@@ -1,17 +1,17 @@
 const fs = require('fs-extra')
 const path = require('path')
 
-const e2e = require('../lib/e2e').default
+const systemTests = require('../lib/system-tests').default
 const Fixtures = require('../lib/fixtures')
 
 const nonExistentSpec = Fixtures.projectPath('non-existent-spec')
 const e2eProject = Fixtures.projectPath('e2e')
 
 describe('e2e plugins', () => {
-  e2e.setup()
+  systemTests.setup()
 
   it('fails when spec does not exist', function () {
-    return e2e.exec(this, {
+    return systemTests.exec(this, {
       spec: 'spec.js',
       project: nonExistentSpec,
       sanitizeScreenshotDimensions: true,
@@ -26,7 +26,7 @@ describe('e2e plugins', () => {
 
     return fs.outputFile(specPath, 'it(\'passes\', () => {})')
     .then(() => {
-      return e2e.exec(this, {
+      return systemTests.exec(this, {
         spec: specPath,
         sanitizeScreenshotDimensions: true,
       })

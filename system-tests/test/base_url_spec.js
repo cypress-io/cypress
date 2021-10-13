@@ -1,4 +1,4 @@
-const e2e = require('../lib/e2e').default
+const systemTests = require('../lib/system-tests').default
 
 const onServer = (app) => {
   return app.get('/app/html', (req, res) => {
@@ -8,20 +8,20 @@ const onServer = (app) => {
 
 describe('e2e baseUrl', () => {
   context('https', () => {
-    e2e.setup({
+    systemTests.setup({
       settings: {
         baseUrl: 'https://httpbin.org',
       },
     })
 
-    e2e.it('passes', {
+    systemTests.it('passes', {
       spec: 'base_url_spec.js',
       snapshot: true,
     })
   })
 
   context('http', () => {
-    e2e.setup({
+    systemTests.setup({
       servers: {
         port: 9999,
         onServer,
@@ -31,7 +31,7 @@ describe('e2e baseUrl', () => {
       },
     })
 
-    e2e.it('passes', {
+    systemTests.it('passes', {
       spec: 'base_url_spec.js',
       snapshot: true,
     })

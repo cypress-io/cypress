@@ -1,4 +1,4 @@
-import e2e, { expect } from '../lib/e2e'
+import systemTests, { expect } from '../lib/system-tests'
 import Fixtures from '../lib/fixtures'
 import path from 'path'
 
@@ -11,7 +11,7 @@ const verifyPassedAndFailedAreSame = (expectedFailures) => {
 }
 
 describe('e2e error ui', function () {
-  e2e.setup()
+  systemTests.setup()
 
   ;[
     'webpack-preprocessor',
@@ -20,7 +20,7 @@ describe('e2e error ui', function () {
     'webpack-preprocessor-awesome-typescript-loader',
   ]
   .forEach((project) => {
-    e2e.it(`handles sourcemaps in webpack for project: ${project}`, {
+    systemTests.it(`handles sourcemaps in webpack for project: ${project}`, {
       project: Fixtures.projectPath(project),
       spec: 'failing_spec.*',
       expectedExitCode: 1,
@@ -31,7 +31,7 @@ describe('e2e error ui', function () {
   })
 
   // https://github.com/cypress-io/cypress/issues/16255
-  e2e.it('handles errors when integration folder is outside of project root', {
+  systemTests.it('handles errors when integration folder is outside of project root', {
     project: path.join(Fixtures.projectPath('integration-outside-project-root'), 'project-root'),
     spec: '../../../integration/failing_spec.js',
     expectedExitCode: 1,

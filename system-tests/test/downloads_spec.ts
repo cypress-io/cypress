@@ -1,15 +1,15 @@
 import path from 'path'
 
-import e2e, { expect } from '../lib/e2e'
+import systemTests, { expect } from '../lib/system-tests'
 import Fixtures from '../lib/fixtures'
 import { fs } from '@packages/server/lib/util/fs'
 
 const downloadsProject = Fixtures.projectPath('downloads')
 
 describe('e2e downloads', () => {
-  e2e.setup()
+  systemTests.setup()
 
-  e2e.it('handles various file downloads', {
+  systemTests.it('handles various file downloads', {
     project: downloadsProject,
     spec: 'downloads_spec.ts',
     config: {
@@ -21,7 +21,7 @@ describe('e2e downloads', () => {
     return fs.pathExists(path.join(Fixtures.projectPath('downloads'), 'cypress', 'dls', fileName))
   }
 
-  e2e.it('allows changing the downloads folder', {
+  systemTests.it('allows changing the downloads folder', {
     project: Fixtures.projectPath('downloads'),
     spec: '*',
     config: {
@@ -38,13 +38,13 @@ describe('e2e downloads', () => {
   })
 
   it('trashes downloads between runs', async function () {
-    await e2e.exec(this, {
+    await systemTests.exec(this, {
       project: downloadsProject,
       spec: 'download_csv_spec.ts',
     })
 
     // this run should trash the downloads from the above run
-    await e2e.exec(this, {
+    await systemTests.exec(this, {
       project: downloadsProject,
       spec: 'simple_passing_spec.ts',
     })
@@ -56,13 +56,13 @@ describe('e2e downloads', () => {
   })
 
   it('does not trash downloads between runs if trashAssetsBeforeRuns: false', async function () {
-    await e2e.exec(this, {
+    await systemTests.exec(this, {
       project: downloadsProject,
       spec: 'download_csv_spec.ts',
     })
 
     // this run should _not_ trash the downloads from the above run
-    await e2e.exec(this, {
+    await systemTests.exec(this, {
       project: downloadsProject,
       spec: 'simple_passing_spec.ts',
       config: {

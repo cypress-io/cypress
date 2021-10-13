@@ -4,11 +4,11 @@ const path = require('path')
 const _ = require('lodash')
 const snapshot = require('snap-shot-it')
 const { fs } = require('@packages/server/lib/util/fs')
-const { default: e2e, STDOUT_DURATION_IN_TABLES_RE } = require('../lib/e2e')
+const { default: systemTests, STDOUT_DURATION_IN_TABLES_RE } = require('../lib/system-tests')
 const Fixtures = require('../lib/fixtures')
 const { expectCorrectModuleApiResult } = require('../lib/resultsUtils')
 const e2ePath = Fixtures.projectPath('e2e')
-const { it } = e2e
+const { it } = systemTests
 
 const outputPath = path.join(e2ePath, 'output.json')
 
@@ -20,7 +20,7 @@ const specs = [
 ].join(',')
 
 describe('e2e spec_isolation', () => {
-  e2e.setup()
+  systemTests.setup()
 
   it('fails', {
     spec: specs,
@@ -41,7 +41,7 @@ describe('e2e spec_isolation', () => {
       // and snapshot it so its what we expect after normalizing it
       let json = await fs.readJsonAsync(outputPath)
 
-      json.runs = e2e.normalizeRuns(json.runs)
+      json.runs = systemTests.normalizeRuns(json.runs)
 
       // also mutates into normalized obj ready for snapshot
       expectCorrectModuleApiResult(json, {
@@ -65,7 +65,7 @@ describe('e2e spec_isolation', () => {
       await execFn()
       let json = await fs.readJsonAsync(outputPath)
 
-      json.runs = e2e.normalizeRuns(json.runs)
+      json.runs = systemTests.normalizeRuns(json.runs)
 
       // also mutates into normalized obj ready for snapshot
       expectCorrectModuleApiResult(json, {

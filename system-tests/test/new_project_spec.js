@@ -1,13 +1,13 @@
 const path = require('path')
 const Fixtures = require('../lib/fixtures')
-const e2e = require('../lib/e2e').default
+const systemTests = require('../lib/system-tests').default
 const { fs } = require('@packages/server/lib/util/fs')
 
 const noScaffoldingPath = Fixtures.projectPath('no-scaffolding')
 const supportPath = path.join(noScaffoldingPath, 'cypress', 'support')
 
 describe('e2e new project', () => {
-  e2e.setup()
+  systemTests.setup()
 
   it('passes', function () {
     return fs
@@ -15,7 +15,7 @@ describe('e2e new project', () => {
     .then(() => {
       throw new Error('support folder should not exist')
     }).catch(() => {
-      return e2e.exec(this, {
+      return systemTests.exec(this, {
         project: noScaffoldingPath,
         sanitizeScreenshotDimensions: true,
         snapshot: true,

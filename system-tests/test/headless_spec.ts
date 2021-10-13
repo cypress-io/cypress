@@ -1,8 +1,8 @@
-import e2e from '../lib/e2e'
+import systemTests from '../lib/system-tests'
 import Fixtures from '../lib/fixtures'
 
 describe('e2e headless', function () {
-  e2e.setup()
+  systemTests.setup()
 
   describe('ELECTRON_RUN_AS_NODE', () => {
     const baseSpec = {
@@ -24,7 +24,7 @@ describe('e2e headless', function () {
       },
     }
 
-    e2e.it('pass for browsers that do not need xvfb', {
+    systemTests.it('pass for browsers that do not need xvfb', {
       ...baseSpec,
       browser: ['chrome', 'chrome-beta', 'firefox'],
       expectedExitCode: 0,
@@ -35,7 +35,7 @@ describe('e2e headless', function () {
       },
     })
 
-    e2e.it('fails for browsers that do need xvfb', {
+    systemTests.it('fails for browsers that do need xvfb', {
       ...baseSpec,
       expectedExitCode: 1,
       browser: ['electron'],
@@ -43,7 +43,7 @@ describe('e2e headless', function () {
   })
 
   // cypress run --headless
-  e2e.it('tests in headless mode pass', {
+  systemTests.it('tests in headless mode pass', {
     spec: 'headless_spec.js',
     config: {
       env: {
@@ -65,7 +65,7 @@ describe('e2e headless', function () {
     'electron',
     '!electron',
   ].map((b) => {
-    e2e.it(`tests in headed mode pass in ${b}`, {
+    systemTests.it(`tests in headed mode pass in ${b}`, {
       spec: 'headless_spec.js',
       config: {
         env: {
@@ -79,13 +79,13 @@ describe('e2e headless', function () {
     })
   })
 
-  e2e.it('launches maximized by default in headless mode (1920x1080)', {
+  systemTests.it('launches maximized by default in headless mode (1920x1080)', {
     headed: false,
     project: Fixtures.projectPath('screen-size'),
     spec: 'default_size.spec.js',
   })
 
-  e2e.it('launches at DPR 1x', {
+  systemTests.it('launches at DPR 1x', {
     headed: false,
     project: Fixtures.projectPath('screen-size'),
     spec: 'device_pixel_ratio.spec.js',

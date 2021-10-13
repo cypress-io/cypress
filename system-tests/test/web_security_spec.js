@@ -1,4 +1,4 @@
-const e2e = require('../lib/e2e').default
+const systemTests = require('../lib/system-tests').default
 
 const onServer = function (app) {
   app.get('/link', (req, res) => {
@@ -51,7 +51,7 @@ const onServer = function (app) {
 }
 
 describe('e2e web security', () => {
-  e2e.setup({
+  systemTests.setup({
     servers: [{
       port: 4466,
       onServer,
@@ -68,7 +68,7 @@ describe('e2e web security', () => {
   })
 
   context('when enabled', () => {
-    e2e.it('fails', {
+    systemTests.it('fails', {
       spec: 'web_security_spec.js',
       snapshot: true,
       expectedExitCode: 4,
@@ -76,7 +76,7 @@ describe('e2e web security', () => {
   })
 
   context('when disabled', () => {
-    e2e.it('passes', {
+    systemTests.it('passes', {
       spec: 'web_security_spec.js',
       config: {
         chromeWebSecurity: false,
@@ -87,7 +87,7 @@ describe('e2e web security', () => {
   })
 
   context('firefox', () => {
-    e2e.it('displays warning when firefox and chromeWebSecurity:false', {
+    systemTests.it('displays warning when firefox and chromeWebSecurity:false', {
       spec: 'simple_passing_spec.js',
       snapshot: true,
       browser: 'firefox',

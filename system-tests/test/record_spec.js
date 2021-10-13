@@ -3,7 +3,7 @@ const path = require('path')
 const Promise = require('bluebird')
 const jsonSchemas = require('@cypress/json-schemas').api
 const snapshot = require('snap-shot-it')
-const e2e = require('../lib/e2e').default
+const systemTests = require('../lib/system-tests').default
 const { fs } = require('@packages/server/lib/util/fs')
 const Fixtures = require('../lib/fixtures')
 const {
@@ -34,7 +34,7 @@ describe('e2e record', () => {
     setupStubbedServer(createRoutes())
 
     it('passes', async function () {
-      const { stdout } = await e2e.exec(this, {
+      const { stdout } = await systemTests.exec(this, {
         key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
         spec: 'record*',
         record: true,
@@ -221,7 +221,7 @@ describe('e2e record', () => {
 
       expectRunsToHaveCorrectTimings(runs)
 
-      runs = e2e.normalizeRuns(runs)
+      runs = systemTests.normalizeRuns(runs)
 
       snapshot(runs)
 
@@ -347,7 +347,7 @@ describe('e2e record', () => {
       this.retries(3)
 
       return Promise.all([
-        e2e.exec(this, {
+        systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
           spec: 'record*',
           group: 'prod-e2e',
@@ -368,7 +368,7 @@ describe('e2e record', () => {
         Promise
         .delay(3000)
         .then(() => {
-          return e2e.exec(this, {
+          return systemTests.exec(this, {
             key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
             spec: 'record*',
             group: 'prod-e2e',
@@ -391,7 +391,7 @@ describe('e2e record', () => {
     setupStubbedServer(createRoutes())
 
     it('sends Studio usage metadata', function () {
-      return e2e.exec(this, {
+      return systemTests.exec(this, {
         key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
         spec: 'studio_written.spec.js',
         record: true,
@@ -412,7 +412,7 @@ describe('e2e record', () => {
     setupStubbedServer([])
 
     it('errors and exits when no specs found', function () {
-      return e2e.exec(this, {
+      return systemTests.exec(this, {
         spec: 'notfound/**',
         snapshot: true,
         expectedExitCode: 1,
@@ -423,7 +423,7 @@ describe('e2e record', () => {
     })
 
     it('errors and exits when no browser found', function () {
-      return e2e.exec(this, {
+      return systemTests.exec(this, {
         browser: 'browserDoesNotExist',
         spec: 'record_pass*',
         snapshot: true,
@@ -440,7 +440,7 @@ describe('e2e record', () => {
 
     // https://github.com/cypress-io/cypress/issues/15512
     it('succeeds when empty spec file', async function () {
-      await e2e.exec(this, {
+      await systemTests.exec(this, {
         key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
         record: true,
         spec: 'empty_suite.spec.js,empty.spec.js',
@@ -466,10 +466,10 @@ describe('e2e record', () => {
   })
 
   context('projectId', () => {
-    e2e.setup()
+    systemTests.setup()
 
     it('errors and exits without projectId', function () {
-      return e2e.exec(this, {
+      return systemTests.exec(this, {
         key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
         spec: 'record_pass*',
         record: true,
@@ -483,7 +483,7 @@ describe('e2e record', () => {
     setupStubbedServer(createRoutes())
 
     it('respects quiet mode', function () {
-      return e2e.exec(this, {
+      return systemTests.exec(this, {
         key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
         spec: 'record_pass*',
         record: true,
@@ -498,7 +498,7 @@ describe('e2e record', () => {
     setupStubbedServer(createRoutes())
 
     it('errors and exits without recordKey', function () {
-      return e2e.exec(this, {
+      return systemTests.exec(this, {
         spec: 'record_pass*',
         record: true,
         snapshot: true,
@@ -516,7 +516,7 @@ describe('e2e record', () => {
       process.env.CIRCLE_PR_REPONAME = 'cypress'
       process.env.CYPRESS_INTERNAL_SYSTEM_TESTS = '0'
 
-      return e2e.exec(this, {
+      return systemTests.exec(this, {
         spec: 'record_pass*',
         record: true,
         snapshot: true,
@@ -536,7 +536,7 @@ describe('e2e record', () => {
       process.env.CIRCLE_PR_REPONAME = 'cypress'
       process.env.CYPRESS_INTERNAL_SYSTEM_TESTS = '0'
 
-      return e2e.exec(this, {
+      return systemTests.exec(this, {
         spec: 'record_pass*',
         record: true,
         parallel: true,
@@ -555,7 +555,7 @@ describe('e2e record', () => {
     })
 
     it('config from runtime, testOptions', async function () {
-      await e2e.exec(this, {
+      await systemTests.exec(this, {
         key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
         spec: 'config_record_spec*',
         record: true,
@@ -610,7 +610,7 @@ describe('e2e record', () => {
       }), { video: false })
 
       it('changes spec run order', async function () {
-        await e2e.exec(this, {
+        await systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
           spec: 'a_record.spec.js,b_record.spec.js',
           record: true,
@@ -650,7 +650,7 @@ describe('e2e record', () => {
     }), { video: false })
 
     it('records tests and exits without executing', async function () {
-      await e2e.exec(this, {
+      await systemTests.exec(this, {
         key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
         spec: 'a_record_instantfail.spec.js,b_record.spec.js',
         record: true,
@@ -677,7 +677,7 @@ describe('e2e record', () => {
     })
 
     it('records tests and exits without executing in parallel', async function () {
-      await e2e.exec(this, {
+      await systemTests.exec(this, {
         key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
         spec: 'a_record_instantfail.spec.js,b_record.spec.js',
         record: true,
@@ -707,7 +707,7 @@ describe('e2e record', () => {
     })
 
     it('does not upload when not enabled', function () {
-      return e2e.exec(this, {
+      return systemTests.exec(this, {
         key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
         spec: 'record_pass*',
         record: true,
@@ -729,7 +729,7 @@ describe('e2e record', () => {
       setupStubbedServer(routes)
 
       it('errors and exits on 401', function () {
-        return e2e.exec(this, {
+        return systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
           spec: 'record_pass*',
           record: true,
@@ -751,7 +751,7 @@ describe('e2e record', () => {
       setupStubbedServer(routes)
 
       it('errors and exits', function () {
-        return e2e.exec(this, {
+        return systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
           spec: 'record_pass*',
           record: true,
@@ -775,7 +775,7 @@ describe('e2e record', () => {
       it('errors and exits', function () {
         process.env.DISABLE_API_RETRIES = 'true'
 
-        return e2e.exec(this, {
+        return systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
           spec: 'record_pass*',
           record: true,
@@ -794,7 +794,7 @@ describe('e2e record', () => {
       it('when grouping without parallelization errors and exits', function () {
         process.env.DISABLE_API_RETRIES = 'true'
 
-        return e2e.exec(this, {
+        return systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
           spec: 'record_pass*',
           group: 'foo',
@@ -815,7 +815,7 @@ describe('e2e record', () => {
       it('does not proceed and exits with error when parallelizing', function () {
         process.env.DISABLE_API_RETRIES = 'true'
 
-        return e2e.exec(this, {
+        return systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
           spec: 'record_pass*',
           group: 'foo',
@@ -850,7 +850,7 @@ describe('e2e record', () => {
       it('does not proceed and exits with error when parallelizing and creating instance', function () {
         process.env.DISABLE_API_RETRIES = 'true'
 
-        return e2e.exec(this, {
+        return systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
           spec: 'record_pass*',
           group: 'foo',
@@ -874,7 +874,7 @@ describe('e2e record', () => {
       it('without parallelization - does not proceed', async function () {
         process.env.DISABLE_API_RETRIES = 'true'
 
-        await e2e.exec(this, {
+        await systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
           spec: '*_record.spec.js',
           record: true,
@@ -917,7 +917,7 @@ describe('e2e record', () => {
       it('does not proceed and exits with error when parallelizing and updating instance', function () {
         process.env.DISABLE_API_RETRIES = 'true'
 
-        return e2e.exec(this, {
+        return systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
           spec: 'record_pass*',
           group: 'foo',
@@ -960,7 +960,7 @@ describe('e2e record', () => {
       it('errors and exits when group name is in use', function () {
         process.env.CIRCLECI = '1'
 
-        return e2e.exec(this, {
+        return systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
           spec: 'record_pass*',
           group: 'e2e-tests',
@@ -991,7 +991,7 @@ describe('e2e record', () => {
       }))
 
       it('errors and exits when there is an unknown 422 response', function () {
-        return e2e.exec(this, {
+        return systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
           spec: 'record_pass*',
           group: 'e2e-tests',
@@ -1029,7 +1029,7 @@ describe('e2e record', () => {
       }))
 
       it('errors and exits when on free plan and over recorded runs limit', function () {
-        return e2e.exec(this, {
+        return systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
           spec: 'record_pass*',
           record: true,
@@ -1056,7 +1056,7 @@ describe('e2e record', () => {
       }))
 
       it('errors and exits when on free plan and over recorded tests limit', function () {
-        return e2e.exec(this, {
+        return systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
           spec: 'record_pass*',
           record: true,
@@ -1080,7 +1080,7 @@ describe('e2e record', () => {
         } }))
 
       it('errors and exits when attempting parallel run when not available in plan', function () {
-        return e2e.exec(this, {
+        return systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
           spec: 'record_pass*',
           record: true,
@@ -1103,7 +1103,7 @@ describe('e2e record', () => {
       } }))
 
       it('errors and exits when attempting parallel run when not available in plan', function () {
-        return e2e.exec(this, {
+        return systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
           spec: 'record_pass*',
           record: true,
@@ -1123,7 +1123,7 @@ describe('e2e record', () => {
       } }))
 
       it('errors and exits when there\'s an unknown 402 error', function () {
-        return e2e.exec(this, {
+        return systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
           spec: 'record_pass*',
           record: true,
@@ -1145,7 +1145,7 @@ describe('e2e record', () => {
       it('errors and exits on createInstance error', function () {
         process.env.DISABLE_API_RETRIES = 'true'
 
-        return e2e.exec(this, {
+        return systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
           spec: '*_record_*',
           record: true,
@@ -1175,7 +1175,7 @@ describe('e2e record', () => {
       // it('without parallelization continues, does not post instance results', async function () {
       //   process.env.DISABLE_API_RETRIES = 'true'
 
-      //   return e2e.exec(this, {
+      //   return systemTests.exec(this, {
       //     key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
       //     spec: '*_record.spec*',
       //     record: true,
@@ -1197,7 +1197,7 @@ describe('e2e record', () => {
       it('without parallelization errors and exits', async function () {
         process.env.DISABLE_API_RETRIES = 'true'
 
-        return e2e.exec(this, {
+        return systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
           spec: '*_record.spec*',
           group: 'foo',
@@ -1220,7 +1220,7 @@ describe('e2e record', () => {
       it('with parallelization errors and exits', async function () {
         process.env.DISABLE_API_RETRIES = 'true'
 
-        await e2e.exec(this, {
+        await systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
           spec: '*_record.spec.js',
           record: true,
@@ -1256,7 +1256,7 @@ describe('e2e record', () => {
       it('errors and exits in serial', function () {
         process.env.DISABLE_API_RETRIES = 'true'
 
-        return e2e.exec(this, {
+        return systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
           spec: 'record_pass*',
           record: true,
@@ -1290,7 +1290,7 @@ describe('e2e record', () => {
       it('warns but proceeds', function () {
         process.env.DISABLE_API_RETRIES = 'true'
 
-        return e2e.exec(this, {
+        return systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
           spec: 'record_pass*',
           record: true,
@@ -1335,7 +1335,7 @@ describe('e2e record', () => {
       })
 
       it('warns but proceeds', function () {
-        return e2e.exec(this, {
+        return systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
           spec: 'record_pass*',
           record: true,
@@ -1407,7 +1407,7 @@ describe('e2e record', () => {
       it('warns and does not create or update instances', function () {
         process.env.API_RETRY_INTERVALS = '1000,2000,3000'
 
-        return e2e.exec(this, {
+        return systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
           spec: 'record_pass*',
           group: 'foo',
@@ -1467,7 +1467,7 @@ describe('e2e record', () => {
         }))
 
         it('warns when over private test results', function () {
-          return e2e.exec(this, {
+          return systemTests.exec(this, {
             key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
             spec: 'record_pass*',
             record: true,
@@ -1502,7 +1502,7 @@ describe('e2e record', () => {
         }))
 
         it('warns when over test results', function () {
-          return e2e.exec(this, {
+          return systemTests.exec(this, {
             key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
             spec: 'record_pass*',
             record: true,
@@ -1536,7 +1536,7 @@ describe('e2e record', () => {
         }))
 
         it('warns when using parallel feature', function () {
-          return e2e.exec(this, {
+          return systemTests.exec(this, {
             key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
             spec: 'record_pass*',
             record: true,
@@ -1570,7 +1570,7 @@ describe('e2e record', () => {
         }))
 
         it('warns when using parallel feature', function () {
-          return e2e.exec(this, {
+          return systemTests.exec(this, {
             key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
             spec: 'record_pass*',
             record: true,
@@ -1605,7 +1605,7 @@ describe('e2e record', () => {
         }))
 
         it('warns when over private test results', function () {
-          return e2e.exec(this, {
+          return systemTests.exec(this, {
             key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
             spec: 'record_pass*',
             record: true,
@@ -1640,7 +1640,7 @@ describe('e2e record', () => {
         }))
 
         it('warns when over test results', function () {
-          return e2e.exec(this, {
+          return systemTests.exec(this, {
             key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
             spec: 'record_pass*',
             record: true,
@@ -1675,7 +1675,7 @@ describe('e2e record', () => {
         }))
 
         it('warns when over test results', function () {
-          return e2e.exec(this, {
+          return systemTests.exec(this, {
             key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
             spec: 'record_pass*',
             record: true,
@@ -1695,7 +1695,7 @@ describe('e2e record', () => {
         }))
 
         it('warns with unknown warning code', function () {
-          return e2e.exec(this, {
+          return systemTests.exec(this, {
             key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
             spec: 'record_pass*',
             record: true,

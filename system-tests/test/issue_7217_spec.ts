@@ -1,13 +1,13 @@
 import path from 'path'
-import e2e from '../lib/e2e'
+import systemTests from '../lib/system-tests'
 
 describe('e2e issue 7217', () => {
-  e2e.setup()
+  systemTests.setup()
 
   // this test ensures that the right error is reported if the
   // browser can't connect
   // https://github.com/cypress-io/cypress/issues/7217
-  e2e.it('shows correct error if browser does not connect', {
+  systemTests.it('shows correct error if browser does not connect', {
     expectedExitCode: 1,
     spec: 'simple_passing_spec.js',
     processEnv: {

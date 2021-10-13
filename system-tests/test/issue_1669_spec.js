@@ -1,11 +1,11 @@
-const e2e = require('../lib/e2e').default
+const systemTests = require('../lib/system-tests').default
 
 describe('e2e issue 1669', () => {
-  e2e.setup()
+  systemTests.setup()
 
   // https://github.com/cypress-io/cypress/issues/1669
   it('passes', function () {
-    return e2e.exec(this, {
+    return systemTests.exec(this, {
       spec: 'issue_1669_spec.js',
       snapshot: true,
       browser: 'chrome',

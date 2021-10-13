@@ -1,10 +1,10 @@
-const e2e = require('../lib/e2e').default
+const systemTests = require('../lib/system-tests').default
 
 describe('e2e only spec', () => {
-  e2e.setup()
+  systemTests.setup()
 
   it('failing', function () {
-    return e2e.exec(this, {
+    return systemTests.exec(this, {
       spec: 'only*.js',
       snapshot: true,
     })

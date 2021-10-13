@@ -1,4 +1,4 @@
-const e2e = require('../lib/e2e').default
+const systemTests = require('../lib/system-tests').default
 
 const hosts = {
   'app.localhost': '127.0.0.1',
@@ -6,14 +6,14 @@ const hosts = {
 }
 
 describe('e2e domain', () => {
-  e2e.setup({
+  systemTests.setup({
     servers: {
       port: 4848,
       static: true,
     },
   })
 
-  e2e.it('passes', {
+  systemTests.it('passes', {
     spec: 'domain*',
     snapshot: true,
     video: false,

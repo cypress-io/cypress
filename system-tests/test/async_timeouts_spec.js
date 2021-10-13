@@ -1,9 +1,9 @@
-const e2e = require('../lib/e2e').default
+const systemTests = require('../lib/system-tests').default
 
 describe('e2e async timeouts', () => {
-  e2e.setup()
+  systemTests.setup()
 
-  e2e.it('failing1', {
+  systemTests.it('failing1', {
     spec: 'async_timeouts_spec.js',
     snapshot: true,
     expectedExitCode: 2,

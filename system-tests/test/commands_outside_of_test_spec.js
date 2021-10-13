@@ -1,21 +1,21 @@
-const e2e = require('../lib/e2e').default
+const systemTests = require('../lib/system-tests').default
 
 describe('e2e commands outside of test', () => {
-  e2e.setup()
+  systemTests.setup()
 
-  e2e.it('fails on cy commands', {
+  systemTests.it('fails on cy commands', {
     spec: 'commands_outside_of_test_spec.js',
     snapshot: true,
     expectedExitCode: 1,
   })
 
-  e2e.it('fails on failing assertions', {
+  systemTests.it('fails on failing assertions', {
     spec: 'assertions_failing_outside_of_test_spec.js',
     snapshot: true,
     expectedExitCode: 1,
   })
 
-  e2e.it('passes on passing assertions', {
+  systemTests.it('passes on passing assertions', {
     spec: 'assertions_passing_outside_of_test_spec.js',
     snapshot: true,
   })

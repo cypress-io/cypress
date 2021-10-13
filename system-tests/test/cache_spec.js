@@ -1,7 +1,7 @@
 const fs = require('fs')
 const path = require('path')
 const Fixtures = require('../lib/fixtures')
-const e2e = require('../lib/e2e').default
+const systemTests = require('../lib/system-tests').default
 
 const replacerRe = /(<h1>)\w+(<\/h1>)/
 
@@ -33,7 +33,7 @@ const onServer = function (app) {
 }
 
 describe('e2e cache', () => {
-  e2e.setup({
+  systemTests.setup({
     servers: {
       port: 1515,
       onServer,
@@ -45,21 +45,21 @@ describe('e2e cache', () => {
   })
 
   it('passes', function () {
-    return e2e.exec(this, {
+    return systemTests.exec(this, {
       spec: 'cache_spec.js',
       snapshot: true,
     })
   })
 
   it('clears cache when browser is spawned', function () {
-    return e2e.exec(this, {
+    return systemTests.exec(this, {
       spec: 'cache_clearing_spec.js',
     })
     .then(() => {
       // only 1 request should have gone out
       expect(requestsForCache).to.eq(1)
 
-      return e2e.exec(this, {
+      return systemTests.exec(this, {
         spec: 'cache_clearing_spec.js',
       })
       .then(() => {

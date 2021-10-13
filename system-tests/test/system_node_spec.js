@@ -1,4 +1,4 @@
-const e2e = require('../lib/e2e').default
+const systemTests = require('../lib/system-tests').default
 const execa = require('execa')
 const Fixtures = require('../lib/fixtures')
 const Promise = require('bluebird')
@@ -6,7 +6,7 @@ const Promise = require('bluebird')
 const systemNode = Fixtures.projectPath('system-node')
 
 describe('e2e system node', () => {
-  e2e.setup()
+  systemTests.setup()
 
   it('uses system node when launching plugins file', function () {
     return Promise.join(
@@ -15,7 +15,7 @@ describe('e2e system node', () => {
       (expectedNodeVersion, expectedNodePath) => {
         expectedNodeVersion = expectedNodeVersion.slice(1) // v1.2.3 -> 1.2.3
 
-        return e2e.exec(this, {
+        return systemTests.exec(this, {
           project: systemNode,
           config: {
             env: {

@@ -1,5 +1,5 @@
 const bodyParser = require('body-parser')
-const e2e = require('../lib/e2e').default
+const systemTests = require('../lib/system-tests').default
 
 let count = 0
 
@@ -62,7 +62,7 @@ const onServer = function (app) {
 }
 
 describe('e2e page_loading', () => {
-  e2e.setup({
+  systemTests.setup({
     servers: [{
       port: 1717,
       onServer,
@@ -77,7 +77,7 @@ describe('e2e page_loading', () => {
   // additionally this creates an edge case where after __cypress.initial is
   // set we send an XHR which should not inject because its requested for JSON
   // but that another XHR which is requested for html should inject
-  e2e.it('passes', {
+  systemTests.it('passes', {
     spec: 'page_loading_spec.js',
     snapshot: true,
   })

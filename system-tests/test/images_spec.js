@@ -1,7 +1,7 @@
-const e2e = require('../lib/e2e').default
+const systemTests = require('../lib/system-tests').default
 
 describe('e2e images', () => {
-  e2e.setup({
+  systemTests.setup({
     servers: {
       port: 3636,
       static: true,
@@ -10,7 +10,7 @@ describe('e2e images', () => {
 
   // this tests that images are correctly proxied and that we are not
   // accidentally modifying their bytes in the stream
-  e2e.it('passes', {
+  systemTests.it('passes', {
     spec: 'images_spec.js',
     snapshot: true,
   })

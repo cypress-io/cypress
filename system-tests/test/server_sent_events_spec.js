@@ -1,5 +1,5 @@
 const SseStream = require('ssestream')
-const e2e = require('../lib/e2e').default
+const systemTests = require('../lib/system-tests').default
 
 let clients = 0
 
@@ -51,7 +51,7 @@ const onSSEServer = (app) => {
 const onSSEsServer = function (app) {}
 
 describe('e2e server sent events', () => {
-  e2e.setup({
+  systemTests.setup({
     servers: [{
       port: 3038,
       static: true,
@@ -66,7 +66,7 @@ describe('e2e server sent events', () => {
   })
 
   // https://github.com/cypress-io/cypress/issues/1440
-  e2e.it('passes', {
+  systemTests.it('passes', {
     spec: 'server_sent_events_spec.js',
     snapshot: true,
   })

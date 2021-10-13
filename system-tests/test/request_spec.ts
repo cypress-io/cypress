@@ -1,6 +1,6 @@
 import bodyParser from 'body-parser'
 import cookieParser from 'cookie-parser'
-import e2e from '../lib/e2e'
+import systemTests from '../lib/system-tests'
 
 let counts = null
 
@@ -136,7 +136,7 @@ const onServer = function (app) {
 }
 
 describe('e2e requests', () => {
-  e2e.setup({
+  systemTests.setup({
     servers: [{
       port: 2290,
       onServer,
@@ -167,7 +167,7 @@ describe('e2e requests', () => {
     }
   })
 
-  e2e.it('passes', {
+  systemTests.it('passes', {
     spec: 'request_spec.js',
     snapshot: true,
     config: {
@@ -176,7 +176,7 @@ describe('e2e requests', () => {
   })
 
   it('fails when network immediately fails', function () {
-    return e2e.exec(this, {
+    return systemTests.exec(this, {
       spec: 'request_http_network_error_failing_spec.js',
       snapshot: true,
       expectedExitCode: 1,
@@ -184,7 +184,7 @@ describe('e2e requests', () => {
   })
 
   it('fails on status code', function () {
-    return e2e.exec(this, {
+    return systemTests.exec(this, {
       spec: 'request_status_code_failing_spec.js',
       snapshot: true,
       expectedExitCode: 1,
@@ -198,7 +198,7 @@ describe('e2e requests', () => {
   })
 
   it('prints long http props on fail', function () {
-    return e2e.exec(this, {
+    return systemTests.exec(this, {
       spec: 'request_long_http_props_failing_spec.js',
       snapshot: true,
       expectedExitCode: 1,

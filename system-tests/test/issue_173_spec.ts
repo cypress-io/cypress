@@ -1,10 +1,10 @@
-import e2e from '../lib/e2e'
+import systemTests from '../lib/system-tests'
 
 describe('e2e issue 173', () => {
-  e2e.setup()
+  systemTests.setup()
 
   // https://github.com/cypress-io/cypress/issues/173
-  e2e.it('failing', {
+  systemTests.it('failing', {
     spec: 'issue_173_spec.js',
     snapshot: true,
     expectedExitCode: 1,

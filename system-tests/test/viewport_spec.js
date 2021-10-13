@@ -1,14 +1,14 @@
-const e2e = require('../lib/e2e').default
+const systemTests = require('../lib/system-tests').default
 
 describe('e2e viewport', () => {
-  e2e.setup({
+  systemTests.setup({
     settings: {
       viewportWidth: 800,
       viewportHeight: 600,
     },
   })
 
-  e2e.it('passes', {
+  systemTests.it('passes', {
     spec: 'viewport_spec.js',
     snapshot: true,
   })

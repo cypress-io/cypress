@@ -3,7 +3,7 @@ import os from 'os'
 import path from 'path'
 import cp from 'child_process'
 import util from 'util'
-import e2e from '../lib/e2e'
+import systemTests from '../lib/system-tests'
 import Fixtures from '../lib/fixtures'
 
 const exec = async (cmd, ...args) => {
@@ -44,7 +44,7 @@ describe('e2e yarn v2', () => {
     await projectExec('yarn')
   })
 
-  e2e.it('can compile plugin and test specs', {
+  systemTests.it('can compile plugin and test specs', {
     snapshot: false,
     command: 'yarn',
     browser: 'electron',

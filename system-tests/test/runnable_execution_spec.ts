@@ -1,8 +1,8 @@
-import e2e from '../lib/e2e'
+import systemTests from '../lib/system-tests'
 import Fixtures from '../lib/fixtures'
 
 describe('e2e runnable execution', () => {
-  e2e.setup({
+  systemTests.setup({
     servers: [{
       port: 3434,
       static: true,
@@ -20,20 +20,20 @@ describe('e2e runnable execution', () => {
   // navigation in before and in test body doesn't cause infinite loop
   // but throws correct error
   // https://github.com/cypress-io/cypress/issues/1987
-  e2e.it('cannot navigate in before hook and test', {
+  systemTests.it('cannot navigate in before hook and test', {
     project: Fixtures.projectPath('hooks-after-rerun'),
     spec: 'beforehook-and-test-navigation.js',
     snapshot: true,
     expectedExitCode: 2,
   })
 
-  e2e.it('runnables run correct number of times with navigation', {
+  systemTests.it('runnables run correct number of times with navigation', {
     project: Fixtures.projectPath('hooks-after-rerun'),
     spec: 'runnable-run-count.spec.js',
     snapshot: true,
   })
 
-  e2e.it('runs correctly after top navigation with already ran suite', {
+  systemTests.it('runs correctly after top navigation with already ran suite', {
     spec: 'runnables_already_run_suite.js',
     snapshot: true,
     expectedExitCode: 1,

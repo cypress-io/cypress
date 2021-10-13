@@ -3,14 +3,14 @@ const path = require('path')
 const bodyParser = require('body-parser')
 const multer = require('multer')
 const { fs } = require('@packages/server/lib/util/fs')
-const e2e = require('../lib/e2e').default
+const systemTests = require('../lib/system-tests').default
 const Fixtures = require('../lib/fixtures')
 
 const HTTPS_PORT = 11443
 const HTTP_PORT = 11180
 
 describe('e2e form submissions', () => {
-  return e2e.setup()
+  return systemTests.setup()
 })
 
 const e2ePath = Fixtures.projectPath('e2e')
@@ -87,14 +87,14 @@ buffer compare yielded: ${ret}\
 
 describe('e2e forms', () => {
   context('submissions with jquery XHR POST', () => {
-    e2e.setup()
+    systemTests.setup()
 
-    e2e.it('passing', {
+    systemTests.it('passing', {
       spec: 'form_submission_passing_spec.js',
       snapshot: true,
     })
 
-    e2e.it('failing', {
+    systemTests.it('failing', {
       spec: 'form_submission_failing_spec.js',
       snapshot: true,
       expectedExitCode: 1,
@@ -106,7 +106,7 @@ describe('e2e forms', () => {
   })
 
   context('<form> submissions', () => {
-    e2e.setup({
+    systemTests.setup({
       settings: {
         env: {
           PATH_TO_LARGE_IMAGE: pathToLargeImage,
@@ -138,7 +138,7 @@ describe('e2e forms', () => {
       })
     })
 
-    e2e.it('passes with https on localhost', {
+    systemTests.it('passes with https on localhost', {
       config: {
         baseUrl: `https://localhost:${HTTPS_PORT}`,
       },
@@ -146,7 +146,7 @@ describe('e2e forms', () => {
       snapshot: true,
     })
 
-    e2e.it('passes with http on localhost', {
+    systemTests.it('passes with http on localhost', {
       config: {
         baseUrl: `http://localhost:${HTTP_PORT}`,
       },

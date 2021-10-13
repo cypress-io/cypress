@@ -1,13 +1,13 @@
-const e2e = require('../lib/e2e').default
+const systemTests = require('../lib/system-tests').default
 const { fs } = require('@packages/server/lib/util/fs')
 const path = require('path')
 const Fixtures = require('../lib/fixtures')
 
 describe('e2e config', () => {
-  e2e.setup()
+  systemTests.setup()
 
   it('provides various environment details', function () {
-    return e2e.exec(this, {
+    return systemTests.exec(this, {
       spec: 'config_passing_spec.js',
       snapshot: true,
       config: {
@@ -19,7 +19,7 @@ describe('e2e config', () => {
   })
 
   it('applies defaultCommandTimeout globally', function () {
-    return e2e.exec(this, {
+    return systemTests.exec(this, {
       project: Fixtures.projectPath('config-with-short-timeout'),
       snapshot: true,
       expectedExitCode: 1,
@@ -29,7 +29,7 @@ describe('e2e config', () => {
   // TODO: test that environment variables and CYPRESS_config work as well
 
   it('throws error when invalid viewportWidth in the configuration file', function () {
-    return e2e.exec(this, {
+    return systemTests.exec(this, {
       project: Fixtures.projectPath('config-with-invalid-viewport'),
       expectedExitCode: 1,
       snapshot: true,
@@ -37,7 +37,7 @@ describe('e2e config', () => {
   })
 
   it('throws error when invalid browser in the configuration file', function () {
-    return e2e.exec(this, {
+    return systemTests.exec(this, {
       project: Fixtures.projectPath('config-with-invalid-browser'),
       expectedExitCode: 1,
       snapshot: true,
@@ -45,33 +45,33 @@ describe('e2e config', () => {
   })
 
   it('supports global shadow dom inclusion', function () {
-    return e2e.exec(this, {
+    return systemTests.exec(this, {
       project: Fixtures.projectPath('shadow-dom-global-inclusion'),
     })
   })
 
   it('supports custom configFile in JavaScript', function () {
-    return e2e.exec(this, {
+    return systemTests.exec(this, {
       project: Fixtures.projectPath('config-with-custom-file-js'),
       configFile: 'cypress.config.custom.js',
     })
   })
 
   it('supports custom configFile in TypeScript', function () {
-    return e2e.exec(this, {
+    return systemTests.exec(this, {
       project: Fixtures.projectPath('config-with-custom-file-ts'),
       configFile: 'cypress.config.custom.ts',
     })
   })
 
   it('supports custom configFile in a default JavaScript file', function () {
-    return e2e.exec(this, {
+    return systemTests.exec(this, {
       project: Fixtures.projectPath('config-with-js'),
     })
   })
 
   it('supports custom configFile in a default TypeScript file', function () {
-    return e2e.exec(this, {
+    return systemTests.exec(this, {
       project: Fixtures.projectPath('config-with-ts'),
     })
   })
@@ -83,7 +83,7 @@ describe('e2e config', () => {
       fs.writeFile(path.join(projectRoot, 'cypress.config.js'), 'module.exports = {}'),
       fs.writeFile(path.join(projectRoot, 'cypress.config.ts'), 'export default {}'),
     ]).then(() => {
-      return e2e.exec(this, {
+      return systemTests.exec(this, {
         project: projectRoot,
         expectedExitCode: 1,
         snapshot: true,

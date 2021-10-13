@@ -9,7 +9,7 @@ ffmpeg.setFfprobePath(ffprobePath)
 const path = require('path')
 const fs = require('fs-extra')
 const humanInterval = require('human-interval')
-const e2e = require('../lib/e2e').default
+const systemTests = require('../lib/system-tests').default
 const glob = require('@packages/server/lib/util/glob')
 const videoCapture = require('@packages/server/lib/video_capture')
 const Fixtures = require('../lib/fixtures')
@@ -31,13 +31,13 @@ function outputFinalFrameAsJpg (inputFile, outputFile) {
 }
 
 describe('e2e video compression', () => {
-  e2e.setup()
+  systemTests.setup()
 
   return [
     true,
     false,
   ].forEach((headed) => {
-    e2e.it(`passes (head${headed ? 'ed' : 'less'})`, {
+    systemTests.it(`passes (head${headed ? 'ed' : 'less'})`, {
       // videos are corrupted in firefox due to known issues
       browser: '!firefox',
       spec: 'video_compression_spec.js',

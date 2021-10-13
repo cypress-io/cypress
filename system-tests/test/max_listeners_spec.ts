@@ -2,16 +2,16 @@ import _ from 'lodash'
 import path from 'path'
 import fs from 'fs-extra'
 
-import e2e from '../lib/e2e'
+import systemTests from '../lib/system-tests'
 import Fixtures from '../lib/fixtures'
 
 const projectPath = Fixtures.projectPath('max-listeners')
 
 describe('max listeners warning spec', () => {
-  e2e.setup()
+  systemTests.setup()
 
   // @see https://github.com/cypress-io/cypress/issues/1305
-  e2e.it('does not log MaxEventListeners error', {
+  systemTests.it('does not log MaxEventListeners error', {
     browser: 'electron',
     project: projectPath,
     spec: '*',

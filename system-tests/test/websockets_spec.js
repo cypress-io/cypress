@@ -1,6 +1,6 @@
 const ws = require('ws')
 
-const e2e = require('../lib/e2e').default
+const systemTests = require('../lib/system-tests').default
 
 const onServer = (app) => {
   return app.get('/foo', (req, res) => {
@@ -21,7 +21,7 @@ const onWsServer = function (app, server) {
 const onWssServer = function (app) {}
 
 describe('e2e websockets', () => {
-  e2e.setup({
+  systemTests.setup({
     servers: [{
       port: 3038,
       static: true,
@@ -36,7 +36,7 @@ describe('e2e websockets', () => {
   })
 
   // https://github.com/cypress-io/cypress/issues/556
-  e2e.it('passes', {
+  systemTests.it('passes', {
     spec: 'websockets_spec.js',
     snapshot: true,
   })

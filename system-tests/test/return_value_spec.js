@@ -1,10 +1,10 @@
-const e2e = require('../lib/e2e').default
+const systemTests = require('../lib/system-tests').default
 
 describe('e2e return value', () => {
-  e2e.setup()
+  systemTests.setup()
 
   it('failing1', function () {
-    return e2e.exec(this, {
+    return systemTests.exec(this, {
       spec: 'return_value_spec.js',
       snapshot: true,
       expectedExitCode: 3,

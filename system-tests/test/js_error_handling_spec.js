@@ -1,6 +1,6 @@
 const fs = require('fs')
 const Fixtures = require('../lib/fixtures')
-const e2e = require('../lib/e2e').default
+const systemTests = require('../lib/system-tests').default
 
 const onServer = function (app) {
   app.get('/index.html', (req, res) => {
@@ -35,7 +35,7 @@ const onServer = function (app) {
 }
 
 describe('e2e js error handling', () => {
-  e2e.setup({
+  systemTests.setup({
     servers: [{
       port: 1122,
       static: true,
@@ -45,7 +45,7 @@ describe('e2e js error handling', () => {
     }],
   })
 
-  e2e.it('fails', {
+  systemTests.it('fails', {
     spec: 'js_error_handling_failing_spec.js',
     snapshot: true,
     expectedExitCode: 5,

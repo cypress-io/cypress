@@ -1,7 +1,7 @@
 import cors from 'cors'
 import parser from 'cookie-parser'
 import session from 'express-session'
-import e2e from '../lib/e2e'
+import systemTests from '../lib/system-tests'
 
 const onServer = function (app) {
   app.use(parser())
@@ -111,14 +111,14 @@ const onServer = function (app) {
 }
 
 describe('e2e subdomain', () => {
-  e2e.setup({
+  systemTests.setup({
     servers: {
       port: 2292,
       onServer,
     },
   })
 
-  e2e.it('passes', {
+  systemTests.it('passes', {
     spec: 'subdomain_spec.js',
     snapshot: true,
     config: {

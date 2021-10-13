@@ -2,7 +2,7 @@ import path from 'path'
 import snapshot from 'snap-shot-it'
 
 import { root } from '../lib/spec_helper'
-import e2e from '../lib/e2e'
+import systemTests from '../lib/system-tests'
 import { projectPath } from '../lib/fixtures'
 
 const { fs } = require(`${root}/lib/util/fs`)
@@ -19,9 +19,9 @@ const snapshotFile = (project, file, folder = 'integration') => {
 // this is intentional and indicates how the studio "restarts" the runner
 
 describe('e2e studio', function () {
-  e2e.setup()
+  systemTests.setup()
 
-  e2e.it('extends test', {
+  systemTests.it('extends test', {
     project: projectPath('studio'),
     spec: 'extend.spec.js',
     snapshot: true,
@@ -33,7 +33,7 @@ describe('e2e studio', function () {
 
   // includes "New Test" in snapshot
   // this is the blank new test that's being created
-  e2e.it('creates new test', {
+  systemTests.it('creates new test', {
     project: projectPath('studio'),
     spec: 'new.spec.js',
     browser: 'electron',
@@ -43,7 +43,7 @@ describe('e2e studio', function () {
     },
   })
 
-  e2e.it('can write to imported files', {
+  systemTests.it('can write to imported files', {
     project: projectPath('studio'),
     spec: 'external.spec.js',
     snapshot: true,
@@ -56,7 +56,7 @@ describe('e2e studio', function () {
     },
   })
 
-  e2e.it('extends test without source maps', {
+  systemTests.it('extends test without source maps', {
     project: projectPath('studio-no-source-maps'),
     spec: 'extend.spec.js',
     snapshot: true,
@@ -66,7 +66,7 @@ describe('e2e studio', function () {
     },
   })
 
-  e2e.it('creates new test without source maps', {
+  systemTests.it('creates new test without source maps', {
     project: projectPath('studio-no-source-maps'),
     spec: 'new.spec.js',
     browser: 'electron',

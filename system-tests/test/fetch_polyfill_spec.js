@@ -1,4 +1,4 @@
-const e2e = require('../lib/e2e').default
+const systemTests = require('../lib/system-tests').default
 const { stripIndent } = require('common-tags')
 const bodyParser = require('body-parser')
 
@@ -128,14 +128,14 @@ const onServer = function (app) {
 }
 
 describe('e2e fetch polyfill', () => {
-  e2e.setup({
+  systemTests.setup({
     servers: {
       port: 1818,
       onServer,
     },
   })
 
-  e2e.it('passes', {
+  systemTests.it('passes', {
     spec: 'fetch_spec.js',
     snapshot: false,
     config: {
@@ -145,14 +145,14 @@ describe('e2e fetch polyfill', () => {
 })
 
 describe('e2e no fetch polyfill', () => {
-  e2e.setup({
+  systemTests.setup({
     servers: {
       port: 1818,
       onServer,
     },
   })
 
-  e2e.it('passes', {
+  systemTests.it('passes', {
     spec: 'fetch_no_polyfill_spec.js',
     snapshot: false,
     config: {

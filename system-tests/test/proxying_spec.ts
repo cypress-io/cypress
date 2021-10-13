@@ -1,7 +1,7 @@
-import e2e from '../lib/e2e'
+import systemTests from '../lib/system-tests'
 
 describe('e2e proxying spec', () => {
-  e2e.setup({
+  systemTests.setup({
     servers: {
       port: 7878,
       static: true,
@@ -10,7 +10,7 @@ describe('e2e proxying spec', () => {
     },
   })
 
-  e2e.it('integrity check', {
+  systemTests.it('integrity check', {
     spec: 'proxying_spec.js',
   })
 })

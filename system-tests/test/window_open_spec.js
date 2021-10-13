@@ -1,11 +1,11 @@
-const e2e = require('../lib/e2e').default
+const systemTests = require('../lib/system-tests').default
 
 describe('e2e window.open', () => {
-  e2e.setup()
+  systemTests.setup()
 
   // NOTE: skipping this for now due to snap-shot-it monkey patching causing test failures
   it.skip('passes', function () {
-    return e2e.exec(this, {
+    return systemTests.exec(this, {
       spec: 'window_open_spec.coffee',
       snapshot: true,
     })

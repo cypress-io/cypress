@@ -1,9 +1,9 @@
-const e2e = require('../lib/e2e').default
+const systemTests = require('../lib/system-tests').default
 
 describe('run-ct', () => {
-  e2e.setup()
+  systemTests.setup()
 
-  e2e.it('reports correct exit code when failing', {
+  systemTests.it('reports correct exit code when failing', {
     spec: 'simple_failing_spec.js',
     testingType: 'component',
     snapshot: false,

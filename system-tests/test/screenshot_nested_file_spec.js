@@ -1,9 +1,9 @@
-const e2e = require('../lib/e2e').default
+const systemTests = require('../lib/system-tests').default
 
 describe('e2e screenshot in nested spec', () => {
-  e2e.setup()
+  systemTests.setup()
 
-  e2e.it('passes', {
+  systemTests.it('passes', {
     spec: 'nested-1/nested-2/screenshot_nested_file_spec.js',
     snapshot: true,
   })

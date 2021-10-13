@@ -1,10 +1,10 @@
-import e2e from '../lib/e2e'
+import systemTests from '../lib/system-tests'
 import Fixtures from '../lib/fixtures'
 
-const it = e2e.it
+const it = systemTests.it
 
 describe('retries', () => {
-  e2e.setup()
+  systemTests.setup()
 
   it('supports retries', {
     project: Fixtures.projectPath('retries-2'),

@@ -1,9 +1,9 @@
 import mockedEnv from 'mocked-env'
-import e2e from '../lib/e2e'
+import systemTests from '../lib/system-tests'
 import Fixtures from '../lib/fixtures'
 
 describe('e2e cdp', function () {
-  e2e.setup()
+  systemTests.setup()
   let restoreEnv: Function
 
   beforeEach(() => {
@@ -17,7 +17,7 @@ describe('e2e cdp', function () {
   })
 
   // NOTE: this test takes almost a minute and is largely redundant with protocol_spec
-  e2e.it.skip('fails when remote debugging port cannot be connected to', {
+  systemTests.it.skip('fails when remote debugging port cannot be connected to', {
     project: Fixtures.projectPath('remote-debugging-port-removed'),
     spec: 'spec.ts',
     browser: 'chrome',
@@ -25,7 +25,7 @@ describe('e2e cdp', function () {
   })
 
   // https://github.com/cypress-io/cypress/issues/5685
-  e2e.it('handles disconnections as expected', {
+  systemTests.it('handles disconnections as expected', {
     project: Fixtures.projectPath('remote-debugging-disconnect'),
     spec: 'spec.ts',
     browser: 'chrome',

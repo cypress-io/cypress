@@ -1,5 +1,5 @@
 const compression = require('compression')
-const e2e = require('../lib/e2e').default
+const systemTests = require('../lib/system-tests').default
 const Fixtures = require('../lib/fixtures')
 const path = require('path')
 
@@ -36,7 +36,7 @@ const pageOnlyController = (charset) => {
 }
 
 describe('e2e interception spec', () => {
-  e2e.setup({
+  systemTests.setup({
     servers: [
       {
         onServer (app) {
@@ -61,7 +61,7 @@ describe('e2e interception spec', () => {
   context('character encodings', () => {
     // @see https://github.com/cypress-io/cypress/issues/1543
     it('does not mangle non-UTF-8 text', function () {
-      return e2e.exec(this, {
+      return systemTests.exec(this, {
         spec: 'character_encoding_spec.js',
         config: {
           defaultCommandTimeout: 100,

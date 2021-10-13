@@ -1,4 +1,4 @@
-import e2e from '../lib/e2e'
+import systemTests from '../lib/system-tests'
 import Fixtures from '../lib/fixtures'
 import browserUtils from '@packages/server/lib/browsers/utils'
 
@@ -10,9 +10,9 @@ const isTextTerminal = true // we're always in run mode
 const PATH_TO_CHROME_PROFILE = browserUtils.getProfileDir(browser, isTextTerminal)
 
 describe('e2e before:browser:launch', () => {
-  e2e.setup()
+  systemTests.setup()
 
-  e2e.it('modifies preferences on disk if DNE', {
+  systemTests.it('modifies preferences on disk if DNE', {
     browser: 'chrome',
     config: {
       video: false,
@@ -25,7 +25,7 @@ describe('e2e before:browser:launch', () => {
     spec: 'spec.js',
   })
 
-  e2e.it('can add extensions', {
+  systemTests.it('can add extensions', {
     spec: 'spec.js',
     config: {
       video: false,

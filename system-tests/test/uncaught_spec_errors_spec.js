@@ -1,33 +1,33 @@
-const e2e = require('../lib/e2e').default
+const systemTests = require('../lib/system-tests').default
 
 describe('e2e uncaught errors', () => {
-  e2e.setup()
+  systemTests.setup()
 
-  e2e.it('failing1', {
+  systemTests.it('failing1', {
     spec: 'uncaught_synchronous_before_tests_parsed.js',
     snapshot: true,
     expectedExitCode: 1,
   })
 
-  e2e.it('failing2', {
+  systemTests.it('failing2', {
     spec: 'uncaught_synchronous_during_hook_spec.js',
     snapshot: true,
     expectedExitCode: 1,
   })
 
-  e2e.it('failing3', {
+  systemTests.it('failing3', {
     spec: 'uncaught_during_test_spec.js',
     snapshot: true,
     expectedExitCode: 3,
   })
 
-  e2e.it('failing4', {
+  systemTests.it('failing4', {
     spec: 'uncaught_during_hook_spec.js',
     snapshot: true,
     expectedExitCode: 1,
   })
 
-  e2e.it('failing5', {
+  systemTests.it('failing5', {
     spec: 'caught_async_sync_test_spec.js',
     snapshot: true,
     expectedExitCode: 4,

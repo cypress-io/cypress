@@ -4,7 +4,7 @@ const cert = require('@packages/https-proxy/test/helpers/certs')
 const https = require('https')
 const useragent = require('express-useragent')
 const { allowDestroy } = require('@packages/network')
-const e2e = require('../lib/e2e').default
+const systemTests = require('../lib/system-tests').default
 
 // create an HTTPS server that forces TLSv1
 const startTlsV1Server = (port) => {
@@ -117,7 +117,7 @@ foo\
 
 describe('e2e visit', () => {
   context('low response timeout', () => {
-    e2e.setup({
+    systemTests.setup({
       settings: {
         responseTimeout: 500,
         pageLoadTimeout: 1000,
@@ -129,7 +129,7 @@ describe('e2e visit', () => {
       },
     })
 
-    e2e.it('passes', {
+    systemTests.it('passes', {
       spec: 'visit_spec.js',
       snapshot: true,
       onRun (exec) {
@@ -143,7 +143,7 @@ describe('e2e visit', () => {
       },
     })
 
-    e2e.it('passes with experimentalSourceRewriting', {
+    systemTests.it('passes with experimentalSourceRewriting', {
       spec: 'source_rewriting_spec.js',
       config: {
         experimentalSourceRewriting: true,
@@ -160,38 +160,38 @@ describe('e2e visit', () => {
       },
     })
 
-    e2e.it('fails when network connection immediately fails', {
+    systemTests.it('fails when network connection immediately fails', {
       spec: 'visit_http_network_error_failing_spec.js',
       snapshot: true,
       expectedExitCode: 1,
     })
 
-    e2e.it('fails when server responds with 500', {
+    systemTests.it('fails when server responds with 500', {
       spec: 'visit_http_500_response_failing_spec.js',
       snapshot: true,
       expectedExitCode: 1,
     })
 
-    e2e.it('fails when file server responds with 404', {
+    systemTests.it('fails when file server responds with 404', {
       spec: 'visit_file_404_response_failing_spec.js',
       snapshot: true,
       expectedExitCode: 1,
     })
 
-    e2e.it('fails when content type isnt html', {
+    systemTests.it('fails when content type isnt html', {
       spec: 'visit_non_html_content_type_failing_spec.js',
       snapshot: true,
       expectedExitCode: 1,
     })
 
-    e2e.it('calls onBeforeLoad when overwriting cy.visit', {
+    systemTests.it('calls onBeforeLoad when overwriting cy.visit', {
       snapshot: true,
       spec: 'issue_2196_spec.js',
     })
   })
 
   context('low responseTimeout, normal pageLoadTimeout', () => {
-    e2e.setup({
+    systemTests.setup({
       settings: {
         responseTimeout: 2000,
       },
@@ -202,7 +202,7 @@ describe('e2e visit', () => {
       },
     })
 
-    e2e.it('fails when response never ends', {
+    systemTests.it('fails when response never ends', {
       spec: 'visit_response_never_ends_failing_spec.js',
       snapshot: true,
       expectedExitCode: 3,
@@ -210,7 +210,7 @@ describe('e2e visit', () => {
   })
 
   context('normal response timeouts', () => {
-    e2e.setup({
+    systemTests.setup({
       settings: {
         pageLoadTimeout: 1000,
       },
@@ -221,7 +221,7 @@ describe('e2e visit', () => {
       },
     })
 
-    e2e.it('fails when visit times out', {
+    systemTests.it('fails when visit times out', {
       spec: 'visit_http_timeout_failing_spec.js',
       snapshot: true,
       expectedExitCode: 2,

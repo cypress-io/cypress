@@ -9,7 +9,7 @@ const bodyParser = require('body-parser')
 const DebugProxy = require('@cypress/debugging-proxy')
 const launcher = require('@packages/launcher')
 const chrome = require('@packages/server/lib/browsers/chrome')
-const e2e = require('../lib/e2e').default
+const systemTests = require('../lib/system-tests').default
 const random = require('@packages/server/lib/util/random')
 const Fixtures = require('../lib/fixtures')
 let mitmProxy = require('http-mitm-proxy')
@@ -155,7 +155,7 @@ const controllers = {
 describe('e2e network error handling', function () {
   this.timeout(240000)
 
-  e2e.setup({
+  systemTests.setup({
     servers: [
       {
         onServer (app) {
@@ -366,7 +366,7 @@ describe('e2e network error handling', function () {
     })
 
     it('baseurl check tries 5 times in run mode', function () {
-      return e2e.exec(this, {
+      return systemTests.exec(this, {
         config: {
           baseUrl: 'http://never-gonna-exist.invalid',
         },
@@ -376,7 +376,7 @@ describe('e2e network error handling', function () {
     })
 
     it('tests run as expected', function () {
-      return e2e.exec(this, {
+      return systemTests.exec(this, {
         spec: 'network_error_handling_spec.js',
         video: false,
         expectedExitCode: 2,
@@ -469,7 +469,7 @@ describe('e2e network error handling', function () {
         process.env.HTTP_PROXY = `http://localhost:${PROXY_PORT}`
         process.env.NO_PROXY = '<-loopback>' // proxy everything including localhost
 
-        return e2e.exec(this, {
+        return systemTests.exec(this, {
           spec: 'https_passthru_spec.js',
           snapshot: true,
         })
@@ -498,7 +498,7 @@ describe('e2e network error handling', function () {
         process.env.HTTP_PROXY = `http://localhost:${PROXY_PORT}`
         process.env.NO_PROXY = '<-loopback>,localhost:13373' // proxy everything except for the irrelevant test
 
-        return e2e.exec(this, {
+        return systemTests.exec(this, {
           spec: 'https_passthru_spec.js',
           snapshot: true,
           config: {
@@ -526,7 +526,7 @@ describe('e2e network error handling', function () {
     // https://github.com/cypress-io/cypress/issues/4298
     context('does not delay a 304 Not Modified', () => {
       it('in normal network conditions', function () {
-        return e2e.exec(this, {
+        return systemTests.exec(this, {
           spec: 'network_error_304_handling_spec.js',
           video: false,
           config: {
@@ -546,7 +546,7 @@ describe('e2e network error handling', function () {
           process.env.HTTP_PROXY = `http://localhost:${PROXY_PORT}`
           process.env.NO_PROXY = ''
         }).then(() => {
-          return e2e.exec(this, {
+          return systemTests.exec(this, {
             spec: 'network_error_304_handling_spec.js',
             video: false,
             config: {
@@ -578,7 +578,7 @@ describe('e2e network error handling', function () {
         process.env.HTTP_PROXY = `http://localhost:${PROXY_PORT}`
         process.env.NO_PROXY = ''
 
-        return e2e.exec(this, {
+        return systemTests.exec(this, {
           spec: 'network_error_304_handling_spec.js',
           video: false,
           config: {

@@ -1,15 +1,15 @@
 const { fs } = require('@packages/server/lib/util/fs')
 const path = require('path')
-const e2e = require('../lib/e2e').default
+const systemTests = require('../lib/system-tests').default
 const Fixtures = require('../lib/fixtures')
 
 const e2ePath = Fixtures.projectPath('e2e')
 
 // https://github.com/cypress-io/cypress/issues/9209
 describe('no superfluous screenshots when afterEach() failed', () => {
-  e2e.setup()
+  systemTests.setup()
 
-  e2e.it('2 screenshots', {
+  systemTests.it('2 screenshots', {
     spec: 'no_superfluous_screenshots_spec.js',
     onRun (exec) {
       return exec().

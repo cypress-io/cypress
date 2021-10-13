@@ -1,11 +1,11 @@
-const e2e = require('../lib/e2e').default
+const systemTests = require('../lib/system-tests').default
 const Fixtures = require('../lib/fixtures')
 
 describe('e2e specs', () => {
-  e2e.setup()
+  systemTests.setup()
 
   it('failing when no specs found', function () {
-    return e2e.exec(this, {
+    return systemTests.exec(this, {
       config: { integrationFolder: 'cypress/specs' },
       snapshot: true,
       expectedExitCode: 1,
@@ -13,7 +13,7 @@ describe('e2e specs', () => {
   })
 
   it('failing when no spec pattern found', function () {
-    return e2e.exec(this, {
+    return systemTests.exec(this, {
       spec: 'cypress/integration/**notfound**',
       snapshot: true,
       expectedExitCode: 1,
@@ -24,7 +24,7 @@ describe('e2e specs', () => {
   it('handles the same integration and fixtures folders', function () {
     const project = Fixtures.projectPath('same-fixtures-integration-folders')
 
-    return e2e.exec(this, {
+    return systemTests.exec(this, {
       project,
       snapshot: false,
       expectedExitCode: 0,
@@ -34,7 +34,7 @@ describe('e2e specs', () => {
   it('handles the fixtures folder being the subfolder of integration', function () {
     const project = Fixtures.projectPath('fixture-subfolder-of-integration')
 
-    return e2e.exec(this, {
+    return systemTests.exec(this, {
       project,
       snapshot: false,
       expectedExitCode: 0,

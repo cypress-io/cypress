@@ -1,5 +1,5 @@
 const bodyParser = require('body-parser')
-const e2e = require('../lib/e2e').default
+const systemTests = require('../lib/system-tests').default
 
 const onServer = function (app) {
   app.use(bodyParser.json())
@@ -21,19 +21,19 @@ const onServer = function (app) {
 }
 
 describe('e2e xhr', () => {
-  e2e.setup({
+  systemTests.setup({
     servers: {
       port: 1919,
       onServer,
     },
   })
 
-  e2e.it('passes in global mode', {
+  systemTests.it('passes in global mode', {
     spec: 'xhr_spec.js',
     snapshot: true,
   })
 
-  e2e.it('passes through CLI', {
+  systemTests.it('passes through CLI', {
     spec: 'xhr_spec.js',
     snapshot: true,
     useCli: true,

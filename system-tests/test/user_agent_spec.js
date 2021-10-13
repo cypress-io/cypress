@@ -1,4 +1,4 @@
-const e2e = require('../lib/e2e').default
+const systemTests = require('../lib/system-tests').default
 
 const onServer = function (app) {
   app.get('/agent', (req, res) => {
@@ -15,7 +15,7 @@ const onServer = function (app) {
 }
 
 describe('e2e user agent', () => {
-  e2e.setup({
+  systemTests.setup({
     servers: {
       port: 4545,
       onServer,
@@ -26,7 +26,7 @@ describe('e2e user agent', () => {
     },
   })
 
-  e2e.it('passes', {
+  systemTests.it('passes', {
     spec: 'user_agent_spec.js',
     snapshot: true,
   })

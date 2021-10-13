@@ -1,10 +1,10 @@
-import e2e from '../lib/e2e'
+import systemTests from '../lib/system-tests'
 import Fixtures from '../lib/fixtures'
 
 describe('e2e non-proxied spec', () => {
-  e2e.setup()
+  systemTests.setup()
 
-  e2e.it('passes', {
+  systemTests.it('passes', {
     spec: 'spec.js',
     config: {
       video: false,

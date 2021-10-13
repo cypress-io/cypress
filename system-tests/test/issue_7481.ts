@@ -1,15 +1,15 @@
-import e2e from '../lib/e2e'
+import systemTests from '../lib/system-tests'
 
 const PORT = 3333
 
 describe('e2e issue 7481', () => {
-  e2e.setup({
+  systemTests.setup({
     servers: {
       port: PORT,
     },
   })
 
-  e2e.it('does not error loading authenticated url', {
+  systemTests.it('does not error loading authenticated url', {
     spec: 'simple_passing_spec.js',
     config: {
       baseUrl: `http://username:password@localhost:${PORT}/`,

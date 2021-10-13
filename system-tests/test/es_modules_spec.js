@@ -1,10 +1,10 @@
-const e2e = require('../lib/e2e').default
+const systemTests = require('../lib/system-tests').default
 
 describe('e2e es modules', () => {
-  e2e.setup()
+  systemTests.setup()
 
   it('passes', function () {
-    return e2e.exec(this, {
+    return systemTests.exec(this, {
       spec: 'es_modules_in_coffee_spec.coffee',
       snapshot: true,
       noTypeScript: true,
@@ -12,12 +12,12 @@ describe('e2e es modules', () => {
   })
 
   it('fails', function () {
-    return e2e.exec(this, {
+    return systemTests.exec(this, {
       spec: 'es_module_import_failing_spec.js',
       snapshot: true,
       expectedExitCode: 1,
       noTypeScript: true,
-      onStdout: e2e.normalizeWebpackErrors,
+      onStdout: systemTests.normalizeWebpackErrors,
     })
   })
 })

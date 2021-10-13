@@ -1,8 +1,8 @@
-import e2e from '../lib/e2e'
+import systemTests from '../lib/system-tests'
 import parser from 'cookie-parser'
 import BodyParser from 'body-parser'
 
-const it = e2e.it
+const it = systemTests.it
 
 const onServer = function (app) {
   app.use(parser())
@@ -108,7 +108,7 @@ const onServer = function (app) {
 }
 
 describe('e2e sessions', () => {
-  e2e.setup({
+  systemTests.setup({
     servers: [{
       port: 4466,
       https: true,

@@ -1,4 +1,4 @@
-const e2e = require('../lib/e2e').default
+const systemTests = require('../lib/system-tests').default
 
 const onServer = function (app) {
   app.get('/', (req, res) => {
@@ -15,7 +15,7 @@ const onServer = function (app) {
 }
 
 describe('e2e blockHosts', () => {
-  e2e.setup({
+  systemTests.setup({
     servers: [{
       port: 3131,
       onServer,
@@ -31,7 +31,7 @@ describe('e2e blockHosts', () => {
   })
 
   it('passes', function () {
-    return e2e.exec(this, {
+    return systemTests.exec(this, {
       spec: 'block_hosts_spec.js',
       snapshot: true,
     })

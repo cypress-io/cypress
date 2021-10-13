@@ -1,11 +1,11 @@
 /* eslint-disable no-restricted-properties */
 import dayjs from 'dayjs'
 import parser from 'cookie-parser'
-import e2e from '../lib/e2e'
+import systemTests from '../lib/system-tests'
 import humanInterval from 'human-interval'
 import cors from 'cors'
 
-const it = e2e.it
+const it = systemTests.it
 
 const onServer = function (app) {
   app.use(parser())
@@ -173,7 +173,7 @@ const sharedBaseUrlSpecSnapshot = 'e2e cookies with baseurl'
 const sharedNoBaseUrlSpecSnapshot = 'e2e cookies with no baseurl'
 
 describe('e2e cookies', () => {
-  e2e.setup({
+  systemTests.setup({
     servers: [{
       onServer,
       port: httpPort,
@@ -324,7 +324,7 @@ describe('cross-origin cookies, set:cookies', () => {
     })
   }
 
-  e2e.setup({
+  systemTests.setup({
     servers: [{
       onServer,
       port: httpPort,

@@ -1,10 +1,10 @@
 import * as fs from 'fs'
 import * as path from 'path'
-import e2e from '../lib/e2e'
+import systemTests from '../lib/system-tests'
 import Fixtures from '../lib/fixtures'
 
 describe('e2e readonly fs', function () {
-  e2e.setup()
+  systemTests.setup()
 
   const projectPath = Fixtures.projectPath('read-only-project-root')
 
@@ -27,7 +27,7 @@ describe('e2e readonly fs', function () {
     })
   }
 
-  e2e.it('warns when unable to write to disk', {
+  systemTests.it('warns when unable to write to disk', {
     project: projectPath,
     expectedExitCode: 1,
     spec: 'spec.js',

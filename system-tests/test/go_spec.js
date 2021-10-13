@@ -1,4 +1,4 @@
-const e2e = require('../lib/e2e').default
+const systemTests = require('../lib/system-tests').default
 
 const onServer = function (app) {
   app.get('/first', (req, res) => {
@@ -11,7 +11,7 @@ const onServer = function (app) {
 }
 
 describe('e2e go', () => {
-  e2e.setup({
+  systemTests.setup({
     servers: {
       port: 1818,
       onServer,
@@ -21,7 +21,7 @@ describe('e2e go', () => {
   // this tests that history changes work as intended
   // there have been regressions in electron which would
   // otherwise cause these tests to fail
-  e2e.it('passes', {
+  systemTests.it('passes', {
     spec: 'go_spec.js',
     snapshot: true,
   })

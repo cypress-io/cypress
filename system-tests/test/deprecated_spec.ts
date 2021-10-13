@@ -1,12 +1,12 @@
-import e2e from '../lib/e2e'
+import systemTests from '../lib/system-tests'
 import Fixtures from '../lib/fixtures'
 
 const beforeBrowserLaunchProject = Fixtures.projectPath('plugin-before-browser-launch-deprecation')
 
 describe('deprecated before:browser:launch args', () => {
-  e2e.setup()
+  systemTests.setup()
 
-  e2e.it('fails when adding unknown properties to launchOptions', {
+  systemTests.it('fails when adding unknown properties to launchOptions', {
     config: {
       video: false,
       env: {
@@ -19,7 +19,7 @@ describe('deprecated before:browser:launch args', () => {
     snapshot: true,
   })
 
-  e2e.it('push and no return - warns user exactly once', {
+  systemTests.it('push and no return - warns user exactly once', {
     config: {
       video: false,
       env: {
@@ -33,7 +33,7 @@ describe('deprecated before:browser:launch args', () => {
     psInclude: ['--foo', '--bar'],
   })
 
-  e2e.it('using non-deprecated API - no warning', {
+  systemTests.it('using non-deprecated API - no warning', {
     // TODO: implement webPreferences.additionalArgs here
     // once we decide if/what we're going to make the implemenation
     // SUGGESTION: add this to Cypress.browser.args which will capture
@@ -51,7 +51,7 @@ describe('deprecated before:browser:launch args', () => {
     psInclude: ['--foo', '--bar'],
   })
 
-  e2e.it('concat return returns once per spec', {
+  systemTests.it('concat return returns once per spec', {
     // TODO: implement webPreferences.additionalArgs here
     // once we decide if/what we're going to make the implemenation
     // SUGGESTION: add this to Cypress.browser.args which will capture
@@ -68,7 +68,7 @@ describe('deprecated before:browser:launch args', () => {
     stdoutInclude: 'Deprecation Warning:',
   })
 
-  e2e.it('no mutate return', {
+  systemTests.it('no mutate return', {
     // TODO: implement webPreferences.additionalArgs here
     // once we decide if/what we're going to make the implemenation
     // SUGGESTION: add this to Cypress.browser.args which will capture
@@ -91,7 +91,7 @@ describe('deprecated before:browser:launch args', () => {
   // error which reads strangely - the message + stack are both
   // printed. we should print that we are aborting the run because
   // the before:browser:launch handler threw an error / rejected
-  e2e.it('displays errors thrown and aborts the run', {
+  systemTests.it('displays errors thrown and aborts the run', {
     config: {
       video: false,
       env: {
@@ -109,7 +109,7 @@ describe('deprecated before:browser:launch args', () => {
   // error which reads strangely - the message + stack are both
   // printed. we should print that we are aborting the run because
   // the before:browser:launch handler threw an error / rejected
-  e2e.it('displays promises rejected and aborts the run', {
+  systemTests.it('displays promises rejected and aborts the run', {
     config: {
       video: false,
       env: {

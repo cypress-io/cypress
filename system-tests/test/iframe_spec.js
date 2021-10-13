@@ -1,7 +1,7 @@
 const path = require('path')
 const bodyParser = require('body-parser')
 const Fixtures = require('../lib/fixtures')
-const e2e = require('../lib/e2e').default
+const systemTests = require('../lib/system-tests').default
 
 const e2ePath = Fixtures.projectPath('e2e')
 
@@ -69,14 +69,14 @@ outer contents
 }
 
 describe('e2e iframes', () => {
-  e2e.setup({
+  systemTests.setup({
     servers: {
       port: 1616,
       onServer,
     },
   })
 
-  e2e.it('passes', {
+  systemTests.it('passes', {
     spec: 'iframe_spec.js',
     snapshot: true,
     config: {

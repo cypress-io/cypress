@@ -1,11 +1,11 @@
-const e2e = require('../lib/e2e').default
+const systemTests = require('../lib/system-tests').default
 const Fixtures = require('../lib/fixtures')
 
 describe('e2e task', () => {
-  e2e.setup()
+  systemTests.setup()
 
   it('fails', function () {
-    return e2e.exec(this, {
+    return systemTests.exec(this, {
       project: Fixtures.projectPath('task-not-registered'),
       spec: 'task_not_registered_spec.js',
       sanitizeScreenshotDimensions: true,

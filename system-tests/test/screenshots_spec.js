@@ -2,7 +2,7 @@ const _ = require('lodash')
 const path = require('path')
 const Promise = require('bluebird')
 const Fixtures = require('../lib/fixtures')
-const e2e = require('../lib/e2e').default
+const systemTests = require('../lib/system-tests').default
 let sizeOf = require('image-size')
 const { fs } = require('@packages/server/lib/util/fs')
 
@@ -12,28 +12,28 @@ const e2ePath = Fixtures.projectPath('e2e')
 
 const onServer = function (app) {
   app.get('/color/:color', (req, res) => {
-    return e2e.sendHtml(`\
+    return systemTests.sendHtml(`\
 <style>body { margin: 0; }</style>
 <div style="height: 2000px; width: 2000px; background-color: ${req.params.color};"></div>`)(req, res)
   })
 
-  app.get('/fullPage', e2e.sendHtml(`\
+  app.get('/fullPage', systemTests.sendHtml(`\
 <style>body { margin: 0; }</style>
 <div style="background: white; height: 200px;"></div>
 <div style="background: black; height: 200px;"></div>
 <div style="background: white; height: 100px;"></div>\
 `))
 
-  app.get('/fullPage-same', e2e.sendHtml(`\
+  app.get('/fullPage-same', systemTests.sendHtml(`\
 <style>body { margin: 0; }</style>
 <div style="height: 500px;"></div>\
 `))
 
-  app.get('/element', e2e.sendHtml(`\
+  app.get('/element', systemTests.sendHtml(`\
 <div class="element" style="background: red; width: 400px; height: 300px; margin: 20px;"></div>\
 `))
 
-  app.get('/pathological', e2e.sendHtml(`\
+  app.get('/pathological', systemTests.sendHtml(`\
 <style>div { width: 1px; height: 1px; position: fixed; }</style>
 <div style="left: 0; top: 0; background-color: grey;"></div>
 <div style="left: 1px; top: 0; background-color: white;"></div>
@@ -43,14 +43,14 @@ const onServer = function (app) {
 <div style="right: 0; bottom: 0; background-color: black;"></div>\
 `))
 
-  return app.get('/identical', e2e.sendHtml(`\
+  return app.get('/identical', systemTests.sendHtml(`\
 <style>div { height: 1300px; width: 200px; background-color: #ddd; }</style>
 <div></div>\
 `))
 }
 
 describe('e2e screenshots', () => {
-  e2e.setup({
+  systemTests.setup({
     servers: {
       port: 3322,
       onServer,
@@ -60,12 +60,12 @@ describe('e2e screenshots', () => {
   // this tests that screenshots can be manually generated
   // and are also generated automatically on failure with
   // the test title as the file name
-  e2e.it('passes', {
+  systemTests.it('passes', {
     spec: 'screenshots_spec.js',
     expectedExitCode: 5,
     snapshot: true,
     timeout: 180000,
-    onStdout: e2e.normalizeWebpackErrors,
+    onStdout: systemTests.normalizeWebpackErrors,
     onRun (exec, browser) {
       return exec()
       .then(() => {

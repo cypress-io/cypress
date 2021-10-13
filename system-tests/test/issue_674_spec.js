@@ -1,10 +1,10 @@
-const e2e = require('../lib/e2e').default
+const systemTests = require('../lib/system-tests').default
 
 describe('e2e issue 674', () => {
-  e2e.setup()
+  systemTests.setup()
 
   // https://github.com/cypress-io/cypress/issues/674
-  e2e.it('fails', {
+  systemTests.it('fails', {
     spec: 'issue_674_spec.js',
     snapshot: true,
     expectedExitCode: 1,
