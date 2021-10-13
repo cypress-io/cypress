@@ -145,4 +145,36 @@ describe('e2e reporters', () => {
       reporterOptions: 'topLevelSuite=top suite,flowId=12345,useStdError=\'true\',useStdError=\'true\',recordHookFailures=\'true\',actualVsExpected=\'true\'',
     })
   })
+
+  it('shows slow tests in orange', function () {
+    return e2e.exec(this, {
+      spec: 'simple_passing_spec.js',
+      snapshot: false,
+      config: {
+        slowTestThreshold: 1,
+      },
+      processEnv: {
+        MOCHA_COLORS: 1,
+      },
+    }).then((result) => {
+      // With a very low slowTestThreshold, the timing should be in orange, since the test is considered 'slow'.
+      expect(result.stdout.match(/passes(.*)/)[1]).to.contain('\u001b[33m')
+    })
+  })
+
+  it('shows fast tests in default color', function () {
+    return e2e.exec(this, {
+      spec: 'simple_passing_spec.js',
+      snapshot: false,
+      config: {
+        slowTestThreshold: 100000,
+      },
+      processEnv: {
+        MOCHA_COLORS: 1,
+      },
+    }).then((result) => {
+      // This is a fast test, so we expect not to see the test timing in orange
+      expect(result.stdout.match(/passes(.*)/)[1]).not.to.contain('\u001b[33m')
+    })
+  })
 })
