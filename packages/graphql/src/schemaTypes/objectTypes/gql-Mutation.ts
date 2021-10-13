@@ -133,7 +133,7 @@ export const mutation = mutationType({
         })),
       },
       resolve: (root, args, ctx) => {
-        ctx.actions.app.setActiveBrowser(args.id)
+        ctx.actions.app.setActiveBrowserById(args.id)
 
         return {}
       },

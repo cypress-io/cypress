@@ -10,7 +10,7 @@ import type { EventEmitter } from 'events'
 import { openProject } from './open_project'
 import cache from './cache'
 
-const { getBrowsers } = browserUtils
+const { getBrowsers, ensureAndGetByNameOrPath } = browserUtils
 
 interface MakeDataContextOptions {
   os: PlatformName
@@ -25,6 +25,9 @@ export function makeDataContext (options: MakeDataContextOptions) {
     appApi: {
       getBrowsers () {
         return getBrowsers()
+      },
+      ensureAndGetByNameOrPath (nameOrPath, returnAll, browsers) {
+        return ensureAndGetByNameOrPath(nameOrPath, returnAll, browsers)
       },
     },
     authApi: {

@@ -63,6 +63,10 @@ export class DataContext extends DataContextShell {
       toAwait.push(this.actions.project.setActiveProject(this.config.launchArgs.projectRoot))
     }
 
+    if (this.config.launchArgs.browser) {
+      toAwait.push(this.actions.app.setActiveBrowserByNameOrPath(this.config.launchArgs.browser))
+    }
+
     if (IS_DEV_ENV) {
       this.actions.dev.watchForRelaunch()
     }

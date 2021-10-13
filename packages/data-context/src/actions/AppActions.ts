@@ -3,20 +3,31 @@ import type { DataContext } from '..'
 
 export interface AppApiShape {
   getBrowsers(): Promise<FoundBrowser[]>
+  ensureAndGetByNameOrPath(nameOrPath: string, returnAll?: boolean, browsers?: FoundBrowser[]): Promise<FoundBrowser | FoundBrowser[]>
 }
 
 export class AppActions {
   constructor (private ctx: DataContext) {}
 
-  async setActiveBrowser (id: string) {
+  setActiveBrowser (browser?: FoundBrowser) {
+    if (browser) {
+      this.ctx.coreData.wizard.chosenBrowser = browser
+    }
+  }
+
+  setActiveBrowserById (id: string) {
     const browserId = this.ctx.fromId(id, 'Browser')
 
     // Ensure that this is a valid ID to set
     const browser = this.ctx.appData.browsers?.find((b) => this.idForBrowser(b) === browserId)
 
-    if (browser) {
-      this.ctx.coreData.wizard.chosenBrowser = browser
-    }
+    this.setActiveBrowser(browser)
+  }
+
+  async setActiveBrowserByNameOrPath (browserNameOrPath: string) {
+    const browser = (await this.ctx._apis.appApi.ensureAndGetByNameOrPath(browserNameOrPath)) as FoundBrowser | undefined
+
+    this.setActiveBrowser(browser)
   }
 
   async refreshBrowsers () {
