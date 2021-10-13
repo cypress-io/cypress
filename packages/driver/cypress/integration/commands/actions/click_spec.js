@@ -1097,6 +1097,19 @@ describe('src/cy/commands/actions/click', () => {
         cy.get('p').click()
       })
 
+      // https://github.com/cypress-io/cypress/issues/4233
+      it('allows users to pass in a custom scroll behavior', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).contain('failed because this element is not visible')
+          expect(err.message).contain('it has CSS property: `position: fixed` and it\'s being covered by another element')
+          done()
+        })
+
+        cy.viewport(400, 400)
+        cy.visit('./fixtures/sticky-header.html')
+        cy.get('p').click({ scrollBehavior: 'top' })
+      })
+
       it('does not scroll when being forced', () => {
         const scrolled = []
 
