@@ -46,6 +46,14 @@ type ItOptions = ExecOptions & {
   onRun?: (
     execFn: ExecFn
   ) => Promise<any> | any
+  /**
+   * Same as using `systemTests.it.only`.
+   */
+  only?: boolean
+  /**
+   * Same as using `systemTests.it.skip`.
+   */
+  skip?: boolean
 }
 
 type ExecOptions = {
@@ -259,10 +267,8 @@ const expectedAddedVideoSnapshotLines = [
   'This error will not alter the exit code.', '',
   'TimeoutError: operation timed out',
   '[stack trace lines]', '', '',
-  '│ Video:        false                                                                            │',
 ]
 const expectedDeletedVideoSnapshotLines = [
-  '│ Video:        true                                                                             │',
   '(Video)', '',
   '-  Started processing:  Compressing to 32 CRF',
 ]
@@ -605,13 +611,13 @@ const localItFn = function (title: string, opts: ItOptions) {
   return _.each(browsersToTest, browserToTest)
 }
 
-localItFn.only = function (title, options) {
+localItFn.only = function (title: string, options: ItOptions) {
   options.only = true
 
   return localItFn(title, options)
 }
 
-localItFn.skip = function (title, options) {
+localItFn.skip = function (title: string, options: ItOptions) {
   options.skip = true
 
   return localItFn(title, options)
