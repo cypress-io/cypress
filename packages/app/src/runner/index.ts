@@ -14,7 +14,7 @@
  * namespace there, and access it with `window.UnifiedRunner`.
  *
  */
-import { store, Store } from '../store'
+import { getStore, Store } from '../store'
 import { injectBundle } from './injectBundle'
 import type { BaseSpec } from '@packages/types/src/spec'
 import { UnifiedReporterAPI } from './reporter'
@@ -33,7 +33,7 @@ const randomString = `${Math.random()}`
  * and server (via web socket).
  */
 function setupRunner (done: () => void) {
-  window.UnifiedRunner.eventManager.addGlobalListeners(store, {
+  window.UnifiedRunner.eventManager.addGlobalListeners(getStore(), {
     automationElement: '__cypress-string',
     randomString,
   })
@@ -63,7 +63,7 @@ function teardownSpec (store: Store) {
  * Cypress on it.
  *
  */
-function setupSpecCT (spec: BaseSpec) {
+function runSpecCT (spec: BaseSpec) {
   // TODO: figure out how to manage window.config.
   const config = window.UnifiedRunner.config
 
@@ -88,6 +88,16 @@ function setupSpecCT (spec: BaseSpec) {
   // create new AUT
   const autIframe = new window.UnifiedRunner.AutIframe('Test Project')
   const $autIframe: JQuery<HTMLIFrameElement> = autIframe.create().appendTo($container)
+
+  // IFrame Model to manage snapshots, etc.
+  // const iframeModel = new window.UnifiedRunner.IframeModel({
+  //   state: getStore(),
+  //   restoreDom: () => console.log('TODO: restore dom'),
+  //   highlightEl: () => console.log('TODO: highlight el'),
+  //   detachDom: () => console.log('TODO: detachDo'),
+  //   snapshotControls: () => console.log('Ahhhh') // window.UnifiedRunner.React
+  // })
+  // iframeModel.listen()
 
   const specSrc = getSpecUrl(config.namespace, spec)
 
@@ -115,7 +125,7 @@ function createSpecIFrame (specSrc: string) {
  * a Spec IFrame to load the spec's source code, and
  * initialize Cypress on the AUT.
  */
-function setupSpecE2E (spec: BaseSpec) {
+function runSpecE2E (spec: BaseSpec) {
   // TODO: manage config with GraphQL, don't put it on window.
   const config = window.UnifiedRunner.config
 
@@ -164,7 +174,9 @@ function setupSpecE2E (spec: BaseSpec) {
  * This only needs to happen once, prior to running the first spec.
  */
 function initialize (ready: () => void) {
-  injectBundle(() => setupRunner(ready))
+  injectBundle(() => {
+    window.UnifiedRunner.MobX.runInAction(() => setupRunner(ready))
+  })
 }
 
 /**
@@ -183,10 +195,12 @@ function initialize (ready: () => void) {
  *
  * 4. Force the Reporter to re-render with the new spec we are executed.
  *
- * 5. Setup the spec. This involves a few things, see the `setupSpecCT` function's
+ * 5. Setup the spec. This involves a few things, see the `runSpecCT` function's
  *    description for more information.
  */
 async function executeSpec (spec: BaseSpec) {
+  const store = getStore()
+
   store.setSpec(spec)
 
   await UnifiedReporterAPI.resetReporter()
@@ -196,11 +210,11 @@ async function executeSpec (spec: BaseSpec) {
   UnifiedReporterAPI.setupReporter()
 
   if (window.UnifiedRunner.config.testingType === 'e2e') {
-    return setupSpecE2E(spec)
+    return runSpecE2E(spec)
   }
 
   if (window.UnifiedRunner.config.testingType === 'component') {
-    return setupSpecCT(spec)
+    return runSpecCT(spec)
   }
 
   throw Error('Unknown or undefined testingType on window.UnifiedRunner.config.testingType')

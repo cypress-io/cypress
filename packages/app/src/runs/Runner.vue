@@ -76,15 +76,15 @@ async function selectSpec (id: string) {
   execute(specToRun.data.setCurrentSpec.currentSpec)
 }
 
-onMounted(() => {
-  const executeSpec = () => {
-    if (!props.gql?.activeProject?.currentSpec) {
-      return
-    }
-
-    execute(props.gql.activeProject.currentSpec)
+function executeSpec () {
+  if (!props.gql?.activeProject?.currentSpec) {
+    return
   }
 
+  execute(props.gql.activeProject.currentSpec)
+}
+
+onMounted(() => {
   UnifiedRunnerAPI.initialize(() => {
     window.UnifiedRunner.eventManager.on('restart', () => {
       executeSpec()

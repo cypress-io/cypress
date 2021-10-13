@@ -1,4 +1,6 @@
 import type { Store } from './src/store'
+import type MobX from 'mobx'
+import type { AutSnapshot } from '@packages/types'
 
 interface ConnectionInfo { 
   automationElement: '__cypress-string',
@@ -82,7 +84,22 @@ declare global {
        * checker to run on runner-shared and reporter, and it blows up.
        */
       AutIframe: any
+      IframeModel: new (payload: {
+        state: Store
+        restoreDom: (snapshot: AutSnapshot) => void
+        highlightEl: ({ body: unknown }, { $el, coords, highlightAtr, scrollBy }: any) => void
+        detachDom: () => void
+        snapshotControls: (snapshotProps: any) => any // 
+      }) => {
+        listen: () => void
+      }
+
+      MobX: typeof MobX
+
+      SnapshotControls: any
+
       Reporter: any
+
       shortcuts: {
         stop: () => void
       }

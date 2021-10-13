@@ -2,10 +2,11 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import $Cypress from '@packages/driver'
 const driverUtils = $Cypress.utils
-import { eventManager, AutIframe, Container } from '@packages/runner-shared'
+import { eventManager, AutIframe, Container, IframeModel, SnapshotControls } from '@packages/runner-shared'
 import defaultEvents from '@packages/reporter/src/lib/events'
 import { Reporter } from '@packages/reporter/src/main'
 import shortcuts from '@packages/reporter/src/lib/shortcuts'
+import * as MobX from 'mobx'
 
 export function getSpecUrl (namespace: string, spec: FoundSpec, prefix = '') {
   return spec ? `${prefix}/${namespace}/iframes/${spec.absolute}` : ''
@@ -16,11 +17,17 @@ const UnifiedRunner = {
 
   React,
 
+  MobX,
+
   ReactDOM,
 
   Reporter,
 
+  SnapshotControls,
+
   AutIframe,
+
+  IframeModel,
 
   defaultEvents,
 
@@ -42,13 +49,11 @@ window.UnifiedRunner = UnifiedRunner
 import 'regenerator-runtime/runtime'
 import type { FoundSpec } from '@packages/types/src/spec'
 
-import { autorun, action, configure } from 'mobx'
-
 import App from './app/RunnerCt'
 import State from './lib/state'
 import util from './lib/util'
 
-configure({ enforceActions: 'always' })
+MobX.configure({ enforceActions: 'always' })
 
 const Runner: any = {
   emit (evt: string, ...args: unknown[]) {
@@ -56,7 +61,7 @@ const Runner: any = {
   },
 
   start (el, base64Config) {
-    action('started', () => {
+    MobX.action('started', () => {
       const config = JSON.parse(driverUtils.decodeBase64Unicode(base64Config))
 
       const NO_COMMAND_LOG = config.env && config.env.NO_COMMAND_LOG
@@ -88,7 +93,7 @@ const Runner: any = {
       // anytime the hash changes, see if we need to set a new spec
       window.addEventListener('hashchange', setSpecByUrlHash)
 
-      autorun(() => {
+      MobX.autorun(() => {
         const { spec } = state
 
         if (spec) {
@@ -97,7 +102,7 @@ const Runner: any = {
       })
 
       Runner.state = state
-      Runner.configureMobx = configure
+      Runner.configureMobx = MobX.configure
 
       state.updateDimensions(config.viewportWidth, config.viewportHeight)
 

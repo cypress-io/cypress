@@ -1,4 +1,4 @@
-import { store, Store } from '../store'
+import { getStore, Store } from '../store'
 import { getReporterElement } from './utils'
 
 let hasInitializeReporter = false
@@ -18,7 +18,7 @@ async function resetReporter () {
 function setupReporter () {
   const $reporterRoot = getReporterElement()
 
-  renderReporter($reporterRoot, store, window.UnifiedRunner.eventManager)
+  renderReporter($reporterRoot, getStore(), window.UnifiedRunner.eventManager)
   hasInitializeReporter = true
 }
 

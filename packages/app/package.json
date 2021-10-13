@@ -43,6 +43,7 @@
     "graphql-tag": "^2.12.5",
     "javascript-time-ago": "2.3.8",
     "just-my-luck": "3.0.0",
+    "mobx": "5.15.4",
     "prismjs": "1.24.0",
     "rimraf": "3.0.2",
     "rollup-plugin-polyfill-node": "^0.7.0",

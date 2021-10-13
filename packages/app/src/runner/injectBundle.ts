@@ -1,6 +1,8 @@
 // function injectReporterStyle () {
 //   const style = document.createElement('style')
 
+import { initializeStore } from '../store'
+
 //   style.innerText = `
 //     .reporter {
 //       min-height: 0;
@@ -45,6 +47,10 @@ export async function injectBundle (ready: () => void) {
     // just stick config on window until we figure out how we are
     // going to manage it
     window.UnifiedRunner.config = window.UnifiedRunner.decodeBase64(data.base64Config)
+    window.UnifiedRunner.MobX.runInAction(() => {
+      initializeStore(window.UnifiedRunner.config.testingType)
+    })
+
     ready()
   }
 }
