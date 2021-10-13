@@ -14,7 +14,7 @@ const morgan = require('morgan')
 const stream = require('stream')
 const express = require('express')
 const Bluebird = require('bluebird')
-const debug = require('debug')('cypress:support:e2e')
+const debug = require('debug')('cypress:system-tests')
 const httpsProxy = require('@packages/https-proxy')
 const Fixtures = require('./fixtures')
 const { allowDestroy } = require(`@packages/server/lib/util/server_destroy`)
@@ -41,7 +41,7 @@ type ExecFn = (options?: ExecOptions) => Promise<ExecResult>
 
 type ItOptions = ExecOptions & {
   /**
-   * If a function is supplied, it will be executed instead of running the `e2e.exec` function immediately.
+   * If a function is supplied, it will be executed instead of running the `systemTests.exec` function immediately.
    */
   onRun?: (
     execFn: ExecFn
@@ -50,7 +50,7 @@ type ItOptions = ExecOptions & {
 
 type ExecOptions = {
   /**
-   * Deprecated. Use `--inspect-brk` from command line instead.
+   * Deprecated. Use `--cypress-inspect-brk` from command line instead.
    * @deprecated
    */
   inspectBrk?: null
@@ -566,7 +566,7 @@ const localItFn = function (title: string, opts: ItOptions) {
   const options = _.defaults({}, opts, DEFAULT_OPTIONS)
 
   if (!title) {
-    throw new Error('e2e.it(...) must be passed a title as the first argument')
+    throw new Error('systemTests.it(...) must be passed a title as the first argument')
   }
 
   // LOGIC FOR AUTOGENERATING DYNAMIC TESTS
@@ -595,7 +595,7 @@ const localItFn = function (title: string, opts: ItOptions) {
       const ctx = this
 
       const execFn = (overrides = {}) => {
-        return e2e.exec(ctx, _.extend({ originalTitle }, options, overrides, { browser }))
+        return systemTests.exec(ctx, _.extend({ originalTitle }, options, overrides, { browser }))
       }
 
       return options.onRun(execFn, browser, ctx)
@@ -627,7 +627,7 @@ const maybeVerifyExitCode = (expectedExitCode, fn) => {
   return fn()
 }
 
-const e2e = {
+const systemTests = {
 
   replaceStackTraceLines,
 
@@ -692,9 +692,9 @@ const e2e = {
   options (ctx, options: ExecOptions) {
     if (options.inspectBrk != null) {
       throw new Error(`
-      passing { inspectBrk: true } to e2e options is no longer supported
+      passing { inspectBrk: true } to system test options is no longer supported
       Please pass the --cypress-inspect-brk flag to the test command instead
-      e.g. "yarn test test/e2e/1_async_timeouts_spec.js --cypress-inspect-brk"
+      e.g. "yarn test async_timeouts_spec.js --cypress-inspect-brk"
       `)
     }
 
@@ -713,9 +713,9 @@ const e2e = {
 
     if (options.exit != null) {
       throw new Error(`
-      passing { exit: false } to e2e options is no longer supported
+      passing { exit: false } to system test options is no longer supported
       Please pass the --no-exit flag to the test command instead
-      e.g. "yarn test test/e2e/1_async_timeouts_spec.js --no-exit"
+      e.g. "yarn test async_timeouts_spec.js --no-exit"
       `)
     }
 
@@ -858,20 +858,20 @@ const e2e = {
    * Executes a given project and optionally sanitizes and checks output.
    * @example
     ```
-      e2e.setup()
+      systemTests.setup()
       project = Fixtures.projectPath("component-tests")
-      e2e.exec(this, {
+      systemTests.exec(this, {
         project,
         config: {
           video: false
         }
       })
       .then (result) ->
-        console.log(e2e.normalizeStdout(result.stdout))
+        console.log(systemTests.normalizeStdout(result.stdout))
     ```
    */
   exec (ctx, options: ExecOptions) {
-    debug('e2e exec options %o', options)
+    debug('systemTests.exec options %o', options)
     options = this.options(ctx, options)
     debug('processed options %o', options)
     let args = this.args(options)
@@ -951,7 +951,7 @@ const e2e = {
             throw err
           }
 
-          console.warn('(e2e warning) Firefox failed to process the video, but this is being ignored due to known issues with video processing in Firefox.')
+          console.warn('(system tests warning) Firefox failed to process the video, but this is being ignored due to known issues with video processing in Firefox.')
         }
       }
 
@@ -984,7 +984,7 @@ const e2e = {
           VIDEO_COMPRESSION_THROTTLE: 120000,
 
           // don't fail our own tests running from forked PR's
-          CYPRESS_INTERNAL_E2E_TESTS: '1',
+          CYPRESS_INTERNAL_SYSTEM_TESTS: '1',
 
           // Emulate no typescript environment
           CYPRESS_INTERNAL_NO_TYPESCRIPT: options.noTypeScript ? '1' : '0',
@@ -1067,6 +1067,6 @@ const e2e = {
 }
 
 export {
-  e2e as default,
+  systemTests as default,
   expect,
 }
