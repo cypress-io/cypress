@@ -7,6 +7,7 @@ import { BUNDLERS, CODE_LANGUAGES, FRONTEND_FRAMEWORKS, TESTING_TYPES } from '@p
 import { TestingTypeEnum, WizardStepEnum } from '../enumTypes/gql-WizardEnums'
 import { Storybook } from './gql-Storybook'
 import { WizardCodeLanguage } from './gql-WizardCodeLanguage'
+import { WizardSampleConfigFile } from './gql-WizardSampleConfigFile'
 
 export const Wizard = objectType({
   name: 'Wizard',
@@ -78,7 +79,8 @@ export const Wizard = objectType({
       resolve: (source, args, ctx) => ctx.wizard.sampleCode(),
     })
 
-    t.string('sampleConfigFiles', {
+    t.list.nonNull.field('sampleConfigFiles', {
+      type: WizardSampleConfigFile,
       description: 'Set of sample configuration files based bundler, framework and language of choice',
       resolve: (source, args, ctx) => ctx.wizard.sampleConfigFiles(),
     })

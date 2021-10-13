@@ -25,11 +25,8 @@ export interface FullConfig extends Partial<Cypress.RuntimeConfigOptions & Cypre
 export interface SampleConfigFile{
   status: 'changes' | 'valid' | 'skipped' | 'error'
   filePath: string
-  language: 'js' | 'ts'
   content: string
   description?: string
-  warning?: {
-    description: string
-    docsLink: string
-  }
+  warningText?: string
+  warningLink?: string
 }

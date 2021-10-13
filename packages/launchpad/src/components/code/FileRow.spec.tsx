@@ -1,10 +1,10 @@
 /* eslint-disable no-irregular-whitespace */
 import FileRow from './FileRow.vue'
 
-const content = `const { defineConfig } = require(’cypress’)
-const { devServer, defineDevServerConfig } = require(’@cypress/vite-dev-server’)
+const content = `import { defineConfig } from ’cypress'
+import { devServer, defineDevServerConfig } from ’@cypress/vite-dev-server’
 
-​module.exports = defineConfig({
+export default defineConfig({
   component: {
     devServer,
     devServerConfig: defineDevServerConfig({
@@ -19,28 +19,24 @@ describe('FileRow', () => {
       <div class="p-5 w-full">
         <FileRow
           status="valid"
-          language="js"
           content={content}
-          filePath="cypress/integration/support.js"
+          filePath="cypress/integration/support.ts"
           description="Lorem ipsum dolor sit"
         />
         <FileRow
           status="changes"
-          language="js"
           content={content}
           filePath="cypress/integration/command.js"
           description="Aenean lacinia bibendum nulla sed consectetur."
         />
         <FileRow
           status="skipped"
-          language="js"
           content={content}
           filePath="cypress.config.js"
           description="Lorem ipsum dolor sit"
         />
         <FileRow
           status="error"
-          language="js"
           content={content}
           filePath="cypress/integration/index.js"
           description="Lorem ipsum dolor sit"
@@ -54,18 +50,16 @@ describe('FileRow', () => {
       <div class="p-5 w-full">
         <FileRow
           status="valid"
-          language="js"
           content={content}
           filePath="cypress/integration/support.js"
           description="Lorem ipsum dolor sit"
         />
         <FileRow
           status="changes"
-          language="js"
           content={content}
           filePath="cypress/integration/command.js"
           description="Lorem ipsum dolor sit"
-          warning={{ description: 'Please merge the code below with your existing `cypress.config.js`', docsLink: '' }}
+          warningText="Please merge the code below with your existing `cypress.config.js`"
         />
       </div>
     ))
@@ -80,11 +74,10 @@ describe('FileRow', () => {
       <div class="p-5 w-full">
         <FileRow
           status="changes"
-          language="js"
           content={content}
           filePath="cypress/integration/command.js"
           description="Lorem ipsum dolor sit amet, consectetur adipisicing elit. Laboriosam at temporibus nulla ratione a nam inventore esse facere vel nemo est veniam dolore, ullam fuga quidem, cum dolor quibusdam officiis."
-          warning={{ description: 'Please merge the code below with your existing `cypress.config.js`', docsLink: '' }}
+          warningText="Please merge the code below with your existing `cypress.config.js`"
         />
       </div>
     ))

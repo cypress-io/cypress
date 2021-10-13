@@ -102,6 +102,7 @@
       "confirmManualInstall": "I've installed them"
     },
     "step": {
+      "continue": "Continue",
       "next": "Next Step",
       "back": "Back"
     },

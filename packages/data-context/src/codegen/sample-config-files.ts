@@ -30,7 +30,6 @@ export async function getSampleConfigFiles (testingType: NexusGenEnums['TestingT
     return {
       filePath,
       content,
-      language,
       status: 'valid',
     }
   })

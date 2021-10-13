@@ -15,6 +15,7 @@
         :language="language"
       >
         {{ code }}
+        // {{ language }}
       </PrismJs>
       <CopyButton
         v-if="manualCreate && code"

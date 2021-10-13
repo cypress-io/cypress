@@ -98,6 +98,7 @@
         "lodash",
         "path",
         "prismjs",
+        "prismjs/components/prism-json",
         "prismjs/components/prism-typescript",
         "prismjs/components/prism-yaml",
         "socket.io-client",
