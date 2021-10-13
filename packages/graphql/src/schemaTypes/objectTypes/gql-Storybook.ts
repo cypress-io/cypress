@@ -44,9 +44,21 @@ export const Storybook = objectType({
       },
     })
 
-    t.string('generatedSpec', {
-      description: 'Most recent generated spec',
-      resolve: (source, args, ctx) => ctx.wizardData.generatedSpec?.relative ?? null,
+    t.field('generatedSpec', {
+      type: objectType({
+        name: 'GeneratedSpec',
+        node: 'content',
+        definition (t) {
+          t.nonNull.string('content', {
+            description: 'File content of most recently generated spec.',
+          })
+
+          t.nonNull.field('spec', {
+            type: FileParts,
+          })
+        },
+      }),
+      resolve: (src, args, ctx) => ctx.wizardData.generatedSpec,
     })
   },
 })
