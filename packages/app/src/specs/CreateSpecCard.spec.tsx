@@ -1,6 +1,5 @@
 import CreateSpecCard from './CreateSpecCard.vue'
 import DocumentCode from '~icons/cy/document-code_x48'
-import { withKeys } from 'vue'
 
 const iconSelector = '[data-testid=create-spec-card-icon]'
 const specCardSelector = '[data-testid=create-spec-card]'
@@ -48,7 +47,6 @@ describe('<CreateSpecCard />', { viewportWidth: 400, viewportHeight: 400 }, () =
     </div>))
       .get(specCardSelector)
       .focus().click().type('{enter}').type(' ')
-      // .get('@onKeypressSpy').should('have.been.calledTwice')
-      .get('@onClickSpy').should('have.been.called')
+      .get('@onClickSpy').should('have.been.calledThrice')
   })
 })
