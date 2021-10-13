@@ -45,7 +45,7 @@ type ItOptions = ExecOptions & {
    */
   onRun?: (
     execFn: ExecFn
-  ) => Promise<void> | void
+  ) => Promise<any> | any
 }
 
 type ExecOptions = {
@@ -165,7 +165,7 @@ type ExecOptions = {
   /**
    * Set OS-level env vars.
    */
-  processEnv?: { [key: string]: string }
+  processEnv?: { [key: string]: string | number }
   /**
    * Set an output path.
    */
@@ -209,6 +209,10 @@ type Server = {
    * If set, use `express.static` middleware to serve the e2e project's static assets.
    */
   static?: boolean
+  /**
+   * If set, use the `cors` middleware to provide CORS headers.
+   */
+  cors?: boolean
   /**
    * A function that receives the Express app for setting up routes, etc.
    */
