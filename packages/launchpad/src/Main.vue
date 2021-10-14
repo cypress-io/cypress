@@ -29,10 +29,13 @@
             @click="isTestingTypeModalOpen = true"
           >
             {{ t('welcomePage.review') }}<i-cy-arrow-right_x16
-              class="inline-block transition-transform duration-200 transform ml-4px icon-dark-current group-hocus:translate-x-3px"
+              class="inline-block transition-transform duration-200 ease-in transform -translate-y-1px ml-4px icon-dark-current group-hocus:translate-x-2px"
             />
           </button>
-          <TestingTypeCards :gql="query.data.value" />
+          <TestingTypeCards
+            :gql="query.data.value"
+            @open-compare="isTestingTypeModalOpen = true"
+          />
         </template>
         <Wizard
           v-else
