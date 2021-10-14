@@ -6,10 +6,13 @@ const emit = defineEmits(['click'])
 
 </script>
 <template>
-  <div class="mb-4 overflow-hidden border border-gray-100 rounded bg-light-50">
-    <button
-      class="flex items-center w-full text-left py-10px focus-default"
-      @click="emit('click')"
+  <div
+    class="mb-4 overflow-hidden border border-gray-100 rounded bg-light-50 hocus-default"
+    tabindex="0"
+    @click="emit('click')"
+  >
+    <div
+      class="flex items-center w-full text-left py-10px cursor-pointer rounded"
     >
       <div class="flex items-center h-10 px-5 border-r border-r-gray-100">
         <slot name="icon" />
@@ -28,7 +31,12 @@ const emit = defineEmits(['click'])
       >
         <slot name="right" />
       </div>
-    </button>
-    <slot name="slider" />
+    </div>
+    <div
+      v-if="slots.slider"
+      @click.stop=""
+    >
+      <slot name="slider" />
+    </div>
   </div>
 </template>

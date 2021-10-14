@@ -1,16 +1,15 @@
 import {
-  ConfigFilesDocument,
+  ConfigFilesFragmentDoc,
 } from '../generated/graphql-test'
 import ConfigFiles from './ConfigFiles.vue'
 
-// TODO: Can't mock queries
-xdescribe('<ConfigFile />', () => {
+describe('<ConfigFile />', () => {
   beforeEach(() => {
-    cy.mountFragment(ConfigFilesDocument, {
-      render: () => {
+    cy.mountFragment(ConfigFilesFragmentDoc, {
+      render: (qgl) => {
         return (
           <div>
-            <ConfigFiles />
+            <ConfigFiles gql={qgl} />
           </div>
         )
       },

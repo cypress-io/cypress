@@ -38,6 +38,7 @@ const { t } = useI18n()
 gql`
 fragment ConfigFiles on Wizard {
   sampleConfigFiles {
+    id
     filePath
     content
     status
