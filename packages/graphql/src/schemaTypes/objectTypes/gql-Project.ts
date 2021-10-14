@@ -73,4 +73,8 @@ export const Project = objectType({
       },
     })
   },
+  sourceType: {
+    module: __dirname,
+    export: 'ProjectShape',
+  },
 })

@@ -5,22 +5,29 @@ import chaiAsPromised from 'chai-as-promised'
 import chaiSubset from 'chai-subset'
 import sinonChai from '@cypress/sinon-chai'
 import sinon from 'sinon'
+import rimraf from 'rimraf'
+import util from 'util'
 
 chai.use(chaiAsPromised)
 chai.use(chaiSubset)
 chai.use(sinonChai)
 
-import type { WithCtxOptions } from './support/e2eSupport'
+import path from 'path'
+import type { WithCtxInjected, WithCtxOptions } from './support/e2eSupport'
+import { e2eProjectDirs } from './support/e2eProjectDirs'
 
 export async function e2ePluginSetup (projectRoot: string, on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) {
+  process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF = 'true'
   // require'd so we don't import the types from @packages/server which would
   // pollute strict type checking
   const { runInternalServer } = require('@packages/server/lib/modes/internal-server')
+  const Fixtures = require('../../../server/test/support/helpers/fixtures')
+  const tmpDir = path.join(__dirname, '.projects')
 
-  process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF = 'true'
-  const { serverPortPromise, ctx } = runInternalServer({
-    projectRoot,
-  }) as {ctx: DataContext, serverPortPromise: Promise<number>}
+  await util.promisify(rimraf)(tmpDir)
+
+  Fixtures.setTmpDir(tmpDir)
+  Fixtures.scaffold()
 
   interface WithCtxObj {
     fn: string
@@ -28,24 +35,42 @@ export async function e2ePluginSetup (projectRoot: string, on: Cypress.PluginEve
     activeTestId: string
   }
 
+  let ctx: DataContext
+  let serverPortPromise: Promise<number>
   let currentTestId: string | undefined
   let testState: Record<string, any> = {}
 
   on('task', {
     async withCtx (obj: WithCtxObj) {
-      await serverPortPromise
-
+      // Ensure we spin up a completely isolated server/state for each test
       if (obj.activeTestId !== currentTestId) {
+        ctx?.destroy()
         currentTestId = obj.activeTestId
-        testState = {}
+        testState = {};
+        ({ serverPortPromise, ctx } = runInternalServer({
+          projectRoot,
+        }) as {ctx: DataContext, serverPortPromise: Promise<number>})
+
+        await serverPortPromise
       }
 
-      const val = await Promise.resolve(new Function('ctx', 'options', 'chai', 'expect', 'sinon', `return (${obj.fn})(ctx, options, chai, expect, sinon)`).call(undefined, ctx, {
+      const options: WithCtxInjected = {
         ...obj.options,
         testState,
         require,
         process,
-      }, chai, expect, sinon))
+        projectDir (projectName) {
+          if (!e2eProjectDirs.includes(projectName)) {
+            throw new Error(`${projectName} is not a fixture project`)
+          }
+
+          return path.join(tmpDir, projectName)
+        },
+      }
+
+      const val = await Promise.resolve(new Function('ctx', 'options', 'chai', 'expect', 'sinon', `
+        return (${obj.fn})(ctx, options, chai, expect, sinon)
+      `).call(undefined, ctx, options, chai, expect, sinon))
 
       return val || null
     },

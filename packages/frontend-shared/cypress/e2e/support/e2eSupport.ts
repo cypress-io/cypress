@@ -1,28 +1,41 @@
+import '@testing-library/cypress/add-commands'
 import type { DataContext } from '@packages/data-context'
-import { e2eProjectPaths } from './e2eProjectRegistry'
+import { e2eProjectDirs } from './e2eProjectDirs'
 
 const NO_TIMEOUT = 1000 * 1000
 const FOUR_SECONDS = 4 * 1000
 
-export type ProjectFixture = keyof typeof e2eProjectPaths
+export type ProjectFixture = typeof e2eProjectDirs[number]
 
 export interface WithCtxOptions extends Cypress.Loggable, Cypress.Timeoutable {
-  projectName?: string
+  projectName?: ProjectFixture
   [key: string]: any
 }
 
-export interface WithCtxInjected {
-  testState: Record<string, any>
+export interface WithCtxInjected extends WithCtxOptions {
   require: typeof require
   process: typeof process
+  testState: Record<string, any>
+  projectDir(projectName: ProjectFixture): string
 }
 
 declare global {
   namespace Cypress {
     interface Chainable {
+      /**
+       * Calls a function block with the "ctx" object from the server,
+       * and an object containing any options passed into the server context
+       * and some helper properties:
+       *
+       *
+       * You cannot access any variables outside of the function scope,
+       * however we do provide expect, chai, sinon
+       */
       withCtx: typeof withCtx
+      /**
+       * Takes the name of a "system" test directory, and mounts the project within open mode
+       */
       setupE2E: typeof setupE2E
-      openProject: typeof openProject
       initializeApp: typeof initializeApp
       visitApp(href?: string): Chainable<string>
       visitLaunchpad(href?: string): Chainable<string>
@@ -30,16 +43,11 @@ declare global {
        * Get the project path for testing opening a new project
        */
       e2eProjectPath(project: ProjectFixture): string
-      // graphqlRequest(): Chainable<string>
     }
   }
 }
 
 beforeEach(() => {
-  cy.e2eProjectPath = (project: ProjectFixture) => {
-    return e2eProjectPaths[project]
-  }
-
   // Reset the ports so we know we need to call "setupE2E" before each test
   Cypress.env('e2e_serverPort', undefined)
   Cypress.env('e2e_gqlPort', undefined)
@@ -48,21 +56,20 @@ beforeEach(() => {
 // function setup
 
 function setupE2E (projectName?: ProjectFixture) {
-  if (projectName && !e2eProjectPaths[projectName]) {
+  if (projectName && !e2eProjectDirs.includes(projectName)) {
     throw new Error(`Unknown project ${projectName}`)
   }
 
   return cy.withCtx(async (ctx, o) => {
-    await ctx.dispose()
     if (o.projectName) {
-      await ctx.actions.project.setActiveProject(o.e2eProjectPaths[o.projectName])
+      await ctx.actions.project.setActiveProject(o.projectDir(o.projectName))
     }
 
     return [
       ctx.gqlServerPort,
       ctx.appServerPort,
     ]
-  }, { projectName, e2eProjectPaths, log: false }).then(([gqlPort, serverPort]) => {
+  }, { projectName, log: false }).then(([gqlPort, serverPort]) => {
     Cypress.env('e2e_gqlPort', gqlPort)
     Cypress.env('e2e_serverPort', serverPort)
   })
@@ -83,14 +90,6 @@ function initializeApp (mode: 'component' | 'e2e' = 'e2e') {
   }, { log: false, mode }).then((serverPort) => {
     Cypress.env('e2e_serverPort', serverPort)
   })
-}
-
-function openProject (projectName?: ProjectFixture) {
-  return cy.withCtx((ctx, o) => {
-    if (o.projectName) {
-      ctx.actions.project.setActiveProject(o.e2eProjectPaths[o.projectName])
-    }
-  }, { log: false, projectName, e2eProjectPaths })
 }
 
 function visitApp () {
@@ -117,6 +116,8 @@ function visitLaunchpad (hash?: string) {
   cy.visit(`dist-launchpad/index.html?gqlPort=${e2e_gqlPort}`)
 }
 
+const pageLoadId = `uid${Math.random()}`
+
 function withCtx<T extends Partial<WithCtxOptions>> (fn: (ctx: DataContext, o: T & WithCtxInjected) => any, opts: T = {} as T): Cypress.Chainable {
   const _log = opts.log === false ? { end () {} } : Cypress.log({
     name: 'withCtx',
@@ -134,7 +135,7 @@ function withCtx<T extends Partial<WithCtxOptions>> (fn: (ctx: DataContext, o: T
     fn: fn.toString(),
     options: rest,
     // @ts-expect-error
-    activeTestId: Cypress.mocha.getRunner().test.id ?? Cypress.currentTest.title,
+    activeTestId: `${pageLoadId}-${Cypress.mocha.getRunner().test.id ?? Cypress.currentTest.title}`,
   }, { timeout: timeout ?? Cypress.env('e2e_isDebugging') ? NO_TIMEOUT : FOUR_SECONDS, log }).then(() => {
     _log.end()
   })
@@ -143,6 +144,5 @@ function withCtx<T extends Partial<WithCtxOptions>> (fn: (ctx: DataContext, o: T
 Cypress.Commands.add('visitApp', visitApp)
 Cypress.Commands.add('visitLaunchpad', visitLaunchpad)
 Cypress.Commands.add('initializeApp', initializeApp)
-Cypress.Commands.add('openProject', openProject)
 Cypress.Commands.add('setupE2E', setupE2E)
 Cypress.Commands.add('withCtx', withCtx)
