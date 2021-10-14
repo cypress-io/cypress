@@ -16,7 +16,7 @@ import type { LaunchOpts, LaunchArgs, OpenProjectLaunchOptions, FoundBrowser } f
 import { fs } from './util/fs'
 import path from 'path'
 import os from 'os'
-import { closeGraphQLServer } from './gui/makeGraphQLServer'
+import type { DataContextShell } from '@packages/data-context/src/DataContextShell'
 
 const debug = Debug('cypress:server:open_project')
 
@@ -124,7 +124,7 @@ export class OpenProject {
     // of potential domain changes, request buffers, etc
     this.openProject!.reset()
 
-    const url = getSpecUrl({
+    let url = getSpecUrl({
       absoluteSpecPath: spec.absolute,
       specType: spec.specType,
       browserUrl: this.openProject.cfg.browserUrl,
@@ -408,12 +408,15 @@ export class OpenProject {
     this.stopSpecsWatcher()
 
     return Promise.all([
-      closeGraphQLServer(),
+      this._ctx?.destroy(),
       this.closeOpenProjectAndBrowsers(),
     ]).then(() => null)
   }
 
+  _ctx?: DataContextShell
+
   async create (path: string, args: LaunchArgs, options: OpenProjectLaunchOptions, browsers: FoundBrowser[] = []) {
+    this._ctx = options.ctx
     debug('open_project create %s', path)
 
     _.defaults(options, {

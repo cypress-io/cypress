@@ -164,6 +164,10 @@ export const mutation = mutationType({
         storyPath: nonNull('String'),
       },
       resolve: async (_, args, ctx) => {
+        if (!ctx.activeProject) {
+          throw Error(`Cannot set spec without active project!`)
+        }
+
         const latestSpec = await ctx.actions.storybook.generateSpecFromStory(args.storyPath)
 
         return latestSpec?.relative

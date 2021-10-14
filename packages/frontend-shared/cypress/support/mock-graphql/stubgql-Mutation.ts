@@ -63,6 +63,10 @@ export const stubMutation: MaybeResolver<Mutation> = {
     return true
   },
   generateSpecFromStory (source, args, ctx) {
+    if (!ctx.app.activeProject) {
+      throw Error('Cannot set currentSpec without active project')
+    }
+
     return '/Users/lachlan/code/work/cypress5/packages/app/src/Basic.spec.tsx'
   },
 }

@@ -30,7 +30,13 @@ const props = defineProps<{
 }>()
 
 onMounted(() => {
-  UnifiedRunnerAPI.initialize(execute)
+  UnifiedRunnerAPI.initialize(() => {
+    window.UnifiedRunner.eventManager.on('restart', () => {
+      execute()
+    })
+
+    execute()
+  })
 })
 
 onBeforeUnmount(() => {
@@ -72,3 +78,14 @@ const execute = () => {
   name: "Runner"
 }
 </route>
+
+<style>
+#unified-runner > div {
+  height: 100%;
+}
+
+iframe {
+  width: 100%;
+  height: 100%;
+}
+</style>

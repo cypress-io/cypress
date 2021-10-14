@@ -32,6 +32,9 @@ export const logger = {
       // _.trim([]) returns '' but we want to log empty arrays, so account for that
       if (_.isString(value) && _.trim(value) === '') return
 
+      // Skip trim if we know value is an object
+      if (typeof value !== 'object' && _.trim(value) === '' && !_.isArray(value)) return
+
       this.log(`%c${key}`, 'font-weight: bold', value)
     })
   },
