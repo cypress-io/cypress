@@ -1,12 +1,15 @@
 import type { DataContext } from '@packages/data-context'
 import * as inspector from 'inspector'
-import chai, { expect } from 'chai'
-import chaiAsPromised from 'chai-as-promised'
-import chaiSubset from 'chai-subset'
 import sinonChai from '@cypress/sinon-chai'
 import sinon from 'sinon'
 import rimraf from 'rimraf'
 import util from 'util'
+
+// require'd so we don't conflict with globals loaded in @packages/types
+const chai = require('chai')
+const chaiAsPromised = require('chai-as-promised')
+const chaiSubset = require('chai-subset')
+const { expect } = chai
 
 chai.use(chaiAsPromised)
 chai.use(chaiSubset)

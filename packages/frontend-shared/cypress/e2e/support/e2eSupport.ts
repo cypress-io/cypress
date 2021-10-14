@@ -39,10 +39,6 @@ declare global {
       initializeApp: typeof initializeApp
       visitApp(href?: string): Chainable<string>
       visitLaunchpad(href?: string): Chainable<string>
-      /**
-       * Get the project path for testing opening a new project
-       */
-      e2eProjectPath(project: ProjectFixture): string
     }
   }
 }

@@ -11,9 +11,9 @@ describe('Launchpad: Open Mode', () => {
 
   it('allows adding a project', () => {
     cy.withCtx((ctx, o) => {
-      ctx.actions.project.setActiveProject(o.projectPath)
+      ctx.actions.project.setActiveProject(o.projectDir('todos'))
       ctx.emitter.toLaunchpad()
-    }, { projectPath: cy.e2eProjectPath('todos') })
+    })
 
     cy.get('h1').should('contain', 'Welcome')
   })
