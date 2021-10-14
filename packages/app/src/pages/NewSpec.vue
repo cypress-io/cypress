@@ -81,7 +81,6 @@ mutation NewSpec_GenerateSpecFromStory($storyPath: String!) {
   generateSpecFromStory (storyPath: $storyPath) {
     storybook {
       generatedSpec {
-        id
         content
         spec {
           id
@@ -99,8 +98,8 @@ const mutation = useMutation(NewSpec_GenerateSpecFromStoryDocument)
 
 const generatedSpec = computed(() => mutation.data.value?.generateSpecFromStory.storybook?.generatedSpec)
 
-async function storyClick (story: string) {
-  await mutation.executeMutation({ storyPath: story })
+function storyClick (story: string) {
+  mutation.executeMutation({ storyPath: story })
 }
 
 function specClick () {
