@@ -119,9 +119,18 @@ $warn-header-background: $orange-1000;
 $warn-header-text: $orange-700;
 $warn-text: $orange-600;
 
-$header-height: 46px;
+$header-height: 64px;
 $reporter-contents-min-width: 170px;
 
 $font-sans: 'Mulish', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 $open-sans: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 $monospace: Consolas, Monaco, 'Andale Mono', monospace;
+@font-face {
+  font-family: system;
+  font-style: normal;
+  font-weight: 300;
+  src: local('.SFNSText-Light'), local('.HelveticaNeueDeskInterface-Light'),
+    local('.LucidaGrandeUI'), local('Ubuntu Light'), local('Segoe UI Light'),
+    local('Roboto-Light'), local('DroidSans'), local('Tahoma');
+}
+$font-system: 'system';

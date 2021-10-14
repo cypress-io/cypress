@@ -43,7 +43,7 @@ class RunnableHeader extends Component<RunnableHeaderProps> {
     return renderRunnableHeader(
       <>
         <FileNameOpener fileDetails={fileDetails} />
-        <span style={{ float: 'right' }}>{formatDuration(statsStore.duration)}</span>
+        <span className='duration'>{formatDuration(statsStore.duration)}</span>
       </>,
     )
   }

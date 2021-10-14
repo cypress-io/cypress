@@ -1,13 +1,14 @@
 .reporter {
   header {
     background-color: $gray-1000;
-    border-bottom: 1px solid $gray-900;
     display: flex;
     flex-shrink: 0;
     flex-wrap: wrap;
+    font-family: $font-system;
     min-height: $header-height;
     outline: 0;
     overflow: hidden;
+    padding: 16px;
     width: 100%;
     z-index: 1;
 
@@ -19,12 +20,12 @@
       background-color: $gray-1000;
       border-color: transparent;
       border-radius: 0;
-      display: block;
+      display: inline-block;
+      font-weight: 300;
       line-height: 26px;
       outline: 0;
-      padding: 10px 0;
+      padding: 0 4px;
       text-align: center;
-      width: 40px;
 
       &:hover {
         background-color: $gray-900;
@@ -48,13 +49,15 @@
     display: flex;
 
     button {
-      border-right: 1px solid $gray-900;
+      color: $gray-700;
+      font-size: 16px;
       font-weight: 400;
-      padding: 10px 12px;
+      padding-right: 8px;
       width: auto !important;
 
       span {
         display: none;
+        margin-left: 10px;
       }
 
       i {
@@ -64,55 +67,58 @@
   }
 
   .stats {
+    align-items: center;
+    border: 1px solid $gray-900;
+    border-radius: 4px;
     display: flex;
     flex-wrap: wrap;
+    justify-content: center;
     margin-bottom: 0;
     padding: 0;
 
     li {
-      display: block;
+      display: inline-block;
       font-size: 16px;
-      height: 46px;
-      line-height: 26px;
+      font-weight: 600;
       list-style-type: none;
-      padding: 10px 5px;
+      padding: 0 8px 0 4px;
 
-      &.passed {
+      &.passed i {
         color: $pass;
       }
 
-      &.failed {
+      &.failed i {
         color: $fail;
       }
 
-      &.pending {
+      &.pending i {
         color: $gray-400;
       }
 
       i {
         margin: 5px;
       }
-    }
 
-    .duration {
-      border-left: 1px solid $gray-900;
-      border-right: 1px solid $gray-900;
-      padding-left: 10px;
-      padding-right: 10px;
+      .num {
+        color: $white;
+
+        &.empty {
+          color: $gray-800;
+          line-height: 18px;
+          vertical-align: text-top;
+        }
+      }
     }
   }
 
   .controls {
+    align-items: center;
+    border: 1px solid $gray-900;
+    border-radius: 4px;
     display: flex;
     flex-wrap: wrap;
-
-    > span {
-      display: flex;
-
-      &:last-child button {
-        border-right: 1px solid $gray-900;
-      }
-    }
+    justify-content: center;
+    margin-left: 8px;
 
     .paused-label {
       align-items: center;
@@ -159,21 +165,20 @@
         }
       }
     }
+
+    span:not(:last-child) {
+      button {
+        border-right: 1px solid $gray-900;
+      }
+    }
   }
 
   // utilizing element size queries: https://github.com/marcj/css-element-queries
   // styles take effect when width is greater than or equal to the specified amount
   &[min-width~="398px"] {
-    header button {
-      width: 50px;
-    }
 
     .focus-tests button span {
       display: inline;
-    }
-
-    .stats li {
-      padding: 10px;
     }
   }
 }

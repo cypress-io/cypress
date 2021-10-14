@@ -5,7 +5,6 @@
 
   .container {
     background-color: $gray-1000;
-    box-shadow: 0 1px 2px $gray-600;
     flex-grow: 2;
     overflow-y: auto;
   }
@@ -363,15 +362,17 @@
 
   .runnable-header {
     background: $gray-1000;
+    border-top: 1px solid $gray-900;
     border-bottom: 1px solid $gray-900;
     display: block;
-    font-size: 13px;
+    font-family: $font-system;
+    font-size: 14px;
     line-height: 24px;
+    margin: 0px 16px;
     overflow-wrap: break-word;
-    padding: 5px 10px;
+    padding: 16px 0px;
     position: sticky;
     top: 0;
-    width: 100%;
     z-index: 1;
 
     span > span > a:before,
@@ -385,6 +386,16 @@
 
     a, a:active, a:focus, a:hover {
       color: $white;
+    }
+
+    .duration {
+      border: 1px solid $gray-900;
+      border-radius: 8px;
+      color: $gray-600;
+      float: right;
+      font-size: 12px;
+      line-height: 16px;
+      padding: 2px 6px;
     }
   }
 
