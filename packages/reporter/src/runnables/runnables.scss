@@ -362,18 +362,34 @@
 
   .runnable-header {
     background: $gray-1000;
-    border-top: 1px solid $gray-900;
-    border-bottom: 1px solid $gray-900;
     display: block;
     font-family: $font-system;
     font-size: 14px;
     line-height: 24px;
-    margin: 0px 16px;
     overflow-wrap: break-word;
-    padding: 16px 0px;
+    padding: 16px;
     position: sticky;
     top: 0;
+    width: 100%;
     z-index: 1;
+
+    &:before,
+    &:after {
+      background-color: $gray-900;
+      content: '';
+      position: absolute;
+      width: calc(100% - 32px);
+      height: 1px;
+      left: 16px;
+    }
+
+    &:before {
+      top: 0;
+    }
+
+    &:after {
+      bottom: 0;
+    }
 
     span > span > a:before,
     span > span > span:before {
