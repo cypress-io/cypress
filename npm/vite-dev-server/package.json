@@ -8,7 +8,8 @@
     "build-prod": "tsc",
     "cy:open": "node ../../scripts/cypress.js open-ct --project ${PWD}",
     "cy:run": "node ../../scripts/cypress.js run-ct --project ${PWD}",
-    "test": "yarn cy:run",
+    "cy:run-signature": "yarn cy:run --config=\"{\\\"pluginsFile\\\":\\\"cypress/new-signature/plugins.js\\\"}\"",
+    "test": "yarn cy:run && yarn cy:run-signature",
     "watch": "tsc -w"
   },
   "dependencies": {
