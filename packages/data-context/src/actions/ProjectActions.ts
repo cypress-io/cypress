@@ -29,10 +29,8 @@ export class ProjectActions {
     return this.ctx._apis.projectApi
   }
 
-  async clearActiveProject () {
+  clearActiveProject () {
     this.ctx.appData.activeProject = null
-
-    return this.api.closeActiveProject()
   }
 
   private get projects () {
@@ -44,6 +42,9 @@ export class ProjectActions {
   }
 
   async setActiveProject (projectRoot: string) {
+    this.clearActiveProject()
+    await this.api.closeActiveProject()
+
     this.ctx.coreData.app.activeProject = {
       projectRoot,
       title: '',

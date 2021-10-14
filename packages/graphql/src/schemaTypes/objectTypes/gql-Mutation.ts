@@ -58,6 +58,7 @@ export const mutation = mutationType({
       type: 'Query',
       resolve: (root, args, ctx) => {
         ctx.actions.project.clearActiveProject()
+        ctx.actions.wizard.resetWizard()
 
         return {}
       },
@@ -246,6 +247,7 @@ export const mutation = mutationType({
         open: booleanArg({ description: 'Whether to open the project when added' }),
       },
       async resolve (_root, args, ctx) {
+        ctx.actions.wizard.resetWizard()
         await ctx.actions.project.addProject(args)
 
         return ctx.appData

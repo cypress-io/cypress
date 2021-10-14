@@ -179,4 +179,18 @@ export class WizardActions {
 
     return this.data
   }
+
+  /// reset wizard history, useful for when changing to a new project
+  resetWizard () {
+    this.data.currentStep = 'welcome'
+    this.data.history = []
+    this.data.chosenBundler = null
+    this.data.chosenTestingType = null
+    this.data.chosenFramework = null
+    this.data.chosenLanguage = 'js'
+    this.data.chosenManualInstall = false
+    this.data.chosenBrowser = null
+
+    return this.data
+  }
 }
