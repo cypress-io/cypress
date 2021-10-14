@@ -294,8 +294,8 @@ const isVideoSnapshotError = (err: Error) => {
     if (line.charAt(0) === '-') deleted.push(line.slice(1).trim())
   }
 
-  _.remove(added, sometimesAddedVideoSnapshotLine)
-  _.remove(deleted, sometimesDeletedVideoSnapshotLine)
+  _.pull(added, sometimesAddedVideoSnapshotLine)
+  _.pull(deleted, sometimesDeletedVideoSnapshotLine)
 
   return _.isEqual(added, expectedAddedVideoSnapshotLines) && _.isEqual(deleted, expectedDeletedVideoSnapshotLines)
 }
