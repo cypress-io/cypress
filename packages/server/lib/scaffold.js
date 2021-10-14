@@ -256,9 +256,7 @@ module.exports = {
       return fs.copyAsync(src, dest)
     }).catch((error) => {
       if (error.code === 'EACCES') {
-        const err = errors.get('ERROR_WRITING_FILE', dest, error)
-
-        errors.log(err)
+        error = errors.get('ERROR_WRITING_FILE', dest, error)
       }
 
       throw error
