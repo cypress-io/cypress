@@ -98,5 +98,32 @@ describe('src/cy/commands/debugging', () => {
         expect(cy.state('onPaused')).to.be.null
       })
     })
+
+    it('can pause in run mode with --headed and --no-exit', function () {
+      let didPause = false
+
+      Cypress.config('isInteractive', false)
+      Cypress.config('browser').isHeaded = true
+      Cypress.config('exit', false)
+
+      cy.once('paused', (name) => {
+        cy.once('paused', (name) => {
+          didPause = true
+
+          // resume the rest of the commands so this
+          // test ends
+          Cypress.emit('resume:all')
+        })
+
+        Cypress.emit('resume:next')
+      })
+
+      cy.pause().wrap({}).should('deep.eq', {}).then(function () {
+        expect(didPause).to.be.true
+
+        // should no longer have onPaused
+        expect(cy.state('onPaused')).to.be.null
+      })
+    })
   })
 })

@@ -6740,6 +6740,7 @@ exports['src/cypress/runner retries mochaEvents screenshots retry screenshot in 
       "height": 660
     },
     "scaled": false,
+    "overwrite": false,
     "blackout": [],
     "startTime": "match.string",
     "current": 1,
@@ -6755,7 +6756,8 @@ exports['src/cypress/runner retries mochaEvents screenshots retry screenshot in 
   "scale": false,
   "waitForCommandSynchronization": false,
   "disableTimersAndAnimations": true,
-  "blackout": []
+  "blackout": [],
+  "overwrite": false
 }
 
 exports['src/cypress/runner retries mochaEvents cleanses errors before emitting does not try to serialize error with err.actual as DOM node #1'] = [
