@@ -121,7 +121,8 @@ export class WizardDataSource {
       description: 'The config file you are supposed to have',
       content: configFileContent,
       status: 'changes',
-      warningText: 'Please merge the code below with your existing <span class="px-1 inline-block rounded bg-warning-200 text-warning-600">cypress.config.js</span>',
+      warningText: ['Please merge the code below with your existing',
+        '<span class="px-1 inline-block rounded bg-warning-200 text-warning-600">cypress.config.js</span>'].join(),
       warningLink: 'https://docs.cypress.io/config-file',
     }
 
