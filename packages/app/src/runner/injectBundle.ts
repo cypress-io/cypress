@@ -1,19 +1,4 @@
-// function injectReporterStyle () {
-//   const style = document.createElement('style')
-
 import { initializeStore } from '../store'
-
-//   style.innerText = `
-//     .reporter {
-//       min-height: 0;
-//       width: 300px;
-//       left: 750px;
-//       position: absolute;
-//     }
-//   `
-
-//   document.head.appendChild(style)
-// }
 
 export async function injectBundle (ready: () => void) {
   const src = '/__cypress/runner/cypress_runner.js'
@@ -40,8 +25,6 @@ export async function injectBundle (ready: () => void) {
 
   document.head.appendChild(script)
   document.head.appendChild(link)
-
-  // injectReporterStyle()
 
   script.onload = () => {
     // just stick config on window until we figure out how we are

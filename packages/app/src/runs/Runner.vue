@@ -1,29 +1,36 @@
 <template>
   <div class="grid grid-cols-3 p-12 gap-8">
-    <InlineSpecList
-      :gql="props.gql"
-      @selectSpec="selectSpec"
-    />
-    <div
-      v-once
-      :id="RUNNER_ID"
-    />
-    <div
-      v-once
-      :id="REPORTER_ID"
-    />
+    <div>
+      <InlineSpecList
+        :gql="props.gql"
+        @selectSpec="selectSpec"
+      />
+    </div>
+
+    <div id="runner" :style="`width: ${runnerColumnWidth}px`">
+      <div 
+        class="viewport origin-left" 
+        :style="viewportStyle"
+      >
+      
+        <div v-once :id="RUNNER_ID" />
+      </div>
+      <div>Viewport: {{ viewportDimensions.width }}px x {{ viewportDimensions.height }}px</div>
+    </div>
+
+    <div v-once :id="REPORTER_ID" style="display: none;" />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { onBeforeUnmount, onMounted } from 'vue'
+import { computed, onBeforeUnmount, onMounted, reactive } from 'vue'
 import { useMutation } from '@urql/vue'
 import { UnifiedRunnerAPI } from '../runner'
 import { REPORTER_ID, RUNNER_ID, getRunnerElement, getReporterElement, empty } from '../runner/utils'
 import { gql } from '@urql/core'
 import { Runner_SetCurrentSpecDocument, Specs_RunnerFragment } from '../generated/graphql'
 import InlineSpecList from '../specs/InlineSpecList.vue'
-import type { BaseSpec } from '@packages/types/src'
+import { getStore } from '../store'
 
 gql`
 fragment CurrentSpec_Runner on Spec {
@@ -60,6 +67,29 @@ mutation Runner_SetCurrentSpec($id: ID!) {
 }
 `
 
+const runnerColumnWidth = 300
+
+const store = getStore()
+
+const viewportDimensions = reactive({
+  height: store.height,
+  width: store.width,
+})
+
+window.UnifiedRunner.MobX.reaction(
+  () => [store.height, store.width],
+  ([height, width]) => {
+    viewportDimensions.height = height
+    viewportDimensions.width = width
+  },
+)
+
+const viewportStyle = computed(() => `
+  width: ${viewportDimensions.width}px;
+  height: ${viewportDimensions.height}px;
+  transform: scale(${runnerColumnWidth / viewportDimensions.width})
+`)
+
 const setSpecMutation = useMutation(Runner_SetCurrentSpecDocument)
 
 const props = defineProps<{
@@ -73,7 +103,7 @@ async function selectSpec (id: string) {
     return
   }
 
-  execute(specToRun.data.setCurrentSpec.currentSpec)
+  UnifiedRunnerAPI.executeSpec(specToRun.data?.setCurrentSpec.currentSpec)
 }
 
 function executeSpec () {
@@ -81,17 +111,15 @@ function executeSpec () {
     return
   }
 
-  execute(props.gql.activeProject.currentSpec)
+  UnifiedRunnerAPI.executeSpec(props.gql.activeProject.currentSpec)
 }
 
 onMounted(() => {
-  UnifiedRunnerAPI.initialize(() => {
-    window.UnifiedRunner.eventManager.on('restart', () => {
-      executeSpec()
-    })
-
+  window.UnifiedRunner.eventManager.on('restart', () => {
     executeSpec()
   })
+
+  executeSpec()
 })
 
 onBeforeUnmount(() => {
@@ -103,17 +131,19 @@ onBeforeUnmount(() => {
   empty(getReporterElement())
 })
 
-const execute = (spec: BaseSpec) => {
-  UnifiedRunnerAPI.executeSpec(spec)
-}
 </script>
 
 <style scoped>
+.viewport {
+  border: 2px dotted blue;
+}
+
+#runner {
+  border: 1px solid black;
+}
+
 #unified-runner {
   position: relative;
-  /* flex-grow: 1; */
-  /* box-shadow: 0px 0px 5px 0 black; */
-  /* padding: 10px; */
 }
 
 #unified-reporter {

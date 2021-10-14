@@ -111,6 +111,7 @@ function runSpecCT (spec: BaseSpec) {
     },
   })
 
+
   iframeModel.listen()
 
   const specSrc = getSpecUrl(config.namespace, spec)
