@@ -1,5 +1,5 @@
 diff --git a/node_modules/snap-shot-it/src/index.js b/node_modules/snap-shot-it/src/index.js
-index 0fb68da..c8f2778 100644
+index 0fb68da..a5fdc45 100644
 --- a/node_modules/snap-shot-it/src/index.js
 +++ b/node_modules/snap-shot-it/src/index.js
 @@ -16,8 +16,11 @@ const itsName = require('its-name')
@@ -41,15 +41,19 @@ index 0fb68da..c8f2778 100644
      : R.identity
    const what = preCompare(value)
  
-@@ -319,6 +322,11 @@ function snapshot (value) {
+@@ -319,10 +322,15 @@ function snapshot (value) {
        // the code is duplicate from above to get just the key collision error
        const info = R.assoc('key', e.key, snapshotInfo)
        info.allowDuplicate = Boolean(snapshotOptions.allowSharedSnapshot)
 +
-+      if (info.allowDuplicate) {
-+        return
-+      }
 +
        debug('current snapshot info %o', info)
  
        const prevInfo = findExistingSnapshotKey(info)
+       if (prevInfo) {
++        if (info.allowDuplicate) {
++          return
++        }
+         debug('found duplicate snapshot name: %s', prevInfo.key)
+         console.error(
+           'Snapshot error was caused by the duplicate snapshot name'
