@@ -4,17 +4,17 @@ describe('Launchpad: Open Mode', () => {
     cy.visitLaunchpad()
   })
 
-  it('Shows the open page, with a search bar', () => {
+  it('Shows the open page', () => {
     cy.get('h1').should('contain', 'Cypress')
-    cy.get('[type=search]')
   })
 
   it('allows adding a project', () => {
-    cy.withCtx((ctx, o) => {
-      ctx.actions.project.setActiveProject(o.projectDir('todos'))
+    cy.withCtx(async (ctx, o) => {
+      await ctx.actions.project.setActiveProject(o.projectDir('todos'))
       ctx.emitter.toLaunchpad()
     })
 
-    cy.get('h1').should('contain', 'Welcome')
+    cy.get('h1').should('contain', 'Welcome to Cypress')
+    cy.findByText('Choose which method of testing you would like to set up first.')
   })
 })

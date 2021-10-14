@@ -51,7 +51,7 @@ export async function e2ePluginSetup (projectRoot: string, on: Cypress.PluginEve
         currentTestId = obj.activeTestId
         testState = {};
         ({ serverPortPromise, ctx } = runInternalServer({
-          projectRoot,
+          projectRoot: null,
         }) as {ctx: DataContext, serverPortPromise: Promise<number>})
 
         await serverPortPromise
