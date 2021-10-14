@@ -332,6 +332,8 @@ export = {
 
   getBrowsers,
 
+  throwBrowserNotFound,
+
   writeExtension (browser, isTextTerminal, proxyUrl, socketIoRoute) {
     debug('writing extension')
 
