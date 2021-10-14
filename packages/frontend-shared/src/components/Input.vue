@@ -21,10 +21,13 @@
         </span>
       </div>
       <input
+        :style="style"
         v-model="localValue"
         :type="type"
         :class="_inputClasses"
-        class="block w-full pl-10 leading-tight placeholder-gray-400 border-gray-300 rounded-md disabled:bg-gray-100 disabled:text-gray-400 focus:ring-indigo-500 focus:border-indigo-500 py-9px"
+      class="block w-full leading-tight placeholder-gray-400
+      border-gray-300 border-1 rounded-md disabled:bg-gray-100
+      disabled:text-gray-400 hocus-default py-9px"
         v-bind="inputAttrs"
       >
       <div
@@ -73,6 +76,7 @@ const props = withDefaults(defineProps<{
   suffixIcon?: FunctionalComponent<SVGAttributes, {}>
   suffixIconClasses?: string | string[] | Record<string, string>
   modelValue?: string
+  style?: string
 }>(), {
   type: 'text',
   modelValue: '',

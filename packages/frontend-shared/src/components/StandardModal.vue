@@ -36,21 +36,18 @@
         >
           <slot name="description" />
         </DialogDescription>
-        <slot />
-
-        <div
-          v-if="$slots.footer"
-          class="border-t-1px px-24px py-16px bg-gray-50"
-        >
+        <StandardModalBody :variant="variant"><slot/></StandardModalBody>
+        <StandardModalFooter v-if="$slots.footer">
           <slot name="footer" />
-        </div>
+        </StandardModalFooter>
       </div>
     </div>
   </Dialog>
 </template>
 <script setup lang="ts">
 import { useI18n } from '@cy/i18n'
-
+import StandardModalBody from './StandardModalBody.vue'
+import StandardModalFooter from './StandardModalFooter.vue'
 import { useModelWrapper } from '@packages/frontend-shared/src/composables'
 
 import {
@@ -72,6 +69,7 @@ const props = withDefaults(defineProps<{
   helpLink?: string
   helpText?: string,
   clickOutside?: boolean
+  variant?: 'bare'
 }>(), {
   clickOutside: true,
   modelValue: false,
@@ -86,7 +84,5 @@ const localValue = useModelWrapper(props, emit, 'modelValue')
 const setIsOpen = (val: boolean) => {
   emit('update:modelValue', val)
 }
-
-const { t } = useI18n()
 
 </script>
