@@ -230,7 +230,7 @@ export class Header extends Component<HeaderProps> {
     }
 
     this.props.state.updateWindowDimensions({
-      headerHeight: $(this.headerRef.current).outerHeight(),
+      headerHeight: $(this.headerRef.current).outerHeight() as number,
     })
   };
 

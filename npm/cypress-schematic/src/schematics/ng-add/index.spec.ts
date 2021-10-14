@@ -1,3 +1,5 @@
+/// <reference path="../../../../../cli/types/mocha/index.d.ts" />
+
 import { SchematicTestRunner, UnitTestTree } from '@angular-devkit/schematics/testing'
 import { join, resolve } from 'path'
 import { expect } from 'chai'
