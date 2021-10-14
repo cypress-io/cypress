@@ -3,6 +3,7 @@
     <TestingTypeCard
       v-if="e2e"
       :id="e2e.type"
+      :data-cy-testingType="e2e.type"
       :title="e2e.title"
       :description="firstTimeE2E ? e2e.description : 'LAUNCH'"
       :configured="!firstTimeE2E"
@@ -13,10 +14,10 @@
       @keyup.space="e2eNextStep"
       @openCompare="$emit('openCompare')"
     />
-
     <TestingTypeCard
       v-if="ct"
       :id="ct.type"
+      :data-cy-testingType="ct.type"
       :title="ct.title"
       :description="firstTimeCT ? ct.description : 'LAUNCH'"
       :configured="!firstTimeCT"

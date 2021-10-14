@@ -1,4 +1,5 @@
 {
+  "$schema": "../../cli/schema/cypress.schema.json",
   "projectId": "sehy69",
   "viewportWidth": 800,
   "viewportHeight": 850,
@@ -19,6 +20,8 @@
     "pluginsFile": "cypress/component/plugins/index.js"
   },
   "e2e": {
-    "supportFile": false
+    "supportFile": "cypress/e2e/support/e2eSupport.ts",
+    "integrationFolder": "cypress/e2e/integration",
+    "pluginsFile": "cypress/e2e/plugins/index.ts"
   }
 }

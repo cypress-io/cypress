@@ -9,8 +9,4 @@ export interface StorybookInfo {
   storybookRoot: string
   files: StorybookFile[]
   storyGlobs: string[]
-  getStories: (
-    storybookRoot: string,
-    storyGlobs: string[]
-  ) => Promise<string[]>
 }
