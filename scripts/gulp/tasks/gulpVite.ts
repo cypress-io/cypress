@@ -72,6 +72,27 @@ function spawnViteDevServer (
  *  * viteBuildLaunchpad
  *------------------------------------------------------------------------**/
 
+export async function symlinkViteProjects () {
+  await Promise.all([
+    spawned('cmd-symlink', 'ln -s ../app/dist dist-app', {
+      cwd: monorepoPaths.pkgLaunchpad,
+      waitForExit: true,
+    }).catch((e) => {}),
+    spawned('cmd-symlink', 'ln -s dist dist-app', {
+      cwd: monorepoPaths.pkgApp,
+      waitForExit: true,
+    }).catch((e) => {}),
+    spawned('cmd-symlink', 'ln -s dist dist-launchpad', {
+      cwd: monorepoPaths.pkgLaunchpad,
+      waitForExit: true,
+    }).catch((e) => {}),
+    spawned('cmd-symlink', 'ln -s ../launchpad/dist dist-launchpad', {
+      cwd: monorepoPaths.pkgApp,
+      waitForExit: true,
+    }).catch((e) => {}),
+  ])
+}
+
 export function viteBuildApp () {
   return spawned('vite:build-app', `yarn vite build`, {
     cwd: monorepoPaths.pkgApp,

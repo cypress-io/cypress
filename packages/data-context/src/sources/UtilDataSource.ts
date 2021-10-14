@@ -18,6 +18,12 @@ export class UtilDataSource {
     return vals.map((v) => v.status === 'fulfilled' ? v.value : this.ensureError(v.reason))
   }
 
+  assertAbsolute (val: string) {
+    if (!this.ctx.path.isAbsolute(val)) {
+      throw new Error(`Expected ${val} to be an absolute path`)
+    }
+  }
+
   ensureError (val: any): Error {
     return val instanceof Error ? val : new Error(val)
   }
