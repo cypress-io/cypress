@@ -26,6 +26,7 @@ export interface ActiveProjectShape extends ProjectShape {
   currentSpecId?: Maybe<string>
   specs?: FoundSpec[]
   config: ResolvedFromConfig[]
+  generatedSpec: GeneratedSpec | null
 }
 
 export interface AppDataShape {
@@ -48,7 +49,6 @@ export interface WizardDataShape {
   chosenLanguage: NexusGenEnums['CodeLanguageEnum']
   chosenManualInstall: boolean
   chosenBrowser: FoundBrowser | null
-  generatedSpec: GeneratedSpec | null
 }
 
 export interface CoreDataShape {
@@ -85,7 +85,6 @@ export function makeCoreData (): CoreDataShape {
       allBundlers: BUNDLERS,
       history: ['welcome'],
       chosenBrowser: null,
-      generatedSpec: null,
     },
     user: null,
   }

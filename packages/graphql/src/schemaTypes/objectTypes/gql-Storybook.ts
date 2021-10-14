@@ -47,7 +47,6 @@ export const Storybook = objectType({
     t.field('generatedSpec', {
       type: objectType({
         name: 'GeneratedSpec',
-        node: 'content',
         definition (t) {
           t.nonNull.string('content', {
             description: 'File content of most recently generated spec.',
@@ -58,7 +57,15 @@ export const Storybook = objectType({
           })
         },
       }),
-      resolve: (src, args, ctx) => ctx.wizardData.generatedSpec,
+      resolve: (src, args, ctx) => {
+        const project = ctx.activeProject
+
+        if (!project) {
+          return null
+        }
+
+        return project.generatedSpec
+      },
     })
   },
 })

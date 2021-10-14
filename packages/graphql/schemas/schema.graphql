@@ -313,12 +313,9 @@ enum FrontendFrameworkEnum {
   vuecli
 }
 
-type GeneratedSpec implements Node {
+type GeneratedSpec {
   """File content of most recently generated spec."""
   content: String!
-
-  """Relay style Node ID field for the GeneratedSpec field"""
-  id: ID!
   spec: FileParts!
 }
 

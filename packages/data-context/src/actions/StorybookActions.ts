@@ -22,7 +22,7 @@ export class StorybookActions {
       config.componentFolder,
     )
 
-    this.ctx.wizardData.generatedSpec = spec
+    project.generatedSpec = spec
   }
 
   private async generateSpec (

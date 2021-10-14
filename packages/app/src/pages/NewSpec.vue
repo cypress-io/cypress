@@ -81,7 +81,6 @@ mutation NewSpec_GenerateSpecFromStory($storyPath: String!) {
   generateSpecFromStory (storyPath: $storyPath) {
     storybook {
       generatedSpec {
-        id
         content
         spec {
           id
