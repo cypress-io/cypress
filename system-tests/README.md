@@ -57,7 +57,7 @@ describe('my new project', () => {
 })
 ```
 
-From here, you could
+From here, you could run this test with `yarn test my-new-project`.
 
 There are many more options available for `systemTests.it` and `systemTests.setup`. You can massage the stdout, do pre-run tasks, set up HTTP/S servers, and more. Explore the typedocs in [`./lib/system-tests`](./lib/system-tests) for more information.
 
