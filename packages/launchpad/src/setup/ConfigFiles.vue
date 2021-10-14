@@ -28,7 +28,7 @@
 import { computed } from 'vue'
 import { gql } from '@urql/core'
 import { useMutation, useQuery } from '@urql/vue'
-import { ConfigFilesDocument, ConfigFilesNavigateDocument } from '../generated/graphql'
+import { ConfigFilesFragment, ConfigFilesNavigateDocument } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
 import Button from '@cy/components/Button.vue'
 import FileRow from '../components/code/FileRow.vue'
@@ -36,16 +36,14 @@ import FileRow from '../components/code/FileRow.vue'
 const { t } = useI18n()
 
 gql`
-query ConfigFiles {
-  wizard {
-    sampleConfigFiles {
-      filePath
-      content
-      status
-      description
-      warningText
-      warningLink
-    }
+fragment ConfigFiles on Wizard {
+  sampleConfigFiles {
+    filePath
+    content
+    status
+    description
+    warningText
+    warningLink
   }
 }
 `
@@ -60,11 +58,10 @@ mutation ConfigFilesNavigate($direction: WizardNavigateDirection!) {
 
 const navigate = useMutation(ConfigFilesNavigateDocument)
 
-const { data } = useQuery({
-  query: ConfigFilesDocument,
-})
-
-const files = computed(() => data.value?.wizard.sampleConfigFiles)
+const props = defineProps<{
+  gql:ConfigFilesFragment
+}>()
+const files = computed(() => props.gql.sampleConfigFiles)
 
 const continueForward: any = () => {
   // TODO: scaffold files here

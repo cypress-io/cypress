@@ -8,7 +8,7 @@ const emit = defineEmits(['click'])
 <template>
   <div class="mb-4 overflow-hidden border border-gray-100 rounded bg-light-50">
     <button
-      class="flex items-center w-full text-left py-10px"
+      class="flex items-center w-full text-left py-10px focus-default"
       @click="emit('click')"
     >
       <div class="flex items-center h-10 px-5 border-r border-r-gray-100">

@@ -17,10 +17,11 @@ export default defineConfig({
 })`
 
 export async function getSampleConfigFiles (testingType: NexusGenEnums['TestingTypeEnum'], language: NexusGenEnums['CodeLanguageEnum']): Promise<SampleConfigFile[]> {
+  const testingTypeFolder = { e2e: 'integration', component: 'component' }[testingType]
   const filePaths = [
+    `cypress/${testingTypeFolder}/support.${language}`,
+    `cypress/${testingTypeFolder}/commands.${language}`,
     'cypress/fixtures/example.json',
-    `cypress/integration/support.${language}`,
-    `cypress/integration/commands.${language}`,
   ]
 
   return filePaths.map((filePath) => {

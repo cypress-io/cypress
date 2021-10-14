@@ -102,6 +102,8 @@
         "prismjs/components/prism-json",
         "prismjs/components/prism-typescript",
         "prismjs/components/prism-yaml",
+        "prismjs/plugins/line-numbers/prism-line-numbers",
+        "prismjs/plugins/line-numbers/prism-line-numbers.js",
         "socket.io-client",
         "vue",
         "vue-demi",

@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
 import 'prismjs'
+import 'prismjs/plugins/line-numbers/prism-line-numbers.css'
 import '@packages/frontend-shared/src/styles/prism.scss'
 import ListRow from '@cy/components/ListRow.vue'
 import Button from '@cy/components/Button.vue'
@@ -25,6 +26,7 @@ const prismInstalled = ref(false)
 Promise.all([
   import('prismjs/components/prism-typescript'),
   import('prismjs/components/prism-json'),
+  import('prismjs/plugins/line-numbers/prism-line-numbers'),
 ]).then(() => {
   prismInstalled.value = true
 })

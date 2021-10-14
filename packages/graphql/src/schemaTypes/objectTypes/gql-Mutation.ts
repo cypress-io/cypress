@@ -102,7 +102,14 @@ export const mutation = mutationType({
         direction: nonNull(WizardNavigateDirectionEnum),
       },
       description: 'Navigates backward in the wizard',
-      resolve: (_, args, ctx) => ctx.actions.wizard.navigate(args.direction),
+      // FIXME: remove the emitter from there it's a temporary fix
+      resolve: async (_, args, ctx) => {
+        const res = await ctx.actions.wizard.navigate(args.direction)
+
+        ctx.emitter.toLaunchpad()
+
+        return res
+      },
     })
 
     t.field('wizardInstallDependencies', {
