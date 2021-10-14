@@ -1,12 +1,12 @@
 <template>
   <div
-    class="relative flex flex-col w-full border border-gray-200 rounded p-30px text text-body-gray-500 hocus-default"
+    class="relative flex flex-col w-full border border-gray-100 rounded p-30px text text-body-gray-500 hocus-default"
     tabindex="0"
   >
     <div class="h-152px mb-24px">
       <img
         :src="image"
-        alt=""
+        :alt="''"
       >
     </div>
     <h2 class="mt-4 text-primary text-18px">
@@ -21,9 +21,7 @@
         v-if="configured"
         class="flex items-center border rounded-full pl-8px pr-16px py-8px text-jade-500"
       >
-        <GrommetIcon
-          class="fill-current stroke-current text-jade-500"
-        />
+        <GrommetIcon class="fill-current stroke-current text-jade-500" />
         {{ t('setupPage.testingCard.configured') }}
       </span>
       <span
@@ -34,10 +32,13 @@
         {{ t('setupPage.testingCard.notConfigured') }}
       </span>
       <button
-        class="flex items-center justify-center border rounded-full text-body-gray-400 w-32px h-32px group hocus-default focus:outline-transparent"
+        class="flex items-center justify-center border border-gray-100 rounded-full text-body-gray-400 w-32px h-32px group hocus-default focus:outline-transparent"
+        :aria-label="t('welcomePage.review')"
         @click.stop="$emit('openCompare')"
       >
-        <i-cy-question-mark_x16 class="icon-dark-gray-200 group-hocus:icon-dark-indigo-300" />
+        <i-cy-question-mark_x16
+          class="icon-dark-gray-400 group-hocus:icon-dark-indigo-300 w-18px h-18px"
+        />
       </button>
     </div>
   </div>
