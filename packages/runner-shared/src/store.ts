@@ -5,6 +5,7 @@ import { automation, automationStatus } from './automation'
 export type RunMode = 'single'
 
 const defaults = {
+  url: '',
   component: {
     height: 500,
     width: 500,
@@ -13,7 +14,9 @@ const defaults = {
     height: 660,
     width: 1000,
   },
-}
+} as const
+
+type Callback = (...args: unknown[]) => void
 
 export class BaseStore {
   @observable spec: Cypress.Spec | undefined
@@ -24,6 +27,14 @@ export class BaseStore {
   @observable isLoading = true
   @observable width: number
   @observable height: number
+  @observable url = ''
+  @observable highlightUrl = false
+  @observable isLoadingUrl = false
+
+  @observable messageTitle?: string
+  @observable messageDescription?: 'info' | 'warning'
+  @observable messageType?: string
+  @observable callbackAfterUpdate?: Callback
 
   constructor (testingType: Cypress.TestingType) {
     this.width = defaults[testingType].width
@@ -58,5 +69,29 @@ export class BaseStore {
   @action updateDimensions (width: number, height: number) {
     this.height = height
     this.width = width
+  }
+
+  @action resetUrl () {
+    this.url = ''
+    this.highlightUrl = false
+    this.isLoadingUrl = false
+  }
+
+  @action clearMessage () {
+    this.messageTitle = undefined
+    this.messageDescription = undefined
+    this.messageType = undefined
+  }
+
+  @action setCallbackAfterUpdateToNull () {
+    this.callbackAfterUpdate = undefined
+  }
+
+  setCallbackAfterUpdate (cb: Callback) {
+    this.callbackAfterUpdate = () => {
+      this.setCallbackAfterUpdateToNull()
+
+      cb()
+    }
   }
 }

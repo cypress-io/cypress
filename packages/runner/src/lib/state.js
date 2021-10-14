@@ -10,10 +10,6 @@ const _defaults = {
   reporterWidth: null,
   specListWidth: null,
   specs: [],
-
-  url: '',
-  highlightUrl: false,
-  isLoadingUrl: false,
 }
 
 export default class State extends BaseStore {
@@ -21,19 +17,12 @@ export default class State extends BaseStore {
 
   @observable isRunning = false
 
-  @observable messageTitle = _defaults.messageTitle
-  @observable messageDescription = _defaults.messageDescription
-  @observable messageType = _defaults.messageType
   @observable.ref messageControls = _defaults.messageControls
 
   @observable snapshot = {
     showingHighlights: true,
     stateIndex: 0,
   }
-
-  @observable url = _defaults.url
-  @observable highlightUrl = _defaults.highlightUrl
-  @observable isLoadingUrl = _defaults.isLoadingUrl
 
   // if null, the default CSS handles it
   // if non-null, the user has set it by resizing
@@ -115,29 +104,5 @@ export default class State extends BaseStore {
     if (reporterWidth != null) this.absoluteReporterWidth = reporterWidth
 
     if (headerHeight != null) this.headerHeight = headerHeight
-  }
-
-  @action clearMessage () {
-    this.messageTitle = _defaults.messageTitle
-    this.messageDescription = _defaults.messageDescription
-    this.messageType = _defaults.messageType
-  }
-
-  setCallbackAfterUpdate (cb) {
-    this.callbackAfterUpdate = () => {
-      this.setCallbackAfterUpdateToNull()
-
-      cb()
-    }
-  }
-
-  @action setCallbackAfterUpdateToNull () {
-    this.callbackAfterUpdate = null
-  }
-
-  @action resetUrl () {
-    this.url = _defaults.url
-    this.highlightUrl = _defaults.highlightUrl
-    this.isLoadingUrl = _defaults.isLoadingUrl
   }
 }

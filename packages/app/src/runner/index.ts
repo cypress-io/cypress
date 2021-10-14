@@ -33,10 +33,21 @@ const randomString = `${Math.random()}`
  * and server (via web socket).
  */
 function setupRunner (done: () => void) {
-  window.UnifiedRunner.eventManager.addGlobalListeners(getStore(), {
+  const store = getStore()
+
+  window.UnifiedRunner.eventManager.addGlobalListeners(store, {
     automationElement: '__cypress-string',
     randomString,
   })
+
+  window.UnifiedRunner.MobX.reaction(
+    () => [store.height, store.width],
+    ([viewportHeight, viewportWidth]) => {
+      // console.log(`${viewportHeight} x ${viewportWidth}`)
+    },
+  )
+
+  // reaction(() => value, (value, previousValue, reaction) => { sideEffect }, options?).
 
   done()
 }
@@ -90,14 +101,17 @@ function runSpecCT (spec: BaseSpec) {
   const $autIframe: JQuery<HTMLIFrameElement> = autIframe.create().appendTo($container)
 
   // IFrame Model to manage snapshots, etc.
-  // const iframeModel = new window.UnifiedRunner.IframeModel({
-  //   state: getStore(),
-  //   restoreDom: () => console.log('TODO: restore dom'),
-  //   highlightEl: () => console.log('TODO: highlight el'),
-  //   detachDom: () => console.log('TODO: detachDo'),
-  //   snapshotControls: () => console.log('Ahhhh') // window.UnifiedRunner.React
-  // })
-  // iframeModel.listen()
+  const iframeModel = new window.UnifiedRunner.IframeModel({
+    restoreDom: autIframe.restoreDom,
+    highlightEl: autIframe.highlightEl,
+    detachDom: autIframe.detachDom,
+    state: getStore(),
+    snapshotControls: () => {
+      // console.log('Ahhhh') // window.UnifiedRunner.React
+    },
+  })
+
+  iframeModel.listen()
 
   const specSrc = getSpecUrl(config.namespace, spec)
 

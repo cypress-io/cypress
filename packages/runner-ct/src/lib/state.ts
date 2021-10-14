@@ -22,12 +22,6 @@ interface Defaults {
   pluginsHeight: number | null
   specListWidth: number | null
   isSpecsListOpen: boolean
-
-  url: string
-  highlightUrl: boolean
-  isLoadingUrl: boolean
-
-  callbackAfterUpdate: ((...args: unknown[]) => void) | null
 }
 
 const _defaults: Defaults = {
@@ -42,11 +36,6 @@ const _defaults: Defaults = {
   specListWidth: DEFAULT_LIST_WIDTH,
   isSpecsListOpen: true,
 
-  url: '',
-  highlightUrl: false,
-  isLoadingUrl: false,
-
-  callbackAfterUpdate: null,
 }
 
 export default class State extends BaseStore {
@@ -55,20 +44,12 @@ export default class State extends BaseStore {
   @observable isRunning = false
   @observable waitingForInitialBuild = false
 
-  @observable messageTitle = _defaults.messageTitle
-  @observable messageDescription = _defaults.messageDescription
-  @observable messageType = _defaults.messageType
-  @observable callbackAfterUpdate = _defaults.callbackAfterUpdate
   @observable.ref messageControls = _defaults.messageControls
 
   @observable snapshot = {
     showingHighlights: true,
     stateIndex: 0,
   }
-
-  @observable url = _defaults.url
-  @observable highlightUrl = _defaults.highlightUrl
-  @observable isLoadingUrl = _defaults.isLoadingUrl
 
   @observable screenshotting = false
 
@@ -223,30 +204,6 @@ export default class State extends BaseStore {
     if (headerHeight) {
       this.headerHeight = headerHeight
     }
-  }
-
-  @action clearMessage () {
-    this.messageTitle = _defaults.messageTitle
-    this.messageDescription = _defaults.messageDescription
-    this.messageType = _defaults.messageType
-  }
-
-  setCallbackAfterUpdate (cb) {
-    this.callbackAfterUpdate = () => {
-      this.setCallbackAfterUpdateToNull()
-
-      cb()
-    }
-  }
-
-  @action setCallbackAfterUpdateToNull () {
-    this.callbackAfterUpdate = null
-  }
-
-  @action resetUrl () {
-    this.url = _defaults.url
-    this.highlightUrl = _defaults.highlightUrl
-    this.isLoadingUrl = _defaults.isLoadingUrl
   }
 
   @action updateSpecByUrl (specUrl) {
