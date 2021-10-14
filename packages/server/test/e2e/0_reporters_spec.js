@@ -146,7 +146,7 @@ describe('e2e reporters', () => {
     })
   })
 
-  it('shows slow tests in orange', function () {
+  it('shows slow tests in yellow', function () {
     return e2e.exec(this, {
       spec: 'simple_passing_spec.js',
       snapshot: false,
@@ -157,7 +157,7 @@ describe('e2e reporters', () => {
         MOCHA_COLORS: 1,
       },
     }).then((result) => {
-      // With a very low slowTestThreshold, the timing should be in orange, since the test is considered 'slow'.
+      // With a very low slowTestThreshold, the timing should be in yellow, since the test is considered 'slow'.
       expect(result.stdout.match(/passes(.*)/)[1]).to.contain('\u001b[33m')
     })
   })
@@ -173,7 +173,7 @@ describe('e2e reporters', () => {
         MOCHA_COLORS: 1,
       },
     }).then((result) => {
-      // This is a fast test, so we expect not to see the test timing in orange
+      // This is a fast test, so we expect not to see the test timing in yellow
       expect(result.stdout.match(/passes(.*)/)[1]).not.to.contain('\u001b[33m')
     })
   })
