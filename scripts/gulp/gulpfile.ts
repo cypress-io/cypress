@@ -128,6 +128,7 @@ gulp.task('buildProd',
       viteBuildApp,
       viteBuildLaunchpad,
     ),
+    symlinkViteProjects,
   ))
 
 gulp.task(
