@@ -56,6 +56,10 @@ function setupE2E (projectName?: ProjectFixture) {
     throw new Error(`Unknown project ${projectName}`)
   }
 
+  if (projectName) {
+    cy.task('setupE2E', projectName, { log: false })
+  }
+
   return cy.withCtx(async (ctx, o) => {
     if (o.projectName) {
       await ctx.actions.project.setActiveProject(o.projectDir(o.projectName))

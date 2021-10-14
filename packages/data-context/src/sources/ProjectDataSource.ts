@@ -97,7 +97,7 @@ export class ProjectDataSource {
       // If we have a cypress.json file, even with no overrides, assume that it's not our
       // first time accessing (for now, until the config refactor lands)
       if (testingType === 'e2e') {
-        return Object.keys(config).length === 0
+        return false
       }
 
       const overrides = config.component || {}

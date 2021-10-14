@@ -30,7 +30,6 @@ export async function e2ePluginSetup (projectRoot: string, on: Cypress.PluginEve
   await util.promisify(rimraf)(tmpDir)
 
   Fixtures.setTmpDir(tmpDir)
-  Fixtures.scaffold()
 
   interface WithCtxObj {
     fn: string
@@ -44,6 +43,11 @@ export async function e2ePluginSetup (projectRoot: string, on: Cypress.PluginEve
   let testState: Record<string, any> = {}
 
   on('task', {
+    setupE2E (projectName: string) {
+      Fixtures.scaffoldProject(projectName)
+
+      return null
+    },
     async withCtx (obj: WithCtxObj) {
       // Ensure we spin up a completely isolated server/state for each test
       if (obj.activeTestId !== currentTestId) {

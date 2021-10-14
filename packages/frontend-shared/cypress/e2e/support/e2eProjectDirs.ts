@@ -76,6 +76,7 @@ export const e2eProjectDirs = [
   'ts-proj-with-paths',
   'uncaught-support-file',
   'unify-onboarding',
+  'unify-plugin-errors',
   'various-file-types',
   'webpack-preprocessor',
   'webpack-preprocessor-awesome-typescript-loader',

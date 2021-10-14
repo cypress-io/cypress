@@ -26,6 +26,10 @@ module.exports = {
     tmpDir = dir
   },
 
+  scaffoldProject (project) {
+    return fs.copySync(path.join(projects, project), path.join(tmpDir, project))
+  },
+
   // copies all of the project fixtures
   // to the tmpDir .projects in the root
   scaffold () {
