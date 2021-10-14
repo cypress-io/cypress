@@ -19,6 +19,8 @@ export class StorybookActions {
     const spec = await this.generate(storyPath, project.projectRoot, config.componentFolder)
 
     this.ctx.wizardData.generatedSpec = spec
+
+    return spec
   }
 
   private async generate (

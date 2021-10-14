@@ -1,19 +1,12 @@
 import type { GraphQLResolveInfo } from 'graphql'
 import { core, dynamicOutputMethod, plugin } from 'nexus'
 
-export type InputVal<
-  TypeName extends string,
-  FieldName extends string
-> = 'input' extends keyof core.ArgsValue<TypeName, FieldName>
-  ? core.ArgsValue<TypeName, FieldName>['input'] & {}
-  : never
-
 export type LiveMutationResolver<
   TypeName extends string,
   FieldName extends string
 > = (
   root: core.SourceValue<TypeName>,
-  args: InputVal<TypeName, FieldName>,
+  args: core.ArgsValue<TypeName, FieldName>,
   context: core.GetGen<'context'>,
   info: GraphQLResolveInfo
 ) => Promise<string | void>
@@ -23,9 +16,10 @@ export type LiveMutationFieldOpts<
   FieldName extends string
 > = {
   type?: 'String'
-  nullable?: never
+  nonNull?: boolean
   description?: string
   list?: never
+  args?: core.ArgsRecord
   resolve: LiveMutationResolver<TypeName, FieldName>
 }
 
@@ -56,9 +50,9 @@ export const NexusLiveMutationPlugin = plugin({
             LiveMutationFieldOpts<string, string>
           ]
 
-          const { resolve, type, ...rest } = config
+          const { resolve, type, nonNull, ...rest } = config
 
-          t.field(fieldName, {
+          t[nonNull ? 'nonNull' : 'nullable'].field(fieldName, {
             type: type ?? 'Boolean',
             ...rest,
             resolve: async (root, args, ctx, info) => {

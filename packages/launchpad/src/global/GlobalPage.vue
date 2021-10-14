@@ -39,16 +39,7 @@ import { GlobalPageFragment, GlobalPage_AddProjectDocument, GlobalPage_RemovePro
 
 gql`
 mutation GlobalPage_addProject($path: String!, $open: Boolean = true) {
-  addProject(path: $path, open: $open) {
-    projects {
-      id
-      title
-      projectId
-      projectRoot
-      isFirstTimeCT
-      isFirstTimeE2E
-    }
-  }
+  addProject(path: $path, open: $open) 
 }
 `
 
@@ -62,11 +53,7 @@ fragment GlobalPage on App {
 
 gql`
 mutation GlobalPage_RemoveProject($path: String!) {
-  removeProject(path: $path) {
-    projects {
-      id
-    }
-  }
+  removeProject(path: $path) 
 }
 `
 

@@ -31,6 +31,8 @@ type App {
 
 """Base error"""
 type BaseError {
+  """Header message for generic base error component"""
+  header: String
   message: String
   stack: String
   title: String
@@ -298,13 +300,13 @@ type Mutation {
     """Whether to open the project when added"""
     open: Boolean
     path: String!
-  ): App!
+  ): Boolean
 
   """Create an Index HTML file for a new component testing project"""
-  appCreateComponentIndexHtml(template: String!): App
+  appCreateComponentIndexHtml(template: String!): Boolean
 
   """Create a Cypress config file for a new project"""
-  appCreateConfigFile(code: String!, configFilename: String!): App
+  appCreateConfigFile(code: String!, configFilename: String!): Boolean
   clearActiveProject: Boolean
 
   """
@@ -313,60 +315,60 @@ type Mutation {
   devRelaunch(action: DevRelaunchAction!): Boolean
 
   """Generate spec from Storybook story"""
-  generateSpecFromStory(storyPath: String!): Wizard!
+  generateSpecFromStory(storyPath: String!): String
 
   """
   Initializes open_project global singleton to manager current project state
   """
-  initializeOpenProject: Wizard
+  initializeOpenProject: Boolean
   internal_clearLatestProjectCache: Boolean
   internal_triggerIpcToApp: Boolean
   internal_triggerIpcToLaunchpad(msg: String!): Boolean
 
   """Launches project from open_project global singleton"""
-  launchOpenProject: App
+  launchOpenProject: Boolean
 
   """Sets the active browser"""
   launchpadSetBrowser(
     """ID of the browser that we want to set"""
     id: ID!
-  ): Query
+  ): Boolean
 
   """Auth with Cypress Cloud"""
-  login: Query
+  login: Boolean
 
   """Log out of Cypress Cloud"""
-  logout: Query
+  logout: Boolean
 
   """Set the current navigation item"""
-  navigationMenuSetItem(type: NavItem!): NavigationMenu
+  navigationMenuSetItem(type: NavItem!): Boolean
 
   """Remove project from projects array and cache"""
-  removeProject(path: String!): App!
+  removeProject(path: String!): Boolean
 
   """Set active project to run tests on"""
-  setActiveProject(path: String!): App!
+  setActiveProject(path: String!): Boolean
 
   """Set the current spec under test"""
-  setCurrentSpec(id: ID!): Project!
+  setCurrentSpec(id: ID!): Boolean
 
   """Installs the dependencies for the component testing step"""
   wizardInstallDependencies: Wizard
 
   """Navigates backward in the wizard"""
-  wizardNavigate(direction: WizardNavigateDirection!): Wizard
+  wizardNavigate(direction: WizardNavigateDirection!): Boolean
 
   """Sets the frontend bundler we want to use for the project"""
-  wizardSetBundler(bundler: SupportedBundlers!): Wizard
+  wizardSetBundler(bundler: SupportedBundlers!): Boolean
 
   """Sets the language we want to use for the config file"""
-  wizardSetCodeLanguage(language: CodeLanguageEnum!): Wizard
+  wizardSetCodeLanguage(language: CodeLanguageEnum!): Boolean
 
   """Sets the frontend framework we want to use for the project"""
-  wizardSetFramework(framework: FrontendFrameworkEnum!): Wizard
+  wizardSetFramework(framework: FrontendFrameworkEnum!): Boolean
 
   """Sets the current testing type we want to use"""
-  wizardSetTestingType(type: TestingTypeEnum!): Wizard
+  wizardSetTestingType(type: TestingTypeEnum!): Boolean
 
   """Validates that the manual install has occurred properly"""
   wizardValidateManualInstall: Wizard

@@ -81,11 +81,7 @@ import { allBrowsersIcons } from '../../../frontend-shared/src/assets/browserLog
 
 gql`
 mutation OpenBrowserList_SetBrowser($id: ID!) {
-  launchpadSetBrowser(id: $id) {
-    app {
-      ...OpenBrowserList
-    }
-  }
+  launchpadSetBrowser(id: $id)
 }
 `
 

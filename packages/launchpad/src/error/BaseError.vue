@@ -32,6 +32,26 @@
           >cypress.config.js</a>
         </i18n-t>
       </slot>
+
+      <div class="">
+        <slot name="error-message">
+          <p
+            v-if="errorMessage"
+            class="font-light"
+          >
+            {{ errorMessage }}
+          </p>
+        </slot>
+      </div>
+
+      <slot name="stack">
+        <p
+          v-if="stack"
+          class="font-light"
+        >
+          {{ stack }}
+        </p>
+      </slot>
     </div>
     <i-cy-placeholder_x48 class="w-120px h-120px mx-auto my-0 icon-light-gray-50 icon-dark-gray-200" />
     <div class="inline-flex gap-16px justify-between">
@@ -66,6 +86,7 @@ import type { BaseErrorFragment } from '../generated/graphql'
 
 gql`
 fragment BaseError on BaseError {
+  header
   title
   message
   stack
@@ -80,7 +101,6 @@ const { t } = useI18n()
 
 const props = defineProps<{
   gql: BaseErrorFragment
-  header?: string
   message?: string
 }>()
 
@@ -88,5 +108,7 @@ defineEmits<{
   (event: 'retry')
 }>()
 
-const headerText = computed(() => props.header ? props.header : t('launchpadErrors.generic.header'))
+const headerText = computed(() => props.gql.header ? props.gql.header : t('launchpadErrors.generic.header'))
+const errorMessage = computed(() => props.gql.message ? props.gql.message : t('launchpadErrors.generic.message'))
+const stack = computed(() => props.gql.stack ? props.gql.stack : null)
 </script>

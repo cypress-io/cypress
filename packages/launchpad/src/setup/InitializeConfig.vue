@@ -28,9 +28,7 @@ fragment InitializeConfig on Wizard {
 
 gql`
 mutation InitializeOpenProject {
-  initializeOpenProject {
-    ...InitializeConfig
-  }
+  initializeOpenProject 
 }
 `
 

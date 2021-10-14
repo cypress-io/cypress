@@ -40,25 +40,16 @@ query NewSpecQuery {
 
 gql`
 mutation NewSpec_GenerateSpecFromStory($storyPath: String!) {
-  generateSpecFromStory (storyPath: $storyPath) {
-    storybook {
-      configured,
-      generatedSpec
-    }
-  }
+  generateSpecFromStory (storyPath: $storyPath) 
 } 
 `
 
 const query = useQuery({ query: NewSpecQueryDocument })
 const mutation = useMutation(NewSpec_GenerateSpecFromStoryDocument)
 
-async function storyClick (story) {
-  await mutation.executeMutation({ storyPath: story })
-  const generatedSpec = mutation.data.value?.generateSpecFromStory.storybook?.generatedSpec
-
-  // Runner doesn't pick up new file without timeout, I'm guessing a race condition between file watcher and runner starting
-  setTimeout(() => {
-    window.location.href = `${window.location.origin}/__/#/tests/component/${generatedSpec}`
-  }, 500)
+function storyClick (story) {
+  return mutation.executeMutation({ storyPath: story }).then((data) => {
+    window.location.href = `${window.location.origin}/__/#/tests/component/${data.data}`
+  })
 }
 </script>

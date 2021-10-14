@@ -29,14 +29,7 @@ import { TestingTypeIcons } from '../utils/icons'
 
 gql`
 mutation TestingType_Select($testingType: TestingTypeEnum!) {
-  wizardSetTestingType(type: $testingType) {
-    step
-    canNavigateForward
-    testingType
-    title
-    description
-    ...TestingType
-  }
+  wizardSetTestingType(type: $testingType) 
 }
 `
 

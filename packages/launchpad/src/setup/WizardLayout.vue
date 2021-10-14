@@ -43,9 +43,7 @@ fragment WizardLayout on Wizard {
 
 gql`
 mutation WizardLayoutNavigate($direction: WizardNavigateDirection!) {
-  wizardNavigate(direction: $direction) {
-    ...WizardLayout
-  }
+  wizardNavigate(direction: $direction) 
 }
 `
 
