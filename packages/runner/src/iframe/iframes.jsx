@@ -20,6 +20,11 @@ const $ = $Cypress.$
 @observer
 export default class Iframes extends Component {
   _disposers = []
+  
+  constructor () {
+    super()
+    console.log('iframes.jsx')
+  }
 
   render () {
     const { width, height, scale, marginLeft, headerHeight, scriptError } = this.props.state
@@ -71,7 +76,7 @@ export default class Iframes extends Component {
   }
 
   componentDidMount () {
-    this.autIframe = new AutIframe(this.props.config)
+    this.autIframe = new AutIframe(this.props.config, this.props.eventManager)
 
     this.props.eventManager.on('visit:failed', this.autIframe.showVisitFailure)
     this.props.eventManager.on('before:screenshot', this.autIframe.beforeScreenshot)
@@ -109,6 +114,7 @@ export default class Iframes extends Component {
       restoreDom: this.autIframe.restoreDom,
       highlightEl: this.autIframe.highlightEl,
       detachDom: this.autIframe.detachDom,
+      eventManager: this.props.eventManager,
       snapshotControls: (snapshotProps) => (
         <SnapshotControls
           eventManager={this.props.eventManager}
@@ -193,7 +199,7 @@ export default class Iframes extends Component {
   }
 
   componentDidUpdate () {
-    const cb = this.props.state.callbackAfterUpdate
+    const cb = this.props.state.viewportUpdateCallback
 
     if (cb) {
       cb()

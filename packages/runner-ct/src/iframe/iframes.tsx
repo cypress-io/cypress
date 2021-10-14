@@ -9,8 +9,8 @@ import {
   IframeModel,
   selectorPlaygroundModel,
   AutIframe,
-  eventManager as EventManager,
 } from '@packages/runner-shared'
+import type { eventManager as EventManager } from '@packages/runner-shared'
 
 import State from '../../src/lib/state'
 import styles from '../app/RunnerCt.module.scss'
@@ -32,7 +32,7 @@ export const Iframes = namedObserver('Iframes', ({
   eventManager,
 }: IFramesProps) => {
   const containerRef = useRef<HTMLDivElement>(null)
-  const autIframe = useRef(new AutIframe(config))
+  const autIframe = useRef(new AutIframe(config.projectName, eventManager))
 
   const _toggleSnapshotHighlights = (snapshotProps) => {
     state.setShowSnapshotHighlight(!state.snapshot.showingHighlights)
@@ -130,11 +130,13 @@ export const Iframes = namedObserver('Iframes', ({
       }),
     ]
 
-    const iframeModel = new IframeModel({
+    eventManager.id()
+    new IframeModel({
       state,
       restoreDom: autIframe.current.restoreDom,
       highlightEl: autIframe.current.highlightEl,
       detachDom: autIframe.current.detachDom,
+      eventManager: eventManager,
       snapshotControls: (snapshotProps) => (
         <SnapshotControls
           eventManager={eventManager}
@@ -144,9 +146,7 @@ export const Iframes = namedObserver('Iframes', ({
           onStateChange={_changeSnapshotState}
         />
       ),
-    })
-
-    iframeModel.listen()
+    }).listen()
 
     return () => {
       eventManager.notifyRunningSpec(null)
@@ -167,7 +167,7 @@ export const Iframes = namedObserver('Iframes', ({
       return
     }
 
-    state.callbackAfterUpdate?.()
+    state.viewportUpdateCallback?.()
   })
 
   const { height, width, scriptError, scale, screenshotting } = state

@@ -15,10 +15,10 @@ async function resetReporter () {
   }
 }
 
-function setupReporter () {
+function setupReporter (store: Store) {
   const $reporterRoot = getReporterElement()
 
-  renderReporter($reporterRoot, getStore(), window.UnifiedRunner.eventManager)
+  renderReporter($reporterRoot, store, window.UnifiedRunner.eventManager)
   hasInitializeReporter = true
 }
 
@@ -33,6 +33,7 @@ function renderReporter (
     }
   }
 
+  eventManager.id()
   const reporter = window.UnifiedRunner.React.createElement(window.UnifiedRunner.Reporter, {
     runMode: 'single' as const,
     runner: eventManager.reporterBus,

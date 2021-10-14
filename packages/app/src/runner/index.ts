@@ -39,11 +39,12 @@ function setupRunner (done: () => void) {
     automationElement: '__cypress-string',
     randomString,
   })
+  window.UnifiedRunner.eventManager.start(window.UnifiedRunner.config)
 
   window.UnifiedRunner.MobX.reaction(
     () => [store.height, store.width],
-    ([viewportHeight, viewportWidth]) => {
-      // console.log(`${viewportHeight} x ${viewportWidth}`)
+    () => {
+      store.viewportUpdateCallback?.()
     },
   )
 
@@ -67,6 +68,21 @@ function getSpecUrl (namespace: string, spec: BaseSpec, prefix = '') {
  */
 function teardownSpec (store: Store) {
   return window.UnifiedRunner.eventManager.teardown(store)
+}
+
+function createIframeModel (autIframe: any) {
+  // IFrame Model to manage snapshots, etc.
+  const iframeModel = new window.UnifiedRunner.IframeModel({
+    restoreDom: autIframe.restoreDom,
+    highlightEl: autIframe.highlightEl,
+    detachDom: autIframe.detachDom,
+    eventManager: window.UnifiedRunner.eventManager,
+    state: getStore(),
+    snapshotControls: () => {
+      // console.log('Ahhhh') // window.UnifiedRunner.React
+    },
+  })
+  iframeModel.listen()
 }
 
 /**
@@ -97,27 +113,14 @@ function runSpecCT (spec: BaseSpec) {
   $runnerRoot.append($container)
 
   // create new AUT
-  const autIframe = new window.UnifiedRunner.AutIframe('Test Project')
+  const autIframe = new window.UnifiedRunner.AutIframe('Test Project', window.UnifiedRunner.eventManager)
   const $autIframe: JQuery<HTMLIFrameElement> = autIframe.create().appendTo($container)
-
-  // IFrame Model to manage snapshots, etc.
-  const iframeModel = new window.UnifiedRunner.IframeModel({
-    restoreDom: autIframe.restoreDom,
-    highlightEl: autIframe.highlightEl,
-    detachDom: autIframe.detachDom,
-    state: getStore(),
-    snapshotControls: () => {
-      // console.log('Ahhhh') // window.UnifiedRunner.React
-    },
-  })
-
-
-  iframeModel.listen()
-
   const specSrc = getSpecUrl(config.namespace, spec)
 
   autIframe.showInitialBlankContents()
   $autIframe.prop('src', specSrc)
+
+  createIframeModel(autIframe)
 
   // initialize Cypress (driver) with the AUT!
   window.UnifiedRunner.eventManager.initialize($autIframe, config)
@@ -163,7 +166,7 @@ function runSpecE2E (spec: BaseSpec) {
   $runnerRoot.append($container)
 
   // create new AUT
-  const autIframe = new window.UnifiedRunner.AutIframe('Test Project')
+  const autIframe = new window.UnifiedRunner.AutIframe('Test Project', window.UnifiedRunner.eventManager)
 
   autIframe.showInitialBlankContents()
   const $autIframe: JQuery<HTMLIFrameElement> = autIframe.create().appendTo($container)
@@ -171,6 +174,8 @@ function runSpecE2E (spec: BaseSpec) {
   // create Spec IFrame
   const specSrc = getSpecUrl(config.namespace, spec)
   const $specIframe = createSpecIFrame(specSrc)
+
+  createIframeModel(autIframe)
 
   // append to document, so the iframe will execute the spec
   $container.appendChild($specIframe)
@@ -221,8 +226,7 @@ async function executeSpec (spec: BaseSpec) {
   await UnifiedReporterAPI.resetReporter()
 
   await teardownSpec(store)
-
-  UnifiedReporterAPI.setupReporter()
+  UnifiedReporterAPI.setupReporter(store)
 
   if (window.UnifiedRunner.config.testingType === 'e2e') {
     return runSpecE2E(spec)

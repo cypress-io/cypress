@@ -34,7 +34,7 @@ export class BaseStore {
   @observable messageTitle?: string
   @observable messageDescription?: 'info' | 'warning'
   @observable messageType?: string
-  @observable callbackAfterUpdate?: Callback
+  @observable viewportUpdateCallback?: Callback
 
   constructor (testingType: Cypress.TestingType) {
     this.width = defaults[testingType].width
@@ -83,13 +83,13 @@ export class BaseStore {
     this.messageType = undefined
   }
 
-  @action setCallbackAfterUpdateToNull () {
-    this.callbackAfterUpdate = undefined
+  @action setViewportUpdatedCallbackToNull () {
+    this.viewportUpdateCallback = undefined
   }
 
-  setCallbackAfterUpdate (cb: Callback) {
-    this.callbackAfterUpdate = () => {
-      this.setCallbackAfterUpdateToNull()
+  setViewportUpdatedCallback (cb: Callback) {
+    this.viewportUpdateCallback = () => {
+      this.setViewportUpdatedCallbackToNull()
 
       cb()
     }

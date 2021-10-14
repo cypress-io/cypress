@@ -3,7 +3,7 @@ import $Cypress from '@packages/driver'
 import * as blankContents from '../blank-contents'
 import { visitFailure } from '../visit-failure'
 import { selectorPlaygroundModel } from '../selector-playground'
-import { eventManager } from '../event-manager'
+// import { eventManager } from '../event-manager'
 import { dom } from '../dom'
 import { logger } from '../logger'
 import { studioRecorder } from '../studio'
@@ -14,7 +14,9 @@ export class AutIframe {
   debouncedToggleSelectorPlayground: DebouncedFunc<(isEnabled: any) => void>
   $iframe?: JQuery<HTMLIFrameElement>
 
-  constructor (private projectName: string) {
+  constructor (private projectName: string, eventManager: any) {
+    eventManager.id()
+    console.log('Createing new AutIframe')
     this.debouncedToggleSelectorPlayground = _.debounce(this.toggleSelectorPlayground, 300)
   }
 

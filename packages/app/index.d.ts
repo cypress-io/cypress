@@ -83,7 +83,7 @@ declare global {
        * We cannot import the correct types, because this causes the linter and type
        * checker to run on runner-shared and reporter, and it blows up.
        */
-      AutIframe: new (projectName: string) => {
+      AutIframe: new (projectName: string, eventManager: any) => {
         create: () => JQuery<HTMLIFrameElement>
         state: Store
         highlightEl: ({ body: unknown }, { $el, coords, highlightAtr, scrollBy }: any) => void
@@ -98,6 +98,7 @@ declare global {
         restoreDom: (snapshot: AutSnapshot) => void
         detachDom: () => void
         snapshotControls: (snapshotProps: any) => any // 
+        eventManager: any
       }) => {
         listen: () => void
       }

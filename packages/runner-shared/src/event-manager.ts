@@ -28,6 +28,8 @@ ws.on('connect', () => {
   ws.emit('runner:connected')
 })
 
+const rand = Math.random().toFixed(5)
+
 const driverToReporterEvents = 'paused session:add'.split(' ')
 const driverToLocalAndReporterEvents = 'run:start run:end'.split(' ')
 const driverToSocketEvents = 'backend:request automation:request mocha recorder:frame'.split(' ')
@@ -55,6 +57,8 @@ if (window.Cypress) {
 let Cypress
 
 export const eventManager = {
+  id () {},
+
   reporterBus,
 
   getCypress () {
