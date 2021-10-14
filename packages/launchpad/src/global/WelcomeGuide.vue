@@ -16,7 +16,7 @@
     />
     <div class="divide-y divide-gray-300">
       <div class="grid">
-        <div class="children:leading-normal ml-2 mb-4">
+        <div class="children:leading-normal mb-4">
           <h1 class="text-2rem text-gray-900">
             {{ t('welcomeGuide.header.title') }}
           </h1>

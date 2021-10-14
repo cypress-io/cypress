@@ -1,7 +1,7 @@
 <template>
   <template v-if="query.data.value">
     <HeaderBar :gql="query.data.value" />
-    <div class="max-content">
+    <div class="px-24px">
       <template v-if="query.error.value">
         <BaseError />
       </template>

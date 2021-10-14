@@ -16,7 +16,10 @@
               class="pointer-events-none"
               :class="prefixIconClasses"
             />
-            <i-cy-magnifying-glass_x16 v-else-if="type === 'search'" />
+            <i-cy-magnifying-glass_x16
+              v-else-if="type === 'search'"
+              class="icon-light-gray-50 icon-dark-gray-500"
+            />
           </slot>
         </span>
       </div>
@@ -24,7 +27,7 @@
         v-model="localValue"
         :type="type"
         :class="_inputClasses"
-        class="block w-full pl-10 leading-tight placeholder-gray-400 border-gray-300 rounded-md disabled:bg-gray-100 disabled:text-gray-400 focus:ring-indigo-500 focus:border-indigo-500 py-9px"
+        class="block w-full pl-10 leading-tight placeholder-gray-400 border-gray-100 rounded-md disabled:bg-gray-100 disabled:text-gray-400 focus:ring-indigo-500 focus:border-indigo-500 py-9px"
         v-bind="inputAttrs"
       >
       <div

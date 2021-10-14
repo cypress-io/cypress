@@ -6,7 +6,7 @@
     <li
       v-for="item, idx in items"
       :key="idx"
-      class="truncate"
+      class="truncate -ml-12px"
     >
       <Button
         class="text-left text-16px truncate w-full children:truncate children:leading-normal"
