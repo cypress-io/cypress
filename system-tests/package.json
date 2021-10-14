@@ -6,8 +6,7 @@
   "main": "index.js",
   "scripts": {
     "test": "node ./scripts/run.js --glob-in-dir=test",
-    "test:ci": "node ./scripts/run.js",
-    "import:from:server": "./scripts/import_from_server.sh"
+    "test:ci": "node ./scripts/run.js"
   },
   "dependencies": {
     "@babel/parser": "7.13.0",
