@@ -25,7 +25,7 @@
           </p>
         </div>
 
-        <div class="grid link-wrappers justify-between">
+        <div class="flex gap-60px">
           <WelcomeGuideLinks
             class="mb-2"
             :header="t('welcomeGuide.projectListHeader')"
@@ -106,8 +106,4 @@ const openLink = (item) => {
 </script>
 
 <style scoped lang="scss">
-.link-wrappers {
-  // for some reason, I can't get this to work inside of an inline class.
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-}
 </style>

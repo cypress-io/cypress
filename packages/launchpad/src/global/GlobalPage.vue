@@ -4,7 +4,7 @@
     <WelcomeGuide />
 
     <!-- If there are projects -->
-    <div class="grid grid-cols-1 gap-6 pt-6 grid-cols-2">
+    <div class="grid pt-6 grid-cols-2 gap-6">
       <div class="min-w-full col-start-1 col-end-3 flex items-center gap-6">
         <GlobalPageHeader
           v-model="match"
