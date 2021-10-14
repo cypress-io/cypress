@@ -78,4 +78,8 @@ export const Project = objectType({
       resolve: (source, args, ctx) => ctx.storybook.loadStorybookInfo(),
     })
   },
+  sourceType: {
+    module: __dirname,
+    export: 'ProjectShape',
+  },
 })

@@ -9,7 +9,7 @@ import { parse } from 'graphql'
 const SHOW_GRAPHIQL = process.env.CYPRESS_INTERNAL_ENV !== 'production'
 
 export function addGraphQLHTTP (app: ReturnType<typeof express>, context: DataContext) {
-  app.use('/graphql', graphqlHTTP((req, res, params) => {
+  app.use('/graphql/:operationName?', graphqlHTTP((req, res, params) => {
     const ctx = SHOW_GRAPHIQL ? maybeProxyContext(params, context) : context
 
     return {
