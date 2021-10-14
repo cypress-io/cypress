@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react'
-import * as React from 'react'
+import type * as React from 'react'
 
 /**
  * Wraps MobX `observer` to properly add a component `displayName` for debugging purposes

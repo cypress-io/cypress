@@ -26,15 +26,17 @@ const viewports = {
 
 const validOrientations = ['landscape', 'portrait']
 
+type CurrentViewport = Pick<Cypress.Config, 'viewportWidth' | 'viewportHeight'>
+
 // NOTE: this is outside the function because its 'global' state to the
 // cypress application and not local to the specific run. the last
 // viewport set is always the 'current' viewport as opposed to the
 // config. there was a bug where re-running tests without a hard
 // refresh would cause viewport to hang
-let currentViewport = null
+let currentViewport: CurrentViewport | null = null
 
 export default (Commands, Cypress, cy, state) => {
-  const defaultViewport = _.pick(Cypress.config(), 'viewportWidth', 'viewportHeight')
+  const defaultViewport: CurrentViewport = _.pick(Cypress.config() as Cypress.Config, 'viewportWidth', 'viewportHeight')
 
   // currentViewport could already be set due to previous runs
   currentViewport = currentViewport || defaultViewport
@@ -57,7 +59,7 @@ export default (Commands, Cypress, cy, state) => {
     state(viewport)
 
     return new Promise((resolve) => {
-      if (currentViewport.viewportWidth === width && currentViewport.viewportHeight === height) {
+      if (currentViewport!.viewportWidth === width && currentViewport!.viewportHeight === height) {
         // noop if viewport won't change
         return resolve(currentViewport)
       }
@@ -76,7 +78,8 @@ export default (Commands, Cypress, cy, state) => {
   }
 
   Commands.addAll({
-    title (options = {}) {
+    // TODO: any -> Partial<Cypress.Loggable & Cypress.Timeoutable>
+    title (options: any = {}) {
       const userOptions = options
 
       options = _.defaults({}, userOptions, { log: true })
@@ -98,7 +101,8 @@ export default (Commands, Cypress, cy, state) => {
       return resolveTitle()
     },
 
-    window (options = {}) {
+    // TODO: any -> Partial<Cypress.Loggable & Cypress.Timeoutable>
+    window (options: any = {}) {
       const userOptions = options
 
       options = _.defaults({}, userOptions, { log: true })
@@ -140,7 +144,8 @@ export default (Commands, Cypress, cy, state) => {
       return verifyAssertions()
     },
 
-    document (options = {}) {
+    // TODO: any -> Partial<Cypress.Loggable & Cypress.Timeoutable>
+    document (options: any = {}) {
       const userOptions = options
 
       options = _.defaults({}, userOptions, { log: true })
@@ -183,7 +188,8 @@ export default (Commands, Cypress, cy, state) => {
       return verifyAssertions()
     },
 
-    viewport (presetOrWidth, heightOrOrientation, options = {}) {
+    // TODO: any -> Partial<Cypress.Loggable>
+    viewport (presetOrWidth, heightOrOrientation, options: any = {}) {
       const userOptions = options
 
       if (_.isObject(heightOrOrientation)) {
@@ -202,9 +208,12 @@ export default (Commands, Cypress, cy, state) => {
         const isPreset = typeof presetOrWidth === 'string'
 
         options._log = Cypress.log({
+          // TODO: timeout below should be removed
+          // because cy.viewport option doesn't support `timeout`
+          // @see https://docs.cypress.io/api/commands/viewport#Arguments
           timeout: options.timeout,
           consoleProps () {
-            const obj = {}
+            const obj: Record<string, string | number> = {}
 
             if (isPreset) {
               obj.Preset = presetOrWidth
