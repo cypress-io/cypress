@@ -1,7 +1,8 @@
 {
-  "video": false,
-  "testFiles": "**/*cy-spec.tsx",
-  "viewportWidth": 500,
-  "viewportHeight": 800,
+  "component": {
+    "testFiles": "**/*.cy.{js,jsx,ts,tsx}",
+    "componentFolder": "src"
+  },
+  "testFiles": "**/*.cy.{js,jsx,ts,tsx}",
   "componentFolder": "src"
 }

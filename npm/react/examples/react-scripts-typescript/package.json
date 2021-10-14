@@ -3,7 +3,9 @@
   "scripts": {
     "cy:open": "node ../../../../scripts/cypress open-ct",
     "start": "react-scripts start",
-    "test": "node ../../../../scripts/cypress run-ct"
+    "test": "node ../../../../scripts/cypress run-ct",
+    "storybook": "start-storybook -p 6006",
+    "build-storybook": "build-storybook"
   },
   "dependencies": {
     "react": "^17.0.1",
@@ -12,10 +14,29 @@
   },
   "devDependencies": {
     "@cypress/react": "file:../../dist",
+    "@storybook/addon-actions": "^6.3.12",
+    "@storybook/addon-essentials": "^6.3.12",
+    "@storybook/addon-links": "^6.3.12",
+    "@storybook/node-logger": "^6.3.12",
+    "@storybook/preset-create-react-app": "^3.2.0",
+    "@storybook/react": "^6.3.12",
+    "@storybook/testing-react": "0.0.22",
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
     "mocha-junit-reporter": "^2.0.0",
     "mocha-multi-reporters": "^1.5.1",
     "typescript": "^4.2.3"
+  },
+  "eslintConfig": {
+    "overrides": [
+      {
+        "files": [
+          "**/*.stories.*"
+        ],
+        "rules": {
+          "import/no-anonymous-default-export": "off"
+        }
+      }
+    ]
   }
 }
