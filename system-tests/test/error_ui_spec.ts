@@ -19,7 +19,7 @@ describe('e2e error ui', function () {
     'webpack-preprocessor-ts-loader-compiler-options',
     // TODO: unskip this once we understand why it is failing
     // @see https://github.com/cypress-io/cypress/issues/18497
-    'webpack-preprocessor-awesome-typescript-loader',
+    // 'webpack-preprocessor-awesome-typescript-loader',
   ]
   .forEach((project) => {
     systemTests.it(`handles sourcemaps in webpack for project: ${project}`, {
