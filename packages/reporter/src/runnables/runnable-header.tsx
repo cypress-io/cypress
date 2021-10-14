@@ -1,16 +1,22 @@
+import { observer } from 'mobx-react'
 import React, { Component, ReactElement } from 'react'
 
 import FileNameOpener from '../lib/file-name-opener'
+import { StatsStore } from '../header/stats-store'
 
 const renderRunnableHeader = (children: ReactElement) => <div className="runnable-header">{children}</div>
 
+const formatDuration = (duration: number) => duration ? String((duration / 1000).toFixed(2)).padStart(5, '0') : '--'
+
 interface RunnableHeaderProps {
   spec: Cypress.Cypress['spec']
+  statsStore: StatsStore
 }
 
+@observer
 class RunnableHeader extends Component<RunnableHeaderProps> {
   render () {
-    const { spec } = this.props
+    const { spec, statsStore } = this.props
 
     const relativeSpecPath = spec.relative
 
@@ -35,7 +41,10 @@ class RunnableHeader extends Component<RunnableHeaderProps> {
     }
 
     return renderRunnableHeader(
-      <FileNameOpener fileDetails={fileDetails} />,
+      <>
+        <FileNameOpener fileDetails={fileDetails} />
+        <span style={{ float: 'right' }}>{formatDuration(statsStore.duration)}</span>
+      </>,
     )
   }
 }

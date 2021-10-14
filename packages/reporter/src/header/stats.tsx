@@ -4,7 +4,6 @@ import React from 'react'
 import { StatsStore } from './stats-store'
 
 const count = (num: number) => num > 0 ? num : '--'
-const formatDuration = (duration: number) => duration ? String((duration / 1000).toFixed(2)).padStart(5, '0') : '--'
 
 interface Props {
   stats: StatsStore
@@ -26,9 +25,6 @@ const Stats = observer(({ stats }: Props) => (
       <i aria-hidden="true" className='fas fa-circle-notch' />
       <span className='visually-hidden'>Pending:</span>
       <span className='num'>{count(stats.numPending)}</span>
-    </li>
-    <li className='duration'>
-      <span className='num'>{formatDuration(stats.duration)}</span>
     </li>
   </ul>
 ))

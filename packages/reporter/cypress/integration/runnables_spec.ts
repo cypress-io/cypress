@@ -114,6 +114,24 @@ describe('runnables', () => {
     cy.get('.error li').should('have.length', 2)
   })
 
+  it('displays the time taken in seconds', () => {
+    start()
+
+    const startTime = new Date(2000, 0, 1)
+    const now = new Date(2000, 0, 1, 0, 0, 12, 340)
+
+    cy.clock(now).then(() => {
+      runner.emit('reporter:start', { startTime: startTime.toISOString() })
+    })
+
+    cy.get('.runnable-header span:last').should('have.text', '12.34')
+  })
+
+  it('displays "--" if no time taken', () => {
+    start()
+    cy.get('.runnable-header span:last').should('have.text', '--')
+  })
+
   describe('when there are no tests', () => {
     beforeEach(() => {
       runnables.suites = []
