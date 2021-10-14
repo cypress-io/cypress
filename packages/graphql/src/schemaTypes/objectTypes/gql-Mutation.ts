@@ -167,15 +167,19 @@ export const mutation = mutationType({
     })
 
     t.nonNull.field('generateSpecFromStory', {
-      type: 'Wizard',
+      type: 'Project',
       description: 'Generate spec from Storybook story',
       args: {
         storyPath: nonNull('String'),
       },
       async resolve (_root, args, ctx) {
+        if (!ctx.activeProject) {
+          throw Error(`Cannot set spec without active project!`)
+        }
+
         await ctx.actions.storybook.generateSpecFromStory(args.storyPath)
 
-        return ctx.wizardData
+        return ctx.activeProject
       },
     })
 

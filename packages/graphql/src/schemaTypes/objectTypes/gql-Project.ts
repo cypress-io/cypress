@@ -72,6 +72,11 @@ export const Project = objectType({
         return ctx.project.getResolvedConfigFields(source.projectRoot)
       },
     })
+
+    t.field('storybook', {
+      type: 'Storybook',
+      resolve: (source, args, ctx) => ctx.storybook.loadStorybookInfo(),
+    })
   },
   sourceType: {
     module: __dirname,

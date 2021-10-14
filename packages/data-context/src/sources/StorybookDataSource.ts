@@ -1,8 +1,10 @@
+import type { SpecFile, StorybookInfo } from '@packages/types'
 import glob from 'glob'
 import * as path from 'path'
-import type { DataContext } from '..'
 import { promisify } from 'util'
-import type { StorybookInfo } from '@packages/types'
+import type { DataContext } from '..'
+
+const asyncGlob = promisify(glob)
 
 const STORYBOOK_FILES = [
   'main.js',
@@ -14,12 +16,46 @@ const STORYBOOK_FILES = [
 export class StorybookDataSource {
   constructor (private ctx: DataContext) {}
 
-  get storybookInfo () {
+  async loadStorybookInfo () {
     if (!this.ctx.activeProject?.projectRoot) {
       return Promise.resolve(null)
     }
 
     return this.storybookInfoLoader.load(this.ctx.activeProject?.projectRoot)
+  }
+
+  async getStories (): Promise<SpecFile[]> {
+    const project = this.ctx.activeProject
+
+    if (!project) {
+      throw Error(`Cannot find stories without activeProject.`)
+    }
+
+    const storybook = await this.ctx.storybook.loadStorybookInfo()
+
+    if (!storybook) {
+      return []
+    }
+
+    const config = await this.ctx.project.getConfig(project.projectRoot)
+    const files: string[] = []
+
+    for (const storyPattern of storybook.storyGlobs) {
+      const res = await asyncGlob(path.join(storybook.storybookRoot, storyPattern))
+
+      files.push(...res)
+    }
+
+    // Don't currently support mdx
+    return files.reduce((acc, file) => {
+      if (file.endsWith('.mdx')) {
+        return acc
+      }
+
+      const spec = this.ctx.file.normalizeFileToSpec(file, project.projectRoot, config.componentFolder || project.projectRoot)
+
+      return [...acc, spec]
+    }, [] as SpecFile[])
   }
 
   private storybookInfoLoader = this.ctx.loader<string, StorybookInfo | null>((projectRoots) => this.batchStorybookInfo(projectRoots))
@@ -34,7 +70,6 @@ export class StorybookDataSource {
       storybookRoot,
       files: [],
       storyGlobs: [],
-      getStories: this.getStories,
     }
 
     try {
@@ -75,18 +110,5 @@ export class StorybookDataSource {
     }
 
     return storybookInfo
-  }
-
-  private async getStories (storybookRoot: string, storyGlobs: string[]) {
-    const files: string[] = []
-
-    for (const storyPattern of storyGlobs) {
-      const res = await promisify(glob)(path.join(storybookRoot, storyPattern))
-
-      files.push(...res)
-    }
-
-    // Don't currently support mdx
-    return files.filter((file) => !file.endsWith('.mdx'))
   }
 }
