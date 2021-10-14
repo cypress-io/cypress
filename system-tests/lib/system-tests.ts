@@ -267,13 +267,13 @@ const expectedAddedVideoSnapshotLines = [
   'This error will not alter the exit code.', '',
   'TimeoutError: operation timed out',
   '[stack trace lines]', '', '',
-  '│ Video:        false                                                                            │',
 ]
 const expectedDeletedVideoSnapshotLines = [
-  '│ Video:        true                                                                             │',
   '(Video)', '',
   '-  Started processing:  Compressing to 32 CRF',
 ]
+const sometimesAddedVideoSnapshotLine = '│ Video:        false                                                                            │'
+const sometimesDeletedVideoSnapshotLine = '│ Video:        true                                                                             │'
 
 const isVideoSnapshotError = (err: Error) => {
   const [added, deleted] = [[], []]
@@ -293,6 +293,9 @@ const isVideoSnapshotError = (err: Error) => {
 
     if (line.charAt(0) === '-') deleted.push(line.slice(1).trim())
   }
+
+  _.remove(added, sometimesAddedVideoSnapshotLine)
+  _.remove(deleted, sometimesDeletedVideoSnapshotLine)
 
   return _.isEqual(added, expectedAddedVideoSnapshotLines) && _.isEqual(deleted, expectedDeletedVideoSnapshotLines)
 }
