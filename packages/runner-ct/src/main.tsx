@@ -2,7 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import $Cypress from '@packages/driver'
 const driverUtils = $Cypress.utils
-import { eventManager, AutIframe, Container, IframeModel, SnapshotControls } from '@packages/runner-shared'
+import { eventManager, AutIframe, Container, SnapshotControls, selectorPlaygroundModel, studioRecorder } from '@packages/runner-shared'
 import defaultEvents from '@packages/reporter/src/lib/events'
 import { Reporter } from '@packages/reporter/src/main'
 import shortcuts from '@packages/reporter/src/lib/shortcuts'
@@ -13,6 +13,10 @@ export function getSpecUrl (namespace: string, spec: FoundSpec, prefix = '') {
 }
 
 const UnifiedRunner = {
+  studioRecorder,
+
+  selectorPlaygroundModel,
+
   shortcuts,
 
   React,
@@ -26,8 +30,6 @@ const UnifiedRunner = {
   SnapshotControls,
 
   AutIframe,
-
-  IframeModel,
 
   defaultEvents,
 

@@ -92,16 +92,8 @@ declare global {
         showInitialBlankContents: () => void
       }
 
-      IframeModel: new (payload: {
-        state: Store
-        highlightEl: ({ body: unknown }, { $el, coords, highlightAtr, scrollBy }: any) => void
-        restoreDom: (snapshot: AutSnapshot) => void
-        detachDom: () => void
-        snapshotControls: (snapshotProps: any) => any // 
-        eventManager: any
-      }) => {
-        listen: () => void
-      }
+      studioRecorder: any
+      selectorPlaygroundModel: any
 
       MobX: typeof MobX
 

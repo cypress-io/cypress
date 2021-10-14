@@ -30,11 +30,17 @@ export class BaseStore {
   @observable url = ''
   @observable highlightUrl = false
   @observable isLoadingUrl = false
+  @observable isRunning = false
 
   @observable messageTitle?: string
-  @observable messageDescription?: 'info' | 'warning'
+  @observable messageDescription?: 'info' | 'warning' | 'pinned'
   @observable messageType?: string
   @observable viewportUpdateCallback?: Callback
+  @observable messageControls?: any
+  @observable snapshot?: {
+    showingHighlights: boolean
+    stateIndex: number
+  }
 
   constructor (testingType: Cypress.TestingType) {
     this.width = defaults[testingType].width

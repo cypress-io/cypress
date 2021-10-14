@@ -1,45 +1,56 @@
-import _ from 'lodash'
-import { action } from 'mobx'
+import type { AutSnapshot } from '@packages/types/src/runner'
 
-import { selectorPlaygroundModel } from '../selector-playground'
-import { studioRecorder } from '../studio'
+import type { Store } from '@packages/app/src/store'
+
+type Fn = () => void
 
 export class IframeModel {
-  constructor ({ state, detachDom, restoreDom, highlightEl, snapshotControls, eventManager }) {
-    this.eventManager = eventManager
-    this.state = state
-    this.detachDom = detachDom
-    this.restoreDom = restoreDom
-    this.highlightEl = highlightEl
-    this.snapshotControls = snapshotControls
+  isSnapshotPinned: boolean = false
+  originalState?: AutSnapshot
+  detachedId?: number
+  intervalId?: number
 
+  constructor (
+    private state: Store, 
+    private detachDom: () => AutSnapshot, 
+    private restoreDom: (snapshot: any) => void, 
+    private highlightEl: ({ body }: any, opts: any) => void, 
+    private eventManager: any,
+    private snapshotControls: any, 
+    private MobX: any,
+    private studio: {
+      selectorPlaygroundModel: any,
+      recorder: any,
+    }
+  ) {
     this._reset()
   }
 
   listen () {
-    this.eventManager.on('run:start', action('run:start', this._beforeRun))
-    this.eventManager.on('run:end', action('run:end', this._afterRun))
+    this.eventManager.on('run:start', this.MobX.action('run:start', this._beforeRun))
+    this.eventManager.on('run:end', this.MobX.action('run:end', this._afterRun))
 
-    this.eventManager.on('viewport:changed', action('viewport:changed', this._updateViewport))
-    this.eventManager.on('config', action('config', (config) => {
-      this._updateViewport(_.map(config, 'viewportHeight', 'viewportWidth'))
+    this.eventManager.on('viewport:changed', this.MobX.action('viewport:changed', this._updateViewport))
+    this.eventManager.on('config', this.MobX.action('config', (config: any) => {
+      const { viewportWidth, viewportHeight } = config
+      return this._updateViewport({ viewportHeight, viewportWidth })
     }))
 
-    this.eventManager.on('url:changed', action('url:changed', this._updateUrl))
-    this.eventManager.on('page:loading', action('page:loading', this._updateLoadingUrl))
+    this.eventManager.on('url:changed', this.MobX.action('url:changed', this._updateUrl))
+    this.eventManager.on('page:loading', this.MobX.action('page:loading', this._updateLoadingUrl))
 
-    this.eventManager.on('show:snapshot', action('show:snapshot', this._setSnapshots))
-    this.eventManager.on('hide:snapshot', action('hide:snapshot', this._clearSnapshots))
+    this.eventManager.on('show:snapshot', this.MobX.action('show:snapshot', this._setSnapshots))
+    this.eventManager.on('hide:snapshot', this.MobX.action('hide:snapshot', this._clearSnapshots))
 
-    this.eventManager.on('pin:snapshot', action('pin:snapshot', this._pinSnapshot))
-    this.eventManager.on('unpin:snapshot', action('unpin:snapshot', this._unpinSnapshot))
+    this.eventManager.on('pin:snapshot', this.MobX.action('pin:snapshot', this._pinSnapshot))
+    this.eventManager.on('unpin:snapshot', this.MobX.action('unpin:snapshot', this._unpinSnapshot))
   }
 
   _beforeRun = () => {
     this.state.isLoading = false
     this.state.isRunning = true
     this.state.resetUrl()
-    selectorPlaygroundModel.setEnabled(false)
+    this.studio.selectorPlaygroundModel.setEnabled(false)
     this._reset()
     this._clearMessage()
   }
@@ -48,7 +59,7 @@ export class IframeModel {
     this.state.isRunning = false
   }
 
-  _updateViewport = ({ viewportWidth, viewportHeight }, cb) => {
+  _updateViewport = ({ viewportWidth, viewportHeight }, cb?: Fn) => {
     this.state.updateDimensions(viewportWidth, viewportHeight)
 
     if (cb) {
@@ -56,11 +67,11 @@ export class IframeModel {
     }
   }
 
-  _updateUrl = (url) => {
+  _updateUrl = (url: string) => {
     this.state.url = url
   }
 
-  _updateLoadingUrl = (isLoadingUrl) => {
+  _updateLoadingUrl = (isLoadingUrl: boolean) => {
     this.state.isLoadingUrl = isLoadingUrl
   }
 
@@ -68,14 +79,14 @@ export class IframeModel {
     this.state.clearMessage()
   }
 
-  _setSnapshots = (snapshotProps) => {
+  _setSnapshots = (snapshotProps: AutSnapshot) => {
     if (this.isSnapshotPinned) return
 
     if (this.state.isRunning) {
       return this._testsRunningError()
     }
 
-    if (studioRecorder.isOpen) {
+    if (this.studio.recorder.isOpen) {
       return this._studioOpenError()
     }
 
@@ -101,12 +112,12 @@ export class IframeModel {
 
     clearInterval(this.intervalId)
 
-    const revert = action('revert:snapshot', this._showSnapshot)
+    const revert = this.MobX.action('revert:snapshot', this._showSnapshot)
 
     if (snapshots.length > 1) {
       let i = 0
 
-      this.intervalId = setInterval(() => {
+      this.intervalId = window.setInterval(() => {
         if (this.isSnapshotPinned) return
 
         i += 1
@@ -143,6 +154,7 @@ export class IframeModel {
     clearInterval(this.intervalId)
 
     this.state.highlightUrl = false
+    console.log(this.originalState)
 
     if (!this.originalState || !this.originalState.body) {
       return this._clearMessage()
@@ -153,7 +165,11 @@ export class IframeModel {
     // process on next tick so we don't restore the dom if we're
     // about to receive another 'show:snapshot' event, else that would
     // be a huge waste
-    setTimeout(action('clear:snapshots:next:tick', () => {
+    setTimeout(this.MobX.action('clear:snapshots:next:tick', () => {
+      if (!this.originalState) {
+        return
+      }
+
       // we want to only restore the dom if we haven't received
       // another snapshot by the time this function runs
       if (previousDetachedId !== this.detachedId) return
@@ -163,8 +179,8 @@ export class IframeModel {
       this.restoreDom(this.originalState.snapshot)
       this._clearMessage()
 
-      this.originalState = null
-      this.detachedId = null
+      this.originalState = undefined
+      this.detachedId = undefined
     }))
   }
 
@@ -182,8 +198,10 @@ export class IframeModel {
 
     this.isSnapshotPinned = true
 
-    this.state.snapshot.showingHighlights = true
-    this.state.snapshot.stateIndex = 0
+    this.state.snapshot = {
+      showingHighlights: true,
+      stateIndex: 0
+    }
 
     this.state.messageTitle = 'DOM Snapshot'
     this.state.messageDescription = 'pinned'
@@ -195,14 +213,14 @@ export class IframeModel {
 
   _setMissingSnapshotMessage () {
     this.state.messageTitle = 'The snapshot is missing. Displaying current state of the DOM.'
-    this.state.messageDescription = ''
+    this.state.messageDescription = undefined
     this.state.messageType = 'warning'
   }
 
   _unpinSnapshot = () => {
     this.isSnapshotPinned = false
     this.state.messageTitle = 'DOM Snapshot'
-    this.state.messageDescription = ''
+    this.state.messageDescription = undefined
     this.state.messageControls = null
   }
 
@@ -236,9 +254,9 @@ export class IframeModel {
   }
 
   _reset () {
-    this.detachedId = null
-    this.intervalId = null
-    this.originalState = null
+    this.detachedId = undefined
+    this.intervalId = undefined
+    this.originalState = undefined
     this.isSnapshotPinned = false
   }
 }

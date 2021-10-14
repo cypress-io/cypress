@@ -1,5 +1,5 @@
 <template>
-  <div class="grid grid-cols-3 p-12 gap-8 h-full">
+  <div id="main-grid" class="grid p-12 gap-8 h-full">
     <div>
       <InlineSpecList
         :gql="props.gql"
@@ -67,7 +67,7 @@ mutation Runner_SetCurrentSpec($id: ID!) {
 }
 `
 
-const runnerColumnWidth = 300
+const runnerColumnWidth = 400
 
 const store = getStore()
 
@@ -134,6 +134,10 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
+#main-grid {
+  grid-template-columns: 1fr 2fr 2fr;
+}
+
 .viewport {
   border: 2px dotted blue;
 }

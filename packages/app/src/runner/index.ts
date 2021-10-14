@@ -19,6 +19,7 @@ import { injectBundle } from './injectBundle'
 import type { BaseSpec } from '@packages/types/src/spec'
 import { UnifiedReporterAPI } from './reporter'
 import { getRunnerElement, empty } from './utils'
+import { IframeModel } from './iframe-model'
 
 const randomString = `${Math.random()}`
 
@@ -72,16 +73,21 @@ function teardownSpec (store: Store) {
 
 function createIframeModel (autIframe: any) {
   // IFrame Model to manage snapshots, etc.
-  const iframeModel = new window.UnifiedRunner.IframeModel({
-    restoreDom: autIframe.restoreDom,
-    highlightEl: autIframe.highlightEl,
-    detachDom: autIframe.detachDom,
-    eventManager: window.UnifiedRunner.eventManager,
-    state: getStore(),
-    snapshotControls: () => {
-      // console.log('Ahhhh') // window.UnifiedRunner.React
+  const iframeModel = new IframeModel(
+    getStore(),
+    autIframe.detachDom,
+    autIframe.restoreDom,
+    autIframe.highlightEl,
+    window.UnifiedRunner.eventManager,
+    () => {
+      console.log('TODO: snapshot controls')
     },
-  })
+    window.UnifiedRunner.MobX,
+    {
+      recorder: window.UnifiedRunner.studioRecorder,
+      selectorPlaygroundModel: window.UnifiedRunner.selectorPlaygroundModel
+    }
+  )
   iframeModel.listen()
 }
 

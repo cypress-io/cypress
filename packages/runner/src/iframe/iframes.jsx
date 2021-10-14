@@ -2,16 +2,17 @@ import cs from 'classnames'
 import { action, autorun } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
+import * as MobX from 'mobx'
 import $Cypress from '@packages/driver'
 import {
   SnapshotControls,
   ScriptError,
-  IframeModel,
   selectorPlaygroundModel,
   AutIframe,
   logger,
   studioRecorder,
 } from '@packages/runner-shared'
+import { IframeModel } from '@packages/app/src/runner/iframe-model'
 
 import util from '../lib/util'
 
@@ -109,13 +110,13 @@ export default class Iframes extends Component {
 
     this.props.eventManager.start(this.props.config)
 
-    this.iframeModel = new IframeModel({
-      state: this.props.state,
-      restoreDom: this.autIframe.restoreDom,
-      highlightEl: this.autIframe.highlightEl,
-      detachDom: this.autIframe.detachDom,
-      eventManager: this.props.eventManager,
-      snapshotControls: (snapshotProps) => (
+    this.iframeModel = new IframeModel(
+      this.props.state,
+      this.autIframe.detachDom,
+      this.autIframe.restoreDom,
+      this.autIframe.highlightEl,
+      this.props.eventManager,
+      (snapshotProps) => (
         <SnapshotControls
           eventManager={this.props.eventManager}
           snapshotProps={snapshotProps}
@@ -124,7 +125,12 @@ export default class Iframes extends Component {
           onStateChange={this._changeSnapshotState}
         />
       ),
-    })
+      MobX,
+      {
+        selectorPlaygroundModel,
+        recorder: studioRecorder
+      }
+    )
 
     this.iframeModel.listen()
     this._run(this.props.config)

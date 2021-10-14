@@ -1,15 +1,17 @@
 import cs from 'classnames'
 import { action, when, autorun } from 'mobx'
 import React, { useRef, useEffect } from 'react'
+import * as MobX from 'mobx'
 import $Cypress from '@packages/driver'
 import {
   SnapshotControls,
   ScriptError,
   namedObserver,
-  IframeModel,
   selectorPlaygroundModel,
   AutIframe,
+  studioRecorder,
 } from '@packages/runner-shared'
+import { IframeModel } from '@packages/app/src/runner/iframe-model'
 import type { eventManager as EventManager } from '@packages/runner-shared'
 
 import State from '../../src/lib/state'
@@ -130,14 +132,13 @@ export const Iframes = namedObserver('Iframes', ({
       }),
     ]
 
-    eventManager.id()
-    new IframeModel({
+    new IframeModel(
       state,
-      restoreDom: autIframe.current.restoreDom,
-      highlightEl: autIframe.current.highlightEl,
-      detachDom: autIframe.current.detachDom,
-      eventManager: eventManager,
-      snapshotControls: (snapshotProps) => (
+      autIframe.current.detachDom,
+      autIframe.current.restoreDom,
+      autIframe.current.highlightEl,
+      eventManager,
+      (snapshotProps: any) => (
         <SnapshotControls
           eventManager={eventManager}
           snapshotProps={snapshotProps}
@@ -146,7 +147,12 @@ export const Iframes = namedObserver('Iframes', ({
           onStateChange={_changeSnapshotState}
         />
       ),
-    }).listen()
+      MobX,
+      {
+        recorder: studioRecorder,
+        selectorPlaygroundModel
+      }
+    ).listen()
 
     return () => {
       eventManager.notifyRunningSpec(null)
