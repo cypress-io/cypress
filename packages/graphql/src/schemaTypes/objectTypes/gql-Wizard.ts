@@ -74,11 +74,6 @@ export const Wizard = objectType({
       resolve: (source, args, ctx) => ctx.wizard.packagesToInstall(),
     })
 
-    t.string('sampleCode', {
-      description: 'Configuration file based on bundler and framework of choice',
-      resolve: (source, args, ctx) => ctx.wizard.sampleCode(),
-    })
-
     t.list.nonNull.field('sampleConfigFiles', {
       type: WizardSampleConfigFile,
       description: 'Set of sample configuration files based bundler, framework and language of choice',

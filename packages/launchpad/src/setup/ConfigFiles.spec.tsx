@@ -1,16 +1,16 @@
 import {
-  ConfigFilesFragmentDoc,
+  ConfigFilesDocument,
 } from '../generated/graphql-test'
 import ConfigFiles from './ConfigFiles.vue'
 
 // TODO: failing on CI. Find out why.
 describe('<ConfigFile />', () => {
   beforeEach(() => {
-    cy.mountFragment(ConfigFilesFragmentDoc, {
-      render: (gql) => {
+    cy.mountFragment(ConfigFilesDocument, {
+      render: () => {
         return (
           <div>
-            <ConfigFiles gql={gql} />
+            <ConfigFiles />
           </div>
         )
       },

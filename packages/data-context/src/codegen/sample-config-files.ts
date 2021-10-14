@@ -2,12 +2,12 @@ import type { NexusGenEnums } from '@packages/graphql/src/gen/nxs.gen'
 import type { SampleConfigFile } from '@packages/types'
 
 // FIXME: temporary content
-const content = `const { defineConfig } = require(’cypress’)
-const { devServer, defineDevServerConfig } = require(’@cypress/vite-dev-server’)  
+const content = `import { defineConfig } from ’cypress'
+import { devServer, defineDevServerConfig } from ’@cypress/vite-dev-server’
 
 // sample code !!!
 
-module.exports = defineConfig({
+export default defineConfig({
   component: {
     devServer,
     devServerConfig: defineDevServerConfig({
@@ -17,12 +17,7 @@ module.exports = defineConfig({
 })`
 
 export async function getSampleConfigFiles (testingType: NexusGenEnums['TestingTypeEnum'], language: NexusGenEnums['CodeLanguageEnum']): Promise<SampleConfigFile[]> {
-  const filePaths = testingType === 'component' ? [
-    'cypress/fixtures/example.json',
-    `cypress/component/support.${language}`,
-    `cypress/component/commands.${language}`,
-    'cypress/component/entry.html',
-  ] : [
+  const filePaths = [
     'cypress/fixtures/example.json',
     `cypress/integration/support.${language}`,
     `cypress/integration/commands.${language}`,

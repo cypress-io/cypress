@@ -107,23 +107,35 @@ export class WizardDataSource {
   }
 
   async sampleConfigFiles (): Promise<SampleConfigFile[]> {
-    const configFileContent = await this.sampleCode()
     const testingType = this.chosenTestingType
+
+    const configFileContent = await this.sampleCode()
+    const templateFileContent = await this.sampleTemplate()
 
     if (!this.chosenLanguage || !configFileContent || !testingType) {
       return []
     }
 
-    const sampleFile: SampleConfigFile = {
+    const sampleConfigFile: SampleConfigFile = {
       filePath: `cypress.config.${this.chosenLanguage.type}`,
       description: 'The config file you are supposed to have',
       content: configFileContent,
       status: 'changes',
-      warningText: 'Please merge the code below with your existing `cypress.config.js`',
+      warningText: 'Please merge the code below with your existing <span class="px-1 inline-block rounded bg-warning-200 text-warning-600">cypress.config.js</span>',
       warningLink: 'https://docs.cypress.io/config-file',
     }
 
-    return [sampleFile, ...(await getSampleConfigFiles(testingType, this.chosenLanguage.type))]
+    if (testingType === 'component' && templateFileContent) {
+      const sampleTemplateFile: SampleConfigFile = {
+        filePath: 'cypress/component/entry.html',
+        content: templateFileContent,
+        status: 'valid',
+      }
+
+      return [sampleConfigFile, ...(await getSampleConfigFiles(testingType, this.chosenLanguage.type)), sampleTemplateFile]
+    }
+
+    return [sampleConfigFile, ...(await getSampleConfigFiles(testingType, this.chosenLanguage.type))]
   }
 
   async sampleTemplate () {

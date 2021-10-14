@@ -63,7 +63,7 @@ const statusClasses = computed(() => props.status === 'skipped' ? 'skipped' : pr
       />
     </template>
     <template #description>
-      {{ description }}
+      <span v-html="description" />
     </template>
     <template #right>
       <i-cy-dropcaret />
@@ -74,9 +74,10 @@ const statusClasses = computed(() => props.status === 'skipped' ? 'skipped' : pr
         class="flex items-center p-3 border-t border-gray-200 bg-warning-100 text-warning-600"
       >
         <span class="font-semibold">{{ statusLabel }}: </span>
-        <p class="flex-grow ml-1">
-          {{ warningText }}
-        </p>
+        <p
+          class="flex-grow ml-1"
+          v-html="warningText"
+        />
         <Button>Learn more</Button>
       </div>
       <div
