@@ -63,6 +63,10 @@ export const stubMutation: MaybeResolver<Mutation> = {
     return ctx.app.activeProject
   },
   generateSpecFromStory (source, args, ctx) {
-    return ctx.wizard
+    if (!ctx.app.activeProject) {
+      throw Error('Cannot set currentSpec without active project')
+    }
+
+    return ctx.app.activeProject
   },
 }
