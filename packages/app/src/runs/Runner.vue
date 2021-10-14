@@ -1,5 +1,5 @@
 <template>
-  <div class="grid grid-cols-3 p-12 gap-8">
+  <div class="grid grid-cols-3 p-12 gap-8 h-full">
     <div>
       <InlineSpecList
         :gql="props.gql"
@@ -18,7 +18,7 @@
       <div>Viewport: {{ viewportDimensions.width }}px x {{ viewportDimensions.height }}px</div>
     </div>
 
-    <div v-once :id="REPORTER_ID" style="display: none;" />
+    <div v-once :id="REPORTER_ID" />
   </div>
 </template>
 
@@ -149,7 +149,7 @@ onBeforeUnmount(() => {
 #unified-reporter {
   position: relative;
   width: 300px;
-  height: 100vh;
+  height: 100%;
 }
 </style>
 

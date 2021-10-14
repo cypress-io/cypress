@@ -102,7 +102,6 @@
         "prismjs/components/prism-yaml",
         "socket.io-client",
         "vue",
-        "vue-demi",
         "vue-i18n",
         "vue-prism-component",
         "vue-prism-editor",

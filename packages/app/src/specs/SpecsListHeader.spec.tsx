@@ -39,4 +39,10 @@ describe('<SpecsListHeader />', { keystrokeDelay: 0 }, () => {
     .get('@new-spec')
     .should('have.been.called')
   })
+
+  it('small', () => {
+    cy.wait(500)
+    cy.viewport(900, 100)
+    expect(1).to.eq(1)
+  })
 })
