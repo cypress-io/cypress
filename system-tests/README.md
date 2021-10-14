@@ -22,9 +22,44 @@ To keep the browser open after a spec run (for easier debugging and iterating on
 yarn test test/go_spec.js --browser chrome --no-exit
 ```
 
+To debug the Cypress process under test, you can pass `--cypress-inspect-brk`:
+
+```sh
+yarn test test/go_spec.js --browser chrome --no-exit
+```
+
 ## Developing tests
 
-TODO
+System tests cover the entire Cypress run, so they are good for testing features that do not fit into a normal integration or unit test. However, they do take more resources to run, so consider carefully if you really *need* to write a system test, or if you could achieve 100% coverage via an integration or unit test instead.
+
+There are two parts to a system test:
+
+1. A test written using the [`systemTests`](./lib/system-tests) Mocha wrapper that lives in [`./test`](./test), and
+2. A matching Cypress project that lives in the [`./projects`](./projects) directory.
+
+For example, if you initialized a new project in `./projects/my-new-project`, and you wanted to assert that 2 tests fail and take a snapshot of the `stdout`, you'd write a test like this:
+
+```ts
+// ./test/my-new-project.spec.ts
+import systemTests from '../lib/system-tests'
+import Fixtures from '../lib/fixtures'
+
+describe('my new project', () => {
+    // scaffold projects
+    systemTests.setup()
+
+    systemTests.it('fails as expected', {
+        project: Fixtures.projectPath('my-new-project'),
+        snapshot: true,
+        spec: '*',
+        expectedExitCode: 2
+    })
+})
+```
+
+From here, you could
+
+There are many more options available for `systemTests.it` and `systemTests.setup`. You can massage the stdout, do pre-run tasks, set up HTTP/S servers, and more. Explore the typedocs in [`./lib/system-tests`](./lib/system-tests) for more information.
 
 ## Updating snaphots
 
