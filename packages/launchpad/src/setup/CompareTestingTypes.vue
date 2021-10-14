@@ -1,5 +1,5 @@
 <template>
-  <div class="flex justify-around pt-16px">
+  <div class="flex justify-around pt-24px">
     <CompareTestingCard
       class="border-r border-r-gray-100"
       title="End-to-end Tests:"

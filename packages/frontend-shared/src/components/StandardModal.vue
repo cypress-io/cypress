@@ -16,12 +16,12 @@
         class="relative mx-auto bg-white rounded"
         :class="modalClasses"
       >
-        <div class="flex items-center justify-between border-b-1px min-h-64px px-24px">
+        <div class="flex items-center justify-between border-b-1px border-b-gray-100 min-h-56px px-24px">
           <DialogTitle class="text-gray-900 text-18px">
             <slot name="title" /> <span class="inline-block border-t border-t-gray-100 w-32px h-6px mx-8px" /> <a
               :href="helpLink"
               target="_blank"
-              class="text-indigo-500 group outline-transparent"
+              class="text-indigo-500 group outline-transparent text-16px"
             >
               <span class="group-hocus:underline">{{ helpText }}</span>
               <i-cy-circle-bg-question-mark_x16 class="relative inline-block icon-dark-indigo-500 icon-light-indigo-100 -top-2px ml-8px" /></a>
