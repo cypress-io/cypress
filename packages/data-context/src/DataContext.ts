@@ -1,4 +1,5 @@
 import type { LaunchArgs, OpenProjectLaunchOptions, PlatformName } from '@packages/types'
+import path from 'path'
 import type { AppApiShape, ProjectApiShape } from './actions'
 import type { NexusGenAbstractTypeMembers } from '@packages/graphql/src/gen/nxs.gen'
 import type { AuthApiShape } from './actions/AuthActions'
@@ -43,6 +44,11 @@ export class DataContext extends DataContextShell {
   @cached
   get fs () {
     return fsExtra
+  }
+
+  @cached
+  get path () {
+    return path
   }
 
   constructor (private config: DataContextConfig) {
@@ -193,7 +199,9 @@ export class DataContext extends DataContextShell {
     console.error(e)
   }
 
-  async dispose () {
+  async destroy () {
+    super.destroy()
+
     return Promise.all([
       this.util.disposeLoaders(),
       this.actions.project.clearActiveProject(),
