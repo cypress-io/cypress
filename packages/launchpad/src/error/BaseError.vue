@@ -58,9 +58,19 @@
 </template>
 
 <script lang="ts" setup>
+import { gql } from '@urql/vue'
 import Button from '@cy/components/Button.vue'
 import { computed } from 'vue'
 import { useI18n } from '@cy/i18n'
+import type { BaseErrorFragment } from '../generated/graphql'
+
+gql`
+fragment BaseError on BaseError {
+  title
+  message
+  stack
+}
+`
 
 const openDocs = () => {
   document.location.href = 'https://docs.cypress.io'
@@ -69,6 +79,7 @@ const openDocs = () => {
 const { t } = useI18n()
 
 const props = defineProps<{
+  gql: BaseErrorFragment
   header?: string
   message?: string
 }>()

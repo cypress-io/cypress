@@ -2,8 +2,8 @@
   <template v-if="query.data.value">
     <HeaderBar :gql="query.data.value" />
     <div class="max-content">
-      <template v-if="query.error.value">
-        <BaseError />
+      <template v-if="query.data.value.baseError">
+        <BaseError :gql="query.data.value.baseError" />
       </template>
       <template v-else-if="query.data.value.app.isInGlobalMode && !query.data.value?.app.activeProject">
         <GlobalPage :gql="query.data.value.app" />
@@ -40,6 +40,10 @@ gql`
 query MainLaunchpadQuery {
   ...TestingTypeCards
   ...Wizard
+
+  baseError {
+    ...BaseError
+  }
 
   wizard {
     canNavigateForward

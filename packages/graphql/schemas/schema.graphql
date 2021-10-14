@@ -29,6 +29,13 @@ type App {
   selectedBrowser: Browser
 }
 
+"""Base error"""
+type BaseError {
+  message: String
+  stack: String
+  title: String
+}
+
 """Container representing a browser"""
 type Browser implements Node {
   channel: String!
@@ -298,7 +305,7 @@ type Mutation {
 
   """Create a Cypress config file for a new project"""
   appCreateConfigFile(code: String!, configFilename: String!): App
-  clearActiveProject: Query!
+  clearActiveProject: Boolean
 
   """
   Development only: Triggers or dismisses a prompted refresh by touching the file watched by our development scripts
@@ -479,6 +486,7 @@ type Project implements Node {
 """The root "Query" type containing all entry fields for our querying"""
 type Query {
   app: App!
+  baseError: BaseError
 
   """Returns an object conforming to the Relay spec"""
   cloudNode(

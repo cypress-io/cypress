@@ -54,12 +54,9 @@ export const mutation = mutationType({
       },
     })
 
-    t.nonNull.field('clearActiveProject', {
-      type: 'Query',
-      resolve: (root, args, ctx) => {
-        ctx.actions.project.clearActiveProject()
-
-        return {}
+    t.liveMutation('clearActiveProject', {
+      resolve: async (root, args, ctx) => {
+        await ctx.actions.project.clearActiveProject()
       },
     })
 
