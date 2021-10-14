@@ -77,7 +77,7 @@ export class WizardDataSource {
 
   async sampleCode () {
     const data = this.ctx.wizardData
-    const storybookInfo = await this.ctx.storybook.storybookInfo
+    const storybookInfo = await this.ctx.storybook.loadStorybookInfo()
 
     if (!this.chosenLanguage) {
       return null
@@ -106,7 +106,7 @@ export class WizardDataSource {
   }
 
   async sampleTemplate () {
-    const storybookInfo = await this.ctx.storybook.storybookInfo
+    const storybookInfo = await this.ctx.storybook.loadStorybookInfo()
 
     if (!this.chosenFramework || !this.chosenBundler) {
       return null
