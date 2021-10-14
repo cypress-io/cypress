@@ -8,6 +8,9 @@ describe('e2e readonly fs', function () {
 
   const projectPath = Fixtures.projectPath('read-only-project-root')
 
+  /**
+   * Change permissions recursively
+   */
   const chmodr = (p: string, mode: number) => {
     const stats = fs.statSync(p)
 
