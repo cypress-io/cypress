@@ -267,8 +267,10 @@ const expectedAddedVideoSnapshotLines = [
   'This error will not alter the exit code.', '',
   'TimeoutError: operation timed out',
   '[stack trace lines]', '', '',
+  '│ Video:        false                                                                            │',
 ]
 const expectedDeletedVideoSnapshotLines = [
+  '│ Video:        true                                                                             │',
   '(Video)', '',
   '-  Started processing:  Compressing to 32 CRF',
 ]
