@@ -17,7 +17,7 @@ const props = defineProps<{
 const resolvedLang = computed(() => 'js' === props.lang ? 'javascript' : 'ts' === props.lang ? 'typescript' : props.lang)
 
 const highlightedCode = computed(() => {
-  return highlighter?.codeToHtml(props.code, props.lang)
+  return highlighter?.codeToHtml(props.code, resolvedLang.value)
 })
 </script>
 
@@ -29,7 +29,7 @@ const highlightedCode = computed(() => {
 </template>
 
 <style>
-.shiki{
+.shiki {
   padding: 16px;
 }
 .shiki code {

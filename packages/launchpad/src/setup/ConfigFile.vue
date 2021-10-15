@@ -34,7 +34,7 @@ import CopyButton from '@cy/components/CopyButton.vue'
 import { ConfigFileFragment, ConfigFile_AppCreateConfigFileDocument, ConfigFile_AppCreateComponentIndexHtmlDocument } from '../generated/graphql'
 import { useMutation } from '@urql/vue'
 import { useI18n } from '@cy/i18n'
-import ShikiHighlight from '../../../frontend-shared/src/components/ShikiHighlight.vue'
+import ShikiHighlight from '@cy/components/ShikiHighlight.vue'
 
 const { t } = useI18n()
 
