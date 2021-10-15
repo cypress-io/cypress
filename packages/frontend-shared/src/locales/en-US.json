@@ -94,7 +94,8 @@
       "frameworkLabel": "Front-end Framework",
       "frameworkPlaceholder": "Pick a framework",
       "bundlerLabel": "Bundler",
-      "bundlerPlaceholder": "Pick a bundler"
+      "bundlerPlaceholder": "Pick a bundler",
+      "languageLabel": "Language"
     },
     "install": {
       "startButton": "Install",
@@ -109,6 +110,10 @@
     },
     "configFile": {
       "createManually": "Create file manually"
+    },
+    "testingCard": {
+      "configured": "Configured",
+      "notConfigured": "Not Configured"
     }
   },
   "globalPage": {
@@ -129,6 +134,20 @@
     "projectListHeader": "Recently Viewed Projects",
     "linkHeader": "Quick Access",
     "confirmWelcomeGuide": "Show the welcome guide when opening Cypress."
+  },
+  "welcomePage": {
+    "review": "Review the differences between each testing type",
+    "codeExample": "Code Example",
+    "compareTypes": {
+      "e2eTitle": "End-to-end Tests",
+      "e2ebullet1": "Visit URLs via",
+      "e2ebullet2": "Test flows and functionality across multiple pages.",
+      "e2ebullet3": "Ideal for testing integrated flows in CD workflows.",
+      "componentTitle": "Component Tests",
+      "ctBullet1": "Import components via",
+      "ctBullet2": "Test individual components of a design system in isolation",
+      "ctBullet3": "Ideal for testing isolated flows and components in CI"
+    }
   },
   "settingsPage": {
     "config": {

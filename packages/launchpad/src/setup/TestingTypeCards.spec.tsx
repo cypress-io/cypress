@@ -2,9 +2,46 @@ import {
   TestingTypeCardsFragmentDoc,
 } from '../generated/graphql-test'
 import TestingTypeCards from './TestingTypeCards.vue'
+import { defaultMessages } from '@cy/i18n'
 
 describe('TestingTypeCards', () => {
-  it('renders correct label depending if testingType has been configured', () => {
+  it('renders correct label when no testingType has been configured', () => {
+    cy.mountFragment(TestingTypeCardsFragmentDoc, {
+      onResult: (result, ctx) => {
+        if (result.app.activeProject) {
+          result.app.activeProject.isFirstTimeCT = true
+          result.app.activeProject.isFirstTimeE2E = true
+        }
+      },
+      render: (gqlVal) => {
+        return <TestingTypeCards gql={gqlVal} />
+      },
+    }).then(() => {
+      cy.findAllByText(defaultMessages.setupPage.testingCard.notConfigured).should('have.length', 2)
+
+      // TODO: Pullout to i18n
+      cy.contains('Click here to configure end-to-end testing with Cypress.').should('be.visible')
+    })
+  })
+
+  it('renders correct label when projects have been configured', () => {
+    cy.mountFragment(TestingTypeCardsFragmentDoc, {
+      onResult: (result, ctx) => {
+        if (result.app.activeProject) {
+          result.app.activeProject.isFirstTimeCT = false
+          result.app.activeProject.isFirstTimeE2E = false
+        }
+      },
+      render: (gqlVal) => {
+        return <TestingTypeCards gql={gqlVal} />
+      },
+    }).then(() => {
+      cy.findAllByText('LAUNCH').should('have.length', 2)
+      cy.findAllByText(defaultMessages.setupPage.testingCard.configured).should('have.length', 2)
+    })
+  })
+
+  it('renders correct label when one project has been configured and the other has not', () => {
     cy.mountFragment(TestingTypeCardsFragmentDoc, {
       onResult: (result, ctx) => {
         if (result.app.activeProject) {
@@ -16,12 +53,25 @@ describe('TestingTypeCards', () => {
         return <TestingTypeCards gql={gqlVal} />
       },
     }).then(() => {
-      // CT has been configured so we should show "launch"
-      cy.contains('LAUNCH').should('be.visible')
-
-      // E2E has NOT been configured so we should show "setup"
-      // TODO - pull this from i18n when wizard text is moved into i18n
+      cy.findAllByText('LAUNCH').should('have.length', 1)
+      cy.findAllByText(defaultMessages.setupPage.testingCard.configured).should('have.length', 1)
+      cy.findAllByText(defaultMessages.setupPage.testingCard.notConfigured).should('have.length', 1)
+      // TODO: Pullout to i18n
       cy.contains('Click here to configure end-to-end testing with Cypress.').should('be.visible')
+    })
+  })
+
+  it('emits an `openCompare` event when the question mark is clicked in cards', () => {
+    cy.mountFragment(TestingTypeCardsFragmentDoc, {
+      render: (gqlVal) => {
+        return <TestingTypeCards gql={gqlVal} />
+      },
+    }).then(() => {
+      cy.findAllByLabelText(defaultMessages.welcomePage.review).as('buttons')
+      cy.get('@buttons').eq(0).click()
+      cy.get('@buttons').eq(1).click().then(() =>
+        cy.wrap(Cypress.vueWrapper.findComponent(TestingTypeCards).emitted('openCompare'))
+        .should('have.length', 2))
     })
   })
 })

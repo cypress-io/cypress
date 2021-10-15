@@ -1,5 +1,5 @@
 import { booleanArg, enumType, idArg, mutationType, nonNull, stringArg } from 'nexus'
-import { FrontendFrameworkEnum, NavItemEnum, SupportedBundlerEnum, TestingTypeEnum, WizardNavigateDirectionEnum } from '../enumTypes/gql-WizardEnums'
+import { CodeLanguageEnum, FrontendFrameworkEnum, NavItemEnum, SupportedBundlerEnum, TestingTypeEnum, WizardNavigateDirectionEnum } from '../enumTypes/gql-WizardEnums'
 import { Wizard } from './gql-Wizard'
 
 export const mutation = mutationType({
@@ -65,8 +65,9 @@ export const mutation = mutationType({
 
     t.nonNull.field('clearActiveProject', {
       type: 'Query',
-      resolve: (root, args, ctx) => {
-        ctx.actions.project.clearActiveProject()
+      resolve: async (root, args, ctx) => {
+        await ctx.actions.project.clearActiveProject()
+        ctx.actions.wizard.resetWizard()
 
         return {}
       },
@@ -96,6 +97,13 @@ export const mutation = mutationType({
         bundler: nonNull(SupportedBundlerEnum),
       },
       resolve: (root, args, ctx) => ctx.actions.wizard.setBundler(args.bundler),
+    })
+
+    t.field('wizardSetCodeLanguage', {
+      type: Wizard,
+      description: 'Sets the language we want to use for the config file',
+      args: { language: nonNull(CodeLanguageEnum) },
+      resolve: (_, args, ctx) => ctx.actions.wizard.setCodeLanguage(args.language),
     })
 
     t.field('wizardNavigate', {
@@ -169,15 +177,19 @@ export const mutation = mutationType({
     })
 
     t.nonNull.field('generateSpecFromStory', {
-      type: 'Wizard',
+      type: 'Project',
       description: 'Generate spec from Storybook story',
       args: {
         storyPath: nonNull('String'),
       },
       async resolve (_root, args, ctx) {
+        if (!ctx.activeProject) {
+          throw Error(`Cannot set spec without active project!`)
+        }
+
         await ctx.actions.storybook.generateSpecFromStory(args.storyPath)
 
-        return ctx.wizardData
+        return ctx.activeProject
       },
     })
 
@@ -254,6 +266,7 @@ export const mutation = mutationType({
         open: booleanArg({ description: 'Whether to open the project when added' }),
       },
       async resolve (_root, args, ctx) {
+        ctx.actions.wizard.resetWizard()
         await ctx.actions.project.addProject(args)
 
         return ctx.appData

@@ -34,8 +34,12 @@ export class ProjectActions {
 
   async clearActiveProject () {
     this.ctx.appData.activeProject = null
+    await this.api.closeActiveProject()
 
-    return this.api.closeActiveProject()
+    // TODO(tim): Improve general state management w/ immutability (immer) & updater fn
+    this.ctx.coreData.app.isInGlobalMode = true
+    this.ctx.coreData.app.activeProject = null
+    this.ctx.coreData.app.activeTestingType = null
   }
 
   private get projects () {
@@ -49,6 +53,9 @@ export class ProjectActions {
   async setActiveProject (projectRoot: string) {
     const title = this.ctx.project.projectTitle(projectRoot)
 
+    this.clearActiveProject()
+    await this.api.closeActiveProject()
+
     this.ctx.coreData.app.activeProject = {
       projectRoot,
       title,
@@ -58,6 +65,7 @@ export class ProjectActions {
       isFirstTimeE2E: await this.ctx.project.isFirstTimeAccessing(projectRoot, 'e2e'),
       config: await this.ctx.project.getResolvedConfigFields(projectRoot),
       preferences: await this.ctx.project.getProjectPreferences(title),
+      generatedSpec: null,
     }
 
     return this
@@ -92,6 +100,7 @@ export class ProjectActions {
     }
 
     try {
+      await this.api.closeActiveProject()
       await this.api.initializeProject(launchArgs, {
         ...this.ctx.launchOptions,
         ...options,

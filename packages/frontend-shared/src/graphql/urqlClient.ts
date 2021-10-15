@@ -12,6 +12,7 @@ import { client } from '@packages/socket/lib/browser'
 
 import { cacheExchange as graphcacheExchange } from '@urql/exchange-graphcache'
 import { pubSubExchange } from './urqlExchangePubsub'
+import { namedRouteExchange } from './urqlExchangeNamedRoute'
 
 const GQL_PORT_MATCH = /gqlPort=(\d+)/.exec(window.location.search)
 const SERVER_PORT_MATCH = /serverPort=(\d+)/.exec(window.location.search)
@@ -69,6 +70,7 @@ export function makeUrqlClient (target: 'launchpad' | 'app'): Client {
     }),
     // https://formidable.com/open-source/urql/docs/graphcache/errors/
     makeCacheExchange(),
+    namedRouteExchange,
     // TODO(tim): add this when we want to use the socket as the GraphQL
     // transport layer for all operations
     // target === 'launchpad' ? fetchExchange : socketExchange(io),

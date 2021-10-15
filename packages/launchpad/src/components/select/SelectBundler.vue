@@ -21,6 +21,7 @@
         w-full
         focus:border-indigo-600 focus:outline-transparent
       "
+      data-cy="select-bundler"
       :class="disabledClass
         + (isOpen ? ' border-indigo-600' : ' border-gray-200')
         + (props.disabled ? ' bg-gray-100 text-gray-800' : '')"
@@ -68,6 +69,7 @@
         :key="opt.type"
         focus="1"
         class="cursor-pointer flex items-center py-1 px-2 hover:bg-gray-10"
+        :data-cy-bundler="opt.type"
         @click="selectOption(opt.type)"
       >
         <img

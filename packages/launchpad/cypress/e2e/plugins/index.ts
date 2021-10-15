@@ -1,5 +1,5 @@
 /// <reference types="cypress" />
-const { monorepoPaths } = require('../../../../scripts/gulp/monorepoPaths')
+const { monorepoPaths } = require('../../../../../scripts/gulp/monorepoPaths')
 import { e2ePluginSetup } from '@packages/frontend-shared/cypress/e2e/e2ePluginSetup'
 
 // ***********************************************************
