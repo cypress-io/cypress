@@ -84,7 +84,7 @@ export async function symlinkViteProjects () {
   for (const basePath of [monorepoPaths.pkgLaunchpad, monorepoPaths.pkgApp]) {
     for (const target of ['dist-launchpad', 'dist-app'] as const) {
       if (!fs.existsSync(path.join(basePath, target))) {
-        fs.createSymlink(DIST_SOURCES[target], path.join(basePath, target), 'dir')
+        await fs.createSymlink(DIST_SOURCES[target], path.join(basePath, target), 'dir')
       }
     }
   }
