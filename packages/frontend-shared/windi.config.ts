@@ -48,4 +48,4 @@ export const defaultConfig: WindiCssOptions = {
   },
 }
 
-export default defineConfig(defineConfig)
+export default defineConfig(defaultConfig)

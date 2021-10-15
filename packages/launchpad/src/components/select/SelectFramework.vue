@@ -47,6 +47,7 @@
         :key="opt.id"
         focus="1"
         class="cursor-pointer flex items-center py-1 px-2 hover:bg-gray-10"
+        :data-cy-framework="opt.type"
         @click="selectOption(opt.type)"
       >
         <img

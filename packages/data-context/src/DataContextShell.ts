@@ -1,4 +1,6 @@
 import { EventEmitter } from 'events'
+import type { Server } from 'http'
+import type { AddressInfo } from 'net'
 import { DataEmitterActions } from './actions/DataEmitterActions'
 import { cached } from './util/cached'
 
@@ -9,6 +11,7 @@ export interface DataContextShellConfig {
 // Used in places where we have to create a "shell" data context,
 // for non-unified parts of the codebase
 export class DataContextShell {
+  private _gqlServer?: Server
   private _appServerPort: number | undefined
   private _gqlServerPort: number | undefined
 
@@ -18,8 +21,9 @@ export class DataContextShell {
     this._appServerPort = port
   }
 
-  setGqlServerPort (port: number | undefined) {
-    this._gqlServerPort = port
+  setGqlServer (srv: Server) {
+    this._gqlServer = srv
+    this._gqlServerPort = (srv.address() as AddressInfo).port
   }
 
   get appServerPort () {
@@ -39,5 +43,9 @@ export class DataContextShell {
     return {
       busApi: this.shellConfig.rootBus,
     }
+  }
+
+  destroy () {
+    this._gqlServer?.close()
   }
 }

@@ -163,6 +163,10 @@
     },
     "configFile": {
       "createManually": "Create file manually"
+    },
+    "testingCard": {
+      "configured": "Configured",
+      "notConfigured": "Not Configured"
     }
   },
   "globalPage": {

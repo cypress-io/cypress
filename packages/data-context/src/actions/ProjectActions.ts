@@ -30,9 +30,14 @@ export class ProjectActions {
   }
 
   async clearActiveProject () {
-    this.ctx.appData.activeProject = null
+    await this.api.closeActiveProject()
 
-    return this.api.closeActiveProject()
+    // TODO(tim): Improve general state management w/ immutability (immer) & updater fn
+    this.ctx.coreData.app.isInGlobalMode = true
+    this.ctx.coreData.app.activeProject = null
+    this.ctx.coreData.app.activeTestingType = null
+    this.ctx.coreData.wizard.history = ['welcome']
+    this.ctx.coreData.wizard.currentStep = 'welcome'
   }
 
   private get projects () {
