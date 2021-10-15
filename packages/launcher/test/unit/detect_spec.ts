@@ -4,9 +4,10 @@ import { goalBrowsers } from '../fixtures'
 import { expect } from 'chai'
 import { utils } from '../../lib/utils'
 import sinon, { SinonStub } from 'sinon'
-const os = require('os')
+import os from 'os'
 import { log } from '../log'
 import { project } from 'ramda'
+import * as darwinUtil from '../../lib/darwin/util'
 
 const isWindows = () => {
   return os.platform() === 'win32'
@@ -166,6 +167,27 @@ describe('browser detection', () => {
 
       expect(foundBrowser.warning).to.contain('does not support running Custom Firefox version 85')
       .and.contain('Firefox newer than or equal to 86')
+    })
+  })
+
+  // https://github.com/cypress-io/cypress/issues/17773
+  context('darwin performance workaround', () => {
+    let browsers
+
+    beforeEach(() => {
+      sinon.stub(os, 'platform').returns('darwin')
+      sinon.stub(os, 'release').returns('20.0.0')
+
+      browsers = []
+
+      sinon.stub(darwinUtil, 'darwinDetectionWorkaround').resolves(browsers)
+    })
+
+    it('uses workaround when on darwin 20.0.0+', async () => {
+      const result = await detect()
+
+      expect(darwinUtil.darwinDetectionWorkaround).to.be.called
+      expect(result).to.equal(browsers)
     })
   })
 })

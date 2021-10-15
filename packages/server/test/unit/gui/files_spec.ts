@@ -4,7 +4,7 @@ import { expect } from 'chai'
 import 'sinon-chai'
 
 import { showDialogAndCreateSpec } from '../../../lib/gui/files'
-import openProject from '../../../lib/open_project'
+import { openProject } from '../../../lib/open_project'
 import { ProjectBase } from '../../../lib/project-base'
 import * as dialog from '../../../lib/gui/dialog'
 import * as specWriter from '../../../lib/util/spec_writer'
@@ -32,14 +32,24 @@ describe('gui/files', () => {
 
       this.err = new Error('foo')
 
+      sinon.stub(ProjectBase.prototype, 'initializeConfig').resolves()
       sinon.stub(ProjectBase.prototype, 'open').resolves()
       sinon.stub(ProjectBase.prototype, 'getConfig').returns(this.config)
 
       this.showSaveDialog = sinon.stub(dialog, 'showSaveDialog').resolves(this.selectedPath)
-      this.createFile = sinon.stub(specWriter, 'createFile').resolves({})
+      this.createFile = sinon.stub(specWriter, 'createFile').resolves()
       this.getSpecs = sinon.stub(openProject, 'getSpecs').resolves(this.specs)
 
-      return openProject.create('/_test-output/path/to/project-e2e')
+      return openProject.create('/_test-output/path/to/project-e2e', {
+        _: [process.cwd()],
+        config: {},
+        cwd: '',
+        project: '/_test-output/path/to/project-e2e',
+        projectRoot: '/_test-output/path/to/project-e2e',
+        testingType: 'e2e',
+        invokedFromCli: true,
+        os: 'linux',
+      }, {})
     })
 
     it('calls dialog.showSaveDialog with integration folder from config', function () {

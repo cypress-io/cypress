@@ -183,6 +183,15 @@ class Server {
       }
 
       return this._getPortFor(hostname)
+      .catch(async (err) => {
+        debug('Error adding context, deleting certs and regenning %o', { hostname, err })
+
+        // files on disk can be corrupted, so try again
+        // @see https://github.com/cypress-io/cypress/issues/8705
+        await this._ca.clearDataForHostname(hostname)
+
+        return this._getPortFor(hostname)
+      })
       .then((port) => {
         sslServers[hostname] = { port }
 

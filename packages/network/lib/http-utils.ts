@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { IncomingMessage } from 'http'
+import type { IncomingMessage } from 'http'
 
 // https://github.com/cypress-io/cypress/issues/4298
 // https://tools.ietf.org/html/rfc7230#section-3.3.3

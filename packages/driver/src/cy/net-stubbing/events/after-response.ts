@@ -1,5 +1,5 @@
-import { CyHttpMessages } from '@packages/net-stubbing/lib/types'
-import { HandlerFn } from '.'
+import type { CyHttpMessages } from '@packages/net-stubbing/lib/types'
+import type { HandlerFn } from '.'
 import { parseJsonBody } from './utils'
 
 export const onAfterResponse: HandlerFn<CyHttpMessages.ResponseComplete> = async (Cypress, frame, userHandler, { getRequest, getRoute }) => {

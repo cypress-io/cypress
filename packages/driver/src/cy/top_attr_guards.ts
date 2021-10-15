@@ -1,4 +1,4 @@
-import * as $elements from '../dom/elements'
+import $elements from '../dom/elements'
 
 const invalidTargets = new Set(['_parent', '_top'])
 

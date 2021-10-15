@@ -146,6 +146,7 @@ describe('Routes', () => {
               specsStore: new SpecsStore({}, 'e2e'),
               createRoutes,
               testingType: 'e2e',
+              exit: false,
             })
             .spread(async (port) => {
               const automationStub = {
@@ -377,6 +378,21 @@ describe('Routes', () => {
         })
       })
     })
+
+    it('sends exit config', function () {
+      return this.setup({ baseUrl: 'http://localhost:9999/app' })
+      .then(() => {
+        return this.rp('http://localhost:9999/__')
+        .then((res) => {
+          expect(res.statusCode).to.eq(200)
+
+          const base64Config = /Runner\.start\(.*, "(.*)"\)/.exec(res.body)[1]
+          const configStr = Buffer.from(base64Config, 'base64').toString()
+
+          expect(configStr).to.include('"exit":false')
+        })
+      })
+    })
   })
 
   context('GET /__cypress/runner/*', () => {
@@ -449,13 +465,12 @@ describe('Routes', () => {
             integrationFolder: 'tests',
             fixturesFolder: 'tests/_fixtures',
             supportFile: 'tests/_support/spec_helper.js',
-            javascripts: ['tests/etc/**/*'],
           },
         })
       })
 
       it('returns base json file path objects of only tests', function () {
-        // this should omit any _fixture files, _support files and javascripts
+        // this should omit any _fixture files, _support files
         return glob(path.join(Fixtures.projectPath('todos'), 'tests', '_fixtures', '**', '*'))
         .then((files) => {
           // make sure there are fixtures in here!
@@ -477,7 +492,7 @@ describe('Routes', () => {
                 body,
               } = res
 
-              expect(body.integration).to.have.length(4)
+              expect(body.integration).to.have.length(5)
 
               // remove the absolute path key
               body.integration = _.map(body.integration, (obj) => {
@@ -487,8 +502,12 @@ describe('Routes', () => {
               expect(res.body).to.deep.eq({
                 integration: [
                   {
-                    'name': 'sub/a&b%c.js',
-                    'relative': 'tests/sub/a&b%c.js',
+                    name: 'etc/etc.js',
+                    relative: 'tests/etc/etc.js',
+                  },
+                  {
+                    name: 'sub/a&b%c.js',
+                    relative: 'tests/sub/a&b%c.js',
                   },
                   {
                     name: 'sub/sub_test.coffee',
@@ -738,7 +757,7 @@ describe('Routes', () => {
           projectRoot: Fixtures.projectPath('no-server'),
           config: {
             integrationFolder: 'my-tests',
-            javascripts: ['helpers/includes.js'],
+            supportFile: 'helpers/includes.js',
           },
         })
       })
@@ -752,7 +771,7 @@ describe('Routes', () => {
         })
       })
 
-      it('processes helpers/includes.js javascripts', function () {
+      it('processes helpers/includes.js supportFile', function () {
         return this.rp('http://localhost:2020/__cypress/tests?p=helpers/includes.js')
         .then((res) => {
           expect(res.statusCode).to.eq(200)
@@ -1108,7 +1127,6 @@ describe('Routes', () => {
               integrationFolder: 'tests',
               fixturesFolder: 'tests/_fixtures',
               supportFile: 'tests/_support/spec_helper.js',
-              javascripts: ['tests/etc/etc.js'],
             },
           }, {}, spec)
         }

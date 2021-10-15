@@ -1,8 +1,8 @@
 import _ from 'lodash'
 import debugModule from 'debug'
 import { uri } from '@packages/network'
-import { Readable } from 'stream'
-import { IncomingMessage } from 'http'
+import type { Readable } from 'stream'
+import type { IncomingMessage } from 'http'
 
 const debug = debugModule('cypress:proxy:http:util:buffers')
 

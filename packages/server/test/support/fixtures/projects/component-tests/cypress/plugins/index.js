@@ -5,9 +5,6 @@ const webpackConfig = {
   output: {
     publicPath: '/',
   },
-  devServer: {
-    publicPath: '/',
-  },
 }
 
 /**

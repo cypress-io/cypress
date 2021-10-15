@@ -1,13 +1,15 @@
 import { action, autorun, configure } from 'mobx'
 import React from 'react'
 import { render } from 'react-dom'
-import { utils as driverUtils } from '@packages/driver'
+import $Cypress from '@packages/driver'
 
 import App, { SPEC_LIST_WIDTH } from './app/app'
 import NoSpec from './errors/no-spec'
 import State from './lib/state'
 import { Container, eventManager } from '@packages/runner-shared'
 import util from './lib/util'
+
+const driverUtils = $Cypress.utils
 
 configure({ enforceActions: 'always' })
 

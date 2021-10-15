@@ -5,7 +5,7 @@
   "main": "src/index.ts",
   "scripts": {
     "test": "yarn test-unit",
-    "test-unit": "mocha --config test/.mocharc.json src/**/*.spec.* --exit"
+    "test-unit": "mocha --config test/.mocharc.json src/*.spec.* src/**/*.spec.* --exit"
   },
   "dependencies": {},
   "devDependencies": {

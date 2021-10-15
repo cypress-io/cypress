@@ -67,6 +67,16 @@ const copyAllToDist = function (distDir) {
     })
   }
 
+  // these packages are bundled into others, don't need any of their
+  // source files in the binary, and don't have dist files
+  const skipPackages = [
+    './packages/driver',
+    './packages/reporter',
+    './packages/ui-components',
+  ]
+
+  const notSkipped = (pkg) => !skipPackages.includes(pkg)
+
   const copyPackage = function (pkg) {
     console.log('** copy package: %s **', pkg)
 
@@ -119,8 +129,10 @@ const copyAllToDist = function (distDir) {
     }
 
     return Promise.resolve(externalUtils.globby(globs, globOptions))
-    .map(copyPackage, { concurrency: 1 })
-  }).then(() => {
+  })
+  .filter(notSkipped)
+  .map(copyPackage, { concurrency: 1 })
+  .then(() => {
     console.log('Finished Copying %dms', new Date() - started)
 
     return console.log('')

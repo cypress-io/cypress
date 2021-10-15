@@ -8,6 +8,7 @@ const onSubmitNewProject = function (orgId) {
         projectName: this.config.projectName,
         orgId,
         public: false,
+        configFile: 'cypress.json',
       })
     })
   })
@@ -25,6 +26,7 @@ const onSubmitNewProject = function (orgId) {
         projectRoot: '/foo/bar',
         orgId,
         public: true,
+        configFile: 'cypress.json',
       })
     })
   })
@@ -75,7 +77,7 @@ const onSubmitNewProject = function (orgId) {
 
     it('displays empty runs page', function () {
       cy.get('.setup-project').should('not.exist')
-      cy.contains('To record your first')
+      cy.contains('How to record your first')
       cy.contains('cypress run --record --key record-key-123')
     })
 
@@ -487,7 +489,10 @@ describe('Connect to Dashboard', function () {
             cy.get('.setup-project')
             .contains('.btn', 'Set up project').click()
             .then(() => {
-              expect(this.ipc.setProjectId).to.be.calledWith({ id: this.dashboardProjects[1].id, projectRoot: '/foo/bar' })
+              expect(this.ipc.setProjectId).to.be.calledWith({
+                id: this.dashboardProjects[1].id,
+                projectRoot: '/foo/bar',
+                configFile: 'cypress.json' })
             })
           })
 

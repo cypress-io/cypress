@@ -490,7 +490,7 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         ${chalk.yellow('Assign a different port with the \'--port <port>\' argument or shut down the other running process.')}`
     case 'ERROR_READING_FILE':
       filePath = `\`${arg1}\``
-      err = `\`${arg2}\``
+      err = `\`${arg2.type || arg2.code || arg2.name}: ${arg2.message}\``
 
       return stripIndent`\
         Error reading from: ${chalk.blue(filePath)}
@@ -694,6 +694,20 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         ${chalk.yellow(arg1.error)}
 
         Learn more at https://on.cypress.io/reporters`
+      // TODO: update with vetted cypress language
+    case 'NO_DEFAULT_CONFIG_FILE_FOUND':
+      return stripIndent`\
+        Could not find a Cypress configuration file, exiting.
+
+        We looked but did not find a default config file in this folder: ${chalk.blue(arg1)}`
+      // TODO: update with vetted cypress language
+    case 'CONFIG_FILES_LANGUAGE_CONFLICT':
+      return stripIndent`
+          There is both a \`${arg2}\` and a \`${arg3}\` at the location below:
+          ${arg1}
+
+          Cypress does not know which one to read for config. Please remove one of the two and try again.
+          `
     case 'CONFIG_FILE_NOT_FOUND':
       return stripIndent`\
         Could not find a Cypress configuration file, exiting.
@@ -974,7 +988,7 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
       `
     case 'CT_NO_DEV_START_EVENT':
       return stripIndent`\
-        To run component-testing, cypress needs the \`dev-server:start\` event. 
+        To run component-testing, cypress needs the \`dev-server:start\` event.
 
         Implement it by adding a \`on('dev-server:start', () => startDevServer())\` call in your pluginsFile.
         ${arg1 ?
@@ -989,6 +1003,15 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         `
     case 'UNSUPPORTED_BROWSER_VERSION':
       return arg1
+    case 'WIN32_DEPRECATION':
+      return stripIndent`\
+        You are running a 32-bit build of Cypress. Cypress will remove Windows 32-bit support in a future release.
+
+        ${arg1 ? 'Try installing Node.js 64-bit and reinstalling Cypress to use the 64-bit build.'
+        : 'Consider upgrading to a 64-bit OS to continue using Cypress in future releases.'}
+
+        For more information, see: https://on.cypress.io/win32-removal
+        `
     default:
   }
 }
@@ -1040,6 +1063,11 @@ const clone = function (err, options = {}) {
 
   if (options.html) {
     obj.message = ansi_up.ansi_to_html(err.message)
+    // revert back the distorted characters
+    // in case there is an error in a child_process
+    // that contains quotes
+    .replace(/\&\#x27;/g, '\'')
+    .replace(/\&quot\;/g, '"')
   } else {
     obj.message = err.message
   }

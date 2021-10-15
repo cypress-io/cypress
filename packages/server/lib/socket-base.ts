@@ -13,7 +13,7 @@ import { ensureProp } from './util/class-helpers'
 import { getUserEditor, setUserEditor } from './util/editors'
 import { openFile } from './util/file-opener'
 import open from './util/open'
-import { DestroyableHttpServer } from './util/server_destroy'
+import type { DestroyableHttpServer } from './util/server_destroy'
 import * as session from './session'
 
 type StartListeningCallbacks = {

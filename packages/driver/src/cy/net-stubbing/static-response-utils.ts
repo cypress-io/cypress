@@ -1,11 +1,14 @@
 import _ from 'lodash'
 
-import {
+import type {
   StaticResponse,
   BackendStaticResponseWithArrayBuffer,
   FixtureOpts,
 } from '@packages/net-stubbing/lib/types'
-import * as $errUtils from '../../cypress/error_utils'
+import {
+  caseInsensitiveHas,
+} from '@packages/net-stubbing/lib/util'
+import $errUtils from '../../cypress/error_utils'
 
 // user-facing StaticResponse only
 export const STATIC_RESPONSE_KEYS: (keyof StaticResponse)[] = ['body', 'fixture', 'statusCode', 'headers', 'forceNetworkError', 'throttleKbps', 'delay', 'delayMs']
@@ -112,7 +115,16 @@ export function getBackendStaticResponse (staticResponse: Readonly<StaticRespons
       backendStaticResponse.body = staticResponse.body
     } else {
       backendStaticResponse.body = JSON.stringify(staticResponse.body)
-      _.set(backendStaticResponse, 'headers.content-type', 'application/json')
+
+      // There are various json-related MIME types. We cannot simply set it as `application/json`.
+      // @see https://www.iana.org/assignments/media-types/media-types.xhtml
+      if (
+        !backendStaticResponse.headers ||
+        (backendStaticResponse.headers &&
+          !caseInsensitiveHas(backendStaticResponse.headers, 'content-type'))
+      ) {
+        _.set(backendStaticResponse, 'headers.content-type', 'application/json')
+      }
     }
   }
 

@@ -5,7 +5,7 @@ import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import { findDOMNode } from 'react-dom'
 import { Reporter } from '@packages/reporter'
-import { $ } from '@packages/driver'
+import $ from 'jquery'
 import {
   Message,
   errorMessages,

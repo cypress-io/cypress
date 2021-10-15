@@ -45,8 +45,8 @@ const setupDashboardProject = (projectDetails) => {
   .catch(ipc.isUnauthed, ipc.handleUnauthed)
 }
 
-const setProjectId = (id, projectRoot) => {
-  return ipc.setProjectId({ id, projectRoot })
+const setProjectId = (id, projectRoot, configFile) => {
+  return ipc.setProjectId({ id, projectRoot, configFile })
 }
 
 export default {

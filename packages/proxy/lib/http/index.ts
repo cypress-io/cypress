@@ -1,6 +1,6 @@
 import _ from 'lodash'
-import CyServer from '@packages/server'
-import {
+import type CyServer from '@packages/server'
+import type {
   CypressIncomingRequest,
   CypressOutgoingResponse,
   BrowserPreRequest,
@@ -9,11 +9,11 @@ import Debug from 'debug'
 import ErrorMiddleware from './error-middleware'
 import { HttpBuffers } from './util/buffers'
 import { GetPreRequestCb, PreRequests } from './util/prerequests'
-import { IncomingMessage } from 'http'
-import { NetStubbingState } from '@packages/net-stubbing'
+import type { IncomingMessage } from 'http'
+import type { NetStubbingState } from '@packages/net-stubbing'
 import Bluebird from 'bluebird'
-import { Readable } from 'stream'
-import { Request, Response } from 'express'
+import type { Readable } from 'stream'
+import type { Request, Response } from 'express'
 import RequestMiddleware from './request-middleware'
 import ResponseMiddleware from './response-middleware'
 import { DeferredSourceMapCache } from '@packages/rewriter'
