@@ -8,6 +8,9 @@
  */
 
 import type { SpawnOptions } from 'child_process'
+import fs from 'fs-extra'
+import path from 'path'
+
 import { ENV_VARS } from '../gulpConstants'
 
 import { monorepoPaths } from '../monorepoPaths'
@@ -72,29 +75,23 @@ function spawnViteDevServer (
  *  * viteBuildLaunchpad
  *------------------------------------------------------------------------**/
 
+const DIST_SOURCES = {
+  'dist-launchpad': path.join(monorepoPaths.pkgLaunchpad, 'dist'),
+  'dist-app': path.join(monorepoPaths.pkgApp, 'dist'),
+} as const
+
 export async function symlinkViteProjects () {
-  await Promise.all([
-    spawned('cmd-symlink', 'ln -s ../app/dist-app-e2e dist-app', {
-      cwd: monorepoPaths.pkgLaunchpad,
-      waitForExit: true,
-    }).catch((e) => {}),
-    spawned('cmd-symlink', 'ln -s dist-launchpad-e2e dist-app', {
-      cwd: monorepoPaths.pkgApp,
-      waitForExit: true,
-    }).catch((e) => {}),
-    spawned('cmd-symlink', 'ln -s dist-app-e2e dist-launchpad', {
-      cwd: monorepoPaths.pkgLaunchpad,
-      waitForExit: true,
-    }).catch((e) => {}),
-    spawned('cmd-symlink', 'ln -s ../launchpad/dist-launchpad-e2e dist-launchpad', {
-      cwd: monorepoPaths.pkgApp,
-      waitForExit: true,
-    }).catch((e) => {}),
-  ])
+  for (const basePath of [monorepoPaths.pkgLaunchpad, monorepoPaths.pkgApp]) {
+    for (const target of ['dist-launchpad', 'dist-app'] as const) {
+      if (!fs.existsSync(path.join(basePath, target))) {
+        await fs.createSymlink(DIST_SOURCES[target], path.join(basePath, target), 'dir')
+      }
+    }
+  }
 }
 
 export function viteBuildApp () {
-  return spawned('vite:build-app', `yarn vite build --outDir dist-app-e2e`, {
+  return spawned('vite:build-app', `yarn vite build --outDir dist`, {
     cwd: monorepoPaths.pkgApp,
     waitForExit: true,
     env: {
@@ -115,7 +112,7 @@ export function viteBuildAndWatchApp () {
 }
 
 export function viteBuildLaunchpad () {
-  return spawned('vite:build-launchpad', `yarn vite build --outDir dist-launchpad-e2e`, {
+  return spawned('vite:build-launchpad', `yarn vite build --outDir dist`, {
     cwd: monorepoPaths.pkgLaunchpad,
     waitForExit: true,
   })
