@@ -27,6 +27,7 @@ export class IframeModel {
   }
 
   listen () {
+    console.log('Iframe model listen()')
     this.eventManager.on('run:start', this.MobX.action('run:start', this._beforeRun))
     this.eventManager.on('run:end', this.MobX.action('run:end', this._afterRun))
 

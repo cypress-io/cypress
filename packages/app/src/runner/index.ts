@@ -23,6 +23,51 @@ import { IframeModel } from './iframe-model'
 
 const randomString = `${Math.random()}`
 
+let _autIframeModel: any
+
+/**
+ * Creates an instance of an AutIframe model which ise used to control
+ * various things like snapshots, and the lifecycle of the underlying
+ * AUT <iframe> element
+ * 
+ * This only needs to be created once per **spec**. If you change spec,
+ * you need to create a new AUT IFrame model.
+ */
+function getAutIframeModel () {
+  if (!_autIframeModel) {
+    throw Error('Must create a new instance of AutIframe before accessing')
+  }
+  return _autIframeModel
+}
+
+/**
+ * 1:1: relationship with the AUT IFrame model.
+ * controls various things to do with snapshots, test url, etc.
+ * It also has a listen function which initializes many events to do with the
+ * run lifecycle, snapshots, and viewport.
+ */
+function createIframeModel () {
+  const autIframe = getAutIframeModel()
+  // IFrame Model to manage snapshots, etc.
+  const iframeModel = new IframeModel(
+    getStore(),
+    autIframe.detachDom,
+    autIframe.restoreDom,
+    autIframe.highlightEl,
+    window.UnifiedRunner.eventManager,
+    () => {
+      console.log('TODO: snapshot controls')
+    },
+    window.UnifiedRunner.MobX,
+    {
+      recorder: window.UnifiedRunner.studioRecorder,
+      selectorPlaygroundModel: window.UnifiedRunner.selectorPlaygroundModel
+    }
+  )
+  iframeModel.listen()
+}
+
+
 /**
  * One-time setup. Required `window.UnifiedRunner` to exist,
  * so this is passed as a callback to the `renderRunner` function,
@@ -49,7 +94,8 @@ function setupRunner (done: () => void) {
     },
   )
 
-  // reaction(() => value, (value, previousValue, reaction) => { sideEffect }, options?).
+  _autIframeModel = new window.UnifiedRunner.AutIframe('Test Project', window.UnifiedRunner.eventManager)
+  createIframeModel()
 
   done()
 }
@@ -69,26 +115,6 @@ function getSpecUrl (namespace: string, spec: BaseSpec, prefix = '') {
  */
 function teardownSpec (store: Store) {
   return window.UnifiedRunner.eventManager.teardown(store)
-}
-
-function createIframeModel (autIframe: any) {
-  // IFrame Model to manage snapshots, etc.
-  const iframeModel = new IframeModel(
-    getStore(),
-    autIframe.detachDom,
-    autIframe.restoreDom,
-    autIframe.highlightEl,
-    window.UnifiedRunner.eventManager,
-    () => {
-      console.log('TODO: snapshot controls')
-    },
-    window.UnifiedRunner.MobX,
-    {
-      recorder: window.UnifiedRunner.studioRecorder,
-      selectorPlaygroundModel: window.UnifiedRunner.selectorPlaygroundModel
-    }
-  )
-  iframeModel.listen()
 }
 
 /**
@@ -119,14 +145,12 @@ function runSpecCT (spec: BaseSpec) {
   $runnerRoot.append($container)
 
   // create new AUT
-  const autIframe = new window.UnifiedRunner.AutIframe('Test Project', window.UnifiedRunner.eventManager)
+  const autIframe = getAutIframeModel()
   const $autIframe: JQuery<HTMLIFrameElement> = autIframe.create().appendTo($container)
   const specSrc = getSpecUrl(config.namespace, spec)
 
   autIframe.showInitialBlankContents()
   $autIframe.prop('src', specSrc)
-
-  createIframeModel(autIframe)
 
   // initialize Cypress (driver) with the AUT!
   window.UnifiedRunner.eventManager.initialize($autIframe, config)
@@ -172,7 +196,7 @@ function runSpecE2E (spec: BaseSpec) {
   $runnerRoot.append($container)
 
   // create new AUT
-  const autIframe = new window.UnifiedRunner.AutIframe('Test Project', window.UnifiedRunner.eventManager)
+  const autIframe = getAutIframeModel()
 
   autIframe.showInitialBlankContents()
   const $autIframe: JQuery<HTMLIFrameElement> = autIframe.create().appendTo($container)
@@ -180,8 +204,6 @@ function runSpecE2E (spec: BaseSpec) {
   // create Spec IFrame
   const specSrc = getSpecUrl(config.namespace, spec)
   const $specIframe = createSpecIFrame(specSrc)
-
-  createIframeModel(autIframe)
 
   // append to document, so the iframe will execute the spec
   $container.appendChild($specIframe)

@@ -46,7 +46,7 @@ function renderReporter (
     // TODO: Are we re-skinning the Reporter header?
     // If so, with React or Vue?
     // For now, just render and empty div.
-    renderReporterHeader: (props: null) => window.UnifiedRunner.React.createElement(EmptyHeader, props),
+    // renderReporterHeader: (props: null) => window.UnifiedRunner.React.createElement(EmptyHeader, props),
   })
 
   window.UnifiedRunner.ReactDOM.render(reporter, root)

@@ -173,6 +173,7 @@ const events: Events = {
     })
 
     localBus.on('show:snapshot', (commandId) => {
+      console.log('localBus show:snapshot')
       runner.emit('runner:show:snapshot', commandId)
     })
 
