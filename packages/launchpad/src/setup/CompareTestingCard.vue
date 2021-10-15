@@ -30,9 +30,10 @@
     <h3 class="text-gray-900 mb-8px">
       Code Example
     </h3>
-    <CodeEditor
-      v-model="localCode"
-      class="border border-gray-100 rounded h-160px text-14px"
+    <ShikiHighlight
+      :code="localCode"
+      lang="javascript"
+      class="border border-gray-100 rounded text-14px leading-20px"
       readonly
       line-numbers
     />
@@ -41,6 +42,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import ShikiHighlight from '@cy/components/ShikiHighlight.vue'
 import InlineFragment from '../components/code/InlineFragment.vue'
 
 const props = withDefaults(defineProps<{
@@ -54,25 +56,3 @@ const props = withDefaults(defineProps<{
 
 const localCode = ref(props.code)
 </script>
-
-<style>
-/* very hacky CSS that is going to go away the second we have a better code
-rendering solution for our needs than prism */
-.prism-editor-wrapper .prism-editor__line-numbers {
-    background-color: #f3f4fa !important;
-    padding: 8px !important;
-    border-right: 1px solid #e1e3ed;
-    width: 40px !important;
-    line-height: 24px !important;
-    font-size: 14px !important;
-}
-
-.prism-editor__container {
-    padding: 8px 8px !important;
-    line-height: 24px !important;
-}
-
-.prism-editor-wrapper .token.parameter {
-    color: #9095ad !important;
-}
-</style>
