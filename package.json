@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "8.5.0",
+  "version": "8.6.0",
   "description": "Cypress.io end to end testing tool",
   "private": true,
   "scripts": {
@@ -90,7 +90,7 @@
     "@types/glob": "7.1.1",
     "@types/lodash": "4.14.168",
     "@types/markdown-it": "0.0.9",
-    "@types/mini-css-extract-plugin": "1.4.2",
+    "@types/mini-css-extract-plugin": "1.2.3",
     "@types/mocha": "8.0.3",
     "@types/node": "14.14.31",
     "@types/prismjs": "1.16.0",
@@ -165,7 +165,7 @@
     "mock-fs": "4.9.0",
     "odiff-bin": "2.1.0",
     "parse-github-repo-url": "1.4.1",
-    "patch-package": "6.2.2",
+    "patch-package": "6.4.7",
     "plist": "3.0.1",
     "pluralize": "8.0.0",
     "postinstall-postinstall": "2.0.0",

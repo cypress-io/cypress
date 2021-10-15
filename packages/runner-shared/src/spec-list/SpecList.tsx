@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
 
-import React, { useCallback, useMemo, useRef } from 'react'
+import React, { MutableRefObject, useCallback, useMemo, useRef } from 'react'
 import cs from 'classnames'
 import { throttle } from 'lodash'
 import { SearchInput, FileTree, SpecificTreeNode, TreeFile, FileBase, TreeFolder, VirtualizedTreeRef } from '@cypress/design-system'
@@ -47,7 +47,7 @@ export const SpecList: React.FC<SpecListProps> = ({ searchRef, className, specs,
     }
   }, [searchRef])
 
-  const onEnter = useCallback(() => fileTreeRef.current.focus(), [])
+  const onEnter = useCallback(() => fileTreeRef.current!.focus(), [])
 
   const onVerticalArrowKey = useCallback((arrow: 'up' | 'down') => {
     if (arrow === 'down') {
@@ -74,7 +74,7 @@ export const SpecList: React.FC<SpecListProps> = ({ searchRef, className, specs,
       <div>
         {/* TODO: Do we need any other rootDirectories? */}
         <FileTree
-          innerRef={fileTreeRef}
+          innerRef={fileTreeRef as MutableRefObject<VirtualizedTreeRef>}
           files={matches}
           rootDirectory="/"
           emptyPlaceholder="No specs found"
