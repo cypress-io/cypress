@@ -74,19 +74,19 @@ function spawnViteDevServer (
 
 export async function symlinkViteProjects () {
   await Promise.all([
-    spawned('cmd-symlink', 'ln -s ../app/dist dist-app', {
+    spawned('cmd-symlink', 'ln -s ../app/dist-app-e2e dist-app', {
       cwd: monorepoPaths.pkgLaunchpad,
       waitForExit: true,
     }).catch((e) => {}),
-    spawned('cmd-symlink', 'ln -s dist dist-app', {
+    spawned('cmd-symlink', 'ln -s dist-launchpad-e2e dist-app', {
       cwd: monorepoPaths.pkgApp,
       waitForExit: true,
     }).catch((e) => {}),
-    spawned('cmd-symlink', 'ln -s dist dist-launchpad', {
+    spawned('cmd-symlink', 'ln -s dist-app-e2e dist-launchpad', {
       cwd: monorepoPaths.pkgLaunchpad,
       waitForExit: true,
     }).catch((e) => {}),
-    spawned('cmd-symlink', 'ln -s ../launchpad/dist dist-launchpad', {
+    spawned('cmd-symlink', 'ln -s ../launchpad/dist-launchpad-e2e dist-launchpad', {
       cwd: monorepoPaths.pkgApp,
       waitForExit: true,
     }).catch((e) => {}),
@@ -94,7 +94,7 @@ export async function symlinkViteProjects () {
 }
 
 export function viteBuildApp () {
-  return spawned('vite:build-app', `yarn vite build`, {
+  return spawned('vite:build-app', `yarn vite build --outDir dist-app-e2e`, {
     cwd: monorepoPaths.pkgApp,
     waitForExit: true,
     env: {
@@ -115,7 +115,7 @@ export function viteBuildAndWatchApp () {
 }
 
 export function viteBuildLaunchpad () {
-  return spawned('vite:build-launchpad', `yarn vite build`, {
+  return spawned('vite:build-launchpad', `yarn vite build --outDir dist-launchpad-e2e`, {
     cwd: monorepoPaths.pkgLaunchpad,
     waitForExit: true,
   })
