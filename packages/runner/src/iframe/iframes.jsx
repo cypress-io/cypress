@@ -1,5 +1,4 @@
 import cs from 'classnames'
-import { action, autorun } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 import * as MobX from 'mobx'
@@ -21,11 +20,6 @@ const $ = $Cypress.$
 @observer
 export default class Iframes extends Component {
   _disposers = []
-  
-  constructor () {
-    super()
-    console.log('iframes.jsx')
-  }
 
   render () {
     const { width, height, scale, marginLeft, headerHeight, scriptError } = this.props.state
@@ -100,11 +94,11 @@ export default class Iframes extends Component {
 
     this.props.eventManager.on('print:selector:elements:to:console', this._printSelectorElementsToConsole)
 
-    this._disposers.push(autorun(() => {
+    this._disposers.push(MobX.autorun(() => {
       this.autIframe.toggleSelectorPlayground(selectorPlaygroundModel.isEnabled)
     }))
 
-    this._disposers.push(autorun(() => {
+    this._disposers.push(MobX.autorun(() => {
       this.autIframe.toggleSelectorHighlight(selectorPlaygroundModel.isShowingHighlight)
     }))
 
@@ -128,15 +122,15 @@ export default class Iframes extends Component {
       MobX,
       {
         selectorPlaygroundModel,
-        recorder: studioRecorder
-      }
+        recorder: studioRecorder,
+      },
     )
 
     this.iframeModel.listen()
     this._run(this.props.config)
   }
 
-  @action _setScriptError = (err) => {
+  @MobX.action _setScriptError = (err) => {
     if (err && 'error' in err) {
       this.props.state.scriptError = err.error
     }

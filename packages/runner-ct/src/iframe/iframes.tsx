@@ -1,5 +1,4 @@
 import cs from 'classnames'
-import { action, when, autorun } from 'mobx'
 import React, { useRef, useEffect } from 'react'
 import * as MobX from 'mobx'
 import $Cypress from '@packages/driver'
@@ -12,6 +11,7 @@ import {
   studioRecorder,
 } from '@packages/runner-shared'
 import { IframeModel } from '@packages/app/src/runner/iframe-model'
+// eslint-disable-next-line no-duplicate-imports
 import type { eventManager as EventManager } from '@packages/runner-shared'
 
 import State from '../../src/lib/state'
@@ -61,7 +61,7 @@ export const Iframes = namedObserver('Iframes', ({
     }
   }
 
-  const _setScriptError = action((err: string | undefined) => {
+  const _setScriptError = MobX.action((err: string | undefined) => {
     state.scriptError = err
   })
 
@@ -73,7 +73,7 @@ export const Iframes = namedObserver('Iframes', ({
     eventManager.setup(config)
 
     // This is extremely required to not run test till devtools registered
-    when(() => state.readyToRunTests, () => {
+    MobX.when(() => state.readyToRunTests, () => {
       window.Cypress.on('window:before:load', state.registerDevtools)
 
       const $autIframe = _loadIframes(spec)
@@ -119,13 +119,13 @@ export const Iframes = namedObserver('Iframes', ({
     eventManager.start(config)
 
     const disposers = [
-      autorun(() => {
+      MobX.autorun(() => {
         autIframe.current.toggleSelectorPlayground(selectorPlaygroundModel.isEnabled)
       }),
-      autorun(() => {
+      MobX.autorun(() => {
         autIframe.current.toggleSelectorHighlight(selectorPlaygroundModel.isShowingHighlight)
       }),
-      autorun(() => {
+      MobX.autorun(() => {
         if (state.spec) {
           _run(state.spec, config)
         }
@@ -150,8 +150,8 @@ export const Iframes = namedObserver('Iframes', ({
       MobX,
       {
         recorder: studioRecorder,
-        selectorPlaygroundModel
-      }
+        selectorPlaygroundModel,
+      },
     ).listen()
 
     return () => {

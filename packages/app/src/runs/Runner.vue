@@ -1,5 +1,8 @@
 <template>
-  <div id="main-grid" class="grid p-12 gap-8 h-full">
+  <div
+    id="main-grid"
+    class="grid p-12 gap-8 h-full"
+  >
     <div>
       <InlineSpecList
         :gql="props.gql"
@@ -7,18 +10,26 @@
       />
     </div>
 
-    <div id="runner" :style="`width: ${runnerColumnWidth}px`">
-      <div 
-        class="viewport origin-left" 
+    <div
+      id="runner"
+      :style="`width: ${runnerColumnWidth}px`"
+    >
+      <div
+        class="viewport origin-left"
         :style="viewportStyle"
       >
-      
-        <div v-once :id="RUNNER_ID" />
+        <div
+          v-once
+          :id="RUNNER_ID"
+        />
       </div>
       <div>Viewport: {{ viewportDimensions.width }}px x {{ viewportDimensions.height }}px</div>
     </div>
 
-    <div v-once :id="REPORTER_ID" />
+    <div
+      v-once
+      :id="REPORTER_ID"
+    />
   </div>
 </template>
 
@@ -84,11 +95,13 @@ window.UnifiedRunner.MobX.reaction(
   },
 )
 
-const viewportStyle = computed(() => `
+const viewportStyle = computed(() => {
+  return `
   width: ${viewportDimensions.width}px;
   height: ${viewportDimensions.height}px;
   transform: scale(${runnerColumnWidth / viewportDimensions.width})
-`)
+`
+})
 
 const setSpecMutation = useMutation(Runner_SetCurrentSpecDocument)
 

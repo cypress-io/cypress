@@ -29,7 +29,7 @@ let _autIframeModel: any
  * Creates an instance of an AutIframe model which ise used to control
  * various things like snapshots, and the lifecycle of the underlying
  * AUT <iframe> element
- * 
+ *
  * This only needs to be created once per **spec**. If you change spec,
  * you need to create a new AUT IFrame model.
  */
@@ -37,6 +37,7 @@ function getAutIframeModel () {
   if (!_autIframeModel) {
     throw Error('Must create a new instance of AutIframe before accessing')
   }
+
   return _autIframeModel
 }
 
@@ -56,17 +57,18 @@ function createIframeModel () {
     autIframe.highlightEl,
     window.UnifiedRunner.eventManager,
     () => {
+      // eslint-disable-next-line no-console
       console.log('TODO: snapshot controls')
     },
     window.UnifiedRunner.MobX,
     {
       recorder: window.UnifiedRunner.studioRecorder,
-      selectorPlaygroundModel: window.UnifiedRunner.selectorPlaygroundModel
-    }
+      selectorPlaygroundModel: window.UnifiedRunner.selectorPlaygroundModel,
+    },
   )
+
   iframeModel.listen()
 }
-
 
 /**
  * One-time setup. Required `window.UnifiedRunner` to exist,
@@ -85,6 +87,7 @@ function setupRunner (done: () => void) {
     automationElement: '__cypress-string',
     randomString,
   })
+
   window.UnifiedRunner.eventManager.start(window.UnifiedRunner.config)
 
   window.UnifiedRunner.MobX.reaction(

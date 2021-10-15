@@ -1,16 +1,17 @@
 import { mount } from '@cypress/vue'
-import { defineComponent, h, ref } from 'vue'
+import { defineComponent, ref } from 'vue'
 
 const Comp = defineComponent({
   setup () {
     const count = ref(0)
+
     return () => (
       <div>
         <p>{count.value}</p>
-        <button onClick={() => count.value += 1}>Count</button> 
+        <button onClick={() => count.value += 1}>Count</button>
       </div>
     )
-  }
+  },
 })
 
 describe('basic', () => {
@@ -19,6 +20,7 @@ describe('basic', () => {
     mount(Comp).then(() => {
       cy.get('button').click()
     })
+
     cy.viewport(700, 500)
     cy.get('p').contains(1)
     cy.get('button').click()
