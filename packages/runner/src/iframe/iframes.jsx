@@ -75,12 +75,10 @@ export default class Iframes extends Component {
 
   componentDidMount () {
     this.autIframe = new AutIframe(
-      this.props.config,
+      this.props.config.projectName,
       this.props.eventManager,
       _,
       $,
-      this.props.config.projectName,
-      this.props.eventManager,
       logger,
       dom,
       visitFailure,
