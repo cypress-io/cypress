@@ -130,7 +130,7 @@ export const WIZARD_STEPS = [
     description: 'Paste the command below into your terminal to install the required packages.',
   },
   {
-    type: 'createConfig',
+    type: 'configFiles',
     title: 'Configuration Files',
     description: 'We added the following files to your project.',
   },

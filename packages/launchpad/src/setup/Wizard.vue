@@ -13,7 +13,7 @@
       :gql="props.gql.wizard"
     />
     <ConfigFiles
-      v-if="props.gql.wizard.step === 'createConfig'"
+      v-if="props.gql.wizard.step === 'configFiles'"
       :gql="props.gql.wizard"
     />
     <InitializeConfig

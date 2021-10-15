@@ -750,7 +750,7 @@ type WizardSampleConfigFile implements Node {
 }
 
 enum WizardStep {
-  createConfig
+  configFiles
   initializePlugins
   installDependencies
   selectFramework

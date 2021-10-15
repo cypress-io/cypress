@@ -135,7 +135,7 @@ export class WizardActions {
 
     if (this.data.currentStep === 'welcome' && this.data.chosenTestingType === 'e2e') {
       if (this.ctx.activeProject?.isFirstTimeE2E) {
-        this.navigateToStep('createConfig')
+        this.navigateToStep('configFiles')
       } else if (!this.ctx.activeProject?.e2ePluginsInitialized) {
         // not first time, and we haven't initialized plugins - initialize them
         this.navigateToStep('initializePlugins')
@@ -154,12 +154,12 @@ export class WizardActions {
     }
 
     if (this.data.currentStep === 'installDependencies') {
-      this.navigateToStep('createConfig')
+      this.navigateToStep('configFiles')
 
       return this.data
     }
 
-    if (this.data.currentStep === 'createConfig') {
+    if (this.data.currentStep === 'configFiles') {
       if (this.data.chosenTestingType === 'component') {
         if (this.ctx.activeProject?.ctPluginsInitialized) {
           this.navigateToStep('setupComplete')
