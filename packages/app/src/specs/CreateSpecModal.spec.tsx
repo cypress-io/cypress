@@ -50,7 +50,9 @@ describe('<CreateSpecModal />', () => {
       cy.contains(messages.chooseAComponentHeader).should('be.visible')
     })
   })
+})
 
+describe('playground', () => {
   it('can be opened and closed via the show prop', () => {
     const show = ref(false)
 
