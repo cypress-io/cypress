@@ -59,7 +59,7 @@ const VariantClassesTable = {
 const SizeClassesTable = {
   sm: 'px-6px py-2px text-14px',
   md: 'px-12px py-6px text-14px',
-  lg: 'px-16px py-8px',
+  lg: 'px-16px py-10px',
   'lg-wide': 'px-32px py-8px',
 }
 
