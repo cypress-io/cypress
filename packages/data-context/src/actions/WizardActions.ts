@@ -189,7 +189,6 @@ export class WizardActions {
     this.data.chosenFramework = null
     this.data.chosenLanguage = 'js'
     this.data.chosenManualInstall = false
-    this.data.chosenBrowser = null
 
     return this.data
   }
