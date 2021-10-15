@@ -94,8 +94,6 @@
         "gravatar",
         "lodash",
         "path",
-        "prismjs",
-        "prismjs/components/prism-typescript",
         "shiki",
         "socket.io-client",
         "vue",
