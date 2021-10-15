@@ -217,10 +217,6 @@ export const options = [
     validation: v.isStringOrFalse,
     isFolder: true,
   }, {
-    name: 'slowTestThreshold',
-    defaultValue: null,
-    validation: v.isNumber,
-  }, {
     name: 'socketId',
     defaultValue: null,
     isInternal: true,
