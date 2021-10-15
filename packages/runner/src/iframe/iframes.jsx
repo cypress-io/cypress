@@ -10,9 +10,11 @@ import {
   AutIframe,
   logger,
   studioRecorder,
+  visitFailure,
+  blankContents,
+  dom,
 } from '@packages/runner-shared'
 import { IframeModel } from '@packages/app/src/runner/iframe-model'
-
 import util from '../lib/util'
 
 const $ = $Cypress.$
@@ -71,7 +73,20 @@ export default class Iframes extends Component {
   }
 
   componentDidMount () {
-    this.autIframe = new AutIframe(this.props.config, this.props.eventManager)
+    this.autIframe = new AutIframe(
+      this.props.config,
+      this.props.eventManager,
+      this.props.config.projectName,
+      this.props.eventManager,
+      logger,
+      dom,
+      visitFailure,
+      {
+        recorder: studioRecorder,
+        selectorPlaygroundModel,
+      },
+      blankContents,
+    )
 
     this.props.eventManager.on('visit:failed', this.autIframe.showVisitFailure)
     this.props.eventManager.on('before:screenshot', this.autIframe.beforeScreenshot)

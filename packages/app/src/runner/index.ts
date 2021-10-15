@@ -97,7 +97,19 @@ function setupRunner (done: () => void) {
     },
   )
 
-  _autIframeModel = new window.UnifiedRunner.AutIframe('Test Project', window.UnifiedRunner.eventManager)
+  _autIframeModel = new window.UnifiedRunner.AutIframe(
+    'Test Project',
+    window.UnifiedRunner.eventManager,
+    window.UnifiedRunner.logger,
+    window.UnifiedRunner.dom,
+    window.UnifiedRunner.visitFailure,
+    {
+      recorder: window.UnifiedRunner.studioRecorder,
+      selectorPlaygroundModel: window.UnifiedRunner.selectorPlaygroundModel,
+    },
+    window.UnifiedRunner.blankContents,
+  )
+
   createIframeModel()
 
   done()

@@ -9,6 +9,10 @@ import {
   selectorPlaygroundModel,
   AutIframe,
   studioRecorder,
+  visitFailure,
+  dom,
+  logger,
+  blankContents,
 } from '@packages/runner-shared'
 import { IframeModel } from '@packages/app/src/runner/iframe-model'
 // eslint-disable-next-line no-duplicate-imports
@@ -34,7 +38,18 @@ export const Iframes = namedObserver('Iframes', ({
   eventManager,
 }: IFramesProps) => {
   const containerRef = useRef<HTMLDivElement>(null)
-  const autIframe = useRef(new AutIframe(config.projectName, eventManager))
+  const autIframe = useRef(new AutIframe(
+    config.projectName,
+    eventManager,
+    logger,
+    dom,
+    visitFailure,
+    {
+      recorder: studioRecorder,
+      selectorPlaygroundModel,
+    },
+    blankContents,
+  ))
 
   const _toggleSnapshotHighlights = (snapshotProps) => {
     state.setShowSnapshotHighlight(!state.snapshot.showingHighlights)

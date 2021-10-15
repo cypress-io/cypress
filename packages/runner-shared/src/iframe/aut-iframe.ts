@@ -1,19 +1,29 @@
 import _, { DebouncedFunc } from 'lodash'
 import $Cypress from '@packages/driver'
-import * as blankContents from '../blank-contents'
-import { visitFailure } from '../visit-failure'
-import { selectorPlaygroundModel } from '../selector-playground'
-import { dom } from '../dom'
-import { logger } from '../logger'
-import { studioRecorder } from '../studio'
 
 const $ = $Cypress.$
 
 export class AutIframe {
   debouncedToggleSelectorPlayground: DebouncedFunc<(isEnabled: any) => void>
   $iframe?: JQuery<HTMLIFrameElement>
+  _highlightedEl?: JQuery<Element>
 
-  constructor (private projectName: string, private eventManager: any) {
+  constructor (
+    private projectName: string,
+    private eventManager: any,
+    private logger: any,
+    private dom: any,
+    private visitFailure: (props: any) => string,
+    private studio: {
+      selectorPlaygroundModel: any
+      recorder: any
+    },
+    private blankContents: {
+      initial: () => string
+      session: () => string
+      sessionLifecycle: () => string
+    },
+  ) {
     this.debouncedToggleSelectorPlayground = _.debounce(this.toggleSelectorPlayground, 300)
   }
 
@@ -27,19 +37,19 @@ export class AutIframe {
   }
 
   showInitialBlankContents () {
-    this._showContents(blankContents.initial())
+    this._showContents(this.blankContents.initial())
   }
 
   showSessionBlankContents () {
-    this._showContents(blankContents.session())
+    this._showContents(this.blankContents.session())
   }
 
   showSessionLifecycleBlankContents () {
-    this._showContents(blankContents.sessionLifecycle())
+    this._showContents(this.blankContents.sessionLifecycle())
   }
 
   showVisitFailure = (props) => {
-    this._showContents(visitFailure(props))
+    this._showContents(this.visitFailure(props))
   }
 
   _showContents (contents) {
@@ -70,8 +80,12 @@ export class AutIframe {
     return Cypress.cy.detachDom(this._contents())
   }
 
-  visitBlank = ({ type } = { type: null }) => {
-    return new Promise((resolve) => {
+  visitBlank = ({ type }: { type?: 'session' | 'session-lifecycle' }) => {
+    return new Promise<void>((resolve) => {
+      if (!this.$iframe) {
+        return
+      }
+
       this.$iframe[0].src = 'about:blank'
 
       this.$iframe.one('load', () => {
@@ -93,23 +107,30 @@ export class AutIframe {
 
   restoreDom = (snapshot) => {
     const Cypress = this.eventManager.getCypress()
-    const { headStyles, bodyStyles } = Cypress ? Cypress.cy.getStyles(snapshot) : {}
+    const { headStyles = undefined, bodyStyles = undefined } = Cypress ? Cypress.cy.getStyles(snapshot) : {}
     const { body, htmlAttrs } = snapshot
     const contents = this._contents()
-    const $html = contents.find('html')
+    // @ts-ignore - no idea
+    const $html = contents?.find('html') as JQuery<HTMLHtmlElement>
 
-    this._replaceHtmlAttrs($html, htmlAttrs)
+    if ($html) {
+      this._replaceHtmlAttrs($html, htmlAttrs)
+    }
+
     this._replaceHeadStyles(headStyles)
 
     // remove the old body and replace with restored one
-    this._body().remove()
-    this._insertBodyStyles(body.get(), bodyStyles)
-    $html.append(body.get())
 
-    this.debouncedToggleSelectorPlayground(selectorPlaygroundModel.isEnabled)
+    this._body()?.remove()
+    this._insertBodyStyles(body.get(), bodyStyles)
+    $html?.append(body.get())
+
+    this.debouncedToggleSelectorPlayground(this.studio.selectorPlaygroundModel.isEnabled)
   }
 
-  _replaceHtmlAttrs ($html, htmlAttrs) {
+  // note htmlAttrs is actually `NamedNodeMap`: https://developer.mozilla.org/en-US/docs/Web/API/NamedNodeMap
+  // but typing it correctly gives a lot more weird typing errors
+  _replaceHtmlAttrs ($html: JQuery<HTMLHtmlElement>, htmlAttrs: Record<string, string>) {
     let oldAttrs = {}
 
     // remove all attributes
@@ -129,26 +150,26 @@ export class AutIframe {
     })
   }
 
-  _replaceHeadStyles (styles = []) {
-    const $head = this._contents().find('head')
-    const existingStyles = $head.find('link[rel="stylesheet"],style')
+  _replaceHeadStyles (styles: Record<string, any> = {}) {
+    const $head = this._contents()?.find('head')
+    const existingStyles = $head?.find('link[rel="stylesheet"],style')
 
     _.each(styles, (style, index) => {
       if (style.href) {
         // make a best effort at not disturbing <link> stylesheets
         // if possible by checking to see if the existing head has a
         // stylesheet with the same href in the same position
-        this._replaceLink($head, existingStyles[index], style)
+        this._replaceLink($head, existingStyles?.[index], style)
       } else {
         // for <style> tags, just replace them completely since the contents
         // could be different and it shouldn't cause a FOUC since
         // there's no http request involved
-        this._replaceStyle($head, existingStyles[index], style)
+        this._replaceStyle($head, existingStyles?.[index], style)
       }
     })
 
     // remove any extra stylesheets
-    if (existingStyles.length > styles.length) {
+    if (existingStyles && existingStyles.length > styles.length) {
       existingStyles.slice(styles.length).remove()
     }
   }
@@ -181,7 +202,7 @@ export class AutIframe {
     }
   }
 
-  _insertBodyStyles ($body, styles = []) {
+  _insertBodyStyles ($body, styles: Record<string, any> = {}) {
     _.each(styles, (style) => {
       $body.append(style.href ? this._linkTag(style) : this._styleTag(style))
     })
@@ -217,7 +238,7 @@ export class AutIframe {
       // then we need to additional scroll the window
       // by these offsets
       if (scrollBy) {
-        this.$iframe.prop('contentWindow').scrollBy(scrollBy.x, scrollBy.y)
+        this.$iframe?.prop('contentWindow').scrollBy(scrollBy.x, scrollBy.y)
       }
     }
 
@@ -230,25 +251,25 @@ export class AutIframe {
       // switch to using outerWidth + outerHeight
       // because we want to highlight our element even
       // if it only has margin and zero content height / width
-      const dimensions = dom.getOuterSize($_el)
+      const dimensions = this.dom.getOuterSize($_el)
 
       // dont show anything if our element displaces nothing
       if (dimensions.width === 0 || dimensions.height === 0 || $_el.css('display') === 'none') {
         return
       }
 
-      dom.addElementBoxModelLayers($_el, $body).attr('data-highlight-el', true)
+      this.dom.addElementBoxModelLayers($_el, $body).attr('data-highlight-el', true)
     })
 
     if (coords) {
       requestAnimationFrame(() => {
-        dom.addHitBoxLayer(coords, $body).attr('data-highlight-hitbox', true)
+        this.dom.addHitBoxLayer(coords, $body).attr('data-highlight-hitbox', true)
       })
     }
   }
 
   removeHighlights = () => {
-    this._contents() && this._contents().find('.__cypress-highlight').remove()
+    this._contents() && this._contents()?.find('.__cypress-highlight').remove()
   }
 
   toggleSelectorPlayground = (isEnabled) => {
@@ -271,7 +292,7 @@ export class AutIframe {
   }
 
   _resetShowHighlight = () => {
-    selectorPlaygroundModel.setShowingHighlight(false)
+    this.studio.selectorPlaygroundModel.setShowingHighlight(false)
   }
 
   _onSelectorMouseMove = (e) => {
@@ -305,15 +326,15 @@ export class AutIframe {
 
     const selector = Cypress.SelectorPlayground.getSelector($el)
 
-    dom.addOrUpdateSelectorPlaygroundHighlight({
+    this.dom.addOrUpdateSelectorPlaygroundHighlight({
       $el,
       selector,
       $body,
       showTooltip: true,
       onClick: () => {
-        selectorPlaygroundModel.setNumElements(1)
-        selectorPlaygroundModel.resetMethod()
-        selectorPlaygroundModel.setSelector(selector)
+        this.studio.selectorPlaygroundModel.setNumElements(1)
+        this.studio.selectorPlaygroundModel.resetMethod()
+        this.studio.selectorPlaygroundModel.setSelector(selector)
       },
     })
   }
@@ -323,9 +344,9 @@ export class AutIframe {
 
     if (!$body) return
 
-    dom.addOrUpdateSelectorPlaygroundHighlight({ $el: null, $body })
+    this.dom.addOrUpdateSelectorPlaygroundHighlight({ $el: null, $body })
     if (this._highlightedEl) {
-      this._highlightedEl = null
+      this._highlightedEl = undefined
     }
   }
 
@@ -338,33 +359,33 @@ export class AutIframe {
 
     const Cypress = this.eventManager.getCypress()
 
-    const $el = this.getElements(Cypress.dom)
+    const $el = this.getElements(Cypress.this.dom)
 
-    selectorPlaygroundModel.setValidity(!!$el)
+    this.studio.selectorPlaygroundModel.setValidity(!!$el)
 
     if ($el) {
-      selectorPlaygroundModel.setNumElements($el.length)
+      this.studio.selectorPlaygroundModel.setNumElements($el.length)
 
       if ($el.length) {
-        dom.scrollIntoView(this._window(), $el[0])
+        this.dom.scrollIntoView(this._window(), $el[0])
       }
     }
 
-    dom.addOrUpdateSelectorPlaygroundHighlight({
+    this.dom.addOrUpdateSelectorPlaygroundHighlight({
       $el: $el && $el.length ? $el : null,
-      selector: selectorPlaygroundModel.selector,
+      selector: this.studio.selectorPlaygroundModel.selector,
       $body: this._body(),
       showTooltip: false,
     })
   }
 
   getElements (cypressDom) {
-    const { selector, method } = selectorPlaygroundModel
+    const { selector, method } = this.studio.selectorPlaygroundModel
     const $contents = this._contents()
 
     if (!$contents || !selector) return
 
-    return dom.getElementsForSelector({
+    return this.dom.getElementsForSelector({
       method,
       selector,
       cypressDom,
@@ -373,25 +394,25 @@ export class AutIframe {
   }
 
   printSelectorElementsToConsole () {
-    logger.clearLog()
+    this.logger.clearLog()
 
     const Cypress = this.eventManager.getCypress()
 
-    const $el = this.getElements(Cypress.dom)
+    const $el = this.getElements(Cypress.this.dom)
 
-    const command = `cy.${selectorPlaygroundModel.method}('${selectorPlaygroundModel.selector}')`
+    const command = `cy.${this.studio.selectorPlaygroundModel.method}('${this.studio.selectorPlaygroundModel.selector}')`
 
     if (!$el) {
-      return logger.logFormatted({
+      return this.logger.logFormatted({
         Command: command,
         Yielded: 'Nothing',
       })
     }
 
-    logger.logFormatted({
+    this.logger.logFormatted({
       Command: command,
       Elements: $el.length,
-      Yielded: Cypress.dom.getElements($el),
+      Yielded: Cypress.this.dom.getElements($el),
     })
   }
 
@@ -399,15 +420,15 @@ export class AutIframe {
     // could fail if iframe is cross-origin, so fail gracefully
     try {
       if (config.disableTimersAndAnimations) {
-        dom.addCssAnimationDisabler(this._body())
+        this.dom.addCssAnimationDisabler(this._body())
       }
 
       _.each(config.blackout, (selector) => {
-        dom.addBlackout(this._body(), selector)
+        this.dom.addBlackout(this._body(), selector)
       })
     } catch (err) {
       /* eslint-disable no-console */
-      console.error('Failed to modify app dom:')
+      console.error('Failed to modify app this.dom:')
       console.error(err)
       /* eslint-disable no-console */
     }
@@ -417,27 +438,27 @@ export class AutIframe {
     // could fail if iframe is cross-origin, so fail gracefully
     try {
       if (config.disableTimersAndAnimations) {
-        dom.removeCssAnimationDisabler(this._body())
+        this.dom.removeCssAnimationDisabler(this._body())
       }
 
-      dom.removeBlackouts(this._body())
+      this.dom.removeBlackouts(this._body())
     } catch (err) {
       /* eslint-disable no-console */
-      console.error('Failed to modify app dom:')
+      console.error('Failed to modify app this.dom:')
       console.error(err)
       /* eslint-disable no-console */
     }
   }
 
   startStudio = () => {
-    if (studioRecorder.isLoading) {
-      studioRecorder.start(this._body()[0])
+    if (this.studio.recorder.isLoading) {
+      this.studio.recorder.start(this._body()?.[0])
     }
   }
 
   reattachStudio = () => {
-    if (studioRecorder.isActive) {
-      studioRecorder.attachListeners(this._body()[0])
+    if (this.studio.recorder.isActive) {
+      this.studio.recorder.attachListeners(this._body()?.[0])
     }
   }
 }
