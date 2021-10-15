@@ -65,7 +65,9 @@ const statusClasses = computed(() => props.status === 'skipped' ? 'skipped' : pr
       />
     </template>
     <template #description>
-      <span v-html="description" />
+      <span>
+        {{ description }}
+      </span>
     </template>
     <template #right>
       <i-cy-dropcaret />
@@ -90,6 +92,7 @@ const statusClasses = computed(() => props.status === 'skipped' ? 'skipped' : pr
         <PrismJs
           :key="language"
           :language="language"
+          class="line-numbers"
         >
           {{ content }}
         </PrismJs>
