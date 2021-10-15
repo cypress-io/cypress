@@ -333,6 +333,39 @@ describe('taking screenshots', () => {
     })
   })
 
+  // @see https://github.com/cypress-io/cypress/issues/7955
+  it('can set overwrite default option to replace existing filename', () => {
+    Cypress.Screenshot.defaults({
+      overwrite: true,
+    })
+
+    cy.viewport(600, 200)
+    cy.visit('http://localhost:3322/color/yellow')
+    cy.screenshot('overwrite-test', {
+      clip: { x: 10, y: 10, width: 160, height: 80 },
+    })
+
+    cy.task('check:screenshot:size', {
+      name: `${path.basename(__filename)}/overwrite-test.png`,
+      width: 160,
+      height: 80,
+      devicePixelRatio,
+    })
+
+    cy.screenshot('overwrite-test', {
+      clip: { x: 10, y: 10, width: 100, height: 50 },
+    })
+
+    cy.readFile(`cypress/screenshots/${path.basename(__filename)}/overwrite-test (1).png`).should('not.exist')
+
+    cy.task('check:screenshot:size', {
+      name: `${path.basename(__filename)}/overwrite-test.png`,
+      width: 100,
+      height: 50,
+      devicePixelRatio,
+    })
+  })
+
   context('before hooks', () => {
     before(() => {
       // failure 2
