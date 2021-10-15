@@ -409,7 +409,7 @@ type Mutation {
   """Sets the frontend framework we want to use for the project"""
   wizardSetFramework(framework: FrontendFrameworkEnum!): Boolean
 
-  """Updates the different fields of the wizard"""
+  """Updates the different fields of the wizard data store"""
   wizardUpdate(input: WizardUpdateInput!): Boolean
 
   """Validates that the manual install has occurred properly"""

@@ -46,10 +46,11 @@
     <div class="inline-flex gap-16px justify-between">
       <slot name="footer">
         <Button
+          v-if="lastMutationDefined"
           size="lg"
           variant="primary"
           data-testid="error-retry-button"
-          @click="$emit('retry')"
+          @click="retry()"
         >
           {{ t('launchpadErrors.generic.retryButton') }}
         </Button>
@@ -72,6 +73,7 @@ import Button from '@cy/components/Button.vue'
 import { computed } from 'vue'
 import { useI18n } from '@cy/i18n'
 import type { BaseErrorFragment } from '../generated/graphql'
+import { lastMutationRetry } from '@packages/frontend-shared/src/graphql/urqlExchangeLatestMutation'
 
 gql`
 fragment BaseError on BaseError {
@@ -92,11 +94,14 @@ const props = defineProps<{
   gql: BaseErrorFragment
 }>()
 
-defineEmits<{
-  (event: 'retry')
-}>()
+const retry = () => {
+  lastMutationRetry()
+}
 
 const headerText = computed(() => props.gql.header ? props.gql.header : t('launchpadErrors.generic.header'))
 const errorMessage = computed(() => props.gql.message ? props.gql.message : null)
 const stack = computed(() => props.gql.stack ? props.gql.stack : null)
+const lastMutationDefined = computed(() => {
+  return Boolean(lastMutationRetry)
+})
 </script>

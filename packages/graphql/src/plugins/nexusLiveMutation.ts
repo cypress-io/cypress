@@ -9,7 +9,7 @@ export type LiveMutationResolver<
   args: core.ArgsValue<TypeName, FieldName>,
   context: core.GetGen<'context'>,
   info: GraphQLResolveInfo
-) => Promise<string | void>
+) => Promise<string | void> | void
 
 export type LiveMutationFieldOpts<
   TypeName extends string,
