@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import type { Response } from 'express'
+import type { Request, Response } from 'express'
 import send from 'send'
 import os from 'os'
 import { fs } from '../util/fs'
@@ -22,7 +22,7 @@ const _serveNonProxiedError = (res: Response) => {
   })
 }
 
-export interface ServeOptions extends Pick<InitializeRoutes, 'getSpec' | 'config' | 'getCurrentBrowser' | 'getRemoteState' | 'specsStore'> {
+export interface ServeOptions extends Pick<InitializeRoutes, 'getSpec' | 'config' | 'getCurrentBrowser' | 'getRemoteState' | 'specsStore' | 'exit'> {
   testingType: Cypress.TestingType
 }
 
@@ -47,7 +47,7 @@ export const runner = {
       return _serveNonProxiedError(res)
     }
 
-    let { config, getRemoteState, getCurrentBrowser, getSpec, specsStore } = options
+    let { config, getRemoteState, getCurrentBrowser, getSpec, specsStore, exit } = options
 
     config = _.clone(config)
     // at any given point, rather than just arbitrarily modifying it.
@@ -72,6 +72,7 @@ export const runner = {
     config.spec = getSpec() ?? null
     config.specs = specsStore.specFiles
     config.browser = getCurrentBrowser()
+    config.exit = exit ?? true
 
     debug('serving runner index.html with config %o',
       _.pick(config, 'version', 'platform', 'arch', 'projectName'))
@@ -82,8 +83,8 @@ export const runner = {
     return serveRunner(runnerPkg, config, res)
   },
 
-  handle (testingType, req, res) {
-    const pathToFile = getPathToDist(testingType === 'e2e' ? 'runner' : 'runner-ct', req.params[0])
+  handle (testingType: Cypress.TestingType, req: Request, res: Response) {
+    const pathToFile = getPathToDist(process.env.LAUNCHPAD || testingType === 'component' ? 'runner-ct' : 'runner', req.params[0])
 
     return send(req, pathToFile)
     .pipe(res)
