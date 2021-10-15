@@ -55,6 +55,7 @@ export default (Commands, Cypress, cy, state, config) => {
       waitForAnimations: config('waitForAnimations'),
       animationDistanceThreshold: config('animationDistanceThreshold'),
       scrollBehavior: config('scrollBehavior'),
+      userSetScrollBehavior: userOptions.userSetScrollBehavior ?? userOptions.scrollBehavior !== undefined,
       ctrlKey: false,
       controlKey: false,
       altKey: false,
@@ -173,7 +174,6 @@ export default (Commands, Cypress, cy, state, config) => {
       // $actionability.verify and retrying, but each click should
       // have its own full timeout
       const individualOptions = {
-        userSetScrollBehavior: userOptions.scrollBehavior !== undefined,
         ...options,
       }
 

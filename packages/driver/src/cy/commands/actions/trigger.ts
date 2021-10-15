@@ -57,6 +57,7 @@ export default (Commands, Cypress, cy, state, config) => {
         waitForAnimations: config('waitForAnimations'),
         animationDistanceThreshold: config('animationDistanceThreshold'),
         scrollBehavior: config('scrollBehavior'),
+        userSetScrollBehavior: userOptions.scrollBehavior !== undefined,
       })
 
       if ($dom.isWindow(options.$el)) {

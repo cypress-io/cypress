@@ -30,6 +30,7 @@ const checkOrUncheck = (Cypress, cy, type, subject, values = [], userOptions = {
     $el: subject,
     log: true,
     force: false,
+    userSetScrollBehavior: userOptions.scrollBehavior !== undefined,
   })
 
   const isNoop = ($el) => {
@@ -139,6 +140,7 @@ const checkOrUncheck = (Cypress, cy, type, subject, values = [], userOptions = {
         waitForAnimations: options.waitForAnimations,
         animationDistanceThreshold: options.animationDistanceThreshold,
         scrollBehavior: options.scrollBehavior,
+        userSetScrollBehavior: options.userSetScrollBehavior,
       }).then(() => {
         if (options._log) {
           options._log.snapshot().end()

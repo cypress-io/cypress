@@ -432,6 +432,27 @@ describe('src/cy/commands/actions/type - #type', () => {
       })
     })
 
+    // https://github.com/cypress-io/cypress/issues/4233
+    it('can scroll to an element behind a sticky header', () => {
+      cy.viewport(400, 400)
+      cy.visit('./fixtures/sticky-header.html')
+      cy.get('input:first').type('foo')
+    })
+
+    // https://github.com/cypress-io/cypress/issues/4233
+    it('does not try other scroll behaviors if user has explicity set the scroll behavior', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.message).contain('failed because this element is not visible')
+        expect(err.message).contain('it has CSS property: `position: fixed` and it\'s being covered by another element')
+        done()
+      })
+
+      cy.viewport(400, 400)
+      cy.visit('./fixtures/sticky-header.html')
+      cy.get('#container').scrollTo('bottom')
+      cy.get('input:first').type('foo', { scrollBehavior: 'top' })
+    })
+
     it('errors when scrollBehavior is false and element is out of view and is clicked', (done) => {
       cy.on('fail', (err) => {
         expect(err.message).to.include('`cy.type()` failed because the center of this element is hidden from view')
