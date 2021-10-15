@@ -56,8 +56,8 @@ export const mutation = mutationType({
 
     t.nonNull.field('clearActiveProject', {
       type: 'Query',
-      resolve: (root, args, ctx) => {
-        ctx.actions.project.clearActiveProject()
+      resolve: async (root, args, ctx) => {
+        await ctx.actions.project.clearActiveProject()
         ctx.actions.wizard.resetWizard()
 
         return {}

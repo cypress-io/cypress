@@ -1,13 +1,13 @@
 import { defaultMessages } from '@cy/i18n'
 import WelcomeGuide from './WelcomeGuide.vue'
-import { RecentProjects_WelcomeGuideFragmentDoc } from '../generated/graphql-test'
+import { WelcomeGuideFragmentDoc } from '../generated/graphql-test'
 
 const welcomeGuide = defaultMessages.welcomeGuide.header
 
 describe('<WelcomeGuide />', () => {
   it('should be dismissable when clicking on the Dismiss button', () => {
     cy.viewport(1200, 800)
-    cy.mountFragment(RecentProjects_WelcomeGuideFragmentDoc, {
+    cy.mountFragment(WelcomeGuideFragmentDoc, {
       render: (gqlVal) => {
         return (
           <div class="min-w-400px max-w-1100px resize-x overflow-auto">
@@ -26,7 +26,7 @@ describe('<WelcomeGuide />', () => {
 
   it('renders', () => {
     cy.viewport(1200, 800)
-    cy.mountFragment(RecentProjects_WelcomeGuideFragmentDoc, {
+    cy.mountFragment(WelcomeGuideFragmentDoc, {
       render: (gqlVal) => {
         return (
           <div class="min-w-400px max-w-1100px resize-x overflow-auto">

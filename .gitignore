@@ -50,6 +50,9 @@ packages/example/app
 packages/example/build
 packages/example/cypress/integration
 
+# from frontend-shared
+packages/frontend-shared/cypress/e2e/.projects
+
 # from server
 packages/server/.cy
 packages/server/.projects
