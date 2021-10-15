@@ -14,7 +14,6 @@ export class AutIframe {
   $iframe?: JQuery<HTMLIFrameElement>
 
   constructor (private projectName: string, private eventManager: any) {
-    console.log('Createing new AutIframe')
     this.debouncedToggleSelectorPlayground = _.debounce(this.toggleSelectorPlayground, 300)
   }
 
