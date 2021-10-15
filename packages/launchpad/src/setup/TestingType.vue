@@ -28,8 +28,8 @@ import { TestingType_SelectDocument, TestingTypeFragment, TestingTypeEnum } from
 import { TestingTypeIcons } from '../utils/icons'
 
 gql`
-mutation TestingType_Select($testingType: TestingTypeEnum!) {
-  wizardSetTestingType(type: $testingType) 
+mutation TestingType_Select($input: WizardUpdateInput!) {
+  wizardUpdate(input: $input)
 }
 `
 
@@ -51,6 +51,7 @@ const props = defineProps<{
 const mutation = useMutation(TestingType_SelectDocument)
 
 const selectTestingType = (testingType: TestingTypeEnum) => {
-  mutation.executeMutation({ testingType })
+  // TODO: Figure out types for direction
+  mutation.executeMutation({ input: { testingType, direction: null } })
 }
 </script>

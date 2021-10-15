@@ -400,9 +400,6 @@ type Mutation {
   """Installs the dependencies for the component testing step"""
   wizardInstallDependencies: Wizard
 
-  """Navigates backward in the wizard"""
-  wizardNavigate(direction: WizardNavigateDirection!): Boolean
-
   """Sets the frontend bundler we want to use for the project"""
   wizardSetBundler(bundler: SupportedBundlers!): Boolean
 
@@ -412,8 +409,8 @@ type Mutation {
   """Sets the frontend framework we want to use for the project"""
   wizardSetFramework(framework: FrontendFrameworkEnum!): Boolean
 
-  """Sets the current testing type we want to use"""
-  wizardSetTestingType(type: TestingTypeEnum!): Boolean
+  """Updates the different fields of the wizard"""
+  wizardUpdate(input: WizardUpdateInput!): Boolean
 
   """Validates that the manual install has occurred properly"""
   wizardValidateManualInstall: Wizard
@@ -809,4 +806,9 @@ enum WizardStep {
   selectFramework
   setupComplete
   welcome
+}
+
+input WizardUpdateInput {
+  direction: WizardNavigateDirection
+  testingType: TestingTypeEnum
 }

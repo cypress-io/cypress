@@ -12,10 +12,10 @@
       <slot name="message">
         <!-- Can't pull this out because of the i18n-t component -->
         <p
-          v-if="message"
+          v-if="errorMessage"
           class="font-light"
         >
-          {{ message }}
+          {{ errorMessage }}
         </p>
         <i18n-t
           v-else
@@ -32,17 +32,6 @@
           >cypress.config.js</a>
         </i18n-t>
       </slot>
-
-      <div class="">
-        <slot name="error-message">
-          <p
-            v-if="errorMessage"
-            class="font-light"
-          >
-            {{ errorMessage }}
-          </p>
-        </slot>
-      </div>
 
       <slot name="stack">
         <p
@@ -101,7 +90,6 @@ const { t } = useI18n()
 
 const props = defineProps<{
   gql: BaseErrorFragment
-  message?: string
 }>()
 
 defineEmits<{
@@ -109,6 +97,6 @@ defineEmits<{
 }>()
 
 const headerText = computed(() => props.gql.header ? props.gql.header : t('launchpadErrors.generic.header'))
-const errorMessage = computed(() => props.gql.message ? props.gql.message : t('launchpadErrors.generic.message'))
+const errorMessage = computed(() => props.gql.message ? props.gql.message : null)
 const stack = computed(() => props.gql.stack ? props.gql.stack : null)
 </script>

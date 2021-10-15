@@ -1,5 +1,6 @@
-import { booleanArg, enumType, idArg, mutationType, nonNull, stringArg } from 'nexus'
-import { CodeLanguageEnum, FrontendFrameworkEnum, NavItemEnum, SupportedBundlerEnum, TestingTypeEnum, WizardNavigateDirectionEnum } from '../enumTypes/gql-WizardEnums'
+import { arg, booleanArg, enumType, idArg, mutationType, nonNull, stringArg } from 'nexus'
+import { CodeLanguageEnum, FrontendFrameworkEnum, NavItemEnum, SupportedBundlerEnum } from '../enumTypes/gql-WizardEnums'
+import { WizardUpdateInput } from '../inputTypes/gql-WizardUpdateInput'
 import { Wizard } from './gql-Wizard'
 
 export const mutation = mutationType({
@@ -60,11 +61,21 @@ export const mutation = mutationType({
       },
     })
 
-    t.liveMutation('wizardSetTestingType', {
-      description: 'Sets the current testing type we want to use',
-      args: { type: nonNull(TestingTypeEnum) },
+    t.liveMutation('wizardUpdate', {
+      description: 'Updates the different fields of the wizard data store',
+      args: {
+        input: nonNull(arg({
+          type: WizardUpdateInput,
+        })),
+      },
       resolve: async (_, args, ctx) => {
-        await ctx.actions.wizard.setTestingType(args.type)
+        if (args.input.testingType) {
+          await ctx.actions.wizard.setTestingType(args.input.testingType)
+        }
+
+        if (args.input.direction) {
+          await ctx.actions.wizard.navigate(args.input.direction)
+        }
       },
     })
 
@@ -92,16 +103,6 @@ export const mutation = mutationType({
       args: { language: nonNull(CodeLanguageEnum) },
       resolve: async (_, args, ctx) => {
         await ctx.actions.wizard.setCodeLanguage(args.language)
-      },
-    })
-
-    t.liveMutation('wizardNavigate', {
-      args: {
-        direction: nonNull(WizardNavigateDirectionEnum),
-      },
-      description: 'Navigates backward in the wizard',
-      resolve: async (_, args, ctx) => {
-        await ctx.actions.wizard.navigate(args.direction)
       },
     })
 
