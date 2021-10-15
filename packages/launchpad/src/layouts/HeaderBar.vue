@@ -1,5 +1,5 @@
 <template>
-  <div class="px-6 py-4 border-b mb-7">
+  <div class="px-6 py-4 border-b border-b-gray-100 mb-7">
     <div class="flex items-center justify-between max-content">
       <div class="flex items-center">
         <img
