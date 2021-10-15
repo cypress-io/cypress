@@ -1,6 +1,6 @@
 <template>
   <Dialog
-    :open="localValue"
+    :open="modelValue"
     class="fixed inset-0 z-10 overflow-y-auto"
     @close="clickOutside && setIsOpen(false)"
   >
@@ -55,7 +55,6 @@
 import { useI18n } from '@cy/i18n'
 import StandardModalBody from './StandardModalBody.vue'
 import StandardModalFooter from './StandardModalFooter.vue'
-import { useModelWrapper } from '@packages/frontend-shared/src/composables'
 
 import {
   Dialog,
@@ -82,8 +81,6 @@ const props = withDefaults(defineProps<{
   helpText: 'Need help?',
   helpLink: 'https://docs.cypress.io',
 })
-
-const localValue = useModelWrapper(props, emit, 'modelValue')
 
 const setIsOpen = (val: boolean) => {
   emit('update:modelValue', val)
