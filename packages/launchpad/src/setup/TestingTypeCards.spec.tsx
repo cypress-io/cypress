@@ -60,4 +60,18 @@ describe('TestingTypeCards', () => {
       cy.contains('Click here to configure end-to-end testing with Cypress.').should('be.visible')
     })
   })
+
+  it('emits an `openCompare` event when the question mark is clicked in cards', () => {
+    cy.mountFragment(TestingTypeCardsFragmentDoc, {
+      render: (gqlVal) => {
+        return <TestingTypeCards gql={gqlVal} />
+      },
+    }).then(() => {
+      cy.findAllByLabelText(defaultMessages.welcomePage.review).as('buttons')
+      cy.get('@buttons').eq(0).click()
+      cy.get('@buttons').eq(1).click().then(() =>
+        cy.wrap(Cypress.vueWrapper.findComponent(TestingTypeCards).emitted('openCompare'))
+        .should('have.length', 2))
+    })
+  })
 })
