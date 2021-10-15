@@ -1,6 +1,6 @@
 import { DataContext } from '@packages/data-context'
 import specsUtil from './util/specs'
-import type { FindSpecs, FoundBrowser, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions, PlatformName } from '@packages/types'
+import type { Cache, FindSpecs, FoundBrowser, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions, PlatformName } from '@packages/types'
 import { checkAuthQuery } from '@packages/graphql/src/stitching/remoteGraphQLCalls'
 import browserUtils from './browsers/utils'
 import auth from './gui/auth'
@@ -60,11 +60,20 @@ export function makeDataContext (options: MakeDataContextOptions) {
       clearLatestProjectsCache () {
         return cache.removeLatestProjects()
       },
+      clearProjectPreferences () {
+        return cache.removeProjectPreferences()
+      },
       removeProjectFromCache (path: string) {
         return cache.removeProject(path)
       },
       closeActiveProject () {
         return openProject.closeOpenProjectAndBrowsers()
+      },
+      readCache (): Promise<Cache> {
+        return cache.read()
+      },
+      writeCache (item: Partial<Cache>) {
+        return cache.write(item)
       },
     },
   })

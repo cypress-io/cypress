@@ -54,6 +54,15 @@ export const mutation = mutationType({
       },
     })
 
+    t.field('internal_clearProjectPreferencesCache', {
+      type: 'Boolean',
+      resolve: (source, args, ctx) => {
+        ctx.actions.project.clearProjectPreferencesCache()
+
+        return true
+      },
+    })
+
     t.nonNull.field('clearActiveProject', {
       type: 'Query',
       resolve: (root, args, ctx) => {
@@ -227,6 +236,16 @@ export const mutation = mutationType({
       },
     })
 
+    t.field('launchProjectFromPreferences', {
+      type: 'App',
+      description: 'Launches project with saved preferences',
+      async resolve (_root, args, ctx) {
+        await ctx.actions.project.launchProjectFromPreferences()
+
+        return ctx.appData
+      },
+    })
+
     t.nonNull.field('addProject', {
       type: 'App',
       description: 'Add project to projects array and cache it',
@@ -281,6 +300,22 @@ export const mutation = mutationType({
         ctx.actions.project.setCurrentSpec(args.id)
 
         return ctx.activeProject
+      },
+    })
+
+    t.nonNull.field('setProjectPreferences', {
+      type: 'App',
+      description: 'Save the projects preferences to cache',
+      args: {
+        testingType: nonNull(TestingTypeEnum),
+        browserId: nonNull(idArg({
+          description: 'ID of the browser that we want to set',
+        })),
+      },
+      async resolve (_root, args, ctx) {
+        await ctx.actions.project.setProjectPreferences(args)
+
+        return ctx.appData
       },
     })
   },

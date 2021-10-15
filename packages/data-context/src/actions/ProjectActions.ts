@@ -1,5 +1,5 @@
-import type { MutationAddProjectArgs, MutationAppCreateConfigFileArgs, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
-import type { FindSpecs, FoundBrowser, FoundSpec, FullConfig, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions } from '@packages/types'
+import type { MutationAddProjectArgs, MutationAppCreateConfigFileArgs, MutationSetProjectPreferencesArgs, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
+import type { Cache, FindSpecs, FoundBrowser, FoundSpec, FullConfig, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions } from '@packages/types'
 import path from 'path'
 import type { ProjectShape } from '../data/coreDataShape'
 
@@ -19,7 +19,10 @@ export interface ProjectApiShape {
   removeProjectFromCache(projectRoot: string): void
   getProjectRootsFromCache(): Promise<string[]>
   clearLatestProjectsCache(): Promise<unknown>
+  clearProjectPreferences(): Promise<unknown>
   closeActiveProject(): Promise<unknown>
+  readCache(): Promise<Cache>
+  writeCache(item: Partial<Cache>): void
 }
 
 export class ProjectActions {
@@ -44,14 +47,17 @@ export class ProjectActions {
   }
 
   async setActiveProject (projectRoot: string) {
+    const title = this.ctx.project.projectTitle(projectRoot)
+
     this.ctx.coreData.app.activeProject = {
       projectRoot,
-      title: '',
+      title,
       ctPluginsInitialized: false,
       e2ePluginsInitialized: false,
       isFirstTimeCT: await this.ctx.project.isFirstTimeAccessing(projectRoot, 'component'),
       isFirstTimeE2E: await this.ctx.project.isFirstTimeAccessing(projectRoot, 'e2e'),
       config: await this.ctx.project.getResolvedConfigFields(projectRoot),
+      preferences: await this.ctx.project.getProjectPreferences(title),
     }
 
     return this
@@ -145,16 +151,37 @@ export class ProjectActions {
       throw Error(`Could not find browser`)
     }
 
-    const spec: Cypress.Spec = {
+    const spec = this.makeSpec(testingType)
+
+    this.ctx.appData.activeTestingType = testingType
+
+    return this.api.launchProject(browser, spec, options)
+  }
+
+  launchProjectFromPreferences () {
+    if (!this.ctx.activeProject?.preferences) {
+      throw Error('Cannot launch project without saved preferences')
+    }
+
+    this.initializeActiveProject()
+
+    const { browser, testingType } = this.ctx.activeProject.preferences
+    const spec = this.makeSpec(testingType)
+
+    return this.api.launchProject(
+      browser,
+      spec,
+      {},
+    )
+  }
+
+  private makeSpec (testingType: TestingTypeEnum): Cypress.Spec {
+    return {
       name: '',
       absolute: '',
       relative: '',
       specType: testingType === 'e2e' ? 'integration' : 'component',
     }
-
-    this.ctx.appData.activeTestingType = testingType
-
-    return this.api.launchProject(browser, spec, options)
   }
 
   removeProject (projectRoot: string) {
@@ -194,6 +221,10 @@ export class ProjectActions {
     await this.api.clearLatestProjectsCache()
   }
 
+  async clearProjectPreferencesCache () {
+    await this.api.clearProjectPreferences()
+  }
+
   async createComponentIndexHtml (template: string) {
     const project = this.ctx.activeProject
 
@@ -206,5 +237,19 @@ export class ProjectActions {
 
       await this.ctx.fs.outputFile(indexHtmlPath, template)
     }
+  }
+
+  async setProjectPreferences (args: MutationSetProjectPreferencesArgs) {
+    if (!this.ctx.activeProject) {
+      throw Error(`Cannot save preferences without activeProject.`)
+    }
+
+    const preferences = await this.api.readCache()
+    const updatedPreferences = {
+      ...preferences.PROJECT_PREFERENCES,
+      [this.ctx.activeProject.title]: { ...args },
+    }
+
+    this.api.writeCache({ PROJECT_PREFERENCES: updatedPreferences })
   }
 }

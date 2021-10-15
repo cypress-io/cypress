@@ -1,4 +1,6 @@
 import { objectType } from 'nexus'
+import path from 'path'
+import { ProjectPreferences } from '.'
 import { cloudProjectBySlug } from '../../stitching/remoteGraphQLCalls'
 
 export interface ProjectShape {
@@ -70,6 +72,14 @@ export const Project = objectType({
       description: 'Project configuration',
       resolve: (source, args, ctx) => {
         return ctx.project.getResolvedConfigFields(source.projectRoot)
+      },
+    })
+
+    t.field('preferences', {
+      type: ProjectPreferences,
+      description: 'Cached preferences for this project',
+      resolve: (source, args, ctx) => {
+        return ctx.project.getProjectPreferences(path.basename(source.projectRoot))
       },
     })
   },

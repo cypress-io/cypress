@@ -18,7 +18,7 @@ export class ProjectDataSource {
     return config.projectId
   }
 
-  async projectTitle (projectRoot: string) {
+  projectTitle (projectRoot: string) {
     return path.basename(projectRoot)
   }
 
@@ -114,5 +114,11 @@ export class ProjectDataSource {
       // unexpected error
       throw err
     }
+  }
+
+  async getProjectPreferences (projectTitle: string) {
+    const cache = await this.api.readCache()
+
+    return cache.PROJECT_PREFERENCES[projectTitle] ?? null
   }
 }

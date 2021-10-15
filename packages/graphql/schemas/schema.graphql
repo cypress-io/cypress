@@ -308,11 +308,15 @@ type Mutation {
   """
   initializeOpenProject: Wizard
   internal_clearLatestProjectCache: Boolean
+  internal_clearProjectPreferencesCache: Boolean
   internal_triggerIpcToApp: Boolean
   internal_triggerIpcToLaunchpad(msg: String!): Boolean
 
   """Launches project from open_project global singleton"""
   launchOpenProject: App
+
+  """Launches project with saved preferences"""
+  launchProjectFromPreferences: App
 
   """Sets the active browser"""
   launchpadSetBrowser(
@@ -337,6 +341,13 @@ type Mutation {
 
   """Set the current spec under test"""
   setCurrentSpec(id: ID!): Project!
+
+  """Save the projects preferences to cache"""
+  setProjectPreferences(
+    """ID of the browser that we want to set"""
+    browserId: ID!
+    testingType: TestingTypeEnum!
+  ): App!
 
   """Installs the dependencies for the component testing step"""
   wizardInstallDependencies: Wizard
@@ -447,6 +458,9 @@ type Project implements Node {
   """Whether the user configured this project to use e2e Testing"""
   isFirstTimeE2E: Boolean!
 
+  """Cached preferences for this project"""
+  preferences: ProjectPreferences
+
   """Used to associate project with Cypress cloud"""
   projectId: String
   projectRoot: String!
@@ -466,6 +480,15 @@ type Project implements Node {
     last: Int
   ): SpecConnection
   title: String!
+}
+
+"""Preferences specific to a project"""
+type ProjectPreferences {
+  """The preferred browser to launch"""
+  browser: String
+
+  """The preferred testing type to start in"""
+  testingType: String
 }
 
 """The root "Query" type containing all entry fields for our querying"""

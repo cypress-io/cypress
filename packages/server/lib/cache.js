@@ -38,6 +38,7 @@ module.exports = {
     return {
       USER: {},
       PROJECTS: [],
+      PROJECT_PREFERENCES: {},
     }
   },
 
@@ -145,6 +146,10 @@ module.exports = {
 
   removeLatestProjects () {
     return fileUtil.set({ PROJECTS: [] })
+  },
+
+  removeProjectPreferences () {
+    return fileUtil.set({ PROJECT_PREFERENCES: {} })
   },
 
   remove () {
