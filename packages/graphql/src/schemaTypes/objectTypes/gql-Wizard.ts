@@ -5,7 +5,6 @@ import { WizardNpmPackage } from './gql-WizardNpmPackage'
 import { objectType } from 'nexus'
 import { BUNDLERS, CODE_LANGUAGES, FRONTEND_FRAMEWORKS, TESTING_TYPES } from '@packages/types'
 import { TestingTypeEnum, WizardStepEnum } from '../enumTypes/gql-WizardEnums'
-import { Storybook } from './gql-Storybook'
 import { WizardCodeLanguage } from './gql-WizardCodeLanguage'
 import { WizardSampleConfigFile } from './gql-WizardSampleConfigFile'
 
@@ -104,11 +103,6 @@ export const Wizard = objectType({
     t.string('title', {
       description: 'The title of the page, given the current step of the wizard',
       resolve: (source, args, ctx) => ctx.wizard.title ?? null,
-    })
-
-    t.field('storybook', {
-      type: Storybook,
-      resolve: (source, args, ctx) => ctx.storybook.storybookInfo,
     })
   },
   sourceType: {

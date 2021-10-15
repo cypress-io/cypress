@@ -18,7 +18,7 @@
     />
     <InitializeConfig
       v-if="props.gql.wizard.step === 'initializePlugins'"
-      :gql="props.gql.wizard"
+      :gql="props.gql"
     />
     <OpenBrowser v-if="props.gql.wizard.step === 'setupComplete'" />
   </div>
@@ -43,9 +43,9 @@ fragment Wizard on Query {
     testingType
     ...EnvironmentSetup
     ...InstallDependencies
-    ...InitializeConfig
     ...ConfigFiles
   }
+  ...InitializeConfig_Config
 }`
 
 const props = defineProps<{

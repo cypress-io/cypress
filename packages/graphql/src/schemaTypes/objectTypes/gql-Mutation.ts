@@ -56,8 +56,9 @@ export const mutation = mutationType({
 
     t.nonNull.field('clearActiveProject', {
       type: 'Query',
-      resolve: (root, args, ctx) => {
-        ctx.actions.project.clearActiveProject()
+      resolve: async (root, args, ctx) => {
+        await ctx.actions.project.clearActiveProject()
+        ctx.actions.wizard.resetWizard()
 
         return {}
       },
@@ -174,15 +175,19 @@ export const mutation = mutationType({
     })
 
     t.nonNull.field('generateSpecFromStory', {
-      type: 'Wizard',
+      type: 'Project',
       description: 'Generate spec from Storybook story',
       args: {
         storyPath: nonNull('String'),
       },
       async resolve (_root, args, ctx) {
+        if (!ctx.activeProject) {
+          throw Error(`Cannot set spec without active project!`)
+        }
+
         await ctx.actions.storybook.generateSpecFromStory(args.storyPath)
 
-        return ctx.wizardData
+        return ctx.activeProject
       },
     })
 
@@ -249,6 +254,7 @@ export const mutation = mutationType({
         open: booleanArg({ description: 'Whether to open the project when added' }),
       },
       async resolve (_root, args, ctx) {
+        ctx.actions.wizard.resetWizard()
         await ctx.actions.project.addProject(args)
 
         return ctx.appData

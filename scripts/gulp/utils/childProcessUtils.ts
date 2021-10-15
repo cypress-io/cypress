@@ -7,6 +7,7 @@ import { prefixLog, prefixStream } from './prefixStream'
 import { addChildProcess } from '../tasks/gulpRegistry'
 
 export type AllSpawnableApps =
+  | `cmd-${string}`
   | `vite-${string}`
   | `vite:build-${string}`
   | `serve:${string}`
