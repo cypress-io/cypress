@@ -126,15 +126,6 @@
     "searchPlaceholder": "Search Projects",
     "addProjectButton": "Add Project"
   },
-  "welcomeGuide": {
-    "header": {
-      "title": "Cypress",
-      "description": "A powerful open-source testing platform for developers and engineering teams all around the world."
-    },
-    "projectListHeader": "Recently Viewed Projects",
-    "linkHeader": "Quick Access",
-    "confirmWelcomeGuide": "Show the welcome guide when opening Cypress."
-  },
   "welcomePage": {
     "review": "Review the differences between each testing type",
     "codeExample": "Code Example",

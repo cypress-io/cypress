@@ -51,11 +51,5 @@ describe('<GlobalPage />', { viewportHeight: 900, viewportWidth: 1200 }, () => {
       .trigger('change', { force: true })
       // .findByText('yet-another-test-project').should('be.visible')
     })
-
-    describe('Welcome Guide', () => {
-      it('renders the welcome guide', () => {
-        cy.findByText(defaultMessages.welcomeGuide.header.description).should('be.visible')
-      })
-    })
   })
 })

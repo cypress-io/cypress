@@ -79,7 +79,6 @@ query MainLaunchpadQuery {
   app {
     isInGlobalMode
     ...GlobalPage
-    ...WelcomeGuide
   }
   ...HeaderBar
 }
