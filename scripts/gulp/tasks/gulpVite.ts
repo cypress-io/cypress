@@ -73,6 +73,10 @@ function spawnViteDevServer (
  *------------------------------------------------------------------------**/
 
 export async function symlinkViteProjects () {
+  if (!process.env.CIRCLECI) {
+    return
+  }
+
   await Promise.all([
     spawned('cmd-symlink', 'ln -s ../app/dist dist-app', {
       cwd: monorepoPaths.pkgLaunchpad,
