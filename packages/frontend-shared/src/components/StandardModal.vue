@@ -5,8 +5,11 @@
     @close="clickOutside && setIsOpen(false)"
   >
     <div class="flex items-center justify-center min-h-screen">
-      <slot name="overlay" v-bind:classes="'fixed inset-0'">
-        <DialogOverlay class="bg-gray-800 opacity-90" />
+      <slot
+        name="overlay"
+        :classes="'fixed inset-0'"
+      >
+        <DialogOverlay class="fixed inset-0 bg-gray-800 opacity-90" />
       </slot>
 
       <div
@@ -15,11 +18,13 @@
       >
         <div class="flex items-center justify-between border-b-1px min-h-64px px-24px">
           <DialogTitle class="text-gray-900 text-18px">
-            <slot name="title" /> - <a
+            <slot name="title" /> <span class="inline-block border-t border-t-gray-100 w-32px h-6px mx-8px" /> <a
               :href="helpLink"
               target="_blank"
-              class="text-indigo-500"
-            >{{ helpText }}</a>
+              class="text-indigo-500 group outline-transparent text-16px"
+            >
+              <span class="group-hocus:underline">{{ helpText }}</span>
+              <i-cy-circle-bg-question-mark_x16 class="relative inline-block icon-dark-indigo-500 icon-light-indigo-100 -top-2px ml-8px" /></a>
           </DialogTitle>
           <button
             aria-label="Close"
@@ -36,7 +41,9 @@
         >
           <slot name="description" />
         </DialogDescription>
-        <StandardModalBody :variant="variant"><slot/></StandardModalBody>
+        <StandardModalBody :variant="variant">
+          <slot />
+        </StandardModalBody>
         <StandardModalFooter v-if="$slots.footer">
           <slot name="footer" />
         </StandardModalFooter>
@@ -63,17 +70,14 @@ const emit = defineEmits<{
 
 const props = withDefaults(defineProps<{
   modelValue?: boolean
-  activatorText?: string
-  width?: string,
   modalClasses?: string
   helpLink?: string
-  helpText?: string,
+  helpText?: string
   clickOutside?: boolean
   variant?: 'bare'
 }>(), {
   clickOutside: true,
   modelValue: false,
-  activatorText: '',
   modalClasses: 'w-480px',
   helpText: 'Need help?',
   helpLink: 'https://docs.cypress.io',
