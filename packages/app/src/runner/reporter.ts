@@ -1,4 +1,4 @@
-import { getStore, Store } from '../store'
+import type { Store } from '../store'
 import { getReporterElement } from './utils'
 
 let hasInitializeReporter = false
@@ -27,12 +27,6 @@ function renderReporter (
   store: Store,
   eventManager: typeof window.UnifiedRunner.eventManager,
 ) {
-  class EmptyHeader extends window.UnifiedRunner.React.Component {
-    render () {
-      return window.UnifiedRunner.React.createElement('div')
-    }
-  }
-
   eventManager.id()
   const reporter = window.UnifiedRunner.React.createElement(window.UnifiedRunner.Reporter, {
     runMode: 'single' as const,

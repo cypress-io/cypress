@@ -25,8 +25,6 @@ export {
   RESOLVED_FROM,
 } from './config'
 
-export * from './runner'
-
 export * from './server'
 
 export * from './storybook'
