@@ -173,7 +173,11 @@ export const $chaiJquery = (chai, chaiUtils, callbacks = {}) => {
       text,
     )
 
-    const actual = wrap(this).text()
+    // https://github.com/cypress-io/cypress/issues/18097
+    // If there are multiple elements, use the first.
+    const wrapped = wrap(this)
+    const $el = wrapped.length > 1 ? wrapped.eq(0) : wrapped
+    const actual = $el.text()
 
     return assertPartial(
       this,

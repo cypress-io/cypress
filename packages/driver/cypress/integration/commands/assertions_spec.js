@@ -1810,13 +1810,17 @@ describe('src/cy/commands/assertions', () => {
         })
       })
 
+      // https://github.com/cypress-io/cypress/issues/18097
+      it('matches the first', () => {
+        cy.get('span').should('have.text', 'foo')
+      })
+
       it('partial match', function () {
         expect(this.$div).to.have.text('foo')
         expect(this.$div).to.contain.text('o')
         expect(this.$div).to.include.text('o')
         cy.get('div').should('contain.text', 'iv').should('contain.text', 'd')
-
-        cy.get('div').should('not.contain.text', 'fizzbuzz').should('contain.text', 'Nest')
+        cy.get('div:nth-of-type(2)').should('not.contain.text', 'fizzbuzz').should('contain.text', 'Nest')
       })
 
       it('throws when obj is not DOM', function (done) {
