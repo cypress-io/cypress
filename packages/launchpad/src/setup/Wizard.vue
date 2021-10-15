@@ -45,7 +45,7 @@ fragment Wizard on Query {
     ...InstallDependencies
   }
   ...ConfigFile
-  ...Config_InitializeConfig
+  ...InitializeConfig_Config
 }`
 
 const props = defineProps<{

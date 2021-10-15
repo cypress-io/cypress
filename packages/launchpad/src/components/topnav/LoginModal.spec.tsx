@@ -1,4 +1,4 @@
-import { AuthenticatedState_LoginModalFragmentDoc } from '../../generated/graphql-test'
+import { LoginModalFragmentDoc } from '../../generated/graphql-test'
 import LoginModal from './LoginModal.vue'
 import { defaultMessages } from '@cy/i18n'
 
@@ -11,7 +11,7 @@ const cloudViewer = {
 }
 
 const mountSuccess = () => {
-  cy.mountFragment(AuthenticatedState_LoginModalFragmentDoc, {
+  cy.mountFragment(LoginModalFragmentDoc, {
     onResult: (result) => {
       result.__typename = 'Query'
       result.app.isAuthBrowserOpened = true
@@ -24,7 +24,7 @@ const mountSuccess = () => {
 
 describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
   it('renders and reaches "opening browser" status', () => {
-    cy.mountFragment(AuthenticatedState_LoginModalFragmentDoc, {
+    cy.mountFragment(LoginModalFragmentDoc, {
       render: (gqlVal) => <div class="resize overflow-auto border-current border-1 h-700px"><LoginModal gql={gqlVal} modelValue={true} /></div>,
     })
 
@@ -40,7 +40,7 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
   })
 
   it('shows correct "waiting for login" status', () => {
-    cy.mountFragment(AuthenticatedState_LoginModalFragmentDoc, {
+    cy.mountFragment(LoginModalFragmentDoc, {
       onResult: (result) => {
         result.__typename = 'Query'
         result.app.isAuthBrowserOpened = true

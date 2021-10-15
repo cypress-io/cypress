@@ -16,10 +16,10 @@
 import { onMounted, computed } from 'vue'
 import WizardLayout from './WizardLayout.vue'
 import { useMutation, gql } from '@urql/vue'
-import { Config_InitializeConfigFragment, InitializeOpenProjectDocument } from '../generated/graphql'
+import { InitializeConfig_ConfigFragment, InitializeOpenProjectDocument } from '../generated/graphql'
 
 gql`
-fragment WizardState_InitializeConfig on Wizard {
+fragment InitializeConfig_WizardState on Wizard {
   canNavigateForward
   chosenTestingTypePluginsInitialized
   step
@@ -27,9 +27,9 @@ fragment WizardState_InitializeConfig on Wizard {
 `
 
 gql`
-fragment Config_InitializeConfig on Query {
+fragment InitializeConfig_Config on Query {
   wizard {
-    ...WizardState_InitializeConfig
+    ...InitializeConfig_WizardState
   }
 
   app {
@@ -56,13 +56,13 @@ fragment Config_InitializeConfig on Query {
 gql`
 mutation InitializeOpenProject {
   initializeOpenProject {
-    ...WizardState_InitializeConfig
+    ...InitializeConfig_WizardState
   }
 }
 `
 
 const props = defineProps<{
-  gql: Config_InitializeConfigFragment
+  gql: InitializeConfig_ConfigFragment
 }>()
 
 const initializeOpenProject = useMutation(InitializeOpenProjectDocument)

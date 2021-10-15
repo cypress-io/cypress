@@ -67,7 +67,7 @@ import WelcomeGuideLinks from './WelcomeGuideLinks.vue'
 import IconCircleX from '~icons/akar-icons/circle-x'
 import IconPlaceholder from '~icons/icons8/circle-thin'
 import { gql } from '@urql/core'
-import { RecentProjects_WelcomeGuideFragment, WelcomeGuide_SetActiveProjectDocument } from '../generated/graphql'
+import { WelcomeGuideFragment, WelcomeGuide_SetActiveProjectDocument } from '../generated/graphql'
 import { useMutation } from '@urql/vue'
 
 const links = [
@@ -86,7 +86,7 @@ const links = [
 ]
 
 gql`
-fragment RecentProjects_WelcomeGuide on App {
+fragment WelcomeGuide on App {
   projects {
     id
     projectRoot
@@ -114,7 +114,7 @@ const show = ref(true)
 const showWelcomeGuideOnStartup = ref(true)
 
 const props = defineProps<{
-  gql: RecentProjects_WelcomeGuideFragment
+  gql: WelcomeGuideFragment
 }>()
 
 const projects = computed(() => {

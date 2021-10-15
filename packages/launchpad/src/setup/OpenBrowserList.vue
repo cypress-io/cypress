@@ -71,7 +71,7 @@
 
 <script lang="ts" setup>
 import { useI18n } from '@cy/i18n'
-import { Browsers_OpenBrowserListFragment, OpenBrowserList_SetBrowserDocument } from '../generated/graphql'
+import { OpenBrowserListFragment, OpenBrowserList_SetBrowserDocument } from '../generated/graphql'
 import Button from '@packages/frontend-shared/src/components/Button.vue'
 import { computed } from 'vue'
 import _clone from 'lodash/clone'
@@ -83,14 +83,14 @@ gql`
 mutation OpenBrowserList_SetBrowser($id: ID!) {
   launchpadSetBrowser(id: $id) {
     app {
-      ...Browsers_OpenBrowserList
+      ...OpenBrowserList
     }
   }
 }
 `
 
 gql`
-fragment Browsers_OpenBrowserList on App {
+fragment OpenBrowserList on App {
   selectedBrowser {
     id
     displayName
@@ -111,7 +111,7 @@ fragment Browsers_OpenBrowserList on App {
 `
 
 const props = defineProps<{
-  gql: Browsers_OpenBrowserListFragment,
+  gql: OpenBrowserListFragment,
 }>()
 
 defineEmits(['navigated-back', 'launch'])
