@@ -15,14 +15,10 @@
       :style="`width: ${runnerColumnWidth}px`"
     >
       <div
+        :id="RUNNER_ID"
         class="viewport origin-left"
         :style="viewportStyle"
-      >
-        <div
-          v-once
-          :id="RUNNER_ID"
-        />
-      </div>
+      />
       <div>Viewport: {{ viewportDimensions.width }}px x {{ viewportDimensions.height }}px</div>
     </div>
 

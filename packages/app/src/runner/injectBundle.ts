@@ -29,9 +29,14 @@ export async function injectBundle (ready: () => void) {
   script.onload = () => {
     // just stick config on window until we figure out how we are
     // going to manage it
-    window.UnifiedRunner.config = window.UnifiedRunner.decodeBase64(data.base64Config)
+    const config = window.UnifiedRunner.decodeBase64(data.base64Config) as any
+
+    window.UnifiedRunner.config = config
+
     window.UnifiedRunner.MobX.runInAction(() => {
-      initializeStore(window.UnifiedRunner.config.testingType)
+      const store = initializeStore(window.UnifiedRunner.config.testingType)
+
+      store.updateDimensions(config.viewportWidth, config.viewportHeight)
     })
 
     ready()
