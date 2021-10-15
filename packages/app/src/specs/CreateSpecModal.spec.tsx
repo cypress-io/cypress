@@ -9,38 +9,41 @@ const descriptionSelector = '[data-testid=create-generator-description]'
 const titleSelector = '[data-testid=create-generator-title]'
 const overlaySelector = '[data-testid=create-spec-modal-overlay]'
 
-beforeEach(() => {
-  const show = ref(true)
-  cy.mount(() => <div>
-    <CreateSpecModal
-      show={ show }
-      onClose={() => show.value = false }
-      currentGenerator={ ImportFromComponentGenerator }/>
-  </div>)
-})
+describe('<CreateSpecModal />', () => {
+  beforeEach(() => {
+    const show = ref(true)
+    cy.mount(() => <div>
+      <CreateSpecModal
+        show={ show }
+        onClose={() => show.value = false }
+        currentGenerator={ ImportFromComponentGenerator }/>
+    </div>)
+  })
 
-it('renders a modal', () => {
-  cy.get(modalSelector).should('be.visible')
-})
+  it('renders a modal', () => {
+    cy.get(modalSelector).should('be.visible')
+  })
 
-it('cannot be dismissed when you press escape or click off it', () => {
-  cy.get(modalSelector)
-    .should('be.visible')
-    .click(0, 0)
-    .get(modalSelector)
-    .should('be.visible')
-    .type('{esc}')
-    .get(modalSelector)
-    .should('be.visible')
-})
+  describe('dismissing', () => {
+    it('is not dismissed when you press escape or click outside', () => {
+      cy.get(modalSelector)
+        .click(0, 0)
+        .get(modalSelector)
+        .should('be.visible')
+        .type('{esc}')
+        .get(modalSelector)
+        .should('be.visible')
+    })
 
-it('is dismissed when the X button is pressed', () => {
-  cy.get(modalSelector)
-    .should('be.visible')
-    .get(modalCloseSelector)
-    .click()
-    .get(modalSelector)
-    .should('not.be.visible')
+    it('is dismissed when the X button is clicked', () => {
+      cy.get(modalSelector)
+        .get(modalCloseSelector)
+        .click()
+        .get(modalSelector)
+        .should('not.be.visible')
+    })
+  })
+  
 })
 
 it('can be opened and closed via the show prop', () => {
