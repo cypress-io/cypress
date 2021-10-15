@@ -8,12 +8,14 @@
     />
     <Button
       :prefix-icon="IconPlus"
-      aria-controls="fileupload"
+      aria-controls="dropzone"
       prefix-icon-class="text-center justify-center text-lg"
       class="w-20% min-w-120px text-size-16px h-full hocus-default"
       data-testid="addProjectButton"
       size="lg"
-      @click="showDropzone = !showDropzone"
+      :variant="showDropzone ? 'pending' : 'primary'"
+      :aria-expanded="showDropzone"
+      @click="toggleDropzone"
     >
       {{ t('globalPage.addProjectButton') }}
     </Button>
@@ -21,6 +23,7 @@
 
   <FileDropzone
     v-if="showDropzone"
+    id="dropzone"
     @addProject="emit('addProject', $event)"
   />
 </template>
@@ -47,4 +50,8 @@ const emit = defineEmits<{
 }>()
 
 const localValue = useModelWrapper(props, emit, 'modelValue')
+
+const toggleDropzone = () => {
+  showDropzone.value = !showDropzone.value
+}
 </script>
