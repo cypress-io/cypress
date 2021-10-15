@@ -13986,7 +13986,7 @@ cli-table@^0.3.1:
   dependencies:
     colors "1.0.3"
 
-cli-truncate@^2.0.0, cli-truncate@^2.1.0:
+cli-truncate@^2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/cli-truncate/-/cli-truncate-2.1.0.tgz#c39e28bf05edcde5be3b98992a22deed5a2b93c7"
   integrity sha512-n8fOixwDD6b/ObinzTrp1ZKFzbgvKZvuz/TvejnLn1aQfC6r52XEx85FmuC+3HI+JM7coBRXUvNqEU2PHVrHpg==
@@ -17208,28 +17208,28 @@ electron-builder@22.9.1:
     update-notifier "^4.1.1"
     yargs "^16.0.3"
 
-electron-context-menu@2.2.0:
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/electron-context-menu/-/electron-context-menu-2.2.0.tgz#1cb2b8ccbede684f38fcebb33d4944d4e851f3e4"
-  integrity sha512-ArnzPlGqBrkOFOAWbq4aVWMtN6ZfYxVNon8s+akOm7ffnNv8yqYi4EPiMeQ5UU894dPi7I1PhTGVKBlOQM4a1g==
+electron-context-menu@3.1.1:
+  version "3.1.1"
+  resolved "https://registry.npmjs.org/electron-context-menu/-/electron-context-menu-3.1.1.tgz#109884e79df293f7e85effcbdbbe45d362987d94"
+  integrity sha512-LJhwaKf6XHwk2LQ5SdwoGNODoA8lRwks9bbEeAqqMf4e3hsrT7pZtX6MaHKYNFZKxF14JjI/VR+VRjGvxmaQoA==
   dependencies:
-    cli-truncate "^2.0.0"
-    electron-dl "^3.0.0"
-    electron-is-dev "^1.0.1"
+    cli-truncate "^2.1.0"
+    electron-dl "^3.2.1"
+    electron-is-dev "^2.0.0"
 
-electron-dl@^3.0.0:
-  version "3.2.0"
-  resolved "https://registry.yarnpkg.com/electron-dl/-/electron-dl-3.2.0.tgz#7fc5ebc683d05d3393591a994f8b825686137651"
-  integrity sha512-Wz6YZi0fwy/hmdkrtrBwj7W4JlrFd1tY5jvNdLHd0PUTlJFJ6pGi9mPQGtZRdjodkXYpaiD1uio+wh01hqrZNg==
+electron-dl@^3.2.1:
+  version "3.2.1"
+  resolved "https://registry.npmjs.org/electron-dl/-/electron-dl-3.2.1.tgz#244a1316c663691f70e8aa4515cd1a401b4b5690"
+  integrity sha512-k5DFjocJlXbrjshO1zeWe/Gz7HkGwCgnehHPemiyzN2B/LfLlnbIX7sCj5F+huTwZ2l+nQehTI4IR37xvCn6FQ==
   dependencies:
     ext-name "^5.0.0"
     pupa "^2.0.1"
     unused-filename "^2.1.0"
 
-electron-is-dev@^1.0.1:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/electron-is-dev/-/electron-is-dev-1.2.0.tgz#2e5cea0a1b3ccf1c86f577cee77363ef55deb05e"
-  integrity sha512-R1oD5gMBPS7PVU8gJwH6CtT0e6VSoD0+SzSnYpNm+dBkcijgA+K7VAMHDfnRq/lkKPZArpzplTW6jfiMYosdzw==
+electron-is-dev@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.npmjs.org/electron-is-dev/-/electron-is-dev-2.0.0.tgz#833487a069b8dad21425c67a19847d9064ab19bd"
+  integrity sha512-3X99K852Yoqu9AcW50qz3ibYBWY79/pBhlMCab8ToEWS48R0T9tyxRiQhwylE7zQdXrMnx2JKqUJyMPmt5FBqA==
 
 electron-notarize@1.0.0:
   version "1.0.0"
