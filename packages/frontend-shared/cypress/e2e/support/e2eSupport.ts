@@ -103,7 +103,7 @@ function visitApp () {
     throw new Error(`Missing serverPort - did you forget to call cy.initializeApp(...) ?`)
   }
 
-  return cy.visit(`dist-app/index.html?gqlPort=${e2e_gqlPort}&serverPort=${e2e_serverPort}`)
+  return cy.visit(`dist-app-e2e/index.html?gqlPort=${e2e_gqlPort}&serverPort=${e2e_serverPort}`)
 }
 
 function visitLaunchpad (hash?: string) {
@@ -113,7 +113,7 @@ function visitLaunchpad (hash?: string) {
     throw new Error(`Missing gqlPort - did you forget to call cy.setupE2E(...) ?`)
   }
 
-  cy.visit(`dist-launchpad/index.html?gqlPort=${e2e_gqlPort}`)
+  cy.visit(`dist-launchpad-e2e/index.html?gqlPort=${e2e_gqlPort}`)
 }
 
 const pageLoadId = `uid${Math.random()}`
