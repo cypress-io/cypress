@@ -131,8 +131,8 @@ export const WIZARD_STEPS = [
   },
   {
     type: 'createConfig',
-    title: 'Cypress.config',
-    description: 'Cypress will now create the following config file in the local directory for this project.',
+    title: 'Configuration Files',
+    description: 'We added the following files to your project.',
   },
   {
     type: 'setupComplete',
