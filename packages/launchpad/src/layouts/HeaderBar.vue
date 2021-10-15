@@ -104,6 +104,10 @@ mutation GlobalPageHeader_clearActiveProject {
         id
       }
     }
+    wizard {
+      step
+      chosenTestingTypePluginsInitialized
+    }
   }
 }
 `

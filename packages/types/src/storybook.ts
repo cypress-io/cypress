@@ -1,3 +1,5 @@
+import type { FoundSpec } from './spec'
+
 export interface StorybookFile {
   name: string
   absolute: string
@@ -9,4 +11,9 @@ export interface StorybookInfo {
   storybookRoot: string
   files: StorybookFile[]
   storyGlobs: string[]
+}
+
+export interface GeneratedSpec {
+  spec: FoundSpec
+  content: string
 }

@@ -16,7 +16,7 @@
     <button
       class="h-10"
       data-testid="removeProjectButton"
-      @click="$emit('removeProject', props.gql.projectRoot)"
+      @click="emit('removeProject', props.gql.projectRoot)"
     >
       <Icon
         icon="ant-design:close-circle-outlined"

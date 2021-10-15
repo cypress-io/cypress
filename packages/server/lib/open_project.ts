@@ -413,6 +413,18 @@ export class OpenProject {
     ]).then(() => null)
   }
 
+  // close existing open project if it exists, for example
+  // if  you are switching from CT to E2E or vice versa.
+  // used by launchpad
+  async closeActiveProject () {
+    await this.closeOpenProjectAndBrowsers()
+
+    // When closing a project, we should teardown any spec watchers.
+    // TODO: move all file system watching to a centralize
+    // location with a well defined setup and teardown API.
+    this.stopSpecsWatcher()
+  }
+
   _ctx?: DataContextShell
 
   async create (path: string, args: LaunchArgs, options: OpenProjectLaunchOptions, browsers: FoundBrowser[] = []) {

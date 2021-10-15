@@ -313,6 +313,12 @@ enum FrontendFrameworkEnum {
   vuecli
 }
 
+type GeneratedSpec {
+  """File content of most recently generated spec."""
+  content: String!
+  spec: FileParts!
+}
+
 """Git information about a spec file"""
 type GitInfo {
   """Last person to change the file in git"""
@@ -620,8 +626,7 @@ enum SpecType {
 
 """Storybook"""
 type Storybook implements Node {
-  """Most recent generated spec"""
-  generatedSpec: String
+  generatedSpec: GeneratedSpec
 
   """Relay style Node ID field for the Storybook field"""
   id: ID!
