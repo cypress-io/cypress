@@ -2573,11 +2573,6 @@ declare namespace Cypress {
      */
     reporterOptions: { [key: string]: any }
     /**
-     * Slow test threshold in milliseconds. Only affects the visual output of some reporters. For example, the spec reporter will display the test time in yellow if over the threshold. Defaults to 10000ms for e2e tests and 250ms for component tests.
-     * @default null
-     */
-    slowTestThreshold: number | null
-    /**
      * Whether Cypress will watch and restart tests on test file changes
      * @default true
      */
