@@ -9,7 +9,9 @@
     },
     "fileSearch": {
       "byFilenameInput": "Search by filename...",
-      "matchesIndicator": "No Matches | 1 Match | {count} Matches"
+      "byExtensionInput": "Extensions to include e.g. *.tsx, *.jsx, *.vue",
+      "matchesIndicatorEmptyFileSearch": "No Matches | 1 Match | { denominator } Matches",
+      "matchesIndicator": "No Matches | {numerator} of {denominator} Matches"
     },
     "button": {
       "cancel": "Cancel"
