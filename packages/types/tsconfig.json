@@ -12,7 +12,6 @@
     "noUnusedParameters": false,
     "experimentalDecorators": true,
     "allowJs": true,
-    "lib": ["DOM"],
     "types": [],
     "noUncheckedIndexedAccess": true,
     "importsNotUsedAsValues": "error"

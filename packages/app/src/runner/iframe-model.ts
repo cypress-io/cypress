@@ -1,6 +1,18 @@
-import type { AutSnapshot } from '@packages/types/src/runner'
-
 import type { Store } from '../store'
+
+export interface AutSnapshot {
+  id?: number
+  name?: string
+  snapshot?: AutSnapshot
+  snapshots?: AutSnapshot[]
+  htmlAttrs: Record<string, any> // Type is NamedNodeMap, not sure if we should include lib: ["DOM"]
+  viewportHeight: number
+  viewportWidth: number
+  url: string
+  body: {
+    get: () => unknown // TOOD: find out what this is, some sort of JQuery API.
+  }
+}
 
 type Fn = () => void
 
@@ -11,29 +23,29 @@ export class IframeModel {
   intervalId?: number
 
   constructor (
-    private state: Store, 
-    private detachDom: () => AutSnapshot, 
-    private restoreDom: (snapshot: any) => void, 
-    private highlightEl: ({ body }: any, opts: any) => void, 
+    private state: Store,
+    private detachDom: () => AutSnapshot,
+    private restoreDom: (snapshot: any) => void,
+    private highlightEl: ({ body }: any, opts: any) => void,
     private eventManager: any,
-    private snapshotControls: any, 
+    private snapshotControls: any,
     private MobX: any,
     private studio: {
-      selectorPlaygroundModel: any,
-      recorder: any,
-    }
+      selectorPlaygroundModel: any
+      recorder: any
+    },
   ) {
     this._reset()
   }
 
   listen () {
-    console.log('Iframe model listen()')
     this.eventManager.on('run:start', this.MobX.action('run:start', this._beforeRun))
     this.eventManager.on('run:end', this.MobX.action('run:end', this._afterRun))
 
     this.eventManager.on('viewport:changed', this.MobX.action('viewport:changed', this._updateViewport))
     this.eventManager.on('config', this.MobX.action('config', (config: any) => {
       const { viewportWidth, viewportHeight } = config
+
       return this._updateViewport({ viewportHeight, viewportWidth })
     }))
 
@@ -155,7 +167,6 @@ export class IframeModel {
     clearInterval(this.intervalId)
 
     this.state.highlightUrl = false
-    console.log(this.originalState)
 
     if (!this.originalState || !this.originalState.body) {
       return this._clearMessage()
@@ -201,7 +212,7 @@ export class IframeModel {
 
     this.state.snapshot = {
       showingHighlights: true,
-      stateIndex: 0
+      stateIndex: 0,
     }
 
     this.state.messageTitle = 'DOM Snapshot'

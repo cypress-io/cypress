@@ -1,6 +1,6 @@
 import type { Store } from './src/store'
 import type MobX from 'mobx'
-import type { AutSnapshot } from '@packages/types'
+import type { AutSnapshot } from './src/runner/iframe-model'
 
 interface ConnectionInfo { 
   automationElement: '__cypress-string',
