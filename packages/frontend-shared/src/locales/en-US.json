@@ -9,7 +9,7 @@
     },
     "fileSearch": {
       "byFilenameInput": "Search by filename...",
-      "byExtensionInput": "Extensions to include e.g. *.tsx, *.jsx, *.vue",
+      "byExtensionInput": "Extensions to include e.g. *.tsx, *.vue",
       "matchesIndicatorEmptyFileSearch": "No Matches | 1 Match | { denominator } Matches",
       "matchesIndicator": "No Matches | {numerator} of {denominator} Matches"
     },

@@ -3,7 +3,7 @@ import { useI18n } from '@cy/i18n'
 import { defineComponent } from 'vue'
 import BookCodeIcon from '~icons/cy/book-code_x48';
 
-const ImportFromStoryCard = () => defineComponent({
+const ImportFromStoryCard = defineComponent({
   setup: () => {
     const { t } = useI18n()
     return () => CardWrapper({

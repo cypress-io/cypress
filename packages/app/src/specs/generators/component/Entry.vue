@@ -1,6 +1,6 @@
 <template>
   <StandardModalBody>
-    Body
+    <FileMatch/>
   </StandardModalBody>
   <StandardModalFooter>
     <Button>Hello!</Button>
@@ -13,6 +13,7 @@ import { useI18n } from '@cy/i18n'
 import StandardModalBody from '@cy/components/StandardModalBody.vue'
 import StandardModalFooter from '@cy/components/StandardModalFooter.vue'
 import Button from '@cy/components/Button.vue'
+import FileMatch from '../../../components/FileMatch.vue'
 
 const props = defineProps<{
   title: string,

@@ -1,12 +1,12 @@
 <template>
   <button
     style="width: fit-content"
-    class="flex items-center m-2px border rounded gap-8px hocus-default leading-snug"
+    class="flex items-center leading-snug border rounded gap-8px hocus-default"
     :class="classes"
   >
     <span
       v-if="prefixIcon || $slots.prefix"
-      class="justify-self-start flex items-center"
+      class="flex items-center justify-self-start"
     >
       <slot name="prefix">
         <component
@@ -20,7 +20,7 @@
     </span>
     <span
       v-if="suffixIcon || $slots.suffix"
-      class="justify-self-start flex items-center"
+      class="flex items-center justify-self-start"
     >
       <slot name="suffix">
         <component

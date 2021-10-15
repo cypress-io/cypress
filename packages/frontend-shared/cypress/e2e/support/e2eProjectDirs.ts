@@ -60,7 +60,6 @@ export const e2eProjectDirs = [
   'retries-2',
   'same-fixtures-integration-folders',
   'screen-size',
-  'server',
   'shadow-dom-global-inclusion',
   'studio',
   'studio-no-source-maps',

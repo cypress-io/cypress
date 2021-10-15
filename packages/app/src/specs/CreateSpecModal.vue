@@ -1,5 +1,5 @@
 <template>
-  <StandardModal :clickOutside="false" v-model="modal" variant="bare">
+  <StandardModal :clickOutside="false" v-model="show" variant="bare">
     <template #overlay="{classes}">
       <DialogOverlay :class="classes" class="bg-gray-900 opacity-[0.97]" />
     </template>
@@ -30,12 +30,18 @@ import { DialogOverlay } from '@headlessui/vue'
 import { ref } from 'vue'
 import Button from '@cy/components/Button.vue'
 import StandardModal from '@cy/components/StandardModal.vue'
+import { useVModels } from '@vueuse/core'
+
+const props = defineProps<{
+  show: boolean
+  currentGenerator: SpecGenerator | null,
+}>()
+
+const emits = defineEmits<{
+  (event: 'update:show', value: boolean): void
+}>()
 
 const modal = ref(true)
 const title = ref('')
 const description = ref('')
-
-defineProps<{
-  currentGenerator: SpecGenerator | null,
-}>()
 </script>

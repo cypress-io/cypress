@@ -23,10 +23,10 @@
           </DialogTitle>
           <button
             aria-label="Close"
-            class="hocus-default"
+            class="border-transparent rounded-full hocus-default border-1"
             @click="setIsOpen(false)"
           >
-            <i-cy-delete_x12 class="icon-dark-gray-400 w-12px h-12px" />
+            <i-cy-delete_x12 class="icon-dark-gray-400 w-12px h-12px m-4px" />
           </button>
         </div>
 

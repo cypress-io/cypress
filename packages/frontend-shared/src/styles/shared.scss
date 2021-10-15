@@ -39,6 +39,11 @@ body {
 // Taken from Tailwind CSS Forms -- a plugin for tailwind.
 // We could probably add these into WindiCSS directly
 // https://github.com/tailwindlabs/tailwindcss-forms
+// [type="search"]::-webkit-search-cancel-button,
+// [type="search"]::-webkit-search-decoration {
+//   -webkit-appearance: none !important;
+//   appearance: none !important;
+// }
 
 [multiple],
 [type=date],

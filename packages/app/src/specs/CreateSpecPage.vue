@@ -1,5 +1,5 @@
 <template>
-  <CreateSpecModal :currentGenerator="currentGenerator"/>
+  <CreateSpecModal v-model:show="showModal" :currentGenerator="currentGenerator"/>
   <div class="overflow-scroll text-center max-w-600px">
     <h1
       data-testid="create-spec-page-title"
@@ -64,11 +64,11 @@ const props = defineProps<{
 
 const generators = computed(() => _generators.filter(g => g.matches(props.testingType)))
 const currentGenerator: Ref<null | SpecGenerator> = ref(null)
-const modal = ref(false)
+const showModal = ref(false)
 
 const openModal = (id) => {
-  currentGenerator.value = find(generators.value, id) || null
-  modal.value = true
+  currentGenerator.value = find(generators.value, { id }) || null
+  showModal.value = true
 }
 
 const goToSpecsPattern = () => {}

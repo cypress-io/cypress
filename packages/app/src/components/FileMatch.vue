@@ -28,7 +28,7 @@
 
 
 <template>
-  <div class="inline-flex items-center rounded border-1 w-592px hocus-default focus-within-default h-40px">
+  <div class="inline-flex items-center w-full rounded border-1 hocus-default focus-within-default h-40px">
   <FileMatchButton @click="toggleExpanded" :expanded="expanded">
     <span v-if="!expanded">{{ extensionPattern }}</span>
   </FileMatchButton>
@@ -44,7 +44,7 @@
   </FileMatchIndicator>
   </div>
 
-<div class="inline-flex items-center rounded mt-8px border-1 w-592px hocus-default focus-within-default h-40px" :class="{ 'hidden' : !expanded }">
+<div class="inline-flex items-center w-full rounded mt-8px border-1 hocus-default focus-within-default h-40px" :class="{ 'hidden' : !expanded }">
   <div class="inline-flex items-center flex-grow group">
     <i-cy-magnifying-glass_x16 class="inline-block ml-12px mr-8px icon-light-gray-50 icon-dark-gray-500 group-focus-within:icon-light-indigo-50 group-focus-within:icon-dark-indigo-400"/>
     <FileMatchInput v-model="pattern" :placeholder="t('components.fileSearch.byFilenameInput')"/>
