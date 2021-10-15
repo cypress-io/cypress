@@ -1,14 +1,11 @@
 <template>
   <template v-if="props.gql?.projects?.length">
     <!-- If there are projects -->
+    <GlobalPageHeader
+      v-model="match"
+      @add-project="handleAddProject"
+    />
     <div class="grid pt-6 grid-cols-2 gap-6">
-      <div class="min-w-full col-start-1 col-end-3 flex items-center gap-6">
-        <GlobalPageHeader
-          v-model="match"
-          @add-project="handleAddProject"
-        />
-      </div>
-
       <GlobalProjectCard
         v-for="project in filteredProjects"
         :key="project.id"

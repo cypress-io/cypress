@@ -1,29 +1,28 @@
 <template>
-  <Input
-    v-model="localValue"
-    type="search"
-    class="min-w-200px w-80% flex-grow"
-    :placeholder="t('globalPage.searchPlaceholder')"
-  />
-  <input
-    ref="fileInputRef"
-    type="file"
-    class="hidden"
-    webkitdirectory
-    webkitRelativePath
-    @change="handleFileSelection"
-  >
+  <div class="min-w-full col-start-1 col-end-3 flex items-center gap-6 mb-24px">
+    <Input
+      v-model="localValue"
+      type="search"
+      class="min-w-200px w-80% flex-grow"
+      :placeholder="t('globalPage.searchPlaceholder')"
+    />
+    <Button
+      :prefix-icon="IconPlus"
+      aria-controls="fileupload"
+      prefix-icon-class="text-center justify-center text-lg"
+      class="w-20% min-w-120px text-size-16px h-full hocus-default"
+      data-testid="addProjectButton"
+      size="lg"
+      @click="showDropzone = !showDropzone"
+    >
+      {{ t('globalPage.addProjectButton') }}
+    </Button>
+  </div>
 
-  <Button
-    :prefix-icon="IconPlus"
-    aria-controls="fileupload"
-    prefix-icon-class="text-center justify-center text-lg"
-    class="w-20% min-w-120px text-size-16px h-full focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500"
-    data-testid="addProjectButton"
-    @click="handleButtonClick"
-  >
-    {{ t('globalPage.addProjectButton') }}
-  </Button>
+  <FileDropzone
+    v-if="showDropzone"
+    @addProject="emit('addProject', $event)"
+  />
 </template>
 
 <script lang="ts" setup>
@@ -31,44 +30,21 @@ import { ref } from 'vue'
 import Button from '@cy/components/Button.vue'
 import Input from '@cy/components/Input.vue'
 import IconPlus from '~icons/mdi/plus'
+import FileDropzone from './FileDropzone.vue'
 import { useModelWrapper } from '@packages/frontend-shared/src/composables'
 import { useI18n } from '@cy/i18n'
 
-const fileInputRef = ref<HTMLInputElement>()
+const showDropzone = ref(false)
 const { t } = useI18n()
 
 const props = defineProps<{
   modelValue: string
 }>()
 
-const emits = defineEmits<{
+const emit = defineEmits<{
   (e: 'update:modelValue', value: string): void
   (e: 'addProject', value: string): void
 }>()
 
-function handleButtonClick () {
-  fileInputRef.value?.click()
-}
-
-function handleFileSelection (e: Event) {
-  const target = e.target as HTMLInputElement
-  const files = target.files
-  const path = getFilePath(files)
-
-  emits('addProject', path)
-}
-
-type WebkitFile = File & { path: string }
-function getFilePath (files: FileList | null) {
-  if (files) {
-    const file = files[0] as WebkitFile
-    const path = file?.path ?? ''
-
-    return path
-  }
-
-  return ''
-}
-
-const localValue = useModelWrapper(props, emits, 'modelValue')
+const localValue = useModelWrapper(props, emit, 'modelValue')
 </script>
