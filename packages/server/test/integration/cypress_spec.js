@@ -108,6 +108,7 @@ describe('lib/cypress', () => {
   require('mocha-banner').register()
 
   beforeEach(function () {
+    process.chdir(previousCwd)
     this.timeout(8000)
 
     cache.__removeSync()
@@ -499,7 +500,7 @@ describe('lib/cypress', () => {
         ])
       }).each(ensureDoesNotExist)
       .then(() => {
-        this.expectExitWithErr('CONFIG_FILE_NOT_FOUND', this.pristinePath)
+        this.expectExitWithErr('NO_DEFAULT_CONFIG_FILE_FOUND', this.pristinePath)
       })
     })
 
@@ -839,17 +840,18 @@ describe('lib/cypress', () => {
     // also make sure we test the rest of the integration functionality
     // for headed errors! <-- not unit tests, but integration tests!
     it('logs error and exits when project folder has read permissions only and cannot write cypress.json', function () {
-      // test disabled if running as root - root can write all things at all times
+      // test disabled if running as root (such as inside docker) - root can write all things at all times
       if (process.geteuid() === 0) {
         return
       }
 
       const permissionsPath = path.resolve('./permissions')
-
       const cypressJson = path.join(permissionsPath, 'cypress.json')
 
-      return fs.outputFileAsync(cypressJson, '{}')
+      return fs.mkdirAsync(permissionsPath)
       .then(() => {
+        return fs.outputFileAsync(cypressJson, '{}')
+      }).then(() => {
         // read only
         return fs.chmodAsync(permissionsPath, '555')
       }).then(() => {
@@ -857,9 +859,9 @@ describe('lib/cypress', () => {
       }).then(() => {
         return fs.chmodAsync(permissionsPath, '777')
       }).then(() => {
-        return fs.removeAsync(permissionsPath)
-      }).then(() => {
-        this.expectExitWithErr('ERROR_READING_FILE', path.join(permissionsPath, 'cypress.json'))
+        this.expectExitWithErr('ERROR_WRITING_FILE', permissionsPath)
+      }).finally(() => {
+        return fs.rmdir(permissionsPath, { recursive: true })
       })
     })
 

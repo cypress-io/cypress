@@ -3,7 +3,7 @@ import { action, computed, observable } from 'mobx'
 import { FileDetails } from '@packages/ui-components'
 
 import Attempt from '../attempts/attempt-model'
-import Err from '../errors/err-model'
+import Err, { ErrProps } from '../errors/err-model'
 import { HookProps } from '../hooks/hook-model'
 import Runnable, { RunnableProps } from '../runnables/runnable-model'
 import { CommandProps } from '../commands/command-model'
@@ -18,7 +18,7 @@ export type UpdateTestCallback = () => void
 
 export interface TestProps extends RunnableProps {
   state: TestState | null
-  err?: Err
+  err?: ErrProps
   isOpen?: boolean
   agents?: Array<AgentProps>
   commands?: Array<CommandProps>

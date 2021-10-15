@@ -87,7 +87,7 @@ export default {
           padding: '20px',
           width: dimensions('outerWidth'),
           height: dimensions('outerHeight'),
-        })
+        }) as JQuery<HTMLIFrameElement>
 
         $iframes.eq(idx).replaceWith($placeholder)
         const contents = `\

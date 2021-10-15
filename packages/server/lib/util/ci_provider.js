@@ -505,7 +505,7 @@ const _providerCommitParams = () => {
       message: env.DRONE_COMMIT_MESSAGE,
       authorName: env.DRONE_COMMIT_AUTHOR,
       authorEmail: env.DRONE_COMMIT_AUTHOR_EMAIL,
-      // remoteOrigin: ???
+      remoteOrigin: env.DRONE_GIT_HTTP_URL,
       defaultBranch: env.DRONE_REPO_BRANCH,
     },
     githubActions: {

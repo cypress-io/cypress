@@ -10,7 +10,24 @@ const newLineRe = /\n/g
 
 export default (Commands, Cypress, cy) => {
   Commands.addAll({ prevSubject: 'element' }, {
-    select (subject, valueOrText, options = {}) {
+    // TODO: any -> Partial<Cypress.SelectOptions>
+    select (subject, valueOrTextOrIndex, options: any = {}) {
+      if (
+        !_.isNumber(valueOrTextOrIndex)
+        && !_.isString(valueOrTextOrIndex)
+        && !_.isArray(valueOrTextOrIndex)
+      ) {
+        $errUtils.throwErrByPath('select.invalid_argument', { args: { value: JSON.stringify(valueOrTextOrIndex) } })
+      }
+
+      if (
+        _.isArray(valueOrTextOrIndex)
+        && valueOrTextOrIndex.length > 0
+        && !_.some(valueOrTextOrIndex, (val) => _.isNumber(val) || _.isString(val))
+      ) {
+        $errUtils.throwErrByPath('select.invalid_array_argument', { args: { value: JSON.stringify(valueOrTextOrIndex) } })
+      }
+
       const userOptions = options
 
       options = _.defaults({}, userOptions, {
@@ -19,7 +36,7 @@ export default (Commands, Cypress, cy) => {
         force: false,
       })
 
-      const consoleProps = {}
+      const consoleProps: Record<string, any> = {}
 
       if (options.log) {
         // figure out the options which actually change the behavior of clicks
@@ -63,19 +80,23 @@ export default (Commands, Cypress, cy) => {
         $errUtils.throwErrByPath('select.multiple_elements', { args: { num: options.$el.length } })
       }
 
-      // normalize valueOrText if its not an array
-      valueOrText = [].concat(valueOrText).map((v) => {
+      // normalize valueOrTextOrIndex if its not an array
+      valueOrTextOrIndex = [].concat(valueOrTextOrIndex).map((v: any) => {
+        if (_.isNumber(v) && (!_.isInteger(v) || v < 0)) {
+          $errUtils.throwErrByPath('select.invalid_number', { args: { index: v } })
+        }
+
         // https://github.com/cypress-io/cypress/issues/16045
         // replace `&nbsp;` in the text to `\us00a0` to find match.
         // @see https://stackoverflow.com/a/53306311/1038927
-        return v.replace(/&nbsp;/g, '\u00a0')
+        return _.isNumber(v) ? v : v.replace(/&nbsp;/g, '\u00a0')
       })
 
       const multiple = options.$el.prop('multiple')
 
       // throw if we're not a multiple select and we've
       // passed an array of values
-      if (!multiple && valueOrText.length > 1) {
+      if (!multiple && valueOrTextOrIndex.length > 1) {
         $errUtils.throwErrByPath('select.invalid_multiple')
       }
 
@@ -88,15 +109,15 @@ export default (Commands, Cypress, cy) => {
           $errUtils.throwErrByPath('select.disabled', { args: { node } })
         }
 
-        const values = []
-        const optionEls = []
+        const values: string[] = []
+        const optionEls: JQuery<any>[] = []
         const optionsObjects = options.$el.find('option').map((index, el) => {
           // push the value in values array if its
           // found within the valueOrText
           const value = $elements.getNativeProp(el, 'value')
           const optEl = $dom.wrap(el)
 
-          if (valueOrText.includes(value)) {
+          if (valueOrTextOrIndex.includes(value) || valueOrTextOrIndex.includes(index)) {
             optionEls.push(optEl)
             values.push(value)
           }
@@ -124,7 +145,7 @@ export default (Commands, Cypress, cy) => {
           notAllUniqueValues = uniqueValues.length !== optionsObjects.length
 
           _.each(optionsObjects, (obj) => {
-            if (valueOrText.includes(obj.text)) {
+            if (valueOrTextOrIndex.includes(obj.text)) {
               optionEls.push(obj.$el)
               const objValue = obj.value
 
@@ -137,13 +158,13 @@ export default (Commands, Cypress, cy) => {
         // we have more than 1 option to set then blow up
         if (!multiple && (values.length > 1)) {
           $errUtils.throwErrByPath('select.multiple_matches', {
-            args: { value: valueOrText.join(', ') },
+            args: { value: valueOrTextOrIndex.join(', ') },
           })
         }
 
-        if (!values.length) {
+        if (!values.length && !(_.isArray(valueOrTextOrIndex) && valueOrTextOrIndex.length === 0)) {
           $errUtils.throwErrByPath('select.no_matches', {
-            args: { value: valueOrText.join(', ') },
+            args: { value: valueOrTextOrIndex.join(', ') },
           })
         }
 
@@ -246,7 +267,7 @@ export default (Commands, Cypress, cy) => {
               let selectedIndex = 0
 
               _.each(optionEls, ($el) => {
-                const index = _.findIndex(optionsObjects, (optionObject) => {
+                const index = _.findIndex(optionsObjects, (optionObject: any) => {
                   return $el.text() === optionObject.originalText
                 })
 
