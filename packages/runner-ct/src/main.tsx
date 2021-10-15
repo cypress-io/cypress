@@ -1,4 +1,5 @@
 import React from 'react'
+import _ from 'lodash'
 import ReactDOM from 'react-dom'
 import $Cypress from '@packages/driver'
 const driverUtils = $Cypress.utils
@@ -13,6 +14,10 @@ export function getSpecUrl (namespace: string, spec: FoundSpec, prefix = '') {
 }
 
 const UnifiedRunner = {
+  _,
+
+  CypressJQuery: $Cypress.$,
+
   logger,
 
   dom,

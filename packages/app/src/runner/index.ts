@@ -100,6 +100,8 @@ function setupRunner (done: () => void) {
   _autIframeModel = new window.UnifiedRunner.AutIframe(
     'Test Project',
     window.UnifiedRunner.eventManager,
+    window.UnifiedRunner._,
+    window.UnifiedRunner.CypressJQuery,
     window.UnifiedRunner.logger,
     window.UnifiedRunner.dom,
     window.UnifiedRunner.visitFailure,

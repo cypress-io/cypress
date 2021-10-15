@@ -88,6 +88,8 @@ declare global {
       dom: any
       visitFailure: any
       blankContents: any
+      _: any // lodash
+      CypressJQuery: any
 
       studioRecorder: any
       selectorPlaygroundModel: any

@@ -1,7 +1,7 @@
-import _, { DebouncedFunc } from 'lodash'
-import $Cypress from '@packages/driver'
+import type { DebouncedFunc } from 'lodash'
 
-const $ = $Cypress.$
+// JQuery bundled w/ Cypress
+type $CypressJQuery = any
 
 export class AutIframe {
   debouncedToggleSelectorPlayground: DebouncedFunc<(isEnabled: any) => void>
@@ -11,6 +11,8 @@ export class AutIframe {
   constructor (
     private projectName: string,
     private eventManager: any,
+    private _: any,
+    private $: $CypressJQuery,
     private logger: any,
     private dom: any,
     private visitFailure: (props: any) => string,
@@ -24,11 +26,11 @@ export class AutIframe {
       sessionLifecycle: () => string
     },
   ) {
-    this.debouncedToggleSelectorPlayground = _.debounce(this.toggleSelectorPlayground, 300)
+    this.debouncedToggleSelectorPlayground = this._.debounce(this.toggleSelectorPlayground, 300)
   }
 
   create () {
-    this.$iframe = $('<iframe>', {
+    this.$iframe = this.$('<iframe>', {
       id: `Your App: '${this.projectName}'`,
       class: 'aut-iframe',
     })
@@ -135,17 +137,17 @@ export class AutIframe {
 
     // remove all attributes
     if ($html[0]) {
-      oldAttrs = _.map($html[0].attributes, (attr) => {
+      oldAttrs = this._.map($html[0].attributes, (attr) => {
         return attr.name
       })
     }
 
-    _.each(oldAttrs, (attr) => {
+    this._.each(oldAttrs, (attr) => {
       $html.removeAttr(attr)
     })
 
     // set the ones specified
-    _.each(htmlAttrs, (value, key) => {
+    this._.each(htmlAttrs, (value, key) => {
       $html.attr(key, value)
     })
   }
@@ -154,7 +156,7 @@ export class AutIframe {
     const $head = this._contents()?.find('head')
     const existingStyles = $head?.find('link[rel="stylesheet"],style')
 
-    _.each(styles, (style, index) => {
+    this._.each(styles, (style, index) => {
       if (style.href) {
         // make a best effort at not disturbing <link> stylesheets
         // if possible by checking to see if the existing head has a
@@ -186,7 +188,7 @@ export class AutIframe {
     }
 
     if (existingStyle.href !== style.href) {
-      $(existingStyle).replaceWith(linkTag)
+      this.$(existingStyle).replaceWith(linkTag)
     }
   }
 
@@ -194,7 +196,7 @@ export class AutIframe {
     const styleTag = this._styleTag(style)
 
     if (existingStyle) {
-      $(existingStyle).replaceWith(styleTag)
+      this.$(existingStyle).replaceWith(styleTag)
     } else {
       // no existing style at this index, so no more styles at all in
       // the head, so just append it
@@ -203,7 +205,7 @@ export class AutIframe {
   }
 
   _insertBodyStyles ($body, styles: Record<string, any> = {}) {
-    _.each(styles, (style) => {
+    this._.each(styles, (style) => {
       $body.append(style.href ? this._linkTag(style) : this._styleTag(style))
     })
   }
@@ -243,10 +245,10 @@ export class AutIframe {
     }
 
     $el.each((__, element) => {
-      const $_el = $(element)
+      const $_el = this.$(element)
 
       // bail if our el no longer exists in the parent body
-      if (!$.contains(body, element)) return
+      if (!this.$.contains(body, element)) return
 
       // switch to using outerWidth + outerHeight
       // because we want to highlight our element even
@@ -301,7 +303,7 @@ export class AutIframe {
     if (!$body) return
 
     let el = e.target
-    let $el = $(el)
+    let $el = this.$(el)
 
     const $ancestorHighlight = $el.closest('.__cypress-selector-playground')
 
@@ -314,7 +316,7 @@ export class AutIframe {
 
       $highlight.css('display', 'none')
       el = this._document().elementFromPoint(e.clientX, e.clientY)
-      $el = $(el)
+      $el = this.$(el)
       $highlight.css('display', 'block')
     }
 
@@ -423,7 +425,7 @@ export class AutIframe {
         this.dom.addCssAnimationDisabler(this._body())
       }
 
-      _.each(config.blackout, (selector) => {
+      this._.each(config.blackout, (selector) => {
         this.dom.addBlackout(this._body(), selector)
       })
     } catch (err) {

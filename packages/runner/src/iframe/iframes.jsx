@@ -1,4 +1,5 @@
 import cs from 'classnames'
+import * as _ from 'lodash'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 import * as MobX from 'mobx'
@@ -76,6 +77,8 @@ export default class Iframes extends Component {
     this.autIframe = new AutIframe(
       this.props.config,
       this.props.eventManager,
+      _,
+      $,
       this.props.config.projectName,
       this.props.eventManager,
       logger,

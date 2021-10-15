@@ -1,4 +1,5 @@
 import cs from 'classnames'
+import _ from 'lodash'
 import React, { useRef, useEffect } from 'react'
 import * as MobX from 'mobx'
 import $Cypress from '@packages/driver'
@@ -41,6 +42,8 @@ export const Iframes = namedObserver('Iframes', ({
   const autIframe = useRef(new AutIframe(
     config.projectName,
     eventManager,
+    _,
+    $Cypress.$,
     logger,
     dom,
     visitFailure,
