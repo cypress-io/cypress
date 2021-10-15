@@ -10,12 +10,11 @@
       v-if="tsInstalled"
       class="relative p-4"
     >
-      <PrismJs
+      <ShikiHighlight
         :key="language"
-        :language="language"
-      >
-        {{ code }}
-      </PrismJs>
+        :lang="language || 'js'"
+        :code="code || ''"
+      />
       <CopyButton
         v-if="manualCreate && code"
         :text="code"
@@ -35,6 +34,7 @@ import CopyButton from '@cy/components/CopyButton.vue'
 import { ConfigFileFragment, ConfigFile_AppCreateConfigFileDocument, ConfigFile_AppCreateComponentIndexHtmlDocument } from '../generated/graphql'
 import { useMutation } from '@urql/vue'
 import { useI18n } from '@cy/i18n'
+import ShikiHighlight from '../../../frontend-shared/src/components/ShikiHighlight.vue'
 
 const { t } = useI18n()
 

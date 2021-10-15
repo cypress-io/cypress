@@ -13,7 +13,9 @@
     "cypress:run": "cross-env TZ=America/New_York node ../../scripts/cypress run-ct --project ${PWD}",
     "dev": "vite --open"
   },
-  "dependencies": {},
+  "dependencies": {
+    "shiki": "^0.9.12"
+  },
   "devDependencies": {
     "@antfu/utils": "^0.3.0",
     "@cypress/vite-dev-server": "0.0.0-development",
