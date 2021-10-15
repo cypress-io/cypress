@@ -118,9 +118,9 @@
   },
   "globalPage": {
     "empty": {
-      "title": "Welcome to Cypress!",
-      "helper": "Add your first project below to start testing with Cypress.",
-      "dropText": "Drag your project directory here or {0}",
+      "title": "Add Project",
+      "helper": "Get started by adding your first project below.",
+      "dropText": "Drag your project here or {0}",
       "browseManually": "browse manually."
     },
     "searchPlaceholder": "Search Projects",

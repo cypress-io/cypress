@@ -3,11 +3,11 @@
     <div class="flex items-center justify-between max-content">
       <div class="flex items-center">
         <img
-          class="mr-2 w-32px h-32px"
+          class="mr-18px w-32px h-32px"
           src="../images/cypress-dark.png"
         >
         <span
-          class="text-primary"
+          class="text-indigo-500"
           @click="clearActiveProject"
         >Projects</span>
         <!-- TODO: Replace with a cy icon -->
