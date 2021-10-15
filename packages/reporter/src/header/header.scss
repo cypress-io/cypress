@@ -166,9 +166,14 @@
       }
     }
 
-    span:not(:last-child) {
+    span {
       button {
-        border-right: 1px solid $gray-900;
+        height: 30px;
+      }
+      &:not(:last-child) {
+        button {
+          border-right: 1px solid $gray-900;
+        }
       }
     }
   }
