@@ -13,7 +13,7 @@ async function initHighlighter () {
   }
 
   highlighter = await getHighlighter({
-    themes: ['cypress'],
+    themes: ['cypress.theme'],
     langs: ['typescript', 'javascript', 'css', 'json', 'yaml'],
   })
 }

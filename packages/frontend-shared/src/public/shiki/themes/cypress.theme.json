@@ -13,7 +13,7 @@
         "source.groovy.embedded"
       ],
       "settings": {
-        "foreground": "#000000ff"
+        "foreground": "#0000ff"
       }
     },
     {
@@ -37,7 +37,7 @@
     {
       "scope": "comment",
       "settings": {
-        "foreground": "#008000"
+        "foreground": "#FF0000"
       }
     },
     {
