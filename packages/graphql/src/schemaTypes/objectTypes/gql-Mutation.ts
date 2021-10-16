@@ -111,7 +111,6 @@ export const mutation = mutationType({
       type: Wizard,
       description: 'Installs the dependencies for the component testing step',
       resolve: (_, args, ctx) => {
-        // ctx.wizardData
         return ctx.wizardData
       },
     })
@@ -203,7 +202,7 @@ export const mutation = mutationType({
           ctx.coreData.baseError = null
         } catch (error: any) {
           ctx.coreData.baseError = {
-            header: 'Cypress Configuration Error',
+            title: 'Cypress Configuration Error',
             message: error.message,
             stack: error.stack,
           }

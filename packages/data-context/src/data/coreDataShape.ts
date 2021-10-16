@@ -52,7 +52,6 @@ export interface WizardDataShape {
 }
 
 export interface BaseErrorDataShape {
-  header: string
   title?: string
   message: string
   stack?: string

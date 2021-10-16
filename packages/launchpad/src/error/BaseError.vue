@@ -73,11 +73,10 @@ import Button from '@cy/components/Button.vue'
 import { computed } from 'vue'
 import { useI18n } from '@cy/i18n'
 import type { BaseErrorFragment } from '../generated/graphql'
-import { lastMutationRetry } from '@packages/frontend-shared/src/graphql/urqlExchangeLatestMutation'
+import { makeUrqlClient } from '@packages/frontend-shared/src/graphql/urqlClient'
 
 gql`
 fragment BaseError on BaseError {
-  header
   title
   message
   stack
@@ -94,14 +93,24 @@ const props = defineProps<{
   gql: BaseErrorFragment
 }>()
 
+const latestOperation = window.localStorage.getItem('latestGQLOperation')
+
 const retry = () => {
-  lastMutationRetry()
+  const client = makeUrqlClient('launchpad')
+
+  const op = latestOperation ? JSON.parse(latestOperation) : null
+
+  return client.reexecuteOperation(
+    client.createRequestOperation('mutation', op, {
+      requestPolicy: 'cache-and-network',
+    }),
+  )
 }
 
-const headerText = computed(() => props.gql.header ? props.gql.header : t('launchpadErrors.generic.header'))
+const headerText = computed(() => props.gql.title ? props.gql.title : t('launchpadErrors.generic.header'))
 const errorMessage = computed(() => props.gql.message ? props.gql.message : null)
 const stack = computed(() => props.gql.stack ? props.gql.stack : null)
 const lastMutationDefined = computed(() => {
-  return Boolean(lastMutationRetry)
+  return Boolean(latestOperation)
 })
 </script>
