@@ -645,7 +645,7 @@ const getCaretPosition = function (el) {
   return null
 }
 
-const interceptSelect = function () {
+const interceptSelect = function (this: any) {
   if ($elements.isInput(this) && !$elements.canSetSelectionRangeElement(this)) {
     setSelectionRange(this, 0, $elements.getNativeProp(this, 'value').length)
   }
