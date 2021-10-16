@@ -6476,6 +6476,7 @@ exports['src/cypress/runner retries mochaEvents screenshots retry screenshot in 
       "height": 660
     },
     "scaled": false,
+    "overwrite": false,
     "blackout": [],
     "startTime": "match.string",
     "current": 1,
@@ -6491,7 +6492,8 @@ exports['src/cypress/runner retries mochaEvents screenshots retry screenshot in 
   "scale": false,
   "waitForCommandSynchronization": false,
   "disableTimersAndAnimations": true,
-  "blackout": []
+  "blackout": [],
+  "overwrite": false
 }
 
 exports['serialize state - retries'] = {
