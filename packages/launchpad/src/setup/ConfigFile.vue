@@ -10,6 +10,7 @@
       :key="language"
       :lang="language || 'js'"
       :code="code || ''"
+      line-numbers
     />
     <CopyButton
       v-if="manualCreate && code"

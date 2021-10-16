@@ -34,7 +34,6 @@
       :code="localCode"
       lang="javascript"
       class="border border-gray-100 rounded text-14px leading-20px"
-      readonly
       line-numbers
     />
   </div>
