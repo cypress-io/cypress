@@ -56,11 +56,15 @@ const highlightedCode = computed(() => {
 
 <style lang="scss">
 .shiki {
-  @apply bg-transparent
+  @apply bg-transparent p-4
 }
 
 .inline .shiki {
-  @apply py-1 px-2 bg-gray-50 text-gray-200 overflow-x-auto
+  @apply py-1 px-2 bg-gray-50 text-gray-500 overflow-x-auto
+}
+
+.line-numbers .shiki{
+  @apply p-0
 }
 
 .line-numbers .shiki code {
@@ -71,7 +75,7 @@ const highlightedCode = computed(() => {
 .line-numbers .shiki code .line::before {
   content: counter(step);
   counter-increment: step;
-  @apply text-gray-200 bg-gray-50 w-10 inline-block text-right px-2
+  @apply bg-gray-50 text-gray-500 w-10 inline-block text-right px-2 mr-4
 }
 
 .line-numbers .shiki code .line:first-child::before{

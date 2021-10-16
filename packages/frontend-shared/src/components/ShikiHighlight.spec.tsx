@@ -1,8 +1,7 @@
 import ShikiHighlight from './ShikiHighlight.vue'
 import code from '../../windi.config?raw'
 
-const devServerCode = `
-const { defineConfig } = require(’cypress’)
+const devServerCode = `const { defineConfig } = require(’cypress’)
 const { devServer, defineDevServerConfig } = require(’@cypress/vite-dev-server’)
 
 module.exports = defineConfig({
@@ -12,12 +11,11 @@ module.exports = defineConfig({
       entryHtmlFile: 'cypress/component/support/entry.html'
     }),
   },
-})
-`
+})`
 
 describe('<ShikiHighlight/>', () => {
   it('playground', () => {
-    cy.mount(() => <ShikiHighlight code={devServerCode} lang="js" />)
+    cy.mount(() => <ShikiHighlight code={devServerCode} lang="js" lineNumbers />)
   })
 
   it('render the code', () => {
