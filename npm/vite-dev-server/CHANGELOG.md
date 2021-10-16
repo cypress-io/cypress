@@ -1,3 +1,12 @@
+# [@cypress/vite-dev-server-v2.1.1](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v2.1.0...@cypress/vite-dev-server-v2.1.1) (2021-10-04)
+
+
+### Bug Fixes
+
+* **vite-dev-server:** remove base and root from inlineVitConfig types ([#17180](https://github.com/cypress-io/cypress/issues/17180)) ([07e7d0e](https://github.com/cypress-io/cypress/commit/07e7d0ed252bf1a2bd3224f617e1fc2e64f19a06))
+* **vite-dev-server:** replace UserConfig with InlineConfig to allow correct `configFile` types ([#18167](https://github.com/cypress-io/cypress/issues/18167)) ([6e0c2c1](https://github.com/cypress-io/cypress/commit/6e0c2c1af81be750a74bad0528d52de45746a453))
+* **vite-dev-server:** windows `supportFile` + preserve optimize entries ([#18286](https://github.com/cypress-io/cypress/issues/18286)) ([ea2f6a4](https://github.com/cypress-io/cypress/commit/ea2f6a45c7057e51b2fc879ff70da75538fa1002))
+
 # [@cypress/vite-dev-server-v2.1.0](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v2.0.8...@cypress/vite-dev-server-v2.1.0) (2021-09-10)
 
 
