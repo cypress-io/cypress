@@ -32,9 +32,11 @@ onBeforeMount(async () => {
 const props = withDefaults(defineProps<{
   code: string;
   lang: 'javascript' | 'typescript' | 'json' | 'js' | 'ts' | 'yaml';
-  lineNumbers?: boolean
+  lineNumbers?: boolean,
+  inline?: boolean
 }>(), {
   lineNumbers: false,
+  inline: false,
 })
 
 const resolvedLang = computed(() => 'js' === props.lang ? 'javascript' : 'ts' === props.lang ? 'typescript' : props.lang)
@@ -47,15 +49,20 @@ const highlightedCode = computed(() => {
 <template>
   <div
     v-if="highlighterInitialized"
-    :class="{'line-numbers':lineNumbers}"
+    :class="{'line-numbers':lineNumbers, inline }"
     v-html="highlightedCode"
   />
 </template>
 
-<style>
+<style lang="scss">
 .shiki {
-  padding: 16px;
+  @apply bg-transparent
 }
+
+.inline .shiki {
+  @apply py-1 px-2 bg-gray-50 text-gray-200 overflow-x-auto
+}
+
 .line-numbers .shiki code {
   counter-reset: step;
   counter-increment: step 0;
@@ -64,10 +71,14 @@ const highlightedCode = computed(() => {
 .line-numbers .shiki code .line::before {
   content: counter(step);
   counter-increment: step;
-  width: 1rem;
-  margin-right: 1.5rem;
-  display: inline-block;
-  text-align: right;
-  color: rgba(115,138,148,.4)
+  @apply text-gray-200 bg-gray-50 w-10 inline-block text-right px-2
+}
+
+.line-numbers .shiki code .line:first-child::before{
+  @apply pt-4
+}
+
+.line-numbers .shiki code .line:last-child::before{
+  @apply pb-4
 }
 </style>

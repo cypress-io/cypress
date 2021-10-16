@@ -14,10 +14,11 @@
     <div class="inline-grid grid-flow-col justify-start gap-10px">
       <ShikiHighlight
         :code="formattedProjectId"
-        class="max-w-400px text-sm"
+        class="max-w-400px text-sm border border-gray-100 rounded overflow-hidden"
         :prefix-icon="IconCodeBraces"
         prefix-icon-class="text-cool-gray-400"
         lang="yaml"
+        inline
       />
       <Button
         variant="outline"
