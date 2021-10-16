@@ -29,8 +29,8 @@
     "@urql/exchange-execute": "1.1.0",
     "@urql/exchange-graphcache": "4.3.3",
     "@urql/vue": "0.4.3",
-    "@vitejs/plugin-vue": "^1.9.2",
-    "@vitejs/plugin-vue-jsx": "^1.1.8",
+    "@vitejs/plugin-vue": "1.2.4",
+    "@vitejs/plugin-vue-jsx": "1.1.6",
     "@vue/compiler-core": "3.2.6",
     "@vue/compiler-dom": "3.2.6",
     "@vue/compiler-sfc": "3.2.6",
@@ -59,5 +59,32 @@
     "windicss-analysis": "^0.3.4",
     "wonka": "^4.0.15"
   },
-  "module": "es2020"
+  "module": "es2020",
+  "vite": {
+    "optimizeDeps": {
+      "include": [
+        "@testing-library/cypress/add-commands",
+        "@urql/core",
+        "@urql/devtools",
+        "@urql/exchange-execute",
+        "@urql/exchange-graphcache",
+        "@urql/vue",
+        "@vue/test-utils",
+        "cypress-file-upload",
+        "dedent",
+        "fake-uuid",
+        "graphql",
+        "graphql-relay",
+        "graphql/jsutils/Path",
+        "lodash",
+        "path",
+        "shiki",
+        "socket.io-client",
+        "vue",
+        "vue-i18n",
+        "vue-toastification",
+        "wonka"
+      ]
+    }
+  }
 }
