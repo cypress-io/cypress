@@ -58,6 +58,7 @@ export const mutation = mutationType({
     t.liveMutation('clearActiveProject', {
       resolve: async (_, args, ctx) => {
         await ctx.actions.project.clearActiveProject()
+        ctx.actions.wizard.resetWizard()
       },
     })
 
@@ -159,7 +160,6 @@ export const mutation = mutationType({
     })
 
     t.liveMutation('generateSpecFromStory', {
-      type: 'String',
       description: 'Generate spec from Storybook story',
       args: {
         storyPath: nonNull('String'),
@@ -169,9 +169,7 @@ export const mutation = mutationType({
           throw Error(`Cannot set spec without active project!`)
         }
 
-        const latestSpec = await ctx.actions.storybook.generateSpecFromStory(args.storyPath)
-
-        return latestSpec?.relative
+        await ctx.actions.storybook.generateSpecFromStory(args.storyPath)
       },
     })
 
@@ -231,6 +229,7 @@ export const mutation = mutationType({
         open: booleanArg({ description: 'Whether to open the project when added' }),
       },
       resolve: async (_, args, ctx) => {
+        ctx.actions.wizard.resetWizard()
         await ctx.actions.project.addProject(args)
       },
     })

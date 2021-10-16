@@ -14,7 +14,7 @@ describe('Launchpad: Open Mode', () => {
       ctx.emitter.toLaunchpad()
     })
 
-    cy.get('h1').should('contain', 'Welcome to Cypress')
-    cy.findByText('Choose which method of testing you would like to set up first.')
+    cy.get('h1').should('contain', 'Welcome to Cypress!')
+    cy.findByText('Choose which method of testing you would like to get started with for this project.')
   })
 })

@@ -1,7 +1,7 @@
 <template>
   <template v-if="props.gql?.projects?.length">
     <!-- Welcome Guide can fetch its own information for if it should render -->
-    <WelcomeGuide />
+    <WelcomeGuide :gql="props.gql" />
 
     <!-- If there are projects -->
     <div class="grid grid-cols-1 gap-6 pt-6 grid-cols-2">

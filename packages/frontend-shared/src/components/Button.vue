@@ -6,7 +6,7 @@
   >
     <span
       v-if="prefixIcon || $slots.prefix"
-      class="justify-self-start flex items-center"
+      class="justify-self-start flex items-center pr-2"
     >
       <slot name="prefix">
         <component

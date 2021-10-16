@@ -1,4 +1,4 @@
-import type { FoundSpec, FullConfig } from '@packages/types'
+import type { FullConfig, GeneratedSpec } from '@packages/types'
 import { readCsfOrMdx } from '@storybook/csf-tools'
 import endent from 'endent'
 import * as path from 'path'
@@ -22,16 +22,14 @@ export class StorybookActions {
       config.componentFolder,
     )
 
-    this.ctx.wizardData.generatedSpec = spec
-
-    return spec
+    project.generatedSpec = spec
   }
 
   private async generateSpec (
     storyPath: string,
     projectRoot: string,
     componentFolder: FullConfig['componentFolder'],
-  ): Promise<FoundSpec | null> {
+  ): Promise<GeneratedSpec | null> {
     const specFileExtension = '.cy'
     const parsedFile = path.parse(storyPath)
     const fileName = parsedFile.name.split('.')[0] as string
@@ -72,14 +70,17 @@ export class StorybookActions {
 
     // Can this be obtained from the spec watcher?
     return {
-      absolute: newSpecAbsolute,
-      baseName: parsedNewSpec.base,
-      fileExtension: parsedNewSpec.ext,
-      fileName,
-      name: path.relative(componentFolder || projectRoot, newSpecAbsolute),
-      relative: path.relative(projectRoot, newSpecAbsolute),
-      specFileExtension,
-      specType: 'component',
+      spec: {
+        absolute: newSpecAbsolute,
+        baseName: parsedNewSpec.base,
+        fileExtension: parsedNewSpec.ext,
+        fileName,
+        name: path.relative(componentFolder || projectRoot, newSpecAbsolute),
+        relative: path.relative(projectRoot, newSpecAbsolute),
+        specFileExtension,
+        specType: 'component',
+      },
+      content: newSpecContent,
     }
   }
 
