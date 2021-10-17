@@ -124,7 +124,11 @@
       "browseManually": "browse manually."
     },
     "searchPlaceholder": "Search Projects",
-    "addProjectButton": "Add Project"
+    "addProjectButton": "Add Project",
+    "projectActions": "Project Actions",
+    "removeProject": "Remove Project",
+    "openInIDE": "Open In IDE",
+    "openInFinder": "Open In Finder"
   },
   "welcomePage": {
     "review": "Review the differences between each testing type",
