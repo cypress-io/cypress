@@ -11,6 +11,8 @@
         :key="project.id"
         :gql="project"
         @removeProject="handleRemoveProject"
+        @openInFinder="handleOpenInFinder"
+        @openInIDE="handleOpenInIDE"
       />
     </div>
   </template>
@@ -67,6 +69,14 @@ const addProject = useMutation(GlobalPage_AddProjectDocument)
 
 function handleAddProject (path: string) {
   addProject.executeMutation({ path })
+}
+
+function handleOpenInFinder (path: string) {
+  // todo - add gql mutation for this action
+}
+
+function handleOpenInIDE (path: string) {
+  // todo - add gql mutation for this action
 }
 
 const removeProject = useMutation(GlobalPage_RemoveProjectDocument)

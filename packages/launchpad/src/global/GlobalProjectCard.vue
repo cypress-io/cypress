@@ -19,9 +19,9 @@
           {{ props.gql.title }}
         </p>
         <p
-          class="text-sm text-gray-500 relative flex flex-wrap self-end items-center gap-1 bullet-points children:flex children:items-center children:gap-1"
+          class="text-sm text-gray-500 relative"
         >
-          <span>{{ props.gql.projectRoot }}</span>
+          {{ props.gql.projectRoot }}
         </p>
       </button>
     </div>
@@ -41,6 +41,7 @@
           <button
             :class="{ 'bg-gray-700': active }"
             class="text-left px-16px py-8px border-b border-b-gray-800"
+            @click="emit('removeProject', props.gql.projectRoot)"
           >
             Remove Project
           </button>
@@ -49,6 +50,7 @@
           <button
             :class="{ 'bg-gray-700': active }"
             class="text-left px-16px py-8px border-b border-b-gray-800"
+            @click="emit('openInIDE', props.gql.projectRoot)"
           >
             Open In IDE
           </button>
@@ -57,30 +59,18 @@
           <button
             :class="{ 'bg-gray-700': active }"
             class="text-left px-16px py-8px border-b border-b-gray-800"
+            @click="emit('openInFinder', props.gql.projectRoot)"
           >
             Open In Finder
           </button>
         </MenuItem>
       </MenuItems>
     </Menu>
-    <!-- <button
-      class="h-10"
-      data-testid="removeProjectButton"
-      @click="emit('removeProject', props.gql.projectRoot)"
-    >
-      <Icon
-        icon="ant-design:close-circle-outlined"
-        width="1.5em"
-        height="1.5em"
-        class="text-gray-600"
-      />
-    </button>-->
   </div>
 </template>
 
 <script setup lang="ts">
 import { gql, useMutation } from '@urql/vue'
-import { Icon } from '@iconify/vue'
 import { GlobalProjectCardFragment, GlobalProjectCard_SetActiveProjectDocument } from '../generated/graphql'
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
 
@@ -125,21 +115,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   (event: 'projectSelected', project: GlobalProjectCardFragment): void
   (event: 'removeProject', path: string): void
+  (event: 'openInIDE', path: string): void
+  (event: 'openInFinder', path: string): void
 }>()
 </script>
-
-<style scoped lang="scss">
-// You can't do things like `children:after:....` inside of the inline classes.
-// Not sure why.
-.bullet-points > * {
-  &:after {
-    @apply min-h-4px max-h-4px max-w-4px min-w-4px rounded-full bg-gray-300;
-    content: "";
-    display: inline-block;
-  }
-
-  &:last-child:after {
-    @apply hidden;
-  }
-}
-</style>
