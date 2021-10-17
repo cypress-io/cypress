@@ -15,6 +15,9 @@ describe('<GlobalPageHeader />', () => {
 
     // @ts-ignore = vModel is v-model in vue
     cy.mount(() => (<div class="p-12 overflow-auto resize-x max-w-600px"><GlobalPageHeader onAddProject={fileUploadSpy} vModel={search.value}/></div>))
+
+    cy.contains('button', defaultMessages.globalPage.addProjectButton)
+    .click()
     .get(fileInputSelector)
     .then(($input) => {
       $input.on('change', fileUploadSpy)
@@ -31,11 +34,6 @@ describe('<GlobalPageHeader />', () => {
 
   it('should not display the file input', () => {
     cy.get(fileInputSelector).should('not.be.visible')
-  })
-
-  it('should be accessible', () => {
-    cy.get(addProjectSelector)
-    .should('have.attr', 'aria-controls', 'fileupload')
   })
 
   it('should have webkit attributes', () => {
