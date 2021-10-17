@@ -73,7 +73,3 @@ This project is licensed under the terms of the [MIT license](/LICENSE).
 Let the world know your project is using Cypress.io to test with this cool badge
 
 [![Cypress.io](https://img.shields.io/badge/tested%20with-Cypress-04C38E.svg)](https://www.cypress.io/)
-
-```
-[![Cypress.io](https://img.shields.io/badge/tested%20with-Cypress-04C38E.svg)](https://www.cypress.io/)
-```
