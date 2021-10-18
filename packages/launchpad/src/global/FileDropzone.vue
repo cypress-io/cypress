@@ -1,5 +1,8 @@
 <template>
-  <div ref="projectUpload">
+  <div
+    ref="projectUpload"
+    class="relative"
+  >
     <FileSelector
       v-slot="{ openDialog }"
       v-model="files"
@@ -36,6 +39,13 @@
     >
       {{ uploadName }}
     </div>
+    <button
+      aria-label="Close"
+      class="hocus-default absolute right-20px top-20px"
+      @click="emit('close')"
+    >
+      <i-cy-delete_x12 class="icon-dark-gray-400 w-12px h-12px" />
+    </button>
   </div>
 </template>
 <script setup lang="ts">
@@ -46,22 +56,26 @@ import { useI18n } from '@cy/i18n'
 
 const { t } = useI18n()
 const projectUpload = ref<HTMLDivElement>()
-const files = ref<FileList>([] as any)
+const files = ref<FileList | []>([] as any)
 
 watch(files, (newVal) => {
-  if (newVal.length) {
+  if (newVal?.length) {
     handleFileSelection(newVal)
   }
 })
 
-function handleFileSelection (files: FileList) {
-  const path = getFilePath(files)
+function handleFileSelection (fileList: FileList | []) {
+  const path = getFilePath(fileList)
 
   emit('addProject', path)
+
+  // reset file list between uploads, if we don't do this, a user
+  // accidentally re-uploading a project blocks upload attempts
+  files.value = []
 }
 
 type WebkitFile = File & { path: string }
-function getFilePath (files: FileList | null) {
+function getFilePath (files: FileList | null | []) {
   if (files) {
     const file = files[0] as WebkitFile
     const path = file?.path ?? ''
@@ -74,6 +88,7 @@ function getFilePath (files: FileList | null) {
 
 const emit = defineEmits<{
   (e: 'addProject', value: string): void
+  (e: 'close'): void
 }>()
 
 const uploadName = ref('')
