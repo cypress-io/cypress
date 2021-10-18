@@ -4,7 +4,7 @@
   "tokenColors": [
     {
       "settings": {
-        "foreground": "#000000"
+        "foreground": "-gray-900"
       }
     },
     {
@@ -175,7 +175,7 @@
         "entity.name.function.preprocessor"
       ],
       "settings": {
-        "foreground": "#0000ff"
+        "foreground": "-teal-500"
       }
     },
     {
@@ -199,13 +199,13 @@
     {
       "scope": "storage",
       "settings": {
-        "foreground": "#0000ff"
+        "foreground": "-teal-500"
       }
     },
     {
       "scope": "storage.type",
       "settings": {
-        "foreground": "#0000ff"
+        "foreground": "var(--teal-500)"
       }
     },
     {
@@ -214,7 +214,7 @@
         "keyword.operator.noexcept"
       ],
       "settings": {
-        "foreground": "#0000ff"
+        "foreground": "var(--teal-500)"
       }
     },
     {

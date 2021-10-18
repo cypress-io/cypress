@@ -1,4 +1,4 @@
-import ShikiHighlight from './ShikiHighlight.vue'
+import ShikiHighlight, { initHighlighter } from './ShikiHighlight.vue'
 import code from '../../windi.config?raw'
 
 const devServerCode = `const { defineConfig } = require(’cypress’)
@@ -14,6 +14,10 @@ module.exports = defineConfig({
 })`
 
 describe('<ShikiHighlight/>', () => {
+  beforeEach(async () => {
+    await initHighlighter()
+  })
+
   it('playground', () => {
     cy.mount(() => <ShikiHighlight code={devServerCode} lang="js" lineNumbers />)
   })
