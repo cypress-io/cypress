@@ -73,7 +73,6 @@ import Button from '@cy/components/Button.vue'
 import { computed } from 'vue'
 import { useI18n } from '@cy/i18n'
 import type { BaseErrorFragment } from '../generated/graphql'
-import { makeUrqlClient } from '@packages/frontend-shared/src/graphql/urqlClient'
 
 gql`
 fragment BaseError on BaseError {
@@ -95,13 +94,13 @@ const props = defineProps<{
 
 const latestOperation = window.localStorage.getItem('latestGQLOperation')
 
-const retry = () => {
-  const client = makeUrqlClient('launchpad')
+const retry = async () => {
+  const { launchpadClient } = await import('../main')
 
   const op = latestOperation ? JSON.parse(latestOperation) : null
 
-  return client.reexecuteOperation(
-    client.createRequestOperation('mutation', op, {
+  return launchpadClient.reexecuteOperation(
+    launchpadClient.createRequestOperation('mutation', op, {
       requestPolicy: 'cache-and-network',
     }),
   )
