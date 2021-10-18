@@ -1,5 +1,6 @@
-import { BUNDLERS, FoundBrowser, FoundSpec, GeneratedSpec, ProjectPreference, ResolvedFromConfig } from '@packages/types'
+import { BUNDLERS, FoundBrowser, FoundSpec, GeneratedSpec, ProjectPreferences, ResolvedFromConfig } from '@packages/types'
 import type { NexusGenEnums, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
+import type { BrowserWindow } from 'electron'
 
 export type Maybe<T> = T | null | undefined
 
@@ -26,7 +27,7 @@ export interface ActiveProjectShape extends ProjectShape {
   currentSpecId?: Maybe<string>
   specs?: FoundSpec[]
   config: ResolvedFromConfig[]
-  preferences?: ProjectPreference | null
+  preferences?: ProjectPreferences | null
   generatedSpec: GeneratedSpec | null
 }
 
@@ -52,11 +53,16 @@ export interface WizardDataShape {
   chosenBrowser: FoundBrowser | null
 }
 
+export interface ElectronShape {
+  browserWindow: BrowserWindow | null
+}
+
 export interface CoreDataShape {
   dev: DevStateShape
   app: AppDataShape
   wizard: WizardDataShape
   user: AuthenticatedUserShape | null
+  electron: ElectronShape
 }
 
 /**
@@ -88,5 +94,8 @@ export function makeCoreData (): CoreDataShape {
       chosenBrowser: null,
     },
     user: null,
+    electron: {
+      browserWindow: null,
+    },
   }
 }
