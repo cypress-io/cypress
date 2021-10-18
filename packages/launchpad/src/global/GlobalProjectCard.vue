@@ -36,7 +36,7 @@
           :class="open? 'icon-dark-gray-700' : 'group-hocus:icon-dark-gray-300'"
         />
       </MenuButton>
-      <MenuItems class="absolute bg-gray-900 text-white flex flex-col right-0 -bottom-100px right-18px rounded outline-transparent">
+      <MenuItems class="absolute bg-gray-900 text-white flex flex-col right-0 -bottom-100px right-18px rounded outline-transparent z-40">
         <MenuItem #="{ active }">
           <button
             :class="{ 'bg-gray-700': active }"
