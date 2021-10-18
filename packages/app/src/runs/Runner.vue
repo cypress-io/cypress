@@ -35,7 +35,7 @@ import { useMutation } from '@urql/vue'
 import { UnifiedRunnerAPI } from '../runner'
 import { REPORTER_ID, RUNNER_ID, getRunnerElement, getReporterElement, empty } from '../runner/utils'
 import { gql } from '@urql/core'
-import { Runner_SetCurrentSpecDocument, Specs_RunnerFragment } from '../generated/graphql'
+import { CurrentSpec_RunnerFragment, Runner_SetCurrentSpecDocument, Specs_RunnerFragment } from '../generated/graphql'
 import InlineSpecList from '../specs/InlineSpecList.vue'
 import { getStore } from '../store'
 
@@ -115,20 +115,21 @@ async function selectSpec (id: string) {
   UnifiedRunnerAPI.executeSpec(specToRun.data?.setCurrentSpec.currentSpec)
 }
 
-function executeSpec () {
-  if (!props.gql?.activeProject?.currentSpec) {
-    return
-  }
-
-  UnifiedRunnerAPI.executeSpec(props.gql.activeProject.currentSpec)
+function executeSpec (spec: CurrentSpec_RunnerFragment) {
+  UnifiedRunnerAPI.executeSpec(spec)
 }
 
 onMounted(() => {
-  window.UnifiedRunner.eventManager.on('restart', () => {
-    executeSpec()
+  window.UnifiedRunner.eventManager.on('restart', (spec: CurrentSpec_RunnerFragment) => {
+    console.log('Time to run spec!', spec)
+    executeSpec(spec)
   })
 
-  executeSpec()
+  if (!props.gql.activeProject?.currentSpec) {
+    return
+  }
+
+  executeSpec(props.gql.activeProject.currentSpec)
 })
 
 onBeforeUnmount(() => {

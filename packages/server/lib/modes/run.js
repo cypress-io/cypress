@@ -1079,7 +1079,15 @@ module.exports = {
         // If we do not launch the browser,
         // we tell it that we are ready
         // to receive the next spec
-        return Promise.resolve(this.navigateToNextSpec(options.spec))
+        if (process.env.UNIFIED_RUNNER) {
+          // should we manage current spec in data context or just via url for run mode?
+          // how about open mode?
+          const id = Buffer.from(`Spec:${options.spec.absolute}`).toString('base64')
+          options.ctx.actions.project.setCurrentSpec(id)
+          return Promise.resolve(openProject.runNextSpec(options.spec))
+        } else {
+          return Promise.resolve(this.navigateToNextSpec(options.spec))
+        }
       }
 
       return Promise.join(
@@ -1408,7 +1416,6 @@ module.exports = {
     const { project, browser, onError, ctx } = options
 
     const id = Buffer.from(`Spec:${spec.absolute}`).toString('base64')
-    console.log({ id }, spec)
     ctx.actions.project.setCurrentSpec(id)
     const { isHeadless } = browser
 
@@ -1459,6 +1466,7 @@ module.exports = {
         }),
 
         connection: this.waitForBrowserToConnect({
+          ctx,
           spec,
           project,
           browser,

@@ -518,6 +518,11 @@ export class SocketBase {
     return this.toRunner('change:to:url', url)
   }
 
+  runNextSpec (spec: Cypress.Spec) {
+    console.log('socket-base run next spec')
+    return this.toRunner('run:next:spec', spec)
+  }
+
   close () {
     return this.io.close()
   }

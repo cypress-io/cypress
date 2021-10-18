@@ -85,6 +85,10 @@ export const eventManager = {
       window.location.href = url
     })
 
+    ws.on('run:next:spec', (spec: Cypress.Spec) => {
+      localBus.emit('restart', spec)
+    })
+
     ws.on('automation:push:message', (msg, data = {}) => {
       if (!Cypress) return
 

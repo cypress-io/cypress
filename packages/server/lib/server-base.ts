@@ -583,6 +583,11 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return this._socket && this._socket.changeToUrl(url)
   }
 
+  runNextSpec (spec: Cypress.Spec) {
+    console.log('server-base run next spec')
+    return this._socket && this._socket.runNextSpec(spec)
+  }
+
   onRequest (fn) {
     this._middleware = fn
   }

@@ -91,6 +91,14 @@ export class OpenProject {
     return this.openProject
   }
 
+  runNextSpec (spec: Cypress.Spec) {
+    if (!this.openProject) {
+      return
+    }
+    console.log('open project run next spec')
+    this.openProject.runNextSpec(spec)
+  }
+
   changeUrlToSpec (spec: Cypress.Cypress['spec']) {
     if (!this.openProject) {
       return

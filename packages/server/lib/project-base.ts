@@ -674,6 +674,11 @@ export class ProjectBase<TServer extends Server> extends EE {
     this.server.changeToUrl(url)
   }
 
+  runNextSpec (spec: Cypress.Spec) {
+    console.log('project base run next spec')
+    this.server.runNextSpec(spec)
+  }
+
   shouldCorrelatePreRequests = () => {
     if (!this.browser) {
       return false
