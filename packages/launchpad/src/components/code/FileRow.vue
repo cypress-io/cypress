@@ -64,7 +64,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onBeforeMount, ref } from 'vue'
+import { computed, ref } from 'vue'
 import 'prismjs'
 import 'prismjs/plugins/line-numbers/prism-line-numbers.css'
 import '@packages/frontend-shared/src/styles/prism.scss'
@@ -82,11 +82,7 @@ const props = defineProps<{
 
 const language = computed(() => /\.(\w+)$/.exec(props.filePath)?.[1])
 
-const open = ref(false)
-
-onBeforeMount(() => {
-  open.value = !['valid', 'skipped'].includes(props.status)
-})
+const open = ref(!['valid', 'skipped'].includes(props.status))
 
 const prismInstalled = ref(false)
 
