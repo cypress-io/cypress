@@ -14,7 +14,11 @@
     </div>
     <template v-if="codeGenType">
       <div>
-        Glob Pattern: <input v-model="codeGenGlob">
+        <label for="glob-pattern">Glob Pattern: </label>
+        <input
+          id="glob-pattern"
+          v-model="codeGenGlob"
+        >
       </div>
       <div>
         <ul>
@@ -124,7 +128,6 @@ query NewSpec_SearchCodeGenCandidates($glob: String!) {
         edges {
           ...NewSpec_CodeGenCandidateNode
         }
-
       }
     }
   }
