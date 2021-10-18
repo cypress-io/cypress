@@ -40,7 +40,7 @@
         class="flex items-center p-3 border-t border-gray-200 bg-warning-100 text-warning-600"
       >
         <span class="font-semibold">{{ statusLabel }}: </span>
-        <p class="flex-grow ml-1">
+        <p class="flex-grow ml-1 text-left">
           Please merge the code below with your existing <span class="inline-block px-1 rounded bg-warning-200 text-warning-600">{{ filePath }}</span>
         </p>
         <Button @click="document.location = 'https://docs.cypress.io/config'">
