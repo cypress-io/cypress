@@ -64,7 +64,7 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
 
   it('emits an event to close the modal when "Continue" button is clicked', () => {
     mountSuccess()
-    cy.findByRole('button', { name: text.login.actionContinue }).click().then(async () => {
+    cy.findByRole('button', { name: text.login.actionContinue }).click().then(() => {
       cy.wrap(Cypress.vueWrapper.findComponent(LoginModal).emitted('update:modelValue')?.[0])
       .should('deep.equal', [false])
     })

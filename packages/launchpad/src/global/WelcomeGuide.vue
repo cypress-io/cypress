@@ -29,11 +29,11 @@
           <WelcomeGuideLinks
             class="mb-2"
             :header="t('welcomeGuide.projectListHeader')"
-            :items="projects.slice(0, 3)"
-            @itemSelected="chooseProject"
+            :items="projects"
+            @itemSelected="setActiveProject"
           >
             <template #default="{ item }">
-              {{ item.path }}
+              {{ item.description }}
             </template>
           </WelcomeGuideLinks>
           <WelcomeGuideLinks
@@ -59,48 +59,83 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from '@cy/i18n'
 import Checkbox from '@cy/components/Checkbox.vue'
 import Button from '@cy/components/Button.vue'
 import WelcomeGuideLinks from './WelcomeGuideLinks.vue'
 import IconCircleX from '~icons/akar-icons/circle-x'
 import IconPlaceholder from '~icons/icons8/circle-thin'
-
-const projects = [
-  { path: '~/Documents/GitHub/web' },
-  { path: '~/Documents/GitHub/web/vue-ts-starter' },
-  { path: '~/Documents/GitHub/marketing' },
-
-  // Only show the first 3
-  { path: '~Documents/wherever/definitely-foo' },
-  { path: '~Documents/somewhere/else' },
-]
+import { gql } from '@urql/core'
+import { WelcomeGuideFragment, WelcomeGuide_SetActiveProjectDocument } from '../generated/graphql'
+import { useMutation } from '@urql/vue'
 
 const links = [
   {
     description: 'Getting Started',
-    href: 'https://on.cypress.io/',
+    path: 'https://on.cypress.io/',
   },
   {
     description: 'Learning Academy',
-    href: 'https://on.cypress.io/',
+    path: 'https://on.cypress.io/',
   },
   {
     description: 'Cypress Releases',
-    href: 'https://on.cypress.io/',
+    path: 'https://on.cypress.io/',
   },
 ]
+
+gql`
+fragment WelcomeGuide on App {
+  projects {
+    id
+    projectRoot
+    title
+  }
+}`
+
+gql`
+mutation WelcomeGuide_SetActiveProject($path: String!) {
+  setActiveProject(path: $path) {
+    activeProject {
+      id
+      title
+      projectId
+      projectRoot
+      isFirstTimeCT
+      isFirstTimeE2E
+    }
+  }
+}
+`
 
 const { t } = useI18n()
 const show = ref(true)
 const showWelcomeGuideOnStartup = ref(true)
 
-const chooseProject = (project) => {
-  // TODO: Opens the project
+const props = defineProps<{
+  gql: WelcomeGuideFragment
+}>()
+
+const projects = computed(() => {
+  if (props.gql.projects) {
+    return props.gql.projects.slice(0, 3).map((x) => {
+      return {
+        description: `${x.title} (${x.projectRoot})`,
+        path: x.projectRoot,
+      }
+    })
+  }
+
+  return []
+})
+
+const setActiveProjectMutation = useMutation(WelcomeGuide_SetActiveProjectDocument)
+const setActiveProject = ({ path }: { path: string }) => {
+  setActiveProjectMutation.executeMutation({ path })
 }
 
-const openLink = (item) => {
+const openLink = ({ path }: { path: string }) => {
   // TODO: Open the item's href
 }
 </script>

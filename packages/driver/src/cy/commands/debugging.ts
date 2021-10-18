@@ -47,8 +47,8 @@ export default (Commands, Cypress, cy, state, config) => {
     // pause should indefinitely pause until the user
     // presses a key or clicks in the UI to continue
     pause (subject, options = {}) {
-      // bail if we're headless
-      if (!config('isInteractive')) {
+      // bail if we're in run mode, unless --headed and --no-exit flags are passed
+      if (!config('isInteractive') && (!config('browser').isHeaded || config('exit'))) {
         return subject
       }
 
