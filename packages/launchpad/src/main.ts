@@ -11,11 +11,13 @@ import { createI18n } from '@cy/i18n'
 
 const app = createApp(App)
 
+export const launchpadClient = makeUrqlClient('launchpad')
+
 app.use(Toast, {
   position: POSITION.BOTTOM_RIGHT,
 })
 
-app.use(urql, makeUrqlClient('launchpad'))
+app.use(urql, launchpadClient)
 app.use(createI18n())
 
 app.mount('#app')

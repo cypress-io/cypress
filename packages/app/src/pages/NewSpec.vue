@@ -70,6 +70,14 @@ query NewSpecQuery {
             ...StoryNode_NewSpec
           }
         }
+        generatedSpec {
+          content
+          spec {
+            id
+            name
+            relative
+          }
+        }
       }
     }
   }
@@ -78,25 +86,14 @@ query NewSpecQuery {
 
 gql`
 mutation NewSpec_GenerateSpecFromStory($storyPath: String!) {
-  generateSpecFromStory (storyPath: $storyPath) {
-    storybook {
-      generatedSpec {
-        content
-        spec {
-          id
-          name
-          relative
-        }
-      }
-    }
-  }
+  generateSpecFromStory (storyPath: $storyPath) 
 } 
 `
 
 const query = useQuery({ query: NewSpecQueryDocument })
 const mutation = useMutation(NewSpec_GenerateSpecFromStoryDocument)
 
-const generatedSpec = computed(() => mutation.data.value?.generateSpecFromStory.storybook?.generatedSpec)
+const generatedSpec = computed(() => query.data.value?.app.activeProject?.storybook?.generatedSpec)
 
 function storyClick (story: string) {
   mutation.executeMutation({ storyPath: story })
