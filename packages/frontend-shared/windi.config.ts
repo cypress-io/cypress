@@ -32,7 +32,7 @@ export const defaultConfig: WindiCssOptions = {
     'focus-default': 'focus:border focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100 focus:outline-transparent transition transition-colors duration-100 disabled:hover:ring-0 disabled:hover:border-0',
     'hocus-default': 'hocus:border hocus:border-indigo-300 hocus:ring-2 hocus:ring-indigo-100 hocus:outline-transparent transition transition-colors duration-100 disabled:ring-0 disabled:border-0',
     'focus-within-default': 'focus-within:border focus-within:border-indigo-300 focus-within:ring-2 focus-within:ring-indigo-100 focus-within:outline-transparent transition transition-colors duration-100 disabled:ring-0 disabled:border-0',
-    'hocus-link-default': 'outline-transparent hocus:underline',
+    'hocus-link-default': 'focus:outline-transparent hocus:underline',
   },
   extract: {
     // accepts globs and file paths relative to project root

@@ -48,7 +48,7 @@
                   <span class="text-gray-600">{{ props.gql.cloudViewer?.email }}</span>
                   <br>
                   <a
-                    class="text-indigo-500 outline-transparent hocus:underline"
+                    class="text-indigo-500 hocus-link-default"
                     href="https://on.cypress.io/dashboard/profile"
                     target="_blank"
                   >Profile Settings</a>
