@@ -1,11 +1,19 @@
 <template>
-  <div class="min-w-full col-start-1 col-end-3 flex items-center gap-6 mb-24px">
+  <div class="min-w-full col-start-1 col-end-3 flex items-center gap-6 mb-24px relative">
     <Input
+      id="project-search"
       v-model="localValue"
+      name="project-search"
       type="search"
       class="min-w-200px w-80% flex-grow"
-      :placeholder="t('globalPage.searchPlaceholder')"
     />
+    <label
+      for="project-search"
+      class="absolute text-14px text-gray-400 left-42px transition-opacity duration-50"
+      :class="{'opacity-0': localValue.length}"
+    >
+      {{ t('globalPage.searchPlaceholder') }}
+    </label>
     <Button
       :prefix-icon="IconPlus"
       aria-controls="dropzone"
