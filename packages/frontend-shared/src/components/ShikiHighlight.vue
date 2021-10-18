@@ -7,7 +7,7 @@ setCDN('/shiki/')
 
 let highlighter: Highlighter
 
-async function initHighlighter () {
+export async function initHighlighter () {
   if (highlighter) {
     return
   }
@@ -52,6 +52,11 @@ const highlightedCode = computed(() => {
     :class="{'line-numbers':lineNumbers, inline }"
     v-html="highlightedCode"
   />
+  <pre
+    v-else
+    class="shiki"
+    :class="{'line-numbers':lineNumbers, inline }"
+  >{{ code }}</pre>
 </template>
 
 <style lang="scss">
@@ -60,7 +65,7 @@ const highlightedCode = computed(() => {
 }
 
 .inline .shiki {
-  @apply py-1 px-2 bg-gray-50 text-gray-500 overflow-x-auto
+  @apply py-1 px-2 bg-gray-50 text-gray-500 overflow-x-auto inline-block
 }
 
 .line-numbers .shiki{

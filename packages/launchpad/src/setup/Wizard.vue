@@ -33,6 +33,8 @@ import OpenBrowser from './OpenBrowser.vue'
 import { gql } from '@urql/core'
 import type { WizardFragment } from '../generated/graphql'
 import InitializeConfig from './InitializeConfig.vue'
+import { initHighlighter } from '@cy/components/ShikiHighlight.vue'
+import { onMounted } from 'vue'
 
 gql`
 fragment Wizard on Query {
@@ -47,6 +49,12 @@ fragment Wizard on Query {
   ...ConfigFile
   ...InitializeConfig_Config
 }`
+
+// Make sure highlighter is initialized before
+// we show any code to avoid jank at rendering
+onMounted(() => {
+  initHighlighter()
+})
 
 const props = defineProps<{
   gql: WizardFragment
