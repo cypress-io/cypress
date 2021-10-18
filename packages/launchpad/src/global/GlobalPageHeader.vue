@@ -42,6 +42,8 @@
   <NoResults
     v-if="!projectCount"
     :search="localValue"
+    :message="t('globalPage.noResultsMessage')"
+    @clear="handleClear"
   />
 </template>
 
@@ -68,6 +70,10 @@ const emit = defineEmits<{
 }>()
 
 const localValue = useModelWrapper(props, emit, 'modelValue')
+
+const handleClear = () => {
+  localValue.value = ''
+}
 
 const toggleDropzone = () => {
   showDropzone.value = !showDropzone.value

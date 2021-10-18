@@ -43,6 +43,10 @@
       "gitInfo": "{fileState} {timeAgo}"
     }
   },
+  "noResults": {
+    "defaultMessage": "No results matched your search",
+    "clearSearch": "Clear Search"
+  },
   "topNav": {
     "released": "Released",
     "version": "Version",
@@ -128,7 +132,8 @@
     "projectActions": "Project Actions",
     "removeProject": "Remove Project",
     "openInIDE": "Open In IDE",
-    "openInFinder": "Open In Finder"
+    "openInFinder": "Open In Finder",
+    "noResultsMessage": "No projects matched your search"
   },
   "welcomePage": {
     "review": "Review the differences between each testing type",
