@@ -2,7 +2,7 @@ import { defaultMessages } from '@cy/i18n'
 import GlobalPageHeader from './GlobalPageHeader.vue'
 import { ref } from 'vue'
 
-const searchSelector = `input[placeholder="${defaultMessages.globalPage.searchPlaceholder}"]`
+const searchLabel = defaultMessages.globalPage.searchPlaceholder
 const fileInputSelector = 'input[type=file]'
 const addProjectSelector = '[data-testid=addProjectButton]'
 
@@ -27,8 +27,8 @@ describe('<GlobalPageHeader />', () => {
   it('renders and has a reactive input', () => {
     const searchText = 'My project name goes here'
 
-    cy.get(searchSelector).should('be.visible')
-    .get(searchSelector).type(searchText)
+    cy.findByLabelText(searchLabel)
+    .type(searchText)
     .get('@search').its('value').should('eq', searchText)
   })
 

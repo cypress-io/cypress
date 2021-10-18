@@ -1,3 +1,5 @@
+import { defaultMessages } from '@cy/i18n'
+
 describe('Launchpad: Open Mode', () => {
   beforeEach(() => {
     cy.setupE2E()
@@ -14,7 +16,7 @@ describe('Launchpad: Open Mode', () => {
       ctx.emitter.toLaunchpad()
     })
 
-    cy.get('h1').should('contain', 'Welcome to Cypress!')
-    cy.findByText('Choose which method of testing you would like to get started with for this project.')
+    cy.get('h1').should('contain', defaultMessages.globalPage.empty.title)
+    cy.findByText(defaultMessages.globalPage.empty.helper)
   })
 })
