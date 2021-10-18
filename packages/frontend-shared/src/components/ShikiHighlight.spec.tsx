@@ -13,7 +13,7 @@ module.exports = defineConfig({
   },
 })`
 
-describe('<ShikiHighlight/>', () => {
+describe('<ShikiHighlight/>', { viewportWidth: 1300, viewportHeight: 1300 }, () => {
   beforeEach(async () => {
     await initHighlighter()
   })
@@ -32,7 +32,7 @@ describe('<ShikiHighlight/>', () => {
     cy.get('.shiki').should('be.visible')
   })
 
-  it('display inline and remove some of the padding when "inline"', () => {
+  it('display inline and remove some of the padding when "inline"', { viewportWidth: 300, viewportHeight: 100 }, () => {
     cy.mount(() => <ShikiHighlight code={'project: xv123456'} lang="yaml" inline />)
     cy.get('.shiki').should('be.visible')
   })

@@ -15,9 +15,9 @@ fs.readFile(`${filePath}.template.json`,
       const colorScale = colors[colorName]
 
       for (let colorGrade in colorScale) {
-        const variableNameRegExp = new RegExp(`-${colorName}-${colorGrade}`)
+        const variableNameRegExp = new RegExp(`-${colorName}-${colorGrade}"`, 'g')
 
-        contents = contents.replace(variableNameRegExp, colorScale[colorGrade])
+        contents = contents.replace(variableNameRegExp, `${colorScale[colorGrade]}"`)
       }
     }
     fs.writeFile(`${filePath}.json`, contents, (err) => {
