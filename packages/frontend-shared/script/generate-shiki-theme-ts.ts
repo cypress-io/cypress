@@ -14,8 +14,6 @@ fs.readFile(`${filePath}.template.json`,
     for (let colorName in colors) {
       const colorScale = colors[colorName]
 
-      console.log(colorName)
-
       for (let colorGrade in colorScale) {
         const variableNameRegExp = new RegExp(`-${colorName}-${colorGrade}`)
 
@@ -27,6 +25,6 @@ fs.readFile(`${filePath}.template.json`,
         throw err
       }
 
-      console.log('cypress shiki theme generated succesfully')
+      console.log(`${filePath}.json generated successfully`)
     })
   })
