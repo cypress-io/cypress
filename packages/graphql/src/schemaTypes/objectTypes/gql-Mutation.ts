@@ -248,16 +248,6 @@ export const mutation = mutationType({
       },
     })
 
-    t.field('launchProjectFromPreferences', {
-      type: 'App',
-      description: 'Launches project with saved preferences',
-      async resolve (_root, args, ctx) {
-        await ctx.actions.project.launchProjectFromPreferences()
-
-        return ctx.appData
-      },
-    })
-
     t.nonNull.field('addProject', {
       type: 'App',
       description: 'Add project to projects array and cache it',

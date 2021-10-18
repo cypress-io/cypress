@@ -160,37 +160,16 @@ export class ProjectActions {
       throw Error(`Could not find browser`)
     }
 
-    const spec = this.makeSpec(testingType)
-
-    this.ctx.appData.activeTestingType = testingType
-
-    return this.api.launchProject(browser, spec, options)
-  }
-
-  launchProjectFromPreferences () {
-    if (!this.ctx.activeProject?.preferences) {
-      throw Error('Cannot launch project without saved preferences')
-    }
-
-    this.initializeActiveProject()
-
-    const { browser, testingType } = this.ctx.activeProject.preferences
-    const spec = this.makeSpec(testingType)
-
-    return this.api.launchProject(
-      browser,
-      spec,
-      {},
-    )
-  }
-
-  private makeSpec (testingType: TestingTypeEnum): Cypress.Spec {
-    return {
+    const spec = {
       name: '',
       absolute: '',
       relative: '',
       specType: testingType === 'e2e' ? 'integration' : 'component',
-    }
+    } as Cypress.Spec
+
+    this.ctx.appData.activeTestingType = testingType
+
+    return this.api.launchProject(browser, spec, options)
   }
 
   removeProject (projectRoot: string) {

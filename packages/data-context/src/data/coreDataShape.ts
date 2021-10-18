@@ -1,4 +1,4 @@
-import { BUNDLERS, FoundBrowser, FoundSpec, GeneratedSpec, ProjectPreferences, ResolvedFromConfig } from '@packages/types'
+import { BUNDLERS, FoundBrowser, FoundSpec, GeneratedSpec, Preferences, ResolvedFromConfig } from '@packages/types'
 import type { NexusGenEnums, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
 import type { BrowserWindow } from 'electron'
 
@@ -27,7 +27,7 @@ export interface ActiveProjectShape extends ProjectShape {
   currentSpecId?: Maybe<string>
   specs?: FoundSpec[]
   config: ResolvedFromConfig[]
-  preferences?: ProjectPreferences | null
+  preferences?: Preferences| null
   generatedSpec: GeneratedSpec | null
 }
 

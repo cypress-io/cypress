@@ -69,4 +69,13 @@ export const stubMutation: MaybeResolver<Mutation> = {
 
     return ctx.app.activeProject
   },
+  hideBrowserWindow (source, args, ctx) {
+    return ctx.app
+  },
+  setProjectPreferences (source, args, ctx) {
+    return ctx.app
+  },
+  showBrowserWindow (source, args, ctx) {
+    return ctx.app
+  },
 }

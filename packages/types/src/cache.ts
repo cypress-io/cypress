@@ -4,11 +4,11 @@ export type Cache = {
   USER: CachedUser
 }
 
-export type ProjectPreferences = { [key: string]: Preferences}
+export type ProjectPreferences = { [project: string]: Preferences}
 
 export type Preferences = {
-  browserId: string
-  testingType: 'e2e' | 'component'
+  browserId: string | null
+  testingType: 'e2e' | 'component' | null
 }
 
 export type CachedUser = {
