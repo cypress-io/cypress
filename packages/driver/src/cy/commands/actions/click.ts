@@ -54,8 +54,6 @@ export default (Commands, Cypress, cy, state, config) => {
       errorOnSelect: true,
       waitForAnimations: config('waitForAnimations'),
       animationDistanceThreshold: config('animationDistanceThreshold'),
-      scrollBehavior: config('scrollBehavior'),
-      userSetScrollBehavior: userOptions.userSetScrollBehavior ?? userOptions.scrollBehavior !== undefined,
       ctrlKey: false,
       controlKey: false,
       altKey: false,
@@ -181,7 +179,7 @@ export default (Commands, Cypress, cy, state, config) => {
       // because we're issuing the clicks synchronously
       // once we establish the coordinates and the element
       // passes all of the internal checks
-      return $actionability.verify(cy, $el, individualOptions, {
+      return $actionability.verify(cy, $el, config, individualOptions, {
         onScroll ($el, type) {
           return Cypress.action('cy:scrolled', $el, type)
         },

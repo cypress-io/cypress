@@ -288,8 +288,11 @@ const ensureNotAnimating = function (cy, $el, coordsHistory, animationDistanceTh
   cy.ensureElementIsNotAnimating($el, coordsHistory, animationDistanceThreshold)
 }
 
-const verify = function (cy, $el, options, callbacks) {
+const verify = function (cy, $el, config, options, callbacks) {
+  const userSetScrollBehavior = options.scrollBehavior !== undefined
+
   _.defaults(options, {
+    scrollBehavior: config('scrollBehavior'),
     ensure: {
       position: true,
       visibility: true,
@@ -398,7 +401,7 @@ const verify = function (cy, $el, options, callbacks) {
 
         if (options.ensure.visibility) {
           // if the user specified the scroll behavior explicitly, stick with that and don't try other scroll behaviors
-          if (options.userSetScrollBehavior) {
+          if (userSetScrollBehavior) {
             cy.ensureVisibility($el, _log)
           } else {
             // if not already visible, try remaining scroll behavior options

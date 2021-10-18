@@ -31,8 +31,6 @@ export default function (Commands, Cypress, cy, state, config) {
       parseSpecialCharSequences: true,
       waitForAnimations: config('waitForAnimations'),
       animationDistanceThreshold: config('animationDistanceThreshold'),
-      scrollBehavior: config('scrollBehavior'),
-      userSetScrollBehavior: userOptions.userSetScrollBehavior ?? userOptions.scrollBehavior !== undefined,
     })
 
     if (options.log) {
@@ -416,7 +414,7 @@ export default function (Commands, Cypress, cy, state, config) {
         }
       }
 
-      return $actionability.verify(cy, options.$el, options, {
+      return $actionability.verify(cy, options.$el, config, options, {
         onScroll ($el, type) {
           return Cypress.action('cy:scrolled', $el, type)
         },
@@ -444,7 +442,6 @@ export default function (Commands, Cypress, cy, state, config) {
             interval: options.interval,
             errorOnSelect: false,
             scrollBehavior: options.scrollBehavior,
-            userSetScrollBehavior: options.userSetScrollBehavior,
           })
           .then(() => {
             let activeElement = $elements.getActiveElByDocument($elToClick)
@@ -505,8 +502,6 @@ export default function (Commands, Cypress, cy, state, config) {
       force: false,
       waitForAnimations: config('waitForAnimations'),
       animationDistanceThreshold: config('animationDistanceThreshold'),
-      scrollBehavior: config('scrollBehavior'),
-      userSetScrollBehavior: userOptions.scrollBehavior !== undefined,
     })
 
     // blow up if any member of the subject
@@ -544,7 +539,6 @@ export default function (Commands, Cypress, cy, state, config) {
           waitForAnimations: options.waitForAnimations,
           animationDistanceThreshold: options.animationDistanceThreshold,
           scrollBehavior: options.scrollBehavior,
-          userSetScrollBehavior: options.userSetScrollBehavior,
         }).then(() => {
           if (options._log) {
             options._log.snapshot().end()
@@ -574,7 +568,7 @@ export default function (Commands, Cypress, cy, state, config) {
           notReadonly: true,
         }
 
-        return $actionability.verify(cy, $el, options, {
+        return $actionability.verify(cy, $el, config, options, {
           onScroll ($el, type) {
             return Cypress.action('cy:scrolled', $el, type)
           },
