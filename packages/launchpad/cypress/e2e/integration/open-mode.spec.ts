@@ -7,7 +7,7 @@ describe('Launchpad: Open Mode', () => {
   })
 
   it('Shows the open page', () => {
-    cy.get('h1').should('contain', 'Cypress')
+    cy.get('h1').should('contain', defaultMessages.globalPage.empty.title)
   })
 
   it('allows adding a project', () => {
