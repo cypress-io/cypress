@@ -85,6 +85,11 @@ export const getSpecUrl = ({
 
   debug('get spec url: %s for spec type %s', absoluteSpecPath, specType)
 
+  // current spec no longer controlled by URL
+  if (process.env.UNIFIED_RUNNER) {
+    return browserUrl
+  }
+
   // if we don't have a absoluteSpecPath or its __all
   if (!absoluteSpecPath || absoluteSpecPath === '__all') {
     const url = normalizeSpecUrl(browserUrl, '/__all')

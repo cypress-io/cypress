@@ -176,6 +176,10 @@ export class ProjectBase<TServer extends Server> extends EE {
 
     let cfg = this.getConfig()
 
+    if (process.env.UNIFIED_RUNNER) {
+      cfg.clientRoute = '/__vite__/'
+    }
+
     process.chdir(this.projectRoot)
 
     // TODO: we currently always scaffold the plugins file
