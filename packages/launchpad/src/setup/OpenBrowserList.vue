@@ -34,7 +34,7 @@
           <div class="text-center">
             <img
               :src="allBrowsersIcons[browser.displayName]"
-              alt
+              :alt="browser.displayName"
               class="inline w-40px h-40px"
             >
           </div>
@@ -72,20 +72,16 @@
 <script lang="ts" setup>
 import { useI18n } from '@cy/i18n'
 import { OpenBrowserListFragment, OpenBrowserList_SetBrowserDocument } from '../generated/graphql'
-import Button from '../../../frontend-shared/src/components/Button.vue'
+import Button from '@packages/frontend-shared/src/components/Button.vue'
 import { computed } from 'vue'
 import _clone from 'lodash/clone'
 import openInNew from '~icons/mdi/open-in-new'
 import { useMutation, gql } from '@urql/vue'
-import { allBrowsersIcons } from '../../../frontend-shared/src/assets/browserLogos'
+import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
 
 gql`
 mutation OpenBrowserList_SetBrowser($id: ID!) {
-  launchpadSetBrowser(id: $id) {
-    app {
-      ...OpenBrowserList
-    }
-  }
+  launchpadSetBrowser(id: $id)
 }
 `
 

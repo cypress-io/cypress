@@ -27,6 +27,19 @@ export const FileParts = objectType({
   },
 })
 
+export const GeneratedSpec = objectType({
+  name: 'GeneratedSpec',
+  definition (t) {
+    t.nonNull.string('content', {
+      description: 'File content of most recently generated spec.',
+    })
+
+    t.nonNull.field('spec', {
+      type: FileParts,
+    })
+  },
+})
+
 export const Storybook = objectType({
   name: 'Storybook',
   description: 'Storybook',
@@ -44,9 +57,17 @@ export const Storybook = objectType({
       },
     })
 
-    t.string('generatedSpec', {
-      description: 'Most recent generated spec',
-      resolve: (source, args, ctx) => ctx.wizardData.generatedSpec?.relative ?? null,
+    t.field('generatedSpec', {
+      type: GeneratedSpec,
+      resolve: (src, args, ctx) => {
+        const project = ctx.activeProject
+
+        if (!project) {
+          return null
+        }
+
+        return project.generatedSpec
+      },
     })
   },
 })

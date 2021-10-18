@@ -97,14 +97,7 @@ import { useI18n } from '@cy/i18n'
 
 gql`
 mutation GlobalPageHeader_clearActiveProject {
-  clearActiveProject {
-    app {
-      isInGlobalMode
-      activeProject {
-        id
-      }
-    }
-  }
+  clearActiveProject
 }
 `
 

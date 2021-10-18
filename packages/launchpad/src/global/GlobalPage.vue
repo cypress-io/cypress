@@ -1,7 +1,7 @@
 <template>
   <template v-if="props.gql?.projects?.length">
     <!-- Welcome Guide can fetch its own information for if it should render -->
-    <WelcomeGuide />
+    <WelcomeGuide :gql="props.gql" />
 
     <!-- If there are projects -->
     <div class="grid grid-cols-1 gap-6 pt-6 grid-cols-2">
@@ -39,16 +39,7 @@ import { GlobalPageFragment, GlobalPage_AddProjectDocument, GlobalPage_RemovePro
 
 gql`
 mutation GlobalPage_addProject($path: String!, $open: Boolean = true) {
-  addProject(path: $path, open: $open) {
-    projects {
-      id
-      title
-      projectId
-      projectRoot
-      isFirstTimeCT
-      isFirstTimeE2E
-    }
-  }
+  addProject(path: $path, open: $open) 
 }
 `
 
@@ -62,11 +53,7 @@ fragment GlobalPage on App {
 
 gql`
 mutation GlobalPage_RemoveProject($path: String!) {
-  removeProject(path: $path) {
-    projects {
-      id
-    }
-  }
+  removeProject(path: $path) 
 }
 `
 

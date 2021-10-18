@@ -27,9 +27,6 @@ const localValue = useModelWrapper(props, emit, 'modelValue')
 </script>
 
 <style>
-.prism-editor__line-number {
-  display: none;
-}
 
 .prism-editor textarea {
   @apply focus:ring-0 focus:outline-none;

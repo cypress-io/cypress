@@ -111,8 +111,8 @@ export const NAV_ITEMS = [
 export const WIZARD_STEPS = [
   {
     type: 'welcome',
-    title: 'Welcome to Cypress',
-    description: 'Choose which method of testing you would like to set up first.',
+    title: 'Welcome to Cypress!',
+    description: 'Choose which method of testing you would like to get started with for this project.',
   },
   {
     type: 'initializePlugins',

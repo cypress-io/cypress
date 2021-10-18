@@ -16,7 +16,7 @@
     <button
       class="h-10"
       data-testid="removeProjectButton"
-      @click="$emit('removeProject', props.gql.projectRoot)"
+      @click="emit('removeProject', props.gql.projectRoot)"
     >
       <Icon
         icon="ant-design:close-circle-outlined"
@@ -35,16 +35,7 @@ import { GlobalProjectCardFragment, GlobalProjectCard_SetActiveProjectDocument }
 
 gql`
 mutation GlobalProjectCard_setActiveProject($path: String!) {
-  setActiveProject(path: $path) {
-    activeProject {
-      id
-      title
-      projectId
-      projectRoot
-      isFirstTimeCT
-      isFirstTimeE2E
-    }
-  }
+  setActiveProject(path: $path) 
 }
 `
 
