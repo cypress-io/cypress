@@ -38,6 +38,11 @@
     @addProject="emit('addProject', $event)"
     @close="toggleDropzone"
   />
+
+  <NoResults
+    v-if="!projectCount"
+    :search="localValue"
+  />
 </template>
 
 <script lang="ts" setup>
@@ -47,12 +52,14 @@ import Input from '@cy/components/Input.vue'
 import FileDropzone from './FileDropzone.vue'
 import { useModelWrapper } from '@packages/frontend-shared/src/composables'
 import { useI18n } from '@cy/i18n'
+import NoResults from '@cy/components/NoResults.vue'
 
 const showDropzone = ref(false)
 const { t } = useI18n()
 
 const props = defineProps<{
-  modelValue: string
+  modelValue: string,
+  projectCount?: number | null
 }>()
 
 const emit = defineEmits<{

@@ -3,9 +3,13 @@
     <!-- If there are projects -->
     <GlobalPageHeader
       v-model="match"
+      :project-count="filteredProjects?.length"
       @add-project="handleAddProject"
     />
-    <h2 class="text-gray-800 mb-16px">
+    <h2
+      v-if="filteredProjects.length"
+      class="text-gray-800 mb-16px"
+    >
       Recent Projects
     </h2>
     <div :class="{ 'md:grid md:grid-cols-2 md:gap-24px mb-0': filteredProjects?.length > 1 }">
@@ -29,6 +33,7 @@
 </template>
 
 <script setup lang="ts">
+
 import { computed, ref } from 'vue'
 import { gql, useMutation } from '@urql/vue'
 import GlobalProjectCard from './GlobalProjectCard.vue'

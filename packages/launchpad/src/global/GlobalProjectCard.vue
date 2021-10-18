@@ -1,6 +1,7 @@
 <template>
   <div
     class="relative w-full rounded border border-gray-100 bg-white pr-16px pt-13px pb-13px flex items-center space-x-3 group hocus-default focus-within-default"
+    @click="setActiveProject(props.gql.projectRoot)"
   >
     <div class="w-73px h-40px text-center flex items-center justify-center border-r border-r-gray-100 mr-4px">
       <i-cy-bookmark_x24
@@ -9,20 +10,17 @@
     </div>
 
     <div class="flex-1 min-w-0">
-      <button
-        class="focus:outline-none underline-transparent grid w-full text-left children:truncate"
-        @click="setActiveProject(props.gql.projectRoot)"
-      >
-        <p
+      <button class="focus:outline-none underline-transparent grid w-full text-left children:truncate">
+        <span
           class="text-16px row-[1] leading-normal font-medium text-indigo-500"
         >
           {{ props.gql.title }}
-        </p>
-        <p
+        </span>
+        <span
           class="text-sm text-gray-500 relative"
         >
           {{ props.gql.projectRoot }}
-        </p>
+        </span>
       </button>
     </div>
 
@@ -58,7 +56,7 @@
         <MenuItem #="{ active }">
           <button
             :class="{ 'bg-gray-700': active }"
-            class="text-left px-16px py-8px border-b border-b-gray-800"
+            class="text-left px-16px py-8px border-b border-b-gray-800 rounded-b"
             @click="emit('openInFinder', props.gql.projectRoot)"
           >
             Open In Finder
