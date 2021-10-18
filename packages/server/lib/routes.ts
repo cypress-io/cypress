@@ -169,6 +169,26 @@ export const createCommonRoutes = ({
 
   router.get(clientRoute, (req, res) => {
     debug('Serving Cypress front-end by requested URL:', req.url)
+    debug('unified', req.params[0])
+
+    if (process.env.UNIFIED_RUNNER) {
+      if (!req.params[0]) {
+        const pathToFile = getPathToDist('app', 'index.html')
+        return fs.readFile(pathToFile, 'utf8')
+        .then((file) => {
+          return res.send(file.replace('<body>', replaceBody(ctx)))
+        })
+      }
+
+      const pathToFile = getPathToDist('app', req.params[0])
+      debug('unified pathToFile %s', pathToFile)
+      return send(req, pathToFile).pipe(res)
+
+
+      // const runnerPath = process.env.CYPRESS_INTERNAL_RUNNER_PATH || getPathToDist('app')
+
+      // return res.render(runnerPath)
+    }
 
     runner.serve(req, res, testingType === 'e2e' ? 'runner' : 'runner-ct', {
       config,
@@ -181,7 +201,15 @@ export const createCommonRoutes = ({
     })
   })
 
+  router.get('/__/assets/*', (req, res) => {
+    debug('assets/*', req.params[0])
+    const pathToFile = getPathToDist('app', 'assets', req.params[0])
+    debug('serving static asset %s', pathToFile)
+    return send(req, pathToFile).pipe(res)
+  })
+
   router.all('*', (req, res) => {
+    debug('networkProxy', req.url)
     networkProxy.handleHttpRequest(req, res)
   })
 

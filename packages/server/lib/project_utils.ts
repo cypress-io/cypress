@@ -83,11 +83,11 @@ export const getSpecUrl = ({
   specType ??= 'integration'
   browserUrl ??= ''
 
-  debug('get spec url: %s for spec type %s', absoluteSpecPath, specType)
+  debug('get spec url: %s for spec type %s browserUrl %s', absoluteSpecPath, specType, browserUrl)
 
   // current spec no longer controlled by URL
   if (process.env.UNIFIED_RUNNER) {
-    return browserUrl
+    return `${browserUrl}#/runner`
   }
 
   // if we don't have a absoluteSpecPath or its __all

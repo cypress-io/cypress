@@ -600,6 +600,7 @@ const openProjectCreate = (projectRoot, socketId, args) => {
     isTextTerminal: args.isTextTerminal,
     // pass the list of browsers we have detected when opening a project
     // to give user's plugins file a chance to change it
+    ctx: args.ctx,
     browsers: args.browsers,
     onWarning,
     onError: args.onError,
@@ -1404,8 +1405,11 @@ module.exports = {
   },
 
   runSpec (config, spec = {}, options = {}, estimated, firstSpec) {
-    const { project, browser, onError } = options
+    const { project, browser, onError, ctx } = options
 
+    const id = Buffer.from(`Spec:${spec.absolute}`).toString('base64')
+    console.log({ id }, spec)
+    ctx.actions.project.setCurrentSpec(id)
     const { isHeadless } = browser
 
     debug('about to run spec %o', {
@@ -1501,7 +1505,7 @@ module.exports = {
     })
 
     const socketId = random.id()
-    const { projectRoot, record, key, ciBuildId, parallel, group, browser: browserName, tag, testingType } = options
+    const { projectRoot, record, key, ciBuildId, parallel, group, browser: browserName, tag, testingType, ctx } = options
 
     // this needs to be a closure over `this.exitEarly` and not a reference
     // because `this.exitEarly` gets overwritten in `this.listenForProjectEnd`
@@ -1585,6 +1589,7 @@ module.exports = {
 
           const runAllSpecs = ({ beforeSpecRun, afterSpecRun, runUrl, parallel }) => {
             return this.runSpecs({
+              ctx,
               beforeSpecRun,
               afterSpecRun,
               projectRoot,
