@@ -17,6 +17,8 @@ export async function initHighlighter () {
     langs: ['typescript', 'javascript', 'css', 'json', 'yaml'],
   })
 }
+
+export { highlighter }
 </script>
 
 <script lang="ts" setup>
