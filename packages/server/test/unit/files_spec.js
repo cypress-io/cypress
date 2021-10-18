@@ -41,6 +41,12 @@ describe('lib/files', () => {
       })
     })
 
+    it('explicit null encoding is sent to driver as base64 string', function () {
+      return files.readFile(this.projectRoot, 'tests/_fixtures/ascii.foo', { encoding: null }).then(({ contents }) => {
+        expect(contents).to.eql(Buffer.from('\n').toString('base64'))
+      })
+    })
+
     it('parses json to valid JS object', function () {
       return files.readFile(this.projectRoot, 'tests/_fixtures/users.json').then(({ contents }) => {
         expect(contents).to.eql([
@@ -71,6 +77,14 @@ describe('lib/files', () => {
       return files.writeFile(this.projectRoot, '.projects/write_file.txt', '', { encoding: 'ascii' }).then(() => {
         return files.readFile(this.projectRoot, '.projects/write_file.txt').then(({ contents }) => {
           expect(contents).to.equal('�')
+        })
+      })
+    })
+
+    it('explicit null encoding is read from driver as base64 string', function () {
+      return files.writeFile(this.projectRoot, '.projects/write_file.txt', Buffer.from(''), { encoding: null }).then(() => {
+        return files.readFile(this.projectRoot, '.projects/write_file.txt', { encoding: null }).then(({ contents }) => {
+          expect(contents).to.eql(Buffer.from('').toString('base64'))
         })
       })
     })

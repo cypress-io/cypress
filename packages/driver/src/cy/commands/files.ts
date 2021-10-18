@@ -11,11 +11,11 @@ export default (Commands, Cypress, cy) => {
 
       if (_.isObject(encoding)) {
         userOptions = encoding
-        encoding = null
+        encoding = undefined
       }
 
       options = _.defaults({}, userOptions, {
-        encoding: encoding != null ? encoding : 'utf8',
+        encoding: encoding === undefined ? 'utf8' : encoding,
         log: true,
       })
 
@@ -53,6 +53,10 @@ export default (Commands, Cypress, cy) => {
             args: { cmd: 'readFile', action: 'read', file, filePath: err.filePath, error: err.message },
           })
         }).then(({ contents, filePath }) => {
+          if (options.encoding === null) {
+            contents = Buffer.from(contents, 'base64')
+          }
+
           consoleProps['File Path'] = filePath
           consoleProps['Contents'] = contents
 
@@ -85,11 +89,11 @@ export default (Commands, Cypress, cy) => {
 
       if (_.isObject(encoding)) {
         userOptions = encoding
-        encoding = null
+        encoding = undefined
       }
 
       options = _.defaults({}, userOptions, {
-        encoding: encoding ? encoding : 'utf8',
+        encoding: encoding === undefined ? 'utf8' : encoding,
         flag: userOptions.flag ? userOptions.flag : 'w',
         log: true,
       })
@@ -118,6 +122,11 @@ export default (Commands, Cypress, cy) => {
           onFail: options._log,
           args: { contents },
         })
+      }
+
+      if (Buffer.isBuffer(contents)) {
+        contents = contents.toString('base64')
+        options.encoding = 'base64'
       }
 
       if (_.isObject(contents)) {

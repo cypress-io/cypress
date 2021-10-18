@@ -6,10 +6,10 @@ module.exports = {
     const filePath = path.resolve(projectRoot, file)
     const readFn = path.extname(filePath) === '.json' ? fs.readJsonAsync : fs.readFileAsync
 
-    return readFn(filePath, options.encoding || 'utf8')
+    return readFn(filePath, options.encoding === undefined ? 'utf8' : options.encoding)
     .then((contents) => {
       return {
-        contents,
+        contents: options.encoding === null ? contents.toString('base64') : contents,
         filePath,
       }
     })
@@ -22,7 +22,7 @@ module.exports = {
   writeFile (projectRoot, file, contents, options = {}) {
     const filePath = path.resolve(projectRoot, file)
     const writeOptions = {
-      encoding: options.encoding || 'utf8',
+      encoding: options.encoding === undefined ? 'utf8' : options.encoding,
       flag: options.flag || 'w',
     }
 
