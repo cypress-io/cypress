@@ -335,7 +335,6 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
-/npm/react/bin/*
 # End of https://www.gitignore.io/api/osx,git,node,windows,intellij,linux
 
 # Circle cache artifacts
