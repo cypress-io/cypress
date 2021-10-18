@@ -47,25 +47,19 @@ import { useI18n } from '@cy/i18n'
 
 gql`
 mutation EnvironmentSetupSetFramework($framework: FrontendFrameworkEnum!) {
-  wizardSetFramework(framework: $framework) {
-    ...EnvironmentSetup
-  }
+  wizardSetFramework(framework: $framework) 
 }
 `
 
 gql`
 mutation EnvironmentSetupSetBundler($bundler: SupportedBundlers!) {
-  wizardSetBundler(bundler: $bundler) {
-    ...EnvironmentSetup
-  }
+  wizardSetBundler(bundler: $bundler) 
 }
 `
 
 gql`
 mutation EnvironmentSetupSetCodeLanguage($language: CodeLanguageEnum!) {
-  wizardSetCodeLanguage(language: $language) {
-    ...EnvironmentSetup
-  }
+  wizardSetCodeLanguage(language: $language)
 }
 `
 
