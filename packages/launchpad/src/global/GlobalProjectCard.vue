@@ -1,8 +1,8 @@
 <template>
   <div
-    class="relative w-full rounded-lg border border-gray-100 bg-white px-16px pt-13px pb-15px shadow-sm flex items-center space-x-3 group hocus-default focus-within-default"
+    class="relative w-full rounded border border-gray-100 bg-white pr-16px pt-13px pb-13px flex items-center space-x-3 group hocus-default focus-within-default"
   >
-    <div class="w-70px text-center flex align-middle justify-center">
+    <div class="w-73px h-40px text-center flex items-center justify-center border-r border-r-gray-100 mr-4px">
       <i-cy-bookmark_x24
         class="w-24px h-28px icon-dark-gray-500 icon-light-gray-50 group-hocus:icon-dark-indigo-400 group-hocus:icon-light-indigo-200"
       />

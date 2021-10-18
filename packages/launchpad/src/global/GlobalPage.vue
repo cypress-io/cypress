@@ -5,11 +5,15 @@
       v-model="match"
       @add-project="handleAddProject"
     />
-    <div class="grid pt-6 grid-cols-2 gap-6">
+    <h2 class="text-gray-800 mb-16px">
+      Recent Projects
+    </h2>
+    <div :class="{ 'md:grid md:grid-cols-2 md:gap-24px mb-0': filteredProjects?.length > 1 }">
       <GlobalProjectCard
         v-for="project in filteredProjects"
         :key="project.id"
         :gql="project"
+        class="mb-24px md:mb-0"
         @removeProject="handleRemoveProject"
         @openInFinder="handleOpenInFinder"
         @openInIDE="handleOpenInIDE"
