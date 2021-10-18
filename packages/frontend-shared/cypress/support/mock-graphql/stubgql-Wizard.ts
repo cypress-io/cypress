@@ -53,8 +53,6 @@ export const stubWizard: MaybeResolver<Wizard> = {
         "bar": 42
       }`,
       status: 'changes',
-      warningText: 'Please do the necessary changes to your <span class="px-1 inline-block rounded bg-warning-200 text-warning-600">cypress.config.js</span>',
-      warningLink: 'http://docs.cypress.io',
     },
     {
       ...testNodeId('WizardSampleConfigFile'),

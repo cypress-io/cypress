@@ -815,8 +815,6 @@ type WizardSampleConfigFile implements Node {
   """Relay style Node ID field for the WizardSampleConfigFile field"""
   id: ID!
   status: WizardConfigFileStatusEnum!
-  warningLink: String
-  warningText: String
 }
 
 enum WizardStep {

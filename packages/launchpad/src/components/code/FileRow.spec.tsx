@@ -59,7 +59,6 @@ describe('FileRow', () => {
           content={content}
           filePath="cypress/integration/command.js"
           description="Lorem ipsum dolor sit"
-          warningText={'Please merge the code below with your existing <span class="px-1 inline-block rounded bg-warning-200 text-warning-600">cypress.config.js</span>'}
         />
       </div>
     ))
@@ -77,7 +76,6 @@ describe('FileRow', () => {
           content={content}
           filePath="cypress/integration/command.js"
           description="Lorem ipsum dolor sit amet, consectetur adipisicing elit. Laboriosam at temporibus nulla ratione a nam inventore esse facere vel nemo est veniam dolore, ullam fuga quidem, cum dolor quibusdam officiis."
-          warningText={'Please merge the code below with your existing <span class="px-1 inline-block rounded bg-warning-200 text-warning-600">cypress.config.js</span>'}
         />
       </div>
     ))

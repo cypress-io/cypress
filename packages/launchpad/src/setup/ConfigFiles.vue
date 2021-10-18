@@ -43,8 +43,6 @@ fragment ConfigFiles on Wizard {
     content
     status
     description
-    warningText
-    warningLink
   }
 }
 `

@@ -13,8 +13,6 @@ const props = defineProps<{
     filePath: string
     content: string
     description?: string | null
-    warningText?: string | null
-    warningLink?: string | null
 }>()
 
 const language = computed(() => /\.(\w+)$/.exec(props.filePath)?.[1])
@@ -74,15 +72,16 @@ const statusClasses = computed(() => props.status === 'skipped' ? 'skipped' : pr
     </template>
     <template #slider>
       <div
-        v-if="warningText && open"
+        v-if="status === 'changes' && open"
         class="flex items-center p-3 border-t border-gray-200 bg-warning-100 text-warning-600"
       >
         <span class="font-semibold">{{ statusLabel }}: </span>
-        <p
-          class="flex-grow ml-1"
-          v-html="warningText"
-        />
-        <Button>Learn more</Button>
+        <p class="flex-grow ml-1">
+          Please merge the code below with your existing <span class="inline-block px-1 rounded bg-warning-200 text-warning-600">{{ filePath }}</span>
+        </p>
+        <Button @click="document.location = 'https://docs.cypress.io/config'">
+          Learn more
+        </Button>
       </div>
       <div
         v-if="prismInstalled"

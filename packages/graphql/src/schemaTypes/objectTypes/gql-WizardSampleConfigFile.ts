@@ -13,9 +13,6 @@ export const WizardSampleConfigFile = objectType({
 
     t.nonNull.string('content')
 
-    t.string('warningText')
-    t.string('warningLink')
-
     t.string('description')
   },
 })
