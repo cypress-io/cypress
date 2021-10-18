@@ -1,5 +1,5 @@
 <template>
-  <div class="px-6 py-4 border-b border-b-gray-100 mb-7">
+  <div class="px-6 py-15px border-b border-b-gray-100 mb-24px">
     <div class="flex items-center justify-between max-content">
       <div class="flex items-center">
         <img
@@ -7,7 +7,7 @@
           src="../images/cypress-dark.png"
         >
         <span
-          class="text-indigo-500"
+          :class="props.gql?.app?.activeProject ? 'text-indigo-500' : 'text-gray-700'"
           @click="clearActiveProject"
         >Projects</span>
         <!-- TODO: Replace with a cy icon -->

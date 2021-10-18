@@ -1,30 +1,31 @@
 <template>
-  <div class="min-w-full col-start-1 col-end-3 flex items-center gap-6 mb-24px relative">
+  <div class="min-w-full col-start-1 col-end-3 flex items-center gap-16px mb-24px relative">
     <Input
       id="project-search"
       v-model="localValue"
       name="project-search"
       type="search"
-      class="min-w-200px w-80% flex-grow"
+      class="min-w-200px w-85% flex-grow"
     />
     <label
       for="project-search"
-      class="absolute text-14px text-gray-400 left-42px transition-opacity duration-50"
+      class="absolute text-gray-400 left-42px transition-opacity duration-50"
       :class="{'opacity-0': localValue.length}"
     >
       {{ t('globalPage.searchPlaceholder') }}
     </label>
     <Button
-      :prefix-icon="IconPlus"
       aria-controls="dropzone"
-      prefix-icon-class="text-center justify-center text-lg"
-      class="w-20% min-w-120px text-size-16px h-full hocus-default"
+      class="text-size-16px h-full hocus-default"
       data-testid="addProjectButton"
       size="lg"
       :variant="showDropzone ? 'pending' : 'primary'"
       :aria-expanded="showDropzone"
       @click="toggleDropzone"
     >
+      <template #prefix>
+        <i-cy-add-large_x16 :class="showDropzone ? 'icon-dark-gray-100' : 'icon-dark-indigo-300'" />
+      </template>
       {{ t('globalPage.addProjectButton') }}
     </Button>
   </div>
@@ -40,7 +41,6 @@
 import { ref } from 'vue'
 import Button from '@cy/components/Button.vue'
 import Input from '@cy/components/Input.vue'
-import IconPlus from '~icons/mdi/plus'
 import FileDropzone from './FileDropzone.vue'
 import { useModelWrapper } from '@packages/frontend-shared/src/composables'
 import { useI18n } from '@cy/i18n'

@@ -6,7 +6,7 @@
   >
     <span
       v-if="prefixIcon || $slots.prefix"
-      class="justify-self-start flex items-center pr-2"
+      class="justify-self-start flex items-center"
     >
       <slot name="prefix">
         <component
@@ -49,7 +49,7 @@ import { computed, useAttrs } from 'vue'
 import type { ButtonHTMLAttributes, FunctionalComponent, SVGAttributes } from 'vue'
 
 const VariantClassesTable = {
-  primary: 'border-indigo-500 bg-indigo-600 text-white',
+  primary: 'border-indigo-500 bg-indigo-500 text-white',
   outline: 'border-gray-100 text-indigo-600',
   pending: 'bg-gray-500 text-white',
   link: 'border-transparent text-indigo-600',
@@ -59,7 +59,7 @@ const VariantClassesTable = {
 const SizeClassesTable = {
   sm: 'px-6px py-2px text-14px',
   md: 'px-12px py-6px text-14px',
-  lg: 'px-16px py-10px',
+  lg: 'px-16px py-11px',
   'lg-wide': 'px-32px py-8px',
 }
 
