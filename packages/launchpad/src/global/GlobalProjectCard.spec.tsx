@@ -28,7 +28,6 @@ describe('<GlobalProjectCard />', () => {
   function assertEventEmittedOnce (eventName: string) {
     cy.vue(GlobalProjectCard)
     .then((card) => {
-      cy.wrap(card.emitted(eventName))
       cy.wrap(card.emitted(eventName)[0][0]).should('equal', defaultPath)
     })
   }
