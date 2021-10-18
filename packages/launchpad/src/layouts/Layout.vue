@@ -93,12 +93,7 @@ query Layout {
 
 gql`
 mutation NavigationMenuSetItem($type: NavItem!) {
-  navigationMenuSetItem (type: $type) {
-    selected
-    items {
-      ...SideBarItem
-    }
-  }
+  navigationMenuSetItem (type: $type) 
 } 
 `
 

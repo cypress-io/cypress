@@ -57,7 +57,14 @@ export interface ElectronShape {
   browserWindow: BrowserWindow | null
 }
 
+export interface BaseErrorDataShape {
+  title?: string
+  message: string
+  stack?: string
+}
+
 export interface CoreDataShape {
+  baseError: BaseErrorDataShape | null
   dev: DevStateShape
   app: AppDataShape
   wizard: WizardDataShape
@@ -70,6 +77,7 @@ export interface CoreDataShape {
  */
 export function makeCoreData (): CoreDataShape {
   return {
+    baseError: null,
     dev: {
       refreshState: null,
     },
