@@ -65,7 +65,7 @@ export function getCodecData (src) {
       return debug('get codecData stderr log %o', { message: stderr })
     }).on('codecData', resolve)
     .input(src)
-    .format('null')
+    .format('yuv420p')
     .output(new BlackHoleStream())
     .run()
   }).tap((data) => {
