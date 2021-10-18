@@ -22,7 +22,7 @@
                 <!--
               This button allows keyboard users to fire a click event with the Enter or Space keys,
               which will be handled by the dropzone's existing click handler.
-                                -->
+                -->
                 {{ t('globalPage.empty.browseManually') }}
               </button>
             </i18n-t>
@@ -30,12 +30,12 @@
         </div>
       </Dropzone>
     </FileSelector>
-  </div>
-  <div
-    data-testid="upload-name"
-    class="hidden"
-  >
-    {{ uploadName }}
+    <div
+      data-testid="upload-name"
+      class="hidden"
+    >
+      {{ uploadName }}
+    </div>
   </div>
 </template>
 <script setup lang="ts">
@@ -73,7 +73,7 @@ function getFilePath (files: FileList | null) {
 }
 
 const emit = defineEmits<{
-    (e: 'addProject', value: string): void
+  (e: 'addProject', value: string): void
 }>()
 
 const uploadName = ref('')
