@@ -1,12 +1,30 @@
-import { objectType } from 'nexus'
+import { nonNull, objectType, stringArg } from 'nexus'
 import path from 'path'
 import { ProjectPreferences } from '.'
 import { cloudProjectBySlug } from '../../stitching/remoteGraphQLCalls'
+import { FileParts } from './gql-FileParts'
 
 export interface ProjectShape {
   projectId?: string | null
   projectRoot: string
 }
+
+const GeneratedSpec = objectType({
+  name: 'GeneratedSpec',
+  definition (t) {
+    t.nonNull.id('id', {
+      resolve: (src, args, ctx) => src.spec.absolute,
+    })
+
+    t.nonNull.string('content', {
+      description: 'File content of most recently generated spec.',
+    })
+
+    t.nonNull.field('spec', {
+      type: FileParts,
+    })
+  },
+})
 
 export const Project = objectType({
   name: 'Project',
@@ -86,6 +104,38 @@ export const Project = objectType({
     t.field('storybook', {
       type: 'Storybook',
       resolve: (source, args, ctx) => ctx.storybook.loadStorybookInfo(),
+    })
+
+    t.nonNull.string('codeGenGlob', {
+      description: 'Glob pattern for component searching',
+      args: {
+        type: nonNull(stringArg()),
+      },
+      resolve: (src, args, ctx) => ctx.project.getCodeGenGlob(args.type ?? null),
+    })
+
+    t.connectionField('codeGenCandidates', {
+      type: FileParts,
+      description: 'List of all code generation candidates stories',
+      additionalArgs: {
+        glob: nonNull(stringArg()),
+      },
+      nodes: (source, args, ctx) => {
+        return ctx.project.getCodeGenCandidates(args.glob)
+      },
+    })
+
+    t.field('generatedSpec', {
+      type: GeneratedSpec,
+      resolve: (src, args, ctx) => {
+        const project = ctx.activeProject
+
+        if (!project) {
+          return null
+        }
+
+        return project.generatedSpec
+      },
     })
   },
   sourceType: {
