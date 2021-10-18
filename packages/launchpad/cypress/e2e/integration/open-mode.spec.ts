@@ -1,4 +1,4 @@
-import { defaultMessages } from '@cy/i18n'
+import { defaultMessages } from '../../../../frontend-shared/src/locales/i18n'
 
 describe('Launchpad: Open Mode', () => {
   beforeEach(() => {
