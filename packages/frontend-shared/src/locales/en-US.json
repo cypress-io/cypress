@@ -120,7 +120,7 @@
     "empty": {
       "title": "Add Project",
       "helper": "Get started by adding your first project below.",
-      "dropText": "Drag your project here or {0}",
+      "dropText": "Drag your project directory here or {0}",
       "browseManually": "browse manually."
     },
     "searchPlaceholder": "Search projects",

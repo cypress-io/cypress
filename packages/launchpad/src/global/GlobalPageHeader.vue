@@ -33,7 +33,10 @@
   <FileDropzone
     v-if="showDropzone"
     id="dropzone"
+    class="mb-24px"
+    close-button
     @addProject="emit('addProject', $event)"
+    @close="toggleDropzone"
   />
 </template>
 
