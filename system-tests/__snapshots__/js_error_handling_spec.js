@@ -105,6 +105,17 @@ This behavior is configurable, and you can choose to turn this off by listening 
 https://on.cypress.io/uncaught-exception-from-application
 
 https://on.cypress.io/cross-origin-script-error
+      [stack trace lines]
+
+
+
+Warning: We failed processing this video.
+
+This error will not alter the exit code.
+
+TimeoutError: operation timed out
+      [stack trace lines]
+
 
   (Results)
 
@@ -115,7 +126,7 @@ https://on.cypress.io/cross-origin-script-error
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  5                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     js_error_handling_failing_spec.js                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -133,13 +144,6 @@ https://on.cypress.io/cross-origin-script-error
       afterEach hook -- t5 (failed).png                                                             
   -  /XXX/XXX/XXX/cypress/screenshots/js_error_handling_failing_spec.js/s1 -- cross o     (1280x720)
      rigin script errors -- explains where script errored (failed).png                              
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/js_error_handling_failing_spec.     (X second)
-                          js.mp4                                                                    
 
 
 ====================================================================================================
