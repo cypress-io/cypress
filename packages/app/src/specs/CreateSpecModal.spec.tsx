@@ -15,7 +15,7 @@ describe('<CreateSpecModal />', () => {
 
     cy.mount(() => (<div>
       <CreateSpecModal
-        show={show}
+        show={show.value}
         onClose={() => show.value = false}
         currentGenerator={ImportFromComponentGenerator}/>
     </div>))
@@ -60,7 +60,7 @@ describe('playground', () => {
       <button data-testid="trigger" onClick={() => show.value = true}>Open Modal</button>
       <br/>
       <CreateSpecModal
-        show={show}
+        show={show.value}
         onClose={() => show.value = false}
         currentGenerator={ImportFromComponentGenerator}/>
     </>)).get(triggerButtonSelector)

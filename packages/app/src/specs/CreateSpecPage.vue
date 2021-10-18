@@ -1,5 +1,8 @@
 <template>
-  <CreateSpecModal v-model:show="showModal" :currentGenerator="currentGenerator"/>
+  <CreateSpecModal
+    :show="showModal"
+    @close="showModal = false"
+    :initialGenerator="generator"/>
   <div class="overflow-scroll text-center max-w-600px">
     <h1
       data-testid="create-spec-page-title"
@@ -18,9 +21,7 @@
       class="flex flex-wrap pb-32px border-b-1 gap-32px children:mx-auto"
       data-testid="create-spec-page-cards"
     >
-      <component v-for="generator in generators" :key="generator.id"
-      :is="generator.card"
-      @click="openModal(generator.id)"/>
+     @select="openModal"/>
     </div>
 
     <div class="text-center mt-32px">
@@ -46,15 +47,14 @@
 
 <script lang="ts" setup>
 import { useI18n } from '@cy/i18n'
-import { find } from 'lodash'
-import type { TestingTypeEnum } from '../generated/graphql'
 import SettingsIcon from '~icons/cy/settings_x16'
 import Button from '@cy/components/Button.vue'
+import type { TestingTypeEnum } from '../generated/graphql'
 import { ref, computed } from 'vue'
 import type { Ref } from 'vue'
 import CreateSpecModal from './CreateSpecModal.vue'
-import { generators as _generators } from './generators'
-import type { SpecGenerator } from './generators'
+import CreateSpecChooser from './CreateSpecChooser.vue'
+import { useRouter } from 'vue-router'
 const { t } = useI18n()
 
 // TODO: gql current testingType when it's available
@@ -62,14 +62,13 @@ const props = defineProps<{
   testingType: TestingTypeEnum
 }>()
 
-const generators = computed(() => _generators.filter(g => g.matches(props.testingType)))
-const currentGenerator: Ref<null | SpecGenerator> = ref(null)
+const router = useRouter()
+
 const showModal = ref(false)
 
-const openModal = (id) => {
-  currentGenerator.value = find(generators.value, { id }) || null
-  showModal.value = true
-}
+const generator = ref(null)
 
-const goToSpecsPattern = () => {}
+const openModal = (id) => {
+  router.currentRoute.value.query.modal = id
+}
 </script>

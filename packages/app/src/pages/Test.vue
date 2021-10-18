@@ -1,0 +1,3 @@
+<template>
+  Test Page
+</template>

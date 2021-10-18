@@ -1,7 +1,7 @@
 <template>
   <StandardModal
     :click-outside="false"
-    :model-value="show.value"
+    :model-value="show"
     variant="bare"
     data-testid="create-spec-modal"
     @update:modelValue="close"
@@ -31,32 +31,44 @@ additional style, classes, and padding. Make sure to render it intentionally -->
 user through the flow to generate a spec. When a generator is finished, it
 will emit a success or failure event -->
     <component
+      v-if="currentGenerator"
+      @restart="currentGenerator = null"
       :is="currentGenerator?.entry"
       v-model:title="title"
       v-model:description="description"
     />
+
+    <CreateSpecChooser v-else>
+      
+    </CreateSpecChooser>
   </StandardModal>
 </template>
 
 <script lang="ts" setup>
 import type { SpecGenerator } from './generators'
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { DialogOverlay } from '@headlessui/vue'
 import StandardModal from '@cy/components/StandardModal.vue'
-
-withDefaults(defineProps<{
-  show?: boolean
-  currentGenerator?: SpecGenerator | null,
-}>(), {
-  currentGenerator: null,
-  show: false,
-})
+import { useVModels, whenever, not} from '@vueuse/core'
+import { generators } from './generators'
+const props = defineProps<{
+  show: boolean
+  // currentGenerator?: SpecGenerator | null
+}>()
 
 const emits = defineEmits<{
   (event: 'close', value: boolean): void
 }>()
 
 const close = () => emits('close', false)
+
+const currentGenerator = ref(generators[3])
+
+watch(currentGenerator, () => {
+  if (!currentGenerator.value) {
+    debugger;
+  }
+})
 
 const title = ref('')
 const description = ref('')

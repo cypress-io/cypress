@@ -44,6 +44,7 @@ const navigation = [
   { name: 'Runs', icon: CodeIcon, href: '/runner' },
   { name: 'Settings', icon: SettingsIcon, href: '/settings' },
   { name: 'New Spec', icon: SettingsIcon, href: '/newspec' },
+  { name: 'Test', icon: SettingsIcon, href: '/test' },
 ]
 
 defineProps<{

@@ -29,7 +29,7 @@ const emits = defineEmits<{
 }>()
 
 const { title } = useVModels(props, emits)
-title.value = t('createSpec.component.importFromComponent.chooseAComponentHeader')
+title.value = t('createSpec.component.importFromStory.chooseAStoryHeader')
 
 // onBeforeUnmount(() => {
 //   title.value = ''

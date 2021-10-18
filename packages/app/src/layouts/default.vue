@@ -20,8 +20,12 @@
             <component
               :is="Component"
             />
+            
             <!-- </keep-alive> -->
           </transition>
+          <div v-if="route.query.merp">
+            <CreateSpecModal @close="route.query = {}" v-if="true" :show="true" />
+          </div>
         </router-view>
       </section>
     </main>
@@ -33,4 +37,8 @@
 
 <script lang="ts" setup>
 import SidebarNavigation from '../navigation/SidebarNavigation.vue'
+import CreateSpecModal from '../specs/CreateSpecModal.vue'
+import { generators } from '../specs/generators'
+
+const currentGenerator = generators[0]
 </script>
