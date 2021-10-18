@@ -1,6 +1,10 @@
 import type { DataContext } from '..'
 import * as path from 'path'
 import type { SpecFile } from '@packages/types'
+import glob from 'glob'
+import { promisify } from 'util'
+
+const asyncGlob = promisify(glob)
 
 export class FileDataSource {
   private watchedFilePaths = new Set<string>()
@@ -30,6 +34,16 @@ export class FileDataSource {
       relative: path.relative(projectRoot, absolute),
       baseName: parsed.base,
       fileName: parsed.base.split('.')[0] || '',
+    }
+  }
+
+  async getFilesByGlob (glob: string, globOptions: { root: string | undefined }) {
+    try {
+      const files = await asyncGlob(glob, { ignore: '**/node_modules/**', nodir: true, ...globOptions })
+
+      return files
+    } catch (e) {
+      return []
     }
   }
 
