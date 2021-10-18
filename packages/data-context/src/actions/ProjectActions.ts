@@ -160,12 +160,12 @@ export class ProjectActions {
       throw Error(`Could not find browser`)
     }
 
-    const spec = {
+    const spec: Cypress.Spec = {
       name: '',
       absolute: '',
       relative: '',
       specType: testingType === 'e2e' ? 'integration' : 'component',
-    } as Cypress.Spec
+    }
 
     this.ctx.appData.activeTestingType = testingType
 
