@@ -263,7 +263,7 @@ export const STDOUT_DURATION_IN_TABLES_RE = /(\s+?)(\d+ms|\d+:\d+:?\d+)/g
 // extract the 'Difference' section from a snap-shot-it error message
 const diffRe = /Difference\n-{10}\n([\s\S]*)\n-{19}\nSaved snapshot text/m
 const expectedAddedVideoSnapshotLines = [
-  'Warning: We failed processing this video.',
+  'Warning: We failed processing this video.', '',
   'This error will not alter the exit code.', '',
   'TimeoutError: operation timed out',
   '[stack trace lines]', '', '',
