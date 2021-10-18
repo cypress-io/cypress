@@ -53,7 +53,6 @@ export class ProjectActions {
   async setActiveProject (projectRoot: string) {
     const title = this.ctx.project.projectTitle(projectRoot)
 
-    await this.api.closeActiveProject()
     await this.clearActiveProject()
 
     this.ctx.coreData.app.activeProject = {
