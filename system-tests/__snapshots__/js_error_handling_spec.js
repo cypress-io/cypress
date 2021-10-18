@@ -105,17 +105,6 @@ This behavior is configurable, and you can choose to turn this off by listening 
 https://on.cypress.io/uncaught-exception-from-application
 
 https://on.cypress.io/cross-origin-script-error
-      [stack trace lines]
-
-
-
-Warning: We failed processing this video.
-
-This error will not alter the exit code.
-
-TimeoutError: operation timed out
-      [stack trace lines]
-
 
   (Results)
 

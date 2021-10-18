@@ -49,7 +49,9 @@ describe('e2e js error handling', () => {
     spec: 'js_error_handling_failing_spec.js',
     snapshot: true,
     expectedExitCode: 5,
-    video: false,
+    config: {
+      video: false,
+    },
     onStdout (stdout) {
       // firefox has a stack line for the cross-origin error that other browsers don't
       return stdout
