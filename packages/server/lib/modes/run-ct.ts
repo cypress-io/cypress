@@ -1,15 +1,16 @@
-import type { BrowserName } from '@packages/types'
+import type { DataContext } from '@packages/data-context'
+import type { LaunchArgs } from '@packages/types'
 import { openProject } from '../open_project'
 import DevServerPlugin from '../plugins/dev-server'
+import { runInternalServer } from './internal-server'
 import RunMode from './run'
 
-export interface RunOptions {
-  browser?: BrowserName
+export interface RunOptions extends LaunchArgs {
   runAllSpecsInSameBrowserSession?: boolean
-  onError: (error: Error) => void
+  ctx?: DataContext
 }
 
-export const run = (options: RunOptions) => {
+export const run = async (options: RunOptions) => {
   // TODO: make sure if we need to run this in electron by default to match e2e behavior?
   options.browser = options.browser || 'electron'
   options.runAllSpecsInSameBrowserSession = true
@@ -27,6 +28,15 @@ export const run = (options: RunOptions) => {
       process.exit(1)
     })
   })
+
+  if (process.env.UNIFIED_RUNNER) {
+    const { serverPortPromise, ctx } = runInternalServer(options)
+
+    await serverPortPromise
+    options.ctx = ctx
+
+    return RunMode.run(options)
+  }
 
   return RunMode.run(options)
 }

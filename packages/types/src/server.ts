@@ -1,4 +1,5 @@
 import type { DataContext } from '@packages/data-context'
+import type { BrowserName } from '.'
 import type { Browser, FoundBrowser } from './browser'
 import type { PlatformName } from './platform'
 
@@ -21,7 +22,9 @@ export interface LaunchArgs {
   _: [string] // Cypress App binary location
   config: Record<string, unknown>
   cwd: string
-  browser: Browser
+  // sometimes it's just "electron", other times a full browser object
+  // todo(lachlan): standardize and fully these arguments
+  browser: Browser | BrowserName
   configFile?: string
   // Global mode is triggered by CLI via `--global` or when there is no `projectRoot` (essentially when the Cypress Config file can't be found)
   global: boolean
@@ -39,6 +42,7 @@ export interface LaunchArgs {
   exit?: boolean
 
   onFocusTests?: () => any
+  onError: (error: Error) => void
 }
 
 type NullableMiddlewareHook = (() => void) | null
