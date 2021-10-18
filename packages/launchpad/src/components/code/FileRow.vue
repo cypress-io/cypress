@@ -1,39 +1,3 @@
-<script lang="ts" setup>
-import { computed, ref } from 'vue'
-import 'prismjs'
-import 'prismjs/plugins/line-numbers/prism-line-numbers.css'
-import '@packages/frontend-shared/src/styles/prism.scss'
-import ListRow from '@cy/components/ListRow.vue'
-import Button from '@cy/components/Button.vue'
-import Badge from '@cy/components/Badge.vue'
-import PrismJs from 'vue-prism-component'
-
-const props = defineProps<{
-    status: 'changes' | 'valid' | 'skipped' | 'error'
-    filePath: string
-    content: string
-    description?: string | null
-}>()
-
-const language = computed(() => /\.(\w+)$/.exec(props.filePath)?.[1])
-
-const open = ref(false)
-
-const prismInstalled = ref(false)
-
-Promise.all([
-  import('prismjs/components/prism-typescript'),
-  import('prismjs/components/prism-json'),
-  import('prismjs/plugins/line-numbers/prism-line-numbers'),
-]).then(() => {
-  prismInstalled.value = true
-})
-
-const statusLabel = computed(() => props.status === 'skipped' ? 'Skipped' : props.status === 'changes' ? 'Changes required' : undefined)
-const statusClasses = computed(() => props.status === 'skipped' ? 'skipped' : props.status === 'changes' ? 'warning' : undefined)
-
-</script>
-
 <template>
   <ListRow @click="open = !open">
     <template #icon>
@@ -91,7 +55,6 @@ const statusClasses = computed(() => props.status === 'skipped' ? 'skipped' : pr
         <PrismJs
           :key="language"
           :language="language"
-          class="line-numbers"
         >
           {{ content }}
         </PrismJs>
@@ -99,3 +62,42 @@ const statusClasses = computed(() => props.status === 'skipped' ? 'skipped' : pr
     </template>
   </ListRow>
 </template>
+
+<script lang="ts" setup>
+import { computed, onBeforeMount, ref } from 'vue'
+import 'prismjs'
+import 'prismjs/plugins/line-numbers/prism-line-numbers.css'
+import '@packages/frontend-shared/src/styles/prism.scss'
+import ListRow from '@cy/components/ListRow.vue'
+import Button from '@cy/components/Button.vue'
+import Badge from '@cy/components/Badge.vue'
+import PrismJs from 'vue-prism-component'
+
+const props = defineProps<{
+    status: 'changes' | 'valid' | 'skipped' | 'error'
+    filePath: string
+    content: string
+    description?: string | null
+}>()
+
+const language = computed(() => /\.(\w+)$/.exec(props.filePath)?.[1])
+
+const open = ref(false)
+
+onBeforeMount(() => {
+  open.value = !['valid', 'skipped'].includes(props.status)
+})
+
+const prismInstalled = ref(false)
+
+Promise.all([
+  import('prismjs/components/prism-typescript'),
+  import('prismjs/components/prism-json'),
+]).then(() => {
+  prismInstalled.value = true
+})
+
+const statusLabel = computed(() => props.status === 'skipped' ? 'Skipped' : props.status === 'changes' ? 'Changes required' : undefined)
+const statusClasses = computed(() => props.status === 'skipped' ? 'skipped' : props.status === 'changes' ? 'warning' : undefined)
+
+</script>
