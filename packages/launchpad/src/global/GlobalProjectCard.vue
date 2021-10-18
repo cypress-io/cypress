@@ -35,16 +35,7 @@ import { GlobalProjectCardFragment, GlobalProjectCard_SetActiveProjectDocument }
 
 gql`
 mutation GlobalProjectCard_setActiveProject($path: String!) {
-  setActiveProject(path: $path) {
-    activeProject {
-      id
-      title
-      projectId
-      projectRoot
-      isFirstTimeCT
-      isFirstTimeE2E
-    }
-  }
+  setActiveProject(path: $path) 
 }
 `
 

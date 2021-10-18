@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-220 mx-auto py-8">
+  <div class="py-8 mx-auto max-w-220">
     <FileRow
       v-for="file in files"
       :key="file.filePath"
@@ -50,10 +50,8 @@ fragment ConfigFiles on Wizard {
 `
 
 gql`
-mutation ConfigFilesNavigate($direction: WizardNavigateDirection!) {
-  wizardNavigate(direction: $direction) {
-    ...WizardLayout
-  }
+mutation ConfigFilesNavigate($input: WizardUpdateInput!) {
+  wizardUpdate(input: $input)
 }
 `
 
@@ -65,12 +63,13 @@ const props = defineProps<{
 const files = computed(() => props.gql.sampleConfigFiles)
 
 const continueForward: any = () => {
-  // TODO: scaffold files here
-  navigate.executeMutation({ direction: 'forward' })
+  // TODO: check that all the files have been fixed
+  // if not diplay the same screen again with errors
+  navigate.executeMutation({ input: { direction: 'forward', testingType: null } })
 }
 
 const backFn:any = () => {
-  navigate.executeMutation({ direction: 'back' })
+  navigate.executeMutation({ input: { direction: 'back', testingType: null } })
 }
 
 </script>
