@@ -208,7 +208,7 @@ export function start (name, options: StartOptions = {}) {
         priority: 20,
       })
       .videoCodec('libx264')
-      .outputOptions('-preset ultrafast -pix_fmt yuv420p')
+      .outputOptions('-preset ultrafast')
       .on('start', (command) => {
         debug('capture started %o', { command })
 
