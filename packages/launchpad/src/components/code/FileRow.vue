@@ -48,16 +48,15 @@
         </Button>
       </div>
       <div
-        v-if="prismInstalled"
         class="p-3 pt-4 overflow-auto border-t border-gray-100"
         :class="open ? 'block': 'hidden'"
       >
-        <PrismJs
-          :key="language"
-          :language="language"
-        >
-          {{ content }}
-        </PrismJs>
+        <ShikiHighlight
+          v-if="language"
+          :lang="language"
+          :code="content"
+          line-numbers
+        />
       </div>
     </template>
   </ListRow>
@@ -65,13 +64,10 @@
 
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
-import 'prismjs'
-import 'prismjs/plugins/line-numbers/prism-line-numbers.css'
-import '@packages/frontend-shared/src/styles/prism.scss'
 import ListRow from '@cy/components/ListRow.vue'
 import Button from '@cy/components/Button.vue'
 import Badge from '@cy/components/Badge.vue'
-import PrismJs from 'vue-prism-component'
+import ShikiHighlight from '@cy/components/ShikiHighlight.vue'
 
 const props = defineProps<{
     status: 'changes' | 'valid' | 'skipped' | 'error'
@@ -80,18 +76,18 @@ const props = defineProps<{
     description?: string | null
 }>()
 
-const language = computed(() => /\.(\w+)$/.exec(props.filePath)?.[1])
+const language = computed(() => {
+  // get the extension of the current file path
+  const extension = /\.(\w+)$/.exec(props.filePath)?.[1]
+
+  if (extension && ['css', 'jsx', 'tsx', 'json', 'yaml'].includes(extension)) {
+    return extension as 'css' | 'jsx' | 'tsx' | 'json' | 'yaml'
+  }
+
+  return undefined
+})
 
 const open = ref(!['valid', 'skipped'].includes(props.status))
-
-const prismInstalled = ref(false)
-
-Promise.all([
-  import('prismjs/components/prism-typescript'),
-  import('prismjs/components/prism-json'),
-]).then(() => {
-  prismInstalled.value = true
-})
 
 const statusLabel = computed(() => props.status === 'skipped' ? 'Skipped' : props.status === 'changes' ? 'Changes required' : undefined)
 const statusClasses = computed(() => props.status === 'skipped' ? 'skipped' : props.status === 'changes' ? 'warning' : undefined)

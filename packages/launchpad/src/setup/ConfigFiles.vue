@@ -27,7 +27,7 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 import { gql } from '@urql/core'
-import { useMutation, useQuery } from '@urql/vue'
+import { useMutation } from '@urql/vue'
 import { ConfigFilesFragment, ConfigFilesNavigateDocument } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
 import Button from '@cy/components/Button.vue'
