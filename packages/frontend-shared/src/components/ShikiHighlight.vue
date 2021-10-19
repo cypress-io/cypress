@@ -12,7 +12,7 @@ shikiWrapperClasses computed property.
 ### The styles are spread across the template and the style block
 1. Utility classes that affect all modes and don't need to target a specific
    Shiki-only global style are placed on the top-most div.
-2. Styling the line numbers themselves must be done inside of a <script>
+2. Styling the line numbers themselves must be done inside of a <style>
    block because the selectors are too complex.
 3. When using style blocks without WindiCSS classes, you must use !important.
 -->
