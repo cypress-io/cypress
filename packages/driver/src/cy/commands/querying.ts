@@ -10,7 +10,8 @@ import { getAliasedRequests, isDynamicAliasingPossible } from '../net-stubbing/a
 
 export default (Commands, Cypress, cy, state) => {
   Commands.addAll({
-    focused (options = {}) {
+    // TODO: any -> Partial<Cypress.Loggable & Cypress.Timeoutable>
+    focused (options: any = {}) {
       const userOptions = options
 
       options = _.defaults({}, userOptions, {
@@ -71,7 +72,8 @@ export default (Commands, Cypress, cy, state) => {
       return resolveFocused()
     },
 
-    get (selector, options = {}) {
+    // TODO: any -> Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.Withinable & Cypress.Shadow>
+    get (selector, options: any = {}) {
       const userOptions = options
       const ctx = this
 
@@ -92,7 +94,7 @@ export default (Commands, Cypress, cy, state) => {
       options.includeShadowDom = resolveShadowDomInclusion(Cypress, userOptions.includeShadowDom)
 
       let aliasObj
-      const consoleProps = {}
+      const consoleProps: Record<string, any> = {}
       const start = (aliasType) => {
         if (options.log === false) {
           return
@@ -120,7 +122,7 @@ export default (Commands, Cypress, cy, state) => {
           start(aliasType)
         }
 
-        const obj = {}
+        const obj: any = {}
 
         if (aliasType === 'dom') {
           _.extend(obj, {
@@ -226,7 +228,7 @@ export default (Commands, Cypress, cy, state) => {
             // within our subject then filter out
             // anything not currently in the DOM
             if ($dom.isDetached(subject)) {
-              subject = subject.filter((index, el) => $dom.isAttached(el))
+              subject = (subject as any).filter((index, el) => $dom.isAttached(el))
 
               // if we have nothing left
               // just go replay the commands
@@ -246,6 +248,8 @@ export default (Commands, Cypress, cy, state) => {
                 if ((err.type === 'length') && (err.actual < err.expected)) {
                   return replayFrom = true
                 }
+
+                return false
               },
               onRetry () {
                 if (replayFrom) {
@@ -347,7 +351,7 @@ export default (Commands, Cypress, cy, state) => {
           if ($el.selector == null) {
             $el.selector = selector
           }
-        } catch (err) {
+        } catch (err: any) {
           // this is usually a sizzle error (invalid selector)
           err.onFail = () => {
             if (options.log === false) {
@@ -407,7 +411,8 @@ export default (Commands, Cypress, cy, state) => {
       return resolveElements()
     },
 
-    root (options = {}) {
+    // TODO: any -> Partial<Cypress.Loggable & Cypress.Timeoutable>
+    root (options: any = {}) {
       const userOptions = options
 
       options = _.defaults({}, userOptions, { log: true })
@@ -438,7 +443,8 @@ export default (Commands, Cypress, cy, state) => {
   })
 
   Commands.addAll({ prevSubject: ['optional', 'window', 'document', 'element'] }, {
-    contains (subject, filter, text, options = {}) {
+    // TODO: any -> Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.CaseMatchable & Cypress.Shadow>
+    contains (subject, filter, text, options: any = {}) {
       let userOptions = options
 
       // nuke our subject if its present but not an element.
@@ -516,6 +522,8 @@ export default (Commands, Cypress, cy, state) => {
 
           return `Expected to find content: '${text}' ${getPhrase()}but never did.`
         }
+
+        return null
       }
 
       let consoleProps
@@ -583,6 +591,8 @@ export default (Commands, Cypress, cy, state) => {
                 default:
                   break
               }
+
+              return null
             },
           })
         })
@@ -697,7 +707,7 @@ export default (Commands, Cypress, cy, state) => {
 
     options = _.defaults({}, userOptions, { log: true })
 
-    const consoleProps = {
+    const consoleProps: Record<string, any> = {
       'Applied To': $dom.getElements(subject),
     }
 
