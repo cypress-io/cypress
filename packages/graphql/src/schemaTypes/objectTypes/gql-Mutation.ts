@@ -67,6 +67,15 @@ export const mutation = mutationType({
       },
     })
 
+    t.field('internal_clearAllProjectPreferencesCache', {
+      type: 'Boolean',
+      resolve: (_, args, ctx) => {
+        ctx.actions.project.clearAllProjectPreferencesCache()
+
+        return true
+      },
+    })
+
     t.liveMutation('clearActiveProject', {
       resolve: async (_, args, ctx) => {
         await ctx.actions.project.clearActiveProject()

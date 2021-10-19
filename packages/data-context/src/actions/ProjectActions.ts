@@ -1,5 +1,5 @@
 import type { MutationAddProjectArgs, MutationAppCreateConfigFileArgs, MutationSetProjectPreferencesArgs, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
-import type { Cache, FindSpecs, FoundBrowser, FoundSpec, FullConfig, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions } from '@packages/types'
+import type { FindSpecs, FoundBrowser, FoundSpec, FullConfig, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions, Preferences } from '@packages/types'
 import path from 'path'
 import type { ProjectShape } from '../data/coreDataShape'
 
@@ -18,11 +18,12 @@ export interface ProjectApiShape {
   insertProjectToCache(projectRoot: string): void
   removeProjectFromCache(projectRoot: string): void
   getProjectRootsFromCache(): Promise<string[]>
+  insertProjectPreferencesToCache(projectTitle: string, preferences: Preferences): void
+  getProjectPreferencesFromCache(): Promise<Record<string, Preferences>>
   clearLatestProjectsCache(): Promise<unknown>
   clearProjectPreferences(projectTitle: string): Promise<unknown>
+  clearAllProjectPreferences(): Promise<unknown>
   closeActiveProject(): Promise<unknown>
-  readCache(): Promise<Cache>
-  writeCache(item: Partial<Cache>): void
 }
 
 export class ProjectActions {
@@ -212,6 +213,10 @@ export class ProjectActions {
     await this.api.clearProjectPreferences(projectTitle)
   }
 
+  async clearAllProjectPreferencesCache () {
+    await this.api.clearAllProjectPreferences()
+  }
+
   async createComponentIndexHtml (template: string) {
     const project = this.ctx.activeProject
 
@@ -231,12 +236,6 @@ export class ProjectActions {
       throw Error(`Cannot save preferences without activeProject.`)
     }
 
-    const preferences = await this.api.readCache()
-    const updatedPreferences = {
-      ...preferences.PROJECT_PREFERENCES,
-      [this.ctx.activeProject.title]: { ...args },
-    }
-
-    this.api.writeCache({ PROJECT_PREFERENCES: updatedPreferences })
+    this.api.insertProjectPreferencesToCache(this.ctx.activeProject.title, { ...args })
   }
 }

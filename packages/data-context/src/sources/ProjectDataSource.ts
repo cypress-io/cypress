@@ -117,8 +117,8 @@ export class ProjectDataSource {
   }
 
   async getProjectPreferences (projectTitle: string) {
-    const cache = await this.api.readCache()
+    const preferences = await this.api.getProjectPreferencesFromCache()
 
-    return cache.PROJECT_PREFERENCES[projectTitle] ?? null
+    return preferences[projectTitle] ?? null
   }
 }
