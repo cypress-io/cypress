@@ -61,7 +61,7 @@ export function getMsFromDuration (duration) {
 export function getCodecData (src) {
   return new Bluebird((resolve, reject) => {
     return ffmpeg()
-    .outputOptions('-pix_fmt yuv420p')
+    .outputOptions('-vf format=yuv420p')
     .on('stderr', (stderr) => {
       return debug('get codecData stderr log %o', { message: stderr })
     }).on('codecData', resolve)
