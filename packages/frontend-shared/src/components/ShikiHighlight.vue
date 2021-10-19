@@ -69,7 +69,7 @@ import { Highlighter, getHighlighter, setOnigasmWASM, setCDN } from 'shiki'
 import onigasm from 'onigasm/lib/onigasm.wasm?url'
 
 setOnigasmWASM(onigasm)
-setCDN('shiki/')
+setCDN(`${import.meta.env.BASE_URL}/shiki/`)
 
 let highlighter: Highlighter
 
