@@ -43,7 +43,7 @@
         <p class="flex-grow ml-1 text-left">
           Please merge the code below with your existing <span class="inline-block px-1 rounded bg-warning-200 text-warning-600">{{ filePath }}</span>
         </p>
-        <Button @click="document.location = 'https://docs.cypress.io/config'">
+        <Button @click="document.location.assign('https://docs.cypress.io/config')">
           Learn more
         </Button>
       </div>
