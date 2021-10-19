@@ -8,6 +8,7 @@ describe('Launchpad: Open Mode', () => {
 
   it('Shows the open page', () => {
     cy.get('h1').should('contain', defaultMessages.globalPage.empty.title)
+    cy.contains(defaultMessages.globalPage.empty.helper).should('be.visible')
   })
 
   it('allows adding a project', () => {
@@ -16,7 +17,8 @@ describe('Launchpad: Open Mode', () => {
       ctx.emitter.toLaunchpad()
     })
 
-    cy.get('h1').should('contain', defaultMessages.globalPage.empty.title)
-    cy.findByText(defaultMessages.globalPage.empty.helper)
+    // we should be taken to the Welcome page for the project
+    cy.get('h1').should('contain', 'Welcome to Cypress!')
+    cy.findByText('Choose which method of testing you would like to get started with for this project.')
   })
 })
