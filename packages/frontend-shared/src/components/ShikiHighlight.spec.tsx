@@ -1,8 +1,8 @@
 import ShikiHighlight, { initHighlighter } from './ShikiHighlight.vue'
 import code from '../../windi.config?raw'
 
-const devServerCode = `const { defineConfig } = require(’cypress’)
-const { devServer, defineDevServerConfig } = require(’@cypress/vite-dev-server’)
+const devServerCode = `const { defineConfig } = require('cypress')
+const { devServer, defineDevServerConfig } = require('@cypress/vite-dev-server')
 
 module.exports = defineConfig({
   component: {
@@ -13,7 +13,7 @@ module.exports = defineConfig({
   },
 })`
 
-describe('<ShikiHighlight/>', { viewportWidth: 1300, viewportHeight: 1300 }, () => {
+describe('<ShikiHighlight/>', { viewportWidth: 800, viewportHeight: 500 }, () => {
   beforeEach(async () => {
     await initHighlighter()
   })
@@ -24,7 +24,7 @@ describe('<ShikiHighlight/>', { viewportWidth: 1300, viewportHeight: 1300 }, () 
     </div>))
   })
 
-  it('trims whitespace to show the correct number of lines', () => {
+  it('trims whitespace to show the correct number of lines', { viewportWidth: 500, viewportHeight: 500 }, () => {
     const line = `console.log('my string')`
     const numLines = 15
 
@@ -45,7 +45,7 @@ describe('<ShikiHighlight/>', { viewportWidth: 1300, viewportHeight: 1300 }, () 
     .should('have.length', numLines)
   })
 
-  it('wraps long code without line numbers', () => {
+  it('wraps long code without line numbers', { viewportWidth: 900, viewportHeight: 500 }, () => {
     cy.mount(() => <div class="p-12"><ShikiHighlight wrap code={code} lang="ts" /></div>)
     cy.get('.shiki').should('be.visible')
   })
