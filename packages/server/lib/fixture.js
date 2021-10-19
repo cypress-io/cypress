@@ -132,7 +132,7 @@ module.exports = {
       case '.png': case '.jpg': case '.jpeg': case '.gif': case '.tif': case '.tiff': case '.zip':
         return this.parse(p, fixture, options.encoding)
       default:
-        return this.parse(p, fixture, options.encoding)
+        return this.parse(p, fixture, options.encoding || 'utf8')
     }
   },
 
