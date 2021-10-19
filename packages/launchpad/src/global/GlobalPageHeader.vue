@@ -17,7 +17,6 @@
     <Button
       aria-controls="dropzone"
       class="text-size-16px h-full"
-      :class="{ 'hocus-default': !showDropzone }"
       data-testid="addProjectButton"
       size="lg"
       :variant="showDropzone ? 'pending' : 'primary'"
@@ -40,7 +39,7 @@
     id="dropzone"
     data-testid="dropzone"
     class="mb-24px"
-    :close-button="projectCount ? projectCount > 0 : false"
+    close-button
     @addProject="emit('addProject', $event)"
     @close="toggleDropzone"
   />
