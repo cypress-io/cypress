@@ -145,10 +145,6 @@ describe('header', () => {
       })
 
       describe('pause controls', () => {
-        it('does not display paused label', () => {
-          cy.get('.paused-label').should('not.exist')
-        })
-
         it('does not display play button', () => {
           cy.get('.play').should('not.exist')
         })
@@ -166,10 +162,6 @@ describe('header', () => {
     describe('when paused with next command', () => {
       beforeEach(() => {
         runner.emit('paused', 'find')
-      })
-
-      it('displays paused label', () => {
-        cy.get('.paused-label').should('be.visible')
       })
 
       it('displays play button', () => {

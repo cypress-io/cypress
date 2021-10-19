@@ -391,17 +391,13 @@
       bottom: 0;
     }
 
-    span > span > a:before,
-    span > span > span:before {
-      @extend .#{$fa-css-prefix};
-      @extend .#{$fa-css-prefix}-file;
-      color: $gray-700;
-      display: inline;
-      margin-right: 5px;
+    span > span > a > svg {
+      margin-bottom: -2px;
+      margin-right: 8px;
     }
 
     a, a:active, a:focus, a:hover {
-      color: $white;
+      color: $gray-700;
     }
 
     .duration {

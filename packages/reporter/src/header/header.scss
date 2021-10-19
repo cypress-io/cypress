@@ -24,7 +24,7 @@
       font-weight: 300;
       line-height: 26px;
       outline: 0;
-      padding: 0 4px;
+      padding: 0 8px;
       text-align: center;
 
       &:hover {
@@ -47,21 +47,23 @@
 
   .focus-tests {
     display: flex;
+    height: 32px;
 
     button {
       color: $gray-700;
       font-size: 16px;
       font-weight: 400;
+      padding-left: 0;
       padding-right: 8px;
       width: auto !important;
 
       span {
         display: none;
-        margin-left: 10px;
       }
 
-      i {
-        margin-right: 5px;
+      svg {
+        margin-right: 8px;
+        margin-bottom: -2px;
       }
     }
   }
@@ -120,24 +122,9 @@
     justify-content: center;
     margin-left: 8px;
 
-    .paused-label {
-      align-items: center;
-      margin-right: 5px;
-
-      label {
-        background-color: $red-500;
-      }
-    }
-
     i {
       font-size: 90%;
       margin: 5px;
-
-      &.fa-redo {
-        font-size: 100%;
-        position: relative;
-        top: 1px;
-      }
     }
 
     .toggle-auto-scrolling {
@@ -164,6 +151,18 @@
           color: $orange-400;
         }
       }
+    }
+
+    span:last-child {
+      button {
+        color: $gray-400;
+        padding-top: 4px;
+      }
+    }
+
+    .play {
+      color: $gray-400;
+      padding-top: 4px;
     }
 
     span {

@@ -6,6 +6,8 @@ import { FileDetails } from '@packages/ui-components'
 
 import FileOpener from './file-opener'
 
+import TextIcon from '-!react-svg-loader!../lib/img/document-text_x16.svg'
+
 interface Props {
   fileDetails: FileDetails
   className?: string
@@ -18,6 +20,7 @@ const FileNameOpener = observer((props: Props) => {
     <Tooltip title={'Open in IDE'} wrapperClassName={props.className} className='cy-tooltip'>
       <span>
         <FileOpener fileDetails={props.fileDetails}>
+          <TextIcon />
           {originalFile}{!!line && `:${line}`}{!!column && `:${column}`}
         </FileOpener>
       </span>

@@ -8,6 +8,11 @@ import Tooltip from '@cypress/react-tooltip'
 import defaultEvents, { Events } from '../lib/events'
 import { AppState } from '../lib/app-state'
 
+import NextIcon from '-!react-svg-loader!../lib/img/action-next_x16.svg'
+import PlayIcon from '-!react-svg-loader!../lib/img/action-play_x16.svg'
+import RestartIcon from '-!react-svg-loader!../lib/img/action-restart_x16.svg'
+import StopIcon from '-!react-svg-loader!../lib/img/action-stop_x16.svg'
+
 const ifThen = (condition: boolean, component: React.ReactNode) => (
   condition ? component : null
 )
@@ -27,14 +32,9 @@ const Controls = observer(({ events = defaultEvents, appState }: Props) => {
   return (
     <div className='controls'>
       {ifThen(appState.isPaused, (
-        <span className='paused-label'>
-          <label>Paused</label>
-        </span>
-      ))}
-      {ifThen(appState.isPaused, (
         <Tooltip placement='bottom' title={<p>Resume <span className='kbd'>C</span></p>} className='cy-tooltip'>
           <button aria-label='Resume' className='play' onClick={emit('resume')}>
-            <i className='fas fa-play' />
+            <PlayIcon />
           </button>
         </Tooltip>
       ))}
@@ -53,21 +53,25 @@ const Controls = observer(({ events = defaultEvents, appState }: Props) => {
       {ifThen(appState.isRunning && !appState.isPaused, (
         <Tooltip placement='bottom' title={<p>Stop Running <span className='kbd'>S</span></p>} className='cy-tooltip' visible={appState.studioActive ? false : null}>
           <button aria-label='Stop' className='stop' onClick={emit('stop')} disabled={appState.studioActive}>
-            <i className='fas fa-stop' />
+            <StopIcon />
           </button>
         </Tooltip>
       ))}
       {ifThen(!appState.isRunning, (
         <Tooltip placement='bottom' title={<p>Run All Tests <span className='kbd'>R</span></p>} className='cy-tooltip'>
           <button aria-label='Rerun all tests' className='restart' onClick={emit('restart')}>
-            <i className={appState.studioActive ? 'fas fa-undo' : 'fas fa-redo'} />
+            {appState.studioActive ? (
+              <RestartIcon transform="scale(-1 1)" />
+            ) : (
+              <RestartIcon />
+            )}
           </button>
         </Tooltip>
       ))}
       {ifThen(!!appState.nextCommandName, (
         <Tooltip placement='bottom' title={<p>Next <span className='kbd'>[N]:</span>{appState.nextCommandName}</p>} className='cy-tooltip'>
           <button aria-label={`Next '${appState.nextCommandName}'`} className='next' onClick={emit('next')}>
-            <i className='fas fa-step-forward' />
+            <NextIcon />
           </button>
         </Tooltip>
       ))}
