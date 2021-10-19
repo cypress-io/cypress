@@ -22,5 +22,6 @@ app.use(createI18n())
 // Make sure highlighter is initialized before
 // we show any code to avoid jank at rendering
 // @ts-ignore
-await initHighlighter()
-app.mount('#app')
+initHighlighter().then(() => {
+  app.mount('#app')
+})
