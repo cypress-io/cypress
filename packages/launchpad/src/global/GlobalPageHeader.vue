@@ -33,6 +33,7 @@
   <FileDropzone
     v-if="showDropzone"
     id="dropzone"
+    data-testid="dropzone"
     class="mb-24px"
     close-button
     @addProject="emit('addProject', $event)"

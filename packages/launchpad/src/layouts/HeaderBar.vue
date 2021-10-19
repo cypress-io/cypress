@@ -1,6 +1,9 @@
 <template>
-  <div class="px-6 py-15px border-b border-b-gray-100 mb-24px">
-    <div class="flex items-center justify-between max-content">
+  <div
+    class="px-6 py-15px border-b border-b-gray-100 mb-24px"
+    data-testid="header-bar"
+  >
+    <div class="flex items-center justify-between">
       <div class="flex items-center">
         <img
           class="mr-18px w-32px h-32px"
