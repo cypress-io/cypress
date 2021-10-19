@@ -9,10 +9,11 @@
           class="mr-18px w-32px h-32px"
           src="../images/cypress-dark.png"
         >
-        <span
+        <a
           :class="props.gql?.app?.activeProject ? 'text-indigo-500' : 'text-gray-700'"
-          @click="clearActiveProject"
-        >Projects</span>
+          href="global-mode"
+          @click.prevent="clearActiveProject"
+        >Projects</a>
         <!-- TODO: Replace with a cy icon -->
         <i-oi-chevron-right
           v-if="props.gql?.app?.activeProject"
