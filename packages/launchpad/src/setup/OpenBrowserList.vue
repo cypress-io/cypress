@@ -9,7 +9,7 @@
         :key="browser.id"
         class="relative block pt-6 pb-4 text-center rounded w-160px border-1"
         :class="{
-          'border-indigo-300 ring-2 ring-indigo-50': browser.isSelected,
+          'border-jade-300 ring-2 ring-jade-50': browser.isSelected,
           'border-gray-200': !browser.isSelected,
           'filter grayscale bg-gray-100': browser.disabled,
           'hover:border-indigo-200 hover:ring-2 hover:ring-indigo-50': !browser.disabled && !browser.isSelected
@@ -73,7 +73,7 @@
 import { useI18n } from '@cy/i18n'
 import { OpenBrowserListFragment, OpenBrowserList_SetBrowserDocument } from '../generated/graphql'
 import Button from '@packages/frontend-shared/src/components/Button.vue'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import _clone from 'lodash/clone'
 import openInNew from '~icons/mdi/open-in-new'
 import { useMutation, gql } from '@urql/vue'
@@ -96,6 +96,7 @@ fragment OpenBrowserList on App {
     name
     family
     disabled
+    isActive
     isSelected
     channel
     displayName
@@ -121,6 +122,9 @@ const setSelected = (browserId: string) => {
 }
 
 const launchText = computed(() => props.gql.selectedBrowser ? `${t('setupPage.openBrowser.launch')} ${props.gql.selectedBrowser.displayName}` : '')
+
+const activeBrowserId = ref('')
+
 </script>
 
 <style scoped>
