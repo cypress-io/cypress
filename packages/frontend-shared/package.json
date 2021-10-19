@@ -3,7 +3,8 @@
   "version": "0.0.0-development",
   "private": true,
   "scripts": {
-    "build-prod": "tsc || echo 'built, with type errors'",
+    "build": "yarn generate-shiki-theme",
+    "build-prod": "yarn build && tsc || echo 'built, with type errors'",
     "check-ts": "vue-tsc --noEmit",
     "clean-deps": "rimraf node_modules",
     "clean": "rimraf dist ./node_modules/.vite src/*.js src/**/*.js && echo 'cleaned'",
@@ -11,7 +12,8 @@
     "windi": "yarn windicss-analysis",
     "cypress:open": "cross-env TZ=America/New_York node ../../scripts/cypress open-ct --project ${PWD}",
     "cypress:run": "cross-env TZ=America/New_York node ../../scripts/cypress run-ct --project ${PWD}",
-    "dev": "vite --open"
+    "dev": "vite --open",
+    "generate-shiki-theme": "node ./script/generate-shiki-theme.js"
   },
   "dependencies": {
     "shiki": "^0.9.12"
