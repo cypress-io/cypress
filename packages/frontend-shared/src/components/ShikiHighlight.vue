@@ -20,7 +20,35 @@ shikiWrapperClasses computed property.
 <template>
   <div
     v-if="highlighterInitialized"
-    :class="shikiWrapperClasses"
+    :class="[
+
+      'shiki-wrapper',
+
+      // All styles contain these utility classes
+      'overflow-scroll relative text-14px leading-24px font-light rounded',
+
+      /**
+       * 1. Single line is forced onto one line without any borders. It loses
+       *    any additional padding.
+       *
+       * 2. Multi-line without line-numbers adds padding to compensate for the
+       *    lack of margin-right that the line-numbers usually add. It has a
+       *    border.
+       *
+       * 3. Multi-line with line-numbers doesn't have the padding, because the
+       *    line numbers have margin-right.
+       *
+       * 4. Any of these can be wrapped with whitespace: pre-wrap. When using
+       *    with line-numbers, the breaks will create a new line.
+       */
+      {
+        'inline': props.inline,
+        'border-1 border-gray-100': !props.inline,
+        'wrap': props.wrap,
+        'line-numbers': props.lineNumbers,
+        'p-8px': !props.lineNumbers && !props.inline,
+      },
+    ]"
     v-html="highlightedCode"
   />
 </template>
@@ -76,37 +104,6 @@ const highlightedCode = computed(() => {
   return highlighter?.codeToHtml(props.code.trim(), resolvedLang.value)
 })
 
-const shikiWrapperClasses = computed(() => {
-  return [
-
-    'shiki-wrapper',
-
-    // All styles contain these utility classes
-    'overflow-scroll relative text-14px leading-24px font-light rounded',
-
-    /**
-    * 1. Single line is forced onto one line without any borders. It loses
-    *    any additional padding.
-    *
-    * 2. Multi-line without line-numbers adds padding to compensate for the
-    *    lack of margin-right that the line-numbers usually add. It has a
-    *    border.
-    *
-    * 3. Multi-line with line-numbers doesn't have the padding, because the
-    *    line numbers have margin-right.
-    *
-    * 4. Any of these can be wrapped with whitespace: pre-wrap. When using
-    *    with line-numbers, the breaks will create a new line.
-    */
-    {
-      'inline': props.inline,
-      'border-1 border-gray-100': !props.inline,
-      'wrap': props.wrap,
-      'line-numbers': props.lineNumbers,
-      'p-8px': !props.lineNumbers && !props.inline,
-    },
-  ]
-})
 </script>
 
 <!-- This is a scoped style, but we're able to style *outside* of the
@@ -119,18 +116,16 @@ avoid colliding with styles elsewhere in the document.
 
 <style lang="scss" scoped>
 
-$offset: 8px;
+$offset: 1em;
 
 .inline:deep(.shiki) {
   @apply py-1 px-2 bg-gray-50 text-gray-500 inline-block;
 }
 
 .shiki-wrapper {
-  padding-top: $offset !important;
-  padding-bottom: $offset !important;
 
   &:deep(.shiki) {
-    @apply border-r-10px border-r-white;
+    @apply min-w-max border-r-10px border-r-transparent py-8px;
   }
 
   &.wrap:deep(.line) {
@@ -144,7 +139,7 @@ $offset: 8px;
 
       // Keep bg-gray-50 synced with the box-shadows.
       .line::before, .line:first-child::before {
-        @apply bg-gray-50 text-gray-500 min-w-40px inline-block text-right px-8px mr-16px sticky z-1;
+        @apply bg-gray-50 text-gray-500 min-w-40px inline-block text-right px-8px mr-16px sticky z-0;
         left: -1px !important;
         content: counter(step);
         counter-increment: step;
@@ -155,12 +150,6 @@ $offset: 8px;
       // To avoid this, we use box-shadows and offset the parent container.
       .line:first-child::before {
         box-shadow: 0 (-1 * $offset) theme('colors.gray.50') !important;
-      }
-
-      .line:first-child::after {
-        @apply bg-gray-100 w-1px -top-1 -bottom-1 left-40px z-0 absolute;
-        // box-shadow: 0 ($offset) theme('colors.gray.50') !important;
-        content: " ";
       }
 
       .line:last-child::before {

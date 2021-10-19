@@ -33,7 +33,7 @@
     <ShikiHighlight
       :code="localCode"
       lang="javascript"
-      class="border border-gray-100 rounded text-14px leading-20px"
+      class="border border-gray-100 rounded "
       line-numbers
     />
   </div>

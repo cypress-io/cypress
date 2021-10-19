@@ -14,10 +14,10 @@
 
       <div
         class="relative mx-auto bg-white rounded"
-        :class="modalClasses"
+        :class="classes"
       >
         <div
-          class="flex sticky top-0 items-center justify-between
+          class="flex sticky rounded-t top-0 items-center justify-between
         border-b-1px border-b-gray-100 min-h-56px px-24px bg-white z-1"
         >
           <DialogTitle class="text-gray-900 text-18px">
@@ -58,9 +58,14 @@
     </div>
   </Dialog>
 </template>
+
+<script lang="ts">
+export const inheritAttrs = false
+</script>
+
 <script setup lang="ts">
 import { useI18n } from '@cy/i18n'
-
+import { computed } from 'vue'
 import { useModelWrapper } from '@packages/frontend-shared/src/composables'
 
 import {
@@ -76,14 +81,13 @@ const emit = defineEmits<{
 
 const props = withDefaults(defineProps<{
   modelValue?: boolean
-  modalClasses?: string
   helpLink?: string
   helpText?: string
   clickOutside?: boolean
+  class: string | string[] | Record<string, any>
 }>(), {
   clickOutside: true,
   modelValue: false,
-  modalClasses: 'w-480px',
   helpText: 'Need help?',
   helpLink: 'https://docs.cypress.io',
 })
@@ -94,6 +98,7 @@ const setIsOpen = (val: boolean) => {
   emit('update:modelValue', val)
 }
 
+const classes = computed(() => props.class)
 const { t } = useI18n()
 
 </script>

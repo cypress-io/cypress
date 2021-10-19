@@ -16,7 +16,7 @@
           <WizardHeader :gql="query.data.value.wizard" />
           <StandardModal
             v-model="isTestingTypeModalOpen"
-            modal-classes="md:w-full lg:w-960px"
+            class="h-full sm:h-auto sm:w-auto w-full sm:mx-[5%]"
           >
             <template #title>
               Key Differences
