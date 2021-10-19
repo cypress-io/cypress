@@ -27,7 +27,7 @@ shikiWrapperClasses computed property.
         'shiki-wrapper',
 
         // All styles contain these utility classes
-        'overflow-scroll cursor-pointer hover:border-indigo-200 relative text-14px leading-24px font-light rounded',
+        'overflow-scroll hover:border-indigo-200 relative text-14px leading-24px font-light rounded',
 
         /**
          * 1. Single line is forced onto one line without any borders. It loses
@@ -49,10 +49,11 @@ shikiWrapperClasses computed property.
           'wrap': props.wrap,
           'line-numbers': props.lineNumbers,
           'p-8px': !props.lineNumbers && !props.inline,
-          'copied': copied && !props.inline
+          'copied': copied && !props.inline,
+          'cursor-pointer': copyOnClick
         },
       ]"
-      @click="copyCode"
+      @click="copyOnClick ? () => copyCode() : () => {}"
       v-html="highlightedCode"
     />
     <p
@@ -109,10 +110,12 @@ const props = withDefaults(defineProps<{
   lineNumbers?: boolean,
   inline?: boolean,
   wrap?: boolean,
+  copyOnClick?: boolean,
 }>(), {
   lineNumbers: false,
   inline: false,
   wrap: false,
+  copyOnClick: false,
 })
 
 const resolvedLang = computed(() => {
