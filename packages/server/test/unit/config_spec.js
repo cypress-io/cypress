@@ -2329,7 +2329,7 @@ describe('lib/config', () => {
       expect(config.setAbsolutePaths(obj)).to.deep.eq(obj)
     })
 
-    return ['fileServerFolder', 'fixturesFolder', 'integrationFolder', 'unitFolder', 'supportFile', 'pluginsFile'].forEach((folder) => {
+    return ['fileServerFolder', 'fixturesFolder', 'integrationFolder', 'supportFile', 'pluginsFile'].forEach((folder) => {
       it(`converts relative ${folder} to absolute path`, () => {
         const obj = {
           projectRoot: '/_test-output/path/to/project',

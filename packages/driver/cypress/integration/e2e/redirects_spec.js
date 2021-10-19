@@ -15,7 +15,7 @@ describe('redirection', () => {
       .visit('/fixtures/meta-redirect-timeout.html')
       .contains('timeout')
       .then(function () {
-      // visit, contains, page load, new url
+        // visit, contains, page load, new url
         expect(this.logs.length).to.eq(4)
 
         expect(this.logs[0].get('name')).to.eq('visit')
@@ -31,7 +31,7 @@ describe('redirection', () => {
       .visit('/fixtures/meta-redirect.html')
       .get('a:first')
       .then(function () {
-      // visit, get, page load, new url
+        // visit, get, page load, new url
         expect(this.logs.length).to.eq(4)
 
         expect(this.logs[0].get('name')).to.eq('visit')

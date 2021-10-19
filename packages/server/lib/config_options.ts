@@ -1,4 +1,4 @@
-const v = require('./util/validation')
+const v = require('./uitl/validation')
 
 // NOTE:
 // If you add/remove/change a config value, make sure to update the following
@@ -7,15 +7,11 @@ const v = require('./util/validation')
 //
 // Add options in alphabetical order for better readability
 
-export const options = [
+const configOptions = [
   {
     name: 'animationDistanceThreshold',
     defaultValue: 5,
     validation: v.isNumber,
-  }, {
-    name: 'autoOpen',
-    defaultValue: false,
-    isInternal: true,
   }, {
     name: 'baseUrl',
     defaultValue: null,
@@ -25,17 +21,9 @@ export const options = [
     defaultValue: null,
     validation: v.isStringOrArrayOfStrings,
   }, {
-    name: 'browsers',
-    defaultValue: [],
-    validation: v.isValidBrowserList,
-  }, {
     name: 'chromeWebSecurity',
     defaultValue: true,
     validation: v.isBoolean,
-  }, {
-    name: 'clientRoute',
-    defaultValue: '/__/',
-    isInternal: true,
   }, {
     name: 'clientCertificates',
     defaultValue: [],
@@ -51,20 +39,9 @@ export const options = [
     validation: v.isStringOrFalse,
     isFolder: true,
   }, {
-    name: 'configFile',
-    defaultValue: 'cypress.json',
-    validation: v.isStringOrFalse,
-    // not truly internal, but can only be set via cli,
-    // so we don't consider it a "public" option
-    isInternal: true,
-  }, {
     name: 'defaultCommandTimeout',
     defaultValue: 4000,
     validation: v.isNumber,
-  }, {
-    name: 'devServerPublicPathRoute',
-    defaultValue: '/__cypress/src',
-    isInternal: true,
   }, {
     name: 'downloadsFolder',
     defaultValue: 'cypress/downloads',
@@ -93,17 +70,17 @@ export const options = [
     validation: v.isBoolean,
     isExperimental: true,
   }, {
+    name: 'experimentalSessionSupport',
+    defaultValue: false,
+    validation: v.isBoolean,
+    isExperimental: true,
+  }, {
     name: 'experimentalSourceRewriting',
     defaultValue: false,
     validation: v.isBoolean,
     isExperimental: true,
   }, {
     name: 'experimentalStudio',
-    defaultValue: false,
-    validation: v.isBoolean,
-    isExperimental: true,
-  }, {
-    name: 'experimentalSessionSupport',
     defaultValue: false,
     validation: v.isBoolean,
     isExperimental: true,
@@ -118,9 +95,6 @@ export const options = [
     validation: v.isStringOrFalse,
     isFolder: true,
   }, {
-    name: 'hosts',
-    defaultValue: null,
-  }, {
     name: 'ignoreTestFiles',
     defaultValue: '*.hot-update.js',
     validation: v.isStringOrArrayOfStrings,
@@ -134,21 +108,9 @@ export const options = [
     validation: v.isString,
     isFolder: true,
   }, {
-    name: 'isTextTerminal',
-    defaultValue: false,
-    isInternal: true,
-  }, {
-    name: 'morgan',
-    defaultValue: true,
-    isInternal: true,
-  }, {
     name: 'modifyObstructiveCode',
     defaultValue: true,
     validation: v.isBoolean,
-  }, {
-    name: 'namespace',
-    defaultValue: '__cypress',
-    isInternal: true,
   }, {
     name: 'nodeVersion',
     defaultValue: 'default',
@@ -185,10 +147,6 @@ export const options = [
     name: 'reporterOptions',
     defaultValue: null,
   }, {
-    name: 'reporterRoute',
-    defaultValue: '/__cypress/reporter',
-    isInternal: true,
-  }, {
     name: 'requestTimeout',
     defaultValue: 5000,
     validation: v.isNumber,
@@ -217,21 +175,9 @@ export const options = [
     validation: v.isStringOrFalse,
     isFolder: true,
   }, {
-    name: 'socketId',
-    defaultValue: null,
-    isInternal: true,
-  }, {
-    name: 'socketIoRoute',
-    defaultValue: '/__socket.io',
-    isInternal: true,
-  }, {
     name: 'scrollBehavior',
     defaultValue: 'top',
     validation: v.isOneOf('center', 'top', 'bottom', 'nearest', false),
-  }, {
-    name: 'socketIoCookie',
-    defaultValue: '__socket.io',
-    isInternal: true,
   }, {
     name: 'supportFile',
     defaultValue: 'cypress/support',
@@ -252,10 +198,6 @@ export const options = [
     name: 'trashAssetsBeforeRuns',
     defaultValue: true,
     validation: v.isBoolean,
-  }, {
-    name: 'unitFolder',
-    isFolder: true,
-    isInternal: true,
   }, {
     name: 'userAgent',
     defaultValue: null,
@@ -293,11 +235,78 @@ export const options = [
     name: 'watchForFileChanges',
     defaultValue: true,
     validation: v.isBoolean,
+  },
+]
+
+const runtimeOptions = [
+  {
+    name: 'autoOpen',
+    defaultValue: false,
+    isInternal: true,
+  }, {
+    name: 'browsers',
+    defaultValue: [],
+    validation: v.isValidBrowserList,
+  }, {
+    name: 'clientRoute',
+    defaultValue: '/__/',
+    isInternal: true,
+  }, {
+    name: 'configFile',
+    defaultValue: 'cypress.json',
+    validation: v.isStringOrFalse,
+    // not truly internal, but can only be set via cli,
+    // so we don't consider it a "public" option
+    isInternal: true,
+  }, {
+    name: 'devServerPublicPathRoute',
+    defaultValue: '/__cypress/src',
+    isInternal: true,
+  }, {
+    name: 'hosts',
+    defaultValue: null,
+  }, {
+    name: 'isTextTerminal',
+    defaultValue: false,
+    isInternal: true,
+  }, {
+    name: 'morgan',
+    defaultValue: true,
+    isInternal: true,
+  }, {
+    name: 'modifyObstructiveCode',
+    defaultValue: true,
+    validation: v.isBoolean,
+  }, {
+    name: 'namespace',
+    defaultValue: '__cypress',
+    isInternal: true,
+  }, {
+    name: 'reporterRoute',
+    defaultValue: '/__cypress/reporter',
+    isInternal: true,
+  }, {
+    name: 'socketId',
+    defaultValue: null,
+    isInternal: true,
+  }, {
+    name: 'socketIoCookie',
+    defaultValue: '__socket.io',
+    isInternal: true,
+  }, {
+    name: 'socketIoRoute',
+    defaultValue: '/__socket.io',
+    isInternal: true,
   }, {
     name: 'xhrRoute',
     defaultValue: '/xhrs/',
     isInternal: true,
   },
+]
+
+export const options = [
+  ...configOptions,
+  ...runtimeOptions,
 ]
 
 export const breakingOptions = [

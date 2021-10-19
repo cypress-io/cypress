@@ -2541,77 +2541,94 @@ declare namespace Cypress {
     certs: PEMCert[] | PFXCert[]
   }
 
+  // NOTE:
+  // If you add/remove/change a config value, make sure to update the following
+  // - packages/config/src/config_options.ts 
+  // - cypress.schema.json
+  //
+  // Add options in alphabetical order for better readability & to match other file's order
   interface ResolvedConfigOptions {
+    /**
+     * The distance in pixels an element must exceed over time to be considered animating
+     * @default 5
+     */
+    animationDistanceThreshold: number
     /**
      * Url used as prefix for [cy.visit()](https://on.cypress.io/visit) or [cy.request()](https://on.cypress.io/request) command’s url
      * @default null
      */
     baseUrl: string | null
     /**
-     * Any values to be set as [environment variables](https://docs.cypress.io/guides/guides/environment-variables.html)
-     * @default {}
+     * The list of hosts to be blocked
      */
-    env: { [key: string]: any }
+    blockHosts: null | string | string[]
     /**
-     * A String or Array of glob patterns used to ignore test files that would otherwise be shown in your list of tests. Cypress uses minimatch with the options: {dot: true, matchBase: true}. We suggest using http://globtester.com to test what files would match.
-     * @default "*.hot-update.js"
-     */
-    ignoreTestFiles: string | string[]
-    /**
-     * The number of tests for which snapshots and command data are kept in memory. Reduce this number if you are experiencing high memory consumption in your browser during a test run.
-     * @default 50
-     */
-    numTestsKeptInMemory: number
-    /**
-     * Port used to host Cypress. Normally this is a randomly generated port
-     * @default null
-     */
-    port: number | null
-    /**
-     * The [reporter](https://docs.cypress.io/guides/guides/reporters.html) used when running headlessly or in CI
-     * @default "spec"
-     */
-    reporter: string
-    /**
-     * Some reporters accept [reporterOptions](https://on.cypress.io/reporters) that customize their behavior
-     * @default "spec"
-     */
-    reporterOptions: { [key: string]: any }
-    /**
-     * Whether Cypress will watch and restart tests on test file changes
+     * Whether Chrome Web Security for same-origin policy and insecure mixed content is enabled. Read more about this here
      * @default true
      */
-    watchForFileChanges: boolean
+    chromeWebSecurity: boolean
+    /**
+     * An array of objects defining the certificates
+     */
+    clientCertificates: ClientCertificate[]
+    /**
+     * Override default config options for Component Testing runner.
+     * @default {}
+     */
+    component: Omit<ResolvedConfigOptions, TestingType>
+    /**
+     * Path to folder containing component test files.
+     */
+    componentFolder: false | string
     /**
      * Time, in milliseconds, to wait until most DOM based commands are considered timed out
      * @default 4000
      */
     defaultCommandTimeout: number
     /**
+     * Path to folder where files downloaded during a test are saved
+     * @default "cypress/downloads"
+     */
+    downloadsFolder: string
+    /**
+     * Override default config options for E2E Testing runner.
+     * @default {}
+     */
+    e2e: Omit<ResolvedConfigOptions, TestingType>
+    /**
+     * Any values to be set as [environment variables](https://docs.cypress.io/guides/guides/environment-variables.html)
+     * @default {}
+     */
+    env: { [key: string]: any }
+    /**
      * Time, in milliseconds, to wait for a system command to finish executing during a [cy.exec()](https://on.cypress.io/exec) command
      * @default 60000
      */
     execTimeout: number
     /**
-     * Time, in milliseconds, to wait for page transition events or [cy.visit()](https://on.cypress.io/visit), [cy.go()](https://on.cypress.io/go), [cy.reload()](https://on.cypress.io/reload) commands to fire their page load events
-     * @default 60000
+     * Polyfills `window.fetch` to enable Network spying and stubbing
      */
-    pageLoadTimeout: number
+    experimentalFetchPolyfill: boolean
     /**
-     * Time, in milliseconds, to wait for an XHR request to go out in a [cy.wait()](https://on.cypress.io/wait) command
-     * @default 5000
+     * Allows listening to the `before:run`, `after:run`, `before:spec`, and `after:spec` events in the plugins file during interactive mode.
+     * @default false
      */
-    requestTimeout: number
+    experimentalInteractiveRunEvents: boolean
     /**
-     * Time, in milliseconds, to wait until a response in a [cy.request()](https://on.cypress.io/request), [cy.wait()](https://on.cypress.io/wait), [cy.fixture()](https://on.cypress.io/fixture), [cy.getCookie()](https://on.cypress.io/getcookie), [cy.getCookies()](https://on.cypress.io/getcookies), [cy.setCookie()](https://on.cypress.io/setcookie), [cy.clearCookie()](https://on.cypress.io/clearcookie), [cy.clearCookies()](https://on.cypress.io/clearcookies), and [cy.screenshot()](https://on.cypress.io/screenshot) commands
-     * @default 30000
+     * Enable experimental session support. See https://on.cypress.io/session
+     * @default false
      */
-    responseTimeout: number
+    experimentalSessionSupport: boolean
     /**
-     * Time, in milliseconds, to wait for a task to finish executing during a cy.task() command
-     * @default 60000
-     */
-    taskTimeout: number
+    * Generate and save commands directly to your test suite by interacting with your app as an end user would.
+    * @default false
+    */
+    experimentalSourceRewriting: boolean
+    /**
+    * Generate and save commands directly to your test suite by interacting with your app as an end user would.
+    * @default false
+    */
+    experimentalStudio: boolean
     /**
      * Path to folder where application files will attempt to be served from
      * @default root project folder
@@ -2623,30 +2640,72 @@ declare namespace Cypress {
      */
     fixturesFolder: string | false
     /**
+     * A String or Array of glob patterns used to ignore test files that would otherwise be shown in your list of tests. Cypress uses minimatch with the options: {dot: true, matchBase: true}. We suggest using http://globtester.com to test what files would match.
+     * @default "*.hot-update.js"
+     */
+    ignoreTestFiles: string | string[]
+    /**
+     * Enables including elements within the shadow DOM when using querying
+     * commands (e.g. cy.get(), cy.find()). Can be set globally in cypress.json,
+     * per-suite or per-test in the test configuration object, or programmatically
+     * with Cypress.config()
+     * @default false
+     */
+    includeShadowDom: boolean
+    /**
      * Path to folder containing integration test files
      * @default "cypress/integration"
      */
     integrationFolder: string
-    /**
-     * Path to folder where files downloaded during a test are saved
-     * @default "cypress/downloads"
-     */
-    downloadsFolder: string
     /**
      * If set to `system`, Cypress will try to find a `node` executable on your path to use when executing your plugins. Otherwise, Cypress will use the Node version bundled with Cypress.
      * @default "bundled"
      */
     nodeVersion: 'system' | 'bundled'
     /**
+     * The number of tests for which snapshots and command data are kept in memory. Reduce this number if you are experiencing high memory consumption in your browser during a test run.
+     * @default 50
+     */
+    numTestsKeptInMemory: number
+    /**
+     * Time, in milliseconds, to wait for page transition events or [cy.visit()](https://on.cypress.io/visit), [cy.go()](https://on.cypress.io/go), [cy.reload()](https://on.cypress.io/reload) commands to fire their page load events
+     * @default 60000
+     */
+     pageLoadTimeout: number
+    /**
      * Path to plugins file. (Pass false to disable)
      * @default "cypress/plugins/index.js"
      */
     pluginsFile: string | false
     /**
+     * Port used to host Cypress. Normally this is a randomly generated port
+     * @default null
+     */
+    port: number | null
+    /**
+     * A unique ID for the project used for recording
+     */
+    projectId: null | string
+    /**
      * The application under test cannot redirect more than this limit.
      * @default 20
      */
     redirectionLimit: number
+    /**
+     * The [reporter](https://docs.cypress.io/guides/guides/reporters.html) used when running headlessly or in CI
+     * @default "spec"
+     */
+    reporter: string
+    /**
+     * Some reporters accept [reporterOptions](https://on.cypress.io/reporters) that customize their behavior
+     * @default "spec"
+     */
+    reporterOptions: { [key: string]: any }
+    /**
+     * Time, in milliseconds, to wait for an XHR request to go out in a [cy.wait()](https://on.cypress.io/wait) command
+     * @default 5000
+     */
+    requestTimeout: number
     /**
      * If `nodeVersion === 'system'` and a `node` executable is found, this will be the full filesystem path to that executable.
      * @default null
@@ -2658,95 +2717,10 @@ declare namespace Cypress {
      */
     resolvedNodeVersion: string
     /**
-     * Whether Cypress will take a screenshot when a test fails during cypress run.
-     * @default true
+     * Time, in milliseconds, to wait until a response in a [cy.request()](https://on.cypress.io/request), [cy.wait()](https://on.cypress.io/wait), [cy.fixture()](https://on.cypress.io/fixture), [cy.getCookie()](https://on.cypress.io/getcookie), [cy.getCookies()](https://on.cypress.io/getcookies), [cy.setCookie()](https://on.cypress.io/setcookie), [cy.clearCookie()](https://on.cypress.io/clearcookie), [cy.clearCookies()](https://on.cypress.io/clearcookies), and [cy.screenshot()](https://on.cypress.io/screenshot) commands
+     * @default 30000
      */
-    screenshotOnRunFailure: boolean
-    /**
-     * Path to folder where screenshots will be saved from [cy.screenshot()](https://on.cypress.io/screenshot) command or after a headless or CI run’s test failure
-     * @default "cypress/screenshots"
-     */
-    screenshotsFolder: string | false
-    /**
-     * Path to file to load before test files load. This file is compiled and bundled. (Pass false to disable)
-     * @default "cypress/support/index.js"
-     */
-    supportFile: string | false
-    /**
-     * Path to folder where videos will be saved after a headless or CI run
-     * @default "cypress/videos"
-     */
-    videosFolder: string
-    /**
-     * Whether Cypress will trash assets within the screenshotsFolder and videosFolder before headless test runs.
-     * @default true
-     */
-    trashAssetsBeforeRuns: boolean
-    /**
-     * The quality setting for the video compression, in Constant Rate Factor (CRF). The value can be false to disable compression or a value between 0 and 51, where a lower value results in better quality (at the expense of a higher file size).
-     * @default 32
-     */
-    videoCompression: number | false
-    /**
-     * Whether Cypress will record a video of the test run when running headlessly.
-     * @default true
-     */
-    video: boolean
-    /**
-     * Whether Cypress will upload the video to the Dashboard even if all tests are passing. This applies only when recording your runs to the Dashboard. Turn this off if you’d like the video uploaded only when there are failing tests.
-     * @default true
-     */
-    videoUploadOnPasses: boolean
-    /**
-     * Whether Chrome Web Security for same-origin policy and insecure mixed content is enabled. Read more about this here
-     * @default true
-     */
-    chromeWebSecurity: boolean
-    /**
-     * Default height in pixels for the application under tests’ viewport (Override with [cy.viewport()](https://on.cypress.io/viewport) command)
-     * @default 660
-     */
-    viewportHeight: number
-    /**
-     * Default width in pixels for the application under tests’ viewport. (Override with [cy.viewport()](https://on.cypress.io/viewport) command)
-     * @default 1000
-     */
-    viewportWidth: number
-    /**
-     * The distance in pixels an element must exceed over time to be considered animating
-     * @default 5
-     */
-    animationDistanceThreshold: number
-    /**
-     * Whether to wait for elements to finish animating before executing commands
-     * @default true
-     */
-    waitForAnimations: boolean
-    /**
-     * Viewport position to which an element should be scrolled prior to action commands. Setting `false` disables scrolling.
-     * @default 'top'
-     */
-    scrollBehavior: scrollBehaviorOptions
-    /**
-     * Enable experimental session support. See https://on.cypress.io/session
-     * @default false
-     */
-    experimentalSessionSupport: boolean
-    /**
-     * Allows listening to the `before:run`, `after:run`, `before:spec`, and `after:spec` events in the plugins file during interactive mode.
-     * @default false
-     */
-    experimentalInteractiveRunEvents: boolean
-    /**
-     * Generate and save commands directly to your test suite by interacting with your app as an end user would.
-     * @default false
-     */
-    experimentalSourceRewriting: boolean
-    /**
-     * Generate and save commands directly to your test suite by interacting with your app as an end user would.
-     * @default false
-     */
-    experimentalStudio: boolean
+    responseTimeout: number
     /**
      * Number of times to retry a failed test.
      * If a number is set, tests will retry in both runMode and openMode.
@@ -2755,59 +2729,87 @@ declare namespace Cypress {
      */
     retries: Nullable<number | { runMode?: Nullable<number>, openMode?: Nullable<number> }>
     /**
-     * Enables including elements within the shadow DOM when using querying
-     * commands (e.g. cy.get(), cy.find()). Can be set globally in cypress.json,
-     * per-suite or per-test in the test configuration object, or programmatically
-     * with Cypress.config()
-     * @default false
+     * Whether Cypress will take a screenshot when a test fails during cypress run.
+     * @default true
      */
-    includeShadowDom: boolean
-
+    screenshotOnRunFailure: boolean
     /**
-     * The list of hosts to be blocked
+     * Path to folder where screenshots will be saved from [cy.screenshot()](https://on.cypress.io/screenshot) command or after a headless or CI run’s test failure
+     * @default "cypress/screenshots"
      */
-    blockHosts: null | string | string[]
+     screenshotsFolder: string | false
     /**
-     * Path to folder containing component test files.
+     * Viewport position to which an element should be scrolled prior to action commands. Setting `false` disables scrolling.
+     * @default 'top'
      */
-    componentFolder: false | string
+    scrollBehavior: scrollBehaviorOptions
     /**
-     * A unique ID for the project used for recording
+     * Path to file to load before test files load. This file is compiled and bundled. (Pass false to disable)
+     * @default "cypress/support/index.js"
      */
-    projectId: null | string
+    supportFile: string | false
     /**
      * Path to the support folder.
      */
     supportFolder: string
     /**
+     * Time, in milliseconds, to wait for a task to finish executing during a cy.task() command
+     * @default 60000
+     */
+    taskTimeout: number
+    /**
      * Glob pattern to determine what test files to load.
      */
     testFiles: string | string[]
+     /**
+     * Whether Cypress will trash assets within the screenshotsFolder and videosFolder before headless test runs.
+     * @default true
+     */
+    trashAssetsBeforeRuns: boolean   
     /**
      * The user agent the browser sends in all request headers.
      */
     userAgent: null | string
     /**
-     * Polyfills `window.fetch` to enable Network spying and stubbing
+     * Whether Cypress will record a video of the test run when running headlessly.
+     * @default true
      */
-    experimentalFetchPolyfill: boolean
-
+    video: boolean
     /**
-     * Override default config options for Component Testing runner.
-     * @default {}
+     * Path to folder where videos will be saved after a headless or CI run
+     * @default "cypress/videos"
      */
-    component: Omit<ResolvedConfigOptions, TestingType>
-
+    videosFolder: string
+     /**
+      * The quality setting for the video compression, in Constant Rate Factor (CRF). The value can be false to disable compression or a value between 0 and 51, where a lower value results in better quality (at the expense of a higher file size).
+      * @default 32
+      */
+    videoCompression: number | false
+     /**
+      * Whether Cypress will upload the video to the Dashboard even if all tests are passing. This applies only when recording your runs to the Dashboard. Turn this off if you’d like the video uploaded only when there are failing tests.
+      * @default true
+      */
+    videoUploadOnPasses: boolean
     /**
-     * Override default config options for E2E Testing runner.
-     * @default {}
+     * Default height in pixels for the application under tests’ viewport (Override with [cy.viewport()](https://on.cypress.io/viewport) command)
+     * @default 660
      */
-    e2e: Omit<ResolvedConfigOptions, TestingType>
-
+    viewportHeight: number
+     /**
+      * Default width in pixels for the application under tests’ viewport. (Override with [cy.viewport()](https://on.cypress.io/viewport) command)
+      * @default 1000
+      */
+    viewportWidth: number
     /**
-     * An array of objects defining the certificates
+     * Whether to wait for elements to finish animating before executing commands
+     * @default true
      */
-    clientCertificates: ClientCertificate[]
+    waitForAnimations: boolean
+    /**
+     * Whether Cypress will watch and restart tests on test file changes
+     * @default true
+     */
+    watchForFileChanges: boolean
   }
 
   /**
