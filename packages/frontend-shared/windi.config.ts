@@ -13,7 +13,9 @@ export const defaultConfig: WindiCssOptions = {
     extend: {
       borderRadius: {
         DEFAULT: '4px',
-        md: '4px',
+        md: '4px' },
+      fontFamily: {
+        mono: '"Fira Code", "Dank Mono", monospace',
       },
       gridTemplateColumns: {
         launchpad: '64px 1fr',

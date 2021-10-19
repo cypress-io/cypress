@@ -6,16 +6,13 @@
     :next-fn="createConfig"
     :can-navigate-forward="props.gql.wizard.canNavigateForward"
   >
-    <div
-      v-if="tsInstalled"
-      class="relative p-4"
-    >
-      <PrismJs
+    <div class="relative">
+      <ShikiHighlight
         :key="language"
-        :language="language"
-      >
-        {{ code }}
-      </PrismJs>
+        :lang="language || 'js'"
+        :code="code || ''"
+        line-numbers
+      />
       <CopyButton
         v-if="manualCreate && code"
         :text="code"
@@ -26,15 +23,13 @@
 
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
-import 'prismjs'
-import '@packages/frontend-shared/src/styles/prism.scss'
 import { gql } from '@urql/core'
-import PrismJs from 'vue-prism-component'
 import WizardLayout from './WizardLayout.vue'
 import CopyButton from '@cy/components/CopyButton.vue'
 import { ConfigFileFragment, ConfigFile_AppCreateConfigFileDocument, ConfigFile_AppCreateComponentIndexHtmlDocument } from '../generated/graphql'
 import { useMutation } from '@urql/vue'
 import { useI18n } from '@cy/i18n'
+import ShikiHighlight from '@cy/components/ShikiHighlight.vue'
 
 const { t } = useI18n()
 
@@ -85,16 +80,11 @@ const altFn = (val: boolean) => {
   manualCreate.value = val
 }
 
-const tsInstalled = ref(false)
 const language = computed(() => {
   return props.gql.wizard.language?.type
 })
 const nextButtonName = computed(() => {
   return manualCreate.value ? 'I\'ve added this file' : 'Create File'
-})
-
-import('prismjs/components/prism-typescript').then(() => {
-  tsInstalled.value = true
 })
 
 const createConfigFile = useMutation(ConfigFile_AppCreateConfigFileDocument)
@@ -128,9 +118,3 @@ const createConfig = async () => {
   })
 }
 </script>
-
-<style>
-body pre[class*="language-"] {
-  margin: 0 5px;
-}
-</style>

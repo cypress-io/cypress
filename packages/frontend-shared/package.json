@@ -11,9 +11,12 @@
     "windi": "yarn windicss-analysis",
     "cypress:open": "cross-env TZ=America/New_York node ../../scripts/cypress open-ct --project ${PWD}",
     "cypress:run": "cross-env TZ=America/New_York node ../../scripts/cypress run-ct --project ${PWD}",
-    "dev": "vite --open"
+    "dev": "vite --open",
+    "generate-shiki-theme": "node ./script/generate-shiki-theme.js"
   },
-  "dependencies": {},
+  "dependencies": {
+    "shiki": "^0.9.12"
+  },
   "devDependencies": {
     "@antfu/utils": "^0.3.0",
     "@cypress/vite-dev-server": "0.0.0-development",

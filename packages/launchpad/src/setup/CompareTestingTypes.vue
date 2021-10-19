@@ -1,5 +1,5 @@
 <template>
-  <div class="flex justify-around pt-24px">
+  <div class="sm:grid md:w-full grid-cols-2 pt-24px">
     <CompareTestingCard
       class="border-r border-r-gray-100"
       title="End-to-end Tests:"
@@ -24,16 +24,31 @@ const { t } = useI18n()
 
 // these are code examples so should not trigger linter
 /* eslint-disable no-irregular-whitespace */
-const ctCode = `import Button from ‘design-system’
-​
-it(‘clicks the confirm button’) {
-  cy.mount(<Button>)
-  cy.get(‘Button’).click()
-}`
+const ctCode = `
+import BaseModal from './BaseModal'
 
-const e2eCode = `it(‘clicks the confirm button’) { \n  cy.visit(‘https://yourwebsite.com’) \n  cy.get(‘button[type=submit]’).click()
-}
+it('closes when the X button is pressed', () => {
+  cy.mount(<BaseModal />)
+    .get('[aria-label=Close]')
+    .click()
+    .get('[data-testid=modal]')
+    .should('not.exist')
+})
+`
 
+const e2eCode = `
+it('only shows a promotional modal on first visit', () => {
+  cy.visit('http://localhost:3000/')
+    .get('[data-testid=modal]')
+    .should('be.visible')
+    .get('[aria-label=Close]')
+    .click()
+
+    // should not load a second time
+    .reload()
+    .get('[data-testid=modal]')
+    .should('not.exist')
+})
 `
 
 const e2eItems = [t('welcomePage.compareTypes.e2ebullet1'), t('welcomePage.compareTypes.e2ebullet2'), t('welcomePage.compareTypes.e2ebullet3')]
