@@ -90,8 +90,6 @@ export const Iframes = namedObserver('Iframes', ({
     }
 
     const specSrc = getSpecUrl({ namespace: config.namespace, spec })
-    // const $container = $Cypress.$(containerRef.current).empty()
-    // const $autIframe: JQuery<HTMLIFrameElement> = autIframe.create().appendTo($container)
 
     autIframe.showInitialBlankContents()
 
