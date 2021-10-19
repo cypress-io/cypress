@@ -60,11 +60,14 @@ export function getMsFromDuration (duration) {
 
 export function getCodecData (src) {
   return new Bluebird((resolve, reject) => {
-    return ffmpeg()
+    return ffmpeg({ logger: true })
     .outputOptions('-pix_fmt yuv420p')
     .on('stderr', (stderr) => {
       return debug('get codecData stderr log %o', { message: stderr })
     }).on('codecData', resolve)
+    .on('error', function (err) {
+      return debug(`An error occurred: ${ err.message}`)
+    })
     .input(src)
     .format('null')
     .output(new BlackHoleStream())
