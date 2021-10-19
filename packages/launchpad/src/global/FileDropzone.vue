@@ -94,7 +94,7 @@ const emit = defineEmits<{
 withDefaults(defineProps<{
   closeButton: boolean
 }>(), {
-  closeButton: true,
+  closeButton: false,
 })
 
 const uploadName = ref('')
