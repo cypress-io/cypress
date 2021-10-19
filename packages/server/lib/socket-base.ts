@@ -375,6 +375,10 @@ export class SocketBase {
               return firefoxUtil.windowFocus()
             case 'get:fixture':
               return getFixture(args[0], args[1])
+              // Buffers are base64 encoded for sending over the websocket. This is done
+              // here rather than in fixture code because net stubbing wants to send the
+              // unencoded buffer, and it also relies on the same fixture loading code.
+              .then((resp) => Buffer.isBuffer(resp) ? resp.toString('base64') : resp)
             case 'read:file':
               return files.readFile(config.projectRoot, args[0], args[1])
             case 'write:file':
