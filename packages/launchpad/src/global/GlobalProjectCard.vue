@@ -43,7 +43,7 @@
           <button
             :class="{ 'bg-gray-700': active }"
             class="rounded text-left px-16px py-8px border-b border-b-gray-800"
-            @click.stop="emit(item.event, props.gql.projectRoot)"
+            @click.stop="handleMenuClick(item.event)"
           >
             {{ item.name }}
           </button>
@@ -87,6 +87,15 @@ const setActiveProject = (project: string) => {
 const props = defineProps<{
   gql: GlobalProjectCardFragment
 }>()
+const { t } = useI18n()
+
+type eventName = 'removeProject' | 'openInIDE' | 'openInFinder'
+
+const menuItems: { name: string, event: eventName }[] = [
+  { name: t('globalPage.removeProject'), event: 'removeProject' },
+  { name: t('globalPage.openInIDE'), event: 'openInIDE' },
+  { name: t('globalPage.openInFinder'), event: 'openInFinder' },
+]
 
 const emit = defineEmits<{
   (event: 'projectSelected', project: GlobalProjectCardFragment): void
@@ -95,11 +104,19 @@ const emit = defineEmits<{
   (event: 'openInFinder', path: string): void
 }>()
 
-const { t } = useI18n()
-
-const menuItems = [
-  { name: t('globalPage.removeProject'), event: 'removeProject' },
-  { name: t('globalPage.openInIDE'), event: 'openInIDE' },
-  { name: t('globalPage.openInFinder'), event: 'openInFinder' },
-]
+const handleMenuClick = (eventName: eventName) => {
+  switch (eventName) {
+    case 'removeProject':
+      emit(eventName, props.gql.projectRoot)
+      break
+    case 'openInIDE':
+      emit(eventName, props.gql.projectRoot)
+      break
+    case 'openInFinder':
+      emit(eventName, props.gql.projectRoot)
+      break
+    default:
+      return
+  }
+}
 </script>
