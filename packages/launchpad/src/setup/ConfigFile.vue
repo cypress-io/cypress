@@ -60,23 +60,13 @@ fragment SampleCode on Wizard {
 
 gql`
 mutation ConfigFile_appCreateConfigFile($code: String!, $configFilename: String!) {
-  appCreateConfigFile(code: $code, configFilename: $configFilename) {
-    activeProject {
-      id
-      projectRoot
-    }
-  }
+  appCreateConfigFile(code: $code, configFilename: $configFilename)
 }
 `
 
 gql`
 mutation ConfigFile_appCreateComponentIndexHtml($template: String!) {
-  appCreateComponentIndexHtml(template: $template) {
-    activeProject {
-      id
-      projectRoot
-    }
-  }
+  appCreateComponentIndexHtml(template: $template) 
 }
 `
 

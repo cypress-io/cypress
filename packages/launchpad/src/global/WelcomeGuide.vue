@@ -96,16 +96,7 @@ fragment WelcomeGuide on App {
 
 gql`
 mutation WelcomeGuide_SetActiveProject($path: String!) {
-  setActiveProject(path: $path) {
-    activeProject {
-      id
-      title
-      projectId
-      projectRoot
-      isFirstTimeCT
-      isFirstTimeE2E
-    }
-  }
+  setActiveProject(path: $path)
 }
 `
 

@@ -34,14 +34,7 @@ const { t } = useI18n()
 
 gql`
 mutation SpecsList_SetCurrentSpec($id: ID!) {
-  setCurrentSpec(id: $id) {
-    currentSpec {
-      id
-      relative
-      absolute
-      name
-    }
-  }
+  setCurrentSpec(id: $id)
 }
 `
 

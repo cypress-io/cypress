@@ -12,11 +12,13 @@ import { initHighlighter } from '@cy/components/ShikiHighlight.vue'
 
 const app = createApp(App)
 
+export const launchpadClient = makeUrqlClient('launchpad')
+
 app.use(Toast, {
   position: POSITION.BOTTOM_RIGHT,
 })
 
-app.use(urql, makeUrqlClient('launchpad'))
+app.use(urql, launchpadClient)
 app.use(createI18n())
 
 // Make sure highlighter is initialized before
