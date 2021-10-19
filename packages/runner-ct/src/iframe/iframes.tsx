@@ -26,13 +26,15 @@ interface IFramesProps {
   config: Cypress.RuntimeConfigOptions
 }
 
+let autIframe: AutIframe
+let $autIframe: JQuery<HTMLIFrameElement>
+
 export const Iframes = namedObserver('Iframes', ({
   config,
   state,
   eventManager,
 }: IFramesProps) => {
   const containerRef = useRef<HTMLDivElement>(null)
-  const autIframe = useRef(new AutIframe(config))
 
   const _toggleSnapshotHighlights = (snapshotProps) => {
     state.setShowSnapshotHighlight(!state.snapshot.showingHighlights)
@@ -40,9 +42,9 @@ export const Iframes = namedObserver('Iframes', ({
     if (state.snapshot.showingHighlights) {
       const snapshot = snapshotProps.snapshots[state.snapshot.stateIndex]
 
-      autIframe.current.highlightEl(snapshot, snapshotProps)
+      autIframe.highlightEl(snapshot, snapshotProps)
     } else {
-      autIframe.current.removeHighlights()
+      autIframe.removeHighlights()
     }
   }
 
@@ -50,12 +52,12 @@ export const Iframes = namedObserver('Iframes', ({
     const snapshot = snapshotProps.snapshots[index]
 
     state.setSnapshotIndex(index)
-    autIframe.current.restoreDom(snapshot)
+    autIframe.restoreDom(snapshot)
 
     if (state.snapshot.showingHighlights && snapshotProps.$el) {
-      autIframe.current.highlightEl(snapshot, snapshotProps)
+      autIframe.highlightEl(snapshot, snapshotProps)
     } else {
-      autIframe.current.removeHighlights()
+      autIframe.removeHighlights()
     }
   }
 
@@ -74,7 +76,7 @@ export const Iframes = namedObserver('Iframes', ({
     when(() => state.readyToRunTests, () => {
       window.Cypress.on('window:before:load', state.registerDevtools)
 
-      const $autIframe = _loadIframes(spec)
+      _loadIframes(spec)
 
       eventManager.initialize($autIframe, config)
     })
@@ -88,10 +90,10 @@ export const Iframes = namedObserver('Iframes', ({
     }
 
     const specSrc = getSpecUrl({ namespace: config.namespace, spec })
-    const $container = $Cypress.$(containerRef.current).empty()
-    const $autIframe: JQuery<HTMLIFrameElement> = autIframe.current.create().appendTo($container)
+    // const $container = $Cypress.$(containerRef.current).empty()
+    // const $autIframe: JQuery<HTMLIFrameElement> = autIframe.create().appendTo($container)
 
-    autIframe.current.showInitialBlankContents()
+    autIframe.showInitialBlankContents()
 
     // In mount mode we need to render something right from spec file
     // So load application tests to the aut frame
@@ -101,9 +103,15 @@ export const Iframes = namedObserver('Iframes', ({
   }
 
   useEffect(() => {
-    eventManager.on('visit:failed', autIframe.current.showVisitFailure)
-    eventManager.on('before:screenshot', autIframe.current.beforeScreenshot)
-    eventManager.on('after:screenshot', autIframe.current.afterScreenshot)
+    const $container = $Cypress.$(containerRef.current)
+
+    autIframe = new AutIframe(config)
+    $autIframe = autIframe.create()
+    $autIframe.appendTo($container)
+
+    eventManager.on('visit:failed', autIframe.showVisitFailure)
+    eventManager.on('before:screenshot', autIframe.beforeScreenshot)
+    eventManager.on('after:screenshot', autIframe.afterScreenshot)
     eventManager.on('script:error', _setScriptError)
 
     // TODO: need to take headless mode into account
@@ -112,29 +120,24 @@ export const Iframes = namedObserver('Iframes', ({
       _run(state.spec, config)
     })
 
-    eventManager.on('print:selector:elements:to:console', autIframe.current.printSelectorElementsToConsole)
-
-    eventManager.start(config)
+    eventManager.on('print:selector:elements:to:console', autIframe.printSelectorElementsToConsole)
 
     const disposers = [
       autorun(() => {
-        autIframe.current.toggleSelectorPlayground(selectorPlaygroundModel.isEnabled)
+        autIframe.toggleSelectorPlayground(selectorPlaygroundModel.isEnabled)
       }),
       autorun(() => {
-        autIframe.current.toggleSelectorHighlight(selectorPlaygroundModel.isShowingHighlight)
-      }),
-      autorun(() => {
-        if (state.spec) {
-          _run(state.spec, config)
-        }
+        autIframe.toggleSelectorHighlight(selectorPlaygroundModel.isShowingHighlight)
       }),
     ]
 
+    eventManager.start(config)
+
     const iframeModel = new IframeModel({
       state,
-      restoreDom: autIframe.current.restoreDom,
-      highlightEl: autIframe.current.highlightEl,
-      detachDom: autIframe.current.detachDom,
+      restoreDom: autIframe.restoreDom,
+      highlightEl: autIframe.highlightEl,
+      detachDom: autIframe.detachDom,
       snapshotControls: (snapshotProps) => (
         <SnapshotControls
           eventManager={eventManager}
@@ -147,6 +150,7 @@ export const Iframes = namedObserver('Iframes', ({
     })
 
     iframeModel.listen()
+    _run(state.spec, config)
 
     return () => {
       eventManager.notifyRunningSpec(null)
