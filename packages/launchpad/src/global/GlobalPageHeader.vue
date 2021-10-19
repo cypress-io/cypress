@@ -16,7 +16,8 @@
     </label>
     <Button
       aria-controls="dropzone"
-      class="text-size-16px h-full hocus-default"
+      class="text-size-16px h-full"
+      :class="{ 'hocus-default': !showDropzone }"
       data-testid="addProjectButton"
       size="lg"
       :variant="showDropzone ? 'pending' : 'primary'"
@@ -24,7 +25,11 @@
       @click="toggleDropzone"
     >
       <template #prefix>
-        <i-cy-add-large_x16 :class="showDropzone ? 'icon-dark-gray-100' : 'icon-dark-indigo-300'" />
+        <i-cy-add-large_x16
+          class="transform duration-150"
+          :class="showDropzone ?
+            'icon-dark-gray-100 rotate-45' : 'icon-dark-indigo-300'"
+        />
       </template>
       {{ t('globalPage.addProjectButton') }}
     </Button>
@@ -35,7 +40,7 @@
     id="dropzone"
     data-testid="dropzone"
     class="mb-24px"
-    close-button
+    :close-button="false"
     @addProject="emit('addProject', $event)"
     @close="toggleDropzone"
   />

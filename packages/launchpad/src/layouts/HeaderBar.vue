@@ -10,8 +10,9 @@
           src="../images/cypress-dark.png"
         >
         <a
-          :class="props.gql?.app?.activeProject ? 'text-indigo-500' : 'text-gray-700'"
-          href="global-mode"
+          :class="props.gql?.app?.activeProject ? 'text-indigo-500' :
+            'text-gray-700'"
+          :href="props.gql?.app?.activeProject ? 'global-mode' : undefined"
           @click.prevent="clearActiveProject"
         >Projects</a>
         <!-- TODO: Replace with a cy icon -->

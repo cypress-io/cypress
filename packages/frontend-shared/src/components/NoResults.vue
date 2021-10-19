@@ -3,14 +3,13 @@
     v-if="search"
     class="text-center"
   >
-    <img
-      class="mx-auto mt-80px mb-36px w-344px"
-      :src="noResultsImage"
+    <NoResultsIllustration
+      class="mx-auto mt-80px"
       alt
-    >
-    <p class="text-gray-500 text-18px">
-      {{ message }}:
-      <span class="text-purple-500">{{ search }}</span>
+    />
+    <p class="text-gray-500 text-18px leading-normal">
+      {{ message || t('noResults.defaultMessage') }}:
+      <span class="block truncate text-purple-500">{{ search }}</span>
     </p>
     <Button
       class="mx-auto mt-20px"
@@ -28,17 +27,18 @@
 
 <script setup lang="ts">
 import Button from './Button.vue'
-import noResultsImage from '../assets/png/no-results.png'
+import { useI18n } from '@cy/i18n'
+import NoResultsIllustration from '../assets/illustrations/no-results.svg'
 
-withDefaults(defineProps<{
+defineProps<{
   search?: string,
   message?: string
-}>(), {
-  message: 'No results matched your search',
-})
+}>()
 
 const emit = defineEmits<{
   (e: 'clear'): void
 }>()
+
+const { t } = useI18n()
 
 </script>

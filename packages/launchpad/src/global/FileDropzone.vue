@@ -1,20 +1,18 @@
 <template>
   <div
     ref="projectUpload"
-    class="relative"
+    class="relative cursor-pointer"
   >
     <FileSelector
       v-slot="{ openDialog }"
       v-model="files"
       allow-multiple
     >
-      <Dropzone
-        v-slot="{ hovered }"
-        @click="openDialog"
-      >
+      <Dropzone @click="openDialog">
         <div
-          class="relative block w-full p-58px text-center border-1 border-gray-200 border-dashed rounded-lg h-240px min-w-220px bg-gray-50 hover:border-gray-400"
-          :class="{ 'border-blue-200': hovered }"
+          class="relative block w-full p-58px text-center border-1
+        border-gray-200 border-dashed rounded-lg h-240px min-w-220px
+        bg-gray-50 hocus-default"
         >
           <i-cy-drag-project_x80
             class="mx-auto -mb-4px w-80px h-80px icon-dark-indigo-500 icon-light-indigo-200"
@@ -40,11 +38,13 @@
       {{ uploadName }}
     </div>
     <button
+      v-if="closeButton"
       aria-label="Close"
-      class="hocus-default absolute right-20px top-20px"
+      class="text-gray-400 hocus:text-gray-500 outline-none absolute w-32px
+    h-32px right-8px top-8px flex items-center justify-center"
       @click="emit('close')"
     >
-      <i-cy-delete_x12 class="icon-dark-gray-400 w-12px h-12px" />
+      <i-cy-delete_x12 class="icon-dark-current w-12px h-12px" />
     </button>
   </div>
 </template>
@@ -90,6 +90,12 @@ const emit = defineEmits<{
   (e: 'addProject', value: string): void
   (e: 'close'): void
 }>()
+
+withDefaults(defineProps<{
+  closeButton: boolean
+}>(), {
+  closeButton: true,
+})
 
 const uploadName = ref('')
 

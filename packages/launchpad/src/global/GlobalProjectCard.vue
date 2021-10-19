@@ -1,6 +1,6 @@
 <template>
   <div
-    class="relative w-full rounded border border-gray-100 bg-white pr-16px pt-13px pb-13px flex items-center space-x-3 group hocus-default focus-within-default"
+    class="cursor-pointer relative w-full rounded border border-gray-100 bg-white pr-4px pt-13px pb-13px flex items-center space-x-3 group hocus-default focus-within-default"
     @click="setActiveProject(props.gql.projectRoot)"
   >
     <div
@@ -25,7 +25,9 @@
     <Menu #="{ open }">
       <MenuButton
         aria-label="Project Actions"
-        class="focus:outline-transparent text-white focus:text-gray-300"
+        class="focus:outline-transparent w-32px h-32px flex items-center
+      justify-center text-white focus:text-gray-300"
+        @click.prevent.stop
       >
         <i-cy-vertical-dots_x16
           class="icon-dark-current transition transition-color duration-300"
@@ -33,7 +35,8 @@
         />
       </MenuButton>
       <MenuItems
-        class="absolute bg-gray-900 text-white flex flex-col right-0 -bottom-100px right-18px outline-transparent z-40"
+        class="absolute bg-gray-900 text-white flex flex-col right-0
+      -bottom-104px right-18px outline-transparent z-40 rounded overflow-scroll"
       >
         <MenuItem
           v-for="item in menuItems"
@@ -42,7 +45,7 @@
         >
           <button
             :class="{ 'bg-gray-700': active }"
-            class="rounded text-left px-16px py-8px border-b border-b-gray-800"
+            class="text-left px-16px py-8px border-b border-b-gray-800"
             @click.stop="handleMenuClick(item.event)"
           >
             {{ item.name }}

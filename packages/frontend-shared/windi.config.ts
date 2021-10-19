@@ -11,6 +11,10 @@ export const defaultConfig: WindiCssOptions = {
   important: true,
   theme: {
     extend: {
+      borderRadius: {
+        DEFAULT: '4px',
+        md: '4px',
+      },
       gridTemplateColumns: {
         launchpad: '64px 1fr',
       },

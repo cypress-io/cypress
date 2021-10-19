@@ -127,6 +127,7 @@
       "dropText": "Drag your project directory here or {0}",
       "browseManually": "browse manually."
     },
+    "recentProjectsHeader": "Recent Projects",
     "searchPlaceholder": "Search projects",
     "addProjectButton": "Add Project",
     "projectActions": "Project Actions",

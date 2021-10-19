@@ -10,7 +10,7 @@
       v-if="filteredProjects.length"
       class="text-gray-800 mb-16px"
     >
-      Recent Projects
+      {{ t('globalPage.recentProjectsHeader') }}
     </h2>
     <div :class="{ 'md:grid md:grid-cols-2 md:gap-24px mb-0': filteredProjects?.length > 1 }">
       <GlobalProjectCard
@@ -33,7 +33,7 @@
 </template>
 
 <script setup lang="ts">
-
+import { useI18n } from '@cy/i18n'
 import { computed, ref } from 'vue'
 import { gql, useMutation } from '@urql/vue'
 import GlobalProjectCard from './GlobalProjectCard.vue'
@@ -90,4 +90,5 @@ const filteredProjects = computed(() => {
 })
 
 const match = ref('')
+const { t } = useI18n()
 </script>
