@@ -16,7 +16,7 @@
           <WizardHeader :gql="query.data.value.wizard" />
           <StandardModal
             v-model="isTestingTypeModalOpen"
-            modal-classes="w-960px"
+            modal-classes="md:w-full lg:w-960px"
           >
             <template #title>
               Key Differences
@@ -60,8 +60,10 @@ import GlobalPage from './global/GlobalPage.vue'
 import BaseError from './error/BaseError.vue'
 import StandardModal from '@cy/components/StandardModal.vue'
 import CompareTestingTypes from './setup/CompareTestingTypes.vue'
+
 import { useI18n } from '@cy/i18n'
 import { ref } from 'vue'
+import ShikiHighlight from '../../frontend-shared/src/components/ShikiHighlight.vue'
 
 const { t } = useI18n()
 const isTestingTypeModalOpen = ref(false)
