@@ -553,7 +553,7 @@
     semver "^5.4.1"
     source-map "^0.5.0"
 
-"@babel/core@^7.0.0", "@babel/core@^7.0.1", "@babel/core@^7.1.0", "@babel/core@^7.1.6", "@babel/core@^7.11.0", "@babel/core@^7.11.1", "@babel/core@^7.12.10", "@babel/core@^7.12.3", "@babel/core@^7.14.6", "@babel/core@^7.14.8", "@babel/core@^7.4.5", "@babel/core@^7.5.4", "@babel/core@^7.7.5", "@babel/core@^7.8.6", "@babel/core@^7.9.6":
+"@babel/core@^7.0.0", "@babel/core@^7.0.1", "@babel/core@^7.1.0", "@babel/core@^7.1.6", "@babel/core@^7.11.0", "@babel/core@^7.11.1", "@babel/core@^7.12.10", "@babel/core@^7.12.3", "@babel/core@^7.14.6", "@babel/core@^7.4.5", "@babel/core@^7.5.4", "@babel/core@^7.7.5", "@babel/core@^7.8.6", "@babel/core@^7.9.6":
   version "7.15.5"
   resolved "https://registry.yarnpkg.com/@babel/core/-/core-7.15.5.tgz#f8ed9ace730722544609f90c9bb49162dc3bf5b9"
   integrity sha512-pYgXxiwAgQpgM1bNkZsDEq85f0ggXMA5L7c+o3tskGMh2BunCI9QUwB9Z4jpvXUOuMdyGKiGKQiRe11VS6Jzvg==
@@ -9602,18 +9602,6 @@
     "@vue/babel-plugin-jsx" "^1.0.6"
     hash-sum "^2.0.0"
 
-"@vitejs/plugin-vue-jsx@^1.1.8":
-  version "1.1.8"
-  resolved "https://registry.yarnpkg.com/@vitejs/plugin-vue-jsx/-/plugin-vue-jsx-1.1.8.tgz#c7b9efd94efe8801635f755b6fd0d0a3a70cf596"
-  integrity sha512-2ah1PuLf2fFdfJO91VLOPNHlNkhpOEgOY0/yNjJwhGNdWec5f2D4hrGdf4vUFIFcNw6D6SXEUhE4Fva5+TmKLA==
-  dependencies:
-    "@babel/core" "^7.14.8"
-    "@babel/plugin-syntax-import-meta" "^7.10.4"
-    "@babel/plugin-transform-typescript" "^7.14.6"
-    "@rollup/pluginutils" "^4.1.1"
-    "@vue/babel-plugin-jsx" "^1.0.6"
-    hash-sum "^2.0.0"
-
 "@vitejs/plugin-vue@1.2.0":
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/@vitejs/plugin-vue/-/plugin-vue-1.2.0.tgz#f0a92470b74761f90afc8cda204fa3bec9df09f4"
@@ -9623,11 +9611,6 @@
   version "1.2.4"
   resolved "https://registry.yarnpkg.com/@vitejs/plugin-vue/-/plugin-vue-1.2.4.tgz#a7aa6e6a31c556a8b781de730316deeecf7f56f2"
   integrity sha512-D/3H9plevPQGgQGwmV6eecvOnooLTecPR63HPffVVWPEhbfvmtYLWgznzs456NBb2DItiRTCIa1yWxvGqC+I8A==
-
-"@vitejs/plugin-vue@^1.9.2":
-  version "1.9.2"
-  resolved "https://registry.yarnpkg.com/@vitejs/plugin-vue/-/plugin-vue-1.9.2.tgz#7234efb8c3c3d60c7eac350a935074ab1820ae0e"
-  integrity sha512-QnUQJvGmY+YT9xTidLcjr6NAjKWNdSuul1M+BZ6uwTQaO5vpAY9USBncXESATk742dYMZGJenegJgeJhG/HMNQ==
 
 "@volar/code-gen@^0.27.14":
   version "0.27.14"
