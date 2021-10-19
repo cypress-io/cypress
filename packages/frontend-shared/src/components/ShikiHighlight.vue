@@ -69,7 +69,7 @@ export async function initHighlighter () {
 
   highlighter = await getHighlighter({
     themes: ['cypress.theme'],
-    langs: ['typescript', 'javascript', 'css', 'json', 'yaml'],
+    langs: ['typescript', 'javascript', 'css', 'jsx', 'tsx', 'json', 'yaml'],
   })
 }
 
@@ -88,7 +88,7 @@ onBeforeMount(async () => {
 
 const props = withDefaults(defineProps<{
   code: string;
-  lang: 'javascript' | 'typescript' | 'json' | 'js' | 'ts' | 'yaml';
+  lang: 'javascript' | 'typescript' | 'json' | 'js' | 'ts' | 'tsx' | 'jsx' | 'yaml';
   lineNumbers?: boolean,
   inline?: boolean,
   wrap?: boolean,
@@ -98,7 +98,13 @@ const props = withDefaults(defineProps<{
   wrap: false,
 })
 
-const resolvedLang = computed(() => 'js' === props.lang ? 'javascript' : 'ts' === props.lang ? 'typescript' : props.lang)
+const resolvedLang = computed(() => {
+  if (props.lang === 'javascript' || props.lang === 'js' || props.lang === 'jsx') return 'jsx'
+
+  if (props.lang === 'typescript' || props.lang === 'ts' || props.lang === 'tsx') return 'tsx'
+
+  return props.lang
+})
 
 const highlightedCode = computed(() => {
   return highlighter?.codeToHtml(props.code.trim(), resolvedLang.value)

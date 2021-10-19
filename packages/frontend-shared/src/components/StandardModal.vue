@@ -14,11 +14,10 @@
 
       <div
         class="relative mx-auto bg-white rounded"
-        :class="classes"
+        :class="props.class"
       >
         <div
-          class="flex sticky rounded-t top-0 items-center justify-between
-        border-b-1px border-b-gray-100 min-h-56px px-24px bg-white z-1"
+          class="sticky top-0 flex items-center justify-between bg-white rounded-t border-b-1px border-b-gray-100 min-h-56px px-24px z-1"
         >
           <DialogTitle class="text-gray-900 text-18px">
             <slot name="title" /> <span class="inline-block border-t border-t-gray-100 w-32px h-6px mx-8px" /> <a
@@ -31,12 +30,10 @@
           </DialogTitle>
           <button
             aria-label="Close"
-            class=" p-5px rounded-full border-1
-          border-transparent hover:border-indigo-300 hocus-default
-          "
+            class="border-transparent rounded-full  p-5px border-1 hover:border-indigo-300 hocus-default"
             @click="setIsOpen(false)"
           >
-            <i-cy-delete_x12 class="icon-dark-gray-400  w-12px h-12px" />
+            <i-cy-delete_x12 class="icon-dark-gray-400 w-12px h-12px" />
           </button>
         </div>
 
@@ -98,7 +95,6 @@ const setIsOpen = (val: boolean) => {
   emit('update:modelValue', val)
 }
 
-const classes = computed(() => props.class)
 const { t } = useI18n()
 
 </script>
