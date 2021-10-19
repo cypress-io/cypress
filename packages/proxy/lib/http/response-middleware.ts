@@ -260,12 +260,12 @@ const SetInjectionLevel: ResponseMiddleware = function () {
     this.getRenderedHTMLOrigins()[origin] = true
   }
 
-  debug('determine injection for %s', this.req.url)
+  this.debug('determine injection')
 
   const isReqMatchOriginPolicy = reqMatchesOriginPolicy(this.req, this.getRemoteState())
   const getInjectionLevel = () => {
     if (this.incomingRes.headers['x-cypress-file-server-error'] && !this.res.isInitial) {
-      debug('- partial injection (x-cypress-file-server-error)')
+      this.debug('- partial injection (x-cypress-file-server-error)')
 
       return 'partial'
     }
@@ -273,36 +273,36 @@ const SetInjectionLevel: ResponseMiddleware = function () {
     const isHTML = resContentTypeIs(this.incomingRes, 'text/html')
 
     if (!isHTML || !isReqMatchOriginPolicy) {
-      debug('- no injection (%s, %s)', isHTML ? 'is html' : 'not html', isReqMatchOriginPolicy ? 'origin match' : 'no origin match')
+      this.debug('- no injection (%s, %s)', isHTML ? 'is html' : 'not html', isReqMatchOriginPolicy ? 'origin match' : 'no origin match')
 
       return false
     }
 
     if (this.req.proxiedUrl.includes('127.0.0.1:3501')) {
-      debug('- multidomain injection')
+      this.debug('- multidomain injection')
 
       return 'fullMultidomain'
     }
 
     if (this.res.isInitial) {
-      debug('- full injection')
+      this.debug('- full injection')
 
       return 'full'
     }
 
     if (!isRenderedHTML) {
-      debug('- no injection (not rendered html)')
+      this.debug('- no injection (not rendered html)')
 
       return false
     }
 
-    debug('- partial injection (default)')
+    this.debug('- partial injection (default)')
 
     return 'partial'
   }
 
   if (this.res.wantsInjection) {
-    debug('- already has injection: %s', this.res.wantsInjection)
+    this.debug('- already has injection: %s', this.res.wantsInjection)
   }
 
   if (!this.res.wantsInjection) {
