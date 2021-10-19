@@ -6,6 +6,10 @@ import Promise from 'bluebird'
 import $errUtils from '../../cypress/error_utils'
 
 const clone = (obj) => {
+  if (Buffer.isBuffer(obj)) {
+    return Buffer.from(obj)
+  }
+
   return JSON.parse(JSON.stringify(obj))
 }
 
@@ -47,7 +51,7 @@ export default (Commands, Cypress, cy, state, config) => {
         options = args[1]
       }
 
-      if (_.isString(args[0])) {
+      if (_.isString(args[0]) || args[0] === null) {
         options.encoding = args[0]
       }
 
@@ -62,6 +66,13 @@ export default (Commands, Cypress, cy, state, config) => {
       .then((response) => {
         if (response && response.__error) {
           return $errUtils.throwErr(response.__error)
+        }
+
+        // https://github.com/cypress-io/cypress/issues/1558
+        // Binary files (read with explicit `null` encoding by the user) are transmitted over the
+        // websocket base64 encoded. See packages/server/lib/fixture.js.
+        if (options.encoding === null) {
+          response = Buffer.from(response, 'base64')
         }
 
         // add the fixture to the cache

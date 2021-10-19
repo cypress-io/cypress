@@ -35,6 +35,16 @@ describe('src/cy/commands/fixtures', () => {
       })
     })
 
+    it('passes explicit null encoding through to server and decodes response', () => {
+      Cypress.backend.withArgs('get:fixture').resolves(Buffer.from('\n').toString('base64'))
+
+      cy.fixture('foo', null).then((obj) => {
+        expect(Cypress.backend).to.be.calledWith('get:fixture', 'foo', {
+          encoding: null,
+        })
+      }).should('eql', Buffer.from('\n'))
+    })
+
     it('can have encoding as second argument and options as third argument', () => {
       Cypress.backend.withArgs('get:fixture').resolves({ foo: 'bar' })
 

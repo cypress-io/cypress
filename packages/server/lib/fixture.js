@@ -116,6 +116,15 @@ module.exports = {
   },
 
   parseFileByExtension (p, fixture, ext, options = {}) {
+    // https://github.com/cypress-io/cypress/issues/1558
+    // If the user explicitly specifies `null` as the encoding, we treat the
+    // file as binary regardless of extension. We base64 encode them for
+    // transmission over the websocket. There is a matching Buffer.from()
+    // in packages/driver/src/cy/commands/fixtures.ts
+    if (options.encoding === null) {
+      return this.parse(p, fixture, 'base64')
+    }
+
     switch (ext) {
       case '.json': return this.parseJson(p, fixture)
       case '.js': return this.parseJs(p, fixture)

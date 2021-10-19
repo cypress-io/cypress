@@ -325,6 +325,15 @@ John,Chef,1982
     })
   })
 
+  // https://github.com/cypress-io/cypress/issues/1558
+  context('binary files', () => {
+    it('returns file as base64 encoded string, regardless of extension', function () {
+      return fixture.get(this.fixturesFolder, 'nested/fixture.js', { encoding: null }).then((index) => {
+        expect(index).to.eql(Buffer.from('{nested: "fixture"}').toString('base64'))
+      })
+    })
+  })
+
   context('file with unknown extension and encoding specified', () => {
     it('returns text encoded as specified', function () {
       return fixture.get(this.fixturesFolder, 'ascii.foo', { encoding: 'ascii' }).then((index) => {

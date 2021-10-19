@@ -15,6 +15,11 @@ export default (Commands, Cypress, cy) => {
       }
 
       options = _.defaults({}, userOptions, {
+        // https://github.com/cypress-io/cypress/issues/1558
+        // If no encoding is specified, then Cypress has historically defaulted
+        // to `utf8`, because of it's focus on text files. This is in contrast to
+        // NodeJs, which defaults to binary. We allow users to pass in `null`
+        // to restore the default node behavior.
         encoding: encoding === undefined ? 'utf8' : encoding,
         log: true,
       })
@@ -53,6 +58,8 @@ export default (Commands, Cypress, cy) => {
             args: { cmd: 'readFile', action: 'read', file, filePath: err.filePath, error: err.message },
           })
         }).then(({ contents, filePath }) => {
+          // Binary files (read with explicit `null` encoding by the user) are transmitted over the
+          // websocket base64 encoded. See packages/server/lib/files.js.
           if (options.encoding === null) {
             contents = Buffer.from(contents, 'base64')
           }
@@ -93,6 +100,11 @@ export default (Commands, Cypress, cy) => {
       }
 
       options = _.defaults({}, userOptions, {
+        // https://github.com/cypress-io/cypress/issues/1558
+        // If no encoding is specified, then Cypress has historically defaulted
+        // to `utf8`, because of it's focus on text files. This is in contrast to
+        // NodeJs, which defaults to binary. We allow users to pass in `null`
+        // to restore the default node behavior.
         encoding: encoding === undefined ? 'utf8' : encoding,
         flag: userOptions.flag ? userOptions.flag : 'w',
         log: true,

@@ -37,6 +37,7 @@ describe('src/cy/commands/files', () => {
       })
     })
 
+    // https://github.com/cypress-io/cypress/issues/1558
     it('passes explicit null encoding through to server and decodes response', () => {
       Cypress.backend.resolves({
         contents: Buffer.from('\n').toString('base64'),
@@ -355,6 +356,7 @@ describe('src/cy/commands/files', () => {
       })
     })
 
+    // https://github.com/cypress-io/cypress/issues/1558
     it('explicit null encoding is sent to server as base64 string', () => {
       Cypress.backend.resolves(okResponse)
 
