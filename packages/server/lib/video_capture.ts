@@ -61,7 +61,6 @@ export function getMsFromDuration (duration) {
 export function getCodecData (src) {
   return new Bluebird((resolve, reject) => {
     return ffmpeg()
-    .outputOptions('-vf format=yuv420p')
     .on('stderr', (stderr) => {
       return debug('get codecData stderr log %o', { message: stderr })
     }).on('codecData', resolve)
@@ -208,7 +207,7 @@ export function start (name, options: StartOptions = {}) {
         priority: 20,
       })
       .videoCodec('libx264')
-      .outputOptions('-preset ultrafast')
+      .outputOptions('-preset ultrafast -pix_fmt yuv420p')
       .on('start', (command) => {
         debug('capture started %o', { command })
 
