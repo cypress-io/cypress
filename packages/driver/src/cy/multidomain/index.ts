@@ -142,7 +142,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
 
         // this signals to the runner to create the spec bridge for
         // the specified domain
-        Cypress.action('cy:expect:domain', '127.0.0.1:3501')
+        Cypress.action('cy:expect:domain', domain)
       })
     },
   })
