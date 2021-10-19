@@ -36,11 +36,11 @@
   </div>
 
   <FileDropzone
-    v-if="projectCount && projectCount > 0"
+    v-if="showDropzone"
     id="dropzone"
     data-testid="dropzone"
     class="mb-24px"
-    :close-button="false"
+    :close-button="projectCount ? projectCount > 0 : false"
     @addProject="emit('addProject', $event)"
     @close="toggleDropzone"
   />
