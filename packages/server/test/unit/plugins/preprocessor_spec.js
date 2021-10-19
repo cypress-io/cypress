@@ -1,6 +1,6 @@
 require('../../spec_helper')
 
-const Fixtures = require('../../support/helpers/fixtures')
+const Fixtures = require('@tooling/system-tests/lib/fixtures')
 const path = require('path')
 const appData = require(`${root}../lib/util/app_data`)
 

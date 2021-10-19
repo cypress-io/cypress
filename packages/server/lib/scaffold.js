@@ -7,6 +7,7 @@ const { fs } = require('./util/fs')
 const glob = require('./util/glob')
 const cwd = require('./cwd')
 const debug = require('debug')('cypress:server:scaffold')
+const errors = require('./errors')
 const { isEmpty } = require('ramda')
 const { isDefault } = require('./util/config')
 
@@ -232,7 +233,6 @@ module.exports = {
 
   plugins (folder, config) {
     debug(`plugins folder ${folder}`)
-
     // skip if user has explicitly set pluginsFile
     if (!config.pluginsFile || !isDefault(config, 'pluginsFile')) {
       return Promise.resolve()
@@ -254,6 +254,12 @@ module.exports = {
     return this._assertInFileTree(dest, config)
     .then(() => {
       return fs.copyAsync(src, dest)
+    }).catch((error) => {
+      if (error.code === 'EACCES') {
+        error = errors.get('ERROR_WRITING_FILE', dest, error)
+      }
+
+      throw error
     })
   },
 

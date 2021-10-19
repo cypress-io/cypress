@@ -8,7 +8,8 @@ import $actionability from '../../actionability'
 
 export default (Commands, Cypress, cy) => {
   Commands.addAll({ prevSubject: 'element' }, {
-    submit (subject, options = {}) {
+    // TODO: any -> Partial<Cypress.Loggable & Cypress.Timeoutable>
+    submit (subject, options: any = {}) {
       const userOptions = options
 
       options = _.defaults({}, userOptions, {
