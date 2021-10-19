@@ -57,8 +57,11 @@ export const mutation = mutationType({
 
     t.field('internal_clearProjectPreferencesCache', {
       type: 'Boolean',
+      args: {
+        projectTitle: nonNull(stringArg()),
+      },
       resolve: (_, args, ctx) => {
-        ctx.actions.project.clearProjectPreferencesCache()
+        ctx.actions.project.clearProjectPreferencesCache(args.projectTitle)
 
         return true
       },

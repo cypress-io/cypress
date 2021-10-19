@@ -148,8 +148,15 @@ module.exports = {
     return fileUtil.set({ PROJECTS: [] })
   },
 
-  removeProjectPreferences () {
-    return fileUtil.set({ PROJECT_PREFERENCES: {} })
+  removeProjectPreferences (projectTitle) {
+    const preferences = fileUtil.get('PROJECT_PREFERENCES', {})
+
+    const updatedPreferences = {
+      ...preferences.PROJECT_PREFERENCES,
+      [projectTitle]: null,
+    }
+
+    return fileUtil.set({ PROJECT_PREFERENCES: updatedPreferences })
   },
 
   remove () {

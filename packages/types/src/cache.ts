@@ -1,18 +1,16 @@
-export type Cache = {
+export interface Cache {
   PROJECTS: string[]
-  PROJECT_PREFERENCES: ProjectPreferences
+  PROJECT_PREFERENCES: Record<string, Preferences>
   USER: CachedUser
 }
 
-export type ProjectPreferences = { [project: string]: Preferences}
-
-export type Preferences = {
+export interface Preferences {
   browserId: string | null
   testingType: 'e2e' | 'component' | null
 }
 
-export type CachedUser = {
-  authToken: any
-  name: any
-  email: any
+export interface CachedUser {
+  authToken: string
+  name: string
+  email: string
 }

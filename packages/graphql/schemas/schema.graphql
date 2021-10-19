@@ -374,7 +374,7 @@ type Mutation {
   """
   initializeOpenProject: Boolean
   internal_clearLatestProjectCache: Boolean
-  internal_clearProjectPreferencesCache: Boolean
+  internal_clearProjectPreferencesCache(projectTitle: String!): Boolean
   internal_triggerIpcToApp: Boolean
   internal_triggerIpcToLaunchpad(msg: String!): Boolean
 

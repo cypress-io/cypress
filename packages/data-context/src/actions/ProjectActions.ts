@@ -19,7 +19,7 @@ export interface ProjectApiShape {
   removeProjectFromCache(projectRoot: string): void
   getProjectRootsFromCache(): Promise<string[]>
   clearLatestProjectsCache(): Promise<unknown>
-  clearProjectPreferences(): Promise<unknown>
+  clearProjectPreferences(projectTitle: string): Promise<unknown>
   closeActiveProject(): Promise<unknown>
   readCache(): Promise<Cache>
   writeCache(item: Partial<Cache>): void
@@ -208,8 +208,8 @@ export class ProjectActions {
     await this.api.clearLatestProjectsCache()
   }
 
-  async clearProjectPreferencesCache () {
-    await this.api.clearProjectPreferences()
+  async clearProjectPreferencesCache (projectTitle: string) {
+    await this.api.clearProjectPreferences(projectTitle)
   }
 
   async createComponentIndexHtml (template: string) {
