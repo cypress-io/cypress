@@ -79,6 +79,7 @@ export const makeConfig = (config: Partial<UserConfig> = {}, plugins: PluginOpti
 
   return {
     base,
+    publicDir: path.resolve(__dirname, './src/public'),
 
     // Production-only build options
     build: {

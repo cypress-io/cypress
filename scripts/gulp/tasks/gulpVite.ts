@@ -124,6 +124,12 @@ export function viteBuildAndWatchLaunchpad () {
   })
 }
 
+export function generateShikiTheme () {
+  return spawned('vite:build-generate-shiki-theme', `yarn generate-shiki-theme`, {
+    cwd: monorepoPaths.pkgFrontendShared,
+  })
+}
+
 export function viteCleanApp () {
   return spawned('vite-clean', `yarn clean`, {
     cwd: monorepoPaths.pkgApp,
