@@ -18,7 +18,7 @@ shikiWrapperClasses computed property.
 -->
 
 <template>
-  <div class="relative group">
+  <div class="relative">
     <div
       v-if="highlighterInitialized"
       ref="codeEl"
@@ -27,7 +27,7 @@ shikiWrapperClasses computed property.
         'shiki-wrapper',
 
         // All styles contain these utility classes
-        'overflow-scroll cursor-pointer relative text-14px leading-24px font-light rounded',
+        'overflow-scroll cursor-pointer hover:border-indigo-200 relative text-14px leading-24px font-light rounded',
 
         /**
          * 1. Single line is forced onto one line without any borders. It loses
@@ -52,19 +52,15 @@ shikiWrapperClasses computed property.
           'copied': copied && !props.inline
         },
       ]"
-      @dblclick="copyCode"
+      @click="copyCode"
       v-html="highlightedCode"
     />
-    <button
-      class="absolute text-white transition duration-150 bg-indigo-500 border-transparent rounded outline-none delay-0 hocus-default border-1 focus-within:opacity-100 group-hover:opacity-100 text-14px px-8px py-6px top-8px right-8px"
-      :class="copied ?
-        'opacity-100' : 'opacity-0'"
-      @click="copyCode"
-      @keypress.enter="copyCode"
-      @keypress.space="copyCode"
+    <p
+      class="absolute text-white transition duration-100 bg-indigo-500 rounded text-14px px-8px py-6px top-8px right-8px"
+      :class="copied ? 'opacity-100' : 'opacity-0'"
     >
-      {{ copied ? t('clipboard.copied') : t('clipboard.copy') }}
-    </button>
+      {{ t('clipboard.copied') }}
+    </p>
   </div>
 </template>
 
