@@ -8,7 +8,7 @@ const ProjectBase = require(`${root}lib/project-base`).ProjectBase
 const { openProject } = require('../../lib/open_project')
 const preprocessor = require(`${root}lib/plugins/preprocessor`)
 const runEvents = require(`${root}lib/plugins/run_events`)
-const Fixtures = require('../test/../support/helpers/fixtures')
+const Fixtures = require('@tooling/system-tests/lib/fixtures')
 
 const todosPath = Fixtures.projectPath('todos')
 
