@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full px-24px mb-24px">
+  <div class="w-full cursor-default px-24px mb-24px">
     <h3 class="text-gray-900 mb-12px text-18px">
       {{ title }}
     </h3>
@@ -33,7 +33,6 @@
     <ShikiHighlight
       :code="localCode"
       lang="javascript"
-      class="border border-gray-100 rounded "
       line-numbers
     />
   </div>

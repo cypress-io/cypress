@@ -18,39 +18,54 @@ shikiWrapperClasses computed property.
 -->
 
 <template>
-  <div
-    v-if="highlighterInitialized"
-    :class="[
+  <div class="relative group">
+    <div
+      v-if="highlighterInitialized"
+      ref="codeEl"
+      :class="[
 
-      'shiki-wrapper',
+        'shiki-wrapper',
 
-      // All styles contain these utility classes
-      'overflow-scroll relative text-14px leading-24px font-light rounded',
+        // All styles contain these utility classes
+        'overflow-scroll cursor-pointer relative text-14px leading-24px font-light rounded',
 
-      /**
-       * 1. Single line is forced onto one line without any borders. It loses
-       *    any additional padding.
-       *
-       * 2. Multi-line without line-numbers adds padding to compensate for the
-       *    lack of margin-right that the line-numbers usually add. It has a
-       *    border.
-       *
-       * 3. Multi-line with line-numbers doesn't have the padding, because the
-       *    line numbers have margin-right.
-       *
-       * 4. Any of these can be wrapped with whitespace: pre-wrap. When using
-       *    with line-numbers, the breaks will create a new line.
-       */
-      {
-        'inline': props.inline,
-        'border-1 border-gray-100': !props.inline,
-        'wrap': props.wrap,
-        'line-numbers': props.lineNumbers,
-        'p-8px': !props.lineNumbers && !props.inline,
-      },
-    ]"
-    v-html="highlightedCode"
-  />
+        /**
+         * 1. Single line is forced onto one line without any borders. It loses
+         *    any additional padding.
+         *
+         * 2. Multi-line without line-numbers adds padding to compensate for the
+         *    lack of margin-right that the line-numbers usually add. It has a
+         *    border.
+         *
+         * 3. Multi-line with line-numbers doesn't have the padding, because the
+         *    line numbers have margin-right.
+         *
+         * 4. Any of these can be wrapped with whitespace: pre-wrap. When using
+         *    with line-numbers, the breaks will create a new line.
+         */
+        {
+          'inline': props.inline,
+          'border-1 border-gray-100': !props.inline,
+          'wrap': props.wrap,
+          'line-numbers': props.lineNumbers,
+          'p-8px': !props.lineNumbers && !props.inline,
+          'copied': copied && !props.inline
+        },
+      ]"
+      @dblclick="copyCode"
+      v-html="highlightedCode"
+    />
+    <button
+      class="absolute text-white transition duration-150 bg-indigo-500 border-transparent rounded outline-none delay-0 hocus-default border-1 focus-within:opacity-100 group-hover:opacity-100 text-14px px-8px py-6px top-8px right-8px"
+      :class="copied ?
+        'opacity-100' : 'opacity-0'"
+      @click="copyCode"
+      @keypress.enter="copyCode"
+      @keypress.space="copyCode"
+    >
+      {{ copied ? t('clipboard.copied') : t('clipboard.copy') }}
+    </button>
+  </div>
 </template>
 
 <script lang="ts">
@@ -78,6 +93,12 @@ export { highlighter }
 
 <script lang="ts" setup>
 import { computed, onBeforeMount, ref } from 'vue'
+// eslint-disable-next-line no-duplicate-imports
+import type { Ref } from 'vue'
+import { useClipboard } from '@vueuse/core'
+import { useI18n } from '@cy/i18n'
+
+const { t } = useI18n()
 
 const highlighterInitialized = ref(false)
 
@@ -110,6 +131,18 @@ const highlightedCode = computed(() => {
   return highlighter?.codeToHtml(props.code.trim(), resolvedLang.value)
 })
 
+const codeEl: Ref<HTMLElement | null> = ref(null)
+
+const { copy, copied } = useClipboard()
+
+const copyCode = () => {
+  if (codeEl.value) {
+    const text = codeEl.value.innerText
+
+    copy(text)
+  }
+}
+
 </script>
 
 <!-- This is a scoped style, but we're able to style *outside* of the
@@ -129,7 +162,6 @@ $offset: 1em;
 }
 
 .shiki-wrapper {
-
   &:deep(.shiki) {
     @apply min-w-max border-r-10px border-r-transparent py-8px;
   }
