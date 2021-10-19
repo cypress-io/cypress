@@ -6,12 +6,18 @@
     :next-fn="createConfig"
     :can-navigate-forward="props.gql.wizard.canNavigateForward"
   >
-    <ShikiHighlight
-      :key="language"
-      :lang="language || 'js'"
-      :code="code || ''"
-      line-numbers
-    />
+    <div class="relative">
+      <ShikiHighlight
+        :key="language"
+        :lang="language || 'js'"
+        :code="code || ''"
+        line-numbers
+      />
+      <CopyButton
+        v-if="manualCreate && code"
+        :text="code"
+      />
+    </div>
   </WizardLayout>
 </template>
 
@@ -19,6 +25,7 @@
 import { computed, ref } from 'vue'
 import { gql } from '@urql/core'
 import WizardLayout from './WizardLayout.vue'
+import CopyButton from '@cy/components/CopyButton.vue'
 import { ConfigFileFragment, ConfigFile_AppCreateConfigFileDocument, ConfigFile_AppCreateComponentIndexHtmlDocument } from '../generated/graphql'
 import { useMutation } from '@urql/vue'
 import { useI18n } from '@cy/i18n'
