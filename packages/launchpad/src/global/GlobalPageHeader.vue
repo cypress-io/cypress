@@ -36,7 +36,7 @@
   </div>
 
   <FileDropzone
-    v-if="showDropzone"
+    v-if="projectCount && projectCount > 0"
     id="dropzone"
     data-testid="dropzone"
     class="mb-24px"
