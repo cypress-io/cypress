@@ -1,5 +1,5 @@
 import { arg, booleanArg, enumType, idArg, mutationType, nonNull, stringArg } from 'nexus'
-import { CodeLanguageEnum, FrontendFrameworkEnum, NavItemEnum, SupportedBundlerEnum } from '../enumTypes/gql-WizardEnums'
+import { CodeLanguageEnum, FrontendFrameworkEnum, NavItemEnum, SupportedBundlerEnum, TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
 import { WizardUpdateInput } from '../inputTypes/gql-WizardUpdateInput'
 import { Wizard } from './gql-Wizard'
 
@@ -50,6 +50,27 @@ export const mutation = mutationType({
       type: 'Boolean',
       resolve: (_, args, ctx) => {
         ctx.actions.project.clearLatestProjectCache()
+
+        return true
+      },
+    })
+
+    t.field('internal_clearProjectPreferencesCache', {
+      type: 'Boolean',
+      args: {
+        projectTitle: nonNull(stringArg()),
+      },
+      resolve: (_, args, ctx) => {
+        ctx.actions.project.clearProjectPreferencesCache(args.projectTitle)
+
+        return true
+      },
+    })
+
+    t.field('internal_clearAllProjectPreferencesCache', {
+      type: 'Boolean',
+      resolve: (_, args, ctx) => {
+        ctx.actions.project.clearAllProjectPreferencesCache()
 
         return true
       },
@@ -264,6 +285,42 @@ export const mutation = mutationType({
         }
 
         await ctx.actions.project.setCurrentSpec(args.id)
+      },
+    })
+
+    t.nonNull.field('setProjectPreferences', {
+      type: 'App',
+      description: 'Save the projects preferences to cache',
+      args: {
+        testingType: nonNull(TestingTypeEnum),
+        browserId: nonNull(idArg({
+          description: 'ID of the browser that we want to set',
+        })),
+      },
+      async resolve (_, args, ctx) {
+        await ctx.actions.project.setProjectPreferences(args)
+
+        return ctx.appData
+      },
+    })
+
+    t.nonNull.field('hideBrowserWindow', {
+      type: 'App',
+      description: 'Hides the launchpad windows',
+      resolve: (_, args, ctx) => {
+        ctx.actions.electron.hideBrowserWindow()
+
+        return ctx.appData
+      },
+    })
+
+    t.nonNull.field('showBrowserWindow', {
+      type: 'App',
+      description: 'show the launchpad windows',
+      resolve: (_, args, ctx) => {
+        ctx.actions.electron.showBrowserWindow()
+
+        return ctx.appData
       },
     })
   },
