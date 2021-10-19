@@ -11,9 +11,12 @@
     "windi": "yarn windicss-analysis",
     "cypress:open": "cross-env TZ=America/New_York node ../../scripts/cypress open-ct --project ${PWD}",
     "cypress:run": "cross-env TZ=America/New_York node ../../scripts/cypress run-ct --project ${PWD}",
-    "dev": "vite --open"
+    "dev": "vite --open",
+    "generate-shiki-theme": "node ./script/generate-shiki-theme.js"
   },
-  "dependencies": {},
+  "dependencies": {
+    "shiki": "^0.9.12"
+  },
   "devDependencies": {
     "@antfu/utils": "^0.3.0",
     "@cypress/vite-dev-server": "0.0.0-development",
@@ -27,8 +30,8 @@
     "@urql/exchange-execute": "1.1.0",
     "@urql/exchange-graphcache": "4.3.3",
     "@urql/vue": "0.4.3",
-    "@vitejs/plugin-vue": "^1.9.2",
-    "@vitejs/plugin-vue-jsx": "^1.1.8",
+    "@vitejs/plugin-vue": "1.2.4",
+    "@vitejs/plugin-vue-jsx": "1.1.6",
     "@vue/compiler-core": "3.2.6",
     "@vue/compiler-dom": "3.2.6",
     "@vue/compiler-sfc": "3.2.6",
@@ -68,6 +71,7 @@
         "@urql/exchange-graphcache",
         "@urql/vue",
         "@vue/test-utils",
+        "@vueuse/core",
         "cypress-file-upload",
         "dedent",
         "fake-uuid",
@@ -76,6 +80,7 @@
         "graphql/jsutils/Path",
         "lodash",
         "path",
+        "shiki",
         "socket.io-client",
         "vue",
         "vue-i18n",

@@ -3,7 +3,7 @@
     v-if="props.gql.wizard"
     :gql="props.gql.wizard"
   />
-  <div class="mb-5">
+  <div class="mb-5 children:relative">
     <EnvironmentSetup
       v-if="props.gql.wizard.step === 'selectFramework'"
       :gql="props.gql.wizard"

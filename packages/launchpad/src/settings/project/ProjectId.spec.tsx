@@ -36,7 +36,7 @@ describe('<ProjectId />', () => {
       .click()
       .findByText('Copy')
       .should('not.exist')
-      .findByText('Copied')
+      .findAllByText('Copied')
       .should('be.visible')
     })
   })

@@ -38,6 +38,7 @@ module.exports = {
     return {
       USER: {},
       PROJECTS: [],
+      PROJECT_PREFERENCES: {},
     }
   },
 
@@ -145,6 +146,39 @@ module.exports = {
 
   removeLatestProjects () {
     return fileUtil.set({ PROJECTS: [] })
+  },
+
+  getProjectPreferences () {
+    return fileUtil.get('PROJECT_PREFERENCES', {})
+  },
+
+  insertProjectPreferences (projectTitle, projectPreferences) {
+    return fileUtil.transaction((tx) => {
+      return tx.get('PROJECT_PREFERENCES', {}).then((preferences) => {
+        return tx.set('PROJECT_PREFERENCES', {
+          ...preferences,
+          [projectTitle]: {
+            ...preferences[projectTitle],
+            ...projectPreferences,
+          },
+        })
+      })
+    })
+  },
+
+  removeAllProjectPreferences () {
+    return fileUtil.set({ PROJECT_PREFERENCES: {} })
+  },
+
+  removeProjectPreferences (projectTitle) {
+    const preferences = fileUtil.get('PROJECT_PREFERENCES', {})
+
+    const updatedPreferences = {
+      ...preferences.PROJECT_PREFERENCES,
+      [projectTitle]: null,
+    }
+
+    return fileUtil.set({ PROJECT_PREFERENCES: updatedPreferences })
   },
 
   remove () {

@@ -77,7 +77,6 @@ class Reporter extends Component<SingleReporterProps> {
           scroller={scroller}
           spec={this.props.spec}
         />
-        )
       </div>
     )
   }
