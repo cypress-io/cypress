@@ -271,7 +271,7 @@
         "meta.template.expression"
       ],
       "settings": {
-        "foreground": "-gray-900"
+        "foreground": "-gray-800"
       }
     },
     {
@@ -324,7 +324,7 @@
     {
       "scope": "keyword.operator",
       "settings": {
-        "foreground": "-gray-900"
+        "foreground": "-gray-800"
       }
     },
     {
@@ -379,7 +379,7 @@
         "storage.modifier.package.java"
       ],
       "settings": {
-        "foreground": "-gray-900"
+        "foreground": "-gray-800"
       }
     },
     {
@@ -399,7 +399,7 @@
         "entity.name.operator.custom-literal"
       ],
       "settings": {
-        "foreground": "-orange-600"
+        "foreground": "-orange-500"
       }
     },
     {
@@ -440,7 +440,7 @@
         "storage.type.primitive.groovy"
       ],
       "settings": {
-        "foreground": "-teal-500"
+        "foreground": "-magenta-500"
       }
     },
     {
@@ -534,6 +534,15 @@
       }
     },
     {
+      "name": "Punctuation tokens",
+      "scope": [
+        "punctuation"
+      ],
+      "settings": {
+        "foreground": "-gray-500"
+      }
+    },
+    {
       "scope": [
         "constant.character.character-class.regexp",
         "constant.other.character-class.set.regexp",
@@ -547,7 +556,7 @@
     {
       "scope": "keyword.operator.quantifier.regexp",
       "settings": {
-        "foreground": "-gray-900"
+        "foreground": "-gray-800"
       }
     },
     {
@@ -574,7 +583,7 @@
     {
       "scope": "entity.name.label",
       "settings": {
-        "foreground": "-gray-900"
+        "foreground": "-gray-800"
       }
     }
   ]
