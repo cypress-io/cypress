@@ -1,59 +1,64 @@
 <template>
-  <div class="absolute top-2 right-2">
-    <transition name="fade">
-      <span
-        v-show="showCopied"
-        class="mx-3"
-        role="status"
-      >{{ t('clipboard.copied') }}</span>
-    </transition>
-    <button
+  <div>
+    <!-- <transition name="fade"> -->
+    <!--
+        v-show="showCopied" -->
+    <!-- <span
+      class="absolute -top-10px"
+      role="status"
+    >{{ t('clipboard.copied') }}</span> -->
+    <!-- </transition> -->
+    <Button
       tabindex="1"
-      class="bg-gray-50 text-14px px-2 py-1 rounded text-indigo-600 border-1 border-transparent hocus-default"
+      size="lg"
+      variant="tertiary"
       @click="copyToClipboard"
     >
-      {{ t('clipboard.copy') }}
-    </button>
+      <template #prefix>
+        <i-cy-clipboard_x16 class="icon-dark-indigo-500" />
+      </template>
+      <transition
+        name="fade"
+        mode="out-in"
+      >
+        <span v-if="!showCopied">{{ t('clipboard.copy') }}</span>
+        <span v-else>{{ t('clipboard.copied') }}!</span>
+      </transition>
+    </Button>
+    <textarea
+      ref="textElement"
+      tabindex="-1"
+      :value="text"
+      class="absolute -top-96"
+    />
   </div>
-  <textarea
-    ref="textElement"
-    tabindex="-1"
-    :value="text"
-    class="absolute -top-96"
-  />
 </template>
 
-<script lang="ts">
-import { defineComponent, nextTick, ref } from 'vue'
+<script setup lang="ts">
+import { ref } from 'vue'
 import { useI18n } from '@cy/i18n'
+import Button from '../components/Button.vue'
 
-export default defineComponent({
-  props: {
-    text: {
-      type: String,
-      required: true,
-    },
-  },
-  setup () {
-    const showCopied = ref(false)
-    const textElement = ref<HTMLTextAreaElement | null>(null)
-    const copyToClipboard = async () => {
-      textElement.value?.select()
-      document.execCommand('copy')
-      showCopied.value = true
-      await nextTick()
-      showCopied.value = false
-    }
-    const { t } = useI18n()
+defineProps<{
+  text: string
+}>()
 
-    return { copyToClipboard, textElement, showCopied, t }
-  },
-})
+const showCopied = ref(false)
+const textElement = ref<HTMLTextAreaElement | null>(null)
+const copyToClipboard = async () => {
+  textElement.value?.select()
+  document.execCommand('copy')
+  showCopied.value = true
+  setTimeout(() => {
+    showCopied.value = false
+  }, 2000)
+}
+const { t } = useI18n()
 </script>
 
 <style>
 .fade-leave-active {
-  transition: opacity 1s ease;
+  transition: opacity 100ms ease;
 }
 
 .fade-leave-to {
