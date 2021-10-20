@@ -61,6 +61,7 @@ export const e2eProjectDirs = [
   'same-fixtures-integration-folders',
   'screen-size',
   'shadow-dom-global-inclusion',
+  'spec-generation',
   'studio',
   'studio-no-source-maps',
   'system-node',
