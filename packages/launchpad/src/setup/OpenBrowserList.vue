@@ -73,7 +73,7 @@
 import { useI18n } from '@cy/i18n'
 import { OpenBrowserListFragment, OpenBrowserList_SetBrowserDocument } from '../generated/graphql'
 import Button from '@packages/frontend-shared/src/components/Button.vue'
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import _clone from 'lodash/clone'
 import openInNew from '~icons/mdi/open-in-new'
 import { useMutation, gql } from '@urql/vue'
@@ -121,9 +121,6 @@ const setSelected = (browserId: string) => {
 }
 
 const launchText = computed(() => props.gql.selectedBrowser ? `${t('setupPage.openBrowser.launch')} ${props.gql.selectedBrowser.displayName}` : '')
-
-const activeBrowserId = ref('')
-
 </script>
 
 <style scoped>
