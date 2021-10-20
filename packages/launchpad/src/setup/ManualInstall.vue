@@ -3,7 +3,7 @@
     <pre class="p-12px text-left text-purple-500 border rounded"><span>~$</span> {{ dependenciesCode }}</pre>
     <CopyButton
       :text="dependenciesCode"
-      class="top-20px"
+      class="top-17px right-18px absolute"
     />
   </div>
   <div class="border-t border-t-gray-100 px-24px pt-4px">
