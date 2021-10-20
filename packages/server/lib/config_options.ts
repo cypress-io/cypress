@@ -12,7 +12,6 @@ export const options = [
     name: 'animationDistanceThreshold',
     defaultValue: 5,
     validation: v.isNumber,
-    isReadOnly: false,
   }, {
     name: 'autoOpen',
     defaultValue: false,
@@ -21,12 +20,10 @@ export const options = [
     name: 'baseUrl',
     defaultValue: null,
     validation: v.isFullyQualifiedUrl,
-    isReadOnly: false,
   }, {
     name: 'blockHosts',
     defaultValue: null,
     validation: v.isStringOrArrayOfStrings,
-    isReadOnly: false,
   }, {
     name: 'browsers',
     defaultValue: [],
@@ -64,7 +61,6 @@ export const options = [
     name: 'defaultCommandTimeout',
     defaultValue: 4000,
     validation: v.isNumber,
-    isReadOnly: false,
   }, {
     name: 'devServerPublicPathRoute',
     defaultValue: '/__cypress/src',
@@ -82,12 +78,10 @@ export const options = [
   }, {
     name: 'env',
     validation: v.isPlainObject,
-    isReadOnly: false,
   }, {
     name: 'execTimeout',
     defaultValue: 60000,
     validation: v.isNumber,
-    isReadOnly: false,
   }, {
     name: 'experimentalFetchPolyfill',
     defaultValue: false,
@@ -134,7 +128,6 @@ export const options = [
     name: 'includeShadowDom',
     defaultValue: false,
     validation: v.isBoolean,
-    isReadOnly: false,
   }, {
     name: 'integrationFolder',
     defaultValue: 'cypress/integration',
@@ -164,12 +157,10 @@ export const options = [
     name: 'numTestsKeptInMemory',
     defaultValue: 50,
     validation: v.isNumber,
-    isReadOnly: false,
   }, {
     name: 'pageLoadTimeout',
     defaultValue: 60000,
     validation: v.isNumber,
-    isReadOnly: false,
   }, {
     name: 'pluginsFile',
     defaultValue: 'cypress/plugins',
@@ -186,7 +177,6 @@ export const options = [
   }, {
     name: 'redirectionLimit',
     defaultValue: 20,
-    isReadOnly: false,
   }, {
     name: 'reporter',
     defaultValue: 'spec',
@@ -202,7 +192,6 @@ export const options = [
     name: 'requestTimeout',
     defaultValue: 5000,
     validation: v.isNumber,
-    isReadOnly: false,
   }, {
     name: 'resolvedNodePath',
   }, {
@@ -211,7 +200,6 @@ export const options = [
     name: 'responseTimeout',
     defaultValue: 30000,
     validation: v.isNumber,
-    isReadOnly: false,
   }, {
     name: 'retries',
     defaultValue: {
@@ -223,7 +211,6 @@ export const options = [
     name: 'screenshotOnRunFailure',
     defaultValue: true,
     validation: v.isBoolean,
-    isReadOnly: false,
   }, {
     name: 'screenshotsFolder',
     defaultValue: 'cypress/screenshots',
@@ -241,7 +228,6 @@ export const options = [
     name: 'scrollBehavior',
     defaultValue: 'top',
     validation: v.isOneOf('center', 'top', 'bottom', 'nearest', false),
-    isReadOnly: false,
   }, {
     name: 'socketIoCookie',
     defaultValue: '__socket.io',
@@ -258,7 +244,6 @@ export const options = [
     name: 'taskTimeout',
     defaultValue: 60000,
     validation: v.isNumber,
-    isReadOnly: false,
   }, {
     name: 'testFiles',
     defaultValue: '**/*.*',
@@ -267,7 +252,6 @@ export const options = [
     name: 'trashAssetsBeforeRuns',
     defaultValue: true,
     validation: v.isBoolean,
-    isReadOnly: false,
   }, {
     name: 'unitFolder',
     isFolder: true,
@@ -297,17 +281,14 @@ export const options = [
     name: 'viewportHeight',
     defaultValue: 660,
     validation: v.isNumber,
-    isReadOnly: false,
   }, {
     name: 'viewportWidth',
     defaultValue: 1000,
     validation: v.isNumber,
-    isReadOnly: false,
   }, {
     name: 'waitForAnimations',
     defaultValue: true,
     validation: v.isBoolean,
-    isReadOnly: false,
   }, {
     name: 'watchForFileChanges',
     defaultValue: true,
