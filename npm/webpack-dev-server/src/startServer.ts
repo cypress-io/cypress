@@ -10,7 +10,10 @@ export interface StartDevServer extends UserWebpackDevServerOptions {
   /* Base webpack config object used for loading component testing */
   webpackConfig?: WebpackConfigurationWithDevServer
   /* base html template to render in AUT */
+  template?: string
+  /* base html template to render in AUT */
   indexHtml?: string
+
 }
 
 export interface WebpackConfigurationWithDevServer extends webpack.Configuration {
