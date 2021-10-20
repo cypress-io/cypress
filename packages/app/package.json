@@ -44,8 +44,11 @@
     "graphql-tag": "^2.12.5",
     "javascript-time-ago": "2.3.8",
     "just-my-luck": "3.0.0",
+<<<<<<< HEAD
     "mobx": "5.15.4",
     "prismjs": "1.24.0",
+=======
+>>>>>>> origin/unified-desktop-gui
     "rimraf": "3.0.2",
     "rollup-plugin-polyfill-node": "^0.7.0",
     "unplugin-icons": "^0.11.3",
@@ -60,8 +63,6 @@
     "vite-svg-loader": "2.1.1",
     "vue": "3.2.6",
     "vue-i18n": "9.2.0-beta.7",
-    "vue-prism-component": "2.0.0",
-    "vue-prism-editor": "^2.0.0-alpha.2",
     "vue-router": "4",
     "vue-tsc": "^0.3.0",
     "windicss": "3.1.4",

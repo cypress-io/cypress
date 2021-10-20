@@ -12,10 +12,10 @@
       <slot name="message">
         <!-- Can't pull this out because of the i18n-t component -->
         <p
-          v-if="message"
+          v-if="errorMessage"
           class="font-light"
         >
-          {{ message }}
+          {{ errorMessage }}
         </p>
         <i18n-t
           v-else
@@ -25,22 +25,32 @@
           data-testid="error-message"
         >
           <a
-            class="text-indigo-500 underline-indigo-500 outline-none hocus:underline underline-indigo-500 ring-indigo-500"
+            class="text-indigo-500 underline-indigo-500 hocus-link-default underline-indigo-500 ring-indigo-500"
             href="https://docs.cypress.io"
             data-testid="error-docs-link"
             target="_blank"
           >cypress.config.js</a>
         </i18n-t>
       </slot>
+
+      <slot name="stack">
+        <p
+          v-if="stack"
+          class="font-light"
+        >
+          {{ stack }}
+        </p>
+      </slot>
     </div>
     <i-cy-placeholder_x48 class="w-120px h-120px mx-auto my-0 icon-light-gray-50 icon-dark-gray-200" />
     <div class="inline-flex gap-16px justify-between">
       <slot name="footer">
         <Button
+          v-if="lastMutationDefined"
           size="lg"
           variant="primary"
           data-testid="error-retry-button"
-          @click="$emit('retry')"
+          @click="retry()"
         >
           {{ t('launchpadErrors.generic.retryButton') }}
         </Button>
@@ -58,9 +68,19 @@
 </template>
 
 <script lang="ts" setup>
+import { gql } from '@urql/vue'
 import Button from '@cy/components/Button.vue'
 import { computed } from 'vue'
 import { useI18n } from '@cy/i18n'
+import type { BaseErrorFragment } from '../generated/graphql'
+
+gql`
+fragment BaseError on BaseError {
+  title
+  message
+  stack
+}
+`
 
 const openDocs = () => {
   document.location.href = 'https://docs.cypress.io'
@@ -69,13 +89,27 @@ const openDocs = () => {
 const { t } = useI18n()
 
 const props = defineProps<{
-  header?: string
-  message?: string
+  gql: BaseErrorFragment
 }>()
 
-defineEmits<{
-  (event: 'retry')
-}>()
+const latestOperation = window.localStorage.getItem('latestGQLOperation')
 
-const headerText = computed(() => props.header ? props.header : t('launchpadErrors.generic.header'))
+const retry = async () => {
+  const { launchpadClient } = await import('../main')
+
+  const op = latestOperation ? JSON.parse(latestOperation) : null
+
+  return launchpadClient.reexecuteOperation(
+    launchpadClient.createRequestOperation('mutation', op, {
+      requestPolicy: 'cache-and-network',
+    }),
+  )
+}
+
+const headerText = computed(() => props.gql.title ? props.gql.title : t('launchpadErrors.generic.header'))
+const errorMessage = computed(() => props.gql.message ? props.gql.message : null)
+const stack = computed(() => props.gql.stack ? props.gql.stack : null)
+const lastMutationDefined = computed(() => {
+  return Boolean(latestOperation)
+})
 </script>

@@ -12,12 +12,13 @@
       </i18n-t>
     </template>
     <div class="inline-grid grid-flow-col justify-start gap-10px">
-      <InlineCodeEditor
-        v-model="formattedProjectId"
-        class="max-w-400px"
+      <ShikiHighlight
+        :code="formattedProjectId"
+        class="max-w-400px text-sm border border-gray-100 rounded overflow-hidden"
         :prefix-icon="IconCodeBraces"
         prefix-icon-class="text-cool-gray-400"
-        readonly
+        lang="yaml"
+        inline
       />
       <Button
         variant="outline"
@@ -36,19 +37,17 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, computed } from 'vue'
 import { gql } from '@urql/core'
-import 'prismjs'
-import '@packages/frontend-shared/src/styles/prism.scss'
 import Icon from '@cy/components/Icon.vue'
 import IconCodeBraces from '~icons/mdi/code-braces'
 import IconDashedSquare from '~icons/si-glyph/square-dashed-2'
 import Button from '@cy/components/Button.vue'
 import SettingsSection from '../SettingsSection.vue'
 import { useClipboard } from '@vueuse/core'
-import InlineCodeEditor from '../../components/code/InlineCodeEditor.vue'
 import { useI18n } from '@cy/i18n'
 import type { ProjectIdFragment } from '../../generated/graphql'
+import ShikiHighlight from '../../../../frontend-shared/src/components/ShikiHighlight.vue'
 
 gql`
 fragment ProjectId on Project {
@@ -65,7 +64,6 @@ const clipboard = props.mockClipboard?.() || useClipboard({ source: ref(props.gq
 
 const formattedProjectId = computed(() => `projectId: '${props.gql?.projectId}'`)
 
-onMounted(() => import('prismjs/components/prism-yaml'))
 const { t } = useI18n()
 </script>
 

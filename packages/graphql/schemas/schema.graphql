@@ -29,6 +29,13 @@ type App {
   selectedBrowser: Browser
 }
 
+"""Base error"""
+type BaseError {
+  message: String
+  stack: String
+  title: String
+}
+
 """Container representing a browser"""
 type Browser implements Node {
   channel: String!
@@ -342,14 +349,14 @@ type Mutation {
     """Whether to open the project when added"""
     open: Boolean
     path: String!
-  ): App!
+  ): Boolean
 
   """Create an Index HTML file for a new component testing project"""
-  appCreateComponentIndexHtml(template: String!): App
+  appCreateComponentIndexHtml(template: String!): Boolean
 
   """Create a Cypress config file for a new project"""
-  appCreateConfigFile(code: String!, configFilename: String!): App
-  clearActiveProject: Query!
+  appCreateConfigFile(code: String!, configFilename: String!): Boolean
+  clearActiveProject: Boolean
 
   """
   Development only: Triggers or dismisses a prompted refresh by touching the file watched by our development scripts
@@ -357,60 +364,72 @@ type Mutation {
   devRelaunch(action: DevRelaunchAction!): Boolean
 
   """Generate spec from Storybook story"""
-  generateSpecFromStory(storyPath: String!): Project!
+  generateSpecFromStory(storyPath: String!): Boolean
+
+  """Hides the launchpad windows"""
+  hideBrowserWindow: App!
 
   """
   Initializes open_project global singleton to manager current project state
   """
-  initializeOpenProject: Wizard
+  initializeOpenProject: Boolean
+  internal_clearAllProjectPreferencesCache: Boolean
   internal_clearLatestProjectCache: Boolean
+  internal_clearProjectPreferencesCache(projectTitle: String!): Boolean
   internal_triggerIpcToApp: Boolean
   internal_triggerIpcToLaunchpad(msg: String!): Boolean
 
   """Launches project from open_project global singleton"""
-  launchOpenProject: App
+  launchOpenProject: Boolean
 
   """Sets the active browser"""
   launchpadSetBrowser(
     """ID of the browser that we want to set"""
     id: ID!
-  ): Query
+  ): Boolean
 
   """Auth with Cypress Cloud"""
-  login: Query
+  login: Boolean
 
   """Log out of Cypress Cloud"""
-  logout: Query
+  logout: Boolean
 
   """Set the current navigation item"""
-  navigationMenuSetItem(type: NavItem!): NavigationMenu
+  navigationMenuSetItem(type: NavItem!): Boolean
 
   """Remove project from projects array and cache"""
-  removeProject(path: String!): App!
+  removeProject(path: String!): Boolean
 
   """Set active project to run tests on"""
-  setActiveProject(path: String!): App!
+  setActiveProject(path: String!): Boolean
 
   """Set the current spec under test"""
-  setCurrentSpec(id: ID!): Project!
+  setCurrentSpec(id: ID!): Boolean
+
+  """Save the projects preferences to cache"""
+  setProjectPreferences(
+    """ID of the browser that we want to set"""
+    browserId: ID!
+    testingType: TestingTypeEnum!
+  ): App!
+
+  """show the launchpad windows"""
+  showBrowserWindow: App!
 
   """Installs the dependencies for the component testing step"""
   wizardInstallDependencies: Wizard
 
-  """Navigates backward in the wizard"""
-  wizardNavigate(direction: WizardNavigateDirection!): Wizard
-
   """Sets the frontend bundler we want to use for the project"""
-  wizardSetBundler(bundler: SupportedBundlers!): Wizard
+  wizardSetBundler(bundler: SupportedBundlers!): Boolean
 
   """Sets the language we want to use for the config file"""
-  wizardSetCodeLanguage(language: CodeLanguageEnum!): Wizard
+  wizardSetCodeLanguage(language: CodeLanguageEnum!): Boolean
 
   """Sets the frontend framework we want to use for the project"""
-  wizardSetFramework(framework: FrontendFrameworkEnum!): Wizard
+  wizardSetFramework(framework: FrontendFrameworkEnum!): Boolean
 
-  """Sets the current testing type we want to use"""
-  wizardSetTestingType(type: TestingTypeEnum!): Wizard
+  """Updates the different fields of the wizard data store"""
+  wizardUpdate(input: WizardUpdateInput!): Boolean
 
   """Validates that the manual install has occurred properly"""
   wizardValidateManualInstall: Wizard
@@ -506,6 +525,9 @@ type Project implements Node {
   """Whether the user configured this project to use e2e Testing"""
   isFirstTimeE2E: Boolean!
 
+  """Cached preferences for this project"""
+  preferences: ProjectPreferences
+
   """Used to associate project with Cypress cloud"""
   projectId: String
   projectRoot: String!
@@ -528,9 +550,19 @@ type Project implements Node {
   title: String!
 }
 
+"""Preferences specific to a project"""
+type ProjectPreferences {
+  """The preferred browser to launch"""
+  browserId: String
+
+  """The preferred testing type to start in"""
+  testingType: String
+}
+
 """The root "Query" type containing all entry fields for our querying"""
 type Query {
   app: App!
+  baseError: BaseError
 
   """Returns an object conforming to the Relay spec"""
   cloudNode(
@@ -705,8 +737,10 @@ type Wizard {
   """
   packagesToInstall: [WizardNpmPackage!]
 
-  """Configuration file based on bundler and framework of choice"""
-  sampleCode: String
+  """
+  Set of sample configuration files based bundler, framework and language of choice
+  """
+  sampleConfigFiles: [WizardSampleConfigFile!]
 
   """IndexHtml file based on bundler and framework of choice"""
   sampleTemplate: String
@@ -757,9 +791,11 @@ type WizardCodeLanguage implements Node {
   type: CodeLanguageEnum!
 }
 
-enum WizardCodeLanguageLiteral {
-  js
-  ts
+enum WizardConfigFileStatusEnum {
+  changes
+  error
+  skipped
+  valid
 }
 
 """A frontend framework that we can setup within the app"""
@@ -797,11 +833,27 @@ type WizardNpmPackage implements Node {
   package: String!
 }
 
+"""Each config file suggestion given by the wizard"""
+type WizardSampleConfigFile implements Node {
+  content: String!
+  description: String
+  filePath: String!
+
+  """Relay style Node ID field for the WizardSampleConfigFile field"""
+  id: ID!
+  status: WizardConfigFileStatusEnum!
+}
+
 enum WizardStep {
-  createConfig
+  configFiles
   initializePlugins
   installDependencies
   selectFramework
   setupComplete
   welcome
+}
+
+input WizardUpdateInput {
+  direction: WizardNavigateDirection
+  testingType: TestingTypeEnum
 }

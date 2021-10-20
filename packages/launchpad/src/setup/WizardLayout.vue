@@ -42,10 +42,8 @@ fragment WizardLayout on Wizard {
 `
 
 gql`
-mutation WizardLayoutNavigate($direction: WizardNavigateDirection!) {
-  wizardNavigate(direction: $direction) {
-    ...WizardLayout
-  }
+mutation WizardLayoutNavigate($input: WizardUpdateInput!) {
+  wizardUpdate(input: $input)
 }
 `
 
@@ -59,7 +57,7 @@ const props = withDefaults(
     showNext?: boolean
     canNavigateForward?: boolean
     noContainer?: boolean
-    altFn?:(val: boolean) => void
+    altFn?: (val: boolean) => void
     nextFn?: (...args: unknown[]) => any,
   }>(), {
     next: undefined,
@@ -80,11 +78,11 @@ const navigate = useMutation(WizardLayoutNavigateDocument)
 
 async function nextFn () {
   await props.nextFn?.()
-  navigate.executeMutation({ direction: 'forward' })
+  navigate.executeMutation({ input: { direction: 'forward', testingType: null } })
 }
 
 function backFn () {
-  navigate.executeMutation({ direction: 'back' })
+  navigate.executeMutation({ input: { direction: 'back', testingType: null } })
 }
 
 </script>

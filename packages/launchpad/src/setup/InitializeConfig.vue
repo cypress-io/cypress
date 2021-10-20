@@ -55,9 +55,7 @@ fragment InitializeConfig_Config on Query {
 
 gql`
 mutation InitializeOpenProject {
-  initializeOpenProject {
-    ...InitializeConfig_WizardState
-  }
+  initializeOpenProject 
 }
 `
 

@@ -130,9 +130,9 @@ export = {
    */
   ready (options: {projectRoot?: string} = {}) {
     const { projectRoot } = options
-    const { serverPortPromise, bus } = process.env.LAUNCHPAD
+    const { serverPortPromise, bus, ctx } = process.env.LAUNCHPAD
       ? runInternalServer(options)
-      : { bus: new EventEmitter, serverPortPromise: Promise.resolve(undefined) }
+      : { bus: new EventEmitter, serverPortPromise: Promise.resolve(undefined), ctx: null }
 
     // TODO: potentially just pass an event emitter
     // instance here instead of callback functions
@@ -150,6 +150,7 @@ export = {
     .then(([port, state]) => {
       return Windows.open(projectRoot, port, this.getWindowArgs(state))
       .then((win) => {
+        ctx?.actions.electron.setBrowserWindow(win)
         Events.start({
           ...(options as LaunchArgs),
           onFocusTests () {

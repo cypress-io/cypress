@@ -1,9 +1,9 @@
 <template>
   <template v-if="query.data.value">
     <HeaderBar :gql="query.data.value" />
-    <div class="max-content">
-      <template v-if="query.error.value">
-        <BaseError />
+    <div class="px-24px">
+      <template v-if="query.data.value.baseError">
+        <BaseError :gql="query.data.value.baseError" />
       </template>
       <template
         v-else-if="query.data.value.app.isInGlobalMode && !query.data.value?.app.activeProject"
@@ -16,7 +16,7 @@
           <WizardHeader :gql="query.data.value.wizard" />
           <StandardModal
             v-model="isTestingTypeModalOpen"
-            modal-classes="w-960px"
+            class="h-full sm:h-auto sm:w-auto w-full sm:mx-[5%]"
           >
             <template #title>
               Key Differences
@@ -25,7 +25,7 @@
             <CompareTestingTypes />
           </StandardModal>
           <button
-            class="block mx-auto text-indigo-500 text-18px focus:outline-transparent hocus:underline group"
+            class="block mx-auto text-indigo-500 text-18px hocus-link-default group"
             @click="isTestingTypeModalOpen = true"
           >
             {{ t('welcomePage.review') }}<i-cy-arrow-right_x16
@@ -60,8 +60,10 @@ import GlobalPage from './global/GlobalPage.vue'
 import BaseError from './error/BaseError.vue'
 import StandardModal from '@cy/components/StandardModal.vue'
 import CompareTestingTypes from './setup/CompareTestingTypes.vue'
+
 import { useI18n } from '@cy/i18n'
 import { ref } from 'vue'
+import ShikiHighlight from '../../frontend-shared/src/components/ShikiHighlight.vue'
 
 const { t } = useI18n()
 const isTestingTypeModalOpen = ref(false)
@@ -71,6 +73,10 @@ query MainLaunchpadQuery {
   ...TestingTypeCards
   ...Wizard
 
+  baseError {
+    ...BaseError
+  }
+
   wizard {
     canNavigateForward
     ...WizardHeader
@@ -79,7 +85,6 @@ query MainLaunchpadQuery {
   app {
     isInGlobalMode
     ...GlobalPage
-    ...WelcomeGuide
   }
   ...HeaderBar
 }

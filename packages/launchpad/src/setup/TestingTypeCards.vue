@@ -10,8 +10,8 @@
       :image="e2ePreview"
       role="button"
       @click="e2eNextStep"
-      @keyup.enter="e2eNextStep"
-      @keyup.space="e2eNextStep"
+      @keyup.self.enter="e2eNextStep"
+      @keyup.self.space="e2eNextStep"
       @openCompare="$emit('openCompare')"
     />
     <TestingTypeCard
@@ -24,8 +24,8 @@
       :image="ctPreview"
       role="button"
       @click="ctNextStep"
-      @keyup.enter="ctNextStep"
-      @keyup.space="ctNextStep"
+      @keyup.self.enter="ctNextStep"
+      @keyup.self.space="ctNextStep"
       @openCompare="$emit('openCompare')"
     />
   </div>
@@ -36,9 +36,7 @@ import { gql } from '@urql/core'
 import { useMutation } from '@urql/vue'
 import { computed } from 'vue'
 import {
-  TestingTypeEnum,
-  TestingTypeSelectDocument,
-  TestingTypeCardsNavigateForwardDocument,
+  TestingTypeSelectionDocument,
   TestingTypeCardsFragment,
 } from '../generated/graphql'
 import TestingTypeCard from './TestingTypeCard.vue'
@@ -62,32 +60,16 @@ fragment TestingTypeCards on Query {
       description
     }
   }
-  ...ConfigFile
 }
 `
 
 gql`
-mutation TestingTypeSelect($testingType: TestingTypeEnum!) {
-  wizardSetTestingType(type: $testingType) {
-    testingType
-  }
+  mutation TestingTypeSelection($input: WizardUpdateInput!) {
+  wizardUpdate(input: $input)
 }
 `
 
-gql`
-mutation TestingTypeCardsNavigateForward {
-  wizardNavigate(direction: forward) {
-    step
-    chosenTestingTypePluginsInitialized
-    canNavigateForward
-    title
-    description
-  }
-}
-`
-
-const mutation = useMutation(TestingTypeSelectDocument)
-const navigateForwardMutation = useMutation(TestingTypeCardsNavigateForwardDocument)
+const mutation = useMutation(TestingTypeSelectionDocument)
 
 const props = defineProps<{
   gql: TestingTypeCardsFragment
@@ -100,18 +82,12 @@ const ct = computed(() => {
 const firstTimeCT = computed(() => props.gql.app.activeProject?.isFirstTimeCT)
 const firstTimeE2E = computed(() => props.gql.app.activeProject?.isFirstTimeE2E)
 
-const selectTestingType = (testingType: TestingTypeEnum) => {
-  return mutation.executeMutation({ testingType })
-}
-
 const ctNextStep = async () => {
-  await selectTestingType('component')
-  navigateForwardMutation.executeMutation({})
+  return mutation.executeMutation({ input: { testingType: 'component', direction: 'forward' } })
 }
 
 const e2eNextStep = async () => {
-  await selectTestingType('e2e')
-  navigateForwardMutation.executeMutation({})
+  return mutation.executeMutation({ input: { testingType: 'e2e', direction: 'forward' } })
 }
 
 const e2e = computed(() => {

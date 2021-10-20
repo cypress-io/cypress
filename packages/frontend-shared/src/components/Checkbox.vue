@@ -28,7 +28,7 @@
         <label
           v-if="label"
           :for="id"
-          class="disabled:text-gray-500 text-gray-500 font-light select-none"
+          class="disabled:text-gray-500 text-gray-800 font-light select-none"
         >
           {{ label }}
         </label>

@@ -29,7 +29,7 @@
             <a
               href="https://on.cypress.io/dashboard"
               target="_blank"
-              class="text-indigo-500 hocus:underline outline-transparent"
+              class="text-indigo-500 hocus-link-default"
             >{{ t('topNav.login.dashboard') }}</a>
           </i18n-t>
           <i18n-t

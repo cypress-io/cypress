@@ -1,15 +1,20 @@
 <template>
-  <div class="px-6 py-4 border-b mb-7">
-    <div class="flex items-center justify-between max-content">
+  <div
+    class="px-6 py-15px border-b border-b-gray-100 mb-24px"
+    data-testid="header-bar"
+  >
+    <div class="flex items-center justify-between">
       <div class="flex items-center">
         <img
-          class="mr-2 w-32px h-32px"
+          class="mr-18px w-32px h-32px"
           src="../images/cypress-dark.png"
         >
-        <span
-          class="text-primary"
-          @click="clearActiveProject"
-        >Projects</span>
+        <a
+          :class="props.gql?.app?.activeProject ? 'text-indigo-500' :
+            'text-gray-700'"
+          :href="props.gql?.app?.activeProject ? 'global-mode' : undefined"
+          @click.prevent="clearActiveProject"
+        >Projects</a>
         <!-- TODO: Replace with a cy icon -->
         <i-oi-chevron-right
           v-if="props.gql?.app?.activeProject"
@@ -48,7 +53,7 @@
                   <span class="text-gray-600">{{ props.gql.cloudViewer?.email }}</span>
                   <br>
                   <a
-                    class="text-indigo-500 outline-transparent hocus:underline"
+                    class="text-indigo-500 hocus-link-default"
                     href="https://on.cypress.io/dashboard/profile"
                     target="_blank"
                   >Profile Settings</a>
@@ -97,18 +102,7 @@ import { useI18n } from '@cy/i18n'
 
 gql`
 mutation GlobalPageHeader_clearActiveProject {
-  clearActiveProject {
-    app {
-      isInGlobalMode
-      activeProject {
-        id
-      }
-    }
-    wizard {
-      step
-      chosenTestingTypePluginsInitialized
-    }
-  }
+  clearActiveProject
 }
 `
 
