@@ -1,6 +1,6 @@
 const { _, $ } = Cypress
 
-describe('src/cy/commands/window', () => {
+describe('src/cy/commands/window', { retries: 2 }, () => {
   context('#window', () => {
     it('returns the remote window', () => {
       cy.window().then((win) => {
