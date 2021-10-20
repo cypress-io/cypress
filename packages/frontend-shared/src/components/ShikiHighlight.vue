@@ -74,7 +74,11 @@ setCDN(`${import.meta.env.BASE_URL}shiki/`)
 
 let highlighter: Highlighter
 
-export const langsSupported: Lang[] = ['ts', 'js', 'css', 'jsx', 'tsx', 'json', 'yaml', 'html']
+export const langsSupported = ['typescript', 'javascript', 'ts', 'js', 'css', 'jsx', 'tsx', 'json', 'yaml', 'html'] as const
+
+let langs = langsSupported.concat([])
+
+export type CyLangType = typeof langsSupported[number]
 
 export async function initHighlighter () {
   if (highlighter) {
@@ -83,11 +87,9 @@ export async function initHighlighter () {
 
   highlighter = await getHighlighter({
     themes: ['cypress.theme'],
-    langs: ['typescript', 'javascript', ...langsSupported],
+    langs,
   })
 }
-
-export type { Lang }
 
 export { highlighter }
 </script>
@@ -110,7 +112,7 @@ onBeforeMount(async () => {
 
 const props = withDefaults(defineProps<{
   code: string;
-  lang: Lang | undefined;
+  lang: CyLangType | undefined;
   lineNumbers?: boolean,
   inline?: boolean,
   wrap?: boolean,
