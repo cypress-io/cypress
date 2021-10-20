@@ -36,7 +36,7 @@
       </MenuButton>
       <MenuItems
         class="absolute bg-gray-900 text-white flex flex-col right-0
-      -bottom-104px right-18px children:outline-transparent z-40 rounded overflow-scroll"
+      -bottom-104px right-18px children:outline-transparent outline-transparent z-40 rounded overflow-scroll"
       >
         <MenuItem
           v-for="item in menuItems"
