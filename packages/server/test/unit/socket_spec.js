@@ -456,6 +456,16 @@ describe('lib/socket', () => {
 
         return this.client.emit('backend:request', 'get:fixture', 'does-not-exist.txt', {}, cb)
       })
+
+      it('converts Buffers to base64 strings', function (done) {
+        const cb = function (resp) {
+          expect(resp.response).to.eq('W3sianNvbiI6IHRydWV9XQ==')
+
+          return done()
+        }
+
+        return this.client.emit('backend:request', 'get:fixture', 'foo', { encoding: null }, cb)
+      })
     })
 
     context('on(http:request)', () => {
