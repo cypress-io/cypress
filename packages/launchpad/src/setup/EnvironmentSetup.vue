@@ -1,7 +1,7 @@
 <template>
   <WizardLayout
     :can-navigate-forward="props.gql.canNavigateForward"
-    class="max-w-3xl"
+    class="max-w-776px"
   >
     <div class="m-5">
       <SelectFramework
