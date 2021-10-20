@@ -63,14 +63,7 @@ fragment Specs_Runner on App {
 
 gql`
 mutation Runner_SetCurrentSpec($id: ID!) {
-  setCurrentSpec(id: $id) {
-    currentSpec {
-      id
-      relative
-      absolute
-      name
-    }
-  }
+  setCurrentSpec(id: $id)
 }
 `
 

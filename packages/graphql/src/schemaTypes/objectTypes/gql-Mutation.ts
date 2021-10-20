@@ -279,12 +279,12 @@ export const mutation = mutationType({
       args: {
         id: nonNull(idArg()),
       },
-      resolve: async (_, args, ctx) => {
+      resolve: (_, args, ctx) => {
         if (!ctx.activeProject) {
           throw Error(`Cannot set spec without active project!`)
         }
 
-        await ctx.actions.project.setCurrentSpec(args.id)
+        ctx.actions.project.setCurrentSpec(args.id)
       },
     })
 
