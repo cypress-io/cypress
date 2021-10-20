@@ -1,5 +1,5 @@
 <template>
-  <h1 class="pt-12 font-medium text-center text-32px text-body-gray-900">
+  <h1 class="pt-20px font-medium text-center text-32px text-body-gray-900">
     {{ props.gql.title }}
   </h1>
   <p

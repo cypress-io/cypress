@@ -2,6 +2,7 @@
   <WizardLayout
     :next=" t('setupPage.install.confirmManualInstall')"
     :can-navigate-forward="props.gql.canNavigateForward"
+    class="max-w-640px"
   >
     <ManualInstall
       :gql="props.gql"

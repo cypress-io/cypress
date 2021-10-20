@@ -1,7 +1,7 @@
 <template>
   <div
     :class="{
-      'max-w-3xl mx-auto border-1 border-gray-100 rounded m-10 flex flex-col': !noContainer
+      'mx-auto border-1 border-gray-100 rounded m-10 flex flex-col': !noContainer
     }"
   >
     <div class="flex-grow">
