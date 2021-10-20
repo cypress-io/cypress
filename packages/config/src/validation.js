@@ -2,8 +2,9 @@ const _ = require('lodash')
 const debug = require('debug')('cypress:server:validation')
 const is = require('check-more-types')
 const { commaListsOr } = require('common-tags')
-const configOptions = require('../config_options')
 const path = require('path')
+
+const configOptions = require('./config_options')
 
 // validation functions take a key and a value and should:
 //  - return true if it passes validation
@@ -36,9 +37,7 @@ const isFalse = (value) => {
   return value === false
 }
 
-const { isArray } = _
-const isNumber = _.isFinite
-const { isString } = _
+const { isArray, isString, isFinite: isNumber } = _
 
 /**
  * Validates a single browser object.
@@ -53,7 +52,8 @@ const isValidBrowser = (browser) => {
   const knownBrowserFamilies = ['chromium', 'firefox']
 
   if (!is.oneOf(knownBrowserFamilies)(browser.family)) {
-    return errMsg('family', browser, commaListsOr`either ${knownBrowserFamilies}`)
+  // if (!is.oneOf(Cypress.BrowserFamily)(browser.fami/ly)) {
+    return errMsg('family', browser, commaListsOr`either ${Cypress.BrowserFamily}`)
   }
 
   if (!is.unemptyString(browser.displayName)) {
@@ -136,6 +136,7 @@ const isValidConfig = (key, config) => {
     return status
   }
 
+  // almost the validate function but it's cross-checking the default values
   for (const rule of configOptions.options) {
     if (rule.name in config && rule.validation) {
       const status = rule.validation(`${key}.${rule.name}`, config[rule.name])
@@ -287,7 +288,8 @@ module.exports = {
   },
 
   isFullyQualifiedUrl (key, value) {
-    if (value == null || isFullyQualifiedUrl(value)) {
+    // TO DO: remove empty string check. Added for passivity.
+    if (value == null || value === '' || isFullyQualifiedUrl(value)) {
       return true
     }
 
@@ -320,6 +322,14 @@ module.exports = {
     }
 
     return errMsg(key, value, 'an array')
+  },
+
+  isArrayOfStrings (key, value) {
+    if (isArrayOfStrings(value)) {
+      return true
+    }
+
+    return errMsg(key, value, 'an array of strings')
   },
 
   isStringOrFalse (key, value) {

@@ -3,6 +3,8 @@ import R from 'ramda'
 import path from 'path'
 import Promise from 'bluebird'
 import deepDiff from 'return-deep-diff'
+import configurator from '@packages/config'
+import { options } from '@packages/config/src/config_options'
 
 import errors from './errors'
 import scaffold from './scaffold'
@@ -16,8 +18,9 @@ import findSystemNode from './util/find_system_node'
 
 const debug = Debug('cypress:server:config')
 
-import { options, breakingOptions } from './config_options'
 import { getProcessEnvVars } from './util/config'
+
+const defaultValues = configurator.getDefaultValues()
 
 export const RESOLVED_FROM = ['plugin', 'env', 'default', 'runtime', 'config'] as const
 
@@ -44,26 +47,9 @@ export const CYPRESS_SPECIAL_ENV_VARS = [
   'RECORD_KEY',
 ]
 
-const dashesOrUnderscoresRe = /^(_-)+/
-
-// takes an array and creates an index object of [keyKey]: [valueKey]
-const createIndex = (arr, keyKey, valueKey) => {
-  return _.reduce(arr, (memo, item) => {
-    if (item[valueKey] !== undefined) {
-      memo[item[keyKey]] = item[valueKey]
-    }
-
-    return memo
-  }, {})
-}
-
-const publicConfigKeys = _(options).reject({ isInternal: true }).map('name').value()
-const breakingKeys = _.map(breakingOptions, 'name')
 const folders = _(options).filter({ isFolder: true }).map('name').value()
-const validationRules = createIndex(options, 'name', 'validation')
-const defaultValues: Record<string, any> = createIndex(options, 'name', 'defaultValue')
 
-const convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) => {
+const convertRelativeToAbsolutePaths = (projectRoot, obj) => {
   return _.reduce(folders, (memo, folder) => {
     const val = obj[folder]
 
@@ -76,39 +62,9 @@ const convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) => {
   , {})
 }
 
-const validateNoBreakingConfig = (cfg) => {
-  return _.each(breakingOptions, ({ name, errorKey, newName, isWarning }) => {
-    if (_.has(cfg, name)) {
-      if (isWarning) {
-        return errors.warning(errorKey, name, newName)
-      }
-
-      return errors.throw(errorKey, name, newName)
-    }
-  })
-}
-
-const validate = (cfg, onErr) => {
-  return _.each(cfg, (value, key) => {
-    const validationFn = validationRules[key]
-
-    // does this key have a validation rule?
-    if (validationFn) {
-      // and is the value different from the default?
-      if (value !== defaultValues[key]) {
-        const result = validationFn(key, value)
-
-        if (result !== true) {
-          return onErr(result)
-        }
-      }
-    }
-  })
-}
-
 const validateFile = (file) => {
   return (settings) => {
-    return validate(settings, (errMsg) => {
+    return configurator.validate(settings, (errMsg) => {
       return errors.throw('SETTINGS_VALIDATION_ERROR', file, errMsg)
     })
   }
@@ -122,8 +78,7 @@ const hideSpecialVals = function (val, key) {
   return val
 }
 
-// an object with a few utility methods
-// for easy stubbing from unit tests
+// an object with a few utility methods for easy stubbing from unit tests
 export const utils = {
   resolveModule (name) {
     return require.resolve(name)
@@ -186,21 +141,11 @@ export const utils = {
   },
 }
 
-export function getConfigKeys () {
-  return publicConfigKeys
-}
-
 export function isValidCypressInternalEnvValue (value) {
   // names of config environments, see "config/app.yml"
   const names = ['development', 'test', 'staging', 'production']
 
   return _.includes(names, value)
-}
-
-export function allowed (obj = {}) {
-  const propertyNames = publicConfigKeys.concat(breakingKeys)
-
-  return _.pick(obj, propertyNames)
 }
 
 export function get (projectRoot, options = {}) {
@@ -223,8 +168,7 @@ export function set (obj: Record<string, any> = {}) {
   debug('setting config object')
   let { projectRoot, projectName, config, envFile, options } = obj
 
-  // just force config to be an object
-  // so we dont have to do as much
+  // just force config to be an object so we dont have to do as much
   // work in our tests
   if (config == null) {
     config = {}
@@ -232,8 +176,7 @@ export function set (obj: Record<string, any> = {}) {
 
   debug('config is %o', config)
 
-  // flatten the object's properties
-  // into the master config object
+  // flatten the object's properties into the master config object
   config.envFile = envFile
   config.projectRoot = projectRoot
   config.projectName = projectName
@@ -250,7 +193,7 @@ export function mergeDefaults (config: Record<string, any> = {}, options: Record
   debug('merged config with options, got %o', config)
 
   _
-  .chain(allowed(options))
+  .chain(configurator.allowed(options))
   .omit('env')
   .omit('browsers')
   .each((val, key) => {
@@ -273,7 +216,7 @@ export function mergeDefaults (config: Record<string, any> = {}, options: Record
   // and delete envFile
   config.env = parseEnv(config, options.env, resolved)
 
-  config.cypressEnv = process.env['CYPRESS_INTERNAL_ENV']
+  config.cypressEnv = process.env.CYPRESS_INTERNAL_ENV
   debug('using CYPRESS_INTERNAL_ENV %s', config.cypressEnv)
   if (!isValidCypressInternalEnvValue(config.cypressEnv)) {
     errors.throw('INVALID_CYPRESS_INTERNAL_ENV', config.cypressEnv)
@@ -297,18 +240,18 @@ export function mergeDefaults (config: Record<string, any> = {}, options: Record
     config = setUrls(config)
   }
 
-  config = setAbsolutePaths(config, defaultValues)
+  config = setAbsolutePaths(config)
 
   config = setParentTestsPaths(config)
 
   // validate config again here so that we catch
   // configuration errors coming from the CLI overrides
   // or env var overrides
-  validate(config, (errMsg) => {
+  configurator.validate(config, (errMsg) => {
     return errors.throw('CONFIG_VALIDATION_ERROR', errMsg)
   })
 
-  validateNoBreakingConfig(config)
+  configurator.validateNoBreakingConfig(config, errors.warning, errors.throw)
 
   return setSupportFileAndFolder(config)
   .then(setPluginsFile)
@@ -354,7 +297,7 @@ export function updateWithPluginValues (cfg, overrides) {
 
   // make sure every option returned from the plugins file
   // passes our validation functions
-  validate(overrides, (errMsg) => {
+  configurator.validate(overrides, (errMsg) => {
     if (cfg.pluginsFile && cfg.projectRoot) {
       const relativePluginsPath = path.relative(cfg.projectRoot, cfg.pluginsFile)
 
@@ -428,7 +371,7 @@ export function resolveConfigValues (config, defaults, resolved = {}) {
   // pick out only known configuration keys
   return _
   .chain(config)
-  .pick(publicConfigKeys)
+  .pick(configurator.getConfigKeys())
   .mapValues((val, key) => {
     let r
     const source = (s: ResolvedConfigurationOptionSource): ResolvedFromConfig => {
@@ -639,7 +582,7 @@ export function setParentTestsPaths (obj) {
   return obj
 }
 
-export function setAbsolutePaths (obj, defaults) {
+export function setAbsolutePaths (obj) {
   let pr
 
   obj = _.clone(obj)
@@ -652,7 +595,7 @@ export function setAbsolutePaths (obj, defaults) {
     // obj.fileServerFolder = path.resolve(pr, obj.fileServerFolder)
 
     // and do the same for all the rest
-    _.extend(obj, convertRelativeToAbsolutePaths(pr, obj, defaults))
+    _.extend(obj, convertRelativeToAbsolutePaths(pr, obj))
   }
 
   return obj
@@ -691,36 +634,23 @@ export function parseEnv (cfg: Record<string, any>, envCLI: Record<string, any>,
     })
   }
 
-  const envCfg = cfg.env != null ? cfg.env : {}
+  const envCfg = cfg.env
   const envFile = cfg.envFile != null ? cfg.envFile : {}
   let envProc = getProcessEnvVars(process.env) || {}
 
   envCLI = envCLI != null ? envCLI : {}
 
-  const matchesConfigKey = function (key) {
-    if (_.has(defaultValues, key)) {
-      return key
-    }
-
-    key = key.toLowerCase().replace(dashesOrUnderscoresRe, '')
-    key = _.camelCase(key)
-
-    if (_.has(defaultValues, key)) {
-      return key
-    }
-  }
-
   const configFromEnv = _.reduce(envProc, (memo: string[], val, key) => {
-    let cfgKey: string
+    let cfgkey: string
 
-    cfgKey = matchesConfigKey(key)
+    cfgkey = configurator.matchesConfigKey(key)
 
-    if (cfgKey) {
-      // only change the value if it hasnt been
+    if (cfgkey) {
+      // only change the value if it hasn't been
       // set by the CLI. override default + config
-      if (resolved[cfgKey] !== 'cli') {
-        cfg[cfgKey] = val
-        resolved[cfgKey] = {
+      if (resolved[cfgkey] !== 'cli') {
+        cfg[cfgkey] = val
+        resolved[cfgkey] = {
           value: val,
           from: 'env',
         } as ResolvedFromConfig

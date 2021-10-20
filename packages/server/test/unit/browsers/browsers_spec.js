@@ -5,7 +5,13 @@ const utils = require(`${root}../lib/browsers/utils`)
 const snapshot = require('snap-shot-it')
 
 const normalizeBrowsers = (message) => {
-  return message.replace(/(found are: ).*/, '$1chrome, firefox, electron')
+  const foundMessaging = 'found on your system are:'
+  const parts = message.split(foundMessaging)
+
+  parts[1] = foundMessaging
+  parts[2] = '\n- chrome\n- firefox\n- electron'
+
+  return parts.join('')
 }
 
 // When we added component testing mode, we added the option for electron to be omitted

@@ -988,18 +988,6 @@ describe('lib/config', () => {
     })
   })
 
-  context('.getConfigKeys', () => {
-    beforeEach(function () {
-      this.includes = (key) => {
-        expect(config.getConfigKeys()).to.include(key)
-      }
-    })
-
-    it('includes blockHosts', function () {
-      return this.includes('blockHosts')
-    })
-  })
-
   context('.resolveConfigValues', () => {
     beforeEach(function () {
       this.expected = function (obj) {
@@ -1296,9 +1284,9 @@ describe('lib/config', () => {
     })
 
     it('can override socketId in options', () => {
-      return config.mergeDefaults({ projectRoot: '/foo/bar/' }, { socketId: 1234 })
+      return config.mergeDefaults({ projectRoot: '/foo/bar/' }, { socketId: '1234' })
       .then((cfg) => {
-        expect(cfg.socketId).to.eq(1234)
+        expect(cfg.socketId).to.eq('1234')
       })
     })
 
@@ -1456,6 +1444,8 @@ describe('lib/config', () => {
             projectId: { value: null, from: 'default' },
             redirectionLimit: { value: 20, from: 'default' },
             reporter: { value: 'json', from: 'cli' },
+            resolvedNodePath: { value: null, from: 'default' },
+            resolvedNodeVersion: { value: null, from: 'default' },
             reporterOptions: { value: null, from: 'default' },
             requestTimeout: { value: 5000, from: 'default' },
             responseTimeout: { value: 30000, from: 'default' },
@@ -1463,6 +1453,7 @@ describe('lib/config', () => {
             screenshotOnRunFailure: { value: true, from: 'default' },
             screenshotsFolder: { value: 'cypress/screenshots', from: 'default' },
             supportFile: { value: 'cypress/support', from: 'default' },
+            supportFolder: { value: false, from: 'default' },
             taskTimeout: { value: 60000, from: 'default' },
             testFiles: { value: '**/*.*', from: 'default' },
             trashAssetsBeforeRuns: { value: true, from: 'default' },
@@ -1562,6 +1553,8 @@ describe('lib/config', () => {
             projectId: { value: 'projectId123', from: 'env' },
             redirectionLimit: { value: 20, from: 'default' },
             reporter: { value: 'spec', from: 'default' },
+            resolvedNodePath: { value: null, from: 'default' },
+            resolvedNodeVersion: { value: null, from: 'default' },
             reporterOptions: { value: null, from: 'default' },
             requestTimeout: { value: 5000, from: 'default' },
             responseTimeout: { value: 30000, from: 'default' },
@@ -1569,6 +1562,7 @@ describe('lib/config', () => {
             screenshotOnRunFailure: { value: true, from: 'default' },
             screenshotsFolder: { value: 'cypress/screenshots', from: 'default' },
             supportFile: { value: 'cypress/support', from: 'default' },
+            supportFolder: { value: false, from: 'default' },
             taskTimeout: { value: 60000, from: 'default' },
             testFiles: { value: '**/*.*', from: 'default' },
             trashAssetsBeforeRuns: { value: true, from: 'default' },
@@ -2303,17 +2297,6 @@ describe('lib/config', () => {
       expect(config.setAbsolutePaths({})).to.deep.eq({})
     })
 
-    // it "resolves fileServerFolder with projectRoot", ->
-    //   obj = {
-    //     projectRoot: "/_test-output/path/to/project"
-    //     fileServerFolder: "foo"
-    //   }
-
-    //   expect(config.setAbsolutePaths(obj)).to.deep.eq({
-    //     projectRoot: "/_test-output/path/to/project"
-    //     fileServerFolder: "/_test-output/path/to/project/foo"
-    //   })
-
     it('does not mutate existing obj', () => {
       const obj = {}
 
@@ -2331,7 +2314,7 @@ describe('lib/config', () => {
       expect(config.setAbsolutePaths(obj)).to.deep.eq(obj)
     })
 
-    return ['fileServerFolder', 'fixturesFolder', 'integrationFolder', 'unitFolder', 'supportFile', 'pluginsFile'].forEach((folder) => {
+    return ['fileServerFolder', 'fixturesFolder', 'integrationFolder', 'supportFile', 'pluginsFile'].forEach((folder) => {
       it(`converts relative ${folder} to absolute path`, () => {
         const obj = {
           projectRoot: '/_test-output/path/to/project',

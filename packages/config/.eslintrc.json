@@ -1,0 +1,12 @@
+{
+  "extends": [
+    "../../.eslintrc.json"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "env": {
+    "cypress/globals": true
+  },
+  "plugins": [
+    "cypress"
+  ]
+}
