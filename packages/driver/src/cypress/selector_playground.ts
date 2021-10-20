@@ -66,7 +66,7 @@ export default {
           args: { arg: $utils.stringify(selectorPriority) },
         })
       }
-      // Validate that the priority is on of: "data-*", "id", "class", "tag", "attributes", "nth-child"
+      // Validate that the priority is one of: "data-*", "id", "class", "tag", "attributes", "nth-child"
 
       selectorPriority.forEach((priority) => {
         if (!priority.match(/^(data\-.*|id|class|tag|attributes|nth\-child)$/)) {
