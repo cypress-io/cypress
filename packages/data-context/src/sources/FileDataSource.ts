@@ -1,10 +1,7 @@
 import type { DataContext } from '..'
 import * as path from 'path'
 import type { SpecFile } from '@packages/types'
-import glob from 'glob'
-import { promisify } from 'util'
-
-const asyncGlob = promisify(glob)
+import globby, { GlobbyOptions } from 'globby'
 
 export class FileDataSource {
   private watchedFilePaths = new Set<string>()
@@ -37,9 +34,11 @@ export class FileDataSource {
     }
   }
 
-  async getFilesByGlob (glob: string, globOptions: { root: string | undefined }) {
+  async getFilesByGlob (glob: string | string[], globOptions?: GlobbyOptions) {
+    const globs = (Array.isArray(glob) ? glob : [glob]).concat('!**/node_modules/**')
+
     try {
-      const files = await asyncGlob(glob, { ignore: '**/node_modules/**', nodir: true, ...globOptions })
+      const files = await globby(globs, { onlyFiles: true, absolute: true, ...globOptions })
 
       return files
     } catch (e) {

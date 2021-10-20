@@ -2,6 +2,7 @@ import { nonNull, objectType, stringArg } from 'nexus'
 import path from 'path'
 import { ProjectPreferences } from '.'
 import { cloudProjectBySlug } from '../../stitching/remoteGraphQLCalls'
+import { CodeGenTypeEnum } from '../enumTypes/gql-CodeGenType'
 import { FileParts } from './gql-FileParts'
 
 export interface ProjectShape {
@@ -109,9 +110,9 @@ export const Project = objectType({
     t.nonNull.string('codeGenGlob', {
       description: 'Glob pattern for component searching',
       args: {
-        type: nonNull(stringArg()),
+        type: nonNull(CodeGenTypeEnum),
       },
-      resolve: (src, args, ctx) => ctx.project.getCodeGenGlob(args.type ?? null),
+      resolve: (src, args, ctx) => ctx.project.getCodeGenGlob(args.type),
     })
 
     t.connectionField('codeGenCandidates', {

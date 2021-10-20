@@ -1,6 +1,8 @@
 describe('NewSpec', () => {
   beforeEach(() => {
-    cy.setupE2E('component-tests')
+    cy.setupE2E('spec-generation')
+
+    // Fails locally (cypress:open) unless I refresh browsers
     cy.withCtx(async (ctx) => {
       await ctx.actions.app.refreshBrowsers()
     })
@@ -10,8 +12,8 @@ describe('NewSpec', () => {
     cy.withCtx((ctx) => {
       const { fs, path, activeProject } = ctx
       const projectRoot = activeProject?.projectRoot as string
-      const generatedFile = 'cypress/component-tests/stories/Button.cy.jsx'
-      const generatedFileCopy = 'cypress/component-tests/stories/Button-copy-1.cy.jsx'
+      const generatedFile = 'src/Button.cy.jsx'
+      const generatedFileCopy = 'src/Button-copy-1.cy.jsx'
 
       fs.removeSync(path.join(projectRoot, generatedFile))
       fs.removeSync(path.join(projectRoot, generatedFileCopy))
@@ -26,7 +28,7 @@ describe('NewSpec', () => {
 
     cy.findByText('Generate From Component').click()
 
-    getCodeGenCandidates().first().contains('Foo.vue')
+    getCodeGenCandidates().first().contains('Button.jsx')
   })
 
   it('detects Storybook and generates a spec from story', () => {

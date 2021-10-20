@@ -18,4 +18,4 @@ export interface GeneratedSpec {
   content: string
 }
 
-export const STORYBOOK_GLOB = '/**/*.stories.*'
+export const STORYBOOK_GLOB = '**/*.stories.*'

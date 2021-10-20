@@ -1,7 +1,7 @@
-import type { SpecType } from '@packages/graphql/src/gen/nxs.gen'
+import type { CodeGenType, SpecType } from '@packages/graphql/src/gen/nxs.gen'
 import { FRONTEND_FRAMEWORKS, FullConfig, ResolvedFromConfig, RESOLVED_FROM, SpecFile, STORYBOOK_GLOB } from '@packages/types'
+import { scanFSForAvailableDependency } from 'create-cypress-tests/src/findPackageJson'
 import path from 'path'
-import { scanFSForAvailableDependency } from '../../../../npm/create-cypress-tests/src/findPackageJson'
 
 import type { DataContext } from '..'
 import type { Maybe } from '../data/coreDataShape'
@@ -136,7 +136,7 @@ export class ProjectDataSource {
     return guess?.glob ?? null
   }
 
-  getCodeGenGlob (type: string | null) {
+  getCodeGenGlob (type: CodeGenType) {
     const project = this.ctx.activeProject
 
     if (!project) {
@@ -145,7 +145,7 @@ export class ProjectDataSource {
 
     const looseComponentGlob = '/**/*.{js,jsx,ts,tsx,.vue}'
 
-    if (type === 'stories') {
+    if (type === 'story') {
       return STORYBOOK_GLOB
     }
 
@@ -169,7 +169,7 @@ export class ProjectDataSource {
 
     const config = await this.ctx.project.getConfig(project.projectRoot)
 
-    const codeGenCandidates = await this.ctx.file.getFilesByGlob(glob, { root: config.componentFolder || project.projectRoot })
+    const codeGenCandidates = await this.ctx.file.getFilesByGlob(glob)
 
     return codeGenCandidates.map(
       (file) => this.ctx.file.normalizeFileToSpec(file, project.projectRoot, project.projectRoot ?? config.componentFolder),

@@ -23,7 +23,7 @@ export const FRONTEND_FRAMEWORKS = [
     name: 'Create React App',
     supportedBundlers: ['webpack'],
     package: '@cypress/react',
-    glob: '/**/*.{jsx,tsx}',
+    glob: '**/*.{jsx,tsx}',
     deps: ['react-scripts', 'react', 'react-dom'],
   },
   {
@@ -31,7 +31,7 @@ export const FRONTEND_FRAMEWORKS = [
     name: 'Vue CLI',
     supportedBundlers: ['webpack'],
     package: '@cypress/vue',
-    glob: '/**/*.vue',
+    glob: '**/*.vue',
     deps: ['@vue/cli-service', 'vue'],
   },
   {
@@ -39,7 +39,7 @@ export const FRONTEND_FRAMEWORKS = [
     name: 'React.js',
     supportedBundlers: ['webpack', 'vite'],
     package: '@cypress/react',
-    glob: '/**/*.{jsx,tsx}',
+    glob: '**/*.{jsx,tsx}',
     deps: ['react', 'react-dom'],
   },
   {
@@ -47,7 +47,7 @@ export const FRONTEND_FRAMEWORKS = [
     name: 'Vue.js',
     supportedBundlers: ['webpack', 'vite'],
     package: '@cypress/vue',
-    glob: '/**/*.vue',
+    glob: '**/*.vue',
     deps: ['vue'],
   },
   {
@@ -55,7 +55,7 @@ export const FRONTEND_FRAMEWORKS = [
     name: 'Next.js',
     supportedBundlers: ['webpack'],
     package: '@cypress/react',
-    glob: '/**/*.{jsx,tsx}',
+    glob: '**/*.{jsx,tsx}',
     deps: ['next', 'react', 'react-dom'],
   },
   {
@@ -63,7 +63,7 @@ export const FRONTEND_FRAMEWORKS = [
     name: 'Nuxt.js',
     supportedBundlers: ['webpack'],
     package: '@cypress/vue',
-    glob: '/**/*.vue',
+    glob: '**/*.vue',
     deps: ['nuxt'],
   },
 ] as const

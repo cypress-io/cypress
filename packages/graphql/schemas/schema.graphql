@@ -238,6 +238,11 @@ type CloudUser implements Node {
   userIsViewer: Boolean!
 }
 
+enum CodeGenType {
+  component
+  story
+}
+
 enum CodeLanguageEnum {
   js
   ts
@@ -528,7 +533,7 @@ type Project implements Node {
   ): FilePartsConnection
 
   """Glob pattern for component searching"""
-  codeGenGlob(type: String!): String!
+  codeGenGlob(type: CodeGenType!): String!
 
   """Project configuration"""
   config: JSON!

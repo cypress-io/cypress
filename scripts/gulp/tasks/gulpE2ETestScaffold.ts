@@ -4,9 +4,9 @@ import fs from 'fs-extra'
 
 import { monorepoPaths } from '../monorepoPaths'
 
-const PROJECT_FIXTURE_DIRECTORY = 'test/support/fixtures/projects'
+const PROJECT_FIXTURE_DIRECTORY = 'projects'
 
-const DIR_PATH = path.join(monorepoPaths.pkgServer, PROJECT_FIXTURE_DIRECTORY)
+const DIR_PATH = path.join(monorepoPaths.systemTests, PROJECT_FIXTURE_DIRECTORY)
 const OUTPUT_PATH = path.join(monorepoPaths.pkgFrontendShared, 'cypress/e2e/support/e2eProjectDirs.ts')
 
 export async function e2eTestScaffold () {

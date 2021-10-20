@@ -4,7 +4,7 @@
     <div class="flex">
       <Button
         :disabled="!newSpecQuery.data.value?.app.activeProject?.storybook"
-        @click="codeGenTypeClicked('stories')"
+        @click="codeGenTypeClicked('story')"
       >
         Generate From Story
       </Button>
@@ -72,6 +72,7 @@ import {
   NewSpec_CodeGenGlobQueryDocument,
   NewSpec_GenerateSpecFromStoryDocument,
   NewSpec_SetCurrentSpecDocument,
+  CodeGenType,
 } from '../generated/graphql'
 
 gql`
@@ -97,7 +98,7 @@ query NewSpec_NewSpecQuery {
 `
 
 gql`
-query NewSpec_CodeGenGlobQuery($type: String!) {
+query NewSpec_CodeGenGlobQuery($type: CodeGenType!) {
   app {
     activeProject {
       id
@@ -148,7 +149,7 @@ mutation NewSpec_SetCurrentSpec($id: ID!) {
 
 const newSpecQuery = useQuery({ query: NewSpec_NewSpecQueryDocument })
 
-const codeGenType = ref<string>('')
+const codeGenType = ref<CodeGenType | null>(null)
 
 // Urql allows reactive query variables (ref, computed) but has improper typing
 type ReactiveGraphQLVar = any
@@ -206,7 +207,7 @@ async function specClick () {
   router.push('runner')
 }
 
-function codeGenTypeClicked (type: string) {
+function codeGenTypeClicked (type: CodeGenType) {
   codeGenType.value = type
   candidateChosen.value = false
 }

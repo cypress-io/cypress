@@ -34,14 +34,8 @@ export class StorybookDataSource {
     }
 
     const config = await this.ctx.project.getConfig(project.projectRoot)
-    const files: string[] = []
-
-    for (const storyPattern of storybook.storyGlobs) {
-      const normalizedGlob = path.join(storybook.storybookRoot, storyPattern)
-      const res = await this.ctx.file.getFilesByGlob(normalizedGlob, { root: undefined })
-
-      files.push(...res)
-    }
+    const normalizedGlobs = storybook.storyGlobs.map((glob) => path.join(storybook.storybookRoot, glob))
+    const files = await this.ctx.file.getFilesByGlob(normalizedGlobs)
 
     // Don't currently support mdx
     return files.reduce((acc, file) => {

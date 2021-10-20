@@ -31,5 +31,6 @@ export const monorepoPaths = {
   pkgTs: path.join(__dirname, '../../packages/ts'),
   pkgTypes: path.join(__dirname, '../../packages/types'),
   pkgUiComponents: path.join(__dirname, '../../packages/ui-components'),
-  pkgWebConfig: path.join(__dirname, '../../packages/web-config')
+  pkgWebConfig: path.join(__dirname, '../../packages/web-config'),
+  systemTests: path.join(__dirname, '../../system-tests')
 } as const
