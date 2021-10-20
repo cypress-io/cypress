@@ -235,13 +235,6 @@ $code-border-radius: 4px;
     margin: 0 10px 10px;
 
     .runnable-err-file-path {
-      &:before {
-        @extend .#{$fa-css-prefix};
-        @extend .#{$fa-css-prefix}-file;
-        color: $gray-700;
-        margin-right: 5px;
-      }
-
       background: rgba($gray-900, 0.5);
       border-top-left-radius: $code-border-radius;
       border-top-right-radius: $code-border-radius;

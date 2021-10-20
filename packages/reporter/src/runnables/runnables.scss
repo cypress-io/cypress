@@ -363,7 +363,7 @@
   .runnable-header {
     background: $gray-1000;
     display: block;
-    font-family: $font-system;
+    font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
     font-size: 14px;
     line-height: 24px;
     overflow-wrap: break-word;
@@ -398,6 +398,10 @@
 
     a, a:active, a:focus, a:hover {
       color: $gray-700;
+      font-weight: 300;
+      strong {
+        font-weight: 500;
+      }
     }
 
     .duration {

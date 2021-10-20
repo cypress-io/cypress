@@ -3,6 +3,7 @@ import React, { Component, ReactElement } from 'react'
 
 import FileNameOpener from '../lib/file-name-opener'
 import { StatsStore } from '../header/stats-store'
+import { getFilenameParts } from '../lib/util'
 
 const renderRunnableHeader = (children: ReactElement) => <div className="runnable-header">{children}</div>
 
@@ -32,9 +33,20 @@ class RunnableHeader extends Component<RunnableHeaderProps> {
       )
     }
 
+    const displayFileName = () => {
+      const specParts = getFilenameParts(spec.name)
+
+      return (
+        <>
+          <strong>{specParts[0]}</strong>{specParts[1]}
+        </>
+      )
+    }
+
     const fileDetails = {
       absoluteFile: spec.absolute,
       column: 0,
+      displayFile: displayFileName(),
       line: 0,
       originalFile: relativeSpecPath,
       relativeFile: relativeSpecPath,
@@ -42,7 +54,7 @@ class RunnableHeader extends Component<RunnableHeaderProps> {
 
     return renderRunnableHeader(
       <>
-        <FileNameOpener fileDetails={fileDetails} />
+        <FileNameOpener fileDetails={fileDetails} hasIcon />
         {Boolean(statsStore.duration) && (
           <span className='duration'>{formatDuration(statsStore.duration)}</span>
         )}

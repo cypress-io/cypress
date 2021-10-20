@@ -16,7 +16,42 @@ const onEnterOrSpace = (f: (() => void)) => {
   }
 }
 
+const splitFilename = (filename: string, index: number): [string, string] => {
+  if (index < 0) {
+    return [filename, '']
+  }
+
+  return [filename.substr(0, index), filename.substr(index)]
+}
+
+// strips directory path and then
+// '_spec' and any file extension should be split off from the main part of the filename
+const getFilenameParts = (spec: string): [string, string] => {
+  if (!spec) {
+    return ['', '']
+  }
+
+  const specWithoutPath = spec.substr(spec.lastIndexOf('/') + 1)
+
+  if (!specWithoutPath) {
+    return [spec, '']
+  }
+
+  const specIndex = specWithoutPath.indexOf('_spec.')
+
+  if (specIndex > -1) {
+    return splitFilename(specWithoutPath, specIndex)
+  }
+
+  const dotIndex = specWithoutPath.indexOf('.')
+
+  if (dotIndex < 0) return [spec, '']
+
+  return splitFilename(specWithoutPath, dotIndex)
+}
+
 export {
+  getFilenameParts,
   indent,
   onEnterOrSpace,
 }
