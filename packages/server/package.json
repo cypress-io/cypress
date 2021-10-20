@@ -148,11 +148,8 @@
     "@packages/root": "0.0.0-development",
     "@packages/socket": "0.0.0-development",
     "@packages/ts": "0.0.0-development",
-<<<<<<< HEAD
     "@packages/types": "0.0.0-development",
-=======
     "@tooling/system-tests": "0.0.0-development",
->>>>>>> develop
     "@types/chai-as-promised": "7.1.2",
     "@types/chrome": "0.0.101",
     "@types/http-proxy": "1.17.4",
