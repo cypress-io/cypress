@@ -1,21 +1,13 @@
 <template>
   <div>
-    <!-- <transition name="fade"> -->
-    <!--
-        v-show="showCopied" -->
-    <!-- <span
-      class="absolute -top-10px"
-      role="status"
-    >{{ t('clipboard.copied') }}</span> -->
-    <!-- </transition> -->
     <Button
       tabindex="1"
-      size="lg"
+      size="md"
       variant="tertiary"
       @click="copyToClipboard"
     >
       <template #prefix>
-        <i-cy-clipboard_x16 class="icon-dark-indigo-500" />
+        <i-cy-copy-clipboard_x16 class="icon-dark-indigo-500" />
       </template>
       <transition
         name="fade"

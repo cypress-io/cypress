@@ -1,9 +1,12 @@
 <template>
-  <div class="relative p-12px">
-    <pre class="p-12px text-left text-purple-500 border rounded"><span>~$</span> {{ dependenciesCode }}</pre>
+  <div class="relative p-24px">
+    <div class="absolute h-40px w-160px bg-gradient-to-r from-transparent to-white via-white right-25px top-25px rounded pointer-events-none" />
+    <div class="code-area text-left p-8px text-purple-500 border rounded flex items-center overflow-x-scroll">
+      <i-cy-dollar_x16 class="icon-dark-gray-500 mr-12px" /> <pre>{{ dependenciesCode }}</pre>
+    </div>
     <CopyButton
       :text="dependenciesCode"
-      class="top-17px right-18px absolute"
+      class="top-29px right-30px absolute"
     />
   </div>
   <div class="border-t border-t-gray-100 px-24px pt-4px">
