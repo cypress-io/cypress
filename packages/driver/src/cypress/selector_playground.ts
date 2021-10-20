@@ -58,16 +58,25 @@ export default {
       })
     }
 
-    const { selectorPriority: priority, onElement } = props
+    const { selectorPriority, onElement } = props
 
-    if (priority) {
-      if (!_.isArray(priority)) {
-        $errUtils.throwErrByPath('selector_playground.defaults_invalid_priority', {
-          args: { arg: $utils.stringify(priority) },
+    if (selectorPriority) {
+      if (!_.isArray(selectorPriority)) {
+        $errUtils.throwErrByPath('selector_playground.defaults_invalid_priority_type', {
+          args: { arg: $utils.stringify(selectorPriority) },
         })
       }
+      // Validate that the priority is on of: "data-*", "id", "class", "tag", "attributes", "nth-child"
 
-      defaults.selectorPriority = priority
+      selectorPriority.forEach((priority) => {
+        if (!priority.match(/^(data\-.*|id|class|tag|attributes|nth\-child)$/)) {
+          $errUtils.throwErrByPath('selector_playground.defaults_invalid_priority', {
+            args: { arg: priority },
+          })
+        }
+      })
+
+      defaults.selectorPriority = selectorPriority
     }
 
     if (onElement) {
