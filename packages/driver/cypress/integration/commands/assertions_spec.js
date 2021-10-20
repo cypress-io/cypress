@@ -1,6 +1,6 @@
 const { $, _ } = Cypress
 
-describe('src/cy/commands/assertions', { retries: 2 }, () => {
+describe('src/cy/commands/assertions', () => {
   before(() => {
     cy
     .visit('/fixtures/jquery.html')
