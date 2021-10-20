@@ -2,11 +2,8 @@
   "extends": [
     "../../.eslintrc.json"
   ],
-  "parser": "@typescript-eslint/parser",
-  "env": {
-    "cypress/globals": true
-  },
-  "plugins": [
-    "cypress"
-  ]
+  "ignorePatterns": [
+    "node_modules"
+  ],
+  "parser": "@typescript-eslint/parser"
 }

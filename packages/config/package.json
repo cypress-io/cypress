@@ -5,6 +5,7 @@
   "private": true,
   "main": "src/index.js",
   "scripts": {
+    "lint": "cd ../../ && yarn lint packages/config/**/*",
     "test": "yarn test-unit",
     "test-debug": "yarn test-unit --inspect-brk=5566",
     "test-unit": "mocha --configFile=../../mocha-reporter-config.json -extension=.js,.ts test/unit/*spec.* --exit"

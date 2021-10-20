@@ -1,4 +1,4 @@
-const { getConfigKeys } = require('@packages/config')
+const { getPublicConfigKeys } = require('@packages/config')
 const _ = require('lodash')
 const la = require('lazy-ass')
 const is = require('check-more-types')
@@ -303,7 +303,7 @@ module.exports = {
     }
 
     // get a list of the available config keys
-    const configKeys = getConfigKeys()
+    const configKeys = getPublicConfigKeys()
 
     // and if any of our options match this
     const configValues = _.pick(options, configKeys)
