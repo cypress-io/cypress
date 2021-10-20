@@ -2,7 +2,7 @@ import { defaultMessages } from '@cy/i18n'
 import GlobalPage from './GlobalPage.vue'
 import { GlobalPageFragment, GlobalPageFragmentDoc } from '../generated/graphql-test'
 
-const searchSelector = `input[placeholder="${defaultMessages.globalPage.searchPlaceholder}"`
+const searchLabel = defaultMessages.globalPage.searchPlaceholder
 const emptyMessages = defaultMessages.globalPage.empty
 const testProject = 'test-project'
 const anotherTestProject = 'another-test-project'
@@ -37,25 +37,20 @@ describe('<GlobalPage />', { viewportHeight: 900, viewportWidth: 1200 }, () => {
 
     it('can filter down the projects', () => {
       cy.findByText(testProject).should('be.visible')
-      cy.get(searchSelector).type(anotherTestProject, { delay: 0 })
+      cy.findByLabelText(searchLabel).type(anotherTestProject, { delay: 0 })
       cy.findByText(anotherTestProject).should('be.visible')
       cy.findByText(testProject).should('not.exist')
-      cy.get(searchSelector).clear()
+      cy.findByLabelText(searchLabel).clear()
       cy.findByText(testProject).should('be.visible')
       cy.findByText(anotherTestProject).should('be.visible')
     })
 
     it('can add a project when clicking the button', () => {
+      cy.contains('button', defaultMessages.globalPage.addProjectButton).click()
       cy.get('input[type=file]')
       .attachFileWithPath('absolute/path/to/yet-another-test-project/cypress.json')
       .trigger('change', { force: true })
       // .findByText('yet-another-test-project').should('be.visible')
-    })
-
-    describe('Welcome Guide', () => {
-      it('renders the welcome guide', () => {
-        cy.findByText(defaultMessages.welcomeGuide.header.description).should('be.visible')
-      })
     })
   })
 })

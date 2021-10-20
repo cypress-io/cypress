@@ -1,47 +1,52 @@
 <template>
-  <div class="h-18 border border-gray-200 rounded bg-white flex items-center mb-2 box-border">
-    <div class="w-18 flex items-center justify-center">
+  <ListRow>
+    <template #icon>
       <RunIcon :gql="props.gql" />
-    </div>
-    <div
-      v-if="run.commitInfo"
-      class="pl-4 border-l border-gray-200 flex-grow"
-    >
-      <h2 class="font-medium text-indigo-500 leading-4">
-        {{ run.commitInfo.message }}
-      </h2>
+    </template>
+    <template #header>
+      {{ run.commitInfo?.summary }}
+    </template>
+    <template #description>
       <div class="flex">
         <span
-          v-for="info in runInfo"
-          :key="info.id"
-          class="flex items-center mr-3 mt-1"
+          v-if="run.commitInfo?.authorName"
+          class="flex items-center mr-3"
         >
-          <component
-            :is="info.icon"
-            v-if="info.icon"
-            class="mr-1 text-gray-500 text-sm"
-          />
-          <span class="text-gray-500 text-sm font-light">
-            {{ info.text }}
+          <i-cy-general-user_x16 class="mr-1 icon-dark-gray-500 icon-light-gray-200 icon-secondary-light-gray-200" />
+          <span class="text-sm font-light text-gray-500">
+            {{ run.commitInfo.authorName }}
           </span>
         </span>
+        <span
+          v-if="run.commitInfo?.branch"
+          class="flex items-center mr-3"
+        >
+          <i-cy-tech-branch-h_x16 class="mr-1 icon-dark-gray-300" />
+          <span class="text-sm font-light text-gray-500">
+            {{ run.commitInfo.branch }}
+          </span>
+        </span>
+        <span
+          v-if="run.createdAt"
+          class="flex items-center mr-3"
+        >
+          {{ new Date(run.createdAt).toLocaleTimeString() }}
+        </span>
       </div>
-    </div>
-    <RunResults
-      :gql="props.gql"
-      class="m-6 ml-0"
-    />
-  </div>
+    </template>
+    <template #right>
+      <RunResults
+        :gql="props.gql"
+      />
+    </template>
+  </ListRow>
 </template>
 
 <script lang="ts" setup>
+import ListRow from '@cy/components/ListRow.vue'
+import { gql } from '@urql/core'
 import RunIcon from './RunIcon.vue'
 import RunResults from './RunResults.vue'
-// bx:bx-user-circle
-import IconUserCircle from '~icons/bx/bx-user-circle'
-// carbon:branch
-import IconBranch from '~icons/carbon/branch'
-import { gql } from '@urql/core'
 import type { RunCardFragment } from '../generated/graphql'
 import { computed } from 'vue-demi'
 
@@ -54,7 +59,7 @@ fragment RunCard on CloudRun {
 	commitInfo {
 		authorName
 		authorEmail
-		message
+		summary
 		branch
 	}
 }
@@ -65,18 +70,5 @@ const props = defineProps<{
 }>()
 
 const run = computed(() => props.gql)
-
-const runInfo = [{
-  id: run.value.id,
-  text: run.value.commitInfo?.authorName,
-  icon: IconUserCircle,
-},
-{
-  text: run.value.commitInfo?.branch,
-  icon: IconBranch,
-},
-{
-  text: run.value.createdAt ? new Date(run.value.createdAt).toLocaleTimeString() : null,
-}].filter((o) => Boolean(o.text))
 
 </script>

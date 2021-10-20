@@ -2,7 +2,7 @@ require('../spec_helper')
 
 const config = require(`${root}lib/config`)
 const files = require(`${root}lib/files`)
-const FixturesHelper = require(`${root}/test/support/helpers/fixtures`)
+const FixturesHelper = require('@tooling/system-tests/lib/fixtures')
 
 describe('lib/files', () => {
   beforeEach(function () {

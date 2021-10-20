@@ -1,7 +1,7 @@
 require('../spec_helper')
 
 const plugins = require('../../lib/plugins')
-const Fixtures = require('../support/helpers/fixtures')
+const Fixtures = require('@tooling/system-tests/lib/fixtures')
 
 const pluginsFile = Fixtures.projectPath('plugin-before-browser-launch-deprecation/cypress/plugins/index.js')
 

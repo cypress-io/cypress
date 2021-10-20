@@ -1,6 +1,6 @@
 <template>
   <div
-    class="relative flex flex-col w-full border border-gray-100 rounded p-30px text text-body-gray-500 hocus-default"
+    class="relative flex flex-col w-full border border-gray-100 rounded cursor-default p-30px text text-body-gray-500 hocus-default"
     tabindex="0"
   >
     <div class="h-152px mb-24px">
@@ -9,7 +9,7 @@
         :alt="''"
       >
     </div>
-    <h2 class="mt-4 text-primary text-18px">
+    <h2 class="mt-4 text-indigo-500 text-18px">
       {{ title }}
     </h2>
     <p

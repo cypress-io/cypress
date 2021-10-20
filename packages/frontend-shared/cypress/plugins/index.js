@@ -33,7 +33,6 @@ module.exports = (on, config) => {
           optimizeDeps: {
             include: [
               '@headlessui/vue',
-              'vue-prism-component',
               'vue3-file-selector',
               'just-my-luck',
               'combine-properties',
