@@ -33,10 +33,21 @@ const formatMouseEvents = (events) => {
   })
 }
 
+// TODO: remove any, Function, Record
+type MouseActionOptions = {
+  subject: any
+  positionOrX: string | number
+  y: number
+  userOptions: Record<string, any>
+  onReady: Function
+  onTable: Function
+  defaultOptions?: Record<string, any>
+}
+
 export default (Commands, Cypress, cy, state, config) => {
   const { mouse, keyboard } = cy.devices
 
-  const mouseAction = (eventName, { subject, positionOrX, y, userOptions, onReady, onTable, defaultOptions }) => {
+  const mouseAction = (eventName, { subject, positionOrX, y, userOptions, onReady, onTable, defaultOptions }: MouseActionOptions) => {
     let position
     let x
 

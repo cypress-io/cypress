@@ -20,7 +20,7 @@ const packages = require('./util/packages')
 const xvfb = require('../../cli/lib/exec/xvfb')
 const { transformRequires } = require('./util/transform-requires')
 const { testStaticAssets } = require('./util/testStaticAssets')
-const performanceTracking = require('../../packages/server/test/support/helpers/performance.js')
+const performanceTracking = require('@tooling/system-tests/lib/performance')
 
 const rootPackage = require('@packages/root')
 

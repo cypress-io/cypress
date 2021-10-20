@@ -3,7 +3,7 @@ import path from 'path'
 import sinon from 'sinon'
 import { fs } from '../../lib/util/fs'
 import { getSpecUrl, checkSupportFile, getDefaultConfigFilePath } from '../../lib/project_utils'
-import Fixtures from '../support/helpers/fixtures'
+import Fixtures from '@tooling/system-tests/lib/fixtures'
 
 const todosPath = Fixtures.projectPath('todos')
 

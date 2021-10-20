@@ -12,6 +12,7 @@ const _reset = () => {
     disableTimersAndAnimations: true,
     screenshotOnRunFailure: true,
     blackout: [],
+    overwrite: false,
     onBeforeScreenshot () {},
     onAfterScreenshot () {},
   }

@@ -268,6 +268,11 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
 
       const jsonStats = stats.toJson()
 
+      // these stats are really only useful for debugging
+      if (jsonStats.warnings.length > 0) {
+        debug(`warnings for ${outputPath} %o`, jsonStats.warnings)
+      }
+
       if (stats.hasErrors()) {
         err = new Error('Webpack Compilation Error')
 
@@ -279,15 +284,9 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
 
         err.message += `\n${errorsToAppend}`
 
-        debug('stats had error(s)')
+        debug('stats had error(s) %o', jsonStats.errors)
 
         return rejectWithErr(err)
-      }
-
-      // these stats are really only useful for debugging
-      if (jsonStats.warnings.length > 0) {
-        debug(`warnings for ${outputPath}`)
-        debug(jsonStats.warnings)
       }
 
       debug('finished bundling', outputPath)
