@@ -30,7 +30,7 @@ const resolve = require(`${root}lib/util/resolve`)
 const { fs } = require(`${root}lib/util/fs`)
 const glob = require(`${root}lib/util/glob`)
 const CacheBuster = require(`${root}lib/util/cache_buster`)
-const Fixtures = require(`${root}test/support/helpers/fixtures`)
+const Fixtures = require('@tooling/system-tests/lib/fixtures')
 /**
  * @type {import('@packages/resolve-dist')}
  */

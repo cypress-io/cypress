@@ -1,6 +1,7 @@
 /// <reference path="../../cli/types/index.d.ts" />
-/// <reference path="../ts/index.d.ts" />
+/// <reference path="../../cli/types/jquery/index.d.ts" />
+
 export const $Cypress: Cypress.Cypress
 
-export const $: typeof JQuery
+export const $: JQuery
 export default $Cypress
