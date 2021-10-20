@@ -2,8 +2,8 @@ import type { NexusGenEnums } from '@packages/graphql/src/gen/nxs.gen'
 import type { SampleConfigFile } from '@packages/types'
 
 // FIXME: temporary content
-const content = `import { defineConfig } from ’cypress'
-import { devServer, defineDevServerConfig } from ’@cypress/vite-dev-server’
+const content = `import { defineConfig } from 'cypress'
+import { devServer, defineDevServerConfig } from '@cypress/vite-dev-server'
 
 // sample code !!!
 
