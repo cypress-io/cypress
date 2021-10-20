@@ -1,15 +1,15 @@
 <template>
-  <IconPass
+  <i-cy-runs-pass_x24
     v-if="props.gql.status === 'PASSED'"
-    class="text-jade-500 text-xl"
+    class="h-24px w-24px"
   />
-  <IconFail
+  <i-cy-runs-fail_x24
     v-else-if="props.gql.status ==='FAILED'"
-    class="text-red-500 text-xl"
+    class="h-24px w-24px"
   />
-  <IconWarn
+  <i-cy-runs-warn_x24
     v-else-if="props.gql.status === 'CANCELLED'"
-    class="text-orange-400 text-xl"
+    class="h-24px w-24px"
   />
   <ProgressCircle
     v-else
@@ -22,9 +22,6 @@
 
 <script lang="ts" setup>
 import { gql } from '@urql/vue'
-import IconPass from '../icons/pass.svg?component'
-import IconFail from '../icons/fail.svg?component'
-import IconWarn from '../icons/warn.svg?component'
 import ProgressCircle from '../components/progress/ProgressCircle.vue'
 import type { RunIconFragment } from '../generated/graphql'
 

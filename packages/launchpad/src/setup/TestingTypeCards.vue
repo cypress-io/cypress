@@ -10,8 +10,8 @@
       :image="e2ePreview"
       role="button"
       @click="e2eNextStep"
-      @keyup.enter="e2eNextStep"
-      @keyup.space="e2eNextStep"
+      @keyup.self.enter="e2eNextStep"
+      @keyup.self.space="e2eNextStep"
       @openCompare="$emit('openCompare')"
     />
     <TestingTypeCard
@@ -24,8 +24,8 @@
       :image="ctPreview"
       role="button"
       @click="ctNextStep"
-      @keyup.enter="ctNextStep"
-      @keyup.space="ctNextStep"
+      @keyup.self.enter="ctNextStep"
+      @keyup.self.space="ctNextStep"
       @openCompare="$emit('openCompare')"
     />
   </div>
@@ -60,7 +60,6 @@ fragment TestingTypeCards on Query {
       description
     }
   }
-  ...ConfigFile
 }
 `
 

@@ -12,6 +12,11 @@ export const WizardNavigateDirectionEnum = enumType({
   members: ['forward', 'back'],
 })
 
+export const WizardConfigFileStatusEnum = enumType({
+  name: 'WizardConfigFileStatusEnum',
+  members: ['changes', 'valid', 'skipped', 'error'],
+})
+
 export const FrontendFrameworkEnum = enumType({
   name: 'FrontendFrameworkEnum',
   members: FRONTEND_FRAMEWORKS.map((t) => t.type),
@@ -35,9 +40,4 @@ export const NavItemEnum = enumType({
 export const WizardStepEnum = enumType({
   name: 'WizardStep',
   members: WIZARD_STEPS.map((t) => t.type),
-})
-
-export const WizardCodeLanguageEnum = enumType({
-  name: 'WizardCodeLanguageLiteral',
-  members: ['js', 'ts'],
 })

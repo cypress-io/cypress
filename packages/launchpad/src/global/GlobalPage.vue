@@ -1,22 +1,26 @@
 <template>
   <template v-if="props.gql?.projects?.length">
-    <!-- Welcome Guide can fetch its own information for if it should render -->
-    <WelcomeGuide :gql="props.gql" />
-
     <!-- If there are projects -->
-    <div class="grid grid-cols-1 gap-6 pt-6 grid-cols-2">
-      <div class="min-w-full col-start-1 col-end-3 flex items-center gap-6">
-        <GlobalPageHeader
-          v-model="match"
-          @add-project="handleAddProject"
-        />
-      </div>
-
+    <GlobalPageHeader
+      v-model="match"
+      :project-count="filteredProjects?.length"
+      @add-project="handleAddProject"
+    />
+    <h2
+      v-if="filteredProjects.length"
+      class="text-gray-800 mb-16px"
+    >
+      {{ t('globalPage.recentProjectsHeader') }}
+    </h2>
+    <div :class="{ 'md:grid md:grid-cols-2 md:gap-24px mb-0': filteredProjects?.length > 1 }">
       <GlobalProjectCard
         v-for="project in filteredProjects"
         :key="project.id"
         :gql="project"
+        class="mb-24px md:mb-0"
         @removeProject="handleRemoveProject"
+        @openInFinder="handleOpenInFinder"
+        @openInIDE="handleOpenInIDE"
       />
     </div>
   </template>
@@ -29,9 +33,9 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from '@cy/i18n'
 import { computed, ref } from 'vue'
 import { gql, useMutation } from '@urql/vue'
-import WelcomeGuide from './WelcomeGuide.vue'
 import GlobalProjectCard from './GlobalProjectCard.vue'
 import GlobalPageHeader from './GlobalPageHeader.vue'
 import GlobalEmpty from './GlobalEmpty.vue'
@@ -63,6 +67,14 @@ function handleAddProject (path: string) {
   addProject.executeMutation({ path })
 }
 
+function handleOpenInFinder (path: string) {
+  // todo - add gql mutation for this action
+}
+
+function handleOpenInIDE (path: string) {
+  // todo - add gql mutation for this action
+}
+
 const removeProject = useMutation(GlobalPage_RemoveProjectDocument)
 
 function handleRemoveProject (path: string) {
@@ -78,4 +90,5 @@ const filteredProjects = computed(() => {
 })
 
 const match = ref('')
+const { t } = useI18n()
 </script>

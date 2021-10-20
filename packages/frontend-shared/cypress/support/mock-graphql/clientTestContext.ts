@@ -64,7 +64,7 @@ export function makeClientTestContext (): ClientTestContext {
       isAuthBrowserOpened: false,
     },
     wizard: {
-      step: 'createConfig',
+      step: 'configFiles',
       canNavigateForward: false,
       chosenTestingType: null,
       chosenBundler: null,
