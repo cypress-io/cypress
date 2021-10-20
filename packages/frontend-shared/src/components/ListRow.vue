@@ -2,15 +2,15 @@
 import { useSlots } from 'vue'
 
 const slots = useSlots()
-const emit = defineEmits(['click'])
-
+const emit = defineEmits(['toggle'])
 </script>
+
 <template>
   <div
     class="block w-full mb-4 overflow-hidden border border-gray-100 rounded bg-light-50 hocus-default"
     tabindex="0"
-    @click="emit('click')"
-    @keypress.space.prevent="emit('click')"
+    @click="emit('toggle')"
+    @keypress.space.prevent="emit('toggle')"
   >
     <div
       class="flex items-center w-full text-left rounded cursor-pointer py-10px"

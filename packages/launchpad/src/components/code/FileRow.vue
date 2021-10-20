@@ -1,5 +1,5 @@
 <template>
-  <ListRow @click="open = !open">
+  <ListRow @toggle="handleToggle">
     <template #icon>
       <i-cy-file-changes-added_x24
         v-if="status === 'valid'"
@@ -83,6 +83,9 @@ const language = computed(() => {
 })
 
 const open = ref(!['valid', 'skipped'].includes(props.status))
+const handleToggle = () => {
+  open.value = !open.value
+}
 
 const statusLabel = computed(() => props.status === 'skipped' ? 'Skipped' : props.status === 'changes' ? 'Changes required' : undefined)
 const statusClasses = computed(() => props.status === 'skipped' ? 'skipped' : props.status === 'changes' ? 'warning' : undefined)

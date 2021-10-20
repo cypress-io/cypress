@@ -63,9 +63,11 @@ describe('FileRow', () => {
       </div>
     ))
 
+    cy.contains('cypress/integration/command.js')
+    cy.contains('Changes required').should('exist')
+    cy.get('pre').should('exist')
     cy.contains('cypress/integration/command.js').click()
-    cy.contains('Changes required').should('be.visible')
-    cy.get('pre').should('be.visible')
+    cy.get('pre').should('not.exist')
   })
 
   it('responds nice to small screens', { viewportWidth: 500 }, () => {
@@ -80,8 +82,8 @@ describe('FileRow', () => {
       </div>
     ))
 
-    cy.contains('cypress/integration/command.js').click()
-    cy.contains('Changes required').should('be.visible')
-    cy.get('pre').should('be.visible')
+    cy.contains('cypress/integration/command.js')
+    cy.contains('Changes required').should('exist')
+    cy.get('pre').should('exist')
   })
 })
