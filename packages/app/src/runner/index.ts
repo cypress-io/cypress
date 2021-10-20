@@ -80,7 +80,7 @@ function createIframeModel () {
  * for communication between driver, runner, reporter via event bus,
  * and server (via web socket).
  */
-function setupRunner (done: () => void) {
+function setupRunner () {
   const store = getStore()
 
   window.UnifiedRunner.eventManager.addGlobalListeners(store, {
@@ -113,8 +113,6 @@ function setupRunner (done: () => void) {
   )
 
   createIframeModel()
-
-  done()
 }
 
 /**
@@ -238,10 +236,9 @@ function runSpecE2E (spec: BaseSpec) {
  *
  * This only needs to happen once, prior to running the first spec.
  */
-function initialize (ready: () => void) {
-  injectBundle(() => {
-    window.UnifiedRunner.MobX.runInAction(() => setupRunner(ready))
-  })
+async function initialize () {
+  await injectBundle()
+  window.UnifiedRunner.MobX.runInAction(() => setupRunner())
 }
 
 /**

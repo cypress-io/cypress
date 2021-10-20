@@ -1,13 +1,11 @@
 import { initializeStore } from '../store'
 
-export async function injectBundle (ready: () => void) {
+export async function injectBundle () {
   const src = '/__cypress/runner/cypress_runner.js'
 
   const alreadyInjected = document.querySelector(`script[src="${src}"]`)
 
   if (alreadyInjected) {
-    ready()
-
     return
   }
 
@@ -26,19 +24,21 @@ export async function injectBundle (ready: () => void) {
   document.head.appendChild(script)
   document.head.appendChild(link)
 
-  script.onload = () => {
-    // just stick config on window until we figure out how we are
-    // going to manage it
-    const config = window.UnifiedRunner.decodeBase64(data.base64Config) as any
+  return new Promise<void>((resolve) => {
+    script.onload = () => {
+      // just stick config on window until we figure out how we are
+      // going to manage it
+      const config = window.UnifiedRunner.decodeBase64(data.base64Config) as any
 
-    window.UnifiedRunner.config = config
+      window.UnifiedRunner.config = config
 
-    window.UnifiedRunner.MobX.runInAction(() => {
-      const store = initializeStore(window.UnifiedRunner.config.testingType)
+      window.UnifiedRunner.MobX.runInAction(() => {
+        const store = initializeStore(window.UnifiedRunner.config.testingType)
 
-      store.updateDimensions(config.viewportWidth, config.viewportHeight)
-    })
+        store.updateDimensions(config.viewportWidth, config.viewportHeight)
+      })
 
-    ready()
-  }
+      resolve()
+    }
+  })
 }

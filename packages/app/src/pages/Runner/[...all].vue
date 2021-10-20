@@ -23,10 +23,9 @@ query Runner_All {
 
 const initialized = ref(false)
 
-onMounted(() => {
-  UnifiedRunnerAPI.initialize(() => {
-    initialized.value = true
-  })
+onMounted(async () => {
+  await UnifiedRunnerAPI.initialize()
+  initialized.value = true
 })
 
 // network-only - we do not want to execute a stale spec
