@@ -96,7 +96,6 @@ fragment OpenBrowserList on App {
     name
     family
     disabled
-    isActive
     isSelected
     channel
     displayName
