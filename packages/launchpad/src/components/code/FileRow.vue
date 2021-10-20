@@ -79,7 +79,7 @@ const language = computed(() => {
     return extension as CyLangType
   }
 
-  return undefined
+  return 'plaintext'
 })
 
 const open = ref(!['valid', 'skipped'].includes(props.status))

@@ -78,7 +78,7 @@ export const langsSupported = ['typescript', 'javascript', 'ts', 'js', 'css', 'j
 
 let langs = langsSupported.concat([])
 
-export type CyLangType = typeof langsSupported[number]
+export type CyLangType = typeof langsSupported[number] | 'plaintext' | 'txt'| 'text'
 
 export async function initHighlighter () {
   if (highlighter) {
