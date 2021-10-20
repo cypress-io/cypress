@@ -6,10 +6,11 @@ const emit = defineEmits(['click'])
 
 </script>
 <template>
-  <button
+  <div
     class="block w-full mb-4 overflow-hidden border border-gray-100 rounded bg-light-50 hocus-default"
     tabindex="0"
     @click="emit('click')"
+    @keypress.space.prevent="emit('click')"
   >
     <div
       class="flex items-center w-full text-left rounded cursor-pointer py-10px"
@@ -38,5 +39,5 @@ const emit = defineEmits(['click'])
     >
       <slot name="slider" />
     </div>
-  </button>
+  </div>
 </template>

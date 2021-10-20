@@ -47,17 +47,12 @@
           Learn more
         </Button>
       </div>
-      <div
-        class="p-3 pt-4 overflow-auto border-t border-gray-100"
-        :class="open ? 'block': 'hidden'"
-      >
-        <ShikiHighlight
-          v-if="language"
-          :lang="language"
-          :code="content"
-          line-numbers
-        />
-      </div>
+      <ShikiHighlight
+        v-if="open"
+        :lang="language"
+        :code="content"
+        line-numbers
+      />
     </template>
   </ListRow>
 </template>
@@ -80,8 +75,8 @@ const language = computed(() => {
   // get the extension of the current file path
   const extension = /\.(\w+)$/.exec(props.filePath)?.[1]
 
-  if (extension && ['css', 'jsx', 'tsx', 'json', 'yaml'].includes(extension)) {
-    return extension as 'css' | 'jsx' | 'tsx' | 'json' | 'yaml'
+  if (extension && ['ts', 'js', 'css', 'jsx', 'tsx', 'json', 'yaml'].includes(extension)) {
+    return extension as 'ts' | 'js' | 'css' | 'jsx' | 'tsx' | 'json' | 'yaml'
   }
 
   return undefined
