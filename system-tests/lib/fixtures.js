@@ -6,7 +6,7 @@ const root = path.join(__dirname, '..')
 
 const serverRoot = path.join(__dirname, '../../packages/server/')
 const projects = path.join(root, 'projects')
-const tmpDir = path.join(root, '.projects')
+let tmpDir = path.join(root, '.projects')
 
 // copy contents instead of deleting+creating new file, which can cause
 // filewatchers to lose track of toFile.
@@ -24,6 +24,18 @@ const copyContents = (fromFile, toFile) => {
 }
 
 module.exports = {
+  setTmpDir (dir) {
+    tmpDir = dir
+  },
+
+  scaffoldProject (project) {
+    const from = path.join(projects, project)
+    const to = path.join(tmpDir, project)
+
+    console.log({ from, to })
+    fs.copySync(from, to)
+  },
+
   // copies all of the project fixtures
   // to the tmpDir .projects in the root
   scaffold () {

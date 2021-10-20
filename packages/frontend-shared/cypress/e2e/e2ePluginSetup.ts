@@ -24,7 +24,7 @@ export async function e2ePluginSetup (projectRoot: string, on: Cypress.PluginEve
   // require'd so we don't import the types from @packages/server which would
   // pollute strict type checking
   const { runInternalServer } = require('@packages/server/lib/modes/internal-server')
-  const Fixtures = require('../../../../system-tests/lib/fixtures')
+  const Fixtures = require('@tooling/system-tests/lib/fixtures')
   const tmpDir = path.join(__dirname, '.projects')
 
   await util.promisify(rimraf)(tmpDir)
