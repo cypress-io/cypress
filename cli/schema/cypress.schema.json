@@ -46,8 +46,8 @@
         },
         "slowTestThreshold": {
           "type": "number",
-          "default": null,
-          "description": "Slow test threshold in milliseconds. Only affects the visual output of some reporters. For example, the spec reporter will display the test time in yellow if over the threshold. Defaults to 10000ms for e2e tests and 250ms for component tests. See https://on.cypress.io/configuration#Global"
+          "default": 10000,
+          "description": "Slow test threshold in milliseconds. Only affects the visual output of some reporters. For example, the spec reporter will display the test time in yellow if over the threshold. See https://on.cypress.io/configuration#Global"
         },
         "testFiles": {
           "type": [

@@ -218,7 +218,7 @@ export const options = [
     isFolder: true,
   }, {
     name: 'slowTestThreshold',
-    defaultValue: null,
+    defaultValue: (options: Record<string, any>) => options.testingType === 'component' ? 250 : 10000,
     validation: v.isNumber,
   }, {
     name: 'socketId',

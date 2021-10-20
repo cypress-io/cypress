@@ -269,6 +269,9 @@ export function mergeDefaults (config: Record<string, any> = {}, options: Record
 
   _.defaults(config, defaultValues)
 
+  // Default values can be functions, in which case they
+  config = _.mapValues(config, (value) => (typeof value === 'function' ? value(options) : value))
+
   // split out our own app wide env from user env variables
   // and delete envFile
   config.env = parseEnv(config, options.env, resolved)
@@ -291,7 +294,7 @@ export function mergeDefaults (config: Record<string, any> = {}, options: Record
     config.numTestsKeptInMemory = 0
   }
 
-  config = setResolvedConfigValues(config, defaultValues, resolved)
+  config = setResolvedConfigValues(config, defaultValues, resolved, options)
 
   if (config.port) {
     config = setUrls(config)
@@ -316,10 +319,10 @@ export function mergeDefaults (config: Record<string, any> = {}, options: Record
   .then(_.partialRight(setNodeBinary, options.onWarning))
 }
 
-export function setResolvedConfigValues (config, defaults, resolved) {
+export function setResolvedConfigValues (config, defaults, resolved, options) {
   const obj = _.clone(config)
 
-  obj.resolved = resolveConfigValues(config, defaults, resolved)
+  obj.resolved = resolveConfigValues(config, defaults, resolved, options)
   debug('resolved config is %o', obj.resolved.browsers)
 
   return obj
@@ -424,7 +427,7 @@ export function updateWithPluginValues (cfg, overrides) {
 // combines the default configuration object with values specified in the
 // configuration file like "cypress.json". Values in configuration file
 // overwrite the defaults.
-export function resolveConfigValues (config, defaults, resolved = {}) {
+export function resolveConfigValues (config, defaults, resolved = {}, options = {}) {
   // pick out only known configuration keys
   return _
   .chain(config)
@@ -448,7 +451,9 @@ export function resolveConfigValues (config, defaults, resolved = {}) {
       return source(r)
     }
 
-    if (!(!_.isEqual(config[key], defaults[key]) && key !== 'browsers')) {
+    const defaultValue = typeof defaults[key] === 'function' ? defaults[key](options) : defaults[key]
+
+    if (!(!_.isEqual(config[key], defaultValue) && key !== 'browsers')) {
       // "browsers" list is special, since it is dynamic by default
       // and can only be ovewritten via plugins file
       return source('default')

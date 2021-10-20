@@ -500,9 +500,7 @@ const create = (specWindow, Cypress, config) => {
 
   const _mocha = createMocha(specWindow)
 
-  const slowTestThreshold = config('slowTestThreshold') ?? (Cypress.testingType === 'e2e' ? 10000 : 250)
-
-  _mocha.slow(slowTestThreshold)
+  _mocha.slow(config('slowTestThreshold'))
 
   const _runner = getRunner(_mocha)
 
