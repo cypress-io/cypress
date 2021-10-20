@@ -4,7 +4,7 @@ const R = require('ramda')
 const path = require('path')
 const config = require(`${root}lib/config`)
 const specsUtil = require(`${root}lib/util/specs`).default
-const FixturesHelper = require(`${root}/test/support/helpers/fixtures`)
+const FixturesHelper = require('@tooling/system-tests/lib/fixtures')
 const debug = require('debug')('test')
 
 describe('lib/util/specs', () => {
