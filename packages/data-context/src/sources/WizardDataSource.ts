@@ -184,7 +184,7 @@ export const wizardGetConfigCodeE2E = (opts: GetCodeOptsE2E): string | null => {
   const exportStatement =
     opts.lang.type === 'js' ? 'module.exports = {' : 'export default {'
 
-  return `${exportStatement}{
+  return `${exportStatement}
   e2e: {
     viewportHeight: 660,
     viewportWidth: 1000,
