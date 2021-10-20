@@ -28,10 +28,11 @@ describe('e2e yarn v2', () => {
   let projectDir
 
   beforeEach(async function () {
-    Fixtures.scaffold()
+    Fixtures.scaffoldProject('yarn-v2-pnp')
 
     this.timeout(240000)
 
+    // TODO: remove this once system-tests moves projects to tmpdir
     // copy yarn-v2 to tmpdir so node_modules resolution won't fall back to project root
     projectDir = path.join(os.tmpdir(), `cy-yarn-v2-pnp-${Date.now()}`)
     console.log(`projectDir`, projectDir)

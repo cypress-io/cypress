@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
 
-const { useFixedBrowserLaunchSize } = require('../../../utils')
+const { useFixedBrowserLaunchSize } = require('@tooling/system-tests/lib/pluginUtils')
 
 /**
  * @type {Cypress.PluginConfig}

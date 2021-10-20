@@ -1,9 +1,6 @@
 const systemTests = require('../lib/system-tests').default
 const execa = require('execa')
-const Fixtures = require('../lib/fixtures')
 const Promise = require('bluebird')
-
-const systemNode = Fixtures.projectPath('system-node')
 
 describe('e2e system node', () => {
   systemTests.setup()
@@ -16,7 +13,7 @@ describe('e2e system node', () => {
         expectedNodeVersion = expectedNodeVersion.slice(1) // v1.2.3 -> 1.2.3
 
         return systemTests.exec(this, {
-          project: systemNode,
+          project: 'system-node',
           config: {
             env: {
               expectedNodeVersion,

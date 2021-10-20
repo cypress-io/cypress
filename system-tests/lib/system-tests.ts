@@ -659,16 +659,15 @@ const systemTests = {
 
   setup (options: SetupOptions = {}) {
     beforeEach(async function () {
-      // after installing node modules copying all of the fixtures
-      // can take a long time (5-15 secs)
-      this.timeout(human('2 minutes'))
-      Fixtures.scaffold()
+      // // after installing node modules copying all of the fixtures
+      // // can take a long time (5-15 secs)
+      // this.timeout(human('2 minutes'))
 
-      if (process.env.NO_EXIT) {
-        Fixtures.scaffoldWatch()
-      }
+      Fixtures.remove()
 
       sinon.stub(process, 'exit')
+
+      this.settings = options.settings
 
       if (options.servers) {
         const optsServers = [].concat(options.servers)
@@ -678,12 +677,6 @@ const systemTests = {
         this.servers = servers
       } else {
         this.servers = null
-      }
-
-      const s = options.settings
-
-      if (s) {
-        await settings.write(e2ePath, s)
       }
     })
 
@@ -714,7 +707,7 @@ const systemTests = {
     _.defaults(options, {
       browser: 'electron',
       headed: process.env.HEADED || false,
-      project: e2ePath,
+      project: 'e2e',
       timeout: 120000,
       originalTitle: null,
       expectedExitCode: 0,
@@ -723,6 +716,8 @@ const systemTests = {
       noExit: process.env.NO_EXIT,
       inspectBrk: process.env.CYPRESS_INSPECT_BRK,
     })
+
+    const projectPath = Fixtures.projectPath(options.project)
 
     if (options.exit != null) {
       throw new Error(`
@@ -749,7 +744,7 @@ const systemTests = {
 
         const specDir = options.testingType === 'component' ? 'component' : 'integration'
 
-        return path.join(options.project, 'cypress', specDir, spec)
+        return path.join(projectPath, 'cypress', specDir, spec)
       })
 
       // normalize the path to the spec
@@ -765,7 +760,7 @@ const systemTests = {
     const args = [
       // hides a user warning to go through NPM module
       `--cwd=${serverPath}`,
-      `--run-project=${options.project}`,
+      `--run-project=${Fixtures.projectPath(options.project)}`,
       `--testingType=${options.testingType || 'e2e'}`,
     ]
 
@@ -883,7 +878,7 @@ const systemTests = {
         console.log(systemTests.normalizeStdout(result.stdout))
     ```
    */
-  exec (ctx, options: ExecOptions) {
+  async exec (ctx, options: ExecOptions) {
     debug('systemTests.exec options %o', options)
     options = this.options(ctx, options)
     debug('processed options %o', options)
@@ -893,6 +888,17 @@ const systemTests = {
 
     if (specifiedBrowser && (![].concat(options.browser).includes(specifiedBrowser))) {
       ctx.skip()
+    }
+
+    Fixtures.scaffoldCommonNodeModules()
+    Fixtures.scaffoldProject(options.project)
+
+    if (process.env.NO_EXIT) {
+      Fixtures.scaffoldProjectWatch(options.project)
+    }
+
+    if (ctx.settings) {
+      await settings.write(e2ePath, ctx.settings)
     }
 
     if (options.stubPackage) {
@@ -975,70 +981,73 @@ const systemTests = {
       }
     }
 
-    return new Bluebird((resolve, reject) => {
-      debug('spawning Cypress %o', { args })
-      const cmd = options.command || 'node'
-      const sp = cp.spawn(cmd, args, {
-        env: _.chain(process.env)
-        .omit('CYPRESS_DEBUG')
-        .extend({
-          // FYI: color will be disabled
-          // because we are piping the child process
-          COLUMNS: 100,
-          LINES: 24,
-        })
-        .defaults({
-          // match CircleCI's filesystem limits, so screenshot names in snapshots match
-          CYPRESS_MAX_SAFE_FILENAME_BYTES: 242,
-          FAKE_CWD_PATH: '/XXX/XXX/XXX',
-          DEBUG_COLORS: '1',
-          // prevent any Compression progress
-          // messages from showing up
-          VIDEO_COMPRESSION_THROTTLE: 120000,
-
-          // don't fail our own tests running from forked PR's
-          CYPRESS_INTERNAL_SYSTEM_TESTS: '1',
-
-          // Emulate no typescript environment
-          CYPRESS_INTERNAL_NO_TYPESCRIPT: options.noTypeScript ? '1' : '0',
-
-          // disable frame skipping to make quick Chromium tests have matching snapshots/working video
-          CYPRESS_EVERY_NTH_FRAME: 1,
-
-          // force file watching for use with --no-exit
-          ...(options.noExit ? { CYPRESS_INTERNAL_FORCE_FILEWATCH: '1' } : {}),
-        })
-        .extend(options.processEnv)
-        .value(),
-        ...options.spawnOpts,
+    debug('spawning Cypress %o', { args })
+    const cmd = options.command || 'node'
+    const sp = cp.spawn(cmd, args, {
+      env: _.chain(process.env)
+      .omit('CYPRESS_DEBUG')
+      .extend({
+        // FYI: color will be disabled
+        // because we are piping the child process
+        COLUMNS: 100,
+        LINES: 24,
       })
+      .defaults({
+        // match CircleCI's filesystem limits, so screenshot names in snapshots match
+        CYPRESS_MAX_SAFE_FILENAME_BYTES: 242,
+        FAKE_CWD_PATH: '/XXX/XXX/XXX',
+        DEBUG_COLORS: '1',
+        // prevent any Compression progress
+        // messages from showing up
+        VIDEO_COMPRESSION_THROTTLE: 120000,
 
-      const ColorOutput = function () {
-        const colorOutput = new stream.Transform()
+        // don't fail our own tests running from forked PR's
+        CYPRESS_INTERNAL_SYSTEM_TESTS: '1',
 
-        colorOutput._transform = (chunk, encoding, cb) => cb(null, chalk.magenta(chunk.toString()))
+        // Emulate no typescript environment
+        CYPRESS_INTERNAL_NO_TYPESCRIPT: options.noTypeScript ? '1' : '0',
 
-        return colorOutput
-      }
+        // disable frame skipping to make quick Chromium tests have matching snapshots/working video
+        CYPRESS_EVERY_NTH_FRAME: 1,
 
-      // pipe these to our current process
-      // so we can see them in the terminal
-      // color it so we can tell which is test output
-      sp.stdout
-      .pipe(ColorOutput())
-      .pipe(process.stdout)
+        // force file watching for use with --no-exit
+        ...(options.noExit ? { CYPRESS_INTERNAL_FORCE_FILEWATCH: '1' } : {}),
+      })
+      .extend(options.processEnv)
+      .value(),
+      ...options.spawnOpts,
+    })
 
-      sp.stderr
-      .pipe(ColorOutput())
-      .pipe(process.stderr)
+    const ColorOutput = function () {
+      const colorOutput = new stream.Transform()
 
-      sp.stdout.on('data', (buf) => stdout += buf.toString())
-      sp.stderr.on('data', (buf) => stderr += buf.toString())
+      colorOutput._transform = (chunk, encoding, cb) => cb(null, chalk.magenta(chunk.toString()))
+
+      return colorOutput
+    }
+
+    // pipe these to our current process
+    // so we can see them in the terminal
+    // color it so we can tell which is test output
+    sp.stdout
+    .pipe(ColorOutput())
+    .pipe(process.stdout)
+
+    sp.stderr
+    .pipe(ColorOutput())
+    .pipe(process.stderr)
+
+    sp.stdout.on('data', (buf) => stdout += buf.toString())
+    sp.stderr.on('data', (buf) => stderr += buf.toString())
+
+    const exitCode = await new Promise((resolve, reject) => {
       sp.on('error', reject)
+      sp.on('exit', resolve)
+    })
 
-      return sp.on('exit', resolve)
-    }).tap(copy)
-    .then(exit)
+    await copy()
+
+    return exit(exitCode)
   },
 
   sendHtml (contents) {

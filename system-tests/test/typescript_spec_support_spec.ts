@@ -1,5 +1,4 @@
 import systemTests from '../lib/system-tests'
-import Fixtures from '../lib/fixtures'
 
 describe('e2e typescript in spec and support file', function () {
   systemTests.setup()
@@ -21,10 +20,8 @@ describe('e2e typescript in spec and support file', function () {
   })
 
   it('project passes', function () {
-    const projPath = Fixtures.projectPath('ts-proj')
-
     return systemTests.exec(this, {
-      project: projPath,
+      project: 'ts-proj',
       snapshot: true,
     })
   })
@@ -34,7 +31,7 @@ describe('e2e typescript in spec and support file', function () {
   // @see https://github.com/cypress-io/cypress/issues/8555
   it('respects tsconfig paths', function () {
     return systemTests.exec(this, {
-      project: Fixtures.projectPath('ts-proj-with-paths'),
+      project: 'ts-proj-with-paths',
     })
   })
 })

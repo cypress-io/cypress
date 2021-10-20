@@ -1,12 +1,13 @@
 const fs = require('fs-extra')
 const path = require('path')
 const chokidar = require('chokidar')
+const os = require('os')
 
 const root = path.join(__dirname, '..')
 
 const serverRoot = path.join(__dirname, '../../packages/server/')
 const projects = path.join(root, 'projects')
-const tmpDir = path.join(root, '.projects')
+const tmpDir = path.join(os.tmpdir(), 'cy-projects')
 
 // copy contents instead of deleting+creating new file, which can cause
 // filewatchers to lose track of toFile.
@@ -27,9 +28,48 @@ module.exports = {
   // copies all of the project fixtures
   // to the tmpDir .projects in the root
   scaffold () {
-    return fs.copySync(projects, tmpDir)
+    fs.copySync(projects, tmpDir)
   },
 
+  scaffoldProject (project) {
+    const from = path.join(projects, project)
+    const to = path.join(tmpDir, project)
+
+    fs.copySync(from, to)
+  },
+
+  scaffoldCommonNodeModules () {
+    [
+      '@cypress/code-coverage',
+      '@cypress/webpack-dev-server',
+      '@packages/socket',
+      '@packages/ts',
+      '@tooling/system-tests',
+      'bluebird',
+      'chai',
+      'dayjs',
+      'debug',
+      'execa',
+      'fs-extra',
+      'https-proxy-agent',
+      'jimp',
+      'lazy-ass',
+      'lodash',
+      'proxyquire',
+      'react',
+      'semver',
+      'systeminformation',
+      'typescript',
+    ].forEach((pkg) => {
+      const from = path.join(tmpDir, 'node_modules', pkg)
+      const to = path.dirname(require.resolve(`${pkg}/package.json`))
+
+      fs.ensureDirSync(path.dirname(from))
+      fs.symlinkSync(to, from, 'junction')
+    })
+  },
+
+  // TODO
   scaffoldWatch () {
     const watchdir = path.resolve(__dirname, '../projects')
 
