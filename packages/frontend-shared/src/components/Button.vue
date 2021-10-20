@@ -1,7 +1,7 @@
 <template>
   <button
     style="width: fit-content"
-    class="flex items-center leading-tight border rounded gap-8px outline-none hocus-default"
+    class="flex items-center leading-tight border rounded gap-8px outline-none"
     :class="classes"
   >
     <span
