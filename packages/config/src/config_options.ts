@@ -41,7 +41,8 @@ interface BreakingOption {
   isWarning?: boolean
 }
 
-// isReadOnly
+// TODO - add boolean attribute to indicate read-only / static vs mutable options
+// that can be updated during test executions
 const resolvedOptions: Array<ResolvedConfigOption> = [
   {
     name: 'animationDistanceThreshold',

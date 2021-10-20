@@ -36,7 +36,7 @@ module.exports = {
     return defaultValues
   },
 
-  getConfigKeys: () => {
+  getPublicConfigKeys: () => {
     return publicConfigKeys
   },
 
@@ -52,6 +52,8 @@ module.exports = {
       return key
     }
   },
+
+  options,
 
   validate: (cfg, onErr) => {
     debug('validating configuration')

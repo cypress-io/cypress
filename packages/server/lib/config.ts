@@ -4,7 +4,6 @@ import path from 'path'
 import Promise from 'bluebird'
 import deepDiff from 'return-deep-diff'
 import configurator from '@packages/config'
-import { options } from '@packages/config/src/config_options'
 
 import errors from './errors'
 import scaffold from './scaffold'
@@ -47,7 +46,7 @@ export const CYPRESS_SPECIAL_ENV_VARS = [
   'RECORD_KEY',
 ]
 
-const folders = _(options).filter({ isFolder: true }).map('name').value()
+const folders = _(configurator.options).filter({ isFolder: true }).map('name').value()
 
 const convertRelativeToAbsolutePaths = (projectRoot, obj) => {
   return _.reduce(folders, (memo, folder) => {
@@ -371,7 +370,7 @@ export function resolveConfigValues (config, defaults, resolved = {}) {
   // pick out only known configuration keys
   return _
   .chain(config)
-  .pick(configurator.getConfigKeys())
+  .pick(configurator.getPublicConfigKeys())
   .mapValues((val, key) => {
     let r
     const source = (s: ResolvedConfigurationOptionSource): ResolvedFromConfig => {
@@ -641,16 +640,16 @@ export function parseEnv (cfg: Record<string, any>, envCLI: Record<string, any>,
   envCLI = envCLI != null ? envCLI : {}
 
   const configFromEnv = _.reduce(envProc, (memo: string[], val, key) => {
-    let cfgkey: string
+    let cfgKey: string
 
-    cfgkey = configurator.matchesConfigKey(key)
+    cfgKey = configurator.matchesConfigKey(key)
 
-    if (cfgkey) {
+    if (cfgKey) {
       // only change the value if it hasn't been
       // set by the CLI. override default + config
-      if (resolved[cfgkey] !== 'cli') {
-        cfg[cfgkey] = val
-        resolved[cfgkey] = {
+      if (resolved[cfgKey] !== 'cli') {
+        cfg[cfgKey] = val
+        resolved[cfgKey] = {
           value: val,
           from: 'env',
         } as ResolvedFromConfig

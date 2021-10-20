@@ -145,7 +145,7 @@ class $Cypress {
     this.originalConfig = _.cloneDeep(config)
     this.config = $SetterGetter.create(config, (config) => {
       validate(config, (errMsg) => {
-        throw new Error(`CONFIG_ERROR: ${errMsg}`)
+        $errUtils.throwErr(`CONFIG_ERROR: ${errMsg}`)
       })
     })
 

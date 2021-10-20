@@ -4,7 +4,7 @@ const is = require('check-more-types')
 const { commaListsOr } = require('common-tags')
 const path = require('path')
 
-const configOptions = require('./config_options')
+const configOptions = require('./config_options.ts')
 
 // validation functions take a key and a value and should:
 //  - return true if it passes validation
@@ -52,8 +52,7 @@ const isValidBrowser = (browser) => {
   const knownBrowserFamilies = ['chromium', 'firefox']
 
   if (!is.oneOf(knownBrowserFamilies)(browser.family)) {
-  // if (!is.oneOf(Cypress.BrowserFamily)(browser.fami/ly)) {
-    return errMsg('family', browser, commaListsOr`either ${Cypress.BrowserFamily}`)
+    return errMsg('family', browser, commaListsOr`either ${knownBrowserFamilies}`)
   }
 
   if (!is.unemptyString(browser.displayName)) {
@@ -322,14 +321,6 @@ module.exports = {
     }
 
     return errMsg(key, value, 'an array')
-  },
-
-  isArrayOfStrings (key, value) {
-    if (isArrayOfStrings(value)) {
-      return true
-    }
-
-    return errMsg(key, value, 'an array of strings')
   },
 
   isStringOrFalse (key, value) {
