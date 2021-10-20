@@ -62,7 +62,7 @@ import { computed, ref } from 'vue'
 import ListRow from '@cy/components/ListRow.vue'
 import Button from '@cy/components/Button.vue'
 import Badge from '@cy/components/Badge.vue'
-import ShikiHighlight from '@cy/components/ShikiHighlight.vue'
+import ShikiHighlight, { Lang, langsSupported } from '@cy/components/ShikiHighlight.vue'
 
 const props = defineProps<{
     status: 'changes' | 'valid' | 'skipped' | 'error'
@@ -75,8 +75,8 @@ const language = computed(() => {
   // get the extension of the current file path
   const extension = /\.(\w+)$/.exec(props.filePath)?.[1]
 
-  if (extension && ['ts', 'js', 'css', 'jsx', 'tsx', 'json', 'yaml'].includes(extension)) {
-    return extension as 'ts' | 'js' | 'css' | 'jsx' | 'tsx' | 'json' | 'yaml'
+  if (extension && (langsSupported as string[]).includes(extension)) {
+    return extension as Lang
   }
 
   return undefined

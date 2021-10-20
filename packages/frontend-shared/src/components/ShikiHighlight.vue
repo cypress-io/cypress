@@ -66,13 +66,15 @@ shikiWrapperClasses computed property.
 </template>
 
 <script lang="ts">
-import { Highlighter, getHighlighter, setOnigasmWASM, setCDN } from 'shiki'
+import { Highlighter, getHighlighter, setOnigasmWASM, setCDN, Lang } from 'shiki'
 import onigasm from 'onigasm/lib/onigasm.wasm?url'
 
 setOnigasmWASM(onigasm)
 setCDN(`${import.meta.env.BASE_URL}shiki/`)
 
 let highlighter: Highlighter
+
+export const langsSupported: Lang[] = ['ts', 'js', 'css', 'jsx', 'tsx', 'json', 'yaml', 'html']
 
 export async function initHighlighter () {
   if (highlighter) {
@@ -81,9 +83,11 @@ export async function initHighlighter () {
 
   highlighter = await getHighlighter({
     themes: ['cypress.theme'],
-    langs: ['typescript', 'javascript', 'css', 'jsx', 'tsx', 'json', 'yaml'],
+    langs: ['typescript', 'javascript', ...langsSupported],
   })
 }
+
+export type { Lang }
 
 export { highlighter }
 </script>
@@ -106,7 +110,7 @@ onBeforeMount(async () => {
 
 const props = withDefaults(defineProps<{
   code: string;
-  lang: 'javascript' | 'typescript' | 'css' | 'json' | 'js' | 'ts' | 'tsx' | 'jsx' | 'yaml' | undefined;
+  lang: Lang | undefined;
   lineNumbers?: boolean,
   inline?: boolean,
   wrap?: boolean,
