@@ -118,7 +118,7 @@ export class ProjectDataSource {
   }
 
   guessGlob (projectRoot: string): string | null {
-    const guesses = FRONTEND_FRAMEWORKS.filter((framework) => {
+    const guess = FRONTEND_FRAMEWORKS.find((framework) => {
       const lookingForDeps = (framework.deps as readonly string[]).reduce(
         (acc, dep) => ({ ...acc, [dep]: '*' }),
         {},
@@ -127,16 +127,10 @@ export class ProjectDataSource {
       return scanFSForAvailableDependency(projectRoot, lookingForDeps)
     })
 
-    const [glob, ...rest] = Array.from(new Set(guesses.map((guess) => guess.glob)))
-
-    if (glob && !rest.length) {
-      return glob
-    }
-
-    return null
+    return guess?.glob ?? null
   }
 
-  async getCodeGenGlob (type: string | null) {
+  getCodeGenGlob (type: string | null) {
     const project = this.ctx.activeProject
 
     if (!project) {
@@ -149,7 +143,7 @@ export class ProjectDataSource {
       return STORYBOOK_GLOB
     }
 
-    const glob = await this.guessGlob(project.projectRoot)
+    const glob = this.guessGlob(project.projectRoot)
 
     return glob || looseComponentGlob
   }
