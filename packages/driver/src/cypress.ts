@@ -142,7 +142,7 @@ class $Cypress {
 
     this.state = $SetterGetter.create({})
     this.originalConfig = _.cloneDeep(config)
-    this.config = $SetterGetter.create(config)
+    this.config = $utils.verifyConfigOptions($SetterGetter.create(config))
     this.env = $SetterGetter.create(env)
     this.getTestRetries = function () {
       const testRetries = this.config('retries')
