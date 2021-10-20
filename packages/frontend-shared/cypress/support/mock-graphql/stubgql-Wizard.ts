@@ -1,6 +1,7 @@
 import type { CodegenTypeMap, Wizard } from '../generated/test-graphql-types.gen'
 import { BUNDLERS, CODE_LANGUAGES, FRONTEND_FRAMEWORKS, TESTING_TYPES } from '@packages/types/src/constants'
 import { MaybeResolver, testNodeId } from './clientTestUtils'
+import dedent from 'dedent'
 
 type Writeable<T> = { -readonly [P in keyof T]: T[P] };
 
@@ -32,11 +33,47 @@ export const stubWizard: MaybeResolver<Wizard> = {
     },
   ],
   allBundlers,
-  sampleCode: `
-import { startDevServer } from '@cypress/vite-dev-server'
+  sampleConfigFiles: [
+    {
+      ...testNodeId('WizardSampleConfigFile'),
+      filePath: 'cypress.config.ts',
+      description: 'The proper config file',
+      content: dedent`import { startDevServer } from '@cypress/vite-dev-server'
 
-/* This is some test data. It does not need to be valid code. */
-  `,
+                      /* This is some test data. It does not need to be valid code. */
+            `,
+      status: 'valid',
+    },
+    {
+      ...testNodeId('WizardSampleConfigFile'),
+      filePath: 'cypress/fixtures/example.json',
+      description: 'Please do the necessary changes to your file',
+      content: dedent`{ 
+        "foo": 1,
+        "bar": 42
+      }`,
+      status: 'changes',
+    },
+    {
+      ...testNodeId('WizardSampleConfigFile'),
+      filePath: 'cypress/component/support.ts',
+      description: 'Please do the necessary changes to your file',
+      content: dedent`import { startDevServer } from '@cypress/vite-dev-server'
+
+                      /* This is some test data. It does not need to be valid code. */
+                      `,
+      status: 'skipped',
+    },
+    {
+      ...testNodeId('WizardSampleConfigFile'),
+      filePath: 'cypress/component/commands.ts',
+      description: 'Please do the necessary changes to your file',
+      content: dedent`import { startDevServer } from '@cypress/vite-dev-server'
+
+      /* This is some test data. It does not need to be valid code. */`,
+      status: 'error',
+    },
+  ],
   chosenTestingTypePluginsInitialized: false,
   testingTypes: (TESTING_TYPES as Writeable<typeof TESTING_TYPES>).map((type) => {
     return {
@@ -55,6 +92,12 @@ import { startDevServer } from '@cypress/vite-dev-server'
       isSelected: idx === 0,
     }
   }),
+  language: {
+    ...testNodeId('WizardCodeLanguage'),
+    type: 'ts',
+    name: 'TypeScript',
+    isSelected: true,
+  },
   allLanguages: CODE_LANGUAGES.map((language, idx) => {
     return {
       ...testNodeId('WizardCodeLanguage'),

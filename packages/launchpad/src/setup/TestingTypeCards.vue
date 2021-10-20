@@ -60,7 +60,6 @@ fragment TestingTypeCards on Query {
       description
     }
   }
-  ...ConfigFile
 }
 `
 

@@ -737,8 +737,10 @@ type Wizard {
   """
   packagesToInstall: [WizardNpmPackage!]
 
-  """Configuration file based on bundler and framework of choice"""
-  sampleCode: String
+  """
+  Set of sample configuration files based bundler, framework and language of choice
+  """
+  sampleConfigFiles: [WizardSampleConfigFile!]
 
   """IndexHtml file based on bundler and framework of choice"""
   sampleTemplate: String
@@ -789,9 +791,11 @@ type WizardCodeLanguage implements Node {
   type: CodeLanguageEnum!
 }
 
-enum WizardCodeLanguageLiteral {
-  js
-  ts
+enum WizardConfigFileStatusEnum {
+  changes
+  error
+  skipped
+  valid
 }
 
 """A frontend framework that we can setup within the app"""
@@ -829,8 +833,19 @@ type WizardNpmPackage implements Node {
   package: String!
 }
 
+"""Each config file suggestion given by the wizard"""
+type WizardSampleConfigFile implements Node {
+  content: String!
+  description: String
+  filePath: String!
+
+  """Relay style Node ID field for the WizardSampleConfigFile field"""
+  id: ID!
+  status: WizardConfigFileStatusEnum!
+}
+
 enum WizardStep {
-  createConfig
+  configFiles
   initializePlugins
   installDependencies
   selectFramework

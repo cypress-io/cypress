@@ -12,9 +12,9 @@
       v-if="props.gql.wizard.step === 'installDependencies'"
       :gql="props.gql.wizard"
     />
-    <ConfigFile
-      v-if="props.gql.wizard.step === 'createConfig'"
-      :gql="props.gql"
+    <ConfigFiles
+      v-if="props.gql.wizard.step === 'configFiles'"
+      :gql="props.gql.wizard"
     />
     <InitializeConfig
       v-if="props.gql.wizard.step === 'initializePlugins'"
@@ -27,7 +27,7 @@
 <script lang="ts" setup>
 import EnvironmentSetup from './EnvironmentSetup.vue'
 import InstallDependencies from './InstallDependencies.vue'
-import ConfigFile from './ConfigFile.vue'
+import ConfigFiles from './ConfigFiles.vue'
 import WizardHeader from './WizardHeader.vue'
 import OpenBrowser from './OpenBrowser.vue'
 import { gql } from '@urql/core'
@@ -43,8 +43,8 @@ fragment Wizard on Query {
     testingType
     ...EnvironmentSetup
     ...InstallDependencies
+    ...ConfigFiles
   }
-  ...ConfigFile
   ...InitializeConfig_Config
 }`
 

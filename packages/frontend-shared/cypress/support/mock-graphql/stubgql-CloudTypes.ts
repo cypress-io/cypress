@@ -65,6 +65,8 @@ export function createCloudRunCommitInfo (config: ConfigFor<CloudRunCommitInfo>)
     summary: 'calculate multi-byte panel',
     branch: 'main',
     branchUrl: 'https://',
+    authorName: 'John Appleseed',
+    authorEmail: 'none@cypress.io',
   }
 
   return cloudRunCommitInfo
@@ -120,6 +122,7 @@ export function createCloudRun (config: Partial<CloudRun>): CloudRun {
     status: 'PASSED',
     totalFailed: 0,
     totalSkipped: 0,
+    totalPending: 0,
     totalRunning: 0,
     totalTests: 10,
     totalPassed: 10,

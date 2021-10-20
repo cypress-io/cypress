@@ -130,9 +130,9 @@ export const WIZARD_STEPS = [
     description: 'Paste the command below into your terminal to install the required packages.',
   },
   {
-    type: 'createConfig',
-    title: 'Cypress.config',
-    description: 'Cypress will now create the following config file in the local directory for this project.',
+    type: 'configFiles',
+    title: 'Configuration Files',
+    description: 'We added the following files to your project.',
   },
   {
     type: 'setupComplete',
