@@ -60,8 +60,14 @@ packages/server/support
 packages/server/test/support/fixtures/server/imgs
 packages/server/test/support/fixtures/server/libs
 
+<<<<<<< HEAD
 # from socket, dist built files
 packages/socket/lib/*.js
+=======
+# from system-tests
+system-tests/.projects
+system-tests/fixtures/large-img
+>>>>>>> develop
 
 # from npm/react
 /npm/react/bin/*
@@ -362,7 +368,6 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
-/npm/react/bin/*
 # End of https://www.gitignore.io/api/osx,git,node,windows,intellij,linux
 
 # Circle cache artifacts

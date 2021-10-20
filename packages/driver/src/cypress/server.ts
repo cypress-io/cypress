@@ -166,7 +166,15 @@ const defaults = (obj = {}) => {
   return _.extend(serverDefaults, obj)
 }
 
-const create = (options = {}) => {
+// TODO: Convert it to a class.
+// It's written in this way to bypass type failures.
+export type Server = {
+  restore: () => void
+  cancelPendingXhrs: () => any[]
+  bindTo: (win: Window) => void
+}
+
+const create = (options = {}): Server => {
   options = _.defaults(options, serverDefaults)
 
   const xhrs = {}
