@@ -129,7 +129,8 @@ const resolvedLang = computed(() => {
 
   if (props.lang === 'typescript' || props.lang === 'ts' || props.lang === 'tsx') return 'tsx'
 
-  return props.lang
+  // if the language is not recognized use plaintext
+  return props.lang && (langsSupported as readonly string[]).includes(props.lang) ? props.lang : 'plaintext'
 })
 
 const highlightedCode = computed(() => {
