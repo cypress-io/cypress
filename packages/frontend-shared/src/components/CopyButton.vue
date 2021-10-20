@@ -9,13 +9,10 @@
       <template #prefix>
         <i-cy-copy-clipboard_x16 class="icon-dark-indigo-500" />
       </template>
-      <transition
-        name="fade"
-        mode="out-in"
-      >
+      <TransitionQuickFade mode="out-in">
         <span v-if="!showCopied">{{ t('clipboard.copy') }}</span>
         <span v-else>{{ t('clipboard.copied') }}!</span>
-      </transition>
+      </TransitionQuickFade>
     </Button>
     <textarea
       ref="textElement"
@@ -30,6 +27,7 @@
 import { ref } from 'vue'
 import { useI18n } from '@cy/i18n'
 import Button from '../components/Button.vue'
+import TransitionQuickFade from '../components/transitions/TransitionQuickFade.vue'
 
 defineProps<{
   text: string
@@ -47,13 +45,3 @@ const copyToClipboard = async () => {
 }
 const { t } = useI18n()
 </script>
-
-<style>
-.fade-leave-active {
-  transition: opacity 100ms ease;
-}
-
-.fade-leave-to {
-  opacity: 0;
-}
-</style>
