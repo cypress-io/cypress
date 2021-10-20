@@ -57,7 +57,7 @@ const createIndex = (arr, keyKey, valueKey) => {
   }, {})
 }
 
-const publicConfigKeys = _(options).reject({ isInternal: true }).map('name').value()
+const publicConfigKeys = _(options).reject({ isInternal: true }).reject({ isReadOnly: true }).map('name').value()
 const breakingKeys = _.map(breakingOptions, 'name')
 const folders = _(options).filter({ isFolder: true }).map('name').value()
 const validationRules = createIndex(options, 'name', 'validation')
