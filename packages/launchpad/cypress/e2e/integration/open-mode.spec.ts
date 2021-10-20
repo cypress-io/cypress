@@ -1,3 +1,5 @@
+import defaultMessages from '../../../../frontend-shared/src/locales/en-US.json'
+
 describe('Launchpad: Open Mode', () => {
   beforeEach(() => {
     cy.setupE2E()
@@ -5,16 +7,17 @@ describe('Launchpad: Open Mode', () => {
   })
 
   it('Shows the open page', () => {
-    cy.get('h1').should('contain', 'Cypress')
+    cy.get('h1').should('contain', defaultMessages.globalPage.empty.title)
   })
 
-  it('allows adding a project', () => {
-    cy.withCtx(async (ctx, o) => {
-      await ctx.actions.project.setActiveProject(o.projectDir('todos'))
-      ctx.emitter.toLaunchpad()
-    })
+  describe('when there is a list of projects', () => {
+    it('goes to an active project if one is added', () => {
+      cy.withCtx(async (ctx, o) => {
+        await ctx.actions.project.setActiveProject(o.projectDir('todos'))
+        ctx.emitter.toLaunchpad()
+      })
 
-    cy.get('h1').should('contain', 'Welcome to Cypress!')
-    cy.findByText('Choose which method of testing you would like to get started with for this project.')
+      cy.get('h1').should('contain', 'Welcome to Cypress!')
+    })
   })
 })

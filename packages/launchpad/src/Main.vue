@@ -1,7 +1,7 @@
 <template>
   <template v-if="query.data.value">
     <HeaderBar :gql="query.data.value" />
-    <div class="max-content">
+    <div class="px-24px">
       <template v-if="query.data.value.baseError">
         <BaseError :gql="query.data.value.baseError" />
       </template>
@@ -25,7 +25,7 @@
             <CompareTestingTypes />
           </StandardModal>
           <button
-            class="block mx-auto text-indigo-500 text-18px focus:outline-transparent hocus:underline group"
+            class="block mx-auto text-indigo-500 text-18px hocus-link-default group"
             @click="isTestingTypeModalOpen = true"
           >
             {{ t('welcomePage.review') }}<i-cy-arrow-right_x16
@@ -85,7 +85,6 @@ query MainLaunchpadQuery {
   app {
     isInGlobalMode
     ...GlobalPage
-    ...WelcomeGuide
   }
   ...HeaderBar
 }

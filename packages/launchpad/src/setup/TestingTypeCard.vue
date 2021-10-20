@@ -9,7 +9,7 @@
         :alt="''"
       >
     </div>
-    <h2 class="mt-4 text-primary text-18px">
+    <h2 class="mt-4 text-indigo-500 text-18px">
       {{ title }}
     </h2>
     <p
