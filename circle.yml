@@ -2076,9 +2076,10 @@ linux-workflow: &linux-workflow
         required_env_var: PERCY_TOKEN # skips job if not defined (external PR)
         requires:
           - build
-    - lint-types:
-        requires:
-          - build
+    # todo(lachlan): do we need this? yarn check-ts does something very similar
+    # - lint-types:
+    #     requires:
+    #       - build
     # unit, integration and e2e tests
     - cli-visual-tests:
         requires:
