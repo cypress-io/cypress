@@ -106,7 +106,7 @@ onBeforeMount(async () => {
 
 const props = withDefaults(defineProps<{
   code: string;
-  lang: 'javascript' | 'typescript' | 'css' | 'json' | 'js' | 'ts' | 'tsx' | 'jsx' | 'yaml';
+  lang: 'javascript' | 'typescript' | 'css' | 'json' | 'js' | 'ts' | 'tsx' | 'jsx' | 'yaml' | undefined;
   lineNumbers?: boolean,
   inline?: boolean,
   wrap?: boolean,
