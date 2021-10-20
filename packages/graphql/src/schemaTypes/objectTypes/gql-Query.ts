@@ -1,4 +1,5 @@
 import { objectType } from 'nexus'
+import { BaseError } from '.'
 import { App } from './gql-App'
 import { DevState } from './gql-DevState'
 import { NavigationMenu } from './gql-NavigationMenu'
@@ -8,6 +9,11 @@ export const Query = objectType({
   name: 'Query',
   description: 'The root "Query" type containing all entry fields for our querying',
   definition (t) {
+    t.field('baseError', {
+      type: BaseError,
+      resolve: (root, args, ctx) => ctx.baseError,
+    })
+
     t.nonNull.field('app', {
       type: App,
       resolve: (root, args, ctx) => ctx.appData,

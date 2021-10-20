@@ -14,9 +14,11 @@
 
       <div
         class="relative mx-auto bg-white rounded"
-        :class="modalClasses"
+        :class="props.class"
       >
-        <div class="flex items-center justify-between border-b-1px min-h-64px px-24px">
+        <div
+          class="sticky top-0 flex items-center justify-between bg-white rounded-t border-b-1px border-b-gray-100 min-h-56px px-24px z-1"
+        >
           <DialogTitle class="text-gray-900 text-18px">
             <slot name="title" /> <span class="inline-block border-t border-t-gray-100 w-32px h-6px mx-8px" /> <a
               :href="helpLink"
@@ -28,7 +30,7 @@
           </DialogTitle>
           <button
             aria-label="Close"
-            class="border-transparent rounded-full hocus-default border-1"
+            class="border-transparent rounded-full p-5px border-1 hover:border-indigo-300 hocus-default"
             @click="setIsOpen(false)"
           >
             <i-cy-delete_x12 class="icon-dark-gray-400 w-12px h-12px m-4px" />
@@ -51,6 +53,11 @@
     </div>
   </Dialog>
 </template>
+
+<script lang="ts">
+export const inheritAttrs = false
+</script>
+
 <script setup lang="ts">
 import { useI18n } from '@cy/i18n'
 import StandardModalBody from './StandardModalBody.vue'
@@ -69,15 +76,14 @@ const emit = defineEmits<{
 
 const props = withDefaults(defineProps<{
   modelValue?: boolean
-  modalClasses?: string
   helpLink?: string
   helpText?: string
   clickOutside?: boolean
   variant?: 'bare'
+  class: string | string[] | Record<string, any>
 }>(), {
   clickOutside: true,
   modelValue: false,
-  modalClasses: 'w-480px',
   helpText: 'Need help?',
   helpLink: 'https://docs.cypress.io',
 })

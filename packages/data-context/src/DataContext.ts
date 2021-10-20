@@ -100,6 +100,10 @@ export class DataContext extends DataContextShell {
     return this.coreData.app.browsers
   }
 
+  get baseError () {
+    return this.coreData.baseError
+  }
+
   @cached
   get util () {
     return new UtilDataSource(this)

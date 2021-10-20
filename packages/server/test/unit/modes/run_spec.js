@@ -662,6 +662,7 @@ describe('lib/modes/run', () => {
       sinon.stub(random, 'id').returns(1234)
       sinon.stub(openProject, 'create').resolves(openProject)
       sinon.stub(runMode, 'waitForSocketConnection').resolves()
+      sinon.stub(fs, 'access').resolves()
       sinon.stub(runMode, 'waitForTestsToFinishRunning').resolves({
         stats: { failures: 10 },
         spec: {},
@@ -736,6 +737,7 @@ describe('lib/modes/run', () => {
 
       sinon.stub(electron.app, 'on').withArgs('ready').yieldsAsync()
       sinon.stub(user, 'ensureAuthToken')
+      sinon.stub(fs, 'access').resolves()
       sinon.stub(random, 'id').returns(1234)
       sinon.stub(openProject, 'create').resolves(openProject)
       sinon.stub(system, 'info').resolves({ osName: 'osFoo', osVersion: 'fooVersion' })

@@ -18,7 +18,7 @@ const descriptor = <T extends keyof Window, K extends keyof Window[T]['prototype
   return desc
 }
 
-const _getValue = function () {
+const _getValue = function (this: any) {
   if (isInput(this)) {
     return descriptor('HTMLInputElement', 'value').get
   }
@@ -39,7 +39,7 @@ const _getValue = function () {
   return descriptor('HTMLOptionElement', 'value').get
 }
 
-const _setValue = function () {
+const _setValue = function (this: any) {
   if (isInput(this)) {
     return descriptor('HTMLInputElement', 'value').set
   }
@@ -60,7 +60,7 @@ const _setValue = function () {
   return descriptor('HTMLOptionElement', 'value').set
 }
 
-const _getSelectionStart = function () {
+const _getSelectionStart = function (this: any) {
   if (isInput(this)) {
     return descriptor('HTMLInputElement', 'selectionStart').get
   }
@@ -72,7 +72,7 @@ const _getSelectionStart = function () {
   throw new Error('this should never happen, cannot get selectionStart')
 }
 
-const _getSelectionEnd = function () {
+const _getSelectionEnd = function (this: any) {
   if (isInput(this)) {
     return descriptor('HTMLInputElement', 'selectionEnd').get
   }
@@ -84,7 +84,7 @@ const _getSelectionEnd = function () {
   throw new Error('this should never happen, cannot get selectionEnd')
 }
 
-const _nativeFocus = function () {
+const _nativeFocus = function (this: any) {
   if ($window.isWindow(this)) {
     return window.focus
   }
@@ -96,7 +96,7 @@ const _nativeFocus = function () {
   return window.HTMLElement.prototype.focus
 }
 
-const _nativeBlur = function () {
+const _nativeBlur = function (this: any) {
   if ($window.isWindow(this)) {
     return window.blur
   }
@@ -108,7 +108,7 @@ const _nativeBlur = function () {
   return window.HTMLElement.prototype.blur
 }
 
-const _nativeSetSelectionRange = function () {
+const _nativeSetSelectionRange = function (this: any) {
   if (isInput(this)) {
     return window.HTMLInputElement.prototype.setSelectionRange
   }
@@ -117,7 +117,7 @@ const _nativeSetSelectionRange = function () {
   return window.HTMLTextAreaElement.prototype.setSelectionRange
 }
 
-const _nativeSelect = function () {
+const _nativeSelect = function (this: any) {
   if (isInput(this)) {
     return window.HTMLInputElement.prototype.select
   }
@@ -126,7 +126,7 @@ const _nativeSelect = function () {
   return window.HTMLTextAreaElement.prototype.select
 }
 
-const _isContentEditable = function () {
+const _isContentEditable = function (this: any) {
   if (isSvg(this)) {
     return false
   }
@@ -134,7 +134,7 @@ const _isContentEditable = function () {
   return descriptor('HTMLElement', 'isContentEditable').get
 }
 
-const _setType = function () {
+const _setType = function (this: any) {
   if (isInput(this)) {
     return descriptor('HTMLInputElement', 'type').set
   }
@@ -146,7 +146,7 @@ const _setType = function () {
   throw new Error('this should never happen, cannot set type')
 }
 
-const _getType = function () {
+const _getType = function (this: any) {
   if (isInput(this)) {
     return descriptor('HTMLInputElement', 'type').get
   }
@@ -158,7 +158,7 @@ const _getType = function () {
   throw new Error('this should never happen, cannot get type')
 }
 
-const _getMaxLength = function () {
+const _getMaxLength = function (this: any) {
   if (isInput(this)) {
     return descriptor('HTMLInputElement', 'maxLength').get
   }

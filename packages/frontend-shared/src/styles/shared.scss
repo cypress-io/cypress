@@ -31,6 +31,15 @@ body {
 }
 
 /**
+ * Common theming
+ * -------------------------
+ */
+
+::selection {
+  @apply bg-gray-200 bg-opacity-30;
+}
+
+/**
  * Global Resets
  * -------------------------
  */

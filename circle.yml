@@ -112,6 +112,7 @@ commands:
                   mkdir -p /tmp/node_modules_cache
                   mv ~/cypress/node_modules /tmp/node_modules_cache/root_node_modules
                   mv ~/cypress/cli/node_modules /tmp/node_modules_cache/cli_node_modules
+                  mv ~/cypress/system-tests/node_modules /tmp/node_modules_cache/system-tests_node_modules
                   mv ~/cypress/globbed_node_modules /tmp/node_modules_cache/globbed_node_modules
 
   build-and-persist:
@@ -145,6 +146,7 @@ commands:
             if [[ -d "/tmp/node_modules_cache" ]]; then
               mv /tmp/node_modules_cache/root_node_modules ~/cypress/node_modules
               mv /tmp/node_modules_cache/cli_node_modules ~/cypress/cli/node_modules
+              mv /tmp/node_modules_cache/system-tests_node_modules ~/cypress/system-tests/node_modules
               mv /tmp/node_modules_cache/globbed_node_modules ~/cypress/globbed_node_modules
               rm -rf /tmp/node_modules_cache
             fi
@@ -197,6 +199,7 @@ commands:
                 paths:
                   - node_modules
                   - cli/node_modules
+                  - system-tests/node_modules
                   - globbed_node_modules
       - unless:
           condition: <<parameters.is-mac>>
@@ -452,7 +455,7 @@ commands:
           path: ./packages/runner-ct/cypress/videos
       - store-npm-logs
 
-  run-e2e-tests:
+  run-system-tests:
     parameters:
       browser:
         description: browser shortname to target
@@ -460,8 +463,9 @@ commands:
     steps:
       - restore_cached_workspace
       - run:
+          name: Run system tests
           command: |
-            ALL_SPECS=`circleci tests glob "/root/cypress/packages/server/test/e2e/*spec*"`
+            ALL_SPECS=`circleci tests glob "/root/cypress/system-tests/test/*spec*"`
             SPECS=
             for file in $ALL_SPECS; do
               # filter out non_root tests, they have their own stage
@@ -473,7 +477,7 @@ commands:
             done
             SPECS=`echo $SPECS | xargs -n 1 | circleci tests split --split-by=timings`
             echo SPECS=$SPECS
-            yarn workspace @packages/server test $SPECS --browser <<parameters.browser>>
+            yarn workspace @tooling/system-tests test:ci $SPECS --browser <<parameters.browser>>
       - verify-mocha-results
       - store_test_results:
           path: /tmp/cypress
@@ -974,7 +978,7 @@ jobs:
       - install-required-node
       - run:
           name: Check TS Types
-          command: yarn gulp checkTs
+          command: NODE_OPTIONS=--max_old_space_size=4096 yarn gulp checkTs
 
 
   # a special job that keeps polling Circle and when all
@@ -1068,25 +1072,26 @@ jobs:
       - restore_cached_workspace
       - run: yarn test-npm-package-release-script
 
-  lint-types:
-    <<: *defaults
-    parallelism: 1
-    resource_class: medium
-    steps:
-      - restore_cached_workspace
-      - run:
-          command: ls -la types
-          working_directory: cli
-      - run:
-          command: ls -la chai
-          working_directory: cli/types
-      - run:
-          name: "Lint types 🧹"
-          command: yarn workspace cypress dtslint
-      - run:
-          name: "TypeScript check 🧩"
-          command: yarn type-check --ignore-progress
-      - store-npm-logs
+  # todo(lachlan): do we need this? yarn check-ts does something very similar
+  # lint-types:
+  #   <<: *defaults
+  #   parallelism: 1
+  #   resource_class: medium
+  #   steps:
+  #     - restore_cached_workspace
+  #     - run:
+  #         command: ls -la types
+  #         working_directory: cli
+  #     - run:
+  #         command: ls -la chai
+  #         working_directory: cli/types
+  #     - run:
+  #         name: "Lint types 🧹"
+  #         command: yarn workspace cypress dtslint
+  #     - run:
+  #         name: "TypeScript check 🧩"
+  #         command: yarn type-check --ignore-progress
+  #     - store-npm-logs
 
   server-unit-tests:
     <<: *defaults
@@ -1127,37 +1132,37 @@ jobs:
           path: /tmp/artifacts
       - store-npm-logs
 
-  server-e2e-tests-chrome:
+  system-tests-chrome:
     <<: *defaults
     resource_class: medium
     parallelism: 8
     steps:
-      - run-e2e-tests:
+      - run-system-tests:
           browser: chrome
 
-  server-e2e-tests-electron:
+  system-tests-electron:
     <<: *defaults
     resource_class: medium
     parallelism: 8
     steps:
-      - run-e2e-tests:
+      - run-system-tests:
           browser: electron
 
-  server-e2e-tests-firefox:
+  system-tests-firefox:
     <<: *defaults
     resource_class: medium
     parallelism: 8
     steps:
-      - run-e2e-tests:
+      - run-system-tests:
           browser: firefox
 
-  server-e2e-tests-non-root:
+  system-tests-non-root:
     <<: *defaults
     resource_class: medium
     steps:
       - restore_cached_workspace
       - run:
-          command: yarn workspace @packages/server test ./test/e2e/non_root*spec* --browser electron
+          command: yarn workspace @tooling/system-tests test:ci "test/non_root*spec*" --browser electron
       - verify-mocha-results
       - store_test_results:
           path: /tmp/cypress
@@ -2071,9 +2076,10 @@ linux-workflow: &linux-workflow
         required_env_var: PERCY_TOKEN # skips job if not defined (external PR)
         requires:
           - build
-    - lint-types:
-        requires:
-          - build
+    # todo(lachlan): do we need this? yarn check-ts does something very similar
+    # - lint-types:
+    #     requires:
+    #       - build
     # unit, integration and e2e tests
     - cli-visual-tests:
         requires:
@@ -2094,16 +2100,16 @@ linux-workflow: &linux-workflow
     - server-performance-tests:
         requires:
           - build
-    - server-e2e-tests-chrome:
+    - system-tests-chrome:
         requires:
           - build
-    - server-e2e-tests-electron:
+    - system-tests-electron:
         requires:
           - build
-    - server-e2e-tests-firefox:
+    - system-tests-firefox:
         requires:
           - build
-    - server-e2e-tests-non-root:
+    - system-tests-non-root:
         executor: non-root-docker-user
         requires:
           - build
@@ -2226,10 +2232,10 @@ linux-workflow: &linux-workflow
           - driver-integration-tests-firefox
           - driver-integration-tests-chrome
           - driver-integration-tests-electron
-          - server-e2e-tests-non-root
-          - server-e2e-tests-firefox
-          - server-e2e-tests-electron
-          - server-e2e-tests-chrome
+          - system-tests-non-root
+          - system-tests-firefox
+          - system-tests-electron
+          - system-tests-chrome
           - server-performance-tests
           - server-integration-tests
           - server-unit-tests

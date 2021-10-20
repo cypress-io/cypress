@@ -3,7 +3,7 @@
     class="p-0 m-0 border-0"
     :class="$attrs.class"
   >
-    <div class="relative rounded-md">
+    <div class="relative">
       <div
         v-if="hasPrefix"
         class="absolute inset-y-0 left-0 flex items-center pl-4"
@@ -16,18 +16,22 @@
               class="pointer-events-none"
               :class="prefixIconClasses"
             />
-            <i-cy-magnifying-glass_x16 v-else-if="type === 'search'" />
+            <i-cy-magnifying-glass_x16
+              v-else-if="type === 'search'"
+              class="icon-light-gray-50 icon-dark-gray-500"
+            />
           </slot>
         </span>
       </div>
       <input
-        :style="style"
         v-model="localValue"
+        :style="style"
         :type="type"
+        :spellcheck="false"
         :class="_inputClasses"
-      class="block w-full leading-tight placeholder-gray-400
-      border-gray-300 border-1 rounded-md disabled:bg-gray-100
-      disabled:text-gray-400 hocus-default py-9px"
+        class="block w-full pl-10 text-gray-800 leading-tight placeholder-gray-400
+      hocus-default border-gray-100 rounded-md disabled:bg-gray-100 disabled:text-gray-400
+      py-9px"
         v-bind="inputAttrs"
       >
       <div
