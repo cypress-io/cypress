@@ -126,6 +126,8 @@ export const eventManager = {
 
     _.each(socketToDriverEvents, (event) => {
       ws.on(event, (...args) => {
+        if (!Cypress) return
+
         Cypress.emit(event, ...args)
       })
     })
@@ -216,7 +218,10 @@ export const eventManager = {
     })
 
     reporterBus.on('clear:session', () => {
-      Cypress.backend('clear:session').then(() => {
+      if (!Cypress) return
+
+      Cypress.backend('clear:session')
+      .then(() => {
         rerun()
       })
     })

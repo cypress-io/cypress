@@ -41,6 +41,7 @@ const runScriptsFromUrls = (specWindow, scripts) => {
 export default {
   runScripts: (specWindow, scripts) => {
     // if scripts contains at least one promise
+    // NOTE: really dig into this
     if (scripts.length && typeof scripts[0] === 'function') {
       // chain the loading promises
       // NOTE: since in evalScripts, scripts are evaluated in order,

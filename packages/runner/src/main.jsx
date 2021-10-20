@@ -35,6 +35,7 @@ const Runner = {
         const specPath = util.integrationSpecPath()
 
         if (specPath) {
+          // NOTE: is this necessary?
           state.updateSpecByUrl(specPath)
         }
       }

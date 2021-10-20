@@ -101,7 +101,6 @@ class App extends Component {
           <Header ref='header' runner='e2e' {...this.props} />
           <Iframes ref='iframes' {...this.props} />
           <Message ref='message' state={this.props.state} />
-          {this.props.children}
         </div>
         <Resizer
           style={{ left: this.props.state.absoluteReporterWidth + this.props.state.specListWidth }}

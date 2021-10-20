@@ -16,6 +16,9 @@ export class Container extends Component {
     this._onLaunchBrowser = this._onLaunchBrowser.bind(this)
   }
 
+  // NOTE: react hooks
+  // only want this to run once
+  // but after the component is rendered
   componentDidMount () {
     this.props.eventManager.addGlobalListeners(this.props.state, {
       element: automationElementId,
@@ -23,6 +26,7 @@ export class Container extends Component {
     })
   }
 
+  // NOTE: a lot of indirection here
   render () {
     switch (this.props.state.automation) {
       case automation.CONNECTING:
@@ -57,9 +61,7 @@ export class Container extends Component {
     const { App, ...rest } = this.props
 
     return (
-      <App {...rest}>
-        {this._automationElement()}
-      </App>
+      <App {...rest} />
     )
   }
 
