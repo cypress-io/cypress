@@ -22,7 +22,7 @@
 
 <script lang="ts" setup>
 import { gql } from '@urql/vue'
-import ProgressCircle from '../components/progress/ProgressCircle.vue'
+import ProgressCircle from '@cy/components/ProgressCircle.vue'
 import type { RunIconFragment } from '../generated/graphql'
 
 gql`
