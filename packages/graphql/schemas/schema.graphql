@@ -373,6 +373,7 @@ type Mutation {
   Initializes open_project global singleton to manager current project state
   """
   initializeOpenProject: Boolean
+  internal_clearAllProjectPreferencesCache: Boolean
   internal_clearLatestProjectCache: Boolean
   internal_clearProjectPreferencesCache(projectTitle: String!): Boolean
   internal_triggerIpcToApp: Boolean
