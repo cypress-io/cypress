@@ -3,16 +3,26 @@ import { GlobalProjectCardFragmentDoc } from '../generated/graphql-test'
 import { defaultMessages } from '@cy/i18n'
 
 const defaultPath = '/usr/local/dev/projects/some-test-title'
+const menuSelector = '[data-testid=project-card-menu-items]'
+const projectCardSelector = '[data-testid=project-card]'
 
 describe('<GlobalProjectCard />', () => {
   beforeEach(() => {
+    const removeProjectSpy = cy.spy().as('removeProjectSpy')
+    const openInFinderSpy = cy.spy().as('openInFinderSpy')
+    const openInIDESpy = cy.spy().as('openInIDESpy')
+    const setActiveProjectSpy = cy.spy().as('setActiveProjectSpy')
+
     cy.mountFragment(GlobalProjectCardFragmentDoc, {
       render: (gqlValue) => (
         <div class="p-12 overflow-auto resize-x max-w-600px">
-          <GlobalProjectCard gql={gqlValue} />
+          <GlobalProjectCard gql={gqlValue} onOpenInIDE={openInIDESpy} onOpenInFinder={openInFinderSpy} onRemoveProject={removeProjectSpy} on_setActiveProject={setActiveProjectSpy}/>
         </div>
       ),
     })
+
+    cy.findByLabelText(defaultMessages.globalPage.projectActions, { selector: 'button' })
+    .as('openMenuButton')
   })
 
   it('renders', () => {
@@ -20,35 +30,67 @@ describe('<GlobalProjectCard />', () => {
     cy.findByText(defaultPath).should('be.visible')
   })
 
-  function openActionsMenu () {
-    cy.findByLabelText(defaultMessages.globalPage.projectActions, { selector: 'button' })
-    .click()
-  }
-
-  function assertEventEmittedOnce (eventName: string) {
-    cy.vue(GlobalProjectCard)
-    .then((card) => {
-      cy.wrap(card.emitted(eventName)[0][0]).should('equal', defaultPath)
+  describe('Menu', () => {
+    beforeEach(() => {
+      cy.get('@openMenuButton')
+      .click()
     })
-  }
 
-  it('emits project action events with path value on click', () => {
-    openActionsMenu()
-    cy.contains('button', defaultMessages.globalPage.removeProject)
-    .click()
+    it('emits openInIDE with path value on click', () => {
+      cy.contains(defaultMessages.globalPage.openInIDE)
+      .click()
+      .get('@openInIDESpy')
+      .should('have.been.calledOnceWith', defaultPath)
+      .get(menuSelector)
+      .should('not.exist')
+    })
 
-    assertEventEmittedOnce('removeProject')
+    it('emits openInFinder with path value on click', () => {
+      cy.contains(defaultMessages.globalPage.openInFinder)
+      .click()
+      .get('@openInFinderSpy')
+      .should('have.been.calledOnceWith', defaultPath)
+      .get(menuSelector)
+      .should('not.exist')
+    })
 
-    openActionsMenu()
-    cy.contains('button', defaultMessages.globalPage.openInFinder)
-    .click()
+    it('emits removeProject with path value on click', () => {
+      cy.contains(defaultMessages.globalPage.removeProject)
+      .click()
+      .get('@removeProjectSpy')
+      .should('have.been.calledOnceWith', defaultPath)
+      .get(menuSelector)
+      .should('not.exist')
+    })
 
-    assertEventEmittedOnce('openInFinder')
+    describe('dismiss', () => {
+      it('opens project when card is clicked on while menu is open', () => {
+        cy.get(projectCardSelector)
+        .click()
+        .get('@setActiveProjectSpy')
+        .should('have.been.calledOnceWith', defaultPath)
+      })
 
-    openActionsMenu()
-    cy.contains('button', defaultMessages.globalPage.openInIDE)
-    .click()
+      it('does not open project when menu button is clicked on while menu is open', () => {
+        cy.get('@openMenuButton')
+        .should('be.visible')
+        .click()
+        .get('@setActiveProjectSpy')
+        .should('not.have.been.called')
+      })
 
-    assertEventEmittedOnce('openInIDE')
+      it('dismisses when escape is pressed', () => {
+        cy.get('body').type('{esc}')
+        .get(menuSelector)
+        .should('not.exist')
+      })
+
+      it('dismisses when clicking off the menu', () => {
+        cy.get('body')
+        .click(0, 0)
+        .get(menuSelector)
+        .should('not.exist')
+      })
+    })
   })
 })
