@@ -1,7 +1,6 @@
 <template>
   <div>
     <Button
-      tabindex="1"
       size="md"
       variant="tertiary"
       @click="copyToClipboard"
