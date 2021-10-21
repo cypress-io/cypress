@@ -16,7 +16,7 @@ exports['studio mocha events only runs a single test by id #1'] = [
       "type": "suite",
       "file": "relative/path/to/spec.js",
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -30,7 +30,7 @@ exports['studio mocha events only runs a single test by id #1'] = [
       "file": null,
       "invocationDetails": "{Object 8}",
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -46,7 +46,7 @@ exports['studio mocha events only runs a single test by id #1'] = [
       "invocationDetails": "{Object 8}",
       "currentRetry": 0,
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -63,7 +63,7 @@ exports['studio mocha events only runs a single test by id #1'] = [
       "invocationDetails": "{Object 8}",
       "currentRetry": 0,
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -90,7 +90,7 @@ exports['studio mocha events only runs a single test by id #1'] = [
       "final": true,
       "currentRetry": 0,
       "retries": 0,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -117,7 +117,7 @@ exports['studio mocha events only runs a single test by id #1'] = [
       "final": true,
       "currentRetry": 0,
       "retries": 0,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -131,7 +131,7 @@ exports['studio mocha events only runs a single test by id #1'] = [
       "file": null,
       "invocationDetails": "{Object 8}",
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -159,7 +159,7 @@ exports['studio mocha events only runs a single test by id #1'] = [
       "final": true,
       "currentRetry": 0,
       "retries": 0,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -172,7 +172,7 @@ exports['studio mocha events only runs a single test by id #1'] = [
       "type": "suite",
       "file": "relative/path/to/spec.js",
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -202,7 +202,7 @@ exports['studio mocha events creates a new test when adding to a suite #1'] = [
       "type": "suite",
       "file": "relative/path/to/spec.js",
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -216,7 +216,7 @@ exports['studio mocha events creates a new test when adding to a suite #1'] = [
       "file": null,
       "invocationDetails": "{Object 8}",
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -231,7 +231,7 @@ exports['studio mocha events creates a new test when adding to a suite #1'] = [
       "invocationDetails": "{Object 8}",
       "currentRetry": 0,
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -247,7 +247,7 @@ exports['studio mocha events creates a new test when adding to a suite #1'] = [
       "invocationDetails": "{Object 8}",
       "currentRetry": 0,
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -273,7 +273,7 @@ exports['studio mocha events creates a new test when adding to a suite #1'] = [
       "final": true,
       "currentRetry": 0,
       "retries": 0,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -299,7 +299,7 @@ exports['studio mocha events creates a new test when adding to a suite #1'] = [
       "final": true,
       "currentRetry": 0,
       "retries": 0,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -313,7 +313,7 @@ exports['studio mocha events creates a new test when adding to a suite #1'] = [
       "file": null,
       "invocationDetails": "{Object 8}",
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -340,7 +340,7 @@ exports['studio mocha events creates a new test when adding to a suite #1'] = [
       "final": true,
       "currentRetry": 0,
       "retries": 0,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -353,7 +353,7 @@ exports['studio mocha events creates a new test when adding to a suite #1'] = [
       "type": "suite",
       "file": "relative/path/to/spec.js",
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -383,7 +383,7 @@ exports['studio mocha events can add new test to root runnable #1'] = [
       "type": "suite",
       "file": "relative/path/to/spec.js",
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -397,7 +397,7 @@ exports['studio mocha events can add new test to root runnable #1'] = [
       "type": "test",
       "currentRetry": 0,
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -412,7 +412,7 @@ exports['studio mocha events can add new test to root runnable #1'] = [
       "wallClockStartedAt": "match.date",
       "currentRetry": 0,
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -437,7 +437,7 @@ exports['studio mocha events can add new test to root runnable #1'] = [
       "final": true,
       "currentRetry": 0,
       "retries": 0,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -462,7 +462,7 @@ exports['studio mocha events can add new test to root runnable #1'] = [
       "final": true,
       "currentRetry": 0,
       "retries": 0,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -488,7 +488,7 @@ exports['studio mocha events can add new test to root runnable #1'] = [
       "final": true,
       "currentRetry": 0,
       "retries": 0,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -501,7 +501,7 @@ exports['studio mocha events can add new test to root runnable #1'] = [
       "type": "suite",
       "file": "relative/path/to/spec.js",
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -531,7 +531,7 @@ exports['studio mocha events hooks runs before hooks and test body but not after
       "type": "suite",
       "file": "relative/path/to/spec.js",
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -545,7 +545,7 @@ exports['studio mocha events hooks runs before hooks and test body but not after
       "file": null,
       "invocationDetails": "{Object 8}",
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -562,7 +562,7 @@ exports['studio mocha events hooks runs before hooks and test body but not after
       "invocationDetails": "{Object 8}",
       "currentRetry": 0,
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -579,7 +579,7 @@ exports['studio mocha events hooks runs before hooks and test body but not after
       "invocationDetails": "{Object 8}",
       "currentRetry": 0,
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -597,7 +597,7 @@ exports['studio mocha events hooks runs before hooks and test body but not after
       "invocationDetails": "{Object 8}",
       "currentRetry": 0,
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -635,7 +635,7 @@ exports['studio mocha events hooks runs before hooks and test body but not after
       "invocationDetails": "{Object 8}",
       "currentRetry": 0,
       "retries": 0,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -652,7 +652,7 @@ exports['studio mocha events hooks runs before hooks and test body but not after
       "invocationDetails": "{Object 8}",
       "currentRetry": 0,
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -670,7 +670,7 @@ exports['studio mocha events hooks runs before hooks and test body but not after
       "invocationDetails": "{Object 8}",
       "currentRetry": 0,
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -711,7 +711,7 @@ exports['studio mocha events hooks runs before hooks and test body but not after
       "final": true,
       "currentRetry": 0,
       "retries": 0,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -752,7 +752,7 @@ exports['studio mocha events hooks runs before hooks and test body but not after
       "final": true,
       "currentRetry": 0,
       "retries": 0,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -766,7 +766,7 @@ exports['studio mocha events hooks runs before hooks and test body but not after
       "file": null,
       "invocationDetails": "{Object 8}",
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -808,7 +808,7 @@ exports['studio mocha events hooks runs before hooks and test body but not after
       "final": true,
       "currentRetry": 0,
       "retries": 0,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -821,7 +821,7 @@ exports['studio mocha events hooks runs before hooks and test body but not after
       "type": "suite",
       "file": "relative/path/to/spec.js",
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -851,7 +851,7 @@ exports['studio mocha events hooks runs before hooks but not after hooks when ad
       "type": "suite",
       "file": "relative/path/to/spec.js",
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -865,7 +865,7 @@ exports['studio mocha events hooks runs before hooks but not after hooks when ad
       "file": null,
       "invocationDetails": "{Object 8}",
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -882,7 +882,7 @@ exports['studio mocha events hooks runs before hooks but not after hooks when ad
       "invocationDetails": "{Object 8}",
       "currentRetry": 0,
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -898,7 +898,7 @@ exports['studio mocha events hooks runs before hooks but not after hooks when ad
       "invocationDetails": "{Object 8}",
       "currentRetry": 0,
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -916,7 +916,7 @@ exports['studio mocha events hooks runs before hooks but not after hooks when ad
       "invocationDetails": "{Object 8}",
       "currentRetry": 0,
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -953,7 +953,7 @@ exports['studio mocha events hooks runs before hooks but not after hooks when ad
       "invocationDetails": "{Object 8}",
       "currentRetry": 0,
       "retries": 0,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -970,7 +970,7 @@ exports['studio mocha events hooks runs before hooks but not after hooks when ad
       "invocationDetails": "{Object 8}",
       "currentRetry": 0,
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -988,7 +988,7 @@ exports['studio mocha events hooks runs before hooks but not after hooks when ad
       "invocationDetails": "{Object 8}",
       "currentRetry": 0,
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -1028,7 +1028,7 @@ exports['studio mocha events hooks runs before hooks but not after hooks when ad
       "final": true,
       "currentRetry": 0,
       "retries": 0,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -1068,7 +1068,7 @@ exports['studio mocha events hooks runs before hooks but not after hooks when ad
       "final": true,
       "currentRetry": 0,
       "retries": 0,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -1082,7 +1082,7 @@ exports['studio mocha events hooks runs before hooks but not after hooks when ad
       "file": null,
       "invocationDetails": "{Object 8}",
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -1123,7 +1123,7 @@ exports['studio mocha events hooks runs before hooks but not after hooks when ad
       "final": true,
       "currentRetry": 0,
       "retries": 0,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -1136,7 +1136,7 @@ exports['studio mocha events hooks runs before hooks but not after hooks when ad
       "type": "suite",
       "file": "relative/path/to/spec.js",
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -1166,7 +1166,7 @@ exports['studio mocha events only test can be extended #1'] = [
       "type": "suite",
       "file": "relative/path/to/spec.js",
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -1180,7 +1180,7 @@ exports['studio mocha events only test can be extended #1'] = [
       "file": null,
       "invocationDetails": "{Object 8}",
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -1194,7 +1194,7 @@ exports['studio mocha events only test can be extended #1'] = [
       "file": null,
       "invocationDetails": "{Object 8}",
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -1210,7 +1210,7 @@ exports['studio mocha events only test can be extended #1'] = [
       "invocationDetails": "{Object 8}",
       "currentRetry": 0,
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -1227,7 +1227,7 @@ exports['studio mocha events only test can be extended #1'] = [
       "invocationDetails": "{Object 8}",
       "currentRetry": 0,
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -1254,7 +1254,7 @@ exports['studio mocha events only test can be extended #1'] = [
       "final": true,
       "currentRetry": 0,
       "retries": 0,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -1281,7 +1281,7 @@ exports['studio mocha events only test can be extended #1'] = [
       "final": true,
       "currentRetry": 0,
       "retries": 0,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -1295,7 +1295,7 @@ exports['studio mocha events only test can be extended #1'] = [
       "file": null,
       "invocationDetails": "{Object 8}",
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -1309,7 +1309,7 @@ exports['studio mocha events only test can be extended #1'] = [
       "file": null,
       "invocationDetails": "{Object 8}",
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -1337,7 +1337,7 @@ exports['studio mocha events only test can be extended #1'] = [
       "final": true,
       "currentRetry": 0,
       "retries": 0,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -1350,7 +1350,7 @@ exports['studio mocha events only test can be extended #1'] = [
       "type": "suite",
       "file": "relative/path/to/spec.js",
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -1380,7 +1380,7 @@ exports['studio mocha events only test can be extended when there are multiple i
       "type": "suite",
       "file": "relative/path/to/spec.js",
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -1394,7 +1394,7 @@ exports['studio mocha events only test can be extended when there are multiple i
       "file": null,
       "invocationDetails": "{Object 8}",
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -1408,7 +1408,7 @@ exports['studio mocha events only test can be extended when there are multiple i
       "file": null,
       "invocationDetails": "{Object 8}",
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -1424,7 +1424,7 @@ exports['studio mocha events only test can be extended when there are multiple i
       "invocationDetails": "{Object 8}",
       "currentRetry": 0,
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -1441,7 +1441,7 @@ exports['studio mocha events only test can be extended when there are multiple i
       "invocationDetails": "{Object 8}",
       "currentRetry": 0,
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -1468,7 +1468,7 @@ exports['studio mocha events only test can be extended when there are multiple i
       "final": true,
       "currentRetry": 0,
       "retries": 0,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -1495,7 +1495,7 @@ exports['studio mocha events only test can be extended when there are multiple i
       "final": true,
       "currentRetry": 0,
       "retries": 0,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -1509,7 +1509,7 @@ exports['studio mocha events only test can be extended when there are multiple i
       "file": null,
       "invocationDetails": "{Object 8}",
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -1523,7 +1523,7 @@ exports['studio mocha events only test can be extended when there are multiple i
       "file": null,
       "invocationDetails": "{Object 8}",
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -1551,7 +1551,7 @@ exports['studio mocha events only test can be extended when there are multiple i
       "final": true,
       "currentRetry": 0,
       "retries": 0,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -1564,7 +1564,7 @@ exports['studio mocha events only test can be extended when there are multiple i
       "type": "suite",
       "file": "relative/path/to/spec.js",
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -1594,7 +1594,7 @@ exports['studio mocha events only test can extend a suite that contains an only 
       "type": "suite",
       "file": "relative/path/to/spec.js",
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -1608,7 +1608,7 @@ exports['studio mocha events only test can extend a suite that contains an only 
       "file": null,
       "invocationDetails": "{Object 8}",
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -1622,7 +1622,7 @@ exports['studio mocha events only test can extend a suite that contains an only 
       "file": null,
       "invocationDetails": "{Object 8}",
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -1637,7 +1637,7 @@ exports['studio mocha events only test can extend a suite that contains an only 
       "invocationDetails": "{Object 8}",
       "currentRetry": 0,
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -1653,7 +1653,7 @@ exports['studio mocha events only test can extend a suite that contains an only 
       "invocationDetails": "{Object 8}",
       "currentRetry": 0,
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -1679,7 +1679,7 @@ exports['studio mocha events only test can extend a suite that contains an only 
       "final": true,
       "currentRetry": 0,
       "retries": 0,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -1705,7 +1705,7 @@ exports['studio mocha events only test can extend a suite that contains an only 
       "final": true,
       "currentRetry": 0,
       "retries": 0,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -1719,7 +1719,7 @@ exports['studio mocha events only test can extend a suite that contains an only 
       "file": null,
       "invocationDetails": "{Object 8}",
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -1733,7 +1733,7 @@ exports['studio mocha events only test can extend a suite that contains an only 
       "file": null,
       "invocationDetails": "{Object 8}",
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -1760,7 +1760,7 @@ exports['studio mocha events only test can extend a suite that contains an only 
       "final": true,
       "currentRetry": 0,
       "retries": 0,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -1773,7 +1773,7 @@ exports['studio mocha events only test can extend a suite that contains an only 
       "type": "suite",
       "file": "relative/path/to/spec.js",
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -1803,7 +1803,7 @@ exports['studio mocha events only suite can be added to #1'] = [
       "type": "suite",
       "file": "relative/path/to/spec.js",
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -1817,7 +1817,7 @@ exports['studio mocha events only suite can be added to #1'] = [
       "file": null,
       "invocationDetails": "{Object 8}",
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -1831,7 +1831,7 @@ exports['studio mocha events only suite can be added to #1'] = [
       "file": null,
       "invocationDetails": "{Object 8}",
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -1846,7 +1846,7 @@ exports['studio mocha events only suite can be added to #1'] = [
       "invocationDetails": "{Object 8}",
       "currentRetry": 0,
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -1862,7 +1862,7 @@ exports['studio mocha events only suite can be added to #1'] = [
       "invocationDetails": "{Object 8}",
       "currentRetry": 0,
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -1888,7 +1888,7 @@ exports['studio mocha events only suite can be added to #1'] = [
       "final": true,
       "currentRetry": 0,
       "retries": 0,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -1914,7 +1914,7 @@ exports['studio mocha events only suite can be added to #1'] = [
       "final": true,
       "currentRetry": 0,
       "retries": 0,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -1928,7 +1928,7 @@ exports['studio mocha events only suite can be added to #1'] = [
       "file": null,
       "invocationDetails": "{Object 8}",
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -1942,7 +1942,7 @@ exports['studio mocha events only suite can be added to #1'] = [
       "file": null,
       "invocationDetails": "{Object 8}",
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -1969,7 +1969,7 @@ exports['studio mocha events only suite can be added to #1'] = [
       "final": true,
       "currentRetry": 0,
       "retries": 0,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -1982,7 +1982,7 @@ exports['studio mocha events only suite can be added to #1'] = [
       "type": "suite",
       "file": "relative/path/to/spec.js",
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -2012,7 +2012,7 @@ exports['studio mocha events only suite can be added to when there are multiple 
       "type": "suite",
       "file": "relative/path/to/spec.js",
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -2026,7 +2026,7 @@ exports['studio mocha events only suite can be added to when there are multiple 
       "file": null,
       "invocationDetails": "{Object 8}",
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -2040,7 +2040,7 @@ exports['studio mocha events only suite can be added to when there are multiple 
       "file": null,
       "invocationDetails": "{Object 8}",
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -2055,7 +2055,7 @@ exports['studio mocha events only suite can be added to when there are multiple 
       "invocationDetails": "{Object 8}",
       "currentRetry": 0,
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -2071,7 +2071,7 @@ exports['studio mocha events only suite can be added to when there are multiple 
       "invocationDetails": "{Object 8}",
       "currentRetry": 0,
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -2097,7 +2097,7 @@ exports['studio mocha events only suite can be added to when there are multiple 
       "final": true,
       "currentRetry": 0,
       "retries": 0,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -2123,7 +2123,7 @@ exports['studio mocha events only suite can be added to when there are multiple 
       "final": true,
       "currentRetry": 0,
       "retries": 0,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -2137,7 +2137,7 @@ exports['studio mocha events only suite can be added to when there are multiple 
       "file": null,
       "invocationDetails": "{Object 8}",
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -2151,7 +2151,7 @@ exports['studio mocha events only suite can be added to when there are multiple 
       "file": null,
       "invocationDetails": "{Object 8}",
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -2178,7 +2178,7 @@ exports['studio mocha events only suite can be added to when there are multiple 
       "final": true,
       "currentRetry": 0,
       "retries": 0,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -2191,7 +2191,7 @@ exports['studio mocha events only suite can be added to when there are multiple 
       "type": "suite",
       "file": "relative/path/to/spec.js",
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -2221,7 +2221,7 @@ exports['studio mocha events only suite can extend a test within an only suite #
       "type": "suite",
       "file": "relative/path/to/spec.js",
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -2235,7 +2235,7 @@ exports['studio mocha events only suite can extend a test within an only suite #
       "file": null,
       "invocationDetails": "{Object 8}",
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -2249,7 +2249,7 @@ exports['studio mocha events only suite can extend a test within an only suite #
       "file": null,
       "invocationDetails": "{Object 8}",
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -2265,7 +2265,7 @@ exports['studio mocha events only suite can extend a test within an only suite #
       "invocationDetails": "{Object 8}",
       "currentRetry": 0,
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -2282,7 +2282,7 @@ exports['studio mocha events only suite can extend a test within an only suite #
       "invocationDetails": "{Object 8}",
       "currentRetry": 0,
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -2309,7 +2309,7 @@ exports['studio mocha events only suite can extend a test within an only suite #
       "final": true,
       "currentRetry": 0,
       "retries": 0,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -2336,7 +2336,7 @@ exports['studio mocha events only suite can extend a test within an only suite #
       "final": true,
       "currentRetry": 0,
       "retries": 0,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -2350,7 +2350,7 @@ exports['studio mocha events only suite can extend a test within an only suite #
       "file": null,
       "invocationDetails": "{Object 8}",
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -2364,7 +2364,7 @@ exports['studio mocha events only suite can extend a test within an only suite #
       "file": null,
       "invocationDetails": "{Object 8}",
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -2392,7 +2392,7 @@ exports['studio mocha events only suite can extend a test within an only suite #
       "final": true,
       "currentRetry": 0,
       "retries": 0,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -2405,7 +2405,7 @@ exports['studio mocha events only suite can extend a test within an only suite #
       "type": "suite",
       "file": "relative/path/to/spec.js",
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -2435,7 +2435,7 @@ exports['studio mocha events only suite can extend a test within an only suite w
       "type": "suite",
       "file": "relative/path/to/spec.js",
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -2449,7 +2449,7 @@ exports['studio mocha events only suite can extend a test within an only suite w
       "file": null,
       "invocationDetails": "{Object 8}",
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -2463,7 +2463,7 @@ exports['studio mocha events only suite can extend a test within an only suite w
       "file": null,
       "invocationDetails": "{Object 8}",
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -2479,7 +2479,7 @@ exports['studio mocha events only suite can extend a test within an only suite w
       "invocationDetails": "{Object 8}",
       "currentRetry": 0,
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -2496,7 +2496,7 @@ exports['studio mocha events only suite can extend a test within an only suite w
       "invocationDetails": "{Object 8}",
       "currentRetry": 0,
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -2523,7 +2523,7 @@ exports['studio mocha events only suite can extend a test within an only suite w
       "final": true,
       "currentRetry": 0,
       "retries": 0,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -2550,7 +2550,7 @@ exports['studio mocha events only suite can extend a test within an only suite w
       "final": true,
       "currentRetry": 0,
       "retries": 0,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -2564,7 +2564,7 @@ exports['studio mocha events only suite can extend a test within an only suite w
       "file": null,
       "invocationDetails": "{Object 8}",
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -2578,7 +2578,7 @@ exports['studio mocha events only suite can extend a test within an only suite w
       "file": null,
       "invocationDetails": "{Object 8}",
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -2606,7 +2606,7 @@ exports['studio mocha events only suite can extend a test within an only suite w
       "final": true,
       "currentRetry": 0,
       "retries": 0,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
@@ -2619,7 +2619,7 @@ exports['studio mocha events only suite can extend a test within an only suite w
       "type": "suite",
       "file": "relative/path/to/spec.js",
       "retries": -1,
-      "_slow": 250
+      "_slow": 10000
     }
   ],
   [
