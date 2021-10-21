@@ -804,7 +804,7 @@ export default {
       docsUrl: 'https://on.cypress.io/api',
     },
     invalid_new_command: {
-      message: '`Cypress.Commands.add()` is used to create new commands, but `{{name}}` is already an existing Cypress command. Please use `Cypress.Commands.overwrite()` if you would like to overwrite an existing command.',
+      message: '`Cypress.Commands.add()` is used to create new commands, but `{{name}}` is already defined or is an existing Cypress command.\n\nPlease use `Cypress.Commands.overwrite()` if you would like to overwrite an existing command.\n',
       docsUrl: 'https://docs.cypress.io/api/cypress-api/custom-commands',
     },
     invalid_overwrite: {
