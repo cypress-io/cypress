@@ -10,6 +10,7 @@ describe('utils', () => {
       compare('basic.spec.ts', ['basic', '.spec.ts'])
       compare('something.foo.ts', ['something', '.foo.ts'])
       compare('first-user.js', ['first-user', '.js'])
+      compare('model.coffee', ['model', '.coffee'])
     })
 
     it('handles multiple extensions', () => {
@@ -37,6 +38,11 @@ describe('utils', () => {
 
     it('strips directory path', () => {
       compare('unit/spec_split_spec.ts', ['spec_split', '_spec.ts'])
+      compare('dir/unit/spec_split_spec.ts', ['spec_split', '_spec.ts'])
+    })
+
+    it('displays filename with special characters', () => {
+      compare('cypress/integration/meta_&%_spec.ts', ['meta_&%', '_spec.ts'])
     })
   })
 })

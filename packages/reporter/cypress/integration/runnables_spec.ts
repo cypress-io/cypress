@@ -129,7 +129,7 @@ describe('runnables', () => {
 
   it('does not display time if no time taken', () => {
     start()
-    cy.get('.runnable-header span:first').should('have.text', 'foo/bar')
+    cy.get('.runnable-header span:first').should('have.text', 'foo')
     cy.get('.runnable-header span:last').should('not.have.text', '--')
   })
 

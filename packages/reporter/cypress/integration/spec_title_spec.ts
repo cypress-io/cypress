@@ -54,8 +54,8 @@ describe('spec title', () => {
       })
     })
 
-    it('displays relative spec path', () => {
-      cy.get('.runnable-header').find('a').should('have.text', 'relative/path/to/foo.js')
+    it('displays name without path', () => {
+      cy.get('.runnable-header').find('a').should('have.text', 'foo.js')
 
       cy.percySnapshot()
     })
