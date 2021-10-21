@@ -1,7 +1,7 @@
 const chai = require('chai')
 const snapshot = require('snap-shot-it')
 const sinon = require('sinon')
-const sinonChai = require('@cypress/sinon-chai')
+const sinonChai = require('sinon-chai')
 
 const configUtil = require('../../src/index')
 
