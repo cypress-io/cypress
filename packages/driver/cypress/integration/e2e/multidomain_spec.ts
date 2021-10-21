@@ -1,4 +1,5 @@
-describe('multidomain', () => {
+// @ts-ignore / session support is needed for visiting about:blank between tests
+describe('multidomain', { experimentalSessionSupport: true }, () => {
   const expectTextMessage = (expected, done) => {
     const onMessage = (event) => {
       if (event.data && event.data.actual !== undefined) {

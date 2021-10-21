@@ -123,7 +123,7 @@ export default {
       state('current', command)
       state('chainerId', command.get('chainerId'))
 
-      return stability.whenStable(() => {
+      return stability.whenStableOrAnticipatingMultidomain(() => {
         state('nestedIndex', state('index'))
 
         return command.get('args')
@@ -303,7 +303,7 @@ export default {
           // finished running if the application under
           // test is no longer stable because we cannot
           // move onto the next test until its finished
-          return stability.whenStable(() => {
+          return stability.whenStableOrAnticipatingMultidomain(() => {
             Cypress.action('cy:command:queue:end')
 
             return null

@@ -234,10 +234,10 @@ const MaybeDelayForMultidomain: ResponseMiddleware = function () {
   // in the future, this will be any cross-origin url instead of
   // a hard-coded one
   if (this.req.proxiedUrl.includes('127.0.0.1:3501') && (isHTML || isRenderedHTML)) {
-    debug('is cross-domain, delay until domain:ready event')
+    this.debug('is cross-domain, delay until domain:ready event')
 
     this.serverBus.once('ready:for:domain', () => {
-      debug('ready for domain, let it go')
+      this.debug('ready for domain, let it go')
       this.next()
     })
 

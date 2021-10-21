@@ -2,20 +2,15 @@ import Bluebird from 'bluebird'
 import $Log from '../../cypress/log'
 import { createDeferred } from '../../util/deferred'
 
-export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: Cypress.State) {
+export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy) {
   // @ts-ignore
   Cypress.on('cross:domain:html:received', () => {
-    state('anticipateMultidomain', true)
-
     // when a secondary domain is detected by the proxy, it holds it up
-    // to provide time for the spec bridge to be set up. however, the
-    // queue won't continue running until the page is stable, so we
-    // lie and say it's stable to allow the queue to run, then work
-    // out the actual stability of the page later.
-    // TODO: maybe create a different signal that isn't stability-based,
-    // but lets the queue go ahead and then later signal stability?
+    // to provide time for the spec bridge to be set up. normally, the queue
+    // will not continue until the page is stable, but this signals it to go
+    // ahead because we're anticipating multidomain
     // @ts-ignore
-    cy.isStable(true, 'load')
+    cy.isAnticipatingMultidomain(true)
   })
 
   Commands.addAll({
@@ -137,7 +132,8 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
             fn: fn.toString(),
           })
 
-          state('anticipateMultidomain', false)
+          // @ts-ignore
+          cy.isAnticipatingMultidomain(false)
         })
 
         // this signals to the runner to create the spec bridge for

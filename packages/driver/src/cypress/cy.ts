@@ -513,6 +513,8 @@ export default {
       // stability sync methods
       isStable: stability.isStable,
       whenStable: stability.whenStable,
+      isAnticipatingMultidomain: stability.isAnticipatingMultidomain,
+      whenAnticipatingMultidomain: stability.whenAnticipatingMultidomain,
 
       // xhr sync methods
       getRequestsByAlias: xhrs.getRequestsByAlias,
@@ -617,7 +619,7 @@ export default {
             // we are now stable again which is purposefully
             // the last event we call here, to give our event
             // listeners time to be invoked prior to moving on
-            return stability.isStable(true, 'load')
+            stability.isStable(true, 'load')
           } catch (err) {
             // we failed setting the remote window props which
             // means the page navigated to a different domain
@@ -625,7 +627,9 @@ export default {
             // we expect a cross-origin error and are setting things up
             // elsewhere to handle running cross-domain, so don't fail
             // because of it
-            if (state('anticipateMultidomain')) {
+            if (state('anticipatingMultidomain')) {
+              stability.isStable(true, 'load')
+
               return
             }
 
