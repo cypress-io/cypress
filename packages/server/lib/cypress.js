@@ -31,7 +31,7 @@ const exit = (code = 0) => {
 
 const showWarningForInvalidConfig = (options) => {
   const invalidConfigOptions = require('lodash').keys(options.config).reduce((invalid, option) => {
-    if (!require('@packages/config').getConfigKeys().find((configKey) => configKey === option)) {
+    if (!require('@packages/config').getPublicConfigKeys().find((configKey) => configKey === option)) {
       invalid.push(option)
     }
 
