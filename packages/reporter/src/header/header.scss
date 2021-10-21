@@ -8,7 +8,7 @@
     min-height: $header-height;
     outline: 0;
     overflow: hidden;
-    padding: 16px;
+    padding: 20px 16px;
     width: 100%;
     z-index: 1;
 
@@ -17,7 +17,7 @@
     }
 
     button {
-      background-color: $gray-1000;
+      background-color: transparent;
       border-color: transparent;
       border-radius: 0;
       display: inline-block;
@@ -47,12 +47,12 @@
 
   .focus-tests {
     display: flex;
-    height: 32px;
+    height: 24px;
 
     button {
       color: $gray-700;
       font-size: 16px;
-      font-weight: 400;
+      font-weight: 300;
       padding-left: 0;
       padding-right: 8px;
       width: auto !important;
@@ -74,40 +74,29 @@
     border-radius: 4px;
     display: flex;
     flex-wrap: wrap;
+    height: 24px;
     justify-content: center;
-    margin-bottom: 0;
-    padding: 0;
+    padding-right: 8px;
 
     li {
       display: inline-block;
-      font-size: 16px;
+      font-size: 12px;
       font-weight: 600;
+      line-height: 24px;
       list-style-type: none;
-      padding: 0 8px 0 4px;
+      padding: 1px 0px 0 4px;
 
-      &.passed i {
-        color: $pass;
-      }
-
-      &.failed i {
-        color: $fail;
-      }
-
-      &.pending i {
-        color: $gray-400;
-      }
-
-      i {
-        margin: 5px;
+      svg {
+        margin: 0px 4px;
       }
 
       .num {
         color: $white;
+        line-height: 12px;
+        vertical-align: text-top;
 
         &.empty {
           color: $gray-800;
-          line-height: 18px;
-          vertical-align: text-top;
         }
       }
     }
@@ -123,7 +112,7 @@
     margin-left: 8px;
 
     .toggle-auto-scrolling {
-      line-height: 25px;
+      line-height: 22px;
       padding: 0 10px;
 
       i {
@@ -149,21 +138,15 @@
       }
     }
 
-    span:last-child {
-      button {
-        color: $gray-400;
-        padding: 4px 10px;
-      }
-    }
-
+    span:last-child button,
     .play {
       color: $gray-400;
-      padding: 4px 10px;
+      padding: 1px 10px;
     }
 
     span {
       button {
-        height: 30px;
+        height: 22px;
       }
       &:not(:last-child) {
         button {

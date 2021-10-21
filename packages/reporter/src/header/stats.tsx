@@ -4,6 +4,10 @@ import React from 'react'
 
 import { StatsStore } from './stats-store'
 
+import FailedIcon from '-!react-svg-loader!../lib/img/status-failed_x12.svg'
+import PassedIcon from '-!react-svg-loader!../lib/img/status-passed_x12.svg'
+import PendingIcon from '-!react-svg-loader!../lib/img/status-pending_x12.svg'
+
 const count = (num: number) => num > 0 ? num : '--'
 
 interface Props {
@@ -13,17 +17,17 @@ interface Props {
 const Stats = observer(({ stats }: Props) => (
   <ul aria-label='Stats' className='stats'>
     <li className='pending'>
-      <i aria-hidden="true" className='fas fa-circle-notch' />
+      <PendingIcon aria-hidden="true" />
       <span className='visually-hidden'>Pending:</span>
       <span className={cs('num', { 'empty': !stats.numPending })}>{count(stats.numPending)}</span>
     </li>
     <li className='passed'>
-      <i aria-hidden="true" className='fas fa-check' />
+      <PassedIcon aria-hidden="true" />
       <span className='visually-hidden'>Passed:</span>
       <span className={cs('num', { 'empty': !stats.numPassed })}>{count(stats.numPassed)}</span>
     </li>
     <li className='failed'>
-      <i aria-hidden="true" className='fas fa-times' />
+      <FailedIcon aria-hidden="true" />
       <span className='visually-hidden'>Failed:</span>
       <span className={cs('num', { 'empty': !stats.numFailed })}>{count(stats.numFailed)}</span>
     </li>
