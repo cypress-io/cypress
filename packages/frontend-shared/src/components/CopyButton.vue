@@ -14,31 +14,28 @@
         <span v-else>{{ t('clipboard.copied') }}!</span>
       </TransitionQuickFade>
     </Button>
-    <textarea
-      ref="textElement"
-      tabindex="-1"
-      :value="text"
-      class="absolute -top-96"
-    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useClipboard } from '@vueuse/core'
 import { useI18n } from '@cy/i18n'
 import Button from '../components/Button.vue'
 import TransitionQuickFade from '../components/transitions/TransitionQuickFade.vue'
 
-defineProps<{
+const props = defineProps<{
   text: string
 }>()
 
 const showCopied = ref(false)
-const textElement = ref<HTMLTextAreaElement | null>(null)
-const copyToClipboard = async () => {
-  textElement.value?.select()
-  document.execCommand('copy')
-  showCopied.value = true
+const { copy } = useClipboard()
+const copyToClipboard = () => {
+  if (props.text) {
+    copy(props.text)
+    showCopied.value = true
+  }
+
   setTimeout(() => {
     showCopied.value = false
   }, 2000)
