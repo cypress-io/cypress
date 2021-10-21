@@ -11,8 +11,8 @@
 
 <script lang="ts" setup>
 import { onBeforeUnmount, onMounted } from 'vue'
-import { UnifiedRunnerAPI } from '../runner'
-import { REPORTER_ID, RUNNER_ID, getRunnerElement, getReporterElement, empty } from '../runner/utils'
+import { UnifiedRunnerAPI } from '.'
+import { REPORTER_ID, RUNNER_ID, getRunnerElement, getReporterElement, empty } from './utils'
 import { gql } from '@urql/core'
 import type { CurrentSpec_RunnerFragment } from '../generated/graphql'
 

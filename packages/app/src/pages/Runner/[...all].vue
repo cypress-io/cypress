@@ -9,7 +9,7 @@
 import { gql } from '@urql/core'
 import { useQuery } from '@urql/vue'
 import { Runner_AllDocument } from '../../generated/graphql'
-import Runner from '../../runs/Runner.vue'
+import Runner from '../../runner/Runner.vue'
 
 gql`
 query Runner_All {
