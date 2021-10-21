@@ -15,6 +15,7 @@ export const stubMutation: MaybeResolver<Mutation> = {
       isFirstTimeE2E: true,
       __typename: 'Project',
       config,
+      codeGenGlob: '/**/*.vue',
     }
 
     ctx.app.projects.push(project)

@@ -19,6 +19,8 @@
     "@packages/ts": "0.0.0-development",
     "@packages/types": "0.0.0-development",
     "@storybook/csf-tools": "^6.4.0-alpha.38",
+    "create-cypress-tests": "0.0.0-development",
+    "globby": "^11.0.1",
     "mocha": "7.0.1",
     "rimraf": "3.0.2"
   },

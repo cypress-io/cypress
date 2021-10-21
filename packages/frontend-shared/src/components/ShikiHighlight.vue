@@ -66,13 +66,19 @@ shikiWrapperClasses computed property.
 </template>
 
 <script lang="ts">
-import { Highlighter, getHighlighter, setOnigasmWASM, setCDN } from 'shiki'
+import { Highlighter, getHighlighter, setOnigasmWASM, setCDN, Lang } from 'shiki'
 import onigasm from 'onigasm/lib/onigasm.wasm?url'
 
 setOnigasmWASM(onigasm)
 setCDN(`${import.meta.env.BASE_URL}shiki/`)
 
 let highlighter: Highlighter
+
+export const langsSupported = ['typescript', 'javascript', 'ts', 'js', 'css', 'jsx', 'tsx', 'json', 'yaml', 'html'] as const
+
+let langs = langsSupported.concat([])
+
+export type CyLangType = typeof langsSupported[number] | 'plaintext' | 'txt'| 'text'
 
 export async function initHighlighter () {
   if (highlighter) {
@@ -81,7 +87,7 @@ export async function initHighlighter () {
 
   highlighter = await getHighlighter({
     themes: ['cypress.theme'],
-    langs: ['typescript', 'javascript', 'css', 'jsx', 'tsx', 'json', 'yaml'],
+    langs,
   })
 }
 
@@ -106,7 +112,7 @@ onBeforeMount(async () => {
 
 const props = withDefaults(defineProps<{
   code: string;
-  lang: 'javascript' | 'typescript' | 'css' | 'json' | 'js' | 'ts' | 'tsx' | 'jsx' | 'yaml' | undefined;
+  lang: CyLangType | undefined;
   lineNumbers?: boolean,
   inline?: boolean,
   wrap?: boolean,
@@ -123,7 +129,8 @@ const resolvedLang = computed(() => {
 
   if (props.lang === 'typescript' || props.lang === 'ts' || props.lang === 'tsx') return 'tsx'
 
-  return props.lang
+  // if the language is not recognized use plaintext
+  return props.lang && (langsSupported as readonly string[]).includes(props.lang) ? props.lang : 'plaintext'
 })
 
 const highlightedCode = computed(() => {
