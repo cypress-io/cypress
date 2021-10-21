@@ -1,6 +1,6 @@
 import { nonNull, objectType, stringArg } from 'nexus'
 import path from 'path'
-import { ProjectPreferences } from '.'
+import { ProjectPreferences, Prompts } from '.'
 import { cloudProjectBySlug } from '../../stitching/remoteGraphQLCalls'
 import { CodeGenTypeEnum } from '../enumTypes/gql-CodeGenType'
 import { FileParts } from './gql-FileParts'
@@ -99,6 +99,14 @@ export const Project = objectType({
       description: 'Cached preferences for this project',
       resolve: (source, args, ctx) => {
         return ctx.project.getProjectPreferences(path.basename(source.projectRoot))
+      },
+    })
+
+    t.field('prompts', {
+      type: Prompts,
+      description: 'Cached preferences for this project',
+      resolve: (source, args, ctx) => {
+        return ctx.project.getPrompts()
       },
     })
 
