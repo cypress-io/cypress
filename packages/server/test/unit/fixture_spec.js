@@ -330,7 +330,7 @@ John,Chef,1982
 
   // https://github.com/cypress-io/cypress/issues/1558
   context('binary files', () => {
-    it('returns file as Buffer regardless of extension when passed null encoding', function () {
+    it('returns file as buffer regardless of extension when passed null encoding', function () {
       return fixture.get(this.fixturesFolder, 'nested/fixture.js', { encoding: null }).then((index) => {
         expect(index).to.eql(Buffer.from('{nested: "fixture"}'))
       })
@@ -346,7 +346,7 @@ John,Chef,1982
   })
 
   context('image files', () => {
-    it('returns png as string', function () {
+    it('returns png as buffer', function () {
       return this.read(this.fixturesFolder, 'images/flower.png')
       .then((file) => {
         return fixture.get(this.fixturesFolder, 'images/flower.png')
@@ -356,7 +356,7 @@ John,Chef,1982
       })
     })
 
-    it('returns jpg as string', function () {
+    it('returns jpg as buffer', function () {
       return this.read(this.fixturesFolder, 'images/sample.jpg')
       .then((file) => {
         return fixture.get(this.fixturesFolder, 'images/sample.jpg')
@@ -366,7 +366,7 @@ John,Chef,1982
       })
     })
 
-    it('returns gif as string', function () {
+    it('returns gif as buffer', function () {
       return this.read(this.fixturesFolder, 'images/word.gif')
       .then((file) => {
         return fixture.get(this.fixturesFolder, 'images/word.gif')
@@ -376,7 +376,7 @@ John,Chef,1982
       })
     })
 
-    it('returns tif as Buffer', function () {
+    it('returns tif as buffer', function () {
       return this.read(this.fixturesFolder, 'images/sample.tif')
       .then((file) => {
         return fixture.get(this.fixturesFolder, 'images/sample.tif')
@@ -398,7 +398,7 @@ John,Chef,1982
   })
 
   context('zip files', () => {
-    it('returns zip as Buffer', function () {
+    it('returns zip as buffer', function () {
       return this.read(this.fixturesFolder, 'example.zip')
       .then((file) => {
         return fixture.get(this.fixturesFolder, 'example.zip').then((result) => {
