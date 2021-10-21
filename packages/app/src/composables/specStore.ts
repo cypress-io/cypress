@@ -1,4 +1,4 @@
-import { ref } from 'vue'
+import { ref, inject } from 'vue'
 import { useRouter } from 'vue-router'
 import { BaseSpec } from '@packages/types'
 import { UnifiedRunnerAPI } from '../runner'
@@ -15,7 +15,7 @@ import { UnifiedRunnerAPI } from '../runner'
 
 const currentSpec = ref<BaseSpec>(null)
 
-export function useSpecStore () {
+export function createSpecStore () {
   const router = useRouter()
 
   async function setSpec (spec: BaseSpec) {
@@ -29,3 +29,15 @@ export function useSpecStore () {
     currentSpec,
   }
 }
+
+export function useSpecStore () {
+  const _store = inject<ReturnType<typeof createSpecStore>>(specStoreKey)
+
+  if (!_store) {
+    throw Error(`Could not find a provided spec store. Did you forget to call provide(specStoreKey, createSpecStore())?`)
+  }
+
+  return _store
+}
+
+export const specStoreKey = Symbol('spec-store')

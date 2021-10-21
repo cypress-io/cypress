@@ -11,6 +11,13 @@
   </router-view>
 </template>
 
+<script lang="ts" setup>
+import { provide } from 'vue'
+import { specStoreKey, createSpecStore } from './composables/specStore'
+
+provide(specStoreKey, createSpecStore())
+</script>
+
 <style>
 .reporter {
   position: relative;

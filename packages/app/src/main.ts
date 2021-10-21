@@ -12,6 +12,5 @@ const app = createApp(App)
 app.use(urql, makeUrqlClient('app'))
 app.use(createRouter())
 app.use(createI18n())
-// app.use(specStore)
 
 app.mount('#app')

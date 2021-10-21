@@ -17,7 +17,7 @@ import { computed } from 'vue'
 import { gql } from '@urql/vue'
 import type { SpecNode_InlineSpecListFragment, Specs_InlineSpecListFragment } from '../generated/graphql'
 import SpecName from './SpecName.vue'
-import { useSpecStore } from '../composables/specStore'
+import { specStoreKey, useSpecStore } from '../composables/specStore'
 
 gql`
 fragment SpecNode_InlineSpecList on SpecEdge {
