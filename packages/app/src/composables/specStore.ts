@@ -4,9 +4,13 @@ import { BaseSpec } from '@packages/types'
 import { UnifiedRunnerAPI } from '../runner'
 
 /**
- * Centralized way to manage navigation and access to the the current spec.
- * The source of truth is the ?spec=... query parameter, so rather than
- * duplicating the state, we just derive it from the current route.
+ * Centralized way to manage navigation and running of a spec.
+ * The spec can change either by user interaction in the app (eg, clicking a button)
+ * or by something else (clicking back/forward, push event via web socket, etc).
+ *
+ * Calling `setSpec` will ensure the URL has the correct query parameter,
+ * the currentSpec value is the same as the one in the URL, and (re)-execute
+ * the spec.
  */
 
 const currentSpec = ref<BaseSpec>(null)
