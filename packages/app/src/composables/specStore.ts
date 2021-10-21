@@ -1,6 +1,6 @@
 import { ref, inject } from 'vue'
 import { useRouter } from 'vue-router'
-import { BaseSpec } from '@packages/types'
+import type { BaseSpec } from '@packages/types'
 import { UnifiedRunnerAPI } from '../runner'
 
 /**
@@ -13,7 +13,7 @@ import { UnifiedRunnerAPI } from '../runner'
  * the spec.
  */
 
-const currentSpec = ref<BaseSpec>(null)
+const currentSpec = ref<BaseSpec | null>(null)
 
 export function createSpecStore () {
   const router = useRouter()
