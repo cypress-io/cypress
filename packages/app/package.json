@@ -45,6 +45,7 @@
     "javascript-time-ago": "2.3.8",
     "just-my-luck": "3.0.0",
     "mobx": "5.15.4",
+    "pinia": "2.0.0-rc.14",
     "rimraf": "3.0.2",
     "rollup-plugin-polyfill-node": "^0.7.0",
     "unplugin-icons": "^0.11.3",

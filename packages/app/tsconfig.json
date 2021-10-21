@@ -2,10 +2,11 @@
   "extends": "../frontend-shared/tsconfig.json",
   "include": [
     "src/**/*.vue", 
+    "src/**/*.ts", 
     "src/**/*.tsx", 
+    "*.d.ts", 
     "cypress/**/*.ts", 
     "cypress/**/*.tsx",
-    "index.d.ts",
     "../frontend-shared/src/**/*.vue", 
     "../frontend-shared/src/**/*.tsx", 
     "../frontend-shared/cypress/**/*.ts"
@@ -16,6 +17,7 @@
       "@cy/components/*": ["../frontend-shared/src/components/*"],
       "@packages/*": ["../*"]
     },
-    "allowJs": true
+    "allowJs": true,
+    "noImplicitThis": true
   }
 }
