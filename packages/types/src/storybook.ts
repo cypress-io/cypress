@@ -17,3 +17,5 @@ export interface GeneratedSpec {
   spec: FoundSpec
   content: string
 }
+
+export const STORYBOOK_GLOB = '**/*.stories.*'
