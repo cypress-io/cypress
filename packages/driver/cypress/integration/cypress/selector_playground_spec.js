@@ -40,7 +40,7 @@ describe('src/cypress/selector_playground', () => {
       expect(SelectorPlayground.getSelectorPriority()).to.eql(selectorPriority)
     })
 
-    it('throws if selector:playground:priority if selectorPriority contains an unsupported priority', () => {
+    it('throws if selectorPriority contains an unsupported priority', () => {
       const fn = () => {
         SelectorPlayground.defaults({
           selectorPriority: [
@@ -55,7 +55,7 @@ describe('src/cypress/selector_playground', () => {
       .and.include('`Cypress.SelectorPlayground.defaults()` called with invalid `selectorPriority` property. It must be one of: `data-*`, `id`, `class`, `tag`, `attributes`, `nth-child`. You passed: `name`')
     })
 
-    it('throws if selector:playground:priority has an unsupported priority that contains a substring of a valid priority', () => {
+    it('throws if selectorPriority has an unsupported priority that contains a substring of a valid priority', () => {
       const fn = () => {
         SelectorPlayground.defaults({
           selectorPriority: [

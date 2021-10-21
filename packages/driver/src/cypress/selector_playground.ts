@@ -69,7 +69,7 @@ export default {
       // Validate that the priority is one of: "data-*", "id", "class", "tag", "attributes", "nth-child"
 
       selectorPriority.forEach((priority) => {
-        if (!priority.match(/^(data\-.*|id|class|tag|attributes|nth\-child)$/)) {
+        if (!/^(data\-.*|id|class|tag|attributes|nth\-child)$/.test(priority)) {
           $errUtils.throwErrByPath('selector_playground.defaults_invalid_priority', {
             args: { arg: priority },
           })
