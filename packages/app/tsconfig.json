@@ -4,7 +4,7 @@
     "src/**/*.vue", 
     "src/**/*.ts", 
     "src/**/*.tsx", 
-    "*.d.ts", 
+    "index.d.ts", 
     "cypress/**/*.ts", 
     "cypress/**/*.tsx",
     "../frontend-shared/src/**/*.vue", 
