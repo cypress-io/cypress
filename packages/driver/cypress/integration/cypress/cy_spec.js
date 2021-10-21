@@ -41,7 +41,7 @@ describe('driver/src/cypress/cy', () => {
   context('internals of custom commands', () => {
     let setup
 
-    beforeEach(() => {
+    before(() => {
       setup = (fn = () => {}) => {
         Cypress.Commands.add('nested', () => {
           cy.url()
@@ -148,7 +148,7 @@ describe('driver/src/cypress/cy', () => {
   })
 
   context('custom commands', () => {
-    beforeEach(() => {
+    before(() => {
       Cypress.Commands.add('dashboard.selectRenderer', () => {
         cy.get('[contenteditable]').first()
       })
@@ -176,7 +176,7 @@ describe('driver/src/cypress/cy', () => {
     })
 
     describe('invocation stack', () => {
-      beforeEach(() => {
+      before(() => {
         Cypress.Commands.add('getInput', () => cy.get('input'))
         Cypress.Commands.add('findInput', { prevSubject: 'element' }, (subject) => {
           subject.find('input')
@@ -218,7 +218,7 @@ describe('driver/src/cypress/cy', () => {
     })
 
     describe('child commands', () => {
-      beforeEach(() => {
+      before(() => {
         Cypress.Commands.add('c', { prevSubject: true }, (subject, arg) => {
           cy.wrap([subject, arg])
         })
@@ -363,7 +363,7 @@ describe('driver/src/cypress/cy', () => {
     })
 
     describe('dual commands', () => {
-      beforeEach(() => {
+      before(() => {
         Cypress.Commands.add('d', { prevSubject: 'optional' }, (subject, arg) => {
           cy.wrap([subject, arg])
         })
