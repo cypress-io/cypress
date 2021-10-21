@@ -100,8 +100,8 @@ body,
 }
 
 @font-face {
-  font-family: "Fira Mono";
-  src: local("Fira Mono"),
-   url('../../frontend-shared/src/assets/fonts/FiraMono-Medium.ttf') format("truetype");
+  font-family: "Fira Code";
+  src: local("Fira Code"),
+   url('../../frontend-shared/src/assets/fonts/FiraCode-VariableFont_wght.ttf') format("truetype");
 }
 </style>
