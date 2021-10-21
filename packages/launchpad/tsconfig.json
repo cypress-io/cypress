@@ -3,6 +3,7 @@
   "include": [
     "src/**/*.vue", 
     "src/**/*.tsx", 
+    "*.d.ts", 
     "cypress/**/*.ts", 
     "cypress/**/*.tsx",
     "../frontend-shared/src/**/*.vue", 

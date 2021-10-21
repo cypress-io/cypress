@@ -9,7 +9,8 @@
     "check-ts": "tsc --noEmit",
     "cy:open": "node ../../scripts/cypress.js open --component --project ${PWD}",
     "cy:run": "node ../../scripts/cypress.js run --component --project ${PWD}",
-    "test": "yarn cy:run",
+    "cy:run-signature": "yarn cy:run --config=\"{\\\"pluginsFile\\\":\\\"cypress/new-signature/plugins.js\\\"}\"",
+    "test": "yarn cy:run && yarn cy:run-signature",
     "watch": "tsc -w"
   },
   "dependencies": {
@@ -20,7 +21,7 @@
     "@cypress/react": "0.0.0-development",
     "@cypress/vue": "0.0.0-development",
     "@testing-library/cypress": "7.0.4",
-    "@vitejs/plugin-vue": "1.2.0",
+    "@vitejs/plugin-vue": "1.2.4",
     "@vue/compiler-sfc": "3.2.6",
     "cypress": "0.0.0-development",
     "eslint-plugin-vue": "7.18.0",

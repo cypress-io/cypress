@@ -1,12 +1,12 @@
 <template>
   <button
     style="width: fit-content"
-    class="flex items-center border rounded gap-8px hocus-default"
+    class="flex items-center border rounded gap-8px outline-none"
     :class="classes"
   >
     <span
       v-if="prefixIcon || $slots.prefix"
-      class="justify-self-start flex items-center pr-2"
+      class="justify-self-start flex items-center"
     >
       <slot name="prefix">
         <component
@@ -49,7 +49,7 @@ import { computed, useAttrs } from 'vue'
 import type { ButtonHTMLAttributes, FunctionalComponent, SVGAttributes } from 'vue'
 
 const VariantClassesTable = {
-  primary: 'border-indigo-500 bg-indigo-600 text-white',
+  primary: 'border-indigo-500 bg-indigo-500 text-white',
   outline: 'border-gray-100 text-indigo-600',
   pending: 'bg-gray-500 text-white',
   link: 'border-transparent text-indigo-600',
@@ -59,7 +59,7 @@ const VariantClassesTable = {
 const SizeClassesTable = {
   sm: 'px-6px py-2px text-14px',
   md: 'px-12px py-6px text-14px',
-  lg: 'px-16px py-8px',
+  lg: 'px-16px py-11px max-h-40px',
   'lg-wide': 'px-32px py-8px',
 }
 
@@ -80,6 +80,7 @@ const sizeClasses = computed(() => (SizeClassesTable[props.size || 'md']))
 
 const classes = computed(() => {
   return [
+    { 'hocus-default': props.variant !== 'pending' },
     variantClasses.value,
     sizeClasses.value,
     attrs.class,

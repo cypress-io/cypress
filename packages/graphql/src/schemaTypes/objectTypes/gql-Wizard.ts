@@ -6,6 +6,7 @@ import { objectType } from 'nexus'
 import { BUNDLERS, CODE_LANGUAGES, FRONTEND_FRAMEWORKS, TESTING_TYPES } from '@packages/types'
 import { TestingTypeEnum, WizardStepEnum } from '../enumTypes/gql-WizardEnums'
 import { WizardCodeLanguage } from './gql-WizardCodeLanguage'
+import { WizardSampleConfigFile } from './gql-WizardSampleConfigFile'
 
 export const Wizard = objectType({
   name: 'Wizard',
@@ -72,9 +73,10 @@ export const Wizard = objectType({
       resolve: (source, args, ctx) => ctx.wizard.packagesToInstall(),
     })
 
-    t.string('sampleCode', {
-      description: 'Configuration file based on bundler and framework of choice',
-      resolve: (source, args, ctx) => ctx.wizard.sampleCode(),
+    t.list.nonNull.field('sampleConfigFiles', {
+      type: WizardSampleConfigFile,
+      description: 'Set of sample configuration files based bundler, framework and language of choice',
+      resolve: (source, args, ctx) => ctx.wizard.sampleConfigFiles(),
     })
 
     t.string('sampleTemplate', {

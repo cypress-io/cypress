@@ -29,3 +29,7 @@ Windi CSS can create an awesome interactive summary showing our usage of utility
 ## from this directory
 yarn windi
 ```
+
+## Generate the theme for shiki
+
+See [the readme in the src/public/shiki/themes directory](./src/public/shiki/themes/ReadMe.md)

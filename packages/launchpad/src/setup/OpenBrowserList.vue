@@ -9,7 +9,7 @@
         :key="browser.id"
         class="relative block pt-6 pb-4 text-center rounded w-160px border-1"
         :class="{
-          'border-indigo-300 ring-2 ring-indigo-50': browser.isSelected,
+          'border-jade-300 ring-2 ring-jade-50': browser.isSelected,
           'border-gray-200': !browser.isSelected,
           'filter grayscale bg-gray-100': browser.disabled,
           'hover:border-indigo-200 hover:ring-2 hover:ring-indigo-50': !browser.disabled && !browser.isSelected
@@ -39,7 +39,7 @@
             >
           </div>
           <div class="pt-2 text-lg text-indigo-600">{{ browser.displayName }}</div>
-          <div class="text-xs text-gray-400">{{ browser.majorVersion }}</div>
+          <div class="text-xs text-gray-400">v{{ browser.majorVersion }}.x</div>
         </label>
       </div>
     </div>
@@ -81,11 +81,7 @@ import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLo
 
 gql`
 mutation OpenBrowserList_SetBrowser($id: ID!) {
-  launchpadSetBrowser(id: $id) {
-    app {
-      ...OpenBrowserList
-    }
-  }
+  launchpadSetBrowser(id: $id)
 }
 `
 

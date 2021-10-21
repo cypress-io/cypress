@@ -1,73 +1,86 @@
 <template>
-  <Input
-    v-model="localValue"
-    type="search"
-    class="min-w-200px w-80% flex-grow"
-    :placeholder="t('globalPage.searchPlaceholder')"
+  <div class="min-w-full col-start-1 col-end-3 flex items-center gap-16px mb-24px relative">
+    <Input
+      id="project-search"
+      v-model="localValue"
+      name="project-search"
+      type="search"
+      class="min-w-200px w-85% flex-grow"
+    />
+    <label
+      for="project-search"
+      class="absolute text-gray-400 left-42px transition-opacity duration-50"
+      :class="{'opacity-0': localValue.length}"
+    >
+      {{ t('globalPage.searchPlaceholder') }}
+    </label>
+    <Button
+      aria-controls="dropzone"
+      class="text-size-16px h-full"
+      data-testid="addProjectButton"
+      size="lg"
+      :variant="showDropzone ? 'pending' : 'primary'"
+      :aria-expanded="showDropzone"
+      @click="toggleDropzone"
+    >
+      <template #prefix>
+        <i-cy-add-large_x16
+          class="transform duration-150"
+          :class="showDropzone ?
+            'icon-dark-gray-100 rotate-45' : 'icon-dark-indigo-300'"
+        />
+      </template>
+      {{ t('globalPage.addProjectButton') }}
+    </Button>
+  </div>
+
+  <FileDropzone
+    v-if="showDropzone"
+    id="dropzone"
+    data-testid="dropzone"
+    class="mb-24px"
+    close-button
+    @addProject="emit('addProject', $event)"
+    @close="toggleDropzone"
   />
-  <input
-    ref="fileInputRef"
-    type="file"
-    class="hidden"
-    webkitdirectory
-    webkitRelativePath
-    @change="handleFileSelection"
-  >
-  <Button
-    :prefix-icon="IconPlus"
-    aria-controls="fileupload"
-    prefix-icon-class="text-center justify-center text-lg"
-    class="w-20% min-w-120px text-size-16px h-full focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500"
-    data-testid="addProjectButton"
-    @click="handleButtonClick"
-  >
-    {{ t('globalPage.addProjectButton') }}
-  </Button>
+
+  <NoResults
+    v-if="!projectCount"
+    :search="localValue"
+    :message="t('globalPage.noResultsMessage')"
+    @clear="handleClear"
+  />
 </template>
 
 <script lang="ts" setup>
 import { ref } from 'vue'
 import Button from '@cy/components/Button.vue'
 import Input from '@cy/components/Input.vue'
-import IconPlus from '~icons/mdi/plus'
+import FileDropzone from './FileDropzone.vue'
 import { useModelWrapper } from '@packages/frontend-shared/src/composables'
 import { useI18n } from '@cy/i18n'
+import NoResults from '@cy/components/NoResults.vue'
 
-const fileInputRef = ref<HTMLInputElement>()
+const showDropzone = ref(false)
 const { t } = useI18n()
 
 const props = defineProps<{
-  modelValue: string
+  modelValue: string,
+  projectCount?: number | null
 }>()
 
-const emits = defineEmits<{
+const emit = defineEmits<{
   (e: 'update:modelValue', value: string): void
   (e: 'addProject', value: string): void
 }>()
 
-function handleButtonClick () {
-  fileInputRef.value?.click()
+const localValue = useModelWrapper(props, emit, 'modelValue')
+
+const handleClear = () => {
+  localValue.value = ''
 }
 
-function handleFileSelection (e: Event) {
-  const target = e.target as HTMLInputElement
-  const files = target.files
-  const path = getFilePath(files)
-
-  emits('addProject', path)
+const toggleDropzone = () => {
+  showDropzone.value = !showDropzone.value
 }
-
-type WebkitFile = File & { path: string }
-function getFilePath (files: FileList | null) {
-  if (files) {
-    const file = files[0] as WebkitFile
-    const path = file?.path ?? ''
-
-    return path
-  }
-
-  return ''
-}
-
-const localValue = useModelWrapper(props, emits, 'modelValue')
 </script>
