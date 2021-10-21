@@ -27,7 +27,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onBeforeUnmount, onMounted, reactive, watchEffect } from 'vue'
+import { computed, onBeforeUnmount, onMounted, reactive, watch } from 'vue'
 import { REPORTER_ID, RUNNER_ID, getRunnerElement, getReporterElement, empty } from '../runner/utils'
 import { gql } from '@urql/core'
 import type { Specs_RunnerFragment } from '../generated/graphql'
@@ -95,15 +95,18 @@ function runSpec () {
   specStore.setSpec(spec)
 }
 
-const stopWatchingSpec = watchEffect(() => {
-  const spec = props.gql.activeProject?.specs?.edges.find((x) => x.node.relative === route.query.spec)?.node
+const stopWatchingSpec = watch(
+  () => route.query.spec,
+  (relative) => {
+    const spec = props.gql.activeProject?.specs?.edges.find((x) => x.node.relative === relative)?.node
 
-  if (!spec) {
-    return
-  }
+    if (!spec) {
+      return
+    }
 
-  specStore.setSpec(spec)
-})
+    specStore.setSpec(spec)
+  },
+)
 
 onMounted(() => {
   window.UnifiedRunner.eventManager.on('restart', () => {
