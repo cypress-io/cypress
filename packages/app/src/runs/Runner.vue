@@ -34,7 +34,7 @@ import type { Specs_RunnerFragment } from '../generated/graphql'
 import InlineSpecList from '../specs/InlineSpecList.vue'
 import { getMobXStore } from '../store'
 import { useRoute } from 'vue-router'
-import { useSpecStore } from '../composables/specStore'
+import { useSpecStore } from '../stores/spec'
 
 gql`
 fragment Specs_Runner on App {
@@ -92,7 +92,7 @@ function runSpec () {
     return
   }
 
-  specStore.setSpec(spec)
+  specStore.setCurrentSpec(spec)
 }
 
 const stopWatchingSpec = watch(
@@ -104,7 +104,7 @@ const stopWatchingSpec = watch(
       return
     }
 
-    specStore.setSpec(spec)
+    specStore.setCurrentSpec(spec)
   },
 )
 

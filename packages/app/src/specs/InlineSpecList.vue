@@ -17,7 +17,7 @@ import { computed } from 'vue'
 import { gql } from '@urql/vue'
 import type { SpecNode_InlineSpecListFragment, Specs_InlineSpecListFragment } from '../generated/graphql'
 import SpecName from './SpecName.vue'
-import { specStoreKey, useSpecStore } from '../composables/specStore'
+import { useSpecStore } from '../stores/spec'
 
 gql`
 fragment SpecNode_InlineSpecList on SpecEdge {
@@ -52,7 +52,7 @@ const props = defineProps<{
 const specStore = useSpecStore()
 
 const isCurrentSpec = (spec: SpecNode_InlineSpecListFragment) => {
-  return spec.node.relative === specStore.currentSpec.value?.relative
+  return spec.node.relative === specStore.currentSpec?.relative
 }
 
 function selectSpec (relative: string) {
@@ -62,7 +62,7 @@ function selectSpec (relative: string) {
     return
   }
 
-  specStore.setSpec({
+  specStore.setCurrentSpec({
     absolute: specToSet.absolute,
     relative: specToSet.relative,
     name: specToSet.name,
