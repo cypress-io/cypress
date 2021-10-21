@@ -1,6 +1,9 @@
 <template>
   <div
-    class="cursor-pointer relative w-full rounded border border-gray-100 bg-white pr-4px pt-13px pb-13px flex items-center space-x-3 group hocus-default focus-within-default"
+    class="cursor-pointer relative w-full rounded border border-gray-100
+  bg-white pr-4px pt-13px pb-13px flex items-center space-x-3 group
+  hocus-default focus-within-default"
+    data-testid="project-card"
     @click="setActiveProject(props.gql.projectRoot)"
   >
     <div
@@ -27,7 +30,7 @@
         aria-label="Project Actions"
         class="focus:outline-transparent w-32px h-32px flex items-center
       justify-center text-white focus:text-gray-300"
-        @click.prevent.stop
+        @click.stop
       >
         <i-cy-vertical-dots_x16
           class="icon-dark-current transition transition-color duration-300"
@@ -35,6 +38,7 @@
         />
       </MenuButton>
       <MenuItems
+        data-testid="project-card-menu-items"
         class="absolute bg-gray-900 text-white flex flex-col right-0
       -bottom-104px right-18px outline-transparent z-40 rounded overflow-scroll"
       >
@@ -76,15 +80,21 @@ fragment GlobalProjectCard on Project {
 }
 `
 
-const setActiveProjectMutation = useMutation(GlobalProjectCard_SetActiveProjectDocument)
+const emit = defineEmits<{
+  (event: 'projectSelected', project: GlobalProjectCardFragment): void
+  (event: 'removeProject', path: string): void
+  (event: 'openInIDE', path: string): void
+  (event: 'openInFinder', path: string): void
 
-const setActiveProject = (project: string) => {
-  setActiveProjectMutation.executeMutation({ path: project })
-}
+  // Used for testing, I wish we could easily spy on gql mutations inside
+  // of component tests.
+  (event: '_setActiveProject', path: string): void
+}>()
 
 const props = defineProps<{
   gql: GlobalProjectCardFragment
 }>()
+
 const { t } = useI18n()
 
 type eventName = 'removeProject' | 'openInIDE' | 'openInFinder'
@@ -95,12 +105,12 @@ const menuItems: { name: string, event: eventName }[] = [
   { name: t('globalPage.openInFinder'), event: 'openInFinder' },
 ]
 
-const emit = defineEmits<{
-  (event: 'projectSelected', project: GlobalProjectCardFragment): void
-  (event: 'removeProject', path: string): void
-  (event: 'openInIDE', path: string): void
-  (event: 'openInFinder', path: string): void
-}>()
+const setActiveProjectMutation = useMutation(GlobalProjectCard_SetActiveProjectDocument)
+
+const setActiveProject = (project: string) => {
+  setActiveProjectMutation.executeMutation({ path: project })
+  emit('_setActiveProject', project)
+}
 
 const handleMenuClick = (eventName: eventName) => {
   switch (eventName) {

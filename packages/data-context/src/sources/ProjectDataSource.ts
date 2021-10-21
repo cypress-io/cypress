@@ -1,5 +1,6 @@
-import type { SpecType } from '@packages/graphql/src/gen/nxs.gen'
-import type { FullConfig, ResolvedFromConfig, RESOLVED_FROM, SettingsOptions } from '@packages/types'
+import type { CodeGenType, SpecType } from '@packages/graphql/src/gen/nxs.gen'
+import { FRONTEND_FRAMEWORKS, FullConfig, ResolvedFromConfig, RESOLVED_FROM, SettingsOptions, SpecFile, STORYBOOK_GLOB } from '@packages/types'
+import { scanFSForAvailableDependency } from 'create-cypress-tests/src/findPackageJson'
 import path from 'path'
 
 import type { DataContext } from '..'
@@ -116,5 +117,58 @@ export class ProjectDataSource {
     const preferences = await this.api.getProjectPreferencesFromCache()
 
     return preferences[projectTitle] ?? null
+  }
+
+  guessGlob (projectRoot: string): string | null {
+    const guess = FRONTEND_FRAMEWORKS.find((framework) => {
+      const lookingForDeps = (framework.deps as readonly string[]).reduce(
+        (acc, dep) => ({ ...acc, [dep]: '*' }),
+        {},
+      )
+
+      return scanFSForAvailableDependency(projectRoot, lookingForDeps)
+    })
+
+    return guess?.glob ?? null
+  }
+
+  getCodeGenGlob (type: CodeGenType) {
+    const project = this.ctx.activeProject
+
+    if (!project) {
+      throw Error(`Cannot find glob without activeProject.`)
+    }
+
+    const looseComponentGlob = '/**/*.{js,jsx,ts,tsx,.vue}'
+
+    if (type === 'story') {
+      return STORYBOOK_GLOB
+    }
+
+    const glob = this.guessGlob(project.projectRoot)
+
+    return glob || looseComponentGlob
+  }
+
+  async getCodeGenCandidates (glob: string): Promise<SpecFile[]> {
+    // Storybook can support multiple globs, so show default one while
+    // still fetching all stories
+    if (glob === STORYBOOK_GLOB) {
+      return this.ctx.storybook.getStories()
+    }
+
+    const project = this.ctx.activeProject
+
+    if (!project) {
+      throw Error(`Cannot find components without activeProject.`)
+    }
+
+    const config = await this.ctx.project.getConfig(project.projectRoot)
+
+    const codeGenCandidates = await this.ctx.file.getFilesByGlob(glob)
+
+    return codeGenCandidates.map(
+      (file) => this.ctx.file.normalizeFileToSpec(file, project.projectRoot, project.projectRoot ?? config.componentFolder),
+    )
   }
 }

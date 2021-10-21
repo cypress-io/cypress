@@ -41,6 +41,7 @@ export const createTestProject = (title: string): CodegenTypeMap['Project'] => {
       ],
     },
     config,
+    codeGenGlob: '/**/*.vue',
   }
 }
 

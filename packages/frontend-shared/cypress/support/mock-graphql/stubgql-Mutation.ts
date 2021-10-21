@@ -15,6 +15,7 @@ export const stubMutation: MaybeResolver<Mutation> = {
       isE2EConfigured: true,
       __typename: 'Project',
       config,
+      codeGenGlob: '/**/*.vue',
     }
 
     ctx.app.projects.push(project)
