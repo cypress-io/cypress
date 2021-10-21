@@ -21,3 +21,12 @@ export type ResolvedConfigurationOptions = Partial<{
 export interface FullConfig extends Partial<Cypress.RuntimeConfigOptions & Cypress.ResolvedConfigOptions> {
   resolved: ResolvedConfigurationOptions
 }
+
+export interface SampleConfigFile{
+  status: 'changes' | 'valid' | 'skipped' | 'error'
+  filePath: string
+  content: string
+  description?: string
+  warningText?: string
+  warningLink?: string
+}

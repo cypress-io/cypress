@@ -1,23 +1,27 @@
 <template>
-  <div class="h-7 border border-gray-200 rounded flex text-gray-500">
-    <div class="flex items-center p-2">
-      <IconFlake class="text-gray-400 text-sm mr-1" />
+  <div class="flex h-6 text-gray-500 border border-gray-200 rounded">
+    <div class="flex items-center px-2">
+      <i-cy-status-flaky_x12 class="mr-1 h-12px w-12px icon-dark-gray-400" />
       0
       <!--
 				TODO: Is flake even exposed via the API?
 				{{props.flake}}
 				-->
     </div>
-    <div class="flex items-center p-2">
-      <IconCancel class="text-gray-400 text-sm mr-1" />
+    <div class="flex items-center px-2">
+      <i-cy-status-skipped_x12 class="mr-1 h-12px w-12px icon-dark-gray-400" />
       {{ props.gql.totalSkipped }}
     </div>
-    <div class="flex items-center p-2">
-      <IconPass class="text-jade-600 text-xs mr-1" />
+    <div class="flex items-center px-2">
+      <i-cy-status-pending_x12 class="mr-1 h-12px w-12px icon-dark-gray-400 icon-light-white" />
+      {{ props.gql.totalPending }}
+    </div>
+    <div class="flex items-center px-2">
+      <i-cy-status-passed_x12 class="mr-1 h-12px w-12px icon-dark-jade-400" />
       {{ props.gql.totalPassed }}
     </div>
-    <div class="flex items-center p-2">
-      <IconFail class="text-red-600 mr-1" />
+    <div class="flex items-center px-2">
+      <i-cy-status-failed_x12 class="mr-1 h-12px w-12px icon-dark-red-400" />
       {{ props.gql.totalFailed }}
     </div>
   </div>
@@ -26,14 +30,6 @@
 <script lang="ts" setup>
 import type { RunResultsFragment } from '../generated/graphql'
 import { gql } from '@urql/core'
-// bi:check-lg
-import IconPass from '~icons/bi/check-lg'
-// eva:close-fill
-import IconFail from '~icons/eva/close-fill'
-// fa-solid:snowflake
-import IconFlake from '~icons/fa-solid/snowflake'
-// line-md:cancel
-import IconCancel from '~icons/line-md/cancel'
 
 gql`
 fragment RunResults on CloudRun {

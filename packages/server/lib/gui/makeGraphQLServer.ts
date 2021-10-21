@@ -4,30 +4,7 @@ import type { AddressInfo } from 'net'
 import type { DataContext } from '@packages/data-context'
 import pDefer from 'p-defer'
 import cors from 'cors'
-import type { Server } from 'http'
 import { SocketIOServer } from '@packages/socket'
-
-let graphqlServer: Server | undefined
-
-export async function closeGraphQLServer () {
-  if (!graphqlServer) {
-    return
-  }
-
-  const dfd = pDefer()
-
-  graphqlServer.close((err) => {
-    if (err) {
-      dfd.reject()
-    }
-
-    dfd.resolve()
-  })
-
-  graphqlServer = undefined
-
-  dfd.promise
-}
 
 export async function makeGraphQLServer (ctx: DataContext) {
   const dfd = pDefer<number>()
@@ -39,7 +16,7 @@ export async function makeGraphQLServer (ctx: DataContext) {
   // it's not jammed into the projects
   addGraphQLHTTP(app, ctx)
 
-  const srv = graphqlServer = app.listen(() => {
+  const srv = app.listen(() => {
     const port = (srv.address() as AddressInfo).port
 
     const endpoint = `http://localhost:${port}/graphql`
@@ -50,6 +27,8 @@ export async function makeGraphQLServer (ctx: DataContext) {
     }
 
     ctx.debug(`GraphQL Server at ${endpoint}`)
+
+    ctx.setGqlServer(srv)
 
     dfd.resolve(port)
   })

@@ -1,4 +1,7 @@
 import type { DataContext } from '..'
+import * as path from 'path'
+import type { SpecFile } from '@packages/types'
+import globby, { GlobbyOptions } from 'globby'
 
 export class FileDataSource {
   private watchedFilePaths = new Set<string>()
@@ -17,6 +20,30 @@ export class FileDataSource {
       this.jsonFileLoader.clear(e)
       throw e
     }) as Promise<Result>
+  }
+
+  normalizeFileToSpec (absolute: string, projectRoot: string, searchFolder: string): SpecFile {
+    const parsed = path.parse(absolute)
+
+    return {
+      absolute,
+      name: path.relative(searchFolder, absolute),
+      relative: path.relative(projectRoot, absolute),
+      baseName: parsed.base,
+      fileName: parsed.base.split('.')[0] || '',
+    }
+  }
+
+  async getFilesByGlob (glob: string | string[], globOptions?: GlobbyOptions) {
+    const globs = (Array.isArray(glob) ? glob : [glob]).concat('!**/node_modules/**')
+
+    try {
+      const files = await globby(globs, { onlyFiles: true, absolute: true, ...globOptions })
+
+      return files
+    } catch (e) {
+      return []
+    }
   }
 
   private trackFile () {

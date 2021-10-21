@@ -11,7 +11,7 @@ import gulp from 'gulp'
 import { autobarrelWatcher } from './tasks/gulpAutobarrel'
 import { startCypressWatch, openCypressLaunchpad, openCypressApp, runCypressLaunchpad, wrapRunWithExit, runCypressApp, killExistingCypress } from './tasks/gulpCypress'
 import { graphqlCodegen, graphqlCodegenWatch, nexusCodegen, nexusCodegenWatch, generateFrontendSchema, syncRemoteGraphQL } from './tasks/gulpGraphql'
-import { viteApp, viteCleanApp, viteCleanLaunchpad, viteLaunchpad, viteBuildApp, viteBuildAndWatchApp, viteBuildLaunchpad, viteBuildAndWatchLaunchpad } from './tasks/gulpVite'
+import { viteApp, viteCleanApp, viteCleanLaunchpad, viteLaunchpad, viteBuildApp, viteBuildAndWatchApp, viteBuildLaunchpad, viteBuildAndWatchLaunchpad, symlinkViteProjects, generateShikiTheme } from './tasks/gulpVite'
 import { checkTs } from './tasks/gulpTsc'
 import { makePathMap } from './utils/makePathMap'
 import { makePackage } from './tasks/gulpMakePackage'
@@ -19,6 +19,7 @@ import { setGulpGlobal } from './gulpConstants'
 import { exitAfterAll } from './tasks/gulpRegistry'
 import { execSync } from 'child_process'
 import { webpackRunner } from './tasks/gulpWebpack'
+import { e2eTestScaffold, e2eTestScaffoldWatch } from './tasks/gulpE2ETestScaffold'
 
 /**------------------------------------------------------------------------
  *                      Local Development Workflow
@@ -46,6 +47,9 @@ gulp.task(
 
     // ... and generate the correct GraphQL types for the frontend
     graphqlCodegenWatch,
+
+    // ... and generate the patsh for the e2e support file watching
+    e2eTestScaffoldWatch,
   ),
 )
 
@@ -71,6 +75,7 @@ gulp.task(
       viteApp,
       viteLaunchpad,
       webpackRunner,
+      e2eTestScaffoldWatch,
     ),
 
     // And we're finally ready for electron, watching for changes in
@@ -117,12 +122,14 @@ gulp.task('buildProd',
     syncRemoteGraphQL,
     nexusCodegen,
     graphqlCodegen,
+    generateShikiTheme,
 
     // Build the frontend(s) for production.
     gulp.parallel(
       viteBuildApp,
       viteBuildLaunchpad,
     ),
+    symlinkViteProjects,
   ))
 
 gulp.task(
@@ -132,6 +139,19 @@ gulp.task(
     exitAfterAll,
   ),
 )
+
+gulp.task('watchForE2E', gulp.series(
+  'codegen',
+  gulp.parallel(
+    gulp.series(
+      viteBuildAndWatchLaunchpad,
+      viteBuildAndWatchApp,
+    ),
+    webpackRunner,
+  ),
+  symlinkViteProjects,
+  e2eTestScaffold,
+))
 
 /**------------------------------------------------------------------------
  *                         Launchpad Testing
@@ -176,9 +196,11 @@ const cyOpenLaunchpad = gulp.series(
   //    This watches for changes and is not the same things as statically
   //    building the app for production.
   gulp.parallel(
-    viteBuildApp,
     viteBuildAndWatchLaunchpad,
+    viteBuildApp,
   ),
+
+  symlinkViteProjects,
 
   // 2. Start the REAL (dev) Cypress App, which will launch in open mode.
   openCypressLaunchpad,
@@ -195,6 +217,8 @@ const cyOpenApp = gulp.series(
     ),
     webpackRunner,
   ),
+
+  symlinkViteProjects,
 
   // 2. Start the REAL (dev) Cypress App, which will launch in open mode.
   openCypressApp,
@@ -242,6 +266,7 @@ gulp.task(makePackage)
  * here for debugging, e.g. `yarn gulp syncRemoteGraphQL`
  *------------------------------------------------------------------------**/
 
+gulp.task(symlinkViteProjects)
 gulp.task(syncRemoteGraphQL)
 gulp.task(generateFrontendSchema)
 gulp.task(makePathMap)
@@ -265,6 +290,8 @@ gulp.task('debugCypressLaunchpad', gulp.series(
   openCypressLaunchpad,
 ))
 
+gulp.task(e2eTestScaffoldWatch)
+gulp.task(e2eTestScaffold)
 gulp.task(startCypressWatch)
 gulp.task(openCypressApp)
 gulp.task(openCypressLaunchpad)

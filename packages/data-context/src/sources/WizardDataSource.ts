@@ -1,8 +1,8 @@
-import { Bundler, BUNDLERS, CodeLanguage, CODE_LANGUAGES, FrontendFramework, FRONTEND_FRAMEWORKS, PACKAGES_DESCRIPTIONS, StorybookInfo, WIZARD_STEPS } from '@packages/types'
-import dedent from 'dedent'
-import endent from 'endent'
+import { Bundler, BUNDLERS, CodeLanguage, CODE_LANGUAGES, FrontendFramework, FRONTEND_FRAMEWORKS, PACKAGES_DESCRIPTIONS, SampleConfigFile, StorybookInfo, WIZARD_STEPS } from '@packages/types'
 import type { NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
 import type { DataContext } from '..'
+import { getSampleConfigFiles } from '../codegen/sample-config-files'
+import dedent from 'dedent'
 
 export class WizardDataSource {
   constructor (private ctx: DataContext) {}
@@ -77,7 +77,7 @@ export class WizardDataSource {
 
   async sampleCode () {
     const data = this.ctx.wizardData
-    const storybookInfo = await this.ctx.storybook.storybookInfo
+    const storybookInfo = await this.ctx.storybook.loadStorybookInfo()
 
     if (!this.chosenLanguage) {
       return null
@@ -105,16 +105,49 @@ export class WizardDataSource {
     return null
   }
 
+  async sampleConfigFiles (): Promise<SampleConfigFile[]> {
+    const testingType = this.chosenTestingType
+
+    const configFileContent = await this.sampleCode()
+    const templateFileContent = await this.sampleTemplate()
+
+    if (!this.chosenLanguage || !configFileContent || !testingType) {
+      return []
+    }
+
+    const sampleConfigFile: SampleConfigFile = {
+      filePath: `cypress.config.${this.chosenLanguage.type}`,
+      description: 'The config file you are supposed to have',
+      content: configFileContent,
+      status: 'changes',
+      warningText: ['Please merge the code below with your existing',
+        '<span class="px-1 inline-block rounded bg-warning-200 text-warning-600">cypress.config.js</span>'].join(' '),
+      warningLink: 'https://docs.cypress.io/config-file',
+    }
+
+    if (testingType === 'component' && templateFileContent) {
+      const sampleTemplateFile: SampleConfigFile = {
+        filePath: 'cypress/component/entry.html',
+        content: templateFileContent,
+        status: 'valid',
+      }
+
+      return [sampleConfigFile, ...(await getSampleConfigFiles(testingType, this.chosenLanguage.type)), sampleTemplateFile]
+    }
+
+    return [sampleConfigFile, ...(await getSampleConfigFiles(testingType, this.chosenLanguage.type))]
+  }
+
   async sampleTemplate () {
-    const storybookInfo = await this.ctx.storybook.storybookInfo
+    const storybookInfo = await this.ctx.storybook.loadStorybookInfo()
 
     if (!this.chosenFramework || !this.chosenBundler) {
       return null
     }
 
     return wizardGetComponentIndexHtml({
-      framework: this.chosenFramework,
       bundler: this.chosenBundler,
+      framework: this.chosenFramework,
       storybookInfo,
     })
   }
@@ -151,7 +184,7 @@ export const wizardGetConfigCodeE2E = (opts: GetCodeOptsE2E): string | null => {
   const exportStatement =
     opts.lang.type === 'js' ? 'module.exports = {' : 'export default {'
 
-  return `${exportStatement}{
+  return `${exportStatement}
   e2e: {
     viewportHeight: 660,
     viewportWidth: 1000,
@@ -258,7 +291,7 @@ const getFrameworkConfigFile = (opts: GetCodeOptsCt) => {
       `,
     },
     cra: {
-      js: endent`
+      js: dedent`
         const { defineConfig } = require('cypress')
 
         module.exports = defineConfig({
@@ -268,7 +301,7 @@ const getFrameworkConfigFile = (opts: GetCodeOptsCt) => {
           }
         })
       `,
-      ts: endent`
+      ts: dedent`
         import { defineConfig } from 'cypress'
 
         export default defineConfig({
@@ -280,7 +313,7 @@ const getFrameworkConfigFile = (opts: GetCodeOptsCt) => {
       `,
     },
     vuecli: {
-      js: endent`
+      js: dedent`
         const { defineConfig } = require('cypress')
 
         module.exports = defineConfig({
@@ -290,7 +323,7 @@ const getFrameworkConfigFile = (opts: GetCodeOptsCt) => {
           }
         })
       `,
-      ts: endent`
+      ts: dedent`
         import { defineConfig } from 'cypress'
 
         export default defineConfig({
@@ -330,7 +363,7 @@ export const wizardGetComponentIndexHtml = (opts: Omit<GetCodeOptsCt, 'lang' | '
 
 const getComponentTemplate = (opts: {headModifier: string, bodyModifier: string}) => {
   // TODO: Properly indent additions and strip newline if none
-  return endent`
+  return dedent`
     <!DOCTYPE html>
     <html>
       <head>

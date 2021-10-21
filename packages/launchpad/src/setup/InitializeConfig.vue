@@ -6,7 +6,7 @@
         class="my-2"
       >
       <span class="my-2">
-        {{ props.gql.chosenTestingTypePluginsInitialized ? 'Project initialized.' : 'Initializing...' }}
+        {{ props.gql.wizard.chosenTestingTypePluginsInitialized ? 'Project initialized.' : 'Initializing...' }}
       </span>
     </div>
   </WizardLayout>
@@ -16,10 +16,10 @@
 import { onMounted, computed } from 'vue'
 import WizardLayout from './WizardLayout.vue'
 import { useMutation, gql } from '@urql/vue'
-import { InitializeConfigFragment, InitializeOpenProjectDocument } from '../generated/graphql'
+import { InitializeConfig_ConfigFragment, InitializeOpenProjectDocument } from '../generated/graphql'
 
 gql`
-fragment InitializeConfig on Wizard {
+fragment InitializeConfig_WizardState on Wizard {
   canNavigateForward
   chosenTestingTypePluginsInitialized
   step
@@ -27,20 +27,45 @@ fragment InitializeConfig on Wizard {
 `
 
 gql`
-mutation InitializeOpenProject {
-  initializeOpenProject {
-    ...InitializeConfig
+fragment InitializeConfig_Config on Query {
+  wizard {
+    ...InitializeConfig_WizardState
+  }
+
+  app {
+    selectedBrowser {
+      id
+      displayName
+    }
+    browsers {
+      id
+      name
+      family
+      disabled
+      isSelected
+      channel
+      displayName
+      path
+      version
+      majorVersion
+    }
   }
 }
 `
 
+gql`
+mutation InitializeOpenProject {
+  initializeOpenProject 
+}
+`
+
 const props = defineProps<{
-  gql: InitializeConfigFragment
+  gql: InitializeConfig_ConfigFragment
 }>()
 
 const initializeOpenProject = useMutation(InitializeOpenProjectDocument)
 
-const canNavigateForward = computed(() => props.gql.canNavigateForward ?? false)
+const canNavigateForward = computed(() => props.gql.wizard.canNavigateForward ?? false)
 
 onMounted(async () => {
   await initializeOpenProject.executeMutation({})

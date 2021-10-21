@@ -1,24 +1,15 @@
 <template>
   <div
-    class="
-      bg-gray-50
-      h-9
-      flex
-      items-center
-      px-5
-      gap-2
-      border-b border-gray-100
-      rounded-t-md
-    "
+    class="flex items-center gap-2 px-5 border-b border-gray-100  bg-gray-50 h-9 rounded-t-md"
   >
     <div
       v-for="i in [0, 1, 2]"
       :key="i"
-      class="rounded-md h-3 w-3 border border-1-gray-600"
+      class="w-3 h-3 border rounded-md border-1-gray-600"
     />
   </div>
   <div class="relative">
-    <pre class="text-left text-gray-500 p-5"><span
+    <pre class="p-5 text-left text-gray-500"><span
     class="text-purple-500"
     >{{ projectTitle }}:~$</span> {{ dependenciesCode }}</pre>
     <CopyButton :text="dependenciesCode" />

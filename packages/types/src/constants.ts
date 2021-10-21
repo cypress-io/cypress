@@ -23,36 +23,48 @@ export const FRONTEND_FRAMEWORKS = [
     name: 'Create React App',
     supportedBundlers: ['webpack'],
     package: '@cypress/react',
+    glob: '**/*.{jsx,tsx}',
+    deps: ['react-scripts', 'react', 'react-dom'],
   },
   {
     type: 'vuecli',
     name: 'Vue CLI',
     supportedBundlers: ['webpack'],
     package: '@cypress/vue',
+    glob: '**/*.vue',
+    deps: ['@vue/cli-service', 'vue'],
   },
   {
     type: 'react',
     name: 'React.js',
     supportedBundlers: ['webpack', 'vite'],
     package: '@cypress/react',
+    glob: '**/*.{jsx,tsx}',
+    deps: ['react', 'react-dom'],
   },
   {
     type: 'vue',
     name: 'Vue.js',
     supportedBundlers: ['webpack', 'vite'],
     package: '@cypress/vue',
+    glob: '**/*.vue',
+    deps: ['vue'],
   },
   {
     type: 'nextjs',
     name: 'Next.js',
     supportedBundlers: ['webpack'],
     package: '@cypress/react',
+    glob: '**/*.{jsx,tsx}',
+    deps: ['next', 'react', 'react-dom'],
   },
   {
     type: 'nuxtjs',
     name: 'Nuxt.js',
     supportedBundlers: ['webpack'],
     package: '@cypress/vue',
+    glob: '**/*.vue',
+    deps: ['nuxt'],
   },
 ] as const
 
@@ -111,8 +123,8 @@ export const NAV_ITEMS = [
 export const WIZARD_STEPS = [
   {
     type: 'welcome',
-    title: 'Welcome to Cypress',
-    description: 'Choose which method of testing you would like to set up first.',
+    title: 'Welcome to Cypress!',
+    description: 'Choose which method of testing you would like to get started with for this project.',
   },
   {
     type: 'initializePlugins',
@@ -130,9 +142,9 @@ export const WIZARD_STEPS = [
     description: 'Paste the command below into your terminal to install the required packages.',
   },
   {
-    type: 'createConfig',
-    title: 'Cypress.config',
-    description: 'Cypress will now create the following config file in the local directory for this project.',
+    type: 'configFiles',
+    title: 'Configuration Files',
+    description: 'We added the following files to your project.',
   },
   {
     type: 'setupComplete',

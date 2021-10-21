@@ -43,6 +43,10 @@
       "gitInfo": "{fileState} {timeAgo}"
     }
   },
+  "noResults": {
+    "defaultMessage": "No results matched your search",
+    "clearSearch": "Clear Search"
+  },
   "topNav": {
     "released": "Released",
     "version": "Version",
@@ -102,6 +106,7 @@
       "confirmManualInstall": "I've installed them"
     },
     "step": {
+      "continue": "Continue",
       "next": "Next Step",
       "back": "Back"
     },
@@ -118,22 +123,33 @@
   },
   "globalPage": {
     "empty": {
-      "title": "Welcome to Cypress!",
-      "helper": "Add your first project below to start testing with Cypress.",
+      "title": "Add Project",
+      "helper": "Get started by adding your first project below.",
       "dropText": "Drag your project directory here or {0}",
       "browseManually": "browse manually."
     },
-    "searchPlaceholder": "Search Projects",
-    "addProjectButton": "New Project"
+    "recentProjectsHeader": "Recent Projects",
+    "searchPlaceholder": "Search projects",
+    "addProjectButton": "Add Project",
+    "projectActions": "Project Actions",
+    "removeProject": "Remove Project",
+    "openInIDE": "Open In IDE",
+    "openInFinder": "Open In Finder",
+    "noResultsMessage": "No projects matched your search"
   },
-  "welcomeGuide": {
-    "header": {
-      "title": "Cypress",
-      "description": "A powerful open-source testing platform for developers and engineering teams all around the world."
-    },
-    "projectListHeader": "Recently Viewed Projects",
-    "linkHeader": "Quick Access",
-    "confirmWelcomeGuide": "Show the welcome guide when opening Cypress."
+  "welcomePage": {
+    "review": "Review the differences between each testing type",
+    "codeExample": "Code Example",
+    "compareTypes": {
+      "e2eTitle": "End-to-end Tests",
+      "e2ebullet1": "Visit URLs via",
+      "e2ebullet2": "Test flows and functionality across multiple pages.",
+      "e2ebullet3": "Ideal for testing integrated flows in CD workflows.",
+      "componentTitle": "Component Tests",
+      "ctBullet1": "Import components via",
+      "ctBullet2": "Test individual components of a design system in isolation",
+      "ctBullet3": "Ideal for testing isolated flows and components in CI"
+    }
   },
   "settingsPage": {
     "config": {

@@ -1,5 +1,6 @@
-import { BUNDLERS, FoundBrowser, FoundSpec, ResolvedFromConfig, StorybookFile } from '@packages/types'
+import { BUNDLERS, FoundBrowser, FoundSpec, GeneratedSpec, Preferences, ResolvedFromConfig } from '@packages/types'
 import type { NexusGenEnums, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
+import type { BrowserWindow } from 'electron'
 
 export type Maybe<T> = T | null | undefined
 
@@ -26,6 +27,8 @@ export interface ActiveProjectShape extends ProjectShape {
   currentSpecId?: Maybe<string>
   specs?: FoundSpec[]
   config: ResolvedFromConfig[]
+  preferences?: Preferences| null
+  generatedSpec: GeneratedSpec | null
 }
 
 export interface AppDataShape {
@@ -48,14 +51,25 @@ export interface WizardDataShape {
   chosenLanguage: NexusGenEnums['CodeLanguageEnum']
   chosenManualInstall: boolean
   chosenBrowser: FoundBrowser | null
-  generatedSpec: Omit<StorybookFile, 'content'> | null
+}
+
+export interface ElectronShape {
+  browserWindow: BrowserWindow | null
+}
+
+export interface BaseErrorDataShape {
+  title?: string
+  message: string
+  stack?: string
 }
 
 export interface CoreDataShape {
+  baseError: BaseErrorDataShape | null
   dev: DevStateShape
   app: AppDataShape
   wizard: WizardDataShape
   user: AuthenticatedUserShape | null
+  electron: ElectronShape
 }
 
 /**
@@ -63,6 +77,7 @@ export interface CoreDataShape {
  */
 export function makeCoreData (): CoreDataShape {
   return {
+    baseError: null,
     dev: {
       refreshState: null,
     },
@@ -85,8 +100,10 @@ export function makeCoreData (): CoreDataShape {
       allBundlers: BUNDLERS,
       history: ['welcome'],
       chosenBrowser: null,
-      generatedSpec: null,
     },
     user: null,
+    electron: {
+      browserWindow: null,
+    },
   }
 }

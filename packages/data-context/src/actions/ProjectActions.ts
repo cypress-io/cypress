@@ -1,5 +1,5 @@
-import type { MutationAddProjectArgs, MutationAppCreateConfigFileArgs, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
-import type { FindSpecs, FoundBrowser, FoundSpec, FullConfig, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions } from '@packages/types'
+import type { MutationAddProjectArgs, MutationAppCreateConfigFileArgs, MutationSetProjectPreferencesArgs, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
+import type { FindSpecs, FoundBrowser, FoundSpec, FullConfig, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions, Preferences } from '@packages/types'
 import path from 'path'
 import type { ProjectShape } from '../data/coreDataShape'
 
@@ -18,7 +18,11 @@ export interface ProjectApiShape {
   insertProjectToCache(projectRoot: string): void
   removeProjectFromCache(projectRoot: string): void
   getProjectRootsFromCache(): Promise<string[]>
+  insertProjectPreferencesToCache(projectTitle: string, preferences: Preferences): void
+  getProjectPreferencesFromCache(): Promise<Record<string, Preferences>>
   clearLatestProjectsCache(): Promise<unknown>
+  clearProjectPreferences(projectTitle: string): Promise<unknown>
+  clearAllProjectPreferences(): Promise<unknown>
   closeActiveProject(): Promise<unknown>
 }
 
@@ -31,8 +35,12 @@ export class ProjectActions {
 
   async clearActiveProject () {
     this.ctx.appData.activeProject = null
+    await this.api.closeActiveProject()
 
-    return this.api.closeActiveProject()
+    // TODO(tim): Improve general state management w/ immutability (immer) & updater fn
+    this.ctx.coreData.app.isInGlobalMode = true
+    this.ctx.coreData.app.activeProject = null
+    this.ctx.coreData.app.activeTestingType = null
   }
 
   private get projects () {
@@ -44,14 +52,20 @@ export class ProjectActions {
   }
 
   async setActiveProject (projectRoot: string) {
+    const title = this.ctx.project.projectTitle(projectRoot)
+
+    await this.clearActiveProject()
+
     this.ctx.coreData.app.activeProject = {
       projectRoot,
-      title: '',
+      title,
       ctPluginsInitialized: false,
       e2ePluginsInitialized: false,
       isFirstTimeCT: await this.ctx.project.isFirstTimeAccessing(projectRoot, 'component'),
       isFirstTimeE2E: await this.ctx.project.isFirstTimeAccessing(projectRoot, 'e2e'),
       config: await this.ctx.project.getResolvedConfigFields(projectRoot),
+      preferences: await this.ctx.project.getProjectPreferences(title),
+      generatedSpec: null,
     }
 
     return this
@@ -86,6 +100,7 @@ export class ProjectActions {
     }
 
     try {
+      await this.api.closeActiveProject()
       await this.api.initializeProject(launchArgs, {
         ...this.ctx.launchOptions,
         ...options,
@@ -194,6 +209,14 @@ export class ProjectActions {
     await this.api.clearLatestProjectsCache()
   }
 
+  async clearProjectPreferencesCache (projectTitle: string) {
+    await this.api.clearProjectPreferences(projectTitle)
+  }
+
+  async clearAllProjectPreferencesCache () {
+    await this.api.clearAllProjectPreferences()
+  }
+
   async createComponentIndexHtml (template: string) {
     const project = this.ctx.activeProject
 
@@ -206,5 +229,13 @@ export class ProjectActions {
 
       await this.ctx.fs.outputFile(indexHtmlPath, template)
     }
+  }
+
+  async setProjectPreferences (args: MutationSetProjectPreferencesArgs) {
+    if (!this.ctx.activeProject) {
+      throw Error(`Cannot save preferences without activeProject.`)
+    }
+
+    this.api.insertProjectPreferencesToCache(this.ctx.activeProject.title, { ...args })
   }
 }

@@ -15,32 +15,33 @@ export const stubMutation: MaybeResolver<Mutation> = {
       isFirstTimeE2E: true,
       __typename: 'Project',
       config,
+      codeGenGlob: '/**/*.vue',
     }
 
     ctx.app.projects.push(project)
 
-    return ctx.app
+    return true
   },
   setActiveProject (source, args, ctx) {
     ctx.app.activeProject = ctx.app.projects.find((p) => p.projectRoot === args.path) ?? null
 
-    return {}
+    return true
   },
   appCreateConfigFile: (source, args, ctx) => {
     ctx.wizard.chosenManualInstall = true
     ctx.wizard.canNavigateForward = true
 
-    return ctx.app
+    return true
   },
   clearActiveProject (source, args, ctx) {
     ctx.app.activeProject = null
 
-    return {}
+    return true
   },
   removeProject (source, args, ctx) {
     ctx.app.projects = ctx.app.projects.filter((p) => p.projectRoot !== args.path)
 
-    return ctx.app
+    return true
   },
   setCurrentSpec (source, args, ctx) {
     if (!ctx.app.activeProject) {
@@ -60,9 +61,22 @@ export const stubMutation: MaybeResolver<Mutation> = {
       baseName: 'Basic',
     }
 
-    return ctx.app.activeProject
+    return true
   },
   generateSpecFromStory (source, args, ctx) {
-    return ctx.wizard
+    if (!ctx.app.activeProject) {
+      throw Error('Cannot set currentSpec without active project')
+    }
+
+    return true
+  },
+  hideBrowserWindow (source, args, ctx) {
+    return ctx.app
+  },
+  setProjectPreferences (source, args, ctx) {
+    return ctx.app
+  },
+  showBrowserWindow (source, args, ctx) {
+    return ctx.app
   },
 }

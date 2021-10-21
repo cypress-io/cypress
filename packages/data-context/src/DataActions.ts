@@ -1,11 +1,16 @@
 import type { DataContext } from '.'
-import { AppActions, ProjectActions, StorybookActions, WizardActions } from './actions'
+import { AppActions, ElectronActions, FileActions, ProjectActions, StorybookActions, WizardActions } from './actions'
 import { AuthActions } from './actions/AuthActions'
 import { DevActions } from './actions/DevActions'
 import { cached } from './util'
 
 export class DataActions {
   constructor (private ctx: DataContext) {}
+
+  @cached
+  get file () {
+    return new FileActions(this.ctx)
+  }
 
   @cached
   get dev () {
@@ -35,5 +40,10 @@ export class DataActions {
   @cached
   get storybook () {
     return new StorybookActions(this.ctx)
+  }
+
+  @cached
+  get electron () {
+    return new ElectronActions(this.ctx)
   }
 }
