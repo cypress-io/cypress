@@ -1,10 +1,11 @@
 const validator = require('../../src/index')
+const { expect } = require('chai')
 
 describe('src/index', () => {
-  describe('.getConfigKeys', () => {
+  describe('.getPublicConfigKeys', () => {
     beforeEach(function () {
       this.includes = (key) => {
-        expect(validator.getConfigKeys()).to.include(key)
+        expect(validator.getPublicConfigKeys()).to.include(key)
       }
     })
 

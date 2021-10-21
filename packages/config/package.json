@@ -8,9 +8,10 @@
     "lint": "cd ../../ && yarn lint packages/config/**/*",
     "test": "yarn test-unit",
     "test-debug": "yarn test-unit --inspect-brk=5566",
-    "test-unit": "mocha --configFile=../../mocha-reporter-config.json -extension=.js,.ts test/unit/*spec.* --exit"
+    "test-unit": "mocha --configFile=../../mocha-reporter-config.json -r @packages/ts/register -extension=.js,.ts test/unit/*spec.* --exit"
   },
   "devDependencies": {
+    "@packages/ts": "0.0.0-development",
     "@types/lodash": "^4.14.168",
     "@types/mocha": "^8.0.3",
     "check-more-types": "2.24.0",

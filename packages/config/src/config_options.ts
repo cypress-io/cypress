@@ -40,6 +40,26 @@ interface BreakingOption {
    */
   isWarning?: boolean
 }
+// almost the validate function but it's cross-checking the default values
+const isValidConfig = (key, config) => {
+  const status = v.isPlainObject(key, config)
+
+  if (status !== true) {
+    return status
+  }
+
+  for (const rule of options) {
+    if (rule.name in config && rule.validation) {
+      const status = rule.validation(`${key}.${rule.name}`, config[rule.name])
+
+      if (status !== true) {
+        return status
+      }
+    }
+  }
+
+  return true
+}
 
 // TODO - add boolean attribute to indicate read-only / static vs mutable options
 // that can be updated during test executions
@@ -68,7 +88,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     name: 'component',
     // runner-ct overrides
     defaultValue: {},
-    validation: v.isValidConfig,
+    validation: isValidConfig,
   }, {
     name: 'componentFolder',
     defaultValue: 'cypress/component',
@@ -87,7 +107,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     name: 'e2e',
     // e2e runner overrides
     defaultValue: {},
-    validation: v.isValidConfig,
+    validation: isValidConfig,
   }, {
     name: 'env',
     defaultValue: {},
