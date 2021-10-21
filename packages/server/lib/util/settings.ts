@@ -5,16 +5,10 @@ import errors from '../errors'
 import { fs } from '../util/fs'
 import { requireAsync } from './require_async'
 import Debug from 'debug'
+import { setProjectConfig } from '../cache'
+import type { SettingsOptions } from '@packages/types'
 
 const debug = Debug('cypress:server:settings')
-
-interface SettingsOptions {
-  testingType?: 'component' |'e2e'
-  configFile?: string | false
-  args?: {
-    runProject?: string
-  }
-}
 
 function jsCode (obj) {
   const objJSON = obj && !_.isEmpty(obj)
@@ -126,7 +120,7 @@ export function configFile (options: SettingsOptions = {}) {
   // default is only used in tests.
   // This prevents a the change from becoming bigger than it should
   // FIXME: remove the default
-  return options.configFile === false ? false : (options.configFile || 'cypress.json')
+  return options.configFile === false ? false : (options.configFile || 'cypress.config.js')
 }
 
 export function id (projectRoot, options = {}) {
@@ -146,12 +140,10 @@ export function read (projectRoot, options: SettingsOptions = {}) {
 
   const file = pathToConfigFile(projectRoot, options)
 
-  const readPromise = /\.json$/.test(file) ? fs.readJSON(path.resolve(projectRoot, file)) : requireAsync(file, {
+  return requireAsync(file, {
     projectRoot,
     loadErrorCode: 'CONFIG_FILE_ERROR',
   })
-
-  return readPromise
   .catch((err) => {
     if (err.type === 'MODULE_NOT_FOUND' || err.code === 'ENOENT') {
       if (options.args?.runProject) {
@@ -173,18 +165,28 @@ export function read (projectRoot, options: SettingsOptions = {}) {
     }
 
     debug('resolved configObject', configObject)
-    const changed = _applyRewriteRules(configObject)
+    const changed: { projectId?: string, component?: {}, e2e?: {} } = _applyRewriteRules(configObject)
 
-    // if our object is unchanged
+    const isCTConfigured = Boolean(Object.keys(changed?.component ?? {}).length)
+    const isE2EConfigured = Boolean(Object.keys(changed?.e2e ?? {}).length)
+
+    return setProjectConfig(projectRoot, {
+      projectId: changed?.projectId,
+      isCTConfigured,
+      isE2EConfigured,
+    })
+    .then(() => {
+      // if our object is unchanged
     // then just return it
-    if (_.isEqual(configObject, changed)) {
-      return configObject
-    }
+      if (_.isEqual(configObject, changed)) {
+        return configObject
+      }
 
-    // else write the new reduced obj
-    return _write(file, changed)
-    .then((config) => {
-      return config
+      // else write the new reduced obj and store the projectId on the cache
+      return _write(file, changed)
+      .then((config) => {
+        return config
+      })
     })
   }).catch((err) => {
     debug('an error occured when reading config', err)

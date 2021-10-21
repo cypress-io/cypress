@@ -14,8 +14,8 @@ export const createTestProject = (title: string): CodegenTypeMap['Project'] => {
   // TODO: What a mess, type this without all the hacks
   return {
     ...testNodeId('Project'),
-    isFirstTimeCT: true,
-    isFirstTimeE2E: true,
+    isCTConfigured: true,
+    isE2EConfigured: true,
     projectId: `${snakeTitle}-id`,
     title,
     projectRoot: `/usr/local/dev/projects/${snakeTitle}`,

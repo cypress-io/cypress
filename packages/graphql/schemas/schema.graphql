@@ -520,10 +520,10 @@ type Project implements Node {
   id: ID!
 
   """Whether the user configured this project to use Component Testing"""
-  isFirstTimeCT: Boolean!
+  isCTConfigured: Boolean!
 
   """Whether the user configured this project to use e2e Testing"""
-  isFirstTimeE2E: Boolean!
+  isE2EConfigured: Boolean!
 
   """Cached preferences for this project"""
   preferences: ProjectPreferences

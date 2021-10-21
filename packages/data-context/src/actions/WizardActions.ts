@@ -120,7 +120,7 @@ export class WizardActions {
     }
 
     if (this.data.currentStep === 'welcome' && this.data.chosenTestingType === 'component') {
-      if (this.ctx.activeProject?.isFirstTimeCT) {
+      if (this.ctx.activeProject?.isCTConfigured) {
         this.navigateToStep('selectFramework')
       } else if (!this.ctx.activeProject?.ctPluginsInitialized) {
         // not first time, and we haven't initialized plugins - initialize them
@@ -134,7 +134,7 @@ export class WizardActions {
     }
 
     if (this.data.currentStep === 'welcome' && this.data.chosenTestingType === 'e2e') {
-      if (this.ctx.activeProject?.isFirstTimeE2E) {
+      if (this.ctx.activeProject?.isE2EConfigured) {
         this.navigateToStep('configFiles')
       } else if (!this.ctx.activeProject?.e2ePluginsInitialized) {
         // not first time, and we haven't initialized plugins - initialize them

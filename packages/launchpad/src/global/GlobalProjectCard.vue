@@ -73,11 +73,6 @@ fragment GlobalProjectCard on Project {
   id
   title
   projectRoot
-  cloudProject {
-    latestRun {
-      status
-    }
-  }
 }
 `
 

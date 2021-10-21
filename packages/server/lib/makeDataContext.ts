@@ -1,6 +1,6 @@
 import { DataContext } from '@packages/data-context'
 import specsUtil from './util/specs'
-import type { FindSpecs, FoundBrowser, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions, PlatformName, Preferences } from '@packages/types'
+import type { FindSpecs, FoundBrowser, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions, PlatformName, Preferences, ProjectConfigCache, SettingsOptions } from '@packages/types'
 import { checkAuthQuery } from '@packages/graphql/src/stitching/remoteGraphQLCalls'
 import browserUtils from './browsers/utils'
 import auth from './gui/auth'
@@ -39,8 +39,8 @@ export function makeDataContext (options: MakeDataContextOptions) {
       },
     },
     projectApi: {
-      getConfig (projectRoot: string) {
-        return config.get(projectRoot)
+      getConfig (projectRoot: string, options?: SettingsOptions) {
+        return config.get(projectRoot, options)
       },
       launchProject (browser: FoundBrowser, spec: Cypress.Spec, options?: LaunchOpts) {
         return openProject.launch({ ...browser }, spec, options)
@@ -56,6 +56,12 @@ export function makeDataContext (options: MakeDataContextOptions) {
       },
       findSpecs (payload: FindSpecs) {
         return specsUtil.findSpecs(payload)
+      },
+      setProjectConfig (projectRoot: string, config: Partial<ProjectConfigCache> | null) {
+        return cache.setProjectConfig(projectRoot, config)
+      },
+      getProjectConfig (projectRoot: string) {
+        return cache.getProjectConfig(projectRoot)
       },
       clearLatestProjectsCache () {
         return cache.removeLatestProjects()

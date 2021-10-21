@@ -1,12 +1,12 @@
 import type { MutationAddProjectArgs, MutationAppCreateConfigFileArgs, MutationSetProjectPreferencesArgs, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
-import type { FindSpecs, FoundBrowser, FoundSpec, FullConfig, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions, Preferences } from '@packages/types'
+import type { FindSpecs, FoundBrowser, FoundSpec, FullConfig, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions, Preferences, ProjectConfigCache, SettingsOptions } from '@packages/types'
 import path from 'path'
 import type { ProjectShape } from '../data/coreDataShape'
 
 import type { DataContext } from '..'
 
 export interface ProjectApiShape {
-  getConfig(projectRoot: string): Promise<FullConfig>
+  getConfig(projectRoot: string, options?: SettingsOptions): Promise<FullConfig>
   findSpecs(payload: FindSpecs): Promise<FoundSpec[]>
   /**
    * "Initializes" the given mode, since plugins can define the browsers available
@@ -24,6 +24,8 @@ export interface ProjectApiShape {
   clearProjectPreferences(projectTitle: string): Promise<unknown>
   clearAllProjectPreferences(): Promise<unknown>
   closeActiveProject(): Promise<unknown>
+  setProjectConfig(projectRoot: string, projectId: Partial<ProjectConfigCache> | null): Promise<unknown>
+  getProjectConfig (projectRoot: string): Promise<ProjectConfigCache | null>
 }
 
 export class ProjectActions {
@@ -61,8 +63,8 @@ export class ProjectActions {
       title,
       ctPluginsInitialized: false,
       e2ePluginsInitialized: false,
-      isFirstTimeCT: await this.ctx.project.isFirstTimeAccessing(projectRoot, 'component'),
-      isFirstTimeE2E: await this.ctx.project.isFirstTimeAccessing(projectRoot, 'e2e'),
+      isCTConfigured: await this.ctx.project.isTestingTypeConfigured(projectRoot, 'component'),
+      isE2EConfigured: await this.ctx.project.isTestingTypeConfigured(projectRoot, 'e2e'),
       config: await this.ctx.project.getResolvedConfigFields(projectRoot),
       preferences: await this.ctx.project.getProjectPreferences(title),
       generatedSpec: null,
@@ -224,7 +226,7 @@ export class ProjectActions {
       throw Error(`Cannot create index.html without activeProject.`)
     }
 
-    if (this.ctx.activeProject?.isFirstTimeCT) {
+    if (this.ctx.activeProject?.isCTConfigured) {
       const indexHtmlPath = path.resolve(this.ctx.activeProject.projectRoot, 'cypress/component/support/index.html')
 
       await this.ctx.fs.outputFile(indexHtmlPath, template)

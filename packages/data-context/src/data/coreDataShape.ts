@@ -22,8 +22,8 @@ export interface ActiveProjectShape extends ProjectShape {
   title: string
   ctPluginsInitialized: Maybe<boolean>
   e2ePluginsInitialized: Maybe<boolean>
-  isFirstTimeCT: Maybe<boolean>
-  isFirstTimeE2E: Maybe<boolean>
+  isCTConfigured: Maybe<boolean>
+  isE2EConfigured: Maybe<boolean>
   currentSpecId?: Maybe<string>
   specs?: FoundSpec[]
   config: ResolvedFromConfig[]

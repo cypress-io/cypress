@@ -221,11 +221,13 @@ export const mutation = mutationType({
         try {
           await ctx.actions.wizard.initializeOpenProject()
           ctx.coreData.baseError = null
-        } catch (error: any) {
+        } catch (error) {
+          const e = error as Error
+
           ctx.coreData.baseError = {
             title: 'Cypress Configuration Error',
-            message: error.message,
-            stack: error.stack,
+            message: e.message,
+            stack: e.stack,
           }
         }
       },
