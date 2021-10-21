@@ -50,8 +50,8 @@
 </template>
 
 <script lang="ts" setup>
-import { gql, useQuery } from '@urql/vue'
-import { MainLaunchpadQueryDocument } from './generated/graphql'
+import { gql, useMutation, useQuery } from '@urql/vue'
+import { MainLaunchpadQueryDocument, Main_SkipLaunchpadDocument } from './generated/graphql'
 import TestingTypeCards from './setup/TestingTypeCards.vue'
 import Wizard from './setup/Wizard.vue'
 import WizardHeader from './setup/WizardHeader.vue'
@@ -62,7 +62,7 @@ import StandardModal from '@cy/components/StandardModal.vue'
 import CompareTestingTypes from './setup/CompareTestingTypes.vue'
 
 import { useI18n } from '@cy/i18n'
-import { ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import ShikiHighlight from '../../frontend-shared/src/components/ShikiHighlight.vue'
 
 const { t } = useI18n()
@@ -85,10 +85,42 @@ query MainLaunchpadQuery {
   app {
     isInGlobalMode
     ...GlobalPage
+    activeProject {
+      preferences {
+        browserId
+        testingType 
+      }
+    }
   }
   ...HeaderBar
 }
 `
 
+gql`
+mutation Main_SkipLaunchpad ($browserId: ID!, $testingType: TestingTypeEnum) {
+  hideBrowserWindow
+  wizardUpdate(input: {
+    testingType: $testingType
+  })
+  initializeOpenProject
+  launchpadSetBrowser(id: $browserId)
+  launchOpenProject
+}
+`
+
 const query = useQuery({ query: MainLaunchpadQueryDocument })
+const mutation = useMutation(Main_SkipLaunchpadDocument)
+
+const hasPreferences = computed(() => {
+  return !!query.data.value?.app.activeProject.preferences ?? false
+})
+
+watch(hasPreferences, (newVal, oldVal) => {
+  if (oldVal !== newVal && newVal) {
+    const { browserId, testingType } = query.data.value.app.activeProject.preferences
+
+    // mutation.executeMutation({ browserId, testingType })
+  }
+})
+
 </script>
