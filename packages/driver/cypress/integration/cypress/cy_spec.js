@@ -42,11 +42,11 @@ describe('driver/src/cypress/cy', () => {
     let setup
 
     before(() => {
-      setup = (fn = () => {}) => {
-        Cypress.Commands.add('nested', () => {
-          cy.url()
-        })
+      Cypress.Commands.add('nested', () => {
+        cy.url()
+      })
 
+      setup = (fn = () => {}) => {
         cy.nested().noop().then(() => fn())
       }
     })
@@ -153,7 +153,7 @@ describe('driver/src/cypress/cy', () => {
         cy.get('[contenteditable]').first()
       })
 
-      Cypress.Commands.add('login', { prevSubject: true }, (subject, email) => {
+      Cypress.Commands.add('logout', { prevSubject: true }, (subject, email) => {
         cy.wrap(subject.find('input:first')).type(email)
       })
     })
@@ -162,7 +162,7 @@ describe('driver/src/cypress/cy', () => {
       const input = cy.$$('input:first')
 
       cy.get('input:first').parent()
-      .command('login', 'brian@foo.com').then(($input) => {
+      .command('logout', 'brian@foo.com').then(($input) => {
         expect($input.get(0)).to.eq(input.get(0))
       })
     })
