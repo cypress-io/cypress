@@ -8,7 +8,15 @@
     class="h-24px w-24px"
   />
   <i-cy-status-errored-solid_x24
-    v-else-if="props.gql.status === 'CANCELLED'"
+    v-else-if="props.gql.status === 'TIMEDOUT' || props.gql.status === 'ERRORED' || props.gql.status === 'OVERLIMIT'"
+    class="h-24px w-24px"
+  />
+  <i-cy-status-skipped_x24
+    v-else-if="props.gql.status === 'CANCELLED' || props.gql.status === 'NOTESTS'"
+    class="h-24px w-24px"
+  />
+  <i-cy-status-pending_x24
+    v-else-if="props.gql.status === 'RUNNING'"
     class="h-24px w-24px"
   />
   <ProgressCircle

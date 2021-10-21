@@ -21,6 +21,7 @@ import type {
   QueryCloudProjectBySlugArgs,
   QueryCloudProjectsBySlugsArgs,
   CloudProjectRunsArgs,
+  CloudRunStatus,
 } from '../generated/test-cloud-graphql-types.gen'
 import type { GraphQLResolveInfo } from 'graphql'
 
@@ -67,6 +68,7 @@ export function createCloudRunCommitInfo (config: ConfigFor<CloudRunCommitInfo>)
     branchUrl: 'https://',
     authorName: 'John Appleseed',
     authorEmail: 'none@cypress.io',
+    ...config,
   }
 
   return cloudRunCommitInfo
@@ -82,6 +84,8 @@ export function createCloudRecordKey (config: ConfigFor<CloudRecordKey>) {
   return indexNode(cloudRecordKey)
 }
 
+const STATUS_ARRAY: CloudRunStatus[] = ['CANCELLED', 'ERRORED', 'FAILED', 'NOTESTS', 'OVERLIMIT', 'PASSED', 'RUNNING', 'TIMEDOUT']
+
 export function createCloudProject (config: ConfigFor<CloudProject>) {
   const cloudProject = {
     ...testNodeId('CloudProject'),
@@ -89,10 +93,13 @@ export function createCloudProject (config: ConfigFor<CloudProject>) {
     latestRun: CloudRunStubs.running,
     runs (args: CloudProjectRunsArgs) {
       const twentyRuns = _.times(20, (i) => {
+        const statusIndex = i % STATUS_ARRAY.length
+        const status = STATUS_ARRAY[statusIndex]
+
         return createCloudRun({
-          status: 'PASSED',
+          status,
           totalPassed: i,
-          commitInfo: createCloudRunCommitInfo({ sha: `fake-sha-${getNodeIdx('CloudRun')}` }),
+          commitInfo: createCloudRunCommitInfo({ sha: `fake-sha-${getNodeIdx('CloudRun')}`, summary: `fix: make gql work ${status}` }),
         })
       })
 
