@@ -803,6 +803,10 @@ export default {
       message: 'Could not find a command for: `{{name}}`.\n\nAvailable commands are: {{cmds}}.\n',
       docsUrl: 'https://on.cypress.io/api',
     },
+    invalid_new_command: {
+      message: '`Cypress.Commands.add()` is used to create new commands, but `{{name}}` is already an existing Cypress command. Please use `Cypress.Commands.overwrite()` if you would like to overwrite an existing command.',
+      docsUrl: 'https://docs.cypress.io/api/cypress-api/custom-commands',
+    },
     invalid_overwrite: {
       message: 'Cannot overwite command for: `{{name}}`. An existing command does not exist by that name.',
       docsUrl: 'https://on.cypress.io/api',

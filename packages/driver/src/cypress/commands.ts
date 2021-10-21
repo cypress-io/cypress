@@ -126,6 +126,14 @@ export default {
       },
 
       add (name, options, fn) {
+        if (_.keys(commands).includes(name)) {
+          $errUtils.throwErrByPath('miscellaneous.invalid_new_command', {
+            args: {
+              name,
+            },
+          })
+        }
+
         if (_.isFunction(options)) {
           fn = options
           options = {}
