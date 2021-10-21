@@ -34,7 +34,7 @@ import type { Specs_RunnerFragment } from '../generated/graphql'
 import InlineSpecList from '../specs/InlineSpecList.vue'
 import { getMobXStore } from '../store'
 import { useRoute } from 'vue-router'
-import { useSpecStore, uuseSpecStore } from '../composables/specStore'
+import { useSpecStore } from '../composables/specStore'
 
 gql`
 fragment Specs_Runner on App {
