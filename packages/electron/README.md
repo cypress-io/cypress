@@ -26,7 +26,7 @@ Many users rely on the bundled Chromium and Node.js to be relatively recent. Als
 
 Therefore, the version of `electron` that is bundled with Cypress should be kept as up-to-date as possible with the [stable Electron releases](https://www.electronjs.org/releases/stable).
 
-Upgrading `electron` involves more than just bumping `package.json` and `yarn.lock`. Here are additional tasks to check off when upgrading Electron:
+Upgrading `electron` involves more than just bumping this package's `package.json`. Here are additional tasks to check off when upgrading Electron:
 
 - [ ] **Write an accurate changelog item.** The "User-facing changelog" for an Electron upgrade should mention the new Node.js and Chromium versions bundled.
 - [ ] **Determine if the Electron upgrade is a breaking change.** Electron upgrades constitute "breaking changes" in Cypress if:
@@ -36,13 +36,13 @@ Upgrading `electron` involves more than just bumping `package.json` and `yarn.lo
 - [ ] **Create and publish Docker `base` and `browsers` family images matching the Node.js and Chromium versions in Electron.** The `browsers` image will be used for CI and the `base` will be used for any new `included` family images.
     - See [`cypress-docker-images`](https://github.com/cypress-io/cypress-docker-images/).
 - [ ] **Ensure that a matching Node.js version is enforced in the monorepo for local development and CI.** When Electron is upgraded, oftentimes, the bundled Node.js version that comes with Electron is updated as well. Because all unit and integration tests run in normal Node.js (not Electron's Node.js), it's important for this Node.js version to be synced with the monorepo. There are a few places where this needs to be done:
-    - [ ] [`/.node-version`](../../.node-version) - used by NVM and other Node version managers)
-    - [ ] [`/appveyor.yml`](../../appveyor.yml) - update the nodejs_version
-    - [ ] [`/package.json`](../../package.json) - update "engines"
+    - [ ] [`/.node-version`](../../.node-version) - used by `nvm` and other Node version managers)
+    - [ ] [`/appveyor.yml`](../../appveyor.yml) - update the `nodejs_version`
+    - [ ] [`/package.json`](../../package.json) - update `engines`
     - [ ] [`/scripts/run-docker-local.sh`](../../scripts/run-docker-local.sh) - update Docker image to the new matching `browsers` image
     - [ ] [`/circle.yml`](../../circle.yml)
         - Update the Docker `image`s to the new matching `browsers` image.
         - Update the `xcode` version to one with the same major Node.js version bundled. There is usually not an exact match, this is ok as long as the major version number as the same.
-    - [ ] Do a global search for the old Node.js version to identify any new areas that may need updating/unification, and update those locations (and this document!) with the new Node.js version.
+    - [ ] Do a global search for the old Node.js version to identify any new areas that may need updating/unification, and update those locations (and this document!)
 - [ ] **Manually smoke test `cypress open`.** Upgrading Electron can break the `desktop-gui` in unexpected ways. Since testing in this area is weak, double-check that things like launching `cypress open`, signing into the Dashboard, and launching Electron tests still work.
 - [ ] **Fix failing tests.** Usually, these are due to breaking changes in either Node.js or Electron. Check the changelogs of both to find relevant changes.
