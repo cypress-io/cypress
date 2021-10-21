@@ -33,9 +33,9 @@ export default {
         ret = value
       }
 
-      _.extend(state, obj)
+      validate && validate(obj)
 
-      validate && validate(state)
+      _.extend(state, obj)
 
       return ret
     }

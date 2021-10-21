@@ -6,7 +6,6 @@
   "scripts": {
     "build": "tsc",
     "build-prod": "tsc",
-    "test-unit": "echo 'no unit tests'",
     "watch": "tsc -w"
   },
   "dependencies": {},

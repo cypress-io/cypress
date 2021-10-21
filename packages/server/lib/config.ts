@@ -633,7 +633,7 @@ export function parseEnv (cfg: Record<string, any>, envCLI: Record<string, any>,
     })
   }
 
-  const envCfg = cfg.env
+  const envCfg = cfg.env != null ? cfg.env : {}
   const envFile = cfg.envFile != null ? cfg.envFile : {}
   let envProc = getProcessEnvVars(process.env) || {}
 
