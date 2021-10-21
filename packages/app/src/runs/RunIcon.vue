@@ -1,13 +1,13 @@
 <template>
-  <i-cy-runs-pass_x24
+  <i-cy-status-passed-solid_x24
     v-if="props.gql.status === 'PASSED'"
     class="h-24px w-24px"
   />
-  <i-cy-runs-fail_x24
+  <i-cy-status-failed-solid_x24
     v-else-if="props.gql.status ==='FAILED'"
     class="h-24px w-24px"
   />
-  <i-cy-runs-warn_x24
+  <i-cy-status-errored-solid_x24
     v-else-if="props.gql.status === 'CANCELLED'"
     class="h-24px w-24px"
   />
