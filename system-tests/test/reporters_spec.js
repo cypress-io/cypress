@@ -147,7 +147,7 @@ describe('e2e reporters', () => {
   })
 
   it('shows slow tests in yellow', function () {
-    return e2e.exec(this, {
+    return systemTests.exec(this, {
       spec: 'slowTestThreshold_spec.js',
       snapshot: false,
       config: {
