@@ -14,7 +14,7 @@
  * namespace there, and access it with `window.UnifiedRunner`.
  *
  */
-import { getStore, Store } from '../store'
+import { getMobXStore, Store } from '../store'
 import { injectBundle } from './injectBundle'
 import type { BaseSpec } from '@packages/types/src/spec'
 import { UnifiedReporterAPI } from './reporter'
@@ -51,7 +51,7 @@ function createIframeModel () {
   const autIframe = getAutIframeModel()
   // IFrame Model to manage snapshots, etc.
   const iframeModel = new IframeModel(
-    getStore(),
+    getMobXStore(),
     autIframe.detachDom,
     autIframe.restoreDom,
     autIframe.highlightEl,
@@ -81,7 +81,7 @@ function createIframeModel () {
  * and server (via web socket).
  */
 function setupRunner () {
-  const store = getStore()
+  const store = getMobXStore()
 
   window.UnifiedRunner.eventManager.addGlobalListeners(store, {
     automationElement: '__cypress-string',
@@ -261,7 +261,7 @@ async function initialize () {
  *    description for more information.
  */
 async function executeSpec (spec: BaseSpec) {
-  const store = getStore()
+  const store = getMobXStore()
 
   store.setSpec(spec)
 

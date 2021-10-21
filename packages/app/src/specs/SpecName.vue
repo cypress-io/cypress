@@ -20,6 +20,7 @@ fragment Spec_SpecName on Spec {
   specFileExtension
   fileExtension
   fileName
+  relative
 }
 `
 

@@ -13,7 +13,7 @@
         v-for="spec in filteredSpecs"
         :key="spec.node.id"
         class="text-left"
-        @click.prevent="selectSpec(spec)"
+        @click.prevent="selectSpec(spec.node.relative)"
       >
         <SpecsListRow :gql="spec" />
       </button>
@@ -24,19 +24,13 @@
 <script setup lang="ts">
 import SpecsListHeader from './SpecsListHeader.vue'
 import SpecsListRow from './SpecsListRow.vue'
-import { gql, useMutation } from '@urql/vue'
+import { gql } from '@urql/vue'
 import { computed, ref } from 'vue'
-import { Specs_SpecsListFragment, SpecNode_SpecsListFragment, SpecsList_SetCurrentSpecDocument } from '../generated/graphql'
+import type { Specs_SpecsListFragment, SpecNode_SpecsListFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
 import { useRouter } from 'vue-router'
 
 const { t } = useI18n()
-
-gql`
-mutation SpecsList_SetCurrentSpec($id: ID!) {
-  setCurrentSpec(id: $id)
-}
-`
 
 gql`
 fragment SpecNode_SpecsList on SpecEdge {
@@ -64,15 +58,10 @@ fragment Specs_SpecsList on App {
 }
 `
 
-const setSpecMutation = useMutation(SpecsList_SetCurrentSpecDocument)
-
 const router = useRouter()
 
-async function selectSpec (spec: SpecNode_SpecsListFragment) {
-  const { id } = spec.node
-
-  await setSpecMutation.executeMutation({ id })
-  router.push('runner')
+function selectSpec (specRelative: string) {
+  router.push({ path: 'runner', query: { spec: specRelative } })
 }
 
 const props = defineProps<{

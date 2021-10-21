@@ -27,7 +27,6 @@ function renderReporter (
   store: Store,
   eventManager: typeof window.UnifiedRunner.eventManager,
 ) {
-  eventManager.id()
   const reporter = window.UnifiedRunner.React.createElement(window.UnifiedRunner.Reporter, {
     runMode: 'single' as const,
     runner: eventManager.reporterBus,

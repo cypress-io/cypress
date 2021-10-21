@@ -1,4 +1,4 @@
-import { initializeStore } from '../store'
+import { initializeMobXStore } from '../store'
 
 export async function injectBundle () {
   const src = '/__cypress/runner/cypress_runner.js'
@@ -33,7 +33,7 @@ export async function injectBundle () {
       window.UnifiedRunner.config = config
 
       window.UnifiedRunner.MobX.runInAction(() => {
-        const store = initializeStore(window.UnifiedRunner.config.testingType)
+        const store = initializeMobXStore(window.UnifiedRunner.config.testingType)
 
         store.updateDimensions(config.viewportWidth, config.viewportHeight)
       })

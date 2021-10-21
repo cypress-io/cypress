@@ -4,10 +4,7 @@
     class="grid p-12 gap-8 h-full"
   >
     <div>
-      <InlineSpecList
-        :gql="props.gql"
-        @selectSpec="selectSpec"
-      />
+      <InlineSpecList :gql="props.gql" />
     </div>
 
     <div
@@ -30,23 +27,14 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onBeforeUnmount, onMounted, reactive } from 'vue'
-import { useMutation } from '@urql/vue'
-import { UnifiedRunnerAPI } from '../runner'
+import { computed, onBeforeUnmount, onMounted, reactive, watchEffect } from 'vue'
 import { REPORTER_ID, RUNNER_ID, getRunnerElement, getReporterElement, empty } from '../runner/utils'
 import { gql } from '@urql/core'
-import { Runner_SetCurrentSpecDocument, Specs_RunnerFragment } from '../generated/graphql'
+import type { Specs_RunnerFragment } from '../generated/graphql'
 import InlineSpecList from '../specs/InlineSpecList.vue'
-import { getStore } from '../store'
-
-gql`
-fragment CurrentSpec_Runner on Spec {
-  id
-  relative
-  absolute
-  name
-}
-`
+import { getMobXStore } from '../store'
+import { useRoute } from 'vue-router'
+import { useSpecStore, uuseSpecStore } from '../composables/specStore'
 
 gql`
 fragment Specs_Runner on App {
@@ -54,9 +42,6 @@ fragment Specs_Runner on App {
   activeProject {
     id
     projectRoot
-    currentSpec {
-      ...CurrentSpec_Runner
-    }
   }
 }
 `
@@ -69,7 +54,7 @@ mutation Runner_SetCurrentSpec($id: ID!) {
 
 const runnerColumnWidth = 400
 
-const store = getStore()
+const store = getMobXStore()
 
 const viewportDimensions = reactive({
   height: store.height,
@@ -92,45 +77,53 @@ const viewportStyle = computed(() => {
 `
 })
 
-const setSpecMutation = useMutation(Runner_SetCurrentSpecDocument)
-
 const props = defineProps<{
   gql: Specs_RunnerFragment
 }>()
 
-async function selectSpec (id: string) {
-  const specToRun = await setSpecMutation.executeMutation({ id })
+const specStore = useSpecStore()
+const route = useRoute()
 
-  if (!specToRun.data?.setCurrentSpec.currentSpec) {
+function runSpec () {
+  const relative = route.query.spec
+  const spec = props.gql.activeProject?.specs?.edges.find((x) => x.node.relative === relative)?.node
+
+  if (!spec) {
     return
   }
 
-  UnifiedRunnerAPI.executeSpec(specToRun.data?.setCurrentSpec.currentSpec)
+  specStore.setSpec(spec)
 }
 
-function executeSpec () {
-  if (!props.gql?.activeProject?.currentSpec) {
+const stopWatchingSpec = watchEffect(() => {
+  const spec = props.gql.activeProject?.specs?.edges.find((x) => x.node.relative === route.query.spec)?.node
+
+  if (!spec) {
     return
   }
 
-  UnifiedRunnerAPI.executeSpec(props.gql.activeProject.currentSpec)
-}
+  specStore.setSpec(spec)
+})
 
 onMounted(() => {
   window.UnifiedRunner.eventManager.on('restart', () => {
-    executeSpec()
+    runSpec()
   })
 
-  executeSpec()
+  runSpec()
 })
 
 onBeforeUnmount(() => {
-  // For now we clean up the AUT and Reporter every time we leave the route.
-  // In the long term, we really should use <keep-alive> and maintain the state
-  // For now, this is much more simple.
+  // Clean up the AUT and Reporter every time we leave the route.
   empty(getRunnerElement())
+
+  // TODO: this should be handled by whoever starts it, reporter?
   window.UnifiedRunner.shortcuts.stop()
+
   empty(getReporterElement())
+
+  // stop watching the spec query param in the url
+  stopWatchingSpec()
 })
 
 </script>
