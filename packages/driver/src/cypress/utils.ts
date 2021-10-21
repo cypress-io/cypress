@@ -409,8 +409,8 @@ export default {
   },
 
   verifyConfigOptions (func) {
-    const writeableOptions =
-    ['animationDistanceThreshold',
+    const writeableOptions = [
+      'animationDistanceThreshold',
       'blockHosts',
       'baseUrl',
       'defaultCommandTimeout',
@@ -429,7 +429,8 @@ export default {
       'trashAssetsBeforeRuns',
       'viewportHeight',
       'viewportWidth',
-      'waitForAnimations']
+      'waitForAnimations',
+    ]
 
     return function (...args) {
       switch (args.length) {
