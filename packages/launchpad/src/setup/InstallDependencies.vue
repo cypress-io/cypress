@@ -11,7 +11,6 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
 import WizardLayout from './WizardLayout.vue'
 import ManualInstall from './ManualInstall.vue'
 import { gql } from '@urql/core'
@@ -20,7 +19,6 @@ import { useI18n } from '@cy/i18n'
 
 gql`
 fragment InstallDependencies on Wizard {
-  ...PackagesList
   ...ManualInstall
   canNavigateForward
 }
