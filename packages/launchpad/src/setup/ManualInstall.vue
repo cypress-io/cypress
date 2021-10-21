@@ -2,7 +2,7 @@
   <div class="relative px-24px py-22px">
     <div class="absolute h-38px w-160px bg-gradient-to-r from-transparent to-white via-white right-25px top-25px rounded pointer-events-none" />
     <div class="code-area text-left p-8px text-purple-500 border rounded flex items-center overflow-x-scroll">
-      <i-cy-dollar_x16 class="icon-dark-gray-500 mr-12px" /> <pre>{{ dependenciesCode }}</pre>
+      <i-cy-dollar_x16 class="icon-dark-gray-500 mr-12px" /> <pre><span class="text-14px">{{ dependenciesCode }}</span></pre>
     </div>
     <CopyButton
       :text="dependenciesCode"

@@ -98,4 +98,10 @@ body,
 #app {
   @apply h-full bg-white;
 }
+
+@font-face {
+  font-family: "Fira Mono";
+  src: local("Fira Mono"),
+   url('../../frontend-shared/src/assets/fonts/FiraMono-Medium.ttf') format("truetype");
+}
 </style>
