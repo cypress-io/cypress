@@ -1,5 +1,5 @@
 <template>
-  <main class="min-w-650px max-w-800px">
+  <main class="min-w-650px">
     <div v-if="props.gql.runs?.nodes">
       <RunCard
         v-for="run of props.gql.runs.nodes"

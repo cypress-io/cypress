@@ -1,14 +1,17 @@
 <template>
   <div>
     <h2>Runs Page</h2>
-    <div v-if="query.fetching.value">
-      Loading...
-    </div>
-    <div v-else-if="query.data.value?.app?.activeProject?.cloudProject">
-      <RunsPage :gql="query.data.value.app.activeProject.cloudProject" />
-    </div>
-    <div v-else-if="query.data.value?.app?.activeProject">
-      Connect the current project to the cloud
+    <div class="p-24px">
+      <template v-if="query.fetching.value">
+        Loading...
+      </template>
+      <RunsPage
+        v-else-if="query.data.value?.app?.activeProject?.cloudProject"
+        :gql="query.data.value.app.activeProject.cloudProject"
+      />
+      <template v-else-if="query.data.value?.app?.activeProject">
+        Connect the current project to the cloud
+      </template>
     </div>
   </div>
 </template>
@@ -22,7 +25,10 @@ gql`
 query Runs {
   app {
     activeProject {
+      id
+      projectId
       cloudProject {
+        id
         ...RunsPage
       }
     }
@@ -34,6 +40,6 @@ const query = useQuery({ query: RunsDocument })
 
 <route>
 {
-  name: "Runs Page"
+  name: "Runs"
 }
 </route>

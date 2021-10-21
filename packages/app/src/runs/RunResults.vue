@@ -5,7 +5,7 @@
       0
       <!--
 				TODO: Is flake even exposed via the API?
-				{{props.flake}}
+				{{props.gql.totalFlake}}
 				-->
     </div>
     <div class="flex items-center px-2">
