@@ -19,8 +19,6 @@ const debug = Debug('cypress:server:config')
 
 import { getProcessEnvVars } from './util/config'
 
-const defaultValues = configurator.getDefaultValues()
-
 export const RESOLVED_FROM = ['plugin', 'env', 'default', 'runtime', 'config'] as const
 
 export type ResolvedConfigurationOptionSource = typeof RESOLVED_FROM[number]
@@ -46,6 +44,7 @@ export const CYPRESS_SPECIAL_ENV_VARS = [
   'RECORD_KEY',
 ]
 
+const defaultValues = configurator.getDefaultValues()
 const folders = _(configurator.options).filter({ isFolder: true }).map('name').value()
 
 const convertRelativeToAbsolutePaths = (projectRoot, obj) => {
@@ -209,7 +208,7 @@ export function mergeDefaults (config: Record<string, any> = {}, options: Record
     config.baseUrl = url.replace(/\/\/+$/, '/')
   }
 
-  _.defaults(config, defaultValues)
+  _.defaultsDeep(config, defaultValues)
 
   // split out our own app wide env from user env variables
   // and delete envFile
@@ -246,7 +245,7 @@ export function mergeDefaults (config: Record<string, any> = {}, options: Record
   // validate config again here so that we catch
   // configuration errors coming from the CLI overrides
   // or env var overrides
-  configurator.validate(config, (errMsg) => {
+  configurator.validate(_(config).omit('browsers'), (errMsg) => {
     return errors.throw('CONFIG_VALIDATION_ERROR', errMsg)
   })
 
