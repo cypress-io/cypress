@@ -6,7 +6,7 @@
       @click="copyToClipboard"
     >
       <template #prefix>
-        <i-cy-copy-clipboard_x16 class="icon-dark-indigo-500" />
+        <i-cy-copy-clipboard_x16 class="icon-dark-indigo-500 w-16px h-16px" />
       </template>
       <TransitionQuickFade mode="out-in">
         <span v-if="!showCopied">{{ t('clipboard.copy') }}</span>
