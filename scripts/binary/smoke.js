@@ -159,21 +159,24 @@ const runFailingProjectTest = function (buildAppExecutable, e2e) {
   .then(verifyScreenshots)
 }
 
-const test = function (buildAppExecutable) {
-  Fixtures.scaffold()
-
+const test = async function (buildAppExecutable) {
+  Fixtures.scaffoldCommonNodeModules()
+  Fixtures.scaffoldProject('e2e')
   const e2e = Fixtures.projectPath('e2e')
 
-  return runSmokeTest(buildAppExecutable)
-  .then(() => {
-    return runProjectTest(buildAppExecutable, e2e)
-  }).then(() => {
-    return runFailingProjectTest(buildAppExecutable, e2e)
-  }).then(() => {
-    return Fixtures.remove()
-  })
+  await runSmokeTest(buildAppExecutable)
+  await runProjectTest(buildAppExecutable, e2e)
+  await runFailingProjectTest(buildAppExecutable, e2e)
+  Fixtures.remove()
 }
 
 module.exports = {
   test,
+}
+
+if (require.main === module) {
+  const buildAppExecutable = path.join(__dirname, `../../build/${os.platform()}-unpacked/Cypress`)
+
+  console.log('Script invoked directly, running smoke tests.')
+  test(buildAppExecutable)
 }

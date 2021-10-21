@@ -39,7 +39,9 @@ module.exports = {
   },
 
   scaffoldCommonNodeModules () {
-    [
+    fs.removeSync(path.join(tmpDir, 'node_modules'))
+
+    ;[
       '@cypress/code-coverage',
       '@cypress/webpack-dev-server',
       '@packages/socket',
