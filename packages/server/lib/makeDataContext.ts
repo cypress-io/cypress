@@ -1,6 +1,6 @@
 import { DataContext } from '@packages/data-context'
 import specsUtil from './util/specs'
-import type { FindSpecs, FoundBrowser, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions, PlatformName, Preferences, ProjectConfigCache, SettingsOptions } from '@packages/types'
+import type { FindSpecs, FoundBrowser, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions, PlatformName, Preferences, FullConfig, SettingsOptions } from '@packages/types'
 import { checkAuthQuery } from '@packages/graphql/src/stitching/remoteGraphQLCalls'
 import browserUtils from './browsers/utils'
 import auth from './gui/auth'
@@ -9,6 +9,7 @@ import * as config from './config'
 import type { EventEmitter } from 'events'
 import { openProject } from './open_project'
 import cache from './cache'
+import errors from './errors'
 
 const { getBrowsers } = browserUtils
 
@@ -57,7 +58,7 @@ export function makeDataContext (options: MakeDataContextOptions) {
       findSpecs (payload: FindSpecs) {
         return specsUtil.findSpecs(payload)
       },
-      setProjectConfig (projectRoot: string, config: Partial<ProjectConfigCache> | null) {
+      setProjectConfig (projectRoot: string, config: Partial<FullConfig> | null) {
         return cache.setProjectConfig(projectRoot, config)
       },
       getProjectConfig (projectRoot: string) {
@@ -83,6 +84,9 @@ export function makeDataContext (options: MakeDataContextOptions) {
       },
       closeActiveProject () {
         return openProject.closeActiveProject()
+      },
+      error (type: string, ...args: any) {
+        throw errors.throw(type, ...args)
       },
     },
   })

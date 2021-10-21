@@ -5,7 +5,6 @@ import errors from '../errors'
 import { fs } from '../util/fs'
 import { requireAsync } from './require_async'
 import Debug from 'debug'
-import { setProjectConfig } from '../cache'
 import type { SettingsOptions } from '@packages/types'
 
 const debug = Debug('cypress:server:settings')
@@ -120,7 +119,7 @@ export function configFile (options: SettingsOptions = {}) {
   // default is only used in tests.
   // This prevents a the change from becoming bigger than it should
   // FIXME: remove the default
-  return options.configFile === false ? false : (options.configFile || 'cypress.config.js')
+  return options.configFile === false ? false : options.configFile
 }
 
 export function id (projectRoot, options = {}) {
@@ -167,26 +166,16 @@ export function read (projectRoot, options: SettingsOptions = {}) {
     debug('resolved configObject', configObject)
     const changed: { projectId?: string, component?: {}, e2e?: {} } = _applyRewriteRules(configObject)
 
-    const isCTConfigured = Boolean(Object.keys(changed?.component ?? {}).length)
-    const isE2EConfigured = Boolean(Object.keys(changed?.e2e ?? {}).length)
-
-    return setProjectConfig(projectRoot, {
-      projectId: changed?.projectId,
-      isCTConfigured,
-      isE2EConfigured,
-    })
-    .then(() => {
-      // if our object is unchanged
+    // if our object is unchanged
     // then just return it
-      if (_.isEqual(configObject, changed)) {
-        return configObject
-      }
+    if (_.isEqual(configObject, changed)) {
+      return configObject
+    }
 
-      // else write the new reduced obj and store the projectId on the cache
-      return _write(file, changed)
-      .then((config) => {
-        return config
-      })
+    // else write the new reduced obj and store the projectId on the cache
+    return _write(file, changed)
+    .then((config) => {
+      return config
     })
   }).catch((err) => {
     debug('an error occured when reading config', err)

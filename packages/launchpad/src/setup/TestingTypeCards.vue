@@ -79,8 +79,8 @@ const ct = computed(() => {
   return props.gql.wizard.testingTypes.find((x) => x.type === 'component')
 })
 
-const isCTConfigured = computed(() => props.gql.app.activeProject?.isCTConfigured)
-const isE2EConfigured = computed(() => props.gql.app.activeProject?.isE2EConfigured)
+const isCTConfigured = computed(() => Boolean(props.gql.app.activeProject?.isCTConfigured))
+const isE2EConfigured = computed(() => Boolean(props.gql.app.activeProject?.isE2EConfigured))
 
 const ctNextStep = async () => {
   return mutation.executeMutation({ input: { testingType: 'component', direction: 'forward' } })

@@ -44,7 +44,7 @@ export const Project = objectType({
 
     t.string('projectId', {
       description: 'Used to associate project with Cypress cloud',
-      resolve: async (source, args, ctx) => ctx.project.projectId(source.projectRoot),
+      resolve: (source, args, ctx) => ctx.project.projectId(source.projectRoot),
     })
 
     t.nonNull.string('projectRoot')

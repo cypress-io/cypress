@@ -14,9 +14,3 @@ export interface CachedUser {
   name: string
   email: string
 }
-
-export interface ProjectConfigCache {
-  projectId?: string | null
-  isCTConfigured: boolean
-  isE2EConfigured: boolean
-}

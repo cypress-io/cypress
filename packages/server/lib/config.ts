@@ -14,6 +14,7 @@ import * as settings from './util/settings'
 import Debug from 'debug'
 import pathHelpers from './util/path_helpers'
 import findSystemNode from './util/find_system_node'
+import { setProjectConfig } from './cache'
 
 export interface ConfigSettingsConfig {
   testingType: TestingType
@@ -215,6 +216,11 @@ export function get (projectRoot, options = {}): Promise<FullConfig> {
       config: _.cloneDeep(settings),
       envFile: _.cloneDeep(envFile),
       options,
+    })
+  })
+  .then((fullConfig) => {
+    return setProjectConfig(projectRoot, fullConfig).then(() => {
+      return fullConfig
     })
   })
 }

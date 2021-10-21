@@ -14,7 +14,7 @@ export class ProjectDataSource {
   }
 
   async projectId (projectRoot: string) {
-    const config = await this.api.getProjectConfig(projectRoot)
+    const config = await this.getConfig(projectRoot)
 
     return config?.projectId ?? null
   }
@@ -54,9 +54,38 @@ export class ProjectDataSource {
     return specs.find((x) => x.absolute === currentSpecAbs) ?? null
   }
 
+  private async getDefaultConfigFilePath (projectRoot: string) {
+    const cypressConfigFiles = ['cypress.config.js', 'cypress.config.ts']
+    const filesInProjectDir = await this.ctx.fs.readdir(projectRoot)
+
+    const foundConfigFiles = cypressConfigFiles.filter((file) => filesInProjectDir.includes(file))
+
+    // if we only found one default file, it is the one
+    if (foundConfigFiles.length === 1) {
+      return foundConfigFiles[0]
+    }
+
+    // if we found more than one, throw a language conflict
+    if (foundConfigFiles.length > 1) {
+      throw this.ctx._apis.projectApi.error('CONFIG_FILES_LANGUAGE_CONFLICT', projectRoot, ...foundConfigFiles)
+    }
+
+    return cypressConfigFiles[0]
+  }
+
   async getConfig (projectRoot: string) {
+    // Check first the config files, to be sure there are not to config files
+    const configFile = await this.getDefaultConfigFilePath(projectRoot)
+
+    // Check if we have already cached the config
+    const config = await this.api.getProjectConfig(projectRoot)
+
+    if (config) {
+      return config
+    }
+
     return this.configLoader({
-      // configFile: 'cypress.config.ts',
+      configFile,
     }).load(projectRoot)
   }
 
@@ -103,11 +132,11 @@ export class ProjectDataSource {
     }
 
     if (testingType === 'e2e') {
-      return config.isE2EConfigured
+      return Boolean(Object.keys(config.e2e ?? {}).length)
     }
 
     if (testingType === 'component') {
-      return config.isCTConfigured
+      return Boolean(Object.keys(config.component ?? {}).length)
     }
 
     return false

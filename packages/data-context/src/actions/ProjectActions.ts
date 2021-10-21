@@ -1,5 +1,5 @@
 import type { MutationAddProjectArgs, MutationAppCreateConfigFileArgs, MutationSetProjectPreferencesArgs, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
-import type { FindSpecs, FoundBrowser, FoundSpec, FullConfig, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions, Preferences, ProjectConfigCache, SettingsOptions } from '@packages/types'
+import type { FindSpecs, FoundBrowser, FoundSpec, FullConfig, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions, Preferences, SettingsOptions } from '@packages/types'
 import path from 'path'
 import type { ProjectShape } from '../data/coreDataShape'
 
@@ -24,8 +24,9 @@ export interface ProjectApiShape {
   clearProjectPreferences(projectTitle: string): Promise<unknown>
   clearAllProjectPreferences(): Promise<unknown>
   closeActiveProject(): Promise<unknown>
-  setProjectConfig(projectRoot: string, projectId: Partial<ProjectConfigCache> | null): Promise<unknown>
-  getProjectConfig (projectRoot: string): Promise<ProjectConfigCache | null>
+  setProjectConfig(projectRoot: string, projectId: Partial<FullConfig> | null): Promise<unknown>
+  getProjectConfig (projectRoot: string): Promise<FullConfig | null>
+  error(type: string, ...args: any): Error
 }
 
 export class ProjectActions {

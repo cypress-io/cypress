@@ -272,7 +272,18 @@ export const mutation = mutationType({
         path: nonNull(stringArg()),
       },
       resolve: async (_, args, ctx) => {
-        await ctx.actions.project.setActiveProject(args.path)
+        try {
+          await ctx.actions.project.setActiveProject(args.path)
+          ctx.coreData.baseError = null
+        } catch (error) {
+          const e = error as Error
+
+          ctx.coreData.baseError = {
+            title: 'Cypress Configuration Error',
+            message: e.message,
+            stack: e.stack,
+          }
+        }
       },
     })
 
