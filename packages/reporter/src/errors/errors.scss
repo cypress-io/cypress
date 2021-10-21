@@ -86,7 +86,7 @@ $code-border-radius: 4px;
   .runnable-err-header {
     display: flex;
     justify-content: space-between;
-    background-color: rgba($gray-1000, 0.5);
+    background-color: $err-header-background;
     padding: 5px 10px;
     font-weight: bold;
 
