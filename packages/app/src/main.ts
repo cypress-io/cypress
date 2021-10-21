@@ -1,6 +1,7 @@
 import { createApp } from 'vue'
 import './main.scss'
 import 'virtual:windi.css'
+import { createPinia } from 'pinia'
 import urql from '@urql/vue'
 import App from './App.vue'
 import { makeUrqlClient } from '@packages/frontend-shared/src/graphql/urqlClient'
@@ -12,5 +13,6 @@ const app = createApp(App)
 app.use(urql, makeUrqlClient('app'))
 app.use(createRouter())
 app.use(createI18n())
+app.use(createPinia())
 
 app.mount('#app')

@@ -2,6 +2,7 @@
   "extends": "../frontend-shared/tsconfig.json",
   "include": [
     "src/**/*.vue", 
+    "src/**/*.ts", 
     "src/**/*.tsx", 
     "cypress/**/*.ts", 
     "cypress/**/*.tsx",
@@ -11,6 +12,7 @@
     "../frontend-shared/cypress/**/*.ts"
   ],
   "compilerOptions": {
+    "noImplicitThis": true,
     "paths": {
       "@cy/i18n": ["../frontend-shared/src/locales/i18n"],
       "@cy/components/*": ["../frontend-shared/src/components/*"],
