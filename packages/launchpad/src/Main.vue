@@ -63,7 +63,6 @@ import CompareTestingTypes from './setup/CompareTestingTypes.vue'
 
 import { useI18n } from '@cy/i18n'
 import { ref } from 'vue'
-import ShikiHighlight from '../../frontend-shared/src/components/ShikiHighlight.vue'
 
 const { t } = useI18n()
 const isTestingTypeModalOpen = ref(false)
