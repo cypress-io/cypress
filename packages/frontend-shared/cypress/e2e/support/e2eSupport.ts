@@ -92,7 +92,7 @@ function initializeApp (mode: 'component' | 'e2e' = 'e2e') {
   })
 }
 
-function visitApp () {
+function visitApp (href?: string) {
   const { e2e_serverPort, e2e_gqlPort } = Cypress.env()
 
   if (!e2e_gqlPort) {
@@ -103,7 +103,7 @@ function visitApp () {
     throw new Error(`Missing serverPort - did you forget to call cy.initializeApp(...) ?`)
   }
 
-  return cy.visit(`dist-app/index.html?gqlPort=${e2e_gqlPort}&serverPort=${e2e_serverPort}`)
+  return cy.visit(`dist-app/index.html?gqlPort=${e2e_gqlPort}&serverPort=${e2e_serverPort}${href || ''}`)
 }
 
 function visitLaunchpad (hash?: string) {

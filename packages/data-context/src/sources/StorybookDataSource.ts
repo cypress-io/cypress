@@ -1,10 +1,6 @@
 import type { SpecFile, StorybookInfo } from '@packages/types'
-import glob from 'glob'
 import * as path from 'path'
-import { promisify } from 'util'
 import type { DataContext } from '..'
-
-const asyncGlob = promisify(glob)
 
 const STORYBOOK_FILES = [
   'main.js',
@@ -38,13 +34,8 @@ export class StorybookDataSource {
     }
 
     const config = await this.ctx.project.getConfig(project.projectRoot)
-    const files: string[] = []
-
-    for (const storyPattern of storybook.storyGlobs) {
-      const res = await asyncGlob(path.join(storybook.storybookRoot, storyPattern))
-
-      files.push(...res)
-    }
+    const normalizedGlobs = storybook.storyGlobs.map((glob) => path.join(storybook.storybookRoot, glob))
+    const files = await this.ctx.file.getFilesByGlob(normalizedGlobs)
 
     // Don't currently support mdx
     return files.reduce((acc, file) => {
