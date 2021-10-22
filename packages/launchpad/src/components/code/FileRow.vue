@@ -61,7 +61,7 @@ export type FileRowStatus = 'changes' | 'valid' | 'skipped' | 'error';
 export type StatusInfo = {
   badgeLabel?: string,
   badgeType?: BadgeRowStatus,
-  icon: FunctionalComponent<SVGAttributes>,
+  icon: FunctionalComponent<SVGAttributes, {}>,
   initiallyOpen?: boolean
 }
 </script>
@@ -105,7 +105,7 @@ const language = computed(() => {
 })
 
 const statusInfo: ComputedRef<StatusInfo> = computed(() => {
-  return {
+  const info: Record<FileRowStatus, StatusInfo> = {
     changes: {
       badgeLabel: t('setupPage.configFile.changesRequiredBadge'),
       badgeType: 'warning',
@@ -124,6 +124,8 @@ const statusInfo: ComputedRef<StatusInfo> = computed(() => {
     error: {
       icon: ErrorIcon,
     },
-  }[props.status]
+  }
+
+  return info[props.status]
 })
 </script>
