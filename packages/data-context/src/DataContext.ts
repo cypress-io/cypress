@@ -66,7 +66,9 @@ export class DataContext extends DataContextShell {
     ]
 
     if (this.config.launchArgs.projectRoot) {
-      toAwait.push(this.actions.project.setActiveProject(this.config.launchArgs.projectRoot))
+      // toAwait.push(this.actions.project.setActiveProject(this.config.launchArgs.projectRoot))
+      await this.actions.project.setActiveProject(this.config.launchArgs.projectRoot)
+      this.actions.project.launchProjectWithoutLaunchpad()
     }
 
     if (IS_DEV_ENV) {

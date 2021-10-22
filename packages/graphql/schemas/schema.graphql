@@ -367,7 +367,7 @@ type Mutation {
   generateSpecFromStory(storyPath: String!): Boolean
 
   """Hides the launchpad windows"""
-  hideBrowserWindow: App!
+  hideBrowserWindow: Boolean!
 
   """
   Initializes open_project global singleton to manager current project state
@@ -414,7 +414,7 @@ type Mutation {
   ): App!
 
   """show the launchpad windows"""
-  showBrowserWindow: App!
+  showBrowserWindow: Boolean!
 
   """Installs the dependencies for the component testing step"""
   wizardInstallDependencies: Wizard

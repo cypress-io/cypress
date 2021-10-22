@@ -112,7 +112,7 @@ const query = useQuery({ query: MainLaunchpadQueryDocument })
 const mutation = useMutation(Main_SkipLaunchpadDocument)
 
 const hasPreferences = computed(() => {
-  return !!query.data.value?.app.activeProject.preferences ?? false
+  return !!query.data.value?.app.activeProject?.preferences ?? false
 })
 
 watch(hasPreferences, (newVal, oldVal) => {

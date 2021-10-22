@@ -305,22 +305,22 @@ export const mutation = mutationType({
     })
 
     t.nonNull.field('hideBrowserWindow', {
-      type: 'App',
+      type: 'Boolean',
       description: 'Hides the launchpad windows',
       resolve: (_, args, ctx) => {
         ctx.actions.electron.hideBrowserWindow()
 
-        return ctx.appData
+        return true
       },
     })
 
     t.nonNull.field('showBrowserWindow', {
-      type: 'App',
+      type: 'Boolean',
       description: 'show the launchpad windows',
       resolve: (_, args, ctx) => {
         ctx.actions.electron.showBrowserWindow()
 
-        return ctx.appData
+        return true
       },
     })
   },

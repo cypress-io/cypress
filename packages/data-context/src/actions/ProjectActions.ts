@@ -172,6 +172,42 @@ export class ProjectActions {
     return this.api.launchProject(browser, spec, options)
   }
 
+  async launchProjectWithoutLaunchpad (options?: LaunchOpts) {
+    if (!this.ctx.activeProject) {
+      throw Error('Cannot launch project without an active project')
+    }
+
+    const preferences = await this.api.getProjectPreferencesFromCache()
+    const { browserId, testingType } = preferences[this.ctx.activeProject.title] ?? {}
+
+    if (!browserId || !testingType) {
+      throw Error('Cannont launch project without stored browserId or testingType')
+    }
+
+    const spec = this.makeSpec(testingType)
+    const browser = this.findBrowerById(browserId)
+
+    this.ctx.actions.electron.hideBrowserWindow()
+    this.ctx.coreData.wizard.chosenTestingType = testingType
+    await this.initializeActiveProject()
+    this.ctx.appData.activeTestingType = testingType
+
+    return this.api.launchProject(browser, spec, options)
+  }
+
+  private makeSpec (testingType: TestingTypeEnum): Cypress.Spec {
+    return {
+      name: '',
+      absolute: '',
+      relative: '',
+      specType: testingType === 'e2e' ? 'integration' : 'component',
+    }
+  }
+
+  private findBrowerById (browserId: string) {
+    return this.ctx.coreData?.app?.browsers?.find((browser) => browser.id === browserId) ?? this.ctx.browserList[0]
+  }
+
   removeProject (projectRoot: string) {
     const found = this.ctx.projectsList.find((x) => x.projectRoot === projectRoot)
 
