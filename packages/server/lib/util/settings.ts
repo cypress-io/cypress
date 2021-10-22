@@ -9,12 +9,16 @@ import type { SettingsOptions } from '@packages/types'
 
 const debug = Debug('cypress:server:settings')
 
-function jsCode (obj) {
+function configCode (obj, isTS?: boolean) {
   const objJSON = obj && !_.isEmpty(obj)
     ? JSON.stringify(_.omit(obj, 'configFile'), null, 2)
     : `{
 
 }`
+
+  if (isTS) {
+    return `export default ${objJSON}`
+  }
 
   return `module.exports = ${objJSON}
 `
@@ -96,7 +100,11 @@ function _write (file, obj = {}) {
 
   debug('writing javascript file')
 
-  return fs.writeFileAsync(file, jsCode(obj))
+  const fileExtension = file?.split('.').pop()
+
+  const isTSFile = fileExtension === 'ts'
+
+  return fs.writeFileAsync(file, configCode(obj, isTSFile))
   .return(obj)
   .catch((err) => {
     return _logWriteErr(file, err)

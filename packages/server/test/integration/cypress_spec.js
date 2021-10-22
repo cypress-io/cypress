@@ -370,7 +370,7 @@ describe('lib/cypress', () => {
       }).then(() => {
         expect(api.createProject).not.to.be.called
 
-        return (new ProjectBase({ projectRoot: this.noScaffolding, testingType: 'e2e' })).getProjectId()
+        return (new ProjectBase({ projectRoot: this.noScaffolding, testingType: 'e2e', options: { configFile: 'cypress.config.js' } })).getProjectId()
         .then(() => {
           throw new Error('should have caught error but did not')
         }).catch((err) => {
@@ -488,7 +488,7 @@ describe('lib/cypress', () => {
 
       return Promise.all([
         fs.statAsync(path.join(this.pristinePath, 'cypress')).reflect(),
-        fs.statAsync(path.join(this.pristinePath, 'cypress.json')).reflect(),
+        fs.statAsync(path.join(this.pristinePath, 'cypress.config.js')).reflect(),
       ])
       .each(ensureDoesNotExist)
       .then(() => {
@@ -505,7 +505,7 @@ describe('lib/cypress', () => {
     })
 
     it('does not scaffold integration or example specs when runMode', function () {
-      return settings.write(this.pristinePath, {})
+      return settings.write(this.pristinePath, {}, { configFile: 'cypress.config.js' })
       .then(() => {
         return cypress.start([`--run-project=${this.pristinePath}`])
       }).then(() => {
@@ -562,11 +562,11 @@ describe('lib/cypress', () => {
 
         return fs.statAsync(this.cfg.fixturesFolder)
       }).then(() => {
-        return settings.read(this.idsPath)
+        return settings.read(this.idsPath, { configFile: 'cypress.config.js' })
       }).then((json) => {
         json.fixturesFolder = false
 
-        return settings.write(this.idsPath, json)
+        return settings.write(this.idsPath, json, { configFile: 'cypress.config.js' })
       }).then(() => {
         return cypress.start([`--run-project=${this.idsPath}`])
       }).then(() => {
@@ -611,18 +611,18 @@ describe('lib/cypress', () => {
       })
     })
 
-    it('can change the reporter with cypress.json', function () {
+    it('can change the reporter with cypress.config.js', function () {
       sinon.spy(Reporter, 'create')
 
       return config.get(this.idsPath, { configFile: 'cypress.config.js' })
       .then((cfg) => {
         this.cfg = cfg
 
-        return settings.read(this.idsPath)
+        return settings.read(this.idsPath, { configFile: 'cypress.config.js' })
       }).then((json) => {
         json.reporter = 'dot'
 
-        return settings.write(this.idsPath, json)
+        return settings.write(this.idsPath, json, { configFile: 'cypress.config.js' })
       }).then(() => {
         return cypress.start([`--run-project=${this.idsPath}`])
       }).then(() => {
@@ -680,7 +680,7 @@ describe('lib/cypress', () => {
     })
 
     it('logs error when supportFile doesn\'t exist', function () {
-      return settings.write(this.idsPath, { supportFile: '/does/not/exist' })
+      return settings.write(this.idsPath, { supportFile: '/does/not/exist' }, { configFile: 'cypress.config.js' })
       .then(() => {
         return cypress.start([`--run-project=${this.idsPath}`])
       }).then(() => {
@@ -767,8 +767,8 @@ describe('lib/cypress', () => {
       })
     })
 
-    it('logs error and exits when project has cypress.json syntax error', function () {
-      return fs.writeFileAsync(`${this.todosPath}/cypress.json`, '{\'foo\': \'bar}')
+    it('logs error and exits when project has cypress.config.js syntax error', function () {
+      return fs.writeFileAsync(`${this.todosPath}/cypress.config.js`, `module.exports = {`)
       .then(() => {
         return cypress.start([`--run-project=${this.todosPath}`])
       }).then(() => {
@@ -785,12 +785,12 @@ describe('lib/cypress', () => {
       })
     })
 
-    it('logs error and exits when project has invalid cypress.json values', function () {
-      return settings.write(this.todosPath, { baseUrl: 'localhost:9999' })
+    it('logs error and exits when project has invalid cypress.config.js values', function () {
+      return settings.write(this.todosPath, { baseUrl: 'localhost:9999' }, { configFile: 'cypress.config.js' })
       .then(() => {
         return cypress.start([`--run-project=${this.todosPath}`])
       }).then(() => {
-        this.expectExitWithErr('SETTINGS_VALIDATION_ERROR', 'cypress.json')
+        this.expectExitWithErr('SETTINGS_VALIDATION_ERROR', 'cypress.config.{ts|js}')
       })
     })
 
@@ -839,18 +839,18 @@ describe('lib/cypress', () => {
     // for headed projects!
     // also make sure we test the rest of the integration functionality
     // for headed errors! <-- not unit tests, but integration tests!
-    it('logs error and exits when project folder has read permissions only and cannot write cypress.json', function () {
+    it('logs error and exits when project folder has read permissions only and cannot write cypress.config.js', function () {
       // test disabled if running as root (such as inside docker) - root can write all things at all times
       if (process.geteuid() === 0) {
         return
       }
 
       const permissionsPath = path.resolve('./permissions')
-      const cypressJson = path.join(permissionsPath, 'cypress.json')
+      const cypressConfig = path.join(permissionsPath, 'cypress.config.js')
 
       return fs.mkdirAsync(permissionsPath)
       .then(() => {
-        return fs.outputFileAsync(cypressJson, '{}')
+        return fs.outputFileAsync(cypressConfig, 'module.exports = {}')
       }).then(() => {
         // read only
         return fs.chmodAsync(permissionsPath, '555')
@@ -1695,12 +1695,12 @@ describe('lib/cypress', () => {
 
       return user.set({ name: 'brian', authToken: 'auth-token-123' })
       .then(() => {
-        return settings.read(this.todosPath)
+        return settings.read(this.todosPath, { configFile: 'cypress.config.js' })
       }).then((json) => {
         // this should be overriden by the env argument
         json.baseUrl = 'http://localhost:8080'
 
-        return settings.write(this.todosPath, json)
+        return settings.write(this.todosPath, json, { configFile: 'cypress.config.js' })
       }).then(() => {
         return cypress.start([
           '--port=2121',

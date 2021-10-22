@@ -683,7 +683,7 @@ const systemTests = {
       const s = options.settings
 
       if (s) {
-        await settings.write(e2ePath, s)
+        await settings.write(e2ePath, s, { configFile: 'cypress.config.js' })
       }
     })
 
