@@ -22,13 +22,44 @@ const getFirstValidSizedRect = (el) => {
   }) || el.getBoundingClientRect() // otherwise fall back to the parent client rect
 }
 
-/**
- * @param {JQuery<HTMLElement> | HTMLElement} $el
- */
-const getElementPositioning = ($el) => {
+type ElementPositioning = {
+  scrollTop: number
+  scrollLeft: number
+  width: number
+  height: number
+  fromElViewport: {
+    doc: Document
+    x?: number
+    y?: number
+    top: number
+    left: number
+    right: number
+    bottom: number
+    topCenter: number
+    leftCenter: number
+  }
+  fromElWindow: {
+    x?: number
+    y?: number
+    top: number
+    left: number
+    topCenter: number
+    leftCenter: number
+  }
+  fromAutWindow: {
+    x?: number
+    y?: number
+    top: number
+    left: number
+    topCenter: number
+    leftCenter: number
+  }
+}
+
+const getElementPositioning = ($el: JQuery<HTMLElement> | HTMLElement): ElementPositioning => {
   let autFrame
 
-  const el = $jquery.isJquery($el) ? $el[0] : $el
+  const el: HTMLElement = $jquery.isJquery($el) ? $el[0] : $el
 
   const win = $window.getWindowByElement(el)
 
@@ -128,7 +159,12 @@ const getElementPositioning = ($el) => {
   }
 }
 
-const getCoordsByPosition = (left, top, xPosition = 'center', yPosition = 'center') => {
+const getCoordsByPosition = (
+  left: number,
+  top: number,
+  xPosition: 'left' | 'center' | 'right' = 'center',
+  yPosition: 'top' | 'center' | 'bottom' = 'center',
+) => {
   const getLeft = () => {
     /* eslint-disable default-case */
     switch (xPosition) {
