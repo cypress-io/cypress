@@ -16,7 +16,8 @@
             name="fade"
             mode="out-in"
           >
-            <keep-alive exclude="Runner">
+            <!-- <keep-alive exclude="Runner"> -->
+            <keep-alive>
               <component
                 :is="Component"
               />

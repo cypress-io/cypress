@@ -59,19 +59,7 @@ const isCurrentSpec = (spec: SpecNode_InlineSpecListFragment) => {
 const router = useRouter()
 
 function selectSpec (relative: string) {
-  const specToSet = props.gql.activeProject?.specs?.edges.find((x) => x.node.relative === relative)?.node
-
-  if (!specToSet) {
-    return
-  }
-
-  router.push({ path: 'runner', query: { spec: relative } })
-
-  specStore.setCurrentSpec({
-    absolute: specToSet.absolute,
-    relative: specToSet.relative,
-    name: specToSet.name,
-  })
+  router.push({ query: { spec: relative } })
 }
 
 const specs = computed(() => props.gql.activeProject?.specs?.edges || [])

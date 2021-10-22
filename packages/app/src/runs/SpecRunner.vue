@@ -30,14 +30,13 @@
 import { computed, onBeforeUnmount, onMounted, reactive, watch } from 'vue'
 import { REPORTER_ID, RUNNER_ID, getRunnerElement, getReporterElement, empty } from '../runner/utils'
 import { gql } from '@urql/core'
-import type { Specs_RunnerFragment } from '../generated/graphql'
+import type { SpecRunnerFragment } from '../generated/graphql'
 import InlineSpecList from '../specs/InlineSpecList.vue'
 import { mobxRunnerStore, useSpecStore } from '../store'
-import { useRoute } from 'vue-router'
 import { UnifiedRunnerAPI } from '../runner'
 
 gql`
-fragment Specs_Runner on App {
+fragment SpecRunner on App {
   ...Specs_InlineSpecList
   activeProject {
     id
@@ -76,46 +75,42 @@ const viewportStyle = computed(() => {
 })
 
 const props = defineProps<{
-  gql: Specs_RunnerFragment
+  gql: SpecRunnerFragment
 }>()
 
 const specStore = useSpecStore()
-const route = useRoute()
 
 function runSpec () {
-  const relative = route.query.spec
-  const spec = props.gql.activeProject?.specs?.edges.find((x) => x.node.relative === relative)?.node
-
-  if (!spec) {
+  if (!specStore.currentSpec) {
     return
   }
 
-  specStore.setCurrentSpec(spec)
+  UnifiedRunnerAPI.executeSpec(specStore.currentSpec)
 }
 
-const stopWatchingSpecQuery = watch(
-  () => route.query.spec,
-  (relative) => {
-    const spec = props.gql.activeProject?.specs?.edges.find((x) => x.node.relative === relative)?.node
+// const stopWatchingSpecQuery = watch(
+//   () => route.query.spec,
+//   (relative) => {
+//     const spec = props.gql.activeProject?.specs?.edges.find((x) => x.node.relative === relative)?.node
 
-    if (!spec) {
-      return
-    }
+//     if (!spec) {
+//       return
+//     }
 
-    specStore.setCurrentSpec(spec)
-  },
-)
+//     specStore.setCurrentSpec(spec)
+//   },
+// )
 
-const stopWatchingSpecStore = watch(
-  () => specStore.currentSpec,
-  (spec) => {
-    if (!spec) {
-      return
-    }
+// const stopWatchingSpecStore = watch(
+//   () => specStore.currentSpec,
+//   (spec) => {
+//     if (!spec) {
+//       return
+//     }
 
-    UnifiedRunnerAPI.executeSpec(spec)
-  },
-)
+//     UnifiedRunnerAPI.executeSpec(spec)
+//   },
+// )
 
 onMounted(() => {
   window.UnifiedRunner.eventManager.on('restart', () => {
@@ -135,8 +130,8 @@ onBeforeUnmount(() => {
   empty(getReporterElement())
 
   // stop watching the spec query param in the url
-  stopWatchingSpecStore()
-  stopWatchingSpecQuery()
+  // stopWatchingSpecStore()
+  // stopWatchingSpecQuery()
 })
 
 </script>

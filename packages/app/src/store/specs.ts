@@ -15,7 +15,7 @@ export const useSpecStore = defineStore({
   },
 
   actions: {
-    async setCurrentSpec (currentSpec: BaseSpec) {
+    async setCurrentSpec (currentSpec: BaseSpec | null) {
       this.currentSpec = currentSpec
     },
   },
