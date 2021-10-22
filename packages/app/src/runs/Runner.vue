@@ -94,7 +94,7 @@ function runSpec () {
   specStore.setCurrentSpec(spec)
 }
 
-const stopWatchingSpec = watch(
+const stopWatchingSpecQuery = watch(
   () => route.query.spec,
   (relative) => {
     const spec = props.gql.activeProject?.specs?.edges.find((x) => x.node.relative === relative)?.node
@@ -107,7 +107,7 @@ const stopWatchingSpec = watch(
   },
 )
 
-watch(
+const stopWatchingSpecStore = watch(
   () => specStore.currentSpec,
   (spec) => {
     if (!spec) {
@@ -136,7 +136,8 @@ onBeforeUnmount(() => {
   empty(getReporterElement())
 
   // stop watching the spec query param in the url
-  stopWatchingSpec()
+  stopWatchingSpecStore()
+  stopWatchingSpecQuery()
 })
 
 </script>
