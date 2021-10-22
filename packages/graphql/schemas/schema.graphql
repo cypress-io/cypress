@@ -585,7 +585,6 @@ type ProjectPreferences {
   testingType: String
 }
 
-
 """The root "Query" type containing all entry fields for our querying"""
 type Query {
   app: App!
