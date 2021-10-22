@@ -1,9 +1,10 @@
-import type { MutationAddProjectArgs, MutationAppCreateConfigFileArgs, MutationSetProjectPreferencesArgs, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
+import type { CodeGenType, MutationAddProjectArgs, MutationAppCreateConfigFileArgs, MutationSetProjectPreferencesArgs, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
 import type { FindSpecs, FoundBrowser, FoundSpec, FullConfig, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions, Preferences } from '@packages/types'
 import path from 'path'
 import type { ProjectShape } from '../data/coreDataShape'
 
 import type { DataContext } from '..'
+import { SpecGenerator } from '../codegen'
 
 export interface ProjectApiShape {
   getConfig(projectRoot: string): Promise<FullConfig>
@@ -237,5 +238,67 @@ export class ProjectActions {
     }
 
     this.api.insertProjectPreferencesToCache(this.ctx.activeProject.title, { ...args })
+  }
+
+  async codeGenSpec (codeGenCandidate: string, codeGenType: CodeGenType) {
+    const project = this.ctx.activeProject
+
+    if (!project) {
+      throw Error(`Cannot create spec without activeProject.`)
+    }
+
+    const parsed = path.parse(codeGenCandidate)
+    const config = await this.ctx.project.getConfig(project.projectRoot)
+    const getFileExtension = () => {
+      if (codeGenType === 'integration') {
+        const possibleExtensions = ['.spec', '.test', '-spec', '-test']
+
+        return (
+          possibleExtensions.find((ext) => {
+            return codeGenCandidate.endsWith(ext + parsed.ext)
+          }) || parsed.ext
+        )
+      }
+
+      return '.cy'
+    }
+    const getCodeGenPath = () => {
+      return codeGenType === 'integration'
+        ? this.ctx.path.join(
+          config.integrationFolder || project.projectRoot,
+          codeGenCandidate,
+        )
+        : codeGenCandidate
+    }
+    const getSearchFolder = () => {
+      return (codeGenType === 'integration'
+        ? config.integrationFolder
+        : config.componentFolder) || project.projectRoot
+    }
+
+    const specFileExtension = getFileExtension()
+    const codeGenPath = getCodeGenPath()
+    const searchFolder = getSearchFolder()
+
+    const { specContent, specAbsolute } = await new SpecGenerator(this.ctx, {
+      codeGenPath,
+      codeGenType,
+      specFileExtension,
+    }).generateSpec()
+
+    await this.ctx.fs.outputFile(specAbsolute, specContent)
+
+    const spec = this.ctx.file.normalizeFileToSpec({
+      absolute: specAbsolute,
+      searchFolder,
+      specType: codeGenType === 'integration' ? 'integration' : 'component',
+      projectRoot: project.projectRoot,
+      specFileExtension,
+    })
+
+    project.generatedSpec = {
+      spec,
+      content: specContent,
+    }
   }
 }

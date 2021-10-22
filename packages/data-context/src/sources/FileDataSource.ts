@@ -1,7 +1,18 @@
 import type { DataContext } from '..'
 import * as path from 'path'
-import type { SpecFile } from '@packages/types'
+import type { FoundSpec, SpecFile } from '@packages/types'
 import globby, { GlobbyOptions } from 'globby'
+
+interface CreateFileParts {
+  absolute: string
+  projectRoot: string
+  searchFolder: string
+}
+
+interface CreateFoundSpec extends CreateFileParts {
+  specFileExtension: string
+  specType: FoundSpec['specType']
+}
 
 export class FileDataSource {
   private watchedFilePaths = new Set<string>()
@@ -22,15 +33,24 @@ export class FileDataSource {
     }) as Promise<Result>
   }
 
-  normalizeFileToSpec (absolute: string, projectRoot: string, searchFolder: string): SpecFile {
-    const parsed = path.parse(absolute)
+  normalizeFileToFileParts (options: CreateFileParts): SpecFile {
+    const parsed = path.parse(options.absolute)
 
     return {
-      absolute,
-      name: path.relative(searchFolder, absolute),
-      relative: path.relative(projectRoot, absolute),
+      absolute: options.absolute,
+      name: path.relative(options.searchFolder, options.absolute),
+      relative: path.relative(options.projectRoot, options.absolute),
       baseName: parsed.base,
       fileName: parsed.base.split('.')[0] || '',
+    }
+  }
+
+  normalizeFileToSpec (options: CreateFoundSpec): FoundSpec {
+    return {
+      ...this.normalizeFileToFileParts(options),
+      specFileExtension: options.specFileExtension,
+      specType: options.specType,
+      fileExtension: this.ctx.path.parse(options.absolute).ext,
     }
   }
 
