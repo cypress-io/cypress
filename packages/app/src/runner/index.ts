@@ -14,11 +14,7 @@
  * namespace there, and access it with `window.UnifiedRunner`.
  *
  */
-<<<<<<< HEAD
-import { getStore, Store } from '../store'
-=======
 import { mobxRunnerStore, MobxRunnerStore } from '../store'
->>>>>>> origin/unified-desktop-gui
 import { injectBundle } from './injectBundle'
 import type { BaseSpec } from '@packages/types/src/spec'
 import { UnifiedReporterAPI } from './reporter'
@@ -55,7 +51,7 @@ function createIframeModel () {
   const autIframe = getAutIframeModel()
   // IFrame Model to manage snapshots, etc.
   const iframeModel = new IframeModel(
-    getStore(),
+    mobxRunnerStore,
     autIframe.detachDom,
     autIframe.restoreDom,
     autIframe.highlightEl,
@@ -84,15 +80,8 @@ function createIframeModel () {
  * for communication between driver, runner, reporter via event bus,
  * and server (via web socket).
  */
-<<<<<<< HEAD
 function setupRunner () {
-  const store = getStore()
-
-  window.UnifiedRunner.eventManager.addGlobalListeners(store, {
-=======
-function setupRunner (done: () => void) {
   window.UnifiedRunner.eventManager.addGlobalListeners(mobxRunnerStore, {
->>>>>>> origin/unified-desktop-gui
     automationElement: '__cypress-string',
     randomString,
   })
@@ -100,9 +89,9 @@ function setupRunner (done: () => void) {
   window.UnifiedRunner.eventManager.start(window.UnifiedRunner.config)
 
   window.UnifiedRunner.MobX.reaction(
-    () => [store.height, store.width],
+    () => [mobxRunnerStore.height, mobxRunnerStore.width],
     () => {
-      store.viewportUpdateCallback?.()
+      mobxRunnerStore.viewportUpdateCallback?.()
     },
   )
 
@@ -270,16 +259,12 @@ async function initialize () {
  *    description for more information.
  */
 async function executeSpec (spec: BaseSpec) {
-<<<<<<< HEAD
-  const store = getStore()
-
-  store.setSpec(spec)
+  mobxRunnerStore.setSpec(spec)
 
   await UnifiedReporterAPI.resetReporter()
 
-  await teardownSpec(store)
-  UnifiedReporterAPI.setupReporter(store)
-=======
+  await teardownSpec(mobxRunnerStore)
+  UnifiedReporterAPI.setupReporter()
   mobxRunnerStore.setSpec(spec)
 
   await UnifiedReporterAPI.resetReporter()
@@ -287,7 +272,6 @@ async function executeSpec (spec: BaseSpec) {
   await teardownSpec(mobxRunnerStore)
 
   UnifiedReporterAPI.setupReporter()
->>>>>>> origin/unified-desktop-gui
 
   if (window.UnifiedRunner.config.testingType === 'e2e') {
     return runSpecE2E(spec)

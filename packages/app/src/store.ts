@@ -1,19 +1,19 @@
 import { BaseStore } from '@packages/runner-shared/src/store'
 
-export class Store extends BaseStore {}
+export class MobxRunnerStore extends BaseStore {}
 
-let store: Store
+export let mobxRunnerStore: MobxRunnerStore
 
 export function initializeStore (testingType: Cypress.TestingType) {
-  store = new Store(testingType)
+  mobxRunnerStore = new MobxRunnerStore(testingType)
 
-  return store
+  return mobxRunnerStore
 }
 
 export function getStore () {
-  if (!store) {
-    throw Error('Must initialize store with testingType before accessing it!')
+  if (!mobxRunnerStore) {
+    throw Error('Must initialize mobxRunnerStore with testingType before accessing it!')
   }
 
-  return store
+  return mobxRunnerStore
 }

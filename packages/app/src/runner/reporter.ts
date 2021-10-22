@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-import type { Store } from '../store'
-=======
 import { mobxRunnerStore, MobxRunnerStore } from '../store'
->>>>>>> origin/unified-desktop-gui
 import { getReporterElement } from './utils'
 
 let hasInitializeReporter = false
@@ -19,7 +15,7 @@ async function resetReporter () {
   }
 }
 
-function setupReporter (store: Store) {
+function setupReporter () {
   const $reporterRoot = getReporterElement()
 
   renderReporter($reporterRoot, mobxRunnerStore, window.UnifiedRunner.eventManager)

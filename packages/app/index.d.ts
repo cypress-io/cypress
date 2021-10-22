@@ -1,10 +1,5 @@
-<<<<<<< HEAD
-import type { Store } from './src/store'
 import type MobX from 'mobx'
-import type { AutSnapshot } from './src/runner/iframe-model'
-=======
 import type { MobxRunnerStore } from './src/store'
->>>>>>> origin/unified-desktop-gui
 
 interface ConnectionInfo { 
   automationElement: '__cypress-string',
