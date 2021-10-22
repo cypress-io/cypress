@@ -91,7 +91,7 @@ function setupRunner () {
   window.UnifiedRunner.eventManager.start(window.UnifiedRunner.config)
 
   window.UnifiedRunner.MobX.reaction(
-    () => [getMobxRunnerStore, getMobxRunnerStore],
+    () => [mobxRunnerStore.height, mobxRunnerStore.width],
     () => {
       mobxRunnerStore.viewportUpdateCallback?.()
     },

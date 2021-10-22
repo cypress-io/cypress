@@ -1,4 +1,4 @@
-import type { getMobxRunnerStore, MobxRunnerStore } from './src/store'
+import type { MobxRunnerStore } from './src/store'
 import type MobX from 'mobx'
 
 interface ConnectionInfo { 
