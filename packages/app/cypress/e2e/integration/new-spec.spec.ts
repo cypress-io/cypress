@@ -76,20 +76,14 @@ describe('<Button />', () => {
     })
   })
 
-  const getCodeGenCandidates = () => cy.get('li')
-
   it('generates a spec from story', () => {
-    const getCodeGenCandidate = () => {
-      return getCodeGenCandidates().contains('Button.stories.jsx')
-    }
-
     cy.visitApp('#/newspec')
     cy.wait(1000)
     cy.intercept('mutation-NewSpec_CodeGenSpec').as('codeGenSpec')
 
     cy.findByText('Generate From Story').should('not.be.disabled').click()
 
-    getCodeGenCandidate().click()
+    cy.get('li').contains('Button.stories.jsx').as('codeGen').click()
     cy.wait('@codeGenSpec')
 
     cy.withCtx((ctx, { testState }) => {
@@ -105,7 +99,7 @@ describe('<Button />', () => {
     })
 
     // Test creating a copy
-    getCodeGenCandidate().click()
+    cy.get('@codeGen').click()
     cy.wait('@codeGenSpec')
 
     cy.withCtx((ctx, { testState }) => {
@@ -123,17 +117,13 @@ describe('<Button />', () => {
   })
 
   it('generates a component from story', () => {
-    const getCodeGenCandidate = () => {
-      return getCodeGenCandidates().contains('Button.jsx')
-    }
-
     cy.visitApp('#/newspec')
     cy.wait(1000)
     cy.intercept('mutation-NewSpec_CodeGenSpec').as('codeGenSpec')
 
     cy.findByText('Generate From Component').click()
 
-    getCodeGenCandidate().click()
+    cy.get('li').contains('Button.jsx').as('codeGen').click()
     cy.wait('@codeGenSpec')
 
     cy.withCtx((ctx, { testState }) => {
@@ -152,7 +142,7 @@ describe('<Button />', () => {
     })
 
     // Test creating a copy
-    getCodeGenCandidate().click()
+    cy.get('@codeGen').click()
     cy.wait('@codeGenSpec')
 
     cy.withCtx((ctx, { testState }) => {
@@ -170,8 +160,6 @@ describe('<Button />', () => {
   })
 
   it('generates an integration spec', () => {
-    const getGenerateSpecButton = () => cy.findByText('Generate Spec')
-
     cy.visitApp('#/newspec')
     cy.wait(1000)
     cy.intercept('mutation-NewSpec_CodeGenSpec').as('codeGenSpec')
@@ -179,7 +167,7 @@ describe('<Button />', () => {
     cy.findByText('Generate Integration').click()
 
     cy.get('#fileName').type('HelloWorld.spec.js')
-    getGenerateSpecButton().click()
+    cy.findByText('Generate Spec').as('generateSpec').click()
     cy.wait('@codeGenSpec')
 
     cy.withCtx((ctx, { testState }) => {
@@ -197,7 +185,7 @@ describe('<Button />', () => {
       expect(fileContent).eq(testState.generatedSpecContent.integration)
     })
 
-    getGenerateSpecButton().click()
+    cy.get('@generateSpec').click()
     cy.wait('@codeGenSpec')
 
     cy.withCtx((ctx, { testState }) => {
