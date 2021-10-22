@@ -23,12 +23,12 @@
             </keep-alive>
           </transition>
         </router-view>
-        <ModalManager v-if="activeModalId" />
+        <ModalManager v-if="modalStore.activeModalId" />
       </section>
     </main>
     <nav
       class="h-screen order-first"
-      :class="navBarExpanded ? 'w-240px' : 'w-80px'"
+      :class="mainStore.navBarExpanded ? 'w-240px' : 'w-80px'"
     >
       <SidebarNavigation class="h-full" />
     </nav>
@@ -38,8 +38,8 @@
 <script lang="ts" setup>
 import SidebarNavigation from '../navigation/SidebarNavigation.vue'
 import ModalManager from '../modals/ModalManager.vue'
-import { useModalStore, useMainStore, storeToRefs } from '../store'
+import { useModalStore, useMainStore } from '../store'
 
-const { activeModalId } = storeToRefs(useModalStore())
-const { navBarExpanded } = storeToRefs(useMainStore())
+const modalStore = useModalStore()
+const mainStore = useMainStore()
 </script>

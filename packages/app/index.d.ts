@@ -1,4 +1,4 @@
-import type { Store } from './src/store'
+import type { MobxRunnerStore } from './src/store'
 
 interface ConnectionInfo { 
   automationElement: '__cypress-string',
@@ -42,10 +42,10 @@ declare global {
        * It's only used on the "Runner" part of the unified runner.
        */
       eventManager: {
-        addGlobalListeners: (state: Store, connectionInfo: ConnectionInfo) => void
+        addGlobalListeners: (state: MobxRunnerStore, connectionInfo: ConnectionInfo) => void
         setup: (config: Record<string, unknown>) => void
         initialize: ($autIframe: JQuery<HTMLIFrameElement>, config: Record<string, unknown>) => void
-        teardown: (state: Store) => Promise<void>
+        teardown: (state: MobxRunnerStore) => Promise<void>
         teardownReporter: () => Promise<void>
         [key: string]: any
 

@@ -5,6 +5,7 @@
   >
     <component
       :is="modals[modalStore.activeModalId]"
+      v-if="modalStore.activeModalId"
       :key="modalStore.activeModalId"
     />
   </StandardModal>

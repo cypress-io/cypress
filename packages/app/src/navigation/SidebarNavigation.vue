@@ -42,7 +42,7 @@ import SidebarNavigationRow from './SidebarNavigationRow.vue'
 import SpecsIcon from '~icons/cy/test-results_x24'
 import CodeIcon from '~icons/cy/code-editor_x24'
 import SettingsIcon from '~icons/cy/settings_x24'
-import { useMainStore, storeToRefs } from '../store'
+import { useMainStore } from '../store'
 
 const navigation = [
   { name: 'Specs', icon: SpecsIcon, href: '/' },
