@@ -20,6 +20,7 @@ import type { BaseSpec } from '@packages/types/src/spec'
 import { UnifiedReporterAPI } from './reporter'
 import { getRunnerElement, empty } from './utils'
 import { IframeModel } from './iframe-model'
+import { AutIframe } from './aut-iframe'
 
 const randomString = `${Math.random()}`
 
@@ -96,7 +97,7 @@ function setupRunner () {
     },
   )
 
-  _autIframeModel = new window.UnifiedRunner.AutIframe(
+  _autIframeModel = new AutIframe(
     'Test Project',
     window.UnifiedRunner.eventManager,
     window.UnifiedRunner._,

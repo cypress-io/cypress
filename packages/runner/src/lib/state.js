@@ -7,16 +7,9 @@ const _defaults = {
   messageType: '',
   messageControls: null,
 
-  width: 1000,
-  height: 660,
-
   reporterWidth: null,
   specListWidth: null,
   specs: [],
-
-  url: '',
-  highlightUrl: false,
-  isLoadingUrl: false,
 }
 
 export default class State extends BaseStore {
@@ -24,22 +17,12 @@ export default class State extends BaseStore {
 
   @observable isRunning = false
 
-  @observable messageTitle = _defaults.messageTitle
-  @observable messageDescription = _defaults.messageDescription
-  @observable messageType = _defaults.messageType
   @observable.ref messageControls = _defaults.messageControls
 
   @observable snapshot = {
     showingHighlights: true,
     stateIndex: 0,
   }
-
-  @observable url = _defaults.url
-  @observable highlightUrl = _defaults.highlightUrl
-  @observable isLoadingUrl = _defaults.isLoadingUrl
-
-  @observable width = _defaults.width
-  @observable height = _defaults.height
 
   // if null, the default CSS handles it
   // if non-null, the user has set it by resizing
@@ -60,7 +43,7 @@ export default class State extends BaseStore {
   @observable.ref scriptError = null
 
   constructor ({ reporterWidth, specListWidth, specs, useInlineSpecList }) {
-    super()
+    super('e2e')
     this.reporterWidth = reporterWidth || _defaults.reporterWidth
     this.specListWidth = useInlineSpecList ? specListWidth : 0
     this.useInlineSpecList = useInlineSpecList || false
@@ -108,11 +91,6 @@ export default class State extends BaseStore {
     }
   }
 
-  @action updateDimensions (width, height) {
-    this.width = width
-    this.height = height
-  }
-
   @action updateWindowDimensions ({
     windowWidth,
     windowHeight,
@@ -126,29 +104,5 @@ export default class State extends BaseStore {
     if (reporterWidth != null) this.absoluteReporterWidth = reporterWidth
 
     if (headerHeight != null) this.headerHeight = headerHeight
-  }
-
-  @action clearMessage () {
-    this.messageTitle = _defaults.messageTitle
-    this.messageDescription = _defaults.messageDescription
-    this.messageType = _defaults.messageType
-  }
-
-  setCallbackAfterUpdate (cb) {
-    this.callbackAfterUpdate = () => {
-      this.setCallbackAfterUpdateToNull()
-
-      cb()
-    }
-  }
-
-  @action setCallbackAfterUpdateToNull () {
-    this.callbackAfterUpdate = null
-  }
-
-  @action resetUrl () {
-    this.url = _defaults.url
-    this.highlightUrl = _defaults.highlightUrl
-    this.isLoadingUrl = _defaults.isLoadingUrl
   }
 }
