@@ -6,7 +6,7 @@ import App from './App.vue'
 import { makeUrqlClient } from '@packages/frontend-shared/src/graphql/urqlClient'
 import { createI18n } from '@cy/i18n'
 import { createRouter } from './router/router'
-import { createPinia } from './store'
+import { createPinia } from 'pinia'
 
 const app = createApp(App)
 
