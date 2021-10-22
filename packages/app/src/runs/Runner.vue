@@ -27,14 +27,13 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onBeforeUnmount, onMounted, reactive, toRef, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, reactive, watch } from 'vue'
 import { REPORTER_ID, RUNNER_ID, getRunnerElement, getReporterElement, empty } from '../runner/utils'
 import { gql } from '@urql/core'
 import type { Specs_RunnerFragment } from '../generated/graphql'
 import InlineSpecList from '../specs/InlineSpecList.vue'
 import { mobxRunnerStore, useSpecStore } from '../store'
 import { useRoute } from 'vue-router'
-import type { BaseSpec } from '@packages/types/src'
 import { UnifiedRunnerAPI } from '../runner'
 
 gql`
