@@ -19,6 +19,7 @@ describe('NewSpec', () => {
         integrationCopy: 'cypress/integration/HelloWorld-copy-1.spec.js',
       }
 
+      // Hack for `stop-only-all`
       testState.generatedSpecContent = {
         story: `import React from "react"
 import { mount } from "@cypress/react"
@@ -28,7 +29,7 @@ import * as stories from "./Button.stories"
 const composedStories = composeStories(stories)
 
 describe('Button', () => {
-  it.only('should render Primary', () => {
+  ${/** Hack for "stop-only-all" */'it'}.only('should render Primary', () => {
     const { Primary } = composedStories
     mount(<Primary />)
   })
