@@ -31,11 +31,11 @@
         <i-cy-circle-check_x24 class="icon-dark-jade-100 icon-light-jade-500 w-24px h-24px" />
       </template>
     </TopNavListItem>
-    <TopNavListItem class="p-16px text-center bg-gray-50">
+    <TopNavListItem class="text-center p-16px bg-gray-50">
       <a
         :href="releasesUrl"
         target="_blank"
-        class="block w-full py-8px border-gray-100 text-14px whitespace-nowrap border-rounded border-1 hover:no-underline hover:border-gray-200"
+        class="block w-full border-gray-100 py-8px text-14px whitespace-nowrap border-rounded border-1 hover:no-underline hover:border-gray-200"
       >{{ t('topNav.seeAllReleases') }}</a>
     </TopNavListItem>
   </TopNavList>
@@ -73,7 +73,7 @@
           {{ browser.displayName }}
         </div>
         <div
-          class="mr-20px font-normal text-gray-500 whitespace-nowrap text-14px"
+          class="font-normal text-gray-500 mr-20px whitespace-nowrap text-14px"
         >
           {{ t('topNav.version') }} {{ browser.version }}
         </div>
@@ -92,12 +92,15 @@
   <TopNavList variant="panel">
     <template #heading="{ open }">
       <i-cy-life-ring_x16
-        class="icon-dark-gray-500 icon-light-gray-100 group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50 h-16px w-16px"
+        class=" group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50 h-16px w-16px"
         :class="open ? 'icon-dark-indigo-500 icon-light-indigo-50' : 'icon-dark-gray-500 icon-light-gray-100'"
       />
-      <span>{{ t('topNav.docsMenu.docsHeading') }}</span>
+      <span :class="{'text-indigo-600': open}">{{ t('topNav.docsMenu.docsHeading') }}</span>
     </template>
-    <div class="flex p-16px gap-24px">
+    <div
+      v-if="docsMenuContent === 'main'"
+      class="flex p-16px gap-24px"
+    >
       <div
         v-for="list in docsMenu"
         :key="list.title"
@@ -111,17 +114,29 @@
           <li
             v-for="item in list.children"
             :key="item.text"
-            class="flex items-center mb-4px text-indigo-500"
+            class="flex items-center text-indigo-500 mb-4px"
           >
             <i-cy-book_x16 class="icon-dark-indigo-500 icon-light-indigo-50" />
+
             <a
+              v-if="!item.changeContent"
               :href="getUrl(item.link)"
               target="_blank"
-              class="ml-4px font-normal whitespace-nowrap"
+              class="font-normal ml-4px whitespace-nowrap"
             >{{ item.text }}</a>
+            <button
+              v-else
+              class="font-normal ml-4px whitespace-nowrap"
+              @click="docsMenuContent = item.changeContent"
+            >
+              {{ item.text }}
+            </button>
           </li>
         </ul>
       </div>
+    </div>
+    <div v-else>
+      {{ docsMenuContent }}
     </div>
   </TopNavList>
 
@@ -143,7 +158,7 @@ import { allBrowsersIcons } from '../../../../frontend-shared/src/assets/browser
 import { gql } from '@urql/vue'
 import type { TopNavFragment } from '../../generated/graphql'
 import { useI18n } from '@cy/i18n'
-
+import { ref } from 'vue'
 const { t } = useI18n()
 
 const getUrl = (link) => {
@@ -201,6 +216,8 @@ const props = defineProps<{
   gql: TopNavFragment,
   showBrowsers?: Boolean
 }>()
+
+const docsMenuContent = ref('main')
 
 const docsMenu = [{
   title: t('topNav.docsMenu.gettingStartedTitle'),
@@ -267,6 +284,7 @@ const docsMenu = [{
   title: t('topNav.docsMenu.ciTitle'),
   children: [{
     text: t('topNav.docsMenu.ciSetup'),
+    changeContent: 'ci',
     link: {
       url: 'https://on.cypress.io/ci',
       params: {
@@ -286,6 +304,7 @@ const docsMenu = [{
   },
   {
     text: t('topNav.docsMenu.smartOrchestration'),
+    changeContent: 'orchestration',
     link: {
       url: 'https://docs.cypress.io/guides/dashboard/smart-orchestration',
       params: {
