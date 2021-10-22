@@ -123,10 +123,6 @@ export class ProjectDataSource {
     return preferences[projectTitle] ?? null
   }
 
-  async getPrompts () {
-    return await this.api.getProjectPrompts()
-  }
-
   guessGlob (projectRoot: string): string | null {
     const guess = FRONTEND_FRAMEWORKS.find((framework) => {
       const lookingForDeps = (framework.deps as readonly string[]).reduce(

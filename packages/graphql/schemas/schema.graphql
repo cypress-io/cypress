@@ -558,9 +558,6 @@ type Project implements Node {
   projectId: String
   projectRoot: String!
 
-  """Prompts associated with this project"""
-  prompts: Prompts
-
   """Specs for a project conforming to Relay Connection specification"""
   specs(
     """Returns the elements in the list that come after the specified cursor"""
@@ -588,11 +585,6 @@ type ProjectPreferences {
   testingType: String
 }
 
-"""Details about prompts to be shown in docs menu for a project"""
-type Prompts {
-  """When this prompt was first opened by the user"""
-  firstOpened: String
-}
 
 """The root "Query" type containing all entry fields for our querying"""
 type Query {

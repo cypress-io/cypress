@@ -21,7 +21,6 @@ export interface ProjectApiShape {
   insertProjectPreferencesToCache(projectTitle: string, preferences: Preferences): void
   getProjectPreferencesFromCache(): Promise<Record<string, Preferences>>
   clearLatestProjectsCache(): Promise<unknown>
-  getProjectPrompts(): Promise<unknown>
   clearProjectPreferences(projectTitle: string): Promise<unknown>
   clearAllProjectPreferences(): Promise<unknown>
   closeActiveProject(): Promise<unknown>

@@ -54,11 +54,6 @@ export function makeDataContext (options: MakeDataContextOptions) {
       getProjectRootsFromCache () {
         return cache.getProjectRoots()
       },
-      getProjectPrompts () {
-        return {
-          firstOpened: 'test new',
-        }
-      },
       findSpecs (payload: FindSpecs) {
         return specsUtil.findSpecs(payload)
       },
