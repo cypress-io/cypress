@@ -56,7 +56,6 @@
 <script setup lang="ts">
 import { useI18n } from '@cy/i18n'
 const { t } = useI18n()
-import Button from '@cy/components/Button.vue'
 
 import CircleCI from '../../../../frontend-shared/src/assets/logos/circleci.svg?url'
 import GitHubActions from '../../../../frontend-shared/src/assets/logos/github-actions.svg?url'
