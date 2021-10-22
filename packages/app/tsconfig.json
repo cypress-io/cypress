@@ -3,6 +3,7 @@
   "include": [
     "src/**/*.vue", 
     "src/**/*.tsx", 
+    "src/**/*.ts",
     "cypress/**/*.ts", 
     "cypress/**/*.tsx",
     "index.d.ts",
@@ -11,6 +12,7 @@
     "../frontend-shared/cypress/**/*.ts"
   ],
   "compilerOptions": {
+    "noImplicitThis": true,
     "paths": {
       "@cy/i18n": ["../frontend-shared/src/locales/i18n"],
       "@cy/components/*": ["../frontend-shared/src/components/*"],

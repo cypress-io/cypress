@@ -1,5 +1,14 @@
 <template>
-  <div class="flex flex-col flex-1 min-h-0 bg-gray-1000">
+  <div
+    class="flex relative flex-col flex-1 min-h-0 bg-gray-1000"
+    :class="mainStore.navBarExpanded ? 'w-80px' : 'w-auto'"
+  >
+    <div
+      class="absolute cursor-pointer
+  bg-gray-1000 w-8px
+    bottom-0 top-0 right-0 hover:bg-indigo-300"
+      @click="mainStore.toggleNavBar"
+    />
     <div class="flex flex-col flex-1 pt-5 pb-4 overflow-y-auto">
       <div class="flex items-center flex-shrink-0 px-4">
         <i-cy-bookmark_x24
@@ -38,6 +47,7 @@ import SidebarNavigationRow from './SidebarNavigationRow.vue'
 import SpecsIcon from '~icons/cy/test-results_x24'
 import CodeIcon from '~icons/cy/code-editor_x24'
 import SettingsIcon from '~icons/cy/settings_x24'
+import { useMainStore, storeToRefs } from '../store'
 
 const navigation = [
   { name: 'Specs', icon: SpecsIcon, href: '/' },
@@ -46,7 +56,5 @@ const navigation = [
   { name: 'New Spec', icon: SettingsIcon, href: '/newspec' },
 ]
 
-defineProps<{
-  expanded?: boolean
-}>()
+const mainStore = useMainStore()
 </script>

@@ -81,12 +81,13 @@ const props = withDefaults(defineProps<{
   helpLink?: string
   helpText?: string
   clickOutside?: boolean
-  class: string | string[] | Record<string, any>
+  class?: string | string[]
 }>(), {
   clickOutside: true,
   modelValue: false,
   helpText: 'Need help?',
   helpLink: 'https://docs.cypress.io',
+  class: '',
 })
 
 const localValue = useModelWrapper(props, emit, 'modelValue')

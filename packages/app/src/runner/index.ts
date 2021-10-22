@@ -14,7 +14,7 @@
  * namespace there, and access it with `window.UnifiedRunner`.
  *
  */
-import { store, Store } from '../store'
+import { mobxRunnerStore } from '../store'
 import { injectBundle } from './injectBundle'
 import type { BaseSpec } from '@packages/types/src/spec'
 import { UnifiedReporterAPI } from './reporter'
@@ -33,7 +33,7 @@ const randomString = `${Math.random()}`
  * and server (via web socket).
  */
 function setupRunner (done: () => void) {
-  window.UnifiedRunner.eventManager.addGlobalListeners(store, {
+  window.UnifiedRunner.eventManager.addGlobalListeners(mobxRunnerStore, {
     automationElement: '__cypress-string',
     randomString,
   })

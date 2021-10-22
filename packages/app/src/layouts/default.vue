@@ -16,13 +16,14 @@
             name="fade"
             mode="out-in"
           >
-            <!-- <keep-alive> -->
-            <component
-              :is="Component"
-            />
-            <!-- </keep-alive> -->
+            <keep-alive>
+              <component
+                :is="Component"
+              />
+            </keep-alive>
           </transition>
         </router-view>
+        <ModalManager v-if="activeModalId" />
       </section>
     </main>
     <nav class="h-screen order-first w-240px">
@@ -33,4 +34,8 @@
 
 <script lang="ts" setup>
 import SidebarNavigation from '../navigation/SidebarNavigation.vue'
+import ModalManager from '../modals/ModalManager.vue'
+import { useModalStore, storeToRefs } from '../store'
+
+const { activeModalId } = storeToRefs(useModalStore())
 </script>

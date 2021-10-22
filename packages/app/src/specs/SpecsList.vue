@@ -3,6 +3,7 @@
     <SpecsListHeader
       v-model="search"
       class="pb-32px"
+      @newSpec="modalStore.open('createSpec')"
     />
     <div class="grid items-center divide-y-1 children:h-40px">
       <div class="grid grid-cols-2 children:text-gray-800 children:font-medium">
@@ -29,7 +30,9 @@ import { computed, ref } from 'vue'
 import { Specs_SpecsListFragment, SpecNode_SpecsListFragment, SpecsList_SetCurrentSpecDocument } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
 import { useRouter } from 'vue-router'
+import { useModalStore } from '../store'
 
+const modalStore = useModalStore()
 const { t } = useI18n()
 
 gql`
