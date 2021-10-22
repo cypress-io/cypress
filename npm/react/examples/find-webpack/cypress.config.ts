@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   'video': true,
   'projectId': 'jq5xpp',
   'component': {

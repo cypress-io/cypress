@@ -336,7 +336,7 @@ describe('Settings', () => {
       })
 
       it('notes that cypress.config.js is disabled', () => {
-        cy.contains('set from cypress.config.js file (currently disabled by --config-file false)')
+        cy.contains('set from cypress.config.{ts|js} file (currently disabled by --config-file false)')
       })
     })
 
@@ -381,12 +381,7 @@ describe('Settings', () => {
       it('copies project id config to clipboard', function () {
         cy.get('.action-copy').click()
         .then(() => {
-          const expectedJsonConfig = {
-            projectId: this.config.projectId,
-          }
-          const expectedCopyCommand = JSON.stringify(expectedJsonConfig, null, 2)
-
-          expect(this.ipc.setClipboardText).to.be.calledWith(expectedCopyCommand)
+          expect(this.ipc.setClipboardText).to.be.calledWith('module.exports = {')
         })
       })
     })

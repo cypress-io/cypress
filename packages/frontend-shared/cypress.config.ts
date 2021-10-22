@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   'projectId': 'sehy69',
   'baseUrl': 'http://localhost:5555',
   'viewportWidth': 800,

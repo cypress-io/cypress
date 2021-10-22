@@ -625,7 +625,7 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
 
         Fix the error in your code and re-run your tests.`
 
-    // happens when there is an error in configuration file like "cypress.json"
+    // happens when there is an error in configuration file like "cypress.config.{ts|js}"
     case 'SETTINGS_VALIDATION_ERROR':
       filePath = `\`${arg1}\``
 

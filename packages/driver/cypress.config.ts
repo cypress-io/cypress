@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   'projectId': 'ypt4pf',
   'baseUrl': 'http://localhost:3500',
   'testFiles': '**/*',

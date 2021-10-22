@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   'viewportWidth': 500,
   'viewportHeight': 500,
   'video': false,

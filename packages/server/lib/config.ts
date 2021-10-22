@@ -206,7 +206,7 @@ export type FullConfig =
 
 export function get (projectRoot, options = {}): Promise<FullConfig> {
   return Promise.all([
-    settings.read(projectRoot, options).then(validateFile('cypress.json')),
+    settings.read(projectRoot, options).then(validateFile('cypress.config.{ts|js}')),
     settings.readEnv(projectRoot).then(validateFile('cypress.env.json')),
   ])
   .spread((settings, envFile) => {
@@ -428,7 +428,7 @@ export function updateWithPluginValues (cfg, overrides) {
 }
 
 // combines the default configuration object with values specified in the
-// configuration file like "cypress.json". Values in configuration file
+// configuration file like "cypress.{ts|js}". Values in configuration file
 // overwrite the defaults.
 export function resolveConfigValues (config, defaults, resolved = {}) {
   // pick out only known configuration keys

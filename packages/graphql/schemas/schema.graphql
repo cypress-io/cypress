@@ -511,7 +511,7 @@ enum PluginsState {
   uninitialized
 }
 
-"""A Cypress Project is represented by a cypress.json file"""
+"""A Cypress Project is represented by a cypress.config.{ts|js} file"""
 type Project implements Node {
   """The remote associated project from Cypress Cloud"""
   cloudProject: CloudProject

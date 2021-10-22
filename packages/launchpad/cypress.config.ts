@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   '$schema': '../../cli/schema/cypress.schema.json',
   'projectId': 'sehy69',
   'viewportWidth': 800,

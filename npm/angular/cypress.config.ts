@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   'experimentalFetchPolyfill': true,
   'fixturesFolder': false,
   'includeShadowDom': true,
