@@ -32,14 +32,6 @@ export type ResolvedConfigurationOptions = Partial<{
   [x in keyof Cypress.ResolvedConfigOptions]: ResolvedFromConfig
 }>
 
-export const CYPRESS_ENV_PREFIX = 'CYPRESS_'
-
-export const CYPRESS_ENV_PREFIX_LENGTH = 'CYPRESS_'.length
-
-export const CYPRESS_RESERVED_ENV_VARS = [
-  'CYPRESS_INTERNAL_ENV',
-]
-
 export const CYPRESS_SPECIAL_ENV_VARS = [
   'RECORD_KEY',
 ]

@@ -7,6 +7,7 @@ const debugCiInfo = require('debug')('cypress:server:record:ci-info')
 const Promise = require('bluebird')
 const isForkPr = require('is-fork-pr')
 const commitInfo = require('@cypress/commit-info')
+
 const api = require('../api')
 const logger = require('../logger')
 const errors = require('../errors')
