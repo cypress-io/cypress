@@ -9,7 +9,7 @@ const defaultOptions = {
   configFile: 'cypress.json',
 }
 
-describe('lib/util/settings', { retries: 2 }, () => {
+describe('lib/util/settings', () => {
   context('with default configFile option', () => {
     beforeEach(function () {
       this.setup = (obj = {}) => {
