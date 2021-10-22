@@ -1,7 +1,7 @@
 const _ = require('lodash')
 const debug = require('debug')('cypress:config:validator')
 
-const { options, breakingOptions } = require('./config_options')
+const { options, breakingOptions } = require('./options')
 
 const dashesOrUnderscoresRe = /^(_-)+/
 

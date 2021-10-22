@@ -1,12 +1,5 @@
 const v = require('./validation')
 
-// NOTE:
-// If you add/remove/change a config value, make sure to update the following
-// - cli/types/index.d.ts (including allowed config options on TestOptions)
-// - cypress.schema.json
-//
-// Add options in alphabetical order for better readability
-
 interface ResolvedConfigOption {
   name: string
   defaultValue: any
@@ -40,7 +33,7 @@ interface BreakingOption {
    */
   isWarning?: boolean
 }
-// almost the validate function but it's cross-checking the default values
+
 const isValidConfig = (key, config) => {
   const status = v.isPlainObject(key, config)
 
@@ -60,6 +53,13 @@ const isValidConfig = (key, config) => {
 
   return true
 }
+
+// NOTE:
+// If you add/remove/change a config value, make sure to update the following
+// - cli/types/index.d.ts (including allowed config options on TestOptions)
+// - cypress.schema.json
+//
+// Add options in alphabetical order for better readability
 
 // TODO - add boolean attribute to indicate read-only / static vs mutable options
 // that can be updated during test executions

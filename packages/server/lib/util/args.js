@@ -1,10 +1,11 @@
-const { getPublicConfigKeys } = require('@packages/config')
 const _ = require('lodash')
 const la = require('lazy-ass')
 const is = require('check-more-types')
 const path = require('path')
 const debug = require('debug')('cypress:server:args')
 const minimist = require('minimist')
+const { getPublicConfigKeys } = require('@packages/config')
+
 const coerceUtil = require('./coerce')
 const proxyUtil = require('./proxy')
 const errors = require('../errors')
