@@ -1,4 +1,4 @@
-import type { Store } from '../store'
+import type { MobxRunnerStore } from '../store'
 
 export interface AutSnapshot {
   id?: number
@@ -23,7 +23,7 @@ export class IframeModel {
   intervalId?: number
 
   constructor (
-    private state: Store,
+    private state: MobxRunnerStore,
     private detachDom: () => AutSnapshot,
     private restoreDom: (snapshot: any) => void,
     private highlightEl: ({ body }: any, opts: any) => void,

@@ -264,12 +264,6 @@ async function executeSpec (spec: BaseSpec) {
   await UnifiedReporterAPI.resetReporter()
 
   await teardownSpec(mobxRunnerStore)
-  UnifiedReporterAPI.setupReporter()
-  mobxRunnerStore.setSpec(spec)
-
-  await UnifiedReporterAPI.resetReporter()
-
-  await teardownSpec(mobxRunnerStore)
 
   UnifiedReporterAPI.setupReporter()
 

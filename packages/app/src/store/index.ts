@@ -8,6 +8,8 @@ export * from './modals'
 // Mobx Store Wrapper from @packages/runner-shared
 export * from './runner-store'
 
+export * from './specs'
+
 // Reusable installation function, used as an entry point for tests that
 // require an identical setup to main.ts
 export const createPinia = () => {
