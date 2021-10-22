@@ -3,7 +3,7 @@ const { _, Promise } = Cypress
 
 const RESPONSE_TIMEOUT = 22222
 
-describe('src/cy/commands/request', () => {
+describe('src/cy/commands/request', { retries: 2 }, () => {
   context('#request', {
     responseTimeout: RESPONSE_TIMEOUT,
   }, () => {
