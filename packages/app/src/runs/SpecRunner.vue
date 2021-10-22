@@ -30,9 +30,9 @@
 import { computed, onBeforeUnmount, onMounted, reactive, watch } from 'vue'
 import { REPORTER_ID, RUNNER_ID, getRunnerElement, getReporterElement, empty } from '../runner/utils'
 import { gql } from '@urql/core'
-import { SpecRunnerFragment, SpecsPageContainerDocument } from '../generated/graphql'
+import type { SpecRunnerFragment } from '../generated/graphql'
 import InlineSpecList from '../specs/InlineSpecList.vue'
-import { getMobxRunnerStore, MobxRunnerStore, useSpecStore } from '../store'
+import { getMobxRunnerStore, useSpecStore } from '../store'
 import { UnifiedRunnerAPI } from '../runner'
 
 gql`
