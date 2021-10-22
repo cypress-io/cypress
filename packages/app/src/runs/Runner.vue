@@ -31,13 +31,13 @@
 
 <script lang="ts" setup>
 import { computed, onBeforeUnmount, onMounted, reactive } from 'vue'
-import { useMutation } from '@urql/vue'
 import { UnifiedRunnerAPI } from '../runner'
 import { REPORTER_ID, RUNNER_ID, getRunnerElement, getReporterElement, empty } from '../runner/utils'
 import { gql } from '@urql/core'
-import { Runner_SetCurrentSpecDocument, Specs_RunnerFragment } from '../generated/graphql'
+import type { Specs_RunnerFragment } from '../generated/graphql'
 import InlineSpecList from '../specs/InlineSpecList.vue'
 import { getMobxRunnerStore } from '../store'
+import { useRoute, useRouter } from 'vue-router'
 
 gql`
 fragment CurrentSpec_Runner on Spec {
@@ -58,12 +58,6 @@ fragment Specs_Runner on App {
       ...CurrentSpec_Runner
     }
   }
-}
-`
-
-gql`
-mutation Runner_SetCurrentSpec($id: ID!) {
-  setCurrentSpec(id: $id)
 }
 `
 
@@ -92,16 +86,16 @@ const viewportStyle = computed(() => {
 `
 })
 
-const setSpecMutation = useMutation(Runner_SetCurrentSpecDocument)
-
 const props = defineProps<{
   gql: Specs_RunnerFragment
 }>()
 
-async function selectSpec (id: string) {
-  await setSpecMutation.executeMutation({ id })
+const router = useRouter()
+const route = useRoute()
 
-  const specToRun = props.gql.activeProject?.specs?.edges.find((x) => x.node.id === id)
+async function selectSpec (relative: string) {
+  router.push({ path: 'runner', query: { spec: relative } })
+  const specToRun = props.gql.activeProject?.specs?.edges.find((x) => x.node.relative === relative)
 
   if (!specToRun?.node) {
     return
@@ -111,11 +105,14 @@ async function selectSpec (id: string) {
 }
 
 function executeSpec () {
-  if (!props.gql?.activeProject?.currentSpec) {
+  const relative = route.query.spec
+  const spec = props.gql.activeProject?.specs?.edges.find((x) => x.node.relative === relative)?.node
+
+  if (!spec) {
     return
   }
 
-  UnifiedRunnerAPI.executeSpec(props.gql.activeProject.currentSpec)
+  UnifiedRunnerAPI.executeSpec(spec)
 }
 
 onMounted(() => {

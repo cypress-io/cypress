@@ -4,7 +4,8 @@
       v-for="spec in specs"
       :key="spec.node.id"
       class="text-left grid grid-cols-[16px,auto,auto] items-center gap-10px"
-      @click.prevent="selectSpec(spec.node.id)"
+      :class="{ 'border border-4 border-red-400': isCurrentSpec(spec.node.relative) }"
+      @click.prevent="selectSpec(spec.node.relative)"
     >
       <SpecName :gql="spec.node" />
     </button>
@@ -16,6 +17,7 @@ import { computed } from 'vue'
 import { gql } from '@urql/vue'
 import type { Specs_InlineSpecListFragment } from '../generated/graphql'
 import SpecName from './SpecName.vue'
+import { useRoute } from 'vue-router'
 
 gql`
 fragment SpecNode_InlineSpecList on SpecEdge {
@@ -46,6 +48,10 @@ fragment Specs_InlineSpecList on App {
 const emit = defineEmits<{
   (event: 'selectSpec', id: string): void
 }>()
+
+const route = useRoute()
+
+const isCurrentSpec = (relative: string) => relative === route.query.spec
 
 async function selectSpec (id: string) {
   emit('selectSpec', id)
