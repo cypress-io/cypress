@@ -104,7 +104,7 @@ export const Project = objectType({
 
     t.field('prompts', {
       type: Prompts,
-      description: 'Cached preferences for this project',
+      description: 'Prompts associated with this project',
       resolve: (source, args, ctx) => {
         return ctx.project.getPrompts()
       },

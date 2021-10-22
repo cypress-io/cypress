@@ -29,6 +29,7 @@ export interface ActiveProjectShape extends ProjectShape {
   config: ResolvedFromConfig[]
   preferences?: Preferences| null
   generatedSpec: GeneratedSpec | null
+  prompts: { firstOpened: string }
 }
 
 export interface AppDataShape {
