@@ -14,7 +14,11 @@
  * namespace there, and access it with `window.UnifiedRunner`.
  *
  */
+<<<<<<< HEAD
 import { getStore, Store } from '../store'
+=======
+import { mobxRunnerStore, MobxRunnerStore } from '../store'
+>>>>>>> origin/unified-desktop-gui
 import { injectBundle } from './injectBundle'
 import type { BaseSpec } from '@packages/types/src/spec'
 import { UnifiedReporterAPI } from './reporter'
@@ -80,10 +84,15 @@ function createIframeModel () {
  * for communication between driver, runner, reporter via event bus,
  * and server (via web socket).
  */
+<<<<<<< HEAD
 function setupRunner () {
   const store = getStore()
 
   window.UnifiedRunner.eventManager.addGlobalListeners(store, {
+=======
+function setupRunner (done: () => void) {
+  window.UnifiedRunner.eventManager.addGlobalListeners(mobxRunnerStore, {
+>>>>>>> origin/unified-desktop-gui
     automationElement: '__cypress-string',
     randomString,
   })
@@ -128,8 +137,8 @@ function getSpecUrl (namespace: string, spec: BaseSpec, prefix = '') {
  * This should be called before you execute a spec,
  * or re-running the current spec.
  */
-function teardownSpec (store: Store) {
-  return window.UnifiedRunner.eventManager.teardown(store)
+function teardownSpec (mobxRunnerStore: MobxRunnerStore) {
+  return window.UnifiedRunner.eventManager.teardown(mobxRunnerStore)
 }
 
 /**
@@ -261,6 +270,7 @@ async function initialize () {
  *    description for more information.
  */
 async function executeSpec (spec: BaseSpec) {
+<<<<<<< HEAD
   const store = getStore()
 
   store.setSpec(spec)
@@ -269,6 +279,15 @@ async function executeSpec (spec: BaseSpec) {
 
   await teardownSpec(store)
   UnifiedReporterAPI.setupReporter(store)
+=======
+  mobxRunnerStore.setSpec(spec)
+
+  await UnifiedReporterAPI.resetReporter()
+
+  await teardownSpec(mobxRunnerStore)
+
+  UnifiedReporterAPI.setupReporter()
+>>>>>>> origin/unified-desktop-gui
 
   if (window.UnifiedRunner.config.testingType === 'e2e') {
     return runSpecE2E(spec)
