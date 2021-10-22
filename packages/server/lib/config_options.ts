@@ -44,7 +44,7 @@ export const options = [
     name: 'component',
     // runner-ct overrides
     defaultValue: {},
-    validation: v.isValidConfig,
+    validation: v.isValidConfig(options),
   }, {
     name: 'componentFolder',
     defaultValue: 'cypress/component',
@@ -74,7 +74,7 @@ export const options = [
     name: 'e2e',
     // e2e runner overrides
     defaultValue: {},
-    validation: v.isValidConfig,
+    validation: v.isValidConfig(options),
   }, {
     name: 'env',
     validation: v.isPlainObject,
