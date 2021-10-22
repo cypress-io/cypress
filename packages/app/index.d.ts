@@ -1,4 +1,5 @@
 import type { MobxRunnerStore } from './src/store'
+import type MobX from 'mobx'
 
 interface ConnectionInfo { 
   automationElement: '__cypress-string',
@@ -72,6 +73,19 @@ declare global {
        */
       React: any
       ReactDOM: any
+      logger: any
+      dom: any
+      visitFailure: any
+      blankContents: any
+      _: any // lodash
+      CypressJQuery: any
+
+      studioRecorder: any
+      selectorPlaygroundModel: any
+
+      MobX: typeof MobX
+
+      SnapshotControls: any
 
       /**
        * Any React components or general code needed from
