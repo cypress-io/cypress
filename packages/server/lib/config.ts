@@ -3,7 +3,7 @@ import R from 'ramda'
 import path from 'path'
 import Promise from 'bluebird'
 import deepDiff from 'return-deep-diff'
-import configurator from '@packages/config'
+import configUtils from '@packages/config'
 
 import errors from './errors'
 import scaffold from './scaffold'
@@ -44,8 +44,8 @@ export const CYPRESS_SPECIAL_ENV_VARS = [
   'RECORD_KEY',
 ]
 
-const defaultValues = configurator.getDefaultValues()
-const folders = _(configurator.options).filter({ isFolder: true }).map('name').value()
+const defaultValues = configUtils.getDefaultValues()
+const folders = _(configUtils.options).filter({ isFolder: true }).map('name').value()
 
 const convertRelativeToAbsolutePaths = (projectRoot, obj) => {
   return _.reduce(folders, (memo, folder) => {
@@ -62,7 +62,7 @@ const convertRelativeToAbsolutePaths = (projectRoot, obj) => {
 
 const validateFile = (file) => {
   return (settings) => {
-    return configurator.validate(settings, (errMsg) => {
+    return configUtils.validate(settings, (errMsg) => {
       return errors.throw('SETTINGS_VALIDATION_ERROR', file, errMsg)
     })
   }
@@ -191,7 +191,7 @@ export function mergeDefaults (config: Record<string, any> = {}, options: Record
   debug('merged config with options, got %o', config)
 
   _
-  .chain(configurator.allowed(options))
+  .chain(configUtils.allowed(options))
   .omit('env')
   .omit('browsers')
   .each((val, key) => {
@@ -242,14 +242,13 @@ export function mergeDefaults (config: Record<string, any> = {}, options: Record
 
   config = setParentTestsPaths(config)
 
-  // validate config again here so that we catch
-  // configuration errors coming from the CLI overrides
-  // or env var overrides
-  configurator.validate(_(config).omit('browsers'), (errMsg) => {
+  // validate config again here so that we catch configuration errors coming
+  // from the CLI overrides or env var overrides
+  configUtils.validate(_.omit(config, ['browsers']), (errMsg) => {
     return errors.throw('CONFIG_VALIDATION_ERROR', errMsg)
   })
 
-  configurator.validateNoBreakingConfig(config, errors.warning, errors.throw)
+  configUtils.validateNoBreakingConfig(config, errors.warning, errors.throw)
 
   return setSupportFileAndFolder(config)
   .then(setPluginsFile)
@@ -295,7 +294,7 @@ export function updateWithPluginValues (cfg, overrides) {
 
   // make sure every option returned from the plugins file
   // passes our validation functions
-  configurator.validate(overrides, (errMsg) => {
+  configUtils.validate(overrides, (errMsg) => {
     if (cfg.pluginsFile && cfg.projectRoot) {
       const relativePluginsPath = path.relative(cfg.projectRoot, cfg.pluginsFile)
 
@@ -369,7 +368,7 @@ export function resolveConfigValues (config, defaults, resolved = {}) {
   // pick out only known configuration keys
   return _
   .chain(config)
-  .pick(configurator.getPublicConfigKeys())
+  .pick(configUtils.getPublicConfigKeys())
   .mapValues((val, key) => {
     let r
     const source = (s: ResolvedConfigurationOptionSource): ResolvedFromConfig => {
@@ -641,7 +640,7 @@ export function parseEnv (cfg: Record<string, any>, envCLI: Record<string, any>,
   const configFromEnv = _.reduce(envProc, (memo: string[], val, key) => {
     let cfgKey: string
 
-    cfgKey = configurator.matchesConfigKey(key)
+    cfgKey = configUtils.matchesConfigKey(key)
 
     if (cfgKey) {
       // only change the value if it hasn't been
