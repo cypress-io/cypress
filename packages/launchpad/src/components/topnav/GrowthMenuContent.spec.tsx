@@ -1,11 +1,12 @@
 import GrowthMenuContent from './GrowthMenuContent.vue'
 
-describe('<GrowthMenuContent />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
+describe('<GrowthMenuContent />', { viewportWidth: 500, viewportHeight: 750 }, () => {
   it('renders', () => {
     cy.mount({
       render: () => {
-        return (<div>
+        return (<div class="w-484px border">
           <GrowthMenuContent type="ci"/>
+          <hr />
           <GrowthMenuContent type="orchestration"/>
         </div>)
       },

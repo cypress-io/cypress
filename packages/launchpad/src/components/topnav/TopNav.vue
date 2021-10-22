@@ -101,6 +101,7 @@
       v-if="docsMenuContent === 'main'"
       class="flex p-16px gap-24px"
     >
+      <!-- TODO make this its own component -->
       <div
         v-for="list in docsMenu"
         :key="list.title"
@@ -135,8 +136,21 @@
         </ul>
       </div>
     </div>
-    <div v-else>
-      {{ docsMenuContent }}
+    <div
+      v-else
+      class="w-484px"
+    >
+      <div class="relative border-b border-b-gray-50 p-24px">
+        {{ t(`topNav.docsMenu.prompts.${docsMenuContent}.title`) }}
+        <button
+          aria-label="Close"
+          class="absolute border-transparent rounded-full p-5px border-1 hover:border-indigo-300 hocus-default right-20px top-10px"
+          @click="docsMenuContent= 'main'"
+        >
+          <i-cy-delete_x12 class="icon-dark-gray-400 w-12px h-12px" />
+        </button>
+      </div>
+      <GrowthMenuContentVue :type="docsMenuContent" />
     </div>
   </TopNavList>
 
@@ -154,6 +168,7 @@
 <script setup lang="ts">
 import TopNavListItem from './TopNavListItem.vue'
 import TopNavList from './TopNavList.vue'
+import GrowthMenuContentVue from './GrowthMenuContent.vue'
 import { allBrowsersIcons } from '../../../../frontend-shared/src/assets/browserLogos'
 import { gql } from '@urql/vue'
 import type { TopNavFragment } from '../../generated/graphql'

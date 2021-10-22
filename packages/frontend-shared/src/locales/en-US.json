@@ -64,7 +64,16 @@
       "ciTitle": "Run in CI/CD",
       "ciSetup": "Set up CI",
       "fasterTests": "Run tests faster",
-      "smartOrchestration": "Smart Orchestration"
+      "smartOrchestration": "Smart Orchestration",
+      "prompts": {
+        "ci": {
+          "title": "Configure CI",
+          "description": "Optimize your tests in CI by following these guides."
+        },
+        "orchestration": {
+          "title": "Run tests faster in CI"
+        }
+      }
     },
     "login": {
       "bodyInitial": "Logging in gives you access to the {0}. You can set up projects to be recorded and see test data from your project.",
