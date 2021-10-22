@@ -2,12 +2,18 @@ import { BaseStore } from '@packages/runner-shared/src/store'
 
 export class MobxRunnerStore extends BaseStore { }
 
-export let mobxRunnerStore
+let mobxRunnerStore: MobxRunnerStore
 
-export const createMobxRunnerStore = () => {
-  mobxRunnerStore = new MobxRunnerStore()
+export function getMobxRunnerStore () {
+  if (!mobxRunnerStore) {
+    throw Error('mobxRunnerStore is undefined! Need to call initializeMobxStore')
+  }
 
   return mobxRunnerStore
 }
 
-mobxRunnerStore = createMobxRunnerStore
+export const initializeMobxStore = (testingType: Cypress.TestingType) => {
+  mobxRunnerStore = new BaseStore(testingType)
+
+  return mobxRunnerStore
+}
