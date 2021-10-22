@@ -130,6 +130,8 @@ const isPlainObject = (key, value) => {
   return errMsg(key, value, 'a plain object')
 }
 
+// options is passed in here in order to avoid a circular import
+// where validation depends on config_options and config_options depends on validation
 const isValidConfig = (options) => {
   return (key, config) => {
     const status = isPlainObject(key, config)
