@@ -321,3 +321,9 @@ export const session = () => {
     </div>
   `
 }
+
+export const blankContents = {
+  initial,
+  session,
+  sessionLifecycle,
+}

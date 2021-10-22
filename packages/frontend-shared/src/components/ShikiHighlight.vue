@@ -18,16 +18,15 @@ shikiWrapperClasses computed property.
 -->
 
 <template>
-  <div class="relative">
+  <div class="relative text-left cursor-text">
     <div
       v-if="highlighterInitialized"
       ref="codeEl"
       :class="[
-
         'shiki-wrapper',
 
         // All styles contain these utility classes
-        'overflow-scroll hover:border-indigo-200 relative text-14px leading-24px font-light rounded',
+        'overflow-scroll hover:border-indigo-200 relative text-14px leading-24px font-light',
 
         /**
          * 1. Single line is forced onto one line without any borders. It loses
@@ -45,23 +44,24 @@ shikiWrapperClasses computed property.
          */
         {
           'inline': props.inline,
-          'border-1 border-gray-100': !props.inline,
           'wrap': props.wrap,
           'line-numbers': props.lineNumbers,
           'p-8px': !props.lineNumbers && !props.inline,
-          'copied': copied && !props.inline,
-          'cursor-pointer': copyOnClick
         },
+
+        props.class,
       ]"
       @click="copyOnClick ? () => copyCode() : () => {}"
       v-html="highlightedCode"
     />
-    <p
-      class="absolute text-white transition duration-100 bg-indigo-500 rounded text-14px px-8px py-6px top-8px right-8px"
-      :class="copied ? 'opacity-100' : 'opacity-0'"
+    <Button
+      variant="outline"
+      tabindex="-1"
+      class="absolute  bottom-8px right-8px"
+      @click="copyCode"
     >
-      {{ t('clipboard.copied') }}
-    </p>
+      {{ copied ? t('clipboard.copied') : t('clipboard.copy') }}
+    </Button>
   </div>
 </template>
 
@@ -91,11 +91,14 @@ export async function initHighlighter () {
   })
 }
 
-export { highlighter }
+const inheritAttrs = false
+
+export { highlighter, inheritAttrs }
 </script>
 
 <script lang="ts" setup>
 import { computed, onBeforeMount, ref } from 'vue'
+import Button from '@cy/components/Button.vue'
 // eslint-disable-next-line no-duplicate-imports
 import type { Ref } from 'vue'
 import { useClipboard } from '@vueuse/core'
@@ -117,11 +120,13 @@ const props = withDefaults(defineProps<{
   inline?: boolean,
   wrap?: boolean,
   copyOnClick?: boolean,
+  class?: string | string[] | Record<string, any>
 }>(), {
   lineNumbers: false,
   inline: false,
   wrap: false,
   copyOnClick: false,
+  class: undefined,
 })
 
 const resolvedLang = computed(() => {

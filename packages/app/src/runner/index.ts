@@ -14,13 +14,61 @@
  * namespace there, and access it with `window.UnifiedRunner`.
  *
  */
-import { store, Store } from '../store'
+import { getMobxRunnerStore } from '../store'
 import { injectBundle } from './injectBundle'
 import type { BaseSpec } from '@packages/types/src/spec'
 import { UnifiedReporterAPI } from './reporter'
 import { getRunnerElement, empty } from './utils'
+import { IframeModel } from './iframe-model'
+import { AutIframe } from './aut-iframe'
 
 const randomString = `${Math.random()}`
+
+let _autIframeModel: any
+
+/**
+ * Creates an instance of an AutIframe model which ise used to control
+ * various things like snapshots, and the lifecycle of the underlying
+ * AUT <iframe> element
+ *
+ * This only needs to be created once per **spec**. If you change spec,
+ * you need to create a new AUT IFrame model.
+ */
+function getAutIframeModel () {
+  if (!_autIframeModel) {
+    throw Error('Must create a new instance of AutIframe before accessing')
+  }
+
+  return _autIframeModel
+}
+
+/**
+ * 1:1: relationship with the AUT IFrame model.
+ * controls various things to do with snapshots, test url, etc.
+ * It also has a listen function which initializes many events to do with the
+ * run lifecycle, snapshots, and viewport.
+ */
+function createIframeModel () {
+  const autIframe = getAutIframeModel()
+  // IFrame Model to manage snapshots, etc.
+  const iframeModel = new IframeModel(
+    getMobxRunnerStore(),
+    autIframe.detachDom,
+    autIframe.restoreDom,
+    autIframe.highlightEl,
+    window.UnifiedRunner.eventManager,
+    () => {
+      // TODO snapshot controls
+    },
+    window.UnifiedRunner.MobX,
+    {
+      recorder: window.UnifiedRunner.studioRecorder,
+      selectorPlaygroundModel: window.UnifiedRunner.selectorPlaygroundModel,
+    },
+  )
+
+  iframeModel.listen()
+}
 
 /**
  * One-time setup. Required `window.UnifiedRunner` to exist,
@@ -32,13 +80,39 @@ const randomString = `${Math.random()}`
  * for communication between driver, runner, reporter via event bus,
  * and server (via web socket).
  */
-function setupRunner (done: () => void) {
-  window.UnifiedRunner.eventManager.addGlobalListeners(store, {
+function setupRunner () {
+  const mobxRunnerStore = getMobxRunnerStore()
+
+  window.UnifiedRunner.eventManager.addGlobalListeners(mobxRunnerStore, {
     automationElement: '__cypress-string',
     randomString,
   })
 
-  done()
+  window.UnifiedRunner.eventManager.start(window.UnifiedRunner.config)
+
+  window.UnifiedRunner.MobX.reaction(
+    () => [mobxRunnerStore.height, mobxRunnerStore.width],
+    () => {
+      mobxRunnerStore.viewportUpdateCallback?.()
+    },
+  )
+
+  _autIframeModel = new AutIframe(
+    'Test Project',
+    window.UnifiedRunner.eventManager,
+    window.UnifiedRunner._,
+    window.UnifiedRunner.CypressJQuery,
+    window.UnifiedRunner.logger,
+    window.UnifiedRunner.dom,
+    window.UnifiedRunner.visitFailure,
+    {
+      recorder: window.UnifiedRunner.studioRecorder,
+      selectorPlaygroundModel: window.UnifiedRunner.selectorPlaygroundModel,
+    },
+    window.UnifiedRunner.blankContents,
+  )
+
+  createIframeModel()
 }
 
 /**
@@ -54,8 +128,8 @@ function getSpecUrl (namespace: string, spec: BaseSpec, prefix = '') {
  * This should be called before you execute a spec,
  * or re-running the current spec.
  */
-function teardownSpec (store: Store) {
-  return window.UnifiedRunner.eventManager.teardown(store)
+function teardownSpec () {
+  return window.UnifiedRunner.eventManager.teardown(getMobxRunnerStore())
 }
 
 /**
@@ -63,7 +137,7 @@ function teardownSpec (store: Store) {
  * Cypress on it.
  *
  */
-function setupSpecCT (spec: BaseSpec) {
+function runSpecCT (spec: BaseSpec) {
   // TODO: figure out how to manage window.config.
   const config = window.UnifiedRunner.config
 
@@ -86,9 +160,8 @@ function setupSpecCT (spec: BaseSpec) {
   $runnerRoot.append($container)
 
   // create new AUT
-  const autIframe = new window.UnifiedRunner.AutIframe('Test Project')
+  const autIframe = getAutIframeModel()
   const $autIframe: JQuery<HTMLIFrameElement> = autIframe.create().appendTo($container)
-
   const specSrc = getSpecUrl(config.namespace, spec)
 
   autIframe.showInitialBlankContents()
@@ -115,7 +188,7 @@ function createSpecIFrame (specSrc: string) {
  * a Spec IFrame to load the spec's source code, and
  * initialize Cypress on the AUT.
  */
-function setupSpecE2E (spec: BaseSpec) {
+function runSpecE2E (spec: BaseSpec) {
   // TODO: manage config with GraphQL, don't put it on window.
   const config = window.UnifiedRunner.config
 
@@ -138,7 +211,7 @@ function setupSpecE2E (spec: BaseSpec) {
   $runnerRoot.append($container)
 
   // create new AUT
-  const autIframe = new window.UnifiedRunner.AutIframe('Test Project')
+  const autIframe = getAutIframeModel()
 
   autIframe.showInitialBlankContents()
   const $autIframe: JQuery<HTMLIFrameElement> = autIframe.create().appendTo($container)
@@ -163,8 +236,9 @@ function setupSpecE2E (spec: BaseSpec) {
  *
  * This only needs to happen once, prior to running the first spec.
  */
-function initialize (ready: () => void) {
-  injectBundle(() => setupRunner(ready))
+async function initialize () {
+  await injectBundle()
+  window.UnifiedRunner.MobX.runInAction(() => setupRunner())
 }
 
 /**
@@ -183,24 +257,25 @@ function initialize (ready: () => void) {
  *
  * 4. Force the Reporter to re-render with the new spec we are executed.
  *
- * 5. Setup the spec. This involves a few things, see the `setupSpecCT` function's
+ * 5. Setup the spec. This involves a few things, see the `runSpecCT` function's
  *    description for more information.
  */
 async function executeSpec (spec: BaseSpec) {
-  store.setSpec(spec)
+  const mobxRunnerStore = getMobxRunnerStore()
+
+  mobxRunnerStore.setSpec(spec)
 
   await UnifiedReporterAPI.resetReporter()
 
-  await teardownSpec(store)
-
+  await teardownSpec()
   UnifiedReporterAPI.setupReporter()
 
   if (window.UnifiedRunner.config.testingType === 'e2e') {
-    return setupSpecE2E(spec)
+    return runSpecE2E(spec)
   }
 
   if (window.UnifiedRunner.config.testingType === 'component') {
-    return setupSpecCT(spec)
+    return runSpecCT(spec)
   }
 
   throw Error('Unknown or undefined testingType on window.UnifiedRunner.config.testingType')
