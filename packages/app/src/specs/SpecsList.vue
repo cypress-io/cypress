@@ -64,7 +64,7 @@ fragment Specs_SpecsList on App {
 const router = useRouter()
 
 function selectSpec (relative: string) {
-  router.push({ path: 'runner', query: { spec: relative } })
+  router.push({ query: { spec: relative } })
 }
 
 const props = defineProps<{

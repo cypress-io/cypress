@@ -5,18 +5,24 @@
   />
 </template>
 
+<script lang="ts">
+export default defineComponent({
+  name: 'Runner',
+})
+</script>
+
 <script lang="ts" setup>
 import { gql } from '@urql/core'
 import { useQuery } from '@urql/vue'
-import { onMounted, ref } from 'vue'
-import { Runner_AllDocument } from '../../generated/graphql'
-import { UnifiedRunnerAPI } from '../../runner'
-import Runner from '../../runs/Runner.vue'
+import { defineComponent, onMounted, ref } from 'vue'
+import { Runner_AllDocument } from '../generated/graphql'
+import { UnifiedRunnerAPI } from '../runner'
+import Runner from '../runs/SpecRunner.vue'
 
 gql`
 query Runner_All {
   app {
-    ...Specs_Runner
+    ...Specs_SpecsList
   }
 }
 `
