@@ -40,7 +40,7 @@ const mountSelect = (props: any = {}) => {
         options={defaultOptions}
         modelValue={value}
         {...props}
-        vSlots={props.vSlots}
+        v-slots={props.vSlots}
       />
     </div>
   ))

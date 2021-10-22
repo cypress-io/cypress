@@ -240,6 +240,7 @@ type CloudUser implements Node {
 
 enum CodeGenType {
   component
+  integration
   story
 }
 
@@ -364,13 +365,13 @@ type Mutation {
   appCreateConfigFile(code: String!, configFilename: String!): Boolean
   clearActiveProject: Boolean
 
+  """Generate spec from source"""
+  codeGenSpec(codeGenCandidate: String!, type: CodeGenType!): Boolean
+
   """
   Development only: Triggers or dismisses a prompted refresh by touching the file watched by our development scripts
   """
   devRelaunch(action: DevRelaunchAction!): Boolean
-
-  """Generate spec from Storybook story"""
-  generateSpecFromStory(storyPath: String!): Boolean
 
   """Hides the launchpad windows"""
   hideBrowserWindow: App!

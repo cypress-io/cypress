@@ -16,16 +16,20 @@
             name="fade"
             mode="out-in"
           >
-            <!-- <keep-alive> -->
-            <component
-              :is="Component"
-            />
-            <!-- </keep-alive> -->
+            <keep-alive>
+              <component
+                :is="Component"
+              />
+            </keep-alive>
           </transition>
         </router-view>
+        <ModalManager v-if="modalStore.activeModalId" />
       </section>
     </main>
-    <nav class="h-screen order-first w-240px">
+    <nav
+      class="h-screen order-first"
+      :class="mainStore.navBarExpanded ? 'w-240px' : 'w-80px'"
+    >
       <SidebarNavigation class="h-full" />
     </nav>
   </div>
@@ -33,4 +37,9 @@
 
 <script lang="ts" setup>
 import SidebarNavigation from '../navigation/SidebarNavigation.vue'
+import ModalManager from '../modals/ModalManager.vue'
+import { useModalStore, useMainStore } from '../store'
+
+const modalStore = useModalStore()
+const mainStore = useMainStore()
 </script>

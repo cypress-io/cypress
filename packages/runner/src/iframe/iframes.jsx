@@ -193,7 +193,7 @@ export default class Iframes extends Component {
   }
 
   componentDidUpdate () {
-    const cb = this.props.state.callbackAfterUpdate
+    const cb = this.props.state.viewportUpdateCallback
 
     if (cb) {
       cb()
