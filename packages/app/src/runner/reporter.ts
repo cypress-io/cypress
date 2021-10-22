@@ -1,4 +1,4 @@
-import type { Store } from '../store'
+import { getMobXStore, MobxRunnerStore } from '../store'
 import { getReporterElement } from './utils'
 
 let hasInitializeReporter = false
@@ -15,16 +15,16 @@ async function resetReporter () {
   }
 }
 
-function setupReporter (store: Store) {
+function setupReporter () {
   const $reporterRoot = getReporterElement()
 
-  renderReporter($reporterRoot, store, window.UnifiedRunner.eventManager)
+  renderReporter($reporterRoot, getMobXStore(), window.UnifiedRunner.eventManager)
   hasInitializeReporter = true
 }
 
 function renderReporter (
   root: HTMLElement,
-  store: Store,
+  store: MobxRunnerStore,
   eventManager: typeof window.UnifiedRunner.eventManager,
 ) {
   const reporter = window.UnifiedRunner.React.createElement(window.UnifiedRunner.Reporter, {

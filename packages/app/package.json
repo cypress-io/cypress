@@ -73,6 +73,7 @@
   "vite": {
     "optimizeDeps": {
       "include": [
+        "@headlessui/vue",
         "@iconify/iconify",
         "@testing-library/cypress/add-commands",
         "@urql/exchange-execute",

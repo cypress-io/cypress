@@ -14,7 +14,7 @@
  * namespace there, and access it with `window.UnifiedRunner`.
  *
  */
-import { getMobXStore, Store } from '../store'
+import { getMobXStore, MobxRunnerStore } from '../store'
 import { injectBundle } from './injectBundle'
 import type { BaseSpec } from '@packages/types/src/spec'
 import { UnifiedReporterAPI } from './reporter'
@@ -128,8 +128,8 @@ function getSpecUrl (namespace: string, spec: BaseSpec, prefix = '') {
  * This should be called before you execute a spec,
  * or re-running the current spec.
  */
-function teardownSpec (store: Store) {
-  return window.UnifiedRunner.eventManager.teardown(store)
+function teardownSpec (mobxRunnerStore: MobxRunnerStore) {
+  return window.UnifiedRunner.eventManager.teardown(mobxRunnerStore)
 }
 
 /**
@@ -261,14 +261,17 @@ async function initialize () {
  *    description for more information.
  */
 async function executeSpec (spec: BaseSpec) {
-  const store = getMobXStore()
+  const mobxRunnerStore = getMobXStore()
 
-  store.setSpec(spec)
+  mobxRunnerStore.setSpec(spec)
 
   await UnifiedReporterAPI.resetReporter()
 
-  await teardownSpec(store)
-  UnifiedReporterAPI.setupReporter(store)
+  await UnifiedReporterAPI.resetReporter()
+
+  await teardownSpec(mobxRunnerStore)
+
+  UnifiedReporterAPI.setupReporter()
 
   if (window.UnifiedRunner.config.testingType === 'e2e') {
     return runSpecE2E(spec)
