@@ -1,7 +1,7 @@
 <template>
-  <div>
+  <div class="flex flex-col">
     <h2>New Spec</h2>
-    <div class="flex">
+    <div class="flex gap-4 justify-center">
       <Button
         :disabled="!newSpecQuery.data.value?.app.activeProject?.storybook"
         @click="codeGenTypeClicked('story')"
@@ -11,24 +11,28 @@
       <Button @click="codeGenTypeClicked('component')">
         Generate From Component
       </Button>
+      <Button @click="codeGenTypeClicked('integration')">
+        Generate Integration
+      </Button>
     </div>
     <template v-if="codeGenType">
-      <div>
-        <label for="glob-pattern">Glob Pattern: </label>
-        <input
-          id="glob-pattern"
-          v-model="codeGenGlob"
-        >
-      </div>
-      <div>
-        <ul>
+      <template v-if="codeGenType !== 'integration'">
+        <div class="p-16px">
+          <Input
+            id="glob-pattern"
+            v-model="codeGenGlob"
+          />
+        </div>
+        <ul class="p-16px max-h-210px overflow-auto">
           <li
             v-for="candidate of codeGenCandidates"
             :key="candidate.relative"
             class="group"
             @click="candidateClick(candidate.absolute)"
           >
-            <span class="text-indigo-600 font-medium">{{ candidate.fileName }}</span>
+            <span class="text-indigo-600 font-medium">{{
+              candidate.fileName
+            }}</span>
             <span class="font-light text-gray-400">{{
               candidate.fileExtension
             }}</span>
@@ -37,21 +41,27 @@
             >{{ candidate.relativeFromProjectRoot }}</span>
           </li>
         </ul>
-        <div
-          v-if="candidateChosen && generatedSpec"
-          class="p-16px"
-        >
-          <div class="flex">
-            <span>Generated Spec: </span>
-            <Button @click="specClick">
-              {{ generatedSpec.spec.relative }}
-            </Button>
-          </div>
-          <div>
-            <h2>Generated Spec Content:</h2>
-            <pre>{{ generatedSpec.content }}</pre>
-          </div>
+      </template>
+      <template v-else-if="codeGenType === 'integration'">
+        <div class="flex p-16px gap-4">
+          <Input
+            id="fileName"
+            v-model="fileNameInput"
+            class="flex-auto"
+          />
+          <Button @Click="candidateClick(fileNameInput)">
+            Generate Spec
+          </Button>
         </div>
+      </template>
+      <div
+        v-if="candidateChosen && generatedSpec"
+        class="p-16px flex flex-col items-center"
+      >
+        <Button @click="specClick">
+          {{ generatedSpec.spec.relative }}
+        </Button>
+        <pre>{{ generatedSpec.content }}</pre>
       </div>
     </template>
   </div>
@@ -63,6 +73,7 @@
 </route>
 <script lang="ts" setup>
 import Button from '@cy/components/Button.vue'
+import Input from '@cy/components/Input.vue'
 import { gql, useMutation, useQuery } from '@urql/vue'
 import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
@@ -70,7 +81,7 @@ import {
   NewSpec_NewSpecQueryDocument,
   NewSpec_SearchCodeGenCandidatesDocument,
   NewSpec_CodeGenGlobQueryDocument,
-  NewSpec_GenerateSpecFromStoryDocument,
+  NewSpec_CodeGenSpecDocument,
   NewSpec_SetCurrentSpecDocument,
   CodeGenType,
 } from '../generated/graphql'
@@ -144,15 +155,15 @@ query NewSpec_SearchCodeGenCandidates($glob: String!) {
 `
 
 gql`
-mutation NewSpec_GenerateSpecFromStory($storyPath: String!) {
-  generateSpecFromStory (storyPath: $storyPath) 
-} 
+mutation NewSpec_CodeGenSpec($codeGenCandidate: String!, $type: CodeGenType!) {
+  codeGenSpec(codeGenCandidate: $codeGenCandidate, type: $type)
+}
 `
 
 gql`
-mutation NewSpec_SetCurrentSpec($id: ID!) {
-  setCurrentSpec(id: $id)
-}
+  mutation NewSpec_SetCurrentSpec($id: ID!) {
+    setCurrentSpec(id: $id)
+  }
 `
 
 const newSpecQuery = useQuery({ query: NewSpec_NewSpecQueryDocument })
@@ -195,7 +206,9 @@ const codeGenCandidates = computed(() => {
   )
 })
 
-const mutation = useMutation(NewSpec_GenerateSpecFromStoryDocument)
+const fileNameInput = ref('')
+
+const mutation = useMutation(NewSpec_CodeGenSpecDocument)
 const candidateChosen = ref(false)
 const generatedSpec = computed(
   () => newSpecQuery.data.value?.app.activeProject?.generatedSpec,
@@ -220,8 +233,11 @@ function codeGenTypeClicked (type: CodeGenType) {
   candidateChosen.value = false
 }
 
-function candidateClick (story: string) {
+function candidateClick (codeGenCandidate: string) {
   candidateChosen.value = true
-  mutation.executeMutation({ storyPath: story })
+  mutation.executeMutation({
+    codeGenCandidate,
+    type: codeGenType.value as CodeGenType,
+  })
 }
 </script>

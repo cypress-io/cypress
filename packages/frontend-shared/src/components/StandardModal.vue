@@ -14,7 +14,7 @@
 
       <div
         class="relative mx-auto bg-white rounded"
-        :class="props.class"
+        :class="props.class || ''"
       >
         <div
           class="sticky top-0 flex items-center justify-between bg-white rounded-t border-b-1px border-b-gray-100 min-h-56px px-24px z-1"
@@ -80,12 +80,13 @@ const props = withDefaults(defineProps<{
   helpText?: string
   clickOutside?: boolean
   variant?: 'bare'
-  class: string | string[] | Record<string, any>
+  class?: string | string[] | Record<string, any>
 }>(), {
   clickOutside: true,
   modelValue: false,
   helpText: 'Need help?',
   helpLink: 'https://docs.cypress.io',
+  class: undefined,
 })
 
 const setIsOpen = (val: boolean) => {

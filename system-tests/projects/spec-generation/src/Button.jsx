@@ -3,7 +3,7 @@ import React from 'react';
 /**
  * Primary UI component for user interaction
  */
-export const Button = ({
+export default ({
   primary = false,
   size = 'medium',
   backgroundColor,
