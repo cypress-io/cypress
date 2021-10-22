@@ -14,7 +14,7 @@
  * namespace there, and access it with `window.UnifiedRunner`.
  *
  */
-import { store, Store } from '../store'
+import { mobxRunnerStore, MobxRunnerStore } from '../store'
 import { injectBundle } from './injectBundle'
 import type { BaseSpec } from '@packages/types/src/spec'
 import { UnifiedReporterAPI } from './reporter'
@@ -33,7 +33,7 @@ const randomString = `${Math.random()}`
  * and server (via web socket).
  */
 function setupRunner (done: () => void) {
-  window.UnifiedRunner.eventManager.addGlobalListeners(store, {
+  window.UnifiedRunner.eventManager.addGlobalListeners(mobxRunnerStore, {
     automationElement: '__cypress-string',
     randomString,
   })
@@ -54,8 +54,8 @@ function getSpecUrl (namespace: string, spec: BaseSpec, prefix = '') {
  * This should be called before you execute a spec,
  * or re-running the current spec.
  */
-function teardownSpec (store: Store) {
-  return window.UnifiedRunner.eventManager.teardown(store)
+function teardownSpec (mobxRunnerStore: MobxRunnerStore) {
+  return window.UnifiedRunner.eventManager.teardown(mobxRunnerStore)
 }
 
 /**
@@ -187,11 +187,11 @@ function initialize (ready: () => void) {
  *    description for more information.
  */
 async function executeSpec (spec: BaseSpec) {
-  store.setSpec(spec)
+  mobxRunnerStore.setSpec(spec)
 
   await UnifiedReporterAPI.resetReporter()
 
-  await teardownSpec(store)
+  await teardownSpec(mobxRunnerStore)
 
   UnifiedReporterAPI.setupReporter()
 
