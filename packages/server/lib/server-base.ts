@@ -241,7 +241,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     const { morgan, clientRoute } = config
     const app = express()
 
-    // set the cypress config from the cypress.json file
+    // set the cypress config from the cypress.config.{ts|js} file
     app.set('view engine', 'html')
 
     // since we use absolute paths, configure express-handlebars to not automatically find layouts

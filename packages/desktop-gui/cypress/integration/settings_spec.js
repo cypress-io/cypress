@@ -335,15 +335,15 @@ describe('Settings', () => {
         openConfiguration()
       })
 
-      it('notes that cypress.json is disabled', () => {
-        cy.contains('set from cypress.json file (currently disabled by --config-file false)')
+      it('notes that cypress.config.js is disabled', () => {
+        cy.contains('set from cypress.config.js file (currently disabled by --config-file false)')
       })
     })
 
     context('when configFile is set', function () {
       beforeEach(function () {
         this.openProject.resolve(Cypress._.assign(this.config, {
-          configFile: 'special-cypress.json',
+          configFile: 'special-cypress.config.js',
         }))
 
         this.goToSettings()
@@ -352,7 +352,7 @@ describe('Settings', () => {
       })
 
       it('notes that a custom config is in use', () => {
-        cy.contains('set from custom config file special-cypress.json')
+        cy.contains('set from custom config file special-cypress.config.js')
       })
     })
   })

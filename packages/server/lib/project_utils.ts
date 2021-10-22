@@ -148,8 +148,9 @@ export async function getDefaultConfigFilePath (projectRoot: string, returnDefau
     throw errors.throw('CONFIG_FILES_LANGUAGE_CONFLICT', projectRoot, ...foundConfigFiles)
   }
 
+  // TODO: Should we check if there's a tsConfig to create the correct file?
   if (returnDefaultValueIfNotFound) {
-    // Default is to create a new `cypress.json` file if one does not exist.
+    // Default is to create a new `cypress.config.ts` file if one does not exist.
     return CYPRESS_CONFIG_FILES[0]
   }
 

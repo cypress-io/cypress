@@ -122,10 +122,9 @@ export function configFile (options: SettingsOptions = {}) {
   return options.configFile === false ? false : options.configFile
 }
 
+// TODO: Should we get it from the cache (?)
 export function id (projectRoot, options = {}) {
-  const file = pathToConfigFile(projectRoot, options)
-
-  return fs.readJson(file)
+  return read(projectRoot, options)
   .then((config) => config.projectId)
   .catch(() => {
     return null

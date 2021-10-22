@@ -1837,7 +1837,7 @@ jobs:
           environment:
             CYPRESS_INTERNAL_FORCE_SCAFFOLD: "1"
           command: |
-            echo '{}' > cypress.json
+            echo 'module.exports = {}' > cypress.config.js
             npx cypress run
 
   test-full-typescript-project:

@@ -29,7 +29,7 @@ const GeneratedSpec = objectType({
 
 export const Project = objectType({
   name: 'Project',
-  description: 'A Cypress Project is represented by a cypress.json file',
+  description: 'A Cypress Project is represented by a cypress.config.{ts|js} file',
   node: 'projectRoot',
   definition (t) {
     t.field('cloudProject', {

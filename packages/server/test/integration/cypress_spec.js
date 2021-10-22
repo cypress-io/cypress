@@ -457,7 +457,7 @@ describe('lib/cypress', () => {
     })
 
     it('scaffolds out integration and example specs if they do not exist when not runMode', function () {
-      return config.get(this.pristinePath)
+      return config.get(this.pristinePath, { configFile: 'cypress.config.js' })
       .then((cfg) => {
         return fs.statAsync(cfg.integrationFolder)
         .then(() => {
@@ -520,7 +520,7 @@ describe('lib/cypress', () => {
     })
 
     it('scaffolds out fixtures + files if they do not exist', function () {
-      return config.get(this.pristinePath)
+      return config.get(this.pristinePath, { configFile: 'cypress.config.js' })
       .then((cfg) => {
         return fs.statAsync(cfg.fixturesFolder)
         .then(() => {
@@ -538,7 +538,7 @@ describe('lib/cypress', () => {
     it('scaffolds out support + files if they do not exist', function () {
       const supportFolder = path.join(this.pristinePath, 'cypress/support')
 
-      return config.get(this.pristinePath)
+      return config.get(this.pristinePath, { configFile: 'cypress.config.js' })
       .then(() => {
         return fs.statAsync(supportFolder)
         .then(() => {
@@ -556,7 +556,7 @@ describe('lib/cypress', () => {
     })
 
     it('removes fixtures when they exist and fixturesFolder is false', function (done) {
-      config.get(this.idsPath)
+      config.get(this.idsPath, { configFile: 'cypress.config.js' })
       .then((cfg) => {
         this.cfg = cfg
 
@@ -614,7 +614,7 @@ describe('lib/cypress', () => {
     it('can change the reporter with cypress.json', function () {
       sinon.spy(Reporter, 'create')
 
-      return config.get(this.idsPath)
+      return config.get(this.idsPath, { configFile: 'cypress.config.js' })
       .then((cfg) => {
         this.cfg = cfg
 

@@ -13,7 +13,7 @@ describe('lib/util/specs', () => {
 
     this.todosPath = FixturesHelper.projectPath('todos')
 
-    return config.get(this.todosPath)
+    return config.get(this.todosPath, { configFile: 'cypress.config.js' })
     .then((cfg) => {
       this.config = cfg
     })
@@ -47,7 +47,7 @@ describe('lib/util/specs', () => {
     })
 
     it('by default, returns all files as long as they have a name and extension', () => {
-      return config.get(FixturesHelper.projectPath('various-file-types'))
+      return config.get(FixturesHelper.projectPath('various-file-types'), { configFile: 'cypress.config.js' })
       .then((cfg) => {
         return specsUtil.findSpecs(cfg)
       }).then((files) => {
@@ -60,7 +60,7 @@ describe('lib/util/specs', () => {
     })
 
     it('finds integration and component tests and assigns correct specType', () => {
-      return config.get(FixturesHelper.projectPath('component-tests'))
+      return config.get(FixturesHelper.projectPath('component-tests'), { configFile: 'cypress.config.js' })
       .then((cfg) => {
         cfg.resolved.testingType = { value: 'component' }
 
@@ -85,7 +85,7 @@ describe('lib/util/specs', () => {
     })
 
     it('returns files matching config.testFiles', () => {
-      return config.get(FixturesHelper.projectPath('various-file-types'))
+      return config.get(FixturesHelper.projectPath('various-file-types'), { configFile: 'cypress.config.js' })
       .then((cfg) => {
         cfg.testFiles = '**/*.coffee'
 
@@ -98,7 +98,7 @@ describe('lib/util/specs', () => {
     })
 
     it('uses glob to process config.testFiles', () => {
-      return config.get(FixturesHelper.projectPath('various-file-types'))
+      return config.get(FixturesHelper.projectPath('various-file-types'), { configFile: 'cypress.config.js' })
       .then((cfg) => {
         cfg.testFiles = '{coffee_*.coffee,js_spec.js}'
 
@@ -113,7 +113,7 @@ describe('lib/util/specs', () => {
     })
 
     it('allows array in config.testFiles', () => {
-      return config.get(FixturesHelper.projectPath('various-file-types'))
+      return config.get(FixturesHelper.projectPath('various-file-types'), { configFile: 'cypress.config.js' })
       .then((cfg) => {
         cfg.testFiles = ['coffee_*.coffee', 'js_spec.js']
 
@@ -128,7 +128,7 @@ describe('lib/util/specs', () => {
     })
 
     it('filters using specPattern', () => {
-      return config.get(FixturesHelper.projectPath('various-file-types'))
+      return config.get(FixturesHelper.projectPath('various-file-types'), { configFile: 'cypress.config.js' })
       .then((cfg) => {
         const specPattern = [
           path.join(cfg.projectRoot, 'cypress', 'integration', 'js_spec.js'),
@@ -143,7 +143,7 @@ describe('lib/util/specs', () => {
     })
 
     it('filters using specPattern as array of glob patterns', () => {
-      return config.get(FixturesHelper.projectPath('various-file-types'))
+      return config.get(FixturesHelper.projectPath('various-file-types'), { configFile: 'cypress.config.js' })
       .then((cfg) => {
         debug('test config testFiles is %o', cfg.testFiles)
         const specPattern = [
@@ -161,7 +161,7 @@ describe('lib/util/specs', () => {
     })
 
     it('properly handles directories with names including \'.\'', () => {
-      return config.get(FixturesHelper.projectPath('odd-directory-name'))
+      return config.get(FixturesHelper.projectPath('odd-directory-name'), { configFile: 'cypress.config.js' })
       .then((cfg) => {
         return specsUtil.findSpecs(cfg)
       }).then((files) => {
