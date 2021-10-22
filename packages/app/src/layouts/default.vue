@@ -26,7 +26,10 @@
         <ModalManager v-if="activeModalId" />
       </section>
     </main>
-    <nav class="h-screen order-first w-240px">
+    <nav
+      class="h-screen order-first"
+      :class="navBarExpanded ? 'w-240px' : 'w-80px'"
+    >
       <SidebarNavigation class="h-full" />
     </nav>
   </div>
@@ -35,7 +38,8 @@
 <script lang="ts" setup>
 import SidebarNavigation from '../navigation/SidebarNavigation.vue'
 import ModalManager from '../modals/ModalManager.vue'
-import { useModalStore, storeToRefs } from '../store'
+import { useModalStore, useMainStore, storeToRefs } from '../store'
 
 const { activeModalId } = storeToRefs(useModalStore())
+const { navBarExpanded } = storeToRefs(useMainStore())
 </script>

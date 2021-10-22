@@ -1,12 +1,7 @@
 <template>
-  <div
-    class="flex relative flex-col flex-1 min-h-0 bg-gray-1000"
-    :class="mainStore.navBarExpanded ? 'w-80px' : 'w-auto'"
-  >
+  <div class="flex relative flex-col flex-1 min-h-0 bg-gray-1000">
     <div
-      class="absolute cursor-pointer
-  bg-gray-1000 w-8px
-    bottom-0 top-0 right-0 hover:bg-indigo-300"
+      class="absolute cursor-pointer bg-gray-1000 w-8px bottom-0 top-0 right-0 hover:bg-indigo-300"
       @click="mainStore.toggleNavBar"
     />
     <div class="flex flex-col flex-1 pt-5 pb-4 overflow-y-auto">
