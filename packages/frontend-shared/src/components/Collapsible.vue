@@ -1,5 +1,8 @@
 <template>
-  <button @keypress.space.enter.self="toggle">
+  <div
+    tabindex="0"
+    @keypress.space.enter.self="toggle"
+  >
     <div @click="toggle">
       <slot
         name="target"
@@ -7,10 +10,12 @@
       />
     </div>
     <div
-      :style="{ maxHeight: isOpen ? maxHeight : '0px' }"
+      :style="{
+        maxHeight: isOpen ? maxHeight : '0px',
+      }"
       :aria-hidden="isOpen"
       :class="['overflow-scroll', {
-        'transition transition-all duration-200': isOpen,
+        'transition transition-all duration-500 animate-ease-[cubic-bezier(0.25,0.1,0.25,1)]': isOpen,
       }]"
     >
       <slot
@@ -19,7 +24,7 @@
         :open="isOpen"
       />
     </div>
-  </button>
+  </div>
 </template>
 
 <script setup lang="ts">
