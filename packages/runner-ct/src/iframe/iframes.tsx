@@ -167,7 +167,7 @@ export const Iframes = namedObserver('Iframes', ({
       return
     }
 
-    state.callbackAfterUpdate?.()
+    state.viewportUpdateCallback?.()
   })
 
   const { height, width, scriptError, scale, screenshotting } = state
