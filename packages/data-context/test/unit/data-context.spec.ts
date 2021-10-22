@@ -1,7 +1,43 @@
 import { expect } from 'chai'
+import { DataContext } from '@packages/data-context'
+import snapshot from 'snap-shot-it'
 
-describe('@packages/data-context unit', () => {
-  it('has a sample test', () => {
-    expect(1).to.eq(1)
+const makeDataContext = (options) => {
+  return new DataContext({
+    launchOptions: {},
+    launchArgs: {},
+    appApi: {
+      getBrowsers: () => ({}),
+    },
+    authApi: {},
+    projectApi: {
+      getProjectRootsFromCache: () => ([]),
+    },
+    ...options,
+  })
+}
+
+describe('@packages/data-context', () => {
+  describe('initializeData', () => {
+    it('should initialize', async () => {
+      const context = makeDataContext()
+
+      await context.initializeData()
+      snapshot(context)
+    })
+
+    it('should skip first wizard step when given a testingType', async () => {
+      const context = makeDataContext({
+        launchArgs: {
+          testingType: 'e2e',
+        },
+      })
+
+      await context.initializeData()
+      expect(context._coreData.wizard).to.contain({
+        chosenTestingType: 'e2e',
+        currentStep: 'initializePlugins',
+      })
+    })
   })
 })
