@@ -11,18 +11,16 @@ const defaultSlots = { target: defaultTargetSlot }
 describe('<Collapsible />', { viewportHeight: 450, viewportWidth: 350 }, () => {
   describe('initiallyOpen', () => {
     it('defaults to closed', () => {
-      // @ts-ignore - doesn't know about vSlots
       cy.mount(() => (<>
-        <Collapsible vSlots={defaultSlots}>
+        <Collapsible v-slots={defaultSlots}>
           <p data-testid="content">{ contentText }</p>
         </Collapsible>
       </>)).get(targetSelector).should('have.class', 'not-open')
     })
 
     it('can be set to open initially', () => {
-      // @ts-ignore - doesn't know about vSlots
       cy.mount(() => (<>
-        <Collapsible vSlots={defaultSlots} initiallyOpen>
+        <Collapsible v-slots={defaultSlots} initiallyOpen>
           <p data-testid="content">{ contentText }</p>
         </Collapsible>
       </>)).get(targetSelector).should('have.class', 'open')
@@ -30,9 +28,8 @@ describe('<Collapsible />', { viewportHeight: 450, viewportWidth: 350 }, () => {
   })
 
   it('renders the target and content slots', () => {
-    // @ts-ignore - doesn't know about vSlots
     cy.mount(() => (<>
-      <Collapsible vSlots={defaultSlots}>
+      <Collapsible v-slots={defaultSlots}>
         <p data-testid="content">{ contentText }</p>
       </Collapsible>
     </>))
@@ -45,9 +42,8 @@ describe('<Collapsible />', { viewportHeight: 450, viewportWidth: 350 }, () => {
   })
 
   it('does not render default slot if lazy', () => {
-    // @ts-ignore - doesn't know about vSlots
     cy.mount(() => (<>
-      <Collapsible vSlots={defaultSlots} lazy={true}>
+      <Collapsible v-slots={defaultSlots} lazy={true}>
         <p data-testid="content">{ contentText }</p>
       </Collapsible>
     </>))
@@ -62,8 +58,7 @@ describe('<Collapsible />', { viewportHeight: 450, viewportWidth: 350 }, () => {
   it('overflows properly', () => {
     const overflowedContentSelector = '[data-testid=overflowed-content]'
 
-    // @ts-ignore - doesn't know about vSlots
-    cy.mount(() => (<Collapsible maxHeight="200px" vSlots={defaultSlots}>
+    cy.mount(() => (<Collapsible maxHeight="200px" v-slots={defaultSlots}>
       <div class="h-900px">Large content</div>
       <p data-testid="overflowed-content">Out-of-bounds content</p>
     </Collapsible>))
@@ -77,9 +72,8 @@ describe('<Collapsible />', { viewportHeight: 450, viewportWidth: 350 }, () => {
   })
 
   it('does not toggle when clicking on content', () => {
-    // @ts-ignore - doesn't know about vSlots
     cy.mount(() => (<>
-      <Collapsible vSlots={defaultSlots}>
+      <Collapsible v-slots={defaultSlots}>
         <p data-testid="content">{ contentText }</p>
       </Collapsible>
     </>))
@@ -94,8 +88,7 @@ describe('<Collapsible />', { viewportHeight: 450, viewportWidth: 350 }, () => {
   describe('slotProps', () => {
     describe('toggle', () => {
       it('passes the toggle slot prop to the default slot', () => {
-        // @ts-ignore - doesn't know about vSlots
-        cy.mount(() => (<Collapsible vSlots={{
+        cy.mount(() => (<Collapsible v-slots={{
           target: defaultTargetSlot,
           default: ({ toggle, open }) => (
             <div data-testid="content"
@@ -122,8 +115,7 @@ describe('<Collapsible />', { viewportHeight: 450, viewportWidth: 350 }, () => {
       }
 
       it('passes the open slot props to the header and default slots', () => {
-        // @ts-ignore - doesn't know about vSlots
-        cy.mount(() => (<Collapsible vSlots={slotPropsSlots}></Collapsible>))
+        cy.mount(() => (<Collapsible v-slots={slotPropsSlots}></Collapsible>))
         .get(contentSelector)
         .should('have.class', 'not-open')
         .get(targetSelector)
@@ -145,7 +137,7 @@ describe('<Collapsible />', { viewportHeight: 450, viewportWidth: 350 }, () => {
 
     cy.mount(() => (<div class="mx-auto text-center w-300px my-4 border-1 p-4 rounded">
 
-      <Collapsible vSlots={{ target }}>
+      <Collapsible v-slots={{ target }}>
         <div class="space-y-2">
           <h2 class="text-center text-lg bg-gray-50">
             Content Header
