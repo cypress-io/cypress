@@ -140,11 +140,11 @@
       v-else
       class="w-484px"
     >
-      <div class="relative border-b border-b-gray-50 px-24px py-16px text-18px">
+      <div class="relative border-b border-b-gray-50 px-24px py-18px text-18px">
         {{ t(`topNav.docsMenu.prompts.${docsMenuContent}.title`) }}
         <button
           aria-label="Close"
-          class="absolute border-transparent rounded-full p-5px border-1 hover:border-indigo-300 hocus-default right-20px top-12px"
+          class="absolute border-transparent rounded-full p-5px border-1 hover:border-indigo-300 hocus-default right-20px top-15px"
           @click="docsMenuContent= 'main'"
         >
           <i-cy-delete_x12 class="icon-dark-gray-400 w-12px h-12px" />

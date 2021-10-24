@@ -26,7 +26,7 @@
             class="flex items-center text-gray-800 border rounded gap-12px w-210px h-40px px-16px hocus-default"
           >
             <i-cy-book class="w-16px h-16px icon-dark-gray-500 icon-light-gray-50" />
-            See Other Guides
+            {{ t('topNav.docsMenu.prompts.ci.seeOtherGuides') }}
           </a>
         </li>
       </ul>
@@ -39,10 +39,10 @@
       <i-cy-infinity-loop_x18 class="icon-dark-indigo-500 mr-20px w-20px h-20px" />
       <div class="flex-grow">
         <p class="text-indigo-500 pb-4px">
-          Introduction to CI
+          {{ t('topNav.docsMenu.prompts.ci.intro') }}
         </p>
         <p class="text-gray-600 text-14px">
-          Learn the basics of running Cypress in CI.
+          {{ t('topNav.docsMenu.prompts.ci.learnTheBasics') }}
         </p>
       </div>
       <i-cy-arrow-outline-right class="transition-transform duration-200 ease-in transform icon-dark-gray-400 w-20px h-20px group-hocus:translate-x-2px" />
@@ -52,29 +52,41 @@
     v-else-if="type === 'orchestration'"
     class="p-24px"
   >
-    <div class="pb-12px border-b border-b-gray-50">
-      <div class="bg-jade-400 text-white px-12px py-6px mb-12px rounded">
-        <b>5 mins</b> with Parallelization
+    <div class="pb-12px border-b border-b-gray-50 text-14px">
+      <div class="bg-jade-400 text-white pl-12px pr-3px pt-9px pb-7px mb-12px rounded flex justify-between">
+        <span><b>{{ t('topNav.docsMenu.prompts.orchestration.parallelTime') }}</b> {{ t('topNav.docsMenu.prompts.orchestration.withParallelization') }}</span>
+        <div class="border-l border-l-jade-500 border-opacity-50 grid place-content-center w-28px">
+          <i-cy-lightning_x16 class="icon-dark-white icon-light-jade-400 w-16px h-16px" />
+        </div>
       </div>
-      <div class="bg-gray-500 text-white px-12px py-6px rounded">
-        <b>12 mins</b> without Parallelization
+      <div class="bg-gray-500 text-white pl-12px pr-3px pt-9px pb-7px mb-12px rounded flex justify-between">
+        <span><b>{{ t('topNav.docsMenu.prompts.orchestration.noParallelTime') }}</b>{{ t('topNav.docsMenu.prompts.orchestration.withoutParallelization') }}</span>
+        <div class="border-l border-l-gray-600 border-opacity-50 grid place-content-center w-28px">
+          <i-cy-dollar_x16 class="icon-dark-white w-16px h-16px" />
+        </div>
       </div>
     </div>
-    <p class="text-gray-600">
-      With Smart Orchestration, you’ll be able to:
+    <p class="text-gray-600 mt-20px mb-10px">
+      {{ t('topNav.docsMenu.prompts.orchestration.intro') }}
     </p>
     <ul class="text-gray-700">
-      <li>Run spec files in parallel</li>
-      <li>Prioritize failed specs to run first</li>
-      <li>Cancel CI runs on test failure</li>
+      <li
+        v-for="bullet in orchestrationBullets"
+        :key="bullet"
+        class="flex py-4px items-center"
+      >
+        <i-cy-lightning_x16 class="icon-dark-jade-400 icon-light-jade-200 w-16px h-16px mr-10px" />
+        {{ bullet }}
+      </li>
     </ul>
     <Button
       href="https://on.cypress.io/smart-orchestration"
       size="lg"
+      class="mt-12px"
     >
-      Learn More
+      {{ t('topNav.docsMenu.prompts.orchestration.learnMore') }}
       <template #suffix>
-        <i-cy-arrow-outline-right class="icon-dark-current" />
+        <i-cy-arrow-right_x16 class="icon-dark-current" />
       </template>
     </Button>
   </div>
@@ -170,4 +182,10 @@ const seeOtherGuidesInfo = {
     utm_content,
   },
 }
+
+const orchestrationBullets = [
+  t('topNav.docsMenu.prompts.orchestration.bullet1'),
+  t('topNav.docsMenu.prompts.orchestration.bullet2'),
+  t('topNav.docsMenu.prompts.orchestration.bullet3'),
+]
 </script>

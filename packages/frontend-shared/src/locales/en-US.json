@@ -68,10 +68,22 @@
       "prompts": {
         "ci": {
           "title": "Configure CI",
-          "description": "Optimize your tests in CI by following these guides."
+          "description": "Optimize your tests in CI by following these guides.",
+          "seeOtherGuides": "See Other Guides",
+          "intro": "Introduction to CI",
+          "learnTheBasics": "Learn the basics of running Cypress in CI."
         },
         "orchestration": {
-          "title": "Run tests faster in CI"
+          "title": "Run tests faster in CI",
+          "parallelTime": "5 mins",
+          "noParallelTime": "12 mins",
+          "withParallelization": "with Parallelization",
+          "withoutParallelization": "without Parallelization",
+          "intro": " With Smart Orchestration, you’ll be able to:",
+          "bullet1": "Run spec files in parallel",
+          "bullet2": "Prioritize failed specs to run first",
+          "bullet3": "Cancel CI runs on test failure",
+          "learnMore": "Learn more"
         }
       }
     },
