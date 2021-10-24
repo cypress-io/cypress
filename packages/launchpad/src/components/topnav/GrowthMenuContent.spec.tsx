@@ -6,7 +6,7 @@ describe('<GrowthMenuContent />', { viewportWidth: 500, viewportHeight: 750 }, (
       render: () => {
         return (<div class="w-484px border">
           <GrowthMenuContent type="ci"/>
-          <hr />
+          <hr class="my-32px" />
           <GrowthMenuContent type="orchestration"/>
         </div>)
       },
