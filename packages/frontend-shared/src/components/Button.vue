@@ -6,7 +6,10 @@
     :class="classes"
   >
     <ButtonInternals>
-      <template #prefix>
+      <template
+        v-if="prefixIcon || $slots.prefix"
+        #prefix
+      >
         <slot name="prefix">
           <component
             :is="prefixIcon"
@@ -17,7 +20,10 @@
       <template #default>
         <slot />
       </template>
-      <template #suffix>
+      <template
+        v-if="suffixIcon || $slots.suffix"
+        #suffix
+      >
         <slot name="suffix">
           <component
             :is="suffixIcon"
@@ -35,7 +41,10 @@
     :class="classes"
   >
     <ButtonInternals>
-      <template #prefix>
+      <template
+        v-if="prefixIcon || $slots.prefix"
+        #prefix
+      >
         <slot name="prefix">
           <component
             :is="prefixIcon"
@@ -47,7 +56,10 @@
         <slot />
       </template>
       <template #suffix>
-        <slot name="suffix">
+        <slot
+          v-if="suffixIcon || $slots.suffix"
+          name="suffix"
+        >
           <component
             :is="suffixIcon"
             :class="suffixIconClass"
