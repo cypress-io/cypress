@@ -1,39 +1,67 @@
 <template>
   <button
+    v-if="!href"
     style="width: fit-content"
     class="flex select-none items-center border rounded gap-8px outline-none"
     :class="classes"
   >
-    <span
-      v-if="prefixIcon || $slots.prefix"
-      class="justify-self-start flex items-center"
-    >
-      <slot name="prefix">
-        <component
-          :is="prefixIcon"
-          :class="prefixIconClass"
-        />
-      </slot>
-    </span>
-    <span class="flex-grow">
-      <slot />
-    </span>
-    <span
-      v-if="suffixIcon || $slots.suffix"
-      class="justify-self-start flex items-center"
-    >
-      <slot name="suffix">
-        <component
-          :is="suffixIcon"
-          :class="suffixIconClass"
-        />
-      </slot>
-    </span>
+    <ButtonInternals>
+      <template #prefix>
+        <slot name="prefix">
+          <component
+            :is="prefixIcon"
+            :class="prefixIconClass"
+          />
+        </slot>
+      </template>
+      <template #default>
+        <slot />
+      </template>
+      <template #suffix>
+        <slot name="suffix">
+          <component
+            :is="suffixIcon"
+            :class="suffixIconClass"
+          />
+        </slot>
+      </template>
+    </ButtonInternals>
   </button>
+  <a
+    v-else
+    :href="href"
+    style="width: fit-content"
+    class="flex select-none items-center border rounded gap-8px outline-none"
+    :class="classes"
+  >
+    <ButtonInternals>
+      <template #prefix>
+        <slot name="prefix">
+          <component
+            :is="prefixIcon"
+            :class="prefixIconClass"
+          />
+        </slot>
+      </template>
+      <template #default>
+        <slot />
+      </template>
+      <template #suffix>
+        <slot name="suffix">
+          <component
+            :is="suffixIcon"
+            :class="suffixIconClass"
+          />
+        </slot>
+      </template>
+
+    </ButtonInternals>
+  </a>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue'
+import ButtonInternals from './ButtonInternals.vue'
 
 export default defineComponent({
   inheritAttrs: true,
@@ -71,6 +99,7 @@ const props = defineProps<{
   variant?: 'primary' | 'tertiary' | 'outline' | 'link' | 'text' | 'pending'
   prefixIconClass?: string
   suffixIconClass?: string
+  href?: string // will render as link element
 }>()
 
 const attrs = useAttrs() as ButtonHTMLAttributes
