@@ -48,12 +48,40 @@
       <i-cy-arrow-outline-right class="transition-transform duration-200 ease-in transform icon-dark-gray-400 w-20px h-20px group-hocus:translate-x-2px" />
     </a>
   </div>
-  <div v-else-if="type === 'orchestration'">
-    Orchestration
+  <div
+    v-else-if="type === 'orchestration'"
+    class="p-24px"
+  >
+    <div class="pb-12px border-b border-b-gray-50">
+      <div class="bg-jade-400 text-white px-12px py-6px mb-12px rounded">
+        <b>5 mins</b> with Parallelization
+      </div>
+      <div class="bg-gray-500 text-white px-12px py-6px rounded">
+        <b>12 mins</b> without Parallelization
+      </div>
+    </div>
+    <p class="text-gray-600">
+      With Smart Orchestration, you’ll be able to:
+    </p>
+    <ul class="text-gray-700">
+      <li>Run spec files in parallel</li>
+      <li>Prioritize failed specs to run first</li>
+      <li>Cancel CI runs on test failure</li>
+    </ul>
+    <Button
+      href="https://on.cypress.io/smart-orchestration"
+      size="lg"
+    >
+      Learn More
+      <template #suffix>
+        <i-cy-arrow-outline-right class="icon-dark-current" />
+      </template>
+    </Button>
   </div>
 </template>
 
 <script setup lang="ts">
+import Button from '@cy/components/Button.vue'
 import { useI18n } from '@cy/i18n'
 const { t } = useI18n()
 
