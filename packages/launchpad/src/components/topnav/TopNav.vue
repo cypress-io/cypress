@@ -101,7 +101,10 @@
       v-if="docsMenuVariant === 'main'"
       class="flex p-16px gap-24px"
     >
-      <DocsMenuContent @setDocsContent="docsMenuVariant = $event" />
+      <DocsMenuContent
+        :active-project-exists="!!props.gql?.activeProject"
+        @setDocsContent="docsMenuVariant = $event"
+      />
     </div>
     <div
       v-else
@@ -172,6 +175,9 @@ const versionList = [
 
 gql`
 fragment TopNav on App {
+  activeProject {
+    id
+  }
   selectedBrowser {
     id
     displayName
@@ -208,7 +214,7 @@ onClickOutside(promptsEl, () => {
 
 // using onKeyStroke twice as array of keys is not supported till vueuse 6.6:
 
-onKeyStroke('Enter', (event) => {
+const resetPrompt = (event) => {
   if (promptsEl.value === null) {
     return
   }
@@ -218,18 +224,14 @@ onKeyStroke('Enter', (event) => {
   if (!promptsEl.value.contains(target)) {
     docsMenuVariant.value = 'main'
   }
+}
+
+onKeyStroke('Enter', (event) => {
+  resetPrompt(event)
 })
 
 onKeyStroke(' ', (event) => {
-  if (promptsEl.value === null) {
-    return
-  }
-
-  const target = event.target as HTMLElement
-
-  if (!promptsEl.value.contains(target)) {
-    docsMenuVariant.value = 'main'
-  }
+  resetPrompt(event)
 })
 
 </script>

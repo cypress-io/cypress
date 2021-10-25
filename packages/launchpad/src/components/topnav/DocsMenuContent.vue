@@ -15,9 +15,8 @@
         class="flex items-center text-indigo-500 mb-4px"
       >
         <i-cy-book_x16 class="icon-dark-indigo-500 icon-light-indigo-50" />
-
         <a
-          v-if="!item.changeContent"
+          v-if="!item.changeContent || !activeProjectExists"
           :href="getUrl(item.link)"
           target="_blank"
           class="font-normal ml-4px whitespace-nowrap"
@@ -42,6 +41,10 @@ const { t } = useI18n()
 
 const emit = defineEmits<{
   (e: 'setDocsContent', value: 'ci' | 'orchestration' | 'main'): void,
+}>()
+
+defineProps<{
+  activeProjectExists: boolean,
 }>()
 
 const utm_medium = 'Docs Menu'
