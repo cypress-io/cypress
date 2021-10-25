@@ -32,14 +32,16 @@
       v-if="status === 'changes'"
       class="flex sticky top-0 z-1 border-b-gray-100 border-b items-center p-3 bg-warning-100 text-warning-600"
     >
-      <span class="font-semibold">{{
-        t('setupPage.configFile.changesRequiredLabel') }}: </span>
       <p class="flex-grow ml-1 text-left">
+        <span class="font-semibold">{{ t('setupPage.configFile.changesRequiredLabel') }}: </span>
         <i18n-t keypath="setupPage.configFile.changesRequiredDescription">
           <span class="inline-block px-1 rounded bg-warning-200 text-warning-600">{{ filePath }}</span>
         </i18n-t>
       </p>
-      <Button @click="openDocs">
+      <Button
+        class="whitespace-nowrap"
+        @click="openDocs"
+      >
         {{ t('links.learnMore') }}
       </Button>
     </div>
