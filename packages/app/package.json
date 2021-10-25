@@ -89,6 +89,7 @@
         "nanoid",
         "path",
         "pinia",
+        "shiki",
         "socket.io-client",
         "vue",
         "vue-toastification",
