@@ -1,18 +1,32 @@
 <template>
-  <div
-    class="flex items-center gap-2 px-5 border-b border-gray-100  bg-gray-50 h-9 rounded-t-md"
-  >
-    <div
-      v-for="i in [0, 1, 2]"
-      :key="i"
-      class="w-3 h-3 border rounded-md border-1-gray-600"
+  <div class="relative px-24px py-22px">
+    <div class="absolute h-38px w-160px bg-gradient-to-r from-transparent to-white via-white right-25px top-25px rounded pointer-events-none" />
+    <div class="code-area text-left p-8px text-purple-500 border border-gray-100 rounded flex items-center overflow-x-scroll">
+      <i-cy-dollar_x16 class="icon-dark-gray-500 mr-12px" /> <pre><span class="text-14px font-light">{{ dependenciesCode }}</span></pre>
+    </div>
+    <CopyButton
+      :text="dependenciesCode"
+      class="top-26px right-28px absolute"
     />
   </div>
-  <div class="relative">
-    <pre class="p-5 text-left text-gray-500"><span
-    class="text-purple-500"
-    >{{ projectTitle }}:~$</span> {{ dependenciesCode }}</pre>
-    <CopyButton :text="dependenciesCode" />
+  <div class="border-t border-t-gray-100 px-24px">
+    <ul>
+      <li
+        v-for="dep in props.gql.packagesToInstall"
+        :key="dep.id"
+        class="py-16px border-b border-b-gray-100 last-of-type:border-b-0"
+      >
+        <a
+          :href="`https://www.npmjs.com/package/${dep.package}`"
+          target="_blank"
+          class="text-indigo-500 text-14px hocus-link-default"
+        >{{ dep.package }}</a>
+        <p
+          class="text-gray-500 text-14px leading-5"
+          v-html="dep.description"
+        />
+      </li>
+    </ul>
   </div>
 </template>
 
@@ -42,11 +56,10 @@ defineEmits<{(event: 'back'): void
 
 const dependenciesCode = computed(
   () => {
-    return `yarn add -D \\\n${
+    return `yarn add -D ${
     (props.gql.packagesToInstall ?? [])
-    .map((pack) => `                    ${pack.package} \\`)
-    .join('\n')}`
+    .map((pack) => `${pack.package}`)
+    .join(' ')}`
   },
 )
-const projectTitle = 'TODO: project title in gql'
 </script>
