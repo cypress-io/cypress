@@ -42,9 +42,9 @@ describe('lib/files', () => {
     })
 
     // https://github.com/cypress-io/cypress/issues/1558
-    it('explicit null encoding is sent to driver as base64 string', function () {
+    it('explicit null encoding is sent to driver as a Buffer', function () {
       return files.readFile(this.projectRoot, 'tests/_fixtures/ascii.foo', { encoding: null }).then(({ contents }) => {
-        expect(contents).to.eql(Buffer.from('\n').toString('base64'))
+        expect(contents).to.eql(Buffer.from('\n'))
       })
     })
 
@@ -83,10 +83,10 @@ describe('lib/files', () => {
     })
 
     // https://github.com/cypress-io/cypress/issues/1558
-    it('explicit null encoding is read from driver as base64 string', function () {
+    it('explicit null encoding is written exactly as received', function () {
       return files.writeFile(this.projectRoot, '.projects/write_file.txt', Buffer.from(''), { encoding: null }).then(() => {
         return files.readFile(this.projectRoot, '.projects/write_file.txt', { encoding: null }).then(({ contents }) => {
-          expect(contents).to.eql(Buffer.from('').toString('base64'))
+          expect(contents).to.eql(Buffer.from(''))
         })
       })
     })

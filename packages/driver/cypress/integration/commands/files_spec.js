@@ -40,7 +40,7 @@ describe('src/cy/commands/files', () => {
     // https://github.com/cypress-io/cypress/issues/1558
     it('passes explicit null encoding through to server and decodes response', () => {
       Cypress.backend.resolves({
-        contents: Buffer.from('\n').toString('base64'),
+        contents: Buffer.from('\n'),
         filePath: '/path/to/foo.json',
       })
 
@@ -357,16 +357,16 @@ describe('src/cy/commands/files', () => {
     })
 
     // https://github.com/cypress-io/cypress/issues/1558
-    it('explicit null encoding is sent to server as base64 string', () => {
+    it('explicit null encoding is sent to server as Buffer', () => {
       Cypress.backend.resolves(okResponse)
 
       cy.writeFile('foo.txt', Buffer.from([0, 0, 54, 255]), null).then(() => {
         expect(Cypress.backend).to.be.calledWith(
           'write:file',
           'foo.txt',
-          'AAA2/w==',
+          Buffer.from([0, 0, 54, 255]),
           {
-            encoding: 'base64',
+            encoding: null,
             flag: 'w',
           },
         )

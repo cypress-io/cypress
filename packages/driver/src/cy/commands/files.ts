@@ -58,10 +58,12 @@ export default (Commands, Cypress, cy) => {
             args: { cmd: 'readFile', action: 'read', file, filePath: err.filePath, error: err.message },
           })
         }).then(({ contents, filePath }) => {
-          // Binary files (read with explicit `null` encoding by the user) are transmitted over the
-          // websocket base64 encoded. See packages/server/lib/files.js.
+          // https://github.com/cypress-io/cypress/issues/1558
+          // We invoke Buffer.from() in order to transform this from an ArrayBuffer -
+          // which socket.io uses to transfer the file over the websocket - into a
+          // `Buffer`, which webpack polyfills in the browser.
           if (options.encoding === null) {
-            contents = Buffer.from(contents, 'base64')
+            contents = Buffer.from(contents)
           }
 
           consoleProps['File Path'] = filePath
@@ -136,12 +138,7 @@ export default (Commands, Cypress, cy) => {
         })
       }
 
-      if (Buffer.isBuffer(contents)) {
-        contents = contents.toString('base64')
-        options.encoding = 'base64'
-      }
-
-      if (_.isObject(contents)) {
+      if (_.isObject(contents) && !Buffer.isBuffer(contents)) {
         contents = JSON.stringify(contents, null, 2)
       }
 

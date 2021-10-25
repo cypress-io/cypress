@@ -69,10 +69,11 @@ export default (Commands, Cypress, cy, state, config) => {
         }
 
         // https://github.com/cypress-io/cypress/issues/1558
-        // Binary files (read with explicit `null` encoding by the user) are transmitted over the
-        // websocket base64 encoded. See packages/server/lib/fixture.js.
+        // We invoke Buffer.from() in order to transform this from an ArrayBuffer -
+        // which socket.io uses to transfer the file over the websocket - into a
+        // `Buffer`, which webpack polyfills in the browser.
         if (options.encoding === null) {
-          response = Buffer.from(response, 'base64')
+          response = Buffer.from(response)
         }
 
         // add the fixture to the cache
