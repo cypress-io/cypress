@@ -10,14 +10,14 @@
         <div>{{ t('specPage.componentSpecsHeader') }}</div>
         <div>{{ t('specPage.gitStatusHeader') }}</div>
       </div>
-      <button
+      <RouterLink
         v-for="spec in filteredSpecs"
         :key="spec.node.id"
         class="text-left"
-        @click.prevent="selectSpec(spec.node.relative)"
+        :to="{ path: 'spec', query: { file: spec.node.relative } }"
       >
         <SpecsListRow :gql="spec" />
-      </button>
+      </RouterLink>
     </div>
   </div>
 </template>
@@ -25,11 +25,10 @@
 <script setup lang="ts">
 import SpecsListHeader from './SpecsListHeader.vue'
 import SpecsListRow from './SpecsListRow.vue'
-import { gql, useMutation } from '@urql/vue'
+import { gql } from '@urql/vue'
 import { computed, ref } from 'vue'
 import type { Specs_SpecsListFragment, SpecNode_SpecsListFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
-import { useRouter } from 'vue-router'
 import { useModalStore } from '../store'
 
 const modalStore = useModalStore()
@@ -60,12 +59,6 @@ fragment Specs_SpecsList on App {
   }
 }
 `
-
-const router = useRouter()
-
-function selectSpec (relative: string) {
-  router.push({ path: 'runner', query: { spec: relative } })
-}
 
 const props = defineProps<{
   gql: Specs_SpecsListFragment

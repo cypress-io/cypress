@@ -8,6 +8,12 @@ import { createI18n } from '@cy/i18n'
 import { createRouter } from './router/router'
 import { createPinia } from './store'
 
+// set a global so we can run
+// conditional code in the vite branch
+// so that the existing runner code
+// @ts-ignore
+window.__vite__ = true
+
 const app = createApp(App)
 
 app.use(urql, makeUrqlClient('app'))
