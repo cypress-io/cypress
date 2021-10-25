@@ -89,7 +89,11 @@
     </TopNavListItem>
   </TopNavList>
 
-  <TopNavList variant="panel">
+  <TopNavList
+    variant="panel"
+    role="region"
+    aria-live="polite"
+  >
     <template #heading="{ open }">
       <i-cy-life-ring_x16
         class=" group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50 h-16px w-16px"
