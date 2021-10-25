@@ -4,7 +4,7 @@ import ProjectId from './ProjectId.vue'
 
 describe('<ProjectId />', () => {
   beforeEach(() => {
-    cy.viewport(800, 600)
+    cy.viewport(1000, 600)
   })
 
   const copied = ref('')
@@ -33,11 +33,6 @@ describe('<ProjectId />', () => {
     }).then(() => {
       cy.findByText('projectId').should('be.visible')
       cy.findByText('Copy')
-      .click()
-      .findByText('Copy')
-      .should('not.exist')
-      .findAllByText('Copied')
-      .should('be.visible')
     })
   })
 })

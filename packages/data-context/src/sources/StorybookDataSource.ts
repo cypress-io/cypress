@@ -43,7 +43,11 @@ export class StorybookDataSource {
         return acc
       }
 
-      const spec = this.ctx.file.normalizeFileToSpec(file, project.projectRoot, config.componentFolder || project.projectRoot)
+      const spec = this.ctx.file.normalizeFileToFileParts({
+        absolute: file,
+        projectRoot: project.projectRoot,
+        searchFolder: config.componentFolder || project.projectRoot,
+      })
 
       return [...acc, spec]
     }, [] as SpecFile[])

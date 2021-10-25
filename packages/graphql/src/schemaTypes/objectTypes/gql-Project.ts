@@ -2,7 +2,7 @@ import { nonNull, objectType, stringArg } from 'nexus'
 import path from 'path'
 import { ProjectPreferences } from '.'
 import { cloudProjectBySlug } from '../../stitching/remoteGraphQLCalls'
-import { CodeGenTypeEnum } from '../enumTypes/gql-CodeGenType'
+import { CodeGenTypeEnum } from '../enumTypes/gql-CodeGenTypeEnum'
 import { FileParts } from './gql-FileParts'
 
 export interface ProjectShape {
