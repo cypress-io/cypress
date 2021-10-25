@@ -74,6 +74,10 @@ export default (Commands, Cypress, cy, state, config) => {
         // `Buffer`, which webpack polyfills in the browser.
         if (options.encoding === null) {
           response = Buffer.from(response)
+        } else if (response instanceof ArrayBuffer) {
+          // Cypress' behavior is to base64 encode binary files if the user
+          // doesn't explicitly pass `null` as the encoding.
+          response = Buffer.from(response).toString('base64')
         }
 
         // add the fixture to the cache
