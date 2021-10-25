@@ -624,19 +624,21 @@ const createAndOpenProject = async (socketId, options) => {
 
   await checkAccess(projectRoot)
 
-  return openProjectCreate(projectRoot, socketId, options)
-  .then((open_project) => open_project.getProject())
-  .then((project) => {
-    return Promise.all([
-      project,
-      project.getConfig(),
-      getProjectId(project, projectId),
-    ]).then(([project, config, projectId]) => ({
-      project,
-      config,
-      projectId,
-    }))
-  })
+  const open_project = await openProjectCreate(projectRoot, socketId, options)
+  const project = open_project.getProject()
+
+  const [_project, _config, _projectId] = await Promise.all([
+    project,
+    project.getConfig(),
+    getProjectId(project, projectId),
+  ])
+
+  return {
+    project: _project,
+    config: _config,
+    projectId: _projectId,
+    configFile: project.options.configFile,
+  }
 }
 
 const removeOldProfiles = (browser) => {
@@ -1533,7 +1535,7 @@ module.exports = {
       options.browsers = browsers
 
       return createAndOpenProject(socketId, options)
-      .then(({ project, projectId, config }) => {
+      .then(({ project, projectId, config, configFile }) => {
         debug('project created and opened with config %o', config)
 
         // if we have a project id and a key but record hasnt been given
@@ -1541,7 +1543,7 @@ module.exports = {
         recordMode.throwIfRecordParamsWithoutRecording(record, ciBuildId, parallel, group, tag)
 
         if (record) {
-          recordMode.throwIfNoProjectId(projectId, settings.configFile(options))
+          recordMode.throwIfNoProjectId(projectId, settings.configFile(options.configFile === undefined || options.configFile === null ? { configFile } : options)) //
           recordMode.throwIfIncorrectCiBuildIdUsage(ciBuildId, parallel, group)
           recordMode.throwIfIndeterminateCiBuildId(ciBuildId, parallel, group)
         }

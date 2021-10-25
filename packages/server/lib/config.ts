@@ -204,9 +204,9 @@ export type FullConfig =
     resolved: ResolvedConfigurationOptions
   }
 
-export function get (projectRoot, options = {}): Promise<FullConfig> {
+export function get (projectRoot, options: {configFile?: string | false } = { configFile: undefined }): Promise<FullConfig> {
   return Promise.all([
-    settings.read(projectRoot, options).then(validateFile('cypress.config.{ts|js}')),
+    settings.read(projectRoot, options).then(validateFile(options.configFile ?? 'cypress.config.{ts|js}')),
     settings.readEnv(projectRoot).then(validateFile('cypress.env.json')),
   ])
   .spread((settings, envFile) => {

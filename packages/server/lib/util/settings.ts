@@ -124,9 +124,6 @@ export function isComponentTesting (options: SettingsOptions = {}) {
 }
 
 export function configFile (options: SettingsOptions = {}) {
-  // default is only used in tests.
-  // This prevents a the change from becoming bigger than it should
-  // FIXME: remove the default
   return options.configFile === false ? false : options.configFile
 }
 
