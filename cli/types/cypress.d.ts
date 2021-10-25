@@ -171,6 +171,11 @@ declare namespace Cypress {
   interface ApplicationWindow { } // tslint:disable-line
 
   /**
+   * The configuration for Cypress.
+   */
+  type Config = ResolvedConfigOptions & RuntimeConfigOptions
+
+  /**
    * Several libraries are bundled with Cypress by default.
    *
    * @see https://on.cypress.io/api
@@ -297,7 +302,7 @@ declare namespace Cypress {
     /**
      * Fire automation:request event for internal use.
      */
-    automation(eventName: string, ...args: any[]): Promise<any>
+    automation(eventName: string, ...args: any[]): Bluebird.Promise<any>
 
     /**
      * Promise wrapper for certain internal tasks.
@@ -313,7 +318,7 @@ declare namespace Cypress {
     // {defaultCommandTimeout: 10000, pageLoadTimeout: 30000, ...}
     ```
      */
-    config(): ResolvedConfigOptions & RuntimeConfigOptions
+    config(): Config
     /**
      * Returns one configuration value.
      * @see https://on.cypress.io/config
@@ -2572,6 +2577,11 @@ declare namespace Cypress {
      * @default "spec"
      */
     reporterOptions: { [key: string]: any }
+    /**
+     * Slow test threshold in milliseconds. Only affects the visual output of some reporters. For example, the spec reporter will display the test time in yellow if over the threshold.
+     * @default 10000
+     */
+    slowTestThreshold: number
     /**
      * Whether Cypress will watch and restart tests on test file changes
      * @default true

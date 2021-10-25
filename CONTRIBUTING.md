@@ -396,6 +396,7 @@ By default, top level tasks will execute for all packages. However, most scripts
 | `test-unit`        | Run unit tests                                                   |
 | `test-integration` | Run integration tests                                            |
 | `test-e2e`         | Run end-to-end tests                                             |
+| `test-system`      | Run system tests                                                 |
 | `test-watch`       | Run unit tests and rebuild/rerun on file changes                 |
 
 > Most of the time you will only want to run a task within a specific package; this can be done by providing the package name as a scope to the top level task.
@@ -428,7 +429,6 @@ Each package is responsible for building itself and testing itself and can do so
 | `test`             | Runs all tests once (this usually means running unit tests; via `yarn test-unit`)                                                                        |
 | `test-unit`        | Run all unit tests within the package; `exit 0` if N/A                                                                                                   |
 | `test-integration` | Run all integration tests within the package; `exit 0` if N/A                                                                                            |
-| `test-e2e`         | Run all e2e tests within the package; `exit 0` if N/A                                                                                                    |
 | `test-watch`       | Run all unit tests in the package in watch mode                                                                                                          |
 
 #### Debugging
@@ -486,11 +486,11 @@ This is to ensure that links do not go dead in older versions of Cypress when th
 
 For most packages there are typically unit and integration tests.
 
-Our true e2e tests are in [`packages/server`](packages/server), which test the full stack all together.
+Please refer to each packages' `README.md` which documents how to run tests. It is not feasible to try to run all of the tests together. We run our entire test fleet across over a dozen containers in CI.
+
+There are also a set of system tests in [`system-tests`](system-tests) which attempt to test the entire Cypress App as close to real world as possible. See  the [`README`](system-tests/README.md) for more information.
 
 Additionally, we test the code by running it against various other example projects in CI. See CI badges and links at the top of this document.
-
-Please refer to each packages' `README.md` which documents how to run tests. It is not feasible to try to run all of the tests together. We run our entire test fleet across over a dozen containers in CI.
 
 If you're curious how we manage all of these tests in CI check out our [`circle.yml`](circle.yml) file found in the root `cypress` directory.
 
