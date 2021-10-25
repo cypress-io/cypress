@@ -10,10 +10,10 @@ describe('<PromptContent />', { viewportWidth: 500, viewportHeight: 800 }, () =>
       render: () => {
         return (<div class="w-486px border">
           <h2>{ci.title}</h2>
-          <PromptContent type="ci"/>
+          <PromptContent type="ci" />
           <hr class="my-32px" />
           <h2>{orchestration.title}</h2>
-          <PromptContent type="orchestration"/>
+          <PromptContent type="orchestration" />
         </div>)
       },
     })
@@ -25,6 +25,8 @@ describe('<PromptContent />', { viewportWidth: 500, viewportHeight: 800 }, () =>
     // links populate with params
     cy.get('[data-testid="provider-list"] li')
     .should('have.length', 6)
-    .eq(0).find('a').should('have.attr', 'href', 'https://on.cypress.io/setup-ci-circleci?utm_medium=CI+Prompt+1&utm_campaign=Circle&utm_content=temp-utm')
+    .eq(0)
+    .find('a')
+    .should('have.attr', 'href', 'https://on.cypress.io/setup-ci-circleci?utm_medium=CI+Prompt+1&utm_campaign=Circle&utm_content=Manual')
   })
 })
