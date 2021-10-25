@@ -64,7 +64,28 @@
       "ciTitle": "Run in CI/CD",
       "ciSetup": "Set up CI",
       "fasterTests": "Run tests faster",
-      "smartOrchestration": "Smart Orchestration"
+      "smartOrchestration": "Smart Orchestration",
+      "prompts": {
+        "ci": {
+          "title": "Configure CI",
+          "description": "Optimize your tests in CI by following these guides.",
+          "seeOtherGuides": "See Other Guides",
+          "intro": "Introduction to CI",
+          "learnTheBasics": "Learn the basics of running Cypress in CI."
+        },
+        "orchestration": {
+          "title": "Run tests faster in CI",
+          "parallelTime": "5 mins",
+          "noParallelTime": "12 mins",
+          "withParallelization": "with Parallelization",
+          "withoutParallelization": "without Parallelization",
+          "intro": " With Smart Orchestration, you’ll be able to:",
+          "bullet1": "Run spec files in parallel",
+          "bullet2": "Prioritize failed specs to run first",
+          "bullet3": "Cancel CI runs on test failure",
+          "learnMore": "Learn more"
+        }
+      }
     },
     "login": {
       "bodyInitial": "Logging in gives you access to the {0}. You can set up projects to be recorded and see test data from your project.",
@@ -114,7 +135,11 @@
       "launch": "Launch"
     },
     "configFile": {
-      "createManually": "Create file manually"
+      "createManually": "Create file manually",
+      "skippedLabel": "Skipped",
+      "changesRequiredLabel": "Changes Required",
+      "changesRequiredBadge": "Changes required",
+      "changesRequiredDescription": "Please merge the code below with your existing {0}"
     },
     "testingCard": {
       "configured": "Configured",

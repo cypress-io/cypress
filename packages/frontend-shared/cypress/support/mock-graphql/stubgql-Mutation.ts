@@ -15,6 +15,7 @@ export const stubMutation: MaybeResolver<Mutation> = {
       isFirstTimeE2E: true,
       __typename: 'Project',
       config,
+      codeGenGlob: '/**/*.vue',
     }
 
     ctx.app.projects.push(project)
@@ -62,13 +63,6 @@ export const stubMutation: MaybeResolver<Mutation> = {
 
     return true
   },
-  generateSpecFromStory (source, args, ctx) {
-    if (!ctx.app.activeProject) {
-      throw Error('Cannot set currentSpec without active project')
-    }
-
-    return true
-  },
   hideBrowserWindow (source, args, ctx) {
     return ctx.app
   },
@@ -77,5 +71,27 @@ export const stubMutation: MaybeResolver<Mutation> = {
   },
   showBrowserWindow (source, args, ctx) {
     return ctx.app
+  },
+  codeGenSpec (source, args, ctx) {
+    if (!ctx.app.activeProject) {
+      throw Error('Cannot set currentSpec without active project')
+    }
+
+    ctx.app.activeProject.generatedSpec = {
+      __typename: 'GeneratedSpec',
+      spec: {
+        __typename: 'FileParts',
+        id: 'U3BlYzovVXNlcnMvbGFjaGxhbi9jb2RlL3dvcmsvY3lwcmVzczUvcGFja2FnZXMvYXBwL3NyYy9CYXNpYy5zcGVjLnRzeA==',
+        absolute: '/Users/lachlan/code/work/cypress5/packages/app/src/Basic.spec.tsx',
+        relative: 'app/src/Basic.spec.tsx',
+        name: 'Basic',
+        fileName: 'Basic.spec.tsx',
+        baseName: 'Basic',
+      },
+      content: `it('should do stuff', () => {})`,
+      id: 'U3BlYzovVXNlcnMvbGFjaGxhbi9jb2RlL3dvcmsvY3lwcmVzczUvcGFja2FnZXMvYXBwL3NyYy9CYXNpYy5zcGVjLnRzeA==',
+    }
+
+    return true
   },
 }

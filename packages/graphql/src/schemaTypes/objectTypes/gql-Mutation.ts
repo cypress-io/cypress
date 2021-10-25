@@ -1,4 +1,5 @@
 import { arg, booleanArg, enumType, idArg, mutationType, nonNull, stringArg } from 'nexus'
+import { CodeGenTypeEnum } from '..'
 import { CodeLanguageEnum, FrontendFrameworkEnum, NavItemEnum, SupportedBundlerEnum, TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
 import { WizardUpdateInput } from '../inputTypes/gql-WizardUpdateInput'
 import { Wizard } from './gql-Wizard'
@@ -179,17 +180,14 @@ export const mutation = mutationType({
       },
     })
 
-    t.liveMutation('generateSpecFromStory', {
-      description: 'Generate spec from Storybook story',
+    t.liveMutation('codeGenSpec', {
+      description: 'Generate spec from source',
       args: {
-        storyPath: nonNull('String'),
+        codeGenCandidate: nonNull(stringArg()),
+        type: nonNull(CodeGenTypeEnum),
       },
       resolve: async (_, args, ctx) => {
-        if (!ctx.activeProject) {
-          throw Error(`Cannot set spec without active project!`)
-        }
-
-        await ctx.actions.storybook.generateSpecFromStory(args.storyPath)
+        await ctx.actions.project.codeGenSpec(args.codeGenCandidate, args.type)
       },
     })
 

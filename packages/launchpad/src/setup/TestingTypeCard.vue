@@ -1,6 +1,6 @@
 <template>
   <div
-    class="relative flex flex-col w-full border border-gray-100 rounded cursor-default p-30px text text-body-gray-500 hocus-default"
+    class="relative flex flex-col w-full border border-gray-100 rounded cursor-pointer p-30px text text-body-gray-500 hocus-default"
     tabindex="0"
   >
     <div class="h-152px mb-24px">
@@ -34,6 +34,8 @@
       <button
         class="flex items-center justify-center border border-gray-100 rounded-full text-body-gray-400 w-32px h-32px group hocus-default focus:outline-transparent"
         :aria-label="t('welcomePage.review')"
+        aria-hidden
+        tabindex="-1"
         @click.stop="$emit('openCompare')"
       >
         <i-cy-question-mark_x16
