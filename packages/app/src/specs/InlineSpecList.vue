@@ -53,7 +53,7 @@ const props = defineProps<{
 const specStore = useSpecStore()
 
 const isCurrentSpec = (spec: SpecNode_InlineSpecListFragment) => {
-  return spec.node.relative === specStore.currentSpec?.relative
+  return spec.node.relative === specStore.activeSpec?.relative
 }
 
 const router = useRouter()
