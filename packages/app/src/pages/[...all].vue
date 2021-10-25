@@ -12,9 +12,9 @@
         :key="route.path"
         class="text-left underline underline-2 underline-offset-1 underline-indigo-700 text-indigo-700 hover:text-indigo-500 hover:underline-indigo-500"
       >
-        <router-link :to="route.path">
+        <RouterLink :to="route.path">
           {{ route.name }}
-        </router-link>
+        </RouterLink>
       </li>
     </nav>
   </div>

@@ -306,7 +306,9 @@ export const eventManager = {
     const $window = $(window)
 
     //  TODO(lachlan): best place to do this?
-    $window.on('hashchange', rerun)
+    if (!window.__vite__) {
+      $window.on('hashchange', rerun)
+    }
 
     // when we actually unload then
     // nuke all of the cookies again
