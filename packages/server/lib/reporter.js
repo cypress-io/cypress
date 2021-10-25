@@ -8,6 +8,7 @@ const Mocha = require('mocha-7.0.1')
 const mochaReporters = require('mocha-7.0.1/lib/reporters')
 const mochaCreateStatsCollector = require('mocha-7.0.1/lib/stats-collector')
 const mochaColor = mochaReporters.Base.color
+const mochaSymbols = mochaReporters.Base.symbols
 
 const debug = require('debug')('cypress:server:reporter')
 const Promise = require('bluebird')
@@ -292,6 +293,34 @@ class Reporter {
     this.reporter = new this.mocha._reporter(this.runner, {
       reporterOptions: this.reporterOptions,
     })
+
+    if (this.reporterName === 'spec') {
+      // Unfortunately the reporter doesn't expose its indentation logic, so we have to replicate it here
+      let indents = 0
+
+      this.runner.on('suite', function (suite) {
+        ++indents
+      })
+
+      this.runner.on('suite end', function () {
+        --indents
+      })
+
+      // Override the default reporter to always show test timing even for fast tests
+      // and display slow ones in yellow rather than red
+      this.runner._events.pass[2] = function (test) {
+        const durationColor = test.speed === 'slow' ? 'medium' : 'fast'
+        const fmt =
+          Array(indents).join('  ') +
+          mochaColor('checkmark', `  ${ mochaSymbols.ok}`) +
+          mochaColor('pass', ' %s') +
+          mochaColor(durationColor, ' (%dms)')
+
+        // Log: `✓ test title (300ms)` when a test passes
+        // eslint-disable-next-line no-console
+        console.log(fmt, test.title, test.duration)
+      }
+    }
 
     this.runner.ignoreLeaks = true
   }

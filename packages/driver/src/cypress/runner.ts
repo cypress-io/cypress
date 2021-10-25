@@ -21,7 +21,7 @@ const TEST_BEFORE_RUN_EVENT = 'runner:test:before:run'
 const TEST_AFTER_RUN_EVENT = 'runner:test:after:run'
 
 const RUNNABLE_LOGS = 'routes agents commands hooks'.split(' ')
-const RUNNABLE_PROPS = '_testConfig id order title _titlePath root hookName hookId err state failedFromHookId body speed type duration wallClockStartedAt wallClockDuration timings file originalTitle invocationDetails final currentRetry retries'.split(' ')
+const RUNNABLE_PROPS = '_testConfig id order title _titlePath root hookName hookId err state failedFromHookId body speed type duration wallClockStartedAt wallClockDuration timings file originalTitle invocationDetails final currentRetry retries _slow'.split(' ')
 
 const debug = debugFn('cypress:driver:runner')
 const debugErrors = debugFn('cypress:driver:errors')
@@ -579,6 +579,10 @@ const normalize = (runnable, tests, initialTests, onRunnable, onLogsById, getRun
       if (_.size(cfg)) {
         runnable._testConfig = cfg
         wrappedRunnable._testConfig = cfg
+      }
+
+      if (cfg.slowTestThreshold) {
+        runnable.slow(cfg.slowTestThreshold)
       }
 
       wrappedRunnable._titlePath = runnable.titlePath()
