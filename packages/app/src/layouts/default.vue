@@ -16,11 +16,11 @@
             name="fade"
             mode="out-in"
           >
-            <keep-alive>
-              <component
-                :is="Component"
-              />
-            </keep-alive>
+            <!-- <keep-alive> -->
+            <component
+              :is="Component"
+            />
+            <!-- </keep-alive> -->
           </transition>
         </router-view>
         <ModalManager v-if="modalStore.activeModalId" />
