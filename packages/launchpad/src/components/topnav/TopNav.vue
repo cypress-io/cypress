@@ -98,43 +98,10 @@
       <span :class="{'text-indigo-600': open}">{{ t('topNav.docsMenu.docsHeading') }}</span>
     </template>
     <div
-      v-if="docsMenuContent === 'main'"
+      v-if="docsMenuVariant === 'main'"
       class="flex p-16px gap-24px"
     >
-      <!-- TODO make this its own component -->
-      <div
-        v-for="list in docsMenu"
-        :key="list.title"
-        class="min-w-164px"
-      >
-        <h2 class="font-semibold text-gray-800">
-          {{ list.title }}
-        </h2>
-        <hr class="border-gray-50 my-10px">
-        <ul>
-          <li
-            v-for="item in list.children"
-            :key="item.text"
-            class="flex items-center text-indigo-500 mb-4px"
-          >
-            <i-cy-book_x16 class="icon-dark-indigo-500 icon-light-indigo-50" />
-
-            <a
-              v-if="!item.changeContent"
-              :href="getUrl(item.link)"
-              target="_blank"
-              class="font-normal ml-4px whitespace-nowrap"
-            >{{ item.text }}</a>
-            <button
-              v-else
-              class="font-normal ml-4px whitespace-nowrap"
-              @click="docsMenuContent = item.changeContent"
-            >
-              {{ item.text }}
-            </button>
-          </li>
-        </ul>
-      </div>
+      <DocsMenuContent @setDocsContent="docsMenuVariant = $event" />
     </div>
     <div
       v-else
@@ -142,16 +109,16 @@
       class="w-484px"
     >
       <div class="relative border-b border-b-gray-50 px-24px py-18px text-18px">
-        {{ t(`topNav.docsMenu.prompts.${docsMenuContent}.title`) }}
+        {{ t(`topNav.docsMenu.prompts.${docsMenuVariant}.title`) }}
         <button
           aria-label="Close"
           class="absolute border-transparent rounded-full p-5px border-1 hover:border-indigo-300 hocus-default right-20px top-15px"
-          @click="docsMenuContent= 'main'"
+          @click="docsMenuVariant = 'main'"
         >
           <i-cy-delete_x12 class="icon-dark-gray-400 w-12px h-12px" />
         </button>
       </div>
-      <GrowthMenuContentVue :type="docsMenuContent" />
+      <GrowthMenuContentVue :type="docsMenuVariant" />
     </div>
   </TopNavList>
 
@@ -179,20 +146,9 @@ import { ref } from 'vue'
 import type { Ref } from 'vue'
 const { t } = useI18n()
 import { onClickOutside, onKeyStroke } from '@vueuse/core'
-
-const getUrl = (link) => {
-  let result = link.url
-
-  if (link.params) {
-    result += `?${new URLSearchParams(link.params).toString()}`
-  }
-
-  return result
-}
+import DocsMenuContent from './DocsMenuContent.vue'
 
 const releasesUrl = 'https://github.com/cypress-io/cypress/releases/'
-
-const utm_medium = 'Docs Menu'
 
 // TODO: will come from gql
 const versionList = [
@@ -236,7 +192,7 @@ const props = defineProps<{
   showBrowsers?: Boolean
 }>()
 
-const docsMenuContent: Ref<'main' | 'orchestration' | 'ci'> = ref('main')
+const docsMenuVariant: Ref<'main' | 'orchestration' | 'ci'> = ref('main')
 
 const promptsEl: Ref<HTMLElement | null> = ref(null)
 
@@ -246,7 +202,7 @@ const promptsEl: Ref<HTMLElement | null> = ref(null)
 onClickOutside(promptsEl, () => {
   setTimeout(() => {
     // reset the content of the menu when
-    docsMenuContent.value = 'main'
+    docsMenuVariant.value = 'main'
   }, 300)
 })
 
@@ -260,7 +216,7 @@ onKeyStroke('Enter', (event) => {
   const target = event.target as HTMLElement
 
   if (!promptsEl.value.contains(target)) {
-    docsMenuContent.value = 'main'
+    docsMenuVariant.value = 'main'
   }
 })
 
@@ -272,104 +228,8 @@ onKeyStroke(' ', (event) => {
   const target = event.target as HTMLElement
 
   if (!promptsEl.value.contains(target)) {
-    docsMenuContent.value = 'main'
+    docsMenuVariant.value = 'main'
   }
 })
-
-const docsMenu = [{
-  title: t('topNav.docsMenu.gettingStartedTitle'),
-  children: [{
-    text: t('topNav.docsMenu.firstTest'),
-    link: {
-      url: 'https://on.cypress.io/writing-first-test',
-      params: {
-        utm_medium,
-        utm_content: 'First Test',
-      },
-    },
-  }, {
-    text: t('topNav.docsMenu.testingApp'),
-    link: {
-      url: 'https://on.cypress.io/testing-your-app',
-      params: {
-        utm_medium,
-        utm_content: 'Testing Your App',
-      },
-    },
-  },
-  {
-    text: t('topNav.docsMenu.organizingTests'),
-    link: {
-      url: 'https://docs.cypress.io/guides/core-concepts/writing-and-organizing-tests',
-      params: {
-        utm_medium,
-        utm_content: 'Organizing Tests',
-      },
-    },
-  }],
-}, {
-  title: t('topNav.docsMenu.referencesTitle'),
-  children: [{
-    text: t('topNav.docsMenu.bestPractices'),
-    link: {
-      url: 'https://on.cypress.io/best-practices',
-      params: {
-        utm_medium,
-        utm_content: 'Best Practices',
-      },
-    },
-  }, {
-    text: t('topNav.docsMenu.configuration'),
-    link: {
-      url: 'https://on.cypress.io/configuration',
-      params: {
-        utm_medium,
-        utm_content: 'Configuration',
-      },
-    },
-  }, {
-    text: t('topNav.docsMenu.api'),
-    link: {
-      url: 'https://on.cypress.io/api',
-      params: {
-        utm_medium,
-        utm_content: 'API',
-      },
-    },
-  }],
-}, {
-  title: t('topNav.docsMenu.ciTitle'),
-  children: [{
-    text: t('topNav.docsMenu.ciSetup'),
-    changeContent: 'ci',
-    link: {
-      url: 'https://on.cypress.io/ci',
-      params: {
-        utm_medium,
-        utm_content: 'Set Up CI',
-      },
-    },
-  }, {
-    text: t('topNav.docsMenu.fasterTests'),
-    link: {
-      url: 'https://on.cypress.io/parallelization',
-      params: {
-        utm_medium,
-        utm_content: 'Parallelization',
-      },
-    },
-  },
-  {
-    text: t('topNav.docsMenu.smartOrchestration'),
-    changeContent: 'orchestration',
-    link: {
-      url: 'https://docs.cypress.io/guides/dashboard/smart-orchestration',
-      params: {
-        utm_medium,
-        utm_content: 'Smart Orchestration',
-      },
-    },
-  }],
-}]
 
 </script>
