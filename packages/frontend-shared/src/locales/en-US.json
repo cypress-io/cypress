@@ -114,7 +114,11 @@
       "launch": "Launch"
     },
     "configFile": {
-      "createManually": "Create file manually"
+      "createManually": "Create file manually",
+      "skippedLabel": "Skipped",
+      "changesRequiredLabel": "Changes Required",
+      "changesRequiredBadge": "Changes required",
+      "changesRequiredDescription": "Please merge the code below with your existing {0}"
     },
     "testingCard": {
       "configured": "Configured",

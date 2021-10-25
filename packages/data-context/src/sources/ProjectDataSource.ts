@@ -1,5 +1,5 @@
 import type { CodeGenType, SpecType } from '@packages/graphql/src/gen/nxs.gen'
-import { FRONTEND_FRAMEWORKS, FullConfig, ResolvedFromConfig, RESOLVED_FROM, SpecFile, STORYBOOK_GLOB } from '@packages/types'
+import { FrontendFramework, FRONTEND_FRAMEWORKS, FullConfig, ResolvedFromConfig, RESOLVED_FROM, SpecFile, STORYBOOK_GLOB } from '@packages/types'
 import { scanFSForAvailableDependency } from 'create-cypress-tests/src/findPackageJson'
 import path from 'path'
 
@@ -123,7 +123,11 @@ export class ProjectDataSource {
     return preferences[projectTitle] ?? null
   }
 
-  guessGlob (projectRoot: string): string | null {
+  frameworkLoader = this.ctx.loader<string, FrontendFramework | null>((projectRoots) => {
+    return Promise.all(projectRoots.map((projectRoot) => Promise.resolve(this.guessFramework(projectRoot))))
+  })
+
+  private guessFramework (projectRoot: string) {
     const guess = FRONTEND_FRAMEWORKS.find((framework) => {
       const lookingForDeps = (framework.deps as readonly string[]).reduce(
         (acc, dep) => ({ ...acc, [dep]: '*' }),
@@ -133,10 +137,10 @@ export class ProjectDataSource {
       return scanFSForAvailableDependency(projectRoot, lookingForDeps)
     })
 
-    return guess?.glob ?? null
+    return guess ?? null
   }
 
-  getCodeGenGlob (type: CodeGenType) {
+  async getCodeGenGlob (type: CodeGenType) {
     const project = this.ctx.activeProject
 
     if (!project) {
@@ -149,9 +153,9 @@ export class ProjectDataSource {
       return STORYBOOK_GLOB
     }
 
-    const glob = this.guessGlob(project.projectRoot)
+    const framework = await this.frameworkLoader.load(project.projectRoot)
 
-    return glob || looseComponentGlob
+    return framework?.glob ?? looseComponentGlob
   }
 
   async getCodeGenCandidates (glob: string): Promise<SpecFile[]> {
@@ -172,7 +176,13 @@ export class ProjectDataSource {
     const codeGenCandidates = await this.ctx.file.getFilesByGlob(glob)
 
     return codeGenCandidates.map(
-      (file) => this.ctx.file.normalizeFileToSpec(file, project.projectRoot, project.projectRoot ?? config.componentFolder),
+      (file) => {
+        return this.ctx.file.normalizeFileToFileParts({
+          absolute: file,
+          projectRoot: project.projectRoot,
+          searchFolder: project.projectRoot ?? config.componentFolder,
+        })
+      },
     )
   }
 }

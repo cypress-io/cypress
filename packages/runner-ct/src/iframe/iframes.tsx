@@ -32,7 +32,7 @@ export const Iframes = namedObserver('Iframes', ({
   eventManager,
 }: IFramesProps) => {
   const containerRef = useRef<HTMLDivElement>(null)
-  const autIframe = useRef(new AutIframe(config))
+  const autIframe = useRef(new AutIframe(config.projectName))
 
   const _toggleSnapshotHighlights = (snapshotProps) => {
     state.setShowSnapshotHighlight(!state.snapshot.showingHighlights)
@@ -167,7 +167,7 @@ export const Iframes = namedObserver('Iframes', ({
       return
     }
 
-    state.callbackAfterUpdate?.()
+    state.viewportUpdateCallback?.()
   })
 
   const { height, width, scriptError, scale, screenshotting } = state
