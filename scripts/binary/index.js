@@ -157,7 +157,6 @@ const deploy = {
     const systems = [
       { platform: 'linux', arch: 'x64' },
       { platform: 'darwin', arch: 'x64' },
-      { platform: 'win32', arch: 'ia32' },
       { platform: 'win32', arch: 'x64' },
     ]
 

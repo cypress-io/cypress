@@ -56,7 +56,7 @@ export interface LaunchArgs {
 }
 
 // @see https://github.com/cypress-io/cypress/issues/18094
-async function win32BitWarning (onWarning: (error: Error) => void) {
+async function win32BitError (onError: (error: Error) => void) {
   if (os.platform() !== 'win32' || os.arch() !== 'ia32') return
 
   // adapted from https://github.com/feross/arch/blob/master/index.js
@@ -79,7 +79,7 @@ async function win32BitWarning (onWarning: (error: Error) => void) {
     // pass
   }
 
-  onWarning(errors.get('WIN32_DEPRECATION', hasX64))
+  onError(errors.get('WIN32_UNSUPPORTED', hasX64))
 }
 
 export class OpenProject {
@@ -458,7 +458,7 @@ export class OpenProject {
       },
     })
 
-    await win32BitWarning(options.onWarning)
+    await win32BitError(errors.throw)
 
     try {
       await this.openProject.initializeConfig()

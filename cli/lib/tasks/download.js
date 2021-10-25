@@ -26,14 +26,9 @@ const getProxyForUrlWithNpmConfig = (url) => {
 
 const getRealOsArch = () => {
   // os.arch() returns the arch for which this node was compiled
-  // we want the operating system's arch instead: x64 or x86
+  // we want the operating system's arch instead: x64
 
   const osArch = arch()
-
-  if (osArch === 'x86') {
-    // match process.platform output
-    return 'ia32'
-  }
 
   return osArch
 }

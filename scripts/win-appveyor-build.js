@@ -84,22 +84,6 @@ if (result.stdout.includes('nodemon')) {
   process.exit(1)
 }
 
-// const pathToExe = 'C:/projects/cypress/build/win32/Cypress/Cypress.exe'
-
-// // verify that Cypress.exe is either 32bit or 64bit based on node's arch
-// const dumpbin = shell.exec(`dumpbin /headers ${pathToExe}`)
-
-// // eslint-disable-next-line default-case
-// switch (arch) {
-//   case 'ia32':
-//     assert.ok(dumpbin.stdout.includes('machine (x86)'))
-//     break
-
-//   case 'x64':
-//     assert.ok(dumpbin.stdout.includes('machine (x64)'))
-//     break
-// }
-
 /**
  * Returns true if we are building a pull request
  */

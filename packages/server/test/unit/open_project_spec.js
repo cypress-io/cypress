@@ -5,6 +5,7 @@ const os = require('os')
 const chokidar = require('chokidar')
 const browsers = require(`${root}lib/browsers`)
 const ProjectBase = require(`${root}lib/project-base`).ProjectBase
+const errors = require('../../lib/errors')
 const { openProject } = require('../../lib/open_project')
 const preprocessor = require(`${root}lib/plugins/preprocessor`)
 const runEvents = require(`${root}lib/plugins/run_events`)
@@ -43,10 +44,10 @@ describe('lib/open_project', () => {
     it('warns on win 32bit', async () => {
       sinon.stub(os, 'platform').returns('win32')
       sinon.stub(os, 'arch').returns('ia32')
-      const onWarning = sinon.stub()
+      const onError = sinon.stub(errors, 'throw')
 
-      await openProject.create('/root', {}, { onWarning })
-      expect(onWarning.getCall(0).args[0].message).to.include('You are running a 32-bit build')
+      await openProject.create('/root', {}, { })
+      expect(onError.getCall(0).args[0].message).to.include('Cypress has removed Windows 32-bit support')
     })
   })
 
