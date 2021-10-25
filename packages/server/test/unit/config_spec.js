@@ -2422,25 +2422,3 @@ describe('lib/config', () => {
     })
   })
 })
-
-describe('lib/util/config', () => {
-  context('.isDefault', () => {
-    it('returns true if value is default value', () => {
-      settings = { baseUrl: null }
-      const defaults = { baseUrl: null }
-      const resolved = {}
-      const merged = config.setResolvedConfigValues(settings, defaults, resolved)
-
-      expect(configUtil.isDefault(merged, 'baseUrl')).to.be.true
-    })
-
-    it('returns false if value is not default value', () => {
-      settings = { baseUrl: null }
-      const defaults = { baseUrl: 'http://localhost:8080' }
-      const resolved = {}
-      const merged = config.setResolvedConfigValues(settings, defaults, resolved)
-
-      expect(configUtil.isDefault(merged, 'baseUrl')).to.be.false
-    })
-  })
-})
