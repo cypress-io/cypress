@@ -138,6 +138,7 @@
     </div>
     <div
       v-else
+      ref="promptsEl"
       class="w-484px"
     >
       <div class="relative border-b border-b-gray-50 px-24px py-18px text-18px">
@@ -174,7 +175,10 @@ import { gql } from '@urql/vue'
 import type { TopNavFragment } from '../../generated/graphql'
 import { useI18n } from '@cy/i18n'
 import { ref } from 'vue'
+// eslint-disable-next-line no-duplicate-imports
+import type { Ref } from 'vue'
 const { t } = useI18n()
+import { onClickOutside, onKeyStroke } from '@vueuse/core'
 
 const getUrl = (link) => {
   let result = link.url
@@ -232,7 +236,45 @@ const props = defineProps<{
   showBrowsers?: Boolean
 }>()
 
-const docsMenuContent = ref('main')
+const docsMenuContent: Ref<'main' | 'orchestration' | 'ci'> = ref('main')
+
+const promptsEl: Ref<HTMLElement | null> = ref(null)
+
+// reset docs menu if click or keyboard navigation happens outside
+// so it doesn't reopen on the one of the prompts
+
+onClickOutside(promptsEl, () => {
+  setTimeout(() => {
+    // reset the content of the menu when
+    docsMenuContent.value = 'main'
+  }, 300)
+})
+
+// using onKeyStroke twice as array of keys is not supported till vueuse 6.6:
+
+onKeyStroke('Enter', (event) => {
+  if (promptsEl.value === null) {
+    return
+  }
+
+  const target = event.target as HTMLElement
+
+  if (!promptsEl.value.contains(target)) {
+    docsMenuContent.value = 'main'
+  }
+})
+
+onKeyStroke(' ', (event) => {
+  if (promptsEl.value === null) {
+    return
+  }
+
+  const target = event.target as HTMLElement
+
+  if (!promptsEl.value.contains(target)) {
+    docsMenuContent.value = 'main'
+  }
+})
 
 const docsMenu = [{
   title: t('topNav.docsMenu.gettingStartedTitle'),
