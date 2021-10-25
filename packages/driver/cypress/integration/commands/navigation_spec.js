@@ -4,7 +4,7 @@ const helpers = require('../../support/helpers')
 
 const { _, Promise, $ } = Cypress
 
-describe('src/cy/commands/navigation', { retries: 2 }, () => {
+describe('src/cy/commands/navigation', () => {
   context('#reload', () => {
     before(() => {
       cy
