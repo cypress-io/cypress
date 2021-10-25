@@ -1,8 +1,8 @@
-require('../spec_helper')
+require('../../spec_helper')
 
 const _ = require('lodash')
 const { stripIndent } = require('common-tags')
-const chromePolicyCheck = require(`${root}lib/util/chrome_policy_check`)
+const chromePolicyCheck = require(`${root}../lib/util/chrome_policy_check`)
 
 describe('lib/util/chrome_policy_check', () => {
   context('.getRunner returns a function', () => {

@@ -1,6 +1,6 @@
-require('../spec_helper')
+require('../../spec_helper')
 
-const origin = require(`${root}lib/util/origin`)
+const origin = require(`${root}../lib/util/origin`)
 
 describe('lib/util/origin', () => {
   beforeEach(function () {

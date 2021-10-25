@@ -1,6 +1,6 @@
-import '../spec_helper'
+import '../../spec_helper'
 
-import newlines from '../../lib/util/newlines'
+import newlines from '../../../lib/util/newlines'
 
 describe('lib/util/newlines', function () {
   it('inserts newline at each n char', function () {
