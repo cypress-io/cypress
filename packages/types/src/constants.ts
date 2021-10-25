@@ -168,8 +168,8 @@ export type AllPackages = FrontendFramework['package'] | Bundler['package']
 export type AllPackageTypes = FrontendFramework['type'] | Bundler['type']
 
 export const PACKAGES_DESCRIPTIONS: Record<AllPackages, string> = {
-  '@cypress/vue': 'Allows Cypress to mount each Vue component using <em>cy.mount()</em>',
-  '@cypress/react': 'Allows Cypress to mount each React component using <em>cy.mount()</em>',
+  '@cypress/vue': 'Allows Cypress to mount each Vue component using <span class="text-purple-400">cy.mount()</span>',
+  '@cypress/react': 'Allows Cypress to mount each React component using <span class="text-purple-400">cy.mount()</span>',
   '@cypress/webpack-dev-server': 'Allows Cypress to use your existing build configuration in order to bundle and run your tests',
   '@cypress/vite-dev-server': 'Allows Cypress to use your existing build configuration in order to bundle and run your tests',
   // '@cypress/storybook': 'Allows Cypress to automatically read and test each of your stories',

@@ -1,5 +1,8 @@
 <template>
-  <WizardLayout :can-navigate-forward="props.gql.canNavigateForward">
+  <WizardLayout
+    :can-navigate-forward="props.gql.canNavigateForward"
+    class="max-w-776px"
+  >
     <div class="m-5">
       <SelectFramework
         :name="t('setupPage.projectSetup.frameworkLabel')"
