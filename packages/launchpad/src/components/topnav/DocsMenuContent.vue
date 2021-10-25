@@ -19,11 +19,11 @@
           v-if="!item.changeContent || !activeProjectExists"
           :href="getUrl(item.link)"
           target="_blank"
-          class="font-normal ml-4px whitespace-nowrap"
+          class="font-normal ml-4px whitespace-nowrap hocus-link-default"
         >{{ item.text }}</a>
         <button
           v-else
-          class="font-normal ml-4px whitespace-nowrap"
+          class="font-normal ml-4px whitespace-nowrap hocus-link-default"
           @click="switchToGrowthPrompt(item.changeContent)"
         >
           {{ item.text }}
