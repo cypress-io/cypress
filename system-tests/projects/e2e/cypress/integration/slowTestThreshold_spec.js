@@ -1,5 +1,5 @@
 /* eslint-disable no-undef */
-describe('', () => {
+describe('slowTestThreshold', () => {
   it('passes inherited', () => {
     cy.wait(5)
     cy.wrap(true).should('be.true')

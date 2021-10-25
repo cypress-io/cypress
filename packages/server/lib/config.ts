@@ -269,7 +269,9 @@ export function mergeDefaults (config: Record<string, any> = {}, options: Record
 
   _.defaults(config, defaultValues)
 
-  // Default values can be functions, in which case they
+  // Default values can be functions, in which case they are evaluated
+  // at runtime - for example, slowTestThreshold where the default value
+  // varies between e2e and component testing.
   config = _.mapValues(config, (value) => (typeof value === 'function' ? value(options) : value))
 
   // split out our own app wide env from user env variables
