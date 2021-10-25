@@ -1,9 +1,9 @@
-require('../spec_helper')
+require('../../spec_helper')
 
 const R = require('ramda')
 const path = require('path')
-const config = require(`${root}lib/config`)
-const specsUtil = require(`${root}lib/util/specs`).default
+const config = require(`${root}../lib/config`)
+const specsUtil = require(`${root}../lib/util/specs`).default
 const FixturesHelper = require('@tooling/system-tests/lib/fixtures')
 const debug = require('debug')('test')
 

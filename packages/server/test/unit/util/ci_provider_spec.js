@@ -1,8 +1,8 @@
 const mockedEnv = require('mocked-env')
 
-require('../spec_helper')
+require('../../spec_helper')
 
-const ciProvider = require(`${root}lib/util/ci_provider`)
+const ciProvider = require(`${root}../lib/util/ci_provider`)
 
 const expectsName = (name) => {
   expect(ciProvider.provider(), 'CI providers detected name').to.eq(name)
