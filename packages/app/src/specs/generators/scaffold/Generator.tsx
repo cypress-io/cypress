@@ -3,10 +3,10 @@ import { useI18n } from '@cy/i18n'
 import { defineComponent } from 'vue'
 import BoxOpenIcon from '~icons/cy/box-open_x48';
 
-const ImportFromScaffoldCard = () => defineComponent({
+const ImportFromScaffoldCard = defineComponent({
   setup: () => {
     const { t } = useI18n()
-    return CardWrapper({
+    return () => CardWrapper({
       icon: BoxOpenIcon,
       header: t('createSpec.e2e.importFromScaffold.header'),
       description: t('createSpec.e2e.importFromScaffold.description')

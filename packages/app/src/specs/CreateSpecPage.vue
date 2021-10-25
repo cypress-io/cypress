@@ -1,8 +1,6 @@
 <template>
-  <CreateSpecModal
-    :show="showModal"
-    @close="showModal = false"
-    :initialGenerator="generator"/>
+  <CreateSpecModal :key="generator" :testingType="testingType"
+    :initial-generator="generator" :show="showModal" @close="closeModal"/>
   <div class="overflow-scroll text-center max-w-600px">
     <h1
       data-testid="create-spec-page-title"
@@ -21,7 +19,8 @@
       class="flex flex-wrap pb-32px border-b-1 gap-32px children:mx-auto"
       data-testid="create-spec-page-cards"
     >
-     @select="openModal"/>
+      <CreateSpecCards 
+      @select="choose" :testingType="testingType"></CreateSpecCards>
     </div>
 
     <div class="text-center mt-32px">
@@ -37,7 +36,7 @@
         prefix-icon-class="icon-light-gray-50 icon-dark-gray-400"
         :prefix-icon="SettingsIcon"
         class="mx-auto duration-300 hocus:ring-gray-50 hocus:border-gray-200"
-        @click="goToSpecsPattern"
+        @click=""
       >
         {{ t('createSpec.viewSpecPatternButton') }}
       </Button>
@@ -53,7 +52,7 @@ import type { TestingTypeEnum } from '../generated/graphql'
 import { ref, computed } from 'vue'
 import type { Ref } from 'vue'
 import CreateSpecModal from './CreateSpecModal.vue'
-import CreateSpecChooser from './CreateSpecChooser.vue'
+import CreateSpecCards from './CreateSpecCards.vue'
 import { useRouter } from 'vue-router'
 const { t } = useI18n()
 
@@ -68,7 +67,13 @@ const showModal = ref(false)
 
 const generator = ref(null)
 
-const openModal = (id) => {
-  router.currentRoute.value.query.modal = id
+const closeModal = () => {
+  showModal.value = false
+  generator.value = null
+}
+
+const choose = (id) => {
+  showModal.value = true
+  generator.value = id
 }
 </script>

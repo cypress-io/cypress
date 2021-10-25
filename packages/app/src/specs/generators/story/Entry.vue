@@ -1,4 +1,5 @@
 <template>
+Create from Story
   <StandardModalBody>
     <FileMatch/>
   </StandardModalBody>
@@ -17,8 +18,8 @@ import FileMatch from '../../../components/FileMatch.vue'
 import { onBeforeUnmount } from 'vue'
 
 const props = defineProps<{
-  title: string,
-  description: string
+  title?: string,
+  description?: string
 }>()
 
 const { t } = useI18n()

@@ -1,4 +1,5 @@
 <template>
+Create from Component
   <StandardModalBody>
     <FileMatch/>
   </StandardModalBody>
@@ -10,6 +11,7 @@
 <script setup lang="ts">
 import { useVModels } from '@vueuse/core'
 import { useI18n } from '@cy/i18n'
+import StandardModalHeader from '@cy/components/StandardModalHeader.vue'
 import StandardModalBody from '@cy/components/StandardModalBody.vue'
 import StandardModalFooter from '@cy/components/StandardModalFooter.vue'
 import Button from '@cy/components/Button.vue'
@@ -17,8 +19,8 @@ import FileMatch from '../../../components/FileMatch.vue'
 import { onBeforeUnmount } from 'vue'
 
 const props = defineProps<{
-  title: string,
-  description: string
+  title?: string,
+  description?: string  
 }>()
 
 const { t } = useI18n()

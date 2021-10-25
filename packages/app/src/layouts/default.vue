@@ -22,15 +22,7 @@
               />
             </keep-alive>
           </transition>
-          <div v-if="route.query.merp">
-            <CreateSpecModal
-              v-if="true"
-              :show="true"
-              @close="route.query = {}"
-            />
-          </div>
         </router-view>
-        <ModalManager v-if="modalStore.activeModalId" />
       </section>
     </main>
     <nav
@@ -40,6 +32,7 @@
       <SidebarNavigation class="h-full" />
     </nav>
   </div>
+  <ModalManager v-if="modalStore.activeModalId" />
 </template>
 
 <script lang="ts" setup>

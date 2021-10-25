@@ -6,7 +6,7 @@ import DocumentCodeIcon from '~icons/cy/document-code_x48';
 const ImportEmptySpecCard = defineComponent({
   setup: () => {
     const { t } = useI18n()
-    return CardWrapper({
+    return () => CardWrapper({
       icon: DocumentCodeIcon,
       header: t('createSpec.e2e.importEmptySpec.header'),
       description: t('createSpec.e2e.importEmptySpec.description')
