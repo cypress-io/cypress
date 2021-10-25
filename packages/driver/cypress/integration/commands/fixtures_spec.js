@@ -37,7 +37,7 @@ describe('src/cy/commands/fixtures', () => {
 
     // https://github.com/cypress-io/cypress/issues/1558
     it('passes explicit null encoding through to server and decodes response', () => {
-      Cypress.backend.withArgs('get:fixture').resolves(Buffer.from('\n').toString('base64'))
+      Cypress.backend.withArgs('get:fixture').resolves(Buffer.from('\n'))
 
       cy.fixture('foo', null).then((obj) => {
         expect(Cypress.backend).to.be.calledWith('get:fixture', 'foo', {
