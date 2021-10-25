@@ -25,6 +25,7 @@ jobs:
         uses: SvanBoxel/codeowners-action@v1
         with: 
           path: './.github/CODEOWNERS'
+          file_match_info: 'true'
       
       - run: |
          echo ${{ steps.codeowners.outputs.codeowners }};
