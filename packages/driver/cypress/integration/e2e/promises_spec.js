@@ -100,7 +100,7 @@ describe('promises', () => {
       const { lastLog } = this
 
       expect(logs.length).to.eq(1)
-      expect(lastLog.get('name')).to.eq('bar')
+      expect(lastLog.get('name')).to.eq('foo')
       expect(lastLog.get('error')).to.eq(err)
 
       expect(err.message).to.include('Cypress detected that you returned a promise from a command while also invoking one or more cy commands in that promise.')
@@ -110,22 +110,22 @@ describe('promises', () => {
       return done()
     })
 
-    Cypress.Commands.add('bar', () => {
+    Cypress.Commands.add('foo', () => {
       return new Cypress.Promise((resolve) => {
         return cy.wrap({}).then(resolve)
       })
     })
 
-    return cy.bar()
+    return cy.foo()
   })
 
   it('is okay to return promises from custom commands with no cy commands', () => {
-    Cypress.Commands.add('baz', () => {
+    Cypress.Commands.add('foo', () => {
       return Cypress.Promise
       .delay(10)
     })
 
-    return cy.baz()
+    return cy.foo()
   })
 
   it('can return a promise that throws on its own without warning', () => {

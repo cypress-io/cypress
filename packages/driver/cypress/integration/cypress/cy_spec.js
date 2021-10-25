@@ -148,12 +148,12 @@ describe('driver/src/cypress/cy', () => {
   })
 
   context('custom commands', () => {
-    before(() => {
+    beforeEach(() => {
       Cypress.Commands.add('dashboard.selectRenderer', () => {
         cy.get('[contenteditable]').first()
       })
 
-      Cypress.Commands.add('logout', { prevSubject: true }, (subject, email) => {
+      Cypress.Commands.add('login', { prevSubject: true }, (subject, email) => {
         cy.wrap(subject.find('input:first')).type(email)
       })
     })
@@ -162,7 +162,7 @@ describe('driver/src/cypress/cy', () => {
       const input = cy.$$('input:first')
 
       cy.get('input:first').parent()
-      .command('logout', 'brian@foo.com').then(($input) => {
+      .command('login', 'brian@foo.com').then(($input) => {
         expect($input.get(0)).to.eq(input.get(0))
       })
     })
@@ -176,7 +176,7 @@ describe('driver/src/cypress/cy', () => {
     })
 
     describe('invocation stack', () => {
-      before(() => {
+      beforeEach(() => {
         Cypress.Commands.add('getInput', () => cy.get('input'))
         Cypress.Commands.add('findInput', { prevSubject: 'element' }, (subject) => {
           subject.find('input')
@@ -218,7 +218,7 @@ describe('driver/src/cypress/cy', () => {
     })
 
     describe('child commands', () => {
-      before(() => {
+      beforeEach(() => {
         Cypress.Commands.add('c', { prevSubject: true }, (subject, arg) => {
           cy.wrap([subject, arg])
         })
@@ -363,7 +363,7 @@ describe('driver/src/cypress/cy', () => {
     })
 
     describe('dual commands', () => {
-      before(() => {
+      beforeEach(() => {
         Cypress.Commands.add('d', { prevSubject: 'optional' }, (subject, arg) => {
           cy.wrap([subject, arg])
         })

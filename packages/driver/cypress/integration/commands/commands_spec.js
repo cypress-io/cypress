@@ -48,7 +48,7 @@ describe('src/cy/commands/commands', () => {
   })
 
   context('custom commands', () => {
-    before(() => {
+    beforeEach(() => {
       Cypress.Commands.add('dashboard.selectWindows', () => {
         cy
         .get('[contenteditable]')
@@ -84,7 +84,7 @@ describe('src/cy/commands/commands', () => {
 
     it('throws when attempting to add an existing command', (done) => {
       cy.on('fail', (err) => {
-        expect(err.message).to.eq('`Cypress.Commands.add()` is used to create new commands, but `get` is already defined or is an existing Cypress command.\n\nPlease use `Cypress.Commands.overwrite()` if you would like to overwrite an existing command.\n')
+        expect(err.message).to.eq('`Cypress.Commands.add()` is used to create new commands, but `get` is an existing Cypress command.\n\nPlease use `Cypress.Commands.overwrite()` if you would like to overwrite an existing command.\n')
         expect(err.docsUrl).to.eq('https://docs.cypress.io/api/cypress-api/custom-commands')
 
         done()

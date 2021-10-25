@@ -75,23 +75,23 @@ describe('return values', () => {
       const { lastLog } = this
 
       expect(this.logs.length).to.eq(1)
-      expect(lastLog.get('name')).to.eq('bar')
+      expect(lastLog.get('name')).to.eq('foo')
       expect(lastLog.get('error')).to.eq(err)
-      expect(err.message).to.include('> `cy.bar()`')
-      expect(err.message).to.include('> bar')
+      expect(err.message).to.include('> `cy.foo()`')
+      expect(err.message).to.include('> foo')
       expect(err.message).to.include('Cypress detected that you invoked one or more cy commands in a custom command but returned a different value.')
       expect(err.docsUrl).to.eq('https://on.cypress.io/returning-value-and-commands-in-custom-command')
 
       done()
     })
 
-    Cypress.Commands.add('bar', () => {
+    Cypress.Commands.add('foo', () => {
       cy.wrap(null)
 
       return 'bar'
     })
 
-    return cy.bar()
+    return cy.foo()
   })
 
   it('stringifies function return values', function (done) {
@@ -99,9 +99,9 @@ describe('return values', () => {
       const { lastLog } = this
 
       expect(this.logs.length).to.eq(1)
-      expect(lastLog.get('name')).to.eq('baz')
+      expect(lastLog.get('name')).to.eq('foo')
       expect(lastLog.get('error')).to.eq(err)
-      expect(err.message).to.include('> `cy.baz()`')
+      expect(err.message).to.include('> `cy.foo()`')
       expect(err.message).to.include('> () => {')
       expect(err.message).to.include(`return 'bar';`)
       expect(err.message).to.include('Cypress detected that you invoked one or more cy commands in a custom command but returned a different value.')
@@ -109,7 +109,7 @@ describe('return values', () => {
       done()
     })
 
-    Cypress.Commands.add('baz', () => {
+    Cypress.Commands.add('foo', () => {
       cy.wrap(null)
 
       return () => {
@@ -117,7 +117,7 @@ describe('return values', () => {
       }
     })
 
-    return cy.baz()
+    return cy.foo()
   })
 
   describe('without invoking cy', () => {
