@@ -5,7 +5,10 @@
       <transition
         name="fade"
       >
-        <RunsSkeletton v-if="query.fetching.value" />
+        <template v-if="!delayedMounted && query.fetching.value">
+          &nbsp;
+        </template>
+        <RunsSkeletton v-else-if="query.fetching.value" />
         <RunsPage
           v-else-if="query.data.value?.app?.activeProject?.cloudProject"
           :gql="query.data.value.app.activeProject.cloudProject"
@@ -19,6 +22,7 @@
 </template>
 
 <script lang="ts" setup>
+import { onMountedDelayed } from '@packages/frontend-shared/src/composables'
 import { gql, useQuery } from '@urql/vue'
 import { RunsDocument } from '../generated/graphql'
 import RunsPage from '../runs/RunsPage.vue'
@@ -39,6 +43,8 @@ query Runs {
 }`
 
 const query = useQuery({ query: RunsDocument })
+
+const delayedMounted = onMountedDelayed(200)
 </script>
 
 <route>
@@ -49,7 +55,7 @@ const query = useQuery({ query: RunsDocument })
 
 <style scoped>
 .fade-enter-active, .fade-leave-active {
-  transition: opacity .2s
+  transition: opacity .3s
 }
 
 .fade-enter-from, .fade-leave-to {

@@ -7,44 +7,26 @@
     >
       <ListRowHeader
         disabled
-        class="bg-gray-50 border border-gray-100"
+        class="border border-gray-100"
       >
         <template #icon>
-          <ProgressCircle
-            v-if="i === 1"
-            :progress="25"
-            :radius="12"
-            :stroke="2"
-            class="icon-dark-gray-300 icon-light-gray-100"
-          />
-          <i-cy-status-failed-solid_x24
-            v-else-if="i === 2"
-            class="h-24px w-24px icon-dark-gray-100"
-          />
-          <i-cy-status-errored-solid_x24
-            v-else-if="i === 3"
-            class="h-24px w-24px icon-dark-gray-100"
-          />
-          <i-cy-status-passed-solid_x24
-            v-else
-            class="h-24px w-24px icon-dark-gray-100"
-          />
+          <div class="h-20px w-20px bg-gray-100 rounded-xl mx-2px" />
         </template>
         <template #header>
-          <div class="w-256px rounded-xl h-16px bg-gray-100 my-4px" />
+          <div class="w-256px rounded-xl h-16px bg-gray-50 my-4px" />
         </template>
         <template #description>
           <div
             v-for="j in 4"
             :key="j"
-            class="rounded-lg h-8px bg-gray-100 mr-20px inline-block"
+            class="rounded-lg h-8px bg-gray-50 mr-20px inline-block"
             :class="j === 4 ? 'w-64px' : 'w-80px'"
           />
         </template>
         <template #right>
           <div
             v-if="i >= 2"
-            class="rounded-lg h-16px bg-gray-100 w-166px"
+            class="rounded-lg h-16px bg-gray-50 w-216px"
           />
         </template>
       </ListRowHeader>
