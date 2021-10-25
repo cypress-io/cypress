@@ -17,7 +17,7 @@ import findSystemNode from './util/find_system_node'
 
 const debug = Debug('cypress:server:config')
 
-import { getProcessEnvVars } from './util/config'
+import { getProcessEnvVars, CYPRESS_SPECIAL_ENV_VARS } from './util/config'
 
 export const RESOLVED_FROM = ['plugin', 'env', 'default', 'runtime', 'config'] as const
 
@@ -31,10 +31,6 @@ export type ResolvedFromConfig = {
 export type ResolvedConfigurationOptions = Partial<{
   [x in keyof Cypress.ResolvedConfigOptions]: ResolvedFromConfig
 }>
-
-export const CYPRESS_SPECIAL_ENV_VARS = [
-  'RECORD_KEY',
-]
 
 const defaultValues = configUtils.getDefaultValues()
 const folders = _(configUtils.options).filter({ isFolder: true }).map('name').value()

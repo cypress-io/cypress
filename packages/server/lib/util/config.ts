@@ -9,6 +9,10 @@ export const CYPRESS_RESERVED_ENV_VARS = [
   'CYPRESS_INTERNAL_ENV',
 ]
 
+export const CYPRESS_SPECIAL_ENV_VARS = [
+  'RECORD_KEY',
+]
+
 export const isDefault = (config: Record<string, any>, prop: string) => {
   return config.resolved[prop].from === 'default'
 }
