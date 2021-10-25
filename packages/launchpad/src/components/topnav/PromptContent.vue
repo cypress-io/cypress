@@ -116,7 +116,7 @@
 import Button from '@cy/components/Button.vue'
 import { useI18n } from '@cy/i18n'
 const { t } = useI18n()
-import { getUrlWithParams, LinkWithParams } from '../../../../frontend-shared/src/utils/getUrlWithParams.ts'
+import { getUrlWithParams, LinkWithParams } from '../../../../frontend-shared/src/utils/getUrlWithParams'
 
 import CircleCI from '../../../../frontend-shared/src/assets/logos/circleci.svg?url'
 import GitHubActions from '../../../../frontend-shared/src/assets/logos/github-actions.svg?url'

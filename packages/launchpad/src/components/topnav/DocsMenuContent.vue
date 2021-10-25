@@ -36,7 +36,7 @@
 <script setup lang="ts">
 import Button from '@cy/components/Button.vue'
 import { useI18n } from '@cy/i18n'
-import { getUrlWithParams, LinkWithParams } from '../../../../frontend-shared/src/utils/getUrlWithParams.ts'
+import { getUrlWithParams, LinkWithParams } from '../../../../frontend-shared/src/utils/getUrlWithParams'
 const { t } = useI18n()
 
 const emit = defineEmits<{
