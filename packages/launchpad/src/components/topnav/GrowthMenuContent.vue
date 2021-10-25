@@ -14,7 +14,7 @@
           class
         >
           <Button
-            :href="provider.link.url"
+            :href="getUrl(provider.link)"
             class="w-210px text-gray-800"
             size="lg"
             variant="outline"
@@ -30,7 +30,7 @@
         </li>
         <li>
           <Button
-            :href="seeOtherGuidesInfo.url"
+            :href="getUrl(seeOtherGuidesInfo)"
             variant="outline"
             size="lg"
             class="w-210px text-gray-800"
@@ -116,6 +116,7 @@
 import Button from '@cy/components/Button.vue'
 import { useI18n } from '@cy/i18n'
 const { t } = useI18n()
+import { getUrlWithParams, LinkWithParams } from '../../../../frontend-shared/src/utils/getUrlWithParams.ts'
 
 import CircleCI from '../../../../frontend-shared/src/assets/logos/circleci.svg?url'
 import GitHubActions from '../../../../frontend-shared/src/assets/logos/github-actions.svg?url'
@@ -126,6 +127,10 @@ import AwsCodeBuild from '../../../../frontend-shared/src/assets/logos/aws-codeb
 defineProps<{
   type: 'ci' | 'orchestration' | 'main',
 }>()
+
+const getUrl = (link: LinkWithParams) => {
+  return getUrlWithParams(link)
+}
 
 const slug = 'ci1'
 const utm_medium = 'CI Prompt 1'
