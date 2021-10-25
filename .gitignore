@@ -40,6 +40,10 @@ packages/server/support
 packages/server/test/support/fixtures/server/imgs
 packages/server/test/support/fixtures/server/libs
 
+# from system-tests
+system-tests/.projects
+system-tests/fixtures/large-img
+
 # from npm/react
 /npm/react/bin/*
 /npm/react/cypress/videos
