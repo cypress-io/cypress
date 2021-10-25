@@ -1,10 +1,14 @@
+<script lang="ts">
+export type BadgeRowStatus = 'success' | 'warning' | 'error' | 'skipped' | 'disabled';
+</script>
+
 <script setup lang="ts">
 const props = defineProps<{
-    label: string,
-    status: 'success' | 'warning' | 'error' | 'disabled' | 'skipped'
+  label: string | undefined,
+  status?: BadgeRowStatus
 }>()
 
-const statusClasses = {
+const statusClasses: Record<BadgeRowStatus, string> = {
   disabled: 'bg-gray-50 text-gray-500',
   error: 'bg-error-100 text-error-600',
   skipped: 'bg-gray-100 text-gray-700',
@@ -16,7 +20,7 @@ const statusClasses = {
 <template>
   <div
     class="inline-block px-1 mx-1 text-sm rounded whitespace-nowrap"
-    :class="statusClasses[status]"
+    :class="statusClasses[status || '']"
   >
     {{ label }}
   </div>
