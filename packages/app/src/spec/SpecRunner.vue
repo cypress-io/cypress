@@ -13,7 +13,7 @@
     >
       <div
         :id="RUNNER_ID"
-        class="viewport origin-left"
+        class="viewport origin-top-left"
         :style="viewportStyle"
       />
       <div>Viewport: {{ viewportDimensions.width }}px x {{ viewportDimensions.height }}px</div>
@@ -63,8 +63,7 @@ const viewportStyle = computed(() => {
   return `
   width: ${viewportDimensions.width}px;
   height: ${viewportDimensions.height}px;
-  transform: scale(${runnerColumnWidth / viewportDimensions.width})
-`
+  transform: scale(${runnerColumnWidth / viewportDimensions.width});`
 })
 
 const props = defineProps<{
