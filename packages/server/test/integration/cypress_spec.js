@@ -496,7 +496,7 @@ describe('lib/cypress', () => {
       }).then(() => {
         return Promise.all([
           fs.statAsync(path.join(this.pristinePath, 'cypress')).reflect(),
-          fs.statAsync(path.join(this.pristinePath, 'cypress.json')).reflect(),
+          fs.statAsync(path.join(this.pristinePath, 'cypress.config.js')).reflect(),
         ])
       }).each(ensureDoesNotExist)
       .then(() => {
@@ -790,7 +790,7 @@ describe('lib/cypress', () => {
       .then(() => {
         return cypress.start([`--run-project=${this.todosPath}`])
       }).then(() => {
-        this.expectExitWithErr('SETTINGS_VALIDATION_ERROR', 'cypress.config.{ts|js}')
+        this.expectExitWithErr('SETTINGS_VALIDATION_ERROR', 'cypress.config.js')
       })
     })
 
@@ -1178,10 +1178,10 @@ describe('lib/cypress', () => {
     })
 
     describe('--config-file', () => {
-      it('false does not require cypress.json to run', function () {
-        return fs.statAsync(path.join(this.pristinePath, 'cypress.json'))
+      it('false does not require cypress.config.js to run', function () {
+        return fs.statAsync(path.join(this.pristinePath, 'cypress.config.js'))
         .then(() => {
-          throw new Error('cypress.json should not exist')
+          throw new Error('cypress.config.js should not exist')
         }).catch({ code: 'ENOENT' }, () => {
           return cypress.start([
             `--run-project=${this.pristinePath}`,

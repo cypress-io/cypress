@@ -625,7 +625,7 @@ const createAndOpenProject = async (socketId, options) => {
   await checkAccess(projectRoot)
 
   const open_project = await openProjectCreate(projectRoot, socketId, options)
-  const project = open_project.getProject()
+  const project = await open_project.getProject()
 
   const [_project, _config, _projectId] = await Promise.all([
     project,

@@ -345,7 +345,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     it('calls checkSupportFile with server config when scaffolding is finished', function () {
       return this.project.open().then(() => {
         expect(this.checkSupportFileStub).to.be.calledWith({
-          configFile: 'cypress.json',
+          configFile: 'cypress.config.js',
           supportFile: '/foo/bar/cypress/support/index.js',
         })
       })
@@ -383,9 +383,9 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     })
 
     // TODO: skip this for now
-    it.skip('watches cypress.json', function () {
+    it.skip('watches cypress.config.js', function () {
       return this.server.open().bind(this).then(() => {
-        expect(Watchers.prototype.watch).to.be.calledWith('/Users/brian/app/cypress.json')
+        expect(Watchers.prototype.watch).to.be.calledWith('/Users/brian/app/cypress.config.js')
       })
     })
 
@@ -713,17 +713,17 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     beforeEach(function () {
       this.project = new ProjectBase({ projectRoot: '/_test-output/path/to/project-e2e', testingType: 'e2e' })
       this.project._server = { close () {}, startWebsockets () {} }
-      sinon.stub(settings, 'pathToConfigFile').returns('/path/to/cypress.json')
+      sinon.stub(settings, 'pathToConfigFile').returns('/path/to/cypress.config.js')
       sinon.stub(settings, 'pathToCypressEnvJson').returns('/path/to/cypress.env.json')
       this.watch = sinon.stub(this.project.watchers, 'watch')
       this.watchTree = sinon.stub(this.project.watchers, 'watchTree')
     })
 
-    it('watches cypress.json and cypress.env.json', function () {
+    it('watches cypress.config.js and cypress.env.json', function () {
       this.project.watchSettings({ onSettingsChanged () {} }, {})
       expect(this.watch).to.be.calledOnce
       expect(this.watchTree).to.be.calledOnce
-      expect(this.watchTree).to.be.calledWith('/path/to/cypress.json')
+      expect(this.watchTree).to.be.calledWith('/path/to/cypress.config.js')
 
       expect(this.watch).to.be.calledWith('/path/to/cypress.env.json')
     })
