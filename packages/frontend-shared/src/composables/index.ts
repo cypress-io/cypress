@@ -1,4 +1,4 @@
-import { computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 
 /**
  * This snippet comes from Thorsten Lünborg and is explained in this blog post https://www.vuemastery.com/blog/vue-3-data-down-events-up/
@@ -15,4 +15,17 @@ export function useModelWrapper<T, N extends string = 'modelValue'> (
       emit(`update:${name}` as any, value)
     },
   })
+}
+
+export function onMountedDelayed (delay: number) {
+  const flag = ref(false)
+
+  onMounted(() => {
+    flag.value = false
+    setTimeout(() => {
+      flag.value = true
+    }, delay)
+  })
+
+  return flag
 }
