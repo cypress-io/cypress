@@ -23,6 +23,8 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - id: codeowner
         uses: SvanBoxel/codeowners-action@v1
+        with: 
+          path: './.github/CODEOWNERS'
       
       - run: |
          echo ${{ steps.codeowners.outputs.codeowners }};
