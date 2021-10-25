@@ -1,16 +1,15 @@
 <template>
-  <main class="min-w-650px">
-    <div v-if="props.gql.runs?.nodes">
-      <RunCard
-        v-for="run of props.gql.runs.nodes"
-        :key="run.id"
-        :gql="run"
-      />
-    </div>
-  </main>
+  <div>
+    <RunCard
+      v-for="run of runs"
+      :key="run.id"
+      :gql="run"
+    />
+  </div>
 </template>
 
 <script lang="ts" setup>
+import { computed } from 'vue'
 import { gql } from '@urql/core'
 import RunCard from './RunCard.vue'
 import type { RunsPageFragment } from '../generated/graphql'
@@ -28,4 +27,7 @@ fragment RunsPage on CloudProject {
 const props = defineProps<{
   gql: RunsPageFragment
 }>()
+
+const runs = computed(() => props.gql.runs?.nodes || [])
+
 </script>

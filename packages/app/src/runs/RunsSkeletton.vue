@@ -1,5 +1,5 @@
 <template>
-  <div class="overflow-y-hidden">
+  <div class="overflow-y-hidden absolute left-24px right-24px">
     <div
       v-for="i in numberOfLines"
       :key="i"
@@ -31,7 +31,7 @@
           />
         </template>
         <template #header>
-          <div class="w-256px rounded-xl h-16px bg-gray-100 mt-4px" />
+          <div class="w-256px rounded-xl h-16px bg-gray-100 my-4px" />
         </template>
         <template #description>
           <div
@@ -57,6 +57,7 @@ import ListRowHeader from '@cy/components/ListRowHeader.vue'
 import ProgressCircle from '@cy/components/ProgressCircle.vue'
 
 withDefaults(defineProps<{
+  // this could become the last number of runs we had
   numberOfLines?: number
 }>(), {
   numberOfLines: 20,

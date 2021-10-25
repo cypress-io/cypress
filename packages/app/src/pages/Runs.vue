@@ -1,15 +1,19 @@
 <template>
   <div>
     <h2>Runs Page</h2>
-    <div class="p-24px">
-      <RunsSkeletton v-if="query.fetching.value" />
-      <RunsPage
-        v-else-if="query.data.value?.app?.activeProject?.cloudProject"
-        :gql="query.data.value.app.activeProject.cloudProject"
-      />
-      <template v-else-if="query.data.value?.app?.activeProject">
-        Connect the current project to the cloud
-      </template>
+    <div class="p-24px relative">
+      <transition
+        name="fade"
+      >
+        <RunsSkeletton v-if="query.fetching.value" />
+        <RunsPage
+          v-else-if="query.data.value?.app?.activeProject?.cloudProject"
+          :gql="query.data.value.app.activeProject.cloudProject"
+        />
+        <template v-else-if="query.data.value?.app?.activeProject">
+          Connect the current project to the cloud
+        </template>
+      </transition>
     </div>
   </div>
 </template>
@@ -42,3 +46,13 @@ const query = useQuery({ query: RunsDocument })
   name: "Runs"
 }
 </route>
+
+<style scoped>
+.fade-enter-active, .fade-leave-active {
+  transition: opacity .2s
+}
+
+.fade-enter-from, .fade-leave-to {
+  opacity: 0
+}
+</style>
