@@ -70,7 +70,10 @@
   >
     <div class="pb-12px border-b border-b-gray-50 text-14px">
       <div
-        class="bg-jade-400 text-white pl-12px pr-3px pt-9px pb-7px mb-12px rounded flex justify-between shrink"
+        class="bg-jade-400 text-white pl-12px pr-3px pt-9px pb-7px mb-12px
+      rounded flex justify-between transition transition-all duration-800
+      w-full"
+        :class="{'w-[50%]': shrink}"
       >
         <span>
           <span class="font-bold">{{ t('topNav.docsMenu.prompts.orchestration.parallelTime') }}</span>
@@ -129,13 +132,13 @@
 import Button from '@cy/components/Button.vue'
 import { useI18n } from '@cy/i18n'
 const { t } = useI18n()
-import { getUrlWithParams, LinkWithParams } from '../../../../frontend-shared/src/utils/getUrlWithParams'
-
-import CircleCI from '../../../../frontend-shared/src/assets/logos/circleci.svg?url'
-import GitHubActions from '../../../../frontend-shared/src/assets/logos/github-actions.svg?url'
-import Bitbucket from '../../../../frontend-shared/src/assets/logos/bitbucket.svg?url'
-import Gitlab from '../../../../frontend-shared/src/assets/logos/gitlab.svg?url'
-import AwsCodeBuild from '../../../../frontend-shared/src/assets/logos/aws-codebuild.svg?url'
+import { getUrlWithParams, LinkWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
+import { useTimeout } from '@vueuse/core'
+import CircleCI from '@packages/frontend-shared/src/assets/logos/circleci.svg?url'
+import GitHubActions from '@packages/frontend-shared/src/assets/logos/github-actions.svg?url'
+import Bitbucket from '@packages/frontend-shared/src/assets/logos/bitbucket.svg?url'
+import Gitlab from '@packages/frontend-shared/src/assets/logos/gitlab.svg?url'
+import AwsCodeBuild from '@packages/frontend-shared/src/assets/logos/aws-codebuild.svg?url'
 
 defineProps<{
   type: 'ci' | 'orchestration' | 'main',
@@ -145,6 +148,7 @@ const getUrl = (link: LinkWithParams) => {
   return getUrlWithParams(link)
 }
 
+const shrink = useTimeout(500)
 const utm_medium = 'CI Prompt 1'
 const utm_content = 'Manual' // todo - make this dynamic, "Automatic" is the other option, when the auto-open is complete
 
@@ -226,18 +230,3 @@ const orchestrationBullets = [
   t('topNav.docsMenu.prompts.orchestration.bullet3'),
 ]
 </script>
-
-<style scoped>
-.shrink {
-  animation: shrink 1s ease-out 0.2s forwards;
-}
-
-@keyframes shrink {
-  from {
-    width: 436px
-  }
-  to {
-    width: 255px;
-  }
-}
-</style>
