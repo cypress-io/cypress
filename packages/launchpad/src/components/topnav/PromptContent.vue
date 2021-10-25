@@ -132,9 +132,8 @@ const getUrl = (link: LinkWithParams) => {
   return getUrlWithParams(link)
 }
 
-const slug = 'ci1'
 const utm_medium = 'CI Prompt 1'
-const utm_content = 'temp-utm'
+const utm_content = 'Manual' // todo - make this dynamic, "Automatic" is the other option, when the auto-open is complete
 
 const ciProviders = [
   {

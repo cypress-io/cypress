@@ -121,7 +121,7 @@
           <i-cy-delete_x12 class="icon-dark-gray-400 w-12px h-12px" />
         </button>
       </div>
-      <GrowthMenuContentVue :type="docsMenuVariant" />
+      <PromptContent :type="docsMenuVariant" />
     </div>
   </TopNavList>
 
@@ -139,7 +139,7 @@
 <script setup lang="ts">
 import TopNavListItem from './TopNavListItem.vue'
 import TopNavList from './TopNavList.vue'
-import GrowthMenuContentVue from './GrowthMenuContent.vue'
+import PromptContent from './PromptContent.vue'
 import { allBrowsersIcons } from '../../../../frontend-shared/src/assets/browserLogos'
 import { gql } from '@urql/vue'
 import type { TopNavFragment } from '../../generated/graphql'
