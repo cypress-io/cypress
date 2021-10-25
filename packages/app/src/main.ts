@@ -11,6 +11,7 @@ import { createPinia } from './store'
 // set a global so we can run
 // conditional code in the vite branch
 // so that the existing runner code
+// @ts-ignore
 window.__vite__ = true
 
 const app = createApp(App)

@@ -34,7 +34,7 @@ import type { SpecRunnerFragment } from '../generated/graphql'
 import InlineSpecList from '../specs/InlineSpecList.vue'
 import { getMobxRunnerStore, useSpecStore } from '../store'
 import { UnifiedRunnerAPI } from '../runner'
-import { BaseSpec } from '@packages/types'
+import type { BaseSpec } from '@packages/types'
 
 gql`
 fragment SpecRunner on App {
