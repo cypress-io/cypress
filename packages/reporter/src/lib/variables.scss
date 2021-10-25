@@ -110,9 +110,10 @@ $link-text: $indigo-600;
 
 $err-background: rgba($red-400, 0.1);
 $err-code-background: rgba($red-400, 0.18);
-$err-text: $red-400;
+$err-code-text: $red-300;
 $err-header-background: rgba($red-400, 0.15);
 $err-header-text: $red-300;
+$err-text: $red-400;
 
 $reporter-section-background: #171926; // not a brand color
 
