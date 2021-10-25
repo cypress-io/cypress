@@ -2,7 +2,7 @@ import type { BaseSpec } from '@packages/types/src'
 import { defineStore } from 'pinia'
 
 export interface SpecState {
-  currentSpec: BaseSpec | null
+  activeSpec: BaseSpec | null
 }
 
 export const useSpecStore = defineStore({
@@ -10,13 +10,13 @@ export const useSpecStore = defineStore({
 
   state (): SpecState {
     return {
-      currentSpec: null,
+      activeSpec: null,
     }
   },
 
   actions: {
-    async setCurrentSpec (currentSpec: BaseSpec | null) {
-      this.currentSpec = currentSpec
+    setActiveSpec (activeSpec: BaseSpec | null) {
+      this.activeSpec = activeSpec
     },
   },
 })

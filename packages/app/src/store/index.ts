@@ -5,7 +5,7 @@ export * from './main'
 
 export * from './modals'
 
-export * from './specs'
+export * from './specs-store'
 
 // Mobx Store Wrapper from @packages/runner-shared
 export * from './runner-store'
