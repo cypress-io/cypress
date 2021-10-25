@@ -22,13 +22,16 @@ yarn workspace @packages/electron test-watch
 
 ## Upgrading Electron
 
-Many users expect the bundled Chromium and Node.js to be relatively recent. Also, historically, it has been extremely difficult to upgrade over multiple major versions of Electron at once, because of all the breaking changes in Electron and Node.js that impact Cypress.
+The version of `electron` that is bundled with Cypress should be kept as up-to-date as possible with the [stable Electron releases](https://www.electronjs.org/releases/stable). Many users expect the bundled Chromium and Node.js to be relatively recent. Also, historically, it has been extremely difficult to upgrade over multiple major versions of Electron at once, because of all the breaking changes in Electron and Node.js that impact Cypress.
 
-Therefore, the version of `electron` that is bundled with Cypress should be kept as up-to-date as possible with the [stable Electron releases](https://www.electronjs.org/releases/stable).
 
 Upgrading `electron` involves more than just bumping this package's `package.json`. Here are additional tasks to check off when upgrading Electron:
 
-- [ ] **Write an accurate changelog item.** The "User-facing changelog" for an Electron upgrade should mention the new Node.js and Chromium versions bundled.
+- [ ] **Write accurate changelog items.** The "User-facing changelog" for an Electron upgrade should mention the new Node.js and Chromium versions bundled.
+    - For example:
+        - Upgraded `electron` from `12.0.0-beta.14` to `13.1.7`.
+        - Upgraded bundled Node.js version from `14.6.0` to `14.17.0`.
+        - Upgraded bundled Chromium version from 89.0.0.1234 to 91.0.0.2345.
 - [ ] **Determine if the Electron upgrade is a breaking change.** Electron upgrades constitute "breaking changes" in Cypress if:
     - the major version number of Node.js changes, since users rely on the bundled Node.js to load plugins and `.js` fixtures, or
     - there are changes to Electron that require new shared libraries to be installed on Linux, breaking existing CI setups, or
