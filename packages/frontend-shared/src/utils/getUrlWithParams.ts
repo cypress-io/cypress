@@ -1,6 +1,6 @@
 export type LinkWithParams = {
     url: string
-    params: { utm_medium?: string, utm_content?: string }
+    params: { [key: string]: string }
   }
 
 export const getUrlWithParams = (link: LinkWithParams) => {

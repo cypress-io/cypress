@@ -44,7 +44,13 @@
       </ul>
     </div>
     <a
-      href="https://on.cypress.io/ci"
+      :href="getUrl({
+        url: 'https://on.cypress.io/ci',
+        params: {
+          utm_medium,
+          utm_campaign: 'Learn More',
+        },
+      })"
       target="_blank"
       class="box-border flex items-center border border-transparent group py-16px px-24px bg-gray-50 hocus-default outline-transparent"
     >
@@ -100,7 +106,14 @@
       </li>
     </ul>
     <Button
-      href="https://on.cypress.io/smart-orchestration"
+      :href="getUrl(
+        {
+          url: 'https://on.cypress.io/smart-orchestration',
+          params: {
+            utm_medium,
+            utm_campaign: 'Learn More',
+          },
+        })"
       size="lg"
       class="mt-12px"
     >
