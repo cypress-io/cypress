@@ -381,7 +381,7 @@ describe('Settings', () => {
       it('copies project id config to clipboard', function () {
         cy.get('.action-copy').click()
         .then(() => {
-          expect(this.ipc.setClipboardText).to.be.calledWith('module.exports = {')
+          expect(this.ipc.setClipboardText).to.be.calledWith('module.exports = {\n  projectId: "d8104707-a348-4653-baea-7da9c7d52448"\n}')
         })
       })
     })

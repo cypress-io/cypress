@@ -125,7 +125,7 @@ export class ProjectDataSource {
   }
 
   async isTestingTypeConfigured (projectRoot: string, testingType: 'e2e' | 'component') {
-    const config = await this.api.getProjectConfig(projectRoot)
+    const config = await this.getConfig(projectRoot)
 
     if (!config) {
       return true
