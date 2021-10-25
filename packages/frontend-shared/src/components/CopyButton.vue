@@ -1,62 +1,36 @@
 <template>
-  <div class="absolute top-2 right-2">
-    <transition name="fade">
-      <span
-        v-show="showCopied"
-        class="mx-3"
-        role="status"
-      >{{ t('clipboard.copied') }}</span>
-    </transition>
-    <button
-      tabindex="1"
-      class="bg-gray-50 text-14px px-2 py-1 rounded text-indigo-600 border-1 border-transparent hocus-default"
+  <div>
+    <Button
+      size="md"
+      variant="tertiary"
       @click="copyToClipboard"
     >
-      {{ t('clipboard.copy') }}
-    </button>
+      <template #prefix>
+        <i-cy-copy-clipboard_x16 class="icon-dark-indigo-500 w-16px h-16px" />
+      </template>
+      <TransitionQuickFade mode="out-in">
+        <span v-if="!copied">{{ t('clipboard.copy') }}</span>
+        <span v-else>{{ t('clipboard.copied') }}!</span>
+      </TransitionQuickFade>
+    </Button>
   </div>
-  <textarea
-    ref="textElement"
-    tabindex="-1"
-    :value="text"
-    class="absolute -top-96"
-  />
 </template>
 
-<script lang="ts">
-import { defineComponent, nextTick, ref } from 'vue'
+<script setup lang="ts">
+import { useClipboard } from '@vueuse/core'
 import { useI18n } from '@cy/i18n'
+import Button from '../components/Button.vue'
+import TransitionQuickFade from '../components/transitions/TransitionQuickFade.vue'
 
-export default defineComponent({
-  props: {
-    text: {
-      type: String,
-      required: true,
-    },
-  },
-  setup () {
-    const showCopied = ref(false)
-    const textElement = ref<HTMLTextAreaElement | null>(null)
-    const copyToClipboard = async () => {
-      textElement.value?.select()
-      document.execCommand('copy')
-      showCopied.value = true
-      await nextTick()
-      showCopied.value = false
-    }
-    const { t } = useI18n()
+const props = defineProps<{
+  text: string
+}>()
 
-    return { copyToClipboard, textElement, showCopied, t }
-  },
-})
+const { copy, copied } = useClipboard({ copiedDuring: 2000 })
+const copyToClipboard = () => {
+  if (props.text) {
+    copy(props.text)
+  }
+}
+const { t } = useI18n()
 </script>
-
-<style>
-.fade-leave-active {
-  transition: opacity 1s ease;
-}
-
-.fade-leave-to {
-  opacity: 0;
-}
-</style>

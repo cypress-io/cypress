@@ -4,6 +4,7 @@
       v-for="file in files"
       :key="file.filePath"
       v-bind="file"
+      :description="file.description || undefined"
     />
     <hr class="my-4">
     <div class="flex gap-2">

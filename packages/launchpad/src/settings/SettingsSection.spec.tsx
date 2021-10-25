@@ -11,8 +11,7 @@ describe('<SettingsSection />', () => {
       title: () => <h1>{title}</h1>,
     }
 
-    // @ts-ignore - doesn't know about vSlots
-    cy.mount(() => <SettingsSection vSlots={slots} />)
+    cy.mount(() => <SettingsSection v-slots={slots} />)
     .get('h1').should('contain.text', title)
     .get('p').should('contain.text', description)
   })
