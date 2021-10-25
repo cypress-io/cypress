@@ -73,7 +73,6 @@ const props = defineProps<{
 }>()
 
 function runSpec () {
-  props.activeSpec
   UnifiedRunnerAPI.executeSpec(props.activeSpec)
 }
 

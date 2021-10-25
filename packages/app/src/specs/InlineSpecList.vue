@@ -1,6 +1,6 @@
 <template>
   <div>
-    <router-link
+    <RouterLink
       v-for="spec in specs"
       :key="spec.node.id"
       class="text-left grid grid-cols-[16px,auto,auto] items-center gap-10px"
@@ -8,7 +8,7 @@
       :to="{ path: 'spec', query: { file: spec.node.relative } }"
     >
       <SpecName :gql="spec.node" />
-    </router-link>
+    </RouterLink>
   </div>
 </template>
 

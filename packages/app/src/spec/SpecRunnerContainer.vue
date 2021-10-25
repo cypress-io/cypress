@@ -12,7 +12,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import type { SpecRunnerFragment } from '../generated/graphql'
 import { UnifiedRunnerAPI } from '../runner'
@@ -21,7 +21,6 @@ import SpecRunner from './SpecRunner.vue'
 
 const initialized = ref(false)
 const specStore = useSpecStore()
-// const router = useRouter()
 const route = useRoute()
 
 onMounted(async () => {
@@ -38,5 +37,4 @@ watch(() => route.query.file, (queryParam) => {
 
   specStore.setActiveSpec(spec ?? null)
 }, { immediate: true, flush: 'post' })
-
 </script>

@@ -1,7 +1,5 @@
 <template>
-  <div>
-    <SpecsPageContainer />
-  </div>
+  <SpecsPageContainer />
 </template>
 
 <script lang="ts" setup>

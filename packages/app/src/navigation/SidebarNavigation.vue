@@ -18,7 +18,7 @@
         class="flex-1 px-2 mt-5 space-y-1 bg-gray-1000"
         aria-label="Sidebar"
       >
-        <router-link
+        <RouterLink
           v-for="item in navigation"
           v-slot="{ isActive }"
           :key="item.name"
@@ -31,7 +31,7 @@
           >
             {{ item.name }}
           </SidebarNavigationRow>
-        </router-link>
+        </RouterLink>
       </nav>
     </div>
   </div>

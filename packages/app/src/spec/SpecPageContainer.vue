@@ -20,5 +20,4 @@ query SpecPageContainer {
 `
 
 const query = useQuery({ query: SpecPageContainerDocument })
-
 </script>
