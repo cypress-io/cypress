@@ -19,14 +19,14 @@ const makeDataContext = (options) => {
 
 describe('@packages/data-context', () => {
   describe('initializeData', () => {
-    it('should initialize', async () => {
+    it('initializes', async () => {
       const context = makeDataContext()
 
       await context.initializeData()
       snapshot(context)
     })
 
-    it('should skip first wizard step when given a testingType', async () => {
+    it('skips first wizard step when given a testingType', async () => {
       const context = makeDataContext({
         launchArgs: {
           testingType: 'e2e',
