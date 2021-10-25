@@ -34,7 +34,7 @@
 
 <script setup lang="ts">
 import { Popover, PopoverButton, PopoverPanel } from '@headlessui/vue'
-import TransitionQuickFade from '../transitions/TransitionQuickFade.vue'
+import TransitionQuickFade from '@cy/components/transitions/TransitionQuickFade.vue'
 
 defineProps<{
   variant?: String,

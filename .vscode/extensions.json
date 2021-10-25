@@ -26,6 +26,9 @@
 		// Name: Toggle Quotes
 		// Description: Toggle cycle " -> ' -> `
 		"britesnow.vscode-toggle-quotes",
+		// Name: Volar
+		// Description: Adds proper typescript support for Vue
+		"johnsoncodehk.volar"
 	],
 
 	// List of extensions recommended by VS Code that should not be recommended for Cypress contributors using VS Code:
