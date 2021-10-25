@@ -1,38 +1,69 @@
 <template>
-  <div v-if="query.data.value?.app.activeProject?.storybook">
+  <div class="flex flex-col">
     <h2>New Spec</h2>
-    <div>
-      <ul>
-        <li
-          v-for="story of stories"
-          :key="story.relative"
-          class="group"
-          @click="storyClick(story.absolute)"
-        >
-          <span class="text-indigo-600 font-medium">{{ story.fileName }}</span>
-          <span class="font-light text-gray-400">{{ story.fileExtension }}</span>
-          <span class="font-light text-gray-400 pl-16px hidden group-hover:inline">{{ story.relativeFromProjectRoot }}</span>
-        </li>
-      </ul>
-      <div
-        v-if="generatedSpec"
-        class="p-16px"
+    <div class="flex gap-4 justify-center">
+      <Button
+        :disabled="!newSpecQuery.data.value?.app.activeProject?.storybook"
+        @click="codeGenTypeClicked('story')"
       >
-        <div class="flex">
-          <span>Generated Spec: </span>
-          <Button @click="specClick">
-            {{ generatedSpec.spec.relative }}
+        Generate From Story
+      </Button>
+      <Button @click="codeGenTypeClicked('component')">
+        Generate From Component
+      </Button>
+      <Button @click="codeGenTypeClicked('integration')">
+        Generate Integration
+      </Button>
+    </div>
+    <template v-if="codeGenType">
+      <template v-if="codeGenType !== 'integration'">
+        <div class="p-16px">
+          <Input
+            id="glob-pattern"
+            v-model="codeGenGlob"
+          />
+        </div>
+        <ul class="p-16px max-h-210px overflow-auto">
+          <li
+            v-for="candidate of codeGenCandidates"
+            :key="candidate.relative"
+            class="group"
+            @click="candidateClick(candidate.absolute)"
+          >
+            <span class="text-indigo-600 font-medium">{{
+              candidate.fileName
+            }}</span>
+            <span class="font-light text-gray-400">{{
+              candidate.fileExtension
+            }}</span>
+            <span
+              class="font-light text-gray-400 pl-16px hidden group-hover:inline"
+            >{{ candidate.relativeFromProjectRoot }}</span>
+          </li>
+        </ul>
+      </template>
+      <template v-else-if="codeGenType === 'integration'">
+        <div class="flex p-16px gap-4">
+          <Input
+            id="fileName"
+            v-model="fileNameInput"
+            class="flex-auto"
+          />
+          <Button @Click="candidateClick(fileNameInput)">
+            Generate Spec
           </Button>
         </div>
-        <div>
-          <h2>Generated Spec Content:</h2>
-          <pre>{{ generatedSpec.content }}</pre>
-        </div>
+      </template>
+      <div
+        v-if="candidateChosen && generatedSpec"
+        class="p-16px flex flex-col items-center"
+      >
+        <Button @click="specClick">
+          {{ generatedSpec.spec.relative }}
+        </Button>
+        <pre>{{ generatedSpec.content }}</pre>
       </div>
-    </div>
-  </div>
-  <div v-else>
-    Storybook is not configured for this project
+    </template>
   </div>
 </template>
 <route>
@@ -42,12 +73,54 @@
 </route>
 <script lang="ts" setup>
 import Button from '@cy/components/Button.vue'
+import Input from '@cy/components/Input.vue'
 import { gql, useMutation, useQuery } from '@urql/vue'
-import { computed } from 'vue'
-import { NewSpecQueryDocument, NewSpec_GenerateSpecFromStoryDocument } from '../generated/graphql'
+import { computed, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
+import {
+  NewSpec_NewSpecQueryDocument,
+  NewSpec_SearchCodeGenCandidatesDocument,
+  NewSpec_CodeGenGlobQueryDocument,
+  NewSpec_CodeGenSpecDocument,
+  NewSpec_SetCurrentSpecDocument,
+  CodeGenType,
+} from '../generated/graphql'
 
 gql`
-fragment StoryNode_NewSpec on FilePartsEdge {
+query NewSpec_NewSpecQuery {
+  app {
+    activeProject {
+      id
+      storybook {
+        id
+      }
+      generatedSpec {
+        id
+        content
+        spec {
+          id
+          name
+          relative
+        }
+      }
+    }
+  }
+}
+`
+
+gql`
+query NewSpec_CodeGenGlobQuery($type: CodeGenType!) {
+  app {
+    activeProject {
+      id
+      codeGenGlob: codeGenGlob(type: $type)
+    }
+  }
+}
+`
+
+gql`
+fragment NewSpec_CodeGenCandidateNode on FilePartsEdge {
   node {
     id
     relative
@@ -59,24 +132,13 @@ fragment StoryNode_NewSpec on FilePartsEdge {
 `
 
 gql`
-query NewSpecQuery {
+query NewSpec_SearchCodeGenCandidates($glob: String!) {
   app {
     activeProject {
       id
-      storybook {
-        id
-        stories: stories(first: 25) {
-          edges {
-            ...StoryNode_NewSpec
-          }
-        }
-        generatedSpec {
-          content
-          spec {
-            id
-            name
-            relative
-          }
+      codeGenCandidates: codeGenCandidates(first: 25, glob: $glob) {
+        edges {
+          ...NewSpec_CodeGenCandidateNode
         }
       }
     }
@@ -85,32 +147,89 @@ query NewSpecQuery {
 `
 
 gql`
-mutation NewSpec_GenerateSpecFromStory($storyPath: String!) {
-  generateSpecFromStory (storyPath: $storyPath) 
-} 
+mutation NewSpec_CodeGenSpec($codeGenCandidate: String!, $type: CodeGenType!) {
+  codeGenSpec(codeGenCandidate: $codeGenCandidate, type: $type)
+}
 `
 
-const query = useQuery({ query: NewSpecQueryDocument })
-const mutation = useMutation(NewSpec_GenerateSpecFromStoryDocument)
+gql`
+  mutation NewSpec_SetCurrentSpec($id: ID!) {
+    setCurrentSpec(id: $id)
+  }
+`
 
-const generatedSpec = computed(() => query.data.value?.app.activeProject?.storybook?.generatedSpec)
+const newSpecQuery = useQuery({ query: NewSpec_NewSpecQueryDocument })
 
-function storyClick (story: string) {
-  mutation.executeMutation({ storyPath: story })
-}
+const codeGenType = ref<CodeGenType | null>(null)
 
-function specClick () {
-  window.location.href = `${window.location.origin}/__/#/tests/component/${generatedSpec.value?.spec.name}`
-}
+// Urql allows reactive query variables (ref, computed) but has improper typing
+type ReactiveGraphQLVar = any
 
-const stories = computed(() => {
-  return query.data.value?.app.activeProject?.storybook?.stories?.edges.map(({ node: story }) => {
-    return {
-      ...story,
-      fileExtension: story.baseName.replace(story.fileName, ''),
-      relativeFromProjectRoot: story.relative.replace(story.baseName, ''),
-    }
-  }) || []
+const codeGenGlobQuery = useQuery({
+  query: NewSpec_CodeGenGlobQueryDocument,
+  variables: { type: codeGenType as ReactiveGraphQLVar },
+  pause: computed(() => !codeGenType.value),
+})
+// Query 'pause' with computed property was triggering an infinite loop so use ref and watch instead
+const codeGenGlob = ref('')
+
+watch(codeGenGlobQuery.data, (value, prevVal) => {
+  if (value?.app.activeProject?.codeGenGlob && value.app.activeProject.codeGenGlob !== prevVal?.app.activeProject?.codeGenGlob) {
+    codeGenGlob.value = value.app.activeProject.codeGenGlob
+  }
 })
 
+const searchCodeGenCandidates = useQuery({
+  query: NewSpec_SearchCodeGenCandidatesDocument,
+  variables: { glob: codeGenGlob as ReactiveGraphQLVar },
+  pause: computed(() => !codeGenGlob.value),
+})
+const codeGenCandidates = computed(() => {
+  return (
+    searchCodeGenCandidates.data.value?.app.activeProject?.codeGenCandidates?.edges.map(
+      ({ node: story }) => {
+        return {
+          ...story,
+          fileExtension: story.baseName.replace(story.fileName, ''),
+          relativeFromProjectRoot: story.relative.replace(story.baseName, ''),
+        }
+      },
+    ) || []
+  )
+})
+
+const fileNameInput = ref('')
+
+const mutation = useMutation(NewSpec_CodeGenSpecDocument)
+const candidateChosen = ref(false)
+const generatedSpec = computed(
+  () => newSpecQuery.data.value?.app.activeProject?.generatedSpec,
+)
+
+const setSpecMutation = useMutation(NewSpec_SetCurrentSpecDocument)
+const router = useRouter()
+
+async function specClick () {
+  const specId = newSpecQuery.data.value?.app.activeProject?.generatedSpec?.spec.id
+
+  if (!specId) {
+    return
+  }
+
+  await setSpecMutation.executeMutation({ id: specId })
+  router.push('runner')
+}
+
+function codeGenTypeClicked (type: CodeGenType) {
+  codeGenType.value = type
+  candidateChosen.value = false
+}
+
+function candidateClick (codeGenCandidate: string) {
+  candidateChosen.value = true
+  mutation.executeMutation({
+    codeGenCandidate,
+    type: codeGenType.value as CodeGenType,
+  })
+}
 </script>

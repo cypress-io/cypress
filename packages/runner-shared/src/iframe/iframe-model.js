@@ -52,7 +52,7 @@ export class IframeModel {
     this.state.updateDimensions(viewportWidth, viewportHeight)
 
     if (cb) {
-      this.state.setCallbackAfterUpdate(cb)
+      this.state.setViewportUpdatedCallback(cb)
     }
   }
 

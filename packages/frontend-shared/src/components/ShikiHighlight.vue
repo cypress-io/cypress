@@ -18,16 +18,15 @@ shikiWrapperClasses computed property.
 -->
 
 <template>
-  <div class="relative">
+  <div class="relative text-left cursor-text">
     <div
       v-if="highlighterInitialized"
       ref="codeEl"
       :class="[
-
         'shiki-wrapper',
 
         // All styles contain these utility classes
-        'overflow-scroll hover:border-indigo-200 relative text-14px leading-24px font-light rounded',
+        'overflow-scroll hover:border-indigo-200 relative text-14px leading-24px font-light',
 
         /**
          * 1. Single line is forced onto one line without any borders. It loses
@@ -45,34 +44,41 @@ shikiWrapperClasses computed property.
          */
         {
           'inline': props.inline,
-          'border-1 border-gray-100': !props.inline,
           'wrap': props.wrap,
           'line-numbers': props.lineNumbers,
           'p-8px': !props.lineNumbers && !props.inline,
-          'copied': copied && !props.inline,
-          'cursor-pointer': copyOnClick
         },
+
+        props.class,
       ]"
       @click="copyOnClick ? () => copyCode() : () => {}"
       v-html="highlightedCode"
     />
-    <p
-      class="absolute text-white transition duration-100 bg-indigo-500 rounded text-14px px-8px py-6px top-8px right-8px"
-      :class="copied ? 'opacity-100' : 'opacity-0'"
+    <Button
+      variant="outline"
+      tabindex="-1"
+      class="absolute  bottom-8px right-8px"
+      @click="copyCode"
     >
-      {{ t('clipboard.copied') }}
-    </p>
+      {{ copied ? t('clipboard.copied') : t('clipboard.copy') }}
+    </Button>
   </div>
 </template>
 
 <script lang="ts">
-import { Highlighter, getHighlighter, setOnigasmWASM, setCDN } from 'shiki'
+import { Highlighter, getHighlighter, setOnigasmWASM, setCDN, Lang } from 'shiki'
 import onigasm from 'onigasm/lib/onigasm.wasm?url'
 
 setOnigasmWASM(onigasm)
 setCDN(`${import.meta.env.BASE_URL}shiki/`)
 
 let highlighter: Highlighter
+
+export const langsSupported = ['typescript', 'javascript', 'ts', 'js', 'css', 'jsx', 'tsx', 'json', 'yaml', 'html'] as const
+
+let langs = langsSupported.concat([])
+
+export type CyLangType = typeof langsSupported[number] | 'plaintext' | 'txt'| 'text'
 
 export async function initHighlighter () {
   if (highlighter) {
@@ -81,15 +87,18 @@ export async function initHighlighter () {
 
   highlighter = await getHighlighter({
     themes: ['cypress.theme'],
-    langs: ['typescript', 'javascript', 'css', 'jsx', 'tsx', 'json', 'yaml'],
+    langs,
   })
 }
 
-export { highlighter }
+const inheritAttrs = false
+
+export { highlighter, inheritAttrs }
 </script>
 
 <script lang="ts" setup>
 import { computed, onBeforeMount, ref } from 'vue'
+import Button from '@cy/components/Button.vue'
 // eslint-disable-next-line no-duplicate-imports
 import type { Ref } from 'vue'
 import { useClipboard } from '@vueuse/core'
@@ -106,16 +115,18 @@ onBeforeMount(async () => {
 
 const props = withDefaults(defineProps<{
   code: string;
-  lang: 'javascript' | 'typescript' | 'css' | 'json' | 'js' | 'ts' | 'tsx' | 'jsx' | 'yaml' | undefined;
+  lang: CyLangType | undefined;
   lineNumbers?: boolean,
   inline?: boolean,
   wrap?: boolean,
   copyOnClick?: boolean,
+  class?: string | string[] | Record<string, any>
 }>(), {
   lineNumbers: false,
   inline: false,
   wrap: false,
   copyOnClick: false,
+  class: undefined,
 })
 
 const resolvedLang = computed(() => {
@@ -123,7 +134,8 @@ const resolvedLang = computed(() => {
 
   if (props.lang === 'typescript' || props.lang === 'ts' || props.lang === 'tsx') return 'tsx'
 
-  return props.lang
+  // if the language is not recognized use plaintext
+  return props.lang && (langsSupported as readonly string[]).includes(props.lang) ? props.lang : 'plaintext'
 })
 
 const highlightedCode = computed(() => {

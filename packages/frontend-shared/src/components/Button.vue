@@ -1,7 +1,7 @@
 <template>
   <button
     style="width: fit-content"
-    class="flex items-center border rounded gap-8px outline-none"
+    class="flex select-none items-center border rounded gap-8px outline-none"
     :class="classes"
   >
     <span
@@ -51,6 +51,7 @@ import type { ButtonHTMLAttributes, FunctionalComponent, SVGAttributes } from 'v
 const VariantClassesTable = {
   primary: 'border-indigo-500 bg-indigo-500 text-white',
   outline: 'border-gray-100 text-indigo-600',
+  tertiary: 'text-indigo-500 bg-indigo-50 border-transparent',
   pending: 'bg-gray-500 text-white',
   link: 'border-transparent text-indigo-600',
   text: 'border-0',
@@ -58,7 +59,7 @@ const VariantClassesTable = {
 
 const SizeClassesTable = {
   sm: 'px-6px py-2px text-14px',
-  md: 'px-12px py-6px text-14px',
+  md: 'px-12px py-8px text-14px',
   lg: 'px-16px py-11px max-h-40px',
   'lg-wide': 'px-32px py-8px',
 }
@@ -67,7 +68,7 @@ const props = defineProps<{
   prefixIcon?: FunctionalComponent<SVGAttributes>
   suffixIcon?: FunctionalComponent<SVGAttributes>
   size?: 'sm' | 'md' | 'lg' | 'lg-wide'
-  variant?: 'primary' | 'outline' | 'link' | 'text' | 'pending'
+  variant?: 'primary' | 'tertiary' | 'outline' | 'link' | 'text' | 'pending'
   prefixIconClass?: string
   suffixIconClass?: string
 }>()

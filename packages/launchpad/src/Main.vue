@@ -25,7 +25,7 @@
             <CompareTestingTypes />
           </StandardModal>
           <button
-            class="block mx-auto text-indigo-500 text-18px hocus-link-default group"
+            class="block mx-auto text-indigo-500 text-18px hocus-link-default group mt-12px"
             @click="isTestingTypeModalOpen = true"
           >
             {{ t('welcomePage.review') }}<i-cy-arrow-right_x16

@@ -1,17 +1,6 @@
-<script lang="ts" setup>
-import ListRow from '@cy/components/ListRow.vue'
-import ProgressCircle from '@cy/components/ProgressCircle.vue'
-
-withDefaults(defineProps<{
-  numberOfLines?: number
-}>(), {
-  numberOfLines: 20,
-})
-</script>
-
 <template>
   <div class="overflow-y-hidden">
-    <ListRow
+    <ListRowHeader
       v-for="i in numberOfLines"
       :key="i"
       disabled
@@ -55,6 +44,17 @@ withDefaults(defineProps<{
           class="rounded-lg h-16px bg-gray-100 w-166px"
         />
       </template>
-    </ListRow>
+    </ListRowHeader>
   </div>
 </template>
+
+<script lang="ts" setup>
+import ListRowHeader from '@cy/components/ListRowHeader.vue'
+import ProgressCircle from '@cy/components/ProgressCircle.vue'
+
+withDefaults(defineProps<{
+  numberOfLines?: number
+}>(), {
+  numberOfLines: 20,
+})
+</script>

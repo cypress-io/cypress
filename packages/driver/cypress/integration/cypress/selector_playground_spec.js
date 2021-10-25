@@ -23,11 +23,50 @@ describe('src/cypress/selector_playground', () => {
     })
 
     it('sets selector:playground:priority if selectorPriority specified', () => {
+      const selectorPriority = [
+        'data-1',
+        'data-2',
+        'id',
+        'class',
+        'tag',
+        'attributes',
+        'nth-child',
+      ]
+
       SelectorPlayground.defaults({
-        selectorPriority: ['foo'],
+        selectorPriority,
       })
 
-      expect(SelectorPlayground.getSelectorPriority()).to.eql(['foo'])
+      expect(SelectorPlayground.getSelectorPriority()).to.eql(selectorPriority)
+    })
+
+    it('throws if selectorPriority contains an unsupported priority', () => {
+      const fn = () => {
+        SelectorPlayground.defaults({
+          selectorPriority: [
+            'id',
+            'name',
+          ],
+        })
+      }
+
+      expect(fn).to.throw()
+      .with.property('message')
+      .and.include('`Cypress.SelectorPlayground.defaults()` called with invalid `selectorPriority` property. It must be one of: `data-*`, `id`, `class`, `tag`, `attributes`, `nth-child`. You passed: `name`')
+    })
+
+    it('throws if selectorPriority has an unsupported priority that contains a substring of a valid priority', () => {
+      const fn = () => {
+        SelectorPlayground.defaults({
+          selectorPriority: [
+            'idIsNotValid',
+          ],
+        })
+      }
+
+      expect(fn).to.throw()
+      .with.property('message')
+      .and.include('`Cypress.SelectorPlayground.defaults()` called with invalid `selectorPriority` property. It must be one of: `data-*`, `id`, `class`, `tag`, `attributes`, `nth-child`. You passed: `idIsNotValid`')
     })
 
     it('sets selector:playground:on:element if onElement specified', () => {

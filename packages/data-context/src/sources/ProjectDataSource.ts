@@ -1,5 +1,6 @@
-import type { SpecType } from '@packages/graphql/src/gen/nxs.gen'
-import type { FullConfig, ResolvedFromConfig, RESOLVED_FROM } from '@packages/types'
+import type { CodeGenType, SpecType } from '@packages/graphql/src/gen/nxs.gen'
+import { FrontendFramework, FRONTEND_FRAMEWORKS, FullConfig, ResolvedFromConfig, RESOLVED_FROM, SpecFile, STORYBOOK_GLOB } from '@packages/types'
+import { scanFSForAvailableDependency } from 'create-cypress-tests/src/findPackageJson'
 import path from 'path'
 
 import type { DataContext } from '..'
@@ -120,5 +121,68 @@ export class ProjectDataSource {
     const preferences = await this.api.getProjectPreferencesFromCache()
 
     return preferences[projectTitle] ?? null
+  }
+
+  frameworkLoader = this.ctx.loader<string, FrontendFramework | null>((projectRoots) => {
+    return Promise.all(projectRoots.map((projectRoot) => Promise.resolve(this.guessFramework(projectRoot))))
+  })
+
+  private guessFramework (projectRoot: string) {
+    const guess = FRONTEND_FRAMEWORKS.find((framework) => {
+      const lookingForDeps = (framework.deps as readonly string[]).reduce(
+        (acc, dep) => ({ ...acc, [dep]: '*' }),
+        {},
+      )
+
+      return scanFSForAvailableDependency(projectRoot, lookingForDeps)
+    })
+
+    return guess ?? null
+  }
+
+  async getCodeGenGlob (type: CodeGenType) {
+    const project = this.ctx.activeProject
+
+    if (!project) {
+      throw Error(`Cannot find glob without activeProject.`)
+    }
+
+    const looseComponentGlob = '/**/*.{js,jsx,ts,tsx,.vue}'
+
+    if (type === 'story') {
+      return STORYBOOK_GLOB
+    }
+
+    const framework = await this.frameworkLoader.load(project.projectRoot)
+
+    return framework?.glob ?? looseComponentGlob
+  }
+
+  async getCodeGenCandidates (glob: string): Promise<SpecFile[]> {
+    // Storybook can support multiple globs, so show default one while
+    // still fetching all stories
+    if (glob === STORYBOOK_GLOB) {
+      return this.ctx.storybook.getStories()
+    }
+
+    const project = this.ctx.activeProject
+
+    if (!project) {
+      throw Error(`Cannot find components without activeProject.`)
+    }
+
+    const config = await this.ctx.project.getConfig(project.projectRoot)
+
+    const codeGenCandidates = await this.ctx.file.getFilesByGlob(glob)
+
+    return codeGenCandidates.map(
+      (file) => {
+        return this.ctx.file.normalizeFileToFileParts({
+          absolute: file,
+          projectRoot: project.projectRoot,
+          searchFolder: project.projectRoot ?? config.componentFolder,
+        })
+      },
+    )
   }
 }
