@@ -1,9 +1,10 @@
 <template>
   <div>
     <div
-      class="flex items-center w-full text-left rounded py-10px"
+      class="flex items-center w-full text-left rounded py-12px"
+      :class="props.class"
     >
-      <div class="flex items-center h-10 px-5">
+      <div class="flex items-center h-40px px-24px">
         <slot name="icon">
           <component
             :is="icon"
@@ -11,8 +12,9 @@
           />
         </slot>
       </div>
-      <div class="flex-grow px-3 h-auto border-l border-l-gray-100">
-        <p class="text-indigo-500 whitespace-nowrap min-h-6">
+      <div class="h-40px w-1px bg-gray-100" />
+      <div class="flex-grow px-16px h-auto">
+        <p class="text-indigo-500 whitespace-nowrap">
           <slot name="header" />
         </p>
         <p class="text-sm font-light select-none text-gray-500">
@@ -23,7 +25,7 @@
       </div>
       <div
         v-if="$slots.right"
-        class="flex items-center px-4"
+        class="flex items-center px-16px"
       >
         <slot name="right" />
       </div>
@@ -38,7 +40,8 @@
 <script lang="ts" setup>
 import type { FunctionalComponent, SVGAttributes } from 'vue'
 
-defineProps<{
+const props = defineProps<{
+  class?: string
   description?: string
   icon?: FunctionalComponent<SVGAttributes>
 }>()
