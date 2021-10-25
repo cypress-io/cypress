@@ -51,7 +51,7 @@ export async function e2ePluginSetup (projectRoot: string, on: Cypress.PluginEve
     async withCtx (obj: WithCtxObj) {
       // Ensure we spin up a completely isolated server/state for each test
       if (obj.activeTestId !== currentTestId) {
-        ctx?.destroy()
+        await ctx?.destroy()
         currentTestId = obj.activeTestId
         testState = {};
         ({ serverPortPromise, ctx } = runInternalServer({
