@@ -70,7 +70,7 @@
   >
     <div class="pb-12px border-b border-b-gray-50 text-14px">
       <div
-        class="bg-jade-400 text-white pl-12px pr-3px pt-9px pb-7px mb-12px rounded flex justify-between"
+        class="bg-jade-400 text-white pl-12px pr-3px pt-9px pb-7px mb-12px rounded flex justify-between shrink"
       >
         <span>
           <span class="font-bold">{{ t('topNav.docsMenu.prompts.orchestration.parallelTime') }}</span>
@@ -226,3 +226,18 @@ const orchestrationBullets = [
   t('topNav.docsMenu.prompts.orchestration.bullet3'),
 ]
 </script>
+
+<style scoped>
+.shrink {
+  animation: shrink 1s ease-out 0.2s forwards;
+}
+
+@keyframes shrink {
+  from {
+    width: 436px
+  }
+  to {
+    width: 255px;
+  }
+}
+</style>
