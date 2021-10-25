@@ -393,7 +393,7 @@ commands:
       package:
         description: package to target
         type: enum
-        enum: ['launchpad', 'app']
+        enum: ['frontend-shared', 'launchpad', 'app']
       browser:
         description: browser shortname to target
         type: string
