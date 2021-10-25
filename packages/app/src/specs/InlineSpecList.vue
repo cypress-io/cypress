@@ -1,14 +1,14 @@
 <template>
   <div>
-    <button
+    <router-link
       v-for="spec in specs"
       :key="spec.node.id"
       class="text-left grid grid-cols-[16px,auto,auto] items-center gap-10px"
       :class="{ 'border-2 border-red-400': isCurrentSpec(spec) }"
-      @click.prevent="() => selectSpec(spec.node.relative)"
+      :to="{ path: 'spec', query: { file: spec.node.relative } }"
     >
       <SpecName :gql="spec.node" />
-    </button>
+    </router-link>
   </div>
 </template>
 
@@ -57,10 +57,6 @@ const isCurrentSpec = (spec: SpecNode_InlineSpecListFragment) => {
 }
 
 const router = useRouter()
-
-function selectSpec (relative: string) {
-  router.push({ query: { spec: relative } })
-}
 
 const specs = computed(() => props.gql.activeProject?.specs?.edges || [])
 </script>

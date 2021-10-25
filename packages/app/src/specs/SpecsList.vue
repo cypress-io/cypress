@@ -10,14 +10,14 @@
         <div>{{ t('specPage.componentSpecsHeader') }}</div>
         <div>{{ t('specPage.gitStatusHeader') }}</div>
       </div>
-      <button
+      <router-link
         v-for="spec in filteredSpecs"
         :key="spec.node.id"
         class="text-left"
-        @click.prevent="selectSpec(spec.node.relative)"
+        :to="{ path: 'spec', query: { file: spec.node.relative } }"
       >
         <SpecsListRow :gql="spec" />
-      </button>
+      </router-link>
     </div>
   </div>
 </template>
@@ -60,12 +60,6 @@ fragment Specs_SpecsList on App {
   }
 }
 `
-
-const router = useRouter()
-
-function selectSpec (relative: string) {
-  router.push({ query: { spec: relative } })
-}
 
 const props = defineProps<{
   gql: Specs_SpecsListFragment
