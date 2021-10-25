@@ -4,30 +4,42 @@
       <p class="text-gray-600 mb-16px">
         {{ t('topNav.docsMenu.prompts.ci.description') }}
       </p>
-      <ul class="flex flex-wrap gap-12px">
+      <ul
+        class="flex flex-wrap gap-16px"
+        data-testid="provider-list"
+      >
         <li
           v-for="provider in ciProviders"
           :key="provider.name"
-          class=""
+          class
         >
-          <a
+          <Button
             :href="provider.link.url"
-            class="flex items-center border rounded gap-12px w-210px h-40px px-16px hocus-default"
+            class="w-210px text-gray-800"
+            size="lg"
+            variant="outline"
           >
-            <img
-              :src="provider.icon"
-              width="14"
-            >
-            {{ provider.name }}</a>
+            <template #prefix>
+              <img
+                :src="provider.icon"
+                width="14"
+              >
+            </template>
+            {{ provider.name }}
+          </Button>
         </li>
         <li>
-          <a
+          <Button
             :href="seeOtherGuidesInfo.url"
-            class="flex items-center text-gray-800 border rounded gap-12px w-210px h-40px px-16px hocus-default"
+            variant="outline"
+            size="lg"
+            class="w-210px text-gray-800"
           >
-            <i-cy-book class="w-16px h-16px icon-dark-gray-500 icon-light-gray-50" />
+            <template #prefix>
+              <i-cy-book class="w-16px h-16px icon-dark-gray-500 icon-light-gray-50" />
+            </template>
             {{ t('topNav.docsMenu.prompts.ci.seeOtherGuides') }}
-          </a>
+          </Button>
         </li>
       </ul>
     </div>
@@ -38,14 +50,12 @@
     >
       <i-cy-infinity-loop_x18 class="icon-dark-indigo-500 mr-20px w-20px h-20px" />
       <div class="flex-grow">
-        <p class="text-indigo-500 pb-4px">
-          {{ t('topNav.docsMenu.prompts.ci.intro') }}
-        </p>
-        <p class="text-gray-600 text-14px">
-          {{ t('topNav.docsMenu.prompts.ci.learnTheBasics') }}
-        </p>
+        <p class="text-indigo-500 pb-4px">{{ t('topNav.docsMenu.prompts.ci.intro') }}</p>
+        <p class="text-gray-600 text-14px">{{ t('topNav.docsMenu.prompts.ci.learnTheBasics') }}</p>
       </div>
-      <i-cy-arrow-outline-right class="transition-transform duration-200 ease-in transform icon-dark-gray-400 w-20px h-20px group-hocus:translate-x-2px" />
+      <i-cy-arrow-outline-right
+        class="transition-transform duration-200 ease-in transform icon-dark-gray-400 w-20px h-20px group-hocus:translate-x-2px"
+      />
     </a>
   </div>
   <div
@@ -53,14 +63,24 @@
     class="p-24px"
   >
     <div class="pb-12px border-b border-b-gray-50 text-14px">
-      <div class="bg-jade-400 text-white pl-12px pr-3px pt-9px pb-7px mb-12px rounded flex justify-between">
-        <span><b>{{ t('topNav.docsMenu.prompts.orchestration.parallelTime') }}</b> {{ t('topNav.docsMenu.prompts.orchestration.withParallelization') }}</span>
+      <div
+        class="bg-jade-400 text-white pl-12px pr-3px pt-9px pb-7px mb-12px rounded flex justify-between"
+      >
+        <span>
+          <span class="font-bold">{{ t('topNav.docsMenu.prompts.orchestration.parallelTime') }}</span>
+          {{ t('topNav.docsMenu.prompts.orchestration.withParallelization') }}
+        </span>
         <div class="border-l border-l-jade-500 border-opacity-50 grid place-content-center w-28px">
           <i-cy-lightning_x16 class="icon-dark-white icon-light-jade-400 w-16px h-16px" />
         </div>
       </div>
-      <div class="bg-gray-500 text-white pl-12px pr-3px pt-9px pb-7px mb-12px rounded flex justify-between">
-        <span><b>{{ t('topNav.docsMenu.prompts.orchestration.noParallelTime') }}</b>{{ t('topNav.docsMenu.prompts.orchestration.withoutParallelization') }}</span>
+      <div
+        class="bg-gray-500 text-white pl-12px pr-3px pt-9px pb-7px mb-12px rounded flex justify-between"
+      >
+        <span>
+          <span class="font-bold">{{ t('topNav.docsMenu.prompts.orchestration.noParallelTime') }}</span>
+          {{ t('topNav.docsMenu.prompts.orchestration.withoutParallelization') }}
+        </span>
         <div class="border-l border-l-gray-600 border-opacity-50 grid place-content-center w-28px">
           <i-cy-dollar_x16 class="icon-dark-white w-16px h-16px" />
         </div>
@@ -104,7 +124,7 @@ import Gitlab from '../../../../frontend-shared/src/assets/logos/gitlab.svg?url'
 import AwsCodeBuild from '../../../../frontend-shared/src/assets/logos/aws-codebuild.svg?url'
 
 defineProps<{
-	type: 'ci' | 'orchestration',
+  type: 'ci' | 'orchestration' | 'main',
 }>()
 
 const slug = 'ci1'
@@ -137,7 +157,7 @@ const ciProviders = [
     },
   },
   {
-    name: 'Bitbucket',
+    name: 'Bitbucket Pipelines',
     icon: Bitbucket,
     link: {
       url: 'https://on.cypress.io/bitbucket-pipelines',
@@ -149,7 +169,7 @@ const ciProviders = [
     },
   },
   {
-    name: 'GitLab CI/CD',
+    name: 'GitLab',
     icon: Gitlab,
     link: {
       url: 'https://on.cypress.io/gitlab-ci',
