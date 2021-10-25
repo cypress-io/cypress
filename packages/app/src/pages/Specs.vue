@@ -1,19 +1,11 @@
 <template>
   <div>
-    <suspense>
-      <template #default>
-        <SpecsPageContainer />
-      </template>
-
-      <template #fallback>
-        Loading...
-      </template>
-    </suspense>
+    <SpecsPageContainer />
   </div>
 </template>
 
 <script lang="ts" setup>
-import SpecsPageContainer from '../runs/SpecsPageContainer.vue'
+import SpecsPageContainer from '../specs/SpecsPageContainer.vue'
 </script>
 
 <route>

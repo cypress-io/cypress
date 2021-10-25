@@ -34,20 +34,11 @@ import type { SpecRunnerFragment } from '../generated/graphql'
 import InlineSpecList from '../specs/InlineSpecList.vue'
 import { getMobxRunnerStore, useSpecStore } from '../store'
 import { UnifiedRunnerAPI } from '../runner'
+import { BaseSpec } from '@packages/types'
 
 gql`
 fragment SpecRunner on App {
   ...Specs_InlineSpecList
-  activeProject {
-    id
-    projectRoot
-  }
-}
-`
-
-gql`
-mutation Runner_SetCurrentSpec($id: ID!) {
-  setCurrentSpec(id: $id)
 }
 `
 
@@ -78,21 +69,17 @@ const viewportStyle = computed(() => {
 
 const props = defineProps<{
   gql: SpecRunnerFragment
+  activeSpec: BaseSpec
 }>()
 
-const specStore = useSpecStore()
-
 function runSpec () {
-  if (!specStore.currentSpec) {
-    return
-  }
-
-  UnifiedRunnerAPI.executeSpec(specStore.currentSpec)
+  props.activeSpec
+  UnifiedRunnerAPI.executeSpec(props.activeSpec)
 }
 
-watch(() => specStore.currentSpec, (spec) => {
+watch(() => props.activeSpec, (spec) => {
   runSpec()
-}, { immediate: true })
+}, { immediate: true, flush: 'post' })
 
 onMounted(() => {
   window.UnifiedRunner.eventManager.on('restart', () => {
