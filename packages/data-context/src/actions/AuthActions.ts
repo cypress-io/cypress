@@ -3,20 +3,40 @@ import type { AuthenticatedUserShape } from '../data'
 
 interface AuthMessage {type: string, browserOpened: boolean, name: string, message: string}
 export interface AuthApiShape {
+  getUser(): Promise<Partial<AuthenticatedUserShape>>
   logIn(onMessage: (message: AuthMessage) => void): Promise<AuthenticatedUserShape>
   logOut(): Promise<void>
-  checkAuth(context: DataContext): Promise<void>
 }
 
 export class AuthActions {
   constructor (private ctx: DataContext) {}
+
+  async getUser () {
+    return this.authApi.getUser().then((obj) => {
+      if (obj.authToken) {
+        this.ctx.coreData.user = obj
+        // When we get the user at startup, check the auth by
+        // hitting the network
+        this.checkAuth()
+      }
+    })
+  }
 
   get authApi () {
     return this.ctx._apis.authApi
   }
 
   async checkAuth () {
-    return this.authApi.checkAuth(this.ctx)
+    const result = await this.ctx.cloud.executeRemoteGraphQL({
+      query: `{ cloudViewer { id } }`,
+      variables: {},
+      requestPolicy: 'network-only',
+    })
+
+    if (!result.data?.cloudViewer) {
+      this.ctx.coreData.user = null
+      this.logout()
+    }
   }
 
   async login () {
