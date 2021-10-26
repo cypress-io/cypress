@@ -55,7 +55,7 @@ import { MainLaunchpadQueryDocument } from './generated/graphql'
 import TestingTypeCards from './setup/TestingTypeCards.vue'
 import Wizard from './setup/Wizard.vue'
 import WizardHeader from './setup/WizardHeader.vue'
-import HeaderBar from './layouts/HeaderBar.vue'
+import HeaderBar from '../../frontend-shared/src/gql-components/HeaderBar.vue'
 import GlobalPage from './global/GlobalPage.vue'
 import BaseError from './error/BaseError.vue'
 import StandardModal from '@cy/components/StandardModal.vue'
@@ -86,7 +86,6 @@ query MainLaunchpadQuery {
     isInGlobalMode
     ...GlobalPage
   }
-  ...HeaderBar
 }
 `
 
