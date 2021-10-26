@@ -31,11 +31,11 @@
         <i-cy-circle-check_x24 class="icon-dark-jade-100 icon-light-jade-500 w-24px h-24px" />
       </template>
     </TopNavListItem>
-    <TopNavListItem class="p-16px text-center bg-gray-50">
+    <TopNavListItem class="text-center p-16px bg-gray-50">
       <a
         :href="releasesUrl"
         target="_blank"
-        class="block w-full py-8px border-gray-100 text-14px whitespace-nowrap border-rounded border-1 hover:no-underline hover:border-gray-200"
+        class="block w-full border-gray-100 py-8px text-14px whitespace-nowrap border-rounded border-1 hover:no-underline hover:border-gray-200"
       >{{ t('topNav.seeAllReleases') }}</a>
     </TopNavListItem>
   </TopNavList>
@@ -73,7 +73,7 @@
           {{ browser.displayName }}
         </div>
         <div
-          class="mr-20px font-normal text-gray-500 whitespace-nowrap text-14px"
+          class="font-normal text-gray-500 mr-20px whitespace-nowrap text-14px"
         >
           {{ t('topNav.version') }} {{ browser.version }}
         </div>
@@ -89,39 +89,43 @@
     </TopNavListItem>
   </TopNavList>
 
-  <TopNavList variant="panel">
+  <TopNavList
+    variant="panel"
+    role="region"
+    aria-live="polite"
+  >
     <template #heading="{ open }">
       <i-cy-life-ring_x16
-        class="icon-dark-gray-500 icon-light-gray-100 group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50 h-16px w-16px"
+        class=" group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50 h-16px w-16px"
         :class="open ? 'icon-dark-indigo-500 icon-light-indigo-50' : 'icon-dark-gray-500 icon-light-gray-100'"
       />
-      <span>{{ t('topNav.docsMenu.docsHeading') }}</span>
+      <span :class="{'text-indigo-600': open}">{{ t('topNav.docsMenu.docsHeading') }}</span>
     </template>
-    <div class="flex p-16px gap-24px">
-      <div
-        v-for="list in docsMenu"
-        :key="list.title"
-        class="min-w-164px"
-      >
-        <h2 class="font-semibold text-gray-800">
-          {{ list.title }}
-        </h2>
-        <hr class="border-gray-50 my-10px">
-        <ul>
-          <li
-            v-for="item in list.children"
-            :key="item.text"
-            class="flex items-center mb-4px text-indigo-500"
-          >
-            <i-cy-book_x16 class="icon-dark-indigo-500 icon-light-indigo-50" />
-            <a
-              :href="getUrl(item.link)"
-              target="_blank"
-              class="ml-4px font-normal whitespace-nowrap"
-            >{{ item.text }}</a>
-          </li>
-        </ul>
+    <div
+      v-if="docsMenuVariant === 'main'"
+      class="flex p-16px gap-24px"
+    >
+      <DocsMenuContent
+        :active-project-exists="!!props.gql?.activeProject"
+        @setDocsContent="docsMenuVariant = $event"
+      />
+    </div>
+    <div
+      v-else
+      ref="promptsEl"
+      class="w-484px"
+    >
+      <div class="relative border-b border-b-gray-50 px-24px py-18px text-18px">
+        {{ t(`topNav.docsMenu.prompts.${docsMenuVariant}.title`) }}
+        <button
+          aria-label="Close"
+          class="absolute border-transparent rounded-full p-5px border-1 hover:border-indigo-300 hocus-default right-20px top-15px"
+          @click="docsMenuVariant = 'main'"
+        >
+          <i-cy-delete_x12 class="icon-dark-gray-400 w-12px h-12px" />
+        </button>
       </div>
+      <PromptContent :type="docsMenuVariant" />
     </div>
   </TopNavList>
 
@@ -139,26 +143,19 @@
 <script setup lang="ts">
 import TopNavListItem from './TopNavListItem.vue'
 import TopNavList from './TopNavList.vue'
+import PromptContent from './PromptContent.vue'
 import { allBrowsersIcons } from '../../../../frontend-shared/src/assets/browserLogos'
 import { gql } from '@urql/vue'
 import type { TopNavFragment } from '../../generated/graphql'
 import { useI18n } from '@cy/i18n'
-
+import { ref } from 'vue'
+// eslint-disable-next-line no-duplicate-imports
+import type { Ref } from 'vue'
 const { t } = useI18n()
-
-const getUrl = (link) => {
-  let result = link.url
-
-  if (link.params) {
-    result += `?${new URLSearchParams(link.params).toString()}`
-  }
-
-  return result
-}
+import { onClickOutside, onKeyStroke } from '@vueuse/core'
+import DocsMenuContent from './DocsMenuContent.vue'
 
 const releasesUrl = 'https://github.com/cypress-io/cypress/releases/'
-
-const utm_medium = 'Docs Menu'
 
 // TODO: will come from gql
 const versionList = [
@@ -182,6 +179,9 @@ const versionList = [
 
 gql`
 fragment TopNav on App {
+  activeProject {
+    id
+  }
   selectedBrowser {
     id
     displayName
@@ -202,98 +202,40 @@ const props = defineProps<{
   showBrowsers?: Boolean
 }>()
 
-const docsMenu = [{
-  title: t('topNav.docsMenu.gettingStartedTitle'),
-  children: [{
-    text: t('topNav.docsMenu.firstTest'),
-    link: {
-      url: 'https://on.cypress.io/writing-first-test',
-      params: {
-        utm_medium,
-        utm_content: 'First Test',
-      },
-    },
-  }, {
-    text: t('topNav.docsMenu.testingApp'),
-    link: {
-      url: 'https://on.cypress.io/testing-your-app',
-      params: {
-        utm_medium,
-        utm_content: 'Testing Your App',
-      },
-    },
-  },
-  {
-    text: t('topNav.docsMenu.organizingTests'),
-    link: {
-      url: 'https://docs.cypress.io/guides/core-concepts/writing-and-organizing-tests',
-      params: {
-        utm_medium,
-        utm_content: 'Organizing Tests',
-      },
-    },
-  }],
-}, {
-  title: t('topNav.docsMenu.referencesTitle'),
-  children: [{
-    text: t('topNav.docsMenu.bestPractices'),
-    link: {
-      url: 'https://on.cypress.io/best-practices',
-      params: {
-        utm_medium,
-        utm_content: 'Best Practices',
-      },
-    },
-  }, {
-    text: t('topNav.docsMenu.configuration'),
-    link: {
-      url: 'https://on.cypress.io/configuration',
-      params: {
-        utm_medium,
-        utm_content: 'Configuration',
-      },
-    },
-  }, {
-    text: t('topNav.docsMenu.api'),
-    link: {
-      url: 'https://on.cypress.io/api',
-      params: {
-        utm_medium,
-        utm_content: 'API',
-      },
-    },
-  }],
-}, {
-  title: t('topNav.docsMenu.ciTitle'),
-  children: [{
-    text: t('topNav.docsMenu.ciSetup'),
-    link: {
-      url: 'https://on.cypress.io/ci',
-      params: {
-        utm_medium,
-        utm_content: 'Set Up CI',
-      },
-    },
-  }, {
-    text: t('topNav.docsMenu.fasterTests'),
-    link: {
-      url: 'https://on.cypress.io/parallelization',
-      params: {
-        utm_medium,
-        utm_content: 'Parallelization',
-      },
-    },
-  },
-  {
-    text: t('topNav.docsMenu.smartOrchestration'),
-    link: {
-      url: 'https://docs.cypress.io/guides/dashboard/smart-orchestration',
-      params: {
-        utm_medium,
-        utm_content: 'Smart Orchestration',
-      },
-    },
-  }],
-}]
+const docsMenuVariant: Ref<'main' | 'orchestration' | 'ci'> = ref('main')
+
+const promptsEl: Ref<HTMLElement | null> = ref(null)
+
+// reset docs menu if click or keyboard navigation happens outside
+// so it doesn't reopen on the one of the prompts
+
+onClickOutside(promptsEl, () => {
+  setTimeout(() => {
+    // reset the content of the menu when
+    docsMenuVariant.value = 'main'
+  }, 300)
+})
+
+// using onKeyStroke twice as array of keys is not supported till vueuse 6.6:
+
+const resetPrompt = (event) => {
+  if (promptsEl.value === null) {
+    return
+  }
+
+  const target = event.target as HTMLElement
+
+  if (!promptsEl.value.contains(target)) {
+    docsMenuVariant.value = 'main'
+  }
+}
+
+onKeyStroke('Enter', (event) => {
+  resetPrompt(event)
+})
+
+onKeyStroke(' ', (event) => {
+  resetPrompt(event)
+})
 
 </script>

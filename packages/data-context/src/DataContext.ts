@@ -69,6 +69,13 @@ export class DataContext extends DataContextShell {
       toAwait.push(this.actions.project.setActiveProject(this.config.launchArgs.projectRoot))
     }
 
+    if (this.config.launchArgs.testingType) {
+      // It should be possible to skip the first step in the wizard, if the
+      // user already told us the testing type via command line argument
+      this.actions.wizard.setTestingType(this.config.launchArgs.testingType)
+      this.actions.wizard.navigate('forward')
+    }
+
     if (this.config.launchArgs.browser) {
       toAwait.push(this.actions.app.setActiveBrowserByNameOrPath(this.config.launchArgs.browser))
     }

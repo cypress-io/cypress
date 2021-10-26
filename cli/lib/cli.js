@@ -249,7 +249,7 @@ const addCypressRunCommand = (program) => {
   .description('Runs Cypress tests from the CLI without the GUI')
   .option('-b, --browser <browser-name-or-path>', text('browser'))
   .option('--ci-build-id <id>', text('ciBuildId'))
-  .option('--ct, --component', text('component'))
+  .option('--component', text('component'))
   .option('-c, --config <config>', text('config'))
   .option('-C, --config-file <config-file>', text('configFile'))
   .option('--e2e', text('e2e'))
@@ -388,8 +388,8 @@ module.exports = {
     .usage('[options]')
     .description('Opens Cypress in the interactive GUI.')
     .option('-b, --browser <browser-path>', text('browser'))
+    .option('--component', text('component'))
     .option('-c, --config <config>', text('config'))
-    .option('--ct, --component', text('component'))
     .option('-C, --config-file <config-file>', text('configFile'))
     .option('-d, --detached [bool]', text('detached'), coerceFalse)
     .option('--e2e', text('e2e'))
@@ -418,7 +418,7 @@ module.exports = {
     program
     .command('open-ct')
     .usage('[options]')
-    .description('Opens Cypress component testing interactive mode.')
+    .description('Opens Cypress component testing interactive mode. Deprecated: use "open --component"')
     .option('-b, --browser <browser-path>', text('browser'))
     .option('-c, --config <config>', text('config'))
     .option('-C, --config-file <config-file>', text('configFile'))
@@ -430,6 +430,17 @@ module.exports = {
     .option('--dev', text('dev'), coerceFalse)
     .action((opts) => {
       debug('opening Cypress')
+
+      const msg = `
+      ${logSymbols.warning} Warning: open-ct is deprecated and will be removed in a future release.
+
+      Use \`cypress open --component\` instead.
+      `
+
+      logger.warn()
+      logger.warn(stripIndent(msg))
+      logger.warn()
+
       require('./exec/open')
       .start({ ...util.parseOpts(opts), testingType: 'component' })
       .catch(util.logErrorExit1)
@@ -438,7 +449,7 @@ module.exports = {
     program
     .command('run-ct')
     .usage('[options]')
-    .description('Runs all Cypress Component Testing suites')
+    .description('Runs all Cypress component testing suites. Deprecated: use "run --component"')
     .option('-b, --browser <browser-name-or-path>', text('browser'))
     .option('--ci-build-id <id>', text('ciBuildId'))
     .option('-c, --config <config>', text('config'))
@@ -461,6 +472,16 @@ module.exports = {
     .option('--dev', text('dev'), coerceFalse)
     .action((opts) => {
       debug('running Cypress run-ct')
+
+      const msg = `
+      ${logSymbols.warning} Warning: run-ct is deprecated and will be removed in a future release.
+      Use \`cypress run --component\` instead.
+      `
+
+      logger.warn()
+      logger.warn(stripIndent(msg))
+      logger.warn()
+
       require('./exec/run')
       .start({ ...util.parseOpts(opts), testingType: 'component' })
       .then(util.exit)
