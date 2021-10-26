@@ -62,10 +62,8 @@ export default class State extends BaseStore {
 
   // what the dom reports, always in pixels
   @observable absoluteReporterWidth = 0
-  @observable headerHeight = 0
 
   @observable windowWidth = 0
-  @observable windowHeight = 0
 
   @observable automation = automation.CONNECTING
 
@@ -137,29 +135,8 @@ export default class State extends BaseStore {
     return this.windowWidth - this.absoluteReporterWidth
   }
 
-  @computed get _containerHeight () {
-    return this.windowHeight - this.headerHeight
-  }
-
   @computed get displayScale () {
     return Math.floor(this.scale * 100)
-  }
-
-  @computed.struct get messageStyles () {
-    const actualHeight = this.height * this.scale
-    const messageHeight = 33
-    const nudge = 10
-
-    if ((actualHeight + messageHeight + (nudge * 2)) >= this._containerHeight) {
-      return { state: 'stationary' }
-    }
-
-    return {
-      state: 'attached',
-      styles: {
-        top: (actualHeight + this.headerHeight + nudge),
-      },
-    }
   }
 
   @action setScreenshotting (screenshotting: boolean) {

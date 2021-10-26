@@ -1,4 +1,4 @@
-import { action, observable } from 'mobx'
+import { action, observable, computed } from 'mobx'
 import { nanoid } from 'nanoid'
 import { automation, automationStatus } from './automation'
 
@@ -18,7 +18,7 @@ const defaults = {
 
 type Callback = (...args: unknown[]) => void
 
-export class BaseStore {
+export abstract class BaseStore {
   @observable spec: Cypress.Spec | undefined
   @observable specs: Cypress.Spec[] = []
   @observable specRunId: string | undefined
@@ -31,6 +31,8 @@ export class BaseStore {
   @observable highlightUrl = false
   @observable isLoadingUrl = false
   @observable isRunning = false
+  @observable windowHeight = 0
+  @observable headerHeight = 0
 
   @observable messageTitle?: string
   @observable messageDescription?: 'info' | 'warning' | 'pinned'
@@ -46,6 +48,8 @@ export class BaseStore {
     this.width = defaults[testingType].width
     this.height = defaults[testingType].height
   }
+
+  abstract get scale (): number
 
   @action setSingleSpec (spec: Cypress.Spec | undefined) {
     this.setSpec(spec)
@@ -99,5 +103,26 @@ export class BaseStore {
 
       cb()
     }
+  }
+
+  @computed.struct get messageStyles () {
+    const actualHeight = this.height * this.scale
+    const messageHeight = 33
+    const nudge = 10
+
+    if ((actualHeight + messageHeight + (nudge * 2)) >= this._containerHeight) {
+      return { state: 'stationary' }
+    }
+
+    return {
+      state: 'attached',
+      styles: {
+        top: (actualHeight + this.headerHeight + nudge),
+      },
+    }
+  }
+
+  @computed get _containerHeight () {
+    return this.windowHeight - this.headerHeight
   }
 }
