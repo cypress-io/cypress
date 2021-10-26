@@ -2055,7 +2055,7 @@ jobs:
           name: Add Cypress demo
           working_directory: test-binary
           command: npx @bahmutov/cly init
-     - run:
+      - run:
           name: Scaffold new config file
           working_directory: <<parameters.wd>>
           environment:
