@@ -28,9 +28,6 @@
       v-once
       :id="MESSAGE_ID"
     />
-    <!-- <SnapshotControls
-      :eventManager="eventManager"
-    /> -->
   </div>
 </template>
 
@@ -40,10 +37,9 @@ import { REPORTER_ID, RUNNER_ID, MESSAGE_ID, getRunnerElement, getReporterElemen
 import { gql } from '@urql/core'
 import type { SpecRunnerFragment } from '../generated/graphql'
 import InlineSpecList from '../specs/InlineSpecList.vue'
-import { getMobxRunnerStore, useSpecStore } from '../store'
+import { getMobxRunnerStore } from '../store'
 import { UnifiedRunnerAPI } from '../runner'
 import type { BaseSpec } from '@packages/types'
-import SnapshotControls from './SnapshotsControls.vue'
 
 gql`
 fragment SpecRunner on App {
@@ -92,8 +88,6 @@ window.UnifiedRunner.MobX.reaction(
     )
 
     window.UnifiedRunner.ReactDOM.render(message, document.querySelector(`#${MESSAGE_ID}`))
-    // viewportDimensions.height = height
-    // viewportDimensions.width = width
   },
 )
 
