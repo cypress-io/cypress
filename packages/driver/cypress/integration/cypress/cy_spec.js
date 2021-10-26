@@ -41,7 +41,7 @@ describe('driver/src/cypress/cy', () => {
   context('internals of custom commands', () => {
     let setup
 
-    before(() => {
+    beforeEach(() => {
       Cypress.Commands.add('nested', () => {
         cy.url()
       })

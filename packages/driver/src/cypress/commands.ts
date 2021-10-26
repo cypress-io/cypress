@@ -11,6 +11,8 @@ const builtInCommands = [
   ..._.toArray(allCommands).map((c) => c.default || c),
   addCommand,
 ]
+let builtInCommandNames = []
+let addingBuiltIns
 
 const getTypeByPrevSubject = (prevSubject) => {
   if (prevSubject === 'optional') {
@@ -126,7 +128,11 @@ export default {
       },
 
       add (name, options, fn) {
-        if (_.keys(commands).includes(name)) {
+        if (addingBuiltIns) {
+          builtInCommandNames.push(name)
+        }
+
+        if (!addingBuiltIns && builtInCommandNames.includes(name)) {
           $errUtils.throwErrByPath('miscellaneous.invalid_new_command', {
             args: {
               name,
@@ -171,12 +177,14 @@ export default {
       },
     }
 
+    addingBuiltIns = true
     // perf loop
     for (let cmd of builtInCommands) {
       // support "export default" syntax
       cmd = cmd.default || cmd
       cmd(Commands, Cypress, cy, state, config)
     }
+    addingBuiltIns = false
 
     return Commands
   },
