@@ -28,6 +28,7 @@
 
 
 <template>
+  <div>
   <div class="inline-flex items-center w-full rounded border-1 hocus-default focus-within-default h-40px">
   <FileMatchButton @click="toggleExpanded" :expanded="expanded">
     <span v-if="!expanded">{{ extensionPattern }}</span>
@@ -51,6 +52,7 @@
   </div>
   
   </div>
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -59,14 +61,24 @@ import FileMatchInput from './FileMatchInput.vue'
 import FileMatchButton from './FileMatchButton.vue'
 import FileMatchIndicator from './FileMatchIndicator.vue'
 import { ref, computed } from 'vue'
-import { useToggle } from '@vueuse/core'
+import { useToggle, useVModels } from '@vueuse/core'
 
 const specs = ref([])
 const foundSpecs = computed(() => specs.value)
-const pattern = ref('')
-const extensionPattern = ref('*.vue')
 
 const { t } = useI18n()
+
+const props = defineProps<{
+  extensionPattern: string,
+  pattern: string
+}>()
+
+const emits = defineEmits<{
+  (eventName: 'update:extensionPattern', value: string): void
+  (eventName: 'update:pattern', value: string): void
+}>()
+
+const { extensionPattern, pattern } = useVModels(props, emits)
 
 // 2 of 22 Matches
 // No Matches

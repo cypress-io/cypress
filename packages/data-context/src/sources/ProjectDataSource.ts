@@ -173,7 +173,7 @@ export class ProjectDataSource {
 
     const config = await this.ctx.project.getConfig(project.projectRoot)
 
-    const codeGenCandidates = await this.ctx.file.getFilesByGlob(glob)
+    const codeGenCandidates = await this.ctx.file.getFilesByGlob(config.projectRoot || process.cwd(), glob)
 
     return codeGenCandidates.map(
       (file) => {

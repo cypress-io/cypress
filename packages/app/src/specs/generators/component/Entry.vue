@@ -1,8 +1,7 @@
 <template>
-Create from Component
-  <StandardModalBody>
+  <CreateSpecModalBody>
     <FileMatch/>
-  </StandardModalBody>
+  </CreateSpecModalBody>
   <StandardModalFooter>
     <Button @click="$emit('restart')">Hello!</Button>
   </StandardModalFooter>
@@ -12,7 +11,7 @@ Create from Component
 import { useVModels } from '@vueuse/core'
 import { useI18n } from '@cy/i18n'
 import StandardModalHeader from '@cy/components/StandardModalHeader.vue'
-import StandardModalBody from '@cy/components/StandardModalBody.vue'
+import CreateSpecModalBody from '../CreateSpecModalBody.vue'
 import StandardModalFooter from '@cy/components/StandardModalFooter.vue'
 import Button from '@cy/components/Button.vue'
 import FileMatch from '../../../components/FileMatch.vue'

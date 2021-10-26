@@ -115,14 +115,15 @@ export const Project = objectType({
       resolve: (src, args, ctx) => ctx.project.getCodeGenGlob(args.type),
     })
 
-    t.connectionField('codeGenCandidates', {
+    t.list.field('codeGenCandidates', {
       type: FileParts,
       description: 'List of all code generation candidates stories',
-      additionalArgs: {
+      args: {
         glob: nonNull(stringArg()),
       },
-      nodes: (source, args, ctx) => {
-        return ctx.project.getCodeGenCandidates(args.glob)
+      resolve: async (source, args, ctx) => {
+        const result = await ctx.project.getCodeGenCandidates(args.glob)
+        return result
       },
     })
 

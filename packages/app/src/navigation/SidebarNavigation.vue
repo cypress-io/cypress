@@ -18,7 +18,7 @@
         class="flex-1 px-2 mt-5 space-y-1 bg-gray-1000"
         aria-label="Sidebar"
       >
-        <router-link
+        <RouterLink
           v-for="item in navigation"
           v-slot="{ isActive }"
           :key="item.name"
@@ -31,7 +31,7 @@
           >
             {{ item.name }}
           </SidebarNavigationRow>
-        </router-link>
+        </RouterLink>
       </nav>
     </div>
   </div>
@@ -45,12 +45,11 @@ import SettingsIcon from '~icons/cy/settings_x24'
 import { useMainStore } from '../store'
 
 const navigation = [
-  { name: 'Specs', icon: SpecsIcon, href: '/' },
-  { name: 'New', icon: CodeIcon, href: '/new' }
-  // { name: 'Runs', icon: CodeIcon, href: '/runner' },
-  // { name: 'Settings', icon: SettingsIcon, href: '/settings' },
-  // { name: 'New Spec', icon: SettingsIcon, href: '/newspec' },
-  // { name: 'Test', icon: SettingsIcon, href: '/test' },
+  { name: 'Home', icon: SpecsIcon, href: '/' },
+  { name: 'Specs', icon: CodeIcon, href: '/specs' },
+  { name: 'Runs', icon: CodeIcon, href: '/runs' },
+  { name: 'Settings', icon: SettingsIcon, href: '/settings' },
+  { name: 'New Spec', icon: SettingsIcon, href: '/newspec' },
 ]
 
 const mainStore = useMainStore()

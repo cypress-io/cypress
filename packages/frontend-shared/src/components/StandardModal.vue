@@ -16,7 +16,7 @@
         :class="props.class || ''"
       >
       <StandardModalHeader @close="setIsOpen(false)" :helpLink="helpLink" :helpText="helpText">
-        <slot name="title"></slot>
+        <slot name="title">{{ title }}</slot>
       </StandardModalHeader>
 
       <DialogDescription
@@ -62,6 +62,7 @@ const props = withDefaults(defineProps<{
   helpText?: string
   clickOutside?: boolean
   variant?: 'bare'
+  title?: string,
   class?: string | string[] | Record<string, any>
 }>(), {
   clickOutside: true,

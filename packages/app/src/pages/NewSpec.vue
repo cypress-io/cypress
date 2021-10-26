@@ -1,5 +1,6 @@
 <template>
-  <div class="flex flex-col">
+Hello
+  <!-- <div class="flex flex-col">
     <h2>New Spec</h2>
     <div class="flex gap-4 justify-center">
       <Button
@@ -64,7 +65,7 @@
         <pre>{{ generatedSpec.content }}</pre>
       </div>
     </template>
-  </div>
+  </div> -->
 </template>
 <route>
 {
@@ -72,172 +73,167 @@
 }
 </route>
 <script lang="ts" setup>
-import Button from '@cy/components/Button.vue'
-import Input from '@cy/components/Input.vue'
-import { gql, useMutation, useQuery } from '@urql/vue'
-import { computed, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
-import {
-  NewSpec_NewSpecQueryDocument,
-  NewSpec_SearchCodeGenCandidatesDocument,
-  NewSpec_CodeGenGlobQueryDocument,
-  NewSpec_CodeGenSpecDocument,
-  NewSpec_SetCurrentSpecDocument,
-  CodeGenType,
-} from '../generated/graphql'
+// import Button from '@cy/components/Button.vue'
+// import Input from '@cy/components/Input.vue'
+// import { gql, useMutation, useQuery } from '@urql/vue'
+// import { computed, ref, watch } from 'vue'
+// import { useRouter } from 'vue-router'
+// import {
+//   NewSpec_NewSpecQueryDocument,
+//   NewSpec_SearchCodeGenCandidatesDocument,
+//   NewSpec_CodeGenGlobQueryDocument,
+//   NewSpec_CodeGenSpecDocument,
+//   NewSpec_SetCurrentSpecDocument,
+//   CodeGenType,
+// } from '../generated/graphql'
 
-gql`
-query NewSpec_NewSpecQuery {
-  app {
-    activeProject {
-      id
-      storybook {
-        id
-      }
-      generatedSpec {
-        id
-        content
-        spec {
-          id
-          name
-          relative
-        }
-      }
-    }
-  }
-}
-`
+// gql`
+// query NewSpec_NewSpec {
+//   app {
+//     activeProject {
+//       id
+//       storybook {
+//         id
+//       }
+//       generatedSpec {
+//         __typename
+//       }
+//     }
+//   }
+// }
+// `
 
-gql`
-query NewSpec_CodeGenGlobQuery($type: CodeGenType!) {
-  app {
-    activeProject {
-      id
-      codeGenGlob: codeGenGlob(type: $type)
-    }
-  }
-}
-`
+// gql`
+// query NewSpec_CodeGenGlobQuery($type: CodeGenType!) {
+//   app {
+//     activeProject {
+//       id
+//       codeGenGlob: codeGenGlob(type: $type)
+//     }
+//   }
+// }
+// `
 
-gql`
-fragment NewSpec_CodeGenCandidateNode on FilePartsEdge {
-  node {
-    id
-    relative
-    fileName
-    baseName
-    absolute
-  }
-}
-`
+// gql`
+// fragment NewSpec_CodeGenCandidateNode on FilePartsEdge {
+//   node {
+//     id
+//     relative
+//     fileName
+//     baseName
+//     absolute
+//   }
+// }
+// `
 
-gql`
-query NewSpec_SearchCodeGenCandidates($glob: String!) {
-  app {
-    activeProject {
-      id
-      codeGenCandidates: codeGenCandidates(first: 25, glob: $glob) {
-        edges {
-          ...NewSpec_CodeGenCandidateNode
-        }
-        generatedSpec {
-          content
-          spec {
-            id
-            name
-            relative
-          }
-        }
-      }
-    }
-  }
-}
-`
+// gql`
+// query NewSpec_SearchCodeGenCandidates($glob: String!) {
+//   app {
+//     activeProject {
+//       id
+//       codeGenCandidates: codeGenCandidates(first: 25, glob: $glob) {
+//         edges {
+//           ...NewSpec_CodeGenCandidateNode
+//         }
+//       }
+//       generatedSpec {
+//           content
+//           spec {
+//             id
+//             name
+//             relative
+//           }
+//         }
+//     }
+//   }
+// }
+// `
 
-gql`
-mutation NewSpec_CodeGenSpec($codeGenCandidate: String!, $type: CodeGenType!) {
-  codeGenSpec(codeGenCandidate: $codeGenCandidate, type: $type)
-}
-`
+// gql`
+// mutation NewSpec_CodeGenSpec($codeGenCandidate: String!, $type: CodeGenType!) {
+//   codeGenSpec(codeGenCandidate: $codeGenCandidate, type: $type)
+// }
+// `
 
-gql`
-  mutation NewSpec_SetCurrentSpec($id: ID!) {
-    setCurrentSpec(id: $id)
-  }
-`
+// gql`
+//   mutation NewSpec_SetCurrentSpec($id: ID!) {
+//     setCurrentSpec(id: $id)
+//   }
+// `
 
-const newSpecQuery = useQuery({ query: NewSpec_NewSpecQueryDocument })
+// const newSpecQuery = useQuery({ query: NewSpec_NewSpecQueryDocument })
 
-const codeGenType = ref<CodeGenType | null>(null)
+// const codeGenType = ref<CodeGenType | null>(null)
 
-// Urql allows reactive query variables (ref, computed) but has improper typing
-type ReactiveGraphQLVar = any
+// // Urql allows reactive query variables (ref, computed) but has improper typing
+// type ReactiveGraphQLVar = any
 
-const codeGenGlobQuery = useQuery({
-  query: NewSpec_CodeGenGlobQueryDocument,
-  variables: { type: codeGenType as ReactiveGraphQLVar },
-  pause: computed(() => !codeGenType.value),
-})
-// Query 'pause' with computed property was triggering an infinite loop so use ref and watch instead
-const codeGenGlob = ref('')
+// const codeGenGlobQuery = useQuery({
+//   query: NewSpec_CodeGenGlobQueryDocument,
+//   variables: { type: codeGenType as ReactiveGraphQLVar },
+//   pause: computed(() => !codeGenType.value),
+// })
 
-watch(codeGenGlobQuery.data, (value, prevVal) => {
-  if (value?.app.activeProject?.codeGenGlob && value.app.activeProject.codeGenGlob !== prevVal?.app.activeProject?.codeGenGlob) {
-    codeGenGlob.value = value.app.activeProject.codeGenGlob
-  }
-})
+// // Query 'pause' with computed property was triggering an infinite loop so use ref and watch instead
+// const codeGenGlob = ref('')
 
-const searchCodeGenCandidates = useQuery({
-  query: NewSpec_SearchCodeGenCandidatesDocument,
-  variables: { glob: codeGenGlob as ReactiveGraphQLVar },
-  pause: computed(() => !codeGenGlob.value),
-})
-const codeGenCandidates = computed(() => {
-  return (
-    searchCodeGenCandidates.data.value?.app.activeProject?.codeGenCandidates?.edges.map(
-      ({ node: story }) => {
-        return {
-          ...story,
-          fileExtension: story.baseName.replace(story.fileName, ''),
-          relativeFromProjectRoot: story.relative.replace(story.baseName, ''),
-        }
-      },
-    ) || []
-  )
-})
+// watch(codeGenGlobQuery.data, (value, prevVal) => {
+//   if (value?.app.activeProject?.codeGenGlob && value.app.activeProject.codeGenGlob !== prevVal?.app.activeProject?.codeGenGlob) {
+//     codeGenGlob.value = value.app.activeProject.codeGenGlob
+//   }
+// })
 
-const fileNameInput = ref('')
+// const searchCodeGenCandidates = useQuery({
+//   query: NewSpec_SearchCodeGenCandidatesDocument,
+//   variables: { glob: codeGenGlob as ReactiveGraphQLVar },
+//   pause: computed(() => !codeGenGlob.value),
+// })
+// const codeGenCandidates = computed(() => {
+//   return (
+//     searchCodeGenCandidates.data.value?.app.activeProject?.codeGenCandidates?.edges.map(
+//       ({ node: story }) => {
+//         return {
+//           ...story,
+//           fileExtension: story.baseName.replace(story.fileName, ''),
+//           relativeFromProjectRoot: story.relative.replace(story.baseName, ''),
+//         }
+//       },
+//     ) || []
+//   )
+// })
 
-const mutation = useMutation(NewSpec_CodeGenSpecDocument)
-const candidateChosen = ref(false)
-const generatedSpec = computed(
-  () => newSpecQuery.data.value?.app.activeProject?.generatedSpec,
-)
+// const fileNameInput = ref('')
 
-const setSpecMutation = useMutation(NewSpec_SetCurrentSpecDocument)
-const router = useRouter()
+// const mutation = useMutation(NewSpec_CodeGenSpecDocument)
+// const candidateChosen = ref(false)
+// const generatedSpec = computed(
+//   () => newSpecQuery.data.value?.app.activeProject?.generatedSpec,
+// )
 
-async function specClick () {
-  const specId = newSpecQuery.data.value?.app.activeProject?.generatedSpec?.spec.id
+// const setSpecMutation = useMutation(NewSpec_SetCurrentSpecDocument)
+// const router = useRouter()
 
-  if (!specId) {
-    return
-  }
+// async function specClick () {
+//   const specId = newSpecQuery.data.value?.app.activeProject?.generatedSpec?.spec.id
 
-  await setSpecMutation.executeMutation({ id: specId })
-  router.push('runner')
-}
+//   if (!specId) {
+//     return
+//   }
 
-function codeGenTypeClicked (type: CodeGenType) {
-  codeGenType.value = type
-  candidateChosen.value = false
-}
+//   await setSpecMutation.executeMutation({ id: specId })
+//   router.push('runner')
+// }
 
-function candidateClick (codeGenCandidate: string) {
-  candidateChosen.value = true
-  mutation.executeMutation({
-    codeGenCandidate,
-    type: codeGenType.value as CodeGenType,
-  })
-}
+// function codeGenTypeClicked (type: CodeGenType) {
+//   codeGenType.value = type
+//   candidateChosen.value = false
+// }
+
+// function candidateClick (codeGenCandidate: string) {
+//   candidateChosen.value = true
+//   mutation.executeMutation({
+//     codeGenCandidate,
+//     type: codeGenType.value as CodeGenType,
+//   })
+// }
 </script>

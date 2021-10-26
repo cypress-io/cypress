@@ -284,6 +284,11 @@ type FileParts implements Node {
   """
   baseName: String!
 
+  """
+  The spec file's extension, including "spec" pattern (e.g. .spec.tsx, -spec.tsx, -test.tsx)
+  """
+  fileExtension: String!
+
   """The first part of the file, without extensions (e.g. MySpec)"""
   fileName: String!
 
@@ -295,26 +300,6 @@ type FileParts implements Node {
 
   """Relative path to spec (e.g. src/component/MySpec.test.tsx)"""
   relative: String!
-}
-
-type FilePartsConnection {
-  """
-  https://facebook.github.io/relay/graphql/connections.htm#sec-Edge-Types
-  """
-  edges: [FilePartsEdge!]!
-
-  """
-  https://facebook.github.io/relay/graphql/connections.htm#sec-undefined.PageInfo
-  """
-  pageInfo: PageInfo!
-}
-
-type FilePartsEdge {
-  """https://facebook.github.io/relay/graphql/connections.htm#sec-Cursor"""
-  cursor: String!
-
-  """https://facebook.github.io/relay/graphql/connections.htm#sec-Node"""
-  node: FileParts!
 }
 
 enum FrontendFrameworkEnum {
@@ -518,20 +503,7 @@ type Project implements Node {
   cloudProject: CloudProject
 
   """List of all code generation candidates stories"""
-  codeGenCandidates(
-    """Returns the elements in the list that come after the specified cursor"""
-    after: String
-
-    """Returns the elements in the list that come before the specified cursor"""
-    before: String
-
-    """Returns the first n elements from the list."""
-    first: Int
-    glob: String!
-
-    """Returns the last n elements from the list."""
-    last: Int
-  ): FilePartsConnection
+  codeGenCandidates(glob: String!): [FileParts]
 
   """Glob pattern for component searching"""
   codeGenGlob(type: CodeGenType!): String!

@@ -1,5 +1,8 @@
 <template>
-  <WizardLayout :can-navigate-forward="canNavigateForward">
+  <WizardLayout
+    :can-navigate-forward="canNavigateForward"
+    class="max-w-640px"
+  >
     <div class="flex flex-col items-center mx-auto my-10">
       <img
         src="../images/success.svg"
