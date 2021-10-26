@@ -145,4 +145,21 @@ describe('e2e reporters', () => {
       reporterOptions: 'topLevelSuite=top suite,flowId=12345,useStdError=\'true\',useStdError=\'true\',recordHookFailures=\'true\',actualVsExpected=\'true\'',
     })
   })
+
+  it('shows slow tests in yellow', function () {
+    return systemTests.exec(this, {
+      spec: 'slowTestThreshold_spec.js',
+      snapshot: false,
+      config: {
+        slowTestThreshold: 1,
+      },
+      processEnv: {
+        MOCHA_COLORS: 1,
+      },
+    }).then((result) => {
+      expect(result.stdout.match(/passes inherited(.*)/)[1]).to.contain('\u001b[33m')
+      expect(result.stdout.match(/passes quickly(.*)/)[1]).not.to.contain('\u001b[33m')
+      expect(result.stdout.match(/passes slowly(.*)/)[1]).to.contain('\u001b[33m')
+    })
+  })
 })
