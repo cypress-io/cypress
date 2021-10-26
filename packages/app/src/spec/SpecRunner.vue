@@ -17,8 +17,7 @@
         class="viewport origin-top-left"
         :style="viewportStyle"
       />
-      <SnapshotControls />
-      <SnapshotControlsVue :eventManager="eventManager" />
+      <SnapshotControlsVue :event-manager="eventManager" />
       <div>Viewport: {{ viewportDimensions.width }}px x {{ viewportDimensions.height }}px</div>
     </div>
 
@@ -31,14 +30,13 @@
 
 <script lang="ts" setup>
 import { computed, onBeforeUnmount, onMounted, reactive, watch } from 'vue'
-import { REPORTER_ID, RUNNER_ID, SNAPSHOT_CONTROLS_ID, getRunnerElement, getReporterElement, empty } from '../runner/utils'
+import { REPORTER_ID, RUNNER_ID, getRunnerElement, getReporterElement, empty } from '../runner/utils'
 import { gql } from '@urql/core'
 import type { SpecRunnerFragment } from '../generated/graphql'
 import InlineSpecList from '../specs/InlineSpecList.vue'
 import { getMobxRunnerStore } from '../store'
 import { UnifiedRunnerAPI } from '../runner'
 import type { BaseSpec } from '@packages/types'
-import SnapshotControls from './SnapshotControls.vue'
 import SnapshotControlsVue from './SnapshotControlsVue.vue'
 
 gql`

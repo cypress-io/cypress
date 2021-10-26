@@ -19,7 +19,7 @@ import { injectBundle } from './injectBundle'
 import type { BaseSpec } from '@packages/types/src/spec'
 import { UnifiedReporterAPI } from './reporter'
 import { getRunnerElement, empty } from './utils'
-import { AutSnapshot, IframeModel } from './iframe-model'
+import { IframeModel } from './iframe-model'
 import { AutIframe } from './aut-iframe'
 
 const randomString = `${Math.random()}`
@@ -49,41 +49,6 @@ export function getAutIframeModel () {
  * run lifecycle, snapshots, and viewport.
  */
 function createIframeModel () {
-  const state = getMobxRunnerStore()
-
-  const toggleSnapshotHighlights = window.UnifiedRunner.MobX.runInAction(() => {
-    return (snapshotProps: AutSnapshot) => {
-      if (!state.snapshot) {
-        return
-      }
-
-      state.setShowSnapshotHighlight(!state.snapshot.showingHighlights)
-
-      if (state.snapshot.showingHighlights) {
-        const snapshot = snapshotProps.snapshots[state.snapshot.stateIndex]
-
-        autIframe.highlightEl(snapshot, snapshotProps)
-      } else {
-        autIframe.removeHighlights()
-      }
-    }
-  })
-
-  const changeSnapshotState = window.UnifiedRunner.MobX.runInAction(() => {
-    return (snapshotProps: AutSnapshot, index: number) => {
-      const snapshot = snapshotProps.snapshots[index]
-
-      state.setSnapshotIndex(index)
-      autIframe.restoreDom(snapshot)
-
-      if (state.snapshot?.showingHighlights && snapshotProps.$el) {
-        autIframe.highlightEl(snapshot, snapshotProps)
-      } else {
-        autIframe.removeHighlights()
-      }
-    }
-  })
-
   const autIframe = getAutIframeModel()
   // IFrame Model to manage snapshots, etc.
   const iframeModel = new IframeModel(
@@ -92,19 +57,6 @@ function createIframeModel () {
     autIframe.restoreDom,
     autIframe.highlightEl,
     window.UnifiedRunner.eventManager,
-    (snapshotProps: AutSnapshot) => {
-      return window.UnifiedRunner.React.createElement(
-        window.UnifiedRunner.SnapshotControls,
-        {
-          snapshotProps,
-          state,
-          eventManager: window.UnifiedRunner.eventManager,
-          onToggleHighlights: toggleSnapshotHighlights,
-          onStateChange: changeSnapshotState,
-        },
-      )
-    },
-
     window.UnifiedRunner.MobX,
     {
       recorder: window.UnifiedRunner.studioRecorder,

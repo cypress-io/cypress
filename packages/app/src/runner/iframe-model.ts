@@ -39,7 +39,6 @@ export class IframeModel {
     private restoreDom: (snapshot: any) => void,
     private highlightEl: ({ body }: any, opts: any) => void,
     private eventManager: any,
-    private snapshotControls: any,
     private MobX: any,
     private studio: {
       selectorPlaygroundModel: any
