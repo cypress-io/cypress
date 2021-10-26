@@ -86,7 +86,7 @@ $code-border-radius: 4px;
   .runnable-err-header {
     display: flex;
     justify-content: space-between;
-    background-color: rgba($gray-1000, 0.5);
+    background-color: rgba($red-400, 0.05);
     padding: 5px 10px;
     font-weight: bold;
 
@@ -110,24 +110,25 @@ $code-border-radius: 4px;
   }
 
   .runnable-err-message {
-    padding: 10px;
     font-family: $monospace;
-    color: $err-text;
     font-size: 1em;
+    padding: 10px;
 
     code {
-      background-color: $err-code-background;
-      border-radius: 5px;
+      background-color: rgba($black, 0.2);
+      border-radius: 4px;
+      color: $err-code-text;
       padding: 2px 5px;
     }
 
     strong {
-      color: $err-text;
+      color: $err-code-text;
       font-weight: bold;
     }
   }
 
   .runnable-err-stack-expander {
+    border-top: 1px solid rgba($red-400, 0.1);
     display: flex;
 
     .collapsible-header {
@@ -142,28 +143,28 @@ $code-border-radius: 4px;
       }
 
       div {
-        background: $err-header-background;
         cursor: pointer;
         outline: none;
-        padding: 7px 5px;
+        padding: 14px 5px;
         width: 100%;
 
-        &:hover {
-          background: $gray-800;
-        }
-
-        &:active {
-          background: $gray-800;
-        }
-
         .collapsible-header-text {
-          color: $gray-200;
-          font-size: 13px;
+          color: $red-300;
+          font-size: 14px;
+          font-weight: 500;
+
+          &:hover {
+            color: $red-100;
+          }
+
+          &:active {
+            color: $red-100;
+          }
         }
 
         .collapsible-indicator {
           line-height: 18px;
-          color: $gray-700 !important;
+          color: $red-400 !important;
         }
       }
     }
@@ -171,19 +172,15 @@ $code-border-radius: 4px;
     .runnable-err-print {
       &:focus {
         outline: none;
-
-        div {
-          background: $err-header-background;
-        }
       }
 
       div {
-        background: $err-header-background;
-        color: $gray-200;
+        color: $red-300;
         cursor: pointer;
-        font-size: 13px;
+        font-size: 14px;
+        font-weight: 500;
         height: 100%;
-        padding: 7px 10px;
+        padding: 14px 10px;
         width: 100%;
 
         &:focus {
@@ -191,16 +188,17 @@ $code-border-radius: 4px;
         }
 
         &:hover {
-          background: $err-header-background;
+          color: $red-100;
         }
 
         &:active {
-          background: $red-900;
+          color: $red-100;
         }
 
         i {
-          border: solid 1px $gray-200;
+          border: solid 1px $red-400;
           border-radius: 4px;
+          color: $red-400;
           font-size: 6px;
           padding: 4px 3px;
           vertical-align: middle;
@@ -216,7 +214,7 @@ $code-border-radius: 4px;
   .runnable-err-stack-trace {
     font-family: $monospace;
     overflow: auto;
-    padding: 10px;
+    padding: 0 10px 10px;
 
     .err-stack-line {
       white-space: pre;
@@ -230,7 +228,7 @@ $code-border-radius: 4px;
 
   .test-err-code-frame {
     background-color: $gray-1000;
-    border: 1px solid $gray-800;
+    border: 1px solid rgba($red-400, 0.25);
     border-radius: $code-border-radius;
     margin: 0 10px 10px;
 

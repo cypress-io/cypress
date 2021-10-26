@@ -1,9 +1,9 @@
 {
   "private": true,
   "scripts": {
-    "cy:open": "node ../../../../scripts/cypress open-ct",
+    "cy:open": "node ../../../../scripts/cypress open --component",
     "start": "react-scripts start",
-    "test": "node ../../../../scripts/cypress run-ct"
+    "test": "node ../../../../scripts/cypress run --component"
   },
   "dependencies": {
     "react": "^17.0.1",

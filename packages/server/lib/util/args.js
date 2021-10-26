@@ -211,7 +211,6 @@ module.exports = {
       // set in case we
       // bypassed the cli
       cwd: process.cwd(),
-      testingType: 'e2e',
     })
     .mapValues(coerceUtil.coerce)
     .value()
