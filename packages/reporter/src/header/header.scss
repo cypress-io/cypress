@@ -140,12 +140,12 @@
 
     span:last-child button,
     .play {
-      color: $gray-400;
       padding: 1px 10px;
     }
 
     span {
       button {
+        color: $gray-400;
         height: 22px;
       }
       &:not(:last-child) {

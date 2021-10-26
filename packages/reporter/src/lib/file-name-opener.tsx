@@ -6,7 +6,7 @@ import { FileDetails } from '@packages/ui-components'
 
 import FileOpener from './file-opener'
 
-import TextIcon from '-!react-svg-loader!../lib/img/document-text_x16.svg'
+import TextIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/document-text_x16.svg'
 
 interface Props {
   fileDetails: FileDetails

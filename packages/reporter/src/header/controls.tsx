@@ -8,10 +8,10 @@ import Tooltip from '@cypress/react-tooltip'
 import defaultEvents, { Events } from '../lib/events'
 import { AppState } from '../lib/app-state'
 
-import NextIcon from '-!react-svg-loader!../lib/img/action-next_x16.svg'
-import PlayIcon from '-!react-svg-loader!../lib/img/action-play_x16.svg'
-import RestartIcon from '-!react-svg-loader!../lib/img/action-restart_x16.svg'
-import StopIcon from '-!react-svg-loader!../lib/img/action-stop_x16.svg'
+import NextIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/action-next_x16.svg'
+import PlayIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/action-play_x16.svg'
+import RestartIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/action-restart_x16.svg'
+import StopIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/action-stop_x16.svg'
 
 const ifThen = (condition: boolean, component: React.ReactNode) => (
   condition ? component : null
