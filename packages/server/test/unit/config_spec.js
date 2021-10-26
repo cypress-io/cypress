@@ -1079,6 +1079,14 @@ describe('lib/config', () => {
       }
     })
 
+    it('slowTestThreshold=10000 for e2e', function () {
+      return this.defaults('slowTestThreshold', 10000, {}, { testingType: 'e2e' })
+    })
+
+    it('slowTestThreshold=250 for component', function () {
+      return this.defaults('slowTestThreshold', 250, {}, { testingType: 'component' })
+    })
+
     it('port=null', function () {
       return this.defaults('port', null)
     })
@@ -1462,6 +1470,7 @@ describe('lib/config', () => {
             retries: { value: { runMode: 0, openMode: 0 }, from: 'default' },
             screenshotOnRunFailure: { value: true, from: 'default' },
             screenshotsFolder: { value: 'cypress/screenshots', from: 'default' },
+            slowTestThreshold: { value: 10000, from: 'default' },
             supportFile: { value: 'cypress/support', from: 'default' },
             taskTimeout: { value: 60000, from: 'default' },
             testFiles: { value: '**/*.*', from: 'default' },
@@ -1568,6 +1577,7 @@ describe('lib/config', () => {
             retries: { value: { runMode: 0, openMode: 0 }, from: 'default' },
             screenshotOnRunFailure: { value: true, from: 'default' },
             screenshotsFolder: { value: 'cypress/screenshots', from: 'default' },
+            slowTestThreshold: { value: 10000, from: 'default' },
             supportFile: { value: 'cypress/support', from: 'default' },
             taskTimeout: { value: 60000, from: 'default' },
             testFiles: { value: '**/*.*', from: 'default' },
@@ -2409,28 +2419,6 @@ describe('lib/config', () => {
 
         expect(obj.resolvedNodePath).to.be.undefined
       })
-    })
-  })
-})
-
-describe('lib/util/config', () => {
-  context('.isDefault', () => {
-    it('returns true if value is default value', () => {
-      settings = { baseUrl: null }
-      const defaults = { baseUrl: null }
-      const resolved = {}
-      const merged = config.setResolvedConfigValues(settings, defaults, resolved)
-
-      expect(configUtil.isDefault(merged, 'baseUrl')).to.be.true
-    })
-
-    it('returns false if value is not default value', () => {
-      settings = { baseUrl: null }
-      const defaults = { baseUrl: 'http://localhost:8080' }
-      const resolved = {}
-      const merged = config.setResolvedConfigValues(settings, defaults, resolved)
-
-      expect(configUtil.isDefault(merged, 'baseUrl')).to.be.false
     })
   })
 })
