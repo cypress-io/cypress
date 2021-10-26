@@ -4,7 +4,6 @@ const is = require('check-more-types')
 const { commaListsOr } = require('common-tags')
 const { URL } = require('url')
 
-const configOptions = require('../config_options')
 const path = require('path')
 
 // validation functions take a key and a value and should:
@@ -131,24 +130,28 @@ const isPlainObject = (key, value) => {
   return errMsg(key, value, 'a plain object')
 }
 
-const isValidConfig = (key, config) => {
-  const status = isPlainObject(key, config)
+// options is passed in here in order to avoid a circular import
+// where validation depends on config_options and config_options depends on validation
+const isValidConfig = (options) => {
+  return (key, config) => {
+    const status = isPlainObject(key, config)
 
-  if (status !== true) {
-    return status
-  }
+    if (status !== true) {
+      return status
+    }
 
-  for (const rule of configOptions.options) {
-    if (rule.name in config && rule.validation) {
-      const status = rule.validation(`${key}.${rule.name}`, config[rule.name])
+    for (const rule of options) {
+      if (rule.name in config && rule.validation) {
+        const status = rule.validation(`${key}.${rule.name}`, config[rule.name])
 
-      if (status !== true) {
-        return status
+        if (status !== true) {
+          return status
+        }
       }
     }
-  }
 
-  return true
+    return true
+  }
 }
 
 const isOneOf = (...values) => {
