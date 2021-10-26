@@ -116,12 +116,14 @@ export default {
           options = {}
         }
 
+        addingBuiltIns = true
         // perf loop
         for (let name in obj) {
           const fn = obj[name]
 
           Commands.add(name, options, fn)
         }
+        addingBuiltIns = false
 
         // prevent loop comprehension
         return null
@@ -177,14 +179,12 @@ export default {
       },
     }
 
-    addingBuiltIns = true
     // perf loop
     for (let cmd of builtInCommands) {
       // support "export default" syntax
       cmd = cmd.default || cmd
       cmd(Commands, Cypress, cy, state, config)
     }
-    addingBuiltIns = false
 
     return Commands
   },
