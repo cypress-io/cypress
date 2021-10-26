@@ -3,8 +3,9 @@ import type { MobxRunnerStore } from '../store'
 export interface AutSnapshot {
   id?: number
   name?: string
+  $el?: HTMLBodyElement
   snapshot?: AutSnapshot
-  snapshots?: AutSnapshot[]
+  snapshots: AutSnapshot[]
   htmlAttrs: Record<string, any> // Type is NamedNodeMap, not sure if we should include lib: ["DOM"]
   viewportHeight: number
   viewportWidth: number
@@ -259,6 +260,7 @@ export class IframeModel {
       body,
       htmlAttrs,
       snapshot: finalSnapshot,
+      snapshots: [],
       url: this.state.url,
       // TODO: use same attr for both runner and runner-ct states.
       // these refer to the same thing - the viewport dimensions.

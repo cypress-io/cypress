@@ -30,7 +30,7 @@
 
 <script lang="ts" setup>
 import { computed, onBeforeUnmount, onMounted, reactive, watch } from 'vue'
-import { REPORTER_ID, RUNNER_ID, MESSAGE_ID, getRunnerElement, getReporterElement, empty } from '../runner/utils'
+import { REPORTER_ID, RUNNER_ID, SNAPSHOT_CONTROLS_ID, getRunnerElement, getReporterElement, empty } from '../runner/utils'
 import { gql } from '@urql/core'
 import type { SpecRunnerFragment } from '../generated/graphql'
 import InlineSpecList from '../specs/InlineSpecList.vue'
@@ -59,31 +59,6 @@ window.UnifiedRunner.MobX.reaction(
   ([height, width]) => {
     viewportDimensions.height = height
     viewportDimensions.width = width
-  },
-)
-
-window.UnifiedRunner.MobX.reaction(
-  () => [mobxRunnerStore.messageTitle, mobxRunnerStore.messageControls],
-  ([title, controls]) => {
-    const store = getMobxRunnerStore()
-    const message = window.UnifiedRunner.React.createElement(
-      window.UnifiedRunner.Message,
-      {
-        state: {
-          messageTitle: store.messageTitle,
-          messageControls: store.messageControls,
-          messageDescription: store.messageDescription,
-          messageType: store.messageType,
-          messageStyles: {
-            state: store.messageStyles.state,
-            styles: store.messageStyles.styles,
-            messageType: store.messageType,
-          },
-        },
-      },
-    )
-
-    window.UnifiedRunner.ReactDOM.render(message, document.querySelector(`#${MESSAGE_ID}`))
   },
 )
 

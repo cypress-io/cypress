@@ -2,6 +2,8 @@ import { BaseStore } from '@packages/runner-shared/src/store'
 
 export class MobxRunnerStore extends BaseStore {
   get scale () {
+    // TODO(lachlan): Remove this when styling <SnapshotControls />.
+    // Should decouple UI style from MobX.
     return 1
   }
 }

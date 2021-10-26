@@ -19,7 +19,7 @@ import { injectBundle } from './injectBundle'
 import type { BaseSpec } from '@packages/types/src/spec'
 import { UnifiedReporterAPI } from './reporter'
 import { getRunnerElement, empty } from './utils'
-import { IframeModel } from './iframe-model'
+import { AutSnapshot, IframeModel } from './iframe-model'
 import { AutIframe } from './aut-iframe'
 
 const randomString = `${Math.random()}`
@@ -42,21 +42,6 @@ function getAutIframeModel () {
   return _autIframeModel
 }
 
-interface Snapshots {
-  id: number
-  url: string
-  $el: HTMLBodyElement
-  viewportHeight: number
-  viewportWidth: number
-  snapshots: Array<{
-    body: {
-      get: () => any
-    }
-    htmlAttrs: Record<string, any> // NamedNodeMap?
-    name: string
-  }>
-}
-
 /**
  * 1:1: relationship with the AUT IFrame model.
  * controls various things to do with snapshots, test url, etc.
@@ -66,8 +51,8 @@ interface Snapshots {
 function createIframeModel () {
   const state = getMobxRunnerStore()
 
-  const _toggleSnapshotHighlights = window.UnifiedRunner.MobX.runInAction(() => {
-    return (snapshotProps: Snapshots) => {
+  const toggleSnapshotHighlights = window.UnifiedRunner.MobX.runInAction(() => {
+    return (snapshotProps: AutSnapshot) => {
       if (!state.snapshot) {
         return
       }
@@ -84,8 +69,8 @@ function createIframeModel () {
     }
   })
 
-  const _changeSnapshotState = window.UnifiedRunner.MobX.runInAction(() => {
-    return (snapshotProps: Snapshots, index: number) => {
+  const changeSnapshotState = window.UnifiedRunner.MobX.runInAction(() => {
+    return (snapshotProps: AutSnapshot, index: number) => {
       const snapshot = snapshotProps.snapshots[index]
 
       state.setSnapshotIndex(index)
@@ -107,15 +92,15 @@ function createIframeModel () {
     autIframe.restoreDom,
     autIframe.highlightEl,
     window.UnifiedRunner.eventManager,
-    (snapshotProps: Snapshots) => {
+    (snapshotProps: AutSnapshot) => {
       return window.UnifiedRunner.React.createElement(
         window.UnifiedRunner.SnapshotControls,
         {
           snapshotProps,
           state,
           eventManager: window.UnifiedRunner.eventManager,
-          onToggleHighlights: _toggleSnapshotHighlights,
-          onStateChange: _changeSnapshotState,
+          onToggleHighlights: toggleSnapshotHighlights,
+          onStateChange: changeSnapshotState,
         },
       )
     },

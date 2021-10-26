@@ -1,13 +1,42 @@
 <template>
   <div
     v-once
-    :id="MESSAGE_ID"
+    :id="SNAPSHOT_CONTROLS_ID"
     class="absolute inset-x-0 bottom-12"
   />
 </template>
 
 <script lang="ts" setup>
-import { MESSAGE_ID } from '../runner/utils'
+import { SNAPSHOT_CONTROLS_ID } from '../runner/utils'
+import { getMobxRunnerStore } from '../store'
+
+const mobxRunnerStore = getMobxRunnerStore()
+
+window.UnifiedRunner.MobX.reaction(
+  () => [mobxRunnerStore.messageTitle, mobxRunnerStore.messageControls],
+  () => {
+    const store = getMobxRunnerStore()
+    const message = window.UnifiedRunner.React.createElement(
+      window.UnifiedRunner.Message,
+      {
+        state: {
+          messageTitle: store.messageTitle,
+          messageControls: store.messageControls,
+          messageDescription: store.messageDescription,
+          messageType: store.messageType,
+          messageStyles: {
+            state: store.messageStyles.state,
+            styles: store.messageStyles.styles,
+            messageType: store.messageType,
+          },
+        },
+      },
+    )
+
+    window.UnifiedRunner.ReactDOM.render(message, document.querySelector(`#${SNAPSHOT_CONTROLS_ID}`))
+  },
+)
+
 </script>
 
 <style lang="scss">
