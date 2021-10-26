@@ -20,9 +20,14 @@
     "@packages/types": "0.0.0-development",
     "@storybook/csf-tools": "^6.4.0-alpha.38",
     "create-cypress-tests": "0.0.0-development",
+    "cross-fetch": "^3.1.4",
     "globby": "^11.0.1",
+    "json-stable-stringify": "1.0.1",
+    "lodash": "4.17.21",
     "mocha": "7.0.1",
-    "rimraf": "3.0.2"
+    "p-defer": "^3.0.0",
+    "rimraf": "3.0.2",
+    "wonka": "^4.0.15"
   },
   "files": [
     "src"

@@ -16,6 +16,7 @@ import {
   BrowserDataSource,
   UtilDataSource,
   StorybookDataSource,
+  CloudDataSource,
 } from './sources/'
 import { cached } from './util/cached'
 import { DataContextShell, DataContextShellConfig } from './DataContextShell'
@@ -172,6 +173,11 @@ export class DataContext extends DataContextShell {
     return new ProjectDataSource(this)
   }
 
+  @cached
+  get cloud () {
+    return new CloudDataSource(this)
+  }
+
   get projectsList () {
     return this.coreData.app.projects
   }
@@ -208,6 +214,16 @@ export class DataContext extends DataContextShell {
     // TODO(tim): handle this consistently
     // eslint-disable-next-line no-console
     console.error(e)
+  }
+
+  /**
+   * If we really want to get around the guards added in proxyContext
+   * which disallow referencing ctx.actions / ctx.emitter from contexct for a GraphQL query,
+   * we can call ctx.deref.emitter, etc. This should only be used in exceptional situations where
+   * we're certain this is a good idea.
+   */
+  get deref () {
+    return this
   }
 
   async destroy () {
