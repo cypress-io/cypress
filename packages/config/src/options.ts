@@ -1,4 +1,4 @@
-const v = require('./validation')
+const validation = require('./validation')
 
 interface ResolvedConfigOption {
   name: string
@@ -35,7 +35,7 @@ interface BreakingOption {
 }
 
 const isValidConfig = (key, config) => {
-  const status = v.isPlainObject(key, config)
+  const status = validation.isPlainObject(key, config)
 
   if (status !== true) {
     return status
@@ -67,23 +67,23 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
   {
     name: 'animationDistanceThreshold',
     defaultValue: 5,
-    validation: v.isNumber,
+    validation: validation.isNumber,
   }, {
     name: 'baseUrl',
     defaultValue: null,
-    validation: v.isFullyQualifiedUrl,
+    validation: validation.isFullyQualifiedUrl,
   }, {
     name: 'blockHosts',
     defaultValue: null,
-    validation: v.isStringOrArrayOfStrings,
+    validation: validation.isStringOrArrayOfStrings,
   }, {
     name: 'chromeWebSecurity',
     defaultValue: true,
-    validation: v.isBoolean,
+    validation: validation.isBoolean,
   }, {
     name: 'clientCertificates',
     defaultValue: [],
-    validation: v.isValidClientCertificatesSet,
+    validation: validation.isValidClientCertificatesSet,
   }, {
     name: 'component',
     // runner-ct overrides
@@ -92,16 +92,16 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
   }, {
     name: 'componentFolder',
     defaultValue: 'cypress/component',
-    validation: v.isStringOrFalse,
+    validation: validation.isStringOrFalse,
     isFolder: true,
   }, {
     name: 'defaultCommandTimeout',
     defaultValue: 4000,
-    validation: v.isNumber,
+    validation: validation.isNumber,
   }, {
     name: 'downloadsFolder',
     defaultValue: 'cypress/downloads',
-    validation: v.isString,
+    validation: validation.isString,
     isFolder: true,
   }, {
     name: 'e2e',
@@ -111,195 +111,195 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
   }, {
     name: 'env',
     defaultValue: {},
-    validation: v.isPlainObject,
+    validation: validation.isPlainObject,
   }, {
     name: 'execTimeout',
     defaultValue: 60000,
-    validation: v.isNumber,
+    validation: validation.isNumber,
   }, {
     name: 'experimentalFetchPolyfill',
     defaultValue: false,
-    validation: v.isBoolean,
+    validation: validation.isBoolean,
     isExperimental: true,
   }, {
     name: 'experimentalInteractiveRunEvents',
     defaultValue: false,
-    validation: v.isBoolean,
+    validation: validation.isBoolean,
     isExperimental: true,
   }, {
     name: 'experimentalSessionSupport',
     defaultValue: false,
-    validation: v.isBoolean,
+    validation: validation.isBoolean,
     isExperimental: true,
   }, {
     name: 'experimentalSourceRewriting',
     defaultValue: false,
-    validation: v.isBoolean,
+    validation: validation.isBoolean,
     isExperimental: true,
   }, {
     name: 'experimentalStudio',
     defaultValue: false,
-    validation: v.isBoolean,
+    validation: validation.isBoolean,
     isExperimental: true,
   }, {
     name: 'fileServerFolder',
     defaultValue: '',
-    validation: v.isString,
+    validation: validation.isString,
     isFolder: true,
   }, {
     name: 'fixturesFolder',
     defaultValue: 'cypress/fixtures',
-    validation: v.isStringOrFalse,
+    validation: validation.isStringOrFalse,
     isFolder: true,
   }, {
     name: 'ignoreTestFiles',
     defaultValue: '*.hot-update.js',
-    validation: v.isStringOrArrayOfStrings,
+    validation: validation.isStringOrArrayOfStrings,
   }, {
     name: 'includeShadowDom',
     defaultValue: false,
-    validation: v.isBoolean,
+    validation: validation.isBoolean,
   }, {
     name: 'integrationFolder',
     defaultValue: 'cypress/integration',
-    validation: v.isString,
+    validation: validation.isString,
     isFolder: true,
   }, {
     name: 'modifyObstructiveCode',
     defaultValue: true,
-    validation: v.isBoolean,
+    validation: validation.isBoolean,
   }, {
     name: 'nodeVersion',
     defaultValue: 'default',
-    validation: v.isOneOf('default', 'bundled', 'system'),
+    validation: validation.isOneOf('default', 'bundled', 'system'),
   }, {
     name: 'numTestsKeptInMemory',
     defaultValue: 50,
-    validation: v.isNumber,
+    validation: validation.isNumber,
   }, {
     name: 'pageLoadTimeout',
     defaultValue: 60000,
-    validation: v.isNumber,
+    validation: validation.isNumber,
   }, {
     name: 'pluginsFile',
     defaultValue: 'cypress/plugins',
-    validation: v.isStringOrFalse,
+    validation: validation.isStringOrFalse,
     isFolder: true,
   }, {
     name: 'port',
     defaultValue: null,
-    validation: v.isNumber,
+    validation: validation.isNumber,
   }, {
     name: 'projectId',
     defaultValue: null,
-    validation: v.isString,
+    validation: validation.isString,
   }, {
     name: 'redirectionLimit',
     defaultValue: 20,
-    validation: v.isNumber,
+    validation: validation.isNumber,
   }, {
     name: 'reporter',
     defaultValue: 'spec',
-    validation: v.isString,
+    validation: validation.isString,
   }, {
     name: 'reporterOptions',
     defaultValue: null,
-    validation: v.isPlainObject,
+    validation: validation.isPlainObject,
   }, {
     name: 'requestTimeout',
     defaultValue: 5000,
-    validation: v.isNumber,
+    validation: validation.isNumber,
   }, {
     name: 'resolvedNodePath',
     defaultValue: null,
-    validation: v.isString,
+    validation: validation.isString,
   }, {
     name: 'resolvedNodeVersion',
     defaultValue: null,
-    validation: v.isString,
+    validation: validation.isString,
   }, {
     name: 'responseTimeout',
     defaultValue: 30000,
-    validation: v.isNumber,
+    validation: validation.isNumber,
   }, {
     name: 'retries',
     defaultValue: {
       runMode: 0,
       openMode: 0,
     },
-    validation: v.isValidRetriesConfig,
+    validation: validation.isValidRetriesConfig,
   }, {
     name: 'screenshotOnRunFailure',
     defaultValue: true,
-    validation: v.isBoolean,
+    validation: validation.isBoolean,
   }, {
     name: 'screenshotsFolder',
     defaultValue: 'cypress/screenshots',
-    validation: v.isStringOrFalse,
+    validation: validation.isStringOrFalse,
     isFolder: true,
   }, {
     name: 'scrollBehavior',
     defaultValue: 'top',
-    validation: v.isOneOf('center', 'top', 'bottom', 'nearest', false),
+    validation: validation.isOneOf('center', 'top', 'bottom', 'nearest', false),
   }, {
     name: 'supportFile',
     defaultValue: 'cypress/support',
-    validation: v.isStringOrFalse,
+    validation: validation.isStringOrFalse,
     isFolder: true,
   }, {
     name: 'supportFolder',
     defaultValue: false,
-    validation: v.isStringOrFalse,
+    validation: validation.isStringOrFalse,
     isFolder: true,
   }, {
     name: 'taskTimeout',
     defaultValue: 60000,
-    validation: v.isNumber,
+    validation: validation.isNumber,
   }, {
     name: 'testFiles',
     defaultValue: '**/*.*',
-    validation: v.isStringOrArrayOfStrings,
+    validation: validation.isStringOrArrayOfStrings,
   }, {
     name: 'trashAssetsBeforeRuns',
     defaultValue: true,
-    validation: v.isBoolean,
+    validation: validation.isBoolean,
   }, {
     name: 'userAgent',
     defaultValue: null,
-    validation: v.isString,
+    validation: validation.isString,
   }, {
     name: 'video',
     defaultValue: true,
-    validation: v.isBoolean,
+    validation: validation.isBoolean,
   }, {
     name: 'videoCompression',
     defaultValue: 32,
-    validation: v.isNumberOrFalse,
+    validation: validation.isNumberOrFalse,
   }, {
     name: 'videosFolder',
     defaultValue: 'cypress/videos',
-    validation: v.isString,
+    validation: validation.isString,
     isFolder: true,
   }, {
     name: 'videoUploadOnPasses',
     defaultValue: true,
-    validation: v.isBoolean,
+    validation: validation.isBoolean,
   }, {
     name: 'viewportHeight',
     defaultValue: 660,
-    validation: v.isNumber,
+    validation: validation.isNumber,
   }, {
     name: 'viewportWidth',
     defaultValue: 1000,
-    validation: v.isNumber,
+    validation: validation.isNumber,
   }, {
     name: 'waitForAnimations',
     defaultValue: true,
-    validation: v.isBoolean,
+    validation: validation.isBoolean,
   }, {
     name: 'watchForFileChanges',
     defaultValue: true,
-    validation: v.isBoolean,
+    validation: validation.isBoolean,
   },
 ]
 
@@ -307,76 +307,76 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
   {
     name: 'autoOpen',
     defaultValue: false,
-    validation: v.isBoolean,
+    validation: validation.isBoolean,
     isInternal: true,
   }, {
     name: 'browsers',
     defaultValue: [],
-    validation: v.isValidBrowserList,
+    validation: validation.isValidBrowserList,
   }, {
     name: 'clientRoute',
     defaultValue: '/__/',
-    validation: v.isString,
+    validation: validation.isString,
     isInternal: true,
   }, {
     name: 'configFile',
     defaultValue: 'cypress.json',
-    validation: v.isStringOrFalse,
+    validation: validation.isStringOrFalse,
     // not truly internal, but can only be set via cli,
     // so we don't consider it a "public" option
     isInternal: true,
   }, {
     name: 'devServerPublicPathRoute',
     defaultValue: '/__cypress/src',
-    validation: v.isString,
+    validation: validation.isString,
     isInternal: true,
   }, {
     name: 'hosts',
     defaultValue: null,
-    validation: v.isPlainObject,
+    validation: validation.isPlainObject,
   }, {
     name: 'isTextTerminal',
     defaultValue: false,
-    validation: v.isBoolean,
+    validation: validation.isBoolean,
     isInternal: true,
   }, {
     name: 'morgan',
     defaultValue: true,
-    validation: v.isBoolean,
+    validation: validation.isBoolean,
     isInternal: true,
   }, {
     name: 'modifyObstructiveCode',
     defaultValue: true,
-    validation: v.isBoolean,
+    validation: validation.isBoolean,
   }, {
     name: 'namespace',
     defaultValue: '__cypress',
-    validation: v.isString,
+    validation: validation.isString,
     isInternal: true,
   }, {
     name: 'reporterRoute',
     defaultValue: '/__cypress/reporter',
-    validation: v.isString,
+    validation: validation.isString,
     isInternal: true,
   }, {
     name: 'socketId',
     defaultValue: null,
-    validation: v.isString,
+    validation: validation.isString,
     isInternal: true,
   }, {
     name: 'socketIoCookie',
     defaultValue: '__socket.io',
-    validation: v.isString,
+    validation: validation.isString,
     isInternal: true,
   }, {
     name: 'socketIoRoute',
     defaultValue: '/__socket.io',
-    validation: v.isString,
+    validation: validation.isString,
     isInternal: true,
   }, {
     name: 'xhrRoute',
     defaultValue: '/xhrs/',
-    validation: v.isString,
+    validation: validation.isString,
     isInternal: true,
   },
 ]

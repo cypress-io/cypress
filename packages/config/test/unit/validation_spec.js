@@ -1,5 +1,5 @@
 const snapshot = require('snap-shot-it')
-const v = require('../../src/validation')
+const validation = require('../../src/validation')
 const { expect } = require('chai')
 
 describe('src/validation', () => {
@@ -7,14 +7,14 @@ describe('src/validation', () => {
 
   describe('.isValidClientCertificatesSet', () => {
     it('returns error message for certs not passed as an array array', () => {
-      const result = v.isValidRetriesConfig(mockKey, '1')
+      const result = validation.isValidRetriesConfig(mockKey, '1')
 
       expect(result).to.not.be.true
       snapshot(result)
     })
 
     it('returns error message for certs object without url', () => {
-      const result = v.isValidClientCertificatesSet(mockKey, [
+      const result = validation.isValidClientCertificatesSet(mockKey, [
         { name: 'cert' },
       ])
 
@@ -23,14 +23,14 @@ describe('src/validation', () => {
     })
 
     it('returns error message for certs url not matching *', () => {
-      let result = v.isValidClientCertificatesSet(mockKey, [
+      let result = validation.isValidClientCertificatesSet(mockKey, [
         { url: 'http://url.com' },
       ])
 
       expect(result).to.not.be.true
       snapshot('missing https protocol', result)
 
-      result = v.isValidClientCertificatesSet(mockKey, [
+      result = validation.isValidClientCertificatesSet(mockKey, [
         { url: 'not *' },
       ])
 
@@ -39,7 +39,7 @@ describe('src/validation', () => {
     })
 
     // it('returns error message for missing CA', () => {
-    //   let result = v.isValidClientCertificatesSet(mockKey, [
+    //   let result = validation.isValidClientCertificatesSet(mockKey, [
     //     {
     //       url: 'https://url.com',
     //     }
@@ -50,7 +50,7 @@ describe('src/validation', () => {
     // })
 
     // it('returns error message for duplicate certs', () => {
-    //   let result = v.isValidClientCertificatesSet(mockKey, [
+    //   let result = validation.isValidClientCertificatesSet(mockKey, [
     //     {
     //       url: 'https://url.com',
     //       ca: ['array'] },
@@ -106,38 +106,38 @@ describe('src/validation', () => {
 
       // data-driven testing - computers snapshot value for each item in the list passed through the function
       // https://github.com/bahmutov/snap-shot-it#data-driven-testing
-      return snapshot.apply(null, [v.isValidBrowser].concat(browsers))
+      return snapshot.apply(null, [validation.isValidBrowser].concat(browsers))
     })
   })
 
   describe('.isValidBrowserList', () => {
     it('does not allow empty or not browsers', () => {
-      snapshot('undefined browsers', v.isValidBrowserList('browsers'))
-      snapshot('empty list of browsers', v.isValidBrowserList('browsers', []))
+      snapshot('undefined browsers', validation.isValidBrowserList('browsers'))
+      snapshot('empty list of browsers', validation.isValidBrowserList('browsers', []))
 
-      return snapshot('browsers list with a string', v.isValidBrowserList('browsers', ['foo']))
+      return snapshot('browsers list with a string', validation.isValidBrowserList('browsers', ['foo']))
     })
   })
 
   describe('.isValidRetriesConfig', () => {
     it('returns true for valid retry value', () => {
-      let result = v.isValidRetriesConfig(mockKey, null)
+      let result = validation.isValidRetriesConfig(mockKey, null)
 
       expect(result).to.be.true
 
-      result = v.isValidRetriesConfig(mockKey, 2)
+      result = validation.isValidRetriesConfig(mockKey, 2)
       expect(result).to.be.true
     })
 
     it('returns true for valid retry objects', () => {
-      let result = v.isValidRetriesConfig(mockKey, { runMode: 1 })
+      let result = validation.isValidRetriesConfig(mockKey, { runMode: 1 })
 
       expect(result).to.be.true
 
-      result = v.isValidRetriesConfig(mockKey, { openMode: 1 })
+      result = validation.isValidRetriesConfig(mockKey, { openMode: 1 })
       expect(result).to.be.true
 
-      result = v.isValidRetriesConfig(mockKey, {
+      result = validation.isValidRetriesConfig(mockKey, {
         runMode: 3,
         openMode: 0,
       })
@@ -146,12 +146,12 @@ describe('src/validation', () => {
     })
 
     it('returns error message for invalid retry config', () => {
-      let result = v.isValidRetriesConfig(mockKey, '1')
+      let result = validation.isValidRetriesConfig(mockKey, '1')
 
       expect(result).to.not.be.true
       snapshot('invalid retry value', result)
 
-      result = v.isValidRetriesConfig(mockKey, { fakeMode: 1 })
+      result = validation.isValidRetriesConfig(mockKey, { fakeMode: 1 })
       expect(result).to.not.be.true
       snapshot('invalid retry object', result)
     })
@@ -159,19 +159,19 @@ describe('src/validation', () => {
 
   describe('.isPlainObject', () => {
     it('returns true for value=null', () => {
-      const result = v.isPlainObject(mockKey, null)
+      const result = validation.isPlainObject(mockKey, null)
 
       expect(result).to.be.true
     })
 
     it('returns true for value=number', () => {
-      const result = v.isPlainObject(mockKey, { foo: 'bar' })
+      const result = validation.isPlainObject(mockKey, { foo: 'bar' })
 
       expect(result).to.be.true
     })
 
     it('returns error message when value is a not an object', () => {
-      const result = v.isPlainObject(mockKey, 1)
+      const result = validation.isPlainObject(mockKey, 1)
 
       expect(result).to.not.be.true
       snapshot(result)
@@ -180,19 +180,19 @@ describe('src/validation', () => {
 
   describe('.isNumber', () => {
     it('returns true for value=null', () => {
-      const result = v.isNumber(mockKey, null)
+      const result = validation.isNumber(mockKey, null)
 
       expect(result).to.be.true
     })
 
     it('returns true for value=number', () => {
-      const result = v.isNumber(mockKey, 1)
+      const result = validation.isNumber(mockKey, 1)
 
       expect(result).to.be.true
     })
 
     it('returns error message when value is a not a number', () => {
-      const result = v.isNumber(mockKey, 'string')
+      const result = validation.isNumber(mockKey, 'string')
 
       expect(result).to.not.be.true
       snapshot(result)
@@ -201,19 +201,19 @@ describe('src/validation', () => {
 
   describe('.isNumberOrFalse', () => {
     it('returns true for value=number', () => {
-      const result = v.isNumberOrFalse(mockKey, 1)
+      const result = validation.isNumberOrFalse(mockKey, 1)
 
       expect(result).to.be.true
     })
 
     it('returns true for value=false', () => {
-      const result = v.isNumberOrFalse(mockKey, false)
+      const result = validation.isNumberOrFalse(mockKey, false)
 
       expect(result).to.be.true
     })
 
     it('returns error message when value is a not number or false', () => {
-      const result = v.isNumberOrFalse(mockKey, null)
+      const result = validation.isNumberOrFalse(mockKey, null)
 
       expect(result).to.not.be.true
       snapshot(result)
@@ -222,27 +222,27 @@ describe('src/validation', () => {
 
   describe('.isFullyQualifiedUrl', () => {
     it('returns true for value=null', () => {
-      const result = v.isFullyQualifiedUrl(mockKey, null)
+      const result = validation.isFullyQualifiedUrl(mockKey, null)
 
       expect(result).to.be.true
     })
 
     it('returns true for value=empty string', () => {
-      const result = v.isFullyQualifiedUrl(mockKey, '')
+      const result = validation.isFullyQualifiedUrl(mockKey, '')
 
       expect(result).to.be.true
     })
 
     it('returns true for value=qualified urls', () => {
-      let result = v.isFullyQualifiedUrl(mockKey, 'https://url.com')
+      let result = validation.isFullyQualifiedUrl(mockKey, 'https://url.com')
 
       expect(result).to.be.true
-      result = v.isFullyQualifiedUrl(mockKey, 'http://url.com')
+      result = validation.isFullyQualifiedUrl(mockKey, 'http://url.com')
       expect(result).to.be.true
     })
 
     it('returns error message when value is a not qualified url', () => {
-      const result = v.isFullyQualifiedUrl(mockKey, 'url.com')
+      const result = validation.isFullyQualifiedUrl(mockKey, 'url.com')
 
       expect(result).to.not.be.true
       snapshot(result)
@@ -251,25 +251,25 @@ describe('src/validation', () => {
 
   describe('.isBoolean', () => {
     it('returns true for value=null', () => {
-      const result = v.isBoolean(mockKey, null)
+      const result = validation.isBoolean(mockKey, null)
 
       expect(result).to.be.true
     })
 
     it('returns true for value=true', () => {
-      const result = v.isBoolean(mockKey, true)
+      const result = validation.isBoolean(mockKey, true)
 
       expect(result).to.be.true
     })
 
     it('returns true for value=false', () => {
-      const result = v.isBoolean(mockKey, false)
+      const result = validation.isBoolean(mockKey, false)
 
       expect(result).to.be.true
     })
 
     it('returns error message when value is a not a string', () => {
-      const result = v.isString(mockKey, 1)
+      const result = validation.isString(mockKey, 1)
 
       expect(result).to.not.be.true
       snapshot(result)
@@ -278,19 +278,19 @@ describe('src/validation', () => {
 
   describe('.isString', () => {
     it('returns true for value=null', () => {
-      const result = v.isString(mockKey, null)
+      const result = validation.isString(mockKey, null)
 
       expect(result).to.be.true
     })
 
     it('returns true for value=array', () => {
-      const result = v.isString(mockKey, 'string')
+      const result = validation.isString(mockKey, 'string')
 
       expect(result).to.be.true
     })
 
     it('returns error message when value is a not a string', () => {
-      const result = v.isString(mockKey, 1)
+      const result = validation.isString(mockKey, 1)
 
       expect(result).to.not.be.true
       snapshot(result)
@@ -299,19 +299,19 @@ describe('src/validation', () => {
 
   describe('.isArray', () => {
     it('returns true for value=null', () => {
-      const result = v.isArray(mockKey, null)
+      const result = validation.isArray(mockKey, null)
 
       expect(result).to.be.true
     })
 
     it('returns true for value=array', () => {
-      const result = v.isArray(mockKey, [1, 2, 3])
+      const result = validation.isArray(mockKey, [1, 2, 3])
 
       expect(result).to.be.true
     })
 
     it('returns error message when value is a non-array', () => {
-      const result = v.isArray(mockKey, 1)
+      const result = validation.isArray(mockKey, 1)
 
       expect(result).to.not.be.true
       snapshot(result)
@@ -320,19 +320,19 @@ describe('src/validation', () => {
 
   describe('.isStringOrFalse', () => {
     it('returns true for value=string', () => {
-      const result = v.isStringOrFalse(mockKey, 'string')
+      const result = validation.isStringOrFalse(mockKey, 'string')
 
       expect(result).to.be.true
     })
 
     it('returns true for value=false', () => {
-      const result = v.isStringOrFalse(mockKey, false)
+      const result = validation.isStringOrFalse(mockKey, false)
 
       expect(result).to.be.true
     })
 
     it('returns error message when value is neither string nor false', () => {
-      const result = v.isStringOrFalse(mockKey, null)
+      const result = validation.isStringOrFalse(mockKey, null)
 
       expect(result).to.not.be.true
       snapshot(result)
@@ -341,24 +341,24 @@ describe('src/validation', () => {
 
   describe('.isStringOrArrayOfStrings', () => {
     it('returns true for value=string', () => {
-      const result = v.isStringOrArrayOfStrings(mockKey, 'string')
+      const result = validation.isStringOrArrayOfStrings(mockKey, 'string')
 
       expect(result).to.be.true
     })
 
     it('returns true for value=array of strings', () => {
-      const result = v.isStringOrArrayOfStrings(mockKey, ['string', 'other'])
+      const result = validation.isStringOrArrayOfStrings(mockKey, ['string', 'other'])
 
       expect(result).to.be.true
     })
 
     it('returns error message when value is neither string nor array of string', () => {
-      let result = v.isStringOrArrayOfStrings(mockKey, null)
+      let result = validation.isStringOrArrayOfStrings(mockKey, null)
 
       expect(result).to.not.be.true
       snapshot('not string or array', result)
 
-      result = v.isStringOrArrayOfStrings(mockKey, [1, 2, 3])
+      result = validation.isStringOrArrayOfStrings(mockKey, [1, 2, 3])
 
       expect(result).to.not.be.true
       snapshot('array of non-strings', result)
@@ -367,7 +367,7 @@ describe('src/validation', () => {
 
   describe('.isOneOf', () => {
     it('validates a string', () => {
-      const validate = v.isOneOf('foo', 'bar')
+      const validate = validation.isOneOf('foo', 'bar')
 
       expect(validate).to.be.a('function')
       expect(validate('test', 'foo')).to.be.true
@@ -390,7 +390,7 @@ describe('src/validation', () => {
     })
 
     it('validates a number', () => {
-      const validate = v.isOneOf(1, 2, 3)
+      const validate = validation.isOneOf(1, 2, 3)
 
       expect(validate).to.be.a('function')
       expect(validate('test', 1)).to.be.true
