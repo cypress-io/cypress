@@ -1,39 +1,31 @@
 <template>
   <div class="absolute inset-x-0 bottom-24">
-    <div>
-      <div>
-        {{ snapshotStore.messageTitle }}
-        {{ snapshotStore.messageDescription && `(${snapshotStore.messageDescription})` }}
-      </div>
+    <div class="h-11 flex justify-center">
+      <SnapshotMessage
+        v-if="snapshotStore.messageTitle"
+        :message-title="snapshotStore.messageTitle"
+        :message-description="snapshotStore.messageDescription"
+        :message-type="snapshotStore.messageType"
+      />
 
-      <div v-if="snapshotStore.snapshotProps?.$el">
-        <button
-          class="border border-3 border"
-          @click="unpin"
-        >
-          Unpin
-        </button>
-        <button @click="toggleHighlights">
-          {{ `${snapshotStore.snapshot?.showingHighlights ? 'Hide' : 'Show'} highlights` }}
-        </button>
-      </div>
+      <SnapshotHighlightControls
+        v-if="snapshotStore.isSnapshotPinned && snapshotStore.snapshotProps?.$el"
+        :event-manager="props.eventManager"
+      />
 
-      <div v-if="snapshots.length >= 2">
-        <button
-          v-for="snapshot in snapshots"
-          :key="snapshot.index"
-          @click="changeState(snapshot.index)"
-        >
-          {{ snapshot.name || snapshot.index + 1 }}
-        </button>
-      </div>
+      <SnapshotChangeState
+        v-if="snapshotStore.isSnapshotPinned && shouldShowStateControls"
+      />
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue-demi'
+import { computed } from 'vue'
 import { useSnapshotStore } from './snapshot-store'
+import SnapshotMessage from './SnapshotMessage.vue'
+import SnapshotChangeState from './SnapshotChangeState.vue'
+import SnapshotHighlightControls from './SnapshotHighlightControls.vue'
 
 const props = defineProps<{
   eventManager: typeof window.UnifiedRunner.eventManager
@@ -41,23 +33,12 @@ const props = defineProps<{
 
 const snapshotStore = useSnapshotStore()
 
-const unpin = () => {
-  props.eventManager.snapshotUnpinned()
-}
+const shouldShowStateControls = computed(() => {
+  // only show these controls if there is at least 2 different snapshots to compare.
+  // usually an interaction, such a button was clicked, and we want to show
+  // how the UI looked before and after the button click.
+  const snapshots = snapshotStore.snapshotProps?.snapshots
 
-const toggleHighlights = () => {
-  snapshotStore.toggleHighlights()
-}
-
-const changeState = (index: number) => {
-  snapshotStore.changeState(index)
-}
-
-const snapshots = computed(() => {
-  return (snapshotStore.snapshotProps?.snapshots || [])
-  .map((x, index) => ({ ...x, index }))
+  return snapshots && snapshots.length >= 2
 })
 </script>
-
-<style scoped>
-</style>

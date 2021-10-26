@@ -1,7 +1,8 @@
-import type { SnapshotMessageDescription } from "@packages/runner-shared/src/store";
-import { defineStore } from "pinia";
-import type { AutSnapshot } from "../runner/iframe-model";
+import { defineStore } from 'pinia'
+import type { AutSnapshot } from '../runner/iframe-model'
 import { getAutIframeModel } from '../runner'
+
+export type SnapshotMessageDescription = 'info' | 'warning' | 'pinned'
 
 interface SnapshotStoreState {
   messageTitle?: string
@@ -10,20 +11,22 @@ interface SnapshotStoreState {
   snapshotProps?: AutSnapshot
   isSnapshotPinned: boolean
   snapshot?: {
-    showingHighlights: boolean,
-    stateIndex: number,
+    showingHighlights: boolean
+    stateIndex: number
   }
 }
 
 export const useSnapshotStore = defineStore({
   id: 'snapshots',
-  state: (): SnapshotStoreState => ({
-    messageTitle: undefined,
-    messageDescription: undefined,
-    isSnapshotPinned: false,
-    snapshot: undefined,
-    snapshotProps: undefined
-  }),
+  state: (): SnapshotStoreState => {
+    return {
+      messageTitle: undefined,
+      messageDescription: undefined,
+      isSnapshotPinned: false,
+      snapshot: undefined,
+      snapshotProps: undefined,
+    }
+  },
   actions: {
     setSnapshotPinned (isSnapshotPinned: boolean) {
       this.isSnapshotPinned = isSnapshotPinned
@@ -63,6 +66,7 @@ export const useSnapshotStore = defineStore({
       if (!this.snapshot) {
         return
       }
+
       this.snapshot.showingHighlights = !this.snapshot.showingHighlights
       this.updateHighlighting()
     },
@@ -76,6 +80,7 @@ export const useSnapshotStore = defineStore({
 
       if (this.snapshot.showingHighlights && this.snapshotProps) {
         const snapshot = this.snapshotProps.snapshots[this.snapshot.stateIndex]
+
         aut.highlightEl(snapshot, this.snapshotProps)
       } else {
         aut.removeHighlights()
@@ -88,12 +93,14 @@ export const useSnapshotStore = defineStore({
       }
 
       const snapshot = this.snapshotProps?.snapshots[index]
+
       if (!snapshot) {
         throw Error(`Could not find snapshot index ${index}`)
       }
 
       this.snapshot.stateIndex = index
       const aut = getAutIframeModel()
+
       aut.restoreDom(snapshot)
 
       this.updateHighlighting()
@@ -108,6 +115,6 @@ export const useSnapshotStore = defineStore({
       this.messageTitle = 'The snapshot is missing. Displaying current state of the DOM.'
       this.messageDescription = undefined
       this.messageType = 'warning'
-    }
-  }
+    },
+  },
 })
