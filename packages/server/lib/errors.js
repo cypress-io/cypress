@@ -700,6 +700,20 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         Could not find a Cypress configuration file, exiting.
 
         We looked but did not find a default config file in this folder: ${chalk.blue(arg1)}`
+    case 'CONFIG_FILE_MIGRATION_NEEDED':
+      return stripIndent`
+          There is both a cypress.json file ar the location below:
+          ${arg1}
+
+          Cypress does not support any more 'cypress.json' config, migrate to 'cypress.config.{ts|js}'.
+          `
+    case 'LEGACY_CONFIG_FILE':
+      return stripIndent`
+          There is both a \`${arg2}\` and a cypress.json file at the location below:
+          ${arg1}
+
+          Cypress does not support any more 'cypress.json' config, remove it from your files.
+          `
       // TODO: update with vetted cypress language
     case 'CONFIG_FILES_LANGUAGE_CONFLICT':
       return stripIndent`

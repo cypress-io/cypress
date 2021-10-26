@@ -161,3 +161,21 @@ Cypress does not know which one to read for config. Please remove one of the two
 
 
 `
+
+exports['e2e config throws error when cypress.json is found in project and need migration 1'] = `
+There is both a cypress.json file ar the location below:
+/foo/bar/.projects/config-with-json
+
+Cypress does not support any more 'cypress.json' config, migrate to 'cypress.config.{ts|js}'.
+
+
+`
+
+exports['e2e config throws error when cypress.json is found in project and cypress.config.{ts|js} exists as well 1'] = `
+There is both a \`cypress.config.js\` and a cypress.json file at the location below:
+/foo/bar/.projects/multiples-config-with-json
+
+Cypress does not support any more 'cypress.json' config, remove it from your files.
+
+
+`

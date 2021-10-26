@@ -90,4 +90,24 @@ describe('e2e config', () => {
       })
     })
   })
+
+  it('throws error when cypress.json is found in project and need migration', function () {
+    const projectRoot = Fixtures.projectPath('config-with-json')
+
+    return systemTests.exec(this, {
+      project: projectRoot,
+      expectedExitCode: 1,
+      snapshot: true,
+    })
+  })
+
+  it('throws error when cypress.json is found in project and cypress.config.{ts|js} exists as well', function () {
+    const projectRoot = Fixtures.projectPath('multiples-config-with-json')
+
+    return systemTests.exec(this, {
+      project: projectRoot,
+      expectedExitCode: 1,
+      snapshot: true,
+    })
+  })
 })
