@@ -2147,6 +2147,7 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - run-frontend-shared-component-tests-chrome:
+        context: test-runner:launchpad-tests
         requires:
           - build
     - run-launchpad-integration-tests-chrome:
