@@ -55,6 +55,7 @@ shikiWrapperClasses computed property.
       v-html="highlightedCode"
     />
     <Button
+      v-if="copyButton"
       variant="outline"
       tabindex="-1"
       class="absolute  bottom-8px right-8px"
@@ -120,13 +121,15 @@ const props = withDefaults(defineProps<{
   inline?: boolean,
   wrap?: boolean,
   copyOnClick?: boolean,
-  class?: string | string[] | Record<string, any>
+  class?: string | string[] | Record<string, any>,
+  copyButton?: boolean,
 }>(), {
   lineNumbers: false,
   inline: false,
   wrap: false,
   copyOnClick: false,
   class: undefined,
+  copyButton: false,
 })
 
 const resolvedLang = computed(() => {
