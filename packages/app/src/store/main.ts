@@ -13,10 +13,12 @@ export interface MainStoreState {
  */
 export const useMainStore = defineStore({
   id: 'main',
-  state: (): MainStoreState => ({ 
-    navBarExpanded: false,
-    highlightUrl: false,
-  }),
+  state: (): MainStoreState => {
+    return {
+      navBarExpanded: false,
+      highlightUrl: false,
+    }
+  },
   actions: {
     toggleNavBar () {
       this.navBarExpanded = !this.navBarExpanded
@@ -26,6 +28,6 @@ export const useMainStore = defineStore({
     },
     updateUrl (url?: string) {
       this.url = url
-    }
+    },
   },
 })
