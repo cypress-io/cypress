@@ -1,5 +1,9 @@
 const { $ } = Cypress
 
+before(() => {
+  expect(Cypress.config('retries')).to.deep.eq({ runMode: 2, openMode: 0 })
+})
+
 beforeEach(() => {
   const isActuallyInteractive = Cypress.config('isInteractive')
 
