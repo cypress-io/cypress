@@ -1613,6 +1613,14 @@ jobs:
           repo: cypress-example-kitchensink
       - install-required-node
       - run:
+          name: Scaffold new config file
+          working_directory: /tmp/cypress-example-kitchensink
+          environment:
+            CYPRESS_INTERNAL_FORCE_SCAFFOLD: "1"
+          command: |
+            rm -rf cypress.json
+            echo 'module.exports = {}' > cypress.config.js
+      - run:
           name: Install prod dependencies
           command: yarn --production
           working_directory: /tmp/cypress-example-kitchensink
