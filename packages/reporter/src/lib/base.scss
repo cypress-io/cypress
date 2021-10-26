@@ -103,7 +103,7 @@ body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input
     > tbody > tr > td,
     > tfoot > tr > th,
     > tfoot > tr > td {
-      border-top: 1px solid $gray-900;
+      border-top: 1px solid rgba($gray-900, 0.4);
       line-height: 1.42857;
       padding: 5px;
       vertical-align: top;
@@ -111,7 +111,7 @@ body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input
 
     > thead > tr > th {
       vertical-align: bottom;
-      border-bottom: 2px solid $gray-900;
+      border-bottom: 2px solid rgba($gray-900, 0.4);
     }
 
     > caption + thead > tr:first-child > th,
