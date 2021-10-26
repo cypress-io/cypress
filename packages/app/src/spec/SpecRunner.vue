@@ -18,6 +18,7 @@
         :style="viewportStyle"
       />
       <SnapshotControls />
+      <SnapshotControlsVue :eventManager="eventManager" />
       <div>Viewport: {{ viewportDimensions.width }}px x {{ viewportDimensions.height }}px</div>
     </div>
 
@@ -38,6 +39,7 @@ import { getMobxRunnerStore } from '../store'
 import { UnifiedRunnerAPI } from '../runner'
 import type { BaseSpec } from '@packages/types'
 import SnapshotControls from './SnapshotControls.vue'
+import SnapshotControlsVue from './SnapshotControlsVue.vue'
 
 gql`
 fragment SpecRunner on App {
@@ -46,6 +48,7 @@ fragment SpecRunner on App {
 `
 
 const runnerColumnWidth = 400
+const eventManager = window.UnifiedRunner.eventManager
 
 const mobxRunnerStore = getMobxRunnerStore()
 

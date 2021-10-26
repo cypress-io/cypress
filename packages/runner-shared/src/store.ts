@@ -2,6 +2,8 @@ import { action, observable, computed } from 'mobx'
 import { nanoid } from 'nanoid'
 import { automation, automationStatus } from './automation'
 
+export type SnapshotMessageDescription = 'info' | 'warning' | 'pinned'
+
 export type RunMode = 'single'
 
 const defaults = {
@@ -35,7 +37,7 @@ export abstract class BaseStore {
   @observable headerHeight = 0
 
   @observable messageTitle?: string
-  @observable messageDescription?: 'info' | 'warning' | 'pinned'
+  @observable messageDescription?: SnapshotMessageDescription
   @observable messageType?: string
   @observable viewportUpdateCallback?: Callback
   @observable messageControls?: any
