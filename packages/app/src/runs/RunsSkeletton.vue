@@ -36,7 +36,6 @@
 
 <script lang="ts" setup>
 import ListRowHeader from '@cy/components/ListRowHeader.vue'
-import ProgressCircle from '@cy/components/ProgressCircle.vue'
 
 withDefaults(defineProps<{
   // this could become the last number of runs we had
