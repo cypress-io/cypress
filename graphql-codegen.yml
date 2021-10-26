@@ -85,6 +85,9 @@ generates:
     documents: './packages/app/src/**/*.vue'
     <<: *vueOperations
 
+  './packages/frontend-shared/src/generated/graphql.ts':
+    documents: './packages/frontend-shared/src/**/*.vue'
+    <<: *vueOperations
   ###
   # All GraphQL documents imported into the .spec.tsx files for component testing.
   # Similar to generated/graphql.ts, except it doesn't include the flattening for the document nodes,
