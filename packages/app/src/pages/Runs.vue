@@ -38,8 +38,10 @@ query Runs {
       cloudProject {
         id
         runs(first: 10){
-          id
-          ...RunsCard
+          nodes {
+            id
+            ...RunCard
+          }
         }
       }
     }

@@ -3,10 +3,7 @@
     class="block w-full overflow-hidden mb-4 border border-gray-100
   rounded bg-light-50 hocus-default"
   >
-    <ListRowHeader>
-      <template #icon>
-        <RunIcon :gql="props.gql" />
-      </template>
+    <ListRowHeader :icon="icon">
       <template #header>
         {{ run.commitInfo?.summary }}
       </template>
@@ -48,18 +45,22 @@
 </template>
 
 <script lang="ts" setup>
+import { computed } from 'vue'
 import ListRowHeader from '@cy/components/ListRowHeader.vue'
 import { gql } from '@urql/core'
-import RunIcon from './RunIcon.vue'
 import RunResults from './RunResults.vue'
 import type { RunCardFragment } from '../generated/graphql'
-import { computed } from 'vue-demi'
+import PassedIcon from '~icons/cy/status-passed-solid_x24.svg'
+import FailedIcon from '~icons/cy/status-failed-solid_x24.svg'
+import ErroredIcon from '~icons/cy/status-errored-solid_x24.svg'
+import SkippedIcon from '~icons/cy/status-skipped_x24.svg'
+import PendingIcon from '~icons/cy/status-pending_x24.svg'
 
 gql`
 fragment RunCard on CloudRun {
 	id
 	createdAt
-	...RunIcon
+	status
 	...RunResults
 	commitInfo {
 		authorName
@@ -73,6 +74,20 @@ fragment RunCard on CloudRun {
 const props = defineProps<{
 	gql: RunCardFragment
 }>()
+
+const icon = computed(() => {
+  return props.gql.status === 'PASSED'
+    ? PassedIcon
+    : props.gql.status === 'FAILED'
+      ? FailedIcon
+      : props.gql.status === 'TIMEDOUT' || props.gql.status === 'ERRORED' || props.gql.status === 'OVERLIMIT'
+        ? ErroredIcon
+        : props.gql.status === 'CANCELLED' || props.gql.status === 'NOTESTS'
+          ? SkippedIcon
+          : props.gql.status === 'RUNNING'
+            ? PendingIcon
+            : undefined
+})
 
 const run = computed(() => props.gql)
 
