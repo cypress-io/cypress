@@ -5,10 +5,7 @@
       <transition
         name="fade"
       >
-        <template v-if="!delayedMountedFlag && query.fetching.value">
-          &nbsp;
-        </template>
-        <RunsSkeletton v-else-if="query.fetching.value" />
+        <RunsSkeletton v-if="query.fetching.value" />
         <div
           v-else-if="query.data.value?.app?.activeProject?.cloudProject?.runs?.nodes"
         >
@@ -27,7 +24,6 @@
 </template>
 
 <script lang="ts" setup>
-import { onMountedDelayed } from '@packages/frontend-shared/src/composables'
 import { gql, useQuery } from '@urql/vue'
 import { RunsDocument } from '../generated/graphql'
 import RunCard from '../runs/RunCard.vue'
@@ -51,8 +47,6 @@ query Runs {
 }`
 
 const query = useQuery({ query: RunsDocument })
-
-const delayedMountedFlag = onMountedDelayed(200)
 </script>
 
 <route>
