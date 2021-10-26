@@ -42,11 +42,11 @@ describe('driver/src/cypress/cy', () => {
     let setup
 
     beforeEach(() => {
-      Cypress.Commands.add('nested', () => {
-        cy.url()
-      })
-
       setup = (fn = () => {}) => {
+        Cypress.Commands.add('nested', () => {
+          cy.url()
+        })
+
         cy.nested().noop().then(() => fn())
       }
     })
