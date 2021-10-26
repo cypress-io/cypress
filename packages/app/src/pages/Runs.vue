@@ -5,14 +5,19 @@
       <transition
         name="fade"
       >
-        <template v-if="!delayedMounted && query.fetching.value">
+        <template v-if="!delayedMountedFlag && query.fetching.value">
           &nbsp;
         </template>
         <RunsSkeletton v-else-if="query.fetching.value" />
-        <RunsPage
-          v-else-if="query.data.value?.app?.activeProject?.cloudProject"
-          :gql="query.data.value.app.activeProject.cloudProject"
-        />
+        <div
+          v-else-if="query.data.value?.app?.activeProject?.cloudProject?.runs?.nodes"
+        >
+          <RunCard
+            v-for="run of query.data.value.app.activeProject.cloudProject.runs.nodes"
+            :key="run.id"
+            :gql="run"
+          />
+        </div>
         <template v-else-if="query.data.value?.app?.activeProject">
           Connect the current project to the cloud
         </template>
@@ -25,7 +30,7 @@
 import { onMountedDelayed } from '@packages/frontend-shared/src/composables'
 import { gql, useQuery } from '@urql/vue'
 import { RunsDocument } from '../generated/graphql'
-import RunsPage from '../runs/RunsPage.vue'
+import RunCard from '../runs/RunCard.vue'
 import RunsSkeletton from '../runs/RunsSkeletton.vue'
 
 gql`
@@ -36,7 +41,10 @@ query Runs {
       projectId
       cloudProject {
         id
-        ...RunsPage
+        runs(first: 10){
+          id
+          ...RunsCard
+        }
       }
     }
   }
@@ -44,7 +52,7 @@ query Runs {
 
 const query = useQuery({ query: RunsDocument })
 
-const delayedMounted = onMountedDelayed(200)
+const delayedMountedFlag = onMountedDelayed(200)
 </script>
 
 <route>
