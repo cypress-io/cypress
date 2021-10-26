@@ -5,7 +5,7 @@
 
 <script lang="ts" setup>
 import SpecsPageContainer from '../specs/SpecsPageContainer.vue'
-import HeaderBar from '../../../frontend-shared/src/layouts/HeaderBar.vue'
+import HeaderBar from '../../../frontend-shared/src/gql-components/HeaderBar.vue'
 </script>
 
 <route>

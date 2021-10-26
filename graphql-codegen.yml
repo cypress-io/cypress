@@ -86,7 +86,7 @@ generates:
     <<: *vueOperations
 
   './packages/frontend-shared/src/generated/graphql.ts':
-    documents: './packages/frontend-shared/src/**/*.vue'
+    documents: './packages/frontend-shared/src/gql-components/**/*.vue'
     <<: *vueOperations
   ###
   # All GraphQL documents imported into the .spec.tsx files for component testing.
@@ -100,3 +100,7 @@ generates:
   './packages/app/src/generated/graphql-test.ts':
     documents: './packages/app/src/**/*.vue'
     <<: *vueTesting
+
+  './packages/frontend-shared/src/generated/graphql-test.ts':
+    documents: './packages/frontend-shared/src/gql-components/**/*.vue'
+    <<: *vueOperations
