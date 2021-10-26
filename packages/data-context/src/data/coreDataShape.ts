@@ -51,6 +51,7 @@ export interface WizardDataShape {
   chosenLanguage: NexusGenEnums['CodeLanguageEnum']
   chosenManualInstall: boolean
   chosenBrowser: FoundBrowser | null
+  browserErrorMessage: string | null
 }
 
 export interface ElectronShape {

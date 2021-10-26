@@ -19,6 +19,13 @@ export const App = objectType({
       },
     })
 
+    t.string('browserErrorMessage', {
+      description: 'An error related to finding a browser',
+      resolve: (source, args, ctx) => {
+        return ctx.wizardData.browserErrorMessage
+      },
+    })
+
     t.list.nonNull.field('browsers', {
       type: Browser,
       description: 'Browsers found that are compatible with Cypress',

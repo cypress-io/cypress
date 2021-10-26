@@ -150,9 +150,15 @@ export class ProjectActions {
     }
   }
 
-  async launchProject (testingType: TestingTypeEnum, options: LaunchOpts) {
+  async launchProject (testingType: TestingTypeEnum | null, options: LaunchOpts) {
     if (!this.ctx.activeProject) {
       return null
+    }
+
+    testingType = testingType || this.ctx.wizardData.chosenTestingType
+
+    if (!testingType) {
+      throw Error('Cannot launch project without chosen testing type')
     }
 
     const browser = this.ctx.wizardData.chosenBrowser ?? this.ctx.appData.browsers?.[0]

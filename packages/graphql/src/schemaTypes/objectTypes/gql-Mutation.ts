@@ -232,10 +232,6 @@ export const mutation = mutationType({
     t.liveMutation('launchOpenProject', {
       description: 'Launches project from open_project global singleton',
       resolve: async (_, args, ctx) => {
-        if (!ctx.wizardData.chosenTestingType) {
-          throw Error('Cannot launch project without chosen testing type')
-        }
-
         await ctx.actions.project.launchProject(ctx.wizardData.chosenTestingType, {})
       },
     })
