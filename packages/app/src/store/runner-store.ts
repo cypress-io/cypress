@@ -1,6 +1,10 @@
 import { BaseStore } from '@packages/runner-shared/src/store'
 
-export class MobxRunnerStore extends BaseStore { }
+export class MobxRunnerStore extends BaseStore {
+  get scale () {
+    return 1
+  }
+}
 
 let mobxRunnerStore: MobxRunnerStore
 
@@ -13,7 +17,7 @@ export function getMobxRunnerStore () {
 }
 
 export const initializeMobxStore = (testingType: Cypress.TestingType) => {
-  mobxRunnerStore = new BaseStore(testingType)
+  mobxRunnerStore = new MobxRunnerStore(testingType)
 
   return mobxRunnerStore
 }

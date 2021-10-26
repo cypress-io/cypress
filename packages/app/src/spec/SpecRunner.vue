@@ -23,18 +23,27 @@
       v-once
       :id="REPORTER_ID"
     />
+
+    <div
+      v-once
+      :id="MESSAGE_ID"
+    />
+    <!-- <SnapshotControls
+      :eventManager="eventManager"
+    /> -->
   </div>
 </template>
 
 <script lang="ts" setup>
 import { computed, onBeforeUnmount, onMounted, reactive, watch } from 'vue'
-import { REPORTER_ID, RUNNER_ID, getRunnerElement, getReporterElement, empty } from '../runner/utils'
+import { REPORTER_ID, RUNNER_ID, MESSAGE_ID, getRunnerElement, getReporterElement, empty } from '../runner/utils'
 import { gql } from '@urql/core'
 import type { SpecRunnerFragment } from '../generated/graphql'
 import InlineSpecList from '../specs/InlineSpecList.vue'
 import { getMobxRunnerStore, useSpecStore } from '../store'
 import { UnifiedRunnerAPI } from '../runner'
 import type { BaseSpec } from '@packages/types'
+import SnapshotControls from './SnapshotsControls.vue'
 
 gql`
 fragment SpecRunner on App {
@@ -43,6 +52,8 @@ fragment SpecRunner on App {
 `
 
 const runnerColumnWidth = 400
+
+const eventManager = window.UnifiedRunner.eventManager
 
 const mobxRunnerStore = getMobxRunnerStore()
 
@@ -56,6 +67,33 @@ window.UnifiedRunner.MobX.reaction(
   ([height, width]) => {
     viewportDimensions.height = height
     viewportDimensions.width = width
+  },
+)
+
+window.UnifiedRunner.MobX.reaction(
+  () => [mobxRunnerStore.messageTitle, mobxRunnerStore.messageControls],
+  ([title, controls]) => {
+    const store = getMobxRunnerStore()
+    const message = window.UnifiedRunner.React.createElement(
+      window.UnifiedRunner.Message,
+      {
+        state: {
+          messageTitle: store.messageTitle,
+          messageControls: store.messageControls,
+          messageDescription: store.messageDescription,
+          messageType: store.messageType,
+          messageStyles: {
+            state: store.messageStyles.state,
+            styles: store.messageStyles.styles,
+            messageType: store.messageType,
+          },
+        },
+      },
+    )
+
+    window.UnifiedRunner.ReactDOM.render(message, document.querySelector(`#${MESSAGE_ID}`))
+    // viewportDimensions.height = height
+    // viewportDimensions.width = width
   },
 )
 

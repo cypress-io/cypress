@@ -42,6 +42,20 @@ function getAutIframeModel () {
   return _autIframeModel
 }
 
+interface Snapshots {
+  id: number
+  url: string
+  viewportHeight: number
+  viewportWidth: number
+  snapshots: Array<{
+    body: {
+      get: () => any
+    }
+    htmlAttrs: Record<string, any> // NamedNodeMap?
+    name: string
+  }>
+}
+
 /**
  * 1:1: relationship with the AUT IFrame model.
  * controls various things to do with snapshots, test url, etc.
@@ -57,7 +71,25 @@ function createIframeModel () {
     autIframe.restoreDom,
     autIframe.highlightEl,
     window.UnifiedRunner.eventManager,
-    () => {
+    (snapshotProps: Snapshots) => {
+      // const message = window.UnifiedRunner.React.createElement(
+      //   window.UnifiedRunner.Message,
+      //   {
+      //     snapshotProps,
+      //     state: getMobxRunnerStore(),
+      //     eventManager: window.UnifiedRunner.eventManager,
+      //     onToggleHighlights: () => {
+      //       console.log('toggle')
+      //     },
+      //     onStateChange: () => {
+      //       console.log('state change')
+      //     }
+      //   }
+      // )
+      // const m = document.querySelector('#message')
+      // console.log({ m })
+      // window.UnifiedRunner.ReactDOM.render(ss, m)
+
       // TODO snapshot controls
     },
     window.UnifiedRunner.MobX,

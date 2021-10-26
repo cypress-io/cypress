@@ -2,6 +2,8 @@ export const RUNNER_ID = 'unified-runner'
 
 export const REPORTER_ID = 'unified-reporter'
 
+export const MESSAGE_ID = 'unified-messages'
+
 function getElementById (id: string) {
   const el = document.querySelector<HTMLElement>(`#${id}`)
 
