@@ -17,13 +17,13 @@ export interface AutSnapshot {
   }
 }
 
-interface Snapshot {
-  name?: 'info' | 'pinned' | 'warning'
-  htmlAttrs: Record<string, any> // Type is NamedNodeMap, not sure if we should include lib: ["DOM"]
-  body: {
-    get: () => unknown // TOOD: find out what this is, some sort of JQuery API.
-  }
-}
+// interface Snapshot {
+//   name?: 'info' | 'pinned' | 'warning'
+//   htmlAttrs: Record<string, any> // Type is NamedNodeMap, not sure if we should include lib: ["DOM"]
+//   body: {
+//     get: () => unknown // TOOD: find out what this is, some sort of JQuery API.
+//   }
+// }
 
 type Fn = () => void
 
@@ -104,12 +104,13 @@ export class IframeModel {
   _setSnapshotsVue = (snapshotProps: AutSnapshot) => {
     const store = useSnapshotStore()
     const mainStore = useMainStore()
+
     if (store.isSnapshotPinned) {
       return
     }
 
     if (this.state.isRunning) {
-      store.setTestsRunningError()
+      return store.setTestsRunningError()
     }
 
     if (this.studio.recorder.isOpen) {
@@ -156,11 +157,10 @@ export class IframeModel {
     this._showSnapshotVue(snapshots[0], snapshotProps)
   }
 
-
-    
-  /// todo(lachlan): figure out shape of these two args 
+  /// todo(lachlan): figure out shape of these two args
   _showSnapshotVue = (snapshot: any, snapshotProps: AutSnapshot) => {
     const store = useSnapshotStore()
+
     store.showSnapshot(snapshot.name)
     this._restoreDom(snapshot, snapshotProps)
   }
@@ -211,7 +211,6 @@ export class IframeModel {
     })
   }
 
-
   _pinSnapshotVue = (snapshotProps) => {
     const snapshotStore = useSnapshotStore()
     const { snapshots } = snapshotProps
@@ -219,6 +218,7 @@ export class IframeModel {
     if (!snapshots || !snapshots.length) {
       this.eventManager.snapshotUnpinned()
       snapshotStore.setMissingSnapshotMessage()
+
       return
     }
 
@@ -231,6 +231,7 @@ export class IframeModel {
 
   _unpinSnapshotVue = () => {
     const snapshotStore = useSnapshotStore()
+
     snapshotStore.unpinSnapshot()
   }
 
@@ -265,6 +266,7 @@ export class IframeModel {
     this.originalState = undefined
 
     const store = useSnapshotStore()
+
     store.setSnapshotPinned(false)
   }
 }

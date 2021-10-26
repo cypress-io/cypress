@@ -1,21 +1,27 @@
 <template>
   <div class="absolute inset-x-0 bottom-24">
-    <div v-if="snapshotStore.isSnapshotPinned">
+    <div>
       <div>
         {{ snapshotStore.messageTitle }}
-        ({{ snapshotStore.messageDescription }})
+        {{ snapshotStore.messageDescription && `(${snapshotStore.messageDescription})` }}
       </div>
-      <button class="border border-3 border" @click="unpin">Unpin</button>
 
       <div v-if="snapshotStore.snapshotProps?.$el">
+        <button
+          class="border border-3 border"
+          @click="unpin"
+        >
+          Unpin
+        </button>
         <button @click="toggleHighlights">
           {{ `${snapshotStore.snapshot?.showingHighlights ? 'Hide' : 'Show'} highlights` }}
         </button>
       </div>
 
       <div v-if="snapshots.length >= 2">
-        <button 
+        <button
           v-for="snapshot in snapshots"
+          :key="snapshot.index"
           @click="changeState(snapshot.index)"
         >
           {{ snapshot.name || snapshot.index + 1 }}
@@ -49,7 +55,7 @@ const changeState = (index: number) => {
 
 const snapshots = computed(() => {
   return (snapshotStore.snapshotProps?.snapshots || [])
-    .map((x, index) => ({...x, index }))
+  .map((x, index) => ({ ...x, index }))
 })
 </script>
 
