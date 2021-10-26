@@ -14,7 +14,7 @@ const glob = require('@packages/server/lib/util/glob')
 const videoCapture = require('@packages/server/lib/video_capture')
 const Fixtures = require('../lib/fixtures')
 
-const NUM_TESTS = 5
+const NUM_TESTS = 40
 const MS_PER_TEST = 500
 const EXPECTED_DURATION_MS = NUM_TESTS * MS_PER_TEST
 
