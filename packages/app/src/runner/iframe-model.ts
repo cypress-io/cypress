@@ -218,7 +218,9 @@ export class IframeModel {
     this.state.messageTitle = 'DOM Snapshot'
     this.state.messageDescription = 'pinned'
     this.state.messageType = 'info'
-    this.state.messageControls = this.snapshotControls(snapshotProps)
+    this.state.messageControls = window.UnifiedRunner.MobX.runInAction(() => {
+      return this.snapshotControls(snapshotProps)
+    })
 
     this._restoreDom(snapshots[0], snapshotProps)
   }

@@ -201,16 +201,6 @@ export default class State extends BaseStore {
   }
 
   @action
-  setShowSnapshotHighlight = (showingHighlights: boolean) => {
-    this.snapshot.showingHighlights = showingHighlights
-  }
-
-  @action
-  setSnapshotIndex = (stateIndex: number) => {
-    this.snapshot.stateIndex = stateIndex
-  }
-
-  @action
   initializePlugins = (config: Cypress.RuntimeConfigOptions & Cypress.ResolvedConfigOptions) => {
     if (config.env.reactDevtools && !config.isTextTerminal) {
       this.loadReactDevTools()

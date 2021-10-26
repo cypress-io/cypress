@@ -45,6 +45,7 @@ function getAutIframeModel () {
 interface Snapshots {
   id: number
   url: string
+  $el: HTMLBodyElement
   viewportHeight: number
   viewportWidth: number
   snapshots: Array<{
@@ -63,6 +64,41 @@ interface Snapshots {
  * run lifecycle, snapshots, and viewport.
  */
 function createIframeModel () {
+  const state = getMobxRunnerStore()
+
+  const _toggleSnapshotHighlights = window.UnifiedRunner.MobX.runInAction(() => {
+    return (snapshotProps: Snapshots) => {
+      if (!state.snapshot) {
+        return
+      }
+
+      state.setShowSnapshotHighlight(!state.snapshot.showingHighlights)
+
+      if (state.snapshot.showingHighlights) {
+        const snapshot = snapshotProps.snapshots[state.snapshot.stateIndex]
+
+        autIframe.highlightEl(snapshot, snapshotProps)
+      } else {
+        autIframe.removeHighlights()
+      }
+    }
+  })
+
+  const _changeSnapshotState = window.UnifiedRunner.MobX.runInAction(() => {
+    return (snapshotProps: Snapshots, index: number) => {
+      const snapshot = snapshotProps.snapshots[index]
+
+      state.setSnapshotIndex(index)
+      autIframe.restoreDom(snapshot)
+
+      if (state.snapshot?.showingHighlights && snapshotProps.$el) {
+        autIframe.highlightEl(snapshot, snapshotProps)
+      } else {
+        autIframe.removeHighlights()
+      }
+    }
+  })
+
   const autIframe = getAutIframeModel()
   // IFrame Model to manage snapshots, etc.
   const iframeModel = new IframeModel(
@@ -72,26 +108,18 @@ function createIframeModel () {
     autIframe.highlightEl,
     window.UnifiedRunner.eventManager,
     (snapshotProps: Snapshots) => {
-      // const message = window.UnifiedRunner.React.createElement(
-      //   window.UnifiedRunner.Message,
-      //   {
-      //     snapshotProps,
-      //     state: getMobxRunnerStore(),
-      //     eventManager: window.UnifiedRunner.eventManager,
-      //     onToggleHighlights: () => {
-      //       console.log('toggle')
-      //     },
-      //     onStateChange: () => {
-      //       console.log('state change')
-      //     }
-      //   }
-      // )
-      // const m = document.querySelector('#message')
-      // console.log({ m })
-      // window.UnifiedRunner.ReactDOM.render(ss, m)
-
-      // TODO snapshot controls
+      return window.UnifiedRunner.React.createElement(
+        window.UnifiedRunner.SnapshotControls,
+        {
+          snapshotProps,
+          state,
+          eventManager: window.UnifiedRunner.eventManager,
+          onToggleHighlights: _toggleSnapshotHighlights,
+          onStateChange: _changeSnapshotState,
+        },
+      )
     },
+
     window.UnifiedRunner.MobX,
     {
       recorder: window.UnifiedRunner.studioRecorder,

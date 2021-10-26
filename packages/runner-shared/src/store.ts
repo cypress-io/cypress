@@ -64,6 +64,24 @@ export abstract class BaseStore {
     this.specs = specs
   }
 
+  @action
+  setShowSnapshotHighlight = (showingHighlights: boolean) => {
+    if (!this.snapshot) {
+      return
+    }
+
+    this.snapshot.showingHighlights = showingHighlights
+  }
+
+  @action
+  setSnapshotIndex = (stateIndex: number) => {
+    if (!this.snapshot) {
+      return
+    }
+
+    this.snapshot.stateIndex = stateIndex
+  }
+
   @action updateSpecByUrl (specUrl: string) {
     const foundSpec = this.specs.find((x) => x.name === decodeURI(specUrl))
 
