@@ -7,7 +7,7 @@ const v = require('./util/validation')
 //
 // Add options in alphabetical order for better readability
 
-export const options = [
+const testingTypeOptions = [
   {
     name: 'animationDistanceThreshold',
     defaultValue: 5,
@@ -41,11 +41,6 @@ export const options = [
     defaultValue: [],
     validation: v.isValidClientCertificatesSet,
   }, {
-    name: 'component',
-    // runner-ct overrides
-    defaultValue: {},
-    validation: v.isValidConfig,
-  }, {
     name: 'componentFolder',
     defaultValue: 'cypress/component',
     validation: v.isStringOrFalse,
@@ -70,11 +65,6 @@ export const options = [
     defaultValue: 'cypress/downloads',
     validation: v.isString,
     isFolder: true,
-  }, {
-    name: 'e2e',
-    // e2e runner overrides
-    defaultValue: {},
-    validation: v.isValidConfig,
   }, {
     name: 'env',
     validation: v.isPlainObject,
@@ -297,6 +287,25 @@ export const options = [
     name: 'xhrRoute',
     defaultValue: '/xhrs/',
     isInternal: true,
+  },
+]
+
+// Because these two objects can contain any other option, we
+// pull them out separately from the others. It wouldn't make
+// sense for them to contain themselves.
+export const options = [
+  ...testingTypeOptions,
+  {
+    name: 'e2e',
+    // e2e runner overrides
+    defaultValue: {},
+    validation: v.isValidConfig(testingTypeOptions),
+  },
+  {
+    name: 'component',
+    // runner-ct overrides
+    defaultValue: {},
+    validation: v.isValidConfig(testingTypeOptions),
   },
 ]
 

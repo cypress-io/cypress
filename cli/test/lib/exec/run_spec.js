@@ -197,8 +197,8 @@ describe('exec run', function () {
       })
     })
 
-    it('spawns with --testing-type component when given --ct', function () {
-      return run.start({ ct: true })
+    it('spawns with --testing-type component when given --component', function () {
+      return run.start({ component: true })
       .then(() => {
         expect(spawn.start).to.be.calledWith(['--run-project', process.cwd(), '--testing-type', 'component'])
       })
