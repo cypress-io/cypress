@@ -685,8 +685,6 @@ const systemTests = {
 
       this.timeout(human('2 minutes'))
 
-      Fixtures.remove()
-
       const s = this.servers
 
       if (s) {
@@ -890,7 +888,7 @@ const systemTests = {
       ctx.skip()
     }
 
-    Fixtures.scaffoldCommonNodeModules()
+    await Fixtures.scaffoldCommonNodeModules()
     Fixtures.scaffoldProject(options.project)
 
     if (process.env.NO_EXIT) {

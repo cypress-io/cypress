@@ -38,10 +38,10 @@ module.exports = {
     fs.copySync(from, to)
   },
 
-  scaffoldCommonNodeModules () {
-    fs.removeSync(path.join(tmpDir, 'node_modules'))
+  async scaffoldCommonNodeModules () {
+    await fs.remove(path.join(tmpDir, 'node_modules'))
 
-    ;[
+    await Promise.all([
       '@cypress/code-coverage',
       '@cypress/webpack-dev-server',
       '@packages/socket',
@@ -62,13 +62,13 @@ module.exports = {
       'semver',
       'systeminformation',
       'typescript',
-    ].forEach((pkg) => {
+    ].map(async (pkg) => {
       const from = path.join(tmpDir, 'node_modules', pkg)
       const to = path.dirname(require.resolve(`${pkg}/package.json`))
 
-      fs.ensureDirSync(path.dirname(from))
-      fs.symlinkSync(to, from, 'junction')
-    })
+      await fs.ensureDirSync(path.dirname(from))
+      await fs.symlinkSync(to, from, 'junction')
+    }))
   },
 
   // TODO

@@ -160,7 +160,7 @@ const runFailingProjectTest = function (buildAppExecutable, e2e) {
 }
 
 const test = async function (buildAppExecutable) {
-  Fixtures.scaffoldCommonNodeModules()
+  await Fixtures.scaffoldCommonNodeModules()
   Fixtures.scaffoldProject('e2e')
   const e2e = Fixtures.projectPath('e2e')
 
