@@ -29,6 +29,7 @@
     "babel-loader": "8.1.0",
     "bluebird": "3.7.2",
     "body-parser": "1.19.0",
+    "cachedir": "2.3.0",
     "chai": "1.10.0",
     "chai-as-promised": "7.1.1",
     "chai-subset": "1.6.0",

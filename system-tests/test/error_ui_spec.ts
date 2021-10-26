@@ -12,6 +12,10 @@ const verifyPassedAndFailedAreSame = (expectedFailures) => {
 describe('e2e error ui', function () {
   systemTests.setup()
 
+  beforeEach(() => {
+    Fixtures.scaffoldProject('e2e')
+  })
+
   ;[
     'webpack-preprocessor',
     'webpack-preprocessor-ts-loader',
@@ -26,8 +30,6 @@ describe('e2e error ui', function () {
       spec: 'failing_spec.*',
       expectedExitCode: 1,
       onRun (exec) {
-        Fixtures.scaffoldProject('e2e')
-
         return exec().then(verifyPassedAndFailedAreSame(1))
       },
     })
@@ -39,6 +41,8 @@ describe('e2e error ui', function () {
     spec: '../../../integration/failing_spec.js',
     expectedExitCode: 1,
     onRun (exec) {
+      Fixtures.scaffoldProject('integration-outside-project-root')
+
       return exec().then(verifyPassedAndFailedAreSame(1))
     },
   })

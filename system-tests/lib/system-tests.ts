@@ -663,8 +663,6 @@ const systemTests = {
       // // can take a long time (5-15 secs)
       // this.timeout(human('2 minutes'))
 
-      Fixtures.remove()
-
       sinon.stub(process, 'exit')
 
       this.settings = options.settings
@@ -682,6 +680,8 @@ const systemTests = {
 
     afterEach(async function () {
       process.env = _.clone(env)
+
+      Fixtures.remove()
 
       this.timeout(human('2 minutes'))
 
@@ -890,6 +890,7 @@ const systemTests = {
 
     await Fixtures.scaffoldCommonNodeModules()
     Fixtures.scaffoldProject(options.project)
+    await Fixtures.scaffoldProjectNodeModules(options.project)
 
     if (process.env.NO_EXIT) {
       Fixtures.scaffoldProjectWatch(options.project)
