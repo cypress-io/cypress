@@ -233,10 +233,11 @@ function modifyAngularJson (options: any): Rule {
 
 export const getCypressConfigFile = (angularJsonVal: any, projectName: string) => {
   const project = angularJsonVal.projects[projectName]
-  const tsConfig = project?.architect?.lint?.options?.tsConfig
+  // const tsConfig = project?.architect?.lint?.options?.tsConfig
 
   if (project.root) {
-    return `${project.root}/cypress.config.${tsConfig ? 'ts' : 'js'}`
+    return `${project.root}/cypress.config.js`
+    // return `${project.root}/cypress.config.${tsConfig ? 'ts' : 'js'}`
   }
 
   return null
