@@ -37,10 +37,5 @@
 <script lang="ts" setup>
 import ListRowHeader from '@cy/components/ListRowHeader.vue'
 
-withDefaults(defineProps<{
-  // this could become the last number of runs we had
-  numberOfLines?: number
-}>(), {
-  numberOfLines: 20,
-})
+const numberOfLines = 20
 </script>
