@@ -1870,13 +1870,13 @@ jobs:
           working_directory: <<parameters.wd>>
           command: npx @bahmutov/cly@1 init --typescript
       - run:
-        name: Remove previous config file
-        working_directory: <<parameters.wd>>
-        command: rm -rf cypress.json
+          name: Remove previous config file
+          working_directory: <<parameters.wd>>
+          command: rm -rf cypress.json
       - run:
-        name: Add new config file
-        working_directory: <<parameters.wd>>
-        command: echo 'module.exports = {}' > cypress.config.ts
+          name: Add new config file
+          working_directory: <<parameters.wd>>
+          command: echo 'module.exports = {}' > cypress.config.ts
       - run:
           name: Run project tests 🗳
           working_directory: <<parameters.wd>>
@@ -2056,13 +2056,13 @@ jobs:
           working_directory: test-binary
           command: npx @bahmutov/cly init
       - run:
-        name: Remove previous config file
-        working_directory: <<parameters.wd>>
-        command: rm -rf cypress.json
+          name: Remove previous config file
+          working_directory: <<parameters.wd>>
+          command: rm -rf cypress.json
       - run:
-        name: Add new config file
-        working_directory: <<parameters.wd>>
-        command: echo 'module.exports = {}' > cypress.config.js
+          name: Add new config file
+          working_directory: <<parameters.wd>>
+          command: echo 'module.exports = {}' > cypress.config.js
       - run:
           name: Verify Cypress binary
           working_directory: test-binary
