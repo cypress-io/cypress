@@ -1,10 +1,16 @@
 <template>
   <div
-    class="px-6 py-15px border-b border-b-gray-100 mb-24px"
+    class="px-6 py-15px border-b border-b-gray-100 mb-24px bg-white"
     data-testid="header-bar"
   >
     <div class="flex items-center justify-between">
-      <div class="flex items-center">
+      <div v-if="pageName">
+        {{ pageName }}
+      </div>
+      <div
+        v-else
+        class="flex items-center"
+      >
         <img
           class="mr-18px w-32px h-32px"
           src="../assets/logos/cypress-dark.png"
@@ -24,11 +30,11 @@
       </div>
       <div class="flex gap-6">
         <TopNav
-          :gql="query.app"
+          :gql="query?.app"
           :show-browsers="props.showBrowsers"
         >
           <template
-            v-if="!!query.cloudViewer"
+            v-if="!!query?.cloudViewer"
             #login-title
           >
             <UserAvatar
@@ -38,7 +44,7 @@
             <span class="sr-only">{{ t('topNav.login.actionLogin') }}</span>
           </template>
           <template
-            v-if="!!query.cloudViewer"
+            v-if="!!query?.cloudViewer"
             #login-panel
           >
             <div class="min-w-248px">
@@ -48,9 +54,9 @@
                   class="w-48px mr-16px h-48px"
                 />
                 <div>
-                  <span class="text-gray-800">{{ query.cloudViewer?.fullName }}</span>
+                  <span class="text-gray-800">{{ query?.cloudViewer?.fullName }}</span>
                   <br>
-                  <span class="text-gray-600">{{ query.cloudViewer?.email }}</span>
+                  <span class="text-gray-600">{{ query?.cloudViewer?.email }}</span>
                   <br>
                   <a
                     class="text-indigo-500 hocus-link-default"
@@ -71,7 +77,7 @@
         </TopNav>
         <div>
           <button
-            v-if="!query.cloudViewer"
+            v-if="!query?.cloudViewer"
             class="flex group items-center text-gray-600 focus:outline-transparent"
             @click="openLogin"
           >
@@ -99,6 +105,7 @@ import LoginModal from './topnav/LoginModal.vue'
 import UserAvatar from './topnav/UserAvatar.vue'
 import Auth from './Auth.vue'
 import { useI18n } from '@cy/i18n'
+import type { RouteRecordName } from 'vue-router'
 
 gql`
 mutation GlobalPageHeader_clearActiveProject {
@@ -121,20 +128,21 @@ query HeaderBar_HeaderBarQuery {
 
 const isLoginOpen = ref(false)
 const clearActiveProjectMutation = useMutation(GlobalPageHeader_ClearActiveProjectDocument)
-const email = computed(() => props.gql.cloudViewer?.email || undefined)
+const email = computed(() => query.value?.cloudViewer?.email || undefined)
 
 const openLogin = () => {
   isLoginOpen.value = true
 }
 
 const clearActiveProject = () => {
-  if (props.gql.app.activeProject) {
+  if (query.value?.app.activeProject) {
     clearActiveProjectMutation.executeMutation({})
   }
 }
 
 const props = defineProps<{
-  showBrowsers?: Boolean
+  showBrowsers?: Boolean,
+  pageName?: RouteRecordName | null
 }>()
 
 const { t } = useI18n()
