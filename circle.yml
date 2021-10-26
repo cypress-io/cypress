@@ -1205,7 +1205,7 @@ jobs:
   
   run-frontend-shared-component-tests-chrome:
     <<: *defaults
-    parallelism: 7
+    parallelism: 1
     steps:
       - run-new-ui-tests:
           browser: chrome
