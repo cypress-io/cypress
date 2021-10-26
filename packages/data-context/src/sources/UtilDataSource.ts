@@ -1,6 +1,6 @@
 import DataLoader from 'dataloader'
 import crypto from 'crypto'
-import nodeFetch from 'node-fetch'
+import fetch from 'cross-fetch'
 
 import type { DataContext } from '..'
 
@@ -50,6 +50,6 @@ export class UtilDataSource {
   }
 
   get fetch () {
-    return nodeFetch
+    return fetch
   }
 }

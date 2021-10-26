@@ -14,10 +14,10 @@
   },
   "dependencies": {
     "@storybook/csf-tools": "^6.4.0-alpha.38",
+    "cross-fetch": "^3.1.4",
     "dataloader": "^2.0.0",
     "globby": "^11.0.1",
     "lodash": "4.17.21",
-    "node-fetch": "^2.6.1",
     "p-defer": "^3.0.0",
     "wonka": "^4.0.15"
   },

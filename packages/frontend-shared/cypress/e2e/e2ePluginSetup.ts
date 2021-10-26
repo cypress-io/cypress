@@ -10,7 +10,7 @@ import rimraf from 'rimraf'
 import util from 'util'
 import fs from 'fs'
 import { buildSchema, execute, parse } from 'graphql'
-import { Response, RequestInfo, RequestInit } from 'node-fetch'
+import { Response } from 'cross-fetch'
 
 import { CloudRunQuery } from '../support/mock-graphql/stubgql-CloudTypes'
 import { getOperationName } from '@urql/core'
