@@ -452,7 +452,7 @@ export class Server {
       // FQDN:               http://www.google.com/responses/users.json
       // relative:           partials/phones-list.html
       // absolute-relative:  /app/partials/phones-list.html
-      const fullyQualifiedUrl = this.getFullyQualifiedUrl(contentWindow, url)
+      const fullyQualifiedUrl = server.getFullyQualifiedUrl(contentWindow, url)
 
       // decode the entire url.display to make
       // it easier to do assertions
