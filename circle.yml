@@ -1202,6 +1202,15 @@ jobs:
       - run-runner-ct-integration-tests:
           browser: chrome
           percy: true
+  
+  run-frontend-shared-component-tests-chrome:
+    <<: *defaults
+    parallelism: 7
+    steps:
+      - run-new-ui-tests:
+          browser: chrome
+          package: frontend-shared
+          type: ct
 
   run-launchpad-component-tests-chrome:
     <<: *defaults
