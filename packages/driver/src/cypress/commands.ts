@@ -11,7 +11,7 @@ const builtInCommands = [
   ..._.toArray(allCommands).map((c) => c.default || c),
   addCommand,
 ]
-let builtInCommandNames = []
+let builtInCommandNames = {}
 let addingBuiltIns
 
 const getTypeByPrevSubject = (prevSubject) => {
@@ -129,10 +129,10 @@ export default {
 
       add (name, options, fn) {
         if (addingBuiltIns) {
-          builtInCommandNames.push(name)
+          builtInCommandNames[name] = true
         }
 
-        if (!addingBuiltIns && builtInCommandNames.includes(name)) {
+        if (!addingBuiltIns && builtInCommandNames[name]) {
           $errUtils.throwErrByPath('miscellaneous.invalid_new_command', {
             args: {
               name,
