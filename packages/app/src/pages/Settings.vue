@@ -7,13 +7,14 @@
   </div>
 </template>
 
-<script>
-import { Button } from '@packages/frontend-shared'
+<script lang="ts" setup>
+import Button from '@cy/components/Button.vue'
 import { gql, useMutation } from '@urql/vue'
 import { Settings_OpenLaunchpadDocument } from '../generated/graphql'
 
 gql`
 mutation Settings_OpenLaunchpad {
+  resetWizard
   showBrowserWindow
 }
 `
@@ -21,7 +22,7 @@ mutation Settings_OpenLaunchpad {
 const openLaunchpad = useMutation(Settings_OpenLaunchpadDocument)
 
 function reconfigure () {
-  openLaunchpad.executeMutation()
+  openLaunchpad.executeMutation({})
 }
 
 </script>

@@ -36,4 +36,8 @@ export class ElectronActions {
       this.electron.browserWindow?.setSkipTaskbar(false)
     }
   }
+
+  refreshBrowserWindow () {
+    this.electron.browserWindow?.reload()
+  }
 }

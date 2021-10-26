@@ -302,6 +302,17 @@ export const mutation = mutationType({
       },
     })
 
+    t.nonNull.field('resetWizard', {
+      type: 'Boolean',
+      description: 'Reset the Wizard to the starting position',
+      resolve: (_, args, ctx) => {
+        ctx.actions.wizard.resetWizard()
+        ctx.actions.electron.refreshBrowserWindow()
+
+        return true
+      },
+    })
+
     t.nonNull.field('hideBrowserWindow', {
       type: 'Boolean',
       description: 'Hides the launchpad windows',

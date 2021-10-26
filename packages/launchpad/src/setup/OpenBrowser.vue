@@ -44,6 +44,7 @@ mutation OpenBrowser_LaunchProject ($testingType: TestingTypeEnum!, $browserId: 
 
   setProjectPreferences(testingType: $testingType, browserId: $browserId) {
     activeProject {
+      id
       title
     }
   }

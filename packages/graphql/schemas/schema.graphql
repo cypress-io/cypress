@@ -407,6 +407,9 @@ type Mutation {
   """Remove project from projects array and cache"""
   removeProject(path: String!): Boolean
 
+  """Reset the Wizard to the starting position"""
+  resetWizard: Boolean!
+
   """Set active project to run tests on"""
   setActiveProject(path: String!): Boolean
 
