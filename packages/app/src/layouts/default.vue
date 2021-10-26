@@ -8,7 +8,7 @@
         <HeaderBar
           v-if="showHeader"
           :show-browsers="true"
-          :page-name="route.name"
+          :page-name="currentRoute.name"
         />
         <router-view v-slot="{ Component, route }">
           <h1
@@ -49,9 +49,9 @@ import { useModalStore, useMainStore } from '../store'
 
 const modalStore = useModalStore()
 const mainStore = useMainStore()
-const route = useRoute()
+const currentRoute = useRoute()
 
 const showHeader = computed(() => {
-  return route.name !== 'Spec'
+  return currentRoute.name !== 'Spec'
 })
 </script>
