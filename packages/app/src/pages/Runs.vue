@@ -1,7 +1,7 @@
 <template>
   <div>
     <h2>Runs Page</h2>
-    <div class="p-24px relative">
+    <main class="p-24px relative">
       <transition
         name="fade"
       >
@@ -19,7 +19,7 @@
           Connect the current project to the cloud
         </template>
       </transition>
-    </div>
+    </main>
   </div>
 </template>
 
