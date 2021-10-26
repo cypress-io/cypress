@@ -2057,7 +2057,7 @@ jobs:
           command: npx @bahmutov/cly init
       - run:
           name: Scaffold new config file
-          working_directory: <<parameters.wd>>
+          working_directory: test-binary
           environment:
             CYPRESS_INTERNAL_FORCE_SCAFFOLD: "1"
           command: |
