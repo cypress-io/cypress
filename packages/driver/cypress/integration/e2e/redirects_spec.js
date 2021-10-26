@@ -16,7 +16,9 @@ describe('redirection', () => {
       .contains('timeout')
       .then(function () {
         // visit, contains, page load, new url
-        expect(this.logs.length).to.eq(4)
+        const receivedLogs = this.logs.reduce((prev, curr, index) => `${prev}, ${index}: ${curr.get('name')}`, '')
+
+        expect(this.logs.length).to.eq(4, `received more logs than expected: ${receivedLogs}`)
 
         expect(this.logs[0].get('name')).to.eq('visit')
         expect(this.logs[1].get('name')).to.eq('contains')
@@ -51,9 +53,7 @@ describe('redirection', () => {
       .contains('timeout')
       .then(function () {
         // visit, contains, page load, new url
-        const receivedLogs = this.logs.reduce((prev, curr, index) => `${prev}, ${index}: ${curr.get('name')}`, '')
-
-        expect(this.logs.length).to.eq(4, `received more logs than expected: ${receivedLogs}`)
+        expect(this.logs.length).to.eq(4)
 
         expect(this.logs[0].get('name')).to.eq('visit')
         expect(this.logs[1].get('name')).to.eq('contains')
@@ -67,7 +67,7 @@ describe('redirection', () => {
       .visit('/fixtures/js-redirect.html')
       .get('a:first')
       .then(function () {
-      // visit, get, page load, new url
+        // visit, get, page load, new url
         expect(this.logs.length).to.eq(4)
 
         expect(this.logs[0].get('name')).to.eq('visit')
