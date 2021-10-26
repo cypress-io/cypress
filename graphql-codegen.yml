@@ -103,4 +103,4 @@ generates:
 
   './packages/frontend-shared/src/generated/graphql-test.ts':
     documents: './packages/frontend-shared/src/gql-components/**/*.vue'
-    <<: *vueOperations
+    <<: *vueTesting
