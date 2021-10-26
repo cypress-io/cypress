@@ -10,23 +10,20 @@
     <div
       id="runner"
       :style="`width: ${runnerColumnWidth}px`"
+      class="relative"
     >
       <div
         :id="RUNNER_ID"
         class="viewport origin-top-left"
         :style="viewportStyle"
       />
+      <SnapshotControls />
       <div>Viewport: {{ viewportDimensions.width }}px x {{ viewportDimensions.height }}px</div>
     </div>
 
     <div
       v-once
       :id="REPORTER_ID"
-    />
-
-    <div
-      v-once
-      :id="MESSAGE_ID"
     />
   </div>
 </template>
@@ -40,6 +37,7 @@ import InlineSpecList from '../specs/InlineSpecList.vue'
 import { getMobxRunnerStore } from '../store'
 import { UnifiedRunnerAPI } from '../runner'
 import type { BaseSpec } from '@packages/types'
+import SnapshotControls from './SnapshotControls.vue'
 
 gql`
 fragment SpecRunner on App {
@@ -48,8 +46,6 @@ fragment SpecRunner on App {
 `
 
 const runnerColumnWidth = 400
-
-const eventManager = window.UnifiedRunner.eventManager
 
 const mobxRunnerStore = getMobxRunnerStore()
 
@@ -151,6 +147,7 @@ onBeforeUnmount(() => {
   width: 300px;
   height: 100%;
 }
+
 </style>
 
 <route>

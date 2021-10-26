@@ -1,0 +1,89 @@
+<template>
+  <div
+    v-once
+    :id="MESSAGE_ID"
+    class="absolute inset-x-0 bottom-12"
+  />
+</template>
+
+<script lang="ts" setup>
+import { MESSAGE_ID } from '../runner/utils'
+</script>
+
+<style lang="scss">
+/** Adopted from message.scss in runner-shared */
+/** Cannot be scoped - this style needs to be applied to the underlying React <SnapshotControls /> component */
+$message-height: 33px;
+$error: #e94f5f;
+
+.message-container {
+  display: flex;
+  justify-content: center;
+  left: 0;
+  padding-bottom: 10px;
+  position: absolute;
+  text-align: center;
+  right: 0;
+}
+
+.message-stationary {
+  bottom: 0;
+
+  .message {
+    opacity: 0.7;
+  }
+}
+
+.message-attached .message {
+  opacity: 0.9;
+}
+
+.message,
+.message-controls {
+  border-radius: 5px;
+  height: $message-height;
+  line-height: $message-height;
+}
+
+.message {
+  background-color: #111;
+  color: #FFF;
+  padding: 0 10px;
+
+  .description {
+    color: #F5A327;
+  }
+}
+
+.message-type-warning .message {
+  background-color: $error;
+}
+
+.message-has-description .message .title:after {
+  content: ': ';
+}
+
+.message-type-info {
+  &.message-type-info .message .title:after {
+    content: '';
+  }
+
+  .description {
+    &:before {
+      content: ' (';
+    }
+
+    &:after {
+      content: ')';
+    }
+
+    color: #cf9ef1;
+  }
+}
+
+.message-controls {
+  background-color: #f8f8f8;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+  margin-left: 10px;
+}
+</style>
