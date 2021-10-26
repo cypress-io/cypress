@@ -64,6 +64,8 @@ export class DataContext extends DataContextShell {
       this.actions.app.refreshBrowsers(),
       // load projects from cache on start
       this.actions.project.loadProjects(),
+      // load the cached user & validate the token on start
+      this.actions.auth.getUser(),
     ]
 
     if (this.config.launchArgs.projectRoot) {

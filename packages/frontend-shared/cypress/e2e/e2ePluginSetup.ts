@@ -1,23 +1,32 @@
+import path from 'path'
+import type { RemoteGraphQLInterceptor, WithCtxInjected, WithCtxOptions } from './support/e2eSupport'
+import { e2eProjectDirs } from './support/e2eProjectDirs'
+import type { CloudExecuteRemote } from '@packages/data-context/src/sources'
 import type { DataContext } from '@packages/data-context'
 import * as inspector from 'inspector'
 import sinonChai from '@cypress/sinon-chai'
 import sinon from 'sinon'
 import rimraf from 'rimraf'
 import util from 'util'
+import fs from 'fs'
+import { buildSchema, execute, parse } from 'graphql'
+import { Response, RequestInfo, RequestInit } from 'node-fetch'
+
+import { CloudRunQuery } from '../support/mock-graphql/stubgql-CloudTypes'
+import { getOperationName } from '@urql/core'
+
+const cloudSchema = buildSchema(fs.readFileSync(path.join(__dirname, '../../../graphql/schemas/cloud.graphql'), 'utf8'))
 
 // require'd so we don't conflict with globals loaded in @packages/types
 const chai = require('chai')
 const chaiAsPromised = require('chai-as-promised')
 const chaiSubset = require('chai-subset')
+
 const { expect } = chai
 
 chai.use(chaiAsPromised)
 chai.use(chaiSubset)
 chai.use(sinonChai)
-
-import path from 'path'
-import type { WithCtxInjected, WithCtxOptions } from './support/e2eSupport'
-import { e2eProjectDirs } from './support/e2eProjectDirs'
 
 export async function e2ePluginSetup (projectRoot: string, on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) {
   process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF = 'true'
@@ -35,14 +44,22 @@ export async function e2ePluginSetup (projectRoot: string, on: Cypress.PluginEve
     fn: string
     options: WithCtxOptions
     activeTestId: string
+    // TODO(tim): add an API for intercepting this
+    interceptCloudExecute: (config: CloudExecuteRemote) => {}
   }
 
   let ctx: DataContext
   let serverPortPromise: Promise<number>
   let currentTestId: string | undefined
   let testState: Record<string, any> = {}
+  let remoteGraphQLIntercept: RemoteGraphQLInterceptor | undefined
 
   on('task', {
+    remoteGraphQLIntercept (fn: string) {
+      remoteGraphQLIntercept = new Function('console', 'obj', `return (${fn})(obj)`).bind(null, console) as RemoteGraphQLInterceptor
+
+      return null
+    },
     setupE2E (projectName: string) {
       Fixtures.scaffoldProject(projectName)
 
@@ -53,10 +70,48 @@ export async function e2ePluginSetup (projectRoot: string, on: Cypress.PluginEve
       if (obj.activeTestId !== currentTestId) {
         await ctx?.destroy()
         currentTestId = obj.activeTestId
+        remoteGraphQLIntercept = undefined
         testState = {};
         ({ serverPortPromise, ctx } = runInternalServer({
           projectRoot: null,
         }) as {ctx: DataContext, serverPortPromise: Promise<number>})
+
+        const fetchApi = ctx.util.fetch
+
+        sinon.stub(ctx.util, 'fetch').get(() => {
+          return async (url: RequestInfo, init?: RequestInit) => {
+            if (!String(url).endsWith('/test-runner-graphql')) {
+              return fetchApi(url, init)
+            }
+
+            const { query, variables } = JSON.parse(String(init?.body))
+            const document = parse(query)
+            const operationName = getOperationName(document)
+
+            let result = await execute({
+              operationName,
+              document,
+              variableValues: variables,
+              schema: cloudSchema,
+              rootValue: CloudRunQuery,
+              contextValue: {
+                __server__: ctx,
+              },
+            })
+
+            if (remoteGraphQLIntercept) {
+              result = remoteGraphQLIntercept({
+                operationName,
+                variables,
+                document,
+                query,
+                result,
+              })
+            }
+
+            return new Response(JSON.stringify(result), { status: 200 })
+          }
+        })
 
         await serverPortPromise
       }

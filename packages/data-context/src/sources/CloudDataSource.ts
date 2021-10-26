@@ -1,7 +1,7 @@
 import type { DataContext } from '..'
 import pDefer from 'p-defer'
 import getenv from 'getenv'
-import { pipe, subscribe } from 'wonka'
+import { pipe, subscribe, toPromise } from 'wonka'
 import type { DocumentNode } from 'graphql'
 import {
   createClient,
@@ -11,6 +11,7 @@ import {
   Client,
   createRequest,
   OperationResult,
+  RequestPolicy,
 } from '@urql/core'
 import _ from 'lodash'
 
@@ -24,8 +25,9 @@ const REMOTE_SCHEMA_URLS = {
 
 export interface CloudExecuteRemote {
   query: string
-  document: DocumentNode
+  document?: DocumentNode
   variables: any
+  requestPolicy?: RequestPolicy
 }
 
 export class CloudDataSource {
@@ -48,11 +50,11 @@ export class CloudDataSource {
       return { data: null }
     }
 
-    const dfd = pDefer<OperationResult>()
+    const requestPolicy = config.requestPolicy ?? 'cache-and-network'
 
-    const executingQuery = this._urqlClient.executeQuery(createRequest(config.document, config.variables), {
+    const executingQuery = this._urqlClient.executeQuery(createRequest(config.query, config.variables), {
       fetch: this.ctx.util.fetch,
-      requestPolicy: 'cache-and-network',
+      requestPolicy,
       fetchOptions: {
         headers: {
           'Content-Type': 'application/json',
@@ -61,25 +63,31 @@ export class CloudDataSource {
       },
     })
 
-    let resolvedData: OperationResult | undefined = undefined
+    if (requestPolicy === 'cache-and-network') {
+      let resolvedData: OperationResult | undefined = undefined
+      const dfd = pDefer<OperationResult>()
+      const pipeline = pipe(
+        executingQuery,
+        subscribe((res) => {
+          if (!resolvedData) {
+            resolvedData = res
+            dfd.resolve(res)
+          } else if (!_.isEqual(resolvedData.data, res.data) || !_.isEqual(resolvedData.error, res.error)) {
+            // TODO(tim): send a signal to the frontend so when it refetches it does 'cache-only' request,
+            // since we know we're up-to-date
+            this.ctx.deref.emitter.toApp()
+            this.ctx.deref.emitter.toLaunchpad()
+          }
 
-    const pipeline = pipe(
-      executingQuery,
-      subscribe((res) => {
-        if (!resolvedData) {
-          resolvedData = res
-          dfd.resolve(res)
-        } else if (!_.isEqual(resolvedData.data, res.data) || !_.isEqual(resolvedData.error, res.error)) {
-          this.ctx.deref.emitter.toApp()
-          this.ctx.deref.emitter.toLaunchpad()
-        }
+          if (!res.stale) {
+            pipeline.unsubscribe()
+          }
+        }),
+      )
 
-        if (!res.stale) {
-          pipeline.unsubscribe()
-        }
-      }),
-    )
+      return dfd.promise
+    }
 
-    return dfd.promise
+    return pipe(executingQuery, toPromise)
   }
 }
