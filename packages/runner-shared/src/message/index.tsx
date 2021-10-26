@@ -1,6 +1,6 @@
 import cs from 'classnames'
+import { observer } from 'mobx-react'
 import React, { forwardRef } from 'react'
-import { namedObserver } from '../mobx'
 import './message.scss'
 
 interface MessageProps {
@@ -17,7 +17,7 @@ interface MessageProps {
   }
 }
 
-export const Message = namedObserver('Message', forwardRef<HTMLDivElement, MessageProps>(({ state }, ref) => {
+export const Message = observer(forwardRef<HTMLDivElement, MessageProps>(({ state }, ref) => {
   if (!state.messageTitle) return null
 
   const controls = state.messageControls

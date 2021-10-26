@@ -1,8 +1,6 @@
-import { action, observable, computed } from 'mobx'
+import { action, observable } from 'mobx'
 import { nanoid } from 'nanoid'
 import { automation, automationStatus } from './automation'
-
-export type SnapshotMessageDescription = 'info' | 'warning' | 'pinned'
 
 export type RunMode = 'single'
 
@@ -20,7 +18,7 @@ const defaults = {
 
 type Callback = (...args: unknown[]) => void
 
-export abstract class BaseStore {
+export class BaseStore {
   @observable spec: Cypress.Spec | undefined
   @observable specs: Cypress.Spec[] = []
   @observable specRunId: string | undefined
@@ -33,11 +31,9 @@ export abstract class BaseStore {
   @observable highlightUrl = false
   @observable isLoadingUrl = false
   @observable isRunning = false
-  @observable windowHeight = 0
-  @observable headerHeight = 0
 
   @observable messageTitle?: string
-  @observable messageDescription?: SnapshotMessageDescription
+  @observable messageDescription?: 'info' | 'warning' | 'pinned'
   @observable messageType?: string
   @observable viewportUpdateCallback?: Callback
   @observable messageControls?: any
@@ -51,8 +47,6 @@ export abstract class BaseStore {
     this.height = defaults[testingType].height
   }
 
-  abstract get scale (): number
-
   @action setSingleSpec (spec: Cypress.Spec | undefined) {
     this.setSpec(spec)
   }
@@ -64,24 +58,6 @@ export abstract class BaseStore {
 
   @action setSpecs (specs: Cypress.Spec[]) {
     this.specs = specs
-  }
-
-  @action
-  setShowSnapshotHighlight = (showingHighlights: boolean) => {
-    if (!this.snapshot) {
-      return
-    }
-
-    this.snapshot.showingHighlights = showingHighlights
-  }
-
-  @action
-  setSnapshotIndex = (stateIndex: number) => {
-    if (!this.snapshot) {
-      return
-    }
-
-    this.snapshot.stateIndex = stateIndex
   }
 
   @action updateSpecByUrl (specUrl: string) {
@@ -123,26 +99,5 @@ export abstract class BaseStore {
 
       cb()
     }
-  }
-
-  @computed.struct get messageStyles () {
-    const actualHeight = this.height * this.scale
-    const messageHeight = 33
-    const nudge = 10
-
-    if ((actualHeight + messageHeight + (nudge * 2)) >= this._containerHeight) {
-      return { state: 'stationary' }
-    }
-
-    return {
-      state: 'attached',
-      styles: {
-        top: (actualHeight + this.headerHeight + nudge),
-      },
-    }
-  }
-
-  @computed get _containerHeight () {
-    return this.windowHeight - this.headerHeight
   }
 }

@@ -92,7 +92,6 @@
         "shiki",
         "socket.io-client",
         "vue",
-        "vue-demi",
         "vue-toastification",
         "wonka"
       ]

@@ -17,14 +17,6 @@ export interface AutSnapshot {
   }
 }
 
-// interface Snapshot {
-//   name?: 'info' | 'pinned' | 'warning'
-//   htmlAttrs: Record<string, any> // Type is NamedNodeMap, not sure if we should include lib: ["DOM"]
-//   body: {
-//     get: () => unknown // TOOD: find out what this is, some sort of JQuery API.
-//   }
-// }
-
 type Fn = () => void
 
 export class IframeModel {
@@ -62,11 +54,11 @@ export class IframeModel {
     this.eventManager.on('url:changed', this.MobX.action('url:changed', this._updateUrl))
     this.eventManager.on('page:loading', this.MobX.action('page:loading', this._updateLoadingUrl))
 
-    this.eventManager.on('show:snapshot', this._setSnapshotsVue)
-    this.eventManager.on('hide:snapshot', this._clearSnapshotsVue)
+    this.eventManager.on('show:snapshot', this.setSnapshots)
+    this.eventManager.on('hide:snapshot', this._clearSnapshots)
 
-    this.eventManager.on('pin:snapshot', this._pinSnapshotVue)
-    this.eventManager.on('unpin:snapshot', this._unpinSnapshotVue)
+    this.eventManager.on('pin:snapshot', this._pinSnapshot)
+    this.eventManager.on('unpin:snapshot', this._unpinSnapshot)
   }
 
   _beforeRun = () => {
@@ -100,7 +92,7 @@ export class IframeModel {
     this.state.isLoadingUrl = isLoadingUrl
   }
 
-  _setSnapshotsVue = (snapshotProps: AutSnapshot) => {
+  setSnapshots = (snapshotProps: AutSnapshot) => {
     const store = useSnapshotStore()
     const mainStore = useMainStore()
 
@@ -119,7 +111,7 @@ export class IframeModel {
     const { snapshots } = snapshotProps
 
     if (!snapshots || !snapshots.length) {
-      this._clearSnapshotsVue()
+      this._clearSnapshots()
       store.setMissingSnapshotMessage()
 
       return
@@ -172,7 +164,7 @@ export class IframeModel {
     }
   }
 
-  _clearSnapshotsVue = () => {
+  _clearSnapshots = () => {
     const snapshotStore = useSnapshotStore()
     const mainStore = useMainStore()
 
@@ -210,7 +202,7 @@ export class IframeModel {
     })
   }
 
-  _pinSnapshotVue = (snapshotProps) => {
+  _pinSnapshot = (snapshotProps) => {
     const snapshotStore = useSnapshotStore()
     const { snapshots } = snapshotProps
 
@@ -228,7 +220,7 @@ export class IframeModel {
     this._restoreDom(snapshots[0], snapshotProps)
   }
 
-  _unpinSnapshotVue = () => {
+  _unpinSnapshot = () => {
     const snapshotStore = useSnapshotStore()
 
     snapshotStore.unpinSnapshot()

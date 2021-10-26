@@ -76,14 +76,14 @@ export const useSnapshotStore = defineStore({
         throw Error('Cannot update highlighting if this.snapshot not defined')
       }
 
-      const aut = getAutIframeModel()
+      const autIframeModel = getAutIframeModel()
 
       if (this.snapshot.showingHighlights && this.snapshotProps) {
         const snapshot = this.snapshotProps.snapshots[this.snapshot.stateIndex]
 
-        aut.highlightEl(snapshot, this.snapshotProps)
+        autIframeModel.highlightEl(snapshot, this.snapshotProps)
       } else {
-        aut.removeHighlights()
+        autIframeModel.removeHighlights()
       }
     },
 
@@ -99,9 +99,10 @@ export const useSnapshotStore = defineStore({
       }
 
       this.snapshot.stateIndex = index
-      const aut = getAutIframeModel()
 
-      aut.restoreDom(snapshot)
+      const autIframeModel = getAutIframeModel()
+
+      autIframeModel.restoreDom(snapshot)
 
       this.updateHighlighting()
     },

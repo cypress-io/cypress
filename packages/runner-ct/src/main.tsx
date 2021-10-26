@@ -3,7 +3,7 @@ import _ from 'lodash'
 import ReactDOM from 'react-dom'
 import $Cypress from '@packages/driver'
 const driverUtils = $Cypress.utils
-import { eventManager, AutIframe, Container, SnapshotControls, selectorPlaygroundModel, studioRecorder, logger, dom, blankContents, visitFailure, Message } from '@packages/runner-shared'
+import { eventManager, AutIframe, Container, selectorPlaygroundModel, studioRecorder, logger, dom, blankContents, visitFailure } from '@packages/runner-shared'
 import defaultEvents from '@packages/reporter/src/lib/events'
 import { Reporter } from '@packages/reporter/src/main'
 import shortcuts from '@packages/reporter/src/lib/shortcuts'
@@ -17,8 +17,6 @@ const UnifiedRunner = {
   _,
 
   CypressJQuery: $Cypress.$,
-
-  Message,
 
   logger,
 
@@ -41,8 +39,6 @@ const UnifiedRunner = {
   ReactDOM,
 
   Reporter,
-
-  SnapshotControls,
 
   AutIframe,
 

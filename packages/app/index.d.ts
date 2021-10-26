@@ -85,10 +85,6 @@ declare global {
 
       MobX: typeof MobX
 
-      SnapshotControls: any
-
-      Message: any
-
       /**
        * Any React components or general code needed from
        * runner-shared, reporter or driver are also bundled with

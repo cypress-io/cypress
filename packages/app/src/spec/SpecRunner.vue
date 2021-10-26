@@ -17,7 +17,7 @@
         class="viewport origin-top-left"
         :style="viewportStyle"
       />
-      <SnapshotControlsVue :event-manager="eventManager" />
+      <SnapshotControls :event-manager="eventManager" />
       <div>Viewport: {{ viewportDimensions.width }}px x {{ viewportDimensions.height }}px</div>
     </div>
 
@@ -37,7 +37,7 @@ import InlineSpecList from '../specs/InlineSpecList.vue'
 import { getMobxRunnerStore } from '../store'
 import { UnifiedRunnerAPI } from '../runner'
 import type { BaseSpec } from '@packages/types'
-import SnapshotControlsVue from './SnapshotControlsVue.vue'
+import SnapshotControls from './SnapshotControls.vue'
 
 gql`
 fragment SpecRunner on App {
