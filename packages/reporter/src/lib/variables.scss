@@ -108,11 +108,14 @@ $retried: $orange-800;
 
 $link-text: $indigo-600;
 
-$err-background: $gray-900;
-$err-code-background: $gray-1000;
-$err-text: $red-300;
-$err-header-background: $gray-900;
-$err-header-text: $red-400;
+$err-background: rgba($red-400, 0.1);
+$err-code-background: rgba($red-400, 0.18);
+$err-code-text: $red-300;
+$err-header-background: rgba($red-400, 0.15);
+$err-header-text: $red-300;
+$err-text: $red-400;
+
+$reporter-section-background: #171926; // not a brand color
 
 $warn-background: $red-1000;
 $warn-header-background: $orange-1000;
