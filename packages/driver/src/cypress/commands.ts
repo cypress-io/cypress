@@ -128,16 +128,16 @@ export default {
       },
 
       add (name, options, fn) {
-        if (addingBuiltIns) {
-          builtInCommandNames[name] = true
-        }
-
-        if (!addingBuiltIns && builtInCommandNames[name]) {
+        if (builtInCommandNames[name]) {
           $errUtils.throwErrByPath('miscellaneous.invalid_new_command', {
             args: {
               name,
             },
           })
+        }
+
+        if (addingBuiltIns) {
+          builtInCommandNames[name] = true
         }
 
         if (_.isFunction(options)) {
