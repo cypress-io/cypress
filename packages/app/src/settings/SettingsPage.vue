@@ -1,5 +1,5 @@
 <template>
-  <main class="min-w-650px max-w-800px">
+  <main class="p-24px">
     <SettingsCard
       :title="t('settingsPage.device.title')"
       :description="t('settingsPage.device.description')"
@@ -10,7 +10,7 @@
     <SettingsCard
       :title="t('settingsPage.project.title')"
       :description="t('settingsPage.project.description')"
-      :icon="IconBook"
+      :icon="IconFolder"
     >
       <ProjectSettings />
     </SettingsCard>
@@ -22,8 +22,8 @@ import { useI18n } from '@cy/i18n'
 import SettingsCard from './SettingsCard.vue'
 import ProjectSettings from './project/ProjectSettings.vue'
 import DeviceSettings from './device/DeviceSettings.vue'
-import IconLaptop from '~icons/mdi/laptop'
-import IconBook from '~icons/mdi/book'
+import IconLaptop from '~icons/cy/laptop_x24.svg'
+import IconFolder from '~icons/cy/folder-outline_x24.svg'
 
 const { t } = useI18n()
 </script>

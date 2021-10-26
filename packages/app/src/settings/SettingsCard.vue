@@ -1,62 +1,48 @@
 <template>
-  <div class="p-4 min-w-650px mx-auto my-0">
-    <Disclosure
-      as="section"
-      #="{ open }"
-      class="border-1 border-gray-300 rounded"
-    >
-      <DisclosureButton
-        data-testid="settings-card-header"
-        class="settings-card-header w-full bg-cool-gray-100 py-4 pl-6 pr-3 select-none cursor-pointer grid gap-4"
-      >
-        <span class="grid self-center h-full">
-          <Icon
-            :icon="icon"
-            class="self-center text-indigo-600 text-xl"
+  <Collapsible
+    class="block w-full mb-4 overflow-hidden border border-gray-100 rounded
+  bg-light-50 hocus-default"
+    max-height="1500px"
+  >
+    <template #target="{ open }">
+      <ListRowHeader :class="{ 'border-b border-b-gray-100 rounded-b-none': open }">
+        <template #icon>
+          <component
+            :is="icon"
+            class="icon-dark-indigo-400 w-24px h-24px"
           />
-        </span>
-        <div class="w-0.5px bg-gray-300 h-full" />
-        <div>
-          <h2
-            data-testid="settings-card-title"
-            class="col-start-3 text-xl text-indigo-600"
-          >
-            {{ title }}
-          </h2>
-          <p
-            data-testid="settings-card-description"
-            class="text-gray-500 text-sm"
-          >
-            {{ description }}
-          </p>
-        </div>
-        <Icon
-          :icon="IconCaret"
-          class="transform transition-transform col-start-4 self-center text-xl text-gray-500"
-          :class="{ 'rotate-90': !open, 'rotate-180': open }"
-        />
-      </DisclosureButton>
-
-      <!-- Content of the Settings Card -->
-      <DisclosurePanel class="pl-6 pr-10 pt-6 pb-6 border-t-width-1px border-gray-300">
-        <slot />
-      </DisclosurePanel>
-    </Disclosure>
-  </div>
+        </template>
+        <template #header>
+          {{ title }}
+        </template>
+        <template #description>
+          {{ description }}
+        </template>
+        <template #right>
+          <i-cy-chevron-down
+            :class="{ 'rotate-180': open }"
+            class="transform max-w-16px icon-dark-gray-400"
+          />
+        </template>
+      </ListRowHeader>
+    </template>
+    <div class="p-24px">
+      <slot />
+    </div>
+  </Collapsible>
 </template>
 
 <script lang="ts" setup>
-import IconCaret from '~icons/mdi/caret'
-import Icon from '@cy/components/Icon.vue'
 // eslint-disable-next-line no-duplicate-imports
 import type { FunctionalComponent, SVGAttributes } from 'vue'
-import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/vue'
+import Collapsible from '@cy/components/Collapsible.vue'
+import ListRowHeader from '@cy/components/ListRowHeader.vue'
 
 defineProps<{
-    title: string,
-    description: string,
-    icon: FunctionalComponent<SVGAttributes, {}>
-  }>()
+  title: string,
+  description: string,
+  icon: FunctionalComponent<SVGAttributes, {}>
+}>()
 
 </script>
 

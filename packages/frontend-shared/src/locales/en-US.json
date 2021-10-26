@@ -225,7 +225,7 @@
     },
     "project": {
       "title": "Project Settings",
-      "description": "Settings for this project."
+      "description": "Review the configuration settings currently in use for this project."
     },
     "experiments": {
       "title": "Experiments",
@@ -233,7 +233,7 @@
     },
     "device": {
       "title": "Device Settings",
-      "description": "Settings for this device."
+      "description": "Review the configuration settings currently in use for this device."
     }
   }
 }
