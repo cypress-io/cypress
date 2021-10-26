@@ -68,7 +68,7 @@
 </template>
 <route>
 {
-  name: "New Spec Page"
+  name: "New Spec"
 }
 </route>
 <script lang="ts" setup>

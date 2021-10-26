@@ -6,6 +6,6 @@
 
 <route>
 {
-  name: "Runs Page"
+  name: "Runs"
 }
 </route>

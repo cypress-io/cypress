@@ -8,6 +8,6 @@ import SpecsPageContainer from '../specs/SpecsPageContainer.vue'
 
 <route>
 {
-  name: "Specs Page"
+  name: "Specs"
 }
 </route>
