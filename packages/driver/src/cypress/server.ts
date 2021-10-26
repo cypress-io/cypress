@@ -122,6 +122,9 @@ export class Server {
 
   constructor (options: any = {}) {
     this.options = _.defaults(options, serverDefaults)
+
+    // The function below is used as a callback for lodash
+    this.cancelXhr = this.cancelXhr.bind(this)
   }
 
   restore () {
@@ -185,6 +188,10 @@ export class Server {
     // clone the options to prevent
     // accidental mutations
     return _.clone(this.options)
+  }
+
+  getRoutes () {
+    return this.routes
   }
 
   isIgnored (xhr) {
