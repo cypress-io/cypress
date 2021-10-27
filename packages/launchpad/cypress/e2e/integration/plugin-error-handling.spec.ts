@@ -1,6 +1,8 @@
 describe('Plugin error handling', () => {
   it('it handles a plugin error', () => {
     cy.setupE2E('unify-plugin-errors')
+    cy.loginUser()
+
     cy.visitLaunchpad()
 
     cy.get('[data-cy-testingType=e2e]').click()

@@ -1,4 +1,7 @@
 import DataLoader from 'dataloader'
+import crypto from 'crypto'
+import fetch from 'cross-fetch'
+
 import type { DataContext } from '..'
 
 /**
@@ -40,5 +43,13 @@ export class UtilDataSource {
     for (const loader of this._allLoaders) {
       loader.clearAll()
     }
+  }
+
+  sha1 (value: string) {
+    return crypto.createHash('sha1').update(value).digest('hex')
+  }
+
+  get fetch () {
+    return fetch
   }
 }
