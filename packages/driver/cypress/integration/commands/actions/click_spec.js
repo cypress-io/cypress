@@ -2162,7 +2162,7 @@ describe('src/cy/commands/actions/click', () => {
         cy.on('fail', (err) => {
           expect(this.logs.length).eq(2)
           expect(err.message).not.to.contain('CSS property: `opacity: 0`')
-          expect(err.message).to.contain('`cy.click()` failed because this element:')
+          expect(err.message).to.contain('`cy.click()` failed because this element')
           expect(err.message).to.contain('is being covered by another element')
 
           done()
