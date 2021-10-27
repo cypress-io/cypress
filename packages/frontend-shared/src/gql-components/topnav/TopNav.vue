@@ -57,6 +57,7 @@
       class="px-16px py-12px min-w-240px"
       :class="browser.isSelected ? 'bg-jade-50' : ''"
       :selectable="!browser.isSelected"
+      @click="handleBrowserChoice(browser)"
     >
       <template #prefix>
         <!-- setting both width and min-width on these icons looks odd,
@@ -145,8 +146,8 @@ import TopNavListItem from './TopNavListItem.vue'
 import TopNavList from './TopNavList.vue'
 import PromptContent from './PromptContent.vue'
 import { allBrowsersIcons } from '../../../../frontend-shared/src/assets/browserLogos'
-import { gql } from '@urql/vue'
-import type { TopNavFragment } from '../../generated/graphql'
+import { gql, useMutation } from '@urql/vue'
+import { TopNavFragment, TopNav_LaunchOpenProjectDocument, TopNav_SetBrowserDocument } from '../../generated/graphql'
 import { useI18n } from '@cy/i18n'
 import { ref } from 'vue'
 // eslint-disable-next-line no-duplicate-imports
@@ -196,6 +197,30 @@ fragment TopNav on App {
   }
 }
 `
+
+gql`
+mutation TopNav_LaunchOpenProject  {
+  launchOpenProject
+}
+`
+
+gql`
+mutation TopNav_SetBrowser($id: ID!) {
+  launchpadSetBrowser(id: $id)
+}
+`
+
+const launchOpenProject = useMutation(TopNav_LaunchOpenProjectDocument)
+const setBrowser = useMutation(TopNav_SetBrowserDocument)
+
+const launch = () => {
+  launchOpenProject.executeMutation({})
+}
+
+const handleBrowserChoice = async (browser) => {
+  await setBrowser.executeMutation({ id: browser.id })
+  launch()
+}
 
 const props = defineProps<{
   gql: TopNavFragment,
