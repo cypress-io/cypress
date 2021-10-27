@@ -237,20 +237,6 @@ describe('src/cy/commands/actions/check', () => {
       cy.get(':checkbox:first').check()
     })
 
-    // https://github.com/cypress-io/cypress/issues/4233
-    it('does not try other scroll behaviors if user has explicity set the scroll behavior', (done) => {
-      cy.on('fail', (err) => {
-        expect(err.message).contain('failed because this element is not visible')
-        expect(err.message).contain('it has CSS property: `position: fixed` and it\'s being covered by another element')
-        done()
-      })
-
-      cy.viewport(400, 400)
-      cy.visit('./fixtures/sticky-header.html')
-      cy.get('#container').scrollTo('bottom')
-      cy.get(':checkbox:first').check({ scrollBehavior: 'top' })
-    })
-
     it('waits until element is no longer disabled', () => {
       const chk = $(':checkbox:first').prop('disabled', true)
 

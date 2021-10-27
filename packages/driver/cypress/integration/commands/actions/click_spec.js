@@ -1,4 +1,5 @@
 const { _, $, Promise } = Cypress
+const { expect } = require('chai')
 const { getCommandLogWithText,
   findReactInstance,
   withMutableReporterState,
@@ -1097,19 +1098,6 @@ describe('src/cy/commands/actions/click', () => {
         cy.get('p').click()
       })
 
-      // https://github.com/cypress-io/cypress/issues/4233
-      it('does not try other scroll behaviors if user has explicity set the scroll behavior', (done) => {
-        cy.on('fail', (err) => {
-          expect(err.message).contain('failed because this element is not visible')
-          expect(err.message).contain('it has CSS property: `position: fixed` and it\'s being covered by another element')
-          done()
-        })
-
-        cy.viewport(400, 400)
-        cy.visit('./fixtures/sticky-header.html')
-        cy.get('p').click({ scrollBehavior: 'top' })
-      })
-
       it('does not scroll when being forced', () => {
         const scrolled = []
 
@@ -2175,7 +2163,8 @@ describe('src/cy/commands/actions/click', () => {
         cy.on('fail', (err) => {
           expect(this.logs.length).eq(2)
           expect(err.message).not.to.contain('CSS property: `opacity: 0`')
-          expect(err.message).to.contain('`cy.click()` failed because this element is not visible')
+          expect(err.message).to.contain('`cy.click()` failed because this element:')
+          expect(err.message).to.contain('is being covered by another element')
 
           done()
         })
@@ -2302,16 +2291,9 @@ describe('src/cy/commands/actions/click', () => {
           expect(lastLog.get('snapshots')[0].name).to.eq('before')
           expect(lastLog.get('snapshots')[1]).to.be.an('object')
           expect(lastLog.get('snapshots')[1].name).to.eq('after')
-          expect(err.message).to.include('`cy.click()` failed because this element is not visible:')
-          expect(err.message).to.include('>button ...</button>')
-          expect(err.message).to.include('`<button#button-covered-in-span>` is not visible because it has CSS property: `position: fixed` and it\'s being covered')
-          expect(err.message).to.include('>span on...</span>')
+          expect(err.message).to.include('`cy.click()` failed because this element:')
+          expect(err.message).to.include('is being covered by another element:')
           expect(err.docsUrl).to.eq('https://on.cypress.io/element-cannot-be-interacted-with')
-
-          const console = lastLog.invoke('consoleProps')
-
-          expect(console['Tried to Click']).to.be.undefined
-          expect(console['But its Covered By']).to.be.undefined
 
           done()
         })

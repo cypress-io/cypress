@@ -289,8 +289,6 @@ const ensureNotAnimating = function (cy, $el, coordsHistory, animationDistanceTh
 }
 
 const verify = function (cy, $el, config, options, callbacks) {
-  const userSetScrollBehavior = options.scrollBehavior !== undefined
-
   _.defaults(options, {
     scrollBehavior: config('scrollBehavior'),
     ensure: {
@@ -371,17 +369,6 @@ const verify = function (cy, $el, config, options, callbacks) {
     }
   }
 
-  const scrollUntilVisible = ($el, scrollOptions) => {
-    try {
-      cy.ensureVisibility($el, _log)
-    } catch (err) {
-      if (!scrollOptions[0]) throw err
-
-      scrollElementIntoView($el, scrollOptions[0])
-      scrollUntilVisible($el, scrollOptions.slice(1))
-    }
-  }
-
   return Promise.try(() => {
     const coordsHistory = []
 
@@ -400,16 +387,7 @@ const verify = function (cy, $el, config, options, callbacks) {
         scrollElementIntoView($el, options.scrollBehavior)
 
         if (options.ensure.visibility) {
-          // if the user specified the scroll behavior explicitly, stick with that and don't try other scroll behaviors
-          if (userSetScrollBehavior) {
-            cy.ensureVisibility($el, _log)
-          } else {
-            // if not already visible, try remaining scroll behavior options
-            // https://github.com/cypress-io/cypress/issues/4233
-            const scrollOptions = Object.keys(scrollBehaviorOptionsMap).filter((option) => option !== options.scrollBehavior)
-
-            scrollUntilVisible($el, scrollOptions)
-          }
+          cy.ensureStrictVisibility($el, _log)
         }
 
         if (options.ensure.notReadonly) {
@@ -445,6 +423,7 @@ const verify = function (cy, $el, config, options, callbacks) {
         // this calculation is relative from the viewport so we
         // only care about fromElViewport coords
         $elAtCoords = options.ensure.notCovered && ensureElIsNotCovered(cy, win, $el, coords.fromElViewport, options, _log, onScroll)
+        cy.ensureNotHiddenByAncestors($el, _log)
       }
 
       // pass our final object into onReady

@@ -687,20 +687,6 @@ describe('src/cy/commands/actions/trigger', () => {
         cy.get('p').trigger('mouseover')
       })
 
-      // https://github.com/cypress-io/cypress/issues/4233
-      it('does not try other scroll behaviors if user has explicity set the scroll behavior', (done) => {
-        cy.on('fail', (err) => {
-          expect(err.message).contain('failed because this element is not visible')
-          expect(err.message).contain('it has CSS property: `position: fixed` and it\'s being covered by another element')
-          done()
-        })
-
-        cy.viewport(400, 400)
-        cy.visit('./fixtures/sticky-header.html')
-        cy.get('#container').scrollTo('bottom')
-        cy.get('p').trigger('mouseover', { scrollBehavior: 'top' })
-      })
-
       it('errors when scrollBehavior is false and element is out of view and is clicked', (done) => {
         cy.scrollTo('top')
 
@@ -1067,12 +1053,13 @@ describe('src/cy/commands/actions/trigger', () => {
         cy.on('fail', (err) => {
           expect(this.logs.length).eq(2)
           expect(err.message).not.to.contain('CSS property: `opacity: 0`')
-          expect(err.message).to.contain('`cy.trigger()` failed because this element is not visible')
+          expect(err.message).to.contain('`cy.click()` failed because this element:')
+          expect(err.message).to.contain('is being covered by another element')
 
           done()
         })
 
-        cy.get('#opacity-0-hidden').trigger('mouseover')
+        cy.get('#opacity-0-hidden').click()
       })
 
       it('throws when subject is disabled', function (done) {
