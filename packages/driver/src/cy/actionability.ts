@@ -351,24 +351,6 @@ const verify = function (cy, $el, config, options, callbacks) {
     }
   }
 
-  const scrollElementIntoView = ($el, scrollBehaviorOption) => {
-    if (scrollBehaviorOption !== false) {
-      // scroll the element into view
-      const scrollBehavior = scrollBehaviorOptionsMap[scrollBehaviorOption]
-
-      const removeScrollBehaviorFix = addScrollBehaviorFix()
-
-      debug('scrollIntoView:', $el[0])
-      $el.get(0).scrollIntoView({ block: scrollBehavior })
-
-      removeScrollBehaviorFix()
-
-      if (onScroll) {
-        onScroll($el, 'element')
-      }
-    }
-  }
-
   return Promise.try(() => {
     const coordsHistory = []
 
@@ -384,7 +366,21 @@ const verify = function (cy, $el, config, options, callbacks) {
           cy.ensureNotDisabled($el, _log)
         }
 
-        scrollElementIntoView($el, options.scrollBehavior)
+        if (options.scrollBehavior !== false) {
+          // scroll the element into view
+          const scrollBehavior = scrollBehaviorOptionsMap[options.scrollBehavior]
+
+          const removeScrollBehaviorFix = addScrollBehaviorFix()
+
+          debug('scrollIntoView:', $el[0])
+          $el.get(0).scrollIntoView({ block: scrollBehavior })
+
+          removeScrollBehaviorFix()
+
+          if (onScroll) {
+            onScroll($el, 'element')
+          }
+        }
 
         if (options.ensure.visibility) {
           cy.ensureStrictVisibility($el, _log)
