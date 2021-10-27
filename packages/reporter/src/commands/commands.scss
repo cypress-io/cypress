@@ -70,14 +70,6 @@
     }
   }
 
-  .command-type-parent > span > .command-wrapper {
-    border-top: 1px solid $gray-900;
-
-    &:hover {
-      border-top: 1px solid $gray-1000;
-    }
-  }
-
   .command-type-parent:first-child > span > .command-wrapper {
     border-top: 0;
   }
@@ -103,7 +95,7 @@
   }
 
   .command-wrapper {
-    background-color: $gray-1000;
+    background-color: $reporter-section-background;
     color: $gray-400;
     min-height: 20px;
 
@@ -286,7 +278,7 @@
     background-color: $err-header-background;
 
     &:hover {
-      background: $gray-800;
+      background: rgba($red-400, 0.3);
     }
 
     .command-wrapper-text {

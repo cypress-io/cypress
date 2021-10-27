@@ -34,7 +34,7 @@ let _autIframeModel: any
  * This only needs to be created once per **spec**. If you change spec,
  * you need to create a new AUT IFrame model.
  */
-function getAutIframeModel () {
+export function getAutIframeModel () {
   if (!_autIframeModel) {
     throw Error('Must create a new instance of AutIframe before accessing')
   }
@@ -57,9 +57,6 @@ function createIframeModel () {
     autIframe.restoreDom,
     autIframe.highlightEl,
     window.UnifiedRunner.eventManager,
-    () => {
-      // TODO snapshot controls
-    },
     window.UnifiedRunner.MobX,
     {
       recorder: window.UnifiedRunner.studioRecorder,

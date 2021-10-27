@@ -393,7 +393,7 @@ commands:
       package:
         description: package to target
         type: enum
-        enum: ['launchpad', 'app']
+        enum: ['frontend-shared', 'launchpad', 'app']
       browser:
         description: browser shortname to target
         type: string
@@ -1202,6 +1202,15 @@ jobs:
       - run-runner-ct-integration-tests:
           browser: chrome
           percy: true
+  
+  run-frontend-shared-component-tests-chrome:
+    <<: *defaults
+    parallelism: 1
+    steps:
+      - run-new-ui-tests:
+          browser: chrome
+          package: frontend-shared
+          type: ct
 
   run-launchpad-component-tests-chrome:
     <<: *defaults
@@ -2135,6 +2144,10 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - runner-ct-integration-tests-chrome:
+        requires:
+          - build
+    - run-frontend-shared-component-tests-chrome:
+        context: test-runner:launchpad-tests
         requires:
           - build
     - run-launchpad-integration-tests-chrome:
