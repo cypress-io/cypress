@@ -978,11 +978,11 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       it('returns object containing path and id', function () {
         sinon.stub(settings, 'read').resolves({ projectId: 'id-123' })
 
-        return add(this.configWithJsPath, {})
+        return add(this.pristinePath, {})
         .then((project) => {
           expect(project.id).to.equal('id-123')
 
-          expect(project.path).to.equal(this.configWithJsPath)
+          expect(project.path).to.equal(this.pristinePath)
         })
       })
     })

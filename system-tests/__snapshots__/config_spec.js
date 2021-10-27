@@ -155,7 +155,7 @@ Found an error while validating the \`browsers\` list. Expected \`family\` to be
 
 exports['e2e config throws error when multiple default config file are found in project 1'] = `
 There is both a \`cypress.config.js\` and a \`cypress.config.ts\` at the location below:
-/foo/bar/.projects/pristine
+/foo/bar/.projects/pristine-with-config-file
 
 Cypress does not know which one to read for config. Please remove one of the two and try again.
 
@@ -164,7 +164,7 @@ Cypress does not know which one to read for config. Please remove one of the two
 
 exports['e2e config throws error when cypress.json is found in project and need migration 1'] = `
 There is both a cypress.json file ar the location below:
-/foo/bar/.projects/config-with-js
+/foo/bar/.projects/pristine
 
 Cypress does not support any more 'cypress.json' config, migrate to 'cypress.config.{ts|js}'.
 

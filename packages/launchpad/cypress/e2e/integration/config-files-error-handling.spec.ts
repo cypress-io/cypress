@@ -1,6 +1,6 @@
 describe('Config files error handling', () => {
   it('it handles multiples config files', () => {
-    cy.setupE2E('config-with-js')
+    cy.setupE2E('pristine-with-config-file')
     cy.visitLaunchpad()
 
     cy.withCtx(async (ctx) => {
@@ -26,7 +26,7 @@ describe('Config files error handling', () => {
   })
 
   it('it handles legacy config file', () => {
-    cy.setupE2E('config-with-js')
+    cy.setupE2E('pristine-with-config-file')
     cy.visitLaunchpad()
 
     cy.withCtx(async (ctx) => {
