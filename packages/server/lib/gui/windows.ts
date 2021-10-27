@@ -32,7 +32,6 @@ const getUrl = function (type, port?: number) {
       throw new Error(`No acceptable window type found for: '${type}'`)
   }
 }
-
 const getByType = (type) => {
   return windows[type]
 }

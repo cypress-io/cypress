@@ -16,6 +16,7 @@ import {
   BrowserDataSource,
   UtilDataSource,
   StorybookDataSource,
+  CloudDataSource,
 } from './sources/'
 import { cached } from './util/cached'
 import { DataContextShell, DataContextShellConfig } from './DataContextShell'
@@ -63,10 +64,19 @@ export class DataContext extends DataContextShell {
       this.actions.app.refreshBrowsers(),
       // load projects from cache on start
       this.actions.project.loadProjects(),
+      // load the cached user & validate the token on start
+      this.actions.auth.getUser(),
     ]
 
     if (this.config.launchArgs.projectRoot) {
       toAwait.push(this.actions.project.setActiveProject(this.config.launchArgs.projectRoot))
+    }
+
+    if (this.config.launchArgs.testingType) {
+      // It should be possible to skip the first step in the wizard, if the
+      // user already told us the testing type via command line argument
+      this.actions.wizard.setTestingType(this.config.launchArgs.testingType)
+      this.actions.wizard.navigate('forward')
     }
 
     if (IS_DEV_ENV) {
@@ -165,6 +175,11 @@ export class DataContext extends DataContextShell {
     return new ProjectDataSource(this)
   }
 
+  @cached
+  get cloud () {
+    return new CloudDataSource(this)
+  }
+
   get projectsList () {
     return this.coreData.app.projects
   }
@@ -201,6 +216,16 @@ export class DataContext extends DataContextShell {
     // TODO(tim): handle this consistently
     // eslint-disable-next-line no-console
     console.error(e)
+  }
+
+  /**
+   * If we really want to get around the guards added in proxyContext
+   * which disallow referencing ctx.actions / ctx.emitter from contexct for a GraphQL query,
+   * we can call ctx.deref.emitter, etc. This should only be used in exceptional situations where
+   * we're certain this is a good idea.
+   */
+  get deref () {
+    return this
   }
 
   async destroy () {

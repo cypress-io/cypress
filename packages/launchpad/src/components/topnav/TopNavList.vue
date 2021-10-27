@@ -5,7 +5,7 @@
   >
     <PopoverButton class="flex-grow h-full group focus:outline-none focus:ring-0">
       <div
-        class="flex items-center gap-8px text-gray-600 group-hocus:text-indigo-600"
+        class="flex items-center text-gray-600 gap-8px group-hocus:text-indigo-600"
         :class="open ? 'text-indigo-600' : ''"
       >
         <slot
@@ -13,7 +13,7 @@
           :open="open"
         />
         <i-cy-chevron-down
-          class="w-10px transform group-hocus:icon-dark-indigo-500 transition-all duration-300"
+          class="transition-all duration-300 transform w-10px group-hocus:icon-dark-indigo-500"
           :class="open ? 'rotate-180 icon-dark-indigo-500' : 'icon-dark-gray-200'"
         />
       </div>

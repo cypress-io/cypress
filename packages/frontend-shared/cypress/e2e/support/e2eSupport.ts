@@ -1,6 +1,8 @@
 import '@testing-library/cypress/add-commands'
 import type { DataContext } from '@packages/data-context'
 import { e2eProjectDirs } from './e2eProjectDirs'
+import type { AuthenticatedUserShape } from '@packages/data-context/src/data'
+import type { DocumentNode, ExecutionResult } from 'graphql'
 
 const NO_TIMEOUT = 1000 * 1000
 const FOUR_SECONDS = 4 * 1000
@@ -18,6 +20,16 @@ export interface WithCtxInjected extends WithCtxOptions {
   testState: Record<string, any>
   projectDir(projectName: ProjectFixture): string
 }
+
+export interface RemoteGraphQLInterceptPayload {
+  operationName?: string
+  query: string
+  variables: Record<string, any>
+  document: DocumentNode
+  result: ExecutionResult
+}
+
+export type RemoteGraphQLInterceptor = (obj: RemoteGraphQLInterceptPayload) => ExecutionResult
 
 declare global {
   namespace Cypress {
@@ -37,6 +49,18 @@ declare global {
        */
       setupE2E: typeof setupE2E
       initializeApp: typeof initializeApp
+      /**
+       * Simulates a user logged-in to the cypress app
+       */
+      loginUser: typeof loginUser
+      /**
+       * Gives the ability to intercept the remote GraphQL request & respond accordingly
+       */
+      remoteGraphQLIntercept: typeof remoteGraphQLIntercept
+      /**
+       * Removes the sinon spy'ing on the remote GraphQL fake requests
+       */
+      disableRemoteGraphQLFakes(): void
       visitApp(href?: string): Chainable<string>
       visitLaunchpad(href?: string): Chainable<string>
     }
@@ -141,8 +165,33 @@ function withCtx<T extends Partial<WithCtxOptions>> (fn: (ctx: DataContext, o: T
   })
 }
 
+function loginUser (userShape: Partial<AuthenticatedUserShape> = {}) {
+  const _log = Cypress.log({ name: 'loginUser', message: JSON.stringify(userShape) })
+
+  return cy.withCtx((ctx, o) => {
+    ctx.coreData.user = {
+      authToken: '1234',
+      email: 'test@example.com',
+      name: 'Test User',
+      ...o.userShape,
+    }
+  }, { log: false, userShape }).then(() => {
+    _log.end()
+  })
+}
+
+function remoteGraphQLIntercept (fn: RemoteGraphQLInterceptor) {
+  const _log = Cypress.log({ name: 'remoteGraphQLIntercept', message: '' })
+
+  return cy.task('remoteGraphQLIntercept', fn.toString(), { log: false }).then(() => {
+    _log.end()
+  })
+}
+
 Cypress.Commands.add('visitApp', visitApp)
+Cypress.Commands.add('loginUser', loginUser)
 Cypress.Commands.add('visitLaunchpad', visitLaunchpad)
 Cypress.Commands.add('initializeApp', initializeApp)
 Cypress.Commands.add('setupE2E', setupE2E)
 Cypress.Commands.add('withCtx', withCtx)
+Cypress.Commands.add('remoteGraphQLIntercept', remoteGraphQLIntercept)
