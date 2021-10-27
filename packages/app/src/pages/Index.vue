@@ -4,6 +4,6 @@
 
 <route>
 {
-  name: "Home"
+  name: "Home Page"
 }
 </route>

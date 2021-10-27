@@ -6,6 +6,6 @@
 
 <route>
 {
-  name: "Settings"
+  name: "Settings Page"
 }
 </route>
