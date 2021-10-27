@@ -37,7 +37,7 @@
       </template>
       <template #right>
         <RunResults
-          :gql="props.gql"
+          :gql="run"
         />
       </template>
     </ListRowHeader>
@@ -75,19 +75,18 @@ const props = defineProps<{
 	gql: RunCardFragment
 }>()
 
-const icon = computed(() => {
-  return props.gql.status === 'PASSED'
-    ? PassedIcon
-    : props.gql.status === 'FAILED'
-      ? FailedIcon
-      : props.gql.status === 'TIMEDOUT' || props.gql.status === 'ERRORED' || props.gql.status === 'OVERLIMIT'
-        ? ErroredIcon
-        : props.gql.status === 'CANCELLED' || props.gql.status === 'NOTESTS'
-          ? SkippedIcon
-          : props.gql.status === 'RUNNING'
-            ? PendingIcon
-            : undefined
-})
+const ICON_MAP = {
+  PASSED: PassedIcon,
+  FAILED: FailedIcon,
+  TIMEDOUT: ErroredIcon,
+  ERRORED: ErroredIcon,
+  OVERLIMIT: ErroredIcon,
+  CANCELLED: SkippedIcon,
+  NOTESTS: SkippedIcon,
+  RUNNING: PendingIcon,
+} as const
+
+const icon = computed(() => ICON_MAP[props.gql.status])
 
 const run = computed(() => props.gql)
 
