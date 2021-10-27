@@ -62,7 +62,7 @@ import CompareTestingTypes from './setup/CompareTestingTypes.vue'
 
 import { useI18n } from '@cy/i18n'
 import { ref } from 'vue'
-import HeaderBar from '../../frontend-shared/src/gql-components/HeaderBar.vue'
+import HeaderBar from '@cy/gql-components/HeaderBar.vue'
 
 const { t } = useI18n()
 const isTestingTypeModalOpen = ref(false)
