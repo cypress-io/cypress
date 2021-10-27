@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="overflow-scroll">
     <h2>Runs Page</h2>
     <main class="p-24px relative">
       <transition
@@ -7,10 +7,10 @@
       >
         <RunsSkeletton v-if="query.fetching.value" />
         <div
-          v-else-if="query.data.value?.app?.activeProject?.cloudProject?.runs?.nodes"
+          v-else-if="query.data.value?.app?.activeProject?.cloudProject"
         >
           <RunCard
-            v-for="run of query.data.value.app.activeProject.cloudProject.runs.nodes"
+            v-for="run of query.data.value.app.activeProject.cloudProject.runs?.nodes ?? []"
             :key="run.id"
             :gql="run"
           />
