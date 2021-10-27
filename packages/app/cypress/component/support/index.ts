@@ -21,5 +21,13 @@ import '../../../src/main.scss'
 import '@iconify/iconify'
 import { createRouter } from '../../../src/router/router'
 import { createPinia } from '../../../src/store'
+import { Pinia, setActivePinia } from 'pinia'
 
-registerMountFn({ plugins: [() => createRouter(), () => createPinia()] })
+let pinia: Pinia
+
+beforeEach(() => {
+  pinia = createPinia()
+  setActivePinia(pinia)
+})
+
+registerMountFn({ plugins: [() => createRouter(), () => pinia] })
