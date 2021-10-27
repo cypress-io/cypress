@@ -11,8 +11,6 @@ const builtInCommands = [
   ..._.toArray(allCommands).map((c) => c.default || c),
   addCommand,
 ]
-let builtInCommandNames = {}
-let addingBuiltIns
 
 const getTypeByPrevSubject = (prevSubject) => {
   if (prevSubject === 'optional') {
@@ -32,6 +30,10 @@ export default {
     // of commands
     const commands = {}
     const commandBackups = {}
+    // we track built in commands to ensure users cannot
+    // add custom commands with the same name
+    const builtInCommandNames = {}
+    let addingBuiltIns
 
     const store = (obj) => {
       commands[obj.name] = obj
