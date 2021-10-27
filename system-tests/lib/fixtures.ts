@@ -98,6 +98,8 @@ async function makeWorkspacePackagesAbsolute (pathToPkgJson: string): Promise<st
   return updatedDeps
 }
 
+const relativePathToken = '<<RELATIVE PATH TO MONOREPO ROOT>>'
+
 /**
  * Given a `system-tests` project name, detect and install the `node_modules`
  * specified in the project's `package.json`. No-op if no `package.json` is found.
@@ -111,42 +113,74 @@ export async function scaffoldProjectNodeModules (project: string): Promise<void
     await execa.shell(cmd, { cwd: projectDir, stdio: 'inherit' })
   }
 
+  const cacheDir = _path.join(cachedir('cy-system-tests-node-modules'), project, 'node_modules')
+  // const cacheDir = _path.join(process.env.CI ? 'TBD' : cachedir('cy-system-tests-node-modules'), project, 'node_modules')
+
+  async function removeWorkspacePackages (packages: string[]): Promise<void> {
+    for (const dep of packages) {
+      const depDir = _path.join(cacheDir, dep)
+
+      await fs.remove(depDir)
+    }
+  }
+
+  const updateYarnLock = !!process.env.UPDATE_YARN_LOCK
+
   try {
     // this will throw and exit early if the package.json does not exist
     await require(projectPkgJsonPath)
-    // const cacheDir = _path.join(process.env.CI ? 'TBD' : cachedir('cy-system-tests-node-modules'), project, 'node_modules')
-    const cacheDir = _path.join(cachedir('cy-system-tests-node-modules'), project, 'node_modules')
 
     console.log(`📦 Found package.json for project ${project}.`)
 
     // 1. Ensure there is a cache directory set up for this test project's `node_modules`.
     await symlinkNodeModulesFromCache(project, cacheDir)
 
-    // 1. Before running `yarn`, resolve workspace deps to absolute paths.
+    // 2. Before running `yarn`, resolve workspace deps to absolute paths.
     // This is required to fix `yarn install` for workspace-only packages.
-    const depsToSymlink = await makeWorkspacePackagesAbsolute(projectPkgJsonPath)
+    const workspaceDeps = await makeWorkspacePackagesAbsolute(projectPkgJsonPath)
 
-    // 2. Run `yarn install` with `--frozen-lockfile` by default.
-    await runCmd(`yarn install${process.env.UPDATE_YARN_LOCK ? '' : ' --frozen-lockfile'}`)
+    await removeWorkspacePackages(workspaceDeps)
 
-    if (process.env.UPDATE_YARN_LOCK) {
-      // TODO: do this but less hacky
-      afterEach(async () => {
-        console.log(`📦 Copying yarn.lock for ${project}`)
-        await fs.copy(
-          _path.join(projectDir, 'yarn.lock'),
-          _path.join(root, 'projects', project, 'yarn.lock'),
-        )
-      })
+    // 3. Fix relative paths in `yarn.lock`.
+    const relativePathToProjectDir = _path.relative(projectDir, _path.join(root, '..'))
+    const yarnLockPath = _path.join(projectDir, 'yarn.lock')
+
+    try {
+      const yarnLock = (await fs.readFile(yarnLockPath, 'utf8'))
+      .replace(new RegExp(relativePathToken, 'gm'), relativePathToProjectDir)
+
+      console.log('📦 Writing yarn.lock with fixed relative paths to temp dir')
+      await fs.writeFile(yarnLockPath, yarnLock)
+    } catch (err) {
+      if (err.code !== 'ENOENT' || !updateYarnLock) throw err
+
+      console.log('📦 UPDATE_YARN_LOCK set and no yarn.lock found, continuing')
     }
 
-    // 3. After `yarn install`, we must now symlink *over* all workspace dependencies, or else
+    // 4. Run `yarn install` with `--frozen-lockfile` by default.
+    await runCmd(`yarn install --ignore-scripts${updateYarnLock ? '' : ' --frozen-lockfile'}`)
+
+    if (updateYarnLock) {
+      // TODO: do this but less hacky
+      afterEach(require('lodash/once')(async () => {
+        console.log(`📦 Copying yarn.lock and fixing relative paths for ${project}`)
+
+        // Replace workspace dependency paths in `yarn.lock` with tokens so it can be the same
+        // for all developers.
+        const yarnLock = (await fs.readFile(yarnLockPath, 'utf8'))
+        .replace(new RegExp(relativePathToProjectDir, 'gm'), relativePathToken)
+
+        await fs.writeFile(_path.join(root, 'projects', project, 'yarn.lock'), yarnLock)
+      }))
+    }
+
+    // 5. After `yarn install`, we must now symlink *over* all workspace dependencies, or else
     // `require` calls from `yarn install`'d workspace deps to peer deps will fail.
-    for (const dep of depsToSymlink) {
+    await removeWorkspacePackages(workspaceDeps)
+    for (const dep of workspaceDeps) {
       console.log(`📦 Symlinking workspace dependency: ${dep}`)
       const depDir = _path.join(cacheDir, dep)
 
-      await fs.remove(depDir)
       await fs.symlink(pathToPackage(dep), depDir, 'junction')
     }
   } catch (err) {
