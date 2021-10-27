@@ -1,5 +1,5 @@
 <template>
-  <SnapshotButtonGroup>
+  <SnapshotButtonGroup data-cy="snapshot-change-state">
     <button
       v-for="snapshot in snapshots"
       :key="snapshot.index"

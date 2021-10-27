@@ -1,6 +1,7 @@
 <template>
-  <SnapshotButtonGroup>
+  <SnapshotButtonGroup data-cy="snapshot-highlight-controls">
     <button
+      data-cy="unpin-snapshot"
       class="border-r-1"
       @click="unpin"
     >

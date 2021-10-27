@@ -56,7 +56,7 @@ export const useSnapshotStore = defineStore({
       this.messageDescription = undefined
     },
 
-    showSnapshot (messageDescription?: SnapshotMessageDescription) {
+    showSnapshot (messageDescription?: string) {
       this.messageTitle = 'DOM Snapshot'
       this.messageDescription = messageDescription
       this.messageType = undefined

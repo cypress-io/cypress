@@ -2,6 +2,7 @@
   <div
     class="shadow-md text-white p-3 rounded-md flex items-center justify-center"
     :class="bg"
+    data-cy="snapshot-message"
   >
     <span>{{ props.messageTitle }}</span>
     <span class="text-purple-400 ml-1">
