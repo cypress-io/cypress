@@ -216,6 +216,12 @@ const downloadAndUnzip = ({ version, installDir, downloadDir }) => {
   return Promise.resolve(tasks.run())
 }
 
+const validateOS = () => {
+  return util.getPlatformInfo().then((platformInfo) => {
+    return platformInfo.match(/(darwin|linux|win32)-x64/)
+  })
+}
+
 const start = (options = {}) => {
   debug('installing with options %j', options)
 
@@ -271,7 +277,14 @@ const start = (options = {}) => {
   const cacheDir = state.getCacheDir()
   const binaryDir = state.getBinaryDir(pkgVersion)
 
-  return fs.ensureDirAsync(cacheDir)
+  return validateOS().then((isValid) => {
+    if (!isValid) {
+      return throwFormErrorText(errors.invalidOS)()
+    }
+  })
+  .then(() => {
+    return fs.ensureDirAsync(cacheDir)
+  })
   .catch({ code: 'EACCES' }, (err) => {
     return throwFormErrorText(errors.invalidCacheDirectory)(stripIndent`
     Failed to access ${chalk.cyan(cacheDir)}:

@@ -24,15 +24,6 @@ const getProxyForUrlWithNpmConfig = (url) => {
     null
 }
 
-const getRealOsArch = () => {
-  // os.arch() returns the arch for which this node was compiled
-  // we want the operating system's arch instead: x64
-
-  const osArch = arch()
-
-  return osArch
-}
-
 const getBaseUrl = () => {
   if (util.getEnv('CYPRESS_DOWNLOAD_MIRROR')) {
     let baseUrl = util.getEnv('CYPRESS_DOWNLOAD_MIRROR')
@@ -72,9 +63,8 @@ const getCA = () => {
 const prepend = (urlPath) => {
   const endpoint = url.resolve(getBaseUrl(), urlPath)
   const platform = os.platform()
-  const arch = getRealOsArch()
 
-  return `${endpoint}?platform=${platform}&arch=${arch}`
+  return `${endpoint}?platform=${platform}&arch=${arch()}`
 }
 
 const getUrl = (version) => {

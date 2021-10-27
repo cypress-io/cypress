@@ -39,6 +39,13 @@ const invalidRunProjectPath = {
   `,
 }
 
+const invalidOS = {
+  description: 'The Cypress App could not be installed. Your machine does not meet the operating system requirements.',
+  solution: stripIndent`
+
+  ${chalk.blue('https://on.cypress.io/guides/getting-started/installing-cypress#system-requirements')}`,
+}
+
 const failedDownload = {
   description: 'The Cypress App could not be downloaded.',
   solution: stripIndent`
@@ -391,6 +398,7 @@ module.exports = {
     missingApp,
     notInstalledCI,
     missingDependency,
+    invalidOS,
     invalidSmokeTestDisplayError,
     versionMismatch,
     binaryNotExecutable,

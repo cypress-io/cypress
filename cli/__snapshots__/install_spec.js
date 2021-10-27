@@ -142,7 +142,7 @@ EACCES: permission denied, mkdir '/invalid'
 
 ----------
 
-Platform: darwin (Foo-OsVersion)
+Platform: darwin-x64 (Foo-OsVersion)
 Cypress Version: 1.2.3
 
 `
@@ -244,5 +244,28 @@ Installing Cypress (version: 1.2.3)
 
   - npm uninstall -g cypress
   - npm install --save-dev cypress
+
+`
+
+exports['error when installing on unsupported os'] = `
+Error: The Cypress App could not be installed. Your machine does not meet the operating system requirements.
+
+https://on.cypress.io/guides/getting-started/installing-cypress#system-requirements
+
+----------
+
+Platform: win32-ia32
+this.stdout {
+  data: [
+    'Error: The Cypress App could not be installed. Your machine does not meet the operating system requirements.\\n' +
+      '\\n' +
+      '\\x1B[34mhttps://on.cypress.io/guides/getting-started/installing-cypress#system-requirements\\x1B[39m\\n' +
+      '\\n' +
+      '----------\\n' +
+      '\\n' +
+      'Platform: win32-ia32\\n'
+  ],
+  toString: [Function: toString]
+}
 
 `
