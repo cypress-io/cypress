@@ -469,7 +469,7 @@ const startServer = function (obj) {
   if (s) {
     const opts = _.isObject(s) ? s : {}
 
-    app.use(express.static(e2ePath, opts))
+    app.use(express.static(_path.join(__dirname, '../projects/e2e'), opts))
   }
 
   return new Bluebird((resolve) => {
