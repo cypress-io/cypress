@@ -1,6 +1,6 @@
 <template>
   <template v-if="query.data.value">
-    <HeaderBarContainer />
+    <HeaderBar />
     <div class="px-24px">
       <template v-if="query.data.value.baseError">
         <BaseError :gql="query.data.value.baseError" />
@@ -62,8 +62,7 @@ import CompareTestingTypes from './setup/CompareTestingTypes.vue'
 
 import { useI18n } from '@cy/i18n'
 import { ref } from 'vue'
-import ShikiHighlight from '../../frontend-shared/src/components/ShikiHighlight.vue'
-import HeaderBarContainer from '../../frontend-shared/src/gql-components/HeaderBarContainer.vue'
+import HeaderBar from '../../frontend-shared/src/gql-components/HeaderBarContainer.vue'
 
 const { t } = useI18n()
 const isTestingTypeModalOpen = ref(false)
