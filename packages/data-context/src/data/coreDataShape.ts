@@ -101,6 +101,7 @@ export function makeCoreData (): CoreDataShape {
       allBundlers: BUNDLERS,
       history: ['welcome'],
       chosenBrowser: null,
+      browserErrorMessage: null,
     },
     user: null,
     electron: {
