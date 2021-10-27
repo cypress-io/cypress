@@ -26,11 +26,11 @@ import PendingIcon from '~icons/cy/status-pending_x12.svg'
 
 gql`
 fragment RunResults on CloudRun {
-	id
-	totalPassed
-	totalFailed
-	totalPending
-	totalSkipped
+  id
+  totalPassed
+  totalFailed
+  totalPending
+  totalSkipped
 }
 `
 
