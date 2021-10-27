@@ -3,12 +3,12 @@
     <h2>Runs Page</h2>
     <main class="p-24px relative">
       <RunsConnect
-        v-if="(!activeProject?.projectId || !query.data.value?.cloudViewer?.id)"
+        v-if="!query.fetching.value && (!activeProject?.projectId || !query.data.value?.cloudViewer?.id)"
         :has-project-id="!!activeProject?.projectId"
         :is-logged-in="!!query.data.value?.cloudViewer?.id"
       />
       <RunError
-        v-else-if="!query.fetching.value && cloudRequestError"
+        v-else-if="cloudRequestError"
         :error="cloudRequestError"
       />
       <transition

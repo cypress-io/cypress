@@ -15,9 +15,7 @@ describe('App', () => {
 
   it('shows the loader', () => {
     cy.remoteGraphQLIntercept(async (obj) => {
-      if (obj.result.data?.cloudProjectsBySlugs) {
-        await new Promise((resolve) => setTimeout(resolve, 200))
-      }
+      await new Promise((resolve) => setTimeout(resolve, 200))
 
       return obj.result
     })
