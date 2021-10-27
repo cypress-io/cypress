@@ -11,28 +11,25 @@
         >{{ t('links.learnMore') }}</a>
       </i18n-t>
     </template>
-    <div class="inline-grid grid-flow-col justify-start gap-10px">
-      <ShikiHighlight
-        :code="formattedProjectId"
-        class="max-w-400px text-sm border border-gray-100 rounded overflow-hidden"
-        :prefix-icon="IconCodeBraces"
-        prefix-icon-class="text-cool-gray-400"
-        lang="yaml"
-        inline
+    <div class="flex items-center gap-10px">
+      <div class="bg-gray-50 flex items-center w-256px h-34px pr-16px border rounded border-gray-100 text-jade-500">
+        <i-cy-octothorpe_x16 class="h-16px w-16px icon-dark-gray-500 mx-8px" />
+        <code>{{ props.gql?.projectId }}</code>
+      </div>
+      <CopyButton
+        :text="props.gql?.projectId || ''"
+        variant="outline"
       />
     </div>
   </SettingsSection>
 </template>
 
 <script lang="ts" setup>
-import { ref, computed } from 'vue'
 import { gql } from '@urql/core'
-import IconCodeBraces from '~icons/mdi/code-braces'
-import SettingsSection from '../SettingsSection.vue'
-import { useClipboard } from '@vueuse/core'
+import CopyButton from '@cy/components/CopyButton.vue'
 import { useI18n } from '@cy/i18n'
+import SettingsSection from '../SettingsSection.vue'
 import type { ProjectIdFragment } from '../../generated/graphql'
-import ShikiHighlight from '../../../../frontend-shared/src/components/ShikiHighlight.vue'
 
 gql`
 fragment ProjectId on Project {
@@ -45,15 +42,5 @@ const props = defineProps<{
   gql?: ProjectIdFragment
 }>()
 
-const clipboard = props.mockClipboard?.() || useClipboard({ source: ref(props.gql?.projectId || '') })
-
-const formattedProjectId = computed(() => `projectId: '${props.gql?.projectId}'`)
-
 const { t } = useI18n()
 </script>
-
-<style lang="scss" scoped>
-pre {
-  @apply bg-transparent m-0 p-0;
-}
-</style>
