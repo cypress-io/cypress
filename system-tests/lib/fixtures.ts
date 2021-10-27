@@ -258,14 +258,6 @@ export function remove () {
   return fs.removeSync(tmpDir)
 }
 
-export async function installStubPackage (projectPath, pkgName) {
-  const pathToPkg = _path.join(projectPath, 'node_modules', pkgName)
-
-  await fs.outputJSON(_path.join(projectPath, 'package.json'), { name: 'some-project' })
-  await fs.mkdirp(pathToPkg)
-  await fs.outputFile(_path.join(pathToPkg, 'index.js'), '')
-}
-
 // returns the path to project fixture
 // in the tmpDir
 export function project (...args) {

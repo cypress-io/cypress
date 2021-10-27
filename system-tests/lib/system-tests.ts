@@ -198,10 +198,6 @@ type ExecOptions = {
    * Emulate a no-typescript environment.
    */
   noTypeScript?: boolean
-  /**
-   * If set, a dummy `node_modules` project with this name will be set up.
-   */
-  stubPackage?: string
 }
 
 type Server = {
@@ -898,10 +894,6 @@ const systemTests = {
 
     if (ctx.settings) {
       await settings.write(e2ePath, ctx.settings)
-    }
-
-    if (options.stubPackage) {
-      Fixtures.installStubPackage(options.project, options.stubPackage)
     }
 
     args = options.args || ['index.js'].concat(args)
