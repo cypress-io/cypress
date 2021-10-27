@@ -14,13 +14,14 @@
  * namespace there, and access it with `window.UnifiedRunner`.
  *
  */
-import { getMobxRunnerStore } from '../store'
+import { getMobxRunnerStore, useAutStore } from '../store'
 import { injectBundle } from './injectBundle'
 import type { BaseSpec } from '@packages/types/src/spec'
 import { UnifiedReporterAPI } from './reporter'
 import { getRunnerElement, empty } from './utils'
 import { IframeModel } from './iframe-model'
 import { AutIframe } from './aut-iframe'
+import { watchEffect } from 'vue'
 
 const randomString = `${Math.random()}`
 
@@ -52,7 +53,6 @@ function createIframeModel () {
   const autIframe = getAutIframeModel()
   // IFrame Model to manage snapshots, etc.
   const iframeModel = new IframeModel(
-    getMobxRunnerStore(),
     autIframe.detachDom,
     autIframe.restoreDom,
     autIframe.highlightEl,
@@ -86,6 +86,12 @@ function setupRunner () {
   })
 
   window.UnifiedRunner.eventManager.start(window.UnifiedRunner.config)
+
+  const autStore = useAutStore()
+
+  watchEffect(() => {
+    autStore.viewportUpdateCallback?.()
+  }, { flush: 'post' })
 
   window.UnifiedRunner.MobX.reaction(
     () => [mobxRunnerStore.height, mobxRunnerStore.width],

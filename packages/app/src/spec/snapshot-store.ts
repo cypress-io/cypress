@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import type { AutSnapshot } from '../runner/iframe-model'
 import { getAutIframeModel } from '../runner'
 
-export type SnapshotMessageDescription = 'info' | 'warning' | 'pinned'
+export type SnapshotMessageType = 'info' | 'warning'
 
 interface SnapshotStoreState {
   messageTitle?: string
@@ -110,6 +110,11 @@ export const useSnapshotStore = defineStore({
     setTestsRunningError () {
       this.messageTitle = 'Cannot show Snapshot while tests are running'
       this.messageType = 'warning'
+    },
+
+    setMessage (messageTitle: string, messageType: SnapshotMessageType) {
+      this.messageTitle = messageTitle
+      this.messageType = messageType
     },
 
     setMissingSnapshotMessage () {

@@ -7,18 +7,19 @@
       <InlineSpecList :gql="props.gql" />
     </div>
 
+
     <div
       id="runner"
       :style="`width: ${runnerColumnWidth}px`"
       class="relative"
     >
+      <SpecRunnerHeader :gql="props.gql" />
       <div
         :id="RUNNER_ID"
         class="viewport origin-top-left"
         :style="viewportStyle"
       />
       <SnapshotControls :event-manager="eventManager" />
-      <div>Viewport: {{ viewportDimensions.width }}px x {{ viewportDimensions.height }}px</div>
     </div>
 
     <div
@@ -29,45 +30,34 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onBeforeUnmount, onMounted, reactive, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, watch } from 'vue'
 import { REPORTER_ID, RUNNER_ID, getRunnerElement, getReporterElement, empty } from '../runner/utils'
 import { gql } from '@urql/core'
 import type { SpecRunnerFragment } from '../generated/graphql'
 import InlineSpecList from '../specs/InlineSpecList.vue'
-import { getMobxRunnerStore } from '../store'
+import { useAutStore } from '../store'
 import { UnifiedRunnerAPI } from '../runner'
 import type { BaseSpec } from '@packages/types'
 import SnapshotControls from './SnapshotControls.vue'
+import SpecRunnerHeader from './SpecRunnerHeader.vue'
 
 gql`
 fragment SpecRunner on App {
   ...Specs_InlineSpecList
+  ...SpecRunnerHeader
 }
 `
 
 const runnerColumnWidth = 400
 const eventManager = window.UnifiedRunner.eventManager
 
-const mobxRunnerStore = getMobxRunnerStore()
-
-const viewportDimensions = reactive({
-  height: mobxRunnerStore.height,
-  width: mobxRunnerStore.width,
-})
-
-window.UnifiedRunner.MobX.reaction(
-  () => [mobxRunnerStore.height, mobxRunnerStore.width],
-  ([height, width]) => {
-    viewportDimensions.height = height
-    viewportDimensions.width = width
-  },
-)
+const autStore = useAutStore()
 
 const viewportStyle = computed(() => {
   return `
-  width: ${viewportDimensions.width}px;
-  height: ${viewportDimensions.height}px;
-  transform: scale(${runnerColumnWidth / viewportDimensions.width});`
+  width: ${autStore.viewportDimensions.width}px;
+  height: ${autStore.viewportDimensions.height}px;
+  transform: scale(${runnerColumnWidth / autStore.viewportDimensions.width});`
 })
 
 const props = defineProps<{
