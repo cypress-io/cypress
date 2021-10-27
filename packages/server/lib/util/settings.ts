@@ -149,11 +149,7 @@ export function read (projectRoot, options: SettingsOptions = {}) {
   })
   .catch((err) => {
     if (err.type === 'MODULE_NOT_FOUND' || err.code === 'ENOENT') {
-      if (options.args?.runProject) {
-        return Promise.reject(errors.get('CONFIG_FILE_NOT_FOUND', options.configFile, projectRoot))
-      }
-
-      return _write(file, {})
+      return Promise.reject(errors.get('CONFIG_FILE_NOT_FOUND', options.configFile, projectRoot))
     }
 
     return Promise.reject(err)
