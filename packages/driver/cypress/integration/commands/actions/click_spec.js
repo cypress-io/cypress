@@ -1,5 +1,4 @@
 const { _, $, Promise } = Cypress
-const { expect } = require('chai')
 const { getCommandLogWithText,
   findReactInstance,
   withMutableReporterState,
