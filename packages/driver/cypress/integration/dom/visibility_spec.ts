@@ -1,6 +1,5 @@
+// @ts-ignore
 const { $, dom } = Cypress
-
-export {}
 
 describe('src/cypress/dom/visibility', () => {
   beforeEach(() => {

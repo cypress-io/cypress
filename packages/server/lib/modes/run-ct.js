@@ -1,3 +1,5 @@
+const { openProject } = require('../open_project')
+
 const run = (options) => {
   // TODO: make sure if we need to run this in electron by default to match e2e behavior?
   options.browser = options.browser || 'electron'
@@ -12,15 +14,12 @@ const run = (options) => {
     // if we get compilation error (e.g. from webpack) it means that no assets were emitted
     // and we can not run any tests, even if the error belongs to the different module
     // that's why the only way to avoid this is to close the process
-    require('../open_project').closeBrowser().then(() => {
+    openProject.closeBrowser().then(() => {
       process.exit(1)
     })
   })
 
-  // if we're in run mode with component
-  // testing then just pass this through
-  // without waiting on electron to be ready
-  return require('./run').ready(options)
+  return require('./run').run(options)
 }
 
 module.exports = {

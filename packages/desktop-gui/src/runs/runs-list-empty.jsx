@@ -31,7 +31,7 @@ class RunsListEmpty extends Component {
       url: 'https://on.cypress.io/what-is-a-project-id',
       params: {
         utm_medium,
-        utm_campaign: 'Run Guide',
+        utm_campaign: 'ProjectId',
       },
     })
   }
@@ -47,7 +47,7 @@ class RunsListEmpty extends Component {
       url: 'https://on.cypress.io/ci',
       params: {
         utm_medium,
-        utm_campaign: 'Run Guide',
+        utm_campaign: 'CI',
       },
     })
   }
@@ -58,7 +58,7 @@ class RunsListEmpty extends Component {
       url: 'https://on.cypress.io/recording-project-runs',
       params: {
         utm_medium,
-        utm_campaign: 'Run Guide',
+        utm_campaign: 'Runs Guide',
       },
     })
   }

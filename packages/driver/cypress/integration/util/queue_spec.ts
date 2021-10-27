@@ -1,6 +1,6 @@
 import Bluebird from 'bluebird'
 
-import { create } from '../../../src/util/queue'
+import $Queue from '../../../src/util/queue'
 
 const ids = (queueables) => queueables.map((q) => q.id)
 
@@ -8,7 +8,7 @@ describe('src/util/queue', () => {
   let queue
 
   beforeEach(() => {
-    queue = create([
+    queue = $Queue.create([
       { id: '1' },
       { id: '2' },
       { id: '3' },

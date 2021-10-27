@@ -1,6 +1,9 @@
 require('../../spec_helper')
 
 const os = require('os')
+const mockfs = require('mock-fs')
+const path = require('path')
+const _ = require('lodash')
 
 const extension = require('@packages/extension')
 const launch = require('@packages/launcher/lib/browsers')
@@ -59,6 +62,7 @@ describe('lib/browsers/chrome', () => {
     })
 
     afterEach(function () {
+      mockfs.restore()
       expect(this.criClient.ensureMinimumProtocolVersion).to.be.calledOnce
     })
 
@@ -225,6 +229,43 @@ describe('lib/browsers/chrome', () => {
         ])
 
         expect(onWarning).not.calledOnce
+      })
+    })
+
+    it('install extension and ensure write access', function () {
+      mockfs({
+        [path.resolve(`${__dirname }../../../../../extension/dist`)]: {
+          'background.js': mockfs.file({
+            mode: 0o0444,
+          }),
+        },
+      })
+
+      const getFile = function (path) {
+        return _.reduce(_.compact(_.split(path, '/')), (acc, item) => {
+          return acc.getItem(item)
+        }, mockfs.getMockRoot())
+      }
+
+      chrome._writeExtension.restore()
+      utils.getProfileDir.restore()
+
+      const profilePath = '/home/foo/snap/chromium/current'
+      const fullPath = `${profilePath}/Cypress/chromium-stable/interactive`
+
+      this.readJson.withArgs(`${fullPath}/Default/Preferences`).rejects({ code: 'ENOENT' })
+      this.readJson.withArgs(`${fullPath}/Default/Secure Preferences`).rejects({ code: 'ENOENT' })
+      this.readJson.withArgs(`${fullPath}/Local State`).rejects({ code: 'ENOENT' })
+
+      return chrome.open({
+        isHeadless: false,
+        isHeaded: false,
+        profilePath,
+        name: 'chromium',
+        channel: 'stable',
+      }, 'http://', {}, this.automation)
+      .then(() => {
+        expect((getFile(fullPath).getMode()) & 0o0700).to.be.above(0o0500)
       })
     })
 

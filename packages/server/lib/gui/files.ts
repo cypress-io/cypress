@@ -1,11 +1,11 @@
-import openProject from '../open_project'
+import { openProject } from '../open_project'
 import { createFile } from '../util/spec_writer'
 import { showSaveDialog } from './dialog'
 
 export const showDialogAndCreateSpec = async () => {
   const cfg = openProject.getConfig()
 
-  const path = await showSaveDialog(cfg.integrationFolder)
+  const path = await showSaveDialog(cfg.integrationFolder || '')
 
   if (!path) {
     return {

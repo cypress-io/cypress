@@ -25,11 +25,11 @@ describe('gui/interactive', () => {
   })
 
   context('.getWindowArgs', () => {
-    it('exits process when onClose is called', () => {
-      sinon.stub(process, 'exit')
+    it('quits app when onClose is called', () => {
+      electron.app.quit = sinon.stub()
       interactiveMode.getWindowArgs({}).onClose()
 
-      expect(process.exit).to.be.called
+      expect(electron.app.quit).to.be.called
     })
 
     it('tracks state properties', () => {

@@ -14,7 +14,7 @@ const Updater = require(`${root}../lib/updater`)
 const user = require(`${root}../lib/user`)
 const errors = require(`${root}../lib/errors`)
 const browsers = require(`${root}../lib/browsers`)
-const openProject = require(`${root}../lib/open_project`)
+const { openProject } = require('../../../lib/open_project')
 const open = require(`${root}../lib/util/open`)
 const auth = require(`${root}../lib/gui/auth`)
 const logs = require(`${root}../lib/gui/logs`)
@@ -811,14 +811,6 @@ describe('lib/gui/events', () => {
         return sinon.stub(ProjectBase.prototype, 'close').withArgs({ sync: true }).resolves()
       })
 
-      it('is noop and returns null when no project is open', function () {
-        expect(openProject.getProject()).to.be.null
-
-        return this.handleEvent('close:project').then((assert) => {
-          return assert.sendCalledWith(null)
-        })
-      })
-
       it('closes down open project and returns null', function () {
         sinon.stub(ProjectBase.prototype, 'getConfig').resolves({})
         sinon.stub(ProjectBase.prototype, 'open').resolves()
@@ -833,6 +825,15 @@ describe('lib/gui/events', () => {
           // it should store the opened project
           expect(openProject.getProject()).to.be.null
 
+          return assert.sendCalledWith(null)
+        })
+      })
+
+      it('is noop and returns null when no project is open', function () {
+        openProject.__reset()
+        expect(openProject.getProject()).to.be.null
+
+        return this.handleEvent('close:project').then((assert) => {
           return assert.sendCalledWith(null)
         })
       })
@@ -925,12 +926,12 @@ describe('lib/gui/events', () => {
 
     describe('set:project:id', () => {
       it('calls writeProjectId with projectRoot', function () {
-        const arg = { id: '1', projectRoot: '/project/root/' }
-        const stub = sinon.stub(ProjectStatic, 'writeProjectId').resolves()
+        const arg = { id: '1', projectRoot: '/project/root/', configFile: 'cypress.json' }
+        const stubWriteProjectId = sinon.stub(ProjectStatic, 'writeProjectId').resolves()
 
         return this.handleEvent('set:project:id', arg)
         .then(() => {
-          expect(stub).to.be.calledWith(arg.id, arg.projectRoot)
+          expect(stubWriteProjectId).to.be.calledWith(arg)
           expect(this.send.firstCall.args[0]).to.eq('response')
           expect(this.send.firstCall.args[1].id).to.match(/set:project:id-/)
         })
@@ -939,12 +940,12 @@ describe('lib/gui/events', () => {
 
     describe('setup:dashboard:project', () => {
       it('returns result of ProjectStatic.createCiProject', function () {
-        const arg = { projectRoot: '/project/root/' }
-        const stub = sinon.stub(ProjectStatic, 'createCiProject').resolves()
+        const arg = { projectRoot: '/project/root/', configFile: 'cypress.json' }
+        const stubCreateCiProject = sinon.stub(ProjectStatic, 'createCiProject').resolves()
 
         return this.handleEvent('setup:dashboard:project', arg)
         .then(() => {
-          expect(stub).to.be.calledWith(arg, arg.projectRoot)
+          expect(stubCreateCiProject).to.be.calledWith(arg)
           expect(this.send.firstCall.args[0]).to.eq('response')
           expect(this.send.firstCall.args[1].id).to.match(/setup:dashboard:project-/)
         })

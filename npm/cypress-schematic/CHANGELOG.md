@@ -1,3 +1,10 @@
+# [@cypress/schematic-v1.5.1](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v1.5.0...@cypress/schematic-v1.5.1) (2021-09-10)
+
+
+### Bug Fixes
+
+* **cypress/schematic:** add edge to list of allowed browsers ([#17637](https://github.com/cypress-io/cypress/issues/17637)) ([49de24f](https://github.com/cypress-io/cypress/commit/49de24f6178e0ef7bfd654c3efc0bfa8008e962e))
+
 # [@cypress/schematic-v1.5.0](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v1.4.2...@cypress/schematic-v1.5.0) (2021-07-20)
 
 

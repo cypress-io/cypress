@@ -1,6 +1,6 @@
 import { log } from '../log'
 import { partial, trim, tap, prop } from 'ramda'
-import { FoundBrowser, Browser, PathData } from '../types'
+import type { FoundBrowser, Browser, PathData } from '../types'
 import { notInstalledErr } from '../errors'
 import { utils } from '../utils'
 import os from 'os'

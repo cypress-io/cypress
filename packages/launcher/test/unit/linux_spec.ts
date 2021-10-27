@@ -18,6 +18,9 @@ describe('linux browser detection', () => {
     sinon.restore()
     execa = sinon.stub(utils, 'getOutput')
 
+    sinon.stub(os, 'platform').returns('linux')
+    sinon.stub(os, 'release').returns('1.0.0')
+
     execa.withArgs('test-browser', ['--version'])
     .resolves({ stdout: 'test-browser v100.1.2.3' })
 
@@ -50,7 +53,6 @@ describe('linux browser detection', () => {
     execa.withArgs('chromium', ['--version'])
     .resolves({ stdout: 'Chromium 64.2.3 snap' })
 
-    sinon.stub(os, 'platform').returns('linux')
     sinon.stub(os, 'homedir').returns('/home/foo')
 
     const checkBrowser = ([browser]) => {

@@ -1,7 +1,6 @@
 import _ from 'lodash'
 import $Command from '../../../src/cypress/command'
-
-import { create } from '../../../src/cypress/command_queue'
+import $CommandQueue from '../../../src/cypress/command_queue'
 
 const createCommand = (props = {}) => {
   return $Command.create(_.extend({
@@ -31,7 +30,7 @@ describe('src/cypress/command_queue', () => {
   const isCy = () => {}
 
   beforeEach(() => {
-    queue = create(state, timeouts, stability, cleanup, fail, isCy)
+    queue = $CommandQueue.create(state, timeouts, stability, cleanup, fail, isCy)
 
     queue.add(createCommand({
       name: 'get',

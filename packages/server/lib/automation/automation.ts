@@ -2,29 +2,29 @@ import Bluebird from 'bluebird'
 import { v4 as uuidv4 } from 'uuid'
 import { Cookies } from './cookies'
 import { Screenshot } from './screenshot'
-import { BrowserPreRequest } from '@packages/proxy'
+import type { BrowserPreRequest } from '@packages/proxy'
 
 type NullableMiddlewareHook = (() => void) | null
 
 export type OnBrowserPreRequest = (browserPreRequest: BrowserPreRequest) => void
 
-export type onRequestEvent = (eventName: string, data: any) => void
+export type OnRequestEvent = (eventName: string, data: any) => void
 
-interface IMiddleware {
-  onPush: NullableMiddlewareHook
-  onBeforeRequest: NullableMiddlewareHook
-  onRequest: ((msg: string, data: unknown) => void) | null
-  onResponse: NullableMiddlewareHook
-  onAfterResponse: NullableMiddlewareHook
+export interface AutomationMiddleware {
+  onPush?: NullableMiddlewareHook
+  onBeforeRequest?: OnRequestEvent | null
+  onRequest?: OnRequestEvent | null
+  onResponse?: NullableMiddlewareHook
+  onAfterResponse?: NullableMiddlewareHook
 }
 
 export class Automation {
   private requests: Record<number, (any) => void>
-  private middleware: IMiddleware
+  private middleware: AutomationMiddleware
   private cookies: Cookies
   private screenshot: { capture: (data: any, automate: any) => any }
 
-  constructor (cyNamespace?: string, cookieNamespace?: string, screenshotsFolder?: string | false, public onBrowserPreRequest?: OnBrowserPreRequest, public onRequestEvent?: onRequestEvent) {
+  constructor (cyNamespace?: string, cookieNamespace?: string, screenshotsFolder?: string | false, public onBrowserPreRequest?: OnBrowserPreRequest, public onRequestEvent?: OnRequestEvent) {
     this.requests = {}
 
     // set the middleware
@@ -34,7 +34,7 @@ export class Automation {
     this.screenshot = Screenshot(screenshotsFolder)
   }
 
-  initializeMiddleware = (): IMiddleware => {
+  initializeMiddleware = (): AutomationMiddleware => {
     return {
       onPush: this.middleware?.onPush || null,
       onBeforeRequest: null,
@@ -143,7 +143,7 @@ export class Automation {
     return this.middleware
   }
 
-  use (middlewares: IMiddleware) {
+  use (middlewares: AutomationMiddleware) {
     return this.middleware = {
       ...this.middleware,
       ...middlewares,
@@ -184,7 +184,7 @@ export class Automation {
     }
   }
 
-  get = (fn: keyof IMiddleware) => {
+  get = (fn: keyof AutomationMiddleware) => {
     return this.middleware[fn]
   }
 }

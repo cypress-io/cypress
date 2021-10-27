@@ -27,7 +27,8 @@
         "chrome",
         "chromium",
         "canary",
-        "firefox"
+        "firefox",
+        "edge"
       ]
     },
     "devServerTarget": {

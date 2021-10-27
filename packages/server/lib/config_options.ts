@@ -138,10 +138,6 @@ export const options = [
     defaultValue: false,
     isInternal: true,
   }, {
-    name: 'javascripts',
-    defaultValue: [],
-    isInternal: true,
-  }, {
     name: 'morgan',
     defaultValue: true,
     isInternal: true,
@@ -220,6 +216,10 @@ export const options = [
     defaultValue: 'cypress/screenshots',
     validation: v.isStringOrFalse,
     isFolder: true,
+  }, {
+    name: 'slowTestThreshold',
+    defaultValue: (options: Record<string, any>) => options.testingType === 'component' ? 250 : 10000,
+    validation: v.isNumber,
   }, {
     name: 'socketId',
     defaultValue: null,

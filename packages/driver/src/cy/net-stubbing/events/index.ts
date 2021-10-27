@@ -1,4 +1,4 @@
-import { Route, Interception, StaticResponse, NetEvent } from '../types'
+import type { Route, Interception, StaticResponse, NetEvent } from '../types'
 import { onBeforeRequest } from './before-request'
 import { onResponse } from './response'
 import { onAfterResponse } from './after-response'

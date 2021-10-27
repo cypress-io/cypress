@@ -11,10 +11,9 @@ const logSymbols = require('log-symbols')
 
 const recordMode = require('./record')
 const errors = require('../errors')
-const ProjectStatic = require('../project_static')
 const Reporter = require('../reporter')
 const browserUtils = require('../browsers')
-const openProject = require('../open_project')
+const { openProject } = require('../open_project')
 const videoCapture = require('../video_capture')
 const { fs } = require('../util/fs')
 const runEvents = require('../plugins/run_events')
@@ -609,22 +608,34 @@ const openProjectCreate = (projectRoot, socketId, args) => {
   return openProject.create(projectRoot, args, options)
 }
 
-const createAndOpenProject = function (socketId, options) {
+async function checkAccess (folderPath) {
+  return fs.access(folderPath, fs.W_OK).catch((err) => {
+    if (['EACCES', 'EPERM'].includes(err.code)) {
+      // we cannot write due to folder permissions
+      return errors.warning('FOLDER_NOT_WRITABLE', folderPath)
+    }
+
+    throw err
+  })
+}
+
+const createAndOpenProject = async (socketId, options) => {
   const { projectRoot, projectId } = options
 
-  return ProjectStatic.ensureExists(projectRoot, options)
-  .then(() => {
-    // open this project without
-    // adding it to the global cache
-    return openProjectCreate(projectRoot, socketId, options)
-  })
-  .call('getProject')
+  await checkAccess(projectRoot)
+
+  return openProjectCreate(projectRoot, socketId, options)
+  .then((open_project) => open_project.getProject())
   .then((project) => {
-    return Promise.props({
+    return Promise.all([
       project,
-      config: project.getConfig(),
-      projectId: getProjectId(project, projectId),
-    })
+      project.getConfig(),
+      getProjectId(project, projectId),
+    ]).then(([project, config, projectId]) => ({
+      project,
+      config,
+      projectId,
+    }))
   })
 }
 
@@ -1472,8 +1483,8 @@ module.exports = {
   },
 
   findSpecs (config, specPattern) {
-    return specsUtil
-    .find(config, specPattern)
+    return specsUtil.default
+    .findSpecs(config, specPattern)
     .tap((specs = []) => {
       if (debug.enabled) {
         const names = _.map(specs, 'name')
@@ -1549,8 +1560,14 @@ module.exports = {
         .spread((sys = {}, browser = {}, specs = []) => {
           // return only what is return to the specPattern
           if (specPattern) {
-            specPattern = specsUtil.getPatternRelativeToProjectRoot(specPattern, projectRoot)
+            specPattern = specsUtil.default.getPatternRelativeToProjectRoot(specPattern, projectRoot)
           }
+
+          specs = specs.filter((spec) => {
+            return options.testingType === 'component'
+              ? spec.specType === 'component'
+              : spec.specType === 'integration'
+          })
 
           if (!specs.length) {
             // did we use the spec pattern?
@@ -1568,12 +1585,6 @@ module.exports = {
 
           if (browser.family === 'chromium') {
             chromePolicyCheck.run(onWarning)
-          }
-
-          if (options.testingType === 'component') {
-            specs = specs.filter((spec) => {
-              return spec.specType === 'component'
-            })
           }
 
           const runAllSpecs = ({ beforeSpecRun, afterSpecRun, runUrl, parallel }) => {

@@ -2,7 +2,7 @@ branches:
   only:
     - master
     - develop
-    - windows-code-signing
+    - fix-test-other-projects
     - /win*/
 
 # https://www.appveyor.com/docs/lang/nodejs-iojs/

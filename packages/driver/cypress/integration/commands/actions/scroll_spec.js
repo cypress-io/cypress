@@ -1,5 +1,5 @@
-const { $ } = Cypress.$Cypress
-const { _ } = Cypress
+const { $ } = window.Cypress.$Cypress
+const { _ } = window.Cypress
 
 describe('src/cy/commands/actions/scroll', () => {
   before(() => {

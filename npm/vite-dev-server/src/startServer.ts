@@ -1,5 +1,5 @@
 import Debug from 'debug'
-import { createServer, ViteDevServer, InlineConfig, UserConfig } from 'vite'
+import { createServer, ViteDevServer, InlineConfig } from 'vite'
 import { dirname, resolve } from 'path'
 import getPort from 'get-port'
 import { makeCypressPlugin } from './makeCypressPlugin'
@@ -8,16 +8,16 @@ const debug = Debug('cypress:vite-dev-server:start')
 
 export interface StartDevServerOptions {
   /**
-   * the Cypress options object
+   * the Cypress dev server configuration object
    */
-  options: Cypress.DevServerOptions
+  options: Cypress.DevServerConfig
   /**
    * By default, vite will use your vite.config file to
    * Start the server. If you need additional plugins or
    * to override some options, you can do so using this.
    * @optional
    */
-  viteConfig?: UserConfig
+  viteConfig?: Omit<InlineConfig, 'base' | 'root'>
 }
 
 const resolveServerConfig = async ({ viteConfig, options }: StartDevServerOptions): Promise<InlineConfig> => {
@@ -52,12 +52,21 @@ const resolveServerConfig = async ({ viteConfig, options }: StartDevServerOption
   // Ask vite to pre-optimize all dependencies of the specs
   finalConfig.optimizeDeps = finalConfig.optimizeDeps || {}
 
-  // pre-optimizea all the specs
+  // pre-optimize all the specs
   if ((options.specs && options.specs.length)) {
-    finalConfig.optimizeDeps.entries = [...options.specs.map((spec) => spec.relative)]
+    // fix: we must preserve entries configured on target project
+    const existingOptimizeDepsEntries = finalConfig.optimizeDeps.entries
+
+    if (existingOptimizeDepsEntries) {
+      finalConfig.optimizeDeps.entries = [...existingOptimizeDepsEntries, ...options.specs.map((spec) => spec.relative)]
+    } else {
+      finalConfig.optimizeDeps.entries = [...options.specs.map((spec) => spec.relative)]
+    }
+
     // only optimize a supportFile is it is not false or undefined
     if (supportFile) {
-      finalConfig.optimizeDeps.entries.push(supportFile)
+      // fix: on windows we need to replace backslashes with slashes
+      finalConfig.optimizeDeps.entries.push(supportFile.replace(/\\/g, '/'))
     }
   }
 

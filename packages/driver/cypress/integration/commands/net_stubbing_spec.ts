@@ -1,5 +1,5 @@
 import { getDisplayUrlMatcher } from '@packages/driver/src/cy/net-stubbing/route-matcher-log'
-import { RouteMatcherOptions } from '@packages/net-stubbing/lib/external-types'
+import type { RouteMatcherOptions } from '@packages/net-stubbing/lib/external-types'
 
 const testFail = (cb, expectedDocsUrl = 'https://on.cypress.io/intercept') => {
   cy.on('fail', (err) => {
@@ -11,8 +11,7 @@ const testFail = (cb, expectedDocsUrl = 'https://on.cypress.io/intercept') => {
   })
 }
 
-// TODO: Network retries leak between tests, causing flake.
-describe('network stubbing', { retries: 2 }, function () {
+describe('network stubbing', function () {
   const { $, _, sinon, state, Promise } = Cypress
 
   beforeEach(function () {
@@ -1638,12 +1637,10 @@ describe('network stubbing', { retries: 2 }, function () {
         delay: 5000,
       }).as('create')
 
-      cy.window().then((win) => {
-        win.eval(
-          `fetch("/post-only", {
-            method: 'POST', // *GET, POST, PUT, DELETE, etc.
-          });`,
-        )
+      cy.then(() => {
+        fetch('/post-only', {
+          method: 'POST', // *GET, POST, PUT, DELETE, etc.
+        })
       })
 
       cy.wait('@create', { timeout: 500 })
@@ -3129,7 +3126,7 @@ describe('network stubbing', { retries: 2 }, function () {
     })
   })
 
-  context('waiting and aliasing', function () {
+  context('waiting and aliasing', { defaultCommandTimeout: 10000 }, function () {
     const testFailWaiting = (cb) => testFail(cb, 'https://on.cypress.io/wait')
 
     it('can wait on a single response using "alias"', function () {

@@ -32,7 +32,7 @@ const logException = (err) => {
 // dont yell about any errors either
 
 const runningInternalTests = () => {
-  return env.get('CYPRESS_INTERNAL_E2E_TESTS') === '1'
+  return env.get('CYPRESS_INTERNAL_SYSTEM_TESTS') === '1'
 }
 
 const haveProjectIdAndKeyButNoRecordOption = (projectId, options) => {
