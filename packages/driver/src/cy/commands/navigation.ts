@@ -1090,6 +1090,17 @@ export default (Commands, Cypress, cy, state, config) => {
       }
 
       const visit = () => {
+        // when using the visit the document referrer should be set to an empty string
+        if (config('modifyObstructiveCode')) {
+          Cypress.once('window:before:load', (contentWindow) => {
+            Object.defineProperty(contentWindow.document, 'referrer', {
+              get () {
+                return ''
+              },
+            })
+          })
+        }
+
         // if we've visiting for the first time during
         // a test then we want to first visit about:blank
         // so that we nuke the previous state. subsequent
