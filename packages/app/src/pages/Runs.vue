@@ -2,14 +2,14 @@
   <div>
     <h2>Runs Page</h2>
     <main class="p-24px relative">
-      <RunError
-        v-if="!!query.error.value"
-        :error="query.error.value"
-      />
       <RunsConnect
-        v-else-if="!query.fetching.value && (!activeProject?.projectId || !query.data.value?.cloudViewer?.id)"
+        v-if="(!activeProject?.projectId || !query.data.value?.cloudViewer?.id)"
         :has-project-id="!!activeProject?.projectId"
         :is-logged-in="!!query.data.value?.cloudViewer?.id"
+      />
+      <RunError
+        v-else-if="!query.fetching.value && cloudRequestError"
+        :error="cloudRequestError"
       />
       <transition
         v-else
@@ -70,6 +70,9 @@ query Runs {
 const query = useQuery({ query: RunsDocument })
 
 const activeProject = computed(() => query.data.value?.app?.activeProject)
+
+// const cloudRequestError = computed(() => query.data.value?.app?.activeProject?.cloudRequestError)
+const cloudRequestError = computed(() => undefined)
 </script>
 
 <route>

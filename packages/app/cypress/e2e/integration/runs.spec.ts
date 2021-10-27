@@ -15,7 +15,9 @@ describe('App', () => {
 
   it('shows the loader', () => {
     cy.remoteGraphQLIntercept(async (obj) => {
-      await new Promise((resolve) => setTimeout(resolve, 200))
+      if (obj.result.data?.cloudProjectsBySlugs) {
+        await new Promise((resolve) => setTimeout(resolve, 200))
+      }
 
       return obj.result
     })
@@ -29,7 +31,7 @@ describe('App', () => {
   it('when no runs, shows call to action', () => {
     cy.remoteGraphQLIntercept(async (obj) => {
       // Currently, all remote requests go through here, we want to use this to modify the
-      // remote request before it's used
+      // remote request before it's used and avoid touching the login query
       if (obj.result.data?.cloudProjectsBySlugs) {
         for (const proj of obj.result.data.cloudProjectsBySlugs) {
           if (proj.runs?.nodes) {
