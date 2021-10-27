@@ -54,7 +54,7 @@
     <TopNavListItem
       v-for="browser in props.gql.browsers"
       :key="browser.id"
-      class="px-16px py-12px min-w-240px"
+      class="px-16px py-12px min-w-240px cursor-pointer"
       :class="browser.isSelected ? 'bg-jade-50' : ''"
       :selectable="!browser.isSelected"
       @click="handleBrowserChoice(browser)"
@@ -68,11 +68,12 @@
         >
       </template>
       <div>
-        <div
+        <button
+          class="hocus-link-default box-border"
           :class="browser.isSelected ? 'text-jade-600' : 'text-indigo-600'"
         >
           {{ browser.displayName }}
-        </div>
+        </button>
         <div
           class="font-normal text-gray-500 mr-20px whitespace-nowrap text-14px"
         >
