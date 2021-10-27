@@ -10,8 +10,8 @@
     "test": "yarn cypress:run:ct && yarn types",
     "windi": "yarn windicss-analysis",
     "cypress:open": "cross-env TZ=America/New_York node ../../scripts/cypress open --project ${PWD}",
-    "cypress:run:ct": "cross-env TZ=America/New_York node ../../scripts/cypress run-ct --project ${PWD}",
-    "cypress:run:e2e": "cross-env TZ=America/New_York node ../../scripts/cypress run --project ${PWD}",
+    "cypress:run:ct": "cross-env TZ=America/New_York node ../../scripts/cypress run --component --project ${PWD}",
+    "cypress:run:e2e": "cross-env TZ=America/New_York node ../../scripts/cypress run --e2e --project ${PWD}",
     "dev": "yarn gulp dev --project ${PWD}",
     "start": "echo 'run yarn dev from the root' && exit 1",
     "watch": "echo 'run yarn dev from the root' && exit 1"

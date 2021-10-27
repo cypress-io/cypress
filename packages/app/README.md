@@ -72,10 +72,7 @@ For an icon to work well in the current system, here's what needs to happen when
 1. Icon paths must define themselves as "icon-dark" or "icon-light" in their class names.
 If an icon path doesn't define a class, nothing bad will happen, it just won't get targeted by any styling.
 
-2. Icons with both a stroke and a fill aren't working correctly right now. They will soon.
-You can see this in the video with the Settings cog. It uses and `evenodd` fill pattern and has a path that contains both a stroke and a fill.
-
-3. Finally, you don't need to expose anything. `./src/assets/icons` is automatically watched and loaded 😮
+2. Finally, you don't need to expose anything. `./src/assets/icons` is automatically watched and loaded 😮
 
 ## Diagram
 

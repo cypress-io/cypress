@@ -10,7 +10,7 @@
     "test": "echo 'ok'",
     "cypress:launch": "cross-env TZ=America/New_York node ../../scripts/cypress open --project ${PWD}",
     "cypress:open": "cross-env TZ=America/New_York node ../../scripts/cypress open --project ${PWD}",
-    "cypress:run:ct": "cross-env TZ=America/New_York node ../../scripts/cypress run-ct --project ${PWD}",
+    "cypress:run:ct": "cross-env TZ=America/New_York node ../../scripts/cypress run --component --project ${PWD}",
     "cypress:run:e2e": "cross-env TZ=America/New_York node ../../scripts/cypress run --project ${PWD}",
     "debug": "gulp debug --project ${PWD}",
     "dev": "gulp dev --project ${PWD}",
@@ -93,6 +93,7 @@
         "shiki",
         "socket.io-client",
         "vue",
+        "vue-demi",
         "vue-toastification",
         "wonka"
       ]
