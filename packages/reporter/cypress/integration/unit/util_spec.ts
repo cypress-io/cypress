@@ -1,10 +1,44 @@
-import { getFilenameParts } from '../../../src/lib/util'
+import { formatDuration, getFilenameParts } from '../../../src/lib/util'
 
 const compare = (filename, array) => {
   expect(getFilenameParts(filename)).to.deep.equal(array)
 }
 
 describe('utils', () => {
+  context('formatDuration', () => {
+    it('formats no time', () => {
+      expect(formatDuration(0)).to.equal('--')
+    })
+
+    it('formats time of <1s', () => {
+      expect(formatDuration(1)).to.equal('1ms')
+      expect(formatDuration(999)).to.equal('999ms')
+    })
+
+    it('formats time of >=1s', () => {
+      expect(formatDuration(1000)).to.equal('00:01')
+      expect(formatDuration(1400)).to.equal('00:01')
+      expect(formatDuration(35620)).to.equal('00:36')
+      expect(formatDuration(59200)).to.equal('00:59')
+    })
+
+    it('formats time of >=1m', () => {
+      expect(formatDuration(60000)).to.equal('01:00')
+      expect(formatDuration(600000)).to.equal('10:00')
+      expect(formatDuration(3599000)).to.equal('59:59')
+    })
+
+    it('formats time of >=1h', () => {
+      expect(formatDuration(3600000)).to.equal('1:00:00')
+      expect(formatDuration(4200000)).to.equal('1:10:00')
+      expect(formatDuration(7199000)).to.equal('1:59:59')
+    })
+
+    it('displays larger times in hours', () => {
+      expect(formatDuration(360000000)).to.equal('100:00:00')
+    })
+  })
+
   context('getFilenameParts', () => {
     it('splits basic filenames', () => {
       compare('something.foo.ts', ['something.foo', '.ts'])

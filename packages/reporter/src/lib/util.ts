@@ -16,6 +16,23 @@ const onEnterOrSpace = (f: (() => void)) => {
   }
 }
 
+const formatDuration = (duration: number): string => {
+  if (!duration) return '--'
+
+  if (duration < 1000) {
+    return `${duration}ms`
+  }
+
+  const seconds = Math.round(duration / 1000)
+  const displaySeconds = String(seconds % 60).padStart(2, '0')
+  const displayMinutes = String(Math.floor((seconds / 60) % 60)).padStart(2, '0')
+  const displayHours = String(Math.floor(seconds / (60 * 60)))
+
+  if (displayHours === '0') return `${displayMinutes}:${displaySeconds}`
+
+  return `${displayHours}:${displayMinutes}:${displaySeconds}`
+}
+
 const splitFilename = (filename: string, index: number): [string, string] => {
   if (index < 0) {
     return [filename, '']
@@ -55,6 +72,7 @@ const getFilenameParts = (spec: string): [string, string] => {
 }
 
 export {
+  formatDuration,
   getFilenameParts,
   indent,
   onEnterOrSpace,
