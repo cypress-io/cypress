@@ -337,4 +337,10 @@ export class ProjectActions {
       content: specContent,
     }
   }
+
+  reconfigureProject () {
+    this.ctx.actions.wizard.resetWizard()
+    this.ctx.actions.electron.refreshBrowserWindow()
+    this.ctx.actions.electron.showBrowserWindow()
+  }
 }

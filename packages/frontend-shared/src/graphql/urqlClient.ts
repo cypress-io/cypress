@@ -28,6 +28,7 @@ export function makeCacheExchange () {
       Wizard: (data) => data.__typename,
       GitInfo: () => null,
       BaseError: () => null,
+      ProjectPreferences: (data) => data.__typename,
     },
   })
 }

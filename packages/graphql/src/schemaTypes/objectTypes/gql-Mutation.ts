@@ -323,13 +323,20 @@ export const mutation = mutationType({
       },
     })
 
-    t.nonNull.field('showBrowserWindow', {
+    t.nonNull.field('reconfigureProject', {
       type: 'Boolean',
       description: 'show the launchpad windows',
       resolve: (_, args, ctx) => {
-        ctx.actions.electron.showBrowserWindow()
+        ctx.actions.project.reconfigureProject()
 
         return true
+      },
+    })
+
+    t.liveMutation('showLaunchpadOnAppExit', {
+      description: 'show the launchpad at the browser picker step',
+      resolve: (_, args, ctx) => {
+        ctx.actions.electron.showLaunchpadOnAppExit()
       },
     })
   },

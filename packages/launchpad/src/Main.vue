@@ -85,42 +85,10 @@ query MainLaunchpadQuery {
   app {
     isInGlobalMode
     ...GlobalPage
-    activeProject {
-      preferences {
-        browserId
-        testingType 
-      }
-    }
   }
   ...HeaderBar
 }
 `
 
-gql`
-mutation Main_SkipLaunchpad ($browserId: ID!, $testingType: TestingTypeEnum) {
-  hideBrowserWindow
-  wizardUpdate(input: {
-    testingType: $testingType
-  })
-  initializeOpenProject
-  launchpadSetBrowser(id: $browserId)
-  launchOpenProject
-}
-`
-
 const query = useQuery({ query: MainLaunchpadQueryDocument })
-const mutation = useMutation(Main_SkipLaunchpadDocument)
-
-const hasPreferences = computed(() => {
-  return !!query.data.value?.app.activeProject?.preferences ?? false
-})
-
-watch(hasPreferences, (newVal, oldVal) => {
-  if (oldVal !== newVal && newVal) {
-    const { browserId, testingType } = query.data.value.app.activeProject.preferences
-
-    // mutation.executeMutation({ browserId, testingType })
-  }
-})
-
 </script>

@@ -404,6 +404,9 @@ type Mutation {
   """Set the current navigation item"""
   navigationMenuSetItem(type: NavItem!): Boolean
 
+  """show the launchpad windows"""
+  reconfigureProject: Boolean!
+
   """Remove project from projects array and cache"""
   removeProject(path: String!): Boolean
 
@@ -423,8 +426,8 @@ type Mutation {
     testingType: TestingTypeEnum!
   ): App!
 
-  """show the launchpad windows"""
-  showBrowserWindow: Boolean!
+  """show the launchpad at the browser picker step"""
+  showLaunchpadOnAppExit: Boolean
 
   """Installs the dependencies for the component testing step"""
   wizardInstallDependencies: Wizard

@@ -10,16 +10,15 @@
 <script lang="ts" setup>
 import Button from '@cy/components/Button.vue'
 import { gql, useMutation } from '@urql/vue'
-import { Settings_OpenLaunchpadDocument } from '../generated/graphql'
+import { Settings_ReconfigureProjectDocument } from '../generated/graphql'
 
 gql`
-mutation Settings_OpenLaunchpad {
-  resetWizard
-  showBrowserWindow
+mutation Settings_ReconfigureProject {
+  reconfigureProject
 }
 `
 
-const openLaunchpad = useMutation(Settings_OpenLaunchpadDocument)
+const openLaunchpad = useMutation(Settings_ReconfigureProjectDocument)
 
 function reconfigure () {
   openLaunchpad.executeMutation({})
