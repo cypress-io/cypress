@@ -2,8 +2,12 @@
   <div>
     <h2>Runs Page</h2>
     <main class="p-24px relative">
+      <RunError
+        v-if="!!query.error"
+        :error="query.error"
+      />
       <transition
-        v-if="activeProject?.cloudProject"
+        v-else-if="activeProject?.cloudProject"
         name="fade"
       >
         <RunsSkeleton v-if="query.fetching.value" />
@@ -36,6 +40,7 @@ import RunCard from '../runs/RunCard.vue'
 import RunsSkeleton from '../runs/RunsSkeleton.vue'
 import RunsConnect from '../runs/RunsConnect.vue'
 import RunsEmpty from '../runs/RunsEmpty.vue'
+import RunError from '../runs/RunError.vue'
 
 gql`
 query Runs {
