@@ -1,4 +1,4 @@
-import { HeaderBarFragmentDoc } from '../generated/graphql-test'
+import { HeaderBar_HeaderBarContentFragmentDoc } from '../generated/graphql-test'
 import HeaderBar from './HeaderBar.vue'
 import { defaultMessages } from '@cy/i18n'
 
@@ -6,7 +6,7 @@ const text = defaultMessages.topNav
 
 describe('<HeaderBar />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
   it('renders with functional browser menu when show-browsers prop is true', () => {
-    cy.mountFragment(HeaderBarFragmentDoc, {
+    cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
       onResult: (result, ctx) => {
         result.app.activeProject = null
       },
@@ -22,7 +22,7 @@ describe('<HeaderBar />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
   }),
 
   it('renders without browser menu by default and other items work', () => {
-    cy.mountFragment(HeaderBarFragmentDoc, {
+    cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
       render: (gqlVal) => <div class="resize overflow-auto border-current border-1 h-700px"><HeaderBar gql={gqlVal} /></div>,
     })
 
@@ -36,7 +36,7 @@ describe('<HeaderBar />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
   })
 
   it('displays the active project name', () => {
-    cy.mountFragment(HeaderBarFragmentDoc, {
+    cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
       render: (gqlVal) => <div class="resize overflow-auto border-current border-1 h-700px"><HeaderBar gql={gqlVal} /></div>,
     })
 
@@ -44,7 +44,7 @@ describe('<HeaderBar />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
   })
 
   it('the login modal reaches "opening browser" status', () => {
-    cy.mountFragment(HeaderBarFragmentDoc, {
+    cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
       render: (gqlVal) => <div class="resize overflow-auto border-current border-1 h-700px"><HeaderBar gql={gqlVal} /></div>,
     })
 
@@ -69,7 +69,7 @@ describe('<HeaderBar />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
       fullName: 'Tester Test',
     }
 
-    cy.mountFragment(HeaderBarFragmentDoc, {
+    cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
       onResult: (result) => {
         result.__typename = 'Query'
         result.app.isAuthBrowserOpened = true
@@ -86,7 +86,7 @@ describe('<HeaderBar />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
   })
 
   it('Shows a page name instead of project when a page name is provided', () => {
-    cy.mountFragment(HeaderBarFragmentDoc, {
+    cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
       render: (gqlVal) => <div class="resize overflow-auto border-current border-1 h-700px"><HeaderBar gql={gqlVal} pageName="Test Page" /></div>,
     })
 
