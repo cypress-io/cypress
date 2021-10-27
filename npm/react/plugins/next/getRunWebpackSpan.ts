@@ -12,8 +12,8 @@ export async function getRunWebpackSpan (): Promise<{ runWebpackSpan?: Span }> {
       trace = await import('next/dist/telemetry/trace/trace').then((m) => m.trace)
 
       return { runWebpackSpan: trace('cypress') }
-    }
-    catch (_){
+    } catch (_) {
+      // @ts-ignore
       trace = await import('next/dist/trace/trace').then((m) => m.trace)
 
       return { runWebpackSpan: trace('cypress') }
