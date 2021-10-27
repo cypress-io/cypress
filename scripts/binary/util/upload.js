@@ -134,7 +134,6 @@ const getUploadNameByOsAndArch = function (platform) {
     },
     win32: {
       'x64': 'win32-x64',
-      'ia32': 'win32-ia32',
     },
   }
   const name = _.get(uploadNames[platform], arch)
