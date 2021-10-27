@@ -74,7 +74,7 @@ export async function e2ePluginSetup (projectRoot: string, on: Cypress.PluginEve
         testState = {};
         ({ serverPortPromise, ctx } = runInternalServer({
           projectRoot: null,
-        }) as {ctx: DataContext, serverPortPromise: Promise<number>})
+        }) as {ctx: DataContext, serverPortPromise: Promise<number> })
 
         const fetchApi = ctx.util.fetch
 
