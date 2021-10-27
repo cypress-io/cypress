@@ -2,29 +2,32 @@
   <div>
     <h2>Runs Page</h2>
     <main class="p-24px relative">
+      <RunError
+        v-if="!!query.error"
+        :error="query.error"
+      />
       <transition
+        v-else-if="activeProject?.cloudProject"
         name="fade"
       >
-        <RunsSkeletton v-if="query.fetching.value" />
-        <template v-else-if="cloudRunNodes">
-          <div v-if="cloudRunNodes.length > 0">
-            <RunCard
-              v-for="run of cloudRunNodes"
-              :key="run.id"
-              :gql="run"
-            />
-          </div>
-          <div
-            v-else
-            data-e2e="no-runs"
-          >
-            No runs... record one to the cloud?
-          </div>
-        </template>
-        <template v-else-if="query.data.value?.app?.activeProject">
-          Connect the current project to the cloud
-        </template>
+        <RunsSkeleton v-if="query.fetching.value" />
+        <RunsEmpty
+          v-else-if="!activeProject.cloudProject.runs?.nodes.length"
+          :project-id="activeProject.projectId || ''"
+        />
+        <div v-else>
+          <RunCard
+            v-for="run of activeProject.cloudProject.runs.nodes"
+            :key="run.id"
+            :gql="run"
+          />
+        </div>
       </transition>
+      <RunsConnect
+        v-else
+        :has-project-id="!!activeProject?.projectId"
+        :is-logged-in="!!query.data.value?.cloudViewer?.id"
+      />
     </main>
   </div>
 </template>
@@ -34,7 +37,10 @@ import { computed } from 'vue'
 import { gql, useQuery } from '@urql/vue'
 import { RunsDocument } from '../generated/graphql'
 import RunCard from '../runs/RunCard.vue'
-import RunsSkeletton from '../runs/RunsSkeletton.vue'
+import RunsSkeleton from '../runs/RunsSkeleton.vue'
+import RunsConnect from '../runs/RunsConnect.vue'
+import RunsEmpty from '../runs/RunsEmpty.vue'
+import RunError from '../runs/RunError.vue'
 
 gql`
 query Runs {
@@ -53,10 +59,14 @@ query Runs {
       }
     }
   }
+  cloudViewer {
+    id
+  }
 }`
 
 const query = useQuery({ query: RunsDocument })
-const cloudRunNodes = computed(() => query.data.value?.app.activeProject?.cloudProject?.runs?.nodes)
+
+const activeProject = computed(() => query.data.value?.app?.activeProject)
 </script>
 
 <route>
