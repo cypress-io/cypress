@@ -862,6 +862,7 @@ commands:
           name: list created NPM package
           working_directory: cli/build
           command: ls -l
+      - run: cp cli/build/cypress.tgz cypress.tgz
       - store-npm-logs
       - run: pwd
       - run: ls -l
