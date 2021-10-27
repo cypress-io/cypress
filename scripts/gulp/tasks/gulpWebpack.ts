@@ -6,7 +6,7 @@ import { addChildProcess } from './gulpRegistry'
 
 export function webpackRunner () {
   return runWebpack({
-    cwd: monorepoPaths.pkgRunner,
+    cwd: monorepoPaths.pkgRunnerCt,
     prefix: 'webpack:runner',
     args: ['-w'],
   })

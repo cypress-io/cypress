@@ -1,6 +1,7 @@
 describe('Onboarding Flow', () => {
   beforeEach(() => {
     cy.setupE2E('unify-onboarding')
+    cy.loginUser()
   })
 
   it('can scaffold a project in e2e mode', () => {
