@@ -54,7 +54,8 @@ const currentRoute = useRoute()
 const showHeader = computed(() => {
   // if there's more than one place in the app that will not have a header,
   // this can get more formal
-  return currentRoute.name !== 'Spec Page'
+
+  return currentRoute.name !== 'Spec'
 })
 
 const pageName = computed((): string | undefined => {
