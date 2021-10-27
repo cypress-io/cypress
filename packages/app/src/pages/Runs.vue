@@ -3,19 +3,27 @@
     <h2>Runs Page</h2>
     <main class="p-24px relative">
       <RunError
-        v-if="!!query.error"
-        :error="query.error"
+        v-if="!!query.error.value"
+        :error="query.error.value"
+      />
+      <RunsConnect
+        v-else-if="!query.fetching.value && (!activeProject?.projectId || !query.data.value?.cloudViewer?.id)"
+        :has-project-id="!!activeProject?.projectId"
+        :is-logged-in="!!query.data.value?.cloudViewer?.id"
       />
       <transition
-        v-else-if="activeProject?.cloudProject"
+        v-else
         name="fade"
       >
         <RunsSkeleton v-if="query.fetching.value" />
         <RunsEmpty
-          v-else-if="!activeProject.cloudProject.runs?.nodes.length"
-          :project-id="activeProject.projectId || ''"
+          v-else-if="!activeProject?.cloudProject?.runs?.nodes.length"
+          :project-id="activeProject?.projectId || ''"
         />
-        <div v-else>
+        <div
+          v-else
+          data-cy="runs"
+        >
           <RunCard
             v-for="run of activeProject.cloudProject.runs.nodes"
             :key="run.id"
@@ -23,11 +31,6 @@
           />
         </div>
       </transition>
-      <RunsConnect
-        v-else
-        :has-project-id="!!activeProject?.projectId"
-        :is-logged-in="!!query.data.value?.cloudViewer?.id"
-      />
     </main>
   </div>
 </template>
