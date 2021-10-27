@@ -26,6 +26,7 @@ describe('<HeaderBar />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
       render: (gqlVal) => <div class="resize overflow-auto border-current border-1 h-700px"><HeaderBar gql={gqlVal} /></div>,
     })
 
+    cy.contains('Projects').should('be.visible')
     cy.get('[data-cy="topnav-browser-list"]').should('not.exist')
     cy.contains('button', text.docsMenu.docsHeading).click()
     cy.contains('a', text.docsMenu.firstTest).should('be.visible')
@@ -82,5 +83,14 @@ describe('<HeaderBar />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
     cy.contains(cloudViewer.fullName).should('be.visible')
     cy.contains(cloudViewer.email).should('be.visible')
     cy.findByRole('button', { name: text.login.actionLogout }).should('be.visible')
+  })
+
+  it('Shows a page name instead of project when a page name is provided', () => {
+    cy.mountFragment(HeaderBarFragmentDoc, {
+      render: (gqlVal) => <div class="resize overflow-auto border-current border-1 h-700px"><HeaderBar gql={gqlVal} pageName="Test Page" /></div>,
+    })
+
+    cy.contains('Project').should('not.exist')
+    cy.contains('Test Page').should('be.visible')
   })
 })
