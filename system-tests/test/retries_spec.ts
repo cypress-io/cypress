@@ -19,7 +19,6 @@ describe('retries', () => {
   it('warns about retries plugin', {
     project: 'plugin-retries',
     spec: 'main.spec.js',
-    stubPackage: 'cypress-plugin-retries',
     snapshot: true,
   })
 })
