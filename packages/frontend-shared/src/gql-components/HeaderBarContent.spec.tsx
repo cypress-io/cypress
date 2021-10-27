@@ -1,16 +1,16 @@
 import { HeaderBar_HeaderBarContentFragmentDoc } from '../generated/graphql-test'
-import HeaderBar from './HeaderBar.vue'
+import HeaderBarContent from './HeaderBarContent.vue'
 import { defaultMessages } from '@cy/i18n'
 
 const text = defaultMessages.topNav
 
-describe('<HeaderBar />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
+describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
   it('renders with functional browser menu when show-browsers prop is true', () => {
     cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
       onResult: (result, ctx) => {
         result.app.activeProject = null
       },
-      render: (gqlVal) => <div class="resize overflow-auto border-current border-1 h-700px"><HeaderBar gql={gqlVal} show-browsers={true} /></div>,
+      render: (gqlVal) => <div class="resize overflow-auto border-current border-1 h-700px"><HeaderBarContent gql={gqlVal} show-browsers={true} /></div>,
     })
 
     cy.get('[data-cy="topnav-browser-list"]')
@@ -23,7 +23,7 @@ describe('<HeaderBar />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
 
   it('renders without browser menu by default and other items work', () => {
     cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
-      render: (gqlVal) => <div class="resize overflow-auto border-current border-1 h-700px"><HeaderBar gql={gqlVal} /></div>,
+      render: (gqlVal) => <div class="resize overflow-auto border-current border-1 h-700px"><HeaderBarContent gql={gqlVal} /></div>,
     })
 
     cy.contains('Projects').should('be.visible')
@@ -37,7 +37,7 @@ describe('<HeaderBar />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
 
   it('displays the active project name', () => {
     cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
-      render: (gqlVal) => <div class="resize overflow-auto border-current border-1 h-700px"><HeaderBar gql={gqlVal} /></div>,
+      render: (gqlVal) => <div class="resize overflow-auto border-current border-1 h-700px"><HeaderBarContent gql={gqlVal} /></div>,
     })
 
     cy.contains('test-project').should('be.visible')
@@ -45,7 +45,7 @@ describe('<HeaderBar />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
 
   it('the login modal reaches "opening browser" status', () => {
     cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
-      render: (gqlVal) => <div class="resize overflow-auto border-current border-1 h-700px"><HeaderBar gql={gqlVal} /></div>,
+      render: (gqlVal) => <div class="resize overflow-auto border-current border-1 h-700px"><HeaderBarContent gql={gqlVal} /></div>,
     })
 
     cy.findByRole('button', { name: text.login.actionLogin })
@@ -76,7 +76,7 @@ describe('<HeaderBar />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
         result.cloudViewer = cloudViewer
         result.cloudViewer.__typename = 'CloudUser'
       },
-      render: (gqlVal) => <div class="resize overflow-auto border-current border-1 h-700px"><HeaderBar gql={gqlVal} /></div>,
+      render: (gqlVal) => <div class="resize overflow-auto border-current border-1 h-700px"><HeaderBarContent gql={gqlVal} /></div>,
     })
 
     cy.findByRole('button', { name: text.login.actionLogin }).click()
@@ -87,7 +87,7 @@ describe('<HeaderBar />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
 
   it('Shows a page name instead of project when a page name is provided', () => {
     cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
-      render: (gqlVal) => <div class="resize overflow-auto border-current border-1 h-700px"><HeaderBar gql={gqlVal} pageName="Test Page" /></div>,
+      render: (gqlVal) => <div class="resize overflow-auto border-current border-1 h-700px"><HeaderBarContent gql={gqlVal} pageName="Test Page" /></div>,
     })
 
     cy.contains('Project').should('not.exist')

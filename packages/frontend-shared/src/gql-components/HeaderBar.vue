@@ -1,5 +1,6 @@
 <template>
   <HeaderBarContent
+    v-if="query.data.value"
     :gql="query.data.value"
     :show-browsers="props.showBrowsers"
     :page-name="pageName"
