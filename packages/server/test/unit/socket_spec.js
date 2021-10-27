@@ -456,6 +456,16 @@ describe('lib/socket', () => {
 
         return this.client.emit('backend:request', 'get:fixture', 'does-not-exist.txt', {}, cb)
       })
+
+      it('passes Buffers through intact', function (done) {
+        const cb = function (resp) {
+          expect(resp.response).to.eql(Buffer.from('[{"json": true}]'))
+
+          return done()
+        }
+
+        return this.client.emit('backend:request', 'get:fixture', 'foo', { encoding: null }, cb)
+      })
     })
 
     context('on(http:request)', () => {
