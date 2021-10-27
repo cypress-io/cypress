@@ -38,7 +38,13 @@ export const Project = objectType({
       resolve: async (source, args, ctx, info) => {
         const projectId = await ctx.project.projectId(source.projectRoot)
 
-        return projectId ? cloudProjectBySlug(projectId, ctx, info) : null
+        if (!projectId) {
+          return null
+        }
+
+        const result = await cloudProjectBySlug(projectId, ctx, info)
+
+        return result
       },
     })
 

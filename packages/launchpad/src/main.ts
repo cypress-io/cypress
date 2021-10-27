@@ -4,7 +4,6 @@ import 'virtual:windi.css'
 import urql from '@urql/vue'
 import App from './App.vue'
 import Toast, { POSITION } from 'vue-toastification'
-// Import the CSS or use your own!
 import 'vue-toastification/dist/index.css'
 import { makeUrqlClient } from '@packages/frontend-shared/src/graphql/urqlClient'
 import { createI18n } from '@cy/i18n'

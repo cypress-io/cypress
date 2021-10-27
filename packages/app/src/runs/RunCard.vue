@@ -1,5 +1,6 @@
 <template>
   <button
+    :data-e2e="run.id"
     class="block w-full overflow-hidden mb-4 border border-gray-100
   rounded bg-light-50 hocus-default"
   >

@@ -104,9 +104,11 @@ export function createCloudProject (config: ConfigFor<CloudProject>) {
         })
       })
 
+      const connectionData = connectionFromArray(twentyRuns, args)
+
       return {
-        ...connectionFromArray(twentyRuns, args),
-        nodes: twentyRuns,
+        ...connectionData,
+        nodes: connectionData.edges.map((e) => e.node),
       }
     },
     ...config,
@@ -201,7 +203,7 @@ export const CloudRunQuery: MaybeResolver<Query> = {
     return CloudProjectStubs.componentProject
   },
   cloudProjectsBySlugs (args: QueryCloudProjectsBySlugsArgs) {
-    return args.slugs.map((s) => projectsBySlug[s] ?? null)
+    return args.slugs.map((s) => projectsBySlug[s] ?? createCloudProject({ slug: s }))
   },
   cloudViewer (args, ctx) {
     if (ctx.__server__) {
