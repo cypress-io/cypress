@@ -124,7 +124,7 @@ describe('runnables', () => {
       runner.emit('reporter:start', { startTime: startTime.toISOString() })
     })
 
-    cy.get('.runnable-header span:last').should('have.text', '12.34')
+    cy.get('.runnable-header span:last').should('have.text', '00:12')
   })
 
   it('does not display time if no time taken', () => {

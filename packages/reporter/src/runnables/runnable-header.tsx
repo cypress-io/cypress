@@ -3,11 +3,9 @@ import React, { Component, ReactElement } from 'react'
 
 import FileNameOpener from '../lib/file-name-opener'
 import { StatsStore } from '../header/stats-store'
-import { getFilenameParts } from '../lib/util'
+import { formatDuration, getFilenameParts } from '../lib/util'
 
 const renderRunnableHeader = (children: ReactElement) => <div className="runnable-header">{children}</div>
-
-const formatDuration = (duration: number) => duration ? String((duration / 1000).toFixed(2)).padStart(5, '0') : '--'
 
 interface RunnableHeaderProps {
   spec: Cypress.Cypress['spec']
