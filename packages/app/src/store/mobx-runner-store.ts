@@ -13,7 +13,7 @@ export function getMobxRunnerStore () {
 }
 
 export const initializeMobxStore = (testingType: Cypress.TestingType) => {
-  mobxRunnerStore = new BaseStore(testingType)
+  mobxRunnerStore = new MobxRunnerStore(testingType)
 
   return mobxRunnerStore
 }
