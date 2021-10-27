@@ -131,20 +131,6 @@ describe('src/cy/commands/actions/type - #clear', () => {
     cy.get('input:first').clear()
   })
 
-  // https://github.com/cypress-io/cypress/issues/4233
-  it('does not try other scroll behaviors if user has explicity set the scroll behavior', (done) => {
-    cy.on('fail', (err) => {
-      expect(err.message).contain('failed because this element is not visible')
-      expect(err.message).contain('it has CSS property: `position: fixed` and it\'s being covered by another element')
-      done()
-    })
-
-    cy.viewport(400, 400)
-    cy.visit('./fixtures/sticky-header.html')
-    cy.get('#container').scrollTo('bottom')
-    cy.get('input:first').clear({ scrollBehavior: 'top' })
-  })
-
   // https://github.com/cypress-io/cypress/issues/5835
   it('can force clear when hidden in input', () => {
     const input = cy.$$('input:first')
