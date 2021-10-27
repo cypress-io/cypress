@@ -2,8 +2,6 @@ import { defineStore } from 'pinia'
 
 export interface MainStoreState {
   navBarExpanded: boolean
-  highlightUrl: boolean
-  url?: string
 }
 
 /**
@@ -16,18 +14,11 @@ export const useMainStore = defineStore({
   state: (): MainStoreState => {
     return {
       navBarExpanded: false,
-      highlightUrl: false,
     }
   },
   actions: {
     toggleNavBar () {
       this.navBarExpanded = !this.navBarExpanded
-    },
-    setHighlightUrl (highlightUrl: boolean) {
-      this.highlightUrl = highlightUrl
-    },
-    updateUrl (url?: string) {
-      this.url = url
     },
   },
 })

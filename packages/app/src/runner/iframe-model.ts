@@ -1,5 +1,5 @@
 import { useSnapshotStore } from '../spec/snapshot-store'
-import { MobxRunnerStore, useMainStore } from '../store'
+import { MobxRunnerStore, useAutStore } from '../store'
 
 export interface AutSnapshot {
   id?: number
@@ -94,7 +94,7 @@ export class IframeModel {
 
   setSnapshots = (snapshotProps: AutSnapshot) => {
     const store = useSnapshotStore()
-    const mainStore = useMainStore()
+    const autStore = useAutStore()
 
     if (store.isSnapshotPinned) {
       return
@@ -117,7 +117,7 @@ export class IframeModel {
       return
     }
 
-    mainStore.setHighlightUrl(false)
+    autStore.setHighlightUrl(false)
 
     if (!this.originalState) {
       this._storeOriginalState()
@@ -126,7 +126,7 @@ export class IframeModel {
     this.detachedId = snapshotProps.id
 
     this._updateViewport(snapshotProps)
-    mainStore.updateUrl(snapshotProps.url)
+    autStore.updateUrl(snapshotProps.url)
 
     clearInterval(this.intervalId)
 
@@ -166,13 +166,13 @@ export class IframeModel {
 
   _clearSnapshots = () => {
     const snapshotStore = useSnapshotStore()
-    const mainStore = useMainStore()
+    const autStore = useAutStore()
 
     if (snapshotStore.isSnapshotPinned) return
 
     clearInterval(this.intervalId)
 
-    mainStore.setHighlightUrl(false)
+    autStore.setHighlightUrl(false)
 
     if (!this.originalState || !this.originalState.body) {
       return snapshotStore.clearMessage()
@@ -193,7 +193,7 @@ export class IframeModel {
       if (previousDetachedId !== this.detachedId) return
 
       this._updateViewport(this.originalState)
-      mainStore.updateUrl(this.originalState.url)
+      autStore.updateUrl(this.originalState.url)
       this.restoreDom(this.originalState.snapshot)
       snapshotStore.clearMessage()
 
