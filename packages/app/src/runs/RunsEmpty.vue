@@ -1,6 +1,6 @@
 <template>
   <div data-cy="no-runs">
-    No runs recorded
+    No runs recorded (Placeholder)
   </div>
 </template>
 
@@ -8,6 +8,5 @@
 
 defineProps<{
   projectId: string,
-
 }>()
 </script>

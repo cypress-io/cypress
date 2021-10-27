@@ -7,10 +7,6 @@
         :has-project-id="!!activeProject?.projectId"
         :is-logged-in="!!query.data.value?.cloudViewer?.id"
       />
-      <RunError
-        v-else-if="cloudRequestError"
-        :error="cloudRequestError"
-      />
       <transition
         v-else
         name="fade"
@@ -43,7 +39,6 @@ import RunCard from '../runs/RunCard.vue'
 import RunsSkeleton from '../runs/RunsSkeleton.vue'
 import RunsConnect from '../runs/RunsConnect.vue'
 import RunsEmpty from '../runs/RunsEmpty.vue'
-import RunError from '../runs/RunError.vue'
 
 gql`
 query Runs {
@@ -70,9 +65,6 @@ query Runs {
 const query = useQuery({ query: RunsDocument })
 
 const activeProject = computed(() => query.data.value?.app?.activeProject)
-
-// const cloudRequestError = computed(() => query.data.value?.app?.activeProject?.cloudRequestError)
-const cloudRequestError = computed(() => undefined)
 </script>
 
 <route>
