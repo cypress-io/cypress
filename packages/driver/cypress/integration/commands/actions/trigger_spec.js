@@ -1059,7 +1059,7 @@ describe('src/cy/commands/actions/trigger', () => {
           done()
         })
 
-        cy.get('#opacity-0-hidden').click()
+        cy.get('#opacity-0-hidden').trigger('mouseover')
       })
 
       it('throws when subject is disabled', function (done) {
