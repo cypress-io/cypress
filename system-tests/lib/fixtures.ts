@@ -128,9 +128,13 @@ export async function scaffoldProjectNodeModules (project: string): Promise<void
 
   try {
     // this will throw and exit early if the package.json does not exist
-    await require(projectPkgJsonPath)
+    const pkgJson = require(projectPkgJsonPath)
 
     console.log(`📦 Found package.json for project ${project}.`)
+
+    if (!pkgJson.dependencies && !pkgJson.devDependencies && !pkgJson.optionalDependencies) {
+      return console.log(`📦 No dependencies found, skipping yarn steps`)
+    }
 
     // 1. Ensure there is a cache directory set up for this test project's `node_modules`.
     await symlinkNodeModulesFromCache(project, cacheDir)
@@ -141,20 +145,20 @@ export async function scaffoldProjectNodeModules (project: string): Promise<void
 
     await removeWorkspacePackages(workspaceDeps)
 
-    // 3. Fix relative paths in `yarn.lock`.
+    // 3. Fix relative paths in temp dir's `yarn.lock`.
     const relativePathToProjectDir = _path.relative(projectDir, _path.join(root, '..'))
     const yarnLockPath = _path.join(projectDir, 'yarn.lock')
 
+    console.log('📦 Writing yarn.lock with fixed relative paths to temp dir')
     try {
       const yarnLock = (await fs.readFile(yarnLockPath, 'utf8'))
       .replace(new RegExp(relativePathToken, 'gm'), relativePathToProjectDir)
 
-      console.log('📦 Writing yarn.lock with fixed relative paths to temp dir')
       await fs.writeFile(yarnLockPath, yarnLock)
     } catch (err) {
       if (err.code !== 'ENOENT' || !updateYarnLock) throw err
 
-      console.log('📦 UPDATE_YARN_LOCK set and no yarn.lock found, continuing')
+      console.log('📦 No yarn.lock found, continuing')
     }
 
     // 4. Run `yarn install` with `--frozen-lockfile` by default.
@@ -166,7 +170,7 @@ export async function scaffoldProjectNodeModules (project: string): Promise<void
         console.log(`📦 Copying yarn.lock and fixing relative paths for ${project}`)
 
         // Replace workspace dependency paths in `yarn.lock` with tokens so it can be the same
-        // for all developers.
+        // for all developers
         const yarnLock = (await fs.readFile(yarnLockPath, 'utf8'))
         .replace(new RegExp(relativePathToProjectDir, 'gm'), relativePathToken)
 
@@ -187,6 +191,7 @@ export async function scaffoldProjectNodeModules (project: string): Promise<void
     if (err.code === 'MODULE_NOT_FOUND') return
 
     console.error(`⚠ An error occurred while installing the node_modules for ${project}.`)
+    console.error([err.message, err.stack].join('\n'))
     throw err
   }
 }
@@ -212,6 +217,7 @@ export async function scaffoldCommonNodeModules () {
     'react',
     'semver',
     'systeminformation',
+    'tslib',
     'typescript',
   ].map(symlinkNodeModule))
 }
