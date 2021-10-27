@@ -15,4 +15,12 @@ export class FileActions {
       data,
     )
   }
+
+  async removeFileInProject (relativePath: string) {
+    if (!this.ctx.activeProject) {
+      throw new Error(`Cannot remove file in project without active project`)
+    }
+
+    await this.ctx.fs.remove(path.join(this.ctx.activeProject?.projectRoot, relativePath))
+  }
 }

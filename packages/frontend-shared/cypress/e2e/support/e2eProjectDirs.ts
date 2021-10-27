@@ -27,7 +27,7 @@ export const e2eProjectDirs = [
   'integration-outside-project-root',
   'issue-8111-iframe-input',
   'max-listeners',
-  'multiples-config-with-json',
+  'multiples-config-files-with-json',
   'multiple-task-registrations',
   'no-scaffolding',
   'no-server',
