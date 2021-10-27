@@ -6,7 +6,7 @@ describe('Launchpad: Open Mode', () => {
     cy.visitLaunchpad()
   })
 
-  it('shows the open page when no testingType is not specified', () => {
+  it('shows the open page when testingType is not specified', () => {
     cy.get('h1').should('contain', defaultMessages.globalPage.empty.title)
   })
 
