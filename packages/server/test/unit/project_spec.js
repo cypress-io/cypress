@@ -43,8 +43,7 @@ describe('lib/project-base', () => {
 
     this.todosPath = Fixtures.projectPath('todos')
     this.idsPath = Fixtures.projectPath('ids')
-    this.pristinePath = Fixtures.projectPath('pristine')
-    this.configWithJsPath = Fixtures.projectPath('config-with-js')
+    this.pristinePath = Fixtures.projectPath('pristine-with-config-file')
 
     sinon.stub(scaffold, 'isNewProject').resolves(false)
     sinon.stub(chokidar, 'watch').returns({
@@ -92,7 +91,7 @@ describe('lib/project-base', () => {
     sinon.stub(ServerE2E.prototype, 'open').resolves([])
     sinon.stub(ProjectBase.prototype, 'startCtDevServer').resolves({ port: 9999 })
 
-    const projectCt = new ProjectBase({ projectRoot: this.configWithJsPath, testingType: 'component' })
+    const projectCt = new ProjectBase({ projectRoot: this.pristinePath, testingType: 'component' })
 
     await projectCt.initializeConfig()
 
@@ -965,7 +964,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
   context('.add', () => {
     beforeEach(function () {
-      this.pristinePath = Fixtures.projectPath('pristine')
+      this.pristinePath = Fixtures.projectPath('pristine-with-config-file')
     })
 
     it('inserts path into cache', function () {

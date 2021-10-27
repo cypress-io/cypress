@@ -115,6 +115,7 @@ describe('lib/cypress', () => {
     Fixtures.scaffold()
     this.todosPath = Fixtures.projectPath('todos')
     this.pristinePath = Fixtures.projectPath('pristine')
+    this.pristineWithConfigPath = Fixtures.projectPath('pristine-with-config-file')
     this.noScaffolding = Fixtures.projectPath('no-scaffolding')
     this.recordPath = Fixtures.projectPath('record')
     this.pluginConfig = Fixtures.projectPath('plugin-config')
@@ -456,16 +457,13 @@ describe('lib/cypress', () => {
     })
 
     it('scaffolds out integration and example specs if they do not exist when not runMode', function () {
-      return fs.writeFileAsync(path.join(this.pristinePath, 'cypress.config.js'), 'module.exports = {}')
-      .then(() => {
-        return config.get(this.pristinePath, { configFile: 'cypress.config.js' })
-      })
+      return config.get(this.pristineWithConfigPath, { configFile: 'cypress.config.js' })
       .then((cfg) => {
         return fs.statAsync(cfg.integrationFolder)
         .then(() => {
           throw new Error('integrationFolder should not exist!')
         }).catch(() => {
-          return cypress.start([`--run-project=${this.pristinePath}`, '--no-run-mode'])
+          return cypress.start([`--run-project=${this.pristineWithConfigPath}`, '--no-run-mode'])
         }).then(() => {
           return fs.statAsync(cfg.integrationFolder)
         }).then(() => {
@@ -507,11 +505,9 @@ describe('lib/cypress', () => {
     })
 
     it('does not scaffold integration or example specs when runMode', function () {
-      return fs.writeFileAsync(path.join(this.pristinePath, 'cypress.config.js'), 'module.exports = {}')
+      return cypress.start([`--run-project=${this.pristineWithConfigPath}`])
       .then(() => {
-        return cypress.start([`--run-project=${this.pristinePath}`])
-      }).then(() => {
-        return fs.statAsync(path.join(this.pristinePath, 'cypress', 'integration'))
+        return fs.statAsync(path.join(this.pristineWithConfigPath, 'cypress', 'integration'))
       }).then(() => {
         throw new Error('integration folder should not exist!')
       }).catch((err) => {
@@ -522,16 +518,13 @@ describe('lib/cypress', () => {
     })
 
     it('scaffolds out fixtures + files if they do not exist', function () {
-      return fs.writeFileAsync(path.join(this.pristinePath, 'cypress.config.js'), 'module.exports = {}')
-      .then(() => {
-        return config.get(this.pristinePath, { configFile: 'cypress.config.js' })
-      })
+      return config.get(this.pristineWithConfigPath, { configFile: 'cypress.config.js' })
       .then((cfg) => {
         return fs.statAsync(cfg.fixturesFolder)
         .then(() => {
           throw new Error('fixturesFolder should not exist!')
         }).catch(() => {
-          return cypress.start([`--run-project=${this.pristinePath}`, '--no-run-mode'])
+          return cypress.start([`--run-project=${this.pristineWithConfigPath}`, '--no-run-mode'])
         }).then(() => {
           return fs.statAsync(cfg.fixturesFolder)
         }).then(() => {
@@ -541,18 +534,15 @@ describe('lib/cypress', () => {
     })
 
     it('scaffolds out support + files if they do not exist', function () {
-      const supportFolder = path.join(this.pristinePath, 'cypress/support')
+      const supportFolder = path.join(this.pristineWithConfigPath, 'cypress/support')
 
-      return fs.writeFileAsync(path.join(this.pristinePath, 'cypress.config.js'), 'module.exports = {}')
-      .then(() => {
-        return config.get(this.pristinePath, { configFile: 'cypress.config.js' })
-      })
+      return config.get(this.pristineWithConfigPath, { configFile: 'cypress.config.js' })
       .then(() => {
         return fs.statAsync(supportFolder)
         .then(() => {
           throw new Error('supportFolder should not exist!')
         }).catch({ code: 'ENOENT' }, () => {
-          return cypress.start([`--run-project=${this.pristinePath}`, '--no-run-mode'])
+          return cypress.start([`--run-project=${this.pristineWithConfigPath}`, '--no-run-mode'])
         }).then(() => {
           return fs.statAsync(supportFolder)
         }).then(() => {

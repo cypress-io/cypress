@@ -54,6 +54,7 @@ export const e2eProjectDirs = [
   'plugins-async-error',
   'plugins-root-async-error',
   'pristine',
+  'pristine-with-config-file',
   'read-only-project-root',
   'record',
   'remote-debugging-disconnect',
