@@ -12,7 +12,6 @@ const commitInfo = require('@cypress/commit-info')
 const Fixtures = require('@tooling/system-tests/lib/fixtures')
 const snapshot = require('snap-shot-it')
 const stripAnsi = require('strip-ansi')
-const debug = require('debug')('test')
 const pkg = require('@packages/root')
 const detect = require('@packages/launcher/lib/detect')
 const launch = require('@packages/launcher/lib/browsers')
@@ -457,7 +456,10 @@ describe('lib/cypress', () => {
     })
 
     it('scaffolds out integration and example specs if they do not exist when not runMode', function () {
-      return config.get(this.pristinePath, { configFile: 'cypress.config.js' })
+      return fs.writeFileAsync(path.join(this.pristinePath, 'cypress.config.js'), 'module.exports = {}')
+      .then(() => {
+        return config.get(this.pristinePath, { configFile: 'cypress.config.js' })
+      })
       .then((cfg) => {
         return fs.statAsync(cfg.integrationFolder)
         .then(() => {
@@ -505,7 +507,7 @@ describe('lib/cypress', () => {
     })
 
     it('does not scaffold integration or example specs when runMode', function () {
-      return settings.write(this.pristinePath, {}, { configFile: 'cypress.config.js' })
+      return fs.writeFileAsync(path.join(this.pristinePath, 'cypress.config.js'), 'module.exports = {}')
       .then(() => {
         return cypress.start([`--run-project=${this.pristinePath}`])
       }).then(() => {
@@ -520,7 +522,10 @@ describe('lib/cypress', () => {
     })
 
     it('scaffolds out fixtures + files if they do not exist', function () {
-      return config.get(this.pristinePath, { configFile: 'cypress.config.js' })
+      return fs.writeFileAsync(path.join(this.pristinePath, 'cypress.config.js'), 'module.exports = {}')
+      .then(() => {
+        return config.get(this.pristinePath, { configFile: 'cypress.config.js' })
+      })
       .then((cfg) => {
         return fs.statAsync(cfg.fixturesFolder)
         .then(() => {
@@ -538,7 +543,10 @@ describe('lib/cypress', () => {
     it('scaffolds out support + files if they do not exist', function () {
       const supportFolder = path.join(this.pristinePath, 'cypress/support')
 
-      return config.get(this.pristinePath, { configFile: 'cypress.config.js' })
+      return fs.writeFileAsync(path.join(this.pristinePath, 'cypress.config.js'), 'module.exports = {}')
+      .then(() => {
+        return config.get(this.pristinePath, { configFile: 'cypress.config.js' })
+      })
       .then(() => {
         return fs.statAsync(supportFolder)
         .then(() => {
@@ -1820,27 +1828,6 @@ describe('lib/cypress', () => {
             expect(cfg.env.foo).to.equal('bar')
 
             expect(cfg.port).to.equal(2020)
-          })
-        })
-      })
-
-      it('creates custom config file if it does not exist', function () {
-        return cypress.start([
-          `--config-file=${this.filename}`,
-        ])
-        .then(() => {
-          debug('cypress started with config %s', this.filename)
-          const options = Events.start.firstCall.args[0]
-
-          debug('first call arguments %o', Events.start.firstCall.args)
-
-          return Events.handleEvent(options, {}, {}, 123, 'open:project', this.pristinePath)
-        }).then(() => {
-          expect(this.open, 'open was called').to.be.called
-
-          return fs.readJsonAsync(path.join(this.pristinePath, this.filename))
-          .then((json) => {
-            expect(json, 'json file is empty').to.deep.equal({})
           })
         })
       })

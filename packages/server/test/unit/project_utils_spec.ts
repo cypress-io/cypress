@@ -146,13 +146,6 @@ describe('lib/project_utils', () => {
       expect(ret).to.equal('cypress.config.js')
     })
 
-    it('defaults to cypress.config.js when no file is returned', async () => {
-      readdirStub.withArgs(projectRoot).resolves([])
-      const ret = await getDefaultConfigFilePath(projectRoot)
-
-      expect(ret).to.equal('cypress.config.js')
-    })
-
     it('errors if two default files are present', async () => {
       readdirStub.withArgs(projectRoot).resolves(['cypress.config.js', 'cypress.config.ts'])
       try {
@@ -166,7 +159,7 @@ describe('lib/project_utils', () => {
     it('errors if no file is present and we asked not to create any', async () => {
       readdirStub.withArgs(projectRoot).resolves([])
       try {
-        await getDefaultConfigFilePath(projectRoot, false)
+        await getDefaultConfigFilePath(projectRoot)
         throw Error('should have failed')
       } catch (err) {
         expect(err).to.have.property('type', 'NO_DEFAULT_CONFIG_FILE_FOUND')

@@ -1,13 +1,10 @@
 describe('Config files error handling', () => {
   it('it handles multiples config files', () => {
-    cy.setupE2E('pristine')
+    cy.setupE2E('config-with-js')
     cy.visitLaunchpad()
 
     cy.withCtx(async (ctx) => {
-      await Promise.all([
-        ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {}'),
-        ctx.actions.file.writeFileInProject('cypress.config.ts', 'export default {}'),
-      ])
+      await ctx.actions.file.writeFileInProject('cypress.config.ts', 'export default {}')
     })
 
     cy.get('[data-cy-testingType=e2e]').click()
@@ -18,7 +15,7 @@ describe('Config files error handling', () => {
     .and('contain.text', 'There is both a `cypress.config.js` and a `cypress.config.ts` at the location below')
 
     cy.withCtx(async (ctx) => {
-      await ctx.actions.file.removeFileInProject('cypress.config.js')
+      await ctx.actions.file.removeFileInProject('cypress.config.ts')
     })
 
     cy.get('[data-testid=error-retry-button]').click()
@@ -29,8 +26,12 @@ describe('Config files error handling', () => {
   })
 
   it('it handles legacy config file', () => {
-    cy.setupE2E('config-with-json')
+    cy.setupE2E('config-with-js')
     cy.visitLaunchpad()
+
+    cy.withCtx(async (ctx) => {
+      await ctx.actions.file.writeFileInProject('cypress.json', '{}')
+    })
 
     cy.get('[data-cy-testingType=e2e]').click()
     cy.wait(2000)

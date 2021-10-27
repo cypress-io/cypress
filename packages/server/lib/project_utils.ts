@@ -133,7 +133,7 @@ export const checkSupportFile = async ({
   return
 }
 
-export async function getDefaultConfigFilePath (projectRoot: string, returnDefaultValueIfNotFound: boolean = true): Promise<string | undefined> {
+export async function getDefaultConfigFilePath (projectRoot: string): Promise<string | undefined> {
   const filesInProjectDir = await fs.readdir(projectRoot)
 
   const foundConfigFiles = [...CYPRESS_CONFIG_FILES, LEGACY_CONFIG_FILE].filter((file) => filesInProjectDir.includes(file))
@@ -158,12 +158,6 @@ export async function getDefaultConfigFilePath (projectRoot: string, returnDefau
     }
 
     throw errors.throw('CONFIG_FILES_LANGUAGE_CONFLICT', projectRoot, ...foundConfigFiles)
-  }
-
-  // TODO: Should we check if there's a tsConfig to create the correct file?
-  if (returnDefaultValueIfNotFound) {
-    // Default is to create a new `cypress.config.ts` file if one does not exist.
-    return CYPRESS_CONFIG_FILES[0]
   }
 
   throw errors.get('NO_DEFAULT_CONFIG_FILE_FOUND', projectRoot)

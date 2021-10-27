@@ -10,7 +10,6 @@ export const e2eProjectDirs = [
   'config-with-invalid-browser',
   'config-with-invalid-viewport',
   'config-with-js',
-  'config-with-json',
   'config-with-short-timeout',
   'config-with-ts',
   'cookies',

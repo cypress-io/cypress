@@ -44,6 +44,7 @@ describe('lib/project-base', () => {
     this.todosPath = Fixtures.projectPath('todos')
     this.idsPath = Fixtures.projectPath('ids')
     this.pristinePath = Fixtures.projectPath('pristine')
+    this.configWithJsPath = Fixtures.projectPath('config-with-js')
 
     sinon.stub(scaffold, 'isNewProject').resolves(false)
     sinon.stub(chokidar, 'watch').returns({
@@ -91,7 +92,7 @@ describe('lib/project-base', () => {
     sinon.stub(ServerE2E.prototype, 'open').resolves([])
     sinon.stub(ProjectBase.prototype, 'startCtDevServer').resolves({ port: 9999 })
 
-    const projectCt = new ProjectBase({ projectRoot: this.pristinePath, testingType: 'component' })
+    const projectCt = new ProjectBase({ projectRoot: this.configWithJsPath, testingType: 'component' })
 
     await projectCt.initializeConfig()
 
@@ -978,11 +979,11 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       it('returns object containing path and id', function () {
         sinon.stub(settings, 'read').resolves({ projectId: 'id-123' })
 
-        return add(this.pristinePath, {})
+        return add(this.configWithJsPath, {})
         .then((project) => {
           expect(project.id).to.equal('id-123')
 
-          expect(project.path).to.equal(this.pristinePath)
+          expect(project.path).to.equal(this.configWithJsPath)
         })
       })
     })
