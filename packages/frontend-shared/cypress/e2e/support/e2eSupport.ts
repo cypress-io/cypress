@@ -29,7 +29,7 @@ export interface RemoteGraphQLInterceptPayload {
   result: ExecutionResult
 }
 
-export type RemoteGraphQLInterceptor = (obj: RemoteGraphQLInterceptPayload) => ExecutionResult
+export type RemoteGraphQLInterceptor = (obj: RemoteGraphQLInterceptPayload) => ExecutionResult | Promise<ExecutionResult>
 
 declare global {
   namespace Cypress {

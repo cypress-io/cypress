@@ -1,20 +1,26 @@
 <template>
-  <div class="overflow-scroll">
+  <div>
     <h2>Runs Page</h2>
     <main class="p-24px relative">
       <transition
         name="fade"
       >
         <RunsSkeletton v-if="query.fetching.value" />
-        <div
-          v-else-if="query.data.value?.app?.activeProject?.cloudProject"
-        >
-          <RunCard
-            v-for="run of query.data.value.app.activeProject.cloudProject.runs?.nodes ?? []"
-            :key="run.id"
-            :gql="run"
-          />
-        </div>
+        <template v-else-if="cloudRunNodes">
+          <div v-if="cloudRunNodes.length > 0">
+            <RunCard
+              v-for="run of cloudRunNodes"
+              :key="run.id"
+              :gql="run"
+            />
+          </div>
+          <div
+            v-else
+            data-e2e="no-runs"
+          >
+            No runs... record one to the cloud?
+          </div>
+        </template>
         <template v-else-if="query.data.value?.app?.activeProject">
           Connect the current project to the cloud
         </template>
@@ -24,6 +30,7 @@
 </template>
 
 <script lang="ts" setup>
+import { computed } from 'vue'
 import { gql, useQuery } from '@urql/vue'
 import { RunsDocument } from '../generated/graphql'
 import RunCard from '../runs/RunCard.vue'
@@ -49,6 +56,7 @@ query Runs {
 }`
 
 const query = useQuery({ query: RunsDocument })
+const cloudRunNodes = computed(() => query.data.value?.app.activeProject?.cloudProject?.runs?.nodes)
 </script>
 
 <route>
