@@ -5,7 +5,7 @@
         aria-labelledby="primary-heading"
         class="min-w-0 flex-1 h-full flex flex-col overflow-hidden lg:order-last"
       >
-        <HeaderBar
+        <HeaderBarContainer
           v-if="showHeader"
           :show-browsers="true"
           :page-name="currentRoute.name"
@@ -40,7 +40,7 @@
 
 <script lang="ts" setup>
 import SidebarNavigation from '../navigation/SidebarNavigation.vue'
-import HeaderBar from '../../../frontend-shared/src/gql-components/HeaderBar.vue'
+import HeaderBarContainer from '../../../frontend-shared/src/gql-components/HeaderBarContainer.vue'
 import { useRoute } from 'vue-router'
 import { computed } from 'vue'
 

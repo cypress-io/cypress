@@ -125,6 +125,8 @@ export type GlobalPageHeader_ClearActiveProjectMutationVariables = Exact<{ [key:
 
 export type GlobalPageHeader_ClearActiveProjectMutation = { readonly __typename?: 'Mutation', readonly clearActiveProject: Maybe<boolean> };
 
+export type HeaderBarFragment = { readonly __typename?: 'Query', readonly app: { readonly __typename?: 'App', readonly isAuthBrowserOpened: boolean, readonly activeProject: Maybe<{ readonly __typename?: 'Project', readonly id: string, readonly title: string }>, readonly selectedBrowser: Maybe<{ readonly __typename?: 'Browser', readonly id: string, readonly displayName: string, readonly majorVersion: Maybe<string> }>, readonly browsers: Maybe<ReadonlyArray<{ readonly __typename?: 'Browser', readonly id: string, readonly isSelected: boolean, readonly displayName: string, readonly version: string, readonly majorVersion: Maybe<string> }>> }, readonly cloudViewer: Maybe<{ readonly __typename?: 'CloudUser', readonly id: string, readonly email: Maybe<string>, readonly fullName: Maybe<string> }> };
+
 export type HeaderBar_HeaderBarQueryQueryVariables = Exact<{ [key: string]: never; }>;
 
 

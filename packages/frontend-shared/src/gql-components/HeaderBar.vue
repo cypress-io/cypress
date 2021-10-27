@@ -16,25 +16,25 @@
           src="../assets/logos/cypress-dark.png"
         >
         <a
-          :class="query?.app?.activeProject ? 'text-indigo-500' :
+          :class="props.gql?.app?.activeProject ? 'text-indigo-500' :
             'text-gray-700'"
-          :href="query?.app?.activeProject ? 'global-mode' : undefined"
+          :href="props.gql?.app?.activeProject ? 'global-mode' : undefined"
           @click.prevent="clearActiveProject"
         >Projects</a>
         <!-- TODO: Replace with a cy icon -->
         <i-oi-chevron-right
-          v-if="query?.app?.activeProject"
+          v-if="props.gql?.app?.activeProject"
           class="text-gray-300 h-8px"
         />
-        <span class="text-body-gray-700">{{ query?.app?.activeProject?.title }}</span>
+        <span class="text-body-gray-700">{{ props.gql?.app?.activeProject?.title }}</span>
       </div>
       <div class="flex gap-6">
         <TopNav
-          :gql="query?.app"
+          :gql="props.gql?.app"
           :show-browsers="props.showBrowsers"
         >
           <template
-            v-if="!!query?.cloudViewer"
+            v-if="!!props.gql?.cloudViewer"
             #login-title
           >
             <UserAvatar
@@ -44,7 +44,7 @@
             <span class="sr-only">{{ t('topNav.login.actionLogin') }}</span>
           </template>
           <template
-            v-if="!!query?.cloudViewer"
+            v-if="!!props.gql?.cloudViewer"
             #login-panel
           >
             <div class="min-w-248px">
@@ -54,9 +54,9 @@
                   class="w-48px mr-16px h-48px"
                 />
                 <div>
-                  <span class="text-gray-800">{{ query?.cloudViewer?.fullName }}</span>
+                  <span class="text-gray-800">{{ props.gql?.cloudViewer?.fullName }}</span>
                   <br>
-                  <span class="text-gray-600">{{ query?.cloudViewer?.email }}</span>
+                  <span class="text-gray-600">{{ props.gql?.cloudViewer?.email }}</span>
                   <br>
                   <a
                     class="text-indigo-500 hocus-link-default"
@@ -68,7 +68,7 @@
 
               <div class="p-16px">
                 <Auth
-                  :gql="query"
+                  :gql="props.gql"
                   :show-logout="true"
                 />
               </div>
@@ -77,7 +77,7 @@
         </TopNav>
         <div>
           <button
-            v-if="!query?.cloudViewer"
+            v-if="!props.gql?.cloudViewer"
             class="flex group items-center text-gray-600 focus:outline-transparent"
             @click="openLogin"
           >
@@ -90,16 +90,16 @@
       </div>
       <LoginModal
         v-model="isLoginOpen"
-        :gql="query"
+        :gql="props.gql"
       />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { gql, useMutation, useQuery } from '@urql/vue'
+import { gql, useMutation } from '@urql/vue'
 import { ref, computed } from 'vue'
-import { GlobalPageHeader_ClearActiveProjectDocument, HeaderBar_HeaderBarQueryDocument } from '../generated/graphql'
+import { GlobalPageHeader_ClearActiveProjectDocument, HeaderBarFragment } from '../generated/graphql'
 import TopNav from './topnav/TopNav.vue'
 import LoginModal from './topnav/LoginModal.vue'
 import UserAvatar from './topnav/UserAvatar.vue'
@@ -114,7 +114,7 @@ mutation GlobalPageHeader_clearActiveProject {
 `
 
 gql`
-query HeaderBar_HeaderBarQuery {
+fragment HeaderBar on Query {
   app {
     activeProject {
       id
@@ -128,27 +128,24 @@ query HeaderBar_HeaderBarQuery {
 
 const isLoginOpen = ref(false)
 const clearActiveProjectMutation = useMutation(GlobalPageHeader_ClearActiveProjectDocument)
-const email = computed(() => query.value?.cloudViewer?.email || undefined)
+const email = computed(() => props.gql.cloudViewer?.email || undefined)
 
 const openLogin = () => {
   isLoginOpen.value = true
 }
 
 const clearActiveProject = () => {
-  if (query.value?.app.activeProject) {
+  if (props.gql.app.activeProject) {
     clearActiveProjectMutation.executeMutation({})
   }
 }
 
 const props = defineProps<{
+  gql: HeaderBarFragment,
   showBrowsers?: Boolean,
   pageName?: RouteRecordName | null
 }>()
 
 const { t } = useI18n()
 
-const headerBarQuery = useQuery({ query: HeaderBar_HeaderBarQueryDocument })
-const query = computed(() => {
-  return headerBarQuery.data?.value
-})
 </script>
