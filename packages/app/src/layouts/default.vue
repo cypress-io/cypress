@@ -8,7 +8,7 @@
         <HeaderBar
           v-if="showHeader"
           :show-browsers="true"
-          :page-name="currentRoute.name"
+          :page-name="pageName"
         />
         <router-view v-slot="{ Component, route }">
           <h1
@@ -54,6 +54,10 @@ const currentRoute = useRoute()
 const showHeader = computed(() => {
   // if there's more than one place in the app that will not have a header,
   // this can get more formal
-  return currentRoute.name !== 'Spec'
+  return currentRoute.name !== 'Spec Page'
+})
+
+const pageName = computed((): string | undefined => {
+  return currentRoute.meta?.title as string
 })
 </script>

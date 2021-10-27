@@ -143,7 +143,7 @@ const clearActiveProject = () => {
 const props = defineProps<{
   gql: HeaderBar_HeaderBarContentFragment,
   showBrowsers?: Boolean,
-  pageName?: RouteRecordName | null
+  pageName?: string
 }>()
 
 const { t } = useI18n()

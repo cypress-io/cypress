@@ -22,7 +22,7 @@ query HeaderBar_HeaderBarQuery {
 
 const props = defineProps<{
     showBrowsers?: Boolean,
-    pageName?: RouteRecordName | null
+    pageName?: string
 }>()
 
 const { t } = useI18n()
