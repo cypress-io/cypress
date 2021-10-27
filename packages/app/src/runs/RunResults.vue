@@ -8,7 +8,7 @@
       <component
         :is="result.icon"
         class="mr-1 h-12px w-12px"
-        :class="result.color"
+        :class="result.class"
       />
       {{ result.value }}
     </div>
@@ -43,27 +43,27 @@ const results = [
     // TODO: Is flake even exposed via the API?
     // value: props.gql.totalFlaky,
     value: 0,
-    color: 'icon-dark-gray-400',
+    class: 'icon-dark-gray-400',
     icon: FlakyIcon,
   },
   {
     value: props.gql.totalSkipped,
-    color: 'icon-dark-gray-400',
+    class: 'icon-dark-gray-400',
     icon: SkippedIcon,
   },
   {
     value: props.gql.totalPending,
-    color: 'icon-dark-gray-400 icon-light-white',
+    class: 'icon-dark-gray-400 icon-light-white',
     icon: PendingIcon,
   },
   {
     value: props.gql.totalPassed,
-    color: 'icon-dark-jade-400',
+    class: 'icon-dark-jade-400',
     icon: PassedIcon,
   },
   {
     value: props.gql.totalFailed,
-    color: 'icon-dark-red-400',
+    class: 'icon-dark-red-400',
     icon: FailedIcon,
   },
 ]
