@@ -31,6 +31,9 @@ export async function injectBundle () {
       const config = window.UnifiedRunner.decodeBase64(data.base64Config) as any
       const autStore = useAutStore()
 
+      // TODO(lachlan): use GraphQL to get the viewport dimensions
+      // once it is more practical to do so
+      // find out if we need to continue managing viewportWidth/viewportHeight in MobX at all.
       autStore.updateDimensions(config.viewportWidth, config.viewportHeight)
 
       window.UnifiedRunner.config = config
@@ -38,9 +41,6 @@ export async function injectBundle () {
       window.UnifiedRunner.MobX.runInAction(() => {
         const store = initializeMobxStore(window.UnifiedRunner.config.testingType)
 
-        // TODO(lachlan): use GraphQL to get and set the configuration once
-        // it is more practical to do so
-        // find out if we need to continue managing viewportWidth/viewportHeight in MobX at all.
         store.updateDimensions(config.viewportWidth, config.viewportHeight)
       })
 
