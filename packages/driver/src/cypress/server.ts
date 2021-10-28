@@ -70,18 +70,6 @@ export class Server {
     return this.hasEnabledStubs = bool
   }
 
-  private nope () {
-    return null
-  }
-
-  private warnOnWhitelistRenamed (obj, type) {
-    if (obj.whitelist) {
-      return $errUtils.throwErrByPath('server.whitelist_renamed', { args: { type } })
-    }
-
-    return
-  }
-
   private setHeader (xhr, key, val, transformer?) {
     if (val != null) {
       if (transformer) {
@@ -248,12 +236,12 @@ export class Server {
 
     // bail if we've attached no stubs
     if (!this.routes.length) {
-      return this.nope()
+      return null
     }
 
     // bail if this xhr matches our ignore list
     if (this.isIgnored(xhr)) {
-      return this.nope()
+      return null
     }
 
     // loop in reverse to get
@@ -274,7 +262,7 @@ export class Server {
     }
 
     // else return null
-    return this.nope()
+    return null
   }
 
   methodsMatch (routeMethod, xhrMethod) {
@@ -395,7 +383,10 @@ export class Server {
   }
 
   set (obj) {
-    this.warnOnWhitelistRenamed(obj, 'server')
+    // whitelist is deprecated.
+    if (obj.whitelist) {
+      return $errUtils.throwErrByPath('server.whitelist_renamed', { args: { type: 'server' } })
+    }
 
     // handle enable=true|false
     if (obj.enable != null) {
