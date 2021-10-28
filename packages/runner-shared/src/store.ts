@@ -25,7 +25,19 @@ export abstract class BaseStore {
     this.specRunId = nanoid()
   }
 
+  @action checkCurrentSpecStillExists (specs: Cypress.Cypress['spec'][]) {
+    const newSpecsAbsolutes = new Set(specs.map((spec) => spec.absolute))
+
+    this.specs.forEach((oldSpec) => {
+      if (!newSpecsAbsolutes.has(oldSpec.absolute) && this.spec?.absolute === oldSpec.absolute) {
+        this.spec = undefined
+      }
+    })
+  }
+
   @action setSpecs (specs: Cypress.Cypress['spec'][]) {
+    this.checkCurrentSpecStillExists(specs)
+
     this.specs = specs
   }
 
