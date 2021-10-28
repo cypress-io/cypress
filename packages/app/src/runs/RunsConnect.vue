@@ -54,8 +54,9 @@ const isLoginOpen = ref(false)
 
 function openConnection () {
   if (props.isLoggedIn) {
-    // connect a product
+    // if user is already logged in connect a cloud project
   } else {
+    // start logging in the user
     isLoginOpen.value = true
   }
 }

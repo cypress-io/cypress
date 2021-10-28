@@ -1,14 +1,14 @@
 <template>
   <div class="relative m-24px h-full">
-    <RunsConnect
-      v-if="!query.fetching.value && (!activeProject?.projectId || !query.data.value?.cloudViewer?.id)"
-      :is-logged-in="!!query.data.value?.cloudViewer?.id"
-    />
     <transition
-      v-else
       name="fade"
     >
       <RunsSkeleton v-if="query.fetching.value" />
+      <RunsConnect
+        v-else-if="query.data.value && (!activeProject?.projectId || !query.data.value?.cloudViewer?.id)"
+        :is-logged-in="!!query.data.value?.cloudViewer?.id"
+        :gql="query.data.value"
+      />
       <RunsEmpty
         v-else-if="!activeProject?.cloudProject?.runs?.nodes.length"
         :project-id="activeProject?.projectId || ''"
@@ -52,13 +52,8 @@ query Runs {
         }
       }
     }
-    isAuthBrowserOpened
   }
-  cloudViewer {
-    id
-    email
-    fullName
-  }
+  ...LoginModalFragment
 }`
 
 const query = useQuery({ query: RunsDocument })
