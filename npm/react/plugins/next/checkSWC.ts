@@ -12,7 +12,7 @@ export function checkSWC (
 
   if (hasSWCLoader && cypressConfig.nodeVersion !== 'system') {
     throw new Error(`Cypress requires "nodeVersion" to be set to "system" in order to run Next.js with SWC optimizations.
-Please add "nodeVersion": "system" to your cypress config and try again.`)
+Please add "nodeVersion": "system" to your Cypress configuration and try again.`)
   }
 
   return false
