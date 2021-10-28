@@ -3,10 +3,9 @@ import $Cypress from '@packages/driver'
 import * as blankContents from '../blank-contents'
 import { visitFailure } from '../visit-failure'
 import { selectorPlaygroundModel } from '../selector-playground'
-import { eventManager } from '../event-manager'
+import type { EventManager } from '../event-manager'
 import { dom } from '../dom'
 import { logger } from '../logger'
-import { studioRecorder } from '../studio'
 
 const $ = $Cypress.$
 
@@ -14,7 +13,7 @@ export class AutIframe {
   debouncedToggleSelectorPlayground: DebouncedFunc<(isEnabled: any) => void>
   $iframe?: JQuery<HTMLIFrameElement>
 
-  constructor (private projectName: string) {
+  constructor (private projectName: string, private eventManager: EventManager) {
     this.debouncedToggleSelectorPlayground = _.debounce(this.toggleSelectorPlayground, 300)
   }
 
@@ -64,7 +63,7 @@ export class AutIframe {
   }
 
   detachDom = () => {
-    const Cypress = eventManager.getCypress()
+    const Cypress = this.eventManager.getCypress()
 
     if (!Cypress) return
 
@@ -93,7 +92,7 @@ export class AutIframe {
   }
 
   restoreDom = (snapshot) => {
-    const Cypress = eventManager.getCypress()
+    const Cypress = this.eventManager.getCypress()
     const { headStyles, bodyStyles } = Cypress ? Cypress.cy.getStyles(snapshot) : {}
     const { body, htmlAttrs } = snapshot
     const contents = this._contents()
@@ -302,7 +301,7 @@ export class AutIframe {
 
     this._highlightedEl = el
 
-    const Cypress = eventManager.getCypress()
+    const Cypress = this.eventManager.getCypress()
 
     const selector = Cypress.SelectorPlayground.getSelector($el)
 
@@ -337,7 +336,7 @@ export class AutIframe {
       return
     }
 
-    const Cypress = eventManager.getCypress()
+    const Cypress = this.eventManager.getCypress()
 
     const $el = this.getElements(Cypress.dom)
 
@@ -376,7 +375,7 @@ export class AutIframe {
   printSelectorElementsToConsole () {
     logger.clearLog()
 
-    const Cypress = eventManager.getCypress()
+    const Cypress = this.eventManager.getCypress()
 
     const $el = this.getElements(Cypress.dom)
 
@@ -431,14 +430,14 @@ export class AutIframe {
   }
 
   startStudio = () => {
-    if (studioRecorder.isLoading) {
-      studioRecorder.start(this._body()[0])
+    if (this.eventManager.studioRecorder.isLoading) {
+      this.eventManager.studioRecorder.start(this._body()[0])
     }
   }
 
   reattachStudio = () => {
-    if (studioRecorder.isActive) {
-      studioRecorder.attachListeners(this._body()[0])
+    if (this.eventManager.studioRecorder.isActive) {
+      this.eventManager.studioRecorder.attachListeners(this._body()[0])
     }
   }
 }

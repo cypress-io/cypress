@@ -32,7 +32,7 @@ export const Iframes = namedObserver('Iframes', ({
   eventManager,
 }: IFramesProps) => {
   const containerRef = useRef<HTMLDivElement>(null)
-  const autIframe = useRef(new AutIframe(config.projectName))
+  const autIframe = useRef(new AutIframe(config.projectName, eventManager))
 
   const _toggleSnapshotHighlights = (snapshotProps) => {
     state.setShowSnapshotHighlight(!state.snapshot.showingHighlights)

@@ -2,12 +2,16 @@ import React, { Component } from 'react'
 import { observer } from 'mobx-react'
 import Tooltip from '@cypress/react-tooltip'
 import cs from 'classnames'
-import { eventManager } from '../event-manager'
 
 import { StudioInstructionsModal } from './studio-modals'
 
 @observer
 class Studio extends Component {
+  constructor (props) {
+    super(props)
+    this.eventManager = props.eventManager
+  }
+
   state = {
     modalOpen: false,
     copySuccess: false,
@@ -110,18 +114,18 @@ class Studio extends Component {
   }
 
   _close = () => {
-    eventManager.emit('studio:cancel')
+    this.eventManager.emit('studio:cancel')
   }
 
   _restart = () => {
     this.props.model.reset()
-    eventManager.emit('restart')
+    this.eventManager.emit('restart')
   }
 
   _copy = () => {
     if (this.state.copySuccess) return
 
-    eventManager.emit('studio:copy:to:clipboard', () => {
+    this.eventManager.emit('studio:copy:to:clipboard', () => {
       this.setState({ copySuccess: true })
     })
   }

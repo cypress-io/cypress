@@ -3,7 +3,7 @@ import _ from 'lodash'
 import ReactDOM from 'react-dom'
 import $Cypress from '@packages/driver'
 const driverUtils = $Cypress.utils
-import { eventManager, AutIframe, Container, selectorPlaygroundModel, studioRecorder, logger, dom, blankContents, visitFailure } from '@packages/runner-shared'
+import { EventManager, AutIframe, Container, selectorPlaygroundModel, StudioRecorder, logger, dom, blankContents, visitFailure } from '@packages/runner-shared'
 import defaultEvents from '@packages/reporter/src/lib/events'
 import { Reporter } from '@packages/reporter/src/main'
 import shortcuts from '@packages/reporter/src/lib/shortcuts'
@@ -24,7 +24,7 @@ const UnifiedRunner = {
 
   blankContents,
 
-  studioRecorder,
+  StudioRecorder,
 
   selectorPlaygroundModel,
 
@@ -44,7 +44,7 @@ const UnifiedRunner = {
 
   defaultEvents,
 
-  eventManager,
+  EventManager,
 
   decodeBase64: (base64: string) => {
     return JSON.parse(driverUtils.decodeBase64Unicode(base64))
@@ -67,6 +67,8 @@ import State from './lib/state'
 import util from './lib/util'
 
 MobX.configure({ enforceActions: 'always' })
+
+const eventManager = new EventManager()
 
 const Runner: any = {
   emit (evt: string, ...args: unknown[]) {

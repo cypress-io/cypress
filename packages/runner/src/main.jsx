@@ -6,12 +6,14 @@ import $Cypress from '@packages/driver'
 import App, { SPEC_LIST_WIDTH } from './app/app'
 import NoSpec from './errors/no-spec'
 import State from './lib/state'
-import { Container, eventManager } from '@packages/runner-shared'
+import { Container, EventManager } from '@packages/runner-shared'
 import util from './lib/util'
 
 const driverUtils = $Cypress.utils
 
 configure({ enforceActions: 'always' })
+
+const eventManager = new EventManager()
 
 const Runner = {
   start (el, base64Config) {
