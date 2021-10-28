@@ -733,17 +733,17 @@ commands:
             fi
           working_directory: /tmp/<<parameters.repo>>
       - when:
-        condition: 
-          - not: <<parameters.checkout_branch>>
-        steps:
-        - run:
-            name: Scaffold new config file
-            working_directory: /tmp/<<parameters.repo>>
-            environment:
-              CYPRESS_INTERNAL_FORCE_SCAFFOLD: "1"
-            command: |
-              rm -rf cypress.json
-              echo 'module.exports = {}' > cypress.config.js
+          condition: 
+            - not: <<parameters.checkout_branch>>
+          steps:
+          - run:
+              name: Scaffold new config file
+              working_directory: /tmp/<<parameters.repo>>
+              environment:
+                CYPRESS_INTERNAL_FORCE_SCAFFOLD: "1"
+              command: |
+                rm -rf cypress.json
+                echo 'module.exports = {}' > cypress.config.js
       - run:
           name: Print Cypress version
           working_directory: /tmp/<<parameters.repo>>
