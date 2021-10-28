@@ -8,19 +8,21 @@
       Selector
     </button>
 
-    <div
-      class="rounded-md flex shadow-md mx-2 url px-4"
-      :class="{
-        'bg-yellow-50': autStore.isLoadingUrl,
-        'bg-white': !autStore.isLoadingUrl,
-      }"
-    >
-      <div>
-        {{ autStore.url }}
+    <template v-if="props.gql.activeTestingType">
+      <div
+        class="rounded-md flex shadow-md mx-2 url px-4"
+        :class="{
+          'bg-yellow-50': autStore.isLoadingUrl,
+          'bg-white': !autStore.isLoadingUrl,
+        }"
+      >
+        <div>
+          {{ autStore.url }}
+        </div>
       </div>
-    </div>
 
-    <div>Loading URL: {{ autStore.isLoadingUrl }}</div>
+      <div>Loading URL: {{ autStore.isLoadingUrl }}</div>
+    </template>
 
     <Select
       v-model="browser"
@@ -39,6 +41,8 @@ import type { SpecRunnerHeaderFragment } from '../generated/graphql'
 
 gql`
 fragment SpecRunnerHeader on App {
+  activeTestingType
+
   selectedBrowser {
     id
     displayName
