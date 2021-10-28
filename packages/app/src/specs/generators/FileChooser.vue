@@ -25,7 +25,7 @@
     v-model:extensionPattern="extensionPattern"
     />
 
-    <div v-show="loading">Loading</div>
+    <div v-show="loading" data-testid="loading">Loading</div>
     <FileList v-show="!loading"
       @selectFile="selectFile"
       :files="filteredFiles"

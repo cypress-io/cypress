@@ -5,6 +5,7 @@
       files" @click="$emit('selectFile', file)"
       class="cursor-pointer group children:h-40px children:py-8px last:py-0 flex gap-8px
     items-center text-16px last:border-none border-b-1 border-b-gray-50 leading-normal"
+      data-testid="file-list-row"
       :key="file?.id">
       <i-cy-document-blank_x16 class="icon-light-gray-50 icon-dark-gray-300 min-w-16px min-h-16px"/>
         <div class="h-full inline-flex whitespace-nowrap items-center overflow-hidden">
