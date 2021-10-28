@@ -8,3 +8,11 @@
 import SpecPageContainer from '../spec/SpecPageContainer.vue'
 
 </script>
+
+<route>
+  {
+    meta: {
+      header: false
+    }
+  }
+</route>
