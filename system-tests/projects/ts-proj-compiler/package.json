@@ -1,0 +1,8 @@
+{
+  "name": "ts-proj-compiler",
+  "version": "0.0.0",
+  "private": true,
+  "devDependencies": {
+    "typescript-cached-transpile": "^0.0.6"
+  }
+}

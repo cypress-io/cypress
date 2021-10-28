@@ -20,6 +20,7 @@ try {
   log('register TypeScript project %s fast? %s', project, fast)
 
   tsNode.register({
+    compiler: require.resolve('typescript'),
     project,
     fast,
   })

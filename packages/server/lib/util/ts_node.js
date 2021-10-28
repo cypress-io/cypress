@@ -1,3 +1,4 @@
+// @ts-check
 const debug = require('debug')('cypress:server:ts-node')
 const path = require('path')
 const tsnode = require('ts-node')
@@ -5,7 +6,9 @@ const resolve = require('./resolve')
 
 const getTsNodeOptions = (tsPath, registeredFile) => {
   return {
-    compiler: tsPath, // use the user's installed typescript
+    // use the user's installed typescript, or a custom TS_NODE_COMPILER
+    // if they've specified one
+    compiler: process.env.TS_NODE_COMPILER || tsPath,
     compilerOptions: {
       module: 'CommonJS',
     },
