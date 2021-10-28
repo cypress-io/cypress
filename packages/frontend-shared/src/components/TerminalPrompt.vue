@@ -6,7 +6,7 @@
       no-icon
     />
     <code class="text-gray-600 border border-gray-100 block leading-48px px-16px rounded">
-      <span class="text-purple-400">
+      <span class="text-purple-500">
         {{ projectName }}:~$
       </span>
       {{ command }}
