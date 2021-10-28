@@ -6,6 +6,7 @@ import { fs } from '../util/fs'
 import { requireAsync } from './require_async'
 import Debug from 'debug'
 import type { SettingsOptions } from '@packages/types'
+import { getProjectConfig } from '../cache'
 
 const debug = Debug('cypress:server:settings')
 
@@ -127,9 +128,14 @@ export function configFile (options: SettingsOptions = {}) {
   return options.configFile === false ? false : options.configFile
 }
 
-// TODO: Should we get it from the cache (?)
 export function id (projectRoot, options = {}) {
-  return read(projectRoot, options)
+  return getProjectConfig(projectRoot).then((config) => {
+    if (config) {
+      return Promise.resolve(config)
+    }
+
+    return read(projectRoot, options)
+  })
   .then((config) => config.projectId)
   .catch(() => {
     return null

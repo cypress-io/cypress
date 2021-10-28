@@ -7,6 +7,7 @@ import * as fs from 'fs-extra'
 import { insertValueInJSString, insertValuesInConfigFile } from './configFileUpdater'
 const projectRoot = process.cwd()
 
+// Test util - if needed outside the tests we can move it to utils
 const stripIndent = (strings: any, ...args: any) => {
   const parts = []
 

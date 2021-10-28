@@ -270,7 +270,7 @@ describe('init component tests script', () => {
 
     await initComponentTesting({ config: {}, cypressConfigPath, useYarn: true })
 
-    const injectedCode = await require(path.join(e2eTestOutputPath, 'cypress.config.ts'))
+    const injectedCode = require(path.join(e2eTestOutputPath, 'cypress.config.ts'))
 
     expect(JSON.stringify(injectedCode.default, null, 2)).to.equal(JSON.stringify(
       {

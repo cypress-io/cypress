@@ -1543,7 +1543,7 @@ module.exports = {
         recordMode.throwIfRecordParamsWithoutRecording(record, ciBuildId, parallel, group, tag)
 
         if (record) {
-          recordMode.throwIfNoProjectId(projectId, settings.configFile(options.configFile === undefined || options.configFile === null ? { configFile } : options)) //
+          recordMode.throwIfNoProjectId(projectId, settings.configFile(options.configFile === undefined || options.configFile === null ? { configFile } : options))
           recordMode.throwIfIncorrectCiBuildIdUsage(ciBuildId, parallel, group)
           recordMode.throwIfIndeterminateCiBuildId(ciBuildId, parallel, group)
         }

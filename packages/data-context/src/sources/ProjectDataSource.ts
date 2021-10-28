@@ -131,7 +131,7 @@ export class ProjectDataSource {
 
   private configLoader (options?: SettingsOptions) {
     return this.ctx.loader<string, FullConfig>((projectRoots) => {
-      return Promise.all(projectRoots.map((root) => this.ctx._apis.projectApi.getConfig(root, options))) // 12
+      return Promise.all(projectRoots.map((root) => this.ctx._apis.projectApi.getConfig(root, options)))
     })
   }
 

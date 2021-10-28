@@ -8,7 +8,9 @@ import * as fs from 'fs-extra'
 import { prettifyCode } from '../../utils'
 
 export async function insertValuesInConfigFile (filePath: string, obj: Record<string, any> = {}) {
-  return await insertValuesInJavaScript(filePath, obj)
+  await insertValuesInJavaScript(filePath, obj)
+
+  return true
 }
 
 export async function insertValuesInJavaScript (filePath: string, obj: Record<string, any>) {

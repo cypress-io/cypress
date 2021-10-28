@@ -61,13 +61,7 @@ async function injectAndShowCypressConfig (
     testFiles: '**/*.spec.{js,ts,jsx,tsx}',
   }
 
-  async function autoInjectCypressJson () {
-    await insertValuesInConfigFile(cypressJsonPath, configToInject)
-
-    return true
-  }
-
-  await injectOrShowConfigCode(autoInjectCypressJson, {
+  await injectOrShowConfigCode(() => insertValuesInConfigFile(cypressJsonPath, configToInject), {
     code: JSON.stringify(configToInject, null, 2),
     language: 'js',
     filePath: cypressJsonPath,

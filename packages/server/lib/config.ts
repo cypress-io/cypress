@@ -223,6 +223,9 @@ export function get (projectRoot, options: {configFile?: string | false } = { co
       return fullConfig
     })
   })
+  .catch(() => {
+    return setProjectConfig(projectRoot, null)
+  })
 }
 
 export function set (obj: Record<string, any> = {}) {
