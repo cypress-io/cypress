@@ -1,5 +1,5 @@
 import { useSnapshotStore } from '../spec/snapshot-store'
-import { MobxRunnerStore, useAutStore } from '../store'
+import { useAutStore } from '../store'
 
 export interface AutSnapshot {
   id?: number
@@ -38,9 +38,7 @@ export class IframeModel {
   }
 
   listen () {
-    // this.eventManager.on('run:start', this.MobX.action('run:start', this._beforeRun))
     this.eventManager.on('run:start', this._beforeRun)
-    // this.eventManager.on('run:end', this.MobX.action('run:end', this._afterRun))
     this.eventManager.on('run:end', this._afterRun)
 
     this.eventManager.on('viewport:changed', this._updateViewport)
@@ -51,9 +49,11 @@ export class IframeModel {
     }))
 
     const autStore = useAutStore()
+
     this.eventManager.on('url:changed', (url: string) => {
       autStore.updateUrl(url)
     })
+
     this.eventManager.on('page:loading', this._updateLoadingUrl)
 
     this.eventManager.on('show:snapshot', this.setSnapshots)
@@ -78,11 +78,13 @@ export class IframeModel {
 
   _afterRun = () => {
     const autStore = useAutStore()
+
     autStore.setIsRunning(false)
   }
 
   _updateViewport = ({ viewportWidth, viewportHeight }, cb?: () => void) => {
     const autStore = useAutStore()
+
     autStore.updateDimensions(viewportWidth, viewportHeight)
 
     if (cb) {
@@ -92,6 +94,7 @@ export class IframeModel {
 
   _updateLoadingUrl = (isLoadingUrl: boolean) => {
     const autStore = useAutStore()
+
     autStore.setIsLoadingUrl(isLoadingUrl)
   }
 
@@ -231,9 +234,10 @@ export class IframeModel {
 
   _studioOpenError () {
     const snapshotStore = useSnapshotStore()
+
     snapshotStore.setMessage(
       'Cannot show Snapshot while creating commands in Studio',
-      'warning'
+      'warning',
     )
   }
 
@@ -254,7 +258,7 @@ export class IframeModel {
       // TODO: use same attr for both runner and runner-ct states.
       // these refer to the same thing - the viewport dimensions.
       viewportWidth: autStore.viewportWidth,
-      viewportHeight: autStore.viewportHeight
+      viewportHeight: autStore.viewportHeight,
     }
   }
 
