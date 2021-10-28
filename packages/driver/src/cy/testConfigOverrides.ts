@@ -6,24 +6,20 @@ function mutateConfiguration (testConfigOverride, config, env) {
   delete testConfigOverride.browser
 
   const testConfigOverrideKeys = Object.keys(testConfigOverride)
-  let testEnvOverrideKeys
 
   // only clone the keys that were overridden by the test overrides
   const globalConfig = _.pick(config(), testConfigOverrideKeys)
+  const globalEnv = _.clone(env())
 
   const localConfigOverrides = config(testConfigOverride)
   const localConfigOverridesBackup = _.clone(localConfigOverrides)
 
-  let localTestEnv
-  let localTestEnvBackup
-  let globalEnv
-
   if (testConfigOverride.env) {
-    testEnvOverrideKeys = Object.keys(testConfigOverride.env)
-    globalEnv = _.pick(env(), testEnvOverrideKeys)
-    localTestEnv = env(testConfigOverride.env)
-    localTestEnvBackup = _.clone(localTestEnv)
+    env(testConfigOverride.env)
   }
+
+  const localTestEnv = env()
+  const localTestEnvBackup = _.clone(localTestEnv)
 
   // we restore config back to what it was before the test ran
   // UNLESS the user mutated config with Cypress.config, in which case
@@ -46,7 +42,7 @@ function mutateConfiguration (testConfigOverride, config, env) {
     // reset test config overrides
     config(globalConfig)
 
-    // reset test env overrides
+    env.reset()
     env(globalEnv)
   }
 

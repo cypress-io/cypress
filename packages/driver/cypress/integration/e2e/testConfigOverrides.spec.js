@@ -274,7 +274,7 @@ describe('per-test config', () => {
     })
   })
 
-  describe('in mulitple nested suites', () => {
+  describe('in multiple nested suites', () => {
     describe('config in suite', {
       foo: true,
     }, () => {
