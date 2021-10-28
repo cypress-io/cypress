@@ -255,17 +255,5 @@ https://on.cypress.io/guides/getting-started/installing-cypress#system-requireme
 ----------
 
 Platform: win32-ia32
-this.stdout {
-  data: [
-    'Error: The Cypress App could not be installed. Your machine does not meet the operating system requirements.\\n' +
-      '\\n' +
-      '\\x1B[34mhttps://on.cypress.io/guides/getting-started/installing-cypress#system-requirements\\x1B[39m\\n' +
-      '\\n' +
-      '----------\\n' +
-      '\\n' +
-      'Platform: win32-ia32\\n'
-  ],
-  toString: [Function: toString]
-}
 
 `
