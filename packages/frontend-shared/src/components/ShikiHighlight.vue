@@ -55,10 +55,10 @@ shikiWrapperClasses computed property.
       v-html="highlightedCode"
     />
     <CopyButton
-      v-if="!noCopyBotton"
+      v-if="copyButton"
       variant="outline"
       tabindex="-1"
-      class="absolute  bottom-8px right-8px"
+      class="absolute bottom-8px right-8px"
       :text="code"
       no-icon
     />
@@ -117,7 +117,7 @@ const props = withDefaults(defineProps<{
   inline?: boolean,
   wrap?: boolean,
   copyOnClick?: boolean,
-  noCopyBotton?: boolean,
+  copyButton?: boolean,
   class?: string | string[] | Record<string, any>
 }>(), {
   lineNumbers: false,

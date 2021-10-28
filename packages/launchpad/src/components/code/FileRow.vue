@@ -50,6 +50,7 @@
       :code="content"
       line-numbers
       copy-on-click
+      copy-button
     />
   </Collapsible>
 </template>
