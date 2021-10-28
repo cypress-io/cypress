@@ -37,6 +37,22 @@ describe('src/cy/commands/files', () => {
       })
     })
 
+    // https://github.com/cypress-io/cypress/issues/1558
+    it('passes explicit null encoding through to server and decodes response', () => {
+      Cypress.backend.resolves({
+        contents: Buffer.from('\n'),
+        filePath: '/path/to/foo.json',
+      })
+
+      cy.readFile('foo.json', null).then(() => {
+        expect(Cypress.backend).to.be.calledWith(
+          'read:file',
+          'foo.json',
+          { encoding: null },
+        )
+      }).should('eql', Buffer.from('\n'))
+    })
+
     it('sets the contents as the subject', () => {
       Cypress.backend.resolves(okResponse)
 
@@ -334,6 +350,23 @@ describe('src/cy/commands/files', () => {
           'contents',
           {
             encoding: 'ascii',
+            flag: 'w',
+          },
+        )
+      })
+    })
+
+    // https://github.com/cypress-io/cypress/issues/1558
+    it('explicit null encoding is sent to server as Buffer', () => {
+      Cypress.backend.resolves(okResponse)
+
+      cy.writeFile('foo.txt', Buffer.from([0, 0, 54, 255]), null).then(() => {
+        expect(Cypress.backend).to.be.calledWith(
+          'write:file',
+          'foo.txt',
+          Buffer.from([0, 0, 54, 255]),
+          {
+            encoding: null,
             flag: 'w',
           },
         )

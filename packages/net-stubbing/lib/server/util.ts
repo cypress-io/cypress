@@ -120,7 +120,7 @@ export async function setResponseFromFixture (getFixtureFn: GetFixtureFn, static
     return
   }
 
-  const data = await getFixtureFn(fixture.filePath, { encoding: fixture.encoding || null })
+  const data = await getFixtureFn(fixture.filePath, { encoding: fixture.encoding })
 
   const { headers } = staticResponse
 
