@@ -1,5 +1,5 @@
 <template>
-  <div class="relativ mx-24px">
+  <div class="relative mx-24px h-full">
     <RunsConnect
       v-if="!query.fetching.value && (!activeProject?.projectId || !query.data.value?.cloudViewer?.id)"
       :is-logged-in="!!query.data.value?.cloudViewer?.id"

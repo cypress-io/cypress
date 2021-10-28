@@ -1,24 +1,22 @@
 <template>
-  <div>
-    <Button
-      size="md"
-      :variant="variant"
-      @click="copyToClipboard"
+  <Button
+    size="md"
+    :variant="variant"
+    @click="copyToClipboard"
+  >
+    <template
+      v-if="!noIcon"
+      #prefix
     >
-      <template
-        v-if="!noIcon"
-        #prefix
-      >
-        <i-cy-copy-clipboard_x16
-          class="icon-dark-indigo-500 w-16px h-16px"
-        />
-      </template>
-      <TransitionQuickFade mode="out-in">
-        <span v-if="!copied">{{ t('clipboard.copy') }}</span>
-        <span v-else>{{ t('clipboard.copied') }}!</span>
-      </TransitionQuickFade>
-    </Button>
-  </div>
+      <i-cy-copy-clipboard_x16
+        class="icon-dark-indigo-500 w-16px h-16px"
+      />
+    </template>
+    <TransitionQuickFade mode="out-in">
+      <span v-if="!copied">{{ t('clipboard.copy') }}</span>
+      <span v-else>{{ t('clipboard.copied') }}!</span>
+    </TransitionQuickFade>
+  </Button>
 </template>
 
 <script setup lang="ts">

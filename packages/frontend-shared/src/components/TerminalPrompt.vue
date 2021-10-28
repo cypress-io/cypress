@@ -1,11 +1,11 @@
 <template>
   <div class="relative">
     <CopyButton
-      class="absolute right-8px top-8px"
+      class="absolute right-9px top-9px h-24px px-8px"
       :text="command"
       no-icon
     />
-    <code class="text-gray-600 border border-gray-100 block leading-48px px-16px rounded">
+    <code class="text-gray-700 font-light border border-gray-100 block leading-40px px-16px rounded">
       <span class="text-purple-500">
         {{ projectName }}:~$
       </span>
