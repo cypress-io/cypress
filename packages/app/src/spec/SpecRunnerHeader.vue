@@ -1,14 +1,23 @@
 <template>
   <div class="flex text-xs">
-    <button :disabled="isDisabled">
+    <button
+      data-cy="header-studio"
+      :disabled="isDisabled"
+    >
       Studio
     </button>
 
-    <button :disabled="isDisabled">
+    <button
+      data-cy="header-selector"
+      :disabled="isDisabled"
+    >
       Selector
     </button>
 
-    <template v-if="props.gql.activeTestingType">
+    <div
+      v-if="props.gql.activeTestingType === 'e2e'"
+      data-cy="aut-url"
+    >
       <div
         class="rounded-md flex shadow-md mx-2 url px-4"
         :class="{
@@ -22,10 +31,11 @@
       </div>
 
       <div>Loading URL: {{ autStore.isLoadingUrl }}</div>
-    </template>
+    </div>
 
     <Select
       v-model="browser"
+      data-cy="select-browser"
       :options="browsers"
       item-value="name"
     />
