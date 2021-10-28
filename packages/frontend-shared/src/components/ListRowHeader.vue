@@ -41,7 +41,7 @@
 import type { FunctionalComponent, SVGAttributes } from 'vue'
 
 const props = defineProps<{
-  class?: string
+  class?: string | string[] | Record<string, any>
   description?: string
   icon?: FunctionalComponent<SVGAttributes>
 }>()
