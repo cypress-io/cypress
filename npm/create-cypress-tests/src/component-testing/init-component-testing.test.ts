@@ -272,7 +272,7 @@ describe('init component tests script', () => {
 
     const injectedCode = await require(path.join(e2eTestOutputPath, 'cypress.config.ts'))
 
-    expect(injectedCode.default).to.equal(JSON.stringify(
+    expect(JSON.stringify(injectedCode.default, null, 2)).to.equal(JSON.stringify(
       {
         componentFolder: 'cypress/component',
         testFiles: '**/*.spec.{js,ts,jsx,tsx}',

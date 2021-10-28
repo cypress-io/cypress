@@ -26,7 +26,8 @@
     "fs-extra": "^9.0.1",
     "glob": "^7.1.6",
     "inquirer": "7.3.3",
-    "ora": "^5.1.0"
+    "ora": "^5.1.0",
+    "recast": "0.20.4"
   },
   "devDependencies": {
     "@types/babel__core": "^7.1.2",

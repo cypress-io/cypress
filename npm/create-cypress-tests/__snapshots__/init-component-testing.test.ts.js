@@ -1,5 +1,9 @@
 exports['injects guessed next.js template cypress.config.ts'] = `
-export default {}
+export default {
+  componentFolder: "src",
+  testFiles: "**/*.spec.{js,ts,jsx,tsx}"
+};
+
 `
 
 exports['injects guessed next.js template plugins/index.js'] = `
@@ -16,7 +20,11 @@ module.exports = (on, config) => {
 `
 
 exports['Injected overridden webpack template cypress.config.ts'] = `
-export default {}
+export default {
+  componentFolder: "cypress/component",
+  testFiles: "**/*.spec.{js,ts,jsx,tsx}"
+};
+
 `
 
 exports['Injected overridden webpack template plugins/index.js'] = `

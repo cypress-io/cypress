@@ -8,6 +8,7 @@ import { guessTemplate } from './templates/guessTemplate'
 import { installFrameworkAdapter } from './installFrameworkAdapter'
 import { injectPluginsCode, getPluginsSourceExample } from './babel/babelTransform'
 import { installDependency } from '../utils'
+import { insertValuesInConfigFile } from './config-file-updater/configFileUpdater'
 
 async function injectOrShowConfigCode (injectFn: () => Promise<boolean>, {
   code,
@@ -51,7 +52,7 @@ async function injectOrShowConfigCode (injectFn: () => Promise<boolean>, {
   injected ? printSuccess() : printFailure()
 }
 
-async function injectAndShowCypressJsonConfig (
+async function injectAndShowCypressConfig (
   cypressJsonPath: string,
   componentFolder: string,
 ) {
@@ -61,12 +62,7 @@ async function injectAndShowCypressJsonConfig (
   }
 
   async function autoInjectCypressJson () {
-    const currentConfig = JSON.parse(await fs.readFile(cypressJsonPath, { encoding: 'utf-8' }))
-
-    await fs.writeFile(cypressJsonPath, JSON.stringify({
-      ...currentConfig,
-      ...configToInject,
-    }, null, 2))
+    await insertValuesInConfigFile(cypressJsonPath, configToInject)
 
     return true
   }
@@ -171,7 +167,7 @@ export async function initComponentTesting<T> ({ config, useYarn, cypressConfigP
   console.log(`Let's setup everything for component testing with ${chalk.cyan(chosenTemplateName)}:`)
   console.log()
 
-  await injectAndShowCypressJsonConfig(cypressConfigPath, componentFolder)
+  await injectAndShowCypressConfig(cypressConfigPath, componentFolder)
   await injectAndShowPluginConfig(chosenTemplate, {
     templatePayload,
     pluginsFilePath,
