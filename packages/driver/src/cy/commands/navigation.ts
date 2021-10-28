@@ -792,9 +792,9 @@ export default (Commands, Cypress, cy, state, config) => {
               // when using the visit the document referrer should be set to an empty string
               if (config('modifyObstructiveCode')) {
                 Object.defineProperty(contentWindow.document, 'referrer', {
-                  get () {
-                    return ''
-                  },
+                  value: '',
+                  enumerable: true,
+                  configurable: true,
                 })
               }
 
