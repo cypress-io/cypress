@@ -1,5 +1,5 @@
 <template>
-  <div class="relative m-24px h-full">
+  <div class="relative p-24px h-full overflow-y-scroll">
     <transition
       v-if="query.fetching.value || activeProject?.cloudProject?.runs?.nodes"
       name="fade"
