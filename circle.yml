@@ -733,7 +733,7 @@ commands:
             fi
           working_directory: /tmp/<<parameters.repo>>
       - when:
-          condition: 
+          condition:
             - not: <<parameters.checkout_branch>>
           steps:
           - run:
