@@ -1,4 +1,5 @@
 import React from 'react'
+import 'regenerator-runtime/runtime'
 import _ from 'lodash'
 import ReactDOM from 'react-dom'
 import $Cypress from '@packages/driver'
@@ -59,7 +60,6 @@ const UnifiedRunner = {
 window.UnifiedRunner = UnifiedRunner
 
 /** This is the OG runner-ct */
-import 'regenerator-runtime/runtime'
 import type { FoundSpec } from '@packages/types/src/spec'
 
 import App from './app/RunnerCt'
