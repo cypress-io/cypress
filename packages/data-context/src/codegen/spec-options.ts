@@ -1,6 +1,5 @@
 import type { DataContext } from '../DataContext'
 import type { ParsedPath } from 'path'
-import endent from 'endent'
 import { camelCase, capitalize } from 'lodash'
 import type { CodeGenType } from '@packages/graphql/src/gen/nxs.gen'
 import type { CodeGenFramework } from '@packages/types'
@@ -12,7 +11,7 @@ interface CodeGenOptions {
   specFileExtension: string
 }
 
-export class SpecGenerator {
+export class SpecOptions {
   private parsedPath: ParsedPath;
   private projectRoot: string;
 
@@ -26,20 +25,25 @@ export class SpecGenerator {
     this.projectRoot = this.ctx.activeProject?.projectRoot as string
   }
 
-  async generateSpec () {
+  getCodeGenOptions () {
     if (this.options.codeGenType === 'component') {
-      return this.generateSpecFromComponent()
+      return this.getComponentCodeGenOptions()
     }
 
-    if (this.options.codeGenType === 'integration') {
-      return this.generateIntegrationSpec()
+    if (this.options.codeGenType === 'story') {
+      return this.getStoryCodeGenOptions()
     }
 
-    return this.generateSpecFromStory()
+    return this.getIntegrationCodeGenOptions()
   }
 
-  // ------------Component Generation---------------
-  private async generateSpecFromComponent () {
+  private getIntegrationCodeGenOptions () {
+    return {
+      fileName: this.getFilename(this.parsedPath.ext),
+    }
+  }
+
+  private async getComponentCodeGenOptions () {
     const frontendFramework = await this.getFrontendFramework()
 
     if (!frontendFramework) {
@@ -49,43 +53,25 @@ export class SpecGenerator {
     const framework = frontendFramework.codeGenFramework
     const frameworkOptions = await this.getFrameworkComponentOptions(framework)
 
-    const specContent = endent`
-      import { mount } from "@cypress/${framework}"
-      import ${frameworkOptions.componentName} from "./${frameworkOptions.componentImport}"
-      
-      describe('<${frameworkOptions.componentName} />', () => {
-        it('renders', () => {
-          ${frameworkOptions.body}
-        })
-      })
-    `
-    const specAbsolute = this.getFilename(frameworkOptions.fileExtension)
-
-    return { specContent, specAbsolute }
+    return frameworkOptions
   }
 
   private async getFrameworkComponentOptions (framework: CodeGenFramework) {
     const componentName = capitalize(camelCase(this.parsedPath.name))
     const frameworkOptions = {
       react: {
+        imports: ['import { mount } from "@cypress/react"', `import ${componentName} from "./${this.parsedPath.name}"`],
         componentName,
-        componentImport: this.parsedPath.name,
-        mountImport: '@cypress/react',
-        body: endent`
-          see: https://reactjs.org/docs/test-utils.html
-          mount(<${componentName} />)
-        `,
-        fileExtension: this.parsedPath.ext,
+        docsLink: '// see: https://reactjs.org/docs/test-utils.html',
+        mount: `mount(<${componentName} />)`,
+        fileName: this.getFilename(this.parsedPath.ext),
       },
       vue: {
+        imports: ['import { mount } from "@cypress/vue"', `import ${componentName} from "./${this.parsedPath.base}"`],
         componentName,
-        componentImport: this.parsedPath.base,
-        mountImport: '@cypress/vue',
-        body: endent`
-          // see: https://vue-test-utils.vuejs.org/
-          mount(${componentName}, { props: {} })
-        `,
-        fileExtension: await this.getVueExtenstion(),
+        docsLink: '// see: https://reactjs.org/docs/test-utils.html',
+        mount: `mount(${componentName}, { props: {} })`,
+        fileName: this.getFilename(await this.getVueExtenstion()),
       },
     } as const
 
@@ -103,10 +89,8 @@ export class SpecGenerator {
       return '.js'
     }
   }
-  // ------------------------------------------------
 
-  // ---------------Story Generation-----------------
-  private async generateSpecFromStory () {
+  private async getStoryCodeGenOptions () {
     const frontendFramework = await this.getFrontendFramework()
 
     if (!frontendFramework) {
@@ -127,35 +111,12 @@ export class SpecGenerator {
       csf,
     )
 
-    let specContent = endent`
-      ${frameworkOptions.imports.join('\n')}
-
-      const composedStories = composeStories(stories)
-
-      describe('${csf.meta.component || csf.meta.title}', () => {
-        ${csf.stories
-    .map((story) => {
-      const storyName = story.name.replace(/\s+/, '')
-
-      return endent`
-            it('should render ${storyName}', () => {
-              const { ${storyName} } = composedStories
-              ${frameworkOptions.mount(storyName)}
-            })
-          `
-    })
-    .join('\n\n')}
-      })
-    `
-
-    // Only want first story to render
-    if (csf.stories.length > 1) {
-      specContent = specContent.replace('it(', 'it.only(')
+    const options = {
+      ...frameworkOptions,
+      title: csf.meta.component || csf.meta.title,
     }
 
-    const specAbsolute = this.getFilename(this.parsedPath.ext)
-
-    return { specContent, specAbsolute }
+    return options
   }
 
   private getFrameworkStoryOptions (framework: CodeGenFramework, csf: CsfFile) {
@@ -167,7 +128,15 @@ export class SpecGenerator {
           'import { composeStories } from "@storybook/testing-react"',
           `import * as stories from "./${this.parsedPath.name}"`,
         ],
-        mount: (StoryName: string) => `mount(<${StoryName} />)`,
+        stories: csf.stories.map((story) => {
+          const component = story.name.replace(/\s+/, '')
+
+          return {
+            component,
+            mount: `mount(<${component} />)`,
+          }
+        }),
+        fileName: this.getFilename(this.parsedPath.ext),
       },
       vue: {
         imports: [
@@ -175,28 +144,21 @@ export class SpecGenerator {
           'import { composeStories } from "@storybook/testing-vue3"',
           `import * as stories from "./${this.parsedPath.name}"`,
         ],
-        mount: (StoryName: string) => `mount(${StoryName}())`,
+        stories: csf.stories.map((story) => {
+          const component = story.name.replace(/\s+/, '')
+
+          return {
+            component,
+            mount: `mount(${component}())`,
+          }
+        }),
+        storyName: this.parsedPath.name,
+        fileName: this.getFilename(this.parsedPath.ext),
       },
     } as const
 
     return frameworkOptions[framework]
   }
-  // ------------------------------------------------
-
-  // ------------Intergration Generation-------------
-  private generateIntegrationSpec () {
-    const specContent = endent`
-      describe('${this.parsedPath.base}', () => {
-        it('should visit', () => {
-          cy.visit('/')
-        })
-      })
-    `
-    const specAbsolute = this.getFilename(this.parsedPath.ext)
-
-    return { specContent, specAbsolute }
-  }
-  // ------------------------------------------------
 
   private getFilename (ext: string) {
     const { base, dir, name } = this.parsedPath
@@ -219,7 +181,7 @@ export class SpecGenerator {
       )
     }
 
-    return fileToTry
+    return this.ctx.path.parse(fileToTry).base
   }
 
   private fileExists (absolute: string) {
