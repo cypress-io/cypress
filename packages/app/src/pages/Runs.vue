@@ -1,5 +1,5 @@
 <template>
-  <div class="relative mx-24px h-full">
+  <div class="relative m-24px h-full">
     <RunsConnect
       v-if="!query.fetching.value && (!activeProject?.projectId || !query.data.value?.cloudViewer?.id)"
       :is-logged-in="!!query.data.value?.cloudViewer?.id"
@@ -52,9 +52,12 @@ query Runs {
         }
       }
     }
+    isAuthBrowserOpened
   }
   cloudViewer {
     id
+    email
+    fullName
   }
 }`
 

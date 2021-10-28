@@ -1,6 +1,5 @@
 <template>
   <div
-    class="overflow-y-hidden absolute left-24px right-24px"
     data-cy="runs-loader"
   >
     <div

@@ -40,7 +40,7 @@
 
 <script lang="ts" setup>
 import SidebarNavigation from '../navigation/SidebarNavigation.vue'
-import HeaderBar from '@cy/gql-components//HeaderBar.vue'
+import HeaderBar from '@cy/gql-components/HeaderBar.vue'
 import { useRoute } from 'vue-router'
 import { computed } from 'vue'
 

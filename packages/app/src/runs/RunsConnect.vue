@@ -21,26 +21,44 @@
       class="mx-auto mt-40px"
       :prefix-icon="isLoggedIn ? ChainIcon : UserIcon"
       prefix-icon-class="icon-dark-white icon-light-transparent"
+      @click="openConnection"
     >
       {{ isLoggedIn ? t('runs.connect.buttonProject') : t('runs.connect.buttonUser') }}
     </Button>
+    <LoginModal
+      v-model="isLoginOpen"
+      :gql="gql"
+    />
   </div>
 </template>
 
 <script lang="ts" setup>
+import { ref } from 'vue'
 import SmartIcon from '~icons/cy/illustration-gear_x120.svg'
 import DebugIcon from '~icons/cy/illustration-debug_x120.svg'
 import ChartIcon from '~icons/cy/illustration-chart_x120.svg'
 import UserIcon from '~icons/cy/user-outline_x16.svg'
 import ChainIcon from '~icons/cy/chain-link_x16.svg'
 import Button from '@cy/components/Button.vue'
+import LoginModal, { LoginModalFragment } from '@cy/gql-components/topnav/LoginModal.vue'
 import { useI18n } from '@cy/i18n'
 
 const { t } = useI18n()
 
-defineProps<{
+const props = defineProps<{
   isLoggedIn: boolean,
+  gql: LoginModalFragment,
 }>()
+
+const isLoginOpen = ref(false)
+
+function openConnection () {
+  if (props.isLoggedIn) {
+    // connect a product
+  } else {
+    isLoginOpen.value = true
+  }
+}
 
 const notions = [
   {
