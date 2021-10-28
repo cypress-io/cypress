@@ -14,7 +14,7 @@ import * as settings from './util/settings'
 import Debug from 'debug'
 import pathHelpers from './util/path_helpers'
 import findSystemNode from './util/find_system_node'
-import { setProjectConfig, getProjectConfig } from './cache'
+import { setProjectConfig } from './cache'
 
 export interface ConfigSettingsConfig {
   testingType: TestingType
@@ -205,27 +205,22 @@ export type FullConfig =
   }
 
 export function get (projectRoot, options: {configFile?: string | false } = { configFile: undefined }): Promise<FullConfig> {
-  return getProjectConfig(projectRoot)
-  .then((config) => {
-    if (config) {
-      return Promise.resolve([config.settings, config.envFile])
-    }
-
-    return Promise.all([
-      settings.read(projectRoot, options).then(validateFile(options.configFile ?? 'cypress.config.{ts|js}')),
-      settings.readEnv(projectRoot).then(validateFile('cypress.env.json')),
-    ])
-  })
+  return Promise.all([
+    settings.read(projectRoot, options).then(validateFile(options.configFile ?? 'cypress.config.{ts|js}')),
+    settings.readEnv(projectRoot).then(validateFile('cypress.env.json')),
+  ])
   .spread((settings, envFile) => {
-    return setProjectConfig(projectRoot, { settings, envFile })
-  })
-  .then((config) => {
     return set({
       projectName: getNameFromRoot(projectRoot),
       projectRoot,
-      config: _.cloneDeep(config.settings),
-      envFile: _.cloneDeep(config.envFile),
+      config: _.cloneDeep(settings),
+      envFile: _.cloneDeep(envFile),
       options,
+    })
+  })
+  .then((fullConfig) => {
+    return setProjectConfig(projectRoot, fullConfig).then(() => {
+      return fullConfig
     })
   })
   .catch((e) => {

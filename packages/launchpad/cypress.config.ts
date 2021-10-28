@@ -1,6 +1,4 @@
-import { defineConfig } from 'cypress'
-
-export default defineConfig({
+export default {
   'projectId': 'sehy69',
   'viewportWidth': 800,
   'viewportHeight': 850,
@@ -25,4 +23,4 @@ export default defineConfig({
     'integrationFolder': 'cypress/e2e/integration',
     'pluginsFile': 'cypress/e2e/plugins/index.ts',
   },
-})
+}

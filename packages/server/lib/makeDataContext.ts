@@ -57,6 +57,9 @@ export function makeDataContext (options: MakeDataContextOptions) {
       findSpecs (payload: FindSpecs) {
         return specsUtil.findSpecs(payload)
       },
+      getProjectConfig (projectRoot: string) {
+        return cache.getProjectConfig(projectRoot)
+      },
       clearLatestProjectsCache () {
         return cache.removeLatestProjects()
       },

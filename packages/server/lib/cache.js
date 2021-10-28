@@ -149,7 +149,7 @@ module.exports = {
   // having it on the cache, will help us preventing to read the file on a cp
   // to get the projectId
   setProjectConfig (projectRoot, config) {
-    return fileUtil.set({ PROJECTS_CONFIG: { [projectRoot]: config } }).return(config)
+    return fileUtil.set({ PROJECTS_CONFIG: { [projectRoot]: config } })
   },
 
   getProjectConfig (projectRoot) {
