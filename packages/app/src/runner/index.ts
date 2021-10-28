@@ -92,13 +92,6 @@ function setupRunner () {
     autStore.viewportUpdateCallback?.()
   }, { flush: 'post' })
 
-  window.UnifiedRunner.MobX.reaction(
-    () => [mobxRunnerStore.height, mobxRunnerStore.width],
-    () => {
-      mobxRunnerStore.viewportUpdateCallback?.()
-    },
-  )
-
   _autIframeModel = new AutIframe(
     'Test Project',
     window.UnifiedRunner.eventManager,
