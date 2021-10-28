@@ -1,13 +1,13 @@
 <template>
   <div
     data-cy="no-runs"
-    class="flex flex-col items-center leading-24px max-w-688px mx-auto"
+    class="h-full flex flex-col justify-center items-center leading-24px max-w-688px mx-auto"
   >
     <i-cy-dashboard-checkmark_x48 class="h-48px w-48px" />
     <h2 class="text-18px mt-32px mb-24px text-gray-900">
       {{ t("runs.empty.title") }}
     </h2>
-    <ol class="list-decimal w-full text-gray-600">
+    <ol class="list-decimal w-full text-gray-600 ml-16px">
       <li>
         <p class="mb-8px">
           <i18n-t keypath="runs.empty.step1">
@@ -15,7 +15,7 @@
           </i18n-t>
         </p>
         <ShikiHighlight
-          class="border border-gray-100"
+          class="rounded border border-gray-100 -ml-16px"
           :code="projectIdCode"
           lang="js"
           line-numbers
@@ -28,6 +28,7 @@
           </i18n-t>
         </p>
         <TerminalPrompt
+          class="-ml-16px"
           command="git add cypress.config.js"
           :project-name="projectName"
         />
@@ -37,6 +38,7 @@
           {{ t("runs.empty.step3") }}
         </p>
         <TerminalPrompt
+          class="-ml-16px"
           command="cypress run --record --key <record-key>"
           :project-name="projectName"
         />
