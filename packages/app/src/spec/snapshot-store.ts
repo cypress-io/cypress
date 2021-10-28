@@ -2,12 +2,12 @@ import { defineStore } from 'pinia'
 import type { AutSnapshot } from '../runner/iframe-model'
 import { getAutIframeModel } from '../runner'
 
-export type SnapshotMessageType = 'info' | 'warning'
+export type SnapshotMessageType = 'info' | 'warning' | 'pinned'
 
 interface SnapshotStoreState {
   messageTitle?: string
   messageDescription?: 'pinned' | string
-  messageType?: 'info' | 'warning'
+  messageType?: SnapshotMessageType
   snapshotProps?: AutSnapshot
   isSnapshotPinned: boolean
   snapshot?: {
