@@ -1,3 +1,4 @@
+// https://github.com/cypress-io/cypress/issues/4295
 it('rewrites document.referrer on the AUT to be empty string on visit', () => {
   cy.visit('http://localhost:3500/fixtures/generic.html')
 
