@@ -26,6 +26,7 @@ interface SpecContentProps {
 
 interface SpecContentWrapperProps {
   state: State
+  eventManager: EventManager
   onSplitPaneChange: (newSize: number) => void
 }
 
@@ -35,7 +36,7 @@ export const SpecContent = namedObserver('SpecContent', (props: SpecContentProps
   }
 
   return (
-    <SpecContentWrapper state={props.state} onSplitPaneChange={props.state.updateReporterWidth}>
+    <SpecContentWrapper state={props.state} eventManager={props.eventManager} onSplitPaneChange={props.state.updateReporterWidth}>
       <ReporterContainer
         state={props.state}
         config={props.config}
