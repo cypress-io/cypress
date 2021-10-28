@@ -633,7 +633,7 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         We found an invalid value in the file: ${chalk.blue(filePath)}
 
         ${chalk.yellow(arg2)}`
-    // happens when there is an invalid config value returnes from the
+    // happens when there is an invalid config value returns from the
     // project's plugins file like "cypress/plugins.index.js"
     case 'PLUGINS_CONFIG_VALIDATION_ERROR':
       filePath = `\`${arg1}\``

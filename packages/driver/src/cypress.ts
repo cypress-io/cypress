@@ -117,7 +117,7 @@ class $Cypress {
     // normalize this into boolean
     config.isTextTerminal = !!config.isTextTerminal
 
-    // we asumme we're interactive based on whether or
+    // we assume we're interactive based on whether or
     // not we're in a text terminal, but we keep this
     // as a separate property so we can potentially
     // slice up the behavior

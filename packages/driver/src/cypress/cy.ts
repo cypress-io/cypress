@@ -3,11 +3,15 @@
 /* eslint-disable prefer-rest-params */
 import _ from 'lodash'
 import Promise from 'bluebird'
+import debugFn from 'debug'
+import { registerFetch } from 'unfetch'
 
 import $dom from '../dom'
 import $utils from './utils'
 import $errUtils from './error_utils'
 import $stackUtils from './stack_utils'
+import $sourceMapUtils from './source_map_utils'
+
 import $Chai from '../cy/chai'
 import $Xhrs from '../cy/xhrs'
 import $jQuery from '../cy/jquery'
@@ -31,8 +35,6 @@ import { $Command } from './command'
 import $CommandQueue from './command_queue'
 import $VideoRecorder from '../cy/video-recorder'
 import $TestConfigOverrides from '../cy/testConfigOverrides'
-import debugFn from 'debug'
-import { registerFetch } from 'unfetch'
 
 const debugErrors = debugFn('cypress:driver:errors')
 
@@ -541,7 +543,7 @@ export default {
     _.extend(cy, {
       id: _.uniqueId('cy'),
 
-      // synchrounous querying
+      // synchronous querying
       $$,
 
       state,
@@ -702,6 +704,7 @@ export default {
         return doneEarly()
       },
 
+      // reset is called before each test
       reset (attrs, test) {
         const s = state()
 
@@ -722,7 +725,25 @@ export default {
         queue.reset()
         queue.clear()
         timers.reset()
-        testConfigOverrides.restoreAndSetTestConfigOverrides(test, Cypress.config, Cypress.env)
+
+        try {
+          testConfigOverrides.restoreAndSetTestConfigOverrides(test, Cypress.config, Cypress.env)
+        } catch (e) {
+          e.CaptureStackTrace = false
+          const err = $errUtils.errByPath('config.invalid_test_override', {
+            error: e,
+          })
+
+          err.name = 'ConfigOverrideError'
+
+          const { fileUrl, originalFile } = attrs.invocationDetails
+          const src = $sourceMapUtils.getSourceContents(fileUrl, originalFile)
+
+          err.codeFrame = $stackUtils.getCodeFrameFromSource(src, attrs.invocationDetails)
+          // the stack trace is internal to Cypress and doesn't provide the user with useful information
+          err.stack = undefined
+          $errUtils.throwErr(err)
+        }
 
         return cy.removeAllListeners()
       },

@@ -1,6 +1,5 @@
 const Cookie = require('js-cookie')
 const { stripIndent } = require('common-tags')
-const helpers = require('../../support/helpers')
 
 const { _, Promise, $ } = Cypress
 
@@ -1971,12 +1970,10 @@ describe('src/cy/commands/navigation', () => {
     })
 
     describe('errors', () => {
-      helpers.registerCypressConfigBackupRestore()
-
       beforeEach(function () {
         this.logs = []
 
-        cy.on('log:added', (attrs, log) => {
+        cy.on('log:added', (_attrs, log) => {
           this.lastLog = log
           this.logs.push(log)
         })
@@ -1984,7 +1981,7 @@ describe('src/cy/commands/navigation', () => {
         return null
       })
 
-      it('can time out', function (done) {
+      it('can time out', { 'pageLoadTimeout': 50 }, function (done) {
         let thenCalled = false
 
         cy.on('fail', (err) => {
@@ -2010,8 +2007,6 @@ describe('src/cy/commands/navigation', () => {
         cy
         .visit('/fixtures/jquery.html')
         .window().then((win) => {
-          Cypress.config('pageLoadTimeout', 50)
-
           const $a = win.$('<a href=\'/timeout?ms=500\'>jquery</a>')
           .appendTo(win.document.body)
 
@@ -2086,8 +2081,7 @@ describe('src/cy/commands/navigation', () => {
           }
         })
 
-        cy
-        .visit('/fixtures/jquery.html')
+        cy.visit('/fixtures/jquery.html')
 
         // make get timeout after only 200ms
         .get('#does-not-exist', { timeout: 200 }).should('have.class', 'foo')

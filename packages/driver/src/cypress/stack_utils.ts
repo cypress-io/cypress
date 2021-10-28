@@ -383,6 +383,7 @@ const normalizedUserInvocationStack = (userInvocationStack) => {
 export default {
   replacedStack,
   getCodeFrame,
+  getCodeFrameFromSource,
   getSourceStack,
   getStackLines,
   getSourceDetailsForFirstLine,

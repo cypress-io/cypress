@@ -17,6 +17,7 @@ const mochaCtxKeysRe = /^(_runnable|test)$/
 const betweenQuotesRe = /\"(.+?)\"/
 
 const HOOKS = 'beforeAll beforeEach afterEach afterAll'.split(' ')
+const TEST_BEFORE_RUN_ASYNC_EVENT = 'runner:test:before:run:async'
 const TEST_BEFORE_RUN_EVENT = 'runner:test:before:run'
 const TEST_AFTER_RUN_EVENT = 'runner:test:after:run'
 
@@ -48,8 +49,8 @@ const fired = (event, runnable) => {
 
 const testBeforeRunAsync = (test, Cypress) => {
   return Promise.try(() => {
-    if (!fired('runner:test:before:run:async', test)) {
-      return fire('runner:test:before:run:async', test, Cypress)
+    if (!fired(TEST_BEFORE_RUN_ASYNC_EVENT, test)) {
+      return fire(TEST_BEFORE_RUN_ASYNC_EVENT, test, Cypress)
     }
   })
 }
@@ -1394,7 +1395,7 @@ export default {
           test.wallClockStartedAt = wallClockStartedAt
         }
 
-        // if this isnt a hook, then the name is 'test'
+        // if this isn't a hook, then the name is 'test'
         const hookName = runnable.type === 'hook' ? getHookName(runnable) : 'test'
 
         // set hook id to hook id or test id

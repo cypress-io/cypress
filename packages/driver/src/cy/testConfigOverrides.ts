@@ -1,21 +1,29 @@
 import _ from 'lodash'
 
+// See Test Config Overrides in ../../../../cli/types/cypress.d.ts
+
 function mutateConfiguration (testConfigOverride, config, env) {
-  const globalConfig = _.clone(config())
-  const globalEnv = _.clone(env())
-
   delete testConfigOverride.browser
-  config(testConfigOverride)
 
-  const localTestConfig = config()
-  const localTestConfigBackup = _.clone(localTestConfig)
+  const testConfigOverrideKeys = Object.keys(testConfigOverride)
+  let testEnvOverrideKeys
+
+  // only clone the keys that were overridden by the test overrides
+  const globalConfig = _.pick(config(), testConfigOverrideKeys)
+
+  const localConfigOverrides = config(testConfigOverride)
+  const localConfigOverridesBackup = _.clone(localConfigOverrides)
+
+  let localTestEnv
+  let localTestEnvBackup
+  let globalEnv
 
   if (testConfigOverride.env) {
-    env(testConfigOverride.env)
+    testEnvOverrideKeys = Object.keys(testConfigOverride.env)
+    globalEnv = _.pick(env(), testEnvOverrideKeys)
+    localTestEnv = env(testConfigOverride.env)
+    localTestEnvBackup = _.clone(localTestEnv)
   }
-
-  const localTestEnv = env()
-  const localTestEnvBackup = _.clone(localTestEnv)
 
   // we restore config back to what it was before the test ran
   // UNLESS the user mutated config with Cypress.config, in which case
@@ -23,8 +31,8 @@ function mutateConfiguration (testConfigOverride, config, env) {
   // TODO: (NEXT_BREAKING) always restore configuration
   //   do not allow global mutations inside test
   const restoreConfigFn = function () {
-    _.each(localTestConfig, (val, key) => {
-      if (localTestConfigBackup[key] !== val) {
+    _.each(localConfigOverrides, (val, key) => {
+      if (localConfigOverridesBackup[key] !== val) {
         globalConfig[key] = val
       }
     })
@@ -35,9 +43,10 @@ function mutateConfiguration (testConfigOverride, config, env) {
       }
     })
 
-    config.reset()
+    // reset test config overrides
     config(globalConfig)
-    env.reset()
+
+    // reset test env overrides
     env(globalEnv)
   }
 
@@ -64,6 +73,7 @@ export function getResolvedTestConfigOverride (test) {
 
 class TestConfigOverride {
   private restoreTestConfigFn: Nullable<() => void> = null
+
   restoreAndSetTestConfigOverrides (test, config, env) {
     if (this.restoreTestConfigFn) this.restoreTestConfigFn()
 

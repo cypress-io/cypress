@@ -245,6 +245,17 @@ export default {
     },
   },
 
+  config: {
+    invalid_argument: {
+      message: `Setting the config ${cmd('Cypress.config')} failed with the following validation error:\n\n{{error}}`,
+      docsUrl: 'https://on.cypress.io/config',
+    },
+    'invalid_test_override': {
+      message: `The config overrides passed to your test has the following validation error:\n{{error}}`,
+      docsUrl: 'https://on.cypress.io/config',
+    },
+  },
+
   contains: {
     empty_string: {
       message: `${cmd('contains')} cannot be passed an empty string.`,
