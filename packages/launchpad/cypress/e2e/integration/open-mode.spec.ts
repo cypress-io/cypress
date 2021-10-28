@@ -16,4 +16,12 @@ describe('Launchpad: Open Mode', () => {
       cy.get('h1').should('contain', 'Welcome to Cypress!')
     })
   })
+
+  describe('when a user interacts with the header', () => {
+    it('the Docs menu opens when clicked', () => {
+      cy.contains('Projects').should('be.visible')
+      cy.contains('button', 'Docs').click()
+      cy.contains(defaultMessages.topNav.docsMenu.gettingStartedTitle).should('be.visible')
+    })
+  })
 })
