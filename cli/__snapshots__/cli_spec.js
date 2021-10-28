@@ -23,13 +23,15 @@ exports['shows help for open --foo 1'] = `
                                      values with a comma. overrides any value in
                                      cypress.config.{ts|js}.
     -C, --config-file <config-file>  path to JSON file where configuration values
-                                     are set. defaults to "cypress.config.{ts|js}". pass
-                                     "false" to disable.
+                                     are set. defaults to
+                                     "cypress.config.{ts|js}". pass "false" to
+                                     disable.
     -d, --detached [bool]            runs Cypress application in detached mode
     --e2e                            runs end to end tests
     -e, --env <env>                  sets environment variables. separate
                                      multiple values with a comma. overrides any
-                                     value in cypress.config.{ts|js} or cypress.env.json
+                                     value in cypress.config.{ts|js} or
+                                     cypress.env.json
     --global                         force Cypress into global mode as if its
                                      globally installed
     -p, --port <port>                runs Cypress on a specific port. overrides
