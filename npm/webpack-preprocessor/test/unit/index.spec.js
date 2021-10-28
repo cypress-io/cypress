@@ -353,7 +353,7 @@ describe('webpack preprocessor', function () {
             return true
           },
           toJson () {
-            return { errors: errs }
+            return { warnings: [], errors: errs }
           },
         }
 
