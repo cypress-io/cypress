@@ -51,7 +51,7 @@ describe('App', () => {
   it('when logged out, shows call to action', () => {
     cy.visitApp()
     cy.get('[href="#/runs"]').click()
-    cy.contains('Connect the current user').should('exist')
+    cy.contains('Log in').should('exist')
   })
 
   it('when no project Id in the config file, shows call to action', () => {
@@ -62,6 +62,6 @@ describe('App', () => {
     })
 
     cy.get('[href="#/runs"]').click()
-    cy.contains('Connect the current project').should('exist')
+    cy.contains('Connect your project').should('exist')
   })
 })

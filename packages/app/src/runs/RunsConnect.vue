@@ -1,6 +1,6 @@
 <template>
-  <div class="text-center h-full flex flex-col justify-center w-714px mx-auto">
-    <p class="font-size-18px my-40px">
+  <div class="text-center flex flex-col justify-center max-w-714px mx-auto">
+    <p class="text-18px my-40px">
       View your recorded runs from the Cypress Dashboard
     </p>
     <div class="flex gap-32px">
