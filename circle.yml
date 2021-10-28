@@ -707,6 +707,7 @@ commands:
       checkout_branch:
         description: "Name of the branch to checkout"
         type: string 
+        default: $(node ./scripts/get-next-version)
     steps:
       - clone-repo-and-checkout-release-branch:
           repo: <<parameters.repo>>
