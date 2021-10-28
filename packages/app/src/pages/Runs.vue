@@ -1,33 +1,28 @@
 <template>
-  <div>
-    <h2>Runs Page</h2>
-    <main class="p-24px relative">
-      <RunsConnect
-        v-if="!query.fetching.value && (!activeProject?.projectId || !query.data.value?.cloudViewer?.id)"
-        :is-logged-in="!!query.data.value?.cloudViewer?.id"
+  <RunsConnect
+    v-if="!query.fetching.value && (!activeProject?.projectId || !query.data.value?.cloudViewer?.id)"
+    :is-logged-in="!!query.data.value?.cloudViewer?.id"
+  />
+  <transition
+    v-else
+    name="fade"
+  >
+    <RunsSkeleton v-if="query.fetching.value" />
+    <RunsEmpty
+      v-else-if="!activeProject?.cloudProject?.runs?.nodes.length"
+      :project-id="activeProject?.projectId || ''"
+    />
+    <div
+      v-else
+      data-cy="runs"
+    >
+      <RunCard
+        v-for="run of activeProject.cloudProject.runs.nodes"
+        :key="run.id"
+        :gql="run"
       />
-      <transition
-        v-else
-        name="fade"
-      >
-        <RunsSkeleton v-if="query.fetching.value" />
-        <RunsEmpty
-          v-else-if="!activeProject?.cloudProject?.runs?.nodes.length"
-          :project-id="activeProject?.projectId || ''"
-        />
-        <div
-          v-else
-          data-cy="runs"
-        >
-          <RunCard
-            v-for="run of activeProject.cloudProject.runs.nodes"
-            :key="run.id"
-            :gql="run"
-          />
-        </div>
-      </transition>
-    </main>
-  </div>
+    </div>
+  </transition>
 </template>
 
 <script lang="ts" setup>
