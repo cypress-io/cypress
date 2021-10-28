@@ -1,20 +1,12 @@
 <template>
   <div class="relative m-24px h-full">
     <transition
+      v-if="query.fetching.value || activeProject?.cloudProject?.runs?.nodes"
       name="fade"
     >
       <RunsSkeleton v-if="query.fetching.value" />
-      <RunsConnect
-        v-else-if="query.data.value && (!activeProject?.projectId || !query.data.value?.cloudViewer?.id)"
-        :is-logged-in="!!query.data.value?.cloudViewer?.id"
-        :gql="query.data.value"
-      />
-      <RunsEmpty
-        v-else-if="!activeProject?.cloudProject?.runs?.nodes.length"
-        :project-id="activeProject?.projectId || ''"
-      />
       <div
-        v-else
+        v-else-if="activeProject?.cloudProject?.runs?.nodes"
         data-cy="runs"
       >
         <RunCard
@@ -24,6 +16,15 @@
         />
       </div>
     </transition>
+    <RunsEmpty
+      v-else-if="!activeProject?.cloudProject?.runs?.nodes.length"
+      :project-id="activeProject?.projectId || ''"
+    />
+    <RunsConnect
+      v-else-if="query.data.value && (!activeProject?.projectId || !query.data.value.cloudViewer?.id)"
+      :is-logged-in="!!query.data.value.cloudViewer?.id"
+      :gql="query.data.value"
+    />
   </div>
 </template>
 
