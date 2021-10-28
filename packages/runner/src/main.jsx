@@ -15,6 +15,12 @@ configure({ enforceActions: 'always' })
 
 const eventManager = new EventManager()
 
+// NOTE: this is for testing Cypress-in-Cypress, window.Cypress is undefined here
+// unless Cypress has been loaded into the AUT frame
+if (window.Cypress) {
+  window.eventManager = eventManager
+}
+
 const Runner = {
   start (el, base64Config) {
     action('started', () => {

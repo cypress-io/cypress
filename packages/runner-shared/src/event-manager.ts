@@ -667,11 +667,3 @@ export class EventManager {
     ws.emit('save:app:state', state)
   }
 }
-
-// NOTE: this is for testing Cypress-in-Cypress, window.Cypress is undefined here
-// unless Cypress has been loaded into the AUT frame
-if (window.Cypress) {
-  const eventManager = new EventManager()
-
-  window.eventManager = eventManager
-}
