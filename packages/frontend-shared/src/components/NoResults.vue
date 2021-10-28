@@ -1,15 +1,15 @@
 <template>
   <div
-    v-if="search"
+    v-if="search || emptySearch"
     class="text-center"
   >
     <NoResultsIllustration
-      class="mx-auto mt-80px"
+      class="mx-auto"
       alt
     />
     <p class="text-gray-500 text-18px leading-normal">
-      {{ message || t('noResults.defaultMessage') }}:
-      <span class="block truncate text-purple-500">{{ search }}</span>
+      {{ message || t('noResults.defaultMessage') }}
+      <span v-if="search" class="block truncate text-purple-500">{{ search }}</span>
     </p>
     <Button
       class="mx-auto mt-20px"
@@ -33,6 +33,7 @@ import NoResultsIllustration from '../assets/illustrations/no-results.svg'
 defineProps<{
   search?: string,
   message?: string
+  emptySearch: boolean
 }>()
 
 const emit = defineEmits<{

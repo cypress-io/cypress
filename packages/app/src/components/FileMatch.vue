@@ -28,7 +28,7 @@
 
 
 <template>
-  <div>
+<div>
   <div class="inline-flex items-center w-full rounded border-1 hocus-default focus-within-default h-40px">
   <FileMatchButton @click="toggleExpanded" :expanded="expanded">
     <span v-if="!expanded">{{ extensionPattern }}</span>
@@ -37,7 +37,7 @@
     <i-cy-magnifying-glass_x16 v-if="!expanded" class="inline-block ml-12px mr-8px icon-light-gray-50 icon-dark-gray-500 group-focus-within:icon-light-indigo-50 group-focus-within:icon-dark-indigo-400"/>
 
     <FileMatchInput v-if="expanded" v-model="extensionPattern" class="ml-12px" :placeholder="t('components.fileSearch.byExtensionInput')"/>
-    <FileMatchInput v-else v-model="pattern" :placeholder="t('components.fileSearch.byFilenameInput')"/>
+    <FileMatchInput v-else v-model="pattern" aria-label="file-name-input" :placeholder="t('components.fileSearch.byFilenameInput')"/>
   </div>
   
   <FileMatchIndicator>
@@ -50,7 +50,6 @@
     <i-cy-magnifying-glass_x16 class="inline-block ml-12px mr-8px icon-light-gray-50 icon-dark-gray-500 group-focus-within:icon-light-indigo-50 group-focus-within:icon-dark-indigo-400"/>
     <FileMatchInput v-model="pattern" :placeholder="t('components.fileSearch.byFilenameInput')"/>
   </div>
-  
   </div>
   </div>
 </template>
@@ -61,6 +60,7 @@ import FileMatchInput from './FileMatchInput.vue'
 import FileMatchButton from './FileMatchButton.vue'
 import FileMatchIndicator from './FileMatchIndicator.vue'
 import { ref, computed } from 'vue'
+
 import { useToggle, useVModels } from '@vueuse/core'
 
 const specs = ref([])
@@ -68,9 +68,15 @@ const foundSpecs = computed(() => specs.value)
 
 const { t } = useI18n()
 
+type Matches = {
+  total: number
+  found: number
+}
+
 const props = defineProps<{
   extensionPattern: string,
   pattern: string
+  matches: Matches
 }>()
 
 const emits = defineEmits<{
@@ -83,16 +89,17 @@ const { extensionPattern, pattern } = useVModels(props, emits)
 // 2 of 22 Matches
 // No Matches
 const indicatorText = computed(() => {
-  const numerator = foundSpecs.value.length
-  const denominator = specs.value.length
+  const numerator = props.matches.found
+  const denominator = props.matches.total
+
   if (pattern.value) {
     // When the user has attempted to search anything
     // "No Matches | 1 Match | { denominator } Matches"
-    return t('components.fileSearch.matchesIndicator', { numerator, denominator })
+    return t('components.fileSearch.matchesIndicator', { count: numerator, denominator, numerator })
   }
   // When the user has attempted to search by file path
   // "No Matches | {numerator} of {denominator} Matches"
-  return t('components.fileSearch.matchesIndicatorEmptyFileSearch', { numerator, denominator })
+  return t('components.fileSearch.matchesIndicatorEmptyFileSearch', { count: numerator, denominator, numerator })
 })
 const [expanded, toggleExpanded] = useToggle(false)
 </script>

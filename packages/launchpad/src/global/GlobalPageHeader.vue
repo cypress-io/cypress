@@ -45,6 +45,7 @@
   />
 
   <NoResults
+    class="mt-80px"
     v-if="!projectCount"
     :search="localValue"
     :message="t('globalPage.noResultsMessage')"

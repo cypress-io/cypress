@@ -2,7 +2,7 @@ import { CardWrapper, filters } from '../GeneratorsCommon'
 import { useI18n } from '@cy/i18n'
 import { defineComponent } from 'vue'
 import BookCodeIcon from '~icons/cy/book-code_x48';
-import Entry from './Entry.vue'
+import StoryGeneratorStepOne from './StoryGeneratorStepOne.vue'
 
 const ImportFromStoryCard = defineComponent({
   setup: () => {
@@ -17,7 +17,7 @@ const ImportFromStoryCard = defineComponent({
 
 export const ImportFromStoryGenerator = {
   card: ImportFromStoryCard,
-  entry: Entry,
+  entry: StoryGeneratorStepOne,
   matches: filters.matchesCT,
   id: 'import-from-story'
 }

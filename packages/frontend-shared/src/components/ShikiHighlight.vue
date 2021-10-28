@@ -59,6 +59,7 @@ shikiWrapperClasses computed property.
       tabindex="-1"
       class="absolute  bottom-8px right-8px"
       @click="copyCode"
+      v-if="copyOnClick"
     >
       {{ copied ? t('clipboard.copied') : t('clipboard.copy') }}
     </Button>

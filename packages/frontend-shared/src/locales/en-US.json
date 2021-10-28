@@ -8,10 +8,12 @@
       "dismiss": "Dismiss"
     },
     "fileSearch": {
+      "noMatchesForExtension": "No files found when searching for the file extension",
+      "noMatchesForFileName": "",
       "byFilenameInput": "Search by filename...",
       "byExtensionInput": "Extensions to include e.g. *.tsx, *.vue",
       "matchesIndicatorEmptyFileSearch": "No Matches | 1 Match | { denominator } Matches",
-      "matchesIndicator": "No Matches | {numerator} of {denominator} Matches"
+      "matchesIndicator": "No Matches | {numerator} of {denominator} Matches | {numerator} of {denominator} Matches"
     },
     "button": {
       "cancel": "Cancel"
