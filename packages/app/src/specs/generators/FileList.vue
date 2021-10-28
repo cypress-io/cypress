@@ -25,7 +25,8 @@
 <script setup lang="ts">
 import SpecsListRow from '../SpecsListRow.vue'
 import { computed } from 'vue'
-import NoResults from '@cypress/design-system/Button.vue'
+import NoResults from '@cy/components/NoResults.vue'
+import { gql } from '@urql/vue'
 
 // TODO(tim): fix types
 interface FileParts {

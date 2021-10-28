@@ -10,9 +10,10 @@
 import { generatorList } from './generators'
 import type { GeneratorId } from './generators'
 import { computed } from 'vue'
+import type { Maybe, TestingTypeEnum } from '../generated/graphql'
 
 const props = defineProps<{
-  testingType: 'component' | 'e2e'
+  testingType: TestingTypeEnum
 }>()
 
 defineEmits<{

@@ -20,7 +20,6 @@ import { computed, ref } from 'vue'
 import type { Ref } from 'vue'
 import { gql, useQuery, useMutation } from '@urql/vue'
 import { StoryGeneratorDocument, NewSpec_CodeGenSpecDocument } from '../../../generated/graphql'
-// import type { DocumentNode } from 'graphql'
 
 const props = defineProps<{
   title?: string,

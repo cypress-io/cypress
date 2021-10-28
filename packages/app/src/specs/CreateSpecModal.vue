@@ -34,11 +34,12 @@ import { generators } from './generators'
 import { ref, computed } from 'vue'
 import type { Ref } from 'vue'
 import { useModalStore } from '../store'
+import type { Maybe, TestingTypeEnum } from '../generated/graphql'
 
 const props = defineProps<{
   initialGenerator?: GeneratorId,
   show: boolean,
-  testingType: 'e2e' | 'component'
+  testingType: TestingTypeEnum
 }>()
 
 // const modalStore = useModalStore()

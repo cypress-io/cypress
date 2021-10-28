@@ -1,5 +1,5 @@
 <template>
-  <CreateSpecModal :key="generator" :testingType="testingType"
+  <CreateSpecModal v-if="query.data.value?.app.activeTestingType" :key="generator" :testingType="query.data.value?.app.activeTestingType"
     :initial-generator="generator" :show="showModal" @close="closeModal"/>
   <div class="overflow-scroll text-center max-w-600px">
     <h1
@@ -54,7 +54,21 @@ import type { Ref } from 'vue'
 import CreateSpecModal from './CreateSpecModal.vue'
 import CreateSpecCards from './CreateSpecCards.vue'
 import { useRouter } from 'vue-router'
+import { gql, useQuery } from '@urql/vue'
+import { CreateSpecPageDocument } from '../generated/graphql'
 const { t } = useI18n()
+
+gql`
+  query CreateSpecPage {
+    app {
+      activeTestingType
+    }
+  }
+`
+
+const query = useQuery({
+  query: CreateSpecPageDocument
+})
 
 // TODO: gql current testingType when it's available
 const props = defineProps<{
