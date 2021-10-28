@@ -223,8 +223,12 @@ export function get (projectRoot, options: {configFile?: string | false } = { co
       return fullConfig
     })
   })
-  .catch(() => {
+  .catch((e) => {
+    // Cleanup the cache if there's an error to prevent showing stale data
     return setProjectConfig(projectRoot, null)
+    .then(() => {
+      throw e
+    })
   })
 }
 
