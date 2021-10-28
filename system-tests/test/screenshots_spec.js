@@ -97,9 +97,6 @@ describe('e2e screenshots', () => {
         .then((sizes) => {
           // make sure all of the values are unique
           expect(sizes).to.deep.eq(_.uniq(sizes))
-
-          // png1 should not be within 1k of png2
-          expect(sizes[0]).not.to.be.closeTo(sizes[1], 1000)
         }).then(() => {
           return Promise.all([
             sizeOf(screenshot1),
