@@ -734,7 +734,8 @@ commands:
           working_directory: /tmp/<<parameters.repo>>
       - when:
           condition:
-            - not: <<parameters.checkout_branch>>
+            and:
+              - not: <<parameters.checkout_branch>>
           steps:
           - run:
               name: Scaffold new config file
