@@ -1,18 +1,19 @@
-import _ from 'lodash'
 import { EventEmitter } from 'events'
 import Promise from 'bluebird'
 import { action } from 'mobx'
+import type { BaseStore } from './store'
+import type { RunState } from '@packages/driver/src/cy/commands/navigation'
 
 import { client } from '@packages/socket/lib/browser'
-import type { BaseStore } from './store'
 
 import { StudioRecorder } from './studio'
-import { automation } from './automation'
-import { logger } from './logger'
 import { selectorPlaygroundModel } from './selector-playground'
 
-import $Cypress from '@packages/driver'
-import type { automationElementId } from './automation-element'
+import { automation } from './automation'
+import { logger } from './logger'
+
+import type $Cypress from '@packages/driver'
+const automationElementId = '__cypress-string' as const
 
 const PORT_MATCH = /serverPort=(\d+)/.exec(window.location.search)
 
@@ -21,8 +22,9 @@ const socketConfig = {
   transports: ['websocket'],
 }
 
-const $ = $Cypress.$
 const ws = PORT_MATCH ? client(`http://localhost:${PORT_MATCH[1]}`, socketConfig) : client(socketConfig)
+
+const noop = () => {}
 
 ws.on('connect', () => {
   ws.emit('runner:connected')
@@ -53,6 +55,8 @@ export class EventManager {
   localBus: EventEmitter = new EventEmitter()
   Cypress?: $Cypress
   studioRecorder = new StudioRecorder(this)
+
+  constructor (private $CypressDriver: any) {}
 
   getCypress () {
     return Cypress
@@ -118,16 +122,16 @@ export class EventManager {
     })
 
     ws.on('dev-server:compile:success', ({ specFile }) => {
-      if (!specFile || specFile === state.spec.absolute) {
+      if (!specFile || specFile === state?.spec?.absolute) {
         rerun()
       }
     })
 
-    _.each(socketRerunEvents, (event) => {
+    socketRerunEvents.forEach((event) => {
       ws.on(event, rerun)
     })
 
-    _.each(socketToDriverEvents, (event) => {
+    socketToDriverEvents.forEach((event) => {
       ws.on(event, (...args) => {
         if (!Cypress) return
 
@@ -135,7 +139,7 @@ export class EventManager {
       })
     })
 
-    _.each(localToReporterEvents, (event) => {
+    localToReporterEvents.forEach((event) => {
       this.localBus.on(event, (...args) => {
         this.reporterBus.emit(event, ...args)
       })
@@ -288,7 +292,7 @@ export class EventManager {
     this.localBus.on('studio:save', (saveInfo) => {
       ws.emit('studio:save', saveInfo, (err) => {
         if (err) {
-          this.reporterBus.emit('test:set:state', this.studioRecorder.saveError(err), _.noop)
+          this.reporterBus.emit('test:set:state', this.studioRecorder.saveError(err), noop)
         }
       })
     })
@@ -298,7 +302,8 @@ export class EventManager {
       rerun()
     })
 
-    const $window = $(window)
+    // @ts-ignore
+    const $window = this.$CypressDriver.$(window)
 
     //  TODO(lachlan): best place to do this?
     if (!('__vite__' in window)) {
@@ -333,7 +338,7 @@ export class EventManager {
   }
 
   setup (config) {
-    Cypress = this.Cypress = $Cypress.create(config)
+    Cypress = this.Cypress = this.$CypressDriver.create(config)
 
     // expose Cypress globally
     // since CT AUT shares the window with the spec, we don't want to overwrite
@@ -361,7 +366,7 @@ export class EventManager {
       onSpecReady: () => {
         // get the current runnable in case we reran mid-test due to a visit
         // to a new domain
-        ws.emit('get:existing:run:state', (state = {}) => {
+        ws.emit('get:existing:run:state', (state: RunState = {}) => {
           if (!Cypress.runner) {
             // the tests have been reloaded
             return
@@ -380,7 +385,7 @@ export class EventManager {
 
           this.reporterBus.emit('runnables:ready', runnables)
 
-          if (state.numLogs) {
+          if (state?.numLogs) {
             Cypress.runner.setNumLogs(state.numLogs)
           }
 
@@ -401,7 +406,7 @@ export class EventManager {
             Cypress.runner.resumeAtTest(state.currentId, state.emissions)
           }
 
-          run()
+          return run()
         })
       },
     })
@@ -412,7 +417,7 @@ export class EventManager {
       ws.emit('client:request', msg, data, cb)
     })
 
-    _.each(driverToSocketEvents, (event) => {
+    driverToSocketEvents.forEach((event) => {
       Cypress.on(event, (...args) => {
         return ws.emit(event, ...args)
       })
@@ -472,7 +477,9 @@ export class EventManager {
       const wait = !config.appOnly && config.waitForCommandSynchronization
 
       if (!config.appOnly) {
-        this.reporterBus.emit('test:set:state', _.pick(config, 'id', 'isOpen'), wait ? beforeThenCb : undefined)
+        const { id, isOpen } = config
+
+        this.reporterBus.emit('test:set:state', { id, isOpen }, wait ? beforeThenCb : undefined)
       }
 
       if (!wait) beforeThenCb()
@@ -482,26 +489,26 @@ export class EventManager {
       this.localBus.emit('after:screenshot', config)
     })
 
-    _.each(driverToReporterEvents, (event) => {
+    driverToReporterEvents.forEach((event) => {
       Cypress.on(event, (...args) => {
         this.reporterBus.emit(event, ...args)
       })
     })
 
-    _.each(driverTestEvents, (event) => {
+    driverTestEvents.forEach((event) => {
       Cypress.on(event, (test, cb) => {
         this.reporterBus.emit(event, test, cb)
       })
     })
 
-    _.each(driverToLocalAndReporterEvents, (event) => {
+    driverToLocalAndReporterEvents.forEach((event) => {
       Cypress.on(event, (...args) => {
         this.localBus.emit(event, ...args)
         this.reporterBus.emit(event, ...args)
       })
     })
 
-    _.each(driverToLocalEvents, (event) => {
+    driverToLocalEvents.forEach((event) => {
       Cypress.on(event, (...args) => {
         return this.localBus.emit(event, ...args)
       })
@@ -596,7 +603,7 @@ export class EventManager {
 
       if (displayProps.name === 'visit' && displayProps.state === 'failed') {
         this.studioRecorder.testFailed()
-        this.reporterBus.emit('test:set:state', this.studioRecorder.testError, _.noop)
+        this.reporterBus.emit('test:set:state', this.studioRecorder.testError, noop)
       }
     }
 

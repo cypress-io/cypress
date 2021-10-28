@@ -26,6 +26,11 @@ const RUNNABLE_PROPS = '_testConfig id order title _titlePath root hookName hook
 const debug = debugFn('cypress:driver:runner')
 const debugErrors = debugFn('cypress:driver:errors')
 
+export interface Emissions {
+  started: Record<string, boolean>
+  ended: Record<string, boolean>
+}
+
 const fire = (event, runnable, Cypress) => {
   debug('fire: %o', { event })
   if (runnable._fired == null) {
@@ -1104,7 +1109,7 @@ export default {
     // only used during normalization
     const _runnables = []
     const _logsById = {}
-    let _emissions = {
+    let _emissions: Emissions = {
       started: {},
       ended: {},
     }
@@ -1662,7 +1667,7 @@ export default {
         }
       },
 
-      resumeAtTest (id, emissions = {}) {
+      resumeAtTest (id, emissions: Emissions = {}) {
         _resumedAtTestIndex = getTestIndexFromId(id)
 
         _emissions = emissions
