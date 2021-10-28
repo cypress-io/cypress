@@ -57,7 +57,6 @@ function createIframeModel () {
     autIframe.restoreDom,
     autIframe.highlightEl,
     window.UnifiedRunner.eventManager,
-    window.UnifiedRunner.MobX,
     {
       recorder: window.UnifiedRunner.studioRecorder,
       selectorPlaygroundModel: window.UnifiedRunner.selectorPlaygroundModel,

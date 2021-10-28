@@ -28,7 +28,6 @@ export class IframeModel {
     private restoreDom: (snapshot: any) => void,
     private highlightEl: ({ body }: any, opts: any) => void,
     private eventManager: any,
-    private MobX: any,
     private studio: {
       selectorPlaygroundModel: any
       recorder: any
@@ -42,11 +41,15 @@ export class IframeModel {
     this.eventManager.on('run:end', this._afterRun)
 
     this.eventManager.on('viewport:changed', this._updateViewport)
-    this.eventManager.on('config', this.MobX.action('config', (config: any) => {
+    // TODO(lachlan): verify this is called, and if it actually needs to be.
+    // in CT/E2E/unified, because `listen` is called **after** this $Cypress has been
+    // created and this event has been emitted, so right now in production
+    // I don't think this is actually doing anything.
+    this.eventManager.on('config', (config: { viewportHeight: number, viewportWidth: number }) => {
       const { viewportWidth, viewportHeight } = config
 
       return this._updateViewport({ viewportHeight, viewportWidth })
-    }))
+    })
 
     const autStore = useAutStore()
 
