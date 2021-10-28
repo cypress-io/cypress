@@ -4,7 +4,6 @@
     <main class="p-24px relative">
       <RunsConnect
         v-if="!query.fetching.value && (!activeProject?.projectId || !query.data.value?.cloudViewer?.id)"
-        :has-project-id="!!activeProject?.projectId"
         :is-logged-in="!!query.data.value?.cloudViewer?.id"
       />
       <transition

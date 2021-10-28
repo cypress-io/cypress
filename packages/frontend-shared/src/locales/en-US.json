@@ -235,5 +235,14 @@
       "title": "Device Settings",
       "description": "Settings for this device."
     }
+  },
+  "runs": {
+    "connect": {
+      "smartText": "Scale your test runs with built-in smart orchestration.",
+      "debugText": "Debug tests that fail in CI with visual feedback.",
+      "chartText": "Keep your tests in tip-top shape with powerful analytics.",
+      "buttonUser": "Log in to the Cypress Dashboard",
+      "buttonProject": "Connect your project to the Cypress Dashboard"
+    }
   }
 }
