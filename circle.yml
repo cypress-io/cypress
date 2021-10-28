@@ -523,13 +523,17 @@ commands:
       repo:
         description: "Name of the github repo to clone like: cypress-example-kitchensink"
         type: string
+      checkout_branch:
+        description: "Name of the branch to checkout"
+        type: string 
+        default: $(node ./scripts/get-next-version)
     steps:
       - restore_cached_binary
       - run:
           name: "Cloning test project: <<parameters.repo>>"
           command: |
             git clone --depth 1 --no-single-branch https://github.com/cypress-io/<<parameters.repo>>.git /tmp/<<parameters.repo>>
-            cd /tmp/<<parameters.repo>> && (git checkout $(node ./scripts/get-next-version) || true)
+            cd /tmp/<<parameters.repo>> && (git checkout <<parameters.checkout_branch>> || true)
 
   test-binary-against-rwa:
     description: |
@@ -700,9 +704,13 @@ commands:
         description: Server start command for repo
         type: string
         default: "npm start --if-present"
+      checkout_branch:
+        description: "Name of the branch to checkout"
+        type: string 
     steps:
       - clone-repo-and-checkout-release-branch:
           repo: <<parameters.repo>>
+          checkout_branch: <<parameters.checkout_branch>>
       - when:
           condition: <<parameters.pull_request_id>>
           steps:
@@ -724,14 +732,18 @@ commands:
               CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm install ~/cypress/cypress.tgz
             fi
           working_directory: /tmp/<<parameters.repo>>
-      - run:
-          name: Scaffold new config file
-          working_directory: /tmp/<<parameters.repo>>
-          environment:
-            CYPRESS_INTERNAL_FORCE_SCAFFOLD: "1"
-          command: |
-            rm -rf cypress.json
-            echo 'module.exports = {}' > cypress.config.js
+      - when:
+        condition: 
+          - not: <<parameters.checkout_branch>>
+        steps:
+        - run:
+            name: Scaffold new config file
+            working_directory: /tmp/<<parameters.repo>>
+            environment:
+              CYPRESS_INTERNAL_FORCE_SCAFFOLD: "1"
+            command: |
+              rm -rf cypress.json
+              echo 'module.exports = {}' > cypress.config.js
       - run:
           name: Print Cypress version
           working_directory: /tmp/<<parameters.repo>>
@@ -1620,15 +1632,8 @@ jobs:
     steps:
       - clone-repo-and-checkout-release-branch:
           repo: cypress-example-kitchensink
+          checkout_branch: feat/use-config-file
       - install-required-node
-      - run:
-          name: Scaffold new config file
-          working_directory: /tmp/cypress-example-kitchensink
-          environment:
-            CYPRESS_INTERNAL_FORCE_SCAFFOLD: "1"
-          command: |
-            rm -rf cypress.json
-            echo 'module.exports = {}' > cypress.config.js
       - run:
           name: Install prod dependencies
           command: yarn --production
@@ -1964,6 +1969,7 @@ jobs:
       - test-binary-against-repo:
           repo: cypress-example-kitchensink
           browser: "electron"
+          checkout_branch: feat/use-config-file
 
   test-binary-against-awesome-typescript-loader:
     <<: *defaults
@@ -1979,6 +1985,7 @@ jobs:
       - test-binary-against-repo:
           repo: cypress-example-kitchensink
           browser: firefox
+          checkout_branch: feat/use-config-file
 
   "test-binary-against-kitchensink-chrome":
     <<: *defaults
@@ -1987,6 +1994,7 @@ jobs:
       - test-binary-against-repo:
           repo: cypress-example-kitchensink
           browser: chrome
+          checkout_branch: feat/use-config-file
 
   "test-binary-against-todomvc-firefox":
     <<: *defaults

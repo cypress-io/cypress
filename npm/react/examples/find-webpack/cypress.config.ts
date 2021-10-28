@@ -1,4 +1,6 @@
-export default {
+import { defineConfig } from 'cypress'
+
+export default defineConfig({
   'video': true,
   'projectId': 'jq5xpp',
   'component': {
@@ -10,4 +12,4 @@ export default {
       'root': '#__cy_root',
     },
   },
-}
+})

@@ -1,6 +1,6 @@
 import { DataContext } from '@packages/data-context'
 import specsUtil from './util/specs'
-import type { FindSpecs, FoundBrowser, FullConfig, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions, PlatformName, Preferences, SettingsOptions } from '@packages/types'
+import type { FindSpecs, FoundBrowser, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions, PlatformName, Preferences, SettingsOptions } from '@packages/types'
 import browserUtils from './browsers/utils'
 import auth from './gui/auth'
 import user from './user'
@@ -56,12 +56,6 @@ export function makeDataContext (options: MakeDataContextOptions) {
       },
       findSpecs (payload: FindSpecs) {
         return specsUtil.findSpecs(payload)
-      },
-      setProjectConfig (projectRoot: string, config: Partial<FullConfig> | null) {
-        return cache.setProjectConfig(projectRoot, config)
-      },
-      getProjectConfig (projectRoot: string) {
-        return cache.getProjectConfig(projectRoot)
       },
       clearLatestProjectsCache () {
         return cache.removeLatestProjects()

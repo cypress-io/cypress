@@ -1,4 +1,6 @@
-export default {
+import { defineConfig } from 'cypress'
+
+export default defineConfig({
   'viewportWidth': 500,
   'viewportHeight': 500,
   'video': false,
@@ -6,4 +8,4 @@ export default {
   'projectId': '134ej7',
   'testFiles': '**/*spec.{js,ts,tsx}',
   'experimentalFetchPolyfill': true,
-}
+})

@@ -1,4 +1,6 @@
-export default {
+import { defineConfig } from 'cypress'
+
+export default defineConfig({
   'projectId': 'ypt4pf',
   'baseUrl': 'http://localhost:5006',
   'viewportWidth': 400,
@@ -11,4 +13,4 @@ export default {
     'runMode': 2,
     'openMode': 0,
   },
-}
+})

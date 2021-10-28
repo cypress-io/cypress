@@ -24,7 +24,7 @@ export class ProjectDataSource {
   }
 
   async findSpecs (projectRoot: string, specType: Maybe<SpecType>) {
-    const config = await this.ctx.project.getConfig(projectRoot)
+    const config = await this.getConfig(projectRoot)
     const specs = await this.api.findSpecs({
       projectRoot,
       fixturesFolder: config.fixturesFolder ?? false,
@@ -85,15 +85,8 @@ export class ProjectDataSource {
   }
 
   async getConfig (projectRoot: string) {
-    // Check first the config files, to be sure there are not to config files
+    // Check first the config files, to be sure there are no 2 config files
     const configFile = await this.getDefaultConfigFilePath(projectRoot)
-
-    // Check if we have already cached the config
-    const config = await this.api.getProjectConfig(projectRoot)
-
-    if (config) {
-      return config
-    }
 
     return this.configLoader({
       configFile,

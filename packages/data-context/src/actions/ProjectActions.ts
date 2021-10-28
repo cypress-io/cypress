@@ -25,8 +25,6 @@ export interface ProjectApiShape {
   clearProjectPreferences(projectTitle: string): Promise<unknown>
   clearAllProjectPreferences(): Promise<unknown>
   closeActiveProject(): Promise<unknown>
-  setProjectConfig(projectRoot: string, projectId: Partial<FullConfig> | null): Promise<unknown>
-  getProjectConfig (projectRoot: string): Promise<FullConfig | null>
   error(type: string, ...args: any): Error
 }
 

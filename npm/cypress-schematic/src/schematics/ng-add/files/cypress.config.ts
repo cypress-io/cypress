@@ -1,4 +1,6 @@
-export default {
+import { defineConfig } from 'cypress'
+
+export default defineConfig({
   'integrationFolder': '<%= root%>cypress/integration',
   'supportFile': '<%= root%>cypress/support/index.ts',
   'videosFolder': '<%= root%>cypress/videos',
@@ -6,4 +8,4 @@ export default {
   'pluginsFile': '<%= root%>cypress/plugins/index.ts',
   'fixturesFolder': '<%= root%>cypress/fixtures',
   'baseUrl': '<%= baseUrl%>',
-}
+})

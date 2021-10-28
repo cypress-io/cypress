@@ -1,4 +1,6 @@
-export default {
+import { defineConfig } from 'cypress'
+
+export default defineConfig({
   testFiles: '**/*spec.{ts,tsx}',
   video: true,
   env: {
@@ -8,4 +10,4 @@ export default {
   reporterOptions: {
     configFile: '../../mocha-reporter-config.json',
   },
-}
+})
