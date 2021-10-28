@@ -12,7 +12,6 @@ import { gql, useQuery } from '@urql/vue'
 import HeaderBarContent from './HeaderBarContent.vue'
 import { HeaderBar_HeaderBarQueryDocument } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
-import type { RouteRecordName } from 'vue-router'
 
 gql`
 query HeaderBar_HeaderBarQuery {
@@ -21,7 +20,7 @@ query HeaderBar_HeaderBarQuery {
 `
 
 const props = defineProps<{
-    showBrowsers?: Boolean,
+    showBrowsers?: boolean,
     pageName?: string
 }>()
 

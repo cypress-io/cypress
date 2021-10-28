@@ -105,7 +105,6 @@ import LoginModal from './topnav/LoginModal.vue'
 import UserAvatar from './topnav/UserAvatar.vue'
 import Auth from './Auth.vue'
 import { useI18n } from '@cy/i18n'
-import type { RouteRecordName } from 'vue-router'
 
 gql`
 mutation GlobalPageHeader_clearActiveProject {
@@ -142,7 +141,7 @@ const clearActiveProject = () => {
 
 const props = defineProps<{
   gql: HeaderBar_HeaderBarContentFragment,
-  showBrowsers?: Boolean,
+  showBrowsers?: boolean,
   pageName?: string
 }>()
 

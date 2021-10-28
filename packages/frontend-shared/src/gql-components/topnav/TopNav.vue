@@ -225,7 +225,7 @@ const handleBrowserChoice = async (browser) => {
 
 const props = defineProps<{
   gql: TopNavFragment,
-  showBrowsers?: Boolean
+  showBrowsers?: boolean
 }>()
 
 const docsMenuVariant: Ref<'main' | 'orchestration' | 'ci'> = ref('main')
