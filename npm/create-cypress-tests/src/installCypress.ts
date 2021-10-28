@@ -15,7 +15,7 @@ type InstallCypressOpts = {
 async function copyFiles ({ ignoreExamples, useTypescript }: InstallCypressOpts) {
   let fileSpinner = ora('Creating config files').start()
 
-  await fs.outputFile(path.resolve(process.cwd(), useTypescript ? 'cypress.config.ts' : 'cypress.config.js'), `module.exports = {}\n`)
+  await fs.outputFile(path.resolve(process.cwd(), useTypescript ? 'cypress.config.ts' : 'cypress.config.js'), useTypescript ? `export default {}` : `module.exports = {}\n`)
   await fs.copy(
     initialTemplate.getInitialPluginsFilePath(),
     path.resolve('cypress', 'plugins/index.js'),
