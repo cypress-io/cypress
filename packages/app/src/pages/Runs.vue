@@ -1,28 +1,30 @@
 <template>
-  <RunsConnect
-    v-if="!query.fetching.value && (!activeProject?.projectId || !query.data.value?.cloudViewer?.id)"
-    :is-logged-in="!!query.data.value?.cloudViewer?.id"
-  />
-  <transition
-    v-else
-    name="fade"
-  >
-    <RunsSkeleton v-if="query.fetching.value" />
-    <RunsEmpty
-      v-else-if="!activeProject?.cloudProject?.runs?.nodes.length"
-      :project-id="activeProject?.projectId || ''"
+  <div class="relativ mx-24px">
+    <RunsConnect
+      v-if="!query.fetching.value && (!activeProject?.projectId || !query.data.value?.cloudViewer?.id)"
+      :is-logged-in="!!query.data.value?.cloudViewer?.id"
     />
-    <div
+    <transition
       v-else
-      data-cy="runs"
+      name="fade"
     >
-      <RunCard
-        v-for="run of activeProject.cloudProject.runs.nodes"
-        :key="run.id"
-        :gql="run"
+      <RunsSkeleton v-if="query.fetching.value" />
+      <RunsEmpty
+        v-else-if="!activeProject?.cloudProject?.runs?.nodes.length"
+        :project-id="activeProject?.projectId || ''"
       />
-    </div>
-  </transition>
+      <div
+        v-else
+        data-cy="runs"
+      >
+        <RunCard
+          v-for="run of activeProject.cloudProject.runs.nodes"
+          :key="run.id"
+          :gql="run"
+        />
+      </div>
+    </transition>
+  </div>
 </template>
 
 <script lang="ts" setup>

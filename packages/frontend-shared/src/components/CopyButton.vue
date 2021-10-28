@@ -2,11 +2,16 @@
   <div>
     <Button
       size="md"
-      variant="tertiary"
+      :variant="variant"
       @click="copyToClipboard"
     >
-      <template #prefix>
-        <i-cy-copy-clipboard_x16 class="icon-dark-indigo-500 w-16px h-16px" />
+      <template
+        v-if="!noIcon"
+        #prefix
+      >
+        <i-cy-copy-clipboard_x16
+          class="icon-dark-indigo-500 w-16px h-16px"
+        />
       </template>
       <TransitionQuickFade mode="out-in">
         <span v-if="!copied">{{ t('clipboard.copy') }}</span>
@@ -19,12 +24,17 @@
 <script setup lang="ts">
 import { useClipboard } from '@vueuse/core'
 import { useI18n } from '@cy/i18n'
-import Button from '../components/Button.vue'
+import Button, { ButtonVariants } from '../components/Button.vue'
 import TransitionQuickFade from '../components/transitions/TransitionQuickFade.vue'
 
-const props = defineProps<{
-  text: string
-}>()
+const props = withDefaults(defineProps<{
+  text: string,
+  noIcon?: boolean,
+  variant?: ButtonVariants,
+}>(), {
+  noIcon: false,
+  variant: 'tertiary',
+})
 
 const { copy, copied } = useClipboard({ copiedDuring: 2000 })
 const copyToClipboard = () => {

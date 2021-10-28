@@ -54,14 +54,13 @@ shikiWrapperClasses computed property.
       @click="copyOnClick ? () => copyCode() : () => {}"
       v-html="highlightedCode"
     />
-    <Button
+    <CopyButton
       variant="outline"
       tabindex="-1"
       class="absolute  bottom-8px right-8px"
-      @click="copyCode"
-    >
-      {{ copied ? t('clipboard.copied') : t('clipboard.copy') }}
-    </Button>
+      :text="code"
+      no-icon
+    />
   </div>
 </template>
 
@@ -98,13 +97,10 @@ export { highlighter, inheritAttrs }
 
 <script lang="ts" setup>
 import { computed, onBeforeMount, ref } from 'vue'
-import Button from '@cy/components/Button.vue'
+import CopyButton from '@cy/components/CopyButton.vue'
 // eslint-disable-next-line no-duplicate-imports
 import type { Ref } from 'vue'
 import { useClipboard } from '@vueuse/core'
-import { useI18n } from '@cy/i18n'
-
-const { t } = useI18n()
 
 const highlighterInitialized = ref(false)
 

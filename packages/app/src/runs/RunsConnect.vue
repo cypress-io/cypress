@@ -1,8 +1,8 @@
 <template>
   <div class="h-full text-center flex flex-col justify-center max-w-714px mx-auto">
-    <p class="text-18px my-40px text-gray-900">
-      View your recorded runs from the Cypress Dashboard
-    </p>
+    <h2 class="text-18px mb-40px text-gray-900">
+      {{ t("runs.connect.title") }}
+    </h2>
     <div class="flex gap-32px">
       <div
         v-for="(block, i) in notions"
@@ -18,7 +18,7 @@
       </div>
     </div>
     <Button
-      class="mx-auto my-40px"
+      class="mx-auto mt-40px"
       :prefix-icon="isLoggedIn ? ChainIcon : UserIcon"
       prefix-icon-class="icon-dark-white icon-light-transparent"
     >
