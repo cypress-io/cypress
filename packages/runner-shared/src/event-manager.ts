@@ -43,14 +43,6 @@ const localToReporterEvents = 'reporter:log:add reporter:log:state:changed repor
 // NOTE: this is exposed for testing, ideally we should only expose this if a test flag is set
 window.runnerWs = ws
 
-// NOTE: this is for testing Cypress-in-Cypress, window.Cypress is undefined here
-// unless Cypress has been loaded into the AUT frame
-if (window.Cypress) {
-  const eventManager = new EventManager()
-
-  window.eventManager = eventManager
-}
-
 /**
  * @type {Cypress.Cypress}
  */
@@ -184,7 +176,7 @@ export class EventManager {
 
     this.reporterBus.on('runner:restart', rerun)
 
-    function sendEventIfSnapshotProps (logId, event) {
+    const sendEventIfSnapshotProps = (logId, event) => {
       if (!Cypress) return
 
       const snapshotProps = Cypress.runner.getSnapshotPropsForLogById(logId)
@@ -622,12 +614,12 @@ export class EventManager {
     this.localBus.emit(event, ...args)
   }
 
-  on (event: string, ...args: any[]) {
-    this.localBus.on(event, ...args)
+  on (event: string, listener: (...args: any[]) => void) {
+    this.localBus.on(event, listener)
   }
 
-  off (event: string, ...args: any[]) {
-    this.localBus.off(event, ...args)
+  off (event: string, listener: (...args: any[]) => void) {
+    this.localBus.off(event, listener)
   }
 
   notifyRunningSpec (specFile) {
@@ -674,4 +666,12 @@ export class EventManager {
   saveState (state) {
     ws.emit('save:app:state', state)
   }
+}
+
+// NOTE: this is for testing Cypress-in-Cypress, window.Cypress is undefined here
+// unless Cypress has been loaded into the AUT frame
+if (window.Cypress) {
+  const eventManager = new EventManager()
+
+  window.eventManager = eventManager
 }
