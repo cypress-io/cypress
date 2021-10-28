@@ -13,7 +13,7 @@ const driverUtils = $Cypress.utils
 
 configure({ enforceActions: 'always' })
 
-const eventManager = new EventManager()
+const eventManager = new EventManager($Cypress)
 
 // NOTE: this is for testing Cypress-in-Cypress, window.Cypress is undefined here
 // unless Cypress has been loaded into the AUT frame
