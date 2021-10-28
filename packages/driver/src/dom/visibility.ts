@@ -60,7 +60,7 @@ const isStrictlyHidden = (el, methodName = 'isStrictlyHidden()', options = { che
     // in which case it will fall through to regular visibility logic
     if ($select && $select.length) {
       // if the select is hidden, the options in it are visible too
-      return recurse ? recurse(el, methodName, options) : isStrictlyHidden($select[0], methodName, options)
+      return recurse ? recurse($select[0], methodName, options) : isStrictlyHidden($select[0], methodName, options)
     }
   }
 
