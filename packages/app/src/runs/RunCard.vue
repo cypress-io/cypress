@@ -87,7 +87,7 @@ const ICON_MAP = {
   RUNNING: PendingIcon,
 } as const
 
-const icon = computed(() => props.gql.status && ICON_MAP[props.gql.status])
+const icon = computed(() => ICON_MAP[props.gql.status!])
 
 const run = computed(() => props.gql)
 
