@@ -11,11 +11,16 @@ export default (Commands, Cypress, cy) => {
 
       if (_.isObject(encoding)) {
         userOptions = encoding
-        encoding = null
+        encoding = undefined
       }
 
       options = _.defaults({}, userOptions, {
-        encoding: encoding != null ? encoding : 'utf8',
+        // https://github.com/cypress-io/cypress/issues/1558
+        // If no encoding is specified, then Cypress has historically defaulted
+        // to `utf8`, because of it's focus on text files. This is in contrast to
+        // NodeJs, which defaults to binary. We allow users to pass in `null`
+        // to restore the default node behavior.
+        encoding: encoding === undefined ? 'utf8' : encoding,
         log: true,
       })
 
@@ -53,6 +58,14 @@ export default (Commands, Cypress, cy) => {
             args: { cmd: 'readFile', action: 'read', file, filePath: err.filePath, error: err.message },
           })
         }).then(({ contents, filePath }) => {
+          // https://github.com/cypress-io/cypress/issues/1558
+          // We invoke Buffer.from() in order to transform this from an ArrayBuffer -
+          // which socket.io uses to transfer the file over the websocket - into a
+          // `Buffer`, which webpack polyfills in the browser.
+          if (options.encoding === null) {
+            contents = Buffer.from(contents)
+          }
+
           consoleProps['File Path'] = filePath
           consoleProps['Contents'] = contents
 
@@ -85,11 +98,16 @@ export default (Commands, Cypress, cy) => {
 
       if (_.isObject(encoding)) {
         userOptions = encoding
-        encoding = null
+        encoding = undefined
       }
 
       options = _.defaults({}, userOptions, {
-        encoding: encoding ? encoding : 'utf8',
+        // https://github.com/cypress-io/cypress/issues/1558
+        // If no encoding is specified, then Cypress has historically defaulted
+        // to `utf8`, because of it's focus on text files. This is in contrast to
+        // NodeJs, which defaults to binary. We allow users to pass in `null`
+        // to restore the default node behavior.
+        encoding: encoding === undefined ? 'utf8' : encoding,
         flag: userOptions.flag ? userOptions.flag : 'w',
         log: true,
       })
@@ -120,7 +138,7 @@ export default (Commands, Cypress, cy) => {
         })
       }
 
-      if (_.isObject(contents)) {
+      if (_.isObject(contents) && !Buffer.isBuffer(contents)) {
         contents = JSON.stringify(contents, null, 2)
       }
 
