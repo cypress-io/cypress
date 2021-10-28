@@ -5,6 +5,11 @@
         aria-labelledby="primary-heading"
         class="min-w-0 flex-1 h-full flex flex-col overflow-hidden lg:order-last"
       >
+        <HeaderBar
+          v-if="showHeader"
+          :show-browsers="true"
+          :page-name="pageName"
+        />
         <router-view v-slot="{ Component, route }">
           <h1
             id="primary-heading"
@@ -17,9 +22,7 @@
             mode="out-in"
           >
             <!-- <keep-alive> -->
-            <component
-              :is="Component"
-            />
+            <component :is="Component" />
             <!-- </keep-alive> -->
           </transition>
         </router-view>
@@ -37,9 +40,22 @@
 
 <script lang="ts" setup>
 import SidebarNavigation from '../navigation/SidebarNavigation.vue'
+import HeaderBar from '@cy/gql-components//HeaderBar.vue'
+import { useRoute } from 'vue-router'
+import { computed } from 'vue'
+
 import ModalManager from '../modals/ModalManager.vue'
 import { useModalStore, useMainStore } from '../store'
 
 const modalStore = useModalStore()
 const mainStore = useMainStore()
+const currentRoute = useRoute()
+
+const showHeader = computed(() => {
+  return currentRoute.meta.header !== false
+})
+
+const pageName = computed((): string | undefined => {
+  return currentRoute.meta?.title as string
+})
 </script>

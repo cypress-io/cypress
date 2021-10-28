@@ -63,7 +63,10 @@ const activeProject = computed(() => query.data.value?.app?.activeProject)
 
 <route>
 {
-  name: "Runs"
+  name: "Runs",
+  meta: {
+    title: "Runs"
+  }
 }
 </route>
 

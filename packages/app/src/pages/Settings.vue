@@ -6,6 +6,9 @@
 
 <route>
 {
-  name: "Settings Page"
+  name: "Settings Page",
+  meta: {
+    title: "Settings"
+  }
 }
 </route>
