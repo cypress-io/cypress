@@ -11,6 +11,9 @@ import SettingsPage from '../settings/SettingsPage.vue'
 
 <route>
 {
-  name: "Settings Page"
+  name: "Settings Page",
+  meta: {
+    title: "Settings"
+  }
 }
 </route>

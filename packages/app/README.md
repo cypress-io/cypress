@@ -11,6 +11,9 @@ This is the front-end for the Cypress App.
 4. This launches the existing CT Runner. Change the URL to http://localhost:3000/__vite__/ (note the trailing `/`)
 5. It should show the new Vite powered app 
 
+## Use of graphql by shared components is limited to `src/gql-components`
+
+In the long run, files in the `src/components` directory are intended as the foundation of a design system. As such they may be used in many contexts other than the Cypress App and Launcpad. There are some components that are only intended to be shared between App and Launchpad and make use of GraphQL queries and mutations. These will only work correctly if placed within `src/gql-components` directory.
 ## Using existing, Vite-incompatible modules
 
 Some of our modules, like `@packages/reporter`, `@packages/driver` and `@packages/runner-shared` cannot be easily

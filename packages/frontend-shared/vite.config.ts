@@ -29,6 +29,7 @@ const base = './'
 
 const alias = {
   '@cy/components': path.resolve(__dirname, './src/components'),
+  '@cy/gql-components': path.resolve(__dirname, './src/gql-components'),
 
   // import { defaultMessages, useI18n } from '@cy/i18n'
   '@cy/i18n': path.resolve(__dirname, './src/locales/i18n'),

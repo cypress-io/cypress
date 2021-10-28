@@ -84,6 +84,7 @@
         "graphql",
         "graphql-relay",
         "graphql/jsutils/Path",
+        "gravatar",
         "lodash",
         "mobx",
         "nanoid",
@@ -92,6 +93,7 @@
         "shiki",
         "socket.io-client",
         "vue",
+        "vue-demi",
         "vue-toastification",
         "wonka"
       ]

@@ -58,7 +58,7 @@
 import { useI18n } from '@cy/i18n'
 import { gql } from '@urql/core'
 import { computed } from 'vue'
-import Auth from '../../setup/Auth.vue'
+import Auth from '../Auth.vue'
 
 import {
   Dialog,

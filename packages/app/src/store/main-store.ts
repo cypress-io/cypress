@@ -11,7 +11,11 @@ export interface MainStoreState {
  */
 export const useMainStore = defineStore({
   id: 'main',
-  state: () => ({ navBarExpanded: false }),
+  state: (): MainStoreState => {
+    return {
+      navBarExpanded: false,
+    }
+  },
   actions: {
     toggleNavBar () {
       this.navBarExpanded = !this.navBarExpanded
