@@ -1,10 +1,10 @@
-it('rewrites document.refferrer on the AUT to be empty string on visit', () => {
+it('rewrites document.referrer on the AUT to be empty string on visit', () => {
   cy.visit('http://localhost:3500/fixtures/generic.html')
 
   cy.window().its('document').its('referrer').should('equal', '')
 })
 
-it('does not rewrite document.refferrer if navigation was triggered by click on a link', () => {
+it('does not rewrite document.referrer if navigation was triggered by click on a link', () => {
   cy.visit('http://localhost:3500/fixtures/generic.html')
 
   cy.get('#dimensions').click()
@@ -12,7 +12,7 @@ it('does not rewrite document.refferrer if navigation was triggered by click on 
   cy.window().its('document').its('referrer').should('equal', 'http://localhost:3500/fixtures/generic.html')
 })
 
-it('does not rewrite document.refferrer on visit if modifyObstructiveCode is false', () => {
+it('does not rewrite document.referrer on visit if modifyObstructiveCode is false', () => {
   Cypress.config('modifyObstructiveCode', false)
 
   cy.visit('http://localhost:3500/fixtures/generic.html')

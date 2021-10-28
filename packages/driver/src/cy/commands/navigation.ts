@@ -1093,11 +1093,17 @@ export default (Commands, Cypress, cy, state, config) => {
         // when using the visit the document referrer should be set to an empty string
         if (config('modifyObstructiveCode')) {
           Cypress.once('window:before:load', (contentWindow) => {
-            Object.defineProperty(contentWindow.document, 'referrer', {
-              get () {
-                return ''
-              },
-            })
+            try {
+              Object.defineProperty(contentWindow.document, 'referrer', {
+                get () {
+                  return ''
+                },
+              })
+            } catch (e) {
+              // if visit hasn't caused a reload
+              // we can't redefine existing property
+              // but we shouldn't throw either
+            }
           })
         }
 
