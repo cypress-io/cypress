@@ -25,7 +25,7 @@ const killChildProcess = () => {
   requireProcess = null
 }
 
-export async function requireAsync (filePath: string, options: RequireAsyncOptions): Promise<any> {
+export async function requireAsync <T = any> (filePath: string, options: RequireAsyncOptions): Promise<T> {
   return new Promise((resolve, reject) => {
     if (requireProcess) {
       debug('kill existing config process')
@@ -58,7 +58,7 @@ export async function requireAsync (filePath: string, options: RequireAsyncOptio
 
     ipc.on('loaded', (result) => {
       debug('resolving with result %o', result)
-      resolve(result)
+      resolve(JSON.parse(result))
     })
 
     ipc.on('load:error', (type, ...args) => {

@@ -142,6 +142,29 @@ export function id (projectRoot, options = {}) {
   })
 }
 
+type FunctionsAsString<T extends object> = {
+  [K in keyof T]: T[K] extends Function
+    ? `__serialized__:${string}`
+    : T[K] extends object
+      ? FunctionsAsString<T[K]>
+      : T[K]
+}
+
+const X = {
+  a: 1,
+  b: '2',
+  c: true,
+  d () {},
+  e: {
+    a: 1,
+    b () {},
+  },
+}
+
+type Z = typeof X
+
+type Serialized = FunctionsAsString<Z>
+
 export function read (projectRoot, options: SettingsOptions = {}) {
   if (options.configFile === false) {
     return Promise.resolve({})
@@ -149,7 +172,7 @@ export function read (projectRoot, options: SettingsOptions = {}) {
 
   const file = pathToConfigFile(projectRoot, options)
 
-  return requireAsync(file, {
+  return requireAsync<FunctionsAsString<Cypress.ConfigOptions>>(file, {
     projectRoot,
     loadErrorCode: 'CONFIG_FILE_ERROR',
   })

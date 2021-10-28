@@ -3,6 +3,7 @@ const stripAnsi = require('strip-ansi')
 const debug = require('debug')('cypress:server:require_async:child')
 const tsNodeUtil = require('./ts_node')
 const util = require('../plugins/util')
+const EventEmitter = require('events')
 const ipc = util.wrapIpc(process)
 
 require('./suppress_warnings').suppress()
@@ -56,9 +57,30 @@ function run (ipc, requiredFile, projectRoot) {
       debug('try loading', requiredFile)
       const exp = require(requiredFile)
 
-      const result = exp.default || exp
+      const result = exp.default || exp // as Cypress.Config
 
-      ipc.send('loaded', result)
+      ipc.send('loaded', JSON.stringify(result, (k, v) => {
+        if (typeof v === 'function') {
+          return `__serialized__:${v.toString()}`
+        }
+
+        return v
+      }))
+
+      const e2eOn = new EventEmitter()
+      const ctOn = new EventEmitter()
+
+      if (result.e2e.setupNodeEvents) {
+        try {
+          Promise.resolve(result.e2e.setupNodeEvents(e2eOn, result))
+        } catch {
+          //
+        }
+      }
+
+      if (result.component.setupNodeEvents) {
+        Promise.resolve(result.component.setupNodeEvents(ctOn, result))
+      }
 
       debug('config %o', result)
     } catch (err) {

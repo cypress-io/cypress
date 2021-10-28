@@ -1,5 +1,6 @@
-export default {
-  '$schema': '../../cli/schema/cypress.schema.json',
+import { defineConfig } from 'cypress'
+
+export default defineConfig({
   'projectId': 'sehy69',
   'viewportWidth': 800,
   'viewportHeight': 850,
@@ -24,4 +25,4 @@ export default {
     'integrationFolder': 'cypress/e2e/integration',
     'pluginsFile': 'cypress/e2e/plugins/index.ts',
   },
-}
+})
