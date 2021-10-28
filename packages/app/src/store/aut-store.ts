@@ -8,7 +8,7 @@ interface AutStoreState {
   isLoadingUrl: boolean
   isLoading: boolean
   isRunning: boolean
-  viewportUpdateCallback: (() => void)  | null
+  viewportUpdateCallback: (() => void) | null
 }
 
 export const useAutStore = defineStore({
@@ -23,7 +23,7 @@ export const useAutStore = defineStore({
       viewportWidth: 1000,
       isLoading: false,
       isRunning: false,
-      viewportUpdateCallback: null
+      viewportUpdateCallback: null,
     }
   },
 
@@ -61,7 +61,7 @@ export const useAutStore = defineStore({
       this.url = undefined
       this.highlightUrl = false
       this.isLoadingUrl = false
-    }
+    },
   },
 
   getters: {
@@ -70,6 +70,6 @@ export const useAutStore = defineStore({
         height: state.viewportHeight,
         width: state.viewportWidth,
       }
-    }
-  }
+    },
+  },
 })

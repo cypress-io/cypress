@@ -7,7 +7,6 @@
       <InlineSpecList :gql="props.gql" />
     </div>
 
-
     <div
       id="runner"
       :style="`width: ${runnerColumnWidth}px`"
