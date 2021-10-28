@@ -60,10 +60,16 @@
           outline: none;
           text-decoration: none;
         }
+
+        svg {
+          path:nth-child(2) {
+            fill: $gray-800;
+          }
+        }
       }
     }
 
-    i {
+    svg {
       margin-right: 3px;
     }
 

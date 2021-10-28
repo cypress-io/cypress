@@ -13,6 +13,10 @@ import { Scroller } from '../lib/scroller'
 import { AppState } from '../lib/app-state'
 import FileOpener from '../lib/file-opener'
 
+import OpenIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/technology-code-editor_x16.svg'
+import StudioIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/object-magic-wand-dark-mode_x16.svg'
+import WarningIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/warning_x16.svg'
+
 const Loading = () => (
   <div className='runnable-loading'>
     <div className='runnable-loading-animation'>
@@ -40,7 +44,7 @@ const RunnablesEmptyState = ({ spec, eventManager = events }: RunnablesEmptyStat
   return (
     <div className='no-tests'>
       <h2>
-        <i className='fas fa-exclamation-triangle' /> No tests found.
+        <WarningIcon /> No tests found.
       </h2>
       <p>Cypress could not detect tests in this file.</p>
       { !isAllSpecs && (
@@ -52,10 +56,10 @@ const RunnablesEmptyState = ({ spec, eventManager = events }: RunnablesEmptyStat
             relativeFile: spec.relative,
             absoluteFile: spec.absolute,
           }}>
-            <h3><i className='fas fa-external-link-alt' /> Open file in IDE</h3>
+            <h3><OpenIcon /> Open file in IDE</h3>
           </FileOpener>
           <p className='text-muted'>Write a test using your preferred text editor.</p>
-          <a className='open-studio' onClick={_launchStudio}><h3><i className='fas fa-magic' /> Create test with Cypress Studio</h3></a>
+          <a className='open-studio' onClick={_launchStudio}><h3><StudioIcon /> Create test with Cypress Studio</h3></a>
           <p className='open-studio-desc text-muted'>Use an interactive tool to author a test right here.</p>
         </>
       )}

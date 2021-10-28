@@ -24,7 +24,7 @@
 
     &.command-type-parent .command-controls .studio-command-remove {
       display: block;
-      padding-left: 5px;
+      margin-left: 5px;
 
       &:hover {
         color: $gray-200;
@@ -207,15 +207,21 @@
     text-align: right;
     width: 25px;
 
-    i {
+    svg {
       display: none;
     }
   }
 
   .command-state-pending > span > .command-wrapper .command-number {
-    i {
+    padding-top: 2px;
+
+    svg {
       line-height: 18px;
       display: inline-block;
+
+      .icon-light {
+        stroke: $gray-800;
+      }
     }
 
     span {
@@ -475,9 +481,14 @@
   }
 
   .command-controls {
-    i {
-      padding: 2px;
+    svg {
       color: $gray-600;
+      cursor: pointer;
+      margin: 0px 2px;
+
+      &.command-invisible {
+        padding-top: 2px;
+      }
     }
 
     .studio-command-remove {
@@ -490,10 +501,6 @@
       font-size: 10px;
       line-height: 1.75;
       margin-left: 5px;
-    }
-
-    i:hover {
-      cursor: pointer;
     }
 
     label {
@@ -589,8 +596,10 @@
     padding-right: 8px;
     width: 25px;
 
-    i {
-      @extend .#{$fa-css-prefix}-caret-right;
+    svg {
+      transform: rotate(-90deg);
+      transition-duration: 150ms;
+      transition-property: transform;
     }
   }
 
@@ -605,8 +614,8 @@
 
   .command-is-open > span > .command-wrapper {
     .command-expander {
-      i {
-        @extend .#{$fa-css-prefix}-caret-down;
+      svg {
+        transform: rotate(0deg);
       }
     }
 
@@ -725,7 +734,7 @@
           }
         }
 
-        .command-controls i {
+        .command-controls svg {
           color: $pending;
 
           &:hover {

@@ -1,6 +1,6 @@
 @mixin runnable-state-active {
-    @extend .#{$fa-css-prefix}-sync-alt;
     @extend .#{$fa-css-prefix}-spin;
+    content: url('../../../frontend-shared/src/assets/icons/status-pending_x12.svg');
 }
 
 @mixin runnable-state-processing {
@@ -13,23 +13,19 @@
 }
 
 @mixin runnable-state-skipped {
-    @extend .#{$fa-css-prefix}-ban;
-    color: $gray-500;
+    content: url('../../../frontend-shared/src/assets/icons/status-pending_x12.svg');
 }
 
 @mixin runnable-state-failed {
-    @extend .#{$fa-css-prefix}-times;
-    color: $fail;
+    content: url('../../../frontend-shared/src/assets/icons/status-failed_x12.svg');
 }
 
 @mixin runnable-state-passed {
-    @extend .#{$fa-css-prefix}-check;
-    color: $pass;
+    content: url('../../../frontend-shared/src/assets/icons/status-passed_x12.svg');
 }
 
 @mixin runnable-state-pending {
-    @extend .#{$fa-css-prefix}-circle-notch;
-    color: $indigo-500;
+    content: url('../../../frontend-shared/src/assets/icons/status-pending_x12.svg');
 }
 
 @mixin studio-state-passed {

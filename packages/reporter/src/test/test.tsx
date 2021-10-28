@@ -14,6 +14,8 @@ import TestModel from './test-model'
 import scroller, { Scroller } from '../lib/scroller'
 import Attempts from '../attempts/attempts'
 
+import CheckIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/checkmark_x16.svg'
+
 interface StudioControlsProps {
   events: Events
   model: TestModel
@@ -81,7 +83,11 @@ class StudioControls extends Component<StudioControlsProps, StudioControlsState>
             onClick={this._copy}
             onMouseLeave={this._endCopySuccess}
           >
-            <i className={copySuccess ? 'fas fa-check' : 'far fa-copy'} />
+            {copySuccess ? (
+              <CheckIcon />
+            ) : (
+              <i className='far fa-copy' />
+            )}
           </button>
         </Tooltip>
         <button className='studio-save' disabled={!studioIsNotEmpty} onClick={this._save}>Save Commands</button>

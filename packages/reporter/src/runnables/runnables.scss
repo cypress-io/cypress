@@ -55,10 +55,6 @@
       cursor: pointer;
     }
 
-    i {
-      margin-right: 5px;
-    }
-
     hr {
       margin-top: 1.6em;
       margin-bottom: 1.6em;
@@ -71,6 +67,10 @@
     .open-studio,
     .open-studio-desc {
       display: none;
+    }
+
+    svg {
+      vertical-align: text-top;
     }
   }
 
@@ -147,15 +147,13 @@
       line-height: 18px;
       margin-right: 5px;
       min-width: 12px;
-      height: 18px;
       text-align: center;
       font-size: 11px;
     }
 
     &.suite .collapsible-indicator  {
-      padding-left: 2px;
-      font-size: 14px;
-      color: $gray-700;
+      margin-left: 8px;
+      color: $gray-800;
     }
 
 
@@ -452,10 +450,6 @@
         display: none;
         font-size: 16px;
         padding: 3px 10px;
-
-        i {
-          width: 15px;
-        }
 
         &:hover, &:focus {
           background-color: $indigo-100;
