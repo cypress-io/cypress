@@ -53,8 +53,13 @@ query Runs {
         }
       }
     }
+    isAuthBrowserOpened
   }
-  ...LoginModalFragment
+  cloudViewer {
+    id
+    email
+    fullName
+  }
 }`
 
 const query = useQuery({ query: RunsDocument })
