@@ -59,8 +59,8 @@ function createIframeModel () {
     window.UnifiedRunner.eventManager,
     window.UnifiedRunner.MobX,
     {
-      recorder: window.UnifiedRunner.studioRecorder,
-      selectorPlaygroundModel: window.UnifiedRunner.selectorPlaygroundModel,
+      recorder: window.UnifiedRunner.eventManager.studioRecorder,
+      selectorPlaygroundModel: window.UnifiedRunner.eventManager.selectorPlaygroundModel,
     },
   )
 

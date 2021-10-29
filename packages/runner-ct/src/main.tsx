@@ -14,12 +14,21 @@ export function getSpecUrl (namespace: string, spec: FoundSpec, prefix = '') {
   return spec ? `${prefix}/${namespace}/iframes/${spec.absolute}` : ''
 }
 
+const eventManager = new EventManager(
+  $Cypress,
+  MobX,
+  selectorPlaygroundModel,
+  StudioRecorder,
+)
+
 const UnifiedRunner = {
   _,
 
   CypressJQuery: $Cypress.$,
 
   logger,
+
+  eventManager,
 
   dom,
 
@@ -45,8 +54,6 @@ const UnifiedRunner = {
 
   defaultEvents,
 
-  EventManager,
-
   decodeBase64: (base64: string) => {
     return JSON.parse(driverUtils.decodeBase64Unicode(base64))
   },
@@ -67,13 +74,6 @@ import State from './lib/state'
 import util from './lib/util'
 
 MobX.configure({ enforceActions: 'always' })
-
-const eventManager = new EventManager(
-  $Cypress,
-  MobX,
-  selectorPlaygroundModel,
-  StudioRecorder,
-)
 
 const Runner: any = {
   emit (evt: string, ...args: unknown[]) {
