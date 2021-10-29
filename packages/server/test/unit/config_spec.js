@@ -65,7 +65,7 @@ describe('lib/config', () => {
     it('sets projectRoot', function () {
       this.setup({}, { foo: 'bar' })
 
-      return config.get(this.projectRoot, { configFile: 'cypress.config.js' })
+      return config.get(this.projectRoot)
       .then((obj) => {
         expect(obj.projectRoot).to.eq(this.projectRoot)
 
@@ -76,7 +76,7 @@ describe('lib/config', () => {
     it('sets projectName', function () {
       this.setup({}, { foo: 'bar' })
 
-      return config.get(this.projectRoot, { configFile: 'cypress.config.js' })
+      return config.get(this.projectRoot)
       .then((obj) => {
         expect(obj.projectName).to.eq('project')
       })
@@ -88,7 +88,7 @@ describe('lib/config', () => {
 
       this.setup(settings, envSettings)
 
-      return config.get(this.projectRoot, { configFile: 'cypress.config.js' })
+      return config.get(this.projectRoot)
       .then(() => {
         expect(settings).to.deep.equal({ foo: 'bar' })
         expect(envSettings).to.deep.equal({ baz: 'qux' })
@@ -125,11 +125,11 @@ describe('lib/config', () => {
     context('validation', () => {
       beforeEach(function () {
         this.expectValidationPasses = () => {
-          return config.get(this.projectRoot, { configFile: 'cypress.config.js' }) // shouldn't throw
+          return config.get(this.projectRoot) // shouldn't throw
         }
 
         this.expectValidationFails = (errorMessage = 'validation error') => {
-          return config.get(this.projectRoot, { configFile: 'cypress.config.js' })
+          return config.get(this.projectRoot)
           .then(() => {
             throw new Error('should throw validation error')
           }).catch((err) => {

@@ -150,7 +150,7 @@ describe('exec run', function () {
     })
 
     it('spawns with --config-file set', function () {
-      return run.start({ configFile: 'special-cypress.config.js' })
+      return run.start()
       .then(() => {
         expect(spawn.start).to.be.calledWith(
           ['--run-project', process.cwd(), '--config-file', 'special-cypress.config.js'],

@@ -125,7 +125,9 @@ export function isComponentTesting (options: SettingsOptions = {}) {
 }
 
 export function configFile (options: SettingsOptions = {}) {
-  return options.configFile === false ? false : options.configFile
+  // default is only used in tests.
+  // This prevents a the change from becoming bigger than it should
+  return options.configFile === false ? false : (options.configFile || 'cypress.config.js')
 }
 
 export function id (projectRoot, options = {}) {

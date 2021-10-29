@@ -10,7 +10,7 @@ describe('lib/files', () => {
 
     this.todosPath = FixturesHelper.projectPath('todos')
 
-    return config.get(this.todosPath, { configFile: 'cypress.config.js' }).then((cfg) => {
+    return config.get(this.todosPath).then((cfg) => {
       this.config = cfg;
       ({ projectRoot: this.projectRoot } = cfg)
     })

@@ -370,7 +370,7 @@ describe('lib/cypress', () => {
       }).then(() => {
         expect(api.createProject).not.to.be.called
 
-        return (new ProjectBase({ projectRoot: this.noScaffolding, testingType: 'e2e', options: { configFile: 'cypress.config.js' } })).getProjectId()
+        return (new ProjectBase({ projectRoot: this.noScaffolding, testingType: 'e2e' })).getProjectId()
         .then(() => {
           throw new Error('should have caught error but did not')
         }).catch((err) => {
@@ -457,7 +457,7 @@ describe('lib/cypress', () => {
     })
 
     it('scaffolds out integration and example specs if they do not exist when not runMode', function () {
-      return config.get(this.pristineWithConfigPath, { configFile: 'cypress.config.js' })
+      return config.get(this.pristineWithConfigPath)
       .then((cfg) => {
         return fs.statAsync(cfg.integrationFolder)
         .then(() => {
@@ -518,7 +518,7 @@ describe('lib/cypress', () => {
     })
 
     it('scaffolds out fixtures + files if they do not exist', function () {
-      return config.get(this.pristineWithConfigPath, { configFile: 'cypress.config.js' })
+      return config.get(this.pristineWithConfigPath)
       .then((cfg) => {
         return fs.statAsync(cfg.fixturesFolder)
         .then(() => {
@@ -536,7 +536,7 @@ describe('lib/cypress', () => {
     it('scaffolds out support + files if they do not exist', function () {
       const supportFolder = path.join(this.pristineWithConfigPath, 'cypress/support')
 
-      return config.get(this.pristineWithConfigPath, { configFile: 'cypress.config.js' })
+      return config.get(this.pristineWithConfigPath)
       .then(() => {
         return fs.statAsync(supportFolder)
         .then(() => {
@@ -554,17 +554,17 @@ describe('lib/cypress', () => {
     })
 
     it('removes fixtures when they exist and fixturesFolder is false', function (done) {
-      config.get(this.idsPath, { configFile: 'cypress.config.js' })
+      config.get(this.idsPath)
       .then((cfg) => {
         this.cfg = cfg
 
         return fs.statAsync(this.cfg.fixturesFolder)
       }).then(() => {
-        return settings.read(this.idsPath, { configFile: 'cypress.config.js' })
+        return settings.read(this.idsPath)
       }).then((json) => {
         json.fixturesFolder = false
 
-        return settings.write(this.idsPath, json, { configFile: 'cypress.config.js' })
+        return settings.write(this.idsPath, json)
       }).then(() => {
         return cypress.start([`--run-project=${this.idsPath}`])
       }).then(() => {
@@ -612,15 +612,15 @@ describe('lib/cypress', () => {
     it('can change the reporter with cypress.config.js', function () {
       sinon.spy(Reporter, 'create')
 
-      return config.get(this.idsPath, { configFile: 'cypress.config.js' })
+      return config.get(this.idsPath)
       .then((cfg) => {
         this.cfg = cfg
 
-        return settings.read(this.idsPath, { configFile: 'cypress.config.js' })
+        return settings.read(this.idsPath)
       }).then((json) => {
         json.reporter = 'dot'
 
-        return settings.write(this.idsPath, json, { configFile: 'cypress.config.js' })
+        return settings.write(this.idsPath, json)
       }).then(() => {
         return cypress.start([`--run-project=${this.idsPath}`])
       }).then(() => {
@@ -678,7 +678,7 @@ describe('lib/cypress', () => {
     })
 
     it('logs error when supportFile doesn\'t exist', function () {
-      return settings.write(this.idsPath, { supportFile: '/does/not/exist' }, { configFile: 'cypress.config.js' })
+      return settings.write(this.idsPath, { supportFile: '/does/not/exist' })
       .then(() => {
         return cypress.start([`--run-project=${this.idsPath}`])
       }).then(() => {
@@ -784,7 +784,7 @@ describe('lib/cypress', () => {
     })
 
     it('logs error and exits when project has invalid cypress.config.js values', function () {
-      return settings.write(this.todosPath, { baseUrl: 'localhost:9999' }, { configFile: 'cypress.config.js' })
+      return settings.write(this.todosPath, { baseUrl: 'localhost:9999' })
       .then(() => {
         return cypress.start([`--run-project=${this.todosPath}`])
       }).then(() => {
@@ -1693,12 +1693,12 @@ describe('lib/cypress', () => {
 
       return user.set({ name: 'brian', authToken: 'auth-token-123' })
       .then(() => {
-        return settings.read(this.todosPath, { configFile: 'cypress.config.js' })
+        return settings.read(this.todosPath)
       }).then((json) => {
         // this should be overriden by the env argument
         json.baseUrl = 'http://localhost:8080'
 
-        return settings.write(this.todosPath, json, { configFile: 'cypress.config.js' })
+        return settings.write(this.todosPath, json)
       }).then(() => {
         return cypress.start([
           '--port=2121',
