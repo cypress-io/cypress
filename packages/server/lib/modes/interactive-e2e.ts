@@ -138,8 +138,12 @@ export = {
     // instance here instead of callback functions
     menu.set({
       withDevTools: isDev(),
+      withGraphiQL: isDev(),
       onLogOutClicked () {
         return bus.emit('menu:item:clicked', 'log:out')
+      },
+      getGraphQLPort: () => {
+        return ctx?.gqlServerPort
       },
     })
 
