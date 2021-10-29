@@ -93,7 +93,6 @@
         "nanoid",
         "path",
         "pinia",
-        "react-shadow-dom-retarget-events",
         "shiki",
         "socket.io-client",
         "vue",
