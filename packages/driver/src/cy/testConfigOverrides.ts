@@ -1,21 +1,42 @@
 import _ from 'lodash'
+import $errUtils from '../cypress/error_utils'
+import $stackUtils from '../cypress/stack_utils'
 
 // See Test Config Overrides in ../../../../cli/types/cypress.d.ts
 
-function mutateConfiguration (testConfigOverride, config, env) {
-  delete testConfigOverride.browser
+function mutateConfiguration (testConfigList, config, env) {
+  let testConfigOverrideKeys: any = []
+  let localConfigOverrides: any = {}
 
-  const testConfigOverrideKeys = Object.keys(testConfigOverride)
+  testConfigList.forEach(({ _testConfig: testConfigOverride, invocationDetails }) => {
+    delete testConfigOverride.browser
 
-  // only clone the keys that were overridden by the test overrides
+    testConfigOverrideKeys = testConfigOverrideKeys.concat(Object.keys(testConfigOverride))
+
+    try {
+      config(testConfigOverride)
+    } catch (e) {
+      let err = $errUtils.errByPath('config.invalid_test_override', {
+        errMsg: e.message,
+      })
+
+      err.parsedStack = [invocationDetails]
+      err.codeFrame = $stackUtils.getCodeFrame(err, undefined)
+      // the stack trace is internal to Cypress and doesn't provide the user with useful information
+      // err.stack = undefined
+      throw err
+    }
+
+    localConfigOverrides = _.extend(localConfigOverrides, testConfigOverride)
+  })
+
   const globalConfig = _.pick(config(), testConfigOverrideKeys)
   const globalEnv = _.clone(env())
 
-  const localConfigOverrides = config(testConfigOverride)
   const localConfigOverridesBackup = _.clone(localConfigOverrides)
 
-  if (testConfigOverride.env) {
-    env(testConfigOverride.env)
+  if (localConfigOverrides.env) {
+    env(localConfigOverrides.env)
   }
 
   const localTestEnv = env()
@@ -54,17 +75,23 @@ function mutateConfiguration (testConfigOverride, config, env) {
 export function getResolvedTestConfigOverride (test) {
   let curParent = test.parent
 
-  const testConfig = [test._testConfig]
+  const testConfig = [{
+    _testConfig: test._testConfig,
+    invocationDetails: test.invocationDetails,
+  }]
 
   while (curParent) {
     if (curParent._testConfig) {
-      testConfig.push(curParent._testConfig)
+      testConfig.unshift({
+        _testConfig: curParent._testConfig,
+        invocationDetails: curParent.invocationDetails,
+      })
     }
 
     curParent = curParent.parent
   }
 
-  return _.reduceRight(testConfig, (acc, opts) => _.extend(acc, opts), {})
+  return testConfig.filter((opt) => opt._testConfig !== undefined)
 }
 
 class TestConfigOverride {
@@ -73,7 +100,7 @@ class TestConfigOverride {
   restoreAndSetTestConfigOverrides (test, config, env) {
     if (this.restoreTestConfigFn) this.restoreTestConfigFn()
 
-    const resolvedTestConfig = test._testConfig || {}
+    const resolvedTestConfig = test._testConfig || []
 
     this.restoreTestConfigFn = mutateConfiguration(resolvedTestConfig, config, env)
   }

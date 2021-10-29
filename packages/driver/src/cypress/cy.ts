@@ -10,7 +10,6 @@ import $dom from '../dom'
 import $utils from './utils'
 import $errUtils from './error_utils'
 import $stackUtils from './stack_utils'
-import $sourceMapUtils from './source_map_utils'
 
 import $Chai from '../cy/chai'
 import $Xhrs from '../cy/xhrs'
@@ -224,7 +223,7 @@ export default {
           Cypress.action('app:window:before:unload', e)
 
           // return undefined so our beforeunload handler
-          // doesnt trigger a confirmation dialog
+          // doesn't trigger a confirmation dialog
           return undefined
         },
         onUnload (e) {
@@ -332,7 +331,7 @@ export default {
 
       // we look at whether or not nestedIndex is a number, because if it
       // is then we need to insert inside of our commands, else just push
-      // it onto the end of the queu
+      // it onto the end of the queue
       const index = _.isNumber(nestedIndex) ? nestedIndex : queue.length
 
       queue.insert(index, $Command.create(obj))
@@ -726,24 +725,7 @@ export default {
         queue.clear()
         timers.reset()
 
-        try {
-          testConfigOverrides.restoreAndSetTestConfigOverrides(test, Cypress.config, Cypress.env)
-        } catch (e) {
-          e.CaptureStackTrace = false
-          const err = $errUtils.errByPath('config.invalid_test_override', {
-            error: e,
-          })
-
-          err.name = 'ConfigOverrideError'
-
-          const { fileUrl, originalFile } = attrs.invocationDetails
-          const src = $sourceMapUtils.getSourceContents(fileUrl, originalFile)
-
-          err.codeFrame = $stackUtils.getCodeFrameFromSource(src, attrs.invocationDetails)
-          // the stack trace is internal to Cypress and doesn't provide the user with useful information
-          err.stack = undefined
-          $errUtils.throwErr(err)
-        }
+        testConfigOverrides.restoreAndSetTestConfigOverrides(test, Cypress.config, Cypress.env)
 
         return cy.removeAllListeners()
       },
@@ -1053,8 +1035,7 @@ export default {
               const originalDone = arguments[0]
 
               arguments[0] = (done = function (err) {
-                // TODO: handle no longer error
-                // when ended early
+                // TODO: handle no longer error when ended early
                 doneEarly()
 
                 originalDone(err)
@@ -1075,7 +1056,7 @@ export default {
 
             // if we returned a value from fn
             // and enqueued some new commands
-            // and the value isnt currently cy
+            // and the value isn't currently cy
             // or a promise
             if (ret &&
               (queue.length > currentLength) &&

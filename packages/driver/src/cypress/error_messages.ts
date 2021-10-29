@@ -247,11 +247,11 @@ export default {
 
   config: {
     invalid_argument: {
-      message: `Setting the config ${cmd('Cypress.config')} failed with the following validation error:\n\n{{error}}`,
+      message: `Setting the config via ${cmd('Cypress.config')} failed with the following validation error:\n\n{{errMsg}}`,
       docsUrl: 'https://on.cypress.io/config',
     },
     'invalid_test_override': {
-      message: `The config overrides passed to your test has the following validation error:\n{{error}}`,
+      message: `The config overrides passed to your test has the following validation error:\n\n{{errMsg}}`,
       docsUrl: 'https://on.cypress.io/config',
     },
   },
