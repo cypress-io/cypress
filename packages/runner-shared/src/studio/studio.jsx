@@ -7,11 +7,6 @@ import { StudioInstructionsModal } from './studio-modals'
 
 @observer
 class Studio extends Component {
-  constructor (props) {
-    super(props)
-    this.eventManager = props.eventManager
-  }
-
   state = {
     modalOpen: false,
     copySuccess: false,
@@ -114,18 +109,18 @@ class Studio extends Component {
   }
 
   _close = () => {
-    this.eventManager.emit('studio:cancel')
+    this.props.eventManager.emit('studio:cancel')
   }
 
   _restart = () => {
     this.props.model.reset()
-    this.eventManager.emit('restart')
+    this.props.eventManager.emit('restart')
   }
 
   _copy = () => {
     if (this.state.copySuccess) return
 
-    this.eventManager.emit('studio:copy:to:clipboard', () => {
+    this.props.eventManager.emit('studio:copy:to:clipboard', () => {
       this.setState({ copySuccess: true })
     })
   }

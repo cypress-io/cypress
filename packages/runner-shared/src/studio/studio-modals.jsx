@@ -71,11 +71,6 @@ export class StudioInstructionsModal extends Component {
 
 @observer
 export class StudioInitModal extends Component {
-  constructor (props) {
-    super(props)
-    this.eventManager = props.eventManager
-  }
-
   render () {
     return (
       <Dialog
@@ -119,7 +114,7 @@ export class StudioInitModal extends Component {
     this.props.eventManager.studioRecorder.clearRunnableIds()
   }
 
-  _start = () => this.eventManager.emit('studio:start')
+  _start = () => this.props.eventManager.emit('studio:start')
 }
 
 @observer
