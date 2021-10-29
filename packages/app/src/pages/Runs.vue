@@ -16,14 +16,14 @@
         />
       </div>
     </transition>
-    <RunsEmpty
-      v-else-if="!activeProject?.cloudProject?.runs?.nodes.length"
-      :project-id="activeProject?.projectId || ''"
-    />
     <RunsConnect
       v-else-if="query.data.value && (!activeProject?.projectId || !query.data.value.cloudViewer?.id)"
       :is-logged-in="!!query.data.value.cloudViewer?.id"
       :gql="query.data.value"
+    />
+    <RunsEmpty
+      v-else-if="!activeProject?.cloudProject?.runs?.nodes.length"
+      :project-id="activeProject?.projectId || ''"
     />
   </div>
 </template>
