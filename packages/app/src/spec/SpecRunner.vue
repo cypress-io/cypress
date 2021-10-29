@@ -18,7 +18,10 @@
         class="viewport origin-top-left"
         :style="viewportStyle"
       />
-      <SnapshotControls :event-manager="eventManager" />
+      <SnapshotControls
+        :event-manager="eventManager"
+        :get-aut-iframe="getAutIframeModel"
+      />
     </div>
 
     <div
@@ -34,7 +37,7 @@ import { REPORTER_ID, RUNNER_ID, getRunnerElement, getReporterElement, empty } f
 import { gql } from '@urql/core'
 import type { SpecRunnerFragment } from '../generated/graphql'
 import InlineSpecList from '../specs/InlineSpecList.vue'
-import { getEventManager, UnifiedRunnerAPI } from '../runner'
+import { getAutIframeModel, getEventManager, UnifiedRunnerAPI } from '../runner'
 import { useAutStore } from '../store'
 import type { BaseSpec } from '@packages/types'
 import SnapshotControls from './SnapshotControls.vue'
