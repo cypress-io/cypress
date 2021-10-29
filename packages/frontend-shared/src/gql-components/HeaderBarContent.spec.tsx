@@ -93,4 +93,181 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
     cy.contains('Project').should('not.exist')
     cy.contains('Test Page').should('be.visible')
   })
+
+  describe('prompts', function () {
+    describe('the CI prompt', function () {
+      context('opens on click', function () {
+        beforeEach(function () {
+          cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
+            onResult: (result, ctx) => {
+              result.app.activeProject.savedState = {
+                appWidth: 1121,
+                appHeight: 800,
+                appX: 805,
+                appY: 136,
+                isAppDevToolsOpen: false,
+                firstOpened: 1632852735727,
+                lastOpened: 1635453232070,
+              }
+            },
+            render: (gqlVal) => <div class="resize overflow-auto border-current border-1 h-700px"><HeaderBarContent gql={gqlVal} show-browsers={true} /></div>,
+          })
+        })
+
+        it('opens on menu item click', function () {
+          cy.contains('Docs').click()
+          cy.contains('Set up CI').click()
+        })
+
+        it('is dismissible from X icon', function () {
+          cy.get('.close').click()
+          cy.get('.prompt-ci1').should('not.exist')
+        })
+
+        it('is dismissible from close button', function () {
+          cy.get('.prompt-ci1').contains('Close').click()
+          cy.get('.prompt-ci1').should('not.exist')
+        })
+
+        it('links to various ci providers', function () {
+          cy.get('.ci-provider-button').click({ multiple: true })
+          cy.wrap(this.ipc.externalOpen).should('have.callCount', 5)
+        })
+
+        it('links to more information with correct utm_content', function () {
+          cy.get('.see-other-guides').click()
+          cy.wrap(this.ipc.externalOpen).should('have.been.calledWithMatch', {
+            url: 'https://on.cypress.io/setup-ci',
+            params: {
+              utm_content: 'Manual',
+            },
+          })
+
+          cy.get('.prompt-ci1').contains('Learn More').click()
+          cy.wrap(this.ipc.externalOpen).should('have.been.calledWithMatch', {
+            url: 'https://on.cypress.io/ci',
+            params: {
+              utm_content: 'Manual',
+            },
+          })
+        })
+      })
+
+      context('opens automatically', function () {
+        beforeEach(function () {
+          // 5 days from firstOpened in fixture
+          cy.clock(1609891200000)
+        })
+
+        it('opens when after 4 days from first open, no projectId, and not already shown', function () {
+          this.openProject.resolve({
+            ...this.config,
+            projectId: null,
+            state: {
+              ...this.config.state,
+              promptsShown: {},
+            },
+          })
+
+          cy.get('.prompt-ci1').should('be.visible')
+        })
+
+        it('sends correct utm_content when opened', function () {
+          this.openProject.resolve({
+            ...this.config,
+            projectId: null,
+            state: {
+              ...this.config.state,
+              promptsShown: {},
+            },
+          })
+
+          cy.get('.see-other-guides').click()
+          cy.wrap(this.ipc.externalOpen).should('have.been.calledWithMatch', {
+            url: 'https://on.cypress.io/setup-ci',
+            params: {
+              utm_content: 'Automatic',
+            },
+          })
+
+          cy.get('.prompt-ci1').contains('Learn More').click()
+          cy.wrap(this.ipc.externalOpen).should('have.been.calledWithMatch', {
+            url: 'https://on.cypress.io/ci',
+            params: {
+              utm_content: 'Automatic',
+            },
+          })
+        })
+
+        it('does not open when previously shown', function () {
+          // fixture marks prompt as shown
+          this.openProject.resolve(this.config)
+
+          cy.get('.prompt-ci1').should('not.exist')
+        })
+
+        it('does not open when projectId exists', function () {
+          // projectId exists in fixture
+          this.openProject.resolve(this.config)
+
+          cy.get('.prompt-ci1').should('not.exist')
+        })
+
+        it('does not open when another prompt has been shown recently', function () {
+          this.openProject.resolve({
+            ...this.config,
+            projectId: null,
+            state: {
+              ...this.config.state,
+              promptsShown: {
+                // within 24 hours before the stubbed current time
+                dashboard1: 1609891100000,
+              },
+            },
+          })
+
+          cy.get('.prompt-ci1').should('not.exist')
+        })
+      })
+    })
+
+    describe('the orchestration prompt', function () {
+      it('is not open by default', function () {
+        cy.get('.prompt-orchestration1').should('not.exist')
+      })
+
+      context('opens on click', function () {
+        beforeEach(function () {
+          this.openProject.resolve(this.config)
+
+          cy.get('.docs-menu').trigger('mouseover')
+          cy.get('.docs-dropdown').should('be.visible')
+          cy.contains('Run tests faster').click()
+        })
+
+        it('opens on menu item click', function () {
+          // should open in beforeEach
+          cy.get('.prompt-orchestration1').should('be.visible')
+          cy.get('.docs-dropdown').should('not.exist')
+
+          cy.percySnapshot()
+        })
+
+        it('is dismissible from X icon', function () {
+          cy.get('.close').click()
+          cy.get('.prompt-orchestration1').should('not.exist')
+        })
+
+        it('is dismissible from close button', function () {
+          cy.get('.prompt-orchestration1').contains('Close').click()
+          cy.get('.prompt-orchestration1').should('not.exist')
+        })
+
+        it('links to more information', function () {
+          cy.get('.prompt-orchestration1').contains('Learn More').click()
+          cy.wrap(this.ipc.externalOpen).should('have.been.calledWithMatch', { url: 'https://on.cypress.io/smart-orchestration' })
+        })
+      })
+    })
+  })
 })
