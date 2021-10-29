@@ -4,7 +4,7 @@
  * Filter a list of files by a mix of glob pattern
  * and a search string that includes a file's relative
  * path.
- * 
+ *
  * Features to note: debouncing + loading
  * ==============================================
  * *                Debouncing
@@ -16,47 +16,61 @@
 -->
 
 <template>
-  <CreateSpecModalBody variant="bare" class="relative bg-white px-24px flex
-  flex-col">
+  <CreateSpecModalBody
+    variant="bare"
+    class="relative bg-white px-24px flex
+  flex-col"
+  >
     <FileMatch
-    class="sticky z-10 top-0px pt-24px pb-12px bg-white"
-    :matches="matches"
-    v-model:pattern="filePathSearch"
-    v-model:extensionPattern="localExtensionPattern"
+      v-model:pattern="filePathSearch"
+      v-model:extensionPattern="localExtensionPattern"
+      class="sticky z-10 top-0px pt-24px pb-12px bg-white"
+      :matches="matches"
     />
 
-    <div v-show="loading" data-testid="loading">Loading</div>
-    <FileList v-show="!loading"
-      @selectFile="selectFile"
+    <div
+      v-show="loading"
+      data-testid="loading"
+    >
+      Loading
+    </div>
+    <FileList
+      v-show="!loading"
       :files="filteredFiles"
       :search="filePathSearch"
+      @selectFile="selectFile"
     >
-    <template #no-results>
-      <NoResults
-        emptySearch
-        :search="noResults.search"
-        :message="noResults.message"
-        @clear="noResults.clear"/>
-    </template>
+      <template #no-results>
+        <NoResults
+          empty-search
+          :search="noResults.search"
+          :message="noResults.message"
+          @clear="noResults.clear"
+        />
+      </template>
     </FileList>
   </CreateSpecModalBody>
-  <div class="rounded-b w-full h-24px"></div>
+  <div class="rounded-b w-full h-24px" />
 </template>
 
 <script setup lang="ts">
-import { useVModels, debouncedWatch, useDebounce } from '@vueuse/core'
+import { computed, ref } from 'vue'
+import { debouncedWatch, useDebounce } from '@vueuse/core'
 import { useI18n } from '@cy/i18n'
+
+// eslint-disable-next-line no-duplicate-imports
+import type { Ref } from 'vue'
+
+import Button from '@cy/components/Button.vue'
+import NoResults from '@cy/components/NoResults.vue'
 import CreateSpecModalBody from './CreateSpecModalBody.vue'
 import FileList from './FileList.vue'
-import Button from '@cy/components/Button.vue'
 import FileMatch from '../../components/FileMatch.vue'
-import { computed, ref } from 'vue'
 
-import type { Ref } from 'vue'
-import NoResults from '@cy/components/NoResults.vue';
+type File = any // TODO: proper file typing
 
 const props = withDefaults(defineProps<{
-  files: any[]
+  files: File[]
   extensionPattern: string,
   loading?: boolean
 }>(), {
@@ -65,25 +79,33 @@ const props = withDefaults(defineProps<{
 
 const { t } = useI18n()
 
-type File = any
 const emits = defineEmits<{
   (eventName: 'selectFile', value: File)
   (eventName: 'update:extensionPattern', value: string)
 }>()
 
+// eslint-disable-next-line vue/no-setup-props-destructure
 const initialExtension = props.extensionPattern
 const localExtensionPattern = ref(initialExtension)
 const filePathSearch = ref('')
 
-const selectFile = (file) => { emits('selectFile', file) }
+const selectFile = (file) => {
+  emits('selectFile', file)
+}
 
 ///*------- Debounce -------*/
 
 const debounce = 200
+
+// Incorrectly firing
+// eslint-disable-next-line vue/no-setup-props-destructure
 const debouncedExtensionPattern = useDebounce(localExtensionPattern, debounce)
+
 debouncedWatch(localExtensionPattern, (value) => {
   emits('update:extensionPattern', value)
-}, { debounce: debounce })
+}, { debounce })
+
+///*------- Searching files -------*/
 
 const filteredFiles = computed(() => {
   return props.files?.filter((file) => {
@@ -91,17 +113,25 @@ const filteredFiles = computed(() => {
   })
 })
 
-const matches = computed(() => ({
-  total: props.files.length,
-  found: filteredFiles.value.length
-}))
+///*------- Matches Indicator -------*/
 
-const noResults = computed(() => ({
-  search: filePathSearch.value || debouncedExtensionPattern.value,
-  message: filePathSearch.value ? t('noResults.defaultMessage') : t('components.fileSearch.noMatchesForExtension'),
-  clear: filePathSearch.value ?
-    () => filePathSearch.value = '' :
-    () => localExtensionPattern.value = initialExtension
-}))
+const matches = computed(() => {
+  return {
+    total: props.files.length,
+    found: filteredFiles.value.length,
+  }
+})
+
+///*------- No Results Options -------*/
+
+const noResults = computed(() => {
+  return {
+    search: filePathSearch.value || debouncedExtensionPattern.value,
+    message: filePathSearch.value ? t('noResults.defaultMessage') : t('components.fileSearch.noMatchesForExtension'),
+    clear: filePathSearch.value ?
+      () => filePathSearch.value = '' :
+      () => localExtensionPattern.value = initialExtension,
+  }
+})
 
 </script>
