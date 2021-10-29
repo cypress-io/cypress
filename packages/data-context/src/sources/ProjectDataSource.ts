@@ -88,13 +88,6 @@ export class ProjectDataSource {
     // Check first the config files, to be sure there are no 2 config files
     const configFile = await this.getDefaultConfigFilePath(projectRoot)
 
-    // Check if we have already cached the config
-    const config = await this.api.getProjectConfig(projectRoot)
-
-    if (config) {
-      return config
-    }
-
     return this.configLoader({
       configFile,
     }).load(projectRoot)

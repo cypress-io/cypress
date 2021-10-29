@@ -5,7 +5,6 @@ import type { NexusGenAbstractTypeMembers } from '@packages/graphql/src/gen/nxs.
 import type { AuthApiShape } from './actions/AuthActions'
 import debugLib from 'debug'
 import fsExtra from 'fs-extra'
-import { CoreDataShape, makeCoreData } from './data/coreDataShape'
 import { DataActions } from './DataActions'
 import {
   AppDataSource,
@@ -28,20 +27,14 @@ export interface DataContextConfig extends DataContextShellConfig {
   launchArgs: LaunchArgs
   launchOptions: OpenProjectLaunchOptions
   /**
-   * Default is to
-   */
-  coreData?: CoreDataShape
-  /**
    * Injected from the server
    */
   appApi: AppApiShape
   authApi: AuthApiShape
-  projectApi: ProjectApiShape
+  projectApi: (ctx: DataContext) => ProjectApiShape
 }
 
 export class DataContext extends DataContextShell {
-  private _coreData: CoreDataShape
-
   @cached
   get fs () {
     return fsExtra
@@ -54,7 +47,6 @@ export class DataContext extends DataContextShell {
 
   constructor (private config: DataContextConfig) {
     super(config)
-    this._coreData = config.coreData ?? makeCoreData()
   }
 
   async initializeData () {
@@ -96,10 +88,6 @@ export class DataContext extends DataContextShell {
 
   get launchOptions () {
     return this.config.launchOptions
-  }
-
-  get coreData () {
-    return this._coreData
   }
 
   get user () {
@@ -188,7 +176,7 @@ export class DataContext extends DataContextShell {
     return {
       appApi: this.config.appApi,
       authApi: this.config.authApi,
-      projectApi: this.config.projectApi,
+      projectApi: this.config.projectApi(this),
       busApi: this.config.rootBus,
     }
   }

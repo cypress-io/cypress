@@ -3,9 +3,14 @@ import type { Server } from 'http'
 import type { AddressInfo } from 'net'
 import { DataEmitterActions } from './actions/DataEmitterActions'
 import { cached } from './util/cached'
+import { CoreDataShape, makeCoreData } from './data/coreDataShape'
 
 export interface DataContextShellConfig {
   rootBus: EventEmitter
+    /**
+   * Default is to
+   */
+     coreData?: CoreDataShape
 }
 
 // Used in places where we have to create a "shell" data context,
@@ -14,8 +19,11 @@ export class DataContextShell {
   private _gqlServer?: Server
   private _appServerPort: number | undefined
   private _gqlServerPort: number | undefined
+  private _coreData: CoreDataShape
 
-  constructor (private shellConfig: DataContextShellConfig = { rootBus: new EventEmitter }) {}
+  constructor (private shellConfig: DataContextShellConfig = { rootBus: new EventEmitter }) {
+    this._coreData = shellConfig.coreData ?? makeCoreData()
+  }
 
   setAppServerPort (port: number | undefined) {
     this._appServerPort = port
@@ -43,6 +51,10 @@ export class DataContextShell {
     return {
       busApi: this.shellConfig.rootBus,
     }
+  }
+
+  get coreData () {
+    return this._coreData
   }
 
   destroy () {

@@ -34,7 +34,6 @@ import { SpecsStore } from './specs-store'
 import { checkSupportFile, getDefaultConfigFilePath } from './project_utils'
 import type { FoundBrowser, OpenProjectLaunchOptions } from '@packages/types'
 import { DataContextShell } from '@packages/data-context/src/DataContextShell'
-import { getProjectConfig } from './cache'
 
 // Cannot just use RuntimeConfigOptions as is because some types are not complete.
 // Instead, this is an interface of values that have been manually validated to exist
@@ -706,7 +705,7 @@ export class ProjectBase<TServer extends Server> extends EE {
       this.options.configFile = await getDefaultConfigFilePath(this.projectRoot)
     }
 
-    let theCfg: Cfg = await config.get(this.projectRoot, this.options)
+    let theCfg: Cfg = await config.get(this.projectRoot, this.options, this.ctx)
 
     if (!theCfg.browsers || theCfg.browsers.length === 0) {
       // @ts-ignore - we don't know if the browser is headed or headless at this point.
@@ -861,10 +860,10 @@ export class ProjectBase<TServer extends Server> extends EE {
   async getProjectId () {
     await this.verifyExistence()
 
-    const config = await getProjectConfig(this.projectRoot)
+    const config = this.ctx.coreData.activeProjectConfig[this.projectRoot]
 
-    if (config?.projectId) {
-      return config.projectId
+    if (config?.settings.projectId) {
+      return config.settings.projectId
     }
 
     const readSettings = await settings.read(this.projectRoot, this.options)
