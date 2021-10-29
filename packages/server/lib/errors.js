@@ -705,14 +705,14 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
           There is a cypress.json file at the location below:
           ${arg1}
 
-          Cypress does not support any more 'cypress.json' config, migrate to 'cypress.config.{ts|js}'.
+          Cypress no longer supports 'cypress.json', please migrate to 'cypress.config.{ts|js}'.
           `
     case 'LEGACY_CONFIG_FILE':
       return stripIndent`
           There is both a \`${arg2}\` and a cypress.json file at the location below:
           ${arg1}
 
-          Cypress does not support any more 'cypress.json' config, remove it from your files.
+          Cypress no longer supports 'cypress.json' config, please remove it from your project.
           `
       // TODO: update with vetted cypress language
     case 'CONFIG_FILES_LANGUAGE_CONFLICT':

@@ -166,7 +166,7 @@ exports['e2e config throws error when cypress.json is found in project and need 
 There is a cypress.json file at the location below:
 /foo/bar/.projects/pristine
 
-Cypress does not support any more 'cypress.json' config, migrate to 'cypress.config.{ts|js}'.
+Cypress no longer supports 'cypress.json', please migrate to 'cypress.config.{ts|js}'.
 
 
 `
@@ -175,7 +175,7 @@ exports['e2e config throws error when cypress.json is found in project and cypre
 There is both a \`cypress.config.js\` and a cypress.json file at the location below:
 /foo/bar/.projects/multiples-config-files-with-json
 
-Cypress does not support any more 'cypress.json' config, remove it from your files.
+Cypress no longer supports 'cypress.json' config, please remove it from your project.
 
 
 `
