@@ -51,7 +51,7 @@
 import { computed } from 'vue'
 import ShikiHighlight from '@cy/components/ShikiHighlight.vue'
 import { useI18n } from '@cy/i18n'
-import TerminalPrompt from '../../../frontend-shared/src/components/TerminalPrompt.vue'
+import TerminalPrompt from '@cy/components/TerminalPrompt.vue'
 
 const { t } = useI18n()
 
