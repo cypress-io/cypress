@@ -516,13 +516,17 @@ commands:
     steps:
       - run: yarn verify:mocha:results <<parameters.expectedResultCount>>
 
-  clone-repo-and-checkout-release-branch:
+  clone-repo-and-checkout-branch:
     description: |
       Clones an external repo and then checks out the branch that matches the next version otherwise uses 'master' branch.
     parameters:
       repo:
         description: "Name of the github repo to clone like: cypress-example-kitchensink"
         type: string
+      pull_request_id:
+        description: Pull request number to check out before installing and testing
+        type: integer
+        default: 0
     steps:
       - restore_cached_binary
       - run:
@@ -530,6 +534,16 @@ commands:
           command: |
             git clone --depth 1 --no-single-branch https://github.com/cypress-io/<<parameters.repo>>.git /tmp/<<parameters.repo>>
             cd /tmp/<<parameters.repo>> && (git checkout $(node ./scripts/get-next-version) || true)
+      - when:
+            condition: <<parameters.pull_request_id>>
+            steps:
+              - run:
+                  name: Check out PR <<parameters.pull_request_id>>
+                  working_directory: /tmp/<<parameters.repo>>
+                  command: |
+                    git fetch origin pull/<<parameters.pull_request_id>>/head:pr-<<parameters.pull_request_id>>
+                    git checkout pr-<<parameters.pull_request_id>>
+                    git log -n 2
 
   test-binary-against-rwa:
     description: |
@@ -571,7 +585,7 @@ commands:
         type: string
         default: "CI=true yarn start"
     steps:
-      - clone-repo-and-checkout-release-branch:
+      - clone-repo-and-checkout-branch:
           repo: <<parameters.repo>>
       - when:
           condition: <<parameters.pull_request_id>>
@@ -701,18 +715,9 @@ commands:
         type: string
         default: "npm start --if-present"
     steps:
-      - clone-repo-and-checkout-release-branch:
+      - clone-repo-and-checkout-branch:
           repo: <<parameters.repo>>
-      - when:
-          condition: <<parameters.pull_request_id>>
-          steps:
-            - run:
-                name: Check out PR <<parameters.pull_request_id>>
-                working_directory: /tmp/<<parameters.repo>>
-                command: |
-                  git fetch origin pull/<<parameters.pull_request_id>>/head:pr-<<parameters.pull_request_id>>
-                  git checkout pr-<<parameters.pull_request_id>>
-                  git log -n 2
+          pull_request_id: <<parameters.pull_request_id>>
       - run:
           # Install deps + Cypress binary with yarn if yarn.lock present
           command: |
@@ -1620,7 +1625,7 @@ jobs:
   test-kitchensink:
     <<: *defaults
     steps:
-      - clone-repo-and-checkout-release-branch:
+      - clone-repo-and-checkout-branch:
           repo: cypress-example-kitchensink
           pull_request_id: 510
       - install-required-node
@@ -1655,7 +1660,7 @@ jobs:
     <<: *defaults
     resource_class: medium
     steps:
-      - clone-repo-and-checkout-release-branch:
+      - clone-repo-and-checkout-branch:
           repo: cypress-example-kitchensink
       - run:
           name: Install prod dependencies
@@ -1680,7 +1685,7 @@ jobs:
     <<: *defaults
     resource_class: medium
     steps:
-      - clone-repo-and-checkout-release-branch:
+      - clone-repo-and-checkout-branch:
           repo: cypress-test-tiny
       - run:
           name: Run test project
@@ -1914,7 +1919,7 @@ jobs:
     <<: *defaults
     steps:
       - restore_workspace_binaries
-      - clone-repo-and-checkout-release-branch:
+      - clone-repo-and-checkout-branch:
           repo: cypress-test-tiny
       - run:
           name: Install Cypress
