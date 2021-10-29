@@ -28,5 +28,8 @@ describe('<PromptContent />', { viewportWidth: 500, viewportHeight: 800 }, () =>
     .eq(0)
     .find('a')
     .should('have.attr', 'href', 'https://on.cypress.io/setup-ci-circleci?utm_medium=CI+Prompt+1&utm_campaign=Circle&utm_content=Manual')
+
+    cy.contains('a', defaultMessages.topNav.docsMenu.prompts.ci.intro)
+    .should('have.attr', 'href', 'https://on.cypress.io/ci?utm_medium=CI+Prompt+1&utm_campaign=Learn+More')
   })
 })
