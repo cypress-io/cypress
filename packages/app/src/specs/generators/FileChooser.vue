@@ -84,9 +84,7 @@ const emits = defineEmits<{
   (eventName: 'update:extensionPattern', value: string)
 }>()
 
-// eslint-disable-next-line vue/no-setup-props-destructure
-const initialExtension = props.extensionPattern
-const localExtensionPattern = ref(initialExtension)
+const localExtensionPattern = ref(props.extensionPattern)
 const filePathSearch = ref('')
 
 const selectFile = (file) => {
@@ -96,9 +94,6 @@ const selectFile = (file) => {
 ///*------- Debounce -------*/
 
 const debounce = 200
-
-// Incorrectly firing
-// eslint-disable-next-line vue/no-setup-props-destructure
 const debouncedExtensionPattern = useDebounce(localExtensionPattern, debounce)
 
 debouncedWatch(localExtensionPattern, (value) => {
@@ -130,7 +125,7 @@ const noResults = computed(() => {
     message: filePathSearch.value ? t('noResults.defaultMessage') : t('components.fileSearch.noMatchesForExtension'),
     clear: filePathSearch.value ?
       () => filePathSearch.value = '' :
-      () => localExtensionPattern.value = initialExtension,
+      () => localExtensionPattern.value = props.extensionPattern,
   }
 })
 
