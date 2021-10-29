@@ -140,12 +140,25 @@ const releasePackages = async (packages) => {
   // it would make sense to run each release simultaneously with something like Promise.all()
   // however this can cause a race condition within git (git lock throws an error)
   // so we run them one by one to avoid this
+  const failedReleases = []
+
   for (const name of packages) {
     console.log(`\nReleasing ${name}...`)
-    const { stdout } = await execa('npx', ['lerna', 'exec', '--scope', name, '--', 'npx', '--no-install', 'semantic-release'])
+    const { stdout, exitCode } = await execa('npx', ['lerna', 'exec', '--scope', name, '--', 'npx', '--no-install', 'semantic-release'])
 
-    console.log(`Released ${name} successfully:`)
+    if (exitCode !== 0) {
+      console.log(`Failed releasing ${name}:`)
+      failedReleases.push(name)
+    } else {
+      console.log(`Released ${name} successfully:`)
+    }
+
     console.log(stdout)
+  }
+
+  if (failedReleases.length) {
+    console.log(`\nFailed releasing: ${failedReleases.join(', ')}. Exiting...`)
+    process.exit(1)
   }
 
   console.log(`\nAll packages released successfully`)
