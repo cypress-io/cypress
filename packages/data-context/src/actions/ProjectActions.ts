@@ -1,7 +1,7 @@
 import type { CodeGenType, MutationAddProjectArgs, MutationAppCreateConfigFileArgs, MutationSetProjectPreferencesArgs, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
 import type { FindSpecs, FoundBrowser, FoundSpec, FullConfig, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions, Preferences, SettingsOptions } from '@packages/types'
 import path from 'path'
-import type { ProjectShape } from '../data/coreDataShape'
+import type { ActiveProjectShape, ProjectShape } from '../data/coreDataShape'
 
 import type { DataContext } from '..'
 import { SpecGenerator } from '../codegen'
@@ -58,19 +58,32 @@ export class ProjectActions {
 
     await this.clearActiveProject()
 
-    this.ctx.coreData.app.activeProject = {
+    // TODO: (Alejandro) - Refactor this
+    // Set initial properties, so we can set on it the config on the next update
+    this.setActiveProjectProperties({
       projectRoot,
       title,
       ctPluginsInitialized: false,
       e2ePluginsInitialized: false,
+      generatedSpec: null,
+      config: null,
+      configChildProcess: null,
+    })
+
+    this.setActiveProjectProperties({
       isCTConfigured: await this.ctx.project.isTestingTypeConfigured(projectRoot, 'component'),
       isE2EConfigured: await this.ctx.project.isTestingTypeConfigured(projectRoot, 'e2e'),
       preferences: await this.ctx.project.getProjectPreferences(title),
-      generatedSpec: null,
-      config: null,
-    }
+    })
 
     return this
+  }
+
+  private setActiveProjectProperties (activeProjectProperties: Partial<ActiveProjectShape>) {
+    this.ctx.coreData.app.activeProject = {
+      ...this.ctx.coreData.app.activeProject,
+      ...activeProjectProperties,
+    } as ActiveProjectShape
   }
 
   async loadProjects () {

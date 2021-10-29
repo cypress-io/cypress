@@ -4,6 +4,7 @@
 export * from './AppDataSource'
 export * from './BrowserDataSource'
 export * from './CloudDataSource'
+export * from './ConfigDataSource'
 export * from './FileDataSource'
 export * from './GitDataSource'
 export * from './ProjectDataSource'

@@ -66,7 +66,7 @@ describe('exec open', function () {
     })
 
     it('spawns with --config-file set', function () {
-      return open.start()
+      return open.start({ configFile: 'special-cypress.config.js' })
       .then(() => {
         expect(spawn.start).to.be.calledWith(
           ['--config-file', 'special-cypress.config.js'],

@@ -704,7 +704,7 @@ export class ProjectBase<TServer extends Server> extends EE {
   async initializeConfig (browsers: FoundBrowser[] = []): Promise<Cfg> {
     // set default for "configFile" if undefined
     if (this.options.configFile === undefined || this.options.configFile === null) {
-      this.options.configFile = await getDefaultConfigFilePath(this.projectRoot)
+      this.options.configFile = await getDefaultConfigFilePath(this.projectRoot, this.ctx)
     }
 
     let theCfg: Cfg = await config.get(this.projectRoot, this.options)

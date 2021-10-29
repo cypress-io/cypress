@@ -14,7 +14,6 @@ import * as settings from './util/settings'
 import Debug from 'debug'
 import pathHelpers from './util/path_helpers'
 import findSystemNode from './util/find_system_node'
-import { setProjectConfig } from './cache'
 
 export interface ConfigSettingsConfig {
   testingType: TestingType
@@ -216,18 +215,6 @@ export function get (projectRoot, options: {configFile?: string | false } = { co
       config: _.cloneDeep(settings),
       envFile: _.cloneDeep(envFile),
       options,
-    })
-  })
-  .then((fullConfig) => {
-    return setProjectConfig(projectRoot, fullConfig).then(() => {
-      return fullConfig
-    })
-  })
-  .catch((e) => {
-    // Cleanup the cache if there's an error to prevent showing stale data
-    return setProjectConfig(projectRoot, null)
-    .then(() => {
-      throw e
     })
   })
 }
