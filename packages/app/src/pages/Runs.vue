@@ -47,7 +47,7 @@ query Runs {
       projectId
       cloudProject {
         id
-        runs {
+        runs(first: 10) {
           nodes {
             id
             ...RunCard
