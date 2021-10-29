@@ -729,7 +729,7 @@ commands:
           working_directory: /tmp/<<parameters.repo>>
           environment:
             CYPRESS_INTERNAL_FORCE_SCAFFOLD: "1"
-            command: |
+          command: |
             if [[ -f cypress.json ]]; then
               rm -rf cypress.json
               echo 'module.exports = {}' > cypress.config.js
