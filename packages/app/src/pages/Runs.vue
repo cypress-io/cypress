@@ -24,6 +24,7 @@
     <RunsEmpty
       v-else
       :project-id="activeProject?.projectId || ''"
+      :project-name="activeProject?.title || ''"
     />
   </div>
 </template>
@@ -42,6 +43,7 @@ query Runs {
   app {
     activeProject {
       id
+      title
       projectId
       cloudProject {
         id

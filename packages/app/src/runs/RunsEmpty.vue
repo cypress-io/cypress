@@ -57,6 +57,7 @@ const { t } = useI18n()
 
 const props = defineProps<{
   projectId: string,
+  projectName: string,
 }>()
 
 const projectIdCode = computed(() => {
@@ -65,8 +66,8 @@ const projectIdCode = computed(() => {
 }`
 })
 
+// FIXME: replace with something coming from gql
 const configFilePath = 'cypress.config.js'
-const projectName = 'design-system'
 </script>
 
 <style scoped lang="scss">
