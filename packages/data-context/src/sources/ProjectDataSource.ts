@@ -23,6 +23,10 @@ export class ProjectDataSource {
     return path.basename(projectRoot)
   }
 
+  getCurrentProjectSavedState () {
+    return this.ctx._apis.projectApi.getCurrentProjectSavedState()
+  }
+
   async findSpecs (projectRoot: string, specType: Maybe<SpecType>) {
     const config = await this.ctx.project.getConfig(projectRoot)
     const specs = await this.api.findSpecs({

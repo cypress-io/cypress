@@ -559,6 +559,9 @@ type Project implements Node {
   projectId: String
   projectRoot: String!
 
+  """Project saved state"""
+  savedState: JSON
+
   """Specs for a project conforming to Relay Connection specification"""
   specs(
     """Returns the elements in the list that come after the specified cursor"""

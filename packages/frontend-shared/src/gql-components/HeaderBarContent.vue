@@ -118,6 +118,8 @@ fragment HeaderBar_HeaderBarContent on Query {
     activeProject {
       id
       title
+      config
+      savedState
     }
     ...TopNav
   }
@@ -138,6 +140,10 @@ const clearActiveProject = () => {
     clearActiveProjectMutation.executeMutation({})
   }
 }
+
+const promptState = computed(() => {
+  return props.gql?.app?.activeProject?.savedState
+})
 
 const props = defineProps<{
   gql: HeaderBar_HeaderBarContentFragment,

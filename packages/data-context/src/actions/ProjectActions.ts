@@ -25,6 +25,7 @@ export interface ProjectApiShape {
   clearProjectPreferences(projectTitle: string): Promise<unknown>
   clearAllProjectPreferences(): Promise<unknown>
   closeActiveProject(): Promise<unknown>
+  getCurrentProjectSavedState(): {} | undefined
 }
 
 export class ProjectActions {
@@ -249,6 +250,7 @@ export class ProjectActions {
 
     const parsed = path.parse(codeGenCandidate)
     const config = await this.ctx.project.getConfig(project.projectRoot)
+
     const getFileExtension = () => {
       if (codeGenType === 'integration') {
         const possibleExtensions = ['.spec', '.test', '-spec', '-test']

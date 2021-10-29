@@ -41,6 +41,9 @@ export function makeDataContext (options: MakeDataContextOptions) {
       getConfig (projectRoot: string) {
         return config.get(projectRoot)
       },
+      getCurrentProjectSavedState () {
+        return openProject.getConfig()?.state
+      },
       launchProject (browser: FoundBrowser, spec: Cypress.Spec, options?: LaunchOpts) {
         return openProject.launch({ ...browser }, spec, options)
       },
