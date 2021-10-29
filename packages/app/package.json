@@ -85,6 +85,7 @@
         "graphql-relay",
         "graphql/jsutils/Path",
         "gravatar",
+        "human-interval",
         "lodash",
         "mobx",
         "nanoid",

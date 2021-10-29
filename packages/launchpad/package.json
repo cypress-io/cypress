@@ -91,6 +91,7 @@
         "graphql-relay",
         "graphql/jsutils/Path",
         "gravatar",
+        "human-interval",
         "lodash",
         "lodash/clone",
         "path",
