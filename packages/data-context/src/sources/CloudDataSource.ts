@@ -47,7 +47,7 @@ export class CloudDataSource {
 
   /**
    * Executes the schema against a remote query. Keeps an urql client for the normalized caching,
-   * so we can respont quickly on first-load if we have data. Since this is ultimately being used
+   * so we can respond quickly on first-load if we have data. Since this is ultimately being used
    * as a remote request mechanism for a stitched schema, we reject the promise if we see any errors.
    */
   async executeRemoteGraphQL (config: CloudExecuteRemote): Promise<Partial<OperationResult>> {
