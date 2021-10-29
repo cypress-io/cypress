@@ -60,7 +60,7 @@ const props = defineProps<{
 }>()
 
 const projectIdCode = computed(() => {
-  return `export default {
+  return `${'export'} default {
   projectId: '${props.projectId}'
 }`
 })
