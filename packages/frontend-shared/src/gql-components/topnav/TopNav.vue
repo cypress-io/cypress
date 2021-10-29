@@ -92,16 +92,21 @@
   </TopNavList>
 
   <TopNavList
+    ref="promptsEl"
     variant="panel"
     role="region"
     aria-live="polite"
+    :force-open-state="forceOpenDocs"
+    @clear-force-open="forceOpenDocs = false"
   >
-    <template #heading="{ open }">
+    <template
+      #heading="{ open }"
+    >
       <i-cy-life-ring_x16
         class=" group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50 h-16px w-16px"
-        :class="open ? 'icon-dark-indigo-500 icon-light-indigo-50' : 'icon-dark-gray-500 icon-light-gray-100'"
+        :class="(open || forceOpenDocs) ? 'icon-dark-indigo-500 icon-light-indigo-50' : 'icon-dark-gray-500 icon-light-gray-100'"
       />
-      <span :class="{'text-indigo-600': open}">{{ t('topNav.docsMenu.docsHeading') }}</span>
+      <span :class="{'text-indigo-600': open || forceOpenDocs}">{{ t('topNav.docsMenu.docsHeading') }}</span>
     </template>
     <div
       v-if="docsMenuVariant === 'main'"
@@ -114,7 +119,6 @@
     </div>
     <div
       v-else
-      ref="promptsEl"
       class="w-484px"
     >
       <div class="relative border-b border-b-gray-50 px-24px py-18px text-18px">
@@ -150,7 +154,7 @@ import { allBrowsersIcons } from '../../../../frontend-shared/src/assets/browser
 import { gql, useMutation } from '@urql/vue'
 import { TopNavFragment, TopNav_LaunchOpenProjectDocument, TopNav_SetBrowserDocument } from '../../generated/graphql'
 import { useI18n } from '@cy/i18n'
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 // eslint-disable-next-line no-duplicate-imports
 import type { Ref } from 'vue'
 const { t } = useI18n()
@@ -158,6 +162,7 @@ import { onClickOutside, onKeyStroke } from '@vueuse/core'
 import DocsMenuContent from './DocsMenuContent.vue'
 
 const releasesUrl = 'https://github.com/cypress-io/cypress/releases/'
+const forceOpenDocs = ref(true)
 
 // TODO: will come from gql
 const versionList = [
@@ -232,10 +237,21 @@ const docsMenuVariant: Ref<'main' | 'orchestration' | 'ci'> = ref('main')
 
 const promptsEl: Ref<HTMLElement | null> = ref(null)
 
+watch(forceOpenDocs, (newVal) => {
+  if (newVal === true) {
+    docsMenuVariant.value = 'ci'
+  } else {
+    docsMenuVariant.value = 'main'
+  }
+}, {
+  immediate: true,
+})
+
 // reset docs menu if click or keyboard navigation happens outside
 // so it doesn't reopen on the one of the prompts
 
 onClickOutside(promptsEl, () => {
+  forceOpenDocs.value = false
   setTimeout(() => {
     // reset the content of the menu when
     docsMenuVariant.value = 'main'
