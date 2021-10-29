@@ -111,7 +111,7 @@ export class Server {
   constructor (options: any = {}) {
     this.options = _.defaults(options, serverDefaults)
 
-    // The function below is used as a callback for lodash
+    // The function below is used as a callback for lodash to cancel any pending xhrs
     this.cancelXhr = this.cancelXhr.bind(this)
   }
 
@@ -194,9 +194,7 @@ export class Server {
     const responser = _.isObject(route.response) ? JSON.stringify : null
 
     // add header properties for the xhr's id
-    // and the testId
     this.setHeader(xhr, 'id', xhr.id)
-    // setHeader(xhr, "testId", options.testId)
 
     this.setHeader(xhr, 'status', route.status)
     this.setHeader(xhr, 'response', route.response, responser)
