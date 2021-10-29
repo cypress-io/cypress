@@ -3,6 +3,7 @@
     class="px-6 py-15px border-b border-b-gray-100 bg-white"
     data-testid="header-bar"
   >
+    {{ cloudProjectId }}
     <div class="flex items-center justify-between">
       <div v-if="pageName">
         {{ pageName }}
@@ -98,13 +99,15 @@
 
 <script setup lang="ts">
 import { gql, useMutation } from '@urql/vue'
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { GlobalPageHeader_ClearActiveProjectDocument, HeaderBar_HeaderBarContentFragment } from '../generated/graphql'
 import TopNav from './topnav/TopNav.vue'
 import LoginModal from './topnav/LoginModal.vue'
 import UserAvatar from './topnav/UserAvatar.vue'
 import Auth from './Auth.vue'
 import { useI18n } from '@cy/i18n'
+import interval from 'human-interval'
+import { sortBy } from 'lodash'
 
 gql`
 mutation GlobalPageHeader_clearActiveProject {
@@ -130,6 +133,7 @@ fragment HeaderBar_HeaderBarContent on Query {
 const isLoginOpen = ref(false)
 const clearActiveProjectMutation = useMutation(GlobalPageHeader_ClearActiveProjectDocument)
 const email = computed(() => props.gql.cloudViewer?.email || undefined)
+const automaticOpen = ref(false)
 
 const openLogin = () => {
   isLoginOpen.value = true
@@ -145,6 +149,26 @@ const promptState = computed(() => {
   return props.gql?.app?.activeProject?.savedState
 })
 
+const cloudProjectId = computed(() => {
+  return props.gql?.app?.activeProject?.config?.find((item) => item.field === 'projectId')?.value
+})
+
+watch(cloudProjectId, (newVal) => {
+  if (newVal) {
+    for (const prompt of prompts) {
+      if (shouldShowPrompt(prompt)) {
+        openPrompt(prompt.slug)
+        automaticOpen.value = true
+
+        // only show one prompt at a time
+        return
+      }
+    }
+  }
+}, {
+  immediate: true,
+})
+
 const props = defineProps<{
   gql: HeaderBar_HeaderBarContentFragment,
   showBrowsers?: boolean,
@@ -152,5 +176,43 @@ const props = defineProps<{
 }>()
 
 const { t } = useI18n()
+
+const prompts = sortBy([
+  {
+    slug: 'ci1',
+    interval: interval('4 days'),
+    noProjectId: true,
+  },
+  {
+    slug: 'orchestration1',
+    noProjectId: true,
+  },
+], 'interval')
+
+function shouldShowPrompt (prompt) {
+  const timeSinceOpened = Date.now() - promptState.value.firstOpened
+
+  // prompt has been shown
+  // if (this._promptsShown && this._promptsShown[prompt.slug]) {
+  //   return false
+  // }
+
+  // enough time has passed
+  // no interval indicates never being shown automatically
+  if (!prompt.interval || timeSinceOpened < prompt.interval) {
+    return false
+  }
+
+  // if prompt requires no project id,
+  // check if project id exists
+  if (prompt.noProjectId && cloudProjectId.value) {
+    return false
+  }
+
+  return true
+}
+
+function openPrompt (slug: string) {
+}
 
 </script>
