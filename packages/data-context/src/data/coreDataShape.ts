@@ -63,11 +63,6 @@ export interface BaseErrorDataShape {
   stack?: string
 }
 
-export interface ActiveProjectConfig {
-  settings: Cypress.ConfigOptions
-  envFile: Cypress.ObjectLike
-}
-
 export interface CoreDataShape {
   baseError: BaseErrorDataShape | null
   dev: DevStateShape
@@ -75,9 +70,6 @@ export interface CoreDataShape {
   wizard: WizardDataShape
   user: AuthenticatedUserShape | null
   electron: ElectronShape
-  activeProjectConfig: {
-    [key: string]: ActiveProjectConfig | null
-  }
 }
 
 /**
@@ -85,7 +77,6 @@ export interface CoreDataShape {
  */
 export function makeCoreData (): CoreDataShape {
   return {
-    activeProjectConfig: {},
     baseError: null,
     dev: {
       refreshState: null,

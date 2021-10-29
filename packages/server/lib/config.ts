@@ -14,6 +14,7 @@ import * as settings from './util/settings'
 import Debug from 'debug'
 import pathHelpers from './util/path_helpers'
 import findSystemNode from './util/find_system_node'
+import { setProjectConfig } from './cache'
 
 export interface ConfigSettingsConfig {
   testingType: TestingType
@@ -24,7 +25,6 @@ const debug = Debug('cypress:server:config')
 
 import { options, breakingOptions } from './config_options'
 import { getProcessEnvVars } from './util/config'
-import type { DataContextShell } from '@packages/data-context/src/DataContextShell'
 
 export const CYPRESS_ENV_PREFIX = 'CYPRESS_'
 
@@ -204,29 +204,12 @@ export type FullConfig =
     resolved: ResolvedConfigurationOptions
   }
 
-export function get (projectRoot, options: {configFile?: string | false } = { configFile: undefined }, ctx?: DataContextShell): Promise<FullConfig> {
-  return Promise.resolve(ctx?.coreData.activeProjectConfig[projectRoot])
-  .then((config) => {
-    if (config) {
-      return Promise.resolve([config.settings, config.envFile])
-    }
-
-    return Promise.all([
-      settings.read(projectRoot, options).then(validateFile(options.configFile ?? 'cypress.config.{ts|js}')),
-      settings.readEnv(projectRoot).then(validateFile('cypress.env.json')),
-    ])
-  })
+export function get (projectRoot, options: {configFile?: string | false } = { configFile: undefined }): Promise<FullConfig> {
+  return Promise.all([
+    settings.read(projectRoot, options).then(validateFile(options.configFile ?? 'cypress.config.{ts|js}')),
+    settings.readEnv(projectRoot).then(validateFile('cypress.env.json')),
+  ])
   .spread((settings, envFile) => {
-    if (ctx) {
-      ctx.coreData.activeProjectConfig = {
-        ...ctx.coreData.activeProjectConfig,
-        [projectRoot]: {
-          settings,
-          envFile,
-        },
-      }
-    }
-
     return set({
       projectName: getNameFromRoot(projectRoot),
       projectRoot,
@@ -235,16 +218,17 @@ export function get (projectRoot, options: {configFile?: string | false } = { co
       options,
     })
   })
+  .then((fullConfig) => {
+    return setProjectConfig(projectRoot, fullConfig).then(() => {
+      return fullConfig
+    })
+  })
   .catch((e) => {
     // Cleanup the cache if there's an error to prevent showing stale data
-    if (ctx?.coreData.activeProjectConfig) {
-      ctx.coreData.activeProjectConfig = {
-        ...ctx.coreData.activeProjectConfig,
-        [projectRoot]: null,
-      }
-    }
-
-    throw e
+    return setProjectConfig(projectRoot, null)
+    .then(() => {
+      throw e
+    })
   })
 }
 

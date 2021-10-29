@@ -38,51 +38,52 @@ export function makeDataContext (options: MakeDataContextOptions) {
         return user.logOut()
       },
     },
-    projectApi (ctx: DataContext) {
-      return {
-        getConfig (projectRoot: string, options?: SettingsOptions) {
-          return config.get(projectRoot, options, ctx)
-        },
-        launchProject (browser: FoundBrowser, spec: Cypress.Spec, options?: LaunchOpts) {
-          return openProject.launch({ ...browser }, spec, options)
-        },
-        initializeProject (args: LaunchArgs, options: OpenProjectLaunchOptions, browsers: FoundBrowser[]) {
-          return openProject.create(args.projectRoot, args, options, browsers)
-        },
-        insertProjectToCache (projectRoot: string) {
-          cache.insertProject(projectRoot)
-        },
-        getProjectRootsFromCache () {
-          return cache.getProjectRoots()
-        },
-        findSpecs (payload: FindSpecs) {
-          return specsUtil.findSpecs(payload)
-        },
-        clearLatestProjectsCache () {
-          return cache.removeLatestProjects()
-        },
-        getProjectPreferencesFromCache () {
-          return cache.getProjectPreferences()
-        },
-        clearProjectPreferences (projectTitle: string) {
-          return cache.removeProjectPreferences(projectTitle)
-        },
-        clearAllProjectPreferences () {
-          return cache.removeAllProjectPreferences()
-        },
-        insertProjectPreferencesToCache (projectTitle: string, preferences: Preferences) {
-          cache.insertProjectPreferences(projectTitle, preferences)
-        },
-        removeProjectFromCache (path: string) {
-          return cache.removeProject(path)
-        },
-        closeActiveProject () {
-          return openProject.closeActiveProject()
-        },
-        error (type: string, ...args: any) {
-          throw errors.throw(type, ...args)
-        },
-      }
+    projectApi: {
+      getConfig (projectRoot: string, options?: SettingsOptions) {
+        return config.get(projectRoot, options)
+      },
+      launchProject (browser: FoundBrowser, spec: Cypress.Spec, options?: LaunchOpts) {
+        return openProject.launch({ ...browser }, spec, options)
+      },
+      initializeProject (args: LaunchArgs, options: OpenProjectLaunchOptions, browsers: FoundBrowser[]) {
+        return openProject.create(args.projectRoot, args, options, browsers)
+      },
+      insertProjectToCache (projectRoot: string) {
+        cache.insertProject(projectRoot)
+      },
+      getProjectRootsFromCache () {
+        return cache.getProjectRoots()
+      },
+      findSpecs (payload: FindSpecs) {
+        return specsUtil.findSpecs(payload)
+      },
+      getProjectConfig (projectRoot: string) {
+        return cache.getProjectConfig(projectRoot)
+      },
+      clearLatestProjectsCache () {
+        return cache.removeLatestProjects()
+      },
+      getProjectPreferencesFromCache () {
+        return cache.getProjectPreferences()
+      },
+      clearProjectPreferences (projectTitle: string) {
+        return cache.removeProjectPreferences(projectTitle)
+      },
+      clearAllProjectPreferences () {
+        return cache.removeAllProjectPreferences()
+      },
+      insertProjectPreferencesToCache (projectTitle: string, preferences: Preferences) {
+        cache.insertProjectPreferences(projectTitle, preferences)
+      },
+      removeProjectFromCache (path: string) {
+        return cache.removeProject(path)
+      },
+      closeActiveProject () {
+        return openProject.closeActiveProject()
+      },
+      error (type: string, ...args: any) {
+        throw errors.throw(type, ...args)
+      },
     },
   })
 }

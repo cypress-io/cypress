@@ -6,6 +6,7 @@ import { fs } from '../util/fs'
 import { requireAsync } from './require_async'
 import Debug from 'debug'
 import type { SettingsOptions } from '@packages/types'
+import { getProjectConfig } from '../cache'
 
 const debug = Debug('cypress:server:settings')
 
@@ -130,7 +131,13 @@ export function configFile (options: SettingsOptions = {}) {
 }
 
 export function id (projectRoot, options = {}) {
-  return read(projectRoot, options)
+  return getProjectConfig(projectRoot).then((config) => {
+    if (config) {
+      return Promise.resolve(config)
+    }
+
+    return read(projectRoot, options)
+  })
   .then((config) => config.projectId)
   .catch(() => {
     return null
