@@ -1,6 +1,7 @@
 import * as MobX from 'mobx'
 import $Cypress from '@packages/driver'
-import { EventManager, selectorPlaygroundModel, StudioRecorder } from '@packages/runner-shared'
+import { selectorPlaygroundModel, StudioRecorder } from '@packages/runner-shared'
+import { EventManager } from '@packages/app/src/runner/event-manager'
 import State from '../../src/lib/state'
 
 export const fakeConfig = { projectName: 'Project', env: {}, isTextTerminal: false } as Partial<Cypress.RuntimeConfigOptions>

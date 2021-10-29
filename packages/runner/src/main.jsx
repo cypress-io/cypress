@@ -6,7 +6,8 @@ import $Cypress from '@packages/driver'
 import App, { SPEC_LIST_WIDTH } from './app/app'
 import NoSpec from './errors/no-spec'
 import State from './lib/state'
-import { Container, EventManager, selectorPlaygroundModel, StudioRecorder } from '@packages/runner-shared'
+import { Container, selectorPlaygroundModel, StudioRecorder } from '@packages/runner-shared'
+import { EventManager } from '@packages/app/src/runner/event-manager'
 import util from './lib/util'
 
 const driverUtils = $Cypress.utils

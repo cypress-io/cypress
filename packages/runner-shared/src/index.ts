@@ -20,8 +20,6 @@ export * from './dom'
 
 export * from './logger'
 
-export * from './event-manager'
-
 export * from './automation'
 
 export * from './studio'
