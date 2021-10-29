@@ -1,9 +1,5 @@
 const { $ } = Cypress
 
-before(() => {
-  expect(Cypress.config('retries')).to.deep.eq({ runMode: 2, openMode: 0 })
-})
-
 beforeEach(() => {
   const isActuallyInteractive = Cypress.config('isInteractive')
 
@@ -13,9 +9,15 @@ beforeEach(() => {
   Cypress.config('isInteractive', true)
 
   if (!isActuallyInteractive) {
-    // necessary or else snapshots will not be taken
-    // and we can't test them
-    Cypress.config('numTestsKeptInMemory', 1)
+    Cypress.config({
+      // necessary or else snapshots will not be taken
+      // and we can't test them
+      'numTestsKeptInMemory': 1,
+      // forcing interactive mode so force retries
+      // when test started in 'runMode'
+      // only want retries for 'runMode'
+      'config': 2,
+    })
   }
 
   // remove all event listeners

@@ -5,13 +5,6 @@ const helpers = require('../../support/helpers')
 const { _, Promise, $ } = Cypress
 
 describe('src/cy/commands/navigation', () => {
-  before(() => {
-    expect(Cypress.config('retries')).to.deep.eq({
-      runMode: 2,
-      openMode: 0,
-    })
-  })
-
   context('#reload', () => {
     before(() => {
       cy
@@ -183,7 +176,6 @@ describe('src/cy/commands/navigation', () => {
       })
 
       it('throws passing 1 invalid argument', (done) => {
-        expect(Cypress.config('retries')).to.deep.eq({ runMode: 2, openMode: 0 })
         cy.on('fail', (err) => {
           expect(err.message).to.eq('`cy.reload()` can only accept a boolean or `options` as its arguments.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/reload')
