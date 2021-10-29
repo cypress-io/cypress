@@ -1,12 +1,12 @@
 <template>
   <div class="relative p-24px h-full overflow-y-scroll">
     <transition
-      v-if="query.fetching.value || activeProject?.cloudProject?.runs?.nodes"
+      v-if="query.fetching.value || activeProject?.cloudProject?.runs?.nodes.length"
       name="fade"
     >
       <RunsSkeleton v-if="query.fetching.value" />
       <div
-        v-else-if="activeProject?.cloudProject?.runs?.nodes"
+        v-else-if="activeProject?.cloudProject?.runs?.nodes.length"
         data-cy="runs"
       >
         <RunCard
@@ -22,7 +22,7 @@
       :gql="query.data.value"
     />
     <RunsEmpty
-      v-else-if="!activeProject?.cloudProject?.runs?.nodes.length"
+      v-else
       :project-id="activeProject?.projectId || ''"
     />
   </div>
