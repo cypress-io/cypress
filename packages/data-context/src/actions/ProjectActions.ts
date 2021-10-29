@@ -25,7 +25,6 @@ export interface ProjectApiShape {
   clearProjectPreferences(projectTitle: string): Promise<unknown>
   clearAllProjectPreferences(): Promise<unknown>
   closeActiveProject(): Promise<unknown>
-  getProjectConfig (projectRoot: string): Promise<FullConfig | null>
   error(type: string, ...args: any): Error
 }
 
@@ -66,9 +65,9 @@ export class ProjectActions {
       e2ePluginsInitialized: false,
       isCTConfigured: await this.ctx.project.isTestingTypeConfigured(projectRoot, 'component'),
       isE2EConfigured: await this.ctx.project.isTestingTypeConfigured(projectRoot, 'e2e'),
-      config: await this.ctx.project.getResolvedConfigFields(projectRoot),
       preferences: await this.ctx.project.getProjectPreferences(title),
       generatedSpec: null,
+      config: null,
     }
 
     return this
@@ -250,7 +249,8 @@ export class ProjectActions {
     }
 
     const parsed = path.parse(codeGenCandidate)
-    const config = await this.ctx.project.getConfig(project.projectRoot)
+    const config = await this.ctx.config.getConfigForProject(project.projectRoot)
+
     const getFileExtension = () => {
       if (codeGenType === 'integration') {
         const possibleExtensions = ['.spec', '.test', '-spec', '-test']

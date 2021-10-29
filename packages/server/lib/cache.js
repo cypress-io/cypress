@@ -145,19 +145,6 @@ module.exports = {
     return fileUtil.set({ USER: {} })
   },
 
-  // We may need to set this value every time the config file is read, or updated
-  // having it on the cache, will help us preventing to read the file on a cp
-  // to get the projectId
-  setProjectConfig (projectRoot, config) {
-    return fileUtil.set({ PROJECTS_CONFIG: { [projectRoot]: config } })
-  },
-
-  getProjectConfig (projectRoot) {
-    return fileUtil.get('PROJECTS_CONFIG').then((projects) => {
-      return projects && projects[projectRoot] ? projects[projectRoot] : null
-    })
-  },
-
   removeLatestProjects () {
     return fileUtil.set({ PROJECTS: [] })
   },

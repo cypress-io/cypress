@@ -5,7 +5,7 @@ import * as settings from './util/settings'
 import errors from './errors'
 import { fs } from './util/fs'
 import { escapeFilenameInUrl } from './util/escape_filename'
-import { CYPRESS_CONFIG_FILES, LEGACY_CONFIG_FILE } from './configFiles'
+import { makeLegacyDataContext } from './makeDataContext'
 
 const debug = Debug('cypress:server:project_utils')
 
@@ -133,32 +133,6 @@ export const checkSupportFile = async ({
   return
 }
 
-export async function getDefaultConfigFilePath (projectRoot: string): Promise<string | undefined> {
-  const filesInProjectDir = await fs.readdir(projectRoot)
-
-  const foundConfigFiles = [...CYPRESS_CONFIG_FILES, LEGACY_CONFIG_FILE].filter((file) => filesInProjectDir.includes(file))
-
-  // if we only found one default file, it is the one
-  if (foundConfigFiles.length === 1) {
-    const configFile = foundConfigFiles[0]
-
-    if (configFile === LEGACY_CONFIG_FILE) {
-      throw errors.throw('CONFIG_FILE_MIGRATION_NEEDED', projectRoot, configFile)
-    }
-
-    return configFile
-  }
-
-  // if we found more than one, throw a language conflict
-  if (foundConfigFiles.length > 1) {
-    if (foundConfigFiles.includes(LEGACY_CONFIG_FILE)) {
-      const foundFiles = foundConfigFiles.filter((f) => f !== LEGACY_CONFIG_FILE)
-
-      throw errors.throw('LEGACY_CONFIG_FILE', projectRoot, ...foundFiles)
-    }
-
-    throw errors.throw('CONFIG_FILES_LANGUAGE_CONFLICT', projectRoot, ...foundConfigFiles)
-  }
-
-  throw errors.get('NO_DEFAULT_CONFIG_FILE_FOUND', projectRoot)
+export async function getDefaultConfigFilePath (projectRoot: string, ctx = makeLegacyDataContext()): Promise<string | undefined> {
+  return ctx.config.getDefaultConfigBasename(projectRoot)
 }

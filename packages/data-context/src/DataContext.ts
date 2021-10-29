@@ -20,6 +20,7 @@ import {
 } from './sources/'
 import { cached } from './util/cached'
 import { DataContextShell, DataContextShellConfig } from './DataContextShell'
+import { ConfigDataSource } from './sources/ConfigDataSource'
 
 const IS_DEV_ENV = process.env.CYPRESS_INTERNAL_ENV !== 'production'
 
@@ -52,9 +53,9 @@ export class DataContext extends DataContextShell {
     return path
   }
 
-  constructor (private config: DataContextConfig) {
-    super(config)
-    this._coreData = config.coreData ?? makeCoreData()
+  constructor (private _config: DataContextConfig) {
+    super(_config)
+    this._coreData = _config.coreData ?? makeCoreData()
   }
 
   async initializeData () {
@@ -68,14 +69,14 @@ export class DataContext extends DataContextShell {
       this.actions.auth.getUser(),
     ]
 
-    if (this.config.launchArgs.projectRoot) {
-      toAwait.push(this.actions.project.setActiveProject(this.config.launchArgs.projectRoot))
+    if (this._config.launchArgs.projectRoot) {
+      toAwait.push(this.actions.project.setActiveProject(this._config.launchArgs.projectRoot))
     }
 
-    if (this.config.launchArgs.testingType) {
+    if (this._config.launchArgs.testingType) {
       // It should be possible to skip the first step in the wizard, if the
       // user already told us the testing type via command line argument
-      this.actions.wizard.setTestingType(this.config.launchArgs.testingType)
+      this.actions.wizard.setTestingType(this._config.launchArgs.testingType)
       this.actions.wizard.navigate('forward')
     }
 
@@ -87,15 +88,15 @@ export class DataContext extends DataContextShell {
   }
 
   get os () {
-    return this.config.os
+    return this._config.os
   }
 
   get launchArgs () {
-    return this.config.launchArgs
+    return this._config.launchArgs
   }
 
   get launchOptions () {
-    return this.config.launchOptions
+    return this._config.launchOptions
   }
 
   get coreData () {
@@ -158,6 +159,11 @@ export class DataContext extends DataContextShell {
   }
 
   @cached
+  get config () {
+    return new ConfigDataSource(this)
+  }
+
+  @cached
   get storybook () {
     return new StorybookDataSource(this)
   }
@@ -186,10 +192,10 @@ export class DataContext extends DataContextShell {
 
   get _apis () {
     return {
-      appApi: this.config.appApi,
-      authApi: this.config.authApi,
-      projectApi: this.config.projectApi,
-      busApi: this.config.rootBus,
+      appApi: this._config.appApi,
+      authApi: this._config.authApi,
+      projectApi: this._config.projectApi,
+      busApi: this._config.rootBus,
     }
   }
 

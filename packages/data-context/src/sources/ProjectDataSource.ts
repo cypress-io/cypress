@@ -1,5 +1,5 @@
 import type { CodeGenType, SpecType } from '@packages/graphql/src/gen/nxs.gen'
-import { FrontendFramework, FRONTEND_FRAMEWORKS, FullConfig, ResolvedFromConfig, RESOLVED_FROM, SettingsOptions, SpecFile, STORYBOOK_GLOB } from '@packages/types'
+import { FrontendFramework, FRONTEND_FRAMEWORKS, ResolvedFromConfig, RESOLVED_FROM, SpecFile, STORYBOOK_GLOB } from '@packages/types'
 import { scanFSForAvailableDependency } from 'create-cypress-tests/src/findPackageJson'
 import path from 'path'
 
@@ -21,6 +21,10 @@ export class ProjectDataSource {
 
   projectTitle (projectRoot: string) {
     return path.basename(projectRoot)
+  }
+
+  getConfig (projectRoot: string) {
+    return this.ctx.config.getConfigForProject(projectRoot)
   }
 
   async findSpecs (projectRoot: string, specType: Maybe<SpecType>) {
@@ -54,52 +58,6 @@ export class ProjectDataSource {
     return specs.find((x) => x.absolute === currentSpecAbs) ?? null
   }
 
-  private async getDefaultConfigFilePath (projectRoot: string) {
-    const cypressConfigFiles = ['cypress.config.js', 'cypress.config.ts']
-    const filesInProjectDir = await this.ctx.fs.readdir(projectRoot)
-
-    const foundConfigFiles = cypressConfigFiles.filter((file) => filesInProjectDir.includes(file))
-
-    if (foundConfigFiles.length === 1) {
-      const configFile = foundConfigFiles[0]
-
-      if (configFile === 'cypress.json') {
-        throw this.ctx._apis.projectApi.error('CONFIG_FILE_MIGRATION_NEEDED', projectRoot, configFile)
-      }
-
-      return configFile
-    }
-
-    // if we found more than one, throw a language conflict
-    if (foundConfigFiles.length > 1) {
-      if (foundConfigFiles.includes('cypress.json')) {
-        const foundFiles = foundConfigFiles.filter((f) => f !== 'cypress.json')
-
-        throw this.ctx._apis.projectApi.error('LEGACY_CONFIG_FILE', projectRoot, ...foundFiles)
-      }
-
-      throw this.ctx._apis.projectApi.error('CONFIG_FILES_LANGUAGE_CONFLICT', projectRoot, ...foundConfigFiles)
-    }
-
-    throw this.ctx._apis.projectApi.error('NO_DEFAULT_CONFIG_FILE_FOUND', projectRoot)
-  }
-
-  async getConfig (projectRoot: string) {
-    // Check first the config files, to be sure there are no 2 config files
-    const configFile = await this.getDefaultConfigFilePath(projectRoot)
-
-    // Check if we have already cached the config
-    const config = await this.api.getProjectConfig(projectRoot)
-
-    if (config) {
-      return config
-    }
-
-    return this.configLoader({
-      configFile,
-    }).load(projectRoot)
-  }
-
   async getResolvedConfigFields (projectRoot: string): Promise<ResolvedFromConfig[]> {
     const config = await this.getConfig(projectRoot)
 
@@ -127,12 +85,6 @@ export class ProjectDataSource {
 
       return { ...value, field: key }
     }) as ResolvedFromConfig[]
-  }
-
-  private configLoader (options?: SettingsOptions) {
-    return this.ctx.loader<string, FullConfig>((projectRoots) => {
-      return Promise.all(projectRoots.map((root) => this.ctx._apis.projectApi.getConfig(root, options)))
-    })
   }
 
   async isTestingTypeConfigured (projectRoot: string, testingType: 'e2e' | 'component') {

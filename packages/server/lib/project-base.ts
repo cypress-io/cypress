@@ -33,8 +33,9 @@ import preprocessor from './plugins/preprocessor'
 import { SpecsStore } from './specs-store'
 import { checkSupportFile, getDefaultConfigFilePath } from './project_utils'
 import type { FoundBrowser, OpenProjectLaunchOptions } from '@packages/types'
-import { DataContextShell } from '@packages/data-context/src/DataContextShell'
 import { getProjectConfig } from './cache'
+import { makeLegacyDataContext } from './makeDataContext'
+import type { DataContext } from '@packages/data-context'
 
 // Cannot just use RuntimeConfigOptions as is because some types are not complete.
 // Instead, this is an interface of values that have been manually validated to exist
@@ -68,7 +69,7 @@ export class ProjectBase<TServer extends Server> extends EE {
   public id: string
 
   protected watchers: Watchers
-  protected ctx: DataContextShell
+  protected ctx: DataContext
   protected _cfg?: Cfg
   protected _server?: TServer
   protected _automation?: Automation
@@ -108,7 +109,7 @@ export class ProjectBase<TServer extends Server> extends EE {
     this.spec = null
     this.browser = null
     this.id = createHmac('sha256', 'secret-key').update(projectRoot).digest('hex')
-    this.ctx = options.ctx ?? new DataContextShell()
+    this.ctx = options.ctx ?? makeLegacyDataContext()
 
     debug('Project created %o', {
       testingType: this.testingType,

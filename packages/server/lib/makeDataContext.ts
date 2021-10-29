@@ -1,11 +1,13 @@
 import { DataContext } from '@packages/data-context'
+import os from 'os'
+
 import specsUtil from './util/specs'
 import type { FindSpecs, FoundBrowser, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions, PlatformName, Preferences, SettingsOptions } from '@packages/types'
 import browserUtils from './browsers/utils'
 import auth from './gui/auth'
 import user from './user'
 import * as config from './config'
-import type { EventEmitter } from 'events'
+import { EventEmitter } from 'events'
 import { openProject } from './open_project'
 import cache from './cache'
 import errors from './errors'
@@ -16,6 +18,27 @@ interface MakeDataContextOptions {
   os: PlatformName
   rootBus: EventEmitter
   launchArgs: LaunchArgs
+}
+
+let legacyDataContext: DataContext | undefined
+
+// For testing
+export function clearLegacyDataContext () {
+  legacyDataContext = undefined
+}
+
+export function makeLegacyDataContext (launchArgs: LaunchArgs = {} as LaunchArgs): DataContext {
+  if (legacyDataContext && process.env.LAUNCHPAD) {
+    throw new Error(`Expected ctx to be passed as an arg, but used legacy data context`)
+  } else if (!legacyDataContext) {
+    legacyDataContext = makeDataContext({
+      rootBus: new EventEmitter,
+      launchArgs,
+      os: os.platform() as PlatformName,
+    })
+  }
+
+  return legacyDataContext
 }
 
 export function makeDataContext (options: MakeDataContextOptions) {
@@ -56,9 +79,6 @@ export function makeDataContext (options: MakeDataContextOptions) {
       },
       findSpecs (payload: FindSpecs) {
         return specsUtil.findSpecs(payload)
-      },
-      getProjectConfig (projectRoot: string) {
-        return cache.getProjectConfig(projectRoot)
       },
       clearLatestProjectsCache () {
         return cache.removeLatestProjects()
