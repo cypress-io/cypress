@@ -13,12 +13,12 @@
 
 <script lang="ts" setup>
 import { computed } from 'vue'
-import type { SnapshotMessageDescription } from './snapshot-store'
+import type { SnapshotMessageType } from './snapshot-store'
 
 const props = withDefaults(defineProps<{
   messageTitle?: string
   messageDescription?: string
-  messageType?: SnapshotMessageDescription
+  messageType?: SnapshotMessageType
 }>(), {
   messageTitle: undefined,
   messageDescription: undefined,
