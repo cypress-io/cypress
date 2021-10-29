@@ -6,6 +6,9 @@
 
 <route>
 {
-  name: "Runs Page"
+  name: "Runs Page",
+  meta: {
+    title: "Runs"
+  }
 }
 </route>

@@ -1,5 +1,6 @@
 import { useSnapshotStore } from '../spec/snapshot-store'
-import { MobxRunnerStore, useAutStore } from '../store'
+import { useAutStore } from '../store'
+import type { EventManager } from './event-manager'
 
 export interface AutSnapshot {
   id?: number
@@ -17,8 +18,6 @@ export interface AutSnapshot {
   }
 }
 
-type Fn = () => void
-
 export class IframeModel {
   isSnapshotPinned: boolean = false
   originalState?: AutSnapshot
@@ -26,12 +25,10 @@ export class IframeModel {
   intervalId?: number
 
   constructor (
-    private state: MobxRunnerStore,
     private detachDom: () => AutSnapshot,
     private restoreDom: (snapshot: any) => void,
     private highlightEl: ({ body }: any, opts: any) => void,
-    private eventManager: any,
-    private MobX: any,
+    private eventManager: EventManager,
     private studio: {
       selectorPlaygroundModel: any
       recorder: any
@@ -41,18 +38,27 @@ export class IframeModel {
   }
 
   listen () {
-    this.eventManager.on('run:start', this.MobX.action('run:start', this._beforeRun))
-    this.eventManager.on('run:end', this.MobX.action('run:end', this._afterRun))
+    this.eventManager.on('run:start', this._beforeRun)
+    this.eventManager.on('run:end', this._afterRun)
 
-    this.eventManager.on('viewport:changed', this.MobX.action('viewport:changed', this._updateViewport))
-    this.eventManager.on('config', this.MobX.action('config', (config: any) => {
+    this.eventManager.on('viewport:changed', this._updateViewport)
+    // TODO(lachlan): verify this is called, and if it actually needs to be.
+    // in CT/E2E/unified, because `listen` is called **after** this $Cypress has been
+    // created and this event has been emitted, so right now in production
+    // I don't think this is actually doing anything.
+    this.eventManager.on('config', (config: { viewportHeight: number, viewportWidth: number }) => {
       const { viewportWidth, viewportHeight } = config
 
       return this._updateViewport({ viewportHeight, viewportWidth })
-    }))
+    })
 
-    this.eventManager.on('url:changed', this.MobX.action('url:changed', this._updateUrl))
-    this.eventManager.on('page:loading', this.MobX.action('page:loading', this._updateLoadingUrl))
+    const autStore = useAutStore()
+
+    this.eventManager.on('url:changed', (url: string) => {
+      autStore.updateUrl(url)
+    })
+
+    this.eventManager.on('page:loading', this._updateLoadingUrl)
 
     this.eventManager.on('show:snapshot', this.setSnapshots)
     this.eventManager.on('hide:snapshot', this._clearSnapshots)
@@ -63,45 +69,49 @@ export class IframeModel {
 
   _beforeRun = () => {
     const snapshotStore = useSnapshotStore()
+    const autStore = useAutStore()
 
-    this.state.isLoading = false
-    this.state.isRunning = true
-    this.state.resetUrl()
+    autStore.setIsLoading(false)
+    autStore.setIsRunning(true)
+    autStore.resetUrl()
+
     this.studio.selectorPlaygroundModel.setEnabled(false)
     this._reset()
     snapshotStore.clearMessage()
   }
 
   _afterRun = () => {
-    this.state.isRunning = false
+    const autStore = useAutStore()
+
+    autStore.setIsRunning(false)
   }
 
-  _updateViewport = ({ viewportWidth, viewportHeight }, cb?: Fn) => {
-    this.state.updateDimensions(viewportWidth, viewportHeight)
+  _updateViewport = ({ viewportWidth, viewportHeight }, cb?: () => void) => {
+    const autStore = useAutStore()
+
+    autStore.updateDimensions(viewportWidth, viewportHeight)
 
     if (cb) {
-      this.state.setViewportUpdatedCallback(cb)
+      autStore.setViewportUpdatedCallback(cb)
     }
-  }
-
-  _updateUrl = (url: string) => {
-    this.state.url = url
   }
 
   _updateLoadingUrl = (isLoadingUrl: boolean) => {
-    this.state.isLoadingUrl = isLoadingUrl
+    const autStore = useAutStore()
+
+    autStore.setIsLoadingUrl(isLoadingUrl)
   }
 
   setSnapshots = (snapshotProps: AutSnapshot) => {
-    const store = useSnapshotStore()
+    const snapshotStore = useSnapshotStore()
     const autStore = useAutStore()
 
-    if (store.isSnapshotPinned) {
+    if (snapshotStore.isSnapshotPinned) {
       return
     }
 
-    if (this.state.isRunning) {
-      return store.setTestsRunningError()
+    if (autStore.isRunning) {
+      return snapshotStore.setTestsRunningError()
     }
 
     if (this.studio.recorder.isOpen) {
@@ -112,7 +122,7 @@ export class IframeModel {
 
     if (!snapshots || !snapshots.length) {
       this._clearSnapshots()
-      store.setMissingSnapshotMessage()
+      snapshotStore.setMissingSnapshotMessage()
 
       return
     }
@@ -150,9 +160,9 @@ export class IframeModel {
 
   /// todo(lachlan): figure out shape of these two args
   _showSnapshotVue = (snapshot: any, snapshotProps: AutSnapshot) => {
-    const store = useSnapshotStore()
+    const snapshotStore = useSnapshotStore()
 
-    store.showSnapshot(snapshot.name)
+    snapshotStore.showSnapshot(snapshot.name)
     this._restoreDom(snapshot, snapshotProps)
   }
 
@@ -227,11 +237,16 @@ export class IframeModel {
   }
 
   _studioOpenError () {
-    this.state.messageTitle = 'Cannot show Snapshot while creating commands in Studio'
-    this.state.messageType = 'warning'
+    const snapshotStore = useSnapshotStore()
+
+    snapshotStore.setMessage(
+      'Cannot show Snapshot while creating commands in Studio',
+      'warning',
+    )
   }
 
   _storeOriginalState () {
+    const autStore = useAutStore()
     const finalSnapshot = this.detachDom()
 
     if (!finalSnapshot) return
@@ -243,11 +258,11 @@ export class IframeModel {
       htmlAttrs,
       snapshot: finalSnapshot,
       snapshots: [],
-      url: this.state.url,
+      url: autStore.url || '',
       // TODO: use same attr for both runner and runner-ct states.
       // these refer to the same thing - the viewport dimensions.
-      viewportWidth: this.state.width,
-      viewportHeight: this.state.height,
+      viewportWidth: autStore.viewportWidth,
+      viewportHeight: autStore.viewportHeight,
     }
   }
 
@@ -256,8 +271,8 @@ export class IframeModel {
     this.intervalId = undefined
     this.originalState = undefined
 
-    const store = useSnapshotStore()
+    const snapshotStore = useSnapshotStore()
 
-    store.setSnapshotPinned(false)
+    snapshotStore.setSnapshotPinned(false)
   }
 }

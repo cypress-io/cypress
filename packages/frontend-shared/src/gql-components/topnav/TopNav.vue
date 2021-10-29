@@ -54,9 +54,10 @@
     <TopNavListItem
       v-for="browser in props.gql.browsers"
       :key="browser.id"
-      class="px-16px py-12px min-w-240px"
+      class="px-16px py-12px min-w-240px cursor-pointer"
       :class="browser.isSelected ? 'bg-jade-50' : ''"
       :selectable="!browser.isSelected"
+      @click="handleBrowserChoice(browser)"
     >
       <template #prefix>
         <!-- setting both width and min-width on these icons looks odd,
@@ -67,11 +68,12 @@
         >
       </template>
       <div>
-        <div
+        <button
+          class="hocus-link-default box-border"
           :class="browser.isSelected ? 'text-jade-600' : 'text-indigo-600'"
         >
           {{ browser.displayName }}
-        </div>
+        </button>
         <div
           class="font-normal text-gray-500 mr-20px whitespace-nowrap text-14px"
         >
@@ -145,8 +147,8 @@ import TopNavListItem from './TopNavListItem.vue'
 import TopNavList from './TopNavList.vue'
 import PromptContent from './PromptContent.vue'
 import { allBrowsersIcons } from '../../../../frontend-shared/src/assets/browserLogos'
-import { gql } from '@urql/vue'
-import type { TopNavFragment } from '../../generated/graphql'
+import { gql, useMutation } from '@urql/vue'
+import { TopNavFragment, TopNav_LaunchOpenProjectDocument, TopNav_SetBrowserDocument } from '../../generated/graphql'
 import { useI18n } from '@cy/i18n'
 import { ref } from 'vue'
 // eslint-disable-next-line no-duplicate-imports
@@ -197,9 +199,33 @@ fragment TopNav on App {
 }
 `
 
+gql`
+mutation TopNav_LaunchOpenProject  {
+  launchOpenProject
+}
+`
+
+gql`
+mutation TopNav_SetBrowser($id: ID!) {
+  launchpadSetBrowser(id: $id)
+}
+`
+
+const launchOpenProject = useMutation(TopNav_LaunchOpenProjectDocument)
+const setBrowser = useMutation(TopNav_SetBrowserDocument)
+
+const launch = () => {
+  launchOpenProject.executeMutation({})
+}
+
+const handleBrowserChoice = async (browser) => {
+  await setBrowser.executeMutation({ id: browser.id })
+  launch()
+}
+
 const props = defineProps<{
   gql: TopNavFragment,
-  showBrowsers?: Boolean
+  showBrowsers?: boolean
 }>()
 
 const docsMenuVariant: Ref<'main' | 'orchestration' | 'ci'> = ref('main')

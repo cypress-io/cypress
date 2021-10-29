@@ -13,8 +13,9 @@
   "reporterOptions": {
     "configFile": "../../mocha-reporter-config.json"
   },
+  "componentFolder": "src",
   "component": {
-    "componentFolder": "src/components"
+    "testFiles": "**/*.spec.{js,ts,tsx,jsx}"
   },
   "e2e": {
     "supportFile": "cypress/e2e/support/e2eSupport.ts"
