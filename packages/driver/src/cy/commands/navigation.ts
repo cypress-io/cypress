@@ -9,21 +9,10 @@ import $utils from '../../cypress/utils'
 import $errUtils from '../../cypress/error_utils'
 import $Log from '../../cypress/log'
 import { $Location } from '../../cypress/location'
-import type { Emissions } from '../../cypress/runner'
+import type { RunState } from '../../cypress/runner'
 
 import debugFn from 'debug'
 const debug = debugFn('cypress:driver:navigation')
-
-export interface RunState {
-  startTime?: number
-  currentId?: number
-  emissions?: Emissions
-  tests?: unknown
-  passed?: number
-  failed?: number
-  pending?: number
-  numLogs?: number
-}
 
 let id = null
 let previousDomainVisited = null

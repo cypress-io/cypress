@@ -1,13 +1,13 @@
 import SnapshotControls from './SnapshotControls.vue'
 import { autSnapshot } from '../../cypress/support/fixtures'
 import { useSnapshotStore } from './snapshot-store'
-import { createEventManager } from '../../cypress/e2e/support/ctSupport'
+import { createEventManager, createTestAutIframe } from '../../cypress/e2e/support/ctSupport'
 
-function createTestAutIframe () {
-  return new class {
-    removeHighlights () {}
-  }
-}
+// function createTestAutIframe () {
+//   return new class {
+//     removeHighlights () {}
+//   }
+// }
 
 describe('SnapshotControls', () => {
   const mountSnapshotControls = (

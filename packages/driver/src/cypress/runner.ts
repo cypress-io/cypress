@@ -12,6 +12,7 @@ import $errUtils from './error_utils'
 import $stackUtils from './stack_utils'
 import { getResolvedTestConfigOverride } from '../cy/testConfigOverrides'
 import debugFn from 'debug'
+import { Emissions } from '@packages/types'
 
 const mochaCtxKeysRe = /^(_runnable|test)$/
 const betweenQuotesRe = /\"(.+?)\"/
@@ -25,11 +26,6 @@ const RUNNABLE_PROPS = '_testConfig id order title _titlePath root hookName hook
 
 const debug = debugFn('cypress:driver:runner')
 const debugErrors = debugFn('cypress:driver:errors')
-
-export interface Emissions {
-  started: Record<string, boolean>
-  ended: Record<string, boolean>
-}
 
 const fire = (event, runnable, Cypress) => {
   debug('fire: %o', { event })

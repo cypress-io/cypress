@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events'
 import Promise from 'bluebird'
 import type { BaseStore } from '@packages/runner-shared/src/store'
-import type { RunState } from '@packages/driver/src/cy/commands/navigation'
+import type { RunState } from '@packages/types/src/driver'
 import type MobX from 'mobx'
 
 import { client } from '@packages/socket/lib/browser'
@@ -9,7 +9,10 @@ import { client } from '@packages/socket/lib/browser'
 import { automation } from '@packages/runner-shared/src/automation'
 import { logger } from '@packages/runner-shared/src/logger'
 
-import type $Cypress from '@packages/driver'
+// type is default export of '@packages/driver'
+// cannot import because it's not type safe and tsc throw many type errors.
+type $Cypress = any
+
 const automationElementId = '__cypress-string' as const
 
 const PORT_MATCH = /serverPort=(\d+)/.exec(window.location.search)
@@ -19,7 +22,15 @@ const socketConfig = {
   transports: ['websocket'],
 }
 
+// @ts=ignore
 const ws = PORT_MATCH ? client(`http://localhost:${PORT_MATCH[1]}`, socketConfig) : client(socketConfig)
+
+declare global {
+  interface Window {
+    runnerWs: typeof ws
+    Cypress: typeof Cypress
+  }
+}
 
 const noop = () => {}
 
@@ -351,6 +362,7 @@ export class EventManager {
     // since CT AUT shares the window with the spec, we don't want to overwrite
     // our spec Cypress instance with the component's Cypress instance
     if (window.top === window) {
+      // @ts-ignore
       window.Cypress = Cypress
     }
 
