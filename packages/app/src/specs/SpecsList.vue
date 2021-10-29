@@ -48,7 +48,7 @@ fragment SpecNode_SpecsList on SpecEdge {
 
 gql`
 fragment Specs_SpecsList on App {
-  activeProject {
+  currentProject {
     id
     projectRoot
     specs: specs(first: 25) {
@@ -65,7 +65,7 @@ const props = defineProps<{
 }>()
 
 const search = ref('')
-const specs = computed(() => props.gql.activeProject?.specs?.edges)
+const specs = computed(() => props.gql.currentProject?.specs?.edges)
 
 // If this search becomes any more complex, push it into the server
 const sortByGitStatus = (

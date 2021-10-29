@@ -13,7 +13,7 @@ export class WizardActions {
   }
 
   async initializeOpenProject () {
-    if (!this.ctx.activeProject) {
+    if (!this.ctx.currentProject) {
       throw Error('No active project found. Cannot open a browser without an active project')
     }
 
@@ -22,13 +22,13 @@ export class WizardActions {
     }
 
     // do not re-initialize plugins and dev-server.
-    if (this.data.chosenTestingType === 'component' && this.ctx.activeProject.ctPluginsInitialized) {
+    if (this.data.chosenTestingType === 'component' && this.ctx.currentProject.ctPluginsInitialized) {
       this.ctx.debug('CT already initialized. Returning.')
 
       return
     }
 
-    if (this.data.chosenTestingType === 'e2e' && this.ctx.activeProject.e2ePluginsInitialized) {
+    if (this.data.chosenTestingType === 'e2e' && this.ctx.currentProject.e2ePluginsInitialized) {
       this.ctx.debug('E2E already initialized. Returning.')
 
       return
@@ -38,13 +38,13 @@ export class WizardActions {
 
     // Cannot have both the e2e & component plugins initialized at the same time
     if (this.ctx.wizardData.chosenTestingType === 'e2e') {
-      this.ctx.activeProject.e2ePluginsInitialized = true
-      this.ctx.activeProject.ctPluginsInitialized = false
+      this.ctx.currentProject.e2ePluginsInitialized = true
+      this.ctx.currentProject.ctPluginsInitialized = false
     }
 
     if (this.ctx.wizardData.chosenTestingType === 'component') {
-      this.ctx.activeProject.ctPluginsInitialized = true
-      this.ctx.activeProject.e2ePluginsInitialized = false
+      this.ctx.currentProject.ctPluginsInitialized = true
+      this.ctx.currentProject.e2ePluginsInitialized = false
     }
 
     this.ctx.debug('finishing initializing project')
@@ -120,9 +120,9 @@ export class WizardActions {
     }
 
     if (this.data.currentStep === 'welcome' && this.data.chosenTestingType === 'component') {
-      if (this.ctx.activeProject?.isFirstTimeCT) {
+      if (this.ctx.currentProject?.isFirstTimeCT) {
         this.navigateToStep('selectFramework')
-      } else if (!this.ctx.activeProject?.ctPluginsInitialized) {
+      } else if (!this.ctx.currentProject?.ctPluginsInitialized) {
         // not first time, and we haven't initialized plugins - initialize them
         this.navigateToStep('initializePlugins')
       } else {
@@ -134,9 +134,9 @@ export class WizardActions {
     }
 
     if (this.data.currentStep === 'welcome' && this.data.chosenTestingType === 'e2e') {
-      if (this.ctx.activeProject?.isFirstTimeE2E) {
+      if (this.ctx.currentProject?.isFirstTimeE2E) {
         this.navigateToStep('configFiles')
-      } else if (!this.ctx.activeProject?.e2ePluginsInitialized) {
+      } else if (!this.ctx.currentProject?.e2ePluginsInitialized) {
         // not first time, and we haven't initialized plugins - initialize them
         this.navigateToStep('initializePlugins')
       } else {
@@ -161,7 +161,7 @@ export class WizardActions {
 
     if (this.data.currentStep === 'configFiles') {
       if (this.data.chosenTestingType === 'component') {
-        if (this.ctx.activeProject?.ctPluginsInitialized) {
+        if (this.ctx.currentProject?.ctPluginsInitialized) {
           this.navigateToStep('setupComplete')
         } else {
           this.navigateToStep('initializePlugins')
@@ -169,7 +169,7 @@ export class WizardActions {
       }
 
       if (this.data.chosenTestingType === 'e2e') {
-        if (this.ctx.activeProject?.e2ePluginsInitialized) {
+        if (this.ctx.currentProject?.e2ePluginsInitialized) {
           this.navigateToStep('setupComplete')
         } else {
           this.navigateToStep('initializePlugins')

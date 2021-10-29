@@ -34,7 +34,7 @@ fragment SpecNode_InlineSpecList on SpecEdge {
 
 gql`
 fragment Specs_InlineSpecList on App {
-  activeProject {
+  currentProject {
     id
     projectRoot
     specs: specs(first: 25) {
@@ -58,5 +58,5 @@ const isCurrentSpec = (spec: SpecNode_InlineSpecListFragment) => {
 
 const router = useRouter()
 
-const specs = computed(() => props.gql.activeProject?.specs?.edges || [])
+const specs = computed(() => props.gql.currentProject?.specs?.edges || [])
 </script>

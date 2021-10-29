@@ -128,7 +128,7 @@ export const stubApp: MaybeResolver<App> = {
   __typename: 'App',
   healthCheck: 'OK',
   isInGlobalMode (source, args, ctx) {
-    return Boolean(ctx.app.activeProject)
+    return Boolean(ctx.app.currentProject)
   },
   browsers (source, args, ctx) {
     return ctx.app.browsers
@@ -139,8 +139,8 @@ export const stubApp: MaybeResolver<App> = {
   projects (source, args, ctx) {
     return ctx.app.projects
   },
-  activeProject (source, args, ctx) {
-    return ctx.app.activeProject
+  currentProject (source, args, ctx) {
+    return ctx.app.currentProject
   },
   isAuthBrowserOpened (source, args, ctx) {
     return ctx.app.isAuthBrowserOpened

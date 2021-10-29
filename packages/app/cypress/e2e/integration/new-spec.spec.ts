@@ -67,8 +67,8 @@ describe('<Button />', () => {
     })
 
     cy.withCtx((ctx, { testState }) => {
-      const { fs, path, activeProject } = ctx
-      const projectRoot = activeProject?.projectRoot as string
+      const { fs, path, currentProject } = ctx
+      const projectRoot = currentProject?.projectRoot as string
 
       for (const file of Object.values(testState.generatedSpecs) as string[]) {
         fs.removeSync(path.join(projectRoot, file))
@@ -87,7 +87,7 @@ describe('<Button />', () => {
     cy.wait('@codeGenSpec')
 
     cy.withCtx((ctx, { testState }) => {
-      const generatedSpec = ctx.activeProject?.generatedSpec
+      const generatedSpec = ctx.currentProject?.generatedSpec
 
       expect(generatedSpec?.spec.relative).eq(testState.generatedSpecs.story)
       const fileContent = ctx.fs.readFileSync(
@@ -103,7 +103,7 @@ describe('<Button />', () => {
     cy.wait('@codeGenSpec')
 
     cy.withCtx((ctx, { testState }) => {
-      const generatedSpec = ctx.activeProject?.generatedSpec
+      const generatedSpec = ctx.currentProject?.generatedSpec
 
       expect(generatedSpec?.spec.relative).eq(
         testState.generatedSpecs.storyCopy,
@@ -127,7 +127,7 @@ describe('<Button />', () => {
     cy.wait('@codeGenSpec')
 
     cy.withCtx((ctx, { testState }) => {
-      const generatedSpec = ctx.activeProject?.generatedSpec
+      const generatedSpec = ctx.currentProject?.generatedSpec
 
       expect(generatedSpec?.spec.relative).eq(
         testState.generatedSpecs.component,
@@ -146,7 +146,7 @@ describe('<Button />', () => {
     cy.wait('@codeGenSpec')
 
     cy.withCtx((ctx, { testState }) => {
-      const generatedSpec = ctx.activeProject?.generatedSpec
+      const generatedSpec = ctx.currentProject?.generatedSpec
 
       expect(generatedSpec?.spec.relative).eq(
         testState.generatedSpecs.componentCopy,
@@ -171,7 +171,7 @@ describe('<Button />', () => {
     cy.wait('@codeGenSpec')
 
     cy.withCtx((ctx, { testState }) => {
-      const generatedSpec = ctx.activeProject?.generatedSpec
+      const generatedSpec = ctx.currentProject?.generatedSpec
 
       expect(generatedSpec?.spec.relative).eq(
         testState.generatedSpecs.integration,
@@ -189,7 +189,7 @@ describe('<Button />', () => {
     cy.wait('@codeGenSpec')
 
     cy.withCtx((ctx, { testState }) => {
-      const generatedSpec = ctx.activeProject?.generatedSpec
+      const generatedSpec = ctx.currentProject?.generatedSpec
 
       expect(generatedSpec?.spec.relative).eq(
         testState.generatedSpecs.integrationCopy,

@@ -14,7 +14,7 @@ export interface ClientTestContext {
     selectedBrowser: Browser | null
     browsers: Browser[] | null
     projects: Project[]
-    activeProject: Project | null
+    currentProject: Project | null
     isInGlobalMode: boolean
     isAuthBrowserOpened: boolean
   }
@@ -59,7 +59,7 @@ export function makeClientTestContext (): ClientTestContext {
       browsers,
       projects: [testProject, createTestProject('another-test-project')],
       selectedBrowser: browsers[0],
-      activeProject: testProject,
+      currentProject: testProject,
       isInGlobalMode: false,
       isAuthBrowserOpened: false,
     },

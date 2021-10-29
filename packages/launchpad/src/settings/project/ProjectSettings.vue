@@ -1,13 +1,13 @@
 <template>
   <main class="divide-y divide-gray-200 children:pt-7 children:pb-7">
-    <template v-if="app?.activeProject">
+    <template v-if="app?.currentProject">
       <ProjectId
         class="pt-0"
-        :gql="app.activeProject"
+        :gql="app.currentProject"
       />
-      <template v-if="app.activeProject.cloudProject">
+      <template v-if="app.currentProject.cloudProject">
         <RecordKey
-          v-for="key of app.activeProject.cloudProject.recordKeys"
+          v-for="key of app.currentProject.cloudProject.recordKeys"
           :key="key.id"
           :gql="key"
         />
@@ -35,7 +35,7 @@ import { ProjectSettingsDocument } from '../../generated/graphql'
 gql`
 query ProjectSettings {
   app {
-    activeProject {
+    currentProject {
       id
       ...ProjectId
       cloudProject {

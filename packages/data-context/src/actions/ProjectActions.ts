@@ -35,12 +35,12 @@ export class ProjectActions {
   }
 
   async clearActiveProject () {
-    this.ctx.appData.activeProject = null
+    this.ctx.appData.currentProject = null
     await this.api.closeActiveProject()
 
     // TODO(tim): Improve general state management w/ immutability (immer) & updater fn
     this.ctx.coreData.app.isInGlobalMode = true
-    this.ctx.coreData.app.activeProject = null
+    this.ctx.coreData.app.currentProject = null
     this.ctx.coreData.app.activeTestingType = null
   }
 
@@ -57,7 +57,7 @@ export class ProjectActions {
 
     await this.clearActiveProject()
 
-    this.ctx.coreData.app.activeProject = {
+    this.ctx.coreData.app.currentProject = {
       projectRoot,
       title,
       ctPluginsInitialized: false,
@@ -84,7 +84,7 @@ export class ProjectActions {
   }
 
   async initializeActiveProject (options: OpenProjectLaunchOptions = {}) {
-    if (!this.ctx.activeProject?.projectRoot) {
+    if (!this.ctx.currentProject?.projectRoot) {
       throw Error('Cannot initialize project without an active project')
     }
 
@@ -96,7 +96,7 @@ export class ProjectActions {
 
     const launchArgs: LaunchArgs = {
       ...this.ctx.launchArgs,
-      projectRoot: this.ctx.activeProject.projectRoot,
+      projectRoot: this.ctx.currentProject.projectRoot,
       testingType: this.ctx.wizardData.chosenTestingType,
     }
 
@@ -151,7 +151,7 @@ export class ProjectActions {
   }
 
   async launchProject (testingType: TestingTypeEnum, options: LaunchOpts) {
-    if (!this.ctx.activeProject) {
+    if (!this.ctx.currentProject) {
       return null
     }
 
@@ -189,21 +189,21 @@ export class ProjectActions {
   }
 
   createConfigFile (args: MutationAppCreateConfigFileArgs) {
-    const project = this.ctx.activeProject
+    const project = this.ctx.currentProject
 
     if (!project) {
-      throw Error(`Cannot create config file without activeProject.`)
+      throw Error(`Cannot create config file without currentProject.`)
     }
 
     this.ctx.fs.writeFileSync(path.resolve(project.projectRoot, args.configFilename), args.code)
   }
 
   setCurrentSpec (id: string) {
-    if (!this.ctx.activeProject) {
-      throw Error(`Cannot set current spec without activeProject.`)
+    if (!this.ctx.currentProject) {
+      throw Error(`Cannot set current spec without currentProject.`)
     }
 
-    this.ctx.activeProject.currentSpecId = id
+    this.ctx.currentProject.currentSpecId = id
   }
 
   async clearLatestProjectCache () {
@@ -219,32 +219,32 @@ export class ProjectActions {
   }
 
   async createComponentIndexHtml (template: string) {
-    const project = this.ctx.activeProject
+    const project = this.ctx.currentProject
 
     if (!project) {
-      throw Error(`Cannot create index.html without activeProject.`)
+      throw Error(`Cannot create index.html without currentProject.`)
     }
 
-    if (this.ctx.activeProject?.isFirstTimeCT) {
-      const indexHtmlPath = path.resolve(this.ctx.activeProject.projectRoot, 'cypress/component/support/index.html')
+    if (this.ctx.currentProject?.isFirstTimeCT) {
+      const indexHtmlPath = path.resolve(this.ctx.currentProject.projectRoot, 'cypress/component/support/index.html')
 
       await this.ctx.fs.outputFile(indexHtmlPath, template)
     }
   }
 
   async setProjectPreferences (args: MutationSetProjectPreferencesArgs) {
-    if (!this.ctx.activeProject) {
-      throw Error(`Cannot save preferences without activeProject.`)
+    if (!this.ctx.currentProject) {
+      throw Error(`Cannot save preferences without currentProject.`)
     }
 
-    this.api.insertProjectPreferencesToCache(this.ctx.activeProject.title, { ...args })
+    this.api.insertProjectPreferencesToCache(this.ctx.currentProject.title, { ...args })
   }
 
   async codeGenSpec (codeGenCandidate: string, codeGenType: CodeGenType) {
-    const project = this.ctx.activeProject
+    const project = this.ctx.currentProject
 
     if (!project) {
-      throw Error(`Cannot create spec without activeProject.`)
+      throw Error(`Cannot create spec without currentProject.`)
     }
 
     const parsed = path.parse(codeGenCandidate)

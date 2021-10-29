@@ -71,11 +71,11 @@ export const Project = objectType({
       description: 'Currently selected spec',
       type: 'Spec',
       resolve: (source, args, ctx) => {
-        if (!ctx.activeProject || !ctx.activeProject.currentSpecId) {
+        if (!ctx.currentProject || !ctx.currentProject.currentSpecId) {
           return null
         }
 
-        return ctx.project.getCurrentSpecById(source.projectRoot, ctx.activeProject.currentSpecId)
+        return ctx.project.getCurrentSpecById(source.projectRoot, ctx.currentProject.currentSpecId)
       },
     })
 
@@ -129,7 +129,7 @@ export const Project = objectType({
     t.field('generatedSpec', {
       type: GeneratedSpec,
       resolve: (src, args, ctx) => {
-        const project = ctx.activeProject
+        const project = ctx.currentProject
 
         if (!project) {
           return null

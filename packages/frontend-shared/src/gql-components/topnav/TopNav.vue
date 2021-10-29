@@ -108,7 +108,7 @@
       class="flex p-16px gap-24px"
     >
       <DocsMenuContent
-        :active-project-exists="!!props.gql?.activeProject"
+        :active-project-exists="!!props.gql?.currentProject"
         @setDocsContent="docsMenuVariant = $event"
       />
     </div>
@@ -181,7 +181,7 @@ const versionList = [
 
 gql`
 fragment TopNav on App {
-  activeProject {
+  currentProject {
     id
   }
   selectedBrowser {

@@ -76,7 +76,7 @@ import IconRunsLine from '~icons/clarity/bullet-list-line'
 gql`
 query Layout {
   app {
-    activeProject {
+    currentProject {
       id
       title
     }
@@ -116,7 +116,7 @@ export default defineComponent({
 
     const setMenuItem = useMutation(NavigationMenuSetItemDocument)
 
-    const projectTitle = computed(() => result.data.value?.app.activeProject?.title)
+    const projectTitle = computed(() => result.data.value?.app.currentProject?.title)
 
     const handleSelect = (type: NavItem) => {
       setMenuItem.executeMutation({ type })

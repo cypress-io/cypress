@@ -23,7 +23,7 @@ exports['@packages/data-context initializeData should initialize 1'] = {
       "navItem": "settings",
       "browsers": {},
       "projects": [],
-      "activeProject": null,
+      "currentProject": null,
       "isInGlobalMode": false,
       "isAuthBrowserOpened": false
     },

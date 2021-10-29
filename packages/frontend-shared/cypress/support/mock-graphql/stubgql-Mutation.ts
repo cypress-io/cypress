@@ -23,7 +23,7 @@ export const stubMutation: MaybeResolver<Mutation> = {
     return true
   },
   setActiveProject (source, args, ctx) {
-    ctx.app.activeProject = ctx.app.projects.find((p) => p.projectRoot === args.path) ?? null
+    ctx.app.currentProject = ctx.app.projects.find((p) => p.projectRoot === args.path) ?? null
 
     return true
   },
@@ -34,7 +34,7 @@ export const stubMutation: MaybeResolver<Mutation> = {
     return true
   },
   clearActiveProject (source, args, ctx) {
-    ctx.app.activeProject = null
+    ctx.app.currentProject = null
 
     return true
   },
@@ -44,11 +44,11 @@ export const stubMutation: MaybeResolver<Mutation> = {
     return true
   },
   setCurrentSpec (source, args, ctx) {
-    if (!ctx.app.activeProject) {
+    if (!ctx.app.currentProject) {
       throw Error('Cannot set currentSpec without active project')
     }
 
-    ctx.app.activeProject.currentSpec = {
+    ctx.app.currentProject.currentSpec = {
       id: 'U3BlYzovVXNlcnMvbGFjaGxhbi9jb2RlL3dvcmsvY3lwcmVzczUvcGFja2FnZXMvYXBwL3NyYy9CYXNpYy5zcGVjLnRzeA==',
       __typename: 'Spec',
       absolute: '/Users/lachlan/code/work/cypress5/packages/app/src/Basic.spec.tsx',
@@ -73,11 +73,11 @@ export const stubMutation: MaybeResolver<Mutation> = {
     return ctx.app
   },
   codeGenSpec (source, args, ctx) {
-    if (!ctx.app.activeProject) {
+    if (!ctx.app.currentProject) {
       throw Error('Cannot set currentSpec without active project')
     }
 
-    ctx.app.activeProject.generatedSpec = {
+    ctx.app.currentProject.generatedSpec = {
       __typename: 'GeneratedSpec',
       spec: {
         __typename: 'FileParts',

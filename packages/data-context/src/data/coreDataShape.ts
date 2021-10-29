@@ -35,7 +35,7 @@ export interface AppDataShape {
   navItem: NexusGenEnums['NavItem']
   browsers: ReadonlyArray<FoundBrowser> | null
   projects: ProjectShape[]
-  activeProject: ActiveProjectShape | null
+  currentProject: ActiveProjectShape | null
   isInGlobalMode: boolean
   isAuthBrowserOpened: boolean
   activeTestingType: Maybe<TestingTypeEnum>
@@ -86,7 +86,7 @@ export function makeCoreData (): CoreDataShape {
       navItem: 'settings',
       browsers: null,
       projects: [],
-      activeProject: null,
+      currentProject: null,
       isInGlobalMode: false,
       isAuthBrowserOpened: false,
     },

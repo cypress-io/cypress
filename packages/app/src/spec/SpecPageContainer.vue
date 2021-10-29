@@ -1,5 +1,5 @@
 <template>
-  <div v-if="query.data.value?.app?.activeProject">
+  <div v-if="query.data.value?.app?.currentProject">
     <SpecRunnerContainer
       :gql="query.data.value.app"
     />

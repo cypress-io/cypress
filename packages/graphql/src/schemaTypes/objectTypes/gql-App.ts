@@ -6,7 +6,7 @@ export const App = objectType({
   name: 'App',
   description: 'Namespace for information related to the app',
   definition (t) {
-    t.field('activeProject', {
+    t.field('currentProject', {
       type: Project,
       description: 'Active project',
     })

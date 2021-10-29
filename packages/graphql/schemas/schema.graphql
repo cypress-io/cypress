@@ -4,14 +4,14 @@
 
 """Namespace for information related to the app"""
 type App {
-  """Active project"""
-  activeProject: Project
-
   """The mode the interactive runner was launched in"""
   activeTestingType: TestingTypeEnum
 
   """Browsers found that are compatible with Cypress"""
   browsers: [Browser!]
+
+  """Active project"""
+  currentProject: Project
 
   """See if the GraphQL server is alive"""
   healthCheck: String!

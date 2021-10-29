@@ -6,7 +6,7 @@
         <BaseError :gql="query.data.value.baseError" />
       </template>
       <template
-        v-else-if="query.data.value.app.isInGlobalMode && !query.data.value?.app.activeProject"
+        v-else-if="query.data.value.app.isInGlobalMode && !query.data.value?.app.currentProject"
       >
         <GlobalPage :gql="query.data.value.app" />
       </template>

@@ -23,7 +23,7 @@ export class SpecGenerator {
   constructor (private ctx: DataContext, private options: CodeGenOptions) {
     this.parsedPath = this.ctx.path.parse(options.codeGenPath)
     // Should always be defined
-    this.projectRoot = this.ctx.activeProject?.projectRoot as string
+    this.projectRoot = this.ctx.currentProject?.projectRoot as string
   }
 
   async generateSpec () {

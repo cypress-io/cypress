@@ -8,9 +8,9 @@ describe('TestingTypeCards', () => {
   it('renders correct label when no testingType has been configured', () => {
     cy.mountFragment(TestingTypeCardsFragmentDoc, {
       onResult: (result, ctx) => {
-        if (result.app.activeProject) {
-          result.app.activeProject.isFirstTimeCT = true
-          result.app.activeProject.isFirstTimeE2E = true
+        if (result.app.currentProject) {
+          result.app.currentProject.isFirstTimeCT = true
+          result.app.currentProject.isFirstTimeE2E = true
         }
       },
       render: (gqlVal) => {
@@ -27,9 +27,9 @@ describe('TestingTypeCards', () => {
   it('renders correct label when projects have been configured', () => {
     cy.mountFragment(TestingTypeCardsFragmentDoc, {
       onResult: (result, ctx) => {
-        if (result.app.activeProject) {
-          result.app.activeProject.isFirstTimeCT = false
-          result.app.activeProject.isFirstTimeE2E = false
+        if (result.app.currentProject) {
+          result.app.currentProject.isFirstTimeCT = false
+          result.app.currentProject.isFirstTimeE2E = false
         }
       },
       render: (gqlVal) => {
@@ -44,9 +44,9 @@ describe('TestingTypeCards', () => {
   it('renders correct label when one project has been configured and the other has not', () => {
     cy.mountFragment(TestingTypeCardsFragmentDoc, {
       onResult: (result, ctx) => {
-        if (result.app.activeProject) {
-          result.app.activeProject.isFirstTimeCT = false
-          result.app.activeProject.isFirstTimeE2E = true
+        if (result.app.currentProject) {
+          result.app.currentProject.isFirstTimeCT = false
+          result.app.currentProject.isFirstTimeE2E = true
         }
       },
       render: (gqlVal) => {

@@ -166,8 +166,8 @@ export class DataContext extends DataContextShell {
     return this.coreData.wizard
   }
 
-  get activeProject () {
-    return this.coreData.app.activeProject
+  get currentProject () {
+    return this.coreData.app.currentProject
   }
 
   @cached

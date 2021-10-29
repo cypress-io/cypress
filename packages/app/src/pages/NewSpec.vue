@@ -3,7 +3,7 @@
     <h2>New Spec</h2>
     <div class="flex gap-4 justify-center">
       <Button
-        :disabled="!newSpecQuery.data.value?.app.activeProject?.storybook"
+        :disabled="!newSpecQuery.data.value?.app.currentProject?.storybook"
         @click="codeGenTypeClicked('story')"
       >
         Generate From Story
@@ -92,7 +92,7 @@ import {
 gql`
 query NewSpec_NewSpecQuery {
   app {
-    activeProject {
+    currentProject {
       id
       storybook {
         id
@@ -114,7 +114,7 @@ query NewSpec_NewSpecQuery {
 gql`
 query NewSpec_CodeGenGlobQuery($type: CodeGenType!) {
   app {
-    activeProject {
+    currentProject {
       id
       codeGenGlob: codeGenGlob(type: $type)
     }
@@ -137,7 +137,7 @@ fragment NewSpec_CodeGenCandidateNode on FilePartsEdge {
 gql`
 query NewSpec_SearchCodeGenCandidates($glob: String!) {
   app {
-    activeProject {
+    currentProject {
       id
       codeGenCandidates: codeGenCandidates(first: 25, glob: $glob) {
         edges {
@@ -177,8 +177,8 @@ const codeGenGlobQuery = useQuery({
 const codeGenGlob = ref('')
 
 watch(codeGenGlobQuery.data, (value, prevVal) => {
-  if (value?.app.activeProject?.codeGenGlob && value.app.activeProject.codeGenGlob !== prevVal?.app.activeProject?.codeGenGlob) {
-    codeGenGlob.value = value.app.activeProject.codeGenGlob
+  if (value?.app.currentProject?.codeGenGlob && value.app.currentProject.codeGenGlob !== prevVal?.app.currentProject?.codeGenGlob) {
+    codeGenGlob.value = value.app.currentProject.codeGenGlob
   }
 })
 
@@ -189,7 +189,7 @@ const searchCodeGenCandidates = useQuery({
 })
 const codeGenCandidates = computed(() => {
   return (
-    searchCodeGenCandidates.data.value?.app.activeProject?.codeGenCandidates?.edges.map(
+    searchCodeGenCandidates.data.value?.app.currentProject?.codeGenCandidates?.edges.map(
       ({ node: story }) => {
         return {
           ...story,
@@ -206,14 +206,14 @@ const fileNameInput = ref('')
 const mutation = useMutation(NewSpec_CodeGenSpecDocument)
 const candidateChosen = ref(false)
 const generatedSpec = computed(
-  () => newSpecQuery.data.value?.app.activeProject?.generatedSpec,
+  () => newSpecQuery.data.value?.app.currentProject?.generatedSpec,
 )
 
 const setSpecMutation = useMutation(NewSpec_SetCurrentSpecDocument)
 const router = useRouter()
 
 async function specClick () {
-  const specId = newSpecQuery.data.value?.app.activeProject?.generatedSpec?.spec.id
+  const specId = newSpecQuery.data.value?.app.currentProject?.generatedSpec?.spec.id
 
   if (!specId) {
     return

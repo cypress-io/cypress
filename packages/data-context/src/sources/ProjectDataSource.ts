@@ -141,10 +141,10 @@ export class ProjectDataSource {
   }
 
   async getCodeGenGlob (type: CodeGenType) {
-    const project = this.ctx.activeProject
+    const project = this.ctx.currentProject
 
     if (!project) {
-      throw Error(`Cannot find glob without activeProject.`)
+      throw Error(`Cannot find glob without currentProject.`)
     }
 
     const looseComponentGlob = '/**/*.{js,jsx,ts,tsx,.vue}'
@@ -165,10 +165,10 @@ export class ProjectDataSource {
       return this.ctx.storybook.getStories()
     }
 
-    const project = this.ctx.activeProject
+    const project = this.ctx.currentProject
 
     if (!project) {
-      throw Error(`Cannot find components without activeProject.`)
+      throw Error(`Cannot find components without currentProject.`)
     }
 
     const config = await this.ctx.project.getConfig(project.projectRoot)
