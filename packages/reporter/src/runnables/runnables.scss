@@ -5,7 +5,6 @@
 
   .container {
     background-color: $gray-1000;
-    box-shadow: 0 1px 2px $gray-600;
     flex-grow: 2;
     overflow-y: auto;
   }
@@ -363,28 +362,56 @@
 
   .runnable-header {
     background: $gray-1000;
-    border-bottom: 1px solid $gray-900;
     display: block;
-    font-size: 13px;
+    font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
+    font-size: 14px;
     line-height: 24px;
     overflow-wrap: break-word;
-    padding: 5px 10px;
+    padding: 16px;
     position: sticky;
     top: 0;
     width: 100%;
     z-index: 1;
 
-    span > span > a:before,
-    span > span > span:before {
-      @extend .#{$fa-css-prefix};
-      @extend .#{$fa-css-prefix}-file;
-      color: $gray-700;
-      display: inline;
-      margin-right: 5px;
+    &:before,
+    &:after {
+      background-color: $gray-900;
+      content: '';
+      position: absolute;
+      width: calc(100% - 32px);
+      height: 1px;
+      left: 16px;
+    }
+
+    &:before {
+      top: 0;
+    }
+
+    &:after {
+      bottom: 0;
+    }
+
+    span > span > a > svg {
+      margin-bottom: -2px;
+      margin-right: 8px;
     }
 
     a, a:active, a:focus, a:hover {
-      color: $white;
+      color: $gray-700;
+      font-weight: 300;
+      strong {
+        font-weight: 500;
+      }
+    }
+
+    .duration {
+      border: 1px solid $gray-900;
+      border-radius: 16px;
+      color: $gray-600;
+      float: right;
+      font-size: 12px;
+      line-height: 16px;
+      padding: 2px 6px;
     }
   }
 

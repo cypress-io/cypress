@@ -130,7 +130,7 @@ describe('suites', () => {
 
   describe('studio button', () => {
     it('displays studio icon with half transparency when hovering over test title', () => {
-      cy.contains('suite 1')
+      cy.contains('nested suite 1')
       .closest('.runnable-wrapper')
       .realHover()
       .find('.runnable-controls-studio')
@@ -139,7 +139,7 @@ describe('suites', () => {
     })
 
     it('displays studio icon with no transparency and tooltip on hover', () => {
-      cy.contains('suite 1')
+      cy.contains('nested suite 1')
       .closest('.collapsible-header')
       .find('.runnable-controls-studio')
       .realHover()
