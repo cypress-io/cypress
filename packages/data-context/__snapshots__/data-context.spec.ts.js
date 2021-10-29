@@ -19,7 +19,7 @@ exports['@packages/data-context initializeData should initialize 1'] = {
       "refreshState": null
     },
     "app": {
-      "activeTestingType": null,
+      "currentTestingType": null,
       "navItem": "settings",
       "browsers": {},
       "projects": [],

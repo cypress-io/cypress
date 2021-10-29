@@ -133,8 +133,8 @@ export const stubApp: MaybeResolver<App> = {
   browsers (source, args, ctx) {
     return ctx.app.browsers
   },
-  selectedBrowser (source, args, ctx) {
-    return ctx.app.selectedBrowser
+  currentBrowser (source, args, ctx) {
+    return ctx.app.currentBrowser
   },
   projects (source, args, ctx) {
     return ctx.app.projects

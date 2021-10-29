@@ -38,7 +38,7 @@ export interface AppDataShape {
   currentProject: ActiveProjectShape | null
   isInGlobalMode: boolean
   isAuthBrowserOpened: boolean
-  activeTestingType: Maybe<TestingTypeEnum>
+  currentTestingType: Maybe<TestingTypeEnum>
 }
 
 export interface WizardDataShape {
@@ -82,7 +82,7 @@ export function makeCoreData (): CoreDataShape {
       refreshState: null,
     },
     app: {
-      activeTestingType: null,
+      currentTestingType: null,
       navItem: 'settings',
       browsers: null,
       projects: [],

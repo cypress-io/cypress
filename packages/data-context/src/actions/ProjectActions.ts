@@ -41,7 +41,7 @@ export class ProjectActions {
     // TODO(tim): Improve general state management w/ immutability (immer) & updater fn
     this.ctx.coreData.app.isInGlobalMode = true
     this.ctx.coreData.app.currentProject = null
-    this.ctx.coreData.app.activeTestingType = null
+    this.ctx.coreData.app.currentTestingType = null
   }
 
   private get projects () {
@@ -168,7 +168,7 @@ export class ProjectActions {
       specType: testingType === 'e2e' ? 'integration' : 'component',
     }
 
-    this.ctx.appData.activeTestingType = testingType
+    this.ctx.appData.currentTestingType = testingType
 
     return this.api.launchProject(browser, spec, options)
   }

@@ -36,7 +36,7 @@ fragment InitializeConfig_Config on Query {
   }
 
   app {
-    selectedBrowser {
+    currentBrowser {
       id
       displayName
     }

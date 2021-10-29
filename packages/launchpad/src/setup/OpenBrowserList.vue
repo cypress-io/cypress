@@ -87,7 +87,7 @@ mutation OpenBrowserList_SetBrowser($id: ID!) {
 
 gql`
 fragment OpenBrowserList on App {
-  selectedBrowser {
+  currentBrowser {
     id
     displayName
   }
@@ -120,7 +120,7 @@ const setSelected = (browserId: string) => {
   setBrowser.executeMutation({ id: browserId })
 }
 
-const launchText = computed(() => props.gql.selectedBrowser ? `${t('setupPage.openBrowser.launch')} ${props.gql.selectedBrowser.displayName}` : '')
+const launchText = computed(() => props.gql.currentBrowser ? `${t('setupPage.openBrowser.launch')} ${props.gql.currentBrowser.displayName}` : '')
 </script>
 
 <style scoped>

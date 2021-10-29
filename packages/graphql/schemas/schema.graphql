@@ -4,14 +4,17 @@
 
 """Namespace for information related to the app"""
 type App {
-  """The mode the interactive runner was launched in"""
-  activeTestingType: TestingTypeEnum
-
   """Browsers found that are compatible with Cypress"""
   browsers: [Browser!]
 
+  """The currently selected browser for the application"""
+  currentBrowser: Browser
+
   """Active project"""
   currentProject: Project
+
+  """The mode the interactive runner was launched in"""
+  currentTestingType: TestingTypeEnum
 
   """See if the GraphQL server is alive"""
   healthCheck: String!
@@ -24,9 +27,6 @@ type App {
 
   """All known projects for the app"""
   projects: [Project!]!
-
-  """The currently selected browser for the application"""
-  selectedBrowser: Browser
 }
 
 """Base error"""

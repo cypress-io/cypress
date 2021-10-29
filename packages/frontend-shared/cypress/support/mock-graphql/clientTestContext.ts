@@ -11,7 +11,7 @@ import { allBundlers } from './stubgql-Wizard'
 export interface ClientTestContext {
   app: {
     navItem: NavItem
-    selectedBrowser: Browser | null
+    currentBrowser: Browser | null
     browsers: Browser[] | null
     projects: Project[]
     currentProject: Project | null
@@ -58,7 +58,7 @@ export function makeClientTestContext (): ClientTestContext {
       navItem: 'settings',
       browsers,
       projects: [testProject, createTestProject('another-test-project')],
-      selectedBrowser: browsers[0],
+      currentBrowser: browsers[0],
       currentProject: testProject,
       isInGlobalMode: false,
       isAuthBrowserOpened: false,

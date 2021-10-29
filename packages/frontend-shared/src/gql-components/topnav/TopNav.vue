@@ -40,16 +40,16 @@
     </TopNavListItem>
   </TopNavList>
 
-  <TopNavList v-if="props.gql?.selectedBrowser && showBrowsers">
+  <TopNavList v-if="props.gql?.currentBrowser && showBrowsers">
     <template #heading="{ open }">
       <img
         class="w-16px filter group-hocus:grayscale-0"
         :class="open ? 'grayscale-0' : 'grayscale'"
-        :src="allBrowsersIcons[props.gql?.selectedBrowser?.displayName || '']"
+        :src="allBrowsersIcons[props.gql?.currentBrowser?.displayName || '']"
       >
       <span
         data-cy="topnav-browser-list"
-      >{{ props.gql.selectedBrowser?.displayName }} v{{ props.gql.selectedBrowser?.majorVersion }}</span>
+      >{{ props.gql.currentBrowser?.displayName }} v{{ props.gql.currentBrowser?.majorVersion }}</span>
     </template>
     <TopNavListItem
       v-for="browser in props.gql.browsers"
@@ -184,7 +184,7 @@ fragment TopNav on App {
   currentProject {
     id
   }
-  selectedBrowser {
+  currentBrowser {
     id
     displayName
     majorVersion

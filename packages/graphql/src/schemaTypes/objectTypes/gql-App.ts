@@ -11,7 +11,7 @@ export const App = objectType({
       description: 'Active project',
     })
 
-    t.field('selectedBrowser', {
+    t.field('currentBrowser', {
       type: Browser,
       description: 'The currently selected browser for the application',
       resolve: (source, args, ctx) => {
@@ -29,7 +29,7 @@ export const App = objectType({
       resolve: () => 'OK',
     })
 
-    t.field('activeTestingType', {
+    t.field('currentTestingType', {
       description: 'The mode the interactive runner was launched in',
       type: 'TestingTypeEnum',
     })
