@@ -85,21 +85,6 @@ describe('header', () => {
       cy.get('.failed .num').should('have.text', '--')
       cy.get('.pending .num').should('have.text', '--')
     })
-
-    it('displays the time taken in seconds', () => {
-      const start = new Date(2000, 0, 1)
-      const now = new Date(2000, 0, 1, 0, 0, 12, 340)
-
-      cy.clock(now).then(() => {
-        runner.emit('reporter:start', { startTime: start.toISOString() })
-      })
-
-      cy.get('.duration .num').should('have.text', '12.34')
-    })
-
-    it('displays "--" if no time taken', () => {
-      cy.get('.duration .num').should('have.text', '--')
-    })
   })
 
   describe('controls', () => {
@@ -160,10 +145,6 @@ describe('header', () => {
       })
 
       describe('pause controls', () => {
-        it('does not display paused label', () => {
-          cy.get('.paused-label').should('not.exist')
-        })
-
         it('does not display play button', () => {
           cy.get('.play').should('not.exist')
         })
@@ -181,10 +162,6 @@ describe('header', () => {
     describe('when paused with next command', () => {
       beforeEach(() => {
         runner.emit('paused', 'find')
-      })
-
-      it('displays paused label', () => {
-        cy.get('.paused-label').should('be.visible')
       })
 
       it('displays play button', () => {
