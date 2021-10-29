@@ -108,7 +108,7 @@
       class="flex p-16px gap-24px"
     >
       <DocsMenuContent
-        :active-project-exists="!!props.gql?.currentProject"
+        :current-project-exists="!!props.gql?.currentProject"
         @setDocsContent="docsMenuVariant = $event"
       />
     </div>
