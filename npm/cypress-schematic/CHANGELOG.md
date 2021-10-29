@@ -1,3 +1,10 @@
+# [@cypress/schematic-v1.5.2](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v1.5.1...@cypress/schematic-v1.5.2) (2021-10-29)
+
+
+### Bug Fixes
+
+* revive type checker ([#18172](https://github.com/cypress-io/cypress/issues/18172)) ([af472b6](https://github.com/cypress-io/cypress/commit/af472b6419ecb2aec1abdb09df99b2fa5f56e033))
+
 # [@cypress/schematic-v1.5.1](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v1.5.0...@cypress/schematic-v1.5.1) (2021-09-10)
 
 
