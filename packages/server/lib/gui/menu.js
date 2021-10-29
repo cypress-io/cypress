@@ -6,20 +6,14 @@ const { shell } = require('electron')
 const appData = require('../util/app_data')
 const open = require('../util/open')
 
-// let onLogOutClicked = function () {}
+// hoist up options and allow calling menu.set({})
+// to override existing options or be called multiple
+// times to preserve existing options
 let options = {}
 
 module.exports = {
   set (opts = {}) {
-    _.defaults(options, opts, {
-      withDevTools: false,
-    })
-
-    // // this set by modes/interactive and needs to be preserved if the menu
-    // // is set again by launcher when the Electron browser is run
-    // if (options.onLogOutClicked) {
-    //   ({ onLogOutClicked } = options)
-    // }
+    _.extend(options, opts)
 
     const template = [
       {
