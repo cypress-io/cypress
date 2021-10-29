@@ -53,11 +53,11 @@ const props = defineProps<{
 const isLoginOpen = ref(false)
 
 function openConnection () {
-  if (props.isLoggedIn) {
-    // if user is already logged in connect a cloud project
-  } else {
+  if (!props.isLoggedIn) {
     // start logging in the user
     isLoginOpen.value = true
+  } else {
+    // if user is already logged in connect a cloud project
   }
 }
 
