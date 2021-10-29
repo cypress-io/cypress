@@ -1,9 +1,12 @@
 import RunsEmpty from './RunsEmpty.vue'
+import { RunsEmptyFragmentDoc } from '../generated/graphql-test'
 
 describe('<RunsEmpty />', () => {
   it('playground', () => {
-    cy.mount(
-      <RunsEmpty projectId="abc123" />,
-    )
+    cy.mountFragment(RunsEmptyFragmentDoc, {
+      render (gqlVal) {
+        return <RunsEmpty gql={gqlVal} />
+      },
+    })
   })
 })

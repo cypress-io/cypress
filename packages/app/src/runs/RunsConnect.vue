@@ -33,27 +33,38 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import { gql } from '@urql/vue'
 import SmartIcon from '~icons/cy/illustration-gear_x120.svg'
 import DebugIcon from '~icons/cy/illustration-debug_x120.svg'
 import ChartIcon from '~icons/cy/illustration-chart_x120.svg'
 import UserIcon from '~icons/cy/user-outline_x16.svg'
 import ChainIcon from '~icons/cy/chain-link_x16.svg'
 import Button from '@cy/components/Button.vue'
-import LoginModal, { LoginModalFragment } from '@cy/gql-components/topnav/LoginModal.vue'
+import LoginModal from '@cy/gql-components/topnav/LoginModal.vue'
 import { useI18n } from '@cy/i18n'
+import type { RunsConnectFragment } from '../generated/graphql'
 
 const { t } = useI18n()
 
+gql`
+fragment RunsConnect on Query{
+  cloudViewer{
+    id
+  }
+  ...LoginModal
+}
+`
+
 const props = defineProps<{
-  isLoggedIn: boolean,
-  gql: LoginModalFragment,
+  gql: RunsConnectFragment,
 }>()
 
 const isLoginOpen = ref(false)
+const isLoggedIn = computed(() => Boolean(props.gql.cloudViewer?.id))
 
 function openConnection () {
-  if (!props.isLoggedIn) {
+  if (!isLoggedIn.value) {
     // start logging in the user
     isLoginOpen.value = true
   } else {

@@ -542,6 +542,9 @@ type Project implements Node {
   """Project configuration"""
   config: JSON!
 
+  """Config File Path"""
+  configFilePath: String
+
   """Currently selected spec"""
   currentSpec: Spec
   generatedSpec: GeneratedSpec

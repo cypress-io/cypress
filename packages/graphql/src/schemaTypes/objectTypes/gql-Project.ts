@@ -42,9 +42,7 @@ export const Project = objectType({
           return null
         }
 
-        const result = await cloudProjectBySlug(projectId, ctx, info)
-
-        return result
+        return cloudProjectBySlug(projectId, ctx, info)
       },
     })
 
@@ -97,6 +95,15 @@ export const Project = objectType({
       description: 'Project configuration',
       resolve: (source, args, ctx) => {
         return ctx.project.getResolvedConfigFields(source.projectRoot)
+      },
+    })
+
+    t.string('configFilePath', {
+      description: 'Config File Path',
+      resolve: async (source, args, ctx) => {
+        const config = await ctx.project.getConfig(source.projectRoot)
+
+        return config.configFile ?? null
       },
     })
 

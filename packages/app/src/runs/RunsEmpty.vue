@@ -49,25 +49,34 @@
 
 <script lang="ts" setup>
 import { computed } from 'vue'
+import { gql } from '@urql/vue'
 import ShikiHighlight from '@cy/components/ShikiHighlight.vue'
 import { useI18n } from '@cy/i18n'
 import TerminalPrompt from '@cy/components/TerminalPrompt.vue'
+import type { RunsEmptyFragment } from '../generated/graphql'
 
 const { t } = useI18n()
 
+gql`
+fragment RunsEmpty on Project{
+  title
+  projectId
+  configFilePath
+}
+`
+
 const props = defineProps<{
-  projectId: string,
-  projectName: string,
+  gql: RunsEmptyFragment,
 }>()
 
 const projectIdCode = computed(() => {
   return `${'export'} default {
-  projectId: '${props.projectId}'
+  projectId: '${props.gql.projectId}'
 }`
 })
 
-// FIXME: replace with something coming from gql
-const configFilePath = 'cypress.config.js'
+const projectName = computed(() => props.gql.title)
+const configFilePath = computed(() => props.gql.configFilePath)
 </script>
 
 <style scoped lang="scss">

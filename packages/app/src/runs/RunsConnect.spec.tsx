@@ -1,28 +1,37 @@
 import RunsConnect from './RunsConnect.vue'
-
-const gql = {
-  app: {
-    isAuthBrowserOpened: true,
-  },
-  cloudViewer: {
-    id: '2',
-    email: 't@me.com',
-    fullName: 'John Appleseed',
-  },
-}
+import { RunsConnectFragmentDoc } from '../generated/graphql-test'
 
 describe('<RunsConnect />', () => {
-  it('playground', () => {
-    cy.mount(<RunsConnect isLoggedIn={false} gql={gql} />)
-  })
-
   it('show user connect if not connected', () => {
-    cy.mount(<RunsConnect isLoggedIn={false} gql={gql}/>)
+    cy.mountFragment(RunsConnectFragmentDoc, {
+      onResult: (result) => {
+        result.cloudViewer = null
+      },
+      render (gqlVal) {
+        return <RunsConnect gql={gqlVal} />
+      },
+    })
+
     cy.contains('button', 'Log in').should('be.visible')
   })
 
   it('show project connect if not connected', () => {
-    cy.mount(<RunsConnect isLoggedIn={true} gql={gql}/>)
+    const cloudViewer = {
+      __typename: 'CloudUser',
+      id: '1',
+      email: 'test@test.test',
+      fullName: 'Tester Test',
+    } as const
+
+    cy.mountFragment(RunsConnectFragmentDoc, {
+      onResult: (result) => {
+        result.cloudViewer = cloudViewer
+      },
+      render (gqlVal) {
+        return <RunsConnect gql={gqlVal} />
+      },
+    })
+
     cy.contains('button', 'Connect your project').should('be.visible')
   })
 })

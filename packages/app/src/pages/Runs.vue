@@ -1,72 +1,29 @@
 <template>
   <div class="relative p-24px h-full overflow-y-scroll">
     <transition
-      v-if="query.fetching.value || activeProject?.cloudProject?.runs?.nodes.length"
       name="fade"
     >
-      <RunsSkeleton v-if="query.fetching.value" />
-      <div
-        v-else-if="activeProject?.cloudProject?.runs?.nodes.length"
-        data-cy="runs"
-      >
-        <RunCard
-          v-for="run of activeProject.cloudProject.runs.nodes"
-          :key="run.id"
-          :gql="run"
-        />
-      </div>
+      <RunsSkeleton v-if="query.fetching.value || !query.data.value" />
+      <RunsPage
+        v-else
+        :gql="query.data.value"
+      />
     </transition>
-    <RunsConnect
-      v-else-if="query.data.value && (!activeProject?.projectId || !query.data.value.cloudViewer?.id)"
-      :is-logged-in="!!query.data.value.cloudViewer?.id"
-      :gql="query.data.value"
-    />
-    <RunsEmpty
-      v-else
-      :project-id="activeProject?.projectId || ''"
-      :project-name="activeProject?.title || ''"
-    />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
 import { gql, useQuery } from '@urql/vue'
 import { RunsDocument } from '../generated/graphql'
-import RunCard from '../runs/RunCard.vue'
 import RunsSkeleton from '../runs/RunsSkeleton.vue'
-import RunsConnect from '../runs/RunsConnect.vue'
-import RunsEmpty from '../runs/RunsEmpty.vue'
+import RunsPage from '../runs/RunsPage.vue'
 
 gql`
 query Runs {
-  app {
-    activeProject {
-      id
-      title
-      projectId
-      cloudProject {
-        id
-        runs(first: 10) {
-          nodes {
-            id
-            ...RunCard
-          }
-        }
-      }
-    }
-    isAuthBrowserOpened
-  }
-  cloudViewer {
-    id
-    email
-    fullName
-  }
+  ...RunsPage
 }`
 
 const query = useQuery({ query: RunsDocument })
-
-const activeProject = computed(() => query.data.value?.app?.activeProject)
 </script>
 
 <route>
