@@ -2,15 +2,15 @@ import React from 'react'
 import { shallow } from 'enzyme'
 import sinon from 'sinon'
 import { Dialog } from '@reach/dialog'
-import { EventManager } from '../event-manager'
 
+import { createEventManager } from '../../test/utils'
 import { StudioModals, StudioInstructionsModal, StudioInitModal, StudioSaveModal } from './studio-modals'
 
 describe('<StudioModals />', () => {
   let eventManager
 
   beforeEach(() => {
-    eventManager = new EventManager()
+    eventManager = createEventManager()
     sinon.stub(eventManager, 'emit')
   })
 

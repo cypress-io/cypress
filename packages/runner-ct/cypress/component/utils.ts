@@ -1,3 +1,6 @@
+import * as MobX from 'mobx'
+import $Cypress from '@packages/driver'
+import { EventManager, selectorPlaygroundModel, StudioRecorder } from '@packages/runner-shared'
 import State from '../../src/lib/state'
 
 export const fakeConfig = { projectName: 'Project', env: {}, isTextTerminal: false } as Partial<Cypress.RuntimeConfigOptions>
@@ -15,4 +18,13 @@ export const getPort = (href: string) => {
   const [, port] = href.match(/localhost:(.+?)\//)
 
   return port
+}
+
+export const createEventManager = () => {
+  return new EventManager(
+    $Cypress,
+    MobX,
+    selectorPlaygroundModel,
+    StudioRecorder,
+  )
 }

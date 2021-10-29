@@ -5,7 +5,7 @@ import Tooltip from '@cypress/react-tooltip'
 
 import { Studio } from './studio'
 import { StudioInstructionsModal } from './studio-modals'
-import { EventManager } from '../event-manager'
+import { createEventManager } from '../../test/utils'
 
 const createModel = (props) => {
   return {
@@ -21,7 +21,7 @@ describe('<Studio />', () => {
   let eventManager
 
   beforeEach(() => {
-    eventManager = new EventManager()
+    eventManager = createEventManager()
   })
 
   context('icon', () => {

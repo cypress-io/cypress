@@ -68,7 +68,12 @@ import util from './lib/util'
 
 MobX.configure({ enforceActions: 'always' })
 
-const eventManager = new EventManager($Cypress)
+const eventManager = new EventManager(
+  $Cypress,
+  MobX,
+  selectorPlaygroundModel,
+  StudioRecorder,
+)
 
 const Runner: any = {
   emit (evt: string, ...args: unknown[]) {

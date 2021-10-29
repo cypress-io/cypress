@@ -1,13 +1,10 @@
 import { EventEmitter } from 'events'
 import Promise from 'bluebird'
-import { action } from 'mobx'
 import type { BaseStore } from './store'
 import type { RunState } from '@packages/driver/src/cy/commands/navigation'
+import type MobX from 'mobx'
 
 import { client } from '@packages/socket/lib/browser'
-
-import { StudioRecorder } from './studio'
-import { selectorPlaygroundModel } from './selector-playground'
 
 import { automation } from './automation'
 import { logger } from './logger'
@@ -39,9 +36,6 @@ const socketRerunEvents = 'runner:restart watched:file:changed'.split(' ')
 const socketToDriverEvents = 'net:stubbing:event request:event script:error'.split(' ')
 const localToReporterEvents = 'reporter:log:add reporter:log:state:changed reporter:log:remove'.split(' ')
 
-// const this.localBus.= new EventEmitter()
-// const reporterBus = new EventEmitter()
-
 // NOTE: this is exposed for testing, ideally we should only expose this if a test flag is set
 window.runnerWs = ws
 
@@ -54,9 +48,20 @@ export class EventManager {
   reporterBus: EventEmitter = new EventEmitter()
   localBus: EventEmitter = new EventEmitter()
   Cypress?: $Cypress
-  studioRecorder = new StudioRecorder(this)
+  studioRecorder: any
 
-  constructor (private $CypressDriver: any) {}
+  constructor (
+    // import '@packages/driver'
+    private $CypressDriver: any,
+    // import * as MobX
+    private Mobx: typeof MobX,
+    // selectorPlaygroundModel singleton
+    private selectorPlaygroundModel: any,
+    // StudioRecorder constructor
+    StudioRecorderCtor: any,
+  ) {
+    this.studioRecorder = new StudioRecorderCtor(this)
+  }
 
   getCypress () {
     return Cypress
@@ -73,9 +78,9 @@ export class EventManager {
       return this.runSpec(state)
     }
 
-    ws.emit('is:automation:client:connected', connectionInfo, action('automationEnsured', (isConnected) => {
+    ws.emit('is:automation:client:connected', connectionInfo, this.Mobx.action('automationEnsured', (isConnected) => {
       state.automation = isConnected ? automation.CONNECTED : automation.MISSING
-      ws.on('automation:disconnected', action('automationDisconnected', () => {
+      ws.on('automation:disconnected', this.Mobx.action('automationDisconnected', () => {
         state.automation = automation.DISCONNECTED
       }))
     }))
@@ -565,7 +570,7 @@ export class EventManager {
     Cypress.stop()
 
     this.studioRecorder.setInactive()
-    selectorPlaygroundModel.setOpen(false)
+    this.selectorPlaygroundModel.setOpen(false)
   }
 
   teardownReporter () {

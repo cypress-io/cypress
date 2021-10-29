@@ -4,10 +4,10 @@ import { mount, shallow } from 'enzyme'
 import sinon from 'sinon'
 import Tooltip from '@cypress/react-tooltip'
 
-import { EventManager } from '../event-manager'
-import { Studio, studioRecorder } from '../studio'
+import { Studio } from '../studio'
 import { selectorPlaygroundModel } from '../selector-playground'
 import { Header } from '.'
+import { createEventManager } from '../../test/utils'
 
 const getState = (props) => _.extend({
   defaults: {},
@@ -26,7 +26,7 @@ describe('<Header />', () => {
     })
 
   beforeEach(() => {
-    eventManager = new EventManager()
+    eventManager = createEventManager()
     sinon.stub(eventManager, 'emit')
     sinon.stub(eventManager.studioRecorder, 'removeListeners')
     sinon.stub(eventManager.studioRecorder, 'visitUrl')

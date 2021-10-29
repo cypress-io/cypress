@@ -1,8 +1,8 @@
 import sinon from 'sinon'
 import $ from 'jquery'
 import driver from '@packages/driver'
-import { EventManager } from '../event-manager'
 import { dom } from '../dom'
+import { createEventManager } from '../../test/utils'
 
 import { StudioRecorder } from './studio-recorder'
 
@@ -26,7 +26,7 @@ describe('StudioRecorder', () => {
   let instance
 
   beforeEach(() => {
-    eventManager = new EventManager(driver)
+    eventManager = createEventManager()
     instance = new StudioRecorder(eventManager)
 
     sinon.stub(instance, 'attachListeners')

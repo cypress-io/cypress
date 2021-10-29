@@ -3,9 +3,8 @@ import React from 'react'
 import { mount } from '@cypress/react'
 import RunnerCt from '../../src/app/RunnerCt'
 import '@packages/runner/src/main.scss'
-import { EventManager } from '@packages/runner-shared'
 import { testSpecFile } from '../fixtures/testSpecFile'
-import { makeState, fakeConfig, getPort } from './utils'
+import { makeState, fakeConfig, getPort, createEventManager } from './utils'
 
 /**
  * Specs using a real `eventManager` need to be
@@ -27,7 +26,7 @@ describe('RunnerCt', () => {
       body: testSpecFile,
     })
 
-    const eventManager = new EventManager()
+    const eventManager = createEventManager()
 
     mount(
       <RunnerCt

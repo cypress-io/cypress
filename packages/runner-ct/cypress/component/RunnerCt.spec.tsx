@@ -4,8 +4,7 @@ import React from 'react'
 import { mount } from '@cypress/react'
 import RunnerCt from '../../src/app/RunnerCt'
 import '@packages/runner/src/main.scss'
-import { makeState, fakeConfig } from './utils'
-import { EventManager } from '@packages/runner-shared'
+import { makeState, fakeConfig, createEventManager } from './utils'
 import State from '../../src/lib/state'
 
 const selectors = {
@@ -16,7 +15,7 @@ const selectors = {
 }
 
 const mountRunnerCt = (state: State = makeState(), config = fakeConfig) => {
-  const eventManager = new EventManager()
+  const eventManager = createEventManager()
 
   return mount(
     <RunnerCt
@@ -51,7 +50,7 @@ describe('RunnerCt', () => {
 
   context('keyboard shortcuts', () => {
     it('toggles specs list drawer using shortcut', () => {
-      const eventManager = new EventManager()
+      const eventManager = createEventManager()
       const saveState = cy.spy(eventManager, 'saveState')
 
       mount(
