@@ -1,7 +1,7 @@
 <template>
   <div
     data-cy="no-runs"
-    class="h-full flex flex-col justify-center items-center leading-24px max-w-688px mx-auto"
+    class="min-h-full flex flex-col justify-center items-center leading-24px max-w-688px mx-auto"
   >
     <i-cy-dashboard-checkmark_x48 class="h-48px w-48px icon-dark-gray-500 icon-light-gray-100" />
     <h2 class="text-18px mt-32px mb-24px text-gray-900">
