@@ -3,6 +3,8 @@ import React from 'react'
 // @ts-ignore
 import Tooltip from '@cypress/react-tooltip'
 
+import MenuExpandRightIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/menu-expand-right_x16.svg'
+
 import defaultEvents, { Events } from '../lib/events'
 import { AppState } from '../lib/app-state'
 
@@ -20,12 +22,13 @@ const Header = observer(({ appState, events = defaultEvents, statsStore }: Repor
   <header>
     <Tooltip placement='bottom' title={<p>View All Tests <span className='kbd'>F</span></p>} wrapperClassName='focus-tests' className='cy-tooltip'>
       <button onClick={() => events.emit('focus:tests')}>
-        <i className='fas fa-chevron-left' />
-        <span className='focus-tests-text'>Tests</span>
+        <MenuExpandRightIcon />
+
+        <span className='focus-tests-text'>Specs</span>
       </button>
     </Tooltip>
-    <Stats stats={statsStore} />
     <div className='spacer' />
+    <Stats stats={statsStore} />
     <Controls appState={appState} />
   </header>
 ))
