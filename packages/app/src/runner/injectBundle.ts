@@ -1,3 +1,4 @@
+import { initializeEventManager } from '.'
 import { initializeMobxStore } from '../store'
 
 export async function injectBundle () {
@@ -31,6 +32,10 @@ export async function injectBundle () {
       const config = window.UnifiedRunner.decodeBase64(data.base64Config) as any
 
       window.UnifiedRunner.config = config
+
+      // window.UnifiedRunner exists now, since the Webpack bundle with
+      // the UnifiedRunner namespace was injected.
+      initializeEventManager(window.UnifiedRunner)
 
       window.UnifiedRunner.MobX.runInAction(() => {
         const store = initializeMobxStore(window.UnifiedRunner.config.testingType)

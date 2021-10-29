@@ -35,7 +35,7 @@ import { gql } from '@urql/core'
 import type { SpecRunnerFragment } from '../generated/graphql'
 import InlineSpecList from '../specs/InlineSpecList.vue'
 import { getMobxRunnerStore } from '../store'
-import { UnifiedRunnerAPI } from '../runner'
+import { getEventManager, UnifiedRunnerAPI } from '../runner'
 import type { BaseSpec } from '@packages/types'
 import SnapshotControls from './SnapshotControls.vue'
 
@@ -45,8 +45,9 @@ fragment SpecRunner on App {
 }
 `
 
+const eventManager = getEventManager()
+
 const runnerColumnWidth = 400
-const eventManager = window.UnifiedRunner.eventManager
 
 const mobxRunnerStore = getMobxRunnerStore()
 
@@ -84,7 +85,7 @@ watch(() => props.activeSpec, (spec) => {
 }, { immediate: true, flush: 'post' })
 
 onMounted(() => {
-  window.UnifiedRunner.eventManager.on('restart', () => {
+  getEventManager().on('restart', () => {
     runSpec()
   })
 })

@@ -26,9 +26,10 @@ import { useSnapshotStore } from './snapshot-store'
 import SnapshotMessage from './SnapshotMessage.vue'
 import SnapshotChangeState from './SnapshotChangeState.vue'
 import SnapshotHighlightControls from './SnapshotHighlightControls.vue'
+import type { EventManager } from '../runner/event-manager'
 
 const props = defineProps<{
-  eventManager: typeof window.UnifiedRunner.eventManager
+  eventManager: EventManager
 }>()
 
 const snapshotStore = useSnapshotStore()

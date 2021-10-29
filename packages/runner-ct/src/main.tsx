@@ -26,9 +26,9 @@ const UnifiedRunner = {
 
   CypressJQuery: $Cypress.$,
 
-  logger,
+  CypressDriver: $Cypress,
 
-  eventManager,
+  logger,
 
   dom,
 

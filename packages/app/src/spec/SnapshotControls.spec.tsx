@@ -1,10 +1,11 @@
 import SnapshotControls from './SnapshotControls.vue'
 import { autSnapshot } from '../../cypress/support/fixtures'
 import { useSnapshotStore } from './snapshot-store'
+import { createEventManager } from '../../cypress/e2e/support/ctSupport'
 
 describe('SnapshotControls', () => {
   const mountSnapshotControls = () => {
-    const eventManager = {} as typeof window.UnifiedRunner.eventManager
+    const eventManager = createEventManager()
 
     return cy.mount(() => <SnapshotControls eventManager={eventManager} />)
   }

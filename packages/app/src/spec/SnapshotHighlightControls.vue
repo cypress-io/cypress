@@ -17,11 +17,12 @@
 </template>
 
 <script lang="ts" setup>
+import type { EventManager } from '../runner/event-manager'
 import { useSnapshotStore } from './snapshot-store'
 import SnapshotButtonGroup from './SnapshotButtonGroup.vue'
 
 const props = defineProps<{
-  eventManager: typeof window.UnifiedRunner.eventManager
+  eventManager: EventManager
 }>()
 
 const snapshotStore = useSnapshotStore()
