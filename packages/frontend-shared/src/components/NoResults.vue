@@ -1,5 +1,6 @@
 <template>
   <div
+    data-testid="no-results"
     v-if="search || emptySearch"
     class="text-center"
   >
@@ -12,6 +13,7 @@
       <span v-if="search" class="block truncate text-purple-500">{{ search }}</span>
     </p>
     <Button
+      data-testid="no-results-clear"
       class="mx-auto mt-20px"
       size="lg"
       variant="outline"
@@ -20,7 +22,7 @@
       <template #prefix>
         <i-cy-delete_x12 class="w-12px icon-dark-gray-400" />
       </template>
-      Clear Search
+      {{ t('noResults.clearSearch') }}
     </Button>
   </div>
 </template>

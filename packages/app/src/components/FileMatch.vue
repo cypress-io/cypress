@@ -40,7 +40,7 @@
     <FileMatchInput v-else v-model="pattern" aria-label="file-name-input" :placeholder="t('components.fileSearch.byFilenameInput')"/>
   </div>
   
-  <FileMatchIndicator>
+  <FileMatchIndicator data-testid="file-match-indicator">
   {{ indicatorText }}
   </FileMatchIndicator>
   </div>

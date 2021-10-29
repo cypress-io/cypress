@@ -22,7 +22,7 @@
     class="sticky z-10 top-0px pt-24px pb-12px bg-white"
     :matches="matches"
     v-model:pattern="filePathSearch"
-    v-model:extensionPattern="extensionPattern"
+    v-model:extensionPattern="localExtensionPattern"
     />
 
     <div v-show="loading" data-testid="loading">Loading</div>
@@ -69,11 +69,10 @@ type File = any
 const emits = defineEmits<{
   (eventName: 'selectFile', value: File)
   (eventName: 'update:extensionPattern', value: string)
-  (eventName: 'reset:extensionPattern')
 }>()
 
 const initialExtension = props.extensionPattern
-const { extensionPattern } = useVModels(props, emits)
+const localExtensionPattern = ref(initialExtension)
 const filePathSearch = ref('')
 
 const selectFile = (file) => { emits('selectFile', file) }
@@ -81,10 +80,10 @@ const selectFile = (file) => { emits('selectFile', file) }
 ///*------- Debounce -------*/
 
 const debounce = 200
-const debouncedExtensionPattern = useDebounce(extensionPattern, debounce)
-debouncedWatch(extensionPattern, (value) => {
+const debouncedExtensionPattern = useDebounce(localExtensionPattern, debounce)
+debouncedWatch(localExtensionPattern, (value) => {
   emits('update:extensionPattern', value)
-}, { debounce })
+}, { debounce: debounce })
 
 const filteredFiles = computed(() => {
   return props.files?.filter((file) => {
@@ -102,7 +101,7 @@ const noResults = computed(() => ({
   message: filePathSearch.value ? t('noResults.defaultMessage') : t('components.fileSearch.noMatchesForExtension'),
   clear: filePathSearch.value ?
     () => filePathSearch.value = '' :
-    () => extensionPattern.value = initialExtension
+    () => localExtensionPattern.value = initialExtension
 }))
 
 </script>
