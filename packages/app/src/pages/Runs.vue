@@ -1,14 +1,12 @@
 <template>
   <div class="relative p-24px h-full overflow-y-scroll">
-    <transition
-      name="fade"
-    >
+    <TransitionQuickFade>
       <RunsSkeleton v-if="query.fetching.value || !query.data.value" />
       <RunsPage
         v-else
         :gql="query.data.value"
       />
-    </transition>
+    </TransitionQuickFade>
   </div>
 </template>
 
@@ -17,6 +15,7 @@ import { gql, useQuery } from '@urql/vue'
 import { RunsDocument } from '../generated/graphql'
 import RunsSkeleton from '../runs/RunsSkeleton.vue'
 import RunsPage from '../runs/RunsPage.vue'
+import TransitionQuickFade from '@cy/components/transitions/TransitionQuickFade.vue'
 
 gql`
 query Runs {
@@ -34,13 +33,3 @@ const query = useQuery({ query: RunsDocument })
   }
 }
 </route>
-
-<style scoped>
-.fade-enter-active, .fade-leave-active {
-  transition: opacity .3s
-}
-
-.fade-enter-from, .fade-leave-to {
-  opacity: 0
-}
-</style>
