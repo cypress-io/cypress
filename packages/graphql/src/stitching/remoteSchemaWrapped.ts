@@ -10,7 +10,7 @@ import { remoteSchemaExecutor } from './remoteSchemaExecutor'
 export const remoteSchemaWrapped = wrapSchema({
   schema: remoteSchema,
   executor: remoteSchemaExecutor,
-  // Needed to ensure the operationName is created / propagated correclty
+  // Needed to ensure the operationName is created / propagated correctly
   createProxyingResolver ({
     subschemaConfig,
     operation,
