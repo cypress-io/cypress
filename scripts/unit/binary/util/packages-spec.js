@@ -58,7 +58,6 @@ describe('packages', () => {
     const destinationFolder = os.tmpdir()
 
     debug('destination folder %s', destinationFolder)
-
     await packages.copyAllToDist(destinationFolder)
 
     const files = getFs()
