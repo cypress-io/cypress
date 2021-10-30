@@ -26,31 +26,54 @@
  * ============================================**/
 -->
 
-
 <template>
-<div>
-  <div class="inline-flex items-center w-full rounded border-1 hocus-default focus-within-default h-40px">
-  <FileMatchButton @click="toggleExpanded" :expanded="expanded">
-    <span v-if="!expanded">{{ extensionPattern }}</span>
-  </FileMatchButton>
-  <div class="inline-flex items-center flex-grow group">
-    <i-cy-magnifying-glass_x16 v-if="!expanded" class="inline-block ml-12px mr-8px icon-light-gray-50 icon-dark-gray-500 group-focus-within:icon-light-indigo-50 group-focus-within:icon-dark-indigo-400"/>
+  <div>
+    <div class="inline-flex items-center w-full rounded border-1 hocus-default focus-within-default h-40px truncate">
+      <FileMatchButton
+        :expanded="expanded"
+        @click="toggleExpanded"
+      >
+        <span v-if="!expanded">{{ localExtensionPattern }}</span>
+      </FileMatchButton>
+      <div class="inline-flex items-center flex-grow min-w-min group">
+        <i-cy-magnifying-glass_x16
+          v-if="!expanded"
+          class="inline-block ml-12px mr-8px icon-light-gray-50 icon-dark-gray-500 group-focus-within:icon-light-indigo-50 group-focus-within:icon-dark-indigo-400"
+        />
 
-    <FileMatchInput v-if="expanded" v-model="extensionPattern" class="ml-12px" :placeholder="t('components.fileSearch.byExtensionInput')"/>
-    <FileMatchInput v-else v-model="pattern" aria-label="file-name-input" :placeholder="t('components.fileSearch.byFilenameInput')"/>
-  </div>
-  
-  <FileMatchIndicator data-testid="file-match-indicator">
-  {{ indicatorText }}
-  </FileMatchIndicator>
-  </div>
+        <FileMatchInput
+          v-if="expanded"
+          v-model="localExtensionPattern"
+          class="ml-12px"
+          :placeholder="t('components.fileSearch.byExtensionInput')"
+        />
+        <FileMatchInput
+          v-else
+          v-model="localPattern"
+          aria-label="file-name-input"
+          :placeholder="t('components.fileSearch.byFilenameInput')"
+        />
+      </div>
+      <FileMatchIndicator
+        class="truncate"
+        data-testid="file-match-indicator"
+      >
+        {{ indicatorText }}
+      </FileMatchIndicator>
+    </div>
 
-<div class="inline-flex items-center w-full rounded mt-8px border-1 hocus-default focus-within-default h-40px" :class="{ 'hidden' : !expanded }">
-  <div class="inline-flex items-center flex-grow group">
-    <i-cy-magnifying-glass_x16 class="inline-block ml-12px mr-8px icon-light-gray-50 icon-dark-gray-500 group-focus-within:icon-light-indigo-50 group-focus-within:icon-dark-indigo-400"/>
-    <FileMatchInput v-model="pattern" :placeholder="t('components.fileSearch.byFilenameInput')"/>
-  </div>
-  </div>
+    <div
+      class="inline-flex items-center w-full rounded mt-8px border-1 hocus-default focus-within-default h-40px"
+      :class="{ 'hidden' : !expanded }"
+    >
+      <div class="inline-flex items-center flex-grow group">
+        <i-cy-magnifying-glass_x16 class="inline-block ml-12px mr-8px icon-light-gray-50 icon-dark-gray-500 group-focus-within:icon-light-indigo-50 group-focus-within:icon-dark-indigo-400" />
+        <FileMatchInput
+          v-model="localPattern"
+          :placeholder="t('components.fileSearch.byFilenameInput')"
+        />
+      </div>
+    </div>
   </div>
 </template>
 
@@ -59,12 +82,9 @@ import { useI18n } from '@cy/i18n'
 import FileMatchInput from './FileMatchInput.vue'
 import FileMatchButton from './FileMatchButton.vue'
 import FileMatchIndicator from './FileMatchIndicator.vue'
-import { ref, computed } from 'vue'
+import { computed } from 'vue'
 
 import { useToggle, useVModels } from '@vueuse/core'
-
-const specs = ref([])
-const foundSpecs = computed(() => specs.value)
 
 const { t } = useI18n()
 
@@ -84,7 +104,7 @@ const emits = defineEmits<{
   (eventName: 'update:pattern', value: string): void
 }>()
 
-const { extensionPattern, pattern } = useVModels(props, emits)
+const { extensionPattern: localExtensionPattern, pattern: localPattern } = useVModels(props, emits)
 
 // 2 of 22 Matches
 // No Matches
@@ -92,11 +112,12 @@ const indicatorText = computed(() => {
   const numerator = props.matches.found
   const denominator = props.matches.total
 
-  if (pattern.value) {
+  if (localPattern.value) {
     // When the user has attempted to search anything
     // "No Matches | 1 Match | { denominator } Matches"
     return t('components.fileSearch.matchesIndicator', { count: numerator, denominator, numerator })
   }
+
   // When the user has attempted to search by file path
   // "No Matches | {numerator} of {denominator} Matches"
   return t('components.fileSearch.matchesIndicatorEmptyFileSearch', { count: numerator, denominator, numerator })
