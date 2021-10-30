@@ -737,7 +737,7 @@ commands:
           command: |
             if [[ -f cypress.json ]]; then
               rm -rf cypress.json
-              echo 'export default {}' > cypress.config.js
+              echo 'module.exports = {}' > cypress.config.js
             fi
       - run:
           name: Print Cypress version
@@ -1869,7 +1869,7 @@ jobs:
           environment:
             CYPRESS_INTERNAL_FORCE_SCAFFOLD: "1"
           command: |
-            echo 'export default {}' > cypress.config.js
+            echo 'module.exports = {}' > cypress.config.js
             npx cypress run
 
   test-full-typescript-project:
@@ -2097,7 +2097,7 @@ jobs:
             CYPRESS_INTERNAL_FORCE_SCAFFOLD: "1"
           command: |
             rm -rf cypress.json
-            echo 'export default {}' > cypress.config.js
+            echo 'module.exports = {}' > cypress.config.js
       - run:
           name: Verify Cypress binary
           working_directory: test-binary
