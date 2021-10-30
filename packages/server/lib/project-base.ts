@@ -33,7 +33,6 @@ import preprocessor from './plugins/preprocessor'
 import { SpecsStore } from './specs-store'
 import { checkSupportFile, getDefaultConfigFilePath } from './project_utils'
 import type { FoundBrowser, OpenProjectLaunchOptions } from '@packages/types'
-import { getProjectConfig } from './cache'
 import { makeLegacyDataContext } from './makeDataContext'
 import type { DataContext } from '@packages/data-context'
 
@@ -861,12 +860,6 @@ export class ProjectBase<TServer extends Server> extends EE {
 
   async getProjectId () {
     await this.verifyExistence()
-
-    const config = await getProjectConfig(this.projectRoot)
-
-    if (config?.projectId) {
-      return config.projectId
-    }
 
     const readSettings = await settings.read(this.projectRoot, this.options)
 
