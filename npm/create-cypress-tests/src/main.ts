@@ -8,6 +8,10 @@ import { exec } from 'child_process'
 import { scanFSForAvailableDependency } from './findPackageJson'
 import { findInstalledOrInstallCypress } from './installCypress'
 
+export {
+  scanFSForAvailableDependency,
+}
+
 type MainArgv = {
   useNpm: boolean
   ignoreTs: boolean
