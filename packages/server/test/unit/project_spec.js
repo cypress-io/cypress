@@ -968,7 +968,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     })
 
     it('inserts path into cache', function () {
-      return add(this.pristinePath)
+      return add(this.pristinePath, {})
       .then(() => cache.read()).then((json) => {
         expect(json.PROJECTS).to.deep.eq([this.pristinePath])
       })
@@ -991,7 +991,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       it('returns object containing just the path', function () {
         sinon.stub(settings, 'read').rejects()
 
-        return add(this.pristinePath)
+        return add(this.pristinePath, {})
         .then((project) => {
           expect(project.id).to.be.undefined
 

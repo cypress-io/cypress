@@ -22,14 +22,16 @@ export class ConfigDataSource {
 
   async getDefaultConfigBasename (projectRoot: string) {
     const cypressConfigFiles = ['cypress.config.js', 'cypress.config.ts']
+    const legacyConfigFile = 'cypress.json'
+
     const filesInProjectDir = await this.ctx.fs.readdir(projectRoot)
 
-    const foundConfigFiles = cypressConfigFiles.filter((file) => filesInProjectDir.includes(file))
+    const foundConfigFiles = [...cypressConfigFiles, legacyConfigFile].filter((file) => filesInProjectDir.includes(file))
 
     if (foundConfigFiles.length === 1) {
       const configFile = foundConfigFiles[0]
 
-      if (configFile === 'cypress.json') {
+      if (configFile === legacyConfigFile) {
         throw this.ctx._apis.projectApi.error('CONFIG_FILE_MIGRATION_NEEDED', projectRoot, configFile)
       }
 
@@ -38,8 +40,8 @@ export class ConfigDataSource {
 
     // if we found more than one, throw a language conflict
     if (foundConfigFiles.length > 1) {
-      if (foundConfigFiles.includes('cypress.json')) {
-        const foundFiles = foundConfigFiles.filter((f) => f !== 'cypress.json')
+      if (foundConfigFiles.includes(legacyConfigFile)) {
+        const foundFiles = foundConfigFiles.filter((f) => f !== legacyConfigFile)
 
         throw this.ctx._apis.projectApi.error('LEGACY_CONFIG_FILE', projectRoot, ...foundFiles)
       }
