@@ -139,22 +139,12 @@ const docsMenu: {
     },
   }, {
     text: t('topNav.docsMenu.fasterTests'),
+    changeContent: 'orchestration',
     link: {
       url: 'https://on.cypress.io/parallelization',
       params: {
         utm_medium,
         utm_content: 'Parallelization',
-      },
-    },
-  },
-  {
-    text: t('topNav.docsMenu.smartOrchestration'),
-    changeContent: 'orchestration',
-    link: {
-      url: 'https://docs.cypress.io/guides/dashboard/smart-orchestration',
-      params: {
-        utm_medium,
-        utm_content: 'Smart Orchestration',
       },
     },
   }],

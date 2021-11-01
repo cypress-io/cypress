@@ -134,14 +134,16 @@ import { useI18n } from '@cy/i18n'
 const { t } = useI18n()
 import { getUrlWithParams, LinkWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 import { useTimeout } from '@vueuse/core'
+import { computed } from 'vue'
 import CircleCI from '@packages/frontend-shared/src/assets/logos/circleci.svg?url'
 import GitHubActions from '@packages/frontend-shared/src/assets/logos/github-actions.svg?url'
 import Bitbucket from '@packages/frontend-shared/src/assets/logos/bitbucket.svg?url'
 import Gitlab from '@packages/frontend-shared/src/assets/logos/gitlab.svg?url'
 import AwsCodeBuild from '@packages/frontend-shared/src/assets/logos/aws-codebuild.svg?url'
 
-defineProps<{
+const props = defineProps<{
   type: 'ci' | 'orchestration' | 'main',
+  automatic?: boolean
 }>()
 
 const getUrl = (link: LinkWithParams) => {
@@ -150,7 +152,7 @@ const getUrl = (link: LinkWithParams) => {
 
 const shrink = useTimeout(500)
 const utm_medium = 'CI Prompt 1'
-const utm_content = 'Manual' // todo - make this dynamic, "Automatic" is the other option, when the auto-open is complete
+const utm_content = computed(() => props.automatic ? 'Automatic' : 'Manual')
 
 const ciProviders = [
   {
@@ -161,7 +163,7 @@ const ciProviders = [
       params: {
         utm_medium,
         utm_campaign: 'Circle',
-        utm_content,
+        utm_content: utm_content.value,
       },
     },
   },
@@ -173,7 +175,7 @@ const ciProviders = [
       params: {
         utm_medium,
         utm_campaign: 'GitHub',
-        utm_content,
+        utm_content: utm_content.value,
       },
     },
   },
@@ -185,7 +187,7 @@ const ciProviders = [
       params: {
         utm_medium,
         utm_campaign: 'Bitbucket',
-        utm_content,
+        utm_content: utm_content.value,
       },
     },
   },
@@ -197,7 +199,7 @@ const ciProviders = [
       params: {
         utm_medium,
         utm_campaign: 'GitLab',
-        utm_content,
+        utm_content: utm_content.value,
       },
     },
   },
@@ -209,7 +211,7 @@ const ciProviders = [
       params: {
         utm_medium,
         utm_campaign: 'AWS',
-        utm_content,
+        utm_content: utm_content.value,
       },
     },
   },
@@ -220,7 +222,7 @@ const seeOtherGuidesInfo = {
   params: {
     utm_medium,
     utm_campaign: 'Other',
-    utm_content,
+    utm_content: utm_content.value,
   },
 }
 

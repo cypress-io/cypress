@@ -193,9 +193,9 @@ function shouldShowPrompt (prompt) {
   const timeSinceOpened = Date.now() - promptState.value?.firstOpened
 
   // prompt has been shown
-  // if (this._promptsShown && this._promptsShown[prompt.slug]) {
-  //   return false
-  // }
+  if (promptState.value?.promptsShown?.[prompt.slug]) {
+    return false
+  }
 
   // enough time has passed
   // no interval indicates never being shown automatically

@@ -131,7 +131,10 @@
           <i-cy-delete_x12 class="icon-dark-gray-400 w-12px h-12px" />
         </button>
       </div>
-      <PromptContent :type="docsMenuVariant" />
+      <PromptContent
+        :type="docsMenuVariant"
+        :automatic="forceOpenDocs"
+      />
     </div>
   </TopNavList>
 

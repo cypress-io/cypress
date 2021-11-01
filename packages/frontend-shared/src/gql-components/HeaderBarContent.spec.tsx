@@ -31,7 +31,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
     cy.contains('button', text.docsMenu.docsHeading).click()
     cy.contains('a', text.docsMenu.firstTest).should('be.visible')
     cy.get('[data-cy="topnav-version-list"]').click()
-    cy.contains('a', text.docsMenu.firstTest).should('not.exist')
+    cy.contains('a', text.docsMenu.firstTest).should('not.be.visible')
     cy.contains('a', text.seeAllReleases).should('be.visible')
   })
 
@@ -136,7 +136,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
           cy.contains(defaultMessages.topNav.docsMenu.prompts.ci.description).should('be.visible')
         })
 
-        it('sends correct utm_content when opened', function () {
+        it('links have correct utm_content param', function () {
           cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
             onResult: (result) => {
               result.app.activeProject.savedState = {
@@ -148,51 +148,70 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
             render: (gqlVal) => <div class="resize overflow-auto border-current border-1 h-700px"><HeaderBarContent gql={gqlVal} show-browsers={true} /></div>,
           })
 
-          cy.get('.see-other-guides').click()
-          cy.wrap(this.ipc.externalOpen).should('have.been.calledWithMatch', {
-            url: 'https://on.cypress.io/setup-ci',
-            params: {
-              utm_content: 'Automatic',
-            },
-          })
+          cy.contains(
+            'a[href="https://on.cypress.io/setup-ci?utm_medium=CI+Prompt+1&utm_campaign=Other&utm_content=Automatic"]',
+            defaultMessages.topNav.docsMenu.prompts.ci.seeOtherGuides,
+          )
+          .should('be.visible')
 
-          cy.get('.prompt-ci1').contains('Learn More').click()
-          cy.wrap(this.ipc.externalOpen).should('have.been.calledWithMatch', {
-            url: 'https://on.cypress.io/ci',
-            params: {
-              utm_content: 'Automatic',
-            },
-          })
+          cy.contains(
+            'a[href="https://on.cypress.io/ci?utm_medium=CI+Prompt+1&utm_campaign=Learn+More"]',
+            defaultMessages.topNav.docsMenu.prompts.ci.intro,
+          ).should('be.visible')
         })
 
         it('does not open when previously shown', function () {
-          // fixture marks prompt as shown
-          this.openProject.resolve(this.config)
+          cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
+            onResult: (result) => {
+              result.app.activeProject.savedState = {
+                firstOpened: 1609459200000,
+                lastOpened: 1609459200000,
+                promptsShown: {
+                  'ci1': 1609459200000,
+                  'orchestration1': 1609459200000,
+                },
+              }
+            },
+            render: (gqlVal) => <div class="resize overflow-auto border-current border-1 h-700px"><HeaderBarContent gql={gqlVal} show-browsers={true} /></div>,
+          })
 
-          cy.get('.prompt-ci1').should('not.exist')
+          cy.contains(defaultMessages.topNav.docsMenu.prompts.ci.description).should('not.exist')
         })
 
         it('does not open when projectId exists', function () {
-          // projectId exists in fixture
-          this.openProject.resolve(this.config)
+          cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
+            onResult: (result) => {
+              result.app.activeProject.savedState = {
+                firstOpened: 1609459200000,
+                lastOpened: 1609459200000,
+                promptsShown: {},
+              }
 
-          cy.get('.prompt-ci1').should('not.exist')
+              result.app.activeProject.config.push({ 'field': 'projectId', value: 'test-cloud-project-id' })
+            },
+            render: (gqlVal) => <div class="resize overflow-auto border-current border-1 h-700px"><HeaderBarContent gql={gqlVal} show-browsers={true} /></div>,
+          })
+
+          cy.contains(defaultMessages.topNav.docsMenu.prompts.ci.description).should('not.exist')
         })
 
         it('does not open when another prompt has been shown recently', function () {
-          this.openProject.resolve({
-            ...this.config,
-            projectId: null,
-            state: {
-              ...this.config.state,
-              promptsShown: {
-                // within 24 hours before the stubbed current time
-                dashboard1: 1609891100000,
-              },
+          cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
+            onResult: (result) => {
+              result.app.activeProject.savedState = {
+                firstOpened: 1609459200000,
+                lastOpened: 1609459200000,
+                promptsShown: {
+                  dashboard1: 1609891100000,
+                },
+              }
+
+              result.app.activeProject.config.push({ 'field': 'projectId', value: 'test-cloud-project-id' })
             },
+            render: (gqlVal) => <div class="resize overflow-auto border-current border-1 h-700px"><HeaderBarContent gql={gqlVal} show-browsers={true} /></div>,
           })
 
-          cy.get('.prompt-ci1').should('not.exist')
+          cy.contains(defaultMessages.topNav.docsMenu.prompts.ci.description).should('not.exist')
         })
       })
     })
@@ -204,34 +223,30 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
 
       context('opens on click', function () {
         beforeEach(function () {
-          this.openProject.resolve(this.config)
+          cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
+            render: (gqlVal) => <div class="resize overflow-auto border-current border-1 h-700px"><HeaderBarContent gql={gqlVal} show-browsers={true} /></div>,
+          })
 
-          cy.get('.docs-menu').trigger('mouseover')
-          cy.get('.docs-dropdown').should('be.visible')
+          cy.contains('Docs').click()
           cy.contains('Run tests faster').click()
         })
 
         it('opens on menu item click', function () {
-          // should open in beforeEach
-          cy.get('.prompt-orchestration1').should('be.visible')
-          cy.get('.docs-dropdown').should('not.exist')
-
-          cy.percySnapshot()
+          cy.contains(defaultMessages.topNav.docsMenu.prompts.orchestration.title).should('be.visible')
+          cy.contains('Getting Started').should('not.exist')
         })
 
         it('is dismissible from X icon', function () {
-          cy.get('.close').click()
-          cy.get('.prompt-orchestration1').should('not.exist')
+          cy.findAllByLabelText('Close').click()
+          cy.contains(defaultMessages.topNav.docsMenu.prompts.orchestration.title).should('not.exist')
         })
 
-        it('is dismissible from close button', function () {
-          cy.get('.prompt-orchestration1').contains('Close').click()
-          cy.get('.prompt-orchestration1').should('not.exist')
-        })
-
-        it('links to more information', function () {
-          cy.get('.prompt-orchestration1').contains('Learn More').click()
-          cy.wrap(this.ipc.externalOpen).should('have.been.calledWithMatch', { url: 'https://on.cypress.io/smart-orchestration' })
+        it('links to more information with expected utm params', function () {
+          cy.contains(
+            'a[href="https://on.cypress.io/smart-orchestration?utm_medium=CI+Prompt+1&utm_campaign=Learn+More"]',
+            defaultMessages.topNav.docsMenu.prompts.orchestration.learnMore,
+          )
+          .should('be.visible')
         })
       })
     })
