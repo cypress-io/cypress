@@ -94,7 +94,7 @@ function overloadMochaFnForConfig (fnName, specWindow) {
 
         const ret = origFn.apply(this, mochaArgs)
 
-        // attach testConfigOverrides - executes on `runner:test:before:run` event
+        // attached testConfigOverrides will executes on `runner:test:before:run` event
         ret._testConfig = _testConfig
 
         return ret

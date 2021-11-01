@@ -4,6 +4,7 @@ import $errUtils from '../cypress/error_utils'
 // See Test Config Overrides in ../../../../cli/types/cypress.d.ts
 
 function mutateConfiguration (testConfigList, config, env) {
+  let globalConfig = _.clone(config())
   let testConfigOverrideKeys: any = []
   let localConfigOverrides: any = {}
 
@@ -26,7 +27,8 @@ function mutateConfiguration (testConfigList, config, env) {
     localConfigOverrides = _.extend(localConfigOverrides, testConfigOverride)
   })
 
-  const globalConfig = _.pick(config(), testConfigOverrideKeys)
+  // only store the global config values that updated
+  globalConfig = _.pick(globalConfig, testConfigOverrideKeys)
   const globalEnv = _.clone(env())
 
   const localConfigOverridesBackup = _.clone(localConfigOverrides)
