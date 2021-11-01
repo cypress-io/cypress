@@ -10,15 +10,17 @@ export class HtmlDataSource {
   constructor (private ctx: DataContextShell) {}
 
   async fetchAppInitialData () {
+    const graphql = this.ctx.graphql
+
     await Promise.all([
-      this.ctx.graphql.executeQuery('AppQueryDocument', {}),
-      this.ctx.graphql.executeQuery('NewSpec_NewSpecQueryDocument', {}),
-      this.ctx.graphql.executeQuery('ProjectSettingsDocument', {}),
-      this.ctx.graphql.executeQuery('SpecsPageContainerDocument', {}),
-      this.ctx.graphql.executeQuery('HeaderBar_HeaderBarQueryDocument', {}),
+      graphql.executeQuery('AppQueryDocument', {}),
+      graphql.executeQuery('NewSpec_NewSpecQueryDocument', {}),
+      graphql.executeQuery('ProjectSettingsDocument', {}),
+      graphql.executeQuery('SpecsPageContainerDocument', {}),
+      graphql.executeQuery('HeaderBar_HeaderBarQueryDocument', {}),
     ])
 
-    return this.ctx.graphql.getSSRData()
+    return graphql.getSSRData()
   }
 
   async fetchAppHtml () {
