@@ -151,8 +151,8 @@ export const options = [
     isInternal: true,
   }, {
     name: 'nodeVersion',
-    defaultValue: 'default',
-    validation: v.isOneOf('default', 'bundled', 'system'),
+    defaultValue: 'system',
+    validation: v.isOneOf('bundled', 'system'),
   }, {
     name: 'numTestsKeptInMemory',
     defaultValue: 50,
