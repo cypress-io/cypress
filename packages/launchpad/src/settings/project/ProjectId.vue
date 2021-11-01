@@ -20,19 +20,24 @@
         lang="yaml"
         inline
       />
+      <CopyButton
+        v-if="props.gql?.projectId"
+        :text="props.gql?.projectId"
+        variant="outline"
+      />
     </div>
   </SettingsSection>
 </template>
 
 <script lang="ts" setup>
-import { ref, computed } from 'vue'
+import { computed } from 'vue'
 import { gql } from '@urql/core'
-import IconCodeBraces from '~icons/mdi/code-braces'
-import SettingsSection from '../SettingsSection.vue'
-import { useClipboard } from '@vueuse/core'
+import IconCodeBraces from '~icons/mdi/code'
 import { useI18n } from '@cy/i18n'
+import ShikiHighlight from '@cy/components/ShikiHighlight.vue'
+import CopyButton from '@cy/components/CopyButton.vue'
 import type { ProjectIdFragment } from '../../generated/graphql'
-import ShikiHighlight from '../../../../frontend-shared/src/components/ShikiHighlight.vue'
+import SettingsSection from '../SettingsSection.vue'
 
 gql`
 fragment ProjectId on Project {
@@ -44,8 +49,6 @@ const props = defineProps<{
   mockClipboard?: any,
   gql?: ProjectIdFragment
 }>()
-
-const clipboard = props.mockClipboard?.() || useClipboard({ source: ref(props.gql?.projectId || '') })
 
 const formattedProjectId = computed(() => `projectId: '${props.gql?.projectId}'`)
 
