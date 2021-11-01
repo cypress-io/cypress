@@ -1,39 +1,80 @@
 <template>
   <button
+    v-if="!href"
     style="width: fit-content"
     class="flex items-center leading-tight border rounded gap-8px outline-none"
     :class="classes"
   >
-    <span
-      v-if="prefixIcon || $slots.prefix"
-      class="justify-self-start flex items-center"
-    >
-      <slot name="prefix">
-        <component
-          :is="prefixIcon"
-          :class="prefixIconClass"
-        />
-      </slot>
-    </span>
-    <span class="flex-grow">
-      <slot />
-    </span>
-    <span
-      v-if="suffixIcon || $slots.suffix"
-      class="flex items-center justify-self-start"
-    >
-      <slot name="suffix">
-        <component
-          :is="suffixIcon"
-          :class="suffixIconClass"
-        />
-      </slot>
-    </span>
+    <ButtonInternals>
+      <template
+        v-if="prefixIcon || $slots.prefix"
+        #prefix
+      >
+        <slot name="prefix">
+          <component
+            :is="prefixIcon"
+            :class="prefixIconClass"
+          />
+        </slot>
+      </template>
+      <template #default>
+        <slot />
+      </template>
+      <template
+        v-if="suffixIcon || $slots.suffix"
+        #suffix
+      >
+        <slot name="suffix">
+          <component
+            :is="suffixIcon"
+            :class="suffixIconClass"
+          />
+        </slot>
+      </template>
+    </ButtonInternals>
   </button>
+  <a
+    v-else
+    :href="href"
+    style="width: fit-content"
+    class="flex select-none items-center border rounded gap-8px outline-none"
+    :class="classes"
+    :target="internalLink ? '' : '_blank'"
+  >
+    <ButtonInternals>
+      <template
+        v-if="prefixIcon || $slots.prefix"
+        #prefix
+      >
+        <slot name="prefix">
+          <component
+            :is="prefixIcon"
+            :class="prefixIconClass"
+          />
+        </slot>
+      </template>
+      <template #default>
+        <slot />
+      </template>
+      <template #suffix>
+        <slot
+          v-if="suffixIcon || $slots.suffix"
+          name="suffix"
+        >
+          <component
+            :is="suffixIcon"
+            :class="suffixIconClass"
+          />
+        </slot>
+      </template>
+
+    </ButtonInternals>
+  </a>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue'
+import ButtonInternals from './ButtonInternals.vue'
 
 export default defineComponent({
   inheritAttrs: true,
@@ -55,7 +96,9 @@ const VariantClassesTable = {
   pending: 'bg-gray-500 text-white',
   link: 'border-transparent text-indigo-600',
   text: 'border-0',
-}
+} as const
+
+export type ButtonVariants = keyof(typeof VariantClassesTable)
 
 const SizeClassesTable = {
   sm: 'px-6px py-2px text-14px',
@@ -68,9 +111,11 @@ const props = defineProps<{
   prefixIcon?: FunctionalComponent<SVGAttributes>
   suffixIcon?: FunctionalComponent<SVGAttributes>
   size?: 'sm' | 'md' | 'lg' | 'lg-wide'
-  variant?: 'primary' | 'tertiary' | 'outline' | 'link' | 'text' | 'pending'
+  variant?: ButtonVariants
   prefixIconClass?: string
   suffixIconClass?: string
+  href?: string // will cause the button to render as link element with button styles
+  internalLink?: boolean
 }>()
 
 const attrs = useAttrs() as ButtonHTMLAttributes

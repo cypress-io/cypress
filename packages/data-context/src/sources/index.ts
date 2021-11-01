@@ -3,8 +3,12 @@
 
 export * from './AppDataSource'
 export * from './BrowserDataSource'
+export * from './CloudDataSource'
+export * from './EnvDataSource'
 export * from './FileDataSource'
 export * from './GitDataSource'
+export * from './GraphQLDataSource'
+export * from './HtmlDataSource'
 export * from './ProjectDataSource'
 export * from './SettingsDataSource'
 export * from './StorybookDataSource'

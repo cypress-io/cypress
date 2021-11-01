@@ -4,6 +4,9 @@
 
 <route>
 {
-  name: "Home Page"
+  name: "Home Page",
+  meta: {
+    title: "Home"
+  }
 }
 </route>

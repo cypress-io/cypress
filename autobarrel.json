@@ -5,6 +5,7 @@
     "packages/data-context/src/**/*"
   ],
   "ignore": [
+    "packages/data-context/src/gen",
     "packages/graphql/src/stitching",
     "packages/graphql/src/testing",
     "packages/graphql/src/gen"

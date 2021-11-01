@@ -1,5 +1,5 @@
 <template>
-Hello
+  Hello
   <!-- <div class="flex flex-col">
     <h2>New Spec</h2>
     <div class="flex gap-4 justify-center">
@@ -69,7 +69,10 @@ Hello
 </template>
 <route>
 {
-  name: "New Spec Page"
+  name: "New Spec Page",
+  meta: {
+    title: "New Spec"
+  }
 }
 </route>
 <script lang="ts" setup>

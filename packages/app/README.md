@@ -11,6 +11,9 @@ This is the front-end for the Cypress App.
 4. This launches the existing CT Runner. Change the URL to http://localhost:3000/__vite__/ (note the trailing `/`)
 5. It should show the new Vite powered app 
 
+## Use of graphql by shared components is limited to `src/gql-components`
+
+In the long run, files in the `src/components` directory are intended as the foundation of a design system. As such they may be used in many contexts other than the Cypress App and Launcpad. There are some components that are only intended to be shared between App and Launchpad and make use of GraphQL queries and mutations. These will only work correctly if placed within `src/gql-components` directory.
 ## Using existing, Vite-incompatible modules
 
 Some of our modules, like `@packages/reporter`, `@packages/driver` and `@packages/runner-shared` cannot be easily
@@ -69,10 +72,7 @@ For an icon to work well in the current system, here's what needs to happen when
 1. Icon paths must define themselves as "icon-dark" or "icon-light" in their class names.
 If an icon path doesn't define a class, nothing bad will happen, it just won't get targeted by any styling.
 
-2. Icons with both a stroke and a fill aren't working correctly right now. They will soon.
-You can see this in the video with the Settings cog. It uses and `evenodd` fill pattern and has a path that contains both a stroke and a fill.
-
-3. Finally, you don't need to expose anything. `./src/assets/icons` is automatically watched and loaded 😮
+2. Finally, you don't need to expose anything. `./src/assets/icons` is automatically watched and loaded 😮
 
 ## Diagram
 

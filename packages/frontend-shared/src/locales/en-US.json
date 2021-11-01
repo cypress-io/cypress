@@ -119,7 +119,28 @@
       "ciTitle": "Run in CI/CD",
       "ciSetup": "Set up CI",
       "fasterTests": "Run tests faster",
-      "smartOrchestration": "Smart Orchestration"
+      "smartOrchestration": "Smart Orchestration",
+      "prompts": {
+        "ci": {
+          "title": "Configure CI",
+          "description": "Optimize your tests in CI by following these guides.",
+          "seeOtherGuides": "See Other Guides",
+          "intro": "Introduction to CI",
+          "learnTheBasics": "Learn the basics of running Cypress in CI."
+        },
+        "orchestration": {
+          "title": "Run tests faster in CI",
+          "parallelTime": "5 mins",
+          "noParallelTime": "12 mins",
+          "withParallelization": "with Parallelization",
+          "withoutParallelization": "without Parallelization",
+          "intro": " With Smart Orchestration, you’ll be able to:",
+          "bullet1": "Run spec files in parallel",
+          "bullet2": "Prioritize failed specs to run first",
+          "bullet3": "Cancel CI runs on test failure",
+          "learnMore": "Learn more"
+        }
+      }
     },
     "login": {
       "bodyInitial": "Logging in gives you access to the {0}. You can set up projects to be recorded and see test data from your project.",
@@ -268,6 +289,22 @@
     "device": {
       "title": "Device Settings",
       "description": "Settings for this device."
+    }
+  },
+  "runs": {
+    "connect": {
+      "title": "View your recorded runs from the Cypress Dashboard",
+      "smartText": "Scale your test runs with built-in smart orchestration.",
+      "debugText": "Debug tests that fail in CI with visual feedback.",
+      "chartText": "Keep your tests in tip-top shape with powerful analytics.",
+      "buttonUser": "Log in to the Cypress Dashboard",
+      "buttonProject": "Connect your project to the Cypress Dashboard"
+    },
+    "empty": {
+      "title": "Follow the steps below to record your first run to the Cypress Dashboard",
+      "step1": "Ensure that your {0} file contains the following code:",
+      "step2": "Ensure that your {0} file is checked into source control:",
+      "step3": "Run this command in your local development terminal or in CI:"
     }
   }
 }

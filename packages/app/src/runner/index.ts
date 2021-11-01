@@ -14,13 +14,14 @@
  * namespace there, and access it with `window.UnifiedRunner`.
  *
  */
-import { getMobxRunnerStore } from '../store'
+import { getMobxRunnerStore, useAutStore } from '../store'
 import { injectBundle } from './injectBundle'
 import type { BaseSpec } from '@packages/types/src/spec'
 import { UnifiedReporterAPI } from './reporter'
 import { getRunnerElement, empty } from './utils'
 import { IframeModel } from './iframe-model'
 import { AutIframe } from './aut-iframe'
+import { watchEffect } from 'vue'
 
 const randomString = `${Math.random()}`
 
@@ -34,7 +35,7 @@ let _autIframeModel: any
  * This only needs to be created once per **spec**. If you change spec,
  * you need to create a new AUT IFrame model.
  */
-function getAutIframeModel () {
+export function getAutIframeModel () {
   if (!_autIframeModel) {
     throw Error('Must create a new instance of AutIframe before accessing')
   }
@@ -52,15 +53,10 @@ function createIframeModel () {
   const autIframe = getAutIframeModel()
   // IFrame Model to manage snapshots, etc.
   const iframeModel = new IframeModel(
-    getMobxRunnerStore(),
     autIframe.detachDom,
     autIframe.restoreDom,
     autIframe.highlightEl,
     window.UnifiedRunner.eventManager,
-    () => {
-      // TODO snapshot controls
-    },
-    window.UnifiedRunner.MobX,
     {
       recorder: window.UnifiedRunner.studioRecorder,
       selectorPlaygroundModel: window.UnifiedRunner.selectorPlaygroundModel,
@@ -90,12 +86,11 @@ function setupRunner () {
 
   window.UnifiedRunner.eventManager.start(window.UnifiedRunner.config)
 
-  window.UnifiedRunner.MobX.reaction(
-    () => [mobxRunnerStore.height, mobxRunnerStore.width],
-    () => {
-      mobxRunnerStore.viewportUpdateCallback?.()
-    },
-  )
+  const autStore = useAutStore()
+
+  watchEffect(() => {
+    autStore.viewportUpdateCallback?.()
+  }, { flush: 'post' })
 
   _autIframeModel = new AutIframe(
     'Test Project',

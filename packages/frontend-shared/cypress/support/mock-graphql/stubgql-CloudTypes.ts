@@ -21,6 +21,7 @@ import type {
   QueryCloudProjectBySlugArgs,
   QueryCloudProjectsBySlugsArgs,
   CloudProjectRunsArgs,
+  CloudRunStatus,
 } from '../generated/test-cloud-graphql-types.gen'
 import type { GraphQLResolveInfo } from 'graphql'
 
@@ -35,6 +36,7 @@ let nodeIdx: Partial<Record<CloudTypesWithId, number>> = {}
 function getNodeIdx (type: CloudTypesWithId): number {
   return nodeIdx[type] ?? 0
 }
+const btoa = typeof window !== 'undefined' ? window.btoa : (val: string) => Buffer.from(val).toString('base64')
 
 function testNodeId <T extends CloudTypesWithId> (type: T) {
   nodeIdx[type] = (nodeIdx[type] ?? 0) + 1
@@ -67,6 +69,7 @@ export function createCloudRunCommitInfo (config: ConfigFor<CloudRunCommitInfo>)
     branchUrl: 'https://',
     authorName: 'John Appleseed',
     authorEmail: 'none@cypress.io',
+    ...config,
   }
 
   return cloudRunCommitInfo
@@ -82,6 +85,8 @@ export function createCloudRecordKey (config: ConfigFor<CloudRecordKey>) {
   return indexNode(cloudRecordKey)
 }
 
+const STATUS_ARRAY: CloudRunStatus[] = ['CANCELLED', 'ERRORED', 'FAILED', 'NOTESTS', 'OVERLIMIT', 'PASSED', 'RUNNING', 'TIMEDOUT']
+
 export function createCloudProject (config: ConfigFor<CloudProject>) {
   const cloudProject = {
     ...testNodeId('CloudProject'),
@@ -89,16 +94,21 @@ export function createCloudProject (config: ConfigFor<CloudProject>) {
     latestRun: CloudRunStubs.running,
     runs (args: CloudProjectRunsArgs) {
       const twentyRuns = _.times(20, (i) => {
+        const statusIndex = i % STATUS_ARRAY.length
+        const status = STATUS_ARRAY[statusIndex]
+
         return createCloudRun({
-          status: 'PASSED',
+          status,
           totalPassed: i,
-          commitInfo: createCloudRunCommitInfo({ sha: `fake-sha-${getNodeIdx('CloudRun')}` }),
+          commitInfo: createCloudRunCommitInfo({ sha: `fake-sha-${getNodeIdx('CloudRun')}`, summary: `fix: make gql work ${status}` }),
         })
       })
 
+      const connectionData = connectionFromArray(twentyRuns, args)
+
       return {
-        ...connectionFromArray(twentyRuns, args),
-        nodes: twentyRuns,
+        ...connectionData,
+        nodes: connectionData.edges.map((e) => e.node),
       }
     },
     ...config,
@@ -110,6 +120,8 @@ export function createCloudProject (config: ConfigFor<CloudProject>) {
 export function createCloudUser (config: ConfigFor<CloudUser>): CloudUser {
   const cloudUser: CloudUser = {
     ...testNodeId('CloudUser'),
+    email: 'test@example.com',
+    fullName: 'Test User',
     ...config,
   }
 
@@ -174,8 +186,12 @@ export const CloudProjectStubs = {
   componentProject: createCloudProject({ slug: 'abcd' }),
 } as const
 
+interface CloudTypesContext {
+  __server__?: NexusGen['context']
+}
+
 type MaybeResolver<T> = {
-  [K in keyof T]: K extends 'id' | '__typename' ? T[K] : T[K] | ((args: any, ctx: object, info: GraphQLResolveInfo) => MaybeResolver<T[K]>)
+  [K in keyof T]: K extends 'id' | '__typename' ? T[K] : T[K] | ((args: any, ctx: CloudTypesContext, info: GraphQLResolveInfo) => MaybeResolver<T[K]>)
 }
 
 export const CloudRunQuery: MaybeResolver<Query> = {
@@ -187,9 +203,17 @@ export const CloudRunQuery: MaybeResolver<Query> = {
     return CloudProjectStubs.componentProject
   },
   cloudProjectsBySlugs (args: QueryCloudProjectsBySlugsArgs) {
-    return args.slugs.map((s) => projectsBySlug[s] ?? null)
+    return args.slugs.map((s) => projectsBySlug[s] ?? createCloudProject({ slug: s }))
   },
   cloudViewer (args, ctx) {
+    if (ctx.__server__) {
+      return ctx.__server__.user ? {
+        ...CloudUserStubs.me,
+        email: ctx.__server__.user.email,
+        fullName: ctx.__server__.user.name,
+      } : null
+    }
+
     return CloudUserStubs.me
   },
 }

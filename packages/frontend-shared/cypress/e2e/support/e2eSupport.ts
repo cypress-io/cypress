@@ -1,6 +1,8 @@
 import '@testing-library/cypress/add-commands'
 import type { DataContext } from '@packages/data-context'
 import { e2eProjectDirs } from './e2eProjectDirs'
+import type { AuthenticatedUserShape } from '@packages/data-context/src/data'
+import type { DocumentNode, ExecutionResult } from 'graphql'
 
 const NO_TIMEOUT = 1000 * 1000
 const FOUR_SECONDS = 4 * 1000
@@ -18,6 +20,16 @@ export interface WithCtxInjected extends WithCtxOptions {
   testState: Record<string, any>
   projectDir(projectName: ProjectFixture): string
 }
+
+export interface RemoteGraphQLInterceptPayload {
+  operationName?: string
+  query: string
+  variables: Record<string, any>
+  document: DocumentNode
+  result: ExecutionResult
+}
+
+export type RemoteGraphQLInterceptor = (obj: RemoteGraphQLInterceptPayload) => ExecutionResult | Promise<ExecutionResult>
 
 declare global {
   namespace Cypress {
@@ -37,6 +49,18 @@ declare global {
        */
       setupE2E: typeof setupE2E
       initializeApp: typeof initializeApp
+      /**
+       * Simulates a user logged-in to the cypress app
+       */
+      loginUser: typeof loginUser
+      /**
+       * Gives the ability to intercept the remote GraphQL request & respond accordingly
+       */
+      remoteGraphQLIntercept: typeof remoteGraphQLIntercept
+      /**
+       * Removes the sinon spy'ing on the remote GraphQL fake requests
+       */
+      disableRemoteGraphQLFakes(): void
       visitApp(href?: string): Chainable<string>
       visitLaunchpad(href?: string): Chainable<string>
     }
@@ -103,7 +127,17 @@ function visitApp (href?: string) {
     throw new Error(`Missing serverPort - did you forget to call cy.initializeApp(...) ?`)
   }
 
-  return cy.visit(`dist-app/index.html?gqlPort=${e2e_gqlPort}&serverPort=${e2e_serverPort}${href || ''}`)
+  cy.withCtx(async (ctx) => {
+    return JSON.stringify(ctx.html.fetchAppInitialData())
+  }, { log: false }).then((ssrData) => {
+    return cy.visit(`dist-app/index.html?serverPort=${e2e_serverPort}${href || ''}`, {
+      onBeforeLoad (win) {
+        // Simulates the inject SSR data when we're loading the page normally in the app
+        win.__CYPRESS_INITIAL_DATA__ = JSON.parse(ssrData)
+        win.__CYPRESS_GRAPHQL_PORT__ = e2e_gqlPort
+      },
+    })
+  })
 }
 
 function visitLaunchpad (hash?: string) {
@@ -118,7 +152,9 @@ function visitLaunchpad (hash?: string) {
 
 const pageLoadId = `uid${Math.random()}`
 
-function withCtx<T extends Partial<WithCtxOptions>> (fn: (ctx: DataContext, o: T & WithCtxInjected) => any, opts: T = {} as T): Cypress.Chainable {
+type UnwrapPromise<R> = R extends PromiseLike<infer U> ? U : R
+
+function withCtx<T extends Partial<WithCtxOptions>, R> (fn: (ctx: DataContext, o: T & WithCtxInjected) => R, opts: T = {} as T): Cypress.Chainable<UnwrapPromise<R>> {
   const _log = opts.log === false ? { end () {} } : Cypress.log({
     name: 'withCtx',
     message: '(view in console)',
@@ -131,18 +167,45 @@ function withCtx<T extends Partial<WithCtxOptions>> (fn: (ctx: DataContext, o: T
 
   const { log, timeout, ...rest } = opts
 
-  return cy.task('withCtx', {
+  return cy.task<UnwrapPromise<R>>('withCtx', {
     fn: fn.toString(),
     options: rest,
     // @ts-expect-error
     activeTestId: `${pageLoadId}-${Cypress.mocha.getRunner().test.id ?? Cypress.currentTest.title}`,
-  }, { timeout: timeout ?? Cypress.env('e2e_isDebugging') ? NO_TIMEOUT : FOUR_SECONDS, log }).then(() => {
+  }, { timeout: timeout ?? Cypress.env('e2e_isDebugging') ? NO_TIMEOUT : FOUR_SECONDS, log }).then((result) => {
+    _log.end()
+
+    return result
+  })
+}
+
+function loginUser (userShape: Partial<AuthenticatedUserShape> = {}) {
+  const _log = Cypress.log({ name: 'loginUser', message: JSON.stringify(userShape) })
+
+  return cy.withCtx((ctx, o) => {
+    ctx.coreData.user = {
+      authToken: '1234',
+      email: 'test@example.com',
+      name: 'Test User',
+      ...o.userShape,
+    }
+  }, { log: false, userShape }).then(() => {
+    _log.end()
+  })
+}
+
+function remoteGraphQLIntercept (fn: RemoteGraphQLInterceptor) {
+  const _log = Cypress.log({ name: 'remoteGraphQLIntercept', message: '' })
+
+  return cy.task('remoteGraphQLIntercept', fn.toString(), { log: false }).then(() => {
     _log.end()
   })
 }
 
 Cypress.Commands.add('visitApp', visitApp)
+Cypress.Commands.add('loginUser', loginUser)
 Cypress.Commands.add('visitLaunchpad', visitLaunchpad)
 Cypress.Commands.add('initializeApp', initializeApp)
 Cypress.Commands.add('setupE2E', setupE2E)
 Cypress.Commands.add('withCtx', withCtx)
+Cypress.Commands.add('remoteGraphQLIntercept', remoteGraphQLIntercept)

@@ -1,7 +1,7 @@
 <template>
   <template v-if="query.data.value">
-    <HeaderBar :gql="query.data.value" />
-    <div class="px-24px">
+    <HeaderBar />
+    <div class="p-24px">
       <template v-if="query.data.value.baseError">
         <BaseError :gql="query.data.value.baseError" />
       </template>
@@ -55,15 +55,14 @@ import { MainLaunchpadQueryDocument } from './generated/graphql'
 import TestingTypeCards from './setup/TestingTypeCards.vue'
 import Wizard from './setup/Wizard.vue'
 import WizardHeader from './setup/WizardHeader.vue'
-import HeaderBar from './layouts/HeaderBar.vue'
 import GlobalPage from './global/GlobalPage.vue'
 import BaseError from './error/BaseError.vue'
 import StandardModal from '@cy/components/StandardModal.vue'
+import HeaderBar from '@cy/gql-components/HeaderBar.vue'
 import CompareTestingTypes from './setup/CompareTestingTypes.vue'
 
 import { useI18n } from '@cy/i18n'
 import { ref } from 'vue'
-import ShikiHighlight from '../../frontend-shared/src/components/ShikiHighlight.vue'
 
 const { t } = useI18n()
 const isTestingTypeModalOpen = ref(false)
@@ -86,7 +85,6 @@ query MainLaunchpadQuery {
     isInGlobalMode
     ...GlobalPage
   }
-  ...HeaderBar
 }
 `
 

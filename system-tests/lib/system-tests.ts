@@ -766,11 +766,10 @@ const systemTests = {
       // hides a user warning to go through NPM module
       `--cwd=${serverPath}`,
       `--run-project=${options.project}`,
-      `--testingType=${options.testingType || 'e2e'}`,
     ]
 
-    if (options.testingType === 'component') {
-      args.push('--component-testing')
+    if (options.testingType) {
+      args.push(`--testingType=${options.testingType}`)
     }
 
     if (options.spec) {

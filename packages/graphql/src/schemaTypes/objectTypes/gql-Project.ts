@@ -38,7 +38,11 @@ export const Project = objectType({
       resolve: async (source, args, ctx, info) => {
         const projectId = await ctx.project.projectId(source.projectRoot)
 
-        return projectId ? cloudProjectBySlug(projectId, ctx, info) : null
+        if (!projectId) {
+          return null
+        }
+
+        return cloudProjectBySlug(projectId, ctx, info)
       },
     })
 
@@ -94,6 +98,15 @@ export const Project = objectType({
       },
     })
 
+    t.string('configFilePath', {
+      description: 'Config File Path',
+      resolve: async (source, args, ctx) => {
+        const config = await ctx.project.getConfig(source.projectRoot)
+
+        return config.configFile ?? null
+      },
+    })
+
     t.field('preferences', {
       type: ProjectPreferences,
       description: 'Cached preferences for this project',
@@ -123,6 +136,7 @@ export const Project = objectType({
       },
       resolve: async (source, args, ctx) => {
         const result = await ctx.project.getCodeGenCandidates(args.glob)
+
         return result
       },
     })

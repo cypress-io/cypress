@@ -4,6 +4,7 @@ import * as JustMyLuck from 'just-my-luck'
 import faker from 'faker'
 import { template, keys, reduce, templateSettings } from 'lodash'
 import combineProperties from 'combine-properties'
+import type { AutSnapshot } from '../../src/runner/iframe-model'
 
 templateSettings.interpolate = /{{([\s\S]+?)}}/g
 
@@ -149,4 +150,17 @@ export const randomComponents = (n = 200) => {
       },
     }
   }, n)
+}
+
+export const autSnapshot: AutSnapshot = {
+  id: 1,
+  name: 'DOM Test Snapshot',
+  snapshots: [],
+  htmlAttrs: {},
+  viewportHeight: 500,
+  viewportWidth: 500,
+  url: 'http://localhost:3000',
+  body: {
+    get: () => null,
+  },
 }

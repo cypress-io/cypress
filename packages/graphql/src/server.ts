@@ -42,6 +42,11 @@ function maybeProxyContext (params: GraphQLParams | undefined, context: DataCont
 function proxyContext (ctx: DataContext, operationName: string) {
   return new Proxy(ctx, {
     get (target, p, receiver) {
+      // Allows us to get the context value, deref'ed so it's not guarded
+      if (p === 'deref') {
+        return Reflect.get(ctx, 'deref', ctx)
+      }
+
       if (p === 'actions' || p === 'emitter') {
         throw new Error(
           `Cannot access ctx.${p} within a query, only within mutations / outside of a GraphQL request\n` +

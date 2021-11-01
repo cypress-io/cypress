@@ -1,5 +1,7 @@
 import DataLoader from 'dataloader'
-import type { DataContext } from '..'
+import crypto from 'crypto'
+import fetch from 'cross-fetch'
+import type { DataContextShell } from '../DataContextShell'
 
 /**
  * this.ctx.util....
@@ -8,7 +10,7 @@ import type { DataContext } from '..'
  * within the DataContext layer
  */
 export class UtilDataSource {
-  constructor (private ctx: DataContext) {}
+  constructor (private ctx: DataContextShell) {}
 
   private _allLoaders: DataLoader<any, any>[] = []
 
@@ -40,5 +42,13 @@ export class UtilDataSource {
     for (const loader of this._allLoaders) {
       loader.clearAll()
     }
+  }
+
+  sha1 (value: string) {
+    return crypto.createHash('sha1').update(value).digest('hex')
+  }
+
+  get fetch () {
+    return fetch
   }
 }
