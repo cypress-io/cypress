@@ -1515,6 +1515,7 @@ jobs:
 
   test-kitchensink:
     <<: *defaults
+    parallelism: 3
     steps:
       - clone-repo-and-checkout-release-branch:
           repo: cypress-example-kitchensink
