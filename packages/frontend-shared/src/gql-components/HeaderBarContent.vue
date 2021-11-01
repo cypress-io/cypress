@@ -146,12 +146,12 @@ const clearActiveProject = () => {
   }
 }
 
-const promptState = computed(() => {
+const savedState = computed(() => {
   return props.gql?.app?.activeProject?.savedState
 })
 
 const cloudProjectId = computed(() => {
-  return props.gql?.app?.activeProject?.config?.find((item) => item.field === 'projectId')?.value
+  return props.gql?.app?.activeProject?.config?.find((item: { field: string }) => item.field === 'projectId')?.value
 })
 
 const props = defineProps<{
@@ -165,7 +165,7 @@ const { t } = useI18n()
 const prompts = sortBy([
   {
     slug: 'ci1',
-    interval: interval('4 days'),
+    interval: interval('10 seconds'),
     noProjectId: true,
   },
   {
@@ -174,7 +174,7 @@ const prompts = sortBy([
   },
 ], 'interval')
 
-watch(promptState, (newVal) => {
+watch(savedState, (newVal) => {
   if (newVal) {
     for (const prompt of prompts) {
       if (shouldShowPrompt(prompt)) {
@@ -189,11 +189,11 @@ watch(promptState, (newVal) => {
   immediate: true,
 })
 
-function shouldShowPrompt (prompt) {
-  const timeSinceOpened = Date.now() - promptState.value?.firstOpened
+function shouldShowPrompt (prompt: { slug: string; noProjectId: boolean; interval?: undefined }) {
+  const timeSinceOpened = Date.now() - savedState.value?.firstOpened
 
   // prompt has been shown
-  if (promptState.value?.promptsShown?.[prompt.slug]) {
+  if (savedState.value?.promptsShown?.[prompt.slug]) {
     return false
   }
 

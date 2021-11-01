@@ -420,6 +420,9 @@ type Mutation {
     testingType: TestingTypeEnum!
   ): App!
 
+  """Save the prompt-shown state for this project"""
+  setPromptShown(slug: String!): Boolean
+
   """show the launchpad windows"""
   showBrowserWindow: App!
 

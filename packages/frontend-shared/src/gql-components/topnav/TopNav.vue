@@ -155,7 +155,7 @@ import TopNavList from './TopNavList.vue'
 import PromptContent from './PromptContent.vue'
 import { allBrowsersIcons } from '../../../../frontend-shared/src/assets/browserLogos'
 import { gql, useMutation } from '@urql/vue'
-import { TopNavFragment, TopNav_LaunchOpenProjectDocument, TopNav_SetBrowserDocument } from '../../generated/graphql'
+import { TopNavFragment, TopNav_LaunchOpenProjectDocument, TopNav_SetBrowserDocument, TopNav_SetPromptShownDocument } from '../../generated/graphql'
 import { useI18n } from '@cy/i18n'
 import { ref, watch } from 'vue'
 // eslint-disable-next-line no-duplicate-imports
@@ -218,8 +218,15 @@ mutation TopNav_SetBrowser($id: ID!) {
 }
 `
 
+gql`
+mutation TopNav_SetPromptShown($slug: String!) {
+  setPromptShown(slug: $slug)
+}
+`
+
 const launchOpenProject = useMutation(TopNav_LaunchOpenProjectDocument)
 const setBrowser = useMutation(TopNav_SetBrowserDocument)
+const setPromptShown = useMutation(TopNav_SetPromptShownDocument)
 
 const launch = () => {
   launchOpenProject.executeMutation({})
@@ -252,6 +259,12 @@ watch(() => props.forceOpenDocs, (newVal) => {
   }
 }, {
   immediate: true,
+})
+
+watch(docsMenuVariant, (newVal, oldVal) => {
+  if (oldVal !== 'main') {
+    setPromptShown.executeMutation({ slug: `${oldVal}1` })
+  }
 })
 
 // reset docs menu if click or keyboard navigation happens outside

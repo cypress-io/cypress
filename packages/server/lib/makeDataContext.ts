@@ -47,6 +47,15 @@ export function makeDataContext (options: MakeDataContextOptions) {
       launchProject (browser: FoundBrowser, spec: Cypress.Spec, options?: LaunchOpts) {
         return openProject.launch({ ...browser }, spec, options)
       },
+      setPromptShown (slug) {
+        return openProject.getProject()
+        ?.saveState({
+          promptsShown: {
+            ...(openProject.getProject()?.state?.promptsShown ?? {}),
+            [slug]: Date.now(),
+          },
+        })
+      },
       initializeProject (args: LaunchArgs, options: OpenProjectLaunchOptions, browsers: FoundBrowser[]) {
         return openProject.create(args.projectRoot, args, options, browsers)
       },

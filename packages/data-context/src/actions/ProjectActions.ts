@@ -26,6 +26,7 @@ export interface ProjectApiShape {
   clearAllProjectPreferences(): Promise<unknown>
   closeActiveProject(): Promise<unknown>
   getCurrentProjectSavedState(): {} | undefined
+  setPromptShown(slug: string): void
 }
 
 export class ProjectActions {
@@ -217,6 +218,10 @@ export class ProjectActions {
 
   async clearAllProjectPreferencesCache () {
     await this.api.clearAllProjectPreferences()
+  }
+
+  setPromptShown (slug: string) {
+    this.api.setPromptShown(slug)
   }
 
   async createComponentIndexHtml (template: string) {
