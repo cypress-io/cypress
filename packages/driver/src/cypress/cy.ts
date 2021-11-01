@@ -11,14 +11,14 @@ import $stackUtils from './stack_utils'
 
 import $Chai from '../cy/chai'
 import $Xhrs from '../cy/xhrs'
-import $jQuery from '../cy/jquery'
+import { create as createJQuery, IJQuery } from '../cy/jquery'
 import $Aliases from '../cy/aliases'
 import * as $Events from './events'
 import $Ensures from '../cy/ensures'
 import $Focused from '../cy/focused'
 import $Mouse from '../cy/mouse'
 import $Keyboard from '../cy/keyboard'
-import $Location from '../cy/location'
+import { create as createLocation, ILocation } from '../cy/location'
 import { create as createAssertions, IAssertions } from '../cy/assertions'
 import $Listeners from '../cy/listeners'
 import { $Chainer } from './chainer'
@@ -119,7 +119,7 @@ const setTopOnError = function (Cypress, cy: $Cy) {
 
 // NOTE: this makes the cy object an instance
 // TODO: refactor the 'create' method below into this class
-class $Cy implements ITimeouts, IStability, IAssertions, IRetries {
+class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILocation {
   timeout: ITimeouts['timeout']
   clearTimeout: ITimeouts['clearTimeout']
   isStable: IStability['isStable']
@@ -128,6 +128,8 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries {
   verifyUpcomingAssertions: IAssertions['verifyUpcomingAssertions']
   retry: IRetries['retry']
   state: any
+  getRemotejQueryInstance: IJQuery['getRemotejQueryInstance']
+  getRemoteLocation: ILocation['getRemoteLocation']
 
   constructor (specWindow, Cypress, Cookies, state, config) {
     this.state = state
@@ -155,6 +157,14 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries {
     const retries = createRetries(Cypress, state, this.timeout, this.clearTimeout, this.whenStable, onFinishAssertions)
 
     this.retry = retries.retry
+
+    const jquery = createJQuery(state)
+
+    this.getRemotejQueryInstance = jquery.getRemotejQueryInstance
+
+    const location = createLocation(state)
+
+    this.getRemoteLocation = location.getRemoteLocation
   }
 }
 
@@ -181,8 +191,6 @@ export default {
       return $dom.query(selector, context)
     }
 
-    const jquery = $jQuery.create(state)
-    const location = $Location.create(state)
     const focused = $Focused.create(state)
     const keyboard = $Keyboard.create(state)
     const mouse = $Mouse.create(state, keyboard, focused, Cypress)
@@ -598,12 +606,6 @@ export default {
       getNextAlias: aliases.getNextAlias,
       aliasNotFoundFor: aliases.aliasNotFoundFor,
       getXhrTypeByAlias: aliases.getXhrTypeByAlias,
-
-      // location sync methods
-      getRemoteLocation: location.getRemoteLocation,
-
-      // jquery sync methods
-      getRemotejQueryInstance: jquery.getRemotejQueryInstance,
 
       // focused sync methods
       getFocused: focused.getFocused,
