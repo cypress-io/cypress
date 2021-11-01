@@ -19,11 +19,11 @@ export interface GitInfo {
 export class GitDataSource {
   constructor (private ctx: DataContext) {}
 
-  gitInfo (path: string): Promise<GitInfo> {
+  gitInfo (path: string): Promise<GitInfo | null> {
     return this.gitInfoLoader.load(path)
   }
 
-  private gitInfoLoader = this.ctx.loader<string, GitInfo>((paths) => {
+  private gitInfoLoader = this.ctx.loader<string, GitInfo | null>((paths) => {
     return this.bulkGitInfo(paths)
   })
 
@@ -39,7 +39,7 @@ export class GitDataSource {
           : this.getInfoPosix(absolutePaths)
       )
 
-      const output: GitInfo[] = []
+      const output: Array<GitInfo | null> = []
 
       this.ctx.debug('stdout %s', stdout)
 
@@ -54,6 +54,9 @@ export class GitDataSource {
             lastModifiedHumanReadable: info[2],
             author: info[3],
           })
+        } else {
+          this.ctx.debug(`did not get expected git log for ${file}, expected string with format '<timestamp> <time_ago> <author>'. Got: ${data}`)
+          output.push(null)
         }
       }
 
@@ -71,7 +74,7 @@ export class GitDataSource {
 
   private async getInfoPosix (absolutePaths: readonly string[]) {
     this.ctx.debug('getting git info for %o:', absolutePaths)
-    const paths = absolutePaths.map((x) => path.resolve(x)).join(',')
+    const paths = absolutePaths.map((x) => `"${path.resolve(x)}"`).join(',')
 
     // for file in {one,two} is valid in bash, but for file {one} is not
     // no need to use a for loop for a single file
