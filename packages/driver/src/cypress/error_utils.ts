@@ -541,6 +541,7 @@ const logError = (Cypress, handlerType, err, handled = false) => {
 }
 
 export default {
+  stackWithReplacedProps,
   appendErrMsg,
   createUncaughtException,
   cypressErr,

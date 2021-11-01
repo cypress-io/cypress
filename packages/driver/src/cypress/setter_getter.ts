@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import { extend } from 'lodash'
 
 const reset = (state = {}) => {
   // perf loop
@@ -11,7 +11,7 @@ const reset = (state = {}) => {
 
 // a basic object setter / getter class
 export default {
-  create: (state = {}, validate) => {
+  create: (state = {}, validate?) => {
     const get = (key?) => {
       if (key) {
         return state[key]
@@ -35,7 +35,7 @@ export default {
 
       validate && validate(obj)
 
-      _.extend(state, obj)
+      extend(state, obj)
 
       return ret
     }

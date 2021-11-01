@@ -145,10 +145,7 @@ class $Cypress {
     this.originalConfig = _.cloneDeep(config)
     this.config = $SetterGetter.create(config, (config) => {
       validate(config, (errMsg) => {
-        const err = new Error(errMsg)
-
-        err.name = 'ConfigOverrideError'
-        throw err
+        throw new this.state('specWindow').Error(errMsg)
       })
     })
 
@@ -278,6 +275,8 @@ class $Cypress {
         return this.emit('stop')
 
       case 'cypress:config':
+        // emit config event used to:
+        //   - trigger iframe viewport update
         return this.emit('config', args[0])
 
       case 'runner:start':

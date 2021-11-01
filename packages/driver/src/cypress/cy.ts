@@ -725,7 +725,11 @@ export default {
         queue.clear()
         timers.reset()
 
-        testConfigOverrides.restoreAndSetTestConfigOverrides(test, Cypress.config, Cypress.env)
+        try {
+          testConfigOverrides.restoreAndSetTestConfigOverrides(test, Cypress.config, Cypress.env)
+        } catch (err) {
+          fail(err)
+        }
 
         return cy.removeAllListeners()
       },

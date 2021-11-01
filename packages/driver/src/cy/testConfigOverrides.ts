@@ -1,6 +1,5 @@
 import _ from 'lodash'
 import $errUtils from '../cypress/error_utils'
-import $stackUtils from '../cypress/stack_utils'
 
 // See Test Config Overrides in ../../../../cli/types/cypress.d.ts
 
@@ -20,10 +19,7 @@ function mutateConfiguration (testConfigList, config, env) {
         errMsg: e.message,
       })
 
-      err.parsedStack = [invocationDetails]
-      err.codeFrame = $stackUtils.getCodeFrame(err, undefined)
-      // the stack trace is internal to Cypress and doesn't provide the user with useful information
-      // err.stack = undefined
+      err.stack = $errUtils.stackWithReplacedProps({ stack: invocationDetails.stack }, err)
       throw err
     }
 

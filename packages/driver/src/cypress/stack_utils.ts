@@ -105,12 +105,11 @@ const getInvocationDetails = (specWindow, config) => {
       stack = stackWithLinesDroppedFromMarker(stack, '__cypress/tests', true)
     }
 
-    const details = getSourceDetailsForFirstLine(stack, config('projectRoot'))
+    const details = getSourceDetailsForFirstLine(stack, config('projectRoot')) || {}
 
-    return {
-      details,
-      stack,
-    }
+    details.stack = stack
+
+    return details
   }
 }
 
