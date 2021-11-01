@@ -6,6 +6,10 @@ describe('Launchpad: Open Mode', () => {
     cy.visitLaunchpad()
   })
 
+  it('shows the projects page when a project is not specified', () => {
+    cy.contains('Recent Projects')
+  })
+
   it('shows the open page when testingType is not specified', () => {
     cy.get('h1').should('contain', defaultMessages.globalPage.empty.title)
   })
