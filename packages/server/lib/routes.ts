@@ -1,7 +1,7 @@
 import httpProxy from 'http-proxy'
 import _ from 'lodash'
 import Debug from 'debug'
-import { ErrorRequestHandler, Router, Response } from 'express'
+import { ErrorRequestHandler, Router } from 'express'
 import send from 'send'
 import { getPathToDist } from '@packages/resolve-dist'
 
@@ -94,39 +94,15 @@ export const createCommonRoutes = ({
       target: `http://localhost:${process.env.CYPRESS_INTERNAL_VITE_APP_PORT}/`,
     })
 
-    const proxyIndex = httpProxy.createProxyServer({
-      target: `http://localhost:${process.env.CYPRESS_INTERNAL_VITE_APP_PORT}/`,
-      selfHandleResponse: true,
-    })
-
-    proxyIndex.on('proxyRes', function (proxyRes, _req, _res) {
-      const body: any[] = []
-
-      proxyRes.on('data', function (chunk) {
-        let chunkData = String(chunk)
-
-        if (chunkData.includes('<head>')) {
-          chunkData = chunkData.replace('<body>', replaceBody(ctx))
-        }
-
-        body.push(chunkData)
-      })
-
-      proxyRes.on('end', function () {
-        (_res as Response).send(body.join(''))
-      })
+    router.get('/__vite__/', (req, res) => {
+      ctx.html.appHtml().then((html) => res.send(html)).catch((e) => res.status(500).send({ stack: e.stack }))
     })
 
     // TODO: can namespace this onto a "unified" route like __app-unified__
     // make sure to update the generated routes inside of vite.config.ts
     router.get('/__vite__/*', (req, res) => {
       debug('Proxy to __vite__')
-
-      if (req.params[0] === '') {
-        proxyIndex.web(req, res, {}, (e) => {})
-      } else {
-        proxy.web(req, res, {}, (e) => {})
-      }
+      proxy.web(req, res, {}, (e) => {})
     })
   } else {
     router.get('/__vite__/*', (req, res) => {

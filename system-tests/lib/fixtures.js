@@ -32,7 +32,6 @@ module.exports = {
     const from = path.join(projects, project)
     const to = path.join(tmpDir, project)
 
-    console.log({ from, to })
     fs.copySync(from, to)
   },
 
