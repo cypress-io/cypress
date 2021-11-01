@@ -59,10 +59,12 @@ function __stackReplacementMarker (fn, ctx, args) {
   return fn.apply(ctx, args)
 }
 
+declare let top: WindowProxy & { __alreadySetErrorHandlers__: boolean } | null
+
 // We only set top.onerror once since we make it configurable:false
 // but we update cy instance every run (page reload or rerun button)
-let curCy = null
-const setTopOnError = function (Cypress, cy) {
+let curCy: $Cy | null = null
+const setTopOnError = function (Cypress, cy: $Cy) {
   if (curCy) {
     curCy = cy
 
@@ -86,7 +88,7 @@ const setTopOnError = function (Cypress, cy) {
     // but they came from the spec, so we need to differentiate them
     const isSpecError = $errUtils.isSpecError(Cypress.config('spec'), err)
 
-    const handled = curCy.onUncaughtException({
+    const handled = curCy!.onUncaughtException({
       err,
       promise,
       handlerType,
