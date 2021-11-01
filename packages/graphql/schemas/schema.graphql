@@ -22,6 +22,9 @@ type App {
   """Whether the app is in global mode or not"""
   isInGlobalMode: Boolean!
 
+  """Whether we are currently refreshing the browsers list"""
+  isRefreshingBrowsers: Boolean!
+
   """All known projects for the app"""
   projects: [Project!]!
 
@@ -544,6 +547,9 @@ type Project implements Node {
 
   """Project configuration"""
   config: JSON!
+
+  """Config File Path"""
+  configFilePath: String
 
   """Currently selected spec"""
   currentSpec: Spec

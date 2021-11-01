@@ -4,7 +4,8 @@ import path from 'path'
 import type { ProjectShape } from '../data/coreDataShape'
 
 import type { DataContext } from '..'
-import { SpecGenerator } from '../codegen'
+import { codeGenerator, SpecOptions } from '../codegen'
+import templates from '../codegen/templates'
 
 export interface ProjectApiShape {
   getConfig(projectRoot: string): Promise<FullConfig>
@@ -92,6 +93,11 @@ export class ProjectActions {
       throw Error('Cannot initialize project without choosing testingType')
     }
 
+    // Ensure that we have loaded browsers to choose from
+    if (this.ctx.appData.refreshingBrowsers) {
+      await this.ctx.appData.refreshingBrowsers
+    }
+
     const browsers = [...(this.ctx.browserList ?? [])]
 
     const launchArgs: LaunchArgs = {
@@ -153,6 +159,11 @@ export class ProjectActions {
   async launchProject (testingType: TestingTypeEnum, options: LaunchOpts) {
     if (!this.ctx.activeProject) {
       return null
+    }
+
+    // Ensure that we have loaded browsers to choose from
+    if (this.ctx.appData.refreshingBrowsers) {
+      await this.ctx.appData.refreshingBrowsers
     }
 
     const browser = this.ctx.wizardData.chosenBrowser ?? this.ctx.appData.browsers?.[0]
@@ -316,16 +327,26 @@ export class ProjectActions {
     const codeGenPath = getCodeGenPath()
     const searchFolder = getSearchFolder()
 
-    const { specContent, specAbsolute } = await new SpecGenerator(this.ctx, {
+    const newSpecCodeGenOptions = new SpecOptions(this.ctx, {
       codeGenPath,
       codeGenType,
       specFileExtension,
-    }).generateSpec()
+    })
 
-    await this.ctx.fs.outputFile(specAbsolute, specContent)
+    const codeGenOptions = await newSpecCodeGenOptions.getCodeGenOptions()
+    const codeGenResults = await codeGenerator(
+      { templateDir: templates[codeGenType], target: path.parse(codeGenPath).dir },
+      codeGenOptions,
+    )
+
+    if (!codeGenResults.files[0] || codeGenResults.failed[0]) {
+      throw (codeGenResults.failed[0] || 'Unable to generate spec')
+    }
+
+    const [newSpec] = codeGenResults.files
 
     const spec = this.ctx.file.normalizeFileToSpec({
-      absolute: specAbsolute,
+      absolute: newSpec.file,
       searchFolder,
       specType: codeGenType === 'integration' ? 'integration' : 'component',
       projectRoot: project.projectRoot,
@@ -334,7 +355,7 @@ export class ProjectActions {
 
     project.generatedSpec = {
       spec,
-      content: specContent,
+      content: newSpec.content,
     }
   }
 

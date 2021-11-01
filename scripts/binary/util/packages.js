@@ -168,12 +168,12 @@ const replaceLocalNpmVersions = function (basePath) {
 
         if (dependencies) {
           return Promise.all(_.map(dependencies, (version, pkg) => {
-            const parsedPkg = /(@cypress\/)(.*)/g.exec(pkg)
+            const matchedPkg = Boolean(pkg.startsWith('@cypress/') || pkg === 'create-cypress-tests')
 
-            if (parsedPkg && parsedPkg.length === 3 && version === '0.0.0-development') {
-              const pkgName = parsedPkg[2]
+            if (matchedPkg && version === '0.0.0-development') {
+              const pkgName = pkg.startsWith('@cypress/') ? pkg.split('/')[1] : pkg
 
-              json.dependencies[`@cypress/${pkgName}`] = `file:${path.join(basePath, 'npm', pkgName)}`
+              json.dependencies[pkg] = `file:${path.join(basePath, 'npm', pkgName)}`
               shouldWriteFile = true
 
               return updateNpmPackage(pkgName)

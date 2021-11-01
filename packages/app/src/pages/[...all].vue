@@ -36,6 +36,9 @@ const routes = computed(() => {
     layout: "default",
     error: true
   },
-  name: "404 Page"
+  name: "404 Page",
+  meta: {
+    title: "404"
+  }
 }
 </route>

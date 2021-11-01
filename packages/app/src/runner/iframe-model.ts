@@ -1,10 +1,13 @@
-import type { MobxRunnerStore } from '../store'
+import { useSnapshotStore } from '../spec/snapshot-store'
+import { useAutStore } from '../store'
 
 export interface AutSnapshot {
   id?: number
   name?: string
+  $el?: any
   snapshot?: AutSnapshot
-  snapshots?: AutSnapshot[]
+  snapshots: AutSnapshot[]
+  highlightAttr?: string
   htmlAttrs: Record<string, any> // Type is NamedNodeMap, not sure if we should include lib: ["DOM"]
   viewportHeight: number
   viewportWidth: number
@@ -14,8 +17,6 @@ export interface AutSnapshot {
   }
 }
 
-type Fn = () => void
-
 export class IframeModel {
   isSnapshotPinned: boolean = false
   originalState?: AutSnapshot
@@ -23,13 +24,10 @@ export class IframeModel {
   intervalId?: number
 
   constructor (
-    private state: MobxRunnerStore,
     private detachDom: () => AutSnapshot,
     private restoreDom: (snapshot: any) => void,
     private highlightEl: ({ body }: any, opts: any) => void,
     private eventManager: any,
-    private snapshotControls: any,
-    private MobX: any,
     private studio: {
       selectorPlaygroundModel: any
       recorder: any
@@ -39,64 +37,80 @@ export class IframeModel {
   }
 
   listen () {
-    this.eventManager.on('run:start', this.MobX.action('run:start', this._beforeRun))
-    this.eventManager.on('run:end', this.MobX.action('run:end', this._afterRun))
+    this.eventManager.on('run:start', this._beforeRun)
+    this.eventManager.on('run:end', this._afterRun)
 
-    this.eventManager.on('viewport:changed', this.MobX.action('viewport:changed', this._updateViewport))
-    this.eventManager.on('config', this.MobX.action('config', (config: any) => {
+    this.eventManager.on('viewport:changed', this._updateViewport)
+    // TODO(lachlan): verify this is called, and if it actually needs to be.
+    // in CT/E2E/unified, because `listen` is called **after** this $Cypress has been
+    // created and this event has been emitted, so right now in production
+    // I don't think this is actually doing anything.
+    this.eventManager.on('config', (config: { viewportHeight: number, viewportWidth: number }) => {
       const { viewportWidth, viewportHeight } = config
 
       return this._updateViewport({ viewportHeight, viewportWidth })
-    }))
+    })
 
-    this.eventManager.on('url:changed', this.MobX.action('url:changed', this._updateUrl))
-    this.eventManager.on('page:loading', this.MobX.action('page:loading', this._updateLoadingUrl))
+    const autStore = useAutStore()
 
-    this.eventManager.on('show:snapshot', this.MobX.action('show:snapshot', this._setSnapshots))
-    this.eventManager.on('hide:snapshot', this.MobX.action('hide:snapshot', this._clearSnapshots))
+    this.eventManager.on('url:changed', (url: string) => {
+      autStore.updateUrl(url)
+    })
 
-    this.eventManager.on('pin:snapshot', this.MobX.action('pin:snapshot', this._pinSnapshot))
-    this.eventManager.on('unpin:snapshot', this.MobX.action('unpin:snapshot', this._unpinSnapshot))
+    this.eventManager.on('page:loading', this._updateLoadingUrl)
+
+    this.eventManager.on('show:snapshot', this.setSnapshots)
+    this.eventManager.on('hide:snapshot', this._clearSnapshots)
+
+    this.eventManager.on('pin:snapshot', this._pinSnapshot)
+    this.eventManager.on('unpin:snapshot', this._unpinSnapshot)
   }
 
   _beforeRun = () => {
-    this.state.isLoading = false
-    this.state.isRunning = true
-    this.state.resetUrl()
+    const snapshotStore = useSnapshotStore()
+    const autStore = useAutStore()
+
+    autStore.setIsLoading(false)
+    autStore.setIsRunning(true)
+    autStore.resetUrl()
+
     this.studio.selectorPlaygroundModel.setEnabled(false)
     this._reset()
-    this._clearMessage()
+    snapshotStore.clearMessage()
   }
 
   _afterRun = () => {
-    this.state.isRunning = false
+    const autStore = useAutStore()
+
+    autStore.setIsRunning(false)
   }
 
-  _updateViewport = ({ viewportWidth, viewportHeight }, cb?: Fn) => {
-    this.state.updateDimensions(viewportWidth, viewportHeight)
+  _updateViewport = ({ viewportWidth, viewportHeight }, cb?: () => void) => {
+    const autStore = useAutStore()
+
+    autStore.updateDimensions(viewportWidth, viewportHeight)
 
     if (cb) {
-      this.state.setViewportUpdatedCallback(cb)
+      autStore.setViewportUpdatedCallback(cb)
     }
   }
 
-  _updateUrl = (url: string) => {
-    this.state.url = url
-  }
-
   _updateLoadingUrl = (isLoadingUrl: boolean) => {
-    this.state.isLoadingUrl = isLoadingUrl
+    const autStore = useAutStore()
+
+    autStore.setIsLoadingUrl(isLoadingUrl)
   }
 
-  _clearMessage = () => {
-    this.state.clearMessage()
-  }
+  setSnapshots = (snapshotProps: AutSnapshot) => {
+    const snapshotStore = useSnapshotStore()
+    const autStore = useAutStore()
 
-  _setSnapshots = (snapshotProps: AutSnapshot) => {
-    if (this.isSnapshotPinned) return
+    if (snapshotStore.isSnapshotPinned) {
+      return
+    }
 
-    if (this.state.isRunning) {
-      return this._testsRunningError()
+    if (autStore.isRunning) {
+      return snapshotStore.setTestsRunningError()
     }
 
     if (this.studio.recorder.isOpen) {
@@ -107,12 +121,12 @@ export class IframeModel {
 
     if (!snapshots || !snapshots.length) {
       this._clearSnapshots()
-      this._setMissingSnapshotMessage()
+      snapshotStore.setMissingSnapshotMessage()
 
       return
     }
 
-    this.state.highlightUrl = true
+    autStore.setHighlightUrl(false)
 
     if (!this.originalState) {
       this._storeOriginalState()
@@ -121,11 +135,9 @@ export class IframeModel {
     this.detachedId = snapshotProps.id
 
     this._updateViewport(snapshotProps)
-    this._updateUrl(snapshotProps.url)
+    autStore.updateUrl(snapshotProps.url)
 
     clearInterval(this.intervalId)
-
-    const revert = this.MobX.action('revert:snapshot', this._showSnapshot)
 
     if (snapshots.length > 1) {
       let i = 0
@@ -138,18 +150,18 @@ export class IframeModel {
           i = 0
         }
 
-        revert(snapshots[i], snapshotProps)
+        this._showSnapshotVue(snapshots[i], snapshotProps)
       }, 800)
     }
 
-    revert(snapshots[0], snapshotProps)
+    this._showSnapshotVue(snapshots[0], snapshotProps)
   }
 
-  _showSnapshot = (snapshot, snapshotProps) => {
-    this.state.messageTitle = 'DOM Snapshot'
-    this.state.messageDescription = snapshot.name
-    this.state.messageType = ''
+  /// todo(lachlan): figure out shape of these two args
+  _showSnapshotVue = (snapshot: any, snapshotProps: AutSnapshot) => {
+    const snapshotStore = useSnapshotStore()
 
+    snapshotStore.showSnapshot(snapshot.name)
     this._restoreDom(snapshot, snapshotProps)
   }
 
@@ -162,14 +174,17 @@ export class IframeModel {
   }
 
   _clearSnapshots = () => {
-    if (this.isSnapshotPinned) return
+    const snapshotStore = useSnapshotStore()
+    const autStore = useAutStore()
+
+    if (snapshotStore.isSnapshotPinned) return
 
     clearInterval(this.intervalId)
 
-    this.state.highlightUrl = false
+    autStore.setHighlightUrl(false)
 
     if (!this.originalState || !this.originalState.body) {
-      return this._clearMessage()
+      return snapshotStore.clearMessage()
     }
 
     const previousDetachedId = this.detachedId
@@ -177,7 +192,7 @@ export class IframeModel {
     // process on next tick so we don't restore the dom if we're
     // about to receive another 'show:snapshot' event, else that would
     // be a huge waste
-    setTimeout(this.MobX.action('clear:snapshots:next:tick', () => {
+    setTimeout(() => {
       if (!this.originalState) {
         return
       }
@@ -187,66 +202,50 @@ export class IframeModel {
       if (previousDetachedId !== this.detachedId) return
 
       this._updateViewport(this.originalState)
-      this._updateUrl(this.originalState.url)
+      autStore.updateUrl(this.originalState.url)
       this.restoreDom(this.originalState.snapshot)
-      this._clearMessage()
+      snapshotStore.clearMessage()
 
       this.originalState = undefined
       this.detachedId = undefined
-    }))
+    })
   }
 
   _pinSnapshot = (snapshotProps) => {
+    const snapshotStore = useSnapshotStore()
     const { snapshots } = snapshotProps
 
     if (!snapshots || !snapshots.length) {
       this.eventManager.snapshotUnpinned()
-      this._setMissingSnapshotMessage()
+      snapshotStore.setMissingSnapshotMessage()
 
       return
     }
 
+    snapshotStore.pinSnapshot(snapshotProps)
+
     clearInterval(this.intervalId)
-
-    this.isSnapshotPinned = true
-
-    this.state.snapshot = {
-      showingHighlights: true,
-      stateIndex: 0,
-    }
-
-    this.state.messageTitle = 'DOM Snapshot'
-    this.state.messageDescription = 'pinned'
-    this.state.messageType = 'info'
-    this.state.messageControls = this.snapshotControls(snapshotProps)
 
     this._restoreDom(snapshots[0], snapshotProps)
   }
 
-  _setMissingSnapshotMessage () {
-    this.state.messageTitle = 'The snapshot is missing. Displaying current state of the DOM.'
-    this.state.messageDescription = undefined
-    this.state.messageType = 'warning'
-  }
-
   _unpinSnapshot = () => {
-    this.isSnapshotPinned = false
-    this.state.messageTitle = 'DOM Snapshot'
-    this.state.messageDescription = undefined
-    this.state.messageControls = null
-  }
+    const snapshotStore = useSnapshotStore()
 
-  _testsRunningError () {
-    this.state.messageTitle = 'Cannot show Snapshot while tests are running'
-    this.state.messageType = 'warning'
+    snapshotStore.unpinSnapshot()
   }
 
   _studioOpenError () {
-    this.state.messageTitle = 'Cannot show Snapshot while creating commands in Studio'
-    this.state.messageType = 'warning'
+    const snapshotStore = useSnapshotStore()
+
+    snapshotStore.setMessage(
+      'Cannot show Snapshot while creating commands in Studio',
+      'warning',
+    )
   }
 
   _storeOriginalState () {
+    const autStore = useAutStore()
     const finalSnapshot = this.detachDom()
 
     if (!finalSnapshot) return
@@ -257,11 +256,12 @@ export class IframeModel {
       body,
       htmlAttrs,
       snapshot: finalSnapshot,
-      url: this.state.url,
+      snapshots: [],
+      url: autStore.url || '',
       // TODO: use same attr for both runner and runner-ct states.
       // these refer to the same thing - the viewport dimensions.
-      viewportWidth: this.state.width,
-      viewportHeight: this.state.height,
+      viewportWidth: autStore.viewportWidth,
+      viewportHeight: autStore.viewportHeight,
     }
   }
 
@@ -269,6 +269,9 @@ export class IframeModel {
     this.detachedId = undefined
     this.intervalId = undefined
     this.originalState = undefined
-    this.isSnapshotPinned = false
+
+    const snapshotStore = useSnapshotStore()
+
+    snapshotStore.setSnapshotPinned(false)
   }
 }

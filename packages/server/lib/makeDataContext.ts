@@ -1,7 +1,6 @@
 import { DataContext } from '@packages/data-context'
 import specsUtil from './util/specs'
 import type { FindSpecs, FoundBrowser, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions, PlatformName, Preferences } from '@packages/types'
-import { checkAuthQuery } from '@packages/graphql/src/stitching/remoteGraphQLCalls'
 import browserUtils from './browsers/utils'
 import auth from './gui/auth'
 import user from './user'
@@ -9,6 +8,7 @@ import * as config from './config'
 import type { EventEmitter } from 'events'
 import { openProject } from './open_project'
 import cache from './cache'
+import { graphqlSchema } from '@packages/graphql/src/schema'
 
 const { getBrowsers } = browserUtils
 
@@ -20,6 +20,7 @@ interface MakeDataContextOptions {
 
 export function makeDataContext (options: MakeDataContextOptions) {
   return new DataContext({
+    schema: graphqlSchema,
     ...options,
     launchOptions: {},
     appApi: {
@@ -28,14 +29,14 @@ export function makeDataContext (options: MakeDataContextOptions) {
       },
     },
     authApi: {
+      getUser () {
+        return user.get()
+      },
       logIn (onMessage) {
         return auth.start(onMessage, 'launchpad')
       },
       logOut () {
         return user.logOut()
-      },
-      checkAuth (context) {
-        return checkAuthQuery(context)
       },
     },
     projectApi: {

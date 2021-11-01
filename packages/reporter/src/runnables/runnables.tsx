@@ -8,6 +8,7 @@ import { RunnablesError, RunnablesErrorModel } from './runnable-error'
 import Runnable from './runnable-and-suite'
 import RunnableHeader from './runnable-header'
 import { RunnablesStore, RunnableArray } from './runnables-store'
+import statsStore, { StatsStore } from '../header/stats-store'
 import { Scroller } from '../lib/scroller'
 import { AppState } from '../lib/app-state'
 import FileOpener from '../lib/file-opener'
@@ -109,6 +110,7 @@ const RunnablesContent = observer(({ runnablesStore, spec, error }: RunnablesCon
 export interface RunnablesProps {
   error?: RunnablesErrorModel
   runnablesStore: RunnablesStore
+  statsStore: StatsStore
   spec: Cypress.Cypress['spec']
   scroller: Scroller
   appState?: AppState
@@ -121,7 +123,7 @@ class Runnables extends Component<RunnablesProps> {
 
     return (
       <div ref='container' className='container'>
-        <RunnableHeader spec={spec} />
+        <RunnableHeader spec={spec} statsStore={statsStore} />
         <RunnablesContent
           runnablesStore={runnablesStore}
           spec={spec}

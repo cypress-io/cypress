@@ -1,10 +1,8 @@
 import type { LaunchArgs, OpenProjectLaunchOptions, PlatformName } from '@packages/types'
-import path from 'path'
 import type { AppApiShape, ProjectApiShape } from './actions'
 import type { NexusGenAbstractTypeMembers } from '@packages/graphql/src/gen/nxs.gen'
 import type { AuthApiShape } from './actions/AuthActions'
 import debugLib from 'debug'
-import fsExtra from 'fs-extra'
 import { CoreDataShape, makeCoreData } from './data/coreDataShape'
 import { DataActions } from './DataActions'
 import {
@@ -14,15 +12,17 @@ import {
   ProjectDataSource,
   WizardDataSource,
   BrowserDataSource,
-  UtilDataSource,
   StorybookDataSource,
+  CloudDataSource,
 } from './sources/'
 import { cached } from './util/cached'
 import { DataContextShell, DataContextShellConfig } from './DataContextShell'
+import type { GraphQLSchema } from 'graphql'
 
 const IS_DEV_ENV = process.env.CYPRESS_INTERNAL_ENV !== 'production'
 
 export interface DataContextConfig extends DataContextShellConfig {
+  schema: GraphQLSchema
   os: PlatformName
   launchArgs: LaunchArgs
   launchOptions: OpenProjectLaunchOptions
@@ -41,16 +41,6 @@ export interface DataContextConfig extends DataContextShellConfig {
 export class DataContext extends DataContextShell {
   private _coreData: CoreDataShape
 
-  @cached
-  get fs () {
-    return fsExtra
-  }
-
-  @cached
-  get path () {
-    return path
-  }
-
   constructor (private config: DataContextConfig) {
     super(config)
     this._coreData = config.coreData ?? makeCoreData()
@@ -63,6 +53,8 @@ export class DataContext extends DataContextShell {
       this.actions.app.refreshBrowsers(),
       // load projects from cache on start
       this.actions.project.loadProjects(),
+      // load the cached user & validate the token on start
+      this.actions.auth.getUser(),
     ]
 
     if (this.config.launchArgs.projectRoot) {
@@ -71,6 +63,13 @@ export class DataContext extends DataContextShell {
       if (this.coreData.app.activeProject?.preferences) {
         toAwait.push(this.actions.project.launchProjectWithoutLaunchpad())
       }
+    }
+
+    if (this.config.launchArgs.testingType) {
+      // It should be possible to skip the first step in the wizard, if the
+      // user already told us the testing type via command line argument
+      this.actions.wizard.setTestingType(this.config.launchArgs.testingType)
+      this.actions.wizard.navigate('forward')
     }
 
     if (IS_DEV_ENV) {
@@ -106,11 +105,6 @@ export class DataContext extends DataContextShell {
 
   get baseError () {
     return this.coreData.baseError
-  }
-
-  @cached
-  get util () {
-    return new UtilDataSource(this)
   }
 
   @cached
@@ -169,6 +163,11 @@ export class DataContext extends DataContextShell {
     return new ProjectDataSource(this)
   }
 
+  @cached
+  get cloud () {
+    return new CloudDataSource(this)
+  }
+
   get projectsList () {
     return this.coreData.app.projects
   }
@@ -205,6 +204,16 @@ export class DataContext extends DataContextShell {
     // TODO(tim): handle this consistently
     // eslint-disable-next-line no-console
     console.error(e)
+  }
+
+  /**
+   * If we really want to get around the guards added in proxyContext
+   * which disallow referencing ctx.actions / ctx.emitter from contexct for a GraphQL query,
+   * we can call ctx.deref.emitter, etc. This should only be used in exceptional situations where
+   * we're certain this is a good idea.
+   */
+  get deref () {
+    return this
   }
 
   async destroy () {

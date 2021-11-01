@@ -96,7 +96,9 @@ const VariantClassesTable = {
   pending: 'bg-gray-500 text-white',
   link: 'border-transparent text-indigo-600',
   text: 'border-0',
-}
+} as const
+
+export type ButtonVariants = keyof(typeof VariantClassesTable)
 
 const SizeClassesTable = {
   sm: 'px-6px py-2px text-14px',
@@ -109,7 +111,7 @@ const props = defineProps<{
   prefixIcon?: FunctionalComponent<SVGAttributes>
   suffixIcon?: FunctionalComponent<SVGAttributes>
   size?: 'sm' | 'md' | 'lg' | 'lg-wide'
-  variant?: 'primary' | 'tertiary' | 'outline' | 'link' | 'text' | 'pending'
+  variant?: ButtonVariants
   prefixIconClass?: string
   suffixIconClass?: string
   href?: string // will cause the button to render as link element with button styles

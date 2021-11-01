@@ -7,5 +7,8 @@
   "reporter": "../../node_modules/cypress-multi-reporters/index.js",
   "reporterOptions": {
     "configFile": "../../mocha-reporter-config.json"
+  },
+  "component": {
+    "testFiles": "**/*spec.{ts,tsx}"
   }
 }

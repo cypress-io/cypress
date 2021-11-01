@@ -9,4 +9,10 @@ describe('run-ct', () => {
     snapshot: false,
     expectedExitCode: 2,
   })
+
+  systemTests.it('runs in component testing mode', {
+    spec: 'simple_passing_component_spec.js',
+    testingType: 'component',
+    snapshot: false,
+  })
 })

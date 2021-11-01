@@ -1,4 +1,6 @@
 import type { FoundBrowser } from '@packages/types'
+import pDefer from 'p-defer'
+
 import type { DataContext } from '..'
 
 export interface AppApiShape {
@@ -20,6 +22,15 @@ export class AppActions {
   }
 
   async refreshBrowsers () {
+    if (this.ctx.coreData.app.refreshingBrowsers) {
+      return
+    }
+
+    const dfd = pDefer<FoundBrowser[]>()
+
+    this.ctx.coreData.app.refreshingBrowsers = dfd.promise
+
+    // TODO(tim): global unhandled error concept
     const browsers = await this.ctx._apis.appApi.getBrowsers()
 
     this.ctx.coreData.app.browsers = browsers
@@ -28,6 +39,8 @@ export class AppActions {
     if (!this.hasValidChosenBrowser(browsers) && browsers[0]) {
       this.ctx.coreData.wizard.chosenBrowser = browsers[0]
     }
+
+    dfd.resolve(browsers)
   }
 
   private idForBrowser (obj: FoundBrowser) {
