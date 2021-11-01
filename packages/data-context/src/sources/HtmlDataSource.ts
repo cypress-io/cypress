@@ -10,7 +10,7 @@ export class HtmlDataSource {
   constructor (private ctx: DataContextShell) {}
 
   async fetchAppInitialData () {
-    const graphql = this.ctx.graphql
+    const graphql = this.ctx.graphqlClient()
 
     await Promise.all([
       graphql.executeQuery('AppQueryDocument', {}),
