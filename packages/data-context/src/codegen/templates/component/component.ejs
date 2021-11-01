@@ -1,0 +1,12 @@
+---
+fileName: <%= fileName %>
+---
+
+<%- imports.join('\n') %>
+
+describe('<<%=componentName%> />', () => {
+  it('renders', () => {
+    <%- docsLink %>
+    <%- mount %>
+  })
+})
