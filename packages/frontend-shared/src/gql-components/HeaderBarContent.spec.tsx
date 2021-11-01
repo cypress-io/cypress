@@ -123,7 +123,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
 
         it('opens when after 4 days from first open, no projectId, and not already shown', function () {
           cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
-            onResult: (result, ctx) => {
+            onResult: (result) => {
               result.app.activeProject.savedState = {
                 firstOpened: 1609459200000,
                 lastOpened: 1609459200000,
@@ -137,13 +137,15 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
         })
 
         it('sends correct utm_content when opened', function () {
-          this.openProject.resolve({
-            ...this.config,
-            projectId: null,
-            state: {
-              ...this.config.state,
-              promptsShown: {},
+          cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
+            onResult: (result) => {
+              result.app.activeProject.savedState = {
+                firstOpened: 1609459200000,
+                lastOpened: 1609459200000,
+                promptsShown: { },
+              }
             },
+            render: (gqlVal) => <div class="resize overflow-auto border-current border-1 h-700px"><HeaderBarContent gql={gqlVal} show-browsers={true} /></div>,
           })
 
           cy.get('.see-other-guides').click()

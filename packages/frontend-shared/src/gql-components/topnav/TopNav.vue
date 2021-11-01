@@ -97,7 +97,7 @@
     role="region"
     aria-live="polite"
     :force-open-state="forceOpenDocs"
-    @clear-force-open="forceOpenDocs = false"
+    @clear-force-open="emit('clearForceOpen')"
   >
     <template
       #heading="{ open }"
@@ -162,7 +162,6 @@ import { onClickOutside, onKeyStroke } from '@vueuse/core'
 import DocsMenuContent from './DocsMenuContent.vue'
 
 const releasesUrl = 'https://github.com/cypress-io/cypress/releases/'
-const forceOpenDocs = ref(true)
 
 // TODO: will come from gql
 const versionList = [
@@ -230,14 +229,19 @@ const handleBrowserChoice = async (browser) => {
 
 const props = defineProps<{
   gql: TopNavFragment,
-  showBrowsers?: boolean
+  showBrowsers?: boolean,
+  forceOpenDocs?: boolean
+}>()
+
+const emit = defineEmits<{
+  (e: 'clearForceOpen'): void,
 }>()
 
 const docsMenuVariant: Ref<'main' | 'orchestration' | 'ci'> = ref('main')
 
 const promptsEl: Ref<HTMLElement | null> = ref(null)
 
-watch(forceOpenDocs, (newVal) => {
+watch(() => props.forceOpenDocs, (newVal) => {
   if (newVal === true) {
     docsMenuVariant.value = 'ci'
   } else {
@@ -251,7 +255,7 @@ watch(forceOpenDocs, (newVal) => {
 // so it doesn't reopen on the one of the prompts
 
 onClickOutside(promptsEl, () => {
-  forceOpenDocs.value = false
+  emit('clearForceOpen')
   setTimeout(() => {
     // reset the content of the menu when
     docsMenuVariant.value = 'main'

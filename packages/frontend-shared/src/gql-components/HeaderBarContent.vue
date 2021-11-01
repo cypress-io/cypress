@@ -3,7 +3,6 @@
     class="px-6 py-15px border-b border-b-gray-100 bg-white"
     data-testid="header-bar"
   >
-    {{ cloudProjectId }}
     <div class="flex items-center justify-between">
       <div v-if="pageName">
         {{ pageName }}
@@ -33,6 +32,8 @@
         <TopNav
           :gql="props.gql?.app"
           :show-browsers="props.showBrowsers"
+          :force-open-docs="!!promptToOpen"
+          @clear-force-open="promptToOpen = ''"
         >
           <template
             v-if="!!props.gql?.cloudViewer"
@@ -133,7 +134,7 @@ fragment HeaderBar_HeaderBarContent on Query {
 const isLoginOpen = ref(false)
 const clearActiveProjectMutation = useMutation(GlobalPageHeader_ClearActiveProjectDocument)
 const email = computed(() => props.gql.cloudViewer?.email || undefined)
-const automaticOpen = ref(false)
+const promptToOpen = ref('')
 
 const openLogin = () => {
   isLoginOpen.value = true
@@ -173,12 +174,11 @@ const prompts = sortBy([
   },
 ], 'interval')
 
-watch(cloudProjectId, (newVal) => {
+watch(promptState, (newVal) => {
   if (newVal) {
     for (const prompt of prompts) {
       if (shouldShowPrompt(prompt)) {
-        openPrompt(prompt.slug)
-        automaticOpen.value = true
+        promptToOpen.value = prompt.slug
 
         // only show one prompt at a time
         return
@@ -190,7 +190,7 @@ watch(cloudProjectId, (newVal) => {
 })
 
 function shouldShowPrompt (prompt) {
-  const timeSinceOpened = Date.now() - promptState.value.firstOpened
+  const timeSinceOpened = Date.now() - promptState.value?.firstOpened
 
   // prompt has been shown
   // if (this._promptsShown && this._promptsShown[prompt.slug]) {
@@ -210,9 +210,6 @@ function shouldShowPrompt (prompt) {
   }
 
   return true
-}
-
-function openPrompt (slug: string) {
 }
 
 </script>
