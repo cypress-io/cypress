@@ -1,11 +1,35 @@
 <template>
-  <div>
-    <h2>Runs Page</h2>
+  <div class="relative p-24px h-full overflow-y-scroll">
+    <TransitionQuickFade>
+      <RunsSkeleton v-if="query.fetching.value || !query.data.value" />
+      <RunsPage
+        v-else
+        :gql="query.data.value"
+      />
+    </TransitionQuickFade>
   </div>
 </template>
 
+<script lang="ts" setup>
+import { gql, useQuery } from '@urql/vue'
+import { RunsDocument } from '../generated/graphql'
+import RunsSkeleton from '../runs/RunsSkeleton.vue'
+import RunsPage from '../runs/RunsPage.vue'
+import TransitionQuickFade from '@cy/components/transitions/TransitionQuickFade.vue'
+
+gql`
+query Runs {
+  ...RunsPage
+}`
+
+const query = useQuery({ query: RunsDocument })
+</script>
+
 <route>
 {
-  name: "Runs Page"
+  name: "Runs",
+  meta: {
+    title: "Runs"
+  }
 }
 </route>

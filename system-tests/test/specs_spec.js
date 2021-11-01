@@ -7,6 +7,7 @@ describe('e2e specs', () => {
   it('failing when no specs found', function () {
     return systemTests.exec(this, {
       config: { integrationFolder: 'cypress/specs' },
+      testingType: 'e2e',
       snapshot: true,
       expectedExitCode: 1,
     })
@@ -15,6 +16,7 @@ describe('e2e specs', () => {
   it('failing when no spec pattern found', function () {
     return systemTests.exec(this, {
       spec: 'cypress/integration/**notfound**',
+      testingType: 'e2e',
       snapshot: true,
       expectedExitCode: 1,
     })
@@ -26,6 +28,7 @@ describe('e2e specs', () => {
 
     return systemTests.exec(this, {
       project,
+      testingType: 'e2e',
       snapshot: false,
       expectedExitCode: 0,
     })
@@ -36,6 +39,7 @@ describe('e2e specs', () => {
 
     return systemTests.exec(this, {
       project,
+      testingType: 'e2e',
       snapshot: false,
       expectedExitCode: 0,
     })

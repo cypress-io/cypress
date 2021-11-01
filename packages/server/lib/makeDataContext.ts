@@ -8,6 +8,7 @@ import * as config from './config'
 import type { EventEmitter } from 'events'
 import { openProject } from './open_project'
 import cache from './cache'
+import { graphqlSchema } from '@packages/graphql/src/schema'
 
 const { getBrowsers, ensureAndGetByNameOrPath } = browserUtils
 
@@ -19,6 +20,7 @@ interface MakeDataContextOptions {
 
 export function makeDataContext (options: MakeDataContextOptions) {
   return new DataContext({
+    schema: graphqlSchema,
     ...options,
     launchOptions: {},
     appApi: {

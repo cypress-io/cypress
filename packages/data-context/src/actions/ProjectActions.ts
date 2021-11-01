@@ -92,6 +92,11 @@ export class ProjectActions {
       throw Error('Cannot initialize project without choosing testingType')
     }
 
+    // Ensure that we have loaded browsers to choose from
+    if (this.ctx.appData.refreshingBrowsers) {
+      await this.ctx.appData.refreshingBrowsers
+    }
+
     const browsers = [...(this.ctx.browserList ?? [])]
 
     const launchArgs: LaunchArgs = {
@@ -159,6 +164,11 @@ export class ProjectActions {
 
     if (!testingType) {
       throw Error('Cannot launch project without chosen testing type')
+    }
+
+    // Ensure that we have loaded browsers to choose from
+    if (this.ctx.appData.refreshingBrowsers) {
+      await this.ctx.appData.refreshingBrowsers
     }
 
     const browser = this.ctx.wizardData.chosenBrowser ?? this.ctx.appData.browsers?.[0]

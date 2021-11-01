@@ -1,10 +1,8 @@
 import type { LaunchArgs, OpenProjectLaunchOptions, PlatformName } from '@packages/types'
-import path from 'path'
 import type { AppApiShape, ProjectApiShape } from './actions'
 import type { NexusGenAbstractTypeMembers } from '@packages/graphql/src/gen/nxs.gen'
 import type { AuthApiShape } from './actions/AuthActions'
 import debugLib from 'debug'
-import fsExtra from 'fs-extra'
 import { CoreDataShape, makeCoreData } from './data/coreDataShape'
 import { DataActions } from './DataActions'
 import {
@@ -14,16 +12,17 @@ import {
   ProjectDataSource,
   WizardDataSource,
   BrowserDataSource,
-  UtilDataSource,
   StorybookDataSource,
   CloudDataSource,
 } from './sources/'
 import { cached } from './util/cached'
 import { DataContextShell, DataContextShellConfig } from './DataContextShell'
+import type { GraphQLSchema } from 'graphql'
 
 const IS_DEV_ENV = process.env.CYPRESS_INTERNAL_ENV !== 'production'
 
 export interface DataContextConfig extends DataContextShellConfig {
+  schema: GraphQLSchema
   os: PlatformName
   launchArgs: LaunchArgs
   launchOptions: OpenProjectLaunchOptions
@@ -41,16 +40,6 @@ export interface DataContextConfig extends DataContextShellConfig {
 
 export class DataContext extends DataContextShell {
   private _coreData: CoreDataShape
-
-  @cached
-  get fs () {
-    return fsExtra
-  }
-
-  @cached
-  get path () {
-    return path
-  }
 
   constructor (private config: DataContextConfig) {
     super(config)
@@ -116,11 +105,6 @@ export class DataContext extends DataContextShell {
 
   get baseError () {
     return this.coreData.baseError
-  }
-
-  @cached
-  get util () {
-    return new UtilDataSource(this)
   }
 
   @cached

@@ -6,20 +6,48 @@ describe('Launchpad: Open Mode', () => {
     cy.visitLaunchpad()
   })
 
-  it('Shows the open page', () => {
+  it('shows the open page when testingType is not specified', () => {
     cy.get('h1').should('contain', defaultMessages.globalPage.empty.title)
   })
 
-  it('auto-selects the browser when launched with --browser', () => {
+  it('goes directly to e2e tests when launched with --e2e', () => {
     cy.withCtx(async (ctx) => {
+      // Though the data context is previously initialized,
+      // we re-initialize it here so that it reflects the new launchArg
       ctx.launchArgs.testingType = 'e2e'
-      ctx.launchArgs.browser = 'firefox'
       await ctx.initializeData()
     })
 
     cy.withCtx(async (ctx, o) => {
       await ctx.actions.project.setActiveProject(o.projectDir('todos'))
       ctx.emitter.toLaunchpad()
+    })
+
+    // e2e testing is configured for the todo project, so we don't expect an error.
+    cy.get('h1').should('contain', 'Initializing Config...')
+  })
+
+  it('goes directly to component tests when launched with --component', () => {
+    cy.withCtx(async (ctx) => {
+      // Though the data context is previously initialized,
+      // we re-initialize it here so that it reflects the new launchArg
+      ctx.launchArgs.testingType = 'component'
+      await ctx.initializeData()
+    })
+
+    cy.withCtx(async (ctx, o) => {
+      await ctx.actions.project.setActiveProject(o.projectDir('todos'))
+      ctx.emitter.toLaunchpad()
+    })
+
+    // Component testing is not configured for the todo project
+    cy.get('h1').should('contain', 'Cypress Configuration Error')
+  })
+
+  it('auto-selects the browser when launched with --browser', () => {
+    cy.withCtx(async (ctx) => {
+      ctx.launchArgs.testingType = 'e2e'
+      ctx.launchArgs.browser = 'firefox'
     })
 
     cy.contains('Next Step').click()
@@ -36,6 +64,14 @@ describe('Launchpad: Open Mode', () => {
       })
 
       cy.get('h1').should('contain', 'Welcome to Cypress!')
+    })
+  })
+
+  describe('when a user interacts with the header', () => {
+    it('the Docs menu opens when clicked', () => {
+      cy.contains('Projects').should('be.visible')
+      cy.contains('button', 'Docs').click()
+      cy.contains(defaultMessages.topNav.docsMenu.gettingStartedTitle).should('be.visible')
     })
   })
 })

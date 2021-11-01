@@ -1,6 +1,9 @@
+import { ReactNode } from 'react'
+
 export interface FileDetails {
   absoluteFile?: string
   column: number
+  displayFile?: ReactNode
   line: number
   originalFile: string
   relativeFile: string
