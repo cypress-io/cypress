@@ -25,7 +25,7 @@ export function getLatestNodeVersion (packageName: string): Promise<NodePackage>
   const DEFAULT_VERSION = 'latest'
 
   return new Promise((resolve) => {
-    return get(`https://registry.npmjs.org/${packageName}`, (res) => {
+    return get(`http://registry.npmjs.org/${packageName}`, (res) => {
       let rawData = ''
 
       res.on('data', (chunk) => (rawData += chunk))
