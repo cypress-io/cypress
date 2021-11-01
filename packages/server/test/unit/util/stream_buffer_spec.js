@@ -1,11 +1,11 @@
-require('../spec_helper')
+require('../../spec_helper')
 
 const _ = require('lodash')
 const fs = require('fs')
 const stream = require('stream')
 const Promise = require('bluebird')
 const { concatStream } = require('@packages/network')
-const { streamBuffer } = require('../../lib/util/stream_buffer')
+const { streamBuffer } = require('../../../lib/util/stream_buffer')
 
 function drain (stream) {
   return new Promise((resolve) => {

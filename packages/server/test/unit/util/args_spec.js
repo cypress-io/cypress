@@ -1,12 +1,12 @@
-require('../spec_helper')
+require('../../spec_helper')
 
 const path = require('path')
 const os = require('os')
 const snapshot = require('snap-shot-it')
 const stripAnsi = require('strip-ansi')
 const minimist = require('minimist')
-const argsUtil = require(`${root}lib/util/args`)
-const getWindowsProxyUtil = require(`${root}lib/util/get-windows-proxy`)
+const argsUtil = require(`${root}../lib/util/args`)
+const getWindowsProxyUtil = require(`${root}../lib/util/get-windows-proxy`)
 
 const cwd = process.cwd()
 
