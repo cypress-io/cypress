@@ -1,15 +1,13 @@
-import { ProjectSettingsDocument } from '../../generated/graphql-test'
+import { ProjectSettingsFragmentDoc } from '../../generated/graphql-test'
 import ProjectSettings from './ProjectSettings.vue'
 
-// TODO: Fix this test
-// ProjectSettings should use a fragment, not a query
-xdescribe('<ProjectSettings />', () => {
+describe('<ProjectSettings />', () => {
   it('displays the project, record key, and experiments sections', () => {
-    cy.mountFragment(ProjectSettingsDocument, {
+    cy.mountFragment(ProjectSettingsFragmentDoc, {
       render: (gqlVal) => {
         return (
           <div class="py-4 px-8">
-            <ProjectSettings />
+            <ProjectSettings gql={gqlVal}/>
           </div>
         )
       },
