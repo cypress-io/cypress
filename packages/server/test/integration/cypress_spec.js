@@ -1,7 +1,6 @@
 /* eslint-disable no-restricted-properties */
 require('../spec_helper')
 
-const R = require('ramda')
 const _ = require('lodash')
 const path = require('path')
 const EE = require('events')
@@ -1055,7 +1054,7 @@ describe('lib/cypress', () => {
 
             // when we work with the browsers we set a few extra flags
             const chrome = _.find(TYPICAL_BROWSERS, { name: 'chrome' })
-            const launchedChrome = R.merge(chrome, {
+            const launchedChrome = _.defaults({}, chrome, {
               isHeadless: true,
               isHeaded: false,
             })

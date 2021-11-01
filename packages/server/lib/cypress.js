@@ -9,7 +9,6 @@ require('./environment')
 // essentially do it all again when we boot the correct
 // mode.
 
-const R = require('ramda')
 const Promise = require('bluebird')
 const debug = require('debug')('cypress:server:cypress')
 const argsUtils = require('./util/args')
@@ -123,7 +122,7 @@ module.exports = {
 
     // if the CLI passed "--" somewhere, we need to remove it
     // for https://github.com/cypress-io/cypress/issues/5466
-    argv = R.without('--', argv)
+    argv = argv.filter((val) => val !== '--')
 
     let options
 

@@ -8,7 +8,6 @@ const glob = require('./util/glob')
 const cwd = require('./cwd')
 const debug = require('debug')('cypress:server:scaffold')
 const errors = require('./errors')
-const { isEmpty } = require('ramda')
 const { isDefault } = require('./util/config')
 
 const getExampleSpecsFullPaths = cypressEx.getPathToExamples()
@@ -116,8 +115,8 @@ const isNewProject = (config) => {
     debug('determine if we should scaffold:')
 
     // TODO: add tests for this
-    debug('- empty?', isEmpty(files))
-    if (isEmpty(files)) {
+    debug('- empty?', _.isEmpty(files))
+    if (_.isEmpty(files)) {
       return true
     }
 
