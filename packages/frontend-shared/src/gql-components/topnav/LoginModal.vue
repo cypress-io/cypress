@@ -106,4 +106,6 @@ const title = computed(() => {
   return t('topNav.login.titleInitial')
 })
 
+export type { LoginModalFragment }
+
 </script>

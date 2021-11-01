@@ -3,7 +3,6 @@ import Debug from 'debug'
 import isHtml from 'is-html'
 import _ from 'lodash'
 import stream from 'stream'
-import { EventEmitter } from 'events'
 import url from 'url'
 import httpsProxy from '@packages/https-proxy'
 import { getRouteForRequest } from '@packages/net-stubbing'
@@ -46,7 +45,7 @@ const isResponseHtml = function (contentType, responseBuffer) {
 export class ServerE2E extends ServerBase<SocketE2E> {
   private _urlResolver: Bluebird<Record<string, any>> | null
 
-  constructor (ctx: DataContextShell = new DataContextShell({ rootBus: new EventEmitter })) {
+  constructor (ctx: DataContextShell = new DataContextShell()) {
     super(ctx)
 
     this._urlResolver = null

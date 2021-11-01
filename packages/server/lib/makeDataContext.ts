@@ -11,6 +11,7 @@ import { EventEmitter } from 'events'
 import { openProject } from './open_project'
 import cache from './cache'
 import errors from './errors'
+import { graphqlSchema } from '@packages/graphql/src/schema'
 
 const { getBrowsers } = browserUtils
 
@@ -43,6 +44,7 @@ export function makeLegacyDataContext (launchArgs: LaunchArgs = {} as LaunchArgs
 
 export function makeDataContext (options: MakeDataContextOptions) {
   return new DataContext({
+    schema: graphqlSchema,
     ...options,
     launchOptions: {},
     appApi: {

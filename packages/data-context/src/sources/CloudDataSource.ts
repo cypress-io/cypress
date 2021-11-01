@@ -31,10 +31,10 @@ export interface CloudExecuteRemote {
 }
 
 export class CloudDataSource {
-  private _urqlClient: Client
+  private _cloudUrqlClient: Client
 
   constructor (private ctx: DataContext) {
-    this._urqlClient = createClient({
+    this._cloudUrqlClient = createClient({
       url: `${REMOTE_SCHEMA_URLS[cloudEnv]}/test-runner-graphql`,
       exchanges: [
         dedupExchange,
@@ -45,14 +45,20 @@ export class CloudDataSource {
     })
   }
 
+  /**
+   * Executes the schema against a remote query. Keeps an urql client for the normalized caching,
+   * so we can respond quickly on first-load if we have data. Since this is ultimately being used
+   * as a remote request mechanism for a stitched schema, we reject the promise if we see any errors.
+   */
   async executeRemoteGraphQL (config: CloudExecuteRemote): Promise<Partial<OperationResult>> {
+    // TODO(tim): remove this when we start doing remote requests to public APIs
     if (!this.ctx.user) {
       return { data: null }
     }
 
     const requestPolicy = config.requestPolicy ?? 'cache-and-network'
 
-    const executingQuery = this._urqlClient.executeQuery(createRequest(config.query, config.variables), {
+    const executingQuery = this._cloudUrqlClient.executeQuery(createRequest(config.query, config.variables), {
       fetch: this.ctx.util.fetch,
       requestPolicy,
       fetchOptions: {
@@ -69,10 +75,26 @@ export class CloudDataSource {
       const pipeline = pipe(
         executingQuery,
         subscribe((res) => {
+          this.ctx.debug('executeRemoteGraphQL subscribe res %o', res)
+
           if (!resolvedData) {
             resolvedData = res
-            dfd.resolve(res)
+            if (res.error) {
+              dfd.reject(res.error)
+            } else {
+              dfd.resolve(res)
+            }
           } else if (!_.isEqual(resolvedData.data, res.data) || !_.isEqual(resolvedData.error, res.error)) {
+            if (res.error) {
+              this.ctx.coreData.baseError = {
+                title: res.error.graphQLErrors[0]?.originalError?.name,
+                message: res.error.message,
+                stack: res.error.stack,
+              }
+            } else {
+              this.ctx.coreData.baseError = null
+            }
+
             // TODO(tim): send a signal to the frontend so when it refetches it does 'cache-only' request,
             // since we know we're up-to-date
             this.ctx.deref.emitter.toApp()
@@ -88,6 +110,14 @@ export class CloudDataSource {
       return dfd.promise
     }
 
-    return pipe(executingQuery, toPromise)
+    return pipe(executingQuery, toPromise).then((data) => {
+      this.ctx.debug('executeRemoteGraphQL toPromise res %o', data)
+
+      if (data.error) {
+        throw data.error
+      }
+
+      return data
+    })
   }
 }
