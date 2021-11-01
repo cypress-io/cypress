@@ -224,18 +224,6 @@ require('./packages/server')\
     })
   }
 
-  // If we're in CI, we want to rm `packages/*` && `npm/*` so that we aren't depending on those
-  // in node_modules resolution. Eventually we'll want to fully remove node_modules in smoke tests
-  const removeNpmPackagesInCI = function () {
-    log('#removeNpmPackagesInCI')
-
-    if (!process.env.CI) {
-      return
-    }
-
-    return fse.remove(path.join(process.cwd(), 'npm'))
-  }
-
   // we also don't need ".bin" links inside Electron application
   // thus we can go through dist/packages/*/node_modules and remove all ".bin" folders
   const removeBinFolders = function () {
@@ -362,13 +350,27 @@ require('./packages/server')\
   const runSmokeTests = function () {
     log('#runSmokeTests')
 
-    const run = function () {
+    const run = async function () {
       // make sure to use a longer timeout - on Mac the first
       // launch of a built application invokes gatekeeper check
       // which takes a couple of seconds
       const executablePath = meta.buildAppExecutable(platform)
 
-      return smoke.test(executablePath)
+      // Moving this package specifically to simulate a failing scenario for
+      // https://github.com/cypress-io/cypress/pull/18714
+      await fse.move(
+        path.join(process.cwd(), 'npm/create-cypress-tests'),
+        path.join(process.cwd(), 'npm/__create-cypress-tests'),
+      )
+
+      try {
+        return await smoke.test(executablePath)
+      } finally {
+        await fse.move(
+          path.join(process.cwd(), 'npm/__create-cypress-tests'),
+          path.join(process.cwd(), 'npm/create-cypress-tests'),
+        )
+      }
     }
 
     if (xvfb.isNeeded()) {
@@ -467,7 +469,6 @@ require('./packages/server')\
   .then(removeTypeScript)
   .then(cleanJs)
   .then(transformSymlinkRequires)
-  .then(removeNpmPackagesInCI)
   .then(testVersion(distDir))
   .then(testBuiltStaticAssets)
   .then(removeBinFolders)
