@@ -574,7 +574,7 @@ Independent packages are automatically released when code is merged into `master
 - Please check the "Allow edits from maintainers" checkbox when submitting your PR. This will make it easier for the maintainers to make minor adjustments, to help with tests or any other changes we may need.
 ![Allow edits from maintainers checkbox](https://user-images.githubusercontent.com/1271181/31393427-b3105d44-ada9-11e7-80f2-0dac51e3919e.png)
 - After the PR is approved, the original contributor can merge the PR (if the original contributor has access).
-- When you merge a PR into `develop`, select [**Squash and merge**](https://docs.github.com/en/github/collaborating-with-pull-requests/incorporating-changes-from-a-pull-request/about-pull-request-merges#squash-and-merge-your-pull-request-commits). This will squash all commits into a single commit. *The only exception to squashing is when converting files to another language and there is a clear commit history needed to maintain the file conversion.*
+- When you merge a PR into `develop`, select [**Squash and merge**](https://docs.github.com/en/github/collaborating-with-pull-requests/incorporating-changes-from-a-pull-request/about-pull-request-merges#squash-and-merge-your-pull-request-commits). This will squash all commits into a single commit. *The only exception to squashing is when converting files to another language and there is a clear commit history needed to maintain from the file conversion.*
 
 ### Dependencies
 
