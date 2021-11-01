@@ -2,7 +2,7 @@ import Promise from 'bluebird'
 
 // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
 export const create = (Cypress, state) => ({
-  isStable: (stable = true, event) => {
+  isStable: (stable: boolean = true, event: string) => {
     if (state('isStable') === stable) {
       return
     }
@@ -23,7 +23,7 @@ export const create = (Cypress, state) => ({
     return Cypress.action('cy:stability:changed', stable, event)
   },
 
-  whenStable: (fn) => {
+  whenStable: (fn: () => any) => {
     // if we are not stable
     if (state('isStable') === false) {
       return new Promise((resolve, reject) => {
