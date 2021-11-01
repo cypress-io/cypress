@@ -1231,6 +1231,42 @@ describe('src/cy/commands/actions/click', () => {
         })
       })
 
+      it('can specify scrollBehavior bottom in config', { scrollBehavior: 'bottom' }, () => {
+        cy.get('input:first').then((el) => {
+          cy.spy(el[0], 'scrollIntoView')
+        })
+
+        cy.get('input:first').click()
+
+        cy.get('input:first').then((el) => {
+          expect(el[0].scrollIntoView).calledWith({ block: 'end' })
+        })
+      })
+
+      it('can specify scrollBehavior center in config', { scrollBehavior: 'center' }, () => {
+        cy.get('input:first').then((el) => {
+          cy.spy(el[0], 'scrollIntoView')
+        })
+
+        cy.get('input:first').click()
+
+        cy.get('input:first').then((el) => {
+          expect(el[0].scrollIntoView).calledWith({ block: 'center' })
+        })
+      })
+
+      it('can specify scrollBehavior nearest in config', { scrollBehavior: 'nearest' }, () => {
+        cy.get('input:first').then((el) => {
+          cy.spy(el[0], 'scrollIntoView')
+        })
+
+        cy.get('input:first').click()
+
+        cy.get('input:first').then((el) => {
+          expect(el[0].scrollIntoView).calledWith({ block: 'nearest' })
+        })
+      })
+
       it('does not scroll when scrollBehavior is false in config', { scrollBehavior: false }, () => {
         cy.get('input:first').then((el) => {
           cy.spy(el[0], 'scrollIntoView')

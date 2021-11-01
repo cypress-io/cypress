@@ -408,6 +408,42 @@ describe('src/cy/commands/actions/type - #type', () => {
       })
     })
 
+    it('can specify scrollBehavior bottom in config', { scrollBehavior: 'bottom' }, () => {
+      cy.get(':text:first').then((el) => {
+        cy.spy(el[0], 'scrollIntoView')
+      })
+
+      cy.get(':text:first').type('foo')
+
+      cy.get(':text:first').then((el) => {
+        expect(el[0].scrollIntoView).to.be.calledWith({ block: 'end' })
+      })
+    })
+
+    it('can specify scrollBehavior center in config', { scrollBehavior: 'center' }, () => {
+      cy.get(':text:first').then((el) => {
+        cy.spy(el[0], 'scrollIntoView')
+      })
+
+      cy.get(':text:first').type('foo')
+
+      cy.get(':text:first').then((el) => {
+        expect(el[0].scrollIntoView).to.be.calledWith({ block: 'center' })
+      })
+    })
+
+    it('can specify scrollBehavior nearest in config', { scrollBehavior: 'nearest' }, () => {
+      cy.get(':text:first').then((el) => {
+        cy.spy(el[0], 'scrollIntoView')
+      })
+
+      cy.get(':text:first').type('foo')
+
+      cy.get(':text:first').then((el) => {
+        expect(el[0].scrollIntoView).to.be.calledWith({ block: 'nearest' })
+      })
+    })
+
     it('does not scroll when scrollBehavior is false in config', { scrollBehavior: false }, () => {
       cy.get(':text:first').then((el) => {
         cy.spy(el[0], 'scrollIntoView')

@@ -654,6 +654,42 @@ describe('src/cy/commands/actions/trigger', () => {
         })
       })
 
+      it('can specify scrollBehavior bottom in config', { scrollBehavior: 'bottom' }, () => {
+        cy.get('button:first').then((el) => {
+          cy.spy(el[0], 'scrollIntoView')
+        })
+
+        cy.get('button:first').trigger('mouseover')
+
+        cy.get('button:first').then((el) => {
+          expect(el[0].scrollIntoView).to.be.calledWith({ block: 'end' })
+        })
+      })
+
+      it('can specify scrollBehavior center in config', { scrollBehavior: 'center' }, () => {
+        cy.get('button:first').then((el) => {
+          cy.spy(el[0], 'scrollIntoView')
+        })
+
+        cy.get('button:first').trigger('mouseover')
+
+        cy.get('button:first').then((el) => {
+          expect(el[0].scrollIntoView).to.be.calledWith({ block: 'center' })
+        })
+      })
+
+      it('can specify scrollBehavior nearest in config', { scrollBehavior: 'nearest' }, () => {
+        cy.get('button:first').then((el) => {
+          cy.spy(el[0], 'scrollIntoView')
+        })
+
+        cy.get('button:first').trigger('mouseover')
+
+        cy.get('button:first').then((el) => {
+          expect(el[0].scrollIntoView).to.be.calledWith({ block: 'nearest' })
+        })
+      })
+
       it('does not scroll when scrollBehavior is false in config', { scrollBehavior: false }, () => {
         cy.scrollTo('top')
         cy.get('button:first').then((el) => {
