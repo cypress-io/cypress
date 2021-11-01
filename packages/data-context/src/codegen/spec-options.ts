@@ -69,7 +69,7 @@ export class SpecOptions {
       vue: {
         imports: ['import { mount } from "@cypress/vue"', `import ${componentName} from "./${this.parsedPath.base}"`],
         componentName,
-        docsLink: '// see: https://reactjs.org/docs/test-utils.html',
+        docsLink: '// see: https://vue-test-utils.vuejs.org/',
         mount: `mount(${componentName}, { props: {} })`,
         fileName: this.getFilename(await this.getVueExtenstion()),
       },
