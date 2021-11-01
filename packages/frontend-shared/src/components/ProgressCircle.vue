@@ -10,6 +10,7 @@
       :r="normalizedRadius"
       :cx="radius"
       :cy="radius"
+      class="icon-light-stroke"
     />
     <circle
       stroke="currentColor"
@@ -21,6 +22,7 @@
       :cx="radius"
       :cy="radius"
       stroke-linecap="round"
+      class="icon-dark-stroke"
     />
   </svg>
 </template>
