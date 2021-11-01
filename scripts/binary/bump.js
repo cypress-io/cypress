@@ -140,7 +140,7 @@ const getFilterByProvider = function (providerName, platformName) {
       return false
     }
 
-    if (platformName && val.provider !== platformName) {
+    if (platformName && val.platform !== platformName) {
       return false
     }
 
