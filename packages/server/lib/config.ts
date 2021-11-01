@@ -1,5 +1,4 @@
 import _ from 'lodash'
-import R from 'ramda'
 import path from 'path'
 import Promise from 'bluebird'
 import deepDiff from 'return-deep-diff'
@@ -357,7 +356,7 @@ export function updateWithPluginValues (cfg, overrides) {
     return errors.throw('CONFIG_VALIDATION_ERROR', errMsg)
   })
 
-  let originalResolvedBrowsers = cfg && cfg.resolved && cfg.resolved.browsers && R.clone(cfg.resolved.browsers)
+  let originalResolvedBrowsers = cfg && cfg.resolved && cfg.resolved.browsers && _.cloneDeep(cfg.resolved.browsers)
 
   if (!originalResolvedBrowsers) {
     // have something to resolve with if plugins return nothing
@@ -371,7 +370,7 @@ export function updateWithPluginValues (cfg, overrides) {
 
   debug('config diffs %o', diffs)
 
-  const userBrowserList = diffs && diffs.browsers && R.clone(diffs.browsers)
+  const userBrowserList = diffs && diffs.browsers && _.cloneDeep(diffs.browsers)
 
   if (userBrowserList) {
     debug('user browser list %o', userBrowserList)

@@ -4,7 +4,6 @@ const pkg = require('@packages/root')
 const Promise = require('bluebird')
 const rp = require('@cypress/request-promise')
 const debug = require('debug')('cypress:performance')
-const R = require('ramda')
 
 const API_URL = process.env.PERF_API_URL || 'http://localhost:2999/track'
 const API_KEY = process.env.PERF_API_KEY
@@ -22,18 +21,17 @@ function track (type, data) {
   return commitInfo()
   .then((commitInformation) => {
     const ciInformation = ciProvider.commitParams() || {}
-    const merged = R.mergeWith(R.or, commitInformation, ciInformation)
-    const { sha, branch, author, message, timestamp } = merged
+    const timestamp = commitInformation.timestamp || ciInformation.timestamp
     const timestampISO = new Date(timestamp * 1000).toISOString()
 
     const body = {
       type,
       data: {
         'package.json Version': pkg.version,
-        'Commit SHA': sha,
-        'Commit Branch': branch,
-        'Commit Author': author,
-        'Commit Message': message,
+        'Commit SHA': commitInformation.sha || ciInformation.sha,
+        'Commit Branch': commitInformation.branch || ciInformation.branch,
+        'Commit Author': commitInformation.author || ciInformation.author,
+        'Commit Message': commitInformation.message || ciInformation.message,
         'Commit Timestamp': timestampISO,
         'Build URL': process.env.CIRCLE_BUILD_URL,
         'Build Platform': process.platform,
