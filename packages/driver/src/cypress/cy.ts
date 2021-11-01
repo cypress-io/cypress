@@ -25,7 +25,7 @@ import $Assertions from '../cy/assertions'
 import $Listeners from '../cy/listeners'
 import { $Chainer } from './chainer'
 import $Timers from '../cy/timers'
-import { Timeouts, ITimeouts } from '../cy/timeouts'
+import { create as createTimeouts, ITimeouts } from '../cy/timeouts'
 import $Retries from '../cy/retries'
 import $Stability from '../cy/stability'
 import $selection from '../dom/selection'
@@ -126,7 +126,7 @@ class $Cy implements ITimeouts {
   constructor (specWindow, Cypress, Cookies, state, config) {
     initVideoRecorder(Cypress)
 
-    const timeouts = new Timeouts(state)
+    const timeouts = createTimeouts(state)
 
     this.timeout = timeouts.timeout
     this.clearTimeout = timeouts.clearTimeout
