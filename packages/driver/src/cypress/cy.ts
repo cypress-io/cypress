@@ -162,7 +162,7 @@ export default {
 
     const stability = $Stability.create(Cypress, state)
 
-    const retries = $Retries.create(Cypress, state, timeouts.timeout, timeouts.clearTimeout, stability.whenStable, onFinishAssertions)
+    const retries = $Retries.create(Cypress, state, cy.timeout, cy.clearTimeout, stability.whenStable, onFinishAssertions)
     const assertions = $Assertions.create(Cypress, cy)
 
     const jquery = $jQuery.create(state)
@@ -547,7 +547,10 @@ export default {
       return finish(err)
     }
 
-    const queue = $CommandQueue.create(state, timeouts, stability, cleanup, fail, isCy)
+    const queue = $CommandQueue.create(state, {
+      timeout: cy.timeout,
+      clearTimeout: cy.clearTimeout,
+    }, stability, cleanup, fail, isCy)
 
     _.extend(cy, {
       id: _.uniqueId('cy'),
@@ -1029,7 +1032,7 @@ export default {
 
           // control timeouts on runnables ourselves
           if (_.isFinite(timeout)) {
-            timeouts.timeout(timeout)
+            cy.timeout(timeout)
           }
 
           // store the current length of our queue
