@@ -61,7 +61,6 @@ export class DataContextShell {
     return new DataEmitterActions(this)
   }
 
-  @cached
   get graphql () {
     return new GraphQLDataSource(this, this.shellConfig.schema)
   }
