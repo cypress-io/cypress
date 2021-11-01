@@ -359,16 +359,16 @@ require('./packages/server')\
       // Moving this package specifically to simulate a failing scenario for
       // https://github.com/cypress-io/cypress/pull/18714
       await fse.move(
-        path.join(process.cwd(), 'npm/create-cypress-tests'),
-        path.join(process.cwd(), 'npm/__create-cypress-tests'),
+        path.join(process.cwd(), 'node_modules/create-cypress-tests'),
+        path.join(process.cwd(), 'node_modules/_create-cypress-tests'),
       )
 
       try {
         return await smoke.test(executablePath)
       } finally {
         await fse.move(
-          path.join(process.cwd(), 'npm/__create-cypress-tests'),
-          path.join(process.cwd(), 'npm/create-cypress-tests'),
+          path.join(process.cwd(), 'node_modules/_create-cypress-tests'),
+          path.join(process.cwd(), 'node_modules/create-cypress-tests'),
         )
       }
     }
