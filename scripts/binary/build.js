@@ -234,8 +234,8 @@ require('./packages/server')\
     }
 
     return Promise.all([
-      fse.rmdir(path.join(process.cwd(), 'packages')),
-      fse.rmdir(path.join(process.cwd(), 'npm')),
+      fse.remove(path.join(process.cwd(), 'packages')),
+      fse.remove(path.join(process.cwd(), 'npm')),
     ])
   }
 
