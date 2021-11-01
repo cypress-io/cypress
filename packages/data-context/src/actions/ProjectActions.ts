@@ -66,7 +66,6 @@ export class ProjectActions {
       isFirstTimeE2E: await this.ctx.project.isFirstTimeAccessing(projectRoot, 'e2e'),
       config: await this.ctx.project.getResolvedConfigFields(projectRoot),
       preferences: await this.ctx.project.getProjectPreferences(title),
-      generatedSpec: null,
     }
 
     return this
