@@ -2,7 +2,7 @@ require('../spec_helper')
 
 const os = require('os')
 const path = require('path')
-const R = require('ramda')
+const _ = require('lodash')
 const snapshot = require('../support/snapshot')
 const Promise = require('bluebird')
 const tmp = Promise.promisifyAll(require('tmp'))
@@ -27,11 +27,10 @@ describe('cypress', function () {
       sinon.stub(open, 'start').resolves()
     })
 
-    const getCallArgs = R.path(['lastCall', 'args', 0])
     const getStartArgs = () => {
       expect(open.start).to.be.called
 
-      return getCallArgs(open.start)
+      return _.get(open.start, ['lastCall', 'args', 0])
     }
 
     it('calls open#start, passing in options', function () {
@@ -100,7 +99,6 @@ describe('cypress', function () {
       })
     })
 
-    const getCallArgs = R.path(['lastCall', 'args', 0])
     const normalizeCallArgs = (args) => {
       expect(args.outputPath).to.equal(outputPath)
       delete args.outputPath
@@ -110,7 +108,7 @@ describe('cypress', function () {
     const getStartArgs = () => {
       expect(run.start).to.be.called
 
-      return normalizeCallArgs(getCallArgs(run.start))
+      return normalizeCallArgs(_.get(run.start, ['lastCall', 'args', 0]))
     }
 
     it('calls run#start, passing in options', () => {
