@@ -1,5 +1,5 @@
 import type { Mutation, Project } from '../generated/test-graphql-types.gen'
-import config from '../../fixtures/config.json'
+import config from '../../fixtures/resolved_config_fields.json'
 import path from 'path'
 
 import type { MaybeResolver } from './clientTestUtils'

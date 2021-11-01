@@ -153,22 +153,6 @@ const cloudProjectId = computed(() => {
   return props.gql?.app?.activeProject?.config?.find((item) => item.field === 'projectId')?.value
 })
 
-watch(cloudProjectId, (newVal) => {
-  if (newVal) {
-    for (const prompt of prompts) {
-      if (shouldShowPrompt(prompt)) {
-        openPrompt(prompt.slug)
-        automaticOpen.value = true
-
-        // only show one prompt at a time
-        return
-      }
-    }
-  }
-}, {
-  immediate: true,
-})
-
 const props = defineProps<{
   gql: HeaderBar_HeaderBarContentFragment,
   showBrowsers?: boolean,
@@ -188,6 +172,22 @@ const prompts = sortBy([
     noProjectId: true,
   },
 ], 'interval')
+
+watch(cloudProjectId, (newVal) => {
+  if (newVal) {
+    for (const prompt of prompts) {
+      if (shouldShowPrompt(prompt)) {
+        openPrompt(prompt.slug)
+        automaticOpen.value = true
+
+        // only show one prompt at a time
+        return
+      }
+    }
+  }
+}, {
+  immediate: true,
+})
 
 function shouldShowPrompt (prompt) {
   const timeSinceOpened = Date.now() - promptState.value.firstOpened

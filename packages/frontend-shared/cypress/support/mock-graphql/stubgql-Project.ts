@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import { randomComponents } from './testStubSpecs'
-import config from '../../fixtures/config.json'
+import config from '../../fixtures/resolved_config_fields.json'
 
 import type {
   Project,

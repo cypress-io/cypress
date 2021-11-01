@@ -90,8 +90,6 @@ export const Project = objectType({
     t.nonNull.json('config', {
       description: 'Project configuration',
       resolve: (source, args, ctx) => {
-        ctx.project.getCurrentProjectSavedState()
-
         return ctx.project.getResolvedConfigFields(source.projectRoot)
       },
     })
