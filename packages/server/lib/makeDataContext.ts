@@ -24,12 +24,8 @@ export function makeDataContext (options: MakeDataContextOptions) {
     ...options,
     launchOptions: {},
     appApi: {
-      getBrowsers () {
-        return getBrowsers()
-      },
-      ensureAndGetByNameOrPath (nameOrPath, returnAll, browsers) {
-        return ensureAndGetByNameOrPath(nameOrPath, returnAll, browsers)
-      },
+      getBrowsers,
+      ensureAndGetByNameOrPath,
     },
     authApi: {
       getUser () {
