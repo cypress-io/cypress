@@ -14,6 +14,7 @@ import {
   BrowserDataSource,
   StorybookDataSource,
   CloudDataSource,
+  ConfigDataSource,
 } from './sources/'
 import { cached } from './util/cached'
 import { DataContextShell, DataContextShellConfig } from './DataContextShell'

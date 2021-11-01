@@ -24,7 +24,7 @@ describe('Launchpad: Open Mode', () => {
     })
 
     // e2e testing is configured for the todo project, so we don't expect an error.
-    cy.get('h1').should('contain', 'Initializing Config...')
+    cy.get('h1').should('contain', 'Configuration Files')
   })
 
   it('goes directly to component tests when launched with --component', () => {
@@ -41,7 +41,7 @@ describe('Launchpad: Open Mode', () => {
     })
 
     // Component testing is not configured for the todo project
-    cy.get('h1').should('contain', 'Cypress Configuration Error')
+    cy.get('h1').should('contain', 'Project Setup')
   })
 
   describe('when there is a list of projects', () => {
