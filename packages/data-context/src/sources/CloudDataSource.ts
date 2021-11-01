@@ -31,10 +31,10 @@ export interface CloudExecuteRemote {
 }
 
 export class CloudDataSource {
-  private _urqlClient: Client
+  private _cloudUrqlClient: Client
 
   constructor (private ctx: DataContext) {
-    this._urqlClient = createClient({
+    this._cloudUrqlClient = createClient({
       url: `${REMOTE_SCHEMA_URLS[cloudEnv]}/test-runner-graphql`,
       exchanges: [
         dedupExchange,
@@ -58,7 +58,7 @@ export class CloudDataSource {
 
     const requestPolicy = config.requestPolicy ?? 'cache-and-network'
 
-    const executingQuery = this._urqlClient.executeQuery(createRequest(config.query, config.variables), {
+    const executingQuery = this._cloudUrqlClient.executeQuery(createRequest(config.query, config.variables), {
       fetch: this.ctx.util.fetch,
       requestPolicy,
       fetchOptions: {
