@@ -1,0 +1,17 @@
+---
+fileName: <%= fileName %>
+---
+
+<%- imports.join('\n') %>
+
+const composedStories = composeStories(stories)
+
+describe('<%= title %>', () => {
+<% stories.forEach(({component, mount}, i) => { _%>
+  it<%= (i === 0 && stories.length > 1) ? '.only' : '' %>('should render <%= component %>', () => {
+    const { <%= component %> } = composedStories
+    <%- mount %>
+  })
+<%= stories.length - 1 !== i ? '\n' : '' _%>
+<% }); _%>
+})
