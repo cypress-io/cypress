@@ -127,8 +127,10 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries {
   assert: IAssertions['assert']
   verifyUpcomingAssertions: IAssertions['verifyUpcomingAssertions']
   retry: IRetries['retry']
+  state: any
 
   constructor (specWindow, Cypress, Cookies, state, config) {
+    this.state = state
     initVideoRecorder(Cypress)
 
     const timeouts = createTimeouts(state)
@@ -141,7 +143,7 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries {
     this.isStable = statility.isStable
     this.whenStable = statility.whenStable
 
-    const assertions = createAssertions(Cypress, state)
+    const assertions = createAssertions(Cypress, this)
 
     this.assert = assertions.assert
     this.verifyUpcomingAssertions = assertions.verifyUpcomingAssertions
