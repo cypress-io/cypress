@@ -39,7 +39,7 @@
         </p>
         <TerminalPrompt
           class="-ml-16px"
-          command="cypress run --record --key <record-key>"
+          :command="recordCommand"
           :project-name="projectName"
         />
       </li>
@@ -62,6 +62,11 @@ fragment RunsEmpty on Project{
   title
   projectId
   configFilePath
+  cloudProject {
+    recordKeys {
+      ...RecordKey
+    }
+  }
 }
 `
 
@@ -77,6 +82,14 @@ const projectIdCode = computed(() => {
 
 const projectName = computed(() => props.gql.title)
 const configFilePath = computed(() => props.gql.configFilePath)
+const firstRecordKey = computed(() => {
+  const allRecordKeys = props.gql.cloudProject?.recordKeys
+
+  return allRecordKeys?.length ? allRecordKeys[0] : '<record-key>'
+})
+const recordCommand = computed(() => {
+  return `cypress run --record --key ${firstRecordKey.value}`
+})
 </script>
 
 <style scoped lang="scss">
