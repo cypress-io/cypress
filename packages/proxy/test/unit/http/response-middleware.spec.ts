@@ -200,6 +200,7 @@ describe('http/response-middleware', function () {
           emit: sinon.stub(),
           once: sinon.stub(),
         },
+        debug () {},
       }
     }
   })

@@ -1,4 +1,5 @@
-import { registerFetch } from 'unfetch'
+import _ from 'lodash'
+import registerFetch from 'unfetch'
 import $selection from '../dom/selection'
 
 export const create = (state, config, focused, snapshots) => {
