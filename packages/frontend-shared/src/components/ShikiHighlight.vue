@@ -126,7 +126,6 @@ const props = withDefaults(defineProps<{
   copyOnClick: false,
   noCopyBotton: false,
   class: undefined,
-  copyButton: false,
 })
 
 const resolvedLang = computed(() => {
