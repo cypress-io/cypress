@@ -1,5 +1,3 @@
-// // @ts-nocheck
-
 /* eslint-disable prefer-rest-params */
 import _ from 'lodash'
 import Promise from 'bluebird'
@@ -21,12 +19,12 @@ import $Focused from '../cy/focused'
 import $Mouse from '../cy/mouse'
 import $Keyboard from '../cy/keyboard'
 import $Location from '../cy/location'
-import $Assertions from '../cy/assertions'
+import { create as createAssertions, IAssertions } from '../cy/assertions'
 import $Listeners from '../cy/listeners'
 import { $Chainer } from './chainer'
 import $Timers from '../cy/timers'
 import { create as createTimeouts, ITimeouts } from '../cy/timeouts'
-import $Retries from '../cy/retries'
+import { create as createRetries, IRetries } from '../cy/retries'
 import { create as createStability, IStability } from '../cy/stability'
 import $selection from '../dom/selection'
 import $Snapshots from '../cy/snapshots'
@@ -121,11 +119,14 @@ const setTopOnError = function (Cypress, cy: $Cy) {
 
 // NOTE: this makes the cy object an instance
 // TODO: refactor the 'create' method below into this class
-class $Cy implements ITimeouts, IStability {
+class $Cy implements ITimeouts, IStability, IAssertions, IRetries {
   timeout: ITimeouts['timeout']
   clearTimeout: ITimeouts['clearTimeout']
   isStable: IStability['isStable']
   whenStable: IStability['whenStable']
+  assert: IAssertions['assert']
+  verifyUpcomingAssertions: IAssertions['verifyUpcomingAssertions']
+  retry: IRetries['retry']
 
   constructor (specWindow, Cypress, Cookies, state, config) {
     initVideoRecorder(Cypress)
@@ -139,6 +140,19 @@ class $Cy implements ITimeouts, IStability {
 
     this.isStable = statility.isStable
     this.whenStable = statility.whenStable
+
+    const assertions = createAssertions(Cypress, state)
+
+    this.assert = assertions.assert
+    this.verifyUpcomingAssertions = assertions.verifyUpcomingAssertions
+
+    const onFinishAssertions = function () {
+      return assertions.finishAssertions.apply(window, arguments)
+    }
+
+    const retries = createRetries(Cypress, state, this.timeout, this.clearTimeout, this.whenStable, onFinishAssertions)
+
+    this.retry = retries.retry
   }
 }
 
@@ -148,10 +162,6 @@ export default {
     const commandFns = {}
 
     state('specWindow', specWindow)
-
-    const onFinishAssertions = function () {
-      return assertions.finishAssertions.apply(window, arguments)
-    }
 
     const warnMixingPromisesAndCommands = function () {
       const title = state('runnable').fullTitle()
@@ -169,9 +179,6 @@ export default {
       return $dom.query(selector, context)
     }
 
-    const retries = $Retries.create(Cypress, state, cy.timeout, cy.clearTimeout, cy.whenStable, onFinishAssertions)
-    const assertions = $Assertions.create(Cypress, cy)
-
     const jquery = $jQuery.create(state)
     const location = $Location.create(state)
     const focused = $Focused.create(state)
@@ -179,7 +186,7 @@ export default {
     const mouse = $Mouse.create(state, keyboard, focused, Cypress)
     const timers = $Timers.create(Cypress)
 
-    const { expect } = $Chai.create(specWindow, state, assertions.assert)
+    const { expect } = $Chai.create(specWindow, state, cy.assert)
 
     const xhrs = $Xhrs.create(state)
     const aliases = $Aliases.create(cy)
@@ -612,13 +619,6 @@ export default {
 
       // snapshots sync methods
       createSnapshot: snapshots.createSnapshot,
-
-      // retry sync methods
-      retry: retries.retry,
-
-      // assertions sync methods
-      assert: assertions.assert,
-      verifyUpcomingAssertions: assertions.verifyUpcomingAssertions,
 
       // ensure sync methods
       ensureWindow: ensures.ensureWindow,
