@@ -78,9 +78,10 @@ export class GitDataSource {
 
     // for file in {one,two} is valid in bash, but for file {one} is not
     // no need to use a for loop for a single file
+    // IFS is needed to handle paths with white space.
     const cmd = absolutePaths.length === 1
       ? `${GIT_LOG_COMMAND} ${absolutePaths[0]}`
-      : `for file in {${paths}}; do echo $(${GIT_LOG_COMMAND} $file); done`
+      : `IFS=$'\n'; for file in {${paths}}; do echo $(${GIT_LOG_COMMAND} $file); done`
 
     this.ctx.debug('executing command `%s`:', cmd)
 
