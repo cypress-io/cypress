@@ -25,7 +25,7 @@ import $Assertions from '../cy/assertions'
 import $Listeners from '../cy/listeners'
 import { $Chainer } from './chainer'
 import $Timers from '../cy/timers'
-import $Timeouts from '../cy/timeouts'
+import { Timeouts, ITimeouts } from '../cy/timeouts'
 import $Retries from '../cy/retries'
 import $Stability from '../cy/stability'
 import $selection from '../dom/selection'
@@ -119,11 +119,23 @@ const setTopOnError = function (Cypress, cy) {
 
 // NOTE: this makes the cy object an instance
 // TODO: refactor the 'create' method below into this class
-class $Cy {}
+class $Cy implements ITimeouts {
+  timeout: ITimeouts['timeout']
+  clearTimeout: ITimeouts['clearTimeout']
+
+  constructor (specWindow, Cypress, Cookies, state, config) {
+    initVideoRecorder(Cypress)
+
+    const timeouts = new Timeouts(state)
+
+    this.timeout = timeouts.timeout
+    this.clearTimeout = timeouts.clearTimeout
+  }
+}
 
 export default {
   create (specWindow, Cypress, Cookies, state, config, log) {
-    let cy = new $Cy()
+    let cy = new $Cy(specWindow, Cypress, Cookies, state, config)
     const commandFns = {}
 
     state('specWindow', specWindow)
@@ -148,8 +160,6 @@ export default {
       return $dom.query(selector, context)
     }
 
-    initVideoRecorder(Cypress)
-    const timeouts = $Timeouts.create(state)
     const stability = $Stability.create(Cypress, state)
 
     const retries = $Retries.create(Cypress, state, timeouts.timeout, timeouts.clearTimeout, stability.whenStable, onFinishAssertions)
@@ -560,10 +570,6 @@ export default {
       isCy,
 
       isStopped,
-
-      // timeout sync methods
-      timeout: timeouts.timeout,
-      clearTimeout: timeouts.clearTimeout,
 
       // stability sync methods
       isStable: stability.isStable,
