@@ -10,4 +10,7 @@ export default defineConfig({
   reporterOptions: {
     configFile: '../../mocha-reporter-config.json',
   },
+  component: {
+    testFiles: '**/*spec.{ts,tsx}',
+  },
 })
