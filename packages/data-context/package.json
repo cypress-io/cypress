@@ -15,9 +15,12 @@
   "dependencies": {
     "@storybook/csf-tools": "^6.4.0-alpha.38",
     "@urql/core": "2.3.1",
+    "@urql/exchange-execute": "1.1.0",
+    "@urql/exchange-graphcache": "4.3.3",
     "create-cypress-tests": "0.0.0-development",
     "cross-fetch": "^3.1.4",
     "dataloader": "^2.0.0",
+    "execa": "1.0.0",
     "getenv": "1.0.0",
     "globby": "^11.0.1",
     "graphql": "^15.5.1",
