@@ -10,23 +10,6 @@ export interface ProjectShape {
   projectRoot: string
 }
 
-const GeneratedSpec = objectType({
-  name: 'GeneratedSpec',
-  definition (t) {
-    t.nonNull.id('id', {
-      resolve: (src, args, ctx) => src.spec.absolute,
-    })
-
-    t.nonNull.string('content', {
-      description: 'File content of most recently generated spec.',
-    })
-
-    t.nonNull.field('spec', {
-      type: FileParts,
-    })
-  },
-})
-
 export const Project = objectType({
   name: 'Project',
   description: 'A Cypress Project is represented by a cypress.json file',
@@ -138,19 +121,6 @@ export const Project = objectType({
         const result = await ctx.project.getCodeGenCandidates(args.glob)
 
         return result
-      },
-    })
-
-    t.field('generatedSpec', {
-      type: GeneratedSpec,
-      resolve: (src, args, ctx) => {
-        const project = ctx.activeProject
-
-        if (!project) {
-          return null
-        }
-
-        return project.generatedSpec
       },
     })
   },

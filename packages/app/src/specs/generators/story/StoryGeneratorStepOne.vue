@@ -1,14 +1,16 @@
 <template>
   <FileChooser
-    :files="allFiles"
     v-model:extensionPattern="extensionPattern"
-    @reset:extensionPattern="extensionPattern = initialExtension" 
+    :files="allFiles"
     :loading="query.fetching.value"
+    @reset:extensionPattern="extensionPattern = initialExtension"
     @selectFile="makeSpec"
-    />
-  <GeneratorSuccess v-if="query.data.value" :file="query.data.value.app.activeProject?.generatedSpec">
-  </GeneratorSuccess>
-  <div class="rounded-b w-full h-24px"></div>
+  />
+  <GeneratorSuccess
+    v-if="result"
+    :file="result"
+  />
+  <div class="rounded-b w-full h-24px" />
 </template>
 
 <script setup lang="ts">
@@ -17,7 +19,6 @@ import { useI18n } from '@cy/i18n'
 import FileChooser from '../FileChooser.vue'
 import GeneratorSuccess from '../GeneratorSuccess.vue'
 import { computed, ref } from 'vue'
-import type { Ref } from 'vue'
 import { gql, useQuery, useMutation } from '@urql/vue'
 import { StoryGeneratorDocument, NewSpec_CodeGenSpecDocument } from '../../../generated/graphql'
 
@@ -33,6 +34,7 @@ const emits = defineEmits<{
 }>()
 
 const { title } = useVModels(props, emits)
+
 title.value = t('createSpec.component.importFromStory.chooseAStoryHeader')
 
 gql`
@@ -40,15 +42,6 @@ query StoryGenerator($glob: String!) {
   app {
     activeProject {
       id
-      generatedSpec {
-        content
-        spec {
-          fileName
-          fileExtension
-          baseName
-          id
-        } 
-      }
       codeGenCandidates(glob: $glob) {
         id
         name
@@ -65,7 +58,9 @@ query StoryGenerator($glob: String!) {
 
 gql`
 mutation NewSpec_CodeGenSpec($codeGenCandidate: String!, $type: CodeGenType!) {
-  codeGenSpec(codeGenCandidate: $codeGenCandidate, type: $type)
+  generateSpecFromSource(codeGenCandidate: $codeGenCandidate, type: $type) {
+    ...GeneratorSuccess
+  }
 }
 `
 
@@ -81,22 +76,25 @@ const query = useQuery({
   query: StoryGeneratorDocument,
 
   // @ts-ignore
-  variables: { glob }
+  variables: { glob },
 })
 
 const allFiles = computed(() => {
   if (query.data.value) {
-    return query.data.value.app?.activeProject.codeGenCandidates
+    return query.data.value.app?.activeProject?.codeGenCandidates
   }
+
   return []
 })
 
-const makeSpec = (file) => {
-  debugger;
-  mutation.executeMutation({
+const result = ref()
+const makeSpec = async (file) => {
+  const { data } = await mutation.executeMutation({
     codeGenCandidate: file.relative,
-    type: 'component'
+    type: 'component',
   })
+
+  result.value = data?.generateSpecFromSource
 }
 
 </script>

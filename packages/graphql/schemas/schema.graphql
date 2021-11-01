@@ -353,13 +353,13 @@ type Mutation {
   appCreateConfigFile(code: String!, configFilename: String!): Boolean
   clearActiveProject: Boolean
 
-  """Generate spec from source"""
-  codeGenSpec(codeGenCandidate: String!, type: CodeGenType!): Boolean
-
   """
   Development only: Triggers or dismisses a prompted refresh by touching the file watched by our development scripts
   """
   devRelaunch(action: DevRelaunchAction!): Boolean
+
+  """Generate spec from source"""
+  generateSpecFromSource(codeGenCandidate: String!, type: CodeGenType!): GeneratedSpec
 
   """Hides the launchpad windows"""
   hideBrowserWindow: App!
@@ -519,7 +519,6 @@ type Project implements Node {
 
   """Currently selected spec"""
   currentSpec: Spec
-  generatedSpec: GeneratedSpec
 
   """Relay style Node ID field for the Project field"""
   id: ID!

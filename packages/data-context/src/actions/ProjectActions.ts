@@ -306,7 +306,7 @@ export class ProjectActions {
       specFileExtension,
     })
 
-    project.generatedSpec = {
+    return {
       spec,
       content: specContent,
     }
