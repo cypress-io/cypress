@@ -28,6 +28,10 @@ export class GraphQLDataSource {
     // Late require'd to avoid erroring if codegen hasn't run (for legacy Cypress workflow)
     const allQueries = (this._allQueries ??= require('../gen/all-operations.gen'))
 
+    if (!allQueries[document]) {
+      throw new Error(`Trying to execute unknown operation ${document}, needs to be one of: [${Object.keys(allQueries).join(', ')}]`)
+    }
+
     return this._urqlClient.query(allQueries[document], variables).toPromise()
   }
 
