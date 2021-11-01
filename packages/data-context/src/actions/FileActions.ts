@@ -3,20 +3,7 @@ import path from 'path'
 import type { DataContext } from '..'
 
 export class FileActions {
-  protected createdFiles: string[]
-  constructor (private ctx: DataContext) {
-    this.createdFiles = []
-  }
-
-  // Useful, if there's an error and the file needs to be deleted to be a valid test
-  // this method would cleanup those created files for the retry
-  async cleanupCreatedFilesInProject () {
-    if (!this.ctx.activeProject) {
-      return
-    }
-
-    await Promise.all(this.createdFiles.map((f) => this.ctx.fs.remove(f)))
-  }
+  constructor (private ctx: DataContext) {}
 
   async writeFileInProject (relativePath: string, data: any) {
     if (!this.ctx.activeProject) {
@@ -29,8 +16,6 @@ export class FileActions {
       filePath,
       data,
     )
-
-    this.createdFiles.push(filePath)
   }
 
   async removeFileInProject (relativePath: string) {
