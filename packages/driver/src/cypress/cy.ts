@@ -32,7 +32,7 @@ import $selection from '../dom/selection'
 import $Snapshots from '../cy/snapshots'
 import { $Command } from './command'
 import $CommandQueue from './command_queue'
-import $VideoRecorder from '../cy/video-recorder'
+import { initVideoRecorder } from '../cy/video-recorder'
 import $TestConfigOverrides from '../cy/testConfigOverrides'
 
 const debugErrors = debugFn('cypress:driver:errors')
@@ -148,7 +148,7 @@ export default {
       return $dom.query(selector, context)
     }
 
-    $VideoRecorder.create(Cypress)
+    initVideoRecorder(Cypress)
     const timeouts = $Timeouts.create(state)
     const stability = $Stability.create(Cypress, state)
 
