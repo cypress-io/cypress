@@ -165,7 +165,7 @@ const { t } = useI18n()
 const prompts = sortBy([
   {
     slug: 'ci1',
-    interval: interval('10 seconds'),
+    interval: interval('4 days'),
     noProjectId: true,
   },
   {
