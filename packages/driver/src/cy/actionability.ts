@@ -383,6 +383,9 @@ const verify = function (cy, $el, config, options, callbacks) {
         }
 
         if (options.ensure.visibility) {
+          // ensure element is visible but do not check if hidden by ancestors
+          // until nudging algorithm occurs
+          // https://whimsical.com/actionability-J38eY9K2Y3vA6uCMWtmLVA
           cy.ensureStrictVisibility($el, _log)
         }
 
