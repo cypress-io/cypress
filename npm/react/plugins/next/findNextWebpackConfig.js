@@ -4,6 +4,7 @@ const debug = require('debug')('@cypress/react')
 const getNextJsBaseWebpackConfig = require('next/dist/build/webpack-config').default
 const { findPagesDir } = require('../../dist/next/findPagesDir')
 const { getRunWebpackSpan } = require('../../dist/next/getRunWebpackSpan')
+const { checkSWC } = require('../../dist/next/checkSWC')
 
 async function getNextWebpackConfig (config) {
   let loadConfig
@@ -37,6 +38,8 @@ async function getNextWebpackConfig (config) {
   )
 
   debug('resolved next.js webpack config %o', nextWebpackConfig)
+
+  checkSWC(nextWebpackConfig, config)
 
   return nextWebpackConfig
 }
