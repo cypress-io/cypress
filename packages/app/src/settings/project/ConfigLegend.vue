@@ -1,14 +1,14 @@
 <template>
   <div class="children:mb-18px">
     <ConfigBadge
-      class="bg-gray-100 text-gray-700"
+      :class="CONFIG_LEGEND_COLOR_MAP.default"
       :label="legendText.default.label"
     >
       {{ legendText.default.description }}
     </ConfigBadge>
 
     <ConfigBadge
-      class="bg-teal-100 text-teal-700"
+      :class="CONFIG_LEGEND_COLOR_MAP.config"
       :label="legendText.config.label"
     >
       <i18n-t :keypath="legendText.config.descriptionKey">
@@ -20,21 +20,21 @@
     </ConfigBadge>
 
     <ConfigBadge
-      class="bg-yellow-100 text-yellow-700"
+      :class="CONFIG_LEGEND_COLOR_MAP.env"
       :label="legendText.env.label"
     >
       {{ legendText.env.description }}
     </ConfigBadge>
 
     <ConfigBadge
-      class="bg-red-50 text-red-700"
+      :class="CONFIG_LEGEND_COLOR_MAP.cli"
       :label="legendText.cli.label"
     >
       {{ legendText.cli.description }}
     </ConfigBadge>
 
     <ConfigBadge
-      class="bg-purple-50 text-purple-700"
+      :class="CONFIG_LEGEND_COLOR_MAP.dynamic"
       :label="legendText.dynamic.label"
     >
       <i18n-t :keypath="legendText.dynamic.descriptionKey">
@@ -48,9 +48,10 @@
 </template>
 
 <script lang="ts" setup>
-import ConfigBadge from './ConfigBadge.vue'
 import { computed } from 'vue'
 import { useI18n } from '@cy/i18n'
+import ConfigBadge from './ConfigBadge.vue'
+import { CONFIG_LEGEND_COLOR_MAP } from './ConfigSourceColors'
 
 const { t } = useI18n()
 const legendText = computed(() => {

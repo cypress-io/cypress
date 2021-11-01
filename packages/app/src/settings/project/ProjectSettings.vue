@@ -1,10 +1,9 @@
 <template>
   <div class="divide-y divide-gray-200 children:pt-7 children:pb-7">
     <ProjectId
-      class="pt-0"
       :gql="props.gql"
     />
-    <template v-if="props.gql.cloudProject">
+    <template v-if="props.gql.cloudProject?.recordKeys?.length">
       <RecordKey
         v-for="key of props.gql.cloudProject.recordKeys"
         :key="key.id"
@@ -16,7 +15,7 @@
       on Cypress Cloud.
     </template>
     <Experiments />
-    <Config />
+    <Config :gql="props.gql" />
   </div>
 </template>
 
@@ -32,6 +31,7 @@ gql`
 fragment ProjectSettings on Project{
   id
   ...ProjectId
+  ...Config
   cloudProject {
     id
     recordKeys {

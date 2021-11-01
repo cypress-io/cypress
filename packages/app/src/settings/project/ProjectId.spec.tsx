@@ -18,9 +18,11 @@ describe('<ProjectId />', () => {
   })
 
   it('renders the project ID in the input field', () => {
+    const givenProjectId = 'aaaa-bbbb-cccc-dddd'
+
     cy.mountFragment(ProjectIdFragmentDoc, {
       onResult: (result) => {
-        result.projectId = 'aaaa-bbbb-cccc-dddd'
+        result.projectId = givenProjectId
       },
       render: (gqlVal) => (
         <div class="py-4 px-8">
@@ -31,7 +33,7 @@ describe('<ProjectId />', () => {
         </div>
       ),
     }).then(() => {
-      cy.findByText('projectId').should('be.visible')
+      cy.findByText(givenProjectId).should('be.visible')
       cy.findByText('Copy')
     })
   })

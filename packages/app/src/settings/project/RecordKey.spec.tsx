@@ -2,11 +2,13 @@ import { RecordKeyFragmentDoc } from '../../generated/graphql-test'
 import RecordKey from './RecordKey.vue'
 
 describe('<RecordKey />', () => {
+  const key = '1234-bbbb-5678-dddd'
+
   beforeEach(() => {
     cy.viewport(800, 600)
     cy.mountFragment(RecordKeyFragmentDoc, {
       onResult: (res) => {
-        res.key = 'aaaa-bbbb-cccc-dddd'
+        res.key = key
       },
       render: (gql) => (
         <div class="py-4 px-8">
@@ -21,16 +23,17 @@ describe('<RecordKey />', () => {
   })
 
   it(`has an input that's hidden by default`, () => {
-    cy.get('input[type="password"]').as('Record Key Input')
+    cy.get('code').as('Record Key Input')
     .should('be.visible')
+    .contains('code', key).should('not.exist')
     .get('[aria-label="Record Key Visibility Toggle"]').as('Password Toggle')
     .click()
-    .get('input[type="password"]').should('not.exist')
-    .get('input[type="text"]').should('be.visible')
+
+    cy.contains('code', key).should('be.visible')
     .get('@Password Toggle')
     .click()
-    .get('input[type="text"]').should('not.exist')
-    .get('input[type="password"]').should('be.visible')
+
+    cy.contains('code', key).should('not.exist')
   })
 
   it('has a managed keys button', () => {

@@ -14,8 +14,7 @@
     <div class="flex w-full select-none">
       <ConfigCode
         data-testid="config-code"
-        :code="code"
-        class="relative grow-1 w-full hide-scrollbar rounded-bl-md rounded-tl-md mx-auto border-1 overflow-hidden"
+        :config="configObject"
       />
       <ConfigLegend
         class="rounded-tr-md px-22px py-28px border-1 border-l-0 rounded-br-md min-w-280px"
@@ -25,13 +24,25 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { computed } from 'vue'
+import { gql } from '@urql/vue'
 import SettingsSection from '../SettingsSection.vue'
 import { useI18n } from '@cy/i18n'
-import cypressJson from '../../../cypress.json?raw' // TODO: remove this
 import ConfigLegend from './ConfigLegend.vue'
 import ConfigCode from './ConfigCode.vue'
+import type { ConfigFragment } from '../../generated/graphql'
 
-const code = ref(JSON.parse(JSON.stringify(cypressJson, null, 2)))
 const { t } = useI18n()
+
+gql`
+fragment Config on Project {
+  config
+}
+`
+
+const props = defineProps<{
+  gql: ConfigFragment
+}>()
+
+const configObject = computed(() => props.gql.config.resolved)
 </script>
