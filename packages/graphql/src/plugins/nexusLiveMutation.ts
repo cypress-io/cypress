@@ -9,7 +9,7 @@ export type LiveMutationResolver<
   args: core.ArgsValue<TypeName, FieldName>,
   context: core.GetGen<'context'>,
   info: GraphQLResolveInfo
-) => Promise<string | void> | void
+) => core.MaybePromise<core.FieldTypeName<TypeName, FieldName> extends 'Boolean' ? core.ResultValue<TypeName, FieldName> | void : core.ResultValue<TypeName, FieldName>>
 
 export type LiveMutationFieldOpts<
   TypeName extends string,
