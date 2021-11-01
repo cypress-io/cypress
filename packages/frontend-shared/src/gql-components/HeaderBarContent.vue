@@ -189,7 +189,12 @@ watch(savedState, (newVal) => {
   immediate: true,
 })
 
-function shouldShowPrompt (prompt: { slug: string; noProjectId: boolean; interval?: undefined }) {
+function shouldShowPrompt (prompt: { slug: string; noProjectId: boolean; interval?: number }) {
+  // naver open if there's no page name
+  if (!props.pageName) {
+    return false
+  }
+
   const timeSinceOpened = Date.now() - savedState.value?.firstOpened
 
   // prompt has been shown

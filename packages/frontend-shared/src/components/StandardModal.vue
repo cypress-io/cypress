@@ -1,7 +1,7 @@
 <template>
   <Dialog
     :open="localValue"
-    class="fixed inset-0 z-10 overflow-y-auto"
+    class="fixed inset-0 z-50 overflow-y-auto"
     @close="clickOutside && setIsOpen(false)"
   >
     <div class="flex items-center justify-center min-h-screen">
@@ -13,7 +13,7 @@
       </slot>
 
       <div
-        class="relative mx-auto bg-white rounded"
+        class="relative mx-auto bg-white rounded z-50"
         :class="props.class || ''"
       >
         <div
