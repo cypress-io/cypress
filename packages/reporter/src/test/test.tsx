@@ -13,6 +13,7 @@ import TestModel from './test-model'
 
 import scroller, { Scroller } from '../lib/scroller'
 import Attempts from '../attempts/attempts'
+import StateIcon from '../lib/state-icon'
 
 import CheckIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/checkmark_x16.svg'
 import WandIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/object-magic-wand-dark-mode_x16.svg'
@@ -164,10 +165,10 @@ class Test extends Component<TestProps> {
   }
 
   _header () {
-    const { model } = this.props
+    const { appState, model } = this.props
 
     return (<>
-      <i aria-hidden='true' className='runnable-state' />
+      <StateIcon aria-hidden className="runnable-status-icon" state={model.state} isStudio={appState.studioActive} />
       <span className='runnable-title'>
         <span>{model.title}</span>
         <span className='visually-hidden'>{model.state}</span>

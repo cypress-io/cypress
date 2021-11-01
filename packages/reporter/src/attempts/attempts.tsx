@@ -8,12 +8,13 @@ import Collapsible from '../collapsible/collapsible'
 import Hooks from '../hooks/hooks'
 import Routes from '../routes/routes'
 import TestError from '../errors/test-error'
-import TestModel from '../test/test-model'
+import TestModel, { TestState } from '../test/test-model'
 import AttemptModel from './attempt-model'
 import Sessions from '../sessions/sessions'
 
 import CollapseIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/collapse_x16.svg'
 import ExpandIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/expand_x16.svg'
+import StateIcon from '../lib/state-icon'
 
 const NoCommands = () => (
   <ul className='hooks-container'>
@@ -23,7 +24,7 @@ const NoCommands = () => (
   </ul>
 )
 
-const AttemptHeader = ({ index, isOpen }: {index: number, isOpen: boolean }) => (
+const AttemptHeader = ({ index, isOpen, state }: {index: number, isOpen: boolean, state: TestState }) => (
   <span className='attempt-tag'>
     {isOpen ? (
       <CollapseIcon />
@@ -31,7 +32,7 @@ const AttemptHeader = ({ index, isOpen }: {index: number, isOpen: boolean }) => 
       <ExpandIcon />
     )}
     Attempt {index + 1}
-    <i className="attempt-state" />
+    <StateIcon state={state} className="attempt-state" />
   </span>
 )
 
@@ -91,7 +92,7 @@ class Attempt extends Component<AttemptProps> {
         ref="container"
       >
         <Collapsible
-          header={<AttemptHeader index={model.id} isOpen={model.isOpen}/>}
+          header={<AttemptHeader index={model.id} isOpen={model.isOpen} state={model.state} />}
           headerClass='attempt-name'
           isOpen={model.isOpen}
         >

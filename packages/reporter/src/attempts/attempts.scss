@@ -42,33 +42,12 @@
     }
   }
 
-
-  .attempt-state-active {
-    .attempt-state {
-      @include runnable-state-active;
-    }
-  }
-  .attempt-state-processing {
-    .attempt-state {
-      @include runnable-state-processing;
-    }
-  }
   .attempt-state-failed {
-    .attempt-state {
-      @include runnable-state-failed;
-    }
-
     .attempt-name:after {
       color: $fail;
     }
   }
   .attempt-state-passed {
-    .attempt-state {
-
-    @include runnable-state-passed;
-    }
-
-
     .attempt-name:after {
       color: $pass;
     }
