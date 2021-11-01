@@ -5,7 +5,10 @@
     max-height="1500px"
   >
     <template #target="{ open }">
-      <ListRowHeader :class="{ 'border-b border-b-gray-100 rounded-b-none': open }">
+      <ListRowHeader
+        :class="{ 'rounded-b-none': open, 'bg-gray-50': true }"
+        big-header
+      >
         <template #icon>
           <component
             :is="icon"
