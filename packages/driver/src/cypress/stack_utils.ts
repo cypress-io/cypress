@@ -100,7 +100,7 @@ const getInvocationDetails = (specWindow, config) => {
 
     // firefox throws a different stack than chromium
     // which includes stackframes from cypress_runner.js.
-    // So we drop the lines until we get to the spec stackframe (incldues __cypress/tests)
+    // So we drop the lines until we get to the spec stackframe (includes __cypress/tests)
     if (specWindow.Cypress && specWindow.Cypress.isBrowser('firefox')) {
       stack = stackWithLinesDroppedFromMarker(stack, '__cypress/tests', true)
     }
