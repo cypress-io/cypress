@@ -1,8 +1,8 @@
 const path = require('path')
 const la = require('lazy-ass')
 const check = require('check-more-types')
-const R = require('ramda')
 const os = require('os')
+const _ = require('lodash')
 
 // canonical platform names
 const platforms = {
@@ -11,11 +11,11 @@ const platforms = {
   windows: 'win32',
 }
 
-const isValidPlatform = check.oneOf(R.values(platforms))
+const isValidPlatform = check.oneOf(_.values(platforms))
 
 const checkPlatform = (platform) => {
   return la(isValidPlatform(platform),
-    'invalid build platform', platform, 'valid choices', R.values(platforms))
+    'invalid build platform', platform, 'valid choices', _.values(platforms))
 }
 
 const buildRootDir = () => {
