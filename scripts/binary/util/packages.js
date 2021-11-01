@@ -173,12 +173,7 @@ const replaceLocalNpmVersions = function (basePath) {
             if (matchedPkg && version === '0.0.0-development') {
               const pkgName = pkg.startsWith('@cypress/') ? pkg.split('/')[1] : pkg
 
-              if (pkg.startsWith('@cypress')) {
-                json.dependencies[`@cypress/${pkgName}`] = `file:${path.join(basePath, 'npm', pkgName)}`
-              } else {
-                json.dependencies[pkgName] = `file:${path.join(basePath, 'npm', pkgName)}`
-              }
-
+              json.dependencies[pkg] = `file:${path.join(basePath, 'npm', pkgName)}`
               shouldWriteFile = true
 
               return updateNpmPackage(pkgName)
