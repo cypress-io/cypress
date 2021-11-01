@@ -58,8 +58,7 @@ export class ProjectActions {
 
     await this.clearActiveProject()
 
-    // TODO: (Alejandro) - Refactor this
-    // Set initial properties, so we can set on it the config on the next update
+    // Set initial properties, so we can set the config object on the active project
     this.setActiveProjectProperties({
       projectRoot,
       title,

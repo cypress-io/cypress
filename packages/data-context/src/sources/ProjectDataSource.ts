@@ -1,5 +1,6 @@
 import type { CodeGenType, SpecType } from '@packages/graphql/src/gen/nxs.gen'
 import { FrontendFramework, FRONTEND_FRAMEWORKS, ResolvedFromConfig, RESOLVED_FROM, SpecFile, STORYBOOK_GLOB } from '@packages/types'
+import { scanFSForAvailableDependency } from 'create-cypress-tests/src/findPackageJson'
 import path from 'path'
 
 import type { DataContext } from '..'
@@ -115,8 +116,6 @@ export class ProjectDataSource {
   })
 
   private guessFramework (projectRoot: string) {
-    const { scanFSForAvailableDependency } = require('create-cypress-tests/src/findPackageJson')
-
     const guess = FRONTEND_FRAMEWORKS.find((framework) => {
       const lookingForDeps = (framework.deps as readonly string[]).reduce(
         (acc, dep) => ({ ...acc, [dep]: '*' }),
