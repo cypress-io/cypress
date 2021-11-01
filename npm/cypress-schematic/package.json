@@ -50,8 +50,7 @@
     "testing"
   ],
   "publishConfig": {
-    "access": "public",
-    "registry": "http://registry.npmjs.org/"
+    "access": "public"
   },
   "builders": "./src/builders/builders.json",
   "ng-add": {
