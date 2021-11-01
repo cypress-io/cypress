@@ -1,4 +1,4 @@
-// @ts-nocheck
+// // @ts-nocheck
 
 /* eslint-disable prefer-rest-params */
 import _ from 'lodash'
@@ -27,7 +27,7 @@ import { $Chainer } from './chainer'
 import $Timers from '../cy/timers'
 import { create as createTimeouts, ITimeouts } from '../cy/timeouts'
 import $Retries from '../cy/retries'
-import $Stability from '../cy/stability'
+import { create as createStability, IStability } from '../cy/stability'
 import $selection from '../dom/selection'
 import $Snapshots from '../cy/snapshots'
 import { $Command } from './command'
@@ -119,9 +119,11 @@ const setTopOnError = function (Cypress, cy) {
 
 // NOTE: this makes the cy object an instance
 // TODO: refactor the 'create' method below into this class
-class $Cy implements ITimeouts {
+class $Cy implements ITimeouts, IStability {
   timeout: ITimeouts['timeout']
   clearTimeout: ITimeouts['clearTimeout']
+  isStable: IStability['isStable']
+  whenStable: IStability['whenStable']
 
   constructor (specWindow, Cypress, Cookies, state, config) {
     initVideoRecorder(Cypress)
@@ -130,6 +132,11 @@ class $Cy implements ITimeouts {
 
     this.timeout = timeouts.timeout
     this.clearTimeout = timeouts.clearTimeout
+
+    const statility = createStability(Cypress, state)
+
+    this.isStable = statility.isStable
+    this.whenStable = statility.whenStable
   }
 }
 
@@ -160,9 +167,7 @@ export default {
       return $dom.query(selector, context)
     }
 
-    const stability = $Stability.create(Cypress, state)
-
-    const retries = $Retries.create(Cypress, state, cy.timeout, cy.clearTimeout, stability.whenStable, onFinishAssertions)
+    const retries = $Retries.create(Cypress, state, cy.timeout, cy.clearTimeout, cy.whenStable, onFinishAssertions)
     const assertions = $Assertions.create(Cypress, cy)
 
     const jquery = $jQuery.create(state)
@@ -224,7 +229,7 @@ export default {
           return Cypress.action('app:form:submitted', e)
         },
         onBeforeUnload (e) {
-          stability.isStable(false, 'beforeunload')
+          cy.isStable(false, 'beforeunload')
 
           Cookies.setInitial()
 
@@ -547,10 +552,7 @@ export default {
       return finish(err)
     }
 
-    const queue = $CommandQueue.create(state, {
-      timeout: cy.timeout,
-      clearTimeout: cy.clearTimeout,
-    }, stability, cleanup, fail, isCy)
+    const queue = $CommandQueue.create(state, cy.timeout, cy.whenStable, cleanup, fail, isCy)
 
     _.extend(cy, {
       id: _.uniqueId('cy'),
@@ -573,10 +575,6 @@ export default {
       isCy,
 
       isStopped,
-
-      // stability sync methods
-      isStable: stability.isStable,
-      whenStable: stability.whenStable,
 
       // xhr sync methods
       getRequestsByAlias: xhrs.getRequestsByAlias,
@@ -681,7 +679,7 @@ export default {
             // we are now stable again which is purposefully
             // the last event we call here, to give our event
             // listeners time to be invoked prior to moving on
-            return stability.isStable(true, 'load')
+            return cy.isStable(true, 'load')
           } catch (err) {
             let e = err
 
