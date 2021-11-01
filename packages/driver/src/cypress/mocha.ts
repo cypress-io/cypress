@@ -503,6 +503,8 @@ const create = (specWindow, Cypress, config) => {
 
   const _mocha = createMocha(specWindow)
 
+  _mocha.slow(config('slowTestThreshold'))
+
   const _runner = getRunner(_mocha)
 
   _mocha.suite.file = Cypress.spec.relative
