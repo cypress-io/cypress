@@ -27,7 +27,8 @@ $code-border-radius: 4px;
     }
 
     pre {
-      background: $orange-900;
+      border-color: $orange-300;
+      color: $orange-300;
       display: block;
       width: 100%;
       white-space: initial;

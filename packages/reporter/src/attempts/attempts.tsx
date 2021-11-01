@@ -12,6 +12,9 @@ import TestModel from '../test/test-model'
 import AttemptModel from './attempt-model'
 import Sessions from '../sessions/sessions'
 
+import CollapseIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/collapse_x16.svg'
+import ExpandIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/expand_x16.svg'
+
 const NoCommands = () => (
   <ul className='hooks-container'>
     <li className='no-commands'>
@@ -20,14 +23,15 @@ const NoCommands = () => (
   </ul>
 )
 
-const AttemptHeader = ({ index }: {index: number}) => (
+const AttemptHeader = ({ index, isOpen }: {index: number, isOpen: boolean }) => (
   <span className='attempt-tag'>
-    <span className='open-close-indicator'>
-      <i className='fa fa-fw fa-angle-up' />
-      <i className='fa fa-fw fa-angle-down' />
-    </span>
+    {isOpen ? (
+      <CollapseIcon />
+    ) : (
+      <ExpandIcon />
+    )}
     Attempt {index + 1}
-    <i className="attempt-state fa fa-fw" />
+    <i className="attempt-state" />
   </span>
 )
 
@@ -87,7 +91,7 @@ class Attempt extends Component<AttemptProps> {
         ref="container"
       >
         <Collapsible
-          header={<AttemptHeader index={model.id}/>}
+          header={<AttemptHeader index={model.id} isOpen={model.isOpen}/>}
           headerClass='attempt-name'
           isOpen={model.isOpen}
         >

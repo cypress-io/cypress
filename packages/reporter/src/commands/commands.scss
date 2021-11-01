@@ -484,11 +484,7 @@
     svg {
       color: $gray-600;
       cursor: pointer;
-      margin: 0px 2px;
-
-      &.command-invisible {
-        padding-top: 2px;
-      }
+      margin: 0px 4px;
     }
 
     .studio-command-remove {
@@ -512,6 +508,7 @@
     display: none;
     margin-left: 5px;
     margin-right: 0;
+    padding-top: 2px;
   }
 
   .command-is-invisible .command-invisible {
