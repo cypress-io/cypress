@@ -3,32 +3,37 @@ import $errUtils from '../cypress/error_utils'
 
 // See Test Config Overrides in ../../../../cli/types/cypress.d.ts
 
-function mutateConfiguration (testConfigList, config, env) {
-  let globalConfig = _.clone(config())
-  let testConfigOverrideKeys: any = []
-  let localConfigOverrides: any = {}
-
+function setConfig (testConfigList, config, localConfigOverrides = {}) {
   testConfigList.forEach(({ _testConfig: testConfigOverride, invocationDetails }) => {
-    delete testConfigOverride.browser
+    if (_.isArray(testConfigOverride)) {
+      setConfig(testConfigOverride, config, localConfigOverrides)
+    } else {
+      delete testConfigOverride.browser
 
-    testConfigOverrideKeys = testConfigOverrideKeys.concat(Object.keys(testConfigOverride))
+      try {
+        config(testConfigOverride)
+      } catch (e) {
+        let err = $errUtils.errByPath('config.invalid_test_override', {
+          errMsg: e.message,
+        })
 
-    try {
-      config(testConfigOverride)
-    } catch (e) {
-      let err = $errUtils.errByPath('config.invalid_test_override', {
-        errMsg: e.message,
-      })
-
-      err.stack = $errUtils.stackWithReplacedProps({ stack: invocationDetails.stack }, err)
-      throw err
+        err.stack = $errUtils.stackWithReplacedProps({ stack: invocationDetails.stack }, err)
+        throw err
+      }
+      localConfigOverrides = { ...localConfigOverrides, ...testConfigOverride }
     }
-
-    localConfigOverrides = _.extend(localConfigOverrides, testConfigOverride)
   })
 
+  return localConfigOverrides
+}
+
+function mutateConfiguration (testConfigList, config, env) {
+  let globalConfig = _.clone(config())
+
+  const localConfigOverrides = setConfig(testConfigList, config)
+
   // only store the global config values that updated
-  globalConfig = _.pick(globalConfig, testConfigOverrideKeys)
+  globalConfig = _.pick(globalConfig, Object.keys(localConfigOverrides))
   const globalEnv = _.clone(env())
 
   const localConfigOverridesBackup = _.clone(localConfigOverrides)
@@ -49,6 +54,11 @@ function mutateConfiguration (testConfigList, config, env) {
     _.each(localConfigOverrides, (val, key) => {
       if (localConfigOverridesBackup[key] !== val) {
         globalConfig[key] = val
+      }
+
+      // explicitly set to undefined if config wasn't previously defined
+      if (!globalConfig.hasOwnProperty(key)) {
+        globalConfig[key] = undefined
       }
     })
 

@@ -295,7 +295,7 @@ describe('per-test config', () => {
     })
   })
 
-  describe('emtpy config', {}, () => {
+  describe('empty config', {}, () => {
     it('empty config in test', {}, () => {
       expect(true).ok
     })
