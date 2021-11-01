@@ -85,5 +85,5 @@ const externalEditors = [
 ]
 
 const { t } = useI18n()
-const selectedEditor = ref<string>()
+const selectedEditor = ref<Record<string, any>>()
 </script>
