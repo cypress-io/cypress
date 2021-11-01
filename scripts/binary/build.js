@@ -226,17 +226,14 @@ require('./packages/server')\
 
   // If we're in CI, we want to rm `packages/*` && `npm/*` so that we aren't depending on those
   // in node_modules resolution. Eventually we'll want to fully remove node_modules in smoke tests
-  const removePackagesInCI = function () {
-    log('#removePackagesInCI')
+  const removeNpmPackagesInCI = function () {
+    log('#removeNpmPackagesInCI')
 
     if (!process.env.CI) {
       return
     }
 
-    return Promise.all([
-      fse.remove(path.join(process.cwd(), 'packages')),
-      fse.remove(path.join(process.cwd(), 'npm')),
-    ])
+    return fse.remove(path.join(process.cwd(), 'npm'))
   }
 
   // we also don't need ".bin" links inside Electron application
@@ -470,7 +467,7 @@ require('./packages/server')\
   .then(removeTypeScript)
   .then(cleanJs)
   .then(transformSymlinkRequires)
-  .then(removePackagesInCI)
+  .then(removeNpmPackagesInCI)
   .then(testVersion(distDir))
   .then(testBuiltStaticAssets)
   .then(removeBinFolders)
