@@ -350,13 +350,27 @@ require('./packages/server')\
   const runSmokeTests = function () {
     log('#runSmokeTests')
 
-    const run = function () {
+    const run = async function () {
       // make sure to use a longer timeout - on Mac the first
       // launch of a built application invokes gatekeeper check
       // which takes a couple of seconds
       const executablePath = meta.buildAppExecutable(platform)
 
-      return smoke.test(executablePath)
+      // Moving this package specifically to simulate a failing scenario for
+      // https://github.com/cypress-io/cypress/pull/18714
+      await fse.move(
+        path.join(process.cwd(), 'node_modules/create-cypress-tests'),
+        path.join(process.cwd(), 'node_modules/_create-cypress-tests'),
+      )
+
+      try {
+        return await smoke.test(executablePath)
+      } finally {
+        await fse.move(
+          path.join(process.cwd(), 'node_modules/_create-cypress-tests'),
+          path.join(process.cwd(), 'node_modules/create-cypress-tests'),
+        )
+      }
     }
 
     if (xvfb.isNeeded()) {

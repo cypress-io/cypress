@@ -1,4 +1,4 @@
-exports['@packages/data-context initializeData should initialize 1'] = {
+exports['@packages/data-context initializeData initializes 1'] = {
   "shellConfig": {
     "launchOptions": {},
     "launchArgs": {},
