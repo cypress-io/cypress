@@ -38,29 +38,6 @@ describe('src/validation', () => {
       expect(result).to.not.be.true
       snapshot('invalid url', result)
     })
-
-    // it('returns error message for missing CA', () => {
-    //   let result = validation.isValidClientCertificatesSet(mockKey, [
-    //     {
-    //       url: 'https://url.com',
-    //     }
-    //   ])
-
-    //   expect(result).to.not.be.true
-    //   snapshot('duplicate client certificate', result)
-    // })
-
-    // it('returns error message for duplicate certs', () => {
-    //   let result = validation.isValidClientCertificatesSet(mockKey, [
-    //     {
-    //       url: 'https://url.com',
-    //       ca: ['array'] },
-    //     { url: 'https://url.com', ca: ['array'] },
-    //   ])
-
-    //   expect(result).to.not.be.true
-    //   snapshot('duplicate client certificate', result)
-    // })
   })
 
   describe('.isValidBrowser', () => {

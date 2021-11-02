@@ -3,7 +3,20 @@ import $errUtils from '../cypress/error_utils'
 
 // See Test Config Overrides in ../../../../cli/types/cypress.d.ts
 
-function setConfig (testConfigList, config, localConfigOverrides = {}) {
+type TestConfig = {
+  _testConfig: {
+    browser?: Object
+  }
+  invocationDetails: {
+    stack: Object
+  }
+};
+
+type ConfigOverrides = {
+  env: Object | undefined
+};
+
+function setConfig (testConfigList: Array<TestConfig>, config: Function, localConfigOverrides: ConfigOverrides = { env: undefined }) {
   testConfigList.forEach(({ _testConfig: testConfigOverride, invocationDetails }) => {
     if (_.isArray(testConfigOverride)) {
       setConfig(testConfigOverride, config, localConfigOverrides)
