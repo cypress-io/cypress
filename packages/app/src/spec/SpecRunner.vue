@@ -1,35 +1,44 @@
 <template>
   <div
-    id="main-grid"
-    class="grid p-12 gap-8 h-full"
+    id="main-pane"
+    class="flex"
   >
-    <div>
+    <div
+      id="inline-spec-list"
+      class="bg-gray-1000 w-128"
+    >
       <InlineSpecList :gql="props.gql" />
     </div>
 
-    <div
-      id="runner"
-      :style="`width: ${runnerColumnWidth}px`"
-      class="relative"
-    >
-      <SpecRunnerHeader :gql="props.gql" />
+    <div class="w-128">
       <div
-        :id="RUNNER_ID"
-        class="viewport origin-top-left"
-        :style="viewportStyle"
+        v-once
+        :id="REPORTER_ID"
       />
-      <SnapshotControls :event-manager="eventManager" />
     </div>
 
     <div
-      v-once
-      :id="REPORTER_ID"
-    />
+      ref="runnerPane"
+      class="relative w-full"
+    >
+      <div class="bg-white p-4  border-8 border-blue-300">
+        <SpecRunnerHeader :gql="props.gql" />
+      </div>
+
+      <div class="flex justify-center bg-gray-100 h-full p-4">
+        <div
+          :id="RUNNER_ID"
+          class="viewport origin-top-left"
+          :style="viewportStyle"
+        />
+      </div>
+      <SnapshotControls :event-manager="eventManager" />
+    </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed, onBeforeUnmount, onMounted, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { REPORTER_ID, RUNNER_ID, getRunnerElement, getReporterElement, empty } from '../runner/utils'
 import { gql } from '@urql/core'
 import type { SpecRunnerFragment } from '../generated/graphql'
@@ -47,16 +56,25 @@ fragment SpecRunner on App {
 }
 `
 
-const runnerColumnWidth = 400
 const eventManager = window.UnifiedRunner.eventManager
 
 const autStore = useAutStore()
 
+const runnerPane = ref<HTMLDivElement>()
+
 const viewportStyle = computed(() => {
+  if (!runnerPane.value) {
+    return
+  }
+
+  const scale = runnerPane.value.clientWidth < autStore.viewportDimensions.width
+    ? runnerPane.value.clientWidth / autStore.viewportDimensions.width
+    : 1
+
   return `
   width: ${autStore.viewportDimensions.width}px;
   height: ${autStore.viewportDimensions.height}px;
-  transform: scale(${runnerColumnWidth / autStore.viewportDimensions.width});`
+  transform: scale(${scale});`
 })
 
 const props = defineProps<{
@@ -90,17 +108,32 @@ onBeforeUnmount(() => {
 
 </script>
 
-<style scoped>
-#main-grid {
-  grid-template-columns: 1fr 2fr 2fr;
+<style scoped lang="scss">
+$navbar-width: 80px;
+
+#main-pane {
+  /** There is a "bug" caused by this line:
+    https://github.com/cypress-io/cypress/blob/develop/packages/driver/src/cy/actionability.ts#L375
+    Basically `scrollIntoView` is applied even outside of the <iframe>,
+    scrolling an element "upwards", messing up the UI
+    Easiest way to reprodudce is remove the `position: fixed`
+    and run the `SpecList.spec.tsx` test in runner-ct
+    in CT mode.
+    Ideally we should not need `position: fixed`, but I don't see
+    a good way to work around this right now.
+  */
+  position: fixed;
+  left: $navbar-width;
+  height: 100vh;
+  width: calc(100% - #{$navbar-width});
+}
+
+#inline-spec-list {
+  border-right: 2px solid rgb(67 73 97);
 }
 
 .viewport {
   border: 2px dotted blue;
-}
-
-#runner {
-  border: 1px solid black;
 }
 
 #unified-runner {
@@ -109,7 +142,6 @@ onBeforeUnmount(() => {
 
 #unified-reporter {
   position: relative;
-  width: 300px;
   height: 100%;
 }
 
