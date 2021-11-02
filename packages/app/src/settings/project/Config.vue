@@ -44,5 +44,5 @@ const props = defineProps<{
   gql: ConfigFragment
 }>()
 
-const configObject = computed(() => props.gql.config.resolved)
+const configObject = computed(() => props.gql.config.filter((c) => c.value))
 </script>

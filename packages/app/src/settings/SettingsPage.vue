@@ -1,5 +1,5 @@
 <template>
-  <div class="p-24px">
+  <div class="p-24px h-full overflow-auto">
     <SettingsCard
       :title="t('settingsPage.device.title')"
       :description="t('settingsPage.device.description')"

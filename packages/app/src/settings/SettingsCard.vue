@@ -2,11 +2,10 @@
   <Collapsible
     class="block w-full mb-4 overflow-hidden border border-gray-100 rounded
   bg-light-50 hocus-default"
-    max-height="1500px"
   >
     <template #target="{ open }">
       <ListRowHeader
-        :class="{ 'rounded-b-none': open, 'bg-gray-50': true }"
+        :class="{ 'border-b border-b-gray-100 rounded-b-none': open, 'bg-gray-50': true }"
         big-header
       >
         <template #icon>
