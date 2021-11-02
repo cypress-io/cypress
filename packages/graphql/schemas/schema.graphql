@@ -518,7 +518,7 @@ enum PluginsState {
   uninitialized
 }
 
-"""A Cypress Project is represented by a cypress.json file"""
+"""A Cypress Project is represented by a cypress.config.{ts|js} file"""
 type Project implements Node {
   """The remote associated project from Cypress Cloud"""
   cloudProject: CloudProject
@@ -556,10 +556,10 @@ type Project implements Node {
   id: ID!
 
   """Whether the user configured this project to use Component Testing"""
-  isFirstTimeCT: Boolean!
+  isCTConfigured: Boolean!
 
   """Whether the user configured this project to use e2e Testing"""
-  isFirstTimeE2E: Boolean!
+  isE2EConfigured: Boolean!
 
   """Cached preferences for this project"""
   preferences: ProjectPreferences

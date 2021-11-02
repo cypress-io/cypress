@@ -195,9 +195,7 @@ function modifyAngularJson (options: any): Rule {
           },
         }
 
-        const configFile = projects[project].root
-          ? `${projects[project].root}/cypress.json`
-          : null
+        const configFile = getCypressConfigFile(angularJsonVal, project)
 
         if (configFile) {
           Object.assign(runJson.options, { configFile })
@@ -231,6 +229,17 @@ function modifyAngularJson (options: any): Rule {
 
     return tree
   }
+}
+
+export const getCypressConfigFile = (angularJsonVal: any, projectName: string) => {
+  const project = angularJsonVal.projects[projectName]
+  const tsConfig = project?.architect?.lint?.options?.tsConfig
+
+  if (project.root) {
+    return `${project.root}/cypress.config.${tsConfig ? 'ts' : 'js'}`
+  }
+
+  return null
 }
 
 export const addCypressTsConfig = (tree: Tree, angularJsonVal: any, projectName: string) => {

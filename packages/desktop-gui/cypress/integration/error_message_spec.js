@@ -57,12 +57,12 @@ describe('Error Message', function () {
   })
 
   it('displays error message with html escaped', function () {
-    this.err.message = 'Error reading from: <span class=\'ansi-blur-gf\'>/Users/cypress.json</span><br /><br /> <span class=\'ansi-yellow-fg\'>SyntaxError</span>'
+    this.err.message = 'Error reading from: <span class=\'ansi-blur-gf\'>/Users/cypress.config.js</span><br /><br /> <span class=\'ansi-yellow-fg\'>SyntaxError</span>'
     this.ipc.openProject.rejects(this.err)
     this.start()
 
     cy.get('.error')
-    .should('contain', 'Error reading from: /Users/cypress.json')
+    .should('contain', 'Error reading from: /Users/cypress.config.js')
     .should('not.contain', '<span')
   })
 

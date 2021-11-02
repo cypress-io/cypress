@@ -90,7 +90,7 @@ describe('src/cy/commands/files', () => {
     })
 
     it('really works', () => {
-      cy.readFile('cypress.json').its('baseUrl').should('eq', 'http://localhost:3500')
+      cy.readFile('./cypress/fixtures/fileSpec.json').its('baseUrl').should('eq', 'http://localhost:3500')
     })
 
     it('works when contents are supposed to be null', () => {

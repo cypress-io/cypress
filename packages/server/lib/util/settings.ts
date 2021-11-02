@@ -5,23 +5,20 @@ import errors from '../errors'
 import { fs } from '../util/fs'
 import { requireAsync } from './require_async'
 import Debug from 'debug'
+import type { SettingsOptions } from '@packages/types'
 
 const debug = Debug('cypress:server:settings')
 
-interface SettingsOptions {
-  testingType?: 'component' |'e2e'
-  configFile?: string | false
-  args?: {
-    runProject?: string
-  }
-}
-
-function jsCode (obj) {
+function configCode (obj, isTS?: boolean) {
   const objJSON = obj && !_.isEmpty(obj)
     ? JSON.stringify(_.omit(obj, 'configFile'), null, 2)
     : `{
 
 }`
+
+  if (isTS) {
+    return `export default ${objJSON}`
+  }
 
   return `module.exports = ${objJSON}
 `
@@ -103,7 +100,11 @@ function _write (file, obj = {}) {
 
   debug('writing javascript file')
 
-  return fs.writeFileAsync(file, jsCode(obj))
+  const fileExtension = file?.split('.').pop()
+
+  const isTSFile = fileExtension === 'ts'
+
+  return fs.writeFileAsync(file, configCode(obj, isTSFile))
   .return(obj)
   .catch((err) => {
     return _logWriteErr(file, err)
@@ -125,14 +126,11 @@ export function isComponentTesting (options: SettingsOptions = {}) {
 export function configFile (options: SettingsOptions = {}) {
   // default is only used in tests.
   // This prevents a the change from becoming bigger than it should
-  // FIXME: remove the default
-  return options.configFile === false ? false : (options.configFile || 'cypress.json')
+  return options.configFile === false ? false : (options.configFile || 'cypress.config.js')
 }
 
 export function id (projectRoot, options = {}) {
-  const file = pathToConfigFile(projectRoot, options)
-
-  return fs.readJson(file)
+  return read(projectRoot, options)
   .then((config) => config.projectId)
   .catch(() => {
     return null
@@ -146,19 +144,13 @@ export function read (projectRoot, options: SettingsOptions = {}) {
 
   const file = pathToConfigFile(projectRoot, options)
 
-  const readPromise = /\.json$/.test(file) ? fs.readJSON(path.resolve(projectRoot, file)) : requireAsync(file, {
+  return requireAsync(file, {
     projectRoot,
     loadErrorCode: 'CONFIG_FILE_ERROR',
   })
-
-  return readPromise
   .catch((err) => {
     if (err.type === 'MODULE_NOT_FOUND' || err.code === 'ENOENT') {
-      if (options.args?.runProject) {
-        return Promise.reject(errors.get('CONFIG_FILE_NOT_FOUND', options.configFile, projectRoot))
-      }
-
-      return _write(file, {})
+      return Promise.reject(errors.get('CONFIG_FILE_NOT_FOUND', options.configFile, projectRoot))
     }
 
     return Promise.reject(err)
@@ -173,7 +165,7 @@ export function read (projectRoot, options: SettingsOptions = {}) {
     }
 
     debug('resolved configObject', configObject)
-    const changed = _applyRewriteRules(configObject)
+    const changed: { projectId?: string, component?: {}, e2e?: {} } = _applyRewriteRules(configObject)
 
     // if our object is unchanged
     // then just return it
@@ -181,7 +173,7 @@ export function read (projectRoot, options: SettingsOptions = {}) {
       return configObject
     }
 
-    // else write the new reduced obj
+    // else write the new reduced obj and store the projectId on the cache
     return _write(file, changed)
     .then((config) => {
       return config
