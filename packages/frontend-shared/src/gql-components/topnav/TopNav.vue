@@ -157,7 +157,7 @@ import { allBrowsersIcons } from '../../../../frontend-shared/src/assets/browser
 import { gql, useMutation } from '@urql/vue'
 import { TopNavFragment, TopNav_LaunchOpenProjectDocument, TopNav_SetBrowserDocument, TopNav_SetPromptShownDocument } from '../../generated/graphql'
 import { useI18n } from '@cy/i18n'
-import { ref, watch } from 'vue'
+import { ref, watch, ComponentPublicInstance } from 'vue'
 // eslint-disable-next-line no-duplicate-imports
 import type { Ref } from 'vue'
 const { t } = useI18n()
@@ -249,7 +249,7 @@ const emit = defineEmits<{
 
 const docsMenuVariant: Ref<DocsMenuVariant> = ref('main')
 
-const promptsEl: Ref<HTMLElement | null> = ref(null)
+const promptsEl: Ref<ComponentPublicInstance | null> = ref(null)
 
 watch(() => props.forceOpenDocs, (newVal) => {
   if (newVal === true) {
@@ -287,7 +287,7 @@ const resetPrompt = (event) => {
 
   const target = event.target as HTMLElement
 
-  if (!promptsEl.value.contains(target)) {
+  if (!promptsEl.value?.$el.contains(target)) {
     docsMenuVariant.value = 'main'
   }
 }
@@ -297,6 +297,10 @@ onKeyStroke('Enter', (event) => {
 })
 
 onKeyStroke(' ', (event) => {
+  resetPrompt(event)
+})
+
+onKeyStroke('Escape', (event) => {
   resetPrompt(event)
 })
 
