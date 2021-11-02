@@ -5,7 +5,6 @@
   <div
     v-else
     class="h-full mx-auto bg-white"
-    @click="handleLinkTargetBlank"
   >
     <Main />
   </div>
@@ -19,6 +18,7 @@ import Main from './Main.vue'
 import { AppQueryDocument, App_DevRelaunchDocument,
   App_OpenExternalDocument,
 } from './generated/graphql'
+import { addExternalLinkClickListener } from '../../frontend-shared/src/utils/addExternalLinkClickListener'
 
 gql`
 query AppQuery {
@@ -45,6 +45,8 @@ mutation App_OpenExternal ($url: String!) {
 
 const relaunchMutation = useMutation(App_DevRelaunchDocument)
 const openExternalMutation = useMutation(App_OpenExternalDocument)
+
+addExternalLinkClickListener(openExternalMutation)
 
 /**
  * Sometimes the electron app can start before the GraphQL
@@ -92,30 +94,6 @@ watch(query.data, () => {
 interval = window.setInterval(poll, 200)
 
 const backendInitialized = computed(() => !!query.data?.value?.app)
-
-const handleLinkTargetBlank = (event) => {
-  if (event.target.href && event.target.target === '_blank') {
-    event.preventDefault()
-    // TODO - use a mutation to open these links in the default user browser
-  }
-}
-
-document.addEventListener('click', (event: MouseEvent) => {
-  const target = event.target as HTMLElement
-  const anchor = target.closest('a[href]') as HTMLAnchorElement
-
-  if (anchor) {
-    const destination = anchor.href
-
-    if (destination.startsWith('/')) {
-      return
-    }
-
-    event.preventDefault()
-    event.stopPropagation()
-    openExternalMutation.executeMutation({ url: anchor.href })
-  }
-})
 
 </script>
 

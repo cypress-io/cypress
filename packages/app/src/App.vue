@@ -11,6 +11,27 @@
   </router-view>
 </template>
 
+<script lang="ts" setup>
+
+import {
+  App_OpenExternalDocument,
+} from './generated/graphql'
+
+import { gql, useMutation } from '@urql/vue'
+
+import { addExternalLinkClickListener } from '../../frontend-shared/src/utils/addExternalLinkClickListener'
+
+gql`
+mutation App_OpenExternal ($url: String!) {
+  openExternal(url: $url)
+}
+`
+
+const openExternalMutation = useMutation(App_OpenExternalDocument)
+
+addExternalLinkClickListener(openExternalMutation)
+
+</script>
 <style>
 .reporter {
   position: relative;
