@@ -1,11 +1,11 @@
-import { SettingsPageFragmentDoc } from '../generated/graphql-test'
+import { SettingsContainerFragmentDoc } from '../generated/graphql-test'
 import { defaultMessages } from '@cy/i18n'
-import SettingsPage from './SettingsPage.vue'
+import SettingsContainer from './SettingsContainer.vue'
 
-describe('<SettingsPage />', () => {
+describe('<SettingsContainer />', () => {
   it('renders', () => {
     cy.viewport(900, 800)
-    cy.mountFragment(SettingsPageFragmentDoc, { render: (gql) => <SettingsPage gql={gql} /> })
+    cy.mountFragment(SettingsContainerFragmentDoc, { render: (gql) => <SettingsContainer gql={gql} /> })
 
     cy.contains('Project Settings').click()
 

@@ -16,7 +16,6 @@
         <span
           v-for="{ field, value, from } in config"
           :key="field"
-          class="line"
         >
           {{ field }}:
           <Browsers

@@ -1,5 +1,5 @@
 <template>
-  <SettingsPage
+  <SettingsContainer
     v-if="query.data.value"
     :gql="query.data.value"
   />
@@ -8,11 +8,11 @@
 <script lang="ts" setup>
 import { gql, useQuery } from '@urql/vue'
 import { SettingsDocument } from '../generated/graphql'
-import SettingsPage from '../settings/SettingsPage.vue'
+import SettingsContainer from '../settings/SettingsContainer.vue'
 
 gql`
 query Settings {
-  ...SettingsPage
+  ...SettingsContainer
 }`
 
 const query = useQuery({ query: SettingsDocument })

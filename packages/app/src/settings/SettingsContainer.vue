@@ -1,5 +1,8 @@
 <template>
-  <div class="p-24px h-full overflow-auto">
+  <div
+    class="p-24px h-full overflow-auto"
+    data-cy="settings"
+  >
     <SettingsCard
       :title="t('settingsPage.device.title')"
       :description="t('settingsPage.device.description')"
@@ -25,17 +28,17 @@
 <script lang="ts" setup>
 import { useI18n } from '@cy/i18n'
 import { gql } from '@urql/vue'
-import SettingsCard from '../settings/SettingsCard.vue'
-import ProjectSettings from '../settings/project/ProjectSettings.vue'
-import DeviceSettings from '../settings/device/DeviceSettings.vue'
-import type { SettingsPageFragment } from '../generated/graphql'
+import SettingsCard from './SettingsCard.vue'
+import ProjectSettings from './project/ProjectSettings.vue'
+import DeviceSettings from './device/DeviceSettings.vue'
+import type { SettingsContainerFragment } from '../generated/graphql'
 import IconLaptop from '~icons/cy/laptop_x24.svg'
 import IconFolder from '~icons/cy/folder-outline_x24.svg'
 
 const { t } = useI18n()
 
 gql`
-fragment SettingsPage on Query {
+fragment SettingsContainer on Query {
   app {
     activeProject {
       ...ProjectSettings
@@ -44,6 +47,6 @@ fragment SettingsPage on Query {
 }`
 
 const props = defineProps<{
-  gql: SettingsPageFragment
+  gql: SettingsContainerFragment
 }>()
 </script>
