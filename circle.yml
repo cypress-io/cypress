@@ -151,6 +151,29 @@ commands:
           name: Restore all node_modules to proper workspace folders
           command: node scripts/circle-cache.js --action unpack
 
+  restore_cached_system_tests_deps:
+    steps:
+      - run:
+          name: Generate Circle Cache Key
+          command: yarn workspace @tooling/system-tests cache:key > system_tests_cache_key
+      - restore_cache:
+          name: Restore system tests node_modules cache
+          keys:
+            - v{{ .Environment.CACHE_VERSION }}-{{ arch }}-system-tests-node-modules-cache-{{ checksum "system_tests_cache_key" }}
+            - v{{ .Environment.CACHE_VERSION }}-{{ arch }}-system-tests-node-modules-cache-
+
+  update_cached_system_tests_deps:
+    steps:
+      - restore_cached_system_tests_deps
+      - run:
+          name: Check+update system-tests node_modules cache
+          command: yarn workspace @tooling/system-tests update:cache:ci
+      - save_cache:
+          name: Save system tests node_modules cache
+          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-system-tests-node-modules-cache-{{ checksum "system_tests_cache_key" }}
+          paths:
+            - ~/.cache/cy-system-tests-node-modules
+
   caching-dependency-installer:
     description: 'Installs & caches the dependencies based on yarn lock & package json dependencies'
     parameters:
@@ -206,6 +229,7 @@ commands:
                 key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-test2-node-modules-cache-{{ checksum "circle_cache_key" }}
                 paths:
                   - /tmp/node_modules_cache
+            - update_cached_system_tests_deps
       - run: touch node_modules_installed
       - save_cache:
           name: Saving node-modules cache state key
@@ -427,6 +451,7 @@ commands:
         type: string
     steps:
       - restore_cached_workspace
+      - restore_cached_system_tests_deps
       - run:
           name: Run system tests
           command: |

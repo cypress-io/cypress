@@ -7,5 +7,6 @@
   "devDependencies": {
     "typescript": "^4.2.4"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "cySkipYarnInstall": true
 }

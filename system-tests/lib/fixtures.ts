@@ -55,7 +55,11 @@ async function symlinkNodeModulesFromCache (project: string, cacheDir: string): 
     await fs.mkdirp(cacheDir)
   }
 
-  await fs.symlink(cacheDir, from, 'junction')
+  try {
+    await fs.symlink(cacheDir, from, 'junction')
+  } catch (err) {
+    if (err.code !== 'EEXIST') return
+  }
   console.log(`📦 node_modules symlink created at ${from}`)
 }
 
@@ -80,6 +84,7 @@ async function makeWorkspacePackagesAbsolute (pathToPkgJson: string): Promise<st
     for (const dep in deps) {
       const version = deps[dep]
 
+      // TODO: enforce file: paths for local development
       if (version === '0.0.0-development') {
         const depPkgJson = require(`${dep}/package.json`)
         const absPath = pathToPackage(dep)
@@ -104,7 +109,7 @@ const relativePathToken = '<<RELATIVE PATH TO MONOREPO ROOT>>'
  * Given a `system-tests` project name, detect and install the `node_modules`
  * specified in the project's `package.json`. No-op if no `package.json` is found.
  */
-export async function scaffoldProjectNodeModules (project: string): Promise<void> {
+export async function scaffoldProjectNodeModules (project: string, updateYarnLock: boolean = !!process.env.UPDATE_YARN_LOCK): Promise<void> {
   const projectDir = projectPath(project)
   const projectPkgJsonPath = _path.join(projectDir, 'package.json')
 
@@ -124,13 +129,15 @@ export async function scaffoldProjectNodeModules (project: string): Promise<void
     }
   }
 
-  const updateYarnLock = !!process.env.UPDATE_YARN_LOCK
-
   try {
     // this will throw and exit early if the package.json does not exist
     const pkgJson = require(projectPkgJsonPath)
 
     console.log(`📦 Found package.json for project ${project}.`)
+
+    if (pkgJson.cySkipYarnInstall) {
+      return console.log(`📦 cySkipYarnInstall set in package.json, skipping yarn steps`)
+    }
 
     if (!pkgJson.dependencies && !pkgJson.devDependencies && !pkgJson.optionalDependencies) {
       return console.log(`📦 No dependencies found, skipping yarn steps`)
@@ -161,8 +168,14 @@ export async function scaffoldProjectNodeModules (project: string): Promise<void
       console.log('📦 No yarn.lock found, continuing')
     }
 
-    // 4. Run `yarn install` with `--frozen-lockfile` by default.
-    await runCmd(`yarn install --ignore-scripts${updateYarnLock ? '' : ' --frozen-lockfile'}`)
+    // 4. Run `yarn install`.
+    let cmd = `yarn install --prefer-offline --ignore-scripts`
+
+    if (!updateYarnLock) cmd += ' --frozen-lockfile'
+
+    if (process.env.CI) cmd += ` --cache-folder=~/.yarn-${process.platform} `
+
+    await runCmd(cmd)
 
     if (updateYarnLock) {
       // TODO: do this but less hacky
@@ -188,7 +201,11 @@ export async function scaffoldProjectNodeModules (project: string): Promise<void
       await fs.symlink(pathToPackage(dep), depDir, 'junction')
     }
   } catch (err) {
-    if (err.code === 'MODULE_NOT_FOUND') return
+    if (err.code === 'MODULE_NOT_FOUND') {
+      console.error('Cannot find module:', err)
+
+      return
+    }
 
     console.error(`⚠ An error occurred while installing the node_modules for ${project}.`)
     console.error([err.message, err.stack].join('\n'))

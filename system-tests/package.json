@@ -5,6 +5,8 @@
   "private": true,
   "main": "index.js",
   "scripts": {
+    "cache:key": "bash -c 'cat ./projects/**/{package.json,yarn.lock}'",
+    "update:cache:ci": "node ./scripts/update-cache.js",
     "test": "node ./scripts/run.js --glob-in-dir=test",
     "test:ci": "node ./scripts/run.js"
   },
@@ -48,6 +50,7 @@
     "express-useragent": "1.0.15",
     "fluent-ffmpeg": "2.1.2",
     "fs-extra": "8.1.0",
+    "glob": "7.2.0",
     "http-mitm-proxy": "0.7.0",
     "https-proxy-agent": "3.0.1",
     "human-interval": "1.0.0",
