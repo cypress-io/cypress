@@ -83,7 +83,7 @@ describe('<Button />', () => {
 
     cy.findByText('Generate From Story').should('not.be.disabled').click()
 
-    cy.get('li').contains('Button.stories.jsx').as('codeGen').click()
+    cy.contains('Button.stories.jsx').as('codeGen').click()
     cy.wait('@codeGenSpec')
 
     cy.withCtx((ctx, { testState }) => {
@@ -123,7 +123,7 @@ describe('<Button />', () => {
 
     cy.findByText('Generate From Component').click()
 
-    cy.get('li').contains('Button.jsx').as('codeGen').click()
+    cy.contains('Button.jsx').as('codeGen').click()
     cy.wait('@codeGenSpec')
 
     cy.withCtx((ctx, { testState }) => {
