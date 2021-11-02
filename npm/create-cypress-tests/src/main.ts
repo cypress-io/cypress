@@ -102,3 +102,5 @@ export async function main ({ useNpm, ignoreTs, setupComponentTesting, ignoreExa
 
   console.log(`\nHappy testing with ${chalk.green('cypress.io')} 🌲\n`)
 }
+
+export { scanFSForAvailableDependency }
