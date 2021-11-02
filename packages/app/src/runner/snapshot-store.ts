@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import type { AutSnapshot } from '../runner/iframe-model'
+import type { AutSnapshot } from './iframe-model'
 import { getAutIframeModel } from '../runner'
 
 export type SnapshotMessageType = 'info' | 'warning' | 'pinned'

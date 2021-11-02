@@ -1,15 +1,14 @@
 <template>
-  <div v-if="query.data.value?.app?.activeProject">
-    <SpecRunnerContainer
-      :gql="query.data.value.app"
-    />
-  </div>
+  <SpecRunnerContainer
+    v-if="query.data.value?.app?.activeProject"
+    :gql="query.data.value.app"
+  />
 </template>
 
 <script lang="ts" setup>
 import { gql, useQuery } from '@urql/vue'
 import { SpecPageContainerDocument } from '../generated/graphql'
-import SpecRunnerContainer from './SpecRunnerContainer.vue'
+import SpecRunnerContainer from '../runner/SpecRunnerContainer.vue'
 
 gql`
 query SpecPageContainer {
@@ -21,3 +20,11 @@ query SpecPageContainer {
 
 const query = useQuery({ query: SpecPageContainerDocument })
 </script>
+
+<route>
+  {
+    meta: {
+      header: false
+    }
+  }
+</route>
