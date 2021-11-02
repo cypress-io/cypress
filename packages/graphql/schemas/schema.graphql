@@ -406,6 +406,7 @@ type Mutation {
 
   """Set the current navigation item"""
   navigationMenuSetItem(type: NavItem!): Boolean
+  openExternal(url: String!): Boolean
 
   """Remove project from projects array and cache"""
   removeProject(path: String!): Boolean

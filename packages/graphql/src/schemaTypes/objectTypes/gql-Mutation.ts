@@ -3,6 +3,7 @@ import { CodeGenTypeEnum } from '..'
 import { CodeLanguageEnum, FrontendFrameworkEnum, NavItemEnum, SupportedBundlerEnum, TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
 import { WizardUpdateInput } from '../inputTypes/gql-WizardUpdateInput'
 import { Wizard } from './gql-Wizard'
+import { openExternal } from '../../../../server/lib/gui/links'
 
 export const mutation = mutationType({
   definition (t) {
@@ -51,6 +52,18 @@ export const mutation = mutationType({
       type: 'Boolean',
       resolve: (_, args, ctx) => {
         ctx.actions.project.clearLatestProjectCache()
+
+        return true
+      },
+    })
+
+    t.field('openExternal', {
+      type: 'Boolean',
+      args: {
+        url: nonNull(stringArg()),
+      },
+      resolve: (_, args, ctx) => {
+        openExternal(args.url)
 
         return true
       },

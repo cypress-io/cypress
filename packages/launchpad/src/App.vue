@@ -16,7 +16,9 @@ import { computed, ref, watch } from 'vue'
 import { useToast } from 'vue-toastification'
 import { gql, useMutation, useQuery } from '@urql/vue'
 import Main from './Main.vue'
-import { AppQueryDocument, App_DevRelaunchDocument } from './generated/graphql'
+import { AppQueryDocument, App_DevRelaunchDocument,
+  App_OpenExternalDocument,
+} from './generated/graphql'
 
 gql`
 query AppQuery {
@@ -35,7 +37,14 @@ mutation App_DevRelaunch($action: DevRelaunchAction!) {
 }
 `
 
+gql`
+mutation App_OpenExternal ($url: String!) {
+  openExternal(url: $url)
+}
+`
+
 const relaunchMutation = useMutation(App_DevRelaunchDocument)
+const openExternalMutation = useMutation(App_OpenExternalDocument)
 
 /**
  * Sometimes the electron app can start before the GraphQL
@@ -90,6 +99,24 @@ const handleLinkTargetBlank = (event) => {
     // TODO - use a mutation to open these links in the default user browser
   }
 }
+
+document.addEventListener('click', (event: MouseEvent) => {
+  const target = event.target as HTMLElement
+  const anchor = target.closest('a[href]') as HTMLAnchorElement
+
+  if (anchor) {
+    const destination = anchor.href
+
+    if (destination.startsWith('/')) {
+      return
+    }
+
+    event.preventDefault()
+    event.stopPropagation()
+    openExternalMutation.executeMutation({ url: anchor.href })
+  }
+})
+
 </script>
 
 <style lang="scss">
