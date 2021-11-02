@@ -21,7 +21,7 @@
       ref="runnerPane"
       class="relative w-full"
     >
-      <div class="bg-white p-4">
+      <div class="bg-white p-4  border-8 border-blue-300">
         <SpecRunnerHeader :gql="props.gql" />
       </div>
 
@@ -109,8 +109,23 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped lang="scss">
+$navbar-width: 80px;
+
 #main-pane {
+  /** There is a "bug" caused by this line:
+    https://github.com/cypress-io/cypress/blob/develop/packages/driver/src/cy/actionability.ts#L375
+    Basically `scrollIntoView` is applied even outside of the <iframe>,
+    scrolling an element "upwards", messing up the UI
+    Easiest way to reprodudce is remove the `position: fixed`
+    and run the `SpecList.spec.tsx` test in runner-ct
+    in CT mode.
+    Ideally we should not need `position: fixed`, but I don't see
+    a good way to work around this right now.
+  */
+  position: fixed;
+  left: $navbar-width;
   height: 100vh;
+  width: calc(100% - #{$navbar-width});
 }
 
 #inline-spec-list {
