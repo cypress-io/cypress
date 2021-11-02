@@ -60,11 +60,11 @@ import WizardHeader from './setup/WizardHeader.vue'
 import GlobalPage from './global/GlobalPage.vue'
 import BaseError from './error/BaseError.vue'
 import StandardModal from '@cy/components/StandardModal.vue'
+import HeaderBar from '@cy/gql-components/HeaderBar.vue'
 import CompareTestingTypes from './setup/CompareTestingTypes.vue'
 
 import { useI18n } from '@cy/i18n'
 import { ref } from 'vue'
-import HeaderBar from '@cy/gql-components/HeaderBar.vue'
 
 const { t } = useI18n()
 const isTestingTypeModalOpen = ref(false)

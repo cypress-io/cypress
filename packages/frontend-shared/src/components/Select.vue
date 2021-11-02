@@ -139,6 +139,12 @@
   </Listbox>
 </template>
 
+<script lang="ts">
+export default {
+  inheritAttrs: true,
+}
+</script>
+
 <script lang="ts" setup>
 import { Listbox, ListboxButton, ListboxLabel, ListboxOption, ListboxOptions } from '@headlessui/vue'
 import IconCheck from '~icons/mdi/check'

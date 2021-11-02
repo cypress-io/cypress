@@ -12,7 +12,6 @@
 import { gql, useQuery } from '@urql/vue'
 import HeaderBarContent from './HeaderBarContent.vue'
 import { HeaderBar_HeaderBarQueryDocument } from '../generated/graphql'
-import { useI18n } from '@cy/i18n'
 
 gql`
 query HeaderBar_HeaderBarQuery {
@@ -25,8 +24,6 @@ defineProps<{
   pageName?: string,
   allowAutomaticPromptOpen?: boolean
 }>()
-
-const { t } = useI18n()
 
 const query = useQuery({ query: HeaderBar_HeaderBarQueryDocument })
 

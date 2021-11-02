@@ -38,7 +38,11 @@ export const Project = objectType({
       resolve: async (source, args, ctx, info) => {
         const projectId = await ctx.project.projectId(source.projectRoot)
 
-        return projectId ? cloudProjectBySlug(projectId, ctx, info) : null
+        if (!projectId) {
+          return null
+        }
+
+        return cloudProjectBySlug(projectId, ctx, info)
       },
     })
 
@@ -98,6 +102,15 @@ export const Project = objectType({
       description: 'Project saved state',
       resolve: (source, args, ctx) => {
         return ctx.project.getCurrentProjectSavedState()
+      },
+    })
+
+    t.string('configFilePath', {
+      description: 'Config File Path',
+      resolve: async (source, args, ctx) => {
+        const config = await ctx.project.getConfig(source.projectRoot)
+
+        return config.configFile ?? null
       },
     })
 

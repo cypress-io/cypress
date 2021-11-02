@@ -7,6 +7,8 @@ import { makeUrqlClient } from '@packages/frontend-shared/src/graphql/urqlClient
 import { createI18n } from '@cy/i18n'
 import { createRouter } from './router/router'
 import { createPinia } from './store'
+import Toast, { POSITION } from 'vue-toastification'
+import 'vue-toastification/dist/index.css'
 
 // set a global so we can run
 // conditional code in the vite branch
@@ -15,6 +17,10 @@ import { createPinia } from './store'
 window.__vite__ = true
 
 const app = createApp(App)
+
+app.use(Toast, {
+  position: POSITION.BOTTOM_RIGHT,
+})
 
 app.use(urql, makeUrqlClient('app'))
 app.use(createRouter())

@@ -41,13 +41,14 @@
 import SidebarNavigationRow from './SidebarNavigationRow.vue'
 import SpecsIcon from '~icons/cy/test-results_x24'
 import CodeIcon from '~icons/cy/code-editor_x24'
+import RunsIcon from '~icons/cy/runs_x24'
 import SettingsIcon from '~icons/cy/settings_x24'
 import { useMainStore } from '../store'
 
 const navigation = [
   { name: 'Home', icon: SpecsIcon, href: '/' },
   { name: 'Specs', icon: CodeIcon, href: '/specs' },
-  { name: 'Runs', icon: CodeIcon, href: '/runs' },
+  { name: 'Runs', icon: RunsIcon, href: '/runs' },
   { name: 'Settings', icon: SettingsIcon, href: '/settings' },
   { name: 'New Spec', icon: SettingsIcon, href: '/newspec' },
 ]

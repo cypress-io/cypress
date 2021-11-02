@@ -9,7 +9,9 @@ const makeDataContext = (options) => {
     appApi: {
       getBrowsers: () => ({}),
     },
-    authApi: {},
+    authApi: {
+      getUser: () => Promise.resolve({}),
+    },
     projectApi: {
       getProjectRootsFromCache: () => ([]),
     },
@@ -20,7 +22,7 @@ const makeDataContext = (options) => {
 describe('@packages/data-context', () => {
   describe('initializeData', () => {
     it('initializes', async () => {
-      const context = makeDataContext()
+      const context = makeDataContext({})
 
       await context.initializeData()
       snapshot(context)
