@@ -335,15 +335,15 @@ describe('Settings', () => {
         openConfiguration()
       })
 
-      it('notes that cypress.json is disabled', () => {
-        cy.contains('set from cypress.json file (currently disabled by --config-file false)')
+      it('notes that cypress.config.js is disabled', () => {
+        cy.contains('set from cypress.config.{ts|js} file (currently disabled by --config-file false)')
       })
     })
 
     context('when configFile is set', function () {
       beforeEach(function () {
         this.openProject.resolve(Cypress._.assign(this.config, {
-          configFile: 'special-cypress.json',
+          configFile: 'special-cypress.config.js',
         }))
 
         this.goToSettings()
@@ -352,7 +352,7 @@ describe('Settings', () => {
       })
 
       it('notes that a custom config is in use', () => {
-        cy.contains('set from custom config file special-cypress.json')
+        cy.contains('set from custom config file special-cypress.config.js')
       })
     })
   })
@@ -381,12 +381,7 @@ describe('Settings', () => {
       it('copies project id config to clipboard', function () {
         cy.get('.action-copy').click()
         .then(() => {
-          const expectedJsonConfig = {
-            projectId: this.config.projectId,
-          }
-          const expectedCopyCommand = JSON.stringify(expectedJsonConfig, null, 2)
-
-          expect(this.ipc.setClipboardText).to.be.calledWith(expectedCopyCommand)
+          expect(this.ipc.setClipboardText).to.be.calledWith('module.exports = {\n  projectId: "d8104707-a348-4653-baea-7da9c7d52448"\n}')
         })
       })
     })

@@ -5,7 +5,7 @@
       :key="spec.node.id"
       class="text-left grid grid-cols-[16px,auto,auto] items-center gap-10px"
       :class="{ 'border-2 border-red-400': isCurrentSpec(spec) }"
-      :to="{ path: 'spec', query: { file: spec.node.relative } }"
+      :to="{ path: 'runner', query: { file: spec.node.relative } }"
     >
       <SpecName :gql="spec.node" />
     </RouterLink>

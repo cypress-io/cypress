@@ -8,7 +8,7 @@ const onSubmitNewProject = function (orgId) {
         projectName: this.config.projectName,
         orgId,
         public: false,
-        configFile: 'cypress.json',
+        configFile: 'cypress.config.js',
       })
     })
   })
@@ -26,7 +26,7 @@ const onSubmitNewProject = function (orgId) {
         projectRoot: '/foo/bar',
         orgId,
         public: true,
-        configFile: 'cypress.json',
+        configFile: 'cypress.config.js',
       })
     })
   })
@@ -492,7 +492,7 @@ describe('Connect to Dashboard', function () {
               expect(this.ipc.setProjectId).to.be.calledWith({
                 id: this.dashboardProjects[1].id,
                 projectRoot: '/foo/bar',
-                configFile: 'cypress.json' })
+                configFile: 'cypress.config.js' })
             })
           })
 

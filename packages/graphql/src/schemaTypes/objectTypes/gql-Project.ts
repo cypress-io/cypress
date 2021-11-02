@@ -29,7 +29,7 @@ const GeneratedSpec = objectType({
 
 export const Project = objectType({
   name: 'Project',
-  description: 'A Cypress Project is represented by a cypress.json file',
+  description: 'A Cypress Project is represented by a cypress.config.{ts|js} file',
   node: 'projectRoot',
   definition (t) {
     t.field('cloudProject', {
@@ -48,7 +48,7 @@ export const Project = objectType({
 
     t.string('projectId', {
       description: 'Used to associate project with Cypress cloud',
-      resolve: (source, args, ctx) => ctx.project.projectId(source.projectRoot).then((val) => val ?? null),
+      resolve: (source, args, ctx) => ctx.project.projectId(source.projectRoot),
     })
 
     t.nonNull.string('projectRoot')
@@ -57,17 +57,17 @@ export const Project = objectType({
       resolve: (source, args, ctx) => ctx.project.projectTitle(source.projectRoot),
     })
 
-    t.nonNull.boolean('isFirstTimeCT', {
+    t.nonNull.boolean('isCTConfigured', {
       description: 'Whether the user configured this project to use Component Testing',
       resolve: (source, args, ctx) => {
-        return ctx.project.isFirstTimeAccessing(source.projectRoot, 'component')
+        return ctx.project.isTestingTypeConfigured(source.projectRoot, 'component')
       },
     })
 
-    t.nonNull.boolean('isFirstTimeE2E', {
+    t.nonNull.boolean('isE2EConfigured', {
       description: 'Whether the user configured this project to use e2e Testing',
       resolve: (source, args, ctx) => {
-        return ctx.project.isFirstTimeAccessing(source.projectRoot, 'e2e')
+        return ctx.project.isTestingTypeConfigured(source.projectRoot, 'e2e')
       },
     })
 

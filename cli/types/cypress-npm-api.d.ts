@@ -144,7 +144,7 @@ declare namespace CypressCommandLine {
      *
      * If `false` is passed, no config file will be used.
      *
-     * @default "cypress.json"
+     * @default "cypress.config.{ts|js}"
      */
     configFile: string | false
     /**

@@ -12,7 +12,7 @@ function normalizeWebpackPath (config, webpackConfigPath) {
 /**
  * Injects dev-server based on the webpack config file.
  *
- * **Important:** `webpackFilename` path is relative to the project root (cypress.json location)
+ * **Important:** `webpackFilename` path is relative to the project root (cypress.config.{ts|js} location)
  * @type {(on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions, options: { webpackFilename: string  }) => Cypress.PluginConfigOptions}
  */
 function devServer (cypressDevServerConfig, { webpackFilename, indexHtml }) {

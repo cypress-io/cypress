@@ -194,7 +194,7 @@ describe('e2e plugins', function () {
         config: {
           env: {
             projectRoot: e2eProject,
-            configFile: path.join(e2eProject, 'cypress.json'),
+            configFile: path.join(e2eProject, 'cypress.config.js'),
           },
         },
       })
