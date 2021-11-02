@@ -1,4 +1,4 @@
-const { assertLogLength } = '../../support/utils'
+const { assertLogLength } = require('../../support/utils')
 const { stripIndent } = require('common-tags')
 const { _ } = Cypress
 

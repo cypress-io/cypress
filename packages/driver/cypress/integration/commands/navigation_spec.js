@@ -1,7 +1,7 @@
 const Cookie = require('js-cookie')
 const { stripIndent } = require('common-tags')
 
-const { assertLogLength } = '../../support/utils'
+const { assertLogLength } = require('../../support/utils')
 const { _, Promise, $ } = Cypress
 
 describe('src/cy/commands/navigation', () => {
