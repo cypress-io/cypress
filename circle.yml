@@ -208,6 +208,10 @@ commands:
             . ./scripts/load-nvm.sh
             yarn --prefer-offline --frozen-lockfile --cache-folder ~/.yarn-<< parameters.arch >>
           no_output_timeout: 20m
+      - unless:
+          condition: <<parameters.is-mac>>
+          steps:
+            - update_cached_system_tests_deps
       - prepare-modules-cache:
           dont-move: <<parameters.is-mac>> # we don't move, so we don't hit any issues unpacking symlinks
       - when:
@@ -229,7 +233,6 @@ commands:
                 key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-test2-node-modules-cache-{{ checksum "circle_cache_key" }}
                 paths:
                   - /tmp/node_modules_cache
-            - update_cached_system_tests_deps
       - run: touch node_modules_installed
       - save_cache:
           name: Saving node-modules cache state key
