@@ -140,14 +140,14 @@ exports['e2e config applies defaultCommandTimeout globally 1'] = `
 `
 
 exports['e2e config throws error when invalid viewportWidth in the configuration file 1'] = `
-We found an invalid value in the file: \`cypress.json\`
+We found an invalid value in the file: \`cypress.config.js\`
 
 Expected \`viewportWidth\` to be a number. Instead the value was: \`"foo"\`
 
 `
 
 exports['e2e config throws error when invalid browser in the configuration file 1'] = `
-We found an invalid value in the file: \`cypress.json\`
+We found an invalid value in the file: \`cypress.config.js\`
 
 Found an error while validating the \`browsers\` list. Expected \`family\` to be either chromium or firefox. Instead the value was: \`{"name":"bad browser","family":"unknown family","displayName":"Bad browser","version":"no version","path":"/path/to","majorVersion":123}\`
 
@@ -155,9 +155,27 @@ Found an error while validating the \`browsers\` list. Expected \`family\` to be
 
 exports['e2e config throws error when multiple default config file are found in project 1'] = `
 There is both a \`cypress.config.js\` and a \`cypress.config.ts\` at the location below:
-/foo/bar/.projects/pristine
+/foo/bar/.projects/pristine-with-config-file
 
 Cypress does not know which one to read for config. Please remove one of the two and try again.
+
+
+`
+
+exports['e2e config throws error when cypress.json is found in project and need migration 1'] = `
+There is a cypress.json file at the location below:
+/foo/bar/.projects/pristine
+
+Cypress no longer supports 'cypress.json', please migrate to 'cypress.config.{ts|js}'.
+
+
+`
+
+exports['e2e config throws error when cypress.json is found in project and cypress.config.{ts|js} exists as well 1'] = `
+There is both a \`cypress.config.js\` and a cypress.json file at the location below:
+/foo/bar/.projects/multiples-config-files-with-json
+
+Cypress no longer supports 'cypress.json' config, please remove it from your project.
 
 
 `

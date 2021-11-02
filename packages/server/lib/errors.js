@@ -625,7 +625,7 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
 
         Fix the error in your code and re-run your tests.`
 
-    // happens when there is an error in configuration file like "cypress.json"
+    // happens when there is an error in configuration file like "cypress.config.{ts|js}"
     case 'SETTINGS_VALIDATION_ERROR':
       filePath = `\`${arg1}\``
 
@@ -700,6 +700,20 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         Could not find a Cypress configuration file, exiting.
 
         We looked but did not find a default config file in this folder: ${chalk.blue(arg1)}`
+    case 'CONFIG_FILE_MIGRATION_NEEDED':
+      return stripIndent`
+          There is a cypress.json file at the location below:
+          ${arg1}
+
+          Cypress no longer supports 'cypress.json', please migrate to 'cypress.config.{ts|js}'.
+          `
+    case 'LEGACY_CONFIG_FILE':
+      return stripIndent`
+          There is both a \`${arg2}\` and a cypress.json file at the location below:
+          ${arg1}
+
+          Cypress no longer supports 'cypress.json' config, please remove it from your project.
+          `
       // TODO: update with vetted cypress language
     case 'CONFIG_FILES_LANGUAGE_CONFLICT':
       return stripIndent`
@@ -932,7 +946,7 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         You can safely remove this option from your config.`
     case 'EXPERIMENTAL_COMPONENT_TESTING_REMOVED':
       return stripIndent`\
-        The ${chalk.yellow(`\`experimentalComponentTesting\``)} configuration option was removed in Cypress version \`7.0.0\`. Please remove this flag from \`cypress.json\`.
+        The ${chalk.yellow(`\`experimentalComponentTesting\``)} configuration option was removed in Cypress version \`7.0.0\`. Please remove this flag from \`cypress.config.{ts|js}\`.
 
         Cypress Component Testing is now a standalone command. You can now run your component tests with:
 

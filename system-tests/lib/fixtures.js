@@ -32,6 +32,10 @@ module.exports = {
     const from = path.join(projects, project)
     const to = path.join(tmpDir, project)
 
+    if (fs.existsSync(to)) {
+      fs.removeSync(to)
+    }
+
     fs.copySync(from, to)
   },
 

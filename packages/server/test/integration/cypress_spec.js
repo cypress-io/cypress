@@ -12,7 +12,6 @@ const commitInfo = require('@cypress/commit-info')
 const Fixtures = require('@tooling/system-tests/lib/fixtures')
 const snapshot = require('snap-shot-it')
 const stripAnsi = require('strip-ansi')
-const debug = require('debug')('test')
 const pkg = require('@packages/root')
 const detect = require('@packages/launcher/lib/detect')
 const launch = require('@packages/launcher/lib/browsers')
@@ -116,6 +115,7 @@ describe('lib/cypress', () => {
     Fixtures.scaffold()
     this.todosPath = Fixtures.projectPath('todos')
     this.pristinePath = Fixtures.projectPath('pristine')
+    this.pristineWithConfigPath = Fixtures.projectPath('pristine-with-config-file')
     this.noScaffolding = Fixtures.projectPath('no-scaffolding')
     this.recordPath = Fixtures.projectPath('record')
     this.pluginConfig = Fixtures.projectPath('plugin-config')
@@ -457,13 +457,13 @@ describe('lib/cypress', () => {
     })
 
     it('scaffolds out integration and example specs if they do not exist when not runMode', function () {
-      return config.get(this.pristinePath)
+      return config.get(this.pristineWithConfigPath)
       .then((cfg) => {
         return fs.statAsync(cfg.integrationFolder)
         .then(() => {
           throw new Error('integrationFolder should not exist!')
         }).catch(() => {
-          return cypress.start([`--run-project=${this.pristinePath}`, '--no-run-mode'])
+          return cypress.start([`--run-project=${this.pristineWithConfigPath}`, '--no-run-mode'])
         }).then(() => {
           return fs.statAsync(cfg.integrationFolder)
         }).then(() => {
@@ -488,7 +488,7 @@ describe('lib/cypress', () => {
 
       return Promise.all([
         fs.statAsync(path.join(this.pristinePath, 'cypress')).reflect(),
-        fs.statAsync(path.join(this.pristinePath, 'cypress.json')).reflect(),
+        fs.statAsync(path.join(this.pristinePath, 'cypress.config.js')).reflect(),
       ])
       .each(ensureDoesNotExist)
       .then(() => {
@@ -496,7 +496,7 @@ describe('lib/cypress', () => {
       }).then(() => {
         return Promise.all([
           fs.statAsync(path.join(this.pristinePath, 'cypress')).reflect(),
-          fs.statAsync(path.join(this.pristinePath, 'cypress.json')).reflect(),
+          fs.statAsync(path.join(this.pristinePath, 'cypress.config.js')).reflect(),
         ])
       }).each(ensureDoesNotExist)
       .then(() => {
@@ -505,11 +505,9 @@ describe('lib/cypress', () => {
     })
 
     it('does not scaffold integration or example specs when runMode', function () {
-      return settings.write(this.pristinePath, {})
+      return cypress.start([`--run-project=${this.pristineWithConfigPath}`])
       .then(() => {
-        return cypress.start([`--run-project=${this.pristinePath}`])
-      }).then(() => {
-        return fs.statAsync(path.join(this.pristinePath, 'cypress', 'integration'))
+        return fs.statAsync(path.join(this.pristineWithConfigPath, 'cypress', 'integration'))
       }).then(() => {
         throw new Error('integration folder should not exist!')
       }).catch((err) => {
@@ -520,13 +518,13 @@ describe('lib/cypress', () => {
     })
 
     it('scaffolds out fixtures + files if they do not exist', function () {
-      return config.get(this.pristinePath)
+      return config.get(this.pristineWithConfigPath)
       .then((cfg) => {
         return fs.statAsync(cfg.fixturesFolder)
         .then(() => {
           throw new Error('fixturesFolder should not exist!')
         }).catch(() => {
-          return cypress.start([`--run-project=${this.pristinePath}`, '--no-run-mode'])
+          return cypress.start([`--run-project=${this.pristineWithConfigPath}`, '--no-run-mode'])
         }).then(() => {
           return fs.statAsync(cfg.fixturesFolder)
         }).then(() => {
@@ -536,15 +534,15 @@ describe('lib/cypress', () => {
     })
 
     it('scaffolds out support + files if they do not exist', function () {
-      const supportFolder = path.join(this.pristinePath, 'cypress/support')
+      const supportFolder = path.join(this.pristineWithConfigPath, 'cypress/support')
 
-      return config.get(this.pristinePath)
+      return config.get(this.pristineWithConfigPath)
       .then(() => {
         return fs.statAsync(supportFolder)
         .then(() => {
           throw new Error('supportFolder should not exist!')
         }).catch({ code: 'ENOENT' }, () => {
-          return cypress.start([`--run-project=${this.pristinePath}`, '--no-run-mode'])
+          return cypress.start([`--run-project=${this.pristineWithConfigPath}`, '--no-run-mode'])
         }).then(() => {
           return fs.statAsync(supportFolder)
         }).then(() => {
@@ -611,7 +609,7 @@ describe('lib/cypress', () => {
       })
     })
 
-    it('can change the reporter with cypress.json', function () {
+    it('can change the reporter with cypress.config.js', function () {
       sinon.spy(Reporter, 'create')
 
       return config.get(this.idsPath)
@@ -767,8 +765,8 @@ describe('lib/cypress', () => {
       })
     })
 
-    it('logs error and exits when project has cypress.json syntax error', function () {
-      return fs.writeFileAsync(`${this.todosPath}/cypress.json`, '{\'foo\': \'bar}')
+    it('logs error and exits when project has cypress.config.js syntax error', function () {
+      return fs.writeFileAsync(`${this.todosPath}/cypress.config.js`, `module.exports = {`)
       .then(() => {
         return cypress.start([`--run-project=${this.todosPath}`])
       }).then(() => {
@@ -785,12 +783,12 @@ describe('lib/cypress', () => {
       })
     })
 
-    it('logs error and exits when project has invalid cypress.json values', function () {
+    it('logs error and exits when project has invalid cypress.config.js values', function () {
       return settings.write(this.todosPath, { baseUrl: 'localhost:9999' })
       .then(() => {
         return cypress.start([`--run-project=${this.todosPath}`])
       }).then(() => {
-        this.expectExitWithErr('SETTINGS_VALIDATION_ERROR', 'cypress.json')
+        this.expectExitWithErr('SETTINGS_VALIDATION_ERROR', 'cypress.config.js')
       })
     })
 
@@ -839,18 +837,18 @@ describe('lib/cypress', () => {
     // for headed projects!
     // also make sure we test the rest of the integration functionality
     // for headed errors! <-- not unit tests, but integration tests!
-    it('logs error and exits when project folder has read permissions only and cannot write cypress.json', function () {
+    it('logs error and exits when project folder has read permissions only and cannot write cypress.config.js', function () {
       // test disabled if running as root (such as inside docker) - root can write all things at all times
       if (process.geteuid() === 0) {
         return
       }
 
       const permissionsPath = path.resolve('./permissions')
-      const cypressJson = path.join(permissionsPath, 'cypress.json')
+      const cypressConfig = path.join(permissionsPath, 'cypress.config.js')
 
       return fs.mkdirAsync(permissionsPath)
       .then(() => {
-        return fs.outputFileAsync(cypressJson, '{}')
+        return fs.outputFileAsync(cypressConfig, 'module.exports = {}')
       }).then(() => {
         // read only
         return fs.chmodAsync(permissionsPath, '555')
@@ -1178,10 +1176,10 @@ describe('lib/cypress', () => {
     })
 
     describe('--config-file', () => {
-      it('false does not require cypress.json to run', function () {
-        return fs.statAsync(path.join(this.pristinePath, 'cypress.json'))
+      it('false does not require cypress.config.js to run', function () {
+        return fs.statAsync(path.join(this.pristinePath, 'cypress.config.js'))
         .then(() => {
-          throw new Error('cypress.json should not exist')
+          throw new Error('cypress.config.js should not exist')
         }).catch({ code: 'ENOENT' }, () => {
           return cypress.start([
             `--run-project=${this.pristinePath}`,
@@ -1820,27 +1818,6 @@ describe('lib/cypress', () => {
             expect(cfg.env.foo).to.equal('bar')
 
             expect(cfg.port).to.equal(2020)
-          })
-        })
-      })
-
-      it('creates custom config file if it does not exist', function () {
-        return cypress.start([
-          `--config-file=${this.filename}`,
-        ])
-        .then(() => {
-          debug('cypress started with config %s', this.filename)
-          const options = Events.start.firstCall.args[0]
-
-          debug('first call arguments %o', Events.start.firstCall.args)
-
-          return Events.handleEvent(options, {}, {}, 123, 'open:project', this.pristinePath)
-        }).then(() => {
-          expect(this.open, 'open was called').to.be.called
-
-          return fs.readJsonAsync(path.join(this.pristinePath, this.filename))
-          .then((json) => {
-            expect(json, 'json file is empty').to.deep.equal({})
           })
         })
       })

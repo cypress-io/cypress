@@ -101,21 +101,21 @@ describe('lib/config', () => {
       })
 
       it('can override default port', function () {
-        return config.get(this.projectRoot, { port: 8080 })
+        return config.get(this.projectRoot, { port: 8080, configFile: 'cypress.config.js' })
         .then((obj) => {
           expect(obj.port).to.eq(8080)
         })
       })
 
       it('updates browserUrl', function () {
-        return config.get(this.projectRoot, { port: 8080 })
+        return config.get(this.projectRoot, { port: 8080, configFile: 'cypress.config.js' })
         .then((obj) => {
           expect(obj.browserUrl).to.eq('http://localhost:8080/__/')
         })
       })
 
       it('updates proxyUrl', function () {
-        return config.get(this.projectRoot, { port: 8080 })
+        return config.get(this.projectRoot, { port: 8080, configFile: 'cypress.config.js' })
         .then((obj) => {
           expect(obj.proxyUrl).to.eq('http://localhost:8080')
         })
@@ -144,10 +144,10 @@ describe('lib/config', () => {
         return this.expectValidationPasses()
       })
 
-      it('validates cypress.json', function () {
+      it('validates cypress.config.js', function () {
         this.setup({ reporter: 5 })
 
-        return this.expectValidationFails('cypress.json')
+        return this.expectValidationFails('cypress.config.{ts|js}')
       })
 
       it('validates cypress.env.json', function () {

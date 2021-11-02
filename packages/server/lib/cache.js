@@ -39,6 +39,7 @@ module.exports = {
       USER: {},
       PROJECTS: [],
       PROJECT_PREFERENCES: {},
+      PROJECTS_CONFIG: {},
     }
   },
 
