@@ -1,5 +1,5 @@
 export const CONFIG_LEGEND_COLOR_MAP = {
-  default: 'bg-gray-100 text-gray-700',
+  default: '',
   config: 'bg-teal-100 text-teal-700',
   env: 'bg-yellow-100 text-yellow-700',
   cli: 'bg-red-50 text-red-700',

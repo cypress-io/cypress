@@ -10,6 +10,6 @@
 <script lang="ts" setup>
 
 defineProps<{
-  hosts: any
+  hosts: Record<string, string>
 }>()
 </script>
