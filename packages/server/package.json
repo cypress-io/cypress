@@ -153,6 +153,7 @@
     "chai-uuid": "1.0.6",
     "chokidar-cli": "2.1.0",
     "chrome-har-capturer": "0.13.4",
+    "common-tags": "1.8.0",
     "cors": "2.8.5",
     "cross-env": "6.0.3",
     "devtools-protocol": "0.0.839267",
