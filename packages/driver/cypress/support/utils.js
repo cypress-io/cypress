@@ -66,6 +66,12 @@ export const shouldBeCalledWithCount = (num) => (stub) => wrapped(stub).should('
 
 export const shouldNotBeCalled = (stub) => wrapped(stub).should('not.be.called')
 
+export const assertLogLength = (logs, expectedLength) => {
+  const receivedLogs = logs.map((x, index) => `${index} - ${x.get('name')}`).join(',')
+
+  expect(logs.length).to.eq(expectedLength, `received more logs than expected: [${receivedLogs}]`)
+}
+
 export const attachListeners = (listenerArr) => {
   return (els) => {
     _.each(els, (el, elName) => {

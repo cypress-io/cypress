@@ -1,3 +1,5 @@
+const { assertLogLength } = require('../../support/utils')
+
 describe('redirection', () => {
   beforeEach(function () {
     this.logs = []
@@ -18,7 +20,7 @@ describe('redirection', () => {
         // visit, contains, page load, new url
         const receivedLogs = this.logs.reduce((prev, curr, index) => `${prev}, ${index}: ${curr.get('name')}`, '')
 
-        expect(this.logs.length).to.eq(4, `received more logs than expected: ${receivedLogs}`)
+        assertLogLength(this.logs, 4, `received more logs than expected: ${receivedLogs}`)
 
         expect(this.logs[0].get('name')).to.eq('visit')
         expect(this.logs[1].get('name')).to.eq('contains')
@@ -35,7 +37,7 @@ describe('redirection', () => {
         // visit, get, page load, new url
         const receivedLogs = this.logs.reduce((prev, curr, index) => `${prev}, ${index}: ${curr.get('name')}`, '')
 
-        expect(this.logs.length).to.eq(4, `received more logs than expected: ${receivedLogs}`)
+        assertLogLength(this.logs, 4, `received more logs than expected: ${receivedLogs}`)
 
         expect(this.logs[0].get('name')).to.eq('visit')
         expect(this.logs[1].get('name')).to.eq('get')
@@ -53,7 +55,7 @@ describe('redirection', () => {
       .contains('timeout')
       .then(function () {
         // visit, contains, page load, new url
-        expect(this.logs.length).to.eq(4)
+        assertLogLength(this.logs, 4)
 
         expect(this.logs[0].get('name')).to.eq('visit')
         expect(this.logs[1].get('name')).to.eq('contains')
@@ -68,7 +70,7 @@ describe('redirection', () => {
       .get('a:first')
       .then(function () {
         // visit, get, page load, new url
-        expect(this.logs.length).to.eq(4)
+        assertLogLength(this.logs, 4)
 
         expect(this.logs[0].get('name')).to.eq('visit')
         expect(this.logs[1].get('name')).to.eq('get')

@@ -1,4 +1,5 @@
 const { stripIndent } = require('common-tags')
+const { assertLogLength } = require('../../support/utils')
 const { _, $, Promise } = Cypress
 
 describe('src/cy/commands/xhr', () => {
@@ -1037,7 +1038,7 @@ describe('src/cy/commands/xhr', () => {
           if (!lastLog || lastLog.get('name') !== 'request') return
 
           try {
-            expect(this.logs.length).to.eq(1)
+            assertLogLength(this.logs, 1)
             expect(lastLog.get('error').message).contain('foo is not defined')
 
             done()
@@ -1071,7 +1072,7 @@ describe('src/cy/commands/xhr', () => {
           if (!lastLog || lastLog.get('name') !== 'request') return
 
           try {
-            expect(this.logs.length).to.eq(1)
+            assertLogLength(this.logs, 1)
             expect(lastLog.get('name')).to.eq('request')
             expect(e.message).to.include(lastLog.get('error').message)
             done()
@@ -1997,7 +1998,7 @@ describe('src/cy/commands/xhr', () => {
           const { lastLog } = this
 
           // route + window + xhr log === 3
-          expect(this.logs.length).to.eq(3)
+          assertLogLength(this.logs, 3)
           expect(lastLog.get('name')).to.eq('xhr')
           expect(err.message).to.include(lastLog.get('error').message)
 
@@ -2037,7 +2038,7 @@ describe('src/cy/commands/xhr', () => {
           const { lastLog } = this
 
           expect(err.message).to.eq('some error')
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('name')).to.eq('route')
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('message')).to.eq('/foo/, fixture:bar')
@@ -2088,7 +2089,7 @@ describe('src/cy/commands/xhr', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(2)
+          assertLogLength(this.logs, 2)
           expect(err.message).to.eq('`cy.route()` could not find a registered alias for: `@bar`.\nAvailable aliases are: `foo`.')
           expect(lastLog.get('name')).to.eq('route')
           expect(lastLog.get('error')).to.eq(err)
