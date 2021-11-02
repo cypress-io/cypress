@@ -9,6 +9,7 @@
           v-if="showHeader"
           :show-browsers="true"
           :page-name="pageName"
+          :allow-automatic-prompt-open="true"
         />
         <router-view v-slot="{ Component, route }">
           <h1

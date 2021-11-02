@@ -2,8 +2,9 @@
   <HeaderBarContent
     v-if="query.data.value"
     :gql="query.data.value"
-    :show-browsers="props.showBrowsers"
+    :show-browsers="showBrowsers"
     :page-name="pageName"
+    :allow-automatic-prompt-open="allowAutomaticPromptOpen"
   />
 </template>
 
@@ -19,9 +20,10 @@ query HeaderBar_HeaderBarQuery {
 }
 `
 
-const props = defineProps<{
-    showBrowsers?: boolean,
-    pageName?: string
+defineProps<{
+  showBrowsers?: boolean,
+  pageName?: string,
+  allowAutomaticPromptOpen?: boolean
 }>()
 
 const { t } = useI18n()

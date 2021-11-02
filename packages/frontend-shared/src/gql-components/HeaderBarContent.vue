@@ -157,7 +157,8 @@ const cloudProjectId = computed(() => {
 const props = defineProps<{
   gql: HeaderBar_HeaderBarContentFragment,
   showBrowsers?: boolean,
-  pageName?: string
+  pageName?: string,
+  allowAutomaticPromptOpen?: boolean
 }>()
 
 const { t } = useI18n()
@@ -190,8 +191,8 @@ watch(savedState, (newVal) => {
 })
 
 function shouldShowPrompt (prompt: { slug: string; noProjectId: boolean; interval?: number }) {
-  // naver open if there's no page name
-  if (!props.pageName) {
+  // we weant the component using the header to control if the prompt shows at all
+  if (props.allowAutomaticPromptOpen !== true) {
     return false
   }
 
