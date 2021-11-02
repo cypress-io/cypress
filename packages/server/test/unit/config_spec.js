@@ -1,7 +1,6 @@
 require('../spec_helper')
 
 const _ = require('lodash')
-const R = require('ramda')
 const debug = require('debug')('test')
 const config = require(`${root}lib/config`)
 const errors = require(`${root}lib/errors`)
@@ -1072,7 +1071,7 @@ describe('lib/config', () => {
         cfg.projectRoot = '/foo/bar/'
 
         return config.mergeDefaults(cfg, options)
-        .then(R.prop(prop))
+        .then((val) => val[prop])
         .then((result) => {
           expect(result).to.deep.eq(value)
         })

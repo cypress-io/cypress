@@ -988,7 +988,7 @@ jobs:
             fi
       - wait-on-circle-jobs:
           job-names: >
-            desktop-gui-integration-tests-2x,
+            desktop-gui-integration-tests-7x,
             desktop-gui-component-tests,
             cli-visual-tests,
             runner-integration-tests-chrome,
@@ -1217,9 +1217,9 @@ jobs:
       - run-driver-integration-tests:
           browser: electron
 
-  desktop-gui-integration-tests-2x:
+  desktop-gui-integration-tests-7x:
     <<: *defaults
-    parallelism: 2
+    parallelism: 7
     steps:
       - restore_cached_workspace
       - run:
@@ -2077,7 +2077,7 @@ linux-workflow: &linux-workflow
         requires:
           - build
 
-    - desktop-gui-integration-tests-2x:
+    - desktop-gui-integration-tests-7x:
         requires:
           - build
     - desktop-gui-component-tests:
@@ -2147,7 +2147,7 @@ linux-workflow: &linux-workflow
           - reporter-integration-tests
           - Linux lint
           - desktop-gui-component-tests
-          - desktop-gui-integration-tests-2x
+          - desktop-gui-integration-tests-7x
           - runner-ct-integration-tests-chrome
           - runner-integration-tests-firefox
           - runner-integration-tests-chrome
