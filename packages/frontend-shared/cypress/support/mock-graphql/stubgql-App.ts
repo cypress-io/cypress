@@ -127,6 +127,7 @@ export const longBrowsersList = [
 export const stubApp: MaybeResolver<App> = {
   __typename: 'App',
   healthCheck: 'OK',
+  isRefreshingBrowsers: false,
   isInGlobalMode (source, args, ctx) {
     return Boolean(ctx.app.activeProject)
   },

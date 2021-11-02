@@ -9,7 +9,8 @@
     "index.d.ts",
     "../frontend-shared/src/**/*.vue", 
     "../frontend-shared/src/**/*.tsx", 
-    "../frontend-shared/cypress/**/*.ts"
+    "../frontend-shared/cypress/**/*.ts",
+    "*.d.ts"
   ],
   "compilerOptions": {
     "noImplicitThis": true,

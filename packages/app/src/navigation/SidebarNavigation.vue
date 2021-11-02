@@ -1,7 +1,7 @@
 <template>
   <div class="flex relative flex-col flex-1 min-h-0 bg-gray-1000">
     <div
-      class="absolute cursor-pointer bg-gray-1000 w-8px bottom-0 top-0 right-0 hover:bg-indigo-300"
+      class="absolute cursor-pointer bg-gray-800 w-2px hover:w-8px bottom-0 top-0 right-0 hover:bg-indigo-300"
       @click="mainStore.toggleNavBar"
     />
     <div class="flex flex-col flex-1 pt-5 pb-4 overflow-y-auto">
@@ -41,13 +41,14 @@
 import SidebarNavigationRow from './SidebarNavigationRow.vue'
 import SpecsIcon from '~icons/cy/test-results_x24'
 import CodeIcon from '~icons/cy/code-editor_x24'
+import RunsIcon from '~icons/cy/runs_x24'
 import SettingsIcon from '~icons/cy/settings_x24'
 import { useMainStore } from '../store'
 
 const navigation = [
   { name: 'Home', icon: SpecsIcon, href: '/' },
   { name: 'Specs', icon: CodeIcon, href: '/specs' },
-  { name: 'Runs', icon: CodeIcon, href: '/runs' },
+  { name: 'Runs', icon: RunsIcon, href: '/runs' },
   { name: 'Settings', icon: SettingsIcon, href: '/settings' },
   { name: 'New Spec', icon: SettingsIcon, href: '/newspec' },
 ]
