@@ -163,7 +163,7 @@ export class ProjectActions {
     testingType = testingType || this.ctx.wizardData.chosenTestingType
 
     if (!testingType) {
-      throw Error('Cannot launch project without chosen testing type')
+      return null
     }
 
     // Ensure that we have loaded browsers to choose from
@@ -174,7 +174,7 @@ export class ProjectActions {
     const browser = this.ctx.wizardData.chosenBrowser ?? this.ctx.appData.browsers?.[0]
 
     if (!browser) {
-      throw Error(`Could not find browser`)
+      return null
     }
 
     const spec: Cypress.Spec = {
