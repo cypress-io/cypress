@@ -19,13 +19,6 @@ export const App = objectType({
       },
     })
 
-    t.string('browserErrorMessage', {
-      description: 'An error related to finding a browser',
-      resolve: (source, args, ctx) => {
-        return ctx.wizardData.browserErrorMessage
-      },
-    })
-
     t.nonNull.boolean('isRefreshingBrowsers', {
       description: 'Whether we are currently refreshing the browsers list',
       resolve: (source) => Boolean(source.refreshingBrowsers),

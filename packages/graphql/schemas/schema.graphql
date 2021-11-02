@@ -10,9 +10,6 @@ type App {
   """The mode the interactive runner was launched in"""
   activeTestingType: TestingTypeEnum
 
-  """An error related to finding a browser"""
-  browserErrorMessage: String
-
   """Browsers found that are compatible with Cypress"""
   browsers: [Browser!]
 
@@ -730,6 +727,9 @@ type Wizard {
 
   """All of the languages to choose from"""
   allLanguages: [WizardCodeLanguage!]!
+
+  """An error related to finding a browser"""
+  browserErrorMessage: String
   bundler: WizardBundler
 
   """

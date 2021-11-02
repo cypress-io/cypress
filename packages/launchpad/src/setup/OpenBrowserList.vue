@@ -3,14 +3,6 @@
     v-if="props.gql.browsers"
     @submit.prevent="$emit('launch')"
   >
-    <div
-      v-if="props.gql.browserErrorMessage"
-      data-test-id="browser-error-message"
-      class="flex items-center p-4 text-center rounded min-w-200px max-w-600px mx-auto space-y-32px mt-20px bg-warning-100 text-warning-600"
-    >
-      <i-cy-runs-warn_x24 class="w-40px h-40px" />
-      {{ props.gql.browserErrorMessage }}
-    </div>
     <div class="flex flex-wrap justify-center gap-6 py-16">
       <div
         v-for="browser of props.gql.browsers"
@@ -111,7 +103,6 @@ fragment OpenBrowserList on App {
     version
     majorVersion
   }
-  browserErrorMessage
 }
 `
 
