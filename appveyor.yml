@@ -2,7 +2,7 @@ branches:
   only:
     - master
     - develop
-    - remove-win-32-support
+    - 9.0-release
     - /win*/
 
 # https://www.appveyor.com/docs/lang/nodejs-iojs/
