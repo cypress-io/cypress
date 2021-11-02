@@ -158,9 +158,9 @@ export default {
       }
     }
 
-    const ensureVisibility = (subject, onFail) => {
+    const runVisibilityCheck = (subject, onFail, method) => {
       if (subject.length !== subject.filter(function () {
-        return !$dom.isHidden(this, 'isVisible()', { checkOpacity: false })
+        return !method(this, 'isVisible()', { checkOpacity: false })
       }).length) {
         const cmd = state('current').get('name')
         const reason = $dom.getReasonIsHidden(subject, { checkOpacity: false })
@@ -171,6 +171,18 @@ export default {
           args: { cmd, node, reason },
         })
       }
+    }
+
+    const ensureVisibility = (subject, onFail) => {
+      return runVisibilityCheck(subject, onFail, $dom.isHidden)
+    }
+
+    const ensureStrictVisibility = (subject, onFail) => {
+      return runVisibilityCheck(subject, onFail, $dom.isStrictlyHidden)
+    }
+
+    const ensureNotHiddenByAncestors = (subject, onFail) => {
+      return runVisibilityCheck(subject, onFail, $dom.isHiddenByAncestors)
     }
 
     const ensureAttached = (subject, name, onFail) => {
@@ -398,6 +410,10 @@ export default {
       ensureNotDisabled,
 
       ensureVisibility,
+
+      ensureStrictVisibility,
+
+      ensureNotHiddenByAncestors,
 
       ensureExistence,
 
