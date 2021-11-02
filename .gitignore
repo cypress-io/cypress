@@ -14,7 +14,7 @@ Cached Theme.pak
 Cached Theme Material Design.pak
 
 # from config
-packages/config/lib
+packages/config/src/*.js
 
 # from data-context, compiled .js files
 packages/data-context/src/**/*.js
