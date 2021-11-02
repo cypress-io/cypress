@@ -1,6 +1,6 @@
 <template>
   <div>
-  <CreateSpecPage testingType="component" />
+    <CreateSpecPage testingType="component" />
   </div>
 </template>
 

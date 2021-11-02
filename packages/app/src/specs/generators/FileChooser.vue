@@ -84,6 +84,8 @@ const emits = defineEmits<{
   (eventName: 'update:extensionPattern', value: string)
 }>()
 
+// eslint-disable-next-line
+const initialExtensionPattern = props.extensionPattern
 const localExtensionPattern = ref(props.extensionPattern)
 const filePathSearch = ref('')
 
@@ -125,7 +127,7 @@ const noResults = computed(() => {
     message: filePathSearch.value ? t('noResults.defaultMessage') : t('components.fileSearch.noMatchesForExtension'),
     clear: filePathSearch.value ?
       () => filePathSearch.value = '' :
-      () => localExtensionPattern.value = props.extensionPattern,
+      () => localExtensionPattern.value = initialExtensionPattern
   }
 })
 

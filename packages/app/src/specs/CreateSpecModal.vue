@@ -18,7 +18,7 @@
     :key="generator.id"
     :is="generator.entry"></component>
 
-    <CreateSpecCards v-else @select="currentGeneratorId = $event" :testingType="testingType"></CreateSpecCards>
+    <CreateSpecCards v-else @select="currentGeneratorId = $event" :gql="props.gql"></CreateSpecCards>
   </StandardModal>
 </template>
 
@@ -34,15 +34,21 @@ import { generators } from './generators'
 import { ref, computed } from 'vue'
 import type { Ref } from 'vue'
 import { useModalStore } from '../store'
-import type { Maybe, TestingTypeEnum } from '../generated/graphql'
+import type { CreateSpecModalFragment } from '../generated/graphql'
+import { gql } from '@urql/vue'
 
 const props = defineProps<{
   initialGenerator?: GeneratorId,
   show: boolean,
-  testingType: TestingTypeEnum
+  gql: CreateSpecModalFragment
 }>()
 
-// const modalStore = useModalStore()
+gql`
+fragment CreateSpecModal on App {
+  ...CreateSpecCards
+}
+`
+
 const currentGeneratorId: Ref<GeneratorId | undefined> = ref(props.initialGenerator)
 
 const title = ref('')
@@ -51,4 +57,5 @@ const generator = computed(() => {
   if (currentGeneratorId.value) return generators[currentGeneratorId.value]
   return null
 })
+
 </script>

@@ -1,7 +1,7 @@
 <template>
   <CreateSpecModal v-if="query.data.value?.app.activeTestingType" :key="generator" :testingType="query.data.value?.app.activeTestingType"
     :initial-generator="generator" :show="showModal" @close="closeModal"/>
-  <div class="overflow-scroll text-center max-w-600px">
+  <div class="overflow-scroll text-center max-w-600px" v-if="query.data.value?.app.activeTestingType">
     <h1
       data-testid="create-spec-page-title"
       class="text-gray-900 text-32px mb-12px"
@@ -12,16 +12,12 @@
       data-testid="create-spec-page-description"
       class="leading-normal text-gray-600 text-18px mb-32px"
     >
-      {{ t(`createSpec.page.${testingType}.description`) }}
+      {{ t(`createSpec.page.${query.data.value?.app.activeTestingType}.description`) }}
     </p>
-
-    <div
-      class="flex flex-wrap pb-32px border-b-1 gap-32px children:mx-auto"
+    <CreateSpecCards
       data-testid="create-spec-page-cards"
-    >
-      <CreateSpecCards 
-      @select="choose" :testingType="testingType"></CreateSpecCards>
-    </div>
+      @select="choose"
+      :gql="query.data.value?.app" />
 
     <div class="text-center mt-32px">
       <p
@@ -59,9 +55,10 @@ import { CreateSpecPageDocument } from '../generated/graphql'
 const { t } = useI18n()
 
 gql`
-  query CreateSpecPage {
+query CreateSpecPage {
     app {
       activeTestingType
+      ...CreateSpecCards
     }
   }
 `
