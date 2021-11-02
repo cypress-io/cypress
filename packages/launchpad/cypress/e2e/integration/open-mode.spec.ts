@@ -12,6 +12,8 @@ describe('Launchpad: Open Mode', () => {
   })
 
   it('goes directly to e2e tests when launched with --e2e', () => {
+    cy.setupE2E('todos')
+
     cy.withCtx(async (ctx) => {
       // Though the data context is previously initialized,
       // we re-initialize it here so that it reflects the new launchArg
@@ -20,15 +22,16 @@ describe('Launchpad: Open Mode', () => {
     })
 
     cy.withCtx(async (ctx, o) => {
-      await ctx.actions.project.setActiveProject(o.projectDir('todos'))
       ctx.emitter.toLaunchpad()
     })
 
     // e2e testing is configured for the todo project, so we don't expect an error.
-    cy.get('h1').should('contain', 'Initializing Config...')
+    cy.get('h1').should('contain', 'Configuration Files')
   })
 
   it('goes directly to component tests when launched with --component', () => {
+    cy.setupE2E('todos')
+
     cy.withCtx(async (ctx) => {
       // Though the data context is previously initialized,
       // we re-initialize it here so that it reflects the new launchArg
@@ -37,7 +40,6 @@ describe('Launchpad: Open Mode', () => {
     })
 
     cy.withCtx(async (ctx, o) => {
-      await ctx.actions.project.setActiveProject(o.projectDir('todos'))
       ctx.emitter.toLaunchpad()
     })
 
@@ -47,8 +49,9 @@ describe('Launchpad: Open Mode', () => {
 
   describe('when there is a list of projects', () => {
     it('goes to an active project if one is added', () => {
+      cy.setupE2E('todos')
+
       cy.withCtx(async (ctx, o) => {
-        await ctx.actions.project.setActiveProject(o.projectDir('todos'))
         ctx.emitter.toLaunchpad()
       })
 

@@ -7,7 +7,7 @@ declare global {
 }
 
 export function attachedFileWithPath (subject: HTMLInputElement, path: string) {
-  const attachedFile = new File([new Blob()], 'cypress.json')
+  const attachedFile = new File([new Blob()], 'cypress.config.ts')
 
   Object.defineProperty(attachedFile, 'path', { value: path })
 

@@ -5,8 +5,8 @@
       :id="e2e.type"
       :data-cy-testingType="e2e.type"
       :title="e2e.title"
-      :description="firstTimeE2E ? e2e.description : 'LAUNCH'"
-      :configured="!firstTimeE2E"
+      :description="isE2EConfigured ? 'LAUNCH' : e2e.description "
+      :configured="isE2EConfigured"
       :image="e2ePreview"
       role="button"
       @click="e2eNextStep"
@@ -19,8 +19,8 @@
       :id="ct.type"
       :data-cy-testingType="ct.type"
       :title="ct.title"
-      :description="firstTimeCT ? ct.description : 'LAUNCH'"
-      :configured="!firstTimeCT"
+      :description="isCTConfigured ? 'LAUNCH' : ct.description"
+      :configured="isCTConfigured"
       :image="ctPreview"
       role="button"
       @click="ctNextStep"
@@ -48,8 +48,8 @@ fragment TestingTypeCards on Query {
   app {
     activeProject {
       id
-      isFirstTimeCT
-      isFirstTimeE2E
+      isCTConfigured
+      isE2EConfigured
     }
   }
   wizard {
@@ -79,8 +79,8 @@ const ct = computed(() => {
   return props.gql.wizard.testingTypes.find((x) => x.type === 'component')
 })
 
-const firstTimeCT = computed(() => props.gql.app.activeProject?.isFirstTimeCT)
-const firstTimeE2E = computed(() => props.gql.app.activeProject?.isFirstTimeE2E)
+const isCTConfigured = computed(() => Boolean(props.gql.app.activeProject?.isCTConfigured))
+const isE2EConfigured = computed(() => Boolean(props.gql.app.activeProject?.isE2EConfigured))
 
 const ctNextStep = async () => {
   return mutation.executeMutation({ input: { testingType: 'component', direction: 'forward' } })

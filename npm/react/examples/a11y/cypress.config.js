@@ -1,0 +1,7 @@
+module.exports = {
+  'video': false,
+  'fixturesFolder': false,
+  'testFiles': '**/*spec.js',
+  'viewportWidth': 500,
+  'viewportHeight': 500,
+}
