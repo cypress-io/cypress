@@ -30,3 +30,11 @@ export interface SampleConfigFile{
   warningText?: string
   warningLink?: string
 }
+
+export interface SettingsOptions {
+  testingType?: 'component' |'e2e'
+  configFile?: string | false
+  args?: {
+    runProject?: string
+  }
+}

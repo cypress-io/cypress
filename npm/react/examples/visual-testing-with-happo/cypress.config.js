@@ -1,0 +1,7 @@
+module.exports = {
+  'video': false,
+  'testFiles': '**/*cy-spec.js',
+  'viewportWidth': 400,
+  'viewportHeight': 700,
+  'componentFolder': 'src',
+}

@@ -1,4 +1,4 @@
-import { useSnapshotStore } from '../spec/snapshot-store'
+import { useSnapshotStore } from './snapshot-store'
 import { useAutStore } from '../store'
 import type { EventManager } from './event-manager'
 

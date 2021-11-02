@@ -33,7 +33,8 @@ import preprocessor from './plugins/preprocessor'
 import { SpecsStore } from './specs-store'
 import { checkSupportFile, getDefaultConfigFilePath } from './project_utils'
 import type { FoundBrowser, OpenProjectLaunchOptions } from '@packages/types'
-import { DataContextShell } from '@packages/data-context/src/DataContextShell'
+import { makeLegacyDataContext } from './makeDataContext'
+import type { DataContext } from '@packages/data-context'
 
 // Cannot just use RuntimeConfigOptions as is because some types are not complete.
 // Instead, this is an interface of values that have been manually validated to exist
@@ -67,7 +68,7 @@ export class ProjectBase<TServer extends Server> extends EE {
   public id: string
 
   protected watchers: Watchers
-  protected ctx: DataContextShell
+  protected ctx: DataContext
   protected _cfg?: Cfg
   protected _server?: TServer
   protected _automation?: Automation
@@ -107,7 +108,7 @@ export class ProjectBase<TServer extends Server> extends EE {
     this.spec = null
     this.browser = null
     this.id = createHmac('sha256', 'secret-key').update(projectRoot).digest('hex')
-    this.ctx = options.ctx ?? new DataContextShell()
+    this.ctx = options.ctx ?? makeLegacyDataContext()
 
     debug('Project created %o', {
       testingType: this.testingType,
@@ -702,7 +703,7 @@ export class ProjectBase<TServer extends Server> extends EE {
   async initializeConfig (browsers: FoundBrowser[] = []): Promise<Cfg> {
     // set default for "configFile" if undefined
     if (this.options.configFile === undefined || this.options.configFile === null) {
-      this.options.configFile = await getDefaultConfigFilePath(this.projectRoot, !this.options.args?.runProject)
+      this.options.configFile = await getDefaultConfigFilePath(this.projectRoot, this.ctx)
     }
 
     let theCfg: Cfg = await config.get(this.projectRoot, this.options)
@@ -755,7 +756,7 @@ export class ProjectBase<TServer extends Server> extends EE {
     return this._cfg
   }
 
-  // returns project config (user settings + defaults + cypress.json)
+  // returns project config (user settings + defaults + cypress.config.{ts|js})
   // with additional object "state" which are transient things like
   // window width and height, DevTools open or not, etc.
   getConfig (): Cfg {
@@ -859,6 +860,7 @@ export class ProjectBase<TServer extends Server> extends EE {
 
   async getProjectId () {
     await this.verifyExistence()
+
     const readSettings = await settings.read(this.projectRoot, this.options)
 
     if (readSettings && readSettings.projectId) {

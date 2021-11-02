@@ -3,14 +3,14 @@ import { isUndefined } from 'lodash'
 
 const configFileFormatted = (configFile) => {
   if (configFile === false) {
-    return <><code>cypress.json</code> file (currently disabled by <code>--config-file false</code>)</>
+    return <><code>cypress.config.{`{ts|js}`}</code> file (currently disabled by <code>--config-file false</code>)</>
   }
 
   if (isUndefined(configFile)) {
-    return <><code>cypress.json</code> file</>
+    return <><code>cypress.config.{`{ts|js}`}</code> file</>
   }
 
-  if (['cypress.json', 'cypress.config.js'].includes(configFile)) {
+  if (['cypress.config.ts', 'cypress.config.js'].includes(configFile)) {
     return <><code>{configFile}</code> file</>
   }
 
