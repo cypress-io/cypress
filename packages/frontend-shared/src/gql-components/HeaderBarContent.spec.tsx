@@ -107,12 +107,12 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
         })
 
         it('opens on menu item click', () => {
-          cy.contains(defaultMessages.topNav.docsMenu.prompts.ci.description).should('be.visible')
+          cy.contains(defaultMessages.topNav.docsMenu.prompts.ci1.description).should('be.visible')
         })
 
         it('is dismissible from X icon', () => {
           cy.findAllByLabelText('Close').click()
-          cy.contains(defaultMessages.topNav.docsMenu.prompts.ci.description).should('not.exist')
+          cy.contains(defaultMessages.topNav.docsMenu.prompts.ci1.description).should('not.exist')
         })
       })
 
@@ -141,7 +141,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
 
         it('opens when after 4 days from first open, no projectId, and not already shown', () => {
           mountWithSavedState()
-          cy.contains(defaultMessages.topNav.docsMenu.prompts.ci.description).should('be.visible')
+          cy.contains(defaultMessages.topNav.docsMenu.prompts.ci1.description).should('be.visible')
         })
 
         it('links have correct utm_content param', () => {
@@ -149,12 +149,12 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
 
           cy.contains(
             'a[href="https://on.cypress.io/setup-ci?utm_medium=CI+Prompt+1&utm_campaign=Other&utm_content=Automatic"]',
-            defaultMessages.topNav.docsMenu.prompts.ci.seeOtherGuides,
+            defaultMessages.topNav.docsMenu.prompts.ci1.seeOtherGuides,
           ).should('be.visible')
 
           cy.contains(
             'a[href="https://on.cypress.io/ci?utm_medium=CI+Prompt+1&utm_campaign=Learn+More"]',
-            defaultMessages.topNav.docsMenu.prompts.ci.intro,
+            defaultMessages.topNav.docsMenu.prompts.ci1.intro,
           ).should('be.visible')
         })
 
@@ -163,13 +163,13 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
           it('does not open when projectId exists', () => {
             mountWithSavedState()
 
-            cy.contains(defaultMessages.topNav.docsMenu.prompts.ci.description).should('not.exist')
+            cy.contains(defaultMessages.topNav.docsMenu.prompts.ci1.description).should('not.exist')
           })
 
           it('does not open when another prompt has been shown recently', () => {
             mountWithSavedState({ promptsShown: { dashboard1: 1609891100000 } })
 
-            cy.contains(defaultMessages.topNav.docsMenu.prompts.ci.description).should('not.exist')
+            cy.contains(defaultMessages.topNav.docsMenu.prompts.ci1.description).should('not.exist')
           })
         })
 
@@ -190,7 +190,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
             render: (gqlVal) => <div class="resize overflow-auto border-current border-1 h-700px"><HeaderBarContent gql={gqlVal} show-browsers={true} /></div>,
           })
 
-          cy.contains(defaultMessages.topNav.docsMenu.prompts.ci.description).should('not.exist')
+          cy.contains(defaultMessages.topNav.docsMenu.prompts.ci1.description).should('not.exist')
         })
       })
     })
@@ -211,19 +211,19 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
         })
 
         it('opens on menu item click', () => {
-          cy.contains(defaultMessages.topNav.docsMenu.prompts.orchestration.title).should('be.visible')
+          cy.contains(defaultMessages.topNav.docsMenu.prompts.orchestration1.title).should('be.visible')
           cy.contains('Getting Started').should('not.exist')
         })
 
         it('is dismissible from X icon', () => {
           cy.findAllByLabelText('Close').click()
-          cy.contains(defaultMessages.topNav.docsMenu.prompts.orchestration.title).should('not.exist')
+          cy.contains(defaultMessages.topNav.docsMenu.prompts.orchestration1.title).should('not.exist')
         })
 
         it('links to more information with expected utm params', () => {
           cy.contains(
             'a[href="https://on.cypress.io/smart-orchestration?utm_medium=CI+Prompt+1&utm_campaign=Learn+More"]',
-            defaultMessages.topNav.docsMenu.prompts.orchestration.learnMore,
+            defaultMessages.topNav.docsMenu.prompts.orchestration1.learnMore,
           )
           .should('be.visible')
         })

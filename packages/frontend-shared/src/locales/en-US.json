@@ -66,14 +66,14 @@
       "fasterTests": "Run tests faster",
       "smartOrchestration": "Smart Orchestration",
       "prompts": {
-        "ci": {
+        "ci1": {
           "title": "Configure CI",
           "description": "Optimize your tests in CI by following these guides.",
           "seeOtherGuides": "See Other Guides",
           "intro": "Introduction to CI",
           "learnTheBasics": "Learn the basics of running Cypress in CI."
         },
-        "orchestration": {
+        "orchestration1": {
           "title": "Run tests faster in CI",
           "parallelTime": "5 mins",
           "noParallelTime": "12 mins",

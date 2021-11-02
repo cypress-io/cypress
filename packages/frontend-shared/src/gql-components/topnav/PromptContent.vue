@@ -1,8 +1,8 @@
 <template>
-  <div v-if="type === 'ci'">
+  <div v-if="type === 'ci1'">
     <div class="p-24px pt-20px">
       <p class="text-gray-600 mb-16px">
-        {{ t('topNav.docsMenu.prompts.ci.description') }}
+        {{ t('topNav.docsMenu.prompts.ci1.description') }}
       </p>
       <ul
         class="flex flex-wrap gap-16px"
@@ -38,7 +38,7 @@
             <template #prefix>
               <i-cy-book class="w-16px h-16px icon-dark-gray-500 icon-light-gray-50" />
             </template>
-            {{ t('topNav.docsMenu.prompts.ci.seeOtherGuides') }}
+            {{ t('topNav.docsMenu.prompts.ci1.seeOtherGuides') }}
           </Button>
         </li>
       </ul>
@@ -56,8 +56,8 @@
     >
       <i-cy-infinity-loop_x18 class="icon-dark-indigo-500 mr-20px w-20px h-20px" />
       <div class="flex-grow">
-        <p class="text-indigo-500 pb-4px">{{ t('topNav.docsMenu.prompts.ci.intro') }}</p>
-        <p class="text-gray-600 text-14px">{{ t('topNav.docsMenu.prompts.ci.learnTheBasics') }}</p>
+        <p class="text-indigo-500 pb-4px">{{ t('topNav.docsMenu.prompts.ci1.intro') }}</p>
+        <p class="text-gray-600 text-14px">{{ t('topNav.docsMenu.prompts.ci1.learnTheBasics') }}</p>
       </div>
       <i-cy-arrow-outline-right
         class="transition-transform duration-200 ease-in transform icon-dark-gray-400 w-20px h-20px group-hocus:translate-x-2px"
@@ -65,7 +65,7 @@
     </a>
   </div>
   <div
-    v-else-if="type === 'orchestration'"
+    v-else-if="type === 'orchestration1'"
     class="p-24px"
   >
     <div class="pb-12px border-b border-b-gray-50 text-14px">
@@ -76,8 +76,8 @@
         :class="{'w-[50%]': shrink}"
       >
         <span>
-          <span class="font-bold">{{ t('topNav.docsMenu.prompts.orchestration.parallelTime') }}</span>
-          {{ t('topNav.docsMenu.prompts.orchestration.withParallelization') }}
+          <span class="font-bold">{{ t('topNav.docsMenu.prompts.orchestration1.parallelTime') }}</span>
+          {{ t('topNav.docsMenu.prompts.orchestration1.withParallelization') }}
         </span>
         <div class="border-l border-l-jade-500 border-opacity-50 grid place-content-center w-28px">
           <i-cy-lightning_x16 class="icon-dark-white icon-light-jade-400 w-16px h-16px" />
@@ -87,8 +87,8 @@
         class="bg-gray-500 text-white pl-12px pr-3px pt-9px pb-7px mb-12px rounded flex justify-between"
       >
         <span>
-          <span class="font-bold">{{ t('topNav.docsMenu.prompts.orchestration.noParallelTime') }}</span>
-          {{ t('topNav.docsMenu.prompts.orchestration.withoutParallelization') }}
+          <span class="font-bold">{{ t('topNav.docsMenu.prompts.orchestration1.noParallelTime') }}</span>
+          {{ t('topNav.docsMenu.prompts.orchestration1.withoutParallelization') }}
         </span>
         <div class="border-l border-l-gray-600 border-opacity-50 grid place-content-center w-28px">
           <i-cy-dollar_x16 class="icon-dark-white w-16px h-16px" />
@@ -96,7 +96,7 @@
       </div>
     </div>
     <p class="text-gray-600 mt-20px mb-10px">
-      {{ t('topNav.docsMenu.prompts.orchestration.intro') }}
+      {{ t('topNav.docsMenu.prompts.orchestration1.intro') }}
     </p>
     <ul class="text-gray-700">
       <li
@@ -120,7 +120,7 @@
       size="lg"
       class="mt-12px"
     >
-      {{ t('topNav.docsMenu.prompts.orchestration.learnMore') }}
+      {{ t('topNav.docsMenu.prompts.orchestration1.learnMore') }}
       <template #suffix>
         <i-cy-arrow-right_x16 class="icon-dark-current" />
       </template>
@@ -135,6 +135,7 @@ const { t } = useI18n()
 import { getUrlWithParams, LinkWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 import { useTimeout } from '@vueuse/core'
 import { computed } from 'vue'
+import type { DocsMenuVariant } from './DocsMenuContent.vue'
 import CircleCI from '@packages/frontend-shared/src/assets/logos/circleci.svg?url'
 import GitHubActions from '@packages/frontend-shared/src/assets/logos/github-actions.svg?url'
 import Bitbucket from '@packages/frontend-shared/src/assets/logos/bitbucket.svg?url'
@@ -142,7 +143,7 @@ import Gitlab from '@packages/frontend-shared/src/assets/logos/gitlab.svg?url'
 import AwsCodeBuild from '@packages/frontend-shared/src/assets/logos/aws-codebuild.svg?url'
 
 const props = defineProps<{
-  type: 'ci' | 'orchestration' | 'main',
+  type: DocsMenuVariant,
   automatic?: boolean
 }>()
 
@@ -227,8 +228,8 @@ const seeOtherGuidesInfo = {
 }
 
 const orchestrationBullets = [
-  t('topNav.docsMenu.prompts.orchestration.bullet1'),
-  t('topNav.docsMenu.prompts.orchestration.bullet2'),
-  t('topNav.docsMenu.prompts.orchestration.bullet3'),
+  t('topNav.docsMenu.prompts.orchestration1.bullet1'),
+  t('topNav.docsMenu.prompts.orchestration1.bullet2'),
+  t('topNav.docsMenu.prompts.orchestration1.bullet3'),
 ]
 </script>

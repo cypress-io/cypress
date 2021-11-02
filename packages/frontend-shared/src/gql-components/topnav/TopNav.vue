@@ -162,7 +162,7 @@ import { ref, watch } from 'vue'
 import type { Ref } from 'vue'
 const { t } = useI18n()
 import { onClickOutside, onKeyStroke } from '@vueuse/core'
-import DocsMenuContent from './DocsMenuContent.vue'
+import DocsMenuContent, { DocsMenuVariant } from './DocsMenuContent.vue'
 
 const releasesUrl = 'https://github.com/cypress-io/cypress/releases/'
 
@@ -247,13 +247,13 @@ const emit = defineEmits<{
   (e: 'clearForceOpen'): void,
 }>()
 
-const docsMenuVariant: Ref<'main' | 'orchestration' | 'ci'> = ref('main')
+const docsMenuVariant: Ref<DocsMenuVariant> = ref('main')
 
 const promptsEl: Ref<HTMLElement | null> = ref(null)
 
 watch(() => props.forceOpenDocs, (newVal) => {
   if (newVal === true) {
-    docsMenuVariant.value = 'ci'
+    docsMenuVariant.value = 'ci1'
   } else {
     docsMenuVariant.value = 'main'
   }
@@ -263,7 +263,7 @@ watch(() => props.forceOpenDocs, (newVal) => {
 
 watch(docsMenuVariant, (newVal, oldVal) => {
   if (oldVal !== 'main') {
-    setPromptShown.executeMutation({ slug: `${oldVal}1` })
+    setPromptShown.executeMutation({ slug: `${oldVal}` })
   }
 })
 

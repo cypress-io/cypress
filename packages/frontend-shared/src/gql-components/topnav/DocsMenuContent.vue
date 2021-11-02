@@ -39,8 +39,10 @@ import { useI18n } from '@cy/i18n'
 import { getUrlWithParams, LinkWithParams } from '../../utils/getUrlWithParams'
 const { t } = useI18n()
 
+export type DocsMenuVariant = 'ci1' | 'orchestration1' | 'main'
+
 const emit = defineEmits<{
-  (e: 'setDocsContent', value: 'ci' | 'orchestration' | 'main'): void,
+  (e: 'setDocsContent', value:DocsMenuVariant): void,
 }>()
 
 defineProps<{
@@ -62,7 +64,7 @@ const docsMenu: {
   children: {
     text: string
     link: LinkWithParams,
-    changeContent?: 'ci' | 'orchestration' | 'main'
+    changeContent?: DocsMenuVariant
     }[]
 }[] = [{
   title: t('topNav.docsMenu.gettingStartedTitle'),
@@ -129,7 +131,7 @@ const docsMenu: {
   title: t('topNav.docsMenu.ciTitle'),
   children: [{
     text: t('topNav.docsMenu.ciSetup'),
-    changeContent: 'ci',
+    changeContent: 'ci1',
     link: {
       url: 'https://on.cypress.io/ci',
       params: {
@@ -139,7 +141,7 @@ const docsMenu: {
     },
   }, {
     text: t('topNav.docsMenu.fasterTests'),
-    changeContent: 'orchestration',
+    changeContent: 'orchestration1',
     link: {
       url: 'https://on.cypress.io/parallelization',
       params: {
