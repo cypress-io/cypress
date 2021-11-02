@@ -2,6 +2,7 @@
   <Collapsible
     class="block w-full mb-4 overflow-hidden border border-gray-100 rounded
   bg-light-50 hocus-default"
+    :max-height="maxHeight"
   >
     <template #target="{ open }">
       <ListRowHeader
@@ -28,7 +29,7 @@
         </template>
       </ListRowHeader>
     </template>
-    <div class="p-24px">
+    <div class="px-24px divide-y divide-gray-200 children:py-24px">
       <slot />
     </div>
   </Collapsible>
@@ -44,6 +45,7 @@ defineProps<{
   title: string,
   description: string,
   icon: FunctionalComponent<SVGAttributes, {}>
+  maxHeight: string
 }>()
 
 </script>

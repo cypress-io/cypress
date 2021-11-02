@@ -1,22 +1,20 @@
 <template>
-  <div class="divide-y divide-gray-200 children:pt-7 children:pb-7">
-    <ProjectId
-      :gql="props.gql"
+  <ProjectId
+    :gql="props.gql"
+  />
+  <template v-if="props.gql.cloudProject?.recordKeys?.length">
+    <RecordKey
+      v-for="key of props.gql.cloudProject.recordKeys"
+      :key="key.id"
+      :gql="key"
     />
-    <template v-if="props.gql.cloudProject?.recordKeys?.length">
-      <RecordKey
-        v-for="key of props.gql.cloudProject.recordKeys"
-        :key="key.id"
-        :gql="key"
-      />
-    </template>
-    <template v-else>
-      You don't have any record keys. You should make some so you can record
-      on Cypress Cloud.
-    </template>
-    <Experiments />
-    <Config :gql="props.gql" />
-  </div>
+  </template>
+  <template v-else>
+    You don't have any record keys. You should make some so you can record
+    on Cypress Cloud.
+  </template>
+  <Experiments />
+  <Config :gql="props.gql" />
 </template>
 
 <script lang="ts" setup>

@@ -4,6 +4,7 @@
       :title="t('settingsPage.device.title')"
       :description="t('settingsPage.device.description')"
       :icon="IconLaptop"
+      max-height="800px"
     >
       <DeviceSettings />
     </SettingsCard>
@@ -11,6 +12,7 @@
       :title="t('settingsPage.project.title')"
       :description="t('settingsPage.project.description')"
       :icon="IconFolder"
+      max-height="2200px"
     >
       <ProjectSettings
         v-if="props.gql.app.activeProject"
