@@ -13,6 +13,7 @@
     You don't have any record keys. You should make some so you can record
     on Cypress Cloud.
   </template>
+  <SpecPatterns :gql="props.gql" />
   <Experiments />
   <Config :gql="props.gql" />
 </template>
@@ -23,12 +24,14 @@ import RecordKey from './RecordKey.vue'
 import Experiments from './Experiments.vue'
 import ProjectId from './ProjectId.vue'
 import Config from './Config.vue'
+import SpecPatterns from './SpecPatterns.vue'
 import type { ProjectSettingsFragment } from '../../generated/graphql'
 
 gql`
 fragment ProjectSettings on Project{
   id
   ...ProjectId
+  ...SpecPatterns
   ...Config
   cloudProject {
     id

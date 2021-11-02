@@ -34,7 +34,7 @@
     </ConfigBadge>
 
     <ConfigBadge
-      :class="CONFIG_LEGEND_COLOR_MAP.dynamic"
+      :class="CONFIG_LEGEND_COLOR_MAP.plugin"
       :label="legendText.dynamic.label"
     >
       <i18n-t :keypath="legendText.dynamic.descriptionKey">

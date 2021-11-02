@@ -1,18 +1,27 @@
 <template>
-  <span v-if="value.length">[<br>
+  <span
+    v-if="value.length"
+    :class="colorClasses"
+  >[<br>
     <template
       v-for="blockHost in value"
       :key="blockHost"
     >
-      <span class="line">'{{ blockHost }}',</span><br> </template>
+      <span
+        :class="colorClasses"
+      >'{{ blockHost }}',</span><br> </template>
     ]
   </span>
-  <span v-else>{}</span>
+  <span
+    v-else
+    :class="colorClasses"
+  >{}</span>
 </template>
 
 <script lang="ts" setup>
 
 defineProps<{
-  value: any[]
+  value: any[],
+  colorClasses?: string
 }>()
 </script>

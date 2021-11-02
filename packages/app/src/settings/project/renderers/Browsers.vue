@@ -1,13 +1,14 @@
 <template>
-  <span>[<span
-    v-for="browser in browsers"
-    :key="browser.name"
-  >'{{ browser.name }}', </span>]</span>
+  <span :class="colorClasses">{{ browsers }}</span>
 </template>
 
 <script lang="ts" setup>
+import { computed } from 'vue'
 
-defineProps<{
+const props = defineProps<{
   browsers: any[]
+  colorClasses?: string
 }>()
+
+const browsers = computed(() => props.browsers.map((b) => b.name).join(', '))
 </script>

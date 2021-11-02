@@ -11,7 +11,7 @@
         >cypress.config.js</a>
       </i18n-t>
     </template>
-    <div class="flex w-full select-none">
+    <div class="flex w-full">
       <ConfigCode
         data-testid="config-code"
         :config="configObject"
@@ -44,5 +44,5 @@ const props = defineProps<{
   gql: ConfigFragment
 }>()
 
-const configObject = computed(() => props.gql.config.filter((c) => c.value))
+const configObject = computed(() => props.gql.config)
 </script>

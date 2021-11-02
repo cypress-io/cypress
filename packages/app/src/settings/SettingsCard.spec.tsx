@@ -12,7 +12,7 @@ describe('<SettingsCard />', () => {
 
     cy.mount(() => (
       <div class="">
-        <SettingsCard title={title} description={description} icon={IconLaptop}>
+        <SettingsCard title={title} description={description} icon={IconLaptop} maxHeight="800px">
           <div data-testid="content">
             <p>The body of the content</p>
           </div>

@@ -1,5 +1,5 @@
 <template>
-  <SettingsSection>
+  <SettingsSection code="projectId">
     <template #title>
       {{ t('settingsPage.projectId.title') }}
     </template>
@@ -41,7 +41,6 @@ fragment ProjectId on Project {
 `
 
 const props = defineProps<{
-  mockClipboard?: any,
   gql?: ProjectIdFragment
 }>()
 

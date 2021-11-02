@@ -1,5 +1,5 @@
 <template>
-  <div class="relative grow-1 w-full hide-scrollbar rounded-bl-md rounded-tl-md mx-auto border-1 overflow-auto min-w-100px select-none">
+  <div class="relative grow-1 w-full hide-scrollbar rounded-bl-md rounded-tl-md mx-auto border-1 overflow-auto min-w-100px">
     <Button
       variant="outline"
       class="absolute top-4 right-4"
@@ -9,38 +9,46 @@
       {{ t('file.edit') }}
     </Button>
     <code
-      class="p-2 font-mono text-gray-600 text-sm"
+      class="block p-16px text-gray-600 text-size-14px leading-24px font-thin"
     >
-      <span class="line">{</span><br>
+      {<br>
       <div class="pl-24px">
         <span
           v-for="{ field, value, from } in config"
           :key="field"
           class="line"
         >
-          <template v-if="value">  {{ field }}: <span
+          {{ field }}:
+          <Browsers
+            v-if="field === 'browsers' && Array.isArray(value)"
+            :browsers="value"
+            :color-classes="`rounded-sm px-2px ${colorMap[from]}`"
+          />
+          <StringArray
+            v-else-if="value && Array.isArray(value)"
+            :value="value"
+            :color-classes="`rounded-sm px-2px ${colorMap[from]}`"
+          />
+          <StringRecords
+            v-else-if="value && typeof value === 'object'"
+            :value="value"
+            :color-classes="`rounded-sm px-2px ${colorMap[from]}`"
+          />
+          <span
+            v-else
+            class="rounded-sm px-2px"
             :class="colorMap[from]"
           >
-            <Browsers
-              v-if="field==='browsers' && Array.isArray(value)"
-              :browsers="value"
-            />
-            <StringArray
-              v-else-if="Array.isArray(value)"
-              :value="value"
-            />
-            <StringRecords
-              v-else-if="typeof value === 'object'"
-              :value="value"
-            />
-            <template
-              v-else
-            >{{ typeof value === 'string' ? `'${value}'` : value }}</template>
+            {{ !value
+              ? 'null'
+              : typeof value === 'string'
+                ? `'${value}'`
+                : value }}
           </span>,
-          </template><br>
+          <br>
         </span>
       </div>
-      <span class="line">}</span>
+      }
     </code>
   </div>
 </template>
@@ -55,7 +63,11 @@ import StringArray from './renderers/StringArray.vue'
 import StringRecords from './renderers/StringRecords.vue'
 
 defineProps<{
-  config: Array<{ field: string, from: 'default'| 'config', value: string | number | boolean | Record<string, string> | Array<string | number | boolean> }>
+  config: Array<{
+    field: string,
+    from: 'default'| 'config',
+    value: string | number | boolean | Record<string, string> | Array<string | number | boolean>
+  }>
 }>()
 
 // a bug in vite ddemands that we do this passthrough
