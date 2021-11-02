@@ -333,5 +333,9 @@ export const breakingOptions = [
     name: 'firefoxGcInterval',
     errorKey: 'FIREFOX_GC_INTERVAL_REMOVED',
     isWarning: true,
+  }, {
+    name: 'nodeVersion',
+    errorKey: 'NODE_VERSION_DEPRECATION',
+    isWarning: true,
   },
 ]

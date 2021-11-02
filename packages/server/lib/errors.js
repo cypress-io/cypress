@@ -1010,6 +1010,10 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         ${arg1 ? 'Try installing Node.js 64-bit and reinstalling Cypress to use the 64-bit build.'
         : 'Consider upgrading to a 64-bit OS to continue using Cypress.'}
         `
+    case 'NODE_VERSION_DEPRECATION':
+      return stripIndent`\
+      Deprecation Warning: The ${chalk.yellow(`\`nodeVersion\``)} configuration option will be removed in the next major release of Cypress. Please remove this option from \`cypress.json\`.
+      `
     default:
   }
 }
