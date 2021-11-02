@@ -6,7 +6,6 @@ const os = require('os')
 const chalk = require('chalk')
 const prettyBytes = require('pretty-bytes')
 const _ = require('lodash')
-const R = require('ramda')
 
 // color for numbers and show values
 const g = chalk.green
@@ -22,14 +21,20 @@ methods.findProxyEnvironmentVariables = () => {
   return _.pick(process.env, ['HTTP_PROXY', 'HTTPS_PROXY', 'NO_PROXY'])
 }
 
-const maskSensitiveVariables = R.evolve({
-  CYPRESS_RECORD_KEY: R.always('<redacted>'),
-})
+const maskSensitiveVariables = (obj) => {
+  const masked = { ...obj }
+
+  if (masked.CYPRESS_RECORD_KEY) {
+    masked.CYPRESS_RECORD_KEY = '<redacted>'
+  }
+
+  return masked
+}
 
 methods.findCypressEnvironmentVariables = () => {
   const isCyVariable = (val, key) => key.startsWith('CYPRESS_')
 
-  return R.pickBy(isCyVariable)(process.env)
+  return _.pickBy(process.env, isCyVariable)
 }
 
 const formatCypressVariables = () => {
