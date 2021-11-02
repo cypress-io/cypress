@@ -12,6 +12,8 @@ const log = (...args) => console.log(logTag, ...args)
    * For all system test projects that have a package.json, check and update
    * the node_modules cache using `yarn`.
    */
+  Fixtures.remove()
+
   const projectsDir = path.join(__dirname, '../projects')
   const packageJsons = await glob('**/package.json', {
     cwd: projectsDir,
@@ -27,7 +29,7 @@ const log = (...args) => console.log(logTag, ...args)
     log('Scaffolding node_modules for', project)
 
     Fixtures.scaffoldProject(project)
-    await Fixtures.scaffoldProjectNodeModules(project, false)
+    await Fixtures.scaffoldProjectNodeModules(project, process.env.CI)
     console.timeEnd(timeTag)
   }
 

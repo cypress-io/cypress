@@ -154,7 +154,7 @@ commands:
   restore_cached_system_tests_deps:
     steps:
       - run:
-          name: Generate Circle Cache Key
+          name: Generate Circle Cache key for system tests
           command: yarn workspace @tooling/system-tests cache:key > system_tests_cache_key
       - restore_cache:
           name: Restore system tests node_modules cache

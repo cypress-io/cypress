@@ -84,15 +84,12 @@ async function makeWorkspacePackagesAbsolute (pathToPkgJson: string): Promise<st
     for (const dep in deps) {
       const version = deps[dep]
 
-      // TODO: enforce file: paths for local development
-      if (version === '0.0.0-development') {
-        const depPkgJson = require(`${dep}/package.json`)
+      if (version.startsWith('file:')) {
         const absPath = pathToPackage(dep)
 
         console.log(`📦 Setting absolute path in package.json for ${dep}: ${absPath}.`)
-        if (depPkgJson.version !== version) throw new Error(`Version mismatch (${depPkgJson.version} in ${dep}, but test project wants ${version})`)
 
-        deps[dep] = absPath
+        deps[dep] = `file:${absPath}`
         updatedDeps.push(dep)
       }
     }
@@ -103,14 +100,16 @@ async function makeWorkspacePackagesAbsolute (pathToPkgJson: string): Promise<st
   return updatedDeps
 }
 
-const relativePathToken = '<<RELATIVE PATH TO MONOREPO ROOT>>'
-
 /**
  * Given a `system-tests` project name, detect and install the `node_modules`
  * specified in the project's `package.json`. No-op if no `package.json` is found.
  */
 export async function scaffoldProjectNodeModules (project: string, updateYarnLock: boolean = !!process.env.UPDATE_YARN_LOCK): Promise<void> {
   const projectDir = projectPath(project)
+  const relativePathToMonorepoRoot = _path.relative(
+    _path.join(projects, project),
+    _path.join(root, '..'),
+  )
   const projectPkgJsonPath = _path.join(projectDir, 'package.json')
 
   const runCmd = async (cmd) => {
@@ -153,13 +152,18 @@ export async function scaffoldProjectNodeModules (project: string, updateYarnLoc
     await removeWorkspacePackages(workspaceDeps)
 
     // 3. Fix relative paths in temp dir's `yarn.lock`.
-    const relativePathToProjectDir = _path.relative(projectDir, _path.join(root, '..'))
+    const relativePathToProjectDir = _path.resolve(projectDir, _path.join(root, '..'))
     const yarnLockPath = _path.join(projectDir, 'yarn.lock')
 
     console.log('📦 Writing yarn.lock with fixed relative paths to temp dir')
     try {
+      console.log({
+        relativePathToMonorepoRoot,
+        relativePathToProjectDir,
+      })
+
       const yarnLock = (await fs.readFile(yarnLockPath, 'utf8'))
-      .replace(new RegExp(relativePathToken, 'gm'), relativePathToProjectDir)
+      .replace(new RegExp(relativePathToMonorepoRoot, 'gm'), relativePathToProjectDir)
 
       await fs.writeFile(yarnLockPath, yarnLock)
     } catch (err) {
@@ -177,19 +181,14 @@ export async function scaffoldProjectNodeModules (project: string, updateYarnLoc
 
     await runCmd(cmd)
 
-    if (updateYarnLock) {
-      // TODO: do this but less hacky
-      afterEach(require('lodash/once')(async () => {
-        console.log(`📦 Copying yarn.lock and fixing relative paths for ${project}`)
+    console.log(`📦 Copying yarn.lock and fixing relative paths for ${project}`)
 
-        // Replace workspace dependency paths in `yarn.lock` with tokens so it can be the same
-        // for all developers
-        const yarnLock = (await fs.readFile(yarnLockPath, 'utf8'))
-        .replace(new RegExp(relativePathToProjectDir, 'gm'), relativePathToken)
+    // Replace workspace dependency paths in `yarn.lock` with tokens so it can be the same
+    // for all developers
+    const yarnLock = (await fs.readFile(yarnLockPath, 'utf8'))
+    .replace(new RegExp(relativePathToProjectDir, 'gm'), relativePathToMonorepoRoot)
 
-        await fs.writeFile(_path.join(root, 'projects', project, 'yarn.lock'), yarnLock)
-      }))
-    }
+    await fs.writeFile(_path.join(projects, project, 'yarn.lock'), yarnLock)
 
     // 5. After `yarn install`, we must now symlink *over* all workspace dependencies, or else
     // `require` calls from `yarn install`'d workspace deps to peer deps will fail.
