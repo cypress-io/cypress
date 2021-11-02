@@ -13,7 +13,7 @@ import { onEnterOrSpace } from '../lib/util'
 import Attempt from '../attempts/attempt-model'
 import Command from '../commands/command-model'
 
-import ErrorIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/status-errored_x8.svg'
+import WarningIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/warning_x8.svg'
 import TerminalIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/technology-terminal_x16.svg'
 
 interface DocsUrlProps {
@@ -68,7 +68,7 @@ const TestError = observer((props: TestErrorProps) => {
       <div className='runnable-err'>
         <div className='runnable-err-header'>
           <div className='runnable-err-name'>
-            <ErrorIcon />
+            <WarningIcon />
             {err.name}
           </div>
         </div>

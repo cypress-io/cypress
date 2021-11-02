@@ -20,6 +20,7 @@ import TestError from '../errors/test-error'
 import ChevronIcon from '-!react-svg-loader!@packages/app/src/assets/icons/chevron-down-small_x8.svg'
 import DeleteIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/action-delete-circle_x16.svg'
 import HiddenIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/general-eye-closed_x16.svg'
+import PinIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/object-pin_x16.svg'
 import RunningIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/status-running_x16.svg'
 
 const md = new Markdown()
@@ -264,7 +265,7 @@ class Command extends Component<Props> {
                 <span>{model.number || ''}</span>
               </span>
               <span className='command-pin'>
-                <i className='fas fa-thumbtack' />
+                <PinIcon />
               </span>
               <span className='command-method'>
                 <span>{model.event && model.type !== 'system' ? `(${displayName(model)})` : displayName(model)}</span>

@@ -98,7 +98,8 @@ $code-border-radius: 4px;
       color: $err-header-text;
 
       svg {
-        margin-right: 10px;
+        margin-right: 8px;
+        margin-bottom: 1px;
       }
     }
   }
@@ -202,6 +203,7 @@ $code-border-radius: 4px;
 
         svg {
           color: $red-400;
+          margin-right: 4px;
           vertical-align: middle;
         }
 

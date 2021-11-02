@@ -482,6 +482,7 @@
 
   .command-controls {
     svg {
+      padding: 2px;
       color: $gray-600;
       cursor: pointer;
       margin: 0px 4px;
@@ -575,14 +576,15 @@
     flex-shrink: 0;
     font-size: 14px;
     line-height: 1;
-    margin-right: 10px;
+    margin-left: 4px;
+    margin-right: 6px;
     outline: none;
     padding: 2px 0 0;
     text-align: right;
     width: 15px;
 
-    i {
-      margin-right: 0;
+    .icon-light {
+      fill: $gray-800;
     }
   }
 
@@ -684,6 +686,10 @@
 
       .command-pin {
         color: $pinned;
+
+        .icon-light {
+          fill: $purple-700;
+        }
       }
     }
   }

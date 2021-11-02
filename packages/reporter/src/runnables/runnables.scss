@@ -232,6 +232,12 @@
           stroke: $gray-800;
         }
       }
+
+      &.wand-icon {
+        .icon-light {
+          fill: $indigo-700;
+        }
+      }
     }
   }
 

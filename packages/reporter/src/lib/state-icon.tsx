@@ -34,7 +34,7 @@ const StateIcon = observer((props: Props) => {
   if (state === 'passed') {
     if (isStudio) {
       return (
-        <WandIcon {...rest} width="12px" height="12px" />
+        <WandIcon {...rest} className={cs('wand-icon', rest.className)} viewBox="0 0 16 16" width="12px" height="12px" />
       )
     }
 
