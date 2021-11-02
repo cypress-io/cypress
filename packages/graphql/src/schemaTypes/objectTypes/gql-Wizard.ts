@@ -104,13 +104,6 @@ export const Wizard = objectType({
       description: 'The title of the page, given the current step of the wizard',
       resolve: (source, args, ctx) => ctx.wizard.title ?? null,
     })
-
-    t.string('browserErrorMessage', {
-      description: 'An error related to finding a browser',
-      resolve: (source, args, ctx) => {
-        return ctx.wizardData.browserErrorMessage
-      },
-    })
   },
   sourceType: {
     module: '@packages/data-context/src/data/coreDataShape',
