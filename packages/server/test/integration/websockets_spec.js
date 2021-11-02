@@ -28,7 +28,7 @@ describe('Web Sockets', () => {
 
     this.idsPath = Fixtures.projectPath('ids')
 
-    return config.get(this.idsPath, { port: cyPort })
+    return config.get(this.idsPath, { port: cyPort, configFile: 'cypress.config.js' })
     .then((cfg) => {
       this.cfg = cfg
       this.ws = new ws.Server({ port: wsPort })

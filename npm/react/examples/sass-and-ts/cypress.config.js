@@ -1,0 +1,12 @@
+module.exports = {
+  'video': false,
+  'fixturesFolder': false,
+  'testFiles': '**/*spec.*',
+  'viewportWidth': 500,
+  'viewportHeight': 500,
+  'componentFolder': 'src',
+  'nodeVersion': 'system',
+  'env': {
+    'coverage': true,
+  },
+}

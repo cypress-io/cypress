@@ -58,7 +58,8 @@ describe('App', () => {
     cy.loginUser()
     cy.visitApp()
     cy.withCtx(async (ctx) => {
-      await ctx.actions.file.writeFileInProject('cypress.json', '{}')
+      ctx.config.cleanupCachedConfigForActiveProject()
+      await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {}')
     })
 
     cy.get('[href="#/runs"]').click()

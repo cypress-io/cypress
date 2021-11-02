@@ -6,19 +6,19 @@ const settings = require(`../../../lib/util/settings`)
 
 const projectRoot = process.cwd()
 const defaultOptions = {
-  configFile: 'cypress.json',
+  configFile: 'cypress.config.js',
 }
 
 describe('lib/util/settings', () => {
   context('with default configFile option', () => {
     beforeEach(function () {
       this.setup = (obj = {}) => {
-        return fs.writeJsonAsync('cypress.json', obj)
+        return fs.writeFileAsync('cypress.config.js', `module.exports = ${JSON.stringify(obj)}`)
       }
     })
 
     afterEach(() => {
-      return fs.removeAsync('cypress.json')
+      return fs.removeAsync('cypress.config.js')
     })
 
     context('nested cypress object', () => {
@@ -29,7 +29,7 @@ describe('lib/util/settings', () => {
         }).then((obj) => {
           expect(obj).to.deep.eq({ foo: 'bar' })
 
-          return fs.readJsonAsync('cypress.json')
+          return require(path.join(projectRoot, 'cypress.config.js'))
         }).then((obj) => {
           expect(obj).to.deep.eq({ foo: 'bar' })
         })
@@ -84,13 +84,13 @@ describe('lib/util/settings', () => {
       })
 
       afterEach(function () {
-        return fs.removeAsync(`${this.projectRoot}cypress.json`)
+        return fs.removeAsync(`${this.projectRoot}cypress.config.js`)
       })
 
       it('returns project id for project', function () {
-        return fs.writeJsonAsync(`${this.projectRoot}cypress.json`, {
+        return fs.writeFileAsync(`${this.projectRoot}cypress.config.js`, `module.exports = {
           projectId: 'id-123',
-        })
+        }`)
         .then(() => {
           return settings.id(this.projectRoot, defaultOptions)
         }).then((id) => {
@@ -100,7 +100,7 @@ describe('lib/util/settings', () => {
     })
 
     context('.read', () => {
-      it('promises cypress.json', function () {
+      it('promises cypress.config.js', function () {
         return this.setup({ foo: 'bar' })
         .then(() => {
           return settings.read(projectRoot, defaultOptions)
@@ -109,7 +109,7 @@ describe('lib/util/settings', () => {
         })
       })
 
-      it('promises cypress.json and merges CT specific properties for via testingType: component', function () {
+      it('promises cypress.config.js and merges CT specific properties for via testingType: component', function () {
         return this.setup({ a: 'b', component: { a: 'c' } })
         .then(() => {
           return settings.read(projectRoot, { ...defaultOptions, testingType: 'component' })
@@ -118,7 +118,7 @@ describe('lib/util/settings', () => {
         })
       })
 
-      it('promises cypress.json and merges e2e specific properties', function () {
+      it('promises cypress.config.js and merges e2e specific properties', function () {
         return this.setup({ a: 'b', e2e: { a: 'c' } })
         .then(() => {
           return settings.read(projectRoot, defaultOptions)
@@ -170,7 +170,7 @@ describe('lib/util/settings', () => {
         }).catch((err) => {
           expect(err.type).to.equal('CONFIG_FILE_NOT_FOUND')
 
-          return fs.access(path.join(projectRoot, 'cypress.json'))
+          return fs.access(path.join(projectRoot, 'cypress.config.js'))
           .then(() => {
             throw Error('file should not have been created here')
           }).catch((err) => {
@@ -181,7 +181,7 @@ describe('lib/util/settings', () => {
     })
 
     context('.write', () => {
-      it('promises cypress.json updates', function () {
+      it('promises cypress.config.js updates', function () {
         return this.setup().then(() => {
           return settings.write(projectRoot, { foo: 'bar' }, defaultOptions)
         }).then((obj) => {
@@ -212,7 +212,7 @@ describe('lib/util/settings', () => {
     it('.write does not create a file', function () {
       return settings.write(this.projectRoot, {}, this.options)
       .then(() => {
-        return fs.access(path.join(this.projectRoot, 'cypress.json'))
+        return fs.access(path.join(this.projectRoot, 'cypress.config.js'))
         .then(() => {
           throw Error('file shuold not have been created here')
         }).catch((err) => {

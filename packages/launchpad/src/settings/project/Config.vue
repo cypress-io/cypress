@@ -28,10 +28,10 @@
 import { ref } from 'vue'
 import SettingsSection from '../SettingsSection.vue'
 import { useI18n } from '@cy/i18n'
-import cypressJson from '../../../cypress.json?raw' // TODO: remove this
+import cypressConfig from '../../../cypress.config'
 import ConfigLegend from './ConfigLegend.vue'
 import ConfigCode from './ConfigCode.vue'
 
-const code = ref(JSON.parse(JSON.stringify(cypressJson, null, 2)))
+const code = ref(JSON.parse(JSON.stringify(cypressConfig, null, 2)))
 const { t } = useI18n()
 </script>
