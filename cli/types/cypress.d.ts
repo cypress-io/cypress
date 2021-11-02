@@ -5633,7 +5633,7 @@ declare namespace Cypress {
   }
 
   interface Response<T> {
-    allRequestResponses: Array<RequestResponse<T>>;
+    allRequestResponses: Array<RequestResponse<T>>
     body: T
     duration: number
     headers: { [key: string]: string | string[] }
