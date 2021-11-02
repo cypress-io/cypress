@@ -77,17 +77,36 @@ describe('e2e config', () => {
   })
 
   it('throws error when multiple default config file are found in project', function () {
-    const projectRoot = Fixtures.projectPath('pristine')
+    const projectRoot = Fixtures.projectPath('pristine-with-config-file')
 
-    return Promise.all([
-      fs.writeFile(path.join(projectRoot, 'cypress.config.js'), 'module.exports = {}'),
-      fs.writeFile(path.join(projectRoot, 'cypress.config.ts'), 'export default {}'),
-    ]).then(() => {
+    return fs.writeFile(path.join(projectRoot, 'cypress.config.ts'), 'export default {}').then(() => {
       return systemTests.exec(this, {
         project: projectRoot,
         expectedExitCode: 1,
         snapshot: true,
       })
+    })
+  })
+
+  it('throws error when cypress.json is found in project and need migration', function () {
+    const projectRoot = Fixtures.projectPath('pristine')
+
+    return fs.writeFile(path.join(projectRoot, 'cypress.json'), '{}').then(() => {
+      return systemTests.exec(this, {
+        project: projectRoot,
+        expectedExitCode: 1,
+        snapshot: true,
+      })
+    })
+  })
+
+  it('throws error when cypress.json is found in project and cypress.config.{ts|js} exists as well', function () {
+    const projectRoot = Fixtures.projectPath('multiples-config-files-with-json')
+
+    return systemTests.exec(this, {
+      project: projectRoot,
+      expectedExitCode: 1,
+      snapshot: true,
     })
   })
 })

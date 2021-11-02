@@ -48,7 +48,7 @@ describe('<GlobalPage />', { viewportHeight: 900, viewportWidth: 1200 }, () => {
     it('can add a project when clicking the button', () => {
       cy.contains('button', defaultMessages.globalPage.addProjectButton).click()
       cy.get('input[type=file]')
-      .attachFileWithPath('absolute/path/to/yet-another-test-project/cypress.json')
+      .attachFileWithPath('absolute/path/to/yet-another-test-project/cypress.config.ts')
       .trigger('change', { force: true })
       // .findByText('yet-another-test-project').should('be.visible')
     })

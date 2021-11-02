@@ -1,0 +1,6 @@
+module.exports = {
+  'video': false,
+  'fixturesFolder': false,
+  'testFiles': '**/*spec.js',
+  'componentFolder': 'src',
+}
