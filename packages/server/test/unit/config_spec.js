@@ -2387,7 +2387,7 @@ describe('lib/config', () => {
       })
     })
 
-    it('sets bundled Node ver and if nodeVersion = system and cliNodePath undefined', function () {
+    it('sets bundled Node ver and if nodeVersion = system and userNodePath undefined', function () {
       const obj = config.setNodeBinary({
         nodeVersion: 'system',
       }, undefined, '1.2.3')
@@ -2398,7 +2398,7 @@ describe('lib/config', () => {
       })
     })
 
-    it('sets bundled Node ver and if nodeVersion = system and cliNodeVersion undefined', function () {
+    it('sets bundled Node ver and if nodeVersion = system and userNodeVersion undefined', function () {
       const obj = config.setNodeBinary({
         nodeVersion: 'system',
       }, '/foo/bar/node')

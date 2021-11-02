@@ -100,9 +100,9 @@ describe('lib/exec/spawn', function () {
           '--foo',
           '--cwd',
           cwd,
-          '--cliNodePath',
+          '--userNodePath',
           execPath,
-          '--cliNodeVersion',
+          '--userNodeVersion',
           nodeVersion,
         ], {
           detached: false,
@@ -128,9 +128,9 @@ describe('lib/exec/spawn', function () {
           '--foo',
           '--cwd',
           cwd,
-          '--cliNodePath',
+          '--userNodePath',
           execPath,
-          '--cliNodeVersion',
+          '--userNodeVersion',
           nodeVersion,
         ]
 
@@ -152,9 +152,9 @@ describe('lib/exec/spawn', function () {
           '--foo',
           '--cwd',
           cwd,
-          '--cliNodePath',
+          '--userNodePath',
           execPath,
-          '--cliNodeVersion',
+          '--userNodeVersion',
           nodeVersion,
         ], {
           detached: false,
@@ -177,9 +177,9 @@ describe('lib/exec/spawn', function () {
           '--foo',
           '--cwd',
           cwd,
-          '--cliNodePath',
+          '--userNodePath',
           execPath,
-          '--cliNodeVersion',
+          '--userNodeVersion',
           nodeVersion,
         ], {
           detached: false,

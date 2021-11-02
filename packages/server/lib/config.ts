@@ -293,7 +293,7 @@ export function mergeDefaults (config: Record<string, any> = {}, options: Record
 
   config = setParentTestsPaths(config)
 
-  config = setNodeBinary(config, options.args?.cliNodePath, options.args?.cliNodeVersion)
+  config = setNodeBinary(config, options.args?.userNodePath, options.args?.userNodeVersion)
 
   // validate config again here so that we catch
   // configuration errors coming from the CLI overrides
@@ -454,11 +454,11 @@ export function resolveConfigValues (config, defaults, resolved = {}, options = 
 }
 
 // instead of the built-in Node process, specify a path to 3rd party Node
-export const setNodeBinary = (obj, cliNodePath, cliNodeVersion) => {
+export const setNodeBinary = (obj, userNodePath, userNodeVersion) => {
   // if execPath isn't found we weren't executed from the CLI and should used the bundled node version.
-  if (cliNodePath && cliNodeVersion && obj.nodeVersion === 'system') {
-    obj.resolvedNodePath = cliNodePath
-    obj.resolvedNodeVersion = cliNodeVersion
+  if (userNodePath && userNodeVersion && obj.nodeVersion === 'system') {
+    obj.resolvedNodePath = userNodePath
+    obj.resolvedNodeVersion = userNodeVersion
 
     return obj
   }

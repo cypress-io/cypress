@@ -202,6 +202,14 @@ type ExecOptions = {
    * If set, a dummy `node_modules` project with this name will be set up.
    */
   stubPackage?: string
+  /**
+   * Run Cypress with a custom user node path.
+   */
+  userNodePath?: string
+  /**
+   * Run Cypress with a custom user node version.
+   */
+  userNodeVersion?: string
 }
 
 type Server = {
@@ -848,6 +856,14 @@ const systemTests = {
 
     if (options.configFile) {
       args.push(`--config-file=${options.configFile}`)
+    }
+
+    if (options.userNodePath) {
+      args.push(`--userNodePath=${options.userNodePath}`)
+    }
+
+    if (options.userNodeVersion) {
+      args.push(`--userNodeVersion=${options.userNodeVersion}`)
     }
 
     return args
