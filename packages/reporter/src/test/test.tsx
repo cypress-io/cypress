@@ -16,6 +16,7 @@ import Attempts from '../attempts/attempts'
 import StateIcon from '../lib/state-icon'
 
 import CheckIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/checkmark_x16.svg'
+import ClipboardIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/general-clipboard_x16.svg'
 import WandIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/object-magic-wand-dark-mode_x16.svg'
 import WarningIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/warning_x16.svg'
 
@@ -89,7 +90,7 @@ class StudioControls extends Component<StudioControlsProps, StudioControlsState>
             {copySuccess ? (
               <CheckIcon />
             ) : (
-              <i className='far fa-copy' />
+              <ClipboardIcon />
             )}
           </button>
         </Tooltip>
@@ -168,7 +169,7 @@ class Test extends Component<TestProps> {
     const { appState, model } = this.props
 
     return (<>
-      <StateIcon aria-hidden className="runnable-status-icon" state={model.state} isStudio={appState.studioActive} />
+      <StateIcon aria-hidden className="runnable-state-icon" state={model.state} isStudio={appState.studioActive} />
       <span className='runnable-title'>
         <span>{model.title}</span>
         <span className='visually-hidden'>{model.state}</span>

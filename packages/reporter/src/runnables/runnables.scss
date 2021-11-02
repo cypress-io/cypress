@@ -224,8 +224,14 @@
       }
     }
 
-    .runnable-status-icon {
+    .runnable-state-icon {
       margin: 4px 4px 4px 0px;
+
+      &.fa-spin {
+        .icon-light {
+          stroke: $gray-800;
+        }
+      }
     }
   }
 
