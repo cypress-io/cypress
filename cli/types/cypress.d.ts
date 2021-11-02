@@ -5633,7 +5633,7 @@ declare namespace Cypress {
   }
 
   interface Response<T> {
-    allRequestResponses: any[]
+    allRequestResponses: RequestResponse<T>[]
     body: T
     duration: number
     headers: { [key: string]: string | string[] }
@@ -5643,6 +5643,15 @@ declare namespace Cypress {
     requestHeaders: { [key: string]: string }
     status: number
     statusText: string
+  }
+
+  interface RequestResponse<T> {
+    'Request Body': T,
+    'Request Headers': Response<T>["requestHeaders"],
+    'Request URL': string,
+    'Response Body': T,
+    'Response Headers': Response<T>["headers"],
+    'Response Status': number,
   }
 
   interface Server extends RouteOptions {
