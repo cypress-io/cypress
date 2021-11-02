@@ -1,4 +1,6 @@
 exports['e2e system node uses system node when launching plugins file 1'] = `
+Deprecation Warning: The \`nodeVersion\` configuration option will be removed in the next major release of Cypress. Please remove this option from \`cypress.json\`.
+
 
 ====================================================================================================
 
