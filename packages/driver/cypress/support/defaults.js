@@ -1,23 +1,24 @@
 const { $ } = Cypress
 
-beforeEach(() => {
-  const isActuallyInteractive = Cypress.config('isInteractive')
+const isActuallyInteractive = Cypress.config('isInteractive')
 
+if (!isActuallyInteractive) {
+  // we want to only enable retries in runMode
+  // and because we set `isInteractive` above
+  // we have to set retries here
+  Cypress.config('retries', 2)
+}
+
+beforeEach(() => {
   // always set that we're interactive so we
   // get consistent passes and failures when running
   // from CI and when running in GUI mode
   Cypress.config('isInteractive', true)
 
   if (!isActuallyInteractive) {
-    Cypress.config({
-      // necessary or else snapshots will not be taken
-      // and we can't test them
-      'numTestsKeptInMemory': 1,
-      // forcing interactive mode so force retries
-      // when test started in 'runMode'
-      // only want retries for 'runMode'
-      'config': 2,
-    })
+    // necessary or else snapshots will not be taken
+    // and we can't test them
+    Cypress.config('numTestsKeptInMemory', 1)
   }
 
   // remove all event listeners
