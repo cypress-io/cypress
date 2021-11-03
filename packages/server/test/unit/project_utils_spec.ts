@@ -101,7 +101,7 @@ describe('lib/project_utils', () => {
   describe('checkSupportFile', () => {
     it('does nothing when {supportFile: false}', async () => {
       const ret = await checkSupportFile({
-        configFile: 'cypress.json',
+        configFile: 'cypress.config.ts',
         supportFile: false,
       })
 
@@ -111,7 +111,7 @@ describe('lib/project_utils', () => {
     it('throws when support file does not exist', async () => {
       try {
         await checkSupportFile({
-          configFile: 'cypress.json',
+          configFile: 'cypress.config.ts',
           supportFile: '/this/file/does/not/exist/foo/bar/cypress/support/index.js',
         })
       } catch (e) {
@@ -132,11 +132,11 @@ describe('lib/project_utils', () => {
       readdirStub.restore()
     })
 
-    it('finds cypress.json when present', async () => {
-      readdirStub.withArgs(projectRoot).resolves(['cypress.json'])
+    it('finds cypress.config.ts when present', async () => {
+      readdirStub.withArgs(projectRoot).resolves(['cypress.config.ts'])
       const ret = await getDefaultConfigFilePath(projectRoot)
 
-      expect(ret).to.equal('cypress.json')
+      expect(ret).to.equal('cypress.config.ts')
     })
 
     it('defaults to cypress.config.js when present', async () => {
@@ -146,15 +146,8 @@ describe('lib/project_utils', () => {
       expect(ret).to.equal('cypress.config.js')
     })
 
-    it('defaults to cypress.json when no file is returned', async () => {
-      readdirStub.withArgs(projectRoot).resolves([])
-      const ret = await getDefaultConfigFilePath(projectRoot)
-
-      expect(ret).to.equal('cypress.json')
-    })
-
     it('errors if two default files are present', async () => {
-      readdirStub.withArgs(projectRoot).resolves(['cypress.config.js', 'cypress.json'])
+      readdirStub.withArgs(projectRoot).resolves(['cypress.config.js', 'cypress.config.ts'])
       try {
         await getDefaultConfigFilePath(projectRoot)
         throw Error('should have failed')
@@ -166,7 +159,7 @@ describe('lib/project_utils', () => {
     it('errors if no file is present and we asked not to create any', async () => {
       readdirStub.withArgs(projectRoot).resolves([])
       try {
-        await getDefaultConfigFilePath(projectRoot, false)
+        await getDefaultConfigFilePath(projectRoot)
         throw Error('should have failed')
       } catch (err) {
         expect(err).to.have.property('type', 'NO_DEFAULT_CONFIG_FILE_FOUND')

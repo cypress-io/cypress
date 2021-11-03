@@ -161,7 +161,7 @@ class RunsList extends Component {
 
     // OR if there is an error getting the runs
     if (this.runsStore.error) {
-      // project id missing, probably removed manually from cypress.json
+      // project id missing, probably removed manually from cypress.config.{ts|js}
       if (errors.isMissingProjectId(this.runsStore.error)) {
         return this._projectNotSetup()
 

@@ -1,4 +1,10 @@
+import { makeLegacyDataContext } from '../makeDataContext'
+
 export = (mode, options) => {
+  if (!process.env.LAUNCHPAD) {
+    makeLegacyDataContext(options)
+  }
+
   if (mode === 'record') {
     return require('./record').run(options)
   }

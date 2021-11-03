@@ -22,7 +22,7 @@ describe('lib/scaffold', () => {
 
   context('.isNewProject', () => {
     beforeEach(function () {
-      this.pristinePath = Fixtures.projectPath('pristine')
+      this.pristinePath = Fixtures.projectPath('pristine-with-config-file')
     })
 
     it('is true when integrationFolder is empty', function () {
@@ -129,7 +129,7 @@ describe('lib/scaffold', () => {
 
   context('.integration', () => {
     beforeEach(function () {
-      const pristinePath = Fixtures.projectPath('pristine')
+      const pristinePath = Fixtures.projectPath('pristine-with-config-file')
 
       return config.get(pristinePath).then((cfg) => {
         this.cfg = cfg;
@@ -212,7 +212,7 @@ describe('lib/scaffold', () => {
 
   context('.removeIntegration', () => {
     beforeEach(function () {
-      const pristinePath = Fixtures.projectPath('pristine')
+      const pristinePath = Fixtures.projectPath('pristine-with-config-file')
 
       return config.get(pristinePath).then((cfg) => {
         this.cfg = cfg;
@@ -323,7 +323,7 @@ describe('lib/scaffold', () => {
 
   context('.support', () => {
     beforeEach(function () {
-      const pristinePath = Fixtures.projectPath('pristine')
+      const pristinePath = Fixtures.projectPath('pristine-with-config-file')
 
       return config.get(pristinePath).then((cfg) => {
         this.cfg = cfg;
@@ -400,7 +400,7 @@ describe('lib/scaffold', () => {
 
   context('.plugins', () => {
     beforeEach(function () {
-      const pristinePath = Fixtures.projectPath('pristine')
+      const pristinePath = Fixtures.projectPath('pristine-with-config-file')
 
       return config.get(pristinePath).then((cfg) => {
         this.cfg = cfg;
@@ -456,7 +456,7 @@ describe('lib/scaffold', () => {
 
   context('.fixture', () => {
     beforeEach(function () {
-      const pristinePath = Fixtures.projectPath('pristine')
+      const pristinePath = Fixtures.projectPath('pristine-with-config-file')
 
       return config.get(pristinePath).then((cfg) => {
         this.cfg = cfg;

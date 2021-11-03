@@ -255,6 +255,7 @@ describe('lib/cache', () => {
           },
           PROJECTS: ['foo'],
           PROJECT_PREFERENCES: {},
+          PROJECTS_CONFIG: {},
         })
       })
     })

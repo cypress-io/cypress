@@ -353,7 +353,7 @@ declare namespace Cypress {
 
     // no real way to type without generics
     /**
-     * Returns all environment variables set with CYPRESS_ prefix or in "env" object in "cypress.json"
+     * Returns all environment variables set with CYPRESS_ prefix or in "env" object in "cypress.config.{ts|js}"
      *
      * @see https://on.cypress.io/env
      */
@@ -362,7 +362,7 @@ declare namespace Cypress {
      * Returns specific environment variable or undefined
      * @see https://on.cypress.io/env
      * @example
-     *    // cypress.json
+     *    // cypress.config.js
      *    { "env": { "foo": "bar" } }
      *    Cypress.env("foo") // => bar
      */
@@ -2756,7 +2756,7 @@ declare namespace Cypress {
     retries: Nullable<number | { runMode?: Nullable<number>, openMode?: Nullable<number> }>
     /**
      * Enables including elements within the shadow DOM when using querying
-     * commands (e.g. cy.get(), cy.find()). Can be set globally in cypress.json,
+     * commands (e.g. cy.get(), cy.find()). Can be set globally in cypress.config.{ts|js},
      * per-suite or per-test in the test configuration object, or programmatically
      * with Cypress.config()
      * @default false
@@ -2894,7 +2894,7 @@ declare namespace Cypress {
 
   interface PluginConfigOptions extends ResolvedConfigOptions {
     /**
-    * Absolute path to the config file (default: <projectRoot>/cypress.json) or false
+    * Absolute path to the config file (default: <projectRoot>/cypress.config.{ts|js}) or false
     */
     configFile: string | false
     /**

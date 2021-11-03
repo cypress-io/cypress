@@ -10,9 +10,19 @@ export class FileActions {
       throw new Error(`Cannot write file in project without active project`)
     }
 
+    const filePath = path.join(this.ctx.activeProject?.projectRoot, relativePath)
+
     await this.ctx.fs.writeFile(
-      path.join(this.ctx.activeProject?.projectRoot, relativePath),
+      filePath,
       data,
     )
+  }
+
+  async removeFileInProject (relativePath: string) {
+    if (!this.ctx.activeProject) {
+      throw new Error(`Cannot remove file in project without active project`)
+    }
+
+    await this.ctx.fs.remove(path.join(this.ctx.activeProject?.projectRoot, relativePath))
   }
 }
