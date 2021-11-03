@@ -1,10 +1,10 @@
 import sinon from 'sinon'
 import $ from 'jquery'
 import driver from '@packages/driver'
-import { eventManager } from '../event-manager'
 import { dom } from '../dom'
+import { createEventManager } from '../../test/utils'
 
-import { StudioRecorder, studioRecorder } from './studio-recorder'
+import { StudioRecorder } from './studio-recorder'
 
 const createEvent = (props) => {
   return {
@@ -17,6 +17,7 @@ const createEvent = (props) => {
 }
 
 describe('StudioRecorder', () => {
+  let eventManager
   const cyVisitStub = sinon.stub()
   const getSelectorStub = sinon.stub().returns('.selector')
   const setOnlyTestIdStub = sinon.stub()
@@ -25,7 +26,8 @@ describe('StudioRecorder', () => {
   let instance
 
   beforeEach(() => {
-    instance = new StudioRecorder()
+    eventManager = createEventManager()
+    instance = new StudioRecorder(eventManager)
 
     sinon.stub(instance, 'attachListeners')
     sinon.stub(instance, 'removeListeners')
@@ -53,10 +55,6 @@ describe('StudioRecorder', () => {
 
   afterEach(() => {
     sinon.restore()
-  })
-
-  it('exports a singleton by named export', () => {
-    expect(studioRecorder).to.be.instanceOf(StudioRecorder)
   })
 
   context('#startLoading', () => {

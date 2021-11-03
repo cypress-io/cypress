@@ -11,7 +11,7 @@ const fixedOrAbsoluteRe = /(fixed|absolute)/
 
 const OVERFLOW_PROPS = ['hidden', 'scroll', 'auto']
 
-export const isVisible = (el) => {
+const isVisible = (el) => {
   return !isHidden(el, 'isVisible()')
 }
 
@@ -22,11 +22,22 @@ const { wrap } = $jquery
 // because of circular references
 // the ignoreOpacity option exists for checking actionability
 // as elements with `opacity: 0` are hidden yet actionable
-export const isHidden = (el, methodName = 'isHidden()', options = { checkOpacity: true }) => {
+const isHidden = (el, methodName = 'isHidden()', options = { checkOpacity: true }) => {
+  if (isStrictlyHidden(el, methodName, options, isHidden)) {
+    return true
+  }
+
+  return isHiddenByAncestors(el, methodName, options)
+}
+
+const ensureEl = (el, methodName) => {
   if (!isElement(el)) {
     throw new Error(`\`Cypress.dom.${methodName}\` failed because it requires a DOM element. The subject received was: \`${el}\``)
   }
+}
 
+const isStrictlyHidden = (el, methodName = 'isStrictlyHidden()', options = { checkOpacity: true }, recurse?) => {
+  ensureEl(el, methodName)
   const $el = $jquery.wrap(el)
 
   // the body and html are always visible
@@ -49,7 +60,7 @@ export const isHidden = (el, methodName = 'isHidden()', options = { checkOpacity
     // in which case it will fall through to regular visibility logic
     if ($select && $select.length) {
       // if the select is hidden, the options in it are visible too
-      return isHidden($select[0], methodName)
+      return recurse ? recurse($select[0], methodName, options) : isStrictlyHidden($select[0], methodName, options)
     }
   }
 
@@ -83,6 +94,13 @@ export const isHidden = (el, methodName = 'isHidden()', options = { checkOpacity
   if (elHasOpacityZero($el) && options.checkOpacity) {
     return true
   }
+
+  return false
+}
+
+const isHiddenByAncestors = (el, methodName = 'isHiddenByAncestors()', options = { checkOpacity: true }) => {
+  ensureEl(el, methodName)
+  const $el = $jquery.wrap(el)
 
   // we do some calculations taking into account the parents
   // to see if its hidden by a parent
@@ -537,5 +555,5 @@ export const getReasonIsHidden = function ($el, options = { checkOpacity: true }
 /* eslint-enable no-cond-assign */
 
 export default {
-  isVisible, isHidden, getReasonIsHidden, isW3CFocusable, isW3CRendered,
+  isVisible, isHidden, isStrictlyHidden, isHiddenByAncestors, getReasonIsHidden, isW3CFocusable, isW3CRendered,
 }

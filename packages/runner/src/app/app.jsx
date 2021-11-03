@@ -110,7 +110,7 @@ class App extends Component {
           onResize={this._onReporterResize}
           onResizeEnd={this._onReporterResizeEnd}
         />
-        <StudioModals />
+        <StudioModals eventManager={this.props.eventManager} />
         {/* these pixels help ensure the browser has painted when taking a screenshot */}
         <div ref='screenshotHelperPixels' className='screenshot-helper-pixels'>
           <div /><div /><div /><div /><div /><div />

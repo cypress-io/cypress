@@ -1,5 +1,7 @@
 import { getMobxRunnerStore, MobxRunnerStore } from '../store'
 import { getReporterElement } from './utils'
+import { getEventManager } from '.'
+import type { EventManager } from './event-manager'
 
 let hasInitializeReporter = false
 
@@ -11,21 +13,21 @@ async function unmountReporter () {
 
 async function resetReporter () {
   if (hasInitializeReporter) {
-    await window.UnifiedRunner.eventManager.teardownReporter()
+    await getEventManager().teardownReporter()
   }
 }
 
 function setupReporter () {
   const $reporterRoot = getReporterElement()
 
-  renderReporter($reporterRoot, getMobxRunnerStore(), window.UnifiedRunner.eventManager)
+  renderReporter($reporterRoot, getMobxRunnerStore(), getEventManager())
   hasInitializeReporter = true
 }
 
 function renderReporter (
   root: HTMLElement,
   store: MobxRunnerStore,
-  eventManager: typeof window.UnifiedRunner.eventManager,
+  eventManager: EventManager,
 ) {
   class EmptyHeader extends window.UnifiedRunner.React.Component {
     render () {
