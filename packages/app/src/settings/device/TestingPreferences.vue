@@ -7,7 +7,7 @@
       {{ t('settingsPage.testingPreferences.description') }}
     </template>
     <div
-      class="rounded border border-gray-200 px-16px divide-y divide-gray-200"
+      class="rounded border border-gray-100 px-16px divide-y divide-gray-200"
     >
       <div
         v-for="pref in prefs"
