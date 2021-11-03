@@ -4,7 +4,8 @@ import React from 'react'
 import { mount } from '@cypress/react'
 import RunnerCt from '../../src/app/RunnerCt'
 import '@packages/runner/src/main.scss'
-import { makeState, fakeConfig } from './utils'
+import { makeState, fakeConfig, createEventManager } from './utils'
+import State from '../../src/lib/state'
 
 const selectors = {
   reporter: '[data-cy=reporter]',
@@ -13,23 +14,17 @@ const selectors = {
   searchInput: 'input[placeholder="Find spec..."]',
 }
 
-interface Overrides {
-  saveState?: Function
-}
+const mountRunnerCt = (state: State = makeState(), config = fakeConfig) => {
+  const eventManager = createEventManager()
 
-const noop = () => {}
-
-class FakeEventManager {
-  constructor (overrides: Overrides = {}) {
-    this.saveState = overrides.saveState || noop
-  }
-
-  start = noop
-  on = noop
-  off = noop
-  stop = noop
-  notifyRunningSpec = noop
-  saveState: Function = () => { }
+  return mount(
+    <RunnerCt
+      state={state}
+      eventManager={eventManager}
+      // @ts-ignore
+      config={config}
+    />,
+  )
 }
 
 describe('RunnerCt', () => {
@@ -38,54 +33,30 @@ describe('RunnerCt', () => {
   })
 
   it('renders RunnerCt', () => {
-    mount(
-      <RunnerCt
-        state={makeState()}
-        // @ts-ignore - this is difficult to stub. Real one breaks things.
-        eventManager={new FakeEventManager()}
-        config={fakeConfig}
-      />,
-    )
-
     cy.percySnapshot()
   })
 
   it('renders RunnerCt for video recording', () => {
-    mount(
-      <RunnerCt
-        state={makeState()}
-        // @ts-ignore - this is difficult to stub. Real one breaks things.
-        eventManager={new FakeEventManager()}
-        config={{ ...fakeConfig, isTextTerminal: true }}
-      />,
-    )
+    mountRunnerCt(makeState(), { ...fakeConfig, isTextTerminal: true })
 
     cy.percySnapshot()
   })
 
   it('shows hint message if no component specs', () => {
-    mount(
-      <RunnerCt
-        state={makeState({ specs: [] })}
-        // @ts-ignore - this is difficult to stub. Real one breaks things.
-        eventManager={new FakeEventManager()}
-        config={{ ...fakeConfig, projectRoot: '/root', componentFolder: '/root/src' }}
-      />,
-    )
-
+    mountRunnerCt(makeState({ specs: [] }), { ...fakeConfig, projectRoot: '/root', componentFolder: '/root/src' })
     cy.contains('No specs found')
     cy.percySnapshot()
   })
 
   context('keyboard shortcuts', () => {
     it('toggles specs list drawer using shortcut', () => {
-      const saveState = cy.stub()
+      const eventManager = createEventManager()
+      const saveState = cy.spy(eventManager, 'saveState')
 
       mount(
         <RunnerCt
           state={makeState()}
-          // @ts-ignore - this is difficult to stub. Real one breaks things.
-          eventManager={new FakeEventManager({ saveState })}
+          eventManager={eventManager}
           config={fakeConfig}
         />,
       )
@@ -106,15 +77,7 @@ describe('RunnerCt', () => {
     })
 
     it('focuses the search field on "/"', () => {
-      mount(
-        <RunnerCt
-          state={makeState()}
-          // @ts-ignore - this is difficult to stub. Real one breaks things.
-          eventManager={new FakeEventManager()}
-          config={fakeConfig}
-        />,
-      )
-
+      mountRunnerCt()
       cy.realPress('/')
       cy.get(selectors.searchInput).should('be.focused')
     })
@@ -122,13 +85,7 @@ describe('RunnerCt', () => {
 
   context('no spec selected', () => {
     it('hides reporter', () => {
-      mount(<RunnerCt
-        state={makeState({ spec: null })}
-        // @ts-ignore - this is difficult to stub. Real one breaks things.
-        eventManager={new FakeEventManager()}
-        config={fakeConfig}
-      />)
-
+      mountRunnerCt(makeState({ spec: null }))
       cy.get(selectors.noSpecSelectedReporter).should('exist')
     })
   })

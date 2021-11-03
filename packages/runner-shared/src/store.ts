@@ -31,6 +31,7 @@ export class BaseStore {
   @observable highlightUrl = false
   @observable isLoadingUrl = false
   @observable isRunning = false
+  @observable useInlineSpecList = false
 
   @observable messageTitle?: string
   @observable messageDescription?: 'info' | 'warning' | 'pinned'

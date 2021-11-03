@@ -32,7 +32,10 @@
           :style="viewportStyle"
         />
       </div>
-      <SnapshotControls :event-manager="eventManager" />
+      <SnapshotControls
+        :event-manager="eventManager"
+        :get-aut-iframe="getAutIframeModel"
+      />
     </div>
   </div>
 </template>
@@ -43,8 +46,8 @@ import { REPORTER_ID, RUNNER_ID, getRunnerElement, getReporterElement, empty } f
 import { gql } from '@urql/core'
 import type { SpecRunnerFragment } from '../generated/graphql'
 import InlineSpecList from '../specs/InlineSpecList.vue'
+import { getAutIframeModel, getEventManager, UnifiedRunnerAPI } from '../runner'
 import { useAutStore } from '../store'
-import { UnifiedRunnerAPI } from '../runner'
 import type { BaseSpec } from '@packages/types'
 import SnapshotControls from './SnapshotControls.vue'
 import SpecRunnerHeader from './SpecRunnerHeader.vue'
@@ -56,7 +59,7 @@ fragment SpecRunner on App {
 }
 `
 
-const eventManager = window.UnifiedRunner.eventManager
+const eventManager = getEventManager()
 
 const autStore = useAutStore()
 
@@ -91,7 +94,7 @@ watch(() => props.activeSpec, (spec) => {
 }, { immediate: true, flush: 'post' })
 
 onMounted(() => {
-  window.UnifiedRunner.eventManager.on('restart', () => {
+  getEventManager().on('restart', () => {
     runSpec()
   })
 })
