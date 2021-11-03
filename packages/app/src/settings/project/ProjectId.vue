@@ -1,5 +1,8 @@
 <template>
-  <SettingsSection code="projectId">
+  <SettingsSection
+    code="projectId"
+    data-cy="settings-projectId"
+  >
     <template #title>
       {{ t('settingsPage.projectId.title') }}
     </template>

@@ -1,5 +1,5 @@
 <template>
-  <ProjectSettingsSection>
+  <SettingsSection data-cy="settings-recordKey">
     <template #title>
       {{ t('settingsPage.recordKey.title') }}
     </template>
@@ -33,14 +33,14 @@
         {{ t('settingsPage.recordKey.manageKeys') }}
       </Button>
     </div>
-  </ProjectSettingsSection>
+  </SettingsSection>
 </template>
 
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
 import { useI18n } from '@cy/i18n'
 import type { RecordKeyFragment } from '../../generated/graphql'
-import ProjectSettingsSection from '../SettingsSection.vue'
+import SettingsSection from '../SettingsSection.vue'
 import Button from '@cy/components/Button.vue'
 import IconKey from '~icons/cy/placeholder_x16.svg'
 import IconExport from '~icons/cy/export_x16.svg'

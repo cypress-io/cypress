@@ -10,15 +10,15 @@ describe('Settings', { viewportWidth: 1200 }, () => {
     cy.get('[href="#/settings"]').click()
     cy.findByText('Project Settings').click()
 
-    cy.findByText('projectId')
-    .parent()
-    .parent()
+    cy.get('[data-cy="settings-projectId"]')
+
     .findByText('abc123')
     .should('be.visible')
 
-    cy.findByText('Resolved Configuration')
-    .parent()
-    .contains('code span', 'animationDistanceThreshold')
+    cy.get('[data-cy="settings-config"]')
+    .scrollIntoView()
+    .should('be.visible')
+    .contains('animationDistanceThreshold')
   })
 
   it('displays the settings for the current device', () => {

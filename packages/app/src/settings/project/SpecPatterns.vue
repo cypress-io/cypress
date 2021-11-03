@@ -1,5 +1,8 @@
 <template>
-  <SettingsSection code="specPattern">
+  <SettingsSection
+    code="specPattern"
+    data-cy="settings-specPatterns"
+  >
     <template #title>
       {{ t('settingsPage.specPattern.title') }}
     </template>

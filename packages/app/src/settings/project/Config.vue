@@ -1,5 +1,5 @@
 <template>
-  <SettingsSection>
+  <SettingsSection data-cy="settings-config">
     <template #title>
       {{ t('settingsPage.config.title') }}
     </template>
