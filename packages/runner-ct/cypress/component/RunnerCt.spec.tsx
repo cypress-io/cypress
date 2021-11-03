@@ -89,4 +89,24 @@ describe('RunnerCt', () => {
       cy.get(selectors.noSpecSelectedReporter).should('exist')
     })
   })
+
+  context('current spec is deleted', () => {
+    it('removes selection', () => {
+      const state = makeState({
+        spec: { relative: '/test.js', absolute: 'root/test.js', name: 'test.js' },
+        specs: [
+          { relative: '/test2.js', absolute: 'root/test2.js', name: 'test2.js' },
+          { relative: '/test.js', absolute: 'root/test.js', name: 'test.js' },
+        ],
+      })
+
+      mountRunnerCt(makeState({ spec: null }))
+
+      cy.contains('Your tests are loading').then(() => {
+        state.setSpecs([{ relative: '/test2.js', absolute: 'root/test2.js', name: 'test2.js' }])
+      })
+
+      cy.contains('No spec selected')
+    })
+  })
 })
