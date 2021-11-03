@@ -47,7 +47,7 @@
       :href="getUrl({
         url: 'https://on.cypress.io/ci',
         params: {
-          utm_medium,
+          utm_medium: utmMedium,
           utm_campaign: 'Learn More',
         },
       })"
@@ -113,7 +113,7 @@
         {
           url: 'https://on.cypress.io/smart-orchestration',
           params: {
-            utm_medium,
+            utm_medium: utmMedium,
             utm_campaign: 'Learn More',
           },
         })"
@@ -152,8 +152,8 @@ const getUrl = (link: LinkWithParams) => {
 }
 
 const shrink = useTimeout(500)
-const utm_medium = 'CI Prompt 1'
-const utm_content = computed(() => props.automatic ? 'Automatic' : 'Manual')
+const utmMedium = 'CI Prompt 1'
+const utmContent = computed(() => props.automatic ? 'Automatic' : 'Manual')
 
 const ciProviders = [
   {
@@ -162,9 +162,9 @@ const ciProviders = [
     link: {
       url: 'https://on.cypress.io/setup-ci-circleci',
       params: {
-        utm_medium,
+        utm_medium: utmMedium,
         utm_campaign: 'Circle',
-        utm_content: utm_content.value,
+        utm_content: utmContent.value,
       },
     },
   },
@@ -174,9 +174,9 @@ const ciProviders = [
     link: {
       url: 'https://on.cypress.io/github-actions',
       params: {
-        utm_medium,
+        utm_medium: utmMedium,
         utm_campaign: 'GitHub',
-        utm_content: utm_content.value,
+        utm_content: utmContent.value,
       },
     },
   },
@@ -186,9 +186,9 @@ const ciProviders = [
     link: {
       url: 'https://on.cypress.io/bitbucket-pipelines',
       params: {
-        utm_medium,
+        utm_medium: utmMedium,
         utm_campaign: 'Bitbucket',
-        utm_content: utm_content.value,
+        utm_content: utmContent.value,
       },
     },
   },
@@ -198,9 +198,9 @@ const ciProviders = [
     link: {
       url: 'https://on.cypress.io/gitlab-ci',
       params: {
-        utm_medium,
+        utm_medium: utmMedium,
         utm_campaign: 'GitLab',
-        utm_content: utm_content.value,
+        utm_content: utmContent.value,
       },
     },
   },
@@ -210,9 +210,9 @@ const ciProviders = [
     link: {
       url: 'https://on.cypress.io/aws-codebuild',
       params: {
-        utm_medium,
+        utm_medium: utmMedium,
         utm_campaign: 'AWS',
-        utm_content: utm_content.value,
+        utm_content: utmContent.value,
       },
     },
   },
@@ -221,9 +221,9 @@ const ciProviders = [
 const seeOtherGuidesInfo = {
   url: 'https://on.cypress.io/setup-ci',
   params: {
-    utm_medium,
+    utm_medium: utmMedium,
     utm_campaign: 'Other',
-    utm_content: utm_content.value,
+    utm_content: utmContent.value,
   },
 }
 
