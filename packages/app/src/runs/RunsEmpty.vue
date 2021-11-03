@@ -85,7 +85,7 @@ const configFilePath = computed(() => props.gql.configFilePath)
 const firstRecordKey = computed(() => {
   const allRecordKeys = props.gql.cloudProject?.recordKeys
 
-  return allRecordKeys?.length ? allRecordKeys[0] : '<record-key>'
+  return allRecordKeys?.[0] ?? '<record-key>'
 })
 const recordCommand = computed(() => {
   return `cypress run --record --key ${firstRecordKey.value}`
