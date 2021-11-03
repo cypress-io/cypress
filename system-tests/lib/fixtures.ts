@@ -215,11 +215,7 @@ export async function scaffoldProjectNodeModules (project: string, updateYarnLoc
       await fs.symlink(pathToPackage(dep), depDir, 'junction')
     }
   } catch (err) {
-    if (err.code === 'MODULE_NOT_FOUND') {
-      console.error('Cannot find module:', err)
-
-      return
-    }
+    if (err.code === 'MODULE_NOT_FOUND') return
 
     console.error(`⚠ An error occurred while installing the node_modules for ${project}.`)
     console.error([err.message, err.stack].join('\n'))
