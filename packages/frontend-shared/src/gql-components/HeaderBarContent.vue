@@ -32,8 +32,8 @@
         <TopNav
           :gql="props.gql?.app"
           :show-browsers="props.showBrowsers"
-          :force-open-docs="!!promptToOpen"
-          @clear-force-open="promptToOpen = ''"
+          :force-open-docs="isForceOpenAllowed && isShowablePromptInSavedSatate"
+          @clear-force-open="isForceOpenAllowed = false"
         >
           <template
             v-if="!!props.gql?.cloudViewer"
@@ -134,7 +134,6 @@ fragment HeaderBar_HeaderBarContent on Query {
 const isLoginOpen = ref(false)
 const clearActiveProjectMutation = useMutation(GlobalPageHeader_ClearActiveProjectDocument)
 const email = computed(() => props.gql.cloudViewer?.email || undefined)
-const promptToOpen = ref('')
 
 const openLogin = () => {
   isLoginOpen.value = true
@@ -175,19 +174,18 @@ const prompts = sortBy([
   },
 ], 'interval')
 
-watch(savedState, (newVal) => {
-  if (newVal) {
+const isForceOpenAllowed = ref(true)
+
+const isShowablePromptInSavedSatate = computed(() => {
+  if (savedState.value) {
     for (const prompt of prompts) {
       if (shouldShowPrompt(prompt)) {
-        promptToOpen.value = prompt.slug
-
-        // only show one prompt at a time
-        return
+        return true
       }
     }
   }
-}, {
-  immediate: true,
+
+  return false
 })
 
 function shouldShowPrompt (prompt: { slug: string; noProjectId: boolean; interval?: number }) {
