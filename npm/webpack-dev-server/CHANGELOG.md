@@ -1,3 +1,10 @@
+# [@cypress/webpack-dev-server-v1.7.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v1.6.0...@cypress/webpack-dev-server-v1.7.0) (2021-10-15)
+
+
+### Features
+
+* normalized signatures webpack & vite servers ([#18379](https://github.com/cypress-io/cypress/issues/18379)) ([8f5308f](https://github.com/cypress-io/cypress/commit/8f5308f7068b80fb877da539ce34fb67ba497c4f))
+
 # [@cypress/webpack-dev-server-v1.6.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v1.5.0...@cypress/webpack-dev-server-v1.6.0) (2021-09-10)
 
 

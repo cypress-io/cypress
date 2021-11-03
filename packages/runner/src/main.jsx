@@ -1,4 +1,4 @@
-import { action, autorun, configure } from 'mobx'
+import * as MobX from 'mobx'
 import React from 'react'
 import { render } from 'react-dom'
 import $Cypress from '@packages/driver'
@@ -6,16 +6,30 @@ import $Cypress from '@packages/driver'
 import App, { SPEC_LIST_WIDTH } from './app/app'
 import NoSpec from './errors/no-spec'
 import State from './lib/state'
-import { Container, eventManager } from '@packages/runner-shared'
+import { Container, selectorPlaygroundModel, StudioRecorder } from '@packages/runner-shared'
+import { EventManager } from '@packages/app/src/runner/event-manager'
 import util from './lib/util'
 
 const driverUtils = $Cypress.utils
 
-configure({ enforceActions: 'always' })
+MobX.configure({ enforceActions: 'always' })
+
+const eventManager = new EventManager(
+  $Cypress,
+  MobX,
+  selectorPlaygroundModel,
+  StudioRecorder,
+)
+
+// NOTE: this is for testing Cypress-in-Cypress, window.Cypress is undefined here
+// unless Cypress has been loaded into the AUT frame
+if (window.Cypress) {
+  window.eventManager = eventManager
+}
 
 const Runner = {
   start (el, base64Config) {
-    action('started', () => {
+    MobX.action('started', () => {
       const config = JSON.parse(driverUtils.decodeBase64Unicode(base64Config))
 
       const NO_COMMAND_LOG = config.env && config.env.NO_COMMAND_LOG
@@ -29,7 +43,7 @@ const Runner = {
       })
 
       Runner.state = state
-      Runner.configureMobx = configure
+      Runner.configureMobx = MobX.configure
 
       const setSpecByUrlHash = () => {
         const specPath = util.integrationSpecPath()
@@ -41,7 +55,7 @@ const Runner = {
 
       setSpecByUrlHash()
 
-      autorun(() => {
+      MobX.autorun(() => {
         const { spec } = state
 
         if (spec) {

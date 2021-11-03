@@ -38,7 +38,6 @@ export default class State extends BaseStore {
   @observable windowHeight = 0
 
   @observable automation = automation.CONNECTING
-  @observable useInlineSpecList = false
 
   @observable.ref scriptError = null
 

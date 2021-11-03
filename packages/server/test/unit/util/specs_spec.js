@@ -1,9 +1,9 @@
-require('../spec_helper')
+require('../../spec_helper')
 
-const R = require('ramda')
+const _ = require('lodash')
 const path = require('path')
-const config = require(`${root}lib/config`)
-const specsUtil = require(`${root}lib/util/specs`).default
+const config = require(`${root}../lib/config`)
+const specsUtil = require(`${root}../lib/util/specs`).default
 const FixturesHelper = require('@tooling/system-tests/lib/fixtures')
 const debug = require('debug')('test')
 
@@ -33,7 +33,7 @@ describe('lib/util/specs', () => {
     it('returns absolute filenames', function () {
       return specsUtil
       .findSpecs(this.config)
-      .then((R.forEach(checkFoundSpec)))
+      .then(((specs) => specs.forEach(checkFoundSpec)))
     })
 
     it('handles fixturesFolder being false', function () {
@@ -65,7 +65,7 @@ describe('lib/util/specs', () => {
         cfg.resolved.testingType = { value: 'component' }
 
         return specsUtil.findSpecs(cfg)
-      }).then(R.project(['relative', 'specType']))
+      }).then((val) => val.map((spec) => _.pick(spec, ['relative', 'specType'])))
       .then((files) => {
         expect(files).to.deep.equal([
           {
