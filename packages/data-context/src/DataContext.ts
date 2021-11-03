@@ -69,8 +69,8 @@ export class DataContext extends DataContextShell {
       this.actions.wizard.navigate('forward')
     }
 
-    if (this.config.launchArgs.browser) {
-      toAwait.push(this.actions.app.setActiveBrowserByNameOrPath(this.config.launchArgs.browser))
+    if (this._config.launchArgs.browser) {
+      toAwait.push(this.actions.app.setActiveBrowserByNameOrPath(this._config.launchArgs.browser))
     }
 
     if (IS_DEV_ENV) {
