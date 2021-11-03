@@ -706,7 +706,7 @@ export default {
       },
 
       // reset is called before each test
-      reset (attrs, test) {
+      reset (_attrs, test) {
         const s = state()
 
         const backup = {
@@ -729,6 +729,8 @@ export default {
 
         try {
           testConfigOverrides.restoreAndSetTestConfigOverrides(test, Cypress.config, Cypress.env)
+          // reset mocha slow test threshold
+          test.slow(Cypress.config('slowTestThreshold'))
         } catch (err) {
           fail(err)
         }

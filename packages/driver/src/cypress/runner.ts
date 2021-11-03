@@ -582,10 +582,6 @@ const normalize = (runnable, tests, initialTests, onRunnable, onLogsById, getRun
         wrappedRunnable._testConfig = cfg
       }
 
-      if (cfg.slowTestThreshold) {
-        runnable.slow(cfg.slowTestThreshold)
-      }
-
       wrappedRunnable._titlePath = runnable.titlePath()
     }
 
