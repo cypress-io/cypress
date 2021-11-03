@@ -7,7 +7,6 @@
       <i18n-t keypath="settingsPage.projectId.description">
         <a
           href="https://docs.cypress.io"
-          target="_blank"
         >{{ t('links.learnMore') }}</a>
       </i18n-t>
     </template>

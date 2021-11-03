@@ -18,7 +18,6 @@
       >
         <a
           :href="`https://www.npmjs.com/package/${dep.package}`"
-          target="_blank"
           class="text-indigo-500 text-14px hocus-link-default"
         >{{ dep.package }}</a>
         <p

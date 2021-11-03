@@ -7,7 +7,6 @@
       <i18n-t keypath="settingsPage.config.description">
         <a
           href="https://docs.cypress.io"
-          target="_blank"
         >cypress.config.js</a>
       </i18n-t>
     </template>

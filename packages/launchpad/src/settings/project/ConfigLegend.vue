@@ -14,7 +14,6 @@
       <i18n-t :keypath="legendText.config.descriptionKey">
         <a
           href="https://docs.cypress.io"
-          target="_blank"
         >cypress.config.js</a>
       </i18n-t>
     </ConfigBadge>
@@ -40,7 +39,6 @@
       <i18n-t :keypath="legendText.dynamic.descriptionKey">
         <a
           href="https://docs.cypress.io"
-          target="_blank"
         >setupNodeEnv</a>
       </i18n-t>
     </ConfigBadge>

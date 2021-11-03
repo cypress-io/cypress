@@ -28,7 +28,6 @@
             class="text-indigo-500 underline-indigo-500 hocus-link-default underline-indigo-500 ring-indigo-500"
             href="https://docs.cypress.io"
             data-testid="error-docs-link"
-            target="_blank"
           >cypress.config.js</a>
         </i18n-t>
       </slot>
