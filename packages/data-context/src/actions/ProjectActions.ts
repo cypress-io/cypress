@@ -235,7 +235,6 @@ export class ProjectActions {
   }
 
   private findBrowerByPath (browserPath: string) {
-    console.log(this.ctx.coreData.app)
     return this.ctx.coreData?.app?.browsers?.find((browser) => browser.path === browserPath)
   }
 
