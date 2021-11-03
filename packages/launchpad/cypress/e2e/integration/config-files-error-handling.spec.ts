@@ -15,17 +15,16 @@ describe('Config files error handling', () => {
     cy.contains('h1', 'Configuration Files').should('be.visible')
 
     cy.get('button').contains('Continue').click()
-    cy.get('body')
-    .should('contain.text', 'Cypress Configuration Error')
-    .and('contain.text', 'There is both a `cypress.config.js` and a `cypress.config.ts` at the location below')
+
+    cy.contains('Cypress Configuration Error').should('be.visible')
+    cy.contains('There is both a `cypress.config.js` and a `cypress.config.ts` at the location below').should('be.visible')
 
     cy.withCtx(async (ctx) => {
       await ctx.actions.file.removeFileInProject('cypress.config.ts')
     })
 
     cy.get('[data-testid=error-retry-button]').click()
-    cy.get('body')
-    .should('not.contain.text', 'Cypress Configuration Error')
+    cy.contains('Cypress Configuration Error').should('not.exist')
   })
 
   it('it handles legacy config file', () => {
