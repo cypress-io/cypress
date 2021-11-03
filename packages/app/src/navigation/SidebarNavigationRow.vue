@@ -8,6 +8,8 @@
       items-center
       rounded-md
       group
+      h-40px
+      my-16px
       focus-visible:outline-none
       hover:before:bg-indigo-300
       focus:before:bg-indigo-300
@@ -23,6 +25,7 @@
       flex
       items-center
       overflow-hidden
+      ml-4px
       p-8px
       gap-20px
       rounded-lg
@@ -32,8 +35,8 @@
       <component
         :is="icon"
         v-if="icon"
-        :class="[active ? 'icon-dark-jade-300 icon-light-jade-800' : 'icon-dark-gray-800 icon-light-gray-900']"
-        class="min-w-24px min-h-24px group-hover:icon-dark-indigo-300 group-hover:icon-light-indigo-600 group-focus:icon-dark-indigo-300 group-focus:icon-light-indigo-600"
+        :class="active ? 'icon-dark-jade-300 icon-light-jade-800' : 'icon-dark-gray-800 icon-light-gray-900'"
+        class="w-24px h-24px group-hover:icon-dark-indigo-300 group-hover:icon-light-indigo-600 group-focus:icon-dark-indigo-300 group-focus:icon-light-indigo-600"
       />
       <span
         :class="[active ? 'text-jade-300' : 'text-gray-400']"

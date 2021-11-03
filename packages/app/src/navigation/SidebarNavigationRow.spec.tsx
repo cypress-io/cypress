@@ -7,13 +7,13 @@ import PlaceholderIcon from '~icons/cy/placeholder_x24'
 describe('SidebarNavigationRow', () => {
   it('renders something', () => {
     cy.mount(() => (<div
-      class="resize-x overflow-auto space-y-4 p-4 h-500px bg-gray-900"
+      class="resize-x overflow-auto space-y-4 h-500px w-256px bg-gray-900"
     >
       <h2 class="text-white text-sm uppercase truncate">Tab Style</h2>
-      <SidebarNavigationRow icon={BookIcon} active/>
-      <SidebarNavigationRow icon={SettingsIcon} />
-      <SidebarNavigationRow icon={TestResultsIcon} />
-      <SidebarNavigationRow icon={PlaceholderIcon} />
+      <SidebarNavigationRow icon={BookIcon} active>book</SidebarNavigationRow>
+      <SidebarNavigationRow icon={SettingsIcon}>settings</SidebarNavigationRow>
+      <SidebarNavigationRow icon={TestResultsIcon}>test results</SidebarNavigationRow>
+      <SidebarNavigationRow icon={PlaceholderIcon}>placeholder</SidebarNavigationRow>
     </div>))
   })
 })
