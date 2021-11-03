@@ -44,6 +44,11 @@
           "default": null,
           "description": "The reporter options used. Supported options depend on the reporter. See https://on.cypress.io/reporters#Reporter-Options"
         },
+        "slowTestThreshold": {
+          "type": "number",
+          "default": 10000,
+          "description": "Slow test threshold in milliseconds. Only affects the visual output of some reporters. For example, the spec reporter will display the test time in yellow if over the threshold. See https://on.cypress.io/configuration#Timeouts"
+        },
         "testFiles": {
           "type": [
             "string",

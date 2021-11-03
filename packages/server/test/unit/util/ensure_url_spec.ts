@@ -1,7 +1,7 @@
-import '../spec_helper'
+import '../../spec_helper'
 
 import { connect, agent } from '@packages/network'
-import { isListening } from '../../lib/util/ensure-url'
+import { isListening } from '../../../lib/util/ensure-url'
 import sinon from 'sinon'
 import nock from 'nock'
 
