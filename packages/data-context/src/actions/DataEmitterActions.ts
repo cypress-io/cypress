@@ -15,14 +15,22 @@ export class DataEmitterActions {
   }
 
   init () {
-    this.ctx._apis.busApi.on('menu:item:clicked', (logout) => {
+    this.ctx.rootBus.on('menu:item:clicked', (logout) => {
     })
   }
 
+  /**
+   * Broadcasts a signal to the "app" via Socket.io, typically used to trigger
+   * a re-query of data on the frontend
+   */
   toApp (...args: any[]) {
     this._appSocketServer?.emit('data-context-push', ...args)
   }
 
+  /**
+   * Broadcasts a signal to the "launchpad" (Electron GUI) via Socket.io,
+   * typically used to trigger a re-query of data on the frontend
+   */
   toLaunchpad (...args: any[]) {
     this._launchpadSocketServer?.emit('data-context-push', ...args)
   }

@@ -27,6 +27,7 @@ import { cached } from './util/cached'
 import type { GraphQLSchema } from 'graphql'
 import type { Server } from 'http'
 import type { AddressInfo } from 'net'
+import EventEmitter from 'events'
 
 const IS_DEV_ENV = process.env.CYPRESS_INTERNAL_ENV !== 'production'
 
@@ -48,13 +49,15 @@ export interface DataContextConfig {
 }
 
 export class DataContext {
+  private _rootBus: EventEmitter
   private _coreData: CoreDataShape
   private _gqlServer?: Server
   private _appServerPort: number | undefined
   private _gqlServerPort: number | undefined
 
   constructor (private _config: DataContextConfig) {
-    this._coreData = _config.coreData ?? makeCoreData()
+    this._rootBus = new EventEmitter()
+    this._coreData = _config.coreData ?? makeCoreData(_config.launchArgs)
   }
 
   async initializeData () {
@@ -84,6 +87,10 @@ export class DataContext {
     }
 
     return Promise.all(toAwait)
+  }
+
+  get rootBus () {
+    return this._rootBus
   }
 
   get os () {
@@ -244,7 +251,7 @@ export class DataContext {
       appApi: this._config.appApi,
       authApi: this._config.authApi,
       projectApi: this._config.projectApi,
-      busApi: this._config.rootBus,
+      busApi: this._rootBus,
     }
   }
 
