@@ -19,11 +19,16 @@ query HeaderBar_HeaderBarQuery {
 }
 `
 
-defineProps<{
+withDefaults(
+  defineProps<{
   showBrowsers?: boolean,
   pageName?: string,
   allowAutomaticPromptOpen?: boolean
-}>()
+}>(), {
+    allowAutomaticPromptOpen: false,
+    pageName: undefined,
+  },
+)
 
 const query = useQuery({ query: HeaderBar_HeaderBarQueryDocument })
 
