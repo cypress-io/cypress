@@ -12,6 +12,7 @@ import { openProject } from './open_project'
 import cache from './cache'
 import errors from './errors'
 import { graphqlSchema } from '@packages/graphql/src/schema'
+import type { InternalDataContextOptions } from '@packages/data-context/src/DataContext'
 
 const { getBrowsers } = browserUtils
 
@@ -19,6 +20,7 @@ interface MakeDataContextOptions {
   os: PlatformName
   rootBus: EventEmitter
   launchArgs: LaunchArgs
+  _internalOptions: InternalDataContextOptions
 }
 
 let legacyDataContext: DataContext | undefined
@@ -36,6 +38,9 @@ export function makeLegacyDataContext (launchArgs: LaunchArgs = {} as LaunchArgs
       rootBus: new EventEmitter,
       launchArgs,
       os: os.platform() as PlatformName,
+      _internalOptions: {
+        loadCachedProjects: true,
+      },
     })
   }
 
