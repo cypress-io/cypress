@@ -239,7 +239,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     isFolder: true,
   }, {
     name: 'slowTestThreshold',
-    defaultValue: (options: Record<string, any>) => options.testingType === 'component' ? 250 : 10000,
+    defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? 250 : 10000,
     validation: validate.isNumber,
   }, {
     name: 'scrollBehavior',

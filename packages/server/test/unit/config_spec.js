@@ -2,16 +2,17 @@ require('../spec_helper')
 
 const _ = require('lodash')
 const debug = require('debug')('test')
+const Fixtures = require('@tooling/system-tests/lib/fixtures')
+
 const config = require(`${root}lib/config`)
 const errors = require(`${root}lib/errors`)
 const configUtil = require(`${root}lib/util/config`)
 const findSystemNode = require(`${root}lib/util/find_system_node`)
 const scaffold = require(`${root}lib/scaffold`)
-const Fixtures = require('@tooling/system-tests/lib/fixtures')
 let settings = require(`${root}lib/util/settings`)
 
 describe('lib/config', () => {
-  beforeEach(function () {
+  before(function () {
     this.env = process.env
 
     process.env = _.omit(process.env, 'CYPRESS_DEBUG')
@@ -19,7 +20,7 @@ describe('lib/config', () => {
     Fixtures.scaffold()
   })
 
-  afterEach(function () {
+  after(function () {
     process.env = this.env
   })
 
@@ -1059,9 +1060,8 @@ describe('lib/config', () => {
         cfg.projectRoot = '/foo/bar/'
 
         return config.mergeDefaults(cfg, options)
-        .then((val) => val[prop])
-        .then((result) => {
-          expect(result).to.deep.eq(value)
+        .then((mergedConfig) => {
+          expect(mergedConfig[prop]).to.deep.eq(value)
         })
       }
     })
@@ -2012,6 +2012,12 @@ describe('lib/config', () => {
   })
 
   context('.setSupportFileAndFolder', () => {
+    const mockSupportDefaults = {
+      supportFile: 'cypress/support',
+      supportFolder: false,
+      configFile: 'cypress.json',
+    }
+
     it('does nothing if supportFile is falsey', () => {
       const obj = {
         projectRoot: '/_test-output/path/to/project',
@@ -2031,7 +2037,7 @@ describe('lib/config', () => {
         supportFile: 'test/unit/config_spec.js',
       })
 
-      return config.setSupportFileAndFolder(obj)
+      return config.setSupportFileAndFolder(obj, mockSupportDefaults)
       .then((result) => {
         expect(result).to.eql({
           projectRoot,
@@ -2049,7 +2055,7 @@ describe('lib/config', () => {
         supportFile: 'cypress/support',
       })
 
-      return config.setSupportFileAndFolder(obj)
+      return config.setSupportFileAndFolder(obj, mockSupportDefaults)
       .then((result) => {
         expect(result).to.eql({
           projectRoot,
@@ -2067,7 +2073,7 @@ describe('lib/config', () => {
         supportFile: 'cypress/support',
       })
 
-      return config.setSupportFileAndFolder(obj)
+      return config.setSupportFileAndFolder(obj, mockSupportDefaults)
       .then((result) => {
         expect(result).to.eql({
           projectRoot,
@@ -2084,7 +2090,7 @@ describe('lib/config', () => {
         supportFile: 'does/not/exist',
       })
 
-      return config.setSupportFileAndFolder(obj)
+      return config.setSupportFileAndFolder(obj, mockSupportDefaults)
       .catch((err) => {
         expect(err.message).to.include('The support file is missing or invalid.')
       })
@@ -2105,7 +2111,7 @@ describe('lib/config', () => {
         supportFile: 'cypress/support',
       })
 
-      return config.setSupportFileAndFolder(obj)
+      return config.setSupportFileAndFolder(obj, mockSupportDefaults)
       .then((result) => {
         debug('result is', result)
 
@@ -2132,7 +2138,7 @@ describe('lib/config', () => {
         supportFile: 'cypress/support.ts',
       })
 
-      return config.setSupportFileAndFolder(obj)
+      return config.setSupportFileAndFolder(obj, mockSupportDefaults)
       .then((result) => {
         debug('result is', result)
 
@@ -2146,6 +2152,11 @@ describe('lib/config', () => {
   })
 
   context('.setPluginsFile', () => {
+    const mockPluginDefaults = {
+      pluginsFile: 'cypress/plugins',
+      configFile: 'cypress.json',
+    }
+
     it('does nothing if pluginsFile is falsey', () => {
       const obj = {
         projectRoot: '/_test-output/path/to/project',
@@ -2165,7 +2176,7 @@ describe('lib/config', () => {
         pluginsFile: `${projectRoot}/cypress/plugins`,
       }
 
-      return config.setPluginsFile(obj)
+      return config.setPluginsFile(obj, mockPluginDefaults)
       .then((result) => {
         expect(result).to.eql({
           projectRoot,
@@ -2182,7 +2193,7 @@ describe('lib/config', () => {
         pluginsFile: `${projectRoot}/cypress/plugins`,
       }
 
-      return config.setPluginsFile(obj)
+      return config.setPluginsFile(obj, mockPluginDefaults)
       .then((result) => {
         expect(result).to.eql({
           projectRoot,
@@ -2206,7 +2217,7 @@ describe('lib/config', () => {
         pluginsFile: pluginsFolder,
       }
 
-      return config.setPluginsFile(obj)
+      return config.setPluginsFile(obj, mockPluginDefaults)
       .then((result) => {
         expect(result).to.eql({
           projectRoot,
@@ -2223,7 +2234,7 @@ describe('lib/config', () => {
         pluginsFile: `${projectRoot}/cypress/plugins`,
       })
 
-      return config.setPluginsFile(obj)
+      return config.setPluginsFile(obj, mockPluginDefaults)
       .then((result) => {
         expect(result).to.eql({
           projectRoot,
@@ -2240,7 +2251,7 @@ describe('lib/config', () => {
         pluginsFile: 'does/not/exist',
       }
 
-      return config.setPluginsFile(obj)
+      return config.setPluginsFile(obj, mockPluginDefaults)
       .catch((err) => {
         expect(err.message).to.include('The plugins file is missing or invalid.')
       })
@@ -2261,7 +2272,7 @@ describe('lib/config', () => {
         pluginsFile,
       }
 
-      return config.setPluginsFile(obj)
+      return config.setPluginsFile(obj, mockPluginDefaults)
       .then((result) => {
         expect(result).to.eql({
           projectRoot,

@@ -32,11 +32,11 @@ module.exports = {
     return breakingKeys
   },
 
-  getDefaultValues: () => {
+  getDefaultValues: (runtimeOptions = {}) => {
     // Default values can be functions, in which case they are evaluated
     // at runtime - for example, slowTestThreshold where the default value
     // varies between e2e and component testing.
-    return _.mapValues(defaultValues, (value) => (typeof value === 'function' ? value(options) : value))
+    return _.mapValues(defaultValues, (value) => (typeof value === 'function' ? value(runtimeOptions) : value))
   },
 
   getPublicConfigKeys: () => {

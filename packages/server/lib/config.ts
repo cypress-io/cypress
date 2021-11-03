@@ -31,7 +31,6 @@ export type ResolvedConfigurationOptions = Partial<{
   [x in keyof Cypress.ResolvedConfigOptions]: ResolvedFromConfig
 }>
 
-const defaultValues = configUtils.getDefaultValues()
 const folders = _(configUtils.options).filter({ isFolder: true }).map('name').value()
 
 const convertRelativeToAbsolutePaths = (projectRoot, obj) => {
@@ -195,7 +194,9 @@ export function mergeDefaults (config: Record<string, any> = {}, options: Record
     config.baseUrl = url.replace(/\/\/+$/, '/')
   }
 
-  _.defaultsDeep(config, defaultValues)
+  const defaultsForRuntime = configUtils.getDefaultValues(options)
+
+  _.defaultsDeep(config, defaultsForRuntime)
 
   // split out our own app wide env from user env variables
   // and delete envFile
@@ -219,7 +220,7 @@ export function mergeDefaults (config: Record<string, any> = {}, options: Record
     config.numTestsKeptInMemory = 0
   }
 
-  config = setResolvedConfigValues(config, resolved)
+  config = setResolvedConfigValues(config, defaultsForRuntime, resolved)
 
   if (config.port) {
     config = setUrls(config)
@@ -237,16 +238,16 @@ export function mergeDefaults (config: Record<string, any> = {}, options: Record
 
   configUtils.validateNoBreakingConfig(config, errors.warning, errors.throw)
 
-  return setSupportFileAndFolder(config)
-  .then(setPluginsFile)
+  return setSupportFileAndFolder(config, defaultsForRuntime)
+  .then((obj) => setPluginsFile(obj, defaultsForRuntime))
   .then(setScaffoldPaths)
   .then(_.partialRight(setNodeBinary, options.onWarning))
 }
 
-export function setResolvedConfigValues (config, resolved) {
+export function setResolvedConfigValues (config, defaults, resolved) {
   const obj = _.clone(config)
 
-  obj.resolved = resolveConfigValues(config, resolved)
+  obj.resolved = resolveConfigValues(config, defaults, resolved)
   debug('resolved config is %o', obj.resolved.browsers)
 
   return obj
@@ -351,7 +352,7 @@ export function updateWithPluginValues (cfg, overrides) {
 // combines the default configuration object with values specified in the
 // configuration file like "cypress.json". Values in configuration file
 // overwrite the defaults.
-export function resolveConfigValues (config, resolved = {}) {
+export function resolveConfigValues (config, defaults, resolved = {}) {
   // pick out only known configuration keys
   return _
   .chain(config)
@@ -375,7 +376,7 @@ export function resolveConfigValues (config, resolved = {}) {
       return source(r)
     }
 
-    if (!(!_.isEqual(config[key], defaultValues[key]) && key !== 'browsers')) {
+    if (!(!_.isEqual(config[key], defaults[key]) && key !== 'browsers')) {
       // "browsers" list is special, since it is dynamic by default
       // and can only be overwritten via plugins file
       return source('default')
@@ -418,7 +419,7 @@ export function setScaffoldPaths (obj) {
 }
 
 // async function
-export function setSupportFileAndFolder (obj) {
+export function setSupportFileAndFolder (obj, defaults) {
   if (!obj.supportFile) {
     return Promise.resolve(obj)
   }
@@ -452,7 +453,7 @@ export function setSupportFileAndFolder (obj) {
     return fs.pathExists(obj.supportFile)
     .then((found) => {
       if (!found) {
-        errors.throw('SUPPORT_FILE_NOT_FOUND', obj.supportFile, obj.configFile || defaultValues.configFile)
+        errors.throw('SUPPORT_FILE_NOT_FOUND', obj.supportFile, obj.configFile || defaults.configFile)
       }
 
       return debug('switching to found file %s', obj.supportFile)
@@ -460,7 +461,7 @@ export function setSupportFileAndFolder (obj) {
   }).catch({ code: 'MODULE_NOT_FOUND' }, () => {
     debug('support JS module %s does not load', sf)
 
-    const loadingDefaultSupportFile = sf === path.resolve(obj.projectRoot, defaultValues.supportFile)
+    const loadingDefaultSupportFile = sf === path.resolve(obj.projectRoot, defaults.supportFile)
 
     return utils.discoverModuleFile({
       filename: sf,
@@ -469,7 +470,7 @@ export function setSupportFileAndFolder (obj) {
     })
     .then((result) => {
       if (result === null) {
-        const configFile = obj.configFile || defaultValues.configFile
+        const configFile = obj.configFile || defaults.configFile
 
         return errors.throw('SUPPORT_FILE_NOT_FOUND', path.resolve(obj.projectRoot, sf), configFile)
       }
@@ -505,7 +506,7 @@ export function setSupportFileAndFolder (obj) {
 //   * and the pluginsFile is NOT set to the default
 //     - throw an error, because it should be there if the user
 //       explicitly set it
-export const setPluginsFile = Promise.method((obj) => {
+export const setPluginsFile = Promise.method((obj, defaults) => {
   if (!obj.pluginsFile) {
     return obj
   }
@@ -528,7 +529,7 @@ export const setPluginsFile = Promise.method((obj) => {
   }).catch({ code: 'MODULE_NOT_FOUND' }, () => {
     debug('plugins module does not exist %o', { pluginsFile })
 
-    const isLoadingDefaultPluginsFile = pluginsFile === path.resolve(obj.projectRoot, defaultValues.pluginsFile)
+    const isLoadingDefaultPluginsFile = pluginsFile === path.resolve(obj.projectRoot, defaults.pluginsFile)
 
     return utils.discoverModuleFile({
       filename: pluginsFile,
