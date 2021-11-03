@@ -58,8 +58,8 @@ export class DataContext extends DataContextShell {
       this.actions.auth.getUser(),
     ]
 
-    if (this.config.launchArgs.projectRoot) {
-      await this.actions.project.setActiveProject(this.config.launchArgs.projectRoot)
+    if (this._config.launchArgs.projectRoot) {
+      await this.actions.project.setActiveProject(this._config.launchArgs.projectRoot)
 
       if (this.coreData.app.activeProject?.preferences) {
         toAwait.push(this.actions.project.launchProjectWithoutElectron())
