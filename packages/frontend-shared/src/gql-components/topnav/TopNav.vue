@@ -157,9 +157,8 @@ import { allBrowsersIcons } from '../../../../frontend-shared/src/assets/browser
 import { gql, useMutation } from '@urql/vue'
 import { TopNavFragment, TopNav_LaunchOpenProjectDocument, TopNav_SetBrowserDocument, TopNav_SetPromptShownDocument } from '../../generated/graphql'
 import { useI18n } from '@cy/i18n'
-import { ref, watch, ComponentPublicInstance } from 'vue'
+import { ref, watch, watchEffect, ComponentPublicInstance } from 'vue'
 // eslint-disable-next-line no-duplicate-imports
-import type { Ref } from 'vue'
 const { t } = useI18n()
 import { onClickOutside, onKeyStroke } from '@vueuse/core'
 import DocsMenuContent, { DocsMenuVariant } from './DocsMenuContent.vue'
@@ -247,18 +246,12 @@ const emit = defineEmits<{
   (e: 'clearForceOpen'): void,
 }>()
 
-const docsMenuVariant: Ref<DocsMenuVariant> = ref('main')
+const docsMenuVariant = ref<DocsMenuVariant>('main')
 
-const promptsEl: Ref<ComponentPublicInstance | null> = ref(null)
+const promptsEl = ref<ComponentPublicInstance | null>(null)
 
-watch(() => props.forceOpenDocs, (newVal) => {
-  if (newVal === true) {
-    docsMenuVariant.value = 'ci1'
-  } else {
-    docsMenuVariant.value = 'main'
-  }
-}, {
-  immediate: true,
+watchEffect(() => {
+  docsMenuVariant.value = props.forceOpenDocs ? 'ci1' : 'main'
 })
 
 watch(docsMenuVariant, (newVal, oldVal) => {
