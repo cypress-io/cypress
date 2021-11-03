@@ -1,4 +1,4 @@
-export const addExternalLinkClickListener = (mutation) => {
+export const addExternalLinkClickListener = (mutation: { executeMutation: ({ url: string }) => void }) => {
   document.addEventListener('click', (event: MouseEvent) => {
     const target = event.target as HTMLElement
     const anchor = target.closest('a[href]') as HTMLAnchorElement
