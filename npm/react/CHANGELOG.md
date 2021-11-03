@@ -1,3 +1,12 @@
+# [@cypress/react-v5.10.2](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.10.1...@cypress/react-v5.10.2) (2021-10-29)
+
+
+### Bug Fixes
+
+* Next.JS 12 components testing failing with ` TypeError: Cannot read property 'traceChild' of undefined` ([#18648](https://github.com/cypress-io/cypress/issues/18648)) ([cb0cbdf](https://github.com/cypress-io/cypress/commit/cb0cbdf4c35da09a7dedcc4563a242cb4748e994))
+* remove outdated registry link ([#18710](https://github.com/cypress-io/cypress/issues/18710)) ([e2a869d](https://github.com/cypress-io/cypress/commit/e2a869d2a984abb6703aec966dd9124ee693b8c1))
+* **cypress/react:** disable react-refresh for craco setups ([#18517](https://github.com/cypress-io/cypress/issues/18517)) ([ea10795](https://github.com/cypress-io/cypress/commit/ea1079559473fc672b5e0e188b5b54bf8ebe2f98))
+
 # [@cypress/react-v5.10.1](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.10.0...@cypress/react-v5.10.1) (2021-10-04)
 
 

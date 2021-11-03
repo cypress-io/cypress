@@ -619,6 +619,8 @@ export default {
       ensureElExistence: ensures.ensureElExistence,
       ensureElDoesNotHaveCSS: ensures.ensureElDoesNotHaveCSS,
       ensureVisibility: ensures.ensureVisibility,
+      ensureStrictVisibility: ensures.ensureStrictVisibility,
+      ensureNotHiddenByAncestors: ensures.ensureNotHiddenByAncestors,
       ensureDescendents: ensures.ensureDescendents,
       ensureNotReadonly: ensures.ensureNotReadonly,
       ensureNotDisabled: ensures.ensureNotDisabled,

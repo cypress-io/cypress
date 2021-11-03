@@ -204,6 +204,42 @@ describe('src/cy/commands/actions/check', () => {
       })
     })
 
+    it('can specify scrollBehavior bottom in config', { scrollBehavior: 'bottom' }, () => {
+      cy.get(':checkbox:first').then((el) => {
+        cy.spy(el[0], 'scrollIntoView')
+      })
+
+      cy.get(':checkbox:first').check()
+
+      cy.get(':checkbox:first').then((el) => {
+        expect(el[0].scrollIntoView).to.be.calledWith({ block: 'end' })
+      })
+    })
+
+    it('can specify scrollBehavior center in config', { scrollBehavior: 'center' }, () => {
+      cy.get(':checkbox:first').then((el) => {
+        cy.spy(el[0], 'scrollIntoView')
+      })
+
+      cy.get(':checkbox:first').check()
+
+      cy.get(':checkbox:first').then((el) => {
+        expect(el[0].scrollIntoView).to.be.calledWith({ block: 'center' })
+      })
+    })
+
+    it('can specify scrollBehavior nearest in config', { scrollBehavior: 'nearest' }, () => {
+      cy.get(':checkbox:first').then((el) => {
+        cy.spy(el[0], 'scrollIntoView')
+      })
+
+      cy.get(':checkbox:first').check()
+
+      cy.get(':checkbox:first').then((el) => {
+        expect(el[0].scrollIntoView).to.be.calledWith({ block: 'nearest' })
+      })
+    })
+
     it('does not scroll when scrollBehavior is false in config', { scrollBehavior: false }, () => {
       cy.get(':checkbox:first').scrollIntoView()
       cy.get(':checkbox:first').then((el) => {
@@ -228,6 +264,13 @@ describe('src/cy/commands/actions/check', () => {
       cy.get(':checkbox:first').then((el) => {
         expect(el[0].scrollIntoView).to.be.calledWith({ block: 'start' })
       })
+    })
+
+    // https://github.com/cypress-io/cypress/issues/4233
+    it('can check an element behind a sticky header', () => {
+      cy.viewport(400, 400)
+      cy.visit('./fixtures/sticky-header.html')
+      cy.get(':checkbox:first').check()
     })
 
     it('waits until element is no longer disabled', () => {

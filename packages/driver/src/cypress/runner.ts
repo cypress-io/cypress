@@ -12,6 +12,7 @@ import $errUtils from './error_utils'
 import $stackUtils from './stack_utils'
 import { getResolvedTestConfigOverride } from '../cy/testConfigOverrides'
 import debugFn from 'debug'
+import { Emissions } from '@packages/types'
 
 const mochaCtxKeysRe = /^(_runnable|test)$/
 const betweenQuotesRe = /\"(.+?)\"/
@@ -21,7 +22,7 @@ const TEST_BEFORE_RUN_EVENT = 'runner:test:before:run'
 const TEST_AFTER_RUN_EVENT = 'runner:test:after:run'
 
 const RUNNABLE_LOGS = 'routes agents commands hooks'.split(' ')
-const RUNNABLE_PROPS = '_testConfig id order title _titlePath root hookName hookId err state failedFromHookId body speed type duration wallClockStartedAt wallClockDuration timings file originalTitle invocationDetails final currentRetry retries'.split(' ')
+const RUNNABLE_PROPS = '_testConfig id order title _titlePath root hookName hookId err state failedFromHookId body speed type duration wallClockStartedAt wallClockDuration timings file originalTitle invocationDetails final currentRetry retries _slow'.split(' ')
 
 const debug = debugFn('cypress:driver:runner')
 const debugErrors = debugFn('cypress:driver:errors')
@@ -581,6 +582,10 @@ const normalize = (runnable, tests, initialTests, onRunnable, onLogsById, getRun
         wrappedRunnable._testConfig = cfg
       }
 
+      if (cfg.slowTestThreshold) {
+        runnable.slow(cfg.slowTestThreshold)
+      }
+
       wrappedRunnable._titlePath = runnable.titlePath()
     }
 
@@ -1104,7 +1109,7 @@ export default {
     // only used during normalization
     const _runnables = []
     const _logsById = {}
-    let _emissions = {
+    let _emissions: Emissions = {
       started: {},
       ended: {},
     }
@@ -1662,7 +1667,7 @@ export default {
         }
       },
 
-      resumeAtTest (id, emissions = {}) {
+      resumeAtTest (id, emissions: Emissions = {}) {
         _resumedAtTestIndex = getTestIndexFromId(id)
 
         _emissions = emissions

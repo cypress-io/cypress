@@ -31,6 +31,7 @@ export class BaseStore {
   @observable highlightUrl = false
   @observable isLoadingUrl = false
   @observable isRunning = false
+  @observable useInlineSpecList = false
 
   @observable messageTitle?: string
   @observable messageDescription?: 'info' | 'warning' | 'pinned'
@@ -56,7 +57,17 @@ export class BaseStore {
     this.specRunId = nanoid()
   }
 
+  @action checkCurrentSpecStillExists (specs: Cypress.Spec[]) {
+    const newSpecsAbsolutes = new Set(specs.map((spec) => spec.absolute))
+
+    this.specs.forEach((oldSpec) => {
+      if (!newSpecsAbsolutes.has(oldSpec.absolute) && this.spec?.absolute === oldSpec.absolute) {
+        this.spec = undefined
+      }
+    })
+  }
   @action setSpecs (specs: Cypress.Spec[]) {
+    this.checkCurrentSpecStillExists(specs)
     this.specs = specs
   }
 
