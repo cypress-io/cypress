@@ -1,9 +1,14 @@
 <template>
-  <div>
+  <div
+    tabindex="0"
+    data-cy="collapsible"
+    @keypress.space.enter.self="toggle"
+  >
     <div
-      tabindex="0"
       data-cy="collapsible-header"
       :aria-expanded="isOpen"
+      class="rounded-t focus:outline-indigo-500"
+      :class="{'rounded-b': !isOpen}"
       @click="toggle"
       @keypress.space.enter.self="toggle"
     >
@@ -17,9 +22,9 @@
         maxHeight: isOpen ? maxHeight : '0px',
       }"
       :aria-hidden="!isOpen"
-      :class="['overflow-auto', {
-        'transition transition-all duration-500 animate-ease-[cubic-bezier(0.25,0.1,0.25,1)]': isOpen,
-      }]"
+      :class="{
+        'overflow-auto transition transition-all duration-500 animate-ease-[cubic-bezier(0.25,0.1,0.25,1)]': isOpen,
+      }"
     >
       <slot
         v-if="!lazy || lazy && isOpen"

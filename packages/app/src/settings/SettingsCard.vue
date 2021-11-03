@@ -37,7 +37,6 @@
 </template>
 
 <script lang="ts" setup>
-// eslint-disable-next-line no-duplicate-imports
 import type { FunctionalComponent, SVGAttributes } from 'vue'
 import Collapsible from '@cy/components/Collapsible.vue'
 import ListRowHeader from '@cy/components/ListRowHeader.vue'
