@@ -659,6 +659,8 @@ const systemTests = {
       // // can take a long time (5-15 secs)
       // this.timeout(human('2 minutes'))
 
+      Fixtures.remove()
+
       sinon.stub(process, 'exit')
 
       this.settings = options.settings
@@ -676,8 +678,6 @@ const systemTests = {
 
     afterEach(async function () {
       process.env = _.clone(env)
-
-      Fixtures.remove()
 
       this.timeout(human('2 minutes'))
 

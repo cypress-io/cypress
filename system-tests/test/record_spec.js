@@ -380,7 +380,7 @@ describe('e2e record', () => {
               trashAssetsBeforeRuns: false,
             },
           })
-          .get('stdout')
+          .then(({ stdout }) => stdout)
         }),
       ])
     })
