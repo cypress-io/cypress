@@ -76,7 +76,7 @@ describe('<Button />', () => {
     })
   })
 
-  it.only('generates a spec from story', () => {
+  it('generates a spec from story', () => {
     cy.visitApp('#/newspec')
     cy.wait(1000)
     cy.intercept('mutation-NewSpec_CodeGenSpec').as('codeGenSpec')
@@ -114,8 +114,6 @@ describe('<Button />', () => {
         ctx.fs.constants.F_OK,
       )
     })
-
-    cy.screenshot()
   })
 
   it('generates a component from story', () => {

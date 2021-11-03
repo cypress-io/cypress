@@ -41,7 +41,7 @@ const makeDataContext = (options) => {
         }
       },
       closeActiveProject: () => {},
-      getConfig: () => {},
+      getConfig: () => ({}),
     },
     ...options,
   })
@@ -64,7 +64,7 @@ describe('@packages/data-context', () => {
         e2ePluginsInitialized: false,
         isCTConfigured: true,
         isE2EConfigured: false,
-        config: null,
+        config: {},
         configChildProcess: null,
         generatedSpec: null,
         projectRoot,
@@ -90,6 +90,12 @@ describe('@packages/data-context', () => {
           electron: {},
         },
       })
+
+      context.config.getConfigForProject = () => {
+        return Promise.resolve({
+          resolved: {},
+        })
+      }
 
       const spy = sinon.spy(context._apis.projectApi, 'launchProject')
 
