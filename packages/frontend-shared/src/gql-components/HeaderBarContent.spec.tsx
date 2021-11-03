@@ -94,10 +94,10 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
     cy.contains('Test Page').should('be.visible')
   })
 
-  describe('prompts', function () {
-    describe('the CI prompt', function () {
-      context('opens on click', function () {
-        beforeEach(function () {
+  describe('prompts', () => {
+    describe('the CI prompt', () => {
+      context('opens on click', () => {
+        beforeEach(() => {
           cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
             render: (gqlVal) => <div class="resize overflow-auto border-current border-1 h-700px"><HeaderBarContent gql={gqlVal} show-browsers={true} /></div>,
           })
