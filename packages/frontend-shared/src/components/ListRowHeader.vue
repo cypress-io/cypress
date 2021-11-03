@@ -1,8 +1,5 @@
 <template>
-  <div
-    class="flex items-center w-full text-left rounded py-12px"
-    :class="props.class"
-  >
+  <div class="flex items-center w-full text-left rounded py-12px">
     <div class="flex items-center h-40px px-24px">
       <slot name="icon">
         <component
@@ -38,13 +35,11 @@
 import { FunctionalComponent, SVGAttributes, useSlots } from 'vue'
 
 const props = withDefaults(defineProps<{
-  class?: string | string[] | Record<string, any>
   description?: string
   icon?: FunctionalComponent<SVGAttributes>
   gray?: boolean
   bigHeader?: boolean
 }>(), {
-  class: undefined,
   description: undefined,
   icon: undefined,
   gray: false,
