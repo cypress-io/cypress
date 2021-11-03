@@ -213,7 +213,7 @@ export class ProjectActions {
     const browser = this.findBrowerByPath(browserPath)
 
     if (!browser) {
-      throw Error('Cannot find specifiec browser')
+      throw Error(`Cannot find specified browser at given path: ${browserPath}.`)
     }
 
     this.ctx.actions.electron.hideBrowserWindow()

@@ -19,6 +19,7 @@ import {
 import { cached } from './util/cached'
 import { DataContextShell, DataContextShellConfig } from './DataContextShell'
 import type { GraphQLSchema } from 'graphql'
+import type { App as ElectronApp } from 'electron'
 
 const IS_DEV_ENV = process.env.CYPRESS_INTERNAL_ENV !== 'production'
 
@@ -27,6 +28,7 @@ export interface DataContextConfig extends DataContextShellConfig {
   os: PlatformName
   launchArgs: LaunchArgs
   launchOptions: OpenProjectLaunchOptions
+  electronApp: ElectronApp
   /**
    * Default is to
    */
@@ -45,6 +47,10 @@ export class DataContext extends DataContextShell {
   constructor (private _config: DataContextConfig) {
     super(_config)
     this._coreData = _config.coreData ?? makeCoreData()
+  }
+
+  get electronApp () {
+    return this._config.electronApp
   }
 
   async initializeData () {
