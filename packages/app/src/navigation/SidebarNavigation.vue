@@ -1,5 +1,5 @@
 <template>
-  <div class="flex relative flex-col flex-1 min-h-0 bg-gray-1000">
+  <HideDuringScreenshot class="flex relative flex-col flex-1 min-h-0 bg-gray-1000">
     <div
       class="absolute cursor-pointer bg-gray-800 w-2px hover:w-8px bottom-0 top-0 right-0 hover:bg-indigo-300"
       @click="mainStore.toggleNavBar"
@@ -34,7 +34,7 @@
         </RouterLink>
       </nav>
     </div>
-  </div>
+  </HideDuringScreenshot>
 </template>
 
 <script lang="ts" setup>
@@ -44,6 +44,7 @@ import CodeIcon from '~icons/cy/code-editor_x24'
 import RunsIcon from '~icons/cy/runs_x24'
 import SettingsIcon from '~icons/cy/settings_x24'
 import { useMainStore } from '../store'
+import HideDuringScreenshot from '../runner/screenshot/HideDuringScreenshot.vue'
 
 const navigation = [
   { name: 'Home', icon: SpecsIcon, href: '/' },
