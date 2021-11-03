@@ -1,13 +1,19 @@
 import { useSnapshotStore } from './snapshot-store'
 import { useAutStore } from '../store'
+import type { EventManager } from './event-manager'
 
 export interface AutSnapshot {
   id?: number
   name?: string
-  $el?: any
+  $el: any
   snapshot?: AutSnapshot
+  coords: [number, number]
+  scrollBy: {
+    x: number
+    y: number
+  }
   snapshots: AutSnapshot[]
-  highlightAttr?: string
+  highlightAttr: string
   htmlAttrs: Record<string, any> // Type is NamedNodeMap, not sure if we should include lib: ["DOM"]
   viewportHeight: number
   viewportWidth: number
@@ -27,7 +33,7 @@ export class IframeModel {
     private detachDom: () => AutSnapshot,
     private restoreDom: (snapshot: any) => void,
     private highlightEl: ({ body }: any, opts: any) => void,
-    private eventManager: any,
+    private eventManager: EventManager,
     private studio: {
       selectorPlaygroundModel: any
       recorder: any
@@ -252,6 +258,8 @@ export class IframeModel {
 
     const { body, htmlAttrs } = finalSnapshot
 
+    // todo(lachlan): find correct default, if they are even needed, for required fields ($el, coords...)
+    // @ts-ignore
     this.originalState = {
       body,
       htmlAttrs,

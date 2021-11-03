@@ -1,10 +1,10 @@
-require('../spec_helper')
+require('../../spec_helper')
 
 const os = require('os')
 const path = require('path')
-const { fs } = require(`${root}/lib/util/fs`)
-const findProcess = require(`${root}lib/util/find_process`)
-const profileCleaner = require(`${root}lib/util/profile_cleaner`)
+const { fs } = require(`${root}../lib/util/fs`)
+const findProcess = require(`${root}../lib/util/find_process`)
+const profileCleaner = require(`${root}../lib/util/profile_cleaner`)
 
 const tmpDir = os.tmpdir()
 const pidProfilesFolder = path.join(tmpDir, 'pid-profiles')

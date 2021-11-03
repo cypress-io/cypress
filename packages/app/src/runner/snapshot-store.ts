@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import type { AutSnapshot } from './iframe-model'
-import { getAutIframeModel } from '../runner'
+import type { AutIframe } from './aut-iframe'
 
 export type SnapshotMessageType = 'info' | 'warning' | 'pinned'
 
@@ -62,32 +62,30 @@ export const useSnapshotStore = defineStore({
       this.messageType = undefined
     },
 
-    toggleHighlights () {
+    toggleHighlights (autIframe: AutIframe) {
       if (!this.snapshot) {
         return
       }
 
       this.snapshot.showingHighlights = !this.snapshot.showingHighlights
-      this.updateHighlighting()
+      this.updateHighlighting(autIframe)
     },
 
-    updateHighlighting () {
+    updateHighlighting (autIframe: AutIframe) {
       if (!this.snapshot) {
         throw Error('Cannot update highlighting if this.snapshot not defined')
       }
 
-      const autIframeModel = getAutIframeModel()
-
       if (this.snapshot.showingHighlights && this.snapshotProps) {
         const snapshot = this.snapshotProps.snapshots[this.snapshot.stateIndex]
 
-        autIframeModel.highlightEl(snapshot, this.snapshotProps)
+        autIframe.highlightEl(snapshot, this.snapshotProps)
       } else {
-        autIframeModel.removeHighlights()
+        autIframe.removeHighlights()
       }
     },
 
-    changeState (index: number) {
+    changeState (index: number, autIframe: AutIframe) {
       if (!this.snapshot) {
         throw Error('Cannot change state without first assigning this.snapshot')
       }
@@ -100,11 +98,9 @@ export const useSnapshotStore = defineStore({
 
       this.snapshot.stateIndex = index
 
-      const autIframeModel = getAutIframeModel()
+      autIframe.restoreDom(snapshot)
 
-      autIframeModel.restoreDom(snapshot)
-
-      this.updateHighlighting()
+      this.updateHighlighting(autIframe)
     },
 
     setTestsRunningError () {

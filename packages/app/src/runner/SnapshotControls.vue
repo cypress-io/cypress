@@ -11,10 +11,12 @@
       <SnapshotHighlightControls
         v-if="snapshotStore.isSnapshotPinned && snapshotStore.snapshotProps?.$el"
         :event-manager="props.eventManager"
+        :get-aut-iframe="props.getAutIframe"
       />
 
       <SnapshotChangeState
         v-if="snapshotStore.isSnapshotPinned && shouldShowStateControls"
+        :get-aut-iframe="props.getAutIframe"
       />
     </div>
   </div>
@@ -26,9 +28,12 @@ import { useSnapshotStore } from './snapshot-store'
 import SnapshotMessage from './SnapshotMessage.vue'
 import SnapshotChangeState from './SnapshotChangeState.vue'
 import SnapshotHighlightControls from './SnapshotHighlightControls.vue'
+import type { EventManager } from '../runner/event-manager'
+import type { AutIframe } from '../runner/aut-iframe'
 
 const props = defineProps<{
-  eventManager: typeof window.UnifiedRunner.eventManager
+  eventManager: EventManager
+  getAutIframe: () => AutIframe
 }>()
 
 const snapshotStore = useSnapshotStore()

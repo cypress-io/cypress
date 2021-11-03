@@ -1,3 +1,10 @@
+# [create-cypress-tests-v1.1.3](https://github.com/cypress-io/cypress/compare/create-cypress-tests-v1.1.2...create-cypress-tests-v1.1.3) (2021-10-29)
+
+
+### Bug Fixes
+
+* revive type checker ([#18172](https://github.com/cypress-io/cypress/issues/18172)) ([af472b6](https://github.com/cypress-io/cypress/commit/af472b6419ecb2aec1abdb09df99b2fa5f56e033))
+
 # [create-cypress-tests-v1.1.2](https://github.com/cypress-io/cypress/compare/create-cypress-tests-v1.1.1...create-cypress-tests-v1.1.2) (2021-06-17)
 
 
