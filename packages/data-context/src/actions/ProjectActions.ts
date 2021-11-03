@@ -70,9 +70,10 @@ export class ProjectActions {
       configChildProcess: null,
     })
 
+
     this.setActiveProjectProperties({
-      isCTConfigured: await this.ctx.project.isTestingTypeConfigured(projectRoot, 'component'),
-      isE2EConfigured: await this.ctx.project.isTestingTypeConfigured(projectRoot, 'e2e'),
+      // isCTConfigured: await this.ctx.project.isTestingTypeConfigured(projectRoot, 'component'),
+      // isE2EConfigured: await this.ctx.project.isTestingTypeConfigured(projectRoot, 'e2e'),
       preferences: await this.ctx.project.getProjectPreferences(title),
     })
 
@@ -213,7 +214,7 @@ export class ProjectActions {
     const browser = this.findBrowerByPath(browserPath)
 
     if (!browser) {
-      throw Error('Cannot find specifiec browser')
+      throw Error(`Cannot find specified browser at given path: ${browserPath}.`)
     }
 
     this.ctx.actions.electron.hideBrowserWindow()
@@ -234,6 +235,7 @@ export class ProjectActions {
   }
 
   private findBrowerByPath (browserPath: string) {
+    console.log(this.ctx.coreData.app)
     return this.ctx.coreData?.app?.browsers?.find((browser) => browser.path === browserPath)
   }
 
