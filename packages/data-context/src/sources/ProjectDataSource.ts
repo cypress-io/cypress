@@ -24,7 +24,7 @@ export class ProjectDataSource {
   }
 
   getCurrentProjectSavedState () {
-    return this.ctx._apis.projectApi.getCurrentProjectSavedState()
+    return this.api.getCurrentProjectSavedState()
   }
 
   getConfig (projectRoot: string) {
