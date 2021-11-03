@@ -9,7 +9,7 @@
   />
   <div
     v-if="props.gql.activeTestingType"
-    class="overflow-scroll text-center max-w-600px"
+    class="overflow-scroll text-center max-w-600px mx-auto mt-80px"
   >
     <h1
       data-testid="create-spec-page-title"
@@ -65,6 +65,7 @@ gql`
 fragment CreateSpecPage on App {
   activeTestingType
   ...CreateSpecCards
+  ...CreateSpecModal
 }
 `
 

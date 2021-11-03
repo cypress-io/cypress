@@ -4,6 +4,7 @@
       :is="generator.card"
       v-for="generator in generators"
       :key="generator.id"
+      :disabled="generator.disabled(props.gql.activeProject) || false"
       @click="$emit('select', generator.id)"
     />
   </div>

@@ -18,6 +18,7 @@
       v-if="generator"
       :key="generator.id"
       v-model:title="title"
+      :code-gen-glob="props.gql.activeProject?.codeGenGlob"
     />
 
     <CreateSpecCards
@@ -54,6 +55,9 @@ defineEmits<{
 gql`
 fragment CreateSpecModal on App {
   ...CreateSpecCards
+  activeProject {
+    ...ComponentGeneratorStepOne_codeGenGlob
+  }
 }
 `
 

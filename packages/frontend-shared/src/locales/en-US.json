@@ -77,6 +77,7 @@
       "importFromStory": {
         "header": "Create from story",
         "description": "We'll generate a spec file from the Storybook files that you've written for each component in this project.",
+        "notSetupDescription": "We cannot import any stories because we couldn't detect Storybook in this project.",
         "chooseAStoryHeader": "Choose a story"
       },
       "importFromComponent": {

@@ -1,17 +1,17 @@
 <template>
-  {{ query.data.value?.app.activeProject?.codeGenGlob }}
-  <FileChooser
-    v-model:extensionPattern="extensionPattern"
-    :files="allFiles"
-    :loading="query.fetching.value"
-    @reset:extensionPattern="extensionPattern = initialExtension"
-    @selectFile="makeSpec"
-  />
-  <GeneratorSuccess
-    v-if="result"
-    :file="result"
-  />
-  <div class="rounded-b w-full h-24px" />
+  <div>
+    <FileChooser
+      v-model:extensionPattern="extensionPattern"
+      :files="allFiles"
+      :loading="query.fetching.value"
+      @selectFile="makeSpec"
+    />
+    <GeneratorSuccess
+      v-if="result"
+      :file="result"
+    />
+    <div class="rounded-b w-full h-24px" />
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -25,6 +25,7 @@ import { ComponentGeneratorStepOneDocument, ComponentGeneratorStepOne_GenerateSp
 
 const props = defineProps<{
   title?: string,
+  codeGenGlob: any
 }>()
 
 const { t } = useI18n()
@@ -36,14 +37,19 @@ const emits = defineEmits<{
 
 const { title } = useVModels(props, emits)
 
-title.value = t('createSpec.component.importFromStory.chooseAStoryHeader')
+title.value = t('createSpec.component.importFromComponent.chooseAComponentHeader')
+
+gql`
+fragment ComponentGeneratorStepOne_codeGenGlob on Project {
+  codeGenGlob(type: component)
+}
+`
 
 gql`
 query ComponentGeneratorStepOne($glob: String!) {
   app {
     activeProject {
       id
-      codeGenGlob(type: component)
       codeGenCandidates(glob: $glob) {
         id
         name
@@ -63,12 +69,11 @@ mutation ComponentGeneratorStepOne_generateSpec($codeGenCandidate: String!, $typ
   generateSpecFromSource(codeGenCandidate: $codeGenCandidate, type: $type) {
     ...GeneratorSuccess
   }
-}
-`
+}`
 
-const initialExtension = '*.stories.*'
-const extensionPattern = ref(initialExtension)
 const mutation = useMutation(ComponentGeneratorStepOne_GenerateSpecDocument)
+
+const extensionPattern = ref(props.codeGenGlob)
 
 const glob = computed(() => {
   return `**/${extensionPattern.value}`

@@ -3,7 +3,6 @@
     v-model:extensionPattern="extensionPattern"
     :files="allFiles"
     :loading="query.fetching.value"
-    @reset:extensionPattern="extensionPattern = initialExtension"
     @selectFile="makeSpec"
   />
   <GeneratorSuccess
