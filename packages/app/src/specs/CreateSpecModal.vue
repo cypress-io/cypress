@@ -1,11 +1,11 @@
 <template>
   <StandardModal
-    :clickOutside="false"
+    :click-outside="false"
     variant="bare"
     :title="title"
-    :modelValue="show"
-    @update:model-value="$emit('close')"
+    :model-value="show"
     data-testid="create-spec-modal"
+    @update:model-value="$emit('close')"
   >
     <template #overlay="{classes}">
       <DialogOverlay
@@ -13,26 +13,30 @@
         class="bg-gray-900 opacity-[0.97]"
       />
     </template>
-    <component v-if="generator"
-    v-model:title="title"
-    :key="generator.id"
-    :is="generator.entry"></component>
+    <component
+      :is="generator.entry"
+      v-if="generator"
+      :key="generator.id"
+      v-model:title="title"
+    />
 
-    <CreateSpecCards v-else @select="currentGeneratorId = $event" :gql="props.gql"></CreateSpecCards>
+    <CreateSpecCards
+      v-else
+      :gql="props.gql"
+      @select="currentGeneratorId = $event"
+    />
   </StandardModal>
 </template>
 
 <script lang  ="ts" setup>
-import type { SpecGenerator, GeneratorId } from './generators'
+import { generators, SpecGenerator, GeneratorId } from './generators'
 import { DialogOverlay } from '@headlessui/vue'
 import StandardModal from '@cy/components/StandardModal.vue'
 import StandardModalBody from '@cy/components/StandardModalBody.vue'
 import StandardModalFooter from '@cy/components/StandardModalFooter.vue'
 import CreateSpecCardModal from './CreateSpecCardModal.vue'
 import CreateSpecCards from './CreateSpecCards.vue'
-import { generators } from './generators'
-import { ref, computed } from 'vue'
-import type { Ref } from 'vue'
+import { ref, computed, Ref } from 'vue'
 import { useModalStore } from '../store'
 import type { CreateSpecModalFragment } from '../generated/graphql'
 import { gql } from '@urql/vue'
@@ -41,6 +45,10 @@ const props = defineProps<{
   initialGenerator?: GeneratorId,
   show: boolean,
   gql: CreateSpecModalFragment
+}>()
+
+defineEmits<{
+  (eventName: 'close'): void
 }>()
 
 gql`
@@ -55,6 +63,7 @@ const title = ref('')
 
 const generator = computed(() => {
   if (currentGeneratorId.value) return generators[currentGeneratorId.value]
+
   return null
 })
 

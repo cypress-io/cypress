@@ -1,7 +1,16 @@
 <template>
-  <CreateSpecModal v-if="query.data.value?.app.activeTestingType" :key="generator" :testingType="query.data.value?.app.activeTestingType"
-    :initial-generator="generator" :show="showModal" @close="closeModal"/>
-  <div class="overflow-scroll text-center max-w-600px" v-if="query.data.value?.app.activeTestingType">
+  <CreateSpecModal
+    v-if="props.gql.activeTestingType"
+    :key="generator"
+    :initial-generator="generator"
+    :show="showModal"
+    :gql="props.gql"
+    @close="closeModal"
+  />
+  <div
+    v-if="props.gql.activeTestingType"
+    class="overflow-scroll text-center max-w-600px"
+  >
     <h1
       data-testid="create-spec-page-title"
       class="text-gray-900 text-32px mb-12px"
@@ -12,12 +21,13 @@
       data-testid="create-spec-page-description"
       class="leading-normal text-gray-600 text-18px mb-32px"
     >
-      {{ t(`createSpec.page.${query.data.value?.app.activeTestingType}.description`) }}
+      {{ t(`createSpec.page.${props.gql.activeTestingType}.description`) }}
     </p>
     <CreateSpecCards
       data-testid="create-spec-page-cards"
+      :gql="props.gql"
       @select="choose"
-      :gql="query.data.value?.app" />
+    />
 
     <div class="text-center mt-32px">
       <p
@@ -32,7 +42,7 @@
         prefix-icon-class="icon-light-gray-50 icon-dark-gray-400"
         :prefix-icon="SettingsIcon"
         class="mx-auto duration-300 hocus:ring-gray-50 hocus:border-gray-200"
-        @click=""
+        @click.prevent=""
       >
         {{ t('createSpec.viewSpecPatternButton') }}
       </Button>
@@ -44,39 +54,27 @@
 import { useI18n } from '@cy/i18n'
 import SettingsIcon from '~icons/cy/settings_x16'
 import Button from '@cy/components/Button.vue'
-import type { TestingTypeEnum } from '../generated/graphql'
-import { ref, computed } from 'vue'
-import type { Ref } from 'vue'
+import { ref, computed, Ref } from 'vue'
 import CreateSpecModal from './CreateSpecModal.vue'
 import CreateSpecCards from './CreateSpecCards.vue'
-import { useRouter } from 'vue-router'
-import { gql, useQuery } from '@urql/vue'
-import { CreateSpecPageDocument } from '../generated/graphql'
+import { gql } from '@urql/vue'
+import type { CreateSpecPageFragment } from '../generated/graphql'
 const { t } = useI18n()
 
 gql`
-query CreateSpecPage {
-    app {
-      activeTestingType
-      ...CreateSpecCards
-    }
-  }
+fragment CreateSpecPage on App {
+  activeTestingType
+  ...CreateSpecCards
+}
 `
 
-const query = useQuery({
-  query: CreateSpecPageDocument
-})
-
-// TODO: gql current testingType when it's available
 const props = defineProps<{
-  testingType: TestingTypeEnum
+  gql: CreateSpecPageFragment
 }>()
-
-const router = useRouter()
 
 const showModal = ref(false)
 
-const generator = ref(null)
+const generator = ref()
 
 const closeModal = () => {
   showModal.value = false

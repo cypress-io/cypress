@@ -15,6 +15,7 @@ describe('<CreateSpecModal />', () => {
 
     cy.mount(() => (<div>
       <CreateSpecModal
+        gql={{ activeTestingType: 'component' }}
         show={show.value}
         onClose={() => show.value = false}
         currentGenerator={ImportFromComponentGenerator}/>
@@ -31,9 +32,6 @@ describe('<CreateSpecModal />', () => {
       .click(0, 0)
       .get(modalSelector)
       .should('be.visible')
-      .type('{esc}')
-      .get(modalSelector)
-      .should('be.visible')
     })
 
     it('is dismissed when the X button is clicked', () => {
@@ -47,7 +45,7 @@ describe('<CreateSpecModal />', () => {
 
   describe('generator', () => {
     it('renders the generator', () => {
-      cy.contains(messages.chooseAComponentHeader).should('be.visible')
+      cy.contains(messages.header).should('be.visible')
     })
   })
 })
@@ -60,6 +58,7 @@ describe('playground', () => {
       <button data-testid="trigger" onClick={() => show.value = true}>Open Modal</button>
       <br/>
       <CreateSpecModal
+        gql={{ activeTestingType: 'component' }}
         show={show.value}
         onClose={() => show.value = false}
         currentGenerator={ImportFromComponentGenerator}/>

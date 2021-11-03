@@ -1,4 +1,5 @@
 <template>
+  {{ query.data.value?.app.activeProject?.codeGenGlob }}
   <FileChooser
     v-model:extensionPattern="extensionPattern"
     :files="allFiles"
@@ -42,6 +43,7 @@ query ComponentGeneratorStepOne($glob: String!) {
   app {
     activeProject {
       id
+      codeGenGlob(type: component)
       codeGenCandidates(glob: $glob) {
         id
         name

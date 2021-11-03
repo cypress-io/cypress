@@ -9,7 +9,7 @@ import Components from 'unplugin-vue-components/vite'
 import Icons from 'unplugin-icons/vite'
 import IconsResolver from 'unplugin-icons/resolver'
 import { FileSystemIconLoader } from 'unplugin-icons/loaders'
-import OptimizationPersist from 'vite-plugin-optimize-persist'
+
 import PkgConfig from 'vite-plugin-package-config'
 
 // eslint-disable-next-line no-duplicate-imports
@@ -68,7 +68,7 @@ const makePlugins = (plugins) => {
     // package.json is modified and auto-updated when new cjs dependencies
     // are added
     PkgConfig(),
-    OptimizationPersist(),
+    // OptimizationPersist(),
     // For new plugins only! Merge options for shared plugins via PluginOptions.
     ...(plugins?.plugins || []),
   ])
