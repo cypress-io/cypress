@@ -6,4 +6,7 @@
   "files": [
     "./../ts/index.d.ts"
   ],
+  "compilerOptions": {
+    "outDir": "./lib"
+  }
 }

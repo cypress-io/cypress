@@ -1,7 +1,7 @@
 const snapshot = require('snap-shot-it')
 const { expect } = require('chai')
 
-const validation = require('../../src/validation')
+const validation = require('../../lib/validation')
 
 describe('src/validation', () => {
   const mockKey = 'mockConfigKey'

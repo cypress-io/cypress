@@ -3,7 +3,7 @@ const snapshot = require('snap-shot-it')
 const sinon = require('sinon')
 const sinonChai = require('sinon-chai')
 
-const configUtil = require('../../src/index')
+const configUtil = require('../../lib/index')
 
 chai.use(sinonChai)
 const { expect } = chai
