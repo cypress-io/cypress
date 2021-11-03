@@ -101,6 +101,14 @@ async function makeWorkspacePackagesAbsolute (pathToPkgJson: string): Promise<st
 }
 
 /**
+ * Replace all occurrences of a string.
+ * TODO: remove once we're on Node 15 which has String.prototype.replaceAll
+ */
+function replaceAll (string, from, to) {
+  return string.split(from).join(to)
+}
+
+/**
  * Given a `system-tests` project name, detect and install the `node_modules`
  * specified in the project's `package.json`. No-op if no `package.json` is found.
  */
@@ -162,8 +170,11 @@ export async function scaffoldProjectNodeModules (project: string, updateYarnLoc
         relativePathToProjectDir,
       })
 
-      const yarnLock = (await fs.readFile(yarnLockPath, 'utf8'))
-      .replace(new RegExp(relativePathToMonorepoRoot, 'gm'), relativePathToProjectDir)
+      const yarnLock = replaceAll(
+        await fs.readFile(yarnLockPath, 'utf8'),
+        relativePathToMonorepoRoot,
+        relativePathToProjectDir,
+      )
 
       await fs.writeFile(yarnLockPath, yarnLock)
     } catch (err) {
@@ -176,6 +187,7 @@ export async function scaffoldProjectNodeModules (project: string, updateYarnLoc
     let cmd = `yarn install --prefer-offline --ignore-scripts`
 
     if (!updateYarnLock) cmd += ' --frozen-lockfile'
+    else cmd += ' --update-checksums'
 
     if (process.env.CI) cmd += ` --cache-folder=~/.yarn-${process.platform} `
 
@@ -185,8 +197,11 @@ export async function scaffoldProjectNodeModules (project: string, updateYarnLoc
 
     // Replace workspace dependency paths in `yarn.lock` with tokens so it can be the same
     // for all developers
-    const yarnLock = (await fs.readFile(yarnLockPath, 'utf8'))
-    .replace(new RegExp(relativePathToProjectDir, 'gm'), relativePathToMonorepoRoot)
+    const yarnLock = replaceAll(
+      await fs.readFile(yarnLockPath, 'utf8'),
+      relativePathToProjectDir,
+      relativePathToMonorepoRoot,
+    )
 
     await fs.writeFile(_path.join(projects, project, 'yarn.lock'), yarnLock)
 
