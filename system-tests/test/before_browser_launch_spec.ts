@@ -25,7 +25,7 @@ describe('e2e before:browser:launch', () => {
     spec: 'spec.js',
   })
 
-  systemTests.it.only('can add extensions', {
+  systemTests.it('can add extensions', {
     spec: 'spec.js',
     config: {
       video: false,

@@ -77,6 +77,7 @@ describe('e2e config', () => {
   })
 
   it('throws error when multiple default config file are found in project', function () {
+    Fixtures.scaffoldProject('pristine')
     const projectRoot = Fixtures.projectPath('pristine')
 
     return Promise.all([
