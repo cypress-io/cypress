@@ -1,13 +1,14 @@
 describe('Config files error handling', () => {
   beforeEach(() => {
     cy.setupE2E('pristine-with-config-file')
-    cy.visitLaunchpad()
   })
 
   it('it handles multiples config files', () => {
     cy.withCtx(async (ctx) => {
       await ctx.actions.file.writeFileInProject('cypress.config.ts', 'export default {}')
     })
+
+    cy.visitLaunchpad()
 
     cy.get('[data-cy-testingType=e2e]').click()
 
@@ -32,6 +33,8 @@ describe('Config files error handling', () => {
       await ctx.actions.file.writeFileInProject('cypress.json', '{}')
       await ctx.actions.file.removeFileInProject('cypress.config.js')
     })
+
+    cy.visitLaunchpad()
 
     cy.get('[data-cy-testingType=e2e]').click()
 
@@ -65,6 +68,8 @@ describe('Config files error handling', () => {
     cy.withCtx(async (ctx) => {
       await ctx.actions.file.writeFileInProject('cypress.json', '{}')
     })
+
+    cy.visitLaunchpad()
 
     cy.get('[data-cy-testingType=e2e]').click()
 
