@@ -65,11 +65,11 @@ defineProps<{
   config: Array<{
     field: string,
     from: 'default'| 'config',
-    value: string | number | boolean | Record<string, string> | Array<string | number | boolean>
+    value: string | number | boolean | Record<string, string> | Array<string>
   }>
 }>()
 
-// a bug in vite ddemands that we do this passthrough
+// a bug in vite demands that we do this passthrough
 const colorMap = CONFIG_LEGEND_COLOR_MAP
 
 const { t } = useI18n()

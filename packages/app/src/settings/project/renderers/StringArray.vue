@@ -21,7 +21,7 @@
 <script lang="ts" setup>
 
 defineProps<{
-  value: any[],
+  value: string[],
   colorClasses?: string
 }>()
 </script>
