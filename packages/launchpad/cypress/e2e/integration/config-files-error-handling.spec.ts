@@ -11,7 +11,7 @@ describe('Config files error handling', () => {
 
     cy.get('[data-cy-testingType=e2e]').click()
 
-    cy.contains('h1', 'Configuration Files')
+    cy.contains('h1', 'Configuration Files').should('be.visible')
 
     cy.get('button').contains('Continue').click()
     cy.get('body')
