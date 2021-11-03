@@ -926,7 +926,7 @@ describe('lib/gui/events', () => {
 
     describe('set:project:id', () => {
       it('calls writeProjectId with projectRoot', function () {
-        const arg = { id: '1', projectRoot: '/project/root/', configFile: 'cypress.json' }
+        const arg = { id: '1', projectRoot: '/project/root/', configFile: 'cypress.config.js' }
         const stubWriteProjectId = sinon.stub(ProjectStatic, 'writeProjectId').resolves()
 
         return this.handleEvent('set:project:id', arg)
@@ -940,7 +940,7 @@ describe('lib/gui/events', () => {
 
     describe('setup:dashboard:project', () => {
       it('returns result of ProjectStatic.createCiProject', function () {
-        const arg = { projectRoot: '/project/root/', configFile: 'cypress.json' }
+        const arg = { projectRoot: '/project/root/', configFile: 'cypress.config.js' }
         const stubCreateCiProject = sinon.stub(ProjectStatic, 'createCiProject').resolves()
 
         return this.handleEvent('setup:dashboard:project', arg)

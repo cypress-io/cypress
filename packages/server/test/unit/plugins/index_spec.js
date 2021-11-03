@@ -20,7 +20,7 @@ describe('lib/plugins/index', () => {
 
     configExtras = {
       projectRoot: '/path/to/project/root',
-      configFile: '/path/to/project/root/cypress.json',
+      configFile: '/path/to/project/root/cypress.config.js',
     }
 
     getOptions = (overrides = {}) => {

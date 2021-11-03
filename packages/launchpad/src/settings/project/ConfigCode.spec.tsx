@@ -1,9 +1,9 @@
 import ConfigCode from './ConfigCode.vue'
-import jsonObject from '../../../cypress.json'
+import config from '../../../cypress.config'
 import { defaultMessages } from '@cy/i18n'
 
 const selector = '[data-testid=code]'
-const jsonString = JSON.stringify(jsonObject, null, 2)
+const configString = JSON.stringify(config, null, 2)
 
 describe('<ConfigCode />', () => {
   beforeEach(() => {
@@ -16,12 +16,12 @@ describe('<ConfigCode />', () => {
          */
       }
       { /* @ts-ignore */ }
-      <ConfigCode data-testid="code" tabindex={0} class="" code={jsonString} />
+      <ConfigCode data-testid="code" tabindex={0} class="" code={configString} />
     </div>))
   })
 
   it('renders the code passed in', () => {
-    cy.get(selector).should('contain.text', jsonString)
+    cy.get(selector).should('contain.text', configString)
   })
 
   // This needs to be skipped because it cannot be tested unless "Emulate a focused page" is checked.

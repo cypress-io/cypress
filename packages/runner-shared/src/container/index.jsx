@@ -86,7 +86,7 @@ export class Container extends Component {
     const { NoSpec } = this.props
 
     return (
-      <NoSpec config={this.props.config} onHashChange={this._checkSpecFile}>
+      <NoSpec config={this.props.config} eventManager={this.props.eventManager} onHashChange={this._checkSpecFile}>
         {this._automationElement()}
       </NoSpec>
     )

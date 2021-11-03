@@ -1,13 +1,16 @@
 import { DataContext } from '@packages/data-context'
+import os from 'os'
+
 import specsUtil from './util/specs'
-import type { FindSpecs, FoundBrowser, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions, PlatformName, Preferences } from '@packages/types'
+import type { FindSpecs, FoundBrowser, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions, PlatformName, Preferences, SettingsOptions } from '@packages/types'
 import browserUtils from './browsers/utils'
 import auth from './gui/auth'
 import user from './user'
 import * as config from './config'
-import type { EventEmitter } from 'events'
+import { EventEmitter } from 'events'
 import { openProject } from './open_project'
 import cache from './cache'
+import errors from './errors'
 import { graphqlSchema } from '@packages/graphql/src/schema'
 
 const { getBrowsers, ensureAndGetByNameOrPath } = browserUtils
@@ -16,6 +19,27 @@ interface MakeDataContextOptions {
   os: PlatformName
   rootBus: EventEmitter
   launchArgs: LaunchArgs
+}
+
+let legacyDataContext: DataContext | undefined
+
+// For testing
+export function clearLegacyDataContext () {
+  legacyDataContext = undefined
+}
+
+export function makeLegacyDataContext (launchArgs: LaunchArgs = {} as LaunchArgs): DataContext {
+  if (legacyDataContext && process.env.LAUNCHPAD) {
+    throw new Error(`Expected ctx to be passed as an arg, but used legacy data context`)
+  } else if (!legacyDataContext) {
+    legacyDataContext = makeDataContext({
+      rootBus: new EventEmitter,
+      launchArgs,
+      os: os.platform() as PlatformName,
+    })
+  }
+
+  return legacyDataContext
 }
 
 export function makeDataContext (options: MakeDataContextOptions) {
@@ -39,8 +63,8 @@ export function makeDataContext (options: MakeDataContextOptions) {
       },
     },
     projectApi: {
-      getConfig (projectRoot: string) {
-        return config.get(projectRoot)
+      getConfig (projectRoot: string, options?: SettingsOptions) {
+        return config.get(projectRoot, options)
       },
       launchProject (browser: FoundBrowser, spec: Cypress.Spec, options?: LaunchOpts) {
         return openProject.launch({ ...browser }, spec, options)
@@ -77,6 +101,9 @@ export function makeDataContext (options: MakeDataContextOptions) {
       },
       closeActiveProject () {
         return openProject.closeActiveProject()
+      },
+      error (type: string, ...args: any) {
+        throw errors.throw(type, ...args)
       },
     },
   })

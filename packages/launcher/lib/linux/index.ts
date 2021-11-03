@@ -1,7 +1,6 @@
 import { log } from '../log'
-import { partial, trim, tap, prop } from 'ramda'
-import type { PathData } from '../types'
 import type { FoundBrowser, Browser } from '@packages/types'
+import type { PathData } from '../types'
 import { notInstalledErr } from '../errors'
 import { utils } from '../utils'
 import os from 'os'
@@ -69,9 +68,13 @@ export function getVersionString (path: string) {
 
   return Bluebird.resolve(utils.getOutput(path, ['--version']))
   .timeout(30000, `Timed out after 30 seconds getting browser version for ${path}`)
-  .then(prop('stdout'))
-  .then(trim)
-  .then(tap(partial(log, ['stdout: "%s"'])))
+  .then((val) => val.stdout)
+  .then((val) => val.trim())
+  .then((val) => {
+    log('stdout: %s', val)
+
+    return val
+  })
 }
 
 export function getVersionNumber (version: string, browser: Browser) {

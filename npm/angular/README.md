@@ -22,10 +22,10 @@ require('core-js/es7/reflect');
 require('@cypress/angular/support');
 ```
 
-Enable component testing in `cypress.json`.
+Enable component testing in `cypress.config.js`.
 
-```json
-{
+```js
+module.exports = {
   "component": {
     "componentFolder": "src/app",
     "testFiles": "**/*cy-spec.ts"
