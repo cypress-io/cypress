@@ -1,9 +1,8 @@
-import { expect } from 'chai'
+import chai, { expect } from 'chai'
 import sinon from 'sinon'
 import { DataContext } from '@packages/data-context'
 import snapshot from 'snap-shot-it'
 import sinonChai from '@cypress/sinon-chai'
-import chai from 'chai'
 
 chai.use(sinonChai)
 
@@ -15,14 +14,16 @@ const makeDataContext = (options) => {
       dock: {
         hide: () => {},
         show: () => {},
-      }
+      },
     },
     launchOptions: {},
     launchArgs: {},
     appApi: {
-      getBrowsers: () => [{
-        path: chromeTestPath
-      }],
+      getBrowsers: () => {
+        return [{
+          path: chromeTestPath,
+        }]
+      },
     },
     authApi: {
       getUser: () => Promise.resolve({}),
@@ -35,12 +36,12 @@ const makeDataContext = (options) => {
         return {
           [options.coreData.app.activeProject.title]: {
             browserPath: chromeTestPath,
-            testingType: 'component'
-          }
+            testingType: 'component',
+          },
         }
       },
       closeActiveProject: () => {},
-      getConfig: () => {}
+      getConfig: () => {},
     },
     ...options,
   })
@@ -55,21 +56,6 @@ describe('@packages/data-context', () => {
       snapshot(context)
     })
 
-    it.only('skips first wizard step when given a testingType', async () => {
-      const context = makeDataContext({
-        launchArgs: {
-          projectRoot: '/project/root',
-          testingType: 'e2e',
-        },
-      })
-
-      await context.initializeData()
-      expect(context.coreData.wizard).to.contain({
-        chosenTestingType: 'e2e',
-        currentStep: 'initializePlugins',
-      })
-    })
-
     it('launches without electron if preferences is set', async () => {
       const projectRoot = '/project/root'
       const activeProject = {
@@ -79,33 +65,34 @@ describe('@packages/data-context', () => {
         isCTConfigured: true,
         isE2EConfigured: false,
         config: null,
-        configChildProcess: null, 
-        generatedSpec: null, 
+        configChildProcess: null,
+        generatedSpec: null,
         projectRoot,
         preferences: {
           browserPath: '/some/browser/path',
-          testingType: 'component'
-        }
+          testingType: 'component',
+        },
       }
 
       const context = makeDataContext({
         launchArgs: {
           testingType: 'e2e',
-          projectRoot
+          projectRoot,
         },
         coreData: {
           wizard: {
-            history: []
+            history: [],
           },
           app: {
             projects: [activeProject],
             activeProject,
           },
-          electron: {}
-        }
+          electron: {},
+        },
       })
 
       const spy = sinon.spy(context._apis.projectApi, 'launchProject')
+
       await context.initializeData()
       expect(spy).to.have.been.called
     })
