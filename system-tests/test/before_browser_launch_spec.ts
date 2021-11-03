@@ -1,3 +1,4 @@
+import Fixtures from '../lib/fixtures'
 import systemTests from '../lib/system-tests'
 import browserUtils from '@packages/server/lib/browsers/utils'
 
@@ -24,7 +25,7 @@ describe('e2e before:browser:launch', () => {
     spec: 'spec.js',
   })
 
-  systemTests.it('can add extensions', {
+  systemTests.it.only('can add extensions', {
     spec: 'spec.js',
     config: {
       video: false,
@@ -33,5 +34,9 @@ describe('e2e before:browser:launch', () => {
     project: 'browser-extensions',
     sanitizeScreenshotDimensions: true,
     snapshot: true,
+    onRun: async (exec) => {
+      Fixtures.scaffoldProject('plugin-extension')
+      await exec()
+    },
   })
 })
