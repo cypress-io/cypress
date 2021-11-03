@@ -6,15 +6,15 @@
     <template #description>
       {{ t('settingsPage.proxy.description') }}
     </template>
-    <div class="bg-gray-50 border-1 rounded py-2 px-4 grid gap-1 w-364px">
-      <div class="flex justify-between text-sm">
+    <div class="bg-gray-50 border-1 border-gray-100 rounded py-18px px-20px grid gap-12px w-364px text-14px">
+      <div class="flex justify-between">
         <span class="font-medium text-gray-800">{{ t('settingsPage.proxy.proxyServer') }}</span>
         <span
           class="text-gray-500"
           data-testid="proxy-server"
         >{{ proxyServer }}</span>
       </div>
-      <div class="flex justify-between text-sm">
+      <div class="flex justify-between">
         <span class="font-medium text-gray-800">{{ t('settingsPage.proxy.bypassList') }}</span>
         <span
           class="text-gray-500"

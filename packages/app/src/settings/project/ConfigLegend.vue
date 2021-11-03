@@ -15,6 +15,7 @@
         <a
           href="https://docs.cypress.io"
           target="_blank"
+          class="text-purple-500 hocus-link-default"
         >cypress.config.js</a>
       </i18n-t>
     </ConfigBadge>
@@ -41,6 +42,7 @@
         <a
           href="https://docs.cypress.io"
           target="_blank"
+          class="text-purple-500 hocus-link-default"
         >setupNodeEnv</a>
       </i18n-t>
     </ConfigBadge>
