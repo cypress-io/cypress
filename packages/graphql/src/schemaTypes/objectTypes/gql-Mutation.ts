@@ -231,8 +231,8 @@ export const mutation = mutationType({
 
     t.liveMutation('launchOpenProject', {
       description: 'Launches project from open_project global singleton',
-      resolve: (_, args, ctx) => {
-        return ctx.actions.project.launchProject(ctx.wizardData.chosenTestingType, {})
+      resolve: async (_, args, ctx) => {
+        await ctx.actions.project.launchProject(ctx.wizardData.chosenTestingType, {})
       },
     })
 

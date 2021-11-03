@@ -1,8 +1,8 @@
 <template>
   <Warning
-    v-if="props.gql.wizard.step === 'setupComplete' && props.gql.wizard.browserErrorMessage"
+    v-if="props.gql.wizard.step === 'setupComplete' && props.gql.browserErrorMessage"
     title="Browser Error"
-    :message="props.gql.wizard.browserErrorMessage"
+    :message="props.gql.browserErrorMessage"
   />
   <WizardHeader
     v-if="props.gql.wizard"
