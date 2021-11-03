@@ -1,7 +1,7 @@
-import RunsPage from './RunsPage.vue'
-import { RunsPageFragmentDoc } from '../generated/graphql-test'
+import RunsContainer from './RunsContainer.vue'
+import { RunsContainerFragmentDoc } from '../generated/graphql-test'
 
-describe('<RunsPage />', { keystrokeDelay: 0 }, () => {
+describe('<RunsContainer />', { keystrokeDelay: 0 }, () => {
   const cloudViewer = {
     __typename: 'CloudUser',
     id: '1',
@@ -10,12 +10,12 @@ describe('<RunsPage />', { keystrokeDelay: 0 }, () => {
   } as const
 
   it('playground', () => {
-    cy.mountFragment(RunsPageFragmentDoc, {
+    cy.mountFragment(RunsContainerFragmentDoc, {
       onResult: (result) => {
         result.cloudViewer = cloudViewer
       },
       render (gqlVal) {
-        return <RunsPage gql={gqlVal} />
+        return <RunsContainer gql={gqlVal} />
       },
     })
   })

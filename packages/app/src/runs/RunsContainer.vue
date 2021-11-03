@@ -22,13 +22,13 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 import { gql } from '@urql/vue'
-import RunCard from '../runs/RunCard.vue'
-import RunsConnect from '../runs/RunsConnect.vue'
-import RunsEmpty from '../runs/RunsEmpty.vue'
-import type { RunsPageFragment } from '../generated/graphql'
+import RunCard from './RunCard.vue'
+import RunsConnect from './RunsConnect.vue'
+import RunsEmpty from './RunsEmpty.vue'
+import type { RunsContainerFragment } from '../generated/graphql'
 
 gql`
-fragment RunsPage on Query {
+fragment RunsContainer on Query {
   app {
     activeProject {
       id
@@ -51,7 +51,7 @@ fragment RunsPage on Query {
 }`
 
 const props = defineProps<{
-  gql: RunsPageFragment
+  gql: RunsContainerFragment
 }>()
 
 const activeProject = computed(() => props.gql.app?.activeProject)
