@@ -11,25 +11,6 @@
   </router-view>
 </template>
 
-<script lang="ts" setup>
-import { onBeforeUnmount } from 'vue'
-import { gql, useMutation } from '@urql/vue'
-import { App_ShowLaunchpadDocument } from './generated/graphql'
-
-gql`
-mutation App_ShowLaunchpad {
-  showLaunchpadOnAppExit
-}
-`
-
-const showLaunchpad = useMutation(App_ShowLaunchpadDocument)
-
-window.addEventListener('beforeunload', () => {
-  showLaunchpad.executeMutation({})
-})
-
-</script>
-
 <style>
 .reporter {
   position: relative;
