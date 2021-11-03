@@ -9,15 +9,13 @@
           flex-shrink-0
           mr-20px"
     />
-    <span class="flex-grow text-white">
+    <span class="flex-grow text-white whitespace-nowrap">
       Component testing
     </span>
-    <i-cy-chevron-down
+    <i-cy-chevron-right_x16
       class="icon-dark-gray-700
           w-16px
-          h-16px
-          transform
-          -rotate-90"
+          h-16px"
     />
   </a>
 </template>

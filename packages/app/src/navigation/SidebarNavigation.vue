@@ -25,7 +25,7 @@
         class="flex-1 space-y-1 bg-gray-1000"
         aria-label="Sidebar"
       >
-        <SwitchTestingTypeModal />
+        <SwitchTestingTypeButton />
         <RouterLink
           v-for="item in navigation"
           v-slot="{ isActive }"
@@ -47,7 +47,7 @@
 
 <script lang="ts" setup>
 import SidebarNavigationRow from './SidebarNavigationRow.vue'
-import SwitchTestingTypeModal from './SwitchTestingTypeModal.vue'
+import SwitchTestingTypeButton from './SwitchTestingTypeButton.vue'
 import SpecsIcon from '~icons/cy/test-results_x24'
 import CodeIcon from '~icons/cy/code-editor_x24'
 import RunsIcon from '~icons/cy/runs_x24'

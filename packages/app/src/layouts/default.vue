@@ -29,12 +29,12 @@
         <ModalManager v-if="modalStore.activeModalId" />
       </section>
     </main>
-    <nav
+    <div
       class="h-screen order-first"
-      :class="mainStore.navBarExpanded ? 'w-240px' : 'w-80px'"
+      :class="mainStore.navBarExpanded ? 'w-248px' : 'w-64px'"
     >
       <SidebarNavigation class="h-full" />
-    </nav>
+    </div>
   </div>
 </template>
 
