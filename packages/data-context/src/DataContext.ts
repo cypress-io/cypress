@@ -225,6 +225,7 @@ export class DataContext extends DataContextShell {
       this.util.disposeLoaders(),
       this.actions.project.clearActiveProject(),
       this.actions.dev.dispose(),
+      this.coreData.baseError = null,
     ])
   }
 
