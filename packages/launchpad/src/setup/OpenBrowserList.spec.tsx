@@ -34,17 +34,6 @@ describe('<OpenBrowserList />', () => {
     cy.contains('button', 'different browser').should('not.exist')
   })
 
-  it('renders browser error if there is one', () => {
-    cy.mountFragment(OpenBrowserListFragmentDoc, {
-      onResult: (result) => {
-        result.browserErrorMessage = 'There was an error'
-      },
-      render: (gqlVal) => <div class="resize overflow-auto border-current border-1"><OpenBrowserList gql={gqlVal} /></div>,
-    })
-
-    cy.contains('There was an error').should('be.visible')
-  })
-
   it('does not render browser error if there is not one', () => {
     cy.mountFragment(OpenBrowserListFragmentDoc, {
       render: (gqlVal) => <div class="resize overflow-auto border-current border-1"><OpenBrowserList gql={gqlVal} /></div>,
