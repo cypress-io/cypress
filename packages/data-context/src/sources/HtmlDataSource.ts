@@ -3,11 +3,11 @@
  * including the pre-hydration we use to bootstrap the script data for fast
  * initial loading
  */
-import type { DataContextShell } from '../DataContextShell'
+import type { DataContext } from '../DataContext'
 import { getPathToDist } from '@packages/resolve-dist'
 
 export class HtmlDataSource {
-  constructor (private ctx: DataContextShell) {}
+  constructor (private ctx: DataContext) {}
 
   async fetchAppInitialData () {
     const graphql = this.ctx.graphqlClient()

@@ -67,11 +67,10 @@ describe('<Button />', () => {
     })
 
     cy.withCtx((ctx, { testState }) => {
-      const { fs, path, activeProject } = ctx
-      const projectRoot = activeProject?.projectRoot as string
+      const projectRoot = ctx.activeProject?.projectRoot as string
 
       for (const file of Object.values(testState.generatedSpecs) as string[]) {
-        fs.removeSync(path.join(projectRoot, file))
+        ctx.fs.removeSync(ctx.path.join(projectRoot, file))
       }
     })
   })

@@ -1,10 +1,10 @@
 import type { SocketIOServer } from '@packages/socket'
-import type { DataContextShell } from '../DataContextShell'
+import type { DataContext } from '../DataContext'
 
 export class DataEmitterActions {
   private _launchpadSocketServer: SocketIOServer | undefined
   private _appSocketServer: SocketIOServer | undefined
-  constructor (private ctx: DataContextShell) {}
+  constructor (private ctx: DataContext) {}
 
   setLaunchpadSocketServer (socketServer: SocketIOServer | undefined) {
     this._launchpadSocketServer = socketServer
