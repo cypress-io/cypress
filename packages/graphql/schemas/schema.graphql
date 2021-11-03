@@ -423,11 +423,7 @@ type Mutation {
   setCurrentSpec(id: ID!): Boolean
 
   """Save the projects preferences to cache"""
-  setProjectPreferences(
-    """ID of the browser that we want to set"""
-    browserId: ID!
-    testingType: TestingTypeEnum!
-  ): App!
+  setProjectPreferences(browserPath: String!, testingType: TestingTypeEnum!): App!
 
   """show the launchpad at the browser picker step"""
   showLaunchpadOnAppExit: Boolean
@@ -592,7 +588,7 @@ type Project implements Node {
 """Preferences specific to a project"""
 type ProjectPreferences {
   """The preferred browser to launch"""
-  browserId: String
+  browserPath: String
 
   """The preferred testing type to start in"""
   testingType: String

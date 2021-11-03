@@ -38,11 +38,11 @@ query OpenBrowser {
 const query = useQuery({ query: OpenBrowserDocument })
 
 gql`
-mutation OpenBrowser_LaunchProject ($testingType: TestingTypeEnum!, $browserId: ID!)  {
+mutation OpenBrowser_LaunchProject ($testingType: TestingTypeEnum!, $browserPath: String!)  {
   launchOpenProject
   hideBrowserWindow
 
-  setProjectPreferences(testingType: $testingType, browserId: $browserId) {
+  setProjectPreferences(testingType: $testingType, browserPath: $browserPath) {
     activeProject {
       id
       title
@@ -53,11 +53,15 @@ mutation OpenBrowser_LaunchProject ($testingType: TestingTypeEnum!, $browserId: 
 
 const launchOpenProject = useMutation(OpenBrowser_LaunchProjectDocument)
 
-const launch = (browserId: string) => {
-  launchOpenProject.executeMutation({
-    browserId,
-    testingType: query.data.value.wizard.testingType,
-  })
+const launch = (browserPath?: string) => {
+  const testingType = query.data.value?.wizard?.testingType
+
+  if (browserPath && testingType) {
+    launchOpenProject.executeMutation({
+      browserPath,
+      testingType,
+    })
+  }
 }
 
 </script>

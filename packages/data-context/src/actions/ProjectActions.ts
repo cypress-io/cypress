@@ -184,27 +184,31 @@ export class ProjectActions {
     return this.api.launchProject(browser, spec, options)
   }
 
-  async launchProjectWithoutLaunchpad (options?: LaunchOpts) {
+  async launchProjectWithoutElectron () {
     if (!this.ctx.activeProject) {
       throw Error('Cannot launch project without an active project')
     }
 
     const preferences = await this.api.getProjectPreferencesFromCache()
-    const { browserId, testingType } = preferences[this.ctx.activeProject.title] ?? {}
+    const { browserPath, testingType } = preferences[this.ctx.activeProject.title] ?? {}
 
-    if (!browserId || !testingType) {
-      throw Error('Cannont launch project without stored browserId or testingType')
+    if (!browserPath || !testingType) {
+      throw Error('Cannot launch project without stored browserPath or testingType')
     }
 
     const spec = this.makeSpec(testingType)
-    const browser = this.findBrowerById(browserId)
+    const browser = this.findBrowerByPath(browserPath)
+
+    if (!browser) {
+      throw Error('Cannot find specifiec browser')
+    }
 
     this.ctx.actions.electron.hideBrowserWindow()
     this.ctx.coreData.wizard.chosenTestingType = testingType
     await this.initializeActiveProject()
     this.ctx.appData.activeTestingType = testingType
 
-    return this.api.launchProject(browser, spec, options)
+    return this.api.launchProject(browser, spec, {})
   }
 
   private makeSpec (testingType: TestingTypeEnum): Cypress.Spec {
@@ -216,8 +220,8 @@ export class ProjectActions {
     }
   }
 
-  private findBrowerById (browserId: string) {
-    return this.ctx.coreData?.app?.browsers?.find((browser) => browser.id === browserId) ?? this.ctx.browserList[0]
+  private findBrowerByPath (browserPath: string) {
+    return this.ctx.coreData?.app?.browsers?.find((browser) => browser.path === browserPath)
   }
 
   removeProject (projectRoot: string) {

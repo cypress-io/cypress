@@ -61,7 +61,7 @@ export class DataContext extends DataContextShell {
       await this.actions.project.setActiveProject(this.config.launchArgs.projectRoot)
 
       if (this.coreData.app.activeProject?.preferences) {
-        toAwait.push(this.actions.project.launchProjectWithoutLaunchpad())
+        toAwait.push(this.actions.project.launchProjectWithoutElectron())
       }
     }
 
