@@ -9,9 +9,11 @@ index 53e6177..0dee7fb 100644
 -    responseContent.on('error', function (error) {
 -      self.emit('error', error)
 -    })
-+    // responseContent.on('error', function (error) {
-+    //   self.emit('error', error)
-+    // })
++     responseContent.on('error', function (error) {
++       if (!error.message.includes('aborted') || self.listenerCount('error') !== 0) {
++          self.emit('error', error)
++        }
++    })
      responseContent.on('close', function () { self.emit('close') })
  
      if (self.callback) {
