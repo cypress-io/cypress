@@ -56,7 +56,7 @@ describe('@packages/data-context', () => {
       snapshot(context)
     })
 
-    it('launches without electron if preferences is set', async () => {
+    it('launches project immediately if preferences is set', async () => {
       const projectRoot = '/project/root'
       const activeProject = {
         title: 'active-project',

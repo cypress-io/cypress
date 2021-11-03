@@ -70,10 +70,9 @@ export class ProjectActions {
       configChildProcess: null,
     })
 
-
     this.setActiveProjectProperties({
-      // isCTConfigured: await this.ctx.project.isTestingTypeConfigured(projectRoot, 'component'),
-      // isE2EConfigured: await this.ctx.project.isTestingTypeConfigured(projectRoot, 'e2e'),
+      isCTConfigured: await this.ctx.project.isTestingTypeConfigured(projectRoot, 'component'),
+      isE2EConfigured: await this.ctx.project.isTestingTypeConfigured(projectRoot, 'e2e'),
       preferences: await this.ctx.project.getProjectPreferences(title),
     })
 
