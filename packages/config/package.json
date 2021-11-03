@@ -5,7 +5,6 @@
   "private": true,
   "main": "lib/index.js",
   "scripts": {
-    "prebuild": "rm -rf lib; mkdir lib; cp src/*.js lib",
     "build": "tsc --project .",
     "build-prod": "yarn build",
     "clean": "rm -rf lib",
