@@ -15,12 +15,10 @@ describe('<InstallDependencies />', () => {
     cy.contains('a', '@cypress/react')
     .should('be.visible')
     .and('have.attr', 'href', 'https://www.npmjs.com/package/@cypress/react')
-    .and('have.attr', 'target', '_blank')
 
     cy.contains('a', '@cypress/webpack-dev-server')
     .should('be.visible')
     .and('have.attr', 'href', 'https://www.npmjs.com/package/@cypress/webpack-dev-server')
-    .and('have.attr', 'target', '_blank')
 
     cy.contains('Used to interact with React components via Cypress').should('be.visible')
     cy.contains('Used to bundle code').should('be.visible')
