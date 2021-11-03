@@ -1983,6 +1983,7 @@ describe('src/cy/commands/navigation', () => {
       })
 
       it('can time out', { 'pageLoadTimeout': 50 }, function (done) {
+        Cypress.config('retries', 6)
         let thenCalled = false
 
         cy.on('fail', (err) => {
