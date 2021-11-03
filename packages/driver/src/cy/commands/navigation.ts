@@ -789,6 +789,13 @@ export default (Commands, Cypress, cy, state, config) => {
 
           const onBeforeLoad = (contentWindow) => {
             try {
+              // when using the visit the document referrer should be set to an empty string
+              Object.defineProperty(contentWindow.document, 'referrer', {
+                value: '',
+                enumerable: true,
+                configurable: true,
+              })
+
               options.onBeforeLoad?.call(runnable.ctx, contentWindow)
             } catch (err) {
               err.isCallbackError = true
