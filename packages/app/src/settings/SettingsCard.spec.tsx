@@ -5,9 +5,7 @@ describe('<SettingsCard />', () => {
   it('renders', () => {
     const title = 'My Device Settings'
     const description = 'The configuration I\'m passing in.'
-    const headerSelector = '[data-testid=settings-card-header]'
-    const titleSelector = '[data-testid=settings-card-title]'
-    const descriptionSelector = '[data-testid=settings-card-description]'
+    const headerSelector = '[data-cy="collapsible-header"]'
     const contentSelector = '[data-testid=content]'
 
     cy.mount(() => (
@@ -19,11 +17,11 @@ describe('<SettingsCard />', () => {
         </SettingsCard>
       </div>
     ))
-    .get(titleSelector).should('contain.text', title).get(descriptionSelector).should('contain.text', description)
-    .get(contentSelector).should('not.exist')
-    .get(headerSelector).click()
-    .get(contentSelector).should('be.visible')
-    .get(headerSelector).click()
+
+    cy.get(contentSelector).should('not.exist')
+    cy.findByText(title).click()
+    cy.get(contentSelector).should('be.visible')
+    cy.findByText(title).click()
     .get(contentSelector).should('not.exist')
 
     // expected aria and keyboard behavior with space and enter keys:

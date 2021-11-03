@@ -1,9 +1,12 @@
 <template>
-  <div
-    tabindex="0"
-    @keypress.space.enter.self="toggle"
-  >
-    <div @click="toggle">
+  <div>
+    <div
+      tabindex="0"
+      data-cy="collapsible-header"
+      :aria-expanded="isOpen"
+      @click="toggle"
+      @keypress.space.enter.self="toggle"
+    >
       <slot
         name="target"
         :open="isOpen"
@@ -13,7 +16,7 @@
       :style="{
         maxHeight: isOpen ? maxHeight : '0px',
       }"
-      :aria-hidden="isOpen"
+      :aria-hidden="!isOpen"
       :class="['overflow-auto', {
         'transition transition-all duration-500 animate-ease-[cubic-bezier(0.25,0.1,0.25,1)]': isOpen,
       }]"

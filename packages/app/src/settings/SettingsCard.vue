@@ -3,6 +3,7 @@
     class="block w-full mb-4 overflow-hidden border border-gray-100 rounded
   bg-light-50 hocus-default"
     :max-height="maxHeight"
+    lazy
   >
     <template #target="{ open }">
       <ListRowHeader
