@@ -198,6 +198,10 @@ type ExecOptions = {
    * Emulate a no-typescript environment.
    */
   noTypeScript?: boolean
+  /**
+   * Skip scaffolding the project and node_modules.
+   */
+  skipScaffold?: boolean
 }
 
 type Server = {
@@ -884,9 +888,11 @@ const systemTests = {
       ctx.skip()
     }
 
-    await Fixtures.scaffoldCommonNodeModules()
-    Fixtures.scaffoldProject(options.project)
-    await Fixtures.scaffoldProjectNodeModules(options.project)
+    if (!options.skipScaffold) {
+      await Fixtures.scaffoldCommonNodeModules()
+      Fixtures.scaffoldProject(options.project)
+      await Fixtures.scaffoldProjectNodeModules(options.project)
+    }
 
     if (process.env.NO_EXIT) {
       Fixtures.scaffoldProjectWatch(options.project)

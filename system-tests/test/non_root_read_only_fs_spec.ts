@@ -23,6 +23,7 @@ describe('e2e readonly fs', function () {
   }
 
   const onRun = (exec) => {
+    Fixtures.scaffold('read-only-project-root')
     chmodr(projectPath, 0o500)
 
     return exec().finally(() => {
@@ -38,6 +39,7 @@ describe('e2e readonly fs', function () {
     config: {
       video: false,
     },
+    skipScaffold: true,
     onRun,
   })
 })
