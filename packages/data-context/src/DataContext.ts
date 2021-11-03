@@ -57,7 +57,7 @@ export class DataContext {
 
   constructor (private _config: DataContextConfig) {
     this._rootBus = new EventEmitter()
-    this._coreData = _config.coreData ?? makeCoreData(_config.launchArgs)
+    this._coreData = _config.coreData ?? makeCoreData()
   }
 
   async initializeData () {
