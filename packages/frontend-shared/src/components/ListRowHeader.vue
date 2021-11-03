@@ -26,7 +26,7 @@
       </p>
     </div>
     <div
-      v-if="$slots.right"
+      v-if="slots.right"
       class="flex items-center px-16px"
     >
       <slot name="right" />
@@ -35,15 +35,23 @@
 </template>
 
 <script lang="ts" setup>
-import type { FunctionalComponent, SVGAttributes } from 'vue'
+import { FunctionalComponent, SVGAttributes, useSlots } from 'vue'
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   class?: string | string[] | Record<string, any>
   description?: string
   icon?: FunctionalComponent<SVGAttributes>
   gray?: boolean
   bigHeader?: boolean
-}>()
+}>(), {
+  class: undefined,
+  description: undefined,
+  icon: undefined,
+  gray: false,
+  bigHeader: false,
+})
+
+const slots = useSlots()
 
 const gray = true
 </script>
