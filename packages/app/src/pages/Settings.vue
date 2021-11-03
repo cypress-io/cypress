@@ -18,10 +18,10 @@ mutation Settings_ReconfigureProject {
 }
 `
 
-const openLaunchpad = useMutation(Settings_ReconfigureProjectDocument)
+const openElectron = useMutation(Settings_ReconfigureProjectDocument)
 
 function reconfigure () {
-  openLaunchpad.executeMutation({})
+  openElectron.executeMutation({})
 }
 
 </script>

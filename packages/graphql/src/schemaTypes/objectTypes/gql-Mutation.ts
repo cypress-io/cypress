@@ -344,10 +344,10 @@ export const mutation = mutationType({
       },
     })
 
-    t.liveMutation('showLaunchpadOnAppExit', {
+    t.liveMutation('showElectronOnAppExit', {
       description: 'show the launchpad at the browser picker step',
       resolve: (_, args, ctx) => {
-        ctx.actions.electron.showLaunchpadOnAppExit()
+        ctx.actions.electron.showElectronOnAppExit()
       },
     })
   },

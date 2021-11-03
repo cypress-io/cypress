@@ -426,7 +426,7 @@ type Mutation {
   setProjectPreferences(browserPath: String!, testingType: TestingTypeEnum!): App!
 
   """show the launchpad at the browser picker step"""
-  showLaunchpadOnAppExit: Boolean
+  showElectronOnAppExit: Boolean
 
   """Installs the dependencies for the component testing step"""
   wizardInstallDependencies: Wizard
