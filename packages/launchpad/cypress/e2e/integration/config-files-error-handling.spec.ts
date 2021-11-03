@@ -9,9 +9,9 @@ describe('Config files error handling', () => {
       await ctx.actions.file.writeFileInProject('cypress.config.ts', 'export default {}')
     })
 
-    cy.get('[data-cy-testingType=e2e]', { timeout: 10000 }).click()
+    cy.get('[data-cy-testingType=e2e]').click()
 
-    cy.get('body').should('contain.text', 'Configuration Files')
+    cy.contains('h1', 'Configuration Files')
 
     cy.get('button').contains('Continue').click()
     cy.get('body')
@@ -66,7 +66,7 @@ describe('Config files error handling', () => {
       await ctx.actions.file.writeFileInProject('cypress.json', '{}')
     })
 
-    cy.get('[data-cy-testingType=e2e]', { timeout: 10000 }).click()
+    cy.get('[data-cy-testingType=e2e]').click()
 
     cy.get('body').should('contain.text', 'Configuration Files')
 
