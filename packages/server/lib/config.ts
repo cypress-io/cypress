@@ -64,8 +64,13 @@ const convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) => {
 }
 
 const validateNoBreakingConfig = (cfg) => {
-  return _.each(breakingOptions, ({ name, errorKey, newName, isWarning }) => {
-    if (_.has(cfg, name)) {
+  breakingOptions.forEach(({ name, errorKey, newName, isWarning, value }) => {
+    if (cfg.hasOwnProperty(name)) {
+      if (value && cfg[name] !== value) {
+        // Bail if a value is specified but the config does not have that value.
+        return
+      }
+
       if (isWarning) {
         return errors.warning(errorKey, name, newName)
       }

@@ -334,7 +334,13 @@ export const breakingOptions = [
     isWarning: true,
   }, {
     name: 'nodeVersion',
-    errorKey: 'NODE_VERSION_DEPRECATION',
+    value: 'system',
+    errorKey: 'NODE_VERSION_DEPRECATION_SYSTEM',
+    isWarning: true,
+  }, {
+    name: 'nodeVersion',
+    value: 'bundled',
+    errorKey: 'NODE_VERSION_DEPRECATION_BUNDLED',
     isWarning: true,
   },
 ]

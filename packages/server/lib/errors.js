@@ -633,7 +633,7 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         We found an invalid value in the file: ${chalk.blue(filePath)}
 
         ${chalk.yellow(arg2)}`
-    // happens when there is an invalid config value returnes from the
+    // happens when there is an invalid config value returned from the
     // project's plugins file like "cypress/plugins.index.js"
     case 'PLUGINS_CONFIG_VALIDATION_ERROR':
       filePath = `\`${arg1}\``
@@ -1010,9 +1010,15 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         ${arg1 ? 'Try installing Node.js 64-bit and reinstalling Cypress to use the 64-bit build.'
         : 'Consider upgrading to a 64-bit OS to continue using Cypress.'}
         `
-    case 'NODE_VERSION_DEPRECATION':
+    case 'NODE_VERSION_DEPRECATION_SYSTEM':
       return stripIndent`\
-      Deprecation Warning: The ${chalk.yellow(`\`nodeVersion\``)} configuration option will be removed in the next major release of Cypress. Please remove this option from \`cypress.json\`.
+      Deprecation Warning: ${chalk.yellow(`\`nodeVersion\``)} is currently set to ${chalk.yellow(`\`system\``)} in the ${chalk.yellow(`\`cypress.json\``)} configuration file. As of Cypress v9 the default behavior of ${chalk.yellow(`\`nodeVersion\``)} has changed to always use the version of Node used to start cypress via the cli.
+      Please remove the ${chalk.yellow(`\`nodeVersion\``)} configuration option from ${chalk.yellow(`\`cypress.json\``)}.
+      `
+    case 'NODE_VERSION_DEPRECATION_BUNDLED':
+      return stripIndent`\
+      Deprecation Warning: ${chalk.yellow(`\`nodeVersion\``)} is currently set to ${chalk.yellow(`\`bundled\``)} in the ${chalk.yellow(`\`cypress.json\``)} configuration file. As of Cypress v9 the default behavior of ${chalk.yellow(`\`nodeVersion\``)} has changed to always use the version of Node used to start cypress via the cli. When ${chalk.yellow(`\`nodeVersion\``)} is set to ${chalk.yellow(`\`bundled\``)}, Cypress will use the version of Node bundled with electron. This can cause problems running certain plugins or integrations. 
+      As the ${chalk.yellow(`\`nodeVersion\``)} configuration option will be removed in a future release, it is recommended to remove the ${chalk.yellow(`\`nodeVersion\``)} configuration option from ${chalk.yellow(`\`cypress.json\``)}.
       `
     default:
   }
