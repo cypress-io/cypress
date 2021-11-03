@@ -20,7 +20,7 @@ import FileChooser from '../FileChooser.vue'
 import GeneratorSuccess from '../GeneratorSuccess.vue'
 import { computed, ref } from 'vue'
 import { gql, useQuery, useMutation } from '@urql/vue'
-import { StoryGeneratorDocument, NewSpec_CodeGenSpecDocument } from '../../../generated/graphql'
+import { StoryGeneratorDocument, StoryGeneratorStepOne_GenerateSpecDocument } from '../../../generated/graphql'
 
 const props = defineProps<{
   title?: string,
@@ -57,7 +57,7 @@ query StoryGenerator($glob: String!) {
 `
 
 gql`
-mutation NewSpec_CodeGenSpec($codeGenCandidate: String!, $type: CodeGenType!) {
+mutation StoryGeneratorStepOne_generateSpec($codeGenCandidate: String!, $type: CodeGenType!) {
   generateSpecFromSource(codeGenCandidate: $codeGenCandidate, type: $type) {
     ...GeneratorSuccess
   }
@@ -66,7 +66,7 @@ mutation NewSpec_CodeGenSpec($codeGenCandidate: String!, $type: CodeGenType!) {
 
 const initialExtension = '*.stories.*'
 const extensionPattern = ref(initialExtension)
-const mutation = useMutation(NewSpec_CodeGenSpecDocument)
+const mutation = useMutation(StoryGeneratorStepOne_GenerateSpecDocument)
 
 const glob = computed(() => {
   return `**/${extensionPattern.value}`
