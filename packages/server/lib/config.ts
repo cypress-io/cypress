@@ -63,7 +63,7 @@ const convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) => {
   , {})
 }
 
-const validateNoBreakingConfig = ({ config, configFile }) => {
+const validateNoBreakingConfig = (config) => {
   breakingOptions.forEach(({ name, errorKey, newName, isWarning, value }) => {
     if (config.hasOwnProperty(name)) {
       if (value && config[name] !== value) {
@@ -76,7 +76,7 @@ const validateNoBreakingConfig = ({ config, configFile }) => {
           name,
           newName,
           value,
-          configFile,
+          configFile: config.configFile,
         })
       }
 
@@ -84,7 +84,7 @@ const validateNoBreakingConfig = ({ config, configFile }) => {
         name,
         newName,
         value,
-        configFile,
+        configFile: config.configFile,
       })
     }
   })
@@ -317,7 +317,7 @@ export function mergeDefaults (config: Record<string, any> = {}, options: Record
     return errors.throw('CONFIG_VALIDATION_ERROR', errMsg)
   })
 
-  validateNoBreakingConfig({ config, configFile: options.configFile })
+  validateNoBreakingConfig(config)
 
   return setSupportFileAndFolder(config)
   .then(setPluginsFile)
