@@ -75,10 +75,9 @@ import CreateSpecModalBody from './CreateSpecModalBody.vue'
 import FileList from './FileList.vue'
 import FileMatch from '../../components/FileMatch.vue'
 import { gql } from '@urql/core'
-import type { FileChooserFragment } from '../../generated/graphql'
 
 const props = withDefaults(defineProps<{
-  files: FileChooserFragment[]
+  files: any[]
   extensionPattern: string,
   loading?: boolean
 }>(), {
