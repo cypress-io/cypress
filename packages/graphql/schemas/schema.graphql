@@ -425,16 +425,11 @@ type Mutation {
   """Save the projects preferences to cache"""
   setProjectPreferences(browserPath: String!, testingType: TestingTypeEnum!): App!
 
-<<<<<<< HEAD
   """Save the prompt-shown state for this project"""
   setPromptShown(slug: String!): Boolean
 
-  """show the launchpad windows"""
-  showBrowserWindow: App!
-=======
   """show the launchpad at the browser picker step"""
   showElectronOnAppExit: Boolean
->>>>>>> origin/unified-desktop-gui
 
   """Installs the dependencies for the component testing step"""
   wizardInstallDependencies: Wizard
