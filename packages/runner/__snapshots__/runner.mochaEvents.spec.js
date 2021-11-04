@@ -54,6 +54,10 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -119,6 +123,10 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
     "mocha",
     "test end",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -158,6 +166,10 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -255,6 +267,10 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
     "mocha",
     "test",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -288,6 +304,10 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -339,6 +359,10 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
     "mocha",
     "test end",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -392,6 +416,10 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -489,6 +517,10 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
     "mocha",
     "test",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -505,6 +537,10 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -573,6 +609,10 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
     "mocha",
     "test end",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -630,6 +670,10 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -731,6 +775,10 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
     "mocha",
     "test",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -747,6 +795,10 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -764,6 +816,10 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
     "mocha",
     "pass",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -791,6 +847,10 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
     "mocha",
     "test end",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -818,6 +878,10 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -846,6 +910,10 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
     "mocha",
     "test",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r4",
       "order": 2,
       "title": "test 2",
@@ -862,6 +930,10 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r4",
       "order": 2,
       "title": "test 2",
@@ -930,6 +1002,10 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
     "mocha",
     "test end",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r4",
       "order": 2,
       "title": "test 2",
@@ -987,6 +1063,10 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r4",
       "order": 2,
       "title": "test 2",
@@ -1105,6 +1185,21 @@ exports['src/cypress/runner tests finish with correct state mocha grep fail with
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [
+          {
+            "overrides": {
+              "testConfigList": [],
+              "unverifiedTestConfig": {}
+            },
+            "invocationDetails": "{Object 9}"
+          }
+        ],
+        "unverifiedTestConfig": {
+          "testConfigList": [],
+          "unverifiedTestConfig": {}
+        }
+      },
       "id": "r3",
       "order": 1,
       "title": "test 2",
@@ -1140,6 +1235,21 @@ exports['src/cypress/runner tests finish with correct state mocha grep fail with
     "mocha",
     "test",
     {
+      "_testConfig": {
+        "testConfigList": [
+          {
+            "overrides": {
+              "testConfigList": [],
+              "unverifiedTestConfig": {}
+            },
+            "invocationDetails": "{Object 9}"
+          }
+        ],
+        "unverifiedTestConfig": {
+          "testConfigList": [],
+          "unverifiedTestConfig": {}
+        }
+      },
       "id": "r3",
       "order": 1,
       "title": "test 2",
@@ -1227,6 +1337,21 @@ exports['src/cypress/runner tests finish with correct state mocha grep fail with
     "mocha",
     "fail",
     {
+      "_testConfig": {
+        "testConfigList": [
+          {
+            "overrides": {
+              "testConfigList": [],
+              "unverifiedTestConfig": {}
+            },
+            "invocationDetails": "{Object 9}"
+          }
+        ],
+        "unverifiedTestConfig": {
+          "testConfigList": [],
+          "unverifiedTestConfig": {}
+        }
+      },
       "id": "r3",
       "order": 1,
       "title": "test 2",
@@ -1365,6 +1490,21 @@ exports['src/cypress/runner tests finish with correct state mocha grep fail with
     "mocha",
     "test end",
     {
+      "_testConfig": {
+        "testConfigList": [
+          {
+            "overrides": {
+              "testConfigList": [],
+              "unverifiedTestConfig": {}
+            },
+            "invocationDetails": "{Object 9}"
+          }
+        ],
+        "unverifiedTestConfig": {
+          "testConfigList": [],
+          "unverifiedTestConfig": {}
+        }
+      },
       "id": "r3",
       "order": 1,
       "title": "test 2",
@@ -1441,6 +1581,21 @@ exports['src/cypress/runner tests finish with correct state mocha grep fail with
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [
+          {
+            "overrides": {
+              "testConfigList": [],
+              "unverifiedTestConfig": {}
+            },
+            "invocationDetails": "{Object 9}"
+          }
+        ],
+        "unverifiedTestConfig": {
+          "testConfigList": [],
+          "unverifiedTestConfig": {}
+        }
+      },
       "id": "r3",
       "order": 1,
       "title": "test 2",
@@ -1578,6 +1733,21 @@ exports['src/cypress/runner tests finish with correct state mocha grep pass with
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [
+          {
+            "overrides": {
+              "testConfigList": [],
+              "unverifiedTestConfig": {}
+            },
+            "invocationDetails": "{Object 9}"
+          }
+        ],
+        "unverifiedTestConfig": {
+          "testConfigList": [],
+          "unverifiedTestConfig": {}
+        }
+      },
       "id": "r3",
       "order": 1,
       "title": "test 2",
@@ -1613,6 +1783,21 @@ exports['src/cypress/runner tests finish with correct state mocha grep pass with
     "mocha",
     "test",
     {
+      "_testConfig": {
+        "testConfigList": [
+          {
+            "overrides": {
+              "testConfigList": [],
+              "unverifiedTestConfig": {}
+            },
+            "invocationDetails": "{Object 9}"
+          }
+        ],
+        "unverifiedTestConfig": {
+          "testConfigList": [],
+          "unverifiedTestConfig": {}
+        }
+      },
       "id": "r3",
       "order": 1,
       "title": "test 2",
@@ -1770,6 +1955,21 @@ exports['src/cypress/runner tests finish with correct state mocha grep pass with
     "mocha",
     "pass",
     {
+      "_testConfig": {
+        "testConfigList": [
+          {
+            "overrides": {
+              "testConfigList": [],
+              "unverifiedTestConfig": {}
+            },
+            "invocationDetails": "{Object 9}"
+          }
+        ],
+        "unverifiedTestConfig": {
+          "testConfigList": [],
+          "unverifiedTestConfig": {}
+        }
+      },
       "id": "r3",
       "order": 1,
       "title": "test 2",
@@ -1825,6 +2025,21 @@ exports['src/cypress/runner tests finish with correct state mocha grep pass with
     "mocha",
     "test end",
     {
+      "_testConfig": {
+        "testConfigList": [
+          {
+            "overrides": {
+              "testConfigList": [],
+              "unverifiedTestConfig": {}
+            },
+            "invocationDetails": "{Object 9}"
+          }
+        ],
+        "unverifiedTestConfig": {
+          "testConfigList": [],
+          "unverifiedTestConfig": {}
+        }
+      },
       "id": "r3",
       "order": 1,
       "title": "test 2",
@@ -1894,6 +2109,21 @@ exports['src/cypress/runner tests finish with correct state mocha grep pass with
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [
+          {
+            "overrides": {
+              "testConfigList": [],
+              "unverifiedTestConfig": {}
+            },
+            "invocationDetails": "{Object 9}"
+          }
+        ],
+        "unverifiedTestConfig": {
+          "testConfigList": [],
+          "unverifiedTestConfig": {}
+        }
+      },
       "id": "r3",
       "order": 1,
       "title": "test 2",
@@ -2063,6 +2293,10 @@ exports['src/cypress/runner mocha events simple single test #1'] = [
     "mocha",
     "test",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -2079,6 +2313,10 @@ exports['src/cypress/runner mocha events simple single test #1'] = [
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -2096,6 +2334,10 @@ exports['src/cypress/runner mocha events simple single test #1'] = [
     "mocha",
     "pass",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -2123,6 +2365,10 @@ exports['src/cypress/runner mocha events simple single test #1'] = [
     "mocha",
     "test end",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -2164,6 +2410,10 @@ exports['src/cypress/runner mocha events simple single test #1'] = [
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -2266,6 +2516,10 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -2301,6 +2555,10 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
     "mocha",
     "test",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -2416,6 +2674,10 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
     "mocha",
     "pass",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -2464,6 +2726,10 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
     "mocha",
     "test end",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -2512,6 +2778,10 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -2561,6 +2831,10 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
     "mocha",
     "test",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r4",
       "order": 2,
       "title": "test 2",
@@ -2595,6 +2869,10 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r4",
       "order": 2,
       "title": "test 2",
@@ -2666,6 +2944,10 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
     "mocha",
     "pass",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r4",
       "order": 2,
       "title": "test 2",
@@ -2707,6 +2989,10 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
     "mocha",
     "test end",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r4",
       "order": 2,
       "title": "test 2",
@@ -2748,6 +3034,10 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r4",
       "order": 2,
       "title": "test 2",
@@ -2790,6 +3080,10 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
     "mocha",
     "test",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r5",
       "order": 3,
       "title": "test 3",
@@ -2824,6 +3118,10 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r5",
       "order": 3,
       "title": "test 3",
@@ -2930,6 +3228,10 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
     "mocha",
     "pass",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r5",
       "order": 3,
       "title": "test 3",
@@ -2978,6 +3280,10 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
     "mocha",
     "test end",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r5",
       "order": 3,
       "title": "test 3",
@@ -3040,6 +3346,10 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r5",
       "order": 3,
       "title": "test 3",

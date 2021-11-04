@@ -37,6 +37,10 @@ exports['studio mocha events only runs a single test by id #1'] = [
     "mocha",
     "test",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r4",
       "order": 1,
       "title": "test 2",
@@ -53,6 +57,10 @@ exports['studio mocha events only runs a single test by id #1'] = [
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r4",
       "order": 1,
       "title": "test 2",
@@ -70,6 +78,10 @@ exports['studio mocha events only runs a single test by id #1'] = [
     "mocha",
     "pass",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r4",
       "order": 1,
       "title": "test 2",
@@ -97,6 +109,10 @@ exports['studio mocha events only runs a single test by id #1'] = [
     "mocha",
     "test end",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r4",
       "order": 1,
       "title": "test 2",
@@ -138,6 +154,10 @@ exports['studio mocha events only runs a single test by id #1'] = [
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r4",
       "order": 1,
       "title": "test 2",
@@ -223,6 +243,10 @@ exports['studio mocha events creates a new test when adding to a suite #1'] = [
     "mocha",
     "test",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "New Test",
@@ -238,6 +262,10 @@ exports['studio mocha events creates a new test when adding to a suite #1'] = [
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "New Test",
@@ -254,6 +282,10 @@ exports['studio mocha events creates a new test when adding to a suite #1'] = [
     "mocha",
     "pass",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "New Test",
@@ -280,6 +312,10 @@ exports['studio mocha events creates a new test when adding to a suite #1'] = [
     "mocha",
     "test end",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "New Test",
@@ -320,6 +356,10 @@ exports['studio mocha events creates a new test when adding to a suite #1'] = [
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "New Test",
@@ -390,6 +430,10 @@ exports['studio mocha events can add new test to root runnable #1'] = [
     "mocha",
     "test",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r2",
       "order": 1,
       "title": "New Test",
@@ -404,6 +448,10 @@ exports['studio mocha events can add new test to root runnable #1'] = [
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r2",
       "order": 1,
       "title": "New Test",
@@ -419,6 +467,10 @@ exports['studio mocha events can add new test to root runnable #1'] = [
     "mocha",
     "pass",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r2",
       "order": 1,
       "title": "New Test",
@@ -444,6 +496,10 @@ exports['studio mocha events can add new test to root runnable #1'] = [
     "mocha",
     "test end",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r2",
       "order": 1,
       "title": "New Test",
@@ -469,6 +525,10 @@ exports['studio mocha events can add new test to root runnable #1'] = [
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r2",
       "order": 1,
       "title": "New Test",
@@ -569,6 +629,10 @@ exports['studio mocha events hooks runs before hooks and test body but not after
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test",
@@ -604,6 +668,10 @@ exports['studio mocha events hooks runs before hooks and test body but not after
     "mocha",
     "test",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test",
@@ -677,6 +745,10 @@ exports['studio mocha events hooks runs before hooks and test body but not after
     "mocha",
     "pass",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test",
@@ -718,6 +790,10 @@ exports['studio mocha events hooks runs before hooks and test body but not after
     "mocha",
     "test end",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test",
@@ -773,6 +849,10 @@ exports['studio mocha events hooks runs before hooks and test body but not after
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test",
@@ -889,6 +969,10 @@ exports['studio mocha events hooks runs before hooks but not after hooks when ad
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "New Test",
@@ -923,6 +1007,10 @@ exports['studio mocha events hooks runs before hooks but not after hooks when ad
     "mocha",
     "test",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "New Test",
@@ -995,6 +1083,10 @@ exports['studio mocha events hooks runs before hooks but not after hooks when ad
     "mocha",
     "pass",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "New Test",
@@ -1035,6 +1127,10 @@ exports['studio mocha events hooks runs before hooks but not after hooks when ad
     "mocha",
     "test end",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "New Test",
@@ -1089,6 +1185,10 @@ exports['studio mocha events hooks runs before hooks but not after hooks when ad
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "New Test",
@@ -1201,6 +1301,87 @@ exports['studio mocha events only test can be extended #1'] = [
     "mocha",
     "test",
     {
+      "_testConfig": {
+        "testConfigList": [
+          {
+            "overrides": {
+              "testConfigList": [
+                {
+                  "overrides": {
+                    "testConfigList": [
+                      {
+                        "overrides": {
+                          "testConfigList": [],
+                          "unverifiedTestConfig": {}
+                        },
+                        "invocationDetails": "{Object 9}"
+                      }
+                    ],
+                    "unverifiedTestConfig": {
+                      "testConfigList": [],
+                      "unverifiedTestConfig": {}
+                    }
+                  },
+                  "invocationDetails": "{Object 9}"
+                }
+              ],
+              "unverifiedTestConfig": {
+                "testConfigList": [
+                  {
+                    "overrides": {
+                      "testConfigList": [],
+                      "unverifiedTestConfig": {}
+                    },
+                    "invocationDetails": "{Object 9}"
+                  }
+                ],
+                "unverifiedTestConfig": {
+                  "testConfigList": [],
+                  "unverifiedTestConfig": {}
+                }
+              }
+            },
+            "invocationDetails": "{Object 9}"
+          }
+        ],
+        "unverifiedTestConfig": {
+          "testConfigList": [
+            {
+              "overrides": {
+                "testConfigList": [
+                  {
+                    "overrides": {
+                      "testConfigList": [],
+                      "unverifiedTestConfig": {}
+                    },
+                    "invocationDetails": "{Object 9}"
+                  }
+                ],
+                "unverifiedTestConfig": {
+                  "testConfigList": [],
+                  "unverifiedTestConfig": {}
+                }
+              },
+              "invocationDetails": "{Object 9}"
+            }
+          ],
+          "unverifiedTestConfig": {
+            "testConfigList": [
+              {
+                "overrides": {
+                  "testConfigList": [],
+                  "unverifiedTestConfig": {}
+                },
+                "invocationDetails": "{Object 9}"
+              }
+            ],
+            "unverifiedTestConfig": {
+              "testConfigList": [],
+              "unverifiedTestConfig": {}
+            }
+          }
+        }
+      },
       "id": "r4",
       "order": 1,
       "title": "test 2",
@@ -1217,6 +1398,87 @@ exports['studio mocha events only test can be extended #1'] = [
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [
+          {
+            "overrides": {
+              "testConfigList": [
+                {
+                  "overrides": {
+                    "testConfigList": [
+                      {
+                        "overrides": {
+                          "testConfigList": [],
+                          "unverifiedTestConfig": {}
+                        },
+                        "invocationDetails": "{Object 9}"
+                      }
+                    ],
+                    "unverifiedTestConfig": {
+                      "testConfigList": [],
+                      "unverifiedTestConfig": {}
+                    }
+                  },
+                  "invocationDetails": "{Object 9}"
+                }
+              ],
+              "unverifiedTestConfig": {
+                "testConfigList": [
+                  {
+                    "overrides": {
+                      "testConfigList": [],
+                      "unverifiedTestConfig": {}
+                    },
+                    "invocationDetails": "{Object 9}"
+                  }
+                ],
+                "unverifiedTestConfig": {
+                  "testConfigList": [],
+                  "unverifiedTestConfig": {}
+                }
+              }
+            },
+            "invocationDetails": "{Object 9}"
+          }
+        ],
+        "unverifiedTestConfig": {
+          "testConfigList": [
+            {
+              "overrides": {
+                "testConfigList": [
+                  {
+                    "overrides": {
+                      "testConfigList": [],
+                      "unverifiedTestConfig": {}
+                    },
+                    "invocationDetails": "{Object 9}"
+                  }
+                ],
+                "unverifiedTestConfig": {
+                  "testConfigList": [],
+                  "unverifiedTestConfig": {}
+                }
+              },
+              "invocationDetails": "{Object 9}"
+            }
+          ],
+          "unverifiedTestConfig": {
+            "testConfigList": [
+              {
+                "overrides": {
+                  "testConfigList": [],
+                  "unverifiedTestConfig": {}
+                },
+                "invocationDetails": "{Object 9}"
+              }
+            ],
+            "unverifiedTestConfig": {
+              "testConfigList": [],
+              "unverifiedTestConfig": {}
+            }
+          }
+        }
+      },
       "id": "r4",
       "order": 1,
       "title": "test 2",
@@ -1234,6 +1496,87 @@ exports['studio mocha events only test can be extended #1'] = [
     "mocha",
     "pass",
     {
+      "_testConfig": {
+        "testConfigList": [
+          {
+            "overrides": {
+              "testConfigList": [
+                {
+                  "overrides": {
+                    "testConfigList": [
+                      {
+                        "overrides": {
+                          "testConfigList": [],
+                          "unverifiedTestConfig": {}
+                        },
+                        "invocationDetails": "{Object 9}"
+                      }
+                    ],
+                    "unverifiedTestConfig": {
+                      "testConfigList": [],
+                      "unverifiedTestConfig": {}
+                    }
+                  },
+                  "invocationDetails": "{Object 9}"
+                }
+              ],
+              "unverifiedTestConfig": {
+                "testConfigList": [
+                  {
+                    "overrides": {
+                      "testConfigList": [],
+                      "unverifiedTestConfig": {}
+                    },
+                    "invocationDetails": "{Object 9}"
+                  }
+                ],
+                "unverifiedTestConfig": {
+                  "testConfigList": [],
+                  "unverifiedTestConfig": {}
+                }
+              }
+            },
+            "invocationDetails": "{Object 9}"
+          }
+        ],
+        "unverifiedTestConfig": {
+          "testConfigList": [
+            {
+              "overrides": {
+                "testConfigList": [
+                  {
+                    "overrides": {
+                      "testConfigList": [],
+                      "unverifiedTestConfig": {}
+                    },
+                    "invocationDetails": "{Object 9}"
+                  }
+                ],
+                "unverifiedTestConfig": {
+                  "testConfigList": [],
+                  "unverifiedTestConfig": {}
+                }
+              },
+              "invocationDetails": "{Object 9}"
+            }
+          ],
+          "unverifiedTestConfig": {
+            "testConfigList": [
+              {
+                "overrides": {
+                  "testConfigList": [],
+                  "unverifiedTestConfig": {}
+                },
+                "invocationDetails": "{Object 9}"
+              }
+            ],
+            "unverifiedTestConfig": {
+              "testConfigList": [],
+              "unverifiedTestConfig": {}
+            }
+          }
+        }
+      },
       "id": "r4",
       "order": 1,
       "title": "test 2",
@@ -1261,6 +1604,87 @@ exports['studio mocha events only test can be extended #1'] = [
     "mocha",
     "test end",
     {
+      "_testConfig": {
+        "testConfigList": [
+          {
+            "overrides": {
+              "testConfigList": [
+                {
+                  "overrides": {
+                    "testConfigList": [
+                      {
+                        "overrides": {
+                          "testConfigList": [],
+                          "unverifiedTestConfig": {}
+                        },
+                        "invocationDetails": "{Object 9}"
+                      }
+                    ],
+                    "unverifiedTestConfig": {
+                      "testConfigList": [],
+                      "unverifiedTestConfig": {}
+                    }
+                  },
+                  "invocationDetails": "{Object 9}"
+                }
+              ],
+              "unverifiedTestConfig": {
+                "testConfigList": [
+                  {
+                    "overrides": {
+                      "testConfigList": [],
+                      "unverifiedTestConfig": {}
+                    },
+                    "invocationDetails": "{Object 9}"
+                  }
+                ],
+                "unverifiedTestConfig": {
+                  "testConfigList": [],
+                  "unverifiedTestConfig": {}
+                }
+              }
+            },
+            "invocationDetails": "{Object 9}"
+          }
+        ],
+        "unverifiedTestConfig": {
+          "testConfigList": [
+            {
+              "overrides": {
+                "testConfigList": [
+                  {
+                    "overrides": {
+                      "testConfigList": [],
+                      "unverifiedTestConfig": {}
+                    },
+                    "invocationDetails": "{Object 9}"
+                  }
+                ],
+                "unverifiedTestConfig": {
+                  "testConfigList": [],
+                  "unverifiedTestConfig": {}
+                }
+              },
+              "invocationDetails": "{Object 9}"
+            }
+          ],
+          "unverifiedTestConfig": {
+            "testConfigList": [
+              {
+                "overrides": {
+                  "testConfigList": [],
+                  "unverifiedTestConfig": {}
+                },
+                "invocationDetails": "{Object 9}"
+              }
+            ],
+            "unverifiedTestConfig": {
+              "testConfigList": [],
+              "unverifiedTestConfig": {}
+            }
+          }
+        }
+      },
       "id": "r4",
       "order": 1,
       "title": "test 2",
@@ -1316,6 +1740,87 @@ exports['studio mocha events only test can be extended #1'] = [
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [
+          {
+            "overrides": {
+              "testConfigList": [
+                {
+                  "overrides": {
+                    "testConfigList": [
+                      {
+                        "overrides": {
+                          "testConfigList": [],
+                          "unverifiedTestConfig": {}
+                        },
+                        "invocationDetails": "{Object 9}"
+                      }
+                    ],
+                    "unverifiedTestConfig": {
+                      "testConfigList": [],
+                      "unverifiedTestConfig": {}
+                    }
+                  },
+                  "invocationDetails": "{Object 9}"
+                }
+              ],
+              "unverifiedTestConfig": {
+                "testConfigList": [
+                  {
+                    "overrides": {
+                      "testConfigList": [],
+                      "unverifiedTestConfig": {}
+                    },
+                    "invocationDetails": "{Object 9}"
+                  }
+                ],
+                "unverifiedTestConfig": {
+                  "testConfigList": [],
+                  "unverifiedTestConfig": {}
+                }
+              }
+            },
+            "invocationDetails": "{Object 9}"
+          }
+        ],
+        "unverifiedTestConfig": {
+          "testConfigList": [
+            {
+              "overrides": {
+                "testConfigList": [
+                  {
+                    "overrides": {
+                      "testConfigList": [],
+                      "unverifiedTestConfig": {}
+                    },
+                    "invocationDetails": "{Object 9}"
+                  }
+                ],
+                "unverifiedTestConfig": {
+                  "testConfigList": [],
+                  "unverifiedTestConfig": {}
+                }
+              },
+              "invocationDetails": "{Object 9}"
+            }
+          ],
+          "unverifiedTestConfig": {
+            "testConfigList": [
+              {
+                "overrides": {
+                  "testConfigList": [],
+                  "unverifiedTestConfig": {}
+                },
+                "invocationDetails": "{Object 9}"
+              }
+            ],
+            "unverifiedTestConfig": {
+              "testConfigList": [],
+              "unverifiedTestConfig": {}
+            }
+          }
+        }
+      },
       "id": "r4",
       "order": 1,
       "title": "test 2",
@@ -1415,6 +1920,87 @@ exports['studio mocha events only test can be extended when there are multiple i
     "mocha",
     "test",
     {
+      "_testConfig": {
+        "testConfigList": [
+          {
+            "overrides": {
+              "testConfigList": [
+                {
+                  "overrides": {
+                    "testConfigList": [
+                      {
+                        "overrides": {
+                          "testConfigList": [],
+                          "unverifiedTestConfig": {}
+                        },
+                        "invocationDetails": "{Object 9}"
+                      }
+                    ],
+                    "unverifiedTestConfig": {
+                      "testConfigList": [],
+                      "unverifiedTestConfig": {}
+                    }
+                  },
+                  "invocationDetails": "{Object 9}"
+                }
+              ],
+              "unverifiedTestConfig": {
+                "testConfigList": [
+                  {
+                    "overrides": {
+                      "testConfigList": [],
+                      "unverifiedTestConfig": {}
+                    },
+                    "invocationDetails": "{Object 9}"
+                  }
+                ],
+                "unverifiedTestConfig": {
+                  "testConfigList": [],
+                  "unverifiedTestConfig": {}
+                }
+              }
+            },
+            "invocationDetails": "{Object 9}"
+          }
+        ],
+        "unverifiedTestConfig": {
+          "testConfigList": [
+            {
+              "overrides": {
+                "testConfigList": [
+                  {
+                    "overrides": {
+                      "testConfigList": [],
+                      "unverifiedTestConfig": {}
+                    },
+                    "invocationDetails": "{Object 9}"
+                  }
+                ],
+                "unverifiedTestConfig": {
+                  "testConfigList": [],
+                  "unverifiedTestConfig": {}
+                }
+              },
+              "invocationDetails": "{Object 9}"
+            }
+          ],
+          "unverifiedTestConfig": {
+            "testConfigList": [
+              {
+                "overrides": {
+                  "testConfigList": [],
+                  "unverifiedTestConfig": {}
+                },
+                "invocationDetails": "{Object 9}"
+              }
+            ],
+            "unverifiedTestConfig": {
+              "testConfigList": [],
+              "unverifiedTestConfig": {}
+            }
+          }
+        }
+      },
       "id": "r5",
       "order": 1,
       "title": "test 2",
@@ -1431,6 +2017,87 @@ exports['studio mocha events only test can be extended when there are multiple i
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [
+          {
+            "overrides": {
+              "testConfigList": [
+                {
+                  "overrides": {
+                    "testConfigList": [
+                      {
+                        "overrides": {
+                          "testConfigList": [],
+                          "unverifiedTestConfig": {}
+                        },
+                        "invocationDetails": "{Object 9}"
+                      }
+                    ],
+                    "unverifiedTestConfig": {
+                      "testConfigList": [],
+                      "unverifiedTestConfig": {}
+                    }
+                  },
+                  "invocationDetails": "{Object 9}"
+                }
+              ],
+              "unverifiedTestConfig": {
+                "testConfigList": [
+                  {
+                    "overrides": {
+                      "testConfigList": [],
+                      "unverifiedTestConfig": {}
+                    },
+                    "invocationDetails": "{Object 9}"
+                  }
+                ],
+                "unverifiedTestConfig": {
+                  "testConfigList": [],
+                  "unverifiedTestConfig": {}
+                }
+              }
+            },
+            "invocationDetails": "{Object 9}"
+          }
+        ],
+        "unverifiedTestConfig": {
+          "testConfigList": [
+            {
+              "overrides": {
+                "testConfigList": [
+                  {
+                    "overrides": {
+                      "testConfigList": [],
+                      "unverifiedTestConfig": {}
+                    },
+                    "invocationDetails": "{Object 9}"
+                  }
+                ],
+                "unverifiedTestConfig": {
+                  "testConfigList": [],
+                  "unverifiedTestConfig": {}
+                }
+              },
+              "invocationDetails": "{Object 9}"
+            }
+          ],
+          "unverifiedTestConfig": {
+            "testConfigList": [
+              {
+                "overrides": {
+                  "testConfigList": [],
+                  "unverifiedTestConfig": {}
+                },
+                "invocationDetails": "{Object 9}"
+              }
+            ],
+            "unverifiedTestConfig": {
+              "testConfigList": [],
+              "unverifiedTestConfig": {}
+            }
+          }
+        }
+      },
       "id": "r5",
       "order": 1,
       "title": "test 2",
@@ -1448,6 +2115,87 @@ exports['studio mocha events only test can be extended when there are multiple i
     "mocha",
     "pass",
     {
+      "_testConfig": {
+        "testConfigList": [
+          {
+            "overrides": {
+              "testConfigList": [
+                {
+                  "overrides": {
+                    "testConfigList": [
+                      {
+                        "overrides": {
+                          "testConfigList": [],
+                          "unverifiedTestConfig": {}
+                        },
+                        "invocationDetails": "{Object 9}"
+                      }
+                    ],
+                    "unverifiedTestConfig": {
+                      "testConfigList": [],
+                      "unverifiedTestConfig": {}
+                    }
+                  },
+                  "invocationDetails": "{Object 9}"
+                }
+              ],
+              "unverifiedTestConfig": {
+                "testConfigList": [
+                  {
+                    "overrides": {
+                      "testConfigList": [],
+                      "unverifiedTestConfig": {}
+                    },
+                    "invocationDetails": "{Object 9}"
+                  }
+                ],
+                "unverifiedTestConfig": {
+                  "testConfigList": [],
+                  "unverifiedTestConfig": {}
+                }
+              }
+            },
+            "invocationDetails": "{Object 9}"
+          }
+        ],
+        "unverifiedTestConfig": {
+          "testConfigList": [
+            {
+              "overrides": {
+                "testConfigList": [
+                  {
+                    "overrides": {
+                      "testConfigList": [],
+                      "unverifiedTestConfig": {}
+                    },
+                    "invocationDetails": "{Object 9}"
+                  }
+                ],
+                "unverifiedTestConfig": {
+                  "testConfigList": [],
+                  "unverifiedTestConfig": {}
+                }
+              },
+              "invocationDetails": "{Object 9}"
+            }
+          ],
+          "unverifiedTestConfig": {
+            "testConfigList": [
+              {
+                "overrides": {
+                  "testConfigList": [],
+                  "unverifiedTestConfig": {}
+                },
+                "invocationDetails": "{Object 9}"
+              }
+            ],
+            "unverifiedTestConfig": {
+              "testConfigList": [],
+              "unverifiedTestConfig": {}
+            }
+          }
+        }
+      },
       "id": "r5",
       "order": 1,
       "title": "test 2",
@@ -1475,6 +2223,87 @@ exports['studio mocha events only test can be extended when there are multiple i
     "mocha",
     "test end",
     {
+      "_testConfig": {
+        "testConfigList": [
+          {
+            "overrides": {
+              "testConfigList": [
+                {
+                  "overrides": {
+                    "testConfigList": [
+                      {
+                        "overrides": {
+                          "testConfigList": [],
+                          "unverifiedTestConfig": {}
+                        },
+                        "invocationDetails": "{Object 9}"
+                      }
+                    ],
+                    "unverifiedTestConfig": {
+                      "testConfigList": [],
+                      "unverifiedTestConfig": {}
+                    }
+                  },
+                  "invocationDetails": "{Object 9}"
+                }
+              ],
+              "unverifiedTestConfig": {
+                "testConfigList": [
+                  {
+                    "overrides": {
+                      "testConfigList": [],
+                      "unverifiedTestConfig": {}
+                    },
+                    "invocationDetails": "{Object 9}"
+                  }
+                ],
+                "unverifiedTestConfig": {
+                  "testConfigList": [],
+                  "unverifiedTestConfig": {}
+                }
+              }
+            },
+            "invocationDetails": "{Object 9}"
+          }
+        ],
+        "unverifiedTestConfig": {
+          "testConfigList": [
+            {
+              "overrides": {
+                "testConfigList": [
+                  {
+                    "overrides": {
+                      "testConfigList": [],
+                      "unverifiedTestConfig": {}
+                    },
+                    "invocationDetails": "{Object 9}"
+                  }
+                ],
+                "unverifiedTestConfig": {
+                  "testConfigList": [],
+                  "unverifiedTestConfig": {}
+                }
+              },
+              "invocationDetails": "{Object 9}"
+            }
+          ],
+          "unverifiedTestConfig": {
+            "testConfigList": [
+              {
+                "overrides": {
+                  "testConfigList": [],
+                  "unverifiedTestConfig": {}
+                },
+                "invocationDetails": "{Object 9}"
+              }
+            ],
+            "unverifiedTestConfig": {
+              "testConfigList": [],
+              "unverifiedTestConfig": {}
+            }
+          }
+        }
+      },
       "id": "r5",
       "order": 1,
       "title": "test 2",
@@ -1530,6 +2359,87 @@ exports['studio mocha events only test can be extended when there are multiple i
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [
+          {
+            "overrides": {
+              "testConfigList": [
+                {
+                  "overrides": {
+                    "testConfigList": [
+                      {
+                        "overrides": {
+                          "testConfigList": [],
+                          "unverifiedTestConfig": {}
+                        },
+                        "invocationDetails": "{Object 9}"
+                      }
+                    ],
+                    "unverifiedTestConfig": {
+                      "testConfigList": [],
+                      "unverifiedTestConfig": {}
+                    }
+                  },
+                  "invocationDetails": "{Object 9}"
+                }
+              ],
+              "unverifiedTestConfig": {
+                "testConfigList": [
+                  {
+                    "overrides": {
+                      "testConfigList": [],
+                      "unverifiedTestConfig": {}
+                    },
+                    "invocationDetails": "{Object 9}"
+                  }
+                ],
+                "unverifiedTestConfig": {
+                  "testConfigList": [],
+                  "unverifiedTestConfig": {}
+                }
+              }
+            },
+            "invocationDetails": "{Object 9}"
+          }
+        ],
+        "unverifiedTestConfig": {
+          "testConfigList": [
+            {
+              "overrides": {
+                "testConfigList": [
+                  {
+                    "overrides": {
+                      "testConfigList": [],
+                      "unverifiedTestConfig": {}
+                    },
+                    "invocationDetails": "{Object 9}"
+                  }
+                ],
+                "unverifiedTestConfig": {
+                  "testConfigList": [],
+                  "unverifiedTestConfig": {}
+                }
+              },
+              "invocationDetails": "{Object 9}"
+            }
+          ],
+          "unverifiedTestConfig": {
+            "testConfigList": [
+              {
+                "overrides": {
+                  "testConfigList": [],
+                  "unverifiedTestConfig": {}
+                },
+                "invocationDetails": "{Object 9}"
+              }
+            ],
+            "unverifiedTestConfig": {
+              "testConfigList": [],
+              "unverifiedTestConfig": {}
+            }
+          }
+        }
+      },
       "id": "r5",
       "order": 1,
       "title": "test 2",
@@ -1629,6 +2539,21 @@ exports['studio mocha events only test can extend a suite that contains an only 
     "mocha",
     "test",
     {
+      "_testConfig": {
+        "testConfigList": [
+          {
+            "overrides": {
+              "testConfigList": [],
+              "unverifiedTestConfig": {}
+            },
+            "invocationDetails": "{Object 9}"
+          }
+        ],
+        "unverifiedTestConfig": {
+          "testConfigList": [],
+          "unverifiedTestConfig": {}
+        }
+      },
       "id": "r8",
       "order": 2,
       "title": "New Test",
@@ -1644,6 +2569,21 @@ exports['studio mocha events only test can extend a suite that contains an only 
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [
+          {
+            "overrides": {
+              "testConfigList": [],
+              "unverifiedTestConfig": {}
+            },
+            "invocationDetails": "{Object 9}"
+          }
+        ],
+        "unverifiedTestConfig": {
+          "testConfigList": [],
+          "unverifiedTestConfig": {}
+        }
+      },
       "id": "r8",
       "order": 2,
       "title": "New Test",
@@ -1660,6 +2600,21 @@ exports['studio mocha events only test can extend a suite that contains an only 
     "mocha",
     "pass",
     {
+      "_testConfig": {
+        "testConfigList": [
+          {
+            "overrides": {
+              "testConfigList": [],
+              "unverifiedTestConfig": {}
+            },
+            "invocationDetails": "{Object 9}"
+          }
+        ],
+        "unverifiedTestConfig": {
+          "testConfigList": [],
+          "unverifiedTestConfig": {}
+        }
+      },
       "id": "r8",
       "order": 2,
       "title": "New Test",
@@ -1686,6 +2641,21 @@ exports['studio mocha events only test can extend a suite that contains an only 
     "mocha",
     "test end",
     {
+      "_testConfig": {
+        "testConfigList": [
+          {
+            "overrides": {
+              "testConfigList": [],
+              "unverifiedTestConfig": {}
+            },
+            "invocationDetails": "{Object 9}"
+          }
+        ],
+        "unverifiedTestConfig": {
+          "testConfigList": [],
+          "unverifiedTestConfig": {}
+        }
+      },
       "id": "r8",
       "order": 2,
       "title": "New Test",
@@ -1740,6 +2710,21 @@ exports['studio mocha events only test can extend a suite that contains an only 
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [
+          {
+            "overrides": {
+              "testConfigList": [],
+              "unverifiedTestConfig": {}
+            },
+            "invocationDetails": "{Object 9}"
+          }
+        ],
+        "unverifiedTestConfig": {
+          "testConfigList": [],
+          "unverifiedTestConfig": {}
+        }
+      },
       "id": "r8",
       "order": 2,
       "title": "New Test",
@@ -1838,6 +2823,10 @@ exports['studio mocha events only suite can be added to #1'] = [
     "mocha",
     "test",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r8",
       "order": 4,
       "title": "New Test",
@@ -1853,6 +2842,10 @@ exports['studio mocha events only suite can be added to #1'] = [
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r8",
       "order": 4,
       "title": "New Test",
@@ -1869,6 +2862,10 @@ exports['studio mocha events only suite can be added to #1'] = [
     "mocha",
     "pass",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r8",
       "order": 4,
       "title": "New Test",
@@ -1895,6 +2892,10 @@ exports['studio mocha events only suite can be added to #1'] = [
     "mocha",
     "test end",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r8",
       "order": 4,
       "title": "New Test",
@@ -1949,6 +2950,10 @@ exports['studio mocha events only suite can be added to #1'] = [
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r8",
       "order": 4,
       "title": "New Test",
@@ -2047,6 +3052,10 @@ exports['studio mocha events only suite can be added to when there are multiple 
     "mocha",
     "test",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r11",
       "order": 6,
       "title": "New Test",
@@ -2062,6 +3071,10 @@ exports['studio mocha events only suite can be added to when there are multiple 
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r11",
       "order": 6,
       "title": "New Test",
@@ -2078,6 +3091,10 @@ exports['studio mocha events only suite can be added to when there are multiple 
     "mocha",
     "pass",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r11",
       "order": 6,
       "title": "New Test",
@@ -2104,6 +3121,10 @@ exports['studio mocha events only suite can be added to when there are multiple 
     "mocha",
     "test end",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r11",
       "order": 6,
       "title": "New Test",
@@ -2158,6 +3179,10 @@ exports['studio mocha events only suite can be added to when there are multiple 
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r11",
       "order": 6,
       "title": "New Test",
@@ -2256,6 +3281,43 @@ exports['studio mocha events only suite can extend a test within an only suite #
     "mocha",
     "test",
     {
+      "_testConfig": {
+        "testConfigList": [
+          {
+            "overrides": {
+              "testConfigList": [
+                {
+                  "overrides": {
+                    "testConfigList": [],
+                    "unverifiedTestConfig": {}
+                  },
+                  "invocationDetails": "{Object 9}"
+                }
+              ],
+              "unverifiedTestConfig": {
+                "testConfigList": [],
+                "unverifiedTestConfig": {}
+              }
+            },
+            "invocationDetails": "{Object 9}"
+          }
+        ],
+        "unverifiedTestConfig": {
+          "testConfigList": [
+            {
+              "overrides": {
+                "testConfigList": [],
+                "unverifiedTestConfig": {}
+              },
+              "invocationDetails": "{Object 9}"
+            }
+          ],
+          "unverifiedTestConfig": {
+            "testConfigList": [],
+            "unverifiedTestConfig": {}
+          }
+        }
+      },
       "id": "r7",
       "order": 1,
       "title": "test 3",
@@ -2272,6 +3334,43 @@ exports['studio mocha events only suite can extend a test within an only suite #
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [
+          {
+            "overrides": {
+              "testConfigList": [
+                {
+                  "overrides": {
+                    "testConfigList": [],
+                    "unverifiedTestConfig": {}
+                  },
+                  "invocationDetails": "{Object 9}"
+                }
+              ],
+              "unverifiedTestConfig": {
+                "testConfigList": [],
+                "unverifiedTestConfig": {}
+              }
+            },
+            "invocationDetails": "{Object 9}"
+          }
+        ],
+        "unverifiedTestConfig": {
+          "testConfigList": [
+            {
+              "overrides": {
+                "testConfigList": [],
+                "unverifiedTestConfig": {}
+              },
+              "invocationDetails": "{Object 9}"
+            }
+          ],
+          "unverifiedTestConfig": {
+            "testConfigList": [],
+            "unverifiedTestConfig": {}
+          }
+        }
+      },
       "id": "r7",
       "order": 1,
       "title": "test 3",
@@ -2289,6 +3388,43 @@ exports['studio mocha events only suite can extend a test within an only suite #
     "mocha",
     "pass",
     {
+      "_testConfig": {
+        "testConfigList": [
+          {
+            "overrides": {
+              "testConfigList": [
+                {
+                  "overrides": {
+                    "testConfigList": [],
+                    "unverifiedTestConfig": {}
+                  },
+                  "invocationDetails": "{Object 9}"
+                }
+              ],
+              "unverifiedTestConfig": {
+                "testConfigList": [],
+                "unverifiedTestConfig": {}
+              }
+            },
+            "invocationDetails": "{Object 9}"
+          }
+        ],
+        "unverifiedTestConfig": {
+          "testConfigList": [
+            {
+              "overrides": {
+                "testConfigList": [],
+                "unverifiedTestConfig": {}
+              },
+              "invocationDetails": "{Object 9}"
+            }
+          ],
+          "unverifiedTestConfig": {
+            "testConfigList": [],
+            "unverifiedTestConfig": {}
+          }
+        }
+      },
       "id": "r7",
       "order": 1,
       "title": "test 3",
@@ -2316,6 +3452,43 @@ exports['studio mocha events only suite can extend a test within an only suite #
     "mocha",
     "test end",
     {
+      "_testConfig": {
+        "testConfigList": [
+          {
+            "overrides": {
+              "testConfigList": [
+                {
+                  "overrides": {
+                    "testConfigList": [],
+                    "unverifiedTestConfig": {}
+                  },
+                  "invocationDetails": "{Object 9}"
+                }
+              ],
+              "unverifiedTestConfig": {
+                "testConfigList": [],
+                "unverifiedTestConfig": {}
+              }
+            },
+            "invocationDetails": "{Object 9}"
+          }
+        ],
+        "unverifiedTestConfig": {
+          "testConfigList": [
+            {
+              "overrides": {
+                "testConfigList": [],
+                "unverifiedTestConfig": {}
+              },
+              "invocationDetails": "{Object 9}"
+            }
+          ],
+          "unverifiedTestConfig": {
+            "testConfigList": [],
+            "unverifiedTestConfig": {}
+          }
+        }
+      },
       "id": "r7",
       "order": 1,
       "title": "test 3",
@@ -2371,6 +3544,43 @@ exports['studio mocha events only suite can extend a test within an only suite #
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [
+          {
+            "overrides": {
+              "testConfigList": [
+                {
+                  "overrides": {
+                    "testConfigList": [],
+                    "unverifiedTestConfig": {}
+                  },
+                  "invocationDetails": "{Object 9}"
+                }
+              ],
+              "unverifiedTestConfig": {
+                "testConfigList": [],
+                "unverifiedTestConfig": {}
+              }
+            },
+            "invocationDetails": "{Object 9}"
+          }
+        ],
+        "unverifiedTestConfig": {
+          "testConfigList": [
+            {
+              "overrides": {
+                "testConfigList": [],
+                "unverifiedTestConfig": {}
+              },
+              "invocationDetails": "{Object 9}"
+            }
+          ],
+          "unverifiedTestConfig": {
+            "testConfigList": [],
+            "unverifiedTestConfig": {}
+          }
+        }
+      },
       "id": "r7",
       "order": 1,
       "title": "test 3",
@@ -2470,6 +3680,43 @@ exports['studio mocha events only suite can extend a test within an only suite w
     "mocha",
     "test",
     {
+      "_testConfig": {
+        "testConfigList": [
+          {
+            "overrides": {
+              "testConfigList": [
+                {
+                  "overrides": {
+                    "testConfigList": [],
+                    "unverifiedTestConfig": {}
+                  },
+                  "invocationDetails": "{Object 9}"
+                }
+              ],
+              "unverifiedTestConfig": {
+                "testConfigList": [],
+                "unverifiedTestConfig": {}
+              }
+            },
+            "invocationDetails": "{Object 9}"
+          }
+        ],
+        "unverifiedTestConfig": {
+          "testConfigList": [
+            {
+              "overrides": {
+                "testConfigList": [],
+                "unverifiedTestConfig": {}
+              },
+              "invocationDetails": "{Object 9}"
+            }
+          ],
+          "unverifiedTestConfig": {
+            "testConfigList": [],
+            "unverifiedTestConfig": {}
+          }
+        }
+      },
       "id": "r10",
       "order": 1,
       "title": "test 5",
@@ -2486,6 +3733,43 @@ exports['studio mocha events only suite can extend a test within an only suite w
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [
+          {
+            "overrides": {
+              "testConfigList": [
+                {
+                  "overrides": {
+                    "testConfigList": [],
+                    "unverifiedTestConfig": {}
+                  },
+                  "invocationDetails": "{Object 9}"
+                }
+              ],
+              "unverifiedTestConfig": {
+                "testConfigList": [],
+                "unverifiedTestConfig": {}
+              }
+            },
+            "invocationDetails": "{Object 9}"
+          }
+        ],
+        "unverifiedTestConfig": {
+          "testConfigList": [
+            {
+              "overrides": {
+                "testConfigList": [],
+                "unverifiedTestConfig": {}
+              },
+              "invocationDetails": "{Object 9}"
+            }
+          ],
+          "unverifiedTestConfig": {
+            "testConfigList": [],
+            "unverifiedTestConfig": {}
+          }
+        }
+      },
       "id": "r10",
       "order": 1,
       "title": "test 5",
@@ -2503,6 +3787,43 @@ exports['studio mocha events only suite can extend a test within an only suite w
     "mocha",
     "pass",
     {
+      "_testConfig": {
+        "testConfigList": [
+          {
+            "overrides": {
+              "testConfigList": [
+                {
+                  "overrides": {
+                    "testConfigList": [],
+                    "unverifiedTestConfig": {}
+                  },
+                  "invocationDetails": "{Object 9}"
+                }
+              ],
+              "unverifiedTestConfig": {
+                "testConfigList": [],
+                "unverifiedTestConfig": {}
+              }
+            },
+            "invocationDetails": "{Object 9}"
+          }
+        ],
+        "unverifiedTestConfig": {
+          "testConfigList": [
+            {
+              "overrides": {
+                "testConfigList": [],
+                "unverifiedTestConfig": {}
+              },
+              "invocationDetails": "{Object 9}"
+            }
+          ],
+          "unverifiedTestConfig": {
+            "testConfigList": [],
+            "unverifiedTestConfig": {}
+          }
+        }
+      },
       "id": "r10",
       "order": 1,
       "title": "test 5",
@@ -2530,6 +3851,43 @@ exports['studio mocha events only suite can extend a test within an only suite w
     "mocha",
     "test end",
     {
+      "_testConfig": {
+        "testConfigList": [
+          {
+            "overrides": {
+              "testConfigList": [
+                {
+                  "overrides": {
+                    "testConfigList": [],
+                    "unverifiedTestConfig": {}
+                  },
+                  "invocationDetails": "{Object 9}"
+                }
+              ],
+              "unverifiedTestConfig": {
+                "testConfigList": [],
+                "unverifiedTestConfig": {}
+              }
+            },
+            "invocationDetails": "{Object 9}"
+          }
+        ],
+        "unverifiedTestConfig": {
+          "testConfigList": [
+            {
+              "overrides": {
+                "testConfigList": [],
+                "unverifiedTestConfig": {}
+              },
+              "invocationDetails": "{Object 9}"
+            }
+          ],
+          "unverifiedTestConfig": {
+            "testConfigList": [],
+            "unverifiedTestConfig": {}
+          }
+        }
+      },
       "id": "r10",
       "order": 1,
       "title": "test 5",
@@ -2585,6 +3943,43 @@ exports['studio mocha events only suite can extend a test within an only suite w
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [
+          {
+            "overrides": {
+              "testConfigList": [
+                {
+                  "overrides": {
+                    "testConfigList": [],
+                    "unverifiedTestConfig": {}
+                  },
+                  "invocationDetails": "{Object 9}"
+                }
+              ],
+              "unverifiedTestConfig": {
+                "testConfigList": [],
+                "unverifiedTestConfig": {}
+              }
+            },
+            "invocationDetails": "{Object 9}"
+          }
+        ],
+        "unverifiedTestConfig": {
+          "testConfigList": [
+            {
+              "overrides": {
+                "testConfigList": [],
+                "unverifiedTestConfig": {}
+              },
+              "invocationDetails": "{Object 9}"
+            }
+          ],
+          "unverifiedTestConfig": {
+            "testConfigList": [],
+            "unverifiedTestConfig": {}
+          }
+        }
+      },
       "id": "r10",
       "order": 1,
       "title": "test 5",

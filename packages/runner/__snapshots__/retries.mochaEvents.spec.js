@@ -37,6 +37,10 @@ exports['src/cypress/runner retries mochaEvents simple retry #1'] = [
     "mocha",
     "test",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -53,6 +57,10 @@ exports['src/cypress/runner retries mochaEvents simple retry #1'] = [
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -70,6 +78,10 @@ exports['src/cypress/runner retries mochaEvents simple retry #1'] = [
     "mocha",
     "retry",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -111,6 +123,10 @@ exports['src/cypress/runner retries mochaEvents simple retry #1'] = [
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -146,6 +162,10 @@ exports['src/cypress/runner retries mochaEvents simple retry #1'] = [
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "title": "test 1",
       "body": "[body]",
@@ -161,6 +181,10 @@ exports['src/cypress/runner retries mochaEvents simple retry #1'] = [
     "mocha",
     "pass",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "title": "test 1",
       "state": "passed",
@@ -186,6 +210,10 @@ exports['src/cypress/runner retries mochaEvents simple retry #1'] = [
     "mocha",
     "test end",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "title": "test 1",
       "state": "passed",
@@ -225,6 +253,10 @@ exports['src/cypress/runner retries mochaEvents simple retry #1'] = [
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "title": "test 1",
       "state": "passed",
@@ -325,6 +357,10 @@ exports['src/cypress/runner retries mochaEvents test retry with hooks #1'] = [
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -360,6 +396,10 @@ exports['src/cypress/runner retries mochaEvents test retry with hooks #1'] = [
     "mocha",
     "test",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -440,6 +480,10 @@ exports['src/cypress/runner retries mochaEvents test retry with hooks #1'] = [
     "mocha",
     "retry",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -537,6 +581,10 @@ exports['src/cypress/runner retries mochaEvents test retry with hooks #1'] = [
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -611,6 +659,10 @@ exports['src/cypress/runner retries mochaEvents test retry with hooks #1'] = [
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "title": "test 1",
       "body": "[body]",
@@ -715,6 +767,10 @@ exports['src/cypress/runner retries mochaEvents test retry with hooks #1'] = [
     "mocha",
     "pass",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "title": "test 1",
       "state": "passed",
@@ -761,6 +817,10 @@ exports['src/cypress/runner retries mochaEvents test retry with hooks #1'] = [
     "mocha",
     "test end",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "title": "test 1",
       "state": "passed",
@@ -821,6 +881,10 @@ exports['src/cypress/runner retries mochaEvents test retry with hooks #1'] = [
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "title": "test 1",
       "state": "passed",
@@ -942,6 +1006,21 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [
+          {
+            "overrides": {
+              "testConfigList": [],
+              "unverifiedTestConfig": {}
+            },
+            "invocationDetails": "{Object 9}"
+          }
+        ],
+        "unverifiedTestConfig": {
+          "testConfigList": [],
+          "unverifiedTestConfig": {}
+        }
+      },
       "id": "r3",
       "order": 1,
       "title": "test 2",
@@ -977,6 +1056,21 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
     "mocha",
     "test",
     {
+      "_testConfig": {
+        "testConfigList": [
+          {
+            "overrides": {
+              "testConfigList": [],
+              "unverifiedTestConfig": {}
+            },
+            "invocationDetails": "{Object 9}"
+          }
+        ],
+        "unverifiedTestConfig": {
+          "testConfigList": [],
+          "unverifiedTestConfig": {}
+        }
+      },
       "id": "r3",
       "order": 1,
       "title": "test 2",
@@ -1057,6 +1151,21 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
     "mocha",
     "retry",
     {
+      "_testConfig": {
+        "testConfigList": [
+          {
+            "overrides": {
+              "testConfigList": [],
+              "unverifiedTestConfig": {}
+            },
+            "invocationDetails": "{Object 9}"
+          }
+        ],
+        "unverifiedTestConfig": {
+          "testConfigList": [],
+          "unverifiedTestConfig": {}
+        }
+      },
       "id": "r3",
       "order": 1,
       "title": "test 2",
@@ -1154,6 +1263,21 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [
+          {
+            "overrides": {
+              "testConfigList": [],
+              "unverifiedTestConfig": {}
+            },
+            "invocationDetails": "{Object 9}"
+          }
+        ],
+        "unverifiedTestConfig": {
+          "testConfigList": [],
+          "unverifiedTestConfig": {}
+        }
+      },
       "id": "r3",
       "order": 1,
       "title": "test 2",
@@ -1228,6 +1352,21 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [
+          {
+            "overrides": {
+              "testConfigList": [],
+              "unverifiedTestConfig": {}
+            },
+            "invocationDetails": "{Object 9}"
+          }
+        ],
+        "unverifiedTestConfig": {
+          "testConfigList": [],
+          "unverifiedTestConfig": {}
+        }
+      },
       "id": "r3",
       "title": "test 2",
       "body": "[body]",
@@ -1332,6 +1471,21 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
     "mocha",
     "pass",
     {
+      "_testConfig": {
+        "testConfigList": [
+          {
+            "overrides": {
+              "testConfigList": [],
+              "unverifiedTestConfig": {}
+            },
+            "invocationDetails": "{Object 9}"
+          }
+        ],
+        "unverifiedTestConfig": {
+          "testConfigList": [],
+          "unverifiedTestConfig": {}
+        }
+      },
       "id": "r3",
       "title": "test 2",
       "state": "passed",
@@ -1378,6 +1532,21 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
     "mocha",
     "test end",
     {
+      "_testConfig": {
+        "testConfigList": [
+          {
+            "overrides": {
+              "testConfigList": [],
+              "unverifiedTestConfig": {}
+            },
+            "invocationDetails": "{Object 9}"
+          }
+        ],
+        "unverifiedTestConfig": {
+          "testConfigList": [],
+          "unverifiedTestConfig": {}
+        }
+      },
       "id": "r3",
       "title": "test 2",
       "state": "passed",
@@ -1438,6 +1607,21 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [
+          {
+            "overrides": {
+              "testConfigList": [],
+              "unverifiedTestConfig": {}
+            },
+            "invocationDetails": "{Object 9}"
+          }
+        ],
+        "unverifiedTestConfig": {
+          "testConfigList": [],
+          "unverifiedTestConfig": {}
+        }
+      },
       "id": "r3",
       "title": "test 2",
       "state": "passed",
@@ -1559,6 +1743,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -1594,6 +1782,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
     "mocha",
     "test",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -1748,6 +1940,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
     "mocha",
     "retry",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -1852,6 +2048,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -1933,6 +2133,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "title": "test 1",
       "body": "[body]",
@@ -2108,6 +2312,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
     "mocha",
     "pass",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "title": "test 1",
       "state": "passed",
@@ -2164,6 +2372,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
     "mocha",
     "test end",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "title": "test 1",
       "state": "passed",
@@ -2234,6 +2446,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "title": "test 1",
       "state": "passed",
@@ -2365,6 +2581,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -2400,6 +2620,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "test",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -2577,6 +2801,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "retry",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -2676,6 +2904,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -2762,6 +2994,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "title": "test 1",
       "body": "[body]",
@@ -2910,6 +3146,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "pass",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "title": "test 1",
       "state": "passed",
@@ -2959,6 +3199,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "test end",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "title": "test 1",
       "state": "passed",
@@ -3008,6 +3252,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "title": "test 1",
       "state": "passed",
@@ -3058,6 +3306,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "test",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r4",
       "order": 2,
       "title": "test 2",
@@ -3092,6 +3344,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r4",
       "order": 2,
       "title": "test 2",
@@ -3235,6 +3491,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "pass",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r4",
       "order": 2,
       "title": "test 2",
@@ -3286,6 +3546,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "test end",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r4",
       "order": 2,
       "title": "test 2",
@@ -3337,6 +3601,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r4",
       "order": 2,
       "title": "test 2",
@@ -3389,6 +3657,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "test",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r5",
       "order": 3,
       "title": "test 3",
@@ -3423,6 +3695,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r5",
       "order": 3,
       "title": "test 3",
@@ -3601,6 +3877,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "pass",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r5",
       "order": 3,
       "title": "test 3",
@@ -3659,6 +3939,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "test end",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r5",
       "order": 3,
       "title": "test 3",
@@ -3717,6 +4001,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r5",
       "order": 3,
       "title": "test 3",
@@ -3804,6 +4092,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "test",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r7",
       "order": 4,
       "title": "test 1",
@@ -3820,6 +4112,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r7",
       "order": 4,
       "title": "test 1",
@@ -3854,6 +4150,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "retry",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r7",
       "order": 4,
       "title": "test 1",
@@ -3970,6 +4270,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r7",
       "order": 4,
       "title": "test 1",
@@ -4019,6 +4323,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r7",
       "title": "test 1",
       "body": "[body]",
@@ -4059,6 +4367,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "retry",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r7",
       "title": "test 1",
       "hookName": "after each",
@@ -4173,6 +4485,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r7",
       "title": "test 1",
       "hookName": "after each",
@@ -4220,6 +4536,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r7",
       "title": "test 1",
       "body": "[body]",
@@ -4314,6 +4634,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "pass",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r7",
       "title": "test 1",
       "state": "passed",
@@ -4351,6 +4675,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "test end",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r7",
       "title": "test 1",
       "state": "passed",
@@ -4388,6 +4716,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r7",
       "title": "test 1",
       "state": "passed",
@@ -4454,6 +4786,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "test",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r9",
       "order": 5,
       "title": "test 1",
@@ -4470,6 +4806,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r9",
       "order": 5,
       "title": "test 1",
@@ -4523,6 +4863,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "pass",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r9",
       "order": 5,
       "title": "test 1",
@@ -4557,6 +4901,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "test end",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r9",
       "order": 5,
       "title": "test 1",
@@ -4605,6 +4953,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r9",
       "order": 5,
       "title": "test 1",
@@ -4714,6 +5066,10 @@ exports['src/cypress/runner retries mochaEvents cant retry from [before] #1'] = 
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -4814,6 +5170,10 @@ exports['src/cypress/runner retries mochaEvents cant retry from [before] #1'] = 
     "mocha",
     "test end",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -4860,6 +5220,10 @@ exports['src/cypress/runner retries mochaEvents cant retry from [before] #1'] = 
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -4981,6 +5345,10 @@ exports['src/cypress/runner retries mochaEvents cant retry from [after] #1'] = [
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -5016,6 +5384,10 @@ exports['src/cypress/runner retries mochaEvents cant retry from [after] #1'] = [
     "mocha",
     "test",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -5269,6 +5641,10 @@ exports['src/cypress/runner retries mochaEvents cant retry from [after] #1'] = [
     "mocha",
     "test end",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -5357,6 +5733,10 @@ exports['src/cypress/runner retries mochaEvents cant retry from [after] #1'] = [
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -5506,6 +5886,10 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -5541,6 +5925,10 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
     "mocha",
     "test",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -5656,6 +6044,10 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
     "mocha",
     "pass",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -5704,6 +6096,10 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
     "mocha",
     "test end",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -5752,6 +6148,10 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -5801,6 +6201,10 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
     "mocha",
     "test",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r4",
       "order": 2,
       "title": "test 2",
@@ -5835,6 +6239,10 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r4",
       "order": 2,
       "title": "test 2",
@@ -5870,6 +6278,10 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
     "mocha",
     "retry",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r4",
       "order": 2,
       "title": "test 2",
@@ -5961,6 +6373,10 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r4",
       "order": 2,
       "title": "test 2",
@@ -6028,6 +6444,10 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r4",
       "title": "test 2",
       "body": "[body]",
@@ -6061,6 +6481,10 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
     "mocha",
     "retry",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r4",
       "title": "test 2",
       "err": {
@@ -6150,6 +6574,10 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r4",
       "title": "test 2",
       "err": {
@@ -6215,6 +6643,10 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r4",
       "title": "test 2",
       "body": "[body]",
@@ -6284,6 +6716,10 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
     "mocha",
     "pass",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r4",
       "title": "test 2",
       "state": "passed",
@@ -6323,6 +6759,10 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
     "mocha",
     "test end",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r4",
       "title": "test 2",
       "state": "passed",
@@ -6362,6 +6802,10 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r4",
       "title": "test 2",
       "state": "passed",
@@ -6402,6 +6846,10 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
     "mocha",
     "test",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r5",
       "order": 3,
       "title": "test 3",
@@ -6436,6 +6884,10 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r5",
       "order": 3,
       "title": "test 3",
@@ -6542,6 +6994,10 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
     "mocha",
     "pass",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r5",
       "order": 3,
       "title": "test 3",
@@ -6590,6 +7046,10 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
     "mocha",
     "test end",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r5",
       "order": 3,
       "title": "test 3",
@@ -6652,6 +7112,10 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r5",
       "order": 3,
       "title": "test 3",
@@ -6785,6 +7249,10 @@ exports['src/cypress/runner retries mochaEvents cleanses errors before emitting 
     "mocha",
     "test",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r2",
       "order": 1,
       "title": "visits",
@@ -6801,6 +7269,10 @@ exports['src/cypress/runner retries mochaEvents cleanses errors before emitting 
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r2",
       "order": 1,
       "title": "visits",
@@ -6818,6 +7290,10 @@ exports['src/cypress/runner retries mochaEvents cleanses errors before emitting 
     "mocha",
     "retry",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r2",
       "order": 1,
       "title": "visits",
@@ -6859,6 +7335,10 @@ exports['src/cypress/runner retries mochaEvents cleanses errors before emitting 
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r2",
       "order": 1,
       "title": "visits",
@@ -6894,6 +7374,10 @@ exports['src/cypress/runner retries mochaEvents cleanses errors before emitting 
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r2",
       "title": "visits",
       "body": "[body]",
@@ -6909,6 +7393,10 @@ exports['src/cypress/runner retries mochaEvents cleanses errors before emitting 
     "mocha",
     "retry",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r2",
       "title": "visits",
       "err": {
@@ -6948,6 +7436,10 @@ exports['src/cypress/runner retries mochaEvents cleanses errors before emitting 
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r2",
       "title": "visits",
       "err": {
@@ -6981,6 +7473,10 @@ exports['src/cypress/runner retries mochaEvents cleanses errors before emitting 
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r2",
       "title": "visits",
       "body": "[body]",
@@ -6996,6 +7492,10 @@ exports['src/cypress/runner retries mochaEvents cleanses errors before emitting 
     "mocha",
     "fail",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r2",
       "title": "visits",
       "err": {
@@ -7034,6 +7534,10 @@ exports['src/cypress/runner retries mochaEvents cleanses errors before emitting 
     "mocha",
     "test end",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r2",
       "title": "visits",
       "err": {
@@ -7066,6 +7570,10 @@ exports['src/cypress/runner retries mochaEvents cleanses errors before emitting 
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r2",
       "title": "visits",
       "err": {

@@ -28,7 +28,7 @@ type ConfigOverrides = {
   env: Object | undefined
 };
 
-function setConfig (testConfigList: Array<TestConfig>, config: Function, localConfigOverrides: ConfigOverrides = { env: undefined }) {
+function setConfig (testConfigList: Array<TestConfig>, config, localConfigOverrides: ConfigOverrides = { env: undefined }) {
   testConfigList.forEach(({ overrides: testConfigOverride, invocationDetails }) => {
     if (_.isArray(testConfigOverride)) {
       setConfig(testConfigOverride, config, localConfigOverrides)
@@ -52,7 +52,7 @@ function setConfig (testConfigList: Array<TestConfig>, config: Function, localCo
   return localConfigOverrides
 }
 
-function mutateConfiguration (testConfig: ResolvedTestConfigOverride, config: Function, env: {}) {
+function mutateConfiguration (testConfig: ResolvedTestConfigOverride, config, env) {
   const { testConfigList } = testConfig || []
 
   let globalConfig = _.clone(config())
