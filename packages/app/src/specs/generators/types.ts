@@ -1,11 +1,11 @@
 import type { Component } from 'vue'
 
-export type GeneratorId = 'import-from-component' | 'import-from-empty' | 'import-from-scaffold' | 'import-from-story'
+export type GeneratorId = 'component-generator' | 'empty-generator' | 'scaffold-generator' | 'story-generator'
 
 export interface SpecGenerator {
   card: Component
   entry: Component
   matches: (testingType) => boolean
-  disabled: (activeProject) => boolean | undefined
+  disabled: (activeProject?) => boolean | void
   id: GeneratorId
 }

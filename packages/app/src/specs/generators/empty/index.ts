@@ -1,1 +1,1 @@
-export * from './Generator'
+export * from './EmptyGenerator'

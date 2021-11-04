@@ -1,5 +1,5 @@
 import CreateSpecModal from './CreateSpecModal.vue'
-import { ImportFromComponentGenerator } from './generators'
+import { ComponentGenerator } from './generators'
 import { ref } from 'vue'
 import { defaultMessages } from '@cy/i18n'
 
@@ -18,7 +18,7 @@ describe('<CreateSpecModal />', () => {
         gql={{ activeTestingType: 'component' }}
         show={show.value}
         onClose={() => show.value = false}
-        currentGenerator={ImportFromComponentGenerator}/>
+        currentGenerator={ComponentGenerator}/>
     </div>))
   })
 
@@ -61,7 +61,7 @@ describe('playground', () => {
         gql={{ activeTestingType: 'component' }}
         show={show.value}
         onClose={() => show.value = false}
-        currentGenerator={ImportFromComponentGenerator}/>
+        currentGenerator={ComponentGenerator}/>
     </>)).get(triggerButtonSelector)
     .click()
     .get(modalSelector)

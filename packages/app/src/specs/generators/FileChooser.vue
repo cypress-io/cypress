@@ -65,23 +65,20 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, Ref, ComputedRef } from 'vue'
 import { debouncedWatch, useDebounce, useElementSize } from '@vueuse/core'
 import { useI18n } from '@cy/i18n'
-
-// eslint-disable-next-line no-duplicate-imports
-import type { Ref } from 'vue'
 
 import Button from '@cy/components/Button.vue'
 import NoResults from '@cy/components/NoResults.vue'
 import CreateSpecModalBody from './CreateSpecModalBody.vue'
 import FileList from './FileList.vue'
 import FileMatch from '../../components/FileMatch.vue'
-
-type File = any // TODO: proper file typing
+import { gql } from '@urql/core'
+import type { FileChooserFragment } from '../../generated/graphql'
 
 const props = withDefaults(defineProps<{
-  files: File[]
+  files: FileChooserFragment[]
   extensionPattern: string,
   loading?: boolean
 }>(), {
@@ -89,6 +86,14 @@ const props = withDefaults(defineProps<{
 })
 
 const { t } = useI18n()
+
+gql`
+fragment FileChooser on FileParts {
+  relative
+  id
+  ...FileListItem
+}
+`
 
 const emits = defineEmits<{
   (eventName: 'selectFile', value: File)

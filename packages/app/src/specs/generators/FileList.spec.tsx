@@ -1,6 +1,6 @@
 import FileList from './FileList.vue'
 import { randomComponents } from '@packages/frontend-shared/cypress/support/mock-graphql/testStubSpecs'
-import { ref } from 'vue'
+import { ref, Ref } from 'vue'
 
 const difficultFile = {
   baseName: '[...all].vue',
@@ -46,7 +46,7 @@ describe('<FileList />', { viewportHeight: 500, viewportWidth: 400 }, () => {
 
   describe('without files', () => {
     it('shows the no results slot', () => {
-      const files = ref([])
+      const files: Ref<typeof allFiles> = ref([])
       let idx = 0
 
       cy.mount(() => (<div>

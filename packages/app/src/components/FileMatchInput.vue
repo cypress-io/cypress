@@ -1,8 +1,9 @@
-<template>  
+<template>
   <input
-  v-model="modelValue"
-  class="flex-grow p-0 text-gray-700 placeholder-gray-400 border-transparent outline-none placeholder-shown:overflow-ellipsis placeholder-shown:truncate hocus:border-transparent mr-8px"
-  type="search">
+    v-model="localModelValue"
+    class="flex-grow p-0 text-gray-700 placeholder-gray-400 border-transparent outline-none placeholder-shown:overflow-ellipsis placeholder-shown:truncate hocus:border-transparent mr-8px"
+    type="search"
+  >
 </template>
 
 <script lang="ts" setup>
@@ -16,7 +17,7 @@ const emits = defineEmits<{
   (event: 'update:modelValue', value: string): void
 }>()
 
-const { modelValue } = useVModels(props, emits)
+const { modelValue: localModelValue } = useVModels(props, emits)
 </script>
 
 <style scoped>

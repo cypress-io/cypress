@@ -1,5 +1,6 @@
 <template>
   <FileChooser
+    v-if="allFiles"
     v-model:extensionPattern="extensionPattern"
     :files="allFiles"
     :loading="query.fetching.value"
@@ -22,7 +23,7 @@ import { gql, useQuery, useMutation } from '@urql/vue'
 import { StoryGeneratorDocument, StoryGeneratorStepOne_GenerateSpecDocument } from '../../../generated/graphql'
 
 const props = defineProps<{
-  title?: string,
+  title: string,
 }>()
 
 const { t } = useI18n()
@@ -43,12 +44,8 @@ query StoryGenerator($glob: String!) {
       id
       codeGenCandidates(glob: $glob) {
         id
-        name
-        fileName
-        fileExtension
-        absolute
         relative
-        baseName
+        ...FileChooser
       }
     }
   }

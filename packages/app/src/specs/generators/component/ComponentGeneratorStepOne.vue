@@ -68,7 +68,7 @@ import PlusButtonIcon from '~icons/cy/add-large_x16.svg'
 import TestResultsIcon from '~icons/cy/test-results_x24.svg'
 
 const props = defineProps<{
-  title?: string,
+  title: string,
   codeGenGlob: any
 }>()
 

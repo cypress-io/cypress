@@ -31,7 +31,7 @@
     <div class="inline-flex items-center w-full rounded border-1 hocus-default focus-within-default h-40px truncate">
       <FileMatchButton
         :expanded="expanded"
-        @click="toggleExpanded"
+        @click="toggleExpanded()"
       >
         <span v-if="!expanded">{{ localExtensionPattern }}</span>
       </FileMatchButton>

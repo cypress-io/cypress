@@ -1,9 +1,9 @@
 import { keyBy } from 'lodash'
 import type { SpecGenerator, GeneratorId } from './types'
-import * as Component from './component'
-import * as Story from './story'
-import * as Scaffold from './scaffold'
-import * as Empty from './empty'
+import { ComponentGenerator } from './component'
+import { StoryGenerator } from './story'
+import { ScaffoldGenerator } from './scaffold'
+import { EmptyGenerator } from './empty'
 
 export * from './types'
 
@@ -18,10 +18,10 @@ export * from './scaffold'
 export * from './empty'
 
 export const generatorList: SpecGenerator[] = [
-  Scaffold.ImportFromScaffoldGenerator,
-  Component.ImportFromComponentGenerator,
-  Empty.ImportEmptySpecGenerator,
-  Story.ImportFromStoryGenerator,
+  ComponentGenerator,
+  StoryGenerator,
+  ScaffoldGenerator,
+  EmptyGenerator,
 ]
 
 export const generators = keyBy(generatorList, 'id') as Record<GeneratorId, SpecGenerator>
