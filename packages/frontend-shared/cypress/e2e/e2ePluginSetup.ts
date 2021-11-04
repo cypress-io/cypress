@@ -60,10 +60,10 @@ export async function e2ePluginSetup (projectRoot: string, on: Cypress.PluginEve
 
       return null
     },
-    setupE2E (projectName: string) {
+    scaffoldProject (projectName: string) {
       Fixtures.scaffoldProject(projectName)
 
-      return null
+      return Fixtures.projectPath(projectName)
     },
     async withCtx (obj: WithCtxObj) {
       // Ensure we spin up a completely isolated server/state for each test
@@ -74,6 +74,8 @@ export async function e2ePluginSetup (projectRoot: string, on: Cypress.PluginEve
         testState = {};
         ({ serverPortPromise, ctx } = runInternalServer({
           projectRoot: null,
+        }, {
+          loadCachedProjects: false,
         }) as {ctx: DataContext, serverPortPromise: Promise<number> })
 
         const fetchApi = ctx.util.fetch

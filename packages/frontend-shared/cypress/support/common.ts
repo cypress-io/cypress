@@ -1,7 +1,8 @@
+import '@percy/cypress'
+import type { Component } from 'vue'
+
 // Add cy.mount, cy.mountFragment, cy.mountFragmentList
 export * from './mock-graphql/mountFragment'
-
-import type { Component } from 'vue'
 
 export function addVueCommand () {
   Cypress.Commands.add('vue', (componentToFind = null) => {
@@ -14,15 +15,16 @@ export function addVueCommand () {
 }
 
 declare global {
-    namespace Cypress {
-      interface Chainable {
-        /**
-         * return Vue Test Utils wrapper wrapped in a cypress chainable
-         */
-        vue(componentToFind?: Component): Cypress.Chainable<any>
-      }
+  namespace Cypress {
+    interface Chainable {
+      /**
+       * return Vue Test Utils wrapper wrapped in a cypress chainable
+       */
+      vue(componentToFind?: Component): Cypress.Chainable<any>
     }
   }
+}
+
 import { initHighlighter } from '@cy/components/ShikiHighlight.vue'
 
 // Make sure highlighter is initialized before
