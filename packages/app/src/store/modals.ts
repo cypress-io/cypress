@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 
-export type ModalTypes = 'createSpec'
+export type ModalTypes = 'createSpec' | 'switchTestingType'
 
 export interface ModalStore {
   activeModalId: ModalTypes | null

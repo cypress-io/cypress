@@ -33,7 +33,10 @@
         class="flex-1 space-y-1 bg-gray-1000"
         aria-label="Sidebar"
       >
-        <SwitchTestingTypeButton />
+        <SwitchTestingTypeButton
+          v-if="query.data.value?.app"
+          :gql="query.data.value?.app"
+        />
         <RouterLink
           v-for="item in navigation"
           v-slot="{ isActive }"
@@ -79,6 +82,7 @@ query SideBarNavigation {
       id
       title
     }
+    ...SwitchTestingTypeButton
   }
 }
 `

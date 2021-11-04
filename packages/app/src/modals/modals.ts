@@ -4,4 +4,5 @@ import TestModal from './TestModal.vue'
 
 export const modals: Record<ModalTypes, Component | Promise<Component>> = {
   createSpec: TestModal,
+  switchTestingType: TestModal,
 }
