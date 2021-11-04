@@ -35,14 +35,18 @@ const Layout: FunctionalComponent = () => {
   )
 }
 
-describe('screenshot', () => {
-  it('takes a standard screenshot', () => {
-    cy.viewport(500, 500)
-    mount(() => <Layout />, {
-      styles,
-    })
+const captureTypes = ['fullPage', 'viewport', 'runner'] as const
 
-    cy.screenshot('percy/component_testing_takes_a_screenshot')
+describe('screenshot', () => {
+  captureTypes.forEach((capture) => {
+    it(`takes a standard screenshot with viewport: ${capture}`, () => {
+      cy.viewport(500, 500)
+      mount(() => <Layout />, {
+        styles,
+      })
+
+      cy.screenshot(`percy/component_testing_takes_a_screenshot_viewport_${capture}`, { capture })
+    })
   })
 
   it('takes a screenshot with a custom viewport', () => {
