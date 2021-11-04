@@ -61,11 +61,16 @@ describe('Launchpad: Open Mode', () => {
   })
 
   it('auto-selects the browser when launched with --browser', () => {
+    cy.setupE2E('launchpad')
+
     cy.withCtx(async (ctx) => {
       ctx.launchArgs.testingType = 'e2e'
       ctx.launchArgs.browser = 'firefox'
+
+      await ctx.initializeData()
     })
 
+    cy.contains('Continue').click()
     cy.contains('Next Step').click()
     cy.get('h1').should('contain', 'Choose a Browser')
     cy.contains('Firefox').parent().should('have.class', 'border-jade-300')
