@@ -1996,15 +1996,19 @@ describe('src/cy/commands/navigation', () => {
         it('times out', function (done) {
           let thenCalled = false
 
-          cy.on('fail', (err) => {
-            const { lastLog } = this
+          cy.on('fail', (err, test) => {
+            if (test._currentRetry < 1) {
+              const { lastLog } = this
 
-            // visit, window, page loading
-            assertLogLength(this.logs, 2)
+              // visit, window, page loading
+              assertLogLength(this.logs, 3)
+
+              expect(lastLog.get('name')).to.eq('page load')
+              expect(lastLog.get('error')).to.eq(err)
+            }
+
             expect(err.message).to.include('Your page did not fire its `load` event within `50ms`.')
-            expect(lastLog.get('name')).to.eq('page load')
-            expect(lastLog.get('error')).to.eq(err)
-
+  
             return Promise
             .delay(100)
             .then(() => {
