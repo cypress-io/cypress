@@ -3,8 +3,20 @@ import $errUtils from '../cypress/error_utils'
 
 // See Test Config Overrides in ../../../../cli/types/cypress.d.ts
 
+type ResolvedTestConfigOverride = {
+  /**
+   * The list of test config overrides and the invocation details used to add helpful
+   * error messaging to consumers if a test override fails validation.
+   */
+  testConfigList: Array<TestConfig>
+  /**
+   * The test config overrides that will apply to the test if it passes validation.
+   * */
+  unverifiedTestConfig: Object
+}
+
 type TestConfig = {
-  _testConfig: {
+  overrides: {
     browser?: Object
   }
   invocationDetails: {
@@ -17,7 +29,7 @@ type ConfigOverrides = {
 };
 
 function setConfig (testConfigList: Array<TestConfig>, config: Function, localConfigOverrides: ConfigOverrides = { env: undefined }) {
-  testConfigList.forEach(({ _testConfig: testConfigOverride, invocationDetails }) => {
+  testConfigList.forEach(({ overrides: testConfigOverride, invocationDetails }) => {
     if (_.isArray(testConfigOverride)) {
       setConfig(testConfigOverride, config, localConfigOverrides)
     } else {
@@ -40,7 +52,9 @@ function setConfig (testConfigList: Array<TestConfig>, config: Function, localCo
   return localConfigOverrides
 }
 
-function mutateConfiguration (testConfigList, config, env) {
+function mutateConfiguration (testConfig: ResolvedTestConfigOverride, config: Function, env: {}) {
+  const { testConfigList } = testConfig || []
+
   let globalConfig = _.clone(config())
 
   const localConfigOverrides = setConfig(testConfigList, config)
@@ -93,18 +107,19 @@ function mutateConfiguration (testConfigList, config, env) {
 
 // this is called during test onRunnable time
 // in order to resolve the test config upfront before test runs
-export function getResolvedTestConfigOverride (test) {
+// note: must return as an object to meet the dashboard recording API
+export function getResolvedTestConfigOverride (test): ResolvedTestConfigOverride {
   let curParent = test.parent
 
-  const testConfig = [{
-    _testConfig: test._testConfig,
+  const testConfigList = [{
+    overrides: test._testConfig,
     invocationDetails: test.invocationDetails,
   }]
 
   while (curParent) {
     if (curParent._testConfig) {
-      testConfig.unshift({
-        _testConfig: curParent._testConfig,
+      testConfigList.unshift({
+        overrides: curParent._testConfig,
         invocationDetails: curParent.invocationDetails,
       })
     }
@@ -112,7 +127,13 @@ export function getResolvedTestConfigOverride (test) {
     curParent = curParent.parent
   }
 
-  return testConfig.filter((opt) => opt._testConfig !== undefined)
+  const testConfig = {
+    testConfigList: testConfigList.filter((opt) => opt.overrides !== undefined),
+    // collect test overrides to send to the dashboard api when @packages/server is ran in record mode
+    unverifiedTestConfig: _.reduce(testConfigList, (acc, opts) => _.extend(acc, opts.overrides), {}),
+  }
+
+  return testConfig
 }
 
 class TestConfigOverride {
@@ -121,7 +142,7 @@ class TestConfigOverride {
   restoreAndSetTestConfigOverrides (test, config, env) {
     if (this.restoreTestConfigFn) this.restoreTestConfigFn()
 
-    const resolvedTestConfig = test._testConfig || []
+    const resolvedTestConfig = test._testConfig || {}
 
     this.restoreTestConfigFn = mutateConfiguration(resolvedTestConfig, config, env)
   }
