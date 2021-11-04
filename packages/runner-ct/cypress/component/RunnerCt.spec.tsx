@@ -102,9 +102,7 @@ describe('RunnerCt', () => {
 
       mountRunnerCt(makeState({ spec: null }))
 
-      cy.contains('Your tests are loading').then(() => {
-        state.setSpecs([{ relative: '/test2.js', absolute: 'root/test2.js', name: 'test2.js' }])
-      })
+      state.setSpecs([{ relative: '/test2.js', absolute: 'root/test2.js', name: 'test2.js' }])
 
       cy.contains('No spec selected')
     })

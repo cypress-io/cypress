@@ -197,6 +197,46 @@ export class ProjectActions {
     return this.api.launchProject(browser, spec, options)
   }
 
+  async launchProjectWithoutElectron () {
+    if (!this.ctx.activeProject) {
+      throw Error('Cannot launch project without an active project')
+    }
+
+    const preferences = await this.api.getProjectPreferencesFromCache()
+    const { browserPath, testingType } = preferences[this.ctx.activeProject.title] ?? {}
+
+    if (!browserPath || !testingType) {
+      throw Error('Cannot launch project without stored browserPath or testingType')
+    }
+
+    const spec = this.makeSpec(testingType)
+    const browser = this.findBrowerByPath(browserPath)
+
+    if (!browser) {
+      throw Error(`Cannot find specified browser at given path: ${browserPath}.`)
+    }
+
+    this.ctx.actions.electron.hideBrowserWindow()
+    this.ctx.coreData.wizard.chosenTestingType = testingType
+    await this.initializeActiveProject()
+    this.ctx.appData.activeTestingType = testingType
+
+    return this.api.launchProject(browser, spec, {})
+  }
+
+  private makeSpec (testingType: TestingTypeEnum): Cypress.Spec {
+    return {
+      name: '',
+      absolute: '',
+      relative: '',
+      specType: testingType === 'e2e' ? 'integration' : 'component',
+    }
+  }
+
+  private findBrowerByPath (browserPath: string) {
+    return this.ctx.coreData?.app?.browsers?.find((browser) => browser.path === browserPath)
+  }
+
   removeProject (projectRoot: string) {
     const found = this.ctx.projectsList.find((x) => x.projectRoot === projectRoot)
 
@@ -335,5 +375,11 @@ export class ProjectActions {
       spec,
       content: newSpec.content,
     }
+  }
+
+  reconfigureProject () {
+    this.ctx.actions.wizard.resetWizard()
+    this.ctx.actions.electron.refreshBrowserWindow()
+    this.ctx.actions.electron.showBrowserWindow()
   }
 }
