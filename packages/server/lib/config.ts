@@ -63,19 +63,29 @@ const convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) => {
   , {})
 }
 
-const validateNoBreakingConfig = (cfg) => {
+const validateNoBreakingConfig = ({ config, configFile }) => {
   breakingOptions.forEach(({ name, errorKey, newName, isWarning, value }) => {
-    if (cfg.hasOwnProperty(name)) {
-      if (value && cfg[name] !== value) {
+    if (config.hasOwnProperty(name)) {
+      if (value && config[name] !== value) {
         // Bail if a value is specified but the config does not have that value.
         return
       }
 
       if (isWarning) {
-        return errors.warning(errorKey, name, newName)
+        return errors.warning(errorKey, {
+          name,
+          newName,
+          value,
+          configFile,
+        })
       }
 
-      return errors.throw(errorKey, name, newName)
+      return errors.throw(errorKey, {
+        name,
+        newName,
+        value,
+        configFile,
+      })
     }
   })
 }
@@ -307,7 +317,7 @@ export function mergeDefaults (config: Record<string, any> = {}, options: Record
     return errors.throw('CONFIG_VALIDATION_ERROR', errMsg)
   })
 
-  validateNoBreakingConfig(config)
+  validateNoBreakingConfig({ config, configFile: options.configFile })
 
   return setSupportFileAndFolder(config)
   .then(setPluginsFile)
