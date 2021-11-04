@@ -273,3 +273,11 @@ export const getContainsSelector = (text, filter = '', options: {
 
   return selectors.join()
 }
+
+export const getInputFromLabel = ($el) => {
+  if (!$el.is('label') || !$el.attr('for')) {
+    return $([])
+  }
+
+  return $(`#${$el.attr('for')}`, $el.parents().last())
+}

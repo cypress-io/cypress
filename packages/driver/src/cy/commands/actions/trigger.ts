@@ -7,7 +7,7 @@ import $dom from '../../../dom'
 import $errUtils from '../../../cypress/error_utils'
 import $actionability from '../../actionability'
 
-const dispatch = (target, appWindow, eventName, options) => {
+export const dispatch = (target, appWindow, eventName, options) => {
   const eventConstructor = options.eventConstructor ?? 'Event'
   const ctor = appWindow[eventConstructor]
 

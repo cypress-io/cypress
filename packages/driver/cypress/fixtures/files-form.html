@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Generic File Inputs</title>
+  </head>
+  <body>
+    <form>
+      <label for="basic" id="basic-label">Label A</label>
+      <input id="basic" type="file" />
+    </form>
+
+    <form>
+      <input id="multiple" type="file" multpile />
+    </form>
+
+    <form>
+      <style>
+        #hidden {
+          display: none;
+        }
+      </style>
+      <label for="hidden" id="hidden-label">Label B</label>
+      <input id="hidden" type="file" />
+    </form>
+
+    <form>
+      <label for="text-input" id="text-label">Text label</label>
+      <input type="text" id="text-input" />
+
+      <label for="nonexistent" id="nonexistent-label">Bad label</label>
+    </form>
+  </body>
+</html>
