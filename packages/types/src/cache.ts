@@ -5,7 +5,7 @@ export interface Cache {
 }
 
 export interface Preferences {
-  browserId: string | null
+  browserPath: string | null
   testingType: 'e2e' | 'component' | null
 }
 

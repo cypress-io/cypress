@@ -28,6 +28,7 @@ import type { GraphQLSchema } from 'graphql'
 import type { Server } from 'http'
 import type { AddressInfo } from 'net'
 import EventEmitter from 'events'
+import type { App as ElectronApp } from 'electron'
 
 const IS_DEV_ENV = process.env.CYPRESS_INTERNAL_ENV !== 'production'
 
@@ -36,6 +37,7 @@ export interface DataContextConfig {
   os: PlatformName
   launchArgs: LaunchArgs
   launchOptions: OpenProjectLaunchOptions
+  electronApp: ElectronApp
   /**
    * Default is to
    */
@@ -60,6 +62,10 @@ export class DataContext {
     this._coreData = _config.coreData ?? makeCoreData()
   }
 
+  get electronApp () {
+    return this._config.electronApp
+  }
+
   async initializeData () {
     const toAwait: Promise<any>[] = [
       // Fetch the browsers when the app starts, so we have some by
@@ -72,7 +78,11 @@ export class DataContext {
     ]
 
     if (this._config.launchArgs.projectRoot) {
-      toAwait.push(this.actions.project.setActiveProject(this._config.launchArgs.projectRoot))
+      await this.actions.project.setActiveProject(this._config.launchArgs.projectRoot)
+
+      if (this.coreData.app.activeProject?.preferences) {
+        toAwait.push(this.actions.project.launchProjectWithoutElectron())
+      }
     }
 
     if (this._config.launchArgs.testingType) {

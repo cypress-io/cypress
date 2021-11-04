@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from 'electron'
+import type { BrowserWindow } from 'electron'
 import os from 'os'
 import type { DataContext } from '..'
 
@@ -21,7 +21,7 @@ export class ElectronActions {
     this.electron.browserWindow?.hide()
 
     if (this.isMac) {
-      app.dock.hide()
+      this.ctx.electronApp.dock.hide()
     } else {
       this.electron.browserWindow?.setSkipTaskbar(true)
     }
@@ -31,9 +31,19 @@ export class ElectronActions {
     this.electron.browserWindow?.show()
 
     if (this.isMac) {
-      app.dock.show()
+      this.ctx.electronApp.dock.show()
     } else {
       this.electron.browserWindow?.setSkipTaskbar(false)
     }
+  }
+
+  showElectronOnAppExit () {
+    this.ctx.coreData.wizard.currentStep = 'setupComplete'
+    this.refreshBrowserWindow()
+    this.showBrowserWindow()
+  }
+
+  refreshBrowserWindow () {
+    this.electron.browserWindow?.reload()
   }
 }
