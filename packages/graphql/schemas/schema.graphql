@@ -377,7 +377,7 @@ type Mutation {
   devRelaunch(action: DevRelaunchAction!): Boolean
 
   """Hides the launchpad windows"""
-  hideBrowserWindow: App!
+  hideBrowserWindow: Boolean!
 
   """
   Initializes open_project global singleton to manager current project state
@@ -407,8 +407,14 @@ type Mutation {
   """Set the current navigation item"""
   navigationMenuSetItem(type: NavItem!): Boolean
 
+  """show the launchpad windows"""
+  reconfigureProject: Boolean!
+
   """Remove project from projects array and cache"""
   removeProject(path: String!): Boolean
+
+  """Reset the Wizard to the starting position"""
+  resetWizard: Boolean!
 
   """Set active project to run tests on"""
   setActiveProject(path: String!): Boolean
@@ -417,17 +423,18 @@ type Mutation {
   setCurrentSpec(id: ID!): Boolean
 
   """Save the projects preferences to cache"""
-  setProjectPreferences(
-    """ID of the browser that we want to set"""
-    browserId: ID!
-    testingType: TestingTypeEnum!
-  ): App!
+  setProjectPreferences(browserPath: String!, testingType: TestingTypeEnum!): App!
 
+<<<<<<< HEAD
   """Save the prompt-shown state for this project"""
   setPromptShown(slug: String!): Boolean
 
   """show the launchpad windows"""
   showBrowserWindow: App!
+=======
+  """show the launchpad at the browser picker step"""
+  showElectronOnAppExit: Boolean
+>>>>>>> origin/unified-desktop-gui
 
   """Installs the dependencies for the component testing step"""
   wizardInstallDependencies: Wizard
@@ -592,7 +599,7 @@ type Project implements Node {
 """Preferences specific to a project"""
 type ProjectPreferences {
   """The preferred browser to launch"""
-  browserId: String
+  browserPath: String
 
   """The preferred testing type to start in"""
   testingType: String
