@@ -1,5 +1,6 @@
 import { DataContext } from '@packages/data-context'
 import os from 'os'
+import { app } from 'electron'
 
 import specsUtil from './util/specs'
 import type { FindSpecs, FoundBrowser, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions, PlatformName, Preferences, SettingsOptions } from '@packages/types'
@@ -47,6 +48,7 @@ export function makeDataContext (options: MakeDataContextOptions) {
     schema: graphqlSchema,
     ...options,
     launchOptions: {},
+    electronApp: app,
     appApi: {
       getBrowsers () {
         return getBrowsers()
