@@ -409,6 +409,12 @@ commands:
       - restore_cached_workspace
       - run: 
           command: |
+            CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
+            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
+            PERCY_ENABLE=${PERCY_TOKEN:-0} \
+            PERCY_PARALLEL_TOTAL=-1 \
+
+            yarn percy exec --parallel -- -- \
             DEBUG=<<parameters.debug>> \
             CYPRESS_INTERNAL_FORCE_BROWSER_RELAUNCH='true' \
             CYPRESS_KONFIG_ENV=production \
