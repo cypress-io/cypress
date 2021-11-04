@@ -26,6 +26,7 @@
     "@iconify/vue": "3.0.0-beta.1",
     "@intlify/vite-plugin-vue-i18n": "2.4.0",
     "@packages/frontend-shared": "0.0.0-development",
+    "@percy/cypress": "^3.1.0",
     "@testing-library/cypress": "8.0.0",
     "@types/faker": "5.5.8",
     "@urql/core": "2.3.1",
