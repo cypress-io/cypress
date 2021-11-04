@@ -101,16 +101,16 @@ const VariantClassesTable = {
 export type ButtonVariants = keyof(typeof VariantClassesTable)
 
 const SizeClassesTable = {
-  sm: 'px-6px py-2px text-14px',
-  md: 'px-12px py-8px text-14px',
+  sm: 'px-6px py-2px text-14px h-24px',
+  md: 'px-12px py-8px text-14px h-32px',
   lg: 'px-16px py-11px max-h-40px',
   'lg-wide': 'px-32px py-8px',
-}
+} as const
 
 const props = defineProps<{
   prefixIcon?: FunctionalComponent<SVGAttributes>
   suffixIcon?: FunctionalComponent<SVGAttributes>
-  size?: 'sm' | 'md' | 'lg' | 'lg-wide'
+  size?: keyof typeof SizeClassesTable
   variant?: ButtonVariants
   prefixIconClass?: string
   suffixIconClass?: string

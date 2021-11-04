@@ -1,3 +1,10 @@
+# [@cypress/vue-v3.0.4](https://github.com/cypress-io/cypress/compare/@cypress/vue-v3.0.3...@cypress/vue-v3.0.4) (2021-10-29)
+
+
+### Bug Fixes
+
+* remove outdated registry link ([#18710](https://github.com/cypress-io/cypress/issues/18710)) ([e2a869d](https://github.com/cypress-io/cypress/commit/e2a869d2a984abb6703aec966dd9124ee693b8c1))
+
 # [@cypress/vue-v3.0.3](https://github.com/cypress-io/cypress/compare/@cypress/vue-v3.0.2...@cypress/vue-v3.0.3) (2021-07-31)
 
 

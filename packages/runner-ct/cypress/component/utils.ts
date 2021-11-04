@@ -1,3 +1,7 @@
+import * as MobX from 'mobx'
+import $Cypress from '@packages/driver'
+import { selectorPlaygroundModel, StudioRecorder } from '@packages/runner-shared'
+import { EventManager } from '@packages/app/src/runner/event-manager'
 import State from '../../src/lib/state'
 
 export const fakeConfig = { projectName: 'Project', env: {}, isTextTerminal: false } as Partial<Cypress.RuntimeConfigOptions>
@@ -17,6 +21,11 @@ export const getPort = (href: string) => {
   return port
 }
 
-export class FakeEventManager {
-  on (evt: string) {}
+export const createEventManager = () => {
+  return new EventManager(
+    $Cypress,
+    MobX,
+    selectorPlaygroundModel,
+    StudioRecorder,
+  )
 }

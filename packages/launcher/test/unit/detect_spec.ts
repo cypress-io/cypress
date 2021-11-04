@@ -1,4 +1,5 @@
 require('../spec_helper')
+import _ from 'lodash'
 import { detect, detectByPath, setMajorVersion } from '../../lib/detect'
 import { goalBrowsers } from '../fixtures'
 import { expect } from 'chai'
@@ -6,7 +7,6 @@ import { utils } from '../../lib/utils'
 import sinon, { SinonStub } from 'sinon'
 import os from 'os'
 import { log } from '../log'
-import { project } from 'ramda'
 import * as darwinUtil from '../../lib/darwin/util'
 
 const isWindows = () => {
@@ -20,7 +20,7 @@ describe('browser detection', () => {
     log('detected browsers %j', browsers)
     expect(browsers).to.be.an('array')
 
-    const mainProps = project(['name', 'version'], browsers)
+    const mainProps = browsers.map((val) => _.pick(val, ['name', 'version']))
 
     log('%d browsers\n%j', browsers.length, mainProps)
 

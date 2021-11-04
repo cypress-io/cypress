@@ -95,7 +95,21 @@ export const makeConfig = (config: Partial<UserConfig> = {}, plugins: PluginOpti
       },
     },
 
-    resolve: { alias },
+    resolve: {
+      alias,
+      dedupe: [
+        'vue',
+        '@vue/compiler-core',
+        '@vue/compiler-dom',
+        '@vue/compiler-sfc',
+        '@vueuse/core',
+        '@urql/core',
+        '@urql/devtools',
+        '@urql/exchange-execute',
+        '@urql/exchange-graphcache',
+        '@urql/vue',
+      ],
+    },
 
     // You cannot add or remove arbitrary options from shared plugins.
     // Please use the PluginsOverride option for this.

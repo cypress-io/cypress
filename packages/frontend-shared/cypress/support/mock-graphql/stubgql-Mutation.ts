@@ -64,7 +64,7 @@ export const stubMutation: MaybeResolver<Mutation> = {
     return true
   },
   hideBrowserWindow (source, args, ctx) {
-    return ctx.app
+    return true
   },
   setProjectPreferences (source, args, ctx) {
     return ctx.app
@@ -92,5 +92,11 @@ export const stubMutation: MaybeResolver<Mutation> = {
       content: `it('should do stuff', () => {})`,
       id: 'U3BlYzovVXNlcnMvbGFjaGxhbi9jb2RlL3dvcmsvY3lwcmVzczUvcGFja2FnZXMvYXBwL3NyYy9CYXNpYy5zcGVjLnRzeA==',
     }
+  },
+  reconfigureProject (src, args, ctx) {
+    return true
+  },
+  resetWizard (src, args, ctx) {
+    return true
   },
 }

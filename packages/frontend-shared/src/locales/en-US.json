@@ -275,6 +275,12 @@
       "title": "Project ID",
       "description": "The Project ID configured for this project inside of Cypress Cloud. {0}"
     },
+    "specPattern": {
+      "title": "Spec Patterns",
+      "description": "The globs pointing Cypress App to your spec files configured for this project. {0}",
+      "defaultIndicator": "Default Values",
+      "matches": "{0} Matches"
+    },
     "recordKey": {
       "title": "Record Key",
       "description": "The Record Key configured for this project inside of Cypress Cloud. {0}",
@@ -282,7 +288,7 @@
     },
     "project": {
       "title": "Project Settings",
-      "description": "Settings for this project."
+      "description": "Review the configuration settings currently in use for this project."
     },
     "experiments": {
       "title": "Experiments",
@@ -290,7 +296,11 @@
     },
     "device": {
       "title": "Device Settings",
-      "description": "Settings for this device."
+      "description": "Review the configuration settings currently in use for this device."
+    },
+    "testingPreferences": {
+      "title": "Testing Preferences",
+      "description": "Configure your testing environment with these flags"
     }
   },
   "runs": {
