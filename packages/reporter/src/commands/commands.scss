@@ -596,8 +596,7 @@
 
     svg {
       transform: rotate(-90deg);
-      transition-duration: 150ms;
-      transition-property: transform;
+      transition: transform 150ms ease-out;
     }
   }
 

@@ -10,8 +10,7 @@
   .collapsible-indicator {
     margin-right: 8px;
     transform: rotate(-90deg);
-    transition-duration: 150ms;
-    transition-property: transform;
+    transition: transform 150ms ease-out;
   }
 
   .is-open > .collapsible-header-wrapper > .collapsible-header > .collapsible-header-inner > .collapsible-indicator {

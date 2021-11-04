@@ -44,7 +44,7 @@ const RunnablesEmptyState = ({ spec, eventManager = events }: RunnablesEmptyStat
   return (
     <div className='no-tests'>
       <h2>
-        <WarningIcon /> No tests found.
+        <WarningIcon className="warning-icon" />No tests found.
       </h2>
       <p>Cypress could not detect tests in this file.</p>
       { !isAllSpecs && (
@@ -56,7 +56,7 @@ const RunnablesEmptyState = ({ spec, eventManager = events }: RunnablesEmptyStat
             relativeFile: spec.relative,
             absoluteFile: spec.absolute,
           }}>
-            <h3><OpenIcon /> Open file in IDE</h3>
+            <h3><OpenIcon />Open file in IDE</h3>
           </FileOpener>
           <p className='text-muted'>Write a test using your preferred text editor.</p>
           <a className='open-studio' onClick={_launchStudio}><h3><StudioIcon /> Create test with Cypress Studio</h3></a>

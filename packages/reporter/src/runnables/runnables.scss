@@ -70,7 +70,16 @@
     }
 
     svg {
+      margin-right: 8px;
       vertical-align: text-top;
+
+      &.warning-icon {
+        margin-top: 2px;
+      }
+
+      .icon-light {
+        fill: $indigo-600;
+      }
     }
   }
 
@@ -146,7 +155,7 @@
     }
 
     &.suite .collapsible-indicator {
-      margin-left: 8px;
+      margin-left: 5px;
       color: $gray-800;
     }
 
@@ -225,7 +234,7 @@
     }
 
     .runnable-state-icon {
-      margin: 4px 4px 4px 0px;
+      margin: 4px;
 
       &.fa-spin {
         .icon-light {

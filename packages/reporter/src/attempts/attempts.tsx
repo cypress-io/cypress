@@ -26,11 +26,10 @@ const NoCommands = () => (
 
 const AttemptHeader = ({ index, isOpen, state }: {index: number, isOpen: boolean, state: TestState }) => (
   <span className='attempt-tag'>
-    {isOpen ? (
-      <CollapseIcon />
-    ) : (
-      <ExpandIcon />
-    )}
+    <span className='open-close-indicator'>
+      <CollapseIcon className='collapse-icon' />
+      <ExpandIcon className='expand-icon' />
+    </span>
     Attempt {index + 1}
     <StateIcon state={state} className="attempt-state" />
   </span>

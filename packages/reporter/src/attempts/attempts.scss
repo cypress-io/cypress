@@ -22,7 +22,7 @@
       &:before {
         border-left: 1px solid $gray-900;
         content: '';
-        left: 5px;
+        left: 9px;
         position: absolute;
         top: 22px;
         height: 15px;
@@ -37,10 +37,30 @@
       display: none;
     }
 
-    .open-close-indicator {
-      display: flex;
+    > .is-open .open-close-indicator {
+      svg.collapse-icon {
+        display: block;
+      }
+
+      svg.expand-icon {
+        display: none;
+      }
+    }
+
+  .open-close-indicator {
+    svg {
+      margin-right: 4px;
+
+      &.collapse-icon {
+        display: none;
+      }
+
+      &.expand-icon {
+        display: block;
+      }
     }
   }
+}
 
   .attempt-state-failed {
     .attempt-name:after {
@@ -72,7 +92,7 @@
     &:after {
       color: $gray-600;
       content: '•';
-      left: 3px;
+      left: 7px;
       position: absolute;
       top: 4px;
     }
@@ -101,7 +121,7 @@
     }
 
     .attempt-state {
-      margin-left: 3px;
+      margin-left: 4px;
     }
   }
 }
