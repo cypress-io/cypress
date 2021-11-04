@@ -5,13 +5,13 @@
     :show-next="false"
     #="{backFn}"
   >
-    <div v-if="!query.data.value">
+    <div v-if="!query.data.value?.currentProject">
       Loading browsers...
     </div>
     <OpenBrowserList
       v-else
       variant=""
-      :gql="query.data.value.app"
+      :gql="query.data.value.currentProject"
       @navigated-back="backFn"
       @launch="launch"
     />
@@ -26,7 +26,7 @@ import { OpenBrowserDocument, OpenBrowser_LaunchProjectDocument } from '../gener
 
 gql`
 query OpenBrowser {
-  app {
+  currentProject {
     ...OpenBrowserList
   }
   wizard {
@@ -41,9 +41,8 @@ gql`
 mutation OpenBrowser_LaunchProject ($testingType: TestingTypeEnum!, $browserPath: String!)  {
   launchOpenProject
   hideBrowserWindow
-
   setProjectPreferences(testingType: $testingType, browserPath: $browserPath) {
-    activeProject {
+    currentProject {
       id
       title
     }

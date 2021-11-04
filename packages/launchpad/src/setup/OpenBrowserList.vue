@@ -1,7 +1,7 @@
 <template>
   <form
     v-if="props.gql.browsers"
-    @submit.prevent="emit('launch', props.gql?.selectedBrowser?.path)"
+    @submit.prevent="emit('launch', props.gql?.currentBrowser?.path)"
   >
     <div class="flex flex-wrap justify-center gap-6 py-16">
       <div
@@ -86,7 +86,7 @@ mutation OpenBrowserList_SetBrowser($id: ID!) {
 `
 
 gql`
-fragment OpenBrowserList on App {
+fragment OpenBrowserList on CurrentProject {
   currentBrowser {
     id
     displayName

@@ -3,23 +3,34 @@ import { randomComponents } from './testStubSpecs'
 import config from '../../fixtures/config.json'
 
 import type {
-  Project,
-  CodegenTypeMap,
+  CurrentProject,
+  GlobalProject,
 } from '../generated/test-graphql-types.gen'
-import { MaybeResolver, testNodeId } from './clientTestUtils'
+import { testNodeId } from './clientTestUtils'
 import { CloudProjectStubs } from './stubgql-CloudTypes'
 
-export const createTestProject = (title: string): CodegenTypeMap['Project'] => {
+export const createTestGlobalProject = (title: string, additionalConfig: Partial<GlobalProject> = {}): GlobalProject => {
   const snakeTitle = _.kebabCase(title)
 
-  // TODO: What a mess, type this without all the hacks
   return {
-    ...testNodeId('Project'),
+    ...testNodeId('GlobalProject'),
+    __typename: 'GlobalProject',
+    projectRoot: `/usr/local/dev/projects/${snakeTitle}`,
+    title: snakeTitle,
+    ...additionalConfig,
+  }
+}
+
+export const createTestCurrentProject = (title: string, currentProject: Partial<CurrentProject> = {}): CurrentProject => {
+  const globalProject = createTestGlobalProject(title)
+
+  return {
+    ...globalProject,
+    __typename: 'CurrentProject',
+    isRefreshingBrowsers: false,
     isCTConfigured: true,
     isE2EConfigured: true,
-    projectId: `${snakeTitle}-id`,
-    title,
-    projectRoot: `/usr/local/dev/projects/${snakeTitle}`,
+    projectId: `${globalProject.title}-id`,
     specs: {
       pageInfo: {
         __typename: 'PageInfo',
@@ -44,7 +55,10 @@ export const createTestProject = (title: string): CodegenTypeMap['Project'] => {
     config,
     cloudProject: CloudProjectStubs.componentProject,
     codeGenGlob: '/**/*.vue',
+    ...currentProject,
   }
 }
 
-export const stubProject: MaybeResolver<Project> = createTestProject('Some Test Title')
+export const stubProject: CurrentProject = createTestCurrentProject('Some Test Title')
+
+export const stubGlobalProject: GlobalProject = createTestGlobalProject('Some Test Title')

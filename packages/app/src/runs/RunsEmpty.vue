@@ -58,7 +58,7 @@ import type { RunsEmptyFragment } from '../generated/graphql'
 const { t } = useI18n()
 
 gql`
-fragment RunsEmpty on Project{
+fragment RunsEmpty on CurrentProject {
   title
   projectId
   configFilePath

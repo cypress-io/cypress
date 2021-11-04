@@ -23,6 +23,6 @@ export class FileActions {
       throw new Error(`Cannot remove file in project without active project`)
     }
 
-    await this.ctx.fs.remove(path.join(this.ctx.activeProject?.projectRoot, relativePath))
+    await this.ctx.fs.remove(path.join(this.ctx.currentProject?.projectRoot, relativePath))
   }
 }

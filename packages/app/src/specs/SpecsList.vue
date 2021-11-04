@@ -47,7 +47,7 @@ fragment SpecNode_SpecsList on SpecEdge {
 `
 
 gql`
-fragment Specs_SpecsList on App {
+fragment Specs_SpecsList on Query {
   currentProject {
     id
     projectRoot

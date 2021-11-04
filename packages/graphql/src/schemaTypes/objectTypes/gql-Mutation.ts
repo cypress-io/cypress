@@ -300,7 +300,7 @@ export const mutation = mutationType({
     })
 
     t.nonNull.field('setProjectPreferences', {
-      type: 'App',
+      type: 'Query',
       description: 'Save the projects preferences to cache',
       args: {
         testingType: nonNull(TestingTypeEnum),

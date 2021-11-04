@@ -3,7 +3,7 @@
     <h2>New Spec</h2>
     <div class="flex gap-4 justify-center">
       <Button
-        :disabled="!newSpecQuery.data.value?.app.currentProject?.storybook"
+        :disabled="!newSpecQuery.data.value?.currentProject?.storybook"
         @click="codeGenTypeClicked('story')"
       >
         Generate From Story
@@ -91,20 +91,18 @@ import {
 
 gql`
 query NewSpec_NewSpecQuery {
-  app {
-    currentProject {
+  currentProject {
+    id
+    storybook {
       id
-      storybook {
+    }
+    generatedSpec {
+      id
+      content
+      spec {
         id
-      }
-      generatedSpec {
-        id
-        content
-        spec {
-          id
-          name
-          relative
-        }
+        name
+        relative
       }
     }
   }
@@ -113,11 +111,9 @@ query NewSpec_NewSpecQuery {
 
 gql`
 query NewSpec_CodeGenGlobQuery($type: CodeGenType!) {
-  app {
-    currentProject {
-      id
-      codeGenGlob: codeGenGlob(type: $type)
-    }
+  currentProject {
+    id
+    codeGenGlob: codeGenGlob(type: $type)
   }
 }
 `
@@ -136,13 +132,11 @@ fragment NewSpec_CodeGenCandidateNode on FilePartsEdge {
 
 gql`
 query NewSpec_SearchCodeGenCandidates($glob: String!) {
-  app {
-    currentProject {
-      id
-      codeGenCandidates: codeGenCandidates(first: 25, glob: $glob) {
-        edges {
-          ...NewSpec_CodeGenCandidateNode
-        }
+  currentProject {
+    id
+    codeGenCandidates: codeGenCandidates(first: 25, glob: $glob) {
+      edges {
+        ...NewSpec_CodeGenCandidateNode
       }
     }
   }
@@ -177,8 +171,8 @@ const codeGenGlobQuery = useQuery({
 const codeGenGlob = ref('')
 
 watch(codeGenGlobQuery.data, (value, prevVal) => {
-  if (value?.app.currentProject?.codeGenGlob && value.app.currentProject.codeGenGlob !== prevVal?.app.currentProject?.codeGenGlob) {
-    codeGenGlob.value = value.app.currentProject.codeGenGlob
+  if (value?.currentProject?.codeGenGlob && value.currentProject.codeGenGlob !== prevVal?.currentProject?.codeGenGlob) {
+    codeGenGlob.value = value.currentProject.codeGenGlob
   }
 })
 
@@ -189,7 +183,7 @@ const searchCodeGenCandidates = useQuery({
 })
 const codeGenCandidates = computed(() => {
   return (
-    searchCodeGenCandidates.data.value?.app.currentProject?.codeGenCandidates?.edges.map(
+    searchCodeGenCandidates.data.value?.currentProject?.codeGenCandidates?.edges.map(
       ({ node: story }) => {
         return {
           ...story,
@@ -206,14 +200,14 @@ const fileNameInput = ref('')
 const mutation = useMutation(NewSpec_CodeGenSpecDocument)
 const candidateChosen = ref(false)
 const generatedSpec = computed(
-  () => newSpecQuery.data.value?.app.currentProject?.generatedSpec,
+  () => newSpecQuery.data.value?.currentProject?.generatedSpec,
 )
 
 const setSpecMutation = useMutation(NewSpec_SetCurrentSpecDocument)
 const router = useRouter()
 
 async function specClick () {
-  const specId = newSpecQuery.data.value?.app.currentProject?.generatedSpec?.spec.id
+  const specId = newSpecQuery.data.value?.currentProject?.generatedSpec?.spec.id
 
   if (!specId) {
     return

@@ -73,7 +73,7 @@ mutation GlobalProjectCard_setActiveProject($path: String!) {
 `
 
 gql`
-fragment GlobalProjectCard on Project {
+fragment GlobalProjectCard on GlobalProject {
   id
   title
   projectRoot

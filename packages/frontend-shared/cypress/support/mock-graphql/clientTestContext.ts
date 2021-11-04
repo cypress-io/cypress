@@ -1,20 +1,20 @@
 import { cloneDeep } from 'lodash'
 import type { CloudUser } from '../generated/test-cloud-graphql-types.gen'
-import type { WizardStep, NavItem, Project, Browser, WizardBundler, WizardFrontendFramework, TestingTypeEnum } from '../generated/test-graphql-types.gen'
+import type { WizardStep, NavItem, CurrentProject, Browser, WizardBundler, WizardFrontendFramework, TestingTypeEnum, GlobalProject } from '../generated/test-graphql-types.gen'
 import { resetTestNodeIdx, testNodeId } from './clientTestUtils'
 import * as cloudTypes from './stubgql-CloudTypes'
 import { stubNavigationMenu } from './stubgql-NavigationMenu'
-import { createTestProject } from './stubgql-Project'
+import { createTestCurrentProject, createTestGlobalProject, stubGlobalProject } from './stubgql-Project'
 import { longBrowsersList } from './stubgql-App'
 import { allBundlers } from './stubgql-Wizard'
 
 export interface ClientTestContext {
+  currentProject: CurrentProject | null
+  projects: GlobalProject[]
   app: {
     navItem: NavItem
     currentBrowser: Browser | null
     browsers: Browser[] | null
-    projects: Project[]
-    currentProject: Project | null
     isInGlobalMode: boolean
     isAuthBrowserOpened: boolean
   }
@@ -51,15 +51,15 @@ export function makeClientTestContext (): ClientTestContext {
     }
   })
 
-  const testProject = createTestProject('test-project')
+  const testProject = createTestCurrentProject('test-project')
 
   return {
+    currentProject: testProject,
+    projects: [stubGlobalProject, createTestGlobalProject('another-test-project')],
     app: {
       navItem: 'settings',
       browsers,
-      projects: [testProject, createTestProject('another-test-project')],
       currentBrowser: browsers[0],
-      currentProject: testProject,
       isInGlobalMode: false,
       isAuthBrowserOpened: false,
     },

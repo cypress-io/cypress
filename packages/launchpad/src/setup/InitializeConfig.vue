@@ -35,7 +35,8 @@ fragment InitializeConfig_Config on Query {
     ...InitializeConfig_WizardState
   }
 
-  app {
+  currentProject {
+    id
     currentBrowser {
       id
       displayName

@@ -33,7 +33,7 @@ const props = defineProps<{
 }>()
 
 watch(() => route.query.file, (queryParam) => {
-  const spec = props.gql.currentProject?.specs?.edges.find((x) => x.node.relative === queryParam)?.node
+  const spec = props.gql.specs?.edges.find((x) => x.node.relative === queryParam)?.node
 
   specStore.setActiveSpec(spec ?? null)
 }, { immediate: true, flush: 'post' })

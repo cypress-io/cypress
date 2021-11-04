@@ -45,12 +45,10 @@ import ctPreview from '../images/ct-preview.png'
 
 gql`
 fragment TestingTypeCards on Query {
-  app {
-    currentProject {
-      id
-      isCTConfigured
-      isE2EConfigured
-    }
+  currentProject {
+    id
+    isCTConfigured
+    isE2EConfigured
   }
   wizard {
     testingTypes {
@@ -79,8 +77,8 @@ const ct = computed(() => {
   return props.gql.wizard.testingTypes.find((x) => x.type === 'component')
 })
 
-const isCTConfigured = computed(() => Boolean(props.gql.app.currentProject?.isCTConfigured))
-const isE2EConfigured = computed(() => Boolean(props.gql.app.currentProject?.isE2EConfigured))
+const isCTConfigured = computed(() => Boolean(props.gql.currentProject?.isCTConfigured))
+const isE2EConfigured = computed(() => Boolean(props.gql.currentProject?.isE2EConfigured))
 
 const ctNextStep = async () => {
   return mutation.executeMutation({ input: { testingType: 'component', direction: 'forward' } })

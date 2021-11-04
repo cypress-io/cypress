@@ -40,13 +40,13 @@ export interface ActiveProjectShape extends ProjectShape {
 
 export interface AppDataShape {
   navItem: NexusGenEnums['NavItem']
-  refreshingBrowsers: Promise<FoundBrowser[]> | null
   browsers: ReadonlyArray<FoundBrowser> | null
   projects: ProjectShape[]
   currentProject: ActiveProjectShape | null
   isInGlobalMode: boolean
   isAuthBrowserOpened: boolean
   currentTestingType: Maybe<TestingTypeEnum>
+  refreshingBrowsers: Promise<FoundBrowser[]> | null
 }
 
 export interface WizardDataShape {

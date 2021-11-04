@@ -53,7 +53,7 @@ import SnapshotControls from './SnapshotControls.vue'
 import SpecRunnerHeader from './SpecRunnerHeader.vue'
 
 gql`
-fragment SpecRunner on App {
+fragment SpecRunner on CurrentProject {
   ...Specs_InlineSpecList
   ...SpecRunnerHeader
 }

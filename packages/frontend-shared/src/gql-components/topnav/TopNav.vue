@@ -40,19 +40,19 @@
     </TopNavListItem>
   </TopNavList>
 
-  <TopNavList v-if="props.gql?.currentBrowser && showBrowsers">
+  <TopNavList v-if="props.gql?.currentProject?.currentBrowser && showBrowsers">
     <template #heading="{ open }">
       <img
         class="w-16px filter group-hocus:grayscale-0"
         :class="open ? 'grayscale-0' : 'grayscale'"
-        :src="allBrowsersIcons[props.gql?.currentBrowser?.displayName || '']"
+        :src="allBrowsersIcons[props.gql?.currentProject?.currentBrowser?.displayName || '']"
       >
       <span
         data-cy="topnav-browser-list"
-      >{{ props.gql.currentBrowser?.displayName }} v{{ props.gql.currentBrowser?.majorVersion }}</span>
+      >{{ props.gql.currentProject?.currentBrowser?.displayName }} v{{ props.gql.currentProject?.currentBrowser?.majorVersion }}</span>
     </template>
     <TopNavListItem
-      v-for="browser in props.gql.browsers"
+      v-for="browser in props.gql.currentProject.browsers"
       :key="browser.id"
       class="px-16px py-12px min-w-240px cursor-pointer"
       :class="browser.isSelected ? 'bg-jade-50' : ''"
@@ -180,21 +180,21 @@ const versionList = [
 ]
 
 gql`
-fragment TopNav on App {
+fragment TopNav on Query {
   currentProject {
     id
-  }
-  currentBrowser {
-    id
-    displayName
-    majorVersion
-  }
-  browsers {
-    id
-    isSelected
-    displayName
-    version
-    majorVersion
+    currentBrowser {
+      id
+      displayName
+      majorVersion
+    }
+    browsers {
+      id
+      isSelected
+      displayName
+      version
+      majorVersion
+    }
   }
 }
 `

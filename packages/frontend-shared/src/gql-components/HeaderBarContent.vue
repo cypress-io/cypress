@@ -16,21 +16,21 @@
           src="../assets/logos/cypress-dark.png"
         >
         <a
-          :class="props.gql?.app?.currentProject ? 'text-indigo-500' :
+          :class="props.gql?.currentProject ? 'text-indigo-500' :
             'text-gray-700'"
-          :href="props.gql?.app?.currentProject ? 'global-mode' : undefined"
+          :href="props.gql?.currentProject ? 'global-mode' : undefined"
           @click.prevent="clearActiveProject"
         >Projects</a>
         <!-- TODO: Replace with a cy icon -->
         <i-oi-chevron-right
-          v-if="props.gql?.app?.currentProject"
+          v-if="props.gql?.currentProject"
           class="text-gray-300 h-8px"
         />
-        <span class="text-body-gray-700">{{ props.gql?.app?.currentProject?.title }}</span>
+        <span class="text-body-gray-700">{{ props.gql?.currentProject?.title }}</span>
       </div>
       <div class="flex gap-6">
         <TopNav
-          :gql="props.gql?.app"
+          :gql="props.gql"
           :show-browsers="props.showBrowsers"
         >
           <template
@@ -114,13 +114,11 @@ mutation GlobalPageHeader_clearActiveProject {
 
 gql`
 fragment HeaderBar_HeaderBarContent on Query {
-  app {
-    currentProject {
-      id
-      title
-    }
-    ...TopNav
+  currentProject {
+    id
+    title
   }
+  ...TopNav
   ...Auth
 }
 `
@@ -134,7 +132,7 @@ const openLogin = () => {
 }
 
 const clearActiveProject = () => {
-  if (props.gql.app.currentProject) {
+  if (props.gql.currentProject) {
     clearActiveProjectMutation.executeMutation({})
   }
 }

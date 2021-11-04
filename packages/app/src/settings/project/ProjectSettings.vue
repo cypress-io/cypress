@@ -28,7 +28,7 @@ import SpecPatterns from './SpecPatterns.vue'
 import type { ProjectSettingsFragment } from '../../generated/graphql'
 
 gql`
-fragment ProjectSettings on Project{
+fragment ProjectSettings on CurrentProject {
   id
   ...ProjectId
   ...SpecPatterns

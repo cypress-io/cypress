@@ -1,37 +1,42 @@
 import { nonNull, objectType, stringArg } from 'nexus'
 import path from 'path'
-import { ProjectPreferences } from '.'
 import { cloudProjectBySlug } from '../../stitching/remoteGraphQLCalls'
 import { CodeGenTypeEnum } from '../enumTypes/gql-CodeGenTypeEnum'
+import { Browser } from './gql-Browser'
 import { FileParts } from './gql-FileParts'
+import { GeneratedSpec } from './gql-GeneratedSpec'
+import { ProjectPreferences } from './gql-ProjectPreferences'
 
-export interface ProjectShape {
-  projectId?: string | null
-  projectRoot: string
-}
-
-const GeneratedSpec = objectType({
-  name: 'GeneratedSpec',
-  definition (t) {
-    t.nonNull.id('id', {
-      resolve: (src, args, ctx) => src.spec.absolute,
-    })
-
-    t.nonNull.string('content', {
-      description: 'File content of most recently generated spec.',
-    })
-
-    t.nonNull.field('spec', {
-      type: FileParts,
-    })
-  },
-})
-
-export const Project = objectType({
-  name: 'Project',
-  description: 'A Cypress Project is represented by a cypress.config.{ts|js} file',
+export const CurrentProject = objectType({
+  name: 'CurrentProject',
+  description: 'The currently opened Cypress project, represented by a cypress.config.{ts|js} file',
   node: 'projectRoot',
   definition (t) {
+    t.implements('ProjectLike')
+
+    t.nonNull.boolean('isRefreshingBrowsers', {
+      description: 'Whether we are currently refreshing the browsers list',
+      resolve: (source, args, ctx) => Boolean(ctx.appData.refreshingBrowsers),
+    })
+
+    t.field('currentTestingType', {
+      description: 'The mode the interactive runner was launched in',
+      type: 'TestingTypeEnum',
+    })
+
+    t.field('currentBrowser', {
+      type: Browser,
+      description: 'The currently selected browser for the application',
+      resolve: (source, args, ctx) => {
+        return ctx.wizardData.chosenBrowser
+      },
+    })
+
+    t.list.nonNull.field('browsers', {
+      type: Browser,
+      description: 'Browsers found that are compatible with Cypress',
+    })
+
     t.field('cloudProject', {
       type: 'CloudProject',
       description: 'The remote associated project from Cypress Cloud',
@@ -49,12 +54,6 @@ export const Project = objectType({
     t.string('projectId', {
       description: 'Used to associate project with Cypress cloud',
       resolve: (source, args, ctx) => ctx.project.projectId(source.projectRoot),
-    })
-
-    t.nonNull.string('projectRoot')
-
-    t.nonNull.string('title', {
-      resolve: (source, args, ctx) => ctx.project.projectTitle(source.projectRoot),
     })
 
     t.nonNull.boolean('isCTConfigured', {
@@ -152,8 +151,5 @@ export const Project = objectType({
       },
     })
   },
-  sourceType: {
-    module: __dirname,
-    export: 'ProjectShape',
-  },
+
 })

@@ -50,7 +50,7 @@ import { gql } from '@urql/vue'
 import type { SpecRunnerHeaderFragment } from '../generated/graphql'
 
 gql`
-fragment SpecRunnerHeader on App {
+fragment SpecRunnerHeader on CurrentProject {
   currentTestingType
 
   currentBrowser {

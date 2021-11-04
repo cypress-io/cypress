@@ -1,6 +1,6 @@
 <template>
-  <div v-if="query.data.value?.app">
-    <SpecsList :gql="query.data.value.app" />
+  <div v-if="query.data.value">
+    <SpecsList :gql="query.data.value" />
   </div>
 
   <div v-else>
@@ -15,9 +15,7 @@ import { SpecsPageContainerDocument } from '../generated/graphql'
 
 gql`
 query SpecsPageContainer {
-  app {
-    ...Specs_SpecsList
-  }
+  ...Specs_SpecsList
 }
 `
 
