@@ -655,6 +655,42 @@ describe('src/cy/commands/actions/trigger', () => {
         })
       })
 
+      it('can specify scrollBehavior bottom in config', { scrollBehavior: 'bottom' }, () => {
+        cy.get('button:first').then((el) => {
+          cy.spy(el[0], 'scrollIntoView')
+        })
+
+        cy.get('button:first').trigger('mouseover')
+
+        cy.get('button:first').then((el) => {
+          expect(el[0].scrollIntoView).to.be.calledWith({ block: 'end' })
+        })
+      })
+
+      it('can specify scrollBehavior center in config', { scrollBehavior: 'center' }, () => {
+        cy.get('button:first').then((el) => {
+          cy.spy(el[0], 'scrollIntoView')
+        })
+
+        cy.get('button:first').trigger('mouseover')
+
+        cy.get('button:first').then((el) => {
+          expect(el[0].scrollIntoView).to.be.calledWith({ block: 'center' })
+        })
+      })
+
+      it('can specify scrollBehavior nearest in config', { scrollBehavior: 'nearest' }, () => {
+        cy.get('button:first').then((el) => {
+          cy.spy(el[0], 'scrollIntoView')
+        })
+
+        cy.get('button:first').trigger('mouseover')
+
+        cy.get('button:first').then((el) => {
+          expect(el[0].scrollIntoView).to.be.calledWith({ block: 'nearest' })
+        })
+      })
+
       it('does not scroll when scrollBehavior is false in config', { scrollBehavior: false }, () => {
         cy.scrollTo('top')
         cy.get('button:first').then((el) => {
@@ -679,6 +715,13 @@ describe('src/cy/commands/actions/trigger', () => {
         cy.get('button:first').then((el) => {
           expect(el[0].scrollIntoView).to.be.calledWith({ block: 'start' })
         })
+      })
+
+      // https://github.com/cypress-io/cypress/issues/4233
+      it('can check an element behind a sticky header', () => {
+        cy.viewport(400, 400)
+        cy.visit('./fixtures/sticky-header.html')
+        cy.get('p').trigger('mouseover')
       })
 
       it('errors when scrollBehavior is false and element is out of view and is clicked', (done) => {
@@ -1047,7 +1090,8 @@ describe('src/cy/commands/actions/trigger', () => {
         cy.on('fail', (err) => {
           expect(this.logs.length).eq(2)
           expect(err.message).not.to.contain('CSS property: `opacity: 0`')
-          expect(err.message).to.contain('`cy.trigger()` failed because this element is not visible')
+          expect(err.message).to.contain('`cy.trigger()` failed because this element')
+          expect(err.message).to.contain('is being covered by another element')
 
           done()
         })

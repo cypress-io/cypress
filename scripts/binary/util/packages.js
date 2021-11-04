@@ -8,7 +8,6 @@ const retry = require('bluebird-retry')
 const la = require('lazy-ass')
 const check = require('check-more-types')
 const execa = require('execa')
-const R = require('ramda')
 const prettyMs = require('pretty-ms')
 const pluralize = require('pluralize')
 const debug = require('debug')('cypress:binary')
@@ -39,7 +38,7 @@ const createCLIExecutable = (command) => {
 
     return execa(command, args, { stdio: 'inherit', cwd, env })
     // if everything is ok, resolve with nothing
-    .then(R.always(undefined))
+    .then(() => undefined)
     .catch((result) => {
       const msg = `${commandToExecute} failed with exit code: ${result.code}`
 
