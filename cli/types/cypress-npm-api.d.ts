@@ -395,7 +395,7 @@ declare module 'cypress' {
      * @param {Cypress.ConfigOptions} config
      * @returns {Cypress.ConfigOptions} the configuration passed in parameter
      */
-    defineConfig(config: Cypress.ConfigOptions): Cypress.ConfigOptions
+    defineConfig<ComponentDevServerOpts = any>(config: Cypress.ConfigOptions<ComponentDevServerOpts>): Cypress.ConfigOptions
   }
 
   // export Cypress NPM module interface
