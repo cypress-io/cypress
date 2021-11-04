@@ -18,6 +18,8 @@ const expect = require('chai').expect
 const snapshot = require('../../support/snapshot')
 
 const cwd = process.cwd()
+const execPath = process.execPath
+const nodeVersion = process.versions.node
 
 const defaultBinaryDir = '/default/binary/dir'
 
@@ -98,6 +100,10 @@ describe('lib/exec/spawn', function () {
           '--foo',
           '--cwd',
           cwd,
+          '--userNodePath',
+          execPath,
+          '--userNodeVersion',
+          nodeVersion,
         ], {
           detached: false,
           stdio: ['inherit', 'inherit', 'pipe'],
@@ -122,6 +128,10 @@ describe('lib/exec/spawn', function () {
           '--foo',
           '--cwd',
           cwd,
+          '--userNodePath',
+          execPath,
+          '--userNodeVersion',
+          nodeVersion,
         ]
 
         expect(args).to.deep.equal(['/path/to/cypress', expectedCliArgs])
@@ -142,6 +152,10 @@ describe('lib/exec/spawn', function () {
           '--foo',
           '--cwd',
           cwd,
+          '--userNodePath',
+          execPath,
+          '--userNodeVersion',
+          nodeVersion,
         ], {
           detached: false,
           stdio: ['inherit', 'inherit', 'pipe'],
@@ -163,6 +177,10 @@ describe('lib/exec/spawn', function () {
           '--foo',
           '--cwd',
           cwd,
+          '--userNodePath',
+          execPath,
+          '--userNodeVersion',
+          nodeVersion,
         ], {
           detached: false,
           stdio: ['inherit', 'inherit', 'pipe'],

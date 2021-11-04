@@ -42,6 +42,8 @@ export interface LaunchArgs {
   testingType: Cypress.TestingType
   invokedFromCli: boolean
   os: PlatformName
+  userNodePath?: string
+  userNodeVersion?: string
 
   onFocusTests?: () => any
   /**

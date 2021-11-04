@@ -5,7 +5,6 @@ const debug = require('debug')('test')
 const config = require(`${root}lib/config`)
 const errors = require(`${root}lib/errors`)
 const configUtil = require(`${root}lib/util/config`)
-const findSystemNode = require(`${root}lib/util/find_system_node`)
 const scaffold = require(`${root}lib/scaffold`)
 const Fixtures = require('@tooling/system-tests/lib/fixtures')
 let settings = require(`${root}lib/util/settings`)
@@ -1455,7 +1454,6 @@ describe('lib/config', () => {
             includeShadowDom: { value: false, from: 'default' },
             integrationFolder: { value: 'cypress/integration', from: 'default' },
             modifyObstructiveCode: { value: true, from: 'default' },
-            nodeVersion: { value: 'default', from: 'default' },
             numTestsKeptInMemory: { value: 50, from: 'default' },
             pageLoadTimeout: { value: 60000, from: 'default' },
             pluginsFile: { value: 'cypress/plugins', from: 'default' },
@@ -1562,7 +1560,6 @@ describe('lib/config', () => {
             includeShadowDom: { value: false, from: 'default' },
             integrationFolder: { value: 'cypress/integration', from: 'default' },
             modifyObstructiveCode: { value: true, from: 'default' },
-            nodeVersion: { value: 'default', from: 'default' },
             numTestsKeptInMemory: { value: 50, from: 'default' },
             pageLoadTimeout: { value: 60000, from: 'default' },
             pluginsFile: { value: 'cypress/plugins', from: 'default' },
@@ -2361,62 +2358,51 @@ describe('lib/config', () => {
 
   context('.setNodeBinary', () => {
     beforeEach(function () {
-      this.findSystemNode = sinon.stub(findSystemNode, 'findNodePathAndVersion')
       this.nodeVersion = process.versions.node
     })
 
-    it('sets current Node ver if nodeVersion != system', function () {
-      return config.setNodeBinary({
-        nodeVersion: undefined,
+    it('sets bundled Node ver if nodeVersion != system', function () {
+      const obj = config.setNodeBinary({
+        nodeVersion: 'bundled',
       })
-      .then((obj) => {
-        expect(this.findSystemNode).to.not.be.called
 
-        expect(obj).to.deep.eq({
-          nodeVersion: undefined,
-          resolvedNodeVersion: this.nodeVersion,
-        })
+      expect(obj).to.deep.eq({
+        nodeVersion: 'bundled',
+        resolvedNodeVersion: this.nodeVersion,
       })
     })
 
-    it('sets found Node ver if nodeVersion = system and findNodePathAndVersion resolves', function () {
-      this.findSystemNode.resolves({
-        path: '/foo/bar/node',
-        version: '1.2.3',
-      })
-
-      return config.setNodeBinary({
+    it('sets cli Node ver if nodeVersion = system', function () {
+      const obj = config.setNodeBinary({
         nodeVersion: 'system',
-      })
-      .then((obj) => {
-        expect(this.findSystemNode).to.be.calledOnce
+      }, '/foo/bar/node', '1.2.3')
 
-        expect(obj).to.deep.eq({
-          nodeVersion: 'system',
-          resolvedNodeVersion: '1.2.3',
-          resolvedNodePath: '/foo/bar/node',
-        })
+      expect(obj).to.deep.eq({
+        nodeVersion: 'system',
+        resolvedNodeVersion: '1.2.3',
+        resolvedNodePath: '/foo/bar/node',
       })
     })
 
-    it('sets current Node ver and warns if nodeVersion = system and findNodePathAndVersion rejects', function () {
-      const err = new Error()
-      const onWarning = sinon.stub()
-
-      this.findSystemNode.rejects(err)
-
-      return config.setNodeBinary({
+    it('sets bundled Node ver and if nodeVersion = system and userNodePath undefined', function () {
+      const obj = config.setNodeBinary({
         nodeVersion: 'system',
-      }, onWarning)
-      .then((obj) => {
-        expect(this.findSystemNode).to.be.calledOnce
-        expect(onWarning).to.be.calledOnce
-        expect(obj).to.deep.eq({
-          nodeVersion: 'system',
-          resolvedNodeVersion: this.nodeVersion,
-        })
+      }, undefined, '1.2.3')
 
-        expect(obj.resolvedNodePath).to.be.undefined
+      expect(obj).to.deep.eq({
+        nodeVersion: 'system',
+        resolvedNodeVersion: this.nodeVersion,
+      })
+    })
+
+    it('sets bundled Node ver and if nodeVersion = system and userNodeVersion undefined', function () {
+      const obj = config.setNodeBinary({
+        nodeVersion: 'system',
+      }, '/foo/bar/node')
+
+      expect(obj).to.deep.eq({
+        nodeVersion: 'system',
+        resolvedNodeVersion: this.nodeVersion,
       })
     })
   })

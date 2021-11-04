@@ -11,7 +11,6 @@ import origin from './util/origin'
 import * as settings from './util/settings'
 import Debug from 'debug'
 import pathHelpers from './util/path_helpers'
-import findSystemNode from './util/find_system_node'
 
 const debug = Debug('cypress:server:config')
 
@@ -63,14 +62,29 @@ const convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) => {
   , {})
 }
 
-const validateNoBreakingConfig = (cfg) => {
-  return _.each(breakingOptions, ({ name, errorKey, newName, isWarning }) => {
-    if (_.has(cfg, name)) {
-      if (isWarning) {
-        return errors.warning(errorKey, name, newName)
+const validateNoBreakingConfig = (config) => {
+  breakingOptions.forEach(({ name, errorKey, newName, isWarning, value }) => {
+    if (config.hasOwnProperty(name)) {
+      if (value && config[name] !== value) {
+        // Bail if a value is specified but the config does not have that value.
+        return
       }
 
-      return errors.throw(errorKey, name, newName)
+      if (isWarning) {
+        return errors.warning(errorKey, {
+          name,
+          newName,
+          value,
+          configFile: config.configFile,
+        })
+      }
+
+      return errors.throw(errorKey, {
+        name,
+        newName,
+        value,
+        configFile: config.configFile,
+      })
     }
   })
 }
@@ -293,6 +307,8 @@ export function mergeDefaults (config: Record<string, any> = {}, options: Record
 
   config = setParentTestsPaths(config)
 
+  config = setNodeBinary(config, options.args?.userNodePath, options.args?.userNodeVersion)
+
   // validate config again here so that we catch
   // configuration errors coming from the CLI overrides
   // or env var overrides
@@ -305,7 +321,6 @@ export function mergeDefaults (config: Record<string, any> = {}, options: Record
   return setSupportFileAndFolder(config)
   .then(setPluginsFile)
   .then(setScaffoldPaths)
-  .then(_.partialRight(setNodeBinary, options.onWarning))
 }
 
 export function setResolvedConfigValues (config, defaults, resolved, options) {
@@ -453,22 +468,19 @@ export function resolveConfigValues (config, defaults, resolved = {}, options = 
 }
 
 // instead of the built-in Node process, specify a path to 3rd party Node
-export const setNodeBinary = Promise.method((obj, onWarning) => {
-  if (obj.nodeVersion !== 'system') {
-    obj.resolvedNodeVersion = process.versions.node
+export const setNodeBinary = (obj, userNodePath, userNodeVersion) => {
+  // if execPath isn't found we weren't executed from the CLI and should used the bundled node version.
+  if (userNodePath && userNodeVersion && obj.nodeVersion !== 'bundled') {
+    obj.resolvedNodePath = userNodePath
+    obj.resolvedNodeVersion = userNodeVersion
 
     return obj
   }
 
-  return findSystemNode.findNodePathAndVersion()
-  .then(({ path, version }) => {
-    obj.resolvedNodePath = path
-    obj.resolvedNodeVersion = version
-  }).catch((err) => {
-    onWarning(errors.get('COULD_NOT_FIND_SYSTEM_NODE', process.versions.node))
-    obj.resolvedNodeVersion = process.versions.node
-  }).return(obj)
-})
+  obj.resolvedNodeVersion = process.versions.node
+
+  return obj
+}
 
 export function setScaffoldPaths (obj) {
   obj = _.clone(obj)
