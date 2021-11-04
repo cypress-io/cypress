@@ -33,9 +33,8 @@ export const createTestProject = (title: string): CodegenTypeMap['Project'] => {
             __typename: 'SpecEdge' as const,
             cursor: 'eoifjew',
             node: {
-              id: c.absolute,
-              __typename: 'Spec' as const,
               ...c,
+              id: c.absolute,
             },
           }
         }),
