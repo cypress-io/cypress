@@ -2896,7 +2896,7 @@ declare namespace Cypress {
    */
   type CoreConfigOptions = Partial<Omit<ResolvedConfigOptions, TestingType>>
 
-  interface ComponentConfigOptions<ComponentDevServerOpts> extends CoreConfigOptions {
+  interface ComponentConfigOptions<ComponentDevServerOpts = any> extends CoreConfigOptions {
     // TODO(tim): Keeping optional until we land the implementation
     devServer?: (cypressConfig: DevServerConfig, devServerConfig: ComponentDevServerOpts) => ResolvedDevServerConfig | Promise<ResolvedDevServerConfig>
     devServerConfig?: ComponentDevServerOpts
