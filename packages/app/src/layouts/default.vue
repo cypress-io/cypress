@@ -30,7 +30,7 @@
       </section>
     </main>
     <div
-      class="h-screen order-first"
+      class="h-screen order-first transition-all"
       :class="mainStore.navBarExpanded ? 'w-248px' : 'w-64px'"
     >
       <SidebarNavigation class="h-full" />

@@ -6,7 +6,7 @@ describe('SidebarNavigation', () => {
     cy.mount(() => {
       const mainStore = useMainStore()
 
-      return (<div class={mainStore.navBarExpanded ? 'w-248px' : 'w-64px'}>
+      return (<div class={[mainStore.navBarExpanded ? 'w-248px' : 'w-64px', 'transition-all']}>
         <SidebarNavigation />
       </div>)
     })
