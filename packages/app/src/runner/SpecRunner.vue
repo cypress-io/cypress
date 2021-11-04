@@ -39,6 +39,7 @@
         :event-manager="eventManager"
         :get-aut-iframe="getAutIframeModel"
       />
+      <ScreenshotHelperPixels />
     </div>
   </RemovePositioningDuringScreenshot>
 </template>
@@ -57,6 +58,7 @@ import SpecRunnerHeader from './SpecRunnerHeader.vue'
 import HideDuringScreenshot from './screenshot/HideDuringScreenshot.vue'
 import RemoveClassesDuringScreenshotting from './screenshot/RemoveClassesDuringScreenshotting.vue'
 import RemovePositioningDuringScreenshot from './screenshot/RemovePositioningDuringScreenshot.vue'
+import ScreenshotHelperPixels from './screenshot/ScreenshotHelperPixels.vue'
 import { useScreenshotStore } from '../store/screenshot-store'
 
 gql`
@@ -176,7 +178,7 @@ $navbar-width: 80px;
 
 <style>
 #unified-runner > div {
-  height: 100%;
+  height: min(100%, 100vh);
 }
 
 iframe {
