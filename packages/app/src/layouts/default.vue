@@ -27,13 +27,14 @@
           </transition>
         </router-view>
         <ModalManager v-if="modalStore.activeModalId" />
+        <div id="tooltip-target" />
       </section>
     </main>
     <div
       class="h-screen order-first transition-all"
       :class="mainStore.navBarExpanded ? 'w-248px' : 'w-64px'"
     >
-      <SidebarNavigation class="h-full" />
+      <SidebarNavigation />
     </div>
   </div>
 </template>

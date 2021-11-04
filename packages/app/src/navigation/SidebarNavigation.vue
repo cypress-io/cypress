@@ -1,5 +1,5 @@
 <template>
-  <div class="flex relative flex-col flex-1 min-h-0 bg-gray-1000">
+  <div class="flex relative flex-col flex-1 h-full bg-gray-1000">
     <div
       class="absolute cursor-pointer w-16px bottom-0 top-0 left-full group"
       @click="mainStore.toggleNavBar"
@@ -47,9 +47,8 @@
             :data-e2e-href="item.href"
             :active="isActive"
             :icon="item.icon"
-          >
-            {{ item.name }}
-          </SidebarNavigationRow>
+            :name="item.name"
+          />
         </RouterLink>
       </nav>
       <img
