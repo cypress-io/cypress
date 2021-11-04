@@ -2,6 +2,7 @@
 export * from './mock-graphql/mountFragment'
 
 import type { SnapshotOptions } from '@percy/core'
+import '@percy/cypress'
 
 import _ from 'lodash'
 import type { Component } from 'vue'

@@ -1,4 +1,4 @@
-import { registerMountFn } from '@packages/frontend-shared/cypress/support/common'
+import { registerMountFn, installCustomPercyCommand } from '@packages/frontend-shared/cypress/support/common'
 // ***********************************************************
 // This example support/index.js is processed and
 // loaded automatically before your test files.
@@ -23,8 +23,6 @@ import { createRouter } from '../../../src/router/router'
 import { createPinia } from '../../../src/store'
 import { Pinia, setActivePinia } from 'pinia'
 
-import '@percy/cypress'
-
 let pinia: Pinia
 
 beforeEach(() => {
@@ -33,3 +31,4 @@ beforeEach(() => {
 })
 
 registerMountFn({ plugins: [() => createRouter(), () => pinia] })
+installCustomPercyCommand()

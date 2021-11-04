@@ -76,6 +76,7 @@
         "@headlessui/vue",
         "@iconify/iconify",
         "@iconify/vue",
+        "@percy/cypress",
         "@purge-icons/generated",
         "@testing-library/cypress/add-commands",
         "@urql/core",
