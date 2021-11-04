@@ -1,25 +1,25 @@
 <template>
-  <div>
-    <RouterLink
+  <div class="w-300px overflow-x-hidden">
+    <InlineSpecListRow
       v-for="spec in specs"
       :key="spec.node.id"
-      class="text-left grid grid-cols-[16px,auto,auto] items-center gap-10px"
-      :class="{ 'border-2 border-red-400': isCurrentSpec(spec) }"
-      :to="{ path: 'runner', query: { file: spec.node.relative } }"
+      :spec="spec.node"
+      :selected="isCurrentSpec(spec)"
+      tabIndex="0"
+      :ref="focusRef"
     >
-      <SpecName :gql="spec.node" />
-    </RouterLink>
+    </InlineSpecListRow>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { gql } from '@urql/vue'
 import type { SpecNode_InlineSpecListFragment, Specs_InlineSpecListFragment } from '../generated/graphql'
-import SpecName from './SpecName.vue'
 import { useSpecStore } from '../store'
 import { useRouter } from 'vue-router'
-
+import InlineSpecListRow from './InlineSpecListRow.vue'
+const focusRef = ref()
 gql`
 fragment SpecNode_InlineSpecList on SpecEdge {
   node {
@@ -27,6 +27,7 @@ fragment SpecNode_InlineSpecList on SpecEdge {
     specType
     absolute
     relative
+    baseName
   }
   ...SpecListRow
 }
@@ -56,7 +57,56 @@ const isCurrentSpec = (spec: SpecNode_InlineSpecListFragment) => {
   return spec.node.relative === specStore.activeSpec?.relative
 }
 
-const router = useRouter()
-
 const specs = computed(() => props.gql.activeProject?.specs?.edges || [])
+
+onMounted(() => {
+  document.addEventListener('keydown', ($event) => {
+    const keyboardEvent = document.createEvent('KeyboardEvent')
+    const initMethod = typeof keyboardEvent.initKeyboardEvent !== 'undefined' ? 'initKeyboardEvent' : 'initKeyEvent';
+
+    if ($event.key==='ArrowUp') {
+      keyboardEvent[initMethod](
+        'keydown',
+        true,
+        true,
+        window,
+        false,
+        false,
+        false,
+        false,
+        9,
+        0
+      )
+    } else if ($event.key==='ArrowDown') {
+      keyboardEvent[initMethod](
+        'keydown',
+        true,
+        true,
+        window,
+        false,
+        false,
+        true,
+        false,
+        9,
+        0
+      )
+    }
+  })
+})
+
 </script>
+
+<style>
+.spec-item:hover::before,.selected::before {
+  position: absolute;
+  content: '';
+  width: 8px;
+  left: -4px;
+  height: 28px;
+  @apply border-r-4 border-r-indigo-300 rounded-lg;
+}
+
+.test {
+  border: solid 1px red
+}
+</style>
