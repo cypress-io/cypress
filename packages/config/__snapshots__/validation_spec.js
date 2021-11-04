@@ -124,10 +124,6 @@ exports['src/validation .isNumber returns error message when value is a not a nu
 Expected \`mockConfigKey\` to be a number. Instead the value was: \`"string"\`
 `
 
-exports['src/validation .isFullyQualifiedUrl returns error message when value is a not qualified url 1'] = `
-Expected \`mockConfigKey\` to be a fully qualified URL (starting with \`http://\` or \`https://\`). Instead the value was: \`"url.com"\`
-`
-
 exports['invalid retry value'] = `
 Expected \`mockConfigKey\` to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls. Instead the value was: \`"1"\`
 `
@@ -150,4 +146,12 @@ Expected \`clientCertificates[0].url\` to be an https protocol. Instead the valu
 
 exports['invalid url'] = `
 Expected \`clientCertificates[0].url\` to be a valid URL. Instead the value was: \`"not *"\`
+`
+
+exports['not qualified url'] = `
+Expected \`mockConfigKey\` to be a fully qualified URL (starting with \`http://\` or \`https://\`). Instead the value was: \`"url.com"\`
+`
+
+exports['empty string'] = `
+Expected \`mockConfigKey\` to be a fully qualified URL (starting with \`http://\` or \`https://\`). Instead the value was: \`""\`
 `

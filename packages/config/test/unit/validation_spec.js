@@ -205,12 +205,6 @@ describe('src/validation', () => {
       expect(result).to.be.true
     })
 
-    it('returns true for value=empty string', () => {
-      const result = validation.isFullyQualifiedUrl(mockKey, '')
-
-      expect(result).to.be.true
-    })
-
     it('returns true for value=qualified urls', () => {
       let result = validation.isFullyQualifiedUrl(mockKey, 'https://url.com')
 
@@ -220,10 +214,14 @@ describe('src/validation', () => {
     })
 
     it('returns error message when value is a not qualified url', () => {
-      const result = validation.isFullyQualifiedUrl(mockKey, 'url.com')
+      let result = validation.isFullyQualifiedUrl(mockKey, 'url.com')
 
       expect(result).to.not.be.true
-      snapshot(result)
+      snapshot('not qualified url', result)
+
+      result = validation.isFullyQualifiedUrl(mockKey, '')
+      expect(result).to.not.be.true
+      snapshot('empty string', result)
     })
   })
 

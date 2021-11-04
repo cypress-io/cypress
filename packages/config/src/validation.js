@@ -261,8 +261,7 @@ module.exports = {
   },
 
   isFullyQualifiedUrl (key, value) {
-    // TO DO: remove empty string check. Added for passivity.
-    if (value == null || value === '' || isFullyQualifiedUrl(value)) {
+    if (value == null || isFullyQualifiedUrl(value)) {
       return true
     }
 
