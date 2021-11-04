@@ -1,8 +1,6 @@
 <template>
   <Collapsible
-    initially-open
-    class="
-  outline-none m-4px rounded "
+    class="outline-none m-4px rounded "
   >
     <template #target="{open}">
       <div

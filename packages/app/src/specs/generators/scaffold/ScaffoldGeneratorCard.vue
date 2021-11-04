@@ -8,7 +8,7 @@
 </template>
 
 <script lang="ts" setup>
-import CreateSpecCard from '../CreateSpecCard.vue'
+import CreateSpecCard from '../../CreateSpecCard.vue'
 import { useI18n } from '@cy/i18n'
 import BoxOpenIcon from '~icons/cy/box-open_x48'
 

@@ -10,7 +10,7 @@
 </template>
 
 <script lang="ts" setup>
-import CreateSpecCard from '../CreateSpecCard.vue'
+import CreateSpecCard from '../../CreateSpecCard.vue'
 import { useI18n } from '@cy/i18n'
 import BookCodeIcon from '~icons/cy/book-code_x48'
 
