@@ -15,7 +15,13 @@ describe('<CreateSpecModal />', () => {
 
     cy.mount(() => (<div>
       <CreateSpecModal
-        gql={{ activeTestingType: 'component' }}
+        gql={{
+          activeProject: {
+            id: 'id',
+            codeGenCandidates: [],
+          },
+          activeTestingType: 'component',
+        }}
         show={show.value}
         onClose={() => show.value = false}
         currentGenerator={ComponentGenerator}/>
@@ -58,7 +64,13 @@ describe('playground', () => {
       <button data-testid="trigger" onClick={() => show.value = true}>Open Modal</button>
       <br/>
       <CreateSpecModal
-        gql={{ activeTestingType: 'component' }}
+        gql={{
+          activeProject: {
+            id: 'id',
+            codeGenCandidates: [],
+          },
+          activeTestingType: 'component',
+        }}
         show={show.value}
         onClose={() => show.value = false}
         currentGenerator={ComponentGenerator}/>

@@ -36,7 +36,6 @@
         "
       >
         <Button
-          size="lg"
           :prefix-icon="TestResultsIcon"
           prefix-icon-class="w-16px h-16px icon-dark-white"
         >
@@ -44,7 +43,6 @@
         </Button>
       </router-link>
       <Button
-        size="lg"
         :prefix-icon="PlusButtonIcon"
         prefix-icon-class="w-16px h-16px icon-dark-gray-500"
         variant="outline"
