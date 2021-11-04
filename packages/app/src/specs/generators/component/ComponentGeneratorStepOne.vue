@@ -59,9 +59,9 @@ import { useVModels, whenever } from '@vueuse/core'
 import { useI18n } from '@cy/i18n'
 import FileChooser from '../FileChooser.vue'
 import GeneratorSuccess from '../GeneratorSuccess.vue'
-import { computed, ref } from 'vue'
+import { computed, ref, ComputedRef } from 'vue'
 import { gql, useQuery, useMutation } from '@urql/vue'
-import { ComponentGeneratorStepOneDocument, ComponentGeneratorStepOne_GenerateSpecDocument } from '../../../generated/graphql'
+import { ComponentGeneratorStepOneDocument, ComponentGeneratorStepOne_GenerateSpecDocument, FileChooserFragment } from '../../../generated/graphql'
 import StandardModalFooter from '@cy/components/StandardModalFooter.vue'
 import Button from '@cy/components/Button.vue'
 import PlusButtonIcon from '~icons/cy/add-large_x16.svg'
@@ -131,8 +131,8 @@ const query = useQuery({
   variables: { glob },
 })
 
-const allFiles = computed(() => {
-  if (query.data.value) {
+const allFiles = computed((): any => {
+  if (query.data.value?.app?.activeProject?.codeGenCandidates) {
     return query.data.value.app?.activeProject?.codeGenCandidates
   }
 
