@@ -54,12 +54,14 @@
           :placeholder="t('components.fileSearch.byFilenameInput')"
         />
       </div>
-      <FileMatchIndicator
-        class="truncate"
-        data-testid="file-match-indicator"
-      >
-        {{ indicatorText }}
-      </FileMatchIndicator>
+      <slot name="matches">
+        <FileMatchIndicator
+          class="truncate"
+          data-testid="file-match-indicator"
+        >
+          {{ indicatorText }}
+        </FileMatchIndicator>
+      </slot>
     </div>
 
     <div

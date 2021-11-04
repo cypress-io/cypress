@@ -1,5 +1,6 @@
 <template>
   <StandardModal
+    class="transition duration-200 transition-all"
     :click-outside="false"
     variant="bare"
     :title="title"
@@ -13,19 +14,25 @@
         class="bg-gray-900 opacity-[0.97]"
       />
     </template>
-    <component
-      :is="generator.entry"
-      v-if="generator"
-      :key="generator.id"
-      v-model:title="title"
-      :code-gen-glob="props.gql.activeProject?.codeGenGlob"
-    />
-
-    <CreateSpecCards
-      v-else
-      :gql="props.gql"
-      @select="currentGeneratorId = $event"
-    />
+    <div class="min-h-280px sm:min-w-640px flex flex-col">
+      <component
+        :is="generator.entry"
+        v-if="generator"
+        :key="generator.id"
+        v-model:title="title"
+        :code-gen-glob="props.gql.activeProject?.codeGenGlob"
+        @restart="currentGeneratorId = undefined"
+      />
+      <div
+        v-else
+        class="flex-grow flex items-center self-center"
+      >
+        <CreateSpecCards
+          :gql="props.gql"
+          @select="currentGeneratorId = $event"
+        />
+      </div>
+    </div>
   </StandardModal>
 </template>
 
@@ -38,9 +45,10 @@ import StandardModalFooter from '@cy/components/StandardModalFooter.vue'
 import CreateSpecCardModal from './CreateSpecCardModal.vue'
 import CreateSpecCards from './CreateSpecCards.vue'
 import { ref, computed, Ref } from 'vue'
-import { useModalStore } from '../store'
 import type { CreateSpecModalFragment } from '../generated/graphql'
 import { gql } from '@urql/vue'
+import { not, whenever } from '@vueuse/core'
+import { useI18n } from '@cy/i18n'
 
 const props = defineProps<{
   initialGenerator?: GeneratorId,
@@ -63,7 +71,8 @@ fragment CreateSpecModal on App {
 
 const currentGeneratorId: Ref<GeneratorId | undefined> = ref(props.initialGenerator)
 
-const title = ref('')
+const { t } = useI18n()
+const title = ref(t('createSpec.newSpecModalTitle'))
 
 const generator = computed(() => {
   if (currentGeneratorId.value) return generators[currentGeneratorId.value]
@@ -71,4 +80,7 @@ const generator = computed(() => {
   return null
 })
 
+whenever(not(generator), () => {
+  title.value = t('createSpec.newSpecModalTitle')
+})
 </script>

@@ -99,7 +99,7 @@ export { highlighter, inheritAttrs }
 
 <script lang="ts" setup>
 import { computed, onBeforeMount, ref } from 'vue'
-import CopyButton from '@cy/components/CopyButton.vue'
+import Button from '@cy/components/Button.vue'
 // eslint-disable-next-line no-duplicate-imports
 import type { Ref } from 'vue'
 import { useClipboard } from '@vueuse/core'

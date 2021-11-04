@@ -11,13 +11,11 @@
   >
     <component
       :is="icon"
-      class="mx-auto my-0 w-48px h-48px icon-dark-indigo-400
-    icon-light-indigo-100 icon-light-secondary-jade-200
-    icon-dark-secondary-jade-400"
-      :class="{
+      class="mx-auto my-0 w-48px h-48px"
+      :class="disabled ?
         'icon-dark-gray-600 icon-light-gray-100 icon-dark-secondary-gray-600 icon-light-secondary-gray-300':
-          disabled
-      }"
+        'icon-dark-indigo-400 icon-light-indigo-100    icon-light-secondary-jade-200 icon-dark-secondary-jade-400'
+      "
       data-testid="create-spec-card-icon"
     />
     <h2

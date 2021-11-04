@@ -9,7 +9,7 @@
   />
   <div
     v-if="props.gql.activeTestingType"
-    class="overflow-scroll text-center max-w-600px mx-auto mt-80px"
+    class="overflow-scroll text-center max-w-600px mx-auto py-40px"
   >
     <h1
       data-testid="create-spec-page-title"
@@ -29,7 +29,7 @@
       @select="choose"
     />
 
-    <div class="text-center mt-32px">
+    <div class="text-center border-t-1 pt-32px mt-32px">
       <p
         data-testid="no-specs-message"
         class="leading-normal text-gray-600 text-16px mb-16px"

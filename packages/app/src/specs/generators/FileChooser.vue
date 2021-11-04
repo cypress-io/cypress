@@ -22,20 +22,31 @@
   flex-col"
   >
     <FileMatch
+      ref="fileMatchRef"
       v-model:pattern="filePathSearch"
       v-model:extensionPattern="localExtensionPattern"
       class="sticky z-10 top-0px pt-24px pb-12px bg-white"
       :matches="matches"
-    />
+    >
+      <template
+        v-if="loading"
+        #matches
+      >
+        <i-cy-loading_x16 class="h-24px w-24px mr-10px animate-spin" />
+      </template>
+    </FileMatch>
 
     <div
       v-show="loading"
       data-testid="loading"
     >
+      <!-- TODO(ryan): Get mocks for a loading state here -->
       Loading
     </div>
     <FileList
       v-show="!loading"
+      :style="{ paddingTop: `${fileMatchHeight + 36}px` }"
+      class="absolute left-24px right-24px"
       :files="filteredFiles"
       :search="filePathSearch"
       @selectFile="selectFile"
@@ -55,7 +66,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { debouncedWatch, useDebounce } from '@vueuse/core'
+import { debouncedWatch, useDebounce, useElementSize } from '@vueuse/core'
 import { useI18n } from '@cy/i18n'
 
 // eslint-disable-next-line no-duplicate-imports
@@ -93,6 +104,15 @@ const selectFile = (file) => {
   emits('selectFile', file)
 }
 
+///*------- Styling -------*/
+
+// For the FileList to be searchable without jumping to the top of the
+// FileMatcher's top when focused, we need to use some manual layout.
+// If we concede on position: sticky for the FileMatcher or on making the
+// FileList accessible, we could position the FileList relatively.
+const fileMatchRef = ref(null)
+const { height: fileMatchHeight } = useElementSize(fileMatchRef)
+
 ///*------- Debounce -------*/
 
 const debounce = 200
@@ -127,7 +147,7 @@ const noResults = computed(() => {
     message: filePathSearch.value ? t('noResults.defaultMessage') : t('components.fileSearch.noMatchesForExtension'),
     clear: filePathSearch.value ?
       () => filePathSearch.value = '' :
-      () => localExtensionPattern.value = initialExtensionPattern
+      () => localExtensionPattern.value = initialExtensionPattern,
   }
 })
 

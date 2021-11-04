@@ -44,6 +44,7 @@
     "disabled": "Disabled"
   },
   "createSpec": {
+    "newSpecModalTitle": "Create a new spec",
     "successPage": {
       "header": "Great! The spec was successfully added",
       "runSpecButton": "Okay, run the spec",

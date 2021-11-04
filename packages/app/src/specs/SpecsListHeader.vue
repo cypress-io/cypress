@@ -15,7 +15,7 @@
         data-testid="new-spec-button"
         :prefix-icon="IconAdd"
         prefix-icon-class="justify-center text-lg text-center icon-light-transparent icon-dark-white"
-        class="min-w-127px text-size-16px focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500"
+        class="min-w-127px"
         @click="$emit('newSpec')"
       >
         {{ t('specPage.newSpecButton') }}

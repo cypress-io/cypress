@@ -1,27 +1,71 @@
 <template>
-  <div>
+  <div class="flex-grow">
+    <div
+      v-if="mutation.fetching.value"
+      class="inline-flex items-center w-full justify-center mt-48px"
+    >
+      <i-cy-loading_x16 class="animate-spin w-48px h-48px mr-12px" />
+      <p class="text-lg">
+        Loading
+      </p>
+    </div>
     <FileChooser
+      v-else-if="!result"
       v-model:extensionPattern="extensionPattern"
       :files="allFiles"
       :loading="query.fetching.value"
       @selectFile="makeSpec"
     />
     <GeneratorSuccess
-      v-if="result"
+      v-else
       :file="result"
     />
-    <div class="rounded-b w-full h-24px" />
+  </div>
+  <div>
+    <div
+      v-if="!result"
+      class="rounded-b w-full h-24px"
+    />
+    <StandardModalFooter
+      v-else
+      class="h-72px flex gap-16px"
+    >
+      <router-link
+        class="outline-none"
+        :to="{ path: 'runner', query: { file: result.spec.relative } }
+        "
+      >
+        <Button
+          :prefix-icon="TestResultsIcon"
+          prefix-icon-class="w-16px h-16px icon-dark-white"
+        >
+          {{ t('createSpec.successPage.runSpecButton') }}
+        </Button>
+      </router-link>
+      <Button
+        :prefix-icon="PlusButtonIcon"
+        prefix-icon-class="w-16px h-16px icon-dark-gray-500"
+        variant="outline"
+        @click="$emit('restart')"
+      >
+        {{ t('createSpec.successPage.createAnotherSpecButton') }}
+      </Button>
+    </StandardModalFooter>
   </div>
 </template>
 
 <script setup lang="ts">
-import { useVModels } from '@vueuse/core'
+import { useVModels, whenever } from '@vueuse/core'
 import { useI18n } from '@cy/i18n'
 import FileChooser from '../FileChooser.vue'
 import GeneratorSuccess from '../GeneratorSuccess.vue'
 import { computed, ref } from 'vue'
 import { gql, useQuery, useMutation } from '@urql/vue'
 import { ComponentGeneratorStepOneDocument, ComponentGeneratorStepOne_GenerateSpecDocument } from '../../../generated/graphql'
+import StandardModalFooter from '@cy/components/StandardModalFooter.vue'
+import Button from '@cy/components/Button.vue'
+import PlusButtonIcon from '~icons/cy/add-large_x16.svg'
+import TestResultsIcon from '~icons/cy/test-results_x24.svg'
 
 const props = defineProps<{
   title?: string,
@@ -33,6 +77,7 @@ const { t } = useI18n()
 const emits = defineEmits<{
   (event: 'update:title', value: string): void,
   (event: 'update:description', value: string): void
+  (event: 'restart'): void
 }>()
 
 const { title } = useVModels(props, emits)
@@ -95,6 +140,11 @@ const allFiles = computed(() => {
 })
 
 const result = ref()
+
+whenever(result, () => {
+  title.value = t('createSpec.successPage.header')
+})
+
 const makeSpec = async (file) => {
   const { data } = await mutation.executeMutation({
     codeGenCandidate: file.relative,

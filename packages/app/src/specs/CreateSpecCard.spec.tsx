@@ -42,14 +42,15 @@ describe('<CreateSpecCard />', { viewportWidth: 400, viewportHeight: 400 }, () =
   // TODO: Brian says this can be fixed once the driver is hooked up properly
   xit('emits click events bound to it', () => {
     const onClickSpy = cy.spy().as('onClickSpy')
+
     cy.mount(() => (<div class="m-12">
-      <CreateSpecCard icon={ DocumentCode } header={ header } description={ shortDescription } onClick={ onClickSpy } />
+      <CreateSpecCard icon={DocumentCode} header={header} description={shortDescription} onClick={onClickSpy} />
     </div>))
-      .get(specCardSelector)
-      .focus()
-      .click()
-      .type('{enter}')
-      .type(' ')
-      // .get('@onClickSpy').should('have.been.calledThrice')
+    .get(specCardSelector)
+    .focus()
+    .click()
+    .type('{enter}')
+    .type(' ')
+    // .get('@onClickSpy').should('have.been.calledThrice')
   })
 })

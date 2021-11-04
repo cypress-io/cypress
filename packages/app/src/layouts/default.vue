@@ -35,7 +35,6 @@
       <SidebarNavigation class="h-full" />
     </nav>
   </div>
-  <ModalManager v-if="modalStore.activeModalId" />
 </template>
 
 <script lang="ts" setup>
@@ -43,11 +42,8 @@ import SidebarNavigation from '../navigation/SidebarNavigation.vue'
 import HeaderBar from '@cy/gql-components/HeaderBar.vue'
 import { useRoute } from 'vue-router'
 import { computed } from 'vue'
+import { useMainStore } from '../store'
 
-import ModalManager from '../modals/ModalManager.vue'
-import { useModalStore, useMainStore } from '../store'
-
-const modalStore = useModalStore()
 const mainStore = useMainStore()
 const currentRoute = useRoute()
 

@@ -1,8 +1,12 @@
 <template>
-  <Collapsible class="border-1 hocus-default cursor-pointer  border-gray-50 rounded ">
+  <Collapsible
+    initially-open
+    class="
+  outline-none m-4px rounded "
+  >
     <template #target="{open}">
       <div
-        class="gap-8px px-24px py-16px flex items-center"
+        class="gap-8px px-24px py-16px flex items-center cursor-pointer"
         data-testid="file-row"
       >
         <i-cy-status-passed-solid_x16 />
@@ -15,7 +19,7 @@
         </div>
       </div>
     </template>
-    <div class="rounded border-1 mx-24px mb-16px overflow-hidden">
+    <div class="rounded border-1 mx-24px mb-24px overflow-hidden">
       <ShikiHighlight
         :code="file.content"
         line-numbers
@@ -39,6 +43,7 @@ fragment GeneratorSuccess on GeneratedSpec {
     fileName
     fileExtension
     baseName
+    relative
     id
   } 
 }

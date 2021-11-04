@@ -1,6 +1,10 @@
 <template>
-  <div class="h-full">
+  <div
+    class="h-full outline-none"
+    tabindex="0"
+  >
     <ul v-if="files.length">
+      <!-- TODO(jess): up arrow and down arrow navigation -->
       <li
         v-for="file in files"
         :key="file?.id"

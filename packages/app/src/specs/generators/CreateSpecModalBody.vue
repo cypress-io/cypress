@@ -1,5 +1,8 @@
 <template>
-  <StandardModalBody variant="bare" class="w-640px h-444px overflow-scroll">
+  <StandardModalBody
+    variant="bare"
+    class="w-640px h-444px overflow-scroll"
+  >
     <slot />
   </StandardModalBody>
 </template>
