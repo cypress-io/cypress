@@ -9,7 +9,11 @@
       #prefix
     >
       <i-cy-copy-clipboard_x16
-        class="icon-dark-indigo-500 w-16px h-16px"
+        class="w-16px h-16px"
+        :class="{
+          'icon-dark-indigo-500': variant === 'tertiary',
+          'icon-dark-gray-500': variant === 'outline'
+        }"
       />
     </template>
     <TransitionQuickFade mode="out-in">
