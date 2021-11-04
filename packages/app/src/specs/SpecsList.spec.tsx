@@ -35,6 +35,8 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
   it('renders specs', () => {
     cy.get(rowSelector).first()
     .should(($node) => hasSpecText($node, specs[0]))
+
+    cy.percySnapshot()
   })
 
   it('filters the specs', () => {

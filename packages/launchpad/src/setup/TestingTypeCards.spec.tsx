@@ -9,8 +9,8 @@ describe('TestingTypeCards', () => {
     cy.mountFragment(TestingTypeCardsFragmentDoc, {
       onResult: (result, ctx) => {
         if (result.app.currentProject) {
-          result.app.currentProject.isFirstTimeCT = true
-          result.app.currentProject.isFirstTimeE2E = true
+          result.app.currentProject.isCTConfigured = false
+          result.app.currentProject.isE2EConfigured = false
         }
       },
       render: (gqlVal) => {
@@ -28,8 +28,8 @@ describe('TestingTypeCards', () => {
     cy.mountFragment(TestingTypeCardsFragmentDoc, {
       onResult: (result, ctx) => {
         if (result.app.currentProject) {
-          result.app.currentProject.isFirstTimeCT = false
-          result.app.currentProject.isFirstTimeE2E = false
+          result.app.currentProject.isCTConfigured = true
+          result.app.currentProject.isE2EConfigured = true
         }
       },
       render: (gqlVal) => {
@@ -45,8 +45,8 @@ describe('TestingTypeCards', () => {
     cy.mountFragment(TestingTypeCardsFragmentDoc, {
       onResult: (result, ctx) => {
         if (result.app.currentProject) {
-          result.app.currentProject.isFirstTimeCT = false
-          result.app.currentProject.isFirstTimeE2E = true
+          result.app.currentProject.isCTConfigured = true
+          result.app.currentProject.isE2EConfigured = false
         }
       },
       render: (gqlVal) => {

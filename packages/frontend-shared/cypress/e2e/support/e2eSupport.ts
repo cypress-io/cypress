@@ -29,7 +29,7 @@ export interface RemoteGraphQLInterceptPayload {
   result: ExecutionResult
 }
 
-export type RemoteGraphQLInterceptor = (obj: RemoteGraphQLInterceptPayload) => ExecutionResult
+export type RemoteGraphQLInterceptor = (obj: RemoteGraphQLInterceptPayload) => ExecutionResult | Promise<ExecutionResult>
 
 declare global {
   namespace Cypress {
@@ -81,7 +81,7 @@ function setupE2E (projectName?: ProjectFixture) {
   }
 
   if (projectName) {
-    cy.task('setupE2E', projectName, { log: false })
+    cy.task('scaffoldProject', projectName, { log: false })
   }
 
   return cy.withCtx(async (ctx, o) => {
@@ -127,7 +127,17 @@ function visitApp (href?: string) {
     throw new Error(`Missing serverPort - did you forget to call cy.initializeApp(...) ?`)
   }
 
-  return cy.visit(`dist-app/index.html?gqlPort=${e2e_gqlPort}&serverPort=${e2e_serverPort}${href || ''}`)
+  cy.withCtx(async (ctx) => {
+    return JSON.stringify(ctx.html.fetchAppInitialData())
+  }, { log: false }).then((ssrData) => {
+    return cy.visit(`dist-app/index.html?serverPort=${e2e_serverPort}${href || ''}`, {
+      onBeforeLoad (win) {
+        // Simulates the inject SSR data when we're loading the page normally in the app
+        win.__CYPRESS_INITIAL_DATA__ = JSON.parse(ssrData)
+        win.__CYPRESS_GRAPHQL_PORT__ = e2e_gqlPort
+      },
+    })
+  })
 }
 
 function visitLaunchpad (hash?: string) {
@@ -142,7 +152,9 @@ function visitLaunchpad (hash?: string) {
 
 const pageLoadId = `uid${Math.random()}`
 
-function withCtx<T extends Partial<WithCtxOptions>> (fn: (ctx: DataContext, o: T & WithCtxInjected) => any, opts: T = {} as T): Cypress.Chainable {
+type UnwrapPromise<R> = R extends PromiseLike<infer U> ? U : R
+
+function withCtx<T extends Partial<WithCtxOptions>, R> (fn: (ctx: DataContext, o: T & WithCtxInjected) => R, opts: T = {} as T): Cypress.Chainable<UnwrapPromise<R>> {
   const _log = opts.log === false ? { end () {} } : Cypress.log({
     name: 'withCtx',
     message: '(view in console)',
@@ -155,13 +167,15 @@ function withCtx<T extends Partial<WithCtxOptions>> (fn: (ctx: DataContext, o: T
 
   const { log, timeout, ...rest } = opts
 
-  return cy.task('withCtx', {
+  return cy.task<UnwrapPromise<R>>('withCtx', {
     fn: fn.toString(),
     options: rest,
     // @ts-expect-error
     activeTestId: `${pageLoadId}-${Cypress.mocha.getRunner().test.id ?? Cypress.currentTest.title}`,
-  }, { timeout: timeout ?? Cypress.env('e2e_isDebugging') ? NO_TIMEOUT : FOUR_SECONDS, log }).then(() => {
+  }, { timeout: timeout ?? Cypress.env('e2e_isDebugging') ? NO_TIMEOUT : FOUR_SECONDS, log }).then((result) => {
     _log.end()
+
+    return result
   })
 }
 

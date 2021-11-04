@@ -14,7 +14,7 @@
         v-for="spec in filteredSpecs"
         :key="spec.node.id"
         class="text-left"
-        :to="{ path: 'spec', query: { file: spec.node.relative } }"
+        :to="{ path: 'runner', query: { file: spec.node.relative } }"
       >
         <SpecsListRow :gql="spec" />
       </RouterLink>

@@ -2,6 +2,8 @@ export * from './cache'
 
 export * from './constants'
 
+export * from './driver'
+
 export * from './spec'
 
 export type {

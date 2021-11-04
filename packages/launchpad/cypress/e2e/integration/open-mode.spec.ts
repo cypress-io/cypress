@@ -6,14 +6,65 @@ describe('Launchpad: Open Mode', () => {
     cy.visitLaunchpad()
   })
 
-  it('Shows the open page', () => {
+  it('shows Add Project when no projects have been added', () => {
     cy.get('h1').should('contain', defaultMessages.globalPage.empty.title)
+  })
+
+  it('shows projects when projects have been added', () => {
+    cy.get('h1').should('contain', defaultMessages.globalPage.empty.title)
+  })
+
+  it('shows the projects page when a project is not specified', () => {
+    cy.task('scaffoldProject', 'todos').then((projectPath) => {
+      cy.withCtx(async (ctx, o) => {
+        ctx.actions.project.addProject({ path: o.projectPath as string, open: false })
+      }, { projectPath })
+    })
+
+    cy.contains(defaultMessages.globalPage.recentProjectsHeader)
+  })
+
+  it('goes directly to e2e tests when launched with --e2e', () => {
+    cy.setupE2E('todos')
+
+    cy.withCtx(async (ctx) => {
+      // Though the data context is previously initialized,
+      // we re-initialize it here so that it reflects the new launchArg
+      ctx.launchArgs.testingType = 'e2e'
+      await ctx.initializeData()
+    })
+
+    cy.withCtx(async (ctx, o) => {
+      ctx.emitter.toLaunchpad()
+    })
+
+    // e2e testing is configured for the todo project, so we don't expect an error.
+    cy.get('h1').should('contain', 'Configuration Files')
+  })
+
+  it('goes directly to component tests when launched with --component', () => {
+    cy.setupE2E('todos')
+
+    cy.withCtx(async (ctx) => {
+      // Though the data context is previously initialized,
+      // we re-initialize it here so that it reflects the new launchArg
+      ctx.launchArgs.testingType = 'component'
+      await ctx.initializeData()
+    })
+
+    cy.withCtx(async (ctx, o) => {
+      ctx.emitter.toLaunchpad()
+    })
+
+    // Component testing is not configured for the todo project
+    cy.get('h1').should('contain', 'Cypress Configuration Error')
   })
 
   describe('when there is a list of projects', () => {
     it('goes to an active project if one is added', () => {
+      cy.setupE2E('todos')
+
       cy.withCtx(async (ctx, o) => {
-        await ctx.actions.project.setActiveProject(o.projectDir('todos'))
         ctx.emitter.toLaunchpad()
       })
 

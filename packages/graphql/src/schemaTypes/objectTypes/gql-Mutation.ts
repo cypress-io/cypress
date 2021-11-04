@@ -219,11 +219,13 @@ export const mutation = mutationType({
         try {
           await ctx.actions.wizard.initializeOpenProject()
           ctx.coreData.baseError = null
-        } catch (error: any) {
+        } catch (error) {
+          const e = error as Error
+
           ctx.coreData.baseError = {
             title: 'Cypress Configuration Error',
-            message: error.message,
-            stack: error.stack,
+            message: e.message,
+            stack: e.stack,
           }
         }
       },
@@ -268,7 +270,18 @@ export const mutation = mutationType({
         path: nonNull(stringArg()),
       },
       resolve: async (_, args, ctx) => {
-        await ctx.actions.project.setActiveProject(args.path)
+        try {
+          await ctx.actions.project.setActiveProject(args.path)
+          ctx.coreData.baseError = null
+        } catch (error) {
+          const e = error as Error
+
+          ctx.coreData.baseError = {
+            title: 'Cypress Configuration Error',
+            message: e.message,
+            stack: e.stack,
+          }
+        }
       },
     })
 
@@ -291,9 +304,7 @@ export const mutation = mutationType({
       description: 'Save the projects preferences to cache',
       args: {
         testingType: nonNull(TestingTypeEnum),
-        browserId: nonNull(idArg({
-          description: 'ID of the browser that we want to set',
-        })),
+        browserPath: nonNull(stringArg()),
       },
       async resolve (_, args, ctx) {
         await ctx.actions.project.setProjectPreferences(args)
@@ -302,23 +313,41 @@ export const mutation = mutationType({
       },
     })
 
+    t.nonNull.field('resetWizard', {
+      type: 'Boolean',
+      description: 'Reset the Wizard to the starting position',
+      resolve: (_, args, ctx) => {
+        ctx.actions.wizard.resetWizard()
+        ctx.actions.electron.refreshBrowserWindow()
+
+        return true
+      },
+    })
+
     t.nonNull.field('hideBrowserWindow', {
-      type: 'App',
+      type: 'Boolean',
       description: 'Hides the launchpad windows',
       resolve: (_, args, ctx) => {
         ctx.actions.electron.hideBrowserWindow()
 
-        return ctx.appData
+        return true
       },
     })
 
-    t.nonNull.field('showBrowserWindow', {
-      type: 'App',
+    t.nonNull.field('reconfigureProject', {
+      type: 'Boolean',
       description: 'show the launchpad windows',
       resolve: (_, args, ctx) => {
-        ctx.actions.electron.showBrowserWindow()
+        ctx.actions.project.reconfigureProject()
 
-        return ctx.appData
+        return true
+      },
+    })
+
+    t.liveMutation('showElectronOnAppExit', {
+      description: 'show the launchpad at the browser picker step',
+      resolve: (_, args, ctx) => {
+        ctx.actions.electron.showElectronOnAppExit()
       },
     })
   },

@@ -33,17 +33,17 @@ describe('Button', () => {
     const { Primary } = composedStories
     mount(<Primary />)
   })
-  
+
   it('should render Secondary', () => {
     const { Secondary } = composedStories
     mount(<Secondary />)
   })
-  
+
   it('should render Large', () => {
     const { Large } = composedStories
     mount(<Large />)
   })
-  
+
   it('should render Small', () => {
     const { Small } = composedStories
     mount(<Small />)
@@ -54,7 +54,7 @@ import Button from "./Button"
 
 describe('<Button />', () => {
   it('renders', () => {
-    see: https://reactjs.org/docs/test-utils.html
+    // see: https://reactjs.org/docs/test-utils.html
     mount(<Button />)
   })
 })`,

@@ -11,8 +11,8 @@ export const stubMutation: MaybeResolver<Mutation> = {
       id: `project:${args.path}`,
       title: path.basename(args.path),
       projectRoot: args.path,
-      isFirstTimeCT: true,
-      isFirstTimeE2E: true,
+      isCTConfigured: true,
+      isE2EConfigured: true,
       __typename: 'Project',
       config,
       codeGenGlob: '/**/*.vue',
@@ -64,12 +64,9 @@ export const stubMutation: MaybeResolver<Mutation> = {
     return true
   },
   hideBrowserWindow (source, args, ctx) {
-    return ctx.app
+    return true
   },
   setProjectPreferences (source, args, ctx) {
-    return ctx.app
-  },
-  showBrowserWindow (source, args, ctx) {
     return ctx.app
   },
   codeGenSpec (source, args, ctx) {
@@ -92,6 +89,12 @@ export const stubMutation: MaybeResolver<Mutation> = {
       id: 'U3BlYzovVXNlcnMvbGFjaGxhbi9jb2RlL3dvcmsvY3lwcmVzczUvcGFja2FnZXMvYXBwL3NyYy9CYXNpYy5zcGVjLnRzeA==',
     }
 
+    return true
+  },
+  reconfigureProject (src, args, ctx) {
+    return true
+  },
+  resetWizard (src, args, ctx) {
     return true
   },
 }

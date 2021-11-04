@@ -1,6 +1,6 @@
 <template>
   <div
-    class="px-6 py-15px border-b border-b-gray-100 mb-24px bg-white"
+    class="px-6 py-15px border-b border-b-gray-100 bg-white"
     data-testid="header-bar"
   >
     <div class="flex items-center justify-between">

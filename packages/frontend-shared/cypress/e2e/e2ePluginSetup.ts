@@ -9,7 +9,7 @@ import sinon from 'sinon'
 import rimraf from 'rimraf'
 import util from 'util'
 import fs from 'fs'
-import { buildSchema, execute, parse } from 'graphql'
+import { buildSchema, execute, GraphQLError, parse } from 'graphql'
 import { Response } from 'cross-fetch'
 
 import { CloudRunQuery } from '../support/mock-graphql/stubgql-CloudTypes'
@@ -60,10 +60,10 @@ export async function e2ePluginSetup (projectRoot: string, on: Cypress.PluginEve
 
       return null
     },
-    setupE2E (projectName: string) {
+    scaffoldProject (projectName: string) {
       Fixtures.scaffoldProject(projectName)
 
-      return null
+      return Fixtures.projectPath(projectName)
     },
     async withCtx (obj: WithCtxObj) {
       // Ensure we spin up a completely isolated server/state for each test
@@ -74,7 +74,9 @@ export async function e2ePluginSetup (projectRoot: string, on: Cypress.PluginEve
         testState = {};
         ({ serverPortPromise, ctx } = runInternalServer({
           projectRoot: null,
-        }) as {ctx: DataContext, serverPortPromise: Promise<number>})
+        }, {
+          loadCachedProjects: false,
+        }) as {ctx: DataContext, serverPortPromise: Promise<number> })
 
         const fetchApi = ctx.util.fetch
 
@@ -100,13 +102,19 @@ export async function e2ePluginSetup (projectRoot: string, on: Cypress.PluginEve
             })
 
             if (remoteGraphQLIntercept) {
-              result = remoteGraphQLIntercept({
-                operationName,
-                variables,
-                document,
-                query,
-                result,
-              })
+              try {
+                result = await remoteGraphQLIntercept({
+                  operationName,
+                  variables,
+                  document,
+                  query,
+                  result,
+                })
+              } catch (e) {
+                const err = e as Error
+
+                result = { data: null, extensions: [], errors: [new GraphQLError(err.message, undefined, undefined, undefined, undefined, err)] }
+              }
             }
 
             return new Response(JSON.stringify(result), { status: 200 })

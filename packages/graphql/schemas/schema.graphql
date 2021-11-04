@@ -25,6 +25,9 @@ type App {
   """Whether the app is in global mode or not"""
   isInGlobalMode: Boolean!
 
+  """Whether we are currently refreshing the browsers list"""
+  isRefreshingBrowsers: Boolean!
+
   """All known projects for the app"""
   projects: [Project!]!
 }
@@ -374,7 +377,7 @@ type Mutation {
   devRelaunch(action: DevRelaunchAction!): Boolean
 
   """Hides the launchpad windows"""
-  hideBrowserWindow: App!
+  hideBrowserWindow: Boolean!
 
   """
   Initializes open_project global singleton to manager current project state
@@ -404,8 +407,14 @@ type Mutation {
   """Set the current navigation item"""
   navigationMenuSetItem(type: NavItem!): Boolean
 
+  """show the launchpad windows"""
+  reconfigureProject: Boolean!
+
   """Remove project from projects array and cache"""
   removeProject(path: String!): Boolean
+
+  """Reset the Wizard to the starting position"""
+  resetWizard: Boolean!
 
   """Set active project to run tests on"""
   setActiveProject(path: String!): Boolean
@@ -414,14 +423,10 @@ type Mutation {
   setCurrentSpec(id: ID!): Boolean
 
   """Save the projects preferences to cache"""
-  setProjectPreferences(
-    """ID of the browser that we want to set"""
-    browserId: ID!
-    testingType: TestingTypeEnum!
-  ): App!
+  setProjectPreferences(browserPath: String!, testingType: TestingTypeEnum!): App!
 
-  """show the launchpad windows"""
-  showBrowserWindow: App!
+  """show the launchpad at the browser picker step"""
+  showElectronOnAppExit: Boolean
 
   """Installs the dependencies for the component testing step"""
   wizardInstallDependencies: Wizard
@@ -512,7 +517,7 @@ enum PluginsState {
   uninitialized
 }
 
-"""A Cypress Project is represented by a cypress.json file"""
+"""A Cypress Project is represented by a cypress.config.{ts|js} file"""
 type Project implements Node {
   """The remote associated project from Cypress Cloud"""
   cloudProject: CloudProject
@@ -539,6 +544,9 @@ type Project implements Node {
   """Project configuration"""
   config: JSON!
 
+  """Config File Path"""
+  configFilePath: String
+
   """Currently selected spec"""
   currentSpec: Spec
   generatedSpec: GeneratedSpec
@@ -547,10 +555,10 @@ type Project implements Node {
   id: ID!
 
   """Whether the user configured this project to use Component Testing"""
-  isFirstTimeCT: Boolean!
+  isCTConfigured: Boolean!
 
   """Whether the user configured this project to use e2e Testing"""
-  isFirstTimeE2E: Boolean!
+  isE2EConfigured: Boolean!
 
   """Cached preferences for this project"""
   preferences: ProjectPreferences
@@ -580,7 +588,7 @@ type Project implements Node {
 """Preferences specific to a project"""
 type ProjectPreferences {
   """The preferred browser to launch"""
-  browserId: String
+  browserPath: String
 
   """The preferred testing type to start in"""
   testingType: String

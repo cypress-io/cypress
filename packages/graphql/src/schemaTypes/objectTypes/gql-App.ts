@@ -19,6 +19,11 @@ export const App = objectType({
       },
     })
 
+    t.nonNull.boolean('isRefreshingBrowsers', {
+      description: 'Whether we are currently refreshing the browsers list',
+      resolve: (source) => Boolean(source.refreshingBrowsers),
+    })
+
     t.list.nonNull.field('browsers', {
       type: Browser,
       description: 'Browsers found that are compatible with Cypress',

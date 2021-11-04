@@ -44,6 +44,24 @@ config:
     DateTime: string
     JSON: any  
 generates:
+  './packages/data-context/src/gen/all-operations.gen.ts':
+    config:
+      <<: *documentFilters
+      flattenGeneratedTypes: true
+    schema: 'packages/graphql/schemas/schema.graphql'
+    documents:
+      - './packages/frontend-shared/src/gql-components/**/*.vue'
+      - './packages/app/src/**/*.vue'
+      - './packages/launchpad/src/**/*.vue'
+    plugins:
+      - add:
+          content: '/* eslint-disable */'
+      - 'typescript':
+          noExport: true
+      - 'typescript-operations':
+          noExport: true
+      - 'typed-document-node'
+
   ###
   # Generates types for us to infer the correct "source types" when we mock out on the frontend
   # This ensures we have proper type checking when we're using cy.mountFragment in component tests
@@ -78,11 +96,15 @@ generates:
   # files for useQuery / useMutation, as well as types associated with the fragments
   ###
   './packages/launchpad/src/generated/graphql.ts':
-    documents: './packages/launchpad/src/**/*.vue'
+    documents: 
+      - './packages/launchpad/src/**/*.vue'
+      - './packages/frontend-shared/src/**/*.vue'
     <<: *vueOperations
 
   './packages/app/src/generated/graphql.ts':
-    documents: './packages/app/src/**/*.vue'
+    documents: 
+      - './packages/app/src/**/*.vue'
+      - './packages/frontend-shared/src/**/*.vue'
     <<: *vueOperations
 
   './packages/frontend-shared/src/generated/graphql.ts':
@@ -94,11 +116,15 @@ generates:
   # so we can actually use the document in cy.mountFragment
   ###
   './packages/launchpad/src/generated/graphql-test.ts':
-    documents: './packages/launchpad/src/**/*.vue'
+    documents: 
+      - './packages/launchpad/src/**/*.vue'
+      - './packages/frontend-shared/src/**/*.vue'
     <<: *vueTesting
 
   './packages/app/src/generated/graphql-test.ts':
-    documents: './packages/app/src/**/*.vue'
+    documents: 
+      - './packages/app/src/**/*.vue'
+      - './packages/frontend-shared/src/**/*.vue'
     <<: *vueTesting
 
   './packages/frontend-shared/src/generated/graphql-test.ts':

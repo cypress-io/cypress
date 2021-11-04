@@ -80,9 +80,6 @@ declare global {
       _: any // lodash
       CypressJQuery: any
 
-      studioRecorder: any
-      selectorPlaygroundModel: any
-
       MobX: typeof MobX
 
       /**

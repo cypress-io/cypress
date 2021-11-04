@@ -7,6 +7,7 @@ import type {
   CodegenTypeMap,
 } from '../generated/test-graphql-types.gen'
 import { MaybeResolver, testNodeId } from './clientTestUtils'
+import { CloudProjectStubs } from './stubgql-CloudTypes'
 
 export const createTestProject = (title: string): CodegenTypeMap['Project'] => {
   const snakeTitle = _.kebabCase(title)
@@ -14,8 +15,8 @@ export const createTestProject = (title: string): CodegenTypeMap['Project'] => {
   // TODO: What a mess, type this without all the hacks
   return {
     ...testNodeId('Project'),
-    isFirstTimeCT: true,
-    isFirstTimeE2E: true,
+    isCTConfigured: true,
+    isE2EConfigured: true,
     projectId: `${snakeTitle}-id`,
     title,
     projectRoot: `/usr/local/dev/projects/${snakeTitle}`,
@@ -41,6 +42,7 @@ export const createTestProject = (title: string): CodegenTypeMap['Project'] => {
       ],
     },
     config,
+    cloudProject: CloudProjectStubs.componentProject,
     codeGenGlob: '/**/*.vue',
   }
 }

@@ -5,7 +5,9 @@ import {
   errorExchange,
   fetchExchange,
   Exchange,
+  ssrExchange,
 } from '@urql/core'
+import type { SSRData } from '@urql/core/dist/types/exchanges/ssr'
 import { devtoolsExchange } from '@urql/devtools'
 import { useToast } from 'vue-toastification'
 import { client } from '@packages/socket/lib/browser'
@@ -28,8 +30,16 @@ export function makeCacheExchange () {
       Wizard: (data) => data.__typename,
       GitInfo: () => null,
       BaseError: () => null,
+      ProjectPreferences: (data) => data.__typename,
     },
   })
+}
+
+declare global {
+  interface Window {
+    __CYPRESS_INITIAL_DATA__: SSRData
+    __CYPRESS_GRAPHQL_PORT__?: string
+  }
 }
 
 export function makeUrqlClient (target: 'launchpad' | 'app'): Client {
@@ -37,12 +47,9 @@ export function makeUrqlClient (target: 'launchpad' | 'app'): Client {
 
   if (GQL_PORT_MATCH) {
     gqlPort = GQL_PORT_MATCH[1]
-  } else {
-    // @ts-ignore
+  } else if (window.__CYPRESS_GRAPHQL_PORT__) {
     gqlPort = window.__CYPRESS_GRAPHQL_PORT__
-  }
-
-  if (!gqlPort) {
+  } else {
     throw new Error(`${window.location.href} cannot be visited without a gqlPort`)
   }
 
@@ -60,8 +67,11 @@ export function makeUrqlClient (target: 'launchpad' | 'app'): Client {
     errorExchange({
       onError (error) {
         const message = `
-        GraphQL Field Path: [${error.graphQLErrors[0].path?.join(', ')}]:<br>
-        ${error.message}<br>
+        GraphQL Field Path: [${error.graphQLErrors[0].path?.join(', ')}]:
+
+        ${error.message}
+
+        ${error.stack ?? ''}
       `
 
         toast.error(message, {
@@ -74,6 +84,10 @@ export function makeUrqlClient (target: 'launchpad' | 'app'): Client {
     // https://formidable.com/open-source/urql/docs/graphcache/errors/
     makeCacheExchange(),
     namedRouteExchange,
+    ssrExchange({
+      isClient: true,
+      initialState: window.__CYPRESS_INITIAL_DATA__ ?? {},
+    }),
     // TODO(tim): add this when we want to use the socket as the GraphQL
     // transport layer for all operations
     // target === 'launchpad' ? fetchExchange : socketExchange(io),

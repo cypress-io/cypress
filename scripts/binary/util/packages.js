@@ -8,7 +8,6 @@ const retry = require('bluebird-retry')
 const la = require('lazy-ass')
 const check = require('check-more-types')
 const execa = require('execa')
-const R = require('ramda')
 const prettyMs = require('pretty-ms')
 const pluralize = require('pluralize')
 const debug = require('debug')('cypress:binary')
@@ -39,7 +38,7 @@ const createCLIExecutable = (command) => {
 
     return execa(command, args, { stdio: 'inherit', cwd, env })
     // if everything is ok, resolve with nothing
-    .then(R.always(undefined))
+    .then(() => undefined)
     .catch((result) => {
       const msg = `${commandToExecute} failed with exit code: ${result.code}`
 
@@ -168,12 +167,12 @@ const replaceLocalNpmVersions = function (basePath) {
 
         if (dependencies) {
           return Promise.all(_.map(dependencies, (version, pkg) => {
-            const parsedPkg = /(@cypress\/)(.*)/g.exec(pkg)
+            const matchedPkg = Boolean(pkg.startsWith('@cypress/') || pkg === 'create-cypress-tests')
 
-            if (parsedPkg && parsedPkg.length === 3 && version === '0.0.0-development') {
-              const pkgName = parsedPkg[2]
+            if (matchedPkg && version === '0.0.0-development') {
+              const pkgName = pkg.startsWith('@cypress/') ? pkg.split('/')[1] : pkg
 
-              json.dependencies[`@cypress/${pkgName}`] = `file:${path.join(basePath, 'npm', pkgName)}`
+              json.dependencies[pkg] = `file:${path.join(basePath, 'npm', pkgName)}`
               shouldWriteFile = true
 
               return updateNpmPackage(pkgName)

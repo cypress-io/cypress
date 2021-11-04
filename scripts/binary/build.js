@@ -10,7 +10,6 @@ const pluralize = require('pluralize')
 const execa = require('execa')
 const electron = require('@packages/electron')
 const debug = require('debug')('cypress:binary')
-const R = require('ramda')
 const la = require('lazy-ass')
 const check = require('check-more-types')
 
@@ -116,7 +115,11 @@ const buildCypressApp = function (platform, version, options = {}) {
 
     return packages.runAllBuild()
     // Promise.resolve()
-    .then(R.tap(logBuiltAllPackages))
+    .then((val) => {
+      logBuiltAllPackages(val)
+
+      return val
+    })
   }
 
   const copyPackages = function () {
@@ -343,20 +346,34 @@ require('./packages/server')\
     console.log('in build folder %s', buildFolder)
 
     return execa('ls', ['-la', buildFolder])
-    .then(R.prop('stdout'))
+    .then((val) => val.stdout)
     .then(console.log)
   }
 
   const runSmokeTests = function () {
     log('#runSmokeTests')
 
-    const run = function () {
+    const run = async function () {
       // make sure to use a longer timeout - on Mac the first
       // launch of a built application invokes gatekeeper check
       // which takes a couple of seconds
       const executablePath = meta.buildAppExecutable(platform)
 
-      return smoke.test(executablePath)
+      // Moving this package specifically to simulate a failing scenario for
+      // https://github.com/cypress-io/cypress/pull/18714
+      await fse.move(
+        path.join(process.cwd(), 'node_modules/create-cypress-tests'),
+        path.join(process.cwd(), 'node_modules/_create-cypress-tests'),
+      )
+
+      try {
+        return await smoke.test(executablePath)
+      } finally {
+        await fse.move(
+          path.join(process.cwd(), 'node_modules/_create-cypress-tests'),
+          path.join(process.cwd(), 'node_modules/create-cypress-tests'),
+        )
+      }
     }
 
     if (xvfb.isNeeded()) {
@@ -430,14 +447,16 @@ require('./packages/server')\
     }
 
     const printDiskUsage = function (sizes) {
-      const bySize = R.sortBy(R.prop('1'))
-
-      return console.log(bySize(R.toPairs(sizes)))
+      return console.log(_.sortBy(_.toPairs(sizes), 1))
     }
 
     return execa('du', args)
     .then(parseDiskUsage)
-    .then(R.tap(printDiskUsage))
+    .then((val) => {
+      printDiskUsage(val)
+
+      return val
+    })
     .then((sizes) => {
       return performanceTracking.track('test runner size', sizes)
     })

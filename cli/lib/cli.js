@@ -1,6 +1,5 @@
 // @ts-check
 const _ = require('lodash')
-const R = require('ramda')
 const commander = require('commander')
 const { stripIndent } = require('common-tags')
 const logSymbols = require('log-symbols')
@@ -107,12 +106,12 @@ const descriptions = {
   cacheSize: 'Used with the list command to show the sizes of the cached folders',
   ciBuildId: 'the unique identifier for a run on your CI provider. typically a "BUILD_ID" env var. this value is automatically detected for most CI providers',
   component: 'runs component tests',
-  config: 'sets configuration values. separate multiple values with a comma. overrides any value in cypress.json.',
-  configFile: 'path to JSON file where configuration values are set. defaults to "cypress.json". pass "false" to disable.',
+  config: 'sets configuration values. separate multiple values with a comma. overrides any value in cypress.config.{ts|js}.',
+  configFile: 'path to JSON file where configuration values are set. defaults to "cypress.config.{ts|js}". pass "false" to disable.',
   detached: 'runs Cypress application in detached mode',
   dev: 'runs cypress in development and bypasses binary check',
   e2e: 'runs end to end tests',
-  env: 'sets environment variables. separate multiple values with a comma. overrides any value in cypress.json or cypress.env.json',
+  env: 'sets environment variables. separate multiple values with a comma. overrides any value in cypress.config.{ts|js} or cypress.env.json',
   exit: 'keep the browser open after tests finish',
   forceInstall: 'force install the Cypress binary',
   global: 'force Cypress into global mode as if its globally installed',
@@ -121,7 +120,7 @@ const descriptions = {
   headless: 'hide the browser instead of running headed (default for cypress run)',
   key: 'your secret Record Key. you can omit this if you set a CYPRESS_RECORD_KEY environment variable.',
   parallel: 'enables concurrent runs and automatic load balancing of specs across multiple machines or processes',
-  port: 'runs Cypress on a specific port. overrides any value in cypress.json.',
+  port: 'runs Cypress on a specific port. overrides any value in cypress.config.{ts|js}.',
   project: 'path to the project',
   quiet: 'run quietly, using only the configured reporter',
   record: 'records the run. sends test results, screenshots and videos to your Cypress Dashboard.',
@@ -283,12 +282,17 @@ const castCypressRunOptions = (opts) => {
   // only properties that have type "string | false" in our TS definition
   // require special handling, because CLI parsing takes care of purely
   // boolean arguments
-  const result = R.evolve({
-    port: coerceAnyStringToInt,
-    configFile: coerceFalseOrString,
-  })(opts)
+  const castOpts = { ...opts }
 
-  return result
+  if (_.has(opts, 'port')) {
+    castOpts.port = coerceAnyStringToInt(opts.port)
+  }
+
+  if (_.has(opts, 'configFile')) {
+    castOpts.configFile = coerceFalseOrString(opts.configFile)
+  }
+
+  return castOpts
 }
 
 module.exports = {

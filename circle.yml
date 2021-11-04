@@ -413,6 +413,10 @@ commands:
             CYPRESS_INTERNAL_FORCE_BROWSER_RELAUNCH='true' \
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$TEST_LAUNCHPAD_RECORD_KEY \
+            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
+            PERCY_ENABLE=${PERCY_TOKEN:-0} \
+            PERCY_PARALLEL_TOTAL=-1 \
+            yarn percy exec --parallel -- -- \
             yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --record --parallel --group <<parameters.package>>-<<parameters.type>>
       - store_test_results:
           path: /tmp/cypress
@@ -516,13 +520,17 @@ commands:
     steps:
       - run: yarn verify:mocha:results <<parameters.expectedResultCount>>
 
-  clone-repo-and-checkout-release-branch:
+  clone-repo-and-checkout-branch:
     description: |
       Clones an external repo and then checks out the branch that matches the next version otherwise uses 'master' branch.
     parameters:
       repo:
         description: "Name of the github repo to clone like: cypress-example-kitchensink"
         type: string
+      pull_request_id:
+        description: Pull request number to check out before installing and testing
+        type: integer
+        default: 0
     steps:
       - restore_cached_binary
       - run:
@@ -530,6 +538,16 @@ commands:
           command: |
             git clone --depth 1 --no-single-branch https://github.com/cypress-io/<<parameters.repo>>.git /tmp/<<parameters.repo>>
             cd /tmp/<<parameters.repo>> && (git checkout $(node ./scripts/get-next-version) || true)
+      - when:
+            condition: <<parameters.pull_request_id>>
+            steps:
+              - run:
+                  name: Check out PR <<parameters.pull_request_id>>
+                  working_directory: /tmp/<<parameters.repo>>
+                  command: |
+                    git fetch origin pull/<<parameters.pull_request_id>>/head:pr-<<parameters.pull_request_id>>
+                    git checkout pr-<<parameters.pull_request_id>>
+                    git log -n 2
 
   test-binary-against-rwa:
     description: |
@@ -571,7 +589,7 @@ commands:
         type: string
         default: "CI=true yarn start"
     steps:
-      - clone-repo-and-checkout-release-branch:
+      - clone-repo-and-checkout-branch:
           repo: <<parameters.repo>>
       - when:
           condition: <<parameters.pull_request_id>>
@@ -701,18 +719,9 @@ commands:
         type: string
         default: "npm start --if-present"
     steps:
-      - clone-repo-and-checkout-release-branch:
+      - clone-repo-and-checkout-branch:
           repo: <<parameters.repo>>
-      - when:
-          condition: <<parameters.pull_request_id>>
-          steps:
-            - run:
-                name: Check out PR <<parameters.pull_request_id>>
-                working_directory: /tmp/<<parameters.repo>>
-                command: |
-                  git fetch origin pull/<<parameters.pull_request_id>>/head:pr-<<parameters.pull_request_id>>
-                  git checkout pr-<<parameters.pull_request_id>>
-                  git log -n 2
+          pull_request_id: <<parameters.pull_request_id>>
       - run:
           # Install deps + Cypress binary with yarn if yarn.lock present
           command: |
@@ -724,6 +733,16 @@ commands:
               CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm install ~/cypress/cypress.tgz
             fi
           working_directory: /tmp/<<parameters.repo>>
+      - run:
+          name: Scaffold new config file
+          working_directory: /tmp/<<parameters.repo>>
+          environment:
+            CYPRESS_INTERNAL_FORCE_SCAFFOLD: "1"
+          command: |
+            if [[ -f cypress.json ]]; then
+              rm -rf cypress.json
+              echo 'module.exports = {}' > cypress.config.js
+            fi
       - run:
           name: Print Cypress version
           working_directory: /tmp/<<parameters.repo>>
@@ -1005,7 +1024,7 @@ jobs:
             fi
       - wait-on-circle-jobs:
           job-names: >
-            desktop-gui-integration-tests-2x,
+            desktop-gui-integration-tests-7x,
             desktop-gui-component-tests,
             cli-visual-tests,
             runner-integration-tests-chrome,
@@ -1283,9 +1302,9 @@ jobs:
       - run-driver-integration-tests:
           browser: electron
 
-  desktop-gui-integration-tests-2x:
+  desktop-gui-integration-tests-7x:
     <<: *defaults
-    parallelism: 2
+    parallelism: 7
     steps:
       - restore_cached_workspace
       - run:
@@ -1610,9 +1629,17 @@ jobs:
   test-kitchensink:
     <<: *defaults
     steps:
-      - clone-repo-and-checkout-release-branch:
+      - clone-repo-and-checkout-branch:
           repo: cypress-example-kitchensink
+          pull_request_id: 510
       - install-required-node
+      - run:
+          name: Remove cypress.json
+          description: Remove cypress.json in case it exists
+          working_directory: /tmp/cypress-example-kitchensink
+          environment:
+            CYPRESS_INTERNAL_FORCE_SCAFFOLD: "1"
+          command: rm -rf cypress.json
       - run:
           name: Install prod dependencies
           command: yarn --production
@@ -1637,7 +1664,7 @@ jobs:
     <<: *defaults
     resource_class: medium
     steps:
-      - clone-repo-and-checkout-release-branch:
+      - clone-repo-and-checkout-branch:
           repo: cypress-example-kitchensink
       - run:
           name: Install prod dependencies
@@ -1662,7 +1689,7 @@ jobs:
     <<: *defaults
     resource_class: medium
     steps:
-      - clone-repo-and-checkout-release-branch:
+      - clone-repo-and-checkout-branch:
           repo: cypress-test-tiny
       - run:
           name: Run test project
@@ -1846,7 +1873,7 @@ jobs:
           environment:
             CYPRESS_INTERNAL_FORCE_SCAFFOLD: "1"
           command: |
-            echo '{}' > cypress.json
+            echo 'module.exports = {}' > cypress.config.js
             npx cypress run
 
   test-full-typescript-project:
@@ -1879,6 +1906,14 @@ jobs:
           working_directory: <<parameters.wd>>
           command: npx @bahmutov/cly@1 init --typescript
       - run:
+          name: Scaffold new config file
+          working_directory: <<parameters.wd>>
+          environment:
+            CYPRESS_INTERNAL_FORCE_SCAFFOLD: "1"
+          command: |
+            rm -rf cypress.json
+            echo 'export default {}' > cypress.config.ts
+      - run:
           name: Run project tests 🗳
           working_directory: <<parameters.wd>>
           command: npx cypress run
@@ -1888,7 +1923,7 @@ jobs:
     <<: *defaults
     steps:
       - restore_workspace_binaries
-      - clone-repo-and-checkout-release-branch:
+      - clone-repo-and-checkout-branch:
           repo: cypress-test-tiny
       - run:
           name: Install Cypress
@@ -1940,6 +1975,7 @@ jobs:
       - test-binary-against-repo:
           repo: cypress-example-kitchensink
           browser: "electron"
+          pull_request_id: 510
 
   test-binary-against-awesome-typescript-loader:
     <<: *defaults
@@ -1955,6 +1991,7 @@ jobs:
       - test-binary-against-repo:
           repo: cypress-example-kitchensink
           browser: firefox
+          pull_request_id: 510
 
   "test-binary-against-kitchensink-chrome":
     <<: *defaults
@@ -1963,6 +2000,7 @@ jobs:
       - test-binary-against-repo:
           repo: cypress-example-kitchensink
           browser: chrome
+          pull_request_id: 510
 
   "test-binary-against-todomvc-firefox":
     <<: *defaults
@@ -2056,6 +2094,14 @@ jobs:
           name: Add Cypress demo
           working_directory: test-binary
           command: npx @bahmutov/cly init
+      - run:
+          name: Scaffold new config file
+          working_directory: test-binary
+          environment:
+            CYPRESS_INTERNAL_FORCE_SCAFFOLD: "1"
+          command: |
+            rm -rf cypress.json
+            echo 'module.exports = {}' > cypress.config.js
       - run:
           name: Verify Cypress binary
           working_directory: test-binary
@@ -2166,7 +2212,7 @@ linux-workflow: &linux-workflow
     #     context: test-runner:launchpad-tests
     #     requires:
     #       - build
-    - desktop-gui-integration-tests-2x:
+    - desktop-gui-integration-tests-7x:
         requires:
           - build
     - desktop-gui-component-tests:
@@ -2237,7 +2283,7 @@ linux-workflow: &linux-workflow
           - reporter-integration-tests
           - Linux lint
           - desktop-gui-component-tests
-          - desktop-gui-integration-tests-2x
+          - desktop-gui-integration-tests-7x
           - runner-ct-integration-tests-chrome
           - runner-integration-tests-firefox
           - runner-integration-tests-chrome

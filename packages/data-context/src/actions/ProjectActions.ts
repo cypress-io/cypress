@@ -1,13 +1,14 @@
 import type { CodeGenType, MutationAddProjectArgs, MutationAppCreateConfigFileArgs, MutationSetProjectPreferencesArgs, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
-import type { FindSpecs, FoundBrowser, FoundSpec, FullConfig, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions, Preferences } from '@packages/types'
+import type { FindSpecs, FoundBrowser, FoundSpec, FullConfig, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions, Preferences, SettingsOptions } from '@packages/types'
 import path from 'path'
-import type { ProjectShape } from '../data/coreDataShape'
+import type { ActiveProjectShape, ProjectShape } from '../data/coreDataShape'
 
 import type { DataContext } from '..'
-import { SpecGenerator } from '../codegen'
+import { codeGenerator, SpecOptions } from '../codegen'
+import templates from '../codegen/templates'
 
 export interface ProjectApiShape {
-  getConfig(projectRoot: string): Promise<FullConfig>
+  getConfig(projectRoot: string, options?: SettingsOptions): Promise<FullConfig>
   findSpecs(payload: FindSpecs): Promise<FoundSpec[]>
   /**
    * "Initializes" the given mode, since plugins can define the browsers available
@@ -25,6 +26,7 @@ export interface ProjectApiShape {
   clearProjectPreferences(projectTitle: string): Promise<unknown>
   clearAllProjectPreferences(): Promise<unknown>
   closeActiveProject(): Promise<unknown>
+  error(type: string, ...args: any): Error
 }
 
 export class ProjectActions {
@@ -57,19 +59,31 @@ export class ProjectActions {
 
     await this.clearActiveProject()
 
-    this.ctx.coreData.app.currentProject = {
+    // Set initial properties, so we can set the config object on the active project
+    this.setCurrentProjectProperties({
       projectRoot,
       title,
       ctPluginsInitialized: false,
       e2ePluginsInitialized: false,
-      isFirstTimeCT: await this.ctx.project.isFirstTimeAccessing(projectRoot, 'component'),
-      isFirstTimeE2E: await this.ctx.project.isFirstTimeAccessing(projectRoot, 'e2e'),
-      config: await this.ctx.project.getResolvedConfigFields(projectRoot),
-      preferences: await this.ctx.project.getProjectPreferences(title),
       generatedSpec: null,
-    }
+      config: null,
+      configChildProcess: null,
+    })
+
+    this.setCurrentProjectProperties({
+      isCTConfigured: await this.ctx.project.isTestingTypeConfigured(projectRoot, 'component'),
+      isE2EConfigured: await this.ctx.project.isTestingTypeConfigured(projectRoot, 'e2e'),
+      preferences: await this.ctx.project.getProjectPreferences(title),
+    })
 
     return this
+  }
+
+  private setCurrentProjectProperties (currentProjectProperties: Partial<ActiveProjectShape>) {
+    this.ctx.coreData.app.currentProject = {
+      ...this.ctx.coreData.app.currentProject,
+      ...currentProjectProperties,
+    } as ActiveProjectShape
   }
 
   async loadProjects () {
@@ -90,6 +104,11 @@ export class ProjectActions {
 
     if (!this.ctx.wizardData.chosenTestingType) {
       throw Error('Cannot initialize project without choosing testingType')
+    }
+
+    // Ensure that we have loaded browsers to choose from
+    if (this.ctx.appData.refreshingBrowsers) {
+      await this.ctx.appData.refreshingBrowsers
     }
 
     const browsers = [...(this.ctx.browserList ?? [])]
@@ -155,6 +174,11 @@ export class ProjectActions {
       return null
     }
 
+    // Ensure that we have loaded browsers to choose from
+    if (this.ctx.appData.refreshingBrowsers) {
+      await this.ctx.appData.refreshingBrowsers
+    }
+
     const browser = this.ctx.wizardData.chosenBrowser ?? this.ctx.appData.browsers?.[0]
 
     if (!browser) {
@@ -171,6 +195,46 @@ export class ProjectActions {
     this.ctx.appData.currentTestingType = testingType
 
     return this.api.launchProject(browser, spec, options)
+  }
+
+  async launchProjectWithoutElectron () {
+    if (!this.ctx.currentProject) {
+      throw Error('Cannot launch project without an active project')
+    }
+
+    const preferences = await this.api.getProjectPreferencesFromCache()
+    const { browserPath, testingType } = preferences[this.ctx.currentProject.title] ?? {}
+
+    if (!browserPath || !testingType) {
+      throw Error('Cannot launch project without stored browserPath or testingType')
+    }
+
+    const spec = this.makeSpec(testingType)
+    const browser = this.findBrowerByPath(browserPath)
+
+    if (!browser) {
+      throw Error(`Cannot find specified browser at given path: ${browserPath}.`)
+    }
+
+    this.ctx.actions.electron.hideBrowserWindow()
+    this.ctx.coreData.wizard.chosenTestingType = testingType
+    await this.initializeActiveProject()
+    this.ctx.appData.currentTestingType = testingType
+
+    return this.api.launchProject(browser, spec, {})
+  }
+
+  private makeSpec (testingType: TestingTypeEnum): Cypress.Spec {
+    return {
+      name: '',
+      absolute: '',
+      relative: '',
+      specType: testingType === 'e2e' ? 'integration' : 'component',
+    }
+  }
+
+  private findBrowerByPath (browserPath: string) {
+    return this.ctx.coreData?.app?.browsers?.find((browser) => browser.path === browserPath)
   }
 
   removeProject (projectRoot: string) {
@@ -225,7 +289,7 @@ export class ProjectActions {
       throw Error(`Cannot create index.html without currentProject.`)
     }
 
-    if (this.ctx.currentProject?.isFirstTimeCT) {
+    if (this.ctx.currentProject?.isCTConfigured) {
       const indexHtmlPath = path.resolve(this.ctx.currentProject.projectRoot, 'cypress/component/support/index.html')
 
       await this.ctx.fs.outputFile(indexHtmlPath, template)
@@ -248,7 +312,8 @@ export class ProjectActions {
     }
 
     const parsed = path.parse(codeGenCandidate)
-    const config = await this.ctx.project.getConfig(project.projectRoot)
+    const config = await this.ctx.config.getConfigForProject(project.projectRoot)
+
     const getFileExtension = () => {
       if (codeGenType === 'integration') {
         const possibleExtensions = ['.spec', '.test', '-spec', '-test']
@@ -280,16 +345,26 @@ export class ProjectActions {
     const codeGenPath = getCodeGenPath()
     const searchFolder = getSearchFolder()
 
-    const { specContent, specAbsolute } = await new SpecGenerator(this.ctx, {
+    const newSpecCodeGenOptions = new SpecOptions(this.ctx, {
       codeGenPath,
       codeGenType,
       specFileExtension,
-    }).generateSpec()
+    })
 
-    await this.ctx.fs.outputFile(specAbsolute, specContent)
+    const codeGenOptions = await newSpecCodeGenOptions.getCodeGenOptions()
+    const codeGenResults = await codeGenerator(
+      { templateDir: templates[codeGenType], target: path.parse(codeGenPath).dir },
+      codeGenOptions,
+    )
+
+    if (!codeGenResults.files[0] || codeGenResults.failed[0]) {
+      throw (codeGenResults.failed[0] || 'Unable to generate spec')
+    }
+
+    const [newSpec] = codeGenResults.files
 
     const spec = this.ctx.file.normalizeFileToSpec({
-      absolute: specAbsolute,
+      absolute: newSpec.file,
       searchFolder,
       specType: codeGenType === 'integration' ? 'integration' : 'component',
       projectRoot: project.projectRoot,
@@ -298,7 +373,13 @@ export class ProjectActions {
 
     project.generatedSpec = {
       spec,
-      content: specContent,
+      content: newSpec.content,
     }
+  }
+
+  reconfigureProject () {
+    this.ctx.actions.wizard.resetWizard()
+    this.ctx.actions.electron.refreshBrowserWindow()
+    this.ctx.actions.electron.showBrowserWindow()
   }
 }

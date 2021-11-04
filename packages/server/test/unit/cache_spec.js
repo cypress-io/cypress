@@ -171,7 +171,7 @@ describe('lib/cache', () => {
   context('project preferences', () => {
     it('should insert a projects preferences into the cache', () => {
       const testProjectTitle = 'launchpad'
-      const testPreferences = { testingType: 'e2e', browserId: 'testid' }
+      const testPreferences = { testingType: 'e2e', browserPath: '/some/test/path' }
 
       return cache.insertProjectPreferences(testProjectTitle, testPreferences)
       .then(() => cache.__get('PROJECT_PREFERENCES'))
@@ -182,9 +182,9 @@ describe('lib/cache', () => {
 
     it('should insert multiple projects preferences into the cache', () => {
       const testProjectTitle = 'launchpad'
-      const testPreferences = { testingType: 'e2e', browserId: 'testid' }
+      const testPreferences = { testingType: 'e2e', browserPath: '/some/test/path' }
       const anotherTestProjectTitle = 'launchpad'
-      const anotherTestPreferene = { testingType: 'e2e', browserId: 'testid' }
+      const anotherTestPreferene = { testingType: 'e2e', browserPath: '/some/test/path' }
 
       return cache.insertProjectPreferences(testProjectTitle, testPreferences)
       .then(() => cache.insertProjectPreferences(anotherTestProjectTitle, anotherTestPreferene))
@@ -197,7 +197,7 @@ describe('lib/cache', () => {
 
     it('should clear the projects preferred preferences', async () => {
       const testProjectTitle = 'launchpad'
-      const testPreferences = { testingType: 'e2e', browserId: 'testid' }
+      const testPreferences = { testingType: 'e2e', browserPath: '/some/test/path' }
 
       return cache.insertProjectPreferences(testProjectTitle, testPreferences)
       .then(() => cache.removeProjectPreferences(testProjectTitle))
@@ -255,6 +255,7 @@ describe('lib/cache', () => {
           },
           PROJECTS: ['foo'],
           PROJECT_PREFERENCES: {},
+          PROJECTS_CONFIG: {},
         })
       })
     })

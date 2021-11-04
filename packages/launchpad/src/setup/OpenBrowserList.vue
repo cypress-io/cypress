@@ -1,7 +1,7 @@
 <template>
   <form
     v-if="props.gql.browsers"
-    @submit.prevent="$emit('launch')"
+    @submit.prevent="emit('launch', props.gql?.selectedBrowser?.path)"
   >
     <div class="flex flex-wrap justify-center gap-6 py-16">
       <div
@@ -60,7 +60,7 @@
           size="lg"
           class="inline ml-2"
           variant="outline"
-          @click="$emit('navigated-back')"
+          @click="emit('navigated-back')"
         >
           {{ t('setupPage.step.back') }}
         </Button>
@@ -90,6 +90,7 @@ fragment OpenBrowserList on App {
   currentBrowser {
     id
     displayName
+    path
   }
   browsers {
     id
@@ -110,7 +111,10 @@ const props = defineProps<{
   gql: OpenBrowserListFragment,
 }>()
 
-defineEmits(['navigated-back', 'launch'])
+const emit = defineEmits<{
+  (e: 'navigated-back'): void
+  (e: 'launch', value: string | undefined): void
+}>()
 
 const { t } = useI18n()
 

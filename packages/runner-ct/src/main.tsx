@@ -1,9 +1,11 @@
 import React from 'react'
+import 'regenerator-runtime/runtime'
 import _ from 'lodash'
 import ReactDOM from 'react-dom'
 import $Cypress from '@packages/driver'
 const driverUtils = $Cypress.utils
-import { eventManager, AutIframe, Container, selectorPlaygroundModel, studioRecorder, logger, dom, blankContents, visitFailure } from '@packages/runner-shared'
+import { AutIframe, Container, selectorPlaygroundModel, StudioRecorder, logger, dom, blankContents, visitFailure } from '@packages/runner-shared'
+import { EventManager } from '@packages/app/src/runner/event-manager'
 import defaultEvents from '@packages/reporter/src/lib/events'
 import { Reporter } from '@packages/reporter/src/main'
 import shortcuts from '@packages/reporter/src/lib/shortcuts'
@@ -13,10 +15,19 @@ export function getSpecUrl (namespace: string, spec: FoundSpec, prefix = '') {
   return spec ? `${prefix}/${namespace}/iframes/${spec.absolute}` : ''
 }
 
+const eventManager = new EventManager(
+  $Cypress,
+  MobX,
+  selectorPlaygroundModel,
+  StudioRecorder,
+)
+
 const UnifiedRunner = {
   _,
 
   CypressJQuery: $Cypress.$,
+
+  CypressDriver: $Cypress,
 
   logger,
 
@@ -24,7 +35,7 @@ const UnifiedRunner = {
 
   blankContents,
 
-  studioRecorder,
+  StudioRecorder,
 
   selectorPlaygroundModel,
 
@@ -44,8 +55,6 @@ const UnifiedRunner = {
 
   defaultEvents,
 
-  eventManager,
-
   decodeBase64: (base64: string) => {
     return JSON.parse(driverUtils.decodeBase64Unicode(base64))
   },
@@ -59,7 +68,6 @@ const UnifiedRunner = {
 window.UnifiedRunner = UnifiedRunner
 
 /** This is the OG runner-ct */
-import 'regenerator-runtime/runtime'
 import type { FoundSpec } from '@packages/types/src/spec'
 
 import App from './app/RunnerCt'

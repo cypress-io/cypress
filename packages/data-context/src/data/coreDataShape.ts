@@ -1,6 +1,7 @@
-import { BUNDLERS, FoundBrowser, FoundSpec, GeneratedSpec, Preferences, ResolvedFromConfig } from '@packages/types'
+import { BUNDLERS, FoundBrowser, FoundSpec, FullConfig, GeneratedSpec, Preferences } from '@packages/types'
 import type { NexusGenEnums, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
 import type { BrowserWindow } from 'electron'
+import type { ChildProcess } from 'child_process'
 
 export type Maybe<T> = T | null | undefined
 
@@ -18,21 +19,28 @@ export interface DevStateShape {
   refreshState: null | string
 }
 
+export interface ConfigChildProcessShape {
+  process: ChildProcess
+  executedPlugins: null | 'e2e' | 'ct'
+}
+
 export interface ActiveProjectShape extends ProjectShape {
   title: string
   ctPluginsInitialized: Maybe<boolean>
   e2ePluginsInitialized: Maybe<boolean>
-  isFirstTimeCT: Maybe<boolean>
-  isFirstTimeE2E: Maybe<boolean>
+  isCTConfigured: Maybe<boolean>
+  isE2EConfigured: Maybe<boolean>
   currentSpecId?: Maybe<string>
   specs?: FoundSpec[]
-  config: ResolvedFromConfig[]
+  config: Promise<FullConfig> | null
+  configChildProcess: ConfigChildProcessShape | null
   preferences?: Preferences| null
   generatedSpec: GeneratedSpec | null
 }
 
 export interface AppDataShape {
   navItem: NexusGenEnums['NavItem']
+  refreshingBrowsers: Promise<FoundBrowser[]> | null
   browsers: ReadonlyArray<FoundBrowser> | null
   projects: ProjectShape[]
   currentProject: ActiveProjectShape | null
@@ -82,6 +90,7 @@ export function makeCoreData (): CoreDataShape {
       refreshState: null,
     },
     app: {
+      refreshingBrowsers: null,
       currentTestingType: null,
       navItem: 'settings',
       browsers: null,
