@@ -1,11 +1,13 @@
 <template>
-  <Button @click="reconfigure">
-    Reconfigure
-  </Button>
-  <SettingsContainer
-    v-if="query.data.value"
-    :gql="query.data.value"
-  />
+  <div>
+    <Button @click="reconfigure">
+      Reconfigure
+    </Button>
+    <SettingsContainer
+      v-if="query.data.value"
+      :gql="query.data.value"
+    />
+  </div>
 </template>
 
 <script lang="ts" setup>

@@ -5,8 +5,8 @@ import LogoNuxt from '../images/logos/nuxt.svg?url'
 import LogoVue from '../images/logos/vue.svg?url'
 import LogoReact from '../images/logos/react.svg?url'
 
-import componentLogo from '../images/testingTypes/component.svg'
-import e2eLogo from '../images/testingTypes/e2e.svg'
+import componentLogo from '~icons/cy/testing-type-component_x120.svg'
+import e2eLogo from '~icons/cy/testing-type-e2e_x120.svg'
 
 import type { FrontendFrameworkEnum, SupportedBundlers, TestingTypeEnum } from '../generated/graphql'
 

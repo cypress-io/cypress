@@ -52,6 +52,10 @@
           </SidebarNavigationRow>
         </RouterLink>
       </nav>
+      <img
+        :src="CypressLogo"
+        class="w-32px h-32px m-16px"
+      >
     </div>
   </div>
 </template>
@@ -66,6 +70,7 @@ import RunsIcon from '~icons/cy/runs_x24'
 import SettingsIcon from '~icons/cy/settings_x24'
 import { useMainStore } from '../store'
 import { SideBarNavigationDocument } from '../generated/graphql'
+import CypressLogo from '@packages/frontend-shared/src/assets/logos/cypress_s.png'
 
 const navigation = [
   { name: 'Home', icon: SpecsIcon, href: '/' },
