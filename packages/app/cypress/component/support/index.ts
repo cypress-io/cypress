@@ -1,4 +1,4 @@
-import { registerMountFn, installCustomPercyCommand } from '@packages/frontend-shared/cypress/support/common'
+import { registerMountFn } from '@packages/frontend-shared/cypress/support/common'
 // ***********************************************************
 // This example support/index.js is processed and
 // loaded automatically before your test files.
@@ -31,4 +31,3 @@ beforeEach(() => {
 })
 
 registerMountFn({ plugins: [() => createRouter(), () => pinia] })
-installCustomPercyCommand()
