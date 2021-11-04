@@ -38,7 +38,7 @@ import NoResultsIllustration from '../assets/illustrations/no-results.svg'
 defineProps<{
   search?: string,
   message?: string
-  emptySearch: boolean
+  emptySearch?: boolean
 }>()
 
 const emit = defineEmits<{
