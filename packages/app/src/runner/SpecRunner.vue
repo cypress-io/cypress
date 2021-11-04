@@ -78,9 +78,15 @@ const viewportStyle = computed(() => {
     return
   }
 
-  const scale = runnerPane.value.clientWidth < autStore.viewportDimensions.width
-    ? runnerPane.value.clientWidth / autStore.viewportDimensions.width
-    : 1
+  let scale: number
+
+  if (screenshotStore.isScreenshotting) {
+    scale = 1
+  } else {
+    scale = runnerPane.value.clientWidth < autStore.viewportDimensions.width
+      ? runnerPane.value.clientWidth / autStore.viewportDimensions.width
+      : 1
+  }
 
   return `
   width: ${autStore.viewportDimensions.width}px;
