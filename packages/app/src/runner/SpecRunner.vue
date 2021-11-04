@@ -116,8 +116,10 @@ onMounted(() => {
     runSpec()
   })
 
-  eventManager.on('before:screenshot', () => {
-    screenshotStore.setScreenshotting(true)
+  eventManager.on('before:screenshot', (payload) => {
+    if (payload.appOnly) {
+      screenshotStore.setScreenshotting(true)
+    }
   })
 
   eventManager.on('after:screenshot', () => {
@@ -184,5 +186,6 @@ $navbar-width: 80px;
 iframe {
   width: 100%;
   height: 100%;
+  background: white;
 }
 </style>

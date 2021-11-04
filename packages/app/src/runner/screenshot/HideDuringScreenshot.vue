@@ -14,10 +14,9 @@ export default defineComponent({
 </script>
 
 <script lang="ts" setup>
-import { computed, defineComponent, useAttrs } from 'vue'
+import { computed, defineComponent } from 'vue'
 import { useScreenshotStore } from '../../store/screenshot-store'
 
-const attrs = useAttrs()
 const screenshotStore = useScreenshotStore()
 
 const classes = computed(() => {

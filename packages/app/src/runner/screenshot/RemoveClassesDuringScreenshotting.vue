@@ -1,6 +1,6 @@
 <template>
-  <div class="there-is-intentionally-no-class-here">
-    <slot class="no-class" />
+  <div :class="classes">
+    <slot />
   </div>
 </template>
 
@@ -12,5 +12,15 @@ export default defineComponent({
 </script>
 
 <script lang="ts" setup>
-import { defineComponent } from 'vue'
+import { computed, defineComponent, useAttrs } from 'vue'
+import { useScreenshotStore } from '../../store/screenshot-store'
+
+const screenshotStore = useScreenshotStore()
+const attrs = useAttrs()
+
+const classes = computed(() => {
+  return {
+    [attrs.class as string]: !screenshotStore.isScreenshotting,
+  }
+})
 </script>
