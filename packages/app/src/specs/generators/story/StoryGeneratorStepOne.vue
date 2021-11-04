@@ -85,13 +85,13 @@ const { title } = useVModels(props, emits)
 title.value = t('createSpec.component.importFromStory.header')
 
 gql`
-fragment ComponentGeneratorStepOne_codeGenGlob on Project {
+fragment StoryGeneratorStepOne_codeGenGlob on Project {
   codeGenGlob(type: story)
 }
 `
 
 gql`
-query ComponentGeneratorStepOne($glob: String!) {
+query StoryGeneratorStepOne($glob: String!) {
   app {
     activeProject {
       id
