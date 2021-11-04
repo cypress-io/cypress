@@ -69,9 +69,6 @@ export const stubMutation: MaybeResolver<Mutation> = {
   setProjectPreferences (source, args, ctx) {
     return ctx.app
   },
-  showBrowserWindow (source, args, ctx) {
-    return ctx.app
-  },
   generateSpecFromSource (source, args, ctx) {
     if (!ctx.app.activeProject) {
       throw Error('Cannot set currentSpec without active project')

@@ -5,8 +5,13 @@ import type { GraphQLSchema } from 'graphql'
 import type { DataContextShell } from '../DataContextShell'
 import type * as allOperations from '../gen/all-operations.gen'
 
+// Filter out non-Query shapes
 type AllQueries<T> = {
-  [K in keyof T]: K
+  [K in keyof T]: T[K] extends { __resultType?: infer U }
+    ? U extends { __typename?: 'Query' }
+      ? K
+      : never
+    : never
 }[keyof T]
 
 export class GraphQLDataSource {

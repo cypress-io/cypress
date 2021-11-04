@@ -117,10 +117,8 @@ export const Project = objectType({
       args: {
         glob: nonNull(stringArg()),
       },
-      resolve: async (source, args, ctx) => {
-        const result = await ctx.project.getCodeGenCandidates(args.glob)
-
-        return result
+      resolve: (source, args, ctx) => {
+        return ctx.project.getCodeGenCandidates(args.glob)
       },
     })
   },
