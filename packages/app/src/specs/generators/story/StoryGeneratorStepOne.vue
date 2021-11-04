@@ -12,7 +12,7 @@
     <FileChooser
       v-else-if="!result"
       v-model:extensionPattern="extensionPattern"
-      :files="allFiles"
+      :files="allFiles || []"
       :loading="query.fetching.value"
       @selectFile="makeSpec"
     />
@@ -132,12 +132,12 @@ const query = useQuery({
 })
 
 const allFiles = computed(() => {
-  if (query.data.value) {
+  if (query.data.value?.app?.activeProject?.codeGenCandidates) {
     return query.data.value.app?.activeProject?.codeGenCandidates
   }
 
   return []
-})
+}) as any
 
 const result = ref()
 

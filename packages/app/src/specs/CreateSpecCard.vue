@@ -42,6 +42,10 @@
 <script lang="ts" setup>
 import type { FunctionalComponent, SVGAttributes } from 'vue'
 
+defineEmits<{
+  (eventName: 'click'): void
+}>()
+
 defineProps<{
   icon: FunctionalComponent<SVGAttributes>,
   header: string,

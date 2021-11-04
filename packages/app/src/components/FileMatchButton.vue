@@ -14,6 +14,11 @@
 </template>
 
 <script lang="ts" setup>
+
+defineEmits<{
+  (eventName: 'click'): void
+}>()
+
 withDefaults(defineProps<{
   expanded: boolean
 }>(), { expanded: false })

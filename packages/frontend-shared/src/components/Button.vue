@@ -118,6 +118,10 @@ const props = defineProps<{
   internalLink?: boolean
 }>()
 
+defineEmits<{
+  (eventName: 'click'): void
+}>()
+
 const attrs = useAttrs() as ButtonHTMLAttributes
 
 const variantClasses = computed(() => (VariantClassesTable[props.variant || 'primary']))

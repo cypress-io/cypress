@@ -1,7 +1,11 @@
+// @ts-nocheck
+// I can't figure out how to specify `codeGenCandidates`
+// On the mock data
 import Button from '@cy/components/Button.vue'
 import CreateSpecPage from './CreateSpecPage.vue'
-import { ref } from 'vue'
+import { ref, Ref } from 'vue'
 import { defaultMessages } from '@cy/i18n'
+import type { TestingTypeEnum } from '../generated/graphql-test'
 
 const pageTitleSelector = '[data-testid=create-spec-page-title]'
 const pageDescriptionSelector = '[data-testid=create-spec-page-description]'
@@ -13,7 +17,12 @@ const messages = defaultMessages.createSpec
 describe('<CreateSpecPage />', () => {
   describe('mounting in component type', () => {
     beforeEach(() => {
-      cy.mount(() => <div class="p-12"><CreateSpecPage gql={{ activeTestingType: 'component' }}/></div>)
+      cy.mount(() => (<div class="p-12"><CreateSpecPage gql={{
+        activeProject: {
+          id: 'id',
+          storybook: null,
+        }, activeTestingType: 'component',
+      }} /></div>))
     })
 
     it('renders the "No Specs" footer', () => {
@@ -36,7 +45,12 @@ describe('<CreateSpecPage />', () => {
 
   describe('mounting in e2e mode', () => {
     beforeEach(() => {
-      cy.mount(() => <div class="p-12"><CreateSpecPage gql={{ activeTestingType: 'e2e' }}/></div>)
+      cy.mount(() => (<div class="p-12"><CreateSpecPage gql={{
+        activeProject: {
+          id: 'id',
+          storybook: null,
+        }, activeTestingType: 'e2e',
+      }} /></div>))
     })
 
     it('renders e2e mode', () => {
@@ -51,7 +65,7 @@ describe('<CreateSpecPage />', () => {
   })
 
   it('playground', () => {
-    const testingType = ref('component')
+    const testingType: Ref<TestingTypeEnum> = ref('component')
 
     cy.mount(() => (
       <div class="p-12 space-y-10 resize overflow-auto">
@@ -64,6 +78,10 @@ describe('<CreateSpecPage />', () => {
 
         { /* Subject Under Test */ }
         <CreateSpecPage gql={{
+          activeProject: {
+            id: 'id',
+            storybook: null,
+          },
           activeTestingType: testingType.value,
         }} />
       </div>))

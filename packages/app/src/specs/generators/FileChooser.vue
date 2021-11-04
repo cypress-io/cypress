@@ -81,6 +81,7 @@ const props = withDefaults(defineProps<{
   extensionPattern: string,
   loading?: boolean
 }>(), {
+
   loading: false,
 })
 

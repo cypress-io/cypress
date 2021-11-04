@@ -131,7 +131,7 @@ const allRandomComponents = combineProperties({
   directory: keys(directories),
 })
 
-export const randomComponents = (n = 200) => {
+export const randomComponents = (n = 200): any[] => {
   return faker.random.arrayElements(allRandomComponents, n).map((d: ReturnType<typeof combineProperties>) => {
     const componentName = componentNameGenerator({
       overrides: d,
