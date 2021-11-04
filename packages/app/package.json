@@ -75,6 +75,7 @@
       "include": [
         "@headlessui/vue",
         "@iconify/iconify",
+        "@percy/cypress",
         "@testing-library/cypress/add-commands",
         "@urql/exchange-execute",
         "@urql/vue",
