@@ -13,14 +13,19 @@
 
 <script lang="ts" setup>
 import { computed } from 'vue'
+import type { AutIframe } from '../runner/aut-iframe'
 import { useSnapshotStore } from './snapshot-store'
 import SnapshotButtonGroup from './SnapshotButtonGroup.vue'
 
 const snapshotStore = useSnapshotStore()
 
 const changeState = (index: number) => {
-  snapshotStore.changeState(index)
+  snapshotStore.changeState(index, props.getAutIframe())
 }
+
+const props = defineProps<{
+  getAutIframe: () => AutIframe
+}>()
 
 const snapshots = computed(() => {
   return (snapshotStore.snapshotProps?.snapshots || [])

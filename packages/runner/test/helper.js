@@ -1,4 +1,5 @@
 import { returnMockRequire, register } from '@packages/web-config/node-jsdom-setup'
+import 'regenerator-runtime/runtime'
 import sinon from 'sinon'
 
 const driverMock = {}

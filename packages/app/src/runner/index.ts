@@ -14,6 +14,7 @@
  * namespace there, and access it with `window.UnifiedRunner`.
  *
  */
+import { watchEffect } from 'vue'
 import { getMobxRunnerStore, useAutStore } from '../store'
 import { injectBundle } from './injectBundle'
 import type { BaseSpec } from '@packages/types/src/spec'
@@ -21,7 +22,26 @@ import { UnifiedReporterAPI } from './reporter'
 import { getRunnerElement, empty } from './utils'
 import { IframeModel } from './iframe-model'
 import { AutIframe } from './aut-iframe'
-import { watchEffect } from 'vue'
+import { EventManager } from './event-manager'
+
+let _eventManager: EventManager
+
+export function initializeEventManager (UnifiedRunner: any) {
+  _eventManager = new EventManager(
+    UnifiedRunner.CypressDriver,
+    UnifiedRunner.MobX,
+    UnifiedRunner.selectorPlaygroundModel,
+    UnifiedRunner.StudioRecorder,
+  )
+}
+
+export function getEventManager () {
+  if (!_eventManager) {
+    throw Error(`eventManager is undefined. Make sure you call initializeEventManager before attempting to access it.`)
+  }
+
+  return _eventManager
+}
 
 const randomString = `${Math.random()}`
 
@@ -56,10 +76,10 @@ function createIframeModel () {
     autIframe.detachDom,
     autIframe.restoreDom,
     autIframe.highlightEl,
-    window.UnifiedRunner.eventManager,
+    getEventManager(),
     {
-      recorder: window.UnifiedRunner.studioRecorder,
-      selectorPlaygroundModel: window.UnifiedRunner.selectorPlaygroundModel,
+      recorder: getEventManager().studioRecorder,
+      selectorPlaygroundModel: getEventManager().selectorPlaygroundModel,
     },
   )
 
@@ -79,12 +99,12 @@ function createIframeModel () {
 function setupRunner () {
   const mobxRunnerStore = getMobxRunnerStore()
 
-  window.UnifiedRunner.eventManager.addGlobalListeners(mobxRunnerStore, {
+  getEventManager().addGlobalListeners(mobxRunnerStore, {
     automationElement: '__cypress-string',
     randomString,
   })
 
-  window.UnifiedRunner.eventManager.start(window.UnifiedRunner.config)
+  getEventManager().start(window.UnifiedRunner.config)
 
   const autStore = useAutStore()
 
@@ -94,15 +114,15 @@ function setupRunner () {
 
   _autIframeModel = new AutIframe(
     'Test Project',
-    window.UnifiedRunner.eventManager,
+    getEventManager(),
     window.UnifiedRunner._,
     window.UnifiedRunner.CypressJQuery,
     window.UnifiedRunner.logger,
     window.UnifiedRunner.dom,
     window.UnifiedRunner.visitFailure,
     {
-      recorder: window.UnifiedRunner.studioRecorder,
-      selectorPlaygroundModel: window.UnifiedRunner.selectorPlaygroundModel,
+      recorder: getEventManager().studioRecorder,
+      selectorPlaygroundModel: getEventManager().selectorPlaygroundModel,
     },
     window.UnifiedRunner.blankContents,
   )
@@ -124,7 +144,7 @@ function getSpecUrl (namespace: string, spec: BaseSpec, prefix = '') {
  * or re-running the current spec.
  */
 function teardownSpec () {
-  return window.UnifiedRunner.eventManager.teardown(getMobxRunnerStore())
+  return getEventManager().teardown(getMobxRunnerStore())
 }
 
 /**
@@ -142,7 +162,7 @@ function runSpecCT (spec: BaseSpec) {
   // creates a new instance of the Cypress driver for this spec,
   // initializes a bunch of listeners
   // watches spec file for changes.
-  window.UnifiedRunner.eventManager.setup(config)
+  getEventManager().setup(config)
 
   const $runnerRoot = getRunnerElement()
 
@@ -163,7 +183,7 @@ function runSpecCT (spec: BaseSpec) {
   $autIframe.prop('src', specSrc)
 
   // initialize Cypress (driver) with the AUT!
-  window.UnifiedRunner.eventManager.initialize($autIframe, config)
+  getEventManager().initialize($autIframe, config)
 }
 
 /**
@@ -193,7 +213,7 @@ function runSpecE2E (spec: BaseSpec) {
   // creates a new instance of the Cypress driver for this spec,
   // initializes a bunch of listeners
   // watches spec file for changes.
-  window.UnifiedRunner.eventManager.setup(config)
+  getEventManager().setup(config)
 
   const $runnerRoot = getRunnerElement()
 
@@ -221,7 +241,7 @@ function runSpecE2E (spec: BaseSpec) {
   $specIframe.src = specSrc
 
   // initialize Cypress (driver) with the AUT!
-  window.UnifiedRunner.eventManager.initialize($autIframe, config)
+  getEventManager().initialize($autIframe, config)
 }
 
 /**

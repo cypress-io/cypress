@@ -413,6 +413,10 @@ commands:
             CYPRESS_INTERNAL_FORCE_BROWSER_RELAUNCH='true' \
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$TEST_LAUNCHPAD_RECORD_KEY \
+            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
+            PERCY_ENABLE=${PERCY_TOKEN:-0} \
+            PERCY_PARALLEL_TOTAL=-1 \
+            yarn percy exec --parallel -- -- \
             yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --record --parallel --group <<parameters.package>>-<<parameters.type>>
       - store_test_results:
           path: /tmp/cypress
@@ -1020,7 +1024,7 @@ jobs:
             fi
       - wait-on-circle-jobs:
           job-names: >
-            desktop-gui-integration-tests-2x,
+            desktop-gui-integration-tests-7x,
             desktop-gui-component-tests,
             cli-visual-tests,
             runner-integration-tests-chrome,
@@ -1298,9 +1302,9 @@ jobs:
       - run-driver-integration-tests:
           browser: electron
 
-  desktop-gui-integration-tests-2x:
+  desktop-gui-integration-tests-7x:
     <<: *defaults
-    parallelism: 2
+    parallelism: 7
     steps:
       - restore_cached_workspace
       - run:
@@ -2208,7 +2212,7 @@ linux-workflow: &linux-workflow
     #     context: test-runner:launchpad-tests
     #     requires:
     #       - build
-    - desktop-gui-integration-tests-2x:
+    - desktop-gui-integration-tests-7x:
         requires:
           - build
     - desktop-gui-component-tests:
@@ -2279,7 +2283,7 @@ linux-workflow: &linux-workflow
           - reporter-integration-tests
           - Linux lint
           - desktop-gui-component-tests
-          - desktop-gui-integration-tests-2x
+          - desktop-gui-integration-tests-7x
           - runner-ct-integration-tests-chrome
           - runner-integration-tests-firefox
           - runner-integration-tests-chrome

@@ -26,6 +26,10 @@ describe('<BaseError />', () => {
     })
   })
 
+  afterEach(() => {
+    cy.percySnapshot()
+  })
+
   it('renders the default error the correct messages', () => {
     cy.mountFragment(BaseErrorFragmentDoc, {
       onResult: (result) => {

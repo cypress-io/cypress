@@ -3,7 +3,7 @@ import cs from 'classnames'
 import { ReporterHeaderProps } from '@packages/reporter/src/header/header'
 import { Reporter } from '@packages/reporter/src/main'
 
-import { errorMessages, namedObserver, eventManager as EventManager } from '@packages/runner-shared'
+import { errorMessages, namedObserver, EventManager } from '@packages/runner-shared'
 import State from '../lib/state'
 import { ReporterHeader } from './ReporterHeader'
 import { NoSpec } from './NoSpec'
@@ -12,7 +12,7 @@ import styles from './RunnerCt.module.scss'
 
 interface ReporterContainerProps {
   state: State
-  eventManager: typeof EventManager
+  eventManager: EventManager
   config: {
     configFile: string
     [key: string]: unknown

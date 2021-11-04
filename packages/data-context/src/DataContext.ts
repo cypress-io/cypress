@@ -19,14 +19,20 @@ import {
 import { cached } from './util/cached'
 import { DataContextShell, DataContextShellConfig } from './DataContextShell'
 import type { GraphQLSchema } from 'graphql'
+import type { App as ElectronApp } from 'electron'
 
 const IS_DEV_ENV = process.env.CYPRESS_INTERNAL_ENV !== 'production'
+
+export interface InternalDataContextOptions {
+  loadCachedProjects: boolean
+}
 
 export interface DataContextConfig extends DataContextShellConfig {
   schema: GraphQLSchema
   os: PlatformName
   launchArgs: LaunchArgs
   launchOptions: OpenProjectLaunchOptions
+  electronApp: ElectronApp
   /**
    * Default is to
    */
@@ -37,6 +43,10 @@ export interface DataContextConfig extends DataContextShellConfig {
   appApi: AppApiShape
   authApi: AuthApiShape
   projectApi: ProjectApiShape
+  /**
+   * Internal options used for testing purposes
+   */
+  _internalOptions: InternalDataContextOptions
 }
 
 export class DataContext extends DataContextShell {
@@ -47,19 +57,30 @@ export class DataContext extends DataContextShell {
     this._coreData = _config.coreData ?? makeCoreData()
   }
 
+  get electronApp () {
+    return this._config.electronApp
+  }
+
   async initializeData () {
     const toAwait: Promise<any>[] = [
       // Fetch the browsers when the app starts, so we have some by
       // the time we're continuing.
       this.actions.app.refreshBrowsers(),
-      // load projects from cache on start
-      this.actions.project.loadProjects(),
       // load the cached user & validate the token on start
       this.actions.auth.getUser(),
     ]
 
+    if (this._config._internalOptions.loadCachedProjects) {
+      // load projects from cache on start
+      toAwait.push(this.actions.project.loadProjects())
+    }
+
     if (this._config.launchArgs.projectRoot) {
-      toAwait.push(this.actions.project.setActiveProject(this._config.launchArgs.projectRoot))
+      await this.actions.project.setActiveProject(this._config.launchArgs.projectRoot)
+
+      if (this.coreData.app.activeProject?.preferences) {
+        toAwait.push(this.actions.project.launchProjectWithoutElectron())
+      }
     }
 
     if (this._config.launchArgs.testingType) {
