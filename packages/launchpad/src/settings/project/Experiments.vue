@@ -5,9 +5,11 @@
     </template>
     <template #description>
       <i18n-t keypath="settingsPage.experiments.description">
-        <a
+        <ExternalLink
           href="https://docs.cypress.io"
-        >{{ t('links.learnMore') }}</a>
+        >
+          {{ t('links.learnMore') }}
+        </ExternalLink>
       </i18n-t>
     </template>
     <div
@@ -28,6 +30,7 @@
 import { computed } from 'vue'
 import ExperimentRow from './ExperimentRow.vue'
 import SettingsSection from '../SettingsSection.vue'
+import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import { experiments as defaultExperiments } from './projectSettings'
 
 // eslint-disable-next-line no-duplicate-imports

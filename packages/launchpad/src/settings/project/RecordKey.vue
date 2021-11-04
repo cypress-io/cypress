@@ -5,9 +5,11 @@
     </template>
     <template #description>
       <i18n-t keypath="settingsPage.recordKey.description">
-        <a
+        <ExternalLink
           href="https://docs.cypress.io"
-        >{{ t('links.learnMore') }}</a>
+        >
+          {{ t('links.learnMore') }}
+        </ExternalLink>
       </i18n-t>
     </template>
     <div
@@ -78,6 +80,7 @@ import IconEyeOpen from '~icons/mdi/eye-outline'
 import IconEyeClosed from '~icons/mdi/eye-off-outline'
 import IconDashedSquare from '~icons/si-glyph/square-dashed-2'
 import { gql } from '@urql/core'
+import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 
 gql`
 fragment RecordKey on CloudRecordKey {

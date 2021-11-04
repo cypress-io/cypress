@@ -33,7 +33,7 @@
       </template>
     </ButtonInternals>
   </button>
-  <a
+  <ExternalLink
     v-else
     :href="href"
     style="width: fit-content"
@@ -67,14 +67,14 @@
           />
         </slot>
       </template>
-
     </ButtonInternals>
-  </a>
+  </ExternalLink>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue'
 import ButtonInternals from './ButtonInternals.vue'
+import ExternalLink from '../gql-components/ExternalLink.vue'
 
 export default defineComponent({
   inheritAttrs: true,

@@ -5,9 +5,11 @@
     </template>
     <template #description>
       <i18n-t keypath="settingsPage.projectId.description">
-        <a
+        <ExternalLink
           href="https://docs.cypress.io"
-        >{{ t('links.learnMore') }}</a>
+        >
+          {{ t('links.learnMore') }}
+        </ExternalLink>
       </i18n-t>
     </template>
     <div class="inline-grid grid-flow-col justify-start gap-10px">
@@ -37,6 +39,7 @@ import ShikiHighlight from '@cy/components/ShikiHighlight.vue'
 import CopyButton from '@cy/components/CopyButton.vue'
 import type { ProjectIdFragment } from '../../generated/graphql'
 import SettingsSection from '../SettingsSection.vue'
+import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 
 gql`
 fragment ProjectId on Project {

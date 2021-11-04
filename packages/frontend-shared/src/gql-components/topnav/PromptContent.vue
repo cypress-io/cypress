@@ -43,7 +43,7 @@
         </li>
       </ul>
     </div>
-    <a
+    <ExternalLink
       :href="getUrl({
         url: 'https://on.cypress.io/ci',
         params: {
@@ -56,13 +56,17 @@
     >
       <i-cy-infinity-loop_x18 class="icon-dark-indigo-500 mr-20px w-20px h-20px" />
       <div class="flex-grow">
-        <p class="text-indigo-500 pb-4px">{{ t('topNav.docsMenu.prompts.ci.intro') }}</p>
-        <p class="text-gray-600 text-14px">{{ t('topNav.docsMenu.prompts.ci.learnTheBasics') }}</p>
+        <p class="text-indigo-500 pb-4px">
+          {{ t('topNav.docsMenu.prompts.ci.intro') }}
+        </p>
+        <p class="text-gray-600 text-14px">
+          {{ t('topNav.docsMenu.prompts.ci.learnTheBasics') }}
+        </p>
       </div>
       <i-cy-arrow-outline-right
         class="transition-transform duration-200 ease-in transform icon-dark-gray-400 w-20px h-20px group-hocus:translate-x-2px"
       />
-    </a>
+    </ExternalLink>
   </div>
   <div
     v-else-if="type === 'orchestration'"
@@ -139,6 +143,7 @@ import GitHubActions from '@packages/frontend-shared/src/assets/logos/github-act
 import Bitbucket from '@packages/frontend-shared/src/assets/logos/bitbucket.svg?url'
 import Gitlab from '@packages/frontend-shared/src/assets/logos/gitlab.svg?url'
 import AwsCodeBuild from '@packages/frontend-shared/src/assets/logos/aws-codebuild.svg?url'
+import ExternalLink from '@packages/frontend-shared/src/gql-components/ExternalLink.vue'
 
 defineProps<{
   type: 'ci' | 'orchestration' | 'main',

@@ -16,10 +16,12 @@
         :key="dep.id"
         class="py-16px border-b border-b-gray-100 last-of-type:border-b-0"
       >
-        <a
+        <ExternalLink
           :href="`https://www.npmjs.com/package/${dep.package}`"
           class="text-indigo-500 text-14px hocus-link-default"
-        >{{ dep.package }}</a>
+        >
+          {{ dep.package }}
+        </ExternalLink>
         <p
           class="text-gray-500 text-14px leading-5"
           v-html="dep.description"

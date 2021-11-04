@@ -5,9 +5,11 @@
     </template>
     <template #description>
       <i18n-t keypath="settingsPage.config.description">
-        <a
+        <ExternalLink
           href="https://docs.cypress.io"
-        >cypress.config.js</a>
+        >
+          cypress.config.js
+        </ExternalLink>
       </i18n-t>
     </template>
     <div class="flex w-full select-none">
@@ -30,6 +32,7 @@ import { useI18n } from '@cy/i18n'
 import cypressConfig from '../../../cypress.config'
 import ConfigLegend from './ConfigLegend.vue'
 import ConfigCode from './ConfigCode.vue'
+import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 
 const code = ref(JSON.parse(JSON.stringify(cypressConfig, null, 2)))
 const { t } = useI18n()
