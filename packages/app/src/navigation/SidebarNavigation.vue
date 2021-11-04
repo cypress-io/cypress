@@ -21,9 +21,9 @@
           h-24px
           flex-shrink-0 mx-20px"
         />
-        <div class="text-gray-50 overflow-hidden leading-24px text-size-16px flex-shrink-0">
+        <div class="text-gray-50 overflow-hidden leading-24px text-size-16px whitespace-nowrap">
           {{ query.data.value?.app?.activeProject?.title ?? 'Cypress' }}
-          <p class="text-gray-600 overflow-hidden overflow-ellipsis whitespace-nowrap leading-20px text-size-14px">
+          <p class="text-gray-600 overflow-hidden overflow-ellipsis leading-20px text-size-14px">
             chore/use-import-types-for-gql
           </p>
         </div>
