@@ -5,7 +5,7 @@ import { makeDataContext } from '../makeDataContext'
 import { makeGraphQLServer } from '../gui/makeGraphQLServer'
 import { assertValidPlatform } from '@packages/types/src/platform'
 
-export function runInternalServer (options) {
+export function runInternalServer (launchArgs, _internalOptions = { loadCachedProjects: true }) {
   const bus = new EventEmitter()
   const platform = os.platform()
 
@@ -14,7 +14,8 @@ export function runInternalServer (options) {
   const ctx = makeDataContext({
     os: platform,
     rootBus: bus,
-    launchArgs: options,
+    launchArgs,
+    _internalOptions,
   })
 
   // Initializing the data context, loading browsers, etc.
