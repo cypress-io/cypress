@@ -40,11 +40,11 @@ describe('src/index', () => {
 
       expect(defaultValues).to.deep.include({
         defaultCommandTimeout: 4000,
-        env: {},
         scrollBehavior: 'top',
         watchForFileChanges: true,
       })
 
+      expect(defaultValues.env).to.deep.eq({})
       snapshot(defaultValues)
     })
   })

@@ -251,7 +251,7 @@ export default {
       docsUrl: 'https://on.cypress.io/config',
     },
     'invalid_test_override': {
-      message: `The config overrides passed to your test has the following validation error:\n\n{{errMsg}}`,
+      message: `The config override passed to your test has the following validation error:\n\n{{errMsg}}`,
       docsUrl: 'https://on.cypress.io/config',
     },
   },

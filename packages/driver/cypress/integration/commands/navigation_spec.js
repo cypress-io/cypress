@@ -1981,41 +1981,53 @@ describe('src/cy/commands/navigation', () => {
         return null
       })
 
-      it('can time out', function (done) {
-        let thenCalled = false
+      describe('can time out', () => {
+        let pageLoadTimeout
 
-        cy.on('fail', (err) => {
-          const { lastLog } = this
-
-          // visit, window, page loading
-          expect(this.logs.length).to.eq(3)
-          expect(err.message).to.include('Your page did not fire its `load` event within `50ms`.')
-          expect(lastLog.get('name')).to.eq('page load')
-          expect(lastLog.get('error')).to.eq(err)
-
-          return Promise
-          .delay(100)
-          .then(() => {
-            expect(cy.state('onPageLoadErr')).to.be.null
-            expect(cy.isStopped()).to.be.true // make sure we ran our cleanup routine
-            expect(thenCalled).to.be.false
-
-            done()
-          })
+        before(() => {
+          pageLoadTimeout = Cypress.config().pageLoadTimeout
         })
 
-        cy
-        .visit('/fixtures/jquery.html')
-        .window().then((win) => {
-          Cypress.config('pageLoadTimeout', 50)
-          const $a = win.$('<a href=\'/timeout?ms=500\'>jquery</a>')
-          .appendTo(win.document.body)
+        after(() => {
+          Cypress.config('pageLoadTimeout', pageLoadTimeout)
+        })
 
-          causeSynchronousBeforeUnload($a)
+        it('times out', function (done) {
+          let thenCalled = false
 
-          return null
-        }).wrap(null).then(() => {
-          thenCalled = true
+          cy.on('fail', (err) => {
+            const { lastLog } = this
+
+            // visit, window, page loading
+            expect(this.logs.length).to.eq(3)
+            expect(err.message).to.include('Your page did not fire its `load` event within `50ms`.')
+            expect(lastLog.get('name')).to.eq('page load')
+            expect(lastLog.get('error')).to.eq(err)
+
+            return Promise
+            .delay(100)
+            .then(() => {
+              expect(cy.state('onPageLoadErr')).to.be.null
+              expect(cy.isStopped()).to.be.true // make sure we ran our cleanup routine
+              expect(thenCalled).to.be.false
+
+              done()
+            })
+          })
+
+          cy
+          .visit('/fixtures/jquery.html')
+          .window().then((win) => {
+            Cypress.config('pageLoadTimeout', 50)
+            const $a = win.$('<a href=\'/timeout?ms=500\'>jquery</a>')
+            .appendTo(win.document.body)
+
+            causeSynchronousBeforeUnload($a)
+
+            return null
+          }).wrap(null).then(() => {
+            thenCalled = true
+          })
         })
       })
 
