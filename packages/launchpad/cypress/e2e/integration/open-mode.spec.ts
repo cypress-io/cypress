@@ -6,8 +6,22 @@ describe('Launchpad: Open Mode', () => {
     cy.visitLaunchpad()
   })
 
-  it('shows the open page when testingType is not specified', () => {
+  it('shows Add Project when no projects have been added', () => {
     cy.get('h1').should('contain', defaultMessages.globalPage.empty.title)
+  })
+
+  it('shows projects when projects have been added', () => {
+    cy.get('h1').should('contain', defaultMessages.globalPage.empty.title)
+  })
+
+  it('shows the projects page when a project is not specified', () => {
+    cy.task('scaffoldProject', 'todos').then((projectPath) => {
+      cy.withCtx(async (ctx, o) => {
+        ctx.actions.project.addProject({ path: o.projectPath as string, open: false })
+      }, { projectPath })
+    })
+
+    cy.contains(defaultMessages.globalPage.recentProjectsHeader)
   })
 
   it('goes directly to e2e tests when launched with --e2e', () => {

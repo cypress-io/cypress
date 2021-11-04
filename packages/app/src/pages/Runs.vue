@@ -14,12 +14,12 @@
 import { gql, useQuery } from '@urql/vue'
 import { RunsDocument } from '../generated/graphql'
 import RunsSkeleton from '../runs/RunsSkeleton.vue'
-import RunsPage from '../runs/RunsPage.vue'
+import RunsPage from '../runs/RunsContainer.vue'
 import TransitionQuickFade from '@cy/components/transitions/TransitionQuickFade.vue'
 
 gql`
 query Runs {
-  ...RunsPage
+  ...RunsContainer
 }`
 
 const query = useQuery({ query: RunsDocument })

@@ -22,12 +22,15 @@
 import { useMutation, gql, useQuery } from '@urql/vue'
 import OpenBrowserList from './OpenBrowserList.vue'
 import WizardLayout from './WizardLayout.vue'
-import { OpenBrowserDocument, LaunchOpenProjectDocument } from '../generated/graphql'
+import { OpenBrowserDocument, OpenBrowser_LaunchProjectDocument } from '../generated/graphql'
 
 gql`
 query OpenBrowser {
   app {
     ...OpenBrowserList
+  }
+  wizard {
+    testingType
   }
 }
 `
@@ -35,15 +38,30 @@ query OpenBrowser {
 const query = useQuery({ query: OpenBrowserDocument })
 
 gql`
-mutation LaunchOpenProject  {
+mutation OpenBrowser_LaunchProject ($testingType: TestingTypeEnum!, $browserPath: String!)  {
   launchOpenProject
+  hideBrowserWindow
+
+  setProjectPreferences(testingType: $testingType, browserPath: $browserPath) {
+    activeProject {
+      id
+      title
+    }
+  }
 }
 `
 
-const launchOpenProject = useMutation(LaunchOpenProjectDocument)
+const launchOpenProject = useMutation(OpenBrowser_LaunchProjectDocument)
 
-const launch = () => {
-  launchOpenProject.executeMutation({})
+const launch = (browserPath?: string) => {
+  const testingType = query.data.value?.wizard?.testingType
+
+  if (browserPath && testingType) {
+    launchOpenProject.executeMutation({
+      browserPath,
+      testingType,
+    })
+  }
 }
 
 </script>

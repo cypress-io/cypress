@@ -81,7 +81,7 @@ function setupE2E (projectName?: ProjectFixture) {
   }
 
   if (projectName) {
-    cy.task('setupE2E', projectName, { log: false })
+    cy.task('scaffoldProject', projectName, { log: false })
   }
 
   return cy.withCtx(async (ctx, o) => {

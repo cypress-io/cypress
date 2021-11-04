@@ -1,12 +1,18 @@
 exports['@packages/data-context initializeData initializes 1'] = {
   "shellConfig": {
+    "electronApp": {
+      "dock": {}
+    },
     "launchOptions": {},
     "launchArgs": {},
     "appApi": {},
     "authApi": {},
     "projectApi": {}
   },
-  "config": {
+  "_config": {
+    "electronApp": {
+      "dock": {}
+    },
     "launchOptions": {},
     "launchArgs": {},
     "appApi": {},
@@ -19,9 +25,14 @@ exports['@packages/data-context initializeData initializes 1'] = {
       "refreshState": null
     },
     "app": {
+      "refreshingBrowsers": {},
       "activeTestingType": null,
       "navItem": "settings",
-      "browsers": {},
+      "browsers": [
+        {
+          "path": "/dev/chrome"
+        }
+      ],
       "projects": [],
       "activeProject": null,
       "isInGlobalMode": false,
@@ -49,7 +60,9 @@ exports['@packages/data-context initializeData initializes 1'] = {
       "history": [
         "welcome"
       ],
-      "chosenBrowser": null
+      "chosenBrowser": {
+        "path": "/dev/chrome"
+      }
     },
     "user": null,
     "electron": {
