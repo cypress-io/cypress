@@ -15,23 +15,29 @@
         class="relative mx-auto bg-white rounded"
         :class="props.class || ''"
       >
-      <StandardModalHeader @close="setIsOpen(false)" :helpLink="helpLink" :helpText="helpText">
-        <slot name="title">{{ title }}</slot>
-      </StandardModalHeader>
+        <StandardModalHeader
+          :help-link="helpLink"
+          :help-text="helpText"
+          @close="setIsOpen(false)"
+        >
+          <slot name="title">
+            {{ title }}
+          </slot>
+        </StandardModalHeader>
 
-      <DialogDescription
-        v-if="$slots.description"
-        class="font-normal text-gray-700 p-24px"
-      >
-        <slot name="description" />
-      </DialogDescription>
-      <StandardModalBody :variant="variant">
-        <slot />
-      </StandardModalBody>
-      <StandardModalFooter v-if="$slots.footer">
-        <slot name="footer" />
-      </StandardModalFooter>
-    </div>
+        <DialogDescription
+          v-if="$slots.description"
+          class="font-normal text-gray-700 p-24px"
+        >
+          <slot name="description" />
+        </DialogDescription>
+        <StandardModalBody :variant="variant">
+          <slot />
+        </StandardModalBody>
+        <StandardModalFooter v-if="$slots.footer">
+          <slot name="footer" />
+        </StandardModalFooter>
+      </div>
     </div>
   </Dialog>
 </template>
@@ -70,6 +76,8 @@ const props = withDefaults(defineProps<{
   helpText: 'Need help?',
   helpLink: 'https://docs.cypress.io',
   class: undefined,
+  variant: undefined,
+  title: '',
 })
 
 const setIsOpen = (val: boolean) => {

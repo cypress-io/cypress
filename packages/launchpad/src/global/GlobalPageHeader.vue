@@ -45,8 +45,8 @@
   />
 
   <NoResults
-    class="mt-80px"
     v-if="!projectCount"
+    class="mt-80px"
     :search="localValue"
     :message="t('globalPage.noResultsMessage')"
     @clear="handleClear"

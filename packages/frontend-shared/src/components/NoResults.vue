@@ -1,7 +1,7 @@
 <template>
   <div
-    data-testid="no-results"
     v-if="search || emptySearch"
+    data-testid="no-results"
     class="text-center"
   >
     <NoResultsIllustration
@@ -10,7 +10,10 @@
     />
     <p class="text-gray-500 text-18px leading-normal">
       {{ message || t('noResults.defaultMessage') }}
-      <span v-if="search" class="block truncate text-purple-500">{{ search }}</span>
+      <span
+        v-if="search"
+        class="block truncate text-purple-500"
+      >{{ search }}</span>
     </p>
     <Button
       data-testid="no-results-clear"

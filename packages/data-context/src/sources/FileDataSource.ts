@@ -33,7 +33,7 @@ export class FileDataSource {
     }) as Promise<Result>
   }
 
-  normalizeFileToFileParts(options: CreateFileParts): SpecFile & { fileExtension: string } {
+  normalizeFileToFileParts (options: CreateFileParts): SpecFile & { fileExtension: string } {
     const parsed = path.parse(options.absolute)
 
     return {
@@ -56,11 +56,10 @@ export class FileDataSource {
   }
 
   async getFilesByGlob (cwd: string, glob: string | string[], globOptions?: GlobbyOptions) {
-    debugger;
     const globs = (Array.isArray(glob) ? glob : [glob]).concat('!**/node_modules/**')
 
     try {
-      const files = await globby(globs, { onlyFiles: true, absolute: true, cwd, ...globOptions, })
+      const files = await globby(globs, { onlyFiles: true, absolute: true, cwd, ...globOptions })
 
       return files
     } catch (e) {

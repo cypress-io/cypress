@@ -43,8 +43,8 @@ const makeRuleForClass = ({ name, theme, weight, color }: RuleConfig) => {
         fill: resolvedColor,
       },
       '> *[fill][stroke].icon-light-stroke': {
-        stroke: resolvedColor
-      }
+        stroke: resolvedColor,
+      },
     },
     [secondaryLightKey]: {
       '> *[fill].icon-light-secondary': {
@@ -57,8 +57,8 @@ const makeRuleForClass = ({ name, theme, weight, color }: RuleConfig) => {
         fill: resolvedColor,
       },
       '> *[fill][stroke].icon-light-secondary-stroke': {
-        stroke: resolvedColor
-      }
+        stroke: resolvedColor,
+      },
     },
     [darkKey]: {
       '> *[fill].icon-dark': {
@@ -85,8 +85,8 @@ const makeRuleForClass = ({ name, theme, weight, color }: RuleConfig) => {
         fill: resolvedColor,
       },
       '> *[fill][stroke].icon-dark-secondary-stroke': {
-        stroke: resolvedColor
-      }
+        stroke: resolvedColor,
+      },
     },
   }
 }
