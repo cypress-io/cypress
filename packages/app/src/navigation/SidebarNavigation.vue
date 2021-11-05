@@ -13,7 +13,12 @@
       </div>
     </div>
     <div class="flex flex-col flex-1 overflow-y-auto ">
-      <div class="flex items-center h-64px">
+      <div
+        ref="header"
+        class="flex items-center h-64px"
+        @mouseover="placeTooltip(); hoverTitle = true"
+        @mouseout="hoverTitle = false"
+      >
         <i-cy-bookmark_x24
           class="icon-dark-gray-200
           icon-light-gray-900
@@ -27,6 +32,17 @@
             chore/use-import-types-for-gql
           </p>
         </div>
+        <SidebarTooltip
+          v-if="showTitleTooltip"
+          :tooltip-top="tooltipTop"
+        >
+          <div class="text-left text-gray-50 overflow-hidden leading-24px text-size-16px whitespace-nowrap">
+            {{ query.data.value?.app?.activeProject?.title ?? 'Cypress' }}
+            <p class="text-gray-600 overflow-hidden overflow-ellipsis leading-20px text-size-14px">
+              chore/use-import-types-for-gql
+            </p>
+          </div>
+        </SidebarTooltip>
       </div>
       <hr class="border-gray-900">
       <nav
@@ -60,6 +76,7 @@
 </template>
 
 <script lang="ts" setup>
+import { computed, ref } from 'vue'
 import { gql, useQuery } from '@urql/vue'
 import SidebarNavigationRow from './SidebarNavigationRow.vue'
 import SwitchTestingTypeButton from './SwitchTestingTypeButton.vue'
@@ -67,6 +84,7 @@ import SpecsIcon from '~icons/cy/test-results_x24'
 import CodeIcon from '~icons/cy/code-editor_x24'
 import RunsIcon from '~icons/cy/runs_x24'
 import SettingsIcon from '~icons/cy/settings_x24'
+import SidebarTooltip from './SidebarTooltip.vue'
 import { useMainStore } from '../store'
 import { SideBarNavigationDocument } from '../generated/graphql'
 import CypressLogo from '@packages/frontend-shared/src/assets/logos/cypress_s.png'
@@ -93,5 +111,20 @@ query SideBarNavigation {
 
 const query = useQuery({ query: SideBarNavigationDocument })
 
+const hoverTitle = ref(false)
+const tooltipTop = ref(0)
+
+const wrapper = ref<HTMLDivElement | null>(null)
+
+// We cannot do this in onMounted because
+// top will changes after the bar is mounted
+function placeTooltip () {
+  const { y } = wrapper.value?.getBoundingClientRect() || { y: 0 }
+
+  tooltipTop.value = y
+}
+
 const mainStore = useMainStore()
+
+const showTitleTooltip = computed(() => hoverTitle.value && !mainStore.navBarExpanded)
 </script>

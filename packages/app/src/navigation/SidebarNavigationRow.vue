@@ -47,34 +47,19 @@
       >
         {{ name }}
       </span>
-      <teleport
+      <SidebarTooltip
         v-if="showTooltip"
-        to="#tooltip-target"
-      >
-        hello
-        <div
-          class="bg-gray-1000 text-gray-50 rounded
-                  absolute left-64px
-                  w-160px h-40px px-16px mx-24px
-                  flex items-center justify-center
-                  leading-24px text-size-16px
-                  content
-                  before:block before:absolute before:right-full before:top-12px
-                  before:border-solid before:border-transparent
-                  before:border-width-8px before:border-transparent before:border-r-gray-900 before:border-l-0
-                  need-content"
-          :style="`top: ${tooltipTop}px`"
-        >
-          {{ name }}
-        </div>
-      </teleport>
+        :tooltip-top="tooltipTop"
+        :name="name"
+      />
     </span>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed, FunctionalComponent, onMounted, ref, SVGAttributes } from 'vue'
+import { computed, FunctionalComponent, ref, SVGAttributes } from 'vue'
 import { useMainStore } from '../store'
+import SidebarTooltip from './SidebarTooltip.vue'
 
 withDefaults(defineProps <{
   icon: FunctionalComponent<SVGAttributes, {}>,
@@ -102,11 +87,3 @@ const mainStore = useMainStore()
 
 const showTooltip = computed(() => hover.value && !mainStore.navBarExpanded)
 </script>
-
-<style lang="scss" scoped>
-// This issue needs this line
-// https://github.com/windicss/windicss/issues/419
-.need-content:before{
-  content: ''
-}
-</style>

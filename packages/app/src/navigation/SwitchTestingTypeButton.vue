@@ -1,7 +1,10 @@
 <template>
   <a
+    ref="wrapper"
     class="block p-8px flex items-center m-12px bg-gray-900 group rounded cursor-pointer"
     @click="modalStore.open('switchTestingType')"
+    @mouseover="placeTooltip();hover=true"
+    @mouseout="hover=false"
   >
     <component
       :is="testingTypeIcon"
@@ -23,14 +26,20 @@
           h-16px"
     />
   </a>
+  <SidebarTooltip
+    v-if="showTooltip"
+    :tooltip-top="tooltipTop"
+    :name="testingTypeName || 'none'"
+  />
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { gql } from '@urql/vue'
 import { TESTING_TYPES } from '@packages/types/src'
 import type { SwitchTestingTypeButtonFragment } from '../generated/graphql'
-import { useModalStore } from '../store'
+import { useMainStore, useModalStore } from '../store'
+import SidebarTooltip from './SidebarTooltip.vue'
 import IconE2E from '~icons/cy/testing-type-e2e_x24'
 import IconComponent from '~icons/cy/testing-type-component_x24'
 
@@ -58,5 +67,22 @@ const ICONS_MAP = {
 const testingTypeIcon = computed(() => {
   return props.gql.activeTestingType ? ICONS_MAP[props.gql.activeTestingType] : null
 })
+
+const hover = ref(false)
+const tooltipTop = ref(0)
+
+const wrapper = ref<HTMLDivElement | null>(null)
+
+// We cannot do this in onMounted because
+// top will changes after the bar is mounted
+function placeTooltip () {
+  const { y } = wrapper.value?.getBoundingClientRect() || { y: 0 }
+
+  tooltipTop.value = y
+}
+
+const mainStore = useMainStore()
+
+const showTooltip = computed(() => hover.value && !mainStore.navBarExpanded)
 
 </script>
