@@ -307,7 +307,7 @@ cross-spawn@^7.0.0:
     shebang-command "^2.0.0"
     which "^2.0.1"
 
-"cypress@file:../../..../../../cli":
+"cypress@file:../../../cli":
   version "0.0.0-development"
   dependencies:
     "@cypress/request" "^2.88.6"
@@ -793,7 +793,7 @@ minimist@^1.2.5:
 
 ms@2.1.2:
   version "2.1.2"
-  resolved "https://registry.npmjs.o../../..ms-2.1.2.tgz#d09d1f357b443f493382a8eb3ccd183872ae6009"
+  resolved "https://registry.npmjs.o../../../ms-2.1.2.tgz#d09d1f357b443f493382a8eb3ccd183872ae6009"
   integrity sha512-sGkPx+VjMtmA6MX27oA4FBFELFCZZ4S4XqeGOXCv68tT+jb3vk/RyaKWP0PTKyWtmLSM0b+adUTEvbs1PEaH2w==
 
 ms@^2.1.1:

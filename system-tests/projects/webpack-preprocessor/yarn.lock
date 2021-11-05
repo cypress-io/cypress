@@ -728,7 +728,7 @@
     "@babel/helper-validator-identifier" "^7.15.7"
     to-fast-properties "^2.0.0"
 
-"@cypress/webpack-preprocessor@file:../../..../../../npm/webpack-preprocessor":
+"@cypress/webpack-preprocessor@file:../../../npm/webpack-preprocessor":
   version "0.0.0-development"
   dependencies:
     bluebird "^3.7.1"
@@ -1072,7 +1072,7 @@ mkdirp@^0.5.3:
 
 ms@2.1.2:
   version "2.1.2"
-  resolved "https://registry.npmjs.o../../..ms-2.1.2.tgz#d09d1f357b443f493382a8eb3ccd183872ae6009"
+  resolved "https://registry.npmjs.o../../../ms-2.1.2.tgz#d09d1f357b443f493382a8eb3ccd183872ae6009"
   integrity sha512-sGkPx+VjMtmA6MX27oA4FBFELFCZZ4S4XqeGOXCv68tT+jb3vk/RyaKWP0PTKyWtmLSM0b+adUTEvbs1PEaH2w==
 
 node-releases@^2.0.1:

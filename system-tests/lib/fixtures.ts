@@ -126,7 +126,6 @@ export async function scaffoldProjectNodeModules (project: string, updateYarnLoc
   }
 
   const cacheDir = _path.join(cachedir('cy-system-tests-node-modules'), project, 'node_modules')
-  // const cacheDir = _path.join(process.env.CI ? 'TBD' : cachedir('cy-system-tests-node-modules'), project, 'node_modules')
 
   async function removeWorkspacePackages (packages: string[]): Promise<void> {
     for (const dep of packages) {
@@ -160,16 +159,11 @@ export async function scaffoldProjectNodeModules (project: string, updateYarnLoc
     await removeWorkspacePackages(workspaceDeps)
 
     // 3. Fix relative paths in temp dir's `yarn.lock`.
-    const relativePathToProjectDir = _path.resolve(projectDir, _path.join(root, '..'))
+    const relativePathToProjectDir = _path.relative(projectDir, _path.join(root, '..'))
     const yarnLockPath = _path.join(projectDir, 'yarn.lock')
 
     console.log('📦 Writing yarn.lock with fixed relative paths to temp dir')
     try {
-      console.log({
-        relativePathToMonorepoRoot,
-        relativePathToProjectDir,
-      })
-
       const yarnLock = replaceAll(
         await fs.readFile(yarnLockPath, 'utf8'),
         relativePathToMonorepoRoot,
@@ -253,9 +247,9 @@ export async function symlinkNodeModule (pkg) {
   const from = _path.join(tmpDir, 'node_modules', pkg)
   const to = pathToPackage(pkg)
 
-  await fs.ensureDirSync(_path.dirname(from))
+  await fs.ensureDir(_path.dirname(from))
   try {
-    await fs.symlinkSync(to, from, 'junction')
+    await fs.symlink(to, from, 'junction')
   } catch (err) {
     if (err.code === 'EEXIST') return
 
@@ -263,7 +257,6 @@ export async function symlinkNodeModule (pkg) {
   }
 }
 
-// TODO
 export function scaffoldWatch () {
   const watchdir = _path.resolve(__dirname, '../projects')
 

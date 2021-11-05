@@ -753,7 +753,7 @@
     tunnel-agent "^0.6.0"
     uuid "^8.3.2"
 
-"@cypress/webpack-preprocessor@file:../../..../../../npm/webpack-preprocessor":
+"@cypress/webpack-preprocessor@file:../../../npm/webpack-preprocessor":
   version "0.0.0-development"
   dependencies:
     bluebird "^3.7.1"
@@ -1157,7 +1157,7 @@ cross-spawn@^7.0.0:
     shebang-command "^2.0.0"
     which "^2.0.1"
 
-"cypress@file:../../..../../../cli":
+"cypress@file:../../../cli":
   version "0.0.0-development"
   dependencies:
     "@cypress/request" "^2.88.6"
