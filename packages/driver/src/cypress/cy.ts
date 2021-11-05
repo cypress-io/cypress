@@ -192,6 +192,8 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
     const { expect } = createChai!(specWindow, state, this.assert)
 
     this.expect = expect
+
+    this.$$ = this.$$.bind(this)
   }
 
   $$ (selector, context) {
