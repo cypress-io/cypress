@@ -12,7 +12,6 @@
           w-24px
           h-24px"
         />
-        <i-bi-bookmark-star class="text-white w-18px h-18px" />
       </div>
       <nav
         class="flex-1 px-2 mt-5 space-y-1 bg-gray-1000"
@@ -46,11 +45,9 @@ import SettingsIcon from '~icons/cy/settings_x24'
 import { useMainStore } from '../store'
 
 const navigation = [
-  { name: 'Home', icon: SpecsIcon, href: '/' },
-  { name: 'Specs', icon: CodeIcon, href: '/specs' },
+  { name: 'Home', icon: CodeIcon, href: '/' },
   { name: 'Runs', icon: RunsIcon, href: '/runs' },
   { name: 'Settings', icon: SettingsIcon, href: '/settings' },
-  { name: 'New Spec', icon: SettingsIcon, href: '/newspec' },
 ]
 
 const mainStore = useMainStore()

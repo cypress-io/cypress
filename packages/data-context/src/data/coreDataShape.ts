@@ -1,4 +1,4 @@
-import { BUNDLERS, FoundBrowser, FoundSpec, FullConfig, GeneratedSpec, Preferences } from '@packages/types'
+import { BUNDLERS, FoundBrowser, FoundSpec, FullConfig, Preferences } from '@packages/types'
 import type { NexusGenEnums, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
 import type { BrowserWindow } from 'electron'
 import type { ChildProcess } from 'child_process'
@@ -35,7 +35,6 @@ export interface ActiveProjectShape extends ProjectShape {
   config: Promise<FullConfig> | null
   configChildProcess: ConfigChildProcessShape
   preferences?: Preferences| null
-  generatedSpec: GeneratedSpec | null
 }
 
 export interface AppDataShape {

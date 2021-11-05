@@ -1,9 +1,15 @@
 <template>
   <div class="p-24px">
+    <CreateSpecModal
+      v-if="props.gql.activeTestingType"
+      :show="showModal"
+      :gql="props.gql"
+      @close="showModal = false"
+    />
     <SpecsListHeader
       v-model="search"
       class="pb-32px"
-      @newSpec="modalStore.open('createSpec')"
+      @newSpec="showModal = true"
     />
     <div class="grid items-center divide-y-1 children:h-40px">
       <div class="grid grid-cols-2 children:text-gray-800 children:font-medium">
@@ -27,11 +33,10 @@ import SpecsListHeader from './SpecsListHeader.vue'
 import SpecsListRow from './SpecsListRow.vue'
 import { gql } from '@urql/vue'
 import { computed, ref } from 'vue'
+import CreateSpecModal from './CreateSpecModal.vue'
 import type { Specs_SpecsListFragment, SpecNode_SpecsListFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
-import { useModalStore } from '../store'
 
-const modalStore = useModalStore()
 const { t } = useI18n()
 
 gql`
@@ -48,10 +53,11 @@ fragment SpecNode_SpecsList on SpecEdge {
 
 gql`
 fragment Specs_SpecsList on App {
+  ...CreateSpecModal
   activeProject {
     id
     projectRoot
-    specs: specs(first: 25) {
+    specs: specs(first: 100) {
       edges {
         ...SpecNode_SpecsList
       }
@@ -64,6 +70,7 @@ const props = defineProps<{
   gql: Specs_SpecsListFragment
 }>()
 
+const showModal = ref(false)
 const search = ref('')
 const specs = computed(() => props.gql.activeProject?.specs?.edges)
 
