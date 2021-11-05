@@ -13,7 +13,7 @@
       <div
         class="bg-gray-900 text-gray-50 rounded
                   absolute left-64px h-40px
-                  w-160px px-16px mx-12px
+                  w-176px px-16px mx-12px
                   flex items-center justify-center
                   leading-24px text-size-16px
                   content

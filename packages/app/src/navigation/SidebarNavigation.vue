@@ -80,7 +80,6 @@
 import { gql, useQuery } from '@urql/vue'
 import SidebarNavigationRow from './SidebarNavigationRow.vue'
 import SwitchTestingTypeButton from './SwitchTestingTypeButton.vue'
-import SpecsIcon from '~icons/cy/test-results_x24'
 import CodeIcon from '~icons/cy/code-editor_x24'
 import RunsIcon from '~icons/cy/runs_x24'
 import SettingsIcon from '~icons/cy/settings_x24'

@@ -15,7 +15,7 @@
     <component
       :is="testingTypeIcon"
       class="
-          children:transition children:duration-800
+          children:transition children:duration-300
           icon-dark-jade-300 group-hover:icon-dark-white
           icon-light-jade-600 group-hover:icon-light-gray-700
           w-24px
