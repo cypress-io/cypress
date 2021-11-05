@@ -63,6 +63,7 @@ fragment RunsEmpty on CurrentProject {
   projectId
   configFilePath
   cloudProject {
+    id
     recordKeys {
       ...RecordKey
     }
@@ -83,12 +84,10 @@ const projectIdCode = computed(() => {
 const projectName = computed(() => props.gql.title)
 const configFilePath = computed(() => props.gql.configFilePath)
 const firstRecordKey = computed(() => {
-  const allRecordKeys = props.gql.cloudProject?.recordKeys
-
-  return allRecordKeys?.[0] ?? '<record-key>'
+  return props.gql.cloudProject?.recordKeys?.[0]
 })
 const recordCommand = computed(() => {
-  return `cypress run --record --key ${firstRecordKey.value}`
+  return `cypress run --record --key ${firstRecordKey.value?.key}`
 })
 </script>
 

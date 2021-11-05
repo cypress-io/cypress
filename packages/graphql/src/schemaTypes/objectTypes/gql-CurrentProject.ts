@@ -4,7 +4,6 @@ import { cloudProjectBySlug } from '../../stitching/remoteGraphQLCalls'
 import { CodeGenTypeEnum } from '../enumTypes/gql-CodeGenTypeEnum'
 import { Browser } from './gql-Browser'
 import { FileParts } from './gql-FileParts'
-import { GeneratedSpec } from './gql-GeneratedSpec'
 import { ProjectPreferences } from './gql-ProjectPreferences'
 
 export const CurrentProject = objectType({
@@ -127,27 +126,14 @@ export const CurrentProject = objectType({
       resolve: (src, args, ctx) => ctx.project.getCodeGenGlob(args.type),
     })
 
-    t.connectionField('codeGenCandidates', {
+    t.list.field('codeGenCandidates', {
       type: FileParts,
       description: 'List of all code generation candidates stories',
-      additionalArgs: {
+      args: {
         glob: nonNull(stringArg()),
       },
-      nodes: (source, args, ctx) => {
+      resolve: (source, args, ctx) => {
         return ctx.project.getCodeGenCandidates(args.glob)
-      },
-    })
-
-    t.field('generatedSpec', {
-      type: GeneratedSpec,
-      resolve: (src, args, ctx) => {
-        const project = ctx.currentProject
-
-        if (!project) {
-          return null
-        }
-
-        return project.generatedSpec
       },
     })
   },

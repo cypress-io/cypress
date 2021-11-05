@@ -19,7 +19,7 @@ export default defineConfig({
   'componentFolder': 'src',
   'supportFile': false,
   'component': {
-    'testFiles': '**/*.spec.{js,ts,tsx,jsx}',
+    'testFiles': '**/*.{spec,cy}.{js,ts,tsx,jsx}',
     'supportFile': 'cypress/component/support/index.ts',
     'pluginsFile': 'cypress/component/plugins/index.js',
   },

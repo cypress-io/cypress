@@ -1,5 +1,5 @@
 import type { CodeGenType, SpecType } from '@packages/graphql/src/gen/nxs.gen'
-import { FrontendFramework, FRONTEND_FRAMEWORKS, ResolvedFromConfig, RESOLVED_FROM, SpecFile, STORYBOOK_GLOB } from '@packages/types'
+import { FrontendFramework, FRONTEND_FRAMEWORKS, ResolvedFromConfig, RESOLVED_FROM, SpecFileWithExtension, STORYBOOK_GLOB } from '@packages/types'
 import { scanFSForAvailableDependency } from 'create-cypress-tests'
 import path from 'path'
 
@@ -146,7 +146,7 @@ export class ProjectDataSource {
     return framework?.glob ?? looseComponentGlob
   }
 
-  async getCodeGenCandidates (glob: string): Promise<SpecFile[]> {
+  async getCodeGenCandidates (glob: string): Promise<SpecFileWithExtension[]> {
     // Storybook can support multiple globs, so show default one while
     // still fetching all stories
     if (glob === STORYBOOK_GLOB) {
@@ -161,7 +161,7 @@ export class ProjectDataSource {
 
     const config = await this.ctx.project.getConfig(project.projectRoot)
 
-    const codeGenCandidates = await this.ctx.file.getFilesByGlob(glob)
+    const codeGenCandidates = await this.ctx.file.getFilesByGlob(config.projectRoot || process.cwd(), glob)
 
     return codeGenCandidates.map(
       (file) => {

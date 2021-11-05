@@ -94,7 +94,6 @@ const emit = defineEmits<{
 const props = defineProps<{
   gql: GlobalProjectCardFragment
 }>()
-
 const { t } = useI18n()
 
 type eventName = 'removeProject' | 'openInIDE' | 'openInFinder'

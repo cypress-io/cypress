@@ -242,20 +242,7 @@ type CurrentProject implements Node & ProjectLike {
   cloudProject: CloudProject
 
   """List of all code generation candidates stories"""
-  codeGenCandidates(
-    """Returns the elements in the list that come after the specified cursor"""
-    after: String
-
-    """Returns the elements in the list that come before the specified cursor"""
-    before: String
-
-    """Returns the first n elements from the list."""
-    first: Int
-    glob: String!
-
-    """Returns the last n elements from the list."""
-    last: Int
-  ): FilePartsConnection
+  codeGenCandidates(glob: String!): [FileParts]
 
   """Glob pattern for component searching"""
   codeGenGlob(type: CodeGenType!): String!
@@ -274,7 +261,6 @@ type CurrentProject implements Node & ProjectLike {
 
   """The mode the interactive runner was launched in"""
   currentTestingType: TestingTypeEnum
-  generatedSpec: GeneratedSpec
 
   """Relay style Node ID field for the CurrentProject field"""
   id: ID!
@@ -350,6 +336,11 @@ type FileParts implements Node {
   """
   baseName: String!
 
+  """
+  The spec file's extension, including "spec" pattern (e.g. .spec.tsx, -spec.tsx, -test.tsx)
+  """
+  fileExtension: String!
+
   """The first part of the file, without extensions (e.g. MySpec)"""
   fileName: String!
 
@@ -361,26 +352,6 @@ type FileParts implements Node {
 
   """Relative path to spec (e.g. src/component/MySpec.test.tsx)"""
   relative: String!
-}
-
-type FilePartsConnection {
-  """
-  https://facebook.github.io/relay/graphql/connections.htm#sec-Edge-Types
-  """
-  edges: [FilePartsEdge!]!
-
-  """
-  https://facebook.github.io/relay/graphql/connections.htm#sec-undefined.PageInfo
-  """
-  pageInfo: PageInfo!
-}
-
-type FilePartsEdge {
-  """https://facebook.github.io/relay/graphql/connections.htm#sec-Cursor"""
-  cursor: String!
-
-  """https://facebook.github.io/relay/graphql/connections.htm#sec-Node"""
-  node: FileParts!
 }
 
 enum FrontendFrameworkEnum {
@@ -444,13 +415,13 @@ type Mutation {
   appCreateConfigFile(code: String!, configFilename: String!): Boolean
   clearActiveProject: Boolean
 
-  """Generate spec from source"""
-  codeGenSpec(codeGenCandidate: String!, type: CodeGenType!): Boolean
-
   """
   Development only: Triggers or dismisses a prompted refresh by touching the file watched by our development scripts
   """
   devRelaunch(action: DevRelaunchAction!): Boolean
+
+  """Generate spec from source"""
+  generateSpecFromSource(codeGenCandidate: String!, type: CodeGenType!): GeneratedSpec
 
   """Hides the launchpad windows"""
   hideBrowserWindow: Boolean!
@@ -645,7 +616,7 @@ type Query {
   navigationMenu: NavigationMenu
 
   """All known projects for the app"""
-  projects: [GlobalProject!]!
+  projects: [ProjectLike!]!
 
   """Metadata about the wizard, null if we arent showing the wizard"""
   wizard: Wizard!

@@ -71,13 +71,14 @@
 
 <script lang="ts" setup>
 import { useI18n } from '@cy/i18n'
-import { OpenBrowserListFragment, OpenBrowserList_SetBrowserDocument } from '../generated/graphql'
 import Button from '@packages/frontend-shared/src/components/Button.vue'
 import { computed } from 'vue'
 import _clone from 'lodash/clone'
 import openInNew from '~icons/mdi/open-in-new'
 import { useMutation, gql } from '@urql/vue'
 import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
+
+import { OpenBrowserListFragment, OpenBrowserList_SetBrowserDocument } from '../generated/graphql'
 
 gql`
 mutation OpenBrowserList_SetBrowser($id: ID!) {

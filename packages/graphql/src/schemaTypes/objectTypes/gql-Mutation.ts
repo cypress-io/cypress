@@ -1,7 +1,8 @@
 import { arg, booleanArg, enumType, idArg, mutationType, nonNull, stringArg } from 'nexus'
-import { CodeGenTypeEnum } from '..'
+import { CodeGenTypeEnum } from '../enumTypes/gql-CodeGenTypeEnum'
 import { CodeLanguageEnum, FrontendFrameworkEnum, NavItemEnum, SupportedBundlerEnum, TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
 import { WizardUpdateInput } from '../inputTypes/gql-WizardUpdateInput'
+import { GeneratedSpec } from './gql-GeneratedSpec'
 import { Wizard } from './gql-Wizard'
 
 export const mutation = mutationType({
@@ -180,14 +181,15 @@ export const mutation = mutationType({
       },
     })
 
-    t.liveMutation('codeGenSpec', {
+    t.liveMutation('generateSpecFromSource', {
+      type: GeneratedSpec,
       description: 'Generate spec from source',
       args: {
         codeGenCandidate: nonNull(stringArg()),
         type: nonNull(CodeGenTypeEnum),
       },
       resolve: async (_, args, ctx) => {
-        await ctx.actions.project.codeGenSpec(args.codeGenCandidate, args.type)
+        return ctx.actions.project.codeGenSpec(args.codeGenCandidate, args.type)
       },
     })
 
