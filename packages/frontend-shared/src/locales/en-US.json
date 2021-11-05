@@ -320,6 +320,16 @@
     }
   },
   "navigation": {
-    "chooseTestingType": "Choose a testing type"
+    "testingType": {
+      "e2e": {
+        "name": "E2E Testing",
+        "description": "Build and test the entire experience of your application from end-to-end to each ensure each flow matches your expectations."
+      },
+      "component": {
+        "name": "Component Testing",
+        "description": "Build and test your components from your design system in isolation in order to ensure each state matches your expectations."
+      },
+      "modalTitle": "Choose a testing type"
+    }
   }
 }
