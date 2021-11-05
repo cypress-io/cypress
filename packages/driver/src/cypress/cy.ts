@@ -8,8 +8,7 @@ import $dom from '../dom'
 import $utils from './utils'
 import $errUtils from './error_utils'
 import $stackUtils from './stack_utils'
-
-import $Chai from '../cy/chai'
+import { create as createChai, IChai } from '../cy/chai'
 import $Xhrs from '../cy/xhrs'
 import { create as createJQuery, IJQuery } from '../cy/jquery'
 import $Aliases from '../cy/aliases'
@@ -121,7 +120,7 @@ const setTopOnError = function (Cypress, cy: $Cy) {
 
 // NOTE: this makes the cy object an instance
 // TODO: refactor the 'create' method below into this class
-class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILocation, ITimer {
+class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILocation, ITimer, IChai {
   id: string
   state: any
 
@@ -141,6 +140,8 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
   getRemoteLocation: ILocation['getRemoteLocation']
 
   pauseTimers: ITimer['pauseTimers']
+
+  expect: IChai['expect']
 
   // Private methods
   resetTimer: ReturnType<typeof createTimer>['reset']
@@ -187,6 +188,10 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
 
     this.pauseTimers = timer.pauseTimers
     this.resetTimer = timer.reset
+
+    const { expect } = createChai!(specWindow, state, this.assert)
+
+    this.expect = expect
   }
 
   $$ (selector, context) {
@@ -225,12 +230,10 @@ export default {
     const keyboard = $Keyboard.create(state)
     const mouse = $Mouse.create(state, keyboard, focused, Cypress)
 
-    const { expect } = $Chai.create(specWindow, state, cy.assert)
-
     const xhrs = $Xhrs.create(state)
     const aliases = $Aliases.create(cy)
 
-    const ensures = $Ensures.create(state, expect)
+    const ensures = $Ensures.create(state, cy.expect)
 
     // TODO: for some reason, cy.$$ fails.
     const snapshots = $Snapshots.create($$, state)
@@ -609,9 +612,6 @@ export default {
 
       // errors sync methods
       fail,
-
-      // chai expect sync methods
-      expect,
 
       // is cy
       isCy,

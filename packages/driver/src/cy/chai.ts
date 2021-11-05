@@ -38,13 +38,18 @@ let containProto = null
 let existProto = null
 let getMessage = null
 let chaiUtils = null
-let create = null
 let replaceArgMessages = null
 let removeOrKeepSingleQuotesBetweenStars = null
 let setSpecWindowGlobals = null
 let restoreAsserts = null
 let overrideExpect = null
 let overrideChaiAsserts = null
+
+export let create: ((specWindow, state, assertFn) => ({
+  chai: Chai.ChaiStatic
+  expect: (val: any, message?: string) => Chai.Assertion
+  assert: any
+})) | null = null
 
 chai.use(sinonChai)
 
@@ -543,8 +548,11 @@ chai.use((chai, u) => {
   }
 })
 
+export interface IChai {
+  expect: ReturnType<typeof create>['expect']
+}
+
 export default {
-  create,
   replaceArgMessages,
   removeOrKeepSingleQuotesBetweenStars,
   setSpecWindowGlobals,
