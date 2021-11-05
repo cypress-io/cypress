@@ -4,7 +4,7 @@ import Promise from 'bluebird'
 import $dom from '../../../dom'
 import $errUtils from '../../../cypress/error_utils'
 import $actionability from '../../actionability'
-import { dispatch } from './trigger'
+import { addEventCoords, dispatch } from './trigger'
 
 // TODO: Does not currently need to use promises, but will once we allow users to
 // load fixtures and read files. Writing it async from the start to avoid
@@ -21,56 +21,62 @@ import { dispatch } from './trigger'
  * Or throws an error. Users do many strange things, and this is where
  * we warn them and suggest how to fix it.
  */
-const parseFile = (file: any, index: number, filesArray: any[]): Promise<FileReferenceObject> => {
-  if (typeof file === 'string') {
-    throw new Error('Support for string shorthands is still TODO')
-  }
-
-  if (Buffer.isBuffer(file)) {
-    file = { contents: file }
-  }
-
-  if (!file || file.contents == null) {
-    // Different error messages if the user passed in one file vs. an array of files
-    if (filesArray.length > 1) {
-      $errUtils.throwErrByPath('attachFile.invalid_single_file_reference', {
-        onFail: options._log,
-        args: { file },
-      })
-    } else {
-      $errUtils.throwErrByPath('attachFile.invalid_array_file_reference', {
-        onFail: options._log,
-        args: { file, index },
-      })
+const parseFile = (options) => {
+  return (file: any, index: number, filesArray: any[]): Promise<Cypress.FileReferenceObject> => {
+    if (typeof file === 'string') {
+      throw new Error('Support for string shorthands is still TODO')
     }
-  }
 
-  if (!_.isString(file.contents) && !Buffer.isBuffer(file.contents)) {
-    file.contents = JSON.stringify(file.contents)
-  }
+    if (Buffer.isBuffer(file)) {
+      file = { contents: file }
+    }
 
-  return Promise.resolve(_.defaults({}, file, {
-    fileName: '',
-    lastModified: Date.now(),
-  }))
+    if (!file || file.contents == null) {
+    // Different error messages if the user passed in one file vs. an array of files
+      if (filesArray.length > 1) {
+        $errUtils.throwErrByPath('attachFile.invalid_array_file_reference', {
+          onFail: options._log,
+          args: { file: JSON.stringify(file), index },
+        })
+      } else {
+        $errUtils.throwErrByPath('attachFile.invalid_single_file_reference', {
+          onFail: options._log,
+          args: { file: JSON.stringify(file) },
+        })
+      }
+    }
+
+    if (!_.isString(file.contents) && !Buffer.isBuffer(file.contents)) {
+      file.contents = JSON.stringify(file.contents)
+    }
+
+    return Promise.resolve(_.defaults({}, file, {
+      fileName: '',
+      lastModified: Date.now(),
+    }))
+  }
 }
 
-const createDataTransfer = (files: FileReferenceObject[]): DataTransfer => {
+const createFileList = (files: Cypress.FileReferenceObject[]): FileList => {
   const dataTransfer = new DataTransfer()
 
   files.forEach(({ contents, fileName, lastModified, mimeType }) => {
-    const file = new File([contents], fileName, { lastModified, type: mimeType })
+    const file = new File([contents], fileName || '', { lastModified, type: mimeType })
 
     dataTransfer.items.add(file)
   })
 
-  return dataTransfer
+  return dataTransfer.files
+}
+
+interface InternalAttachFileOptions extends Cypress.AttachFileOptions {
+  _log: any
+  $el: JQuery
 }
 
 export default (Commands, Cypress, cy, state, config) => {
   Commands.addAll({ prevSubject: 'element' }, {
-    // TODO: any -> Partial<Cypress.Loggable & Cypress.Timeoutable>
-    attachFile (subject, files: FileReference | FileReference[], options: Partial<AttachFileOptions>): Chainable<Subject> {
+    attachFile (subject: JQuery<any>, files: Cypress.FileReference | Cypress.FileReference[], options: Partial<InternalAttachFileOptions>): Promise<JQuery> {
       options = _.defaults({}, options, {
         action: 'input',
         log: true,
@@ -84,7 +90,7 @@ export default (Commands, Cypress, cy, state, config) => {
           consoleProps () {
             return {
               'Target': $dom.getElements(options.$el),
-              Elements: options.$el.length,
+              Elements: options.$el?.length,
             }
           },
         })
@@ -92,9 +98,12 @@ export default (Commands, Cypress, cy, state, config) => {
         options._log.snapshot('before', { next: 'after' })
       }
 
-      // Support for drag-n-drop to come at a later date
+      // TODO: Support for drag-n-drop to come at a later date
       if (options.action !== 'input') {
-        $errUtils.throwErr('attachFile.invalid_action', { onFail: options._log })
+        $errUtils.throwErrByPath('attachFile.invalid_action', {
+          onFail: options._log,
+          args: { action: options.action },
+        })
       }
 
       if (subject.length > 1) {
@@ -104,7 +113,7 @@ export default (Commands, Cypress, cy, state, config) => {
         })
       }
 
-      let input = options.$el
+      let input = subject
 
       if (input.is('label')) {
         input = $dom.getInputFromLabel(input)
@@ -119,8 +128,12 @@ export default (Commands, Cypress, cy, state, config) => {
         })
       }
 
+      if (!options.force) {
+        cy.ensureNotDisabled(input, options._log)
+      }
+
       // Make sure files is an array even if the user only passed in one
-      return Promise.all([].concat(files).map(parseFile)).then((filesArray) => {
+      return Promise.all(([] as Cypress.FileReference[]).concat(files).map(parseFile(options))).then((filesArray) => {
         const trigger = () => {
           // We verify actionability on the subject, rather than the input,
           // in order to allow for a hidden <input> with a visible <label>
@@ -132,34 +145,33 @@ export default (Commands, Cypress, cy, state, config) => {
             },
 
             onReady ($elToClick, coords) {
-              // $elToClick is the label or input element - the original subject
+              // $elToClick is either the <label> or <input> - the original subject
               // while `element` is always the <input>
-              const element = input.get(0)
-              const dataTransfer = createDataTransfer(filesArray)
+              const element = input.get(0);
 
-              const { fromElWindow, fromElViewport, fromAutWindow } = coords
+              (element as HTMLInputElement).files = createFileList(filesArray)
 
               if (options._log) {
                 // display the red dot at these coords
                 options._log.set({
-                  coords: fromAutWindow,
+                  coords: coords.fromAutWindow,
                 })
               }
 
               // We dispatch the events on the input element, but target the red dot
-              // based on $elToClick, which may be the input or a label pointing to it
-              const eventOptions = {
-                clientX: fromElViewport.x,
-                clientY: fromElViewport.y,
-                screenX: fromElViewport.x,
-                screenY: fromElViewport.y,
-                pageX: fromElWindow.x,
-                pageY: fromElWindow.y,
-              }
+              // based on $elToClick (the coords $actionability.verify gave us),
+              // which may be the input or a label pointing to it.
+              const inputEventOptions = addEventCoords({
+                bubbles: true,
+                composed: true,
+              }, coords)
 
-              element.files = dataTransfer.files
-              dispatch(element, state('window'), 'input', eventOptions)
-              dispatch(element, state('window'), 'change', eventOptions)
+              const changeEventOptions = addEventCoords({
+                bubbles: true,
+              }, coords)
+
+              dispatch(element, state('window'), 'input', inputEventOptions)
+              dispatch(element, state('window'), 'change', changeEventOptions)
 
               return $elToClick
             },

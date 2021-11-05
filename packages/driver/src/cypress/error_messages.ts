@@ -133,15 +133,15 @@ export default {
 
   attachFile: {
     invalid_action: {
-      message: '`action` can only be `input` or `drag-n-drop`',
+      message: `${cmd('attachFile')} \`action\` can only be \`input\` or \`drag-n-drop\`. You passed: \`{{action}}\`.`,
       docsUrl: 'https://on.cypress.io/attachFile',
     },
     invalid_array_file_reference: {
-      message: `${cmd('attachFile')} must be passed an array of Buffers or objects with non-null 'contents' properties as its 1st argument. At index {{index}} you passed: \`{{file}}\`.`,
+      message: `${cmd('attachFile')} must be passed an array of Buffers or objects with non-null \`contents\`. At files[{{index}}] you passed: \`{{file}}\`.`,
       docsUrl: 'https://on.cypress.io/attachFile',
     },
     invalid_single_file_reference: {
-      message: `${cmd('attachFile')} must be passed a Buffer or an object with a non-null 'contents' property as its 1st argument. You passed: \`{{file}}\`.`,
+      message: `${cmd('attachFile')} must be passed a Buffer or an object with a non-null \`contents\` property as its 1st argument. You passed: \`{{file}}\`.`,
       docsUrl: 'https://on.cypress.io/attachFile',
     },
     multiple_elements: {

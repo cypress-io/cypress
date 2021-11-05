@@ -4,8 +4,32 @@
     <title>Generic File Inputs</title>
   </head>
   <body>
+    <style>
+      form {
+        position: relative;
+        min-height: 30px;
+      }
+
+      #hidden, #hidden-basic-label {
+        display: none;
+      }
+
+      #covered, #covering {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 30px;
+        height: 30px;
+      }
+      #covering {
+        background: black;
+        z-index: 1;
+      }
+    </style>
+
     <form>
       <label for="basic" id="basic-label">Label A</label>
+      <label for="basic" id="hidden-basic-label">Hidden Label A</label>
       <input id="basic" type="file" />
     </form>
 
@@ -14,11 +38,6 @@
     </form>
 
     <form>
-      <style>
-        #hidden {
-          display: none;
-        }
-      </style>
       <label for="hidden" id="hidden-label">Label B</label>
       <input id="hidden" type="file" />
     </form>
@@ -28,6 +47,16 @@
       <input type="text" id="text-input" />
 
       <label for="nonexistent" id="nonexistent-label">Bad label</label>
+    </form>
+
+    <form>
+      <div id="covering"></div>
+      <input id="covered" type="file" />
+    </form>
+
+    <form>
+      <label for="disabled" id="disabled-label">Disabled Label</label>
+      <input id="disabled" type="file" disabled />
     </form>
   </body>
 </html>
