@@ -1,6 +1,7 @@
 import type { BrowserWindow } from 'electron'
 import os from 'os'
 import type { DataContext } from '..'
+import { openExternal } from '@packages/server/lib/gui/links'
 
 export class ElectronActions {
   constructor (private ctx: DataContext) { }
@@ -45,5 +46,9 @@ export class ElectronActions {
 
   refreshBrowserWindow () {
     this.electron.browserWindow?.reload()
+  }
+
+  openExternal (url: string) {
+    openExternal(url)
   }
 }
