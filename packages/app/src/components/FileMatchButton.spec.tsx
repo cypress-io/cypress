@@ -1,3 +1,7 @@
+// @ts-nocheck
+// Anything with onClick SHOULD work, but isn't...
+// Defining emits for "Button.vue" removes the native handler on the
+// <button> element. vue-tsc just can't handle this yet.
 import FileMatchButton from './FileMatchButton.vue'
 import faker from 'faker'
 import { ref } from 'vue'
