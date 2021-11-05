@@ -4,7 +4,6 @@ const execa = require('execa')
 const path = require('path')
 const la = require('lazy-ass')
 const fs = require('fs')
-const R = require('ramda')
 const filesize = require('filesize')
 
 // prints disk usage numbers using "du" utility
@@ -59,7 +58,7 @@ const macZip = (src, dest) => {
 
     return execa(zip, options)
     .then(onZipFinished)
-    .then(R.always(dest))
+    .then(() => dest)
     .catch(onError)
   })
 }
@@ -100,8 +99,12 @@ const linuxZipAction = function (parentFolder, dest, relativeSource) {
 
   return execa(cmd, { shell: true })
   .then(onZipFinished)
-  .then(R.always(dest))
-  .then(R.tap(checkZipSize))
+  .then(() => dest)
+  .then((val) => {
+    checkZipSize(val)
+
+    return val
+  })
   .catch(onError)
 }
 
@@ -123,7 +126,7 @@ const renameFolder = function (src) {
   console.log(`renaming ${src} to ${renamed}`)
 
   return fs.promises.rename(src, renamed)
-  .then(R.always(renamed))
+  .then(() => renamed)
 }
 
 // resolves with zipped filename
@@ -136,7 +139,7 @@ const linuxZip = function (src, dest) {
   return renameFolder(src)
   .then((renamedSource) => {
     return printFileSizes(renamedSource)
-    .then(R.always(renamedSource))
+    .then(() => renamedSource)
   }).then((renamedSource) => {
     console.log(`will zip folder ${renamedSource}`)
     const parentFolder = path.dirname(renamedSource)
@@ -173,8 +176,12 @@ const windowsZipAction = function (src, dest) {
 
   return execa(cmd, { shell: true })
   .then(onZipFinished)
-  .then(R.always(dest))
-  .then(R.tap(checkZipSize))
+  .then(() => dest)
+  .then((val) => {
+    checkZipSize(val)
+
+    return val
+  })
   .catch(onError)
 }
 

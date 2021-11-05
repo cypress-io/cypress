@@ -1,5 +1,4 @@
 const _ = require('lodash')
-const R = require('ramda')
 const os = require('os')
 const ospath = require('ospath')
 const crypto = require('crypto')
@@ -114,10 +113,9 @@ const logBrokenGtkDisplayWarning = () => {
 }
 
 function stdoutLineMatches (expectedLine, stdout) {
-  const lines = stdout.split('\n').map(R.trim)
-  const lineMatches = R.equals(expectedLine)
+  const lines = stdout.split('\n').map((val) => val.trim())
 
-  return lines.some(lineMatches)
+  return lines.some((line) => line === expectedLine)
 }
 
 /**
@@ -229,11 +227,14 @@ const parseOpts = (opts) => {
 
   // some options might be quoted - which leads to unexpected results
   // remove double quotes from certain options
-  const removeQuotes = {
-    group: dequote,
-    ciBuildId: dequote,
+  const cleanOpts = { ...opts }
+  const toDequote = ['group', 'ciBuildId']
+
+  for (const prop of toDequote) {
+    if (_.has(opts, prop)) {
+      cleanOpts[prop] = dequote(opts[prop])
+    }
   }
-  const cleanOpts = R.evolve(removeQuotes, opts)
 
   debug('parsed cli options %o', cleanOpts)
 

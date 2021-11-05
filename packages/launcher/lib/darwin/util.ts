@@ -1,6 +1,5 @@
 import { log } from '../log'
 import { notInstalledErr } from '../errors'
-import { prop, tap } from 'ramda'
 import { utils } from '../utils'
 import * as fs from 'fs-extra'
 import * as os from 'os'
@@ -27,7 +26,7 @@ export function parsePlist (p: string, property: string): Promise<string> {
   return fs
   .readFile(pl, 'utf8')
   .then(plist.parse)
-  .then(prop(property))
+  .then((val) => val[property])
   .then(String) // explicitly convert value to String type
   .catch(failed) // to make TS compiler happy
 }
@@ -50,8 +49,14 @@ export function mdfind (id: string): Promise<string> {
   }
 
   return utils.execa(cmd)
-  .then(prop('stdout'))
-  .then(tap(logFound))
+  .then((val) => {
+    return val.stdout
+  })
+  .then((val) => {
+    logFound(val)
+
+    return val
+  })
   .catch(failedToFind)
 }
 

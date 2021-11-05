@@ -124,6 +124,13 @@ describe('src/cy/commands/actions/type - #clear', () => {
     })
   })
 
+  // https://github.com/cypress-io/cypress/issues/4233
+  it('can scroll to an element behind a sticky header', () => {
+    cy.viewport(400, 400)
+    cy.visit('./fixtures/sticky-header.html')
+    cy.get('input:first').clear()
+  })
+
   // https://github.com/cypress-io/cypress/issues/5835
   it('can force clear when hidden in input', () => {
     const input = cy.$$('input:first')

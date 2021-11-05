@@ -1,3 +1,10 @@
+# [@cypress/schematic-v1.5.3](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v1.5.2...@cypress/schematic-v1.5.3) (2021-10-29)
+
+
+### Bug Fixes
+
+* remove outdated registry link ([#18710](https://github.com/cypress-io/cypress/issues/18710)) ([e2a869d](https://github.com/cypress-io/cypress/commit/e2a869d2a984abb6703aec966dd9124ee693b8c1))
+
 # [@cypress/schematic-v1.5.2](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v1.5.1...@cypress/schematic-v1.5.2) (2021-10-29)
 
 
