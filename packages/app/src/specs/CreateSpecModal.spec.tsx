@@ -19,8 +19,8 @@ describe('<CreateSpecModal />', () => {
             id: 'id',
             codeGenGlob: '**.vue',
             storybook: null,
+            currentTestingType: 'component',
           },
-          activeTestingType: 'component',
         }}
         show={show.value}
         onClose={() => show.value = false}
@@ -69,8 +69,8 @@ describe('playground', () => {
             id: 'id',
             codeGenGlob: '**.vue',
             storybook: null,
+            currentTestingType: 'component',
           },
-          activeTestingType: 'component',
         }}
         show={show.value}
         onClose={() => show.value = false}

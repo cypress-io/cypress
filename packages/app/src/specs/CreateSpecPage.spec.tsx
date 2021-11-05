@@ -19,7 +19,8 @@ describe('<CreateSpecPage />', () => {
           id: 'id',
           storybook: null,
           codeGenGlob: '**.vue',
-        }, activeTestingType: 'component',
+          currentTestingType: 'component',
+        },
       }} /></div>))
     })
 
@@ -48,7 +49,8 @@ describe('<CreateSpecPage />', () => {
           id: 'id',
           storybook: null,
           codeGenGlob: '**.vue',
-        }, activeTestingType: 'e2e',
+          currentTestingType: 'e2e',
+        },
       }} /></div>))
     })
 
