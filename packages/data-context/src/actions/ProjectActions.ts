@@ -65,7 +65,6 @@ export class ProjectActions {
       title,
       ctPluginsInitialized: false,
       e2ePluginsInitialized: false,
-      generatedSpec: null,
       config: null,
       configChildProcess: null,
     })
@@ -371,7 +370,7 @@ export class ProjectActions {
       specFileExtension,
     })
 
-    project.generatedSpec = {
+    return {
       spec,
       content: newSpec.content,
     }

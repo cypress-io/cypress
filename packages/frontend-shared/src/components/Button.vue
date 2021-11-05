@@ -2,7 +2,7 @@
   <button
     v-if="!href"
     style="width: fit-content"
-    class="flex select-none items-center border rounded gap-8px outline-none"
+    class="flex items-center leading-tight border rounded gap-8px outline-none"
     :class="classes"
   >
     <ButtonInternals>
