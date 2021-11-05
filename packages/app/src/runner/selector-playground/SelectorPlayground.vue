@@ -22,7 +22,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch, watchEffect } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { getAutIframeModel } from '..';
 import { useSelectorPlaygroundStore } from '../../store/selector-playground-store';
 import type { AutIframe } from '../aut-iframe';

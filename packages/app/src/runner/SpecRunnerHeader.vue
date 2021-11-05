@@ -87,27 +87,28 @@ const selectorPlaygroundStore = useSelectorPlaygroundStore()
 
 const showPlayground = () => {
   selectorPlaygroundStore.setShow(!selectorPlaygroundStore.show)
-  const p = document.querySelector('#play')!
-  const playground = window.UnifiedRunner.React.createElement(window.UnifiedRunner.SelectorPlayground, {
-    eventManager,
-    model: window.UnifiedRunner.selectorPlaygroundModel,
-  })
+  // window.UnifiedRunner.selectorPlaygroundModel.toggleOpen()
+  console.log('activated', !selectorPlaygroundStore.isEnabled)
+  autIframe.toggleSelectorPlayground(!selectorPlaygroundStore.isEnabled)
 
-  window.UnifiedRunner.ReactDOM.render(playground, p)
+  // const p = document.querySelector('#play')!
+  // const playground = window.UnifiedRunner.React.createElement(window.UnifiedRunner.SelectorPlayground, {
+  //   eventManager,
+  //   model: window.UnifiedRunner.selectorPlaygroundModel,
+  // })
 
-  window.UnifiedRunner.selectorPlaygroundModel.toggleOpen()
+  // window.UnifiedRunner.ReactDOM.render(playground, p)
+
+  // window.UnifiedRunner.selectorPlaygroundModel.toggleOpen()
 }
 
-console.log(
-  window.UnifiedRunner.selectorPlaygroundModel.isEnabled
-)
-window.UnifiedRunner.MobX.observe(
-  // @ts-ignore
-  window.UnifiedRunner.selectorPlaygroundModel, 'isEnabled',
-  (enabled) => {
-    autIframe.toggleSelectorPlayground(enabled)
-  }
-)
+// window.UnifiedRunner.MobX.observe(
+//   // @ts-ignore
+//   window.UnifiedRunner.selectorPlaygroundModel, 'isEnabled',
+//   (enabled) => {
+//     autIframe.toggleSelectorPlayground(enabled)
+//   }
+// )
 
 const browser = computed(() => {
   if (!props.gql.selectedBrowser) {
