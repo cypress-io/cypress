@@ -9,6 +9,8 @@
           {{ headerText }}
         </slot>
       </h1>
+      <!-- eslint-disable vue/multiline-html-element-content-newline  -->
+
       <slot name="message">
         <!-- Can't pull this out because of the i18n-t component -->
         <p
@@ -27,11 +29,10 @@
           <ExternalLink
             href="https://docs.cypress.io"
             data-testid="error-docs-link"
-          >
-            cypress.config.js
-          </ExternalLink>
+          >cypress.config.js</ExternalLink>
         </i18n-t>
       </slot>
+      <!-- eslint-enable vue/multiline-html-element-content-newline  -->
 
       <slot name="stack">
         <p

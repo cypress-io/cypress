@@ -1,10 +1,9 @@
 <template>
+  <!-- eslint-disable vue/multiline-html-element-content-newline  -->
   <a
     :href="props.href"
     :class="classes"
-  >
-    <slot />
-  </a>
+  ><slot /></a>
 </template>
 
 <script lang="ts">

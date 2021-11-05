@@ -1,12 +1,11 @@
 <template>
+  <!-- eslint-disable vue/multiline-html-element-content-newline  -->
   <BaseLink
     data-cy="external"
     :href="props.href"
     :use-default-hocus="props.useDefaultHocus"
     @click.prevent="openExternal"
-  >
-    <slot />
-  </BaseLink>
+  ><slot /></BaseLink>
 </template>
 
 <script lang="ts">

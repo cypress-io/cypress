@@ -11,7 +11,7 @@ describe('<InstallDependencies />', () => {
     })
   })
 
-  it('displays package information and properly formed external links', () => {
+  it('displays package information and links', () => {
     cy.contains('a', '@cypress/react')
     .should('be.visible')
     .and('have.attr', 'href', 'https://www.npmjs.com/package/@cypress/react')
