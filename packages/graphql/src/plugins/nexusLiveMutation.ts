@@ -9,17 +9,15 @@ export type LiveMutationResolver<
   args: core.ArgsValue<TypeName, FieldName>,
   context: core.GetGen<'context'>,
   info: GraphQLResolveInfo
-) => Promise<string | void> | void
+) => core.MaybePromise<core.FieldTypeName<TypeName, FieldName> extends 'Boolean' ? core.ResultValue<TypeName, FieldName> | void : core.ResultValue<TypeName, FieldName>>
 
 export type LiveMutationFieldOpts<
   TypeName extends string,
   FieldName extends string
 > = {
-  type?: 'String'
-  nonNull?: boolean
-  description?: string
-  list?: never
+  type?: core.GetGen<'allOutputTypes', string> | core.AllNexusNamedOutputTypeDefs
   args?: core.ArgsRecord
+  description?: string
   resolve: LiveMutationResolver<TypeName, FieldName>
 }
 
@@ -40,7 +38,7 @@ export const NexusLiveMutationPlugin = plugin({
           fieldName: FieldName, 
           config: LiveMutationFieldOpts<TypeName, FieldName>
         ): void;`,
-        factory ({ typeDef: t, args }) {
+        factory ({ typeDef: t, args, wrapping }) {
           if (t.typeName !== 'Mutation') {
             throw new Error(`t.liveMutation can only be used on a Mutation`)
           }
@@ -50,10 +48,16 @@ export const NexusLiveMutationPlugin = plugin({
             LiveMutationFieldOpts<string, string>
           ]
 
-          const { resolve, type, nonNull, ...rest } = config
+          const { resolve, type = 'Boolean', ...rest } = config
 
-          t[nonNull ? 'nonNull' : 'nullable'].field(fieldName, {
-            type: type ?? 'Boolean',
+          let fieldType = typeof type === 'string' ? type : type?.name
+
+          if (wrapping?.length) {
+            fieldType = core.applyNexusWrapping(fieldType, wrapping)
+          }
+
+          t.field(fieldName, {
+            type: fieldType,
             ...rest,
             resolve: async (root, args, ctx, info) => {
               const value = await resolve(root, args, ctx, info)

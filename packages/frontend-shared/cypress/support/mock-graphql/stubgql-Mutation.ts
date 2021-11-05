@@ -69,12 +69,12 @@ export const stubMutation: MaybeResolver<Mutation> = {
   setProjectPreferences (source, args, ctx) {
     return ctx.app
   },
-  codeGenSpec (source, args, ctx) {
+  generateSpecFromSource (source, args, ctx) {
     if (!ctx.app.activeProject) {
       throw Error('Cannot set currentSpec without active project')
     }
 
-    ctx.app.activeProject.generatedSpec = {
+    return {
       __typename: 'GeneratedSpec',
       spec: {
         __typename: 'FileParts',
@@ -84,12 +84,11 @@ export const stubMutation: MaybeResolver<Mutation> = {
         name: 'Basic',
         fileName: 'Basic.spec.tsx',
         baseName: 'Basic',
+        fileExtension: 'tsx',
       },
       content: `it('should do stuff', () => {})`,
       id: 'U3BlYzovVXNlcnMvbGFjaGxhbi9jb2RlL3dvcmsvY3lwcmVzczUvcGFja2FnZXMvYXBwL3NyYy9CYXNpYy5zcGVjLnRzeA==',
     }
-
-    return true
   },
   reconfigureProject (src, args, ctx) {
     return true
