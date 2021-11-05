@@ -18,7 +18,6 @@
         <ExternalLink
           v-if="!item.changeContent || !activeProjectExists"
           :href="getUrl(item.link)"
-          target="_blank"
           class="font-normal ml-4px whitespace-nowrap"
         >
           {{ item.text }}

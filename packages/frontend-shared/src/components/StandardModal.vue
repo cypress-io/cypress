@@ -23,7 +23,6 @@
             <slot name="title" /> <span class="inline-block border-t border-t-gray-100 w-32px h-6px mx-8px" />
             <ExternalLink
               :href="helpLink"
-              target="_blank"
               class="text-indigo-500 group text-16px"
             >
               <span class="group-hocus:underline">{{ helpText }}</span>

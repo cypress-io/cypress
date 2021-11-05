@@ -28,7 +28,6 @@
           >
             <ExternalLink
               href="https://on.cypress.io/dashboard"
-              target="_blank"
             >
               {{ t('topNav.login.dashboard') }}
             </ExternalLink>
@@ -39,7 +38,6 @@
           >
             <ExternalLink
               href="https://on.cypress.io/dashboard/profile"
-              target="_blank"
               class="text-indigo-500 font-medium"
             >
               {{ viewer.fullName }}

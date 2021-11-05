@@ -51,7 +51,7 @@
           utm_campaign: 'Learn More',
         },
       })"
-      target="_blank"
+      :use-default-hocus="false"
       class="box-border flex items-center border border-transparent group py-16px px-24px bg-gray-50 hocus-default outline-transparent"
     >
       <i-cy-infinity-loop_x18 class="icon-dark-indigo-500 mr-20px w-20px h-20px" />

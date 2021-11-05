@@ -15,14 +15,14 @@
           class="mr-18px w-32px h-32px"
           src="../assets/logos/cypress-dark.png"
         >
-        <BaseLink
+        <a
           :class="props.gql?.app?.activeProject ? 'text-indigo-500' :
             'text-gray-700'"
           :href="props.gql?.app?.activeProject ? 'global-mode' : undefined"
           @click.prevent="clearActiveProject"
         >
           Projects
-        </BaseLink>
+        </a>
         <!-- TODO: Replace with a cy icon -->
         <i-oi-chevron-right
           v-if="props.gql?.app?.activeProject"
@@ -62,7 +62,6 @@
                   <br>
                   <ExternalLink
                     href="https://on.cypress.io/dashboard/profile"
-                    target="_blank"
                   >
                     Profile Settings
                   </ExternalLink>
