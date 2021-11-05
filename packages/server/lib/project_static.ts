@@ -8,8 +8,6 @@ import cache from './cache'
 import user from './user'
 import keys from './util/keys'
 import * as settings from './util/settings'
-import { ProjectBase } from './project-base'
-import { getDefaultConfigFilePath } from './project_utils'
 
 const debug = Debug('cypress:server:project_static')
 
@@ -143,21 +141,11 @@ export async function add (path, options) {
 
   try {
     await cache.insertProject(path)
-    const id = await getId(path)
 
-    return {
-      id,
-      path,
-    }
+    return { path }
   } catch (e) {
     return { path }
   }
-}
-
-export async function getId (path) {
-  const configFile = await getDefaultConfigFilePath(path)
-
-  return new ProjectBase({ projectRoot: path, testingType: 'e2e', options: { configFile } }).getProjectId()
 }
 
 interface ProjectIdOptions{

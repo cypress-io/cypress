@@ -32,7 +32,6 @@ const errors = require(`${root}lib/errors`)
 const plugins = require(`${root}lib/plugins`)
 const cypress = require(`${root}lib/cypress`)
 const ProjectBase = require(`${root}lib/project-base`).ProjectBase
-const { getId } = require(`${root}lib/project_static`)
 const { ServerE2E } = require(`${root}lib/server-e2e`)
 const Reporter = require(`${root}lib/reporter`)
 const Watchers = require(`${root}lib/watchers`)
@@ -1241,10 +1240,7 @@ describe('lib/cypress', () => {
         // make sure we have no user object
         user.set({}),
 
-        getId(this.todosPath)
-        .then((id) => {
-          this.projectId = id
-        }),
+        this.projectId = 'abc123',
       ])
     })
 

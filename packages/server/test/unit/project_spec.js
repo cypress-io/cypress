@@ -19,7 +19,6 @@ const {
   paths,
   remove,
   add,
-  getId,
   getPathsAndIds,
   getProjectStatus,
   getProjectStatuses,
@@ -1100,14 +1099,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     it('calls cache.removeProject with path', () => {
       return remove('/_test-output/path/to/project-e2e').then(() => {
         expect(cache.removeProject).to.be.calledWith('/_test-output/path/to/project-e2e')
-      })
-    })
-  })
-
-  context('.getId', () => {
-    it('returns project id', function () {
-      return getId(this.todosPath).then((id) => {
-        expect(id).to.eq(this.projectId)
       })
     })
   })
