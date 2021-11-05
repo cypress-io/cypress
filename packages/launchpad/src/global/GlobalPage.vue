@@ -34,7 +34,7 @@
 
 <script setup lang="ts">
 import { useI18n } from '@cy/i18n'
-import { computed, ComputedRef, ref } from 'vue'
+import { computed, ref } from 'vue'
 import { gql, useMutation } from '@urql/vue'
 import GlobalProjectCard from './GlobalProjectCard.vue'
 import GlobalPageHeader from './GlobalPageHeader.vue'
