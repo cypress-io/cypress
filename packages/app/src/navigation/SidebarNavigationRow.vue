@@ -1,6 +1,8 @@
 <template>
   <SidebarTooltip
-    :class="[active ? 'before:bg-jade-300 before:scale-x-100 before:transition-colors' : 'before:transition-transform']"
+    :class="active
+      ? 'before:bg-jade-300 before:scale-x-100 before:transition-colors'
+      : 'before:scale-x-0 before:transition-transform'"
     class="w-full
       min-w-40px
       relative
@@ -18,7 +20,7 @@
       before:h-40px
       before:w-4px
       before:bg-indigo-300
-      before:transform before:scale-x-0 before:origin-left
+      before:transform before:origin-left
       before:duration-300
       hover:before:scale-x-100
       hover:before:bg-indigo-300
