@@ -1,5 +1,6 @@
 <template>
   <BaseLink
+    data-cy="external"
     :href="props.href"
     :use-default-hocus="props.useDefaultHocus"
     @click.prevent="openExternal"

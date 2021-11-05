@@ -33,13 +33,13 @@
       </template>
     </ButtonInternals>
   </button>
-  <ExternalLink
+  <Component
+    :is="internalLink ? BaseLink : ExternalLink"
     v-else
     :href="href"
     style="width: fit-content"
     class="flex select-none items-center border rounded gap-8px outline-none"
     :class="classes"
-    :use-default-hocus="false"
   >
     <ButtonInternals>
       <template
@@ -68,13 +68,14 @@
         </slot>
       </template>
     </ButtonInternals>
-  </ExternalLink>
+  </Component>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue'
 import ButtonInternals from './ButtonInternals.vue'
 import ExternalLink from '../gql-components/ExternalLink.vue'
+import BaseLink from '../components/BaseLink.vue'
 
 export default defineComponent({
   inheritAttrs: true,
@@ -115,6 +116,7 @@ const props = defineProps<{
   prefixIconClass?: string
   suffixIconClass?: string
   href?: string // will cause the button to render as link element with button styles
+  internalLink?: boolean
 }>()
 
 const attrs = useAttrs() as ButtonHTMLAttributes
