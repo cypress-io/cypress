@@ -464,12 +464,8 @@ const startServer = function (obj) {
     app.use(require('cors')())
   }
 
-  const s = obj.static
-
-  if (s) {
-    const opts = _.isObject(s) ? s : {}
-
-    app.use(express.static(path.join(__dirname, '../projects/e2e'), opts))
+  if (obj.static) {
+    app.use(express.static(path.join(__dirname, '../projects/e2e'), {}))
   }
 
   return new Bluebird((resolve) => {
@@ -895,7 +891,7 @@ const systemTests = {
     }
 
     if (process.env.NO_EXIT) {
-      Fixtures.scaffoldProjectWatch(options.project)
+      Fixtures.scaffoldWatch()
     }
 
     if (ctx.settings) {
