@@ -51,6 +51,7 @@ import IconComponent from '~icons/cy/testing-type-component_x24'
 gql`
 fragment SwitchTestingTypeButton on App {
   activeTestingType
+  ...SwitchTestingTypeModal
 }
 `
 

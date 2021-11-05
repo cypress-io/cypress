@@ -19,21 +19,21 @@
 import { computed } from 'vue'
 import { gql } from '@urql/vue'
 import { TESTING_TYPES } from '@packages/types/src'
-import type { SwitchTestingTypeButtonFragment } from '../generated/graphql'
+import type { SwitchTestingTypeModalFragment } from '../generated/graphql'
 import StandardModal from '@cy/components/StandardModal.vue'
 import { useI18n } from '@cy/i18n'
 
 const { t } = useI18n()
 
 gql`
-fragment SwitchTestingTypeButton on App {
+fragment SwitchTestingTypeModal on App {
   activeTestingType
 }
 `
 
 const props = defineProps<{
+  gql: SwitchTestingTypeModalFragment
   show: boolean
-  gql: SwitchTestingTypeButtonFragment
 }>()
 
 const emit = defineEmits(['close'])
