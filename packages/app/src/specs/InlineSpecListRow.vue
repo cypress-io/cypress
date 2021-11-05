@@ -7,7 +7,7 @@
   >
     <div
       class="group flex items-center pl-18px"
-      :class="{ selected: selected }"
+      :class="{ 'selected': selected }"
     >
       <SpecFileItem
         :file-name="spec.fileName"

@@ -35,7 +35,7 @@ fragment Specs_InlineSpecList on App {
   activeProject {
     id
     projectRoot
-    specs: specs(first: 25) {
+    specs: specs(first: 1000) {
       edges {
         ...SpecNode_InlineSpecList
       }

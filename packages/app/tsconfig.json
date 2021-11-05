@@ -20,6 +20,7 @@
       "@cy/gql-components/*": ["../frontend-shared/src/gql-components/*"],
       "@packages/*": ["../*"]
     },
-    "allowJs": true
+    "allowJs": true,
+    "types": ["cypress", "cypress-real-events", "@testing-library/cypress"]
   }
 }
