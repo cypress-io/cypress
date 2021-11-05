@@ -70,7 +70,7 @@
     }
 
     svg {
-      margin-right: 8px;
+      margin-right: 5px;
       vertical-align: text-top;
 
       &.warning-icon {
@@ -98,7 +98,7 @@
 
     .runnable-wrapper {
       border-left: 5px solid transparent;
-      padding: 0;
+      padding: 0 0 0 4px;
 
       .collapsible-header {
         &:focus {
@@ -155,7 +155,7 @@
     }
 
     &.suite .collapsible-indicator {
-      margin-left: 5px;
+      margin-left: 2px;
       color: $gray-800;
     }
 
@@ -234,7 +234,8 @@
     }
 
     .runnable-state-icon {
-      margin: 4px;
+      margin-right: 5px;
+      margin-top: 4px;
 
       &.fa-spin {
         .icon-light {
@@ -286,6 +287,7 @@
 
   .runnable-controls {
     float: right;
+    height: 18px;
 
     label {
       padding: 2px 4px;

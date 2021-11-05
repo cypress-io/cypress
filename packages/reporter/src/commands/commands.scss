@@ -213,8 +213,6 @@
   }
 
   .command-state-pending > span > .command-wrapper .command-number {
-    padding-top: 2px;
-
     svg {
       line-height: 18px;
       display: inline-block;
@@ -484,7 +482,7 @@
     svg {
       color: $gray-600;
       cursor: pointer;
-      margin: 0px 4px;
+      margin: 2px;
     }
 
     .studio-command-remove {
@@ -508,7 +506,6 @@
     display: none;
     margin-left: 5px;
     margin-right: 0;
-    padding-top: 2px;
   }
 
   .command-is-invisible .command-invisible {
@@ -575,8 +572,7 @@
     flex-shrink: 0;
     font-size: 14px;
     line-height: 1;
-    margin-left: 4px;
-    margin-right: 6px;
+    margin-right: 10px;
     outline: none;
     padding: 2px 0 0;
     text-align: right;
