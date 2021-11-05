@@ -25,32 +25,20 @@
       focus:before:bg-indigo-300"
     :disabled="mainStore.navBarExpanded"
   >
-    <span
-      v-if="icon"
-      class="h-full
-      flex
-      items-center
-      overflow-hidden
-      ml-4px
-      p-8px
-      gap-20px
-      rounded-lg"
-    >
-      <component
-        :is="
-          icon"
-        :class="active ? 'icon-dark-jade-300 icon-light-jade-800' : 'icon-dark-gray-800 icon-light-gray-900'"
-        class="w-24px h-24px flex-shrink-0
+    <component
+      :is="
+        icon"
+      :class="active ? 'icon-dark-jade-300 icon-light-jade-800' : 'icon-dark-gray-500 icon-light-gray-900'"
+      class="w-24px h-24px flex-shrink-0 m-12px
             group-hover:icon-dark-indigo-300 group-hover:icon-light-indigo-600
             group-focus:icon-dark-indigo-300 group-focus:icon-light-indigo-600
             children:transition children:duration-300"
-      />
-      <span
-        :class="[active ? 'text-jade-300' : 'text-gray-400']"
-        class="truncate group-hocus:text-indigo-300 transition-colors duration-300"
-      >
-        {{ name }}
-      </span>
+    />
+    <span
+      :class="[active ? 'text-jade-300' : 'text-gray-500']"
+      class="ml-8px truncate group-hocus:text-indigo-300 transition-colors duration-300"
+    >
+      {{ name }}
     </span>
     <template #popper>
       {{ name }}
