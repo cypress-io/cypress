@@ -13,11 +13,11 @@
       </div>
     </div>
     <div class="flex flex-col flex-1 overflow-y-auto ">
-      <div
-        ref="header"
+      <SidebarTooltip
         class="flex items-center h-64px"
-        @mouseover="placeTooltip(); hoverTitle = true"
-        @mouseout="hoverTitle = false"
+        :disabled="mainStore.navBarExpanded"
+        :popper-top-offset="4"
+        poppper-class="h-56px"
       >
         <i-cy-bookmark_x24
           class="icon-dark-gray-200
@@ -32,18 +32,17 @@
             chore/use-import-types-for-gql
           </p>
         </div>
-        <SidebarTooltip
-          v-if="showTitleTooltip"
-          :tooltip-top="tooltipTop"
-        >
-          <div class="text-left text-gray-50 overflow-hidden leading-24px text-size-16px whitespace-nowrap">
+
+        <template #popper>
+          <div class="text-left text-gray-50 overflow-hidden leading-16px text-size-16px whitespace-nowrap">
             {{ query.data.value?.app?.activeProject?.title ?? 'Cypress' }}
             <p class="text-gray-600 overflow-hidden overflow-ellipsis leading-20px text-size-14px">
               chore/use-import-types-for-gql
             </p>
           </div>
-        </SidebarTooltip>
-      </div>
+        </template>
+      </SidebarTooltip>
+
       <hr class="border-gray-900">
       <nav
         class="flex-1 space-y-1 bg-gray-1000"
@@ -76,7 +75,6 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
 import { gql, useQuery } from '@urql/vue'
 import SidebarNavigationRow from './SidebarNavigationRow.vue'
 import SwitchTestingTypeButton from './SwitchTestingTypeButton.vue'
@@ -111,20 +109,6 @@ query SideBarNavigation {
 
 const query = useQuery({ query: SideBarNavigationDocument })
 
-const hoverTitle = ref(false)
-const tooltipTop = ref(0)
-
-const wrapper = ref<HTMLDivElement | null>(null)
-
-// We cannot do this in onMounted because
-// top will changes after the bar is mounted
-function placeTooltip () {
-  const { y } = wrapper.value?.getBoundingClientRect() || { y: 0 }
-
-  tooltipTop.value = y
-}
-
 const mainStore = useMainStore()
 
-const showTitleTooltip = computed(() => hoverTitle.value && !mainStore.navBarExpanded)
 </script>
