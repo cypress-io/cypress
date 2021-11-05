@@ -1,8 +1,27 @@
 import type { FullConfig } from '@packages/types'
+import path from 'path'
 import type { DataContext } from '..'
 
 export class ConfigDataSource {
   constructor (private ctx: DataContext) {}
+
+  async getConfigOnChildProcess (filename?: string) {
+    if (!filename) {
+      if (!this.ctx.activeProject?.projectRoot) {
+        throw new Error('Filename is required, and a active project must be set to get it')
+      }
+
+      const defaultConfigName = await this.getDefaultConfigBasename(this.ctx.activeProject?.projectRoot)
+
+      filename = path.join(this.ctx.activeProject.projectRoot, defaultConfigName)
+    }
+
+    const childProcessFilePath = path.join(__dirname, '../../../server/lib/util', 'require_async_child.js')
+
+    const config = await this.ctx.actions.childProcess.fork(filename, childProcessFilePath)
+
+    return config as Cypress.ConfigOptions
+  }
 
   async getConfigForProject (projectRoot: string): Promise<FullConfig> {
     if (!this.ctx.coreData.app.activeProject) {
@@ -30,6 +49,10 @@ export class ConfigDataSource {
 
     if (foundConfigFiles.length === 1) {
       const configFile = foundConfigFiles[0]
+
+      if (!configFile) {
+        throw this.ctx._apis.projectApi.error.throw('NO_DEFAULT_CONFIG_FILE_FOUND', projectRoot)
+      }
 
       if (configFile === legacyConfigFile) {
         throw this.ctx._apis.projectApi.error.throw('CONFIG_FILE_MIGRATION_NEEDED', projectRoot, configFile)

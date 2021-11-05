@@ -7,7 +7,6 @@ const Promise = require('bluebird')
 const preprocessor = require('./preprocessor')
 const devServer = require('./dev-server')
 const resolve = require('../../util/resolve')
-const tsNodeUtil = require('../../util/ts_node')
 const browserLaunch = require('./browser_launch')
 const task = require('./task')
 const util = require('../util')
@@ -37,7 +36,7 @@ const getDefaultPreprocessor = function (config) {
 
 let plugins
 
-const load = (ipc, config, pluginsFile) => {
+const load = (ipc, config) => {
   debug('run plugins function')
 
   let eventIdCount = 0
@@ -49,7 +48,7 @@ const load = (ipc, config, pluginsFile) => {
     const { isValid, error } = validateEvent(event, handler, config)
 
     if (!isValid) {
-      ipc.send('load:error', 'PLUGINS_VALIDATION_ERROR', pluginsFile, error.stack)
+      ipc.send('load:error', 'PLUGINS_VALIDATION_ERROR', error.stack)
 
       return
     }
@@ -97,11 +96,11 @@ const load = (ipc, config, pluginsFile) => {
   })
   .then((modifiedCfg) => {
     debug('plugins file successfully loaded')
-    ipc.send('loaded', modifiedCfg, registrations)
+    ipc.send('loaded:plugins', modifiedCfg, registrations)
   })
   .catch((err) => {
     debug('plugins file errored:', err && err.stack)
-    ipc.send('load:error', 'PLUGINS_FUNCTION_ERROR', pluginsFile, err.stack)
+    ipc.send('load:error:plugins', 'PLUGINS_FUNCTION_ERROR', err.stack)
   })
 }
 
@@ -138,74 +137,25 @@ const execute = (ipc, event, ids, args = []) => {
   }
 }
 
-let tsRegistered = false
-
-const runPlugins = (ipc, pluginsFile, projectRoot) => {
-  debug('pluginsFile:', pluginsFile)
+const runPlugins = (ipc, _plugins, projectRoot) => {
+  plugins = _plugins
   debug('project root:', projectRoot)
   if (!projectRoot) {
     throw new Error('Unexpected: projectRoot should be a string')
   }
 
-  process.on('uncaughtException', (err) => {
-    debug('uncaught exception:', util.serializeError(err))
-    ipc.send('error', util.serializeError(err))
-
-    return false
-  })
-
-  process.on('unhandledRejection', (event) => {
-    const err = (event && event.reason) || event
-
-    debug('unhandled rejection:', util.serializeError(err))
-    ipc.send('error', util.serializeError(err))
-
-    return false
-  })
-
-  if (!tsRegistered) {
-    tsNodeUtil.register(projectRoot, pluginsFile)
-
-    // ensure typescript is only registered once
-    tsRegistered = true
-  }
-
-  try {
-    debug('require pluginsFile')
-    plugins = require(pluginsFile)
-
-    // Handle export default () => {}
-    if (plugins && typeof plugins.default === 'function') {
-      plugins = plugins.default
-    }
-  } catch (err) {
-    debug('failed to require pluginsFile:\n%s', err.stack)
-    ipc.send('load:error', 'PLUGINS_FILE_ERROR', pluginsFile, err.stack)
-
-    return
-  }
-
-  if (typeof plugins !== 'function') {
-    debug('not a function')
-    ipc.send('load:error', 'PLUGINS_DIDNT_EXPORT_FUNCTION', pluginsFile, plugins)
-
-    return
-  }
-
-  ipc.on('load', (config) => {
-    debug('plugins load file "%s"', pluginsFile)
+  ipc.on('load:plugins', (config) => {
     debug('passing config %o', config)
-    load(ipc, config, pluginsFile)
+    load(ipc, config)
   })
 
-  ipc.on('execute', (event, ids, args) => {
+  ipc.on('execute:plugins', (event, ids, args) => {
     execute(ipc, event, ids, args)
   })
 }
 
 // for testing purposes
 runPlugins.__reset = () => {
-  tsRegistered = false
   registeredEventsById = {}
   registeredEventsByName = {}
 }

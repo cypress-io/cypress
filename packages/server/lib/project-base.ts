@@ -706,7 +706,7 @@ export class ProjectBase<TServer extends Server> extends EE {
       this.options.configFile = await getDefaultConfigFilePath(this.projectRoot, this.ctx)
     }
 
-    let theCfg: Cfg = await config.get(this.projectRoot, this.options)
+    let theCfg: Cfg = await config.get(this.projectRoot, this.options, this.ctx)
 
     if (!theCfg.browsers || theCfg.browsers.length === 0) {
       // @ts-ignore - we don't know if the browser is headed or headless at this point.

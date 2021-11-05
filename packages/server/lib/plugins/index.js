@@ -85,7 +85,8 @@ const init = (config, options, ctx) => {
     registeredEvents = {}
 
     if (!pluginsProcess) {
-      await ctx.actions.childProcess.requireAsync('/Users/alejandroestrada/Documents/Code/cypress/cypress/packages/launchpad/cypress.config.ts')
+      // initialize process to read the config and re-use to run the plugins
+      await ctx.config.getConfigOnChildProcess()
       pluginsProcess = ctx.activeProject?.configChildProcess?.process
     }
 

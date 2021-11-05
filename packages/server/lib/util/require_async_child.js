@@ -4,7 +4,7 @@ const debug = require('debug')('cypress:server:require_async:child')
 const tsNodeUtil = require('./ts_node')
 const util = require('../plugins/util')
 const ipc = util.wrapIpc(process)
-const runPlugins = require('../plugins/child/run_plugins2')
+const runPlugins = require('../plugins/child/run_plugins')
 
 require('./suppress_warnings').suppress()
 

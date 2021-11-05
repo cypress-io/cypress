@@ -1,5 +1,5 @@
 import { defineConfig } from 'cypress'
-const { startDevServer } = require('@cypress/vite-dev-server')
+import { e2ePluginSetup } from '@packages/frontend-shared/cypress/e2e/e2ePluginSetup'
 
 export default defineConfig({
   'projectId': 'sehy69',
@@ -20,35 +20,16 @@ export default defineConfig({
     'testFiles': '**/*.spec.{js,ts,tsx,jsx}',
     'supportFile': 'cypress/component/support/index.ts',
     'pluginsFile': 'cypress/component/plugins/index.js',
-    setupNodeEvents (on, config) {
-      // TODO: (Alejandro) -> this goes on setupDevServ
-      on('dev-server:start', async (options) => {
-        return startDevServer({
-          options,
-          viteConfig: {
-            // TODO(tim): Figure out why this isn't being picked up
-            optimizeDeps: {
-              include: [
-                '@headlessui/vue',
-                'vue3-file-selector',
-                'just-my-luck',
-                'combine-properties',
-                'faker',
-              ],
-            },
-          },
-        })
-      })
-
-      return config
-    },
+    setupNodeEvents: require('@packages/frontend-shared/cypress/plugins/index'),
   },
   'e2e': {
     'supportFile': 'cypress/e2e/support/e2eSupport.ts',
     'integrationFolder': 'cypress/e2e/integration',
     'pluginsFile': 'cypress/e2e/plugins/index.ts',
-    setupNodeEvents (on, config) {
-      return config
+    async setupNodeEvents (on, config) {
+      const { monorepoPaths } = require('../../scripts/gulp/monorepoPaths')
+
+      return await e2ePluginSetup(monorepoPaths.pkgLaunchpad, on, config)
     },
   },
 })

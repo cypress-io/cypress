@@ -48,8 +48,8 @@ export function makeLegacyDataContext (launchArgs: LaunchArgs = {} as LaunchArgs
   return legacyDataContext
 }
 
-export function makeDataContext (options: MakeDataContextOptions) {
-  return new DataContext({
+export function makeDataContext (options: MakeDataContextOptions): DataContext {
+  const ctx = new DataContext({
     schema: graphqlSchema,
     ...options,
     launchOptions: {},
@@ -72,7 +72,7 @@ export function makeDataContext (options: MakeDataContextOptions) {
     },
     projectApi: {
       getConfig (projectRoot: string, options?: SettingsOptions) {
-        return config.get(projectRoot, options)
+        return config.get(projectRoot, options, ctx)
       },
       launchProject (browser: FoundBrowser, spec: Cypress.Spec, options?: LaunchOpts) {
         return openProject.launch({ ...browser }, spec, options)
@@ -115,4 +115,6 @@ export function makeDataContext (options: MakeDataContextOptions) {
       },
     },
   })
+
+  return ctx
 }

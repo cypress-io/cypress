@@ -4,14 +4,12 @@ import cp, { ChildProcess } from 'child_process'
 import Debug from 'debug'
 import inspector from 'inspector'
 import _ from 'lodash'
-import path from 'path'
 
 const debug = Debug('cypress:server:require_async')
 
 interface ChildOptions{
   stdio: 'inherit'
   execArgv?: string[]
-  cwd?: string
 }
 
 export class ChildProcessActions {
@@ -25,16 +23,17 @@ export class ChildProcessActions {
     }
   }
 
-  requireAsync (filePath: string) {
+  fork (filePath: string, childProcessFilePath: string) {
     return new Promise((resolve, reject) => {
       if (!this.ctx.activeProject) {
-        reject('Can\'t require a file async without an active project')
+        reject('Can\'t require a fork a process without an active project')
 
         return
       }
 
+      // If there's an active process, kill it before forking a new one.
       if (this.ctx.activeProject?.configChildProcess.process) {
-        debug('kill existing config process')
+        debug('kill existing fork process')
         this.killChildProcess()
       }
 
@@ -51,8 +50,8 @@ export class ChildProcessActions {
 
       const childArguments = ['--projectRoot', this.ctx.activeProject.projectRoot, '--file', filePath]
 
-      debug('fork child process', path.join(__dirname, '../../../server/lib/util', 'require_async_child.js'), childArguments, childOptions)
-      this.ctx.activeProject.configChildProcess.process = cp.fork(path.join(__dirname, '../../../server/lib/util', 'require_async_child.js'), childArguments, childOptions)
+      debug('fork child process', childProcessFilePath, childArguments, childOptions)
+      this.ctx.activeProject.configChildProcess.process = cp.fork(childProcessFilePath, childArguments, childOptions)
 
       const ipc = this.wrapIpc(this.ctx.activeProject.configChildProcess.process)
 

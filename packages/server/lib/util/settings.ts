@@ -3,9 +3,10 @@ import Promise from 'bluebird'
 import path from 'path'
 import errors from '../errors'
 import { fs } from '../util/fs'
-import { requireAsync } from './require_async'
 import Debug from 'debug'
 import type { SettingsOptions } from '@packages/types'
+import type { DataContext } from '@packages/data-context'
+import { makeLegacyDataContext } from '../makeDataContext'
 
 const debug = Debug('cypress:server:settings')
 
@@ -137,17 +138,14 @@ export function id (projectRoot, options = {}) {
   })
 }
 
-export function read (projectRoot, options: SettingsOptions = {}) {
+export function read (projectRoot, options: SettingsOptions = {}, ctx: DataContext = makeLegacyDataContext()) {
   if (options.configFile === false) {
     return Promise.resolve({})
   }
 
   const file = pathToConfigFile(projectRoot, options)
 
-  return requireAsync(file, {
-    projectRoot,
-    loadErrorCode: 'CONFIG_FILE_ERROR',
-  })
+  return ctx.config.getConfigOnChildProcess(file)
   .catch((err) => {
     if (err.type === 'MODULE_NOT_FOUND' || err.code === 'ENOENT') {
       return Promise.reject(errors.get('CONFIG_FILE_NOT_FOUND', options.configFile, projectRoot))
