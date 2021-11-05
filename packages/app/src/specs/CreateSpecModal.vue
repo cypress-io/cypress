@@ -37,7 +37,7 @@
 </template>
 
 <script lang  ="ts" setup>
-import { generators, SpecGenerator, GeneratorId } from './generators'
+import { generators, GeneratorId } from './generators'
 import { DialogOverlay } from '@headlessui/vue'
 import StandardModal from '@cy/components/StandardModal.vue'
 import CreateSpecCards from './CreateSpecCards.vue'
