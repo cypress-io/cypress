@@ -1,6 +1,6 @@
 <template>
   <Dialog
-    :open="localValue"
+    :open="modelValue"
     class="fixed inset-0 z-10 overflow-y-auto"
     @close="clickOutside && setIsOpen(false)"
   >
@@ -11,31 +11,19 @@
       >
         <DialogOverlay class="fixed inset-0 bg-gray-800 opacity-90" />
       </slot>
-
       <div
         class="relative mx-auto bg-white rounded"
         :class="props.class || ''"
       >
-        <div
-          class="sticky top-0 flex items-center justify-between bg-white rounded-t border-b-1px border-b-gray-100 min-h-56px px-24px z-1"
+        <StandardModalHeader
+          :help-link="helpLink"
+          :help-text="helpText"
+          @close="setIsOpen(false)"
         >
-          <DialogTitle class="text-gray-900 text-18px">
-            <slot name="title" /> <span class="inline-block border-t border-t-gray-100 w-32px h-6px mx-8px" /> <a
-              :href="helpLink"
-              target="_blank"
-              class="text-indigo-500 group outline-transparent text-16px"
-            >
-              <span class="group-hocus:underline">{{ helpText }}</span>
-              <i-cy-circle-bg-question-mark_x16 class="relative inline-block icon-dark-indigo-500 icon-light-indigo-100 -top-2px ml-8px" /></a>
-          </DialogTitle>
-          <button
-            aria-label="Close"
-            class="border-transparent rounded-full  p-5px border-1 hover:border-indigo-300 hocus-default"
-            @click="setIsOpen(false)"
-          >
-            <i-cy-delete_x12 class="icon-dark-gray-400 w-12px h-12px" />
-          </button>
-        </div>
+          <slot name="title">
+            {{ title }}
+          </slot>
+        </StandardModalHeader>
 
         <DialogDescription
           v-if="$slots.description"
@@ -43,14 +31,12 @@
         >
           <slot name="description" />
         </DialogDescription>
-        <slot />
-
-        <div
-          v-if="$slots.footer"
-          class="border-t-1px px-24px py-16px bg-gray-50"
-        >
+        <StandardModalBody :variant="variant">
+          <slot />
+        </StandardModalBody>
+        <StandardModalFooter v-if="$slots.footer">
           <slot name="footer" />
-        </div>
+        </StandardModalFooter>
       </div>
     </div>
   </Dialog>
@@ -62,13 +48,13 @@ export const inheritAttrs = false
 
 <script setup lang="ts">
 import { useI18n } from '@cy/i18n'
-import { computed } from 'vue'
-import { useModelWrapper } from '@packages/frontend-shared/src/composables'
+import StandardModalHeader from './StandardModalHeader.vue'
+import StandardModalBody from './StandardModalBody.vue'
+import StandardModalFooter from './StandardModalFooter.vue'
 
 import {
   Dialog,
   DialogOverlay,
-  DialogTitle,
   DialogDescription,
 } from '@headlessui/vue'
 
@@ -81,6 +67,8 @@ const props = withDefaults(defineProps<{
   helpLink?: string
   helpText?: string
   clickOutside?: boolean
+  variant?: 'bare'
+  title?: string,
   class?: string | string[] | Record<string, any>
 }>(), {
   clickOutside: true,
@@ -88,14 +76,12 @@ const props = withDefaults(defineProps<{
   helpText: 'Need help?',
   helpLink: 'https://docs.cypress.io',
   class: undefined,
+  variant: undefined,
+  title: '',
 })
-
-const localValue = useModelWrapper(props, emit, 'modelValue')
 
 const setIsOpen = (val: boolean) => {
   emit('update:modelValue', val)
 }
-
-const { t } = useI18n()
 
 </script>

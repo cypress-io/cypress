@@ -90,11 +90,9 @@ import { SideBarNavigationDocument } from '../generated/graphql'
 import CypressLogo from '@packages/frontend-shared/src/assets/logos/cypress_s.png'
 
 const navigation = [
-  { name: 'Home', icon: SpecsIcon, href: '/' },
-  { name: 'Specs', icon: CodeIcon, href: '/specs' },
+  { name: 'Home', icon: CodeIcon, href: '/' },
   { name: 'Runs', icon: RunsIcon, href: '/runs' },
   { name: 'Settings', icon: SettingsIcon, href: '/settings' },
-  { name: 'New Spec', icon: SettingsIcon, href: '/newspec' },
 ]
 
 gql`

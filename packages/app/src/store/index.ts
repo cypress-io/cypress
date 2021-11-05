@@ -3,8 +3,6 @@ import { createPinia as _createPinia } from 'pinia'
 // Pinia client-side storage
 export * from './main-store'
 
-export * from './modals'
-
 export * from './specs-store'
 
 export * from './aut-store'
