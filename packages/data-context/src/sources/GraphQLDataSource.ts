@@ -5,8 +5,13 @@ import type { GraphQLSchema } from 'graphql'
 import type { DataContextShell } from '../DataContextShell'
 import type * as allOperations from '../gen/all-operations.gen'
 
+// Filter out non-Query shapes
 type AllQueries<T> = {
-  [K in keyof T]: K
+  [K in keyof T]: T[K] extends { __resultType?: infer U }
+    ? U extends { __typename?: 'Query' }
+      ? K
+      : never
+    : never
 }[keyof T]
 
 export class GraphQLDataSource {
@@ -27,6 +32,10 @@ export class GraphQLDataSource {
   executeQuery (document: AllQueries<typeof allOperations>, variables: Record<string, any>) {
     // Late require'd to avoid erroring if codegen hasn't run (for legacy Cypress workflow)
     const allQueries = (this._allQueries ??= require('../gen/all-operations.gen'))
+
+    if (!allQueries[document]) {
+      throw new Error(`Trying to execute unknown operation ${document}, needs to be one of: [${Object.keys(allQueries).join(', ')}]`)
+    }
 
     return this._urqlClient.query(allQueries[document], variables).toPromise()
   }
