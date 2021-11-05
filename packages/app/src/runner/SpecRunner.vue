@@ -5,7 +5,7 @@
   >
     <div
       id="inline-spec-list"
-      class="bg-gray-1000 w-256"
+      class="bg-gray-1000"
     >
       <InlineSpecList :gql="props.gql" />
     </div>

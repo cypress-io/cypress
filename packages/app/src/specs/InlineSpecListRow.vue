@@ -1,9 +1,9 @@
 <template>
   <RouterLink
     :to="{ path: 'runner', query: { file: spec.relative } }"
-    class="group spec-item focus:outline-none"
-    @keydown.up="handleUp"
-    @keydown.down="handleDown"
+    class="group spec-item focus:outline-none relative"
+    @keydown.up.prevent="handleUp"
+    @keydown.down.prevent="handleDown"
   >
     <div
       class="group flex items-center pl-18px"
@@ -43,20 +43,28 @@ const handleUp = (event) => {
   const target = event.target
 
   if (!target.previousSibling.focus) {
-    target.parentElement.lastElementChild.focus()
+    target.parentElement.lastElementChild.focus({ preventScroll: true })
+    target.parentElement.lastElementChild.scrollIntoView(false)
   } else {
-    target.previousSibling.focus()
+    target.previousSibling.focus({ preventScroll: true })
+    target.parentElement.lastElementChild.scrollIntoView(false)
   }
+
+  event.preventDefault()
 }
 
 const handleDown = (event) => {
   const target = event.target
 
   if (!target.nextSibling.focus) {
-    target.parentElement.firstElementChild.focus()
+    target.parentElement.firstElementChild.focus({ preventScroll: true })
+    target.parentElement.firstElementChild.scrollIntoView(false)
   } else {
-    target.nextSibling.focus()
+    target.nextSibling.focus({ preventScroll: true })
+    target.nextSibling.scrollIntoView(false)
   }
+
+  event.preventDefault()
 }
 </script>
 

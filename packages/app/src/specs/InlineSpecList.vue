@@ -1,5 +1,5 @@
 <template>
-  <div class="w-300px overflow-x-hidden">
+  <div class="w-300px overflow-x-hidden h-full">
     <InlineSpecListRow
       v-for="spec in specs"
       :key="spec.node.id"
