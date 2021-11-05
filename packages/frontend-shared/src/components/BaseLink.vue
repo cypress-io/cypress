@@ -1,7 +1,6 @@
 <template>
   <a
     :href="props.href"
-    class="focus:outline-transparent hocus:underline"
     :class="classes"
   >
     <slot />
@@ -27,10 +26,14 @@ const attrs = useAttrs() as AnchorHTMLAttributes
 
 // if no class is used, the link receives a default color
 const classes = computed(() => {
-  return attrs.class ? attrs.class : 'text-indigo-500'
+  return `${attrs.class ? attrs.class : 'text-indigo-500'} 
+  ${props.useDefaultHocus ? 'hocus-link-default' : ''}`
 })
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   href: string,
-}>()
+  useDefaultHocus?: boolean
+}>(), {
+  useDefaultHocus: true,
+})
 </script>

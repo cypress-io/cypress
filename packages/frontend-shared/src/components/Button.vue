@@ -39,7 +39,7 @@
     style="width: fit-content"
     class="flex select-none items-center border rounded gap-8px outline-none"
     :class="classes"
-    :target="internalLink ? '' : '_blank'"
+    :use-default-hocus="false"
   >
     <ButtonInternals>
       <template
@@ -115,7 +115,6 @@ const props = defineProps<{
   prefixIconClass?: string
   suffixIconClass?: string
   href?: string // will cause the button to render as link element with button styles
-  internalLink?: boolean
 }>()
 
 const attrs = useAttrs() as ButtonHTMLAttributes

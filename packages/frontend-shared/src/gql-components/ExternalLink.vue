@@ -1,6 +1,7 @@
 <template>
   <BaseLink
     :href="props.href"
+    :use-default-hocus="props.useDefaultHocus"
     @click.prevent="openExternal"
   >
     <slot />
@@ -32,9 +33,12 @@ mutation App_OpenExternal ($url: String!) {
 
 const openExternalMutation = useMutation(App_OpenExternalDocument)
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   href: string,
-}>()
+  useDefaultHocus?: boolean
+}>(), {
+  useDefaultHocus: true,
+})
 
 const openExternal = () => {
   openExternalMutation.executeMutation({ url: props.href })
