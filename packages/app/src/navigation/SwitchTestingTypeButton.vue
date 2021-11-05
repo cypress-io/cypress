@@ -1,6 +1,6 @@
 <template>
   <SidebarTooltip
-    class="block p-8px flex items-center m-12px bg-gray-900 group rounded cursor-pointer"
+    class="flex items-center m-12px p-8px bg-gray-900 group rounded cursor-pointer overflow-hidden"
     :disabled="mainStore.navBarExpanded"
     tabindex="0"
     @click="modalStore.open('switchTestingType')"
