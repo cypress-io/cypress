@@ -1,6 +1,3 @@
-// @ts-nocheck
-// I can't figure out how to specify `codeGenCandidates`
-// On the mock data
 import Button from '@cy/components/Button.vue'
 import CreateSpecPage from './CreateSpecPage.vue'
 import { ref, Ref } from 'vue'
@@ -21,6 +18,7 @@ describe('<CreateSpecPage />', () => {
         activeProject: {
           id: 'id',
           storybook: null,
+          codeGenGlob: '**.vue',
         }, activeTestingType: 'component',
       }} /></div>))
     })
@@ -49,6 +47,7 @@ describe('<CreateSpecPage />', () => {
         activeProject: {
           id: 'id',
           storybook: null,
+          codeGenGlob: '**.vue',
         }, activeTestingType: 'e2e',
       }} /></div>))
     })
@@ -72,6 +71,7 @@ describe('<CreateSpecPage />', () => {
         { /* Testing Utils */ }
         <Button variant="outline"
           size="md"
+          // @ts-ignore
           onClick={() => testingType.value = testingType.value === 'component' ? 'e2e' : 'component'}>
           Toggle Testing Types
         </Button>
@@ -81,6 +81,7 @@ describe('<CreateSpecPage />', () => {
           activeProject: {
             id: 'id',
             storybook: null,
+            codeGenGlob: '**.vue',
           },
           activeTestingType: testingType.value,
         }} />

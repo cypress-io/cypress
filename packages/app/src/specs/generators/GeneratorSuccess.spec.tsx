@@ -2,7 +2,7 @@ import GeneratorSuccess from './GeneratorSuccess.vue'
 import { randomComponents } from '@packages/frontend-shared/cypress/support/mock-graphql/testStubSpecs'
 
 const targetSelector = '[data-testid=file-row]'
-const spec = randomComponents(1)[0]
+const spec = randomComponents(1, 'FileParts')[0]
 const content = `
 import ${spec.baseName} from './${spec.baseName}'
 import { mount } from '@cypress/react'

@@ -131,7 +131,7 @@ const allRandomComponents = combineProperties({
   directory: keys(directories),
 })
 
-export const randomComponents = (n = 200): any[] => {
+export const randomComponents = <T extends 'Spec' | 'FileParts'>(n = 200, baseTypename: T) => {
   return faker.random.arrayElements(allRandomComponents, n).map((d: ReturnType<typeof combineProperties>) => {
     const componentName = componentNameGenerator({
       overrides: d,
@@ -149,7 +149,7 @@ export const randomComponents = (n = 200): any[] => {
       fileExtension: d.fileExtension,
       specType: 'component' as const,
       fileName: componentName,
-      __typename: 'Spec' as const,
+      __typename: baseTypename,
       id: faker.datatype.uuid(),
       gitInfo: {
         __typename: 'GitInfo' as const,

@@ -1,18 +1,12 @@
-// @ts-nocheck
-// I can't figure out how to specify `codeGenCandidates`
-// On the mock data
 import CreateSpecModal from './CreateSpecModal.vue'
-import { ComponentGenerator } from './generators'
 import { ref } from 'vue'
 import { defaultMessages } from '@cy/i18n'
-import { randomComponents } from '@packages/frontend-shared/cypress/support/mock-graphql/testStubSpecs'
 
 const modalCloseSelector = '[aria-label=Close]'
 const triggerButtonSelector = '[data-testid=trigger]'
 const modalSelector = '[data-testid=create-spec-modal]'
 
 const messages = defaultMessages.createSpec.component.importFromComponent
-const codeGenCandidates = randomComponents(10)
 
 describe('<CreateSpecModal />', () => {
   beforeEach(() => {
@@ -23,13 +17,14 @@ describe('<CreateSpecModal />', () => {
         gql={{
           activeProject: {
             id: 'id',
-            codeGenCandidates,
+            codeGenGlob: '**.vue',
+            storybook: null,
           },
           activeTestingType: 'component',
         }}
         show={show.value}
         onClose={() => show.value = false}
-        currentGenerator={ComponentGenerator}/>
+      />
     </div>))
   })
 
@@ -72,13 +67,14 @@ describe('playground', () => {
         gql={{
           activeProject: {
             id: 'id',
-            codeGenCandidates,
+            codeGenGlob: '**.vue',
+            storybook: null,
           },
           activeTestingType: 'component',
         }}
         show={show.value}
         onClose={() => show.value = false}
-        currentGenerator={ComponentGenerator}/>
+      />
     </>)).get(triggerButtonSelector)
     .click()
     .get(modalSelector)

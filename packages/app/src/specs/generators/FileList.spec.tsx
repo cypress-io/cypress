@@ -11,7 +11,7 @@ const noResultsSlot = () => <div data-testid="no-results">No Results</div>
 const noResultsSelector = '[data-testid=no-results]'
 const fileRowSelector = '[data-testid=file-list-row]'
 
-const allFiles = randomComponents(10)
+const allFiles = randomComponents(10, 'FileParts')
 
 allFiles[1] = { ...allFiles[1], ...difficultFile }
 describe('<FileList />', { viewportHeight: 500, viewportWidth: 400 }, () => {

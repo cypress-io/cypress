@@ -28,7 +28,7 @@ export const createTestProject = (title: string): CodegenTypeMap['Project'] => {
       },
       __typename: 'SpecConnection' as const,
       edges: [
-        ...randomComponents(200).map((c) => {
+        ...randomComponents(200, 'Spec').map((c) => {
           return {
             __typename: 'SpecEdge' as const,
             cursor: 'eoifjew',

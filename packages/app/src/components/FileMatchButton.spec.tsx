@@ -1,4 +1,3 @@
-// @ts-nocheck
 // Anything with onClick SHOULD work, but isn't...
 // Defining emits for "Button.vue" removes the native handler on the
 // <button> element. vue-tsc just can't handle this yet.
@@ -28,7 +27,13 @@ describe('<FileMatchButton />', () => {
     const expanded = ref(false)
 
     cy.mount(() => (<div class="p-12">
-      <FileMatchButton onClick={() => expanded.value = !expanded.value} expanded={expanded.value}>
+      <FileMatchButton
+        // @ts-ignore - vue @click isn't represented in JSX
+        onClick={() => {
+          expanded.value = !expanded.value
+        }}
+        expanded={expanded.value}
+      >
         *.stories.*
       </FileMatchButton>
     </div>))

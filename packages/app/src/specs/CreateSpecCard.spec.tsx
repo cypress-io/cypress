@@ -1,4 +1,3 @@
-// @ts-nocheck
 // Anything with onClick SHOULD work, but isn't...
 // Defining emits for "Button.vue" removes the native handler on the
 // <button> element. vue-tsc just can't handle this yet.
@@ -48,7 +47,9 @@ describe('<CreateSpecCard />', { viewportWidth: 400, viewportHeight: 400 }, () =
     const onClickSpy = cy.spy().as('onClickSpy')
 
     cy.mount(() => (<div class="m-12">
-      <CreateSpecCard icon={DocumentCode} header={header} description={shortDescription} onClick={onClickSpy} />
+      <CreateSpecCard icon={DocumentCode} header={header} description={shortDescription}
+        // @ts-ignore - vue @click isn't represented in JSX
+        onClick={onClickSpy} />
     </div>))
     .get(specCardSelector)
     .focus()

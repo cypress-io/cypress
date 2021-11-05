@@ -6,7 +6,7 @@ import { defaultMessages } from '@cy/i18n'
 
 /*----------  Fixtures  ----------*/
 const numFiles = 20
-const allFiles = randomComponents(numFiles)
+const allFiles = randomComponents(numFiles, 'FileParts')
 const extensionPattern = '*.jsx'
 const existentExtensionPattern = '*.tsx'
 const nonExistentFileName = 'non existent file'
