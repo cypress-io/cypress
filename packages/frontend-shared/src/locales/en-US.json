@@ -318,5 +318,8 @@
       "step2": "Ensure that your {0} file is checked into source control:",
       "step3": "Run this command in your local development terminal or in CI:"
     }
+  },
+  "navigation": {
+    "chooseTestingType": "Choose a testing type"
   }
 }

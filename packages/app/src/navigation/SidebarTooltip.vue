@@ -3,6 +3,7 @@
     ref="wrapper"
     @mouseover="placeTooltip();hover=true"
     @mouseout="hover=false"
+    @click="emit('click')"
   >
     <slot />
     <teleport
@@ -42,6 +43,8 @@ const props = withDefaults(defineProps<{
   popperTopOffset: 0,
   poppperClass: '',
 })
+
+const emit = defineEmits(['click'])
 
 const hover = ref(false)
 const tooltipTop = ref(0)

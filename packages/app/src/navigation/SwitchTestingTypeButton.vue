@@ -4,8 +4,14 @@
     :class="mainStore.navBarExpanded ? undefined : 'hover:border-gray-800'"
     :disabled="mainStore.navBarExpanded"
     tabindex="0"
-    @click="modalStore.open('switchTestingType')"
+    data-cy="switch-testing-type"
+    @click="showModal = true"
   >
+    <SwitchTestingTypeModal
+      :show="showModal"
+      :gql="props.gql"
+      @close="showModal = false"
+    />
     <component
       :is="testingTypeIcon"
       class="
@@ -36,18 +42,19 @@ import { computed, ref } from 'vue'
 import { gql } from '@urql/vue'
 import { TESTING_TYPES } from '@packages/types/src'
 import type { SwitchTestingTypeButtonFragment } from '../generated/graphql'
-import { useMainStore, useModalStore } from '../store'
+import { useMainStore } from '../store'
 import SidebarTooltip from './SidebarTooltip.vue'
+import SwitchTestingTypeModal from './SwitchTestingTypeModal.vue'
 import IconE2E from '~icons/cy/testing-type-e2e_x24'
 import IconComponent from '~icons/cy/testing-type-component_x24'
-
-const modalStore = useModalStore()
 
 gql`
 fragment SwitchTestingTypeButton on App {
   activeTestingType
 }
 `
+
+const showModal = ref(false)
 
 const props = defineProps<{
   gql: SwitchTestingTypeButtonFragment
