@@ -13,7 +13,8 @@ cypress.zip
 Cached Theme.pak
 Cached Theme Material Design.pak
 
-# from config
+# from config, compiled .js files
+packages/config/lib/*.js
 
 # from data-context, compiled .js files
 packages/data-context/src/**/*.js
