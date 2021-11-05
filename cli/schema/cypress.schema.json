@@ -244,7 +244,8 @@
             "system",
             "bundled"
           ],
-          "description": "If set to 'system', Cypress will use the node version that was used to launch the cli when executing your plugins. Otherwise, Cypress will use the Node version bundled with Cypress."
+          "default": "system",
+          "description": "DEPRECATED: If set to 'bundled', Cypress will use the Node version bundled with Cypress. Otherwise, Cypress will use the Node version that was used to launch the Cypress. This Node version is used when executing your plugins file and building spec files."
         },
         "experimentalInteractiveRunEvents": {
           "type": "boolean",
