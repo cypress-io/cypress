@@ -230,8 +230,10 @@ const throwErr = (err, options = {}) => {
 const throwErrByPath = (errPath, options = {}) => {
   const err = errByPath(errPath, options.args)
 
-  // gets rid of internal stack lines that just build the error
-  if (Error.captureStackTrace) {
+  if (options.stack) {
+    err.stack = $stackUtils.replacedStack(err, options.stack)
+  } else if (Error.captureStackTrace) {
+    // gets rid of internal stack lines that just build the error
     Error.captureStackTrace(err, throwErrByPath)
   }
 

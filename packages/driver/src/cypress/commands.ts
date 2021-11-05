@@ -3,6 +3,7 @@
 import _ from 'lodash'
 
 import $errUtils from './error_utils'
+import $stackUtils from './stack_utils'
 
 import { allCommands } from '../cy/commands'
 import { addCommand } from '../cy/net-stubbing'
@@ -135,6 +136,12 @@ export default {
             args: {
               name,
             },
+            stack: (new state('specWindow').Error('add command stack')).stack,
+            errProps: {
+              appendToStack: {
+                title: 'From Cypress Internals',
+                content: $stackUtils.stackWithoutMessage((new Error('add command internal stack')).stack),
+              } },
           })
         }
 
