@@ -1,4 +1,5 @@
 import type { DebouncedFunc } from 'lodash'
+import { useSelectorPlaygroundStore } from '../store/selector-playground-store'
 
 // JQuery bundled w/ Cypress
 type $CypressJQuery = any
@@ -275,7 +276,9 @@ export class AutIframe {
   }
 
   toggleSelectorPlayground = (isEnabled) => {
+    console.log({isEnabled})
     const $body = this._body()
+    console.log({$body})
 
     if (!$body) return
 
@@ -300,7 +303,10 @@ export class AutIframe {
   _onSelectorMouseMove = (e) => {
     const $body = this._body()
 
-    if (!$body) return
+    if (!$body) {
+      console.log('body null')
+      return
+    }
 
     let el = e.target
     let $el = this.$(el)
@@ -320,13 +326,16 @@ export class AutIframe {
       $highlight.css('display', 'block')
     }
 
-    if (this._highlightedEl === el) return
+    if (this._highlightedEl === el) {
+      return
+    }
 
     this._highlightedEl = el
 
     const Cypress = this.eventManager.getCypress()
 
     const selector = Cypress.SelectorPlayground.getSelector($el)
+    const selectorPlaygroundStore = useSelectorPlaygroundStore()
 
     this.dom.addOrUpdateSelectorPlaygroundHighlight({
       $el,
@@ -334,6 +343,11 @@ export class AutIframe {
       $body,
       showTooltip: true,
       onClick: () => {
+        selectorPlaygroundStore.setNumElements(1)
+        selectorPlaygroundStore.resetMethod()
+        selectorPlaygroundStore.setSelector(selector)
+
+
         this.studio.selectorPlaygroundModel.setNumElements(1)
         this.studio.selectorPlaygroundModel.resetMethod()
         this.studio.selectorPlaygroundModel.setSelector(selector)
@@ -361,7 +375,7 @@ export class AutIframe {
 
     const Cypress = this.eventManager.getCypress()
 
-    const $el = this.getElements(Cypress.this.dom)
+    const $el = this.getElements(Cypress.dom)
 
     this.studio.selectorPlaygroundModel.setValidity(!!$el)
 
@@ -400,7 +414,7 @@ export class AutIframe {
 
     const Cypress = this.eventManager.getCypress()
 
-    const $el = this.getElements(Cypress.this.dom)
+    const $el = this.getElements(Cypress.dom)
 
     const command = `cy.${this.studio.selectorPlaygroundModel.method}('${this.studio.selectorPlaygroundModel.selector}')`
 
@@ -414,7 +428,7 @@ export class AutIframe {
     this.logger.logFormatted({
       Command: command,
       Elements: $el.length,
-      Yielded: Cypress.this.dom.getElements($el),
+      Yielded: Cypress.dom.getElements($el),
     })
   }
 

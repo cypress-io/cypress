@@ -4,7 +4,7 @@ import _ from 'lodash'
 import ReactDOM from 'react-dom'
 import $Cypress from '@packages/driver'
 const driverUtils = $Cypress.utils
-import { AutIframe, Container, selectorPlaygroundModel, StudioRecorder, logger, dom, blankContents, visitFailure } from '@packages/runner-shared'
+import { AutIframe, Container, selectorPlaygroundModel, StudioRecorder, logger, dom, blankContents, visitFailure, SelectorPlayground } from '@packages/runner-shared'
 import { EventManager } from '@packages/app/src/runner/event-manager'
 import defaultEvents from '@packages/reporter/src/lib/events'
 import { Reporter } from '@packages/reporter/src/main'
@@ -38,6 +38,8 @@ const UnifiedRunner = {
   StudioRecorder,
 
   selectorPlaygroundModel,
+
+  SelectorPlayground,
 
   shortcuts,
 

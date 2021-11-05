@@ -10,6 +10,7 @@
     <button
       data-cy="header-selector"
       :disabled="isDisabled"
+      @click="showPlayground"
     >
       Selector
     </button>
@@ -39,6 +40,12 @@
       :options="browsers"
       item-value="name"
     />
+
+    <SelectorPlayground 
+      v-if="selectorPlaygroundStore.show" 
+      :aut-iframe="autIframe"
+      :event-manager="eventManager"
+    />
   </div>
 </template>
 
@@ -48,6 +55,9 @@ import { useAutStore } from '../store'
 import Select from '@packages/frontend-shared/src/components/Select.vue'
 import { gql } from '@urql/vue'
 import type { SpecRunnerHeaderFragment } from '../generated/graphql'
+import SelectorPlayground from './selector-playground/SelectorPlayground.vue'
+import { getAutIframeModel, getEventManager } from '.'
+import { useSelectorPlaygroundStore } from '../store/selector-playground-store'
 
 gql`
 fragment SpecRunnerHeader on App {
@@ -68,6 +78,36 @@ fragment SpecRunnerHeader on App {
 const props = defineProps<{
   gql: SpecRunnerHeaderFragment
 }>()
+
+const eventManager = getEventManager()
+const autIframe = getAutIframeModel()
+
+
+const selectorPlaygroundStore = useSelectorPlaygroundStore()
+
+const showPlayground = () => {
+  selectorPlaygroundStore.setShow(!selectorPlaygroundStore.show)
+  const p = document.querySelector('#play')!
+  const playground = window.UnifiedRunner.React.createElement(window.UnifiedRunner.SelectorPlayground, {
+    eventManager,
+    model: window.UnifiedRunner.selectorPlaygroundModel,
+  })
+
+  window.UnifiedRunner.ReactDOM.render(playground, p)
+
+  window.UnifiedRunner.selectorPlaygroundModel.toggleOpen()
+}
+
+console.log(
+  window.UnifiedRunner.selectorPlaygroundModel.isEnabled
+)
+window.UnifiedRunner.MobX.observe(
+  // @ts-ignore
+  window.UnifiedRunner.selectorPlaygroundModel, 'isEnabled',
+  (enabled) => {
+    autIframe.toggleSelectorPlayground(enabled)
+  }
+)
 
 const browser = computed(() => {
   if (!props.gql.selectedBrowser) {

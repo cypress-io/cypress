@@ -23,6 +23,7 @@
     >
       <div class="bg-white p-4  border-8 border-blue-300">
         <SpecRunnerHeader :gql="props.gql" />
+        <div id="play"></div>
       </div>
 
       <div class="flex justify-center bg-gray-100 h-full p-4">
@@ -165,4 +166,17 @@ iframe {
   width: 100%;
   height: 100%;
 }
+
+.highlight {
+  background: rgba(159, 196, 231, 0.6);
+  border: solid 2px #9FC4E7;
+  cursor: pointer;
+}
+
+.tooltip {
+  font-family: sans-serif;
+  font-size: 14px;
+  max-width: 400px !important;
+}
+
 </style>

@@ -45,7 +45,7 @@ export function getEventManager () {
 
 const randomString = `${Math.random()}`
 
-let _autIframeModel: any
+let _autIframeModel: AutIframe
 
 /**
  * Creates an instance of an AutIframe model which ise used to control
