@@ -148,7 +148,7 @@
 import TopNavListItem from './TopNavListItem.vue'
 import TopNavList from './TopNavList.vue'
 import PromptContent from './PromptContent.vue'
-import { allBrowsersIcons } from '../../../../frontend-shared/src/assets/browserLogos'
+import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
 import { gql, useMutation } from '@urql/vue'
 import { TopNavFragment, TopNav_LaunchOpenProjectDocument, TopNav_SetBrowserDocument } from '../../generated/graphql'
 import { useI18n } from '@cy/i18n'

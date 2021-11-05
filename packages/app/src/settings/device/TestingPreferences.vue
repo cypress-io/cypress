@@ -32,7 +32,7 @@
 <script lang="ts" setup>
 import SettingsSection from '../SettingsSection.vue'
 import { useI18n } from '@cy/i18n'
-import Switch from '../../../../frontend-shared/src/components/Switch.vue'
+import Switch from '@packages/frontend-shared/src/components/Switch.vue'
 
 const { t } = useI18n()
 

@@ -107,8 +107,7 @@ import LoginModal from './topnav/LoginModal.vue'
 import UserAvatar from './topnav/UserAvatar.vue'
 import Auth from './Auth.vue'
 import { useI18n } from '@cy/i18n'
-import BaseLink from '@packages/frontend-shared/src/components/BaseLink.vue'
-import ExternalLink from '@packages/frontend-shared/src/gql-components/ExternalLink.vue'
+import ExternalLink from './ExternalLink.vue'
 
 gql`
 mutation GlobalPageHeader_clearActiveProject {

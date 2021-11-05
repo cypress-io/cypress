@@ -143,7 +143,7 @@ import GitHubActions from '@packages/frontend-shared/src/assets/logos/github-act
 import Bitbucket from '@packages/frontend-shared/src/assets/logos/bitbucket.svg?url'
 import Gitlab from '@packages/frontend-shared/src/assets/logos/gitlab.svg?url'
 import AwsCodeBuild from '@packages/frontend-shared/src/assets/logos/aws-codebuild.svg?url'
-import ExternalLink from '@packages/frontend-shared/src/gql-components/ExternalLink.vue'
+import ExternalLink from '../ExternalLink.vue'
 
 defineProps<{
   type: 'ci' | 'orchestration' | 'main',
