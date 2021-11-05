@@ -1,5 +1,5 @@
-import defaultMessages from '../../../../frontend-shared/src/locales/en-US.json'
-import type { Interception } from '../../../../net-stubbing/lib/external-types'
+import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
+import type { Interception } from '@packages/net-stubbing/lib/external-types'
 
 describe('Navigation', () => {
   it('External links trigger mutation to open in a new browser', () => {
