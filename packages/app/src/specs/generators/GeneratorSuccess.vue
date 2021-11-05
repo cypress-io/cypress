@@ -1,6 +1,6 @@
 <template>
   <Collapsible
-    class="outline-none m-4px rounded "
+    class="outline-none m-4px rounded overflow-hidden"
   >
     <template #target="{open}">
       <div
@@ -17,7 +17,7 @@
         </div>
       </div>
     </template>
-    <div class="rounded border-1 mx-24px mb-24px overflow-hidden">
+    <div class="rounded border-1 mx-24px mb-24px">
       <ShikiHighlight
         :code="file.content"
         line-numbers
