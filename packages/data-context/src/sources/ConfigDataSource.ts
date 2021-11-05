@@ -32,7 +32,7 @@ export class ConfigDataSource {
       const configFile = foundConfigFiles[0]
 
       if (configFile === legacyConfigFile) {
-        throw this.ctx._apis.projectApi.error('CONFIG_FILE_MIGRATION_NEEDED', projectRoot, configFile)
+        throw this.ctx._apis.projectApi.error.throw('CONFIG_FILE_MIGRATION_NEEDED', projectRoot, configFile)
       }
 
       return configFile
@@ -43,13 +43,13 @@ export class ConfigDataSource {
       if (foundConfigFiles.includes(legacyConfigFile)) {
         const foundFiles = foundConfigFiles.filter((f) => f !== legacyConfigFile)
 
-        throw this.ctx._apis.projectApi.error('LEGACY_CONFIG_FILE', projectRoot, ...foundFiles)
+        throw this.ctx._apis.projectApi.error.throw('LEGACY_CONFIG_FILE', projectRoot, ...foundFiles)
       }
 
-      throw this.ctx._apis.projectApi.error('CONFIG_FILES_LANGUAGE_CONFLICT', projectRoot, ...foundConfigFiles)
+      throw this.ctx._apis.projectApi.error.throw('CONFIG_FILES_LANGUAGE_CONFLICT', projectRoot, ...foundConfigFiles)
     }
 
-    throw this.ctx._apis.projectApi.error('NO_DEFAULT_CONFIG_FILE_FOUND', projectRoot)
+    throw this.ctx._apis.projectApi.error.throw('NO_DEFAULT_CONFIG_FILE_FOUND', projectRoot)
   }
 
   async cleanupCachedConfigForActiveProject () {

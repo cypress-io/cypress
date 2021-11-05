@@ -110,8 +110,8 @@ export function makeDataContext (options: MakeDataContextOptions) {
       closeActiveProject () {
         return openProject.closeActiveProject()
       },
-      error (type: string, ...args: any) {
-        throw errors.throw(type, ...args)
+      get error () {
+        return errors
       },
     },
   })

@@ -3,6 +3,7 @@
 
 export * from './AppActions'
 export * from './AuthActions'
+export * from './ChildProcessActions'
 export * from './DataEmitterActions'
 export * from './DevActions'
 export * from './ElectronActions'

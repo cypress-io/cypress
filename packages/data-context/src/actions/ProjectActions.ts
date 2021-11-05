@@ -26,7 +26,10 @@ export interface ProjectApiShape {
   clearProjectPreferences(projectTitle: string): Promise<unknown>
   clearAllProjectPreferences(): Promise<unknown>
   closeActiveProject(): Promise<unknown>
-  error(type: string, ...args: any): Error
+  error: {
+    throw: (type: string, ...args: any) => Error
+    get(type: string, ...args: any): Error & { code: string, isCypressErr: boolean}
+  }
 }
 
 export class ProjectActions {
@@ -67,7 +70,10 @@ export class ProjectActions {
       e2ePluginsInitialized: false,
       generatedSpec: null,
       config: null,
-      configChildProcess: null,
+      configChildProcess: {
+        process: null,
+        executedPlugins: null,
+      },
     })
 
     this.setActiveProjectProperties({

@@ -20,7 +20,7 @@ export interface DevStateShape {
 }
 
 export interface ConfigChildProcessShape {
-  process: ChildProcess
+  process: ChildProcess | null
   executedPlugins: null | 'e2e' | 'ct'
 }
 
@@ -33,7 +33,7 @@ export interface ActiveProjectShape extends ProjectShape {
   currentSpecId?: Maybe<string>
   specs?: FoundSpec[]
   config: Promise<FullConfig> | null
-  configChildProcess: ConfigChildProcessShape | null
+  configChildProcess: ConfigChildProcessShape
   preferences?: Preferences| null
   generatedSpec: GeneratedSpec | null
 }

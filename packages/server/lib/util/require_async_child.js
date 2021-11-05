@@ -4,6 +4,7 @@ const debug = require('debug')('cypress:server:require_async:child')
 const tsNodeUtil = require('./ts_node')
 const util = require('../plugins/util')
 const ipc = util.wrapIpc(process)
+const runPlugins = require('../plugins/child/run_plugins2')
 
 require('./suppress_warnings').suppress()
 
@@ -59,6 +60,17 @@ function run (ipc, requiredFile, projectRoot) {
       const result = exp.default || exp
 
       ipc.send('loaded', result)
+
+      ipc.on('plugins', (testingType) => {
+        if (testingType === 'component' && result?.component?.setupNodeEvents) {
+          runPlugins(ipc, result.component.setupNodeEvents, projectRoot)
+        } else if (testingType === 'e2e' && result?.e2e?.setupNodeEvents) {
+          runPlugins(ipc, result.e2e.setupNodeEvents, projectRoot)
+        } else {
+          // Notify the plugins init that there's no plugins to resolve
+          ipc.send('empty:plugins')
+        }
+      })
 
       debug('config %o', result)
     } catch (err) {

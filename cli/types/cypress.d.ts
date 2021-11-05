@@ -2813,6 +2813,11 @@ declare namespace Cypress {
      * An array of objects defining the certificates
      */
     clientCertificates: ClientCertificate[]
+
+     /**
+     * Handle Cypress plugins
+     */
+      setupNodeEvents: (on: PluginEvents, config: PluginConfigOptions) => PluginConfigOptions
   }
 
   /**

@@ -420,7 +420,7 @@ export class ProjectBase<TServer extends Server> extends EE {
       testingType: options.testingType,
       onError: (err: Error) => this._onError(err, options),
       onWarning: options.onWarning,
-    })
+    }, this.ctx)
 
     debug('plugin config yielded: %o', modifiedCfg)
 
