@@ -26,8 +26,8 @@ import { DialogTitle } from '@headlessui/vue'
 import ExternalLink from '../gql-components/ExternalLink.vue'
 
 defineProps<{
-  helpLink?: string,
-  helpText?: string
+  helpLink: string,
+  helpText: string
 }>()
 
 defineEmits<{
