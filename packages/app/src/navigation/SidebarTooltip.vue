@@ -22,6 +22,7 @@
                   need-content"
         :class="poppperClass"
         :style="`top: ${tooltipTop}px`"
+        role="tooltip"
       >
         <slot name="popper" />
       </div>

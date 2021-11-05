@@ -2,6 +2,7 @@
   <div class="flex relative flex-col flex-1 h-full bg-gray-1000">
     <div
       class="absolute cursor-pointer w-16px bottom-0 top-0 left-full group"
+      :aria-expanded="mainStore.navBarExpanded"
       @click="mainStore.toggleNavBar"
     >
       <div class="w-16px origin-left transform scale-x-0 group-hover:scale-x-100 h-full transition-transform duration-300 flex items-center">
@@ -18,6 +19,7 @@
         :disabled="mainStore.navBarExpanded"
         :popper-top-offset="4"
         poppper-class="h-56px"
+        data-cy="sidebar-header"
       >
         <i-cy-bookmark_x24
           class="icon-dark-gray-200
