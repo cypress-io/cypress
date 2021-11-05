@@ -135,7 +135,7 @@ export function getResolvedTestConfigOverride (test): ResolvedTestConfigOverride
   return testConfig
 }
 
-class TestConfigOverride {
+export class TestConfigOverride {
   private restoreTestConfigFn: Nullable<() => void> = null
 
   restoreAndSetTestConfigOverrides (test, config, env) {
@@ -147,10 +147,4 @@ class TestConfigOverride {
       this.restoreTestConfigFn = mutateConfiguration(resolvedTestConfig, config, env)
     }
   }
-}
-
-export default {
-  create () {
-    return new TestConfigOverride()
-  },
 }

@@ -22,7 +22,7 @@ import { create as createLocation, ILocation } from '../cy/location'
 import { create as createAssertions, IAssertions } from '../cy/assertions'
 import $Listeners from '../cy/listeners'
 import { $Chainer } from './chainer'
-import $Timers from '../cy/timers'
+import { create as createTimer, ITimer } from '../cy/timers'
 import { create as createTimeouts, ITimeouts } from '../cy/timeouts'
 import { create as createRetries, IRetries } from '../cy/retries'
 import { create as createStability, IStability } from '../cy/stability'
@@ -31,7 +31,9 @@ import $Snapshots from '../cy/snapshots'
 import { $Command } from './command'
 import $CommandQueue from './command_queue'
 import { initVideoRecorder } from '../cy/video-recorder'
-import $TestConfigOverrides from '../cy/testConfigOverrides'
+import { TestConfigOverride } from '../cy/testConfigOverrides'
+import debugFn from 'debug'
+import { registerFetch } from 'unfetch'
 
 const debugErrors = debugFn('cypress:driver:errors')
 
@@ -119,19 +121,32 @@ const setTopOnError = function (Cypress, cy: $Cy) {
 
 // NOTE: this makes the cy object an instance
 // TODO: refactor the 'create' method below into this class
-class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILocation {
+class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILocation, ITimer {
+  id: string
+  state: any
+
   timeout: ITimeouts['timeout']
   clearTimeout: ITimeouts['clearTimeout']
+
   isStable: IStability['isStable']
   whenStable: IStability['whenStable']
+
   assert: IAssertions['assert']
   verifyUpcomingAssertions: IAssertions['verifyUpcomingAssertions']
+
   retry: IRetries['retry']
-  state: any
+
   getRemotejQueryInstance: IJQuery['getRemotejQueryInstance']
+
   getRemoteLocation: ILocation['getRemoteLocation']
 
+  pauseTimers: ITimer['pauseTimers']
+
+  // Private methods
+  resetTimer: ReturnType<typeof createTimer>['reset']
+
   constructor (specWindow, Cypress, Cookies, state, config) {
+    this.id = _.uniqueId('cy')
     this.state = state
     initVideoRecorder(Cypress)
 
@@ -165,6 +180,21 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
     const location = createLocation(state)
 
     this.getRemoteLocation = location.getRemoteLocation
+
+    // focused, keyboard, mouse
+
+    const timer = createTimer(Cypress)
+
+    this.pauseTimers = timer.pauseTimers
+    this.resetTimer = timer.reset
+  }
+
+  $$ (selector, context) {
+    if (context == null) {
+      context = this.state('document')
+    }
+
+    return $dom.query(selector, context)
   }
 }
 
@@ -194,7 +224,6 @@ export default {
     const focused = $Focused.create(state)
     const keyboard = $Keyboard.create(state)
     const mouse = $Mouse.create(state, keyboard, focused, Cypress)
-    const timers = $Timers.create(Cypress)
 
     const { expect } = $Chai.create(specWindow, state, cy.assert)
 
@@ -203,8 +232,9 @@ export default {
 
     const ensures = $Ensures.create(state, expect)
 
+    // TODO: for some reason, cy.$$ fails.
     const snapshots = $Snapshots.create($$, state)
-    const testConfigOverrides = $TestConfigOverrides.create()
+    const testConfigOverride = new TestConfigOverride()
 
     const isStopped = () => {
       return queue.stopped
@@ -252,7 +282,7 @@ export default {
 
           Cookies.setInitial()
 
-          timers.reset()
+          cy.resetTimer()
 
           Cypress.action('app:window:before:unload', e)
 
@@ -574,13 +604,6 @@ export default {
     const queue = $CommandQueue.create(state, cy.timeout, cy.whenStable, cleanup, fail, isCy)
 
     _.extend(cy, {
-      id: _.uniqueId('cy'),
-
-      // synchronous querying
-      $$,
-
-      state,
-
       // command queue instance
       queue,
 
@@ -617,9 +640,6 @@ export default {
         mouse,
         keyboard,
       },
-
-      // timer sync methods
-      pauseTimers: timers.pauseTimers,
 
       // snapshots sync methods
       createSnapshot: snapshots.createSnapshot,
@@ -739,9 +759,12 @@ export default {
 
           queue.reset()
           queue.clear()
-          timers.reset()
+          cy.resetTimer()
 
-          testConfigOverrides.restoreAndSetTestConfigOverrides(test, Cypress.config, Cypress.env)
+          queue.reset()
+          queue.clear()
+          cy.resetTimer()
+          testConfigOverride.restoreAndSetTestConfigOverrides(test, Cypress.config, Cypress.env)
 
           cy.removeAllListeners()
         } catch (err) {
