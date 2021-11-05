@@ -60,7 +60,7 @@ export const stubMutation: MaybeResolver<Mutation> = {
   setProjectPreferences (source, args, ctx) {
     return {}
   },
-  codeGenSpec (source, args, ctx) {
+  generateSpecFromSource (source, args, ctx) {
     if (!ctx.currentProject) {
       throw Error('Cannot set currentSpec without active project')
     }

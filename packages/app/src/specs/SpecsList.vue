@@ -1,7 +1,7 @@
 <template>
   <div class="p-24px">
     <CreateSpecModal
-      v-if="props.gql.activeTestingType"
+      v-if="props.gql.currentProject?.currentTestingType"
       :show="showModal"
       :gql="props.gql"
       @close="showModal = false"
