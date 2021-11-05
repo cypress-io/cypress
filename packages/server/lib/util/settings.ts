@@ -145,7 +145,7 @@ export function read (projectRoot, options: SettingsOptions = {}, ctx: DataConte
 
   const file = pathToConfigFile(projectRoot, options)
 
-  return ctx.config.getConfigOnChildProcess(file)
+  return ctx.config.getBaseConfig(file)
   .catch((err) => {
     if (err.type === 'MODULE_NOT_FOUND' || err.code === 'ENOENT') {
       return Promise.reject(errors.get('CONFIG_FILE_NOT_FOUND', options.configFile, projectRoot))

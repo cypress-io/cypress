@@ -14,7 +14,7 @@ import {
   BrowserDataSource,
   StorybookDataSource,
   CloudDataSource,
-  ConfigDataSource,
+  ProjectConfigDataSource,
 } from './sources/'
 import { cached } from './util/cached'
 import { DataContextShell, DataContextShellConfig } from './DataContextShell'
@@ -165,7 +165,7 @@ export class DataContext extends DataContextShell {
 
   @cached
   get config () {
-    return new ConfigDataSource(this)
+    return new ProjectConfigDataSource(this)
   }
 
   @cached

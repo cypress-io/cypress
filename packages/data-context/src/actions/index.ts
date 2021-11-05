@@ -3,10 +3,10 @@
 
 export * from './AppActions'
 export * from './AuthActions'
-export * from './ChildProcessActions'
 export * from './DataEmitterActions'
 export * from './DevActions'
 export * from './ElectronActions'
 export * from './FileActions'
 export * from './ProjectActions'
+export * from './ProjectConfigDataActions'
 export * from './WizardActions'

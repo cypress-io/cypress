@@ -20,8 +20,23 @@ export interface DevStateShape {
 }
 
 export interface ConfigChildProcessShape {
-  process: ChildProcess | null
+  /**
+   * Child process executing the config & sourcing plugin events
+   */
+  process: ChildProcess
+  /**
+   * Keeps track of which plugins we have executed in the current config process
+   */
   executedPlugins: null | 'e2e' | 'ct'
+  /**
+   * Config from the initial module.exports
+   */
+  resolvedBaseConfig: Promise<Cypress.ConfigOptions>
+  /**
+   * Config after executing the plugins for the appropriate run mode,
+   * undefined until the testing mode has executed
+   */
+  resolvedFullConfig?: Promise<FullConfig>
 }
 
 export interface ActiveProjectShape extends ProjectShape {
@@ -33,7 +48,7 @@ export interface ActiveProjectShape extends ProjectShape {
   currentSpecId?: Maybe<string>
   specs?: FoundSpec[]
   config: Promise<FullConfig> | null
-  configChildProcess: ConfigChildProcessShape
+  configChildProcess?: ConfigChildProcessShape | null
   preferences?: Preferences| null
 }
 

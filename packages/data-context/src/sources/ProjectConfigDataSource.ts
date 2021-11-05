@@ -1,26 +1,23 @@
 import type { FullConfig } from '@packages/types'
-import path from 'path'
 import type { DataContext } from '..'
 
-export class ConfigDataSource {
+export class ProjectConfigDataSource {
   constructor (private ctx: DataContext) {}
 
-  async getConfigOnChildProcess (filename?: string) {
-    if (!filename) {
-      if (!this.ctx.activeProject?.projectRoot) {
-        throw new Error('Filename is required, and a active project must be set to get it')
-      }
-
-      const defaultConfigName = await this.getDefaultConfigBasename(this.ctx.activeProject?.projectRoot)
-
-      filename = path.join(this.ctx.activeProject.projectRoot, defaultConfigName)
+  async getBaseConfig () {
+    if (!this.ctx.activeProject?.configChildProcess) {
+      return null
     }
 
-    const childProcessFilePath = path.join(__dirname, '../../../server/lib/util', 'require_async_child.js')
+    return this.ctx.activeProject.configChildProcess.resolvedBaseConfig
+  }
 
-    const config = await this.ctx.actions.childProcess.fork(filename, childProcessFilePath)
+  async getOrCreateBaseConfig () {
+    const configChildProcess = this.ctx.activeProject?.configChildProcess
 
-    return config as Cypress.ConfigOptions
+    if (!configChildProcess) {
+      return this.ctx.actions.projectConfig.refreshProjectConfig()
+    }
   }
 
   async getConfigForProject (projectRoot: string): Promise<FullConfig> {
