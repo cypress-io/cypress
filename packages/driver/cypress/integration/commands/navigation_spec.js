@@ -2008,7 +2008,7 @@ describe('src/cy/commands/navigation', () => {
             }
 
             expect(err.message).to.include('Your page did not fire its `load` event within `50ms`.')
- 
+
             return Promise
             .delay(100)
             .then(() => {
