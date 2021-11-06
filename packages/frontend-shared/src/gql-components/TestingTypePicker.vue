@@ -8,7 +8,7 @@
       class="m-24px px-24px pt-36px pb-36px w-336px"
       :icon="tt.icon"
       :hover-icon="tt.iconSolid"
-      icon-size="64"
+      :icon-size="64"
       variant="jade"
       @click="emits('pick', tt.key)"
     >

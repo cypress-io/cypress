@@ -12,8 +12,8 @@
     @click="emits('click')"
   >
     <div
-      class="mx-auto mb-32px children:transition-all children:duration-300"
-      :class="`w-${iconSize}px h-${iconSize}px`"
+      class="mx-auto children:transition-all children:duration-300"
+      :class="`w-${iconSize}px h-${iconSize}px mb-${iconMargin}px`"
     >
       <component
         :is="hoverIcon"
@@ -24,7 +24,7 @@
       />
       <component
         :is="icon"
-        class="opacity-100 group-hover:opacity-0"
+        class="opacity-100"
         :class="[ hoverIcon ? 'group-hover:opacity-0' : undefined,
                   iconClass]
         "
@@ -55,7 +55,7 @@ const props = withDefaults(defineProps<{
   icon: FunctionalComponent<SVGAttributes, {}>
   hoverIcon?: FunctionalComponent<SVGAttributes, {}>
   variant: 'indigo' | 'jade'
-  iconSize: '64' | '48'
+  iconSize: 64 | 48
   disabled?: boolean
 }>(), {
   disabled: false,
@@ -66,6 +66,10 @@ const classMap = {
   indigo: 'icon-dark-indigo-400 icon-light-indigo-100 icon-light-secondary-jade-200 icon-dark-secondary-jade-400',
   jade: 'icon-dark-jade-400 icon-light-jade-100',
 }
+
+const iconMargin = computed(() => {
+  return props.iconSize === 64 ? 32 : 8
+})
 
 const iconClass = computed(() => {
   return [`w-${props.iconSize}px h-${props.iconSize}px`, props.disabled ?

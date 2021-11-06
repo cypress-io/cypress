@@ -1,6 +1,8 @@
 <template>
   <SidebarTooltip
-    class="flex items-center border border-transparent m-12px p-7px bg-gray-900 group rounded cursor-pointer overflow-hidden transition-colors duration-300"
+    class="flex items-center border border-transparent m-12px p-7px bg-gray-900
+    focus:outline-none
+    group rounded cursor-pointer overflow-hidden transition-colors duration-300"
     :class="mainStore.navBarExpanded ? undefined : 'hover:border-gray-800'"
     :disabled="mainStore.navBarExpanded"
     tabindex="0"
