@@ -14,7 +14,8 @@ describe('<StatusBadge />', () => {
           status={status.value}
         />
         <br/>
-        <Button onClick={() => status.value = !status.value}>toggle</Button>
+        {// @ts-ignore
+        }<Button onClick={() => status.value = !status.value}>toggle</Button>
       </div>
     ))
 

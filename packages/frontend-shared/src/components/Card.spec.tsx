@@ -14,13 +14,13 @@ describe('Card', () => {
           description="Build and test the entire experience of your application from end-to-end to each ensure each flow matches your expectations."
           icon={IconE2E}
           hoverIcon={IconE2ESolid}
-          iconSize={'64'}
+          iconSize={64}
           variant='jade'/>
         <Card
           title="Component Testing"
           class="m-16px px-40px pt-36px pb-32px w-336px"
           description="Build and test your components from your design system in isolation in order to ensure each state matches your expectations."
-          iconSize={'64'}
+          iconSize={64}
           icon={IconComponent}
           hoverIcon={IconComponentSolid}
           variant='jade'/>
