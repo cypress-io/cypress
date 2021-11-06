@@ -42,7 +42,7 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
 import { gql } from '@urql/vue'
-import { TESTING_TYPES } from '@packages/types/src'
+import { TESTING_TYPES } from '@packages/types'
 import type { SwitchTestingTypeButtonFragment } from '../generated/graphql'
 import { useMainStore } from '../store'
 import SidebarTooltip from './SidebarTooltip.vue'
