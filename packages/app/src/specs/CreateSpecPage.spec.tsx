@@ -84,8 +84,8 @@ describe('<CreateSpecPage />', () => {
             id: 'id',
             storybook: null,
             codeGenGlob: '**.vue',
+            currentTestingType: testingType.value,
           },
-          activeTestingType: testingType.value,
         }} />
       </div>))
   })
