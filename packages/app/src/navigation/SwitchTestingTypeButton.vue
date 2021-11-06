@@ -1,5 +1,6 @@
 <template>
   <SidebarTooltip
+    v-if="testingType"
     class="flex items-center border border-transparent m-12px p-7px bg-gray-900
     focus:outline-none
     group rounded cursor-pointer overflow-hidden transition-colors duration-300"
@@ -15,7 +16,7 @@
       @close="showModal = false"
     />
     <component
-      :is="testingTypeIcon"
+      :is="testingType.icon"
       class="
           children:transition children:duration-300
           icon-dark-jade-300 group-hover:icon-dark-white
@@ -26,7 +27,7 @@
           mr-20px"
     />
     <span class="flex-grow text-white whitespace-nowrap">
-      {{ testingTypeName }}
+      {{ testingType.name }}
     </span>
     <i-cy-chevron-right_x16
       class="icon-dark-gray-700
@@ -34,7 +35,7 @@
           h-16px"
     />
     <template #popper>
-      {{ testingTypeName }}
+      {{ testingType.name }}
     </template>
   </SidebarTooltip>
 </template>
@@ -42,13 +43,15 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
 import { gql } from '@urql/vue'
-import { TESTING_TYPES } from '@packages/types'
 import type { SwitchTestingTypeButtonFragment } from '../generated/graphql'
 import { useMainStore } from '../store'
 import SidebarTooltip from './SidebarTooltip.vue'
 import SwitchTestingTypeModal from './SwitchTestingTypeModal.vue'
 import IconE2E from '~icons/cy/testing-type-e2e_x24'
 import IconComponent from '~icons/cy/testing-type-component_x24'
+import { useI18n } from '@cy/i18n'
+
+const { t } = useI18n()
 
 gql`
 fragment SwitchTestingTypeButton on App {
@@ -63,17 +66,19 @@ const props = defineProps<{
   gql: SwitchTestingTypeButtonFragment
 }>()
 
-const testingTypeName = computed(() => {
-  return TESTING_TYPES.find((tt) => tt.type === props.gql.activeTestingType)?.title
-})
-
-const ICONS_MAP = {
-  e2e: IconE2E,
-  component: IconComponent,
+const TESTING_TYPE_MAP = {
+  e2e: {
+    name: t(`testingType.e2e.name`),
+    icon: IconE2E,
+  },
+  component: {
+    name: t(`testingType.component.name`),
+    icon: IconComponent,
+  },
 } as const
 
-const testingTypeIcon = computed(() => {
-  return props.gql.activeTestingType ? ICONS_MAP[props.gql.activeTestingType] : null
+const testingType = computed(() => {
+  return props.gql.activeTestingType ? TESTING_TYPE_MAP[props.gql.activeTestingType] : null
 })
 
 const mainStore = useMainStore()

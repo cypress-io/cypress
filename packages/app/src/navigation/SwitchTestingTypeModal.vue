@@ -3,7 +3,7 @@
     class="transition duration-200 transition-all"
     :click-outside="false"
     variant="bare"
-    :title="t('navigation.testingType.modalTitle')"
+    :title="t('testingType.modalTitle')"
     :model-value="show"
     data-cy="switch-modal"
     @update:model-value="emits('close')"

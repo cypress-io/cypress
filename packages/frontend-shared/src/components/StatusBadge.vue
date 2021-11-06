@@ -1,10 +1,10 @@
 <template>
   <span
-    class="inline-flex items-center border rounded-full pl-8px pr-16px py-8px"
+    class="inline-flex items-center border rounded-full p-5px pr-16px text-size-14px leading-20px"
     :class="status ? 'text-jade-500' : 'text-gray-600'"
   >
     <i-cy-grommet_x16
-      class="m-4px h-16px w-16px fill-current"
+      class="mx-4px h-16px w-16px"
       :class="status ? 'icon-light-jade-500 icon-dark-jade-500' : 'icon-dark-gray-200 icon-dark-gray-50'"
     />
     {{ status ? titleOn : titleOff }}

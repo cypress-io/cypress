@@ -59,16 +59,16 @@ const emits = defineEmits<{
 const TESTING_TYPES = [
   {
     key: 'e2e',
-    name: t('navigation.testingType.e2e.name'),
-    description: t('navigation.testingType.e2e.description'),
+    name: t('testingType.e2e.name'),
+    description: t('testingType.e2e.description'),
     icon: IconE2E,
     iconSolid: IconE2ESolid,
     configured: props.gql.activeProject?.isE2EConfigured,
   },
   {
     key: 'component',
-    name: t('navigation.testingType.component.name'),
-    description: t('navigation.testingType.component.description'),
+    name: t('testingType.component.name'),
+    description: t('testingType.component.description'),
     icon: IconComponent,
     iconSolid: IconComponentSolid,
     configured: props.gql.activeProject?.isCTConfigured,
