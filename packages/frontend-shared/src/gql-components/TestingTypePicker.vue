@@ -2,7 +2,8 @@
   <div class="flex justify-center m-24px">
     <Card
       v-for="tt in TESTING_TYPES"
-      :key="tt.name"
+      :key="tt.key"
+      :data-cy-testingType="tt.key"
       :title="tt.name"
       :description="tt.description"
       class="m-24px px-24px pt-36px pb-36px w-336px"
