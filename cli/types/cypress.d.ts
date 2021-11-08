@@ -5625,7 +5625,7 @@ declare namespace Cypress {
     stderr: string
   }
 
-  type FileReference = string | Buffer | FileReferenceObject
+  type FileReference = string | BufferType | FileReferenceObject
   interface FileReferenceObject {
     /*
      * Buffers and strings will be used as-is. All other types will have `JSON.stringify()` applied.
