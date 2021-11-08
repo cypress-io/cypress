@@ -15,7 +15,7 @@ import { stubMutation } from './stubgql-Mutation'
 import { pathToArray } from 'graphql/jsutils/Path'
 import dedent from 'dedent'
 import { stubQuery } from './stubgql-Query'
-import { stubProject } from './stubgql-Project'
+import { stubGlobalProject, stubProject } from './stubgql-Project'
 import { CloudOrganizationStubs, CloudProjectStubs, CloudRecordKeyStubs, CloudRunStubs } from './stubgql-CloudTypes'
 
 type MaybeResolveMap = {[K in keyof CodegenTypeMap]: MaybeResolver<CodegenTypeMap[K]>}
@@ -25,6 +25,7 @@ const GQLStubRegistry: Partial<MaybeResolveMap> = {
   Wizard: stubWizard,
   NavigationMenu: stubNavigationMenu,
   ProjectLike: stubProject,
+  GlobalProject: stubGlobalProject,
   CurrentProject: stubProject,
   Mutation: stubMutation,
   NavigationItem: stubNavigationItem,

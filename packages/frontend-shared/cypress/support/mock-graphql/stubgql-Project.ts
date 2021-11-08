@@ -54,6 +54,7 @@ export const createTestCurrentProject = (title: string, currentProject: Partial<
     config,
     cloudProject: CloudProjectStubs.componentProject,
     codeGenGlob: '/**/*.vue',
+    currentBrowser: currentProject.browsers?.length ? currentProject.browsers[0] : null,
     ...currentProject,
   }
 }

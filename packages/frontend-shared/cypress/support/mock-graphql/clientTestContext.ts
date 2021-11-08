@@ -51,7 +51,7 @@ export function makeClientTestContext (): ClientTestContext {
     }
   })
 
-  const testProject = createTestCurrentProject('test-project')
+  const testProject = createTestCurrentProject('test-project', { browsers })
 
   return {
     currentProject: testProject,
