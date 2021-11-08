@@ -45,7 +45,7 @@ We dynamically generated a new test to display this failure.
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  1                                                                                │
-  │ Video:        true                                                                            │
+  │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     testConfigOverrides-invalid-browser.js                                           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -54,14 +54,13 @@ We dynamically generated a new test to display this failure.
   (Screenshots)
 
   -  /XXX/XXX/XXX/cypress/screenshots/testConfigOverrides-invalid-browser.js/An uncau     (1280x720)
-     ght error was detected outside of a test (failed).png                                          
+     ght error was detected outside of a test (failed).png            
+
+                              
   (Video)
 
-  -  Started processing:  Compressing to 32 CRF
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/testConfigOverrides-invalid-bro     (X second)
-                          wser.js.mp4
-
-
+  -  Started processing:  Compressing to 32 CRF                                                     
+                          wser.js.mp4                                                               
 
 
 ====================================================================================================
