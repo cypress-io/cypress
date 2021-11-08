@@ -24,7 +24,7 @@ const NoCommands = () => (
   </ul>
 )
 
-const AttemptHeader = ({ index, isOpen, state }: {index: number, isOpen: boolean, state: TestState }) => (
+const AttemptHeader = ({ index, state }: {index: number, state: TestState }) => (
   <span className='attempt-tag'>
     <span className='open-close-indicator'>
       <CollapseIcon className='collapse-icon' />
@@ -91,7 +91,7 @@ class Attempt extends Component<AttemptProps> {
         ref="container"
       >
         <Collapsible
-          header={<AttemptHeader index={model.id} isOpen={model.isOpen} state={model.state} />}
+          header={<AttemptHeader index={model.id} state={model.state} />}
           headerClass='attempt-name'
           isOpen={model.isOpen}
         >
