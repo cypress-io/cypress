@@ -134,7 +134,6 @@ export class AutIframe {
 
   // note htmlAttrs is actually `NamedNodeMap`: https://developer.mozilla.org/en-US/docs/Web/API/NamedNodeMap
   // but typing it correctly gives a lot more weird typing errors
-  // _replaceHtmlAttrs ($html: JQuery<HTMLHtmlElement>, htmlAttrs: Record<string, string>) {
   _replaceHtmlAttrs ($html: JQuery<HTMLHtmlElement>, htmlAttrs: Record<string, string>) {
     let oldAttrs = {}
 
