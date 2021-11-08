@@ -80,6 +80,7 @@ export async function e2ePluginSetup (projectRoot: string, on: Cypress.PluginEve
 
         const fetchApi = ctx.util.fetch
 
+        sinon.reset()
         sinon.stub(ctx.util, 'fetch').get(() => {
           return async (url: RequestInfo, init?: RequestInit) => {
             if (!String(url).endsWith('/test-runner-graphql')) {
