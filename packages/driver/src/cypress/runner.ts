@@ -1530,7 +1530,7 @@ export default {
           cy.setRunnable(runnable, hookId)
         })
         .then(() => {
-          testBeforeRunAsync(test, Cypress)
+          return testBeforeRunAsync(test, Cypress)
         })
         .catch((err) => {
           // TODO: if our async tasks fail
