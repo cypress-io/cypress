@@ -1,11 +1,11 @@
 import { cloneDeep } from 'lodash'
 import type { CloudUser } from '../generated/test-cloud-graphql-types.gen'
 import type { WizardStep, NavItem, CurrentProject, Browser, WizardBundler, WizardFrontendFramework, TestingTypeEnum, GlobalProject } from '../generated/test-graphql-types.gen'
-import { resetTestNodeIdx, testNodeId } from './clientTestUtils'
+import { resetTestNodeIdx } from './clientTestUtils'
+import { stubBrowsers } from './stubgql-Browser'
 import * as cloudTypes from './stubgql-CloudTypes'
 import { stubNavigationMenu } from './stubgql-NavigationMenu'
 import { createTestCurrentProject, createTestGlobalProject, stubGlobalProject } from './stubgql-Project'
-import { longBrowsersList } from './stubgql-App'
 import { allBundlers } from './stubgql-Wizard'
 
 export interface ClientTestContext {
@@ -43,24 +43,16 @@ export interface ClientTestContext {
  */
 export function makeClientTestContext (): ClientTestContext {
   resetTestNodeIdx()
-  const browsers = longBrowsersList.map((browser, i): Browser => {
-    return {
-      ...testNodeId('Browser'),
-      ...browser,
-      disabled: false,
-      isSelected: i === 0,
-    }
-  })
 
-  const testProject = createTestCurrentProject('test-project', { browsers })
+  const testProject = createTestCurrentProject('test-project')
 
   return {
     currentProject: testProject,
     projects: [stubGlobalProject, createTestGlobalProject('another-test-project')],
     app: {
       navItem: 'settings',
-      browsers,
-      currentBrowser: browsers[0],
+      browsers: stubBrowsers,
+      currentBrowser: stubBrowsers[0],
       isInGlobalMode: false,
       isAuthBrowserOpened: false,
     },

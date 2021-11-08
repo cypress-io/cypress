@@ -8,6 +8,7 @@ import type {
 } from '../generated/test-graphql-types.gen'
 import { testNodeId } from './clientTestUtils'
 import { CloudProjectStubs } from './stubgql-CloudTypes'
+import { stubBrowsers } from './stubgql-Browser'
 
 export const createTestGlobalProject = (title: string, additionalConfig: Partial<GlobalProject> = {}): GlobalProject => {
   const snakeTitle = _.kebabCase(title)
@@ -55,7 +56,8 @@ export const createTestCurrentProject = (title: string, currentProject: Partial<
     config,
     cloudProject: CloudProjectStubs.componentProject,
     codeGenGlob: '/**/*.vue',
-    currentBrowser: currentProject.browsers?.length ? currentProject.browsers[0] : null,
+    currentBrowser: stubBrowsers[0],
+    browsers: stubBrowsers,
     ...currentProject,
   }
 }

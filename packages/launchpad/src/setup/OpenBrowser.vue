@@ -27,6 +27,7 @@ import { OpenBrowserDocument, OpenBrowser_LaunchProjectDocument } from '../gener
 gql`
 query OpenBrowser {
   currentProject {
+    id
     ...OpenBrowserList
   }
   wizard {
