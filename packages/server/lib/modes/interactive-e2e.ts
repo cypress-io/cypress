@@ -141,6 +141,9 @@ export = {
       onLogOutClicked () {
         return bus.emit('menu:item:clicked', 'log:out')
       },
+      getGraphQLPort: () => {
+        return ctx?.gqlServerPort
+      },
     })
 
     return Promise.all([

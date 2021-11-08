@@ -20,7 +20,7 @@
         v-if="generator"
         :key="generator.id"
         v-model:title="title"
-        :code-gen-glob="props.gql.activeProject?.codeGenGlob"
+        :code-gen-glob="props.gql.currentProject?.codeGenGlob"
         @restart="currentGeneratorId = undefined"
       />
       <div
@@ -58,9 +58,9 @@ defineEmits<{
 }>()
 
 gql`
-fragment CreateSpecModal on App {
+fragment CreateSpecModal on Query {
   ...CreateSpecCards
-  activeProject {
+  currentProject {
     ...ComponentGeneratorStepOne_codeGenGlob
   }
 }

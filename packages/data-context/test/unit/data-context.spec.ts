@@ -34,7 +34,7 @@ const makeDataContext = (options) => {
       getProjectRootsFromCache: () => ([]),
       getProjectPreferencesFromCache: () => {
         return {
-          [options.coreData.app.activeProject.title]: {
+          [options.coreData.app.currentProject.title]: {
             browserPath: chromeTestPath,
             testingType: 'component',
           },
@@ -58,7 +58,7 @@ describe('@packages/data-context', () => {
 
     it('launches project immediately if preferences is set', async () => {
       const projectRoot = '/project/root'
-      const activeProject = {
+      const currentProject = {
         title: 'active-project',
         ctPluginsInitialized: false,
         e2ePluginsInitialized: false,
@@ -84,8 +84,8 @@ describe('@packages/data-context', () => {
             history: [],
           },
           app: {
-            projects: [activeProject],
-            activeProject,
+            projects: [currentProject],
+            currentProject,
           },
           electron: {},
         },

@@ -6,9 +6,9 @@
         <BaseError :gql="query.data.value.baseError" />
       </template>
       <template
-        v-else-if="query.data.value.app.isInGlobalMode && !query.data.value?.app.activeProject"
+        v-else-if="query.data.value.app.isInGlobalMode && !query.data.value?.currentProject"
       >
-        <GlobalPage :gql="query.data.value.app" />
+        <GlobalPage :gql="query.data.value" />
       </template>
 
       <template v-else>
@@ -33,7 +33,7 @@
             />
           </button>
           <TestingTypeCards
-            :gql="query.data.value.app"
+            :gql="query.data.value"
           />
         </template>
         <Wizard
@@ -68,10 +68,12 @@ const isTestingTypeModalOpen = ref(false)
 
 gql`
 query MainLaunchpadQuery {
-  app{
-    ...TestingTypeCards
-  }
+  ...TestingTypeCards
   ...Wizard
+
+  currentProject {
+    id
+  }
 
   baseError {
     ...BaseError
@@ -84,8 +86,8 @@ query MainLaunchpadQuery {
 
   app {
     isInGlobalMode
-    ...GlobalPage
   }
+  ...GlobalPage
 }
 `
 

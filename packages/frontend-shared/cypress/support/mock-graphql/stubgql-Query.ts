@@ -12,4 +12,10 @@ export const stubQuery: MaybeResolver<Query> = {
   wizard (source, args, ctx) {
     return ctx.wizard
   },
+  currentProject (source, args, ctx) {
+    return ctx.currentProject
+  },
+  projects (soruce, args, ctx) {
+    return ctx.projects
+  },
 }

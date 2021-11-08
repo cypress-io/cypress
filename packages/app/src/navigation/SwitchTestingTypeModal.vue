@@ -25,8 +25,8 @@ import { useI18n } from '@cy/i18n'
 const { t } = useI18n()
 
 gql`
-fragment SwitchTestingTypeModal on App {
-    ...TestingTypePicker
+fragment SwitchTestingTypeModal on Query {
+  ...TestingTypePicker
 }
 `
 

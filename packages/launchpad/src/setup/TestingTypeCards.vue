@@ -15,7 +15,7 @@ import {
 } from '../generated/graphql'
 
 gql`
-fragment TestingTypeCards on App {
+fragment TestingTypeCards on Query {
   ...TestingTypePicker
 }
 `

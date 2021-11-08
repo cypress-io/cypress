@@ -18,8 +18,8 @@
       max-height="3200px"
     >
       <ProjectSettings
-        v-if="props.gql.app.activeProject"
-        :gql="props.gql.app.activeProject"
+        v-if="props.gql.currentProject"
+        :gql="props.gql.currentProject"
       />
     </SettingsCard>
   </div>
@@ -39,10 +39,8 @@ const { t } = useI18n()
 
 gql`
 fragment SettingsContainer on Query {
-  app {
-    activeProject {
-      ...ProjectSettings
-    }
+  currentProject {
+    ...ProjectSettings
   }
 }`
 
