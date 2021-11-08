@@ -171,6 +171,8 @@ const SendRequestOutgoing: RequestMiddleware = function () {
   req.on('error', this.onError)
   req.on('response', (incomingRes) => this.onResponse(incomingRes, req))
   this.req.socket.on('close', () => {
+    if (!this.req.aborted) return
+
     this.debug('request aborted')
     req.abort()
   })
