@@ -29,7 +29,7 @@
           flex-shrink-0 mx-20px"
         />
         <div class="text-gray-50 truncate leading-24px text-size-16px">
-          {{ query.data.value?.app?.activeProject?.title ?? 'Cypress' }}
+          {{ query.data.value?.app?.currentProject?.title ?? 'Cypress' }}
           <p class="text-gray-600 truncate leading-20px text-size-14px">
             chore/use-import-types-for-gql
           </p>
@@ -37,7 +37,7 @@
 
         <template #popper>
           <div class="text-left text-gray-50 truncate leading-16px text-size-16px">
-            {{ query.data.value?.app?.activeProject?.title ?? 'Cypress' }}
+            {{ query.data.value?.app?.currentProject?.title ?? 'Cypress' }}
             <p class="text-gray-600 truncate leading-20px text-size-14px">
               chore/use-import-types-for-gql
             </p>
@@ -97,12 +97,10 @@ const navigation = [
 
 gql`
 query SideBarNavigation {
-  app {
-    activeProject {
-      id
-      title
-    }
-    ...SwitchTestingTypeButton
+  ...SwitchTestingTypeButton
+  currentProject {
+    id
+    title
   }
 }
 `

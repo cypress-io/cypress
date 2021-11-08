@@ -68,9 +68,7 @@ const isTestingTypeModalOpen = ref(false)
 
 gql`
 query MainLaunchpadQuery {
-  app{
-    ...TestingTypeCards
-  }
+  ...TestingTypeCards
   ...Wizard
 
   currentProject {
