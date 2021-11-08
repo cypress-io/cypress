@@ -44,9 +44,7 @@ const selectorPlaygroundStore = useSelectorPlaygroundStore()
 const copyText = ref<HTMLInputElement>()
 
 watch(() => selectorPlaygroundStore.method, (method) => {
-  if (method === 'contains') {
-    selectorPlaygroundStore.containsSelector = 'Hello world'
-  }
+  props.autIframe.toggleSelectorHighlight(true)
 })
 
 const selector = computed({
