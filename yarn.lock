@@ -2417,10 +2417,10 @@
     stealthy-require "^1.1.1"
     tough-cookie "^2.3.3"
 
-"@cypress/request@2.88.6", "@cypress/request@^2.88.6":
-  version "2.88.6"
-  resolved "https://registry.yarnpkg.com/@cypress/request/-/request-2.88.6.tgz#a970dd675befc6bdf8a8921576c01f51cc5798e9"
-  integrity sha512-z0UxBE/+qaESAHY9p9sM2h8Y4XqtsbDCt0/DPOrqA/RZgKi4PkxdpXyK4wCCnSk1xHqWHZZAE+gV6aDAR6+caQ==
+"@cypress/request@2.88.7", "@cypress/request@^2.88.7":
+  version "2.88.7"
+  resolved "https://registry.npmjs.org/@cypress/request/-/request-2.88.7.tgz#386d960ab845a96953723348088525d5a75aaac4"
+  integrity sha512-FTULIP2rnDJvZDT9t6B4nSfYR40ue19tVmv3wUcY05R9/FPCoMl1nAPJkzWzBCo7ltVn5ThQTbxiMoGBN7k0ig==
   dependencies:
     aws-sign2 "~0.7.0"
     aws4 "^1.8.0"
