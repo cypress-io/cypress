@@ -288,8 +288,9 @@ const ensureNotAnimating = function (cy, $el, coordsHistory, animationDistanceTh
   cy.ensureElementIsNotAnimating($el, coordsHistory, animationDistanceThreshold)
 }
 
-const verify = function (cy, $el, options, callbacks) {
+const verify = function (cy, $el, config, options, callbacks) {
   _.defaults(options, {
+    scrollBehavior: config('scrollBehavior'),
     ensure: {
       position: true,
       visibility: true,
@@ -381,9 +382,11 @@ const verify = function (cy, $el, options, callbacks) {
           }
         }
 
-        // ensure its visible
         if (options.ensure.visibility) {
-          cy.ensureVisibility($el, _log)
+          // ensure element is visible but do not check if hidden by ancestors
+          // until nudging algorithm occurs
+          // https://whimsical.com/actionability-J38eY9K2Y3vA6uCMWtmLVA
+          cy.ensureStrictVisibility($el, _log)
         }
 
         if (options.ensure.notReadonly) {
@@ -419,6 +422,7 @@ const verify = function (cy, $el, options, callbacks) {
         // this calculation is relative from the viewport so we
         // only care about fromElViewport coords
         $elAtCoords = options.ensure.notCovered && ensureElIsNotCovered(cy, win, $el, coords.fromElViewport, options, _log, onScroll)
+        cy.ensureNotHiddenByAncestors($el, _log)
       }
 
       // pass our final object into onReady

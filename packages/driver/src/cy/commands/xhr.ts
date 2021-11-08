@@ -5,7 +5,7 @@ import Promise from 'bluebird'
 import $utils from '../../cypress/utils'
 import $errUtils from '../../cypress/error_utils'
 import $stackUtils from '../../cypress/stack_utils'
-import $Server, { Server } from '../../cypress/server'
+import { Server } from '../../cypress/server'
 import { $Location } from '../../cypress/location'
 
 let server: Server | null = null
@@ -103,7 +103,7 @@ type XHRConsoleProps = {
 const startXhrServer = (cy, state, config) => {
   const logs = {}
 
-  server = $Server.create({
+  server = new Server({
     xhrUrl: config('xhrUrl'),
     stripOrigin,
 

@@ -56,7 +56,6 @@ export default (Commands, Cypress, cy, state, config) => {
         y,
         waitForAnimations: config('waitForAnimations'),
         animationDistanceThreshold: config('animationDistanceThreshold'),
-        scrollBehavior: config('scrollBehavior'),
       })
 
       if ($dom.isWindow(options.$el)) {
@@ -112,7 +111,7 @@ export default (Commands, Cypress, cy, state, config) => {
           return dispatch(subject, state('window'), eventName, eventOptions)
         }
 
-        return $actionability.verify(cy, subject, options, {
+        return $actionability.verify(cy, subject, config, options, {
           onScroll ($el, type) {
             Cypress.action('cy:scrolled', $el, type)
           },
