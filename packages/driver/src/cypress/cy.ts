@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 /* eslint-disable prefer-rest-params */
 import _ from 'lodash'
 import Promise from 'bluebird'
@@ -196,9 +198,6 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
   documentHasFocus: ReturnType<typeof createFocused>['documentHasFocus']
   interceptFocus: ReturnType<typeof createFocused>['interceptFocus']
   interceptBlur: ReturnType<typeof createFocused>['interceptBlur']
-
-  // temporary -> should be removed
-  focused: any
 
   constructor (specWindow, Cypress, Cookies, state, config) {
     this.id = _.uniqueId('cy')

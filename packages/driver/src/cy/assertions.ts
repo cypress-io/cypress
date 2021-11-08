@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import _ from 'lodash'
 import Promise from 'bluebird'
 
@@ -48,6 +50,8 @@ const isDomSubjectAndMatchesValue = (value, subject) => {
     // and that all the els are the same
     return isDomTypeFn(subject) && allElsAreTheSame()
   }
+
+  return false
 }
 
 // Rules:

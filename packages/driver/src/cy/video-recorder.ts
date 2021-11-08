@@ -24,6 +24,8 @@ export const initVideoRecorder = (Cypress) => {
         mimeType: 'video/webm',
       }
 
+      // TODO: update TypeScript to 4.4+.
+      // @ts-ignore
       const mediaRecorder = new window.MediaRecorder(stream, options)
 
       mediaRecorder.start(200)
