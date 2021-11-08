@@ -1,7 +1,7 @@
 <template>
   <form
     v-if="props.gql.browsers"
-    @submit.prevent="emit('launch', props.gql?.selectedBrowser?.path)"
+    @submit.prevent="emit('launch', props.gql?.currentBrowser?.path)"
   >
     <div class="flex flex-wrap justify-center gap-6 py-16">
       <div
@@ -71,13 +71,14 @@
 
 <script lang="ts" setup>
 import { useI18n } from '@cy/i18n'
-import { OpenBrowserListFragment, OpenBrowserList_SetBrowserDocument } from '../generated/graphql'
 import Button from '@packages/frontend-shared/src/components/Button.vue'
 import { computed } from 'vue'
 import _clone from 'lodash/clone'
 import openInNew from '~icons/mdi/open-in-new'
 import { useMutation, gql } from '@urql/vue'
 import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
+
+import { OpenBrowserListFragment, OpenBrowserList_SetBrowserDocument } from '../generated/graphql'
 
 gql`
 mutation OpenBrowserList_SetBrowser($id: ID!) {
@@ -86,8 +87,8 @@ mutation OpenBrowserList_SetBrowser($id: ID!) {
 `
 
 gql`
-fragment OpenBrowserList on App {
-  selectedBrowser {
+fragment OpenBrowserList on CurrentProject {
+  currentBrowser {
     id
     displayName
     path
@@ -124,7 +125,7 @@ const setSelected = (browserId: string) => {
   setBrowser.executeMutation({ id: browserId })
 }
 
-const launchText = computed(() => props.gql.selectedBrowser ? `${t('setupPage.openBrowser.launch')} ${props.gql.selectedBrowser.displayName}` : '')
+const launchText = computed(() => props.gql.currentBrowser ? `${t('setupPage.openBrowser.launch')} ${props.gql.currentBrowser.displayName}` : '')
 </script>
 
 <style scoped>

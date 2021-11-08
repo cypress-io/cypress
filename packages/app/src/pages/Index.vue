@@ -1,6 +1,13 @@
 <template>
-  <div v-if="query.data.value?.app">
-    <SpecsList :gql="query.data.value.app" />
+  <div v-if="query.data.value">
+    <SpecsList
+      v-if="query.data.value.currentProject?.specs"
+      :gql="query.data.value"
+    />
+    <CreateSpecPage
+      v-else
+      :gql="query.data.value"
+    />
   </div>
 
   <div v-else>
@@ -12,12 +19,12 @@
 import { gql, useQuery } from '@urql/vue'
 import SpecsList from '../specs/SpecsList.vue'
 import { SpecsPageContainerDocument } from '../generated/graphql'
+import CreateSpecPage from '../specs/CreateSpecPage.vue'
 
 gql`
 query SpecsPageContainer {
-  app {
-    ...Specs_SpecsList
-  }
+  ...Specs_SpecsList
+  ...CreateSpecPage
 }
 `
 

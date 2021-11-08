@@ -1,4 +1,4 @@
-import type { SpecFile, StorybookInfo } from '@packages/types'
+import type { SpecFileWithExtension, StorybookInfo } from '@packages/types'
 import * as path from 'path'
 import type { DataContext } from '..'
 
@@ -13,18 +13,18 @@ export class StorybookDataSource {
   constructor (private ctx: DataContext) {}
 
   async loadStorybookInfo () {
-    if (!this.ctx.activeProject?.projectRoot) {
+    if (!this.ctx.currentProject?.projectRoot) {
       return Promise.resolve(null)
     }
 
-    return this.storybookInfoLoader.load(this.ctx.activeProject?.projectRoot)
+    return this.storybookInfoLoader.load(this.ctx.currentProject?.projectRoot)
   }
 
-  async getStories (): Promise<SpecFile[]> {
-    const project = this.ctx.activeProject
+  async getStories (): Promise<SpecFileWithExtension[]> {
+    const project = this.ctx.currentProject
 
     if (!project) {
-      throw Error(`Cannot find stories without activeProject.`)
+      throw Error(`Cannot find stories without currentProject.`)
     }
 
     const storybook = await this.ctx.storybook.loadStorybookInfo()
@@ -35,7 +35,7 @@ export class StorybookDataSource {
 
     const config = await this.ctx.project.getConfig(project.projectRoot)
     const normalizedGlobs = storybook.storyGlobs.map((glob) => path.join(storybook.storybookRoot, glob))
-    const files = await this.ctx.file.getFilesByGlob(normalizedGlobs)
+    const files = await this.ctx.file.getFilesByGlob(project.projectRoot, normalizedGlobs)
 
     // Don't currently support mdx
     return files.reduce((acc, file) => {
@@ -50,7 +50,7 @@ export class StorybookDataSource {
       })
 
       return [...acc, spec]
-    }, [] as SpecFile[])
+    }, [] as SpecFileWithExtension[])
   }
 
   private storybookInfoLoader = this.ctx.loader<string, StorybookInfo | null>((projectRoots) => this.batchStorybookInfo(projectRoots))

@@ -26,15 +26,15 @@
             <!-- </keep-alive> -->
           </transition>
         </router-view>
-        <ModalManager v-if="modalStore.activeModalId" />
       </section>
     </main>
-    <nav
-      class="h-screen order-first"
-      :class="mainStore.navBarExpanded ? 'w-240px' : 'w-80px'"
+    <div
+      class="h-screen order-first transition-all"
+      :class="mainStore.navBarExpanded ? 'w-248px' : 'w-64px'"
     >
-      <SidebarNavigation class="h-full" />
-    </nav>
+      <SidebarNavigation />
+    </div>
+    <div id="tooltip-target" />
   </div>
 </template>
 
@@ -43,11 +43,8 @@ import SidebarNavigation from '../navigation/SidebarNavigation.vue'
 import HeaderBar from '@cy/gql-components/HeaderBar.vue'
 import { useRoute } from 'vue-router'
 import { computed } from 'vue'
+import { useMainStore } from '../store'
 
-import ModalManager from '../modals/ModalManager.vue'
-import { useModalStore, useMainStore } from '../store'
-
-const modalStore = useModalStore()
 const mainStore = useMainStore()
 const currentRoute = useRoute()
 

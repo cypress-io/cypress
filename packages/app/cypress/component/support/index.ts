@@ -22,6 +22,7 @@ import '@iconify/iconify'
 import { createRouter } from '../../../src/router/router'
 import { createPinia } from '../../../src/store'
 import { Pinia, setActivePinia } from 'pinia'
+import 'cypress-real-events/support'
 
 let pinia: Pinia
 

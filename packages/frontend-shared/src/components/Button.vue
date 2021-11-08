@@ -2,7 +2,7 @@
   <button
     v-if="!href"
     style="width: fit-content"
-    class="flex select-none items-center border rounded gap-8px outline-none"
+    class="flex items-center leading-tight border rounded gap-8px outline-none"
     :class="classes"
   >
     <ButtonInternals>
@@ -107,10 +107,12 @@ const SizeClassesTable = {
   'lg-wide': 'px-32px py-8px',
 } as const
 
+export type ButtonSizes = keyof(typeof SizeClassesTable)
+
 const props = defineProps<{
   prefixIcon?: FunctionalComponent<SVGAttributes>
   suffixIcon?: FunctionalComponent<SVGAttributes>
-  size?: keyof typeof SizeClassesTable
+  size?: ButtonSizes
   variant?: ButtonVariants
   prefixIconClass?: string
   suffixIconClass?: string

@@ -1,29 +1,20 @@
-import type { Mutation, Project } from '../generated/test-graphql-types.gen'
-import config from '../../fixtures/config.json'
+import type { Mutation } from '../generated/test-graphql-types.gen'
 import path from 'path'
 
 import type { MaybeResolver } from './clientTestUtils'
+import { createTestCurrentProject, createTestGlobalProject } from './stubgql-Project'
 
 export const stubMutation: MaybeResolver<Mutation> = {
   __typename: 'Mutation',
   addProject (source, args, ctx) {
-    const project: Project = {
-      id: `project:${args.path}`,
-      title: path.basename(args.path),
-      projectRoot: args.path,
-      isCTConfigured: true,
-      isE2EConfigured: true,
-      __typename: 'Project',
-      config,
-      codeGenGlob: '/**/*.vue',
-    }
-
-    ctx.app.projects.push(project)
+    ctx.projects.push(createTestGlobalProject(path.basename(args.path)))
 
     return true
   },
   setActiveProject (source, args, ctx) {
-    ctx.app.activeProject = ctx.app.projects.find((p) => p.projectRoot === args.path) ?? null
+    const project = ctx.projects.find((p) => p.projectRoot === args.path)
+
+    ctx.currentProject = project ? createTestCurrentProject(project.title) : null
 
     return true
   },
@@ -34,21 +25,21 @@ export const stubMutation: MaybeResolver<Mutation> = {
     return true
   },
   clearActiveProject (source, args, ctx) {
-    ctx.app.activeProject = null
+    ctx.currentProject = null
 
     return true
   },
   removeProject (source, args, ctx) {
-    ctx.app.projects = ctx.app.projects.filter((p) => p.projectRoot !== args.path)
+    ctx.projects = ctx.projects.filter((p) => p.projectRoot !== args.path)
 
     return true
   },
   setCurrentSpec (source, args, ctx) {
-    if (!ctx.app.activeProject) {
+    if (!ctx.currentProject) {
       throw Error('Cannot set currentSpec without active project')
     }
 
-    ctx.app.activeProject.currentSpec = {
+    ctx.currentProject.currentSpec = {
       id: 'U3BlYzovVXNlcnMvbGFjaGxhbi9jb2RlL3dvcmsvY3lwcmVzczUvcGFja2FnZXMvYXBwL3NyYy9CYXNpYy5zcGVjLnRzeA==',
       __typename: 'Spec',
       absolute: '/Users/lachlan/code/work/cypress5/packages/app/src/Basic.spec.tsx',
@@ -67,14 +58,14 @@ export const stubMutation: MaybeResolver<Mutation> = {
     return true
   },
   setProjectPreferences (source, args, ctx) {
-    return ctx.app
+    return {}
   },
-  codeGenSpec (source, args, ctx) {
-    if (!ctx.app.activeProject) {
+  generateSpecFromSource (source, args, ctx) {
+    if (!ctx.currentProject) {
       throw Error('Cannot set currentSpec without active project')
     }
 
-    ctx.app.activeProject.generatedSpec = {
+    return {
       __typename: 'GeneratedSpec',
       spec: {
         __typename: 'FileParts',
@@ -84,12 +75,11 @@ export const stubMutation: MaybeResolver<Mutation> = {
         name: 'Basic',
         fileName: 'Basic.spec.tsx',
         baseName: 'Basic',
+        fileExtension: 'tsx',
       },
       content: `it('should do stuff', () => {})`,
       id: 'U3BlYzovVXNlcnMvbGFjaGxhbi9jb2RlL3dvcmsvY3lwcmVzczUvcGFja2FnZXMvYXBwL3NyYy9CYXNpYy5zcGVjLnRzeA==',
     }
-
-    return true
   },
   reconfigureProject (src, args, ctx) {
     return true

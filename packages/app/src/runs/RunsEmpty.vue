@@ -58,11 +58,12 @@ import type { RunsEmptyFragment } from '../generated/graphql'
 const { t } = useI18n()
 
 gql`
-fragment RunsEmpty on Project{
+fragment RunsEmpty on CurrentProject {
   title
   projectId
   configFilePath
   cloudProject {
+    id
     recordKeys {
       ...RecordKey
     }
@@ -83,9 +84,7 @@ const projectIdCode = computed(() => {
 const projectName = computed(() => props.gql.title)
 const configFilePath = computed(() => props.gql.configFilePath)
 const firstRecordKey = computed(() => {
-  const allRecordKeys = props.gql.cloudProject?.recordKeys
-
-  return allRecordKeys?.[0] ?? '<record-key>'
+  return props.gql.cloudProject?.recordKeys?.[0]?.key ?? '<record-key>'
 })
 const recordCommand = computed(() => {
   return `cypress run --record --key ${firstRecordKey.value}`

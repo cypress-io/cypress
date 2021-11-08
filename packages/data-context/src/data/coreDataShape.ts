@@ -1,4 +1,4 @@
-import { BUNDLERS, FoundBrowser, FoundSpec, FullConfig, GeneratedSpec, Preferences } from '@packages/types'
+import { BUNDLERS, FoundBrowser, FoundSpec, FullConfig, Preferences } from '@packages/types'
 import type { NexusGenEnums, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
 import type { BrowserWindow } from 'electron'
 import type { ChildProcess } from 'child_process'
@@ -35,18 +35,18 @@ export interface ActiveProjectShape extends ProjectShape {
   config: Promise<FullConfig> | null
   configChildProcess: ConfigChildProcessShape | null
   preferences?: Preferences| null
-  generatedSpec: GeneratedSpec | null
+  browsers: FoundBrowser[] | null
 }
 
 export interface AppDataShape {
   navItem: NexusGenEnums['NavItem']
-  refreshingBrowsers: Promise<FoundBrowser[]> | null
   browsers: ReadonlyArray<FoundBrowser> | null
   projects: ProjectShape[]
-  activeProject: ActiveProjectShape | null
+  currentProject: ActiveProjectShape | null
   isInGlobalMode: boolean
   isAuthBrowserOpened: boolean
-  activeTestingType: Maybe<TestingTypeEnum>
+  currentTestingType: Maybe<TestingTypeEnum>
+  refreshingBrowsers: Promise<FoundBrowser[]> | null
 }
 
 export interface WizardDataShape {
@@ -59,6 +59,7 @@ export interface WizardDataShape {
   chosenLanguage: NexusGenEnums['CodeLanguageEnum']
   chosenManualInstall: boolean
   chosenBrowser: FoundBrowser | null
+  browserErrorMessage: string | null
 }
 
 export interface ElectronShape {
@@ -91,11 +92,11 @@ export function makeCoreData (): CoreDataShape {
     },
     app: {
       refreshingBrowsers: null,
-      activeTestingType: null,
+      currentTestingType: null,
       navItem: 'settings',
       browsers: null,
       projects: [],
-      activeProject: null,
+      currentProject: null,
       isInGlobalMode: false,
       isAuthBrowserOpened: false,
     },
@@ -109,6 +110,7 @@ export function makeCoreData (): CoreDataShape {
       allBundlers: BUNDLERS,
       history: ['welcome'],
       chosenBrowser: null,
+      browserErrorMessage: null,
     },
     user: null,
     electron: {
