@@ -18,7 +18,7 @@
     "unlink:sandbox": "cd sandbox && yarn unlink @cypress/schematic && cd .. && yarn unlink"
   },
   "dependencies": {
-    "@angular-devkit/architect": "0.1202.10",
+    "@angular-devkit/architect": "^0.1202.10",
     "@angular-devkit/core": "^12.2.10",
     "@angular-devkit/schematics": "^12.2.10",
     "@schematics/angular": "^12.2.10",
