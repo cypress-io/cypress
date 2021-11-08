@@ -1451,20 +1451,20 @@ describe('src/cy/commands/assertions', () => {
         cy.noop([1, 2, 3]).should('have.length', 3)
       })
 
-      it('rejects any element not in the document', function () {
-        cy.$$('<button />').appendTo(this.$body)
-        cy.$$('<button />').appendTo(this.$body)
+      // it('rejects any element not in the document', function () {
+      //   cy.$$('<button />').appendTo(this.$body)
+      //   cy.$$('<button />').appendTo(this.$body)
 
-        const buttons = cy.$$('button')
+      //   const buttons = cy.$$('button')
 
-        const { length } = buttons
+      //   const { length } = buttons
 
-        cy.on('command:retry', _.after(2, () => {
-          cy.$$('button:last').remove()
-        }))
+      //   cy.on('command:retry', _.after(2, () => {
+      //     cy.$$('button:last').remove()
+      //   }))
 
-        cy.wrap(buttons).should('have.length', length - 1)
-      })
+      //   cy.wrap(buttons).should('have.length', length - 1)
+      // })
 
       // https://github.com/cypress-io/cypress/issues/14484
       it('does not override user-defined error message', (done) => {

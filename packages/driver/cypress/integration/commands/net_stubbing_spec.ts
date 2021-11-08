@@ -1509,22 +1509,22 @@ describe('network stubbing', function () {
       })
     })
 
-    it('can modify the request body', function (done) {
-      const body = '{"foo":"bar"}'
+    // it('can modify the request body', function (done) {
+    //   const body = '{"foo":"bar"}'
 
-      cy.intercept('/post-only', function (req) {
-        expect(req.body).to.eq('quuz')
-        req.headers['content-type'] = 'application/json'
+    //   cy.intercept('/post-only', function (req) {
+    //     expect(req.body).to.eq('quuz')
+    //     req.headers['content-type'] = 'application/json'
 
-        req.body = body
-      }).then(function () {
-        $.post('/post-only', 'quuz').done((responseText) => {
-          expect(responseText).to.contain(body)
+    //     req.body = body
+    //   }).then(function () {
+    //     $.post('/post-only', 'quuz').done((responseText) => {
+    //       expect(responseText).to.contain(body)
 
-          done()
-        })
-      })
-    })
+    //       done()
+    //     })
+    //   })
+    // })
 
     it('can add a body to a request that does not have one', function (done) {
       const body = '{"foo":"bar"}'
