@@ -934,7 +934,7 @@ const _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, se
     }
 
     if (!fired(TEST_BEFORE_RUN_EVENT, test)) {
-      fire(Cypress, TEST_BEFORE_RUN_EVENT, test)
+      fire(TEST_BEFORE_RUN_EVENT, test, Cypress)
     }
 
     test.state = 'pending'
@@ -1000,7 +1000,7 @@ const _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, se
     // a double done(err) callback, and we need to fire
     // this again!
     if (fired(TEST_AFTER_RUN_EVENT, runnable)) {
-      fire(Cypress, TEST_AFTER_RUN_EVENT, runnable)
+      fire(TEST_AFTER_RUN_EVENT, runnable, Cypress)
     }
 
     if (isHook) {
@@ -1518,7 +1518,8 @@ export default {
           if (!fired(TEST_BEFORE_RUN_EVENT, test)) {
             cy.reset(test)
             test.slow(Cypress.config('slowTestThreshold'))
-            fire(Cypress, TEST_BEFORE_RUN_EVENT, test)
+            test._retries = Cypress.getTestRetries() ?? -1
+            fire(TEST_BEFORE_RUN_EVENT, test, Cypress)
           }
 
           cy.state('duringUserTestExecution', false)
