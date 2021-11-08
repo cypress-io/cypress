@@ -1,5 +1,5 @@
 import type { DataContext } from '@packages/data-context'
-import type { Browser, FoundBrowser } from './browser'
+import type { FoundBrowser } from './browser'
 import type { PlatformName } from './platform'
 
 export interface LaunchOpts {
@@ -21,7 +21,7 @@ export interface LaunchArgs {
   _: [string] // Cypress App binary location
   config: Record<string, unknown>
   cwd: string
-  browser: Browser
+  browser?: string
   configFile?: string
   // Global mode is triggered by CLI via `--global` or when there is no `projectRoot` (essentially when the Cypress Config file can't be found)
   global: boolean

@@ -156,7 +156,7 @@ export const mutation = mutationType({
         })),
       },
       resolve: async (_, args, ctx) => {
-        await ctx.actions.app.setActiveBrowser(args.id)
+        await ctx.actions.app.setActiveBrowserById(args.id)
       },
     })
 
@@ -236,10 +236,6 @@ export const mutation = mutationType({
     t.liveMutation('launchOpenProject', {
       description: 'Launches project from open_project global singleton',
       resolve: async (_, args, ctx) => {
-        if (!ctx.wizardData.chosenTestingType) {
-          throw Error('Cannot launch project without chosen testing type')
-        }
-
         await ctx.actions.project.launchProject(ctx.wizardData.chosenTestingType, {})
       },
     })

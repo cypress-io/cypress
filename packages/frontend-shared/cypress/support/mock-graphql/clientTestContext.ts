@@ -17,6 +17,7 @@ export interface ClientTestContext {
     activeProject: Project | null
     isInGlobalMode: boolean
     isAuthBrowserOpened: boolean
+    activeTestingType: TestingTypeEnum
   }
   wizard: {
     step: WizardStep
@@ -29,6 +30,7 @@ export interface ClientTestContext {
     allBundlers: WizardBundler[]
     history: WizardStep[]
     chosenBrowser: null
+    browserErrorMessage: null
   }
   user: Partial<CloudUser> | null
   cloudTypes: typeof cloudTypes
@@ -62,6 +64,7 @@ export function makeClientTestContext (): ClientTestContext {
       activeProject: testProject,
       isInGlobalMode: false,
       isAuthBrowserOpened: false,
+      activeTestingType: 'e2e',
     },
     wizard: {
       step: 'configFiles',
@@ -74,6 +77,7 @@ export function makeClientTestContext (): ClientTestContext {
       allBundlers,
       history: ['welcome'],
       chosenBrowser: null,
+      browserErrorMessage: null,
     },
     user: null,
     cloudTypes,

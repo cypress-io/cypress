@@ -46,7 +46,7 @@
         :prefix-icon="PlusButtonIcon"
         prefix-icon-class="w-16px h-16px icon-dark-gray-500"
         variant="outline"
-        @click="$emit('restart')"
+        @click="emits('restart')"
       >
         {{ t('createSpec.successPage.createAnotherSpecButton') }}
       </Button>

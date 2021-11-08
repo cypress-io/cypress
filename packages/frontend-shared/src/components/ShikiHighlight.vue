@@ -54,20 +54,24 @@ shikiWrapperClasses computed property.
       @click="copyOnClick ? () => copyCode() : () => {}"
       v-html="highlightedCode"
     />
-    <Button
-      v-if="copyOnClick"
+    <pre
+      v-else
+      class="overflow-scroll border rounded border-gray-100 text-14px leading-24px font-light py-8px"
+      :class="[props.class, lineNumbers ? 'pl-56px' : 'pl-8px' ]"
+    >{{ code }}</pre>
+    <CopyButton
+      v-if="copyButton"
       variant="outline"
       tabindex="-1"
       class="absolute bottom-8px right-8px"
-      @click="copyCode"
-    >
-      {{ copied ? t('clipboard.copied') : t('clipboard.copy') }}
-    </Button>
+      :text="code"
+      no-icon
+    />
   </div>
 </template>
 
 <script lang="ts">
-import { Highlighter, getHighlighter, setOnigasmWASM, setCDN, Lang } from 'shiki'
+import { Highlighter, getHighlighter, setOnigasmWASM, setCDN } from 'shiki'
 import onigasm from 'onigasm/lib/onigasm.wasm?url'
 
 setOnigasmWASM(onigasm)
@@ -98,12 +102,9 @@ export { highlighter, inheritAttrs }
 </script>
 
 <script lang="ts" setup>
-import { computed, onBeforeMount, ref } from 'vue'
-import Button from '@cy/components/Button.vue'
-// eslint-disable-next-line no-duplicate-imports
-import type { Ref } from 'vue'
+import { computed, onBeforeMount, Ref, ref } from 'vue'
 import { useClipboard } from '@vueuse/core'
-import { useI18n } from '@cy/i18n'
+import CopyButton from './CopyButton.vue'
 
 const highlighterInitialized = ref(false)
 
@@ -126,11 +127,9 @@ const props = withDefaults(defineProps<{
   inline: false,
   wrap: false,
   copyOnClick: false,
-  noCopyBotton: false,
+  copyButton: false,
   class: undefined,
 })
-
-const { t } = useI18n()
 
 const resolvedLang = computed(() => {
   if (props.lang === 'javascript' || props.lang === 'js' || props.lang === 'jsx') return 'jsx'
@@ -177,7 +176,7 @@ $offset: 1.1em;
 
 .shiki-wrapper {
   &:deep(.shiki) {
-    @apply min-w-max border-r-10px border-r-transparent py-8px;
+    @apply min-w-max border-r-10px border-r-transparent;
   }
 
   &.wrap:deep(.line) {
@@ -185,9 +184,7 @@ $offset: 1.1em;
   }
 
   &.line-numbers:deep(.shiki) {
-    .line {
-    }
-
+    @apply py-8px;
     code {
       counter-reset: step;
       counter-increment: step 0;
