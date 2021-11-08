@@ -25,6 +25,10 @@ export interface SpecFile extends BaseSpec {
   fileName: string
 }
 
+export interface SpecFileWithExtension extends SpecFile {
+  fileExtension: string
+}
+
 export interface FoundSpec extends SpecFile {
   specFileExtension: string
   fileExtension: string
