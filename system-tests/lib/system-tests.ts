@@ -300,6 +300,16 @@ const isVideoSnapshotError = (err: Error) => {
   return _.isEqual(added, expectedAddedVideoSnapshotLines) && _.isEqual(deleted, expectedDeletedVideoSnapshotLines)
 }
 
+const isFirefoxConnectionError = (err: Error) => {
+  const matches = diffRe.exec(err.message)
+
+  if (!matches || !matches.length) {
+    return false
+  }
+
+  return matches[1].includes('+Failed to connect to Firefox, retrying in 1 second')
+}
+
 // this captures an entire stack trace and replaces it with [stack trace lines]
 // so that the stdout can contain stack traces of different lengths
 // '@' will be present in firefox stack trace lines
@@ -960,11 +970,17 @@ const systemTests = {
         } catch (err) {
           // firefox has issues with recording video. for now, ignore snapshot diffs that only differ in this error.
           // @see https://github.com/cypress-io/cypress/pull/16731
-          if (!(options.browser === 'firefox' && isVideoSnapshotError(err))) {
+          if (!(options.browser === 'firefox' && (isVideoSnapshotError(err) || isFirefoxConnectionError(err)))) {
             throw err
           }
 
-          console.log('(system tests warning) Firefox failed to process the video, but this is being ignored due to known issues with video processing in Firefox.')
+          if (isVideoSnapshotError(err)) {
+            console.log('(system tests warning) Firefox failed to process the video, but this is being ignored due to known issues with video processing in Firefox.')
+          }
+
+          if (isFirefoxConnectionError(err)) {
+            console.log('(system tests warning) Firefox failed to connect initially, but this is being ignored due to known issues with Firefox taking longer than normal to launch.')
+          }
         }
       }
 
