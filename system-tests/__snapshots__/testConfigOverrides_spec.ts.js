@@ -36,6 +36,7 @@ We dynamically generated a new test to display this failure.
 
 
 
+
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
@@ -54,13 +55,14 @@ We dynamically generated a new test to display this failure.
   (Screenshots)
 
   -  /XXX/XXX/XXX/cypress/screenshots/testConfigOverrides-invalid-browser.js/An uncau     (1280x720)
-     ght error was detected outside of a test (failed).png            
+     ght error was detected outside of a test (failed).png                                          
 
-                              
+     
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-                          wser.js.mp4                                                               
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/testConfigOverrides-invalid-bro     (X second)
+                           wser.js.mp4                                                               
 
 
 ====================================================================================================
@@ -219,6 +221,7 @@ https://on.cypress.io/config
 Expected \`defaultCommandTimeout\` to be a number. Instead the value was: \`"500"\`
 
 https://on.cypress.io/config
+  Error
       [stack trace lines]
 
   6) nested contexts 
@@ -266,7 +269,7 @@ https://on.cypress.io/config
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  2                                                                                │
-  │ Video:        false                                                                            │
+  │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     testConfigOverrides-invalid.js                                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -278,6 +281,13 @@ https://on.cypress.io/config
      ig override throws error (failed).png                                                          
   -  /XXX/XXX/XXX/cypress/screenshots/testConfigOverrides-invalid.js/inline test conf     (1280x720)
      ig override throws error when executed within cy cmd (failed).png                              
+
+
+  (Video)
+
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/testConfigOverrides-invalid.js.     (X second)
+                          mp4                                                                       
 
 
 ====================================================================================================
@@ -352,6 +362,7 @@ exports['testConfigOverrides / fails when passing invalid config values with bef
 Expected \`retries\` to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls. Instead the value was: \`"1"\`
 
 https://on.cypress.io/config
+  Error
       [stack trace lines]
 
   4) runs all tests
@@ -362,6 +373,7 @@ https://on.cypress.io/config
 Expected \`defaultCommandTimeout\` to be a number. Instead the value was: \`"500"\`
 
 https://on.cypress.io/config
+  Error
       [stack trace lines]
 
   5) runs all tests
@@ -372,6 +384,7 @@ https://on.cypress.io/config
 Expected \`defaultCommandTimeout\` to be a number. Instead the value was: \`"500"\`
 
 https://on.cypress.io/config
+  Error
       [stack trace lines]
 
   6) runs all tests
@@ -396,6 +409,7 @@ Expected \`retries\` to be a positive number or null or an object with keys "ope
 https://on.cypress.io/config
 
 Because this error occurred during a \`before all\` hook we are skipping the remaining tests in the current suite: \`throws error correctly when...\`
+  Error
       [stack trace lines]
 
   8) runs all tests
@@ -411,14 +425,6 @@ https://on.cypress.io/config
 
 
 
-Warning: We failed processing this video.
-
-This error will not alter the exit code.
-
-TimeoutError: operation timed out
-      [stack trace lines]
-
-
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
@@ -428,7 +434,7 @@ TimeoutError: operation timed out
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  2                                                                                │
-  │ Video:        false                                                                            │
+  │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     testConfigOverrides-before-invalid.js                                            │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -443,6 +449,13 @@ TimeoutError: operation timed out
      ailed).png                                                                                     
 
 
+  (Video)
+
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/testConfigOverrides-before-inva     (X second)
+                          lid.js.mp4                                                                
+   
+   
 ====================================================================================================
 
   (Run Finished)
@@ -493,16 +506,9 @@ exports['testConfigOverrides / correctly fails when invalid config values for it
 Expected \`retries\` to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls. Instead the value was: \`"1"\`
 
 https://on.cypress.io/config
+  Error
       [stack trace lines]
 
-
-
-Warning: We failed processing this video.
-
-This error will not alter the exit code.
-
-TimeoutError: operation timed out
-      [stack trace lines]
 
 
   (Results)
@@ -514,10 +520,16 @@ TimeoutError: operation timed out
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        false                                                                            │
+  │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     testConfigOverrides-only-invalid.js                                              │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+  (Video)
+
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/testConfigOverrides-only-invali     (X second)
+                          d.js.mp4                                                                  
 
 
 ====================================================================================================
