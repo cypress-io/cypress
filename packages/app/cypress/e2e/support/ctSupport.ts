@@ -29,10 +29,7 @@ export const createTestAutIframe = (eventManager = createEventManager()) => {
     logger,
     null, // dom - imports driver, which we don't want in CT, so just stub it out
     visitFailure,
-    {
-      recorder: eventManager.studioRecorder,
-      selectorPlaygroundModel: eventManager.selectorPlaygroundModel,
-    },
+    eventManager.studioRecorder,
     blankContents,
   )
 }

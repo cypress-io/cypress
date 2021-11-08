@@ -120,10 +120,7 @@ function setupRunner () {
     window.UnifiedRunner.logger,
     window.UnifiedRunner.dom,
     window.UnifiedRunner.visitFailure,
-    {
-      recorder: getEventManager().studioRecorder,
-      selectorPlaygroundModel: getEventManager().selectorPlaygroundModel,
-    },
+    getEventManager().studioRecorder,
     window.UnifiedRunner.blankContents,
   )
 

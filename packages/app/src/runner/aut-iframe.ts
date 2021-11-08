@@ -18,10 +18,7 @@ export class AutIframe {
     private logger: any,
     private dom: any,
     private visitFailure: (props: any) => string,
-    private studio: {
-      selectorPlaygroundModel: any
-      recorder: any
-    },
+    private studioRecorder: any,
     private blankContents: {
       initial: () => string
       session: () => string
@@ -129,7 +126,9 @@ export class AutIframe {
     this._insertBodyStyles(body.get(), bodyStyles)
     $html?.append(body.get())
 
-    this.debouncedToggleSelectorPlayground(this.studio.selectorPlaygroundModel.isEnabled)
+    const selectorPlaygroundStore = useSelectorPlaygroundStore()
+
+    this.debouncedToggleSelectorPlayground(selectorPlaygroundStore.isEnabled)
   }
 
   // note htmlAttrs is actually `NamedNodeMap`: https://developer.mozilla.org/en-US/docs/Web/API/NamedNodeMap
@@ -282,21 +281,15 @@ export class AutIframe {
     if (!$body) return
 
     if (isEnabled) {
-      $body.on('mouseenter', this._resetShowHighlight)
       $body.on('mousemove', this._onSelectorMouseMove)
       $body.on('mouseleave', this._clearHighlight)
     } else {
-      $body.off('mouseenter', this._resetShowHighlight)
       $body.off('mousemove', this._onSelectorMouseMove)
       $body.off('mouseleave', this._clearHighlight)
       if (this._highlightedEl) {
         this._clearHighlight()
       }
     }
-  }
-
-  _resetShowHighlight = () => {
-    this.studio.selectorPlaygroundModel.setShowingHighlight(false)
   }
 
   _onSelectorMouseMove = (e) => {
@@ -368,11 +361,9 @@ export class AutIframe {
 
     const $el = this.getElements(Cypress.dom)
 
-    this.studio.selectorPlaygroundModel.setValidity(!!$el)
     selectorPlaygroundStore.setValidity(!!$el)
 
     if ($el) {
-      this.studio.selectorPlaygroundModel.setNumElements($el.length)
       selectorPlaygroundStore.setNumElements($el.length)
 
       if ($el.length) {
@@ -382,14 +373,13 @@ export class AutIframe {
 
     this.dom.addOrUpdateSelectorPlaygroundHighlight({
       $el: $el && $el.length ? $el : null,
-      selector: this.studio.selectorPlaygroundModel.selector,
+      selector: selectorPlaygroundStore.selector,
       $body: this._body(),
       showTooltip: false,
     })
   }
 
   getElements (cypressDom) {
-    console.log(`getElements`)
     const selectorPlaygroundStore = useSelectorPlaygroundStore()
     const $contents = this._contents()
 
@@ -410,7 +400,8 @@ export class AutIframe {
 
     const $el = this.getElements(Cypress.dom)
 
-    const command = `cy.${this.studio.selectorPlaygroundModel.method}('${this.studio.selectorPlaygroundModel.selector}')`
+    const selectorPlaygroundStore = useSelectorPlaygroundStore()
+    const command = `cy.${selectorPlaygroundStore.method}('${selectorPlaygroundStore.selector}')`
 
     if (!$el) {
       return this.logger.logFormatted({
@@ -461,14 +452,14 @@ export class AutIframe {
   }
 
   startStudio = () => {
-    if (this.studio.recorder.isLoading) {
-      this.studio.recorder.start(this._body()?.[0])
+    if (this.studioRecorder.isLoading) {
+      this.studioRecorder.start(this._body()?.[0])
     }
   }
 
   reattachStudio = () => {
-    if (this.studio.recorder.isActive) {
-      this.studio.recorder.attachListeners(this._body()?.[0])
+    if (this.studioRecorder.isActive) {
+      this.studioRecorder.attachListeners(this._body()?.[0])
     }
   }
 }

@@ -1,6 +1,6 @@
 <template>
   <div class="flex">
-    <button 
+    <button
       :class="{ active: selectorPlaygroundStore.isEnabled }"
       @click="toggleEnabled"
     >
@@ -9,24 +9,30 @@
       </span>
     </button>
 
-    <button @click="selectorPlaygroundStore.toggleMethod">Method (cy.{{ selectorPlaygroundStore.method }})</button>
+    <button @click="selectorPlaygroundStore.toggleMethod">
+      Method (cy.{{ selectorPlaygroundStore.method }})
+    </button>
 
-    <input 
+    <input
       ref="copyText"
       v-model="selector"
-    />
+    >
     <div>{{ selectorPlaygroundStore.numElements }}</div>
-    <button @click="copySelector">Copy</button>
-    <button @click="printSelected">Print</button>
+    <button @click="copySelector">
+      Copy
+    </button>
+    <button @click="printSelected">
+      Print
+    </button>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch } from 'vue';
-import { getAutIframeModel } from '..';
-import { useSelectorPlaygroundStore } from '../../store/selector-playground-store';
-import type { AutIframe } from '../aut-iframe';
-import type { EventManager } from '../event-manager';
+import { computed, ref, watch } from 'vue'
+import { getAutIframeModel } from '..'
+import { useSelectorPlaygroundStore } from '../../store/selector-playground-store'
+import type { AutIframe } from '../aut-iframe'
+import type { EventManager } from '../event-manager'
 
 const props = defineProps<{
   eventManager: EventManager
@@ -51,26 +57,24 @@ const selector = computed({
   },
   set (value: string) {
     if (selectorPlaygroundStore.method === 'get') {
-    console.log(`get(${value}`)
       selectorPlaygroundStore.getSelector = value
     }
 
     if (selectorPlaygroundStore.method === 'contains') {
-    console.log(`contains(${value}`)
       selectorPlaygroundStore.containsSelector = value
     }
 
     props.autIframe.toggleSelectorHighlight(true)
-  }
+  },
 })
 
 function toggleEnabled () {
   const newVal = !selectorPlaygroundStore.isEnabled
+
   selectorPlaygroundStore.setEnabled(newVal)
 
-  console.log({ newVal })
-
   const autIframe = getAutIframeModel()
+
   autIframe.toggleSelectorPlayground(newVal)
 }
 
@@ -82,6 +86,7 @@ function copySelector () {
   try {
     copyText.value?.select()
     const successful = document.execCommand('copy')
+
     if (successful) {
       // Copied!
     } else {
