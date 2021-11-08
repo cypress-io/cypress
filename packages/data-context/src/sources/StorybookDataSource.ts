@@ -1,4 +1,4 @@
-import type { SpecFile, StorybookInfo } from '@packages/types'
+import type { SpecFileWithExtension, StorybookInfo } from '@packages/types'
 import * as path from 'path'
 import type { DataContext } from '..'
 
@@ -20,7 +20,7 @@ export class StorybookDataSource {
     return this.storybookInfoLoader.load(this.ctx.activeProject?.projectRoot)
   }
 
-  async getStories (): Promise<SpecFile[]> {
+  async getStories (): Promise<SpecFileWithExtension[]> {
     const project = this.ctx.activeProject
 
     if (!project) {
@@ -35,7 +35,7 @@ export class StorybookDataSource {
 
     const config = await this.ctx.project.getConfig(project.projectRoot)
     const normalizedGlobs = storybook.storyGlobs.map((glob) => path.join(storybook.storybookRoot, glob))
-    const files = await this.ctx.file.getFilesByGlob(normalizedGlobs)
+    const files = await this.ctx.file.getFilesByGlob(project.projectRoot, normalizedGlobs)
 
     // Don't currently support mdx
     return files.reduce((acc, file) => {
@@ -50,7 +50,7 @@ export class StorybookDataSource {
       })
 
       return [...acc, spec]
-    }, [] as SpecFile[])
+    }, [] as SpecFileWithExtension[])
   }
 
   private storybookInfoLoader = this.ctx.loader<string, StorybookInfo | null>((projectRoots) => this.batchStorybookInfo(projectRoots))
