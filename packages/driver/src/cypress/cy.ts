@@ -26,7 +26,7 @@ import { create as createTimeouts, ITimeouts } from '../cy/timeouts'
 import { create as createRetries, IRetries } from '../cy/retries'
 import { create as createStability, IStability } from '../cy/stability'
 import $selection from '../dom/selection'
-import $Snapshots from '../cy/snapshots'
+import { create as createSnapshots, ISnapshots } from '../cy/snapshots'
 import { $Command } from './command'
 import $CommandQueue from './command_queue'
 import { initVideoRecorder } from '../cy/video-recorder'
@@ -120,7 +120,7 @@ const setTopOnError = function (Cypress, cy: $Cy) {
 
 // NOTE: this makes the cy object an instance
 // TODO: refactor the 'create' method below into this class
-class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILocation, ITimer, IChai, IXhr, IAliases, IEnsures {
+class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILocation, ITimer, IChai, IXhr, IAliases, IEnsures, ISnapshots {
   id: string
   state: any
 
@@ -172,15 +172,28 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
   ensureScrollability: IEnsures['ensureScrollability']
   ensureNotReadonly: IEnsures['ensureNotReadonly']
 
+  createSnapshot: ISnapshots['createSnapshot']
+  detachDom: ISnapshots['detachDom']
+  getStyles: ISnapshots['getStyles']
+
   // Private methods
   resetTimer: ReturnType<typeof createTimer>['reset']
+
   ensureSubjectByType: ReturnType<typeof createEnsures>['ensureSubjectByType']
   ensureRunnable: ReturnType<typeof createEnsures>['ensureRunnable']
+
+  onCssModified: ReturnType<typeof createSnapshots>['onCssModified']
+  onBeforeWindowLoad: ReturnType<typeof createSnapshots>['onBeforeWindowLoad']
 
   constructor (specWindow, Cypress, Cookies, state, config) {
     this.id = _.uniqueId('cy')
     this.state = state
     initVideoRecorder(Cypress)
+
+    // bind methods
+    this.$$ = this.$$.bind(this)
+
+    // init traits
 
     const timeouts = createTimeouts(state)
 
@@ -260,8 +273,14 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
     this.ensureSubjectByType = ensures.ensureSubjectByType
     this.ensureRunnable = ensures.ensureRunnable
 
-    // binded functions
-    this.$$ = this.$$.bind(this)
+    const snapshots = createSnapshots(this.$$, state)
+
+    this.createSnapshot = snapshots.createSnapshot
+    this.detachDom = snapshots.detachDom
+    this.getStyles = snapshots.getStyles
+
+    this.onCssModified = snapshots.onCssModified
+    this.onBeforeWindowLoad = snapshots.onBeforeWindowLoad
   }
 
   $$ (selector, context) {
@@ -292,7 +311,6 @@ export default {
     const keyboard = $Keyboard.create(state)
     const mouse = $Mouse.create(state, keyboard, focused, Cypress)
 
-    const snapshots = $Snapshots.create(cy.$$, state)
     const testConfigOverride = new TestConfigOverride()
 
     const isStopped = () => {
@@ -409,7 +427,7 @@ export default {
         }
 
         const cssModificationSpy = function (original, ...args) {
-          snapshots.onCssModified(this.href)
+          cy.onCssModified(this.href)
 
           return original.apply(this, args)
         }
@@ -684,9 +702,6 @@ export default {
         mouse,
         keyboard,
       },
-
-      // snapshots sync methods
-      createSnapshot: snapshots.createSnapshot,
 
       initialize ($autIframe) {
         setRemoteIframeProps($autIframe, state)
@@ -998,7 +1013,7 @@ export default {
 
         wrapNativeMethods(contentWindow)
 
-        snapshots.onBeforeWindowLoad()
+        cy.onBeforeWindowLoad()
       },
 
       onUncaughtException ({ handlerType, frameType, err, promise }) {
@@ -1046,14 +1061,6 @@ export default {
             r(err)
           }
         }
-      },
-
-      detachDom (...args) {
-        return snapshots.detachDom(...args)
-      },
-
-      getStyles (...args) {
-        return snapshots.getStyles(...args)
       },
 
       setRunnable (runnable, hookId) {
