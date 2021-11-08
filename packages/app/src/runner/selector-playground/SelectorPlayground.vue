@@ -1,21 +1,24 @@
 <template>
-  <div class="flex">
+  <div
+    id="selector-playground"
+    class="flex p-3 items-center bg-white"
+  >
     <button
-      :class="{ active: selectorPlaygroundStore.isEnabled }"
+      :class="{ 'bg-blue-100': selectorPlaygroundStore.isEnabled }"
+      class="rounded-md px-5px h-full"
       data-cy="playground-toggle"
       @click="toggleEnabled"
     >
-      <span class="fa-stack">
-        <i class="fas fa-mouse-pointer fa-stack-1x" />
-      </span>
+      <Icon :icon="IconCursorDefaultOutline" />
     </button>
 
     <div
-      class="flex"
+      class="flex flex-1 mx-2"
       @mouseover="setShowingHighlight"
     >
       <button
         data-cy="playground-method"
+        class="flex"
         @click="selectorPlaygroundStore.toggleMethod"
       >
         cy.{{ selectorPlaygroundStore.method }}('
@@ -24,34 +27,47 @@
       <input
         ref="copyText"
         v-model="selector"
+        class="flex-1 rounded-md border border-gray-300 px-1 pl-2 text-blue-500"
         data-cy="playground-selector"
       >
       ')
     </div>
 
-    <div data-cy="playground-num-elements">
+    <div
+      data-cy="playground-num-elements"
+      class="rounded-md bg-gray-400 text-white mx-1 px-2"
+    >
       {{ selectorPlaygroundStore.numElements }}
     </div>
-    <button
-      data-cy="playground-copy"
-      @click="copySelector"
-    >
-      Copy
-    </button>
-    <button
-      data-cy="playground-print"
-      @click="printSelected"
-    >
-      Print
-    </button>
+
+    <div class="rounded-md border border-gray-100 flex items-center h-full divide-x-2 mr-10px">
+      <button
+        data-cy="playground-copy"
+        class="h-full px-5px"
+        @click="copySelector"
+      >
+        <Icon :icon="IconCopy" />
+      </button>
+
+      <button
+        data-cy="playground-print"
+        class="h-full px-5px"
+        @click="printSelected"
+      >
+        <Icon :icon="IconConsoleLine" />
+      </button>
+    </div>
 
     <a
-      class="selector-info"
+      class="flex items-center text-blue-500"
       href="https://on.cypress.io/selector-playground"
       target="_blank"
       rel="noreferrer"
     >
-      <i class="fas fa-question-circle" />Learn more
+      <span class="mr-5px">
+        <Icon :icon="IconHelpCircle" />
+      </span>
+      Learn more
     </a>
   </div>
 </template>
@@ -61,6 +77,11 @@ import { computed, ref, watch } from 'vue'
 import { useSelectorPlaygroundStore } from '../../store/selector-playground-store'
 import type { AutIframe } from '../aut-iframe'
 import type { EventManager } from '../event-manager'
+import IconCopy from '~icons/mdi/content-copy'
+import Icon from '@packages/frontend-shared/src/components/Icon.vue'
+import IconCursorDefaultOutline from '~icons/mdi/cursor-default-outline'
+import IconHelpCircle from '~icons/mdi/help-circle'
+import IconConsoleLine from '~icons/mdi/console-line'
 
 const props = defineProps<{
   eventManager: EventManager
@@ -128,13 +149,7 @@ function copySelector () {
 </script>
 
 <style scoped lang="scss">
-button {
-  @apply flex items-center justify-center;
-  @apply rounded-md bg-white flex shadow-md ml-2;
-  @apply w-20 hover:bg-gray-50;
-}
-
-button.active {
-  @apply bg-blue-200;
+#selector-playground {
+  height: 50px;
 }
 </style>

@@ -18,6 +18,19 @@ describe('SelectorPlayground', () => {
     }
   }
 
+  it('playground', () => {
+    cy.mount(() => (
+      <div class="bg-gray-100 h-100">
+        <SelectorPlayground
+          eventManager={createEventManager()}
+          getAutIframe={() => createTestAutIframe()}
+        />
+      </div>
+    ))
+
+    cy.percySnapshot()
+  })
+
   it('toggles enabled', () => {
     const selectorPlaygroundStore = useSelectorPlaygroundStore()
 
