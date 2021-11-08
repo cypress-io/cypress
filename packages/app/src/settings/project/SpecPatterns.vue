@@ -49,7 +49,7 @@ import SettingsSection from '../SettingsSection.vue'
 const { t } = useI18n()
 
 gql`
-fragment SpecPatterns on Project {
+fragment SpecPatterns on CurrentProject {
   config
 }
 `

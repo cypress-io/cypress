@@ -91,6 +91,20 @@ describe('gui/menu', function () {
       expect(onLogOutClicked).to.be.called
     })
 
+    it('merges options and calls callback functions', () => {
+      const onLogOutClicked1 = sinon.stub()
+      const onLogOutClicked2 = sinon.stub()
+
+      menu.set()
+      menu.set({ onLogOutClicked: onLogOutClicked1 })
+      menu.set({ onLogOutClicked: onLogOutClicked2 })
+
+      getSubMenuItem(getMenuItem('File'), 'Log Out').click()
+
+      expect(onLogOutClicked1).not.to.be.called
+      expect(onLogOutClicked2).to.be.called
+    })
+
     it('calls original logout callback when menu is reset without new callback', () => {
       const onLogOutClicked = sinon.stub()
 
@@ -260,6 +274,8 @@ describe('gui/menu', function () {
         expect(labels).to.eql([
           'Reload',
           'Toggle Developer Tools',
+          'GraphiQL',
+          'View App Data',
         ])
       })
 

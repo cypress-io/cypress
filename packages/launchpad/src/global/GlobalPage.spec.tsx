@@ -4,9 +4,9 @@ import { GlobalPageFragment, GlobalPageFragmentDoc } from '../generated/graphql-
 
 const searchLabel = defaultMessages.globalPage.searchPlaceholder
 const emptyMessages = defaultMessages.globalPage.empty
-const testProject = 'test-project'
+const testProject = 'some-test-title'
 const anotherTestProject = 'another-test-project'
-const testProjectPath = '/usr/local/dev/projects/test-project'
+const testProjectPath = '/usr/local/dev/projects/some-test-title'
 
 describe('<GlobalPage />', { viewportHeight: 900, viewportWidth: 1200 }, () => {
   describe('without projects', () => {

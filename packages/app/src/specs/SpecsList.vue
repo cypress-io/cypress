@@ -1,7 +1,7 @@
 <template>
   <div class="p-24px">
     <CreateSpecModal
-      v-if="props.gql.activeTestingType"
+      v-if="props.gql.currentProject?.currentTestingType"
       :show="showModal"
       :gql="props.gql"
       @close="showModal = false"
@@ -52,9 +52,9 @@ fragment SpecNode_SpecsList on SpecEdge {
 `
 
 gql`
-fragment Specs_SpecsList on App {
+fragment Specs_SpecsList on Query {
   ...CreateSpecModal
-  activeProject {
+  currentProject {
     id
     projectRoot
     specs: specs(first: 100) {
@@ -72,7 +72,7 @@ const props = defineProps<{
 
 const showModal = ref(false)
 const search = ref('')
-const specs = computed(() => props.gql.activeProject?.specs?.edges)
+const specs = computed(() => props.gql.currentProject?.specs?.edges)
 
 // If this search becomes any more complex, push it into the server
 const sortByGitStatus = (

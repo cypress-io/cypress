@@ -30,14 +30,12 @@ fragment SpecNode_InlineSpecList on SpecEdge {
 `
 
 gql`
-fragment Specs_InlineSpecList on App {
-  activeProject {
-    id
-    projectRoot
-    specs: specs(first: 1000) {
-      edges {
-        ...SpecNode_InlineSpecList
-      }
+fragment Specs_InlineSpecList on CurrentProject {
+  id
+  projectRoot
+  specs: specs(first: 1000) {
+    edges {
+      ...SpecNode_InlineSpecList
     }
   }
 }
@@ -53,6 +51,5 @@ const isCurrentSpec = (spec: SpecNode_InlineSpecListFragment) => {
   return spec.node.relative === specStore.activeSpec?.relative
 }
 
-const specs = computed(() => props.gql.activeProject?.specs?.edges || [])
-
+const specs = computed(() => props.gql.specs?.edges || [])
 </script>

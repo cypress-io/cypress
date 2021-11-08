@@ -85,25 +85,23 @@ const { title } = useVModels(props, emits)
 title.value = t('createSpec.component.importFromComponent.chooseAComponentHeader')
 
 gql`
-fragment ComponentGeneratorStepOne_codeGenGlob on Project {
+fragment ComponentGeneratorStepOne_codeGenGlob on CurrentProject {
   codeGenGlob(type: component)
 }
 `
 
 gql`
 query ComponentGeneratorStepOne($glob: String!) {
-  app {
-    activeProject {
+  currentProject {
+    id
+    codeGenCandidates(glob: $glob) {
       id
-      codeGenCandidates(glob: $glob) {
-        id
-        name
-        fileName
-        fileExtension
-        absolute
-        relative
-        baseName
-      }
+      name
+      fileName
+      fileExtension
+      absolute
+      relative
+      baseName
     }
   }
 }
@@ -132,8 +130,8 @@ const query = useQuery({
 })
 
 const allFiles = computed((): any => {
-  if (query.data.value?.app?.activeProject?.codeGenCandidates) {
-    return query.data.value.app?.activeProject?.codeGenCandidates
+  if (query.data.value?.currentProject?.codeGenCandidates) {
+    return query.data.value.currentProject?.codeGenCandidates
   }
 
   return []

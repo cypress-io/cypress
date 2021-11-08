@@ -39,13 +39,13 @@ import { useI18n } from '@cy/i18n'
 const { t } = useI18n()
 
 gql`
-fragment TestingTypePicker on App {
-    activeTestingType
-    activeProject {
-      id
-      isCTConfigured
-      isE2EConfigured
-    }
+fragment TestingTypePicker on Query {
+  currentProject {
+    id
+    isCTConfigured
+    isE2EConfigured
+    currentTestingType
+  }
 }
 `
 
@@ -64,7 +64,7 @@ const TESTING_TYPES = [
     description: t('testingType.e2e.description'),
     icon: IconE2E,
     iconSolid: IconE2ESolid,
-    configured: props.gql.activeProject?.isE2EConfigured,
+    configured: props.gql.currentProject?.isE2EConfigured,
   },
   {
     key: 'component',
@@ -72,7 +72,7 @@ const TESTING_TYPES = [
     description: t('testingType.component.description'),
     icon: IconComponent,
     iconSolid: IconComponentSolid,
-    configured: props.gql.activeProject?.isCTConfigured,
+    configured: props.gql.currentProject?.isCTConfigured,
   },
 ] as const
 

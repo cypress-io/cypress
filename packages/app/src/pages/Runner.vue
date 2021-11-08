@@ -1,7 +1,7 @@
 <template>
   <SpecRunnerContainer
-    v-if="query.data.value?.app?.activeProject"
-    :gql="query.data.value.app"
+    v-if="query.data.value?.currentProject"
+    :gql="query.data.value.currentProject"
   />
 </template>
 
@@ -12,7 +12,7 @@ import SpecRunnerContainer from '../runner/SpecRunnerContainer.vue'
 
 gql`
 query SpecPageContainer {
-  app {
+  currentProject {
     ...SpecRunner
   }
 }
