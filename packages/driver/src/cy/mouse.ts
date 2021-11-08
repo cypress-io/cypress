@@ -42,7 +42,7 @@ const getMouseCoords = (state) => {
   return state('mouseCoords')
 }
 
-const create = (state, keyboard, focused, Cypress) => {
+export const create = (state, keyboard, focused, Cypress) => {
   const isFirefox = Cypress.browser.family === 'firefox'
 
   const sendPointerEvent = (el, evtOptions, evtName, bubbles = false, cancelable = false) => {
@@ -707,6 +707,8 @@ const create = (state, keyboard, focused, Cypress) => {
   return mouse
 }
 
+export interface Mouse extends ReturnType<typeof create> {}
+
 const { stopPropagation } = window.MouseEvent.prototype
 
 const sendEvent = (evtName, el, evtOptions, bubbles = false, cancelable = false, Constructor, composed = false) => {
@@ -757,8 +759,4 @@ const toCoordsEventOptions = (x, y, win) => {
     layerX: x + scrollX,
     layerY: x + scrollY,
   }
-}
-
-export default {
-  create,
 }

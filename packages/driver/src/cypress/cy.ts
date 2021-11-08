@@ -15,7 +15,7 @@ import { create as createAliases, IAliases } from '../cy/aliases'
 import * as $Events from './events'
 import { create as createEnsures, IEnsures } from '../cy/ensures'
 import { create as createFocused, IFocused } from '../cy/focused'
-import $Mouse from '../cy/mouse'
+import { create as createMouse, Mouse } from '../cy/mouse'
 import { Keyboard } from '../cy/keyboard'
 import { create as createLocation, ILocation } from '../cy/location'
 import { create as createAssertions, IAssertions } from '../cy/assertions'
@@ -126,6 +126,7 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
   config: any
   devices: {
     keyboard: Keyboard
+    mouse: Mouse
   }
 
   timeout: ITimeouts['timeout']
@@ -143,7 +144,10 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
 
   getRemoteLocation: ILocation['getRemoteLocation']
 
-  // focused, keyboard, mouse
+  fireBlur: IFocused['fireBlur']
+  fireFocus: IFocused['fireFocus']
+  needsFocus: IFocused['needsFocus']
+  getFocused: IFocused['getFocused']
 
   pauseTimers: ITimer['pauseTimers']
 
@@ -180,11 +184,6 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
   detachDom: ISnapshots['detachDom']
   getStyles: ISnapshots['getStyles']
 
-  fireBlur: IFocused['fireBlur']
-  fireFocus: IFocused['fireFocus']
-  needsFocus: IFocused['needsFocus']
-  getFocused: IFocused['getFocused']
-
   // Private methods
   resetTimer: ReturnType<typeof createTimer>['reset']
 
@@ -206,10 +205,6 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
     this.state = state
     this.config = config
     initVideoRecorder(Cypress)
-
-    this.devices = {
-      keyboard: new Keyboard(state),
-    }
 
     // bind methods
     this.$$ = this.$$.bind(this)
@@ -247,7 +242,23 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
 
     this.getRemoteLocation = location.getRemoteLocation
 
-    // focused, keyboard, mouse
+    const focused = createFocused(state)
+
+    this.fireBlur = focused.fireBlur
+    this.fireFocus = focused.fireFocus
+    this.needsFocus = focused.needsFocus
+    this.getFocused = focused.getFocused
+
+    this.documentHasFocus = focused.documentHasFocus
+    this.interceptFocus = focused.interceptFocus
+    this.interceptBlur = focused.interceptBlur
+
+    const keyboard = new Keyboard(state)
+
+    this.devices = {
+      keyboard,
+      mouse: createMouse(state, keyboard, focused, Cypress),
+    }
 
     const timer = createTimer(Cypress)
 
@@ -302,20 +313,6 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
 
     this.onCssModified = snapshots.onCssModified
     this.onBeforeWindowLoad = snapshots.onBeforeWindowLoad
-
-    const focused = createFocused(state)
-
-    this.fireBlur = focused.fireBlur
-    this.fireFocus = focused.fireFocus
-    this.needsFocus = focused.needsFocus
-    this.getFocused = focused.getFocused
-
-    this.documentHasFocus = focused.documentHasFocus
-    this.interceptFocus = focused.interceptFocus
-    this.interceptBlur = focused.interceptBlur
-
-    // temporary -> should be removed
-    this.focused = focused
   }
 
   $$ (selector, context) {
@@ -402,8 +399,6 @@ export default {
         args: { title },
       })
     }
-
-    const mouse = $Mouse.create(state, cy.devices.keyboard, cy.focused, Cypress)
 
     const testConfigOverride = new TestConfigOverride()
 
@@ -727,11 +722,6 @@ export default {
       isCy,
 
       isStopped,
-
-      devices: {
-        mouse,
-        keyboard: cy.devices.keyboard,
-      },
 
       initialize ($autIframe) {
         setRemoteIframeProps($autIframe, state)
