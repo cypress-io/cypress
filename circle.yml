@@ -1477,7 +1477,7 @@ jobs:
         - run:
             name: Build + Install
             command: |
-              . ./scripts/load-nvm.sh
+              . ../../scripts/load-nvm.sh
               yarn workspace @cypress/schematic build:all
               yarn policies set-version 1.19.0
               yarn add --dev @angular/cli
