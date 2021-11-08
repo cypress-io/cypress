@@ -35,7 +35,7 @@ export interface ActiveProjectShape extends ProjectShape {
   config: Promise<FullConfig> | null
   configChildProcess: ConfigChildProcessShape | null
   preferences?: Preferences| null
-  browsers: ReadonlyArray<FoundBrowser> | null
+  browsers: FoundBrowser[] | null
 }
 
 export interface AppDataShape {
