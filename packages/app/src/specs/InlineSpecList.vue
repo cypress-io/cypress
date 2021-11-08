@@ -1,5 +1,6 @@
 <template>
   <div>
+    <InlineSpecListHeader v-model:tab="tab"/> {{tab}}
     <RouterLink
       v-for="spec in specs"
       :key="spec.node.id"
@@ -13,12 +14,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { gql } from '@urql/vue'
 import type { SpecNode_InlineSpecListFragment, Specs_InlineSpecListFragment } from '../generated/graphql'
 import SpecName from './SpecName.vue'
 import { useSpecStore } from '../store'
 import { useRouter } from 'vue-router'
+import InlineSpecListHeader from './InlineSpecListHeader.vue'
 
 gql`
 fragment SpecNode_InlineSpecList on SpecEdge {
@@ -57,6 +59,7 @@ const isCurrentSpec = (spec: SpecNode_InlineSpecListFragment) => {
 }
 
 const router = useRouter()
+const tab = ref('file-list')
 
 const specs = computed(() => props.gql.activeProject?.specs?.edges || [])
 </script>
