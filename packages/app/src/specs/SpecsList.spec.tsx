@@ -22,7 +22,7 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
   beforeEach(() => {
     cy.mountFragment(Specs_SpecsListFragmentDoc, {
       onResult: (ctx) => {
-        specs = ctx.activeProject?.specs?.edges || []
+        specs = ctx.currentProject?.specs?.edges || []
 
         return ctx
       },

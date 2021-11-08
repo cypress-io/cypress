@@ -7,9 +7,9 @@ export const StoryGenerator: SpecGenerator = {
   card: StoryGeneratorCard,
   entry: StoryGeneratorStepOne,
   matches: filters.matchesCT,
-  disabled: (activeProject) => {
-    if (activeProject) {
-      return !activeProject.storybook
+  disabled: (currentProject) => {
+    if (currentProject) {
+      return !currentProject.storybook
     }
 
     return false

@@ -15,7 +15,7 @@
     </button>
 
     <div
-      v-if="props.gql.activeTestingType === 'e2e'"
+      v-if="props.gql.currentTestingType === 'e2e'"
       data-cy="aut-url"
     >
       <div
@@ -50,10 +50,10 @@ import { gql } from '@urql/vue'
 import type { SpecRunnerHeaderFragment } from '../generated/graphql'
 
 gql`
-fragment SpecRunnerHeader on App {
-  activeTestingType
+fragment SpecRunnerHeader on CurrentProject {
+  currentTestingType
 
-  selectedBrowser {
+  currentBrowser {
     id
     displayName
   }
@@ -70,15 +70,15 @@ const props = defineProps<{
 }>()
 
 const browser = computed(() => {
-  if (!props.gql.selectedBrowser) {
+  if (!props.gql.currentBrowser) {
     return
   }
 
   const dimensions = `${autStore.viewportDimensions.width}x${autStore.viewportDimensions.height}`
 
   return {
-    id: props.gql.selectedBrowser.id,
-    name: `${props.gql.selectedBrowser.displayName} ${dimensions}`,
+    id: props.gql.currentBrowser.id,
+    name: `${props.gql.currentBrowser.displayName} ${dimensions}`,
   }
 })
 

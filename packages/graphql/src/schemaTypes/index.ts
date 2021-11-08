@@ -3,5 +3,6 @@
 
 export * from './enumTypes/'
 export * from './inputTypes/'
+export * from './interfaceTypes/'
 export * from './objectTypes/'
 export * from './scalarTypes/'
