@@ -10,27 +10,30 @@
       v-if="!disabled && hover"
       to="#tooltip-target"
     >
-      <div
-        class="bg-gray-900 text-gray-50 rounded
+      <transition
+        name="enter-from-left"
+        enter-from-class="transition-all transform origin-left scale-x-0"
+        enter-to-class="transition-all transform origin-left scale-x-100"
+      >
+        <div
+          v-if="scaleUp"
+          class="bg-gray-900 text-gray-50 rounded
                   absolute left-64px h-40px
                   w-176px px-16px mx-12px
                   flex items-center justify-center
                   leading-24px text-size-16px
                   content
-                  transition-all
-                  transform
-                  origin-left
-                  scale-x-0
                   before:block before:absolute before:right-full before:top-1/2 before:-mt-8px
                   before:border-solid before:border-transparent
                   before:border-width-8px before:border-transparent before:border-r-gray-900 before:border-l-0
                   need-content"
-        :class="[popperClass, {'scale-x-100': scaleUp}]"
-        :style="`top: ${tooltipTop}px`"
-        role="tooltip"
-      >
-        <slot name="popper" />
-      </div>
+          :class="popperClass"
+          :style="`top: ${tooltipTop}px`"
+          role="tooltip"
+        >
+          <slot name="popper" />
+        </div>
+      </transition>
     </teleport>
   </div>
 </template>
@@ -70,9 +73,9 @@ function showTooltip () {
   }
 
   hover.value = true
-  setTimeout(() => {
+  nextTick(() => {
     scaleUp.value = true
-  }, 20)
+  })
 }
 
 function hideTooltip () {
@@ -81,7 +84,6 @@ function hideTooltip () {
   }
 
   hover.value = false
-
   scaleUp.value = false
 }
 
