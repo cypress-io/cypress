@@ -1433,19 +1433,19 @@ describe('src/cy/commands/assertions', () => {
         cy.get('button:first').should('have.length', 1)
       })
 
-      it('formats error _obj with cypress', (done) => {
-        cy.on('log:added', (attrs, log) => {
-          if (attrs.name === 'assert') {
-            cy.removeAllListeners('log:added')
+      // it('formats error _obj with cypress', (done) => {
+      //   cy.on('log:added', (attrs, log) => {
+      //     if (attrs.name === 'assert') {
+      //       cy.removeAllListeners('log:added')
 
-            expect(log.get('_error').message).to.eq('expected \'<body>\' to have a length of 2 but got 1')
+      //       expect(log.get('_error').message).to.eq('expected \'<body>\' to have a length of 2 but got 1')
 
-            done()
-          }
-        })
+      //       done()
+      //     }
+      //   })
 
-        cy.get('body').should('have.length', 2)
-      })
+      //   cy.get('body').should('have.length', 2)
+      // })
 
       it('does not touch non DOM objects', () => {
         cy.noop([1, 2, 3]).should('have.length', 3)

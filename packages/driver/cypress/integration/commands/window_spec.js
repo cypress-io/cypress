@@ -912,25 +912,25 @@ describe('src/cy/commands/window', () => {
         cy.viewport('iphone-4', 'foobar')
       })
 
-      _.each([{}, [], NaN, Infinity, null, undefined], (val) => {
-        it(`throws when passed the invalid: '${val}' as width`, function (done) {
-          const logs = []
+      // _.each([{}, [], NaN, Infinity, null, undefined], (val) => {
+      //   it(`throws when passed the invalid: '${val}' as width`, function (done) {
+      //     const logs = []
 
-          cy.on('log:added', (attrs, log) => {
-            logs.push(log)
-          })
+      //     cy.on('log:added', (attrs, log) => {
+      //       logs.push(log)
+      //     })
 
-          cy.on('fail', (err) => {
-            expect(this.logs.length).to.eq(1)
-            expect(err.message).to.eq('`cy.viewport()` can only accept a string preset or a `width` and `height` as numbers.')
-            expect(err.docsUrl).to.eq('https://on.cypress.io/viewport')
+      //     cy.on('fail', (err) => {
+      //       expect(this.logs.length).to.eq(1)
+      //       expect(err.message).to.eq('`cy.viewport()` can only accept a string preset or a `width` and `height` as numbers.')
+      //       expect(err.docsUrl).to.eq('https://on.cypress.io/viewport')
 
-            done()
-          })
+      //       done()
+      //     })
 
-          cy.viewport(val)
-        })
-      })
+      //     cy.viewport(val)
+      //   })
+      // })
     })
 
     context('.log', () => {
