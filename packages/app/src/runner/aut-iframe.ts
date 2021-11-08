@@ -9,7 +9,7 @@ export class AutIframe {
   debouncedToggleSelectorPlayground: DebouncedFunc<(isEnabled: any) => void>
   $iframe?: JQuery<HTMLIFrameElement>
   logger: any
-  _highlightedEl?: JQuery<Element>
+  _highlightedEl?: Element
 
   constructor (
     private projectName: string,
@@ -113,8 +113,7 @@ export class AutIframe {
     const { headStyles = undefined, bodyStyles = undefined } = Cypress ? Cypress.cy.getStyles(snapshot) : {}
     const { body, htmlAttrs } = snapshot
     const contents = this._contents()
-    // @ts-ignore - no idea
-    const $html = contents?.find('html') as JQuery<HTMLHtmlElement>
+    const $html = contents?.find('html') as any as JQuery<HTMLHtmlElement>
 
     if ($html) {
       this._replaceHtmlAttrs($html, htmlAttrs)
@@ -135,6 +134,7 @@ export class AutIframe {
 
   // note htmlAttrs is actually `NamedNodeMap`: https://developer.mozilla.org/en-US/docs/Web/API/NamedNodeMap
   // but typing it correctly gives a lot more weird typing errors
+  // _replaceHtmlAttrs ($html: JQuery<HTMLHtmlElement>, htmlAttrs: Record<string, string>) {
   _replaceHtmlAttrs ($html: JQuery<HTMLHtmlElement>, htmlAttrs: Record<string, string>) {
     let oldAttrs = {}
 
@@ -283,9 +283,11 @@ export class AutIframe {
     if (!$body) return
 
     if (isEnabled) {
+      $body.on('mouseenter', this._resetShowHighlight)
       $body.on('mousemove', this._onSelectorMouseMove)
       $body.on('mouseleave', this._clearHighlight)
     } else {
+      $body.off('mouseenter', this._resetShowHighlight)
       $body.off('mousemove', this._onSelectorMouseMove)
       $body.off('mouseleave', this._clearHighlight)
       if (this._highlightedEl) {
@@ -294,7 +296,13 @@ export class AutIframe {
     }
   }
 
-  _onSelectorMouseMove = (e) => {
+  _resetShowHighlight = () => {
+    const selectorPlaygroundStore = useSelectorPlaygroundStore()
+
+    selectorPlaygroundStore.setShowingHighlight(false)
+  }
+
+  _onSelectorMouseMove = (e: JQuery.MouseMoveEvent) => {
     const $body = this._body()
 
     if (!$body) return

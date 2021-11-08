@@ -10,19 +10,25 @@
       </span>
     </button>
 
-    <button
-      data-cy="playground-method"
-      @click="selectorPlaygroundStore.toggleMethod"
+    <div
+      class="flex"
+      @mouseover="setShowingHighlight"
     >
-      cy.{{ selectorPlaygroundStore.method }}('
-    </button>
+      <button
+        data-cy="playground-method"
+        @click="selectorPlaygroundStore.toggleMethod"
+      >
+        cy.{{ selectorPlaygroundStore.method }}('
+      </button>
 
-    <input
-      ref="copyText"
-      v-model="selector"
-      data-cy="playground-selector"
-    >
-    ')
+      <input
+        ref="copyText"
+        v-model="selector"
+        data-cy="playground-selector"
+      >
+      ')
+    </div>
+
     <div data-cy="playground-num-elements">
       {{ selectorPlaygroundStore.numElements }}
     </div>
@@ -87,6 +93,11 @@ const selector = computed({
     props.getAutIframe().toggleSelectorHighlight(true)
   },
 })
+
+function setShowingHighlight () {
+  selectorPlaygroundStore.setShowingHighlight(true)
+  props.getAutIframe().toggleSelectorHighlight(true)
+}
 
 function toggleEnabled () {
   const newVal = !selectorPlaygroundStore.isEnabled

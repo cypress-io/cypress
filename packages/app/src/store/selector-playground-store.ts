@@ -6,6 +6,7 @@ interface SelectorPlaygroundStore {
   show: boolean
   getSelector: string
   containsSelector: string
+  isShowingHighlight: boolean
   isOpen: boolean
   isEnabled: boolean
   isValid: boolean
@@ -21,6 +22,7 @@ export const useSelectorPlaygroundStore = defineStore({
       show: false,
       getSelector: 'body',
       containsSelector: 'Hello, World',
+      isShowingHighlight: false,
       isOpen: false,
       isEnabled: false,
       isValid: true,
@@ -40,6 +42,10 @@ export const useSelectorPlaygroundStore = defineStore({
 
     setEnabled (isEnabled: boolean) {
       this.isEnabled = isEnabled
+
+      if (!this.isEnabled) {
+        this.isShowingHighlight = false
+      }
     },
 
     toggleOpen () {
@@ -58,6 +64,10 @@ export const useSelectorPlaygroundStore = defineStore({
       } else {
         this.containsSelector = selector
       }
+    },
+
+    setShowingHighlight (isShowingHighlight: boolean) {
+      this.isShowingHighlight = isShowingHighlight
     },
 
     setNumElements (numElements: number) {
