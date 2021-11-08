@@ -1438,7 +1438,7 @@ describe('src/cy/commands/navigation', () => {
         cy.visit('http://google.com:3500/fixtures/generic.html')
       })
 
-      it('throws attemping to visit 2 unique ip addresses', function (done) {
+      it('throws attempting to visit 2 unique ip addresses', function (done) {
         const $autIframe = cy.state('$autIframe')
 
         const load = () => {

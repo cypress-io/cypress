@@ -110,7 +110,6 @@ function mutateConfiguration (testConfig: ResolvedTestConfigOverride, config, en
 // note: must return as an object to meet the dashboard recording API
 export function getResolvedTestConfigOverride (test): ResolvedTestConfigOverride {
   let curParent = test.parent
-
   const testConfigList = [{
     overrides: test._testConfig,
     invocationDetails: test.invocationDetails,
@@ -144,7 +143,9 @@ class TestConfigOverride {
 
     const resolvedTestConfig = test._testConfig || {}
 
-    this.restoreTestConfigFn = mutateConfiguration(resolvedTestConfig, config, env)
+    if (Object.keys(resolvedTestConfig.unverifiedTestConfig).length > 0) {
+      this.restoreTestConfigFn = mutateConfiguration(resolvedTestConfig, config, env)
+    }
   }
 }
 

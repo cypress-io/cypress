@@ -398,16 +398,12 @@ class $Cypress {
         return this.runner.onRunnableRun(...args)
 
       case 'runner:test:before:run':
-        // get back to a clean slate
-        this.cy.reset(...args)
-
         if (this.config('isTextTerminal')) {
           // needed for handling test retries
           this.emit('mocha', 'test:before:run', args[0])
         }
 
         this.emit('test:before:run', ...args)
-
         break
 
       case 'runner:test:before:run:async':
@@ -431,7 +427,6 @@ class $Cypress {
         }
 
         break
-
       case 'cy:before:all:screenshots':
         return this.emit('before:all:screenshots', ...args)
 

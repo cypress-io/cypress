@@ -706,36 +706,34 @@ export default {
       },
 
       // reset is called before each test
-      reset (_attrs, test) {
-        const s = state()
-
-        const backup = {
-          window: s.window,
-          document: s.document,
-          $autIframe: s.$autIframe,
-          specWindow: s.specWindow,
-          activeSessions: s.activeSessions,
-        }
-
-        // reset state back to empty object
-        state.reset()
-
-        // and then restore these backed up props
-        state(backup)
-
-        queue.reset()
-        queue.clear()
-        timers.reset()
-
+      reset (test) {
         try {
+          const s = state()
+
+          const backup = {
+            window: s.window,
+            document: s.document,
+            $autIframe: s.$autIframe,
+            specWindow: s.specWindow,
+            activeSessions: s.activeSessions,
+          }
+
+          // reset state back to empty object
+          state.reset()
+
+          // and then restore these backed up props
+          state(backup)
+
+          queue.reset()
+          queue.clear()
+          timers.reset()
+
           testConfigOverrides.restoreAndSetTestConfigOverrides(test, Cypress.config, Cypress.env)
-          // reset mocha slow test threshold
-          test.slow(Cypress.config('slowTestThreshold'))
+
+          cy.removeAllListeners()
         } catch (err) {
           fail(err)
         }
-
-        return cy.removeAllListeners()
       },
 
       addCommandSync (name, fn) {
