@@ -19,15 +19,27 @@ export const createEventManager = () => {
   )
 }
 
+const mockDom = {
+  addOrUpdateSelectorPlaygroundHighlight: () => {},
+  scrollIntoView: () => {},
+  getElements: () => {},
+}
+
 // Stub AutIframe, useful for component testing
 export const createTestAutIframe = (eventManager = createEventManager()) => {
+  eventManager._testingOnlySetCypress({
+    dom: mockDom,
+  })
+
   return new AutIframe(
     'Test Project',
     eventManager,
     _,
     null, // CypressJQuery, shouldn't be using driver in component tests anyway
     logger,
-    null, // dom - imports driver, which we don't want in CT, so just stub it out
+    // dom - imports driver which causes problems
+    // so just stubbing it out for now
+    mockDom,
     visitFailure,
     eventManager.studioRecorder,
     blankContents,

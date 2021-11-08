@@ -8,6 +8,7 @@ type $CypressJQuery = any
 export class AutIframe {
   debouncedToggleSelectorPlayground: DebouncedFunc<(isEnabled: any) => void>
   $iframe?: JQuery<HTMLIFrameElement>
+  logger: any
   _highlightedEl?: JQuery<Element>
 
   constructor (
@@ -15,7 +16,7 @@ export class AutIframe {
     private eventManager: any,
     private _: any,
     private $: $CypressJQuery,
-    private logger: any,
+    logger: any,
     private dom: any,
     private visitFailure: (props: any) => string,
     private studioRecorder: any,
@@ -25,6 +26,7 @@ export class AutIframe {
       sessionLifecycle: () => string
     },
   ) {
+    this.logger = logger
     this.debouncedToggleSelectorPlayground = this._.debounce(this.toggleSelectorPlayground, 300)
   }
 
@@ -348,7 +350,7 @@ export class AutIframe {
     }
   }
 
-  toggleSelectorHighlight (isShowingHighlight) {
+  toggleSelectorHighlight (isShowingHighlight: boolean) {
     const selectorPlaygroundStore = useSelectorPlaygroundStore()
 
     if (!isShowingHighlight) {

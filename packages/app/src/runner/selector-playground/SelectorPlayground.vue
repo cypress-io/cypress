@@ -2,6 +2,7 @@
   <div class="flex">
     <button
       :class="{ active: selectorPlaygroundStore.isEnabled }"
+      data-cy="playground-toggle"
       @click="toggleEnabled"
     >
       <span class="fa-stack">
@@ -9,19 +10,32 @@
       </span>
     </button>
 
-    <button @click="selectorPlaygroundStore.toggleMethod">
-      Method (cy.{{ selectorPlaygroundStore.method }})
+    <button
+      data-cy="playground-method"
+      @click="selectorPlaygroundStore.toggleMethod"
+    >
+      cy.{{ selectorPlaygroundStore.method }}('
     </button>
 
     <input
       ref="copyText"
       v-model="selector"
+      data-cy="playground-selector"
     >
-    <div>{{ selectorPlaygroundStore.numElements }}</div>
-    <button @click="copySelector">
+    ')
+    <div data-cy="playground-num-elements">
+      {{ selectorPlaygroundStore.numElements }}
+    </div>
+    <button
+      data-cy="playground-copy"
+      @click="copySelector"
+    >
       Copy
     </button>
-    <button @click="printSelected">
+    <button
+      data-cy="playground-print"
+      @click="printSelected"
+    >
       Print
     </button>
 
@@ -38,22 +52,21 @@
 
 <script lang="ts" setup>
 import { computed, ref, watch } from 'vue'
-import { getAutIframeModel } from '..'
 import { useSelectorPlaygroundStore } from '../../store/selector-playground-store'
 import type { AutIframe } from '../aut-iframe'
 import type { EventManager } from '../event-manager'
 
 const props = defineProps<{
   eventManager: EventManager
-  autIframe: AutIframe
+  getAutIframe: () => AutIframe
 }>()
 
 const selectorPlaygroundStore = useSelectorPlaygroundStore()
 
 const copyText = ref<HTMLInputElement>()
 
-watch(() => selectorPlaygroundStore.method, (method) => {
-  props.autIframe.toggleSelectorHighlight(true)
+watch(() => selectorPlaygroundStore.method, () => {
+  props.getAutIframe().toggleSelectorHighlight(true)
 })
 
 const selector = computed({
@@ -71,7 +84,7 @@ const selector = computed({
       selectorPlaygroundStore.containsSelector = value
     }
 
-    props.autIframe.toggleSelectorHighlight(true)
+    props.getAutIframe().toggleSelectorHighlight(true)
   },
 })
 
@@ -80,13 +93,11 @@ function toggleEnabled () {
 
   selectorPlaygroundStore.setEnabled(newVal)
 
-  const autIframe = getAutIframeModel()
-
-  autIframe.toggleSelectorPlayground(newVal)
+  props.getAutIframe().toggleSelectorPlayground(newVal)
 }
 
 function printSelected () {
-  props.autIframe.printSelectorElementsToConsole()
+  props.getAutIframe().printSelectorElementsToConsole()
 }
 
 function copySelector () {

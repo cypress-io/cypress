@@ -41,9 +41,9 @@
       item-value="name"
     />
 
-    <SelectorPlayground 
-      v-if="selectorPlaygroundStore.show" 
-      :aut-iframe="autIframe"
+    <SelectorPlayground
+      v-if="selectorPlaygroundStore.show"
+      :get-aut-iframe="getAutIframe"
       :event-manager="eventManager"
     />
   </div>
@@ -81,7 +81,7 @@ const props = defineProps<{
 
 const eventManager = getEventManager()
 const autIframe = getAutIframeModel()
-
+const getAutIframe = getAutIframeModel
 
 const selectorPlaygroundStore = useSelectorPlaygroundStore()
 

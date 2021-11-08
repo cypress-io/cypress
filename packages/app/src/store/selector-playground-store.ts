@@ -25,7 +25,7 @@ export const useSelectorPlaygroundStore = defineStore({
       isEnabled: false,
       isValid: true,
       numElements: 0,
-      method: 'contains'
+      method: 'get',
     }
   },
 
@@ -76,7 +76,7 @@ export const useSelectorPlaygroundStore = defineStore({
       this.method = 'get'
     },
   },
-  
+
   getters: {
     selector (state) {
       return state.method === 'get' ? state.getSelector : state.containsSelector
@@ -88,6 +88,6 @@ export const useSelectorPlaygroundStore = defineStore({
       }
 
       return state.numElements === 1 ? '1 matched element' : `${state.numElements} matched elements`
-    }
-  }
+    },
+  },
 })
