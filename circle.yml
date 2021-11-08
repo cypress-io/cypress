@@ -1484,11 +1484,15 @@ jobs:
             working_directory: npm/cypress-schematic
         - run:
             name: Launch
-            command: yarn launch:test
+            command: |
+              . ../../scripts/load-nvm.sh
+              yarn launch:test
             working_directory: npm/cypress-schematic
         - run:
             name: Run unit tests
-            command: yarn test
+            command: |
+              . ../../scripts/load-nvm.sh
+              yarn test
             working_directory: npm/cypress-schematic
         - store-npm-logs
 
