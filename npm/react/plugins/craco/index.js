@@ -24,7 +24,3 @@ module.exports = getLegacyDevServer(devServer, (config) => {
 module.exports.devServer = (cypressDevServerConfig, { cracoConfig, indexHtml }) => {
   return devServer(cypressDevServerConfig, cracoConfig, indexHtml)
 }
-
-module.exports.defineDevServerConfig = function (devServerConfig) {
-  return devServerConfig
-}
