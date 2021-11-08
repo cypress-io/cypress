@@ -2,7 +2,7 @@
   "name": "@packages/socket",
   "version": "0.0.0-development",
   "private": true,
-  "main": "index.js",
+  "main": "index",
   "browser": "lib/browser.ts",
   "scripts": {
     "build-prod": "tsc",
