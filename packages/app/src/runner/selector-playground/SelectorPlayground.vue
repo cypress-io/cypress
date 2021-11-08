@@ -24,6 +24,15 @@
     <button @click="printSelected">
       Print
     </button>
+
+    <a
+      class="selector-info"
+      href="https://on.cypress.io/selector-playground"
+      target="_blank"
+      rel="noreferrer"
+    >
+      <i class="fas fa-question-circle" />Learn more
+    </a>
   </div>
 </template>
 
