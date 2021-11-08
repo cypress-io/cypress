@@ -21,7 +21,7 @@
       ref="runnerPane"
       class="relative w-full"
     >
-      <HideDuringScreenshot class="bg-white p-4  border-8 border-blue-300">
+      <HideDuringScreenshot class="bg-white p-4">
         <SpecRunnerHeader :gql="props.gql" />
       </HideDuringScreenshot>
 

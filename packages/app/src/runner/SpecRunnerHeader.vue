@@ -1,51 +1,63 @@
 <template>
-  <div class="flex text-xs">
-    <button
-      data-cy="header-studio"
-      :disabled="isDisabled"
-    >
-      Studio
-    </button>
-
-    <button
-      data-cy="header-selector"
-      :disabled="isDisabled"
-      @click="togglePlayground"
-    >
-      Selector
-    </button>
-
-    <div
-      v-if="props.gql.activeTestingType === 'e2e'"
-      data-cy="aut-url"
-    >
-      <div
-        class="rounded-md flex shadow-md mx-2 url px-4"
-        :class="{
-          'bg-yellow-50': autStore.isLoadingUrl,
-          'bg-white': !autStore.isLoadingUrl,
-        }"
+  <div>
+    <div class="flex justify-between">
+      <!--
+        TODO: Studio. Out of scope for GA.
+        <button
+        data-cy="header-studio"
+        :disabled="isDisabled"
       >
-        <div>
-          {{ autStore.url }}
+        Studio
+      </button> -->
+
+      <button
+        data-cy="header-selector"
+        :disabled="isDisabled"
+        @click="togglePlayground"
+      >
+        <Icon
+          height="22px"
+          width="22px"
+          :icon="IconCrosshairsGPS"
+        />
+      </button>
+
+      <div
+        v-if="props.gql.activeTestingType === 'e2e'"
+        data-cy="aut-url"
+      >
+        <div
+          class="rounded-md flex shadow-md mx-2 url px-4"
+          :class="{
+            'bg-yellow-50': autStore.isLoadingUrl,
+            'bg-white': !autStore.isLoadingUrl,
+          }"
+        >
+          <div>
+            {{ autStore.url }}
+          </div>
         </div>
+
+        <div>Loading URL: {{ autStore.isLoadingUrl }}</div>
       </div>
 
-      <div>Loading URL: {{ autStore.isLoadingUrl }}</div>
+      <Select
+        v-model="browser"
+        data-cy="select-browser"
+        :options="browsers"
+        item-value="name"
+      />
     </div>
 
-    <Select
-      v-model="browser"
-      data-cy="select-browser"
-      :options="browsers"
-      item-value="name"
-    />
-
-    <SelectorPlayground
+    <div
       v-if="selectorPlaygroundStore.show"
-      :get-aut-iframe="getAutIframe"
-      :event-manager="eventManager"
-    />
+      class="mt-8px"
+    >
+      <SelectorPlayground
+        :get-aut-iframe="getAutIframe"
+        :event-manager="eventManager"
+      />
+    </div>
   </div>
 </template>
 
@@ -54,6 +66,8 @@ import { computed } from 'vue'
 import { useAutStore } from '../store'
 import Select from '@packages/frontend-shared/src/components/Select.vue'
 import { gql } from '@urql/vue'
+import IconCrosshairsGPS from '~icons/mdi/crosshairs-gps'
+import Icon from '@packages/frontend-shared/src/components/Icon.vue'
 import type { SpecRunnerHeaderFragment } from '../generated/graphql'
 import SelectorPlayground from './selector-playground/SelectorPlayground.vue'
 import { getAutIframeModel, getEventManager } from '.'
@@ -118,12 +132,12 @@ const isDisabled = computed(() => autStore.isRunning || autStore.isLoading)
 </script>
 
 <style scoped lang="scss">
-button, .url {
-  @apply flex items-center justify-center;
+.url {
+  // @apply flex items-center justify-center;
 }
 
 button {
-  @apply rounded-md bg-white flex shadow-md ml-2;
-  @apply w-20 hover:bg-gray-50;
+  // @apply rounded-md bg-white flex shadow-md ml-2;
+  // @apply w-20 hover:bg-gray-50;
 }
 </style>

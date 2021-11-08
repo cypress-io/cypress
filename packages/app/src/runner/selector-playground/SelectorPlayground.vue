@@ -1,19 +1,23 @@
 <template>
   <div
     id="selector-playground"
-    class="flex p-3 items-center bg-white"
+    class="flex items-center bg-white"
   >
     <button
       :class="{ 'bg-blue-100': selectorPlaygroundStore.isEnabled }"
-      class="rounded-md px-5px h-full"
+      class="rounded-md px-8px h-full"
       data-cy="playground-toggle"
       @click="toggleEnabled"
     >
-      <Icon :icon="IconCursorDefaultOutline" />
+      <Icon
+        :icon="IconCursorDefaultOutline"
+        height="18px"
+        width="18px"
+      />
     </button>
 
     <div
-      class="flex flex-1 mx-2"
+      class="flex flex-1 mx-2 h-full items-center"
       @mouseover="setShowingHighlight"
     >
       <button
@@ -27,7 +31,7 @@
       <input
         ref="copyText"
         v-model="selector"
-        class="flex-1 rounded-md border border-gray-300 px-1 pl-2 text-blue-500"
+        class="flex-1 rounded-md py-8px border border-gray-500 px-1 pl-2 text-blue-500"
         data-cy="playground-selector"
       >
       ')
@@ -35,15 +39,15 @@
 
     <div
       data-cy="playground-num-elements"
-      class="rounded-md bg-gray-400 text-white mx-1 px-2"
+      class="rounded-md bg-gray-400 text-white mx-1 px-3 h-full flex items-center"
     >
       {{ selectorPlaygroundStore.numElements }}
     </div>
 
-    <div class="rounded-md border border-gray-100 flex items-center h-full divide-x-2 mr-10px">
+    <div class="rounded-md border border-1 border-gray-500 flex items-center h-full divide-x-1 divide-gray-500 mr-10px">
       <button
         data-cy="playground-copy"
-        class="h-full px-5px"
+        class="h-full px-8px"
         @click="copySelector"
       >
         <Icon :icon="IconCopy" />
@@ -51,7 +55,7 @@
 
       <button
         data-cy="playground-print"
-        class="h-full px-5px"
+        class="h-full px-8px"
         @click="printSelected"
       >
         <Icon :icon="IconConsoleLine" />
@@ -150,6 +154,6 @@ function copySelector () {
 
 <style scoped lang="scss">
 #selector-playground {
-  height: 50px;
+  height: 40px;
 }
 </style>
