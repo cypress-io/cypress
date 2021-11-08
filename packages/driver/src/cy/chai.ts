@@ -45,11 +45,12 @@ let restoreAsserts = null
 let overrideExpect = null
 let overrideChaiAsserts = null
 
-export let create: ((specWindow, state, assertFn) => ({
+type CreateFunc = ((specWindow, state, assertFn) => ({
   chai: Chai.ChaiStatic
   expect: (val: any, message?: string) => Chai.Assertion
   assert: any
-})) | null = null
+}))
+export let create: CreateFunc | null = null
 
 chai.use(sinonChai)
 
@@ -549,7 +550,7 @@ chai.use((chai, u) => {
 })
 
 export interface IChai {
-  expect: ReturnType<typeof create>['expect']
+  expect: ReturnType<CreateFunc>['expect']
 }
 
 export default {
