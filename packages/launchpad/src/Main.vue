@@ -33,7 +33,7 @@
             />
           </button>
           <TestingTypeCards
-            :gql="query.data.value.app"
+            :gql="query.data.value"
           />
         </template>
         <Wizard
