@@ -482,7 +482,7 @@
     svg {
       color: $gray-600;
       cursor: pointer;
-      margin: 2px;
+      margin: 0px 2px;
     }
 
     .studio-command-remove {
@@ -703,8 +703,9 @@
   }
 
   .num-elements {
-    color: $black;
     background-color: $gray-600;
+    color: $black;
+    vertical-align: text-top;
   }
 
   // utilizing element size queries: https://github.com/marcj/css-element-queries
