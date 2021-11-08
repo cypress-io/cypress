@@ -12,7 +12,7 @@ describe('<OpenBrowserList />', () => {
   it('renders a long list of found browsers correctly', () => {
     cy.mountFragment(OpenBrowserListFragmentDoc, {
       onResult: (result) => {
-        result.selectedBrowser = null
+        result.currentBrowser = null
       },
       render: (gqlVal) => <div class="resize overflow-auto border-current border-1"><OpenBrowserList gql={gqlVal} /></div>,
     })

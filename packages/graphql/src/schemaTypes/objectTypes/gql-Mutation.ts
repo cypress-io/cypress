@@ -289,7 +289,7 @@ export const mutation = mutationType({
         id: nonNull(idArg()),
       },
       resolve: async (_, args, ctx) => {
-        if (!ctx.activeProject) {
+        if (!ctx.currentProject) {
           throw Error(`Cannot set spec without active project!`)
         }
 
@@ -298,7 +298,7 @@ export const mutation = mutationType({
     })
 
     t.nonNull.field('setProjectPreferences', {
-      type: 'App',
+      type: 'Query',
       description: 'Save the projects preferences to cache',
       args: {
         testingType: nonNull(TestingTypeEnum),

@@ -6,6 +6,6 @@ export interface SpecGenerator {
   card: Component
   entry: Component
   matches: (testingType) => boolean
-  disabled: (activeProject?) => boolean | void
+  disabled: (currentProject?) => boolean | void
   id: GeneratorId
 }

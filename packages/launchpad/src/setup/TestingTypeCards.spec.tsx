@@ -8,9 +8,9 @@ describe('TestingTypeCards', () => {
   it('renders correct label when no testingType has been configured', () => {
     cy.mountFragment(TestingTypeCardsFragmentDoc, {
       onResult: (result, ctx) => {
-        if (result.activeProject) {
-          result.activeProject.isCTConfigured = false
-          result.activeProject.isE2EConfigured = false
+        if (result.currentProject) {
+          result.currentProject.isCTConfigured = false
+          result.currentProject.isE2EConfigured = false
         }
       },
       render: (gqlVal) => {
@@ -26,9 +26,9 @@ describe('TestingTypeCards', () => {
   it('renders correct label when projects have been configured', () => {
     cy.mountFragment(TestingTypeCardsFragmentDoc, {
       onResult: (result, ctx) => {
-        if (result.activeProject) {
-          result.activeProject.isCTConfigured = true
-          result.activeProject.isE2EConfigured = true
+        if (result.currentProject) {
+          result.currentProject.isCTConfigured = true
+          result.currentProject.isE2EConfigured = true
         }
       },
       render: (gqlVal) => {
@@ -42,9 +42,9 @@ describe('TestingTypeCards', () => {
   it('renders correct label when one project has been configured and the other has not', () => {
     cy.mountFragment(TestingTypeCardsFragmentDoc, {
       onResult: (result, ctx) => {
-        if (result.activeProject) {
-          result.activeProject.isCTConfigured = true
-          result.activeProject.isE2EConfigured = false
+        if (result.currentProject) {
+          result.currentProject.isCTConfigured = true
+          result.currentProject.isE2EConfigured = false
         }
       },
       render: (gqlVal) => {

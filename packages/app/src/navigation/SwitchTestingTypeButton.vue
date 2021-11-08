@@ -54,9 +54,11 @@ import { useI18n } from '@cy/i18n'
 const { t } = useI18n()
 
 gql`
-fragment SwitchTestingTypeButton on App {
-  activeTestingType
+fragment SwitchTestingTypeButton on Query {
   ...SwitchTestingTypeModal
+  currentProject {
+    currentTestingType
+  }
 }
 `
 
@@ -78,7 +80,7 @@ const TESTING_TYPE_MAP = {
 } as const
 
 const testingType = computed(() => {
-  return props.gql.activeTestingType ? TESTING_TYPE_MAP[props.gql.activeTestingType] : null
+  return props.gql.currentProject?.currentTestingType ? TESTING_TYPE_MAP[props.gql.currentProject.currentTestingType] : null
 })
 
 const mainStore = useMainStore()
