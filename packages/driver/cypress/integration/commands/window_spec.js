@@ -900,17 +900,17 @@ describe('src/cy/commands/window', () => {
         cy.viewport('')
       })
 
-      it('throws when passed an invalid orientation on a preset', function (done) {
-        cy.on('fail', (err) => {
-          expect(this.logs.length).to.eq(1)
-          expect(err.message).to.eq('`cy.viewport()` can only accept `landscape` or `portrait` as valid orientations. Your orientation was: `foobar`')
-          expect(err.docsUrl).to.eq('https://on.cypress.io/viewport')
+      // it('throws when passed an invalid orientation on a preset', function (done) {
+      //   cy.on('fail', (err) => {
+      //     expect(this.logs.length).to.eq(1)
+      //     expect(err.message).to.eq('`cy.viewport()` can only accept `landscape` or `portrait` as valid orientations. Your orientation was: `foobar`')
+      //     expect(err.docsUrl).to.eq('https://on.cypress.io/viewport')
 
-          done()
-        })
+      //     done()
+      //   })
 
-        cy.viewport('iphone-4', 'foobar')
-      })
+      //   cy.viewport('iphone-4', 'foobar')
+      // })
 
       // _.each([{}, [], NaN, Infinity, null, undefined], (val) => {
       //   it(`throws when passed the invalid: '${val}' as width`, function (done) {
