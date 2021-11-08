@@ -84,6 +84,7 @@ export class DataContext extends DataContextShell {
     }
 
     if (this._config.launchArgs.testingType) {
+      this.appData.currentTestingType = this._config.launchArgs.testingType
       // It should be possible to skip the first step in the wizard, if the
       // user already told us the testing type via command line argument
       this.actions.wizard.setTestingType(this._config.launchArgs.testingType)
