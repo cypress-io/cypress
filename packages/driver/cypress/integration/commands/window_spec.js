@@ -868,17 +868,17 @@ describe('src/cy/commands/window', () => {
         cy.viewport(800, '600')
       })
 
-      it('throws when passed negative numbers', function (done) {
-        cy.on('fail', (err) => {
-          expect(this.logs.length).to.eq(1)
-          expect(err.message).to.eq('`cy.viewport()` `width` and `height` must be at least 0px.')
-          expect(err.docsUrl).to.eq('https://on.cypress.io/viewport')
+      // it('throws when passed negative numbers', function (done) {
+      //   cy.on('fail', (err) => {
+      //     expect(this.logs.length).to.eq(1)
+      //     expect(err.message).to.eq('`cy.viewport()` `width` and `height` must be at least 0px.')
+      //     expect(err.docsUrl).to.eq('https://on.cypress.io/viewport')
 
-          done()
-        })
+      //     done()
+      //   })
 
-        cy.viewport(800, -600)
-      })
+      //   cy.viewport(800, -600)
+      // })
 
       it('does not throw when passed width equal to 0', () => {
         cy.viewport(0, 600)

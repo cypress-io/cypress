@@ -687,18 +687,18 @@ describe('app/background', () => {
         return this.server.emit('automation:request', 123, 'take:screenshot')
       })
 
-      it('rejects with browser.runtime.lastError', function (done) {
-        sinon.stub(browser.tabs, 'captureVisibleTab').withArgs(1, { format: 'png' }).rejects(new Error('some error'))
+      // it('rejects with browser.runtime.lastError', function (done) {
+      //   sinon.stub(browser.tabs, 'captureVisibleTab').withArgs(1, { format: 'png' }).rejects(new Error('some error'))
 
-        this.socket.on('automation:response', (id, obj) => {
-          expect(id).to.eq(123)
-          expect(obj.__error).to.eq('some error')
+      //   this.socket.on('automation:response', (id, obj) => {
+      //     expect(id).to.eq(123)
+      //     expect(obj.__error).to.eq('some error')
 
-          return done()
-        })
+      //     return done()
+      //   })
 
-        return this.server.emit('automation:request', 123, 'take:screenshot')
-      })
+      //   return this.server.emit('automation:request', 123, 'take:screenshot')
+      // })
     })
   })
 })
