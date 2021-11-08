@@ -18,7 +18,7 @@
         class="flex items-center h-64px"
         :disabled="mainStore.navBarExpanded"
         :popper-top-offset="4"
-        poppper-class="h-56px"
+        popper-class="h-56px"
         data-cy="sidebar-header"
       >
         <i-cy-bookmark_x24

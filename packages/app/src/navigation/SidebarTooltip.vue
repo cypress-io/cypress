@@ -1,8 +1,8 @@
 <template>
   <div
     ref="wrapper"
-    @mouseover="placeTooltip();hover=true"
-    @mouseout="hover=false"
+    @mouseenter="placeTooltip();showTooltip();"
+    @mouseleave="hideTooltip()"
     @click="emit('click')"
   >
     <slot />
@@ -17,11 +17,15 @@
                   flex items-center justify-center
                   leading-24px text-size-16px
                   content
+                  transition-all
+                  transform
+                  origin-left
+                  scale-x-0
                   before:block before:absolute before:right-full before:top-1/2 before:-mt-8px
                   before:border-solid before:border-transparent
                   before:border-width-8px before:border-transparent before:border-r-gray-900 before:border-l-0
                   need-content"
-        :class="poppperClass"
+        :class="[popperClass, {'scale-x-100': scaleUp}]"
         :style="`top: ${tooltipTop}px`"
         role="tooltip"
       >
@@ -32,21 +36,22 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { ref, nextTick } from 'vue'
 
 const props = withDefaults(defineProps<{
   disabled?:boolean,
   popperTopOffset?:number,
-  poppperClass?:string,
+  popperClass?:string,
 }>(), {
   disabled: false,
   popperTopOffset: 0,
-  poppperClass: '',
+  popperClass: '',
 })
 
 const emit = defineEmits(['click'])
 
 const hover = ref(false)
+const scaleUp = ref(false)
 const tooltipTop = ref(0)
 
 const wrapper = ref<HTMLDivElement | null>(null)
@@ -57,6 +62,27 @@ function placeTooltip () {
   const { y } = wrapper.value?.getBoundingClientRect() || { y: 0 }
 
   tooltipTop.value = y + props.popperTopOffset
+}
+
+function showTooltip () {
+  if (hover.value) {
+    return
+  }
+
+  hover.value = true
+  setTimeout(() => {
+    scaleUp.value = true
+  }, 20)
+}
+
+function hideTooltip () {
+  if (!hover.value) {
+    return
+  }
+
+  hover.value = false
+
+  scaleUp.value = false
 }
 
 </script>
