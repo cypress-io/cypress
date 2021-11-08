@@ -1,5 +1,5 @@
 <template>
-  <div class="flex relative flex-col flex-1 h-full bg-gray-1000">
+  <HideDuringScreenshot class="flex relative flex-col flex-1 h-full bg-gray-1000">
     <div
       class="absolute cursor-pointer w-16px bottom-0 top-0 left-full group"
       :aria-expanded="mainStore.navBarExpanded"
@@ -73,7 +73,7 @@
         class="w-32px h-32px m-16px"
       >
     </div>
-  </div>
+  </HideDuringScreenshot>
 </template>
 
 <script lang="ts" setup>
@@ -87,6 +87,7 @@ import SidebarTooltip from './SidebarTooltip.vue'
 import { useMainStore } from '../store'
 import { SideBarNavigationDocument } from '../generated/graphql'
 import CypressLogo from '@packages/frontend-shared/src/assets/logos/cypress_s.png'
+import HideDuringScreenshot from '../runner/screenshot/HideDuringScreenshot.vue'
 
 const navigation = [
   { name: 'Home', icon: CodeIcon, href: '/' },
