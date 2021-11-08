@@ -151,8 +151,7 @@ export const options = [
     isInternal: true,
   }, {
     name: 'nodeVersion',
-    defaultValue: 'default',
-    validation: v.isOneOf('default', 'bundled', 'system'),
+    validation: v.isOneOf('bundled', 'system'),
   }, {
     name: 'numTestsKeptInMemory',
     defaultValue: 50,
@@ -332,6 +331,16 @@ export const breakingOptions = [
   }, {
     name: 'firefoxGcInterval',
     errorKey: 'FIREFOX_GC_INTERVAL_REMOVED',
+    isWarning: true,
+  }, {
+    name: 'nodeVersion',
+    value: 'system',
+    errorKey: 'NODE_VERSION_DEPRECATION_SYSTEM',
+    isWarning: true,
+  }, {
+    name: 'nodeVersion',
+    value: 'bundled',
+    errorKey: 'NODE_VERSION_DEPRECATION_BUNDLED',
     isWarning: true,
   },
 ]

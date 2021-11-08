@@ -81,7 +81,7 @@ module.exports = {
       args = [args]
     }
 
-    args = [...args, '--cwd', process.cwd()]
+    args = [...args, '--cwd', process.cwd(), '--userNodePath', process.execPath, '--userNodeVersion', process.versions.node]
 
     _.defaults(options, {
       dev: false,
