@@ -30,13 +30,15 @@ export class AutIframe {
     this.debouncedToggleSelectorPlayground = this._.debounce(this.toggleSelectorPlayground, 300)
   }
 
-  create () {
-    this.$iframe = this.$('<iframe>', {
+  create (): JQuery<HTMLIFrameElement> {
+    const $iframe = this.$('<iframe>', {
       id: `Your App: '${this.projectName}'`,
       class: 'aut-iframe',
     })
 
-    return this.$iframe
+    this.$iframe = $iframe
+
+    return $iframe
   }
 
   showInitialBlankContents () {

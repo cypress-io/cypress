@@ -55,7 +55,7 @@ let _autIframeModel: AutIframe
  * This only needs to be created once per **spec**. If you change spec,
  * you need to create a new AUT IFrame model.
  */
-export function getAutIframeModel () {
+export function getAutIframeModel (): AutIframe {
   if (!_autIframeModel) {
     throw Error('Must create a new instance of AutIframe before accessing')
   }
