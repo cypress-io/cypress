@@ -33,8 +33,7 @@
             />
           </button>
           <TestingTypeCards
-            :gql="query.data.value"
-            @open-compare="isTestingTypeModalOpen = true"
+            :gql="query.data.value.app"
           />
         </template>
         <Wizard
@@ -69,7 +68,9 @@ const isTestingTypeModalOpen = ref(false)
 
 gql`
 query MainLaunchpadQuery {
-  ...TestingTypeCards
+  app{
+    ...TestingTypeCards
+  }
   ...Wizard
 
   baseError {

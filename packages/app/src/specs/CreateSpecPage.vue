@@ -54,7 +54,7 @@
 import { useI18n } from '@cy/i18n'
 import SettingsIcon from '~icons/cy/settings_x16'
 import Button from '@cy/components/Button.vue'
-import { ref, computed, Ref } from 'vue'
+import { ref } from 'vue'
 import CreateSpecModal from './CreateSpecModal.vue'
 import CreateSpecCards from './CreateSpecCards.vue'
 import { gql } from '@urql/vue'
