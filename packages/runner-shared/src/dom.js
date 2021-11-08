@@ -201,6 +201,7 @@ function getSelectorHighlightStyles ($el) {
 }
 
 function addOrUpdateSelectorPlaygroundHighlight ({ $el, $body, selector, showTooltip, onClick }) {
+  console.log({ selector })
   const { $container, shadowRoot, $reactContainer } = getOrCreateHelperDom({
     $body,
     className: '__cypress-selector-playground',

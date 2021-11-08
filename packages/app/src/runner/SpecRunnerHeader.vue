@@ -10,7 +10,7 @@
     <button
       data-cy="header-selector"
       :disabled="isDisabled"
-      @click="showPlayground"
+      @click="togglePlayground"
     >
       Selector
     </button>
@@ -85,30 +85,17 @@ const autIframe = getAutIframeModel()
 
 const selectorPlaygroundStore = useSelectorPlaygroundStore()
 
-const showPlayground = () => {
-  selectorPlaygroundStore.setShow(!selectorPlaygroundStore.show)
-  // window.UnifiedRunner.selectorPlaygroundModel.toggleOpen()
-  console.log('activated', !selectorPlaygroundStore.isEnabled)
-  autIframe.toggleSelectorPlayground(!selectorPlaygroundStore.isEnabled)
-
-  // const p = document.querySelector('#play')!
-  // const playground = window.UnifiedRunner.React.createElement(window.UnifiedRunner.SelectorPlayground, {
-  //   eventManager,
-  //   model: window.UnifiedRunner.selectorPlaygroundModel,
-  // })
-
-  // window.UnifiedRunner.ReactDOM.render(playground, p)
-
-  // window.UnifiedRunner.selectorPlaygroundModel.toggleOpen()
+const togglePlayground = () => {
+  if (selectorPlaygroundStore.show) {
+    selectorPlaygroundStore.setShow(false)
+    autIframe.toggleSelectorPlayground(false)
+    selectorPlaygroundStore.setEnabled(false)
+  } else {
+    selectorPlaygroundStore.setShow(true)
+    autIframe.toggleSelectorPlayground(true)
+    selectorPlaygroundStore.setEnabled(true)
+  }
 }
-
-// window.UnifiedRunner.MobX.observe(
-//   // @ts-ignore
-//   window.UnifiedRunner.selectorPlaygroundModel, 'isEnabled',
-//   (enabled) => {
-//     autIframe.toggleSelectorPlayground(enabled)
-//   }
-// )
 
 const browser = computed(() => {
   if (!props.gql.selectedBrowser) {

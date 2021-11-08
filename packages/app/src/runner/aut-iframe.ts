@@ -1,5 +1,6 @@
 import type { DebouncedFunc } from 'lodash'
 import { useSelectorPlaygroundStore } from '../store/selector-playground-store'
+import type JQuery from 'jquery'
 
 // JQuery bundled w/ Cypress
 type $CypressJQuery = any
@@ -355,6 +356,8 @@ export class AutIframe {
   }
 
   toggleSelectorHighlight (isShowingHighlight) {
+    const selectorPlaygroundStore = useSelectorPlaygroundStore()
+
     if (!isShowingHighlight) {
       this._clearHighlight()
 
@@ -366,9 +369,11 @@ export class AutIframe {
     const $el = this.getElements(Cypress.dom)
 
     this.studio.selectorPlaygroundModel.setValidity(!!$el)
+    selectorPlaygroundStore.setValidity(!!$el)
 
     if ($el) {
       this.studio.selectorPlaygroundModel.setNumElements($el.length)
+      selectorPlaygroundStore.setNumElements($el.length)
 
       if ($el.length) {
         this.dom.scrollIntoView(this._window(), $el[0])
@@ -384,14 +389,15 @@ export class AutIframe {
   }
 
   getElements (cypressDom) {
-    const { selector, method } = this.studio.selectorPlaygroundModel
+    console.log(`getElements`)
+    const selectorPlaygroundStore = useSelectorPlaygroundStore()
     const $contents = this._contents()
 
-    if (!$contents || !selector) return
+    if (!$contents || !selectorPlaygroundStore.selector) return
 
     return this.dom.getElementsForSelector({
-      method,
-      selector,
+      method: selectorPlaygroundStore.method,
+      selector: selectorPlaygroundStore.selector,
       cypressDom,
       $root: $contents,
     })

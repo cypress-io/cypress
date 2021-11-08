@@ -51,12 +51,16 @@ const selector = computed({
   },
   set (value: string) {
     if (selectorPlaygroundStore.method === 'get') {
+    console.log(`get(${value}`)
       selectorPlaygroundStore.getSelector = value
     }
 
     if (selectorPlaygroundStore.method === 'contains') {
+    console.log(`contains(${value}`)
       selectorPlaygroundStore.containsSelector = value
     }
+
+    props.autIframe.toggleSelectorHighlight(true)
   }
 })
 
