@@ -14,9 +14,9 @@ import { create as createJQuery, IJQuery } from '../cy/jquery'
 import { create as createAliases, IAliases } from '../cy/aliases'
 import * as $Events from './events'
 import { create as createEnsures, IEnsures } from '../cy/ensures'
-import $Focused from '../cy/focused'
+import { create as createFocused, IFocused } from '../cy/focused'
 import $Mouse from '../cy/mouse'
-import $Keyboard from '../cy/keyboard'
+import { Keyboard } from '../cy/keyboard'
 import { create as createLocation, ILocation } from '../cy/location'
 import { create as createAssertions, IAssertions } from '../cy/assertions'
 import $Listeners from '../cy/listeners'
@@ -120,9 +120,13 @@ const setTopOnError = function (Cypress, cy: $Cy) {
 
 // NOTE: this makes the cy object an instance
 // TODO: refactor the 'create' method below into this class
-class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILocation, ITimer, IChai, IXhr, IAliases, IEnsures, ISnapshots {
+class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILocation, ITimer, IChai, IXhr, IAliases, IEnsures, ISnapshots, IFocused {
   id: string
   state: any
+  config: any
+  devices: {
+    keyboard: Keyboard
+  }
 
   timeout: ITimeouts['timeout']
   clearTimeout: ITimeouts['clearTimeout']
@@ -176,6 +180,11 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
   detachDom: ISnapshots['detachDom']
   getStyles: ISnapshots['getStyles']
 
+  fireBlur: IFocused['fireBlur']
+  fireFocus: IFocused['fireFocus']
+  needsFocus: IFocused['needsFocus']
+  getFocused: IFocused['getFocused']
+
   // Private methods
   resetTimer: ReturnType<typeof createTimer>['reset']
 
@@ -185,10 +194,22 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
   onCssModified: ReturnType<typeof createSnapshots>['onCssModified']
   onBeforeWindowLoad: ReturnType<typeof createSnapshots>['onBeforeWindowLoad']
 
+  documentHasFocus: ReturnType<typeof createFocused>['documentHasFocus']
+  interceptFocus: ReturnType<typeof createFocused>['interceptFocus']
+  interceptBlur: ReturnType<typeof createFocused>['interceptBlur']
+
+  // temporary -> should be removed
+  focused: any
+
   constructor (specWindow, Cypress, Cookies, state, config) {
     this.id = _.uniqueId('cy')
     this.state = state
+    this.config = config
     initVideoRecorder(Cypress)
+
+    this.devices = {
+      keyboard: new Keyboard(state),
+    }
 
     // bind methods
     this.$$ = this.$$.bind(this)
@@ -281,6 +302,20 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
 
     this.onCssModified = snapshots.onCssModified
     this.onBeforeWindowLoad = snapshots.onBeforeWindowLoad
+
+    const focused = createFocused(state)
+
+    this.fireBlur = focused.fireBlur
+    this.fireFocus = focused.fireFocus
+    this.needsFocus = focused.needsFocus
+    this.getFocused = focused.getFocused
+
+    this.documentHasFocus = focused.documentHasFocus
+    this.interceptFocus = focused.interceptFocus
+    this.interceptBlur = focused.interceptBlur
+
+    // temporary -> should be removed
+    this.focused = focused
   }
 
   $$ (selector, context) {
@@ -289,6 +324,67 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
     }
 
     return $dom.query(selector, context)
+  }
+
+  // private
+  wrapNativeMethods (contentWindow) {
+    try {
+      // return null to trick contentWindow into thinking
+      // its not been iframed if modifyObstructiveCode is true
+      if (this.config('modifyObstructiveCode')) {
+        Object.defineProperty(contentWindow, 'frameElement', {
+          get () {
+            return null
+          },
+        })
+      }
+
+      const cy = this
+
+      contentWindow.HTMLElement.prototype.focus = function (focusOption) {
+        return cy.interceptFocus(this, contentWindow, focusOption)
+      }
+
+      contentWindow.HTMLElement.prototype.blur = function () {
+        return cy.interceptBlur(this)
+      }
+
+      contentWindow.SVGElement.prototype.focus = function (focusOption) {
+        return cy.interceptFocus(this, contentWindow, focusOption)
+      }
+
+      contentWindow.SVGElement.prototype.blur = function () {
+        return cy.interceptBlur(this)
+      }
+
+      contentWindow.HTMLInputElement.prototype.select = function () {
+        return $selection.interceptSelect.call(this)
+      }
+
+      contentWindow.document.hasFocus = function () {
+        return cy.documentHasFocus.call(this)
+      }
+
+      const cssModificationSpy = function (original, ...args) {
+        cy.onCssModified(this.href)
+
+        return original.apply(this, args)
+      }
+
+      const { insertRule } = contentWindow.CSSStyleSheet.prototype
+      const { deleteRule } = contentWindow.CSSStyleSheet.prototype
+
+      contentWindow.CSSStyleSheet.prototype.insertRule = _.wrap(insertRule, cssModificationSpy)
+      contentWindow.CSSStyleSheet.prototype.deleteRule = _.wrap(deleteRule, cssModificationSpy)
+
+      if (this.config('experimentalFetchPolyfill')) {
+        // drop "fetch" polyfill that replaces it with XMLHttpRequest
+        // from the app iframe that we wrap for network stubbing
+        contentWindow.fetch = registerFetch(contentWindow)
+        // flag the polyfill to test this experimental feature easier
+        this.state('fetchPolyfilled', true)
+      }
+    } catch (error) { } // eslint-disable-line no-empty
   }
 }
 
@@ -307,9 +403,7 @@ export default {
       })
     }
 
-    const focused = $Focused.create(state)
-    const keyboard = $Keyboard.create(state)
-    const mouse = $Mouse.create(state, keyboard, focused, Cypress)
+    const mouse = $Mouse.create(state, cy.devices.keyboard, cy.focused, Cypress)
 
     const testConfigOverride = new TestConfigOverride()
 
@@ -388,64 +482,6 @@ export default {
           return ret
         },
       })
-    }
-
-    const wrapNativeMethods = function (contentWindow) {
-      try {
-        // return null to trick contentWindow into thinking
-        // its not been iframed if modifyObstructiveCode is true
-        if (config('modifyObstructiveCode')) {
-          Object.defineProperty(contentWindow, 'frameElement', {
-            get () {
-              return null
-            },
-          })
-        }
-
-        contentWindow.HTMLElement.prototype.focus = function (focusOption) {
-          return focused.interceptFocus(this, contentWindow, focusOption)
-        }
-
-        contentWindow.HTMLElement.prototype.blur = function () {
-          return focused.interceptBlur(this)
-        }
-
-        contentWindow.SVGElement.prototype.focus = function (focusOption) {
-          return focused.interceptFocus(this, contentWindow, focusOption)
-        }
-
-        contentWindow.SVGElement.prototype.blur = function () {
-          return focused.interceptBlur(this)
-        }
-
-        contentWindow.HTMLInputElement.prototype.select = function () {
-          return $selection.interceptSelect.call(this)
-        }
-
-        contentWindow.document.hasFocus = function () {
-          return focused.documentHasFocus.call(this)
-        }
-
-        const cssModificationSpy = function (original, ...args) {
-          cy.onCssModified(this.href)
-
-          return original.apply(this, args)
-        }
-
-        const { insertRule } = contentWindow.CSSStyleSheet.prototype
-        const { deleteRule } = contentWindow.CSSStyleSheet.prototype
-
-        contentWindow.CSSStyleSheet.prototype.insertRule = _.wrap(insertRule, cssModificationSpy)
-        contentWindow.CSSStyleSheet.prototype.deleteRule = _.wrap(deleteRule, cssModificationSpy)
-
-        if (config('experimentalFetchPolyfill')) {
-          // drop "fetch" polyfill that replaces it with XMLHttpRequest
-          // from the app iframe that we wrap for network stubbing
-          contentWindow.fetch = registerFetch(contentWindow)
-          // flag the polyfill to test this experimental feature easier
-          state('fetchPolyfilled', true)
-        }
-      } catch (error) { } // eslint-disable-line no-empty
     }
 
     const enqueue = function (obj) {
@@ -692,15 +728,9 @@ export default {
 
       isStopped,
 
-      // focused sync methods
-      getFocused: focused.getFocused,
-      needsFocus: focused.needsFocus,
-      fireFocus: focused.fireFocus,
-      fireBlur: focused.fireBlur,
-
       devices: {
         mouse,
-        keyboard,
+        keyboard: cy.devices.keyboard,
       },
 
       initialize ($autIframe) {
@@ -1011,7 +1041,7 @@ export default {
 
         contentWindowListeners(contentWindow)
 
-        wrapNativeMethods(contentWindow)
+        cy.wrapNativeMethods(contentWindow)
 
         cy.onBeforeWindowLoad()
       },
