@@ -91,9 +91,8 @@ export function makeCoreData (): CoreDataShape {
       refreshState: null,
     },
     app: {
-      refreshingBrowsers: null,
       currentTestingType: null,
-      navItem: 'settings',
+      refreshingBrowsers: null,
       browsers: null,
       projects: [],
       currentProject: null,

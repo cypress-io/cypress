@@ -451,9 +451,6 @@ type Mutation {
   """Log out of Cypress Cloud"""
   logout: Boolean
 
-  """Set the current navigation item"""
-  navigationMenuSetItem(type: NavItem!): Boolean
-
   """show the launchpad windows"""
   reconfigureProject: Boolean!
 
@@ -492,30 +489,6 @@ type Mutation {
 
   """Validates that the manual install has occurred properly"""
   wizardValidateManualInstall: Wizard
-}
-
-enum NavItem {
-  learn
-  projectSetup
-  runs
-  settings
-}
-
-"""Container describing a single nav item"""
-type NavigationItem implements Node {
-  iconPath: String!
-
-  """Relay style Node ID field for the NavigationItem field"""
-  id: ID!
-  name: String!
-  selected: Boolean!
-  type: NavItem!
-}
-
-"""Container for state associated with the side navigation menu"""
-type NavigationMenu {
-  items: [NavigationItem!]!
-  selected: NavItem!
 }
 
 """Implements the Relay Node spec"""
@@ -614,9 +587,6 @@ type Query {
 
   """The state of any info related to local development of the runner"""
   dev: DevState!
-
-  """Metadata about the nagivation menu"""
-  navigationMenu: NavigationMenu
 
   """All known projects for the app"""
   projects: [ProjectLike!]!

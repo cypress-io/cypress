@@ -1,6 +1,6 @@
 import { arg, booleanArg, enumType, idArg, mutationType, nonNull, stringArg } from 'nexus'
 import { CodeGenTypeEnum } from '../enumTypes/gql-CodeGenTypeEnum'
-import { CodeLanguageEnum, FrontendFrameworkEnum, NavItemEnum, SupportedBundlerEnum, TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
+import { CodeLanguageEnum, FrontendFrameworkEnum, SupportedBundlerEnum, TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
 import { WizardUpdateInput } from '../inputTypes/gql-WizardUpdateInput'
 import { GeneratedSpec } from './gql-GeneratedSpec'
 import { Wizard } from './gql-Wizard'
@@ -190,14 +190,6 @@ export const mutation = mutationType({
       },
       resolve: async (_, args, ctx) => {
         return ctx.actions.project.codeGenSpec(args.codeGenCandidate, args.type)
-      },
-    })
-
-    t.liveMutation('navigationMenuSetItem', {
-      description: 'Set the current navigation item',
-      args: { type: nonNull(NavItemEnum) },
-      resolve: async (_, args, ctx) => {
-        await ctx.actions.wizard.setSelectedNavItem(args.type)
       },
     })
 

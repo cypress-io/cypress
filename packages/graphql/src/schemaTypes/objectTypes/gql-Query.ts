@@ -4,7 +4,6 @@ import { ProjectLike } from '..'
 import { App } from './gql-App'
 import { CurrentProject } from './gql-CurrentProject'
 import { DevState } from './gql-DevState'
-import { NavigationMenu } from './gql-NavigationMenu'
 import { Wizard } from './gql-Wizard'
 
 export const Query = objectType({
@@ -19,11 +18,6 @@ export const Query = objectType({
     t.nonNull.field('app', {
       type: App,
       resolve: (root, args, ctx) => ctx.appData,
-    })
-
-    t.field('navigationMenu', {
-      type: NavigationMenu,
-      description: 'Metadata about the nagivation menu',
     })
 
     t.nonNull.field('wizard', {
