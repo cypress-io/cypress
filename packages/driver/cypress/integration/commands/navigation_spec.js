@@ -693,7 +693,7 @@ describe('src/cy/commands/navigation', () => {
     })
 
     it('does not support file:// protocol', {
-      baseUrl: '',
+      baseUrl: null,
     }, (done) => {
       cy.on('fail', (err) => {
         expect(err.message).to.contain('`cy.visit()` failed because the \'file://...\' protocol is not supported by Cypress.')
