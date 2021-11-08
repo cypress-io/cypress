@@ -4,14 +4,14 @@ import faker from 'faker'
 import { defaultMessages } from '@cy/i18n'
 
 const content = `import { defineConfig } from 'cypress'
-import { devServer, defineDevServerConfig } from '@cypress/vite-dev-server'
+import { devServer } from '@cypress/vite-dev-server'
 
 export default defineConfig({
   component: {
     devServer,
-    devServerConfig: defineDevServerConfig({
+    devServerConfig: {
       entryHtmlFile: 'cypress/component/support/entry.html'
-    }),
+    },
   },
 })`
 

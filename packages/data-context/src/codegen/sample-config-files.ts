@@ -3,16 +3,16 @@ import type { SampleConfigFile } from '@packages/types'
 
 // FIXME: temporary content
 const content = `import { defineConfig } from 'cypress'
-import { devServer, defineDevServerConfig } from '@cypress/vite-dev-server'
+import { devServer } from '@cypress/vite-dev-server'
 
 // sample code !!!
 
 export default defineConfig({
   component: {
     devServer,
-    devServerConfig: defineDevServerConfig({
+    devServerConfig: {
       entryHtmlFile: 'cypress/component/support/entry.html'
-    }),
+    },
   },
 })`
 
