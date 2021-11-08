@@ -1,29 +1,31 @@
 import defaultMessages from '../../../../frontend-shared/src/locales/en-US.json'
 
 describe('Launchpad: Open Mode', () => {
-  beforeEach(() => {
-    cy.setupE2E()
-    cy.visitLaunchpad()
-    // Forcing reload, need to sync with @brian-mann to debug behavior here
-    cy.reload({ log: false })
-  })
-
-  it('shows Add Project when no projects have been added', () => {
-    cy.get('h1').should('contain', defaultMessages.globalPage.empty.title)
-  })
-
-  it('shows projects when projects have been added', () => {
-    cy.get('h1').should('contain', defaultMessages.globalPage.empty.title)
-  })
-
-  it('shows the projects page when a project is not specified', () => {
-    cy.task('scaffoldProject', 'todos').then((projectPath) => {
-      cy.withCtx(async (ctx, o) => {
-        ctx.actions.project.addProject({ path: o.projectPath as string, open: false })
-      }, { projectPath })
+  describe('global mode', () => {
+    beforeEach(() => {
+      cy.setupE2E()
+      cy.visitLaunchpad()
+      // Forcing reload, need to sync with @brian-mann to debug behavior here
+      cy.reload({ log: false })
     })
 
-    cy.contains(defaultMessages.globalPage.recentProjectsHeader)
+    it('shows Add Project when no projects have been added', () => {
+      cy.get('h1').should('contain', defaultMessages.globalPage.empty.title)
+    })
+
+    it('shows projects when projects have been added', () => {
+      cy.get('h1').should('contain', defaultMessages.globalPage.empty.title)
+    })
+
+    it('shows the projects page when a project is not specified', () => {
+      cy.task('scaffoldProject', 'todos').then((projectPath) => {
+        cy.withCtx(async (ctx, o) => {
+          ctx.actions.project.addProject({ path: o.projectPath as string, open: false })
+        }, { projectPath })
+      })
+
+      cy.contains(defaultMessages.globalPage.recentProjectsHeader)
+    })
   })
 
   it('goes directly to e2e tests when launched with --e2e', () => {
