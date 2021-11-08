@@ -89,6 +89,7 @@ const props = withDefaults(defineProps<{
   prefixIconClasses: undefined,
   suffixIcon: undefined,
   suffixIconClasses: undefined,
+  style: '',
 })
 
 const emits = defineEmits(['update:modelValue'])
