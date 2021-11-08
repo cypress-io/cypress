@@ -1229,15 +1229,13 @@ export default {
           test.final = false
         }
 
-        if (isBeforeEachHook) {
+        if (willRetry && isBeforeEachHook) {
           delete runnable.err
           test._retriesBeforeEachFailedTestFn = test.fn
 
-          if (willRetry) {
-            // this prevents afterEach hooks that exist at a deeper level than the failing one from running
-            // we will always skip remaining beforeEach hooks since they will always be same level or deeper
-            test._skipHooksWithLevelGreaterThan = runnable.titlePath().length
-          }
+          // this prevents afterEach hooks that exist at a deeper level than the failing one from running
+          // we will always skip remaining beforeEach hooks since they will always be same level or deeper
+          test._skipHooksWithLevelGreaterThan = runnable.titlePath().length
 
           setHookFailureProps(test, runnable, err)
           test.fn = function () {
