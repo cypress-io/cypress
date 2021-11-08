@@ -21,6 +21,11 @@
       "@packages/*": ["../*"]
     },
     "allowJs": true,
-    "types": ["cypress", "cypress-real-events", "@testing-library/cypress"]
+    "types": [
+      "cypress", 
+      "cypress-real-events", 
+      "@intlify/vite-plugin-vue-i18n/client",
+      "@testing-library/cypress"
+    ]
   }
 }

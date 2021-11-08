@@ -1,7 +1,7 @@
 <template>
   <RemovePositioningDuringScreenshot
     id="main-pane"
-    class="flex"
+    class="flex border-l-1 border-gray-900"
   >
     <HideDuringScreenshot
       id="inline-spec-list"
