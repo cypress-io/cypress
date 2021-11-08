@@ -39,7 +39,6 @@ export interface ActiveProjectShape extends ProjectShape {
 }
 
 export interface AppDataShape {
-  navItem: NexusGenEnums['NavItem']
   browsers: ReadonlyArray<FoundBrowser> | null
   projects: ProjectShape[]
   currentProject: ActiveProjectShape | null
