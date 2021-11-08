@@ -69,7 +69,6 @@ import { computed, ref, Ref, ComputedRef } from 'vue'
 import { debouncedWatch, useDebounce, useElementSize } from '@vueuse/core'
 import { useI18n } from '@cy/i18n'
 
-import Button from '@cy/components/Button.vue'
 import NoResults from '@cy/components/NoResults.vue'
 import CreateSpecModalBody from './CreateSpecModalBody.vue'
 import FileList from './FileList.vue'

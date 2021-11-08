@@ -16,7 +16,7 @@ import { graphqlSchema } from '@packages/graphql/src/schema'
 import type { InternalDataContextOptions } from '@packages/data-context/src/DataContext'
 import { openExternal } from '@packages/server/lib/gui/links'
 
-const { getBrowsers } = browserUtils
+const { getBrowsers, ensureAndGetByNameOrPath } = browserUtils
 
 interface MakeDataContextOptions {
   os: PlatformName
@@ -56,9 +56,8 @@ export function makeDataContext (options: MakeDataContextOptions) {
     launchOptions: {},
     electronApp: app,
     appApi: {
-      getBrowsers () {
-        return getBrowsers()
-      },
+      getBrowsers,
+      ensureAndGetByNameOrPath,
     },
     authApi: {
       getUser () {

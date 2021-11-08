@@ -168,7 +168,7 @@ export const mutation = mutationType({
         })),
       },
       resolve: async (_, args, ctx) => {
-        await ctx.actions.app.setActiveBrowser(args.id)
+        await ctx.actions.app.setActiveBrowserById(args.id)
       },
     })
 
@@ -248,10 +248,6 @@ export const mutation = mutationType({
     t.liveMutation('launchOpenProject', {
       description: 'Launches project from open_project global singleton',
       resolve: async (_, args, ctx) => {
-        if (!ctx.wizardData.chosenTestingType) {
-          throw Error('Cannot launch project without chosen testing type')
-        }
-
         await ctx.actions.project.launchProject(ctx.wizardData.chosenTestingType, {})
       },
     })
@@ -305,7 +301,7 @@ export const mutation = mutationType({
         id: nonNull(idArg()),
       },
       resolve: async (_, args, ctx) => {
-        if (!ctx.activeProject) {
+        if (!ctx.currentProject) {
           throw Error(`Cannot set spec without active project!`)
         }
 
@@ -314,7 +310,7 @@ export const mutation = mutationType({
     })
 
     t.nonNull.field('setProjectPreferences', {
-      type: 'App',
+      type: 'Query',
       description: 'Save the projects preferences to cache',
       args: {
         testingType: nonNull(TestingTypeEnum),

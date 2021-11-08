@@ -16,7 +16,7 @@
       >
         <i-cy-book_x16 class="icon-dark-indigo-500 icon-light-indigo-50" />
         <ExternalLink
-          v-if="!item.changeContent || !activeProjectExists"
+          v-if="!item.changeContent || !currentProjectExists"
           :href="getUrl(item.link)"
           class="font-normal ml-4px whitespace-nowrap"
         >
@@ -47,7 +47,7 @@ const emit = defineEmits<{
 }>()
 
 defineProps<{
-  activeProjectExists: boolean,
+  currentProjectExists: boolean,
 }>()
 
 const utm_medium = 'Docs Menu'

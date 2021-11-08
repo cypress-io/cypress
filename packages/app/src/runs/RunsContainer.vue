@@ -1,18 +1,18 @@
 <template>
   <RunsConnect
-    v-if="!activeProject?.projectId || !cloudViewer?.id"
+    v-if="!currentProject?.projectId || !cloudViewer?.id"
     :gql="props.gql"
   />
   <RunsEmpty
-    v-else-if="!activeProject?.cloudProject?.runs?.nodes.length"
-    :gql="activeProject"
+    v-else-if="!currentProject?.cloudProject?.runs?.nodes.length"
+    :gql="currentProject"
   />
   <div
     v-else
     data-cy="runs"
   >
     <RunCard
-      v-for="run of activeProject?.cloudProject?.runs?.nodes"
+      v-for="run of currentProject?.cloudProject?.runs?.nodes"
       :key="run.id"
       :gql="run"
     />
@@ -29,17 +29,15 @@ import type { RunsContainerFragment } from '../generated/graphql'
 
 gql`
 fragment RunsContainer on Query {
-  app {
-    activeProject {
+  currentProject {
+    id
+    ...RunsEmpty
+    cloudProject {
       id
-      ...RunsEmpty
-      cloudProject {
-        id
-        runs(first: 10) {
-          nodes {
-            id
-            ...RunCard
-          }
+      runs(first: 10) {
+        nodes {
+          id
+          ...RunCard
         }
       }
     }
@@ -54,7 +52,7 @@ const props = defineProps<{
   gql: RunsContainerFragment
 }>()
 
-const activeProject = computed(() => props.gql.app?.activeProject)
+const currentProject = computed(() => props.gql.currentProject)
 const cloudViewer = computed(() => props.gql.cloudViewer)
 </script>
 

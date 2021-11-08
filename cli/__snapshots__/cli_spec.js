@@ -16,8 +16,10 @@ exports['shows help for open --foo 1'] = `
   Opens Cypress in the interactive GUI.
 
   Options:
-    -b, --browser <browser-path>     path to a custom browser to be added to the
-                                     list of available browsers in Cypress
+    -b, --browser <browser-path>     runs Cypress in the browser with the given
+                                     name. if a filesystem path is supplied,
+                                     Cypress will attempt to use the browser at
+                                     that path.
     --component                      runs component tests
     -c, --config <config>            sets configuration values. separate multiple
                                      values with a comma. overrides any value in

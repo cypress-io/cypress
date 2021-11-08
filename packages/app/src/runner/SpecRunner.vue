@@ -1,43 +1,47 @@
 <template>
-  <div
+  <RemovePositioningDuringScreenshot
     id="main-pane"
     class="flex"
   >
-    <div
+    <HideDuringScreenshot
       id="inline-spec-list"
       class="bg-gray-1000 w-128"
     >
       <InlineSpecList :gql="props.gql" />
-    </div>
+    </HideDuringScreenshot>
 
-    <div class="w-128">
+    <HideDuringScreenshot class="w-128">
       <div
         v-once
         :id="REPORTER_ID"
       />
-    </div>
+    </HideDuringScreenshot>
 
     <div
       ref="runnerPane"
       class="relative w-full"
     >
-      <div class="bg-white p-4  border-8 border-blue-300">
+      <HideDuringScreenshot class="bg-white p-4  border-8 border-blue-300">
         <SpecRunnerHeader :gql="props.gql" />
-      </div>
+      </HideDuringScreenshot>
 
-      <div class="flex justify-center bg-gray-100 h-full p-4">
+      <RemoveClassesDuringScreenshotting
+        class="flex justify-center bg-gray-100 h-full p-4"
+      >
         <div
           :id="RUNNER_ID"
           class="viewport origin-top-left"
           :style="viewportStyle"
         />
-      </div>
+      </RemoveClassesDuringScreenshotting>
+
       <SnapshotControls
         :event-manager="eventManager"
         :get-aut-iframe="getAutIframeModel"
       />
+      <ScreenshotHelperPixels />
     </div>
-  </div>
+  </RemovePositioningDuringScreenshot>
 </template>
 
 <script lang="ts" setup>
@@ -51,9 +55,14 @@ import { useAutStore } from '../store'
 import type { BaseSpec } from '@packages/types'
 import SnapshotControls from './SnapshotControls.vue'
 import SpecRunnerHeader from './SpecRunnerHeader.vue'
+import HideDuringScreenshot from './screenshot/HideDuringScreenshot.vue'
+import RemoveClassesDuringScreenshotting from './screenshot/RemoveClassesDuringScreenshotting.vue'
+import RemovePositioningDuringScreenshot from './screenshot/RemovePositioningDuringScreenshot.vue'
+import ScreenshotHelperPixels from './screenshot/ScreenshotHelperPixels.vue'
+import { useScreenshotStore } from '../store/screenshot-store'
 
 gql`
-fragment SpecRunner on App {
+fragment SpecRunner on CurrentProject {
   ...Specs_InlineSpecList
   ...SpecRunnerHeader
 }
@@ -62,6 +71,7 @@ fragment SpecRunner on App {
 const eventManager = getEventManager()
 
 const autStore = useAutStore()
+const screenshotStore = useScreenshotStore()
 
 const runnerPane = ref<HTMLDivElement>()
 
@@ -70,9 +80,15 @@ const viewportStyle = computed(() => {
     return
   }
 
-  const scale = runnerPane.value.clientWidth < autStore.viewportDimensions.width
-    ? runnerPane.value.clientWidth / autStore.viewportDimensions.width
-    : 1
+  let scale: number
+
+  if (screenshotStore.isScreenshotting) {
+    scale = 1
+  } else {
+    scale = runnerPane.value.clientWidth < autStore.viewportDimensions.width
+      ? runnerPane.value.clientWidth / autStore.viewportDimensions.width
+      : 1
+  }
 
   return `
   width: ${autStore.viewportDimensions.width}px;
@@ -94,8 +110,20 @@ watch(() => props.activeSpec, (spec) => {
 }, { immediate: true, flush: 'post' })
 
 onMounted(() => {
-  getEventManager().on('restart', () => {
+  const eventManager = getEventManager()
+
+  eventManager.on('restart', () => {
     runSpec()
+  })
+
+  eventManager.on('before:screenshot', (payload) => {
+    if (payload.appOnly) {
+      screenshotStore.setScreenshotting(true)
+    }
+  })
+
+  eventManager.on('after:screenshot', () => {
+    screenshotStore.setScreenshotting(false)
   })
 })
 
@@ -126,17 +154,11 @@ $navbar-width: 80px;
     a good way to work around this right now.
   */
   position: fixed;
-  left: $navbar-width;
   height: 100vh;
-  width: calc(100% - #{$navbar-width});
 }
 
 #inline-spec-list {
   border-right: 2px solid rgb(67 73 97);
-}
-
-.viewport {
-  border: 2px dotted blue;
 }
 
 #unified-runner {
@@ -158,11 +180,12 @@ $navbar-width: 80px;
 
 <style>
 #unified-runner > div {
-  height: 100%;
+  height: min(100%, 100vh);
 }
 
 iframe {
   width: 100%;
   height: 100%;
+  background: white;
 }
 </style>

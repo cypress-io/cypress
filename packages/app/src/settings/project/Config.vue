@@ -38,7 +38,7 @@ import type { ConfigFragment } from '../../generated/graphql'
 const { t } = useI18n()
 
 gql`
-fragment Config on Project {
+fragment Config on CurrentProject {
   config
 }
 `

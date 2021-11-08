@@ -51,7 +51,7 @@ import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 const { t } = useI18n()
 
 gql`
-fragment SpecPatterns on Project {
+fragment SpecPatterns on CurrentProject {
   config
 }
 `

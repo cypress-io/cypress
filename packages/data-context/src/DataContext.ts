@@ -84,16 +84,21 @@ export class DataContext extends DataContextShell {
     if (this._config.launchArgs.projectRoot) {
       await this.actions.project.setActiveProject(this._config.launchArgs.projectRoot)
 
-      if (this.coreData.app.activeProject?.preferences) {
+      if (this.coreData.app.currentProject?.preferences) {
         toAwait.push(this.actions.project.launchProjectWithoutElectron())
       }
     }
 
     if (this._config.launchArgs.testingType) {
+      this.appData.currentTestingType = this._config.launchArgs.testingType
       // It should be possible to skip the first step in the wizard, if the
       // user already told us the testing type via command line argument
       this.actions.wizard.setTestingType(this._config.launchArgs.testingType)
       this.actions.wizard.navigate('forward')
+    }
+
+    if (this._config.launchArgs.browser) {
+      toAwait.push(this.actions.app.setActiveBrowserByNameOrPath(this._config.launchArgs.browser))
     }
 
     if (IS_DEV_ENV) {
@@ -183,8 +188,8 @@ export class DataContext extends DataContextShell {
     return this.coreData.wizard
   }
 
-  get activeProject () {
-    return this.coreData.app.activeProject
+  get currentProject () {
+    return this.coreData.app.currentProject
   }
 
   @cached

@@ -108,10 +108,12 @@ const SizeClassesTable = {
   'lg-wide': 'px-32px py-8px',
 } as const
 
+export type ButtonSizes = keyof(typeof SizeClassesTable)
+
 const props = defineProps<{
   prefixIcon?: FunctionalComponent<SVGAttributes>
   suffixIcon?: FunctionalComponent<SVGAttributes>
-  size?: keyof typeof SizeClassesTable
+  size?: ButtonSizes
   variant?: ButtonVariants
   prefixIconClass?: string
   suffixIconClass?: string

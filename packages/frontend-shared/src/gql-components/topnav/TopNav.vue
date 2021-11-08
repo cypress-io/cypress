@@ -42,19 +42,19 @@
     </TopNavListItem>
   </TopNavList>
 
-  <TopNavList v-if="props.gql?.selectedBrowser && showBrowsers">
+  <TopNavList v-if="props.gql?.currentProject?.currentBrowser && showBrowsers">
     <template #heading="{ open }">
       <img
         class="w-16px filter group-hocus:grayscale-0"
         :class="open ? 'grayscale-0' : 'grayscale'"
-        :src="allBrowsersIcons[props.gql?.selectedBrowser?.displayName || '']"
+        :src="allBrowsersIcons[props.gql?.currentProject?.currentBrowser?.displayName || '']"
       >
       <span
         data-cy="topnav-browser-list"
-      >{{ props.gql.selectedBrowser?.displayName }} v{{ props.gql.selectedBrowser?.majorVersion }}</span>
+      >{{ props.gql.currentProject?.currentBrowser?.displayName }} v{{ props.gql.currentProject?.currentBrowser?.majorVersion }}</span>
     </template>
     <TopNavListItem
-      v-for="browser in props.gql.browsers"
+      v-for="browser in props.gql.currentProject.browsers"
       :key="browser.id"
       class="px-16px py-12px min-w-240px cursor-pointer"
       :class="browser.isSelected ? 'bg-jade-50' : ''"
@@ -110,7 +110,7 @@
       class="flex p-16px gap-24px"
     >
       <DocsMenuContent
-        :active-project-exists="!!props.gql?.activeProject"
+        :current-project-exists="!!props.gql?.currentProject"
         @setDocsContent="docsMenuVariant = $event"
       />
     </div>
@@ -183,21 +183,21 @@ const versionList = [
 ]
 
 gql`
-fragment TopNav on App {
-  activeProject {
+fragment TopNav on Query {
+  currentProject {
     id
-  }
-  selectedBrowser {
-    id
-    displayName
-    majorVersion
-  }
-  browsers {
-    id
-    isSelected
-    displayName
-    version
-    majorVersion
+    currentBrowser {
+      id
+      displayName
+      majorVersion
+    }
+    browsers {
+      id
+      isSelected
+      displayName
+      version
+      majorVersion
+    }
   }
 }
 `

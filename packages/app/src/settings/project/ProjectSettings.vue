@@ -19,7 +19,7 @@
 </template>
 
 <script lang="ts" setup>
-import { gql } from '@urql/core'
+import { gql } from '@urql/vue'
 import RecordKey from './RecordKey.vue'
 import Experiments from './Experiments.vue'
 import ProjectId from './ProjectId.vue'
@@ -28,7 +28,7 @@ import SpecPatterns from './SpecPatterns.vue'
 import type { ProjectSettingsFragment } from '../../generated/graphql'
 
 gql`
-fragment ProjectSettings on Project{
+fragment ProjectSettings on CurrentProject {
   id
   ...ProjectId
   ...SpecPatterns

@@ -21,7 +21,3 @@ export type CypressViteDevServerConfig = Omit<InlineConfig, 'base' | 'root'>
 export function devServer (cypressDevServerConfig: Cypress.DevServerConfig, devServerConfig?: CypressViteDevServerConfig) {
   return startDevServer({ options: cypressDevServerConfig, viteConfig: devServerConfig })
 }
-
-export function defineDevServerConfig (devServerConfig: CypressViteDevServerConfig) {
-  return devServerConfig
-}
