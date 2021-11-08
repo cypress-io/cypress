@@ -28,6 +28,7 @@
     "arch": "^2.2.0",
     "blob-util": "^2.0.2",
     "bluebird": "^3.7.2",
+    "buffer": "^5.6.0",
     "cachedir": "^2.3.0",
     "chalk": "^4.1.0",
     "check-more-types": "^2.24.0",
