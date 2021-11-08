@@ -2,7 +2,7 @@ const validate = require('./validation')
 
 interface ResolvedConfigOption {
   name: string
-  defaultValue: any
+  defaultValue?: any
   validation: Function
   isFolder?: boolean
   isExperimental?: boolean
@@ -24,6 +24,10 @@ interface BreakingOption {
    * String to summarize the error messaging that is logged.
    */
   errorKey: string
+  /**
+   * Configuration value of the configuration option to check against.
+   */
+  value?: string
   /**
    * The new configuration key that is replacing the existing configuration key.
    */
@@ -170,8 +174,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     validation: validate.isBoolean,
   }, {
     name: 'nodeVersion',
-    defaultValue: 'default',
-    validation: validate.isOneOf('default', 'bundled', 'system'),
+    validation: v.isOneOf('bundled', 'system'),
   }, {
     name: 'numTestsKeptInMemory',
     defaultValue: 50,
@@ -418,6 +421,16 @@ export const breakingOptions: Array<BreakingOption> = [
   }, {
     name: 'firefoxGcInterval',
     errorKey: 'FIREFOX_GC_INTERVAL_REMOVED',
+    isWarning: true,
+  }, {
+    name: 'nodeVersion',
+    value: 'system',
+    errorKey: 'NODE_VERSION_DEPRECATION_SYSTEM',
+    isWarning: true,
+  }, {
+    name: 'nodeVersion',
+    value: 'bundled',
+    errorKey: 'NODE_VERSION_DEPRECATION_BUNDLED',
     isWarning: true,
   },
 ]

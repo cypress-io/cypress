@@ -8,7 +8,7 @@ macBuildFilters: &macBuildFilters
     branches:
       only:
         - develop
-        - tgriesser/chore/fix-release
+        - 9.0-release
 
 defaults: &defaults
   parallelism: 1
@@ -42,7 +42,7 @@ onlyMainBranches: &onlyMainBranches
     branches:
       only:
         - develop
-        - tgriesser/chore/fix-release
+        - 9.0-release
   requires:
     - create-build-artifacts
 
@@ -838,7 +838,7 @@ commands:
           paths:
             - cypress/binary-url.json
 
-  build-npm-package:
+  build-cypress-npm-package:
     steps:
       - run:
           name: bump NPM version
@@ -857,13 +857,12 @@ commands:
       - run:
           name: pack NPM package
           working_directory: cli/build
-          command: yarn pack
+          command: yarn pack --filename cypress.tgz
       - run:
           name: list created NPM package
           working_directory: cli/build
           command: ls -l
-      # created file should have filename cypress-<version>.tgz
-      - run: cp cli/build/cypress-v*.tgz cypress.tgz
+      - run: cp cli/build/cypress.tgz cypress.tgz
       - store-npm-logs
       - run: pwd
       - run: ls -l
@@ -1501,11 +1500,11 @@ jobs:
     steps:
       - restore_cached_workspace
       - build-binary
-      - build-npm-package
+      - build-cypress-npm-package
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "tgriesser/chore/fix-release" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "9.0-release" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -2146,7 +2145,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - tgriesser/chore/fix-release
+              - 9.0-release
         requires:
           - build
     - test-kitchensink:
@@ -2158,7 +2157,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - tgriesser/chore/fix-release
+              - 9.0-release
         requires:
           - build
     - create-build-artifacts:
@@ -2208,7 +2207,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - tgriesser/chore/fix-release
+              - 9.0-release
         requires:
           - create-build-artifacts
     - test-npm-module-and-verify-binary:
@@ -2216,7 +2215,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - tgriesser/chore/fix-release
+              - 9.0-release
         requires:
           - create-build-artifacts
     - test-binary-against-staging:
@@ -2225,7 +2224,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - tgriesser/chore/fix-release
+              - 9.0-release
         requires:
           - create-build-artifacts
 
@@ -2250,7 +2249,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - tgriesser/chore/fix-release
+              - 9.0-release
         requires:
           - create-build-artifacts
 
@@ -2322,7 +2321,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
-              - tgriesser/chore/fix-release
+              - 9.0-release
         requires:
           - darwin-create-build-artifacts
 
@@ -2334,7 +2333,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
-              - tgriesser/chore/fix-release
+              - 9.0-release
         requires:
           - darwin-create-build-artifacts
 

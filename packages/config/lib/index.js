@@ -76,13 +76,28 @@ module.exports = {
   },
 
   validateNoBreakingConfig: (cfg, onWarning, onErr) => {
-    return _.each(breakingOptions, ({ name, errorKey, newName, isWarning }) => {
-      if (_.has(cfg, name)) {
-        if (isWarning) {
-          return onWarning(errorKey, name, newName)
+    breakingOptions.forEach(({ name, errorKey, newName, isWarning, value }) => {
+      if (cfg.hasOwnProperty(name)) {
+        if (value && cfg[name] !== value) {
+          // Bail if a value is specified but the config does not have that value.
+          return
         }
 
-        return onErr(errorKey, name, newName)
+        if (isWarning) {
+          return onWarning(errorKey, {
+            name,
+            newName,
+            value,
+            configFile: cfg.configFile,
+          })
+        }
+
+        return onErr(errorKey, {
+          name,
+          newName,
+          value,
+          configFile: cfg.configFile,
+        })
       }
     })
   },

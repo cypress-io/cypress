@@ -1,4 +1,5 @@
 const _ = require('lodash')
+const arch = require('arch')
 const os = require('os')
 const ospath = require('ospath')
 const crypto = require('crypto')
@@ -430,8 +431,14 @@ const util = {
 
   getPlatformInfo () {
     return util.getOsVersionAsync().then((version) => {
+      let osArch = arch()
+
+      if (osArch === 'x86') {
+        osArch = 'ia32'
+      }
+
       return stripIndent`
-        Platform: ${os.platform()} (${version})
+        Platform: ${os.platform()}-${osArch} (${version})
         Cypress Version: ${util.pkgVersion()}
       `
     })
