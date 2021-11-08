@@ -17,6 +17,7 @@ export interface ClientTestContext {
     activeProject: Project | null
     isInGlobalMode: boolean
     isAuthBrowserOpened: boolean
+    activeTestingType: TestingTypeEnum
   }
   wizard: {
     step: WizardStep
@@ -63,6 +64,7 @@ export function makeClientTestContext (): ClientTestContext {
       activeProject: testProject,
       isInGlobalMode: false,
       isAuthBrowserOpened: false,
+      activeTestingType: 'e2e',
     },
     wizard: {
       step: 'configFiles',

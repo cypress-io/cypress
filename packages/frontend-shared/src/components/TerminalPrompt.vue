@@ -1,7 +1,8 @@
 <template>
   <div class="relative">
     <CopyButton
-      class="absolute right-9px top-9px h-24px px-8px"
+      class="absolute right-9px top-9px"
+      size="sm"
       :text="command"
       no-icon
     />
