@@ -13,7 +13,7 @@ export const createTestGlobalProject = (title: string, additionalConfig: Partial
   const snakeTitle = _.kebabCase(title)
 
   return {
-    ...testNodeId('GlobalProject'),
+    ...testNodeId('GlobalProject', snakeTitle),
     __typename: 'GlobalProject',
     projectRoot: `/usr/local/dev/projects/${snakeTitle}`,
     title: snakeTitle,
