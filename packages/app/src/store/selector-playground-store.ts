@@ -53,7 +53,6 @@ export const useSelectorPlaygroundStore = defineStore({
     },
 
     toggleOpen () {
-      console.log('opening!')
       this.setOpen(!this.isOpen)
     },
 

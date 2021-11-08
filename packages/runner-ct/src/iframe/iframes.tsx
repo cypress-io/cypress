@@ -9,7 +9,7 @@ import {
   IframeModel,
   selectorPlaygroundModel,
   AutIframe,
-  eventManager as EventManager,
+  EventManager,
 } from '@packages/runner-shared'
 
 import State from '../../src/lib/state'
@@ -118,7 +118,6 @@ export const Iframes = namedObserver('Iframes', ({
 
     const disposers = [
       autorun(() => {
-      console.log('caling in iframees.tsx')
         autIframe.current.toggleSelectorPlayground(selectorPlaygroundModel.isEnabled)
       }),
       autorun(() => {

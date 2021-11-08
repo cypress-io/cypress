@@ -27,7 +27,6 @@ class SelectorPlaygroundModel {
   }
 
   @action toggleEnabled () {
-    console.log(`Setting: ${!this.isEnabled}`)
     this.setEnabled(!this.isEnabled)
   }
 
@@ -40,7 +39,6 @@ class SelectorPlaygroundModel {
   }
 
   @action toggleOpen () {
-    console.log('opening!')
     this.setOpen(!this.isOpen)
   }
 

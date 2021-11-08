@@ -23,7 +23,6 @@
     >
       <div class="bg-white p-4  border-8 border-blue-300">
         <SpecRunnerHeader :gql="props.gql" />
-        <div id="play"></div>
       </div>
 
       <div class="flex justify-center bg-gray-100 h-full p-4">

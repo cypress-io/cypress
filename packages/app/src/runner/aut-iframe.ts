@@ -276,9 +276,7 @@ export class AutIframe {
   }
 
   toggleSelectorPlayground = (isEnabled) => {
-    console.log({isEnabled})
     const $body = this._body()
-    console.log({$body})
 
     if (!$body) return
 
@@ -303,10 +301,7 @@ export class AutIframe {
   _onSelectorMouseMove = (e) => {
     const $body = this._body()
 
-    if (!$body) {
-      console.log('body null')
-      return
-    }
+    if (!$body) return
 
     let el = e.target
     let $el = this.$(el)
@@ -326,9 +321,7 @@ export class AutIframe {
       $highlight.css('display', 'block')
     }
 
-    if (this._highlightedEl === el) {
-      return
-    }
+    if (this._highlightedEl === el) return
 
     this._highlightedEl = el
 
@@ -346,11 +339,6 @@ export class AutIframe {
         selectorPlaygroundStore.setNumElements(1)
         selectorPlaygroundStore.resetMethod()
         selectorPlaygroundStore.setSelector(selector)
-
-
-        this.studio.selectorPlaygroundModel.setNumElements(1)
-        this.studio.selectorPlaygroundModel.resetMethod()
-        this.studio.selectorPlaygroundModel.setSelector(selector)
       },
     })
   }

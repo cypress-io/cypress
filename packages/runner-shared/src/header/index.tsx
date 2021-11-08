@@ -218,7 +218,6 @@ export class Header extends Component<HeaderProps> {
   }
 
   _togglePlaygroundOpen = () => {
-    console.log('opening playground')
     selectorPlaygroundModel.toggleOpen()
   };
 
