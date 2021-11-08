@@ -48,7 +48,7 @@ import type { RunsConnectFragment } from '../generated/graphql'
 const { t } = useI18n()
 
 gql`
-fragment RunsConnect on Query{
+fragment RunsConnect on Query {
   cloudViewer{
     id
   }
