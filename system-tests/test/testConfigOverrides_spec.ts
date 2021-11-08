@@ -30,4 +30,22 @@ describe('testConfigOverrides', () => {
       expect(results.runs[0].tests[0].title).deep.eq(['suite', 'has invalid testConfigOverrides'])
     },
   })
+
+  systemTests.it('fails when passing invalid config values', {
+    spec: 'testConfigOverrides-invalid.js',
+    snapshot: true,
+    expectedExitCode: 8,
+  })
+
+  systemTests.it('fails when passing invalid config values with beforeEach', {
+    spec: 'testConfigOverrides-before-invalid.js',
+    snapshot: true,
+    expectedExitCode: 8,
+  })
+
+  systemTests.it('correctly fails when invalid config values for it.only', {
+    spec: 'testConfigOverrides-only-invalid.js',
+    snapshot: true,
+    expectedExitCode: 1,
+  })
 })

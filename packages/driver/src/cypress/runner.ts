@@ -75,7 +75,7 @@ const testAfterRun = (test, Cypress) => {
       // if the test:after:run listener throws it's likely spec code
       // Since the test status has already been emitted this can't affect the test status.
       // Let's just log the error to console
-      // TODO: revist when we handle uncaught exceptions/rejections between tests
+      // TODO: revisit when we handle uncaught exceptions/rejections between tests
       // eslint-disable-next-line no-console
       console.error(e)
     }
@@ -338,7 +338,7 @@ const isRootSuite = (suite) => {
 }
 
 const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, getTests) => {
-  // bail if our _runner doesnt have a hook.
+  // bail if our _runner doesn't have a hook.
   // useful in tests
   if (!_runner.hook) {
     return
@@ -1215,6 +1215,7 @@ export default {
       const isAfterEachHook = isHook && !!hookName.match(/after each/)
       const retryAbleRunnable = isTest || isBeforeEachHook || isAfterEachHook
       const willRetry = (test._currentRetry < test._retries) && retryAbleRunnable
+      const isTestConfigOverride = !fired(TEST_BEFORE_RUN_EVENT, test)
 
       const fail = function () {
         return err
@@ -1229,7 +1230,12 @@ export default {
           test.final = false
         }
 
-        if (willRetry && isBeforeEachHook) {
+        if (isTestConfigOverride) {
+          // let the runner handle the error
+          delete runnable.err
+        }
+
+        if ((willRetry || isTestConfigOverride) && isBeforeEachHook) {
           delete runnable.err
           test._retriesBeforeEachFailedTestFn = test.fn
 
@@ -1505,6 +1511,8 @@ export default {
             return null
           })
         }
+
+        test._retries = -1
 
         // TODO: handle promise timeouts here!
         // whenever any runnable is about to run
