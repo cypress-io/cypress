@@ -174,7 +174,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     validation: validate.isBoolean,
   }, {
     name: 'nodeVersion',
-    validation: v.isOneOf('bundled', 'system'),
+    validation: validate.isOneOf('bundled', 'system'),
   }, {
     name: 'numTestsKeptInMemory',
     defaultValue: 50,
