@@ -1512,8 +1512,6 @@ export default {
           })
         }
 
-        test._retries = -1
-
         // TODO: handle promise timeouts here!
         // whenever any runnable is about to run
         // we figure out what test its associated to

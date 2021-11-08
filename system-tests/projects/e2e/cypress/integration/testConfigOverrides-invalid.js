@@ -19,11 +19,11 @@ describe('context config overrides throws error', { retries: '1' }, () => {
 })
 
 describe('nested contexts overrides throws error at the correct line number', { defaultCommandTimeout: '500' }, () => {
-  it('1st test is reached', () => {
+  it('1st test fails on overrides', () => {
     shouldNotExecute()
   })
 
-  it('2nd test is reached', () => {
+  it('2nd test fails on overrides', () => {
     shouldNotExecute()
   })
 })

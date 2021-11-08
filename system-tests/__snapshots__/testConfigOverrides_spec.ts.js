@@ -36,14 +36,6 @@ We dynamically generated a new test to display this failure.
 
 
 
-Warning: We failed processing this video.
-
-This error will not alter the exit code.
-
-TimeoutError: operation timed out
-      [stack trace lines]
-
-
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
@@ -53,7 +45,7 @@ TimeoutError: operation timed out
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  1                                                                                │
-  │ Video:        false                                                                            │
+  │ Video:        true                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     testConfigOverrides-invalid-browser.js                                           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -63,6 +55,13 @@ TimeoutError: operation timed out
 
   -  /XXX/XXX/XXX/cypress/screenshots/testConfigOverrides-invalid-browser.js/An uncau     (1280x720)
      ght error was detected outside of a test (failed).png                                          
+  (Video)
+
+  -  Started processing:  Compressing to 32 CRF
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/testConfigOverrides-invalid-bro     (X second)
+                          wser.js.mp4
+
+
 
 
 ====================================================================================================
@@ -201,6 +200,7 @@ exports['testConfigOverrides / fails when passing invalid config values'] = `
 Expected \`retries\` to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls. Instead the value was: \`"1"\`
 
 https://on.cypress.io/config
+  Error
       [stack trace lines]
 
   4) nested contexts overrides throws error at the correct line number
@@ -210,6 +210,7 @@ https://on.cypress.io/config
 Expected \`defaultCommandTimeout\` to be a number. Instead the value was: \`"500"\`
 
 https://on.cypress.io/config
+  Error
       [stack trace lines]
 
   5) nested contexts overrides throws error at the correct line number
@@ -229,6 +230,7 @@ https://on.cypress.io/config
 Expected \`baseUrl\` to be a fully qualified URL (starting with \`http://\` or \`https://\`). Instead the value was: \`"not_an_http_url"\`
 
 https://on.cypress.io/config
+  Error
       [stack trace lines]
 
   7) throws error correctly when before hook
@@ -240,6 +242,7 @@ Expected \`retries\` to be a positive number or null or an object with keys "ope
 https://on.cypress.io/config
 
 Because this error occurred during a \`before all\` hook we are skipping the remaining tests in the current suite: \`throws error correctly when...\`
+  Error
       [stack trace lines]
 
   8) throws error correctly when beforeEach hook
@@ -249,16 +252,10 @@ Because this error occurred during a \`before all\` hook we are skipping the rem
 Expected \`retries\` to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls. Instead the value was: \`"1"\`
 
 https://on.cypress.io/config
+  Error
       [stack trace lines]
 
 
-
-Warning: We failed processing this video.
-
-This error will not alter the exit code.
-
-TimeoutError: operation timed out
-      [stack trace lines]
 
 
   (Results)
@@ -387,6 +384,7 @@ https://on.cypress.io/config
 Expected \`baseUrl\` to be a fully qualified URL (starting with \`http://\` or \`https://\`). Instead the value was: \`"not_an_http_url"\`
 
 https://on.cypress.io/config
+  Error
       [stack trace lines]
 
   7) runs all tests
@@ -409,6 +407,7 @@ Because this error occurred during a \`before all\` hook we are skipping the rem
 Expected \`retries\` to be a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls. Instead the value was: \`"1"\`
 
 https://on.cypress.io/config
+  Error
       [stack trace lines]
 
 
