@@ -58,6 +58,7 @@ export interface WizardDataShape {
   chosenLanguage: NexusGenEnums['CodeLanguageEnum']
   chosenManualInstall: boolean
   chosenBrowser: FoundBrowser | null
+  browserErrorMessage: string | null
 }
 
 export interface ElectronShape {
@@ -108,6 +109,7 @@ export function makeCoreData (): CoreDataShape {
       allBundlers: BUNDLERS,
       history: ['welcome'],
       chosenBrowser: null,
+      browserErrorMessage: null,
     },
     user: null,
     electron: {

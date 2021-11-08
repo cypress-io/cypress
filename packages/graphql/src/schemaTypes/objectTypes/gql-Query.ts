@@ -49,5 +49,12 @@ export const Query = objectType({
       description: 'All known projects for the app',
       resolve: (root, args, ctx) => ctx.appData.projects,
     })
+
+    t.string('browserErrorMessage', {
+      description: 'An error related to finding a browser',
+      resolve: (source, args, ctx) => {
+        return ctx.wizardData.browserErrorMessage
+      },
+    })
   },
 })

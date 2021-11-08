@@ -588,6 +588,9 @@ type Query {
   app: App!
   baseError: BaseError
 
+  """An error related to finding a browser"""
+  browserErrorMessage: String
+
   """Returns an object conforming to the Relay spec"""
   cloudNode(
     """An ID for a Node conforming to the Relay spec"""
