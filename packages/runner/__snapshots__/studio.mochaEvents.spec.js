@@ -70,7 +70,7 @@ exports['studio mocha events only runs a single test by id #1'] = [
       "file": null,
       "invocationDetails": "{Object 9}",
       "currentRetry": 0,
-      "retries": -1,
+      "retries": 0,
       "_slow": 10000
     }
   ],
@@ -274,7 +274,7 @@ exports['studio mocha events creates a new test when adding to a suite #1'] = [
       "wallClockStartedAt": "match.date",
       "invocationDetails": "{Object 9}",
       "currentRetry": 0,
-      "retries": -1,
+      "retries": 0,
       "_slow": 10000
     }
   ],
@@ -459,7 +459,7 @@ exports['studio mocha events can add new test to root runnable #1'] = [
       "type": "test",
       "wallClockStartedAt": "match.date",
       "currentRetry": 0,
-      "retries": -1,
+      "retries": 0,
       "_slow": 10000
     }
   ],
@@ -642,7 +642,7 @@ exports['studio mocha events hooks runs before hooks and test body but not after
       "file": null,
       "invocationDetails": "{Object 9}",
       "currentRetry": 0,
-      "retries": -1,
+      "retries": 0,
       "_slow": 10000
     }
   ],
@@ -981,7 +981,7 @@ exports['studio mocha events hooks runs before hooks but not after hooks when ad
       "wallClockStartedAt": "match.date",
       "invocationDetails": "{Object 9}",
       "currentRetry": 0,
-      "retries": -1,
+      "retries": 0,
       "_slow": 10000
     }
   ],
@@ -1488,7 +1488,7 @@ exports['studio mocha events only test can be extended #1'] = [
       "file": null,
       "invocationDetails": "{Object 9}",
       "currentRetry": 0,
-      "retries": -1,
+      "retries": 0,
       "_slow": 10000
     }
   ],
@@ -2107,7 +2107,7 @@ exports['studio mocha events only test can be extended when there are multiple i
       "file": null,
       "invocationDetails": "{Object 9}",
       "currentRetry": 0,
-      "retries": -1,
+      "retries": 0,
       "_slow": 10000
     }
   ],
@@ -2592,7 +2592,7 @@ exports['studio mocha events only test can extend a suite that contains an only 
       "wallClockStartedAt": "match.date",
       "invocationDetails": "{Object 9}",
       "currentRetry": 0,
-      "retries": -1,
+      "retries": 0,
       "_slow": 10000
     }
   ],
@@ -2854,7 +2854,7 @@ exports['studio mocha events only suite can be added to #1'] = [
       "wallClockStartedAt": "match.date",
       "invocationDetails": "{Object 9}",
       "currentRetry": 0,
-      "retries": -1,
+      "retries": 0,
       "_slow": 10000
     }
   ],
@@ -3083,7 +3083,7 @@ exports['studio mocha events only suite can be added to when there are multiple 
       "wallClockStartedAt": "match.date",
       "invocationDetails": "{Object 9}",
       "currentRetry": 0,
-      "retries": -1,
+      "retries": 0,
       "_slow": 10000
     }
   ],
@@ -3380,7 +3380,7 @@ exports['studio mocha events only suite can extend a test within an only suite #
       "file": null,
       "invocationDetails": "{Object 9}",
       "currentRetry": 0,
-      "retries": -1,
+      "retries": 0,
       "_slow": 10000
     }
   ],
@@ -3779,7 +3779,7 @@ exports['studio mocha events only suite can extend a test within an only suite w
       "file": null,
       "invocationDetails": "{Object 9}",
       "currentRetry": 0,
-      "retries": -1,
+      "retries": 0,
       "_slow": 10000
     }
   ],

@@ -67,7 +67,7 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "file": null,
       "invocationDetails": "{Object 9}",
       "currentRetry": 0,
-      "retries": -1,
+      "retries": 0,
       "_slow": 10000
     }
   ],
@@ -317,7 +317,7 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "file": null,
       "invocationDetails": "{Object 9}",
       "currentRetry": 0,
-      "retries": -1,
+      "retries": 0,
       "_slow": 10000
     }
   ],
@@ -550,7 +550,7 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "file": null,
       "invocationDetails": "{Object 9}",
       "currentRetry": 0,
-      "retries": -1,
+      "retries": 0,
       "_slow": 10000
     }
   ],
@@ -808,7 +808,7 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "file": null,
       "invocationDetails": "{Object 9}",
       "currentRetry": 0,
-      "retries": -1,
+      "retries": 0,
       "_slow": 10000
     }
   ],
@@ -943,7 +943,7 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "file": null,
       "invocationDetails": "{Object 9}",
       "currentRetry": 0,
-      "retries": -1,
+      "retries": 0,
       "_slow": 10000
     }
   ],
@@ -1209,7 +1209,7 @@ exports['src/cypress/runner tests finish with correct state mocha grep fail with
       "file": null,
       "invocationDetails": "{Object 9}",
       "currentRetry": 0,
-      "retries": -1,
+      "retries": 0,
       "_slow": 10000
     }
   ],
@@ -1757,7 +1757,7 @@ exports['src/cypress/runner tests finish with correct state mocha grep pass with
       "file": null,
       "invocationDetails": "{Object 9}",
       "currentRetry": 0,
-      "retries": -1,
+      "retries": 0,
       "_slow": 10000
     }
   ],
@@ -2326,7 +2326,7 @@ exports['src/cypress/runner mocha events simple single test #1'] = [
       "file": null,
       "invocationDetails": "{Object 9}",
       "currentRetry": 0,
-      "retries": -1,
+      "retries": 0,
       "_slow": 10000
     }
   ],
@@ -2529,7 +2529,7 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
       "file": null,
       "invocationDetails": "{Object 9}",
       "currentRetry": 0,
-      "retries": -1,
+      "retries": 0,
       "_slow": 10000
     }
   ],
@@ -2882,7 +2882,7 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
       "file": null,
       "invocationDetails": "{Object 9}",
       "currentRetry": 0,
-      "retries": -1,
+      "retries": 0,
       "_slow": 10000
     }
   ],
@@ -3131,7 +3131,7 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
       "file": null,
       "invocationDetails": "{Object 9}",
       "currentRetry": 0,
-      "retries": -1,
+      "retries": 0,
       "_slow": 10000
     }
   ],

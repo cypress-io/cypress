@@ -70,7 +70,7 @@ exports['src/cypress/runner retries mochaEvents simple retry #1'] = [
       "file": null,
       "invocationDetails": "{Object 9}",
       "currentRetry": 0,
-      "retries": -1,
+      "retries": 1,
       "_slow": 10000
     }
   ],
@@ -370,7 +370,7 @@ exports['src/cypress/runner retries mochaEvents test retry with hooks #1'] = [
       "file": null,
       "invocationDetails": "{Object 9}",
       "currentRetry": 0,
-      "retries": -1,
+      "retries": 1,
       "_slow": 10000
     }
   ],
@@ -1030,7 +1030,7 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
       "file": null,
       "invocationDetails": "{Object 9}",
       "currentRetry": 0,
-      "retries": -1,
+      "retries": 1,
       "_slow": 10000
     }
   ],
@@ -1756,7 +1756,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
       "file": null,
       "invocationDetails": "{Object 9}",
       "currentRetry": 0,
-      "retries": -1,
+      "retries": 1,
       "_slow": 10000
     }
   ],
@@ -2594,7 +2594,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "file": null,
       "invocationDetails": "{Object 9}",
       "currentRetry": 0,
-      "retries": -1,
+      "retries": 2,
       "_slow": 10000
     }
   ],
@@ -3357,7 +3357,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "file": null,
       "invocationDetails": "{Object 9}",
       "currentRetry": 0,
-      "retries": -1,
+      "retries": 2,
       "_slow": 10000
     }
   ],
@@ -3708,7 +3708,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "file": null,
       "invocationDetails": "{Object 9}",
       "currentRetry": 0,
-      "retries": -1,
+      "retries": 2,
       "_slow": 10000
     }
   ],
@@ -4125,7 +4125,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "file": null,
       "invocationDetails": "{Object 9}",
       "currentRetry": 0,
-      "retries": -1,
+      "retries": 2,
       "_slow": 10000
     }
   ],
@@ -4819,7 +4819,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "file": null,
       "invocationDetails": "{Object 9}",
       "currentRetry": 0,
-      "retries": -1,
+      "retries": 2,
       "_slow": 10000
     }
   ],
@@ -5079,7 +5079,7 @@ exports['src/cypress/runner retries mochaEvents cant retry from [before] #1'] = 
       "file": null,
       "invocationDetails": "{Object 9}",
       "currentRetry": 0,
-      "retries": -1,
+      "retries": 1,
       "_slow": 10000
     }
   ],
@@ -5358,7 +5358,7 @@ exports['src/cypress/runner retries mochaEvents cant retry from [after] #1'] = [
       "file": null,
       "invocationDetails": "{Object 9}",
       "currentRetry": 0,
-      "retries": -1,
+      "retries": 1,
       "_slow": 10000
     }
   ],
@@ -5899,7 +5899,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
       "file": null,
       "invocationDetails": "{Object 9}",
       "currentRetry": 0,
-      "retries": -1,
+      "retries": 2,
       "_slow": 10000
     }
   ],
@@ -6252,7 +6252,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
       "file": null,
       "invocationDetails": "{Object 9}",
       "currentRetry": 0,
-      "retries": -1,
+      "retries": 2,
       "_slow": 10000
     }
   ],
@@ -6897,7 +6897,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
       "file": null,
       "invocationDetails": "{Object 9}",
       "currentRetry": 0,
-      "retries": -1,
+      "retries": 2,
       "_slow": 10000
     }
   ],
@@ -7282,7 +7282,7 @@ exports['src/cypress/runner retries mochaEvents cleanses errors before emitting 
       "file": null,
       "invocationDetails": "{Object 9}",
       "currentRetry": 0,
-      "retries": -1,
+      "retries": 2,
       "_slow": 10000
     }
   ],
