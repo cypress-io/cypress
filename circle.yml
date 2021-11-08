@@ -1472,14 +1472,15 @@ jobs:
       <<: *defaults
       steps:
         - restore_cached_workspace
-        - run:
-            name: Build
-            command: yarn workspace @cypress/schematic build:all
         - install-required-node:
             version: "16.10"
         - run:
-            name: Install @angular/cli
-            command: yarn policies set-version 1.19.0 && yarn add --dev @angular/cli
+            name: Build + Install
+            command: |
+              . ./scripts/load-nvm.sh
+              yarn workspace @cypress/schematic build:all
+              yarn policies set-version 1.19.0
+              yarn add --dev @angular/cli
             working_directory: npm/cypress-schematic
         - run:
             name: Launch
