@@ -19,8 +19,7 @@ describe('TestingTypeCards', () => {
     }).then(() => {
       cy.findAllByText(defaultMessages.setupPage.testingCard.notConfigured).should('have.length', 2)
 
-      // TODO: Pullout to i18n
-      cy.contains('Click here to configure end-to-end testing with Cypress.').should('be.visible')
+      cy.contains('Build and test the entire experience of your application').should('be.visible')
     })
   })
 
@@ -36,7 +35,6 @@ describe('TestingTypeCards', () => {
         return <TestingTypeCards gql={gqlVal} />
       },
     }).then(() => {
-      cy.findAllByText('LAUNCH').should('have.length', 2)
       cy.findAllByText(defaultMessages.setupPage.testingCard.configured).should('have.length', 2)
     })
   })
@@ -53,25 +51,10 @@ describe('TestingTypeCards', () => {
         return <TestingTypeCards gql={gqlVal} />
       },
     }).then(() => {
-      cy.findAllByText('LAUNCH').should('have.length', 1)
       cy.findAllByText(defaultMessages.setupPage.testingCard.configured).should('have.length', 1)
       cy.findAllByText(defaultMessages.setupPage.testingCard.notConfigured).should('have.length', 1)
-      // TODO: Pullout to i18n
-      cy.contains('Click here to configure end-to-end testing with Cypress.').should('be.visible')
-    })
-  })
 
-  it('emits an `openCompare` event when the question mark is clicked in cards', () => {
-    cy.mountFragment(TestingTypeCardsFragmentDoc, {
-      render: (gqlVal) => {
-        return <TestingTypeCards gql={gqlVal} />
-      },
-    }).then(() => {
-      cy.findAllByLabelText(defaultMessages.welcomePage.review).as('buttons')
-      cy.get('@buttons').eq(0).click()
-      cy.get('@buttons').eq(1).click().then(() =>
-        cy.wrap(Cypress.vueWrapper.findComponent(TestingTypeCards).emitted('openCompare'))
-        .should('have.length', 2))
+      cy.contains('Build and test the entire experience of your application').should('be.visible')
     })
   })
 })

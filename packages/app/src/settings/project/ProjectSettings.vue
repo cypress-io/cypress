@@ -19,7 +19,7 @@
 </template>
 
 <script lang="ts" setup>
-import { gql } from '@urql/core'
+import { gql } from '@urql/vue'
 import RecordKey from './RecordKey.vue'
 import Experiments from './Experiments.vue'
 import ProjectId from './ProjectId.vue'

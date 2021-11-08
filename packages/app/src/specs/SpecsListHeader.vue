@@ -17,7 +17,7 @@
         prefix-icon-class="justify-center text-lg text-center icon-light-transparent icon-dark-white"
         class="min-w-127px"
         size="lg"
-        @click="$emit('newSpec')"
+        @click="emit('newSpec')"
       >
         {{ t('specPage.newSpecButton') }}
       </Button>

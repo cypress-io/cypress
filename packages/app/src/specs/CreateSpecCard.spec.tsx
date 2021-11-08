@@ -4,8 +4,8 @@
 import CreateSpecCard from './CreateSpecCard.vue'
 import DocumentCode from '~icons/cy/document-code_x48'
 
-const iconSelector = '[data-testid=create-spec-card-icon]'
-const specCardSelector = '[data-testid=create-spec-card]'
+const iconSelector = '[data-cy=card-icon]'
+const specCardSelector = '[data-cy=card]'
 const header = 'My header text here'
 const shortDescription = `We'll walk you through generating your first spec from a component.`
 
