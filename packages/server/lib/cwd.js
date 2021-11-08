@@ -16,7 +16,7 @@ const appPath = (function () {
 })()
 
 // after we figure out our appPath
-// if the process.cwd() isnt set to that
+// if the process.cwd() isn't set to that
 // then change it
 if (process.cwd() !== appPath) {
   process.chdir(appPath)
