@@ -54,6 +54,11 @@ shikiWrapperClasses computed property.
       @click="copyOnClick ? () => copyCode() : () => {}"
       v-html="highlightedCode"
     />
+    <pre
+      v-else
+      class="overflow-scroll border rounded border-gray-100 text-14px leading-24px font-light py-8px"
+      :class="[props.class, lineNumbers ? 'pl-56px' : 'pl-8px' ]"
+    >{{ code }}</pre>
     <CopyButton
       v-if="copyButton"
       variant="outline"
@@ -66,7 +71,7 @@ shikiWrapperClasses computed property.
 </template>
 
 <script lang="ts">
-import { Highlighter, getHighlighter, setOnigasmWASM, setCDN, Lang } from 'shiki'
+import { Highlighter, getHighlighter, setOnigasmWASM, setCDN } from 'shiki'
 import onigasm from 'onigasm/lib/onigasm.wasm?url'
 
 setOnigasmWASM(onigasm)
@@ -171,7 +176,7 @@ $offset: 1.1em;
 
 .shiki-wrapper {
   &:deep(.shiki) {
-    @apply min-w-max border-r-10px border-r-transparent py-8px;
+    @apply min-w-max border-r-10px border-r-transparent;
   }
 
   &.wrap:deep(.line) {
@@ -179,9 +184,7 @@ $offset: 1.1em;
   }
 
   &.line-numbers:deep(.shiki) {
-    .line {
-    }
-
+    @apply py-8px;
     code {
       counter-reset: step;
       counter-increment: step 0;
