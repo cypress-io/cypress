@@ -11,7 +11,7 @@ import $stackUtils from './stack_utils'
 import { create as createChai, IChai } from '../cy/chai'
 import { create as createXhr, IXhr } from '../cy/xhrs'
 import { create as createJQuery, IJQuery } from '../cy/jquery'
-import $Aliases from '../cy/aliases'
+import { create as createAliases, IAliases } from '../cy/aliases'
 import * as $Events from './events'
 import $Ensures from '../cy/ensures'
 import $Focused from '../cy/focused'
@@ -120,7 +120,7 @@ const setTopOnError = function (Cypress, cy: $Cy) {
 
 // NOTE: this makes the cy object an instance
 // TODO: refactor the 'create' method below into this class
-class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILocation, ITimer, IChai, IXhr {
+class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILocation, ITimer, IChai, IXhr, IAliases {
   id: string
   state: any
 
@@ -147,6 +147,13 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
 
   getIndexedXhrByAlias: IXhr['getIndexedXhrByAlias']
   getRequestsByAlias: IXhr['getRequestsByAlias']
+
+  addAlias: IAliases['addAlias']
+  getAlias: IAliases['getAlias']
+  getNextAlias: IAliases['getNextAlias']
+  validateAlias: IAliases['validateAlias']
+  aliasNotFoundFor: IAliases['aliasNotFoundFor']
+  getXhrTypeByAlias: IAliases['getXhrTypeByAlias']
 
   // Private methods
   resetTimer: ReturnType<typeof createTimer>['reset']
@@ -203,6 +210,16 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
     this.getIndexedXhrByAlias = xhr.getIndexedXhrByAlias
     this.getRequestsByAlias = xhr.getRequestsByAlias
 
+    const aliases = createAliases(this)
+
+    this.addAlias = aliases.addAlias
+    this.getAlias = aliases.getAlias
+    this.getNextAlias = aliases.getNextAlias
+    this.validateAlias = aliases.validateAlias
+    this.aliasNotFoundFor = aliases.aliasNotFoundFor
+    this.getXhrTypeByAlias = aliases.getXhrTypeByAlias
+
+    // binded functions
     this.$$ = this.$$.bind(this)
   }
 
@@ -233,8 +250,6 @@ export default {
     const focused = $Focused.create(state)
     const keyboard = $Keyboard.create(state)
     const mouse = $Mouse.create(state, keyboard, focused, Cypress)
-
-    const aliases = $Aliases.create(cy)
 
     const ensures = $Ensures.create(state, cy.expect)
 
@@ -619,14 +634,6 @@ export default {
       isCy,
 
       isStopped,
-
-      // alias sync methods
-      getAlias: aliases.getAlias,
-      addAlias: aliases.addAlias,
-      validateAlias: aliases.validateAlias,
-      getNextAlias: aliases.getNextAlias,
-      aliasNotFoundFor: aliases.aliasNotFoundFor,
-      getXhrTypeByAlias: aliases.getXhrTypeByAlias,
 
       // focused sync methods
       getFocused: focused.getFocused,
