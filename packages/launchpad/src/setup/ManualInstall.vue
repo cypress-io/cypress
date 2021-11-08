@@ -1,7 +1,7 @@
 <template>
   <TerminalPrompt
     :command="installDependenciesCode"
-    :project-folder-name="props.gql.title || ''"
+    :project-folder-name="projectFolder"
   />
   <div class="border-t border-t-gray-100 px-24px">
     <ul>
@@ -26,14 +26,12 @@
 
 <script lang="ts" setup>
 import { computed } from 'vue'
-import CopyButton from '@cy/components/CopyButton.vue'
-import TerminalPrompt from '@cy/components/TerminalPrompt.vue'
 import { gql } from '@urql/core'
+import TerminalPrompt from '@cy/components/TerminalPrompt.vue'
 import type { ManualInstallFragment } from '../generated/graphql'
 
 gql`
 fragment ManualInstall on Wizard {
-  title
   packagesToInstall {
     id
     name
@@ -43,11 +41,15 @@ fragment ManualInstall on Wizard {
 }
 `
 
+// TODO: make this a real gql value
+const projectFolder = 'design-system'
+
 const props = defineProps<{
   gql: ManualInstallFragment
 }>()
 
-defineEmits<{(event: 'back'): void
+defineEmits<{
+  (event: 'back'): void
 }>()
 
 const installDependenciesCode = computed(
