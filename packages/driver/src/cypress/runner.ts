@@ -956,7 +956,7 @@ const _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, se
     if (_.last(tests) !== test) {
       test.final = true
 
-      return fire(Cypress, TEST_AFTER_RUN_EVENT, test)
+      return fire(TEST_AFTER_RUN_EVENT, test, Cypress)
     }
   })
 
