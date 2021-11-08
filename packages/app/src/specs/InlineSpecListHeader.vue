@@ -1,5 +1,5 @@
 <template>
-  <div class="flex h-64px w-auto items-center gap-8px px-16px">
+  <div class="flex h-64px w-auto items-center gap-8px mx-16px border-b-1 border-gray-900">
     <div class="flex-1 relative items-center group">
       <div class="absolute inset-y-0 flex items-center pointer-events-none">
         <MagnifyingGlassIcon
@@ -19,6 +19,8 @@
         placeholder="Search Specs"
         @focus="inputFocused = true"
         @blur="inputFocused = false"
+        :value="search"
+        @input="onInput"
       />
     </div>
     <!-- <Input
@@ -36,7 +38,7 @@
     <RadioGroup
       :model-value="tab"
       class="flex border-1 border-gray-900 rounded-md h-24px w-64px text-md cursor-pointer"
-      @change="$emit('update:tab', $event.target.checked)"
+      @update:model-value="emit('update:tab', $event)"
     >
       <RadioGroupOption v-slot="{ checked }" as="template" value="file-list">
         <div
@@ -88,16 +90,23 @@ import Button from "@cy/components/Button.vue";
 import { ref, watch } from "vue";
 import { RadioGroup, RadioGroupOption } from "@headlessui/vue";
 
-const props = defineProps<{tab: string}>()
-// watch(() => props.selectedTab, (selectedTab, prevSelectedTab) => {
-//   console.log({selectedTab, prevSelectedTab})
-// })
+defineProps<{tab: string, search: string}>()
 
 const emit = defineEmits<{
   (e: 'update:tab', tab: string): void
+  (e: 'update:search', search: string)
 }>()
 
+// const selectedTab = ref('file-list')
+
 const inputFocused = ref(false);
+
+const onInput = (e: Event) => {
+  const value = (e.target as HTMLInputElement).value
+
+  emit('update:search', value)
+}
+
 </script>
 
 <style>
@@ -106,6 +115,6 @@ const inputFocused = ref(false);
 }
 
 .add-button:hover {
-  box-shadow: 0 0 2px rgba(255, 255, 255, 0.4);
+  box-shadow: 0 0 4px rgba(191, 194, 212, 0.6);
 }
 </style>

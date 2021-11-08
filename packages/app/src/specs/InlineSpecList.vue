@@ -1,15 +1,20 @@
 <template>
   <div>
-    <InlineSpecListHeader v-model:tab="tab"/> {{tab}}
-    <RouterLink
-      v-for="spec in specs"
-      :key="spec.node.id"
-      class="text-left grid grid-cols-[16px,auto,auto] items-center gap-10px"
-      :class="{ 'border-2 border-red-400': isCurrentSpec(spec) }"
-      :to="{ path: 'runner', query: { file: spec.node.relative } }"
-    >
-      <SpecName :gql="spec.node" />
-    </RouterLink>
+    <InlineSpecListHeader v-model:tab="tab" v-model:search="search"/>
+    <template v-if="tab === 'file-list'">
+      <RouterLink
+        v-for="spec in specs"
+        :key="spec.node.id"
+        class="text-left grid grid-cols-[16px,auto,auto] items-center gap-10px"
+        :class="{ 'border-2 border-red-400': isCurrentSpec(spec) }"
+        :to="{ path: 'runner', query: { file: spec.node.relative } }"
+      >
+        <SpecName :gql="spec.node" />
+      </RouterLink>
+    </template>
+    <template v-else>
+      <div class="text-white">FileTree not implemented</div>
+    </template>
   </div>
 </template>
 
@@ -60,6 +65,20 @@ const isCurrentSpec = (spec: SpecNode_InlineSpecListFragment) => {
 
 const router = useRouter()
 const tab = ref('file-list')
+const search = ref('')
 
-const specs = computed(() => props.gql.activeProject?.specs?.edges || [])
+const specs = computed(() => {
+  if (!search.value) {
+    return props.gql.activeProject?.specs?.edges || [];
+  }
+  return (
+    props.gql.activeProject?.specs?.edges.filter((edge) =>
+      (
+        edge.node.fileName.toLowerCase() +
+        edge.node.specFileExtension.toLowerCase()
+      ).includes(search.value.toLocaleLowerCase())
+    ) || []
+  );
+});
+
 </script>
