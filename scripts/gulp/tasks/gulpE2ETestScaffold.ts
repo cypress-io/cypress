@@ -49,4 +49,6 @@ export async function e2eTestScaffoldWatch () {
   fixtureWatcher.on('addDir', () => {
     e2eTestScaffold()
   })
+
+  await e2eTestScaffold()
 }

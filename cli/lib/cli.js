@@ -97,8 +97,7 @@ const parseVariableOpts = (fnArgs, args) => {
 }
 
 const descriptions = {
-  browserOpenMode: 'path to a custom browser to be added to the list of available browsers in Cypress',
-  browserRunMode: 'runs Cypress in the browser with the given name. if a filesystem path is supplied, Cypress will attempt to use the browser at that path.',
+  browser: 'runs Cypress in the browser with the given name. if a filesystem path is supplied, Cypress will attempt to use the browser at that path.',
   cacheClear: 'delete all cached binaries',
   cachePrune: 'deletes all cached binaries except for the version currently in use',
   cacheList: 'list cached binary versions',
@@ -247,7 +246,7 @@ const addCypressRunCommand = (program) => {
   .command('run')
   .usage('[options]')
   .description('Runs Cypress tests from the CLI without the GUI')
-  .option('-b, --browser <browser-name-or-path>', text('browserRunMode'))
+  .option('-b, --browser <browser-name-or-path>', text('browser'))
   .option('--ci-build-id <id>', text('ciBuildId'))
   .option('--component', text('component'))
   .option('-c, --config <config>', text('config'))
@@ -392,7 +391,7 @@ module.exports = {
     .command('open')
     .usage('[options]')
     .description('Opens Cypress in the interactive GUI.')
-    .option('-b, --browser <browser-path>', text('browserOpenMode'))
+    .option('-b, --browser <browser-path>', text('browser'))
     .option('--component', text('component'))
     .option('-c, --config <config>', text('config'))
     .option('-C, --config-file <config-file>', text('configFile'))
@@ -424,7 +423,7 @@ module.exports = {
     .command('open-ct')
     .usage('[options]')
     .description('Opens Cypress component testing interactive mode. Deprecated: use "open --component"')
-    .option('-b, --browser <browser-path>', text('browserOpenMode'))
+    .option('-b, --browser <browser-path>', text('browser'))
     .option('-c, --config <config>', text('config'))
     .option('-C, --config-file <config-file>', text('configFile'))
     .option('-d, --detached [bool]', text('detached'), coerceFalse)
@@ -455,7 +454,7 @@ module.exports = {
     .command('run-ct')
     .usage('[options]')
     .description('Runs all Cypress component testing suites. Deprecated: use "run --component"')
-    .option('-b, --browser <browser-name-or-path>', text('browserRunMode'))
+    .option('-b, --browser <browser-name-or-path>', text('browser'))
     .option('--ci-build-id <id>', text('ciBuildId'))
     .option('-c, --config <config>', text('config'))
     .option('-C, --config-file <config-file>', text('configFile'))

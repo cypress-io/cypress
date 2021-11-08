@@ -35,5 +35,12 @@ export const Query = objectType({
       description: 'The state of any info related to local development of the runner',
       resolve: (root, args, ctx) => ctx.coreData.dev,
     })
+
+    t.string('browserErrorMessage', {
+      description: 'An error related to finding a browser',
+      resolve: (source, args, ctx) => {
+        return ctx.wizardData.browserErrorMessage
+      },
+    })
   },
 })
