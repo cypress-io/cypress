@@ -1,3 +1,13 @@
+/*
+ * Tests TODO:
+ *
+ * Add e2e test covering common frameworks, to make sure it works with real applications (that we didn't write):
+ *   https://uppy.io/
+ *   https://www.dropzone.dev/js/
+ *   https://github.com/lian-yue/vue-upload-component
+ * (though some of these will have to wait for drag-n-drop support)
+ */
+
 const { _, $ } = Cypress
 
 // Reading and decoding files from an input element would, in the real world,
@@ -25,12 +35,12 @@ describe('src/cy/commands/actions/attachFile', () => {
   context('#attachFile', () => {
     it('attaches a single file', () => {
       cy.get('#basic')
-      .attachFile({ contents: 'foo' })
+      .attachFile({ contents: 'foo', fileName: 'foo.txt' })
 
       cy.get('#basic')
       .then((input) => {
         expect(input[0].files.length).to.eq(1)
-        expect(input[0].files[0].name).to.eq('')
+        expect(input[0].files[0].name).to.eq('foo.txt')
         expect(input[0].files[0].type).to.eq('')
         expect(input[0].files[0].lastModified).to.be.closeTo(Date.now(), 1000)
       })
@@ -51,10 +61,8 @@ describe('src/cy/commands/actions/attachFile', () => {
         }, {
           contents: { a: 'bar' },
           fileName: 'bar.json',
-        }, {
-          contents: Buffer.from('baz'),
-          fileName: 'baz.bin',
         },
+        Buffer.from('baz'),
       ])
 
       cy.get('#multiple')
@@ -62,7 +70,7 @@ describe('src/cy/commands/actions/attachFile', () => {
       .then((input) => {
         expect(input[0].files[0].name).to.eq('foo.txt')
         expect(input[0].files[1].name).to.eq('bar.json')
-        expect(input[0].files[2].name).to.eq('baz.bin')
+        expect(input[0].files[2].name).to.eq('')
       })
 
       cy.get('#multiple')
@@ -356,24 +364,76 @@ is being covered by another element:
       it('can force on hidden labels', () => {
         cy.get('#hidden-basic-label').attachFile({ contents: 'foo' }, { force: true })
       })
-    })
 
-    /*
-     * Tests TODO:
-     * Actionability:
-     *   Can scroll to input
-     *   Can scroll to label
-     *   No scroll on 'forced'
-     *   Waits for input to be visible
-     *   Waits for input to be enabled
-     *   Waits until input stops animating
-     *   Can specify scrollBehavior in config
-     *
-     * Add e2e test covering common frameworks, to make sure it works with real applications (that we didn't write):
-     *   https://uppy.io/
-     *   https://www.dropzone.dev/js/
-     *   https://github.com/lian-yue/vue-upload-component
-     * (though some of these will have to wait for drag-n-drop support)
-     */
+      it('can scroll to input', () => {
+        const scrolled = []
+
+        cy.on('scrolled', ($el, type) => {
+          scrolled.push(type)
+        })
+
+        cy.get('#scroll').attachFile({ contents: 'foo' })
+        .then(() => {
+          expect(scrolled).not.to.be.empty
+        })
+      })
+
+      it('can scroll to label', () => {
+        const scrolled = []
+
+        cy.on('scrolled', ($el, type) => {
+          scrolled.push(type)
+        })
+
+        cy.get('#scroll-label').attachFile({ contents: 'foo' })
+        .then(() => {
+          expect(scrolled).not.to.be.empty
+        })
+      })
+
+      it('does not scroll when forced', () => {
+        const scrolled = []
+
+        cy.on('scrolled', ($el, type) => {
+          scrolled.push(type)
+        })
+
+        cy.get('#scroll-label').attachFile({ contents: 'foo' }, { force: true })
+        .then(() => {
+          expect(scrolled).to.be.empty
+        })
+      })
+
+      it('waits until input stops animating', {
+        defaultCommandTimeout: 1000,
+      }, () => {
+        let retries = 0
+
+        cy.on('command:retry', (obj) => {
+          retries += 1
+        })
+
+        cy.stub(cy, 'ensureElementIsNotAnimating')
+        .throws(new Error('animating!'))
+        .onThirdCall().returns()
+
+        cy.get('#basic').attachFile({ contents: 'foo' }).then(() => {
+          expect(retries).to.eq(3)
+          expect(cy.ensureElementIsNotAnimating).to.be.calledThrice
+        })
+      })
+
+      it('can specify scrollBehavior in options', () => {
+        cy.get('#scroll').then((el) => {
+          cy.spy(el[0], 'scrollIntoView')
+        })
+
+        cy.get('#scroll').attachFile({ contents: 'foo' }, { scrollBehavior: 'bottom' })
+
+        cy.get('#scroll').then((el) => {
+          expect(el[0].scrollIntoView).to.be.calledWith({ block: 'end' })
+        })
+      })
+    })
   })
 })

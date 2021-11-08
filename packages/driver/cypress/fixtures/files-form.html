@@ -25,11 +25,22 @@
         background: black;
         z-index: 1;
       }
+
+      #scroll-form {
+        display: block;
+        width: 300px;
+        height: 50px;
+        overflow: auto;
+      }
+      #tall {
+        height: 80px;
+        background: black;
+      }
     </style>
 
     <form>
-      <label for="basic" id="basic-label">Label A</label>
-      <label for="basic" id="hidden-basic-label">Hidden Label A</label>
+      <label for="basic" id="basic-label">Basic Label</label>
+      <label for="basic" id="hidden-basic-label">Hidden Label</label>
       <input id="basic" type="file" />
     </form>
 
@@ -38,7 +49,7 @@
     </form>
 
     <form>
-      <label for="hidden" id="hidden-label">Label B</label>
+      <label for="hidden" id="hidden-label">Label for Hidden</label>
       <input id="hidden" type="file" />
     </form>
 
@@ -57,6 +68,12 @@
     <form>
       <label for="disabled" id="disabled-label">Disabled Label</label>
       <input id="disabled" type="file" disabled />
+    </form>
+
+    <form id="scroll-form">
+      <div id="tall"></div>
+      <label for="scroll" id="scroll-label">Scroll Label</label>
+      <input id="scroll" type="file" />
     </form>
   </body>
 </html>
