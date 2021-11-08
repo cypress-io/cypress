@@ -115,9 +115,16 @@ describe('src/index', () => {
 
       configUtil.validateNoBreakingConfig({
         'experimentalNetworkStubbing': 'should break',
+        configFile: 'config.js',
       }, warningFn, errorFn)
 
-      expect(warningFn).to.have.been.calledOnceWith('EXPERIMENTAL_NETWORK_STUBBING_REMOVED', 'experimentalNetworkStubbing', undefined)
+      expect(warningFn).to.have.been.calledOnceWith('EXPERIMENTAL_NETWORK_STUBBING_REMOVED', {
+        name: 'experimentalNetworkStubbing',
+        newName: undefined,
+        value: undefined,
+        configFile: 'config.js',
+      })
+
       expect(errorFn).to.have.been.callCount(0)
     })
 
@@ -127,10 +134,16 @@ describe('src/index', () => {
 
       configUtil.validateNoBreakingConfig({
         'blacklistHosts': 'should break',
+        configFile: 'config.js',
       }, warningFn, errorFn)
 
       expect(warningFn).to.have.been.callCount(0)
-      expect(errorFn).to.have.been.calledOnceWith('RENAMED_CONFIG_OPTION', 'blacklistHosts', 'blockHosts')
+      expect(errorFn).to.have.been.calledOnceWith('RENAMED_CONFIG_OPTION', {
+        name: 'blacklistHosts',
+        newName: 'blockHosts',
+        value: undefined,
+        configFile: 'config.js',
+      })
     })
   })
 })

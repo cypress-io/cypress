@@ -5,7 +5,9 @@ exports['src/index .getBreakingKeys returns list of breaking config keys 1'] = [
   "experimentalNetworkStubbing",
   "experimentalRunEvents",
   "experimentalShadowDomSupport",
-  "firefoxGcInterval"
+  "firefoxGcInterval",
+  "nodeVersion",
+  "nodeVersion"
 ]
 
 exports['src/index .getDefaultValues returns list of public config keys 1'] = {
@@ -32,7 +34,6 @@ exports['src/index .getDefaultValues returns list of public config keys 1'] = {
   "includeShadowDom": false,
   "integrationFolder": "cypress/integration",
   "modifyObstructiveCode": true,
-  "nodeVersion": "default",
   "numTestsKeptInMemory": 50,
   "pageLoadTimeout": 60000,
   "pluginsFile": "cypress/plugins",
