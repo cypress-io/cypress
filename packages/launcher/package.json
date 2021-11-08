@@ -2,7 +2,6 @@
   "name": "@packages/launcher",
   "version": "0.0.0-development",
   "private": true,
-  "main": "index",
   "scripts": {
     "build-prod": "tsc --project .",
     "clean": "node scripts/clean.js || true",
@@ -34,6 +33,7 @@
     "typescript": "^4.2.3"
   },
   "files": [
+    "index.js",
     "lib"
   ],
   "types": "index.ts"
