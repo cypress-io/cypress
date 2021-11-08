@@ -6,7 +6,7 @@
   <div class="border-t border-t-gray-100 px-24px">
     <ul>
       <li
-        v-for="dep in props.gql.packagesToInstall"
+        v-for="dep in props.gql.wizard.packagesToInstall"
         :key="dep.id"
         class="py-16px border-b border-b-gray-100 last-of-type:border-b-0"
       >
@@ -31,18 +31,23 @@ import TerminalPrompt from '@cy/components/TerminalPrompt.vue'
 import type { ManualInstallFragment } from '../generated/graphql'
 
 gql`
-fragment ManualInstall on Wizard {
-  packagesToInstall {
+fragment ManualInstall on Query {
+  wizard {  
+    packagesToInstall {
+      id
+      name
+      description
+      package
+    }
+  }
+  currentProject {
     id
-    name
-    description
-    package
+    title
   }
 }
 `
 
-// TODO: make this a real gql value
-const projectFolder = 'design-system'
+const projectFolder = computed(() => props.gql.currentProject?.title ?? '')
 
 const props = defineProps<{
   gql: ManualInstallFragment
@@ -55,7 +60,7 @@ defineEmits<{
 const installDependenciesCode = computed(
   () => {
     return `yarn add -D ${
-    (props.gql.packagesToInstall ?? [])
+    (props.gql.wizard.packagesToInstall ?? [])
     .map((pack) => `${pack.package}`)
     .join(' ')}`
   },
