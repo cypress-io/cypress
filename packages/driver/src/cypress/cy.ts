@@ -13,7 +13,7 @@ import { create as createXhr, IXhr } from '../cy/xhrs'
 import { create as createJQuery, IJQuery } from '../cy/jquery'
 import { create as createAliases, IAliases } from '../cy/aliases'
 import * as $Events from './events'
-import $Ensures from '../cy/ensures'
+import { create as createEnsures, IEnsures } from '../cy/ensures'
 import $Focused from '../cy/focused'
 import $Mouse from '../cy/mouse'
 import $Keyboard from '../cy/keyboard'
@@ -120,7 +120,7 @@ const setTopOnError = function (Cypress, cy: $Cy) {
 
 // NOTE: this makes the cy object an instance
 // TODO: refactor the 'create' method below into this class
-class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILocation, ITimer, IChai, IXhr, IAliases {
+class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILocation, ITimer, IChai, IXhr, IAliases, IEnsures {
   id: string
   state: any
 
@@ -155,8 +155,27 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
   aliasNotFoundFor: IAliases['aliasNotFoundFor']
   getXhrTypeByAlias: IAliases['getXhrTypeByAlias']
 
+  ensureElement: IEnsures['ensureElement']
+  ensureAttached: IEnsures['ensureAttached']
+  ensureWindow: IEnsures['ensureWindow']
+  ensureDocument: IEnsures['ensureDocument']
+  ensureElDoesNotHaveCSS: IEnsures['ensureElDoesNotHaveCSS']
+  ensureElementIsNotAnimating: IEnsures['ensureElementIsNotAnimating']
+  ensureNotDisabled: IEnsures['ensureNotDisabled']
+  ensureVisibility: IEnsures['ensureVisibility']
+  ensureStrictVisibility: IEnsures['ensureStrictVisibility']
+  ensureNotHiddenByAncestors: IEnsures['ensureNotHiddenByAncestors']
+  ensureExistence: IEnsures['ensureExistence']
+  ensureElExistence: IEnsures['ensureElExistence']
+  ensureDescendents: IEnsures['ensureDescendents']
+  ensureValidPosition: IEnsures['ensureValidPosition']
+  ensureScrollability: IEnsures['ensureScrollability']
+  ensureNotReadonly: IEnsures['ensureNotReadonly']
+
   // Private methods
   resetTimer: ReturnType<typeof createTimer>['reset']
+  ensureSubjectByType: ReturnType<typeof createEnsures>['ensureSubjectByType']
+  ensureRunnable: ReturnType<typeof createEnsures>['ensureRunnable']
 
   constructor (specWindow, Cypress, Cookies, state, config) {
     this.id = _.uniqueId('cy')
@@ -219,6 +238,28 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
     this.aliasNotFoundFor = aliases.aliasNotFoundFor
     this.getXhrTypeByAlias = aliases.getXhrTypeByAlias
 
+    const ensures = createEnsures(state, this.expect)
+
+    this.ensureElement = ensures.ensureElement
+    this.ensureAttached = ensures.ensureAttached
+    this.ensureWindow = ensures.ensureWindow
+    this.ensureDocument = ensures.ensureDocument
+    this.ensureElDoesNotHaveCSS = ensures.ensureElDoesNotHaveCSS
+    this.ensureElementIsNotAnimating = ensures.ensureElementIsNotAnimating
+    this.ensureNotDisabled = ensures.ensureNotDisabled
+    this.ensureVisibility = ensures.ensureVisibility
+    this.ensureStrictVisibility = ensures.ensureStrictVisibility
+    this.ensureNotHiddenByAncestors = ensures.ensureNotHiddenByAncestors
+    this.ensureExistence = ensures.ensureExistence
+    this.ensureElExistence = ensures.ensureElExistence
+    this.ensureDescendents = ensures.ensureDescendents
+    this.ensureValidPosition = ensures.ensureValidPosition
+    this.ensureScrollability = ensures.ensureScrollability
+    this.ensureNotReadonly = ensures.ensureNotReadonly
+
+    this.ensureSubjectByType = ensures.ensureSubjectByType
+    this.ensureRunnable = ensures.ensureRunnable
+
     // binded functions
     this.$$ = this.$$.bind(this)
   }
@@ -251,8 +292,6 @@ export default {
     const keyboard = $Keyboard.create(state)
     const mouse = $Mouse.create(state, keyboard, focused, Cypress)
 
-    const ensures = $Ensures.create(state, cy.expect)
-
     const snapshots = $Snapshots.create(cy.$$, state)
     const testConfigOverride = new TestConfigOverride()
 
@@ -265,7 +304,7 @@ export default {
     }
 
     const runnableCtx = function (name) {
-      ensures.ensureRunnable(name)
+      cy.ensureRunnable(name)
 
       return state('runnable').ctx
     }
@@ -471,7 +510,7 @@ export default {
       if (prevSubject) {
         // make sure our current subject is valid for
         // what we expect in this command
-        ensures.ensureSubjectByType(subject, prevSubject, name)
+        cy.ensureSubjectByType(subject, prevSubject, name)
       }
 
       args.unshift(subject)
@@ -649,24 +688,6 @@ export default {
       // snapshots sync methods
       createSnapshot: snapshots.createSnapshot,
 
-      // ensure sync methods
-      ensureWindow: ensures.ensureWindow,
-      ensureElement: ensures.ensureElement,
-      ensureDocument: ensures.ensureDocument,
-      ensureAttached: ensures.ensureAttached,
-      ensureExistence: ensures.ensureExistence,
-      ensureElExistence: ensures.ensureElExistence,
-      ensureElDoesNotHaveCSS: ensures.ensureElDoesNotHaveCSS,
-      ensureVisibility: ensures.ensureVisibility,
-      ensureStrictVisibility: ensures.ensureStrictVisibility,
-      ensureNotHiddenByAncestors: ensures.ensureNotHiddenByAncestors,
-      ensureDescendents: ensures.ensureDescendents,
-      ensureNotReadonly: ensures.ensureNotReadonly,
-      ensureNotDisabled: ensures.ensureNotDisabled,
-      ensureValidPosition: ensures.ensureValidPosition,
-      ensureScrollability: ensures.ensureScrollability,
-      ensureElementIsNotAnimating: ensures.ensureElementIsNotAnimating,
-
       initialize ($autIframe) {
         setRemoteIframeProps($autIframe, state)
 
@@ -822,7 +843,7 @@ export default {
 
           let ret
 
-          ensures.ensureRunnable(name)
+          cy.ensureRunnable(name)
 
           // this is the first call on cypress
           // so create a new chainer instance
