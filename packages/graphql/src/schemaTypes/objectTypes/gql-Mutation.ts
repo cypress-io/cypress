@@ -1,7 +1,8 @@
 import { arg, booleanArg, enumType, idArg, mutationType, nonNull, stringArg } from 'nexus'
-import { CodeGenTypeEnum } from '..'
+import { CodeGenTypeEnum } from '../enumTypes/gql-CodeGenTypeEnum'
 import { CodeLanguageEnum, FrontendFrameworkEnum, NavItemEnum, SupportedBundlerEnum, TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
 import { WizardUpdateInput } from '../inputTypes/gql-WizardUpdateInput'
+import { GeneratedSpec } from './gql-GeneratedSpec'
 import { Wizard } from './gql-Wizard'
 
 export const mutation = mutationType({
@@ -155,7 +156,7 @@ export const mutation = mutationType({
         })),
       },
       resolve: async (_, args, ctx) => {
-        await ctx.actions.app.setActiveBrowser(args.id)
+        await ctx.actions.app.setActiveBrowserById(args.id)
       },
     })
 
@@ -180,14 +181,15 @@ export const mutation = mutationType({
       },
     })
 
-    t.liveMutation('codeGenSpec', {
+    t.liveMutation('generateSpecFromSource', {
+      type: GeneratedSpec,
       description: 'Generate spec from source',
       args: {
         codeGenCandidate: nonNull(stringArg()),
         type: nonNull(CodeGenTypeEnum),
       },
       resolve: async (_, args, ctx) => {
-        await ctx.actions.project.codeGenSpec(args.codeGenCandidate, args.type)
+        return ctx.actions.project.codeGenSpec(args.codeGenCandidate, args.type)
       },
     })
 
@@ -234,10 +236,6 @@ export const mutation = mutationType({
     t.liveMutation('launchOpenProject', {
       description: 'Launches project from open_project global singleton',
       resolve: async (_, args, ctx) => {
-        if (!ctx.wizardData.chosenTestingType) {
-          throw Error('Cannot launch project without chosen testing type')
-        }
-
         await ctx.actions.project.launchProject(ctx.wizardData.chosenTestingType, {})
       },
     })

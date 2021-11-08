@@ -13,11 +13,6 @@ declare namespace legacyDevServer {
   }
 
   /**
-   * Type helper to make writing `CypressCracoDevServerConfig` easier
-   */
-  function defineDevServerConfig(devServerConfig: CypressCracoDevServerConfig): CypressCracoDevServerConfig
-
-  /**
    * Sets up a dev server for using Cypress compoennt testing with CRACO (https://github.com/gsoft-inc/craco)
    * @param cypressDevServerConfig comes from the `devServer()` function first argument
    * @param devServerConfig additional config object (create an empty object to see how to use it)

@@ -65,7 +65,6 @@ export class ProjectActions {
       title,
       ctPluginsInitialized: false,
       e2ePluginsInitialized: false,
-      generatedSpec: null,
       config: null,
       configChildProcess: null,
     })
@@ -169,8 +168,14 @@ export class ProjectActions {
     }
   }
 
-  async launchProject (testingType: TestingTypeEnum, options: LaunchOpts) {
+  async launchProject (testingType: TestingTypeEnum | null, options: LaunchOpts) {
     if (!this.ctx.activeProject) {
+      return null
+    }
+
+    testingType = testingType || this.ctx.wizardData.chosenTestingType
+
+    if (!testingType) {
       return null
     }
 
@@ -182,7 +187,7 @@ export class ProjectActions {
     const browser = this.ctx.wizardData.chosenBrowser ?? this.ctx.appData.browsers?.[0]
 
     if (!browser) {
-      throw Error(`Could not find browser`)
+      return null
     }
 
     const spec: Cypress.Spec = {
@@ -371,7 +376,7 @@ export class ProjectActions {
       specFileExtension,
     })
 
-    project.generatedSpec = {
+    return {
       spec,
       content: newSpec.content,
     }

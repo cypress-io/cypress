@@ -18,6 +18,15 @@
   "overrides": [
     {
       "files": [
+        "*.ts"
+      ],
+      "rules": {
+        "no-dupe-class-members": "off",
+        "@typescript-eslint/no-dupe-class-members": "error"
+      }
+    },
+    {
+      "files": [
         "lib/*"
       ],
       "rules": {

@@ -84,15 +84,21 @@ export function makeUrqlClient (target: 'launchpad' | 'app'): Client {
     // https://formidable.com/open-source/urql/docs/graphcache/errors/
     makeCacheExchange(),
     namedRouteExchange,
-    ssrExchange({
-      isClient: true,
-      initialState: window.__CYPRESS_INITIAL_DATA__ ?? {},
-    }),
     // TODO(tim): add this when we want to use the socket as the GraphQL
     // transport layer for all operations
     // target === 'launchpad' ? fetchExchange : socketExchange(io),
     fetchExchange,
   ]
+
+  // If we're in the launched app, we want to use the SSR exchange
+  if (target === 'app') {
+    exchanges.push(ssrExchange({
+      isClient: true,
+      initialState: window.__CYPRESS_INITIAL_DATA__ ?? {},
+    }))
+  }
+
+  exchanges.push(fetchExchange)
 
   if (import.meta.env.DEV) {
     exchanges.unshift(devtoolsExchange)

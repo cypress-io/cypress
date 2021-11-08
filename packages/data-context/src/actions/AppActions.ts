@@ -1,3 +1,4 @@
+import type Bluebird from 'bluebird'
 import type { FoundBrowser } from '@packages/types'
 import pDefer from 'p-defer'
 
@@ -5,19 +6,39 @@ import type { DataContext } from '..'
 
 export interface AppApiShape {
   getBrowsers(): Promise<FoundBrowser[]>
+  ensureAndGetByNameOrPath(nameOrPath: string, returnAll?: boolean, browsers?: FoundBrowser[]): Bluebird<FoundBrowser | FoundBrowser[] | undefined>
 }
 
 export class AppActions {
   constructor (private ctx: DataContext) {}
 
-  async setActiveBrowser (id: string) {
+  setActiveBrowser (browser: FoundBrowser) {
+    this.ctx.coreData.wizard.chosenBrowser = browser
+  }
+
+  setActiveBrowserById (id: string) {
     const browserId = this.ctx.fromId(id, 'Browser')
 
     // Ensure that this is a valid ID to set
     const browser = this.ctx.appData.browsers?.find((b) => this.idForBrowser(b) === browserId)
 
     if (browser) {
-      this.ctx.coreData.wizard.chosenBrowser = browser
+      this.setActiveBrowser(browser)
+    }
+  }
+
+  async setActiveBrowserByNameOrPath (browserNameOrPath: string) {
+    let browser
+
+    try {
+      browser = (await this.ctx._apis.appApi.ensureAndGetByNameOrPath(browserNameOrPath)) as FoundBrowser | undefined
+    } catch (err: unknown?) {
+      this.ctx.debug('Error getting browser by name or path (%s): %s', browserNameOrPath, err?.stack || err)
+      this.ctx.coreData.wizard.browserErrorMessage = `The browser '${browserNameOrPath}' was not found on your system or is not supported by Cypress. Choose a browser below.`
+    }
+
+    if (browser) {
+      this.setActiveBrowser(browser)
     }
   }
 

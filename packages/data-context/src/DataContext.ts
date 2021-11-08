@@ -103,6 +103,10 @@ export class DataContext {
       this.actions.wizard.navigate('forward')
     }
 
+    if (this._config.launchArgs.browser) {
+      toAwait.push(this.actions.app.setActiveBrowserByNameOrPath(this._config.launchArgs.browser))
+    }
+
     if (IS_DEV_ENV) {
       this.actions.dev.watchForRelaunch()
     }

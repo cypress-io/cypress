@@ -25,6 +25,7 @@
       </div>
       <input
         v-model="localValue"
+        :style="style"
         :type="type"
         :spellcheck="false"
         :class="_inputClasses"
@@ -79,6 +80,7 @@ const props = withDefaults(defineProps<{
   suffixIcon?: FunctionalComponent<SVGAttributes, {}>
   suffixIconClasses?: string | string[] | Record<string, string>
   modelValue?: string
+  style?: string
 }>(), {
   type: 'text',
   modelValue: '',

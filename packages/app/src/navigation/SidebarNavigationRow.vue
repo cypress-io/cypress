@@ -1,33 +1,10 @@
 <template>
   <div
     :class="[active ? 'before:bg-jade-300' : 'before:bg-transparent']"
-    class="w-full
-      min-w-40px
-      relative
-      flex
-      items-center
-      rounded-md
-      group
-      focus-visible:outline-none
-      hover:before:bg-indigo-300
-      focus:before:bg-indigo-300
-      before:content-open-square
-      before:mr-4px
-      before:rounded-r-md
-      before:text-transparent
-      before:h-40px
-      before:w-4px"
+    class="relative flex items-center w-full rounded-md min-w-40px group focus-visible:outline-none hover:before:bg-indigo-300 focus:before:bg-indigo-300 before:content-open-square before:mr-4px before:rounded-r-md before:text-transparent before:h-40px before:w-4px"
   >
     <span
-      class="h-full
-      flex
-      items-center
-      overflow-hidden
-      p-8px
-      gap-20px
-      rounded-lg
-      children:group-focus:text-indigo-300
-      children:group-hover:text-indigo-300"
+      class="flex items-center h-full overflow-hidden rounded-lg p-8px gap-20px children:group-focus:text-indigo-300 children:group-hover:text-indigo-300"
     >
       <component
         :is="icon"
