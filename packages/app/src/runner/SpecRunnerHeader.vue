@@ -13,6 +13,7 @@
       <button
         data-cy="header-selector"
         :disabled="isDisabled"
+        class="px-8px"
         @click="togglePlayground"
       >
         <Icon

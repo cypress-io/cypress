@@ -20,18 +20,30 @@
       class="flex flex-1 mx-2 h-full items-center"
       @mouseover="setShowingHighlight"
     >
-      <button
-        data-cy="playground-method"
+      <!-- <button
         class="flex"
         @click="selectorPlaygroundStore.toggleMethod"
       >
         cy.{{ selectorPlaygroundStore.method }}('
-      </button>
+      </button> -->
 
+      <Select
+        :options="methods"
+        item-value="display"
+        data-cy="playground-method"
+        :model-value="{
+          value: selectorPlaygroundStore.method,
+          display: `cy.${selectorPlaygroundStore.method}`
+        }"
+        class="w-120px"
+        @update:model-value="({ value }) => selectorPlaygroundStore.setMethod(value)"
+      />
+
+      <span class="mx-5px">('</span>
       <input
         ref="copyText"
         v-model="selector"
-        class="flex-1 rounded-md py-8px border border-gray-500 px-1 pl-2 text-blue-500"
+        class="flex-1 rounded-md py-8px border border-gray-500 px-1 pl-4 text-blue-500"
         data-cy="playground-selector"
       >
       ')
@@ -85,12 +97,24 @@ import IconCopy from '~icons/mdi/content-copy'
 import Icon from '@packages/frontend-shared/src/components/Icon.vue'
 import IconCursorDefaultOutline from '~icons/mdi/cursor-default-outline'
 import IconHelpCircle from '~icons/mdi/help-circle'
+import SelectorPlaygroundSelectMethod from './SelectorPlaygroundSelectMethod.vue'
+import Select from '@packages/frontend-shared/src/components/Select.vue'
 import IconConsoleLine from '~icons/mdi/console-line'
 
 const props = defineProps<{
   eventManager: EventManager
   getAutIframe: () => AutIframe
 }>()
+
+const methods = [
+  {
+    display: 'cy.get',
+    value: 'get',
+  }, {
+    display: 'cy.contains',
+    value: 'contains',
+  },
+]
 
 const selectorPlaygroundStore = useSelectorPlaygroundStore()
 

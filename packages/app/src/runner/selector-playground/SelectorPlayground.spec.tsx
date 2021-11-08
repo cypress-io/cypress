@@ -56,8 +56,8 @@ describe('SelectorPlayground', () => {
     expect(selectorPlaygroundStore.method).to.eq('get')
 
     cy.get('[data-cy="playground-method"]').as('method')
-    cy.get('@method').contains('cy.get')
-    cy.get('@method').click().then(() => {
+    cy.get('@method').contains('cy.get').click()
+    cy.get('li').contains('cy.contains').click().then(() => {
       expect(selectorPlaygroundStore.method).to.eq('contains')
       expect(autIframe.toggleSelectorHighlight).to.have.been.called
       cy.get('@method').contains('cy.contains')
