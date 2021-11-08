@@ -2,6 +2,7 @@ import type { LaunchArgs, OpenProjectLaunchOptions, PlatformName } from '@packag
 import type { AppApiShape, ProjectApiShape } from './actions'
 import type { NexusGenAbstractTypeMembers } from '@packages/graphql/src/gen/nxs.gen'
 import type { AuthApiShape } from './actions/AuthActions'
+import type { ElectronApiShape } from './actions/ElectronActions'
 import debugLib from 'debug'
 import { CoreDataShape, makeCoreData } from './data/coreDataShape'
 import { DataActions } from './DataActions'
@@ -43,6 +44,7 @@ export interface DataContextConfig extends DataContextShellConfig {
   appApi: AppApiShape
   authApi: AuthApiShape
   projectApi: ProjectApiShape
+  electronApi: ElectronApiShape
   /**
    * Internal options used for testing purposes
    */
@@ -59,6 +61,10 @@ export class DataContext extends DataContextShell {
 
   get electronApp () {
     return this._config.electronApp
+  }
+
+  get electronApi () {
+    return this._config.electronApi
   }
 
   async initializeData () {
@@ -201,6 +207,7 @@ export class DataContext extends DataContextShell {
       authApi: this._config.authApi,
       projectApi: this._config.projectApi,
       busApi: this._config.rootBus,
+      electronApi: this._config.electronApi,
     }
   }
 

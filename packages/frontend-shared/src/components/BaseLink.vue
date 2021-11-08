@@ -26,9 +26,8 @@ const attrs = useAttrs() as AnchorHTMLAttributes
 // if no class is used, the link receives a default color
 const classes = computed(() => {
   const hocus = props.useDefaultHocus ? 'hocus-link-default' : ''
-  const color = hasTailwindTextColorClass(attrs.class) ? '' : 'text-indigo-500'
 
-  return `${attrs.class} ${hocus} ${color}`
+  return `${attrs.class} ${hocus}`
 })
 
 const props = withDefaults(defineProps<{
@@ -42,3 +41,9 @@ function hasTailwindTextColorClass (classList: string) {
   return !!classList.split(' ').find((className) => /^text-.*-\d{2,4}$/gm.test(className))
 }
 </script>
+
+<style lang="scss" scoped>
+a {
+  color: theme('colors.indigo.500')
+}
+</style>

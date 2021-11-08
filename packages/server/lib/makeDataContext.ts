@@ -14,6 +14,7 @@ import cache from './cache'
 import errors from './errors'
 import { graphqlSchema } from '@packages/graphql/src/schema'
 import type { InternalDataContextOptions } from '@packages/data-context/src/DataContext'
+import { openExternal } from '@packages/server/lib/gui/links'
 
 const { getBrowsers } = browserUtils
 
@@ -112,6 +113,11 @@ export function makeDataContext (options: MakeDataContextOptions) {
       },
       error (type: string, ...args: any) {
         throw errors.throw(type, ...args)
+      },
+    },
+    electronApi: {
+      openExternal (url: string) {
+        openExternal(url)
       },
     },
   })

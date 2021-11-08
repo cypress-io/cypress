@@ -1,7 +1,10 @@
 import type { BrowserWindow } from 'electron'
 import os from 'os'
 import type { DataContext } from '..'
-import { openExternal } from '@packages/server/lib/gui/links'
+
+export interface ElectronApiShape {
+  openExternal(url: string): void
+}
 
 export class ElectronActions {
   constructor (private ctx: DataContext) { }
@@ -49,6 +52,6 @@ export class ElectronActions {
   }
 
   openExternal (url: string) {
-    openExternal(url)
+    this.ctx.electronApi.openExternal(url)
   }
 }
