@@ -39,6 +39,7 @@ watch(() => route.query.file, (queryParam) => {
 
   if (selectorPlaygroundStore.show) {
     const autIframe = getAutIframeModel()
+
     autIframe.toggleSelectorPlayground(false)
     selectorPlaygroundStore.setEnabled(false)
     selectorPlaygroundStore.setShow(false)
