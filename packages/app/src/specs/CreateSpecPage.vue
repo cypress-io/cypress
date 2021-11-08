@@ -1,6 +1,6 @@
 <template>
   <CreateSpecModal
-    v-if="props.gql.activeTestingType"
+    v-if="props.gql.currentProject?.currentTestingType"
     :key="generator"
     :initial-generator="generator"
     :show="showModal"
@@ -8,7 +8,7 @@
     @close="closeModal"
   />
   <div
-    v-if="props.gql.activeTestingType"
+    v-if="props.gql.currentProject?.currentTestingType"
     class="overflow-scroll text-center max-w-600px mx-auto py-40px"
   >
     <h1
@@ -21,7 +21,7 @@
       data-testid="create-spec-page-description"
       class="leading-normal text-gray-600 text-18px mb-32px"
     >
-      {{ t(`createSpec.page.${props.gql.activeTestingType}.description`) }}
+      {{ t(`createSpec.page.${props.gql.currentProject.currentTestingType}.description`) }}
     </p>
     <CreateSpecCards
       data-testid="create-spec-page-cards"
@@ -54,7 +54,7 @@
 import { useI18n } from '@cy/i18n'
 import SettingsIcon from '~icons/cy/settings_x16'
 import Button from '@cy/components/Button.vue'
-import { ref, computed, Ref } from 'vue'
+import { ref } from 'vue'
 import CreateSpecModal from './CreateSpecModal.vue'
 import CreateSpecCards from './CreateSpecCards.vue'
 import { gql } from '@urql/vue'
@@ -62,10 +62,12 @@ import type { CreateSpecPageFragment } from '../generated/graphql'
 const { t } = useI18n()
 
 gql`
-fragment CreateSpecPage on App {
-  activeTestingType
+fragment CreateSpecPage on Query {
   ...CreateSpecCards
   ...CreateSpecModal
+   currentProject {
+     currentTestingType
+  }
 }
 `
 

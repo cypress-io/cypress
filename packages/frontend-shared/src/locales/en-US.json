@@ -318,5 +318,16 @@
       "step2": "Ensure that your {0} file is checked into source control:",
       "step3": "Run this command in your local development terminal or in CI:"
     }
+  },
+  "testingType": {
+    "modalTitle": "Choose a testing type",
+    "e2e": {
+      "name": "E2E Testing",
+      "description": "Build and test the entire experience of your application from end-to-end to each ensure each flow matches your expectations."
+    },
+    "component": {
+      "name": "Component Testing",
+      "description": "Build and test your components from your design system in isolation in order to ensure each state matches your expectations."
+    }
   }
 }

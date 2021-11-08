@@ -5,7 +5,7 @@ export class AppDataSource {
 
   get isGlobalMode () {
     const hasGlobalModeArg = this.ctx.launchArgs.global ?? false
-    const isMissingActiveProject = !this.ctx.activeProject
+    const isMissingActiveProject = !this.ctx.currentProject
 
     return hasGlobalModeArg || isMissingActiveProject
   }

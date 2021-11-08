@@ -39,11 +39,11 @@ export class WizardDataSource {
   }
 
   get chosenTestingTypePluginsInitialized () {
-    if (this.chosenTestingType === 'component' && this.ctx.activeProject?.ctPluginsInitialized) {
+    if (this.chosenTestingType === 'component' && this.ctx.currentProject?.ctPluginsInitialized) {
       return true
     }
 
-    if (this.chosenTestingType === 'e2e' && this.ctx.activeProject?.e2ePluginsInitialized) {
+    if (this.chosenTestingType === 'e2e' && this.ctx.currentProject?.e2ePluginsInitialized) {
       return true
     }
 
@@ -62,11 +62,11 @@ export class WizardDataSource {
     }
 
     if (data.currentStep === 'initializePlugins') {
-      if (data.chosenTestingType === 'component' && !this.ctx.activeProject?.ctPluginsInitialized) {
+      if (data.chosenTestingType === 'component' && !this.ctx.currentProject?.ctPluginsInitialized) {
         return false
       }
 
-      if (data.chosenTestingType === 'e2e' && !this.ctx.activeProject?.e2ePluginsInitialized) {
+      if (data.chosenTestingType === 'e2e' && !this.ctx.currentProject?.e2ePluginsInitialized) {
         return false
       }
     }

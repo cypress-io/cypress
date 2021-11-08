@@ -7,9 +7,6 @@ const text = defaultMessages.topNav
 describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
   it('renders with functional browser menu when show-browsers prop is true', () => {
     cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
-      onResult: (result, ctx) => {
-        result.app.activeProject = null
-      },
       render: (gqlVal) => <div class="resize overflow-auto border-current border-1 h-700px"><HeaderBarContent gql={gqlVal} show-browsers={true} /></div>,
     })
 
