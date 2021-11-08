@@ -20,13 +20,6 @@
       class="flex flex-1 mx-2 h-full items-center"
       @mouseover="setShowingHighlight"
     >
-      <!-- <button
-        class="flex"
-        @click="selectorPlaygroundStore.toggleMethod"
-      >
-        cy.{{ selectorPlaygroundStore.method }}('
-      </button> -->
-
       <Select
         :options="methods"
         item-value="display"

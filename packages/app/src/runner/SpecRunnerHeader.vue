@@ -134,11 +134,6 @@ const isDisabled = computed(() => autStore.isRunning || autStore.isLoading)
 
 <style scoped lang="scss">
 .url {
-  // @apply flex items-center justify-center;
-}
-
-button {
-  // @apply rounded-md bg-white flex shadow-md ml-2;
-  // @apply w-20 hover:bg-gray-50;
+  @apply flex items-center justify-center;
 }
 </style>
