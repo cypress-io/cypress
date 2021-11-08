@@ -14,7 +14,6 @@ import { computed } from 'vue'
 import { gql } from '@urql/vue'
 import type { SpecNode_InlineSpecListFragment, Specs_InlineSpecListFragment } from '../generated/graphql'
 import { useSpecStore } from '../store'
-import { useRouter } from 'vue-router'
 import InlineSpecListRow from './InlineSpecListRow.vue'
 
 gql`

@@ -40,31 +40,35 @@ const props = defineProps<{
 
 const relativeFolder = computed(() => props.spec.relative.replace(`/${props.spec.baseName}`, ''))
 const handleUp = (event) => {
+  event.preventDefault()
+
   const target = event.target
 
   if (!target.previousSibling.focus) {
+    if (!target.parentElement.lastElementChild) return
+
     target.parentElement.lastElementChild.focus({ preventScroll: true })
     target.parentElement.lastElementChild.scrollIntoView(false)
   } else {
     target.previousSibling.focus({ preventScroll: true })
-    target.parentElement.lastElementChild.scrollIntoView(false)
+    target.previousSibling.lastElementChild.scrollIntoView({ block: 'nearest' })
   }
-
-  event.preventDefault()
 }
 
 const handleDown = (event) => {
+  event.preventDefault()
+
   const target = event.target
 
   if (!target.nextSibling.focus) {
+    if (!target.parentElement.firstElementChild) return
+
     target.parentElement.firstElementChild.focus({ preventScroll: true })
     target.parentElement.firstElementChild.scrollIntoView(false)
   } else {
     target.nextSibling.focus({ preventScroll: true })
-    target.nextSibling.scrollIntoView(false)
+    target.nextSibling.scrollIntoView({ block: 'nearest' })
   }
-
-  event.preventDefault()
 }
 </script>
 
@@ -72,11 +76,6 @@ const handleDown = (event) => {
 .spec-item:hover::before,
 .spec-item:focus::before,
 .selected::before {
-  position: absolute;
-  content: "";
-  width: 8px;
-  left: -4px;
-  height: 28px;
-  @apply border-r-4 border-r-indigo-300 rounded-lg;
+  @apply absolute content-[""] w-8px left-[-4px] h-28px border-r-4 border-r-indigo-300 rounded-lg;
 }
 </style>

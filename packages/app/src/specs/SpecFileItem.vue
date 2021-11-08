@@ -1,7 +1,6 @@
 <template>
   <div class="flex items-center py-4px text-sm">
-    <component
-      :is="DocumentIconBlank"
+    <DocumentIconBlank
       class="group-hocus:icon-dark-indigo-300 group-hocus:icon-light-indigo-600 text-base"
       :class="selected ? 'icon-dark-indigo-300 icon-light-indigo-600' : 'icon-dark-gray-800 icon-light-gray-1000'"
     />
