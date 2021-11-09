@@ -1,5 +1,4 @@
 import { watch, Ref, ref, computed } from 'vue'
-import type { MaybeRef } from '@vueuse/shared'
 import { useElementSize } from '@vueuse/core'
 
 export interface UseVirtualListOptions {
@@ -22,7 +21,7 @@ export type UseVirtualListItem<T> = {
   index: number
 }
 
-export function useVirtualList <T = any> (list: MaybeRef<T[]>, options: UseVirtualListOptions) {
+export function useVirtualList <T = any> (list: Ref<T[]>, options: UseVirtualListOptions) {
   const containerRef: Ref = ref<HTMLElement | null>()
   const size = useElementSize(containerRef)
 
@@ -33,6 +32,7 @@ export function useVirtualList <T = any> (list: MaybeRef<T[]>, options: UseVirtu
   const { itemHeight, overscan = 5 } = options
 
   if (!itemHeight) {
+    // eslint-disable-next-line
     console.warn('please enter a valid itemHeight')
   }
 
