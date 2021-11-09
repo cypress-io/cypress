@@ -34,12 +34,6 @@ mutation App_DevRelaunch($action: DevRelaunchAction!) {
 }
 `
 
-gql`
-mutation App_OpenExternal ($url: String!) {
-  openExternal(url: $url)
-}
-`
-
 const relaunchMutation = useMutation(App_DevRelaunchDocument)
 
 /**
