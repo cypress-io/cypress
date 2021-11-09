@@ -298,7 +298,7 @@ commands:
             nvm use <<parameters.version>>
             node --version
             echo "before nvm alias default"
-            if [ -z <<parameters.version>> ] then
+            if [ -z "<<parameters.version>>" ] then
               nvm alias default <<parameters.version>>
             else
               nvm alias default $(cat .node-version)
