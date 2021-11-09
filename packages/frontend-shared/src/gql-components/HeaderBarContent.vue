@@ -20,7 +20,9 @@
             'text-gray-700'"
           :href="props.gql?.currentProject ? 'global-mode' : undefined"
           @click.prevent="clearActiveProject"
-        >Projects</a>
+        >
+          Projects
+        </a>
         <!-- TODO: Replace with a cy icon -->
         <i-oi-chevron-right
           v-if="props.gql?.currentProject"
@@ -58,11 +60,11 @@
                   <br>
                   <span class="text-gray-600">{{ props.gql?.cloudViewer?.email }}</span>
                   <br>
-                  <a
-                    class="text-indigo-500 hocus-link-default"
+                  <ExternalLink
                     href="https://on.cypress.io/dashboard/profile"
-                    target="_blank"
-                  >Profile Settings</a>
+                  >
+                    Profile Settings
+                  </ExternalLink>
                 </div>
               </div>
 
@@ -105,6 +107,7 @@ import LoginModal from './topnav/LoginModal.vue'
 import UserAvatar from './topnav/UserAvatar.vue'
 import Auth from './Auth.vue'
 import { useI18n } from '@cy/i18n'
+import ExternalLink from './ExternalLink.vue'
 
 gql`
 mutation GlobalPageHeader_clearActiveProject {

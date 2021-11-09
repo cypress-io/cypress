@@ -13,6 +13,8 @@ import { useToast } from 'vue-toastification'
 import { client } from '@packages/socket/lib/browser'
 
 import { cacheExchange as graphcacheExchange } from '@urql/exchange-graphcache'
+import { urqlCacheKeys } from '@packages/data-context/src/util/urqlCacheKeys'
+
 import { pubSubExchange } from './urqlExchangePubsub'
 import { namedRouteExchange } from './urqlExchangeNamedRoute'
 import { latestMutationExchange } from './urqlExchangeLatestMutation'
@@ -23,16 +25,7 @@ const SERVER_PORT_MATCH = /serverPort=(\d+)/.exec(window.location.search)
 const toast = useToast()
 
 export function makeCacheExchange () {
-  return graphcacheExchange({
-    keys: {
-      App: (data) => data.__typename,
-      DevState: (data) => data.__typename,
-      Wizard: (data) => data.__typename,
-      GitInfo: () => null,
-      BaseError: () => null,
-      ProjectPreferences: (data) => data.__typename,
-    },
-  })
+  return graphcacheExchange(urqlCacheKeys)
 }
 
 declare global {

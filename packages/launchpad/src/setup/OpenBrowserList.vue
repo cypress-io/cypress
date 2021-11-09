@@ -88,6 +88,7 @@ mutation OpenBrowserList_SetBrowser($id: ID!) {
 
 gql`
 fragment OpenBrowserList on CurrentProject {
+  id
   currentBrowser {
     id
     displayName

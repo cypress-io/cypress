@@ -15,12 +15,13 @@
       :class="index ? '' : 'bg-jade-50'"
     >
       <div class="whitespace-nowrap">
-        <a
+        <ExternalLink
           :href="`${releasesUrl}/tag/v${item.version}`"
           :class="index ? '' : 'text-jade-600'"
           class="font-semibold"
-          target="_blank"
-        >{{ item.version }}</a>
+        >
+          {{ item.version }}
+        </ExternalLink>
         <br>
         <span class="text-gray-600 text-14px">{{ t('topNav.released') }} {{ item.released }}</span>
       </div>
@@ -32,11 +33,12 @@
       </template>
     </TopNavListItem>
     <TopNavListItem class="text-center p-16px bg-gray-50">
-      <a
+      <ExternalLink
         :href="releasesUrl"
-        target="_blank"
         class="block w-full border-gray-100 py-8px text-14px whitespace-nowrap border-rounded border-1 hover:no-underline hover:border-gray-200"
-      >{{ t('topNav.seeAllReleases') }}</a>
+      >
+        {{ t('topNav.seeAllReleases') }}
+      </ExternalLink>
     </TopNavListItem>
   </TopNavList>
 
@@ -146,7 +148,7 @@
 import TopNavListItem from './TopNavListItem.vue'
 import TopNavList from './TopNavList.vue'
 import PromptContent from './PromptContent.vue'
-import { allBrowsersIcons } from '../../../../frontend-shared/src/assets/browserLogos'
+import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
 import { gql, useMutation } from '@urql/vue'
 import { TopNavFragment, TopNav_LaunchOpenProjectDocument, TopNav_SetBrowserDocument } from '../../generated/graphql'
 import { useI18n } from '@cy/i18n'
@@ -156,6 +158,7 @@ import type { Ref } from 'vue'
 const { t } = useI18n()
 import { onClickOutside, onKeyStroke } from '@vueuse/core'
 import DocsMenuContent from './DocsMenuContent.vue'
+import ExternalLink from '../ExternalLink.vue'
 
 const releasesUrl = 'https://github.com/cypress-io/cypress/releases/'
 

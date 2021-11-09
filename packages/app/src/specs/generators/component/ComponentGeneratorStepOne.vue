@@ -86,6 +86,7 @@ title.value = t('createSpec.component.importFromComponent.chooseAComponentHeader
 
 gql`
 fragment ComponentGeneratorStepOne_codeGenGlob on CurrentProject {
+  id
   codeGenGlob(type: component)
 }
 `
@@ -110,6 +111,7 @@ query ComponentGeneratorStepOne($glob: String!) {
 gql`
 mutation ComponentGeneratorStepOne_generateSpec($codeGenCandidate: String!, $type: CodeGenType!) {
   generateSpecFromSource(codeGenCandidate: $codeGenCandidate, type: $type) {
+    id
     ...GeneratorSuccess
   }
 }`
