@@ -15,7 +15,7 @@
  *
  */
 import { watchEffect } from 'vue'
-import { getMobxRunnerStore, useAutStore } from '../store'
+import { getMobxRunnerStore, initializeMobxStore, useAutStore } from '../store'
 import { injectBundle } from './injectBundle'
 import type { BaseSpec } from '@packages/types/src/spec'
 import { UnifiedReporterAPI } from './reporter'
@@ -241,6 +241,16 @@ function runSpecE2E (spec: BaseSpec) {
   getEventManager().initialize($autIframe, config)
 }
 
+let isTorndown = false
+
+function teardown () {
+  if (_eventManager) {
+    _eventManager.stop()
+  }
+
+  isTorndown = true  
+}
+
 /**
  * Inject the global `UnifiedRunner` via a <script src="..."> tag.
  * which includes the event manager and AutIframe constructor.
@@ -249,7 +259,40 @@ function runSpecE2E (spec: BaseSpec) {
  * This only needs to happen once, prior to running the first spec.
  */
 async function initialize () {
+  isTorndown = false
   await injectBundle()
+
+  if(isTorndown) {
+    return
+  }
+
+
+  const response = await window.fetch('/api')
+  const data = await response.json()
+  // get data...
+
+  // just stick config on window until we figure out how we are
+  // going to manage it
+  const config = window.UnifiedRunner.decodeBase64(data.base64Config) as any
+  const autStore = useAutStore()
+
+  // TODO(lachlan): use GraphQL to get the viewport dimensions
+  // once it is more practical to do so
+  // find out if we need to continue managing viewportWidth/viewportHeight in MobX at all.
+  autStore.updateDimensions(config.viewportWidth, config.viewportHeight)
+
+  window.UnifiedRunner.config = config
+
+  // window.UnifiedRunner exists now, since the Webpack bundle with
+  // the UnifiedRunner namespace was injected.
+  initializeEventManager(window.UnifiedRunner)
+
+  window.UnifiedRunner.MobX.runInAction(() => {
+    const store = initializeMobxStore(window.UnifiedRunner.config.testingType)
+
+    store.updateDimensions(config.viewportWidth, config.viewportHeight)
+  })
+
   window.UnifiedRunner.MobX.runInAction(() => setupRunner())
 }
 
@@ -277,10 +320,10 @@ async function executeSpec (spec: BaseSpec) {
 
   mobxRunnerStore.setSpec(spec)
 
-  await UnifiedReporterAPI.resetReporter()
+  // await UnifiedReporterAPI.resetReporter()
 
   await teardownSpec()
-  UnifiedReporterAPI.setupReporter()
+  // UnifiedReporterAPI.setupReporter()
 
   if (window.UnifiedRunner.config.testingType === 'e2e') {
     return runSpecE2E(spec)
@@ -296,4 +339,5 @@ async function executeSpec (spec: BaseSpec) {
 export const UnifiedRunnerAPI = {
   initialize,
   executeSpec,
+  teardown
 }

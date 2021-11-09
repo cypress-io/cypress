@@ -7,7 +7,7 @@
       id="inline-spec-list"
       class="bg-gray-1000 w-128"
     >
-      <InlineSpecList :gql="props.gql" />
+      <!-- <InlineSpecList :gql="props.gql" /> -->
     </HideDuringScreenshot>
 
     <HideDuringScreenshot class="w-128">

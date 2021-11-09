@@ -60,7 +60,7 @@ export class EventManager {
   reporterBus: EventEmitter = new EventEmitter()
   localBus: EventEmitter = new EventEmitter()
   Cypress?: $Cypress
-  studioRecorder: any
+  // studioRecorder: any
   selectorPlaygroundModel: any
 
   constructor (
@@ -73,7 +73,7 @@ export class EventManager {
     // StudioRecorder constructor
     StudioRecorderCtor: any,
   ) {
-    this.studioRecorder = new StudioRecorderCtor(this)
+    // this.studioRecorder = new StudioRecorderCtor(this)
     this.selectorPlaygroundModel = selectorPlaygroundModel
   }
 
@@ -122,7 +122,7 @@ export class EventManager {
     })
 
     ws.on('watched:file:changed', () => {
-      this.studioRecorder.cancel()
+      // this.studioRecorder.cancel()
       rerun()
     })
 
@@ -261,63 +261,63 @@ export class EventManager {
     })
 
     const studioInit = () => {
-      ws.emit('studio:init', (showedStudioModal) => {
-        if (!showedStudioModal) {
-          this.studioRecorder.showInitModal()
-        } else {
-          rerun()
-        }
-      })
+      // ws.emit('studio:init', (showedStudioModal) => {
+      //   if (!showedStudioModal) {
+      //     this.studioRecorder.showInitModal()
+      //   } else {
+      //     rerun()
+      //   }
+      // })
     }
 
     this.reporterBus.on('studio:init:test', (testId) => {
-      this.studioRecorder.setTestId(testId)
+      // this.studioRecorder.setTestId(testId)
 
       studioInit()
     })
 
     this.reporterBus.on('studio:init:suite', (suiteId) => {
-      this.studioRecorder.setSuiteId(suiteId)
+      // this.studioRecorder.setSuiteId(suiteId)
 
       studioInit()
     })
 
     this.reporterBus.on('studio:cancel', () => {
-      this.studioRecorder.cancel()
+      // this.studioRecorder.cancel()
       rerun()
     })
 
     this.reporterBus.on('studio:remove:command', (commandId) => {
-      this.studioRecorder.removeLog(commandId)
+      // this.studioRecorder.removeLog(commandId)
     })
 
     this.reporterBus.on('studio:save', () => {
-      this.studioRecorder.startSave()
+      // this.studioRecorder.startSave()
     })
 
     this.reporterBus.on('studio:copy:to:clipboard', (cb) => {
-      this._studioCopyToClipboard(cb)
+      // this._studioCopyToClipboard(cb)
     })
 
     this.localBus.on('studio:start', () => {
-      this.studioRecorder.closeInitModal()
+      // this.studioRecorder.closeInitModal()
       rerun()
     })
 
     this.localBus.on('studio:copy:to:clipboard', (cb) => {
-      this._studioCopyToClipboard(cb)
+      // this._studioCopyToClipboard(cb)
     })
 
     this.localBus.on('studio:save', (saveInfo) => {
       ws.emit('studio:save', saveInfo, (err) => {
         if (err) {
-          this.reporterBus.emit('test:set:state', this.studioRecorder.saveError(err), noop)
+          // this.reporterBus.emit('test:set:state', this.studioRecorder.saveError(err), noop)
         }
       })
     })
 
     this.localBus.on('studio:cancel', () => {
-      this.studioRecorder.cancel()
+      // this.studioRecorder.cancel()
       rerun()
     })
 
@@ -392,7 +392,7 @@ export class EventManager {
             return
           }
 
-          this.studioRecorder.initialize(config, state)
+          // this.studioRecorder.initialize(config, state)
 
           const runnables = Cypress.runner.normalizeAll(state.tests)
 
@@ -452,7 +452,7 @@ export class EventManager {
         this.reporterBus.emit('reporter:collect:run:state', (reporterState) => {
           resolve({
             ...reporterState,
-            studio: this.studioRecorder.state,
+            // studio: this.studioRecorder.state,
           })
         })
       })
@@ -466,7 +466,7 @@ export class EventManager {
 
       const displayProps = Cypress.runner.getDisplayPropsForLog(log)
 
-      this._interceptStudio(displayProps)
+      // this._interceptStudio(displayProps)
 
       this.reporterBus.emit('reporter:log:add', displayProps)
     })
@@ -540,13 +540,13 @@ export class EventManager {
     })
 
     Cypress.on('test:before:run:async', (_attr, test) => {
-      this.studioRecorder.interceptTest(test)
+      // this.studioRecorder.interceptTest(test)
     })
 
     Cypress.on('test:after:run', (test) => {
-      if (this.studioRecorder.isOpen && test.state !== 'passed') {
-        this.studioRecorder.testFailed()
-      }
+      // if (this.studioRecorder.isOpen && test.state !== 'passed') {
+        // this.studioRecorder.testFailed()
+      // }
     })
   }
 
@@ -564,12 +564,13 @@ export class EventManager {
       numPending: state.pending,
       autoScrollingEnabled: state.autoScrollingEnabled,
       scrollTop: state.scrollTop,
-      studioActive: this.studioRecorder.hasRunnableId,
+      // studioActive: this.studioRecorder.hasRunnableId,
     })
   }
 
   stop () {
     this.localBus.removeAllListeners()
+    this.reporterBus.removeAllListeners()
     ws.off()
   }
 
@@ -584,7 +585,7 @@ export class EventManager {
     // need to stop cypress always
     Cypress.stop()
 
-    this.studioRecorder.setInactive()
+    // this.studioRecorder.setInactive()
     this.selectorPlaygroundModel.setOpen(false)
   }
 
@@ -618,23 +619,23 @@ export class EventManager {
   }
 
   _interceptStudio (displayProps) {
-    if (this.studioRecorder.isActive) {
-      displayProps.hookId = this.studioRecorder.hookId
+    // if (this.studioRecorder.isActive) {
+    //   displayProps.hookId = this.studioRecorder.hookId
 
-      if (displayProps.name === 'visit' && displayProps.state === 'failed') {
-        this.studioRecorder.testFailed()
-        this.reporterBus.emit('test:set:state', this.studioRecorder.testError, noop)
-      }
-    }
+    //   if (displayProps.name === 'visit' && displayProps.state === 'failed') {
+    //     this.studioRecorder.testFailed()
+    //     this.reporterBus.emit('test:set:state', this.studioRecorder.testError, noop)
+    //   }
+    // }
 
     return displayProps
   }
 
   _studioCopyToClipboard (cb) {
-    ws.emit('studio:get:commands:text', this.studioRecorder.logs, (commandsText) => {
-      this.studioRecorder.copyToClipboard(commandsText)
-      .then(cb)
-    })
+    // ws.emit('studio:get:commands:text', this.studioRecorder.logs, (commandsText) => {
+    //   this.studioRecorder.copyToClipboard(commandsText)
+    //   .then(cb)
+    // })
   }
 
   emit (event: string, ...args: any[]) {

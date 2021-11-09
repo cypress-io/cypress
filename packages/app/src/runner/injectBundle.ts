@@ -7,11 +7,11 @@ export async function injectBundle () {
   const alreadyInjected = document.querySelector(`script[src="${src}"]`)
 
   if (alreadyInjected) {
-    return
+     null
   }
 
-  const response = await window.fetch('/api')
-  const data = await response.json()
+  // const response = window.fetch('/api')
+  // const data = response.json()
   const script = document.createElement('script')
 
   script.src = src
@@ -25,31 +25,8 @@ export async function injectBundle () {
   document.head.appendChild(script)
   document.head.appendChild(link)
 
-  return new Promise<void>((resolve) => {
-    script.onload = () => {
-      // just stick config on window until we figure out how we are
-      // going to manage it
-      const config = window.UnifiedRunner.decodeBase64(data.base64Config) as any
-      const autStore = useAutStore()
-
-      // TODO(lachlan): use GraphQL to get the viewport dimensions
-      // once it is more practical to do so
-      // find out if we need to continue managing viewportWidth/viewportHeight in MobX at all.
-      autStore.updateDimensions(config.viewportWidth, config.viewportHeight)
-
-      window.UnifiedRunner.config = config
-
-      // window.UnifiedRunner exists now, since the Webpack bundle with
-      // the UnifiedRunner namespace was injected.
-      initializeEventManager(window.UnifiedRunner)
-
-      window.UnifiedRunner.MobX.runInAction(() => {
-        const store = initializeMobxStore(window.UnifiedRunner.config.testingType)
-
-        store.updateDimensions(config.viewportWidth, config.viewportHeight)
-      })
-
-      resolve()
-    }
+  return new Promise<void>(resolve => {
+    script.onload = () => resolve()
   })
 }
+
