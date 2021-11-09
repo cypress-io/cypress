@@ -24,7 +24,7 @@
 
     &.command-type-parent .command-controls .studio-command-remove {
       display: block;
-      padding-left: 5px;
+      margin-left: 5px;
 
       &:hover {
         color: $gray-200;
@@ -207,15 +207,19 @@
     text-align: right;
     width: 25px;
 
-    i {
+    svg {
       display: none;
     }
   }
 
   .command-state-pending > span > .command-wrapper .command-number {
-    i {
+    svg {
       line-height: 18px;
       display: inline-block;
+
+      .icon-light {
+        stroke: $gray-800;
+      }
     }
 
     span {
@@ -475,9 +479,10 @@
   }
 
   .command-controls {
-    i {
-      padding: 2px;
+    svg {
       color: $gray-600;
+      cursor: pointer;
+      margin: 0px 2px;
     }
 
     .studio-command-remove {
@@ -490,10 +495,6 @@
       font-size: 10px;
       line-height: 1.75;
       margin-left: 5px;
-    }
-
-    i:hover {
-      cursor: pointer;
     }
 
     label {
@@ -577,8 +578,8 @@
     text-align: right;
     width: 15px;
 
-    i {
-      margin-right: 0;
+    .icon-light {
+      fill: $gray-800;
     }
   }
 
@@ -589,8 +590,9 @@
     padding-right: 8px;
     width: 25px;
 
-    i {
-      @extend .#{$fa-css-prefix}-caret-right;
+    svg {
+      transform: rotate(-90deg);
+      transition: transform 150ms ease-out;
     }
   }
 
@@ -605,8 +607,8 @@
 
   .command-is-open > span > .command-wrapper {
     .command-expander {
-      i {
-        @extend .#{$fa-css-prefix}-caret-down;
+      svg {
+        transform: rotate(0deg);
       }
     }
 
@@ -678,6 +680,10 @@
 
       .command-pin {
         color: $pinned;
+
+        .icon-light {
+          fill: $purple-700;
+        }
       }
     }
   }
@@ -697,8 +703,9 @@
   }
 
   .num-elements {
-    color: $black;
     background-color: $gray-600;
+    color: $black;
+    vertical-align: text-top;
   }
 
   // utilizing element size queries: https://github.com/marcj/css-element-queries
@@ -725,7 +732,7 @@
           }
         }
 
-        .command-controls i {
+        .command-controls svg {
           color: $pending;
 
           &:hover {

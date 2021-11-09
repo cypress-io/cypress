@@ -20,6 +20,12 @@
       "@cy/gql-components/*": ["../frontend-shared/src/gql-components/*"],
       "@packages/*": ["../*"]
     },
-    "allowJs": true
+    "allowJs": true,
+    "types": [
+      "cypress", 
+      "cypress-real-events", 
+      "@intlify/vite-plugin-vue-i18n/client",
+      "@testing-library/cypress"
+    ]
   }
 }
