@@ -98,8 +98,6 @@ const emit = defineEmits<{
   (e: 'addSpec')
 }>()
 
-// const selectedTab = ref('file-list')
-
 const inputFocused = ref(false)
 
 const onInput = (e: Event) => {
