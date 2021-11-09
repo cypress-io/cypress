@@ -1659,6 +1659,33 @@ describe('src/cy/commands/xhr', () => {
       })
     })
 
+    // https://github.com/cypress-io/cypress/issues/18858
+    it('can stub headers', (done) => {
+      cy
+      .route({
+        url: '/foo',
+        response: '',
+        headers: {
+          'some-header': 'header-value',
+        },
+      }).as('getFoo')
+      .window().then((win) => {
+        win.$.ajax({
+          url: '/foo',
+          error (_a, _b, err) {
+            done(`Errored but should not have: ${err.stack}`)
+          },
+        })
+
+        return null
+      })
+      .wait('@getFoo')
+      .then((xhr) => {
+        expect(xhr.response.headers['some-header']).to.equal('header-value')
+        done()
+      })
+    })
+
     // https://github.com/cypress-io/cypress/issues/2372
     it('warns if a percent-encoded URL is used', () => {
       cy.spy(Cypress.utils, 'warning')
