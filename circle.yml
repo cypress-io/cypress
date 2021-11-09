@@ -298,7 +298,7 @@ commands:
             nvm use <<parameters.version>>
             node --version
             echo "before nvm alias default"
-            nvm alias default
+            nvm alias default <<parameters.version>>
 
   install-chrome:
     description: Install Google Chrome
