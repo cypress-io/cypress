@@ -283,20 +283,6 @@ export const mutation = mutationType({
       },
     })
 
-    t.liveMutation('setCurrentSpec', {
-      description: 'Set the current spec under test',
-      args: {
-        id: nonNull(idArg()),
-      },
-      resolve: async (_, args, ctx) => {
-        if (!ctx.currentProject) {
-          throw Error(`Cannot set spec without active project!`)
-        }
-
-        await ctx.actions.project.setCurrentSpec(args.id)
-      },
-    })
-
     t.nonNull.field('setProjectPreferences', {
       type: 'Query',
       description: 'Save the projects preferences to cache',
