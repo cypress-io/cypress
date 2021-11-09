@@ -41,7 +41,7 @@ export const Query = objectType({
     t.field('currentProject', {
       type: CurrentProject,
       description: 'The currently opened project',
-      resolve: (root, args, ctx) => ctx.coreData.app.currentProject,
+      resolve: (root, args, ctx) => ctx.coreData.currentProject,
     })
 
     t.nonNull.list.nonNull.field('projects', {

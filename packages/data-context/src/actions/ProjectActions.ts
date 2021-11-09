@@ -37,12 +37,12 @@ export class ProjectActions {
   }
 
   async clearActiveProject () {
-    this.ctx.appData.currentProject = null
+    this.ctx.coreData.currentProject = null
     await this.api.closeActiveProject()
 
     // TODO(tim): Improve general state management w/ immutability (immer) & updater fn
     this.ctx.coreData.app.isInGlobalMode = true
-    this.ctx.coreData.app.currentProject = null
+    this.ctx.coreData.currentProject = null
     this.ctx.coreData.app.currentTestingType = null
   }
 
@@ -79,9 +79,9 @@ export class ProjectActions {
   }
 
   private setCurrentProjectProperties (currentProjectProperties: Partial<ActiveProjectShape>) {
-    this.ctx.coreData.app.currentProject = {
+    this.ctx.coreData.currentProject = {
       browsers: this.ctx.coreData.app.browsers,
-      ...this.ctx.coreData.app.currentProject,
+      ...this.ctx.coreData.currentProject,
       ...currentProjectProperties,
     } as ActiveProjectShape
   }

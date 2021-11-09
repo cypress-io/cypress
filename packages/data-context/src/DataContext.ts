@@ -97,7 +97,7 @@ export class DataContext {
     if (this._config.launchArgs.projectRoot) {
       await this.actions.project.setActiveProject(this._config.launchArgs.projectRoot)
 
-      if (this.coreData.app.currentProject?.preferences) {
+      if (this.coreData.currentProject?.preferences) {
         toAwait.push(this.actions.project.launchProjectWithoutElectron())
       }
     }
@@ -206,7 +206,7 @@ export class DataContext {
   }
 
   get currentProject () {
-    return this.coreData.app.currentProject
+    return this.coreData.currentProject
   }
 
   @cached
