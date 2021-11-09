@@ -94,15 +94,15 @@ describe('e2e forms', () => {
     //   snapshot: true,
     // })
 
-    systemTests.it('failing', {
-      spec: 'form_submission_failing_spec.js',
-      snapshot: true,
-      expectedExitCode: 1,
-      onStdout: (stdout) => {
-        return stdout
-        .replace(/((?: {6}-)+[^\n]+\n)/gm, '')
-      }, // remove variable diff
-    })
+    // systemTests.it('failing', {
+    //   spec: 'form_submission_failing_spec.js',
+    //   snapshot: true,
+    //   expectedExitCode: 1,
+    //   onStdout: (stdout) => {
+    //     return stdout
+    //     .replace(/((?: {6}-)+[^\n]+\n)/gm, '')
+    //   }, // remove variable diff
+    // })
   })
 
   context('<form> submissions', () => {
