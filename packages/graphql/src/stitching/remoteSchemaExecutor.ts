@@ -7,7 +7,7 @@ import type { DataContext } from '@packages/data-context'
  * @returns
  */
 export const remoteSchemaExecutor = async (obj: Record<string, any>) => {
-  const { _document, variables, context: _context } = obj
+  const { document: _document, variables, context: _context } = obj
 
   const document: DocumentNode = _document
   const context: DataContext = _context
