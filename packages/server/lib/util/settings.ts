@@ -10,6 +10,8 @@ import { makeLegacyDataContext } from '../makeDataContext'
 
 const debug = Debug('cypress:server:settings')
 
+type ChangedConfig = { projectId?: string, component?: {}, e2e?: {} }
+
 function configCode (obj, isTS?: boolean) {
   const objJSON = obj && !_.isEmpty(obj)
     ? JSON.stringify(_.omit(obj, 'configFile'), null, 2)
@@ -88,7 +90,7 @@ function _logWriteErr (file, err) {
   return _err('ERROR_WRITING_FILE', file, err)
 }
 
-function _write (file, obj = {}) {
+function _write (file, obj: any = {}) {
   if (/\.json$/.test(file)) {
     debug('writing json file')
 
@@ -145,7 +147,7 @@ export function read (projectRoot, options: SettingsOptions = {}, ctx: DataConte
 
   const file = pathToConfigFile(projectRoot, options)
 
-  return ctx.config.getBaseConfig(file)
+  return ctx.config.getOrCreateBaseConfig(file)
   .catch((err) => {
     if (err.type === 'MODULE_NOT_FOUND' || err.code === 'ENOENT') {
       return Promise.reject(errors.get('CONFIG_FILE_NOT_FOUND', options.configFile, projectRoot))
@@ -163,7 +165,7 @@ export function read (projectRoot, options: SettingsOptions = {}, ctx: DataConte
     }
 
     debug('resolved configObject', configObject)
-    const changed: { projectId?: string, component?: {}, e2e?: {} } = _applyRewriteRules(configObject)
+    const changed: ChangedConfig = _applyRewriteRules(configObject)
 
     // if our object is unchanged
     // then just return it

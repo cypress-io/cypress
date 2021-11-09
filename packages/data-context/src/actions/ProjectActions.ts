@@ -69,10 +69,7 @@ export class ProjectActions {
       ctPluginsInitialized: false,
       e2ePluginsInitialized: false,
       config: null,
-      configChildProcess: {
-        process: null,
-        executedPlugins: null,
-      },
+      configChildProcess: null,
     })
 
     this.setCurrentProjectProperties({

@@ -21,26 +21,26 @@ export class ProjectConfigDataActions {
   static CHILD_PROCESS_FILE_PATH = path.join(__dirname, '../../../server/lib/util', 'require_async_child.js')
 
   killConfigProcess () {
-    if (this.ctx.activeProject?.configChildProcess) {
-      this.ctx.activeProject.configChildProcess.process.kill()
-      this.ctx.activeProject.configChildProcess = null
+    if (this.ctx.currentProject?.configChildProcess) {
+      this.ctx.currentProject.configChildProcess.process.kill()
+      this.ctx.currentProject.configChildProcess = null
     }
   }
 
   refreshProjectConfig (configFilePath: string) {
-    if (!this.ctx.activeProject) {
-      return null
+    if (!this.ctx.currentProject) {
+      throw new Error('Can\'t refresh project config without current project')
     }
 
     this.killConfigProcess()
 
     const process = this.forkConfigProcess({
-      projectRoot: this.ctx.activeProject.projectRoot,
+      projectRoot: this.ctx.currentProject.projectRoot,
       configFilePath,
     })
     const dfd = pDefer<Cypress.ConfigOptions>()
 
-    this.ctx.activeProject.configChildProcess = {
+    this.ctx.currentProject.configChildProcess = {
       process,
       executedPlugins: null,
       resolvedBaseConfig: dfd.promise,

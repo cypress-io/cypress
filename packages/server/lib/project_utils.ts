@@ -134,5 +134,5 @@ export const checkSupportFile = async ({
 }
 
 export async function getDefaultConfigFilePath (projectRoot: string, ctx = makeLegacyDataContext()): Promise<string | undefined> {
-  return ctx.config.getDefaultConfigFilePath(projectRoot)
+  return ctx.config.getDefaultConfigBasename(projectRoot)
 }

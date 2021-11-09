@@ -7,8 +7,8 @@ const errors = require('../errors')
 const util = require('./util')
 const pkg = require('@packages/root')
 
-let pluginsProcess = null
-let executedPlugins = null
+let pluginsProcess
+let executedPlugins
 let registeredEvents = {}
 let handlers = []
 
@@ -48,8 +48,8 @@ const init = (config, options, ctx) => {
     // noop, incompatible plugin not installed
   }
 
-  if (!(ctx && ctx.activeProject)) {
-    throw new Error('No active project to initialize plugins')
+  if (!(ctx && ctx.currentProject)) {
+    throw new Error('No current project to initialize plugins')
   }
 
   return new Promise(async (_resolve, _reject) => {
@@ -69,11 +69,11 @@ const init = (config, options, ctx) => {
     const resolve = fulfill(_resolve)
     const reject = fulfill(_reject)
 
-    pluginsProcess = ctx.activeProject.configChildProcess.process
-    executedPlugins = ctx.activeProject.configChildProcess.executedPlugins
+    pluginsProcess = ctx.currentProject?.configChildProcess?.process
+    executedPlugins = ctx.currentProject?.configChildProcess?.executedPlugins
 
     const killPluginsProcess = () => {
-      ctx.actions.childProcess.killChildProcess()
+      ctx.actions.projectConfig.killConfigProcess()
       pluginsProcess = null
     }
 
@@ -86,11 +86,17 @@ const init = (config, options, ctx) => {
 
     if (!pluginsProcess) {
       // initialize process to read the config and re-use to run the plugins
-      await ctx.config.getConfigOnChildProcess()
-      pluginsProcess = ctx.activeProject?.configChildProcess?.process
+      await ctx.config.getOrCreateBaseConfig()
+      pluginsProcess = ctx.currentProject?.configChildProcess?.process
     }
 
-    ctx.activeProject.configChildProcess.executedPlugins = options.testingType
+    if (ctx.currentProject?.configChildProcess) {
+      ctx.currentProject.configChildProcess.executedPlugins = options.testingType
+    }
+
+    if (!pluginsProcess) {
+      return
+    }
 
     const ipc = util.wrapIpc(pluginsProcess)
 
@@ -116,7 +122,7 @@ const init = (config, options, ctx) => {
     ipc.send('load:plugins', config)
 
     ipc.on('empty:plugins', () => {
-      resolve()
+      resolve(null)
     })
 
     ipc.on('loaded:plugins', (newCfg, registrations) => {
