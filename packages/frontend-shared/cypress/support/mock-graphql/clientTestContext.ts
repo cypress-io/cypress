@@ -16,8 +16,8 @@ export interface ClientTestContext {
     currentBrowser: Browser | null
     browsers: Browser[] | null
     isInGlobalMode: boolean
-    isAuthBrowserOpened: boolean
   }
+  isAuthBrowserOpened: boolean
   wizard: {
     step: WizardStep
     canNavigateForward: boolean

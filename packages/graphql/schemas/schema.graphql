@@ -4,9 +4,6 @@
 
 """Namespace for information related to the app"""
 type App {
-  """Whether the browser has been opened for auth or not"""
-  isAuthBrowserOpened: Boolean!
-
   """Whether the app is in global mode or not"""
   isInGlobalMode: Boolean!
 }
@@ -601,6 +598,9 @@ type Query {
 
   """The state of any info related to local development of the runner"""
   dev: DevState!
+
+  """Whether the browser has been opened for auth or not"""
+  isAuthBrowserOpened: Boolean!
 
   """Metadata about the nagivation menu"""
   navigationMenu: NavigationMenu

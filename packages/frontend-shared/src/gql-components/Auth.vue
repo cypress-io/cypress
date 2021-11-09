@@ -61,9 +61,7 @@ fragment Auth on Query {
     email
     fullName
   }
-  app {
-    isAuthBrowserOpened
-  }
+  isAuthBrowserOpened
 }
 `
 
@@ -81,9 +79,7 @@ mutation Login {
 
 gql`
 query BrowserOpened {
-  app {
-    isAuthBrowserOpened
-  }
+  isAuthBrowserOpened
 }
 `
 
@@ -103,7 +99,7 @@ const emit = defineEmits<{
 }>()
 
 const viewer = computed(() => props.gql?.cloudViewer)
-const isBrowserOpened = computed(() => props.gql?.app?.isAuthBrowserOpened)
+const isBrowserOpened = computed(() => props.gql?.isAuthBrowserOpened)
 const isLoggingIn = computed(() => clickedOnce.value && !viewer.value)
 
 const query = useQuery({

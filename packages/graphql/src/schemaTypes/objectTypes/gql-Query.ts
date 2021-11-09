@@ -56,5 +56,10 @@ export const Query = objectType({
         return ctx.wizardData.browserErrorMessage
       },
     })
+
+    t.nonNull.boolean('isAuthBrowserOpened', {
+      description: 'Whether the browser has been opened for auth or not',
+      resolve: (source, args, ctx) => ctx.coreData.isAuthBrowserOpened,
+    })
   },
 })

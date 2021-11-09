@@ -10,10 +10,6 @@ export const App = objectType({
         return ctx.app.isGlobalMode
       },
     })
-
-    t.nonNull.boolean('isAuthBrowserOpened', {
-      description: 'Whether the browser has been opened for auth or not',
-    })
   },
   sourceType: {
     module: '@packages/data-context/src/data/coreDataShape',

@@ -35,9 +35,9 @@ exports['@packages/data-context initializeData initializes 1'] = {
       ],
       "projects": [],
       "currentProject": null,
-      "isInGlobalMode": false,
-      "isAuthBrowserOpened": false
+      "isInGlobalMode": false
     },
+    "isAuthBrowserOpened": false,
     "wizard": {
       "chosenTestingType": null,
       "chosenBundler": null,
