@@ -2895,7 +2895,21 @@ declare namespace Cypress {
    * All configuration items are optional.
    */
   type CoreConfigOptions = Partial<Omit<ResolvedConfigOptions, TestingType>>
-  type ConfigOptions = CoreConfigOptions & { e2e?: CoreConfigOptions, component?: CoreConfigOptions }
+
+  interface ComponentConfigOptions<ComponentDevServerOpts = any> extends CoreConfigOptions {
+    // TODO(tim): Keeping optional until we land the implementation
+    devServer?: (cypressConfig: DevServerConfig, devServerConfig: ComponentDevServerOpts) => ResolvedDevServerConfig | Promise<ResolvedDevServerConfig>
+    devServerConfig?: ComponentDevServerOpts
+  }
+
+  /**
+   * Takes ComponentDevServerOpts to track the signature of the devServerConfig for the provided `devServer`,
+   * so we have proper completion for `devServerConfig`
+   */
+  type ConfigOptions<ComponentDevServerOpts = any> = CoreConfigOptions & {
+    e2e?: CoreConfigOptions,
+    component?: ComponentConfigOptions<ComponentDevServerOpts>
+  }
 
   interface PluginConfigOptions extends ResolvedConfigOptions {
     /**

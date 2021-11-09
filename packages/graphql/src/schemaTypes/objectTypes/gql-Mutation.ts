@@ -3,7 +3,6 @@ import { CodeGenTypeEnum } from '../enumTypes/gql-CodeGenTypeEnum'
 import { CodeLanguageEnum, FrontendFrameworkEnum, NavItemEnum, SupportedBundlerEnum, TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
 import { WizardUpdateInput } from '../inputTypes/gql-WizardUpdateInput'
 import { GeneratedSpec } from './gql-GeneratedSpec'
-import { Wizard } from './gql-Wizard'
 
 export const mutation = mutationType({
   definition (t) {
@@ -22,27 +21,6 @@ export const mutation = mutationType({
         } else {
           ctx.actions.dev.dismissRelaunch()
         }
-
-        return true
-      },
-    })
-
-    t.field('internal_triggerIpcToLaunchpad', {
-      type: 'Boolean',
-      args: {
-        msg: nonNull(stringArg()),
-      },
-      resolve: (_, args, ctx) => {
-        ctx.emitter.toLaunchpad(args.msg)
-
-        return true
-      },
-    })
-
-    t.field('internal_triggerIpcToApp', {
-      type: 'Boolean',
-      resolve: (_, args, ctx) => {
-        ctx.emitter.toApp('someData')
 
         return true
       },
@@ -130,24 +108,6 @@ export const mutation = mutationType({
       },
     })
 
-    t.field('wizardInstallDependencies', {
-      type: Wizard,
-      description: 'Installs the dependencies for the component testing step',
-      resolve: (_, args, ctx) => {
-        return ctx.wizardData
-      },
-    })
-
-    t.field('wizardValidateManualInstall', {
-      type: Wizard,
-      description: 'Validates that the manual install has occurred properly',
-      resolve: (_, args, ctx) => {
-        ctx.actions.wizard.validateManualInstall()
-
-        return ctx.wizardData
-      },
-    })
-
     t.liveMutation('launchpadSetBrowser', {
       description: 'Sets the active browser',
       args: {
@@ -156,7 +116,7 @@ export const mutation = mutationType({
         })),
       },
       resolve: async (_, args, ctx) => {
-        await ctx.actions.app.setActiveBrowser(args.id)
+        await ctx.actions.app.setActiveBrowserById(args.id)
       },
     })
 
@@ -236,10 +196,6 @@ export const mutation = mutationType({
     t.liveMutation('launchOpenProject', {
       description: 'Launches project from open_project global singleton',
       resolve: async (_, args, ctx) => {
-        if (!ctx.wizardData.chosenTestingType) {
-          throw Error('Cannot launch project without chosen testing type')
-        }
-
         await ctx.actions.project.launchProject(ctx.wizardData.chosenTestingType, {})
       },
     })
@@ -287,22 +243,8 @@ export const mutation = mutationType({
       },
     })
 
-    t.liveMutation('setCurrentSpec', {
-      description: 'Set the current spec under test',
-      args: {
-        id: nonNull(idArg()),
-      },
-      resolve: async (_, args, ctx) => {
-        if (!ctx.activeProject) {
-          throw Error(`Cannot set spec without active project!`)
-        }
-
-        await ctx.actions.project.setCurrentSpec(args.id)
-      },
-    })
-
     t.nonNull.field('setProjectPreferences', {
-      type: 'App',
+      type: 'Query',
       description: 'Save the projects preferences to cache',
       args: {
         testingType: nonNull(TestingTypeEnum),

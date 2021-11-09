@@ -55,14 +55,14 @@ describe('SpecRunnerHeader', () => {
     cy.get('[data-cy="header-selector"]').should('not.be.disabled')
   })
 
-  it('shows url section if activeTestingType is e2e', () => {
+  it('shows url section if currentTestingType is e2e', () => {
     const autStore = useAutStore()
 
     autStore.updateUrl('http://localhost:3000')
 
     cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
       onResult: (gql) => {
-        gql.activeTestingType = 'e2e'
+        gql.currentTestingType = 'e2e'
       },
       render: (gqlVal) => {
         return <SpecRunnerHeader gql={gqlVal} />
@@ -72,14 +72,14 @@ describe('SpecRunnerHeader', () => {
     cy.get('[data-cy="aut-url"]').should('exist')
   })
 
-  it('does not show url section if activeTestingType is component', () => {
+  it('does not show url section if currentTestingType is component', () => {
     const autStore = useAutStore()
 
     autStore.updateUrl('http://localhost:3000')
 
     cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
       onResult: (gql) => {
-        gql.activeTestingType = 'component'
+        gql.currentTestingType = 'component'
       },
       render: (gqlVal) => {
         return <SpecRunnerHeader gql={gqlVal} />
@@ -95,7 +95,7 @@ describe('SpecRunnerHeader', () => {
     autStore.updateDimensions(555, 777)
     cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
       onResult: (ctx) => {
-        ctx.selectedBrowser = ctx.browsers?.find((x) => x.displayName === 'Chrome') ?? null
+        ctx.currentBrowser = ctx.browsers?.find((x) => x.displayName === 'Chrome') ?? null
       },
       render: (gqlVal) => {
         return <SpecRunnerHeader gql={gqlVal} />

@@ -20,7 +20,7 @@
         v-if="generator"
         :key="generator.id"
         v-model:title="title"
-        :code-gen-glob="props.gql.activeProject?.codeGenGlob"
+        :code-gen-glob="props.gql.currentProject?.codeGenGlob"
         @restart="currentGeneratorId = undefined"
       />
       <div
@@ -37,11 +37,9 @@
 </template>
 
 <script lang  ="ts" setup>
-import { generators, SpecGenerator, GeneratorId } from './generators'
+import { generators, GeneratorId } from './generators'
 import { DialogOverlay } from '@headlessui/vue'
 import StandardModal from '@cy/components/StandardModal.vue'
-import StandardModalBody from '@cy/components/StandardModalBody.vue'
-import StandardModalFooter from '@cy/components/StandardModalFooter.vue'
 import CreateSpecCards from './CreateSpecCards.vue'
 import { ref, computed, Ref } from 'vue'
 import type { CreateSpecModalFragment } from '../generated/graphql'
@@ -60,9 +58,10 @@ defineEmits<{
 }>()
 
 gql`
-fragment CreateSpecModal on App {
+fragment CreateSpecModal on Query {
   ...CreateSpecCards
-  activeProject {
+  currentProject {
+    id
     ...ComponentGeneratorStepOne_codeGenGlob
   }
 }

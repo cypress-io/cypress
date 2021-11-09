@@ -1,5 +1,8 @@
 import type { LaunchArgs, OpenProjectLaunchOptions, PlatformName } from '@packages/types'
-import type { AppApiShape, ProjectApiShape } from './actions'
+import fsExtra from 'fs-extra'
+import path from 'path'
+
+import { AppApiShape, DataEmitterActions, ProjectApiShape } from './actions'
 import type { NexusGenAbstractTypeMembers } from '@packages/graphql/src/gen/nxs.gen'
 import type { AuthApiShape } from './actions/AuthActions'
 import debugLib from 'debug'
@@ -15,10 +18,16 @@ import {
   StorybookDataSource,
   CloudDataSource,
   ConfigDataSource,
+  EnvDataSource,
+  GraphQLDataSource,
+  HtmlDataSource,
+  UtilDataSource,
 } from './sources/'
 import { cached } from './util/cached'
-import { DataContextShell, DataContextShellConfig } from './DataContextShell'
 import type { GraphQLSchema } from 'graphql'
+import type { Server } from 'http'
+import type { AddressInfo } from 'net'
+import EventEmitter from 'events'
 import type { App as ElectronApp } from 'electron'
 
 const IS_DEV_ENV = process.env.CYPRESS_INTERNAL_ENV !== 'production'
@@ -27,7 +36,7 @@ export interface InternalDataContextOptions {
   loadCachedProjects: boolean
 }
 
-export interface DataContextConfig extends DataContextShellConfig {
+export interface DataContextConfig {
   schema: GraphQLSchema
   os: PlatformName
   launchArgs: LaunchArgs
@@ -49,11 +58,15 @@ export interface DataContextConfig extends DataContextShellConfig {
   _internalOptions: InternalDataContextOptions
 }
 
-export class DataContext extends DataContextShell {
+export class DataContext {
+  private _rootBus: EventEmitter
   private _coreData: CoreDataShape
+  private _gqlServer?: Server
+  private _appServerPort: number | undefined
+  private _gqlServerPort: number | undefined
 
   constructor (private _config: DataContextConfig) {
-    super(_config)
+    this._rootBus = new EventEmitter()
     this._coreData = _config.coreData ?? makeCoreData()
   }
 
@@ -78,16 +91,21 @@ export class DataContext extends DataContextShell {
     if (this._config.launchArgs.projectRoot) {
       await this.actions.project.setActiveProject(this._config.launchArgs.projectRoot)
 
-      if (this.coreData.app.activeProject?.preferences) {
+      if (this.coreData.app.currentProject?.preferences) {
         toAwait.push(this.actions.project.launchProjectWithoutElectron())
       }
     }
 
     if (this._config.launchArgs.testingType) {
+      this.appData.currentTestingType = this._config.launchArgs.testingType
       // It should be possible to skip the first step in the wizard, if the
       // user already told us the testing type via command line argument
       this.actions.wizard.setTestingType(this._config.launchArgs.testingType)
       this.actions.wizard.navigate('forward')
+    }
+
+    if (this._config.launchArgs.browser) {
+      toAwait.push(this.actions.app.setActiveBrowserByNameOrPath(this._config.launchArgs.browser))
     }
 
     if (IS_DEV_ENV) {
@@ -95,6 +113,10 @@ export class DataContext extends DataContextShell {
     }
 
     return Promise.all(toAwait)
+  }
+
+  get rootBus () {
+    return this._rootBus
   }
 
   get os () {
@@ -177,8 +199,8 @@ export class DataContext extends DataContextShell {
     return this.coreData.wizard
   }
 
-  get activeProject () {
-    return this.coreData.app.activeProject
+  get currentProject () {
+    return this.coreData.app.currentProject
   }
 
   @cached
@@ -191,8 +213,63 @@ export class DataContext extends DataContextShell {
     return new CloudDataSource(this)
   }
 
+  @cached
+  get env () {
+    return new EnvDataSource(this)
+  }
+
+  @cached
+  get emitter () {
+    return new DataEmitterActions(this)
+  }
+
+  graphqlClient () {
+    return new GraphQLDataSource(this, this._config.schema)
+  }
+
+  @cached
+  get html () {
+    return new HtmlDataSource(this)
+  }
+
+  @cached
+  get util () {
+    return new UtilDataSource(this)
+  }
+
   get projectsList () {
     return this.coreData.app.projects
+  }
+
+  // Servers
+
+  setAppServerPort (port: number | undefined) {
+    this._appServerPort = port
+  }
+
+  setGqlServer (srv: Server) {
+    this._gqlServer = srv
+    this._gqlServerPort = (srv.address() as AddressInfo).port
+  }
+
+  get appServerPort () {
+    return this._appServerPort
+  }
+
+  get gqlServerPort () {
+    return this._gqlServerPort
+  }
+
+  // Utilities
+
+  @cached
+  get fs () {
+    return fsExtra
+  }
+
+  @cached
+  get path () {
+    return path
   }
 
   get _apis () {
@@ -200,7 +277,7 @@ export class DataContext extends DataContextShell {
       appApi: this._config.appApi,
       authApi: this._config.authApi,
       projectApi: this._config.projectApi,
-      busApi: this._config.rootBus,
+      busApi: this._rootBus,
     }
   }
 
@@ -240,7 +317,7 @@ export class DataContext extends DataContextShell {
   }
 
   async destroy () {
-    super.destroy()
+    this._gqlServer?.close()
 
     return Promise.all([
       this.util.disposeLoaders(),

@@ -38,7 +38,8 @@ import CodeBox from './CodeBox.vue'
 import type { ProjectIdFragment } from '../../generated/graphql'
 
 gql`
-fragment ProjectId on Project {
+fragment ProjectId on CurrentProject {
+  id
   projectId
 }
 `

@@ -5,15 +5,15 @@
  */
 
 const path = require('path')
-const { devServer, defineDevServerConfig } = require('../../dist')
+const { devServer } = require('../../dist')
 
 module.exports = (on, config) => {
   on('dev-server:start', async (options) => {
     return devServer(
       options,
-      defineDevServerConfig({
+      {
         configFile: path.resolve(__dirname, '..', '..', 'vite.config.ts'),
-      }),
+      },
     )
   })
 

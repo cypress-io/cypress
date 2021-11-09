@@ -15,11 +15,12 @@ describe('<CreateSpecPage />', () => {
   describe('mounting in component type', () => {
     beforeEach(() => {
       cy.mount(() => (<div class="p-12"><CreateSpecPage gql={{
-        activeProject: {
+        currentProject: {
           id: 'id',
           storybook: null,
           codeGenGlob: '**.vue',
-        }, activeTestingType: 'component',
+          currentTestingType: 'component',
+        },
       }} /></div>))
     })
 
@@ -44,11 +45,12 @@ describe('<CreateSpecPage />', () => {
   describe('mounting in e2e mode', () => {
     beforeEach(() => {
       cy.mount(() => (<div class="p-12"><CreateSpecPage gql={{
-        activeProject: {
+        currentProject: {
           id: 'id',
           storybook: null,
           codeGenGlob: '**.vue',
-        }, activeTestingType: 'e2e',
+          currentTestingType: 'e2e',
+        },
       }} /></div>))
     })
 
@@ -78,12 +80,12 @@ describe('<CreateSpecPage />', () => {
 
         { /* Subject Under Test */ }
         <CreateSpecPage gql={{
-          activeProject: {
+          currentProject: {
             id: 'id',
             storybook: null,
             codeGenGlob: '**.vue',
+            currentTestingType: testingType.value,
           },
-          activeTestingType: testingType.value,
         }} />
       </div>))
   })

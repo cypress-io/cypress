@@ -1,7 +1,7 @@
 <template>
   <form
     v-if="props.gql.browsers"
-    @submit.prevent="emit('launch', props.gql?.selectedBrowser?.path)"
+    @submit.prevent="emit('launch', props.gql?.currentBrowser?.path)"
   >
     <div class="flex flex-wrap justify-center gap-6 py-16">
       <div
@@ -87,8 +87,9 @@ mutation OpenBrowserList_SetBrowser($id: ID!) {
 `
 
 gql`
-fragment OpenBrowserList on App {
-  selectedBrowser {
+fragment OpenBrowserList on CurrentProject {
+  id
+  currentBrowser {
     id
     displayName
     path
@@ -125,7 +126,7 @@ const setSelected = (browserId: string) => {
   setBrowser.executeMutation({ id: browserId })
 }
 
-const launchText = computed(() => props.gql.selectedBrowser ? `${t('setupPage.openBrowser.launch')} ${props.gql.selectedBrowser.displayName}` : '')
+const launchText = computed(() => props.gql.currentBrowser ? `${t('setupPage.openBrowser.launch')} ${props.gql.currentBrowser.displayName}` : '')
 </script>
 
 <style scoped>

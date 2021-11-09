@@ -71,7 +71,3 @@ export function devServer (cypressDevServerConfig: Cypress.DevServerConfig, devS
     template: devServerConfig?.template,
   })
 }
-
-export function defineDevServerConfig (devServerConfig: CypressWebpackDevServerConfig) {
-  return devServerConfig
-}

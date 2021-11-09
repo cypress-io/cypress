@@ -22,7 +22,7 @@
         :code="file.content"
         line-numbers
         lang="js"
-        :copy-on-click="false"
+        copy-button
       />
     </div>
   </Collapsible>
@@ -36,13 +36,14 @@ import type { GeneratorSuccessFragment } from '../../generated/graphql'
 
 gql`
 fragment GeneratorSuccess on GeneratedSpec {
+  id
   content
   spec {
+    id
     fileName
     fileExtension
     baseName
     relative
-    id
   } 
 }
 `

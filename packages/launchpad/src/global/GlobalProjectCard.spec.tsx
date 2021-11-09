@@ -30,7 +30,7 @@ describe('<GlobalProjectCard />', () => {
   })
 
   it('renders', () => {
-    cy.findByText('Some Test Title').should('be.visible')
+    cy.findByText('some-test-title').should('be.visible')
     cy.findByText(defaultPath).should('be.visible')
   })
 

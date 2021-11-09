@@ -15,12 +15,12 @@ describe('<CreateSpecModal />', () => {
     cy.mount(() => (<div>
       <CreateSpecModal
         gql={{
-          activeProject: {
+          currentProject: {
             id: 'id',
             codeGenGlob: '**.vue',
             storybook: null,
+            currentTestingType: 'component',
           },
-          activeTestingType: 'component',
         }}
         show={show.value}
         onClose={() => show.value = false}
@@ -65,12 +65,12 @@ describe('playground', () => {
       <br/>
       <CreateSpecModal
         gql={{
-          activeProject: {
+          currentProject: {
             id: 'id',
             codeGenGlob: '**.vue',
             storybook: null,
+            currentTestingType: 'component',
           },
-          activeTestingType: 'component',
         }}
         show={show.value}
         onClose={() => show.value = false}

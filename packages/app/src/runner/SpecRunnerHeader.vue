@@ -24,7 +24,7 @@
       </button>
 
       <div
-        v-if="props.gql.activeTestingType === 'e2e'"
+        v-if="props.gql.currentTestingType === 'e2e'"
         data-cy="aut-url"
       >
         <div
@@ -75,10 +75,11 @@ import { getAutIframeModel, getEventManager } from '.'
 import { useSelectorPlaygroundStore } from '../store/selector-playground-store'
 
 gql`
-fragment SpecRunnerHeader on App {
-  activeTestingType
+fragment SpecRunnerHeader on CurrentProject {
+  id
+  currentTestingType
 
-  selectedBrowser {
+  currentBrowser {
     id
     displayName
   }
@@ -113,15 +114,15 @@ const togglePlayground = () => {
 }
 
 const browser = computed(() => {
-  if (!props.gql.selectedBrowser) {
+  if (!props.gql.currentBrowser) {
     return
   }
 
   const dimensions = `${autStore.viewportDimensions.width}x${autStore.viewportDimensions.height}`
 
   return {
-    id: props.gql.selectedBrowser.id,
-    name: `${props.gql.selectedBrowser.displayName} ${dimensions}`,
+    id: props.gql.currentBrowser.id,
+    name: `${props.gql.currentBrowser.displayName} ${dimensions}`,
   }
 })
 

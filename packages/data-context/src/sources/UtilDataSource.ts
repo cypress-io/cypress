@@ -1,7 +1,7 @@
 import DataLoader from 'dataloader'
 import crypto from 'crypto'
 import fetch from 'cross-fetch'
-import type { DataContextShell } from '../DataContextShell'
+import type { DataContext } from '../DataContext'
 
 /**
  * this.ctx.util....
@@ -10,7 +10,7 @@ import type { DataContextShell } from '../DataContextShell'
  * within the DataContext layer
  */
 export class UtilDataSource {
-  constructor (private ctx: DataContextShell) {}
+  constructor (private ctx: DataContext) {}
 
   private _allLoaders: DataLoader<any, any>[] = []
 
