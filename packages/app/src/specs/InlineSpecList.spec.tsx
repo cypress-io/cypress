@@ -7,7 +7,7 @@ describe('InlineSpecList', () => {
   beforeEach(() => {
     cy.mountFragment(Specs_InlineSpecListFragmentDoc, {
       onResult: (ctx) => {
-        specs = ctx.activeProject?.specs?.edges || []
+        specs = ctx.specs?.edges || []
 
         return ctx
       },

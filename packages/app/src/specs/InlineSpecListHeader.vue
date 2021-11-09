@@ -1,6 +1,6 @@
 <template>
-  <div class="flex h-64px w-auto items-center gap-8px mx-16px border-b-1 border-gray-900">
-    <div class="flex-1 relative items-center group">
+  <div class="h-64px items-center gap-8px mx-16px border-b-1 border-gray-900 grid grid-cols-[minmax(0,1fr),63px,24px]">
+    <div class="relative items-center group">
       <div class="absolute inset-y-0 flex items-center pointer-events-none">
         <MagnifyingGlassIcon
           :class="inputFocused ? 'icon-dark-white' : 'icon-dark-gray-900'"
@@ -9,6 +9,7 @@
       </div>
       <input
         class="
+          w-full
           bg-gray-1000
           pl-6
           text-gray-500
@@ -17,30 +18,23 @@
           outline-none
         "
         placeholder="Search Specs"
+        :value="search"
         @focus="inputFocused = true"
         @blur="inputFocused = false"
-        :value="search"
         @input="onInput"
-      />
+      >
     </div>
-    <!-- <Input
-      placeholder="Search Specs"
-      :prefix-icon="MagnifyingGlassIcon"
-      input-classes="bg-gray-1000 text-gray-100 border-none text-white"
-      prefix-icon-classes="icon-light-gray-1000 icon-dark-gray-700"
-      class="flex-1"
-    /> -->
-    <!-- <Button size="sm" variant="outline" class="border-gray-800 gap-0">
-      <template #prefix>
-        <component :is="FileTreeIcon" class="icon-light-gray-50 icon-dark-gray-200"></component>
-      </template>
-    </Button> -->
     <RadioGroup
       :model-value="tab"
       class="flex border-1 border-gray-900 rounded-md h-24px w-64px text-md cursor-pointer"
       @update:model-value="emit('update:tab', $event)"
     >
-      <RadioGroupOption v-slot="{ checked }" as="template" value="file-list">
+      <RadioGroupOption
+        v-slot="{ checked }"
+        as="template"
+        value="file-list"
+        data-cy="file-list-radio-option"
+      >
         <div
           class="flex flex-1 items-center justify-center outline-none"
           :class="{ 'bg-gray-900': checked }"
@@ -50,7 +44,12 @@
           />
         </div>
       </RadioGroupOption>
-      <RadioGroupOption v-slot="{ checked }" as="template" value="file-tree">
+      <RadioGroupOption
+        v-slot="{ checked }"
+        as="template"
+        value="file-tree"
+        data-cy="file-tree-radio-option"
+      >
         <div
           class="flex flex-1 items-center justify-center outline-none"
           :class="{ 'bg-gray-900': checked }"
@@ -64,7 +63,6 @@
     <button
       class="
         border-1 border-gray-900
-        wh-24px
         h-24px
         w-24px
         rounded-md
@@ -74,6 +72,8 @@
         items-center
         justify-center
       "
+      data-cy="runner-spec-list-add-spec"
+      @click="emit('addSpec')"
     >
       <AddSmallIcon class="icon-light-gray-50 icon-dark-gray-200" />
     </button>
@@ -81,25 +81,26 @@
 </template>
 
 <script lang="ts" setup>
-import MagnifyingGlassIcon from "~icons/cy/magnifying-glass_x16.svg";
-import FileTreeIcon from "~icons/cy/file-tree.svg";
-import FileListIcon from "~icons/cy/file-list.svg";
-import AddSmallIcon from "~icons/cy/add-small_x16.svg";
-import Input from "@cy/components/Input.vue";
-import Button from "@cy/components/Button.vue";
-import { ref, watch } from "vue";
-import { RadioGroup, RadioGroupOption } from "@headlessui/vue";
+import MagnifyingGlassIcon from '~icons/cy/magnifying-glass_x16.svg'
+import FileTreeIcon from '~icons/cy/file-tree.svg'
+import FileListIcon from '~icons/cy/file-list.svg'
+import AddSmallIcon from '~icons/cy/add-small_x16.svg'
+import Input from '@cy/components/Input.vue'
+import Button from '@cy/components/Button.vue'
+import { ref, watch } from 'vue'
+import { RadioGroup, RadioGroupOption } from '@headlessui/vue'
 
 defineProps<{tab: string, search: string}>()
 
 const emit = defineEmits<{
   (e: 'update:tab', tab: string): void
   (e: 'update:search', search: string)
+  (e: 'addSpec')
 }>()
 
 // const selectedTab = ref('file-list')
 
-const inputFocused = ref(false);
+const inputFocused = ref(false)
 
 const onInput = (e: Event) => {
   const value = (e.target as HTMLInputElement).value

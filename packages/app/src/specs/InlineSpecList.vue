@@ -1,22 +1,24 @@
 <template>
-  <div>
+  <div class="w-280px">
     <InlineSpecListHeader
       v-model:tab="tab"
       v-model:search="search"
     />
-    <template v-if="tab === 'file-list'">
-      <InlineSpecListRow
-        v-for="spec in specs"
-        :key="spec.node.id"
-        :spec="spec.node"
-        :selected="isCurrentSpec(spec)"
-      />
-    </template>
-    <template v-else>
-      <div class="text-white">
-        FileTree not implemented
-      </div>
-    </template>
+    <div class="h-[calc(100vh-65px)] overflow-y-auto overflow-x-hidden pt-16px">
+      <template v-if="tab === 'file-list'">
+        <InlineSpecListRow
+          v-for="spec in specs"
+          :key="spec.node.id"
+          :spec="spec.node"
+          :selected="isCurrentSpec(spec)"
+        />
+      </template>
+      <template v-else>
+        <div class="text-white">
+          FileTree not implemented
+        </div>
+      </template>
+    </div>
   </div>
 </template>
 
