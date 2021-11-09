@@ -17,7 +17,7 @@ export class VersionsDataSource {
    *   { version: '8.4.0', released: '2021-09-13T20:29:16.074Z' },
    * ]
    */
-  async versions (n: number = 10): Promise<Version[]> {
+  async versions (n: number = 5): Promise<Version[]> {
     const result = await execa(`npm`, [`view`, `cypress`, `time`, `--json`])
 
     const json = JSON.parse(result.stdout)

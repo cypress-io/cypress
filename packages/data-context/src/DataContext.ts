@@ -141,7 +141,7 @@ export class DataContext extends DataContextShell {
     return new GitDataSource(this)
   }
 
-  versions (count: number) {
+  versions (count?: number) {
     return new VersionsDataSource().versions(count)
   }
 

@@ -45,7 +45,7 @@ export const Query = objectType({
       args: {
         count: intArg(),
       },
-      resolve: (root, args, ctx) => ctx.versions(args.count),
+      resolve: (root, args, ctx) => ctx.versions(args.count ?? undefined),
     })
 
     t.field('currentProject', {

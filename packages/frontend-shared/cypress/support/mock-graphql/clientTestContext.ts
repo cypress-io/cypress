@@ -1,6 +1,6 @@
 import { cloneDeep } from 'lodash'
 import type { CloudUser } from '../generated/test-cloud-graphql-types.gen'
-import type { WizardStep, NavItem, CurrentProject, Browser, WizardBundler, WizardFrontendFramework, TestingTypeEnum, GlobalProject } from '../generated/test-graphql-types.gen'
+import type { WizardStep, NavItem, CurrentProject, Browser, WizardBundler, WizardFrontendFramework, TestingTypeEnum, GlobalProject, Version } from '../generated/test-graphql-types.gen'
 import { resetTestNodeIdx } from './clientTestUtils'
 import { stubBrowsers } from './stubgql-Browser'
 import * as cloudTypes from './stubgql-CloudTypes'
@@ -18,6 +18,7 @@ export interface ClientTestContext {
     isInGlobalMode: boolean
     isAuthBrowserOpened: boolean
   }
+  versions: Version[]
   wizard: {
     step: WizardStep
     canNavigateForward: boolean
@@ -56,6 +57,20 @@ export function makeClientTestContext (): ClientTestContext {
       isInGlobalMode: false,
       isAuthBrowserOpened: false,
     },
+    versions: [
+      {
+        __typename: 'Version',
+        id: '8.7.0',
+        version: '8.7.0',
+        released: '2021-10-25T21:38:59.983Z',
+      },
+      {
+        __typename: 'Version',
+        id: '8.6.0',
+        version: '8.6.0',
+        released: '2021-10-11T19:40:49.036Z',
+      },
+    ],
     wizard: {
       step: 'configFiles',
       canNavigateForward: false,

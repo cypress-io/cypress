@@ -18,4 +18,7 @@ export const stubQuery: MaybeResolver<Query> = {
   projects (soruce, args, ctx) {
     return ctx.projects
   },
+  versions (ssource, args, ctx) {
+    return ctx.versions
+  },
 }
