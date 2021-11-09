@@ -68,6 +68,28 @@
           />
         </RouterLink>
       </nav>
+      <SidebarTooltip
+        class="cursor-pointer inline-block rounded
+              absolute right-0 bottom-0
+              p-7px m-16px w-32px
+              border border-transparent hover:border-gray-500
+              transform transition-all duration-300"
+        :class="{ '-translate-y-48px': !mainStore.navBarExpanded }"
+        :disabled="mainStore.navBarExpanded"
+        :popper-top-offset="-4"
+        @click="bindingsOpen = true"
+      >
+        <i-cy-command-key_x16
+          class="w-16px h-16px icon-dark-gray-500"
+        />
+        <template #popper>
+          {{ t('sideBar.keyboardShortcuts') }}
+        </template>
+        <KeyboardBindingsModal
+          :show="bindingsOpen"
+          @close="bindingsOpen = false"
+        />
+      </SidebarTooltip>
       <img
         :src="CypressLogo"
         class="w-32px h-32px m-16px"
@@ -77,17 +99,22 @@
 </template>
 
 <script lang="ts" setup>
+import { ref } from 'vue'
 import { gql, useQuery } from '@urql/vue'
 import SidebarNavigationRow from './SidebarNavigationRow.vue'
 import SwitchTestingTypeButton from './SwitchTestingTypeButton.vue'
+import KeyboardBindingsModal from './KeyboardBindingsModal.vue'
 import CodeIcon from '~icons/cy/code-editor_x24'
 import RunsIcon from '~icons/cy/runs_x24'
 import SettingsIcon from '~icons/cy/settings_x24'
 import SidebarTooltip from './SidebarTooltip.vue'
+import HideDuringScreenshot from '../runner/screenshot/HideDuringScreenshot.vue'
 import { useMainStore } from '../store'
 import { SideBarNavigationDocument } from '../generated/graphql'
 import CypressLogo from '@packages/frontend-shared/src/assets/logos/cypress_s.png'
-import HideDuringScreenshot from '../runner/screenshot/HideDuringScreenshot.vue'
+import { useI18n } from '@cy/i18n'
+
+const { t } = useI18n()
 
 const navigation = [
   { name: 'Home', icon: CodeIcon, href: '/' },
@@ -106,6 +133,8 @@ query SideBarNavigation {
 `
 
 const query = useQuery({ query: SideBarNavigationDocument })
+
+const bindingsOpen = ref(false)
 
 const mainStore = useMainStore()
 
