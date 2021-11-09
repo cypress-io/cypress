@@ -3,7 +3,7 @@
     <div class="relative items-center group">
       <div class="absolute inset-y-0 flex items-center pointer-events-none">
         <MagnifyingGlassIcon
-          :class="inputFocused ? 'icon-dark-white' : 'icon-dark-gray-900'"
+          :class="inputFocused ? 'icon-dark-gray-200' : 'icon-dark-gray-900'"
           class="icon-light-gray-1000"
         />
       </div>
