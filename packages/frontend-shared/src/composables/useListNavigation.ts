@@ -1,16 +1,18 @@
 import { onKeyStroke } from '@vueuse/core'
-import { computed, watch, ref, Ref } from 'vue'
-import type { UseCollapsibleTreeNode } from './useCollapsibleTree'
+import { ref, onBeforeUpdate } from 'vue'
 
-export const useListNavigation = (rootEl, itemRefs: Ref<any[]>) => {
+export const useListNavigation = (rootEl) => {
   const selectedItem = ref(0)
-
-  const scroll = (el) => {
-    if (typeof el.focus === 'function') {
-      el.focus({ preventScroll: true })
-      el.scrollIntoView({ block: 'nearest' })
+  const itemRefs = ref([]) as any
+  const setItemRef = (el) => {
+    if (el) {
+      itemRefs.value.push(el)
     }
   }
+
+  onBeforeUpdate(() => {
+    itemRefs.value = []
+  })
 
   const goToItem = (direction: 'next' | 'previous', event) => {
     event.preventDefault()
@@ -27,23 +29,10 @@ export const useListNavigation = (rootEl, itemRefs: Ref<any[]>) => {
         selectedItem.value--
       }
     }
+
     itemRefs.value[selectedItem.value]?.focus({ preventScroll: true })
     itemRefs.value[selectedItem.value]?.scrollIntoView({ block: 'nearest' })
-
-
-    // const target = (event.target as HTMLAnchorElement)
-
-    // if (!target) return
-
-    // const firstEl = target.parentElement?.firstElementChild as HTMLAnchorElement
-    // const lastEl = target.parentElement?.lastElementChild as HTMLAnchorElement
-    // const el = (direction === 'next' ? target.nextElementSibling : target.previousElementSibling) as HTMLAnchorElement
-
-    // if (typeof el.focus === 'function') scroll(el)
-    // else if (direction === 'next') scroll(firstEl)
-    // else if (direction === 'previous') scroll(lastEl)
   }
-
 
   onKeyStroke('ArrowDown', (event: KeyboardEvent) => {
     goToItem('next', event)
@@ -53,5 +42,8 @@ export const useListNavigation = (rootEl, itemRefs: Ref<any[]>) => {
     goToItem('previous', event)
   }, { target: rootEl })
 
-  return {selectedItem}
+  return { selectedItem, rowProps: {
+    ref: setItemRef,
+    tabIndex: '-1',
+  } }
 }

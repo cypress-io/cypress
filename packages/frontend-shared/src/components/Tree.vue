@@ -16,13 +16,10 @@
     <div
       v-for="row, idx in filteredTree"
       :key="idx"
-      :ref="setItemRef"
-      href="#"
+      v-bind="rowProps"
       class="block pt-20px mt-20px"
-      :data-tree-idx="idx"
       :class="{ 'bg-gray-50': row.children, 'hidden': row.hidden.value, 'border-2 border-red-500': selectedItem === idx }"
       :style="{ marginLeft: `${row.depth * 25}px` }"
-      tabindex="-1"
       @click="onRowClick(row, idx)"
       @keypress.enter.space.prevent="onRowClick(row, idx)"
     >
@@ -36,17 +33,6 @@ import { useCollapsibleTree } from '../composables/useCollapsibleTree'
 import faker from 'faker'
 import { Ref, ref, onBeforeUpdate, computed } from 'vue'
 import { useListNavigation } from '../composables/useListNavigation'
-
-const itemRefs = ref([]) as any
-const setItemRef = (el) => {
-  if (el) {
-    itemRefs.value.push(el)
-  }
-}
-
-onBeforeUpdate(() => {
-  itemRefs.value = []
-})
 
 const contacts = Array.from(new Array(3).keys()).map(() => {
   return {
@@ -78,5 +64,5 @@ const rootEl: Ref<HTMLElement | undefined> = ref()
 const { tree, expand, collapse } = useCollapsibleTree(root)
 const filteredTree = computed(() => tree.filter(((item) => !item.hidden.value)))
 
-const { selectedItem } = useListNavigation(rootEl, itemRefs)
+const { selectedItem, rowProps } = useListNavigation(rootEl)
 </script>
