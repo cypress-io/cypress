@@ -35,6 +35,7 @@ fragment CreateSpecCards on Query {
     id
     currentTestingType
     storybook {
+      id
       storybookRoot
     }
   }

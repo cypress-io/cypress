@@ -5,11 +5,12 @@
     </template>
     <template #description>
       <i18n-t keypath="settingsPage.config.description">
-        <a
+        <ExternalLink
           href="https://docs.cypress.io"
-          target="_blank"
-          class="text-purple-500 hocus-link-default"
-        >cypress.config.js</a>
+          class="text-purple-500"
+        >
+          cypress.config.js
+        </ExternalLink>
       </i18n-t>
     </template>
     <div class="flex w-full">
@@ -31,12 +32,14 @@ import SettingsSection from '../SettingsSection.vue'
 import { useI18n } from '@cy/i18n'
 import ConfigLegend from './ConfigLegend.vue'
 import ConfigCode from './ConfigCode.vue'
+import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import type { ConfigFragment } from '../../generated/graphql'
 
 const { t } = useI18n()
 
 gql`
 fragment Config on CurrentProject {
+  id
   config
 }
 `

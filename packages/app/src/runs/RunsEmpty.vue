@@ -59,12 +59,14 @@ const { t } = useI18n()
 
 gql`
 fragment RunsEmpty on CurrentProject {
+  id
   title
   projectId
   configFilePath
   cloudProject {
     id
     recordKeys {
+      id
       ...RecordKey
     }
   }

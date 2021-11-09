@@ -21,6 +21,7 @@ export const CurrentProject = objectType({
     t.field('currentTestingType', {
       description: 'The mode the interactive runner was launched in',
       type: 'TestingTypeEnum',
+      resolve: (_, args, ctx) => ctx.wizard.chosenTestingType,
     })
 
     t.field('currentBrowser', {
@@ -66,18 +67,6 @@ export const CurrentProject = objectType({
       description: 'Whether the user configured this project to use e2e Testing',
       resolve: (source, args, ctx) => {
         return ctx.project.isTestingTypeConfigured(source.projectRoot, 'e2e')
-      },
-    })
-
-    t.field('currentSpec', {
-      description: 'Currently selected spec',
-      type: 'Spec',
-      resolve: (source, args, ctx) => {
-        if (!ctx.currentProject || !ctx.currentProject.currentSpecId) {
-          return null
-        }
-
-        return ctx.project.getCurrentSpecById(source.projectRoot, ctx.currentProject.currentSpecId)
       },
     })
 
