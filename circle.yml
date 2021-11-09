@@ -50,7 +50,7 @@ executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
     docker:
-      - image: cypress/browsers:node14.17.0-chrome91-ff89
+      - image: cypress/browsers:node16.5.0-chrome94-ff93
     # by default, we use "small" to save on CI costs. bump on a per-job basis if needed.
     resource_class: small
     environment:
@@ -59,7 +59,7 @@ executors:
   # Docker image with non-root "node" user
   non-root-docker-user:
     docker:
-      - image: cypress/browsers:node14.17.0-chrome91-ff89
+      - image: cypress/browsers:node16.5.0-chrome94-ff93
         user: node
     environment:
       PLATFORM: linux
@@ -70,7 +70,7 @@ executors:
   mac:
     macos:
       # Executor should have Node >= required version
-      xcode: "12.2.0"
+      xcode: "13.0.0"
     environment:
       PLATFORM: mac
 
@@ -266,15 +266,20 @@ commands:
 
   install-required-node:
     # https://discuss.circleci.com/t/switch-nodejs-version-on-machine-executor-solved/26675/2
-    description: Install Node version matching .node-version
+    description: Install Node version
+    parameters:
+      version:
+        type: string
+        default: ""
     steps:
       - run:
           name: Install NVM
           # TODO: determine why we get the missing .nvmrc file error
           command: |
-            export NODE_VERSION=$(cat .node-version)
+            export NODE_VERSION=<<parameters.version>>
+            export NODE_VERSION=${NODE_VERSION:-$(cat .node-version)}
             echo "Installing Node $NODE_VERSION"
-            cp .node-version .nvmrc
+            echo $NODE_VERSION > .nvmrc
             curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.35.3/install.sh | bash
       - run:
           # https://github.com/nvm-sh/nvm#nvmrc
@@ -282,9 +287,9 @@ commands:
           command: |
             . ./scripts/load-nvm.sh
             echo "before nvm install"
-            nvm install
+            nvm install <<parameters.version>>
             echo "before nvm use"
-            nvm use
+            nvm use <<parameters.version>>
             echo "before nvm alias default"
             nvm alias default
             node --version
@@ -1467,20 +1472,27 @@ jobs:
       <<: *defaults
       steps:
         - restore_cached_workspace
+        - install-required-node:
+            version: "16.10"
         - run:
-            name: Build
-            command: yarn workspace @cypress/schematic build:all
-        - run:
-            name: Install @angular/cli
-            command: yarn policies set-version 1.19.0 && yarn add --dev @angular/cli
+            name: Build + Install
+            command: |
+              . ../../scripts/load-nvm.sh
+              yarn workspace @cypress/schematic build:all
+              yarn policies set-version 1.19.0
+              yarn add --dev @angular/cli
             working_directory: npm/cypress-schematic
         - run:
             name: Launch
-            command: yarn launch:test
+            command: |
+              . ../../scripts/load-nvm.sh
+              yarn launch:test
             working_directory: npm/cypress-schematic
         - run:
             name: Run unit tests
-            command: yarn test
+            command: |
+              . ../../scripts/load-nvm.sh
+              yarn test
             working_directory: npm/cypress-schematic
         - store-npm-logs
 
