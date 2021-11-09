@@ -14,7 +14,9 @@ describe('testConfigOverrides', () => {
     spec: 'testConfigOverrides-invalid-browser.js',
     snapshot: true,
     expectedExitCode: 1,
-
+    config: {
+      video: false,
+    },
   })
 
   systemTests.it('has originalTitle when skip due to browser config', {
@@ -31,21 +33,42 @@ describe('testConfigOverrides', () => {
     },
   })
 
-  systemTests.it('fails when passing invalid config values', {
-    spec: 'testConfigOverrides-invalid.js',
-    snapshot: true,
-    expectedExitCode: 8,
-  })
+  // window.Error throws differently for firefox. break into
+  // browser permutations for snapshot comparisons
+  const permutations = [
+    ['chrome', 'electron'],
+    ['firefox'],
+  ]
 
-  systemTests.it('fails when passing invalid config values with beforeEach', {
-    spec: 'testConfigOverrides-before-invalid.js',
-    snapshot: true,
-    expectedExitCode: 8,
-  })
+  permutations.forEach((browserList) => {
+    systemTests.it(`fails when passing invalid config values - [${browserList}]`, {
+      spec: 'testConfigOverrides-invalid.js',
+      snapshot: true,
+      browser: browserList,
+      expectedExitCode: 8,
+      config: {
+        video: false,
+      },
+    })
 
-  systemTests.it('correctly fails when invalid config values for it.only', {
-    spec: 'testConfigOverrides-only-invalid.js',
-    snapshot: true,
-    expectedExitCode: 1,
+    systemTests.it(`fails when passing invalid config values with beforeEach - [${browserList}]`, {
+      spec: 'testConfigOverrides-before-invalid.js',
+      snapshot: true,
+      browser: browserList,
+      expectedExitCode: 8,
+      config: {
+        video: false,
+      },
+    })
+
+    systemTests.it(`correctly fails when invalid config values for it.only [${browserList}]`, {
+      spec: 'testConfigOverrides-only-invalid.js',
+      snapshot: true,
+      browser: browserList,
+      expectedExitCode: 1,
+      config: {
+        video: false,
+      },
+    })
   })
 })
