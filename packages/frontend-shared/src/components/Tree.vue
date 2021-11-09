@@ -2,7 +2,6 @@
   Items,
   <!-- Selected: {{ selectedNode }} -->
   Total Count: {{ tree.length }}
-  {{ selectedIndex }}
   <button @click="expand">
     Expand
   </button>
@@ -18,7 +17,7 @@
       v-for="row, idx in tree"
       :key="idx"
       class="block pt-20px mt-20px"
-      :data-list-idx="idx"
+      :data-tree-idx="idx"
       :class="{ 'bg-gray-50': row.children, 'hidden': row.hidden.value, 'text-red-500': selectedIndex === idx}"
       :style="{ marginLeft: `${row.depth * 25}px` }"
       @click="onRowClick(row, idx)"
