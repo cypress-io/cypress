@@ -9,6 +9,7 @@ macBuildFilters: &macBuildFilters
       only:
         - develop
         - 9.0-release
+        - fix-9.0-darwin-node-install
 
 defaults: &defaults
   parallelism: 1
@@ -281,13 +282,13 @@ commands:
             echo "Installing Node $NODE_VERSION"
             echo $NODE_VERSION > .nvmrc
             curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.35.3/install.sh | bash
-            echo "before nvm alias default"
-            nvm alias default node
       - run:
           # https://github.com/nvm-sh/nvm#nvmrc
           name: Install Node
           command: |
             . ./scripts/load-nvm.sh
+            echo "before nvm alias default"
+            nvm alias default node
             echo "before nvm install"
             nvm install <<parameters.version>>
             echo "before nvm use"
