@@ -39,7 +39,7 @@ import { gql, useMutation } from '@urql/vue'
 import GlobalProjectCard from './GlobalProjectCard.vue'
 import GlobalPageHeader from './GlobalPageHeader.vue'
 import GlobalEmpty from './GlobalEmpty.vue'
-import { GlobalPageFragment, GlobalPage_AddProjectDocument, GlobalPage_RemoveProjectDocument } from '../generated/graphql'
+import { GlobalPageFragment, GlobalPage_AddProjectDocument, GlobalPage_RemoveProjectDocument, GlobalProjectCardFragment } from '../generated/graphql'
 
 gql`
 mutation GlobalPage_addProject($path: String!, $open: Boolean = true) {
@@ -48,7 +48,7 @@ mutation GlobalPage_addProject($path: String!, $open: Boolean = true) {
 `
 
 gql`
-fragment GlobalPage on App {
+fragment GlobalPage on Query {
   projects {
     ...GlobalProjectCard
   }
@@ -86,7 +86,7 @@ const props = defineProps<{
 }>()
 
 const filteredProjects = computed(() => {
-  return props.gql.projects.filter((p) => p.title.toLowerCase().indexOf(match.value.toLowerCase()) !== -1)
+  return (props.gql.projects as GlobalProjectCardFragment[]).filter((p) => p.title.toLowerCase().indexOf(match.value.toLowerCase()) !== -1)
 })
 
 const match = ref('')

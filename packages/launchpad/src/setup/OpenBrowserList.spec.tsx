@@ -5,11 +5,14 @@ import { longBrowsersList } from '@packages/frontend-shared/cypress/support/mock
 const launchButtonSelector = 'button[data-testid=launch-button]'
 
 describe('<OpenBrowserList />', () => {
-  it('renders a long list of found browsers correctly', () => {
+  beforeEach(() => {
     cy.viewport(1000, 750)
+  })
+
+  it('renders a long list of found browsers correctly', () => {
     cy.mountFragment(OpenBrowserListFragmentDoc, {
       onResult: (result) => {
-        result.selectedBrowser = null
+        result.currentBrowser = null
       },
       render: (gqlVal) => <div class="resize overflow-auto border-current border-1"><OpenBrowserList gql={gqlVal} /></div>,
     })
@@ -23,12 +26,19 @@ describe('<OpenBrowserList />', () => {
   })
 
   it('renders launch button when a browser is selected', () => {
-    cy.viewport(1000, 750)
     cy.mountFragment(OpenBrowserListFragmentDoc, {
       render: (gqlVal) => <div class="resize overflow-auto border-current border-1"><OpenBrowserList gql={gqlVal} /></div>,
     })
 
     cy.get(launchButtonSelector).should('be.visible').and('have.text', 'Launch Electron')
     cy.contains('button', 'different browser').should('not.exist')
+  })
+
+  it('does not render browser error if there is not one', () => {
+    cy.mountFragment(OpenBrowserListFragmentDoc, {
+      render: (gqlVal) => <div class="resize overflow-auto border-current border-1"><OpenBrowserList gql={gqlVal} /></div>,
+    })
+
+    cy.contains('[data-test-id="browser-error-message"]').should('not.exist')
   })
 })

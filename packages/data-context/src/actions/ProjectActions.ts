@@ -40,13 +40,13 @@ export class ProjectActions {
   }
 
   async clearActiveProject () {
-    this.ctx.appData.activeProject = null
+    this.ctx.appData.currentProject = null
     await this.api.closeActiveProject()
 
     // TODO(tim): Improve general state management w/ immutability (immer) & updater fn
     this.ctx.coreData.app.isInGlobalMode = true
-    this.ctx.coreData.app.activeProject = null
-    this.ctx.coreData.app.activeTestingType = null
+    this.ctx.coreData.app.currentProject = null
+    this.ctx.coreData.app.currentTestingType = null
   }
 
   private get projects () {
@@ -63,7 +63,7 @@ export class ProjectActions {
     await this.clearActiveProject()
 
     // Set initial properties, so we can set the config object on the active project
-    this.setActiveProjectProperties({
+    this.setCurrentProjectProperties({
       projectRoot,
       title,
       ctPluginsInitialized: false,
@@ -75,7 +75,7 @@ export class ProjectActions {
       },
     })
 
-    this.setActiveProjectProperties({
+    this.setCurrentProjectProperties({
       isCTConfigured: await this.ctx.project.isTestingTypeConfigured(projectRoot, 'component'),
       isE2EConfigured: await this.ctx.project.isTestingTypeConfigured(projectRoot, 'e2e'),
       preferences: await this.ctx.project.getProjectPreferences(title),
@@ -84,10 +84,11 @@ export class ProjectActions {
     return this
   }
 
-  private setActiveProjectProperties (activeProjectProperties: Partial<ActiveProjectShape>) {
-    this.ctx.coreData.app.activeProject = {
-      ...this.ctx.coreData.app.activeProject,
-      ...activeProjectProperties,
+  private setCurrentProjectProperties (currentProjectProperties: Partial<ActiveProjectShape>) {
+    this.ctx.coreData.app.currentProject = {
+      browsers: this.ctx.coreData.app.browsers,
+      ...this.ctx.coreData.app.currentProject,
+      ...currentProjectProperties,
     } as ActiveProjectShape
   }
 
@@ -103,7 +104,7 @@ export class ProjectActions {
   }
 
   async initializeActiveProject (options: OpenProjectLaunchOptions = {}) {
-    if (!this.ctx.activeProject?.projectRoot) {
+    if (!this.ctx.currentProject?.projectRoot) {
       throw Error('Cannot initialize project without an active project')
     }
 
@@ -120,7 +121,7 @@ export class ProjectActions {
 
     const launchArgs: LaunchArgs = {
       ...this.ctx.launchArgs,
-      projectRoot: this.ctx.activeProject.projectRoot,
+      projectRoot: this.ctx.currentProject.projectRoot,
       testingType: this.ctx.wizardData.chosenTestingType,
     }
 
@@ -174,8 +175,14 @@ export class ProjectActions {
     }
   }
 
-  async launchProject (testingType: TestingTypeEnum, options: LaunchOpts) {
-    if (!this.ctx.activeProject) {
+  async launchProject (testingType: TestingTypeEnum | null, options: LaunchOpts) {
+    if (!this.ctx.currentProject) {
+      return null
+    }
+
+    testingType = testingType || this.ctx.wizardData.chosenTestingType
+
+    if (!testingType) {
       return null
     }
 
@@ -187,7 +194,7 @@ export class ProjectActions {
     const browser = this.ctx.wizardData.chosenBrowser ?? this.ctx.appData.browsers?.[0]
 
     if (!browser) {
-      throw Error(`Could not find browser`)
+      return null
     }
 
     const spec: Cypress.Spec = {
@@ -197,18 +204,18 @@ export class ProjectActions {
       specType: testingType === 'e2e' ? 'integration' : 'component',
     }
 
-    this.ctx.appData.activeTestingType = testingType
+    this.ctx.appData.currentTestingType = testingType
 
     return this.api.launchProject(browser, spec, options)
   }
 
   async launchProjectWithoutElectron () {
-    if (!this.ctx.activeProject) {
+    if (!this.ctx.currentProject) {
       throw Error('Cannot launch project without an active project')
     }
 
     const preferences = await this.api.getProjectPreferencesFromCache()
-    const { browserPath, testingType } = preferences[this.ctx.activeProject.title] ?? {}
+    const { browserPath, testingType } = preferences[this.ctx.currentProject.title] ?? {}
 
     if (!browserPath || !testingType) {
       throw Error('Cannot launch project without stored browserPath or testingType')
@@ -224,7 +231,7 @@ export class ProjectActions {
     this.ctx.actions.electron.hideBrowserWindow()
     this.ctx.coreData.wizard.chosenTestingType = testingType
     await this.initializeActiveProject()
-    this.ctx.appData.activeTestingType = testingType
+    this.ctx.appData.currentTestingType = testingType
 
     return this.api.launchProject(browser, spec, {})
   }
@@ -258,21 +265,13 @@ export class ProjectActions {
   }
 
   createConfigFile (args: MutationAppCreateConfigFileArgs) {
-    const project = this.ctx.activeProject
+    const project = this.ctx.currentProject
 
     if (!project) {
-      throw Error(`Cannot create config file without activeProject.`)
+      throw Error(`Cannot create config file without currentProject.`)
     }
 
     this.ctx.fs.writeFileSync(path.resolve(project.projectRoot, args.configFilename), args.code)
-  }
-
-  setCurrentSpec (id: string) {
-    if (!this.ctx.activeProject) {
-      throw Error(`Cannot set current spec without activeProject.`)
-    }
-
-    this.ctx.activeProject.currentSpecId = id
   }
 
   async clearLatestProjectCache () {
@@ -288,32 +287,32 @@ export class ProjectActions {
   }
 
   async createComponentIndexHtml (template: string) {
-    const project = this.ctx.activeProject
+    const project = this.ctx.currentProject
 
     if (!project) {
-      throw Error(`Cannot create index.html without activeProject.`)
+      throw Error(`Cannot create index.html without currentProject.`)
     }
 
-    if (this.ctx.activeProject?.isCTConfigured) {
-      const indexHtmlPath = path.resolve(this.ctx.activeProject.projectRoot, 'cypress/component/support/index.html')
+    if (this.ctx.currentProject?.isCTConfigured) {
+      const indexHtmlPath = path.resolve(this.ctx.currentProject.projectRoot, 'cypress/component/support/index.html')
 
       await this.ctx.fs.outputFile(indexHtmlPath, template)
     }
   }
 
   async setProjectPreferences (args: MutationSetProjectPreferencesArgs) {
-    if (!this.ctx.activeProject) {
-      throw Error(`Cannot save preferences without activeProject.`)
+    if (!this.ctx.currentProject) {
+      throw Error(`Cannot save preferences without currentProject.`)
     }
 
-    this.api.insertProjectPreferencesToCache(this.ctx.activeProject.title, { ...args })
+    this.api.insertProjectPreferencesToCache(this.ctx.currentProject.title, { ...args })
   }
 
   async codeGenSpec (codeGenCandidate: string, codeGenType: CodeGenType) {
-    const project = this.ctx.activeProject
+    const project = this.ctx.currentProject
 
     if (!project) {
-      throw Error(`Cannot create spec without activeProject.`)
+      throw Error(`Cannot create spec without currentProject.`)
     }
 
     const parsed = path.parse(codeGenCandidate)

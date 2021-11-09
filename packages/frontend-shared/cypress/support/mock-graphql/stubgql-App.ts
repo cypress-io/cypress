@@ -126,22 +126,8 @@ export const longBrowsersList = [
 
 export const stubApp: MaybeResolver<App> = {
   __typename: 'App',
-  healthCheck: 'OK',
-  isRefreshingBrowsers: false,
   isInGlobalMode (source, args, ctx) {
-    return Boolean(ctx.app.activeProject)
-  },
-  browsers (source, args, ctx) {
-    return ctx.app.browsers
-  },
-  selectedBrowser (source, args, ctx) {
-    return ctx.app.selectedBrowser
-  },
-  projects (source, args, ctx) {
-    return ctx.app.projects
-  },
-  activeProject (source, args, ctx) {
-    return ctx.app.activeProject
+    return Boolean(ctx.currentProject)
   },
   isAuthBrowserOpened (source, args, ctx) {
     return ctx.app.isAuthBrowserOpened

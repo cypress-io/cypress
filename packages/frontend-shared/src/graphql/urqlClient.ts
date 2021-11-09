@@ -13,6 +13,8 @@ import { useToast } from 'vue-toastification'
 import { client } from '@packages/socket/lib/browser'
 
 import { cacheExchange as graphcacheExchange } from '@urql/exchange-graphcache'
+import { urqlCacheKeys } from '@packages/data-context/src/util/urqlCacheKeys'
+
 import { pubSubExchange } from './urqlExchangePubsub'
 import { namedRouteExchange } from './urqlExchangeNamedRoute'
 import { latestMutationExchange } from './urqlExchangeLatestMutation'
@@ -23,16 +25,7 @@ const SERVER_PORT_MATCH = /serverPort=(\d+)/.exec(window.location.search)
 const toast = useToast()
 
 export function makeCacheExchange () {
-  return graphcacheExchange({
-    keys: {
-      App: (data) => data.__typename,
-      DevState: (data) => data.__typename,
-      Wizard: (data) => data.__typename,
-      GitInfo: () => null,
-      BaseError: () => null,
-      ProjectPreferences: (data) => data.__typename,
-    },
-  })
+  return graphcacheExchange(urqlCacheKeys)
 }
 
 declare global {
@@ -84,15 +77,21 @@ export function makeUrqlClient (target: 'launchpad' | 'app'): Client {
     // https://formidable.com/open-source/urql/docs/graphcache/errors/
     makeCacheExchange(),
     namedRouteExchange,
-    ssrExchange({
-      isClient: true,
-      initialState: window.__CYPRESS_INITIAL_DATA__ ?? {},
-    }),
     // TODO(tim): add this when we want to use the socket as the GraphQL
     // transport layer for all operations
     // target === 'launchpad' ? fetchExchange : socketExchange(io),
     fetchExchange,
   ]
+
+  // If we're in the launched app, we want to use the SSR exchange
+  if (target === 'app') {
+    exchanges.push(ssrExchange({
+      isClient: true,
+      initialState: window.__CYPRESS_INITIAL_DATA__ ?? {},
+    }))
+  }
+
+  exchanges.push(fetchExchange)
 
   if (import.meta.env.DEV) {
     exchanges.unshift(devtoolsExchange)

@@ -9,6 +9,8 @@
           {{ headerText }}
         </slot>
       </h1>
+      <!-- eslint-disable vue/multiline-html-element-content-newline  -->
+
       <slot name="message">
         <!-- Can't pull this out because of the i18n-t component -->
         <p
@@ -24,14 +26,13 @@
           class="font-light"
           data-testid="error-message"
         >
-          <a
-            class="text-indigo-500 underline-indigo-500 hocus-link-default underline-indigo-500 ring-indigo-500"
+          <ExternalLink
             href="https://docs.cypress.io"
             data-testid="error-docs-link"
-            target="_blank"
-          >cypress.config.js</a>
+          >cypress.config.js</ExternalLink>
         </i18n-t>
       </slot>
+      <!-- eslint-enable vue/multiline-html-element-content-newline  -->
 
       <slot name="stack">
         <p
@@ -73,6 +74,7 @@ import Button from '@cy/components/Button.vue'
 import { computed } from 'vue'
 import { useI18n } from '@cy/i18n'
 import type { BaseErrorFragment } from '../generated/graphql'
+import ExternalLink from '@packages/frontend-shared/src/gql-components/ExternalLink.vue'
 
 gql`
 fragment BaseError on BaseError {

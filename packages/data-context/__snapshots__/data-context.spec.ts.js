@@ -25,8 +25,8 @@ exports['@packages/data-context initializeData initializes 1'] = {
       "refreshState": null
     },
     "app": {
+      "currentTestingType": null,
       "refreshingBrowsers": {},
-      "activeTestingType": null,
       "navItem": "settings",
       "browsers": [
         {
@@ -34,7 +34,7 @@ exports['@packages/data-context initializeData initializes 1'] = {
         }
       ],
       "projects": [],
-      "activeProject": null,
+      "currentProject": null,
       "isInGlobalMode": false,
       "isAuthBrowserOpened": false
     },

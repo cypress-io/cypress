@@ -45,22 +45,22 @@ export interface ActiveProjectShape extends ProjectShape {
   e2ePluginsInitialized: Maybe<boolean>
   isCTConfigured: Maybe<boolean>
   isE2EConfigured: Maybe<boolean>
-  currentSpecId?: Maybe<string>
   specs?: FoundSpec[]
   config: Promise<FullConfig> | null
   configChildProcess?: ConfigChildProcessShape | null
   preferences?: Preferences| null
+  browsers: FoundBrowser[] | null
 }
 
 export interface AppDataShape {
   navItem: NexusGenEnums['NavItem']
-  refreshingBrowsers: Promise<FoundBrowser[]> | null
   browsers: ReadonlyArray<FoundBrowser> | null
   projects: ProjectShape[]
-  activeProject: ActiveProjectShape | null
+  currentProject: ActiveProjectShape | null
   isInGlobalMode: boolean
   isAuthBrowserOpened: boolean
-  activeTestingType: Maybe<TestingTypeEnum>
+  currentTestingType: Maybe<TestingTypeEnum>
+  refreshingBrowsers: Promise<FoundBrowser[]> | null
 }
 
 export interface WizardDataShape {
@@ -73,6 +73,7 @@ export interface WizardDataShape {
   chosenLanguage: NexusGenEnums['CodeLanguageEnum']
   chosenManualInstall: boolean
   chosenBrowser: FoundBrowser | null
+  browserErrorMessage: string | null
 }
 
 export interface ElectronShape {
@@ -105,11 +106,11 @@ export function makeCoreData (): CoreDataShape {
     },
     app: {
       refreshingBrowsers: null,
-      activeTestingType: null,
+      currentTestingType: null,
       navItem: 'settings',
       browsers: null,
       projects: [],
-      activeProject: null,
+      currentProject: null,
       isInGlobalMode: false,
       isAuthBrowserOpened: false,
     },
@@ -123,6 +124,7 @@ export function makeCoreData (): CoreDataShape {
       allBundlers: BUNDLERS,
       history: ['welcome'],
       chosenBrowser: null,
+      browserErrorMessage: null,
     },
     user: null,
     electron: {

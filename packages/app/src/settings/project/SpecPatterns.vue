@@ -8,10 +8,11 @@
     </template>
     <template #description>
       <i18n-t keypath="settingsPage.specPattern.description">
-        <a
+        <ExternalLink
           href="https://docs.cypress.io"
-          target="_blank"
-        >{{ t('links.learnMore') }}</a>
+        >
+          {{ t('links.learnMore') }}
+        </ExternalLink>
       </i18n-t>
     </template>
     <div class="border border-gray-200 rounded overflow-hidden">
@@ -46,10 +47,12 @@ import { gql } from '@urql/vue'
 import StatusIndicator from '@cy/components/StatusIndicator.vue'
 import type { SpecPatternsFragment } from '../../generated/graphql'
 import SettingsSection from '../SettingsSection.vue'
+import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 const { t } = useI18n()
 
 gql`
-fragment SpecPatterns on Project {
+fragment SpecPatterns on CurrentProject {
+  id
   config
 }
 `

@@ -35,8 +35,9 @@ fragment InitializeConfig_Config on Query {
     ...InitializeConfig_WizardState
   }
 
-  app {
-    selectedBrowser {
+  currentProject {
+    id
+    currentBrowser {
       id
       displayName
     }

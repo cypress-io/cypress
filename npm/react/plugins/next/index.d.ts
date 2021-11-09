@@ -15,11 +15,6 @@ declare namespace legacyDevServer {
   }
 
   /**
-   * Type helper to make writing `CypressNextDevServerConfig` easier
-   */
-  function defineDevServerConfig(devServerConfig: CypressNextDevServerConfig): CypressNextDevServerConfig
-
-  /**
    * Sets up a Cypress component testing environment for your NextJs application
    * @param cypressDevServerConfig comes from the `devServer()` function first argument
    * @returns the resolved dev server object that cypress can use to start testing

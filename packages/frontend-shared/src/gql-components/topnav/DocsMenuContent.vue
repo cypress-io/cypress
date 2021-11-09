@@ -15,12 +15,13 @@
         class="flex items-center text-indigo-500 mb-4px"
       >
         <i-cy-book_x16 class="icon-dark-indigo-500 icon-light-indigo-50" />
-        <a
-          v-if="!item.changeContent || !activeProjectExists"
+        <ExternalLink
+          v-if="!item.changeContent || !currentProjectExists"
           :href="getUrl(item.link)"
-          target="_blank"
-          class="font-normal ml-4px whitespace-nowrap hocus-link-default"
-        >{{ item.text }}</a>
+          class="font-normal ml-4px whitespace-nowrap"
+        >
+          {{ item.text }}
+        </ExternalLink>
         <button
           v-else
           class="font-normal ml-4px whitespace-nowrap hocus-link-default"
@@ -37,6 +38,8 @@
 import Button from '@cy/components/Button.vue'
 import { useI18n } from '@cy/i18n'
 import { getUrlWithParams, LinkWithParams } from '../../utils/getUrlWithParams'
+import ExternalLink from '../ExternalLink.vue'
+
 const { t } = useI18n()
 
 const emit = defineEmits<{
@@ -44,7 +47,7 @@ const emit = defineEmits<{
 }>()
 
 defineProps<{
-  activeProjectExists: boolean,
+  currentProjectExists: boolean,
 }>()
 
 const utm_medium = 'Docs Menu'

@@ -1,9 +1,11 @@
-import defaultMessages from '../../../../frontend-shared/src/locales/en-US.json'
+import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 
 describe('Launchpad: Open Mode', () => {
   beforeEach(() => {
     cy.setupE2E()
     cy.visitLaunchpad()
+    // Forcing reload, need to sync with @brian-mann to debug behavior here
+    cy.reload({ log: false })
   })
 
   it('shows Add Project when no projects have been added', () => {
@@ -58,6 +60,26 @@ describe('Launchpad: Open Mode', () => {
 
     // Component testing is not configured for the todo project
     cy.get('h1').should('contain', 'Cypress Configuration Error')
+  })
+
+  it('auto-selects the browser when launched with --browser', () => {
+    cy.setupE2E('launchpad')
+
+    cy.withCtx(async (ctx) => {
+      ctx.launchArgs.testingType = 'e2e'
+      ctx.launchArgs.browser = 'firefox'
+
+      await ctx.initializeData()
+    })
+
+    // Need to visit after args have been configured, todo: fix in #18776
+    cy.visitLaunchpad()
+
+    cy.contains('Continue').click()
+    cy.contains('Next Step').click()
+    cy.get('h1').should('contain', 'Choose a Browser')
+    cy.contains('Firefox').parent().should('have.class', 'border-jade-300')
+    cy.get('button[data-testid=launch-button]').invoke('text').should('include', 'Launch Firefox')
   })
 
   describe('when there is a list of projects', () => {

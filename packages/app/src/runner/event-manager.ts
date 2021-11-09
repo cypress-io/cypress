@@ -3,6 +3,7 @@ import Promise from 'bluebird'
 import type { BaseStore } from '@packages/runner-shared/src/store'
 import type { RunState } from '@packages/types/src/driver'
 import type MobX from 'mobx'
+import type { LocalBusEventMap } from './event-manager-types'
 
 import { client } from '@packages/socket/lib/browser'
 
@@ -640,6 +641,8 @@ export class EventManager {
     this.localBus.emit(event, ...args)
   }
 
+  on<K extends Extract<keyof LocalBusEventMap, string>>(k: K, f: (v: LocalBusEventMap[K]) => void): void
+  on (event: string, listener: (...args: any[]) => void): void
   on (event: string, listener: (...args: any[]) => void) {
     this.localBus.on(event, listener)
   }
@@ -691,5 +694,10 @@ export class EventManager {
 
   saveState (state) {
     ws.emit('save:app:state', state)
+  }
+
+  // usefulf for testing
+  _testingOnlySetCypress (cypress: any) {
+    Cypress = cypress
   }
 }
