@@ -19,9 +19,7 @@ import { AppQueryDocument, App_DevRelaunchDocument } from './generated/graphql'
 
 gql`
 query AppQuery {
-  app {
-    __typename
-  }
+  __typename
   dev {
     needsRelaunch
   }
@@ -87,7 +85,7 @@ watch(query.data, () => {
 
 interval = window.setInterval(poll, 200)
 
-const backendInitialized = computed(() => !!query.data?.value?.app)
+const backendInitialized = computed(() => !!query.data?.value?.__typename)
 
 </script>
 

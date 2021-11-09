@@ -6,7 +6,7 @@
         <BaseError :gql="query.data.value.baseError" />
       </template>
       <template
-        v-else-if="query.data.value.app.isInGlobalMode && !query.data.value?.currentProject"
+        v-else-if="query.data.value.isInGlobalMode && !query.data.value?.currentProject"
       >
         <GlobalPage :gql="query.data.value" />
       </template>
@@ -84,9 +84,7 @@ query MainLaunchpadQuery {
     ...WizardHeader
   }
 
-  app {
-    isInGlobalMode
-  }
+  isInGlobalMode
   ...GlobalPage
 }
 `

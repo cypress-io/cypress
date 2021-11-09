@@ -10,7 +10,6 @@ import debugLib from 'debug'
 import { CoreDataShape, makeCoreData } from './data/coreDataShape'
 import { DataActions } from './DataActions'
 import {
-  AppDataSource,
   GitDataSource,
   FileDataSource,
   ProjectDataSource,
@@ -78,6 +77,10 @@ export class DataContext {
 
   get electronApi () {
     return this._config.electronApi
+  }
+
+  get isGlobalMode () {
+    return !this.currentProject
   }
 
   async initializeData () {
@@ -175,11 +178,6 @@ export class DataContext {
   @cached
   get actions () {
     return new DataActions(this)
-  }
-
-  @cached
-  get app () {
-    return new AppDataSource(this)
   }
 
   get appData () {

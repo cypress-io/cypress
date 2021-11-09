@@ -15,7 +15,6 @@ export interface ClientTestContext {
     navItem: NavItem
     currentBrowser: Browser | null
     browsers: Browser[] | null
-    isInGlobalMode: boolean
   }
   isAuthBrowserOpened: boolean
   wizard: {
@@ -53,7 +52,6 @@ export function makeClientTestContext (): ClientTestContext {
       navItem: 'settings',
       browsers: stubBrowsers,
       currentBrowser: stubBrowsers[0],
-      isInGlobalMode: false,
     },
     isAuthBrowserOpened: false,
     wizard: {
