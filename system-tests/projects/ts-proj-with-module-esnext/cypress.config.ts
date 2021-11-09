@@ -1,10 +1,11 @@
+import { asyncGreeting } from './greeting'
+
 module.exports = {
+  'supportFolder': false,
   e2e: {
     setupNodeEvents (on, config) {
       on('task', {
-        'returns:arg' (arg) {
-          return arg
-        },
+        hello: asyncGreeting,
       })
 
       return config

@@ -2817,7 +2817,7 @@ declare namespace Cypress {
      /**
      * Handle Cypress plugins
      */
-      setupNodeEvents: (on: PluginEvents, config: PluginConfigOptions) => Promise<PluginConfigOptions> | PluginConfigOptions
+      setupNodeEvents: (on: PluginEvents, config: PluginConfigOptions) => Promise<PluginConfigOptions> | PluginConfigOptions 
   }
 
   /**

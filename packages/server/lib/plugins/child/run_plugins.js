@@ -138,7 +138,9 @@ const execute = (ipc, event, ids, args = []) => {
 }
 
 const runPlugins = (ipc, _plugins, projectRoot) => {
-  plugins = _plugins
+  // Set a default handler to successfully register `file:preprocessor`
+  plugins = _plugins ?? ((on, config) => {})
+
   debug('project root:', projectRoot)
   if (!projectRoot) {
     throw new Error('Unexpected: projectRoot should be a string')

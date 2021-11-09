@@ -28,7 +28,7 @@ function run (ipc, requiredFile, projectRoot) {
     throw new Error('Unexpected: projectRoot should be a string')
   }
 
-  if (!tsRegistered && requiredFile.endsWith('.ts')) {
+  if (!tsRegistered) {
     debug('register typescript for required file')
     tsNodeUtil.register(projectRoot, requiredFile)
 
@@ -62,10 +62,10 @@ function run (ipc, requiredFile, projectRoot) {
       ipc.send('loaded', result)
 
       ipc.on('plugins', (testingType) => {
-        if (testingType === 'component' && result?.component?.setupNodeEvents) {
-          runPlugins(ipc, result.component.setupNodeEvents, projectRoot)
-        } else if (testingType === 'e2e' && result?.e2e?.setupNodeEvents) {
-          runPlugins(ipc, result.e2e.setupNodeEvents, projectRoot)
+        if (testingType === 'component') {
+          runPlugins(ipc, result.component?.setupNodeEvents, projectRoot)
+        } else if (testingType === 'e2e') {
+          runPlugins(ipc, result.e2e?.setupNodeEvents, projectRoot)
         } else {
           // Notify the plugins init that there's no plugins to resolve
           ipc.send('empty:plugins')

@@ -55,7 +55,12 @@ export class ProjectConfigDataActions {
     const configProcessArgs = ['--projectRoot', opts.projectRoot, '--file', opts.configFilePath]
 
     const childOptions: ForkOptions = {
-      stdio: 'inherit',
+      stdio: 'pipe',
+      cwd: path.dirname(opts.configFilePath),
+      env: {
+        ...process.env,
+        NODE_OPTIONS: process.env.ORIGINAL_NODE_OPTIONS || '',
+      },
     }
 
     if (inspector.url()) {
