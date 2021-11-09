@@ -1,14 +1,11 @@
 <template>
-  <div>
-    <RouterLink
+  <div class="w-300px overflow-x-hidden h-full">
+    <InlineSpecListRow
       v-for="spec in specs"
       :key="spec.node.id"
-      class="text-left grid grid-cols-[16px,auto,auto] items-center gap-10px"
-      :class="{ 'border-2 border-red-400': isCurrentSpec(spec) }"
-      :to="{ path: 'runner', query: { file: spec.node.relative } }"
-    >
-      <SpecName :gql="spec.node" />
-    </RouterLink>
+      :spec="spec.node"
+      :selected="isCurrentSpec(spec)"
+    />
   </div>
 </template>
 
@@ -16,9 +13,8 @@
 import { computed } from 'vue'
 import { gql } from '@urql/vue'
 import type { SpecNode_InlineSpecListFragment, Specs_InlineSpecListFragment } from '../generated/graphql'
-import SpecName from './SpecName.vue'
 import { useSpecStore } from '../store'
-import { useRouter } from 'vue-router'
+import InlineSpecListRow from './InlineSpecListRow.vue'
 
 gql`
 fragment SpecNode_InlineSpecList on SpecEdge {
@@ -28,6 +24,7 @@ fragment SpecNode_InlineSpecList on SpecEdge {
     specType
     absolute
     relative
+    baseName
   }
   ...SpecListRow
 }
@@ -37,7 +34,7 @@ gql`
 fragment Specs_InlineSpecList on CurrentProject {
   id
   projectRoot
-  specs: specs(first: 25) {
+  specs: specs(first: 1000) {
     edges {
       ...SpecNode_InlineSpecList
     }
@@ -54,8 +51,6 @@ const specStore = useSpecStore()
 const isCurrentSpec = (spec: SpecNode_InlineSpecListFragment) => {
   return spec.node.relative === specStore.activeSpec?.relative
 }
-
-const router = useRouter()
 
 const specs = computed(() => props.gql.specs?.edges || [])
 </script>
