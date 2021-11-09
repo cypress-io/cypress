@@ -1,3 +1,4 @@
+const { assertLogLength } = require('../../../support/utils')
 const { _, Promise, $ } = Cypress
 
 describe('src/cy/commands/actions/check', () => {
@@ -469,7 +470,7 @@ describe('src/cy/commands/actions/check', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(chk.length + 1)
+          assertLogLength(this.logs, chk.length + 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(err.message).to.include('`cy.check()` failed because this element is not visible')
 
@@ -501,7 +502,7 @@ describe('src/cy/commands/actions/check', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(chk.length + 1)
+          assertLogLength(this.logs, chk.length + 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(err.message).to.include('`cy.check()` failed because this element is not visible')
 
@@ -515,7 +516,7 @@ describe('src/cy/commands/actions/check', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
 
           done()
@@ -530,7 +531,7 @@ describe('src/cy/commands/actions/check', () => {
         $('<span>span on button</span>').css({ position: 'absolute', left: checkbox.offset().left, top: checkbox.offset().top, padding: 5, display: 'inline-block', backgroundColor: 'yellow' }).prependTo($('body'))
 
         cy.on('fail', (err) => {
-          expect(this.logs.length).to.eq(2)
+          assertLogLength(this.logs, 2)
           expect(err.message).to.include('`cy.check()` failed because this element')
           expect(err.message).to.include('is being covered by another element')
 
@@ -559,7 +560,7 @@ describe('src/cy/commands/actions/check', () => {
 
       it('does not log an additional log on failure', function (done) {
         cy.on('fail', () => {
-          expect(this.logs.length).to.eq(3)
+          assertLogLength(this.logs, 3)
 
           done()
         })
@@ -1016,7 +1017,7 @@ describe('src/cy/commands/actions/check', () => {
           const { lastLog } = this
           const len = (chk.length * 2) + 6
 
-          expect(this.logs.length).to.eq(len)
+          assertLogLength(this.logs, len)
           expect(lastLog.get('error')).to.eq(err)
           expect(err.message).to.include('`cy.uncheck()` failed because this element is not visible')
 
@@ -1032,7 +1033,7 @@ describe('src/cy/commands/actions/check', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
 
           done()
@@ -1068,7 +1069,7 @@ describe('src/cy/commands/actions/check', () => {
         $('<span>span on button</span>').css({ position: 'absolute', left: checkbox.offset().left, top: checkbox.offset().top, padding: 5, display: 'inline-block', backgroundColor: 'yellow' }).prependTo($('body'))
 
         cy.on('fail', (err) => {
-          expect(this.logs.length).to.eq(2)
+          assertLogLength(this.logs, 2)
           expect(err.message).to.include('`cy.uncheck()` failed because this element')
           expect(err.message).to.include('is being covered by another element')
 
@@ -1122,7 +1123,7 @@ describe('src/cy/commands/actions/check', () => {
 
       it('does not log an additional log on failure', function (done) {
         cy.on('fail', () => {
-          expect(this.logs.length).to.eq(3)
+          assertLogLength(this.logs, 3)
 
           done()
         })

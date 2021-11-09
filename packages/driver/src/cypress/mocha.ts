@@ -416,6 +416,13 @@ const patchRunnableResetTimeout = () => {
     }
 
     this.timer = setTimeout(() => {
+      if (runnable.state === 'passed') {
+        // this timeout can be reached at the same time that a
+        // user does an asynchronous `done`, so double-check
+        // that the test has not already passed before timing out
+        return
+      }
+
       const err = $errUtils.errByPath(getErrPath(), { ms })
 
       runnable.callback(err)

@@ -1,3 +1,4 @@
+const { assertLogLength } = require('../../../support/utils')
 const { _, $ } = Cypress
 
 describe('src/cy/commands/actions/select', () => {
@@ -586,7 +587,7 @@ describe('src/cy/commands/actions/select', () => {
 
       it('does not log an additional log on failure', function (done) {
         cy.on('fail', () => {
-          expect(this.logs.length).to.eq(3)
+          assertLogLength(this.logs, 3)
 
           done()
         })
@@ -597,7 +598,7 @@ describe('src/cy/commands/actions/select', () => {
       it('only logs once on failure', function (done) {
         cy.on('fail', (err) => {
           // 2 logs, 1 for cy.get, 1 for cy.select
-          expect(this.logs.length).to.eq(2)
+          assertLogLength(this.logs, 2)
 
           done()
         })
@@ -702,7 +703,7 @@ describe('src/cy/commands/actions/select', () => {
         })
 
         cy.get('#select-maps').select('de_dust2').then(function () {
-          expect(this.logs.length).to.eq(2)
+          assertLogLength(this.logs, 2)
           expect(types.length).to.eq(1)
         })
       })
