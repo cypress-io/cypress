@@ -63,6 +63,7 @@ import { useScreenshotStore } from '../store/screenshot-store'
 
 gql`
 fragment SpecRunner on CurrentProject {
+  id
   ...Specs_InlineSpecList
   ...SpecRunnerHeader
 }

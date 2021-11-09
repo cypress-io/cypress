@@ -23,6 +23,7 @@ import { useRouter } from 'vue-router'
 gql`
 fragment SpecNode_InlineSpecList on SpecEdge {
   node {
+    id
     name
     specType
     absolute
