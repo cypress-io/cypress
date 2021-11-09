@@ -1,4 +1,4 @@
-import { ComputedRef, computed, Ref, ref } from 'vue'
+import { ComputedRef, computed, Ref } from 'vue'
 import { useToggle } from '@vueuse/core'
 
 export interface UseCollapsibleTreeNode {
@@ -19,6 +19,10 @@ export interface UseCollapsibleTreeNode {
 
   parent?: UseCollapsibleTreeNode
   children?: UseCollapsibleTreeNode[]
+}
+
+export interface UseCollapsibleTreeOptions {
+  expandInitially?: boolean
 }
 
 function collectRoots (node, acc: UseCollapsibleTreeNode[] = []) {
@@ -77,7 +81,7 @@ function buildTree (rawNode, options, acc: UseCollapsibleTreeNode[] = [], depth 
   return acc
 }
 
-export function useCollapsibleTree (tree, options = {}) {
+export function useCollapsibleTree (tree, options: UseCollapsibleTreeOptions = {}) {
   options.expandInitially = options.expandInitially || true
   const collapsibleTree = buildTree(tree, options)
 
@@ -105,6 +109,8 @@ export function useCollapsibleTree (tree, options = {}) {
 
       return nodes
     }
+
+    return
   }
 
   return {

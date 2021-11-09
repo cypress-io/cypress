@@ -1,7 +1,4 @@
 <template>
-  Items,
-  <!-- Selected: {{ selectedNode }} -->
-  Total Count: {{ tree.length }}
   <button @click="expand">
     Expand
   </button>
@@ -18,7 +15,10 @@
       :key="idx"
       v-bind="rowProps"
       class="block pt-20px mt-20px"
-      :class="{ 'bg-gray-50': row.children, 'hidden': row.hidden.value, 'border-2 border-red-500': selectedItem === idx }"
+      :class="{
+        'bg-gray-50': row.children,
+        'border-2 border-red-500': selectedItem === idx
+      }"
       :style="{ marginLeft: `${row.depth * 25}px` }"
       @click="onRowClick(row, idx)"
       @keypress.enter.space.prevent="onRowClick(row, idx)"
@@ -29,10 +29,10 @@
 </template>
 
 <script lang="ts" setup>
-import { useCollapsibleTree } from '../composables/useCollapsibleTree'
+import { useCollapsibleTree } from '../../composables/useCollapsibleTree'
 import faker from 'faker'
-import { Ref, ref, onBeforeUpdate, computed } from 'vue'
-import { useListNavigation } from '../composables/useListNavigation'
+import { Ref, ref, computed } from 'vue'
+import { useListNavigation } from '../../composables/useListNavigation'
 
 const contacts = Array.from(new Array(3).keys()).map(() => {
   return {

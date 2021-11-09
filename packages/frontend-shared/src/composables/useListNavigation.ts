@@ -42,8 +42,11 @@ export const useListNavigation = (rootEl) => {
     goToItem('previous', event)
   }, { target: rootEl })
 
-  return { selectedItem, rowProps: {
-    ref: setItemRef,
-    tabIndex: '-1',
-  } }
+  return {
+    selectedItem,
+    rowProps: {
+      ref: setItemRef,
+      tabindex: '-1',
+    },
+  }
 }
