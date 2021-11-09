@@ -695,4 +695,9 @@ export class EventManager {
   saveState (state) {
     ws.emit('save:app:state', state)
   }
+
+  // usefulf for testing
+  _testingOnlySetCypress (cypress: any) {
+    Cypress = cypress
+  }
 }

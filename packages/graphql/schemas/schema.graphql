@@ -448,6 +448,7 @@ type Mutation {
 
   """Set the current navigation item"""
   navigationMenuSetItem(type: NavItem!): Boolean
+  openExternal(url: String!): Boolean
 
   """show the launchpad windows"""
   reconfigureProject: Boolean!

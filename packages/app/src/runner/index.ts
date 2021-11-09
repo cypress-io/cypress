@@ -45,7 +45,7 @@ export function getEventManager () {
 
 const randomString = `${Math.random()}`
 
-let _autIframeModel: any
+let _autIframeModel: AutIframe
 
 /**
  * Creates an instance of an AutIframe model which ise used to control
@@ -55,7 +55,7 @@ let _autIframeModel: any
  * This only needs to be created once per **spec**. If you change spec,
  * you need to create a new AUT IFrame model.
  */
-export function getAutIframeModel () {
+export function getAutIframeModel (): AutIframe {
   if (!_autIframeModel) {
     throw Error('Must create a new instance of AutIframe before accessing')
   }
@@ -120,10 +120,7 @@ function setupRunner () {
     window.UnifiedRunner.logger,
     window.UnifiedRunner.dom,
     window.UnifiedRunner.visitFailure,
-    {
-      recorder: getEventManager().studioRecorder,
-      selectorPlaygroundModel: getEventManager().selectorPlaygroundModel,
-    },
+    getEventManager().studioRecorder,
     window.UnifiedRunner.blankContents,
   )
 
