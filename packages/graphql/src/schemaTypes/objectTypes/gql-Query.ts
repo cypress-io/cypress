@@ -1,10 +1,11 @@
-import { objectType } from 'nexus'
+import { intArg, objectType } from 'nexus'
 import { BaseError } from '.'
 import { ProjectLike } from '..'
 import { App } from './gql-App'
 import { CurrentProject } from './gql-CurrentProject'
 import { DevState } from './gql-DevState'
 import { NavigationMenu } from './gql-NavigationMenu'
+import { Version } from './gql-Version'
 import { Wizard } from './gql-Wizard'
 
 export const Query = objectType({
@@ -36,6 +37,15 @@ export const Query = objectType({
       type: DevState,
       description: 'The state of any info related to local development of the runner',
       resolve: (root, args, ctx) => ctx.coreData.dev,
+    })
+
+    t.nonNull.list.nonNull.field('versions', {
+      type: Version,
+      description: 'Previous versions of cypress and their release date',
+      args: {
+        count: intArg(),
+      },
+      resolve: (root, args, ctx) => ctx.versions(args.count),
     })
 
     t.field('currentProject', {

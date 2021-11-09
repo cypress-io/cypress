@@ -1,14 +1,14 @@
 <template>
-  <TopNavList v-if="versionList">
+  <TopNavList v-if="props.gql.versions">
     <template #heading="{ open }">
       <i-cy-box_x16
         class="group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50 h-16px w-16px"
         :class="open ? 'icon-dark-indigo-500 icon-light-indigo-50' : 'icon-dark-gray-500 icon-light-gray-100'"
       />
-      <span data-cy="topnav-version-list">v{{ versionList[0].version }}</span>
+      <span data-cy="topnav-version-list">v{{ props.gql.versions[0].version }}</span>
     </template>
     <TopNavListItem
-      v-for="(item, index) in versionList"
+      v-for="(item, index) in props.gql.versions"
       :key="item.version"
       :selectable="!!index"
       class="px-16px py-8px min-w-240px"
@@ -22,7 +22,7 @@
           target="_blank"
         >{{ item.version }}</a>
         <br>
-        <span class="text-gray-600 text-14px">{{ t('topNav.released') }} {{ item.released }}</span>
+        <span class="text-gray-600 text-14px">{{ t('topNav.released') }} {{ timeAgoInWords(item.released) }}</span>
       </div>
       <template
         v-if="!index"
@@ -146,7 +146,8 @@
 import TopNavListItem from './TopNavListItem.vue'
 import TopNavList from './TopNavList.vue'
 import PromptContent from './PromptContent.vue'
-import { allBrowsersIcons } from '../../../../frontend-shared/src/assets/browserLogos'
+import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
+import { getTimeAgo } from '@packages/frontend-shared/src/utils/time'
 import { gql, useMutation } from '@urql/vue'
 import { TopNavFragment, TopNav_LaunchOpenProjectDocument, TopNav_SetBrowserDocument } from '../../generated/graphql'
 import { useI18n } from '@cy/i18n'
@@ -159,28 +160,14 @@ import DocsMenuContent from './DocsMenuContent.vue'
 
 const releasesUrl = 'https://github.com/cypress-io/cypress/releases/'
 
-// TODO: will come from gql
-const versionList = [
-  {
-    version: '8.4.1',
-    released: '2 days ago',
-  },
-  {
-    version: '8.4.0',
-    released: '6 days ago',
-  },
-  {
-    version: '8.3.1',
-    released: '12 days ago',
-  },
-  {
-    version: '8.3.0',
-    released: '2 weeks ago',
-  },
-]
-
 gql`
 fragment TopNav on Query {
+  versions {
+    id
+    version
+    released
+  }
+
   currentProject {
     id
     currentBrowser {
@@ -234,6 +221,8 @@ const promptsEl: Ref<HTMLElement | null> = ref(null)
 
 // reset docs menu if click or keyboard navigation happens outside
 // so it doesn't reopen on the one of the prompts
+
+const timeAgoInWords = (iso8601: string) => getTimeAgo(iso8601)
 
 onClickOutside(promptsEl, () => {
   setTimeout(() => {

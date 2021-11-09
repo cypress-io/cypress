@@ -20,6 +20,7 @@ import { cached } from './util/cached'
 import { DataContextShell, DataContextShellConfig } from './DataContextShell'
 import type { GraphQLSchema } from 'graphql'
 import type { App as ElectronApp } from 'electron'
+import { VersionsDataSource } from './sources/VersionsDataSource'
 
 const IS_DEV_ENV = process.env.CYPRESS_INTERNAL_ENV !== 'production'
 
@@ -138,6 +139,10 @@ export class DataContext extends DataContextShell {
   @cached
   get git () {
     return new GitDataSource(this)
+  }
+
+  versions (count: number) {
+    return new VersionsDataSource().versions(count)
   }
 
   @cached

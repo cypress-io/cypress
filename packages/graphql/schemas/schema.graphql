@@ -621,6 +621,9 @@ type Query {
   """All known projects for the app"""
   projects: [ProjectLike!]!
 
+  """Previous versions of cypress and their release date"""
+  versions(count: Int): [Version!]!
+
   """Metadata about the wizard, null if we arent showing the wizard"""
   wizard: Wizard!
 }
@@ -716,6 +719,18 @@ type TestingTypeInfo implements Node {
   id: ID!
   title: String!
   type: TestingTypeEnum!
+}
+
+"""Version of Cypress and release date"""
+type Version {
+  """unique id"""
+  id: String!
+
+  """Release date as an iso8601 timestamp"""
+  released: String!
+
+  """Version number (follows semantic versioning)"""
+  version: String!
 }
 
 """
