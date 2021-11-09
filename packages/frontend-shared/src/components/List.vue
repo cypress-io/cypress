@@ -1,19 +1,16 @@
 <template>
   Items,
-  <!-- Selected: {{ selectedNode }} -->
   <button>OK</button>
   <div
     ref="target"
     tabindex="0"
   >
-    <div
-      v-for="item, idx in items"
+    <a
+      v-for="item in items"
       :key="item.id"
-      :data-list-idx="idx"
-      :class="{'bg-red-500': selectedIndex === idx}"
     >
       {{ item.value }}
-    </div>
+    </a>
   </div>
 </template>
 
@@ -37,6 +34,6 @@ const items = Array.from(new Array(100).keys()).map(() => {
 
 const target: Ref<HTMLElement | undefined> = ref()
 
-const { selectedNode, selectedIndex } = useListNavigation(target)
+useListNavigation(target)
 
 </script>

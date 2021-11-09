@@ -1,50 +1,43 @@
-import { whenever, onKeyStroke, MaybeRef } from '@vueuse/core'
-import { computed, onMounted, Ref, ref } from 'vue'
+import { onKeyStroke } from '@vueuse/core'
+import { computed, watch } from 'vue'
 
-export const useListNavigation = (target) => {
-  const selectedNode: Ref<HTMLElement> = ref()
+export const useListNavigation = (rootEl) => {
+  const focused = ref()
 
-  const elNeedsToBeScrolled = (el) => {
-    const box = el.getBoundingClientRect()
-    const targetBox = target.value.getBoundingClientRect()
-
-    return box.y < 0 ||
-      box.y > targetBox.height ||
-      box.y > window.innerHeight
+  const scroll = (el) => {
+    if (typeof el.focus === 'function') {
+      el.focus({ preventScroll: true })
+      el.scrollIntoView({ block: 'nearest' })
+    }
   }
 
-  whenever(selectedNode, (node) => {
-    if (node.getBoundingClientRect()) {
-      if (elNeedsToBeScrolled(node)) node.scrollIntoView()
-    }
-  })
+  const goToItem = (direction: 'next' | 'previous', event) => {
+    event.preventDefault()
 
-  onMounted(() => {
-    selectedNode.value = selectedNode.value ? selectedNode.value : target.value?.children[0]
-  })
+    const target = (event.target as HTMLAnchorElement)
 
-  onKeyStroke('ArrowDown', (e) => {
-    e.preventDefault()
-    if (selectedNode.value?.nextElementSibling) {
-      selectedNode.value = selectedNode.value.nextElementSibling
-    } else {
-      selectedNode.value = target.value?.children[0]
-    }
-  }, { target: target as MaybeRef<EventTarget> })
+    if (!target) return
 
-  onKeyStroke('ArrowUp', (e) => {
-    e.preventDefault()
-    if (selectedNode.value?.previousElementSibling) {
-      selectedNode.value = selectedNode.value.previousElementSibling
-    } else {
-      selectedNode.value = target.value?.children[target.value?.children.length - 1]
-    }
-  }, { target: target as MaybeRef<EventTarget> })
+    const firstEl = target.parentElement?.firstElementChild as HTMLAnchorElement
+    const lastEl = target.parentElement?.lastElementChild as HTMLAnchorElement
+    const el = (direction === 'next' ? target.nextElementSibling : target.previousElementSibling) as HTMLAnchorElement
 
-  return {
-    selectedNode,
-    selectedIndex: computed(() => {
-      return parseInt(selectedNode.value?.getAttribute('data-list-idx') || '0', 10)
-    }),
+    if (typeof el.focus === 'function') scroll(el)
+    else if (direction === 'next') scroll(firstEl)
+    else if (direction === 'previous') scroll(lastEl)
   }
+
+  const children = computed(() => rootEl.value?.children || [])
+
+  watch(children, () => {
+    for (const child of children.value) {
+      onKeyStroke('ArrowDown', (event: KeyboardEvent) => {
+        goToItem('next', event)
+      }, { target: child })
+
+      onKeyStroke('ArrowUp', (event) => {
+        goToItem('previous', event)
+      }, { target: child })
+    }
+  })
 }

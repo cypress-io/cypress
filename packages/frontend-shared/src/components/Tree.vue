@@ -10,20 +10,20 @@
   </button>
   <div
     ref="rootEl"
-    tabindex="0"
     class="h-200px overflow-auto"
   >
-    <div
+    <a
       v-for="row, idx in tree"
       :key="idx"
-      class="block pt-20px mt-20px"
+      href="#"
+      class="block pt-20px mt-20px focus:bg-red-500 focus:text-white"
       :data-tree-idx="idx"
-      :class="{ 'bg-gray-50': row.children, 'hidden': row.hidden.value, 'text-red-500': selectedIndex === idx}"
+      :class="{ 'bg-gray-50': row.children, 'hidden': row.hidden.value }"
       :style="{ marginLeft: `${row.depth * 25}px` }"
       @click="onRowClick(row, idx)"
     >
       {{ row.value ? `${row.label}: ${row.value}` : row.label }}
-    </div>
+    </a>
   </div>
 </template>
 
@@ -55,11 +55,11 @@ const root = {
 
 const onRowClick = (row, idx) => {
   row.toggle()
-  selectedNode.value = document.querySelector(`[data-list-idx="${idx}"]`)
 }
 
 const rootEl: Ref<HTMLElement | undefined> = ref()
 
 const { tree, expand, collapse } = useCollapsibleTree(root)
-const { selectedIndex, selectedNode } = useListNavigation(rootEl)
+
+useListNavigation(rootEl)
 </script>
