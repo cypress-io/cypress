@@ -13,19 +13,21 @@
     class="h-200px overflow-auto"
     tabindex="0"
   >
-    <a
+    <div
       v-for="row, idx in filteredTree"
       :key="idx"
+      :ref="setItemRef"
       href="#"
       class="block pt-20px mt-20px"
       :data-tree-idx="idx"
       :class="{ 'bg-gray-50': row.children, 'hidden': row.hidden.value, 'border-2 border-red-500': selectedItem === idx }"
       :style="{ marginLeft: `${row.depth * 25}px` }"
+      tabindex="-1"
       @click="onRowClick(row, idx)"
-      :ref="setItemRef"
+      @keypress.enter.space.prevent="onRowClick(row, idx)"
     >
       {{ row.value ? `${row.label}: ${row.value}` : row.label }}
-    </a>
+    </div>
   </div>
 </template>
 
@@ -74,7 +76,7 @@ const onRowClick = (row, idx) => {
 const rootEl: Ref<HTMLElement | undefined> = ref()
 
 const { tree, expand, collapse } = useCollapsibleTree(root)
-const filteredTree = computed(() => tree.filter((item => !item.hidden.value)))
+const filteredTree = computed(() => tree.filter(((item) => !item.hidden.value)))
 
-const {selectedItem} = useListNavigation(rootEl, itemRefs)
+const { selectedItem } = useListNavigation(rootEl, itemRefs)
 </script>
