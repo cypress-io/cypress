@@ -1,6 +1,6 @@
 .reporter {
   .hooks-container {
-    margin: 5px 0 5px 5px;
+    margin: 5px 0 5px 9px;
     padding-left: 10px;
     border-left: 1px dotted $gray-900;
 
@@ -60,11 +60,13 @@
           outline: none;
           text-decoration: none;
         }
-      }
-    }
 
-    i {
-      margin-right: 3px;
+        svg {
+          path:nth-child(2) {
+            fill: $gray-800;
+          }
+        }
+      }
     }
 
     .hook-failed .hook-failed-message {
