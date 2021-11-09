@@ -16,7 +16,11 @@ describe('redirection', () => {
       .contains('timeout')
       .then(function () {
       // visit, contains, page load, new url
-        expect(this.logs.length).to.eq(4)
+
+        // logging to remove later
+        const receivedLogs = this.logs.map((x, index) => `\n\n${index} - ${x.get('name')}: ${x.get('message')}`).join('\n')
+
+        expect(this.logs.length).to.eq(4, `received ${this.logs.length} logs when we expected ${4}: [${receivedLogs}]`)
 
         expect(this.logs[0].get('name')).to.eq('visit')
         expect(this.logs[1].get('name')).to.eq('contains')
