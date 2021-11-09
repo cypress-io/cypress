@@ -87,7 +87,7 @@ import FileListIcon from '~icons/cy/file-list.svg'
 import AddSmallIcon from '~icons/cy/add-small_x16.svg'
 import Input from '@cy/components/Input.vue'
 import Button from '@cy/components/Button.vue'
-import { ref, watch } from 'vue'
+import { ref } from 'vue'
 import { RadioGroup, RadioGroupOption } from '@headlessui/vue'
 
 defineProps<{tab: string, search: string}>()
