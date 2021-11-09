@@ -285,15 +285,20 @@ commands:
       - run:
           # https://github.com/nvm-sh/nvm#nvmrc
           name: Install Node
+          # on linux, nvm gets aliased as default above but isn't available
+          # until load-nvm.sh is run. on darwin, nvm needs to be aliased
+          # and is already available for it
           command: |
-            echo "before nvm alias default"
-            nvm alias default node
+            which nvm && echo "before nvm alias default node"
+            which nvm && nvm alias default node
             . ./scripts/load-nvm.sh
             echo "before nvm install"
             nvm install <<parameters.version>>
             echo "before nvm use"
             nvm use <<parameters.version>>
             node --version
+            echo "before nvm alias default"
+            nvm alias default
 
   install-chrome:
     description: Install Google Chrome
