@@ -52,6 +52,7 @@ const { t } = useI18n()
 
 gql`
 fragment SpecPatterns on CurrentProject {
+  id
   config
 }
 `

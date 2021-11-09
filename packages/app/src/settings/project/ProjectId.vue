@@ -41,6 +41,7 @@ import type { ProjectIdFragment } from '../../generated/graphql'
 
 gql`
 fragment ProjectId on CurrentProject {
+  id
   projectId
 }
 `

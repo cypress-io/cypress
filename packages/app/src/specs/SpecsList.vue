@@ -42,6 +42,7 @@ const { t } = useI18n()
 gql`
 fragment SpecNode_SpecsList on SpecEdge {
   node {
+    id
     name
     specType
     absolute
