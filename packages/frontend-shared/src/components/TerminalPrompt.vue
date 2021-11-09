@@ -24,6 +24,6 @@ defineProps<{
 
 <style lang="scss" scoped>
 .opacity-gradient {
-  background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255, .9) 20%, rgba(255,255,255,1) 100%);
+  background: linear-gradient(to right, rgba(255,255,255,.3) 0%, rgba(255,255,255, 1) 25%, rgba(255,255,255,1) 100%);
 }
 </style>
