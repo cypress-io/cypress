@@ -11,16 +11,18 @@
   <div
     ref="rootEl"
     class="h-200px overflow-auto"
+    tabindex="0"
   >
     <a
-      v-for="row, idx in tree"
+      v-for="row, idx in filteredTree"
       :key="idx"
       href="#"
-      class="block pt-20px mt-20px focus:bg-red-500 focus:text-white"
+      class="block pt-20px mt-20px"
       :data-tree-idx="idx"
-      :class="{ 'bg-gray-50': row.children, 'hidden': row.hidden.value }"
+      :class="{ 'bg-gray-50': row.children, 'hidden': row.hidden.value, 'border-2 border-red-500': selectedItem === idx }"
       :style="{ marginLeft: `${row.depth * 25}px` }"
       @click="onRowClick(row, idx)"
+      :ref="setItemRef"
     >
       {{ row.value ? `${row.label}: ${row.value}` : row.label }}
     </a>
@@ -30,10 +32,21 @@
 <script lang="ts" setup>
 import { useCollapsibleTree } from '../composables/useCollapsibleTree'
 import faker from 'faker'
-import { Ref, ref } from 'vue'
+import { Ref, ref, onBeforeUpdate, computed } from 'vue'
 import { useListNavigation } from '../composables/useListNavigation'
 
-const contacts = Array.from(new Array(100).keys()).map(() => {
+const itemRefs = ref([]) as any
+const setItemRef = (el) => {
+  if (el) {
+    itemRefs.value.push(el)
+  }
+}
+
+onBeforeUpdate(() => {
+  itemRefs.value = []
+})
+
+const contacts = Array.from(new Array(3).keys()).map(() => {
   return {
     value: faker.name.firstName(),
     label: 'Contact Details',
@@ -55,11 +68,13 @@ const root = {
 
 const onRowClick = (row, idx) => {
   row.toggle()
+  selectedItem.value = idx
 }
 
 const rootEl: Ref<HTMLElement | undefined> = ref()
 
 const { tree, expand, collapse } = useCollapsibleTree(root)
+const filteredTree = computed(() => tree.filter((item => !item.hidden.value)))
 
-useListNavigation(rootEl)
+const {selectedItem} = useListNavigation(rootEl, itemRefs)
 </script>
