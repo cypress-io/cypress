@@ -21,6 +21,9 @@ export const CurrentProject = objectType({
     t.field('currentTestingType', {
       description: 'The mode the interactive runner was launched in',
       type: 'TestingTypeEnum',
+      resolve: (source, args, ctx) => {
+        return ctx.appData.currentTestingType ?? null
+      },
     })
 
     t.field('currentBrowser', {
