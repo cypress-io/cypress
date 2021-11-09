@@ -47,7 +47,7 @@ class Sessions extends React.Component<SessionsProps> {
                 headerExtras={
                   <div className="clear-sessions"
                     onClick={() => events.emit('clear:session')}
-                  ><span><i className="fas fa-ban" />Clear All Sessions</span></div>}
+                  ><span><i className="fas fa-ban" /> Clear All Sessions</span></div>}
                 contentClass='instrument-content'
               >
                 <div>

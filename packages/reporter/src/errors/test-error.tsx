@@ -13,6 +13,9 @@ import { onEnterOrSpace } from '../lib/util'
 import Attempt from '../attempts/attempt-model'
 import Command from '../commands/command-model'
 
+import WarningIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/warning_x8.svg'
+import TerminalIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/technology-terminal_x16.svg'
+
 interface DocsUrlProps {
   url: string | string[]
 }
@@ -65,7 +68,7 @@ const TestError = observer((props: TestErrorProps) => {
       <div className='runnable-err'>
         <div className='runnable-err-header'>
           <div className='runnable-err-name'>
-            <i className='fas fa-exclamation-circle' />
+            <WarningIcon />
             {err.name}
           </div>
         </div>
@@ -86,7 +89,7 @@ const TestError = observer((props: TestErrorProps) => {
                   role='button'
                   tabIndex={0}
                 >
-                  <div tabIndex={-1}><i className="fas fa-terminal" /> <span>Print to console</span></div>
+                  <div tabIndex={-1}><TerminalIcon /> <span>Print to console</span></div>
                 </div>
               </FlashOnClick>
             }

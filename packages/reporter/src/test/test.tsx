@@ -13,6 +13,12 @@ import TestModel from './test-model'
 
 import scroller, { Scroller } from '../lib/scroller'
 import Attempts from '../attempts/attempts'
+import StateIcon from '../lib/state-icon'
+
+import CheckIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/checkmark_x16.svg'
+import ClipboardIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/general-clipboard_x16.svg'
+import WandIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/object-magic-wand-dark-mode_x16.svg'
+import WarningIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/warning_x16.svg'
 
 interface StudioControlsProps {
   events: Events
@@ -81,7 +87,11 @@ class StudioControls extends Component<StudioControlsProps, StudioControlsState>
             onClick={this._copy}
             onMouseLeave={this._endCopySuccess}
           >
-            <i className={copySuccess ? 'fas fa-check' : 'far fa-copy'} />
+            {copySuccess ? (
+              <CheckIcon />
+            ) : (
+              <ClipboardIcon />
+            )}
           </button>
         </Tooltip>
         <button className='studio-save' disabled={!studioIsNotEmpty} onClick={this._save}>Save Commands</button>
@@ -156,21 +166,23 @@ class Test extends Component<TestProps> {
   }
 
   _header () {
-    const { model } = this.props
+    const { appState, model } = this.props
 
     return (<>
-      <i aria-hidden='true' className='runnable-state fas' />
+      <StateIcon aria-hidden className="runnable-state-icon" state={model.state} isStudio={appState.studioActive} />
       <span className='runnable-title'>
         <span>{model.title}</span>
         <span className='visually-hidden'>{model.state}</span>
       </span>
       <span className='runnable-controls'>
         <Tooltip placement='top' title='One or more commands failed' className='cy-tooltip'>
-          <i className='fas fa-exclamation-triangle runnable-controls-status' />
+          <span>
+            <WarningIcon className="runnable-controls-status" />
+          </span>
         </Tooltip>
         <Tooltip placement='right' title='Add Commands to Test' className='cy-tooltip'>
           <a onClick={this._launchStudio} className='runnable-controls-studio'>
-            <i className='fas fa-magic' />
+            <WandIcon />
           </a>
         </Tooltip>
       </span>

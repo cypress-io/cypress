@@ -7,7 +7,7 @@ describe('Navigation', () => {
     cy.initializeApp()
     cy.visitApp()
 
-    cy.intercept('mutation-App_OpenExternal', { 'data': { 'openExternal': true } }).as('OpenExternal')
+    cy.intercept('mutation-ExternalLink_OpenExternal', { 'data': { 'openExternal': true } }).as('OpenExternal')
     cy.contains('button', defaultMessages.topNav.docsMenu.docsHeading).click()
     cy.contains('a', defaultMessages.topNav.docsMenu.firstTest).click()
     cy.wait('@OpenExternal').then((interception: Interception) => {
