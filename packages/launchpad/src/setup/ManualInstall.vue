@@ -1,5 +1,6 @@
 <template>
   <TerminalPrompt
+    class="m-24px"
     :command="installDependenciesCode"
     :project-folder-name="projectFolder"
   />
