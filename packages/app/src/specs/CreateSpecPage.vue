@@ -66,6 +66,7 @@ fragment CreateSpecPage on Query {
   ...CreateSpecCards
   ...CreateSpecModal
    currentProject {
+     id
      currentTestingType
   }
 }

@@ -16,7 +16,8 @@ import type { LaunchOpts, LaunchArgs, OpenProjectLaunchOptions, FoundBrowser } f
 import { fs } from './util/fs'
 import path from 'path'
 import os from 'os'
-import type { DataContextShell } from '@packages/data-context/src/DataContextShell'
+import type { DataContext } from '@packages/data-context'
+import { makeLegacyDataContext } from './makeDataContext'
 
 const debug = Debug('cypress:server:open_project')
 
@@ -425,10 +426,10 @@ export class OpenProject {
     this.stopSpecsWatcher()
   }
 
-  _ctx?: DataContextShell
+  _ctx?: DataContext
 
   async create (path: string, args: LaunchArgs, options: OpenProjectLaunchOptions, browsers: FoundBrowser[] = []) {
-    this._ctx = options.ctx
+    this._ctx = options.ctx ?? makeLegacyDataContext()
     debug('open_project create %s', path)
 
     _.defaults(options, {

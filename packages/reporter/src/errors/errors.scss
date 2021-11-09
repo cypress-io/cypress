@@ -13,10 +13,6 @@ $code-border-radius: 4px;
       line-height: 1.4;
       margin-bottom: 0.6em;
 
-      > i {
-        margin-right: 5px;
-      }
-
       a {
         float: right;
       }
@@ -27,7 +23,8 @@ $code-border-radius: 4px;
     }
 
     pre {
-      background: $orange-900;
+      border-color: $orange-300;
+      color: $orange-300;
       display: block;
       width: 100%;
       white-space: initial;
@@ -56,7 +53,7 @@ $code-border-radius: 4px;
 
   .runnable-err-wrapper {
     cursor: default;
-    margin: 5px 0 5px 5px;
+    margin: 5px 0 5px 9px;
     padding-left: 10px;
     border-left: 1px dotted $gray-900;
   }
@@ -84,9 +81,9 @@ $code-border-radius: 4px;
   }
 
   .runnable-err-header {
+    background-color: rgba($red-400, 0.05);
     display: flex;
     justify-content: space-between;
-    background-color: rgba($red-400, 0.05);
     padding: 5px 10px;
     font-weight: bold;
 
@@ -96,8 +93,7 @@ $code-border-radius: 4px;
       line-height: 22px;
       color: $err-header-text;
 
-      i {
-        font-size: 10px;
+      svg {
         margin-right: 10px;
       }
     }
@@ -142,29 +138,31 @@ $code-border-radius: 4px;
         }
       }
 
+      &:active,
+      &:hover {
+        .collapsible-header-text {
+          color: $red-100;
+        }
+        .collapsible-indicator {
+          color: $red-200;
+        }
+      }
+
       div {
         cursor: pointer;
         outline: none;
-        padding: 14px 5px;
+        padding: 14px 10px;
         width: 100%;
 
         .collapsible-header-text {
           color: $red-300;
           font-size: 14px;
           font-weight: 500;
-
-          &:hover {
-            color: $red-100;
-          }
-
-          &:active {
-            color: $red-100;
-          }
         }
 
         .collapsible-indicator {
           line-height: 18px;
-          color: $red-400 !important;
+          color: $red-400;
         }
       }
     }
@@ -172,6 +170,17 @@ $code-border-radius: 4px;
     .runnable-err-print {
       &:focus {
         outline: none;
+      }
+
+      &:active,
+      &:hover {
+        div {
+          color: $red-100;
+        }
+
+        svg {
+          color: $red-200;
+        }
       }
 
       div {
@@ -187,20 +196,9 @@ $code-border-radius: 4px;
           outline: none;
         }
 
-        &:hover {
-          color: $red-100;
-        }
-
-        &:active {
-          color: $red-100;
-        }
-
-        i {
-          border: solid 1px $red-400;
-          border-radius: 4px;
+        svg {
           color: $red-400;
-          font-size: 6px;
-          padding: 4px 3px;
+          margin: 4px 3px;
           vertical-align: middle;
         }
 

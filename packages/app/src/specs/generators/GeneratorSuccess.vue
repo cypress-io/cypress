@@ -36,13 +36,14 @@ import type { GeneratorSuccessFragment } from '../../generated/graphql'
 
 gql`
 fragment GeneratorSuccess on GeneratedSpec {
+  id
   content
   spec {
+    id
     fileName
     fileExtension
     baseName
     relative
-    id
   } 
 }
 `
