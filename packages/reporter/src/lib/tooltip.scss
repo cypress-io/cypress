@@ -7,6 +7,13 @@ $cy-tooltip-class: 'cy-tooltip';
   background-color: $gray-50;
   color: $gray-1000;
 
+  .cy-tooltip-arrow {
+    svg {
+      fill: $gray-50;
+      stroke: $gray-1000;
+    }
+  }
+
   .kbd {
     color: $gray-1000;
     padding: 1px 4px;

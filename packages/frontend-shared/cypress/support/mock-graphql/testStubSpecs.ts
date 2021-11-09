@@ -141,6 +141,7 @@ export const randomComponents = <T extends 'Spec' | 'FileParts'>(n = 200, baseTy
     const name = `${componentName}${d.specPattern}${d.fileExtension}`
 
     return {
+      id: faker.datatype.uuid(),
       baseName: componentName,
       relative: `${directories[d.directory](d)}/${name}`,
       absolute: `${faker.system.directoryPath()}/${directories[d.directory](d)}/${name}`,
@@ -150,7 +151,6 @@ export const randomComponents = <T extends 'Spec' | 'FileParts'>(n = 200, baseTy
       specType: 'component' as const,
       fileName: componentName,
       __typename: baseTypename,
-      id: faker.datatype.uuid(),
       gitInfo: {
         __typename: 'GitInfo' as const,
         id: faker.datatype.uuid(),

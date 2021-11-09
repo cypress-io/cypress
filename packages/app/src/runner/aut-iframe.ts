@@ -1,4 +1,6 @@
 import type { DebouncedFunc } from 'lodash'
+import { useSelectorPlaygroundStore } from '../store/selector-playground-store'
+import type JQuery from 'jquery'
 
 // JQuery bundled w/ Cypress
 type $CypressJQuery = any
@@ -6,36 +8,37 @@ type $CypressJQuery = any
 export class AutIframe {
   debouncedToggleSelectorPlayground: DebouncedFunc<(isEnabled: any) => void>
   $iframe?: JQuery<HTMLIFrameElement>
-  _highlightedEl?: JQuery<Element>
+  logger: any
+  _highlightedEl?: Element
 
   constructor (
     private projectName: string,
     private eventManager: any,
     private _: any,
     private $: $CypressJQuery,
-    private logger: any,
+    logger: any,
     private dom: any,
     private visitFailure: (props: any) => string,
-    private studio: {
-      selectorPlaygroundModel: any
-      recorder: any
-    },
+    private studioRecorder: any,
     private blankContents: {
       initial: () => string
       session: () => string
       sessionLifecycle: () => string
     },
   ) {
+    this.logger = logger
     this.debouncedToggleSelectorPlayground = this._.debounce(this.toggleSelectorPlayground, 300)
   }
 
-  create () {
-    this.$iframe = this.$('<iframe>', {
+  create (): JQuery<HTMLIFrameElement> {
+    const $iframe = this.$('<iframe>', {
       id: `Your App: '${this.projectName}'`,
       class: 'aut-iframe',
     })
 
-    return this.$iframe
+    this.$iframe = $iframe
+
+    return $iframe
   }
 
   showInitialBlankContents () {
@@ -112,8 +115,7 @@ export class AutIframe {
     const { headStyles = undefined, bodyStyles = undefined } = Cypress ? Cypress.cy.getStyles(snapshot) : {}
     const { body, htmlAttrs } = snapshot
     const contents = this._contents()
-    // @ts-ignore - no idea
-    const $html = contents?.find('html') as JQuery<HTMLHtmlElement>
+    const $html = contents?.find('html') as any as JQuery<HTMLHtmlElement>
 
     if ($html) {
       this._replaceHtmlAttrs($html, htmlAttrs)
@@ -127,7 +129,9 @@ export class AutIframe {
     this._insertBodyStyles(body.get(), bodyStyles)
     $html?.append(body.get())
 
-    this.debouncedToggleSelectorPlayground(this.studio.selectorPlaygroundModel.isEnabled)
+    const selectorPlaygroundStore = useSelectorPlaygroundStore()
+
+    this.debouncedToggleSelectorPlayground(selectorPlaygroundStore.isEnabled)
   }
 
   // note htmlAttrs is actually `NamedNodeMap`: https://developer.mozilla.org/en-US/docs/Web/API/NamedNodeMap
@@ -294,10 +298,12 @@ export class AutIframe {
   }
 
   _resetShowHighlight = () => {
-    this.studio.selectorPlaygroundModel.setShowingHighlight(false)
+    const selectorPlaygroundStore = useSelectorPlaygroundStore()
+
+    selectorPlaygroundStore.setShowingHighlight(false)
   }
 
-  _onSelectorMouseMove = (e) => {
+  _onSelectorMouseMove = (e: JQuery.MouseMoveEvent) => {
     const $body = this._body()
 
     if (!$body) return
@@ -327,6 +333,7 @@ export class AutIframe {
     const Cypress = this.eventManager.getCypress()
 
     const selector = Cypress.SelectorPlayground.getSelector($el)
+    const selectorPlaygroundStore = useSelectorPlaygroundStore()
 
     this.dom.addOrUpdateSelectorPlaygroundHighlight({
       $el,
@@ -334,9 +341,9 @@ export class AutIframe {
       $body,
       showTooltip: true,
       onClick: () => {
-        this.studio.selectorPlaygroundModel.setNumElements(1)
-        this.studio.selectorPlaygroundModel.resetMethod()
-        this.studio.selectorPlaygroundModel.setSelector(selector)
+        selectorPlaygroundStore.setNumElements(1)
+        selectorPlaygroundStore.resetMethod()
+        selectorPlaygroundStore.setSelector(selector)
       },
     })
   }
@@ -352,7 +359,9 @@ export class AutIframe {
     }
   }
 
-  toggleSelectorHighlight (isShowingHighlight) {
+  toggleSelectorHighlight (isShowingHighlight: boolean) {
+    const selectorPlaygroundStore = useSelectorPlaygroundStore()
+
     if (!isShowingHighlight) {
       this._clearHighlight()
 
@@ -361,12 +370,12 @@ export class AutIframe {
 
     const Cypress = this.eventManager.getCypress()
 
-    const $el = this.getElements(Cypress.this.dom)
+    const $el = this.getElements(Cypress.dom)
 
-    this.studio.selectorPlaygroundModel.setValidity(!!$el)
+    selectorPlaygroundStore.setValidity(!!$el)
 
     if ($el) {
-      this.studio.selectorPlaygroundModel.setNumElements($el.length)
+      selectorPlaygroundStore.setNumElements($el.length)
 
       if ($el.length) {
         this.dom.scrollIntoView(this._window(), $el[0])
@@ -375,21 +384,21 @@ export class AutIframe {
 
     this.dom.addOrUpdateSelectorPlaygroundHighlight({
       $el: $el && $el.length ? $el : null,
-      selector: this.studio.selectorPlaygroundModel.selector,
+      selector: selectorPlaygroundStore.selector,
       $body: this._body(),
       showTooltip: false,
     })
   }
 
   getElements (cypressDom) {
-    const { selector, method } = this.studio.selectorPlaygroundModel
+    const selectorPlaygroundStore = useSelectorPlaygroundStore()
     const $contents = this._contents()
 
-    if (!$contents || !selector) return
+    if (!$contents || !selectorPlaygroundStore.selector) return
 
     return this.dom.getElementsForSelector({
-      method,
-      selector,
+      method: selectorPlaygroundStore.method,
+      selector: selectorPlaygroundStore.selector,
       cypressDom,
       $root: $contents,
     })
@@ -400,9 +409,10 @@ export class AutIframe {
 
     const Cypress = this.eventManager.getCypress()
 
-    const $el = this.getElements(Cypress.this.dom)
+    const $el = this.getElements(Cypress.dom)
 
-    const command = `cy.${this.studio.selectorPlaygroundModel.method}('${this.studio.selectorPlaygroundModel.selector}')`
+    const selectorPlaygroundStore = useSelectorPlaygroundStore()
+    const command = `cy.${selectorPlaygroundStore.method}('${selectorPlaygroundStore.selector}')`
 
     if (!$el) {
       return this.logger.logFormatted({
@@ -414,7 +424,7 @@ export class AutIframe {
     this.logger.logFormatted({
       Command: command,
       Elements: $el.length,
-      Yielded: Cypress.this.dom.getElements($el),
+      Yielded: Cypress.dom.getElements($el),
     })
   }
 
@@ -453,14 +463,14 @@ export class AutIframe {
   }
 
   startStudio = () => {
-    if (this.studio.recorder.isLoading) {
-      this.studio.recorder.start(this._body()?.[0])
+    if (this.studioRecorder.isLoading) {
+      this.studioRecorder.start(this._body()?.[0])
     }
   }
 
   reattachStudio = () => {
-    if (this.studio.recorder.isActive) {
-      this.studio.recorder.attachListeners(this._body()?.[0])
+    if (this.studioRecorder.isActive) {
+      this.studioRecorder.attachListeners(this._body()?.[0])
     }
   }
 }

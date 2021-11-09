@@ -8,10 +8,11 @@
     </template>
     <template #description>
       <i18n-t keypath="settingsPage.projectId.description">
-        <a
+        <ExternalLink
           href="https://docs.cypress.io"
-          target="_blank"
-        >{{ t('links.learnMore') }}</a>
+        >
+          {{ t('links.learnMore') }}
+        </ExternalLink>
       </i18n-t>
     </template>
     <div class="flex items-center gap-10px">
@@ -34,11 +35,13 @@ import CopyButton from '@cy/components/CopyButton.vue'
 import { useI18n } from '@cy/i18n'
 import IconOctothorpe from '~icons/cy/octothorpe_x16.svg'
 import SettingsSection from '../SettingsSection.vue'
+import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import CodeBox from './CodeBox.vue'
 import type { ProjectIdFragment } from '../../generated/graphql'
 
 gql`
 fragment ProjectId on CurrentProject {
+  id
   projectId
 }
 `

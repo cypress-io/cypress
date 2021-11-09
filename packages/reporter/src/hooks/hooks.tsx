@@ -10,6 +10,9 @@ import Collapsible from '../collapsible/collapsible'
 import HookModel, { HookName } from './hook-model'
 import FileOpener from '../lib/file-opener'
 
+import ArrowRightIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/arrow-right_x16.svg'
+import OpenIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/technology-code-editor_x16.svg'
+
 export interface HookHeaderProps {
   model: HookModel
   number?: number
@@ -27,7 +30,7 @@ export interface HookOpenInIDEProps {
 
 const HookOpenInIDE = ({ invocationDetails }: HookOpenInIDEProps) => (
   <FileOpener fileDetails={invocationDetails} className='hook-open-in-ide'>
-    <i className='fas fa-external-link-alt fa-sm' /> <span>Open in IDE</span>
+    <OpenIcon viewBox="0 0 16 16" width="12" height="12" /> <span>Open in IDE</span>
   </FileOpener>
 )
 
@@ -42,7 +45,7 @@ const StudioNoCommands = () => (
             </span>
           </span>
           <span className='command-controls'>
-            <i className='fa fa-arrow-right' />
+            <ArrowRightIcon />
           </span>
         </div>
       </div>

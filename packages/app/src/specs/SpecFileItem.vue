@@ -1,7 +1,7 @@
 <template>
   <div class="flex items-center py-4px text-sm">
     <DocumentIconBlank
-      class="group-hocus:icon-dark-indigo-300 group-hocus:icon-light-indigo-600 text-base"
+      class="text-base group-hocus:(icon-dark-indigo-300 icon-light-indigo-600) group-hover:children:(transition-all ease-in-out duration-250)"
       :class="selected ? 'icon-dark-indigo-300 icon-light-indigo-600' : 'icon-dark-gray-800 icon-light-gray-1000'"
     />
     <span
@@ -22,4 +22,3 @@ defineProps<{
   selected: boolean
 }>()
 </script>
-<style></style>

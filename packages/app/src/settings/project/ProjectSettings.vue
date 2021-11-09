@@ -36,6 +36,7 @@ fragment ProjectSettings on CurrentProject {
   cloudProject {
     id
     recordKeys {
+      id
       ...RecordKey
     }
   }
