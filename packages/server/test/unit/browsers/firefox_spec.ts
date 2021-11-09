@@ -235,6 +235,8 @@ describe('lib/browsers/firefox', () => {
         },
       })
 
+      utils.writeExtension.restore()
+
       const getFile = function (path) {
         return _.reduce(_.compact(_.split(path, '/')), (acc, item) => {
           return acc.getItem(item)
@@ -242,7 +244,7 @@ describe('lib/browsers/firefox', () => {
       }
 
       return firefox.open(this.browser, 'http://', this.options).then(() => {
-        expect(getFile(`${process.env.HOME }/.config/Cypress/cy/test/browsers/firefox-stable/interactive/CypressExtension/background.js`).getMode()).to.be.equals(0o444)
+        expect(getFile(`${process.env.HOME }/.config/Cypress/cy/test/browsers/firefox-stable/interactive/CypressExtension/background.js`).getMode()).to.be.equals(0o644)
       })
     })
 
