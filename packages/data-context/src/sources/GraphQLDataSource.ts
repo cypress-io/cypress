@@ -4,6 +4,7 @@ import { executeExchange } from '@urql/exchange-execute'
 import type { GraphQLSchema } from 'graphql'
 import type { DataContext } from '../DataContext'
 import type * as allOperations from '../gen/all-operations.gen'
+import { urqlCacheKeys } from '../util/urqlCacheKeys'
 
 // Filter out non-Query shapes
 type AllQueries<T> = {
@@ -49,7 +50,7 @@ export class GraphQLDataSource {
       url: `__`,
       exchanges: [
         dedupExchange,
-        cacheExchange(),
+        cacheExchange(urqlCacheKeys),
         this._ssr,
         executeExchange({
           schema: this.schema,
