@@ -1235,30 +1235,30 @@ jobs:
       # we don't really need any artifacts - we are only interested in visual screenshots
       - store-npm-logs
 
-  # reporter-integration-tests:
-  #   <<: *defaults
-  #   resource_class: medium
-  #   steps:
-  #     - restore_cached_workspace
-  #     - run:
-  #         command: yarn build-for-tests
-  #         working_directory: packages/reporter
-  #     - run:
-  #         command: |
-  #           CYPRESS_KONFIG_ENV=production \
-  #           CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-  #           PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
-  #           PERCY_ENABLE=${PERCY_TOKEN:-0} \
-  #           PERCY_PARALLEL_TOTAL=-1 \
-  #           yarn percy exec --parallel -- -- \
-  #           yarn cypress:run --record --parallel --group reporter
-  #         working_directory: packages/reporter
-  #     - verify-mocha-results
-  #     - store_test_results:
-  #         path: /tmp/cypress
-  #     - store_artifacts:
-  #         path: /tmp/artifacts
-  #     - store-npm-logs
+  reporter-integration-tests:
+    <<: *defaults
+    resource_class: medium
+    steps:
+      - restore_cached_workspace
+      - run:
+          command: yarn build-for-tests
+          working_directory: packages/reporter
+      - run:
+          command: |
+            CYPRESS_KONFIG_ENV=production \
+            CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
+            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
+            PERCY_ENABLE=${PERCY_TOKEN:-0} \
+            PERCY_PARALLEL_TOTAL=-1 \
+            yarn percy exec --parallel -- -- \
+            yarn cypress:run --record --parallel --group reporter
+          working_directory: packages/reporter
+      - verify-mocha-results
+      - store_test_results:
+          path: /tmp/cypress
+      - store_artifacts:
+          path: /tmp/artifacts
+      - store-npm-logs
 
   ui-components-integration-tests:
     <<: *defaults
