@@ -85,7 +85,7 @@ describe('src/cy/commands/navigation', () => {
     })
 
     // TODO: fix this
-    it('(FLAKY) sets timeout to Cypress.config(pageLoadTimeout)', {
+    it('sets timeout to Cypress.config(pageLoadTimeout)', {
       pageLoadTimeout: 4567,
     }, () => {
       const timeout = cy.spy(Promise.prototype, 'timeout')
@@ -303,7 +303,7 @@ describe('src/cy/commands/navigation', () => {
     })
 
     // TODO: fix this
-    it('(FLAKY) sets timeout to Cypress.config(pageLoadTimeout)', {
+    it('sets timeout to Cypress.config(pageLoadTimeout)', {
       pageLoadTimeout: 4567,
     }, () => {
       const timeout = cy.spy(Promise.prototype, 'timeout')
@@ -546,7 +546,7 @@ describe('src/cy/commands/navigation', () => {
 
   context('#visit', () => {
     // TODO: fix this
-    it('(FLAKY) sets timeout to Cypress.config(pageLoadTimeout)', {
+    it('sets timeout to Cypress.config(pageLoadTimeout)', {
       pageLoadTimeout: 4567,
     }, () => {
       const timeout = cy.spy(Promise.prototype, 'timeout')
