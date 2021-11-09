@@ -21,7 +21,7 @@
       ref="runnerPane"
       class="relative w-full"
     >
-      <HideDuringScreenshot class="bg-white p-4  border-8 border-blue-300">
+      <HideDuringScreenshot class="bg-white p-4">
         <SpecRunnerHeader :gql="props.gql" />
       </HideDuringScreenshot>
 
@@ -189,4 +189,17 @@ iframe {
   height: 100%;
   background: white;
 }
+
+.highlight {
+  background: rgba(159, 196, 231, 0.6);
+  border: solid 2px #9FC4E7;
+  cursor: pointer;
+}
+
+.tooltip {
+  font-family: sans-serif;
+  font-size: 14px;
+  max-width: 400px !important;
+}
+
 </style>
