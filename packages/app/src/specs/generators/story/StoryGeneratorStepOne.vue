@@ -86,6 +86,7 @@ title.value = t('createSpec.component.importFromStory.header')
 
 gql`
 fragment StoryGeneratorStepOne_codeGenGlob on CurrentProject {
+  id
   codeGenGlob(type: story)
 }
 `
@@ -110,6 +111,7 @@ query StoryGeneratorStepOne($glob: String!) {
 gql`
 mutation StoryGeneratorStepOne_generateSpec($codeGenCandidate: String!, $type: CodeGenType!) {
   generateSpecFromSource(codeGenCandidate: $codeGenCandidate, type: $type) {
+    id
     ...GeneratorSuccess
   }
 }`

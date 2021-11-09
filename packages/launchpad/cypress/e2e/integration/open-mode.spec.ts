@@ -1,4 +1,4 @@
-import defaultMessages from '../../../../frontend-shared/src/locales/en-US.json'
+import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 
 describe('Launchpad: Open Mode', () => {
   beforeEach(() => {

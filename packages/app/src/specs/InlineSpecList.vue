@@ -19,6 +19,7 @@ import InlineSpecListRow from './InlineSpecListRow.vue'
 gql`
 fragment SpecNode_InlineSpecList on SpecEdge {
   node {
+    id
     name
     specType
     absolute

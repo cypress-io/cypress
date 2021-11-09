@@ -1,10 +1,4 @@
-import type { MobxRunnerStore } from './src/store'
 import type MobX from 'mobx'
-
-interface ConnectionInfo { 
-  automationElement: '__cypress-string',
-  randomString: string 
-}
 
 export {}
 
@@ -34,24 +28,6 @@ declare global {
        * Proxy event to the reporter via `Reporter.defaultEvents.emit`
        */
       emit (evt: string, ...args: unknown[]): void
-
-      /**
-       * This is the eventManager which orchestrates all the communication
-       * between the reporter, driver, and server, as well as handle
-       * setup, teardown and running of specs.
-       * 
-       * It's only used on the "Runner" part of the unified runner.
-       */
-      eventManager: {
-        addGlobalListeners: (state: MobxRunnerStore, connectionInfo: ConnectionInfo) => void
-        setup: (config: Record<string, unknown>) => void
-        initialize: ($autIframe: JQuery<HTMLIFrameElement>, config: Record<string, unknown>) => void
-        teardown: (state: MobxRunnerStore) => Promise<void>
-        teardownReporter: () => Promise<void>
-        [key: string]: any
-
-        on (event: 'restart', ...args: unknown[]): void
-      }
 
       /**
        * This is the config served from the back-end.
@@ -90,7 +66,6 @@ declare global {
        * We cannot import the correct types, because this causes the linter and type
        * checker to run on runner-shared and reporter, and it blows up.
        */
-      AutIframe: any
       Reporter: any
       shortcuts: {
         stop: () => void
