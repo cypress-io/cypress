@@ -1347,28 +1347,28 @@ describe('src/cy/commands/navigation', () => {
           url: 'http://foobarbaz',
           headers: 'quux',
         })
-      });
-
-      [
-        'foo',
-        null,
-        false,
-      ].forEach((qs) => {
-        const str = String(qs)
-
-        it(`throws when qs is ${str}`, (done) => {
-          cy.on('fail', (err) => {
-            expect(err.message).to.contain(`\`cy.visit()\` requires the \`qs\` option to be an object, but received: \`${str}\``)
-
-            done()
-          })
-
-          cy.visit({
-            url: 'http://foobarbaz',
-            qs,
-          })
-        })
       })
+
+      // [
+      //   'foo',
+      //   null,
+      //   false,
+      // ].forEach((qs) => {
+      //   const str = String(qs)
+
+      //   it(`throws when qs is ${str}`, (done) => {
+      //     cy.on('fail', (err) => {
+      //       expect(err.message).to.contain(`\`cy.visit()\` requires the \`qs\` option to be an object, but received: \`${str}\``)
+
+      //       done()
+      //     })
+
+      //     cy.visit({
+      //       url: 'http://foobarbaz',
+      //       qs,
+      //     })
+      //   })
+      // })
 
       it('throws when failOnStatusCode is false and retryOnStatusCodeFailure is true', (done) => {
         cy.on('fail', (err) => {
