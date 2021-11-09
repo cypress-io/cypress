@@ -580,5 +580,14 @@ describe('util', () => {
         ciBuildId: 'my ci build id',
       })
     })
+
+    it('throws when both --component and --e2e are given', () => {
+      expect(() => {
+        return util.parseOpts({
+          component: true,
+          e2e: true,
+        })
+      }).to.throw(Error)
+    })
   })
 })
