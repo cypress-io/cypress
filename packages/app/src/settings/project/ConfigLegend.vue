@@ -12,11 +12,12 @@
       :label="legendText.config.label"
     >
       <i18n-t :keypath="legendText.config.descriptionKey">
-        <a
+        <ExternalLink
           href="https://docs.cypress.io"
-          target="_blank"
-          class="text-purple-500 hocus-link-default"
-        >cypress.config.js</a>
+          class="text-purple-500"
+        >
+          cypress.config.js
+        </ExternalLink>
       </i18n-t>
     </ConfigBadge>
 
@@ -39,20 +40,22 @@
       :label="legendText.dynamic.label"
     >
       <i18n-t :keypath="legendText.dynamic.descriptionKey">
-        <a
+        <ExternalLink
           href="https://docs.cypress.io"
-          target="_blank"
-          class="text-purple-500 hocus-link-default"
-        >setupNodeEnv</a>
+          class="text-purple-500"
+        >
+          setupNodeEnv
+        </ExternalLink>
       </i18n-t>
     </ConfigBadge>
   </div>
 </template>
 
 <script lang="ts" setup>
+import ConfigBadge from './ConfigBadge.vue'
+import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import { computed } from 'vue'
 import { useI18n } from '@cy/i18n'
-import ConfigBadge from './ConfigBadge.vue'
 import { CONFIG_LEGEND_COLOR_MAP } from './ConfigSourceColors'
 
 const { t } = useI18n()

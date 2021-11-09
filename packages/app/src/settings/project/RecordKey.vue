@@ -5,10 +5,11 @@
     </template>
     <template #description>
       <i18n-t keypath="settingsPage.recordKey.description">
-        <a
+        <ExternalLink
           href="https://docs.cypress.io"
-          target="_blank"
-        >{{ t('links.learnMore') }}</a>
+        >
+          {{ t('links.learnMore') }}
+        </ExternalLink>
       </i18n-t>
     </template>
     <div
@@ -47,6 +48,7 @@ import IconExport from '~icons/cy/export_x16.svg'
 import { gql } from '@urql/core'
 import CopyButton from '@cy/components/CopyButton.vue'
 import CodeBox from './CodeBox.vue'
+import ExternalLink from '@packages/frontend-shared/src/gql-components/ExternalLink.vue'
 
 gql`
 fragment RecordKey on CloudRecordKey {

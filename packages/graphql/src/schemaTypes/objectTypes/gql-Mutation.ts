@@ -35,6 +35,18 @@ export const mutation = mutationType({
       },
     })
 
+    t.field('openExternal', {
+      type: 'Boolean',
+      args: {
+        url: nonNull(stringArg()),
+      },
+      resolve: (_, args, ctx) => {
+        ctx.actions.electron.openExternal(args.url)
+
+        return true
+      },
+    })
+
     t.field('internal_clearProjectPreferencesCache', {
       type: 'Boolean',
       args: {
