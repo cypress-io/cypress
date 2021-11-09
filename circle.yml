@@ -1028,7 +1028,7 @@ jobs:
             desktop-gui-component-tests,
             cli-visual-tests,
             runner-integration-tests-chrome,
-            runner-ct-integration-tests-chrome
+            runner-ct-integration-tests-chrome,
             reporter-integration-tests,
       - run: yarn percy build:finalize
 

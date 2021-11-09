@@ -51,6 +51,7 @@ import type { SpecRunnerHeaderFragment } from '../generated/graphql'
 
 gql`
 fragment SpecRunnerHeader on CurrentProject {
+  id
   currentTestingType
 
   currentBrowser {

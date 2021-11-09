@@ -37,6 +37,7 @@ const { t } = useI18n()
 
 gql`
 fragment Config on CurrentProject {
+  id
   config
 }
 `

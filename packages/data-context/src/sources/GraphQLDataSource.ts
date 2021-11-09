@@ -2,8 +2,9 @@ import { createClient, Client, dedupExchange, ssrExchange } from '@urql/core'
 import { cacheExchange } from '@urql/exchange-graphcache'
 import { executeExchange } from '@urql/exchange-execute'
 import type { GraphQLSchema } from 'graphql'
-import type { DataContextShell } from '../DataContextShell'
+import type { DataContext } from '../DataContext'
 import type * as allOperations from '../gen/all-operations.gen'
+import { urqlCacheKeys } from '../util/urqlCacheKeys'
 
 // Filter out non-Query shapes
 type AllQueries<T> = {
@@ -18,7 +19,7 @@ export class GraphQLDataSource {
   private _urqlClient: Client
   private _ssr: ReturnType<typeof ssrExchange>
 
-  constructor (private ctx: DataContextShell, private schema: GraphQLSchema) {
+  constructor (private ctx: DataContext, private schema: GraphQLSchema) {
     this._ssr = ssrExchange({ isClient: false })
     this._urqlClient = this.makeClient()
   }
@@ -49,7 +50,7 @@ export class GraphQLDataSource {
       url: `__`,
       exchanges: [
         dedupExchange,
-        cacheExchange(),
+        cacheExchange(urqlCacheKeys),
         this._ssr,
         executeExchange({
           schema: this.schema,
