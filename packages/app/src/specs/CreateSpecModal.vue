@@ -61,6 +61,7 @@ gql`
 fragment CreateSpecModal on Query {
   ...CreateSpecCards
   currentProject {
+    id
     ...ComponentGeneratorStepOne_codeGenGlob
   }
 }

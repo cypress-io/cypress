@@ -8,7 +8,7 @@
 import { computed } from 'vue'
 import { useScreenshotStore } from '../../store/screenshot-store'
 
-const navbarWidth = 80
+const navbarWidth = 64
 const screenshotStore = useScreenshotStore()
 
 const style = computed(() => {
