@@ -572,6 +572,14 @@ export class EventManager {
     this.localBus.removeAllListeners()
     this.reporterBus.removeAllListeners()
     ws.off()
+
+    if (Cypress) {
+      Cypress.stop()
+      Cypress.removeAllListeners()
+      Cypress.events.removeAllListeners()
+      Cypress.cy.resetTo()
+      Cypress.$autIframe = null
+    }
   }
 
   async teardown (state: BaseStore) {

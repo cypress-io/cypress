@@ -729,6 +729,15 @@ export default {
         return cy.removeAllListeners()
       },
 
+      resetTo () {
+        state.reset()
+        queue.reset()
+        queue.clear()
+        timers.reset()
+        cy.removeAllListeners()
+        cy.expect = null
+      },
+
       addCommandSync (name, fn) {
         cy[name] = function () {
           return fn.apply(runnableCtx(name), arguments)
