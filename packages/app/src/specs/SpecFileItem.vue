@@ -22,4 +22,8 @@ defineProps<{
   selected: boolean
 }>()
 </script>
-<style></style>
+<style>
+.group:hover path {
+  transition: all ease-in-out 0.3s;
+}
+</style>
