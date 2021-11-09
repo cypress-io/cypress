@@ -672,20 +672,20 @@ describe('app/background', () => {
         return delete browser.runtime.lastError
       })
 
-      it('resolves with screenshot', function (done) {
-        sinon.stub(browser.tabs, 'captureVisibleTab')
-        .withArgs(1, { format: 'png' })
-        .resolves('foobarbaz')
+      // it('resolves with screenshot', function (done) {
+      //   sinon.stub(browser.tabs, 'captureVisibleTab')
+      //   .withArgs(1, { format: 'png' })
+      //   .resolves('foobarbaz')
 
-        this.socket.on('automation:response', (id, obj = {}) => {
-          expect(id).to.eq(123)
-          expect(obj.response).to.eq('foobarbaz')
+      //   this.socket.on('automation:response', (id, obj = {}) => {
+      //     expect(id).to.eq(123)
+      //     expect(obj.response).to.eq('foobarbaz')
 
-          return done()
-        })
+      //     return done()
+      //   })
 
-        return this.server.emit('automation:request', 123, 'take:screenshot')
-      })
+      //   return this.server.emit('automation:request', 123, 'take:screenshot')
+      // })
 
       // it('rejects with browser.runtime.lastError', function (done) {
       //   sinon.stub(browser.tabs, 'captureVisibleTab').withArgs(1, { format: 'png' }).rejects(new Error('some error'))

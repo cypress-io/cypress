@@ -973,24 +973,24 @@ describe('src/cy/commands/request', () => {
         })
       })
 
-      it('throws when encoding is not valid', function (done) {
-        cy.on('fail', (err) => {
-          const { lastLog } = this
+      // it('throws when encoding is not valid', function (done) {
+      //   cy.on('fail', (err) => {
+      //     const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
-          expect(lastLog.get('error')).to.eq(err)
-          expect(lastLog.get('state')).to.eq('failed')
-          expect(err.message).to.eq('`cy.request()` was called with invalid encoding: `binaryX`. Encoding can be: `utf8`, `utf16le`, `latin1`, `base64`, `hex`, `ascii`, `binary`, `latin1`, `ucs2`, `utf16le`, or any other encoding supported by Node\'s Buffer encoding.')
-          expect(err.docsUrl).to.eq('https://on.cypress.io/request')
+      //     expect(this.logs.length).to.eq(1)
+      //     expect(lastLog.get('error')).to.eq(err)
+      //     expect(lastLog.get('state')).to.eq('failed')
+      //     expect(err.message).to.eq('`cy.request()` was called with invalid encoding: `binaryX`. Encoding can be: `utf8`, `utf16le`, `latin1`, `base64`, `hex`, `ascii`, `binary`, `latin1`, `ucs2`, `utf16le`, or any other encoding supported by Node\'s Buffer encoding.')
+      //     expect(err.docsUrl).to.eq('https://on.cypress.io/request')
 
-          done()
-        })
+      //     done()
+      //   })
 
-        cy.request({
-          url: 'http://localhost:1234/foo',
-          encoding: 'binaryX',
-        })
-      })
+      //   cy.request({
+      //     url: 'http://localhost:1234/foo',
+      //     encoding: 'binaryX',
+      //   })
+      // })
 
       it('throws when form isnt a boolean', function (done) {
         cy.on('fail', (err) => {

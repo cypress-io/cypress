@@ -83,10 +83,10 @@ export const itHandlesFileOpening = ({ getRunner, selector, file, stackTrace = f
     // NOTE: this fails because mobx doesn't make the editors observable, so
     // the changes to the path don't bubble up correctly. this only happens
     // in the Cypress test and not when running the actual app
-    it.skip('updates "Other" path when typed into', () => {
-      cy.contains('Other').find('input[type="text"]').type('/absolute/path/to/foo.js')
-      .should('have.value', '/absolute/path/to/foo.js')
-    })
+    // it.skip('updates "Other" path when typed into', () => {
+    //   cy.contains('Other').find('input[type="text"]').type('/absolute/path/to/foo.js')
+    //   .should('have.value', '/absolute/path/to/foo.js')
+    // })
 
     describe('when editor is not selected', () => {
       it('disables submit button', () => {
