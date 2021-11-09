@@ -13,12 +13,12 @@ import type { Cfg } from './project-base'
 import xhrs from './controllers/xhrs'
 import { runner, ServeOptions } from './controllers/runner'
 import { iframesController } from './controllers/iframes'
-import type { DataContextShell } from '@packages/data-context/src/DataContextShell'
+import type { DataContext } from '@packages/data-context/src/DataContext'
 
 const debug = Debug('cypress:server:routes')
 
 export interface InitializeRoutes {
-  ctx: DataContextShell
+  ctx: DataContext
   specsStore: SpecsStore
   config: Cfg
   getSpec: () => Cypress.Spec | null
@@ -31,7 +31,7 @@ export interface InitializeRoutes {
   exit?: boolean
 }
 
-function replaceBody (ctx: DataContextShell) {
+function replaceBody (ctx: DataContext) {
   return `<body><script>window.__CYPRESS_GRAPHQL_PORT__ = ${JSON.stringify(ctx.gqlServerPort)};</script>\n`
 }
 
