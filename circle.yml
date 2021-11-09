@@ -292,13 +292,17 @@ commands:
             echo "before nvm alias default node" || true
             nvm alias default node || true
             . ./scripts/load-nvm.sh
-            echo "before nvm install"
+            echo "before nvm install <<parameters.version>>"
             nvm install <<parameters.version>>
-            echo "before nvm use"
+            echo "before nvm use <<parameters.version>>"
             nvm use <<parameters.version>>
             node --version
             echo "before nvm alias default"
-            nvm alias default <<parameters.version>>
+            if [ -z <<parameters.version>> ] then
+              nvm alias default <<parameters.version>>
+            else
+              nvm alias default $(cat .node-version)
+            fi
 
   install-chrome:
     description: Install Google Chrome
