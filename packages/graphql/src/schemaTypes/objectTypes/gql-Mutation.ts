@@ -3,7 +3,6 @@ import { CodeGenTypeEnum } from '../enumTypes/gql-CodeGenTypeEnum'
 import { CodeLanguageEnum, FrontendFrameworkEnum, NavItemEnum, SupportedBundlerEnum, TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
 import { WizardUpdateInput } from '../inputTypes/gql-WizardUpdateInput'
 import { GeneratedSpec } from './gql-GeneratedSpec'
-import { Wizard } from './gql-Wizard'
 
 export const mutation = mutationType({
   definition (t) {
@@ -22,27 +21,6 @@ export const mutation = mutationType({
         } else {
           ctx.actions.dev.dismissRelaunch()
         }
-
-        return true
-      },
-    })
-
-    t.field('internal_triggerIpcToLaunchpad', {
-      type: 'Boolean',
-      args: {
-        msg: nonNull(stringArg()),
-      },
-      resolve: (_, args, ctx) => {
-        ctx.emitter.toLaunchpad(args.msg)
-
-        return true
-      },
-    })
-
-    t.field('internal_triggerIpcToApp', {
-      type: 'Boolean',
-      resolve: (_, args, ctx) => {
-        ctx.emitter.toApp('someData')
 
         return true
       },
@@ -127,24 +105,6 @@ export const mutation = mutationType({
       args: { language: nonNull(CodeLanguageEnum) },
       resolve: async (_, args, ctx) => {
         await ctx.actions.wizard.setCodeLanguage(args.language)
-      },
-    })
-
-    t.field('wizardInstallDependencies', {
-      type: Wizard,
-      description: 'Installs the dependencies for the component testing step',
-      resolve: (_, args, ctx) => {
-        return ctx.wizardData
-      },
-    })
-
-    t.field('wizardValidateManualInstall', {
-      type: Wizard,
-      description: 'Validates that the manual install has occurred properly',
-      resolve: (_, args, ctx) => {
-        ctx.actions.wizard.validateManualInstall()
-
-        return ctx.wizardData
       },
     })
 
