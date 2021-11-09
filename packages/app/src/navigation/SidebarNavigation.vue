@@ -51,7 +51,7 @@
         aria-label="Sidebar"
       >
         <SwitchTestingTypeButton
-          v-if="query.data.value"
+          v-if="query.data.value" 
           :gql="query.data.value"
         />
         <RouterLink

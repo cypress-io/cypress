@@ -22,6 +22,7 @@ export class ElectronActions {
   }
 
   hideBrowserWindow () {
+    return
     this.electron.browserWindow?.hide()
 
     if (this.isMac) {
