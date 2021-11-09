@@ -123,6 +123,10 @@ export class ProjectBase<TServer extends Server> extends EE {
       onSettingsChanged: false,
       ...options,
     }
+
+    this.ctx.actions.project.setCurrentProjectProperties({
+      projectRoot: this.projectRoot,
+    })
   }
 
   protected ensureProp = ensureProp

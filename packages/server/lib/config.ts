@@ -193,11 +193,7 @@ export type FullConfig =
 
 export function get (
   projectRoot,
-  options: {
-    configFile?: string | false
-  } = {
-    configFile: undefined,
-  },
+  options: { configFile?: string | false } = { configFile: undefined },
   ctx: DataContext,
 ): Promise<FullConfig> {
   return Promise.all([

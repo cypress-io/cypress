@@ -81,7 +81,7 @@ export class ProjectActions {
     return this
   }
 
-  private setCurrentProjectProperties (currentProjectProperties: Partial<ActiveProjectShape>) {
+  setCurrentProjectProperties (currentProjectProperties: Partial<ActiveProjectShape>) {
     this.ctx.coreData.app.currentProject = {
       browsers: this.ctx.coreData.app.browsers,
       ...this.ctx.coreData.app.currentProject,
