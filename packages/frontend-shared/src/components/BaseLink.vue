@@ -27,7 +27,7 @@ const attrs = useAttrs() as AnchorHTMLAttributes
 const classes = computed(() => {
   const hocus = props.useDefaultHocus ? 'hocus-link-default' : ''
 
-  return `${attrs.class} ${hocus}`
+  return `${attrs.class ?? 'text-indigo-500'} ${hocus}`
 })
 
 const props = withDefaults(defineProps<{
@@ -37,13 +37,4 @@ const props = withDefaults(defineProps<{
   useDefaultHocus: true,
 })
 
-function hasTailwindTextColorClass (classList: string) {
-  return !!classList.split(' ').find((className) => /^text-.*-\d{2,4}$/gm.test(className))
-}
 </script>
-
-<style lang="scss" scoped>
-a {
-  color: theme('colors.indigo.500')
-}
-</style>

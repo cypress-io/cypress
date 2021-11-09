@@ -8,8 +8,8 @@ describe('<BaseLink />', () => {
       >Test Link</BaseLink>
     ))
 
-    cy.get('a')
-    .should('have.class', 'text-indigo-500 hocus-link-default')
+    cy.get('a').should('have.class', 'text-indigo-500')
+    cy.get('a').should('have.class', 'hocus-link-default')
   })
 
   it('allows opt out default styles', { viewportWidth: 100, viewportHeight: 60 }, () => {
