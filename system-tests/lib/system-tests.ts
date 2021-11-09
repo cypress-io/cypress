@@ -17,6 +17,7 @@ const Bluebird = require('bluebird')
 const debug = require('debug')('cypress:system-tests')
 const httpsProxy = require('@packages/https-proxy')
 const Fixtures = require('./fixtures')
+
 const { allowDestroy } = require(`@packages/server/lib/util/server_destroy`)
 const cypress = require(`@packages/server/lib/cypress`)
 const screenshots = require(`@packages/server/lib/screenshots`)
@@ -588,7 +589,7 @@ const localItFn = function (title: string, opts: ItOptions) {
     throw new Error('systemTests.it(...) must be passed a title as the first argument')
   }
 
-  // LOGIC FOR AUTOGENERATING DYNAMIC TESTS
+  // LOGIC FOR AUTO-GENERATING DYNAMIC TESTS
   // - create multiple tests for each default browser
   // - if browser is specified in options:
   //   ...skip the tests for each default browser if that browser

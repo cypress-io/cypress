@@ -1,6 +1,5 @@
 const Cookie = require('js-cookie')
 const { stripIndent } = require('common-tags')
-const helpers = require('../../support/helpers')
 
 const { _, Promise, $ } = Cypress
 
@@ -694,7 +693,7 @@ describe('src/cy/commands/navigation', () => {
     })
 
     it('does not support file:// protocol', {
-      baseUrl: '',
+      baseUrl: null,
     }, (done) => {
       cy.on('fail', (err) => {
         expect(err.message).to.contain('`cy.visit()` failed because the \'file://...\' protocol is not supported by Cypress.')
@@ -1439,7 +1438,7 @@ describe('src/cy/commands/navigation', () => {
         cy.visit('http://google.com:3500/fixtures/generic.html')
       })
 
-      it('throws attemping to visit 2 unique ip addresses', function (done) {
+      it('throws attempting to visit 2 unique ip addresses', function (done) {
         const $autIframe = cy.state('$autIframe')
 
         const load = () => {
@@ -1971,12 +1970,10 @@ describe('src/cy/commands/navigation', () => {
     })
 
     describe('errors', () => {
-      helpers.registerCypressConfigBackupRestore()
-
       beforeEach(function () {
         this.logs = []
 
-        cy.on('log:added', (attrs, log) => {
+        cy.on('log:added', (_attrs, log) => {
           this.lastLog = log
           this.logs.push(log)
         })
@@ -1984,42 +1981,53 @@ describe('src/cy/commands/navigation', () => {
         return null
       })
 
-      it('can time out', function (done) {
-        let thenCalled = false
+      describe('can time out', () => {
+        let pageLoadTimeout
 
-        cy.on('fail', (err) => {
-          const { lastLog } = this
-
-          // visit, window, page loading
-          expect(this.logs.length).to.eq(3)
-          expect(err.message).to.include('Your page did not fire its `load` event within `50ms`.')
-          expect(lastLog.get('name')).to.eq('page load')
-          expect(lastLog.get('error')).to.eq(err)
-
-          return Promise
-          .delay(100)
-          .then(() => {
-            expect(cy.state('onPageLoadErr')).to.be.null
-            expect(cy.isStopped()).to.be.true // make sure we ran our cleanup routine
-            expect(thenCalled).to.be.false
-
-            done()
-          })
+        before(() => {
+          pageLoadTimeout = Cypress.config().pageLoadTimeout
         })
 
-        cy
-        .visit('/fixtures/jquery.html')
-        .window().then((win) => {
-          Cypress.config('pageLoadTimeout', 50)
+        after(() => {
+          Cypress.config('pageLoadTimeout', pageLoadTimeout)
+        })
 
-          const $a = win.$('<a href=\'/timeout?ms=500\'>jquery</a>')
-          .appendTo(win.document.body)
+        it('times out', function (done) {
+          let thenCalled = false
 
-          causeSynchronousBeforeUnload($a)
+          cy.on('fail', (err) => {
+            const { lastLog } = this
 
-          return null
-        }).wrap(null).then(() => {
-          thenCalled = true
+            // visit, window, page loading
+            expect(this.logs.length).to.eq(3)
+            expect(err.message).to.include('Your page did not fire its `load` event within `50ms`.')
+            expect(lastLog.get('name')).to.eq('page load')
+            expect(lastLog.get('error')).to.eq(err)
+
+            return Promise
+            .delay(100)
+            .then(() => {
+              expect(cy.state('onPageLoadErr')).to.be.null
+              expect(cy.isStopped()).to.be.true // make sure we ran our cleanup routine
+              expect(thenCalled).to.be.false
+
+              done()
+            })
+          })
+
+          cy
+          .visit('/fixtures/jquery.html')
+          .window().then((win) => {
+            Cypress.config('pageLoadTimeout', 50)
+            const $a = win.$('<a href=\'/timeout?ms=500\'>jquery</a>')
+            .appendTo(win.document.body)
+
+            causeSynchronousBeforeUnload($a)
+
+            return null
+          }).wrap(null).then(() => {
+            thenCalled = true
+          })
         })
       })
 
@@ -2086,8 +2094,7 @@ describe('src/cy/commands/navigation', () => {
           }
         })
 
-        cy
-        .visit('/fixtures/jquery.html')
+        cy.visit('/fixtures/jquery.html')
 
         // make get timeout after only 200ms
         .get('#does-not-exist', { timeout: 200 }).should('have.class', 'foo')

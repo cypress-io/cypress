@@ -205,7 +205,7 @@ const throwErr = (err, options = {}) => {
   let { onFail, errProps } = options
 
   // assume onFail is a command if
-  //# onFail is present and isnt a function
+  //# onFail is present and isn't a function
   if (onFail && !_.isFunction(onFail)) {
     const command = onFail
 
@@ -543,6 +543,7 @@ const logError = (Cypress, handlerType, err, handled = false) => {
 }
 
 export default {
+  stackWithReplacedProps,
   appendErrMsg,
   createUncaughtException,
   cypressErr,

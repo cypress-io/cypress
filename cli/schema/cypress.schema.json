@@ -7,6 +7,7 @@
       "properties": {
         "baseUrl": {
           "type": "string",
+          "default": null,
           "description": "Url used as prefix for cy.visit() or cy.request() command’s url. Example http://localhost:3030 or https://test.my-domain.com"
         },
         "env": {

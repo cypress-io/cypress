@@ -101,7 +101,7 @@ export default {
           // are not and the retry code is happening between
           // runnables which is bad likely due to the issue below
           //
-          // bug in bluebird with not propagating cancelations
+          // bug in bluebird with not propagating cancellations
           // fast enough in a series of promises
           // https://github.com/petkaantonov/bluebird/issues/1424
           return state('canceled') || state('error') || runnableHasChanged()

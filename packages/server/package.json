@@ -128,6 +128,7 @@
     "@cypress/json-schemas": "5.39.0",
     "@cypress/sinon-chai": "2.9.1",
     "@ffprobe-installer/ffprobe": "1.1.0",
+    "@packages/config": "0.0.0-development",
     "@packages/desktop-gui": "0.0.0-development",
     "@packages/electron": "0.0.0-development",
     "@packages/example": "0.0.0-development",

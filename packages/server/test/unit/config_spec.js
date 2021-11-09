@@ -2,15 +2,16 @@ require('../spec_helper')
 
 const _ = require('lodash')
 const debug = require('debug')('test')
+const Fixtures = require('@tooling/system-tests/lib/fixtures')
+
 const config = require(`${root}lib/config`)
 const errors = require(`${root}lib/errors`)
 const configUtil = require(`${root}lib/util/config`)
 const scaffold = require(`${root}lib/scaffold`)
-const Fixtures = require('@tooling/system-tests/lib/fixtures')
 let settings = require(`${root}lib/util/settings`)
 
 describe('lib/config', () => {
-  beforeEach(function () {
+  before(function () {
     this.env = process.env
 
     process.env = _.omit(process.env, 'CYPRESS_DEBUG')
@@ -18,7 +19,7 @@ describe('lib/config', () => {
     Fixtures.scaffold()
   })
 
-  afterEach(function () {
+  after(function () {
     process.env = this.env
   })
 
@@ -986,18 +987,6 @@ describe('lib/config', () => {
     })
   })
 
-  context('.getConfigKeys', () => {
-    beforeEach(function () {
-      this.includes = (key) => {
-        expect(config.getConfigKeys()).to.include(key)
-      }
-    })
-
-    it('includes blockHosts', function () {
-      return this.includes('blockHosts')
-    })
-  })
-
   context('.resolveConfigValues', () => {
     beforeEach(function () {
       this.expected = function (obj) {
@@ -1070,9 +1059,8 @@ describe('lib/config', () => {
         cfg.projectRoot = '/foo/bar/'
 
         return config.mergeDefaults(cfg, options)
-        .then((val) => val[prop])
-        .then((result) => {
-          expect(result).to.deep.eq(value)
+        .then((mergedConfig) => {
+          expect(mergedConfig[prop]).to.deep.eq(value)
         })
       }
     })
@@ -1302,9 +1290,9 @@ describe('lib/config', () => {
     })
 
     it('can override socketId in options', () => {
-      return config.mergeDefaults({ projectRoot: '/foo/bar/' }, { socketId: 1234 })
+      return config.mergeDefaults({ projectRoot: '/foo/bar/' }, { socketId: '1234' })
       .then((cfg) => {
-        expect(cfg.socketId).to.eq(1234)
+        expect(cfg.socketId).to.eq('1234')
       })
     })
 
@@ -1461,6 +1449,8 @@ describe('lib/config', () => {
             projectId: { value: null, from: 'default' },
             redirectionLimit: { value: 20, from: 'default' },
             reporter: { value: 'json', from: 'cli' },
+            resolvedNodePath: { value: null, from: 'default' },
+            resolvedNodeVersion: { value: null, from: 'default' },
             reporterOptions: { value: null, from: 'default' },
             requestTimeout: { value: 5000, from: 'default' },
             responseTimeout: { value: 30000, from: 'default' },
@@ -1469,6 +1459,7 @@ describe('lib/config', () => {
             screenshotsFolder: { value: 'cypress/screenshots', from: 'default' },
             slowTestThreshold: { value: 10000, from: 'default' },
             supportFile: { value: 'cypress/support', from: 'default' },
+            supportFolder: { value: false, from: 'default' },
             taskTimeout: { value: 60000, from: 'default' },
             testFiles: { value: '**/*.*', from: 'default' },
             trashAssetsBeforeRuns: { value: true, from: 'default' },
@@ -1567,6 +1558,8 @@ describe('lib/config', () => {
             projectId: { value: 'projectId123', from: 'env' },
             redirectionLimit: { value: 20, from: 'default' },
             reporter: { value: 'spec', from: 'default' },
+            resolvedNodePath: { value: null, from: 'default' },
+            resolvedNodeVersion: { value: null, from: 'default' },
             reporterOptions: { value: null, from: 'default' },
             requestTimeout: { value: 5000, from: 'default' },
             responseTimeout: { value: 30000, from: 'default' },
@@ -1575,6 +1568,7 @@ describe('lib/config', () => {
             screenshotsFolder: { value: 'cypress/screenshots', from: 'default' },
             slowTestThreshold: { value: 10000, from: 'default' },
             supportFile: { value: 'cypress/support', from: 'default' },
+            supportFolder: { value: false, from: 'default' },
             taskTimeout: { value: 60000, from: 'default' },
             testFiles: { value: '**/*.*', from: 'default' },
             trashAssetsBeforeRuns: { value: true, from: 'default' },
@@ -2015,6 +2009,12 @@ describe('lib/config', () => {
   })
 
   context('.setSupportFileAndFolder', () => {
+    const mockSupportDefaults = {
+      supportFile: 'cypress/support',
+      supportFolder: false,
+      configFile: 'cypress.json',
+    }
+
     it('does nothing if supportFile is falsey', () => {
       const obj = {
         projectRoot: '/_test-output/path/to/project',
@@ -2034,7 +2034,7 @@ describe('lib/config', () => {
         supportFile: 'test/unit/config_spec.js',
       })
 
-      return config.setSupportFileAndFolder(obj)
+      return config.setSupportFileAndFolder(obj, mockSupportDefaults)
       .then((result) => {
         expect(result).to.eql({
           projectRoot,
@@ -2052,7 +2052,7 @@ describe('lib/config', () => {
         supportFile: 'cypress/support',
       })
 
-      return config.setSupportFileAndFolder(obj)
+      return config.setSupportFileAndFolder(obj, mockSupportDefaults)
       .then((result) => {
         expect(result).to.eql({
           projectRoot,
@@ -2070,7 +2070,7 @@ describe('lib/config', () => {
         supportFile: 'cypress/support',
       })
 
-      return config.setSupportFileAndFolder(obj)
+      return config.setSupportFileAndFolder(obj, mockSupportDefaults)
       .then((result) => {
         expect(result).to.eql({
           projectRoot,
@@ -2087,7 +2087,7 @@ describe('lib/config', () => {
         supportFile: 'does/not/exist',
       })
 
-      return config.setSupportFileAndFolder(obj)
+      return config.setSupportFileAndFolder(obj, mockSupportDefaults)
       .catch((err) => {
         expect(err.message).to.include('The support file is missing or invalid.')
       })
@@ -2108,7 +2108,7 @@ describe('lib/config', () => {
         supportFile: 'cypress/support',
       })
 
-      return config.setSupportFileAndFolder(obj)
+      return config.setSupportFileAndFolder(obj, mockSupportDefaults)
       .then((result) => {
         debug('result is', result)
 
@@ -2135,7 +2135,7 @@ describe('lib/config', () => {
         supportFile: 'cypress/support.ts',
       })
 
-      return config.setSupportFileAndFolder(obj)
+      return config.setSupportFileAndFolder(obj, mockSupportDefaults)
       .then((result) => {
         debug('result is', result)
 
@@ -2149,6 +2149,11 @@ describe('lib/config', () => {
   })
 
   context('.setPluginsFile', () => {
+    const mockPluginDefaults = {
+      pluginsFile: 'cypress/plugins',
+      configFile: 'cypress.json',
+    }
+
     it('does nothing if pluginsFile is falsey', () => {
       const obj = {
         projectRoot: '/_test-output/path/to/project',
@@ -2168,7 +2173,7 @@ describe('lib/config', () => {
         pluginsFile: `${projectRoot}/cypress/plugins`,
       }
 
-      return config.setPluginsFile(obj)
+      return config.setPluginsFile(obj, mockPluginDefaults)
       .then((result) => {
         expect(result).to.eql({
           projectRoot,
@@ -2185,7 +2190,7 @@ describe('lib/config', () => {
         pluginsFile: `${projectRoot}/cypress/plugins`,
       }
 
-      return config.setPluginsFile(obj)
+      return config.setPluginsFile(obj, mockPluginDefaults)
       .then((result) => {
         expect(result).to.eql({
           projectRoot,
@@ -2209,7 +2214,7 @@ describe('lib/config', () => {
         pluginsFile: pluginsFolder,
       }
 
-      return config.setPluginsFile(obj)
+      return config.setPluginsFile(obj, mockPluginDefaults)
       .then((result) => {
         expect(result).to.eql({
           projectRoot,
@@ -2226,7 +2231,7 @@ describe('lib/config', () => {
         pluginsFile: `${projectRoot}/cypress/plugins`,
       })
 
-      return config.setPluginsFile(obj)
+      return config.setPluginsFile(obj, mockPluginDefaults)
       .then((result) => {
         expect(result).to.eql({
           projectRoot,
@@ -2243,7 +2248,7 @@ describe('lib/config', () => {
         pluginsFile: 'does/not/exist',
       }
 
-      return config.setPluginsFile(obj)
+      return config.setPluginsFile(obj, mockPluginDefaults)
       .catch((err) => {
         expect(err.message).to.include('The plugins file is missing or invalid.')
       })
@@ -2264,7 +2269,7 @@ describe('lib/config', () => {
         pluginsFile,
       }
 
-      return config.setPluginsFile(obj)
+      return config.setPluginsFile(obj, mockPluginDefaults)
       .then((result) => {
         expect(result).to.eql({
           projectRoot,
@@ -2309,17 +2314,6 @@ describe('lib/config', () => {
       expect(config.setAbsolutePaths({})).to.deep.eq({})
     })
 
-    // it "resolves fileServerFolder with projectRoot", ->
-    //   obj = {
-    //     projectRoot: "/_test-output/path/to/project"
-    //     fileServerFolder: "foo"
-    //   }
-
-    //   expect(config.setAbsolutePaths(obj)).to.deep.eq({
-    //     projectRoot: "/_test-output/path/to/project"
-    //     fileServerFolder: "/_test-output/path/to/project/foo"
-    //   })
-
     it('does not mutate existing obj', () => {
       const obj = {}
 
@@ -2337,7 +2331,7 @@ describe('lib/config', () => {
       expect(config.setAbsolutePaths(obj)).to.deep.eq(obj)
     })
 
-    return ['fileServerFolder', 'fixturesFolder', 'integrationFolder', 'unitFolder', 'supportFile', 'pluginsFile'].forEach((folder) => {
+    return ['fileServerFolder', 'fixturesFolder', 'integrationFolder', 'supportFile', 'pluginsFile'].forEach((folder) => {
       it(`converts relative ${folder} to absolute path`, () => {
         const obj = {
           projectRoot: '/_test-output/path/to/project',
