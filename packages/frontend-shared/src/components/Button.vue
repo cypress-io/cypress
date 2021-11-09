@@ -33,7 +33,7 @@
       </template>
     </ButtonInternals>
   </button>
-  <Component
+  <component
     :is="internalLink ? BaseLink : ExternalLink"
     v-else
     :href="href"
@@ -68,7 +68,7 @@
         </slot>
       </template>
     </ButtonInternals>
-  </Component>
+  </component>
 </template>
 
 <script lang="ts">

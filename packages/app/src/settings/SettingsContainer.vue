@@ -1,6 +1,6 @@
 <template>
   <div
-    class="p-24px h-full overflow-auto"
+    class="p-24px h-full"
     data-cy="settings"
   >
     <SettingsCard
