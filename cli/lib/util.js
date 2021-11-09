@@ -245,7 +245,7 @@ const parseOpts = (opts) => {
     util.logErrorExit1(new Error(stripIndent`
       Error: You passed both --component and --e2e, but only one can be provided.
 
-      See https://docs.cypress.io/ for more information on testing types.
+      See https://on.cypress.io/ for more information on testing types.
     `))
   }
 
