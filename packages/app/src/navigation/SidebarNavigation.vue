@@ -96,7 +96,7 @@ const navigation = [
 ]
 
 gql`
-query sideBarNavigation {
+query SideBarNavigation {
   ...SwitchTestingTypeButton
   currentProject {
     id
