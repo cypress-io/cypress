@@ -286,9 +286,9 @@ commands:
           # https://github.com/nvm-sh/nvm#nvmrc
           name: Install Node
           command: |
-            . ./scripts/load-nvm.sh
             echo "before nvm alias default"
             nvm alias default node
+            . ./scripts/load-nvm.sh
             echo "before nvm install"
             nvm install <<parameters.version>>
             echo "before nvm use"
