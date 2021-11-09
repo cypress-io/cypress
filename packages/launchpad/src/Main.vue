@@ -59,7 +59,6 @@ import BaseError from './error/BaseError.vue'
 import StandardModal from '@cy/components/StandardModal.vue'
 import HeaderBar from '@cy/gql-components/HeaderBar.vue'
 import CompareTestingTypes from './setup/CompareTestingTypes.vue'
-import ExternalLink from '@packages/frontend-shared/src/gql-components/ExternalLink.vue'
 
 import { useI18n } from '@cy/i18n'
 import { ref } from 'vue'
