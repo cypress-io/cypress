@@ -18,20 +18,16 @@ export default defineComponent({
 
 <script setup lang="ts">
 import BaseLink from '../components/BaseLink.vue'
-
-import {
-  App_OpenExternalDocument,
-} from '../generated/graphql'
-
+import { ExternalLink_OpenExternalDocument } from '../generated/graphql'
 import { gql, useMutation } from '@urql/vue'
 
 gql`
-mutation App_OpenExternal ($url: String!) {
+mutation ExternalLink_OpenExternal ($url: String!) {
   openExternal(url: $url)
 }
 `
 
-const openExternalMutation = useMutation(App_OpenExternalDocument)
+const openExternalMutation = useMutation(ExternalLink_OpenExternalDocument)
 
 const props = withDefaults(defineProps<{
   href: string,
