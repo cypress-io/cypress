@@ -1,5 +1,4 @@
-import type { Executor } from '@graphql-tools/utils/executor'
-import { print } from 'graphql'
+import { DocumentNode, print } from 'graphql'
 
 import type { DataContext } from '@packages/data-context'
 
@@ -7,8 +6,11 @@ import type { DataContext } from '@packages/data-context'
  * Takes a "document" and executes it against the GraphQL schema
  * @returns
  */
-export const remoteSchemaExecutor: Executor<DataContext> = async (obj) => {
-  const { document, variables, context } = obj
+export const remoteSchemaExecutor = async (obj: Record<string, any>) => {
+  const { _document, variables, context: _context } = obj
+
+  const document: DocumentNode = _document
+  const context: DataContext = _context
 
   if (!context?.user) {
     return { data: null }
