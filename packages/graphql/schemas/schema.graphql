@@ -749,7 +749,6 @@ type Wizard {
   The testing type we are setting in the wizard, null if this has not been chosen
   """
   testingType: TestingTypeEnum
-  testingTypes: [TestingTypeInfo!]!
 
   """The title of the page, given the current step of the wizard"""
   title: String
