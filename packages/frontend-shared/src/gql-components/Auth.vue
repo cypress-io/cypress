@@ -98,8 +98,8 @@ const emit = defineEmits<{
   (event: 'continue', value: boolean): void
 }>()
 
-const viewer = computed(() => props.gql?.cloudViewer)
-const isBrowserOpened = computed(() => props.gql?.isAuthBrowserOpened)
+const viewer = computed(() => props.gql.cloudViewer)
+const isBrowserOpened = computed(() => props.gql.isAuthBrowserOpened)
 const isLoggingIn = computed(() => clickedOnce.value && !viewer.value)
 
 const query = useQuery({

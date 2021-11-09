@@ -54,8 +54,8 @@ export function makeClientTestContext (): ClientTestContext {
       browsers: stubBrowsers,
       currentBrowser: stubBrowsers[0],
       isInGlobalMode: false,
-      isAuthBrowserOpened: false,
     },
+    isAuthBrowserOpened: false,
     wizard: {
       step: 'configFiles',
       canNavigateForward: false,
