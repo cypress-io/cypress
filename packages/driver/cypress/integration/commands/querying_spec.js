@@ -1,5 +1,6 @@
-const { _, $ } = Cypress
-const { Promise } = Cypress
+const { assertLogLength } = require('../../support/utils')
+
+const { _, $, Promise } = Cypress
 
 describe('src/cy/commands/querying', () => {
   beforeEach(() => {
@@ -214,7 +215,7 @@ describe('src/cy/commands/querying', () => {
 
       it('does not log an additional log on failure', function (done) {
         cy.on('fail', () => {
-          expect(this.logs.length).to.eq(2)
+          assertLogLength(this.logs, 2)
 
           done()
         })
@@ -386,7 +387,7 @@ describe('src/cy/commands/querying', () => {
 
       it('can silence logging', () => {
         cy.get('div:first').within({ log: false }, () => {}).then(function () {
-          expect(this.logs.length).to.eq(0)
+          assertLogLength(this.logs, 0)
         })
       })
 
@@ -437,7 +438,7 @@ describe('src/cy/commands/querying', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
 
           done()
@@ -1334,7 +1335,7 @@ describe('src/cy/commands/querying', () => {
 
       it('throws once when incorrect sizzle selector', function (done) {
         cy.on('fail', (err) => {
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
 
           done()
         })
@@ -2125,7 +2126,7 @@ space
         cy.get('#complex-contains').contains('nested contains').then(function ($label) {
           const names = _.map(this.logs, (log) => log.get('name'))
 
-          expect(this.logs.length).to.eq(2)
+          assertLogLength(this.logs, 2)
 
           expect(names).to.deep.eq(['get', 'contains'])
         })
@@ -2238,7 +2239,7 @@ space
 
       it('logs once on error', function (done) {
         cy.on('fail', (err) => {
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
 
           done()
         })
@@ -2324,7 +2325,7 @@ space
 
       it('throws when assertion is have.length > 1', function (done) {
         cy.on('fail', (err) => {
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(err.message).to.eq('`cy.contains()` cannot be passed a `length` option because it will only ever return 1 element.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/contains')
 

@@ -1,8 +1,15 @@
 const { $ } = Cypress
 
-beforeEach(() => {
-  const isActuallyInteractive = Cypress.config('isInteractive')
+const isActuallyInteractive = Cypress.config('isInteractive')
 
+if (!isActuallyInteractive) {
+  // we want to only enable retries in runMode
+  // and because we set `isInteractive` above
+  // we have to set retries here
+  Cypress.config('retries', 2)
+}
+
+beforeEach(() => {
   // always set that we're interactive so we
   // get consistent passes and failures when running
   // from CI and when running in GUI mode
