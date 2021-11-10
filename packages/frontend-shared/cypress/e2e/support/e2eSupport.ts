@@ -134,10 +134,6 @@ function initializeApp (mode: 'component' | 'e2e' = 'e2e') {
 function visitApp (href?: string) {
   const { e2e_serverPort, e2e_gqlPort } = Cypress.env()
 
-  if (!e2e_gqlPort) {
-    throw new Error(`Missing gqlPort - did you forget to call cy.openE2E(...) ?`)
-  }
-
   if (!e2e_serverPort) {
     throw new Error(`Missing serverPort - did you forget to call cy.initializeApp(...) ?`)
   }
@@ -156,13 +152,7 @@ function visitApp (href?: string) {
 }
 
 function visitLaunchpad () {
-  const { e2e_gqlPort } = Cypress.env()
-
-  if (!e2e_gqlPort) {
-    throw new Error(`Missing gqlPort - did you forget to call cy.openE2E(...) ?`)
-  }
-
-  cy.visit(`dist-launchpad/index.html?gqlPort=${e2e_gqlPort}`)
+  cy.visit(`dist-launchpad/index.html?gqlPort=${Cypress.env('e2e_gqlPort')}`)
 }
 
 type UnwrapPromise<R> = R extends PromiseLike<infer U> ? U : R
