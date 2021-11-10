@@ -309,7 +309,8 @@ commands:
           command: |
             nvm install ${NODE_VERSION} || exit 1
             nvm use ${NODE_VERSION} || exit 1
-            nvm alias default || exit 1
+            nvm list
+            nvm alias default ${NODE_VERSION} || exit 1
             node --version
 
   install-chrome:
