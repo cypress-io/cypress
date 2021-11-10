@@ -249,7 +249,7 @@ commands:
       - run:
           name: Print working folder
           command: |
-            if [ "$PLATFORM"  = 'windows']; then
+            if [ "$PLATFORM" = 'windows']; then
               echo %cd%
             else 
               echo pwd
@@ -267,7 +267,7 @@ commands:
       - run:
           name: check Node version
           command: |
-            yarn ./scripts/circleci/check-node-version
+            yarn ./scripts/circleci/check-node-version.js
 
       ## make sure the TERM is set to 'xterm' in node (Linux only)
       ## else colors (and tests) will fail
@@ -277,7 +277,7 @@ commands:
       - run:
           name: Check terminal
           command: |
-            node ./scripts/circleci/check-terminal
+            node ./scripts/circleci/check-terminal.js
       - run:
           name: Stop .only
           command: |
