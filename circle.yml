@@ -933,10 +933,8 @@ jobs:
   build:
     <<: *defaults
     resource_class: medium+
+    shell: /bin/bash --login
     steps:
-      - checkout
-      - install-required-node
-      - install-build-setup
       - unpack-dependencies
       - run:
           name: Top level packages
