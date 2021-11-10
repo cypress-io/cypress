@@ -935,8 +935,8 @@ jobs:
     shell: /bin/bash --login
     steps:
       - run: 
-        name: check workspace
-        command: ls -a; ls -a cypress
+          name: check workspace
+          command: ls -a; ls -a cypress
       - unpack-dependencies
       - run:
           name: Top level packages
