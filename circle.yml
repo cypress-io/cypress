@@ -302,15 +302,15 @@ commands:
             echo "
               export NVM_DIR='$HOME/.nvm'
               [ -s '$NVM_DIR/nvm.sh' ] && \. '$NVM_DIR/nvm.sh' # load nvm
-              export NODE_VERSION=${node_version}
+              export NODE_VERSION='${node_version}'
             " > ~/.bashrc
       - run:
           # https://github.com/nvm-sh/nvm#nvmrc
           name: Install Node
           command: |
             cat ~/.bashrc
-            # . ~/.bcashrc
-            echo "before nvm install"
+            . ~/.bcashrc
+            echo "before nvm install ${NODE_VERSION}"
             nvm install
             echo "before nvm use"
             nvm use
