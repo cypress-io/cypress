@@ -18,13 +18,13 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
     .should('be.visible')
   }),
 
-  it.only('renders without browser menu by default and other items work', () => {
+  it('renders without browser menu by default and other items work', () => {
     cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
       render: (gqlVal) => (
         <div class="resize overflow-auto border-current border-1 h-700px">
           <HeaderBarContent gql={gqlVal} />
         </div>
-      )
+      ),
     })
 
     cy.contains('Projects').should('be.visible')
@@ -34,6 +34,64 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
     cy.get('[data-cy="topnav-version-list"]').click()
     cy.contains('a', text.docsMenu.firstTest).should('not.exist')
     cy.contains('a', text.seeAllReleases).should('be.visible')
+  })
+
+  it('does not show hint when on latest version of Cypress', () => {
+    cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
+      onResult: (result) => {
+        result.versions = {
+          __typename: 'VersionData',
+          latest: {
+            __typename: 'Version',
+            id: '8.7.0',
+            version: '8.7.0',
+            released: '2021-10-25T21:00:00.000Z',
+          },
+          current: {
+            __typename: 'Version',
+            id: '8.7.0',
+            version: '8.7.0',
+            released: '2021-10-25T21:00:00.000Z',
+          },
+        }
+      },
+      render: (gqlVal) => (
+        <div class="resize overflow-auto border-current border-1 h-700px">
+          <HeaderBarContent gql={gqlVal} />
+        </div>
+      ),
+    })
+
+    cy.get('[data-cy="topnav-version-list"]').click()
+  })
+
+  it('shows hint to upgrade to latest version of cypress', () => {
+    cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
+      onResult: (result) => {
+        result.versions = {
+          __typename: 'VersionData',
+          current: {
+            __typename: 'Version',
+            id: '8.6.0',
+            version: '8.6.0',
+            released: '2021-06-25T21:00:00.000Z',
+          },
+          latest: {
+            __typename: 'Version',
+            id: '8.7.0',
+            version: '8.7.0',
+            released: '2021-10-25T21:00:00.000Z',
+          },
+        }
+      },
+      render: (gqlVal) => (
+        <div class="resize overflow-auto border-current border-1 h-700px">
+          <HeaderBarContent gql={gqlVal} />
+        </div>
+      ),
+    })
+
+    cy.get('[data-cy="topnav-version-list"]').click()
   })
 
   it('displays the active project name', () => {

@@ -1,36 +1,100 @@
 <template>
-  <TopNavList v-if="props.gql.versions">
+  <TopNavList v-if="versions">
     <template #heading="{ open }">
       <i-cy-box_x16
         class="group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50 h-16px w-16px"
         :class="open ? 'icon-dark-indigo-500 icon-light-indigo-50' : 'icon-dark-gray-500 icon-light-gray-100'"
       />
-      <span data-cy="topnav-version-list">v{{ props.gql.versions.current.version }}</span>
+      <span data-cy="topnav-version-list">v{{ versions.current.version }}</span>
     </template>
-    <TopNavListItem
-      class="px-16px py-8px min-w-240px"
-    >
-      <div class="whitespace-nowrap">
-        <a
-          :href="`${releasesUrl}/tag/v${props.gql.versions.current}`"
-          s="font-semibold"
-          target="_blank"
-        >{{ props.gql.versions.current.version }}</a>
-        <br>
-        <span class="text-gray-600 text-14px">{{ t('topNav.released') }} {{ timeAgoInWords(props.gql.versions.current.released) }}</span>
-      </div>
-      <template
-        #suffix
+
+    <template v-if="runningOldVersion">
+      <TopNavListItem
+        class="px-16px py-8px min-w-240px"
       >
-        <i-cy-circle-check_x24 class="icon-dark-jade-100 icon-light-jade-500 w-24px h-24px" />
-      </template>
-    </TopNavListItem>
-    <TopNavListItem class="text-center p-16px bg-gray-50">
-      <a
+        <div class="whitespace-nowrap">
+          <ExternalLink
+            :href="`${releasesUrl}/tag/v${versions.current.version}`"
+            class="font-semibold"
+          >
+            {{ versions.current.version }}
+          </ExternalLink>
+          <br>
+          <span class="text-gray-600 text-12px">{{ t('topNav.released') }} {{ versions.current.released }}</span>
+        </div>
+        <template #suffix>
+          <span class="rounded-md bg-indigo-50">
+            <span class="font-semibold text-indigo-500 p-5px">
+              Latest
+            </span>
+          </span>
+        </template>
+      </TopNavListItem>
+
+      <TopNavListItem class="px-16px py-8px min-w-240px pb-12px">
+        <p class="text-gray-600 text-12px py-8px leading-normal">
+          You're currently running an old version of Cypress.
+          Update to the latest version for the best experience.
+        </p>
+        <Button class="w-full">
+          Update to {{ versions.latest.version }}
+        </Button>
+      </TopNavListItem>
+
+      <TopNavListItem
+        class="bg-yellow-50 px-16px py-8px min-w-240px"
+      >
+        <div class="whitespace-nowrap">
+          <ExternalLink
+            :href="`${releasesUrl}/tag/v${versions.current.version}`"
+            class="font-semibold text-amber-800"
+          >
+            {{ versions.current.version }}
+          </ExternalLink>
+          <br>
+          <span class="text-gray-600 text-12px">{{ t('topNav.released') }} {{ versions.current.released }}</span>
+        </div>
+        <template #suffix>
+          <span class="rounded-md bg-yellow-100">
+            <span class="font-semibold text-amber-800 p-5px">
+              Installed
+            </span>
+          </span>
+        </template>
+      </TopNavListItem>
+    </template>
+
+    <template v-else>
+      <TopNavListItem
+        class="bg-jade-50 px-16px py-8px min-w-240px"
+      >
+        <div class="whitespace-nowrap">
+          <ExternalLink
+            :href="`${releasesUrl}/tag/v${versions.current.version}`"
+            class="font-semibold"
+          >
+            {{ versions.current.version }}
+          </ExternalLink>
+          <br>
+          <span class="text-gray-600 text-12px">{{ t('topNav.released') }} {{ versions.current.released }}</span>
+        </div>
+        <template #suffix>
+          <span class="rounded-md bg-jade-100">
+            <span class="font-semibold text-jade-800 px-5px">
+              Latest
+            </span>
+          </span>
+        </template>
+      </TopNavListItem>
+    </template>
+
+    <TopNavListItem class="text-center p-16px text-indigo-600">
+      <ExternalLink
         :href="releasesUrl"
-        target="_blank"
-        class="block w-full border-gray-100 py-8px text-14px whitespace-nowrap border-rounded border-1 hover:no-underline hover:border-gray-200"
-      >{{ t('topNav.seeAllReleases') }}</a>
+        class="block w-full border-gray-100 py-8px text-12px whitespace-nowrap border-rounded border-1 hover:no-underline hover:border-gray-200"
+      >
+        {{ t('topNav.seeAllReleases') }}
+      </ExternalLink>
     </TopNavListItem>
   </TopNavList>
 
@@ -145,12 +209,27 @@ import { getTimeAgo } from '@packages/frontend-shared/src/utils/time'
 import { gql, useMutation } from '@urql/vue'
 import { TopNavFragment, TopNav_LaunchOpenProjectDocument, TopNav_SetBrowserDocument } from '../../generated/graphql'
 import { useI18n } from '@cy/i18n'
-import { ref } from 'vue'
+import { computed, FunctionalComponent, h, ref } from 'vue'
 // eslint-disable-next-line no-duplicate-imports
 import type { Ref } from 'vue'
 const { t } = useI18n()
-import { onClickOutside, onKeyStroke } from '@vueuse/core'
+import { onClickOutside, onKeyStroke, useTimeAgo } from '@vueuse/core'
 import DocsMenuContent from './DocsMenuContent.vue'
+import ExternalLink from '../ExternalLink.vue'
+import Button from '../../components/Button.vue'
+
+type TailwindNum = '50' | '100' | '200' | '300' | '400' | '500' | '600' | '700' | '800' | '900'
+
+const Badge: FunctionalComponent<{
+  color: 'yellow' | 'blue' | 'jade',
+  bg: TailwindNum
+  text: TailwindNum
+}> = (props, ctx) => {
+  return (
+    h('span', { class: `rounded-md bg-${props.color}-${props.bg}` },
+      [h('span', { class: `font-semibold text-amber-800 px-5px` }, ctx.slots)])
+  )
+}
 
 const releasesUrl = 'https://github.com/cypress-io/cypress/releases/'
 
@@ -223,7 +302,22 @@ const promptsEl: Ref<HTMLElement | null> = ref(null)
 // reset docs menu if click or keyboard navigation happens outside
 // so it doesn't reopen on the one of the prompts
 
-const timeAgoInWords = (iso8601: string) => getTimeAgo(iso8601)
+const versions = computed(() => {
+  return {
+    current: {
+      released: useTimeAgo(new Date(props.gql.versions.current.released)).value,
+      version: props.gql.versions.current.version,
+    },
+    latest: {
+      released: useTimeAgo(new Date(props.gql.versions.latest.released)).value,
+      version: props.gql.versions.latest.version,
+    },
+  }
+})
+
+const runningOldVersion = computed(() => {
+  return props.gql.versions.current.released < props.gql.versions.latest.released
+})
 
 onClickOutside(promptsEl, () => {
   setTimeout(() => {

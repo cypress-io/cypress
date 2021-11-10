@@ -1,11 +1,11 @@
 <template>
   <RemovePositioningDuringScreenshot
     id="main-pane"
-    class="flex"
+    class="flex border-l-1 border-gray-900"
   >
     <HideDuringScreenshot
       id="inline-spec-list"
-      class="bg-gray-1000 w-128"
+      class="bg-gray-1000"
     >
       <InlineSpecList :gql="props.gql" />
     </HideDuringScreenshot>
@@ -21,7 +21,7 @@
       ref="runnerPane"
       class="relative w-full"
     >
-      <HideDuringScreenshot class="bg-white p-4  border-8 border-blue-300">
+      <HideDuringScreenshot class="bg-white p-4">
         <SpecRunnerHeader :gql="props.gql" />
       </HideDuringScreenshot>
 
@@ -63,6 +63,7 @@ import { useScreenshotStore } from '../store/screenshot-store'
 
 gql`
 fragment SpecRunner on CurrentProject {
+  id
   ...Specs_InlineSpecList
   ...SpecRunnerHeader
 }
@@ -188,4 +189,17 @@ iframe {
   height: 100%;
   background: white;
 }
+
+.highlight {
+  background: rgba(159, 196, 231, 0.6);
+  border: solid 2px #9FC4E7;
+  cursor: pointer;
+}
+
+.tooltip {
+  font-family: sans-serif;
+  font-size: 14px;
+  max-width: 400px !important;
+}
+
 </style>

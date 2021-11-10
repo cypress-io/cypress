@@ -256,9 +256,6 @@ type CurrentProject implements Node & ProjectLike {
   """The currently selected browser for the application"""
   currentBrowser: Browser
 
-  """Currently selected spec"""
-  currentSpec: Spec
-
   """The mode the interactive runner was launched in"""
   currentTestingType: TestingTypeEnum
 
@@ -433,8 +430,6 @@ type Mutation {
   internal_clearAllProjectPreferencesCache: Boolean
   internal_clearLatestProjectCache: Boolean
   internal_clearProjectPreferencesCache(projectTitle: String!): Boolean
-  internal_triggerIpcToApp: Boolean
-  internal_triggerIpcToLaunchpad(msg: String!): Boolean
 
   """Launches project from open_project global singleton"""
   launchOpenProject: Boolean
@@ -453,6 +448,7 @@ type Mutation {
 
   """Set the current navigation item"""
   navigationMenuSetItem(type: NavItem!): Boolean
+  openExternal(url: String!): Boolean
 
   """show the launchpad windows"""
   reconfigureProject: Boolean!
@@ -466,17 +462,11 @@ type Mutation {
   """Set active project to run tests on"""
   setActiveProject(path: String!): Boolean
 
-  """Set the current spec under test"""
-  setCurrentSpec(id: ID!): Boolean
-
   """Save the projects preferences to cache"""
   setProjectPreferences(browserPath: String!, testingType: TestingTypeEnum!): Query!
 
   """show the launchpad at the browser picker step"""
   showElectronOnAppExit: Boolean
-
-  """Installs the dependencies for the component testing step"""
-  wizardInstallDependencies: Wizard
 
   """Sets the frontend bundler we want to use for the project"""
   wizardSetBundler(bundler: SupportedBundlers!): Boolean
@@ -489,9 +479,6 @@ type Mutation {
 
   """Updates the different fields of the wizard data store"""
   wizardUpdate(input: WizardUpdateInput!): Boolean
-
-  """Validates that the manual install has occurred properly"""
-  wizardValidateManualInstall: Wizard
 }
 
 enum NavItem {

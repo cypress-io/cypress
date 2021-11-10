@@ -57,6 +57,7 @@ gql`
 fragment SwitchTestingTypeButton on Query {
   ...SwitchTestingTypeModal
   currentProject {
+    id
     currentTestingType
   }
 }

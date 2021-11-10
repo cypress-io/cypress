@@ -47,7 +47,6 @@ export const inheritAttrs = false
 </script>
 
 <script setup lang="ts">
-import { useI18n } from '@cy/i18n'
 import StandardModalHeader from './StandardModalHeader.vue'
 import StandardModalBody from './StandardModalBody.vue'
 import StandardModalFooter from './StandardModalFooter.vue'

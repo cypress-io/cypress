@@ -30,7 +30,7 @@
         <TerminalPrompt
           class="-ml-16px"
           command="git add cypress.config.js"
-          :project-name="projectName"
+          :project-folder-name="projectName"
         />
       </li>
       <li class="mt-24px">
@@ -40,7 +40,7 @@
         <TerminalPrompt
           class="-ml-16px"
           :command="recordCommand"
-          :project-name="projectName"
+          :project-folder-name="projectName"
         />
       </li>
     </ol>
@@ -59,12 +59,14 @@ const { t } = useI18n()
 
 gql`
 fragment RunsEmpty on CurrentProject {
+  id
   title
   projectId
   configFilePath
   cloudProject {
     id
     recordKeys {
+      id
       ...RecordKey
     }
   }

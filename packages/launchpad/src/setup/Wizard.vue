@@ -15,7 +15,7 @@
     />
     <InstallDependencies
       v-if="props.gql.wizard.step === 'installDependencies'"
-      :gql="props.gql.wizard"
+      :gql="props.gql"
     />
     <ConfigFiles
       v-if="props.gql.wizard.step === 'configFiles'"
@@ -48,10 +48,10 @@ fragment Wizard on Query {
     step
     testingType
     ...EnvironmentSetup
-    ...InstallDependencies
     ...ConfigFiles
   }
   browserErrorMessage
+  ...InstallDependencies
   ...InitializeConfig_Config
 }`
 

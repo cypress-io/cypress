@@ -1,11 +1,6 @@
 describe('App', () => {
   beforeEach(() => {
     cy.setupE2E('component-tests')
-    cy.withCtx(async (ctx) => {
-      // TODO: Why do we need this?
-      await ctx.actions.app.refreshBrowsers()
-    })
-
     cy.initializeApp()
   })
 
