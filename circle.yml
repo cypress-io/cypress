@@ -126,6 +126,17 @@ commands:
       - attach_workspace:
           at: ~/
 
+  print_working_dir:
+    steps:
+      name: Print working folder
+      command: |
+        if [ "$PLATFORM" = 'windows']; then
+          echo %cd%
+        else 
+          echo $PWD
+        fi
+        ls
+
   prepare-modules-cache:
     parameters:
       dont-move:
@@ -927,8 +938,9 @@ jobs:
           shell: bash.exe --login
         steps:
           - checkout
+          - print_working_dir
           - persist_to_workspace:
-              root: ~/
+              root: .
               paths:
                 - cypress
           - install-required-node
@@ -937,18 +949,18 @@ jobs:
               arch: win32
               is-mac: false
           - store-npm-logs
+
   ## Checks if we already have a valid cache for the node_modules_install and if it has,
   ## skips ahead to the build step, otherwise installs and caches the node_modules
   node_modules_install:
-    <<: *defaults
+    <<: *defaultsj
     resource_class: medium+
     shell: /bin/bash --login
     steps:
       - checkout
-      - run:
-        command: ls %{CIRCLE_WORKING_DIRECTORY}
+      - print_working_dir
       - persist_to_workspace:
-          root: ${CIRCLE_WORKING_DIRECTORY}
+          root: .
           paths:
             - cypress
       - install-required-node
