@@ -2,6 +2,7 @@
 // created by autobarrel, do not modify directly
 
 export * from './AppActions'
+export * from './ApplicationDataActions'
 export * from './AuthActions'
 export * from './DataEmitterActions'
 export * from './DevActions'

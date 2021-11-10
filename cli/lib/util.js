@@ -252,12 +252,16 @@ const getApplicationDataFolder = (...paths) => {
   const { env } = process
 
   // allow overriding the app_data folder
-  const folder = env.CYPRESS_KONFIG_ENV || env.CYPRESS_INTERNAL_ENV || 'development'
+  let folder = env.CYPRESS_KONFIG_ENV || env.CYPRESS_INTERNAL_ENV || 'development'
 
   const PRODUCT_NAME = pkg.productName || pkg.name
   const OS_DATA_PATH = ospath.data()
 
   const ELECTRON_APP_DATA_PATH = path.join(OS_DATA_PATH, PRODUCT_NAME)
+
+  if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF === 'true') {
+    folder = `${folder}-e2e-test`
+  }
 
   const p = path.join(ELECTRON_APP_DATA_PATH, 'cy', folder, ...paths)
 

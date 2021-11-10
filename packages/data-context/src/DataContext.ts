@@ -2,7 +2,7 @@ import type { LaunchArgs, OpenProjectLaunchOptions, PlatformName } from '@packag
 import fsExtra from 'fs-extra'
 import path from 'path'
 
-import { AppApiShape, DataEmitterActions, ProjectApiShape } from './actions'
+import { AppApiShape, ApplicationDataApiShape, DataEmitterActions, ProjectApiShape } from './actions'
 import type { NexusGenAbstractTypeMembers } from '@packages/graphql/src/gen/nxs.gen'
 import type { AuthApiShape } from './actions/AuthActions'
 import type { ElectronApiShape } from './actions/ElectronActions'
@@ -51,6 +51,7 @@ export interface DataContextConfig {
    * Injected from the server
    */
   appApi: AppApiShape
+  appDataApi: ApplicationDataApiShape
   authApi: AuthApiShape
   projectApi: ProjectApiShape
   electronApi: ElectronApiShape
@@ -281,6 +282,7 @@ export class DataContext {
   get _apis () {
     return {
       appApi: this._config.appApi,
+      appDataApi: this._config.appDataApi,
       authApi: this._config.authApi,
       projectApi: this._config.projectApi,
       electronApi: this._config.electronApi,

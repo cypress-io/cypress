@@ -80,7 +80,6 @@ export function makeUrqlClient (target: 'launchpad' | 'app'): Client {
     // TODO(tim): add this when we want to use the socket as the GraphQL
     // transport layer for all operations
     // target === 'launchpad' ? fetchExchange : socketExchange(io),
-    fetchExchange,
   ]
 
   // If we're in the launched app, we want to use the SSR exchange

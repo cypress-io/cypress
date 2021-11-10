@@ -103,7 +103,7 @@
     "@types/enzyme-adapter-react-16": "1.0.5",
     "@types/execa": "0.9.0",
     "@types/fluent-ffmpeg": "^2.1.18",
-    "@types/fs-extra": "^8.0.1",
+    "@types/fs-extra": "^8.1.2",
     "@types/getenv": "^1.0.0",
     "@types/glob": "7.1.1",
     "@types/gulp": "^4.0.9",

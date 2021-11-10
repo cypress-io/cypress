@@ -15,6 +15,7 @@ import errors from './errors'
 import { graphqlSchema } from '@packages/graphql/src/schema'
 import type { InternalDataContextOptions } from '@packages/data-context/src/DataContext'
 import { openExternal } from '@packages/server/lib/gui/links'
+import app_data from './util/app_data'
 
 const { getBrowsers, ensureAndGetByNameOrPath } = browserUtils
 
@@ -59,6 +60,7 @@ export function makeDataContext (options: MakeDataContextOptions) {
       getBrowsers,
       ensureAndGetByNameOrPath,
     },
+    appDataApi: app_data,
     authApi: {
       getUser () {
         return user.get()

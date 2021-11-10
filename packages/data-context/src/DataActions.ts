@@ -1,11 +1,16 @@
 import type { DataContext } from '.'
-import { AppActions, ElectronActions, FileActions, ProjectActions, WizardActions } from './actions'
+import { AppActions, ApplicationDataActions, ElectronActions, FileActions, ProjectActions, WizardActions } from './actions'
 import { AuthActions } from './actions/AuthActions'
 import { DevActions } from './actions/DevActions'
 import { cached } from './util'
 
 export class DataActions {
   constructor (private ctx: DataContext) {}
+
+  @cached
+  get applicationData () {
+    return new ApplicationDataActions(this.ctx)
+  }
 
   @cached
   get file () {

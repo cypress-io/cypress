@@ -22,13 +22,14 @@ export class ElectronActions {
   }
 
   hideBrowserWindow () {
-    this.electron.browserWindow?.hide()
-
-    if (this.isMac) {
-      this.ctx.electronApp.dock.hide()
-    } else {
-      this.electron.browserWindow?.setSkipTaskbar(true)
-    }
+    return
+    // TODO(tim): Revisit this UI / workflow
+    // this.electron.browserWindow?.hide()
+    // if (this.isMac) {
+    //   this.ctx.electronApp.dock.hide()
+    // } else {
+    //   this.electron.browserWindow?.setSkipTaskbar(true)
+    // }
   }
 
   showBrowserWindow () {

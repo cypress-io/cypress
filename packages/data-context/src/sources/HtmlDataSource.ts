@@ -13,10 +13,12 @@ export class HtmlDataSource {
     const graphql = this.ctx.graphqlClient()
 
     await Promise.all([
+      graphql.executeQuery('SideBarNavigationDocument', {}),
       graphql.executeQuery('AppQueryDocument', {}),
       graphql.executeQuery('SettingsDocument', {}),
       graphql.executeQuery('SpecsPageContainerDocument', {}),
       graphql.executeQuery('HeaderBar_HeaderBarQueryDocument', {}),
+      graphql.executeQuery('SettingsDocument', {}),
     ])
 
     return graphql.getSSRData()
