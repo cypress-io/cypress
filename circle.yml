@@ -920,8 +920,8 @@ jobs:
       - checkout
       - persist_to_workspace:
         root: ~/
-          paths:
-            - cypress
+        paths:
+          - cypress
       - install-required-node
       - install-build-setup
       - caching-dependency-installer:
