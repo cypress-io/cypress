@@ -86,7 +86,7 @@ executors:
       PLATFORM: mac
   
   win/default:
-    # name:win/default win/default
+    name:win/default win/default
     shell: bash.exe
     # by default, we use "small" to save on CI costs. bump on a per-job basis if needed.
     resource_class: small
