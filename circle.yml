@@ -251,7 +251,7 @@ commands:
           name: print Node version
           command: |
             echo "nvm use default"
-            nvm use default
+            nvm use default || exit 1
             node -v
       - run:
           name: print yarn version
@@ -299,22 +299,18 @@ commands:
             curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.30.0/install.sh | bash
             echo "
               export NVM_DIR='$HOME/.nvm'
-              [ -s '$NVM_DIR/nvm.sh' ] && \. '$NVM_DIR/nvm.sh' # load nvm
+              # [ -s '$NVM_DIR/nvm.sh' ] && \. '$NVM_DIR/nvm.sh' # load nvm
+              \. '$NVM_DIR/nvm.sh' # load nvm
               export NODE_VERSION='${node_version}'
             " >> ~/.bash_profile
       - run:
           # https://github.com/nvm-sh/nvm#nvmrc
           name: Install Node
           command: |
-            cat ~/.bash_profile
-            echo "before nvm install ${NODE_VERSION}"
-            nvm install
-            echo "before nvm use"
-            nvm use
-            echo "before nvm alias default"
-            nvm alias default
+            nvm install || exit 1
+            nvm use || exit 1
+            nvm alias default || exit 1
             node --version
-      # . ./scripts/load-nvm.sh
 
   install-chrome:
     description: Install Google Chrome
@@ -943,14 +939,13 @@ jobs:
 
   lint:
     <<: *defaults
+    shell: /bin/bash --login
     steps:
       - restore_cached_workspace
-      - install-required-node
       ## this will catch ".only"s in js/coffee as well
       - run:
           name: Linting 🧹
           command: |
-            . ./scripts/load-nvm.sh
             git clean -df
             yarn lint
       - run:
@@ -1236,7 +1231,6 @@ jobs:
           path: /tmp/artifacts
       - store-npm-logs
 
-
   desktop-gui-component-tests:
     <<: *defaults
     resource_class: medium
@@ -1346,6 +1340,7 @@ jobs:
       - run:
           name: Run tests
           command: yarn workspace @cypress/webpack-dev-server test
+
   npm-vite-dev-server:
     <<: *defaults
     steps:
@@ -1561,7 +1556,7 @@ jobs:
           path: /tmp/cypress-example-kitchensink/cypress/videos
       - store-npm-logs
 
-  "test-kitchensink-against-staging":
+  test-kitchensink-against-staging:
     <<: *defaults
     resource_class: medium
     steps:
@@ -1586,7 +1581,7 @@ jobs:
             yarn cypress:run --project /tmp/cypress-example-kitchensink --record
       - store-npm-logs
 
-  "test-against-staging":
+  test-against-staging:
     <<: *defaults
     resource_class: medium
     steps:
@@ -1601,7 +1596,7 @@ jobs:
             yarn cypress:run --project /tmp/cypress-test-tiny --record
       - store-npm-logs
 
-  "test-binary-and-npm-against-other-projects":
+  test-binary-and-npm-against-other-projects:
     <<: *defaults
     resource_class: medium
     steps:
@@ -1638,7 +1633,7 @@ jobs:
               --provider circle
       - store-npm-logs
 
-  "test-npm-module-and-verify-binary":
+  test-npm-module-and-verify-binary:
     <<: *defaults
     steps:
       - restore_cached_workspace
