@@ -249,11 +249,11 @@ commands:
       - run:
           name: Print working folder
           command: |
-          if [ "$PLATFORM"  = 'windows']; then
-            echo %cd%
-          else 
-            echo pwd
-          fi
+            if [ "$PLATFORM"  = 'windows']; then
+              echo %cd%
+            else 
+              echo pwd
+            fi
       - run:
           name: print global yarn cache path
           command: echo $(yarn global bin)
