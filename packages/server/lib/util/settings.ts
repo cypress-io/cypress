@@ -188,7 +188,7 @@ export function read (projectRoot, options: SettingsOptions = {}) {
       return config
     })
   }).catch((err) => {
-    debug('an error occured when reading config', err)
+    debug('an error occurred when reading config', err)
     if (errors.isCypressErr(err)) {
       throw err
     }

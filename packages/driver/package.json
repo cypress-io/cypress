@@ -7,8 +7,7 @@
     "cypress:open": "node ../../scripts/cypress open",
     "cypress:run": "node ../../scripts/cypress run",
     "postinstall": "patch-package",
-    "start": "node -e 'console.log(require(`chalk`).red(`\nError:\n\tRunning \\`yarn start\\` is no longer needed for driver/cypress tests.\n\tWe now automatically spawn the server in the pluginsFile.\n\tChanges to the server will be watched and reloaded automatically.`))'",
-    "test-integration": "yarn cypress:run"
+    "start": "node -e 'console.log(require(`chalk`).red(`\nError:\n\tRunning \\`yarn start\\` is no longer needed for driver/cypress tests.\n\tWe now automatically spawn the server in the pluginsFile.\n\tChanges to the server will be watched and reloaded automatically.`))'"
   },
   "dependencies": {},
   "devDependencies": {
@@ -18,6 +17,7 @@
     "@cypress/unique-selector": "0.4.2",
     "@cypress/webpack-preprocessor": "0.0.0-development",
     "@cypress/what-is-circular": "1.0.1",
+    "@packages/config": "0.0.0-development",
     "@packages/network": "0.0.0-development",
     "@packages/resolve-dist": "0.0.0-development",
     "@packages/runner": "0.0.0-development",
