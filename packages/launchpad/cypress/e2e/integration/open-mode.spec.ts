@@ -2,7 +2,7 @@ import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 
 describe('Launchpad: Open Mode', () => {
   beforeEach(() => {
-    cy.setupE2E()
+    cy.openE2E()
     cy.visitLaunchpad()
     // Forcing reload, need to sync with @brian-mann to debug behavior here
     cy.reload({ log: false })
@@ -17,17 +17,13 @@ describe('Launchpad: Open Mode', () => {
   })
 
   it('shows the projects page when a project is not specified', () => {
-    cy.task('scaffoldProject', 'todos').then((projectPath) => {
-      cy.withCtx(async (ctx, o) => {
-        ctx.actions.project.addProject({ path: o.projectPath as string, open: false })
-      }, { projectPath })
-    })
-
+    cy.addProject('todos')
+    cy.visitLaunchpad()
     cy.contains(defaultMessages.globalPage.recentProjectsHeader)
   })
 
   it('goes directly to e2e tests when launched with --e2e', () => {
-    cy.setupE2E('todos')
+    cy.openE2E('todos')
 
     cy.withCtx(async (ctx) => {
       // Though the data context is previously initialized,
@@ -45,7 +41,7 @@ describe('Launchpad: Open Mode', () => {
   })
 
   it('goes directly to component tests when launched with --component', () => {
-    cy.setupE2E('todos')
+    cy.openE2E('todos')
 
     cy.withCtx(async (ctx) => {
       // Though the data context is previously initialized,
@@ -63,7 +59,7 @@ describe('Launchpad: Open Mode', () => {
   })
 
   it('auto-selects the browser when launched with --browser', () => {
-    cy.setupE2E('launchpad')
+    cy.openE2E('launchpad')
 
     cy.withCtx(async (ctx) => {
       ctx.launchArgs.testingType = 'e2e'
@@ -84,7 +80,7 @@ describe('Launchpad: Open Mode', () => {
 
   describe('when there is a list of projects', () => {
     it('goes to an active project if one is added', () => {
-      cy.setupE2E('todos')
+      cy.openE2E('todos')
 
       cy.withCtx(async (ctx, o) => {
         ctx.emitter.toLaunchpad()

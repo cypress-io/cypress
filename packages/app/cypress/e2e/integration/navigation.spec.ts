@@ -3,7 +3,7 @@ import type { Interception } from '@packages/net-stubbing/lib/external-types'
 
 describe('Navigation', () => {
   it('External links trigger mutation to open in a new browser', () => {
-    cy.setupE2E('component-tests')
+    cy.openE2E('component-tests')
     cy.initializeApp()
     cy.visitApp()
 

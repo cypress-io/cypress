@@ -45,9 +45,16 @@ declare global {
        */
       withCtx: typeof withCtx
       /**
-       * Takes the name of a "system" test directory, and mounts the project within open mode
+       * Takes the name of a system-tests directory, and mounts the project within open mode
        */
-      setupE2E: typeof setupE2E
+      openE2E: typeof openE2E
+      /**
+       * Takes the name of a system-tests directory and scaffolds the project, without opening
+       */
+      addProject: typeof addProject
+      /**
+       * Ensures there's an app server for a project and visits the app
+       */
       initializeApp: typeof initializeApp
       /**
        * Simulates a user logged-in to the cypress app
@@ -68,20 +75,29 @@ declare global {
 }
 
 beforeEach(() => {
-  // Reset the ports so we know we need to call "setupE2E" before each test
+  // Reset the ports, and call the __internal__beforeEach which sets up a
+  // fresh data context for each test
   Cypress.env('e2e_serverPort', undefined)
   Cypress.env('e2e_gqlPort', undefined)
+  cy.task<{ gqlPort: number }>('__internal__beforeEach', {}, { log: false }).then(({ gqlPort }) => {
+    Cypress.env('e2e_gqlPort', gqlPort)
+    Cypress.env('e2e_serverPort', undefined)
+  })
 })
 
-// function setup
+function addProject (projectName: ProjectFixture) {
+  return logInternal({ name: 'addProject', message: projectName }, () => {
+    return cy.task('addProject', projectName, { log: false })
+  })
+}
 
-function setupE2E (projectName?: ProjectFixture) {
+function openE2E (projectName?: ProjectFixture) {
   if (projectName && !e2eProjectDirs.includes(projectName)) {
     throw new Error(`Unknown project ${projectName}`)
   }
 
   if (projectName) {
-    cy.task('scaffoldProject', projectName, { log: false })
+    cy.task('addProject', projectName, { log: false })
   }
 
   return cy.withCtx(async (ctx, o) => {
@@ -94,7 +110,6 @@ function setupE2E (projectName?: ProjectFixture) {
       ctx.appServerPort,
     ]
   }, { projectName, log: false }).then(([gqlPort, serverPort]) => {
-    Cypress.env('e2e_gqlPort', gqlPort)
     Cypress.env('e2e_serverPort', serverPort)
   })
 }
@@ -120,7 +135,7 @@ function visitApp (href?: string) {
   const { e2e_serverPort, e2e_gqlPort } = Cypress.env()
 
   if (!e2e_gqlPort) {
-    throw new Error(`Missing gqlPort - did you forget to call cy.setupE2E(...) ?`)
+    throw new Error(`Missing gqlPort - did you forget to call cy.openE2E(...) ?`)
   }
 
   if (!e2e_serverPort) {
@@ -128,7 +143,7 @@ function visitApp (href?: string) {
   }
 
   cy.withCtx(async (ctx) => {
-    return JSON.stringify(ctx.html.fetchAppInitialData())
+    return JSON.stringify(await ctx.html.fetchAppInitialData())
   }, { log: false }).then((ssrData) => {
     return cy.visit(`dist-app/index.html?serverPort=${e2e_serverPort}${href || ''}`, {
       onBeforeLoad (win) {
@@ -140,11 +155,11 @@ function visitApp (href?: string) {
   })
 }
 
-function visitLaunchpad (hash?: string) {
+function visitLaunchpad () {
   const { e2e_gqlPort } = Cypress.env()
 
   if (!e2e_gqlPort) {
-    throw new Error(`Missing gqlPort - did you forget to call cy.setupE2E(...) ?`)
+    throw new Error(`Missing gqlPort - did you forget to call cy.openE2E(...) ?`)
   }
 
   cy.visit(`dist-launchpad/index.html?gqlPort=${e2e_gqlPort}`)
@@ -180,32 +195,41 @@ function withCtx<T extends Partial<WithCtxOptions>, R> (fn: (ctx: DataContext, o
 }
 
 function loginUser (userShape: Partial<AuthenticatedUserShape> = {}) {
-  const _log = Cypress.log({ name: 'loginUser', message: JSON.stringify(userShape) })
-
-  return cy.withCtx((ctx, o) => {
-    ctx.coreData.user = {
-      authToken: '1234',
-      email: 'test@example.com',
-      name: 'Test User',
-      ...o.userShape,
-    }
-  }, { log: false, userShape }).then(() => {
-    _log.end()
+  return logInternal({ name: 'loginUser', message: JSON.stringify(userShape) }, () => {
+    return cy.withCtx((ctx, o) => {
+      ctx.coreData.user = {
+        authToken: '1234',
+        email: 'test@example.com',
+        name: 'Test User',
+        ...o.userShape,
+      }
+    }, { log: false, userShape })
   })
 }
 
 function remoteGraphQLIntercept (fn: RemoteGraphQLInterceptor) {
-  const _log = Cypress.log({ name: 'remoteGraphQLIntercept', message: '' })
+  return logInternal('remoteGraphQLIntercept', () => {
+    return cy.task<null>('remoteGraphQLIntercept', fn.toString(), { log: false })
+  })
+}
 
-  return cy.task('remoteGraphQLIntercept', fn.toString(), { log: false }).then(() => {
+function logInternal<T> (name: string | Partial<Cypress.LogConfig>, cb: (log: Cypress.Log) => Cypress.Chainable<T>, opts: Partial<Cypress.Loggable> = {}): Cypress.Chainable<T> {
+  const _log = typeof name === 'string'
+    ? Cypress.log({ name, message: '' })
+    : Cypress.log(name)
+
+  return cb(_log).then<T>((val) => {
     _log.end()
+
+    return val
   })
 }
 
 Cypress.Commands.add('visitApp', visitApp)
 Cypress.Commands.add('loginUser', loginUser)
 Cypress.Commands.add('visitLaunchpad', visitLaunchpad)
+Cypress.Commands.add('addProject', addProject)
 Cypress.Commands.add('initializeApp', initializeApp)
-Cypress.Commands.add('setupE2E', setupE2E)
+Cypress.Commands.add('openE2E', openE2E)
 Cypress.Commands.add('withCtx', withCtx)
 Cypress.Commands.add('remoteGraphQLIntercept', remoteGraphQLIntercept)

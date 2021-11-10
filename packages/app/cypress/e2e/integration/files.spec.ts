@@ -1,6 +1,6 @@
 describe('App', () => {
   beforeEach(() => {
-    cy.setupE2E('component-tests')
+    cy.openE2E('component-tests')
     cy.initializeApp()
   })
 

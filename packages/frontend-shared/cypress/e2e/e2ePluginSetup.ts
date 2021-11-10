@@ -50,81 +50,90 @@ export async function e2ePluginSetup (projectRoot: string, on: Cypress.PluginEve
 
   let ctx: DataContext
   let serverPortPromise: Promise<number>
-  let currentTestId: string | undefined
   let testState: Record<string, any> = {}
   let remoteGraphQLIntercept: RemoteGraphQLInterceptor | undefined
 
   on('task', {
+    /**
+     * Called before each test to do global setup/cleanup
+     */
+    async __internal__beforeEach () {
+      testState = {}
+      await ctx?.destroy()
+      sinon.reset()
+      remoteGraphQLIntercept = undefined;
+
+      ({ serverPortPromise, ctx } = runInternalServer({
+        projectRoot: null,
+      }, {
+        loadCachedProjects: false,
+      }) as {ctx: DataContext, serverPortPromise: Promise<number> })
+
+      const fetchApi = ctx.util.fetch
+
+      await ctx.actions.applicationData.removeAppDir()
+      await ctx.actions.applicationData.ensureAppDirExists()
+
+      sinon.stub(ctx.util, 'fetch').get(() => {
+        return async (url: RequestInfo, init?: RequestInit) => {
+          if (!String(url).endsWith('/test-runner-graphql')) {
+            return fetchApi(url, init)
+          }
+
+          const { query, variables } = JSON.parse(String(init?.body))
+          const document = parse(query)
+          const operationName = getOperationName(document)
+
+          let result = await execute({
+            operationName,
+            document,
+            variableValues: variables,
+            schema: cloudSchema,
+            rootValue: CloudRunQuery,
+            contextValue: {
+              __server__: ctx,
+            },
+          })
+
+          if (remoteGraphQLIntercept) {
+            try {
+              result = await remoteGraphQLIntercept({
+                operationName,
+                variables,
+                document,
+                query,
+                result,
+              })
+            } catch (e) {
+              const err = e as Error
+
+              result = { data: null, extensions: [], errors: [new GraphQLError(err.message, undefined, undefined, undefined, undefined, err)] }
+            }
+          }
+
+          return new Response(JSON.stringify(result), { status: 200 })
+        }
+      })
+
+      const gqlPort = await serverPortPromise
+
+      return {
+        gqlPort,
+      }
+    },
     remoteGraphQLIntercept (fn: string) {
       remoteGraphQLIntercept = new Function('console', 'obj', `return (${fn})(obj)`).bind(null, console) as RemoteGraphQLInterceptor
 
       return null
     },
-    scaffoldProject (projectName: string) {
+    async addProject (projectName: string) {
       Fixtures.scaffoldProject(projectName)
+
+      await ctx.actions.project.addProject({ path: Fixtures.projectPath(projectName) })
 
       return Fixtures.projectPath(projectName)
     },
     async withCtx (obj: WithCtxObj) {
-      // Ensure we spin up a completely isolated server/state for each test
-      if (obj.activeTestId !== currentTestId) {
-        await ctx?.destroy()
-        currentTestId = obj.activeTestId
-        remoteGraphQLIntercept = undefined
-        testState = {};
-        ({ serverPortPromise, ctx } = runInternalServer({
-          projectRoot: null,
-        }, {
-          loadCachedProjects: false,
-        }) as {ctx: DataContext, serverPortPromise: Promise<number> })
-
-        const fetchApi = ctx.util.fetch
-
-        sinon.reset()
-        sinon.stub(ctx.util, 'fetch').get(() => {
-          return async (url: RequestInfo, init?: RequestInit) => {
-            if (!String(url).endsWith('/test-runner-graphql')) {
-              return fetchApi(url, init)
-            }
-
-            const { query, variables } = JSON.parse(String(init?.body))
-            const document = parse(query)
-            const operationName = getOperationName(document)
-
-            let result = await execute({
-              operationName,
-              document,
-              variableValues: variables,
-              schema: cloudSchema,
-              rootValue: CloudRunQuery,
-              contextValue: {
-                __server__: ctx,
-              },
-            })
-
-            if (remoteGraphQLIntercept) {
-              try {
-                result = await remoteGraphQLIntercept({
-                  operationName,
-                  variables,
-                  document,
-                  query,
-                  result,
-                })
-              } catch (e) {
-                const err = e as Error
-
-                result = { data: null, extensions: [], errors: [new GraphQLError(err.message, undefined, undefined, undefined, undefined, err)] }
-              }
-            }
-
-            return new Response(JSON.stringify(result), { status: 200 })
-          }
-        })
-
-        await serverPortPromise
-      }
-
       const options: WithCtxInjected = {
         ...obj.options,
         testState,

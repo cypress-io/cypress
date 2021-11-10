@@ -1,10 +1,10 @@
 describe('Config files error handling', () => {
   beforeEach(() => {
-    cy.setupE2E('pristine-with-config-file')
+    cy.openE2E('pristine-with-config-file')
     cy.visitLaunchpad()
   })
 
-  it('it handles multiples config files', () => {
+  it('it handles multiple config files', () => {
     cy.withCtx(async (ctx) => {
       await ctx.actions.file.writeFileInProject('cypress.config.ts', 'export default {}')
     })

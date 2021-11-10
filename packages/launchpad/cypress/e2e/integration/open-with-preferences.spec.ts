@@ -1,6 +1,6 @@
 describe('Launchpad: Open With Preferences', () => {
   beforeEach(() => {
-    cy.setupE2E('todos')
+    cy.openE2E('todos')
   })
 
   it('it should open the app when there are saved preferences', () => {

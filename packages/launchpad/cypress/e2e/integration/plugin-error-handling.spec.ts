@@ -1,12 +1,11 @@
 describe('Plugin error handling', () => {
   it('it handles a plugin error', () => {
-    cy.setupE2E('unify-plugin-errors')
+    cy.openE2E('unify-plugin-errors')
     cy.loginUser()
 
     cy.visitLaunchpad()
 
     cy.get('[data-cy-testingType=e2e]').click()
-    cy.wait(2000)
 
     cy.get('body')
     .should('contain.text', 'Cypress Configuration Error')
@@ -17,7 +16,6 @@ describe('Plugin error handling', () => {
     })
 
     cy.get('[data-testid=error-retry-button]').click()
-    cy.wait(2000)
 
     cy.get('body')
     .should('not.contain.text', 'Cypress Configuration Error')

@@ -1,6 +1,6 @@
 describe('Settings', { viewportWidth: 1200 }, () => {
   beforeEach(() => {
-    cy.setupE2E('component-tests')
+    cy.openE2E('component-tests')
 
     cy.initializeApp()
   })
