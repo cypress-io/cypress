@@ -40,6 +40,7 @@ const { t } = useI18n()
 gql`
 fragment SettingsContainer on Query {
   currentProject {
+    id
     ...ProjectSettings
   }
 }`

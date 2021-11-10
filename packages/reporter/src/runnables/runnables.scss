@@ -55,10 +55,6 @@
       cursor: pointer;
     }
 
-    i {
-      margin-right: 5px;
-    }
-
     hr {
       margin-top: 1.6em;
       margin-bottom: 1.6em;
@@ -71,6 +67,19 @@
     .open-studio,
     .open-studio-desc {
       display: none;
+    }
+
+    svg {
+      margin-right: 5px;
+      vertical-align: text-top;
+
+      &.warning-icon {
+        margin-top: 2px;
+      }
+
+      .icon-light {
+        fill: $indigo-600;
+      }
     }
   }
 
@@ -89,7 +98,7 @@
 
     .runnable-wrapper {
       border-left: 5px solid transparent;
-      padding: 0;
+      padding: 0 0 0 4px;
 
       .collapsible-header {
         &:focus {
@@ -136,42 +145,23 @@
       }
     }
 
-    &.runnable-active {
-      .runnable-state {
-        @include runnable-state-active;
-      }
-    }
-
     .runnable-state,.attempt-state {
       display: inline-block;
       line-height: 18px;
       margin-right: 5px;
       min-width: 12px;
-      height: 18px;
       text-align: center;
       font-size: 11px;
     }
 
-    &.suite .collapsible-indicator  {
-      padding-left: 2px;
-      font-size: 14px;
-      color: $gray-700;
-    }
-
-
-    &.test.runnable-processing  {
-      .runnable-state {
-        @include runnable-state-processing;
-      }
+    &.suite .collapsible-indicator {
+      margin-left: 2px;
+      color: $gray-800;
     }
 
     &.runnable-failed > div > .runnable-wrapper,
     &.runnable-failed > div > .runnable-instruments {
       border-left: 5px solid $fail;
-
-      .fa-exclamation-triangle.has-command-failures {
-        visibility: visible;
-      }
     }
 
     &.runnable-pending > div > .runnable-wrapper,
@@ -196,10 +186,6 @@
     }
 
     &.runnable-skipped > .runnable-wrapper {
-      .runnable-state {
-        @include runnable-state-skipped;
-      }
-
       .runnable-title {
         color: $gray-600;
       }
@@ -210,12 +196,6 @@
       border-left: 5px solid $gray-500;
     }
 
-    &.test.runnable-failed {
-      .runnable-state {
-        @include runnable-state-failed;
-      }
-    }
-
     &.suite > div > .runnable-wrapper {
       .runnable-title {
         color: $gray-50;
@@ -223,17 +203,7 @@
       }
     }
 
-    &.test.runnable-passed {
-      .runnable-state {
-        @include runnable-state-passed;
-      }
-    }
-
     &.test.runnable-passed.runnable-studio {
-      .runnable-state {
-        @include studio-state-passed;
-      }
-
       .studio-controls {
         display: flex;
 
@@ -244,9 +214,6 @@
     }
 
     &.test.runnable-pending {
-      .runnable-state {
-        @include runnable-state-pending;
-      }
       .runnable-title {
         color: $indigo-300;
       }
@@ -263,6 +230,23 @@
     &.test.runnable-failed {
       .studio-controls {
         display: flex;
+      }
+    }
+
+    .runnable-state-icon {
+      margin-right: 5px;
+      margin-top: 4px;
+
+      &.fa-spin {
+        .icon-light {
+          stroke: $gray-800;
+        }
+      }
+
+      &.wand-icon {
+        .icon-light {
+          fill: $indigo-700;
+        }
       }
     }
   }
@@ -303,6 +287,7 @@
 
   .runnable-controls {
     float: right;
+    height: 18px;
 
     label {
       padding: 2px 4px;
@@ -451,11 +436,7 @@
         color: $indigo-500;
         display: none;
         font-size: 16px;
-        padding: 3px 10px;
-
-        i {
-          width: 15px;
-        }
+        padding: 4px 10px 2px;
 
         &:hover, &:focus {
           background-color: $indigo-100;

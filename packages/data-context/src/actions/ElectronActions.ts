@@ -2,6 +2,10 @@ import type { BrowserWindow } from 'electron'
 import os from 'os'
 import type { DataContext } from '..'
 
+export interface ElectronApiShape {
+  openExternal(url: string): void
+}
+
 export class ElectronActions {
   constructor (private ctx: DataContext) { }
 
@@ -45,5 +49,9 @@ export class ElectronActions {
 
   refreshBrowserWindow () {
     this.electron.browserWindow?.reload()
+  }
+
+  openExternal (url: string) {
+    this.ctx.electronApi.openExternal(url)
   }
 }

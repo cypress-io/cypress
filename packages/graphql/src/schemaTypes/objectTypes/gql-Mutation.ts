@@ -3,7 +3,6 @@ import { CodeGenTypeEnum } from '../enumTypes/gql-CodeGenTypeEnum'
 import { CodeLanguageEnum, FrontendFrameworkEnum, NavItemEnum, SupportedBundlerEnum, TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
 import { WizardUpdateInput } from '../inputTypes/gql-WizardUpdateInput'
 import { GeneratedSpec } from './gql-GeneratedSpec'
-import { Wizard } from './gql-Wizard'
 
 export const mutation = mutationType({
   definition (t) {
@@ -27,31 +26,22 @@ export const mutation = mutationType({
       },
     })
 
-    t.field('internal_triggerIpcToLaunchpad', {
-      type: 'Boolean',
-      args: {
-        msg: nonNull(stringArg()),
-      },
-      resolve: (_, args, ctx) => {
-        ctx.emitter.toLaunchpad(args.msg)
-
-        return true
-      },
-    })
-
-    t.field('internal_triggerIpcToApp', {
-      type: 'Boolean',
-      resolve: (_, args, ctx) => {
-        ctx.emitter.toApp('someData')
-
-        return true
-      },
-    })
-
     t.field('internal_clearLatestProjectCache', {
       type: 'Boolean',
       resolve: (_, args, ctx) => {
         ctx.actions.project.clearLatestProjectCache()
+
+        return true
+      },
+    })
+
+    t.field('openExternal', {
+      type: 'Boolean',
+      args: {
+        url: nonNull(stringArg()),
+      },
+      resolve: (_, args, ctx) => {
+        ctx.actions.electron.openExternal(args.url)
 
         return true
       },
@@ -127,24 +117,6 @@ export const mutation = mutationType({
       args: { language: nonNull(CodeLanguageEnum) },
       resolve: async (_, args, ctx) => {
         await ctx.actions.wizard.setCodeLanguage(args.language)
-      },
-    })
-
-    t.field('wizardInstallDependencies', {
-      type: Wizard,
-      description: 'Installs the dependencies for the component testing step',
-      resolve: (_, args, ctx) => {
-        return ctx.wizardData
-      },
-    })
-
-    t.field('wizardValidateManualInstall', {
-      type: Wizard,
-      description: 'Validates that the manual install has occurred properly',
-      resolve: (_, args, ctx) => {
-        ctx.actions.wizard.validateManualInstall()
-
-        return ctx.wizardData
       },
     })
 
@@ -280,20 +252,6 @@ export const mutation = mutationType({
             stack: e.stack,
           }
         }
-      },
-    })
-
-    t.liveMutation('setCurrentSpec', {
-      description: 'Set the current spec under test',
-      args: {
-        id: nonNull(idArg()),
-      },
-      resolve: async (_, args, ctx) => {
-        if (!ctx.currentProject) {
-          throw Error(`Cannot set spec without active project!`)
-        }
-
-        await ctx.actions.project.setCurrentSpec(args.id)
       },
     })
 

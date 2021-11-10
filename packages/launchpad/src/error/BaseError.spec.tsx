@@ -47,7 +47,6 @@ describe('<BaseError />', () => {
     .should('contain.text', messages.readTheDocsButton)
     .get(docsLinkSelector)
     .should('have.attr', 'href', docsLink)
-    .and('have.attr', 'target', '_blank')
   })
 
   // NOTE: Figure out how to stub the graphql mutation call
