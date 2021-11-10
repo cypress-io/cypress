@@ -85,13 +85,13 @@ executors:
     environment:
       PLATFORM: mac
   
-  # windows:
-  #   name: win/default
-  #   shell: bash.exe
-  #   # by default, we use "small" to save on CI costs. bump on a per-job basis if needed.
-  #   resource_class: small
-  #   environment:
-  #     PLATFORM: windows
+  windows:
+    name: win/default
+    shell: bash.exe
+    # by default, we use "small" to save on CI costs. bump on a per-job basis if needed.
+    resource_class: small
+    environment:
+      PLATFORM: windows
 
 commands:
   restore_workspace_binaries:
@@ -2361,8 +2361,8 @@ windows-workflow: &windows-workflow
 workflows:
   linux:
     <<: *linux-workflow
-  # windows:
-  #   <<: *windows-workflow
+  windows:
+    <<: *windows-workflow
   mac:
     <<: *mac-workflow
     # usually we don't build Mac app - it takes a long time
