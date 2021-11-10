@@ -2362,7 +2362,7 @@ mac-workflow: &mac-workflow
 
 windows-workflow: &windows-workflow
   jobs:
-    - winonode_modules_install:
+    - node_modules_install:
         name: windows-node-modules-install
         executor: windows
         arch: win32
