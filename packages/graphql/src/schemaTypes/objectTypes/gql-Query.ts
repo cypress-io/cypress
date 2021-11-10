@@ -44,7 +44,7 @@ export const Query = objectType({
       description: 'Previous versions of cypress and their release date',
       resolve: (root, args, ctx) => {
         return ctx.versions()
-      }
+      },
     })
 
     t.field('currentProject', {

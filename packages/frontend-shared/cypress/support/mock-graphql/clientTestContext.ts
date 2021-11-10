@@ -20,11 +20,13 @@ export interface ClientTestContext {
   }
   versions: {
     latest: {
+      __typename: 'Version'
       id: string
       version: string
       released: string
     }
     current: {
+      __typename: 'Version'
       id: string
       version: string
       released: string

@@ -16,11 +16,11 @@ export class VersionsDataSource {
    * Returns most recent and current version of Cypress
    * {
    *   current: {
-   *     version: '8.7.0', 
+   *     version: '8.7.0',
    *     released: '2021-10-15T21:38:59.983Z'
    *   },
    *   latest: {
-   *     version: '8.8.0', 
+   *     version: '8.8.0',
    *     released: '2021-10-25T21:38:59.983Z'
    *   }
    * }
@@ -43,16 +43,16 @@ export class VersionsDataSource {
     const latestVersion: Version = {
       id: latest,
       version: latest,
-      released: json[latest]
+      released: json[latest],
     }
-  
+
     return {
       latest: latestVersion,
       current: {
         version: currentCypressVersion.version,
-        released: currentCypressVersion.version === '0.0.0-development' ? new Date().toISOString() :json[currentCypressVersion.version],
-        id: currentCypressVersion.version
-      }
+        released: currentCypressVersion.version === '0.0.0-development' ? new Date().toISOString() : json[currentCypressVersion.version],
+        id: currentCypressVersion.version,
+      },
     }
   }
 }
