@@ -34,9 +34,7 @@ mainBuildFilters: &mainBuildFilters
         - develop
         - tgriesser/chore/fix-release
 
-# usually we don't build Mac app - it takes a long time
-# but sometimes we want to really confirm we are doing the right thing
-# so just add your branch to the list here to build and test on Mac
+
 macBuildFilters: &macBuildFilters
   filters:
     branches:
@@ -936,6 +934,9 @@ jobs:
     resource_class: medium+
     shell: /bin/bash --login
     steps:
+      - run: 
+        name: check workspace
+        command: ls -a; ls -a cypress
       - unpack-dependencies
       - run:
           name: Top level packages
@@ -2295,12 +2296,10 @@ mac-workflow: &mac-workflow
         executor: mac
         requires:
           - darwin-node-modules-install
-        <<: *macBuildFilters
 
     - lint:
         name: darwin-lint
         executor: mac
-        <<: *macBuildFilters
         requires:
           - darwin-build
 
@@ -2313,21 +2312,18 @@ mac-workflow: &mac-workflow
           - test-runner:upload
           - test-runner:commit-status-checks
         executor: mac
-        <<: *macBuildFilters
         requires:
           - darwin-build
 
     - test-kitchensink:
         name: darwin-test-kitchensink
         executor: mac
-        <<: *macBuildFilters
         requires:
           - darwin-build
 
     - test-binary-against-kitchensink:
         name: darwin-test-binary-against-kitchensink
         executor: mac
-        <<: *macBuildFilters
         requires:
           - darwin-create-build-artifacts
 
@@ -2335,7 +2331,6 @@ mac-workflow: &mac-workflow
         context: test-runner:record-tests
         name: darwin-test-binary-against-staging
         executor: mac
-        <<: *macBuildFilters
         requires:
           - darwin-create-build-artifacts
 
@@ -2343,7 +2338,6 @@ mac-workflow: &mac-workflow
         context: test-runner:trigger-test-jobs
         name: darwin-test-binary-and-npm-against-other-projects
         executor: mac
-        <<: *macBuildFilters
         requires:
           - darwin-create-build-artifacts
 
@@ -2352,6 +2346,9 @@ workflows:
     <<: *linux-workflow
   mac:
     <<: *mac-workflow
+    # usually we don't build Mac app - it takes a long time
+    # but sometimes we want to really confirm we are doing the right thing
+    # so just add your branch to the list here to build and test on Mac
     when:
       or:
       - equal: [ develop, << pipeline.git.branch >> ]
