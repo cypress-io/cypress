@@ -1,19 +1,33 @@
 <template>
-  <div class="w-300px overflow-x-hidden h-full">
-    <InlineSpecListRow
-      v-for="spec in specs"
-      :key="spec.node.id"
-      :spec="spec.node"
-      :selected="isCurrentSpec(spec)"
+  <div class="w-280px">
+    <InlineSpecListHeader
+      v-model:tab="tab"
+      v-model:search="search"
     />
+    <div class="h-[calc(100vh-65px)] overflow-y-auto overflow-x-hidden pt-16px">
+      <template v-if="tab === 'file-list'">
+        <InlineSpecListRow
+          v-for="spec in specs"
+          :key="spec.node.id"
+          :spec="spec.node"
+          :selected="isCurrentSpec(spec)"
+        />
+      </template>
+      <template v-else>
+        <div class="text-white">
+          FileTree not implemented
+        </div>
+      </template>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { gql } from '@urql/vue'
 import type { SpecNode_InlineSpecListFragment, Specs_InlineSpecListFragment } from '../generated/graphql'
 import { useSpecStore } from '../store'
+import InlineSpecListHeader from './InlineSpecListHeader.vue'
 import InlineSpecListRow from './InlineSpecListRow.vue'
 
 gql`
@@ -52,5 +66,22 @@ const isCurrentSpec = (spec: SpecNode_InlineSpecListFragment) => {
   return spec.node.relative === specStore.activeSpec?.relative
 }
 
-const specs = computed(() => props.gql.specs?.edges || [])
+const tab = ref('file-list')
+const search = ref('')
+
+const specs = computed(() => {
+  if (!search.value) {
+    return props.gql.specs?.edges || []
+  }
+
+  return (
+    props.gql.specs?.edges.filter((edge) => {
+      return (
+        edge.node.fileName.toLowerCase() +
+        edge.node.specFileExtension.toLowerCase()
+      ).includes(search.value.toLocaleLowerCase())
+    }) || []
+  )
+})
+
 </script>
