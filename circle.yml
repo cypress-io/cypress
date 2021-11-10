@@ -1251,7 +1251,7 @@ jobs:
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
-            yarn percy exec --v --parallel -- -- \
+            yarn percy exec --verbose --parallel -- -- \
             yarn cypress:run --record --parallel --group reporter
           working_directory: packages/reporter
       - verify-mocha-results
