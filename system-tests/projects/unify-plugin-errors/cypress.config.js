@@ -1,5 +1,5 @@
 module.exports = {
-  e2e: {
+  'e2e': {
     baseUrl: 'https://cypress.com',
     async setupNodeEvents (on, config) {
       await new Promise((resolve) => setTimeout(resolve, 1000))

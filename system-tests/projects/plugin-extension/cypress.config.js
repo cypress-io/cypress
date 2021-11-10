@@ -1,7 +1,7 @@
 const path = require('path')
 
 module.exports = {
-  e2e: {
+  'e2e': {
     setupNodeEvents (on, config) {
       on('before:browser:launch', (browser = {}, options) => {
         const pathToExt = path.resolve('ext')

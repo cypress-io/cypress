@@ -8,7 +8,7 @@ let rss = []
 let intervalId
 
 module.exports = {
-  e2e: {
+  'e2e': {
     setupNodeEvents (on, config) {
       on('task', {
         'console' (...args) {

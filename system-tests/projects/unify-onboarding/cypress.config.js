@@ -1,5 +1,5 @@
 module.exports = {
-  component: {
+  'component': {
     setupNodeEvents (on, config) {
       const { startDevServer } = require('@cypress/webpack-dev-server')
 

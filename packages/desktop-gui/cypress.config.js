@@ -18,7 +18,7 @@ module.exports = {
   'reporterOptions': {
     'configFile': '../../mocha-reporter-config.json',
   },
-  e2e: {
+  'e2e': {
     setupNodeEvents (on, config) {
       const express = require('express')
 
@@ -31,7 +31,7 @@ module.exports = {
       return config
     },
   },
-  component: {
+  'component': {
     setupNodeEvents (on, config) {
       const { startDevServer } = require('@cypress/webpack-dev-server')
 

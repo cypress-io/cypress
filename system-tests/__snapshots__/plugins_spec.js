@@ -119,14 +119,14 @@ exports['e2e plugins can modify config from plugins 1'] = `
 `
 
 exports['e2e plugins catches invalid browsers list returned from plugins 1'] = `
-An invalid configuration value returned from the plugins file: \`cypress/plugins/index.js\`
+An invalid configuration value from the setupNodeEvents on config file: \`cypress.config.js\`
 
 Expected at least one browser
 
 `
 
 exports['e2e plugins catches invalid browser returned from plugins 1'] = `
-An invalid configuration value returned from the plugins file: \`cypress/plugins/index.js\`
+An invalid configuration value from the setupNodeEvents on config file: \`cypress.config.js\`
 
 Found an error while validating the \`browsers\` list. Expected \`displayName\` to be a non-empty string. Instead the value was: \`{"name":"browser name","family":"chromium"}\`
 

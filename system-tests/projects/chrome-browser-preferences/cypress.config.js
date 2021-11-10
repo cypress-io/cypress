@@ -4,7 +4,7 @@ const fse = require('fs-extra')
 const path = require('path')
 
 module.exports = {
-  e2e: {
+  'e2e': {
     setupNodeEvents (on, config) {
       const parentPid = process.ppid
       let { PATH_TO_CHROME_PROFILE } = config.env

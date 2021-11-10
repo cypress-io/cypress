@@ -1,6 +1,6 @@
 module.exports = {
   'retries': null,
-  e2e: {
+  'e2e': {
     setupNodeEvents (on, config) {
       const wp = require('@cypress/webpack-preprocessor')
       const path = require('path')
@@ -16,7 +16,7 @@ module.exports = {
               exclude: /node_modules/,
               loader: 'awesome-typescript-loader',
               options: {
-                configFileName: path.join(__dirname, '..', 'tsconfig.json'),
+                configFileName: path.join(__dirname, 'tsconfig.json'),
               },
             },
           ],

@@ -2,12 +2,12 @@ const plugin = require('./plugins')
 
 module.exports = {
   'retries': null,
-  e2e: {
+  'e2e': {
     setupNodeEvents (on, config) {
       return plugin(on, config)
     },
   },
-  component: {
+  'component': {
     setupNodeEvents (on, config) {
       const { startDevServer } = require('@cypress/webpack-dev-server')
 

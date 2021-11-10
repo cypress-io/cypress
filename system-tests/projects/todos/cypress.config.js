@@ -5,7 +5,7 @@ module.exports = {
   'port': 8888,
   'projectId': 'abc123',
   'pluginsFile': false,
-  component: {
-    specFilePattern: 'src/**/*.spec.cy.js',
+  'component': {
+    'specFilePattern': 'src/**/*.spec.cy.js',
   },
 }

@@ -1,5 +1,5 @@
 module.exports = {
-  e2e: {
+  'e2e': {
     setupNodeEvents (on, config) {
       return {
         viewportWidth: 'foo',

@@ -4,7 +4,7 @@ const os = require('os')
 const socketIo = require('@packages/socket/lib/browser')
 
 module.exports = {
-  e2e: {
+  'e2e': {
     setupNodeEvents (on, config) {
       on('task', {
         'get:tmp:path': () => {

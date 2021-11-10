@@ -1,6 +1,6 @@
 module.exports = {
   'componentFolder': 'src',
-  e2e: {
+  'e2e': {
     setupNodeEvents (on, config) {
       const { startDevServer } = require('@cypress/webpack-dev-server')
 

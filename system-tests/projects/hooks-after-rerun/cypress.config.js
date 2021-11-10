@@ -1,7 +1,7 @@
 const state = {}
 
 module.exports = {
-  e2e: {
+  'e2e': {
     setupNodeEvents (on, config) {
       on('task', {
         incrState (arg) {

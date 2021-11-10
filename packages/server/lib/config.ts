@@ -351,10 +351,10 @@ export function updateWithPluginValues (cfg, overrides) {
   // make sure every option returned from the plugins file
   // passes our validation functions
   validate(overrides, (errMsg) => {
-    if (cfg.pluginsFile && cfg.projectRoot) {
-      const relativePluginsPath = path.relative(cfg.projectRoot, cfg.pluginsFile)
+    if (cfg.configFile && cfg.projectRoot) {
+      const relativeConfigPath = path.relative(cfg.projectRoot, cfg.configFile)
 
-      return errors.throw('PLUGINS_CONFIG_VALIDATION_ERROR', relativePluginsPath, errMsg)
+      return errors.throw('PLUGINS_CONFIG_VALIDATION_ERROR', relativeConfigPath, errMsg)
     }
 
     return errors.throw('CONFIG_VALIDATION_ERROR', errMsg)

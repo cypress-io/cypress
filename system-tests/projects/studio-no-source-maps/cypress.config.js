@@ -1,6 +1,6 @@
 module.exports = {
   'experimentalStudio': true,
-  e2e: {
+  'e2e': {
     setupNodeEvents (on, config) {
       const webpackPreprocessor = require('@cypress/webpack-preprocessor')
 

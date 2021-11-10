@@ -1,9 +1,9 @@
 const path = require('path')
 
-const replacementPath = path.join(__dirname, '../../screenshot-replacement.png')
+const replacementPath = path.join(__dirname, './screenshot-replacement.png')
 
 module.exports = {
-  e2e: {
+  'e2e': {
     setupNodeEvents (on, config) {
       on('after:screenshot', (details) => {
         if (details.testFailure) {

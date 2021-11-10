@@ -13,7 +13,7 @@ export default defineConfig({
     'runMode': 2,
     'openMode': 0,
   },
-  e2e: {
+  'e2e': {
     setupNodeEvents (on, config) {
       const express = require('express')
 

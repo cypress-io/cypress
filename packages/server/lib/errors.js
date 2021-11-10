@@ -639,7 +639,7 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
       filePath = `\`${arg1}\``
 
       return stripIndent`\
-        An invalid configuration value returned from the plugins file: ${chalk.blue(filePath)}
+        An invalid configuration value returned from the setupNodeEvents on config file: ${chalk.blue(filePath)}
 
         ${chalk.yellow(arg2)}`
     // general configuration error not-specific to configuration or plugins files

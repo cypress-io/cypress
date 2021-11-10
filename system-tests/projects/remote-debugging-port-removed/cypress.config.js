@@ -1,7 +1,7 @@
 const la = require('lazy-ass')
 
 module.exports = {
-  e2e: {
+  'e2e': {
     setupNodeEvents (on, config) {
       on('before:browser:launch', (browser = {}, options) => {
         la(browser.family === 'chromium', 'this test can only be run with a chromium-family browser')

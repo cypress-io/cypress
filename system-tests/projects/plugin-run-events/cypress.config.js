@@ -4,7 +4,7 @@ const Promise = require('bluebird')
 module.exports = {
   'fixturesFolder': false,
   'supportFile': false,
-  e2e: {
+  'e2e': {
     setupNodeEvents (on, config) {
       on('before:run', (runDetails) => {
         const { specs, browser } = runDetails

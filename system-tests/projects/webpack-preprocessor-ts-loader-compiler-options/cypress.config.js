@@ -1,6 +1,6 @@
 module.exports = {
   'retries': null,
-  e2e: {
+  'e2e': {
     setupNodeEvents (on, config) {
       const wp = require('@cypress/webpack-preprocessor')
 
