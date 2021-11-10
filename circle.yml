@@ -85,8 +85,8 @@ executors:
     environment:
       PLATFORM: mac
   
-  win/default:
-    name:win/default win/default
+  windows:
+    name: win/default win/default
     shell: bash.exe
     # by default, we use "small" to save on CI costs. bump on a per-job basis if needed.
     resource_class: small
@@ -2343,7 +2343,7 @@ windows-workflow: &windows-workflow
   jobs:
     - node_modules_install:
         name: windows-node-modules-install
-        executor: win/default
+        executor: windows
         arch: win32
 
     - build:
