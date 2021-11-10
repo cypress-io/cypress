@@ -924,6 +924,7 @@ jobs:
       - caching-dependency-installer:
           arch: << parameters.arch >>
           is-mac: <<parameters.is-mac>>
+      - build-and-persist
       - store-npm-logs
 
   ## restores node_modules from previous step & builds if first step skipped
