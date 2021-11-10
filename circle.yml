@@ -85,6 +85,9 @@ executors:
     environment:
       PLATFORM: mac
   
+  windows:
+    name: win/default
+    shell: bash.exe --login
   # windows:
   #   machine:  
   #     image: windows-server-2019-vs2019:stable
@@ -942,8 +945,10 @@ jobs:
     shell: /bin/bash --login
     steps:
       - checkout
+      - run:
+        command: ls %{CIRCLE_WORKING_DIRECTORY}
       - persist_to_workspace:
-          root: ~/
+          root: ${CIRCLE_WORKING_DIRECTORY}
           paths:
             - cypress
       - install-required-node
@@ -952,7 +957,6 @@ jobs:
           arch: << parameters.arch >>
           is-mac: <<parameters.is-mac>>
       - store-npm-logs
-
 
   ## restores node_modules from previous step & builds if first step skipped
   build:
