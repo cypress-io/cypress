@@ -11,7 +11,7 @@ export default defineConfig({
   'component': {
     setupNodeEvents (on, config) {
       const { startDevServer } = require('@cypress/webpack-dev-server')
-      const webpackConfig = require('../../webpack.config')
+      const webpackConfig = require('./webpack.config')
 
       if (!webpackConfig.resolve) {
         webpackConfig.resolve = {}
