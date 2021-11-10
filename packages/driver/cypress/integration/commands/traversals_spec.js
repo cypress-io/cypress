@@ -1,3 +1,4 @@
+const { assertLogLength } = require('../../support/utils')
 const { _, $, dom } = Cypress
 
 const helpers = require('../../support/helpers')
@@ -333,7 +334,7 @@ describe('src/cy/commands/traversals', () => {
 
     it('throws once when incorrect sizzle selector', function (done) {
       cy.on('fail', (err) => {
-        expect(this.logs.length).to.eq(2)
+        assertLogLength(this.logs, 2)
 
         done()
       })
