@@ -286,6 +286,7 @@ commands:
           # https://github.com/nvm-sh/nvm#nvmrc
           name: Install Node
           command: |
+            . .bashrc
             echo "before nvm install"
             nvm install
             echo "before nvm use"
