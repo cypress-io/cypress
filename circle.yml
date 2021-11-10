@@ -94,7 +94,7 @@ executors:
   windows:
     machine:
       image: windows-server-2019-vs2019:stable
-    resource_class: windows.medium
+    # resource_class: windows.medium
       # name: win/default
     shell: bash.exe
     environment:
