@@ -2357,8 +2357,7 @@ windows-workflow: &windows-workflow
   jobs:
     - node_modules_install:
       name: windows-node-modules-install
-      executor:
-        name: win/default
+      executor: win/default
         size: small
         shell: bash.exe
         environment:
