@@ -192,6 +192,7 @@ commands:
           command: |
             if [[ -f "node_modules_installed" ]]; then
               echo "Node modules already cached for dependencies, exiting"
+              
               circleci-agent step halt
             fi
       - run: date +%Y-%U > cache_date
@@ -924,7 +925,6 @@ jobs:
       - caching-dependency-installer:
           arch: << parameters.arch >>
           is-mac: <<parameters.is-mac>>
-      - build-and-persist
       - store-npm-logs
 
   ## restores node_modules from previous step & builds if first step skipped
@@ -933,6 +933,7 @@ jobs:
     resource_class: medium+
     shell: /bin/bash --login
     steps:
+      - checkout
       - unpack-dependencies
       - run:
           name: Top level packages
