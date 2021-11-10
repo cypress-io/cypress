@@ -84,7 +84,7 @@ const getJobStatus = async (workflowId) => {
   return response
 }
 
-const waitForAllJobs = async (jobNames, workflowId) => {
+const waitForAllJobs = async (timePassed, jobNames, workflowId) => {
   let response
 
   try {
@@ -116,13 +116,14 @@ const waitForAllJobs = async (jobNames, workflowId) => {
   const futureOrRunning = _.union(blockedJobs, runningJobNames)
   const jobsToWaitFor = _.intersection(jobNames, futureOrRunning)
 
-  debug('jobs to wait for %o', jobsToWaitFor)
-
   if (!jobsToWaitFor.length) {
     console.log('No more jobs to wait for!')
 
     return Promise.resolve()
   }
+
+  timePassed += seconds(30)
+  console.log('%d passed....still waiting for %o', timePassed, jobsToWaitFor)
 
   return Promise.reject(new Error('Jobs have not finished'))
 }
@@ -181,6 +182,7 @@ const main = () => {
 
   debug('received circle jobs: %o', jobNames)
 
+  const timePassed = minutes(3)
   // finished, has one failed job
   // const workflowId = '566ffe9a-62d4-45cd-9a27-9882139e0121'
   // pending workflow
@@ -190,15 +192,19 @@ const main = () => {
   // getWorkflowJobs(workflowId).then(console.log, console.error)
 
   // https://github.com/demmer/bluebird-retry
-  retry(waitForAllJobs.bind(null, jobNames, workflowId), {
-    timeout: minutes(30), // max time for this job
-    interval: seconds(30), // poll intervals
-    max_interval: seconds(30),
-  }).then(() => {
-    console.log('all done')
-  }, (err) => {
-    console.error(err)
-    process.exit(1)
+  Promise
+  .delay(minutes(3)) // wait three minutes before polling
+  .then(() => {
+    return retry(waitForAllJobs.bind(null, timePassed, jobNames, workflowId), {
+      timeout: minutes(30), // max time for this job
+      interval: seconds(30), // poll intervals
+      max_interval: seconds(30),
+    }).then(() => {
+      console.log('all done')
+    }, (err) => {
+      console.error(err)
+      process.exit(1)
+    })
   })
 
   // getJobStatus(workflowId).then(console.log, console.error)
