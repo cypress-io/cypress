@@ -557,7 +557,7 @@ commands:
           working_directory: /tmp/<<parameters.repo>>
           # force installing the freshly built binary
           command: |
-            CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i ~/cypress/cypress.tgz && [[ -f yarn.lock ]] && yarn
+            CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i --legacy-peer-deps ~/cypress/cypress.tgz && [[ -f yarn.lock ]] && yarn
       - run:
           name: Print Cypress version
           working_directory: /tmp/<<parameters.repo>>
@@ -687,7 +687,7 @@ commands:
               CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip yarn add -D ~/cypress/cypress.tgz
             else
               npm install
-              CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm install ~/cypress/cypress.tgz
+              CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm install --legacy-peer-deps ~/cypress/cypress.tgz
             fi
           working_directory: /tmp/<<parameters.repo>>
       - run:
@@ -1807,7 +1807,7 @@ jobs:
           name: Install Cypress
           working_directory: /tmp/cypress-test-tiny
           # force installing the freshly built binary
-          command: CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i ~/cypress/cypress.tgz
+          command: CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i --legacy-peer-deps ~/cypress/cypress.tgz
       - run:
           name: Run test project
           working_directory: /tmp/cypress-test-tiny
