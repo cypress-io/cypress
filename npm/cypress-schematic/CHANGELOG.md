@@ -1,3 +1,10 @@
+# [@cypress/schematic-v1.6.0](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v1.5.3...@cypress/schematic-v1.6.0) (2021-11-10)
+
+
+### Features
+
+* **deps:** update dependency electron to v15 🌟 ([#18317](https://github.com/cypress-io/cypress/issues/18317)) ([3095d73](https://github.com/cypress-io/cypress/commit/3095d733e92527ffd67344c6899211e058ceefa3))
+
 # [@cypress/schematic-v1.5.3](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v1.5.2...@cypress/schematic-v1.5.3) (2021-10-29)
 
 
