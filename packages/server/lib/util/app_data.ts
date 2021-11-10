@@ -1,15 +1,16 @@
-const os = require('os')
-const path = require('path')
-const ospath = require('ospath')
-const Promise = require('bluebird')
-const la = require('lazy-ass')
-const check = require('check-more-types')
+import os from 'os'
+import path from 'path'
+import ospath from 'ospath'
+import Bluebird from 'bluebird'
+import la from 'lazy-ass'
+import check from 'check-more-types'
+import { fs } from '../util/fs'
+import cwd from '../cwd'
+import md5 from 'md5'
+import sanitize from 'sanitize-filename'
+
 const log = require('debug')('cypress:server:appdata')
 const pkg = require('@packages/root')
-const { fs } = require('../util/fs')
-const cwd = require('../cwd')
-const md5 = require('md5')
-const sanitize = require('sanitize-filename')
 
 const PRODUCT_NAME = pkg.productName || pkg.name
 const OS_DATA_PATH = ospath.data()
@@ -32,7 +33,7 @@ const isProduction = () => {
   return process.env.CYPRESS_INTERNAL_ENV === 'production'
 }
 
-const toHashName = (projectRoot) => {
+const toHashName = (projectRoot: string) => {
   if (!projectRoot) {
     throw new Error('Missing project path')
   }
@@ -47,7 +48,7 @@ const toHashName = (projectRoot) => {
   return `${name}-${hash}`
 }
 
-module.exports = {
+export = {
   toHashName,
 
   getBundledFilePath (projectRoot, filePath) {
@@ -58,16 +59,16 @@ module.exports = {
     const ensure = () => {
       return this.removeSymlink()
       .then(() => {
-        return Promise.join(
+        return Bluebird.all([
           fs.ensureDirAsync(this.path()),
           !isProduction() ? this.symlink() : undefined,
-        )
+        ])
       })
     }
 
     // try twice to ensure the dir
     return ensure()
-    .tapCatch(() => Promise.delay(100))
+    .tapCatch(() => Bluebird.delay(100))
     .catch(ensure)
   },
 
@@ -78,6 +79,7 @@ module.exports = {
     log('symlink folder from %s to %s', src, dest)
     const symlinkType = getSymlinkType()
 
+    // @ts-ignore - based on code, should be valid... 'junction' for windows is not in the types
     return fs.ensureSymlinkAsync(src, dest, symlinkType)
   },
 
@@ -92,7 +94,11 @@ module.exports = {
       'expected CYPRESS_INTERNAL_ENV, found', env.CYPRESS_INTERNAL_ENV)
 
     // allow overriding the app_data folder
-    let folder = env.CYPRESS_KONFIG_ENV || env.CYPRESS_INTERNAL_ENV
+    let folder = env.CYPRESS_KONFIG_ENV || env.CYPRESS_INTERNAL_ENV!
+
+    if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF === 'true') {
+      folder = `${folder}-e2e-test`
+    }
 
     const p = path.join(ELECTRON_APP_DATA_PATH, 'cy', folder, ...paths)
 
@@ -110,10 +116,10 @@ module.exports = {
   },
 
   remove () {
-    return Promise.join(
+    return Bluebird.all([
       fs.removeAsync(this.path()),
       this.removeSymlink(),
-    )
+    ])
   },
 
 }
