@@ -170,7 +170,7 @@ const init = (config, options, ctx) => {
 
       killPluginsProcess()
 
-      err = errors.get('PLUGINS_UNEXPECTED_ERROR', config.pluginsFile, err.annotated || err.stack || err.message)
+      err = errors.get('PLUGINS_UNEXPECTED_ERROR', config.testingType, config.configFile, err.annotated || err.stack || err.message)
       err.title = 'Error running plugin'
 
       // this can sometimes trigger before the promise is fulfilled and

@@ -599,7 +599,7 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
 
       return { msg, details: arg2 }
     case 'PLUGINS_UNEXPECTED_ERROR':
-      msg = `The following error was thrown by a plugin. We stopped running your tests because a plugin crashed. Please check your plugins file (\`${arg1}\`)`
+      msg = `The following error was thrown by a plugin. We stopped running your tests because a plugin crashed. Please check your setupNodeEvents method for (\`${arg1}\`) on file (\`${arg2}\`)`
 
       return { msg, details: arg2 }
     case 'PLUGINS_VALIDATION_ERROR':
