@@ -205,11 +205,10 @@ import TopNavListItem from './TopNavListItem.vue'
 import TopNavList from './TopNavList.vue'
 import PromptContent from './PromptContent.vue'
 import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
-import { getTimeAgo } from '@packages/frontend-shared/src/utils/time'
 import { gql, useMutation } from '@urql/vue'
 import { TopNavFragment, TopNav_LaunchOpenProjectDocument, TopNav_SetBrowserDocument } from '../../generated/graphql'
 import { useI18n } from '@cy/i18n'
-import { computed, FunctionalComponent, h, ref } from 'vue'
+import { computed, ref } from 'vue'
 // eslint-disable-next-line no-duplicate-imports
 import type { Ref } from 'vue'
 const { t } = useI18n()
@@ -217,19 +216,6 @@ import { onClickOutside, onKeyStroke, useTimeAgo } from '@vueuse/core'
 import DocsMenuContent from './DocsMenuContent.vue'
 import ExternalLink from '../ExternalLink.vue'
 import Button from '../../components/Button.vue'
-
-type TailwindNum = '50' | '100' | '200' | '300' | '400' | '500' | '600' | '700' | '800' | '900'
-
-const Badge: FunctionalComponent<{
-  color: 'yellow' | 'blue' | 'jade',
-  bg: TailwindNum
-  text: TailwindNum
-}> = (props, ctx) => {
-  return (
-    h('span', { class: `rounded-md bg-${props.color}-${props.bg}` },
-      [h('span', { class: `font-semibold text-amber-800 px-5px` }, ctx.slots)])
-  )
-}
 
 const releasesUrl = 'https://github.com/cypress-io/cypress/releases/'
 
