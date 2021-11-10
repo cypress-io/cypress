@@ -15,7 +15,7 @@ export default defineConfig({
         return startDevServer({
           options,
           viteConfig: {
-            configFile: path.resolve(__dirname, '..', 'vite.config.ts'),
+            configFile: path.resolve(__dirname, 'vite.config.ts'),
           },
         })
       })
