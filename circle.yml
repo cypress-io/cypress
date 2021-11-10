@@ -265,18 +265,27 @@ commands:
   install-required-node:
     # https://discuss.circleci.com/t/switch-nodejs-version-on-machine-executor-solved/26675/2
     description: Install Node version matching .node-version
+    parameters:
+      version:
+        type: string
+        default: ""
     steps:
       - run:
           name: Install NVM
           command: |
-            echo "Installing Node $NODE_VERSION"
-            curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.35.3/install.sh | bash
-            export NODE_VERSION=$(cat .node-version)
+            node_version=<<parameters.version>>
+            node_version=${node_version:-$(cat .node-version)}
+            echo "Installing Node $node_version"
+            curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.30.0/install.sh | bash
+            echo "
+              export NVM_DIR='$HOME/.nvm'
+              [ -s '$NVM_DIR/nvm.sh' ] && \. '$NVM_DIR/nvm.sh' # load nvm
+              export NODE_VERSION=${node_version}
+            " > .bashrc
       - run:
           # https://github.com/nvm-sh/nvm#nvmrc
           name: Install Node
           command: |
-            . ./scripts/load-nvm.sh
             echo "before nvm install"
             nvm install
             echo "before nvm use"
