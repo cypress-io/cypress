@@ -2357,7 +2357,12 @@ windows-workflow: &windows-workflow
   jobs:
     - node_modules_install:
       name: windows-node-modules-install
-        <<: &windowsExecutor
+      executor:
+        name: win/default
+        size: small
+        shell: bash.exe
+        environment:
+          PLATFORM: windows
       arch: win32
 
     # - build:
