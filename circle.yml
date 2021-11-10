@@ -86,12 +86,18 @@ executors:
       PLATFORM: mac
   
   # windows:
-  #   windows: win/default
-  #   shell: bash.exe
-  #   # by default, we use "small" to save on CI costs. bump on a per-job basis if needed.
-  #   resource_class: small
-  #   environment:
-  #     PLATFORM: windows
+  #   machine:  
+  #     image: windows-server-2019-vs2019:stable
+  #     resource_class: windows.small
+  #     shell: bash.exe
+  
+  windows:
+    windows: win/default
+    shell: bash.exe
+    # by default, we use "small" to save on CI costs. bump on a per-job basis if needed.
+    resource_class: small
+    environment:
+      PLATFORM: windows
 
 commands:
   restore_workspace_binaries:
@@ -2357,15 +2363,16 @@ windows-workflow: &windows-workflow
   jobs:
     - node_modules_install:
       name: windows-node-modules-install
-      executor:
-        name: windows/default
-        size: medium
-        shell: bash.exe
+      executor: windows
+      arch: win32
+
+        # name: windows/default
+        # size: medium
+        # shell: bash.exe
 
         # size: small
         # environment:
         #   PLATFORM: windows
-      arch: win32
 
     # - build:
     #     name: windows-build
