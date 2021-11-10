@@ -934,10 +934,7 @@ jobs:
     resource_class: medium+
     shell: /bin/bash --login
     steps:
-      - run: 
-          name: check workspace
-          command: ls -a; ls -a cypress
-      - unpack-dependencies
+      - restore_cached_workspace
       - run:
           name: Top level packages
           command: yarn list --depth=0 || true
