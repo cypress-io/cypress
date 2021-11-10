@@ -18,9 +18,13 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
     .should('be.visible')
   }),
 
-  it('renders without browser menu by default and other items work', () => {
+  it.only('renders without browser menu by default and other items work', () => {
     cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
-      render: (gqlVal) => <div class="resize overflow-auto border-current border-1 h-700px"><HeaderBarContent gql={gqlVal} /></div>,
+      render: (gqlVal) => (
+        <div class="resize overflow-auto border-current border-1 h-700px">
+          <HeaderBarContent gql={gqlVal} />
+        </div>
+      )
     })
 
     cy.contains('Projects').should('be.visible')

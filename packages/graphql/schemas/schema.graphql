@@ -622,7 +622,7 @@ type Query {
   projects: [ProjectLike!]!
 
   """Previous versions of cypress and their release date"""
-  versions(count: Int): [Version!]!
+  versions: VersionData!
 
   """Metadata about the wizard, null if we arent showing the wizard"""
   wizard: Wizard!
@@ -731,6 +731,15 @@ type Version {
 
   """Version number (follows semantic versioning)"""
   version: String!
+}
+
+"""Version of Cypress and release date"""
+type VersionData {
+  """current version of cypress you are using"""
+  current: Version!
+
+  """latest version of cypress"""
+  latest: Version!
 }
 
 """

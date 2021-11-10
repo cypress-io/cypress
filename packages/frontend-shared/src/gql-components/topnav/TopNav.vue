@@ -5,27 +5,21 @@
         class="group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50 h-16px w-16px"
         :class="open ? 'icon-dark-indigo-500 icon-light-indigo-50' : 'icon-dark-gray-500 icon-light-gray-100'"
       />
-      <span data-cy="topnav-version-list">v{{ props.gql.versions[0].version }}</span>
+      <span data-cy="topnav-version-list">v{{ props.gql.versions.current.version }}</span>
     </template>
     <TopNavListItem
-      v-for="(item, index) in props.gql.versions"
-      :key="item.version"
-      :selectable="!!index"
       class="px-16px py-8px min-w-240px"
-      :class="index ? '' : 'bg-jade-50'"
     >
       <div class="whitespace-nowrap">
         <a
-          :href="`${releasesUrl}/tag/v${item.version}`"
-          :class="index ? '' : 'text-jade-600'"
-          class="font-semibold"
+          :href="`${releasesUrl}/tag/v${props.gql.versions.current}`"
+          s="font-semibold"
           target="_blank"
-        >{{ item.version }}</a>
+        >{{ props.gql.versions.current.version }}</a>
         <br>
-        <span class="text-gray-600 text-14px">{{ t('topNav.released') }} {{ timeAgoInWords(item.released) }}</span>
+        <span class="text-gray-600 text-14px">{{ t('topNav.released') }} {{ timeAgoInWords(props.gql.versions.current.released) }}</span>
       </div>
       <template
-        v-if="!index"
         #suffix
       >
         <i-cy-circle-check_x24 class="icon-dark-jade-100 icon-light-jade-500 w-24px h-24px" />
@@ -163,9 +157,16 @@ const releasesUrl = 'https://github.com/cypress-io/cypress/releases/'
 gql`
 fragment TopNav on Query {
   versions {
-    id
-    version
-    released
+    current {
+      id
+      version
+      released
+    }
+    latest {
+      id
+      version
+      released
+    }
   }
 
   currentProject {

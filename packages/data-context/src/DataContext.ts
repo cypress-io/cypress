@@ -141,8 +141,8 @@ export class DataContext extends DataContextShell {
     return new GitDataSource(this)
   }
 
-  versions (count?: number) {
-    return new VersionsDataSource().versions(count)
+  async versions () {
+    return new VersionsDataSource().versions()
   }
 
   @cached
