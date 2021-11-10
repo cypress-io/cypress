@@ -2356,9 +2356,9 @@ windowsExecutor: &windowsExecutor
 windows-workflow: &windows-workflow
   jobs:
     - node_modules_install:
-        name: windows-node-modules-install
-         <<: &windowsExecutor
-        arch: win32
+      name: windows-node-modules-install
+        <<: &windowsExecutor
+      arch: win32
 
     # - build:
     #     name: windows-build
