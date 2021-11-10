@@ -6,7 +6,7 @@ const minimist = require('minimist')
 const crypto = require('crypto')
 const fs = require('fs')
 const stringify = require('fast-json-stable-stringify')
-const rootPackageJson = require('../package.json')
+const rootPackageJson = require('../../package.json')
 
 const opts = minimist(process.argv.slice(2))
 
@@ -21,7 +21,7 @@ async function circleCache () {
   }
 }
 
-const BASE_DIR = path.join(__dirname, '..')
+const BASE_DIR = path.join(__dirname, '..', '..')
 const CACHE_DIR = path.join(BASE_DIR, 'globbed_node_modules')
 const p = (str) => path.join(BASE_DIR, str)
 
