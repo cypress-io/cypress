@@ -2364,21 +2364,21 @@ mac-workflow: &mac-workflow
 windows-workflow: &windows-workflow
   jobs:
     - windows_node_modules_install:
-      executor:
-        name: win/default
-        shell: bash.exe --login
-      steps:
-        - checkout
-        - persist_to_workspace:
-            root: ~/
-            paths:
-              - cypress
-        - install-required-node
-        - verify-build-setup
-        - caching-dependency-installer:
-            arch: win32
-            is-mac: false
-        - store-npm-logs
+        executor:
+          name: win/default
+          shell: bash.exe --login
+        steps:
+          - checkout
+          - persist_to_workspace:
+              root: ~/
+              paths:
+                - cypress
+          - install-required-node
+          - verify-build-setup
+          - caching-dependency-installer:
+              arch: win32
+              is-mac: false
+          - store-npm-logs
 
     # - node_modules_install:
     #     name: windows-node-modules-install
