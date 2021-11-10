@@ -4,6 +4,7 @@
     style="width: fit-content"
     class="flex items-center leading-tight border rounded gap-8px outline-none"
     :class="classes"
+    :disabled="disabled"
   >
     <ButtonInternals>
       <template
@@ -119,6 +120,7 @@ const props = defineProps<{
   suffixIconClass?: string
   href?: string // will cause the button to render as link element with button styles
   internalLink?: boolean
+  disabled?: boolean
 }>()
 
 const attrs = useAttrs() as ButtonHTMLAttributes
@@ -133,7 +135,7 @@ const classes = computed(() => {
     variantClasses.value,
     sizeClasses.value,
     attrs.class,
-    (attrs.disabled && props.variant !== 'pending') ? 'opacity-50' : '',
+    (props.disabled && props.variant !== 'pending') ? 'opacity-50' : '',
   ]
 })
 </script>
