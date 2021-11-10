@@ -55,8 +55,8 @@ windowsBuildFilters: &windowsBuildFilters
 # executor to run on Windows
 # https://circleci.com/docs/2.0/executor-types/#using-the-windows-executor
 # https://circleci.com/docs/2.0/hello-world-windows/#software-pre-installed-in-the-windows-image
-orbs:
-  win: circleci/windows@2.4.1
+# orbs:
+#   win: circleci/windows@2.4.1
 
 executors:
   # the Docker image with Cypress dependencies and Chrome browser
@@ -86,13 +86,13 @@ executors:
     environment:
       PLATFORM: mac
   
-  windows:
-    name: win/default
-    shell: bash.exe
-    # by default, we use "small" to save on CI costs. bump on a per-job basis if needed.
-    resource_class: small
-    environment:
-      PLATFORM: win32
+  # windows:
+  #   name: win/default
+  #   shell: bash.exe
+  #   # by default, we use "small" to save on CI costs. bump on a per-job basis if needed.
+  #   resource_class: small
+  #   environment:
+  #     PLATFORM: win32
 
 commands:
   restore_workspace_binaries:
@@ -309,7 +309,7 @@ commands:
           name: Install Node
           command: |
             cat ~/.bashrc
-            # . ~/.bashrc
+            # . ~/.bcashrc
             echo "before nvm install"
             nvm install
             echo "before nvm use"
