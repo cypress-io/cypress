@@ -2362,9 +2362,9 @@ mac-workflow: &mac-workflow
 windows-workflow: &windows-workflow
   jobs:
     - node_modules_install:
-      name: windows-node-modules-install
-      executor: windows
-      arch: win32
+        name: windows-node-modules-install
+        executor: windows
+        arch: win32
 
         # name: windows/default
         # size: medium
