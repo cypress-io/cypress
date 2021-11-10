@@ -94,7 +94,7 @@ The task handler was:
 'returns:undefined' () {}
 
 Fix this in your setupNodeEvents method here:
-/foo/bar/.projects/e2e/cypress.config..js
+/foo/bar/.projects/e2e/cypress.config.js
 
 https://on.cypress.io/api/task
       [stack trace lines]

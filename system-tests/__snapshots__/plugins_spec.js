@@ -346,7 +346,7 @@ exports['e2e plugins calls after:screenshot for cy.screenshot() and failure scre
 `
 
 exports['e2e plugins catches invalid viewportWidth returned from plugins 1'] = `
-An invalid configuration value returned from the setupNodeEvents on config file:: \`cypress.config.js\`
+An invalid configuration value returned from the setupNodeEvents on config file: \`cypress.config.js\`
 
 Expected \`viewportWidth\` to be a number. Instead the value was: \`"foo"\`
 

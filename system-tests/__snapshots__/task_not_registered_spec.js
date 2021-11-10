@@ -54,7 +54,7 @@ https://on.cypress.io/api/task
   (Screenshots)
 
   -  /XXX/XXX/XXX/cypress/screenshots/task_not_registered_spec.js/fails because the t          (YxX)
-     ask event is not registered in setupNodeEvents method (failed).png                                       
+     ask event is not registered in setupNodeEvents method (failed).png                             
 
 
   (Video)
