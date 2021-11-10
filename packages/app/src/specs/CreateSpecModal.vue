@@ -22,6 +22,7 @@
         v-model:title="title"
         :code-gen-glob="props.gql.currentProject?.codeGenGlob"
         @restart="currentGeneratorId = undefined"
+        @close="$emit('close')"
       />
       <div
         v-else

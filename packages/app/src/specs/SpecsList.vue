@@ -58,7 +58,7 @@ fragment Specs_SpecsList on Query {
   currentProject {
     id
     projectRoot
-    specs: specs(first: 100) {
+    specs: specs(first: 1000) {
       edges {
         ...SpecNode_SpecsList
       }

@@ -6,12 +6,12 @@
     <p class="mb-6 text-lg font-light text-body-gray">
       {{ t('globalPage.empty.helper') }}
     </p>
-    <FileDropzone @addProject="emit('addProject', $event)" />
+    <GlobalDropzone @addProject="emit('addProject', $event)" />
   </main>
 </template>
 
 <script lang="ts" setup>
-import FileDropzone from './FileDropzone.vue'
+import GlobalDropzone from './GlobalDropzone.vue'
 import { useI18n } from '@cy/i18n'
 
 const { t } = useI18n()

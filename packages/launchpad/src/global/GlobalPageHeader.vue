@@ -34,7 +34,7 @@
     </Button>
   </div>
 
-  <FileDropzone
+  <GlobalDropzone
     v-if="showDropzone"
     id="dropzone"
     data-testid="dropzone"
@@ -57,7 +57,7 @@
 import { ref } from 'vue'
 import Button from '@cy/components/Button.vue'
 import Input from '@cy/components/Input.vue'
-import FileDropzone from './FileDropzone.vue'
+import GlobalDropzone from './GlobalDropzone.vue'
 import { useModelWrapper } from '@packages/frontend-shared/src/composables'
 import { useI18n } from '@cy/i18n'
 import NoResults from '@cy/components/NoResults.vue'

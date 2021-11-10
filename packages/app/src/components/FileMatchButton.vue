@@ -4,6 +4,7 @@
     class="inline-flex items-center h-full text-gray-700 transition duration-150 rounded-l outline-none group bg-gray-50 border-r-gray-100 border-r-1 hocus:bg-indigo-50 hocus:border-r-indigo-300 hocus:text-indigo-500 px-12px"
   >
     <i-cy-chevron-right-small_x16
+      v-if="chevron"
       class="transition duration-150 transform min-w-16px min-h-16px icon-dark-gray-400 group-hocus:icon-dark-indigo-400"
       :class="{
         'rotate-90': expanded
@@ -15,6 +16,10 @@
 
 <script lang="ts" setup>
 withDefaults(defineProps<{
-  expanded: boolean
-}>(), { expanded: false })
+  expanded?: boolean
+  chevron?: boolean
+}>(), {
+  expanded: false,
+  chevron: true,
+})
 </script>

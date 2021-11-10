@@ -2,8 +2,8 @@
   <button
     v-if="!href"
     style="width: fit-content"
-    class="flex items-center leading-tight border rounded gap-8px outline-none"
-    :class="classes"
+    class="flex items-center disabled:hover:border-transparent disabled:hover:border-1 disabled:cursor-default leading-tight border rounded gap-8px outline-none"
+    :class="[classes, { 'max-h-40px min-h-40px': size === 'lg' }]"
   >
     <ButtonInternals>
       <template
@@ -104,7 +104,7 @@ export type ButtonVariants = keyof(typeof VariantClassesTable)
 const SizeClassesTable = {
   sm: 'px-6px py-2px text-14px h-24px',
   md: 'px-12px py-8px text-14px h-32px',
-  lg: 'px-16px py-11px max-h-40px',
+  lg: 'px-16px py-11px',
   'lg-wide': 'px-32px py-8px',
 } as const
 

@@ -1,29 +1,29 @@
 <!--
 /**==============================================
- * *             FileMatch.vue
- * Complex component to search and edit multiple
- * text filters at once
- * ==============================================
- * *           Collapsed (default)
- *
- * ? The user is searching by filePattern only as is
- * ? able to see the extensionPattern
- *
- * ? [[v extensionPattern][filePattern][matches]]
- *
- *
- * ----------------------------------------------
- * *               Expanded
- *
- * ? The user has two inputs and can edit filePattern
- * ? and extensionPattern independently.
- *
- * ? 1. The input is bound to extensionPattern.
- * ? 2. The bottom input is bound to the filePattern.
- *
- * ? [[v][extensionPattern][matches]]
- * ? [filePattern                   ]
- * ============================================**/
+* *             FileMatch.vue
+* Complex component to search and edit multiple
+* text filters at once
+* ==============================================
+* *           Collapsed (default)
+*
+* ? The user is searching by filePattern only as is
+* ? able to see the extensionPattern
+*
+* ? [[v extensionPattern][filePattern][matches]]
+*
+*
+* ----------------------------------------------
+* *               Expanded
+*
+* ? The user has two inputs and can edit filePattern
+* ? and extensionPattern independently.
+*
+* ? 1. The input is bound to extensionPattern.
+* ? 2. The bottom input is bound to the filePattern.
+*
+* ? [[v][extensionPattern][matches]]
+* ? [filePattern                   ]
+* ============================================**/
 -->
 
 <template>
@@ -91,19 +91,19 @@ import { useToggle, useVModels } from '@vueuse/core'
 const { t } = useI18n()
 
 type Matches = {
-  total: number
-  found: number
+total: number
+found: number
 }
 
 const props = defineProps<{
-  extensionPattern: string,
-  pattern: string
-  matches: Matches
+extensionPattern: string,
+pattern: string
+matches: Matches
 }>()
 
 const emits = defineEmits<{
-  (eventName: 'update:extensionPattern', value: string): void
-  (eventName: 'update:pattern', value: string): void
+(eventName: 'update:extensionPattern', value: string): void
+(eventName: 'update:pattern', value: string): void
 }>()
 
 const { extensionPattern: localExtensionPattern, pattern: localPattern } = useVModels(props, emits)
@@ -115,8 +115,8 @@ const indicatorText = computed(() => {
   const denominator = props.matches.total
 
   if (localPattern.value) {
-    // When the user has attempted to search anything
-    // "No Matches | 1 Match | { denominator } Matches"
+  // When the user has attempted to search anything
+  // "No Matches | 1 Match | { denominator } Matches"
     return t('components.fileSearch.matchesIndicator', { count: numerator, denominator, numerator })
   }
 

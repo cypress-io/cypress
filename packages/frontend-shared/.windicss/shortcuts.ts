@@ -6,7 +6,7 @@
  * outline with that, do border-transparent for the non-hocus state.
  */
 
-const focusDefault = 'outline-none focus:border focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100 focus:outline-transparent transition duration-150 disabled:hover:ring-0 disabled:hover:border-0'
+const focusDefault = 'outline-none focus:border focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100 focus:outline-transparent transition duration-150 disabled:hover:ring-0 disabled:hover:border-transparent disabled:hover:border-1 disabled:cursor-default'
 
 // Usually what you want
 const hocusDefault = focusDefault.replace(/focus:/g, 'hocus:')
