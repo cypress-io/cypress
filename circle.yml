@@ -181,9 +181,9 @@ commands:
         type: enum
         enum: ['linux', 'darwin']
     steps:
-        - run:
-          # Deps needed by circle-cache.js, before we "yarn" or unpack cached node_modules
-          name: Cache Helper Deps
+      - run:
+          # Dependencies needed by circle-cache.js, before we "yarn" or unpack cached node_modules
+          name: Cache Helper Dependencies
           working_directory: ~/
           command: npm i globby@11.0.4 fs-extra@10.0.0 minimist@1.2.5 fast-json-stable-stringify@2.1.0
       - run:
@@ -248,7 +248,12 @@ commands:
     steps:
       - run:
           name: Print working folder
-          command: echo $PWD
+          command: |
+          if [ "$PLATFORM"  = 'windows']; then
+            echo %cd%
+          else 
+            echo pwd
+          fi
       - run:
           name: print global yarn cache path
           command: echo $(yarn global bin)
@@ -262,7 +267,7 @@ commands:
       - run:
           name: check Node version
           command: |
-            yarn check-node-version
+            yarn ./scripts/circle-ci/check-node-version
 
       ## make sure the TERM is set to 'xterm' in node (Linux only)
       ## else colors (and tests) will fail
@@ -272,7 +277,7 @@ commands:
       - run:
           name: Check terminal
           command: |
-            yarn check-terminal
+            node ./scripts/circle-ci/check-terminal
       - run:
           name: Stop .only
           command: |
