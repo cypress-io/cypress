@@ -309,7 +309,7 @@ commands:
           name: Install Node
           command: |
             cat ~/.bashrc
-            . ~/.bcashrc
+            . ~/.bashrc
             echo "before nvm install ${NODE_VERSION}"
             nvm install
             echo "before nvm use"
