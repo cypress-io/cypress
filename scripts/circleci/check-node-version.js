@@ -47,7 +47,7 @@ const read = require('fs').readFileSync
 const join = require('path').join
 
 const nodeVersionNeededString = read(
-  join(__dirname, '..', '.node-version'),
+  join(__dirname, '..', '..', '.node-version'),
   'utf8',
 )
 const nodeVersionNeeded = nodeVersionNeededString.split('.')
