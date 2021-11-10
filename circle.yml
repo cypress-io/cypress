@@ -27,7 +27,7 @@ defaults: &defaults
     LINES: 24
 
 # filters and requires for testing binary with Firefox
-mainBranchFilters: &mainBranchFilters
+mainBuildFilters: &mainBuildFilters
   filters:
     branches:
       only:
@@ -269,10 +269,9 @@ commands:
       - run:
           name: Install NVM
           command: |
-            export NODE_VERSION=$(cat .node-version)
             echo "Installing Node $NODE_VERSION"
-            cp .node-version .nvmrc
-            curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.35.3/install.sh | bash --no-use
+            curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.35.3/install.sh | bash
+            export NODE_VERSION=$(cat .node-version)
       - run:
           # https://github.com/nvm-sh/nvm#nvmrc
           name: Install Node
@@ -2134,7 +2133,7 @@ linux-workflow: &linux-workflow
     # and testing it on a real project
     - test-against-staging:
         context: test-runner:record-tests
-        <<: *mainBranchFilters
+        <<: *mainBuildFilters
         requires:
           - build
     - test-kitchensink:
@@ -2142,7 +2141,7 @@ linux-workflow: &linux-workflow
           - build
     - test-kitchensink-against-staging:
         context: test-runner:record-tests
-        <<: *mainBranchFilters
+        <<: *mainBuildFilters
         requires:
           - build
     - create-build-artifacts:
@@ -2188,53 +2187,53 @@ linux-workflow: &linux-workflow
           - create-build-artifacts
     - test-binary-and-npm-against-other-projects:
         context: test-runner:trigger-test-jobs
-        <<: *mainBranchFilters
+        <<: *mainBuildFilters
         requires:
           - create-build-artifacts
     - test-npm-module-and-verify-binary:
-        <<: *mainBranchFilters
+        <<: *mainBuildFilters
         requires:
           - create-build-artifacts
     - test-binary-against-staging:
         context: test-runner:record-tests
-        <<: *mainBranchFilters
+        <<: *mainBuildFilters
         requires:
           - create-build-artifacts
 
     - test-binary-against-kitchensink-chrome:
-        <<: *mainBranchFilters
+        <<: *mainBuildFilters
         requires:
           - create-build-artifacts
     - test-binary-against-conduit-chrome:
-        <<: *mainBranchFilters
+        <<: *mainBuildFilters
         requires:
           - create-build-artifacts
     - test-binary-against-recipes-firefox:
-        <<: *mainBranchFilters
+        <<: *mainBuildFilters
         requires:
           - create-build-artifacts
     - test-binary-against-kitchensink-firefox:
-        <<: *mainBranchFilters
+        <<: *mainBuildFilters
         requires:
           - create-build-artifacts
     - test-binary-against-todomvc-firefox:
-        <<: *mainBranchFilters
+        <<: *mainBuildFilters
         requires:
           - create-build-artifacts
     - test-binary-against-documentation-firefox:
-        <<: *mainBranchFilters
+        <<: *mainBuildFilters
         requires:
           - create-build-artifacts
     - test-binary-against-api-testing-firefox:
-        <<: *mainBranchFilters
+        <<: *mainBuildFilters
         requires:
           - create-build-artifacts
     - test-binary-against-piechopper-firefox:
-        <<: *mainBranchFilters
+        <<: *mainBuildFilters
         requires:
           - create-build-artifacts
     - test-binary-against-cypress-realworld-app:
-        <<: *mainBranchFilters
+        <<: *mainBuildFilters
         requires:
           - create-build-artifacts
 
