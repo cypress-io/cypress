@@ -43,7 +43,6 @@ export async function e2ePluginSetup (projectRoot: string, on: Cypress.PluginEve
   interface WithCtxObj {
     fn: string
     options: WithCtxOptions
-    activeTestId: string
     // TODO(tim): add an API for intercepting this
     interceptCloudExecute: (config: CloudExecuteRemote) => {}
   }
@@ -121,19 +120,19 @@ export async function e2ePluginSetup (projectRoot: string, on: Cypress.PluginEve
         gqlPort,
       }
     },
-    remoteGraphQLIntercept (fn: string) {
+    __internal_remoteGraphQLIntercept (fn: string) {
       remoteGraphQLIntercept = new Function('console', 'obj', `return (${fn})(obj)`).bind(null, console) as RemoteGraphQLInterceptor
 
       return null
     },
-    async addProject (projectName: string) {
+    async __internal_addProject (projectName: string) {
       Fixtures.scaffoldProject(projectName)
 
       await ctx.actions.project.addProject({ path: Fixtures.projectPath(projectName) })
 
       return Fixtures.projectPath(projectName)
     },
-    async withCtx (obj: WithCtxObj) {
+    async __internal_withCtx (obj: WithCtxObj) {
       const options: WithCtxInjected = {
         ...obj.options,
         testState,

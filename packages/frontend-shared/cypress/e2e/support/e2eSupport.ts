@@ -87,7 +87,7 @@ beforeEach(() => {
 
 function addProject (projectName: ProjectFixture) {
   return logInternal({ name: 'addProject', message: projectName }, () => {
-    return cy.task('addProject', projectName, { log: false })
+    return cy.task('__internal_addProject', projectName, { log: false })
   })
 }
 
@@ -97,7 +97,7 @@ function openE2E (projectName?: ProjectFixture) {
   }
 
   if (projectName) {
-    cy.task('addProject', projectName, { log: false })
+    cy.task('__internal_addProject', projectName, { log: false })
   }
 
   return cy.withCtx(async (ctx, o) => {
@@ -165,29 +165,27 @@ function visitLaunchpad () {
   cy.visit(`dist-launchpad/index.html?gqlPort=${e2e_gqlPort}`)
 }
 
-const pageLoadId = `uid${Math.random()}`
-
 type UnwrapPromise<R> = R extends PromiseLike<infer U> ? U : R
 
 function withCtx<T extends Partial<WithCtxOptions>, R> (fn: (ctx: DataContext, o: T & WithCtxInjected) => R, opts: T = {} as T): Cypress.Chainable<UnwrapPromise<R>> {
-  const _log = opts.log === false ? { end () {} } : Cypress.log({
+  const { log, timeout, ...rest } = opts
+
+  const _log = log === false ? { end () {} } : Cypress.log({
     name: 'withCtx',
     message: '(view in console)',
     consoleProps () {
       return {
         'Executed': fn.toString(),
+        timeout,
+        options: rest,
       }
     },
   })
 
-  const { log, timeout, ...rest } = opts
-
-  return cy.task<UnwrapPromise<R>>('withCtx', {
+  return cy.task<UnwrapPromise<R>>('__internal_withCtx', {
     fn: fn.toString(),
     options: rest,
-    // @ts-expect-error
-    activeTestId: `${pageLoadId}-${Cypress.mocha.getRunner().test.id ?? Cypress.currentTest.title}`,
-  }, { timeout: timeout ?? Cypress.env('e2e_isDebugging') ? NO_TIMEOUT : FOUR_SECONDS, log }).then((result) => {
+  }, { timeout: timeout ?? Cypress.env('e2e_isDebugging') ? NO_TIMEOUT : FOUR_SECONDS, log: false }).then((result) => {
     _log.end()
 
     return result
@@ -209,7 +207,7 @@ function loginUser (userShape: Partial<AuthenticatedUserShape> = {}) {
 
 function remoteGraphQLIntercept (fn: RemoteGraphQLInterceptor) {
   return logInternal('remoteGraphQLIntercept', () => {
-    return cy.task<null>('remoteGraphQLIntercept', fn.toString(), { log: false })
+    return cy.task<null>('__internal_remoteGraphQLIntercept', fn.toString(), { log: false })
   })
 }
 
