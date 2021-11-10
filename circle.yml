@@ -169,7 +169,7 @@ commands:
             fi
       - run:
           name: Restore all node_modules to proper workspace folders
-          command: node scripts/circle-cache.js --action unpack
+          command: node scripts/circleci/circle-cache.js --action unpack
 
   caching-dependency-installer:
     description: 'Installs & caches the dependencies based on yarn lock & package json dependencies'
@@ -1808,7 +1808,7 @@ jobs:
           command: npx cypress run
 
   # install NPM + binary zip and run against staging API
-  "test-binary-against-staging":
+  test-binary-against-staging:
     <<: *defaults
     steps:
       - restore_workspace_binaries
@@ -1829,7 +1829,7 @@ jobs:
             $(yarn bin)/cypress run --record
       - store-npm-logs
 
-  "test-binary-against-recipes-firefox":
+  test-binary-against-recipes-firefox:
     <<: *defaults
     steps:
       - test-binary-against-repo:
@@ -1857,7 +1857,7 @@ jobs:
   #         pull_request_id: 515
   #         folder: examples/fundamentals__typescript
 
-  "test-binary-against-kitchensink":
+  test-binary-against-kitchensink:
     <<: *defaults
     resource_class: medium
     steps:
@@ -1872,7 +1872,7 @@ jobs:
           repo: cypress-test-awesome-typescript-loader
           browser: "electron"
 
-  "test-binary-against-kitchensink-firefox":
+  test-binary-against-kitchensink-firefox:
     <<: *defaults
     resource_class: medium
     steps:
@@ -1880,7 +1880,7 @@ jobs:
           repo: cypress-example-kitchensink
           browser: firefox
 
-  "test-binary-against-kitchensink-chrome":
+  test-binary-against-kitchensink-chrome:
     <<: *defaults
     resource_class: medium
     steps:
@@ -1888,7 +1888,7 @@ jobs:
           repo: cypress-example-kitchensink
           browser: chrome
 
-  "test-binary-against-todomvc-firefox":
+  test-binary-against-todomvc-firefox:
     <<: *defaults
     resource_class: medium
     steps:
@@ -1896,7 +1896,7 @@ jobs:
           repo: cypress-example-todomvc
           browser: firefox
 
-  "test-binary-against-documentation-firefox":
+  test-binary-against-documentation-firefox:
     <<: *defaults
     resource_class: medium
     steps:
@@ -1907,7 +1907,7 @@ jobs:
           wait-on: http://localhost:3000
           server-start-command: yarn serve:dist
 
-  "test-binary-against-conduit-chrome":
+  test-binary-against-conduit-chrome:
     <<: *defaults
     resource_class: medium
     steps:
@@ -1916,7 +1916,7 @@ jobs:
           browser: chrome
           command: "npm run cypress:run"
 
-  "test-binary-against-api-testing-firefox":
+  test-binary-against-api-testing-firefox:
     <<: *defaults
     steps:
       - test-binary-against-repo:
@@ -1924,7 +1924,7 @@ jobs:
           browser: firefox
           command: "npm run cy:run"
 
-  "test-binary-against-piechopper-firefox":
+  test-binary-against-piechopper-firefox:
     <<: *defaults
     resource_class: medium
     steps:
@@ -1933,7 +1933,7 @@ jobs:
           browser: firefox
           command: "npm run cypress:run"
 
-  "test-binary-against-cypress-realworld-app":
+  test-binary-against-cypress-realworld-app:
     <<: *defaults
     resource_class: medium+
     steps:
