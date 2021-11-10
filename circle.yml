@@ -1905,6 +1905,7 @@ jobs:
           repo: cypress-example-conduit-app
           browser: chrome
           command: "npm run cypress:run"
+          wait-on: http://localhost:3000
 
   "test-binary-against-api-testing-firefox":
     <<: *defaults
