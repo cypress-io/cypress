@@ -32,11 +32,6 @@ export interface ConfigChildProcessShape {
    * Config from the initial module.exports
    */
   resolvedBaseConfig: Promise<Cypress.ConfigOptions>
-  /**
-   * Config after executing the plugins for the appropriate run mode,
-   * undefined until the testing mode has executed
-   */
-  resolvedFullConfig?: Promise<FullConfig>
 }
 
 export interface ActiveProjectShape extends ProjectShape {

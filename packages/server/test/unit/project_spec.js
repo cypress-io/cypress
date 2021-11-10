@@ -948,7 +948,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       .resolves({ projectId: 'id-123' })
     })
 
-    it('calls Settings.write with projectRoot and attrs', function () {
+    it('calls Settings.writeOnly with projectRoot and attrs', function () {
       return writeProjectId({ id: 'id-123' }).then((id) => {
         expect(id).to.eq('id-123')
       })
@@ -1039,7 +1039,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
     it('calls writeProjectId with id', function () {
       return createCiProject({ foo: 'bar', projectRoot, configFile }).then(() => {
-        expect(settings.write).to.be.calledWith(projectRoot, { projectId: 'project-id-123' }, { configFile })
+        expect(settings.writeOnly).to.be.calledWith(projectRoot, { projectId: 'project-id-123' }, { configFile })
       })
     })
 

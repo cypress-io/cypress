@@ -71,14 +71,6 @@ export class ProjectConfigDataSource {
     throw this.ctx._apis.projectApi.error.throw('NO_DEFAULT_CONFIG_FILE_FOUND', projectRoot)
   }
 
-  async cleanupCachedConfigForActiveProject () {
-    if (!this.ctx.coreData.app.currentProject?.config) {
-      return
-    }
-
-    this.ctx.coreData.app.currentProject.config = null
-  }
-
   protected async getConfigFilePath () {
     const projectRoot = this.ctx.currentProject?.projectRoot
 

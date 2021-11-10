@@ -63,9 +63,9 @@ function run (ipc, requiredFile, projectRoot) {
 
       ipc.on('plugins', (testingType) => {
         if (testingType === 'component') {
-          runPlugins(ipc, result.component?.setupNodeEvents, projectRoot)
+          runPlugins(ipc, result.component?.setupNodeEvents, projectRoot, requiredFile)
         } else if (testingType === 'e2e') {
-          runPlugins(ipc, result.e2e?.setupNodeEvents, projectRoot)
+          runPlugins(ipc, result.e2e?.setupNodeEvents, projectRoot, requiredFile)
         } else {
           // Notify the plugins init that there's no plugins to resolve
           ipc.send('empty:plugins')

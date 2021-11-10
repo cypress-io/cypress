@@ -28,14 +28,6 @@ export class ProjectConfigDataActions {
   }
 
   refreshProjectConfig (configFilePath: string) {
-    if (!this.ctx.currentProject) {
-      const projectRoot = path.dirname(configFilePath)
-
-      this.ctx.actions.project.setCurrentProjectProperties({
-        projectRoot,
-      })
-    }
-
     // The currentProject should be created now - this should not happen
     if (!this.ctx.currentProject) {
       throw new Error('Can\'t refresh project config without current project')

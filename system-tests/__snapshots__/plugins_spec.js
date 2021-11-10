@@ -119,14 +119,14 @@ exports['e2e plugins can modify config from plugins 1'] = `
 `
 
 exports['e2e plugins catches invalid browsers list returned from plugins 1'] = `
-An invalid configuration value from the setupNodeEvents on config file: \`cypress.config.js\`
+An invalid configuration value returned from the setupNodeEvents on config file: \`cypress.config.js\`
 
 Expected at least one browser
 
 `
 
 exports['e2e plugins catches invalid browser returned from plugins 1'] = `
-An invalid configuration value from the setupNodeEvents on config file: \`cypress.config.js\`
+An invalid configuration value returned from the setupNodeEvents on config file: \`cypress.config.js\`
 
 Found an error while validating the \`browsers\` list. Expected \`displayName\` to be a non-empty string. Instead the value was: \`{"name":"browser name","family":"chromium"}\`
 
@@ -346,7 +346,7 @@ exports['e2e plugins calls after:screenshot for cy.screenshot() and failure scre
 `
 
 exports['e2e plugins catches invalid viewportWidth returned from plugins 1'] = `
-An invalid configuration value returned from the plugins file: \`cypress/plugins/index.js\`
+An invalid configuration value returned from the setupNodeEvents on config file:: \`cypress.config.js\`
 
 Expected \`viewportWidth\` to be a number. Instead the value was: \`"foo"\`
 
@@ -424,7 +424,7 @@ It exported:
 `
 
 exports['e2e plugins fails when invalid event is registered 1'] = `
-The following validation error was thrown by your plugins file (\`/foo/bar/.projects/plugin-validation-error/cypress/plugins/index.js\`).
+The following validation error was thrown by your plugins file (\`/foo/bar/.projects/plugin-validation-error/cypress.config.js\`).
 
  Error: You must pass a valid event name when registering a plugin.
 

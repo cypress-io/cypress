@@ -4,7 +4,7 @@ const _ = require('lodash')
 const Jimp = require('jimp')
 const path = require('path')
 const Promise = require('bluebird')
-const { useFixedBrowserLaunchSize } = require('../../utils')
+const { useFixedBrowserLaunchSize } = require('../../../utils')
 
 /**
  * @type {Cypress.PluginConfig}

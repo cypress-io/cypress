@@ -1,4 +1,4 @@
-const plugin = require('./plugins')
+const plugin = require('./cypress/plugins')
 
 module.exports = {
   'retries': null,

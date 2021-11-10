@@ -183,7 +183,7 @@ describe('lib/util/settings', () => {
     context('.write', () => {
       it('promises cypress.config.js updates', function () {
         return this.setup().then(() => {
-          return settings.write(projectRoot, { foo: 'bar' }, defaultOptions)
+          return settings.writeOnly(projectRoot, { foo: 'bar' }, defaultOptions)
         }).then((obj) => {
           expect(obj).to.deep.eq({ foo: 'bar' })
         })
@@ -192,7 +192,7 @@ describe('lib/util/settings', () => {
       it('only writes over conflicting keys', function () {
         return this.setup({ projectId: '12345', autoOpen: true })
         .then(() => {
-          return settings.write(projectRoot, { projectId: 'abc123' }, defaultOptions)
+          return settings.writeOnly(projectRoot, { projectId: 'abc123' }, defaultOptions)
         }).then((obj) => {
           expect(obj).to.deep.eq({ projectId: 'abc123', autoOpen: true })
         })
@@ -210,7 +210,7 @@ describe('lib/util/settings', () => {
     })
 
     it('.write does not create a file', function () {
-      return settings.write(this.projectRoot, {}, this.options)
+      return settings.writeOnly(this.projectRoot, {}, this.options)
       .then(() => {
         return fs.access(path.join(this.projectRoot, 'cypress.config.js'))
         .then(() => {

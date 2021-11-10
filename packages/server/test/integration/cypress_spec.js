@@ -563,7 +563,7 @@ describe('lib/cypress', () => {
       }).then((json) => {
         json.fixturesFolder = false
 
-        return settings.write(this.idsPath, json)
+        return settings.writeOnly(this.idsPath, json)
       }).then(() => {
         return cypress.start([`--run-project=${this.idsPath}`])
       }).then(() => {
@@ -619,7 +619,7 @@ describe('lib/cypress', () => {
       }).then((json) => {
         json.reporter = 'dot'
 
-        return settings.write(this.idsPath, json)
+        return settings.writeOnly(this.idsPath, json)
       }).then(() => {
         return cypress.start([`--run-project=${this.idsPath}`])
       }).then(() => {
@@ -677,7 +677,7 @@ describe('lib/cypress', () => {
     })
 
     it('logs error when supportFile doesn\'t exist', function () {
-      return settings.write(this.idsPath, { supportFile: '/does/not/exist' })
+      return settings.writeOnly(this.idsPath, { supportFile: '/does/not/exist' })
       .then(() => {
         return cypress.start([`--run-project=${this.idsPath}`])
       }).then(() => {
@@ -783,7 +783,7 @@ describe('lib/cypress', () => {
     })
 
     it('logs error and exits when project has invalid cypress.config.js values', function () {
-      return settings.write(this.todosPath, { baseUrl: 'localhost:9999' })
+      return settings.writeOnly(this.todosPath, { baseUrl: 'localhost:9999' })
       .then(() => {
         return cypress.start([`--run-project=${this.todosPath}`])
       }).then(() => {
@@ -1697,7 +1697,7 @@ describe('lib/cypress', () => {
         // this should be overriden by the env argument
         json.baseUrl = 'http://localhost:8080'
 
-        return settings.write(this.todosPath, json)
+        return settings.writeOnly(this.todosPath, json)
       }).then(() => {
         return cypress.start([
           '--port=2121',

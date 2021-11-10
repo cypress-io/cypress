@@ -36,7 +36,7 @@ const getDefaultPreprocessor = function (config) {
 
 let plugins
 
-const load = (ipc, config) => {
+const load = (ipc, requiredFile, config) => {
   debug('run plugins function')
 
   let eventIdCount = 0
@@ -48,7 +48,7 @@ const load = (ipc, config) => {
     const { isValid, error } = validateEvent(event, handler, config)
 
     if (!isValid) {
-      ipc.send('load:error', 'PLUGINS_VALIDATION_ERROR', error.stack)
+      ipc.send('load:error:plugins', 'PLUGINS_VALIDATION_ERROR', requiredFile, error.stack)
 
       return
     }
@@ -137,7 +137,7 @@ const execute = (ipc, event, ids, args = []) => {
   }
 }
 
-const runPlugins = (ipc, _plugins, projectRoot) => {
+const runPlugins = (ipc, _plugins, projectRoot, requiredFile) => {
   // Set a default handler to successfully register `file:preprocessor`
   plugins = _plugins ?? ((on, config) => {})
 
@@ -148,7 +148,7 @@ const runPlugins = (ipc, _plugins, projectRoot) => {
 
   ipc.on('load:plugins', (config) => {
     debug('passing config %o', config)
-    load(ipc, config)
+    load(ipc, requiredFile, config)
   })
 
   ipc.on('execute:plugins', (event, ids, args) => {

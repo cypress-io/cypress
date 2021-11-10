@@ -126,7 +126,7 @@ const init = (config, options, ctx) => {
     })
 
     ipc.on('loaded:plugins', (newCfg, registrations) => {
-      _.omit(config, 'projectRoot', 'configFile')
+      newCfg = _.omit(newCfg, 'projectRoot', 'configFile')
 
       _.each(registrations, (registration) => {
         debug('register plugins process event', registration.event, 'with id', registration.eventId)
