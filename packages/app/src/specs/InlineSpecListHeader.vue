@@ -2,7 +2,7 @@
   <div class="h-64px items-center gap-8px mx-16px border-b-1 border-gray-900 grid grid-cols-[minmax(0,1fr),63px,24px]">
     <div class="relative items-center group">
       <div class="absolute inset-y-0 flex items-center pointer-events-none">
-        <MagnifyingGlassIcon
+        <i-cy-magnifying-glass_x16
           :class="inputFocused ? 'icon-dark-gray-200' : 'icon-dark-gray-900'"
           class="icon-light-gray-1000"
         />
@@ -39,8 +39,8 @@
           class="flex flex-1 items-center justify-center outline-none"
           :class="{ 'bg-gray-900': checked }"
         >
-          <FileTreeIcon
-            :class="checked ? 'icon-light-gray-200' : 'icon-light-gray-700'"
+          <i-cy-file-list
+            :class="checked ? 'icon-dark-gray-200' : 'icon-dark-gray-700'"
           />
         </div>
       </RadioGroupOption>
@@ -54,8 +54,8 @@
           class="flex flex-1 items-center justify-center outline-none"
           :class="{ 'bg-gray-900': checked }"
         >
-          <FileListIcon
-            :class="checked ? 'icon-light-gray-200' : 'icon-light-gray-700'"
+          <i-cy-file-tree
+            :class="checked ? 'icon-dark-gray-200' : 'icon-dark-gray-700'"
           />
         </div>
       </RadioGroupOption>
@@ -75,16 +75,12 @@
       data-cy="runner-spec-list-add-spec"
       @click="emit('addSpec')"
     >
-      <AddSmallIcon class="icon-light-gray-50 icon-dark-gray-200" />
+      <i-cy-add-small_x16 class="icon-light-gray-50 icon-dark-gray-200" />
     </button>
   </div>
 </template>
 
 <script lang="ts" setup>
-import MagnifyingGlassIcon from '~icons/cy/magnifying-glass_x16.svg'
-import FileTreeIcon from '~icons/cy/file-tree.svg'
-import FileListIcon from '~icons/cy/file-list.svg'
-import AddSmallIcon from '~icons/cy/add-small_x16.svg'
 import Input from '@cy/components/Input.vue'
 import Button from '@cy/components/Button.vue'
 import { ref } from 'vue'
@@ -94,8 +90,8 @@ defineProps<{tab: string, search: string}>()
 
 const emit = defineEmits<{
   (e: 'update:tab', tab: string): void
-  (e: 'update:search', search: string)
-  (e: 'addSpec')
+  (e: 'update:search', search: string): void
+  (e: 'addSpec'): void
 }>()
 
 const inputFocused = ref(false)
@@ -109,6 +105,7 @@ const onInput = (e: Event) => {
 </script>
 
 <style>
+/** Windi box shadows are dark, so styles are for lighter box shadows */
 .add-button {
   transition: box-shadow 0.3s ease-in-out;
 }
