@@ -122,7 +122,7 @@ commands:
         type: boolean
         default: false
     steps:
-      - run: node scripts/circle-cache.js --action prepare
+      - run: node scripts/circleci/circle-cache.js --action prepare
       - unless:
           condition: << parameters.dont-move >>
           steps:
@@ -154,7 +154,7 @@ commands:
     steps:
       - run:
           name: Generate Circle Cache Key
-          command: node scripts/circle-cache.js --action cacheKey > circle_cache_key
+          command: node scripts/circleci/circle-cache.js --action cacheKey > circle_cache_key
       - restore_cache:
           key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-test2-node-modules-cache-{{ checksum "circle_cache_key" }}
       - run:
@@ -267,7 +267,7 @@ commands:
       - run:
           name: check Node version
           command: |
-            yarn ./scripts/circle-ci/check-node-version
+            yarn ./scripts/circleci/check-node-version
 
       ## make sure the TERM is set to 'xterm' in node (Linux only)
       ## else colors (and tests) will fail
@@ -277,7 +277,7 @@ commands:
       - run:
           name: Check terminal
           command: |
-            node ./scripts/circle-ci/check-terminal
+            node ./scripts/circleci/check-terminal
       - run:
           name: Stop .only
           command: |
