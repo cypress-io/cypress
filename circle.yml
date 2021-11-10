@@ -85,13 +85,13 @@ executors:
     environment:
       PLATFORM: mac
   
-  windows:
-    name: win/default win/default
-    shell: bash.exe
-    # by default, we use "small" to save on CI costs. bump on a per-job basis if needed.
-    resource_class: small
-    environment:
-      PLATFORM: windows
+  # windows:
+  #   windows: win/default
+  #   shell: bash.exe
+  #   # by default, we use "small" to save on CI costs. bump on a per-job basis if needed.
+  #   resource_class: small
+  #   environment:
+  #     PLATFORM: windows
 
 commands:
   restore_workspace_binaries:
@@ -2339,24 +2339,38 @@ mac-workflow: &mac-workflow
         requires:
           - darwin-create-build-artifacts
 
+  #   windows: win/default
+  #   shell: bash.exe
+  #   # by default, we use "small" to save on CI costs. bump on a per-job basis if needed.
+  #   resource_class: small
+  #   environment:
+  #     PLATFORM: windows
+windowsExecutor: &windowsExecutor
+    executor:
+      name: win/default
+      size: small
+      shell: bash.exe
+      environment:
+        PLATFORM: windows
+
 windows-workflow: &windows-workflow
   jobs:
     - node_modules_install:
         name: windows-node-modules-install
-        executor: windows
+         <<: &windowsExecutor
         arch: win32
 
-    - build:
-        name: windows-build
-        executor: win/default
-        requires:
-          - windows-node-modules-install
+    # - build:
+    #     name: windows-build
+    #     executor: win/default
+    #     requires:
+    #       - windows-node-modules-install
 
-    - lint:
-        name: windows-lint
-        executor: win/default
-        requires:
-          - windows-build
+    # - lint:
+    #     name: windows-lint
+    #     executor: win/default
+    #     requires:
+    #       - windows-build
 
 workflows:
   linux:
