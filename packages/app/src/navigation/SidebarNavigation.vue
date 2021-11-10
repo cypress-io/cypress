@@ -83,7 +83,7 @@
           class="w-16px h-16px icon-dark-gray-500"
         />
         <template #popper>
-          {{ t('sideBar.keyboardShortcuts') }}
+          {{ t('sideBar.keyboardShortcuts.title') }}
         </template>
         <KeyboardBindingsModal
           :show="bindingsOpen"
