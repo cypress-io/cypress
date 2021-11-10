@@ -2350,5 +2350,5 @@ workflows:
     <<: *linux-workflow
   mac:
     <<: *mac-workflow
-    when:
-      - equal: [ develop, << pipeline.git.branch >> ]
+    # when:
+      # - equal: [ develop, << pipeline.git.branch >> ]
