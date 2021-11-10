@@ -300,7 +300,7 @@ commands:
             echo "
               export NVM_DIR='$HOME/.nvm'
               # [ -s '$NVM_DIR/nvm.sh' ] && \. '$NVM_DIR/nvm.sh' # load nvm
-              \. '$NVM_DIR/nvm.sh' # load nvm
+              \. '$HOME/.nvm/nvm.sh' # load nvm
               export NODE_VERSION='${node_version}'
             " >> ~/.bash_profile
       - run:
