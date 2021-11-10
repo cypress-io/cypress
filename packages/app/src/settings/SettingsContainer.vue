@@ -22,20 +22,41 @@
         :gql="props.gql.currentProject"
       />
     </SettingsCard>
+    <hr class="border-gray-100 my-32px">
+    <p class="leading-24px text-16px text-light max-w-500px text-gray-500 mx-auto text-center">
+      {{ t('settingsPage.footer.text') }}
+    </p>
+    <Button
+      class="my-16px mx-auto"
+      variant="outline"
+      :prefix-icon="SettingsIcon"
+      prefix-icon-class="icon-dark-gray-500 icon-light-gray-50"
+      @click="reconfigure"
+    >
+      {{ t('settingsPage.footer.button') }}
+    </Button>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { useI18n } from '@cy/i18n'
-import { gql } from '@urql/vue'
+import { gql, useMutation } from '@urql/vue'
+import Button from '@cy/components/Button.vue'
 import SettingsCard from './SettingsCard.vue'
 import ProjectSettings from './project/ProjectSettings.vue'
 import DeviceSettings from './device/DeviceSettings.vue'
-import type { SettingsContainerFragment } from '../generated/graphql'
+import { SettingsContainer_ReconfigureProjectDocument, SettingsContainerFragment } from '../generated/graphql'
 import IconLaptop from '~icons/cy/laptop_x24.svg'
 import IconFolder from '~icons/cy/folder-outline_x24.svg'
+import SettingsIcon from '~icons/cy/settings_x16.svg'
 
 const { t } = useI18n()
+
+gql`
+mutation SettingsContainer_ReconfigureProject {
+  reconfigureProject
+}
+`
 
 gql`
 fragment SettingsContainer on Query {
@@ -48,4 +69,10 @@ fragment SettingsContainer on Query {
 const props = defineProps<{
   gql: SettingsContainerFragment
 }>()
+
+const openElectron = useMutation(SettingsContainer_ReconfigureProjectDocument)
+
+function reconfigure () {
+  openElectron.executeMutation({})
+}
 </script>
