@@ -2364,11 +2364,11 @@ windows-workflow: &windows-workflow
     - winonode_modules_install:
         name: windows-node-modules-install
         executor:
-          machine:
-            image: windows-server-2019-vs2019:stable
-            resource_class: windows.medium
-            # name: win/default
-            shell: bash.exe
+            machine:
+                image: windows-server-2019-vs2019:stable
+                resource_class: windows.medium
+                # name: win/default
+                shell: bash.exe
         arch: win32
 
         # name: windows/default
