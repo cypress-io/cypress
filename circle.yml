@@ -287,6 +287,7 @@ commands:
           command: |
             yarn stop-only-all
 
+  # run this step in an interactive bash shell 
   install-required-node:
     # https://discuss.circleci.com/t/switch-nodejs-version-on-machine-executor-solved/26675/2
     description: Install Node version matching .node-version
@@ -303,8 +304,6 @@ commands:
             echo "Installing Node $node_version"
             curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.30.0/install.sh | bash
             echo "
-              export NVM_DIR='$HOME/.nvm'
-              # [ -s '$NVM_DIR/nvm.sh' ] && \. '$NVM_DIR/nvm.sh' # load nvm
               \. '$HOME/.nvm/nvm.sh' # load nvm
               export NODE_VERSION='${node_version}'
             " >> ~/.bash_profile
@@ -837,13 +836,11 @@ commands:
           # notarization on Mac can take a while
           no_output_timeout: "45m"
           command: |
-            . ./scripts/load-nvm.sh
             node --version
             yarn binary-build --platform $PLATFORM --version $(node ./scripts/get-next-version.js)
       - run:
           name: Zip the binary
           command: |
-            . ./scripts/load-nvm.sh
             yarn binary-zip --platform $PLATFORM
       - store-npm-logs
       - persist_to_workspace:
@@ -874,7 +871,6 @@ commands:
       - run:
           name: build NPM package
           command: |
-            . ./scripts/load-nvm.sh
             yarn build --scope cypress
       - run:
           command: ls -la types
@@ -922,6 +918,10 @@ jobs:
     shell: /bin/bash --login
     steps:
       - checkout
+      - persist_to_workspace:
+        root: ~/
+          paths:
+            - cypress
       - install-required-node
       - install-build-setup
       - caching-dependency-installer:
@@ -929,13 +929,13 @@ jobs:
           is-mac: <<parameters.is-mac>>
       - store-npm-logs
 
+
   ## restores node_modules from previous step & builds if first step skipped
   build:
     <<: *defaults
     resource_class: medium+
     shell: /bin/bash --login
     steps:
-      - checkout
       - unpack-dependencies
       - run:
           name: Top level packages
@@ -1538,6 +1538,7 @@ jobs:
 
   test-kitchensink:
     <<: *defaults
+    shell: /bin/bash --login
     steps:
       - clone-repo-and-checkout-release-branch:
           repo: cypress-example-kitchensink
@@ -1554,7 +1555,6 @@ jobs:
       - run:
           name: Run Kitchensink example project
           command: |
-            . ./scripts/load-nvm.sh
             yarn cypress:run --project /tmp/cypress-example-kitchensink
       - store_artifacts:
           path: /tmp/cypress-example-kitchensink/cypress/screenshots
@@ -1565,9 +1565,11 @@ jobs:
   test-kitchensink-against-staging:
     <<: *defaults
     resource_class: medium
+    shell: /bin/bash --login
     steps:
       - clone-repo-and-checkout-release-branch:
           repo: cypress-example-kitchensink
+      - install-required-node
       - run:
           name: Install prod dependencies
           command: yarn --production
@@ -2350,5 +2352,9 @@ workflows:
     <<: *linux-workflow
   mac:
     <<: *mac-workflow
-    # when:
-      # - equal: [ develop, << pipeline.git.branch >> ]
+    when:
+      or:
+      - equal: [ develop, << pipeline.git.branch >> ]
+      - matches:
+            pattern: "-release$"
+            value: << pipeline.git.branch >>
