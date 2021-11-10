@@ -63,6 +63,8 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
     })
 
     cy.get('[data-cy="topnav-version-list"]').click()
+    cy.get('[data-cy="latest-version"]').contains('8.7.0')
+    cy.get('[data-cy="update-hint"]').should('not.exist')
   })
 
   it('shows hint to upgrade to latest version of cypress', () => {
@@ -92,6 +94,9 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
     })
 
     cy.get('[data-cy="topnav-version-list"]').click()
+    cy.get('[data-cy="latest-version"]').contains('8.7.0')
+    cy.get('[data-cy="current-version"]').contains('8.6.0')
+    cy.get('[data-cy="update-hint"]').should('exist')
   })
 
   it('displays the active project name', () => {

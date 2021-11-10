@@ -11,16 +11,18 @@
     <template v-if="runningOldVersion">
       <TopNavListItem
         class="px-16px py-8px min-w-240px"
+        data-cy="update-hint"
       >
         <div class="whitespace-nowrap">
           <ExternalLink
-            :href="`${releasesUrl}/tag/v${versions.current.version}`"
+            :href="`${releasesUrl}/tag/v${versions.latest.version}`"
             class="font-semibold"
+            data-cy="latest-version"
           >
-            {{ versions.current.version }}
+            {{ versions.latest.version }}
           </ExternalLink>
           <br>
-          <span class="text-gray-600 text-12px">{{ t('topNav.released') }} {{ versions.current.released }}</span>
+          <span class="text-gray-600 text-12px">{{ t('topNav.released') }} {{ versions.latest.released }}</span>
         </div>
         <template #suffix>
           <span class="rounded-md bg-indigo-50">
@@ -48,6 +50,7 @@
           <ExternalLink
             :href="`${releasesUrl}/tag/v${versions.current.version}`"
             class="font-semibold text-amber-800"
+            data-cy="current-version"
           >
             {{ versions.current.version }}
           </ExternalLink>
@@ -72,6 +75,7 @@
           <ExternalLink
             :href="`${releasesUrl}/tag/v${versions.current.version}`"
             class="font-semibold"
+            data-cy="latest-version"
           >
             {{ versions.current.version }}
           </ExternalLink>
