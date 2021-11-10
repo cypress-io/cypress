@@ -13,7 +13,7 @@ defaults: &defaults
     arch:
       type: enum
       default: 'linux'
-      enum: ['linux', 'darwin']
+      enum: ['linux', 'darwin', 'win32']
   executor: <<parameters.executor>>
   environment:
     ## set specific timezone
@@ -44,6 +44,20 @@ macBuildFilters: &macBuildFilters
         - develop
         - tgriesser/chore/fix-release
 
+windowsBuildFilters: &windowsBuildFilters
+  # <<: *mainBuildFilters
+  filters:
+    branches:
+      only:
+        - develop
+        - rm-appveyor
+
+# executor to run on Windows
+# https://circleci.com/docs/2.0/executor-types/#using-the-windows-executor
+# https://circleci.com/docs/2.0/hello-world-windows/#software-pre-installed-in-the-windows-image
+orbs:
+  win: circleci/windows@2.4.1
+
 executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
@@ -71,6 +85,14 @@ executors:
       xcode: "12.2.0"
     environment:
       PLATFORM: mac
+  
+  windows:
+    name: win/default
+    shell: bash.exe
+    # by default, we use "small" to save on CI costs. bump on a per-job basis if needed.
+    resource_class: small
+    environment:
+      PLATFORM: win32
 
 commands:
   restore_workspace_binaries:
@@ -281,12 +303,13 @@ commands:
               export NVM_DIR='$HOME/.nvm'
               [ -s '$NVM_DIR/nvm.sh' ] && \. '$NVM_DIR/nvm.sh' # load nvm
               export NODE_VERSION=${node_version}
-            " > .bashrc
+            " > ~/.bashrc
       - run:
           # https://github.com/nvm-sh/nvm#nvmrc
           name: Install Node
           command: |
-            . .bashrc
+            cat ~/.bashrc
+            # . ~/.bashrc
             echo "before nvm install"
             nvm install
             echo "before nvm use"
@@ -294,6 +317,7 @@ commands:
             echo "before nvm alias default"
             nvm alias default
             node --version
+      # . ./scripts/load-nvm.sh
 
   install-chrome:
     description: Install Google Chrome
