@@ -2361,9 +2361,14 @@ mac-workflow: &mac-workflow
 
 windows-workflow: &windows-workflow
   jobs:
-    - node_modules_install:
+    - winonode_modules_install:
         name: windows-node-modules-install
-        executor: windows
+        executor:
+        machine:
+          image: windows-server-2019-vs2019:stable
+          resource_class: windows.medium
+          # name: win/default
+          shell: bash.exe
         arch: win32
 
         # name: windows/default
