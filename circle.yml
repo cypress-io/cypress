@@ -279,7 +279,8 @@ commands:
             export NODE_VERSION=<<parameters.version>>
             export NODE_VERSION=${NODE_VERSION:-$(cat .node-version)}
             echo "Installing Node $NODE_VERSION"
-            echo $NODE_VERSION > .nvmrc
+            echo $NODE_VERSION > .node-version
+            cp .node-version .nvmrc
             curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.35.3/install.sh | bash
             . ./scripts/load-nvm.sh
             echo "before nvm install"
