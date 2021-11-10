@@ -307,8 +307,8 @@ commands:
           # https://github.com/nvm-sh/nvm#nvmrc
           name: Install Node
           command: |
-            nvm install || exit 1
-            nvm use || exit 1
+            nvm install ${NODE_VERSION} || exit 1
+            nvm use ${NODE_VERSION} || exit 1
             nvm alias default || exit 1
             node --version
 
