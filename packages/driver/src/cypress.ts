@@ -1,5 +1,6 @@
 // @ts-nocheck
 
+import { validate } from '@packages/config'
 import _ from 'lodash'
 import $ from 'jquery'
 import * as blobUtil from 'blob-util'
@@ -116,7 +117,7 @@ class $Cypress {
     // normalize this into boolean
     config.isTextTerminal = !!config.isTextTerminal
 
-    // we asumme we're interactive based on whether or
+    // we assume we're interactive based on whether or
     // not we're in a text terminal, but we keep this
     // as a separate property so we can potentially
     // slice up the behavior
@@ -142,7 +143,12 @@ class $Cypress {
 
     this.state = $SetterGetter.create({})
     this.originalConfig = _.cloneDeep(config)
-    this.config = $SetterGetter.create(config)
+    this.config = $SetterGetter.create(config, (config) => {
+      validate(config, (errMsg) => {
+        throw new this.state('specWindow').Error(errMsg)
+      })
+    })
+
     this.env = $SetterGetter.create(env)
     this.getTestRetries = function () {
       const testRetries = this.config('retries')
@@ -269,6 +275,8 @@ class $Cypress {
         return this.emit('stop')
 
       case 'cypress:config':
+        // emit config event used to:
+        //   - trigger iframe viewport update
         return this.emit('config', args[0])
 
       case 'runner:start':
@@ -390,16 +398,12 @@ class $Cypress {
         return this.runner.onRunnableRun(...args)
 
       case 'runner:test:before:run':
-        // get back to a clean slate
-        this.cy.reset(...args)
-
         if (this.config('isTextTerminal')) {
           // needed for handling test retries
           this.emit('mocha', 'test:before:run', args[0])
         }
 
         this.emit('test:before:run', ...args)
-
         break
 
       case 'runner:test:before:run:async':
@@ -423,7 +427,6 @@ class $Cypress {
         }
 
         break
-
       case 'cy:before:all:screenshots':
         return this.emit('before:all:screenshots', ...args)
 

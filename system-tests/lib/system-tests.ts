@@ -17,6 +17,7 @@ const Bluebird = require('bluebird')
 const debug = require('debug')('cypress:system-tests')
 const httpsProxy = require('@packages/https-proxy')
 const Fixtures = require('./fixtures')
+
 const { allowDestroy } = require(`@packages/server/lib/util/server_destroy`)
 const cypress = require(`@packages/server/lib/cypress`)
 const screenshots = require(`@packages/server/lib/screenshots`)
@@ -202,6 +203,14 @@ type ExecOptions = {
    * If set, a dummy `node_modules` project with this name will be set up.
    */
   stubPackage?: string
+  /**
+   * Run Cypress with a custom user node path.
+   */
+  userNodePath?: string
+  /**
+   * Run Cypress with a custom user node version.
+   */
+  userNodeVersion?: string
 }
 
 type Server = {
@@ -250,7 +259,7 @@ const pathUpToProjectName = Fixtures.projectPath('')
 
 const DEFAULT_BROWSERS = ['electron', 'chrome', 'firefox']
 
-const stackTraceLinesRe = /(\n?[^\S\n\r]*).*?(@|\bat\b).*\.(js|coffee|ts|html|jsx|tsx)(-\d+)?:\d+:\d+[\n\S\s]*?(\n\s*?\n|$)/g
+const stackTraceLinesRe = /(\n?[^\S\n\r]*).*?(@|\bat\b)(?:.*node:.*|.*\.(js|coffee|ts|html|jsx|tsx))(-\d+)?:\d+:\d+[\n\S\s]*?(\n\s*?\n|$)/g
 const browserNameVersionRe = /(Browser\:\s+)(Custom |)(Electron|Chrome|Canary|Chromium|Firefox)(\s\d+)(\s\(\w+\))?(\s+)/
 const availableBrowsersRe = /(Available browsers found on your system are:)([\s\S]+)/g
 const crossOriginErrorRe = /(Blocked a frame .* from accessing a cross-origin frame.*|Permission denied.*cross-origin object.*)/gm
@@ -580,7 +589,7 @@ const localItFn = function (title: string, opts: ItOptions) {
     throw new Error('systemTests.it(...) must be passed a title as the first argument')
   }
 
-  // LOGIC FOR AUTOGENERATING DYNAMIC TESTS
+  // LOGIC FOR AUTO-GENERATING DYNAMIC TESTS
   // - create multiple tests for each default browser
   // - if browser is specified in options:
   //   ...skip the tests for each default browser if that browser
@@ -848,6 +857,14 @@ const systemTests = {
 
     if (options.configFile) {
       args.push(`--config-file=${options.configFile}`)
+    }
+
+    if (options.userNodePath) {
+      args.push(`--userNodePath=${options.userNodePath}`)
+    }
+
+    if (options.userNodeVersion) {
+      args.push(`--userNodeVersion=${options.userNodeVersion}`)
     }
 
     return args

@@ -2,7 +2,6 @@
   "name": "@packages/socket",
   "version": "0.0.0-development",
   "private": true,
-  "main": "index.js",
   "browser": "lib/browser.ts",
   "scripts": {
     "build-prod": "tsc",
@@ -25,6 +24,7 @@
     "resolve-pkg": "2.0.0"
   },
   "files": [
+    "index.js",
     "lib",
     "patches"
   ],

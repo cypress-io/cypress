@@ -142,7 +142,7 @@ export default {
           return enqueuedCmd = obj
         }
 
-        // only check for command enqueing when none
+        // only check for command enqueuing when none
         // of our args are functions else commands
         // like cy.then or cy.each would always fail
         // since they return promises and queue more
@@ -224,8 +224,7 @@ export default {
 
         command.set({ subject })
 
-        // end / snapshot our logs
-        // if they need it
+        // end / snapshot our logs if they need it
         command.finishLogs()
 
         // reset the nestedIndex back to null
@@ -234,8 +233,7 @@ export default {
         // also reset recentlyReady back to null
         state('recentlyReady', null)
 
-        // we're finished with the current command
-        // so set it back to null
+        // we're finished with the current command so set it back to null
         state('current', null)
 
         state('subject', subject)
