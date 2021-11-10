@@ -252,7 +252,7 @@ commands:
             if [ "$PLATFORM" = 'windows']; then
               echo %cd%
             else 
-              echo pwd
+              echo $PWD
             fi
       - run:
           name: print global yarn cache path
@@ -267,15 +267,14 @@ commands:
       - run:
           name: check Node version
           command: |
-            yarn ./scripts/circleci/check-node-version.js
-
-      ## make sure the TERM is set to 'xterm' in node (Linux only)
-      ## else colors (and tests) will fail
-      ## See the following information
-      ##   * http://andykdocs.de/development/Docker/Fixing+the+Docker+TERM+variable+issue
-      ##   * https://unix.stackexchange.com/questions/43945/whats-the-difference-between-various-term-variables
+            node ./scripts/circleci/check-node-version.js
       - run:
-          name: Check terminal
+          name: Check terminal variables
+          ## make sure the TERM is set to 'xterm' in node (Linux only)
+          ## else colors (and tests) will fail
+          ## See the following information
+          ##   * http://andykdocs.de/development/Docker/Fixing+the+Docker+TERM+variable+issue
+          ##   * https://unix.stackexchange.com/questions/43945/whats-the-difference-between-various-term-variables
           command: |
             node ./scripts/circleci/check-terminal.js
       - run:
