@@ -62,3 +62,6 @@ if (nodeVersionNeeded[0] !== nodeVersion[0]) {
   /* eslint-enable no-console */
   process.exit(1)
 }
+
+// eslint-disable-next-line no-console
+console.log('✅ current Node version of %s matches the version specified in.node-version %s', process.versions.node)

@@ -181,6 +181,11 @@ commands:
         type: enum
         enum: ['linux', 'darwin']
     steps:
+        - run:
+          # Deps needed by circle-cache.js, before we "yarn" or unpack cached node_modules
+          name: Cache Helper Deps
+          working_directory: ~/
+          command: npm i globby@11.0.4 fs-extra@10.0.0 minimist@1.2.5 fast-json-stable-stringify@2.1.0
       - run:
           name: Generate Circle Cache Key
           command: node scripts/circle-cache.js --action cacheKey > circle_cache_key
@@ -250,8 +255,6 @@ commands:
       - run:
           name: print Node version
           command: |
-            echo "nvm use default"
-            nvm use default || exit 1
             node -v
       - run:
           name: print yarn version
@@ -269,18 +272,11 @@ commands:
       - run:
           name: Check terminal
           command: |
-            . ./scripts/load-nvm.sh
             yarn check-terminal
       - run:
           name: Stop .only
           command: |
-            . ./scripts/load-nvm.sh
             yarn stop-only-all
-      - run:
-          # Deps needed by circle-cache.js, before we "yarn" or unpack cached node_modules
-          name: Cache Helper Deps
-          working_directory: ~/
-          command: npm i globby@11.0.4 fs-extra@10.0.0 minimist@1.2.5 fast-json-stable-stringify@2.1.0
 
   install-required-node:
     # https://discuss.circleci.com/t/switch-nodejs-version-on-machine-executor-solved/26675/2
