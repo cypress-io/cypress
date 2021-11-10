@@ -220,9 +220,41 @@ type CloudUser implements Node {
   userIsViewer: Boolean!
 }
 
+enum CodeGenGenResultType {
+  binary
+  text
+}
+
+"""Represents a spec on the file system"""
+type CodeGenResult implements Node {
+  """Content of generated file."""
+  content: String!
+
+  """Absolute path of generated file."""
+  file: String!
+
+  """Relay style Node ID field for the CodeGenResult field"""
+  id: ID!
+  status: CodeGenStatus!
+  type: CodeGenGenResultType!
+}
+
+"""Result of generated file with file parts"""
+type CodeGenResultWithFileParts {
+  codeGenResult: CodeGenResult!
+  fileParts: FileParts!
+}
+
+enum CodeGenStatus {
+  add
+  overwrite
+  skipped
+}
+
 enum CodeGenType {
   component
   integration
+  scaffoldIntegration
   story
 }
 
@@ -458,6 +490,7 @@ type Mutation {
 
   """Reset the Wizard to the starting position"""
   resetWizard: Boolean!
+  scaffoldIntegration: [CodeGenResultWithFileParts!]!
 
   """Set active project to run tests on"""
   setActiveProject(path: String!): Boolean

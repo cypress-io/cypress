@@ -4,6 +4,7 @@
 export * from './gql-App'
 export * from './gql-BaseError'
 export * from './gql-Browser'
+export * from './gql-CodeGenResult'
 export * from './gql-CurrentProject'
 export * from './gql-DevState'
 export * from './gql-FileParts'

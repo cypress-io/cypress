@@ -380,4 +380,37 @@ export class ProjectActions {
     this.ctx.actions.electron.refreshBrowserWindow()
     this.ctx.actions.electron.showBrowserWindow()
   }
+
+  async scaffoldIntegration () {
+    const project = this.ctx.currentProject
+
+    if (!project) {
+      throw Error(`Cannot create spec without activeProject.`)
+    }
+
+    const config = await this.ctx.project.getConfig(project.projectRoot)
+    const integrationFolder = config.integrationFolder || project.projectRoot
+
+    const results = await codeGenerator(
+      { templateDir: templates['scaffoldIntegration'], target: integrationFolder },
+      {},
+    )
+
+    if (results.failed.length) {
+      throw new Error(`Failed generating files: ${results.failed.map((e) => `${e}`)}`)
+    }
+
+    const withFileParts = results.files.map((res) => {
+      return {
+        fileParts: this.ctx.file.normalizeFileToFileParts({
+          absolute: res.file,
+          projectRoot: project.projectRoot,
+          searchFolder: integrationFolder,
+        }),
+        codeGenResult: res,
+      }
+    })
+
+    return withFileParts
+  }
 }
