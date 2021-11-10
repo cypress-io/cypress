@@ -307,7 +307,9 @@ const isFirefoxConnectionError = (err: Error) => {
     return false
   }
 
-  return matches[1].includes('+Failed to connect to Firefox, retrying in 1 second')
+  const lines = matches[1].split('\n')
+
+  return lines.some((line) => line.includes('+Failed to connect to Firefox,'))
 }
 
 // this captures an entire stack trace and replaces it with [stack trace lines]
