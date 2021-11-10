@@ -33,6 +33,7 @@
           pl-8px
           hidden
           group-hover:inline
+          whitespace-nowrap
         "
       >{{ relativeFolder }}</span>
     </div>
