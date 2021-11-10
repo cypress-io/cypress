@@ -2345,13 +2345,13 @@ mac-workflow: &mac-workflow
   #   resource_class: small
   #   environment:
   #     PLATFORM: windows
-windowsExecutor: &windowsExecutor
-    executor:
-      name: win/default
-      size: small
-      shell: bash.exe
-      environment:
-        PLATFORM: windows
+# windowsExecutor: &windowsExecutor
+#   executor:
+#     name: win/default
+#     size: small
+#     shell: bash.exe
+#     environment:
+#       PLATFORM: windows
 
 windows-workflow: &windows-workflow
   jobs:
