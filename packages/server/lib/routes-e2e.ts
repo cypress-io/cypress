@@ -23,7 +23,7 @@ export const createRoutesE2E = ({
   // this could be just a regular .js file or a .coffee file
   routesE2E.get('/__cypress/tests', (req, res, next) => {
     // slice out the cache buster
-    const test = CacheBuster.strip(req.query.p)
+    const test = decodeURI(CacheBuster.strip(req.query.p))
 
     specController.handle(test, req, res, config, next, onError)
   })

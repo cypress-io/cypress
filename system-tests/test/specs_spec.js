@@ -40,4 +40,14 @@ describe('e2e specs', () => {
       expectedExitCode: 0,
     })
   })
+
+  it('handles specs with % in the name', function () {
+    const project = Fixtures.projectPath('spec-name-special-characters')
+
+    return systemTests.exec(this, {
+      project,
+      snapshot: false,
+      expectedExitCode: 0,
+    })
+  })
 })

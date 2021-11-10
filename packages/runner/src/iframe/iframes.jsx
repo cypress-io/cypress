@@ -162,7 +162,7 @@ export default class Iframes extends Component {
       class: 'spec-iframe',
     }).appendTo($container)
 
-    $specIframe.prop('src', specSrc)
+    $specIframe.prop('src', encodeURI(specSrc))
 
     return $autIframe
   }
