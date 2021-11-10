@@ -188,7 +188,7 @@ commands:
           command: npm i globby@11.0.4 fs-extra@10.0.0 minimist@1.2.5 fast-json-stable-stringify@2.1.0
       - run:
           name: Generate Circle Cache Key
-          command: node scripts/circle-cache.js --action cacheKey > circle_cache_key
+          command: node scripts/circleci/circle-cache.js --action cacheKey > circle_cache_key
       - restore_cache:
           name: Restore cache state, to check for known modules cache existence
           key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-test2-node-modules-cache-state-{{ checksum "circle_cache_key" }}
@@ -517,7 +517,7 @@ commands:
           name: "Cloning test project: <<parameters.repo>>"
           command: |
             git clone --depth 1 --no-single-branch https://github.com/cypress-io/<<parameters.repo>>.git /tmp/<<parameters.repo>>
-            cd /tmp/<<parameters.repo>> && (git checkout $(node ./scripts/get-next-version) || true)
+            cd /tmp/<<parameters.repo>> && (git checkout $(node ./scripts/get-next-version.js) || true)
 
   test-binary-against-rwa:
     description: |
