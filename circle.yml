@@ -919,9 +919,9 @@ jobs:
     steps:
       - checkout
       - persist_to_workspace:
-        root: ~/
-        paths:
-          - cypress
+          root: ~/
+          paths:
+            - cypress
       - install-required-node
       - install-build-setup
       - caching-dependency-installer:
@@ -2289,7 +2289,6 @@ mac-workflow: &mac-workflow
         executor: mac
         arch: darwin
         is-mac: true
-        <<: *macBuildFilters
 
     - build:
         name: darwin-build
@@ -2353,9 +2352,9 @@ workflows:
     <<: *linux-workflow
   mac:
     <<: *mac-workflow
-    # when:
-    #   or:
-    #   - equal: [ develop, << pipeline.git.branch >> ]
-    #   - matches:
-    #         pattern: "-release$"
-    #         value: << pipeline.git.branch >>
+    when:
+      or:
+      - equal: [ develop, << pipeline.git.branch >> ]
+      - matches:
+            pattern: "-release$"
+            value: << pipeline.git.branch >>
