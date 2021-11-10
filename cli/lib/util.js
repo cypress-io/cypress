@@ -241,14 +241,6 @@ const parseOpts = (opts) => {
 
   debug('parsed cli options %o', cleanOpts)
 
-  if (cleanOpts.component && cleanOpts.e2e) {
-    util.logErrorExit1(new Error(stripIndent`
-      Error: You passed both --component and --e2e, but only one can be provided.
-
-      See https://on.cypress.io/ for more information on testing types.
-    `))
-  }
-
   return cleanOpts
 }
 

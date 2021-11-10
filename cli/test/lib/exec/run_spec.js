@@ -104,6 +104,14 @@ describe('exec run', function () {
     it('throws if testingType is invalid', () => {
       expect(() => run.processRunOptions({ testingType: 'randomTestingType' })).to.throw()
     })
+
+    it('throws if both e2e and component are set', () => {
+      expect(() => run.processRunOptions({ e2e: true, component: true })).to.throw()
+    })
+
+    it('throws if both testingType and component are set', () => {
+      expect(() => run.processRunOptions({ testingType: 'component', component: true })).to.throw()
+    })
   })
 
   context('.start', function () {
