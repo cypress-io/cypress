@@ -1,15 +1,5 @@
 version: 2.1
 
-# usually we don't build Mac app - it takes a long time
-# but sometimes we want to really confirm we are doing the right thing
-# so just add your branch to the list here to build and test on Mac
-macBuildFilters: &macBuildFilters
-  filters:
-    branches:
-      only:
-        - develop
-        - tgriesser/chore/fix-release
-
 defaults: &defaults
   parallelism: 1
   working_directory: ~/cypress
@@ -37,14 +27,22 @@ defaults: &defaults
     LINES: 24
 
 # filters and requires for testing binary with Firefox
-onlyMainBranches: &onlyMainBranches
+mainBranchFilters: &mainBranchFilters
   filters:
     branches:
       only:
         - develop
         - tgriesser/chore/fix-release
-  requires:
-    - create-build-artifacts
+
+# usually we don't build Mac app - it takes a long time
+# but sometimes we want to really confirm we are doing the right thing
+# so just add your branch to the list here to build and test on Mac
+macBuildFilters: &macBuildFilters
+  filters:
+    branches:
+      only:
+        - develop
+        - tgriesser/chore/fix-release
 
 executors:
   # the Docker image with Cypress dependencies and Chrome browser
@@ -270,12 +268,11 @@ commands:
     steps:
       - run:
           name: Install NVM
-          # TODO: determine why we get the missing .nvmrc file error
           command: |
             export NODE_VERSION=$(cat .node-version)
             echo "Installing Node $NODE_VERSION"
             cp .node-version .nvmrc
-            curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.35.3/install.sh | bash
+            curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.35.3/install.sh | bash --no-use
       - run:
           # https://github.com/nvm-sh/nvm#nvmrc
           name: Install Node
@@ -370,8 +367,7 @@ commands:
       - restore_cached_workspace
       - run:
           command: |
-            cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --parallel -- --') || true
-
+            cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --parallel --') || true
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
@@ -857,16 +853,12 @@ commands:
       - run:
           name: pack NPM package
           working_directory: cli/build
-          command: yarn pack
+          command: yarn pack --filename ../../cypress.tgz
       - run:
           name: list created NPM package
-          working_directory: cli/build
           command: ls -l
-      # created file should have filename cypress-<version>.tgz
-      - run: cp cli/build/cypress-v*.tgz cypress.tgz
       - store-npm-logs
-      - run: pwd
-      - run: ls -l
+      # - run: pwd
       - persist_to_workspace:
           root: ~/
           paths:
@@ -964,7 +956,7 @@ jobs:
             desktop-gui-component-tests,
             cli-visual-tests,
             runner-integration-tests-chrome,
-            runner-ct-integration-tests-chrome
+            runner-ct-integration-tests-chrome,
             reporter-integration-tests,
       - run: yarn percy build:finalize
 
@@ -1204,7 +1196,7 @@ jobs:
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
-            yarn percy exec --parallel -- -- \
+            yarn percy exec --parallel -- \
             yarn cypress:run --record --parallel --group 2x-desktop-gui
           working_directory: packages/desktop-gui
       - verify-mocha-results
@@ -1228,7 +1220,7 @@ jobs:
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
-            yarn percy exec --parallel -- -- \
+            yarn percy exec --parallel -- \
             yarn cypress:run:ct
           working_directory: packages/desktop-gui
       - verify-mocha-results
@@ -1250,7 +1242,7 @@ jobs:
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
-            yarn percy exec --parallel -- -- \
+            yarn percy exec --parallel -- \
             yarn cypress:run --record --parallel --group reporter
           working_directory: packages/reporter
       - verify-mocha-results
@@ -1389,7 +1381,7 @@ jobs:
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
-            yarn percy exec --parallel -- -- \
+            yarn percy exec --parallel -- \
             yarn test --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json
           working_directory: npm/design-system
       - store_test_results:
@@ -2142,11 +2134,7 @@ linux-workflow: &linux-workflow
     # and testing it on a real project
     - test-against-staging:
         context: test-runner:record-tests
-        filters:
-          branches:
-            only:
-              - develop
-              - tgriesser/chore/fix-release
+        <<: *mainBranchFilters
         requires:
           - build
     - test-kitchensink:
@@ -2154,11 +2142,7 @@ linux-workflow: &linux-workflow
           - build
     - test-kitchensink-against-staging:
         context: test-runner:record-tests
-        filters:
-          branches:
-            only:
-              - develop
-              - tgriesser/chore/fix-release
+        <<: *mainBranchFilters
         requires:
           - build
     - create-build-artifacts:
@@ -2204,53 +2188,53 @@ linux-workflow: &linux-workflow
           - create-build-artifacts
     - test-binary-and-npm-against-other-projects:
         context: test-runner:trigger-test-jobs
-        filters:
-          branches:
-            only:
-              - develop
-              - tgriesser/chore/fix-release
+        <<: *mainBranchFilters
         requires:
           - create-build-artifacts
     - test-npm-module-and-verify-binary:
-        filters:
-          branches:
-            only:
-              - develop
-              - tgriesser/chore/fix-release
+        <<: *mainBranchFilters
         requires:
           - create-build-artifacts
     - test-binary-against-staging:
         context: test-runner:record-tests
-        filters:
-          branches:
-            only:
-              - develop
-              - tgriesser/chore/fix-release
+        <<: *mainBranchFilters
         requires:
           - create-build-artifacts
 
     - test-binary-against-kitchensink-chrome:
-        <<: *onlyMainBranches
+        <<: *mainBranchFilters
+        requires:
+          - create-build-artifacts
     - test-binary-against-conduit-chrome:
-        <<: *onlyMainBranches
+        <<: *mainBranchFilters
+        requires:
+          - create-build-artifacts
     - test-binary-against-recipes-firefox:
-        <<: *onlyMainBranches
+        <<: *mainBranchFilters
+        requires:
+          - create-build-artifacts
     - test-binary-against-kitchensink-firefox:
-        <<: *onlyMainBranches
+        <<: *mainBranchFilters
+        requires:
+          - create-build-artifacts
     - test-binary-against-todomvc-firefox:
-        <<: *onlyMainBranches
+        <<: *mainBranchFilters
+        requires:
+          - create-build-artifacts
     - test-binary-against-documentation-firefox:
-        <<: *onlyMainBranches
+        <<: *mainBranchFilters
+        requires:
+          - create-build-artifacts
     - test-binary-against-api-testing-firefox:
-        <<: *onlyMainBranches
+        <<: *mainBranchFilters
+        requires:
+          - create-build-artifacts
     - test-binary-against-piechopper-firefox:
-        <<: *onlyMainBranches
+        <<: *mainBranchFilters
+        requires:
+          - create-build-artifacts
     - test-binary-against-cypress-realworld-app:
-        filters:
-          branches:
-            only:
-              - develop
-              - tgriesser/chore/fix-release
+        <<: *mainBranchFilters
         requires:
           - create-build-artifacts
 
@@ -2259,6 +2243,7 @@ linux-workflow: &linux-workflow
         executor: non-root-docker-user
         requires:
           - create-build-artifacts
+
     - test-binary-as-specific-user:
         name: "test binary as a root user"
         requires:
@@ -2318,11 +2303,7 @@ mac-workflow: &mac-workflow
         context: test-runner:record-tests
         name: darwin-test-binary-against-staging
         executor: mac
-        filters:
-          branches:
-            only:
-              - develop
-              - tgriesser/chore/fix-release
+        <<: *macBuildFilters
         requires:
           - darwin-create-build-artifacts
 
@@ -2330,11 +2311,7 @@ mac-workflow: &mac-workflow
         context: test-runner:trigger-test-jobs
         name: darwin-test-binary-and-npm-against-other-projects
         executor: mac
-        filters:
-          branches:
-            only:
-              - develop
-              - tgriesser/chore/fix-release
+        <<: *macBuildFilters
         requires:
           - darwin-create-build-artifacts
 
