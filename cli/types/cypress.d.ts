@@ -175,6 +175,17 @@ declare namespace Cypress {
    */
   type Config = ResolvedConfigOptions & RuntimeConfigOptions
 
+  type AddSubjectArgument<
+    TPrevSubject extends CommandOptions['prevSubject'],
+    TFunction extends (...args: any) => any
+    > = (
+    prevSubject: TPrevSubject extends 'element' ? JQuery | HTMLElement
+      : TPrevSubject extends 'window' ? Window
+        : TPrevSubject extends 'document' ? Document
+          : any,
+    ...args: Parameters<TFunction>
+  ) => ReturnType<TFunction>
+
   /**
    * Several libraries are bundled with Cypress by default.
    *
@@ -421,7 +432,7 @@ declare namespace Cypress {
      */
     Commands: {
       add<T extends keyof Chainable>(name: T, fn: Chainable[T]): void
-      add<T extends keyof Chainable>(name: T, options: CommandOptions, fn: Chainable[T]): void
+      add<T extends keyof Chainable, TOptions extends CommandOptions>(name: T, options: TOptions, fn: Chainable[T] extends (...args: any) => any ? TOptions['prevSubject'] extends false ? Chainable[T] : AddSubjectArgument<TOptions['prevSubject'], Chainable[T]> : never): void
       overwrite<T extends keyof Chainable>(name: T, fn: Chainable[T]): void
     }
 

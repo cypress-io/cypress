@@ -74,7 +74,37 @@ namespace CypressCommandsTests {
     arg
     return
   })
-  Cypress.Commands.add('newCommand', { prevSubject: true }, (arg) => {
+  Cypress.Commands.add('newCommand', { prevSubject: true }, (subject, arg) => {
+    // $ExpectType any
+    subject
+    // $ExpectType string
+    arg
+    return
+  })
+  Cypress.Commands.add('newCommand', { prevSubject: 'element' }, (subject, arg) => {
+    // $ExpectType HTMLElement | JQuery<HTMLElement>
+    subject
+    // $ExpectType string
+    arg
+    return
+  })
+  Cypress.Commands.add('newCommand', { prevSubject: 'window' }, (subject, arg) => {
+    // $ExpectType Window
+    subject
+    // $ExpectType string
+    arg
+    return
+  })
+  Cypress.Commands.add('newCommand', { prevSubject: 'document' }, (subject, arg) => {
+    // $ExpectType Document
+    subject
+    // $ExpectType string
+    arg
+    return
+  })
+  Cypress.Commands.add('newCommand', { prevSubject: 'optional' }, (subject, arg) => {
+    // $ExpectType any
+    subject
     // $ExpectType string
     arg
     return
