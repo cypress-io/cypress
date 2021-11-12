@@ -5625,6 +5625,8 @@ declare namespace Cypress {
     name: string
     /** Override *name* for display purposes only */
     displayName: string
+    /** junk for loggging */
+    mattadata: any
     message: any
     /** Set to false if you want to control the finishing of the command in the log yourself */
     autoEnd: boolean

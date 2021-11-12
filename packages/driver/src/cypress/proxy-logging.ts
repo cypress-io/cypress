@@ -87,6 +87,7 @@ function getRequestLogConfig (req: Omit<ProxyRequest, 'log'>): Partial<Cypress.L
     event: true,
     url: req.preRequest.url,
     method: req.preRequest.method,
+    mattadata: req,
     timeout: 0,
     consoleProps: () => req.consoleProps,
     renderProps: () => {

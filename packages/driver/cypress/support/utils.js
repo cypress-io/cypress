@@ -68,8 +68,11 @@ export const shouldNotBeCalled = (stub) => wrapped(stub).should('not.be.called')
 
 export const assertLogLength = (logs, expectedLength) => {
   const receivedLogs = logs.map((x, index) => `\n\n${index} - ${x.get('name')}: ${x.get('message')}`).join('\n')
+  const logDetail = logs[3]?.get('mattadata')?.preRequest
 
-  expect(logs.length).to.eq(expectedLength, `received ${logs.length} logs when we expected ${expectedLength}: [${receivedLogs}]`)
+  // console.log('log detail', logDetail)
+
+  expect(logs.length).to.eq(expectedLength, `received ${logs.length} logs when we expected ${expectedLength}: [${receivedLogs}] \n\n Log[3] Detail: ${JSON.stringify(logDetail, undefined, 2)} \n`)
 }
 
 export const attachListeners = (listenerArr) => {
