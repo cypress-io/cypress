@@ -422,6 +422,7 @@ export default {
       'isInteractive',
       'isTextTerminal',
       'keystrokeDelay',
+      'modifyObstructiveCode',
       'numTestsKeptInMemory',
       'pageLoadTimeout',
       'retries',
