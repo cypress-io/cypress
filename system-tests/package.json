@@ -6,7 +6,7 @@
   "main": "index.js",
   "scripts": {
     "cache:key": "bash -c 'cat ./projects/**/{package.json,yarn.lock}'",
-    "update:cache:ci": "node ./scripts/update-cache.js",
+    "projects:yarn:install": "node ./scripts/projects-yarn-install.js",
     "test": "node ./scripts/run.js --glob-in-dir=test",
     "test:ci": "node ./scripts/run.js"
   },

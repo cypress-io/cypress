@@ -167,7 +167,7 @@ commands:
       - restore_cached_system_tests_deps
       - run:
           name: Check+update system-tests node_modules cache
-          command: yarn workspace @tooling/system-tests update:cache:ci
+          command: yarn workspace @tooling/system-tests projects:yarn:install
       - save_cache:
           name: Save system tests node_modules cache
           key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-system-tests-node-modules-cache-{{ checksum "system_tests_cache_key" }}
