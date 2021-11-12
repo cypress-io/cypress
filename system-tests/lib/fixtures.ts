@@ -124,7 +124,10 @@ function getYarnCommand (opts: {
   if (!opts.runScripts) cmd += ' --ignore-scripts'
 
   if (!opts.updateYarnLock) cmd += ' --frozen-lockfile'
-  else cmd += ' --update-checksums'
+
+  // yarn v1 has a bug with integrity checking and local cache/dependencies
+  // @see https://github.com/yarnpkg/yarn/issues/6407
+  cmd += ' --update-checksums'
 
   // in CircleCI, this offline cache can be used
   if (opts.isCI) cmd += ` --cache-folder=~/.yarn-${process.platform} `
