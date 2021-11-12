@@ -966,9 +966,7 @@ const systemTests = {
             throw err
           }
 
-          if (isVideoSnapshotError(err)) {
-            console.log('(system tests warning) Firefox failed to process the video, but this is being ignored due to known issues with video processing in Firefox.')
-          }
+          console.log('(system tests warning) Firefox failed to process the video, but this is being ignored due to known issues with video processing in Firefox.')
         }
       }
 
