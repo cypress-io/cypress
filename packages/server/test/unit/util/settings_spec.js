@@ -1,4 +1,5 @@
 const path = require('path')
+const { makeLegacyDataContext } = require('../../../lib/makeDataContext')
 
 require('../../spec_helper')
 const { fs } = require('../../../lib/util/fs')
@@ -10,9 +11,13 @@ const defaultOptions = {
 }
 
 describe('lib/util/settings', () => {
+  const ctx = makeLegacyDataContext()
+
   context('with default configFile option', () => {
     beforeEach(function () {
       this.setup = (obj = {}) => {
+        ctx.actions.project.setActiveProject(projectRoot)
+
         return fs.writeFileAsync('cypress.config.js', `module.exports = ${JSON.stringify(obj)}`)
       }
     })
@@ -79,6 +84,8 @@ describe('lib/util/settings', () => {
     context('.id', () => {
       beforeEach(function () {
         this.projectRoot = path.join(projectRoot, '_test-output/path/to/project/')
+
+        ctx.actions.project.setActiveProject(this.projectRoot)
 
         return fs.ensureDirAsync(this.projectRoot)
       })

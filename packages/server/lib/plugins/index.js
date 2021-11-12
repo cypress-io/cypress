@@ -170,7 +170,7 @@ const init = (config, options, ctx) => {
 
       killPluginsProcess()
 
-      err = errors.get('PLUGINS_UNEXPECTED_ERROR', config.testingType, config.configFile, err.annotated || err.stack || err.message)
+      err = errors.get('SETUP_NODE_EVENTS_UNEXPECTED_ERROR', config.testingType, config.configFile, err.annotated || err.stack || err.message)
       err.title = 'Error running plugin'
 
       // this can sometimes trigger before the promise is fulfilled and
@@ -190,7 +190,7 @@ const init = (config, options, ctx) => {
     }
 
     pluginsProcess.on('error', handleError)
-    ipc.on('error', handleError)
+    ipc.on('error:plugins', handleError)
     ipc.on('warning', handleWarning)
 
     // see timers/parent.js line #93 for why this is necessary

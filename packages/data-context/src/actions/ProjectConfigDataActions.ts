@@ -28,7 +28,6 @@ export class ProjectConfigDataActions {
   }
 
   refreshProjectConfig (configFilePath: string) {
-    // The currentProject should be created now - this should not happen
     if (!this.ctx.currentProject) {
       throw new Error('Can\'t refresh project config without current project')
     }

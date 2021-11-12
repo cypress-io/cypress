@@ -22,6 +22,8 @@ run(ipc, file, projectRoot)
  * @returns
  */
 function run (ipc, requiredFile, projectRoot) {
+  let areSetupNodeEventsLoaded = false
+
   debug('requiredFile:', requiredFile)
   debug('projectRoot:', projectRoot)
   if (!projectRoot) {
@@ -38,7 +40,7 @@ function run (ipc, requiredFile, projectRoot) {
 
   process.on('uncaughtException', (err) => {
     debug('uncaught exception:', util.serializeError(err))
-    ipc.send('error', util.serializeError(err))
+    ipc.send(areSetupNodeEventsLoaded ? 'error:plugins' : 'error', util.serializeError(err))
 
     return false
   })
@@ -52,6 +54,14 @@ function run (ipc, requiredFile, projectRoot) {
     return false
   })
 
+  const runSetupNodeEvents = (setupNodeEvents) => {
+    if (setupNodeEvents && typeof setupNodeEvents !== 'function') {
+      ipc.send('load:error:plugins', 'SETUP_NODE_EVENTS_IS_NOT_FUNCTION', requiredFile, setupNodeEvents)
+    }
+
+    runPlugins(ipc, setupNodeEvents, projectRoot, requiredFile)
+  }
+
   ipc.on('load', () => {
     try {
       debug('try loading', requiredFile)
@@ -62,10 +72,11 @@ function run (ipc, requiredFile, projectRoot) {
       ipc.send('loaded', result)
 
       ipc.on('plugins', (testingType) => {
+        areSetupNodeEventsLoaded = true
         if (testingType === 'component') {
-          runPlugins(ipc, result.component?.setupNodeEvents, projectRoot, requiredFile)
+          runSetupNodeEvents(result.component?.setupNodeEvents)
         } else if (testingType === 'e2e') {
-          runPlugins(ipc, result.e2e?.setupNodeEvents, projectRoot, requiredFile)
+          runSetupNodeEvents(result.e2e?.setupNodeEvents)
         } else {
           // Notify the plugins init that there's no plugins to resolve
           ipc.send('empty:plugins')

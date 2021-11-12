@@ -370,7 +370,7 @@ exports['e2e plugins fails when there is an async error inside an event handler 
                                                                                                     
   Running:  app_spec.js                                                                     (1 of 1)
 
-  The following error was thrown by a plugin. We stopped running your tests because a plugin crashed. Please check your setupNodeEvents method for (e2e) file (\`/foo/bar/.projects/plugins-async-error/cypress.config.js\`)
+The following error was thrown by a plugin. We stopped running your tests because a plugin crashed. Please check your setupNodeEvents method for (\`e2e\`) on file (\`/foo/bar/.projects/plugins-async-error/cypress.config.js\`)
 
  Error: Async error from plugins file
       [stack trace lines]
@@ -404,22 +404,22 @@ exports['e2e plugins fails when there is an async error inside an event handler 
 
 `
 
-exports['e2e plugins fails when there is no function exported 1'] = `
-The \`pluginsFile\` must export a function with the following signature:
+exports['e2e plugins fails when setupNodeEvents is not a function 1'] = `
+The \`setupNodeEvents\` method must BE a function with the following signature:
 
 \`\`\`
-module.exports = function (on, config) {
+setupNodeEvents (on, config) {
   // configure plugins here
 }
 \`\`\`
 
 Learn more: https://on.cypress.io/plugins-api
 
-We loaded the \`pluginsFile\` from: \`/foo/bar/.projects/plugin-empty/cypress/plugins/index.js\`
+We loaded the \`setupNodeEvents\` from: \`/foo/bar/.projects/plugin-empty/cypress.config.js\`
 
 It exported:
 
- {}
+ "foo"
 
 `
 

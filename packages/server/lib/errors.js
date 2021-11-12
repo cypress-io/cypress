@@ -574,19 +574,19 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
       }
 
       return msg
-    case 'PLUGINS_DIDNT_EXPORT_FUNCTION':
+    case 'SETUP_NODE_EVENTS_IS_NOT_FUNCTION':
       msg = stripIndent`\
-        The \`pluginsFile\` must export a function with the following signature:
+        The \`setupNodeEvents\` method must BE a function with the following signature:
 
         \`\`\`
-        module.exports = function (on, config) {
+        setupNodeEvents (on, config) {
           // configure plugins here
         }
         \`\`\`
 
         Learn more: https://on.cypress.io/plugins-api
 
-        We loaded the \`pluginsFile\` from: \`${arg1}\`
+        We loaded the \`setupNodeEvents\` from: \`${arg1}\`
 
         It exported:`
 
@@ -598,10 +598,10 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         We invoked the function exported by \`${arg1}\`, but it threw an error.`
 
       return { msg, details: arg2 }
-    case 'PLUGINS_UNEXPECTED_ERROR':
+    case 'SETUP_NODE_EVENTS_UNEXPECTED_ERROR':
       msg = `The following error was thrown by a plugin. We stopped running your tests because a plugin crashed. Please check your setupNodeEvents method for (\`${arg1}\`) on file (\`${arg2}\`)`
 
-      return { msg, details: arg2 }
+      return { msg, details: arg3 }
     case 'PLUGINS_VALIDATION_ERROR':
       msg = `The following validation error was thrown by your plugins file (\`${arg1}\`).`
 
