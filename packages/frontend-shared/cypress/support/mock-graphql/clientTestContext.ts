@@ -12,9 +12,8 @@ export interface ClientTestContext {
   app: {
     currentBrowser: Browser | null
     browsers: Browser[] | null
-    isInGlobalMode: boolean
-    isAuthBrowserOpened: boolean
   }
+  isAuthBrowserOpened: boolean
   wizard: {
     step: WizardStep
     canNavigateForward: boolean
@@ -48,9 +47,8 @@ export function makeClientTestContext (): ClientTestContext {
     app: {
       browsers: stubBrowsers,
       currentBrowser: stubBrowsers[0],
-      isInGlobalMode: false,
-      isAuthBrowserOpened: false,
     },
+    isAuthBrowserOpened: false,
     wizard: {
       step: 'configFiles',
       canNavigateForward: false,

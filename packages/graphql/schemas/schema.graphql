@@ -2,15 +2,6 @@
 ### Do not make changes to this file directly
 
 
-"""Namespace for information related to the app"""
-type App {
-  """Whether the browser has been opened for auth or not"""
-  isAuthBrowserOpened: Boolean!
-
-  """Whether the app is in global mode or not"""
-  isInGlobalMode: Boolean!
-}
-
 """Base error"""
 type BaseError {
   message: String
@@ -545,7 +536,6 @@ type ProjectPreferences {
 
 """The root "Query" type containing all entry fields for our querying"""
 type Query {
-  app: App!
   baseError: BaseError
 
   """An error related to finding a browser"""
@@ -574,6 +564,12 @@ type Query {
 
   """The state of any info related to local development of the runner"""
   dev: DevState!
+
+  """Whether the browser has been opened for auth or not"""
+  isAuthBrowserOpened: Boolean!
+
+  """Whether the app is in global mode or not"""
+  isInGlobalMode: Boolean!
 
   """All known projects for the app"""
   projects: [ProjectLike!]!
@@ -723,7 +719,6 @@ type Wizard {
   The testing type we are setting in the wizard, null if this has not been chosen
   """
   testingType: TestingTypeEnum
-  testingTypes: [TestingTypeInfo!]!
 
   """The title of the page, given the current step of the wizard"""
   title: String

@@ -6,7 +6,6 @@ import { makeCacheExchange } from '@packages/frontend-shared/src/graphql/urqlCli
 import { clientTestSchema } from './clientTestSchema'
 import type { ClientTestContext } from './clientTestContext'
 import { defaultTypeResolver, FieldNode, GraphQLFieldResolver, GraphQLResolveInfo, GraphQLTypeResolver, isNonNullType } from 'graphql'
-import { stubApp } from './stubgql-App'
 import { stubWizard } from './stubgql-Wizard'
 import type { CodegenTypeMap } from '../generated/test-graphql-types.gen'
 import type { MaybeResolver } from './clientTestUtils'
@@ -20,7 +19,6 @@ import { CloudOrganizationStubs, CloudProjectStubs, CloudRecordKeyStubs, CloudRu
 type MaybeResolveMap = {[K in keyof CodegenTypeMap]: MaybeResolver<CodegenTypeMap[K]>}
 
 const GQLStubRegistry: Partial<MaybeResolveMap> = {
-  App: stubApp,
   Wizard: stubWizard,
   ProjectLike: stubProject,
   GlobalProject: stubGlobalProject,

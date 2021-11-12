@@ -41,7 +41,6 @@ export class ProjectActions {
     await this.api.closeActiveProject()
 
     // TODO(tim): Improve general state management w/ immutability (immer) & updater fn
-    this.ctx.coreData.app.isInGlobalMode = true
     this.ctx.coreData.currentProject = null
     this.ctx.coreData.app.currentTestingType = null
   }

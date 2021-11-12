@@ -40,8 +40,6 @@ export interface ActiveProjectShape extends ProjectShape {
 export interface AppDataShape {
   browsers: ReadonlyArray<FoundBrowser> | null
   projects: ProjectShape[]
-  isInGlobalMode: boolean
-  isAuthBrowserOpened: boolean
   currentTestingType: Maybe<TestingTypeEnum>
   refreshingBrowsers: Promise<FoundBrowser[]> | null
 }
@@ -77,6 +75,7 @@ export interface CoreDataShape {
   wizard: WizardDataShape
   user: AuthenticatedUserShape | null
   electron: ElectronShape
+  isAuthBrowserOpened: boolean
 }
 
 /**
@@ -93,9 +92,8 @@ export function makeCoreData (): CoreDataShape {
       refreshingBrowsers: null,
       browsers: null,
       projects: [],
-      isInGlobalMode: false,
-      isAuthBrowserOpened: false,
     },
+    isAuthBrowserOpened: false,
     currentProject: null,
     wizard: {
       chosenTestingType: null,
