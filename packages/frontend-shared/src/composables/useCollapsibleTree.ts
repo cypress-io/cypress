@@ -1,51 +1,56 @@
 import { ComputedRef, computed, Ref } from 'vue'
 import { useToggle } from '@vueuse/core'
 
-export interface UseCollapsibleTreeNode {
-  [key: string]: any
+export type RawNode <T> = {
+  value: string
+  children: RawNode<T>[]
+}
 
+export type UseCollapsibleTreeNode <T extends RawNode<T>> = {
   // make all parents open themselves
-  reveal: () => UseCollapsibleTreeNode[]
+  reveal: () => UseCollapsibleTreeNode<T>[]
 
   // control open/close state
   hidden: ComputedRef<boolean>
   expanded: Ref<boolean>
   expand: () => boolean
   collapse: () => boolean
-  toggleCollapsed: () => void
+  toggle: () => void
 
   // Depth of a particular node -- 1 indexed
   depth: number
 
-  parent?: UseCollapsibleTreeNode
-  children?: UseCollapsibleTreeNode[]
-}
+  parent?: UseCollapsibleTreeNode<T>
+  children: UseCollapsibleTreeNode<T>[]
+} & { [K in keyof T]: T[K]}
 
 export interface UseCollapsibleTreeOptions {
   expandInitially?: boolean
+  dropRoot?: boolean
 }
 
-function collectRoots (node, acc: UseCollapsibleTreeNode[] = []) {
+function collectRoots<T extends RawNode<T>> (node: UseCollapsibleTreeNode<T>, acc: UseCollapsibleTreeNode<T>[] = []) {
   acc.push(node)
   if (!node.parent) {
     return acc
   }
 
-  collectRoots(node.parent, acc)
+  collectRoots<T>(node.parent, acc)
 
   return acc
 }
 
-export const useCollapsibleTreeNode = (rawNode, options, depth, parent) => {
-  const roots = parent ? collectRoots(parent) : []
+export const useCollapsibleTreeNode = <T extends RawNode<T>>(rawNode: T, options, depth, parent): UseCollapsibleTreeNode<T> => {
+  const treeNode = rawNode as UseCollapsibleTreeNode<T>
+  const roots = parent ? collectRoots<T>(parent) : []
   const [expanded, toggle] = useToggle(!!options.expandInitially)
   const hidden = computed(() => {
-    return roots.find((r) => r.expanded.value === false)
+    return !!roots.find((r) => r.expanded.value === false)
   })
 
   const reveal = () => {
     expanded.value = false
-    const parentNodes = collectRoots(parent)
+    const parentNodes = collectRoots<T>(parent)
 
     for (const parentNode of parentNodes) {
       parentNode.expand()
@@ -55,7 +60,7 @@ export const useCollapsibleTreeNode = (rawNode, options, depth, parent) => {
   }
 
   return {
-    ...rawNode,
+    ...treeNode,
     depth,
     parent,
     hidden,
@@ -67,8 +72,8 @@ export const useCollapsibleTreeNode = (rawNode, options, depth, parent) => {
   }
 }
 
-function buildTree (rawNode, options, acc: UseCollapsibleTreeNode[] = [], depth = 1, parent = null) {
-  const node = useCollapsibleTreeNode(rawNode, options, depth, parent)
+function buildTree<T extends RawNode<T>> (rawNode: T, options, acc: UseCollapsibleTreeNode<T>[] = [], depth = 1, parent = null as T | null) {
+  const node = useCollapsibleTreeNode<T>(rawNode, options, depth, parent)
 
   acc.push(node)
 
@@ -81,9 +86,9 @@ function buildTree (rawNode, options, acc: UseCollapsibleTreeNode[] = [], depth 
   return acc
 }
 
-export function useCollapsibleTree (tree, options: UseCollapsibleTreeOptions = {}) {
+export function useCollapsibleTree <T extends RawNode<T>> (tree: T, options: UseCollapsibleTreeOptions = {}) {
   options.expandInitially = options.expandInitially || true
-  const collapsibleTree = buildTree(tree, options)
+  const collapsibleTree = buildTree<T>(tree, options)
 
   const expand = (matches?) => {
     if (typeof matches === 'function') {
@@ -114,7 +119,7 @@ export function useCollapsibleTree (tree, options: UseCollapsibleTreeOptions = {
   }
 
   return {
-    tree: collapsibleTree,
+    tree: options.dropRoot ? collapsibleTree.slice(1) : collapsibleTree,
     reveal,
     expand,
     collapse,

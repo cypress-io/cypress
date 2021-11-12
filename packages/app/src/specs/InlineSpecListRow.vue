@@ -20,7 +20,7 @@
     @keydown.up.prevent="handleUp"
     @keydown.down.prevent="handleDown"
   >
-    <div class="flex items-center pl-18px">
+    <div class="flex items-center pl-16px">
       <SpecFileItem
         :file-name="spec.fileName"
         :extension="spec.specFileExtension"

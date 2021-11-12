@@ -14,9 +14,9 @@
         />
       </template>
       <template v-else>
-        <div class="text-white">
-          FileTree not implemented
-        </div>
+        <InlineSpecListTree
+          :specs="specs.map(spec => spec.node)"
+        />
       </template>
     </div>
   </div>
@@ -29,6 +29,7 @@ import type { SpecNode_InlineSpecListFragment, Specs_InlineSpecListFragment } fr
 import { useSpecStore } from '../store'
 import InlineSpecListHeader from './InlineSpecListHeader.vue'
 import InlineSpecListRow from './InlineSpecListRow.vue'
+import InlineSpecListTree from './InlineSpecListTree.vue'
 
 gql`
 fragment SpecNode_InlineSpecList on SpecEdge {
