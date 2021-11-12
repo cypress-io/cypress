@@ -54,8 +54,6 @@ export class WizardActions {
     //
   }
 
-  setSelectedNavItem (navItem: NexusGenEnums['NavItem']) {}
-
   setTestingType (type: 'component' | 'e2e') {
     this.ctx.coreData.wizard.chosenTestingType = type
 

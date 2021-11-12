@@ -38,7 +38,6 @@ export interface ActiveProjectShape extends ProjectShape {
 }
 
 export interface AppDataShape {
-  navItem: NexusGenEnums['NavItem']
   browsers: ReadonlyArray<FoundBrowser> | null
   projects: ProjectShape[]
   currentTestingType: Maybe<TestingTypeEnum>
@@ -89,9 +88,8 @@ export function makeCoreData (): CoreDataShape {
       refreshState: null,
     },
     app: {
-      refreshingBrowsers: null,
       currentTestingType: null,
-      navItem: 'settings',
+      refreshingBrowsers: null,
       browsers: null,
       projects: [],
     },
