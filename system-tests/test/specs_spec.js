@@ -41,7 +41,7 @@ describe('e2e specs', () => {
     })
   })
 
-  it('handles specs with % in the name', function () {
+  it('handles specs with special characters in the file name', function () {
     const project = Fixtures.projectPath('spec-name-special-characters')
 
     return systemTests.exec(this, {

@@ -151,7 +151,7 @@ export default class Iframes extends Component {
   // jQuery is a better fit for managing these iframes, since they need to get
   // wiped out and reset on re-runs and the snapshots are from dom we don't control
   _loadIframes (specPath) {
-    const specSrc = `/${this.props.config.namespace}/iframes/${specPath}`
+    const specSrc = `/${this.props.config.namespace}/iframes/${encodeURIComponent(specPath)}`
     const $container = $(this.refs.container).empty()
     const $autIframe = this.autIframe.create(this.props.config).appendTo($container)
 
@@ -162,7 +162,7 @@ export default class Iframes extends Component {
       class: 'spec-iframe',
     }).appendTo($container)
 
-    $specIframe.prop('src', encodeURI(specSrc))
+    $specIframe.prop('src', specSrc)
 
     return $autIframe
   }
