@@ -100,12 +100,61 @@ async function makeWorkspacePackagesAbsolute (pathToPkgJson: string): Promise<st
   return updatedDeps
 }
 
+function getYarnCommand (opts: {
+  yarnV2: boolean
+  updateYarnLock: boolean
+  isCI: boolean
+  runScripts: boolean
+}): string {
+  let cmd = `yarn install`
+
+  if (opts.yarnV2) {
+    // yarn v2's docs are no longer available on their site now that yarn v3 is out,
+    // Internet Archive has them here:
+    // @see https://web.archive.org/web/20210102223647/https://yarnpkg.com/cli/install
+    if (!opts.runScripts) cmd += ' --skip-builds'
+
+    if (!opts.updateYarnLock) cmd += ' --immutable'
+
+    return cmd
+  }
+
+  cmd += ' --prefer-offline'
+
+  if (!opts.runScripts) cmd += ' --ignore-scripts'
+
+  if (!opts.updateYarnLock) cmd += ' --frozen-lockfile'
+  else cmd += ' --update-checksums'
+
+  // in CircleCI, this offline cache can be used
+  if (opts.isCI) cmd += ` --cache-folder=~/.yarn-${process.platform} `
+
+  return cmd
+}
+
+type Dependencies = Record<string, string>
+
 /**
- * Replace all occurrences of a string.
- * TODO: remove once we're on Node 15 which has String.prototype.replaceAll
+ * Type for package.json files for system-tests example projects.
  */
-function replaceAll (string, from, to) {
-  return string.split(from).join(to)
+type SystemTestPkgJson = {
+  /**
+   * By default, scaffolding will run `yarn install` if there is a `package.json`.
+   * This option, if set, disables that.
+   */
+  _cySkipYarnInstall?: boolean
+  /**
+   * Run the yarn v2-style install command instead of yarn v1-style.
+   */
+  _cyYarnV2?: boolean
+  /**
+   * By default, the automatic `yarn install` will not run postinstall scripts. This
+   * option, if set, will cause postinstall scripts to run for this project.
+   */
+  _cyRunScripts?: boolean
+  dependencies?: Dependencies
+  devDependencies?: Dependencies
+  optionalDependencies?: Dependencies
 }
 
 /**
@@ -137,11 +186,11 @@ export async function scaffoldProjectNodeModules (project: string, updateYarnLoc
 
   try {
     // this will throw and exit early if the package.json does not exist
-    const pkgJson = require(projectPkgJsonPath)
+    const pkgJson: SystemTestPkgJson = require(projectPkgJsonPath)
 
     console.log(`📦 Found package.json for project ${project}.`)
 
-    if (pkgJson.cySkipYarnInstall) {
+    if (pkgJson._cySkipYarnInstall) {
       return console.log(`📦 cySkipYarnInstall set in package.json, skipping yarn steps`)
     }
 
@@ -164,11 +213,8 @@ export async function scaffoldProjectNodeModules (project: string, updateYarnLoc
 
     console.log('📦 Writing yarn.lock with fixed relative paths to temp dir')
     try {
-      const yarnLock = replaceAll(
-        await fs.readFile(yarnLockPath, 'utf8'),
-        relativePathToMonorepoRoot,
-        relativePathToProjectDir,
-      )
+      const yarnLock = (await fs.readFile(yarnLockPath, 'utf8'))
+      .replaceAll(relativePathToMonorepoRoot, relativePathToProjectDir)
 
       await fs.writeFile(yarnLockPath, yarnLock)
     } catch (err) {
@@ -178,12 +224,12 @@ export async function scaffoldProjectNodeModules (project: string, updateYarnLoc
     }
 
     // 4. Run `yarn install`.
-    let cmd = `yarn install --prefer-offline --ignore-scripts`
-
-    if (!updateYarnLock) cmd += ' --frozen-lockfile'
-    else cmd += ' --update-checksums'
-
-    if (process.env.CI) cmd += ` --cache-folder=~/.yarn-${process.platform} `
+    const cmd = getYarnCommand({
+      updateYarnLock,
+      yarnV2: pkgJson._cyYarnV2,
+      isCI: !!process.env.CI,
+      runScripts: pkgJson._cyRunScripts,
+    })
 
     await runCmd(cmd)
 
@@ -191,11 +237,8 @@ export async function scaffoldProjectNodeModules (project: string, updateYarnLoc
 
     // Replace workspace dependency paths in `yarn.lock` with tokens so it can be the same
     // for all developers
-    const yarnLock = replaceAll(
-      await fs.readFile(yarnLockPath, 'utf8'),
-      relativePathToProjectDir,
-      relativePathToMonorepoRoot,
-    )
+    const yarnLock = (await fs.readFile(yarnLockPath, 'utf8'))
+    .replaceAll(relativePathToProjectDir, relativePathToMonorepoRoot)
 
     await fs.writeFile(_path.join(projects, project, 'yarn.lock'), yarnLock)
 

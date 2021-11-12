@@ -8,5 +8,5 @@
     "typescript": "^4.2.4"
   },
   "license": "MIT",
-  "cySkipYarnInstall": true
+  "_cyYarnV2": true
 }
