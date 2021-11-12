@@ -10,7 +10,6 @@ import debugLib from 'debug'
 import { CoreDataShape, makeCoreData } from './data/coreDataShape'
 import { DataActions } from './DataActions'
 import {
-  AppDataSource,
   GitDataSource,
   FileDataSource,
   ProjectDataSource,
@@ -87,61 +86,9 @@ export class DataContext {
     this._coreData = makeCoreData(launchArgs)
   }
 
-  /**
-   * Any work that's necessary to initialize the context for run mode
-   */
-  async initializeRunMode () {
-    if (this._coreData.hasIntializedMode) {
-      throw new Error(`Mode already initialized`)
-    }
-
-    this._coreData.hasIntializedMode = 'run'
-    // TODO: figure out what this needs to be... sourcing & validating config?
-  }
-
-  /**
-   * After we set the launch args, we call this to "initialize" open mode.
-   * This kicks off any data initialization we need to do before the app
-   * is ready to go, and includes launching the server
-   */
-  async initializeOpenMode () {
-    if (this._coreData.hasIntializedMode) {
-      throw new Error(`Mode already initialized`)
-    }
-
-    this._coreData.hasIntializedMode = 'open'
-
-    // Fetch the browsers when the app starts, so we have some by
-    // the time we're continuing.
-    this.actions.app.refreshBrowsers()
-
-    // If there's no "current" project, we just want to launch global mode,
-    // which involves sourcing the current projects.
-    if (!this.currentProject) {
-      await this.actions.project.loadGlobalProjects()
-
-      return
-    }
-
-    // Otherwise, we want to set this project as the "active" project,
-    // which will kick off the process of sourcing the config, if we have
-    // a config file for this project
-    this.actions.project.setActiveProject(this.currentProject.projectRoot)
-
-    // If we have a testing type, we want to execute the plugins for that testing type
-    if (this.currentProject?.currentTestingType) {
-      //
-    }
-
-    if (this.currentProject?.currentTestingType && this.currentProject.cliBrowser) {
-      //
-    }
-  }
-
   async initializeData () {
     const toAwait: Promise<any>[] = [
       // load the cached user & validate the token on start
-      this.actions.auth.getUser(),
     ]
 
     if (this._config._internalOptions.loadCachedProjects) {
@@ -152,7 +99,7 @@ export class DataContext {
     if (this._config.launchArgs.projectRoot) {
       await this.actions.project.setActiveProject(this._config.launchArgs.projectRoot)
 
-      if (this.coreData.app.currentProject?.preferences) {
+      if (this.coreData.currentProject?.preferences) {
         toAwait.push(this.actions.project.launchProjectWithoutElectron())
       }
     }
@@ -216,11 +163,6 @@ export class DataContext {
     return new DataActions(this)
   }
 
-  @cached
-  get app () {
-    return new AppDataSource(this)
-  }
-
   get appData () {
     return this.coreData.app
   }
@@ -245,11 +187,11 @@ export class DataContext {
   }
 
   get currentProject () {
-    return this.coreData.app.currentProject
+    return this.coreData.currentProject
   }
 
   get currentTestingType () {
-    return this.coreData.app.currentProject?.currentTestingType ?? null
+    return this.coreData.currentProject?.currentTestingType ?? null
   }
 
   @cached
@@ -384,5 +326,62 @@ export class DataContext {
 
   get loader () {
     return this.util.loader
+  }
+
+  /**
+   * Any work that's necessary to initialize the context for run mode
+   */
+  async initializeRunMode () {
+    if (this._coreData.hasIntializedMode) {
+      throw new Error(`Mode already initialized`)
+    }
+
+    this._coreData.hasIntializedMode = 'run'
+    // TODO: figure out what this needs to be... sourcing & validating config?
+  }
+
+  /**
+   * After we set the launch args, we call this to "initialize" open mode.
+   * This kicks off any data initialization we need to do before the app
+   * is ready to go, and includes launching the server
+   */
+  async initializeOpenMode () {
+    if (this._coreData.hasIntializedMode) {
+      throw new Error(`Mode already initialized`)
+    }
+
+    // Load the cached user & validate the token on start
+    this.actions.auth.getUser()
+
+    this._coreData.hasIntializedMode = 'open'
+
+    // Fetch the browsers when the app starts, so we have some by
+    // the time we're continuing.
+    this.actions.app.refreshBrowsers()
+
+    // If there's no "current" project, we just want to launch global mode,
+    // which involves sourcing the current projects.
+    if (!this.currentProject) {
+      await this.actions.project.loadGlobalProjects()
+
+      return
+    }
+
+    // Otherwise, we want to set this project as the "active" project,
+    // which will kick off the process of sourcing the config, if we have
+    // a config file for this project
+    this.actions.project.setActiveProject(this.currentProject.projectRoot)
+
+    // If we have a testing type, we want to execute the plugins for that testing type
+    if (this.currentProject?.currentTestingType) {
+      this.actions.project.initializeActiveProject().then(() => {
+        if (this.currentProject?.cliBrowser) {
+          //
+        }
+      })
+      .catch((e) => {
+
+      })
+    }
   }
 }

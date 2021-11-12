@@ -87,9 +87,7 @@ fragment LoginModal on Query {
     email
     fullName
   }
-  app {
-    isAuthBrowserOpened
-  }
+  isAuthBrowserOpened
 }
 `
 

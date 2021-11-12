@@ -36,20 +36,18 @@ export class ProjectActions {
 
   async clearCurrentTestingType () {
     await this.api.closeActiveProject()
-    if (!this.ctx.appData.currentProject) {
+    if (!this.ctx.currentProject) {
       return
     }
 
-    this.ctx.appData.currentProject.currentTestingType = null
+    this.ctx.currentProject.currentTestingType = null
   }
 
   async clearCurrentProject () {
-    this.ctx.appData.currentProject = null
     await this.api.closeActiveProject()
 
     // TODO(tim): Improve general state management w/ immutability (immer) & updater fn
-    this.ctx.coreData.app.isInGlobalMode = true
-    this.ctx.coreData.app.currentProject = null
+    this.ctx.coreData.currentProject = null
   }
 
   private get projects () {
@@ -71,13 +69,19 @@ export class ProjectActions {
     const title = this.ctx.project.projectTitle(projectRoot)
 
     // Set initial properties, so we can set the config object on the active project
-    this.ctx.coreData.app.currentProject = {
+    this.ctx.coreData.currentProject = {
       title,
       projectRoot,
       currentTestingType: null,
+      isLoadingConfig: true,
+      configPromise: null,
+      errorLoadingConfig: null,
+      config: null,
     }
 
-    return this
+    // Load the project config, but don't block on this - it will alert
+    // its status separately via updating coreData.currentProject
+    return this.loadConfigForProject(projectRoot)
   }
 
   setCurrentTestingType (type: TestingTypeEnum) {
@@ -94,7 +98,11 @@ export class ProjectActions {
     this.ctx.coreData.app.projects = await projects
   }
 
-  async initializeActiveProject (options: OpenProjectLaunchOptions = {}) {
+  /**
+   * Starts the plugins for a given project, and launches
+   * the development server if we are in component testing mode
+   */
+  async initializeActiveProject () {
     if (!this.ctx.currentProject) {
       throw Error('Cannot initialize project without an active project')
     }
@@ -120,13 +128,10 @@ export class ProjectActions {
       await this.api.closeActiveProject()
       await this.api.initializeProject(launchArgs, {
         ...this.ctx.launchOptions,
-        ...options,
         ctx: this.ctx,
       }, browsers)
     } catch (e) {
-      // TODO(tim): remove / replace with ctx.log.error
-      // eslint-disable-next-line
-      console.error(e)
+      this.ctx.logError(e)
       throw e
     }
   }
@@ -166,6 +171,11 @@ export class ProjectActions {
     }
   }
 
+  /**
+   * Launches the project in the browser, based on the current testing type
+   * @param options
+   * @returns
+   */
   async launchProject (options: LaunchOpts) {
     const currentTestingType = this.ctx.currentProject?.currentTestingType
 
@@ -243,11 +253,7 @@ export class ProjectActions {
     this.api.removeProjectFromCache(projectRoot)
   }
 
-  syncProjects () {
-    //
-  }
-
-  createConfigFile (args: MutationAppCreateConfigFileArgs) {
+  createConfigFile (args: { configFilename: string, code: string }) {
     const project = this.ctx.currentProject
 
     if (!project) {
@@ -299,7 +305,11 @@ export class ProjectActions {
     }
 
     const parsed = path.parse(codeGenCandidate)
-    const config = await this.ctx.config.getConfigForProject(project.projectRoot)
+    const config = project.config
+
+    if (!config) {
+      return null
+    }
 
     const getFileExtension = () => {
       if (codeGenType === 'integration') {
@@ -362,6 +372,39 @@ export class ProjectActions {
       spec,
       content: newSpec.content,
     }
+  }
+
+  loadConfigForProject (projectRoot: string): Promise<FullConfig | null> {
+    const project = this.ctx.coreData.currentProject
+
+    if (!project) {
+      throw new Error(`Cannot access config without currentProject`)
+    }
+
+    if (!project.configPromise) {
+      project.configPromise = Promise.resolve().then(async () => {
+        const configFile = await this.ctx.config.getDefaultConfigBasename(projectRoot)
+
+        return this.ctx._apis.projectApi.getConfig(projectRoot, { configFile })
+      })
+      .then((fullConfig) => {
+        project.config = fullConfig
+
+        return fullConfig
+      })
+      .catch((e) => {
+        project.config = null
+        project.errorLoadingConfig = e
+
+        return null
+      })
+      .finally(() => {
+        project.isLoadingConfig = false
+        this.ctx.emitter.toLaunchpad()
+      })
+    }
+
+    return project.configPromise
   }
 
   reconfigureProject () {

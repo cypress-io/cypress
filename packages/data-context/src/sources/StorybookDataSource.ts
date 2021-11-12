@@ -33,7 +33,12 @@ export class StorybookDataSource {
       return []
     }
 
-    const config = await this.ctx.project.getConfig(project.projectRoot)
+    const config = project.config
+
+    if (!config) {
+      return []
+    }
+
     const normalizedGlobs = storybook.storyGlobs.map((glob) => path.join(storybook.storybookRoot, glob))
     const files = await this.ctx.file.getFilesByGlob(project.projectRoot, normalizedGlobs)
 

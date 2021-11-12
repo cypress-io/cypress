@@ -26,8 +26,8 @@ import { useWizardStore } from '../store/wizardStore'
 const wizardStore = useWizardStore()
 
 gql`
-fragment Wizard on Wizard {
-  ...ConfigFiles
+fragment Wizard on Query {
+  ...InstallDependencies
 }`
 
 const props = defineProps<{

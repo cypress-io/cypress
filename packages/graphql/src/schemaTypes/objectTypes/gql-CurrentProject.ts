@@ -24,9 +24,8 @@ export const CurrentProject = objectType({
       resolve: (_, args, ctx) => ctx.currentProject?.currentTestingType ?? null,
     })
 
-    t.nonNull.boolean('loadingConfig', {
+    t.nonNull.boolean('isLoadingConfig', {
       description: 'True if we are currently executing the child process to source',
-      resolve: () => false,
     })
 
     t.field('currentBrowser', {
@@ -92,19 +91,26 @@ export const CurrentProject = objectType({
       },
     })
 
-    t.nonNull.json('config', {
+    t.nonNull.boolean('needsOnboarding', {
+      description: 'Whether this is a newly setup project and needs onboarding',
+      resolve: (source, args, ctx) => ctx.project.needsOnboarding(),
+    })
+
+    t.nonNull.boolean('isLoadingConfig', {
+      description: 'Whether we are currently loading the config',
+    })
+
+    t.json('config', {
       description: 'Project configuration',
       resolve: (source, args, ctx) => {
-        return ctx.project.getResolvedConfigFields(source.projectRoot)
+        return ctx.project.getResolvedConfigFields()
       },
     })
 
     t.string('configFilePath', {
       description: 'Config File Path',
       resolve: async (source, args, ctx) => {
-        const config = await ctx.project.getConfig(source.projectRoot)
-
-        return config.configFile ?? null
+        return ctx.currentProject?.config?.configFile ?? null
       },
     })
 
@@ -140,5 +146,8 @@ export const CurrentProject = objectType({
       },
     })
   },
-
+  sourceType: {
+    module: '@packages/data-context/src/data/coreDataShape',
+    export: 'CurrentProjectShape',
+  },
 })

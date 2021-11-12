@@ -14,7 +14,7 @@ export class ProjectDataSource {
   }
 
   async projectId (projectRoot: string) {
-    const config = await this.getConfig(projectRoot)
+    const config = this.getLoadedConfig()
 
     return config?.projectId ?? null
   }
@@ -23,16 +23,17 @@ export class ProjectDataSource {
     return path.basename(projectRoot)
   }
 
-  getConfig (projectRoot: string) {
-    return this.ctx.config.getConfigForProject(projectRoot)
+  getLoadedConfig () {
+    return this.ctx.currentProject?.config
   }
 
   async findSpecs (specType: Maybe<SpecType> = null) {
-    if (!this.ctx.currentProject) {
+    const config = this.ctx.currentProject?.config
+
+    if (!this.ctx.currentProject || !config) {
       return null
     }
 
-    const config = await this.getConfig(this.ctx.currentProject.projectRoot)
     const specs = await this.api.findSpecs({
       projectRoot: this.ctx.currentProject.projectRoot,
       fixturesFolder: config.fixturesFolder ?? false,
@@ -50,8 +51,12 @@ export class ProjectDataSource {
     return specs.filter((spec) => spec.specType === specType)
   }
 
-  async getResolvedConfigFields (projectRoot: string): Promise<ResolvedFromConfig[]> {
-    const config = await this.getConfig(projectRoot)
+  getResolvedConfigFields (): ResolvedFromConfig[] | null {
+    const config = this.ctx.currentProject?.config
+
+    if (!config) {
+      return null
+    }
 
     interface ResolvedFromWithField extends ResolvedFromConfig {
       field: typeof RESOLVED_FROM[number]
@@ -92,7 +97,7 @@ export class ProjectDataSource {
       return false
     }
 
-    const config = await this.getConfig(this.ctx.currentProject.projectRoot)
+    const config = this.ctx.currentProject.config
 
     if (!config) {
       return true
@@ -159,12 +164,11 @@ export class ProjectDataSource {
 
     const project = this.ctx.currentProject
 
-    if (!project) {
+    if (!project || !project.config) {
       throw Error(`Cannot find components without currentProject.`)
     }
 
-    const config = await this.ctx.project.getConfig(project.projectRoot)
-
+    const config = project.config
     const codeGenCandidates = await this.ctx.file.getFilesByGlob(config.projectRoot || process.cwd(), glob)
 
     return codeGenCandidates.map(
@@ -176,5 +180,21 @@ export class ProjectDataSource {
         })
       },
     )
+  }
+
+  async needsOnboarding () {
+    if (this.ctx.currentTestingType === 'e2e') {
+      if (await this.ctx.project.isE2EConfigured()) {
+        return false
+      }
+    }
+
+    if (this.ctx.currentTestingType === 'component') {
+      if (await this.ctx.project.isCTConfigured()) {
+        return false
+      }
+    }
+
+    return true
   }
 }

@@ -12,7 +12,7 @@ describe('Launchpad: Open Mode', () => {
     cy.get('h1').should('contain', defaultMessages.globalPage.empty.title)
   })
 
-  it('shows projects when projects have been added', () => {
+  it('shows Add Project when no projects have been added', () => {
     cy.get('h1').should('contain', defaultMessages.globalPage.empty.title)
   })
 
@@ -55,7 +55,7 @@ describe('Launchpad: Open Mode', () => {
     })
 
     // Component testing is not configured for the todo project
-    cy.get('h1').should('contain', 'Cypress Configuration Error')
+    cy.get('h1').should('contain', 'Project Setup')
   })
 
   it('auto-selects the browser when launched with --browser', () => {
@@ -92,6 +92,9 @@ describe('Launchpad: Open Mode', () => {
 
   describe('when a user interacts with the header', () => {
     it('the Docs menu opens when clicked', () => {
+      cy.openModeSystemTest('todos')
+      cy.visitLaunchpad()
+
       cy.contains('Projects').should('be.visible')
       cy.contains('button', 'Docs').click()
       cy.contains(defaultMessages.topNav.docsMenu.gettingStartedTitle).should('be.visible')

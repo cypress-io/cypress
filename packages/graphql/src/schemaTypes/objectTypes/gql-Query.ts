@@ -1,11 +1,8 @@
-import { objectType } from 'nexus'
-import { BaseError } from '.'
-import { ProjectLike } from '..'
-import { App } from './gql-App'
+import { nonNull, objectType } from 'nexus'
+import { BaseError, WizardSampleConfigFile } from '.'
+import { ProjectLike, WizardSetupInput } from '..'
 import { CurrentProject } from './gql-CurrentProject'
 import { DevState } from './gql-DevState'
-import { NavigationMenu } from './gql-NavigationMenu'
-import { Wizard } from './gql-Wizard'
 
 export const Query = objectType({
   name: 'Query',
@@ -14,22 +11,6 @@ export const Query = objectType({
     t.field('baseError', {
       type: BaseError,
       resolve: (root, args, ctx) => ctx.baseError,
-    })
-
-    t.nonNull.field('app', {
-      type: App,
-      resolve: (root, args, ctx) => ctx.appData,
-    })
-
-    t.field('navigationMenu', {
-      type: NavigationMenu,
-      description: 'Metadata about the nagivation menu',
-    })
-
-    t.field('wizard', {
-      type: Wizard,
-      description: 'Metadata about the wizard, null if we arent showing the wizard',
-      resolve: (root, args, ctx) => ctx.wizard.rootField(),
     })
 
     t.nonNull.field('dev', {
@@ -41,13 +22,40 @@ export const Query = objectType({
     t.field('currentProject', {
       type: CurrentProject,
       description: 'The currently opened project',
-      resolve: (root, args, ctx) => ctx.coreData.app.currentProject,
+      resolve: (root, args, ctx) => ctx.coreData.currentProject,
     })
 
     t.nonNull.list.nonNull.field('projects', {
       type: ProjectLike,
       description: 'All known projects for the app',
       resolve: (root, args, ctx) => ctx.projectsList,
+    })
+
+    t.list.nonNull.field('sampleConfigFiles', {
+      type: WizardSampleConfigFile,
+      args: {
+        input: nonNull(WizardSetupInput),
+      },
+      description: 'Set of sample configuration files based bundler, framework and language of choice',
+      resolve: (source, args, ctx) => ctx.wizard.sampleConfigFiles(args.input),
+    })
+
+    t.string('sampleTemplate', {
+      description: 'IndexHtml file based on bundler and framework of choice',
+      args: {
+        input: nonNull(WizardSetupInput),
+      },
+      resolve: (source, args, ctx) => ctx.wizard.sampleTemplate(args.input),
+    })
+
+    t.nonNull.boolean('isInGlobalMode', {
+      description: 'Whether the app is in global mode or not',
+      resolve: (source, args, ctx) => !ctx.currentProject,
+    })
+
+    t.nonNull.boolean('isAuthBrowserOpened', {
+      description: 'Whether the browser has been opened for auth or not',
+      resolve: (source, args, ctx) => ctx.coreData.isAuthBrowserOpened,
     })
   },
 })

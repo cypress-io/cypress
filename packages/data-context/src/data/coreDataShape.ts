@@ -43,23 +43,35 @@ export interface CurrentProjectShape extends ProjectShape {
    * that are available after sourcing the config
    */
   browserErrorMessage?: string | null
-  ctPluginsInitialized?: Maybe<boolean>
-  e2ePluginsInitialized?: Maybe<boolean>
   specs?: FoundSpec[]
-  config?: Promise<FullConfig> | null
+  /**
+   * Set to true while we are resolving the config
+   */
+  isLoadingConfig: boolean
+  /**
+   * Captures an error found when sourcing the config
+   */
+  errorLoadingConfig: Error | null
+  /**
+   * The full config resolved for the project
+   */
+  config: FullConfig | null
+  /**
+   * The promise loading the config, or null if we haven't kicked it off yet
+   */
+  configPromise: Promise<FullConfig | null> | null
   configChildProcess?: ConfigChildProcessShape | null
-  preferences?: Preferences| null
+  /**
+   * Preferences loaded for the user
+   */
+  preferences?: Preferences | null
   browsers?: FoundBrowser[] | null
 }
 
 export interface AppDataShape {
-  navItem: NexusGenEnums['NavItem']
-  browsers: ReadonlyArray<FoundBrowser> | null
   projects: string[]
-  currentProject: CurrentProjectShape | null
-  isInGlobalMode: boolean
-  isAuthBrowserOpened: boolean
   refreshingBrowsers: Promise<FoundBrowser[]> | null
+  browsers: ReadonlyArray<FoundBrowser> | null
 }
 
 export interface WizardDataShape {
@@ -85,10 +97,12 @@ export interface CoreDataShape {
   baseError: BaseErrorDataShape | null
   dev: DevStateShape
   app: AppDataShape
+  currentProject: CurrentProjectShape | null
   wizard: WizardDataShape
   user: AuthenticatedUserShape | null
   electron: ElectronShape
   hasIntializedMode: 'open' | 'run' | null
+  isAuthBrowserOpened: boolean
 }
 
 function makeCurrentProject (launchArgs: LaunchArgs): CurrentProjectShape | null {
@@ -100,6 +114,10 @@ function makeCurrentProject (launchArgs: LaunchArgs): CurrentProjectShape | null
     title: path.basename(launchArgs.projectRoot),
     projectRoot: launchArgs.projectRoot,
     currentTestingType: launchArgs.testingType ?? null,
+    isLoadingConfig: false,
+    config: null,
+    configPromise: null,
+    errorLoadingConfig: null,
   }
 }
 
@@ -115,13 +133,11 @@ export function makeCoreData (launchArgs: LaunchArgs): CoreDataShape {
     },
     app: {
       refreshingBrowsers: null,
-      navItem: 'settings',
       browsers: null,
       projects: [],
-      currentProject: makeCurrentProject(launchArgs),
-      isInGlobalMode: false,
-      isAuthBrowserOpened: false,
     },
+    isAuthBrowserOpened: false,
+    currentProject: makeCurrentProject(launchArgs),
     wizard: {
       chosenBundler: null,
       chosenFramework: null,

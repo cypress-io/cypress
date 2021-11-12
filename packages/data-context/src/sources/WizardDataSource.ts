@@ -1,102 +1,63 @@
-import { Bundler, BUNDLERS, CodeLanguage, CODE_LANGUAGES, FrontendFramework, FRONTEND_FRAMEWORKS, PACKAGES_DESCRIPTIONS, SampleConfigFile, StorybookInfo } from '@packages/types'
-import type { NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
+import { Bundler, BUNDLERS, CodeLanguage, CODE_LANGUAGES, FrontendFramework, FRONTEND_FRAMEWORKS, SampleConfigFile, StorybookInfo } from '@packages/types'
 import type { DataContext } from '..'
 import { getSampleConfigFiles } from '../codegen/sample-config-files'
 import dedent from 'dedent'
-import type { WizardDataShape } from '../data'
+import type { WizardSetupInput } from '@packages/graphql/src/gen/nxs.gen'
 
 export class WizardDataSource {
   constructor (private ctx: DataContext) {}
 
-  // Returns
-  async rootField (): Promise<WizardDataShape | null> {
-    if (this.ctx.currentTestingType === 'e2e') {
-      if (await this.ctx.project.isE2EConfigured()) {
-        return this.ctx.wizardData
-      }
+  private inputData (input: WizardSetupInput) {
+    return {
+      bundler: BUNDLERS.find((b) => b.type === input.bundler),
+      framework: FRONTEND_FRAMEWORKS.find((f) => f.type === input.framework),
+      language: CODE_LANGUAGES.find((f) => f.type === input.language),
     }
-
-    if (this.ctx.currentTestingType === 'component') {
-      if (await this.ctx.project.isCTConfigured()) {
-        return this.ctx.wizardData
-      }
-    }
-
-    return null
   }
 
-  packagesToInstall (): Array<NexusGenObjects['WizardNpmPackage']> | null {
-    if (!this.chosenFramework || !this.chosenBundler) {
-      return null
-    }
-
-    return [
-      {
-        name: this.chosenFramework.name,
-        description: PACKAGES_DESCRIPTIONS[this.chosenFramework.package],
-        package: this.chosenFramework.package,
-      },
-      {
-        name: this.chosenBundler.name,
-        description: PACKAGES_DESCRIPTIONS[this.chosenBundler.package],
-        package: this.chosenBundler.package,
-      },
-    ]
-  }
-
-  get currentTestingTypePluginsInitialized () {
-    if (this.currentTestingType === 'component' && this.ctx.currentProject?.ctPluginsInitialized) {
-      return true
-    }
-
-    if (this.currentTestingType === 'e2e' && this.ctx.currentProject?.e2ePluginsInitialized) {
-      return true
-    }
-
-    return false
-  }
-
-  async sampleCode () {
+  async sampleCode (input: WizardSetupInput) {
     const storybookInfo = await this.ctx.storybook.loadStorybookInfo()
+    const data = this.inputData(input)
 
-    if (!this.chosenLanguage) {
+    if (!data.language) {
       return null
     }
 
     if (this.currentTestingType === 'component') {
-      if (!this.chosenFramework || !this.chosenBundler) {
+      if (!data.framework || !data.bundler) {
         return null
       }
 
       return wizardGetConfigCodeCt({
-        framework: this.chosenFramework,
-        bundler: this.chosenBundler,
-        lang: this.chosenLanguage,
+        framework: data.framework,
+        bundler: data.bundler,
+        lang: data.language,
         storybookInfo,
       })
     }
 
     if (this.currentTestingType === 'e2e') {
       return wizardGetConfigCodeE2E({
-        lang: this.chosenLanguage,
+        lang: data.language,
       })
     }
 
     return null
   }
 
-  async sampleConfigFiles (): Promise<SampleConfigFile[]> {
+  async sampleConfigFiles (input: WizardSetupInput): Promise<SampleConfigFile[]> {
     const testingType = this.currentTestingType
 
-    const configFileContent = await this.sampleCode()
-    const templateFileContent = await this.sampleTemplate()
+    const data = this.inputData(input)
+    const configFileContent = await this.sampleCode(input)
+    const templateFileContent = await this.sampleTemplate(input)
 
-    if (!this.chosenLanguage || !configFileContent || !testingType) {
+    if (!data.language || !configFileContent || !testingType) {
       return []
     }
 
     const sampleConfigFile: SampleConfigFile = {
-      filePath: `cypress.config.${this.chosenLanguage.type}`,
+      filePath: `cypress.config.${input.language}`,
       description: 'The config file you are supposed to have',
       content: configFileContent,
       status: 'changes',
@@ -112,40 +73,29 @@ export class WizardDataSource {
         status: 'valid',
       }
 
-      return [sampleConfigFile, ...(await getSampleConfigFiles(testingType, this.chosenLanguage.type)), sampleTemplateFile]
+      return [sampleConfigFile, ...(await getSampleConfigFiles(testingType, input.language)), sampleTemplateFile]
     }
 
-    return [sampleConfigFile, ...(await getSampleConfigFiles(testingType, this.chosenLanguage.type))]
+    return [sampleConfigFile, ...(await getSampleConfigFiles(testingType, input.language))]
   }
 
-  async sampleTemplate () {
+  async sampleTemplate (input: WizardSetupInput) {
+    const data = this.inputData(input)
     const storybookInfo = await this.ctx.storybook.loadStorybookInfo()
 
-    if (!this.chosenFramework || !this.chosenBundler) {
+    if (!data.framework || !data.bundler) {
       return null
     }
 
     return wizardGetComponentIndexHtml({
-      bundler: this.chosenBundler,
-      framework: this.chosenFramework,
+      bundler: data.bundler,
+      framework: data.framework,
       storybookInfo,
     })
   }
 
-  get currentTestingType () {
+  private get currentTestingType () {
     return this.ctx.currentProject?.currentTestingType ?? null
-  }
-
-  get chosenFramework () {
-    return FRONTEND_FRAMEWORKS.find((f) => f.type === this.ctx.wizardData.chosenFramework)
-  }
-
-  get chosenBundler () {
-    return BUNDLERS.find((f) => f.type === this.ctx.wizardData.chosenBundler)
-  }
-
-  get chosenLanguage () {
-    return CODE_LANGUAGES.find((f) => f.type === this.ctx.wizardData.chosenLanguage)
   }
 }
 

@@ -24,6 +24,10 @@ gql`
   mutation TestingTypeCards_selectTestingType($type: TestingTypeEnum!) {
   selectProjectTestingType(type: $type) {
     ...TestingTypeCards
+    currentProject {
+      id
+      needsOnboarding
+    }
   }
 }
 `

@@ -1,24 +1,34 @@
 <template>
-  <div>
-    <RouterLink
-      v-for="spec in specs"
-      :key="spec.node.id"
-      class="text-left grid grid-cols-[16px,auto,auto] items-center gap-10px"
-      :class="{ 'border-2 border-red-400': isCurrentSpec(spec) }"
-      :to="{ path: 'runner', query: { file: spec.node.relative } }"
-    >
-      <SpecName :gql="spec.node" />
-    </RouterLink>
+  <div class="w-280px">
+    <InlineSpecListHeader
+      v-model:tab="tab"
+      v-model:search="search"
+    />
+    <div class="h-[calc(100vh-65px)] overflow-y-auto overflow-x-hidden pt-16px">
+      <template v-if="tab === 'file-list'">
+        <InlineSpecListRow
+          v-for="spec in specs"
+          :key="spec.node.id"
+          :spec="spec.node"
+          :selected="isCurrentSpec(spec)"
+        />
+      </template>
+      <template v-else>
+        <div class="text-white">
+          FileTree not implemented
+        </div>
+      </template>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { gql } from '@urql/vue'
 import type { SpecNode_InlineSpecListFragment, Specs_InlineSpecListFragment } from '../generated/graphql'
-import SpecName from './SpecName.vue'
 import { useSpecStore } from '../store'
-import { useRouter } from 'vue-router'
+import InlineSpecListHeader from './InlineSpecListHeader.vue'
+import InlineSpecListRow from './InlineSpecListRow.vue'
 
 gql`
 fragment SpecNode_InlineSpecList on SpecEdge {
@@ -28,6 +38,7 @@ fragment SpecNode_InlineSpecList on SpecEdge {
     specType
     absolute
     relative
+    baseName
   }
   ...SpecListRow
 }
@@ -37,7 +48,7 @@ gql`
 fragment Specs_InlineSpecList on CurrentProject {
   id
   projectRoot
-  specs: specs(first: 25) {
+  specs: specs(first: 1000) {
     edges {
       ...SpecNode_InlineSpecList
     }
@@ -55,7 +66,22 @@ const isCurrentSpec = (spec: SpecNode_InlineSpecListFragment) => {
   return spec.node.relative === specStore.activeSpec?.relative
 }
 
-const router = useRouter()
+const tab = ref('file-list')
+const search = ref('')
 
-const specs = computed(() => props.gql.specs?.edges || [])
+const specs = computed(() => {
+  if (!search.value) {
+    return props.gql.specs?.edges || []
+  }
+
+  return (
+    props.gql.specs?.edges.filter((edge) => {
+      return (
+        edge.node.fileName.toLowerCase() +
+        edge.node.specFileExtension.toLowerCase()
+      ).includes(search.value.toLocaleLowerCase())
+    }) || []
+  )
+})
+
 </script>

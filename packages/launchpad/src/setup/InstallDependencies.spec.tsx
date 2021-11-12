@@ -1,9 +1,12 @@
 import InstallDependencies from './InstallDependencies.vue'
 import { defaultMessages } from '@cy/i18n'
+import { InstallDependenciesFragmentDoc } from '../generated/graphql-test'
 
 describe('<InstallDependencies />', () => {
   beforeEach(() => {
-    cy.mount(<InstallDependencies />)
+    cy.mountFragment(InstallDependenciesFragmentDoc, {
+      render: (gqlVal) => <InstallDependencies gql={gqlVal} />,
+    })
   })
 
   it('displays package information and links', () => {

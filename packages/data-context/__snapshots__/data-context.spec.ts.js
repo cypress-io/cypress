@@ -27,7 +27,6 @@ exports['@packages/data-context initializeData initializes 1'] = {
     "app": {
       "currentTestingType": null,
       "refreshingBrowsers": {},
-      "navItem": "settings",
       "browsers": [
         {
           "path": "/dev/chrome"
@@ -35,9 +34,8 @@ exports['@packages/data-context initializeData initializes 1'] = {
       ],
       "projects": [],
       "currentProject": null,
-      "isInGlobalMode": false,
-      "isAuthBrowserOpened": false
     },
+    "isAuthBrowserOpened": false,
     "wizard": {
       "chosenTestingType": null,
       "chosenBundler": null,

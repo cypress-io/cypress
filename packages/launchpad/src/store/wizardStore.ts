@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { Bundler, BUNDLERS, CodeLanguage, FrontendFramework, FRONTEND_FRAMEWORKS, PACKAGES_DESCRIPTIONS } from '@packages/types/src/constants'
+import { WizardSetupInput } from '../generated/graphql'
 
 const WIZARD_STEPS = ['selectFramework', 'installDependencies', 'configFiles'] as const
 
@@ -29,6 +30,13 @@ export const useWizardStore = defineStore({
     return initState()
   },
   getters: {
+    variables (): WizardSetupInput {
+      return {
+        bundler: this.wizardBundler,
+        framework: this.wizardFramework,
+        language: this.wizardCodeLanguage,
+      }
+    },
     bundlerOptions (this: S) {
       if (this.wizardFramework) {
         const framework = FRONTEND_FRAMEWORKS.find((t) => t.type === this.wizardFramework)

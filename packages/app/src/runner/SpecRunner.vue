@@ -1,11 +1,11 @@
 <template>
   <RemovePositioningDuringScreenshot
     id="main-pane"
-    class="flex"
+    class="flex border-l-1 border-gray-900"
   >
     <HideDuringScreenshot
       id="inline-spec-list"
-      class="bg-gray-1000 w-128"
+      class="bg-gray-1000"
     >
       <InlineSpecList :gql="props.gql" />
     </HideDuringScreenshot>

@@ -93,29 +93,6 @@ export const CODE_LANGUAGES = [
 
 export type CodeLanguage = typeof CODE_LANGUAGES[number]
 
-export const NAV_ITEMS = [
-  {
-    type: 'projectSetup',
-    name: 'Project Setup',
-    iconPath: 'clarity/dashboard-line',
-  },
-  {
-    type: 'runs',
-    name: 'Runs',
-    iconPath: 'clarity/bullet-list-line',
-  },
-  {
-    type: 'learn',
-    name: 'Learn',
-    iconPath: 'clarity/terminal-line',
-  },
-  {
-    type: 'settings',
-    name: 'Settings',
-    iconPath: 'clarity/settings-line',
-  },
-] as const
-
 export type AllPackages = FrontendFramework['package'] | Bundler['package']
 
 export type AllPackageTypes = FrontendFramework['type'] | Bundler['type']

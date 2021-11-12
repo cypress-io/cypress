@@ -8,6 +8,7 @@
     :title="t('setupPage.openBrowser.title')"
     :description="t('setupPage.openBrowser.description')"
   />
+  <Spinner />
   <OpenBrowser
     v-if="query.data.value?.currentProject"
     :gql="query.data.value.currentProject"
@@ -21,6 +22,7 @@ import { gql, useQuery } from '@urql/vue'
 import HeadingText from './HeadingText.vue'
 import { OpenBrowserContainerDocument } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
+import Spinner from '@packages/frontend-shared/src/components/Spinner.vue'
 
 const { t } = useI18n()
 
@@ -30,9 +32,6 @@ query OpenBrowserContainer {
     id
     browserErrorMessage
     ...OpenBrowser
-  }
-  wizard {
-    ...Wizard
   }
 }
 `

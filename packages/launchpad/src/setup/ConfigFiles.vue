@@ -32,13 +32,13 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 import { gql } from '@urql/core'
-import type { ConfigFilesFragment } from '../generated/graphql'
+import { ConfigFilesDocument } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
 import Button from '@cy/components/Button.vue'
 import FileRow from '../components/code/FileRow.vue'
 import { useWizardStore } from '../store/wizardStore'
-import WizardLayout from './WizardLayout.vue'
 import HeadingText from './HeadingText.vue'
+import { useQuery } from '@urql/vue'
 
 const wizardStore = useWizardStore()
 
@@ -56,8 +56,8 @@ mutation ConfigFiles_CompleteWizard {
 `
 
 gql`
-fragment ConfigFiles on Wizard {
-  sampleConfigFiles {
+query ConfigFiles($input: WizardSetupInput!) {
+  sampleConfigFiles (input: $input) {
     id
     filePath
     content
@@ -67,10 +67,12 @@ fragment ConfigFiles on Wizard {
 }
 `
 
-const props = defineProps<{
-  gql: ConfigFilesFragment
-}>()
-const files = computed(() => props.gql.sampleConfigFiles)
+const query = useQuery({
+  query: ConfigFilesDocument,
+  variables: { input: wizardStore.variables },
+})
+
+const files = computed(() => query.data.value?.sampleConfigFiles)
 
 const continueForward: any = () => {
   // TODO: mutation to "complete" the wizard workflow

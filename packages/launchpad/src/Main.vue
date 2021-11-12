@@ -1,18 +1,21 @@
 <template>
-  <template v-if="query.data.value">
+  <template v-if="data">
     <HeaderBar />
     <div class="p-24px">
-      <template v-if="query.data.value.baseError">
-        <BaseError :gql="query.data.value.baseError" />
+      <template v-if="data.baseError">
+        <BaseError :gql="data.baseError" />
       </template>
       <GlobalPage
-        v-else-if="query.data.value.app.isInGlobalMode && !query.data.value?.currentProject"
-        :gql="query.data.value"
+        v-else-if="!data?.currentProject"
+        :gql="data"
       />
-      <ChooseTestingTypeContainer v-else-if="!query.data.value.currentProject?.currentTestingType" />
+      <Spinner v-else-if="data.currentProject.isLoadingConfig" />
+      <ChooseTestingTypeContainer
+        v-else-if="!data.currentProject?.currentTestingType"
+      />
       <Wizard
-        v-else-if="query.data.value.wizard"
-        :gql="query.data.value.wizard"
+        v-else-if="data.currentProject.needsOnboarding"
+        :gql="data"
       />
       <OpenBrowserContainer v-else />
     </div>
@@ -31,8 +34,10 @@ import BaseError from './error/BaseError.vue'
 import OpenBrowserContainer from './setup/OpenBrowserContainer.vue'
 import ChooseTestingTypeContainer from './setup/ChooseTestingTypeContainer.vue'
 import HeaderBar from '@cy/gql-components/HeaderBar.vue'
+import Spinner from '@cy/components/Spinner.vue'
 
 import { useI18n } from '@cy/i18n'
+import { computed } from 'vue-demi'
 
 const { t } = useI18n()
 
@@ -42,19 +47,18 @@ query MainLaunchpadQuery {
   currentProject {
     id
     currentTestingType
+    needsOnboarding
+    isLoadingConfig
   }
   baseError {
     ...BaseError
   }
-  wizard {
-    ...Wizard
-  }
-  app {
-    isInGlobalMode
-  }
+  isInGlobalMode
   ...GlobalPage
+  ...Wizard
 }
 `
 
 const query = useQuery({ query: MainLaunchpadQueryDocument })
+const data = computed(() => query.data.value)
 </script>

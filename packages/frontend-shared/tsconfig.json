@@ -34,7 +34,7 @@
      * TODO: Look into changing this in the future
      */
     /* Additional Checks */
-    "skipLibCheck": false,
+    "skipLibCheck": true,
     /* Report errors on unused locals. */
     // "noEmit": true,
     "noUnusedLocals": false,

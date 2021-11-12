@@ -1,14 +1,9 @@
 <template>
-  <div class="relative px-24px py-22px">
-    <div class="absolute h-38px w-160px bg-gradient-to-r from-transparent to-white via-white right-25px top-25px rounded pointer-events-none" />
-    <div class="code-area text-left p-8px text-purple-500 border border-gray-100 rounded flex items-center overflow-x-scroll">
-      <i-cy-dollar_x16 class="icon-dark-gray-500 mr-12px" /> <pre><span class="text-14px font-light">{{ dependenciesCode }}</span></pre>
-    </div>
-    <CopyButton
-      :text="dependenciesCode"
-      class="top-26px right-28px absolute"
-    />
-  </div>
+  <TerminalPrompt
+    class="m-24px"
+    :command="installDependenciesCode"
+    :project-folder-name="projectFolder"
+  />
   <div class="border-t border-t-gray-100 px-24px">
     <ul>
       <li
@@ -33,13 +28,29 @@
 
 <script lang="ts" setup>
 import { computed } from 'vue'
-import CopyButton from '@cy/components/CopyButton.vue'
 import ExternalLink from '@packages/frontend-shared/src/gql-components/ExternalLink.vue'
 import { useWizardStore } from '../store/wizardStore'
+import { gql } from '@urql/core'
+import type { ManualInstallFragment } from '../generated/graphql'
+
+gql`
+fragment ManualInstall on Query {
+  currentProject {
+    id
+    title
+  }
+}
+`
+
+const props = defineProps<{
+  gql: ManualInstallFragment
+}>()
+
+const projectFolder = computed(() => props.gql.currentProject?.title ?? '')
 
 const wizardStore = useWizardStore()
 
-const dependenciesCode = computed(
+const installDependenciesCode = computed(
   () => {
     return `yarn add -D ${
     (wizardStore.toInstall ?? [])

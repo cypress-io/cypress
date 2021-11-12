@@ -12,6 +12,10 @@ export async function makeGraphQLServer (ctx: DataContext) {
 
   app.use(cors())
 
+  app.get('/__cypress/shiki-themes', (req, res) => {
+    res.json([{}, {}])
+  })
+
   // TODO: Figure out how we want to cleanup & juggle the config, so
   // it's not jammed into the projects
   addGraphQLHTTP(app, ctx)

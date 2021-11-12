@@ -58,9 +58,6 @@ mutation EnvironmentSetup_clearTestingType {
       id
       currentTestingType
     }
-    wizard {
-      ...Wizard
-    }
   }
 }
 `

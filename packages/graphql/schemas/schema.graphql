@@ -2,15 +2,6 @@
 ### Do not make changes to this file directly
 
 
-"""Namespace for information related to the app"""
-type App {
-  """Whether the browser has been opened for auth or not"""
-  isAuthBrowserOpened: Boolean!
-
-  """Whether the app is in global mode or not"""
-  isInGlobalMode: Boolean!
-}
-
 """Base error"""
 type BaseError {
   message: String
@@ -251,7 +242,7 @@ type CurrentProject implements Node & ProjectLike {
   codeGenGlob(type: CodeGenType!): String!
 
   """Project configuration"""
-  config: JSON!
+  config: JSON
 
   """Config File Path"""
   configFilePath: String
@@ -271,11 +262,14 @@ type CurrentProject implements Node & ProjectLike {
   """Whether the user configured this project to use e2e Testing"""
   isE2EConfigured: Boolean!
 
+  """Whether we are currently loading the config"""
+  isLoadingConfig: Boolean!
+
   """Whether we are currently refreshing the browsers list"""
   isRefreshingBrowsers: Boolean!
 
-  """True if we are currently executing the child process to source"""
-  loadingConfig: Boolean!
+  """Whether this is a newly setup project and needs onboarding"""
+  needsOnboarding: Boolean!
 
   """Cached preferences for this project"""
   preferences: ProjectPreferences
@@ -473,30 +467,6 @@ type Mutation {
   showElectronOnAppExit: Boolean
 }
 
-enum NavItem {
-  learn
-  projectSetup
-  runs
-  settings
-}
-
-"""Container describing a single nav item"""
-type NavigationItem implements Node {
-  iconPath: String!
-
-  """Relay style Node ID field for the NavigationItem field"""
-  id: ID!
-  name: String!
-  selected: Boolean!
-  type: NavItem!
-}
-
-"""Container for state associated with the side navigation menu"""
-type NavigationMenu {
-  items: [NavigationItem!]!
-  selected: NavItem!
-}
-
 """Implements the Relay Node spec"""
 interface Node {
   """Globally unique identifier representing a concrete GraphQL ObjectType"""
@@ -564,7 +534,6 @@ type ProjectPreferences {
 
 """The root "Query" type containing all entry fields for our querying"""
 type Query {
-  app: App!
   baseError: BaseError
 
   """Returns an object conforming to the Relay spec"""
@@ -591,14 +560,22 @@ type Query {
   """The state of any info related to local development of the runner"""
   dev: DevState!
 
-  """Metadata about the nagivation menu"""
-  navigationMenu: NavigationMenu
+  """Whether the browser has been opened for auth or not"""
+  isAuthBrowserOpened: Boolean!
+
+  """Whether the app is in global mode or not"""
+  isInGlobalMode: Boolean!
 
   """All known projects for the app"""
   projects: [ProjectLike!]!
 
-  """Metadata about the wizard, null if we arent showing the wizard"""
-  wizard: Wizard
+  """
+  Set of sample configuration files based bundler, framework and language of choice
+  """
+  sampleConfigFiles(input: WizardSetupInput!): [WizardSampleConfigFile!]
+
+  """IndexHtml file based on bundler and framework of choice"""
+  sampleTemplate(input: WizardSetupInput!): String
 }
 
 """Represents a spec on the file system"""
@@ -689,64 +666,13 @@ enum TestingTypeEnum {
 The Wizard is a container for any state associated with initial onboarding to Cypress
 """
 type Wizard {
-  """All of the languages to choose from"""
-  allLanguages: [WizardCodeLanguage!]!
-
-  """Whether the plugins for the selected testing type has been initialized"""
-  currentTestingTypePluginsInitialized: Boolean!
-  framework: WizardFrontendFramework
-
-  """All of the component testing frameworks to choose from"""
-  frameworks: [WizardFrontendFramework!]!
-  language: WizardCodeLanguage
-
-  """
-  A list of packages to install, null if we have not chosen both a framework and bundler
-  """
-  packagesToInstall: [WizardNpmPackage!]
-
   """
   Set of sample configuration files based bundler, framework and language of choice
   """
-  sampleConfigFiles: [WizardSampleConfigFile!]
+  sampleConfigFiles(input: WizardSetupInput!): [WizardSampleConfigFile!]
 
   """IndexHtml file based on bundler and framework of choice"""
-  sampleTemplate: String
-}
-
-"""Wizard bundler"""
-type WizardBundler implements Node {
-  """Relay style Node ID field for the WizardBundler field"""
-  id: ID!
-
-  """Whether this is the selected framework bundler"""
-  isSelected: Boolean
-
-  """Display name of the bundler"""
-  name: String!
-
-  """Package to install associated with the bundler"""
-  package: String!
-
-  """The name of the framework"""
-  type: SupportedBundlers!
-}
-
-"""
-A code language that the user can choose from to create their cypress.config
-"""
-type WizardCodeLanguage implements Node {
-  """Relay style Node ID field for the WizardCodeLanguage field"""
-  id: ID!
-
-  """Whether this is the selected language in the wizard"""
-  isSelected: Boolean!
-
-  """The name of the language"""
-  name: String!
-
-  """The key of the language"""
-  type: CodeLanguageEnum!
+  sampleTemplate(input: WizardSetupInput!): String
 }
 
 enum WizardConfigFileStatusEnum {
@@ -754,36 +680,6 @@ enum WizardConfigFileStatusEnum {
   error
   skipped
   valid
-}
-
-"""A frontend framework that we can setup within the app"""
-type WizardFrontendFramework implements Node {
-  """Relay style Node ID field for the WizardFrontendFramework field"""
-  id: ID!
-
-  """Whether this is the selected framework in the wizard"""
-  isSelected: Boolean!
-
-  """The name of the framework"""
-  name: String!
-
-  """All of the supported bundlers for this framework"""
-  supportedBundlers: [WizardBundler!]!
-
-  """The name of the framework"""
-  type: FrontendFrameworkEnum!
-}
-
-"""Details about an NPM Package listed during the wizard install"""
-type WizardNpmPackage implements Node {
-  description: String!
-
-  """Relay style Node ID field for the WizardNpmPackage field"""
-  id: ID!
-
-  """The package name that you would npm install"""
-  name: String!
-  package: String!
 }
 
 """Each config file suggestion given by the wizard"""
@@ -797,6 +693,8 @@ type WizardSampleConfigFile implements Node {
   status: WizardConfigFileStatusEnum!
 }
 
-input WizardUpdateInput {
-  bundler: SupportedBundlers
+input WizardSetupInput {
+  bundler: SupportedBundlers!
+  framework: FrontendFrameworkEnum!
+  language: CodeLanguageEnum!
 }

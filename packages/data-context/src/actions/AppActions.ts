@@ -41,9 +41,9 @@ export class AppActions {
     }
   }
 
-  async refreshBrowsers () {
+  async refreshBrowsers (): Promise<FoundBrowser[]> {
     if (this.ctx.coreData.app.refreshingBrowsers) {
-      return
+      return this.ctx.coreData.app.refreshingBrowsers
     }
 
     const dfd = pDefer<FoundBrowser[]>()
@@ -55,8 +55,8 @@ export class AppActions {
 
     this.ctx.coreData.app.browsers = browsers
 
-    if (this.ctx.coreData.app.currentProject) {
-      this.ctx.coreData.app.currentProject.browsers = browsers
+    if (this.ctx.coreData.currentProject) {
+      this.ctx.coreData.currentProject.browsers = browsers
     }
 
     // If we don't have a chosen browser, assign to the first one in the list
@@ -65,6 +65,8 @@ export class AppActions {
     }
 
     dfd.resolve(browsers)
+
+    return dfd.promise
   }
 
   private idForBrowser (obj: FoundBrowser) {
