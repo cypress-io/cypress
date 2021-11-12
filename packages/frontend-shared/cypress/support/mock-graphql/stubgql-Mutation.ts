@@ -34,26 +34,6 @@ export const stubMutation: MaybeResolver<Mutation> = {
 
     return true
   },
-  setCurrentSpec (source, args, ctx) {
-    if (!ctx.currentProject) {
-      throw Error('Cannot set currentSpec without active project')
-    }
-
-    ctx.currentProject.currentSpec = {
-      id: 'U3BlYzovVXNlcnMvbGFjaGxhbi9jb2RlL3dvcmsvY3lwcmVzczUvcGFja2FnZXMvYXBwL3NyYy9CYXNpYy5zcGVjLnRzeA==',
-      __typename: 'Spec',
-      absolute: '/Users/lachlan/code/work/cypress5/packages/app/src/Basic.spec.tsx',
-      relative: 'app/src/Basic.spec.tsx',
-      specFileExtension: '.spec.tsx',
-      specType: 'component',
-      name: 'Basic',
-      fileExtension: 'spec.tsx',
-      fileName: 'Basic.spec.tsx',
-      baseName: 'Basic',
-    }
-
-    return true
-  },
   hideBrowserWindow (source, args, ctx) {
     return true
   },

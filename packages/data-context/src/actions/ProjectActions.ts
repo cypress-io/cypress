@@ -268,14 +268,6 @@ export class ProjectActions {
     this.ctx.fs.writeFileSync(path.resolve(project.projectRoot, args.configFilename), args.code)
   }
 
-  setCurrentSpec (id: string) {
-    if (!this.ctx.currentProject) {
-      throw Error(`Cannot set current spec without currentProject.`)
-    }
-
-    this.ctx.currentProject.currentSpecId = id
-  }
-
   async clearLatestProjectCache () {
     await this.api.clearLatestProjectsCache()
   }

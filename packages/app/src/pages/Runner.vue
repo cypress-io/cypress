@@ -13,6 +13,7 @@ import SpecRunnerContainer from '../runner/SpecRunnerContainer.vue'
 gql`
 query SpecPageContainer {
   currentProject {
+    id
     ...SpecRunner
   }
 }

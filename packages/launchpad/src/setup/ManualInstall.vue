@@ -1,26 +1,22 @@
 <template>
-  <div class="relative px-24px py-22px">
-    <div class="absolute h-38px w-160px bg-gradient-to-r from-transparent to-white via-white right-25px top-25px rounded pointer-events-none" />
-    <div class="code-area text-left p-8px text-purple-500 border border-gray-100 rounded flex items-center overflow-x-scroll">
-      <i-cy-dollar_x16 class="icon-dark-gray-500 mr-12px" /> <pre><span class="text-14px font-light">{{ dependenciesCode }}</span></pre>
-    </div>
-    <CopyButton
-      :text="dependenciesCode"
-      class="top-26px right-28px absolute"
-    />
-  </div>
+  <TerminalPrompt
+    class="m-24px"
+    :command="installDependenciesCode"
+    :project-folder-name="projectFolder"
+  />
   <div class="border-t border-t-gray-100 px-24px">
     <ul>
       <li
-        v-for="dep in props.gql.packagesToInstall"
+        v-for="dep in props.gql.wizard.packagesToInstall"
         :key="dep.id"
         class="py-16px border-b border-b-gray-100 last-of-type:border-b-0"
       >
-        <a
+        <ExternalLink
           :href="`https://www.npmjs.com/package/${dep.package}`"
-          target="_blank"
           class="text-indigo-500 text-14px hocus-link-default"
-        >{{ dep.package }}</a>
+        >
+          {{ dep.package }}
+        </ExternalLink>
         <p
           class="text-gray-500 text-14px leading-5"
           v-html="dep.description"
@@ -32,32 +28,42 @@
 
 <script lang="ts" setup>
 import { computed } from 'vue'
-import CopyButton from '@cy/components/CopyButton.vue'
 import { gql } from '@urql/core'
+import TerminalPrompt from '@cy/components/TerminalPrompt.vue'
 import type { ManualInstallFragment } from '../generated/graphql'
+import ExternalLink from '@packages/frontend-shared/src/gql-components/ExternalLink.vue'
 
 gql`
-fragment ManualInstall on Wizard {
-  packagesToInstall {
+fragment ManualInstall on Query {
+  wizard {  
+    packagesToInstall {
+      id
+      name
+      description
+      package
+    }
+  }
+  currentProject {
     id
-    name
-    description
-    package
+    title
   }
 }
 `
+
+const projectFolder = computed(() => props.gql.currentProject?.title ?? '')
 
 const props = defineProps<{
   gql: ManualInstallFragment
 }>()
 
-defineEmits<{(event: 'back'): void
+defineEmits<{
+  (event: 'back'): void
 }>()
 
-const dependenciesCode = computed(
+const installDependenciesCode = computed(
   () => {
     return `yarn add -D ${
-    (props.gql.packagesToInstall ?? [])
+    (props.gql.wizard.packagesToInstall ?? [])
     .map((pack) => `${pack.package}`)
     .join(' ')}`
   },

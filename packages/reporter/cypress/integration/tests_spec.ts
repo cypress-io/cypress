@@ -134,7 +134,7 @@ describe('tests', () => {
 
   describe('studio', () => {
     describe('button', () => {
-      it('displays studio icon with half transparency when hovering over test title', () => {
+      it('displays studio icon with half transparency when hovering over test title', { scrollBehavior: false }, () => {
         cy.contains('test 1')
         .closest('.runnable-wrapper')
         .realHover()
@@ -143,7 +143,7 @@ describe('tests', () => {
         .should('have.css', 'opacity', '0.5')
       })
 
-      it('displays studio icon with no transparency and tooltip on hover', () => {
+      it('displays studio icon with no transparency and tooltip on hover', { scrollBehavior: false }, () => {
         cy.contains('test 1')
         .closest('.collapsible-header')
         .find('.runnable-controls-studio')

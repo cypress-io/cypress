@@ -30,7 +30,6 @@ export interface ActiveProjectShape extends ProjectShape {
   e2ePluginsInitialized: Maybe<boolean>
   isCTConfigured: Maybe<boolean>
   isE2EConfigured: Maybe<boolean>
-  currentSpecId?: Maybe<string>
   specs?: FoundSpec[]
   config: Promise<FullConfig> | null
   configChildProcess: ConfigChildProcessShape | null

@@ -5,7 +5,6 @@
   <div
     v-else
     class="h-full mx-auto bg-white"
-    @click="handleLinkTargetBlank"
   >
     <Main />
   </div>
@@ -84,12 +83,6 @@ interval = window.setInterval(poll, 200)
 
 const backendInitialized = computed(() => !!query.data?.value?.app)
 
-const handleLinkTargetBlank = (event) => {
-  if (event.target.href && event.target.target === '_blank') {
-    event.preventDefault()
-    // TODO - use a mutation to open these links in the default user browser
-  }
-}
 </script>
 
 <style lang="scss">

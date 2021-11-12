@@ -1,7 +1,11 @@
 import type { LaunchArgs, OpenProjectLaunchOptions, PlatformName } from '@packages/types'
-import type { AppApiShape, ProjectApiShape } from './actions'
+import fsExtra from 'fs-extra'
+import path from 'path'
+
+import { AppApiShape, DataEmitterActions, ProjectApiShape } from './actions'
 import type { NexusGenAbstractTypeMembers } from '@packages/graphql/src/gen/nxs.gen'
 import type { AuthApiShape } from './actions/AuthActions'
+import type { ElectronApiShape } from './actions/ElectronActions'
 import debugLib from 'debug'
 import { CoreDataShape, makeCoreData } from './data/coreDataShape'
 import { DataActions } from './DataActions'
@@ -15,10 +19,16 @@ import {
   StorybookDataSource,
   CloudDataSource,
   ConfigDataSource,
+  EnvDataSource,
+  GraphQLDataSource,
+  HtmlDataSource,
+  UtilDataSource,
 } from './sources/'
 import { cached } from './util/cached'
-import { DataContextShell, DataContextShellConfig } from './DataContextShell'
 import type { GraphQLSchema } from 'graphql'
+import type { Server } from 'http'
+import type { AddressInfo } from 'net'
+import EventEmitter from 'events'
 import type { App as ElectronApp } from 'electron'
 
 const IS_DEV_ENV = process.env.CYPRESS_INTERNAL_ENV !== 'production'
@@ -27,7 +37,7 @@ export interface InternalDataContextOptions {
   loadCachedProjects: boolean
 }
 
-export interface DataContextConfig extends DataContextShellConfig {
+export interface DataContextConfig {
   schema: GraphQLSchema
   os: PlatformName
   launchArgs: LaunchArgs
@@ -43,22 +53,31 @@ export interface DataContextConfig extends DataContextShellConfig {
   appApi: AppApiShape
   authApi: AuthApiShape
   projectApi: ProjectApiShape
+  electronApi: ElectronApiShape
   /**
    * Internal options used for testing purposes
    */
   _internalOptions: InternalDataContextOptions
 }
 
-export class DataContext extends DataContextShell {
+export class DataContext {
+  private _rootBus: EventEmitter
   private _coreData: CoreDataShape
+  private _gqlServer?: Server
+  private _appServerPort: number | undefined
+  private _gqlServerPort: number | undefined
 
   constructor (private _config: DataContextConfig) {
-    super(_config)
+    this._rootBus = new EventEmitter()
     this._coreData = _config.coreData ?? makeCoreData()
   }
 
   get electronApp () {
     return this._config.electronApp
+  }
+
+  get electronApi () {
+    return this._config.electronApi
   }
 
   async initializeData () {
@@ -100,6 +119,10 @@ export class DataContext extends DataContextShell {
     }
 
     return Promise.all(toAwait)
+  }
+
+  get rootBus () {
+    return this._rootBus
   }
 
   get os () {
@@ -196,8 +219,63 @@ export class DataContext extends DataContextShell {
     return new CloudDataSource(this)
   }
 
+  @cached
+  get env () {
+    return new EnvDataSource(this)
+  }
+
+  @cached
+  get emitter () {
+    return new DataEmitterActions(this)
+  }
+
+  graphqlClient () {
+    return new GraphQLDataSource(this, this._config.schema)
+  }
+
+  @cached
+  get html () {
+    return new HtmlDataSource(this)
+  }
+
+  @cached
+  get util () {
+    return new UtilDataSource(this)
+  }
+
   get projectsList () {
     return this.coreData.app.projects
+  }
+
+  // Servers
+
+  setAppServerPort (port: number | undefined) {
+    this._appServerPort = port
+  }
+
+  setGqlServer (srv: Server) {
+    this._gqlServer = srv
+    this._gqlServerPort = (srv.address() as AddressInfo).port
+  }
+
+  get appServerPort () {
+    return this._appServerPort
+  }
+
+  get gqlServerPort () {
+    return this._gqlServerPort
+  }
+
+  // Utilities
+
+  @cached
+  get fs () {
+    return fsExtra
+  }
+
+  @cached
+  get path () {
+    return path
   }
 
   get _apis () {
@@ -205,7 +283,8 @@ export class DataContext extends DataContextShell {
       appApi: this._config.appApi,
       authApi: this._config.authApi,
       projectApi: this._config.projectApi,
-      busApi: this._config.rootBus,
+      electronApi: this._config.electronApi,
+      busApi: this._rootBus,
     }
   }
 
@@ -245,7 +324,7 @@ export class DataContext extends DataContextShell {
   }
 
   async destroy () {
-    super.destroy()
+    this._gqlServer?.close()
 
     return Promise.all([
       this.util.disposeLoaders(),

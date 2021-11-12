@@ -9,7 +9,7 @@ import {
   IframeModel,
   selectorPlaygroundModel,
   AutIframe,
-  eventManager as EventManager,
+  EventManager,
 } from '@packages/runner-shared'
 
 import State from '../../src/lib/state'

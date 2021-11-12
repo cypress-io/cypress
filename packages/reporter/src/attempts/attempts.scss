@@ -22,7 +22,7 @@
       &:before {
         border-left: 1px solid $gray-900;
         content: '';
-        left: 5px;
+        left: 9px;
         position: absolute;
         top: 22px;
         height: 15px;
@@ -38,57 +38,36 @@
     }
 
     > .is-open .open-close-indicator {
-        i.fa-angle-down {
-          margin-top: 0;
-        }
-
-        i.fa-angle-up {
-          order: 1;
-          margin-top: -4px;
-        }
+      svg.collapse-icon {
+        display: block;
       }
 
-    .open-close-indicator {
-      display: flex;
-      flex-direction: column;
+      svg.expand-icon {
+        display: none;
+      }
+    }
 
-      i {
-        margin-right: 5px;
+  .open-close-indicator {
+    svg {
+      margin-right: 3px;
 
-        &.fa-angle-down {
-          margin-top: -4px;
-        }
+      &.collapse-icon {
+        display: none;
+      }
+
+      &.expand-icon {
+        display: block;
       }
     }
   }
+}
 
-
-  .attempt-state-active {
-    .attempt-state {
-      @include runnable-state-active;
-    }
-  }
-  .attempt-state-processing {
-    .attempt-state {
-      @include runnable-state-processing;
-    }
-  }
   .attempt-state-failed {
-    .attempt-state {
-      @include runnable-state-failed;
-    }
-
     .attempt-name:after {
       color: $fail;
     }
   }
   .attempt-state-passed {
-    .attempt-state {
-
-    @include runnable-state-passed;
-    }
-
-
     .attempt-name:after {
       color: $pass;
     }
@@ -113,9 +92,9 @@
     &:after {
       color: $gray-600;
       content: '•';
-      left: 3px;
+      left: 7px;
       position: absolute;
-      top: 6px;
+      top: 4px;
     }
 
     .attempt-tag {
