@@ -1,10 +1,7 @@
 const debug = require('debug')('cypress:server:find_system_node')
-const execa = require('execa')
 const fixPath = require('fix-path')
 const Promise = require('bluebird')
 const which = require('which')
-
-const NODE_VERSION_RE = /^v(\d+\.\d+\.\d+)/m
 
 /*
  * Find the full path to a `node` binary on the current PATH.
@@ -41,44 +38,6 @@ function findNodeInFullPath () {
   })
 }
 
-function findNodeVersionFromPath (path) {
-  if (!path) {
-    return Promise.resolve(null)
-  }
-
-  return execa.stdout(path, ['-v'])
-  .then((stdout) => {
-    debug('node -v returned %o', { stdout })
-    const matches = NODE_VERSION_RE.exec(stdout)
-
-    if (matches && matches.length === 2) {
-      const version = matches[1]
-
-      debug('found Node version', { version })
-
-      return version
-    }
-  })
-  .catch((err) => {
-    debug('could not resolve Node version %o', { err })
-
-    throw err
-  })
-}
-
-function findNodePathAndVersion () {
-  return findNodeInFullPath()
-  .then((path) => {
-    return findNodeVersionFromPath(path)
-    .then((version) => {
-      return {
-        path, version,
-      }
-    })
-  })
-}
-
 module.exports = {
   findNodeInFullPath,
-  findNodePathAndVersion,
 }

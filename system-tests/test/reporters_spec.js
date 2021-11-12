@@ -154,11 +154,13 @@ describe('e2e reporters', () => {
       },
       processEnv: {
         MOCHA_COLORS: 1,
+        CI: 1,
+        CIRCLECI: true,
       },
     }).then((result) => {
-      expect(result.stdout.match(/passes inherited(.*)/)[1]).to.contain('\u001b[33m')
-      expect(result.stdout.match(/passes quickly(.*)/)[1]).not.to.contain('\u001b[33m')
-      expect(result.stdout.match(/passes slowly(.*)/)[1]).to.contain('\u001b[33m')
+      expect(result.stdout.match(/passes inherited(.*)/)[1], 'when verifying "passes inherited" test time colors').to.contain('\u001b[33m')
+      expect(result.stdout.match(/passes quickly(.*)/)[1], 'when verifying "passes quickly" test time colors').not.to.contain('\u001b[33m')
+      expect(result.stdout.match(/passes slowly(.*)/)[1], 'when verifying "passes slowly" test time color').to.contain('\u001b[33m')
     })
   })
 })

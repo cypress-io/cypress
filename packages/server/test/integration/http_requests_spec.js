@@ -60,6 +60,23 @@ const cleanResponseBody = (body) => {
   return replaceAbsolutePaths(removeWhitespace(body))
 }
 
+function getHugeJsFile () {
+  const pathToHugeAppJs = Fixtures.path('server/libs/huge_app.js')
+
+  const getHugeFile = () => {
+    return rp('https://s3.amazonaws.com/internal-test-runner-assets.cypress.io/huge_app.js')
+    .then((resp) => {
+      return fs
+      .outputFileAsync(pathToHugeAppJs, resp)
+      .return(resp)
+    })
+  }
+
+  return fs
+  .readFileAsync(pathToHugeAppJs, 'utf8')
+  .catch(getHugeFile)
+}
+
 describe('Routes', () => {
   require('mocha-banner').register()
 
@@ -3316,20 +3333,7 @@ describe('Routes', () => {
         })
 
         it('does not die rewriting a huge JS file', function () {
-          const pathToHugeAppJs = Fixtures.path('server/libs/huge_app.js')
-
-          const getHugeFile = () => {
-            return rp('https://s3.amazonaws.com/internal-test-runner-assets.cypress.io/huge_app.js')
-            .then((resp) => {
-              return fs
-              .outputFileAsync(pathToHugeAppJs, resp)
-              .return(resp)
-            })
-          }
-
-          return fs
-          .readFileAsync(pathToHugeAppJs, 'utf8')
-          .catch(getHugeFile)
+          return getHugeJsFile()
           .then((hugeJsFile) => {
             nock(this.server._remoteOrigin)
             .get('/app.js')
@@ -3823,8 +3827,7 @@ describe('Routes', () => {
       })
 
       it('aborts the proxied request', function (done) {
-        fs
-        .readFileAsync(Fixtures.path('server/libs/huge_app.js'), 'utf8')
+        getHugeJsFile()
         .then((str) => {
           const server = http.createServer((req, res) => {
             // when the incoming message to our

@@ -45,7 +45,6 @@ describe('/lib/tasks/install', function () {
     beforeEach(function () {
       logger.reset()
 
-      // sinon.stub(os, 'tmpdir').returns('/tmp')
       sinon.stub(util, 'isCi').returns(false)
       sinon.stub(util, 'isPostInstall').returns(false)
       sinon.stub(util, 'pkgVersion').returns(packageVersion)
@@ -439,6 +438,23 @@ describe('/lib/tasks/install', function () {
         return snapshot(
           'silent install 1',
           normalize(`[no output]${this.stdout.toString()}`),
+        )
+      })
+    })
+
+    it('exits with error when installing on unsupported os', function () {
+      sinon.stub(util, 'getPlatformInfo').resolves('Platform: win32-ia32')
+
+      return install.start()
+      .then(() => {
+        throw new Error('should have caught error')
+      })
+      .catch((err) => {
+        logger.error(err)
+
+        snapshot(
+          'error when installing on unsupported os',
+          normalize(this.stdout.toString()),
         )
       })
     })

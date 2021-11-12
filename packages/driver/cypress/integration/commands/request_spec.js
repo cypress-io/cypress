@@ -821,7 +821,7 @@ describe('src/cy/commands/request', () => {
       })
 
       it('throws when url is not FQDN', {
-        baseUrl: '',
+        baseUrl: null,
       }, function (done) {
         cy.stub(cy, 'getRemoteLocation').withArgs('origin').returns('')
 
@@ -841,7 +841,7 @@ describe('src/cy/commands/request', () => {
       })
 
       it('throws when url is not FQDN, notes that configFile is disabled', {
-        baseUrl: '',
+        baseUrl: null,
         configFile: false,
       }, function (done) {
         cy.stub(cy, 'getRemoteLocation').withArgs('origin').returns('')
@@ -861,7 +861,7 @@ describe('src/cy/commands/request', () => {
       })
 
       it('throws when url is not FQDN, notes that configFile is non-default', {
-        baseUrl: '',
+        baseUrl: null,
         configFile: 'foo.json',
       }, function (done) {
         cy.stub(cy, 'getRemoteLocation').withArgs('origin').returns('')

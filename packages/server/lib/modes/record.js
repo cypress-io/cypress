@@ -7,6 +7,7 @@ const debugCiInfo = require('debug')('cypress:server:record:ci-info')
 const Promise = require('bluebird')
 const isForkPr = require('is-fork-pr')
 const commitInfo = require('@cypress/commit-info')
+
 const api = require('../api')
 const logger = require('../logger')
 const errors = require('../errors')
@@ -749,7 +750,7 @@ const createRunAndRecordSpecs = (options = {}) => {
           return _.pick({
             ...v,
             clientId: v.id,
-            config: v._testConfig || null,
+            config: v._testConfig?.unverifiedTestConfig || null,
             title: v._titlePath,
             hookIds: v.hooks.map((hook) => hook.hookId),
           },

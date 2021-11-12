@@ -17,28 +17,11 @@ if (isWindows() && process.env.APPVEYOR) {
     return `Appveyor CPU arch is set to: '${cpuArch}' but the node version that is being used is running: '${nodeArch}'. Expected it to equal: '${expectedArch}'`
   }
 
-  // if we're in the x86 CPU architecture check
-  // to ensure that os.arch() is ia32
-
-  // eslint-disable-next-line default-case
-  switch (cpuArch) {
-    case 'x86':
-      assert.equal(
-        os.arch(),
-        'ia32',
-        getErrMsg('ia32'),
-      )
-
-      break
-    case 'x64':
-      assert.equal(
-        os.arch(),
-        'x64',
-        getErrMsg('x64'),
-      )
-
-      break
-  }
+  assert.equal(
+    os.arch(),
+    'x64',
+    getErrMsg('x64'),
+  )
 }
 
 // we want to ensure we are building using the same major version
