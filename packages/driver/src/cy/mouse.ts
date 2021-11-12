@@ -707,8 +707,6 @@ export const create = (state, keyboard, focused, Cypress) => {
   return mouse
 }
 
-export interface Mouse extends ReturnType<typeof create> {}
-
 const { stopPropagation } = window.MouseEvent.prototype
 
 const sendEvent = (evtName, el, evtOptions, bubbles = false, cancelable = false, Constructor, composed = false) => {
@@ -760,3 +758,5 @@ const toCoordsEventOptions = (x, y, win) => {
     layerY: x + scrollY,
   }
 }
+
+export interface Mouse extends ReturnType<typeof create> {}

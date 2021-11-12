@@ -75,7 +75,7 @@ export const create = (cy) => ({
     }
 
     if (reserved.includes(alias)) {
-      return $errUtils.throwErrByPath('as.reserved_word', { args: { alias } })
+      $errUtils.throwErrByPath('as.reserved_word', { args: { alias } })
     }
 
     return null
@@ -105,7 +105,7 @@ export const create = (cy) => ({
       ? 'alias.not_registered_with_available'
       : 'alias.not_registered_without_available'
 
-    return $errUtils.throwErrByPath(errPath, {
+    $errUtils.throwErrByPath(errPath, {
       onFail: log,
       args: { cmd, displayName, availableAliases: availableAliases.join(', ') },
     })
