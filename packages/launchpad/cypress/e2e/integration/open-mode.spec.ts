@@ -2,7 +2,7 @@ import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 
 describe('Launchpad: Open Mode', () => {
   beforeEach(() => {
-    cy.openE2E()
+    cy.openModeGlobal()
     cy.visitLaunchpad()
     // Forcing reload, need to sync with @brian-mann to debug behavior here
     cy.reload({ log: false })
@@ -23,7 +23,7 @@ describe('Launchpad: Open Mode', () => {
   })
 
   it('goes directly to e2e tests when launched with --e2e', () => {
-    cy.openE2E('todos')
+    cy.openModeSystemTest('todos')
 
     cy.withCtx(async (ctx) => {
       // Though the data context is previously initialized,
@@ -41,7 +41,7 @@ describe('Launchpad: Open Mode', () => {
   })
 
   it('goes directly to component tests when launched with --component', () => {
-    cy.openE2E('todos')
+    cy.openModeSystemTest('todos')
 
     cy.withCtx(async (ctx) => {
       // Though the data context is previously initialized,
@@ -59,7 +59,7 @@ describe('Launchpad: Open Mode', () => {
   })
 
   it('auto-selects the browser when launched with --browser', () => {
-    cy.openE2E('launchpad')
+    cy.openModeSystemTest('launchpad')
 
     cy.withCtx(async (ctx) => {
       ctx.launchArgs.testingType = 'e2e'
@@ -80,7 +80,7 @@ describe('Launchpad: Open Mode', () => {
 
   describe('when there is a list of projects', () => {
     it('goes to an active project if one is added', () => {
-      cy.openE2E('todos')
+      cy.openModeSystemTest('todos')
 
       cy.withCtx(async (ctx, o) => {
         ctx.emitter.toLaunchpad()

@@ -31,7 +31,7 @@ const makeDataContext = (options) => {
     projectApi: {
       initializeProject: () => {},
       launchProject: () => {},
-      getProjectRootsFromCache: () => ([]),
+      getProjectRootsFromCache: () => Promise.resolve([]),
       getProjectPreferencesFromCache: () => {
         return {
           [options.coreData.app.currentProject.title]: {

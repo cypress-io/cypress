@@ -1,6 +1,6 @@
 import { cloneDeep } from 'lodash'
 import type { CloudUser } from '../generated/test-cloud-graphql-types.gen'
-import type { WizardStep, NavItem, CurrentProject, Browser, WizardBundler, WizardFrontendFramework, TestingTypeEnum, GlobalProject } from '../generated/test-graphql-types.gen'
+import type { NavItem, CurrentProject, Browser, WizardBundler, WizardFrontendFramework, GlobalProject } from '../generated/test-graphql-types.gen'
 import { resetTestNodeIdx } from './clientTestUtils'
 import { stubBrowsers } from './stubgql-Browser'
 import * as cloudTypes from './stubgql-CloudTypes'
@@ -19,17 +19,11 @@ export interface ClientTestContext {
     isAuthBrowserOpened: boolean
   }
   wizard: {
-    step: WizardStep
-    canNavigateForward: boolean
-    chosenTestingType: TestingTypeEnum | null
     chosenBundler: WizardBundler | null
     chosenFramework: WizardFrontendFramework | null
     chosenManualInstall: boolean
-    currentStep: WizardStep
     allBundlers: WizardBundler[]
-    history: WizardStep[]
     chosenBrowser: null
-    browserErrorMessage: null
   }
   user: Partial<CloudUser> | null
   cloudTypes: typeof cloudTypes
@@ -57,17 +51,11 @@ export function makeClientTestContext (): ClientTestContext {
       isAuthBrowserOpened: false,
     },
     wizard: {
-      step: 'configFiles',
-      canNavigateForward: false,
-      chosenTestingType: null,
       chosenBundler: null,
       chosenFramework: null,
       chosenManualInstall: false,
-      currentStep: 'welcome',
       allBundlers,
-      history: ['welcome'],
       chosenBrowser: null,
-      browserErrorMessage: null,
     },
     user: null,
     cloudTypes,

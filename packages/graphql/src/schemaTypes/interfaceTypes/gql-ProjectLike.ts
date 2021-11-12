@@ -3,6 +3,7 @@ import { interfaceType } from 'nexus'
 export interface ProjectShape {
   projectId?: string | null
   projectRoot: string
+  title: string
 }
 
 export const ProjectLike = interfaceType({
@@ -19,7 +20,7 @@ export const ProjectLike = interfaceType({
     })
 
     t.nonNull.string('title', {
-      resolve: (source, args, ctx) => ctx.project.projectTitle(source.projectRoot),
+      resolve: (source, args, ctx) => source.title,
     })
   },
   resolveType (root) {

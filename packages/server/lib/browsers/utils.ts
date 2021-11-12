@@ -9,7 +9,7 @@ import plugins from '../plugins'
 const path = require('path')
 const debug = require('debug')('cypress:server:browsers:utils')
 const getPort = require('get-port')
-const launcher = require('@packages/launcher')
+import launcher = require('@packages/launcher')
 const { fs } = require('../util/fs')
 const extension = require('@packages/extension')
 const appData = require('../util/app_data')
@@ -244,7 +244,7 @@ const parseBrowserOption = (opt) => {
   }
 }
 
-const ensureAndGetByNameOrPath = (nameOrPath: string, returnAll = false, browsers: FoundBrowser[] = []): Bluebird<FoundBrowser | FoundBrowser[] | undefined> => {
+const ensureAndGetByNameOrPath = (nameOrPath: string, returnAll = false, browsers: FoundBrowser[] = []): Bluebird<FoundBrowser | FoundBrowser[] | undefined | null> => {
   const findBrowsers = browsers.length ? Bluebird.resolve(browsers) : getBrowsers()
 
   return findBrowsers
@@ -256,7 +256,7 @@ const ensureAndGetByNameOrPath = (nameOrPath: string, returnAll = false, browser
     // try to find the browser by name with the highest version property
     const sortedBrowsers = _.sortBy(browsers, ['version'])
 
-    const browser = _.findLast(sortedBrowsers, filter)
+    const browser = _.findLast(sortedBrowsers, filter) as FoundBrowser | undefined
 
     if (browser) {
       // short circuit if found
@@ -279,11 +279,15 @@ const ensureAndGetByNameOrPath = (nameOrPath: string, returnAll = false, browser
         return browser
       }).catch((err) => {
         errors.throw('BROWSER_NOT_FOUND_BY_PATH', nameOrPath, err.message)
+
+        return null
       })
     }
 
     // not a path, not found by name
     throwBrowserNotFound(nameOrPath, browsers)
+
+    return null
   })
 }
 

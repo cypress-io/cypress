@@ -3,11 +3,17 @@ import type { DataContext } from '@packages/data-context'
 import { e2eProjectDirs } from './e2eProjectDirs'
 import type { AuthenticatedUserShape } from '@packages/data-context/src/data'
 import type { DocumentNode, ExecutionResult } from 'graphql'
+import type { LaunchArgs } from '@packages/types'
 
 const NO_TIMEOUT = 1000 * 1000
 const FOUR_SECONDS = 4 * 1000
 
 export type ProjectFixture = typeof e2eProjectDirs[number]
+
+export interface ResetLaunchArgsResult {
+  launchArgs: LaunchArgs
+  e2eServerPort?: number
+}
 
 export interface WithCtxOptions extends Cypress.Loggable, Cypress.Timeoutable {
   projectName?: ProjectFixture
@@ -45,17 +51,17 @@ declare global {
        */
       withCtx: typeof withCtx
       /**
+       * Opens the project in "Global" mode, without a project mounted
+       */
+      openModeGlobal: typeof openModeGlobal
+      /**
        * Takes the name of a system-tests directory, and mounts the project within open mode
        */
-      openE2E: typeof openE2E
+      openModeSystemTest: typeof openModeSystemTest
       /**
        * Takes the name of a system-tests directory and scaffolds the project, without opening
        */
       addProject: typeof addProject
-      /**
-       * Ensures there's an app server for a project and visits the app
-       */
-      initializeApp: typeof initializeApp
       /**
        * Simulates a user logged-in to the cypress app
        */
@@ -74,14 +80,13 @@ declare global {
   }
 }
 
+// Reset the ports, and call the __internal__beforeEach which sets up a
+// fresh data context / GraphQL server for each test
 beforeEach(() => {
-  // Reset the ports, and call the __internal__beforeEach which sets up a
-  // fresh data context for each test
   Cypress.env('e2e_serverPort', undefined)
   Cypress.env('e2e_gqlPort', undefined)
   cy.task<{ gqlPort: number }>('__internal__beforeEach', {}, { log: false }).then(({ gqlPort }) => {
     Cypress.env('e2e_gqlPort', gqlPort)
-    Cypress.env('e2e_serverPort', undefined)
   })
 })
 
@@ -91,43 +96,32 @@ function addProject (projectName: ProjectFixture) {
   })
 }
 
-function openE2E (projectName?: ProjectFixture) {
-  if (projectName && !e2eProjectDirs.includes(projectName)) {
-    throw new Error(`Unknown project ${projectName}`)
+function openModeGlobal (argv: string[] = []) {
+  const finalArgv = [...argv]
+
+  if (!finalArgv.includes('--global')) {
+    finalArgv.push('--global')
   }
 
-  if (projectName) {
-    cy.task('__internal_addProject', projectName, { log: false })
-  }
-
-  return cy.withCtx(async (ctx, o) => {
-    if (o.projectName) {
-      await ctx.actions.project.setActiveProject(o.projectDir(o.projectName))
-    }
-
-    return [
-      ctx.gqlServerPort,
-      ctx.appServerPort,
-    ]
-  }, { projectName, log: false }).then(([gqlPort, serverPort]) => {
-    Cypress.env('e2e_serverPort', serverPort)
+  return logInternal({ name: 'openModeGlobal', message: argv?.join(' ') }, () => {
+    return cy.task<ResetLaunchArgsResult>('__internal_resetLaunchArgs', { argv: finalArgv }, { log: false })
+    .then(({ launchArgs }) => launchArgs)
   })
 }
 
-function initializeApp (mode: 'component' | 'e2e' = 'e2e') {
-  return cy.withCtx(async (ctx, o) => {
-    ctx.actions.wizard.setTestingType(o.mode)
-    await ctx.actions.project.initializeActiveProject({
-      skipPluginIntializeForTesting: true,
-    })
+function openModeSystemTest (projectName: ProjectFixture, argv: string[] = []) {
+  if (!e2eProjectDirs.includes(projectName)) {
+    throw new Error(`Unknown project ${projectName}`)
+  }
 
-    await ctx.actions.project.launchProject(o.mode, {
-      skipBrowserOpenForTest: true,
-    })
+  return logInternal({ name: 'openModeSystemTest', message: argv.join(' ') }, () => {
+    cy.task('__internal_addProject', projectName, { log: false })
 
-    return ctx.appServerPort
-  }, { log: false, mode }).then((serverPort) => {
-    Cypress.env('e2e_serverPort', serverPort)
+    return cy.task<ResetLaunchArgsResult>('__internal_resetLaunchArgs', { projectName, argv }, { log: false }).then((obj) => {
+      Cypress.env('e2e_serverPort', obj.e2eServerPort)
+
+      return obj.launchArgs
+    })
   })
 }
 
@@ -135,7 +129,11 @@ function visitApp (href?: string) {
   const { e2e_serverPort, e2e_gqlPort } = Cypress.env()
 
   if (!e2e_serverPort) {
-    throw new Error(`Missing serverPort - did you forget to call cy.initializeApp(...) ?`)
+    throw new Error(`
+      Missing serverPort, app was not initialized.
+      Make sure you're adding args to openModeSystemTest which will launch the browser, such as:
+      ['--e2e', '--browser', 'electron']
+    `)
   }
 
   cy.withCtx(async (ctx) => {
@@ -217,7 +215,6 @@ Cypress.Commands.add('visitApp', visitApp)
 Cypress.Commands.add('loginUser', loginUser)
 Cypress.Commands.add('visitLaunchpad', visitLaunchpad)
 Cypress.Commands.add('addProject', addProject)
-Cypress.Commands.add('initializeApp', initializeApp)
-Cypress.Commands.add('openE2E', openE2E)
+Cypress.Commands.add('openModeSystemTest', openModeSystemTest)
 Cypress.Commands.add('withCtx', withCtx)
 Cypress.Commands.add('remoteGraphQLIntercept', remoteGraphQLIntercept)

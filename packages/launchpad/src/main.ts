@@ -8,6 +8,7 @@ import 'vue-toastification/dist/index.css'
 import { makeUrqlClient } from '@packages/frontend-shared/src/graphql/urqlClient'
 import { createI18n } from '@cy/i18n'
 import { initHighlighter } from '@cy/components/ShikiHighlight.vue'
+import { createPinia } from 'pinia'
 
 const app = createApp(App)
 
@@ -19,6 +20,7 @@ app.use(Toast, {
 
 app.use(urql, launchpadClient)
 app.use(createI18n())
+app.use(createPinia())
 
 // Make sure highlighter is initialized before
 // we show any code to avoid jank at rendering

@@ -1,28 +1,31 @@
 <template>
   <WizardLayout
-    :can-navigate-forward="props.gql.canNavigateForward"
+    :title="t('setupPage.projectSetup.title')"
+    :description="t('setupPage.projectSetup.description')"
+    :back-fn="backFn"
+    :can-navigate-forward="canNavigateForward"
     class="max-w-776px"
   >
     <div class="m-5">
       <SelectFramework
         :name="t('setupPage.projectSetup.frameworkLabel')"
-        :options="frameworks ?? []"
-        :value="props.gql.framework?.id ?? undefined"
+        :options="FRONTEND_FRAMEWORKS"
+        :value="wizardStore.wizardFramework"
         :placeholder="t('setupPage.projectSetup.frameworkPlaceholder')"
         @select="setFEFramework"
       />
       <SelectBundler
         :name="t('setupPage.projectSetup.bundlerLabel')"
-        :disabled="bundlers.length === 1"
-        :options="bundlers || []"
-        :value="props.gql.bundler?.id ?? undefined"
+        :disabled="wizardStore.bundlerOptions.length === 1"
+        :options="wizardStore.bundlerOptions"
+        :value="wizardStore.wizardBundler"
         :placeholder="t('setupPage.projectSetup.bundlerPlaceholder')"
         @select="setFEBundler"
       />
       <SelectLanguage
         :name="t('setupPage.projectSetup.languageLabel')"
-        :options="languages || []"
-        :value="props.gql.language?.id ?? 'js'"
+        :options="CODE_LANGUAGES"
+        :value="wizardStore.wizardCodeLanguage"
         @select="setLanguage"
       />
     </div>
@@ -37,103 +40,52 @@ import SelectBundler from '../components/select/SelectBundler.vue'
 import SelectLanguage from '../components/select/SelectLanguage.vue'
 import { gql } from '@urql/core'
 import {
-  EnvironmentSetupFragment,
-  EnvironmentSetupSetFrameworkDocument,
-  EnvironmentSetupSetBundlerDocument,
-  EnvironmentSetupSetCodeLanguageDocument,
   FrontendFrameworkEnum,
-  SupportedBundlers,
   CodeLanguageEnum,
+  EnvironmentSetup_ClearTestingTypeDocument,
 } from '../generated/graphql'
+import { useWizardStore } from '../store/wizardStore'
+import { CODE_LANGUAGES, FRONTEND_FRAMEWORKS, BUNDLERS, Bundler } from '@packages/types/src/constants'
 import { useMutation } from '@urql/vue'
 import { useI18n } from '@cy/i18n'
 
-gql`
-mutation EnvironmentSetupSetFramework($framework: FrontendFrameworkEnum!) {
-  wizardSetFramework(framework: $framework) 
-}
-`
+const wizardStore = useWizardStore()
 
 gql`
-mutation EnvironmentSetupSetBundler($bundler: SupportedBundlers!) {
-  wizardSetBundler(bundler: $bundler) 
-}
-`
-
-gql`
-mutation EnvironmentSetupSetCodeLanguage($language: CodeLanguageEnum!) {
-  wizardSetCodeLanguage(language: $language)
-}
-`
-
-gql`
-fragment EnvironmentSetup on Wizard {
-  canNavigateForward
-  bundler {
-    id
-    name
-    type
-    isSelected
-  }
-  framework {
-    type
-    id
-    name
-    isSelected
-    supportedBundlers {
+mutation EnvironmentSetup_clearTestingType {
+  clearCurrentTestingType {
+    currentProject {
       id
-      type
-      name
+      currentTestingType
+    }
+    wizard {
+      ...Wizard
     }
   }
-  frameworks {
-    id
-    name
-    isSelected
-    type
-  }
-  allBundlers {
-    id
-    name
-    type
-  }
-  language {
-    id
-    name
-    isSelected
-    type
-  }
-  allLanguages {
-    id
-    name
-    type
-  }
 }
 `
 
-const props = defineProps<{
-  gql: EnvironmentSetupFragment
-}>()
+const clearTestingType = useMutation(EnvironmentSetup_ClearTestingTypeDocument)
 
-const setFramework = useMutation(EnvironmentSetupSetFrameworkDocument)
-const setBundler = useMutation(EnvironmentSetupSetBundlerDocument)
-const setLanguageMutation = useMutation(EnvironmentSetupSetCodeLanguageDocument)
-
-const setFEBundler = (bundler: SupportedBundlers) => {
-  setBundler.executeMutation({ bundler })
+const setFEBundler = (bundler: Bundler['type']) => {
+  wizardStore.setBundler(bundler)
 }
 
 const setFEFramework = (framework: FrontendFrameworkEnum) => {
-  setFramework.executeMutation({ framework })
+  wizardStore.setFramework(framework)
 }
 
 const setLanguage = (language: CodeLanguageEnum) => {
-  setLanguageMutation.executeMutation({ language })
+  wizardStore.setCodeLanguage(language)
 }
 
 const { t } = useI18n()
 
-const bundlers = computed(() => props.gql.framework?.supportedBundlers ?? props.gql.allBundlers)
-const frameworks = computed(() => props.gql.frameworks ?? [])
-const languages = computed(() => props.gql.allLanguages ?? [])
+const backFn = () => {
+  return clearTestingType.executeMutation({})
+}
+
+const canNavigateForward = computed(() => {
+  return Boolean(wizardStore.wizardBundler && wizardStore.wizardFramework)
+})
 </script>

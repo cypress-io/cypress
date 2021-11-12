@@ -44,7 +44,6 @@ exports['@packages/data-context initializeData initializes 1'] = {
       "chosenFramework": null,
       "chosenLanguage": "js",
       "chosenManualInstall": false,
-      "currentStep": "welcome",
       "allBundlers": [
         {
           "type": "webpack",

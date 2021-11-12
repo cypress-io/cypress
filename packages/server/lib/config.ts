@@ -2,7 +2,7 @@ import _ from 'lodash'
 import path from 'path'
 import Promise from 'bluebird'
 import deepDiff from 'return-deep-diff'
-import type { ResolvedConfigurationOptions, ResolvedFromConfig, ResolvedConfigurationOptionSource, TestingType } from '@packages/types'
+import type { ResolvedConfigurationOptions, ResolvedFromConfig, ResolvedConfigurationOptionSource } from '@packages/types'
 
 import errors from './errors'
 import scaffold from './scaffold'
@@ -15,7 +15,7 @@ import pathHelpers from './util/path_helpers'
 import findSystemNode from './util/find_system_node'
 
 export interface ConfigSettingsConfig {
-  testingType: TestingType
+  testingType: TestingTypeEnum
   configFile?: false | string
 }
 
@@ -23,6 +23,7 @@ const debug = Debug('cypress:server:config')
 
 import { options, breakingOptions } from './config_options'
 import { getProcessEnvVars, CYPRESS_SPECIAL_ENV_VARS } from './util/config'
+import type { TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
 
 const dashesOrUnderscoresRe = /^(_-)+/
 

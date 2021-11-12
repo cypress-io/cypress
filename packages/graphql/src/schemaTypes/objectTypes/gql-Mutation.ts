@@ -1,7 +1,6 @@
-import { arg, booleanArg, enumType, idArg, mutationType, nonNull, stringArg } from 'nexus'
+import { booleanArg, enumType, idArg, mutationType, nonNull, stringArg } from 'nexus'
 import { CodeGenTypeEnum } from '../enumTypes/gql-CodeGenTypeEnum'
-import { CodeLanguageEnum, FrontendFrameworkEnum, NavItemEnum, SupportedBundlerEnum, TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
-import { WizardUpdateInput } from '../inputTypes/gql-WizardUpdateInput'
+import { TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
 import { GeneratedSpec } from './gql-GeneratedSpec'
 
 export const mutation = mutationType({
@@ -68,55 +67,33 @@ export const mutation = mutationType({
       },
     })
 
-    t.liveMutation('clearActiveProject', {
+    t.field('clearCurrentTestingType', {
+      type: 'Query',
+      description: 'Clears the current testing type, closing any active project',
       resolve: async (_, args, ctx) => {
-        await ctx.actions.project.clearActiveProject()
-        ctx.actions.wizard.resetWizard()
+        await ctx.actions.project.clearCurrentTestingType()
+
+        return {}
       },
     })
 
-    t.liveMutation('wizardUpdate', {
-      description: 'Updates the different fields of the wizard data store',
+    t.liveMutation('clearCurrentProject', {
+      description: 'Clears the current project, called when we want to navigate back to the global mode screen',
+      resolve: async (_, args, ctx) => {
+        await ctx.actions.project.clearCurrentProject()
+      },
+    })
+
+    t.field('selectProjectTestingType', {
+      type: 'Query',
+      description: 'Updates the testing type for the current project',
       args: {
-        input: nonNull(arg({
-          type: WizardUpdateInput,
-        })),
+        type: nonNull(TestingTypeEnum),
       },
-      resolve: async (_, args, ctx) => {
-        if (args.input.testingType) {
-          await ctx.actions.wizard.setTestingType(args.input.testingType)
-        }
+      resolve (source, args, ctx) {
+        ctx.actions.project.setCurrentTestingType(args.type)
 
-        if (args.input.direction) {
-          await ctx.actions.wizard.navigate(args.input.direction)
-        }
-      },
-    })
-
-    t.liveMutation('wizardSetFramework', {
-      description: 'Sets the frontend framework we want to use for the project',
-      args: { framework: nonNull(FrontendFrameworkEnum) },
-      resolve: async (_, args, ctx) => {
-        await ctx.actions.wizard.setFramework(args.framework)
-      },
-    })
-
-    // TODO: Move these 3 to a single wizardUpdate(input: WizardUpdateInput!)
-    t.liveMutation('wizardSetBundler', {
-      description: 'Sets the frontend bundler we want to use for the project',
-      args: {
-        bundler: nonNull(SupportedBundlerEnum),
-      },
-      resolve: async (_, args, ctx) => {
-        await ctx.actions.wizard.setBundler(args.bundler)
-      },
-    })
-
-    t.liveMutation('wizardSetCodeLanguage', {
-      description: 'Sets the language we want to use for the config file',
-      args: { language: nonNull(CodeLanguageEnum) },
-      resolve: async (_, args, ctx) => {
-        await ctx.actions.wizard.setCodeLanguage(args.language)
+        return {}
       },
     })
 
@@ -132,27 +109,6 @@ export const mutation = mutationType({
       },
     })
 
-    t.liveMutation('appCreateConfigFile', {
-      args: {
-        code: nonNull('String'),
-        configFilename: nonNull('String'),
-      },
-      description: 'Create a Cypress config file for a new project',
-      resolve: async (_, args, ctx) => {
-        await ctx.actions.project.createConfigFile(args)
-      },
-    })
-
-    t.liveMutation('appCreateComponentIndexHtml', {
-      args: {
-        template: nonNull('String'),
-      },
-      description: 'Create an Index HTML file for a new component testing project',
-      resolve: async (_, args, ctx) => {
-        await ctx.actions.project.createComponentIndexHtml(args.template)
-      },
-    })
-
     t.liveMutation('generateSpecFromSource', {
       type: GeneratedSpec,
       description: 'Generate spec from source',
@@ -162,14 +118,6 @@ export const mutation = mutationType({
       },
       resolve: async (_, args, ctx) => {
         return ctx.actions.project.codeGenSpec(args.codeGenCandidate, args.type)
-      },
-    })
-
-    t.liveMutation('navigationMenuSetItem', {
-      description: 'Set the current navigation item',
-      args: { type: nonNull(NavItemEnum) },
-      resolve: async (_, args, ctx) => {
-        await ctx.actions.wizard.setSelectedNavItem(args.type)
       },
     })
 
@@ -187,28 +135,18 @@ export const mutation = mutationType({
       },
     })
 
-    t.liveMutation('initializeOpenProject', {
-      description: 'Initializes open_project global singleton to manager current project state',
-      resolve: async (_, args, ctx) => {
-        try {
-          await ctx.actions.wizard.initializeOpenProject()
-          ctx.coreData.baseError = null
-        } catch (error) {
-          const e = error as Error
-
-          ctx.coreData.baseError = {
-            title: 'Cypress Configuration Error',
-            message: e.message,
-            stack: e.stack,
-          }
-        }
+    t.field('completeOnboarding', {
+      type: 'Query',
+      description: 'Signal the completion of the onboarding steps, assumes the config is correct now and attempts to launch the project',
+      resolve: () => {
+        return {}
       },
     })
 
     t.liveMutation('launchOpenProject', {
       description: 'Launches project from open_project global singleton',
       resolve: async (_, args, ctx) => {
-        await ctx.actions.project.launchProject(ctx.wizardData.chosenTestingType, {})
+        await ctx.actions.project.launchProject({})
       },
     })
 
@@ -219,7 +157,6 @@ export const mutation = mutationType({
         open: booleanArg({ description: 'Whether to open the project when added' }),
       },
       resolve: async (_, args, ctx) => {
-        ctx.actions.wizard.resetWizard()
         await ctx.actions.project.addProject(args)
       },
     })
@@ -266,17 +203,6 @@ export const mutation = mutationType({
         await ctx.actions.project.setProjectPreferences(args)
 
         return ctx.appData
-      },
-    })
-
-    t.nonNull.field('resetWizard', {
-      type: 'Boolean',
-      description: 'Reset the Wizard to the starting position',
-      resolve: (_, args, ctx) => {
-        ctx.actions.wizard.resetWizard()
-        ctx.actions.electron.refreshBrowserWindow()
-
-        return true
       },
     })
 

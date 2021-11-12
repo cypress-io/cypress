@@ -1,8 +1,12 @@
 <template>
+  <HeadingText
+    :title="title"
+    :description="description"
+  />
   <div
-    :class="{
+    :class="[$attrs.class, {
       'mx-auto border-1 border-gray-100 rounded my-32px flex flex-col': !noContainer
-    }"
+    }]"
   >
     <div class="flex-grow">
       <slot :backFn="backFn" />
@@ -25,32 +29,20 @@
 </template>
 
 <script lang="ts" setup>
+import HeadingText from './HeadingText.vue'
 import ButtonBar from './ButtonBar.vue'
 import { computed } from 'vue'
-import { useMutation } from '@urql/vue'
-import { gql } from '@urql/core'
-import { WizardLayoutNavigateDocument } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
+import { useWizardStore } from '../store/wizardStore'
 
-gql`
-fragment WizardLayout on Wizard {
-  title
-  description
-  step
-  canNavigateForward
-}
-`
-
-gql`
-mutation WizardLayoutNavigate($input: WizardUpdateInput!) {
-  wizardUpdate(input: $input)
-}
-`
+const wizardStore = useWizardStore()
 
 const { t } = useI18n()
 
 const props = withDefaults(
   defineProps<{
+    title: string
+    description: string
     next?: string
     back?: string
     alt?: string
@@ -58,6 +50,7 @@ const props = withDefaults(
     canNavigateForward?: boolean
     noContainer?: boolean
     altFn?: (val: boolean) => void
+    backFn?: (...args: unknown[]) => any,
     nextFn?: (...args: unknown[]) => any,
   }>(), {
     next: undefined,
@@ -68,21 +61,21 @@ const props = withDefaults(
     noContainer: undefined,
     altFn: undefined,
     nextFn: undefined,
+    backFn: undefined,
   },
 )
 
 const nextLabel = computed(() => props.next || t('setupPage.step.next'))
 const backLabel = computed(() => props.back || t('setupPage.step.back'))
 
-const navigate = useMutation(WizardLayoutNavigateDocument)
-
 async function nextFn () {
   await props.nextFn?.()
-  navigate.executeMutation({ input: { direction: 'forward', testingType: null } })
+  wizardStore.next()
 }
 
-function backFn () {
-  navigate.executeMutation({ input: { direction: 'back', testingType: null } })
+async function backFn () {
+  await props.backFn?.()
+  wizardStore.previous()
 }
 
 </script>

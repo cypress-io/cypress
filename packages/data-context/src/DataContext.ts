@@ -38,14 +38,12 @@ export interface InternalDataContextOptions {
 }
 
 export interface DataContextConfig {
+  mode: 'open' | 'run'
   schema: GraphQLSchema
   os: PlatformName
   launchArgs: LaunchArgs
   launchOptions: OpenProjectLaunchOptions
   electronApp: ElectronApp
-  /**
-   * Default is to
-   */
   coreData?: CoreDataShape
   /**
    * Injected from the server
@@ -70,7 +68,11 @@ export class DataContext {
 
   constructor (private _config: DataContextConfig) {
     this._rootBus = new EventEmitter()
-    this._coreData = _config.coreData ?? makeCoreData()
+    this._coreData = _config.coreData ?? makeCoreData(_config.launchArgs)
+
+    if (IS_DEV_ENV) {
+      this.actions.dev.watchForRelaunch()
+    }
   }
 
   get electronApp () {
@@ -81,18 +83,70 @@ export class DataContext {
     return this._config.electronApi
   }
 
+  resetLaunchArgs (launchArgs: LaunchArgs) {
+    this._coreData = makeCoreData(launchArgs)
+  }
+
+  /**
+   * Any work that's necessary to initialize the context for run mode
+   */
+  async initializeRunMode () {
+    if (this._coreData.hasIntializedMode) {
+      throw new Error(`Mode already initialized`)
+    }
+
+    this._coreData.hasIntializedMode = 'run'
+    // TODO: figure out what this needs to be... sourcing & validating config?
+  }
+
+  /**
+   * After we set the launch args, we call this to "initialize" open mode.
+   * This kicks off any data initialization we need to do before the app
+   * is ready to go, and includes launching the server
+   */
+  async initializeOpenMode () {
+    if (this._coreData.hasIntializedMode) {
+      throw new Error(`Mode already initialized`)
+    }
+
+    this._coreData.hasIntializedMode = 'open'
+
+    // Fetch the browsers when the app starts, so we have some by
+    // the time we're continuing.
+    this.actions.app.refreshBrowsers()
+
+    // If there's no "current" project, we just want to launch global mode,
+    // which involves sourcing the current projects.
+    if (!this.currentProject) {
+      await this.actions.project.loadGlobalProjects()
+
+      return
+    }
+
+    // Otherwise, we want to set this project as the "active" project,
+    // which will kick off the process of sourcing the config, if we have
+    // a config file for this project
+    this.actions.project.setActiveProject(this.currentProject.projectRoot)
+
+    // If we have a testing type, we want to execute the plugins for that testing type
+    if (this.currentProject?.currentTestingType) {
+      //
+    }
+
+    if (this.currentProject?.currentTestingType && this.currentProject.cliBrowser) {
+      //
+    }
+  }
+
   async initializeData () {
     const toAwait: Promise<any>[] = [
-      // Fetch the browsers when the app starts, so we have some by
-      // the time we're continuing.
-      this.actions.app.refreshBrowsers(),
       // load the cached user & validate the token on start
       this.actions.auth.getUser(),
     ]
 
     if (this._config._internalOptions.loadCachedProjects) {
       // load projects from cache on start
-      toAwait.push(this.actions.project.loadProjects())
+      toAwait.push(this.actions.project.loadGlobalProjects())
     }
 
     if (this._config.launchArgs.projectRoot) {
@@ -101,22 +155,6 @@ export class DataContext {
       if (this.coreData.app.currentProject?.preferences) {
         toAwait.push(this.actions.project.launchProjectWithoutElectron())
       }
-    }
-
-    if (this._config.launchArgs.testingType) {
-      this.appData.currentTestingType = this._config.launchArgs.testingType
-      // It should be possible to skip the first step in the wizard, if the
-      // user already told us the testing type via command line argument
-      this.actions.wizard.setTestingType(this._config.launchArgs.testingType)
-      this.actions.wizard.navigate('forward')
-    }
-
-    if (this._config.launchArgs.browser) {
-      toAwait.push(this.actions.app.setActiveBrowserByNameOrPath(this._config.launchArgs.browser))
-    }
-
-    if (IS_DEV_ENV) {
-      this.actions.dev.watchForRelaunch()
     }
 
     return Promise.all(toAwait)
@@ -210,6 +248,10 @@ export class DataContext {
     return this.coreData.app.currentProject
   }
 
+  get currentTestingType () {
+    return this.coreData.app.currentProject?.currentTestingType ?? null
+  }
+
   @cached
   get project () {
     return new ProjectDataSource(this)
@@ -245,7 +287,12 @@ export class DataContext {
   }
 
   get projectsList () {
-    return this.coreData.app.projects
+    return this.coreData.app.projects.map((p) => {
+      return {
+        title: this.project.projectTitle(p),
+        projectRoot: p,
+      }
+    })
   }
 
   // Servers
@@ -330,7 +377,7 @@ export class DataContext {
 
     return Promise.all([
       this.util.disposeLoaders(),
-      this.actions.project.clearActiveProject(),
+      this.actions.project.clearCurrentProject(),
       this.actions.dev.dispose(),
     ])
   }

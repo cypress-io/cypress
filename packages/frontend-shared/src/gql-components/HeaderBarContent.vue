@@ -19,7 +19,7 @@
           :class="props.gql?.currentProject ? 'text-indigo-500' :
             'text-gray-700'"
           :href="props.gql?.currentProject ? 'global-mode' : undefined"
-          @click.prevent="clearActiveProject"
+          @click.prevent="clearCurrentProject"
         >
           Projects
         </a>
@@ -101,7 +101,7 @@
 <script setup lang="ts">
 import { gql, useMutation } from '@urql/vue'
 import { ref, computed } from 'vue'
-import { GlobalPageHeader_ClearActiveProjectDocument, HeaderBar_HeaderBarContentFragment } from '../generated/graphql'
+import { GlobalPageHeader_ClearCurrentProjectDocument, HeaderBar_HeaderBarContentFragment } from '../generated/graphql'
 import TopNav from './topnav/TopNav.vue'
 import LoginModal from './topnav/LoginModal.vue'
 import UserAvatar from './topnav/UserAvatar.vue'
@@ -110,8 +110,8 @@ import { useI18n } from '@cy/i18n'
 import ExternalLink from './ExternalLink.vue'
 
 gql`
-mutation GlobalPageHeader_clearActiveProject {
-  clearActiveProject
+mutation GlobalPageHeader_clearCurrentProject {
+  clearCurrentProject
 }
 `
 
@@ -127,16 +127,16 @@ fragment HeaderBar_HeaderBarContent on Query {
 `
 
 const isLoginOpen = ref(false)
-const clearActiveProjectMutation = useMutation(GlobalPageHeader_ClearActiveProjectDocument)
+const clearCurrentProjectMutation = useMutation(GlobalPageHeader_ClearCurrentProjectDocument)
 const email = computed(() => props.gql.cloudViewer?.email || undefined)
 
 const openLogin = () => {
   isLoginOpen.value = true
 }
 
-const clearActiveProject = () => {
+const clearCurrentProject = () => {
   if (props.gql.currentProject) {
-    clearActiveProjectMutation.executeMutation({})
+    clearCurrentProjectMutation.executeMutation({})
   }
 }
 

@@ -1,33 +1,24 @@
 <template>
   <WizardLayout
-    :next=" t('setupPage.install.confirmManualInstall')"
-    :can-navigate-forward="props.gql.canNavigateForward"
+    :title="t('setupPage.install.title')"
+    :description="t('setupPage.install.description')"
+    :next="t('setupPage.install.confirmManualInstall')"
+    :can-navigate-forward="canNavigateForward"
     class="max-w-640px"
   >
-    <ManualInstall
-      :gql="props.gql"
-    />
+    <ManualInstall />
   </WizardLayout>
 </template>
 
 <script lang="ts" setup>
 import WizardLayout from './WizardLayout.vue'
 import ManualInstall from './ManualInstall.vue'
-import { gql } from '@urql/core'
-import type { InstallDependenciesFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
-
-gql`
-fragment InstallDependencies on Wizard {
-  ...ManualInstall
-  canNavigateForward
-}
-`
-
-const props = defineProps<{
-  gql: InstallDependenciesFragment
-}>()
+import { computed } from 'vue-demi'
 
 const { t } = useI18n()
+
+// TODO: determine how we want this to work w/ checking for installed modules
+const canNavigateForward = computed(() => true)
 
 </script>

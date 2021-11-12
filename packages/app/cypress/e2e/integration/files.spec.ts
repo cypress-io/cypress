@@ -1,7 +1,6 @@
 describe('App', () => {
   beforeEach(() => {
-    cy.openE2E('component-tests')
-    cy.initializeApp()
+    cy.openModeSystemTest('component-tests', ['--e2e', '--browser', 'electron'])
   })
 
   it('resolves the home page', () => {

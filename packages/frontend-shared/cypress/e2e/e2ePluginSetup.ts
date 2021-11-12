@@ -1,5 +1,5 @@
 import path from 'path'
-import type { RemoteGraphQLInterceptor, WithCtxInjected, WithCtxOptions } from './support/e2eSupport'
+import type { RemoteGraphQLInterceptor, ResetLaunchArgsResult, WithCtxInjected, WithCtxOptions } from './support/e2eSupport'
 import { e2eProjectDirs } from './support/e2eProjectDirs'
 import type { CloudExecuteRemote } from '@packages/data-context/src/sources'
 import type { DataContext } from '@packages/data-context'
@@ -14,6 +14,7 @@ import { Response } from 'cross-fetch'
 
 import { CloudRunQuery } from '../support/mock-graphql/stubgql-CloudTypes'
 import { getOperationName } from '@urql/core'
+import argUtils from '@packages/server/lib/util/args'
 
 const cloudSchema = buildSchema(fs.readFileSync(path.join(__dirname, '../../../graphql/schemas/cloud.graphql'), 'utf8'))
 
@@ -28,12 +29,19 @@ chai.use(chaiAsPromised)
 chai.use(chaiSubset)
 chai.use(sinonChai)
 
+interface InternalResetLaunchArgs {
+  argv: string[]
+  projectName?: string
+}
+
 export async function e2ePluginSetup (projectRoot: string, on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) {
   process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF = 'true'
   // require'd so we don't import the types from @packages/server which would
   // pollute strict type checking
   const { runInternalServer } = require('@packages/server/lib/modes/internal-server')
   const Fixtures = require('@tooling/system-tests/lib/fixtures')
+  const cli = require('../../../../cli/lib/cli')
+  const cliOpen = require('../../../../cli/lib/exec/open')
   const tmpDir = path.join(__dirname, '.projects')
 
   await util.promisify(rimraf)(tmpDir)
@@ -131,6 +139,26 @@ export async function e2ePluginSetup (projectRoot: string, on: Cypress.PluginEve
       await ctx.actions.project.addProject({ path: Fixtures.projectPath(projectName) })
 
       return Fixtures.projectPath(projectName)
+    },
+    async __internal_resetLaunchArgs ({ argv, projectName }: InternalResetLaunchArgs): Promise<ResetLaunchArgsResult> {
+      const openArgv = projectName && !argv.includes('--project') ? ['--project', Fixtures.projectPath(projectName), ...argv] : [...argv]
+
+      // Runs the launchArgs through the whole pipeline for the CLI open process,
+      // which probably needs a bit of refactoring / consolidating
+      const cliOptions = await cli.parseOpenCommand(['open', ...openArgv])
+      const processedArgv = cliOpen.processOpenOptions(cliOptions)
+      const finalLaunchArgs = argUtils.toObject(processedArgv)
+
+      // Reset the state of the context
+      ctx.resetLaunchArgs(finalLaunchArgs)
+
+      // Handle any pre-loading that should occur based on the launch arg settings
+      await ctx.initializeOpenMode()
+
+      return {
+        launchArgs: finalLaunchArgs,
+        e2eServerPort: ctx.appServerPort,
+      }
     },
     async __internal_withCtx (obj: WithCtxObj) {
       const options: WithCtxInjected = {

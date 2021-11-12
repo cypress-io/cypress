@@ -10,7 +10,7 @@ import { gql } from '@urql/core'
 import { useMutation } from '@urql/vue'
 import TestingTypePicker from '@cy/gql-components/TestingTypePicker.vue'
 import {
-  TestingTypeSelectionDocument,
+  TestingTypeCards_SelectTestingTypeDocument,
   TestingTypeCardsFragment,
 } from '../generated/graphql'
 
@@ -21,19 +21,21 @@ fragment TestingTypeCards on Query {
 `
 
 gql`
-  mutation TestingTypeSelection($input: WizardUpdateInput!) {
-  wizardUpdate(input: $input)
+  mutation TestingTypeCards_selectTestingType($type: TestingTypeEnum!) {
+  selectProjectTestingType(type: $type) {
+    ...TestingTypeCards
+  }
 }
 `
 
-const mutation = useMutation(TestingTypeSelectionDocument)
+const mutation = useMutation(TestingTypeCards_SelectTestingTypeDocument)
 
 const props = defineProps<{
   gql: TestingTypeCardsFragment
 }>()
 
 function selectTestingType (testingType: 'e2e' | 'component') {
-  mutation.executeMutation({ input: { testingType, direction: 'forward' } })
+  mutation.executeMutation({ type: testingType })
 }
 
 </script>

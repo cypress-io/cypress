@@ -6,10 +6,10 @@ import ConfigFiles from './ConfigFiles.vue'
 describe('<ConfigFile />', () => {
   beforeEach(() => {
     cy.mountFragment(ConfigFilesFragmentDoc, {
-      render: (qgl) => {
+      render: (gql) => {
         return (
           <div>
-            <ConfigFiles gql={qgl} />
+            <ConfigFiles gql={gql} />
           </div>
         )
       },

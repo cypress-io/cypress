@@ -80,20 +80,6 @@ export const FRONTEND_FRAMEWORKS = [
 
 export type FrontendFramework = typeof FRONTEND_FRAMEWORKS[number]
 
-export const TESTING_TYPES = [
-  {
-    type: 'e2e',
-    title: 'E2E Testing',
-    description: 'Click here to configure end-to-end testing with Cypress.',
-  }, {
-    type: 'component',
-    title: 'Component Testing',
-    description: 'Click here to configure Component Testing with your choice of framework and dev server.',
-  },
-] as const
-
-export type TestingType = typeof TESTING_TYPES[number]
-
 export const CODE_LANGUAGES = [
   {
     type: 'js',
@@ -127,39 +113,6 @@ export const NAV_ITEMS = [
     type: 'settings',
     name: 'Settings',
     iconPath: 'clarity/settings-line',
-  },
-] as const
-
-export const WIZARD_STEPS = [
-  {
-    type: 'welcome',
-    title: 'Welcome to Cypress!',
-    description: 'Choose which method of testing you would like to get started with for this project.',
-  },
-  {
-    type: 'initializePlugins',
-    title: 'Initializing Config...',
-    description: 'Please wait while we load your project and find browsers installed on your system.',
-  },
-  {
-    type: 'selectFramework',
-    title: 'Project Setup',
-    description: 'Confirm the front-end framework and bundler used in your project.',
-  },
-  {
-    type: 'installDependencies',
-    title: 'Install Dev Dependencies',
-    description: 'Paste the command below into your terminal to install the required packages.',
-  },
-  {
-    type: 'configFiles',
-    title: 'Configuration Files',
-    description: 'We added the following files to your project.',
-  },
-  {
-    type: 'setupComplete',
-    title: 'Choose a Browser',
-    description: 'Choose your preferred browser for testing your components.',
   },
 ] as const
 

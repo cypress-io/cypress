@@ -51,6 +51,6 @@ it('only shows a promotional modal on first visit', () => {
 })
 `
 
-const e2eItems = [t('welcomePage.compareTypes.e2ebullet1'), t('welcomePage.compareTypes.e2ebullet2'), t('welcomePage.compareTypes.e2ebullet3')]
-const ctItems = [t('welcomePage.compareTypes.ctBullet1'), t('welcomePage.compareTypes.ctBullet2'), t('welcomePage.compareTypes.ctBullet3')]
+const e2eItems = [t('chooseTestingTypePage.compareTypes.e2ebullet1'), t('chooseTestingTypePage.compareTypes.e2ebullet2'), t('chooseTestingTypePage.compareTypes.e2ebullet3')]
+const ctItems = [t('chooseTestingTypePage.compareTypes.ctBullet1'), t('chooseTestingTypePage.compareTypes.ctBullet2'), t('chooseTestingTypePage.compareTypes.ctBullet3')]
 </script>

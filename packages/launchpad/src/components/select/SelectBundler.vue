@@ -85,9 +85,10 @@
 </template>
 
 <script lang="ts" setup>
+import type { Bundler } from '@packages/types/src/constants'
 import { computed, ref } from 'vue'
 import { ClickOutside as vClickOutside } from '../../directives/ClickOutside'
-import type { EnvironmentSetupFragment, SupportedBundlers } from '../../generated/graphql'
+import type { SupportedBundlers } from '../../generated/graphql'
 import { FrameworkBundlerLogos } from '../../utils/icons'
 
 const emit = defineEmits<{
@@ -96,9 +97,9 @@ const emit = defineEmits<{
 
 const props = withDefaults(defineProps<{
   name: string
-  value?: string
+  value?: SupportedBundlers | null
   placeholder?: string
-  options: EnvironmentSetupFragment['allBundlers']
+  options: Bundler[] | ReadonlyArray<Bundler>
   disabled?: boolean
 }>(), {
   disabled: false,
@@ -109,7 +110,7 @@ const props = withDefaults(defineProps<{
 const isOpen = ref(false)
 
 const selectedOptionObject = computed(() => {
-  return props.options.find((opt) => opt.id === props.value)
+  return props.options.find((opt) => opt.type === props.value)
 })
 
 const selectOption = (opt: SupportedBundlers) => {

@@ -1,22 +1,28 @@
-import { Bundler, BUNDLERS, CodeLanguage, CODE_LANGUAGES, FrontendFramework, FRONTEND_FRAMEWORKS, PACKAGES_DESCRIPTIONS, SampleConfigFile, StorybookInfo, WIZARD_STEPS } from '@packages/types'
+import { Bundler, BUNDLERS, CodeLanguage, CODE_LANGUAGES, FrontendFramework, FRONTEND_FRAMEWORKS, PACKAGES_DESCRIPTIONS, SampleConfigFile, StorybookInfo } from '@packages/types'
 import type { NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
 import type { DataContext } from '..'
 import { getSampleConfigFiles } from '../codegen/sample-config-files'
 import dedent from 'dedent'
+import type { WizardDataShape } from '../data'
 
 export class WizardDataSource {
   constructor (private ctx: DataContext) {}
 
-  private get data () {
-    return this.ctx.wizardData
-  }
+  // Returns
+  async rootField (): Promise<WizardDataShape | null> {
+    if (this.ctx.currentTestingType === 'e2e') {
+      if (await this.ctx.project.isE2EConfigured()) {
+        return this.ctx.wizardData
+      }
+    }
 
-  get description () {
-    return WIZARD_STEPS.find((step) => step.type === this.data.currentStep)?.description
-  }
+    if (this.ctx.currentTestingType === 'component') {
+      if (await this.ctx.project.isCTConfigured()) {
+        return this.ctx.wizardData
+      }
+    }
 
-  get title () {
-    return WIZARD_STEPS.find((step) => step.type === this.data.currentStep)?.title
+    return null
   }
 
   packagesToInstall (): Array<NexusGenObjects['WizardNpmPackage']> | null {
@@ -38,52 +44,26 @@ export class WizardDataSource {
     ]
   }
 
-  get chosenTestingTypePluginsInitialized () {
-    if (this.chosenTestingType === 'component' && this.ctx.currentProject?.ctPluginsInitialized) {
+  get currentTestingTypePluginsInitialized () {
+    if (this.currentTestingType === 'component' && this.ctx.currentProject?.ctPluginsInitialized) {
       return true
     }
 
-    if (this.chosenTestingType === 'e2e' && this.ctx.currentProject?.e2ePluginsInitialized) {
+    if (this.currentTestingType === 'e2e' && this.ctx.currentProject?.e2ePluginsInitialized) {
       return true
     }
 
     return false
   }
 
-  get canNavigateForward () {
-    const data = this.ctx.wizardData
-
-    if (data.currentStep === 'setupComplete') {
-      return false
-    }
-
-    if (data.currentStep === 'selectFramework' && (!data.chosenBundler || !data.chosenFramework)) {
-      return false
-    }
-
-    if (data.currentStep === 'initializePlugins') {
-      if (data.chosenTestingType === 'component' && !this.ctx.currentProject?.ctPluginsInitialized) {
-        return false
-      }
-
-      if (data.chosenTestingType === 'e2e' && !this.ctx.currentProject?.e2ePluginsInitialized) {
-        return false
-      }
-    }
-
-    // TODO: add constraints here to determine if we can move forward
-    return true
-  }
-
   async sampleCode () {
-    const data = this.ctx.wizardData
     const storybookInfo = await this.ctx.storybook.loadStorybookInfo()
 
     if (!this.chosenLanguage) {
       return null
     }
 
-    if (data.chosenTestingType === 'component') {
+    if (this.currentTestingType === 'component') {
       if (!this.chosenFramework || !this.chosenBundler) {
         return null
       }
@@ -96,7 +76,7 @@ export class WizardDataSource {
       })
     }
 
-    if (this.chosenTestingType === 'e2e') {
+    if (this.currentTestingType === 'e2e') {
       return wizardGetConfigCodeE2E({
         lang: this.chosenLanguage,
       })
@@ -106,7 +86,7 @@ export class WizardDataSource {
   }
 
   async sampleConfigFiles (): Promise<SampleConfigFile[]> {
-    const testingType = this.chosenTestingType
+    const testingType = this.currentTestingType
 
     const configFileContent = await this.sampleCode()
     const templateFileContent = await this.sampleTemplate()
@@ -152,8 +132,8 @@ export class WizardDataSource {
     })
   }
 
-  get chosenTestingType () {
-    return this.ctx.wizardData.chosenTestingType
+  get currentTestingType () {
+    return this.ctx.currentProject?.currentTestingType ?? null
   }
 
   get chosenFramework () {

@@ -1,8 +1,6 @@
 describe('Settings', { viewportWidth: 1200 }, () => {
   beforeEach(() => {
-    cy.openE2E('component-tests')
-
-    cy.initializeApp()
+    cy.openModeSystemTest('component-tests', ['--e2e', '--browser', 'electron'])
   })
 
   it('displays the settings for the current project', () => {

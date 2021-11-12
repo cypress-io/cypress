@@ -10,11 +10,6 @@ export interface LaunchOpts {
   onBrowserClose?: (...args: unknown[]) => void
   onBrowserOpen?: (...args: unknown[]) => void
   onError?: (err: Error) => void
-  /**
-   * Whether we want to skip opening the browser, in the case we're
-   * using Cypress to test the server directly
-   */
-  skipBrowserOpenForTest?: true
 }
 
 export interface LaunchArgs {
@@ -33,7 +28,7 @@ export interface LaunchArgs {
    */
   runProject?: string
   projectRoot: string // same as above
-  testingType: Cypress.TestingType
+  testingType?: Cypress.TestingType
   invokedFromCli: boolean
   os: PlatformName
   exit?: boolean

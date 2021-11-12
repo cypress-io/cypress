@@ -20,6 +20,7 @@ import app_data from './util/app_data'
 const { getBrowsers, ensureAndGetByNameOrPath } = browserUtils
 
 interface MakeDataContextOptions {
+  mode: 'run' | 'open'
   os: PlatformName
   rootBus: EventEmitter
   launchArgs: LaunchArgs
@@ -33,11 +34,12 @@ export function clearLegacyDataContext () {
   legacyDataContext = undefined
 }
 
-export function makeLegacyDataContext (launchArgs: LaunchArgs = {} as LaunchArgs): DataContext {
+export function makeLegacyDataContext (launchArgs: LaunchArgs = {} as LaunchArgs, mode: 'open' | 'run' = 'run'): DataContext {
   if (legacyDataContext && process.env.LAUNCHPAD) {
     throw new Error(`Expected ctx to be passed as an arg, but used legacy data context`)
   } else if (!legacyDataContext) {
     legacyDataContext = makeDataContext({
+      mode,
       rootBus: new EventEmitter,
       launchArgs,
       os: os.platform() as PlatformName,
@@ -45,6 +47,14 @@ export function makeLegacyDataContext (launchArgs: LaunchArgs = {} as LaunchArgs
         loadCachedProjects: true,
       },
     })
+  }
+
+  return legacyDataContext
+}
+
+export function getLegacyDataContext () {
+  if (!legacyDataContext) {
+    throw new Error(`legacyDataContext`)
   }
 
   return legacyDataContext
@@ -58,7 +68,9 @@ export function makeDataContext (options: MakeDataContextOptions) {
     electronApp: app,
     appApi: {
       getBrowsers,
-      ensureAndGetByNameOrPath,
+      ensureAndGetByNameOrPath (nameOrPath: string, browsers: FoundBrowser[]) {
+        return ensureAndGetByNameOrPath(nameOrPath, false, browsers)
+      },
     },
     appDataApi: app_data,
     authApi: {
@@ -117,9 +129,7 @@ export function makeDataContext (options: MakeDataContextOptions) {
       },
     },
     electronApi: {
-      openExternal (url: string) {
-        openExternal(url)
-      },
+      openExternal,
     },
   })
 }

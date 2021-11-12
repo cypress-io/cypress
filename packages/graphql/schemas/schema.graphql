@@ -235,6 +235,9 @@ enum CodeLanguageEnum {
 The currently opened Cypress project, represented by a cypress.config.{ts|js} file
 """
 type CurrentProject implements Node & ProjectLike {
+  """An error related to finding a browser"""
+  browserErrorMessage: String
+
   """Browsers found that are compatible with Cypress"""
   browsers: [Browser!]
 
@@ -270,6 +273,9 @@ type CurrentProject implements Node & ProjectLike {
 
   """Whether we are currently refreshing the browsers list"""
   isRefreshingBrowsers: Boolean!
+
+  """True if we are currently executing the child process to source"""
+  loadingConfig: Boolean!
 
   """Cached preferences for this project"""
   preferences: ProjectPreferences
@@ -405,12 +411,18 @@ type Mutation {
     path: String!
   ): Boolean
 
-  """Create an Index HTML file for a new component testing project"""
-  appCreateComponentIndexHtml(template: String!): Boolean
+  """
+  Clears the current project, called when we want to navigate back to the global mode screen
+  """
+  clearCurrentProject: Boolean
 
-  """Create a Cypress config file for a new project"""
-  appCreateConfigFile(code: String!, configFilename: String!): Boolean
-  clearActiveProject: Boolean
+  """Clears the current testing type, closing any active project"""
+  clearCurrentTestingType: Query
+
+  """
+  Signal the completion of the onboarding steps, assumes the config is correct now and attempts to launch the project
+  """
+  completeOnboarding: Query
 
   """
   Development only: Triggers or dismisses a prompted refresh by touching the file watched by our development scripts
@@ -422,11 +434,6 @@ type Mutation {
 
   """Hides the launchpad windows"""
   hideBrowserWindow: Boolean!
-
-  """
-  Initializes open_project global singleton to manager current project state
-  """
-  initializeOpenProject: Boolean
   internal_clearAllProjectPreferencesCache: Boolean
   internal_clearLatestProjectCache: Boolean
   internal_clearProjectPreferencesCache(projectTitle: String!): Boolean
@@ -445,9 +452,6 @@ type Mutation {
 
   """Log out of Cypress Cloud"""
   logout: Boolean
-
-  """Set the current navigation item"""
-  navigationMenuSetItem(type: NavItem!): Boolean
   openExternal(url: String!): Boolean
 
   """show the launchpad windows"""
@@ -456,8 +460,8 @@ type Mutation {
   """Remove project from projects array and cache"""
   removeProject(path: String!): Boolean
 
-  """Reset the Wizard to the starting position"""
-  resetWizard: Boolean!
+  """Updates the testing type for the current project"""
+  selectProjectTestingType(type: TestingTypeEnum!): Query
 
   """Set active project to run tests on"""
   setActiveProject(path: String!): Boolean
@@ -467,18 +471,6 @@ type Mutation {
 
   """show the launchpad at the browser picker step"""
   showElectronOnAppExit: Boolean
-
-  """Sets the frontend bundler we want to use for the project"""
-  wizardSetBundler(bundler: SupportedBundlers!): Boolean
-
-  """Sets the language we want to use for the config file"""
-  wizardSetCodeLanguage(language: CodeLanguageEnum!): Boolean
-
-  """Sets the frontend framework we want to use for the project"""
-  wizardSetFramework(framework: FrontendFrameworkEnum!): Boolean
-
-  """Updates the different fields of the wizard data store"""
-  wizardUpdate(input: WizardUpdateInput!): Boolean
 }
 
 enum NavItem {
@@ -575,9 +567,6 @@ type Query {
   app: App!
   baseError: BaseError
 
-  """An error related to finding a browser"""
-  browserErrorMessage: String
-
   """Returns an object conforming to the Relay spec"""
   cloudNode(
     """An ID for a Node conforming to the Relay spec"""
@@ -609,7 +598,7 @@ type Query {
   projects: [ProjectLike!]!
 
   """Metadata about the wizard, null if we arent showing the wizard"""
-  wizard: Wizard!
+  wizard: Wizard
 }
 
 """Represents a spec on the file system"""
@@ -696,43 +685,19 @@ enum TestingTypeEnum {
   e2e
 }
 
-type TestingTypeInfo implements Node {
-  description: String!
-
-  """Relay style Node ID field for the TestingTypeInfo field"""
-  id: ID!
-  title: String!
-  type: TestingTypeEnum!
-}
-
 """
 The Wizard is a container for any state associated with initial onboarding to Cypress
 """
 type Wizard {
-  """All of the bundlers to choose from"""
-  allBundlers: [WizardBundler!]!
-
   """All of the languages to choose from"""
   allLanguages: [WizardCodeLanguage!]!
-  bundler: WizardBundler
-
-  """
-  Given the current state, returns whether the user progress to the next step of the wizard
-  """
-  canNavigateForward: Boolean!
 
   """Whether the plugins for the selected testing type has been initialized"""
-  chosenTestingTypePluginsInitialized: Boolean!
-
-  """The title of the page, given the current step of the wizard"""
-  description: String
+  currentTestingTypePluginsInitialized: Boolean!
   framework: WizardFrontendFramework
 
   """All of the component testing frameworks to choose from"""
   frameworks: [WizardFrontendFramework!]!
-
-  """Whether we have chosen manual install or not"""
-  isManualInstall: Boolean!
   language: WizardCodeLanguage
 
   """
@@ -747,16 +712,6 @@ type Wizard {
 
   """IndexHtml file based on bundler and framework of choice"""
   sampleTemplate: String
-  step: WizardStep!
-
-  """
-  The testing type we are setting in the wizard, null if this has not been chosen
-  """
-  testingType: TestingTypeEnum
-  testingTypes: [TestingTypeInfo!]!
-
-  """The title of the page, given the current step of the wizard"""
-  title: String
 }
 
 """Wizard bundler"""
@@ -819,11 +774,6 @@ type WizardFrontendFramework implements Node {
   type: FrontendFrameworkEnum!
 }
 
-enum WizardNavigateDirection {
-  back
-  forward
-}
-
 """Details about an NPM Package listed during the wizard install"""
 type WizardNpmPackage implements Node {
   description: String!
@@ -847,16 +797,6 @@ type WizardSampleConfigFile implements Node {
   status: WizardConfigFileStatusEnum!
 }
 
-enum WizardStep {
-  configFiles
-  initializePlugins
-  installDependencies
-  selectFramework
-  setupComplete
-  welcome
-}
-
 input WizardUpdateInput {
-  direction: WizardNavigateDirection
-  testingType: TestingTypeEnum
+  bundler: SupportedBundlers
 }

@@ -21,7 +21,12 @@ export const CurrentProject = objectType({
     t.field('currentTestingType', {
       description: 'The mode the interactive runner was launched in',
       type: 'TestingTypeEnum',
-      resolve: (_, args, ctx) => ctx.wizard.chosenTestingType,
+      resolve: (_, args, ctx) => ctx.currentProject?.currentTestingType ?? null,
+    })
+
+    t.nonNull.boolean('loadingConfig', {
+      description: 'True if we are currently executing the child process to source',
+      resolve: () => false,
     })
 
     t.field('currentBrowser', {
@@ -56,17 +61,24 @@ export const CurrentProject = objectType({
       resolve: (source, args, ctx) => ctx.project.projectId(source.projectRoot),
     })
 
+    t.string('browserErrorMessage', {
+      description: 'An error related to finding a browser',
+      resolve: (source, args, ctx) => {
+        return ctx.currentProject?.browserErrorMessage ?? null
+      },
+    })
+
     t.nonNull.boolean('isCTConfigured', {
       description: 'Whether the user configured this project to use Component Testing',
       resolve: (source, args, ctx) => {
-        return ctx.project.isTestingTypeConfigured(source.projectRoot, 'component')
+        return ctx.project.isCTConfigured()
       },
     })
 
     t.nonNull.boolean('isE2EConfigured', {
       description: 'Whether the user configured this project to use e2e Testing',
       resolve: (source, args, ctx) => {
-        return ctx.project.isTestingTypeConfigured(source.projectRoot, 'e2e')
+        return ctx.project.isE2EConfigured()
       },
     })
 
@@ -74,7 +86,9 @@ export const CurrentProject = objectType({
       description: 'Specs for a project conforming to Relay Connection specification',
       type: 'Spec',
       nodes: (source, args, ctx) => {
-        return ctx.project.findSpecs(source.projectRoot, ctx.appData.currentTestingType === 'component' ? 'component' : 'integration')
+        return ctx.project.findSpecs(ctx.currentTestingType === 'component' ? 'component' : 'integration').then(() => {
+          return []
+        })
       },
     })
 

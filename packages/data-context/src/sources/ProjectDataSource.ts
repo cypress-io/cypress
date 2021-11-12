@@ -27,10 +27,14 @@ export class ProjectDataSource {
     return this.ctx.config.getConfigForProject(projectRoot)
   }
 
-  async findSpecs (projectRoot: string, specType: Maybe<SpecType>) {
-    const config = await this.getConfig(projectRoot)
+  async findSpecs (specType: Maybe<SpecType> = null) {
+    if (!this.ctx.currentProject) {
+      return null
+    }
+
+    const config = await this.getConfig(this.ctx.currentProject.projectRoot)
     const specs = await this.api.findSpecs({
-      projectRoot,
+      projectRoot: this.ctx.currentProject.projectRoot,
       fixturesFolder: config.fixturesFolder ?? false,
       supportFile: config.supportFile ?? false,
       testFiles: config.testFiles ?? [],
@@ -44,18 +48,6 @@ export class ProjectDataSource {
     }
 
     return specs.filter((spec) => spec.specType === specType)
-  }
-
-  async getCurrentSpecById (projectRoot: string, base64Id: string) {
-    // TODO: should cache current specs so we don't need to
-    // call findSpecs each time we ask for the current spec.
-    const specs = await this.findSpecs(projectRoot, null)
-
-    // id is base64 formatted as per Relay: <type>:<string>
-    // in this case, Spec:/my/abs/path
-    const currentSpecAbs = Buffer.from(base64Id, 'base64').toString().split(':')[1]
-
-    return specs.find((x) => x.absolute === currentSpecAbs) ?? null
   }
 
   async getResolvedConfigFields (projectRoot: string): Promise<ResolvedFromConfig[]> {
@@ -87,8 +79,20 @@ export class ProjectDataSource {
     }) as ResolvedFromConfig[]
   }
 
-  async isTestingTypeConfigured (projectRoot: string, testingType: 'e2e' | 'component') {
-    const config = await this.getConfig(projectRoot)
+  isCTConfigured () {
+    return this.isTestingTypeConfigured('component')
+  }
+
+  isE2EConfigured () {
+    return this.isTestingTypeConfigured('e2e')
+  }
+
+  private async isTestingTypeConfigured (testingType: 'e2e' | 'component') {
+    if (!this.ctx.currentProject) {
+      return false
+    }
+
+    const config = await this.getConfig(this.ctx.currentProject.projectRoot)
 
     if (!config) {
       return true

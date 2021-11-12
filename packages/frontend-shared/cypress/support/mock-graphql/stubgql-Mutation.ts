@@ -18,13 +18,7 @@ export const stubMutation: MaybeResolver<Mutation> = {
 
     return true
   },
-  appCreateConfigFile: (source, args, ctx) => {
-    ctx.wizard.chosenManualInstall = true
-    ctx.wizard.canNavigateForward = true
-
-    return true
-  },
-  clearActiveProject (source, args, ctx) {
+  clearCurrentProject (source, args, ctx) {
     ctx.currentProject = null
 
     return true
@@ -62,9 +56,6 @@ export const stubMutation: MaybeResolver<Mutation> = {
     }
   },
   reconfigureProject (src, args, ctx) {
-    return true
-  },
-  resetWizard (src, args, ctx) {
     return true
   },
 }

@@ -1,10 +1,6 @@
 import { makeLegacyDataContext } from '../makeDataContext'
 
 export = (mode, options) => {
-  if (!process.env.LAUNCHPAD) {
-    makeLegacyDataContext(options)
-  }
-
   if (mode === 'record') {
     return require('./record').run(options)
   }
@@ -14,6 +10,7 @@ export = (mode, options) => {
   }
 
   if (mode === 'run') {
+    makeLegacyDataContext(options, 'run')
     if (options.testingType === 'component') {
       return require('./run-ct').run(options)
     }
@@ -26,6 +23,7 @@ export = (mode, options) => {
   }
 
   if (mode === 'interactive') {
+    makeLegacyDataContext(options, 'open')
     if (options.testingType === 'component' && !process.env.LAUNCHPAD) {
       return require('./interactive-ct').run(options)
     }

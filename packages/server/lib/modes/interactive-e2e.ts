@@ -131,7 +131,7 @@ export = {
   ready (options: {projectRoot?: string} = {}) {
     const { projectRoot } = options
     const { serverPortPromise, bus, ctx } = process.env.LAUNCHPAD
-      ? runInternalServer(options)
+      ? runInternalServer(options as LaunchArgs)
       : { bus: new EventEmitter, serverPortPromise: Promise.resolve(undefined), ctx: null }
 
     // TODO: potentially just pass an event emitter

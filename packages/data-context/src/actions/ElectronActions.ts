@@ -1,5 +1,4 @@
 import type { BrowserWindow } from 'electron'
-import os from 'os'
 import type { DataContext } from '..'
 
 export interface ElectronApiShape {
@@ -14,7 +13,7 @@ export class ElectronActions {
   }
 
   private get isMac () {
-    return os.platform() === 'darwin'
+    return this.ctx.os === 'darwin'
   }
 
   setBrowserWindow (window: BrowserWindow) {
@@ -43,7 +42,6 @@ export class ElectronActions {
   }
 
   showElectronOnAppExit () {
-    this.ctx.coreData.wizard.currentStep = 'setupComplete'
     this.refreshBrowserWindow()
     this.showBrowserWindow()
   }

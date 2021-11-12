@@ -26,10 +26,10 @@ export const Query = objectType({
       description: 'Metadata about the nagivation menu',
     })
 
-    t.nonNull.field('wizard', {
+    t.field('wizard', {
       type: Wizard,
       description: 'Metadata about the wizard, null if we arent showing the wizard',
-      resolve: (root, args, ctx) => ctx.coreData.wizard,
+      resolve: (root, args, ctx) => ctx.wizard.rootField(),
     })
 
     t.nonNull.field('dev', {
@@ -47,14 +47,7 @@ export const Query = objectType({
     t.nonNull.list.nonNull.field('projects', {
       type: ProjectLike,
       description: 'All known projects for the app',
-      resolve: (root, args, ctx) => ctx.appData.projects,
-    })
-
-    t.string('browserErrorMessage', {
-      description: 'An error related to finding a browser',
-      resolve: (source, args, ctx) => {
-        return ctx.wizardData.browserErrorMessage
-      },
+      resolve: (root, args, ctx) => ctx.projectsList,
     })
   },
 })

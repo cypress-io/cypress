@@ -12,8 +12,8 @@
   <div class="border-t border-t-gray-100 px-24px">
     <ul>
       <li
-        v-for="dep in props.gql.packagesToInstall"
-        :key="dep.id"
+        v-for="dep in wizardStore.toInstall"
+        :key="dep.package"
         class="py-16px border-b border-b-gray-100 last-of-type:border-b-0"
       >
         <ExternalLink
@@ -34,32 +34,15 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 import CopyButton from '@cy/components/CopyButton.vue'
-import { gql } from '@urql/core'
-import type { ManualInstallFragment } from '../generated/graphql'
 import ExternalLink from '@packages/frontend-shared/src/gql-components/ExternalLink.vue'
+import { useWizardStore } from '../store/wizardStore'
 
-gql`
-fragment ManualInstall on Wizard {
-  packagesToInstall {
-    id
-    name
-    description
-    package
-  }
-}
-`
-
-const props = defineProps<{
-  gql: ManualInstallFragment
-}>()
-
-defineEmits<{(event: 'back'): void
-}>()
+const wizardStore = useWizardStore()
 
 const dependenciesCode = computed(
   () => {
     return `yarn add -D ${
-    (props.gql.packagesToInstall ?? [])
+    (wizardStore.toInstall ?? [])
     .map((pack) => `${pack.package}`)
     .join(' ')}`
   },

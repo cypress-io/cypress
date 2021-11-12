@@ -4,9 +4,7 @@
       class="text-gray-800 text-sm my-3 block"
       :class="{ 'opacity-50': disabled }"
     >
-      {{
-        name
-      }}
+      {{ name }}
     </label>
     <button
       v-click-outside="() => (isOpen = false)"
@@ -44,7 +42,7 @@
     >
       <li
         v-for="opt in options"
-        :key="opt.id"
+        :key="opt.type"
         focus="1"
         class="cursor-pointer flex items-center py-1 px-2 hover:bg-gray-10"
         :data-cy-framework="opt.type"
@@ -63,6 +61,7 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
 import { ClickOutside as vClickOutside } from '../../directives/ClickOutside'
+import type { FRONTEND_FRAMEWORKS } from '@packages/types/src/constants'
 import type { EnvironmentSetupFragment, FrontendFrameworkEnum } from '../../generated/graphql'
 import { FrameworkBundlerLogos } from '../../utils/icons'
 
@@ -78,9 +77,9 @@ const emit = defineEmits<{
 
 const props = withDefaults(defineProps<{
   name: string
-  value?: string
+  value?: FrontendFrameworkEnum | null
   placeholder?: string
-  options: EnvironmentSetupFragment['frameworks']
+  options: typeof FRONTEND_FRAMEWORKS
   disabled?: boolean
 }>(), {
   disabled: false,
@@ -91,7 +90,7 @@ const props = withDefaults(defineProps<{
 const isOpen = ref(false)
 
 const selectedOptionObject = computed(() => {
-  return props.options.find((opt) => opt.id === props.value)
+  return props.options.find((opt) => opt.type === props.value)
 })
 
 const selectOption = (opt: FrontendFrameworkEnum) => {

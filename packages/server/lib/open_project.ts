@@ -230,7 +230,7 @@ export class OpenProject {
         session.clearSessions()
       })
       .then(() => {
-        if (options.skipBrowserOpenForTest) {
+        if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {
           return
         }
 

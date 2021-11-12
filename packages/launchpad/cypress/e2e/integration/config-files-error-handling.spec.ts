@@ -1,6 +1,6 @@
 describe('Config files error handling', () => {
   beforeEach(() => {
-    cy.openE2E('pristine-with-config-file')
+    cy.openModeSystemTest('pristine-with-config-file')
     cy.visitLaunchpad()
   })
 

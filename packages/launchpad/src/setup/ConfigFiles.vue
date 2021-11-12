@@ -1,4 +1,8 @@
 <template>
+  <HeadingText
+    :title="t('setupPage.configFile.title')"
+    :description="t('setupPage.configFile.description')"
+  />
   <div class="py-8 mx-auto max-w-220">
     <FileRow
       v-for="file in files"
@@ -28,13 +32,28 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 import { gql } from '@urql/core'
-import { useMutation } from '@urql/vue'
-import { ConfigFilesFragment, ConfigFilesNavigateDocument } from '../generated/graphql'
+import type { ConfigFilesFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
 import Button from '@cy/components/Button.vue'
 import FileRow from '../components/code/FileRow.vue'
+import { useWizardStore } from '../store/wizardStore'
+import WizardLayout from './WizardLayout.vue'
+import HeadingText from './HeadingText.vue'
+
+const wizardStore = useWizardStore()
 
 const { t } = useI18n()
+
+gql`
+mutation ConfigFiles_CompleteWizard {
+  completeOnboarding {
+    currentProject {
+      id
+      title
+    }
+  }
+}
+`
 
 gql`
 fragment ConfigFiles on Wizard {
@@ -48,27 +67,21 @@ fragment ConfigFiles on Wizard {
 }
 `
 
-gql`
-mutation ConfigFilesNavigate($input: WizardUpdateInput!) {
-  wizardUpdate(input: $input)
-}
-`
-
-const navigate = useMutation(ConfigFilesNavigateDocument)
-
 const props = defineProps<{
-  gql:ConfigFilesFragment
+  gql: ConfigFilesFragment
 }>()
 const files = computed(() => props.gql.sampleConfigFiles)
 
 const continueForward: any = () => {
-  // TODO: check that all the files have been fixed
-  // if not diplay the same screen again with errors
-  navigate.executeMutation({ input: { direction: 'forward', testingType: null } })
+  // TODO: mutation to "complete" the wizard workflow
 }
 
-const backFn:any = () => {
-  navigate.executeMutation({ input: { direction: 'back', testingType: null } })
+const canNavigateForward: any = () => {
+  //
+}
+
+const backFn: any = () => {
+  wizardStore.setWizardStep('installDependencies')
 }
 
 </script>

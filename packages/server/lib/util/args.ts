@@ -1,13 +1,16 @@
-const _ = require('lodash')
-const la = require('lazy-ass')
-const is = require('check-more-types')
-const path = require('path')
-const debug = require('debug')('cypress:server:args')
-const minimist = require('minimist')
-const coerceUtil = require('./coerce')
-const configUtil = require('../config')
-const proxyUtil = require('./proxy')
-const errors = require('../errors')
+import _ = require('lodash')
+import la = require('lazy-ass')
+import is = require('check-more-types')
+import path = require('path')
+import debugLib = require('debug')
+import minimist = require('minimist')
+import coerceUtil = require('./coerce')
+import configUtil = require('../config')
+import proxyUtil = require('./proxy')
+import errors = require('../errors')
+import type { LaunchArgs } from '@packages/types'
+
+const debug = debugLib('cypress:server:args')
 
 const nestedObjectsInCurlyBracesRe = /\{(.+?)\}/g
 const nestedArraysInSquareBracketsRe = /\[(.+?)\]/g
@@ -154,7 +157,9 @@ const sanitizeAndConvertNestedArgs = (str, argname) => {
     .fromPairs()
     .mapValues(JSONOrCoerce)
     .value()
-  } catch (err) {
+  } catch (e) {
+    const err = e as Error
+
     debug('could not pass config %s value %s', argname, str)
     debug('error %o', err)
 
@@ -162,10 +167,10 @@ const sanitizeAndConvertNestedArgs = (str, argname) => {
   }
 }
 
-module.exports = {
+export = {
   normalizeBackslashes,
 
-  toObject (argv) {
+  toObject (argv): LaunchArgs {
     debug('argv array: %o', argv)
 
     const alias = {
@@ -202,6 +207,7 @@ module.exports = {
     // were we invoked from the CLI or directly?
     const invokedFromCli = Boolean(options.cwd)
 
+    // @ts-ignore
     options = _
     .chain(options)
     .defaults(allowed)
@@ -318,6 +324,7 @@ module.exports = {
     _.extend(options.config, configValues)
 
     // remove them from the root options object
+    // @ts-ignore
     options = _.omit(options, configKeys)
 
     options = normalizeBackslashes(options)
@@ -339,7 +346,7 @@ module.exports = {
 
     debug('argv options: %o', options)
 
-    return options
+    return options as LaunchArgs
   },
 
   toArray (obj = {}) {

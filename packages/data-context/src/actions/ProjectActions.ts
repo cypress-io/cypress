@@ -1,8 +1,6 @@
-import type { CodeGenType, MutationAddProjectArgs, MutationAppCreateConfigFileArgs, MutationSetProjectPreferencesArgs, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
+import type { CodeGenType, MutationAddProjectArgs, MutationSetProjectPreferencesArgs, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
 import type { FindSpecs, FoundBrowser, FoundSpec, FullConfig, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions, Preferences, SettingsOptions } from '@packages/types'
 import path from 'path'
-import type { ActiveProjectShape, ProjectShape } from '../data/coreDataShape'
-
 import type { DataContext } from '..'
 import { codeGenerator, SpecOptions } from '../codegen'
 import templates from '../codegen/templates'
@@ -36,73 +34,72 @@ export class ProjectActions {
     return this.ctx._apis.projectApi
   }
 
-  async clearActiveProject () {
+  async clearCurrentTestingType () {
+    await this.api.closeActiveProject()
+    if (!this.ctx.appData.currentProject) {
+      return
+    }
+
+    this.ctx.appData.currentProject.currentTestingType = null
+  }
+
+  async clearCurrentProject () {
     this.ctx.appData.currentProject = null
     await this.api.closeActiveProject()
 
     // TODO(tim): Improve general state management w/ immutability (immer) & updater fn
     this.ctx.coreData.app.isInGlobalMode = true
     this.ctx.coreData.app.currentProject = null
-    this.ctx.coreData.app.currentTestingType = null
   }
 
   private get projects () {
     return this.ctx.coreData.app.projects
   }
 
-  private set projects (projects: ProjectShape[]) {
+  private set projects (projects: string[]) {
     this.ctx.coreData.app.projects = projects
   }
 
+  /**
+   * Given a project "root" directory, sets as the active project directory
+   * @param projectRoot
+   * @returns
+   */
   async setActiveProject (projectRoot: string) {
+    await this.clearCurrentProject()
+
     const title = this.ctx.project.projectTitle(projectRoot)
 
-    await this.clearActiveProject()
-
     // Set initial properties, so we can set the config object on the active project
-    this.setCurrentProjectProperties({
-      projectRoot,
+    this.ctx.coreData.app.currentProject = {
       title,
-      ctPluginsInitialized: false,
-      e2ePluginsInitialized: false,
-      config: null,
-      configChildProcess: null,
-    })
-
-    this.setCurrentProjectProperties({
-      isCTConfigured: await this.ctx.project.isTestingTypeConfigured(projectRoot, 'component'),
-      isE2EConfigured: await this.ctx.project.isTestingTypeConfigured(projectRoot, 'e2e'),
-      preferences: await this.ctx.project.getProjectPreferences(title),
-    })
+      projectRoot,
+      currentTestingType: null,
+    }
 
     return this
   }
 
-  private setCurrentProjectProperties (currentProjectProperties: Partial<ActiveProjectShape>) {
-    this.ctx.coreData.app.currentProject = {
-      browsers: this.ctx.coreData.app.browsers,
-      ...this.ctx.coreData.app.currentProject,
-      ...currentProjectProperties,
-    } as ActiveProjectShape
+  setCurrentTestingType (type: TestingTypeEnum) {
+    if (this.ctx.currentProject) {
+      this.ctx.currentProject.currentTestingType = type
+    }
+
+    return null
   }
 
-  async loadProjects () {
-    const projectRoots = await this.api.getProjectRootsFromCache()
+  async loadGlobalProjects () {
+    const projects = this.api.getProjectRootsFromCache()
 
-    this.projects = [
-      ...this.projects,
-      ...projectRoots.map((projectRoot) => ({ projectRoot })),
-    ]
-
-    return this.projects
+    this.ctx.coreData.app.projects = await projects
   }
 
   async initializeActiveProject (options: OpenProjectLaunchOptions = {}) {
-    if (!this.ctx.currentProject?.projectRoot) {
+    if (!this.ctx.currentProject) {
       throw Error('Cannot initialize project without an active project')
     }
 
-    if (!this.ctx.wizardData.chosenTestingType) {
+    if (!this.ctx.currentProject.currentTestingType) {
       throw Error('Cannot initialize project without choosing testingType')
     }
 
@@ -116,7 +113,7 @@ export class ProjectActions {
     const launchArgs: LaunchArgs = {
       ...this.ctx.launchArgs,
       projectRoot: this.ctx.currentProject.projectRoot,
-      testingType: this.ctx.wizardData.chosenTestingType,
+      testingType: this.ctx.currentProject.currentTestingType,
     }
 
     try {
@@ -141,10 +138,10 @@ export class ProjectActions {
   async addProject (args: MutationAddProjectArgs) {
     const projectRoot = await this.getDirectoryPath(args.path)
 
-    const found = this.projects.find((x) => x.projectRoot === projectRoot)
+    const found = this.ctx.projectsList.find((x) => x.projectRoot === projectRoot)
 
     if (!found) {
-      this.projects.push({ projectRoot })
+      this.projects.push(projectRoot)
       this.api.insertProjectToCache(projectRoot)
     }
 
@@ -169,14 +166,10 @@ export class ProjectActions {
     }
   }
 
-  async launchProject (testingType: TestingTypeEnum | null, options: LaunchOpts) {
-    if (!this.ctx.currentProject) {
-      return null
-    }
+  async launchProject (options: LaunchOpts) {
+    const currentTestingType = this.ctx.currentProject?.currentTestingType
 
-    testingType = testingType || this.ctx.wizardData.chosenTestingType
-
-    if (!testingType) {
+    if (!this.ctx.currentProject || !currentTestingType) {
       return null
     }
 
@@ -195,10 +188,8 @@ export class ProjectActions {
       name: '',
       absolute: '',
       relative: '',
-      specType: testingType === 'e2e' ? 'integration' : 'component',
+      specType: currentTestingType === 'e2e' ? 'integration' : 'component',
     }
-
-    this.ctx.appData.currentTestingType = testingType
 
     return this.api.launchProject(browser, spec, options)
   }
@@ -223,9 +214,7 @@ export class ProjectActions {
     }
 
     this.ctx.actions.electron.hideBrowserWindow()
-    this.ctx.coreData.wizard.chosenTestingType = testingType
     await this.initializeActiveProject()
-    this.ctx.appData.currentTestingType = testingType
 
     return this.api.launchProject(browser, spec, {})
   }
@@ -250,7 +239,7 @@ export class ProjectActions {
       throw new Error(`Cannot remove ${projectRoot}, it is not a known project`)
     }
 
-    this.projects = this.projects.filter((project) => project.projectRoot !== projectRoot)
+    this.ctx.coreData.app.projects = this.ctx.coreData.app.projects.filter((project) => project !== projectRoot)
     this.api.removeProjectFromCache(projectRoot)
   }
 
@@ -287,8 +276,8 @@ export class ProjectActions {
       throw Error(`Cannot create index.html without currentProject.`)
     }
 
-    if (this.ctx.currentProject?.isCTConfigured) {
-      const indexHtmlPath = path.resolve(this.ctx.currentProject.projectRoot, 'cypress/component/support/index.html')
+    if (await this.ctx.project.isCTConfigured()) {
+      const indexHtmlPath = path.resolve(project.projectRoot, 'cypress/component/support/index.html')
 
       await this.ctx.fs.outputFile(indexHtmlPath, template)
     }
@@ -376,7 +365,6 @@ export class ProjectActions {
   }
 
   reconfigureProject () {
-    this.ctx.actions.wizard.resetWizard()
     this.ctx.actions.electron.refreshBrowserWindow()
     this.ctx.actions.electron.showBrowserWindow()
   }

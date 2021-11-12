@@ -173,6 +173,8 @@
   },
   "setupPage": {
     "projectSetup": {
+      "title": "Project Setup",
+      "description": "Confirm the front-end framework and bundler used in your project.",
       "frameworkLabel": "Front-end Framework",
       "frameworkPlaceholder": "Pick a framework",
       "bundlerLabel": "Bundler",
@@ -180,6 +182,8 @@
       "languageLabel": "Language"
     },
     "install": {
+      "title": "Install Dev Dependencies",
+      "description": "Paste the command below into your terminal to install the required packages.",
       "startButton": "Install",
       "confirmManualInstall": "I've installed them"
     },
@@ -189,9 +193,15 @@
       "back": "Back"
     },
     "openBrowser": {
-      "launch": "Launch"
+      "launch": "Launch",
+      "title": "Choose a Browser",
+      "description": "Choose your preferred browser for testing your components.",
+      "loadingTitle": "Initializing Config...",
+      "loadingDescription": "Please wait while we load your project and find browsers installed on your system."
     },
     "configFile": {
+      "title": "Configuration Files",
+      "description": "We added the following files to your project.",
       "createManually": "Create file manually",
       "skippedLabel": "Skipped",
       "changesRequiredLabel": "Changes Required",
@@ -219,7 +229,9 @@
     "openInFinder": "Open In Finder",
     "noResultsMessage": "No projects matched your search"
   },
-  "welcomePage": {
+  "chooseTestingTypePage": {
+    "title": "Welcome to Cypress!",
+    "description": "Choose which method of testing you would like to get started with for this project.",
     "review": "Review the differences between each testing type",
     "codeExample": "Code Example",
     "compareTypes": {

@@ -1,47 +1,42 @@
 <template>
-  <WizardLayout
-    no-container
-    :can-navigate-forward="false"
-    :show-next="false"
-    #="{backFn}"
-  >
-    <div v-if="!query.data.value?.currentProject">
-      Loading browsers...
-    </div>
-    <OpenBrowserList
-      v-else
-      variant=""
-      :gql="query.data.value.currentProject"
-      @navigated-back="backFn"
-      @launch="launch"
-    />
-  </WizardLayout>
+  <OpenBrowserList
+    variant=""
+    :gql="props.gql"
+    @navigated-back="backFn"
+    @launch="launch"
+  />
 </template>
 
 <script lang="ts" setup>
-import { useMutation, gql, useQuery } from '@urql/vue'
+import { useMutation, gql } from '@urql/vue'
 import OpenBrowserList from './OpenBrowserList.vue'
-import WizardLayout from './WizardLayout.vue'
-import { OpenBrowserDocument, OpenBrowser_LaunchProjectDocument } from '../generated/graphql'
+import { OpenBrowserFragment, OpenBrowser_LaunchProjectDocument } from '../generated/graphql'
 
 gql`
-query OpenBrowser {
-  currentProject {
-    id
-    ...OpenBrowserList
-  }
-  wizard {
-    testingType
+mutation OpenBrowser_clearTestingType {
+  clearCurrentTestingType {
+    currentProject {
+      id
+    }
+    wizard {
+      ...Wizard
+    }
   }
 }
 `
 
-const query = useQuery({ query: OpenBrowserDocument })
+gql`
+fragment OpenBrowser on CurrentProject {
+  id
+  currentTestingType
+  ...OpenBrowserList
+}
+`
 
 gql`
 mutation OpenBrowser_LaunchProject ($testingType: TestingTypeEnum!, $browserPath: String!)  {
   launchOpenProject
-  hideBrowserWindow
+  # hideBrowserWindow
   setProjectPreferences(testingType: $testingType, browserPath: $browserPath) {
     currentProject {
       id
@@ -51,10 +46,18 @@ mutation OpenBrowser_LaunchProject ($testingType: TestingTypeEnum!, $browserPath
 }
 `
 
+const props = defineProps<{
+  gql: OpenBrowserFragment
+}>()
+
 const launchOpenProject = useMutation(OpenBrowser_LaunchProjectDocument)
 
+const backFn = () => {
+  //
+}
+
 const launch = (browserPath?: string) => {
-  const testingType = query.data.value?.wizard?.testingType
+  const testingType = props.gql.currentTestingType
 
   if (browserPath && testingType) {
     launchOpenProject.executeMutation({

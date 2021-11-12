@@ -1,9 +1,7 @@
 import type { CodegenTypeMap, Wizard } from '../generated/test-graphql-types.gen'
-import { BUNDLERS, CODE_LANGUAGES, FRONTEND_FRAMEWORKS, TESTING_TYPES } from '@packages/types/src/constants'
+import { BUNDLERS, CODE_LANGUAGES, FRONTEND_FRAMEWORKS } from '@packages/types/src/constants'
 import { MaybeResolver, testNodeId } from './clientTestUtils'
 import dedent from 'dedent'
-
-type Writeable<T> = { -readonly [P in keyof T]: T[P] };
 
 export const allBundlers = BUNDLERS.map((bundler, idx) => {
   return {
@@ -15,9 +13,6 @@ export const allBundlers = BUNDLERS.map((bundler, idx) => {
 
 export const stubWizard: MaybeResolver<Wizard> = {
   __typename: 'Wizard',
-  canNavigateForward: true,
-  step: 'welcome',
-  isManualInstall: false,
   packagesToInstall: [
     {
       ...testNodeId('WizardNpmPackage'),
@@ -32,7 +27,6 @@ export const stubWizard: MaybeResolver<Wizard> = {
       package: '@cypress/webpack-dev-server',
     },
   ],
-  allBundlers,
   sampleConfigFiles: [
     {
       ...testNodeId('WizardSampleConfigFile'),
@@ -74,13 +68,7 @@ export const stubWizard: MaybeResolver<Wizard> = {
       status: 'error',
     },
   ],
-  chosenTestingTypePluginsInitialized: false,
-  testingTypes: (TESTING_TYPES as Writeable<typeof TESTING_TYPES>).map((type) => {
-    return {
-      ...testNodeId('TestingTypeInfo'),
-      ...type,
-    }
-  }),
+  currentTestingTypePluginsInitialized: false,
   frameworks: FRONTEND_FRAMEWORKS.map((framework, idx) => {
     // get around readonly errors
     const supportedBundlers = framework.supportedBundlers as unknown as Array<CodegenTypeMap['WizardBundler']>
