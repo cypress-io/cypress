@@ -433,6 +433,8 @@ export default {
       'scrollBehavior',
       'slowTestThreshold',
       'taskTimeout',
+      'testConfigList',
+      'unverifiedTestConfig',
       'trashAssetsBeforeRuns',
       'viewportHeight',
       'viewportWidth',
