@@ -26,19 +26,28 @@ const TestingPreferences = observer(({
         Testing Preferences
       </div>
 
-      <button
-        aria-label={`${appState.autoScrollingEnabled ? 'Disable' : 'Enable'} Auto-scrolling`}
-        className={cs('toggle-auto-scrolling', { 'auto-scrolling-enabled': appState.autoScrollingEnabled })}
-        onClick={action('toggle:auto:scrolling', toggleAutoScrolling)}
-      >
-        Toggle auto-scroll
-      </button>
-      Auto scrolling is:&nbsp;
-      {appState.autoScrollingEnabled ? (
-        'on'
-      ) : (
-        'off'
-      )}
+      <div className="testing-preference">
+        <div className="testing-preference-header">
+          Auto-scrolling
+          <button
+            aria-label={`${appState.autoScrollingEnabled ? 'Disable' : 'Enable'} Auto-scrolling`}
+            className={cs('toggle-auto-scrolling', { 'auto-scrolling-enabled': appState.autoScrollingEnabled })}
+            onClick={action('toggle:auto:scrolling', toggleAutoScrolling)}
+          >
+            Toggle auto-scroll
+          </button>
+        </div>
+        <div>
+          Automatically scroll the command log while the tests are running.
+          <br />
+          Auto scrolling is:&nbsp;
+          {appState.autoScrollingEnabled ? (
+            'on'
+          ) : (
+            'off'
+          )}
+        </div>
+      </div>
     </div>
   )
 })
