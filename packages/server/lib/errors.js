@@ -879,7 +879,7 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
 
         ${arg1.stack}`
     case 'CDP_RETRYING_CONNECTION':
-      return `Failed to connect to ${arg2}, retrying in 1 second (attempt ${chalk.yellow(arg1)}/62)`
+      return `Still waiting to connect to ${arg2}, retrying in 1 second (attempt ${chalk.yellow(arg1)}/62)`
     case 'DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS':
       return stripIndent`\
         Deprecation Warning: The \`before:browser:launch\` plugin event changed its signature in version \`4.0.0\`

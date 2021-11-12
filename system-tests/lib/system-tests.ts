@@ -300,18 +300,6 @@ const isVideoSnapshotError = (err: Error) => {
   return _.isEqual(added, expectedAddedVideoSnapshotLines) && _.isEqual(deleted, expectedDeletedVideoSnapshotLines)
 }
 
-const isFirefoxConnectionError = (err: Error) => {
-  const matches = diffRe.exec(err.message)
-
-  if (!matches || !matches.length) {
-    return false
-  }
-
-  const lines = matches[1].split('\n')
-
-  return lines.some((line) => line.includes('+Failed to connect to Firefox,'))
-}
-
 // this captures an entire stack trace and replaces it with [stack trace lines]
 // so that the stdout can contain stack traces of different lengths
 // '@' will be present in firefox stack trace lines
@@ -444,6 +432,8 @@ const normalizeStdout = function (str, options: any = {}) {
   .replace(/^(\- )(\/.*\/packages\/server\/)(.*)$/gm, '$1$3')
   // Different browsers have different cross-origin error messages
   .replace(crossOriginErrorRe, '[Cross origin error message]')
+  // Replaces connection warning since Firefox sometimes takes longer to connect
+  .replace(/Still waiting to connect to Firefox, retrying in 1 second \(attempt .+\/.+\)/g, '')
 
   if (options.sanitizeScreenshotDimensions) {
     // screenshot dimensions
@@ -972,16 +962,12 @@ const systemTests = {
         } catch (err) {
           // firefox has issues with recording video. for now, ignore snapshot diffs that only differ in this error.
           // @see https://github.com/cypress-io/cypress/pull/16731
-          if (!(options.browser === 'firefox' && (isVideoSnapshotError(err) || isFirefoxConnectionError(err)))) {
+          if (!(options.browser === 'firefox' && isVideoSnapshotError(err))) {
             throw err
           }
 
           if (isVideoSnapshotError(err)) {
             console.log('(system tests warning) Firefox failed to process the video, but this is being ignored due to known issues with video processing in Firefox.')
-          }
-
-          if (isFirefoxConnectionError(err)) {
-            console.log('(system tests warning) Firefox failed to connect initially, but this is being ignored due to known issues with Firefox taking longer than normal to launch.')
           }
         }
       }
