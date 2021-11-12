@@ -2,15 +2,6 @@
 ### Do not make changes to this file directly
 
 
-"""Namespace for information related to the app"""
-type App {
-  """Whether the browser has been opened for auth or not"""
-  isAuthBrowserOpened: Boolean!
-
-  """Whether the app is in global mode or not"""
-  isInGlobalMode: Boolean!
-}
-
 """Base error"""
 type BaseError {
   message: String
@@ -477,9 +468,6 @@ type Mutation {
 
   """Log out of Cypress Cloud"""
   logout: Boolean
-
-  """Set the current navigation item"""
-  navigationMenuSetItem(type: NavItem!): Boolean
   openExternal(url: String!): Boolean
 
   """show the launchpad windows"""
@@ -512,30 +500,6 @@ type Mutation {
 
   """Updates the different fields of the wizard data store"""
   wizardUpdate(input: WizardUpdateInput!): Boolean
-}
-
-enum NavItem {
-  learn
-  projectSetup
-  runs
-  settings
-}
-
-"""Container describing a single nav item"""
-type NavigationItem implements Node {
-  iconPath: String!
-
-  """Relay style Node ID field for the NavigationItem field"""
-  id: ID!
-  name: String!
-  selected: Boolean!
-  type: NavItem!
-}
-
-"""Container for state associated with the side navigation menu"""
-type NavigationMenu {
-  items: [NavigationItem!]!
-  selected: NavItem!
 }
 
 """Implements the Relay Node spec"""
@@ -605,7 +569,6 @@ type ProjectPreferences {
 
 """The root "Query" type containing all entry fields for our querying"""
 type Query {
-  app: App!
   baseError: BaseError
 
   """An error related to finding a browser"""
@@ -635,8 +598,11 @@ type Query {
   """The state of any info related to local development of the runner"""
   dev: DevState!
 
-  """Metadata about the nagivation menu"""
-  navigationMenu: NavigationMenu
+  """Whether the browser has been opened for auth or not"""
+  isAuthBrowserOpened: Boolean!
+
+  """Whether the app is in global mode or not"""
+  isInGlobalMode: Boolean!
 
   """All known projects for the app"""
   projects: [ProjectLike!]!
@@ -786,7 +752,6 @@ type Wizard {
   The testing type we are setting in the wizard, null if this has not been chosen
   """
   testingType: TestingTypeEnum
-  testingTypes: [TestingTypeInfo!]!
 
   """The title of the page, given the current step of the wizard"""
   title: String

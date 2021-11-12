@@ -1,10 +1,8 @@
 import { objectType } from 'nexus'
 import { BaseError } from '.'
 import { ProjectLike } from '..'
-import { App } from './gql-App'
 import { CurrentProject } from './gql-CurrentProject'
 import { DevState } from './gql-DevState'
-import { NavigationMenu } from './gql-NavigationMenu'
 import { Wizard } from './gql-Wizard'
 
 export const Query = objectType({
@@ -14,16 +12,6 @@ export const Query = objectType({
     t.field('baseError', {
       type: BaseError,
       resolve: (root, args, ctx) => ctx.baseError,
-    })
-
-    t.nonNull.field('app', {
-      type: App,
-      resolve: (root, args, ctx) => ctx.appData,
-    })
-
-    t.field('navigationMenu', {
-      type: NavigationMenu,
-      description: 'Metadata about the nagivation menu',
     })
 
     t.nonNull.field('wizard', {
@@ -41,7 +29,7 @@ export const Query = objectType({
     t.field('currentProject', {
       type: CurrentProject,
       description: 'The currently opened project',
-      resolve: (root, args, ctx) => ctx.coreData.app.currentProject,
+      resolve: (root, args, ctx) => ctx.coreData.currentProject,
     })
 
     t.nonNull.list.nonNull.field('projects', {
@@ -55,6 +43,16 @@ export const Query = objectType({
       resolve: (source, args, ctx) => {
         return ctx.wizardData.browserErrorMessage
       },
+    })
+
+    t.nonNull.boolean('isInGlobalMode', {
+      description: 'Whether the app is in global mode or not',
+      resolve: (source, args, ctx) => !ctx.currentProject,
+    })
+
+    t.nonNull.boolean('isAuthBrowserOpened', {
+      description: 'Whether the browser has been opened for auth or not',
+      resolve: (source, args, ctx) => ctx.coreData.isAuthBrowserOpened,
     })
   },
 })

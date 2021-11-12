@@ -1,7 +1,6 @@
 /* eslint-disable padding-line-between-statements */
 // created by autobarrel, do not modify directly
 
-export * from './gql-App'
 export * from './gql-BaseError'
 export * from './gql-Browser'
 export * from './gql-CodeGenResult'
@@ -12,8 +11,6 @@ export * from './gql-GeneratedSpec'
 export * from './gql-GitInfo'
 export * from './gql-GlobalProject'
 export * from './gql-Mutation'
-export * from './gql-NavigationItem'
-export * from './gql-NavigationMenu'
 export * from './gql-ProjectPreferences'
 export * from './gql-Query'
 export * from './gql-Spec'
