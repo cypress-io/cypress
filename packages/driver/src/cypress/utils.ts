@@ -408,7 +408,7 @@ export default {
     return ret && _.isFunction(ret.then)
   },
 
-  verifyConfigOptions (func) {
+  verifyWriteableOptions (func) {
     const writeableOptions = [
       'animationDistanceThreshold',
       'blockHosts',

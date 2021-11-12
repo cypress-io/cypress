@@ -3,11 +3,14 @@
 /* eslint-disable prefer-rest-params */
 import _ from 'lodash'
 import Promise from 'bluebird'
+import debugFn from 'debug'
+import { registerFetch } from 'unfetch'
 
 import $dom from '../dom'
 import $utils from './utils'
 import $errUtils from './error_utils'
 import $stackUtils from './stack_utils'
+
 import $Chai from '../cy/chai'
 import $Xhrs from '../cy/xhrs'
 import $jQuery from '../cy/jquery'
@@ -31,8 +34,6 @@ import { $Command } from './command'
 import $CommandQueue from './command_queue'
 import $VideoRecorder from '../cy/video-recorder'
 import $TestConfigOverrides from '../cy/testConfigOverrides'
-import debugFn from 'debug'
-import { registerFetch } from 'unfetch'
 
 const debugErrors = debugFn('cypress:driver:errors')
 
@@ -222,7 +223,7 @@ export default {
           Cypress.action('app:window:before:unload', e)
 
           // return undefined so our beforeunload handler
-          // doesnt trigger a confirmation dialog
+          // doesn't trigger a confirmation dialog
           return undefined
         },
         onUnload (e) {
@@ -330,7 +331,7 @@ export default {
 
       // we look at whether or not nestedIndex is a number, because if it
       // is then we need to insert inside of our commands, else just push
-      // it onto the end of the queu
+      // it onto the end of the queue
       const index = _.isNumber(nestedIndex) ? nestedIndex : queue.length
 
       queue.insert(index, $Command.create(obj))
@@ -541,7 +542,7 @@ export default {
     _.extend(cy, {
       id: _.uniqueId('cy'),
 
-      // synchrounous querying
+      // synchronous querying
       $$,
 
       state,
@@ -619,6 +620,8 @@ export default {
       ensureElExistence: ensures.ensureElExistence,
       ensureElDoesNotHaveCSS: ensures.ensureElDoesNotHaveCSS,
       ensureVisibility: ensures.ensureVisibility,
+      ensureStrictVisibility: ensures.ensureStrictVisibility,
+      ensureNotHiddenByAncestors: ensures.ensureNotHiddenByAncestors,
       ensureDescendents: ensures.ensureDescendents,
       ensureNotReadonly: ensures.ensureNotReadonly,
       ensureNotDisabled: ensures.ensureNotDisabled,
@@ -702,29 +705,35 @@ export default {
         return doneEarly()
       },
 
-      reset (attrs, test) {
-        const s = state()
+      // reset is called before each test
+      reset (test) {
+        try {
+          const s = state()
 
-        const backup = {
-          window: s.window,
-          document: s.document,
-          $autIframe: s.$autIframe,
-          specWindow: s.specWindow,
-          activeSessions: s.activeSessions,
+          const backup = {
+            window: s.window,
+            document: s.document,
+            $autIframe: s.$autIframe,
+            specWindow: s.specWindow,
+            activeSessions: s.activeSessions,
+          }
+
+          // reset state back to empty object
+          state.reset()
+
+          // and then restore these backed up props
+          state(backup)
+
+          queue.reset()
+          queue.clear()
+          timers.reset()
+
+          testConfigOverrides.restoreAndSetTestConfigOverrides(test, Cypress.config, Cypress.env)
+
+          cy.removeAllListeners()
+        } catch (err) {
+          fail(err)
         }
-
-        // reset state back to empty object
-        state.reset()
-
-        // and then restore these backed up props
-        state(backup)
-
-        queue.reset()
-        queue.clear()
-        timers.reset()
-        testConfigOverrides.restoreAndSetTestConfigOverrides(test, Cypress.config, Cypress.env)
-
-        return cy.removeAllListeners()
       },
 
       addCommandSync (name, fn) {
@@ -1032,8 +1041,7 @@ export default {
               const originalDone = arguments[0]
 
               arguments[0] = (done = function (err) {
-                // TODO: handle no longer error
-                // when ended early
+                // TODO: handle no longer error when ended early
                 doneEarly()
 
                 originalDone(err)
@@ -1054,7 +1062,7 @@ export default {
 
             // if we returned a value from fn
             // and enqueued some new commands
-            // and the value isnt currently cy
+            // and the value isn't currently cy
             // or a promise
             if (ret &&
               (queue.length > currentLength) &&

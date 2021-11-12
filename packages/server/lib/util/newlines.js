@@ -1,10 +1,16 @@
-const R = require('ramda')
-
 const addNewlineAtEveryNChar = (str, n) => {
-  // Add a newline char after every 'n' char
-  if (str) {
-    return R.splitEvery(n, str).join('\n')
+  if (!str) {
+    return str
   }
+
+  let result = []
+  let idx = 0
+
+  while (idx < str.length) {
+    result.push(str.slice(idx, idx += n))
+  }
+
+  return result.join('\n')
 }
 
 module.exports = {

@@ -633,7 +633,7 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         We found an invalid value in the file: ${chalk.blue(filePath)}
 
         ${chalk.yellow(arg2)}`
-    // happens when there is an invalid config value returnes from the
+    // happens when there is an invalid config value is returned from the
     // project's plugins file like "cypress/plugins.index.js"
     case 'PLUGINS_CONFIG_VALIDATION_ERROR':
       filePath = `\`${arg1}\``
@@ -650,9 +650,9 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         ${chalk.yellow(arg1)}`
     case 'RENAMED_CONFIG_OPTION':
       return stripIndent`\
-        The ${chalk.yellow(arg1)} configuration option you have supplied has been renamed.
+        The ${chalk.yellow(arg1.name)} configuration option you have supplied has been renamed.
 
-        Please rename ${chalk.yellow(arg1)} to ${chalk.blue(arg2)}`
+        Please rename ${chalk.yellow(arg1.name)} to ${chalk.blue(arg1.newName)}`
     case 'CANNOT_CONNECT_BASE_URL':
       return stripIndent`\
         Cypress failed to verify that your server is running.
@@ -932,7 +932,7 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         You can safely remove this option from your config.`
     case 'EXPERIMENTAL_COMPONENT_TESTING_REMOVED':
       return stripIndent`\
-        The ${chalk.yellow(`\`experimentalComponentTesting\``)} configuration option was removed in Cypress version \`7.0.0\`. Please remove this flag from \`cypress.json\`.
+        The ${chalk.yellow(`\`experimentalComponentTesting\``)} configuration option was removed in Cypress version \`7.0.0\`. Please remove this flag from ${chalk.yellow(`\`${arg1.configFile}\``)}.
 
         Cypress Component Testing is now a standalone command. You can now run your component tests with:
 
@@ -1003,15 +1003,23 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         `
     case 'UNSUPPORTED_BROWSER_VERSION':
       return arg1
-    case 'WIN32_DEPRECATION':
+    case 'WIN32_UNSUPPORTED':
       return stripIndent`\
-        You are running a 32-bit build of Cypress. Cypress will remove Windows 32-bit support in a future release.
+        You are attempting to run Cypress on Windows 32-bit. Cypress has removed Windows 32-bit support.
 
         ${arg1 ? 'Try installing Node.js 64-bit and reinstalling Cypress to use the 64-bit build.'
-        : 'Consider upgrading to a 64-bit OS to continue using Cypress in future releases.'}
-
-        For more information, see: https://on.cypress.io/win32-removal
+        : 'Consider upgrading to a 64-bit OS to continue using Cypress.'}
         `
+    case 'NODE_VERSION_DEPRECATION_SYSTEM':
+      return stripIndent`\
+      Deprecation Warning: ${chalk.yellow(`\`${arg1.name}\``)} is currently set to ${chalk.yellow(`\`${arg1.value}\``)} in the ${chalk.yellow(`\`${arg1.configFile}\``)} configuration file. As of Cypress version \`9.0.0\` the default behavior of ${chalk.yellow(`\`${arg1.name}\``)} has changed to always use the version of Node used to start cypress via the cli.
+      Please remove the ${chalk.yellow(`\`${arg1.name}\``)} configuration option from ${chalk.yellow(`\`${arg1.configFile}\``)}.
+      `
+    case 'NODE_VERSION_DEPRECATION_BUNDLED':
+      return stripIndent`\
+      Deprecation Warning: ${chalk.yellow(`\`${arg1.name}\``)} is currently set to ${chalk.yellow(`\`${arg1.value}\``)} in the ${chalk.yellow(`\`${arg1.configFile}\``)} configuration file. As of Cypress version \`9.0.0\` the default behavior of ${chalk.yellow(`\`${arg1.name}\``)} has changed to always use the version of Node used to start cypress via the cli. When ${chalk.yellow(`\`${arg1.name}\``)} is set to ${chalk.yellow(`\`${arg1.value}\``)}, Cypress will use the version of Node bundled with electron. This can cause problems running certain plugins or integrations. 
+      As the ${chalk.yellow(`\`${arg1.name}\``)} configuration option will be removed in a future release, it is recommended to remove the ${chalk.yellow(`\`${arg1.name}\``)} configuration option from ${chalk.yellow(`\`${arg1.configFile}\``)}.
+      `
     default:
   }
 }

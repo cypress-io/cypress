@@ -1,7 +1,6 @@
 /* eslint-disable no-restricted-properties */
 require('../spec_helper')
 
-const R = require('ramda')
 const _ = require('lodash')
 const path = require('path')
 const EE = require('events')
@@ -17,6 +16,8 @@ const pkg = require('@packages/root')
 const detect = require('@packages/launcher/lib/detect')
 const launch = require('@packages/launcher/lib/browsers')
 const extension = require('@packages/extension')
+const v = require('@packages/config/lib/validation')
+
 const argsUtil = require(`${root}lib/util/args`)
 const { fs } = require(`${root}lib/util/fs`)
 const ciProvider = require(`${root}lib/util/ci_provider`)
@@ -44,7 +45,6 @@ const browserUtils = require(`${root}lib/browsers/utils`)
 const chromeBrowser = require(`${root}lib/browsers/chrome`)
 const { openProject } = require(`${root}lib/open_project`)
 const env = require(`${root}lib/util/env`)
-const v = require(`${root}lib/util/validation`)
 const system = require(`${root}lib/util/system`)
 const appData = require(`${root}lib/util/app_data`)
 const electronApp = require('../../lib/util/electron-app')
@@ -1054,7 +1054,7 @@ describe('lib/cypress', () => {
 
             // when we work with the browsers we set a few extra flags
             const chrome = _.find(TYPICAL_BROWSERS, { name: 'chrome' })
-            const launchedChrome = R.merge(chrome, {
+            const launchedChrome = _.defaults({}, chrome, {
               isHeadless: true,
               isHeaded: false,
             })
