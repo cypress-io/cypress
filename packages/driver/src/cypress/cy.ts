@@ -10,6 +10,7 @@ import $dom from '../dom'
 import $utils from './utils'
 import $errUtils from './error_utils'
 import $stackUtils from './stack_utils'
+
 import { create as createChai, IChai } from '../cy/chai'
 import { create as createXhr, IXhr } from '../cy/xhrs'
 import { create as createJQuery, IJQuery } from '../cy/jquery'
@@ -33,8 +34,6 @@ import { $Command } from './command'
 import $CommandQueue from './command_queue'
 import { initVideoRecorder } from '../cy/video-recorder'
 import { TestConfigOverride } from '../cy/testConfigOverrides'
-import debugFn from 'debug'
-import { registerFetch } from 'unfetch'
 
 const debugErrors = debugFn('cypress:driver:errors')
 

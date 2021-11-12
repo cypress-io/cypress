@@ -514,7 +514,7 @@ export const create = (Cypress, cy) => {
     },
 
     assert (...args) {
-      // if we've temporarily overriden assertions
+      // if we've temporarily overridden assertions
       // then just bail early with this function
       const fn = cy.state('overrideAssert') || assertFn
 
