@@ -12,6 +12,8 @@ const VALID_POSITIONS = 'topLeft top topRight left center right bottomLeft botto
 // they may need to work with both element arrays, or specific items
 // such as a single element, a single document, or single window
 
+let returnFalse = () => false
+
 export const create = (state, expect) => {
   // TODO: we should probably normalize all subjects
   // into an array and loop through each and verify
@@ -152,7 +154,9 @@ export const create = (state, expect) => {
   }
 
   const runVisibilityCheck = (subject, onFail, method) => {
-    const visibleSubjects = subject.filter(() => !method(this, 'isVisible()', { checkOpacity: false }))
+    const visibleSubjects = subject.filter(function () {
+      return !method(this, 'isVisible()', { checkOpacity: false })
+    })
 
     if (subject.length !== visibleSubjects.length) {
       const cmd = state('current').get('name')
@@ -240,7 +244,7 @@ export const create = (state, expect) => {
   }
 
   const ensureExistence = (subject) => {
-    const returnFalse = () => {
+    returnFalse = () => {
       cleanup()
 
       return false
