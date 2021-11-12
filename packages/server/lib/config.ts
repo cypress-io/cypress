@@ -2,7 +2,7 @@ import _ from 'lodash'
 import path from 'path'
 import Promise from 'bluebird'
 import deepDiff from 'return-deep-diff'
-import type { ResolvedConfigurationOptions, ResolvedFromConfig, ResolvedConfigurationOptionSource, TestingType } from '@packages/types'
+import type { ResolvedConfigurationOptions, ResolvedFromConfig, ResolvedConfigurationOptionSource } from '@packages/types'
 
 import errors from './errors'
 import scaffold from './scaffold'
@@ -13,11 +13,6 @@ import * as settings from './util/settings'
 import Debug from 'debug'
 import pathHelpers from './util/path_helpers'
 import findSystemNode from './util/find_system_node'
-
-export interface ConfigSettingsConfig {
-  testingType: TestingType
-  configFile?: false | string
-}
 
 const debug = Debug('cypress:server:config')
 

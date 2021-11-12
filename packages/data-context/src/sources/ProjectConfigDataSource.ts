@@ -20,19 +20,19 @@ export class ProjectConfigDataSource {
   }
 
   async getConfigForProject (projectRoot: string): Promise<FullConfig> {
-    if (!this.ctx.coreData.app.currentProject) {
+    if (!this.ctx.coreData.currentProject) {
       throw new Error(`Cannot access config without currentProject`)
     }
 
-    if (!this.ctx.coreData.app.currentProject.config) {
-      this.ctx.coreData.app.currentProject.config = Promise.resolve().then(async () => {
+    if (!this.ctx.coreData.currentProject.config) {
+      this.ctx.coreData.currentProject.config = Promise.resolve().then(async () => {
         const configFile = await this.ctx.config.getDefaultConfigBasename(projectRoot)
 
         return this.ctx._apis.projectApi.getConfig(projectRoot, { configFile })
       })
     }
 
-    return this.ctx.coreData.app.currentProject.config
+    return this.ctx.coreData.currentProject.config
   }
 
   async getDefaultConfigBasename (projectRoot: string) {

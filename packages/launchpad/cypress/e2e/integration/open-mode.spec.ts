@@ -1,33 +1,36 @@
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 
 describe('Launchpad: Open Mode', () => {
-  beforeEach(() => {
-    cy.setupE2E()
-    cy.visitLaunchpad()
-    // Forcing reload, need to sync with @brian-mann to debug behavior here
-    cy.reload({ log: false })
-  })
-
-  it('shows Add Project when no projects have been added', () => {
-    cy.get('h1').should('contain', defaultMessages.globalPage.empty.title)
-  })
-
-  it('shows projects when projects have been added', () => {
-    cy.get('h1').should('contain', defaultMessages.globalPage.empty.title)
-  })
-
-  it('shows the projects page when a project is not specified', () => {
-    cy.task('scaffoldProject', 'todos').then((projectPath) => {
-      cy.withCtx(async (ctx, o) => {
-        ctx.actions.project.addProject({ path: o.projectPath as string, open: false })
-      }, { projectPath })
+  describe('global mode', () => {
+    beforeEach(() => {
+      cy.setupE2E()
+      cy.visitLaunchpad()
     })
 
-    cy.contains(defaultMessages.globalPage.recentProjectsHeader)
+    it('shows Add Project when no projects have been added', () => {
+      cy.get('h1').should('contain', defaultMessages.globalPage.empty.title)
+    })
+
+    it('shows projects when projects have been added', () => {
+      cy.get('h1').should('contain', defaultMessages.globalPage.empty.title)
+    })
+
+    it('shows the projects page when a project is not specified', () => {
+      cy.task('scaffoldProject', 'todos').then((projectPath) => {
+        cy.withCtx(async (ctx, o) => {
+          ctx.actions.project.addProject({ path: o.projectPath as string, open: false })
+        }, { projectPath })
+      })
+
+      cy.visitLaunchpad()
+
+      cy.contains(defaultMessages.globalPage.recentProjectsHeader)
+    })
   })
 
   it('goes directly to e2e tests when launched with --e2e', () => {
     cy.setupE2E('todos')
+    cy.visitLaunchpad()
 
     cy.withCtx(async (ctx) => {
       // Though the data context is previously initialized,
@@ -45,7 +48,8 @@ describe('Launchpad: Open Mode', () => {
   })
 
   it('goes directly to component tests when launched with --component', () => {
-    cy.setupE2E('todos')
+    cy.setupE2E('launchpad')
+    cy.visitLaunchpad()
 
     cy.withCtx(async (ctx) => {
       // Though the data context is previously initialized,
@@ -59,11 +63,12 @@ describe('Launchpad: Open Mode', () => {
     })
 
     // Component testing is not configured for the todo project
-    cy.get('h1').should('contain', 'Cypress Configuration Error')
+    cy.get('h1').should('contain', 'Project Setup')
   })
 
   it('auto-selects the browser when launched with --browser', () => {
     cy.setupE2E('launchpad')
+    cy.visitLaunchpad()
 
     cy.withCtx(async (ctx) => {
       ctx.launchArgs.testingType = 'e2e'
@@ -85,6 +90,7 @@ describe('Launchpad: Open Mode', () => {
   describe('when there is a list of projects', () => {
     it('goes to an active project if one is added', () => {
       cy.setupE2E('todos')
+      cy.visitLaunchpad()
 
       cy.withCtx(async (ctx, o) => {
         ctx.emitter.toLaunchpad()
@@ -96,6 +102,9 @@ describe('Launchpad: Open Mode', () => {
 
   describe('when a user interacts with the header', () => {
     it('the Docs menu opens when clicked', () => {
+      cy.setupE2E('todos')
+      cy.visitLaunchpad()
+
       cy.contains('Projects').should('be.visible')
       cy.contains('button', 'Docs').click()
       cy.contains(defaultMessages.topNav.docsMenu.gettingStartedTitle).should('be.visible')

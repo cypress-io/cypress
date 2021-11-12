@@ -10,7 +10,6 @@ import debugLib from 'debug'
 import { CoreDataShape, makeCoreData } from './data/coreDataShape'
 import { DataActions } from './DataActions'
 import {
-  AppDataSource,
   GitDataSource,
   FileDataSource,
   ProjectDataSource,
@@ -80,6 +79,10 @@ export class DataContext {
     return this._config.electronApi
   }
 
+  get isGlobalMode () {
+    return !this.currentProject
+  }
+
   async initializeData () {
     const toAwait: Promise<any>[] = [
       // Fetch the browsers when the app starts, so we have some by
@@ -97,7 +100,7 @@ export class DataContext {
     if (this._config.launchArgs.projectRoot) {
       await this.actions.project.setActiveProject(this._config.launchArgs.projectRoot)
 
-      if (this.coreData.app.currentProject?.preferences) {
+      if (this.coreData.currentProject?.preferences) {
         toAwait.push(this.actions.project.launchProjectWithoutElectron())
       }
     }
@@ -177,11 +180,6 @@ export class DataContext {
     return new DataActions(this)
   }
 
-  @cached
-  get app () {
-    return new AppDataSource(this)
-  }
-
   get appData () {
     return this.coreData.app
   }
@@ -206,7 +204,7 @@ export class DataContext {
   }
 
   get currentProject () {
-    return this.coreData.app.currentProject
+    return this.coreData.currentProject
   }
 
   @cached

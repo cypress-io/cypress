@@ -1,6 +1,3 @@
-import type { App } from '../generated/test-graphql-types.gen'
-import type { MaybeResolver } from './clientTestUtils'
-
 export const longBrowsersList = [
   {
     name: 'electron',
@@ -123,13 +120,3 @@ export const longBrowsersList = [
     majorVersion: '69',
   },
 ] as const
-
-export const stubApp: MaybeResolver<App> = {
-  __typename: 'App',
-  isInGlobalMode (source, args, ctx) {
-    return Boolean(ctx.currentProject)
-  },
-  isAuthBrowserOpened (source, args, ctx) {
-    return ctx.app.isAuthBrowserOpened
-  },
-}
