@@ -21,8 +21,10 @@ const TestingPreferences = observer(({
   }
 
   return (
-    <div>
-      Hello world
+    <div className="testing-preferences">
+      <div className="testing-preferences-header">
+        Testing Preferences
+      </div>
 
       <button
         aria-label={`${appState.autoScrollingEnabled ? 'Disable' : 'Enable'} Auto-scrolling`}
