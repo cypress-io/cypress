@@ -206,25 +206,22 @@ describe('per-test config', () => {
 
   describe('in nested suite', () => {
     describe('config in suite', {
-      foo: true,
       defaultCommandTimeout: 200,
     }, () => {
-      it('has config.foo', () => {
-        expect(Cypress.config().foo).ok
+      it('has config.defaultCommandTimeout', () => {
         expect(Cypress.config().defaultCommandTimeout).eq(200)
       })
 
       describe('inner suite', {
-        bar: true,
+        pageLoadTimeout: 200,
       }, () => {
         it('has config.bar', () => {
-          expect(Cypress.config().bar).ok
+          expect(Cypress.config().pageLoadTimeout).eq(200)
         })
 
-        it('has config.bar and config.foo', () => {
-          expect(Cypress.config().bar).ok
-          expect(Cypress.config().foo).ok
+        it('has config.defaultCommandTimeout and config.pageLoadTimeout', () => {
           expect(Cypress.config().defaultCommandTimeout).eq(200)
+          expect(Cypress.config().pageLoadTimeout).eq(200)
         })
       })
     })
@@ -232,43 +229,43 @@ describe('per-test config', () => {
 
   describe('in double nested suite', () => {
     describe('config in suite', {
-      foo: true,
+      defaultCommandTimeout: 200,
     }, () => {
-      describe('inner suite', { bar: true }, () => {
-        it('has config.bar', () => {
-          expect(Cypress.config().bar).ok
-          expect(Cypress.config().foo).ok
+      describe('inner suite', { pageLoadTimeout: 200 }, () => {
+        it('has config.pageLoadTimeout', () => {
+          expect(Cypress.config().defaultCommandTimeout).eq(200)
+          expect(Cypress.config().pageLoadTimeout).eq(200)
         })
       })
     })
   })
 
-  describe('in mulitple nested suites', {
-    foo: false,
+  describe('in multiple nested suites', {
+    defaultCommandTimeout: 100,
   }, () => {
     describe('config in suite', {
-      foo: true,
+      defaultCommandTimeout: 200,
     }, () => {
-      describe('inner suite 1', { bar: true }, () => {
-        it('has config.bar', () => {
-          expect(Cypress.config().bar).ok
-          expect(Cypress.config().foo).ok
+      describe('inner suite 1', { pageLoadTimeout: 200 }, () => {
+        it('has config.pageLoadTimeout', () => {
+          expect(Cypress.config().defaultCommandTimeout).eq(200)
+          expect(Cypress.config().pageLoadTimeout).eq(200)
         })
       })
 
-      describe('inner suite 2', { baz: true }, () => {
-        it('has config.baz', () => {
-          expect(Cypress.config().bar).not.ok
-          expect(Cypress.config().baz).ok
-          expect(Cypress.config().foo).ok
+      describe('inner suite 2', { requestTimeout: 200 }, () => {
+        it('has config.requestTimeout', () => {
+          expect(Cypress.config().pageLoadTimeout).not.eq(200)
+          expect(Cypress.config().requestTimeout).eq(200)
+          expect(Cypress.config().defaultCommandTimeout).eq(200)
         })
       })
 
       describe('inner suite 3', () => {
-        it('has only config.foo', () => {
-          expect(Cypress.config().bar).not.ok
-          expect(Cypress.config().baz).not.ok
-          expect(Cypress.config().foo).ok
+        it('has only config.defaultCommandTimeout', () => {
+          expect(Cypress.config().pageLoadTimeout).not.eq(200)
+          expect(Cypress.config().requestTimeout).not.eq(200)
+          expect(Cypress.config().defaultCommandTimeout).eq(200)
         })
       })
     })
@@ -276,20 +273,20 @@ describe('per-test config', () => {
 
   describe('in multiple nested suites', () => {
     describe('config in suite', {
-      foo: true,
+      defaultCommandTimeout: 200,
     }, () => {
-      describe('inner suite 1', { bar: true }, () => {
-        it('has config.bar', () => {
-          expect(Cypress.config().bar).ok
-          expect(Cypress.config().foo).ok
+      describe('inner suite 1', { pageLoadTimeout: 200 }, () => {
+        it('has config.pageLoadTimeout', () => {
+          expect(Cypress.config().pageLoadTimeout).eq(200)
+          expect(Cypress.config().defaultCommandTimeout).eq(200)
         })
       })
 
-      describe('inner suite 2', { baz: true }, () => {
-        it('has config.bar', () => {
-          expect(Cypress.config().bar).not.ok
-          expect(Cypress.config().baz).ok
-          expect(Cypress.config().foo).ok
+      describe('inner suite 2', { requestTimeout: 200 }, () => {
+        it('has config.requestTimeout', () => {
+          expect(Cypress.config().pageLoadTimeout).not.eq(200)
+          expect(Cypress.config().requestTimeout).eq(200)
+          expect(Cypress.config().defaultCommandTimeout).eq(200)
         })
       })
     })

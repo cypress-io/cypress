@@ -421,6 +421,7 @@ export default {
       'includeShadowDom',
       'isInteractive',
       'isTextTerminal',
+      'keystrokeDelay',
       'numTestsKeptInMemory',
       'pageLoadTimeout',
       'retries',
