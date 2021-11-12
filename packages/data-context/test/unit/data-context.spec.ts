@@ -34,7 +34,7 @@ const makeDataContext = (options) => {
       getProjectRootsFromCache: () => ([]),
       getProjectPreferencesFromCache: () => {
         return {
-          [options.coreData.app.currentProject.title]: {
+          [options.coreData.currentProject.title]: {
             browserPath: chromeTestPath,
             testingType: 'component',
           },

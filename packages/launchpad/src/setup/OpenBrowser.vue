@@ -41,7 +41,8 @@ const query = useQuery({ query: OpenBrowserDocument })
 gql`
 mutation OpenBrowser_LaunchProject ($testingType: TestingTypeEnum!, $browserPath: String!)  {
   launchOpenProject
-  hideBrowserWindow
+  # Removing for now until we decide what the behavior should be
+  # hideBrowserWindow
   setProjectPreferences(testingType: $testingType, browserPath: $browserPath) {
     currentProject {
       id

@@ -6,9 +6,6 @@ export const stubQuery: MaybeResolver<Query> = {
   dev () {
     return {}
   },
-  app (source, args, ctx) {
-    return ctx.app
-  },
   wizard (source, args, ctx) {
     return ctx.wizard
   },
@@ -17,5 +14,11 @@ export const stubQuery: MaybeResolver<Query> = {
   },
   projects (soruce, args, ctx) {
     return ctx.projects
+  },
+  isAuthBrowserOpened (source, args, ctx) {
+    return ctx.isAuthBrowserOpened
+  },
+  isInGlobalMode (source, args, ctx) {
+    return !ctx.currentProject
   },
 }

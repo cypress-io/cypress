@@ -92,6 +92,8 @@ function addProject (projectName: ProjectFixture) {
 }
 
 function openE2E (projectName?: ProjectFixture) {
+  const _log = Cypress.log({ name: 'openE2E', message: projectName ?? '' })
+
   if (projectName && !e2eProjectDirs.includes(projectName)) {
     throw new Error(`Unknown project ${projectName}`)
   }
@@ -110,6 +112,8 @@ function openE2E (projectName?: ProjectFixture) {
       ctx.appServerPort,
     ]
   }, { projectName, log: false }).then(([gqlPort, serverPort]) => {
+    _log.end()
+    Cypress.env('e2e_gqlPort', gqlPort)
     Cypress.env('e2e_serverPort', serverPort)
   })
 }
