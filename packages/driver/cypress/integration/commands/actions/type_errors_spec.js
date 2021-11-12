@@ -1,3 +1,4 @@
+const { assertLogLength } = require('../../../support/utils')
 const { _, $ } = Cypress
 
 describe('src/cy/commands/actions/type - #type errors', () => {
@@ -100,7 +101,7 @@ describe('src/cy/commands/actions/type - #type errors', () => {
       cy.on('fail', (err) => {
         const { lastLog } = this
 
-        expect(this.logs.length).to.eq(2)
+        assertLogLength(this.logs, 2)
         expect(lastLog.get('error')).to.eq(err)
         expect(err.message).to.include('`cy.type()` failed because this element is not visible')
 
@@ -130,7 +131,7 @@ describe('src/cy/commands/actions/type - #type errors', () => {
       cy.on('fail', (err) => {
         const { lastLog } = this
 
-        expect(this.logs.length).to.eq(1)
+        assertLogLength(this.logs, 1)
         expect(lastLog.get('error')).to.eq(err)
 
         done()
@@ -156,7 +157,7 @@ describe('src/cy/commands/actions/type - #type errors', () => {
       .prependTo(cy.$$('body'))
 
       cy.on('fail', (err) => {
-        expect(this.logs.length).to.eq(2)
+        assertLogLength(this.logs, 2)
         expect(err.message).to.include('`cy.type()` failed because this element')
         expect(err.message).to.include('is being covered by another element')
 
@@ -168,7 +169,7 @@ describe('src/cy/commands/actions/type - #type errors', () => {
 
     it('throws when special characters dont exist', function (done) {
       cy.on('fail', (err) => {
-        expect(this.logs.length).to.eq(2)
+        assertLogLength(this.logs, 2)
 
         const allChars = _.keys(Cypress.Keyboard.getKeymap()).join(', ')
 
@@ -186,7 +187,7 @@ If you want to skip parsing special character sequences and type the text exactl
 
     it('throws when attempting to type tab', function (done) {
       cy.on('fail', (err) => {
-        expect(this.logs.length).to.eq(2)
+        assertLogLength(this.logs, 2)
         expect(err.message).to.eq('`{tab}` isn\'t a supported character sequence.')
 
         done()
@@ -197,7 +198,7 @@ If you want to skip parsing special character sequences and type the text exactl
 
     it('throws on an empty string', function (done) {
       cy.on('fail', (err) => {
-        expect(this.logs.length).to.eq(2)
+        assertLogLength(this.logs, 2)
         expect(err.message).to.eq('`cy.type()` cannot accept an empty string. You need to actually type something.')
         expect(err.docsUrl).to.eq('https://on.cypress.io/type')
         done()
@@ -262,7 +263,7 @@ If you want to skip parsing special character sequences and type the text exactl
           })
 
           cy.on('fail', (err) => {
-            expect(this.logs.length).to.eq(2)
+            assertLogLength(this.logs, 2)
             expect(err.message).to.eq(`\`cy.type()\` can only accept a string or number. You passed in: \`${val}\``)
             expect(err.docsUrl).to.eq('https://on.cypress.io/type')
             done()
@@ -312,7 +313,7 @@ If you want to skip parsing special character sequences and type the text exactl
 
     it('does not log an additional log on failure', function (done) {
       cy.on('fail', () => {
-        expect(this.logs.length).to.eq(3)
+        assertLogLength(this.logs, 3)
 
         done()
       })
@@ -323,7 +324,7 @@ If you want to skip parsing special character sequences and type the text exactl
     context('[type=date]', () => {
       it('throws when chars is not a string', function (done) {
         cy.on('fail', (err) => {
-          expect(this.logs.length).to.eq(2)
+          assertLogLength(this.logs, 2)
           expect(err.message).to.eq('Typing into a `date` input with `cy.type()` requires a valid date with the format `YYYY-MM-DD`. You passed: `1989`')
           expect(err.docsUrl).to.eq('https://on.cypress.io/type')
           done()
@@ -334,7 +335,7 @@ If you want to skip parsing special character sequences and type the text exactl
 
       it('throws when chars is invalid format', function (done) {
         cy.on('fail', (err) => {
-          expect(this.logs.length).to.eq(2)
+          assertLogLength(this.logs, 2)
           expect(err.message).to.eq('Typing into a `date` input with `cy.type()` requires a valid date with the format `YYYY-MM-DD`. You passed: `01-01-1989`')
           expect(err.docsUrl).to.eq('https://on.cypress.io/type')
           done()
@@ -345,7 +346,7 @@ If you want to skip parsing special character sequences and type the text exactl
 
       it('throws when chars is non-existent date', function (done) {
         cy.on('fail', (err) => {
-          expect(this.logs.length).to.eq(2)
+          assertLogLength(this.logs, 2)
           expect(err.message).to.eq('Typing into a `date` input with `cy.type()` requires a valid date with the format `YYYY-MM-DD`. You passed: `1989-04-31`')
           expect(err.docsUrl).to.eq('https://on.cypress.io/type')
           done()
@@ -359,7 +360,7 @@ If you want to skip parsing special character sequences and type the text exactl
     context('[type=month]', () => {
       it('throws when chars is not a string', function (done) {
         cy.on('fail', (err) => {
-          expect(this.logs.length).to.eq(2)
+          assertLogLength(this.logs, 2)
           expect(err.message).to.eq('Typing into a `month` input with `cy.type()` requires a valid month with the format `YYYY-MM`. You passed: `6`')
           expect(err.docsUrl).to.eq('https://on.cypress.io/type')
           done()
@@ -370,7 +371,7 @@ If you want to skip parsing special character sequences and type the text exactl
 
       it('throws when chars is invalid format', function (done) {
         cy.on('fail', (err) => {
-          expect(this.logs.length).to.eq(2)
+          assertLogLength(this.logs, 2)
           expect(err.message).to.eq('Typing into a `month` input with `cy.type()` requires a valid month with the format `YYYY-MM`. You passed: `01/2000`')
           expect(err.docsUrl).to.eq('https://on.cypress.io/type')
           done()
@@ -381,7 +382,7 @@ If you want to skip parsing special character sequences and type the text exactl
 
       it('throws when chars is invalid month', function (done) {
         cy.on('fail', (err) => {
-          expect(this.logs.length).to.eq(2)
+          assertLogLength(this.logs, 2)
           expect(err.message).to.eq('Typing into a `month` input with `cy.type()` requires a valid month with the format `YYYY-MM`. You passed: `1989-13`')
           expect(err.docsUrl).to.eq('https://on.cypress.io/type')
           done()
@@ -408,7 +409,7 @@ If you want to skip parsing special character sequences and type the text exactl
     context('[type=week]', () => {
       it('throws when chars is not a string', function (done) {
         cy.on('fail', (err) => {
-          expect(this.logs.length).to.eq(2)
+          assertLogLength(this.logs, 2)
           expect(err.message).to.eq('Typing into a `week` input with `cy.type()` requires a valid week with the format `YYYY-Www`, where `W` is the literal character `W` and `ww` is the week number (00-53). You passed: `23`')
           expect(err.docsUrl).to.eq('https://on.cypress.io/type')
           done()
@@ -419,7 +420,7 @@ If you want to skip parsing special character sequences and type the text exactl
 
       it('throws when chars is invalid format', function (done) {
         cy.on('fail', (err) => {
-          expect(this.logs.length).to.eq(2)
+          assertLogLength(this.logs, 2)
           expect(err.message).to.eq('Typing into a `week` input with `cy.type()` requires a valid week with the format `YYYY-Www`, where `W` is the literal character `W` and `ww` is the week number (00-53). You passed: `2005/W18`')
           expect(err.docsUrl).to.eq('https://on.cypress.io/type')
           done()
@@ -430,7 +431,7 @@ If you want to skip parsing special character sequences and type the text exactl
 
       it('throws when chars is invalid week', function (done) {
         cy.on('fail', (err) => {
-          expect(this.logs.length).to.eq(2)
+          assertLogLength(this.logs, 2)
           expect(err.message).to.eq('Typing into a `week` input with `cy.type()` requires a valid week with the format `YYYY-Www`, where `W` is the literal character `W` and `ww` is the week number (00-53). You passed: `1995-W60`')
           expect(err.docsUrl).to.eq('https://on.cypress.io/type')
           done()
