@@ -105,7 +105,7 @@ export const mutation = mutationType({
         })),
       },
       resolve: async (_, args, ctx) => {
-        await ctx.actions.app.setActiveBrowserById(args.id)
+        await ctx.actions.project.setActiveBrowserById(args.id)
       },
     })
 

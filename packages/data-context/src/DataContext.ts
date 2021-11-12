@@ -374,14 +374,7 @@ export class DataContext {
 
     // If we have a testing type, we want to execute the plugins for that testing type
     if (this.currentProject?.currentTestingType) {
-      this.actions.project.initializeActiveProject().then(() => {
-        if (this.currentProject?.cliBrowser) {
-          //
-        }
-      })
-      .catch((e) => {
-
-      })
+      this.actions.project.initializeActiveProject()
     }
   }
 }

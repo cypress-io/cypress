@@ -59,20 +59,11 @@ describe('Launchpad: Open Mode', () => {
   })
 
   it('auto-selects the browser when launched with --browser', () => {
-    cy.openModeSystemTest('launchpad')
-
-    cy.withCtx(async (ctx) => {
-      ctx.launchArgs.testingType = 'e2e'
-      ctx.launchArgs.browser = 'firefox'
-
-      await ctx.initializeData()
-    })
+    cy.openModeSystemTest('launchpad', ['--e2e', '--browser', 'firefox'])
 
     // Need to visit after args have been configured, todo: fix in #18776
     cy.visitLaunchpad()
 
-    cy.contains('Continue').click()
-    cy.contains('Next Step').click()
     cy.get('h1').should('contain', 'Choose a Browser')
     cy.contains('Firefox').parent().should('have.class', 'border-jade-300')
     cy.get('button[data-testid=launch-button]').invoke('text').should('include', 'Launch Firefox')

@@ -265,9 +265,6 @@ type CurrentProject implements Node & ProjectLike {
   """Whether we are currently loading the config"""
   isLoadingConfig: Boolean!
 
-  """Whether we are currently refreshing the browsers list"""
-  isRefreshingBrowsers: Boolean!
-
   """Whether this is a newly setup project and needs onboarding"""
   needsOnboarding: Boolean!
 

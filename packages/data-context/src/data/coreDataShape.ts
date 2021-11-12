@@ -60,12 +60,23 @@ export interface CurrentProjectShape extends ProjectShape {
    * The promise loading the config, or null if we haven't kicked it off yet
    */
   configPromise: Promise<FullConfig | null> | null
+  /**
+   * The child process used for loading the config / executing the plugins
+   */
   configChildProcess?: ConfigChildProcessShape | null
   /**
    * Preferences loaded for the user
    */
   preferences?: Preferences | null
+  /**
+   * All browsers loaded for this project, we get this after the plugins config is loaded
+   * for the given testing type, since this value can be manipulated by that
+   */
   browsers?: FoundBrowser[] | null
+  /**
+   * Chosen browser for the current project
+   */
+  chosenBrowser?: FoundBrowser | null
 }
 
 export interface AppDataShape {
@@ -80,7 +91,6 @@ export interface WizardDataShape {
   chosenFramework: NexusGenEnums['FrontendFrameworkEnum'] | null
   chosenLanguage: NexusGenEnums['CodeLanguageEnum']
   chosenManualInstall: boolean
-  chosenBrowser: FoundBrowser | null
 }
 
 export interface ElectronShape {
@@ -144,7 +154,6 @@ export function makeCoreData (launchArgs: LaunchArgs): CoreDataShape {
       chosenLanguage: 'js',
       chosenManualInstall: false,
       allBundlers: BUNDLERS,
-      chosenBrowser: null,
     },
     user: null,
     electron: {

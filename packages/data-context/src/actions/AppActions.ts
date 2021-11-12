@@ -5,41 +5,11 @@ import type { DataContext } from '..'
 
 export interface AppApiShape {
   getBrowsers(): Promise<FoundBrowser[]>
-  ensureAndGetByNameOrPath(nameOrPath: string, browsers: FoundBrowser[]): PromiseLike<FoundBrowser | undefined>
+  ensureAndGetByNameOrPath(nameOrPath: string, browsers: ReadonlyArray<FoundBrowser>): Promise<FoundBrowser | undefined>
 }
 
 export class AppActions {
   constructor (private ctx: DataContext) {}
-
-  setActiveBrowser (browser: FoundBrowser) {
-    this.ctx.coreData.wizard.chosenBrowser = browser
-  }
-
-  setActiveBrowserById (id: string) {
-    const browserId = this.ctx.fromId(id, 'Browser')
-
-    // Ensure that this is a valid ID to set
-    const browser = this.ctx.appData.browsers?.find((b) => this.idForBrowser(b) === browserId)
-
-    if (browser) {
-      this.setActiveBrowser(browser)
-    }
-  }
-
-  async setActiveBrowserByNameOrPath (browserNameOrPath: string) {
-    let browser
-
-    try {
-      browser = (await this.ctx._apis.appApi.ensureAndGetByNameOrPath(browserNameOrPath)) as FoundBrowser | undefined
-    } catch (err: unknown?) {
-      this.ctx.debug('Error getting browser by name or path (%s): %s', browserNameOrPath, err?.stack || err)
-      this.ctx.currentProject.browserErrorMessage = `The browser '${browserNameOrPath}' was not found on your system or is not supported by Cypress. Choose a browser below.`
-    }
-
-    if (browser) {
-      this.setActiveBrowser(browser)
-    }
-  }
 
   async refreshBrowsers (): Promise<FoundBrowser[]> {
     if (this.ctx.coreData.app.refreshingBrowsers) {
@@ -59,11 +29,6 @@ export class AppActions {
       this.ctx.coreData.currentProject.browsers = browsers
     }
 
-    // If we don't have a chosen browser, assign to the first one in the list
-    if (!this.hasValidChosenBrowser(browsers) && browsers[0]) {
-      this.ctx.coreData.wizard.chosenBrowser = browsers[0]
-    }
-
     dfd.resolve(browsers)
 
     return dfd.promise
@@ -78,7 +43,7 @@ export class AppActions {
    * ones we have selected
    */
   private hasValidChosenBrowser (browsers: FoundBrowser[]) {
-    const chosenBrowser = this.ctx.coreData.wizard.chosenBrowser
+    const chosenBrowser = this.ctx.coreData.currentProject?.chosenBrowser
 
     if (!chosenBrowser) {
       return false

@@ -81,7 +81,7 @@ export class ProjectActions {
 
     // Load the project config, but don't block on this - it will alert
     // its status separately via updating coreData.currentProject
-    return this.loadConfigForProject(projectRoot)
+    this.loadConfigForProject(projectRoot)
   }
 
   setCurrentTestingType (type: TestingTypeEnum) {
@@ -111,7 +111,7 @@ export class ProjectActions {
       throw Error('Cannot initialize project without choosing testingType')
     }
 
-    // Ensure that we have loaded browsers to choose from
+    // Ensure that we have loaded browsers to choose from / send into the config list
     if (this.ctx.appData.refreshingBrowsers) {
       await this.ctx.appData.refreshingBrowsers
     }
@@ -407,8 +407,48 @@ export class ProjectActions {
     return project.configPromise
   }
 
+  setActiveBrowserById (id: string) {
+    const browserId = this.ctx.fromId(id, 'Browser')
+
+    // Ensure that this is a valid ID to set
+    const browser = this.ctx.appData.browsers?.find((b) => this.ctx.browser.idForBrowser(b) === browserId)
+
+    if (browser) {
+      this.setActiveBrowser(browser)
+    }
+  }
+
+  setActiveBrowser (browser: FoundBrowser) {
+    const project = this.ctx.currentProject
+
+    if (project) {
+      project.chosenBrowser = browser
+    }
+  }
+
   reconfigureProject () {
     this.ctx.actions.electron.refreshBrowserWindow()
     this.ctx.actions.electron.showBrowserWindow()
+  }
+
+  private setActiveBrowserByNameOrPath (browserNameOrPath: string) {
+    const project = this.ctx.currentProject
+
+    if (!project) {
+      return
+    }
+
+    if (this.ctx.appData.refreshingBrowsers) {
+      await this.ctx.appData.refreshingBrowsers
+    }
+
+    this.ctx._apis.appApi.ensureAndGetByNameOrPath(browserNameOrPath, this.ctx.browserList ?? []).then((browser) => {
+      if (browser) {
+        this.ctx.coreData
+      }
+    }).catch((e) => {
+      this.ctx.debug('Error getting browser by name or path (%s): %s', browserNameOrPath, e?.stack || e)
+      project.browserErrorMessage = `The browser '${browserNameOrPath}' was not found on your system or is not supported by Cypress. Choose a browser below.`
+    })
   }
 }

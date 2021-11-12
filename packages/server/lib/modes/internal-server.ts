@@ -6,13 +6,14 @@ import { makeGraphQLServer } from '../gui/makeGraphQLServer'
 import { assertValidPlatform } from '@packages/types/src/platform'
 import type { LaunchArgs } from '@packages/types'
 
-export function runInternalServer (launchArgs: LaunchArgs, _internalOptions = { loadCachedProjects: true }) {
+export function runInternalServer (launchArgs: LaunchArgs, _internalOptions = { loadCachedProjects: true }, mode: 'run' | 'open') {
   const bus = new EventEmitter()
   const platform = os.platform()
 
   assertValidPlatform(platform)
 
   const ctx = makeDataContext({
+    mode,
     os: platform,
     rootBus: bus,
     launchArgs,

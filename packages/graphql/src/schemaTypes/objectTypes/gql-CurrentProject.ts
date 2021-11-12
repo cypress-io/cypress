@@ -13,11 +13,6 @@ export const CurrentProject = objectType({
   definition (t) {
     t.implements('ProjectLike')
 
-    t.nonNull.boolean('isRefreshingBrowsers', {
-      description: 'Whether we are currently refreshing the browsers list',
-      resolve: (source, args, ctx) => Boolean(ctx.appData.refreshingBrowsers),
-    })
-
     t.field('currentTestingType', {
       description: 'The mode the interactive runner was launched in',
       type: 'TestingTypeEnum',
@@ -39,6 +34,13 @@ export const CurrentProject = objectType({
     t.list.nonNull.field('browsers', {
       type: Browser,
       description: 'Browsers found that are compatible with Cypress',
+      resolve: (source, args, ctx) => {
+        if (source.isLoadingConfig) {
+          return null
+        }
+
+        return source.browsers ?? null
+      },
     })
 
     t.field('cloudProject', {
