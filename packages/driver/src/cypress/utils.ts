@@ -420,6 +420,7 @@ export default {
       'includeShadowDom',
       'numTestsKeptInMemory',
       'pageLoadTimeout',
+      'retries',
       'redirectionLimit',
       'requestTimeout',
       'responseTimeout',
