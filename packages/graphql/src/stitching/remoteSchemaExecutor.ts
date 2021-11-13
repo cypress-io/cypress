@@ -22,7 +22,7 @@ export const remoteSchemaExecutor = async (obj: Record<string, any>) => {
     query: print(document),
   })
 
-  context.debug('executorResult %o', executorResult)
+  // context.debug('executorResult %o', executorResult)
 
   return executorResult
 }

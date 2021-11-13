@@ -34,8 +34,17 @@ interface InternalResetLaunchArgs {
   projectName?: string
 }
 
+interface InternalAddProjectOpts {
+  projectName: string
+  open?: boolean
+}
+
 export async function e2ePluginSetup (projectRoot: string, on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) {
   process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF = 'true'
+  delete process.env.CYPRESS_INTERNAL_GRAPHQL_PORT
+  delete process.env.CYPRESS_INTERNAL_VITE_APP_PORT
+  delete process.env.CYPRESS_INTERNAL_VITE_LAUNCHPAD_PORT
+
   // require'd so we don't import the types from @packages/server which would
   // pollute strict type checking
   const { runInternalServer } = require('@packages/server/lib/modes/internal-server')
@@ -56,7 +65,7 @@ export async function e2ePluginSetup (projectRoot: string, on: Cypress.PluginEve
   }
 
   let ctx: DataContext
-  let serverPortPromise: Promise<number>
+  let gqlPort: number
   let testState: Record<string, any> = {}
   let remoteGraphQLIntercept: RemoteGraphQLInterceptor | undefined
 
@@ -70,11 +79,9 @@ export async function e2ePluginSetup (projectRoot: string, on: Cypress.PluginEve
       sinon.reset()
       remoteGraphQLIntercept = undefined;
 
-      ({ serverPortPromise, ctx } = runInternalServer({
+      ({ gqlPort, ctx } = await runInternalServer({
         projectRoot: null,
-      }, {
-        loadCachedProjects: false,
-      }, 'open') as {ctx: DataContext, serverPortPromise: Promise<number> })
+      }, 'open') as {ctx: DataContext, gqlPort: number })
 
       const fetchApi = ctx.util.fetch
 
@@ -122,8 +129,6 @@ export async function e2ePluginSetup (projectRoot: string, on: Cypress.PluginEve
         }
       })
 
-      const gqlPort = await serverPortPromise
-
       return {
         gqlPort,
       }
@@ -133,15 +138,15 @@ export async function e2ePluginSetup (projectRoot: string, on: Cypress.PluginEve
 
       return null
     },
-    async __internal_addProject (projectName: string) {
-      Fixtures.scaffoldProject(projectName)
+    async __internal_addProject (opts: InternalAddProjectOpts) {
+      Fixtures.scaffoldProject(opts.projectName)
 
-      await ctx.actions.project.addProject({ path: Fixtures.projectPath(projectName) })
+      await ctx.actions.globalProject?.addProject({ path: Fixtures.projectPath(opts.projectName), open: opts.open })
 
-      return Fixtures.projectPath(projectName)
+      return Fixtures.projectPath(opts.projectName)
     },
     async __internal_resetLaunchArgs ({ argv, projectName }: InternalResetLaunchArgs): Promise<ResetLaunchArgsResult> {
-      const openArgv = projectName && !argv.includes('--project') ? ['--project', Fixtures.projectPath(projectName), ...argv] : [...argv]
+      const openArgv = projectName && !argv.includes('--project') ? ['--project', Fixtures.projectPath(projectName), ...argv] : ['--global', ...argv]
 
       // Runs the launchArgs through the whole pipeline for the CLI open process,
       // which probably needs a bit of refactoring / consolidating
@@ -153,7 +158,7 @@ export async function e2ePluginSetup (projectRoot: string, on: Cypress.PluginEve
       ctx.resetLaunchArgs(finalLaunchArgs)
 
       // Handle any pre-loading that should occur based on the launch arg settings
-      await ctx.initializeOpenMode()
+      await ctx.initializeMode()
 
       return {
         launchArgs: finalLaunchArgs,

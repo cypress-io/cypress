@@ -1,5 +1,6 @@
 import { nonNull, objectType, stringArg } from 'nexus'
 import path from 'path'
+import { ApplicationError } from '.'
 import { cloudProjectBySlug } from '../../stitching/remoteGraphQLCalls'
 import { CodeGenTypeEnum } from '../enumTypes/gql-CodeGenTypeEnum'
 import { Browser } from './gql-Browser'
@@ -16,19 +17,13 @@ export const CurrentProject = objectType({
     t.field('currentTestingType', {
       description: 'The mode the interactive runner was launched in',
       type: 'TestingTypeEnum',
-      resolve: (_, args, ctx) => ctx.currentProject?.currentTestingType ?? null,
-    })
-
-    t.nonNull.boolean('isLoadingConfig', {
-      description: 'True if we are currently executing the child process to source',
+      resolve: (source, args, ctx) => source.currentTestingType ?? null,
     })
 
     t.field('currentBrowser', {
       type: Browser,
       description: 'The currently selected browser for the application',
-      resolve: (source, args, ctx) => {
-        return ctx.wizardData.chosenBrowser
-      },
+      resolve: (source, args, ctx) => source.currentBrowser ?? null,
     })
 
     t.list.nonNull.field('browsers', {
@@ -65,7 +60,7 @@ export const CurrentProject = objectType({
     t.string('browserErrorMessage', {
       description: 'An error related to finding a browser',
       resolve: (source, args, ctx) => {
-        return ctx.currentProject?.browserErrorMessage ?? null
+        return source.browserErrorMessage ?? null
       },
     })
 
@@ -87,7 +82,7 @@ export const CurrentProject = objectType({
       description: 'Specs for a project conforming to Relay Connection specification',
       type: 'Spec',
       nodes: (source, args, ctx) => {
-        return ctx.project.findSpecs(ctx.currentTestingType === 'component' ? 'component' : 'integration').then(() => {
+        return ctx.project.findSpecs(ctx.currentProject?.currentTestingType === 'component' ? 'component' : 'integration').then(() => {
           return []
         })
       },
@@ -102,6 +97,20 @@ export const CurrentProject = objectType({
       description: 'Whether we are currently loading the config',
     })
 
+    t.field('errorLoadingConfig', {
+      type: ApplicationError,
+      description: 'An error encountered while loading the config',
+    })
+
+    t.nonNull.boolean('isLoadingPlugins', {
+      description: 'Whether we are currently loading the plugins',
+    })
+
+    t.field('errorLoadingPlugins', {
+      type: ApplicationError,
+      description: 'An error encountered while loading the plugins',
+    })
+
     t.json('config', {
       description: 'Project configuration',
       resolve: (source, args, ctx) => {
@@ -112,7 +121,7 @@ export const CurrentProject = objectType({
     t.string('configFilePath', {
       description: 'Config File Path',
       resolve: async (source, args, ctx) => {
-        return ctx.currentProject?.config?.configFile ?? null
+        return source.config?.configFile ?? null
       },
     })
 

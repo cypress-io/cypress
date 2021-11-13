@@ -1,4 +1,5 @@
-import { booleanArg, enumType, idArg, mutationType, nonNull, stringArg } from 'nexus'
+import debugLib from 'debug'
+import { arg, booleanArg, enumType, idArg, mutationType, nonNull, stringArg } from 'nexus'
 import { CodeGenTypeEnum } from '../enumTypes/gql-CodeGenTypeEnum'
 import { TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
 import { GeneratedSpec } from './gql-GeneratedSpec'
@@ -16,7 +17,7 @@ export const mutation = mutationType({
       },
       resolve: async (_, args, ctx) => {
         if (args.action === 'trigger') {
-          await ctx.actions.dev.triggerRelaunch()
+          ctx.actions.dev.triggerRelaunch()
         } else {
           ctx.actions.dev.dismissRelaunch()
         }
@@ -25,10 +26,24 @@ export const mutation = mutationType({
       },
     })
 
+    t.list.string('devDebug', {
+      description: 'Toggles the DEBUG flag',
+      args: {
+        debug: stringArg(),
+      },
+      resolve: (source, args, ctx) => {
+        if (args.debug) {
+          debugLib.enable(args.debug)
+        }
+
+        return debugLib.names.map((n) => n.source)
+      },
+    })
+
     t.field('internal_clearLatestProjectCache', {
       type: 'Boolean',
       resolve: (_, args, ctx) => {
-        ctx.actions.project.clearLatestProjectCache()
+        ctx.actions.currentProject?.clearLatestProjectCache()
 
         return true
       },
@@ -52,7 +67,7 @@ export const mutation = mutationType({
         projectTitle: nonNull(stringArg()),
       },
       resolve: (_, args, ctx) => {
-        ctx.actions.project.clearProjectPreferencesCache(args.projectTitle)
+        ctx.actions.currentProject?.clearProjectPreferencesCache(args.projectTitle)
 
         return true
       },
@@ -61,7 +76,7 @@ export const mutation = mutationType({
     t.field('internal_clearAllProjectPreferencesCache', {
       type: 'Boolean',
       resolve: (_, args, ctx) => {
-        ctx.actions.project.clearAllProjectPreferencesCache()
+        ctx.actions.currentProject?.clearAllProjectPreferencesCache()
 
         return true
       },
@@ -71,7 +86,7 @@ export const mutation = mutationType({
       type: 'Query',
       description: 'Clears the current testing type, closing any active project',
       resolve: async (_, args, ctx) => {
-        await ctx.actions.project.clearCurrentTestingType()
+        await ctx.actions.currentProject?.clearCurrentTestingType()
 
         return {}
       },
@@ -80,7 +95,7 @@ export const mutation = mutationType({
     t.liveMutation('clearCurrentProject', {
       description: 'Clears the current project, called when we want to navigate back to the global mode screen',
       resolve: async (_, args, ctx) => {
-        await ctx.actions.project.clearCurrentProject()
+        await ctx.actions.currentProject?.clearCurrentProject()
       },
     })
 
@@ -91,7 +106,7 @@ export const mutation = mutationType({
         type: nonNull(TestingTypeEnum),
       },
       resolve (source, args, ctx) {
-        ctx.actions.project.setCurrentTestingType(args.type)
+        ctx.actions.currentProject?.setCurrentTestingType(args.type)
 
         return {}
       },
@@ -105,11 +120,11 @@ export const mutation = mutationType({
         })),
       },
       resolve: async (_, args, ctx) => {
-        await ctx.actions.project.setActiveBrowserById(args.id)
+        await ctx.actions.currentProject?.setActiveBrowserById(args.id)
       },
     })
 
-    t.liveMutation('generateSpecFromSource', {
+    t.field('generateSpecFromSource', {
       type: GeneratedSpec,
       description: 'Generate spec from source',
       args: {
@@ -117,7 +132,7 @@ export const mutation = mutationType({
         type: nonNull(CodeGenTypeEnum),
       },
       resolve: async (_, args, ctx) => {
-        return ctx.actions.project.codeGenSpec(args.codeGenCandidate, args.type)
+        return await ctx.actions.currentProject?.codeGenSpec(args.codeGenCandidate, args.type) ?? null
       },
     })
 
@@ -146,7 +161,7 @@ export const mutation = mutationType({
     t.liveMutation('launchOpenProject', {
       description: 'Launches project from open_project global singleton',
       resolve: async (_, args, ctx) => {
-        await ctx.actions.project.launchProject({})
+        await ctx.actions.currentProject?.launchAppInBrowser()
       },
     })
 
@@ -157,7 +172,7 @@ export const mutation = mutationType({
         open: booleanArg({ description: 'Whether to open the project when added' }),
       },
       resolve: async (_, args, ctx) => {
-        await ctx.actions.project.addProject(args)
+        await ctx.actions.globalProject.addProject(args)
       },
     })
 
@@ -167,17 +182,40 @@ export const mutation = mutationType({
         path: nonNull(stringArg()),
       },
       resolve: async (_, args, ctx) => {
-        await ctx.actions.project.removeProject(args.path)
+        await ctx.actions.globalProject.removeProject(args.path)
       },
     })
 
-    t.liveMutation('setActiveProject', {
+    t.field('retryLoadConfig', {
+      type: 'Query',
+      description: 'Retries loading the project config, called when there was an error sourcing the config',
+      resolve: (source, args, ctx) => {
+        ctx.actions.currentProject?.loadConfig()
+
+        return {}
+      },
+    })
+
+    t.field('retryLoadPlugins', {
+      type: 'Query',
+      description: 'Retries loading the plugins config, called when there was an error executing the plugins',
+      resolve: (source, args, ctx) => {
+        ctx.actions.currentProject?.setupPluginEvents()
+
+        return {}
+      },
+    })
+
+    t.field('setActiveProject', {
+      type: 'Query',
       description: 'Set active project to run tests on',
       args: {
         path: nonNull(stringArg()),
       },
       resolve: async (_, args, ctx) => {
-        await ctx.actions.project.setActiveProject(args.path)
+        await ctx.actions.globalProject.setActiveProject(args.path)
+
+        return {}
       },
     })
 
@@ -189,7 +227,7 @@ export const mutation = mutationType({
         browserPath: nonNull(stringArg()),
       },
       async resolve (_, args, ctx) {
-        await ctx.actions.project.setProjectPreferences(args)
+        await ctx.actions.currentProject?.setProjectPreferences(args)
 
         return ctx.appData
       },
@@ -208,8 +246,14 @@ export const mutation = mutationType({
     t.nonNull.field('reconfigureProject', {
       type: 'Boolean',
       description: 'show the launchpad windows',
-      resolve: (_, args, ctx) => {
-        ctx.actions.project.reconfigureProject()
+      args: {
+        testingType: nonNull(arg({ type: TestingTypeEnum })),
+      },
+      resolve: async (_, args, ctx) => {
+        if (args.testingType !== ctx.currentProject?.currentTestingType) {
+          await ctx.actions.currentProject?.switchTestingType(args.testingType)
+        }
+        // ctx.actions.currentProject?.reconfigureProject()
 
         return true
       },

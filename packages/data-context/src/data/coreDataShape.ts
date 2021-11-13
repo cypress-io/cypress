@@ -1,8 +1,9 @@
-import { BUNDLERS, FoundBrowser, FoundSpec, FullConfig, LaunchArgs, Preferences } from '@packages/types'
+import type { FoundBrowser, FullConfig, LaunchArgs, Preferences } from '@packages/types'
 import type { NexusGenEnums, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
 import type { BrowserWindow } from 'electron'
 import type { ChildProcess } from 'child_process'
 import path from 'path'
+import type { ApplicationErrorSource } from '@packages/graphql/src/schemaTypes/objectTypes/gql-ApplicationError'
 
 export type Maybe<T> = T | null | undefined
 
@@ -37,29 +38,36 @@ export interface CurrentProjectShape extends ProjectShape {
   /**
    * the --browser flag, if specified by the CLI via LaunchArgs
    */
-  cliBrowser?: string
+  cliBrowser: string | null
   /**
    * Warning when the cliBrowser doesn't match up with the browsers
    * that are available after sourcing the config
    */
   browserErrorMessage?: string | null
-  specs?: FoundSpec[]
   /**
    * Set to true while we are resolving the config
    */
   isLoadingConfig: boolean
   /**
+   * Promise indicating the value of the loading config
+   */
+  isLoadingConfigPromise: Promise<FullConfig | null> | null
+  /**
+   * Set to true while we are loading the project's plugins
+   */
+  isLoadingPlugins: boolean
+  /**
+   * Set if there is an error loading the plugins
+   */
+  errorLoadingPlugins: BaseErrorDataShape | null
+  /**
    * Captures an error found when sourcing the config
    */
-  errorLoadingConfig: Error | null
+  errorLoadingConfig: BaseErrorDataShape | null
   /**
    * The full config resolved for the project
    */
   config: FullConfig | null
-  /**
-   * The promise loading the config, or null if we haven't kicked it off yet
-   */
-  configPromise: Promise<FullConfig | null> | null
   /**
    * The child process used for loading the config / executing the plugins
    */
@@ -76,18 +84,17 @@ export interface CurrentProjectShape extends ProjectShape {
   /**
    * Chosen browser for the current project
    */
-  chosenBrowser?: FoundBrowser | null
+  currentBrowser?: FoundBrowser | null
 }
 
 export interface AppDataShape {
-  projects: string[]
-  refreshingBrowsers: Promise<FoundBrowser[]> | null
-  browsers: ReadonlyArray<FoundBrowser> | null
+  isLoadingMachineBrowsers: boolean
+  loadingMachineBrowsers: Promise<FoundBrowser[]> | null
+  machineBrowsers: ReadonlyArray<FoundBrowser> | null
 }
 
 export interface WizardDataShape {
   chosenBundler: NexusGenEnums['SupportedBundlers'] | null
-  allBundlers: typeof BUNDLERS
   chosenFramework: NexusGenEnums['FrontendFrameworkEnum'] | null
   chosenLanguage: NexusGenEnums['CodeLanguageEnum']
   chosenManualInstall: boolean
@@ -104,9 +111,11 @@ export interface BaseErrorDataShape {
 }
 
 export interface CoreDataShape {
-  baseError: BaseErrorDataShape | null
+  globalError: ApplicationErrorSource | null
   dev: DevStateShape
   app: AppDataShape
+  isLoadingGlobalProjects: boolean
+  globalProjects: string[] | null
   currentProject: CurrentProjectShape | null
   wizard: WizardDataShape
   user: AuthenticatedUserShape | null
@@ -121,13 +130,16 @@ function makeCurrentProject (launchArgs: LaunchArgs): CurrentProjectShape | null
   }
 
   return {
+    cliBrowser: null,
     title: path.basename(launchArgs.projectRoot),
     projectRoot: launchArgs.projectRoot,
     currentTestingType: launchArgs.testingType ?? null,
     isLoadingConfig: false,
+    isLoadingConfigPromise: null,
+    isLoadingPlugins: false,
     config: null,
-    configPromise: null,
     errorLoadingConfig: null,
+    errorLoadingPlugins: null,
   }
 }
 
@@ -136,16 +148,18 @@ function makeCurrentProject (launchArgs: LaunchArgs): CurrentProjectShape | null
  */
 export function makeCoreData (launchArgs: LaunchArgs): CoreDataShape {
   return {
+    globalError: null,
     hasIntializedMode: null,
-    baseError: null,
     dev: {
       refreshState: null,
     },
     app: {
-      refreshingBrowsers: null,
-      browsers: null,
-      projects: [],
+      isLoadingMachineBrowsers: false,
+      loadingMachineBrowsers: null,
+      machineBrowsers: null,
     },
+    globalProjects: null,
+    isLoadingGlobalProjects: false,
     isAuthBrowserOpened: false,
     currentProject: makeCurrentProject(launchArgs),
     wizard: {
@@ -153,7 +167,6 @@ export function makeCoreData (launchArgs: LaunchArgs): CoreDataShape {
       chosenFramework: null,
       chosenLanguage: 'js',
       chosenManualInstall: false,
-      allBundlers: BUNDLERS,
     },
     user: null,
     electron: {

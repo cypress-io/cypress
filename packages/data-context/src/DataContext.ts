@@ -1,6 +1,8 @@
 import type { LaunchArgs, OpenProjectLaunchOptions, PlatformName } from '@packages/types'
 import fsExtra from 'fs-extra'
 import path from 'path'
+import Bluebird from 'bluebird'
+import 'server-destroy'
 
 import { AppApiShape, ApplicationDataApiShape, DataEmitterActions, ProjectApiShape } from './actions'
 import type { NexusGenAbstractTypeMembers } from '@packages/graphql/src/gen/nxs.gen'
@@ -29,12 +31,9 @@ import type { Server } from 'http'
 import type { AddressInfo } from 'net'
 import EventEmitter from 'events'
 import type { App as ElectronApp } from 'electron'
+import type { SocketIOServer } from '@packages/socket'
 
 const IS_DEV_ENV = process.env.CYPRESS_INTERNAL_ENV !== 'production'
-
-export interface InternalDataContextOptions {
-  loadCachedProjects: boolean
-}
 
 export interface DataContextConfig {
   mode: 'open' | 'run'
@@ -52,17 +51,15 @@ export interface DataContextConfig {
   authApi: AuthApiShape
   projectApi: ProjectApiShape
   electronApi: ElectronApiShape
-  /**
-   * Internal options used for testing purposes
-   */
-  _internalOptions: InternalDataContextOptions
 }
 
 export class DataContext {
   private _rootBus: EventEmitter
   private _coreData: CoreDataShape
-  private _gqlServer?: Server
+  private _gqlServer: Server | undefined
+  private _gqlSocketServer: SocketIOServer | undefined
   private _appServerPort: number | undefined
+  private _appSocketServer: SocketIOServer | undefined
   private _gqlServerPort: number | undefined
 
   constructor (private _config: DataContextConfig) {
@@ -84,27 +81,6 @@ export class DataContext {
 
   resetLaunchArgs (launchArgs: LaunchArgs) {
     this._coreData = makeCoreData(launchArgs)
-  }
-
-  async initializeData () {
-    const toAwait: Promise<any>[] = [
-      // load the cached user & validate the token on start
-    ]
-
-    if (this._config._internalOptions.loadCachedProjects) {
-      // load projects from cache on start
-      toAwait.push(this.actions.project.loadGlobalProjects())
-    }
-
-    if (this._config.launchArgs.projectRoot) {
-      await this.actions.project.setActiveProject(this._config.launchArgs.projectRoot)
-
-      if (this.coreData.currentProject?.preferences) {
-        toAwait.push(this.actions.project.launchProjectWithoutElectron())
-      }
-    }
-
-    return Promise.all(toAwait)
   }
 
   get rootBus () {
@@ -132,11 +108,7 @@ export class DataContext {
   }
 
   get browserList () {
-    return this.coreData.app.browsers
-  }
-
-  get baseError () {
-    return this.coreData.baseError
+    return this.coreData.app.machineBrowsers
   }
 
   @cached
@@ -158,7 +130,6 @@ export class DataContext {
    * All mutations (update / delete / create), fs writes, etc.
    * should run through this namespace. Everything else should be a "getter"
    */
-  @cached
   get actions () {
     return new DataActions(this)
   }
@@ -167,17 +138,14 @@ export class DataContext {
     return this.coreData.app
   }
 
-  @cached
   get wizard () {
     return new WizardDataSource(this)
   }
 
-  @cached
   get config () {
     return new ConfigDataSource(this)
   }
 
-  @cached
   get storybook () {
     return new StorybookDataSource(this)
   }
@@ -199,26 +167,25 @@ export class DataContext {
     return new ProjectDataSource(this)
   }
 
-  @cached
   get cloud () {
     return new CloudDataSource(this)
   }
 
-  @cached
   get env () {
     return new EnvDataSource(this)
   }
 
-  @cached
   get emitter () {
-    return new DataEmitterActions(this)
+    return new DataEmitterActions(this, {
+      gqlSocketServer: this._gqlSocketServer,
+      appSocketServer: this._appSocketServer,
+    })
   }
 
   graphqlClient () {
     return new GraphQLDataSource(this, this._config.schema)
   }
 
-  @cached
   get html () {
     return new HtmlDataSource(this)
   }
@@ -229,15 +196,19 @@ export class DataContext {
   }
 
   get projectsList () {
-    return this.coreData.app.projects.map((p) => {
+    return this.coreData.globalProjects?.map((p) => {
       return {
         title: this.project.projectTitle(p),
         projectRoot: p,
       }
-    })
+    }) ?? null
   }
 
   // Servers
+
+  setAppSocketServer (socketServer: SocketIOServer | undefined) {
+    this._appSocketServer = socketServer
+  }
 
   setAppServerPort (port: number | undefined) {
     this._appServerPort = port
@@ -246,6 +217,10 @@ export class DataContext {
   setGqlServer (srv: Server) {
     this._gqlServer = srv
     this._gqlServerPort = (srv.address() as AddressInfo).port
+  }
+
+  setGqlSocketServer (socketServer: SocketIOServer | undefined) {
+    this._gqlSocketServer = socketServer
   }
 
   get appServerPort () {
@@ -258,12 +233,10 @@ export class DataContext {
 
   // Utilities
 
-  @cached
   get fs () {
     return fsExtra
   }
 
-  @cached
   get path () {
     return path
   }
@@ -314,13 +287,38 @@ export class DataContext {
     return this
   }
 
+  /**
+   * Convert an error into a plain object
+   */
+  prepError (err: Error, title = 'Something went wrong') {
+    return {
+      title,
+      name: err.name,
+      message: err.message,
+      stack: err.stack,
+    }
+  }
+
   async destroy () {
-    this._gqlServer?.close()
+    this.debug('DataContext destroy')
+
+    await this.destroyServers()
 
     return Promise.all([
       this.util.disposeLoaders(),
-      this.actions.project.clearCurrentProject(),
+      this.actions.currentProject?.clearCurrentProject(),
       this.actions.dev.dispose(),
+    ])
+  }
+
+  private destroyServers () {
+    this._gqlSocketServer?.disconnectSockets(true)
+    // causes: Error: SocketCt#startListening must first be called before accessing 'this.io' while testing
+    // this._appSocketServer?.disconnectSockets(true)
+
+    return Promise.all([
+      Bluebird.fromCallback((cb) => this._gqlServer ? this._gqlServer.destroy(cb) : cb(null)),
+      // Bluebird.fromCallback((cb) => this._gqlSocketServer ? this._gqlSocketServer.close(cb) : cb(null)),
     ])
   }
 
@@ -328,10 +326,18 @@ export class DataContext {
     return this.util.loader
   }
 
+  async initializeMode () {
+    if (this._config.mode === 'run') {
+      await this.initializeRunMode()
+    } else if (this._config.mode === 'open') {
+      await this.initializeOpenMode()
+    }
+  }
+
   /**
    * Any work that's necessary to initialize the context for run mode
    */
-  async initializeRunMode () {
+  private async initializeRunMode () {
     if (this._coreData.hasIntializedMode) {
       throw new Error(`Mode already initialized`)
     }
@@ -345,36 +351,36 @@ export class DataContext {
    * This kicks off any data initialization we need to do before the app
    * is ready to go, and includes launching the server
    */
-  async initializeOpenMode () {
+  private async initializeOpenMode () {
     if (this._coreData.hasIntializedMode) {
       throw new Error(`Mode already initialized`)
     }
 
-    // Load the cached user & validate the token on start
-    this.actions.auth.getUser()
+    this.debug('initializeOpenMode: coreData', this._coreData)
 
     this._coreData.hasIntializedMode = 'open'
 
-    // Fetch the browsers when the app starts, so we have some by
-    // the time we're continuing.
-    this.actions.app.refreshBrowsers()
+    const toAwait: Array<Promise<any> | undefined> = []
+
+    // Load the cached user & validate the token on start
+    this.actions.auth.getUser()
+
+    // Fetch the machine browsers right when the app starts, so we have some by
+    // the time we're attempting to source the project
+    toAwait.push(this.actions.app.loadMachineBrowsers())
 
     // If there's no "current" project, we just want to launch global mode,
     // which involves sourcing the current projects.
     if (!this.currentProject) {
-      await this.actions.project.loadGlobalProjects()
-
-      return
+      toAwait.push(this.actions.globalProject.loadGlobalProjects())
+    } else if (this.currentProject?.currentTestingType) {
+      // Otherwise, if we know the testing type we want to
+      // which will kick off the process of sourcing the config, if we have
+      // a config file for this project
+      toAwait.push(this.actions.currentProject?.loadConfigAndPlugins())
     }
 
-    // Otherwise, we want to set this project as the "active" project,
-    // which will kick off the process of sourcing the config, if we have
-    // a config file for this project
-    this.actions.project.setActiveProject(this.currentProject.projectRoot)
-
-    // If we have a testing type, we want to execute the plugins for that testing type
-    if (this.currentProject?.currentTestingType) {
-      this.actions.project.initializeActiveProject()
-    }
+    // this.actions.currentProject?.launchProjectWithoutElectron()
+    return Promise.all(toAwait)
   }
 }

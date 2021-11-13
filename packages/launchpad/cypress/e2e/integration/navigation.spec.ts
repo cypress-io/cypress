@@ -3,7 +3,7 @@ import type { Interception } from '@packages/net-stubbing/lib/external-types'
 
 describe('Navigation', () => {
   it('External links trigger mutation to open in a new browser', () => {
-    cy.openModeGlobal()
+    cy.openMode(['--e2e', '--browser', 'electron'])
     cy.visitLaunchpad()
 
     cy.intercept('mutation-ExternalLink_OpenExternal', { 'data': { 'openExternal': true } }).as('OpenExternal')

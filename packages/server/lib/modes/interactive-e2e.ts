@@ -128,11 +128,11 @@ export = {
    * @param {import('@packages/types').LaunchArgs} options
    * @returns
    */
-  ready (options: {projectRoot?: string} = {}) {
+  async ready (options: {projectRoot?: string} = {}) {
     const { projectRoot } = options
-    const { serverPortPromise, bus, ctx } = process.env.LAUNCHPAD
-      ? runInternalServer(options as LaunchArgs, undefined, 'open')
-      : { bus: new EventEmitter, serverPortPromise: Promise.resolve(undefined), ctx: null }
+    const { bus, gqlPort, ctx } = process.env.LAUNCHPAD
+      ? await runInternalServer(options as LaunchArgs, 'open')
+      : { bus: new EventEmitter, gqlPort: undefined, ctx: null }
 
     // TODO: potentially just pass an event emitter
     // instance here instead of callback functions
@@ -146,12 +146,9 @@ export = {
       },
     })
 
-    return Promise.all([
-      serverPortPromise,
-      savedState.create(projectRoot, false).then((state) => state.get()),
-    ])
-    .then(([port, state]) => {
-      return Windows.open(projectRoot, port, this.getWindowArgs(state))
+    return savedState.create(projectRoot, false).then((state) => state.get())
+    .then((state) => {
+      return Windows.open(projectRoot, gqlPort, this.getWindowArgs(state))
       .then((win) => {
         ctx?.actions.electron.setBrowserWindow(win)
         Events.start({

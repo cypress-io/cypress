@@ -9,12 +9,23 @@ import { getPathToDist } from '@packages/resolve-dist'
 export class HtmlDataSource {
   constructor (private ctx: DataContext) {}
 
+  async fetchLaunchpadInitialData () {
+    const graphql = this.ctx.graphqlClient()
+
+    await Promise.all([
+      graphql.executeQuery('LaunchpadAppQueryDocument', {}),
+      graphql.executeQuery('LaunchpadMainDocument', {}),
+      graphql.executeQuery('HeaderBar_HeaderBarQueryDocument', {}),
+    ])
+
+    return graphql.getSSRData()
+  }
+
   async fetchAppInitialData () {
     const graphql = this.ctx.graphqlClient()
 
     await Promise.all([
       graphql.executeQuery('SideBarNavigationDocument', {}),
-      graphql.executeQuery('AppQueryDocument', {}),
       graphql.executeQuery('SettingsDocument', {}),
       graphql.executeQuery('SpecsPageContainerDocument', {}),
       graphql.executeQuery('HeaderBar_HeaderBarQueryDocument', {}),

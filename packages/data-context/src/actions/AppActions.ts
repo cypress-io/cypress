@@ -5,31 +5,36 @@ import type { DataContext } from '..'
 
 export interface AppApiShape {
   getBrowsers(): Promise<FoundBrowser[]>
-  ensureAndGetByNameOrPath(nameOrPath: string, browsers: ReadonlyArray<FoundBrowser>): Promise<FoundBrowser | undefined>
+  ensureAndGetByNameOrPath(nameOrPath: string, browsers: ReadonlyArray<FoundBrowser>): Promise<FoundBrowser>
 }
 
 export class AppActions {
   constructor (private ctx: DataContext) {}
 
-  async refreshBrowsers (): Promise<FoundBrowser[]> {
-    if (this.ctx.coreData.app.refreshingBrowsers) {
-      return this.ctx.coreData.app.refreshingBrowsers
+  async loadMachineBrowsers (): Promise<FoundBrowser[]> {
+    if (this.ctx.coreData.app.loadingMachineBrowsers) {
+      return this.ctx.coreData.app.loadingMachineBrowsers
     }
 
     const dfd = pDefer<FoundBrowser[]>()
 
-    this.ctx.coreData.app.refreshingBrowsers = dfd.promise
+    this.ctx.coreData.app.loadingMachineBrowsers = dfd.promise
 
-    // TODO(tim): global unhandled error concept
-    const browsers = await this.ctx._apis.appApi.getBrowsers()
+    this.ctx.debug('loadMachineBrowsers')
+    try {
+      const browsers = await this.ctx._apis.appApi.getBrowsers()
 
-    this.ctx.coreData.app.browsers = browsers
+      this.ctx.coreData.app.machineBrowsers = browsers
 
-    if (this.ctx.coreData.currentProject) {
-      this.ctx.coreData.currentProject.browsers = browsers
+      this.ctx.debug('loadMachineBrowsers: %o', browsers)
+      dfd.resolve(browsers)
+    } catch (e) {
+      this.ctx.debug('loadMachineBrowsers error %o', e)
+      this.ctx.coreData.globalError = this.ctx.prepError(e as Error)
+      dfd.resolve([])
+    } finally {
+      this.ctx.coreData.app.loadingMachineBrowsers = null
     }
-
-    dfd.resolve(browsers)
 
     return dfd.promise
   }
@@ -42,8 +47,8 @@ export class AppActions {
    * Check whether we have a current chosen browser, and it matches up to one of the
    * ones we have selected
    */
-  private hasValidChosenBrowser (browsers: FoundBrowser[]) {
-    const chosenBrowser = this.ctx.coreData.currentProject?.chosenBrowser
+  private hasValidCurrentBrowser (browsers: FoundBrowser[]) {
+    const chosenBrowser = this.ctx.coreData.currentProject?.currentBrowser
 
     if (!chosenBrowser) {
       return false

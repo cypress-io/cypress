@@ -4,7 +4,7 @@ import Debug from 'debug'
 import Bluebird from 'bluebird'
 import chokidar from 'chokidar'
 import pluralize from 'pluralize'
-import { ProjectBase } from './project-base'
+import { Cfg, ProjectBase } from './project-base'
 import browsers from './browsers'
 import specsUtil from './util/specs'
 import preprocessor from './plugins/preprocessor'
@@ -428,7 +428,7 @@ export class OpenProject {
 
   _ctx?: DataContext
 
-  async create (path: string, args: LaunchArgs, options: OpenProjectLaunchOptions, browsers: FoundBrowser[] = []) {
+  async create (path: string, args: LaunchArgs, options: OpenProjectLaunchOptions, browsers: FoundBrowser[] = []): Promise<Cfg> {
     this._ctx = options.ctx ?? makeLegacyDataContext()
     debug('open_project create %s', path)
 
@@ -454,7 +454,7 @@ export class OpenProject {
     debug('and options %o', options)
 
     // store the currently open project
-    this.openProject = new ProjectBase({
+    const project = this.openProject = new ProjectBase({
       testingType: args.testingType === 'component' ? 'component' : 'e2e',
       projectRoot: path,
       options: {
@@ -466,18 +466,20 @@ export class OpenProject {
     await win32BitWarning(options.onWarning)
 
     try {
-      await this.openProject.initializeConfig(browsers)
-      await this.openProject.open()
+      await project.initializeConfig(browsers)
+      await project.open()
     } catch (err: any) {
       if (err.isCypressErr && err.portInUse) {
-        errors.throw(err.type, err.port)
+        throw errors.throw(err.type, err.port)
       } else {
         // rethrow and handle elsewhere
-        throw (err)
+        throw err
       }
+    } finally {
+      this.openProject = project
     }
 
-    return this
+    return project.getConfig()
   }
 
   // for testing purposes

@@ -44,6 +44,10 @@ const processOpenOptions = (options = {}) => {
     args.push('--project', options.project)
   }
 
+  if (options.global) {
+    args.push('--global', options.global)
+  }
+
   args.push(...processTestingType(options))
 
   debug('opening from options %j', options)

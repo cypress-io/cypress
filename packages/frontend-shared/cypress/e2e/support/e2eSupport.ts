@@ -53,7 +53,7 @@ declare global {
       /**
        * Opens the project in "Global" mode, without a project mounted
        */
-      openModeGlobal: typeof openModeGlobal
+      openMode: typeof openMode
       /**
        * Takes the name of a system-tests directory, and mounts the project within open mode
        */
@@ -90,21 +90,15 @@ beforeEach(() => {
   })
 })
 
-function addProject (projectName: ProjectFixture) {
+function addProject (projectName: ProjectFixture, open = false) {
   return logInternal({ name: 'addProject', message: projectName }, () => {
-    return cy.task('__internal_addProject', projectName, { log: false })
+    return cy.task('__internal_addProject', { projectName, open }, { log: false })
   })
 }
 
-function openModeGlobal (argv: string[] = []) {
-  const finalArgv = [...argv]
-
-  if (!finalArgv.includes('--global')) {
-    finalArgv.push('--global')
-  }
-
-  return logInternal({ name: 'openModeGlobal', message: argv?.join(' ') }, () => {
-    return cy.task<ResetLaunchArgsResult>('__internal_resetLaunchArgs', { argv: finalArgv }, { log: false })
+function openMode (argv: string[] = []) {
+  return logInternal({ name: 'openMode', message: argv?.join(' ') }, () => {
+    return cy.task<ResetLaunchArgsResult>('__internal_resetLaunchArgs', { argv }, { log: false })
     .then(({ launchArgs }) => launchArgs)
   })
 }
@@ -115,7 +109,7 @@ function openModeSystemTest (projectName: ProjectFixture, argv: string[] = []) {
   }
 
   return logInternal({ name: 'openModeSystemTest', message: argv.join(' ') }, () => {
-    cy.task('__internal_addProject', projectName, { log: false })
+    cy.task('__internal_addProject', { projectName }, { log: false })
 
     return cy.task<ResetLaunchArgsResult>('__internal_resetLaunchArgs', { projectName, argv }, { log: false }).then((obj) => {
       Cypress.env('e2e_serverPort', obj.e2eServerPort)
@@ -150,7 +144,9 @@ function visitApp (href?: string) {
 }
 
 function visitLaunchpad () {
-  cy.visit(`dist-launchpad/index.html?gqlPort=${Cypress.env('e2e_gqlPort')}`)
+  return logInternal(`visitLaunchpad ${Cypress.env('e2e_gqlPort')}`, () => {
+    return cy.visit(`dist-launchpad/index.html?gqlPort=${Cypress.env('e2e_gqlPort')}`, { log: false })
+  })
 }
 
 type UnwrapPromise<R> = R extends PromiseLike<infer U> ? U : R
@@ -215,6 +211,7 @@ Cypress.Commands.add('visitApp', visitApp)
 Cypress.Commands.add('loginUser', loginUser)
 Cypress.Commands.add('visitLaunchpad', visitLaunchpad)
 Cypress.Commands.add('addProject', addProject)
+Cypress.Commands.add('openMode', openMode)
 Cypress.Commands.add('openModeSystemTest', openModeSystemTest)
 Cypress.Commands.add('withCtx', withCtx)
 Cypress.Commands.add('remoteGraphQLIntercept', remoteGraphQLIntercept)

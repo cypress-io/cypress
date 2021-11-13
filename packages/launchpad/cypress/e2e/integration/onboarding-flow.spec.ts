@@ -23,6 +23,6 @@ describe('Onboarding Flow', () => {
 
     cy.visitLaunchpad()
     cy.get('[data-cy-testingType=component]').click()
-    cy.get('h1').should('contain', 'Initializing Config...')
+    cy.get('h1').should('contain', 'Initializing Browsers...')
   })
 })

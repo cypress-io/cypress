@@ -15,7 +15,8 @@ import {
 } from '../generated/graphql'
 
 gql`
-fragment TestingTypeCards on Query {
+fragment TestingTypeCards on CurrentProject {
+  id
   ...TestingTypePicker
 }
 `
@@ -23,10 +24,13 @@ fragment TestingTypeCards on Query {
 gql`
   mutation TestingTypeCards_selectTestingType($type: TestingTypeEnum!) {
   selectProjectTestingType(type: $type) {
-    ...TestingTypeCards
     currentProject {
       id
       needsOnboarding
+      isLoadingConfig
+      isLoadingPlugins
+      config
+      ...TestingTypeCards
     }
   }
 }

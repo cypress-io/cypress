@@ -5,6 +5,8 @@ import type { DataContext } from '@packages/data-context'
 import pDefer from 'p-defer'
 import cors from 'cors'
 import { SocketIOServer } from '@packages/socket'
+import type { Server } from 'http'
+import serverDestroy from 'server-destroy'
 
 export async function makeGraphQLServer (ctx: DataContext) {
   const dfd = pDefer<number>()
@@ -16,11 +18,22 @@ export async function makeGraphQLServer (ctx: DataContext) {
     res.json([{}, {}])
   })
 
+  app.get('/__cypress/launchpad-preload', (req, res) => {
+    ctx.html.fetchLaunchpadInitialData().then((data) => res.json(data)).catch((e) => {
+      ctx.logError(e)
+      res.json({})
+    })
+  })
+
   // TODO: Figure out how we want to cleanup & juggle the config, so
   // it's not jammed into the projects
   addGraphQLHTTP(app, ctx)
 
-  const srv = app.listen(() => {
+  const graphqlPort = process.env.CYPRESS_INTERNAL_GRAPHQL_PORT
+
+  let srv: Server
+
+  function listenCallback () {
     const port = (srv.address() as AddressInfo).port
 
     const endpoint = `http://localhost:${port}/graphql`
@@ -35,14 +48,18 @@ export async function makeGraphQLServer (ctx: DataContext) {
     ctx.setGqlServer(srv)
 
     dfd.resolve(port)
-  })
+  }
+
+  srv = graphqlPort ? app.listen(graphqlPort, listenCallback) : app.listen(listenCallback)
+
+  serverDestroy(srv)
 
   const socketServer = new SocketIOServer(srv, {
     path: '/__gqlSocket',
     transports: ['websocket'],
   })
 
-  ctx.emitter.setLaunchpadSocketServer(socketServer)
+  ctx.setGqlSocketServer(socketServer)
 
   return dfd.promise
 }

@@ -163,7 +163,7 @@ const sanitizeAndConvertNestedArgs = (str, argname) => {
     debug('could not pass config %s value %s', argname, str)
     debug('error %o', err)
 
-    return errors.throw('COULD_NOT_PARSE_ARGUMENTS', argname, str, err.message)
+    throw errors.throw('COULD_NOT_PARSE_ARGUMENTS', argname, str, err.message)
   }
 }
 
@@ -274,7 +274,7 @@ export = {
         debug('could not pass config spec value %s', spec)
         debug('error %o', err)
 
-        return errors.throw('COULD_NOT_PARSE_ARGUMENTS', 'spec', spec, 'spec must be a string or comma-separated list')
+        throw errors.throw('COULD_NOT_PARSE_ARGUMENTS', 'spec', spec, 'spec must be a string or comma-separated list')
       }
     }
 

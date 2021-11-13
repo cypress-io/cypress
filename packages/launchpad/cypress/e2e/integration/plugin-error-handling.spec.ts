@@ -1,10 +1,8 @@
 describe('Plugin error handling', () => {
   it('it handles a plugin error', () => {
     cy.openModeSystemTest('unify-plugin-errors')
-    cy.loginUser()
-
     cy.visitLaunchpad()
-
+    cy.wait(1000)
     cy.get('[data-cy-testingType=e2e]').click()
 
     cy.get('body')
@@ -19,5 +17,7 @@ describe('Plugin error handling', () => {
 
     cy.get('body')
     .should('not.contain.text', 'Cypress Configuration Error')
+
+    cy.get('body').should('contain', 'Choose a Browser')
   })
 })

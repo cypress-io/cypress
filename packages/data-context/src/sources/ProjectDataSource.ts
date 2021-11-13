@@ -183,13 +183,13 @@ export class ProjectDataSource {
   }
 
   async needsOnboarding () {
-    if (this.ctx.currentTestingType === 'e2e') {
+    if (this.ctx.currentProject?.currentTestingType === 'e2e') {
       if (await this.ctx.project.isE2EConfigured()) {
         return false
       }
     }
 
-    if (this.ctx.currentTestingType === 'component') {
+    if (this.ctx.currentProject?.currentTestingType === 'component') {
       if (await this.ctx.project.isCTConfigured()) {
         return false
       }

@@ -1,12 +1,9 @@
 <template>
-  <div v-if="!backendInitialized">
-    Loading...
-  </div>
   <div
-    v-else
+    v-if="backendInitialized"
     class="h-full mx-auto bg-white"
   >
-    <Main />
+    <LaunchpadMain />
   </div>
 </template>
 
@@ -14,11 +11,11 @@
 import { computed, ref, watch } from 'vue'
 import { useToast } from 'vue-toastification'
 import { gql, useMutation, useQuery } from '@urql/vue'
-import Main from './Main.vue'
-import { AppQueryDocument, App_DevRelaunchDocument } from './generated/graphql'
+import LaunchpadMain from './LaunchpadMain.vue'
+import { LaunchpadAppQueryDocument, App_DevRelaunchDocument } from './generated/graphql'
 
 gql`
-query AppQuery {
+query LaunchpadAppQuery {
   __typename
   dev {
     needsRelaunch
@@ -35,12 +32,14 @@ mutation App_DevRelaunch($action: DevRelaunchAction!) {
 const relaunchMutation = useMutation(App_DevRelaunchDocument)
 
 /**
+ * TODO: Tim - see if this is still possible, this should never happen
+ *
  * Sometimes the electron app can start before the GraphQL
  * server and current project has been initialized.
  * We poll until those conditions are met, then render the app
  */
 const query = useQuery({
-  query: AppQueryDocument,
+  query: LaunchpadAppQueryDocument,
   requestPolicy: 'cache-and-network',
 })
 

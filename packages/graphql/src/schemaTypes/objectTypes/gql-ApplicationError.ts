@@ -1,14 +1,14 @@
 import { objectType } from 'nexus'
 
-export interface BaseErrorSource {
+export interface ApplicationErrorSource {
   title?: string
   message: string
   stack?: string
 }
 
-export const BaseError = objectType({
-  name: 'BaseError',
-  description: 'Base error',
+export const ApplicationError = objectType({
+  name: 'ApplicationError',
+  description: 'Error data for an exception that occurs in the application',
   definition (t) {
     t.string('title')
     t.string('message')
@@ -16,6 +16,6 @@ export const BaseError = objectType({
   },
   sourceType: {
     module: __filename,
-    export: 'BaseErrorSource',
+    export: 'ApplicationErrorSource',
   },
 })

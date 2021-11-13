@@ -13,7 +13,6 @@ import { openProject } from './open_project'
 import cache from './cache'
 import errors from './errors'
 import { graphqlSchema } from '@packages/graphql/src/schema'
-import type { InternalDataContextOptions } from '@packages/data-context/src/DataContext'
 import { openExternal } from '@packages/server/lib/gui/links'
 import app_data from './util/app_data'
 
@@ -24,7 +23,6 @@ interface MakeDataContextOptions {
   os: PlatformName
   rootBus: EventEmitter
   launchArgs: LaunchArgs
-  _internalOptions: InternalDataContextOptions
 }
 
 let legacyDataContext: DataContext | undefined
@@ -43,9 +41,6 @@ export function makeLegacyDataContext (launchArgs: LaunchArgs = {} as LaunchArgs
       rootBus: new EventEmitter,
       launchArgs,
       os: os.platform() as PlatformName,
-      _internalOptions: {
-        loadCachedProjects: true,
-      },
     })
   }
 
@@ -92,7 +87,7 @@ export function makeDataContext (options: MakeDataContextOptions) {
         return openProject.launch({ ...browser }, spec, options)
       },
       initializeProject (args: LaunchArgs, options: OpenProjectLaunchOptions, browsers: FoundBrowser[]) {
-        return openProject.create(args.projectRoot, args, options, browsers)
+        return openProject.create(args.projectRoot, args, options, browsers).then((p) => p.browsers as FoundBrowser[])
       },
       insertProjectToCache (projectRoot: string) {
         cache.insertProject(projectRoot)

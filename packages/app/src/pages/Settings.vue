@@ -16,8 +16,8 @@ query Settings {
 }`
 
 gql`
-mutation Settings_ReconfigureProject {
-  reconfigureProject
+mutation Settings_ReconfigureProject($testingType: TestingTypeEnum!) {
+  reconfigureProject(testingType: $testingType)
 }
 `
 
@@ -25,8 +25,8 @@ const query = useQuery({ query: SettingsDocument })
 
 const openElectron = useMutation(Settings_ReconfigureProjectDocument)
 
-function reconfigure () {
-  openElectron.executeMutation({})
+function reconfigure (type) {
+  openElectron.executeMutation({ testingType: type })
 }
 </script>
 

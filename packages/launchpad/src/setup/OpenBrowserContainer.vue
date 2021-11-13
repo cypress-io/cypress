@@ -1,40 +1,56 @@
 <template>
   <Warning
-    v-if="query.data.value?.currentProject?.browserErrorMessage"
+    v-if="props.gql?.browserErrorMessage"
     title="Browser Error"
-    :message="query.data.value?.currentProject?.browserErrorMessage"
+    :message="props.gql?.browserErrorMessage"
   />
   <HeadingText
-    :title="t('setupPage.openBrowser.title')"
-    :description="t('setupPage.openBrowser.description')"
+    :title="heading.title"
+    :description="heading.description"
   />
-  <Spinner />
   <OpenBrowser
-    v-if="query.data.value?.currentProject"
-    :gql="query.data.value.currentProject"
+    v-if="props.gql"
+    :gql="props.gql"
   />
 </template>
 
 <script lang="ts" setup>
 import Warning from '../error/Warning.vue'
 import OpenBrowser from './OpenBrowser.vue'
-import { gql, useQuery } from '@urql/vue'
+import { gql } from '@urql/vue'
 import HeadingText from './HeadingText.vue'
-import { OpenBrowserContainerDocument } from '../generated/graphql'
+import type { OpenBrowserContainerFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
-import Spinner from '@packages/frontend-shared/src/components/Spinner.vue'
+import { computed } from 'vue-demi'
 
 const { t } = useI18n()
 
 gql`
-query OpenBrowserContainer {
-  currentProject {
-    id
-    browserErrorMessage
-    ...OpenBrowser
-  }
+fragment OpenBrowserContainer on CurrentProject {
+  id
+  browserErrorMessage
+  currentTestingType
+  isLoadingPlugins
+  ...OpenBrowser
 }
 `
 
-const query = useQuery({ query: OpenBrowserContainerDocument })
+const props = defineProps<{
+  gql: OpenBrowserContainerFragment
+}>()
+
+const descriptionText = computed(() => {
+  return props.gql.currentTestingType === 'e2e'
+    ? t('setupPage.openBrowser.description.application')
+    : t('setupPage.openBrowser.description.components')
+})
+
+const heading = computed(() => {
+  const isLoading = props.gql.isLoadingPlugins
+
+  return {
+    title: isLoading ? t('setupPage.openBrowser.loadingTitle') : t('setupPage.openBrowser.title'),
+    description: isLoading ? t('setupPage.openBrowser.loadingDescription') : descriptionText.value,
+  }
+})
 </script>

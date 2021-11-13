@@ -1,6 +1,7 @@
 import type { DataContext } from '..'
 
 export interface ApplicationDataApiShape {
+  path(): string
   toHashName(projectRoot: string): string
   ensure(): PromiseLike<unknown>
   remove(): PromiseLike<unknown>

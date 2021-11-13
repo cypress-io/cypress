@@ -244,7 +244,7 @@ const parseBrowserOption = (opt) => {
   }
 }
 
-const ensureAndGetByNameOrPath = (nameOrPath: string, returnAll = false, browsers: FoundBrowser[] = []): Bluebird<FoundBrowser | FoundBrowser[] | undefined | null> => {
+const ensureAndGetByNameOrPath = (nameOrPath: string, returnAll = false, browsers: FoundBrowser[] = []): Bluebird<FoundBrowser | FoundBrowser[]> => {
   const findBrowsers = browsers.length ? Bluebird.resolve(browsers) : getBrowsers()
 
   return findBrowsers
@@ -278,16 +278,12 @@ const ensureAndGetByNameOrPath = (nameOrPath: string, returnAll = false, browser
 
         return browser
       }).catch((err) => {
-        errors.throw('BROWSER_NOT_FOUND_BY_PATH', nameOrPath, err.message)
-
-        return null
+        throw errors.throw('BROWSER_NOT_FOUND_BY_PATH', nameOrPath, err.message)
       })
     }
 
     // not a path, not found by name
-    throwBrowserNotFound(nameOrPath, browsers)
-
-    return null
+    throw throwBrowserNotFound(nameOrPath, browsers)
   })
 }
 
@@ -304,7 +300,7 @@ const formatBrowsersToOptions = (browsers) => {
 const throwBrowserNotFound = (browserName, browsers: FoundBrowser[] = []) => {
   const names = `- ${formatBrowsersToOptions(browsers).join('\n- ')}`
 
-  return errors.throw('BROWSER_NOT_FOUND_BY_NAME', browserName, names)
+  errors.throw('BROWSER_NOT_FOUND_BY_NAME', browserName, names)
 }
 
 export = {

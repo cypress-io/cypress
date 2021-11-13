@@ -9,10 +9,12 @@ export class BrowserDataSource {
   }
 
   isSelected (obj: FoundBrowser) {
-    if (!this.ctx.wizardData.chosenBrowser) {
+    const browser = this.ctx.currentProject?.currentBrowser
+
+    if (!browser) {
       return false
     }
 
-    return this.idForBrowser(this.ctx.wizardData.chosenBrowser) === this.idForBrowser(obj)
+    return this.idForBrowser(browser) === this.idForBrowser(obj)
   }
 }

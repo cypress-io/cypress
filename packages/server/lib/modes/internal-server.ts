@@ -6,7 +6,7 @@ import { makeGraphQLServer } from '../gui/makeGraphQLServer'
 import { assertValidPlatform } from '@packages/types/src/platform'
 import type { LaunchArgs } from '@packages/types'
 
-export function runInternalServer (launchArgs: LaunchArgs, _internalOptions = { loadCachedProjects: true }, mode: 'run' | 'open') {
+export async function runInternalServer (launchArgs: LaunchArgs, mode: 'run' | 'open') {
   const bus = new EventEmitter()
   const platform = os.platform()
 
@@ -17,14 +17,15 @@ export function runInternalServer (launchArgs: LaunchArgs, _internalOptions = { 
     os: platform,
     rootBus: bus,
     launchArgs,
-    _internalOptions,
   })
 
-  // Initializing the data context, loading browsers, etc.
-  ctx.initializeData()
   ctx.emitter.init()
 
-  const serverPortPromise = makeGraphQLServer(ctx)
+  // Initializing the data context, loading browsers, etc.
+  const [gqlPort] = await Promise.all([
+    makeGraphQLServer(ctx),
+    ctx.initializeMode(),
+  ])
 
-  return { ctx, bus, serverPortPromise }
+  return { ctx, bus, gqlPort }
 }

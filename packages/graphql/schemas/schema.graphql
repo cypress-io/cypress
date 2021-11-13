@@ -2,8 +2,8 @@
 ### Do not make changes to this file directly
 
 
-"""Base error"""
-type BaseError {
+"""Error data for an exception that occurs in the application"""
+type ApplicationError {
   message: String
   stack: String
   title: String
@@ -253,6 +253,12 @@ type CurrentProject implements Node & ProjectLike {
   """The mode the interactive runner was launched in"""
   currentTestingType: TestingTypeEnum
 
+  """An error encountered while loading the config"""
+  errorLoadingConfig: ApplicationError
+
+  """An error encountered while loading the plugins"""
+  errorLoadingPlugins: ApplicationError
+
   """Relay style Node ID field for the CurrentProject field"""
   id: ID!
 
@@ -264,6 +270,9 @@ type CurrentProject implements Node & ProjectLike {
 
   """Whether we are currently loading the config"""
   isLoadingConfig: Boolean!
+
+  """Whether we are currently loading the plugins"""
+  isLoadingPlugins: Boolean!
 
   """Whether this is a newly setup project and needs onboarding"""
   needsOnboarding: Boolean!
@@ -312,6 +321,8 @@ enum DevRelaunchAction {
 
 """State associated/helpful for local development of Cypress"""
 type DevState {
+  debugMatches: [String]
+
   """
   When we have edited server related files, we may want to relaunch the client.
   """
@@ -415,6 +426,9 @@ type Mutation {
   """
   completeOnboarding: Query
 
+  """Toggles the DEBUG flag"""
+  devDebug(debug: String): [String]
+
   """
   Development only: Triggers or dismisses a prompted refresh by touching the file watched by our development scripts
   """
@@ -446,16 +460,26 @@ type Mutation {
   openExternal(url: String!): Boolean
 
   """show the launchpad windows"""
-  reconfigureProject: Boolean!
+  reconfigureProject(testingType: TestingTypeEnum!): Boolean!
 
   """Remove project from projects array and cache"""
   removeProject(path: String!): Boolean
+
+  """
+  Retries loading the project config, called when there was an error sourcing the config
+  """
+  retryLoadConfig: Query
+
+  """
+  Retries loading the plugins config, called when there was an error executing the plugins
+  """
+  retryLoadPlugins: Query
 
   """Updates the testing type for the current project"""
   selectProjectTestingType(type: TestingTypeEnum!): Query
 
   """Set active project to run tests on"""
-  setActiveProject(path: String!): Boolean
+  setActiveProject(path: String!): Query
 
   """Save the projects preferences to cache"""
   setProjectPreferences(browserPath: String!, testingType: TestingTypeEnum!): Query!
@@ -531,8 +555,6 @@ type ProjectPreferences {
 
 """The root "Query" type containing all entry fields for our querying"""
 type Query {
-  baseError: BaseError
-
   """Returns an object conforming to the Relay spec"""
   cloudNode(
     """An ID for a Node conforming to the Relay spec"""
@@ -557,14 +579,22 @@ type Query {
   """The state of any info related to local development of the runner"""
   dev: DevState!
 
+  """
+  A "global error" is something that should never occur, and means that we need to clear application state and prompt to file an issue on GitHub
+  """
+  globalError: ApplicationError
+
   """Whether the browser has been opened for auth or not"""
   isAuthBrowserOpened: Boolean!
 
   """Whether the app is in global mode or not"""
   isInGlobalMode: Boolean!
 
+  """Whether we are loading the projects"""
+  isLoadingGlobalProjects: Boolean!
+
   """All known projects for the app"""
-  projects: [ProjectLike!]!
+  projects: [ProjectLike!]
 
   """
   Set of sample configuration files based bundler, framework and language of choice

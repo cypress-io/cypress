@@ -1,7 +1,7 @@
 import { defaultMessages } from '@cy/i18n'
-import BaseError from './BaseError.vue'
+import ErrorDisplay from './ErrorDisplay.vue'
 import Button from '@cy/components/Button.vue'
-import { BaseErrorFragmentDoc } from '../generated/graphql-test'
+import { ErrorDisplayFragmentDoc } from '../generated/graphql-test'
 
 // Selectors
 const headerSelector = '[data-testid=error-header]'
@@ -19,23 +19,17 @@ const customMessage = `Don't worry, just click the "It's fixed now" button to tr
 const customFooterText = `Yikes, try again!`
 const customStack = 'some err message\n  at fn (foo.js:1:1)'
 
-describe('<BaseError />', () => {
-  beforeEach(() => {
-    cy.window().then((win) => {
-      win.localStorage.setItem('latestGQLOperation', '{}')
-    })
-  })
-
+describe('<ErrorDisplay />', () => {
   afterEach(() => {
     cy.percySnapshot()
   })
 
   it('renders the default error the correct messages', () => {
-    cy.mountFragment(BaseErrorFragmentDoc, {
+    cy.mountFragment(ErrorDisplayFragmentDoc, {
       onResult: (result) => {
         result.title = messages.header
       },
-      render: (gqlVal) => <BaseError gql={gqlVal} />,
+      render: (gqlVal) => <ErrorDisplay gql={gqlVal} />,
     })
     .get(headerSelector)
     .should('contain.text', messages.header)
@@ -51,12 +45,12 @@ describe('<BaseError />', () => {
 
   // NOTE: Figure out how to stub the graphql mutation call
   it.skip('emits the retry event by default', () => {
-    cy.mountFragment(BaseErrorFragmentDoc, {
+    cy.mountFragment(ErrorDisplayFragmentDoc, {
       onResult: (result) => {
         result.title = messages.header
         result.message = null
       },
-      render: (gqlVal) => <BaseError gql={gqlVal} />,
+      render: (gqlVal) => <ErrorDisplay gql={gqlVal} />,
     })
     .get(retryButtonSelector)
     .click()
@@ -66,13 +60,13 @@ describe('<BaseError />', () => {
   })
 
   it('renders custom error messages and headers with props', () => {
-    cy.mountFragment(BaseErrorFragmentDoc, {
+    cy.mountFragment(ErrorDisplayFragmentDoc, {
       onResult: (result) => {
         result.title = customHeaderMessage
         result.message = customMessage
         result.stack = customStack
       },
-      render: (gqlVal) => <BaseError gql={gqlVal} />,
+      render: (gqlVal) => <ErrorDisplay gql={gqlVal} />,
     })
     .get('body')
     .should('contain.text', customHeaderMessage)
@@ -81,13 +75,13 @@ describe('<BaseError />', () => {
   })
 
   it('renders the header, message, and footer slots', () => {
-    cy.mountFragment(BaseErrorFragmentDoc, {
+    cy.mountFragment(ErrorDisplayFragmentDoc, {
       onResult: (result) => {
         result.title = messages.header
         result.message = messages.message
       },
       render: (gqlVal) => (
-        <BaseError
+        <ErrorDisplay
           gql={gqlVal}
           v-slots={{
             footer: () => <Button size="lg" data-testid="custom-error-footer">{ customFooterText }</Button>,

@@ -17,7 +17,6 @@ import { urqlCacheKeys } from '@packages/data-context/src/util/urqlCacheKeys'
 
 import { pubSubExchange } from './urqlExchangePubsub'
 import { namedRouteExchange } from './urqlExchangeNamedRoute'
-import { latestMutationExchange } from './urqlExchangeLatestMutation'
 
 const GQL_PORT_MATCH = /gqlPort=(\d+)/.exec(window.location.search)
 const SERVER_PORT_MATCH = /serverPort=(\d+)/.exec(window.location.search)
@@ -35,28 +34,44 @@ declare global {
   }
 }
 
-export function makeUrqlClient (target: 'launchpad' | 'app'): Client {
-  let gqlPort: string
-
+function gqlPort () {
   if (GQL_PORT_MATCH) {
-    gqlPort = GQL_PORT_MATCH[1]
-  } else if (window.__CYPRESS_GRAPHQL_PORT__) {
-    gqlPort = window.__CYPRESS_GRAPHQL_PORT__
-  } else {
-    throw new Error(`${window.location.href} cannot be visited without a gqlPort`)
+    return GQL_PORT_MATCH[1]
   }
 
-  const GRAPHQL_URL = `http://localhost:${gqlPort}/graphql`
+  if (window.__CYPRESS_GRAPHQL_PORT__) {
+    return window.__CYPRESS_GRAPHQL_PORT__
+  }
+
+  throw new Error(`${window.location.href} cannot be visited without a gqlPort`)
+}
+
+/**
+ * Fetch the initial launchpad data
+ */
+export async function preloadLaunchpadData () {
+  try {
+    const resp = await fetch(`http://localhost:${gqlPort()}/__cypress/launchpad-preload`)
+
+    window.__CYPRESS_INITIAL_DATA__ = await resp.json()
+  } catch {
+    //
+  }
+}
+
+export function makeUrqlClient (target: 'launchpad' | 'app'): Client {
+  const port = gqlPort()
+
+  const GRAPHQL_URL = `http://localhost:${port}/graphql`
 
   // If we're in the launchpad, we connect to the known GraphQL Socket port,
   // otherwise we connect to the /__socket.io of the current domain, unless we've explicitly
   //
-  const io = getPubSubSource({ target, gqlPort, serverPort: SERVER_PORT_MATCH?.[1] })
+  const io = getPubSubSource({ target, gqlPort: port, serverPort: SERVER_PORT_MATCH?.[1] })
 
   const exchanges: Exchange[] = [
     dedupExchange,
     pubSubExchange(io),
-    latestMutationExchange,
     errorExchange({
       onError (error) {
         const message = `
@@ -80,15 +95,12 @@ export function makeUrqlClient (target: 'launchpad' | 'app'): Client {
     // TODO(tim): add this when we want to use the socket as the GraphQL
     // transport layer for all operations
     // target === 'launchpad' ? fetchExchange : socketExchange(io),
-  ]
-
-  // If we're in the launched app, we want to use the SSR exchange
-  if (target === 'app') {
-    exchanges.push(ssrExchange({
+    ssrExchange({
       isClient: true,
       initialState: window.__CYPRESS_INITIAL_DATA__ ?? {},
-    }))
-  }
+    }),
+    fetchExchange,
+  ]
 
   exchanges.push(fetchExchange)
 

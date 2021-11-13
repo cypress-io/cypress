@@ -47,11 +47,10 @@
     <div class="inline-flex gap-16px justify-between">
       <slot name="footer">
         <Button
-          v-if="lastMutationDefined"
           size="lg"
           variant="primary"
           data-testid="error-retry-button"
-          @click="retry()"
+          @click="retry"
         >
           {{ t('launchpadErrors.generic.retryButton') }}
         </Button>
@@ -73,11 +72,11 @@ import { gql } from '@urql/vue'
 import Button from '@cy/components/Button.vue'
 import { computed } from 'vue'
 import { useI18n } from '@cy/i18n'
-import type { BaseErrorFragment } from '../generated/graphql'
+import type { ErrorDisplayFragment } from '../generated/graphql'
 import ExternalLink from '@packages/frontend-shared/src/gql-components/ExternalLink.vue'
 
 gql`
-fragment BaseError on BaseError {
+fragment ErrorDisplay on ApplicationError {
   title
   message
   stack
@@ -91,27 +90,11 @@ const openDocs = () => {
 const { t } = useI18n()
 
 const props = defineProps<{
-  gql: BaseErrorFragment
+  gql: ErrorDisplayFragment
+  retry?: () => any
 }>()
-
-const latestOperation = window.localStorage.getItem('latestGQLOperation')
-
-const retry = async () => {
-  const { launchpadClient } = await import('../main')
-
-  const op = latestOperation ? JSON.parse(latestOperation) : null
-
-  return launchpadClient.reexecuteOperation(
-    launchpadClient.createRequestOperation('mutation', op, {
-      requestPolicy: 'cache-and-network',
-    }),
-  )
-}
 
 const headerText = computed(() => props.gql.title ? props.gql.title : t('launchpadErrors.generic.header'))
 const errorMessage = computed(() => props.gql.message ? props.gql.message : null)
 const stack = computed(() => props.gql.stack ? props.gql.stack : null)
-const lastMutationDefined = computed(() => {
-  return Boolean(latestOperation)
-})
 </script>

@@ -21,28 +21,31 @@
     />
   </button>
   <TestingTypeCards
-    :gql="query.data.value"
+    :gql="props.gql"
   />
 </template>
 
 <script lang="ts" setup>
 import { useI18n } from '@cy/i18n'
-import { gql, useQuery } from '@urql/vue'
+import { gql } from '@urql/vue'
 import { ref } from 'vue'
-import { ChooseTestingTypeContainerDocument } from '../generated/graphql'
 import StandardModal from '@cy/components/StandardModal.vue'
 import HeadingText from './HeadingText.vue'
 import CompareTestingTypes from './CompareTestingTypes.vue'
 import TestingTypeCards from './TestingTypeCards.vue'
+import type { ChooseTestingTypeContainerFragment } from '../generated/graphql'
 
 const { t } = useI18n()
 const isTestingTypeModalOpen = ref(false)
 
 gql`
-query ChooseTestingTypeContainer {
+fragment ChooseTestingTypeContainer on CurrentProject {
+  id
   ...TestingTypeCards
 }
 `
 
-const query = useQuery({ query: ChooseTestingTypeContainerDocument })
+const props = defineProps<{
+  gql: ChooseTestingTypeContainerFragment
+}>()
 </script>

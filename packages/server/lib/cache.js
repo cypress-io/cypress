@@ -6,7 +6,9 @@ const FileUtil = require('./util/file')
 const logger = require('./logger')
 
 const fileUtil = new FileUtil({
-  path: appData.path('cache'),
+  get path () {
+    return appData.path('cache')
+  },
 })
 
 const convertProjectsToArray = function (obj) {

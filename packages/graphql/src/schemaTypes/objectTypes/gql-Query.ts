@@ -1,5 +1,5 @@
 import { nonNull, objectType } from 'nexus'
-import { BaseError, WizardSampleConfigFile } from '.'
+import { ApplicationError, WizardSampleConfigFile } from '.'
 import { ProjectLike, WizardSetupInput } from '..'
 import { CurrentProject } from './gql-CurrentProject'
 import { DevState } from './gql-DevState'
@@ -8,9 +8,10 @@ export const Query = objectType({
   name: 'Query',
   description: 'The root "Query" type containing all entry fields for our querying',
   definition (t) {
-    t.field('baseError', {
-      type: BaseError,
-      resolve: (root, args, ctx) => ctx.baseError,
+    t.field('globalError', {
+      type: ApplicationError,
+      description: 'A "global error" is something that should never occur, and means that we need to clear application state and prompt to file an issue on GitHub',
+      resolve: (root, args, ctx) => ctx.coreData.globalError,
     })
 
     t.nonNull.field('dev', {
@@ -25,7 +26,12 @@ export const Query = objectType({
       resolve: (root, args, ctx) => ctx.coreData.currentProject,
     })
 
-    t.nonNull.list.nonNull.field('projects', {
+    t.nonNull.boolean('isLoadingGlobalProjects', {
+      description: 'Whether we are loading the projects',
+      resolve: (root, args, ctx) => ctx.coreData.isLoadingGlobalProjects,
+    })
+
+    t.list.nonNull.field('projects', {
       type: ProjectLike,
       description: 'All known projects for the app',
       resolve: (root, args, ctx) => ctx.projectsList,

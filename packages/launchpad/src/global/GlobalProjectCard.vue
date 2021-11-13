@@ -68,7 +68,12 @@ import { useI18n } from '@cy/i18n'
 
 gql`
 mutation GlobalProjectCard_setActiveProject($path: String!) {
-  setActiveProject(path: $path) 
+  setActiveProject(path: $path) {
+    currentProject {
+      id
+      ...TestingTypeCards
+    }
+  }
 }
 `
 

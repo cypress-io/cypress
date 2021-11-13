@@ -25,14 +25,15 @@ import { useI18n } from '@cy/i18n'
 const { t } = useI18n()
 
 gql`
-fragment SwitchTestingTypeModal on Query {
+fragment SwitchTestingTypeModal on CurrentProject {
+  id
   ...TestingTypePicker
 }
 `
 
 gql`
-mutation SwitchTestingType_ReconfigureProject {
-  reconfigureProject
+mutation SwitchTestingType_ReconfigureProject($testingType: TestingTypeEnum!) {
+  reconfigureProject(testingType: $testingType)
 }
 `
 
@@ -47,7 +48,7 @@ const emits = defineEmits<{
 
 const openElectron = useMutation(SwitchTestingType_ReconfigureProjectDocument)
 
-function reconfigure () {
-  openElectron.executeMutation({})
+function reconfigure (type) {
+  openElectron.executeMutation({ testingType: type })
 }
 </script>

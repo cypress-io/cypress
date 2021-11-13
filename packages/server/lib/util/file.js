@@ -26,16 +26,15 @@ function getUid () {
 
 class File {
   constructor (options = {}) {
-    if (!options.path) {
+    if (!_.has(options, 'path')) {
       throw new Error('Must specify path to file when creating new FileUtil()')
     }
 
-    this.path = options.path
+    this.options = options
 
     // If multiple users write to a specific directory is os.tmpdir, permission errors can arise.
     // Instead, we make a user specific directory with os.tmpdir.
     this._lockFileDir = path.join(os.tmpdir(), `cypress-${getUid()}`)
-    this._lockFilePath = path.join(this._lockFileDir, `${md5(this.path)}.lock`)
 
     this._queue = new pQueue({ concurrency: 1 })
 
@@ -45,6 +44,14 @@ class File {
     exit.ensure(() => {
       return lockFile.unlockSync(this._lockFilePath)
     })
+  }
+
+  get path () {
+    return this.options.path
+  }
+
+  get _lockFilePath () {
+    return path.join(this._lockFileDir, `${md5(this.path)}.lock`)
   }
 
   transaction (fn) {

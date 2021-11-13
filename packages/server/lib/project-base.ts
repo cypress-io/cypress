@@ -349,7 +349,7 @@ export class ProjectBase<TServer extends Server> extends EE {
     const closePreprocessor = this.testingType === 'e2e' ? preprocessor.close : undefined
 
     this.ctx.setAppServerPort(undefined)
-    this.ctx.emitter.setAppSocketServer(undefined)
+    this.ctx.setAppSocketServer(undefined)
 
     await Promise.all([
       this.server?.close(),
@@ -664,7 +664,7 @@ export class ProjectBase<TServer extends Server> extends EE {
       },
     })
 
-    this.ctx.emitter.setAppSocketServer(io)
+    this.ctx.setAppSocketServer(io)
   }
 
   changeToUrl (url) {

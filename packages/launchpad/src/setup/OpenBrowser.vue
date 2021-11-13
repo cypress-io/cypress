@@ -1,22 +1,28 @@
 <template>
   <OpenBrowserList
-    variant=""
+    v-if="props.gql.browsers"
     :gql="props.gql"
     @navigated-back="backFn"
     @launch="launch"
   />
+  <Spinner v-else />
 </template>
 
 <script lang="ts" setup>
 import { useMutation, gql } from '@urql/vue'
+import Spinner from '@packages/frontend-shared/src/components/Spinner.vue'
 import OpenBrowserList from './OpenBrowserList.vue'
-import { OpenBrowserFragment, OpenBrowser_LaunchProjectDocument } from '../generated/graphql'
+import { OpenBrowserFragment, OpenBrowser_ClearTestingTypeDocument, OpenBrowser_LaunchProjectDocument } from '../generated/graphql'
 
 gql`
 mutation OpenBrowser_clearTestingType {
   clearCurrentTestingType {
     currentProject {
       id
+      currentTestingType
+      browsers {
+        id
+      }
     }
   }
 }
@@ -27,6 +33,9 @@ fragment OpenBrowser on CurrentProject {
   id
   currentTestingType
   ...OpenBrowserList
+  browsers {
+    id
+  }
 }
 `
 
@@ -49,15 +58,16 @@ const props = defineProps<{
 }>()
 
 const launchOpenProject = useMutation(OpenBrowser_LaunchProjectDocument)
+const clearTestingType = useMutation(OpenBrowser_ClearTestingTypeDocument)
 
 const backFn = () => {
-  //
+  clearTestingType.executeMutation({})
 }
 
 const launch = (browserPath?: string) => {
   const testingType = props.gql.currentTestingType
 
-  if (browserPath && testingType) {
+  if (browserPath !== undefined && testingType) {
     launchOpenProject.executeMutation({
       browserPath,
       testingType,

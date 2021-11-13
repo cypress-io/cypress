@@ -51,8 +51,8 @@
         aria-label="Sidebar"
       >
         <SwitchTestingTypeButton
-          v-if="query.data.value"
-          :gql="query.data.value"
+          v-if="query.data.value?.currentProject"
+          :gql="query.data.value.currentProject"
         />
         <RouterLink
           v-for="item in navigation"
@@ -124,10 +124,10 @@ const navigation = [
 
 gql`
 query SideBarNavigation {
-  ...SwitchTestingTypeButton
   currentProject {
     id
     title
+    ...SwitchTestingTypeButton
   }
 }
 `
