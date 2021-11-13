@@ -90,6 +90,8 @@ export class DataContext {
       this.actions.app.refreshBrowsers(),
       // load the cached user & validate the token on start
       this.actions.auth.getUser(),
+
+      this.actions.app.refreshNodePathAndVersion(),
     ]
 
     if (this._config._internalOptions.loadCachedProjects) {
@@ -150,6 +152,10 @@ export class DataContext {
 
   get browserList () {
     return this.coreData.app.browsers
+  }
+
+  get nodePathAndVersion () {
+    return this.coreData.app.nodePathAndVersion
   }
 
   get baseError () {

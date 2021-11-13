@@ -61,6 +61,7 @@ export class ProjectConfigDataActions {
         ...process.env,
         NODE_OPTIONS: process.env.ORIGINAL_NODE_OPTIONS || '',
       },
+      execPath: this.ctx.nodePathAndVersion?.path,
     }
 
     if (inspector.url()) {

@@ -10,8 +10,11 @@ const scaffold = require(`${root}lib/scaffold`)
 const { fs } = require(`${root}lib/util/fs`)
 const glob = require(`${root}lib/util/glob`)
 const Fixtures = require('@tooling/system-tests/lib/fixtures')
+const { makeLegacyDataContext } = require('../../lib/makeDataContext')
 
 describe('lib/scaffold', () => {
+  const ctx = makeLegacyDataContext()
+
   beforeEach(() => {
     return Fixtures.scaffold()
   })
@@ -530,12 +533,13 @@ describe('lib/scaffold', () => {
   })
 
   context('.fileTree', () => {
-    beforeEach(function () {
+    beforeEach(async function () {
       const todosPath = Fixtures.projectPath('todos')
+
+      await ctx.actions.project.setActiveProject(todosPath)
 
       return config.get(todosPath).then((cfg) => {
         this.cfg = cfg
-        this.cfg.pluginsFile = path.join(this.cfg.projectRoot, 'cypress/plugins/index.js')
       })
     })
 

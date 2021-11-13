@@ -13,6 +13,10 @@ export class ProjectConfigDataSource {
         configFilePath = await this.getConfigFilePath()
       }
 
+      if (!this.ctx.nodePathAndVersion) {
+        await this.ctx.actions.app.refreshNodePathAndVersion()
+      }
+
       return this.ctx.deref.actions.projectConfig.refreshProjectConfig(configFilePath)
     }
 

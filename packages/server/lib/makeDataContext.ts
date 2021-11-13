@@ -12,6 +12,7 @@ import { EventEmitter } from 'events'
 import { openProject } from './open_project'
 import cache from './cache'
 import errors from './errors'
+import findSystemNode from './util/find_system_node'
 import { graphqlSchema } from '@packages/graphql/src/schema'
 import type { InternalDataContextOptions } from '@packages/data-context/src/DataContext'
 import { openExternal } from '@packages/server/lib/gui/links'
@@ -58,6 +59,9 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
     appApi: {
       getBrowsers,
       ensureAndGetByNameOrPath,
+      findNodePathAndVersion () {
+        return findSystemNode.findNodePathAndVersion()
+      },
     },
     authApi: {
       getUser () {
