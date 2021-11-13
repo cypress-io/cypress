@@ -18,13 +18,19 @@ const open = require(`${root}lib/util/open`)
 const Fixtures = require('@tooling/system-tests/lib/fixtures')
 const firefoxUtil = require(`${root}lib/browsers/firefox-util`).default
 const { createRoutes } = require(`${root}lib/routes`)
+const { makeLegacyDataContext } = require(`${root}lib/makeDataContext`)
 
 describe('lib/socket', () => {
-  beforeEach(function () {
+  const ctx = makeLegacyDataContext()
+
+  beforeEach(async function () {
     Fixtures.scaffold()
 
     this.todosPath = Fixtures.projectPath('todos')
-    this.server = new ServerE2E(this.todosPath)
+
+    await ctx.actions.project.setActiveProject(this.todosPath)
+
+    this.server = new ServerE2E(ctx)
 
     return config.get(this.todosPath)
     .then((cfg) => {

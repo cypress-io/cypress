@@ -47,6 +47,7 @@ const system = require(`${root}lib/util/system`)
 const appData = require(`${root}lib/util/app_data`)
 const electronApp = require('../../lib/util/electron-app')
 const savedState = require(`${root}lib/saved_state`)
+const { makeLegacyDataContext } = require(`${root}/lib/makeDataContext`)
 
 const TYPICAL_BROWSERS = [
   {
@@ -104,6 +105,7 @@ const snapshotConsoleLogs = function (name) {
 
 describe('lib/cypress', () => {
   require('mocha-banner').register()
+  const ctx = makeLegacyDataContext()
 
   beforeEach(function () {
     process.chdir(previousCwd)
@@ -456,7 +458,8 @@ describe('lib/cypress', () => {
     })
 
     it('scaffolds out integration and example specs if they do not exist when not runMode', function () {
-      return config.get(this.pristineWithConfigPath)
+      return ctx.actions.project.setActiveProject(this.pristineWithConfigPath)
+      .then(() => config.get(this.pristineWithConfigPath))
       .then((cfg) => {
         return fs.statAsync(cfg.integrationFolder)
         .then(() => {
@@ -517,7 +520,8 @@ describe('lib/cypress', () => {
     })
 
     it('scaffolds out fixtures + files if they do not exist', function () {
-      return config.get(this.pristineWithConfigPath)
+      return ctx.actions.project.setActiveProject(this.pristineWithConfigPath)
+      .then(() => config.get(this.pristineWithConfigPath))
       .then((cfg) => {
         return fs.statAsync(cfg.fixturesFolder)
         .then(() => {
@@ -535,7 +539,8 @@ describe('lib/cypress', () => {
     it('scaffolds out support + files if they do not exist', function () {
       const supportFolder = path.join(this.pristineWithConfigPath, 'cypress/support')
 
-      return config.get(this.pristineWithConfigPath)
+      return ctx.actions.project.setActiveProject(this.pristineWithConfigPath)
+      .then(() => config.get(this.pristineWithConfigPath))
       .then(() => {
         return fs.statAsync(supportFolder)
         .then(() => {
@@ -553,7 +558,8 @@ describe('lib/cypress', () => {
     })
 
     it('removes fixtures when they exist and fixturesFolder is false', function (done) {
-      config.get(this.idsPath)
+      ctx.actions.project.setActiveProject(this.idsPath)
+      .then(() => config.get(this.idsPath))
       .then((cfg) => {
         this.cfg = cfg
 
@@ -611,7 +617,8 @@ describe('lib/cypress', () => {
     it('can change the reporter with cypress.config.js', function () {
       sinon.spy(Reporter, 'create')
 
-      return config.get(this.idsPath)
+      return ctx.actions.project.setActiveProject(this.idsPath)
+      .then(() => config.get(this.idsPath))
       .then((cfg) => {
         this.cfg = cfg
 
@@ -1691,9 +1698,9 @@ describe('lib/cypress', () => {
       process.env.CYPRESS_watch_for_file_changes = 'false'
 
       return user.set({ name: 'brian', authToken: 'auth-token-123' })
-      .then(() => {
-        return settings.read(this.todosPath)
-      }).then((json) => {
+      .then(() => ctx.actions.project.setActiveProject(this.todosPath))
+      .then(() => settings.read(this.todosPath))
+      .then((json) => {
         // this should be overriden by the env argument
         json.baseUrl = 'http://localhost:8080'
 
