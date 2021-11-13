@@ -1912,7 +1912,7 @@ jobs:
             CYPRESS_INTERNAL_FORCE_SCAFFOLD: "1"
           command: |
             rm -rf cypress.json
-            echo 'export default {
+            echo "export default {
                     e2e: {
                       setupNodeEvents (on, config) {
                         on('task', {
@@ -1926,7 +1926,7 @@ jobs:
                         return config
                       },
                     },
-                  }' > cypress.config.ts
+                  }" > cypress.config.ts
       - run:
           name: Run project tests 🗳
           working_directory: <<parameters.wd>>
