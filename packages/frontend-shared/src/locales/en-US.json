@@ -116,7 +116,10 @@
   "topNav": {
     "released": "Released",
     "version": "Version",
+    "installed": "Installed",
+    "latest": "Latest",
     "seeAllReleases": "See all releases",
+    "runningOldVersion": "You're currently running an old version of Cypress. Update to the latest version for the best experience.",
     "docsMenu": {
       "docsHeading": "Docs",
       "gettingStartedTitle": "Getting Started",

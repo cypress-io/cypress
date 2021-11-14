@@ -35,8 +35,7 @@
 
       <TopNavListItem class="px-16px py-8px min-w-240px pb-12px">
         <p class="text-gray-600 text-12px py-8px leading-normal">
-          You're currently running an old version of Cypress.
-          Update to the latest version for the best experience.
+          {{ t('topNav.runningOldVersion') }}
         </p>
         <Button class="w-full">
           Update to {{ versions.latest.version }}
@@ -60,7 +59,7 @@
         <template #suffix>
           <span class="rounded-md bg-yellow-100">
             <span class="font-semibold text-amber-800 p-5px">
-              Installed
+              {{ t('topNav.installed') }}
             </span>
           </span>
         </template>
@@ -85,7 +84,7 @@
         <template #suffix>
           <span class="rounded-md bg-jade-100">
             <span class="font-semibold text-jade-800 px-5px">
-              Latest
+              {{ t('topNav.latest') }}
             </span>
           </span>
         </template>
