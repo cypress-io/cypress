@@ -136,7 +136,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
     cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
       onResult: (result) => {
         result.__typename = 'Query'
-        result.app.isAuthBrowserOpened = true
+        result.isAuthBrowserOpened = true
         result.cloudViewer = cloudViewer
         result.cloudViewer.__typename = 'CloudUser'
       },

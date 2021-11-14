@@ -80,20 +80,6 @@ export const FRONTEND_FRAMEWORKS = [
 
 export type FrontendFramework = typeof FRONTEND_FRAMEWORKS[number]
 
-export const TESTING_TYPES = [
-  {
-    type: 'e2e',
-    title: 'E2E Testing',
-    description: 'Click here to configure end-to-end testing with Cypress.',
-  }, {
-    type: 'component',
-    title: 'Component Testing',
-    description: 'Click here to configure Component Testing with your choice of framework and dev server.',
-  },
-] as const
-
-export type TestingType = typeof TESTING_TYPES[number]
-
 export const CODE_LANGUAGES = [
   {
     type: 'js',
@@ -106,29 +92,6 @@ export const CODE_LANGUAGES = [
 ] as const
 
 export type CodeLanguage = typeof CODE_LANGUAGES[number]
-
-export const NAV_ITEMS = [
-  {
-    type: 'projectSetup',
-    name: 'Project Setup',
-    iconPath: 'clarity/dashboard-line',
-  },
-  {
-    type: 'runs',
-    name: 'Runs',
-    iconPath: 'clarity/bullet-list-line',
-  },
-  {
-    type: 'learn',
-    name: 'Learn',
-    iconPath: 'clarity/terminal-line',
-  },
-  {
-    type: 'settings',
-    name: 'Settings',
-    iconPath: 'clarity/settings-line',
-  },
-] as const
 
 export const WIZARD_STEPS = [
   {
