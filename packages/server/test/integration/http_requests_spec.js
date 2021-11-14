@@ -36,6 +36,7 @@ const Fixtures = require('@tooling/system-tests/lib/fixtures')
  */
 const { getRunnerInjectionContents } = require(`@packages/resolve-dist`)
 const { createRoutes } = require(`${root}lib/routes`)
+const { makeLegacyDataContext } = require(`${root}/lib/makeDataContext`)
 
 zlib = Promise.promisifyAll(zlib)
 
@@ -62,6 +63,7 @@ const cleanResponseBody = (body) => {
 
 describe('Routes', () => {
   require('mocha-banner').register()
+  const ctx = makeLegacyDataContext()
 
   beforeEach(function () {
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
@@ -72,6 +74,8 @@ describe('Routes', () => {
 
     nock.enableNetConnect()
 
+    Fixtures.scaffold()
+
     this.setup = (initialUrl, obj = {}, spec) => {
       if (_.isObject(initialUrl)) {
         obj = initialUrl
@@ -79,13 +83,16 @@ describe('Routes', () => {
       }
 
       if (!obj.projectRoot) {
-        obj.projectRoot = '/foo/bar/'
+        obj.projectRoot = Fixtures.projectPath('e2e')
       }
 
-      // get all the config defaults
-      // and allow us to override them
-      // for each test
-      return config.set(obj)
+      return ctx.actions.project.setActiveProject(obj.projectRoot)
+      .then(() => {
+        // get all the config defaults
+        // and allow us to override them
+        // for each test
+        return config.set(obj)
+      })
       .then((cfg) => {
         // use a jar for each test
         // but reset it automatically
@@ -128,7 +135,7 @@ describe('Routes', () => {
         }
 
         const open = () => {
-          this.project = new ProjectBase({ projectRoot: '/path/to/project-e2e', testingType: 'e2e' })
+          this.project = new ProjectBase({ projectRoot: Fixtures.projectPath('e2e'), testingType: 'e2e' })
 
           cfg.pluginsFile = false
 
@@ -168,7 +175,7 @@ describe('Routes', () => {
 
             pluginsModule.init(cfg, {
               projectRoot: cfg.projectRoot,
-            }),
+            }, ctx),
           ])
         }
 
