@@ -12,11 +12,14 @@ const screenshots = require(`${root}lib/screenshots`)
 const { fs } = require(`${root}lib/util/fs`)
 const plugins = require(`${root}lib/plugins`)
 const { Screenshot } = require(`${root}lib/automation/screenshot`)
+const { makeLegacyDataContext } = require(`${root}lib/makeDataContext`)
 
 const image = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAALlJREFUeNpi1F3xYAIDA4MBA35wgQWqyB5dRoaVmeHJ779wPhOM0aQtyBAoyglmOwmwM6z1lWY44CMDFgcBFmRTGp3EGGJe/WIQ5mZm4GRlBGJmhlm3PqGaeODpNzCtKsbGIARUCALvvv6FWw9XeOvrH4bbQNOQwfabnzHdGK3AwyAjyAqX2HPzC0Pn7Y9wPtyNIMGlD74wmAqwMZz+8AvFxzATVZAFQIqwABWQiWtgAY5uCnKAAwQYAPr8OZysiz4PAAAAAElFTkSuQmCC'
 const iso8601Regex = /^\d{4}\-\d{2}\-\d{2}T\d{2}\:\d{2}\:\d{2}\.?\d*Z?$/
 
 describe('lib/screenshots', () => {
+  const ctx = makeLegacyDataContext()
+
   beforeEach(function () {
     // make each test timeout after only 1 sec
     // so that durations are handled correctly
@@ -56,7 +59,10 @@ describe('lib/screenshots', () => {
     Jimp.prototype.composite = sinon.stub()
     // Jimp.prototype.getBuffer = sinon.stub().resolves(@buffer)
 
-    return config.get(this.todosPath).then((config1) => {
+    return ctx.actions.project.setActiveProject(this.todosPath)
+    .then(() => {
+      return config.get(this.todosPath)
+    }).then((config1) => {
       this.config = config1
     })
   })

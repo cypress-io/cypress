@@ -6,6 +6,7 @@ const config = require(`${root}lib/config`)
 const fixture = require(`${root}lib/fixture`)
 const { fs } = require(`${root}lib/util/fs`)
 const FixturesHelper = require('@tooling/system-tests/lib/fixtures')
+const { makeLegacyDataContext } = require(`${root}lib/makeDataContext`)
 const os = require('os')
 const eol = require('eol')
 
@@ -14,6 +15,8 @@ const isWindows = () => {
 }
 
 describe('lib/fixture', () => {
+  const ctx = makeLegacyDataContext()
+
   beforeEach(function () {
     FixturesHelper.scaffold()
 
@@ -22,7 +25,11 @@ describe('lib/fixture', () => {
       return fs.readFileAsync(path.join(folder, image), encoding)
     }
 
-    return config.get(this.todosPath).then((cfg) => {
+    return ctx.actions.project.setActiveProject(this.todosPath)
+    .then(() => {
+      return config.get(this.todosPath)
+    })
+    .then((cfg) => {
       ({ fixturesFolder: this.fixturesFolder } = cfg)
     })
   })
@@ -172,7 +179,10 @@ Expecting 'EOF', '}', ':', ',', ']', got 'STRING'\
     it('can load a fixture with no extension when a same-named folder also exists', () => {
       const projectPath = FixturesHelper.projectPath('folder-same-as-fixture')
 
-      return config.get(projectPath)
+      return ctx.actions.project.setActiveProject(projectPath)
+      .then(() => {
+        return config.get(projectPath)
+      })
       .then((cfg) => {
         return fixture.get(cfg.fixturesFolder, 'foo')
         .then((result) => {

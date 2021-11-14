@@ -4,16 +4,22 @@ const _ = require('lodash')
 const path = require('path')
 const config = require(`${root}../lib/config`)
 const specsUtil = require(`${root}../lib/util/specs`).default
+const { makeLegacyDataContext } = require(`${root}../lib/makeDataContext`)
 const FixturesHelper = require('@tooling/system-tests/lib/fixtures')
 const debug = require('debug')('test')
 
 describe('lib/util/specs', () => {
+  const ctx = makeLegacyDataContext()
+
   beforeEach(function () {
     FixturesHelper.scaffold()
 
     this.todosPath = FixturesHelper.projectPath('todos')
 
-    return config.get(this.todosPath)
+    return ctx.actions.project.setActiveProject(this.todosPath)
+    .then(() => {
+      return config.get(this.todosPath)
+    })
     .then((cfg) => {
       this.config = cfg
     })

@@ -943,7 +943,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     beforeEach(function () {
       this.project = new ProjectBase({ projectRoot: '/_test-output/path/to/project-e2e', testingType: 'e2e' })
 
-      sinon.stub(settings, 'write')
+      sinon.stub(settings, 'writeOnly')
       .withArgs(this.project.projectRoot, { projectId: 'id-123' })
       .resolves({ projectId: 'id-123' })
     })

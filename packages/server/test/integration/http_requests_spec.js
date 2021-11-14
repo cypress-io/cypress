@@ -36,7 +36,7 @@ const Fixtures = require('@tooling/system-tests/lib/fixtures')
  */
 const { getRunnerInjectionContents } = require(`@packages/resolve-dist`)
 const { createRoutes } = require(`${root}lib/routes`)
-const { makeLegacyDataContext } = require(`${root}/lib/makeDataContext`)
+const { makeLegacyDataContext } = require(`${root}lib/makeDataContext`)
 
 zlib = Promise.promisifyAll(zlib)
 
@@ -3954,6 +3954,8 @@ describe('Routes', () => {
       this.timeout(1000)
 
       beforeEach(function (done) {
+        Fixtures.scaffold('e2e')
+
         this.httpSrv = http.createServer((req, res) => {
           const { query } = url.parse(req.url, true)
 

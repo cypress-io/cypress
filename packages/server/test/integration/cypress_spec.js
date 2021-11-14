@@ -47,7 +47,7 @@ const system = require(`${root}lib/util/system`)
 const appData = require(`${root}lib/util/app_data`)
 const electronApp = require('../../lib/util/electron-app')
 const savedState = require(`${root}lib/saved_state`)
-const { makeLegacyDataContext } = require(`${root}/lib/makeDataContext`)
+const { makeLegacyDataContext } = require(`${root}lib/makeDataContext`)
 
 const TYPICAL_BROWSERS = [
   {
