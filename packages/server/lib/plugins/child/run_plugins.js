@@ -34,9 +34,9 @@ const getDefaultPreprocessor = function (config) {
   return webpackPreprocessor(options)
 }
 
-let plugins
+let setupNodeEvents
 
-const load = (ipc, requiredFile, config) => {
+const load = (ipc, config, requiredFile) => {
   debug('run plugins function')
 
   let eventIdCount = 0
@@ -86,7 +86,7 @@ const load = (ipc, requiredFile, config) => {
   .try(() => {
     debug('run plugins function')
 
-    return plugins(register, config)
+    return setupNodeEvents(register, config)
   })
   .tap(() => {
     if (!registeredEventsByName['file:preprocessor']) {
@@ -137,9 +137,13 @@ const execute = (ipc, event, ids, args = []) => {
   }
 }
 
-const runPlugins = (ipc, _plugins, projectRoot, requiredFile) => {
+const runSetupNodeEvents = (ipc, _setupNodeEvents, projectRoot, requiredFile) => {
+  if (_setupNodeEvents && typeof _setupNodeEvents !== 'function') {
+    ipc.send('load:error:plugins', 'SETUP_NODE_EVENTS_IS_NOT_FUNCTION', requiredFile, _setupNodeEvents)
+  }
+
   // Set a default handler to successfully register `file:preprocessor`
-  plugins = _plugins ?? ((on, config) => {})
+  setupNodeEvents = _setupNodeEvents ?? ((on, config) => {})
 
   debug('project root:', projectRoot)
   if (!projectRoot) {
@@ -148,7 +152,7 @@ const runPlugins = (ipc, _plugins, projectRoot, requiredFile) => {
 
   ipc.on('load:plugins', (config) => {
     debug('passing config %o', config)
-    load(ipc, requiredFile, config)
+    load(ipc, config, requiredFile)
   })
 
   ipc.on('execute:plugins', (event, ids, args) => {
@@ -157,9 +161,9 @@ const runPlugins = (ipc, _plugins, projectRoot, requiredFile) => {
 }
 
 // for testing purposes
-runPlugins.__reset = () => {
+runSetupNodeEvents.__reset = () => {
   registeredEventsById = {}
   registeredEventsByName = {}
 }
 
-module.exports = runPlugins
+module.exports = runSetupNodeEvents

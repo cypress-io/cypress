@@ -559,21 +559,6 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         Or you might have renamed the extension of your \`supportFile\` to \`.ts\`. If that's the case, restart the test runner.
 
         Learn more at https://on.cypress.io/support-file-missing-or-invalid`
-    case 'PLUGINS_FILE_ERROR':
-      msg = stripIndent`\
-        The plugins file is missing or invalid.
-
-        Your \`pluginsFile\` is set to \`${arg1}\`, but either the file is missing, it contains a syntax error, or threw an error when required. The \`pluginsFile\` must be a \`.js\`, \`.ts\`, or \`.coffee\` file.
-
-        Or you might have renamed the extension of your \`pluginsFile\`. If that's the case, restart the test runner.
-
-        Please fix this, or set \`pluginsFile\` to \`false\` if a plugins file is not necessary for your project.`.trim()
-
-      if (arg2) {
-        return { msg, details: arg2 }
-      }
-
-      return msg
     case 'SETUP_NODE_EVENTS_IS_NOT_FUNCTION':
       msg = stripIndent`\
         The \`setupNodeEvents\` method must BE a function with the following signature:

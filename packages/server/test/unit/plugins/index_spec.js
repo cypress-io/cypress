@@ -11,7 +11,8 @@ const plugins = require(`${root}../lib/plugins`)
 
 const PLUGIN_PID = 77777
 
-describe('lib/plugins/index', () => {
+// TODO: (Alejandro) - checking tests on CI
+describe.skip('lib/plugins/index', () => {
   let pluginsProcess
   let ipc
   let configExtras
@@ -211,6 +212,7 @@ describe('lib/plugins/index', () => {
       })
     })
 
+    //
     describe('load:error message', () => {
       context('PLUGINS_FILE_ERROR', () => {
         beforeEach(() => {
