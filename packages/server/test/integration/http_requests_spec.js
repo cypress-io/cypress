@@ -175,6 +175,7 @@ describe('Routes', () => {
 
             pluginsModule.init(cfg, {
               projectRoot: cfg.projectRoot,
+              testingType: 'e2e',
             }, ctx),
           ])
         }
@@ -203,6 +204,7 @@ describe('Routes', () => {
     return Promise.join(
       this.server.close(),
       httpsServer.stop(),
+      ctx.actions.project.clearActiveProject(),
     )
   })
 
