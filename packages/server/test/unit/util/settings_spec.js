@@ -16,9 +16,10 @@ describe('lib/util/settings', () => {
   context('with default configFile option', () => {
     beforeEach(function () {
       this.setup = (obj = {}) => {
-        ctx.actions.project.setActiveProject(projectRoot)
-
-        return fs.writeFileAsync('cypress.config.js', `module.exports = ${JSON.stringify(obj)}`)
+        return ctx.actions.project.setActiveProject(projectRoot)
+        .then(() => {
+          return fs.writeFileAsync('cypress.config.js', `module.exports = ${JSON.stringify(obj)}`)
+        })
       }
     })
 

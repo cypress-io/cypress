@@ -15,10 +15,11 @@ describe('lib/files', () => {
 
     return ctx.actions.project.setActiveProject(this.todosPath)
     .then(() => {
-      return config.get(this.todosPath).then((cfg) => {
-        this.config = cfg;
-        ({ projectRoot: this.projectRoot } = cfg)
-      })
+      return config.get(this.todosPath)
+    })
+    .then((cfg) => {
+      this.config = cfg;
+      ({ projectRoot: this.projectRoot } = cfg)
     })
   })
 

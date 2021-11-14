@@ -36,8 +36,11 @@ const { fs } = require(`${root}lib/util/fs`)
 const settings = require(`${root}lib/util/settings`)
 const Watchers = require(`${root}lib/watchers`)
 const { SocketE2E } = require(`${root}lib/socket-e2e`)
+const { makeLegacyDataContext } = require(`${root}lib/makeDataContext`)
 
 describe('lib/project-base', () => {
+  const ctx = makeLegacyDataContext()
+
   beforeEach(function () {
     Fixtures.scaffold()
 
@@ -53,7 +56,11 @@ describe('lib/project-base', () => {
 
     sinon.stub(runEvents, 'execute').resolves()
 
-    return settings.read(this.todosPath).then((obj = {}) => {
+    return ctx.actions.project.setActiveProject(this.todosPath)
+    .then(() => {
+      return settings.read(this.todosPath)
+    })
+    .then((obj = {}) => {
       ({ projectId: this.projectId } = obj)
 
       return config.set({ projectName: 'project', projectRoot: '/foo/bar' })
@@ -1024,7 +1031,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       this.newProject = { id: 'project-id-123' }
 
       sinon.stub(user, 'ensureAuthToken').resolves('auth-token-123')
-      sinon.stub(settings, 'write').resolves()
+      sinon.stub(settings, 'writeOnly').resolves()
       sinon.stub(commitInfo, 'getRemoteOrigin').resolves('remoteOrigin')
       sinon.stub(api, 'createProject')
       .withArgs({ foo: 'bar' }, 'remoteOrigin', 'auth-token-123')

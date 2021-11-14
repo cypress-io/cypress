@@ -53,7 +53,12 @@ describe('lib/util/specs', () => {
     })
 
     it('by default, returns all files as long as they have a name and extension', () => {
-      return config.get(FixturesHelper.projectPath('various-file-types'))
+      const projectPath = FixturesHelper.projectPath('various-file-types')
+
+      return ctx.actions.project.setActiveProject(projectPath)
+      .then(() => {
+        return config.get(projectPath)
+      })
       .then((cfg) => {
         return specsUtil.findSpecs(cfg)
       }).then((files) => {
@@ -66,7 +71,12 @@ describe('lib/util/specs', () => {
     })
 
     it('finds integration and component tests and assigns correct specType', () => {
-      return config.get(FixturesHelper.projectPath('component-tests'))
+      const projectPath = FixturesHelper.projectPath('component-tests')
+
+      return ctx.actions.project.setActiveProject(projectPath)
+      .then(() => {
+        return config.get(projectPath)
+      })
       .then((cfg) => {
         cfg.resolved.testingType = { value: 'component' }
 
@@ -91,7 +101,12 @@ describe('lib/util/specs', () => {
     })
 
     it('returns files matching config.testFiles', () => {
-      return config.get(FixturesHelper.projectPath('various-file-types'))
+      const projectPath = FixturesHelper.projectPath('various-file-types')
+
+      return ctx.actions.project.setActiveProject(projectPath)
+      .then(() => {
+        return config.get(projectPath)
+      })
       .then((cfg) => {
         cfg.testFiles = '**/*.coffee'
 
@@ -104,7 +119,12 @@ describe('lib/util/specs', () => {
     })
 
     it('uses glob to process config.testFiles', () => {
-      return config.get(FixturesHelper.projectPath('various-file-types'))
+      const projectPath = FixturesHelper.projectPath('various-file-types')
+
+      return ctx.actions.project.setActiveProject(projectPath)
+      .then(() => {
+        return config.get(projectPath)
+      })
       .then((cfg) => {
         cfg.testFiles = '{coffee_*.coffee,js_spec.js}'
 
@@ -119,7 +139,12 @@ describe('lib/util/specs', () => {
     })
 
     it('allows array in config.testFiles', () => {
-      return config.get(FixturesHelper.projectPath('various-file-types'))
+      const projectPath = FixturesHelper.projectPath('various-file-types')
+
+      return ctx.actions.project.setActiveProject(projectPath)
+      .then(() => {
+        return config.get(projectPath)
+      })
       .then((cfg) => {
         cfg.testFiles = ['coffee_*.coffee', 'js_spec.js']
 
@@ -134,7 +159,12 @@ describe('lib/util/specs', () => {
     })
 
     it('filters using specPattern', () => {
-      return config.get(FixturesHelper.projectPath('various-file-types'))
+      const projectPath = FixturesHelper.projectPath('various-file-types')
+
+      return ctx.actions.project.setActiveProject(projectPath)
+      .then(() => {
+        return config.get(projectPath)
+      })
       .then((cfg) => {
         const specPattern = [
           path.join(cfg.projectRoot, 'cypress', 'integration', 'js_spec.js'),
@@ -149,7 +179,12 @@ describe('lib/util/specs', () => {
     })
 
     it('filters using specPattern as array of glob patterns', () => {
-      return config.get(FixturesHelper.projectPath('various-file-types'))
+      const projectPath = FixturesHelper.projectPath('various-file-types')
+
+      return ctx.actions.project.setActiveProject(projectPath)
+      .then(() => {
+        return config.get(projectPath)
+      })
       .then((cfg) => {
         debug('test config testFiles is %o', cfg.testFiles)
         const specPattern = [
@@ -167,7 +202,12 @@ describe('lib/util/specs', () => {
     })
 
     it('properly handles directories with names including \'.\'', () => {
-      return config.get(FixturesHelper.projectPath('odd-directory-name'))
+      const projectPath = FixturesHelper.projectPath('odd-directory-name')
+
+      return ctx.actions.project.setActiveProject(projectPath)
+      .then(() => {
+        return config.get(projectPath)
+      })
       .then((cfg) => {
         return specsUtil.findSpecs(cfg)
       }).then((files) => {

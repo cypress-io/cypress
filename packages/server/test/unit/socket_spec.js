@@ -23,16 +23,17 @@ const { makeLegacyDataContext } = require(`${root}lib/makeDataContext`)
 describe('lib/socket', () => {
   const ctx = makeLegacyDataContext()
 
-  beforeEach(async function () {
+  beforeEach(function () {
     Fixtures.scaffold()
 
     this.todosPath = Fixtures.projectPath('todos')
 
-    await ctx.actions.project.setActiveProject(this.todosPath)
-
     this.server = new ServerE2E(ctx)
 
-    return config.get(this.todosPath)
+    return ctx.actions.project.setActiveProject(this.todosPath)
+    .then(() => {
+      return config.get(this.todosPath)
+    })
     .then((cfg) => {
       this.cfg = cfg
     })

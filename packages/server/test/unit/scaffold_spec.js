@@ -134,7 +134,11 @@ describe('lib/scaffold', () => {
     beforeEach(function () {
       const pristinePath = Fixtures.projectPath('pristine-with-config-file')
 
-      return config.get(pristinePath).then((cfg) => {
+      return ctx.actions.project.setActiveProject(pristinePath)
+      .then(() => {
+        return config.get(pristinePath)
+      })
+      .then((cfg) => {
         this.cfg = cfg;
         ({ integrationFolder: this.integrationFolder } = this.cfg)
       })
@@ -217,7 +221,11 @@ describe('lib/scaffold', () => {
     beforeEach(function () {
       const pristinePath = Fixtures.projectPath('pristine-with-config-file')
 
-      return config.get(pristinePath).then((cfg) => {
+      return ctx.actions.project.setActiveProject(pristinePath)
+      .then(() => {
+        return config.get(pristinePath)
+      })
+      .then((cfg) => {
         this.cfg = cfg;
         ({ integrationFolder: this.integrationFolder } = this.cfg)
       })
@@ -328,7 +336,11 @@ describe('lib/scaffold', () => {
     beforeEach(function () {
       const pristinePath = Fixtures.projectPath('pristine-with-config-file')
 
-      return config.get(pristinePath).then((cfg) => {
+      return ctx.actions.project.setActiveProject(pristinePath)
+      .then(() => {
+        return config.get(pristinePath)
+      })
+      .then((cfg) => {
         this.cfg = cfg;
         ({ supportFolder: this.supportFolder } = this.cfg)
       })
@@ -405,7 +417,11 @@ describe('lib/scaffold', () => {
     beforeEach(function () {
       const pristinePath = Fixtures.projectPath('pristine-with-config-file')
 
-      return config.get(pristinePath).then((cfg) => {
+      return ctx.actions.project.setActiveProject(pristinePath)
+      .then(() => {
+        return config.get(pristinePath)
+      })
+      .then((cfg) => {
         this.cfg = cfg;
         ({ pluginsFile: this.pluginsFile } = this.cfg)
         this.pluginsFolder = path.dirname(this.pluginsFile)
@@ -461,7 +477,11 @@ describe('lib/scaffold', () => {
     beforeEach(function () {
       const pristinePath = Fixtures.projectPath('pristine-with-config-file')
 
-      return config.get(pristinePath).then((cfg) => {
+      return ctx.actions.project.setActiveProject(pristinePath)
+      .then(() => {
+        return config.get(pristinePath)
+      })
+      .then((cfg) => {
         this.cfg = cfg;
         ({ fixturesFolder: this.fixturesFolder } = this.cfg)
       })
@@ -533,12 +553,14 @@ describe('lib/scaffold', () => {
   })
 
   context('.fileTree', () => {
-    beforeEach(async function () {
+    beforeEach(function () {
       const todosPath = Fixtures.projectPath('todos')
 
-      await ctx.actions.project.setActiveProject(todosPath)
-
-      return config.get(todosPath).then((cfg) => {
+      return ctx.actions.project.setActiveProject(todosPath)
+      .then(() => {
+        return config.get(todosPath)
+      })
+      .then((cfg) => {
         this.cfg = cfg
       })
     })
