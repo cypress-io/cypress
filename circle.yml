@@ -1030,6 +1030,8 @@ jobs:
             runner-integration-tests-chrome,
             runner-ct-integration-tests-chrome,
             reporter-integration-tests,
+            run-app-integration-tests-chrome,
+            run-launchpad-integration-tests-chrome
       - run: yarn percy build:finalize
 
   cli-visual-tests:
