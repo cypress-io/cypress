@@ -29,18 +29,19 @@ export interface UseCollapsibleTreeOptions {
   dropRoot?: boolean
 }
 
-function collectRoots<T extends RawNode<T>> (node: UseCollapsibleTreeNode<T>, acc: UseCollapsibleTreeNode<T>[] = []) {
-  acc.push(node)
-  if (!node.parent) {
+function collectRoots<T extends RawNode<T>> (node: UseCollapsibleTreeNode<T> | null, acc: UseCollapsibleTreeNode<T>[] = []) {
+  if (!node || !node.parent) {
     return acc
   }
+
+  acc.push(node)
 
   collectRoots<T>(node.parent, acc)
 
   return acc
 }
 
-export const useCollapsibleTreeNode = <T extends RawNode<T>>(rawNode: T, options, depth, parent): UseCollapsibleTreeNode<T> => {
+export const useCollapsibleTreeNode = <T extends RawNode<T>>(rawNode: T, options: UseCollapsibleTreeOptions, depth: number, parent: UseCollapsibleTreeNode<T> | null): UseCollapsibleTreeNode<T> => {
   const treeNode = rawNode as UseCollapsibleTreeNode<T>
   const roots = parent ? collectRoots<T>(parent) : []
   const [expanded, toggle] = useToggle(!!options.expandInitially)
@@ -72,7 +73,7 @@ export const useCollapsibleTreeNode = <T extends RawNode<T>>(rawNode: T, options
   }
 }
 
-function buildTree<T extends RawNode<T>> (rawNode: T, options, acc: UseCollapsibleTreeNode<T>[] = [], depth = 1, parent = null as T | null) {
+function buildTree<T extends RawNode<T>> (rawNode: T, options: UseCollapsibleTreeOptions, acc: UseCollapsibleTreeNode<T>[] = [], depth = 1, parent: UseCollapsibleTreeNode<T> | null = null) {
   const node = useCollapsibleTreeNode<T>(rawNode, options, depth, parent)
 
   acc.push(node)
