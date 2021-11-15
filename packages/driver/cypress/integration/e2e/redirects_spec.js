@@ -12,22 +12,24 @@ describe('redirection', () => {
   })
 
   context('meta', () => {
-    it('binds to the new page after a timeout', () => {
-      cy
-      .visit('/fixtures/meta-redirect-timeout.html')
-      .contains('timeout')
-      .then(function () {
-        // visit, contains, page load, new url
-        const receivedLogs = this.logs.reduce((prev, curr, index) => `${prev}, ${index}: ${curr.get('name')}`, '')
+    for (let i = 0; i <= 1000; i++) {
+      it(`binds to the new page after a timeout, iteration ${i}`, () => {
+        cy
+        .visit('/fixtures/meta-redirect-timeout.html')
+        .contains('timeout')
+        .then(function () {
+          // visit, contains, page load, new url
+          const receivedLogs = this.logs.reduce((prev, curr, index) => `${prev}, ${index}: ${curr.get('name')}`, '')
 
-        assertLogLength(this.logs, 4, `received more logs than expected: ${receivedLogs}`)
+          assertLogLength(this.logs, 4, `received more logs than expected: ${receivedLogs}`)
 
-        expect(this.logs[0].get('name')).to.eq('visit')
-        expect(this.logs[1].get('name')).to.eq('contains')
-        expect(this.logs[2].get('name')).to.eq('page load')
-        expect(this.logs[3].get('name')).to.eq('new url')
+          expect(this.logs[0].get('name')).to.eq('visit')
+          expect(this.logs[1].get('name')).to.eq('contains')
+          expect(this.logs[2].get('name')).to.eq('page load')
+          expect(this.logs[3].get('name')).to.eq('new url')
+        })
       })
-    })
+    }
 
     it('binds to the new page on immediate refresh', () => {
       cy
