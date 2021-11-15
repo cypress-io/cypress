@@ -71,6 +71,7 @@
                 v-else
                 :directories="row.value.split('/')"
                 :expanded="row.expanded.value"
+                :depth="row.depth - 2"
                 :style="{ paddingLeft: `${((row.depth - 2) * 20) + 16}px` }"
                 @click="row.toggle"
               />

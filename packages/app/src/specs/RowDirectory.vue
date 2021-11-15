@@ -1,5 +1,8 @@
 <template>
-  <div class="h-full grid grid-cols-[16px,16px,auto] items-center gap-10px">
+  <div
+    class="h-full grid grid-cols-[16px,16px,auto] items-center gap-10px"
+    :data-cy="`row-directory-depth-${depth}`"
+  >
     <i-cy-chevron-down-small_x16
       class="
         icon-dark-gray-300 mr-8px
@@ -37,5 +40,6 @@ import IconFolder from '~icons/cy/folder-outline_x24.svg'
 defineProps<{
   directories: string[]
   expanded: boolean
+  depth: number
 }>()
 </script>

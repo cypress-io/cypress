@@ -1,5 +1,8 @@
 <template>
-  <div class="h-full grid grid-cols-[16px,auto,auto] items-center gap-10px">
+  <div
+    class="h-full grid grid-cols-[16px,auto,auto] items-center gap-10px"
+    data-cy="spec-item"
+  >
     <component
       :is="DocumentIconBlank"
       class="icon-light-gray-50 icon-dark-gray-200 document-icon"

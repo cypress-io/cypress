@@ -65,4 +65,16 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
     .and('contain.text', specs[0].node.fileExtension)
     .click()
   })
+
+  it('changes to tree view', () => {
+    cy.get('[data-cy="file-tree-radio-option"]').click()
+
+    // close all directories
+    ;['src', 'packages', 'frontend', '__test__', 'lib', 'tests'].forEach((dir) => {
+      cy.get('[data-cy="row-directory-depth-0"]').contains(dir).click()
+    })
+
+    // all directories closed; no specs should be showing.
+    cy.get('[data-cy="spec-item"]').should('not.exist')
+  })
 })
