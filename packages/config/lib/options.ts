@@ -6,6 +6,7 @@ interface ResolvedConfigOption {
   validation: Function
   isFolder?: boolean
   isExperimental?: boolean
+  isWriteable?: boolean
 }
 
 interface RuntimeConfigOption {
@@ -13,6 +14,7 @@ interface RuntimeConfigOption {
   defaultValue: any
   validation: Function
   isInternal?: boolean
+  isWriteable?: boolean
 }
 
 interface BreakingOption {
@@ -72,14 +74,17 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     name: 'animationDistanceThreshold',
     defaultValue: 5,
     validation: validate.isNumber,
+    isWriteable: true,
   }, {
     name: 'baseUrl',
     defaultValue: null,
     validation: validate.isFullyQualifiedUrl,
+    isWriteable: true,
   }, {
     name: 'blockHosts',
     defaultValue: null,
     validation: validate.isStringOrArrayOfStrings,
+    isWriteable: true,
   }, {
     name: 'chromeWebSecurity',
     defaultValue: true,
@@ -102,6 +107,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     name: 'defaultCommandTimeout',
     defaultValue: 4000,
     validation: validate.isNumber,
+    isWriteable: true,
   }, {
     name: 'downloadsFolder',
     defaultValue: 'cypress/downloads',
@@ -116,11 +122,20 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     name: 'env',
     defaultValue: {},
     validation: validate.isPlainObject,
+    isWriteable: true,
   }, {
     name: 'execTimeout',
     defaultValue: 60000,
     validation: validate.isNumber,
-  }, {
+    isWriteable: true,
+  },
+  {
+    name: 'exit',
+    defaultValue: true,
+    validation: validate.isBoolean,
+    isWriteable: true,
+  },
+  {
     name: 'experimentalFetchPolyfill',
     defaultValue: false,
     validation: validate.isBoolean,
@@ -135,6 +150,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     defaultValue: false,
     validation: validate.isBoolean,
     isExperimental: true,
+    isWriteable: true,
   }, {
     name: 'experimentalSourceRewriting',
     defaultValue: false,
@@ -163,15 +179,33 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     name: 'includeShadowDom',
     defaultValue: false,
     validation: validate.isBoolean,
+    isWriteable: true,
   }, {
     name: 'integrationFolder',
     defaultValue: 'cypress/integration',
     validation: validate.isString,
     isFolder: true,
-  }, {
+  },
+  {
+    name: 'isInteractive',
+    defaultValue: {
+      runMode: false,
+      openMode: true,
+    },
+    validation: validate.isBoolean,
+    isWriteable: true,
+  },
+  {
+    name: 'keystrokeDelay',
+    defaultValue: 0,
+    validation: validate.isNumber,
+    isWriteable: true,
+  },
+  {
     name: 'modifyObstructiveCode',
     defaultValue: true,
     validation: validate.isBoolean,
+    isWriteable: true,
   }, {
     name: 'nodeVersion',
     validation: validate.isOneOf('bundled', 'system'),
@@ -179,10 +213,12 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     name: 'numTestsKeptInMemory',
     defaultValue: 50,
     validation: validate.isNumber,
+    isWriteable: true,
   }, {
     name: 'pageLoadTimeout',
     defaultValue: 60000,
     validation: validate.isNumber,
+    isWriteable: true,
   }, {
     name: 'pluginsFile',
     defaultValue: 'cypress/plugins',
@@ -200,6 +236,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     name: 'redirectionLimit',
     defaultValue: 20,
     validation: validate.isNumber,
+    isWriteable: true,
   }, {
     name: 'reporter',
     defaultValue: 'spec',
@@ -212,6 +249,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     name: 'requestTimeout',
     defaultValue: 5000,
     validation: validate.isNumber,
+    isWriteable: true,
   }, {
     name: 'resolvedNodePath',
     defaultValue: null,
@@ -224,6 +262,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     name: 'responseTimeout',
     defaultValue: 30000,
     validation: validate.isNumber,
+    isWriteable: true,
   }, {
     name: 'retries',
     defaultValue: {
@@ -231,10 +270,12 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
       openMode: 0,
     },
     validation: validate.isValidRetriesConfig,
+    isWriteable: true,
   }, {
     name: 'screenshotOnRunFailure',
     defaultValue: true,
     validation: validate.isBoolean,
+    isWriteable: true,
   }, {
     name: 'screenshotsFolder',
     defaultValue: 'cypress/screenshots',
@@ -244,10 +285,12 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     name: 'slowTestThreshold',
     defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? 250 : 10000,
     validation: validate.isNumber,
+    isWriteable: true,
   }, {
     name: 'scrollBehavior',
     defaultValue: 'top',
     validation: validate.isOneOf('center', 'top', 'bottom', 'nearest', false),
+    isWriteable: true,
   }, {
     name: 'supportFile',
     defaultValue: 'cypress/support',
@@ -262,6 +305,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     name: 'taskTimeout',
     defaultValue: 60000,
     validation: validate.isNumber,
+    isWriteable: true,
   }, {
     name: 'testFiles',
     defaultValue: '**/*.*',
@@ -270,6 +314,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     name: 'trashAssetsBeforeRuns',
     defaultValue: true,
     validation: validate.isBoolean,
+    isWriteable: true,
   }, {
     name: 'userAgent',
     defaultValue: null,
@@ -295,14 +340,17 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     name: 'viewportHeight',
     defaultValue: 660,
     validation: validate.isNumber,
+    isWriteable: true,
   }, {
     name: 'viewportWidth',
     defaultValue: 1000,
     validation: validate.isNumber,
+    isWriteable: true,
   }, {
     name: 'waitForAnimations',
     defaultValue: true,
     validation: validate.isBoolean,
+    isWriteable: true,
   }, {
     name: 'watchForFileChanges',
     defaultValue: true,
@@ -332,6 +380,7 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     // not truly internal, but can only be set via cli,
     // so we don't consider it a "public" option
     isInternal: true,
+    isWriteable: true,
   }, {
     name: 'devServerPublicPathRoute',
     defaultValue: '/__cypress/src',
@@ -346,6 +395,7 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     defaultValue: false,
     validation: validate.isBoolean,
     isInternal: true,
+    isWriteable: true,
   }, {
     name: 'morgan',
     defaultValue: true,

@@ -101,4 +101,38 @@ module.exports = {
       }
     })
   },
+
+  validateNoReadOnlyConfig: (func) => {
+    let writeableOptions = options.filter((option) => option.isWriteable).map((option) => option.name)
+
+    writeableOptions = [...writeableOptions, 'testConfigList', 'unverifiedTestConfig']
+
+    return function (...args) {
+      switch (args.length) {
+        case 0:
+          return func()
+        case 1:
+          if (_.isString(args[0])) {
+            return func(...args)
+          }
+
+          if (_.isObject(args[0])) {
+            Object.keys(args[0]).forEach((element) => {
+              if (!writeableOptions.includes(element)) {
+                throw new Error(`\`Cypress.config()\` cannot be called with option \`${element}\` because it is a read-only property.`)
+              }
+            })
+          }
+
+          return func(...args)
+
+        default:
+          if (!writeableOptions.includes(args[0])) {
+            throw new Error(`\`Cypress.config()\` cannot be called with option \`${args[0]}\` because it is a read-only property.`)
+          }
+
+          return func(...args)
+      }
+    }
+  },
 }

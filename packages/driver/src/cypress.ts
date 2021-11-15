@@ -1,6 +1,6 @@
 // @ts-nocheck
 
-import { validate } from '@packages/config'
+import { validate, validateNoReadOnlyConfig } from '@packages/config'
 import _ from 'lodash'
 import $ from 'jquery'
 import * as blobUtil from 'blob-util'
@@ -143,7 +143,7 @@ class $Cypress {
 
     this.state = $SetterGetter.create({})
     this.originalConfig = _.cloneDeep(config)
-    this.config = $utils.verifyWriteableOptions($SetterGetter.create(config, (config) => {
+    this.config = validateNoReadOnlyConfig($SetterGetter.create(config, (config) => {
       validate(config, (errMsg) => {
         throw new this.state('specWindow').Error(errMsg)
       })
