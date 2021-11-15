@@ -10,9 +10,13 @@ const defaultOptions = {
   configFile: 'cypress.config.js',
 }
 
-const ctx = makeLegacyDataContext()
+let ctx
 
 describe('lib/util/settings', () => {
+  beforeEach(() => {
+    ctx = makeLegacyDataContext()
+  })
+
   context('with default configFile option', () => {
     beforeEach(function () {
       this.setup = (obj = {}) => {
@@ -241,6 +245,8 @@ describe('lib/util/settings', () => {
   context('with js files', () => {
     it('.read returns from configFile when its a JavaScript file', function () {
       this.projectRoot = path.join(projectRoot, '_test-output/path/to/project/')
+
+      ctx.actions.project.setActiveProjectForTestSetup(this.projectRoot)
 
       return fs.writeFile(path.join(this.projectRoot, 'cypress.custom.js'), `module.exports = { baz: 'lurman' }`)
       .then(() => {

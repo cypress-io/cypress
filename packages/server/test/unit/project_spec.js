@@ -38,10 +38,11 @@ const Watchers = require(`${root}lib/watchers`)
 const { SocketE2E } = require(`${root}lib/socket-e2e`)
 const { makeLegacyDataContext } = require(`${root}lib/makeDataContext`)
 
-describe('lib/project-base', () => {
-  const ctx = makeLegacyDataContext()
+let ctx
 
+describe('lib/project-base', () => {
   beforeEach(function () {
+    ctx = makeLegacyDataContext()
     Fixtures.scaffold()
 
     this.todosPath = Fixtures.projectPath('todos')

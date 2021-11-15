@@ -20,10 +20,11 @@ const firefoxUtil = require(`${root}lib/browsers/firefox-util`).default
 const { createRoutes } = require(`${root}lib/routes`)
 const { makeLegacyDataContext } = require(`${root}lib/makeDataContext`)
 
-describe('lib/socket', () => {
-  const ctx = makeLegacyDataContext()
+let ctx
 
+describe('lib/socket', () => {
   beforeEach(function () {
+    ctx = makeLegacyDataContext()
     Fixtures.scaffold()
 
     this.todosPath = Fixtures.projectPath('todos')

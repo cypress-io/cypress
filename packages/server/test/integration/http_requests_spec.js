@@ -61,11 +61,13 @@ const cleanResponseBody = (body) => {
   return replaceAbsolutePaths(removeWhitespace(body))
 }
 
+let ctx
+
 describe('Routes', () => {
   require('mocha-banner').register()
-  const ctx = makeLegacyDataContext()
 
   beforeEach(function () {
+    ctx = makeLegacyDataContext()
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 
     sinon.stub(CacheBuster, 'get').returns('-123')

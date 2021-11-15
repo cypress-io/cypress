@@ -42,7 +42,7 @@ export interface DataContextConfig {
   os: PlatformName
   launchArgs: LaunchArgs
   launchOptions: OpenProjectLaunchOptions
-  electronApp: ElectronApp
+  electronApp?: ElectronApp
   /**
    * Default is to
    */

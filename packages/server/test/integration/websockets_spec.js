@@ -21,11 +21,13 @@ const otherPort = 55551
 const wsPort = 20000
 const wssPort = 8443
 
+let ctx
+
 describe('Web Sockets', () => {
   require('mocha-banner').register()
-  const ctx = makeLegacyDataContext()
 
   beforeEach(function () {
+    ctx = makeLegacyDataContext()
     Fixtures.scaffold()
 
     this.idsPath = Fixtures.projectPath('ids')

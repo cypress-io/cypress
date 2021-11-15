@@ -103,11 +103,13 @@ const snapshotConsoleLogs = function (name) {
   return snapshot(name, stripAnsi(args))
 }
 
+let ctx
+
 describe('lib/cypress', () => {
   require('mocha-banner').register()
-  const ctx = makeLegacyDataContext()
 
   beforeEach(function () {
+    ctx = makeLegacyDataContext()
     process.chdir(previousCwd)
     this.timeout(8000)
 

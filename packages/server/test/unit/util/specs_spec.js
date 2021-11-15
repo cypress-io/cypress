@@ -8,10 +8,11 @@ const FixturesHelper = require('@tooling/system-tests/lib/fixtures')
 const debug = require('debug')('test')
 const { makeLegacyDataContext } = require('../../../lib/makeDataContext')
 
-const ctx = makeLegacyDataContext()
+let ctx
 
 describe('lib/util/specs', () => {
   beforeEach(function () {
+    ctx = makeLegacyDataContext()
     FixturesHelper.scaffold()
 
     this.todosPath = FixturesHelper.projectPath('todos')

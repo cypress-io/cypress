@@ -11,15 +11,17 @@ const util = require('../../../lib/plugins/util')
 
 const PLUGIN_PID = 77777
 
+let ctx
+
 // TODO: (Alejandro) - checking tests on CI
 describe.skip('lib/plugins/index', () => {
   let pluginsProcess
   let ipc
   let configExtras
   let getOptions
-  const ctx = makeLegacyDataContext()
 
   beforeEach(() => {
+    ctx = makeLegacyDataContext()
     plugins._reset()
 
     FixturesHelper.scaffold()

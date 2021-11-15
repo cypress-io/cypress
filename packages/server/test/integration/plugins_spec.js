@@ -4,10 +4,11 @@ const plugins = require('../../lib/plugins')
 const Fixtures = require('@tooling/system-tests/lib/fixtures')
 const { makeLegacyDataContext } = require('../../lib/makeDataContext')
 
-describe('lib/plugins', () => {
-  const ctx = makeLegacyDataContext()
+let ctx
 
+describe('lib/plugins', () => {
   beforeEach(() => {
+    ctx = makeLegacyDataContext()
     Fixtures.scaffold()
 
     return ctx.actions.project.setActiveProject(Fixtures.projectPath('plugin-before-browser-launch-deprecation'))

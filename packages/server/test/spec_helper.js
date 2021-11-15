@@ -109,7 +109,10 @@ beforeEach(function () {
   return cache.remove()
 })
 
+const { clearLegacyDataContext } = require('../lib/makeDataContext')
+
 afterEach(() => {
+  clearLegacyDataContext()
   sinon.restore()
 
   nock.cleanAll()

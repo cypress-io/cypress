@@ -14,10 +14,11 @@ const isWindows = () => {
   return os.platform() === 'win32'
 }
 
-describe('lib/fixture', () => {
-  const ctx = makeLegacyDataContext()
+let ctx
 
+describe('lib/fixture', () => {
   beforeEach(function () {
+    ctx = makeLegacyDataContext()
     FixturesHelper.scaffold()
 
     this.todosPath = FixturesHelper.projectPath('todos')
