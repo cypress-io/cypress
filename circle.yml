@@ -92,6 +92,14 @@ executors:
     resource_class: medium
     environment:
       PLATFORM: mac
+  
+  windows:
+    machine:
+      image: windows-default # Windows machine image
+    resource_class: windows.medium
+    shell: bash.exe --login
+    environment:
+      PLATFORM: windows
 
 commands:
   restore_workspace_binaries:
@@ -2385,12 +2393,13 @@ windows-workflow: &windows-workflow
   jobs:
     - node_modules_install:
         name: windows-node-modules-install
-        <<: *windowsProperties
+        executor: windows
+        arch: win32
         only-cache-for-root-user: true
 
     - build:
         name: windows-build
-        <<: *windowsProperties
+        executor: windows
         requires:
           - windows-node-modules-install
 
