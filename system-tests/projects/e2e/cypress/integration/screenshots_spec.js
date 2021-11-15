@@ -158,7 +158,7 @@ describe('taking screenshots', () => {
         const total = first + second + third + fourth
         const padding = 2000 // account for slower machines
 
-        expect(duration).to.be.within(total, total + padding)
+        expect(duration).to.be.within(total - padding, total + padding)
       },
     })
   })
