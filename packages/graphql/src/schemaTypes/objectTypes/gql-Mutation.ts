@@ -28,8 +28,8 @@ export const mutation = mutationType({
 
     t.field('internal_clearLatestProjectCache', {
       type: 'Boolean',
-      resolve: (_, args, ctx) => {
-        ctx.actions.project.clearLatestProjectCache()
+      resolve: async (_, args, ctx) => {
+        await ctx.actions.project.clearLatestProjectCache()
 
         return true
       },
@@ -52,8 +52,8 @@ export const mutation = mutationType({
       args: {
         projectTitle: nonNull(stringArg()),
       },
-      resolve: (_, args, ctx) => {
-        ctx.actions.project.clearProjectPreferencesCache(args.projectTitle)
+      resolve: async (_, args, ctx) => {
+        await ctx.actions.project.clearProjectPreferencesCache(args.projectTitle)
 
         return true
       },
@@ -61,8 +61,8 @@ export const mutation = mutationType({
 
     t.field('internal_clearAllProjectPreferencesCache', {
       type: 'Boolean',
-      resolve: (_, args, ctx) => {
-        ctx.actions.project.clearAllProjectPreferencesCache()
+      resolve: async (_, args, ctx) => {
+        await ctx.actions.project.clearAllProjectPreferencesCache()
 
         return true
       },
