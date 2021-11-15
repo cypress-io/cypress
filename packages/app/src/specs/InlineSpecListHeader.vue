@@ -28,7 +28,7 @@
     <SelectSpecListView
       :model-value="tab"
       class="flex border-1 border-gray-900 rounded-md h-24px w-64px text-md cursor-pointer"
-      @update:model-value="emit('update:tab', $event)"
+      @update:tab="updateTab"
     />
 
     <button
@@ -55,16 +55,23 @@
 import Input from '@cy/components/Input.vue'
 import Button from '@cy/components/Button.vue'
 import { ref } from 'vue'
-import { RadioGroup, RadioGroupOption } from '@headlessui/vue'
 import SelectSpecListView from './SelectSpecListView.vue'
+import type { SpecViewType } from './SpecsList.vue'
 
-defineProps<{tab: string, search: string}>()
+defineProps<{
+  tab: SpecViewType
+  search: string
+}>()
 
 const emit = defineEmits<{
-  (e: 'update:tab', tab: string): void
+  (e: 'update:tab', tab: SpecViewType): void
   (e: 'update:search', search: string): void
   (e: 'addSpec'): void
 }>()
+
+const updateTab = (tab: SpecViewType) => {
+  emit('update:tab', tab)
+}
 
 const inputFocused = ref(false)
 

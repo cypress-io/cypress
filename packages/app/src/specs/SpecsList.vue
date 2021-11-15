@@ -11,14 +11,20 @@
       class="pb-32px"
       @newSpec="showModal = true"
     />
-    <button @click="toggle">
-      toggle
-    </button>
 
     <div class="grid items-center divide-y-1 children:h-40px">
       <div class="grid grid-cols-2 children:text-gray-800 children:font-medium">
-        <div>{{ t('specPage.componentSpecsHeader') }}</div>
-        <div>{{ t('specPage.gitStatusHeader') }}</div>
+        <div class="flex justify-between items-center">
+          {{ t('specPage.componentSpecsHeader') }}
+        </div>
+        <div class="flex justify-between items-center">
+          <div>{{ t('specPage.gitStatusHeader') }}</div>
+          <SelectSpecListView
+            :model-value="specViewType"
+            class="flex border-1 border-gray-900 rounded-md h-24px w-64px text-md cursor-pointer"
+            @update:tab="updateTab"
+          />
+        </div>
       </div>
 
       <template v-if="specViewType === 'flat'">
@@ -98,6 +104,7 @@ import DirectoryItem from './DirectoryItem.vue'
 import RowDirectory from './RowDirectory.vue'
 import SpecItem from './SpecItem.vue'
 import type { FoundSpec } from '@packages/types/src'
+import SelectSpecListView from './SelectSpecListView.vue'
 
 const { t } = useI18n()
 
@@ -135,7 +142,7 @@ fragment Specs_SpecsList on Query {
 }
 `
 
-type SpecViewType = 'flat' | 'tree'
+export type SpecViewType = 'flat' | 'tree'
 
 const props = defineProps<{
   gql: Specs_SpecsListFragment
@@ -145,8 +152,8 @@ const showModal = ref(false)
 const search = ref('')
 const specViewType = ref<SpecViewType>('flat')
 
-const toggle = () => {
-  specViewType.value = specViewType.value === 'flat' ? 'tree' : 'flat'
+const updateTab = (tab: SpecViewType) => {
+  specViewType.value = tab
 }
 
 const flatSpecList = computed(() => props.gql.currentProject?.specs?.edges)

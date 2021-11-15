@@ -5,7 +5,7 @@
       v-model:search="search"
     />
     <div class="h-[calc(100vh-65px)] overflow-y-auto overflow-x-hidden pt-16px">
-      <template v-if="tab === 'file-list'">
+      <template v-if="tab === 'flat'">
         <InlineSpecListRow
           v-for="spec in specs"
           :key="spec.node.id"
@@ -30,6 +30,7 @@ import { useSpecStore } from '../store'
 import InlineSpecListHeader from './InlineSpecListHeader.vue'
 import InlineSpecListRow from './InlineSpecListRow.vue'
 import InlineSpecListTree from './InlineSpecListTree.vue'
+import type { SpecViewType } from './SpecsList.vue'
 
 gql`
 fragment SpecNode_InlineSpecList on SpecEdge {
@@ -69,7 +70,7 @@ const isCurrentSpec = (spec: SpecNode_InlineSpecListFragment) => {
   return spec.node.relative === specStore.activeSpec?.relative
 }
 
-const tab = ref('file-list')
+const tab = ref<SpecViewType>('flat')
 const search = ref('')
 
 const specs = computed(() => {

@@ -2,12 +2,12 @@
   <RadioGroup
     :model-value="modelValue"
     class="flex border-1 border-gray-900 rounded-md h-24px w-64px text-md cursor-pointer"
-    @update:model-value="emit('update:tab', $event)"
+    @update:model-value="val => emit('update:tab', val)"
   >
     <RadioGroupOption
       v-slot="{ checked }"
       as="template"
-      value="file-list"
+      value="flat"
       data-cy="file-list-radio-option"
     >
       <div
@@ -22,7 +22,7 @@
     <RadioGroupOption
       v-slot="{ checked }"
       as="template"
-      value="file-tree"
+      value="tree"
       data-cy="file-tree-radio-option"
     >
       <div
@@ -39,12 +39,13 @@
 
 <script lang="ts" setup>
 import { RadioGroup, RadioGroupOption } from '@headlessui/vue'
+import type { SpecViewType } from './SpecsList.vue'
 
 defineProps<{
-  modelValue: string
+  modelValue: SpecViewType
 }>()
 
 const emit = defineEmits<{
-  (e: 'update:tab', tab: string): void
+  (e: 'update:tab', tab: SpecViewType): void
 }>()
 </script>
