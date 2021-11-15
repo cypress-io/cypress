@@ -96,15 +96,15 @@ import SpecsListRowItem from './SpecsListRowItem.vue'
 import { gql } from '@urql/vue'
 import { computed, ref } from 'vue'
 import CreateSpecModal from './CreateSpecModal.vue'
-import type { Specs_SpecsListFragment, SpecNode_SpecsListFragment, SpecListRowFragment } from '../generated/graphql'
+import type { Specs_SpecsListFragment, SpecListRowFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
-import { buildSpecTree, SpecTreeNode } from '@packages/frontend-shared/src/utils/buildSpecTree'
-import { useCollapsibleTree, UseCollapsibleTreeNode } from '@packages/frontend-shared/src/composables/useCollapsibleTree'
-import DirectoryItem from './DirectoryItem.vue'
+import { buildSpecTree } from '@packages/frontend-shared/src/utils/buildSpecTree'
+import { useCollapsibleTree } from '@packages/frontend-shared/src/composables/useCollapsibleTree'
 import RowDirectory from './RowDirectory.vue'
 import SpecItem from './SpecItem.vue'
 import type { FoundSpec } from '@packages/types/src'
 import SelectSpecListView from './SelectSpecListView.vue'
+import { includes } from 'lodash'
 
 const { t } = useI18n()
 
@@ -156,25 +156,28 @@ const updateTab = (tab: SpecViewType) => {
   specViewType.value = tab
 }
 
-const flatSpecList = computed(() => props.gql.currentProject?.specs?.edges)
+const flatSpecList = computed(() => {
+  if (search.value) {
+    return props.gql.currentProject?.specs?.edges.filter((x) => x.node.absolute.toLowerCase().includes(search.value.toLowerCase()))
+  }
+
+  return props.gql.currentProject?.specs?.edges
+})
 
 const specTree = computed(() => buildSpecTree<FoundSpec & { gitInfo: SpecListRowFragment }>(props.gql.currentProject?.specs?.edges.map((x) => x.node) || []))
 const collapsible = useCollapsibleTree(specTree.value, { dropRoot: true })
 
 const treeSpecList = computed(() => {
+  if (search.value) {
+    // todo(lachlan) this will not show the folders of the filtered specs
+    // we should update the useCollapsibleTree to have some kind of search
+    // functionality, ideally with fuzzysort, that correctly returns the matched
+    // specs and the directories to show.
+    return collapsible.tree.filter(((item) => {
+      return !item.hidden.value && item.data?.absolute.toLowerCase().includes(search.value.toLowerCase())
+    }))
+  }
+
   return collapsible.tree.filter(((item) => !item.hidden.value))
 })
-
-// If this search becomes any more complex, push it into the server
-// const sortByGitStatus = (
-//   a: SpecNode_SpecsListFragment,
-//   b: SpecNode_SpecsListFragment,
-// ) => {
-//   return a.node.gitInfo ? 1 : -1
-// }
-// const filteredSpecs = computed(() => {
-//   return specs.value?.filter((s) => {
-//     return s.node.relative.toLowerCase().includes(search.value.toLowerCase())
-//   })?.sort(sortByGitStatus)
-// })
 </script>
