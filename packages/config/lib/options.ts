@@ -188,10 +188,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
   },
   {
     name: 'isInteractive',
-    defaultValue: {
-      runMode: false,
-      openMode: true,
-    },
+    defaultValue: true,
     validation: validate.isBoolean,
     isWriteable: true,
   },
