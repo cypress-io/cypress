@@ -84,11 +84,11 @@ const onRowClick = (row: UseCollapsibleTreeNode<SpecTreeNode>, idx) => {
   }
 }
 
-const rootEl: Ref<HTMLElement | undefined> = ref()
+const rootEl = ref<HTMLUListElement>()
 
 const { selectedItem, rowProps } = useListNavigation(rootEl)
-
 </script>
+
 <style scoped>
 li::before {
   content: "";
