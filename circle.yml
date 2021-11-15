@@ -90,8 +90,8 @@ executors:
   windows:
     machine:  
       image: windows-server-2019-vs2019:stable
-      resource_class: windows.small
-      shell: bash.exe
+      # resource_class: windows.small
+      # shell: bash.exe
     environment:
       PLATFORM: windows
       ## set so that e2e tests are consistent
@@ -2415,9 +2415,10 @@ windows-workflow: &windows-workflow
 
     - build:
         name: windows-build
-        executor:
-          name: win/default
-          shell: bash.exe --login
+        executor: windows
+        # executor:
+        #   name: win/default
+        #   shell: bash.exe --login
         requires:
           - windows_node_modules_install
 
