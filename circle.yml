@@ -308,9 +308,6 @@ commands:
           ##   * https://unix.stackexchange.com/questions/43945/whats-the-difference-between-various-term-variables
           command: yarn check-terminal
             # node ./scripts/circleci/check-terminal.js
-      - run:
-          name: Stop .only
-          command: yarn stop-only-all
 
   # run this step in an interactive bash shell 
   install-required-node:
@@ -944,6 +941,9 @@ jobs:
     steps:
       - checkout
       - print_working_dir
+      - run:
+          name: Stop .only
+          command: yarn stop-only-all
       - persist_to_workspace:
           root: ~/
           paths:
@@ -964,6 +964,9 @@ jobs:
     steps:
       - checkout
       - print_working_dir
+      - run:
+          name: Stop .only
+          command: yarn stop-only-all
       - persist_to_workspace:
           root: ~/
           paths:
