@@ -232,7 +232,7 @@ commands:
             fi
       - run:
           command: |
-            if [ "$PLATFORM" = 'windows']; then
+            if [ "$PLATFORM" = 'windows' ]; then
               date /t > cache_date
             else 
               date +%Y-%U > cache_date
