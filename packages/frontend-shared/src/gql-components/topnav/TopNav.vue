@@ -74,13 +74,13 @@
     </TopNavListItem>
   </TopNavList>
   <ExternalLink
+    v-else
     :href="`${releasesUrl}/tag/v${versions.latest.version}`"
     class="text-gray-600 flex items-center gap-8px group hocus:text-indigo-500 hocus:outline-0 outline-transparent"
     :use-default-hocus="false"
   >
     <i-cy-box_x16
       class="group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50 h-16px w-16px"
-      :class="open ? 'icon-dark-indigo-500 icon-light-indigo-50' : 'icon-dark-gray-500 icon-light-gray-100'"
     />
     <span>
       v{{ versions.latest.version }}
@@ -187,6 +187,10 @@
     </template>
     <slot name="login-panel" />
   </TopNavList>
+  <!-- <UpdateCypressModal
+    :installed-version="versions.current.version"
+    :latest-version="versions.latest.version"
+  /> -->
 </template>
 
 <script setup lang="ts">
@@ -205,6 +209,7 @@ import { onClickOutside, onKeyStroke, useTimeAgo } from '@vueuse/core'
 import DocsMenuContent from './DocsMenuContent.vue'
 import ExternalLink from '../ExternalLink.vue'
 import Button from '../../components/Button.vue'
+import UpdateCypressModal from './UpdateCypressModal.vue'
 
 const releasesUrl = 'https://github.com/cypress-io/cypress/releases'
 
