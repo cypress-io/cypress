@@ -55,6 +55,15 @@ windowsBuildFilters: &windowsBuildFilters
 orbs:
   win: circleci/windows@2.4.1
 
+windowsProperties: &windowsProperties
+  executor:
+    name: win/default
+    shell: bash.exe
+    size: medium
+  arch: win32
+  environment:
+      PLATFORM: windows
+
 executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
@@ -83,25 +92,6 @@ executors:
     resource_class: medium
     environment:
       PLATFORM: mac
-
-  windows:
-    # machine:  
-      # image: windows-server-2019-vs2019:stable
-      # resource_class: windows.small
-    name: win/default
-    shell: bash.exe
-    environment:
-      PLATFORM: windows
-
-  # windows:
-  #   windows:
-  #   machine:
-  #     image: windows-server-2019-vs2019:stable
-  #   # resource_class: windows.medium
-  #     # name: win/default
-  #   shell: bash.exe
-  #   environment:
-  #     PLATFORM: windows
 
 commands:
   restore_workspace_binaries:
@@ -2400,19 +2390,15 @@ mac-workflow: &mac-workflow
 windows-workflow: &windows-workflow
   jobs:
     - node_modules_install:
-        executor:
-          name: win/default
-          shell: bash.exe --login
-        arch: win32
+        name: windows-node-modules-install
+        <<: *windowsProperties
         only-cache-for-root-user: true
 
     - build:
         name: windows-build
-        # executor:
-        #   name: win/default
-        #   shell: bash.exe --login
+        <<: *windowsProperties
         requires:
-          - windows_node_modules_install
+          - windows-node-modules-install
 
     # - node_modules_install:
     #     name: windows-node-modules-install
