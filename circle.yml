@@ -129,14 +129,14 @@ commands:
   print_working_dir:
     steps:
       - run:
-        name: Print working folder
-        command: |
-          if [ "$PLATFORM" = 'windows']; then
-            echo %cd%
-          else 
-            echo $PWD
-          fi
-          ls
+          name: Print working folder
+          command: |
+            if [ "$PLATFORM" = 'windows']; then
+              echo %cd%
+            else 
+              echo $PWD
+            fi
+            ls
 
   prepare-modules-cache:
     parameters:
