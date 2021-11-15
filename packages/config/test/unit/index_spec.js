@@ -146,4 +146,42 @@ describe('src/index', () => {
       })
     })
   })
+
+  describe('.validateNoReadOnlyConfig', () => {
+    it('does not validate if no args passed in', () => {
+      const setConfig = () => true
+
+      const returnFunc = configUtil.validateNoReadOnlyConfig(setConfig)
+
+      expect(returnFunc()).to.eq(true)
+    })
+
+    it('does not validate if string arg passed in', () => {
+      const setConfig = (config) => config
+
+      const returnFunc = configUtil.validateNoReadOnlyConfig(setConfig)
+
+      expect(returnFunc('testConfig')).to.eq('testConfig')
+    })
+
+    it('validates if object arg passed in (failure)', () => {
+      const setConfig = (config) => config
+
+      const returnFunc = configUtil.validateNoReadOnlyConfig(setConfig)
+
+      try {
+        returnFunc({ 'chromeWebSecurity': true })
+      } catch (err) {
+        expect(err.message.includes('`Cypress.config()` cannot be called with option `chromeWebSecurity` because it is a read-only property.'))
+      }
+    })
+
+    it('validates if object arg passed in (success)', () => {
+      const setConfig = (config) => config
+
+      const returnFunc = configUtil.validateNoReadOnlyConfig(setConfig)
+
+      expect(returnFunc({ 'requestTimeout': 1000 })).to.deep.eq({ 'requestTimeout': 1000 })
+    })
+  })
 })
