@@ -3985,6 +3985,13 @@ describe('shadow dom', () => {
 
     cy.get('#shadow-element-1').click()
   })
+
+  // https://github.com/cypress-io/cypress/issues/18008
+  it('ignores the covering shadow host', () => {
+    cy.visit('/fixtures/shadow-dom-button.html')
+
+    cy.get('#element').shadow().find('[data-test-id="my-button"]').click()
+  })
 })
 
 describe('mouse state', () => {
