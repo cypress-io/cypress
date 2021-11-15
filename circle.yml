@@ -60,8 +60,8 @@ windowsProperties: &windowsProperties
     name: win/default
     shell: bash.exe
     size: medium
-  environment:
-    PLATFORM: windows
+  # environment:
+  #   PLATFORM: windows
   arch: win32
 
 executors:
@@ -2393,13 +2393,13 @@ windows-workflow: &windows-workflow
   jobs:
     - node_modules_install:
         name: windows-node-modules-install
-        executor: windows
+        <<: *windowsProperties
         arch: win32
         only-cache-for-root-user: true
 
     - build:
         name: windows-build
-        executor: windows
+        <<: *windowsProperties
         requires:
           - windows-node-modules-install
 
