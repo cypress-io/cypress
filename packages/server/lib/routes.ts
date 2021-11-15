@@ -94,10 +94,6 @@ export const createCommonRoutes = ({
       target: `http://localhost:${process.env.CYPRESS_INTERNAL_VITE_APP_PORT}/`,
     })
 
-    router.get('/__vite__/', (req, res) => {
-      ctx.html.appHtml().then((html) => res.send(html)).catch((e) => res.status(500).send({ stack: e.stack }))
-    })
-
     // TODO: can namespace this onto a "unified" route like __app-unified__
     // make sure to update the generated routes inside of vite.config.ts
     router.get('/__vite__/*', (req, res) => {
@@ -146,15 +142,32 @@ export const createCommonRoutes = ({
   router.get(clientRoute, (req, res) => {
     debug('Serving Cypress front-end by requested URL:', req.url)
 
-    runner.serve(req, res, testingType === 'e2e' ? 'runner' : 'runner-ct', {
-      config,
-      testingType,
-      getSpec,
-      getCurrentBrowser,
-      getRemoteState,
-      specsStore,
-      exit,
-    })
+    if (process.env.LAUNCHPAD) {
+      ctx.html.appHtml()
+      .then((html) => res.send(html))
+      .catch((e) => res.status(500).send({ stack: e.stack }))
+    } else {
+      runner.serve(req, res, testingType === 'e2e' ? 'runner' : 'runner-ct', {
+        config,
+        testingType,
+        getSpec,
+        getCurrentBrowser,
+        getRemoteState,
+        specsStore,
+        exit,
+      })
+    }
+  })
+
+  // serve static assets from the dist'd Vite app
+  router.get([
+    `${clientRoute}assets/*`,
+    `${clientRoute}shiki/*`,
+  ], (req, res) => {
+    debug('proxying static assets %s, params[0] %s', req.url, req.params[0])
+    const pathToFile = getPathToDist('app', 'assets', req.params[0])
+
+    return send(req, pathToFile).pipe(res)
   })
 
   router.all('*', (req, res) => {
