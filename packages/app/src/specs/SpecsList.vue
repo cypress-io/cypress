@@ -11,7 +11,9 @@
       class="pb-32px"
       @newSpec="showModal = true"
     />
-    <button @click="toggle">toggle</button>
+    <button @click="toggle">
+      toggle
+    </button>
 
     <div class="grid items-center divide-y-1 children:h-40px">
       <div class="grid grid-cols-2 children:text-gray-800 children:font-medium">
@@ -27,12 +29,12 @@
           :to="{ path: 'runner', query: { file: spec.node.relative } }"
         >
           <SpecsListRowItem>
-            <template v-slot:file>
+            <template #file>
               <SpecItem :spec="spec.node" />
             </template>
 
-            <template v-slot:git-info>
-              <SpecListGitInfo 
+            <template #git-info>
+              <SpecListGitInfo
                 v-if="spec.node.gitInfo"
                 :gql="spec.node.gitInfo"
               />
@@ -42,25 +44,34 @@
       </template>
 
       <template v-if="specViewType === 'tree'">
-        <template v-for="row in treeSpecList">
+        <template
+          v-for="(row, idx) in treeSpecList"
+          :key="idx"
+        >
           <SpecsListRowItem>
-            <template v-slot:file>
-              <SpecItem 
+            <template #file>
+              <RouterLink
                 v-if="row.isLeaf && row.data"
-                :spec="row.data" 
-                :style="{ paddingLeft: `${((row.depth - 2) * 20) + 16}px` }"
-              />
+                :key="row.data.absolute"
+                :to="{ path: 'runner', query: { file: row.data?.relative } }"
+              >
+                <SpecItem
+                  :spec="row.data"
+                  :style="{ paddingLeft: `${((row.depth - 2) * 20) + 16}px` }"
+                />
+              </RouterLink>
 
-              <RowDirectory 
+              <RowDirectory
                 v-else
                 :directories="row.value.split('/')"
                 :expanded="row.expanded.value"
                 :style="{ paddingLeft: `${((row.depth - 2) * 20) + 16}px` }"
+                @click="row.toggle"
               />
             </template>
 
-            <template v-slot:git-info>
-              <SpecListGitInfo 
+            <template #git-info>
+              <SpecListGitInfo
                 v-if="row.data?.gitInfo"
                 :gql="row.data.gitInfo"
               />
@@ -74,15 +85,15 @@
 
 <script setup lang="ts">
 import SpecsListHeader from './SpecsListHeader.vue'
-import SpecListGitInfo from './SpecsListRow.vue'
+import SpecListGitInfo from './SpecListGitInfo.vue'
 import SpecsListRowItem from './SpecsListRowItem.vue'
 import { gql } from '@urql/vue'
 import { computed, ref } from 'vue'
 import CreateSpecModal from './CreateSpecModal.vue'
 import type { Specs_SpecsListFragment, SpecNode_SpecsListFragment, SpecListRowFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
-import { buildSpecTree } from '@packages/frontend-shared/src/utils/buildSpecTree'
-import { useCollapsibleTree } from '@packages/frontend-shared/src/composables/useCollapsibleTree'
+import { buildSpecTree, SpecTreeNode } from '@packages/frontend-shared/src/utils/buildSpecTree'
+import { useCollapsibleTree, UseCollapsibleTreeNode } from '@packages/frontend-shared/src/composables/useCollapsibleTree'
 import DirectoryItem from './DirectoryItem.vue'
 import RowDirectory from './RowDirectory.vue'
 import SpecItem from './SpecItem.vue'
@@ -140,9 +151,10 @@ const toggle = () => {
 
 const flatSpecList = computed(() => props.gql.currentProject?.specs?.edges)
 
+const specTree = computed(() => buildSpecTree<FoundSpec & { gitInfo: SpecListRowFragment }>(props.gql.currentProject?.specs?.edges.map((x) => x.node) || []))
+const collapsible = useCollapsibleTree(specTree.value, { dropRoot: true })
+
 const treeSpecList = computed(() => {
-  const specTree = buildSpecTree<FoundSpec & { gitInfo: SpecListRowFragment }>(props.gql.currentProject?.specs?.edges.map(x => x.node) || [])
-  const collapsible = useCollapsibleTree(specTree, { dropRoot: true })
   return collapsible.tree.filter(((item) => !item.hidden.value))
 })
 

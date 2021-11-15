@@ -8,17 +8,9 @@
     <div>
       <slot name="file" />
     </div>
-    <div>Git inof</div>
 
-    <!-- <div class="grid git-info-row grid-cols-[16px,auto] items-center gap-9px">
-      <span class="flex items-center justify-center w-16px">
-        Icon
-      </span>
-      <div
-        class="overflow-hidden truncate"
-      >
-        Git Info Text
-      </div>
-    </div>  -->
+    <div>
+      <slot name="git-info" />
+    </div>
   </div>
 </template>

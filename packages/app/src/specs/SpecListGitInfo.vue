@@ -1,5 +1,5 @@
 <template>
-  <div class="grid git-info-row grid-cols-[16px,auto] items-center gap-9px">
+  <div class="h-full grid git-info-row grid-cols-[16px,auto] items-center gap-9px">
     <span class="flex items-center justify-center w-16px">
       <span
         v-if="fileState !== 'unmodified'"
