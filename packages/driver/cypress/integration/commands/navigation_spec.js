@@ -1349,11 +1349,6 @@ describe('src/cy/commands/navigation', () => {
         })
       })
 
-      // [ 'foo', null, false, ]
-
-      // .forEach((qs) => {
-      // const str = String('foo')
-
       it(`throws when qs is foo`, (done) => {
         cy.on('fail', (err) => {
           expect(err.message).to.contain(`\`cy.visit()\` requires the \`qs\` option to be an object, but received: \`foo\``)

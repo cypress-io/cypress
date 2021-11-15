@@ -53,7 +53,6 @@ describe('e2e record', () => {
 
       const urls = getRequestUrls()
 
-      // const instanceReqs = urls.slice(0, 22)
       const firstRun = urls[0]
 
       expect(firstRun).to.eq('POST /runs')
@@ -104,42 +103,6 @@ describe('e2e record', () => {
         'PUT /screenshots/1.png',
         `PUT /instances/${instanceId}/stdout`,
       ])
-
-      // expect(instanceReqs).to.deep.eq([
-      //   // first create run request
-      //   'POST /runs',
-
-      //   // spec 1
-      //   `POST /runs/${runId}/instances`,
-      //   // no instances/:id/tests because spec failed during eval
-      //   `POST /instances/${instanceId}/results`,
-      //   'PUT /videos/video.mp4',
-      //   `PUT /instances/${instanceId}/stdout`,
-
-      //   // spec 2
-      //   `POST /runs/${runId}/instances`,
-      //   `POST /instances/${instanceId}/tests`,
-      //   `POST /instances/${instanceId}/results`,
-      //   'PUT /videos/video.mp4',
-      //   'PUT /screenshots/1.png',
-      //   `PUT /instances/${instanceId}/stdout`,
-
-      //   // spec 3
-      //   `POST /runs/${runId}/instances`,
-      //   `POST /instances/${instanceId}/tests`,
-      //   `POST /instances/${instanceId}/results`,
-      //   // no video because no tests failed
-      //   'PUT /screenshots/1.png',
-      //   `PUT /instances/${instanceId}/stdout`,
-
-      //   // spec 4
-      //   `POST /runs/${runId}/instances`,
-      //   `POST /instances/${instanceId}/tests`,
-      //   `POST /instances/${instanceId}/results`,
-      //   'PUT /videos/video.mp4',
-      //   'PUT /screenshots/1.png',
-      //   `PUT /instances/${instanceId}/stdout`,
-      // ])
 
       const postRun = requests[0]
 
