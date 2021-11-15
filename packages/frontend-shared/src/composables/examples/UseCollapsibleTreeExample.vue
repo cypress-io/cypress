@@ -23,7 +23,7 @@
       @click="onRowClick(row, idx)"
       @keypress.enter.space.prevent="onRowClick(row, idx)"
     >
-      {{ row.value ? `${row.label}: ${row.value}` : row.label }}
+      {{ row.name ? `${row.label}: ${row.name}` : row.label }}
     </div>
   </div>
 </template>
@@ -36,20 +36,20 @@ import { useListNavigation } from '../../composables/useListNavigation'
 
 type ExampleNode = {
   children: ExampleNode[]
-  value: string
+  name: string
   id: string
   label: string
 }
 
 const contacts: ExampleNode[] = Array.from(new Array(3).keys()).map(() => {
   return {
-    value: faker.name.firstName(),
+    name: faker.name.firstName(),
     label: 'Contact Details',
     id: faker.datatype.uuid(),
     children: [
-      { id: faker.datatype.uuid(), value: faker.name.jobDescriptor(), label: 'Job Descriptor', children: [] },
-      { id: faker.datatype.uuid(), value: faker.name.jobTitle(), label: 'Job Title', children: [] },
-      { id: faker.datatype.uuid(), value: faker.company.companyName(), label: 'Company Name', children: [] },
+      { id: faker.datatype.uuid(), name: faker.name.jobDescriptor(), label: 'Job Descriptor', children: [] },
+      { id: faker.datatype.uuid(), name: faker.name.jobTitle(), label: 'Job Title', children: [] },
+      { id: faker.datatype.uuid(), name: faker.company.companyName(), label: 'Company Name', children: [] },
     ],
   }
 })
@@ -57,7 +57,7 @@ const contacts: ExampleNode[] = Array.from(new Array(3).keys()).map(() => {
 const root: ExampleNode = {
   children: contacts,
   label: 'All Contacts',
-  value: '',
+  name: '',
   id: faker.datatype.uuid(),
 }
 

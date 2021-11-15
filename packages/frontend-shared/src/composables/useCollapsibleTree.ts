@@ -2,7 +2,7 @@ import { ComputedRef, computed, Ref } from 'vue'
 import { useToggle } from '@vueuse/core'
 
 export type RawNode <T> = {
-  value: string
+  name: string
   children: RawNode<T>[]
 }
 

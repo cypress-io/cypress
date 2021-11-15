@@ -69,7 +69,7 @@
 
               <RowDirectory
                 v-else
-                :directories="row.value.split('/')"
+                :directories="row.name.split('/')"
                 :expanded="row.expanded.value"
                 :depth="row.depth - 2"
                 :style="{ paddingLeft: `${((row.depth - 2) * 10) + 16}px` }"

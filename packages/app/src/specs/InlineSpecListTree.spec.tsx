@@ -38,7 +38,7 @@ describe('InlineSpecListTree', () => {
       </div>
     ))
 
-    cy.get('li').first().should('contain', 'src/components')
+    cy.get('li').first().should('contain', 'src / components')
     cy.then(() => specProp.value = foundSpecs.slice(0, 4))
     cy.get('li').should('have.length', 7).first().should('contain', 'src').and('not.contain', '/components')
   })

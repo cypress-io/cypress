@@ -21,8 +21,8 @@
 </template>
 
 <script lang="ts" setup>
-defineProps<{
-  directories: string[]
-  expanded: boolean
-}>()
+withDefaults(defineProps<{ directories: string[], expanded: boolean }>(), {
+  directories: () => [],
+  expanded: false,
+})
 </script>

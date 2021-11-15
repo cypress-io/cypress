@@ -28,14 +28,14 @@
     >
       <SpecFileItem
         v-if="row.isLeaf"
-        :file-name="row.data?.fileName || row.value"
+        :file-name="row.data?.fileName || row.name"
         :extension="row.data?.specFileExtension || ''"
         :selected="isCurrentSpec(row.data)"
         class="pl-22px"
       />
       <DirectoryItem
         v-else
-        :directories="row.value.split('/')"
+        :directories="row.name.split('/')"
         :expanded="row.expanded.value"
       />
     </li>
@@ -74,7 +74,11 @@ const filteredTree = computed(() => collapsible.value.tree.filter(((item) => !it
 const onRowClick = (row: UseCollapsibleTreeNode<SpecTreeNode>, idx) => {
   selectedItem.value = idx
   if (row.isLeaf) {
-    router.push({ path: 'runner', query: { file: row.data?.relative } })
+    if (!row.data) {
+      return
+    }
+
+    router.push({ path: 'runner', query: { file: row.data.relative } })
   } else {
     row.toggle()
   }
