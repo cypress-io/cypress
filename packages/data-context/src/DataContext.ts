@@ -29,6 +29,7 @@ import type { Server } from 'http'
 import type { AddressInfo } from 'net'
 import EventEmitter from 'events'
 import type { App as ElectronApp } from 'electron'
+import { VersionsDataSource } from './sources/VersionsDataSource'
 
 const IS_DEV_ENV = process.env.CYPRESS_INTERNAL_ENV !== 'production'
 
@@ -170,6 +171,10 @@ export class DataContext {
   @cached
   get git () {
     return new GitDataSource(this)
+  }
+
+  async versions () {
+    return new VersionsDataSource().versions()
   }
 
   @cached
