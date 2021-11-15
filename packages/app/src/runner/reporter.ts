@@ -29,12 +29,6 @@ function renderReporter (
   store: MobxRunnerStore,
   eventManager: EventManager,
 ) {
-  class EmptyHeader extends window.UnifiedRunner.React.Component {
-    render () {
-      return window.UnifiedRunner.React.createElement('div')
-    }
-  }
-
   const reporter = window.UnifiedRunner.React.createElement(window.UnifiedRunner.Reporter, {
     runMode: 'single' as const,
     runner: eventManager.reporterBus,
@@ -44,10 +38,6 @@ function renderReporter (
     error: null, // errorMessages.reporterError(props.state.scriptError, props.state.spec.relative),
     resetStatsOnSpecChange: true,
     experimentalStudioEnabled: false,
-    // TODO: Are we re-skinning the Reporter header?
-    // If so, with React or Vue?
-    // For now, just render and empty div.
-    renderReporterHeader: (props: null) => window.UnifiedRunner.React.createElement(EmptyHeader, props),
   })
 
   window.UnifiedRunner.ReactDOM.render(reporter, root)
