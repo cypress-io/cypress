@@ -58,7 +58,7 @@ orbs:
 windowsProperties: &windowsProperties
   executor:
     name: win/default
-    shell: bash.exe
+    # shell: bash.exe
     size: medium
   # environment:
   #   PLATFORM: windows
