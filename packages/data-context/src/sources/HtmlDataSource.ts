@@ -30,7 +30,7 @@ export class HtmlDataSource {
       return html
     }
 
-    return this.ctx.fs.readFile(getPathToDist('app'), 'utf8')
+    return this.ctx.fs.readFile(getPathToDist('app', 'index.html'), 'utf8')
   }
 
   /**

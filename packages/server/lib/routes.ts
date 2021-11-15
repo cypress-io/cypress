@@ -159,6 +159,13 @@ export const createCommonRoutes = ({
     }
   })
 
+  router.get(`${clientRoute}assets/*`, (req, res) => {
+    debug('proxying static assets %s, params[0] %s', req.url, req.params[0])
+    const pathToFile = getPathToDist('app', 'assets', req.params[0])
+
+    return send(req, pathToFile).pipe(res)
+  })
+
   router.all('*', (req, res) => {
     networkProxy.handleHttpRequest(req, res)
   })
