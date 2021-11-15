@@ -95,8 +95,8 @@ executors:
       image: windows-server-2019-vs2019:stable
       resource_class: windows.small
       shell: bash.exe
-      enviornment:
-        ROOT: %USERPROFILE%
+      environment:
+        ROOT: C:\Users\circleci
         CYPRESS_PROJECT: project
   # windows:
   #   windows:
