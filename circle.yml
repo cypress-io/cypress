@@ -2415,9 +2415,9 @@ windows-workflow: &windows-workflow
 
     - build:
         name: windows-build
-        # executor:
-        #   name: win/default
-        #   shell: bash.exe --login
+        executor:
+          name: win/default
+          shell: bash.exe --login
         requires:
           - windows_node_modules_install
 
