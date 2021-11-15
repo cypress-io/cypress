@@ -59,7 +59,7 @@ windowsProperties: &windowsProperties
   executor:
     name: win/default
     shell: bash.exe
-    # size: medium
+    size: medium
   # environment:
   #   PLATFORM: windows
   arch: win32
@@ -942,7 +942,7 @@ jobs:
   ## skips ahead to the build step, otherwise installs and caches the node_modules
   node_modules_install:
     <<: *defaults
-    resource_class: medium+
+    # resource_class: medium+
     shell: /bin/bash --login
     steps:
       - checkout
