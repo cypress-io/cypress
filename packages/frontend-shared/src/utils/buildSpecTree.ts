@@ -1,14 +1,14 @@
 import type { FoundSpec } from '@packages/types'
 
-export type SpecTreeNode = {
+export type SpecTreeNode<T extends FoundSpec = FoundSpec> = {
   value: string
-  children: SpecTreeNode[]
+  children: SpecTreeNode<T>[]
   isLeaf: boolean
-  parent?: SpecTreeNode
-  data?: FoundSpec
+  parent?: SpecTreeNode<T>
+  data?: T
 }
 
-export function buildSpecTree (specs: FoundSpec[], root: SpecTreeNode = { value: '/', isLeaf: false, children: [] }) {
+export function buildSpecTree<T extends FoundSpec> (specs: FoundSpec[], root: SpecTreeNode<T> = { value: '/', isLeaf: false, children: [] }) {
   specs.forEach((spec) => buildSpecTreeRecursive(spec.relative, root, spec))
 
   collapseEmptyChildren(root)
@@ -16,7 +16,7 @@ export function buildSpecTree (specs: FoundSpec[], root: SpecTreeNode = { value:
   return root
 }
 
-export function buildSpecTreeRecursive (path: string, tree: SpecTreeNode, data?: FoundSpec) {
+export function buildSpecTreeRecursive<T extends FoundSpec> (path: string, tree: SpecTreeNode<T>, data?: T) {
   const [firstFile, ...rest] = path.split('/')
 
   if (rest.length < 1) {
@@ -40,7 +40,7 @@ export function buildSpecTreeRecursive (path: string, tree: SpecTreeNode, data?:
   return tree
 }
 
-function collapseEmptyChildren (node: SpecTreeNode) {
+function collapseEmptyChildren<T extends FoundSpec> (node: SpecTreeNode<T>) {
   for (const child of node.children) {
     collapseEmptyChildren(child)
   }
