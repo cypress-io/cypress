@@ -37,12 +37,11 @@ export class ProjectActions {
   }
 
   async clearActiveProject () {
-    this.ctx.appData.currentProject = null
+    this.ctx.coreData.currentProject = null
     await this.api.closeActiveProject()
 
     // TODO(tim): Improve general state management w/ immutability (immer) & updater fn
-    this.ctx.coreData.app.isInGlobalMode = true
-    this.ctx.coreData.app.currentProject = null
+    this.ctx.coreData.currentProject = null
     this.ctx.coreData.app.currentTestingType = null
   }
 
@@ -79,9 +78,9 @@ export class ProjectActions {
   }
 
   private setCurrentProjectProperties (currentProjectProperties: Partial<ActiveProjectShape>) {
-    this.ctx.coreData.app.currentProject = {
+    this.ctx.coreData.currentProject = {
       browsers: this.ctx.coreData.app.browsers,
-      ...this.ctx.coreData.app.currentProject,
+      ...this.ctx.coreData.currentProject,
       ...currentProjectProperties,
     } as ActiveProjectShape
   }
@@ -379,5 +378,38 @@ export class ProjectActions {
     this.ctx.actions.wizard.resetWizard()
     this.ctx.actions.electron.refreshBrowserWindow()
     this.ctx.actions.electron.showBrowserWindow()
+  }
+
+  async scaffoldIntegration () {
+    const project = this.ctx.currentProject
+
+    if (!project) {
+      throw Error(`Cannot create spec without activeProject.`)
+    }
+
+    const config = await this.ctx.project.getConfig(project.projectRoot)
+    const integrationFolder = config.integrationFolder || project.projectRoot
+
+    const results = await codeGenerator(
+      { templateDir: templates['scaffoldIntegration'], target: integrationFolder },
+      {},
+    )
+
+    if (results.failed.length) {
+      throw new Error(`Failed generating files: ${results.failed.map((e) => `${e}`)}`)
+    }
+
+    const withFileParts = results.files.map((res) => {
+      return {
+        fileParts: this.ctx.file.normalizeFileToFileParts({
+          absolute: res.file,
+          projectRoot: project.projectRoot,
+          searchFolder: integrationFolder,
+        }),
+        codeGenResult: res,
+      }
+    })
+
+    return withFileParts
   }
 }

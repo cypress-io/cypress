@@ -56,8 +56,8 @@ export class AppActions {
 
     this.ctx.coreData.app.browsers = browsers
 
-    if (this.ctx.coreData.app.currentProject) {
-      this.ctx.coreData.app.currentProject.browsers = browsers
+    if (this.ctx.coreData.currentProject) {
+      this.ctx.coreData.currentProject.browsers = browsers
     }
 
     // If we don't have a chosen browser, assign to the first one in the list

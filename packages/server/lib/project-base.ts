@@ -847,7 +847,10 @@ export class ProjectBase<TServer extends Server> extends EE {
 
     if (scaffoldExamples) {
       debug('will scaffold integration and fixtures folder')
-      push(scaffold.integration(cfg.integrationFolder, cfg))
+      if (!process.env.LAUNCHPAD) {
+        push(scaffold.integration(cfg.integrationFolder, cfg))
+      }
+
       push(scaffold.fixture(cfg.fixturesFolder, cfg))
     } else {
       debug('will not scaffold integration or fixtures folder')

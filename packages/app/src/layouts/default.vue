@@ -36,9 +36,7 @@ import SidebarNavigation from '../navigation/SidebarNavigation.vue'
 import HeaderBar from '@cy/gql-components/HeaderBar.vue'
 import { useRoute } from 'vue-router'
 import { computed } from 'vue'
-import { useMainStore } from '../store'
 
-const mainStore = useMainStore()
 const currentRoute = useRoute()
 
 const showHeader = computed(() => {
@@ -49,6 +47,7 @@ const pageName = computed((): string | undefined => {
   return currentRoute.meta?.title as string
 })
 </script>
+
 <style lang="scss" scoped>
 .layout-grid {
   display: grid;

@@ -1,7 +1,7 @@
 <template>
   <WizardLayout
     :next=" t('setupPage.install.confirmManualInstall')"
-    :can-navigate-forward="props.gql.canNavigateForward"
+    :can-navigate-forward="props.gql.wizard.canNavigateForward"
     class="max-w-640px"
   >
     <ManualInstall
@@ -18,9 +18,11 @@ import type { InstallDependenciesFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
 
 gql`
-fragment InstallDependencies on Wizard {
+fragment InstallDependencies on Query {
   ...ManualInstall
-  canNavigateForward
+  wizard {
+    canNavigateForward
+  }
 }
 `
 
