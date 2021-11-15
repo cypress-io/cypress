@@ -6,10 +6,10 @@
     />
 
     <div
-      class="text-gray-400 group-hocus:text-indigo-500"
+      class="text-gray-400 text-indigo-500 group-hocus:text-indigo-500"
       :title="`${spec.fileName}${spec.specFileExtension}`"
     >
-      <span class="font-medium text-gray-700 group-hocus:text-indigo-500">{{ spec.fileName }}</span>
+      <span class="font-medium text-indigo-500 group-hocus:text-indigo-500">{{ spec.fileName }}</span>
       <span class="font-light group-hocus:text-indigo-500">{{ spec.specFileExtension }}</span>
     </div>
   </div>

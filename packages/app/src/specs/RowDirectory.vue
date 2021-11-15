@@ -1,19 +1,28 @@
 <template>
-  <div class="h-full grid grid-cols-[16px,auto,auto] items-center gap-10px">
+  <div class="h-full grid grid-cols-[16px,16px,auto] items-center gap-10px">
+    <i-cy-chevron-down-small_x16
+      class="
+        icon-dark-gray-300 mr-8px
+        group-hocus:(icon-dark-gray-700)
+      "
+      :class="{'transform rotate-270': !expanded}"
+    />
     <component
       :is="IconFolder"
       class="icon-light-gray-50 icon-dark-gray-200 document-icon"
-      :class="{'transform rotate-270': !expanded}"
     />
+
     <div>
       <template
         v-for="(directory, idx) in directories || []"
         :key="directory"
       >
-        <span>{{ directory }}</span>
+        <span class="font-medium text-gray-600 px-4px">
+          {{ directory }}
+        </span>
         <span
           v-if="idx !== directories.length - 1"
-          class="font-medium text-gray-800 px-4px"
+          class="text-gray-700 px-2px"
         >
           /
         </span>
