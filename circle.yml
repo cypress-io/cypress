@@ -969,7 +969,8 @@ jobs:
         steps:
           - checkout
           - print_working_dir
-          - persist
+          - persist:
+              arch: win32
           - install-required-node
           - verify-build-setup
           - caching-dependency-installer:
@@ -987,6 +988,7 @@ jobs:
       - checkout
       - print_working_dir
       - persist
+          arch: << parameters.arch >>
       - install-required-node
       - verify-build-setup
       - caching-dependency-installer:
