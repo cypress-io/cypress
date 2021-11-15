@@ -26,6 +26,10 @@ export = (mode, options) => {
   }
 
   if (mode === 'interactive') {
+    if (process.env.LAUNCHPAD) {
+      return require('./interactive-unified').run(options)
+    }
+
     if (options.testingType === 'component' && !process.env.LAUNCHPAD) {
       return require('./interactive-ct').run(options)
     }

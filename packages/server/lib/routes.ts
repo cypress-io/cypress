@@ -89,13 +89,13 @@ export const createCommonRoutes = ({
     res.json(options)
   })
 
+  router.get('/__vite__/', (req, res) => {
+    ctx.html.appHtml().then((html) => res.send(html)).catch((e) => res.status(500).send({ stack: e.stack }))
+  })
+
   if (process.env.CYPRESS_INTERNAL_VITE_APP_PORT) {
     const proxy = httpProxy.createProxyServer({
       target: `http://localhost:${process.env.CYPRESS_INTERNAL_VITE_APP_PORT}/`,
-    })
-
-    router.get('/__vite__/', (req, res) => {
-      ctx.html.appHtml().then((html) => res.send(html)).catch((e) => res.status(500).send({ stack: e.stack }))
     })
 
     // TODO: can namespace this onto a "unified" route like __app-unified__
