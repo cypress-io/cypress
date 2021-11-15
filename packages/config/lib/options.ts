@@ -195,7 +195,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
   {
     name: 'keystrokeDelay',
     defaultValue: 0,
-    validation: validate.isNumber,
+    validation: validate.isNumber || validate.isBoolean,
     isWriteable: true,
   },
   {
