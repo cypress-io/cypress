@@ -7,7 +7,7 @@ defaults: &defaults
     executor:
       type: executor
       default: cy-doc
-    is-mac:
+    only-cache-for-root-user:
       type: boolean
       default: false
     arch:
@@ -206,7 +206,7 @@ commands:
   caching-dependency-installer:
     description: 'Installs & caches the dependencies based on yarn lock & package json dependencies'
     parameters:
-      is-mac:
+      only-cache-for-root-user:
         type: boolean
         default: false
       arch:
@@ -250,9 +250,9 @@ commands:
             yarn --prefer-offline --frozen-lockfile --cache-folder ~/.yarn-<< parameters.arch >>
           no_output_timeout: 20m
       - prepare-modules-cache:
-          dont-move: <<parameters.is-mac>> # we don't move, so we don't hit any issues unpacking symlinks
+          dont-move: <<parameters.only-cache-for-root-user>> # we don't move, so we don't hit any issues unpacking symlinks
       - when:
-          condition: <<parameters.is-mac>> # on mac, we don't move to /tmp since we don't need to worry about different users
+          condition: <<parameters.only-cache-for-root-user>> # we don't move to /tmp since we don't need to worry about different users
           steps:
             - save_cache:
                 name: Saving node modules for root, cli, and all globbed workspace packages
@@ -263,7 +263,7 @@ commands:
                   - system-tests/node_modules
                   - globbed_node_modules
       - unless:
-          condition: <<parameters.is-mac>>
+          condition: <<parameters.only-cache-for-root-user>>
           steps:
             - save_cache:
                 name: Saving node modules for root, cli, and all globbed workspace packages
@@ -505,6 +505,7 @@ commands:
     steps:
       - store_artifacts:
           path: ~/.npm/_logs
+          
 
   post-install-comment:
     description: Post GitHub comment with a blurb on how to install pre-release version
@@ -949,7 +950,7 @@ jobs:
       - verify-build-setup
       - caching-dependency-installer:
           arch: win32
-          is-mac: false
+          only-cache-for-root-user: true
       - store-npm-logs
 
   ## Checks if we already have a valid cache for the node_modules_install and if it has,
@@ -977,7 +978,7 @@ jobs:
       - verify-build-setup
       - caching-dependency-installer:
           arch: << parameters.arch >>
-          is-mac: <<parameters.is-mac>>
+          only-cache-for-root-user: <<parameters.only-cache-for-root-user>>
       - store-npm-logs
 
   ## restores node_modules from previous step & builds if first step skipped
@@ -2337,7 +2338,7 @@ mac-workflow: &mac-workflow
         name: darwin-node-modules-install
         executor: mac
         arch: darwin
-        is-mac: true
+        only-cache-for-root-user: true
 
     - build:
         name: darwin-build
