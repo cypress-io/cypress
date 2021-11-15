@@ -40,7 +40,7 @@ gulp.task(
     // Codegen for our GraphQL Server so we have the latest schema to build
     // the frontend codegen correctly
     // Fetch the latest "remote" schema from the Cypress cloud
-    syncRemoteGraphQL,
+    // syncRemoteGraphQL,
 
     // Codegen for our GraphQL Server so we have the latest schema to build the frontend codegen correctly
     nexusCodegenWatch,
@@ -119,7 +119,7 @@ gulp.task('buildProd',
   gulp.series(
     'viteClean',
 
-    syncRemoteGraphQL,
+    // syncRemoteGraphQL,
     nexusCodegen,
     graphqlCodegen,
     generateShikiTheme,
@@ -267,7 +267,7 @@ gulp.task(makePackage)
  *------------------------------------------------------------------------**/
 
 gulp.task(symlinkViteProjects)
-gulp.task(syncRemoteGraphQL)
+// gulp.task(syncRemoteGraphQL)
 gulp.task(generateFrontendSchema)
 gulp.task(makePathMap)
 gulp.task(nexusCodegen)

@@ -107,56 +107,6 @@ export const createCommonRoutes = ({
     }
   })
 
-  router.get('*', (req, res, next) => {
-    debug(`requested: ${req.url}`)
-    next()
-  })
-
-  router.get(['/api', '/__/api'], (req, res) => {
-    const options = makeServeConfig({
-      config,
-      getCurrentBrowser,
-      specsStore,
-    })
-
-    res.json(options)
-  })
-
-  router.get('/', (req, res) => {
-    ctx.html.appHtml().then((html) => res.send(html)).catch((e) => res.status(500).send({ stack: e.stack }))
-  })
-
-  if (process.env.CYPRESS_INTERNAL_VITE_APP_PORT) {
-    const proxy = httpProxy.createProxyServer({
-      target: `http://localhost:${process.env.CYPRESS_INTERNAL_VITE_APP_PORT}/`,
-    })
-
-    // TODO: can namespace this onto a "unified" route like __app-unified__
-    // make sure to update the generated routes inside of vite.config.ts
-    router.get('*', (req, res) => {
-      debug('Proxy to unified dev')
-      proxy.web(req, res, {}, (e) => {})
-    })
-  } else {
-    router.get('*', (req, res) => {
-      debug('Proxy to unified static')
-      const pathToFile = getPathToDist('app', req.params[0])
-
-      if (req.params[0] === '') {
-        return fs.readFile(pathToFile, 'utf8')
-        .then((file) => {
-          res.send(file.replace('<body>', replaceBody(ctx)))
-        })
-      }
-
-      return send(req, pathToFile).pipe(res)
-    })
-  }
-
-  router.get('/__cypress/runner/*', (req, res) => {
-    runner.handle(testingType, req, res)
-  })
-
   router.all('/__cypress/xhrs/*', (req, res, next) => {
     xhrs.handle(req, res, config, next)
   })
@@ -170,6 +120,64 @@ export const createCommonRoutes = ({
       iframesController.component({ config, nodeProxy }, req, res)
     }
   })
+
+  router.get(['/api', '/__/api'], (req, res) => {
+    if (testingType === 'e2e') {
+      config.remote = getRemoteState()
+    }
+    const options = makeServeConfig({
+      config,
+      getCurrentBrowser,
+      specsStore,
+    })
+
+    res.json(options)
+  })
+
+  router.get('/', (req, res) => {
+    ctx.html.appHtml().then((html) => res.send(html)).catch((e) => res.status(500).send({ stack: e.stack }))
+  })
+
+  router.get('/__cypress/runner/*', (req, res) => {
+    // todo(lachlan): find a better way to do this
+    // we serve driver and some other code from runner-shared
+    // via a single JS file bundled with webpack
+    // so we need some special routing just for that asset file
+    if (req.url.endsWith('cypress_runner.css') || req.url.endsWith('cypress_runner.js')) {
+      const pathToFile = getPathToDist('runner-ct', req.params[0])
+      debug('sending static asset %s', pathToFile)
+      send(req, pathToFile).pipe(res)
+    } else {
+      runner.handle(testingType, req, res)
+    }
+  })
+
+  if (process.env.CYPRESS_INTERNAL_VITE_APP_PORT) {
+    const proxy = httpProxy.createProxyServer({
+      target: `http://localhost:${process.env.CYPRESS_INTERNAL_VITE_APP_PORT}/`,
+    })
+
+    // TODO: can namespace this onto a "unified" route like __app-unified__
+    // make sure to update the generated routes inside of vite.config.ts
+    router.get('*', (req, res) => {
+      debug('Proxy to unified dev %s', req.url)
+      proxy.web(req, res, {}, (e) => {})
+    })
+  } else {
+    router.get('*', (req, res) => {
+      debug('Proxy to unified static %s', req.url)
+      const pathToFile = getPathToDist('app', req.params[0])
+
+      if (req.params[0] === '') {
+        return fs.readFile(pathToFile, 'utf8')
+        .then((file) => {
+          res.send(file.replace('<body>', replaceBody(ctx)))
+        })
+      }
+
+      return send(req, pathToFile).pipe(res)
+    })
+  }
 
   router.all('*', (req, res) => {
     networkProxy.handleHttpRequest(req, res)

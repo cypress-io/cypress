@@ -28,6 +28,7 @@ export const createRoutesCT = ({
   // user app code + spec code
   // default mounted to /__cypress/src/*
   routesCt.get(`${config.devServerPublicPathRoute}*`, (req, res) => {
+    debug('devServerPublicPathRoute %s', req.url)
     // user the node proxy here instead of the network proxy
     // to avoid the user accidentally intercepting and modifying
     // their own app.js files + spec.js files
