@@ -94,10 +94,6 @@ export const createCommonRoutes = ({
       target: `http://localhost:${process.env.CYPRESS_INTERNAL_VITE_APP_PORT}/`,
     })
 
-    // router.get('/__vite__/', (req, res) => {
-    //   ctx.html.appHtml().then((html) => res.send(html)).catch((e) => res.status(500).send({ stack: e.stack }))
-    // })
-
     // TODO: can namespace this onto a "unified" route like __app-unified__
     // make sure to update the generated routes inside of vite.config.ts
     router.get('/__vite__/*', (req, res) => {
@@ -147,7 +143,9 @@ export const createCommonRoutes = ({
     debug('Serving Cypress front-end by requested URL:', req.url)
 
     if (process.env.LAUNCHPAD) {
-      ctx.html.appHtml().then((html) => res.send(html)).catch((e) => res.status(500).send({ stack: e.stack }))
+      ctx.html.appHtml()
+      .then((html) => res.send(html))
+      .catch((e) => res.status(500).send({ stack: e.stack }))
     } else {
       runner.serve(req, res, testingType === 'e2e' ? 'runner' : 'runner-ct', {
         config,
