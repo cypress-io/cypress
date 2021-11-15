@@ -62,6 +62,7 @@ executors:
       - image: cypress/browsers:node14.17.0-chrome91-ff89
     # by default, we use "small" to save on CI costs. bump on a per-job basis if needed.
     resource_class: small
+    shell: /bin/bash --login
     environment:
       PLATFORM: linux
 
@@ -70,6 +71,7 @@ executors:
     docker:
       - image: cypress/browsers:node14.17.0-chrome91-ff89
         user: node
+    shell: /bin/bash --login
     environment:
       PLATFORM: linux
 
@@ -81,6 +83,7 @@ executors:
       # Executor should have Node >= required version
       xcode: "12.2.0"
     resource_class: medium
+    shell: /bin/bash --login
     environment:
       PLATFORM: mac
   
@@ -91,12 +94,10 @@ executors:
     machine:  
       image: windows-server-2019-vs2019:stable
       resource_class: windows.medium
-      # shell: bash.exe
+      shell: bash.exe --login
     environment:
       PLATFORM: windows
-      ## set so that e2e tests are consistent
-      COLUMNS: 100
-      LINES: 24
+
   # windows:
   #   windows:
   #   machine:
@@ -955,7 +956,7 @@ jobs:
   node_modules_install:
     <<: *defaults
     # resource_class: medium+
-    shell: /bin/bash --login
+    # shell: /bin/bash --login
     steps:
       - checkout
       - print_working_dir
@@ -982,7 +983,7 @@ jobs:
   build:
     <<: *defaults
     # resource_class: medium+
-    shell: /bin/bash --login
+    # shell: /bin/bash --login
     steps:
       - restore_cached_workspace
       - run:
@@ -1567,7 +1568,7 @@ jobs:
   create-build-artifacts:
     <<: *defaults
     resource_class: medium+
-    shell: /bin/bash --login
+    # shell: /bin/bash --login
     steps:
       - restore_cached_workspace
       - build-binary
@@ -1585,7 +1586,7 @@ jobs:
 
   test-kitchensink:
     <<: *defaults
-    shell: /bin/bash --login
+    # shell: /bin/bash --login
     steps:
       - clone-repo-and-checkout-release-branch:
           repo: cypress-example-kitchensink
@@ -1612,7 +1613,7 @@ jobs:
   test-kitchensink-against-staging:
     <<: *defaults
     resource_class: medium
-    shell: /bin/bash --login
+    # shell: /bin/bash --login
     steps:
       - clone-repo-and-checkout-release-branch:
           repo: cypress-example-kitchensink
