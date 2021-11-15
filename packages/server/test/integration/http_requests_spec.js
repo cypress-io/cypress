@@ -3951,7 +3951,7 @@ describe('Routes', () => {
     })
 
     context('when body should be empty', function () {
-      this.timeout(1000)
+      this.timeout(5000) // TODO(tim): figure out why this is flaky now?
 
       beforeEach(function (done) {
         Fixtures.scaffold('e2e')

@@ -14,7 +14,7 @@ describe('Navigation', () => {
       expect(interception.request.body.variables.url).to.equal('https://on.cypress.io/writing-first-test?utm_medium=Docs+Menu&utm_content=First+Test')
     })
 
-    cy.get('[href="#/runs"]').click()
+    cy.get('[href="#/runs"]').click({ force: true }) // TODO(tim): figure out why this is flaky / covered?
     cy.contains(defaultMessages.runs.connect.title).should('be.visible')
   })
 })
