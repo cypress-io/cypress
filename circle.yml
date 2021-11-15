@@ -131,7 +131,7 @@ commands:
       - run:
           name: Print working folder
           command: |
-            if [ "$PLATFORM" = 'windows']; then
+            if [ "$PLATFORM" = 'windows' ]; then
               echo %cd%
             else 
               echo $PWD
@@ -285,7 +285,7 @@ commands:
       - run:
           name: Print working folder
           command: |
-            if [ "$PLATFORM" = 'windows']; then
+            if [ "$PLATFORM" = 'windows' ]; then
               echo %cd%
             else 
               echo $PWD
