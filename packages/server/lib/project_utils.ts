@@ -13,6 +13,10 @@ const multipleForwardSlashesRe = /[^:\/\/](\/{2,})/g
 const backSlashesRe = /\\/g
 
 const normalizeSpecUrl = (browserUrl: string, specUrl: string) => {
+  if (process.env.LAUNCHPAD) {
+    return browserUrl
+  }
+
   const replacer = (match: string) => match.replace('//', '/')
 
   return [
