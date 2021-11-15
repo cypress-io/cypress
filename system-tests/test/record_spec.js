@@ -53,19 +53,25 @@ describe('e2e record', () => {
 
       const urls = getRequestUrls()
 
-      const instanceReqs = urls.slice(0, 22)
+      // const instanceReqs = urls.slice(0, 22)
+      const firstRun = urls[0]
 
-      expect(instanceReqs).to.deep.eq([
-        // first create run request
-        'POST /runs',
+      expect(firstRun).to.eq('POST /runs')
 
+      const spec1 = urls.slice(1, 5)
+
+      expect(spec1).to.deep.eq([
         // spec 1
         `POST /runs/${runId}/instances`,
         // no instances/:id/tests because spec failed during eval
         `POST /instances/${instanceId}/results`,
         'PUT /videos/video.mp4',
         `PUT /instances/${instanceId}/stdout`,
+      ])
 
+      const spec2 = urls.slice(5, 11)
+
+      expect(spec2).to.deep.eq([
         // spec 2
         `POST /runs/${runId}/instances`,
         `POST /instances/${instanceId}/tests`,
@@ -73,7 +79,11 @@ describe('e2e record', () => {
         'PUT /videos/video.mp4',
         'PUT /screenshots/1.png',
         `PUT /instances/${instanceId}/stdout`,
+      ])
 
+      const spec3 = urls.slice(11, 16)
+
+      expect(spec3).to.deep.eq([
         // spec 3
         `POST /runs/${runId}/instances`,
         `POST /instances/${instanceId}/tests`,
@@ -81,7 +91,11 @@ describe('e2e record', () => {
         // no video because no tests failed
         'PUT /screenshots/1.png',
         `PUT /instances/${instanceId}/stdout`,
+      ])
 
+      const spec4 = urls.slice(16, 22)
+
+      expect(spec4).to.deep.eq([
         // spec 4
         `POST /runs/${runId}/instances`,
         `POST /instances/${instanceId}/tests`,
@@ -90,6 +104,42 @@ describe('e2e record', () => {
         'PUT /screenshots/1.png',
         `PUT /instances/${instanceId}/stdout`,
       ])
+
+      // expect(instanceReqs).to.deep.eq([
+      //   // first create run request
+      //   'POST /runs',
+
+      //   // spec 1
+      //   `POST /runs/${runId}/instances`,
+      //   // no instances/:id/tests because spec failed during eval
+      //   `POST /instances/${instanceId}/results`,
+      //   'PUT /videos/video.mp4',
+      //   `PUT /instances/${instanceId}/stdout`,
+
+      //   // spec 2
+      //   `POST /runs/${runId}/instances`,
+      //   `POST /instances/${instanceId}/tests`,
+      //   `POST /instances/${instanceId}/results`,
+      //   'PUT /videos/video.mp4',
+      //   'PUT /screenshots/1.png',
+      //   `PUT /instances/${instanceId}/stdout`,
+
+      //   // spec 3
+      //   `POST /runs/${runId}/instances`,
+      //   `POST /instances/${instanceId}/tests`,
+      //   `POST /instances/${instanceId}/results`,
+      //   // no video because no tests failed
+      //   'PUT /screenshots/1.png',
+      //   `PUT /instances/${instanceId}/stdout`,
+
+      //   // spec 4
+      //   `POST /runs/${runId}/instances`,
+      //   `POST /instances/${instanceId}/tests`,
+      //   `POST /instances/${instanceId}/results`,
+      //   'PUT /videos/video.mp4',
+      //   'PUT /screenshots/1.png',
+      //   `PUT /instances/${instanceId}/stdout`,
+      // ])
 
       const postRun = requests[0]
 
