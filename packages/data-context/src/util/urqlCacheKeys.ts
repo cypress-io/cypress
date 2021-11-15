@@ -16,5 +16,6 @@ export const urqlCacheKeys: Partial<CacheExchangeOpts> = {
     GitInfo: () => null,
     BaseError: () => null,
     ProjectPreferences: (data) => data.__typename,
+    VersionData: () => null,
   },
 }
