@@ -85,14 +85,14 @@ executors:
     environment:
       PLATFORM: mac
   
-  windows:
-    name: win/default
-    shell: bash.exe --login
   # windows:
-  #   machine:  
-  #     image: windows-server-2019-vs2019:stable
-  #     resource_class: windows.small
-  #     shell: bash.exe
+  #   name: win/default
+  #   shell: bash.exe --login
+  windows:
+    machine:  
+      image: windows-server-2019-vs2019:stable
+      resource_class: windows.small
+      shell: bash.exe
   
   # windows:
   #   windows:
@@ -128,14 +128,15 @@ commands:
 
   print_working_dir:
     steps:
-      name: Print working folder
-      command: |
-        if [ "$PLATFORM" = 'windows']; then
-          echo %cd%
-        else 
-          echo $PWD
-        fi
-        ls
+      - run:
+        name: Print working folder
+        command: |
+          if [ "$PLATFORM" = 'windows']; then
+            echo %cd%
+          else 
+            echo $PWD
+          fi
+          ls
 
   prepare-modules-cache:
     parameters:
