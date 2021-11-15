@@ -63,7 +63,7 @@
               >
                 <SpecItem
                   :spec="row.data"
-                  :style="{ paddingLeft: `${((row.depth - 2) * 20) + 16}px` }"
+                  :style="{ paddingLeft: `${((row.depth - 2) * 10) + 16 + 22}px` }"
                 />
               </RouterLink>
 
@@ -72,7 +72,7 @@
                 :directories="row.value.split('/')"
                 :expanded="row.expanded.value"
                 :depth="row.depth - 2"
-                :style="{ paddingLeft: `${((row.depth - 2) * 20) + 16}px` }"
+                :style="{ paddingLeft: `${((row.depth - 2) * 10) + 16}px` }"
                 @click="row.toggle"
               />
             </template>
