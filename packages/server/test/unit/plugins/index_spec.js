@@ -6,8 +6,8 @@ const cp = require('child_process')
 const { makeLegacyDataContext } = require('../../../lib/makeDataContext')
 const FixturesHelper = require('@tooling/system-tests/lib/fixtures')
 
-const util = require(`${root}../lib/plugins/util`)
-const plugins = require(`${root}../lib/plugins`)
+const plugins = require('../../../lib/plugins')
+const util = require('../../../lib/plugins/util')
 
 const PLUGIN_PID = 77777
 

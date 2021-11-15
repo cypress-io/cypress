@@ -1,25 +1,24 @@
 require('../spec_helper')
 
-const config = require(`${root}lib/config`)
-const files = require(`${root}lib/files`)
+const files = require('../../lib/files')
+const config = require('../../lib/config')
 const FixturesHelper = require('@tooling/system-tests/lib/fixtures')
-const { makeLegacyDataContext } = require(`${root}lib/makeDataContext`)
+const { makeLegacyDataContext } = require('../../lib/makeDataContext')
+
+const ctx = makeLegacyDataContext()
 
 describe('lib/files', () => {
-  const ctx = makeLegacyDataContext()
-
   beforeEach(function () {
     FixturesHelper.scaffold()
 
     this.todosPath = FixturesHelper.projectPath('todos')
 
-    return ctx.actions.project.setActiveProject(this.todosPath)
-    .then(() => {
-      return config.get(this.todosPath)
-    })
-    .then((cfg) => {
+    ctx.actions.project.setActiveProjectForTestSetup(this.todosPath)
+
+    return config.get(this.todosPath).then((cfg) => {
       this.config = cfg;
       ({ projectRoot: this.projectRoot } = cfg)
+      ctx.actions.project.setActiveProjectForTestSetup(this.projectRoot)
     })
   })
 

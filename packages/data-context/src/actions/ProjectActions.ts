@@ -80,6 +80,21 @@ export class ProjectActions {
     return this
   }
 
+  // Temporary: remove after other refactor lands
+  setActiveProjectForTestSetup (projectRoot: string) {
+    const title = this.ctx.project.projectTitle(projectRoot)
+
+    // Set initial properties, so we can set the config object on the active project
+    this.setCurrentProjectProperties({
+      projectRoot,
+      title,
+      ctPluginsInitialized: false,
+      e2ePluginsInitialized: false,
+      config: null,
+      configChildProcess: null,
+    })
+  }
+
   setCurrentProjectProperties (currentProjectProperties: Partial<ActiveProjectShape>) {
     this.ctx.coreData.currentProject = {
       browsers: this.ctx.coreData.app.browsers,

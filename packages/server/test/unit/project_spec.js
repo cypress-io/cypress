@@ -946,7 +946,8 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     })
   })
 
-  context('#writeProjectId', () => {
+  // TODO: (tim) figure out what we want to do about project ID writing
+  context.skip('#writeProjectId', () => {
     beforeEach(function () {
       this.project = new ProjectBase({ projectRoot: '/_test-output/path/to/project-e2e', testingType: 'e2e' })
 
@@ -1022,7 +1023,8 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     })
   })
 
-  context('#createCiProject', () => {
+  // TODO: remove, createCiProject is no longer used in the new project / will be built separately
+  context.skip('#createCiProject', () => {
     const projectRoot = '/_test-output/path/to/project-e2e'
     const configFile = 'cypress.config.js'
 
