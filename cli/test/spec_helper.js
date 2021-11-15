@@ -6,6 +6,8 @@ const mockfs = require('mock-fs')
 const Promise = require('bluebird')
 const util = require('../lib/util')
 const { MockChildProcess } = require('spawn-mock')
+const { clearLegacyDataContext } = require('../../packages/server/lib/makeDataContext')
+
 const _kill = MockChildProcess.prototype.kill
 
 const patchMockSpawn = () => {
@@ -100,6 +102,7 @@ beforeEach(function () {
 })
 
 afterEach(function () {
+  clearLegacyDataContext()
   mockfs.restore()
   process.env = _.clone(env)
   sinon.restore()
