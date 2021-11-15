@@ -6,7 +6,7 @@
     />
     <i-cy-folder_x16 class="mr-8px w-16px h-16px" />
     <template
-      v-for="(directory, idx) in directories || []"
+      v-for="(directory, idx) in directories"
       :key="directory"
     >
       <span class="font-medium text-gray-400">{{ directory }}</span>
@@ -21,7 +21,12 @@
 </template>
 
 <script lang="ts" setup>
-withDefaults(defineProps<{ directories: string[], expanded: boolean }>(), {
+interface Props {
+  directories: string[],
+  expanded: boolean
+}
+
+withDefaults(defineProps<Props>(), {
   directories: () => [],
   expanded: false,
 })
