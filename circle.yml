@@ -174,7 +174,30 @@ commands:
             - cypress
             - .ssh
             - node_modules # contains the npm i -g modules
-  
+
+  persist:
+    description: Correctly persist for OS.
+    parameters:
+      arch:
+        type: enum
+        enum: ['linux', 'darwin', 'win32']
+    steps:
+      - when:
+          condition: equal: ['win32', <<parameters.arch>>]
+# So we don't throw these in the workspace cache
+          steps:
+            - persist_to_workspace:
+              root: ~/
+              paths:
+                - project
+      - unless:
+          condition: equal: ['win32', <<parameters.arch>>]
+          steps:
+            - persist_to_workspace:
+              root: ~/
+              paths:
+                - cypress
+
   unpack-dependencies:
     description: 'Unpacks dependencies associated with the current workflow'
     steps:
@@ -944,10 +967,7 @@ jobs:
         steps:
           - checkout
           - print_working_dir
-          - persist_to_workspace:
-              root: $ROOT
-              paths:
-                - $CYPRESS_PROJECT
+          - persist
           - install-required-node
           - verify-build-setup
           - caching-dependency-installer:
@@ -964,10 +984,7 @@ jobs:
     steps:
       - checkout
       - print_working_dir
-      - persist_to_workspace:
-          root: .
-          paths:
-            - cypress
+      - persist
       - install-required-node
       - verify-build-setup
       - caching-dependency-installer:
