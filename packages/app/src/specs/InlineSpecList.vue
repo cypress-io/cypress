@@ -40,8 +40,10 @@ fragment SpecNode_InlineSpecList on SpecEdge {
     absolute
     relative
     baseName
+    specFileExtension
+    fileExtension
+    fileName
   }
-  ...SpecListRow
 }
 `
 
