@@ -962,13 +962,13 @@ jobs:
       - checkout
       - print_working_dir
       - unless:
-        condition:
-          # stop-only does not correct match on windows: https://github.com/bahmutov/stop-only/issues/78
-          equal: ['win32', <<parameters.arch>>]
-        steps:
-          - run:
-              name: Stop .only
-              command: yarn stop-only-all
+          condition:
+            # stop-only does not correct match on windows: https://github.com/bahmutov/stop-only/issues/78
+            equal: ['win32', <<parameters.arch>>]
+          steps:
+            - run:
+                name: Stop .only
+                command: yarn stop-only-all
       - persist_to_workspace:
           root: ~/
           paths:
