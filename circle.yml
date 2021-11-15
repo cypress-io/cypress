@@ -90,7 +90,7 @@ executors:
   windows:
     machine:  
       image: windows-server-2019-vs2019:stable
-      resource_class: windows.small
+      resource_class: windows.medium
       # shell: bash.exe
     environment:
       PLATFORM: windows
@@ -954,7 +954,7 @@ jobs:
   ## skips ahead to the build step, otherwise installs and caches the node_modules
   node_modules_install:
     <<: *defaults
-    resource_class: medium+
+    # resource_class: medium+
     shell: /bin/bash --login
     steps:
       - checkout
@@ -981,7 +981,7 @@ jobs:
   ## restores node_modules from previous step & builds if first step skipped
   build:
     <<: *defaults
-    resource_class: medium+
+    # resource_class: medium+
     shell: /bin/bash --login
     steps:
       - restore_cached_workspace
@@ -2403,10 +2403,12 @@ mac-workflow: &mac-workflow
 
 windows-workflow: &windows-workflow
   jobs:
-    - windows_node_modules_install:
-        executor:
-          name: win/default
-          shell: bash.exe --login
+    - node_modules_install:
+        name: windows-node-modules-install
+        executor: windows
+        # executor:
+        #   name: win/default
+        #   shell: bash.exe --login
         # executor:
         #   name: win/default
         #   shell: bash.exe --login
@@ -2420,7 +2422,7 @@ windows-workflow: &windows-workflow
         #   name: win/default
         #   shell: bash.exe --login
         requires:
-          - windows_node_modules_install
+          - windows-node-modules-install
 
     # - node_modules_install:
     #     name: windows-node-modules-install
