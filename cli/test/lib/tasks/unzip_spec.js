@@ -98,7 +98,7 @@ describe('lib/tasks/unzip', function () {
       setTimeout(() => {
         debug('emitting unzip error')
         unzipChildProcess.emit('error', new Error('unzip fails badly'))
-      }, 100)
+      }, 50)
 
       unzip
       .start({
