@@ -79,6 +79,39 @@ export const createCommonRoutes = ({
 
   const router = Router()
 
+  const clientRoute = config.clientRoute
+
+  if (!clientRoute) {
+    throw Error(`clientRoute is required. Received ${clientRoute}`)
+  }
+
+  router.get(clientRoute, (req, res) => {
+    debug('Serving Cypress front-end by requested URL:', req.url)
+    debug('launchpad', process.env.LAUNCHPAD)
+
+    if (process.env.LAUNCHPAD) {
+      console.log(
+        ctx.html.appHtml()
+      )
+      ctx.html.appHtml().then((html) => res.send(html)).catch((e) => res.status(500).send({ stack: e.stack }))
+    } else {
+      runner.serve(req, res, testingType === 'e2e' ? 'runner' : 'runner-ct', {
+        config,
+        testingType,
+        getSpec,
+        getCurrentBrowser,
+        getRemoteState,
+        specsStore,
+        exit,
+      })
+    }
+  })
+
+  router.get('*', (req, res, next) => {
+    debug(`requested: ${req.url}`)
+    next()
+  })
+
   router.get(['/api', '/__/api'], (req, res) => {
     const options = makeServeConfig({
       config,
@@ -136,26 +169,6 @@ export const createCommonRoutes = ({
     if (testingType === 'component') {
       iframesController.component({ config, nodeProxy }, req, res)
     }
-  })
-
-  const clientRoute = config.clientRoute
-
-  if (!clientRoute) {
-    throw Error(`clientRoute is required. Received ${clientRoute}`)
-  }
-
-  router.get(clientRoute, (req, res) => {
-    debug('Serving Cypress front-end by requested URL:', req.url)
-
-    runner.serve(req, res, testingType === 'e2e' ? 'runner' : 'runner-ct', {
-      config,
-      testingType,
-      getSpec,
-      getCurrentBrowser,
-      getRemoteState,
-      specsStore,
-      exit,
-    })
   })
 
   router.all('*', (req, res) => {

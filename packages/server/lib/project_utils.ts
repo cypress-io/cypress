@@ -12,8 +12,12 @@ const debug = Debug('cypress:server:project_utils')
 const multipleForwardSlashesRe = /[^:\/\/](\/{2,})/g
 const backSlashesRe = /\\/g
 
-const normalizeSpecUrl = (browserUrl: string, specUrl: string) => {
+const normalizeSpecUrl = (browserUrl: string, specUrl: string, isLaunchpad: boolean) => {
   const replacer = (match: string) => match.replace('//', '/')
+
+  if (isLaunchpad) {
+    return browserUrl
+  }
 
   return [
     browserUrl,
@@ -85,11 +89,14 @@ export const getSpecUrl = ({
   specType ??= 'integration'
   browserUrl ??= ''
 
+  if (isLaunchpad) {
+  }
+
   debug('get spec url: %s for spec type %s', absoluteSpecPath, specType)
 
   // if we don't have a absoluteSpecPath or its __all
   if (!absoluteSpecPath || absoluteSpecPath === '__all') {
-    const url = normalizeSpecUrl(browserUrl, '/__all')
+    const url = normalizeSpecUrl(browserUrl, '/__all', isLaunchpad)
 
     debug('returning url to run all specs: %s', url)
 
@@ -110,7 +117,7 @@ export const getSpecUrl = ({
     pathToSpec: absoluteSpecPath,
     type: specType,
   })
-  const url = normalizeSpecUrl(browserUrl, prefixedPath)
+  const url = normalizeSpecUrl(browserUrl, prefixedPath, isLaunchpad)
 
   debug('return path to spec %o', { specType, absoluteSpecPath, prefixedPath, url })
 
