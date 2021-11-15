@@ -90,7 +90,7 @@ executors:
   windows:
     machine:  
       image: windows-server-2019-vs2019:stable
-      # resource_class: windows.small
+      resource_class: windows.small
       # shell: bash.exe
     environment:
       PLATFORM: windows
