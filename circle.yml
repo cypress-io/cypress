@@ -16,8 +16,6 @@ defaults: &defaults
       enum: ['linux', 'darwin', 'win32']
   executor: <<parameters.executor>>
   environment:
-    ROOT: ~/
-    CYPRESS_PROJECT: cypress
     ## set specific timezone
     TZ: "/usr/share/zoneinfo/America/New_York"
 
@@ -35,7 +33,6 @@ mainBuildFilters: &mainBuildFilters
       only:
         - develop
         - tgriesser/chore/fix-release
-
 
 macBuildFilters: &macBuildFilters
   filters:
@@ -96,8 +93,10 @@ executors:
       resource_class: windows.small
       shell: bash.exe
     environment:
-      ROOT: C:\Users\circleci
-      CYPRESS_PROJECT: project
+      PLATFORM: windows
+      ## set so that e2e tests are consistent
+      COLUMNS: 100
+      LINES: 24
   # windows:
   #   windows:
   #   machine:
@@ -963,20 +962,21 @@ commands:
 
 jobs:
   windows_node_modules_install:
-        executor:
-          name: win/default
-          shell: bash.exe --login
-        steps:
-          - checkout
-          - print_working_dir
-          - persist:
-              arch: win32
-          - install-required-node
-          - verify-build-setup
-          - caching-dependency-installer:
-              arch: win32
-              is-mac: false
-          - store-npm-logs
+    <<: *defaults
+    executor:
+      name: win/default
+      shell: bash.exe --login
+    steps:
+      - checkout
+      - print_working_dir
+      - persist:
+          arch: win32
+      - install-required-node
+      - verify-build-setup
+      - caching-dependency-installer:
+          arch: win32
+          is-mac: false
+      - store-npm-logs
 
   ## Checks if we already have a valid cache for the node_modules_install and if it has,
   ## skips ahead to the build step, otherwise installs and caches the node_modules
