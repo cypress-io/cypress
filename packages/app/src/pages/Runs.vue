@@ -1,5 +1,5 @@
 <template>
-  <div class="relative p-24px h-full overflow-y-scroll">
+  <div class="relative p-24px h-full">
     <TransitionQuickFade>
       <RunsSkeleton v-if="query.fetching.value || !query.data.value" />
       <RunsPage
