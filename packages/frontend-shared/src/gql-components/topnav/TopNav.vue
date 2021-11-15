@@ -206,7 +206,7 @@ import DocsMenuContent from './DocsMenuContent.vue'
 import ExternalLink from '../ExternalLink.vue'
 import Button from '../../components/Button.vue'
 
-const releasesUrl = 'https://github.com/cypress-io/cypress/releases/'
+const releasesUrl = 'https://github.com/cypress-io/cypress/releases'
 
 gql`
 fragment TopNav on Query {
