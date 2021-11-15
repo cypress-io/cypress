@@ -869,17 +869,17 @@ describe('src/cy/commands/window', () => {
         cy.viewport(800, '600')
       })
 
-      // it('throws when passed negative numbers', function (done) {
-      //   cy.on('fail', (err) => {
-      //     assertLogLength(this.logs, 1)
-      //     expect(err.message).to.eq('`cy.viewport()` `width` and `height` must be at least 0px.')
-      //     expect(err.docsUrl).to.eq('https://on.cypress.io/viewport')
+      it('throws when passed negative numbers', function (done) {
+        cy.on('fail', (err) => {
+          assertLogLength(this.logs, 1)
+          expect(err.message).to.eq('`cy.viewport()` `width` and `height` must be at least 0px.')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/viewport')
 
-      //     done()
-      //   })
+          done()
+        })
 
-      //   cy.viewport(800, -600)
-      // })
+        cy.viewport(800, -600)
+      })
 
       it('does not throw when passed width equal to 0', () => {
         cy.viewport(0, 600)
@@ -901,37 +901,37 @@ describe('src/cy/commands/window', () => {
         cy.viewport('')
       })
 
-      // it('throws when passed an invalid orientation on a preset', function (done) {
-      //   cy.on('fail', (err) => {
-      //     assertLogLength(this.logs, 1)
-      //     expect(err.message).to.eq('`cy.viewport()` can only accept `landscape` or `portrait` as valid orientations. Your orientation was: `foobar`')
-      //     expect(err.docsUrl).to.eq('https://on.cypress.io/viewport')
+      it('throws when passed an invalid orientation on a preset', function (done) {
+        cy.on('fail', (err) => {
+          assertLogLength(this.logs, 1)
+          expect(err.message).to.eq('`cy.viewport()` can only accept `landscape` or `portrait` as valid orientations. Your orientation was: `foobar`')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/viewport')
 
-      //     done()
-      //   })
+          done()
+        })
 
-      //   cy.viewport('iphone-4', 'foobar')
-      // })
+        cy.viewport('iphone-4', 'foobar')
+      })
 
-      // _.each([{}, [], NaN, Infinity, null, undefined], (val) => {
-      //   it(`throws when passed the invalid: '${val}' as width`, function (done) {
-      //     const logs = []
+      _.each([{}, [], NaN, Infinity, null, undefined], (val) => {
+        it(`throws when passed the invalid: '${val}' as width`, function (done) {
+          const logs = []
 
-      //     cy.on('log:added', (attrs, log) => {
-      //       logs.push(log)
-      //     })
+          cy.on('log:added', (attrs, log) => {
+            logs.push(log)
+          })
 
-      //     cy.on('fail', (err) => {
-      //       assertLogLength(this.logs, 1)
-      //       expect(err.message).to.eq('`cy.viewport()` can only accept a string preset or a `width` and `height` as numbers.')
-      //       expect(err.docsUrl).to.eq('https://on.cypress.io/viewport')
+          cy.on('fail', (err) => {
+            assertLogLength(this.logs, 1)
+            expect(err.message).to.eq('`cy.viewport()` can only accept a string preset or a `width` and `height` as numbers.')
+            expect(err.docsUrl).to.eq('https://on.cypress.io/viewport')
 
-      //       done()
-      //     })
+            done()
+          })
 
-      //     cy.viewport(val)
-      //   })
-      // })
+          cy.viewport(val)
+        })
+      })
     })
 
     context('.log', () => {
