@@ -941,9 +941,6 @@ jobs:
     steps:
       - checkout
       - print_working_dir
-      - run:
-          name: Stop .only
-          command: yarn stop-only-all
       - persist_to_workspace:
           root: ~/
           paths:
@@ -964,9 +961,14 @@ jobs:
     steps:
       - checkout
       - print_working_dir
-      - run:
-          name: Stop .only
-          command: yarn stop-only-all
+      - unless:
+        condition:
+          # stop-only does not correct match on windows: https://github.com/bahmutov/stop-only/issues/78
+          equal: ['win32', <<parameters.arch>>]
+        steps:
+          - run:
+              name: Stop .only
+              command: yarn stop-only-all
       - persist_to_workspace:
           root: ~/
           paths:
