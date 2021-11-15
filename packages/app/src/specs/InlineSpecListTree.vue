@@ -31,7 +31,7 @@
         :file-name="row.data?.fileName || row.value"
         :extension="row.data?.specFileExtension || ''"
         :selected="isCurrentSpec(row.data)"
-        class="ml-22px"
+        class="pl-22px"
       />
       <DirectoryItem
         v-else

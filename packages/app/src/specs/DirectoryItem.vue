@@ -13,11 +13,16 @@
       <span
         v-if="idx !== directories.length - 1"
         class="font-medium text-gray-800 px-4px"
-      >/</span>
+      >
+        /
+      </span>
     </template>
   </div>
 </template>
 
 <script lang="ts" setup>
-defineProps<{ directories: string[], expanded: boolean }>()
+defineProps<{
+  directories: string[]
+  expanded: boolean
+}>()
 </script>
