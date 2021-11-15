@@ -159,7 +159,11 @@ export const createCommonRoutes = ({
     }
   })
 
-  router.get(`${clientRoute}assets/*`, (req, res) => {
+  // serve static assets from the dist'd Vite app
+  router.get([
+    `${clientRoute}assets/*`,
+    `${clientRoute}shiki/*`,
+  ], (req, res) => {
     debug('proxying static assets %s, params[0] %s', req.url, req.params[0])
     const pathToFile = getPathToDist('app', 'assets', req.params[0])
 
