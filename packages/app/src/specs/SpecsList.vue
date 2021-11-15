@@ -105,7 +105,6 @@ import RowDirectory from './RowDirectory.vue'
 import SpecItem from './SpecItem.vue'
 import type { FoundSpec } from '@packages/types/src'
 import SelectSpecListView from './SelectSpecListView.vue'
-import { includes } from 'lodash'
 
 const { t } = useI18n()
 
