@@ -60,8 +60,8 @@ windowsProperties: &windowsProperties
     name: win/default
     shell: bash.exe
     size: medium
-    environment:
-      PLATFORM: windows
+  environment:
+    PLATFORM: windows
   arch: win32
 
 executors:
@@ -121,6 +121,7 @@ commands:
           name: Print working folder
           command: |
             if [ "$PLATFORM" = 'windows' ]; then
+              echo "WINDOWS"
               echo %cd%
             else 
               echo $PWD
@@ -271,14 +272,7 @@ commands:
   verify-build-setup:
     description: Common commands run when setting up for build or yarn install
     steps:
-      - run:
-          name: Print working folder
-          command: |
-            if [ "$PLATFORM" = 'windows' ]; then
-              echo %cd%
-            else 
-              echo $PWD
-            fi
+      - print_working_dir
       - run:
           name: print global yarn cache path
           command: echo $(yarn global bin)
@@ -293,7 +287,7 @@ commands:
           ##   * http://andykdocs.de/development/Docker/Fixing+the+Docker+TERM+variable+issue
           ##   * https://unix.stackexchange.com/questions/43945/whats-the-difference-between-various-term-variables
           command: yarn check-terminal
-            # node ./scripts/circleci/check-terminal.js
+            node ./scripts/circleci/check-terminal.js
 
   # run this step in an interactive bash shell 
   install-required-node:
