@@ -43,6 +43,10 @@
     "enabled": "Enabled",
     "disabled": "Disabled"
   },
+  "inlineSpecsList": {
+    "specs": "Specs",
+    "ariaLabel": "toggle specs list"
+  },
   "createSpec": {
     "newSpecModalTitle": "Create a new spec",
     "successPage": {

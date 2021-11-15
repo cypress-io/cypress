@@ -57,10 +57,6 @@
       padding-right: 8px;
       width: auto !important;
 
-      span {
-        display: none;
-      }
-
       svg {
         margin-right: 8px;
         margin-bottom: -2px;
@@ -153,15 +149,6 @@
           border-right: 1px solid $gray-900;
         }
       }
-    }
-  }
-
-  // utilizing element size queries: https://github.com/marcj/css-element-queries
-  // styles take effect when width is greater than or equal to the specified amount
-  &[min-width~="398px"] {
-
-    .focus-tests button span {
-      display: inline;
     }
   }
 }

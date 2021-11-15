@@ -3,8 +3,6 @@ import React from 'react'
 // @ts-ignore
 import Tooltip from '@cypress/react-tooltip'
 
-import MenuExpandRightIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/menu-expand-right_x16.svg'
-
 import defaultEvents, { Events } from '../lib/events'
 import { AppState } from '../lib/app-state'
 
@@ -21,11 +19,7 @@ export interface ReporterHeaderProps {
 const Header = observer(({ appState, events = defaultEvents, statsStore }: ReporterHeaderProps) => (
   <header>
     <Tooltip placement='bottom' title={<p>View All Tests <span className='kbd'>F</span></p>} wrapperClassName='focus-tests' className='cy-tooltip'>
-      <button onClick={() => events.emit('focus:tests')}>
-        <MenuExpandRightIcon />
-
-        <span className='focus-tests-text'>Specs</span>
-      </button>
+      <div id="focus-tests-vue-teleport-target" />
     </Tooltip>
     <div className='spacer' />
     <Stats stats={statsStore} />

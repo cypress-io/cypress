@@ -13,4 +13,8 @@ export default defineConfig({
     'runMode': 2,
     'openMode': 0,
   },
+  e2e: {
+    viewportHeight: 660,
+    viewportWidth: 1000,
+  },
 })

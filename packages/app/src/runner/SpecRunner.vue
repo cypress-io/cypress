@@ -10,7 +10,7 @@
       <InlineSpecList :gql="props.gql" />
     </HideDuringScreenshot>
 
-    <HideDuringScreenshot class="w-128">
+    <HideDuringScreenshot class="min-w-300px">
       <div
         v-once
         :id="REPORTER_ID"
