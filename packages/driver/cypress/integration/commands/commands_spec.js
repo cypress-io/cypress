@@ -96,6 +96,22 @@ describe('src/cy/commands/commands', () => {
         .first()
       })
     })
+
+    // https://github.com/cypress-io/cypress/issues/6146
+    it('throws when attempting to add a command with the same name as an internal function', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.eq('`Cypress.Commands.add()` cannot create a new command named `reset` because that name is reserved internally by Cypress.')
+        expect(err.docsUrl).to.eq('https://on.cypress.io/custom-commands')
+
+        done()
+      })
+
+      Cypress.Commands.add('reset', () => {
+        cy
+        .get('[contenteditable]')
+        .first()
+      })
+    })
   })
 
   context('errors', () => {

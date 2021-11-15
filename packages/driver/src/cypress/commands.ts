@@ -13,6 +13,11 @@ const builtInCommands = [
   addCommand,
 ]
 
+const reservedCommandNames = [
+  'getAlias',
+  'reset',
+]
+
 const getTypeByPrevSubject = (prevSubject) => {
   if (prevSubject === 'optional') {
     return 'dual'
@@ -133,6 +138,20 @@ export default {
       add (name, options, fn) {
         if (builtInCommandNames[name]) {
           $errUtils.throwErrByPath('miscellaneous.invalid_new_command', {
+            args: {
+              name,
+            },
+            stack: (new state('specWindow').Error('add command stack')).stack,
+            errProps: {
+              appendToStack: {
+                title: 'From Cypress Internals',
+                content: $stackUtils.stackWithoutMessage((new Error('add command internal stack')).stack),
+              } },
+          })
+        }
+
+        if (reservedCommandNames.includes(name)) {
+          $errUtils.throwErrByPath('miscellaneous.reserved_command', {
             args: {
               name,
             },
