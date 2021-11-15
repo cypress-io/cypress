@@ -59,7 +59,7 @@ windowsProperties: &windowsProperties
   executor:
     name: win/default
     shell: bash.exe
-    size: medium
+    # size: medium
   # environment:
   #   PLATFORM: windows
   arch: win32
