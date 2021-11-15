@@ -413,6 +413,7 @@ export default {
       'animationDistanceThreshold',
       'blockHosts',
       'baseUrl',
+      'configFile',
       'defaultCommandTimeout',
       'env',
       'execTimeout',
