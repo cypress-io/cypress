@@ -40,7 +40,7 @@ export class ProjectActions {
   }
 
   async clearActiveProject () {
-    this.ctx.coreData.currentProject = null
+    this.ctx.actions.projectConfig.killConfigProcess()
     await this.api.closeActiveProject()
 
     // TODO(tim): Improve general state management w/ immutability (immer) & updater fn
@@ -82,6 +82,8 @@ export class ProjectActions {
 
   // Temporary: remove after other refactor lands
   setActiveProjectForTestSetup (projectRoot: string) {
+    this.ctx.actions.projectConfig.killConfigProcess()
+
     const title = this.ctx.project.projectTitle(projectRoot)
 
     // Set initial properties, so we can set the config object on the active project
