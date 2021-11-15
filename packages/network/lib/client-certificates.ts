@@ -203,7 +203,7 @@ export function loadClientCertificateConfig (config) {
     clientCertificateStore.clear()
 
     // The basic validation of the certificate configuration has already been done by this point
-    // within the 'isValidClientCertificatesSet' function within packages/server/lib/util/validation.js
+    // within the 'isValidClientCertificatesSet' function within packages/config/src/validation.js
     if (clientCertificates) {
       clientCertificates.forEach((item) => {
         debug(`loading client cert at index ${index}`)

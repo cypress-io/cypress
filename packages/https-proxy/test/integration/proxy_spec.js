@@ -99,9 +99,7 @@ describe('Proxy', () => {
       proxy: 'http://localhost:3333',
       resolveWithFullResponse: true,
     })
-    .then((res) => {
-      // ensure client has disconnected
-      expect(res.socket.destroyed).to.be.true
+    .then(() => {
       // ensure the outgoing socket created for this connection was destroyed
       expect(net.connect).calledOnce
 
@@ -311,10 +309,7 @@ describe('Proxy', () => {
         resolveWithFullResponse: true,
         forever: false,
       })
-      .then((res) => {
-        // ensure client has disconnected
-        expect(res.socket.destroyed).to.be.true
-
+      .then(() => {
         // ensure the outgoing socket created for this connection was destroyed
         expect(net.connect).calledOnce
         const socket = net.connect.getCalls()[0].returnValue

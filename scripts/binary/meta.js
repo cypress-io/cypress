@@ -44,7 +44,7 @@ const buildDir = function (platform, ...args) {
       }
 
       // x86 32bit architecture
-      return path.resolve(root, 'win-ia32-unpacked', ...args)
+      throw new Error('Windows 32-bit is not supported.')
     default:
       throw new Error('unexpected platform')
   }
