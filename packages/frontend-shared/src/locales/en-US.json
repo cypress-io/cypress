@@ -116,7 +116,10 @@
   "topNav": {
     "released": "Released",
     "version": "Version",
+    "installed": "Installed",
+    "latest": "Latest",
     "seeAllReleases": "See all releases",
+    "runningOldVersion": "You're currently running an old version of Cypress. Update to the latest version for the best experience.",
     "docsMenu": {
       "docsHeading": "Docs",
       "gettingStartedTitle": "Getting Started",
@@ -310,6 +313,10 @@
     "testingPreferences": {
       "title": "Testing Preferences",
       "description": "Configure your testing environment with these flags"
+    },
+    "footer": {
+      "text": "You can reconfigure the settings for this project if you’re experiencing issues with your Cypress configuration.",
+      "button": "Reconfigure Project"
     }
   },
   "runs": {

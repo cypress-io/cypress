@@ -16,6 +16,10 @@ module.exports = {
     return glob(pathToExamples, { nodir: true })
   },
 
+  getPathToIntegration() {
+    return path.join(__dirname, '..', 'cypress', 'integration')
+  },
+
   getPathToExampleFolders () {
     return glob(`${pathToExamples}${path.sep}`)
   },

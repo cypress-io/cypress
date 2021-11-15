@@ -2,6 +2,7 @@
 // created by autobarrel, do not modify directly
 
 export * from './gql-BrowserFamilyEnum'
+export * from './gql-CodeGenResultEnum'
 export * from './gql-CodeGenTypeEnum'
 export * from './gql-ProjectEnums'
 export * from './gql-SpecEnum'

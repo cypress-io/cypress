@@ -10,9 +10,12 @@
         :is="icon.component"
         :class="icon.classes"
       />
-      <div>
+      <div
+        class="overflow-hidden truncate text-gray-400 group-hocus:text-indigo-500"
+        :title="`${spec.fileName}${spec.specFileExtension}`"
+      >
         <span class="font-medium text-gray-700 group-hocus:text-indigo-500">{{ spec.fileName }}</span>
-        <span class="font-light text-gray-400 group-hocus:text-indigo-500">{{ spec.specFileExtension }}</span>
+        <span class="font-light group-hocus:text-indigo-500">{{ spec.specFileExtension }}</span>
       </div>
     </div>
     <div class="grid git-info-row grid-cols-[16px,auto] items-center gap-9px">
@@ -27,7 +30,10 @@
           class="min-w-16px max-w-16px min-h-16px icon-dark-gray-300 group-hocus:icon-dark-indigo-500 max-h-16px"
         />
       </span>
-      <div :class="classes?.gitText">
+      <div
+        class="overflow-hidden truncate"
+        :class="classes?.gitText"
+      >
         {{ gitInfoText }}
       </div>
     </div>

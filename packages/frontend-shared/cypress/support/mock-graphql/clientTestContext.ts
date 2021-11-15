@@ -1,5 +1,14 @@
 import type { CloudUser } from '../generated/test-cloud-graphql-types.gen'
-import type { WizardStep, CurrentProject, Browser, WizardBundler, WizardFrontendFramework, TestingTypeEnum, GlobalProject } from '../generated/test-graphql-types.gen'
+import type {
+  WizardStep,
+  CurrentProject,
+  Browser,
+  WizardBundler,
+  WizardFrontendFramework,
+  TestingTypeEnum,
+  GlobalProject,
+  VersionData,
+} from '../generated/test-graphql-types.gen'
 import { resetTestNodeIdx } from './clientTestUtils'
 import { stubBrowsers } from './stubgql-Browser'
 import * as cloudTypes from './stubgql-CloudTypes'
@@ -13,6 +22,7 @@ export interface ClientTestContext {
     currentBrowser: Browser | null
     browsers: Browser[] | null
   }
+  versions: VersionData
   isAuthBrowserOpened: boolean
   wizard: {
     step: WizardStep
@@ -47,6 +57,21 @@ export function makeClientTestContext (): ClientTestContext {
     app: {
       browsers: stubBrowsers,
       currentBrowser: stubBrowsers[0],
+    },
+    versions: {
+      __typename: 'VersionData',
+      current: {
+        __typename: 'Version',
+        id: '8.7.0',
+        version: '8.7.0',
+        released: '2021-10-25T21:38:59.983Z',
+      },
+      latest: {
+        __typename: 'Version',
+        id: '8.6.0',
+        version: '8.6.0',
+        released: '2021-10-11T19:40:49.036Z',
+      },
     },
     isAuthBrowserOpened: false,
     wizard: {
