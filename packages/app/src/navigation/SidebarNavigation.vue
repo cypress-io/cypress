@@ -1,8 +1,11 @@
 <template>
-  <HideDuringScreenshot class="flex relative flex-col flex-1 h-full bg-gray-1000">
+  <HideDuringScreenshot
+    :aria-expanded="mainStore.navBarExpanded"
+    class="relative flex flex-col bg-gray-1000 transition-all duration-300"
+    :class="mainStore.navBarExpanded ? 'w-248px' : 'w-64px'"
+  >
     <div
       class="absolute cursor-pointer w-16px bottom-0 top-0 left-full group"
-      :aria-expanded="mainStore.navBarExpanded"
       @click="mainStore.toggleNavBar"
     >
       <div class="w-16px origin-left transform scale-x-0 group-hover:scale-x-100 h-full transition-transform duration-300 flex items-center">
@@ -15,7 +18,7 @@
     </div>
     <div class="flex flex-col flex-1 overflow-y-auto ">
       <SidebarTooltip
-        class="flex items-center h-64px"
+        class="flex items-center h-64px flex-shrink-0 border-b border-gray-900"
         :disabled="mainStore.navBarExpanded"
         :popper-top-offset="4"
         popper-class="h-56px"
@@ -45,7 +48,6 @@
         </template>
       </SidebarTooltip>
 
-      <hr class="border-gray-900">
       <nav
         class="flex-1 space-y-1 bg-gray-1000"
         aria-label="Sidebar"
@@ -117,7 +119,7 @@ import { useI18n } from '@cy/i18n'
 const { t } = useI18n()
 
 const navigation = [
-  { name: 'Home', icon: CodeIcon, href: '/' },
+  { name: 'Specs', icon: CodeIcon, href: '/' },
   { name: 'Runs', icon: RunsIcon, href: '/runs' },
   { name: 'Settings', icon: SettingsIcon, href: '/settings' },
 ]
