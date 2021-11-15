@@ -55,15 +55,6 @@ windowsBuildFilters: &windowsBuildFilters
 orbs:
   win: circleci/windows@2.4.1
 
-windowsProperties: &windowsProperties
-  executor:
-    name: win/default
-    # shell: bash.exe
-    size: medium
-  # environment:
-  #   PLATFORM: windows
-  arch: win32
-
 executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
@@ -93,13 +84,28 @@ executors:
     environment:
       PLATFORM: mac
   
+  # windows:
+  #   name: win/default
+  #   shell: bash.exe --login
   windows:
-    machine:
-      image: windows-default # Windows machine image
-    resource_class: windows.medium
-    shell: bash.exe --login
+    machine:  
+      image: windows-server-2019-vs2019:stable
+      resource_class: windows.small
+      shell: bash.exe
     environment:
       PLATFORM: windows
+      ## set so that e2e tests are consistent
+      COLUMNS: 100
+      LINES: 24
+  # windows:
+  #   windows:
+  #   machine:
+  #     image: windows-server-2019-vs2019:stable
+  #   # resource_class: windows.medium
+  #     # name: win/default
+  #   shell: bash.exe
+  #   environment:
+  #     PLATFORM: windows
 
 commands:
   restore_workspace_binaries:
@@ -129,7 +135,6 @@ commands:
           name: Print working folder
           command: |
             if [ "$PLATFORM" = 'windows' ]; then
-              echo "WINDOWS"
               echo %cd%
             else 
               echo $PWD
@@ -280,7 +285,14 @@ commands:
   verify-build-setup:
     description: Common commands run when setting up for build or yarn install
     steps:
-      - print_working_dir
+      - run:
+          name: Print working folder
+          command: |
+            if [ "$PLATFORM" = 'windows' ]; then
+              echo %cd%
+            else 
+              echo $PWD
+            fi
       - run:
           name: print global yarn cache path
           command: echo $(yarn global bin)
@@ -295,7 +307,7 @@ commands:
           ##   * http://andykdocs.de/development/Docker/Fixing+the+Docker+TERM+variable+issue
           ##   * https://unix.stackexchange.com/questions/43945/whats-the-difference-between-various-term-variables
           command: yarn check-terminal
-            node ./scripts/circleci/check-terminal.js
+            # node ./scripts/circleci/check-terminal.js
 
   # run this step in an interactive bash shell 
   install-required-node:
@@ -942,7 +954,7 @@ jobs:
   ## skips ahead to the build step, otherwise installs and caches the node_modules
   node_modules_install:
     <<: *defaults
-    # resource_class: medium+
+    resource_class: medium+
     shell: /bin/bash --login
     steps:
       - checkout
@@ -2391,17 +2403,23 @@ mac-workflow: &mac-workflow
 
 windows-workflow: &windows-workflow
   jobs:
-    - node_modules_install:
-        name: windows-node-modules-install
-        <<: *windowsProperties
+    - windows_node_modules_install:
+        executor:
+          name: win/default
+          shell: bash.exe --login
+        # executor:
+        #   name: win/default
+        #   shell: bash.exe --login
         arch: win32
         only-cache-for-root-user: true
 
     - build:
         name: windows-build
-        <<: *windowsProperties
+        # executor:
+        #   name: win/default
+        #   shell: bash.exe --login
         requires:
-          - windows-node-modules-install
+          - windows_node_modules_install
 
     # - node_modules_install:
     #     name: windows-node-modules-install
