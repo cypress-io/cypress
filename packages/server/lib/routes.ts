@@ -89,7 +89,7 @@ export const createCommonRoutes = ({
     res.json(options)
   })
 
-  router.get('/__vite__/', (req, res) => {
+  router.get('/', (req, res) => {
     ctx.html.appHtml().then((html) => res.send(html)).catch((e) => res.status(500).send({ stack: e.stack }))
   })
 
@@ -100,12 +100,13 @@ export const createCommonRoutes = ({
 
     // TODO: can namespace this onto a "unified" route like __app-unified__
     // make sure to update the generated routes inside of vite.config.ts
-    router.get('/__vite__/*', (req, res) => {
-      debug('Proxy to __vite__')
+    router.get('*', (req, res) => {
+      debug('Proxy to unified dev')
       proxy.web(req, res, {}, (e) => {})
     })
   } else {
-    router.get('/__vite__/*', (req, res) => {
+    router.get('*', (req, res) => {
+      debug('Proxy to unified static')
       const pathToFile = getPathToDist('app', req.params[0])
 
       if (req.params[0] === '') {

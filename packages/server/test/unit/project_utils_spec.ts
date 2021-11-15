@@ -23,6 +23,7 @@ describe('lib/project_utils', () => {
       const str = getSpecUrl({
         ...defaultProps,
         absoluteSpecPath: undefined,
+        isLaunchpad: false,
       })
 
       expect(str).to.eq('http://localhost:8888/__/#/tests/__all')
@@ -32,6 +33,7 @@ describe('lib/project_utils', () => {
       const str = getSpecUrl({
         ...defaultProps,
         absoluteSpecPath: '__all',
+        isLaunchpad: false,
       })
 
       expect(str).to.eq('http://localhost:8888/__/#/tests/__all')
@@ -41,6 +43,7 @@ describe('lib/project_utils', () => {
       const str = getSpecUrl({
         ...defaultProps,
         absoluteSpecPath: '__all',
+        isLaunchpad: false,
       })
 
       expect(str).to.eq('http://localhost:8888/__/#/tests/__all')
@@ -50,6 +53,7 @@ describe('lib/project_utils', () => {
       const str = getSpecUrl({
         ...defaultProps,
         absoluteSpecPath: 'cypress/integration/bar.js',
+        isLaunchpad: false,
       })
 
       expect(str).to.eq('http://localhost:8888/__/#/tests/cypress/integration/bar.js')
@@ -60,6 +64,7 @@ describe('lib/project_utils', () => {
       const str = getSpecUrl({
         ...defaultProps,
         absoluteSpecPath: todosSpec,
+        isLaunchpad: false,
       })
 
       expect(str).to.eq('http://localhost:8888/__/#/tests/integration/sub/sub_test.coffee')
@@ -70,6 +75,7 @@ describe('lib/project_utils', () => {
       const str = getSpecUrl({
         ...defaultProps,
         absoluteSpecPath: todosSpec,
+        isLaunchpad: false,
       })
 
       expect(str).to.eq('http://localhost:8888/__/#/tests/integration/sub/a%26b%25c.js')
@@ -82,6 +88,7 @@ describe('lib/project_utils', () => {
       const str = getSpecUrl({
         ...defaultProps,
         absoluteSpecPath: todosSpec,
+        isLaunchpad: false,
       })
 
       expect(str).to.eq('http://localhost:8888/__/#/tests/integration/sub/a%3F.spec.js')
@@ -92,6 +99,7 @@ describe('lib/project_utils', () => {
       const str = getSpecUrl({
         ...defaultProps,
         absoluteSpecPath: todosSpec,
+        isLaunchpad: false,
       })
 
       expect(str).to.eq('http://localhost:8888/__/#/tests/integration/s%25%26%3Fub/a.spec.js')

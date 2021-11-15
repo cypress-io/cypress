@@ -27,7 +27,7 @@ import { AllSpawnableApps, spawned, spawnUntilMatch } from '../utils/childProces
 export function viteApp () {
   const APP_PORT = ENV_VARS.DEV.CYPRESS_INTERNAL_VITE_APP_PORT
 
-  return spawnViteDevServer('vite-app', `yarn vite --port ${APP_PORT} --base /__vite__/`, {
+  return spawnViteDevServer('vite-app', `yarn vite --port ${APP_PORT}`, {
     cwd: monorepoPaths.pkgApp,
   })
 }

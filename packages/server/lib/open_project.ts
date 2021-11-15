@@ -104,6 +104,7 @@ export class OpenProject {
       integrationFolder: this.openProject.cfg.integrationFolder || 'integration',
       componentFolder: this.openProject.cfg.componentFolder || 'component',
       projectRoot: this.openProject.projectRoot,
+      isLaunchpad: !!process.env.LAUNCHPAD
     })
 
     this.openProject.changeToUrl(newSpecUrl)
@@ -132,6 +133,7 @@ export class OpenProject {
       integrationFolder: this.openProject.cfg.integrationFolder || 'integration',
       componentFolder: this.openProject.cfg.componentFolder || 'component?',
       projectRoot: this.openProject.projectRoot,
+      isLaunchpad: !!process.env.LAUNCHPAD
     })
 
     debug('open project url %s', url)

@@ -72,13 +72,15 @@ export const getSpecUrl = ({
   integrationFolder,
   componentFolder,
   projectRoot,
+  isLaunchpad
 }: {
   absoluteSpecPath?: string
   browserUrl?: string
   integrationFolder: string
   componentFolder: string
   projectRoot: string
-  specType?: 'integration' | 'component'
+  specType?: 'integration' | 'component',
+  isLaunchpad: boolean
 }) => {
   specType ??= 'integration'
   browserUrl ??= ''
