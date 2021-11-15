@@ -16,6 +16,8 @@ defaults: &defaults
       enum: ['linux', 'darwin', 'win32']
   executor: <<parameters.executor>>
   environment:
+    ROOT: ~/
+    CYPRESS_PROJECT: cypress
     ## set specific timezone
     TZ: "/usr/share/zoneinfo/America/New_York"
 
@@ -93,7 +95,9 @@ executors:
       image: windows-server-2019-vs2019:stable
       resource_class: windows.small
       shell: bash.exe
-  
+      enviornment:
+        ROOT: %USERPROFILE%
+        CYPRESS_PROJECT: project
   # windows:
   #   windows:
   #   machine:
@@ -170,7 +174,7 @@ commands:
             - cypress
             - .ssh
             - node_modules # contains the npm i -g modules
-
+  
   unpack-dependencies:
     description: 'Unpacks dependencies associated with the current workflow'
     steps:
@@ -941,9 +945,9 @@ jobs:
           - checkout
           - print_working_dir
           - persist_to_workspace:
-              root: .
+              root: $ROOT
               paths:
-                - cypress
+                - $CYPRESS_PROJECT
           - install-required-node
           - verify-build-setup
           - caching-dependency-installer:
