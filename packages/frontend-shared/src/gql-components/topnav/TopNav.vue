@@ -1,5 +1,5 @@
 <template>
-  <TopNavList v-if="versions">
+  <TopNavList v-if="versions && runningOldVersion">
     <template #heading="{ open }">
       <i-cy-box_x16
         class="group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50 h-16px w-16px"
@@ -8,88 +8,61 @@
       <span data-cy="topnav-version-list">v{{ versions.current.version }}</span>
     </template>
 
-    <template v-if="runningOldVersion">
-      <TopNavListItem
-        class="px-16px py-8px min-w-240px"
-        data-cy="update-hint"
-      >
-        <div class="whitespace-nowrap">
-          <ExternalLink
-            :href="`${releasesUrl}/tag/v${versions.latest.version}`"
-            class="font-semibold"
-            data-cy="latest-version"
-          >
-            {{ versions.latest.version }}
-          </ExternalLink>
-          <br>
-          <span class="text-gray-600 text-12px">{{ t('topNav.released') }} {{ versions.latest.released }}</span>
-        </div>
-        <template #suffix>
-          <span class="rounded-md bg-indigo-50">
-            <span class="font-semibold text-indigo-500 p-5px">
-              Latest
-            </span>
+    <TopNavListItem
+      class="px-16px py-8px min-w-240px"
+      data-cy="update-hint"
+    >
+      <div class="whitespace-nowrap">
+        <ExternalLink
+          :href="`${releasesUrl}/tag/v${versions.latest.version}`"
+          class="font-semibold"
+          data-cy="latest-version"
+        >
+          {{ versions.latest.version }}
+        </ExternalLink>
+        <br>
+        <span class="text-gray-600 text-12px">{{ t('topNav.released') }} {{ versions.latest.released }}</span>
+      </div>
+      <template #suffix>
+        <span class="rounded-md bg-indigo-50">
+          <span class="font-semibold text-indigo-500 p-5px">
+            Latest
           </span>
-        </template>
-      </TopNavListItem>
+        </span>
+      </template>
+    </TopNavListItem>
 
-      <TopNavListItem class="px-16px py-8px min-w-240px pb-12px">
-        <p class="text-gray-600 text-12px py-8px leading-normal">
-          {{ t('topNav.runningOldVersion') }}
-        </p>
-        <Button class="w-full">
-          Update to {{ versions.latest.version }}
-        </Button>
-      </TopNavListItem>
+    <TopNavListItem class="px-16px py-8px min-w-240px pb-12px">
+      <p class="text-gray-600 text-12px py-8px leading-normal">
+        {{ t('topNav.runningOldVersion') }}
+      </p>
+      <Button class="w-full">
+        Update to {{ versions.latest.version }}
+      </Button>
+    </TopNavListItem>
 
-      <TopNavListItem
-        class="bg-yellow-50 px-16px py-8px min-w-240px"
-      >
-        <div class="whitespace-nowrap">
-          <ExternalLink
-            :href="`${releasesUrl}/tag/v${versions.current.version}`"
-            class="font-semibold text-amber-800"
-            data-cy="current-version"
-          >
-            {{ versions.current.version }}
-          </ExternalLink>
-          <br>
-          <span class="text-gray-600 text-12px">{{ t('topNav.released') }} {{ versions.current.released }}</span>
-        </div>
-        <template #suffix>
-          <span class="rounded-md bg-yellow-100">
-            <span class="font-semibold text-amber-800 p-5px">
-              {{ t('topNav.installed') }}
-            </span>
+    <TopNavListItem
+      class="bg-yellow-50 px-16px py-8px min-w-240px"
+    >
+      <div class="whitespace-nowrap">
+        <ExternalLink
+          :href="`${releasesUrl}/tag/v${versions.current.version}`"
+          class="font-semibold text-amber-800"
+          data-cy="current-version"
+        >
+          {{ versions.current.version }}
+        </ExternalLink>
+        <br>
+        <span class="text-gray-600 text-12px">{{ t('topNav.released') }} {{ versions.current.released }}</span>
+      </div>
+      <template #suffix>
+        <span class="rounded-md bg-yellow-100">
+          <span class="font-semibold text-amber-800 p-5px">
+            {{ t('topNav.installed') }}
           </span>
-        </template>
-      </TopNavListItem>
-    </template>
-
-    <template v-else>
-      <TopNavListItem
-        class="bg-jade-50 px-16px py-8px min-w-240px"
-      >
-        <div class="whitespace-nowrap">
-          <ExternalLink
-            :href="`${releasesUrl}/tag/v${versions.current.version}`"
-            class="font-semibold"
-            data-cy="latest-version"
-          >
-            {{ versions.current.version }}
-          </ExternalLink>
-          <br>
-          <span class="text-gray-600 text-12px">{{ t('topNav.released') }} {{ versions.current.released }}</span>
-        </div>
-        <template #suffix>
-          <span class="rounded-md bg-jade-100">
-            <span class="font-semibold text-jade-800 px-5px">
-              {{ t('topNav.latest') }}
-            </span>
-          </span>
-        </template>
-      </TopNavListItem>
-    </template>
+        </span>
+      </template>
+    </TopNavListItem>
 
     <TopNavListItem class="text-center p-16px text-indigo-600">
       <ExternalLink
@@ -100,6 +73,19 @@
       </ExternalLink>
     </TopNavListItem>
   </TopNavList>
+  <ExternalLink
+    :href="`${releasesUrl}/tag/v${versions.latest.version}`"
+    class="text-gray-600 flex items-center gap-8px group hocus:text-indigo-500 hocus:outline-0 outline-transparent"
+    :use-default-hocus="false"
+  >
+    <i-cy-box_x16
+      class="group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50 h-16px w-16px"
+      :class="open ? 'icon-dark-indigo-500 icon-light-indigo-50' : 'icon-dark-gray-500 icon-light-gray-100'"
+    />
+    <span>
+      v{{ versions.latest.version }}
+    </span>
+  </ExternalLink>
 
   <TopNavList v-if="props.gql?.currentProject?.currentBrowser && showBrowsers">
     <template #heading="{ open }">
