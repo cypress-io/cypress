@@ -85,7 +85,7 @@ export class EventManager {
     const rerun = () => {
       if (!this) {
         // if the tests have been reloaded
-        // then nothing to rerun
+        // then there is nothing to rerun
         return
       }
 
