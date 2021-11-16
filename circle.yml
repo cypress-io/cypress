@@ -941,8 +941,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Top level packages
-          command: yarn list typescript
-          # --depth=0 || true
+          command: yarn list --depth=0 || true
       - run:
           name: Build packages
           command: yarn build-prod
@@ -1033,14 +1032,14 @@ jobs:
               echo "This is an external PR, cannot access other services"
               circleci-agent step halt
             fi
-      # - wait-on-circle-jobs:
-      #     job-names: >
-      #       desktop-gui-integration-tests-7x,
-      #       desktop-gui-component-tests,
-      #       cli-visual-tests,
-      #       runner-integration-tests-chrome,
-      #       runner-ct-integration-tests-chrome,
-      #       reporter-integration-tests,
+      - wait-on-circle-jobs:
+          job-names: >
+            desktop-gui-integration-tests-7x,
+            desktop-gui-component-tests,
+            cli-visual-tests,
+            runner-integration-tests-chrome,
+            runner-ct-integration-tests-chrome,
+            reporter-integration-tests
       - run: yarn percy build:finalize
 
   cli-visual-tests:
@@ -2195,7 +2194,6 @@ linux-workflow: &linux-workflow
         context: test-runner:npm-release
         requires:
           - build
-          - percy-finalize
           - npm-eslint-plugin-dev
           - npm-create-cypress-tests
           - npm-react
@@ -2223,6 +2221,12 @@ linux-workflow: &linux-workflow
           - server-unit-tests
           - unit-tests
           - unit-tests-release
+          - desktop-gui-integration-tests-7x,
+          - desktop-gui-component-tests,
+          - cli-visual-tests,
+          - runner-integration-tests-chrome,
+          - runner-ct-integration-tests-chrome,
+          - reporter-integration-tests
 
     # various testing scenarios, like building full binary
     # and testing it on a real project
