@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import Bluebird from 'bluebird'
 import chai, { expect } from 'chai'
 import chaiAsPromised from 'chai-as-promised'
@@ -67,36 +66,16 @@ describe('lib/util/editors', () => {
       sinon.restore()
     })
 
-    it('returns a list of editors on the user\'s system with an "On Computer" option prepended and an "Other" option appended', () => {
-      return getUserEditor().then(({ availableEditors }) => {
-        const names = _.map(availableEditors, 'name')
-
-        expect(names).to.eql(['Finder', 'Sublime Text', 'Visual Studio Code', 'Vim', 'Other'])
-        expect(availableEditors[0]).to.eql({
-          id: 'computer',
-          name: 'Finder',
-          isOther: false,
-          binary: 'computer',
-        })
-
-        expect(availableEditors[4]).to.eql({
-          id: 'other',
-          name: 'Other',
-          isOther: true,
-          binary: '',
-        })
-      })
-    })
-
     it('includes user-set path for "Other" option if available', () => {
       // @ts-ignore
       savedState.create.resolves({
         get () {
-          return { isOther: true, binary: '/path/to/editor' }
+          return { isOther: true, binary: '/path/to/editor', id: 'other' }
         },
       })
 
       return getUserEditor().then(({ availableEditors }) => {
+        console.log(availableEditors)
         expect(availableEditors[4].binary).to.equal('/path/to/editor')
       })
     })
@@ -143,7 +122,7 @@ describe('lib/util/editors', () => {
         })
 
         return getUserEditor(true).then(({ availableEditors, preferredOpener }) => {
-          expect(availableEditors).to.have.length(5)
+          expect(availableEditors).to.have.length(4)
           expect(preferredOpener).to.equal(preferredOpener)
         })
       })
@@ -168,14 +147,14 @@ describe('lib/util/editors', () => {
 
       it('returns available editors if preferred opener has not been saved', () => {
         return getUserEditor(false).then(({ availableEditors, preferredOpener }) => {
-          expect(availableEditors).to.have.length(5)
+          expect(availableEditors).to.have.length(4)
           expect(preferredOpener).to.be.undefined
         })
       })
 
       it('is default', () => {
         return getUserEditor().then(({ availableEditors, preferredOpener }) => {
-          expect(availableEditors).to.have.length(5)
+          expect(availableEditors).to.have.length(4)
           expect(preferredOpener).to.be.undefined
         })
       })
