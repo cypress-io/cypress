@@ -1,6 +1,7 @@
 const fs = require('fs-extra')
 const path = require('path')
 const chokidar = require('chokidar')
+const _fs = require('fs')
 
 const root = path.join(__dirname, '..')
 
@@ -32,7 +33,7 @@ module.exports = {
     const from = path.join(projects, project)
     const to = path.join(tmpDir, project)
 
-    if (fs.existsSync(to)) {
+    if (_fs.existsSync(to)) {
       fs.removeSync(to)
     }
 
