@@ -2455,8 +2455,8 @@ windows-workflow: &windows-workflow
         requires:
           - windows-build
     
-    - build-npm-packages:
-        name: windows-build-npm-packages
+    - build-npm-package:
+        name: windows-build-npm-package
         executor: windows
         requires:
           - windows-build
