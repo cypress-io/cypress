@@ -118,9 +118,7 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         This option will not have an effect in ${_.capitalize(arg1)}. Tests that rely on web security being disabled will not run as expected.`
     case 'BROWSER_NOT_FOUND_BY_NAME':
       str = stripIndent`\
-        Can't run because you've entered an invalid browser name.
-
-        Browser: '${arg1}' was not found on your system or is not supported by Cypress.
+        The specified browser was not found on your system or is not supported by Cypress: \`${arg1}\`
 
         Cypress supports the following browsers:
         - chrome
@@ -132,7 +130,9 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         You can also use a custom browser: https://on.cypress.io/customize-browsers
 
         Available browsers found on your system are:
-        ${arg2}`
+        ${arg2}
+
+        Read more about launching browsers: https://on.cypress.io/launching-browsers`
 
       if (arg1 === 'canary') {
         str += '\n\n'
@@ -145,7 +145,9 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
       return str
     case 'BROWSER_NOT_FOUND_BY_PATH':
       msg = stripIndent`\
-        We could not identify a known browser at the path you provided: \`${arg1}\`
+        We could not identify a known browser at the path you specified: \`${arg1}\`
+
+        Read more about launching browsers: https://on.cypress.io/launching-browsers
 
         The output from the command we ran was:`
 

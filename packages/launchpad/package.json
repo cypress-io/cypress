@@ -5,6 +5,7 @@
   "scripts": {
     "check-ts": "vue-tsc --noEmit",
     "build-prod": "cross-env NODE_ENV=production vite build",
+    "postinstall": "patch-package",
     "clean": "rimraf dist && rimraf ./node_modules/.vite && rimraf dist-e2e && echo 'cleaned'",
     "clean-deps": "rimraf node_modules",
     "test": "yarn cypress:run:ct && yarn types",
@@ -28,6 +29,7 @@
     "@packages/frontend-shared": "0.0.0-development",
     "@percy/cypress": "^3.1.0",
     "@testing-library/cypress": "8.0.0",
+    "@toycode/markdown-it-class": "1.2.4",
     "@urql/core": "2.3.1",
     "@urql/devtools": "2.0.3",
     "@urql/vue": "0.4.3",
@@ -46,6 +48,7 @@
     "graphql-tag": "^2.12.5",
     "gravatar": "1.8.0",
     "javascript-time-ago": "2.3.8",
+    "markdown-it": "12.2.0",
     "rimraf": "3.0.2",
     "rollup-plugin-polyfill-node": "^0.7.0",
     "type-fest": "^2.3.4",
@@ -71,6 +74,11 @@
     "script",
     "src"
   ],
+  "workspaces": {
+    "nohoist": [
+      "@toycode/markdown-it-class"
+    ]
+  },
   "vite": {
     "optimizeDeps": {
       "include": [

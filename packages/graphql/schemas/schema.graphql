@@ -30,6 +30,12 @@ enum BrowserFamily {
   firefox
 }
 
+"""Browser warning"""
+type BrowserWarning {
+  message: String
+  title: String
+}
+
 """
 A CloudOrganization represents an Organization stored in the Cypress Cloud
 """
@@ -571,8 +577,8 @@ type ProjectPreferences {
 type Query {
   baseError: BaseError
 
-  """An error related to finding a browser"""
-  browserErrorMessage: String
+  """A warning related to finding a browser"""
+  browserWarning: BrowserWarning
 
   """Returns an object conforming to the Relay spec"""
   cloudNode(

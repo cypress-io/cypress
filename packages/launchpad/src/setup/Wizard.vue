@@ -1,8 +1,8 @@
 <template>
   <Warning
-    v-if="props.gql.wizard.step === 'setupComplete' && props.gql.browserErrorMessage"
-    title="Browser Error"
-    :message="props.gql.browserErrorMessage"
+    v-if="props.gql.wizard.step === 'setupComplete' && props.gql.browserWarning"
+    :title="props.gql.browserWarning.title"
+    :message="props.gql.browserWarning.message"
   />
   <WizardHeader
     v-if="props.gql.wizard"
@@ -50,7 +50,10 @@ fragment Wizard on Query {
     ...EnvironmentSetup
     ...ConfigFiles
   }
-  browserErrorMessage
+  browserWarning {
+    title
+    message
+  }
   ...InstallDependencies
   ...InitializeConfig_Config
 }`

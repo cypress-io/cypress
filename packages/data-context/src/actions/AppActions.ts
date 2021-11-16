@@ -34,7 +34,12 @@ export class AppActions {
       browser = (await this.ctx._apis.appApi.ensureAndGetByNameOrPath(browserNameOrPath)) as FoundBrowser | undefined
     } catch (err: unknown?) {
       this.ctx.debug('Error getting browser by name or path (%s): %s', browserNameOrPath, err?.stack || err)
-      this.ctx.coreData.wizard.browserErrorMessage = `The browser '${browserNameOrPath}' was not found on your system or is not supported by Cypress. Choose a browser below.`
+      const message = err.details ? `${err.message}\n\n\`\`\`\n${err.details}\n\`\`\`` : err.message
+
+      this.ctx.coreData.wizard.browserWarning = {
+        title: 'Browser Warning',
+        message,
+      }
     }
 
     if (browser) {
