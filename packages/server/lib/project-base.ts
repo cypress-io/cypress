@@ -124,6 +124,7 @@ export class ProjectBase<TServer extends Server> extends EE {
       ...options,
     }
 
+    this.ctx.actions.projectConfig.killConfigProcess()
     this.ctx.actions.project.setCurrentProjectProperties({
       projectRoot: this.projectRoot,
       configChildProcess: null,
