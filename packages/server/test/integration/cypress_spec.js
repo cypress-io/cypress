@@ -543,8 +543,9 @@ describe('lib/cypress', () => {
     it('scaffolds out support + files if they do not exist', function () {
       const supportFolder = path.join(this.pristineWithConfigPath, 'cypress/support')
 
-      return ctx.actions.project.setActiveProjectForTestSetup(this.pristineWithConfigPath)
-      .then(() => config.get(this.pristineWithConfigPath))
+      ctx.actions.project.setActiveProjectForTestSetup(this.pristineWithConfigPath)
+
+      return config.get(this.pristineWithConfigPath)
       .then(() => {
         return fs.statAsync(supportFolder)
         .then(() => {
@@ -564,7 +565,7 @@ describe('lib/cypress', () => {
     it('removes fixtures when they exist and fixturesFolder is false', function (done) {
       ctx.actions.project.setActiveProjectForTestSetup(this.idsPath)
 
-      return config.get(this.idsPath)
+      config.get(this.idsPath)
       .then((cfg) => {
         this.cfg = cfg
 
