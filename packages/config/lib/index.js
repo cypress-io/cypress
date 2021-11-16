@@ -103,9 +103,7 @@ module.exports = {
   },
 
   validateNoReadOnlyConfig: (func) => {
-    let writeableOptions = options.filter((option) => option.isWriteable).map((option) => option.name)
-
-    writeableOptions = [...writeableOptions, 'testConfigList', 'unverifiedTestConfig']
+    const writeableOptions = options.filter((option) => option.isWriteable).map((option) => option.name)
 
     return function (...args) {
       switch (args.length) {
