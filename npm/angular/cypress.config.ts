@@ -9,5 +9,6 @@ export default defineConfig({
   'component': {
     'componentFolder': 'src/app',
     'testFiles': '**/*cy-spec.ts',
+    'setupNodeEvents': require('./cypress/plugins'),
   },
 })

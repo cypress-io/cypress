@@ -174,7 +174,7 @@ export async function writeProjectId ({ id, projectRoot, configFile }: ProjectId
   // TODO: We need to set this
   // this.generatedProjectIdTimestamp = new Date()
 
-  await settings.write(projectRoot, attrs, { configFile })
+  await settings.writeOnly(projectRoot, attrs, { configFile })
 
   return id
 }

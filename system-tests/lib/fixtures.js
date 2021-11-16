@@ -1,3 +1,4 @@
+const _fs = require('fs')
 const fs = require('fs-extra')
 const path = require('path')
 const chokidar = require('chokidar')
