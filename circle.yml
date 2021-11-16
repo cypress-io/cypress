@@ -2425,6 +2425,7 @@ windows-workflow: &windows-workflow
         only-cache-for-root-user: true
 
     - build:
+        name: windows-build
         executor: windows
         requires:
           - windows-node-modules-install
