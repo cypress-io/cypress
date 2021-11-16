@@ -18,6 +18,7 @@ const debug = Debug('cypress:server:config')
 
 import { options, breakingOptions } from './config_options'
 import { getProcessEnvVars, CYPRESS_SPECIAL_ENV_VARS } from './util/config'
+import type { DataContext } from '@packages/data-context'
 
 const dashesOrUnderscoresRe = /^(_-)+/
 
@@ -185,9 +186,13 @@ export type FullConfig =
     resolved: ResolvedConfigurationOptions
   }
 
-export function get (projectRoot, options: {configFile?: string | false } = { configFile: undefined }): Promise<FullConfig> {
+export function get (
+  projectRoot,
+  options: { configFile?: string | false } = { configFile: undefined },
+  ctx: DataContext,
+): Promise<FullConfig> {
   return Promise.all([
-    settings.read(projectRoot, options).then(validateFile(options.configFile ?? 'cypress.config.{ts|js}')),
+    settings.read(projectRoot, options, ctx).then(validateFile(options.configFile ?? 'cypress.config.{ts|js}')),
     settings.readEnv(projectRoot).then(validateFile('cypress.env.json')),
   ])
   .spread((settings, envFile) => {
@@ -298,7 +303,6 @@ export function mergeDefaults (config: Record<string, any> = {}, options: Record
   validateNoBreakingConfig(config)
 
   return setSupportFileAndFolder(config)
-  .then(setPluginsFile)
   .then(setScaffoldPaths)
   .then(_.partialRight(setNodeBinary, options.onWarning))
 }
@@ -342,10 +346,10 @@ export function updateWithPluginValues (cfg, overrides) {
   // make sure every option returned from the plugins file
   // passes our validation functions
   validate(overrides, (errMsg) => {
-    if (cfg.pluginsFile && cfg.projectRoot) {
-      const relativePluginsPath = path.relative(cfg.projectRoot, cfg.pluginsFile)
+    if (cfg.configFile && cfg.projectRoot) {
+      const relativeConfigPath = path.relative(cfg.projectRoot, cfg.configFile)
 
-      return errors.throw('PLUGINS_CONFIG_VALIDATION_ERROR', relativePluginsPath, errMsg)
+      return errors.throw('PLUGINS_CONFIG_VALIDATION_ERROR', relativeConfigPath, errMsg)
     }
 
     return errors.throw('CONFIG_VALIDATION_ERROR', errMsg)
@@ -552,63 +556,6 @@ export function setSupportFileAndFolder (obj) {
     return obj
   })
 }
-
-// set pluginsFile to an absolute path with the following rules:
-// - do nothing if pluginsFile is falsey
-// - look up the absolute path via node, so 'cypress/plugins' can resolve
-//   to 'cypress/plugins/index.js' or 'cypress/plugins/index.coffee'
-// - if not found
-//   * and the pluginsFile is set to the default
-//     - and the path to the pluginsFile directory exists
-//       * assume the user doesn't need a pluginsFile, set it to false
-//         so it's ignored down the pipeline
-//     - and the path to the pluginsFile directory does not exist
-//       * set it to cypress/plugins/index.js, it will get scaffolded
-//   * and the pluginsFile is NOT set to the default
-//     - throw an error, because it should be there if the user
-//       explicitly set it
-export const setPluginsFile = Promise.method((obj) => {
-  if (!obj.pluginsFile) {
-    return obj
-  }
-
-  obj = _.clone(obj)
-
-  const {
-    pluginsFile,
-  } = obj
-
-  debug(`setting plugins file ${pluginsFile}`)
-  debug(`for project root ${obj.projectRoot}`)
-
-  return Promise
-  .try(() => {
-    // resolve full path with extension
-    obj.pluginsFile = utils.resolveModule(pluginsFile)
-
-    return debug(`set pluginsFile to ${obj.pluginsFile}`)
-  }).catch({ code: 'MODULE_NOT_FOUND' }, () => {
-    debug('plugins module does not exist %o', { pluginsFile })
-
-    const isLoadingDefaultPluginsFile = pluginsFile === path.resolve(obj.projectRoot, defaultValues.pluginsFile)
-
-    return utils.discoverModuleFile({
-      filename: pluginsFile,
-      isDefault: isLoadingDefaultPluginsFile,
-      projectRoot: obj.projectRoot,
-    })
-    .then((result) => {
-      if (result === null) {
-        return errors.throw('PLUGINS_FILE_ERROR', path.resolve(obj.projectRoot, pluginsFile))
-      }
-
-      debug('setting plugins file to %o', { result })
-      obj.pluginsFile = result
-
-      return obj
-    })
-  }).return(obj)
-})
 
 export function setParentTestsPaths (obj) {
   // projectRoot:              "/path/to/project"

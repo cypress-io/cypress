@@ -26,7 +26,7 @@ export class VersionsDataSource {
    * }
    */
   async versions (): Promise<VersionData> {
-    const currentCypressVersion = require('cypress/package.json')
+    const currentCypressVersion = require('@packages/root')
     const result = await execa(`npm`, [`view`, `cypress`, `time`, `--json`])
 
     const json = JSON.parse(result.stdout)
