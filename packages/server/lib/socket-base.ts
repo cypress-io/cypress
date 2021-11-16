@@ -520,7 +520,7 @@ export class SocketBase {
   }
 
   close () {
-    return this.io.close()
+    return this._io?.close()
   }
 
   sendSpecList (specs, testingType: Cypress.TestingType) {
