@@ -23,7 +23,7 @@
         />
         <Icon
           v-else
-          n="IconTerminal"
+          :icon="IconTerminal"
           class="text-gray-600 text-md"
         />
       </template>
@@ -51,20 +51,14 @@ import Sublime from '~icons/logos/sublimetext-icon'
 import Emacs from '~icons/logos/emacs'
 import IconTerminal from '~icons/mdi/terminal'
 import { gql } from '@urql/core'
-import type { ExternalEditorSettingsFragment } from '../../generated/graphql'
+import { ExternalEditorSettingsFragment, SetPreferredEditorDocument } from '../../generated/graphql'
 import type { EditorId } from '@packages/types/src/editors'
 import { useMutation } from '@urql/vue'
-import { SetPreferredEditorDocument } from '@packages/data-context/src/gen/all-operations.gen'
 
-interface EditorItem {
-  name: string
-  key: string
-  binary: string | null
-  icon: FunctionalComponent<SVGAttributes, {}>
-}
+type ExternalEditor = ExternalEditorSettingsFragment['editors'][number]
 
-// @ts-ignore (lachlan): add all icons for all editors
-const icons: Record<EditorId, EditorItem['icon']> = {
+// @ts-ignore (lachlan): add all icons for all editors such as RubyMine, etc
+const icons: Record<EditorId, FunctionalComponent<SVGAttributes, {}>> = {
   'code': VSCode,
   'webstorm': Webstorm,
   'atom': Atom,
@@ -100,9 +94,8 @@ const props = defineProps<{
   gql: ExternalEditorSettingsFragment
 }>()
 
-type ExternalEditor = ExternalEditorSettingsFragment['editors'][number]
-
 const { t } = useI18n()
+
 const selectedEditor = ref<ExternalEditor | undefined>(undefined)
 
 const updateEditor = async (editor: ExternalEditor) => {
