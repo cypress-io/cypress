@@ -17,7 +17,7 @@ import {
   BrowserDataSource,
   StorybookDataSource,
   CloudDataSource,
-  ConfigDataSource,
+  ProjectConfigDataSource,
   EnvDataSource,
   GraphQLDataSource,
   HtmlDataSource,
@@ -42,7 +42,7 @@ export interface DataContextConfig {
   os: PlatformName
   launchArgs: LaunchArgs
   launchOptions: OpenProjectLaunchOptions
-  electronApp: ElectronApp
+  electronApp?: ElectronApp
   /**
    * Default is to
    */
@@ -91,6 +91,8 @@ export class DataContext {
       this.actions.app.refreshBrowsers(),
       // load the cached user & validate the token on start
       this.actions.auth.getUser(),
+
+      this.actions.app.refreshNodePathAndVersion(),
     ]
 
     if (this._config._internalOptions.loadCachedProjects) {
@@ -153,6 +155,10 @@ export class DataContext {
     return this.coreData.app.browsers
   }
 
+  get nodePathAndVersion () {
+    return this.coreData.app.nodePathAndVersion
+  }
+
   get baseError () {
     return this.coreData.baseError
   }
@@ -196,7 +202,7 @@ export class DataContext {
 
   @cached
   get config () {
-    return new ConfigDataSource(this)
+    return new ProjectConfigDataSource(this)
   }
 
   @cached

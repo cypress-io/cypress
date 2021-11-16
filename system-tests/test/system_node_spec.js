@@ -18,6 +18,7 @@ describe('e2e system node', () => {
         return systemTests.exec(this, {
           project: systemNode,
           config: {
+            nodeVersion: 'system',
             env: {
               expectedNodeVersion,
               expectedNodePath,
