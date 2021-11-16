@@ -262,6 +262,8 @@ export class Header extends Component<HeaderProps> {
 
     if (!this._studioNeedsUrl) return
 
+    // TODO: studio/studio-recorder.js should be converted to ts. And add proper type.
+    // @ts-ignore
     studioRecorder.visitUrl(this.urlInput)
 
     this.urlInput = ''
