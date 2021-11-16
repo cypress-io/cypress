@@ -14,6 +14,6 @@ export default defineConfig({
   component: {
     devServer,
     componentFolder: 'src',
-    testFiles: '**/*spec.tsx',
+    specPattern: '**/*spec.tsx',
   },
 })

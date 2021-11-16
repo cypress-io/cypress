@@ -8,6 +8,6 @@ export default defineConfig({
   component: {
     devServer,
     componentFolder: 'src',
-    testFiles: '**/*cy-spec.tsx',
+    specPattern: '**/*cy-spec.tsx',
   },
 })

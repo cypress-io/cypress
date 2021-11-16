@@ -16,6 +16,6 @@ module.exports = defineConfig({
   component: {
     devServer,
     componentFolder: 'src',
-    testFiles: '**/*cy-spec.js',
+    specPattern: '**/*cy-spec.js',
   },
 })

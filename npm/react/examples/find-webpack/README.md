@@ -35,7 +35,7 @@ module.exports = defineConfig({
 })
 ```
 
-Here we are adding some Component Testing specific options, hence the `"component"` key. `"componentFolder"` is where all the components and tests are located, and `"testFiles"` is the pattern to search for test files.
+Here we are adding some Component Testing specific options, hence the `"component"` key. `"componentFolder"` is where all the components and tests are located, and `"specPattern"` is the pattern to search for test files.
 
 The last thing we need to is tell Cypress to use `@cypress/webpack-dev-server` for component tests. Plugins are explained in detail in the [Cypress documentation](https://docs.cypress.io/guides/tooling/plugins-guide#Installing-plugins). Now add:
 

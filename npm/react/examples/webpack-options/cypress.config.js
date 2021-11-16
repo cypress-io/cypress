@@ -42,7 +42,7 @@ module.exports = defineConfig({
   component: {
     devServer,
     devServerConfig: webpackConfig,
-    testFiles: '**/*cy-spec.js',
+    specPattern: '**/*cy-spec.js',
     setupNodeEvents (on, config) {
       process.env.BABEL_ENV = 'test' // this is required to load commonjs babel plugin
 

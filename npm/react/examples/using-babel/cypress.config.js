@@ -14,6 +14,6 @@ module.exports = defineConfig({
   component: {
     devServer,
     componentFolder: 'src',
-    testFiles: '**/*spec.js',
+    specPattern: '**/*spec.js',
   },
 })

@@ -7,6 +7,6 @@ module.exports = defineConfig({
   pluginsFile: 'cypress/plugins.js',
   component: {
     componentFolder: 'cypress/components',
-    testFiles: '**/*.spec.{js,jsx}',
+    specPattern: '**/*.spec.{js,jsx}',
   }
 })
