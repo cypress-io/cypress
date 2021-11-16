@@ -4,7 +4,6 @@ export default defineConfig({
   'projectId': 'sehy69',
   'viewportWidth': 800,
   'viewportHeight': 850,
-  'fixturesFolder': false,
   'retries': {
     'runMode': 2,
     'openMode': 0,

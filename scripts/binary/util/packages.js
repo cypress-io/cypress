@@ -50,6 +50,7 @@ const createCLIExecutable = (command) => {
 const yarn = createCLIExecutable('yarn')
 const npx = createCLIExecutable('npx')
 
+const runAllBuildUI = _.partial(npx, ['lerna', 'run', 'build-prod-ui'])
 const runAllBuild = _.partial(npx, ['lerna', 'run', 'build-prod', '--ignore', 'cli'])
 
 // removes transpiled JS files in the original package folders
@@ -271,6 +272,8 @@ const npmInstallAll = function (pathToPackages) {
 }
 
 module.exports = {
+  runAllBuildUI,
+
   runAllBuild,
 
   copyAllToDist,

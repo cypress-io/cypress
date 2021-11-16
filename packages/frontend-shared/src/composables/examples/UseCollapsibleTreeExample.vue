@@ -1,10 +1,4 @@
 <template>
-  <button @click="expand">
-    Expand
-  </button>
-  <button @click="collapse">
-    Collapse
-  </button>
   <div
     ref="rootEl"
     class="h-200px overflow-auto"
@@ -23,7 +17,7 @@
       @click="onRowClick(row, idx)"
       @keypress.enter.space.prevent="onRowClick(row, idx)"
     >
-      {{ row.value ? `${row.label}: ${row.value}` : row.label }}
+      {{ row.name ? `${row.label}: ${row.name}` : row.label }}
     </div>
   </div>
 </template>
@@ -34,23 +28,30 @@ import faker from 'faker'
 import { Ref, ref, computed } from 'vue'
 import { useListNavigation } from '../../composables/useListNavigation'
 
-const contacts = Array.from(new Array(3).keys()).map(() => {
+type ExampleNode = {
+  children: ExampleNode[]
+  name: string
+  id: string
+  label: string
+}
+
+const contacts: ExampleNode[] = Array.from(new Array(3).keys()).map(() => {
   return {
-    value: faker.name.firstName(),
+    name: faker.name.firstName(),
     label: 'Contact Details',
     id: faker.datatype.uuid(),
     children: [
-      { id: faker.datatype.uuid(), value: faker.name.jobDescriptor(), label: 'Job Descriptor' },
-      { id: faker.datatype.uuid(), value: faker.name.jobTitle(), label: 'Job Title' },
-      { id: faker.datatype.uuid(), value: faker.company.companyName(), label: 'Company Name' },
+      { id: faker.datatype.uuid(), name: faker.name.jobDescriptor(), label: 'Job Descriptor', children: [] },
+      { id: faker.datatype.uuid(), name: faker.name.jobTitle(), label: 'Job Title', children: [] },
+      { id: faker.datatype.uuid(), name: faker.company.companyName(), label: 'Company Name', children: [] },
     ],
   }
 })
 
-const root = {
+const root: ExampleNode = {
   children: contacts,
   label: 'All Contacts',
-  value: '',
+  name: '',
   id: faker.datatype.uuid(),
 }
 
@@ -61,7 +62,7 @@ const onRowClick = (row, idx) => {
 
 const rootEl: Ref<HTMLElement | undefined> = ref()
 
-const { tree, expand, collapse } = useCollapsibleTree(root)
+const { tree } = useCollapsibleTree(root)
 const filteredTree = computed(() => tree.filter(((item) => !item.hidden.value)))
 
 const { selectedItem, rowProps } = useListNavigation(rootEl)
