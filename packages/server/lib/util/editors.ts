@@ -3,7 +3,7 @@ import Bluebird from 'bluebird'
 import debugModule from 'debug'
 
 import { Editor, osFileSystemExplorer, EditorsResult, CyEditor } from '@packages/types'
-import { 
+import {
   getEnvEditors,
 } from './env-editors'
 import shell from './shell'
@@ -15,14 +15,14 @@ const createEditor = (editor: Editor): CyEditor => {
   return {
     id: editor.id,
     name: editor.name,
-    openerId: editor.binary,
+    binary: editor.binary,
     isOther: false,
   }
 }
 
 const getOtherEditor = (preferredOpener?: CyEditor): CyEditor => {
   // if preferred editor is the 'other' option, use it since it has the
-  // path (openerId) saved with it
+  // path (binary) saved with it
   if (preferredOpener && preferredOpener.isOther) {
     return preferredOpener
   }
@@ -30,7 +30,7 @@ const getOtherEditor = (preferredOpener?: CyEditor): CyEditor => {
   return {
     id: 'other',
     name: 'Other',
-    openerId: null,
+    binary: null,
     isOther: true,
   }
 }
@@ -39,7 +39,7 @@ const computerOpener = (): CyEditor => {
   return {
     id: 'computer',
     name: osFileSystemExplorer[process.platform] || osFileSystemExplorer.linux,
-    openerId: 'computer',
+    binary: 'computer',
     isOther: false,
   }
 }
@@ -90,11 +90,10 @@ export const getUserEditor = async (alwaysIncludeEditors = false): Promise<Edito
   })
 }
 
-export const setUserEditor = (editor) => {
+export const setUserEditor = async (editor: Editor) => {
   debug('set user editor: %o', editor)
 
-  return savedState.create()
-  .then((state) => {
-    state.set('preferredOpener', editor)
-  })
+  const state = await savedState.create()
+
+  state.set('preferredOpener', editor)
 }

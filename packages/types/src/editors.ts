@@ -206,31 +206,30 @@ export interface Editor {
   name: EditorName
 }
 
-export type EditorName = 
+export type EditorName =
   | typeof linuxEditors[number]['name']
   | typeof macOSEditors[number]['name']
   | typeof windowsEditors[number]['name']
   | 'Other'
 
+export type Editorbinary = EditorBinary | 'computer' | null
 
-export type EditorOpenerId = EditorBinary | 'computer' | null
-
-export type EditorId = 
+export type EditorId =
   | typeof linuxEditors[number]['id']
   | typeof macOSEditors[number]['id']
   | typeof windowsEditors[number]['id']
-  | 'other' 
+  | 'other'
   | 'computer'
 
-export type EditorBinary = 
+export type EditorBinary =
   | typeof linuxEditors[number]['binary']
   | typeof macOSEditors[number]['binary']
   | typeof windowsEditors[number]['binary']
 
 export interface CyEditor {
-  id: EditorId 
+  id: EditorId
   name: EditorName
-  openerId: EditorOpenerId
+  binary: Editorbinary
   isOther: boolean
 }
 
@@ -238,4 +237,3 @@ export interface EditorsResult {
   preferredOpener?: CyEditor
   availableEditors: CyEditor[]
 }
-

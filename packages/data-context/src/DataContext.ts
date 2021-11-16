@@ -19,6 +19,7 @@ import {
   CloudDataSource,
   ConfigDataSource,
   EnvDataSource,
+  EditorDataSource,
   GraphQLDataSource,
   HtmlDataSource,
   UtilDataSource,
@@ -30,7 +31,6 @@ import type { AddressInfo } from 'net'
 import EventEmitter from 'events'
 import type { App as ElectronApp } from 'electron'
 import { VersionsDataSource } from './sources/VersionsDataSource'
-import { EditorDataSource } from './sources/EditorDataSource'
 import type { EditorApiShape } from './actions/EditorActions'
 
 const IS_DEV_ENV = process.env.CYPRESS_INTERNAL_ENV !== 'production'
@@ -167,6 +167,11 @@ export class DataContext {
   @cached
   get file () {
     return new FileDataSource(this)
+  }
+
+  @cached
+  get editor () {
+    return new EditorDataSource(this)
   }
 
   @cached

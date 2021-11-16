@@ -7,25 +7,27 @@
       {{ t('settingsPage.editor.description') }}
     </template>
     <Select
-      v-model="selectedEditor"
+      :model-value="selectedEditor"
       :options="externalEditors"
       item-value="name"
+      item-key="id"
       :placeholder="t('settingsPage.editor.noEditorSelectedPlaceholder')"
       class="w-300px"
+      @update:model-value="updateEditor"
     >
       <template #input-prefix="{ value }">
         <Icon
           v-if="value"
-          :icon="value.icon"
+          :icon="icons[value.id]"
           class="text-md"
         />
         <Icon
           v-else
-          :icon="IconTerminal"
+          n="IconTerminal"
           class="text-gray-600 text-md"
         />
       </template>
-      <template #item-prefix="{value}">
+      <template #item-prefix="{ value }">
         <Icon
           :icon="value.icon"
           class="text-md"
@@ -36,7 +38,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, FunctionalComponent, ref, SVGAttributes } from 'vue'
+import { computed, FunctionalComponent, ref, SVGAttributes, watchEffect } from 'vue'
 import Icon from '@cy/components/Icon.vue'
 import SettingsSection from '../SettingsSection.vue'
 import { useI18n } from '@cy/i18n'
@@ -51,10 +53,13 @@ import IconTerminal from '~icons/mdi/terminal'
 import { gql } from '@urql/core'
 import type { ExternalEditorSettingsFragment } from '../../generated/graphql'
 import type { EditorId } from '@packages/types/src/editors'
+import { useMutation } from '@urql/vue'
+import { SetPreferredEditorDocument } from '@packages/data-context/src/gen/all-operations.gen'
 
 interface EditorItem {
   name: string
   key: string
+  binary: string | null
   icon: FunctionalComponent<SVGAttributes, {}>
 }
 
@@ -70,29 +75,48 @@ const icons: Record<EditorId, EditorItem['icon']> = {
   'emacs': Emacs,
 }
 
-// TODO, grab these from gql or the user's machine.
-const externalEditors = computed((): EditorItem[] => 
-  props.gql.editors.map(editor => ({
-    key: editor.id,
-    name: editor.name,
-    icon: icons[editor.id]
-  }))
-)
+const externalEditors = computed(() => {
+  return props.gql.editors.map((x) => ({ ...x, icon: icons[x.id] }))
+})
+
+gql`
+mutation SetPreferredEditor ($binary: String!) {
+  setPreferredEditor (binary: $binary)
+}`
 
 gql`
 fragment ExternalEditorSettings on Query {
   editors {
     id
     name
-    openerId
+    binary
+    isPreferred
   }
 }`
 
+const setPreferredEditor = useMutation(SetPreferredEditorDocument)
 
 const props = defineProps<{
   gql: ExternalEditorSettingsFragment
 }>()
 
+type ExternalEditor = ExternalEditorSettingsFragment['editors'][number]
+
 const { t } = useI18n()
-const selectedEditor = ref<Record<string, any>>()
+const selectedEditor = ref<ExternalEditor | undefined>(undefined)
+
+const updateEditor = async (editor: ExternalEditor) => {
+  if (!editor?.binary) {
+    return
+  }
+
+  await setPreferredEditor.executeMutation({ binary: editor.binary })
+  selectedEditor.value = editor
+}
+
+watchEffect(() => {
+  const preferred = props.gql.editors.find((x) => x.isPreferred)
+
+  selectedEditor.value = preferred
+})
 </script>

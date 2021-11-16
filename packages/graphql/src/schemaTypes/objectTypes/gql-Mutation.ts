@@ -300,6 +300,25 @@ export const mutation = mutationType({
       },
     })
 
+    t.nonNull.field('setPreferredEditor', {
+      type: 'Boolean',
+      description: 'set preferred editor',
+      args: {
+        binary: nonNull(stringArg()),
+      },
+      resolve: async (_, args, ctx) => {
+        const editor = ctx.coreData.editor.all.find((x) => x.binary === args.binary)
+
+        if (!editor) {
+          return false
+        }
+
+        await ctx.actions.editor.setPreferredEditor(editor)
+
+        return true
+      },
+    })
+
     t.liveMutation('showElectronOnAppExit', {
       description: 'show the launchpad at the browser picker step',
       resolve: (_, args, ctx) => {

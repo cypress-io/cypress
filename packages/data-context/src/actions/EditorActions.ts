@@ -1,14 +1,19 @@
 import type { DataContext } from '..'
-import type { EditorsResult } from '@packages/types'
+import type { Editor, EditorsResult } from '@packages/types'
 
 export interface EditorApiShape {
   getAllEditors (): Promise<EditorsResult>
+  setPreferredEditor (editor: Editor): Promise<void>
 }
 
 export class EditorActions {
   constructor (private ctx: DataContext) { }
 
-  getAllEditors (url: string) {
+  getAllEditors () {
     return this.ctx.editorApi.getAllEditors()
+  }
+
+  async setPreferredEditor (editor: Editor) {
+    return this.ctx.editorApi.setPreferredEditor(editor)
   }
 }

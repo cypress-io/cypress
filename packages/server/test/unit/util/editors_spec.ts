@@ -76,14 +76,14 @@ describe('lib/util/editors', () => {
           id: 'computer',
           name: 'Finder',
           isOther: false,
-          openerId: 'computer',
+          binary: 'computer',
         })
 
         expect(availableEditors[4]).to.eql({
           id: 'other',
           name: 'Other',
           isOther: true,
-          openerId: '',
+          binary: '',
         })
       })
     })
@@ -92,12 +92,12 @@ describe('lib/util/editors', () => {
       // @ts-ignore
       savedState.create.resolves({
         get () {
-          return { isOther: true, openerId: '/path/to/editor' }
+          return { isOther: true, binary: '/path/to/editor' }
         },
       })
 
       return getUserEditor().then(({ availableEditors }) => {
-        expect(availableEditors[4].openerId).to.equal('/path/to/editor')
+        expect(availableEditors[4].binary).to.equal('/path/to/editor')
       })
     })
 

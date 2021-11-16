@@ -15,7 +15,7 @@ import errors from './errors'
 import { graphqlSchema } from '@packages/graphql/src/schema'
 import type { InternalDataContextOptions } from '@packages/data-context/src/DataContext'
 import { openExternal } from '@packages/server/lib/gui/links'
-import { getUserEditor } from './util/editors'
+import { getUserEditor, setUserEditor } from './util/editors'
 
 const { getBrowsers, ensureAndGetByNameOrPath } = browserUtils
 
@@ -123,7 +123,10 @@ export function makeDataContext (options: MakeDataContextOptions) {
     editorApi: {
       getAllEditors (): Promise<EditorsResult> {
         return getUserEditor(true)
-      } 
-    }
+      },
+      setPreferredEditor (editor) {
+        return setUserEditor(editor)
+      },
+    },
   })
 }

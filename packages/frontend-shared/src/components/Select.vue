@@ -155,13 +155,9 @@ import { useI18n } from '@cy/i18n'
 
 const { t } = useI18n()
 
-interface Option {
-  [key: string]: any
-}
-
 const props = withDefaults(defineProps<{
-  options: Option[],
-  modelValue?: Option // Current object being selected
+  options: any[],
+  modelValue?: any // Current object being selected
   placeholder?: string
   label?: string
   itemValue?: string // The key of the modelValue to render
@@ -175,10 +171,10 @@ const props = withDefaults(defineProps<{
 })
 
 const emit = defineEmits<{
-  (event: 'update:modelValue', value: Option)
+  (event: 'update:modelValue', value: any)
 }>()
 
-const handleUpdate = (value: Option) => {
+const handleUpdate = (value: any) => {
   emit('update:modelValue', value)
 }
 </script>

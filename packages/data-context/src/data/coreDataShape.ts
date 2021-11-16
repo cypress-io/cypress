@@ -1,5 +1,5 @@
 import { BUNDLERS, FoundBrowser, FoundSpec, FullConfig, Preferences } from '@packages/types'
-import type { NexusGenEnums, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
+import type { NexusGenEnums, NexusGenObjects, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
 import type { BrowserWindow } from 'electron'
 import type { ChildProcess } from 'child_process'
 
@@ -17,6 +17,10 @@ export interface ProjectShape {
 
 export interface DevStateShape {
   refreshState: null | string
+}
+
+export interface EditorDataShape {
+  all: NexusGenObjects['Editor'][]
 }
 
 export interface ConfigChildProcessShape {
@@ -70,6 +74,7 @@ export interface BaseErrorDataShape {
 export interface CoreDataShape {
   baseError: BaseErrorDataShape | null
   dev: DevStateShape
+  editor: EditorDataShape
   app: AppDataShape
   currentProject: ActiveProjectShape | null
   wizard: WizardDataShape
@@ -92,6 +97,9 @@ export function makeCoreData (): CoreDataShape {
       refreshingBrowsers: null,
       browsers: null,
       projects: [],
+    },
+    editor: {
+      all: [],
     },
     isAuthBrowserOpened: false,
     currentProject: null,

@@ -346,13 +346,15 @@ type DevState {
 
 """Represents an editor on the local machine"""
 type Editor {
+  """Binary that opens the editor"""
+  binary: String
   id: String!
+
+  """whether this is the user's preferred editor"""
+  isPreferred: Boolean!
 
   """name of editor"""
   name: String!
-
-  """Binary that opens the editor"""
-  openerId: String
 }
 
 """Represents a spec on the file system"""
@@ -493,6 +495,9 @@ type Mutation {
 
   """Set active project to run tests on"""
   setActiveProject(path: String!): Boolean
+
+  """set preferred editor"""
+  setPreferredEditor(binary: String!): Boolean!
 
   """Save the projects preferences to cache"""
   setProjectPreferences(browserPath: String!, testingType: TestingTypeEnum!): Query!

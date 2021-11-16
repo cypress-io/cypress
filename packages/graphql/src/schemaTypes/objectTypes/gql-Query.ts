@@ -69,9 +69,13 @@ export const Query = objectType({
       type: Editor,
       description: 'editors on the user local machine',
       resolve: async (source, args, ctx) => {
-        const { availableEditors } = await ctx.editorApi.getAllEditors()
-        return availableEditors
-      }
+        // const editors = await ctx._apis.appApi.getBrowsers()
+        const { availableEditors, preferredOpener } = await ctx._apis.editorApi.getAllEditors()
+
+        ctx.coreData.editor.all = availableEditors.map((x) => ({ ...x, isPreferred: x.binary === preferredOpener?.binary ?? false }))
+
+        return ctx.coreData.editor.all
+      },
     })
   },
 })
