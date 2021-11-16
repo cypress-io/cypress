@@ -1,5 +1,4 @@
 <template>
-  <div>asdfasf</div>
   <SettingsSection>
     <template #title>
       {{ t('settingsPage.editor.title') }}

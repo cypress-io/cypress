@@ -189,11 +189,6 @@ export class DataContext {
     return new BrowserDataSource(this)
   }
 
-  @cached
-  get editor () {
-    return new LocalSettingsSource(this)
-  }
-
   /**
    * All mutations (update / delete / create), fs writes, etc.
    * should run through this namespace. Everything else should be a "getter"
