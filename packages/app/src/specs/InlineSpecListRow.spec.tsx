@@ -2,27 +2,16 @@ import type { FoundSpec } from '@packages/types/src'
 import InlineSpecListRow from './InlineSpecListRow.vue'
 
 describe('InlineSpecListRow', () => {
-  const specFileExtension = '.spec.tsx'
-  const relativeFolder = 'src/components'
-  const specs: FoundSpec[] = ['Spec-A', 'Spec-B', 'Spec-C'].map((fileName) => {
-    const baseName = fileName + specFileExtension
+  let specs: FoundSpec[]
 
-    return {
-      baseName,
-      fileName,
-      specFileExtension,
-      relative: `${relativeFolder}/${baseName}`,
-      absolute: '',
-      fileExtension: '.tsx',
-      specType: 'component',
-      name: '',
-    }
+  before(() => {
+    cy.fixture('found-specs').then((foundSpecs) => specs = foundSpecs)
   })
 
   it('should handle keyboard navigation', () => {
     cy.mount(() =>
       (<div class="bg-gray-1000">
-        {specs.map((spec) => (<InlineSpecListRow data-cy="row" spec={spec} selected={false}/>))}
+        {specs.slice(0, 3).map((spec) => (<InlineSpecListRow data-cy="row" spec={spec} selected={false}/>))}
       </div>))
 
     cy.get('a')
@@ -43,9 +32,12 @@ describe('InlineSpecListRow', () => {
   })
 
   it('should show relative path on hover', () => {
+    const spec = specs[0]
+    const relativeFolder = spec.relative.replace(`/${spec.baseName}`, '')
+
     cy.mount(() =>
       (<div class="bg-gray-1000">
-        <InlineSpecListRow data-cy="row" spec={specs[0]} selected={false}/>
+        <InlineSpecListRow data-cy="row" spec={spec} selected={false}/>
       </div>))
 
     cy.findByText(relativeFolder).should('not.be.visible')

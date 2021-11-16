@@ -9,19 +9,18 @@
       v-model:search="search"
     />
     <div class="h-[calc(100vh-65px)] overflow-y-auto overflow-x-hidden pt-16px">
-      <template v-if="tab === 'file-list'">
+      <div v-if="tab === 'flat'">
         <InlineSpecListRow
           v-for="spec in specs"
           :key="spec.node.id"
           :spec="spec.node"
           :selected="isCurrentSpec(spec)"
         />
-      </template>
-      <template v-else>
-        <div class="text-white">
-          FileTree not implemented
-        </div>
-      </template>
+      </div>
+      <InlineSpecListTree
+        v-else
+        :specs="specs.map(spec => spec.node)"
+      />
     </div>
   </div>
   <teleport
@@ -51,6 +50,8 @@ import type { SpecNode_InlineSpecListFragment, Specs_InlineSpecListFragment } fr
 import { useSpecStore } from '../store'
 import InlineSpecListHeader from './InlineSpecListHeader.vue'
 import InlineSpecListRow from './InlineSpecListRow.vue'
+import InlineSpecListTree from './InlineSpecListTree.vue'
+import type { SpecViewType } from './SpecsList.vue'
 import { onKeyStroke } from '@vueuse/core'
 import { useI18n } from '@cy/i18n'
 
@@ -65,8 +66,10 @@ fragment SpecNode_InlineSpecList on SpecEdge {
     absolute
     relative
     baseName
+    specFileExtension
+    fileExtension
+    fileName
   }
-  ...SpecListRow
 }
 `
 
@@ -92,7 +95,7 @@ const isCurrentSpec = (spec: SpecNode_InlineSpecListFragment) => {
   return spec.node.relative === specStore.activeSpec?.relative
 }
 
-const tab = ref('file-list')
+const tab = ref<SpecViewType>('flat')
 const search = ref('')
 
 const specs = computed(() => {
