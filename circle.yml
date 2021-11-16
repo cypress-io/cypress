@@ -2448,6 +2448,8 @@ mac-workflow: &mac-workflow
     - build:
         name: darwin-build
         executor: mac
+        environment:
+          NEXT_VERSION=10.0.0
         requires:
           - darwin-node-modules-install
         <<: *macBuildFilters

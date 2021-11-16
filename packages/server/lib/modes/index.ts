@@ -26,6 +26,8 @@ export = (mode, options) => {
   }
 
   if (mode === 'interactive') {
+    // Change default for `cypress open` to be LAUNCHPAD=1
+    process.env.LAUNCHPAD = process.env.LAUNCHPAD === '0' ? '0' : '1'
     if (options.testingType === 'component' && !process.env.LAUNCHPAD) {
       return require('./interactive-ct').run(options)
     }
