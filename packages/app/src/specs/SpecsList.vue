@@ -19,72 +19,43 @@
         </div>
         <div class="flex justify-between items-center">
           <div>{{ t('specPage.gitStatusHeader') }}</div>
-          <SelectSpecListView
-            :model-value="specViewType"
-            class="flex border-1 border-gray-900 rounded-md h-24px w-64px text-md cursor-pointer"
-            @update:tab="updateTab"
-          />
         </div>
       </div>
 
-      <template v-if="specViewType === 'flat'">
-        <RouterLink
-          v-for="spec in flatSpecList"
-          :key="spec.node.id"
-          class="text-left"
-          :to="{ path: 'runner', query: { file: spec.node.relative } }"
-        >
-          <SpecsListRowItem>
-            <template #file>
-              <SpecItem :spec="spec.node" />
-            </template>
-
-            <template #git-info>
-              <SpecListGitInfo
-                v-if="spec.node.gitInfo"
-                :gql="spec.node.gitInfo"
+      <template
+        v-for="(row, idx) in treeSpecList"
+        :key="idx"
+      >
+        <SpecsListRowItem>
+          <template #file>
+            <RouterLink
+              v-if="row.isLeaf && row.data"
+              :key="row.data.absolute"
+              :to="{ path: 'runner', query: { file: row.data?.relative } }"
+            >
+              <SpecItem
+                :spec="row.data"
+                :style="{ paddingLeft: `${((row.depth - 2) * 10) + 16 + 22}px` }"
               />
-            </template>
-          </SpecsListRowItem>
-        </RouterLink>
-      </template>
+            </RouterLink>
 
-      <template v-if="specViewType === 'tree'">
-        <template
-          v-for="(row, idx) in treeSpecList"
-          :key="idx"
-        >
-          <SpecsListRowItem>
-            <template #file>
-              <RouterLink
-                v-if="row.isLeaf && row.data"
-                :key="row.data.absolute"
-                :to="{ path: 'runner', query: { file: row.data?.relative } }"
-              >
-                <SpecItem
-                  :spec="row.data"
-                  :style="{ paddingLeft: `${((row.depth - 2) * 10) + 16 + 22}px` }"
-                />
-              </RouterLink>
+            <RowDirectory
+              v-else
+              :directories="row.name.split('/')"
+              :expanded="row.expanded.value"
+              :depth="row.depth - 2"
+              :style="{ paddingLeft: `${((row.depth - 2) * 10) + 16}px` }"
+              @click="row.toggle"
+            />
+          </template>
 
-              <RowDirectory
-                v-else
-                :directories="row.name.split('/')"
-                :expanded="row.expanded.value"
-                :depth="row.depth - 2"
-                :style="{ paddingLeft: `${((row.depth - 2) * 10) + 16}px` }"
-                @click="row.toggle"
-              />
-            </template>
-
-            <template #git-info>
-              <SpecListGitInfo
-                v-if="row.data?.gitInfo"
-                :gql="row.data.gitInfo"
-              />
-            </template>
-          </SpecsListRowItem>
-        </template>
+          <template #git-info>
+            <SpecListGitInfo
+              v-if="row.data?.gitInfo"
+              :gql="row.data.gitInfo"
+            />
+          </template>
+        </SpecsListRowItem>
       </template>
     </div>
   </div>
@@ -104,7 +75,6 @@ import { useCollapsibleTree } from '@packages/frontend-shared/src/composables/us
 import RowDirectory from './RowDirectory.vue'
 import SpecItem from './SpecItem.vue'
 import type { FoundSpec } from '@packages/types/src'
-import SelectSpecListView from './SelectSpecListView.vue'
 
 const { t } = useI18n()
 
@@ -142,27 +112,12 @@ fragment Specs_SpecsList on Query {
 }
 `
 
-export type SpecViewType = 'flat' | 'tree'
-
 const props = defineProps<{
   gql: Specs_SpecsListFragment
 }>()
 
 const showModal = ref(false)
 const search = ref('')
-const specViewType = ref<SpecViewType>('flat')
-
-const updateTab = (tab: SpecViewType) => {
-  specViewType.value = tab
-}
-
-const flatSpecList = computed(() => {
-  if (search.value) {
-    return props.gql.currentProject?.specs?.edges.filter((x) => x.node.absolute.toLowerCase().includes(search.value.toLowerCase()))
-  }
-
-  return props.gql.currentProject?.specs?.edges
-})
 
 const specTree = computed(() => buildSpecTree<FoundSpec & { gitInfo: SpecListRowFragment }>(props.gql.currentProject?.specs?.edges.map((x) => x.node) || []))
 const collapsible = useCollapsibleTree(specTree.value, { dropRoot: true })
