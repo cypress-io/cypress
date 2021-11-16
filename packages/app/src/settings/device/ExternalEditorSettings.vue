@@ -1,4 +1,5 @@
 <template>
+  <div>asdfasf</div>
   <SettingsSection>
     <template #title>
       {{ t('settingsPage.editor.title') }}
@@ -68,7 +69,7 @@ const icons: Record<EditorId, FunctionalComponent<SVGAttributes, {}>> = {
 }
 
 const externalEditors = computed(() => {
-  return props.gql.localSettings.availableEditors?.map((x) => ({ ...x, icon: icons[x.id] }))
+  return props.gql.localSettings.availableEditors?.map((x) => ({ ...x, icon: icons[x.id] })) || []
 })
 
 gql`

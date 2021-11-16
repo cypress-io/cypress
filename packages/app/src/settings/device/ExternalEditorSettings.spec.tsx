@@ -1,11 +1,34 @@
 import ExternalEditorSettings from './ExternalEditorSettings.vue'
 import { defaultMessages } from '@cy/i18n'
+import { ExternalEditorSettingsFragmentDoc } from '../../generated/graphql-test'
 
 const editorText = defaultMessages.settingsPage.editor
 
 describe('<ExternalEditorSettings />', () => {
   beforeEach(() => {
-    cy.mount(() => <ExternalEditorSettings class="p-12" />)
+    cy.mountFragment(ExternalEditorSettingsFragmentDoc, {
+      onResult: (ctx) => {
+        ctx.localSettings.availableEditors = [
+          {
+            __typename: 'Editor',
+            id: 'code',
+            name: 'VS Code',
+            binary: 'code',
+            isPreferred: false,
+          },
+          {
+            __typename: 'Editor',
+            id: 'vim',
+            name: 'Vim',
+            binary: 'vim',
+            isPreferred: false,
+          },
+        ]
+      },
+      render: (gqlVal) => {
+        return <ExternalEditorSettings gql={gqlVal} />
+      },
+    })
   })
 
   it('renders the placeholder by default', () => {
