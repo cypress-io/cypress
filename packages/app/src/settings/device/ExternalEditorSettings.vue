@@ -51,11 +51,9 @@ import Sublime from '~icons/logos/sublimetext-icon'
 import Emacs from '~icons/logos/emacs'
 import IconTerminal from '~icons/mdi/terminal'
 import { gql } from '@urql/core'
-import { ExternalEditorSettingsFragment, SetPreferredEditorDocument } from '../../generated/graphql'
+import { ExternalEditorSettingsFragment, ExternalEditorSettings_EditorFragment, SetPreferredEditorDocument } from '../../generated/graphql'
 import type { EditorId } from '@packages/types/src/editors'
 import { useMutation } from '@urql/vue'
-
-type ExternalEditor = ExternalEditorSettingsFragment['editors'][number]
 
 // @ts-ignore (lachlan): add all icons for all editors such as RubyMine, etc
 const icons: Record<EditorId, FunctionalComponent<SVGAttributes, {}>> = {
@@ -70,21 +68,31 @@ const icons: Record<EditorId, FunctionalComponent<SVGAttributes, {}>> = {
 }
 
 const externalEditors = computed(() => {
-  return props.gql.editors?.map((x) => ({ ...x, icon: icons[x.id] }))
+  return props.gql.localSettings.availableEditors?.map((x) => ({ ...x, icon: icons[x.id] }))
 })
 
 gql`
 mutation SetPreferredEditor ($binary: String!) {
   setPreferredEditor (binary: $binary)
+
 }`
 
 gql`
+fragment ExternalEditorSettings_Editor on Editor {
+  id
+  name
+  isPreferred
+  binary
+}
+`
+
+gql`
 fragment ExternalEditorSettings on Query {
-  editors {
-    id
-    name
-    binary
-    isPreferred
+  localSettings {
+    availableEditors {
+      id
+      ...ExternalEditorSettings_Editor
+    }
   }
 }`
 
@@ -96,9 +104,9 @@ const props = defineProps<{
 
 const { t } = useI18n()
 
-const selectedEditor = ref<ExternalEditor | undefined>(undefined)
+const selectedEditor = ref<ExternalEditorSettings_EditorFragment | undefined>(undefined)
 
-const updateEditor = async (editor: ExternalEditor) => {
+const updateEditor = async (editor: ExternalEditorSettings_EditorFragment) => {
   if (!editor?.binary) {
     return
   }
@@ -108,7 +116,7 @@ const updateEditor = async (editor: ExternalEditor) => {
 }
 
 watchEffect(() => {
-  const preferred = props.gql.editors?.find((x) => x.isPreferred)
+  const preferred = props.gql.localSettings.availableEditors?.find((x) => x.isPreferred)
 
   selectedEditor.value = preferred
 })
