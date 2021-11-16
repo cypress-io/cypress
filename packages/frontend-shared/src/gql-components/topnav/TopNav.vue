@@ -1,41 +1,100 @@
 <template>
-  <TopNavList v-if="versionList">
+  <TopNavList v-if="versions">
     <template #heading="{ open }">
       <i-cy-box_x16
         class="group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50 h-16px w-16px"
         :class="open ? 'icon-dark-indigo-500 icon-light-indigo-50' : 'icon-dark-gray-500 icon-light-gray-100'"
       />
-      <span data-cy="topnav-version-list">v{{ versionList[0].version }}</span>
+      <span data-cy="topnav-version-list">v{{ versions.current.version }}</span>
     </template>
-    <TopNavListItem
-      v-for="(item, index) in versionList"
-      :key="item.version"
-      :selectable="!!index"
-      class="px-16px py-8px min-w-240px"
-      :class="index ? '' : 'bg-jade-50'"
-    >
-      <div class="whitespace-nowrap">
-        <ExternalLink
-          :href="`${releasesUrl}/tag/v${item.version}`"
-          :class="index ? '' : 'text-jade-600'"
-          class="font-semibold"
-        >
-          {{ item.version }}
-        </ExternalLink>
-        <br>
-        <span class="text-gray-600 text-14px">{{ t('topNav.released') }} {{ item.released }}</span>
-      </div>
-      <template
-        v-if="!index"
-        #suffix
+
+    <template v-if="runningOldVersion">
+      <TopNavListItem
+        class="px-16px py-8px min-w-240px"
+        data-cy="update-hint"
       >
-        <i-cy-circle-check_x24 class="icon-dark-jade-100 icon-light-jade-500 w-24px h-24px" />
-      </template>
-    </TopNavListItem>
-    <TopNavListItem class="text-center p-16px bg-gray-50">
+        <div class="whitespace-nowrap">
+          <ExternalLink
+            :href="`${releasesUrl}/tag/v${versions.latest.version}`"
+            class="font-semibold"
+            data-cy="latest-version"
+          >
+            {{ versions.latest.version }}
+          </ExternalLink>
+          <br>
+          <span class="text-gray-600 text-12px">{{ t('topNav.released') }} {{ versions.latest.released }}</span>
+        </div>
+        <template #suffix>
+          <span class="rounded-md bg-indigo-50">
+            <span class="font-semibold text-indigo-500 p-5px">
+              Latest
+            </span>
+          </span>
+        </template>
+      </TopNavListItem>
+
+      <TopNavListItem class="px-16px py-8px min-w-240px pb-12px">
+        <p class="text-gray-600 text-12px py-8px leading-normal">
+          {{ t('topNav.runningOldVersion') }}
+        </p>
+        <Button class="w-full">
+          Update to {{ versions.latest.version }}
+        </Button>
+      </TopNavListItem>
+
+      <TopNavListItem
+        class="bg-yellow-50 px-16px py-8px min-w-240px"
+      >
+        <div class="whitespace-nowrap">
+          <ExternalLink
+            :href="`${releasesUrl}/tag/v${versions.current.version}`"
+            class="font-semibold text-amber-800"
+            data-cy="current-version"
+          >
+            {{ versions.current.version }}
+          </ExternalLink>
+          <br>
+          <span class="text-gray-600 text-12px">{{ t('topNav.released') }} {{ versions.current.released }}</span>
+        </div>
+        <template #suffix>
+          <span class="rounded-md bg-yellow-100">
+            <span class="font-semibold text-amber-800 p-5px">
+              {{ t('topNav.installed') }}
+            </span>
+          </span>
+        </template>
+      </TopNavListItem>
+    </template>
+
+    <template v-else>
+      <TopNavListItem
+        class="bg-jade-50 px-16px py-8px min-w-240px"
+      >
+        <div class="whitespace-nowrap">
+          <ExternalLink
+            :href="`${releasesUrl}/tag/v${versions.current.version}`"
+            class="font-semibold"
+            data-cy="latest-version"
+          >
+            {{ versions.current.version }}
+          </ExternalLink>
+          <br>
+          <span class="text-gray-600 text-12px">{{ t('topNav.released') }} {{ versions.current.released }}</span>
+        </div>
+        <template #suffix>
+          <span class="rounded-md bg-jade-100">
+            <span class="font-semibold text-jade-800 px-5px">
+              {{ t('topNav.latest') }}
+            </span>
+          </span>
+        </template>
+      </TopNavListItem>
+    </template>
+
+    <TopNavListItem class="text-center p-16px text-indigo-600">
       <ExternalLink
         :href="releasesUrl"
-        class="block w-full border-gray-100 py-8px text-14px whitespace-nowrap border-rounded border-1 hover:no-underline hover:border-gray-200"
+        class="block w-full border-gray-100 py-8px text-12px whitespace-nowrap border-rounded border-1 hover:no-underline hover:border-gray-200"
       >
         {{ t('topNav.seeAllReleases') }}
       </ExternalLink>
@@ -152,38 +211,32 @@ import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLo
 import { gql, useMutation } from '@urql/vue'
 import { TopNavFragment, TopNav_LaunchOpenProjectDocument, TopNav_SetBrowserDocument } from '../../generated/graphql'
 import { useI18n } from '@cy/i18n'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 // eslint-disable-next-line no-duplicate-imports
 import type { Ref } from 'vue'
 const { t } = useI18n()
-import { onClickOutside, onKeyStroke } from '@vueuse/core'
+import { onClickOutside, onKeyStroke, useTimeAgo } from '@vueuse/core'
 import DocsMenuContent from './DocsMenuContent.vue'
 import ExternalLink from '../ExternalLink.vue'
+import Button from '../../components/Button.vue'
 
 const releasesUrl = 'https://github.com/cypress-io/cypress/releases/'
 
-// TODO: will come from gql
-const versionList = [
-  {
-    version: '8.4.1',
-    released: '2 days ago',
-  },
-  {
-    version: '8.4.0',
-    released: '6 days ago',
-  },
-  {
-    version: '8.3.1',
-    released: '12 days ago',
-  },
-  {
-    version: '8.3.0',
-    released: '2 weeks ago',
-  },
-]
-
 gql`
 fragment TopNav on Query {
+  versions {
+    current {
+      id
+      version
+      released
+    }
+    latest {
+      id
+      version
+      released
+    }
+  }
+
   currentProject {
     id
     currentBrowser {
@@ -237,6 +290,23 @@ const promptsEl: Ref<HTMLElement | null> = ref(null)
 
 // reset docs menu if click or keyboard navigation happens outside
 // so it doesn't reopen on the one of the prompts
+
+const versions = computed(() => {
+  return {
+    current: {
+      released: useTimeAgo(new Date(props.gql.versions.current.released)).value,
+      version: props.gql.versions.current.version,
+    },
+    latest: {
+      released: useTimeAgo(new Date(props.gql.versions.latest.released)).value,
+      version: props.gql.versions.latest.version,
+    },
+  }
+})
+
+const runningOldVersion = computed(() => {
+  return props.gql.versions.current.released < props.gql.versions.latest.released
+})
 
 onClickOutside(promptsEl, () => {
   setTimeout(() => {

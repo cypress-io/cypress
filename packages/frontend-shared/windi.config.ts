@@ -19,12 +19,6 @@ export const defaultConfig: WindiCssOptions = {
       fontFamily: {
         mono: '"Fira Code", monospace',
       },
-      gridTemplateColumns: {
-        launchpad: '64px 1fr',
-      },
-      gridTemplateRows: {
-        launchpad: '64px 1fr',
-      },
       colors,
     },
   },
