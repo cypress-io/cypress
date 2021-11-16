@@ -1,8 +1,8 @@
-import { 
-  Editor, 
-  linuxEditors, 
-  macOSEditors, 
-  windowsEditors
+import {
+  Editor,
+  linuxEditors,
+  macOSEditors,
+  windowsEditors,
 } from '@packages/types'
 
 export const getEnvEditors = (): readonly Editor[] => {
