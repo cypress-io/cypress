@@ -60,10 +60,10 @@ describe('lib/screenshots', () => {
     Jimp.prototype.composite = sinon.stub()
     // Jimp.prototype.getBuffer = sinon.stub().resolves(@buffer)
 
-    return ctx.actions.project.setActiveProject(this.todosPath)
-    .then(() => {
-      return config.get(this.todosPath)
-    }).then((config1) => {
+    ctx.actions.project.setActiveProjectForTestSetup(this.todosPath)
+
+    return config.get(this.todosPath)
+    .then((config1) => {
       this.config = config1
     })
   })

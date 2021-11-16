@@ -57,10 +57,9 @@ describe('lib/project-base', () => {
 
     sinon.stub(runEvents, 'execute').resolves()
 
-    return ctx.actions.project.setActiveProject(this.todosPath)
-    .then(() => {
-      return settings.read(this.todosPath)
-    })
+    ctx.actions.project.setActiveProjectForTestSetup(this.todosPath)
+
+    return settings.read(this.todosPath)
     .then((obj = {}) => {
       ({ projectId: this.projectId } = obj)
 

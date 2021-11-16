@@ -32,10 +32,9 @@ describe('Web Sockets', () => {
 
     this.idsPath = Fixtures.projectPath('ids')
 
-    return ctx.actions.project.setActiveProject(this.idsPath)
-    .then(() => {
-      return config.get(this.idsPath, { port: cyPort, configFile: 'cypress.config.js' })
-    })
+    ctx.actions.project.setActiveProjectForTestSetup(this.idsPath)
+
+    return config.get(this.idsPath, { port: cyPort, configFile: 'cypress.config.js' })
     .then((cfg) => {
       this.cfg = cfg
       this.ws = new ws.Server({ port: wsPort })

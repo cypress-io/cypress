@@ -88,13 +88,12 @@ describe('Routes', () => {
         obj.projectRoot = Fixtures.projectPath('e2e')
       }
 
-      return ctx.actions.project.setActiveProject(obj.projectRoot)
-      .then(() => {
-        // get all the config defaults
-        // and allow us to override them
-        // for each test
-        return config.set(obj)
-      })
+      ctx.actions.project.setActiveProjectForTestSetup(obj.projectRoot)
+
+      // get all the config defaults
+      // and allow us to override them
+      // for each test
+      return config.set(obj)
       .then((cfg) => {
         // use a jar for each test
         // but reset it automatically
@@ -3953,7 +3952,7 @@ describe('Routes', () => {
     })
 
     context('when body should be empty', function () {
-      this.timeout(5000) // TODO(tim): figure out why this is flaky now?
+      this.timeout(10000) // TODO(tim): figure out why this is flaky now?
 
       beforeEach(function (done) {
         Fixtures.scaffold('e2e')
