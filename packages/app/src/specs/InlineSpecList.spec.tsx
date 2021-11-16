@@ -13,7 +13,7 @@ describe('InlineSpecList', () => {
       },
       render: (gqlValue) => {
         return (
-          <div >
+          <div data-cy='test-wrapper'>
             <div id="unified-runner-vue-wrapper">
               <div id="focus-tests-vue-teleport-target"></div>
             </div>
@@ -37,6 +37,25 @@ describe('InlineSpecList', () => {
     cy.get(specListSelector).should('be.visible')
     cy.contains('button', 'Specs').click()
     cy.get(specListSelector).should('not.exist')
+    cy.contains('button', 'Specs').click()
+
+    // extra checks here to make sure the component correct remounts the teleport
+    // after the toggle button is removed and readded
+    // as though it was in a part of the DOM that re-rendered
+    cy.get(specListSelector).should('be.visible').then(() => {
+      document.querySelector('#focus-tests-vue-teleport-target')?.remove()
+    })
+
+    cy.contains('button', 'Specs').should('not.exist').then(() => {
+      const target = document.createElement('div')
+
+      target.id = 'focus-tests-vue-teleport-target'
+      document.querySelector('#unified-runner-vue-wrapper')?.appendChild(target)
+    })
+
+    cy.contains('button', 'Specs').click()
+    cy.get(specListSelector).should('not.exist')
+
     cy.contains('button', 'Specs').click()
     cy.get(specListSelector).should('be.visible')
   })

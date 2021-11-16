@@ -142,7 +142,8 @@ which causes the vue button that was rendered there to disappear.
 **/
 function setUpMutationObserver (teleportTarget: Element, elementToObserve: Element) {
   teleportMutuationObserver = new MutationObserver(() => {
-    if (!teleportTarget.children?.length) {
+    // run querySelector fresh every time as the node will have been destroyed and recreated
+    if (document.querySelector('#focus-tests-vue-teleport-target') && !document.querySelector('#focus-tests-vue-teleport-target')?.children?.length) {
       renderTeleport.value = false
       nextTick(() => {
         renderTeleport.value = true
