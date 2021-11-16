@@ -9,9 +9,8 @@
       :icon="IconLaptop"
       max-height="800px"
     >
-      <DeviceSettings />
-
       <ExternalEditorSettings :gql="props.gql" />
+      <DeviceSettings />
     </SettingsCard>
     <SettingsCard
       :title="t('settingsPage.project.title')"

@@ -52,9 +52,13 @@ const getUserEditors = async (): Promise<Editor[]> => {
       debug('saved preferred editor: %o', preferredOpener)
 
       const cyEditors = _.map(editors, createEditor)
-      const other = getOtherEditor(preferredOpener)
+      const preferred = getOtherEditor(preferredOpener)
 
-      return [computerOpener()].concat(cyEditors).concat(other ? other : [])
+      if (!preferred) {
+        return [computerOpener()].concat(cyEditors)
+      }
+
+      return [computerOpener()].concat(cyEditors, preferred)
     })
   })
 }
