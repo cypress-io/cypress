@@ -3,7 +3,7 @@ import { BaseError } from '.'
 import { ProjectLike } from '..'
 import { CurrentProject } from './gql-CurrentProject'
 import { DevState } from './gql-DevState'
-import { Editor } from './gql-Editor'
+import { LocalSettings } from './gql-LocalSettings'
 import { VersionData } from './gql-VersionData'
 import { Wizard } from './gql-Wizard'
 
@@ -65,15 +65,11 @@ export const Query = objectType({
       resolve: (source, args, ctx) => ctx.coreData.isAuthBrowserOpened,
     })
 
-    t.list.nonNull.field('editors', {
-      type: Editor,
+    t.nonNull.field('localSettings', {
+      type: LocalSettings,
       description: 'editors on the user local machine',
-      resolve: async (source, args, ctx) => {
-        if (!ctx.editor.availableEditors) {
-          await ctx.actions.editor.setAvailableAndPreferredEditor()
-        }
-
-        return ctx.editor.availableEditors ?? null
+      resolve: (source, args, ctx) => {
+        return ctx.coreData.localSettings
       },
     })
   },

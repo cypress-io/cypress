@@ -463,6 +463,11 @@ The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://
 """
 scalar JSON
 
+"""local settings on a device-by-device basis"""
+type LocalSettings {
+  availableEditors: [Editor!]
+}
+
 type Mutation {
   """Add project to projects array and cache it"""
   addProject(
@@ -525,6 +530,7 @@ type Mutation {
 
   """Set active project to run tests on"""
   setActiveProject(path: String!): Boolean
+  setPeferredEditor(binary: String!): Boolean
 
   """set preferred editor"""
   setPreferredEditor(binary: String!): Boolean!
@@ -644,14 +650,14 @@ type Query {
   """The state of any info related to local development of the runner"""
   dev: DevState!
 
-  """editors on the user local machine"""
-  editors: [Editor!]
-
   """Whether the browser has been opened for auth or not"""
   isAuthBrowserOpened: Boolean!
 
   """Whether the app is in global mode or not"""
   isInGlobalMode: Boolean!
+
+  """editors on the user local machine"""
+  localSettings: LocalSettings!
 
   """All known projects for the app"""
   projects: [ProjectLike!]!

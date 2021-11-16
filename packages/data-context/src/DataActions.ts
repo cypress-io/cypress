@@ -1,8 +1,7 @@
 import type { DataContext } from '.'
-import { AppActions, ElectronActions, FileActions, ProjectActions, WizardActions } from './actions'
+import { AppActions, ElectronActions, FileActions, LocalSettingsActions, ProjectActions, WizardActions } from './actions'
 import { AuthActions } from './actions/AuthActions'
 import { DevActions } from './actions/DevActions'
-import { EditorActions } from './actions/EditorActions'
 import { cached } from './util'
 
 export class DataActions {
@@ -29,6 +28,11 @@ export class DataActions {
   }
 
   @cached
+  get localSettings () {
+    return new LocalSettingsActions(this.ctx)
+  }
+
+  @cached
   get wizard () {
     return new WizardActions(this.ctx)
   }
@@ -41,10 +45,5 @@ export class DataActions {
   @cached
   get electron () {
     return new ElectronActions(this.ctx)
-  }
-
-  @cached
-  get editor () {
-    return new EditorActions(this.ctx)
   }
 }

@@ -48,6 +48,18 @@ export const mutation = mutationType({
       },
     })
 
+    t.field('setPeferredEditor', {
+      type: 'Boolean',
+      args: {
+        binary: nonNull(stringArg()),
+      },
+      resolve: async (_, args, ctx) => {
+        await ctx.actions.localSettings.setPreferredEditorBinary(args.binary)
+
+        return true
+      },
+    })
+
     t.field('internal_clearProjectPreferencesCache', {
       type: 'Boolean',
       args: {
@@ -307,17 +319,7 @@ export const mutation = mutationType({
         binary: nonNull(stringArg()),
       },
       resolve: async (_, args, ctx) => {
-        if (!ctx.editor.availableEditors) {
-          return false
-        }
-
-        const editor = ctx.editor.availableEditors.find((x) => x.binary === args.binary)
-
-        if (!editor) {
-          return false
-        }
-
-        await ctx.actions.editor.setPreferredEditor(editor)
+        await ctx.actions.localSettings.setPreferredEditorBinary(args.binary)
 
         return true
       },

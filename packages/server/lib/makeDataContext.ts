@@ -3,7 +3,7 @@ import os from 'os'
 import { app } from 'electron'
 
 import specsUtil from './util/specs'
-import type { EditorsResult, FindSpecs, FoundBrowser, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions, PlatformName, Preferences, SettingsOptions } from '@packages/types'
+import type { Editor, FindSpecs, FoundBrowser, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions, PlatformName, Preferences, SettingsOptions } from '@packages/types'
 import browserUtils from './browsers/utils'
 import auth from './gui/auth'
 import user from './user'
@@ -120,12 +120,19 @@ export function makeDataContext (options: MakeDataContextOptions) {
         openExternal(url)
       },
     },
-    editorApi: {
-      getAllEditors (): Promise<EditorsResult> {
-        return getUserEditor(true)
+    localSettingsApi: {
+      async setPreferredOpener (editor: Editor) {
+        await setUserEditor(editor)
       },
-      setPreferredEditor (editor) {
-        return setUserEditor(editor)
+      async getAvailableEditors () {
+        const { availableEditors, preferredOpener } = await getUserEditor(true)
+
+        return availableEditors.map((x) => {
+          return {
+            ...x,
+            isPreferred: x.binary === preferredOpener?.binary ?? false,
+          }
+        })
       },
     },
   })
