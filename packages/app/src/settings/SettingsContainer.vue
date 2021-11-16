@@ -10,6 +10,8 @@
       max-height="800px"
     >
       <DeviceSettings />
+
+      <ExternalEditorSettings :gql="props.gql" />
     </SettingsCard>
     <SettingsCard
       :title="t('settingsPage.project.title')"
@@ -42,6 +44,7 @@
 import { useI18n } from '@cy/i18n'
 import { gql, useMutation } from '@urql/vue'
 import Button from '@cy/components/Button.vue'
+import ExternalEditorSettings from './device/ExternalEditorSettings.vue'
 import SettingsCard from './SettingsCard.vue'
 import ProjectSettings from './project/ProjectSettings.vue'
 import DeviceSettings from './device/DeviceSettings.vue'
@@ -64,6 +67,7 @@ fragment SettingsContainer on Query {
     id
     ...ProjectSettings
   }
+  ...ExternalEditorSettings
 }`
 
 const props = defineProps<{

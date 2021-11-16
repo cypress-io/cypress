@@ -3,7 +3,7 @@ import os from 'os'
 import { app } from 'electron'
 
 import specsUtil from './util/specs'
-import type { FindSpecs, FoundBrowser, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions, PlatformName, Preferences, SettingsOptions } from '@packages/types'
+import type { EditorsResult, FindSpecs, FoundBrowser, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions, PlatformName, Preferences, SettingsOptions } from '@packages/types'
 import browserUtils from './browsers/utils'
 import auth from './gui/auth'
 import user from './user'
@@ -15,6 +15,7 @@ import errors from './errors'
 import { graphqlSchema } from '@packages/graphql/src/schema'
 import type { InternalDataContextOptions } from '@packages/data-context/src/DataContext'
 import { openExternal } from '@packages/server/lib/gui/links'
+import { getUserEditor } from './util/editors'
 
 const { getBrowsers, ensureAndGetByNameOrPath } = browserUtils
 
@@ -119,5 +120,10 @@ export function makeDataContext (options: MakeDataContextOptions) {
         openExternal(url)
       },
     },
+    editorApi: {
+      getAllEditors (): Promise<EditorsResult> {
+        return getUserEditor(true)
+      } 
+    }
   })
 }

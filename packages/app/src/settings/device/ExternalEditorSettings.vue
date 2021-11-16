@@ -36,8 +36,7 @@
 </template>
 
 <script lang="ts" setup>
-
-import { ref } from 'vue'
+import { computed, FunctionalComponent, ref, SVGAttributes } from 'vue'
 import Icon from '@cy/components/Icon.vue'
 import SettingsSection from '../SettingsSection.vue'
 import { useI18n } from '@cy/i18n'
@@ -49,40 +48,50 @@ import Vim from '~icons/logos/vim'
 import Sublime from '~icons/logos/sublimetext-icon'
 import Emacs from '~icons/logos/emacs'
 import IconTerminal from '~icons/mdi/terminal'
+import { gql } from '@urql/core'
+import type { ExternalEditorSettingsFragment } from '../../generated/graphql'
+import type { EditorId } from '@packages/types/src/editors'
+
+interface EditorItem {
+  name: string
+  key: string
+  icon: FunctionalComponent<SVGAttributes, {}>
+}
+
+// @ts-ignore (lachlan): add all icons for all editors
+const icons: Record<EditorId, EditorItem['icon']> = {
+  'code': VSCode,
+  'webstorm': Webstorm,
+  'atom': Atom,
+  'sublimetext': Sublime,
+  'sublimetext2': Sublime,
+  'sublimetextdev': Sublime,
+  'vim': Vim,
+  'emacs': Emacs,
+}
 
 // TODO, grab these from gql or the user's machine.
-const externalEditors = [
-  {
-    name: 'Visual Studio Code',
-    key: 'vscode',
-    icon: VSCode,
-  },
-  {
-    name: 'Webstorm',
-    key: 'webstorm',
-    icon: Webstorm,
-  },
-  {
-    name: 'Atom',
-    key: 'atom',
-    icon: Atom,
-  },
-  {
-    name: 'Sublime Text',
-    key: 'sublime',
-    icon: Sublime,
-  },
-  {
-    name: 'Vim',
-    key: 'vim',
-    icon: Vim,
-  },
-  {
-    name: 'Emacs',
-    key: 'emacs',
-    icon: Emacs,
-  },
-]
+const externalEditors = computed((): EditorItem[] => 
+  props.gql.editors.map(editor => ({
+    key: editor.id,
+    name: editor.name,
+    icon: icons[editor.id]
+  }))
+)
+
+gql`
+fragment ExternalEditorSettings on Query {
+  editors {
+    id
+    name
+    openerId
+  }
+}`
+
+
+const props = defineProps<{
+  gql: ExternalEditorSettingsFragment
+}>()
 
 const { t } = useI18n()
 const selectedEditor = ref<Record<string, any>>()

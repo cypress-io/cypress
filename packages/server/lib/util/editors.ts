@@ -2,23 +2,14 @@ import _ from 'lodash'
 import Bluebird from 'bluebird'
 import debugModule from 'debug'
 
-import { getEnvEditors, Editor } from './env-editors'
+import { Editor, osFileSystemExplorer, EditorsResult, CyEditor } from '@packages/types'
+import { 
+  getEnvEditors,
+} from './env-editors'
 import shell from './shell'
 import savedState from '../saved_state'
 
 const debug = debugModule('cypress:server:editors')
-
-interface CyEditor {
-  id: string
-  name: string
-  openerId: string
-  isOther: boolean
-}
-
-interface EditorsResult {
-  preferredOpener?: CyEditor
-  availableEditors?: CyEditor[]
-}
 
 const createEditor = (editor: Editor): CyEditor => {
   return {
@@ -29,7 +20,7 @@ const createEditor = (editor: Editor): CyEditor => {
   }
 }
 
-const getOtherEditor = (preferredOpener?: CyEditor) => {
+const getOtherEditor = (preferredOpener?: CyEditor): CyEditor => {
   // if preferred editor is the 'other' option, use it since it has the
   // path (openerId) saved with it
   if (preferredOpener && preferredOpener.isOther) {
@@ -39,27 +30,21 @@ const getOtherEditor = (preferredOpener?: CyEditor) => {
   return {
     id: 'other',
     name: 'Other',
-    openerId: '',
+    openerId: null,
     isOther: true,
   }
 }
 
 const computerOpener = (): CyEditor => {
-  const names = {
-    darwin: 'Finder',
-    win32: 'File Explorer',
-    linux: 'File System',
-  }
-
   return {
     id: 'computer',
-    name: names[process.platform] || names.linux,
+    name: osFileSystemExplorer[process.platform] || osFileSystemExplorer.linux,
     openerId: 'computer',
     isOther: false,
   }
 }
 
-const getUserEditors = (): Bluebird<CyEditor[]> => {
+const getUserEditors = async (): Promise<CyEditor[]> => {
   return Bluebird.filter(getEnvEditors(), (editor) => {
     debug('check if user has editor %s with binary %s', editor.name, editor.binary)
 
@@ -77,13 +62,12 @@ const getUserEditors = (): Bluebird<CyEditor[]> => {
 
       const cyEditors = _.map(editors, createEditor)
 
-      // @ts-ignore
-      return [computerOpener()].concat(cyEditors).concat([getOtherEditor(preferredOpener)])
+      return [computerOpener()].concat(cyEditors).concat(getOtherEditor(preferredOpener))
     })
   })
 }
 
-export const getUserEditor = (alwaysIncludeEditors = false): Bluebird<EditorsResult> => {
+export const getUserEditor = async (alwaysIncludeEditors = false): Promise<EditorsResult> => {
   debug('get user editor')
 
   return savedState.create()

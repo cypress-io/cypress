@@ -6,6 +6,8 @@ export * from './driver'
 
 export * from './spec'
 
+export * from './editors'
+
 export type {
   AllPackages,
   AllPackageTypes,

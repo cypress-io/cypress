@@ -30,6 +30,8 @@ import type { AddressInfo } from 'net'
 import EventEmitter from 'events'
 import type { App as ElectronApp } from 'electron'
 import { VersionsDataSource } from './sources/VersionsDataSource'
+import { EditorDataSource } from './sources/EditorDataSource'
+import type { EditorApiShape } from './actions/EditorActions'
 
 const IS_DEV_ENV = process.env.CYPRESS_INTERNAL_ENV !== 'production'
 
@@ -54,6 +56,7 @@ export interface DataContextConfig {
   authApi: AuthApiShape
   projectApi: ProjectApiShape
   electronApi: ElectronApiShape
+  editorApi: EditorApiShape
   /**
    * Internal options used for testing purposes
    */
@@ -78,6 +81,10 @@ export class DataContext {
 
   get electronApi () {
     return this._config.electronApi
+  }
+
+  get editorApi () {
+    return this._config.editorApi
   }
 
   get isGlobalMode () {
@@ -287,6 +294,7 @@ export class DataContext {
       authApi: this._config.authApi,
       projectApi: this._config.projectApi,
       electronApi: this._config.electronApi,
+      editorApi: this._config.editorApi,
       busApi: this._rootBus,
     }
   }
