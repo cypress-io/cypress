@@ -144,6 +144,18 @@ export function generateShikiTheme () {
   })
 }
 
+export async function viteClean () {
+  // Don't clear the .vite cache if we're doing the internal dev flag
+  if (process.env.CYPRESS_INTERNAL_VITE_DEV) {
+    return
+  }
+
+  return Promise.all([
+    viteCleanApp(),
+    viteCleanLaunchpad(),
+  ])
+}
+
 export function viteCleanApp () {
   return spawned('vite-clean', `yarn clean`, {
     cwd: monorepoPaths.pkgApp,

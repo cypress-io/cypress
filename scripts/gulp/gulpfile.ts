@@ -11,7 +11,7 @@ import gulp from 'gulp'
 import { autobarrelWatcher } from './tasks/gulpAutobarrel'
 import { startCypressWatch, openCypressLaunchpad, openCypressApp, runCypressLaunchpad, wrapRunWithExit, runCypressApp, killExistingCypress } from './tasks/gulpCypress'
 import { graphqlCodegen, graphqlCodegenWatch, nexusCodegen, nexusCodegenWatch, generateFrontendSchema, syncRemoteGraphQL } from './tasks/gulpGraphql'
-import { viteApp, viteCleanApp, viteCleanLaunchpad, viteLaunchpad, viteBuildApp, viteBuildAndWatchApp, viteBuildLaunchpad, viteBuildAndWatchLaunchpad, symlinkViteProjects, generateShikiTheme } from './tasks/gulpVite'
+import { viteApp, viteCleanApp, viteCleanLaunchpad, viteLaunchpad, viteBuildApp, viteBuildAndWatchApp, viteBuildLaunchpad, viteBuildAndWatchLaunchpad, symlinkViteProjects, generateShikiTheme, viteClean } from './tasks/gulpVite'
 import { checkTs } from './tasks/gulpTsc'
 import { makePathMap } from './utils/makePathMap'
 import { makePackage } from './tasks/gulpMakePackage'
@@ -26,10 +26,7 @@ import { e2eTestScaffold, e2eTestScaffoldWatch } from './tasks/gulpE2ETestScaffo
  *  * `yarn dev` is your primary command for getting work done
  *------------------------------------------------------------------------**/
 
-gulp.task('viteClean', gulp.parallel(
-  viteCleanApp,
-  viteCleanLaunchpad,
-))
+gulp.task(viteClean)
 
 gulp.task(
   'codegen',
