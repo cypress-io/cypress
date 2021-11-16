@@ -951,7 +951,7 @@ jobs:
           only-cache-for-root-user: true
       - store-npm-logs
   
-  windows_build:
+  windows-build:
     <<: *defaults
     steps:
       - restore_cached_workspace
@@ -2458,6 +2458,26 @@ windows-workflow: &windows-workflow
         #   shell: bash.exe --login
         requires:
           - windows-node-modules-install
+
+      - lint:
+          name: windows-lint
+          executor: windows
+          requires:
+            - windows-build
+      
+      - unit-tests:
+          name: windows-unit-tests
+          executor: windows
+          requires:
+            - windows-build
+      
+      - build-npm-packages:
+          name: windows-build-npm-packages
+          executor: windows
+          requires:
+            - windows-build
+      
+      
 
     # - node_modules_install:
     #     name: windows-node-modules-install
