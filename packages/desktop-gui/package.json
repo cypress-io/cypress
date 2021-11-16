@@ -21,6 +21,7 @@
     "@cypress/json-schemas": "5.35.1",
     "@cypress/react": "0.0.0-development",
     "@cypress/react-tooltip": "0.5.3",
+    "@cypress/webpack-dev-server": "0.0.0-development",
     "@cypress/webpack-preprocessor": "0.0.0-development",
     "@fontsource/fira-sans": "4.3.0",
     "@fontsource/poppins": "4.3.0",
