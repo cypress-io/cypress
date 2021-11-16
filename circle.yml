@@ -2221,11 +2221,11 @@ linux-workflow: &linux-workflow
           - server-unit-tests
           - unit-tests
           - unit-tests-release
-          - desktop-gui-integration-tests-7x,
-          - desktop-gui-component-tests,
-          - cli-visual-tests,
-          - runner-integration-tests-chrome,
-          - runner-ct-integration-tests-chrome,
+          - desktop-gui-integration-tests-7x
+          - desktop-gui-component-tests
+          - cli-visual-tests
+          - runner-integration-tests-chrome
+          - runner-ct-integration-tests-chrome
           - reporter-integration-tests
 
     # various testing scenarios, like building full binary
