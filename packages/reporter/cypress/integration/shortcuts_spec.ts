@@ -124,10 +124,6 @@ describe('shortcuts', function () {
     })
 
     it('has shortcut in tooltips', () => {
-      cy.get('.focus-tests > button').trigger('mouseover')
-      cy.get('.cy-tooltip').should('have.text', 'View All Tests F')
-      cy.get('.focus-tests > button').trigger('mouseout')
-
       cy.get('button.restart').trigger('mouseover')
       cy.get('.cy-tooltip').should('have.text', 'Run All Tests R')
 

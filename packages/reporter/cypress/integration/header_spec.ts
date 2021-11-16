@@ -31,30 +31,6 @@ describe('header', () => {
     })
   })
 
-  describe('tests button', () => {
-    it('displays tooltip on mouseover', () => {
-      cy.get('.focus-tests').trigger('mouseover')
-      cy.get('.cy-tooltip').should('have.text', 'View All Tests F')
-    })
-
-    it('focuses tests on click', () => {
-      cy.spy(runner, 'emit')
-      // { force: true } is necessary for click to work, apparently because
-      // of the tooltip popping up and getting in the way
-      cy.get('.focus-tests button').click({ force: true })
-      cy.wrap(runner.emit).should('be.calledWith', 'focus:tests')
-    })
-
-    it('shows \'Tests\' when >= 398px wide', () => {
-      cy.get('.focus-tests span').should('be.visible')
-    })
-
-    it('hides \'Tests\' < 398px wide', () => {
-      cy.viewport(397, 450)
-      cy.get('.focus-tests span').should('not.be.visible')
-    })
-  })
-
   describe('stats', () => {
     let addStat: Function
 
