@@ -24,7 +24,7 @@ export const getPathToDesktopIndex = (pkg: 'desktop-gui' | 'launchpad', graphqlP
   // For now, if we see that there's a CYPRESS_INTERNAL_VITE_DEV
   // we assume we're running Cypress targeting that (dev server)
   if (pkg === 'launchpad' && process.env.CYPRESS_INTERNAL_VITE_DEV) {
-    return `http://localhost:${process.env.CYPRESS_INTERNAL_VITE_DEV}?gqlPort=${graphqlPort}`
+    return `http://localhost:${process.env.CYPRESS_INTERNAL_VITE_LAUNCHPAD_PORT}?gqlPort=${graphqlPort}`
   }
 
   return `file://${path.join(__dirname, '..', '..', pkg, 'dist', 'index.html')}?gqlPort=${graphqlPort}`
