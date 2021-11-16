@@ -2455,13 +2455,40 @@ windows-workflow: &windows-workflow
         requires:
           - windows-build
     
-    - build-npm-package:
+    - create-build-artifacts:
         name: windows-build-npm-package
+        executor: windows
+        context:
+          - test-runner:upload
+          - test-runner:commit-status-checks
+        requires:
+          - windows-build
+
+    - test-kitchensink:
+        name: darwin-test-kitchensink
         executor: windows
         requires:
           - windows-build
-    
-      
+
+    - test-binary-against-kitchensink:
+        name: windows-test-binary-against-kitchensink
+        executor: windows
+        requires:
+          - windows-create-build-artifacts
+
+    - test-binary-against-staging:
+        name: windows-test-binary-against-staging
+        executor: windows
+        context: test-runner:record-tests
+        requires:
+          - windows-create-build-artifacts
+
+    - test-binary-and-npm-against-other-projects:
+        name: windows-test-binary-and-npm-against-other-projects
+        executor: windows
+        context: test-runner:trigger-test-jobs
+        requires:
+          - windows-create-build-artifacts
 
     # - node_modules_install:
     #     name: windows-node-modules-install
