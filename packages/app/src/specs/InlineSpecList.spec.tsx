@@ -13,7 +13,7 @@ describe('InlineSpecList', () => {
       },
       render: (gqlValue) => {
         return (
-          <div data-cy='test-wrapper'>
+          <div>
             <div id="unified-runner-vue-wrapper">
               <div id="focus-tests-vue-teleport-target"></div>
             </div>
