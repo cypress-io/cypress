@@ -4,7 +4,7 @@
   "description": "Launches Webpack Dev Server for Component Testing",
   "main": "dist/index.js",
   "scripts": {
-    "build": "yarn list && tsc",
+    "build": "yarn list typescript && tsc --version && tsc",
     "build-prod": "tsc",
     "test": "node ./test-wds-3.js",
     "test-all": "tsc && mocha -r @packages/ts/register test/**/*.spec.ts test/*.spec.ts --exit",
