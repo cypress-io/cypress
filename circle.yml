@@ -1917,7 +1917,7 @@ jobs:
 
   test-binary-against-kitchensink:
     <<: *defaults
-    resource_class: medium
+    # resource_class: medium
     steps:
       - test-binary-against-repo:
           repo: cypress-example-kitchensink
