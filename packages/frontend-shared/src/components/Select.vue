@@ -16,7 +16,12 @@
         />
       </ListboxLabel>
       <div class="relative">
-        <ListboxButton class="bg-white text-gray-800 relative w-full border border-gray-100 rounded pl-3 pr-4 py-2 text-left cursor-default focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+        <ListboxButton
+          class="bg-white text-gray-800 relative w-full
+              border border-gray-100 rounded pl-3 pr-4 py-2 text-left cursor-default
+              focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500
+              sm:text-sm"
+        >
           <span class="absolute inset-y-0 flex items-center">
             <slot
               name="input-prefix"
@@ -67,7 +72,11 @@
           leave-from-class="opacity-100"
           leave-to-class="opacity-0"
         >
-          <ListboxOptions class="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
+          <ListboxOptions
+            class="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base
+              ring-1 ring-black ring-opacity-5
+              overflow-auto focus:outline-none sm:text-sm"
+          >
             <ListboxOption
               v-for="option in options"
               :key="get(option, itemKey ?? '')"

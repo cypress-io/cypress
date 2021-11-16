@@ -326,7 +326,32 @@
       "debugText": "Debug tests that fail in CI with visual feedback.",
       "chartText": "Keep your tests in tip-top shape with powerful analytics.",
       "buttonUser": "Log in to the Cypress Dashboard",
-      "buttonProject": "Connect your project to the Cypress Dashboard"
+      "buttonProject": "Connect your project to the Cypress Dashboard",
+      "modal": {
+        "title": "Connect Project",
+        "cancel": "Cancel",
+        "createOrg": {
+          "description": "You need to create an organization in the Cypress Dashboard to continue.",
+          "button": "Create Organization",
+          "waitingButton": "Waiting for you to create an organization..."
+        },
+        "selectProject": {
+          "organization": "Organization",
+          "manageOrgs": "Manage organizations",
+          "project": "Project",
+          "projectName": "Project Name",
+          "projectNameDisclaimer": "(You can change this later)",
+          "createNewProject": "Create new",
+          "chooseExistsingProject": "Choose an existing project",
+          "newProjectAccess": "Project Access",
+          "privateLabel": "Private",
+          "privateDescription": "Only invited users can view recorded test results.",
+          "publicLabel": "Public",
+          "publicDescription": "Anyone can view recorded test results.",
+          "connectProject": "Connect project",
+          "createProject": "Create project"
+        }
+      }
     },
     "empty": {
       "title": "Follow the steps below to record your first run to the Cypress Dashboard",

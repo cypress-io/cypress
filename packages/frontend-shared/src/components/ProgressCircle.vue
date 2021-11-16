@@ -36,7 +36,7 @@ const props = defineProps<{
 	progress: number
 }>()
 
-const normalizedRadius = props.radius - props.stroke * 2
+const normalizedRadius = props.radius - props.stroke
 const circumference = normalizedRadius * 2 * Math.PI
 
 const strokeDashoffset = computed(() => {

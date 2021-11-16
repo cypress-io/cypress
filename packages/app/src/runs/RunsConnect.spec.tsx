@@ -8,7 +8,7 @@ describe('<RunsConnect />', () => {
         result.cloudViewer = null
       },
       render (gqlVal) {
-        return <RunsConnect gql={gqlVal} />
+        return <div class="h-screen"><RunsConnect gql={gqlVal} /></div>
       },
     })
 
@@ -28,7 +28,7 @@ describe('<RunsConnect />', () => {
         result.cloudViewer = cloudViewer
       },
       render (gqlVal) {
-        return <RunsConnect gql={gqlVal} />
+        return <div class="h-screen"><RunsConnect gql={gqlVal} /></div>
       },
     })
 
