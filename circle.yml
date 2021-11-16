@@ -941,7 +941,8 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Top level packages
-          command: yarn list --depth=0 || true
+          command: yarn list 
+          # --depth=0 || true
       - run:
           name: Build packages
           command: yarn build-prod
@@ -2420,35 +2421,13 @@ windows-workflow: &windows-workflow
         # executor:
         #   name: win/default
         #   shell: bash.exe --login
-        # executor:
-        #   name: win/default
-        #   shell: bash.exe --login
         arch: win32
         only-cache-for-root-user: true
 
-    - windows-build:
+    - build:
         executor: windows
         requires:
           - windows-node-modules-install
-        # steps:
-        #   - restore_cached_workspace
-        #   - run:
-        #       name: Top level packages
-        #       command: yarn list --depth=0 || true
-        #   - run:
-        #       name: Build packages
-        #       command: yarn build-prod
-        #   - prepare-modules-cache # So we don't throw these in the workspace cache
-        #   - persist_to_workspace:
-        #       root: ~/
-        #       paths:
-        #         - cypress
-        #         - .ssh
-        #         - node_modules # contains the npm i -g modules
-        #   - store-npm-logs
-        # executor:
-        #   name: win/default
-        #   shell: bash.exe --login
 
     - lint:
         name: windows-lint
@@ -2532,7 +2511,8 @@ linux-2-workflow: &linux-2-workflow
 
 workflows:
   linux:
-    <<: *linux-2-workflow
+    <<: *linux-workflow
+    # <<: *linux-2-workflow
   windows:
     <<: *windows-workflow
   mac:
