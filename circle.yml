@@ -1032,14 +1032,14 @@ jobs:
               echo "This is an external PR, cannot access other services"
               circleci-agent step halt
             fi
-      - wait-on-circle-jobs:
-          job-names: >
-            desktop-gui-integration-tests-7x,
-            desktop-gui-component-tests,
-            cli-visual-tests,
-            runner-integration-tests-chrome,
-            runner-ct-integration-tests-chrome,
-            reporter-integration-tests,
+      # - wait-on-circle-jobs:
+      #     job-names: >
+      #       desktop-gui-integration-tests-7x,
+      #       desktop-gui-component-tests,
+      #       cli-visual-tests,
+      #       runner-integration-tests-chrome,
+      #       runner-ct-integration-tests-chrome,
+      #       reporter-integration-tests,
       - run: yarn percy build:finalize
 
   cli-visual-tests:
@@ -1068,7 +1068,7 @@ jobs:
 
   unit-tests:
     <<: *defaults
-    resource_class: medium
+    # resource_class: medium
     parallelism: 1
     steps:
       - restore_cached_workspace
@@ -1570,7 +1570,7 @@ jobs:
 
   create-build-artifacts:
     <<: *defaults
-    resource_class: medium+
+    # resource_class: medium+
     # shell: /bin/bash --login
     steps:
       - restore_cached_workspace
@@ -1657,7 +1657,7 @@ jobs:
 
   test-binary-and-npm-against-other-projects:
     <<: *defaults
-    resource_class: medium
+    # resource_class: medium
     steps:
       # needs uploaded NPM and test binary
       - restore_cached_workspace
@@ -2064,6 +2064,12 @@ linux-workflow: &linux-workflow
         required_env_var: PERCY_TOKEN # skips job if not defined (external PR)
         requires:
           - build
+          - desktop-gui-integration-tests-7x
+          - desktop-gui-component-tests
+          - cli-visual-tests
+          - runner-integration-tests-chrome
+          - runner-ct-integration-tests-chrome
+          - reporter-integration-tests
     - lint-types:
         requires:
           - build
@@ -2180,6 +2186,7 @@ linux-workflow: &linux-workflow
         context: test-runner:npm-release
         requires:
           - build
+          - percy-finalize
           - npm-eslint-plugin-dev
           - npm-create-cypress-tests
           - npm-react
