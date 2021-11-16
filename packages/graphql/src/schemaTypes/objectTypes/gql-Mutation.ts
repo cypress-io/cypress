@@ -84,12 +84,16 @@ export const mutation = mutationType({
         })),
       },
       resolve: async (_, args, ctx) => {
+        if (ctx.coreData.currentProject?.isMissingConfigFile) {
+          await ctx.actions.project.createConfigFile(args.input.testingType)
+        }
+
         if (args.input.testingType) {
-          await ctx.actions.wizard.setTestingType(args.input.testingType)
+          ctx.actions.wizard.setTestingType(args.input.testingType)
         }
 
         if (args.input.direction) {
-          await ctx.actions.wizard.navigate(args.input.direction)
+          ctx.actions.wizard.navigate(args.input.direction)
         }
       },
     })
@@ -130,17 +134,6 @@ export const mutation = mutationType({
       },
       resolve: async (_, args, ctx) => {
         await ctx.actions.app.setActiveBrowserById(args.id)
-      },
-    })
-
-    t.liveMutation('appCreateConfigFile', {
-      args: {
-        code: nonNull('String'),
-        configFilename: nonNull('String'),
-      },
-      description: 'Create a Cypress config file for a new project',
-      resolve: async (_, args, ctx) => {
-        await ctx.actions.project.createConfigFile(args)
       },
     })
 
