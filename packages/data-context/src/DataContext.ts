@@ -19,10 +19,10 @@ import {
   CloudDataSource,
   ConfigDataSource,
   EnvDataSource,
-  EditorDataSource,
   GraphQLDataSource,
   HtmlDataSource,
   UtilDataSource,
+  EditorDataSource,
 } from './sources/'
 import { cached } from './util/cached'
 import type { GraphQLSchema } from 'graphql'
@@ -98,6 +98,8 @@ export class DataContext {
       this.actions.app.refreshBrowsers(),
       // load the cached user & validate the token on start
       this.actions.auth.getUser(),
+      // and grab the user editor
+      this.actions.editor.refreshEditors()
     ]
 
     if (this._config._internalOptions.loadCachedProjects) {
@@ -170,11 +172,6 @@ export class DataContext {
   }
 
   @cached
-  get editor () {
-    return new EditorDataSource(this)
-  }
-
-  @cached
   get git () {
     return new GitDataSource(this)
   }
@@ -186,6 +183,11 @@ export class DataContext {
   @cached
   get browser () {
     return new BrowserDataSource(this)
+  }
+
+  @cached
+  get editor () {
+    return new EditorDataSource(this)
   }
 
   /**

@@ -70,7 +70,7 @@ const icons: Record<EditorId, FunctionalComponent<SVGAttributes, {}>> = {
 }
 
 const externalEditors = computed(() => {
-  return props.gql.editors.map((x) => ({ ...x, icon: icons[x.id] }))
+  return props.gql.editors?.map((x) => ({ ...x, icon: icons[x.id] }))
 })
 
 gql`
@@ -108,7 +108,7 @@ const updateEditor = async (editor: ExternalEditor) => {
 }
 
 watchEffect(() => {
-  const preferred = props.gql.editors.find((x) => x.isPreferred)
+  const preferred = props.gql.editors?.find((x) => x.isPreferred)
 
   selectedEditor.value = preferred
 })

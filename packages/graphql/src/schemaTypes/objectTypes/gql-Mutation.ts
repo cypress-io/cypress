@@ -307,7 +307,11 @@ export const mutation = mutationType({
         binary: nonNull(stringArg()),
       },
       resolve: async (_, args, ctx) => {
-        const editor = ctx.coreData.editor.all.find((x) => x.binary === args.binary)
+        if (!ctx.editor.availableEditors) {
+          return false
+        }
+
+        const editor = ctx.editor.availableEditors.find((x) => x.binary === args.binary)
 
         if (!editor) {
           return false

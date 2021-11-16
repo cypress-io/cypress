@@ -20,7 +20,9 @@ export interface DevStateShape {
 }
 
 export interface EditorDataShape {
-  all: NexusGenObjects['Editor'][]
+  refreshing: boolean
+  avaiable: NexusGenObjects['Editor'][] | null
+  preferredBinary: string | null
 }
 
 export interface ConfigChildProcessShape {
@@ -37,7 +39,7 @@ export interface ActiveProjectShape extends ProjectShape {
   specs?: FoundSpec[]
   config: Promise<FullConfig> | null
   configChildProcess: ConfigChildProcessShape | null
-  preferences?: Preferences| null
+  preferences?: Preferences | null
   browsers: FoundBrowser[] | null
 }
 
@@ -99,7 +101,8 @@ export function makeCoreData (): CoreDataShape {
       projects: [],
     },
     editor: {
-      all: [],
+      avaiable: null,
+      preferredBinary: null
     },
     isAuthBrowserOpened: false,
     currentProject: null,

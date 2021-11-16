@@ -4,7 +4,6 @@
 export * from './gql-BrowserFamilyEnum'
 export * from './gql-CodeGenResultEnum'
 export * from './gql-CodeGenTypeEnum'
-export * from './gql-EditorEnum'
 export * from './gql-ProjectEnums'
 export * from './gql-SpecEnum'
 export * from './gql-WizardEnums'

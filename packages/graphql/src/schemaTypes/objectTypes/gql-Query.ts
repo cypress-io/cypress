@@ -65,23 +65,15 @@ export const Query = objectType({
       resolve: (source, args, ctx) => ctx.coreData.isAuthBrowserOpened,
     })
 
-    t.nonNull.list.nonNull.field('editors', {
+    t.list.nonNull.field('editors', {
       type: Editor,
       description: 'editors on the user local machine',
       resolve: async (source, args, ctx) => {
-        // const editors = await ctx._apis.appApi.getBrowsers()
-        const { availableEditors, preferredOpener } = await ctx._apis.editorApi.getAllEditors()
+        if (!ctx.editor.availableEditors) {
+          await ctx.actions.editor.setAvailableAndPreferredEditor()
+        }
 
-        ctx.coreData.editor.all = availableEditors.map((x) => {
-          return {
-            name: x.name,
-            binary: x.binary,
-            id: x.id,
-            isPreferred: x.binary === preferredOpener?.binary ?? false,
-          }
-        })
-
-        return ctx.coreData.editor.all
+        return ctx.editor.availableEditors ?? null
       },
     })
   },
