@@ -111,8 +111,8 @@ beforeEach(function () {
 
 const { clearLegacyDataContext } = require('../lib/makeDataContext')
 
-afterEach(() => {
-  clearLegacyDataContext()
+afterEach(async () => {
+  await clearLegacyDataContext()
   sinon.restore()
 
   nock.cleanAll()

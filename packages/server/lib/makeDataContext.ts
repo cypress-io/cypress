@@ -30,7 +30,8 @@ interface MakeDataContextOptions {
 let legacyDataContext: DataContext | undefined
 
 // For testing
-export function clearLegacyDataContext () {
+export async function clearLegacyDataContext () {
+  await legacyDataContext?.destroy()
   legacyDataContext = undefined
 }
 
