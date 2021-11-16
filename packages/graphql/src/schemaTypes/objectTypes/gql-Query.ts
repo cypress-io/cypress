@@ -72,7 +72,14 @@ export const Query = objectType({
         // const editors = await ctx._apis.appApi.getBrowsers()
         const { availableEditors, preferredOpener } = await ctx._apis.editorApi.getAllEditors()
 
-        ctx.coreData.editor.all = availableEditors.map((x) => ({ ...x, isPreferred: x.binary === preferredOpener?.binary ?? false }))
+        ctx.coreData.editor.all = availableEditors.map((x) => {
+          return {
+            name: x.name,
+            binary: x.binary,
+            id: x.id,
+            isPreferred: x.binary === preferredOpener?.binary ?? false,
+          }
+        })
 
         return ctx.coreData.editor.all
       },

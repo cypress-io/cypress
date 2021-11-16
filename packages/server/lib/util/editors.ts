@@ -2,49 +2,40 @@ import _ from 'lodash'
 import Bluebird from 'bluebird'
 import debugModule from 'debug'
 
-import { Editor, osFileSystemExplorer, EditorsResult, CyEditor } from '@packages/types'
-import {
-  getEnvEditors,
-} from './env-editors'
+import { Editor, osFileSystemExplorer, EditorsResult } from '@packages/types'
+import { getEnvEditors } from './env-editors'
 import shell from './shell'
 import savedState from '../saved_state'
 
 const debug = debugModule('cypress:server:editors')
 
-const createEditor = (editor: Editor): CyEditor => {
+const createEditor = (editor: Editor): Editor => {
   return {
     id: editor.id,
     name: editor.name,
     binary: editor.binary,
-    isOther: false,
   }
 }
 
-const getOtherEditor = (preferredOpener?: CyEditor): CyEditor => {
+const getOtherEditor = (preferredOpener?: Editor): Editor | undefined => {
   // if preferred editor is the 'other' option, use it since it has the
   // path (binary) saved with it
-  if (preferredOpener && preferredOpener.isOther) {
+  if (preferredOpener && preferredOpener.id === 'other') {
     return preferredOpener
   }
 
-  return {
-    id: 'other',
-    name: 'Other',
-    binary: null,
-    isOther: true,
-  }
+  return
 }
 
-const computerOpener = (): CyEditor => {
+const computerOpener = (): Editor => {
   return {
     id: 'computer',
     name: osFileSystemExplorer[process.platform] || osFileSystemExplorer.linux,
     binary: 'computer',
-    isOther: false,
   }
 }
 
-const getUserEditors = async (): Promise<CyEditor[]> => {
+const getUserEditors = async (): Promise<Editor[]> => {
   return Bluebird.filter(getEnvEditors(), (editor) => {
     debug('check if user has editor %s with binary %s', editor.name, editor.binary)
 
@@ -57,12 +48,13 @@ const getUserEditors = async (): Promise<CyEditor[]> => {
     .then((state) => {
       return state.get('preferredOpener')
     })
-    .then((preferredOpener?: CyEditor) => {
+    .then((preferredOpener?: Editor) => {
       debug('saved preferred editor: %o', preferredOpener)
 
       const cyEditors = _.map(editors, createEditor)
+      const other = getOtherEditor(preferredOpener)
 
-      return [computerOpener()].concat(cyEditors).concat(getOtherEditor(preferredOpener))
+      return [computerOpener()].concat(cyEditors).concat(other ? other : [])
     })
   })
 }

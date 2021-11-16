@@ -347,14 +347,44 @@ type DevState {
 """Represents an editor on the local machine"""
 type Editor {
   """Binary that opens the editor"""
-  binary: String
-  id: String!
+  binary: String!
+  id: EditorId!
 
   """whether this is the user's preferred editor"""
   isPreferred: Boolean!
 
   """name of editor"""
   name: String!
+}
+
+"""Editor id"""
+enum EditorId {
+  appcode
+  atom
+  atombeta
+  brackets
+  clion
+  clion64
+  code
+  computer
+  emacs
+  idea
+  idea64
+  insiders
+  notepad
+  other
+  phpstorm
+  phpstorm64
+  pycharm
+  pycharm64
+  rubymine
+  rubymine64
+  sublimetext
+  sublimetext2
+  sublimetextdev
+  vim
+  webstorm
+  webstorm64
 }
 
 """Represents a spec on the file system"""

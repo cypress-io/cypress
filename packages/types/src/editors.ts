@@ -43,6 +43,10 @@ export const linuxEditors = [
     id: 'webstorm',
     binary: 'webstorm',
     name: 'WebStorm',
+  }, {
+    id: 'webstorm64',
+    binary: 'webstorm64.exe',
+    name: 'WebStorm 64-bit',
   },
 ] as const
 
@@ -150,7 +154,7 @@ export const windowsEditors = [
   }, {
     id: 'clion64',
     binary: 'clion64.exe',
-    name: 'CLion 64-bit',
+    name: 'CLion (64-bit)',
   }, {
     id: 'idea',
     binary: 'idea.exe',
@@ -158,7 +162,7 @@ export const windowsEditors = [
   }, {
     id: 'idea64',
     binary: 'idea64.exe',
-    name: 'IntelliJ IDEA 64-bit',
+    name: 'IntelliJ IDEA (64-bit)',
   }, {
     id: 'phpstorm',
     binary: 'phpstorm.exe',
@@ -166,7 +170,7 @@ export const windowsEditors = [
   }, {
     id: 'phpstorm64',
     binary: 'phpstorm64.exe',
-    name: 'PhpStorm 64-bit',
+    name: 'PhpStorm (64-bit)',
   }, {
     id: 'pycharm',
     binary: 'pycharm.exe',
@@ -174,7 +178,7 @@ export const windowsEditors = [
   }, {
     id: 'pycharm64',
     binary: 'pycharm64.exe',
-    name: 'PyCharm 64-bit',
+    name: 'PyCharm (64-bit)',
   }, {
     id: 'rubymine',
     binary: 'rubymine.exe',
@@ -182,15 +186,11 @@ export const windowsEditors = [
   }, {
     id: 'rubymine64',
     binary: 'rubymine64.exe',
-    name: 'Rubymine 64-bit',
+    name: 'Rubymine (64-bit)',
   }, {
     id: 'webstorm',
     binary: 'webstorm.exe',
     name: 'WebStorm',
-  }, {
-    id: 'webstorm64',
-    binary: 'webstorm64.exe',
-    name: 'WebStorm 64-bit',
   },
 ] as const
 
@@ -200,40 +200,36 @@ export const osFileSystemExplorer = {
   linux: 'File System',
 } as const
 
-export interface Editor {
-  id: EditorId
-  binary: EditorBinary
-  name: EditorName
-}
-
 export type EditorName =
   | typeof linuxEditors[number]['name']
   | typeof macOSEditors[number]['name']
   | typeof windowsEditors[number]['name']
   | 'Other'
 
-export type Editorbinary = EditorBinary | 'computer' | null
+export type EditorId = typeof editorIds
 
-export type EditorId =
-  | typeof linuxEditors[number]['id']
-  | typeof macOSEditors[number]['id']
-  | typeof windowsEditors[number]['id']
-  | 'other'
-  | 'computer'
+export const editorIds = [
+  ...linuxEditors.map((x) => x.id),
+  ...windowsEditors.map((x) => x.id),
+  ...macOSEditors.map((x) => x.id),
+  'other',
+  'computer',
+] as const
 
-export type EditorBinary =
+type OSEditorBinary =
   | typeof linuxEditors[number]['binary']
   | typeof macOSEditors[number]['binary']
   | typeof windowsEditors[number]['binary']
 
-export interface CyEditor {
-  id: EditorId
-  name: EditorName
-  binary: Editorbinary
-  isOther: boolean
+export type EditorBinary = OSEditorBinary | 'computer' | string
+
+export interface Editor {
+  id: typeof editorIds[number]
+  binary: EditorBinary
+  name: EditorName | string
 }
 
 export interface EditorsResult {
-  preferredOpener?: CyEditor
-  availableEditors: CyEditor[]
+  preferredOpener?: Editor
+  availableEditors: Editor[]
 }
