@@ -25,6 +25,7 @@
         :file-name="spec.fileName"
         :extension="spec.specFileExtension"
         :selected="selected"
+        :indexes="getIndexes(spec)"
       />
       <span
         class="
@@ -41,13 +42,13 @@
 </template>
 
 <script lang="ts" setup>
-import type { FoundSpec } from '@packages/types'
+import type { FuzzyFoundSpec } from '@packages/frontend-shared/src/utils/buildSpecTree'
 import { computed } from 'vue'
 import { RouterLink } from 'vue-router'
 import SpecFileItem from './SpecFileItem.vue'
 
 const props = defineProps<{
-  spec: FoundSpec;
+  spec: FuzzyFoundSpec;
   selected: boolean;
 }>()
 
@@ -86,6 +87,17 @@ const handleDown = (event) => {
     target.parentElement.firstElementChild.focus({ preventScroll: true })
     target.parentElement.firstElementChild.scrollIntoView(false)
   }
+}
+
+function getIndexes (spec: FuzzyFoundSpec) {
+  const indexes = spec.indexes
+
+  const maxIndex = spec.relative.length - 1
+  const minIndex = maxIndex - spec.baseName.length + 1
+
+  const res = indexes?.filter((index) => index >= minIndex && index <= maxIndex)
+
+  return res.map((idx) => idx - minIndex)
 }
 </script>
 

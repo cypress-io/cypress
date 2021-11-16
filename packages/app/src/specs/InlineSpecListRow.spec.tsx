@@ -1,11 +1,11 @@
-import type { FoundSpec } from '@packages/types/src'
 import InlineSpecListRow from './InlineSpecListRow.vue'
+import type { FuzzyFoundSpec } from '@packages/frontend-shared/src/utils/buildSpecTree'
 
 describe('InlineSpecListRow', () => {
-  let specs: FoundSpec[]
+  let specs: FuzzyFoundSpec[]
 
   before(() => {
-    cy.fixture('found-specs').then((foundSpecs) => specs = foundSpecs)
+    cy.fixture('found-specs').then((foundSpecs) => specs = foundSpecs.map((spec) => ({ ...spec, indexes: [] })))
   })
 
   it('should handle keyboard navigation', () => {

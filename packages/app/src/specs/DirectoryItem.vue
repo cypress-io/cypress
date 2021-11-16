@@ -5,29 +5,39 @@
       :class="{'transform rotate-270': !expanded}"
     />
     <i-cy-folder_x16 class="mr-8px w-16px h-16px" />
-    <template
-      v-for="(directory, idx) in directories"
-      :key="directory"
-    >
-      <span class="font-medium text-gray-400">{{ directory }}</span>
+    <span class="text-gray-400">
       <span
-        v-if="idx !== directories.length - 1"
-        class="font-medium text-gray-800 px-4px"
+        v-for="({char, highlighted}, idx) in characters"
+        :key="idx"
+        :class="{'px-4px': char === '/'}"
       >
-        /
+        <span
+          v-if="highlighted"
+          class="text-white"
+        >{{ char }}</span>
+        <template v-else>
+          {{ char }}
+        </template>
+
       </span>
-    </template>
+    </span>
   </div>
 </template>
 
 <script lang="ts" setup>
-interface Props {
-  directories: string[],
-  expanded: boolean
-}
+import { computed } from 'vue'
 
-withDefaults(defineProps<Props>(), {
-  directories: () => [],
+const props = withDefaults(defineProps<{ name: string, expanded: boolean, indexes: number[] }>(), {
+  name: '',
   expanded: false,
+  indexes: () => [],
+})
+
+const characters = computed(() => {
+  const chars = props.name.split('').map((char) => ({ char, highlighted: false }))
+
+  props.indexes.forEach((idx) => chars[idx].highlighted = true)
+
+  return chars
 })
 </script>

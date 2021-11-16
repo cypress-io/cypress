@@ -1,6 +1,9 @@
 import type { FoundSpec } from '@packages/types'
 
+export type FuzzyFoundSpec = FoundSpec & { indexes: number[] }
+
 export type SpecTreeNode<T extends FoundSpec = FoundSpec> = {
+  id: string
   name: string
   children: SpecTreeNode<T>[]
   isLeaf: boolean
@@ -8,9 +11,8 @@ export type SpecTreeNode<T extends FoundSpec = FoundSpec> = {
   data?: T
 }
 
-export function buildSpecTree<T extends FoundSpec> (specs: FoundSpec[], root: SpecTreeNode<T> = { name: '/', isLeaf: false, children: [] }) {
+export function buildSpecTree<T extends FoundSpec> (specs: FoundSpec[], root: SpecTreeNode<T> = { name: '', isLeaf: false, children: [], id: '' }) {
   specs.forEach((spec) => buildSpecTreeRecursive(spec.relative, root, spec))
-
   collapseEmptyChildren(root)
 
   return root
@@ -18,9 +20,10 @@ export function buildSpecTree<T extends FoundSpec> (specs: FoundSpec[], root: Sp
 
 export function buildSpecTreeRecursive<T extends FoundSpec> (path: string, tree: SpecTreeNode<T>, data?: T) {
   const [firstFile, ...rest] = path.split('/')
+  const id = tree.id ? [tree.id, firstFile].join('/') : firstFile
 
   if (rest.length < 1) {
-    tree.children.push({ name: firstFile, isLeaf: true, children: [], parent: tree, data })
+    tree.children.push({ name: firstFile, isLeaf: true, children: [], parent: tree, data, id })
 
     return tree
   }
@@ -33,7 +36,7 @@ export function buildSpecTreeRecursive<T extends FoundSpec> (path: string, tree:
     return tree
   }
 
-  const newTree = buildSpecTreeRecursive(rest.join('/'), { name: firstFile, isLeaf: false, children: [], parent: tree }, data)
+  const newTree = buildSpecTreeRecursive(rest.join('/'), { name: firstFile, isLeaf: false, children: [], parent: tree, id, data }, data)
 
   tree.children.push(newTree)
 
@@ -52,6 +55,7 @@ function collapseEmptyChildren<T extends FoundSpec> (node: SpecTreeNode<T>) {
   // so we check node.parent.parent
   if (node.parent && node.parent.parent && (node.parent.children.length === 1)) {
     node.parent.name = [node.parent.name, node.name].join('/')
+    node.parent.id = [node.parent.id, node.name].join('/')
     node.parent.children = node.children
   }
 
