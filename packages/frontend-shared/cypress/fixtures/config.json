@@ -47,8 +47,6 @@
   {
     "value": {
       "INTERNAL_CLOUD_ENV": "staging",
-      "INTERNAL_VITE_APP_PORT": 3333,
-      "INTERNAL_VITE_LAUNCHPAD_PORT": 3001,
       "KONFIG_ENV": "staging"
     },
     "field": "env",

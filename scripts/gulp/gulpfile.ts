@@ -65,8 +65,10 @@ gulp.task(
   'dev',
   gulp.series(
     makePathMap,
-
-    'codegen',
+    gulp.parallel(
+      'viteClean',
+      'codegen',
+    ),
 
     killExistingCypress,
 
@@ -78,17 +80,13 @@ gulp.task(
       e2eTestScaffoldWatch,
     ),
 
+    symlinkViteProjects,
+
     // And we're finally ready for electron, watching for changes in
     // /graphql to auto-restart the server
     startCypressWatch,
   ),
 )
-
-gulp.task('dev:clean', gulp.series(
-  // Clean any vite assets
-  'viteClean',
-  'dev',
-))
 
 gulp.task(
   'debug',
