@@ -29,7 +29,9 @@ export function viteApp () {
   if (process.env.CYPRESS_INTERNAL_VITE_DEV) {
     const port = process.env.CYPRESS_INTERNAL_VITE_APP_PORT ??= '3333'
 
-    return spawnViteDevServer('vite-app', `yarn vite --port ${port} ${baseSuffix}`)
+    return spawnViteDevServer('vite-app', `yarn vite --port ${port} ${baseSuffix}`, {
+      cwd: monorepoPaths.pkgApp,
+    })
   }
 
   return watchViteBuild('vite-app', `yarn vite build --mode development --minify false --watch ${baseSuffix}`, {
@@ -41,7 +43,9 @@ export function viteLaunchpad () {
   if (process.env.CYPRESS_INTERNAL_VITE_DEV) {
     const port = process.env.CYPRESS_INTERNAL_VITE_LAUNCHPAD_PORT ??= '3001'
 
-    return spawnViteDevServer('vite-launchpad', `yarn vite --port ${port}`)
+    return spawnViteDevServer('vite-launchpad', `yarn vite --port ${port}`, {
+      cwd: monorepoPaths.pkgLaunchpad,
+    })
   }
 
   return watchViteBuild('vite-launchpad', `yarn vite build --mode development --minify false --watch`, {
@@ -145,11 +149,6 @@ export function generateShikiTheme () {
 }
 
 export async function viteClean () {
-  // Don't clear the .vite cache if we're doing the internal dev flag
-  if (process.env.CYPRESS_INTERNAL_VITE_DEV) {
-    return
-  }
-
   return Promise.all([
     viteCleanApp(),
     viteCleanLaunchpad(),

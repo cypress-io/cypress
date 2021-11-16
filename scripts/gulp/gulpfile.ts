@@ -63,7 +63,7 @@ gulp.task(
   gulp.series(
     makePathMap,
     gulp.parallel(
-      'viteClean',
+      viteClean,
       'codegen',
     ),
 
@@ -112,7 +112,7 @@ gulp.task(
 
 gulp.task('buildProd',
   gulp.series(
-    'viteClean',
+    viteClean,
 
     syncRemoteGraphQL,
     nexusCodegen,
@@ -222,7 +222,7 @@ const cyOpenApp = gulp.series(
 // Open Cypress in production mode.
 // Rebuild the Launchpad app between changes.
 gulp.task('cyOpenLaunchpadE2E', gulp.series(
-  'viteClean',
+  viteClean,
 
   // 1. Build the Cypress App itself
   'commonSetup',
@@ -234,7 +234,7 @@ gulp.task('cyOpenLaunchpadE2E', gulp.series(
 // Open Cypress in production mode.
 // Rebuild the Launchpad app between changes.
 gulp.task('cyOpenAppE2E', gulp.series(
-  'viteClean',
+  viteClean,
 
   // 1. Build the Cypress App itself
   'commonSetup',
