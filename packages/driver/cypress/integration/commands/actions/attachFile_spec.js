@@ -1,13 +1,3 @@
-/*
- * Tests TODO:
- *
- * Add e2e test covering common frameworks, to make sure it works with real applications (that we didn't write):
- *   https://uppy.io/
- *   https://www.dropzone.dev/js/
- *   https://github.com/lian-yue/vue-upload-component
- * (though some of these will have to wait for drag-n-drop support)
- */
-
 const { _, $ } = Cypress
 
 // Reading and decoding files from an input element would, in the real world,
