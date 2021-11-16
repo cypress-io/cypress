@@ -1,10 +1,4 @@
 <template>
-  <button @click="expand">
-    Expand
-  </button>
-  <button @click="collapse">
-    Collapse
-  </button>
   <div
     ref="rootEl"
     class="h-200px overflow-auto"
@@ -68,7 +62,7 @@ const onRowClick = (row, idx) => {
 
 const rootEl: Ref<HTMLElement | undefined> = ref()
 
-const { tree, expand, collapse } = useCollapsibleTree(root)
+const { tree } = useCollapsibleTree(root)
 const filteredTree = computed(() => tree.filter(((item) => !item.hidden.value)))
 
 const { selectedItem, rowProps } = useListNavigation(rootEl)
