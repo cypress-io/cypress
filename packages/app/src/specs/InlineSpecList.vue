@@ -44,7 +44,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, nextTick, onBeforeUnmount } from 'vue'
 import { gql } from '@urql/vue'
 import type { SpecNode_InlineSpecListFragment, Specs_InlineSpecListFragment } from '../generated/graphql'
 import { useSpecStore } from '../store'
@@ -52,7 +52,7 @@ import InlineSpecListHeader from './InlineSpecListHeader.vue'
 import InlineSpecListRow from './InlineSpecListRow.vue'
 import InlineSpecListTree from './InlineSpecListTree.vue'
 import type { SpecViewType } from './SpecsList.vue'
-import { onKeyStroke } from '@vueuse/core'
+import { onKeyStroke, useMutationObserver } from '@vueuse/core'
 import { useI18n } from '@cy/i18n'
 
 const { t } = useI18n()
@@ -115,16 +115,46 @@ const specs = computed(() => {
 
 const renderTeleport = ref(false)
 const showList = ref(true)
-
-const teleportInterval = setInterval(() => {
-  if (document.querySelector('#focus-tests-vue-teleport-target')) {
-    renderTeleport.value = true
-    clearInterval(teleportInterval)
-  }
-}, 200)
+let teleportMutuationObserver: MutationObserver | null = null
 
 onKeyStroke('f', () => {
   showList.value = !showList.value
+})
+
+const teleportInterval = setInterval(() => {
+  const teleportTarget = document.querySelector('#focus-tests-vue-teleport-target')
+  const reactVueParent = document.querySelector('#unified-runner-vue-wrapper')
+
+  if (!teleportTarget || !reactVueParent) {
+    return
+  }
+
+  clearInterval(teleportInterval)
+  renderTeleport.value = true
+  setUpMutationObserver(teleportTarget, reactVueParent)
+}, 200)
+
+/**
+This mutation observer allows us to know when the parent of the `teleport`'s target has been
+re-rendered or otherwise changed, and if the target is empty, we can trigger re-render
+of the `teleport` so that the button is replaced immediately. The reporter re-renders if you edit a test,
+which causes the vue button that was rendered there to disappear.
+**/
+function setUpMutationObserver (teleportTarget: Element, elementToObserve: Element) {
+  teleportMutuationObserver = new MutationObserver(() => {
+    if (!teleportTarget.children?.length) {
+      renderTeleport.value = false
+      nextTick(() => {
+        renderTeleport.value = true
+      })
+    }
+  })
+
+  teleportMutuationObserver.observe(elementToObserve, { childList: true, subtree: true })
+}
+
+onBeforeUnmount(() => {
+  teleportMutuationObserver?.disconnect()
 })
 
 </script>

@@ -10,7 +10,10 @@
       <InlineSpecList :gql="props.gql" />
     </HideDuringScreenshot>
 
-    <HideDuringScreenshot class="min-w-320px">
+    <HideDuringScreenshot
+      id="unified-runner-vue-wrapper"
+      class="min-w-320px"
+    >
       <div
         v-once
         :id="REPORTER_ID"
