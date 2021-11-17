@@ -81,9 +81,12 @@ export function makeUrqlClient (target: 'launchpad' | 'app'): Client {
         ${error.stack ?? ''}
       `
 
-        toast.error(message, {
-          timeout: false,
-        })
+        if (process.env.NODE_ENV !== 'production') {
+          toast.error(message, {
+            timeout: false,
+          })
+        }
+
         // eslint-disable-next-line
         console.error(error)
       },

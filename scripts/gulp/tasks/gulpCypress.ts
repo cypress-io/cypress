@@ -139,7 +139,7 @@ export async function startCypressWatch () {
 
   function signalRestart () {
     if (!child) {
-      restartServer()
+      startCypressWithListeners()
     } else {
       fs.writeFile(DevActions.CY_STATE_PATH, JSON.stringify(new Date().toString()))
     }
