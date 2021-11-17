@@ -18,7 +18,7 @@
         {{ t('topNav.updateCypress.pasteToUpgrade') }}
       </p>
       <TerminalPrompt
-        :command="installCommand + 'cypress@10.0.0'"
+        :command="installCommand + 'cypress@' + latestVersion"
         :project-folder-name="projectName"
       />
       <p
@@ -32,7 +32,6 @@
 <script setup lang="ts">
 import StandardModal from '../../components/StandardModal.vue'
 import TerminalPrompt from '../../components/TerminalPrompt.vue'
-import InlineCodeFragment from '../../components/InlineCodeFragment.vue'
 import { useI18n } from '@cy/i18n'
 
 const { t } = useI18n()
