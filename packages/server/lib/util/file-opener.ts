@@ -3,7 +3,16 @@ import launchEditor from 'launch-editor'
 
 const debug = debugModule('cypress:server:file-opener')
 
-export const openFile = (fileDetails) => {
+export interface OpenFileDetails {
+  file: string
+  where: {
+    binary: string
+  }
+  line: number
+  column: number
+}
+
+export const openFile = (fileDetails: OpenFileDetails) => {
   debug('open file: %o', fileDetails)
 
   const binary = fileDetails.where.binary
