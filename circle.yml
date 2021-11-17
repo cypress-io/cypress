@@ -934,30 +934,6 @@ commands:
             - cypress/npm-package-url.json
 
 jobs:
-  windows-build:
-    <<: *defaults
-    steps:
-      - run:
-        name: check nvm version
-        command: nvm current
-      - restore_cached_workspace
-      - run:
-          name: Top level packages
-          command: |
-            yarn versions
-            yarn list --depth=0 || true
-      - run:
-          name: Build packages
-          command: yarn build-prod
-      - prepare-modules-cache # So we don't throw these in the workspace cache
-      - persist_to_workspace:
-          root: ~/
-          paths:
-            - cypress
-            - .ssh
-            - node_modules # contains the npm i -g modules
-      - store-npm-logs
-
   ## Checks if we already have a valid cache for the node_modules_install and if it has,
   ## skips ahead to the build step, otherwise installs and caches the node_modules
   node_modules_install:
