@@ -6,6 +6,10 @@ export const namedRouteExchange: Exchange = ({ client, forward }) => {
     return forward(pipe(
       ops$,
       map((o) => {
+        if (o.context.requestPolicy === 'cache-first' || o.context.requestPolicy === 'cache-only') {
+          return o
+        }
+
         if (!o.context.url.endsWith('/graphql')) {
           throw new Error(`Infinite loop detected? Ping @tgriesser to help debug`)
         }

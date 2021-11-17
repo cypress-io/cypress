@@ -138,7 +138,11 @@ export async function startCypressWatch () {
   fs.ensureDirSync(path.dirname(DevActions.CY_STATE_PATH))
 
   function signalRestart () {
-    fs.writeFile(DevActions.CY_STATE_PATH, JSON.stringify(new Date().toString()))
+    if (!child) {
+      startCypressWithListeners()
+    } else {
+      fs.writeFile(DevActions.CY_STATE_PATH, JSON.stringify(new Date().toString()))
+    }
   }
 
   /**
@@ -186,7 +190,9 @@ export async function startCypressWatch () {
     watcher.close()
   })
 
-  const restartWatcher = chokidar.watch(DevActions.CY_TRIGGER_UPDATE)
+  const restartWatcher = chokidar.watch(DevActions.CY_TRIGGER_UPDATE, {
+    ignoreInitial: true,
+  })
 
   restartWatcher.on('add', restartServer)
   restartWatcher.on('change', restartServer)
