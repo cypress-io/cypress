@@ -11,14 +11,14 @@
     >
       <div
         v-for="pref in prefs"
-        :key="pref.title"
+        :key="pref.id"
         class="py-16px"
       >
         <h4 class="text-gray-800 text-size-16px leading-24px flex items-center">
           {{ pref.title }}
           <Switch
             class="mx-8px"
-            :value="props.gql.localSettings.preferences.autoScrollingEnabled"
+            :value="props.gql.localSettings.preferences[pref.id]"
             :name="pref.title"
             @update="(value) => pref.mutation.executeMutation({ value })"
           />
@@ -32,18 +32,16 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watchEffect } from 'vue'
 import SettingsSection from '../SettingsSection.vue'
 import { useI18n } from '@cy/i18n'
 import Switch from '@packages/frontend-shared/src/components/Switch.vue'
 import { gql, useMutation } from '@urql/vue'
-import { 
+import {
   SetAutoScrollingEnabledDocument,
   SetUseDarkSidebarDocument,
-  SetWatchForSpecChangeDocument
+  SetWatchForSpecChangeDocument,
 } from '@packages/data-context/src/gen/all-operations.gen'
 import type { TestingPreferencesFragment } from '../../generated/graphql'
-import type { DevicePreferences } from '@packages/types/src/devicePreferences'
 
 const { t } = useI18n()
 
@@ -69,7 +67,6 @@ mutation SetUseDarkSidebar($value: Boolean!) {
   setUseDarkSidebar(value: $value)
 }`
 
-
 gql`
 mutation SetWatchForSpecChange($value: Boolean!) {
   setWatchForSpecChange(value: $value)
@@ -78,25 +75,25 @@ mutation SetWatchForSpecChange($value: Boolean!) {
 const prefs = [
   {
     id: 'autoScrollingEnabled',
-    title: t('settingsPage.testingPreferences.autoScrollingEnabled'),
+    title: t('settingsPage.testingPreferences.autoScrollingEnabled.title'),
     mutation: useMutation(SetAutoScrollingEnabledDocument),
-    description: 'alalalala'
-  }
+    description: t('settingsPage.testingPreferences.autoScrollingEnabled.description'),
+  },
+  {
+    id: 'useDarkSidebar',
+    title: t('settingsPage.testingPreferences.useDarkSidebar.title'),
+    mutation: useMutation(SetUseDarkSidebarDocument),
+    description: t('settingsPage.testingPreferences.useDarkSidebar.description'),
+  },
+  {
+    id: 'watchForSpecChange',
+    title: t('settingsPage.testingPreferences.watchForSpecChange.title'),
+    mutation: useMutation(SetWatchForSpecChangeDocument),
+    description: t('settingsPage.testingPreferences.watchForSpecChange.description'),
+  },
 ] as const
 
 const props = defineProps<{
   gql: TestingPreferencesFragment
 }>()
-
-// const autoScrollingEnabled = ref(props.gql.autoScrollingEnabled)
-
-// watchEffect(() => {
-//   autoScrollingEnabled.value = props.gql.autoScrollingEnabled
-//   autoScrollingEnabled.value = props.gql.autoScrollingEnabled
-//   autoScrollingEnabled.value = props.gql.autoScrollingEnabled
-// })
-
-// const setAutoScrollingEnabled = 
-// const setUseDarkSidebar = useMutation(SetUseDarkSidebarDocument)
-// const setWatchForSpecChange = useMutation(SetWatchForSpecChangeDocument)
 </script>

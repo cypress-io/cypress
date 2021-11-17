@@ -472,7 +472,7 @@ type LocalSettings {
 """local setting preferences"""
 type LocalSettingsPreferences {
   autoScrollingEnabled: Boolean!
-  useDarkSideBar: Boolean!
+  useDarkSidebar: Boolean!
   watchForSpecChange: Boolean!
 }
 
