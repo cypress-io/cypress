@@ -14,8 +14,7 @@ const builtInCommands = [
 ]
 
 const reservedCommandNames = [
-  'getAlias',
-  'reset',
+  'addChainer',
 ]
 
 const getTypeByPrevSubject = (prevSubject) => {
