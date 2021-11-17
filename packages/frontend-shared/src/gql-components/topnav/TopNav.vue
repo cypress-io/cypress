@@ -83,7 +83,7 @@
     :use-default-hocus="false"
   >
     <i-cy-box_x16
-      class="group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50 h-16px w-16px"
+      class="group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50 h-16px w-16px icon-dark-gray-500 icon-light-gray-100"
     />
     <span>
       v{{ versions.latest.version }}
