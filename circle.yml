@@ -324,16 +324,17 @@ commands:
             echo "
               \. '$HOME/.nvm/nvm.sh' # load nvm
               export NODE_VERSION='${node_version}'
-              npm install yarn -g # ensure yarn is installed with the correct node engine
             " >> ~/.bash_profile
       - run:
           # https://github.com/nvm-sh/nvm#nvmrc
           name: Install Node
           command: |
+            npm uninstall yarn -g # remove default yarn installed on circleci. built with wrong node engine
             nvm install ${NODE_VERSION} || exit 1
             nvm use ${NODE_VERSION} || exit 1
             nvm alias default ${NODE_VERSION} || exit 1
             node --version
+            npm install yarn -g # ensure yarn is installed with the correct node engine
             yarn check-node-version
         # node ./scripts/circleci/check-node-version.js
 
@@ -2064,7 +2065,7 @@ linux-workflow: &linux-workflow
         context: test-runner:poll-circle-workflow
         required_env_var: PERCY_TOKEN # skips job if not defined (external PR)
         requires:
-          - build
+          # - build
           - desktop-gui-integration-tests-7x
           - desktop-gui-component-tests
           - cli-visual-tests
@@ -2220,7 +2221,7 @@ linux-workflow: &linux-workflow
           - server-unit-tests
           - unit-tests
           - unit-tests-release
-          - cli-visual-tests
+          # - cli-visual-tests
 
       #       desktop-gui-integration-tests-7x,
       #       desktop-gui-component-tests,
