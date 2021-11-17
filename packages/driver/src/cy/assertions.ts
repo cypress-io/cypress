@@ -50,6 +50,8 @@ const isDomSubjectAndMatchesValue = (value, subject) => {
     // and that all the els are the same
     return isDomTypeFn(subject) && allElsAreTheSame()
   }
+
+  return false
 }
 
 // Rules:
@@ -71,74 +73,153 @@ const parseValueActualAndExpected = (value, actual, expected) => {
   return obj
 }
 
-export default {
-  create (Cypress, cy) {
-    const getUpcomingAssertions = () => {
-      const index = cy.state('index') + 1
+export const create = (Cypress, cy) => {
+  const getUpcomingAssertions = () => {
+    const index = cy.state('index') + 1
 
-      const assertions = []
+    const assertions = []
 
-      // grab the rest of the queue'd commands
-      for (let cmd of cy.queue.slice(index)) {
-        // don't break on utilities, just skip over them
-        if (cmd.is('utility')) {
-          continue
-        }
-
-        // grab all of the queued commands which are
-        // assertions and match our current chainerId
-        if (cmd.is('assertion')) {
-          assertions.push(cmd)
-        } else {
-          break
-        }
+    // grab the rest of the queue'd commands
+    for (let cmd of cy.queue.slice(index)) {
+      // don't break on utilities, just skip over them
+      if (cmd.is('utility')) {
+        continue
       }
 
-      return assertions
+      // grab all of the queued commands which are
+      // assertions and match our current chainerId
+      if (cmd.is('assertion')) {
+        assertions.push(cmd)
+      } else {
+        break
+      }
     }
 
-    const injectAssertionFns = (cmds) => {
-      return _.map(cmds, injectAssertion)
+    return assertions
+  }
+
+  const injectAssertionFns = (cmds) => {
+    return _.map(cmds, injectAssertion)
+  }
+
+  const injectAssertion = (cmd) => {
+    return ((subject) => {
+      // set assertions to itself or empty array
+      if (!cmd.get('assertions')) {
+        cmd.set('assertions', [])
+      }
+
+      // reset the assertion index back to 0
+      // so we can track assertions and merge
+      // them up with existing ones
+      cmd.set('assertionIndex', 0)
+
+      if (cy.state('current') != null) {
+        cy.state('current').set('currentAssertionCommand', cmd)
+      }
+
+      return cmd.get('fn').originalFn.apply(
+        cy.state('ctx'),
+        [subject].concat(cmd.get('args')),
+      )
+    })
+  }
+
+  const assertFn = (passed, message, value, actual, expected, error, verifying = false) => {
+    // slice off everything after a ', but' or ' but ' for passing assertions, because
+    // otherwise it doesn't make sense:
+    // "expected <div> to have a an attribute 'href', but it was 'href'"
+    if (message && passed && butRe.test(message)) {
+      message = message.substring(0, message.search(butRe))
     }
 
-    const injectAssertion = (cmd) => {
-      return ((subject) => {
-        // set assertions to itself or empty array
-        if (!cmd.get('assertions')) {
-          cmd.set('assertions', [])
-        }
-
-        // reset the assertion index back to 0
-        // so we can track assertions and merge
-        // them up with existing ones
-        cmd.set('assertionIndex', 0)
-
-        if (cy.state('current') != null) {
-          cy.state('current').set('currentAssertionCommand', cmd)
-        }
-
-        return cmd.get('fn').originalFn.apply(
-          cy.state('ctx'),
-          [subject].concat(cmd.get('args')),
-        )
-      })
+    if (value && value.isSinonProxy) {
+      message = message.replace(stackTracesRe, '\n')
     }
 
-    const finishAssertions = (assertions) => {
-      return _.each(assertions, (log) => {
-        log.snapshot()
+    let obj = parseValueActualAndExpected(value, actual, expected)
 
-        const e = log.get('_error')
-
-        if (e) {
-          return log.error(e)
-        }
-
-        return log.end()
-      })
+    if ($dom.isElement(value)) {
+      obj.$el = $dom.wrap(value)
     }
 
-    const verifyUpcomingAssertions = function (subject, options = {}, callbacks = {}) {
+    // if we are simply verifying the upcoming
+    // assertions then do not immediately end or snapshot
+    // else do
+    if (verifying) {
+      obj._error = error
+    } else {
+      obj.end = true
+      obj.snapshot = true
+      obj.error = error
+    }
+
+    const isChildLike = (subject, current) => {
+      return (value === subject) ||
+        isDomSubjectAndMatchesValue(value, subject) ||
+        // if our current command is an assertion type
+        isAssertionType(current) ||
+        // are we currently verifying assertions?
+        (cy.state('upcomingAssertions') && cy.state('upcomingAssertions').length > 0) ||
+        // did the function have arguments
+        functionHadArguments(current)
+    }
+
+    _.extend(obj, {
+      name: 'assert',
+      // end:      true
+      // snapshot: true
+      message,
+      passed,
+      selector: value ? value.selector : undefined,
+      timeout: 0,
+      type (current, subject) {
+        // if our current command has arguments assume
+        // we are an assertion that's involving the current
+        // subject or our value is the current subject
+        return isChildLike(subject, current) ? 'child' : 'parent'
+      },
+
+      consoleProps: () => {
+        obj = { Command: 'assert' }
+
+        _.extend(obj, parseValueActualAndExpected(value, actual, expected))
+
+        return _.extend(obj,
+          { Message: message.replace(bTagOpen, '').replace(bTagClosed, '') })
+      },
+    })
+
+    // think about completely gutting the whole object toString
+    // which chai does by default, its so ugly and worthless
+
+    if (error) {
+      error.onFail = (err) => { }
+    }
+
+    Cypress.log(obj)
+
+    return null
+  }
+
+  const finishAssertions = (assertions) => {
+    return _.each(assertions, (log) => {
+      log.snapshot()
+
+      const e = log.get('_error')
+
+      if (e) {
+        return log.error(e)
+      }
+
+      return log.end()
+    })
+  }
+
+  return {
+    finishAssertions,
+
+    verifyUpcomingAssertions (subject, options = {}, callbacks = {}) {
       const cmds = getUpcomingAssertions()
 
       cy.state('upcomingAssertions', cmds)
@@ -430,99 +511,19 @@ export default {
         throw err
       })
       .catch(onFailFn)
-    }
+    },
 
-    const assertFn = (passed, message, value, actual, expected, error, verifying = false) => {
-      // slice off everything after a ', but' or ' but ' for passing assertions, because
-      // otherwise it doesn't make sense:
-      // "expected <div> to have a an attribute 'href', but it was 'href'"
-      if (message && passed && butRe.test(message)) {
-        message = message.substring(0, message.search(butRe))
-      }
-
-      if (value && value.isSinonProxy) {
-        message = message.replace(stackTracesRe, '\n')
-      }
-
-      let obj = parseValueActualAndExpected(value, actual, expected)
-
-      if ($dom.isElement(value)) {
-        obj.$el = $dom.wrap(value)
-      }
-
-      // if we are simply verifying the upcoming
-      // assertions then do not immediately end or snapshot
-      // else do
-      if (verifying) {
-        obj._error = error
-      } else {
-        obj.end = true
-        obj.snapshot = true
-        obj.error = error
-      }
-
-      const isChildLike = (subject, current) => {
-        return (value === subject) ||
-          isDomSubjectAndMatchesValue(value, subject) ||
-          // if our current command is an assertion type
-          isAssertionType(current) ||
-          // are we currently verifying assertions?
-          (cy.state('upcomingAssertions') && cy.state('upcomingAssertions').length > 0) ||
-          // did the function have arguments
-          functionHadArguments(current)
-      }
-
-      _.extend(obj, {
-        name: 'assert',
-        // end:      true
-        // snapshot: true
-        message,
-        passed,
-        selector: value ? value.selector : undefined,
-        timeout: 0,
-        type (current, subject) {
-          // if our current command has arguments assume
-          // we are an assertion that's involving the current
-          // subject or our value is the current subject
-          return isChildLike(subject, current) ? 'child' : 'parent'
-        },
-
-        consoleProps: () => {
-          obj = { Command: 'assert' }
-
-          _.extend(obj, parseValueActualAndExpected(value, actual, expected))
-
-          return _.extend(obj,
-            { Message: message.replace(bTagOpen, '').replace(bTagClosed, '') })
-        },
-      })
-
-      // think about completely gutting the whole object toString
-      // which chai does by default, its so ugly and worthless
-
-      if (error) {
-        error.onFail = (err) => { }
-      }
-
-      Cypress.log(obj)
-
-      return null
-    }
-
-    const assert = function (...args) {
+    assert (...args) {
       // if we've temporarily overridden assertions
       // then just bail early with this function
       const fn = cy.state('overrideAssert') || assertFn
 
       return fn.apply(this, args)
-    }
+    },
+  }
+}
 
-    return {
-      finishAssertions,
-
-      verifyUpcomingAssertions,
-
-      assert,
-    }
-  },
+export interface IAssertions {
+  verifyUpcomingAssertions: ReturnType<typeof create>['verifyUpcomingAssertions']
+  assert: ReturnType<typeof create>['assert']
 }
