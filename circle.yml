@@ -235,12 +235,7 @@ commands:
               circleci-agent step halt
             fi
       - run:
-          command: |
-            date +%Y-%U > cache_date
-          # if [ "$PLATFORM" = 'windows' ]; then
-          #   date /t > cache_date
-          # else 
-          # fi
+          command: date +%Y-%U > cache_date
       - restore_cache:
           name: Restore weekly yarn cache
           keys:
@@ -329,6 +324,7 @@ commands:
             echo "
               \. '$HOME/.nvm/nvm.sh' # load nvm
               export NODE_VERSION='${node_version}'
+              npm install yarn -g # ensure yarn is installed with the correct node engine
             " >> ~/.bash_profile
       - run:
           # https://github.com/nvm-sh/nvm#nvmrc
@@ -338,7 +334,6 @@ commands:
             nvm use ${NODE_VERSION} || exit 1
             nvm alias default ${NODE_VERSION} || exit 1
             node --version
-            npm install yarn -g # ensure yarn is installed with the correct node engine
             yarn check-node-version
         # node ./scripts/circleci/check-node-version.js
 
@@ -1548,7 +1543,6 @@ jobs:
         - run:
             name: Build + Install
             command: |
-              . ../../scripts/load-nvm.sh
               yarn workspace @cypress/schematic build:all
               yarn policies set-version 1.19.0
               yarn add --dev @angular/cli
@@ -1556,13 +1550,11 @@ jobs:
         - run:
             name: Launch
             command: |
-              . ../../scripts/load-nvm.sh
               yarn launch:test
             working_directory: npm/cypress-schematic
         - run:
             name: Run unit tests
             command: |
-              . ../../scripts/load-nvm.sh
               yarn test
             working_directory: npm/cypress-schematic
         - store-npm-logs
@@ -2207,13 +2199,13 @@ linux-workflow: &linux-workflow
           - npm-webpack-dev-server
           - npm-cypress-schematic
           - ui-components-integration-tests
-          - reporter-integration-tests
+          # - reporter-integration-tests
           - Linux lint
-          - desktop-gui-component-tests
-          - desktop-gui-integration-tests-7x
-          - runner-ct-integration-tests-chrome
+          # - desktop-gui-component-tests
+          # - desktop-gui-integration-tests-7x
+          # - runner-ct-integration-tests-chrome
           - runner-integration-tests-firefox
-          - runner-integration-tests-chrome
+          # - runner-integration-tests-chrome
           - runner-integration-tests-electron
           - driver-integration-tests-firefox
           - driver-integration-tests-chrome
@@ -2229,6 +2221,13 @@ linux-workflow: &linux-workflow
           - unit-tests
           - unit-tests-release
           - cli-visual-tests
+
+      #       desktop-gui-integration-tests-7x,
+      #       desktop-gui-component-tests,
+      #       cli-visual-tests,
+      #       runner-integration-tests-chrome,
+      #       runner-ct-integration-tests-chrome,
+      #       reporter-integration-tests
 
     # various testing scenarios, like building full binary
     # and testing it on a real project
