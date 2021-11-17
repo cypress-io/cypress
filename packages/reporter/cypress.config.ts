@@ -16,5 +16,12 @@ export default defineConfig({
   e2e: {
     viewportHeight: 660,
     viewportWidth: 1000,
+    setupNodeEvents (on, config) {
+      const express = require('express')
+
+      express().use(express.static('dist')).listen(5006)
+
+      return config
+    },
   },
 })

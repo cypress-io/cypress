@@ -123,6 +123,17 @@ export class ProjectBase<TServer extends Server> extends EE {
       onSettingsChanged: false,
       ...options,
     }
+
+    this.ctx.actions.projectConfig.killConfigProcess()
+    this.ctx.actions.project.setCurrentProjectProperties({
+      projectRoot: this.projectRoot,
+      configChildProcess: null,
+      ctPluginsInitialized: false,
+      e2ePluginsInitialized: false,
+      isCTConfigured: false,
+      isE2EConfigured: false,
+      config: null,
+    })
   }
 
   protected ensureProp = ensureProp
@@ -420,7 +431,7 @@ export class ProjectBase<TServer extends Server> extends EE {
       testingType: options.testingType,
       onError: (err: Error) => this._onError(err, options),
       onWarning: options.onWarning,
-    })
+    }, this.ctx)
 
     debug('plugin config yielded: %o', modifiedCfg)
 
@@ -706,7 +717,7 @@ export class ProjectBase<TServer extends Server> extends EE {
       this.options.configFile = await getDefaultConfigFilePath(this.projectRoot, this.ctx)
     }
 
-    let theCfg: Cfg = await config.get(this.projectRoot, this.options)
+    let theCfg: Cfg = await config.get(this.projectRoot, this.options, this.ctx)
 
     if (!theCfg.browsers || theCfg.browsers.length === 0) {
       // @ts-ignore - we don't know if the browser is headed or headless at this point.

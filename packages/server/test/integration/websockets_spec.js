@@ -14,19 +14,25 @@ const { SpecsStore } = require(`${root}/lib/specs-store`)
 const { Automation } = require(`${root}lib/automation`)
 const Fixtures = require('@tooling/system-tests/lib/fixtures')
 const { createRoutes } = require(`${root}lib/routes`)
+const { makeLegacyDataContext } = require(`${root}lib/makeDataContext`)
 
 const cyPort = 12345
 const otherPort = 55551
 const wsPort = 20000
 const wssPort = 8443
 
+let ctx
+
 describe('Web Sockets', () => {
   require('mocha-banner').register()
 
   beforeEach(function () {
+    ctx = makeLegacyDataContext()
     Fixtures.scaffold()
 
     this.idsPath = Fixtures.projectPath('ids')
+
+    ctx.actions.project.setActiveProjectForTestSetup(this.idsPath)
 
     return config.get(this.idsPath, { port: cyPort, configFile: 'cypress.config.js' })
     .then((cfg) => {

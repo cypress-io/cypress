@@ -5,7 +5,6 @@ import { ErrorRequestHandler, Router } from 'express'
 import send from 'send'
 import { getPathToDist } from '@packages/resolve-dist'
 
-import { fs } from './util/fs'
 import type { SpecsStore } from './specs-store'
 import type { Browser } from './browsers/types'
 import type { NetworkProxy } from '@packages/proxy'
@@ -29,10 +28,6 @@ export interface InitializeRoutes {
   onError: (...args: unknown[]) => any
   testingType: Cypress.TestingType
   exit?: boolean
-}
-
-function replaceBody (ctx: DataContext) {
-  return `<body><script>window.__CYPRESS_GRAPHQL_PORT__ = ${JSON.stringify(ctx.gqlServerPort)};</script>\n`
 }
 
 export const createCommonRoutes = ({
@@ -89,27 +84,17 @@ export const createCommonRoutes = ({
     res.json(options)
   })
 
-  if (process.env.CYPRESS_INTERNAL_VITE_APP_PORT) {
+  if (process.env.CYPRESS_INTERNAL_VITE_DEV) {
     const proxy = httpProxy.createProxyServer({
       target: `http://localhost:${process.env.CYPRESS_INTERNAL_VITE_APP_PORT}/`,
     })
 
-    // TODO: can namespace this onto a "unified" route like __app-unified__
-    // make sure to update the generated routes inside of vite.config.ts
-    router.get('/__vite__/*', (req, res) => {
-      debug('Proxy to __vite__')
+    router.get('/__cypress/assets/*', (req, res) => {
       proxy.web(req, res, {}, (e) => {})
     })
   } else {
-    router.get('/__vite__/*', (req, res) => {
+    router.get('/__cypress/assets/*', (req, res) => {
       const pathToFile = getPathToDist('app', req.params[0])
-
-      if (req.params[0] === '') {
-        return fs.readFile(pathToFile, 'utf8')
-        .then((file) => {
-          res.send(file.replace('<body>', replaceBody(ctx)))
-        })
-      }
 
       return send(req, pathToFile).pipe(res)
     })

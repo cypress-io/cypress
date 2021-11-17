@@ -1,5 +1,5 @@
 import type Bluebird from 'bluebird'
-import type { FoundBrowser } from '@packages/types'
+import type { FoundBrowser, NodePathAndVersion } from '@packages/types'
 import pDefer from 'p-defer'
 
 import type { DataContext } from '..'
@@ -7,6 +7,7 @@ import type { DataContext } from '..'
 export interface AppApiShape {
   getBrowsers(): Promise<FoundBrowser[]>
   ensureAndGetByNameOrPath(nameOrPath: string, returnAll?: boolean, browsers?: FoundBrowser[]): Bluebird<FoundBrowser | FoundBrowser[] | undefined>
+  findNodePathAndVersion(): Promise<{ path: string, version: string}>
 }
 
 export class AppActions {
@@ -84,5 +85,21 @@ export class AppActions {
     }
 
     return browsers.some((b) => this.idForBrowser(b) === this.idForBrowser(chosenBrowser))
+  }
+
+  async refreshNodePathAndVersion () {
+    if (this.ctx.coreData.app.refreshingNodePathAndVersion) {
+      return
+    }
+
+    const dfd = pDefer<NodePathAndVersion>()
+
+    this.ctx.coreData.app.refreshingNodePathAndVersion = dfd.promise
+
+    const nodePathAndVersion = await this.ctx._apis.appApi.findNodePathAndVersion()
+
+    this.ctx.coreData.app.nodePathAndVersion = nodePathAndVersion
+
+    dfd.resolve(nodePathAndVersion)
   }
 }

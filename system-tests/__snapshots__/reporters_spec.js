@@ -13,6 +13,10 @@ Require stack:
 - lib/reporter.js
 - lib/project-base.ts
 - lib/open_project.ts
+- lib/makeDataContext.ts
+- lib/util/settings.ts
+- lib/config.ts
+- lib/util/args.js
 - lib/cypress.js
 - index.js
 - 

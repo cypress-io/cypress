@@ -32,8 +32,18 @@ export class DevActions {
     }
   }
 
+  // In a setTimeout so that we flush the triggering response to the client before sending
   triggerRelaunch () {
-    return this.ctx.fs.writeFile(DevActions.CY_TRIGGER_UPDATE, JSON.stringify(new Date()))
+    setTimeout(async () => {
+      try {
+        await this.ctx.destroy()
+      } catch (e) {
+        this.ctx.logError(e)
+      } finally {
+        process.exitCode = 0
+        await this.ctx.fs.writeFile(DevActions.CY_TRIGGER_UPDATE, JSON.stringify(new Date()))
+      }
+    }, 10)
   }
 
   dismissRelaunch () {
