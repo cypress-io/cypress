@@ -350,9 +350,6 @@ type Editor {
   binary: String!
   id: EditorId!
 
-  """whether this is the user's preferred editor"""
-  isPreferred: Boolean!
-
   """name of editor"""
   name: String!
 }
@@ -465,13 +462,14 @@ scalar JSON
 
 """local settings on a device-by-device basis"""
 type LocalSettings {
-  availableEditors: [Editor!]
+  availableEditors: [Editor!]!
   preferences: LocalSettingsPreferences!
 }
 
 """local setting preferences"""
 type LocalSettingsPreferences {
   autoScrollingEnabled: Boolean!
+  preferredEditorBinary: String
   useDarkSidebar: Boolean!
   watchForSpecChange: Boolean!
 }
@@ -539,10 +537,7 @@ type Mutation {
   """Set active project to run tests on"""
   setActiveProject(path: String!): Boolean
   setAutoScrollingEnabled(value: Boolean!): Boolean
-  setPeferredEditor(binary: String!): Boolean
-
-  """set preferred editor"""
-  setPreferredEditor(binary: String!): Boolean!
+  setPreferredEditorBinary(value: String!): Boolean
 
   """Save the projects preferences to cache"""
   setProjectPreferences(browserPath: String!, testingType: TestingTypeEnum!): Query!

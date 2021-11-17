@@ -8,14 +8,15 @@ export const LocalSettingsPreferences = objectType({
     t.nonNull.boolean('autoScrollingEnabled')
     t.nonNull.boolean('watchForSpecChange')
     t.nonNull.boolean('useDarkSidebar')
-  }
+    t.string('preferredEditorBinary')
+  },
 })
 
 export const LocalSettings = objectType({
   name: 'LocalSettings',
   description: 'local settings on a device-by-device basis',
   definition (t) {
-    t.list.nonNull.field('availableEditors', {
+    t.nonNull.list.nonNull.field('availableEditors', {
       type: Editor,
     })
 

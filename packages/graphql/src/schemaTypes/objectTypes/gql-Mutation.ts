@@ -48,18 +48,6 @@ export const mutation = mutationType({
       },
     })
 
-    t.field('setPeferredEditor', {
-      type: 'Boolean',
-      args: {
-        binary: nonNull(stringArg()),
-      },
-      resolve: async (_, args, ctx) => {
-        await ctx.actions.localSettings.setPreferredEditorBinary(args.binary)
-
-        return true
-      },
-    })
-
     t.field('internal_clearProjectPreferencesCache', {
       type: 'Boolean',
       args: {
@@ -312,19 +300,6 @@ export const mutation = mutationType({
       },
     })
 
-    t.nonNull.field('setPreferredEditor', {
-      type: 'Boolean',
-      description: 'set preferred editor',
-      args: {
-        binary: nonNull(stringArg()),
-      },
-      resolve: async (_, args, ctx) => {
-        await ctx.actions.localSettings.setPreferredEditorBinary(args.binary)
-
-        return true
-      },
-    })
-
     t.liveMutation('setAutoScrollingEnabled', {
       type: 'Boolean',
       args: {
@@ -356,6 +331,18 @@ export const mutation = mutationType({
       },
       resolve: async (_, args, ctx) => {
         await ctx.actions.localSettings.setDevicePreference('watchForSpecChange', args.value)
+
+        return true
+      },
+    })
+
+    t.liveMutation('setPreferredEditorBinary', {
+      type: 'Boolean',
+      args: {
+        value: nonNull(stringArg()),
+      },
+      resolve: async (_, args, ctx) => {
+        await ctx.actions.localSettings.setDevicePreference('preferredEditorBinary', args.value)
 
         return true
       },

@@ -38,7 +38,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, FunctionalComponent, ref, SVGAttributes, watchEffect } from 'vue'
+import { computed, FunctionalComponent, SVGAttributes } from 'vue'
 import Icon from '@cy/components/Icon.vue'
 import SettingsSection from '../SettingsSection.vue'
 import { useI18n } from '@cy/i18n'
@@ -51,7 +51,7 @@ import Sublime from '~icons/logos/sublimetext-icon'
 import Emacs from '~icons/logos/emacs'
 import IconTerminal from '~icons/mdi/terminal'
 import { gql } from '@urql/core'
-import { ExternalEditorSettingsFragment, ExternalEditorSettings_EditorFragment, SetPreferredEditorDocument } from '../../generated/graphql'
+import { SetPreferredEditorBinaryDocument, ExternalEditorSettingsFragment } from '../../generated/graphql'
 import type { EditorId } from '@packages/types/src/editors'
 import { useMutation } from '@urql/vue'
 
@@ -72,31 +72,27 @@ const externalEditors = computed(() => {
 })
 
 gql`
-mutation SetPreferredEditor ($binary: String!) {
-  setPreferredEditor (binary: $binary)
+mutation SetPreferredEditorBinary ($value: String!) {
+  setPreferredEditorBinary (value: $value)
 
 }`
-
-gql`
-fragment ExternalEditorSettings_Editor on Editor {
-  id
-  name
-  isPreferred
-  binary
-}
-`
 
 gql`
 fragment ExternalEditorSettings on Query {
   localSettings {
     availableEditors {
       id
-      ...ExternalEditorSettings_Editor
+      name
+      binary
+    }
+
+    preferences {
+      preferredEditorBinary
     }
   }
 }`
 
-const setPreferredEditor = useMutation(SetPreferredEditorDocument)
+const setPreferredEditor = useMutation(SetPreferredEditorBinaryDocument)
 
 const props = defineProps<{
   gql: ExternalEditorSettingsFragment
@@ -104,20 +100,11 @@ const props = defineProps<{
 
 const { t } = useI18n()
 
-const selectedEditor = ref<ExternalEditorSettings_EditorFragment | undefined>(undefined)
-
-const updateEditor = async (editor: ExternalEditorSettings_EditorFragment) => {
-  if (!editor?.binary) {
-    return
-  }
-
-  await setPreferredEditor.executeMutation({ binary: editor.binary })
-  selectedEditor.value = editor
-}
-
-watchEffect(() => {
-  const preferred = props.gql.localSettings.availableEditors?.find((x) => x.isPreferred)
-
-  selectedEditor.value = preferred
+const selectedEditor = computed(() => {
+  return props.gql.localSettings.availableEditors.find((x) => x.binary === props.gql.localSettings.preferences.preferredEditorBinary)
 })
+
+const updateEditor = async (editor: ExternalEditorSettingsFragment['localSettings']['availableEditors'][number]) => {
+  await setPreferredEditor.executeMutation({ value: editor.binary })
+}
 </script>

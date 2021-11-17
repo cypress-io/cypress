@@ -3,7 +3,6 @@
     class="p-24px h-full"
     data-cy="settings"
   >
-    {{ props.gql.localSettings.preferences.autoScrollingEnabled }}
     <SettingsCard
       :title="t('settingsPage.device.title')"
       :description="t('settingsPage.device.description')"

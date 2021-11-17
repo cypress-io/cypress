@@ -22,9 +22,5 @@ export const Editor = objectType({
     t.nonNull.string('binary', {
       description: 'Binary that opens the editor',
     })
-
-    t.nonNull.boolean('isPreferred', {
-      description: `whether this is the user's preferred editor`,
-    })
   },
 })

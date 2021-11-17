@@ -118,10 +118,6 @@ export function makeCoreData (): CoreDataShape {
       availableEditors: [],
       preferences: devicePreferenceDefaults,
       refreshing: null,
-      // editors: {
-      //   available: [],
-      //   preferredBinary: null
-      // }
     },
     isAuthBrowserOpened: false,
     currentProject: null,

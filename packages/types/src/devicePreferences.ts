@@ -2,7 +2,7 @@ export interface DevicePreferences {
   watchForSpecChange?: boolean
   useDarkSidebar?: boolean
   autoScrollingEnabled?: boolean
-  // preferredEditorBinary?: string 
+  preferredEditorBinary?: string
 }
 
 export const devicePreferenceDefaults: DevicePreferences = {
