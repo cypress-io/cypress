@@ -957,9 +957,6 @@ jobs:
       - run:
           name: Print working folder
           command: echo $PWD
-      - run:
-          name: check nvm & yarn
-          command: nvm list; yarn versions
       - unless:
           condition:
             # stop-only does not correct match on windows: https://github.com/bahmutov/stop-only/issues/78
