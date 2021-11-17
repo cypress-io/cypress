@@ -12,6 +12,8 @@ interface VersionData {
 }
 
 export class VersionsDataSource {
+  static result: undefined | Promise<string>
+
   /**
    * Returns most recent and current version of Cypress
    * {
@@ -27,9 +29,12 @@ export class VersionsDataSource {
    */
   async versions (): Promise<VersionData> {
     const currentCypressVersion = require('@packages/root')
-    const result = await execa(`npm`, [`view`, `cypress`, `time`, `--json`])
 
-    const json = JSON.parse(result.stdout)
+    VersionsDataSource.result ??= execa(`npm`, [`view`, `cypress`, `time`, `--json`]).then((result) => result.stdout)
+
+    const result = await VersionsDataSource.result
+
+    const json = JSON.parse(result)
 
     delete json['modified']
     delete json['created']
@@ -50,7 +55,7 @@ export class VersionsDataSource {
       latest: latestVersion,
       current: {
         version: currentCypressVersion.version,
-        released: currentCypressVersion.version === '0.0.0-development' ? new Date().toISOString() : json[currentCypressVersion.version],
+        released: json[currentCypressVersion.version] ?? new Date().toISOString(),
         id: currentCypressVersion.version,
       },
     }
