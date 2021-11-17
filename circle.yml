@@ -130,19 +130,6 @@ commands:
       - attach_workspace:
           at: ~/
 
-  print_working_dir:
-    steps:
-      - run:
-          name: Print working folder
-          command: echo $PWD
-        # command: |
-        #   if [ "$PLATFORM" = 'windows' ]; then
-        #     echo %cd%
-        #   else 
-        #     echo $PWD
-        #   # fi
-        #   ls
-
   prepare-modules-cache:
     parameters:
       dont-move:
@@ -216,6 +203,9 @@ commands:
         enum: ['linux', 'darwin', 'win32']
     steps:
       - run:
+          name: check yarn version
+          command: nvm list; yarn versions
+      - run:
           # Dependencies needed by circle-cache.js, before we "yarn" or unpack cached node_modules
           name: Cache Helper Dependencies
           working_directory: ~/
@@ -284,12 +274,7 @@ commands:
     steps:
       - run:
           name: Print working folder
-          command: |
-            if [ "$PLATFORM" = 'windows' ]; then
-              echo %cd%
-            else 
-              echo $PWD
-            fi
+          command: echo $PWD
       - run:
           name: print global yarn cache path
           command: echo $(yarn global bin)
@@ -942,10 +927,12 @@ jobs:
     # shell: /bin/bash --login
     steps:
       - checkout
-      - print_working_dir
+      - run:
+          name: Print working folder
+          command: echo $PWD
       - run:
           name: check nvm & yarn
-          command: nvm current; yarn versions
+          command: nvm list; yarn versions
       - unless:
           condition:
             # stop-only does not correct match on windows: https://github.com/bahmutov/stop-only/issues/78
