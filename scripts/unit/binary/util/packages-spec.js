@@ -58,7 +58,6 @@ describe('packages', () => {
     const destinationFolder = os.tmpdir()
 
     debug('destination folder %s', destinationFolder)
-
     await packages.copyAllToDist(destinationFolder)
 
     const files = getFs()
@@ -93,13 +92,9 @@ describe('rewritePackageNames', () => {
 
 describe('transformRequires', () => {
   it('can find and replace symlink requires', async function () {
-    // these tests really refuse to work on Mac, so for now run it only on Linux
-    if (os.platform() !== 'linux') {
-      return this.skip()
-    }
-
     const buildRoot = 'build/linux/Cypress/resources/app'
 
+    sinon.stub(os, 'tmpdir').returns('/tmp')
     mockfs({
       [buildRoot]: { 'packages': {
         'foo': {
@@ -145,13 +140,10 @@ describe('transformRequires', () => {
   })
 
   it('can find and replace symlink requires on win32', async function () {
-    if (os.platform() !== 'linux') {
-      return this.skip()
-    }
-
     const { transformRequires } = proxyquire('../../../binary/util/transform-requires', { path: path.win32 })
     const buildRoot = 'build/linux/Cypress/resources/app'
 
+    sinon.stub(os, 'tmpdir').returns('/tmp')
     mockfs({
       [buildRoot]: { 'packages': {
         'foo': {
@@ -207,8 +199,6 @@ describe('testStaticAssets', () => {
         },
       },
     })
-
-    // logFs()
 
     await expect(testPackageStaticAssets({
       assetGlob: `${buildDir}/packages/runner/dist/*.js`,
@@ -321,12 +311,6 @@ describe('testStaticAssets', () => {
 afterEach(() => {
   mockfs.restore()
 })
-
-// eslint-disable-next-line
-const logFs = () => {
-  // eslint-disable-next-line no-console
-  console.dir(getFs(), { depth: null })
-}
 
 const getFs = () => {
   const cwd = process.cwd().split(path.sep).slice(1)

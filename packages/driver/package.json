@@ -17,6 +17,7 @@
     "@cypress/unique-selector": "0.4.2",
     "@cypress/webpack-preprocessor": "0.0.0-development",
     "@cypress/what-is-circular": "1.0.1",
+    "@packages/config": "0.0.0-development",
     "@packages/network": "0.0.0-development",
     "@packages/resolve-dist": "0.0.0-development",
     "@packages/runner": "0.0.0-development",

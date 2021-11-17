@@ -3,6 +3,7 @@
 const semver = require('semver')
 const Bluebird = require('bluebird')
 const bumpCb = require('conventional-recommended-bump')
+
 const currentVersion = require('../package.json').version
 
 const bump = Bluebird.promisify(bumpCb)

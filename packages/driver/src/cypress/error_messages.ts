@@ -268,6 +268,17 @@ export default {
     },
   },
 
+  config: {
+    invalid_argument: {
+      message: `Setting the config via ${cmd('Cypress.config')} failed with the following validation error:\n\n{{errMsg}}`,
+      docsUrl: 'https://on.cypress.io/config',
+    },
+    'invalid_test_override': {
+      message: `The config override passed to your test has the following validation error:\n\n{{errMsg}}`,
+      docsUrl: 'https://on.cypress.io/config',
+    },
+  },
+
   contains: {
     empty_string: {
       message: `${cmd('contains')} cannot be passed an empty string.`,
@@ -825,6 +836,10 @@ export default {
     invalid_command: {
       message: 'Could not find a command for: `{{name}}`.\n\nAvailable commands are: {{cmds}}.\n',
       docsUrl: 'https://on.cypress.io/api',
+    },
+    invalid_new_command: {
+      message: '`Cypress.Commands.add()` is used to create new commands, but `{{name}}` is an existing Cypress command.\n\nPlease use `Cypress.Commands.overwrite()` if you would like to overwrite an existing command.\n',
+      docsUrl: 'https://on.cypress.io/custom-commands',
     },
     invalid_overwrite: {
       message: 'Cannot overwite command for: `{{name}}`. An existing command does not exist by that name.',

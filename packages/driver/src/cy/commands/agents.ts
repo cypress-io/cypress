@@ -281,7 +281,6 @@ export default function (Commands, Cypress, cy, state) {
 
   return Commands.addAllSync({
     spy,
-
     stub,
   })
 }

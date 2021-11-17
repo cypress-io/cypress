@@ -327,10 +327,6 @@ The project utilizes [yarn workspaces](https://yarnpkg.com/lang/en/docs/workspac
 > **⚠ Running on Windows?**
 >
 > Many of the NPM scripts used during development use commands designed for a Linux-like shell.If you are running a Windows operating system, you may encounter many commands that are not working. To fix this behavior, you have to set a Linux-like shell as the default `npm` script shell. If you have Git for Windows installed, you can set Git Bash as the default script shell by using the following command:
-> ```bash
-> yarn config set script-shell "C:\\Program Files (x86)\\git\\bin\\bash.exe"
-> ```
-> Git Bash may be installed in `Program Files`, if so, use the following command:
 >```bash
 > yarn config set script-shell "C:\\Program Files\\git\\bin\\bash.exe"
 >```
