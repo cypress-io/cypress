@@ -93,6 +93,12 @@ export function makeClientTestContext (): ClientTestContext {
     cloudTypes,
     localSettings: {
       __typename: 'LocalSettings',
+      preferences: {
+        __typename: 'LocalSettingsPreferences',
+        autoScrollingEnabled: true,
+        useDarkSidebar: true,
+        watchForSpecChange: true,
+      },
       availableEditors: [],
     },
     __mockPartial: {},

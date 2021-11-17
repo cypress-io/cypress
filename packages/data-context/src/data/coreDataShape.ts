@@ -1,4 +1,4 @@
-import { BUNDLERS, FoundBrowser, FoundSpec, FullConfig, Preferences, NodePathAndVersion, AvailableEditor, DevicePreferences, devicePreferenceDefaults } from '@packages/types'
+import { BUNDLERS, FoundBrowser, FoundSpec, FullConfig, Preferences, NodePathAndVersion, DevicePreferences, devicePreferenceDefaults, Editor } from '@packages/types'
 import type { NexusGenEnums, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
 import type { BrowserWindow } from 'electron'
 import type { ChildProcess } from 'child_process'
@@ -20,8 +20,8 @@ export interface DevStateShape {
 }
 
 export interface LocalSettingsDataShape {
-  refreshing: Promise<AvailableEditor[]> | null
-  availableEditors: AvailableEditor[]
+  refreshing: Promise<Editor[]> | null
+  availableEditors: Editor[]
   preferences: DevicePreferences
 }
 

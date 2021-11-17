@@ -1,11 +1,11 @@
-import type { AvailableEditor, DevicePreferences, Editor } from '@packages/types'
+import type { DevicePreferences, Editor } from '@packages/types'
 import pDefer from 'p-defer'
 
 import type { DataContext } from '..'
 
 export interface LocalSettingsApiShape {
   setPreferredOpener(editor: Editor): Promise<void>
-  getAvailableEditors(): Promise<AvailableEditor[]>
+  getAvailableEditors(): Promise<Editor[]>
 
   getPreferences (): Promise<DevicePreferences>
   setDevicePreference<K extends keyof DevicePreferences> (key: K, value: DevicePreferences[K]): Promise<void>
@@ -27,7 +27,7 @@ export class LocalSettingsActions {
       return
     }
 
-    const dfd = pDefer<AvailableEditor[]>()
+    const dfd = pDefer<Editor[]>()
 
     this.ctx.coreData.localSettings.refreshing = dfd.promise
 
@@ -39,23 +39,4 @@ export class LocalSettingsActions {
 
     dfd.resolve(availableEditors)
   }
-
-  // async setPreferredEditorBinary (binary: string) {
-  //   const preferred = this.ctx.coreData.localSettings.availableEditors.find((x) => x.binary === binary)
-
-  //   if (!preferred) {
-  //     return
-  //   }
-
-  //   // cache to local settings for future
-  //   await this.ctx._apis.localSettingsApi.setPreferredOpener(preferred)
-
-  //   // update local ctx state as well, so we do not need to re-query file system
-  //   this.ctx.coreData.localSettings.availableEditors = this.ctx.coreData.localSettings.availableEditors.map((x) => {
-  //     return {
-  //       ...x,
-  //       isPreferred: x.binary === binary,
-  //     }
-  //   })
-  // }
 }

@@ -138,14 +138,9 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
         await setUserEditor(editor)
       },
       async getAvailableEditors () {
-        const { availableEditors, preferredOpener } = await getUserEditor(true)
+        const { availableEditors } = await getUserEditor(true)
 
-        return availableEditors.map((x) => {
-          return {
-            ...x,
-            isPreferred: x.binary === preferredOpener?.binary ?? false,
-          }
-        })
+        return availableEditors
       },
     },
   })

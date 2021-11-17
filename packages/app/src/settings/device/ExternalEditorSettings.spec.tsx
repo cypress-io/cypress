@@ -14,14 +14,12 @@ describe('<ExternalEditorSettings />', () => {
             id: 'code',
             name: 'VS Code',
             binary: 'code',
-            isPreferred: false,
           },
           {
             __typename: 'Editor',
             id: 'vim',
             name: 'Vim',
             binary: 'vim',
-            isPreferred: false,
           },
         ]
       },

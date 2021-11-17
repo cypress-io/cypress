@@ -229,10 +229,6 @@ export interface Editor {
   name: EditorName | string
 }
 
-export interface AvailableEditor extends Editor {
-  isPreferred: boolean
-}
-
 export interface EditorsResult {
   preferredOpener?: Editor
   availableEditors: Editor[]
