@@ -90,7 +90,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
       ),
     })
 
-    cy.contains('8.6.0').click()
+    cy.contains('v8.6.0 • Upgrade').click()
     cy.get('[data-cy="latest-version"]').contains('8.7.0')
     cy.get('[data-cy="current-version"]').contains('8.6.0')
     cy.get('[data-cy="update-hint"]').should('be.visible')

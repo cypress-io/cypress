@@ -1,39 +1,42 @@
 <template>
   <TopNavList v-if="versions && runningOldVersion">
     <template #heading="{ open }">
-      <i-cy-box_x16
+      <i-cy-arrow-outline-down_x16
         class="group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50 h-16px w-16px"
         :class="open ? 'icon-dark-indigo-500 icon-light-indigo-50' : 'icon-dark-gray-500 icon-light-gray-100'"
       />
-      <span data-cy="topnav-version-list">v{{ versions.current.version }}</span>
+      <span data-cy="topnav-version-list">v{{ versions.current.version }} <span
+        class="text-indigo-300"
+        aria-hidden="true"
+      >•</span> Upgrade</span>
     </template>
 
     <TopNavListItem
-      class="px-16px py-8px min-w-240px"
+      class="px-16px py-8px min-w-278px"
       data-cy="update-hint"
     >
       <div class="whitespace-nowrap">
         <ExternalLink
           :href="`${releasesUrl}/tag/v${versions.latest.version}`"
-          class="font-semibold"
+          class="font-semibold text-indigo-500"
           data-cy="latest-version"
         >
           {{ versions.latest.version }}
         </ExternalLink>
         <br>
-        <span class="text-gray-600 text-12px">{{ t('topNav.released') }} {{ versions.latest.released }}</span>
+        <span class="text-gray-500 leading-20px text-14px">{{ t('topNav.released') }} {{ versions.latest.released }}</span>
       </div>
       <template #suffix>
         <span class="rounded-md bg-indigo-50">
-          <span class="font-semibold text-indigo-500 p-5px">
-            Latest
+          <span class=" text-indigo-500 p-5px">
+            {{ t('topNav.latest') }}
           </span>
         </span>
       </template>
     </TopNavListItem>
 
-    <TopNavListItem class="px-16px py-8px min-w-240px pb-12px">
-      <p class="text-gray-600 text-12px py-8px leading-normal">
+    <TopNavListItem class="px-16px py-8px pb-16px">
+      <p class="text-gray-500 text-14px py-8px pb-16px leading-normal">
         {{ t('topNav.runningOldVersion') }}
       </p>
       <Button
@@ -45,7 +48,7 @@
     </TopNavListItem>
 
     <TopNavListItem
-      class="bg-yellow-50 px-16px py-8px min-w-240px"
+      class="bg-yellow-50 px-16px py-8px"
     >
       <div class="whitespace-nowrap">
         <ExternalLink
@@ -56,11 +59,11 @@
           {{ versions.current.version }}
         </ExternalLink>
         <br>
-        <span class="text-gray-600 text-12px">{{ t('topNav.released') }} {{ versions.current.released }}</span>
+        <span class="text-gray-600 text-14px">{{ t('topNav.released') }} {{ versions.current.released }}</span>
       </div>
       <template #suffix>
         <span class="rounded-md bg-yellow-100">
-          <span class="font-semibold text-amber-800 p-5px">
+          <span class="text-amber-800 p-5px">
             {{ t('topNav.installed') }}
           </span>
         </span>
