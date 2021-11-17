@@ -52,11 +52,10 @@ import Emacs from '~icons/logos/emacs'
 import IconTerminal from '~icons/mdi/terminal'
 import { gql } from '@urql/core'
 import { SetPreferredEditorBinaryDocument, ExternalEditorSettingsFragment } from '../../generated/graphql'
-import type { EditorId } from '@packages/types/src/editors'
 import { useMutation } from '@urql/vue'
 
 // @ts-ignore (lachlan): add all icons for all editors such as RubyMine, etc
-const icons: Record<EditorId, FunctionalComponent<SVGAttributes, {}>> = {
+const icons: Record<string, FunctionalComponent<SVGAttributes, {}>> = {
   'code': VSCode,
   'webstorm': Webstorm,
   'atom': Atom,

@@ -2,10 +2,16 @@ import _ from 'lodash'
 import Bluebird from 'bluebird'
 import debugModule from 'debug'
 
-import { Editor, osFileSystemExplorer, EditorsResult } from '@packages/types'
+import type { Editor, EditorsResult } from '@packages/types'
 import { getEnvEditors } from './env-editors'
 import shell from './shell'
 import savedState from '../saved_state'
+
+export const osFileSystemExplorer = {
+  darwin: 'Finder',
+  win32: 'File Explorer',
+  linux: 'File System',
+} as const
 
 const debug = debugModule('cypress:server:editors')
 
