@@ -6,12 +6,8 @@ describe('<UpdateCypressModal />', { viewportWidth: 1000, viewportHeight: 750 },
     const installedVersion = '8.2.0'
     const latestVersion = '10.0.0'
 
-    cy.mount(UpdateCypressModal, {
-      props: {
-        installedVersion,
-        latestVersion,
-        show: true,
-      },
+    cy.mount({
+      render: () => <UpdateCypressModal installedVersion={installedVersion} latestVersion={latestVersion} show={true}></UpdateCypressModal>,
     })
 
     cy.contains(`${defaultMessages.topNav.updateCypress.title} ${latestVersion}`).should('be.visible')
