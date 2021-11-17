@@ -64,30 +64,31 @@ namespace CypressIsCyTests {
 
 declare namespace Cypress {
   interface Chainable {
-    newCommand: (arg: string) => void
+    dataCy: (value: string, timeout: number) => Chainable<Element>
   }
 }
 
 namespace CypressCommandsTests {
-  Cypress.Commands.add('newCommand', (arg) => {
+  Cypress.Commands.add('dataCy', (value, timeout) => {
     // $ExpectType string
-    arg
-    return
+    value
+    // $ExpectType number
+    timeout
+    cy.get(`[data-cy=${value}]`, { timeout })
   })
-  Cypress.Commands.add('newCommand', { prevSubject: true }, (arg) => {
+  Cypress.Commands.add('dataCy', { prevSubject: true }, (value, timeout) => {
     // $ExpectType string
-    arg
-    return
+    value
+    // $ExpectType number
+    timeout
+    cy.get(`[data-cy=${value}]`, { timeout })
   })
-  Cypress.Commands.add('newCommand', (arg) => {
+  Cypress.Commands.overwrite('dataCy', (value, timeout) => {
     // $ExpectType string
-    arg
-    return new Promise((resolve) => {})
-  })
-  Cypress.Commands.overwrite('newCommand', (arg) => {
-    // $ExpectType string
-    arg
-    return
+    value
+    // $ExpectType number
+    timeout
+    cy.get(`[data-cy=${value}]`, { timeout })
   })
 }
 

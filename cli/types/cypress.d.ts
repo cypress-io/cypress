@@ -420,9 +420,9 @@ declare namespace Cypress {
      * @see https://on.cypress.io/api/commands
      */
     Commands: {
-      add<T extends keyof Chainable>(name: T, fn: Chainable[T]): void
-      add<T extends keyof Chainable>(name: T, options: CommandOptions, fn: Chainable[T]): void
-      overwrite<T extends keyof Chainable>(name: T, fn: Chainable[T]): void
+      add<T extends ConditionalKeys<Chainable, (...args: any[]) => any>>(name: T, fn: (...args: Parameters<Chainable[T]>) => void): void
+      add<T extends ConditionalKeys<Chainable, (...args: any[]) => any>>(name: T, options: CommandOptions, fn: (...args: Parameters<Chainable[T]>) => void): void
+      overwrite<T extends ConditionalKeys<Chainable, (...args: any[]) => any>>(name: T, fn: (...args: Parameters<Chainable[T]>) => void): void
     }
 
     /**
