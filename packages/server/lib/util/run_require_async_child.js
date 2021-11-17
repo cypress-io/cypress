@@ -65,7 +65,7 @@ function run (ipc, requiredFile, projectRoot) {
 
           if (result.component?.devServer) {
             const devServerFn = (on, config) => {
-              on('dev-server:start', async (options) => result.component.devServer(options, result.component?.devServerConfig))
+              on('dev-server:start', (options) => result.component.devServer(options, result.component?.devServerConfig))
 
               return config
             }
