@@ -317,6 +317,7 @@ commands:
           root: ~/
           paths:
             - .bash_profile
+            - .nvm
       - run:
           # https://github.com/nvm-sh/nvm#nvmrc
           name: Install Node
