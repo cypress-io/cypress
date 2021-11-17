@@ -17,7 +17,7 @@ module.exports = {
     devServer (cypressConfig) {
       const { startDevServer } = require('@cypress/vite-dev-server')
 
-      startDevServer({ options: cypressConfig })
+      return startDevServer({ options: cypressConfig })
     },
   },
 }

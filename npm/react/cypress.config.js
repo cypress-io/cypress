@@ -73,7 +73,7 @@ module.exports = {
         },
       }
 
-      startDevServer({ options: cypressConfig, disableLazyCompilation: false, webpackConfig })
+      return startDevServer({ options: cypressConfig, disableLazyCompilation: false, webpackConfig })
     },
   },
 }
