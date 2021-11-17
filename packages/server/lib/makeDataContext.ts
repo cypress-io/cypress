@@ -16,6 +16,7 @@ import findSystemNode from './util/find_system_node'
 import { graphqlSchema } from '@packages/graphql/src/schema'
 import type { InternalDataContextOptions } from '@packages/data-context/src/DataContext'
 import { openExternal } from '@packages/server/lib/gui/links'
+import { getDevicePreferences, setDevicePreference } from './util/device_preferences'
 import { getUserEditor, setUserEditor } from './util/editors'
 
 const { getBrowsers, ensureAndGetByNameOrPath } = browserUtils
@@ -126,6 +127,13 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       },
     },
     localSettingsApi: {
+      setDevicePreference (key, value) {
+        return setDevicePreference(key, value)
+      },
+
+      async getPreferences () {
+        return getDevicePreferences()
+      },
       async setPreferredOpener (editor: Editor) {
         await setUserEditor(editor)
       },

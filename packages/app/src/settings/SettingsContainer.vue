@@ -3,6 +3,7 @@
     class="p-24px h-full"
     data-cy="settings"
   >
+    {{ props.gql.localSettings.preferences.autoScrollingEnabled }}
     <SettingsCard
       :title="t('settingsPage.device.title')"
       :description="t('settingsPage.device.description')"
@@ -11,6 +12,7 @@
     >
       <ExternalEditorSettings :gql="props.gql" />
       <DeviceSettings />
+      <TestingPreferences :gql="props.gql" />
     </SettingsCard>
     <SettingsCard
       :title="t('settingsPage.project.title')"
@@ -47,6 +49,7 @@ import ExternalEditorSettings from './device/ExternalEditorSettings.vue'
 import SettingsCard from './SettingsCard.vue'
 import ProjectSettings from './project/ProjectSettings.vue'
 import DeviceSettings from './device/DeviceSettings.vue'
+import TestingPreferences from './device/TestingPreferences.vue'
 import { SettingsContainer_ReconfigureProjectDocument, SettingsContainerFragment } from '../generated/graphql'
 import IconLaptop from '~icons/cy/laptop_x24.svg'
 import IconFolder from '~icons/cy/folder-outline_x24.svg'
@@ -62,6 +65,7 @@ mutation SettingsContainer_ReconfigureProject {
 
 gql`
 fragment SettingsContainer on Query {
+  ... TestingPreferences
   currentProject {
     id
     ...ProjectSettings

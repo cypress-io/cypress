@@ -466,6 +466,14 @@ scalar JSON
 """local settings on a device-by-device basis"""
 type LocalSettings {
   availableEditors: [Editor!]
+  preferences: LocalSettingsPreferences!
+}
+
+"""local setting preferences"""
+type LocalSettingsPreferences {
+  autoScrollingEnabled: Boolean!
+  useDarkSideBar: Boolean!
+  watchForSpecChange: Boolean!
 }
 
 type Mutation {
@@ -530,6 +538,7 @@ type Mutation {
 
   """Set active project to run tests on"""
   setActiveProject(path: String!): Boolean
+  setAutoScrollingEnabled(value: Boolean!): Boolean
   setPeferredEditor(binary: String!): Boolean
 
   """set preferred editor"""
@@ -537,6 +546,8 @@ type Mutation {
 
   """Save the projects preferences to cache"""
   setProjectPreferences(browserPath: String!, testingType: TestingTypeEnum!): Query!
+  setUseDarkSidebar(value: Boolean!): Boolean!
+  setWatchForSpecChange(value: Boolean!): Boolean!
 
   """show the launchpad at the browser picker step"""
   showElectronOnAppExit: Boolean

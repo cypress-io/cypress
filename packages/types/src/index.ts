@@ -2,6 +2,8 @@ export * from './cache'
 
 export * from './constants'
 
+export * from './devicePreferences'
+
 export * from './driver'
 
 export * from './spec'
