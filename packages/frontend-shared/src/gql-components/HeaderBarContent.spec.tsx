@@ -31,7 +31,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
     cy.get('[data-cy="topnav-browser-list"]').should('not.exist')
     cy.contains('button', text.docsMenu.docsHeading).click()
     cy.contains('a', text.docsMenu.firstTest).should('be.visible')
-    cy.get('body  ').click()
+    cy.get('body').click()
     cy.contains('a', text.docsMenu.firstTest).should('not.exist')
   })
 
