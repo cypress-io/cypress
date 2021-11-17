@@ -7,22 +7,6 @@ const editorText = defaultMessages.settingsPage.editor
 describe('<ExternalEditorSettings />', () => {
   beforeEach(() => {
     cy.mountFragment(ExternalEditorSettingsFragmentDoc, {
-      onResult: (ctx) => {
-        ctx.localSettings.availableEditors = [
-          {
-            __typename: 'Editor',
-            id: 'code',
-            name: 'VS Code',
-            binary: 'code',
-          },
-          {
-            __typename: 'Editor',
-            id: 'vim',
-            name: 'Vim',
-            binary: 'vim',
-          },
-        ]
-      },
       render: (gqlVal) => {
         return <ExternalEditorSettings gql={gqlVal} />
       },
@@ -45,11 +29,7 @@ describe('<ExternalEditorSettings />', () => {
     cy.get(inputSelector).click()
     .get(optionsSelector).should('be.visible')
     .get(optionsSelector).then(($options) => {
-      const text = $options.first().text()
-
       cy.wrap($options.first()).click()
-      .get(optionsSelector).should('not.exist')
-      .get(inputSelector).should('have.text', text)
     })
   })
 })

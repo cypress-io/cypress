@@ -14,7 +14,7 @@ export interface LocalSettingsApiShape {
 export class LocalSettingsActions {
   constructor (private ctx: DataContext) {}
 
-  async setDevicePreference<K extends keyof DevicePreferences> (key: K, value: DevicePreferences[K]) {
+  setDevicePreference<K extends keyof DevicePreferences> (key: K, value: DevicePreferences[K]) {
     // update local data
     this.ctx.coreData.localSettings.preferences[key] = value
 

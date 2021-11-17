@@ -12,14 +12,14 @@
         <span
           class="text-gray-500"
           data-testid="proxy-server"
-        >{{ props.gql.localSettings.preferences.proxyServer }}</span>
+        >{{ props.gql.localSettings.preferences.proxyServer || '-' }}</span>
       </div>
       <div class="flex justify-between">
         <span class="font-medium text-gray-800">{{ t('settingsPage.proxy.bypassList') }}</span>
         <span
           class="text-gray-500"
           data-testid="bypass-list"
-        >{{ props.gql.localSettings.preferences.proxyBypass }}</span>
+        >{{ props.gql.localSettings.preferences.proxyBypass || '-' }}</span>
       </div>
     </div>
   </SettingsSection>

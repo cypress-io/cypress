@@ -73,7 +73,6 @@ const externalEditors = computed(() => {
 gql`
 mutation SetPreferredEditorBinary ($value: String!) {
   setPreferredEditorBinary (value: $value)
-
 }`
 
 gql`
@@ -103,7 +102,7 @@ const selectedEditor = computed(() => {
   return props.gql.localSettings.availableEditors.find((x) => x.binary === props.gql.localSettings.preferences.preferredEditorBinary)
 })
 
-const updateEditor = async (editor: ExternalEditorSettingsFragment['localSettings']['availableEditors'][number]) => {
-  await setPreferredEditor.executeMutation({ value: editor.binary })
+const updateEditor = (editor: ExternalEditorSettingsFragment['localSettings']['availableEditors'][number]) => {
+  setPreferredEditor.executeMutation({ value: editor.binary })
 }
 </script>

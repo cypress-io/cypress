@@ -99,7 +99,20 @@ export function makeClientTestContext (): ClientTestContext {
         useDarkSidebar: true,
         watchForSpecChange: true,
       },
-      availableEditors: [],
+      availableEditors: [
+        {
+          __typename: 'Editor',
+          id: 'code',
+          name: 'VS Code',
+          binary: 'code',
+        },
+        {
+          __typename: 'Editor',
+          id: 'vim',
+          name: 'Vim',
+          binary: 'vim',
+        },
+      ],
     },
     __mockPartial: {},
   }
