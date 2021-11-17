@@ -29,7 +29,7 @@ class SelectorPlayground extends Component {
 
   render () {
     const { model } = this.props
-    const selectorText = `cy.${model.method}('${this._setQuotesToAttrSelector(model.selector)}')`
+    const selectorText = `cy.${model.method}('${model.selector}')`
 
     return (
       <div className={cs('header-popup selector-playground', `method-${model.method}`, {
@@ -65,7 +65,7 @@ class SelectorPlayground extends Component {
               <input
                 ref={(node) => this._input = node}
                 name={`${model.isEnabled}` /* fixes issue with not resizing when opening/closing selector playground */}
-                value={this._setQuotesToAttrSelector(model.selector)}
+                value={model.selector}
                 onChange={this._updateSelector}
                 onFocus={this._setHighlight(true)}
               />
@@ -225,25 +225,6 @@ class SelectorPlayground extends Component {
 
   _resetPrintText = () => {
     this._setPrintText(defaultPrintText)
-  }
-
-  /**
-   * Method to wrap the HTML attribute selector text in double quotes if there's missing
-   * @param {string} selector -> a string that represents a HTML attribute selector
-   * @returns {string} -> the selector wrapped in double quotes if needed
-   */
-  _setQuotesToAttrSelector = (selector) => {
-    const [attributeName, attributeValue] = selector.split('=')
-
-    if (attributeName && attributeValue) {
-      const hasQuotes = (attributeValue[0] === '"' || attributeValue[0] === '\'')
-
-      if (selector.split('').includes('[', ']') && !hasQuotes) {
-        return `[${attributeName.replace('[', '')}="${attributeValue.replace(']', '"]')}`
-      }
-    }
-
-    return selector
   }
 
   _toggleEnablingSelectorPlayground = () => {
