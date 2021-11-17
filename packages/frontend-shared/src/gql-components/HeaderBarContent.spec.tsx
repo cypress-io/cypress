@@ -64,7 +64,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
     cy.contains('a', '8.7.0').should('be.visible').and('have.attr', 'href', 'https://github.com/cypress-io/cypress/releases/tag/v8.7.0')
   })
 
-  it('shows hint to upgrade to latest version of cypress', () => {
+  it('shows hint and modal to upgrade to latest version of cypress', () => {
     cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
       onResult: (result) => {
         result.versions = {
@@ -93,7 +93,11 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
     cy.contains('8.6.0').click()
     cy.get('[data-cy="latest-version"]').contains('8.7.0')
     cy.get('[data-cy="current-version"]').contains('8.6.0')
-    cy.get('[data-cy="update-hint"]').should('exist')
+    cy.get('[data-cy="update-hint"]').should('be.visible')
+    cy.contains('button', 'Update to').click()
+
+    cy.contains(`${defaultMessages.topNav.updateCypress.title} 8.7.0`).should('be.visible')
+    cy.contains('test-project').should('be.visible')
   })
 
   it('displays the active project name', () => {

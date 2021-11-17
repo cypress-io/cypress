@@ -8,19 +8,23 @@
   >
     <div class="p-24px text-gray-700">
       <p class="mb-16px">
-        You are currently running Version {{ installedVersion }} of Cypress.
+        <i18n-t
+          keypath="topNav.updateCypress.currentlyRunning"
+        >
+          {{ installedVersion }}
+        </i18n-t>
       </p>
       <p class="mb-16px">
-        Paste the command below into your terminal to upgrade to the latest version of Cypress for this project.*
+        {{ t('topNav.updateCypress.pasteToUpgrade') }}
       </p>
       <TerminalPrompt
         :command="installCommand + 'cypress@10.0.0'"
-        :project-folder-name="'test-proj'"
+        :project-folder-name="projectName"
       />
-
-      <p class="pt-16px">
-        *Remember to <span class="font-bold">close this app</span> before installing.
-      </p>
+      <p
+        class="pt-16px"
+        v-html="t('topNav.updateCypress.rememberToClose')"
+      />
     </div>
   </StandardModal>
 </template>
@@ -37,12 +41,14 @@ const props = withDefaults(defineProps<{
   installCommand?: string
   installedVersion: string
   latestVersion: string
+  projectName?: string
   show: boolean
 }>(), {
   installCommand: 'npm install --save-dev ',
+  projectName: '', // in global mode, project won't be populated so an empty string is fine
 })
 
-const title = `Upgrade to Cypress ${props.latestVersion}`
+const title = `${t('topNav.updateCypress.title')} ${props.latestVersion}`
 
 const emits = defineEmits<{
   (eventName: 'close'): void

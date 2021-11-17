@@ -194,6 +194,7 @@
     :show="showUpdateModal"
     :installed-version="versions.current.version"
     :latest-version="versions.latest.version"
+    :project-name="props.gql?.currentProject?.title"
     @close="showUpdateModal = false"
   />
 </template>
@@ -235,6 +236,7 @@ fragment TopNav on Query {
 
   currentProject {
     id
+    title
     currentBrowser {
       id
       displayName
