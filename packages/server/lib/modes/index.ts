@@ -29,7 +29,8 @@ export = (mode, options) => {
     // Change default for `cypress open` to be LAUNCHPAD=1
     if (process.env.LAUNCHPAD === '0') {
       delete process.env.LAUNCHPAD
-    } else {
+    // Temporary (tim), we want existing integration tests running w/ previous structure
+    } else if (process.env.CI !== '1') {
       process.env.LAUNCHPAD = '1'
     }
 
