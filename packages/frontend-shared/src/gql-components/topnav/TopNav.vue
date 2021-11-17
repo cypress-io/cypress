@@ -309,7 +309,7 @@ const versions = computed(() => {
 })
 
 const runningOldVersion = computed(() => {
-  return props.gql.versions.current.released < props.gql.versions.latest.released
+  return props.gql.versions ? props.gql.versions.current.released < props.gql.versions.latest.released : false
 })
 
 onClickOutside(promptsEl, () => {
