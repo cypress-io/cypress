@@ -324,12 +324,13 @@ commands:
             echo "
               \. '$HOME/.nvm/nvm.sh' # load nvm
               export NODE_VERSION='${node_version}'
+              npm uninstall yarn -g # remove default yarn installed on circleci. built with wrong node engine
+              npm install yarn -g # ensure yarn is installed with the correct node engine
             " >> ~/.bash_profile
       - run:
           # https://github.com/nvm-sh/nvm#nvmrc
           name: Install Node
           command: |
-            npm uninstall yarn -g # remove default yarn installed on circleci. built with wrong node engine
             nvm install ${NODE_VERSION} || exit 1
             nvm use ${NODE_VERSION} || exit 1
             nvm alias default ${NODE_VERSION} || exit 1
