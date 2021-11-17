@@ -274,7 +274,7 @@ const getFrameworkConfigFile = (opts: GetCodeOptsCt) => {
               options,
               webpackConfig,
             })
-          } 
+          },
         }
       `,
       ts: dedent`

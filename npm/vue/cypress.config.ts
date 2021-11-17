@@ -9,7 +9,7 @@ export default defineConfig({
   'testFiles': '**/*spec.{js,ts,tsx}',
   'experimentalFetchPolyfill': true,
   'component': {
-    devServer (cypressConfig, devServerConfig) {
+    devServer (cypressConfig) {
       const { startDevServer } = require('@cypress/webpack-dev-server')
       const webpackConfig = require('./webpack.config')
 
@@ -22,7 +22,7 @@ export default defineConfig({
         '@vue/compiler-core$': '@vue/compiler-core/dist/compiler-core.cjs.js',
       }
 
-      return startDevServer({ options: cypressConfig, ...devServerConfig })
+      return startDevServer({ options: cypressConfig, webpackConfig })
     },
     setupNodeEvents (on, config) {
       require('@cypress/code-coverage/task')(on, config)
