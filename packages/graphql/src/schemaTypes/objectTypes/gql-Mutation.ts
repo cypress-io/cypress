@@ -337,10 +337,10 @@ export const mutation = mutationType({
       },
     })
 
-    t.nonNull.field('setUseDarkSidebar', {
+    t.liveMutation('setUseDarkSidebar', {
       type: 'Boolean',
       args: {
-        value: nonNull(booleanArg())
+        value: nonNull(booleanArg()),
       },
       resolve: async (_, args, ctx) => {
         await ctx.actions.localSettings.setDevicePreference('useDarkSidebar', args.value)
@@ -349,7 +349,7 @@ export const mutation = mutationType({
       },
     })
 
-    t.nonNull.field('setWatchForSpecChange', {
+    t.liveMutation('setWatchForSpecChange', {
       type: 'Boolean',
       args: {
         value: nonNull(booleanArg()),

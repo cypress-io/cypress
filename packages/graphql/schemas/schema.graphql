@@ -546,8 +546,8 @@ type Mutation {
 
   """Save the projects preferences to cache"""
   setProjectPreferences(browserPath: String!, testingType: TestingTypeEnum!): Query!
-  setUseDarkSidebar(value: Boolean!): Boolean!
-  setWatchForSpecChange(value: Boolean!): Boolean!
+  setUseDarkSidebar(value: Boolean!): Boolean
+  setWatchForSpecChange(value: Boolean!): Boolean
 
   """show the launchpad at the browser picker step"""
   showElectronOnAppExit: Boolean
