@@ -178,7 +178,8 @@
       "title": "Upgrade to Cypress",
       "currentlyRunning": "You are currently running Version {0} of Cypress.",
       "pasteToUpgrade": "Paste the command below into your terminal to upgrade to the latest version of Cypress for this project.*",
-      "rememberToClose": "*Remember to <span class=\"font-bold\">close this app</span> before installing."
+      "rememberToClose": "*Remember to {0} before installing.",
+      "rememberToCloseInsert": "close this app"
     }
   },
   "launchpadErrors": {

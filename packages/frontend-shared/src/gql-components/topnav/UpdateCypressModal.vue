@@ -23,8 +23,11 @@
       />
       <p
         class="pt-16px"
-        v-html="t('topNav.updateCypress.rememberToClose')"
-      />
+      >
+        <i18n-t keypath="topNav.updateCypress.rememberToClose">
+          <span class="font-bold">{{ t('topNav.updateCypress.rememberToCloseInsert') }}</span>
+        </i18n-t>
+      </p>
     </div>
   </StandardModal>
 </template>
