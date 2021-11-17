@@ -134,6 +134,7 @@ describe('header', () => {
           cy.get('.testing-preferences-toggle').click()
           cy.get('[data-cy=auto-scroll-switch]').click()
           cy.wrap(runner.emit).should('be.calledWith', 'save:state')
+          cy.percySnapshot()
         })
       })
 
