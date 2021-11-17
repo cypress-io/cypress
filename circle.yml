@@ -310,6 +310,7 @@ commands:
             node_version=${node_version:-$(cat .node-version)}
             echo "Installing Node $node_version"
             curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.30.0/install.sh | bash NVM_DIR='~/' PROFILE=.bash_profile
+            cat .bash_profile
             echo "
               export NODE_VERSION='${node_version}'
 
@@ -334,6 +335,7 @@ commands:
               alias cd='cdnvm'
               cd "$PWD"
             " >> ~/.bash_profile
+            cat .bash_profile
       - persist_to_workspace:
           root: ~/
           paths:
