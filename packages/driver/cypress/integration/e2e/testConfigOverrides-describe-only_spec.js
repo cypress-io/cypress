@@ -12,10 +12,10 @@ describe('second should not run', () => {
   })
 })
 
-describe('nested contexts ', { retries: 1 }, () => {
+describe('correctly applies overrides ', { retries: 1 }, () => {
   // eslint-disable-next-line mocha/no-exclusive-tests
-  describe.only('test override', () => {
-    it('updates as expected', { baseUrl: null }, () => {
+  describe.only('when valid configuration', () => {
+    it('for describe.only', { baseUrl: null }, () => {
       const config = Cypress.config()
 
       expect(config.testConfigList).to.be.undefined
