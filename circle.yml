@@ -309,28 +309,27 @@ commands:
             node_version=<<parameters.version>>
             node_version=${node_version:-$(cat .node-version)}
             echo "Installing Node $node_version"
+            echo "export NODE_VERSION='${node_version}'" >> .bash_profile
             curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.30.0/install.sh | bash NVM_DIR='~/' PROFILE=.bash_profile
             cat .bash_profile
             echo "
-              export NODE_VERSION='${node_version}'
-
               cdnvm() {
                 command cd "$@";
-  
-                  declare locally_resolved_nvm_version
-                  # `nvm ls` will check all locally-available versions
-                  # If there are multiple matching versions, take the latest one
-                  # Remove the `->` and `*` characters and spaces
-                  # `locally_resolved_nvm_version` will be `N/A` if no local versions are found
-                  locally_resolved_nvm_version=$(nvm ls --no-colors "$NODE_VERSION" | tail -1 | tr -d '\->*' | tr -d '[:space:]')
 
-                  # If it is not already installed, install it
-                  # `nvm install` will implicitly use the newly-installed version
-                  if [[ "$locally_resolved_nvm_version" == "N/A" ]]; then
-                      nvm install "$NODE_VERSION";
-                  elif [[ $(nvm current) != "$locally_resolved_nvm_version" ]]; then
-                      nvm use "$nvm_version";
-                  fi
+                declare locally_resolved_nvm_version
+                # `nvm ls` will check all locally-available versions
+                # If there are multiple matching versions, take the latest one
+                # Remove the `->` and `*` characters and spaces
+                # `locally_resolved_nvm_version` will be `N/A` if no local versions are found
+                locally_resolved_nvm_version=$(nvm ls --no-colors "$NODE_VERSION" | tail -1 | tr -d '\->*' | tr -d '[:space:]')
+
+                # If it is not already installed, install it
+                # `nvm install` will implicitly use the newly-installed version
+                if [[ "$locally_resolved_nvm_version" == "N/A" ]]; then
+                    nvm install "$NODE_VERSION";
+                elif [[ $(nvm current) != "$locally_resolved_nvm_version" ]]; then
+                    nvm use "$nvm_version";
+                fi
               }
               alias cd='cdnvm'
               cd "$PWD"
