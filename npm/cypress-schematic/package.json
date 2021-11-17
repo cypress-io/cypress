@@ -18,15 +18,15 @@
     "unlink:sandbox": "cd sandbox && yarn unlink @cypress/schematic && cd .. && yarn unlink"
   },
   "dependencies": {
-    "@angular-devkit/architect": "^0.1200.0",
-    "@angular-devkit/core": "^12.0.0",
-    "@angular-devkit/schematics": "^12.0.0",
-    "@schematics/angular": "^12.0.0",
+    "@angular-devkit/architect": "^0.1202.10",
+    "@angular-devkit/core": "^12.2.10",
+    "@angular-devkit/schematics": "^12.2.10",
+    "@schematics/angular": "^12.2.10",
     "jsonc-parser": "^3.0.0",
     "rxjs": "~6.6.0"
   },
   "devDependencies": {
-    "@angular-devkit/schematics-cli": "^12.0.0",
+    "@angular-devkit/schematics-cli": "^12.2.10",
     "@types/chai-enzyme": "0.6.7",
     "@types/mocha": "8.0.3",
     "@types/node": "^12.11.1",
@@ -50,8 +50,7 @@
     "testing"
   ],
   "publishConfig": {
-    "access": "public",
-    "registry": "http://registry.npmjs.org/"
+    "access": "public"
   },
   "builders": "./src/builders/builders.json",
   "ng-add": {

@@ -1,3 +1,4 @@
+const { assertLogLength } = require('../../support/utils')
 const { Promise } = Cypress
 
 describe('src/cy/commands/fixtures', () => {
@@ -33,6 +34,17 @@ describe('src/cy/commands/fixtures', () => {
           encoding: 'ascii',
         })
       })
+    })
+
+    // https://github.com/cypress-io/cypress/issues/1558
+    it('passes explicit null encoding through to server and decodes response', () => {
+      Cypress.backend.withArgs('get:fixture').resolves(Buffer.from('\n'))
+
+      cy.fixture('foo', null).then((obj) => {
+        expect(Cypress.backend).to.be.calledWith('get:fixture', 'foo', {
+          encoding: null,
+        })
+      }).should('eql', Buffer.from('\n'))
     })
 
     it('can have encoding as second argument and options as third argument', () => {
@@ -95,7 +107,7 @@ describe('src/cy/commands/fixtures', () => {
         cy.on('fail', () => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error').message).to.eq('`cy.fixture()` is not valid because you have configured `fixturesFolder` to `false`.')
           expect(lastLog.get('error').docsUrl).to.eq('https://on.cypress.io/fixture')
           expect(lastLog.get('state')).to.eq('failed')
@@ -111,7 +123,7 @@ describe('src/cy/commands/fixtures', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
           expect(lastLog.get('name')).to.eq('fixture')
@@ -130,7 +142,7 @@ describe('src/cy/commands/fixtures', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
           expect(lastLog.get('name')).to.eq('fixture')
@@ -151,7 +163,7 @@ describe('src/cy/commands/fixtures', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
           expect(lastLog.get('name')).to.eq('fixture')

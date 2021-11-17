@@ -1,5 +1,4 @@
 const _ = require('lodash')
-const R = require('ramda')
 const path = require('path')
 const Promise = require('bluebird')
 const cwd = require('../cwd')
@@ -75,7 +74,7 @@ module.exports = {
       // desktop-gui/src/specs/specs-store.js
       return spec.relative.toLowerCase().includes(specFilter.toLowerCase())
     }
-    const specFilterFn = specFilter ? specFilterContains : R.T
+    const specFilterFn = specFilter ? specFilterContains : () => true
 
     const getSpecsHelper = () => {
       // grab all of the specs if this is ci
@@ -85,17 +84,21 @@ module.exports = {
         debug('returning all specs')
 
         return specsUtil.default.findSpecs(config)
-        .then(R.tap((specs) => {
-          return debug('found __all specs %o', specs)
-        }))
+        .then((specs) => {
+          debug('found __all specs %o', specs)
+
+          return specs
+        })
         .filter(specFilterFn)
         .filter((foundSpec) => {
           return componentTestingEnabled
             ? foundSpec.specType === 'component'
             : foundSpec.specType === 'integration'
-        }).then(R.tap((specs) => {
-          return debug('filtered __all specs %o', specs)
-        })).map((spec) => {
+        }).then((specs) => {
+          debug('filtered __all specs %o', specs)
+
+          return specs
+        }).map((spec) => {
           // grab the name of each
           return spec.absolute
         }).map(convertSpecPath)

@@ -327,10 +327,6 @@ The project utilizes [yarn workspaces](https://yarnpkg.com/lang/en/docs/workspac
 > **⚠ Running on Windows?**
 >
 > Many of the NPM scripts used during development use commands designed for a Linux-like shell.If you are running a Windows operating system, you may encounter many commands that are not working. To fix this behavior, you have to set a Linux-like shell as the default `npm` script shell. If you have Git for Windows installed, you can set Git Bash as the default script shell by using the following command:
-> ```bash
-> yarn config set script-shell "C:\\Program Files (x86)\\git\\bin\\bash.exe"
-> ```
-> Git Bash may be installed in `Program Files`, if so, use the following command:
 >```bash
 > yarn config set script-shell "C:\\Program Files\\git\\bin\\bash.exe"
 >```
@@ -573,6 +569,8 @@ Independent packages are automatically released when code is merged into `master
   ![Select release for PR](https://user-images.githubusercontent.com/1271364/135139641-657015d6-2dca-42d4-a4fb-16478f61d63f.png)
 - Please check the "Allow edits from maintainers" checkbox when submitting your PR. This will make it easier for the maintainers to make minor adjustments, to help with tests or any other changes we may need.
 ![Allow edits from maintainers checkbox](https://user-images.githubusercontent.com/1271181/31393427-b3105d44-ada9-11e7-80f2-0dac51e3919e.png)
+- After the PR is approved, the original contributor can merge the PR (if the original contributor has access).
+- When you merge a PR into `develop`, select [**Squash and merge**](https://docs.github.com/en/github/collaborating-with-pull-requests/incorporating-changes-from-a-pull-request/about-pull-request-merges#squash-and-merge-your-pull-request-commits). This will squash all commits into a single commit. *The only exception to squashing is when converting files to another language and there is a clear commit history needed to maintain from the file conversion.*
 
 ### Dependencies
 

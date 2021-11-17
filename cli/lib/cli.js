@@ -1,6 +1,5 @@
 // @ts-check
 const _ = require('lodash')
-const R = require('ramda')
 const commander = require('commander')
 const { stripIndent } = require('common-tags')
 const logSymbols = require('log-symbols')
@@ -279,12 +278,17 @@ const castCypressRunOptions = (opts) => {
   // only properties that have type "string | false" in our TS definition
   // require special handling, because CLI parsing takes care of purely
   // boolean arguments
-  const result = R.evolve({
-    port: coerceAnyStringToInt,
-    configFile: coerceFalseOrString,
-  })(opts)
+  const castOpts = { ...opts }
 
-  return result
+  if (_.has(opts, 'port')) {
+    castOpts.port = coerceAnyStringToInt(opts.port)
+  }
+
+  if (_.has(opts, 'configFile')) {
+    castOpts.configFile = coerceFalseOrString(opts.configFile)
+  }
+
+  return castOpts
 }
 
 module.exports = {
@@ -583,5 +587,6 @@ module.exports = {
 if (!module.parent) {
   logger.error('This CLI module should be required from another Node module')
   logger.error('and not executed directly')
+
   process.exit(-1)
 }

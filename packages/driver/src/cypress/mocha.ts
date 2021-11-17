@@ -50,7 +50,7 @@ function overloadMochaFnForConfig (fnName, specWindow) {
 
   const fnType = fnName === 'it' || fnName === 'specify' ? 'Test' : 'Suite'
 
-  function overrideFn (fn) {
+  function overrideMochaFn (fn) {
     specWindow[fnName] = fn()
     specWindow[fnName]['only'] = fn('only')
     specWindow[fnName]['skip'] = fn('skip')
@@ -58,7 +58,7 @@ function overloadMochaFnForConfig (fnName, specWindow) {
     if (specWindow[`x${fnName}`]) specWindow[`x${fnName}`] = specWindow[fnName]['skip']
   }
 
-  overrideFn(function (subFn) {
+  const replacementFn = function (subFn) {
     return function (...args) {
       /**
        * @type {Cypress.Cypress}
@@ -94,6 +94,7 @@ function overloadMochaFnForConfig (fnName, specWindow) {
 
         const ret = origFn.apply(this, mochaArgs)
 
+        // attached testConfigOverrides will executes on `runner:test:before:run` event
         ret._testConfig = _testConfig
 
         return ret
@@ -101,7 +102,9 @@ function overloadMochaFnForConfig (fnName, specWindow) {
 
       return origFn.apply(this, args)
     }
-  })
+  }
+
+  overrideMochaFn(replacementFn)
 }
 
 const ui = (specWindow, _mocha, config) => {
@@ -355,7 +358,7 @@ const patchSuiteAddTest = (specWindow, config) => {
     const test = args[0]
 
     if (!test.invocationDetails) {
-      test.invocationDetails = $stackUtils.getInvocationDetails(specWindow, config).details
+      test.invocationDetails = $stackUtils.getInvocationDetails(specWindow, config)
     }
 
     const ret = suiteAddTest.apply(this, args)
@@ -387,7 +390,7 @@ const patchSuiteAddSuite = (specWindow, config) => {
     const suite = args[0]
 
     if (!suite.invocationDetails) {
-      suite.invocationDetails = $stackUtils.getInvocationDetails(specWindow, config).details
+      suite.invocationDetails = $stackUtils.getInvocationDetails(specWindow, config)
     }
 
     return suiteAddSuite.apply(this, args)
@@ -416,6 +419,13 @@ const patchRunnableResetTimeout = () => {
     }
 
     this.timer = setTimeout(() => {
+      if (runnable.state === 'passed') {
+        // this timeout can be reached at the same time that a
+        // user does an asynchronous `done`, so double-check
+        // that the test has not already passed before timing out
+        return
+      }
+
       const err = $errUtils.errByPath(getErrPath(), { ms })
 
       runnable.callback(err)
@@ -439,7 +449,7 @@ const patchSuiteHooks = (specWindow, config) => {
         if (!hook.invocationDetails) {
           const invocationDetails = $stackUtils.getInvocationDetails(specWindow, config)
 
-          hook.invocationDetails = invocationDetails.details
+          hook.invocationDetails = invocationDetails
           invocationStack = invocationDetails.stack
         }
 
@@ -499,6 +509,8 @@ const create = (specWindow, Cypress, config) => {
   // _mocha instance
 
   const _mocha = createMocha(specWindow)
+
+  _mocha.slow(config('slowTestThreshold'))
 
   const _runner = getRunner(_mocha)
 

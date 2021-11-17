@@ -1,3 +1,4 @@
+const { assertLogLength } = require('../../support/utils')
 const { stripIndent } = require('common-tags')
 const { _ } = Cypress
 
@@ -35,6 +36,22 @@ describe('src/cy/commands/files', () => {
           { encoding: 'ascii' },
         )
       })
+    })
+
+    // https://github.com/cypress-io/cypress/issues/1558
+    it('passes explicit null encoding through to server and decodes response', () => {
+      Cypress.backend.resolves({
+        contents: Buffer.from('\n'),
+        filePath: '/path/to/foo.json',
+      })
+
+      cy.readFile('foo.json', null).then(() => {
+        expect(Cypress.backend).to.be.calledWith(
+          'read:file',
+          'foo.json',
+          { encoding: null },
+        )
+      }).should('eql', Buffer.from('\n'))
     })
 
     it('sets the contents as the subject', () => {
@@ -159,7 +176,7 @@ describe('src/cy/commands/files', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
           expect(err.message).to.eq('`cy.readFile()` must be passed a non-empty string as its 1st argument. You passed: `undefined`.')
@@ -175,7 +192,7 @@ describe('src/cy/commands/files', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
           expect(err.message).to.eq('`cy.readFile()` must be passed a non-empty string as its 1st argument. You passed: `2`.')
@@ -191,7 +208,7 @@ describe('src/cy/commands/files', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
           expect(err.message).to.eq('`cy.readFile()` must be passed a non-empty string as its 1st argument. You passed: ``.')
@@ -215,7 +232,7 @@ describe('src/cy/commands/files', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
           expect(err.message).to.eq(stripIndent`\
@@ -247,7 +264,7 @@ describe('src/cy/commands/files', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
 
@@ -270,7 +287,7 @@ describe('src/cy/commands/files', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
           expect(err.message).to.eq(stripIndent`\
@@ -294,7 +311,7 @@ describe('src/cy/commands/files', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
           expect(err.message).to.eq('Timed out retrying after 50ms: expected \'foo\' to equal \'contents\'')
@@ -334,6 +351,23 @@ describe('src/cy/commands/files', () => {
           'contents',
           {
             encoding: 'ascii',
+            flag: 'w',
+          },
+        )
+      })
+    })
+
+    // https://github.com/cypress-io/cypress/issues/1558
+    it('explicit null encoding is sent to server as Buffer', () => {
+      Cypress.backend.resolves(okResponse)
+
+      cy.writeFile('foo.txt', Buffer.from([0, 0, 54, 255]), null).then(() => {
+        expect(Cypress.backend).to.be.calledWith(
+          'write:file',
+          'foo.txt',
+          Buffer.from([0, 0, 54, 255]),
+          {
+            encoding: null,
             flag: 'w',
           },
         )
@@ -478,7 +512,7 @@ describe('src/cy/commands/files', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
           expect(err.message).to.eq('`cy.writeFile()` must be passed a non-empty string as its 1st argument. You passed: `undefined`.')
@@ -494,7 +528,7 @@ describe('src/cy/commands/files', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
           expect(err.message).to.eq('`cy.writeFile()` must be passed a non-empty string as its 1st argument. You passed: `2`.')
@@ -510,7 +544,7 @@ describe('src/cy/commands/files', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
           expect(err.message).to.eq('`cy.writeFile()` must be passed a non-empty string, an object, or an array as its 2nd argument. You passed: `undefined`.')
@@ -525,7 +559,7 @@ describe('src/cy/commands/files', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
           expect(err.message).to.eq('`cy.writeFile()` must be passed a non-empty string, an object, or an array as its 2nd argument. You passed: `2`.')
@@ -548,7 +582,7 @@ describe('src/cy/commands/files', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
           expect(err.message).to.eq(stripIndent`

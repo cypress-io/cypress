@@ -1,10 +1,10 @@
 require('../../spec_helper')
 
+const _ = require('lodash')
 const Promise = require('bluebird')
 const electron = require('electron')
 const stripAnsi = require('strip-ansi')
 const snapshot = require('snap-shot-it')
-const R = require('ramda')
 const pkg = require('@packages/root')
 const { fs } = require(`${root}../lib/util/fs`)
 const user = require(`${root}../lib/user`)
@@ -862,7 +862,7 @@ describe('lib/modes/run', () => {
     // for some reason I cannot stub property value using Sinon
     let version
     // save a copy of "true" experiments right away
-    const names = R.clone(experimental.names)
+    const names = _.cloneDeep(experimental.names)
 
     before(() => {
       // reset experiments names before each test

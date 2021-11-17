@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import { extend, isObject, isString } from 'lodash'
 
 const reset = (state = {}) => {
   // perf loop
@@ -11,7 +11,7 @@ const reset = (state = {}) => {
 
 // a basic object setter / getter class
 export default {
-  create: (state = {}) => {
+  create: (state = {}, validate?) => {
     const get = (key?) => {
       if (key) {
         return state[key]
@@ -24,7 +24,7 @@ export default {
       let obj
       let ret
 
-      if (_.isObject(key)) {
+      if (isObject(key)) {
         obj = key
         ret = obj
       } else {
@@ -33,7 +33,9 @@ export default {
         ret = value
       }
 
-      _.extend(state, obj)
+      validate && validate(obj)
+
+      extend(state, obj)
 
       return ret
     }
@@ -44,7 +46,7 @@ export default {
         case 0:
           return get()
         case 1:
-          if (_.isString(key)) {
+          if (isString(key)) {
             return get(key)
           }
 

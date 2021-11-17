@@ -2,7 +2,6 @@ import { findApp, FindAppParams } from './util'
 import type { Browser, DetectedBrowser } from '../types'
 import * as linuxHelper from '../linux'
 import { log } from '../log'
-import { merge } from 'ramda'
 import { get } from 'lodash'
 
 type Detectors = {
@@ -105,7 +104,7 @@ export function detect (browser: Browser): Promise<DetectedBrowser> {
   }
 
   return findApp(findAppParams)
-  .then(merge({ name: browser.name }))
+  .then((val) => ({ name: browser.name, ...val }))
   .catch(() => {
     log('could not detect %s using traditional Mac methods', browser.name)
     log('trying linux search')
