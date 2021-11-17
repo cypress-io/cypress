@@ -14,7 +14,10 @@ export async function setDevicePreference<K extends keyof DevicePreferences> (ke
 
 export async function getDevicePreferences (): Promise<DevicePreferences> {
   const cached = await (await savedState.create()).get()
+
   const state = { ...devicePreferenceDefaults, ...cached }
+
   debug('get preferences: %o', state)
+
   return state
 }
