@@ -22,7 +22,6 @@ import {
   GraphQLDataSource,
   HtmlDataSource,
   UtilDataSource,
-  LocalSettingsSource,
 } from './sources/'
 import { cached } from './util/cached'
 import type { GraphQLSchema } from 'graphql'
@@ -173,11 +172,6 @@ export class DataContext {
   @cached
   get file () {
     return new FileDataSource(this)
-  }
-
-  @cached
-  get localSettings () {
-    return new LocalSettingsSource(this)
   }
 
   @cached
