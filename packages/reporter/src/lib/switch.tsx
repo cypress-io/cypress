@@ -5,7 +5,7 @@ import React, { Component } from 'react'
 interface Props {
   value: boolean
   size?: 'sm' | 'md' | 'lg' | 'xl'
-  name: string
+  'data-cy'?: string
   onUpdate: (e: MouseEvent) => void
 }
 
@@ -18,11 +18,11 @@ class Switch extends Component<Props> {
   }
 
   render () {
-    const { name, size = 'lg', value } = this.props
+    const { 'data-cy': dataCy, size = 'lg', value } = this.props
 
     return (
       <button
-        id={name}
+        data-cy={dataCy}
         className={`switch switch-${size}`}
         role="switch"
         aria-checked={value}

@@ -105,9 +105,12 @@ describe('shortcuts', function () {
 
     it('toggles auto-scrolling', () => {
       cy.get('body').type('a')
-      cy.get('.toggle-auto-scrolling').should('not.have.class', 'auto-scrolling-enabled')
+      cy.get('.testing-preferences-toggle').click()
+      cy.get('[data-cy=auto-scroll-switch]').invoke('attr', 'aria-checked').should('eq', 'false')
+      cy.get('.testing-preferences-toggle').click()
       cy.get('body').type('a')
-      cy.get('.toggle-auto-scrolling').should('have.class', 'auto-scrolling-enabled')
+      cy.get('.testing-preferences-toggle').click()
+      cy.get('[data-cy=auto-scroll-switch]').invoke('attr', 'aria-checked').should('eq', 'true')
     })
 
     it('does not run shortcut if typed into an input', () => {

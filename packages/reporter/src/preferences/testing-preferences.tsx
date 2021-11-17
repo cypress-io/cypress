@@ -30,8 +30,8 @@ const TestingPreferences = observer(({
         <div className="testing-preference-header">
           Auto-scrolling
           <Switch
+            data-cy="auto-scroll-switch"
             value={appState.autoScrollingEnabled}
-            name="auto-scrolling"
             onUpdate={action('toggle:auto:scrolling', toggleAutoScrolling)}
           />
         </div>
