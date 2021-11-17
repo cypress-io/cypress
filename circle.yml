@@ -1033,14 +1033,14 @@ jobs:
               echo "This is an external PR, cannot access other services"
               circleci-agent step halt
             fi
-      - wait-on-circle-jobs:
-          job-names: >
-            desktop-gui-integration-tests-7x,
-            desktop-gui-component-tests,
-            cli-visual-tests,
-            runner-integration-tests-chrome,
-            runner-ct-integration-tests-chrome,
-            reporter-integration-tests
+      # - wait-on-circle-jobs:
+      #     job-names: >
+      #       desktop-gui-integration-tests-7x,
+      #       desktop-gui-component-tests,
+      #       cli-visual-tests,
+      #       runner-integration-tests-chrome,
+      #       runner-ct-integration-tests-chrome,
+      #       reporter-integration-tests
       - run: yarn percy build:finalize
 
   cli-visual-tests:
@@ -2218,6 +2218,7 @@ linux-workflow: &linux-workflow
           - driver-integration-tests-firefox
           - driver-integration-tests-chrome
           - driver-integration-tests-electron
+          - percy-finalize
           - system-tests-non-root
           - system-tests-firefox
           - system-tests-electron
