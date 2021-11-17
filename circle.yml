@@ -294,7 +294,7 @@ commands:
           command: echo $(yarn global bin)
       - run:
           name: print yarn version
-          command: yarn -v
+          command: yarn versions
       - run:
           name: Check terminal variables
           ## make sure the TERM is set to 'xterm' in node (Linux only)
@@ -939,7 +939,9 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Top level packages
-          command: yarn list --depth=0 || true
+          command: |
+            yarn versions
+            yarn list --depth=0 || true
       - run:
           name: Build packages
           command: yarn build-prod
