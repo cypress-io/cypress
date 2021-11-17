@@ -17,6 +17,7 @@ describe('<UpdateCypressModal />', { viewportWidth: 1000, viewportHeight: 750 },
     cy.contains(`${defaultMessages.topNav.updateCypress.title} ${latestVersion}`).should('be.visible')
     cy.contains(`${defaultMessages.topNav.updateCypress.currentlyRunning}`.replace('{0}', installedVersion)).should('be.visible')
     cy.contains(`${defaultMessages.topNav.updateCypress.pasteToUpgrade}`).should('be.visible')
+    cy.contains(`cypress@${latestVersion}`).should('be.visible')
     cy.contains('Remember to close').should('be.visible')
     cy.findByLabelText('Close').click().then(() => {
       cy.wrap(Cypress.vueWrapper.emitted('close')?.[0])
