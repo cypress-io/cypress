@@ -991,7 +991,9 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Top level packages
-          command: yarn list --depth=0 || true
+          command: |
+            yarn versions
+            yarn list --depth=0 || true
       - build-and-persist
       - store-npm-logs
 
