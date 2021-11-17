@@ -15,7 +15,7 @@ module.exports = {
   ],
   'experimentalFetchPolyfill': true,
   'component': {
-    setupNodeEvents (on, config) {
+    devServer (cypressConfig, devServerConfig) {
       const { startDevServer } = require('@cypress/webpack-dev-server')
       const path = require('path')
       const babelConfig = require('./babel.config.js')
@@ -73,11 +73,7 @@ module.exports = {
         },
       }
 
-      on('dev-server:start', (options) => {
-        return startDevServer({ options, webpackConfig, disableLazyCompilation: false })
-      })
-
-      return config
+      startDevServer({ options: cypressConfig, disableLazyCompilation: false, webpackConfig })
     },
   },
 }

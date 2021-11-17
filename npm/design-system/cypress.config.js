@@ -14,12 +14,10 @@ module.exports = {
   componentFolder: 'src',
   fixturesFolder: false,
   component: {
-    setupNodeEvents (on, config) {
+    devServer (cypressConfig) {
       const { startDevServer } = require('@cypress/vite-dev-server')
 
-      on('dev-server:start', (options) => startDevServer({ options }))
-
-      return config
+      startDevServer({ options: cypressConfig })
     },
   },
 }

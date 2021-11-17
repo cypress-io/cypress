@@ -10,7 +10,7 @@ const util = require(`${root}../../lib/plugins/util`)
 const resolve = require(`${root}../../lib/util/resolve`)
 const browserUtils = require(`${root}../../lib/browsers/utils`)
 
-const runSetupNodeEvents = require(`${root}../../lib/plugins/child/run_plugins`)
+const RunPlugins = require(`${root}../../lib/plugins/child/run_plugins`)
 
 const deferred = () => {
   let reject
@@ -24,14 +24,18 @@ const deferred = () => {
 }
 
 describe('lib/plugins/child/run_plugins', () => {
-  beforeEach(function () {
-    runSetupNodeEvents.__reset()
+  let runPlugins
 
+  beforeEach(function () {
     this.ipc = {
       send: sinon.spy(),
       on: sinon.stub(),
       removeListener: sinon.spy(),
     }
+
+    runPlugins = new RunPlugins(this.ipc, 'proj-root', 'cypress.config.js')
+
+    runPlugins.__reset()
   })
 
   afterEach(() => {
@@ -39,7 +43,8 @@ describe('lib/plugins/child/run_plugins', () => {
   })
 
   it('sends error message if setupNodeEvents is not a function', function () {
-    runSetupNodeEvents(this.ipc, 'plugins-file', 'proj-root', 'cypress.config.js')
+    runPlugins.runSetupNodeEvents('plugins-file')
+
     expect(this.ipc.send).to.be.calledWith('load:error:plugins', 'SETUP_NODE_EVENTS_IS_NOT_FUNCTION', 'cypress.config.js')
 
     return snapshot(this.ipc.send.lastCall.args[3].split('\n')[0])
@@ -57,7 +62,7 @@ describe('lib/plugins/child/run_plugins', () => {
         return config
       }
 
-      runSetupNodeEvents(this.ipc, setupNodeEventsFn, 'proj-root', 'cypress.config.js')
+      runPlugins.runSetupNodeEvents(setupNodeEventsFn)
 
       this.ipc.on.withArgs('load:plugins').yield(config)
 
@@ -97,7 +102,8 @@ describe('lib/plugins/child/run_plugins', () => {
       }
 
       mockery.registerMock('@cypress/webpack-batteries-included-preprocessor', webpackPreprocessor)
-      runSetupNodeEvents(this.ipc, setupNodeEventsFn, 'proj-root', 'cypress.config.js')
+
+      runPlugins.runSetupNodeEvents(setupNodeEventsFn)
 
       this.ipc.on.withArgs('load:plugins').yield(config)
 
@@ -139,7 +145,7 @@ describe('lib/plugins/child/run_plugins', () => {
       }
 
       mockery.registerMock('@cypress/webpack-batteries-included-preprocessor', webpackPreprocessor)
-      runSetupNodeEvents(this.ipc, setupNodeEventsFn, 'proj-root', 'cypress.config.js')
+      runPlugins.runSetupNodeEvents(setupNodeEventsFn)
 
       this.ipc.on.withArgs('load:plugins').yield(config)
 
@@ -167,7 +173,7 @@ describe('lib/plugins/child/run_plugins', () => {
       const setupNodeEventsFn = sinon.stub().rejects(err)
 
       this.ipc.on.withArgs('load:plugins').yields({})
-      runSetupNodeEvents(this.ipc, setupNodeEventsFn, 'proj-root', 'cypress.config.js')
+      runPlugins.runSetupNodeEvents(setupNodeEventsFn)
 
       this.ipc.send = _.once((event, errorType, stack) => {
         expect(event).to.eq('load:error:plugins')
@@ -181,7 +187,8 @@ describe('lib/plugins/child/run_plugins', () => {
     it('calls function exported by pluginsFile with register function and config', function () {
       const setupNodeEventsFn = sinon.spy()
 
-      runSetupNodeEvents(this.ipc, setupNodeEventsFn, 'proj-root', 'cypress.config.js')
+      runPlugins.runSetupNodeEvents(setupNodeEventsFn)
+
       const config = {}
 
       this.ipc.on.withArgs('load:plugins').yield(config)
@@ -198,7 +205,8 @@ describe('lib/plugins/child/run_plugins', () => {
         throw err
       }
 
-      runSetupNodeEvents(this.ipc, setupNodeEventsFn, 'proj-root', 'cypress.config.js')
+      runPlugins.runSetupNodeEvents(setupNodeEventsFn)
+
       this.ipc.on.withArgs('load:plugins').yield({})
 
       this.ipc.send = _.once((event, errorType, stack) => {
@@ -226,7 +234,7 @@ describe('lib/plugins/child/run_plugins', () => {
         return register('task', this.taskRequested)
       }
 
-      runSetupNodeEvents(this.ipc, setupNodeEventsFn, 'proj-root', 'cypress.config.js')
+      runPlugins.runSetupNodeEvents(setupNodeEventsFn)
 
       return this.ipc.on.withArgs('load:plugins').yield({})
     })

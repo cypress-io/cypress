@@ -3,7 +3,7 @@ const stripAnsi = require('strip-ansi')
 const debug = require('debug')('cypress:server:require_async:child')
 const tsNodeUtil = require('./ts_node')
 const util = require('../plugins/util')
-const runSetupNodeEvents = require('../plugins/child/run_plugins')
+const RunPlugins = require('../plugins/child/run_plugins')
 
 let tsRegistered = false
 
@@ -57,11 +57,23 @@ function run (ipc, requiredFile, projectRoot) {
       ipc.send('loaded', result)
 
       ipc.on('plugins', (testingType) => {
+        const runPlugins = new RunPlugins(ipc, projectRoot, requiredFile)
+
         areSetupNodeEventsLoaded = true
         if (testingType === 'component') {
-          runSetupNodeEvents(ipc, result.component?.setupNodeEvents, projectRoot, requiredFile)
+          runPlugins.runSetupNodeEvents(result.component?.setupNodeEvents)
+
+          if (result.component?.devServer) {
+            const devServerFn = (on, config) => {
+              on('dev-server:start', async (options) => result.component.devServer(options, result.component?.devServerConfig))
+
+              return config
+            }
+
+            runPlugins.runSetupNodeEvents(devServerFn)
+          }
         } else if (testingType === 'e2e') {
-          runSetupNodeEvents(ipc, result.e2e?.setupNodeEvents, projectRoot, requiredFile)
+          runPlugins.runSetupNodeEvents(result.e2e?.setupNodeEvents)
         } else {
           // Notify the plugins init that there's no plugins to resolve
           ipc.send('empty:plugins')
