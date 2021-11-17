@@ -6,6 +6,7 @@ describe('<UpdateCypressModal />', { viewportWidth: 1000, viewportHeight: 750 },
       props: {
         installedVersion: '8.2.0',
         latestVersion: '10.0.0',
+        show: true,
       },
     })
 

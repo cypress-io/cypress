@@ -36,7 +36,10 @@
       <p class="text-gray-600 text-12px py-8px leading-normal">
         {{ t('topNav.runningOldVersion') }}
       </p>
-      <Button class="w-full">
+      <Button
+        class="w-full"
+        @click="showUpdateModal = true"
+      >
         Update to {{ versions.latest.version }}
       </Button>
     </TopNavListItem>
@@ -187,10 +190,12 @@
     </template>
     <slot name="login-panel" />
   </TopNavList>
-  <!-- <UpdateCypressModal
+  <UpdateCypressModal
+    :show="showUpdateModal"
     :installed-version="versions.current.version"
     :latest-version="versions.latest.version"
-  /> -->
+    @close="showUpdateModal = false"
+  />
 </template>
 
 <script setup lang="ts">
@@ -274,6 +279,8 @@ const props = defineProps<{
   gql: TopNavFragment,
   showBrowsers?: boolean
 }>()
+
+const showUpdateModal = ref(false)
 
 const docsMenuVariant: Ref<'main' | 'orchestration' | 'ci'> = ref('main')
 
