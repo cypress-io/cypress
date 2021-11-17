@@ -958,6 +958,9 @@ jobs:
     # resource_class: medium+
     # shell: /bin/bash --login
     steps:
+      - run:
+          name: check nvm & yarn
+          command: nvm list; yarn versions
       - restore_cached_workspace
       - run:
           name: Top level packages
@@ -2382,20 +2385,6 @@ mac-workflow: &mac-workflow
         requires:
           - darwin-create-build-artifacts
 
-  #   windows: win/default
-  #   shell: bash.exe
-  #   # by default, we use "small" to save on CI costs. bump on a per-job basis if needed.
-  #   resource_class: small
-  #   environment:
-  #     PLATFORM: windows
-# windowsExecutor: &windowsExecutor
-#   executor:
-#     name: win/default
-#     size: small
-#     shell: bash.exe
-#     environment:
-#       PLATFORM: windows
-
 windows-workflow: &windows-workflow
   jobs:
     - node_modules_install:
@@ -2459,31 +2448,6 @@ windows-workflow: &windows-workflow
         context: test-runner:trigger-test-jobs
         requires:
           - windows-create-build-artifacts
-
-    # - node_modules_install:
-    #     name: windows-node-modules-install
-    #     executor: windows
-    #     arch: win32
-
-        # name: windows/default
-        # size: medium
-        # shell: bash.exe
-
-        # size: small
-        # environment:
-        #   PLATFORM: windows
-
-    # - build:
-    #     name: windows-build
-    #     executor: win/default
-    #     requires:
-    #       - windows-node-modules-install
-
-    # - lint:
-    #     name: windows-lint
-    #     executor: win/default
-    #     requires:
-    #       - windows-build
 
 linux-2-workflow: &linux-2-workflow
   jobs:
