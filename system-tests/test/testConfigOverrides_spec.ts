@@ -33,6 +33,24 @@ describe('testConfigOverrides', () => {
     },
   })
 
+  systemTests.it(`correctly applies overrides when valid configuration for describe.only`, {
+    spec: 'testConfigOverrides-describe-only-valid.js',
+    snapshot: true,
+    expectedExitCode: 0,
+    config: {
+      video: false,
+    },
+  })
+
+  systemTests.it(`correctly applies overrides when valid configuration for it.only`, {
+    spec: 'testConfigOverrides-it-only-valid.js',
+    snapshot: true,
+    expectedExitCode: 0,
+    config: {
+      video: false,
+    },
+  })
+
   // window.Error throws differently for firefox. break into
   // browser permutations for snapshot comparisons
   const permutations = [
