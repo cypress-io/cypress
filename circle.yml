@@ -313,6 +313,10 @@ commands:
               npm uninstall yarn -g # remove default yarn installed on circleci. built with wrong node engine
               npm install yarn -g # ensure yarn is installed with the correct node engine
             " >> ~/.bash_profile
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - .bash_profile
       - run:
           # https://github.com/nvm-sh/nvm#nvmrc
           name: Install Node
