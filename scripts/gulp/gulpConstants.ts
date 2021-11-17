@@ -23,8 +23,6 @@ export const ENV_VARS = {
   DEV: {
     CYPRESS_KONFIG_ENV: DEFAULT_INTERNAL_CLOUD_ENV, // TODO: Change this / remove konfig
     CYPRESS_INTERNAL_CLOUD_ENV: DEFAULT_INTERNAL_CLOUD_ENV, // staging for now, until we get an e2e workflow w/ cloud project
-    CYPRESS_INTERNAL_VITE_APP_PORT: `3333`,
-    CYPRESS_INTERNAL_VITE_LAUNCHPAD_PORT: `3001`,
   },
 }
 

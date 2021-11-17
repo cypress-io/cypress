@@ -11,8 +11,6 @@ import type { SpawnOptions } from 'child_process'
 import fs from 'fs-extra'
 import path from 'path'
 
-import { ENV_VARS } from '../gulpConstants'
-
 import { monorepoPaths } from '../monorepoPaths'
 import { AllSpawnableApps, spawned, spawnUntilMatch } from '../utils/childProcessUtils'
 
@@ -25,17 +23,32 @@ import { AllSpawnableApps, spawned, spawnUntilMatch } from '../utils/childProces
  *------------------------------------------------------------------------**/
 
 export function viteApp () {
-  const APP_PORT = ENV_VARS.DEV.CYPRESS_INTERNAL_VITE_APP_PORT
+  const baseSuffix = `--base /__cypress/assets/`
 
-  return spawnViteDevServer('vite-app', `yarn vite --port ${APP_PORT} --base /__vite__/`, {
+  // TODO: remove once we have sourcemap
+  if (process.env.CYPRESS_INTERNAL_VITE_DEV) {
+    const port = process.env.CYPRESS_INTERNAL_VITE_APP_PORT ??= '3333'
+
+    return spawnViteDevServer('vite-app', `yarn vite --port ${port} ${baseSuffix}`, {
+      cwd: monorepoPaths.pkgApp,
+    })
+  }
+
+  return watchViteBuild('vite-app', `yarn vite build --mode development --minify false --watch ${baseSuffix}`, {
     cwd: monorepoPaths.pkgApp,
   })
 }
 
 export function viteLaunchpad () {
-  const LAUNCHPAD_PORT = ENV_VARS.DEV.CYPRESS_INTERNAL_VITE_LAUNCHPAD_PORT
+  if (process.env.CYPRESS_INTERNAL_VITE_DEV) {
+    const port = process.env.CYPRESS_INTERNAL_VITE_LAUNCHPAD_PORT ??= '3001'
 
-  return spawnViteDevServer('vite-launchpad', `yarn vite --port ${LAUNCHPAD_PORT}`, {
+    return spawnViteDevServer('vite-launchpad', `yarn vite --port ${port}`, {
+      cwd: monorepoPaths.pkgLaunchpad,
+    })
+  }
+
+  return watchViteBuild('vite-launchpad', `yarn vite build --mode development --minify false --watch`, {
     cwd: monorepoPaths.pkgLaunchpad,
   })
 }
@@ -81,6 +94,11 @@ const DIST_SOURCES = {
 } as const
 
 export async function symlinkViteProjects () {
+  // If we're running the vite server script, we don't have a dist
+  if (process.env.CYPRESS_INTERNAL_VITE_DEV) {
+    return
+  }
+
   for (const basePath of [monorepoPaths.pkgLaunchpad, monorepoPaths.pkgApp]) {
     for (const target of ['dist-launchpad', 'dist-app'] as const) {
       if (!fs.existsSync(path.join(basePath, target))) {
@@ -128,6 +146,13 @@ export function generateShikiTheme () {
   return spawned('vite:build-generate-shiki-theme', `yarn generate-shiki-theme`, {
     cwd: monorepoPaths.pkgFrontendShared,
   })
+}
+
+export async function viteClean () {
+  return Promise.all([
+    viteCleanApp(),
+    viteCleanLaunchpad(),
+  ])
 }
 
 export function viteCleanApp () {

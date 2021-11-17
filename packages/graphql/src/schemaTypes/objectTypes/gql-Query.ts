@@ -28,7 +28,7 @@ export const Query = objectType({
       resolve: (root, args, ctx) => ctx.coreData.dev,
     })
 
-    t.nonNull.field('versions', {
+    t.field('versions', {
       type: VersionData,
       description: 'Previous versions of cypress and their release date',
       resolve: (root, args, ctx) => {

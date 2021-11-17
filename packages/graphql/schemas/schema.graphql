@@ -641,7 +641,7 @@ type Query {
   projects: [ProjectLike!]!
 
   """Previous versions of cypress and their release date"""
-  versions: VersionData!
+  versions: VersionData
 
   """Metadata about the wizard, null if we arent showing the wizard"""
   wizard: Wizard!
