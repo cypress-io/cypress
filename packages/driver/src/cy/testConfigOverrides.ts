@@ -109,21 +109,23 @@ function mutateConfiguration (testConfig: ResolvedTestConfigOverride, config, en
 // in order to resolve the test config upfront before test runs
 // note: must return as an object to meet the dashboard recording API
 export function getResolvedTestConfigOverride (test): ResolvedTestConfigOverride {
-  let curParent = test.parent
-  const testConfigList = [{
-    overrides: test._testConfig,
-    invocationDetails: test.invocationDetails,
-  }]
+  let curr = test
+  let testConfigList: TestConfig[] = []
 
-  while (curParent) {
-    if (curParent._testConfig) {
-      testConfigList.unshift({
-        overrides: curParent._testConfig,
-        invocationDetails: curParent.invocationDetails,
-      })
+  while (curr) {
+    if (curr._testConfig) {
+      if (curr._testConfig.testConfigList) {
+        // configuration for mocha function has already been processed
+        testConfigList = testConfigList.concat(curr._testConfig.testConfigList)
+      } else {
+        testConfigList.unshift({
+          overrides: curr._testConfig,
+          invocationDetails: curr.invocationDetails,
+        })
+      }
     }
 
-    curParent = curParent.parent
+    curr = curr.parent
   }
 
   const testConfig = {
