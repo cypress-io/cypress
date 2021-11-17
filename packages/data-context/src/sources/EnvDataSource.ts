@@ -9,4 +9,12 @@ export class EnvDataSource {
   get CYPRESS_INTERNAL_VITE_APP_PORT () {
     return process.env.CYPRESS_INTERNAL_VITE_APP_PORT
   }
+
+  get HTTP_PROXY () {
+    return process.env.HTTPS_PROXY || process.env.HTTP_PROXY
+  }
+
+  get NO_PROXY () {
+    return process.env.NO_PROXY
+  }
 }

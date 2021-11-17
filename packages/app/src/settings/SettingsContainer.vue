@@ -10,7 +10,7 @@
       max-height="800px"
     >
       <ExternalEditorSettings :gql="props.gql" />
-      <DeviceSettings />
+      <ProxySettings :gql="props.gql" />
       <TestingPreferences :gql="props.gql" />
     </SettingsCard>
     <SettingsCard
@@ -45,6 +45,7 @@ import { useI18n } from '@cy/i18n'
 import { gql, useMutation } from '@urql/vue'
 import Button from '@cy/components/Button.vue'
 import ExternalEditorSettings from './device/ExternalEditorSettings.vue'
+import ProxySettings from './device/ProxySettings.vue'
 import SettingsCard from './SettingsCard.vue'
 import ProjectSettings from './project/ProjectSettings.vue'
 import DeviceSettings from './device/DeviceSettings.vue'
@@ -70,6 +71,7 @@ fragment SettingsContainer on Query {
     ...ProjectSettings
   }
   ...ExternalEditorSettings
+  ...ProxySettings
 }`
 
 const props = defineProps<{

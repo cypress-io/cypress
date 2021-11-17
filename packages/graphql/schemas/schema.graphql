@@ -440,6 +440,8 @@ type LocalSettings {
 type LocalSettingsPreferences {
   autoScrollingEnabled: Boolean
   preferredEditorBinary: String
+  proxyBypass: String
+  proxyServer: String
   useDarkSidebar: Boolean
   watchForSpecChange: Boolean
 }

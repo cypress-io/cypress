@@ -12,14 +12,14 @@
         <span
           class="text-gray-500"
           data-testid="proxy-server"
-        >{{ proxyServer }}</span>
+        >{{ props.gql.localSettings.preferences.proxyServer }}</span>
       </div>
       <div class="flex justify-between">
         <span class="font-medium text-gray-800">{{ t('settingsPage.proxy.bypassList') }}</span>
         <span
           class="text-gray-500"
           data-testid="bypass-list"
-        >{{ bypassList }}</span>
+        >{{ props.gql.localSettings.preferences.proxyBypass }}</span>
       </div>
     </div>
   </SettingsSection>
@@ -28,10 +28,23 @@
 <script lang="ts" setup>
 import SettingsSection from '../SettingsSection.vue'
 import { useI18n } from '@cy/i18n'
-import { ref } from 'vue'
+import { gql } from '@urql/vue'
+import type { ProxySettingsFragment } from '../../generated/graphql'
 
 const { t } = useI18n()
 
-const proxyServer = ref('http://acme-bank.local:2739/')
-const bypassList = ref('127.0.0.1,127.0.0.2')
+gql`
+fragment ProxySettings on Query {
+  localSettings {
+    preferences {
+      proxyServer
+      proxyBypass
+    }
+  }
+}
+`
+
+const props = defineProps<{
+  gql: ProxySettingsFragment
+}>()
 </script>

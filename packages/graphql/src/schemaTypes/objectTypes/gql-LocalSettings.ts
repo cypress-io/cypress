@@ -9,6 +9,13 @@ export const LocalSettingsPreferences = objectType({
     t.boolean('watchForSpecChange')
     t.boolean('useDarkSidebar')
     t.string('preferredEditorBinary')
+    t.string('proxyServer', {
+      resolve: (source, args, ctx) => ctx.env.HTTP_PROXY,
+    })
+
+    t.string('proxyBypass', {
+      resolve: (source, args, ctx) => ctx.env.NO_PROXY,
+    })
   },
 })
 
