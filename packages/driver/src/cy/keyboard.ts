@@ -1312,10 +1312,6 @@ export class Keyboard {
   }
 }
 
-const create = (state) => {
-  return new Keyboard(state)
-}
-
 let _defaults
 
 const reset = () => {
@@ -1360,7 +1356,6 @@ const defaults = (props: Partial<Cypress.KeyboardDefaultsOptions>) => {
 }
 
 export default {
-  create,
   defaults,
   getConfig,
   getKeymap,
