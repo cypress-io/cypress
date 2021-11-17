@@ -1,7 +1,7 @@
 <template>
   <HideDuringScreenshot
     :aria-expanded="mainStore.navBarExpanded"
-    class="relative flex flex-col bg-gray-1000 transition-all duration-300"
+    class="relative flex flex-col bg-gray-1000 transition-all duration-300 z-10"
     :class="mainStore.navBarExpanded ? 'w-248px' : 'w-64px'"
   >
     <div
@@ -120,8 +120,8 @@ const { t } = useI18n()
 
 const navigation = [
   { name: 'Specs', icon: CodeIcon, href: '/' },
-  { name: 'Runs', icon: RunsIcon, href: '/runs' },
-  { name: 'Settings', icon: SettingsIcon, href: '/settings' },
+{ name: 'Runs', icon: RunsIcon, href: '/runs' },
+{ name: 'Settings', icon: SettingsIcon, href: '/settings' },
 ]
 
 gql`
