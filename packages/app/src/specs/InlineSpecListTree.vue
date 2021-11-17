@@ -47,7 +47,7 @@
 <script setup lang="ts">
 import { useCollapsibleTree, UseCollapsibleTreeNode } from '@packages/frontend-shared/src/composables/useCollapsibleTree'
 import { useListNavigation } from '@packages/frontend-shared/src/composables/useListNavigation'
-import { buildSpecTree, FuzzyFoundSpec, SpecTreeNode } from '@packages/frontend-shared/src/utils/buildSpecTree'
+import { buildSpecTree, FuzzyFoundSpec, SpecTreeNode, getIndexes } from '@packages/frontend-shared/src/utils/spec-utils'
 import SpecFileItem from './SpecFileItem.vue'
 import { computed, ref, Ref } from 'vue'
 import DirectoryItem from './DirectoryItem.vue'
@@ -90,18 +90,6 @@ const onRowClick = (row: UseCollapsibleTreeNode<SpecTreeNode<FuzzyFoundSpec>>, i
 const rootEl = ref<HTMLUListElement>()
 
 const { selectedItem, rowProps } = useListNavigation(rootEl)
-
-function getIndexes (row: UseCollapsibleTreeNode<SpecTreeNode<FuzzyFoundSpec>>) {
-  const indexes = row.data?.indexes || []
-
-  const maxIndex = row.id.length - 1
-  const minIndex = maxIndex - row.name.length + 1
-
-  const res = indexes?.filter((index) => index >= minIndex && index <= maxIndex)
-
-  return res.map((idx) => idx - minIndex)
-}
-
 </script>
 
 <style scoped>

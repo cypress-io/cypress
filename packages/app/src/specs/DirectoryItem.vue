@@ -5,39 +5,20 @@
       :class="{'transform rotate-270': !expanded}"
     />
     <i-cy-folder_x16 class="mr-8px w-16px h-16px" />
-    <span class="text-gray-400">
-      <span
-        v-for="({char, highlighted}, idx) in characters"
-        :key="idx"
-        :class="{'px-4px': char === '/'}"
-      >
-        <span
-          v-if="highlighted"
-          class="text-white"
-        >{{ char }}</span>
-        <template v-else>
-          {{ char }}
-        </template>
-
-      </span>
-    </span>
+    <HighlightedText
+      :text="props.name"
+      :indexes="props.indexes"
+      class="text-gray-400"
+    />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
+import HighlightedText from './HighlightedText.vue'
 
 const props = withDefaults(defineProps<{ name: string, expanded: boolean, indexes: number[] }>(), {
   name: '',
   expanded: false,
   indexes: () => [],
-})
-
-const characters = computed(() => {
-  const chars = props.name.split('').map((char) => ({ char, highlighted: false }))
-
-  props.indexes.forEach((idx) => chars[idx].highlighted = true)
-
-  return chars
 })
 </script>

@@ -1,4 +1,4 @@
-import type { FuzzyFoundSpec } from '@packages/frontend-shared/src/utils/buildSpecTree'
+import type { FuzzyFoundSpec } from '@packages/frontend-shared/src/utils/spec-utils'
 import { ref } from 'vue'
 import InlineSpecListTree from './InlineSpecListTree.vue'
 

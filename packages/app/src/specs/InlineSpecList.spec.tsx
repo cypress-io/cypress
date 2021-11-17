@@ -28,8 +28,7 @@ describe('InlineSpecList', () => {
   })
 
   it('should render a list of spec', () => {
-    cy.get('[data-cy="file-list-radio-option"]').click()
-    cy.get('a').should('exist').and('have.length', specs.length)
+    cy.get('li').should('exist').and('have.length', 7)
   })
 
   it('should support fuzzy sort', () => {

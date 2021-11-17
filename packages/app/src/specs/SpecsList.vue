@@ -34,17 +34,20 @@
               :to="{ path: 'runner', query: { file: row.data?.relative } }"
             >
               <SpecItem
-                :spec="row.data"
+                :file-name="row.data?.fileName || row.name"
+                :extension="row.data?.specFileExtension || ''"
+                :indexes="getIndexes(row)"
                 :style="{ paddingLeft: `${((row.depth - 2) * 10) + 16 + 22}px` }"
               />
             </RouterLink>
 
             <RowDirectory
               v-else
-              :directories="row.name.split('/')"
+              :name="row.name"
               :expanded="row.expanded.value"
               :depth="row.depth - 2"
               :style="{ paddingLeft: `${((row.depth - 2) * 10) + 16}px` }"
+              :indexes="getIndexes(row)"
               @click="row.toggle"
             />
           </template>
@@ -66,15 +69,15 @@ import SpecsListHeader from './SpecsListHeader.vue'
 import SpecListGitInfo from './SpecListGitInfo.vue'
 import SpecsListRowItem from './SpecsListRowItem.vue'
 import { gql } from '@urql/vue'
-import { computed, ref } from 'vue'
+import { computed, ComputedRef, ref } from 'vue'
 import CreateSpecModal from './CreateSpecModal.vue'
 import type { Specs_SpecsListFragment, SpecListRowFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
-import { buildSpecTree } from '@packages/frontend-shared/src/utils/buildSpecTree'
+import { buildSpecTree, FuzzyFoundSpec, getIndexes } from '@packages/frontend-shared/src/utils/spec-utils'
 import { useCollapsibleTree } from '@packages/frontend-shared/src/composables/useCollapsibleTree'
 import RowDirectory from './RowDirectory.vue'
 import SpecItem from './SpecItem.vue'
-import type { FoundSpec } from '@packages/types/src'
+import fuzzySort from 'fuzzysort'
 
 const { t } = useI18n()
 
@@ -119,20 +122,20 @@ const props = defineProps<{
 const showModal = ref(false)
 const search = ref('')
 
-const specTree = computed(() => buildSpecTree<FoundSpec & { gitInfo: SpecListRowFragment }>(props.gql.currentProject?.specs?.edges.map((x) => x.node) || []))
-const collapsible = useCollapsibleTree(specTree.value, { dropRoot: true })
+const specs = computed(() => {
+  const specs = props.gql.currentProject?.specs?.edges.map((x) => x.node) || []
 
-const treeSpecList = computed(() => {
-  if (search.value) {
-    // todo(lachlan) this will not show the folders of the filtered specs
-    // we should update the useCollapsibleTree to have some kind of search
-    // functionality, ideally with fuzzysort, that correctly returns the matched
-    // specs and the directories to show.
-    return collapsible.tree.filter(((item) => {
-      return !item.hidden.value && item.data?.absolute.toLowerCase().includes(search.value.toLowerCase())
-    }))
+  if (!search.value) {
+    return specs.map((spec) => ({ ...spec, indexes: [] as number[] }))
   }
 
-  return collapsible.tree.filter(((item) => !item.hidden.value))
+  return fuzzySort
+  .go(search.value, specs || [], { key: 'relative' })
+  .map(({ obj, indexes }) => ({ ...obj, indexes }))
 })
+
+const specTree = computed(() => buildSpecTree<FuzzyFoundSpec & { gitInfo: SpecListRowFragment }>(specs.value))
+const collapsible = computed(() => useCollapsibleTree(specTree.value, { dropRoot: true }))
+
+const treeSpecList = computed(() => collapsible.value.tree.filter(((item) => !item.hidden.value)))
 </script>
