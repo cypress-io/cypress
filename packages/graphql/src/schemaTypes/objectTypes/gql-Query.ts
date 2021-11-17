@@ -3,6 +3,7 @@ import { BaseError } from '.'
 import { ProjectLike } from '..'
 import { CurrentProject } from './gql-CurrentProject'
 import { DevState } from './gql-DevState'
+import { VersionData } from './gql-VersionData'
 import { Wizard } from './gql-Wizard'
 
 export const Query = objectType({
@@ -24,6 +25,14 @@ export const Query = objectType({
       type: DevState,
       description: 'The state of any info related to local development of the runner',
       resolve: (root, args, ctx) => ctx.coreData.dev,
+    })
+
+    t.field('versions', {
+      type: VersionData,
+      description: 'Previous versions of cypress and their release date',
+      resolve: (root, args, ctx) => {
+        return ctx.versions()
+      },
     })
 
     t.field('currentProject', {

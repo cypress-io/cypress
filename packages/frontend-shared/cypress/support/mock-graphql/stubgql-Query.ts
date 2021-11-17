@@ -12,8 +12,11 @@ export const stubQuery: MaybeResolver<Query> = {
   currentProject (source, args, ctx) {
     return ctx.currentProject
   },
-  projects (soruce, args, ctx) {
+  projects (source, args, ctx) {
     return ctx.projects
+  },
+  versions (source, args, ctx) {
+    return ctx.versions
   },
   isAuthBrowserOpened (source, args, ctx) {
     return ctx.isAuthBrowserOpened

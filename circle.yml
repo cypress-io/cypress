@@ -8,6 +8,7 @@ macBuildFilters: &macBuildFilters
     branches:
       only:
         - develop
+        - 10.0-release
         - tgriesser/chore/fix-release
 
 defaults: &defaults
@@ -42,6 +43,7 @@ onlyMainBranches: &onlyMainBranches
     branches:
       only:
         - develop
+        - 10.0-release
         - tgriesser/chore/fix-release
   requires:
     - create-build-artifacts
@@ -1030,6 +1032,8 @@ jobs:
             runner-integration-tests-chrome,
             runner-ct-integration-tests-chrome,
             reporter-integration-tests,
+            run-app-integration-tests-chrome,
+            run-launchpad-integration-tests-chrome
       - run: yarn percy build:finalize
 
   cli-visual-tests:
@@ -1618,7 +1622,7 @@ jobs:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "tgriesser/chore/fix-release" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "10.0-release" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -1912,7 +1916,21 @@ jobs:
             CYPRESS_INTERNAL_FORCE_SCAFFOLD: "1"
           command: |
             rm -rf cypress.json
-            echo 'export default {}' > cypress.config.ts
+            echo "export default {
+                    e2e: {
+                      setupNodeEvents (on, config) {
+                        on('task', {
+                          log (x) {
+                            console.log(x)
+
+                            return null
+                          },
+                        })
+
+                        return config
+                      },
+                    },
+                  }" > cypress.config.ts
       - run:
           name: Run project tests 🗳
           working_directory: <<parameters.wd>>
@@ -2310,6 +2328,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - 10.0-release
               - tgriesser/chore/fix-release
         requires:
           - build
@@ -2322,6 +2341,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - 10.0-release
               - tgriesser/chore/fix-release
         requires:
           - build
@@ -2372,6 +2392,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - 10.0-release
               - tgriesser/chore/fix-release
         requires:
           - create-build-artifacts
@@ -2380,6 +2401,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - 10.0-release
               - tgriesser/chore/fix-release
         requires:
           - create-build-artifacts
@@ -2389,6 +2411,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - 10.0-release
               - tgriesser/chore/fix-release
         requires:
           - create-build-artifacts
@@ -2414,6 +2437,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - 10.0-release
               - tgriesser/chore/fix-release
         requires:
           - create-build-artifacts
@@ -2486,6 +2510,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
+              - 10.0-release
               - tgriesser/chore/fix-release
         requires:
           - darwin-create-build-artifacts
@@ -2498,6 +2523,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
+              - 10.0-release
               - tgriesser/chore/fix-release
         requires:
           - darwin-create-build-artifacts

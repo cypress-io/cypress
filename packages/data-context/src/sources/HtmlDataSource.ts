@@ -9,30 +9,33 @@ import { getPathToDist } from '@packages/resolve-dist'
 export class HtmlDataSource {
   constructor (private ctx: DataContext) {}
 
+  async fetchLaunchpadInitialData () {
+    const graphql = this.ctx.graphqlClient()
+
+    await Promise.all([
+      graphql.executeQuery('HeaderBar_HeaderBarQueryDocument', {}),
+      graphql.executeQuery('AppQueryDocument', {}),
+      graphql.executeQuery('MainLaunchpadQueryDocument', {}),
+    ])
+
+    return graphql.getSSRData()
+  }
+
   async fetchAppInitialData () {
     const graphql = this.ctx.graphqlClient()
 
     await Promise.all([
-      graphql.executeQuery('SideBarNavigationDocument', {}),
-      graphql.executeQuery('AppQueryDocument', {}),
       graphql.executeQuery('SettingsDocument', {}),
       graphql.executeQuery('SpecsPageContainerDocument', {}),
       graphql.executeQuery('HeaderBar_HeaderBarQueryDocument', {}),
-      graphql.executeQuery('SettingsDocument', {}),
+      graphql.executeQuery('SideBarNavigationDocument', {}),
     ])
 
     return graphql.getSSRData()
   }
 
   async fetchAppHtml () {
-    if (this.ctx.env.CYPRESS_INTERNAL_VITE_APP_PORT) {
-      const response = await this.ctx.util.fetch(`http://localhost:${process.env.CYPRESS_INTERNAL_VITE_APP_PORT}/`, { method: 'GET' })
-      const html = await response.text()
-
-      return html
-    }
-
-    return this.ctx.fs.readFile(getPathToDist('app'), 'utf8')
+    return this.ctx.fs.readFile(getPathToDist('app', 'index.html'), 'utf8')
   }
 
   /**

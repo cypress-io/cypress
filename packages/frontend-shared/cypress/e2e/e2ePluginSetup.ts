@@ -30,6 +30,10 @@ chai.use(sinonChai)
 
 export async function e2ePluginSetup (projectRoot: string, on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) {
   process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF = 'true'
+  delete process.env.CYPRESS_INTERNAL_GRAPHQL_PORT
+  delete process.env.CYPRESS_INTERNAL_VITE_DEV
+  delete process.env.CYPRESS_INTERNAL_VITE_APP_PORT
+  delete process.env.CYPRESS_INTERNAL_VITE_LAUNCHPAD_PORT
   // require'd so we don't import the types from @packages/server which would
   // pollute strict type checking
   const { runInternalServer } = require('@packages/server/lib/modes/internal-server')

@@ -2,6 +2,7 @@ import { arg, booleanArg, enumType, idArg, mutationType, nonNull, stringArg } fr
 import { CodeGenTypeEnum } from '../enumTypes/gql-CodeGenTypeEnum'
 import { CodeLanguageEnum, FrontendFrameworkEnum, SupportedBundlerEnum, TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
 import { WizardUpdateInput } from '../inputTypes/gql-WizardUpdateInput'
+import { CodeGenResultWithFileParts } from './gql-CodeGenResult'
 import { GeneratedSpec } from './gql-GeneratedSpec'
 
 export const mutation = mutationType({
@@ -28,8 +29,8 @@ export const mutation = mutationType({
 
     t.field('internal_clearLatestProjectCache', {
       type: 'Boolean',
-      resolve: (_, args, ctx) => {
-        ctx.actions.project.clearLatestProjectCache()
+      resolve: async (_, args, ctx) => {
+        await ctx.actions.project.clearLatestProjectCache()
 
         return true
       },
@@ -52,8 +53,8 @@ export const mutation = mutationType({
       args: {
         projectTitle: nonNull(stringArg()),
       },
-      resolve: (_, args, ctx) => {
-        ctx.actions.project.clearProjectPreferencesCache(args.projectTitle)
+      resolve: async (_, args, ctx) => {
+        await ctx.actions.project.clearProjectPreferencesCache(args.projectTitle)
 
         return true
       },
@@ -61,8 +62,8 @@ export const mutation = mutationType({
 
     t.field('internal_clearAllProjectPreferencesCache', {
       type: 'Boolean',
-      resolve: (_, args, ctx) => {
-        ctx.actions.project.clearAllProjectPreferencesCache()
+      resolve: async (_, args, ctx) => {
+        await ctx.actions.project.clearAllProjectPreferencesCache()
 
         return true
       },
@@ -162,6 +163,13 @@ export const mutation = mutationType({
       },
       resolve: async (_, args, ctx) => {
         return ctx.actions.project.codeGenSpec(args.codeGenCandidate, args.type)
+      },
+    })
+
+    t.nonNull.list.nonNull.field('scaffoldIntegration', {
+      type: CodeGenResultWithFileParts,
+      resolve: (src, args, ctx) => {
+        return ctx.actions.project.scaffoldIntegration()
       },
     })
 

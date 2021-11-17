@@ -97,7 +97,8 @@ const props = defineProps<{
 const latestOperation = window.localStorage.getItem('latestGQLOperation')
 
 const retry = async () => {
-  const { launchpadClient } = await import('../main')
+  const { getLaunchpadClient } = await import('../main')
+  const launchpadClient = getLaunchpadClient()
 
   const op = latestOperation ? JSON.parse(latestOperation) : null
 

@@ -26,7 +26,10 @@ export interface ProjectApiShape {
   clearProjectPreferences(projectTitle: string): Promise<unknown>
   clearAllProjectPreferences(): Promise<unknown>
   closeActiveProject(): Promise<unknown>
-  error(type: string, ...args: any): Error
+  error: {
+    throw: (type: string, ...args: any) => Error
+    get(type: string, ...args: any): Error & { code: string, isCypressErr: boolean}
+  }
 }
 
 export class ProjectActions {
@@ -37,7 +40,7 @@ export class ProjectActions {
   }
 
   async clearActiveProject () {
-    this.ctx.coreData.currentProject = null
+    this.ctx.actions.projectConfig.killConfigProcess()
     await this.api.closeActiveProject()
 
     // TODO(tim): Improve general state management w/ immutability (immer) & updater fn
@@ -77,7 +80,24 @@ export class ProjectActions {
     return this
   }
 
-  private setCurrentProjectProperties (currentProjectProperties: Partial<ActiveProjectShape>) {
+  // Temporary: remove after other refactor lands
+  setActiveProjectForTestSetup (projectRoot: string) {
+    this.ctx.actions.projectConfig.killConfigProcess()
+
+    const title = this.ctx.project.projectTitle(projectRoot)
+
+    // Set initial properties, so we can set the config object on the active project
+    this.setCurrentProjectProperties({
+      projectRoot,
+      title,
+      ctPluginsInitialized: false,
+      e2ePluginsInitialized: false,
+      config: null,
+      configChildProcess: null,
+    })
+  }
+
+  setCurrentProjectProperties (currentProjectProperties: Partial<ActiveProjectShape>) {
     this.ctx.coreData.currentProject = {
       browsers: this.ctx.coreData.app.browsers,
       ...this.ctx.coreData.currentProject,
@@ -378,5 +398,38 @@ export class ProjectActions {
     this.ctx.actions.wizard.resetWizard()
     this.ctx.actions.electron.refreshBrowserWindow()
     this.ctx.actions.electron.showBrowserWindow()
+  }
+
+  async scaffoldIntegration () {
+    const project = this.ctx.currentProject
+
+    if (!project) {
+      throw Error(`Cannot create spec without activeProject.`)
+    }
+
+    const config = await this.ctx.project.getConfig(project.projectRoot)
+    const integrationFolder = config.integrationFolder || project.projectRoot
+
+    const results = await codeGenerator(
+      { templateDir: templates['scaffoldIntegration'], target: integrationFolder },
+      {},
+    )
+
+    if (results.failed.length) {
+      throw new Error(`Failed generating files: ${results.failed.map((e) => `${e}`)}`)
+    }
+
+    const withFileParts = results.files.map((res) => {
+      return {
+        fileParts: this.ctx.file.normalizeFileToFileParts({
+          absolute: res.file,
+          projectRoot: project.projectRoot,
+          searchFolder: integrationFolder,
+        }),
+        codeGenResult: res,
+      }
+    })
+
+    return withFileParts
   }
 }

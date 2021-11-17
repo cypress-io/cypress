@@ -259,7 +259,7 @@ const getApplicationDataFolder = (...paths) => {
 
   const ELECTRON_APP_DATA_PATH = path.join(OS_DATA_PATH, PRODUCT_NAME)
 
-  if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF === 'true') {
+  if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {
     folder = `${folder}-e2e-test`
   }
 

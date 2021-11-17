@@ -453,13 +453,15 @@ export class OpenProject {
     debug('opening project %s', path)
     debug('and options %o', options)
 
+    const testingType = args.testingType === 'component' ? 'component' : 'e2e'
+
     // store the currently open project
     this.openProject = new ProjectBase({
-      testingType: args.testingType === 'component' ? 'component' : 'e2e',
+      testingType,
       projectRoot: path,
       options: {
         ...options,
-        testingType: args.testingType,
+        testingType,
       },
     })
 

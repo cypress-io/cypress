@@ -13,7 +13,7 @@ export const useMainStore = defineStore({
   id: 'main',
   state: (): MainStoreState => {
     return {
-      navBarExpanded: false,
+      navBarExpanded: true,
     }
   },
   actions: {

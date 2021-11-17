@@ -30,4 +30,10 @@ describe('<Button />', { viewportWidth: 300, viewportHeight: 300 }, () => {
 
     cy.contains('a', 'test').should('not.have.attr', 'data-cy')
   })
+
+  it('shows disabled properly', () => {
+    cy.mount(() => (
+      <Button disabled>test</Button>
+    ))
+  })
 })

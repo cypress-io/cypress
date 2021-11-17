@@ -1,4 +1,4 @@
-import { BUNDLERS, FoundBrowser, FoundSpec, FullConfig, Preferences } from '@packages/types'
+import { BUNDLERS, FoundBrowser, FoundSpec, FullConfig, Preferences, NodePathAndVersion } from '@packages/types'
 import type { NexusGenEnums, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
 import type { BrowserWindow } from 'electron'
 import type { ChildProcess } from 'child_process'
@@ -20,8 +20,18 @@ export interface DevStateShape {
 }
 
 export interface ConfigChildProcessShape {
+  /**
+   * Child process executing the config & sourcing plugin events
+   */
   process: ChildProcess
+  /**
+   * Keeps track of which plugins we have executed in the current config process
+   */
   executedPlugins: null | 'e2e' | 'ct'
+  /**
+   * Config from the initial module.exports
+   */
+  resolvedBaseConfig: Promise<Cypress.ConfigOptions>
 }
 
 export interface ActiveProjectShape extends ProjectShape {
@@ -32,7 +42,7 @@ export interface ActiveProjectShape extends ProjectShape {
   isE2EConfigured: Maybe<boolean>
   specs?: FoundSpec[]
   config: Promise<FullConfig> | null
-  configChildProcess: ConfigChildProcessShape | null
+  configChildProcess?: ConfigChildProcessShape | null
   preferences?: Preferences| null
   browsers: FoundBrowser[] | null
 }
@@ -42,6 +52,8 @@ export interface AppDataShape {
   projects: ProjectShape[]
   currentTestingType: Maybe<TestingTypeEnum>
   refreshingBrowsers: Promise<FoundBrowser[]> | null
+  refreshingNodePathAndVersion: Promise<NodePathAndVersion> | null
+  nodePathAndVersion: NodePathAndVersion | null
 }
 
 export interface WizardDataShape {
@@ -92,6 +104,8 @@ export function makeCoreData (): CoreDataShape {
       refreshingBrowsers: null,
       browsers: null,
       projects: [],
+      refreshingNodePathAndVersion: null,
+      nodePathAndVersion: null,
     },
     isAuthBrowserOpened: false,
     currentProject: null,

@@ -30,4 +30,12 @@ describe('Settings', { viewportWidth: 1200 }, () => {
     cy.findByText('Testing Preferences').should('be.visible')
     cy.findByText('Proxy Settings').should('be.visible')
   })
+
+  it('calls a reconfigure mutation when click on the footer button', () => {
+    cy.visitApp()
+    cy.get('[href="#/settings"]').click()
+    cy.intercept('mutation-SettingsContainer_ReconfigureProject', { 'data': { 'reconfigureProject': true } }).as('ReconfigureProject')
+    cy.findByText('Reconfigure Project').click()
+    cy.wait('@ReconfigureProject')
+  })
 })

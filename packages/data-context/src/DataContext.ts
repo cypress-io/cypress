@@ -17,7 +17,7 @@ import {
   BrowserDataSource,
   StorybookDataSource,
   CloudDataSource,
-  ConfigDataSource,
+  ProjectConfigDataSource,
   EnvDataSource,
   GraphQLDataSource,
   HtmlDataSource,
@@ -29,6 +29,7 @@ import type { Server } from 'http'
 import type { AddressInfo } from 'net'
 import EventEmitter from 'events'
 import type { App as ElectronApp } from 'electron'
+import { VersionsDataSource } from './sources/VersionsDataSource'
 
 const IS_DEV_ENV = process.env.CYPRESS_INTERNAL_ENV !== 'production'
 
@@ -41,7 +42,7 @@ export interface DataContextConfig {
   os: PlatformName
   launchArgs: LaunchArgs
   launchOptions: OpenProjectLaunchOptions
-  electronApp: ElectronApp
+  electronApp?: ElectronApp
   /**
    * Default is to
    */
@@ -91,6 +92,8 @@ export class DataContext {
       this.actions.app.refreshBrowsers(),
       // load the cached user & validate the token on start
       this.actions.auth.getUser(),
+
+      this.actions.app.refreshNodePathAndVersion(),
     ]
 
     if (this._config._internalOptions.loadCachedProjects) {
@@ -153,6 +156,10 @@ export class DataContext {
     return this.coreData.app.browsers
   }
 
+  get nodePathAndVersion () {
+    return this.coreData.app.nodePathAndVersion
+  }
+
   get baseError () {
     return this.coreData.baseError
   }
@@ -165,6 +172,10 @@ export class DataContext {
   @cached
   get git () {
     return new GitDataSource(this)
+  }
+
+  async versions () {
+    return new VersionsDataSource().versions()
   }
 
   @cached
@@ -192,7 +203,7 @@ export class DataContext {
 
   @cached
   get config () {
-    return new ConfigDataSource(this)
+    return new ProjectConfigDataSource(this)
   }
 
   @cached
