@@ -154,7 +154,10 @@ commands:
     steps:
       - run:
           name: Build packages
-          command: yarn build
+          command: |
+            nvm list
+            yarn versions
+            yarn build
       - prepare-modules-cache # So we don't throw these in the workspace cache
       - persist_to_workspace:
           root: ~/
@@ -310,8 +313,6 @@ commands:
             echo "
               \. '$HOME/.nvm/nvm.sh' # load nvm
               export NODE_VERSION='${node_version}'
-              npm uninstall yarn -g # remove default yarn installed on circleci. built with wrong node engine
-              npm install yarn -g # ensure yarn is installed with the correct node engine
             " >> ~/.bash_profile
       - persist_to_workspace:
           root: ~/
@@ -963,10 +964,10 @@ jobs:
     # resource_class: medium+
     # shell: /bin/bash --login
     steps:
+      - restore_cached_workspace
       - run:
           name: check nvm & yarn
           command: nvm list; yarn versions
-      - restore_cached_workspace
       - run:
           name: Top level packages
           command: |
