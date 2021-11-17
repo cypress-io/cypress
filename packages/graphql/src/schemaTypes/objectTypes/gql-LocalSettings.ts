@@ -5,9 +5,9 @@ export const LocalSettingsPreferences = objectType({
   name: 'LocalSettingsPreferences',
   description: 'local setting preferences',
   definition (t) {
-    t.nonNull.boolean('autoScrollingEnabled')
-    t.nonNull.boolean('watchForSpecChange')
-    t.nonNull.boolean('useDarkSidebar')
+    t.boolean('autoScrollingEnabled')
+    t.boolean('watchForSpecChange')
+    t.boolean('useDarkSidebar')
     t.string('preferredEditorBinary')
   },
 })

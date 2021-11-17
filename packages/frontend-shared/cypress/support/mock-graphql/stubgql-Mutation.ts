@@ -29,9 +29,6 @@ export const stubMutation: MaybeResolver<Mutation> = {
 
     return true
   },
-  setPreferredEditor (source, args, ctx) {
-    return true
-  },
   removeProject (source, args, ctx) {
     ctx.projects = ctx.projects.filter((p) => p.projectRoot !== args.path)
 
