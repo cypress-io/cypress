@@ -18,7 +18,7 @@
           {{ pref.title }}
           <Switch
             class="mx-8px"
-            :value="props.gql.localSettings.preferences[pref.id]"
+            :value="props.gql.localSettings.preferences[pref.id] ?? false"
             :name="pref.title"
             @update="(value) => pref.mutation.executeMutation({ value })"
           />
