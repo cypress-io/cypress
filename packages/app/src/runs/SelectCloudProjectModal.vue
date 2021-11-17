@@ -66,44 +66,23 @@
           input-classes="h-38px"
           :model-value="projectName"
         />
-        <label
-          class="text-gray-800 mt-24px block"
-          for="projectAccess"
-        >{{ t('runs.connect.modal.selectProject.newProjectAccess') }}</label>
-        <div class="mt-8px">
-          <input
-            id="projectAccessPrivate"
-            v-model="projectAccess"
-            type="radio"
-            name="projectAccess"
-            value="private"
-            class="mr-8px hocus-default"
-          >
-          <label
-            for="projectAccessPrivate"
-            class="text-16px leading-24px"
-          >
-            <span class="text-gray-800">{{ t('runs.connect.modal.selectProject.privateLabel') }}</span>
-            <span class="text-gray-500"> - {{ t('runs.connect.modal.selectProject.privateDescription') }}</span>
-          </label>
-        </div>
-        <div class="mt-8px">
-          <input
-            id="projectAccessPublic"
-            v-model="projectAccess"
-            type="radio"
-            name="projectAccess"
-            value="public"
-            class="mr-8px hocus-default"
-          >
-          <label
-            for="projectAccessPublic"
-            class="text-16px leading-24px"
-          >
-            <span class="text-gray-800">{{ t('runs.connect.modal.selectProject.publicLabel') }}</span>
-            <span class="text-gray-500"> - {{ t('runs.connect.modal.selectProject.publicDescription') }}</span>
-          </label>
-        </div>
+        <Radio
+          v-model:value="projectAccess"
+          name="projectAccess"
+          :label="t('runs.connect.modal.selectProject.newProjectAccess')"
+          :options="[
+            {
+              label: t('runs.connect.modal.selectProject.privateLabel'),
+              description: t('runs.connect.modal.selectProject.privateDescription'),
+              value: 'private',
+            },
+            {
+              label: t('runs.connect.modal.selectProject.publicLabel'),
+              description: t('runs.connect.modal.selectProject.publicDescription'),
+              value: 'public',
+            },
+          ]"
+        />
       </template>
     </div>
     <template #footer>
@@ -136,6 +115,7 @@ import Button from '@cy/components/Button.vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import Select from '@cy/components/Select.vue'
 import Input from '@cy/components/Input.vue'
+import Radio from '@cy/components/Radio.vue'
 import ConnectIcon from '~icons/cy/chain-link_x16.svg'
 import CreateIcon from '~icons/cy/add-large_x16.svg'
 import { useI18n } from '@cy/i18n'
