@@ -1,3 +1,4 @@
+//
 // override tty if we're being forced to
 require('./lib/util/tty').override()
 

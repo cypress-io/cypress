@@ -1,11 +1,11 @@
 import SpecsList from './SpecsList.vue'
-import { Specs_SpecsListFragmentDoc, SpecListRowFragment } from '../generated/graphql-test'
+import { Specs_SpecsListFragmentDoc, SpecNode_SpecsListFragment } from '../generated/graphql-test'
 import { defaultMessages } from '@cy/i18n'
 
 const rowSelector = '[data-testid=specs-list-row]'
 const inputSelector = 'input'
 const fullFile = (s) => `${s.node.fileName}${s.node.specFileExtension}`
-const hasSpecText = (_node: JQuery<HTMLElement>, spec: SpecListRowFragment) => {
+const hasSpecText = (_node: JQuery<HTMLElement>, spec: SpecNode_SpecsListFragment) => {
   const $node = _node as JQuery<HTMLDivElement>
 
   expect($node).to.contain(spec.node.fileName)
@@ -16,7 +16,7 @@ const hasSpecText = (_node: JQuery<HTMLElement>, spec: SpecListRowFragment) => {
   return $node
 }
 
-let specs: Array<SpecListRowFragment> = []
+let specs: Array<SpecNode_SpecsListFragment> = []
 
 describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
   beforeEach(() => {
@@ -64,5 +64,17 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
     .should('contain.text', specs[0].node.fileName)
     .and('contain.text', specs[0].node.fileExtension)
     .click()
+  })
+
+  it('changes to tree view', () => {
+    cy.get('[data-cy="file-tree-radio-option"]').click()
+
+    // close all directories
+    ;['src', 'packages', 'frontend', '__test__', 'lib', 'tests'].forEach((dir) => {
+      cy.get('[data-cy="row-directory-depth-0"]').contains(dir).click()
+    })
+
+    // all directories closed; no specs should be showing.
+    cy.get('[data-cy="spec-item"]').should('not.exist')
   })
 })

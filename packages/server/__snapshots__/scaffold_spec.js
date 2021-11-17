@@ -93,19 +93,6 @@ exports['lib/scaffold .fileTree returns tree-like structure of scaffolded 1'] = 
       }
     ]
   },
-  {
-    "name": "cypress",
-    "children": [
-      {
-        "name": "plugins",
-        "children": [
-          {
-            "name": "index.js"
-          }
-        ]
-      }
-    ]
-  }
 ]
 
 exports['lib/scaffold .fileTree leaves out integration tests if using component testing 1'] = [
@@ -203,19 +190,6 @@ exports['lib/scaffold .fileTree leaves out integration tests if using component 
       }
     ]
   },
-  {
-    "name": "cypress",
-    "children": [
-      {
-        "name": "plugins",
-        "children": [
-          {
-            "name": "index.js"
-          }
-        ]
-      }
-    ]
-  }
 ]
 
 exports['lib/scaffold .fileTree leaves out fixtures if configured to false 1'] = [
@@ -305,19 +279,6 @@ exports['lib/scaffold .fileTree leaves out fixtures if configured to false 1'] =
       }
     ]
   },
-  {
-    "name": "cypress",
-    "children": [
-      {
-        "name": "plugins",
-        "children": [
-          {
-            "name": "index.js"
-          }
-        ]
-      }
-    ]
-  }
 ]
 
 exports['lib/scaffold .fileTree leaves out support if configured to false 1'] = [
@@ -404,19 +365,6 @@ exports['lib/scaffold .fileTree leaves out support if configured to false 1'] = 
       }
     ]
   },
-  {
-    "name": "cypress",
-    "children": [
-      {
-        "name": "plugins",
-        "children": [
-          {
-            "name": "index.js"
-          }
-        ]
-      }
-    ]
-  }
 ]
 
 exports['lib/scaffold .support creates supportFolder and commands.js and index.js when supportFolder does not exist 1'] = `

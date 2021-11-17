@@ -10,9 +10,14 @@ const scaffold = require(`${root}lib/scaffold`)
 const { fs } = require(`${root}lib/util/fs`)
 const glob = require(`${root}lib/util/glob`)
 const Fixtures = require('@tooling/system-tests/lib/fixtures')
+const { makeLegacyDataContext } = require(`${root}lib/makeDataContext`)
+
+let ctx
 
 describe('lib/scaffold', () => {
   beforeEach(() => {
+    ctx = makeLegacyDataContext()
+
     return Fixtures.scaffold()
   })
 
@@ -131,7 +136,10 @@ describe('lib/scaffold', () => {
     beforeEach(function () {
       const pristinePath = Fixtures.projectPath('pristine-with-config-file')
 
-      return config.get(pristinePath).then((cfg) => {
+      ctx.actions.project.setActiveProjectForTestSetup(pristinePath)
+
+      return config.get(pristinePath)
+      .then((cfg) => {
         this.cfg = cfg;
         ({ integrationFolder: this.integrationFolder } = this.cfg)
       })
@@ -214,7 +222,10 @@ describe('lib/scaffold', () => {
     beforeEach(function () {
       const pristinePath = Fixtures.projectPath('pristine-with-config-file')
 
-      return config.get(pristinePath).then((cfg) => {
+      ctx.actions.project.setActiveProjectForTestSetup(pristinePath)
+
+      return config.get(pristinePath)
+      .then((cfg) => {
         this.cfg = cfg;
         ({ integrationFolder: this.integrationFolder } = this.cfg)
       })
@@ -325,7 +336,10 @@ describe('lib/scaffold', () => {
     beforeEach(function () {
       const pristinePath = Fixtures.projectPath('pristine-with-config-file')
 
-      return config.get(pristinePath).then((cfg) => {
+      ctx.actions.project.setActiveProjectForTestSetup(pristinePath)
+
+      return config.get(pristinePath)
+      .then((cfg) => {
         this.cfg = cfg;
         ({ supportFolder: this.supportFolder } = this.cfg)
       })
@@ -402,7 +416,10 @@ describe('lib/scaffold', () => {
     beforeEach(function () {
       const pristinePath = Fixtures.projectPath('pristine-with-config-file')
 
-      return config.get(pristinePath).then((cfg) => {
+      ctx.actions.project.setActiveProjectForTestSetup(pristinePath)
+
+      return config.get(pristinePath)
+      .then((cfg) => {
         this.cfg = cfg;
         ({ pluginsFile: this.pluginsFile } = this.cfg)
         this.pluginsFolder = path.dirname(this.pluginsFile)
@@ -458,7 +475,10 @@ describe('lib/scaffold', () => {
     beforeEach(function () {
       const pristinePath = Fixtures.projectPath('pristine-with-config-file')
 
-      return config.get(pristinePath).then((cfg) => {
+      ctx.actions.project.setActiveProjectForTestSetup(pristinePath)
+
+      return config.get(pristinePath)
+      .then((cfg) => {
         this.cfg = cfg;
         ({ fixturesFolder: this.fixturesFolder } = this.cfg)
       })
@@ -533,9 +553,11 @@ describe('lib/scaffold', () => {
     beforeEach(function () {
       const todosPath = Fixtures.projectPath('todos')
 
-      return config.get(todosPath).then((cfg) => {
+      ctx.actions.project.setActiveProjectForTestSetup(todosPath)
+
+      return config.get(todosPath)
+      .then((cfg) => {
         this.cfg = cfg
-        this.cfg.pluginsFile = path.join(this.cfg.projectRoot, 'cypress/plugins/index.js')
       })
     })
 
