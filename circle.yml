@@ -338,6 +338,7 @@ commands:
             nvm use ${NODE_VERSION} || exit 1
             nvm alias default ${NODE_VERSION} || exit 1
             node --version
+            npm install yarn -g # ensure yarn is installed with the correct node engine
             yarn check-node-version
         # node ./scripts/circleci/check-node-version.js
 
