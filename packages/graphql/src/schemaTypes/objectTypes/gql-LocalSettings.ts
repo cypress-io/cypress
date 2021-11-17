@@ -10,11 +10,11 @@ export const LocalSettingsPreferences = objectType({
     t.boolean('useDarkSidebar')
     t.string('preferredEditorBinary')
     t.string('proxyServer', {
-      resolve: (source, args, ctx) => ctx.env.HTTP_PROXY,
+      resolve: (source, args, ctx) => ctx.env.HTTP_PROXY ?? null,
     })
 
     t.string('proxyBypass', {
-      resolve: (source, args, ctx) => ctx.env.NO_PROXY,
+      resolve: (source, args, ctx) => ctx.env.NO_PROXY ?? null,
     })
   },
 })
