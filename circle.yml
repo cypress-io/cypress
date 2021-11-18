@@ -327,7 +327,7 @@ commands:
                   echo '
                     declare locally_resolved_nvm_version
                     echo "checking if current nvm versions matches $node_version"
-                    locally_resolved_nvm_version=$(nvm list installed" | tail -1 | tr -d "\->*" | tr -d "[:space:]")
+                    locally_resolved_nvm_version=$(nvm list installed | tail -1 | tr -d "\->*" | tr -d "[:space:]")
 
                     if [[ "$locally_resolved_nvm_version" == "N/A" ]]; then
                         echo "locally_resolved_nvm_version is n/a. try to install"
