@@ -120,8 +120,8 @@ const { t } = useI18n()
 
 const navigation = [
   { name: 'Specs', icon: CodeIcon, href: '/' },
-{ name: 'Runs', icon: RunsIcon, href: '/runs' },
-{ name: 'Settings', icon: SettingsIcon, href: '/settings' },
+  { name: 'Runs', icon: RunsIcon, href: '/runs' },
+  { name: 'Settings', icon: SettingsIcon, href: '/settings' },
 ]
 
 gql`
