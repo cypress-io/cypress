@@ -295,6 +295,7 @@ commands:
           command: yarn check-terminal
             # node ./scripts/circleci/check-terminal.js
 
+
   # run this step in an interactive bash shell 
   install-required-node:
     # https://discuss.circleci.com/t/switch-nodejs-version-on-machine-executor-solved/26675/2
@@ -303,41 +304,78 @@ commands:
       version:
         type: string
         default: ""
+      arch:
+        type: enum
+        enum: ['linux', 'darwin', 'win32']
     steps:
-      - run:
-          name: Install NVM
-          command: |
-            node_version=<<parameters.version>>
-            node_version=${node_version:-$(cat .node-version)}
-            echo "Installing NVM"
-            curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.30.0/install.sh | bash
-            echo "
-              echo "Running bash_profile for ${node_version}"
-              declare node_version
-              node_version=${node_version}
-              export NODE_VERSION=${node_version}
-              export NVM_DIR="${HOME}/.nvm"
-              \. "${HOME}/.nvm/nvm.sh" # This loads nvm
-            " >> ~/.bash_profile
-            echo '
-              declare locally_resolved_nvm_version
-              echo "checking if current nvm versions matches $node_version"
-              locally_resolved_nvm_version=$(nvm list --no-colors "$node_version" | tail -1 | tr -d "\->*" | tr -d "[:space:]")
+      - when:
+          condition:
+            # nvm is pre-installed on windows
+            equal: ['win32', <<parameters.arch>>]
+          steps:
+            - run:
+                name: Add .bash_profile
+                command: |
+                  node_version=<<parameters.version>>
+                  node_version=${node_version:-$(cat .node-version)}
+                  echo "
+                    echo "Running bash_profile for ${node_version}"
+                    declare node_version
+                    node_version=${node_version}
+                    export NODE_VERSION=${node_version}
+                    export NVM_DIR="${HOME}/.nvm"
+                    \. "${HOME}/.nvm/nvm.sh" # This loads nvm
+                  " >> ~/.bash_profile
+                  echo '
+                    declare locally_resolved_nvm_version
+                    echo "checking if current nvm versions matches $node_version"
+                    locally_resolved_nvm_version=$(nvm list installed" | tail -1 | tr -d "\->*" | tr -d "[:space:]")
 
-              if [[ "$locally_resolved_nvm_version" == "N/A" ]]; then
-                  echo "locally_resolved_nvm_version is n/a. try to install"
+                    if [[ "$locally_resolved_nvm_version" == "N/A" ]]; then
+                        echo "locally_resolved_nvm_version is n/a. try to install"
 
-                  nvm install "$node_version";
-                  npm install yarn -g
-              elif [[ $(nvm current) != "$locally_resolved_nvm_version" ]]; then
-                  echo "locally_resolved_nvm_version does not match current version of $(nvm current). use that instead"
-                  nvm use "$nvm_version";
-              fi
-            ' >> ~/.bash_profile
-            echo "list nvm versions"
-            nvm list "$node_version" || echo "something went wrong"
-            cat ~/.bash_profile
-    
+                        nvm install "$node_version";
+                        npm install yarn -g
+                    elif [[ $(nvm current) != "$locally_resolved_nvm_version" ]]; then
+                        echo "locally_resolved_nvm_version does not match current version of $(nvm current). use that instead"
+                        nvm use "$nvm_version";
+                    fi
+                  ' >> ~/.bash_profile
+      - unless:
+          condition:
+            # nvm is pre-installed on windows
+            equal: ['win32', <<parameters.arch>>]
+          steps:
+            - run:
+                name: Install NVM & Add .bash_profile
+                command: |
+                  node_version=<<parameters.version>>
+                  node_version=${node_version:-$(cat .node-version)}
+                  echo "Installing NVM"
+                  curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.30.0/install.sh | bash
+                  echo "
+                    echo "Running bash_profile for ${node_version}"
+                    declare node_version
+                    node_version=${node_version}
+                    export NODE_VERSION=${node_version}
+                    export NVM_DIR="${HOME}/.nvm"
+                    \. "${HOME}/.nvm/nvm.sh" # This loads nvm
+                  " >> ~/.bash_profile
+                  echo '
+                    declare locally_resolved_nvm_version
+                    echo "checking if current nvm versions matches $node_version"
+                    locally_resolved_nvm_version=$(nvm list --no-colors "$node_version" | tail -1 | tr -d "\->*" | tr -d "[:space:]")
+
+                    if [[ "$locally_resolved_nvm_version" == "N/A" ]]; then
+                        echo "locally_resolved_nvm_version is n/a. try to install"
+
+                        nvm install "$node_version";
+                        npm install yarn -g
+                    elif [[ $(nvm current) != "$locally_resolved_nvm_version" ]]; then
+                        echo "locally_resolved_nvm_version does not match current version of $(nvm current). use that instead"
+                        nvm use "$nvm_version";
+                    fi
+                  ' >> ~/.bash_profile
       - persist_to_workspace:
           root: ~/
           paths:
