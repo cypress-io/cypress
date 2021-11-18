@@ -156,6 +156,7 @@ commands:
       - run:
           name: Build packages
           command: |
+            yarn check-node-version
             nvm list || true
             yarn versions || true
             yarn build
@@ -434,16 +435,19 @@ commands:
           command: |
               node_version=<<parameters.version>>
               node_version=${node_version:-$(cat ~/cypress/.node-version)}
+              touch ~/.nvm
+              [ -s "${HOME}/.nvm/nvm.sh" ] && \. "${HOME}/.nvm/nvm.sh" # This loads nvm
               if ! type nvm > /dev/null; then
                 echo "Installing NVM"
                 curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.30.0/install.sh | bash
+                [ -s "${HOME}/.nvm/nvm.sh" ] && \. "${HOME}/.nvm/nvm.sh" # This loads nvm
               fi
-              [ -s "${HOME}/.nvm/nvm.sh" ] && \. "${HOME}/.nvm/nvm.sh" # This loads nvm
+              nvm root ~/.nvm || echo "not nvm-windows"
               echo "Installing Node $node_version"
               nvm install ${node_version} || exit 1
               echo "Using Node $node_version"
               nvm use ${node_version} || exit 1
-              echo "Checking Node version"
+              nvm alias default ${node_version} || exit 1
               node --version
               echo "Installing Yarn"
               npm install yarn -g # ensure yarn is installed with the correct node engine
@@ -2610,9 +2614,19 @@ windows-workflow: &windows-workflow
         requires:
           - windows-create-build-artifacts
 
+linux-2-workflow: &linux-2-workflow
+  jobs:
+    - node_modules_install:
+    - build:
+        requires:
+          - node_modules_install
+    - lint:
+        requires:
+          - build
+      
 workflows:
   linux:
-    <<: *linux-workflow
+    <<: *linux-2-workflow
   windows:
     <<: *windows-workflow
   mac:
