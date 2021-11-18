@@ -83,12 +83,13 @@ namespace CypressCommandsTests {
     timeout
     cy.get(`[data-cy=${value}]`, { timeout })
   })
-  Cypress.Commands.overwrite('dataCy', (value, timeout) => {
+  Cypress.Commands.overwrite('dataCy', (orig, value, timeout) => {
     // $ExpectType string
     value
     // $ExpectType number
     timeout
     cy.get(`[data-cy=${value}]`, { timeout })
+    orig(value, timeout)
   })
 }
 

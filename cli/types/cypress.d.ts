@@ -422,7 +422,7 @@ declare namespace Cypress {
     Commands: {
       add<T extends ConditionalKeys<Chainable, (...args: any[]) => any>>(name: T, fn: (...args: Parameters<Chainable[T]>) => void): void
       add<T extends ConditionalKeys<Chainable, (...args: any[]) => any>>(name: T, options: CommandOptions, fn: (...args: Parameters<Chainable[T]>) => void): void
-      overwrite<T extends ConditionalKeys<Chainable, (...args: any[]) => any>>(name: T, fn: (...args: Parameters<Chainable[T]>) => void): void
+      overwrite<T extends ConditionalKeys<Chainable, (...args: any[]) => any>>(name: T, fn: (orig: Chainable[T], ...args: Parameters<Chainable[T]>) => void): void
     }
 
     /**
