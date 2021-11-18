@@ -313,7 +313,7 @@ commands:
             echo "
               export NODE_VERSION=${node_version}
               export NVM_DIR="${HOME}/.nvm"
-              \. "$NVM_DIR/nvm.sh" # This loads nvm
+              \. "${HOME}/.nvm/nvm.sh" # This loads nvm
             " >> ~/.bash_profile
             echo '
               cdnvm() {
@@ -324,7 +324,7 @@ commands:
                 # Remove the `->` and `*` characters and spaces
                 # `locally_resolved_nvm_version` will be `N/A` if no local versions are found
                 declare locally_resolved_nvm_version
-                locally_resolved_nvm_version=$(nvm ls --no-colors \"$NODE_VERSION" | tail -1 | tr -d "\->*" | tr -d "[:space:]")
+                locally_resolved_nvm_version=$(nvm ls --no-colors "$NODE_VERSION" | tail -1 | tr -d "\->*" | tr -d "[:space:]")
 
                 # If it is not already installed, install it
                 # `nvm install` will implicitly use the newly-installed version
