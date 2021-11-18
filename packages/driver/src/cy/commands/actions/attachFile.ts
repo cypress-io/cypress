@@ -6,8 +6,8 @@ import $errUtils from '../../../cypress/error_utils'
 import $actionability from '../../actionability'
 import { addEventCoords, dispatch } from './trigger'
 
-// TODO: Does not currently need to use promises, but will once we allow users to
-// load fixtures and read files. Writing it async from the start to avoid
+// TODO: Does not currently need to be async, but will once we allow users to
+// load fixtures and read files. Writing it that way from the start to avoid
 // needing to change it later.
 /*
  * Turns a user-provided file - a string shorthand, Buffer, or object
@@ -22,7 +22,7 @@ import { addEventCoords, dispatch } from './trigger'
  * we warn them and suggest how to fix it.
  */
 const parseFile = (options) => {
-  return (file: any, index: number, filesArray: any[]): Promise<Cypress.FileReferenceObject> => {
+  return async (file: any, index: number, filesArray: any[]): Promise<Cypress.FileReferenceObject> => {
     if (typeof file === 'string') {
       throw new Error('Support for string shorthands is still TODO')
     }
@@ -50,10 +50,10 @@ const parseFile = (options) => {
       file.contents = JSON.stringify(file.contents)
     }
 
-    return Promise.resolve(_.defaults({}, file, {
+    return _.defaults({}, file, {
       fileName: '',
       lastModified: Date.now(),
-    }))
+    })
   }
 }
 
