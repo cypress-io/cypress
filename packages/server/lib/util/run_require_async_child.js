@@ -47,14 +47,14 @@ function run (ipc, requiredFile, projectRoot) {
     return false
   })
 
-  const validateOrDefaultSetupNodeEvents = (setupNodeEvents) => {
+  const isValidSetupNodeEvents = (setupNodeEvents) => {
     if (setupNodeEvents && typeof setupNodeEvents !== 'function') {
       ipc.send('load:error:plugins', 'SETUP_NODE_EVENTS_IS_NOT_FUNCTION', requiredFile, setupNodeEvents)
 
-      return
+      return false
     }
 
-    return setupNodeEvents ?? ((on, config) => {})
+    return true
   }
 
   ipc.on('load', () => {
@@ -71,17 +71,25 @@ function run (ipc, requiredFile, projectRoot) {
 
         areSetupNodeEventsLoaded = true
         if (testingType === 'component') {
-          const setupNodeEvents = validateOrDefaultSetupNodeEvents(result.component?.setupNodeEvents)
+          if (!isValidSetupNodeEvents(result.component?.setupNodeEvents)) {
+            return
+          }
 
           runPlugins.runSetupNodeEvents((on, config) => {
             if (result.component?.devServer) {
               on('dev-server:start', (options) => result.component.devServer(options, result.component?.devServerConfig))
             }
 
+            const setupNodeEvents = result.component?.setupNodeEvents ?? ((on, config) => {})
+
             return setupNodeEvents(on, config)
           })
         } else if (testingType === 'e2e') {
-          const setupNodeEvents = validateOrDefaultSetupNodeEvents(result.e2e?.setupNodeEvents)
+          if (!isValidSetupNodeEvents(result.e2e?.setupNodeEvents)) {
+            return
+          }
+
+          const setupNodeEvents = result.e2e?.setupNodeEvents ?? ((on, config) => {})
 
           runPlugins.runSetupNodeEvents(setupNodeEvents)
         } else {

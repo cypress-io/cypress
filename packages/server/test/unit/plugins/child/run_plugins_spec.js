@@ -41,6 +41,35 @@ describe('lib/plugins/child/run_plugins', () => {
     mockery.deregisterMock('@cypress/webpack-batteries-included-preprocessor')
   })
 
+  it('sends error message if setupNodeEvents is not a function', function () {
+    const config = { projectRoot: '/project/root' }
+
+    const setupNodeEventsFn = (on, config) => {
+      on('dev-server:start', (options) => {})
+      on('after:screenshot', () => {})
+      on('task', {})
+
+      return config
+    }
+
+    const foo = ((on, config) => {
+      on('dev-server:start', (options) => {})
+
+      return setupNodeEventsFn(on, config)
+    })
+
+    runPlugins.runSetupNodeEvents(foo)
+
+    this.ipc.on.withArgs('load:plugins').yield(config)
+
+    return Promise
+    .delay(10)
+    .then(() => {
+      expect(this.ipc.send).to.be.calledWith('loaded:plugins', config)
+      expect(this.ipc.send).to.be.calledWith('load:error:plugins', 'SETUP_NODE_EVENTS_DO_NOT_SUPPORT_DEV_SERVER', 'cypress.config.js')
+    })
+  })
+
   describe('on \'load\' message', () => {
     it('sends loaded event with registrations', function () {
       const pluginsDeferred = deferred()

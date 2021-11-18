@@ -10,7 +10,6 @@
     "windi": "yarn windicss-analysis",
     "cypress:open": "cross-env TZ=America/New_York node ../../scripts/cypress open --component --project ${PWD}",
     "cypress:run:e2e": "echo 'no e2e in frontend-shared'",
-    "cypress:open:ct": "cross-env TZ=America/New_York node ../../scripts/cypress open --component --project ${PWD}",
     "cypress:run:ct": "cross-env TZ=America/New_York node ../../scripts/cypress run --component --project ${PWD}",
     "dev": "vite --open",
     "generate-shiki-theme": "node ./script/generate-shiki-theme.js"

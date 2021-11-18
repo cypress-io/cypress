@@ -57,6 +57,12 @@ class RunPlugins {
         return
       }
 
+      if (event === 'dev-server:start' && registeredEventsByName[event]) {
+        this.ipc.send('load:error:plugins', 'SETUP_NODE_EVENTS_DO_NOT_SUPPORT_DEV_SERVER', this.requiredFile)
+
+        return
+      }
+
       if (event === 'task') {
         const existingEventId = registeredEventsByName[event]
 
