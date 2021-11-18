@@ -78,7 +78,7 @@ executors:
   # windows:
   #   name: win/default
   #   shell: bash.exe --login
-  windows: &windowsExecutor
+  windows: &windows-executor
     machine:  
       image: windows-server-2019-vs2019:stable
       resource_class: windows.medium
