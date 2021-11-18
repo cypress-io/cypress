@@ -28,7 +28,7 @@ mainBuildFilters: &mainBuildFilters
     branches:
       only:
         - develop
-        - /*-release/
+        - 10.0-release
 
 executors:
   # the Docker image with Cypress dependencies and Chrome browser
@@ -1469,6 +1469,14 @@ jobs:
           name: Release packages after all jobs pass
           command: yarn npm-release
 
+  # upload-build-artifacts:
+  #   <<: *mainBuildFilters
+  #   resource_class: medium+
+  #   steps:
+  #     - upload-binary
+  #     - upload-npm-package
+  #     - post-install-comment
+
   create-build-artifacts:
     <<: *defaults
     resource_class: medium+
@@ -1479,13 +1487,14 @@ jobs:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "9.0-release" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "10.0-release" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
       - upload-binary
       - upload-npm-package
       - post-install-comment
+      # - upload-build-artifacts
 
   test-kitchensink:
     <<: *defaults
@@ -2370,8 +2379,6 @@ windows-workflow: &windows-workflow
 workflows:
   linux:
     <<: *linux-workflow
-  # matrix:
-    # <<: *matrix-workflow
   windows:
     <<: *windows-workflow
   mac:
