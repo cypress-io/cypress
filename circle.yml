@@ -10,10 +10,10 @@ defaults: &defaults
     only-cache-for-root-user:
       type: boolean
       default: false
-    arch:
-      type: enum
-      default: 'linux'
-      enum: ['linux', 'darwin', 'win32']
+    # arch:
+    #   type: enum
+    #   default: 'linux'
+    #   enum: ['linux', 'darwin', 'win32']
   executor: <<parameters.executor>>
   environment:
     ## set specific timezone
@@ -34,21 +34,6 @@ mainBuildFilters: &mainBuildFilters
         - develop
         - tgriesser/chore/fix-release
 
-macBuildFilters: &macBuildFilters
-  filters:
-    branches:
-      only:
-        - develop
-        - tgriesser/chore/fix-release
-
-windowsBuildFilters: &windowsBuildFilters
-  # <<: *mainBuildFilters
-  filters:
-    branches:
-      only:
-        - develop
-        - rm-appveyor
-
 # executor to run on Windows
 # https://circleci.com/docs/2.0/executor-types/#using-the-windows-executor
 # https://circleci.com/docs/2.0/hello-world-windows/#software-pre-installed-in-the-windows-image
@@ -65,6 +50,7 @@ executors:
     shell: /bin/bash --login -eo pipefail
     environment:
       PLATFORM: linux
+      ARCH: linux
 
   # Docker image with non-root "node" user
   non-root-docker-user:
@@ -74,6 +60,7 @@ executors:
     shell: /bin/bash --login -eo pipefail
     environment:
       PLATFORM: linux
+      ARCH: linux
 
   # executor to run on Mac OS
   # https://circleci.com/docs/2.0/executor-types/#using-macos
@@ -86,27 +73,19 @@ executors:
     shell: /bin/bash --login -eo pipefail
     environment:
       PLATFORM: mac
+      ARCH: linux
   
   # windows:
   #   name: win/default
   #   shell: bash.exe --login
-  windows:
+  windows: &windowsExecutor
     machine:  
       image: windows-server-2019-vs2019:stable
       resource_class: windows.medium
       shell: bash.exe --login -eo pipefail
     environment:
       PLATFORM: windows
-
-  # windows:
-  #   windows:
-  #   machine:
-  #     image: windows-server-2019-vs2019:stable
-  #   # resource_class: windows.medium
-  #     # name: win/default
-  #   shell: bash.exe
-  #   environment:
-  #     PLATFORM: windows
+      ARCH: win32
 
 commands:
   restore_workspace_binaries:
@@ -121,14 +100,14 @@ commands:
 
   restore_cached_workspace:
     parameters:
-      node_version:
+      node-version:
         type: string
         default: ""
     steps:
       - attach_workspace:
           at: ~/
-      - install-required-node
-         node_version: <<parameters.node_version>>
+      - install-required-node:
+         node-version: <<parameters.node-version>>
       - unpack-dependencies
 
   restore_cached_binary:
@@ -187,7 +166,7 @@ commands:
           command: node circle-cache.js --action cacheKey > ../../circle_cache_key
       - restore_cache:
           name: Restore cache state, to check for known modules cache existence
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-test2-node-modules-cache-{{ checksum "circle_cache_key" }}
+          key: v{{ .Environment.CACHE_VERSION }}-{{ .Environment.ARCH }}-test2-node-modules-cache-{{ checksum "circle_cache_key" }}
       - run:
           name: Move node_modules back from /tmp
           command: |
@@ -208,9 +187,9 @@ commands:
       only-cache-for-root-user:
         type: boolean
         default: false
-      arch:
-        type: enum
-        enum: ['linux', 'darwin', 'win32']
+      # arch:
+      #   type: enum
+      #   enum: ['linux', 'darwin', 'win32']
     steps:
       - run:
           name: check yarn version
@@ -226,7 +205,7 @@ commands:
           command: node circle-cache.js --action cacheKey > ../../circle_cache_key
       - restore_cache:
           name: Restore cache state, to check for known modules cache existence
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-test2-node-modules-cache-state-{{ checksum "circle_cache_key" }}
+          key: v{{ .Environment.CACHE_VERSION }}-{{ .Environment.ARCH }}-test2-node-modules-cache-state-{{ checksum "circle_cache_key" }}
       - run:
           name: Bail if cache exists
           command: |
@@ -240,11 +219,11 @@ commands:
       - restore_cache:
           name: Restore weekly yarn cache
           keys:
-            - v{{ .Environment.CACHE_VERSION }}-{{ arch }}-test2-deps-root-weekly-{{ checksum "cache_date" }}
+            - v{{ .Environment.CACHE_VERSION }}-{{ .Environment.ARCH }}-test2-deps-root-weekly-{{ checksum "cache_date" }}
       - run:
           name: Install Node Modules
           command: |
-            yarn --prefer-offline --frozen-lockfile --cache-folder ~/.yarn-<< parameters.arch >>
+            yarn --prefer-offline --frozen-lockfile --cache-folder ~/.yarn-$ARCH
           no_output_timeout: 20m
       - prepare-modules-cache:
           dont-move: <<parameters.only-cache-for-root-user>> # we don't move, so we don't hit any issues unpacking symlinks
@@ -253,7 +232,7 @@ commands:
           steps:
             - save_cache:
                 name: Saving node modules for root, cli, and all globbed workspace packages
-                key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-test2-node-modules-cache-{{ checksum "circle_cache_key" }}
+                key: v{{ .Environment.CACHE_VERSION }}-{{ .Environment.ARCH }}-test2-node-modules-cache-{{ checksum "circle_cache_key" }}
                 paths:
                   - node_modules
                   - cli/node_modules
@@ -264,20 +243,20 @@ commands:
           steps:
             - save_cache:
                 name: Saving node modules for root, cli, and all globbed workspace packages
-                key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-test2-node-modules-cache-{{ checksum "circle_cache_key" }}
+                key: v{{ .Environment.CACHE_VERSION }}-{{ .Environment.ARCH }}-test2-node-modules-cache-{{ checksum "circle_cache_key" }}
                 paths:
                   - /tmp/node_modules_cache
       - run: touch node_modules_installed
       - save_cache:
           name: Saving node-modules cache state key
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-test2-node-modules-cache-state-{{ checksum "circle_cache_key" }}
+          key: v{{ .Environment.CACHE_VERSION }}-{{ .Environment.ARCH }}-test2-node-modules-cache-state-{{ checksum "circle_cache_key" }}
           paths:
             - node_modules_installed
       - save_cache:
           name: Save weekly yarn cache
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-test2-deps-root-weekly-{{ checksum "cache_date" }}
+          key: v{{ .Environment.CACHE_VERSION }}-{{ .Environment.ARCH }}-test2-deps-root-weekly-{{ checksum "cache_date" }}
           paths:
-            - ~/.yarn-<< parameters.arch >>
+            - ~/.yarn-$ARCH
 
   verify-build-setup:
     description: Common commands run when setting up for build or yarn install
@@ -306,14 +285,14 @@ commands:
     # https://discuss.circleci.com/t/switch-nodejs-version-on-machine-executor-solved/26675/2
     description: Install Node version matching .node-version
     parameters:
-      node_version:
+      node-version:
         type: string
         default: ""
     steps:
       - run:
           name: Setup Node
           command: |
-              node_version=<<parameters.node_version>>
+              node_version=<<parameters.node-version>>
               node_version=${node_version:-$(cat .node-version)}
               [ -s "${HOME}/.nvm/nvm.sh" ] && \. "${HOME}/.nvm/nvm.sh" # This loads nvm
               if ! type nvm > /dev/null; then
@@ -927,8 +906,9 @@ jobs:
           command: echo $PWD
       - unless:
           condition:
+            equal: [ *windows-executor, << parameters.executor >> ]
             # stop-only does not correct match on windows: https://github.com/bahmutov/stop-only/issues/78
-            equal: ['win32', <<parameters.arch>>]
+            # equal: ['win32', <<parameters.arch>>]
           steps:
             - run:
                 name: Stop .only
@@ -941,7 +921,7 @@ jobs:
             - .nvm
       - verify-build-setup
       - caching-dependency-installer:
-          arch: << parameters.arch >>
+          # arch: << parameters.arch >>
           only-cache-for-root-user: <<parameters.only-cache-for-root-user>>
       - store-npm-logs
 
@@ -1436,7 +1416,7 @@ jobs:
       - restore_cached_workspace
       - restore_cache:
           name: Restore yarn cache
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-npm-angular-babel-cache
+          key: v{{ .Environment.CACHE_VERSION }}-{{ .Environment.ARCH }}-npm-angular-babel-cache
       - run:
           name: Build
           command: yarn workspace @cypress/angular build
@@ -1458,7 +1438,7 @@ jobs:
       - restore_cached_workspace
       - restore_cache:
           name: Restore yarn cache
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-npm-react-babel-cache
+          key: v{{ .Environment.CACHE_VERSION }}-{{ .Environment.ARCH }}-npm-react-babel-cache
       - run:
           name: Build
           command: yarn workspace @cypress/react build
@@ -1502,7 +1482,7 @@ jobs:
       <<: *defaults
       steps:
         - restore_cached_workspace
-            node_version: "16.10"
+            node-version: "16.10"
         - run:
             name: Build + Install
             command: |
@@ -2015,7 +1995,7 @@ jobs:
 linux-workflow: &linux-workflow
   jobs:
     - node_modules_install:
-        arch: 'linux'
+        # arch: 'linux'
     - build:
         requires:
           - node_modules_install
@@ -2306,7 +2286,7 @@ mac-workflow: &mac-workflow
     - node_modules_install:
         name: darwin-node-modules-install
         executor: mac
-        arch: darwin
+        # arch: darwin
         only-cache-for-root-user: true
 
     - build:
@@ -2364,7 +2344,7 @@ windows-workflow: &windows-workflow
     - node_modules_install:
         name: windows-node-modules-install
         executor: windows
-        arch: win32
+        # arch: win32
         only-cache-for-root-user: true
 
     - build:
@@ -2429,7 +2409,7 @@ linux-2-workflow: &linux-2-workflow
     - lint:
         requires:
           - build
-      
+
 workflows:
   linux:
     <<: *linux-workflow
