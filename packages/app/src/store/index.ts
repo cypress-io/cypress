@@ -7,6 +7,8 @@ export * from './specs-store'
 
 export * from './aut-store'
 
+export * from './runner-store'
+
 // Mobx Store Wrapper from @packages/runner-shared
 export * from './mobx-runner-store'
 

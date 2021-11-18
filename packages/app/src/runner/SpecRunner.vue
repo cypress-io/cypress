@@ -10,7 +10,7 @@
       <InlineSpecList :gql="props.gql" />
     </HideDuringScreenshot>
 
-    <HideDuringScreenshot class="w-128">
+    <HideDuringScreenshot class="min-w-320px">
       <div
         v-once
         :id="REPORTER_ID"
@@ -51,7 +51,7 @@ import { gql } from '@urql/core'
 import type { SpecRunnerFragment } from '../generated/graphql'
 import InlineSpecList from '../specs/InlineSpecList.vue'
 import { getAutIframeModel, getEventManager, UnifiedRunnerAPI } from '../runner'
-import { useAutStore } from '../store'
+import { useAutStore, useRunnerStore } from '../store'
 import type { BaseSpec } from '@packages/types'
 import SnapshotControls from './SnapshotControls.vue'
 import SpecRunnerHeader from './SpecRunnerHeader.vue'
@@ -73,6 +73,7 @@ const eventManager = getEventManager()
 
 const autStore = useAutStore()
 const screenshotStore = useScreenshotStore()
+const runnerStore = useRunnerStore()
 
 const runnerPane = ref<HTMLDivElement>()
 
@@ -115,6 +116,10 @@ onMounted(() => {
 
   eventManager.on('restart', () => {
     runSpec()
+  })
+
+  eventManager.on('toggle:spec:list', () => {
+    runnerStore.toggleSpecList()
   })
 
   eventManager.on('before:screenshot', (payload) => {

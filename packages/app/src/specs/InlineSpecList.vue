@@ -1,5 +1,8 @@
 <template>
-  <div class="w-280px">
+  <div
+    v-if="runnerStore.showSpecList"
+    class="w-280px"
+  >
     <InlineSpecListHeader
       v-model:tab="tab"
       v-model:search="search"
@@ -25,7 +28,7 @@
 import { computed, ref } from 'vue'
 import { gql } from '@urql/vue'
 import type { SpecNode_InlineSpecListFragment, Specs_InlineSpecListFragment } from '../generated/graphql'
-import { useSpecStore } from '../store'
+import { useRunnerStore, useSpecStore } from '../store'
 import InlineSpecListHeader from './InlineSpecListHeader.vue'
 import InlineSpecListRow from './InlineSpecListRow.vue'
 import InlineSpecListTree from './InlineSpecListTree.vue'
@@ -63,6 +66,7 @@ const props = defineProps<{
   gql: Specs_InlineSpecListFragment
 }>()
 
+const runnerStore = useRunnerStore()
 const specStore = useSpecStore()
 
 const isCurrentSpec = (spec: SpecNode_InlineSpecListFragment) => {

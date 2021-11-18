@@ -187,7 +187,9 @@ export class EventManager {
       logCommand(logId)
     })
 
-    this.reporterBus.on('focus:tests', this.focusTests)
+    this.reporterBus.on('toggle:spec:list', () => {
+      this.emit('toggle:spec:list')
+    })
 
     this.reporterBus.on('get:user:editor', (cb) => {
       ws.emit('get:user:editor', cb)
@@ -653,10 +655,6 @@ export class EventManager {
 
   notifyRunningSpec (specFile) {
     ws.emit('spec:changed', specFile)
-  }
-
-  focusTests () {
-    ws.emit('focus:tests')
   }
 
   snapshotUnpinned () {

@@ -23,7 +23,7 @@ class Shortcuts {
         break
       case 's': !appState.isPaused && !appState.studioActive && events.emit('stop')
         break
-      case 'f': events.emit('focus:tests')
+      case 'f': events.emit('toggle:spec:list')
         break
       case 'c': events.emit('resume')
         break

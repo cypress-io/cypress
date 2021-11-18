@@ -75,11 +75,11 @@ describe('shortcuts', function () {
 
     it('focuses on specs', () => {
       cy.get('body').then(() => {
-        expect(runner.emit).not.to.have.been.calledWith('focus:tests')
+        expect(runner.emit).not.to.have.been.calledWith('toggle:spec:list')
       })
 
       cy.get('body').type('f').then(() => {
-        expect(runner.emit).to.have.been.calledWith('focus:tests')
+        expect(runner.emit).to.have.been.calledWith('toggle:spec:list')
       })
     })
 
@@ -124,9 +124,9 @@ describe('shortcuts', function () {
     })
 
     it('has shortcut in tooltips', () => {
-      cy.get('.focus-tests > button').trigger('mouseover')
-      cy.get('.cy-tooltip').should('have.text', 'View All Tests F')
-      cy.get('.focus-tests > button').trigger('mouseout')
+      cy.get('.toggle-specs-wrapper > button').trigger('mouseover')
+      cy.get('.cy-tooltip').should('have.text', 'View All Specs F')
+      cy.get('.toggle-specs-wrapper > button').trigger('mouseout')
 
       cy.get('button.restart').trigger('mouseover')
       cy.get('.cy-tooltip').should('have.text', 'Run All Tests R')

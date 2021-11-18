@@ -20,11 +20,11 @@ export interface ReporterHeaderProps {
 
 const Header = observer(({ appState, events = defaultEvents, statsStore }: ReporterHeaderProps) => (
   <header>
-    <Tooltip placement='bottom' title={<p>View All Tests <span className='kbd'>F</span></p>} wrapperClassName='focus-tests' className='cy-tooltip'>
-      <button onClick={() => events.emit('focus:tests')}>
-        <MenuExpandRightIcon />
+    <Tooltip placement='bottom' title={<p>View All Specs <span className='kbd'>F</span></p>} wrapperClassName='toggle-specs-wrapper' className='cy-tooltip'>
+      <button onClick={() => events.emit('toggle:spec:list')}>
+        <MenuExpandRightIcon style={{ transform: `rotate(0deg)` }} />
 
-        <span className='focus-tests-text'>Specs</span>
+        <span className='toggle-specs-text'>Specs</span>
       </button>
     </Tooltip>
     <div className='spacer' />

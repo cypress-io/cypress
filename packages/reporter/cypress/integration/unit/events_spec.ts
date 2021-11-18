@@ -363,9 +363,9 @@ describe('events', () => {
       expect(runner.emit).to.have.been.calledWith('runner:unpin:snapshot', 'command id')
     })
 
-    it('emits focus:tests on focus:tests', () => {
-      events.emit('focus:tests')
-      expect(runner.emit).to.have.been.calledWith('focus:tests')
+    it('emits toggle:spec:list on toggle:spec:list', () => {
+      events.emit('toggle:spec:list')
+      expect(runner.emit).to.have.been.calledWith('toggle:spec:list')
     })
 
     it('emits save:state on save:state', () => {

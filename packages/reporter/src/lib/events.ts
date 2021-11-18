@@ -188,9 +188,9 @@ const events: Events = {
       runner.emit('runner:unpin:snapshot', commandId)
     })
 
-    localBus.on('focus:tests', () => {
-      runner.emit('focus:tests')
-    })
+    localBus.on('toggle:spec:list', action('toggleSpecsList', () => {
+      runner.emit('toggle:spec:list')
+    }))
 
     localBus.on('get:user:editor', (cb) => {
       runner.emit('get:user:editor', cb)
