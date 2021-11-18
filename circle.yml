@@ -440,25 +440,20 @@ commands:
               if ! type nvm > /dev/null; then
                 echo "Installing NVM"
                 curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.30.0/install.sh | bash
-
-                echo "
-                  echo "Running bash_profile for ${node_version}"
-                  export NODE_VERSION=${node_version}
-                  export NVM_DIR="${HOME}/.nvm"
-                  [ -s "$NVM_DIR/nvm.sh" ] && \. "${HOME}/.nvm/nvm.sh" # This loads nvm
-                " >> ~/.bash_profile
               fi
+              [ -s ${HOME}/.nvm/nvm.sh" ] && \. "${HOME}/.nvm/nvm.sh" # This loads nvm
               echo "Installing Node $node_version"
               nvm install ${node_version} || exit 1
+              echo "Using Node $node_version"
               nvm use ${node_version} || exit 1
-              nvm alias default ${node_version} || exit 1
+              echo "Checking Node version"
               node --version
+              echo "Installing Yarn"
               npm install yarn -g # ensure yarn is installed with the correct node engine
               yarn check-node-version
       - persist_to_workspace:
           root: ~/
           paths:
-            - .bash_profile
             - .nvm
         # node ./scripts/circleci/check-node-version.js
 
