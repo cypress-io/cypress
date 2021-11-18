@@ -42,10 +42,14 @@
       <label for="basic" id="basic-label">Basic Label</label>
       <label for="basic" id="hidden-basic-label">Hidden Label</label>
       <input id="basic" type="file" />
+      <label id="containing-label">
+        Containing Label
+        <input type="file" id="contained" />
+      </label>
     </form>
 
     <form>
-      <input id="multiple" type="file" multpile />
+        <input id="multiple" type="file" multpile />
     </form>
 
     <form>
@@ -57,7 +61,10 @@
       <label for="text-input" id="text-label">Text label</label>
       <input type="text" id="text-input" />
 
-      <label for="nonexistent" id="nonexistent-label">Bad label</label>
+      <label for="nonexistent" id="nonexistent-label">
+        Bad label
+        <input type="file" />
+      </label>
     </form>
 
     <form>

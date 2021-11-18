@@ -629,7 +629,7 @@ declare namespace Cypress {
      * Attach a file to the given <input> element, or drag and drop a file over any subject.
      *
      * @param {FileReference} files - The file(s) to attach or drag onto this element.
-     * @see https://on.cypress.io/TODO
+     * @see https://on.cypress.io/attachFile
      * @example
      *    cy.get('input[type=file]').attachFile(Buffer.from('text'))
      *    cy.get('input[type=file]').attachFile({

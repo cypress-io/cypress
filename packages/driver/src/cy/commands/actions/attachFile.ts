@@ -76,7 +76,7 @@ interface InternalAttachFileOptions extends Cypress.AttachFileOptions {
 
 export default (Commands, Cypress, cy, state, config) => {
   Commands.addAll({ prevSubject: 'element' }, {
-    attachFile (subject: JQuery<any>, files: Cypress.FileReference | Cypress.FileReference[], options: Partial<InternalAttachFileOptions>): Promise<JQuery> {
+    async attachFile (subject: JQuery<any>, files: Cypress.FileReference | Cypress.FileReference[], options: Partial<InternalAttachFileOptions>): Promise<JQuery> {
       options = _.defaults({}, options, {
         action: 'input',
         log: true,
@@ -133,63 +133,57 @@ export default (Commands, Cypress, cy, state, config) => {
       }
 
       // Make sure files is an array even if the user only passed in one
-      return Promise.all(([] as Cypress.FileReference[]).concat(files).map(parseFile(options))).then((filesArray) => {
-        const trigger = () => {
-          // We verify actionability on the subject, rather than the input,
-          // in order to allow for a hidden <input> with a visible <label>
-          // Similarly, this is why we implement something similar, but not identical to,
-          // cy.trigger() to dispatch our events.
-          return $actionability.verify(cy, subject, config, options, {
-            onScroll ($el, type) {
-              Cypress.action('cy:scrolled', $el, type)
-            },
+      const filesArray = await Promise.all(([] as Cypress.FileReference[]).concat(files).map(parseFile(options)))
 
-            onReady ($elToClick, coords) {
-              // $elToClick is either the <label> or <input> - the original subject
-              // while `element` is always the <input>
-              const element = input.get(0);
+      // We verify actionability on the subject, rather than the input,
+      // in order to allow for a hidden <input> with a visible <label>
+      // Similarly, this is why we implement something similar, but not identical to,
+      // cy.trigger() to dispatch our events.
+      await $actionability.verify(cy, subject, config, options, {
+        onScroll ($el, type) {
+          Cypress.action('cy:scrolled', $el, type)
+        },
 
-              (element as HTMLInputElement).files = createFileList(filesArray)
+        onReady ($elToClick, coords) {
+          // $elToClick is either the <label> or <input> - the original subject
+          // while `element` is always the <input>
+          const element = input.get(0);
 
-              if (options._log) {
-                // display the red dot at these coords
-                options._log.set({
-                  coords: coords.fromAutWindow,
-                })
-              }
+          (element as HTMLInputElement).files = createFileList(filesArray)
 
-              // We dispatch the events on the input element, but target the red dot
-              // based on $elToClick (the coords $actionability.verify gave us),
-              // which may be the input or a label pointing to it.
-              const inputEventOptions = addEventCoords({
-                bubbles: true,
-                composed: true,
-              }, coords)
-
-              const changeEventOptions = addEventCoords({
-                bubbles: true,
-              }, coords)
-
-              dispatch(element, state('window'), 'input', inputEventOptions)
-              dispatch(element, state('window'), 'change', changeEventOptions)
-
-              return $elToClick
-            },
-          })
-        }
-
-        return Promise
-        .try(trigger)
-        .then(() => {
-          const verifyAssertions = () => {
-            return cy.verifyUpcomingAssertions(options.$el, options, {
-              onRetry: verifyAssertions,
+          if (options._log) {
+            // display the red dot at these coords
+            options._log.set({
+              coords: coords.fromAutWindow,
             })
           }
 
-          return verifyAssertions()
-        })
+          // We dispatch the events on the input element, but target the red dot
+          // based on $elToClick (the coords $actionability.verify gave us),
+          // which may be the input or a label pointing to it.
+          const inputEventOptions = addEventCoords({
+            bubbles: true,
+            composed: true,
+          }, coords)
+
+          const changeEventOptions = addEventCoords({
+            bubbles: true,
+          }, coords)
+
+          dispatch(element, state('window'), 'input', inputEventOptions)
+          dispatch(element, state('window'), 'change', changeEventOptions)
+
+          return $elToClick
+        },
       })
+
+      const verifyAssertions = () => {
+        return cy.verifyUpcomingAssertions(options.$el, options, {
+          onRetry: verifyAssertions,
+        })
+      }
+
+      return verifyAssertions()
     },
   })
 }

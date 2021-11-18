@@ -95,6 +95,16 @@ describe('src/cy/commands/actions/attachFile', () => {
       })
     })
 
+    it('attaches files to an input from a containing label', () => {
+      cy.get('#containing-label').attachFile({ contents: 'foo' })
+
+      cy.get('#contained')
+      .then(getFileContents)
+      .then((contents) => {
+        expect(contents[0]).to.eql('foo')
+      })
+    })
+
     it('invokes change and input events on the input', (done) => {
       const $input = cy.$$('#basic')
 
@@ -179,7 +189,7 @@ describe('src/cy/commands/actions/attachFile', () => {
 
       it('throws when non-input subject', function (done) {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.attachFile()` can only be called on an `<input type="file">` or a `<label for="fileInput">` pointing to one. Your subject is: `<body>...</body>`')
+          expect(err.message).to.include('`cy.attachFile()` can only be called on an `<input type="file">` or a `<label for="fileInput">` pointing to or containing one. Your subject is: `<body>...</body>`')
           expect(err.docsUrl).to.eq('https://on.cypress.io/attachFile')
           done()
         })
@@ -189,7 +199,7 @@ describe('src/cy/commands/actions/attachFile', () => {
 
       it('throws when non-file input', function (done) {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.attachFile()` can only be called on an `<input type="file">` or a `<label for="fileInput">` pointing to one. Your subject is: `<input type="text" id="text-input">`')
+          expect(err.message).to.include('`cy.attachFile()` can only be called on an `<input type="file">` or a `<label for="fileInput">` pointing to or containing one. Your subject is: `<input type="text" id="text-input">`')
           expect(err.docsUrl).to.eq('https://on.cypress.io/attachFile')
           done()
         })
@@ -199,7 +209,7 @@ describe('src/cy/commands/actions/attachFile', () => {
 
       it('throws when label for non-file input', function (done) {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.attachFile()` can only be called on an `<input type="file">` or a `<label for="fileInput">` pointing to one. Your subject is: `<label for="text-input" id="text-label">Text label</label>`')
+          expect(err.message).to.include('`cy.attachFile()` can only be called on an `<input type="file">` or a `<label for="fileInput">` pointing to or containing one. Your subject is: `<label for="text-input" id="text-label">Text label</label>`')
           expect(err.docsUrl).to.eq('https://on.cypress.io/attachFile')
           done()
         })
@@ -208,8 +218,10 @@ describe('src/cy/commands/actions/attachFile', () => {
       })
 
       it('throws when label without an attached input', function (done) {
+        // Even though this label contains a file input, testing on real browsers confirms that clicking it
+        // does *not* activate the contained input.
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.attachFile()` can only be called on an `<input type="file">` or a `<label for="fileInput">` pointing to one. Your subject is: `<label for="nonexistent" id="nonexistent-label">Bad label</label>`')
+          expect(err.message).to.include('`cy.attachFile()` can only be called on an `<input type="file">` or a `<label for="fileInput">` pointing to or containing one. Your subject is: `<label for="nonexistent" id="nonexistent-label">...</label>`')
           expect(err.docsUrl).to.eq('https://on.cypress.io/attachFile')
           done()
         })

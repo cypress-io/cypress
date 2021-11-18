@@ -149,7 +149,7 @@ export default {
       docsUrl: 'https://on.cypress.io/attachFile',
     },
     not_file_input: {
-      message: `${cmd('attachFile')} can only be called on an \`<input type="file">\` or a \`<label for="fileInput">\` pointing to one. Your subject is: \`{{node}}\``,
+      message: `${cmd('attachFile')} can only be called on an \`<input type="file">\` or a \`<label for="fileInput">\` pointing to or containing one. Your subject is: \`{{node}}\``,
       docsUrl: 'https://on.cypress.io/attachFile',
     },
   },
