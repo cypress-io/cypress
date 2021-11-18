@@ -132,7 +132,7 @@ describe('src/cypress/selector_playground', () => {
         selectorPriority: ['data-foo'],
       })
 
-      expect(SelectorPlayground.getSelector($div)).to.eq('[data-foo=bar]')
+      expect(SelectorPlayground.getSelector($div)).to.eq('[data-foo="bar"]')
 
       SelectorPlayground.defaults({
         onElement ($el) {
@@ -148,7 +148,7 @@ describe('src/cypress/selector_playground', () => {
         },
       })
 
-      expect(SelectorPlayground.getSelector($div)).to.eq('[data-foo=bar]')
+      expect(SelectorPlayground.getSelector($div)).to.eq('[data-foo="bar"]')
     })
   })
 })
