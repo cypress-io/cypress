@@ -37,7 +37,6 @@ executors:
       - image: cypress/browsers:node16.5.0-chrome94-ff93
     # by default, we use "small" to save on CI costs. bump on a per-job basis if needed.
     resource_class: small
-    # shell: /bin/bash --login -eo pipefail
     environment:
       PLATFORM: linux
 
@@ -46,7 +45,6 @@ executors:
     docker:
       - image: cypress/browsers:node16.5.0-chrome94-ff93
         user: node
-    # shell: /bin/bash --login -eo pipefail
     environment:
       PLATFORM: linux
 
@@ -58,7 +56,6 @@ executors:
       # Executor should have Node >= required version
       xcode: "13.0.0"
     resource_class: medium
-    # shell: /bin/bash --login -eo pipefail
     environment:
       PLATFORM: mac
 
@@ -192,7 +189,6 @@ commands:
           command: |
             if [[ -f "node_modules_installed" ]]; then
               echo "Node modules already cached for dependencies, exiting"
-              
               circleci-agent step halt
             fi
       - run: date +%Y-%U > cache_date
@@ -241,9 +237,7 @@ commands:
   verify-build-setup:
     description: Common commands run when setting up for build or yarn install
     steps:
-      - run:
-          name: Print working folder
-          command: echo $PWD
+      - run: pwd
       - run:
           name: print global yarn cache path
           command: echo $(yarn global bin)
@@ -259,7 +253,6 @@ commands:
           ##   * https://unix.stackexchange.com/questions/43945/whats-the-difference-between-various-term-variables
           command: yarn check-terminal
 
-  # run this step in an interactive bash shell
   install-required-node:
     # https://discuss.circleci.com/t/switch-nodejs-version-on-machine-executor-solved/26675/2
     description: Install Node version matching .node-version
@@ -269,25 +262,25 @@ commands:
         default: ""
     steps:
       - run:
-          name: Setup Node
+          name: Install NVM + Node
           command: |
-              node_version=<<parameters.node-version>>
-              node_version=${node_version:-$(cat .node-version)}
+            node_version=<<parameters.node-version>>
+            node_version=${node_version:-$(cat .node-version)}
+            [ -s "${HOME}/.nvm/nvm.sh" ] && \. "${HOME}/.nvm/nvm.sh" # This loads nvm
+            if ! type nvm > /dev/null; then
+              echo "Installing NVM"
+              curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.30.0/install.sh | bash
               [ -s "${HOME}/.nvm/nvm.sh" ] && \. "${HOME}/.nvm/nvm.sh" # This loads nvm
-              if ! type nvm > /dev/null; then
-                echo "Installing NVM"
-                curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.30.0/install.sh | bash
-                [ -s "${HOME}/.nvm/nvm.sh" ] && \. "${HOME}/.nvm/nvm.sh" # This loads nvm
-              fi
-              echo "Installing Node $node_version"
-              nvm install ${node_version} || exit 1
-              echo "Using Node $node_version"
-              nvm use ${node_version} || exit 1
-              nvm alias default ${node_version} || exit 1
-              node --version
-              echo "Installing Yarn"
-              npm install yarn -g # ensure yarn is installed with the correct node engine
-              yarn check-node-version
+            fi
+            echo "Installing Node $node_version"
+            nvm install ${node_version} || exit 1
+            echo "Using Node $node_version"
+            nvm use ${node_version} || exit 1
+            nvm alias default ${node_version} || exit 1
+            node --version
+            echo "Installing Yarn"
+            npm install yarn -g # ensure yarn is installed with the correct node engine
+            yarn check-node-version
 
   install-chrome:
     description: Install Google Chrome
@@ -848,7 +841,7 @@ commands:
           name: list created NPM package
           command: ls -l
       - store-npm-logs
-      # - run: pwd
+      - run: pwd
       - persist_to_workspace:
           root: ~/
           paths:
@@ -877,12 +870,8 @@ jobs:
   node_modules_install:
     <<: *defaults
     # resource_class: medium+
-    # shell: /bin/bash --login
     steps:
       - checkout
-      - run:
-          name: Print working folder
-          command: echo $PWD
       - unless:
           condition:
             # stop-only does not correctly match on windows: https://github.com/bahmutov/stop-only/issues/78
@@ -905,8 +894,6 @@ jobs:
   ## restores node_modules from previous step & builds if first step skipped
   build:
     <<: *defaults
-    # resource_class: medium+
-    # shell: /bin/bash --login
     steps:
       - restore_cached_workspace
       - run:
@@ -1484,8 +1471,7 @@ jobs:
 
   create-build-artifacts:
     <<: *defaults
-    # resource_class: medium+
-    # shell: /bin/bash --login
+    resource_class: medium+
     steps:
       - restore_cached_workspace
       - build-binary
@@ -1503,7 +1489,6 @@ jobs:
 
   test-kitchensink:
     <<: *defaults
-    # shell: /bin/bash --login
     steps:
       - clone-repo-and-checkout-release-branch:
           repo: cypress-example-kitchensink
@@ -1530,7 +1515,6 @@ jobs:
   test-kitchensink-against-staging:
     <<: *defaults
     resource_class: medium
-    # shell: /bin/bash --login
     steps:
       - clone-repo-and-checkout-release-branch:
           repo: cypress-example-kitchensink
@@ -1977,7 +1961,6 @@ linux-workflow: &linux-workflow
         context: test-runner:poll-circle-workflow
         required_env_var: PERCY_TOKEN # skips job if not defined (external PR)
         requires:
-          # - build
           - desktop-gui-integration-tests-7x
           - desktop-gui-component-tests
           - cli-visual-tests
