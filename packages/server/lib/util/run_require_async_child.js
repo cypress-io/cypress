@@ -4,7 +4,6 @@ const debug = require('debug')('cypress:server:require_async:child')
 const tsNodeUtil = require('./ts_node')
 const util = require('../plugins/util')
 const RunPlugins = require('../plugins/child/run_plugins')
-const pkg = require('@packages/root')
 
 let tsRegistered = false
 
@@ -58,20 +57,7 @@ function run (ipc, requiredFile, projectRoot) {
       ipc.send('loaded', result)
 
       ipc.on('plugins', (testingType) => {
-        // TODO: (alejandro) - figure out how to pass the allowedCfg
-        // only init plugins with the
-        // allowed config values to
-        // prevent tampering with the
-        // internals and breaking cypress
-        const allowedCfg = {
-          ...result,
-          projectRoot,
-          testingType,
-          configFile: requiredFile,
-          version: pkg.version,
-        }
-
-        const runPlugins = new RunPlugins(ipc, projectRoot, requiredFile, allowedCfg)
+        const runPlugins = new RunPlugins(ipc, projectRoot, requiredFile)
 
         areSetupNodeEventsLoaded = true
         if (testingType === 'component') {

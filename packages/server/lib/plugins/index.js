@@ -5,6 +5,7 @@ const resolve = require('resolve')
 const Promise = require('bluebird')
 const errors = require('../errors')
 const util = require('./util')
+const pkg = require('@packages/root')
 
 let pluginsProcess
 let executedPlugins
@@ -35,7 +36,7 @@ const registerHandler = (handler) => {
   handlers.push(handler)
 }
 
-const init = (options, ctx) => {
+const init = (config, options, ctx) => {
   // test and warn for incompatible plugin
   try {
     const retriesPluginPath = path.dirname(resolve.sync('cypress-plugin-retries', {
@@ -105,6 +106,21 @@ const init = (options, ctx) => {
       handler(ipc)
     }
 
+    _.extend(config, {
+      projectRoot: options.projectRoot,
+      configFile: options.configFile,
+      version: pkg.version,
+      testingType: options.testingType,
+    })
+
+    // alphabetize config by keys
+    let orderedConfig = {}
+
+    Object.keys(config).sort().forEach((key) => orderedConfig[key] = config[key])
+    config = orderedConfig
+
+    ipc.send('load:plugins', config)
+
     ipc.on('empty:plugins', () => {
       resolve(null)
     })
@@ -154,7 +170,7 @@ const init = (options, ctx) => {
 
       killPluginsProcess()
 
-      err = errors.get('SETUP_NODE_EVENTS_UNEXPECTED_ERROR', options.testingType, options.configFile, err.annotated || err.stack || err.message)
+      err = errors.get('SETUP_NODE_EVENTS_UNEXPECTED_ERROR', config.testingType, config.configFile, err.annotated || err.stack || err.message)
       err.title = 'Error running plugin'
 
       // this can sometimes trigger before the promise is fulfilled and

@@ -419,7 +419,13 @@ export class ProjectBase<TServer extends Server> extends EE {
 
   // TODO(tim): Improve this when we completely overhaul the rest of the code here,
   async initializePlugins (cfg = this._cfg, options = this.options) {
-    const modifiedCfg = await plugins.init({
+    // only init plugins with the
+    // allowed config values to
+    // prevent tampering with the
+    // internals and breaking cypress
+    const allowedCfg = config.allowed(cfg)
+
+    const modifiedCfg = await plugins.init(allowedCfg, {
       projectRoot: this.projectRoot,
       configFile: settings.pathToConfigFile(this.projectRoot, options),
       testingType: options.testingType,
