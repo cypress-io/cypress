@@ -434,7 +434,7 @@ commands:
           name: Setup Node
           command: |
               node_version=<<parameters.version>>
-              node_version=${node_version:-$(cat ~/cypress/.node-version)}
+              node_version=${node_version:-$(cat .node-version)}
               [ -s "${HOME}/.nvm/nvm.sh" ] && \. "${HOME}/.nvm/nvm.sh" # This loads nvm
               if ! type nvm > /dev/null; then
                 echo "Installing NVM"
@@ -563,7 +563,7 @@ commands:
       - restore_cached_workspace
       - run:
           command: |
-            cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --parallel --') || true
+            cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --parallel') || true
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
@@ -590,7 +590,7 @@ commands:
       - restore_cached_workspace
       - run:
           command: |
-            cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec -- --') || true
+            cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec') || true
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
@@ -968,10 +968,6 @@ commands:
           name: "Waiting on Circle CI jobs: <<parameters.job-names>>"
           command: node ./scripts/wait-on-circle-jobs.js --job-names="<<parameters.job-names>>"
   build-binary:
-    parameters:
-      arch:
-        type: enum
-        enum: ['linux', 'darwin', 'win32']
     steps:
       - run:
           name: Check environment variables before code sign (if on Mac)
@@ -999,8 +995,6 @@ commands:
             else
               echo "Not Mac platform, skipping code sign setup"
             fi
-      - install-required-node:
-          arch: << parameters.arch >>
       - run:
           environment:
             DEBUG: electron-builder,electron-osx-sign*
@@ -1716,8 +1710,7 @@ jobs:
     # shell: /bin/bash --login
     steps:
       - restore_cached_workspace
-      - build-binary:
-          arch: << parameters.arch >>
+      - build-binary
       - build-cypress-npm-package
       - run:
           name: Check current branch to persist artifacts
@@ -1736,8 +1729,7 @@ jobs:
     steps:
       - clone-repo-and-checkout-release-branch:
           repo: cypress-example-kitchensink
-      - install-required-node:
-          arch: << parameters.arch >>
+      - setup-node
       - run:
           name: Install prod dependencies
           command: yarn --production
@@ -2337,17 +2329,20 @@ linux-workflow: &linux-workflow
           - npm-react
           - npm-mount-utils
           - npm-vue
+          - npm-vite-dev-server
           - npm-design-system
           - npm-webpack-batteries-included-preprocessor
           - npm-webpack-preprocessor
           - npm-webpack-dev-server
           - npm-cypress-schematic
           - ui-components-integration-tests
+          - lint-types
           - Linux lint
           - runner-integration-tests-firefox
           - runner-integration-tests-electron
           - driver-integration-tests-firefox
           - driver-integration-tests-chrome
+          - driver-integration-tests-chrome-beta
           - driver-integration-tests-electron
           - percy-finalize
           - system-tests-non-root
@@ -2357,6 +2352,7 @@ linux-workflow: &linux-workflow
           - server-performance-tests
           - server-integration-tests
           - server-unit-tests
+          - test-kitchensink
           - unit-tests
           - unit-tests-release
 
