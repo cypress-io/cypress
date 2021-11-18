@@ -21,7 +21,6 @@
           <div>{{ t('specPage.gitStatusHeader') }}</div>
         </div>
       </div>
-
       <template
         v-for="(row, idx) in treeSpecList"
         :key="idx"
@@ -40,7 +39,6 @@
                 :style="{ paddingLeft: `${((row.depth - 2) * 10) + 16 + 22}px` }"
               />
             </RouterLink>
-
             <RowDirectory
               v-else
               :name="row.name"
@@ -51,7 +49,6 @@
               @click="row.toggle"
             />
           </template>
-
           <template #git-info>
             <SpecListGitInfo
               v-if="row.data?.gitInfo"
@@ -69,7 +66,7 @@ import SpecsListHeader from './SpecsListHeader.vue'
 import SpecListGitInfo from './SpecListGitInfo.vue'
 import SpecsListRowItem from './SpecsListRowItem.vue'
 import { gql } from '@urql/vue'
-import { computed, ComputedRef, ref } from 'vue'
+import { computed, ref } from 'vue'
 import CreateSpecModal from './CreateSpecModal.vue'
 import type { Specs_SpecsListFragment, SpecListRowFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
@@ -123,10 +120,11 @@ const showModal = ref(false)
 const search = ref('')
 
 const specs = computed(() => {
-  const specs = props.gql.currentProject?.specs?.edges.map((x) => x.node) || []
+  const specs = props.gql.currentProject?.specs?.edges
+  .map((x) => ({ ...x.node, indexes: [] })) || []
 
   if (!search.value) {
-    return specs.map((spec) => ({ ...spec, indexes: [] as number[] }))
+    return specs
   }
 
   return fuzzySort

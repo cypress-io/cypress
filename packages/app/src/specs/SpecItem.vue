@@ -13,13 +13,13 @@
         :text="fileName"
         :indexes="indexes.filter((idx) => idx < fileName.length)"
         class="font-medium text-indigo-500 group-hocus:text-indigo-500"
-        highlight-classes="text-jade-400"
+        highlight-classes="text-gray-1000"
       />
       <HighlightedText
         :text="extension"
         :indexes="indexes.filter((idx) => idx >= fileName.length).map(idx => idx - fileName.length)"
         class="font-light group-hocus:text-indigo-500"
-        highlight-classes="text-jade-400"
+        highlight-classes="text-gray-1000"
       />
     </div>
   </div>
