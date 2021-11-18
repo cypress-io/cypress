@@ -309,9 +309,11 @@ commands:
             node_version=<<parameters.version>>
             node_version=${node_version:-$(cat .node-version)}
             echo "Installing Node $node_version"
-            echo "export NODE_VERSION='${node_version}'" >> .bash_profile
-            curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.30.0/install.sh | bash PROFILE=.bash_profile
-            cat .bash_profile
+            echo "export NODE_VERSION='${node_version}'" >> ~/.bash_profile
+            ls -a ~/
+            curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.30.0/install.sh | bash PROFILE=~/.bash_profile
+            ls -a ~/
+            cat ~/.bash_profile
             echo "
               cdnvm() {
                 command cd "$@";
@@ -334,7 +336,7 @@ commands:
               alias cd='cdnvm'
               cd "$PWD"
             " >> ~/.bash_profile
-            cat .bash_profile
+            cat ~/.bash_profile
       - persist_to_workspace:
           root: ~/
           paths:
