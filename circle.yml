@@ -323,8 +323,6 @@ commands:
                     declare node_version
                     node_version=${node_version}
                     export NODE_VERSION=${node_version}
-                    export NVM_DIR="${HOME}/.nvm"
-                    \. "${HOME}/.nvm/nvm.sh" # This loads nvm
                   " >> ~/.bash_profile
                   echo '
                     declare locally_resolved_nvm_version
