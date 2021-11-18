@@ -308,12 +308,10 @@ commands:
           command: |
             node_version=<<parameters.version>>
             node_version=${node_version:-$(cat .node-version)}
-            echo "Installing Node $node_version"
-            echo "" >> ~/.bash_profile
+            echo "Installing NVM"
             curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.30.0/install.sh | bash
-            echo "${NVM_DIR}"
             echo '
-              export NODE_VERSION=${node_version}
+              export NODE_VERSION=$node_version
               export NVM_DIR="$HOME/.nvm"
               \. "$NVM_DIR/nvm.sh" # This loads nvm
 
@@ -338,7 +336,7 @@ commands:
               }
               alias cd="cdnvm"
               cd "$PWD"
-            ' >> try
+            ' >> ~/.bash_profile
             cat ~/.bash_profile
       - persist_to_workspace:
           root: ~/
@@ -349,6 +347,7 @@ commands:
           # https://github.com/nvm-sh/nvm#nvmrc
           name: Install Node
           command: |
+            echo "Installing Node $NODE_VERSION"
             nvm install ${NODE_VERSION} || exit 1
             nvm use ${NODE_VERSION} || exit 1
             nvm alias default ${NODE_VERSION} || exit 1
