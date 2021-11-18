@@ -282,22 +282,31 @@ const props = defineProps<{
   showBrowsers?: boolean
 }>()
 
-const versions = computed(() => {
+const versions = (() => {
   if (!props.gql.versions) {
-    return null
+    return ref(null)
   }
 
-  return {
-    current: {
-      released: useTimeAgo(new Date(props.gql.versions.current.released)).value,
-      version: props.gql.versions.current.version,
-    },
-    latest: {
-      released: useTimeAgo(new Date(props.gql.versions.latest.released)).value,
-      version: props.gql.versions.latest.version,
-    },
-  }
-})
+  const currentReleased = useTimeAgo(new Date(props.gql.versions.current.released))
+  const latestReleased = useTimeAgo(new Date(props.gql.versions.latest.released))
+
+  return computed(() => {
+    if (!props.gql.versions) {
+      return null
+    }
+
+    return {
+      current: {
+        released: currentReleased.value,
+        version: props.gql.versions.current.version,
+      },
+      latest: {
+        released: latestReleased.value,
+        version: props.gql.versions.latest.version,
+      },
+    }
+  })
+})()
 
 const runningOldVersion = computed(() => {
   return props.gql.versions ? props.gql.versions.current.released < props.gql.versions.latest.released : false
