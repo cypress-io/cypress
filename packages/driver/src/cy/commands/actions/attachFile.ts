@@ -1,5 +1,4 @@
 import _ from 'lodash'
-import Promise from 'bluebird'
 
 import $dom from '../../../dom'
 import $errUtils from '../../../cypress/error_utils'
