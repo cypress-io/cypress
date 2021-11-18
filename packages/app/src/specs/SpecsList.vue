@@ -14,8 +14,12 @@
 
     <div class="grid items-center divide-y-1 children:h-40px">
       <div class="grid grid-cols-2 children:text-gray-800 children:font-medium">
-        <div class="flex justify-between items-center">
-          {{ t('specPage.componentSpecsHeader') }}
+        <div
+          class="flex justify-between items-center"
+          data-cy="specs-testing-type-header"
+        >
+          {{ props.gql.currentProject?.currentTestingType === 'component' ?
+            t('specPage.componentSpecsHeader') : t('specPage.e2eSpecsHeader') }}
         </div>
         <div class="flex justify-between items-center">
           <div>{{ t('specPage.gitStatusHeader') }}</div>
@@ -133,6 +137,7 @@ fragment Specs_SpecsList on Query {
   currentProject {
     id
     projectRoot
+    currentTestingType
     specs: specs(first: 100) {
       edges {
         ...SpecNode_SpecsList
