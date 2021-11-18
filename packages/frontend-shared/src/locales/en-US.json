@@ -349,7 +349,10 @@
           "publicLabel": "Public",
           "publicDescription": "Anyone can view recorded test results.",
           "connectProject": "Connect project",
-          "createProject": "Create project"
+          "createProject": "Create project",
+          "placeholderOrganizations": "Pick an organization",
+          "placeholderProjects": "Pick an project",
+          "placeholderProjectsPending": "Pick an organization first"
         }
       }
     },

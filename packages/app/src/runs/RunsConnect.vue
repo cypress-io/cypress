@@ -27,7 +27,13 @@
     </Button>
     <LoginModal
       v-model="isLoginOpen"
-      :gql="gql"
+      :gql="props.gql"
+    />
+    <SelectCloudProjectModal
+      v-if="props.gql.cloudViewer && isProjectConnectOpen"
+      :show="isProjectConnectOpen"
+      :gql="props.gql.cloudViewer"
+      @cancel="isProjectConnectOpen = false"
     />
   </div>
 </template>
@@ -44,6 +50,7 @@ import Button from '@cy/components/Button.vue'
 import LoginModal from '@cy/gql-components/topnav/LoginModal.vue'
 import { useI18n } from '@cy/i18n'
 import type { RunsConnectFragment } from '../generated/graphql'
+import SelectCloudProjectModal from './SelectCloudProjectModal.vue'
 
 const { t } = useI18n()
 
@@ -51,6 +58,7 @@ gql`
 fragment RunsConnect on Query {
   cloudViewer{
     id
+    ...SelectCloudProjectModal
   }
   ...LoginModal
 }
@@ -61,6 +69,7 @@ const props = defineProps<{
 }>()
 
 const isLoginOpen = ref(false)
+const isProjectConnectOpen = ref(false)
 const isLoggedIn = computed(() => Boolean(props.gql.cloudViewer?.id))
 
 function openConnection () {
@@ -69,6 +78,7 @@ function openConnection () {
     isLoginOpen.value = true
   } else {
     // if user is already logged in connect a cloud project
+    isProjectConnectOpen.value = true
   }
 }
 

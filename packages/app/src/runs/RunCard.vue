@@ -1,8 +1,10 @@
 <template>
-  <button
+  <ExternalLink
     :data-e2e="run.id"
     class="block w-full overflow-hidden mb-4 border border-gray-100
   rounded bg-light-50 hocus-default"
+    href="#"
+    :use-default-hocus="false"
   >
     <ListRowHeader :icon="icon">
       <template #header>
@@ -42,12 +44,13 @@
         />
       </template>
     </ListRowHeader>
-  </button>
+  </ExternalLink>
 </template>
 
 <script lang="ts" setup>
 import { computed } from 'vue'
 import ListRowHeader from '@cy/components/ListRowHeader.vue'
+import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import { gql } from '@urql/core'
 import RunResults from './RunResults.vue'
 import type { RunCardFragment } from '../generated/graphql'

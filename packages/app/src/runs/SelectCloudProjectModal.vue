@@ -1,13 +1,18 @@
 <template>
   <StandardModal
+    :model-value="show"
     :title="newProject
       ? t('runs.connect.modal.selectProject.createProject')
       : t('runs.connect.modal.title')"
-    :model-value="show"
+    @update:model-value="emit('cancel')"
   >
     <div class="w-640px">
       <Select
-        :options="[]"
+        v-model="pickedOrganization"
+        :options="organizations"
+        item-value="name"
+        item-key="id"
+        :placeholder="orgPlaceholder"
       >
         <template #label>
           <span class="flex justify-between items-center text-16px leading-24px font-normal">
@@ -25,8 +30,14 @@
       </Select>
       <Select
         v-if="!newProject"
-        class="mt-16px"
-        :options="[]"
+        v-model="pickedProject"
+        class="mt-16px transition-all"
+        :class="pickedOrganization ? undefined : 'opacity-50'"
+        :options="projects"
+        item-value="slug"
+        item-key="id"
+        :disabled="!pickedOrganization"
+        :placeholder="projectPlaceholder"
       >
         <template #label>
           <div class="flex justify-between items-center text-16px leading-24px font-normal">
@@ -50,8 +61,12 @@
             class="flex-grow"
             for="projectName"
           >
-            <span class="text-gray-800">{{ t('runs.connect.modal.selectProject.projectName') }}</span>
-            <span class="text-gray-500 ml-8px">{{ t('runs.connect.modal.selectProject.projectNameDisclaimer') }}</span>
+            <span class="text-gray-800">
+              {{ t('runs.connect.modal.selectProject.projectName') }}
+            </span>
+            <span class="text-gray-500 ml-8px">
+              {{ t('runs.connect.modal.selectProject.projectNameDisclaimer') }}
+            </span>
           </label>
           <a
             class="cursor-pointer text-indigo-500 hover:underline"
@@ -109,7 +124,8 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import { gql } from '@urql/vue'
 import StandardModal from '@cy/components/StandardModal.vue'
 import Button from '@cy/components/Button.vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
@@ -119,11 +135,31 @@ import Radio from '@cy/components/Radio.vue'
 import ConnectIcon from '~icons/cy/chain-link_x16.svg'
 import CreateIcon from '~icons/cy/add-large_x16.svg'
 import { useI18n } from '@cy/i18n'
+import type { SelectCloudProjectModalFragment } from '../generated/graphql'
 
 const { t } = useI18n()
 
-defineProps<{
-  show: boolean
+gql`
+fragment SelectCloudProjectModal on CloudUser {
+  id
+  organizations(first: 10) {
+    nodes {
+      id
+      name
+      projects(first: 10) {
+        nodes {
+          id
+          slug
+        }
+      }
+    }
+  }
+}
+`
+
+const props = defineProps<{
+  show: boolean,
+  gql: SelectCloudProjectModalFragment,
 }>()
 
 const emit = defineEmits<{
@@ -133,6 +169,18 @@ const emit = defineEmits<{
 const newProject = ref(false)
 const projectName = ref('')
 const projectAccess = ref<'private' | 'public'>('private')
+const organizations = computed(() => props.gql.organizations?.nodes || [])
+const pickedOrganization = ref(props.gql.organizations?.nodes.length === 1 ? props.gql.organizations.nodes[0] : undefined)
+
+const projects = computed(() => pickedOrganization.value?.projects?.nodes || [])
+const pickedProject = ref()
+
+const orgPlaceholder = t('runs.connect.modal.selectProject.placeholderOrganizations')
+const projectPlaceholder = computed(() => {
+  return pickedOrganization.value
+    ? t('runs.connect.modal.selectProject.placeholderProjects')
+    : t('runs.connect.modal.selectProject.placeholderProjectsPending')
+})
 
 const organizationUrl = '#'
 </script>
