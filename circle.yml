@@ -428,9 +428,6 @@ commands:
       version:
         type: string
         default: ""
-      arch:
-        type: enum
-        enum: ['linux', 'darwin', 'win32']
     steps:
       - run:
           name: Setup Node
@@ -451,10 +448,12 @@ commands:
               echo "Installing Yarn"
               npm install yarn -g # ensure yarn is installed with the correct node engine
               yarn check-node-version
-      - persist_to_workspace:
-          root: ~/
-          paths:
-            - .nvm
+      # - when:
+
+      # - persist_to_workspace:
+      #     root: ~/
+      #     paths:
+      #       - .nvm
         # node ./scripts/circleci/check-node-version.js
 
         # echo '
@@ -1099,12 +1098,12 @@ jobs:
             - run:
                 name: Stop .only
                 command: yarn stop-only-all
+      - setup-node
       - persist_to_workspace:
           root: ~/
           paths:
             - cypress
-      - setup-node:
-          arch: << parameters.arch >>
+            - .nvm
       # - install-required-node:
       #     arch: << parameters.arch >>
       - verify-build-setup
