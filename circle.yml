@@ -65,7 +65,7 @@ executors:
   windows: &windows-executor
     machine:  
       image: windows-server-2019-vs2019:stable
-      shell: bash.exec -eo pipefail
+      shell: bash.exe -eo pipefail
     resource_class: windows.medium
     environment:
       PLATFORM: windows
