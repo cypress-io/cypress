@@ -15,7 +15,7 @@ import { spawn, execSync } from 'child_process'
 import { transformRequires } from './util/transform-requires'
 import execa from 'execa'
 import { testStaticAssets } from './util/testStaticAssets'
-import performanceTracking from '../../packages/server/test/support/helpers/performance.js'
+import performanceTracking from '../../system-tests/lib/performance'
 
 const CY_ROOT_DIR = path.join(__dirname, '..', '..')
 
