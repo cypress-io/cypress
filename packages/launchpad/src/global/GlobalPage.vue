@@ -66,7 +66,7 @@ import { gql, useMutation } from '@urql/vue'
 import GlobalProjectCard from './GlobalProjectCard.vue'
 import GlobalPageHeader from './GlobalPageHeader.vue'
 import GlobalEmpty from './GlobalEmpty.vue'
-import { GlobalPageFragment, GlobalPage_AddProjectDocument, GlobalPage_RemoveProjectDocument, GlobalProjectCardFragment } from '../generated/graphql'
+import { GlobalPageFragment, GlobalPage_AddProjectDocument, GlobalPage_OpenInIdeDocument, GlobalPage_RemoveProjectDocument, GlobalProjectCardFragment, GlobalPage_OpenInFinderDocument } from '../generated/graphql'
 import StandardModal from '@packages/frontend-shared/src/components/StandardModal.vue'
 import ChooseExternalEditor from '@packages/frontend-shared/src/gql-components/ChooseExternalEditor.vue'
 
@@ -89,20 +89,30 @@ gql`
 mutation GlobalPage_RemoveProject($path: String!) {
   removeProject(path: $path) 
 }
+
+mutation GlobalPage_OpenInIDE ($path: String!) {
+  openInIDE(path: $path)
+}
+
+mutation GlobalPage_OpenInFinder ($path: String!) {
+  openInFinder(path: $path)
+}
 `
 
 const addProject = useMutation(GlobalPage_AddProjectDocument)
+const openInIDE = useMutation(GlobalPage_OpenInIdeDocument)
+const openInFinder = useMutation(GlobalPage_OpenInFinderDocument)
 
 function handleAddProject (path: string) {
   addProject.executeMutation({ path })
 }
 
 function handleOpenInFinder (path: string) {
-  // todo - add gql mutation for this action
+  openInFinder.executeMutation({ path })
 }
 
 function handleOpenInIDE (path: string) {
-  // todo - add gql mutation for this action
+  openInIDE.executeMutation({ path })
 }
 
 const removeProject = useMutation(GlobalPage_RemoveProjectDocument)

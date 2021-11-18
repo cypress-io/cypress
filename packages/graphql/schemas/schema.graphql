@@ -496,6 +496,12 @@ type Mutation {
   logout: Boolean
   openExternal(url: String!): Boolean
 
+  """Open a path in the local file explorer"""
+  openInFinder(path: String!): Boolean
+
+  """Open a path in preferred IDE"""
+  openInIDE(path: String!): Boolean
+
   """show the launchpad windows"""
   reconfigureProject: Boolean!
 

@@ -1,5 +1,6 @@
 import type { CodeGenType, MutationAddProjectArgs, MutationAppCreateConfigFileArgs, MutationSetProjectPreferencesArgs, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
 import type { FindSpecs, FoundBrowser, FoundSpec, FullConfig, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions, Preferences, SettingsOptions } from '@packages/types'
+import execa from 'execa'
 import path from 'path'
 import type { ActiveProjectShape, ProjectShape } from '../data/coreDataShape'
 
@@ -54,6 +55,20 @@ export class ProjectActions {
 
   private set projects (projects: ProjectShape[]) {
     this.ctx.coreData.app.projects = projects
+  }
+
+  openInIDE (projectPath: string) {
+    this.ctx.debug(`opening ${projectPath} in ${this.ctx.coreData.localSettings.preferences.preferredEditorBinary}`)
+
+    if (!this.ctx.coreData.localSettings.preferences.preferredEditorBinary) {
+      return
+    }
+
+    if (this.ctx.coreData.localSettings.preferences.preferredEditorBinary === 'computer') {
+      this.ctx.actions.electron.showItemInFolder(projectPath)
+    }
+
+    execa(this.ctx.coreData.localSettings.preferences.preferredEditorBinary, [projectPath])
   }
 
   async setActiveProject (projectRoot: string) {

@@ -354,5 +354,27 @@ export const mutation = mutationType({
         ctx.actions.electron.showElectronOnAppExit()
       },
     })
+
+    t.field('openInIDE', {
+      description: 'Open a path in preferred IDE',
+      type: 'Boolean',
+      args: {
+        path: nonNull(stringArg()),
+      },
+      resolve: (_, args, ctx) => {
+        ctx.actions.project.openInIDE(args.path)
+      },
+    })
+
+    t.field('openInFinder', {
+      description: 'Open a path in the local file explorer',
+      type: 'Boolean',
+      args: {
+        path: nonNull(stringArg()),
+      },
+      resolve: (_, args, ctx) => {
+        ctx.actions.electron.showItemInFolder(args.path)
+      },
+    })
   },
 })

@@ -1,6 +1,6 @@
 import { DataContext } from '@packages/data-context'
 import os from 'os'
-import type { App } from 'electron'
+import electron, { App } from 'electron'
 
 import specsUtil from './util/specs'
 import type { Editor, FindSpecs, FoundBrowser, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions, PlatformName, Preferences, SettingsOptions } from '@packages/types'
@@ -124,6 +124,9 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
     electronApi: {
       openExternal (url: string) {
         openExternal(url)
+      },
+      showItemInFolder (folder: string) {
+        electron.shell.showItemInFolder(folder)
       },
     },
     localSettingsApi: {
