@@ -310,11 +310,12 @@ commands:
             node_version=${node_version:-$(cat .node-version)}
             echo "Installing NVM"
             curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.30.0/install.sh | bash
-            echo '
-              export NODE_VERSION=$node_version
-              export NVM_DIR="$HOME/.nvm"
+            echo "
+              export NODE_VERSION=${node_version}
+              export NVM_DIR="${HOME}/.nvm"
               \. "$NVM_DIR/nvm.sh" # This loads nvm
-
+            " >> ~/.bash_profile
+            echo '
               cdnvm() {
                 command cd "$@";
 
