@@ -338,7 +338,7 @@ commands:
                         npm install yarn -g
                     elif [[ $(nvm current) != "$locally_resolved_nvm_version" ]]; then
                         echo "locally_resolved_nvm_version does not match current version of $(nvm current). use that instead"
-                        nvm use "${nvm_version}"
+                        nvm use "$node_version"
                     fi
                   ' >> ~/.bash_profile
                   cat ~/.bash_profile
@@ -374,7 +374,7 @@ commands:
                         npm install yarn -g
                     elif [[ $(nvm current) != "$locally_resolved_nvm_version" ]]; then
                         echo "locally_resolved_nvm_version does not match current version of $(nvm current). use that instead"
-                        nvm use "$nvm_version";
+                        nvm use "$node_version";
                     fi
                   ' >> ~/.bash_profile
       - persist_to_workspace:
