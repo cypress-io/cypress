@@ -12,7 +12,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, ComputedRef } from 'vue'
+import { computed, ref } from 'vue'
 import { gql } from '@urql/vue'
 import type { Specs_InlineSpecListFragment } from '../generated/graphql'
 import InlineSpecListHeader from './InlineSpecListHeader.vue'
@@ -55,11 +55,11 @@ const props = defineProps<{
 
 const search = ref('')
 
-const specs: ComputedRef<FuzzyFoundSpec[]> = computed(() => {
-  const specs = props.gql.specs?.edges.map((x) => x.node) || []
+const specs = computed<FuzzyFoundSpec[]>(() => {
+  const specs = props.gql.specs?.edges.map((x) => ({ ...x.node, indexes: [] })) || []
 
   if (!search.value) {
-    return specs.map((spec) => ({ ...spec, indexes: [] as number[] }))
+    return specs
   }
 
   return fuzzySort

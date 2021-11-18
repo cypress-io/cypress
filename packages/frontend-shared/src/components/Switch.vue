@@ -48,5 +48,7 @@ const sizeClasses = {
   },
 }
 
-defineEmits(['update'])
+defineEmits<{
+  (e: 'update', value: boolean): void
+}>()
 </script>

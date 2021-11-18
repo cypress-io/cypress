@@ -6,4 +6,12 @@ import type { DataContext } from '../DataContext'
  */
 export class EnvDataSource {
   constructor (private ctx: DataContext) {}
+
+  get HTTP_PROXY () {
+    return process.env.HTTPS_PROXY || process.env.HTTP_PROXY
+  }
+
+  get NO_PROXY () {
+    return process.env.NO_PROXY
+  }
 }

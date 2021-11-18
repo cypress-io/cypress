@@ -18,7 +18,7 @@
       :text="props.name"
       :indexes="props.indexes"
       class="text-gray-600 font-medium"
-      highlight-classes="text-jade-400"
+      highlight-classes="text-gray-1000"
     />
   </div>
 </template>
