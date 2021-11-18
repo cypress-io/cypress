@@ -3249,6 +3249,7 @@ declare namespace Cypress {
   interface WriteFileOptions extends Loggable {
     flag: string
     encoding: Encodings
+    timeout: number
   }
 
   // Kind of onerous, but has a nice auto-complete.

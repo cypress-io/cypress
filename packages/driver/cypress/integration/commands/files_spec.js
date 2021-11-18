@@ -1,5 +1,6 @@
 const { assertLogLength } = require('../../support/utils')
 const { stripIndent } = require('common-tags')
+const Promise = require('bluebird')
 const { _ } = Cypress
 
 const okResponse = {
@@ -336,6 +337,7 @@ describe('src/cy/commands/files', () => {
           {
             encoding: 'utf8',
             flag: 'w',
+            timeout: 4000,
           },
         )
       })
@@ -352,6 +354,7 @@ describe('src/cy/commands/files', () => {
           {
             encoding: 'ascii',
             flag: 'w',
+            timeout: 4000,
           },
         )
       })
@@ -369,6 +372,7 @@ describe('src/cy/commands/files', () => {
           {
             encoding: null,
             flag: 'w',
+            timeout: 4000,
           },
         )
       })
@@ -385,6 +389,24 @@ describe('src/cy/commands/files', () => {
           {
             encoding: 'ascii',
             flag: 'w',
+            timeout: 4000,
+          },
+        )
+      })
+    })
+
+    it('can take timeout as part of options', () => {
+      Cypress.backend.resolves(okResponse)
+
+      cy.writeFile('foo.txt', 'contents', { timeout: 12345 }).then(() => {
+        expect(Cypress.backend).to.be.calledWith(
+          'write:file',
+          'foo.txt',
+          'contents',
+          {
+            encoding: 'utf8',
+            flag: 'w',
+            timeout: 12345,
           },
         )
       })
@@ -436,6 +458,7 @@ describe('src/cy/commands/files', () => {
             {
               encoding: 'utf8',
               flag: 'a+',
+              timeout: 4000,
             },
           )
         })
@@ -601,6 +624,104 @@ describe('src/cy/commands/files', () => {
 
         cy.writeFile('foo.txt', 'contents')
       })
+
+      it('throws when the driver timeout expires', function (done) {
+        const err = new Error('TimeoutError')
+
+        err.name = 'TimeoutError'
+
+        Cypress.backend.rejects(err)
+
+        cy.on('fail', (err) => {
+          const { lastLog } = this
+
+          assertLogLength(this.logs, 1)
+          expect(lastLog.get('error')).to.eq(err)
+          expect(lastLog.get('state')).to.eq('failed')
+          expect(err.message).to.eq(stripIndent`
+            \`cy.writeFile("foo.txt")\` timed out after waiting \`1000ms\`.
+          `)
+
+          expect(err.docsUrl).to.eq('https://on.cypress.io/writefile')
+
+          done()
+        })
+
+        cy.writeFile('foo.txt', 'contents', { timeout: 1000 })
+      })
+
+      it('throws when the server write is aborted', function (done) {
+        const err = new Error()
+
+        err.aborted = true
+
+        Cypress.backend.rejects(err)
+
+        cy.on('fail', (err) => {
+          const { lastLog } = this
+
+          assertLogLength(this.logs, 1)
+          expect(lastLog.get('error')).to.eq(err)
+          expect(lastLog.get('state')).to.eq('failed')
+          expect(err.message).to.eq(stripIndent`
+            \`cy.writeFile("foo.txt")\` timed out after waiting \`1000ms\`.  
+          `)
+
+          expect(err.docsUrl).to.eq('https://on.cypress.io/writefile')
+
+          done()
+        })
+
+        cy.writeFile('foo.txt', 'contents', { timeout: 1000 })
+      })
     })
+  })
+
+  describe('#writeFile-error', () => {
+    const bigString = JSON.stringify(Cypress._.times((10 ** 6), () => 'hehehehe'), null, 2)
+    const tooBigString = JSON.stringify(Cypress._.times(15000000, '😈'), null, 2) // 72MB
+    // afterEach(() => {
+    //   return new Promise((resolve) => {
+    //     setTimeout(() => {
+    //       resolve(cy.writeFile('./fixtures/my-long-file.txt', bigString))
+    //     }, 5000)
+    //   })
+    // })
+
+    // afterEach(() => {
+    //   return cy.writeFile('./fixtures/my-long-file.txt', bigString)
+    // })
+
+    // afterEach(() => {
+    //   cy.writeFile('./fixtures/my-long-file.txt', bigString)
+    // })
+
+    // afterEach(() => {
+    //   return new Promise((resolve) => {
+    //     setTimeout(() => {
+    //       resolve(cy.writeFile('./fixtures/my-long-file.txt', Cypress._.times(9000000, '😈'), { timeout: 1000 }))
+    //     }, 5000)
+    //   })
+    // })
+
+    // afterEach(() => {
+    //   cy.writeFile('./fixtures/my-long-file.txt', bigString, { timeout: 1 })
+    // })
+
+    // it('writes until timeout', () => {
+    //   cy.visit('/fixtures/dom.html')
+
+    //   cy.get('body').then((bodyElement) => {
+    //     expect(true).to.equal(true)
+    //   })
+
+    //   cy.get('body').then((bodyElement) => {
+    //     expect(true).to.equal(true)
+    //   })
+
+    //   cy.get('body').then((bodyElement) => {
+    //     expect(true).to.equal(true)
+    //   })
+    // })
   })
 })

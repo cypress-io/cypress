@@ -1,3 +1,4 @@
+const { clear } = require('console')
 const path = require('path')
 const { fs } = require('./util/fs')
 
@@ -24,23 +25,33 @@ module.exports = {
     })
   },
 
-  writeFile (projectRoot, file, contents, options = {}) {
+  async writeFile (projectRoot, file, contents, options = {}) {
     const filePath = path.resolve(projectRoot, file)
+    const writeFileAbortController = new AbortController()
     const writeOptions = {
       encoding: options.encoding === undefined ? 'utf8' : options.encoding,
       flag: options.flag || 'w',
+      signal: writeFileAbortController.signal,
     }
 
-    return fs.outputFile(filePath, contents, writeOptions)
-    .then(() => {
-      return {
-        contents,
-        filePath,
-      }
-    })
-    .catch((err) => {
+    let writeTimeout = setTimeout(() => {
+      writeFileAbortController.abort()
+    }, options.timeout === undefined ? 1e9 : options.timeout)
+
+    try {
+      await fs.outputFile(filePath, contents, writeOptions)
+
+      return { contents, filePath }
+    } catch (err) {
       err.filePath = filePath
+
+      if (err.name === 'AbortError') {
+        err.aborted = true
+      }
+
       throw err
-    })
+    } finally {
+      clearTimeout(writeTimeout)
+    }
   },
 }

@@ -93,7 +93,7 @@ export default (Commands, Cypress, cy) => {
       return verifyAssertions()
     },
 
-    writeFile (fileName, contents, encoding, options = {}) {
+    async writeFile (fileName, contents, encoding, options = {}) {
       let userOptions = options
 
       if (_.isObject(encoding)) {
@@ -110,6 +110,7 @@ export default (Commands, Cypress, cy) => {
         encoding: encoding === undefined ? 'utf8' : encoding,
         flag: userOptions.flag ? userOptions.flag : 'w',
         log: true,
+        timeout: 4000,
       })
 
       const consoleProps = {}
@@ -142,24 +143,21 @@ export default (Commands, Cypress, cy) => {
         contents = JSON.stringify(contents, null, 2)
       }
 
-      return Cypress.backend('write:file', fileName, contents, _.pick(options, ['encoding', 'flag']))
-      .then(({ contents, filePath }) => {
-        consoleProps['File Path'] = filePath
-        consoleProps['Contents'] = contents
+      try {
+        await Cypress.backend('write:file', fileName, contents, _.pick(options, ['encoding', 'flag', 'timeout'])).timeout(options.timeout)
+      } catch (err) {
+        if (err.aborted || err.name === 'TimeoutError') {
+          return $errUtils.throwErrByPath('files.timed_out', {
+            onFail: options._log,
+            args: { cmd: 'writeFile', file: fileName, timeout: options.timeout },
+          })
+        }
 
-        return null
-      }).catch(Promise.TimeoutError, () => {
-        return $errUtils.throwErrByPath('files.timed_out', {
-          onFail: options._log,
-          args: { cmd: 'writeFile', file: fileName, timeout: options.timeout },
-        })
-      })
-      .catch((err) => {
         return $errUtils.throwErrByPath('files.unexpected_error', {
           onFail: options._log,
           args: { cmd: 'writeFile', action: 'write', file: fileName, filePath: err.filePath, error: err.message },
         })
-      })
+      }
     },
   })
 }
