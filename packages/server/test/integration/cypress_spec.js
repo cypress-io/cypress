@@ -712,7 +712,7 @@ describe('lib/cypress', () => {
         const found1 = _.find(argsSet, (args) => {
           return _.find(args, (arg) => {
             return arg.message && arg.message.includes(
-              'Browser: \'foo\' was not found on your system or is not supported by Cypress.',
+              'The specified browser was not found on your system or is not supported by Cypress: `foo`',
             )
           })
         })

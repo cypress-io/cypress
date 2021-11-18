@@ -127,12 +127,12 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         - electron
         - firefox
 
-        You can also use a custom browser: https://on.cypress.io/customize-browsers
+        You can also [use a custom browser](https://on.cypress.io/customize-browsers).
 
         Available browsers found on your system are:
         ${arg2}
 
-        Read more about launching browsers: https://on.cypress.io/launching-browsers`
+        Read more about [how to troubleshoot launching browsers](https://on.cypress.io/troubleshooting-launching-browsers).`
 
       if (arg1 === 'canary') {
         str += '\n\n'
@@ -147,7 +147,7 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
       msg = stripIndent`\
         We could not identify a known browser at the path you specified: \`${arg1}\`
 
-        Read more about launching browsers: https://on.cypress.io/launching-browsers
+        Read more about [how to troubleshoot launching browsers](https://on.cypress.io/troubleshooting-launching-browsers).
 
         The output from the command we ran was:`
 
@@ -1084,8 +1084,23 @@ const clone = function (err, options = {}) {
   return obj
 }
 
+const markdownLinkRegex = /\[(.*)\]\((.*)\)(.*)\.?[^\S\r\n]*/gm
+const dotColonRegex = /\.\:/g
+
+/**
+ * Changes markdown links to a more stdout-friendly format. Given the following:
+ *   A line with [a link](https://on.cypress.io) in it.
+ * it will convert it to:
+ *   A line with a link in it: https://on.cypress.io
+ */
+const delinkify = (text) => {
+  return text
+  .replace(markdownLinkRegex, '$1$3: $2')
+  .replace(dotColonRegex, ':')
+}
+
 const log = function (err, color = 'red') {
-  console.log(chalk[color](err.message))
+  console.log(chalk[color](delinkify(err.message)))
 
   if (err.details) {
     console.log('\n', chalk['yellow'](err.details))
