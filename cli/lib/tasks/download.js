@@ -9,6 +9,7 @@ const request = require('@cypress/request')
 const Promise = require('bluebird')
 const requestProgress = require('request-progress')
 const { stripIndent } = require('common-tags')
+const getProxyForUrl = require('proxy-from-env').getProxyForUrl
 
 const { throwFormErrorText, errors } = require('../errors')
 const fs = require('../fs')
@@ -16,28 +17,11 @@ const util = require('../util')
 
 const defaultBaseUrl = 'https://download.cypress.io/'
 
-const getProxyUrl = () => {
-  return process.env.HTTPS_PROXY ||
-    process.env.https_proxy ||
+const getProxyForUrlWithNpmConfig = (url) => {
+  return getProxyForUrl(url) ||
     process.env.npm_config_https_proxy ||
-    process.env.HTTP_PROXY ||
-    process.env.http_proxy ||
     process.env.npm_config_proxy ||
     null
-}
-
-const getRealOsArch = () => {
-  // os.arch() returns the arch for which this node was compiled
-  // we want the operating system's arch instead: x64 or x86
-
-  const osArch = arch()
-
-  if (osArch === 'x86') {
-    // match process.platform output
-    return 'ia32'
-  }
-
-  return osArch
 }
 
 const getBaseUrl = () => {
@@ -79,9 +63,8 @@ const getCA = () => {
 const prepend = (urlPath) => {
   const endpoint = url.resolve(getBaseUrl(), urlPath)
   const platform = os.platform()
-  const arch = getRealOsArch()
 
-  return `${endpoint}?platform=${platform}&arch=${arch}`
+  return `${endpoint}?platform=${platform}&arch=${arch()}`
 }
 
 const getUrl = (version) => {
@@ -205,7 +188,7 @@ const verifyDownloadedFile = (filename, expectedSize, expectedChecksum) => {
 // {filename: ..., downloaded: true}
 const downloadFromUrl = ({ url, downloadDestination, progress, ca }) => {
   return new Promise((resolve, reject) => {
-    const proxy = getProxyUrl()
+    const proxy = getProxyForUrlWithNpmConfig(url)
 
     debug('Downloading package', {
       url,
@@ -357,6 +340,6 @@ const start = (opts) => {
 module.exports = {
   start,
   getUrl,
-  getProxyUrl,
+  getProxyForUrlWithNpmConfig,
   getCA,
 }

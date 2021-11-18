@@ -1,3 +1,4 @@
+const { assertLogLength } = require('../../support/utils')
 const { _, Promise } = Cypress
 let reqQueue = []
 
@@ -734,6 +735,17 @@ describe('src/cy/commands/waiting', () => {
 
           cy.wait('@foo', '@bar')
         })
+
+        it('throws when passed callback function', (done) => {
+          cy.on('fail', (err) => {
+            expect(err.message).to.eq('`cy.wait()` was passed invalid arguments. You cannot pass a function. If you would like to wait on the result of a `cy.wait()`, use `cy.then()`.')
+            expect(err.docsUrl).to.eq('https://on.cypress.io/wait')
+
+            done()
+          })
+
+          cy.wait('@foo', () => {})
+        })
       })
     })
 
@@ -989,7 +1001,7 @@ describe('src/cy/commands/waiting', () => {
 
         it('only logs once', function (done) {
           cy.on('fail', (err) => {
-            expect(this.logs.length).to.eq(1)
+            assertLogLength(this.logs, 1)
             expect(err.message).to.eq('`cy.wait()` could not find a registered alias for: `@foo`.\nYou have not aliased anything yet.')
 
             done()

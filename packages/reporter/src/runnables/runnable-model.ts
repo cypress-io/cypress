@@ -9,7 +9,6 @@ export interface RunnableProps {
 
 export default class Runnable {
   @observable id: string
-  @observable shouldRender: boolean = false
   @observable title?: string
   @observable level: number
   @observable hooks: Array<HookProps> = []

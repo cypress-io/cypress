@@ -126,6 +126,13 @@ describe('driver/src/cypress/index', () => {
     })
   })
 
+  context('.testingType', () => {
+    // https://github.com/cypress-io/cypress/issues/17664
+    it(`should be one of 'e2e' or 'component', not undefined`, () => {
+      expect(Cypress.testingType).to.be.oneOf(['e2e', 'component'])
+    })
+  })
+
   context('private command methods', () => {
     it('throws when using Cypress.addAssertionCommand', () => {
       const addAssertionCommand = () => Cypress.addAssertionCommand()

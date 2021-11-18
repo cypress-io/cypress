@@ -115,7 +115,7 @@ index 0ef9f80..4cd787e 100644
      catch (e) {
          return false;
 diff --git a/node_modules/socket.io-parser/dist/is-binary.js b/node_modules/socket.io-parser/dist/is-binary.js
-index 4b7c234..e444014 100644
+index 4b7c234..f588141 100644
 --- a/node_modules/socket.io-parser/dist/is-binary.js
 +++ b/node_modules/socket.io-parser/dist/is-binary.js
 @@ -1,6 +1,7 @@
@@ -126,10 +126,11 @@ index 4b7c234..e444014 100644
  const withNativeArrayBuffer = typeof ArrayBuffer === "function";
  const isView = (obj) => {
      return typeof ArrayBuffer.isView === "function"
-@@ -15,23 +16,37 @@ const withNativeFile = typeof File === "function" ||
+@@ -14,24 +15,38 @@ const withNativeBlob = typeof Blob === "function" ||
+ const withNativeFile = typeof File === "function" ||
      (typeof File !== "undefined" &&
          toString.call(File) === "[object FileConstructor]");
- /**
++/**
 + * Returns true if obj is an ArrayBuffer.
 + * This extra check is made because the "instanceof ArrayBuffer" check does not work
 + * across different execution contexts.
@@ -138,7 +139,7 @@ index 4b7c234..e444014 100644
 +function isArrayBuffer(obj) {
 +    return typeof obj === 'object' && obj !== null && toString.call(obj) === '[object ArrayBuffer]';
 +}
-+/**
+ /**
   * Returns true if obj is a Buffer, an ArrayBuffer, a Blob or a File.
   *
   * @private
@@ -153,7 +154,7 @@ index 4b7c234..e444014 100644
  }
  exports.isBinary = isBinary;
 -function hasBinary(obj, toJSON) {
-+function hasBinary(obj, known = []) {
++function hasBinary(obj, known = [], toJSON = false) {
      if (!obj || typeof obj !== "object") {
          return false;
      }
@@ -168,12 +169,14 @@ index 4b7c234..e444014 100644
                  return true;
              }
          }
-@@ -43,10 +58,10 @@ function hasBinary(obj, toJSON) {
+@@ -42,11 +57,11 @@ function hasBinary(obj, toJSON) {
+     }
      if (obj.toJSON &&
          typeof obj.toJSON === "function" &&
-         arguments.length === 1) {
+-        arguments.length === 1) {
 -        return hasBinary(obj.toJSON(), true);
-+        return hasBinary(obj.toJSON(), known);
++        arguments.length === 2) {
++        return hasBinary(obj.toJSON(), known, true);
      }
      for (const key in obj) {
 -        if (Object.prototype.hasOwnProperty.call(obj, key) && hasBinary(obj[key])) {

@@ -1,3 +1,55 @@
+# [@cypress/react-v5.10.3](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.10.2...@cypress/react-v5.10.3) (2021-11-01)
+
+
+### Bug Fixes
+
+* **@cypress/react:** throw if using Next.js swc-loader without nodeVersion=system ([#18686](https://github.com/cypress-io/cypress/issues/18686)) ([d274a5b](https://github.com/cypress-io/cypress/commit/d274a5b5d92323cb6a9c9d0af3e41bf40e679ac1))
+
+# [@cypress/react-v5.10.2](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.10.1...@cypress/react-v5.10.2) (2021-10-29)
+
+
+### Bug Fixes
+
+* Next.JS 12 components testing failing with ` TypeError: Cannot read property 'traceChild' of undefined` ([#18648](https://github.com/cypress-io/cypress/issues/18648)) ([cb0cbdf](https://github.com/cypress-io/cypress/commit/cb0cbdf4c35da09a7dedcc4563a242cb4748e994))
+* remove outdated registry link ([#18710](https://github.com/cypress-io/cypress/issues/18710)) ([e2a869d](https://github.com/cypress-io/cypress/commit/e2a869d2a984abb6703aec966dd9124ee693b8c1))
+* **cypress/react:** disable react-refresh for craco setups ([#18517](https://github.com/cypress-io/cypress/issues/18517)) ([ea10795](https://github.com/cypress-io/cypress/commit/ea1079559473fc672b5e0e188b5b54bf8ebe2f98))
+
+# [@cypress/react-v5.10.1](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.10.0...@cypress/react-v5.10.1) (2021-10-04)
+
+
+### Bug Fixes
+
+* configure proper pages directory for next application ([#18009](https://github.com/cypress-io/cypress/issues/18009)) ([70c7c36](https://github.com/cypress-io/cypress/commit/70c7c3678180d5408c144fa37f94ba5f5f8ceeb8))
+* next trace error ([#18189](https://github.com/cypress-io/cypress/issues/18189)) ([db6f909](https://github.com/cypress-io/cypress/commit/db6f9096bd6668db1937d0e38d3928866f6cd5df))
+
+# [@cypress/react-v5.10.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.9.4...@cypress/react-v5.10.0) (2021-09-10)
+
+
+### Features
+
+* allow usage of @react/plugins with cypress.config.js ([#17738](https://github.com/cypress-io/cypress/issues/17738)) ([da4b1e0](https://github.com/cypress-io/cypress/commit/da4b1e06ce33945aabddda0e6e175dc0e1b488a5))
+
+# [@cypress/react-v5.9.4](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.9.3...@cypress/react-v5.9.4) (2021-08-10)
+
+
+### Bug Fixes
+
+* do not throw when alt path is found in next ([#17658](https://github.com/cypress-io/cypress/issues/17658)) ([ee7e203](https://github.com/cypress-io/cypress/commit/ee7e203fa059efeac45c7a18526e563643e76d77)), closes [#17476](https://github.com/cypress-io/cypress/issues/17476)
+
+# [@cypress/react-v5.9.3](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.9.2...@cypress/react-v5.9.3) (2021-08-03)
+
+
+### Bug Fixes
+
+* plugin for next 11.0.2 moved webpack-config ([#17529](https://github.com/cypress-io/cypress/issues/17529)) ([130c086](https://github.com/cypress-io/cypress/commit/130c0864e786ae5172f2c70fdc86664dcaf93083)), closes [#17519](https://github.com/cypress-io/cypress/issues/17519) [#17476](https://github.com/cypress-io/cypress/issues/17476)
+
+# [@cypress/react-v5.9.2](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.9.1...@cypress/react-v5.9.2) (2021-07-20)
+
+
+### Bug Fixes
+
+* improve React `mountHook` type ([#17241](https://github.com/cypress-io/cypress/issues/17241)) ([e40969a](https://github.com/cypress-io/cypress/commit/e40969abe39424585fd2075b17e4e7d189f53c3a))
+
 # [@cypress/react-v5.9.1](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.9.0...@cypress/react-v5.9.1) (2021-06-04)
 
 

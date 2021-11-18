@@ -1,7 +1,7 @@
 const Promise = require('bluebird')
-const $scriptUtils = require('@packages/driver/src/cypress/script_utils')
-const $networkUtils = require('@packages/driver/src/cypress/network_utils')
-const $sourceMapUtils = require('@packages/driver/src/cypress/source_map_utils')
+const $scriptUtils = require('@packages/driver/src/cypress/script_utils').default
+const $networkUtils = require('@packages/driver/src/cypress/network_utils').default
+const $sourceMapUtils = require('@packages/driver/src/cypress/source_map_utils').default
 
 describe('src/cypress/script_utils', () => {
   context('#runScripts', () => {

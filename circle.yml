@@ -9,6 +9,7 @@ macBuildFilters: &macBuildFilters
       only:
         - develop
         - tgriesser/build/root-yarn-install
+        - 9.0-release
 
 defaults: &defaults
   parallelism: 1
@@ -42,6 +43,7 @@ onlyMainBranches: &onlyMainBranches
     branches:
       only:
         - develop
+        - 9.0-release
   requires:
     - create-build-artifacts
 
@@ -49,7 +51,7 @@ executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
     docker:
-      - image: cypress/browsers:node14.16.0-chrome90-ff88
+      - image: cypress/browsers:node16.5.0-chrome94-ff93
     # by default, we use "small" to save on CI costs. bump on a per-job basis if needed.
     resource_class: small
     environment:
@@ -58,7 +60,7 @@ executors:
   # Docker image with non-root "node" user
   non-root-docker-user:
     docker:
-      - image: cypress/browsers:node14.16.0-chrome90-ff88
+      - image: cypress/browsers:node16.5.0-chrome94-ff93
         user: node
     environment:
       PLATFORM: linux
@@ -69,7 +71,7 @@ executors:
   mac:
     macos:
       # Executor should have Node >= required version
-      xcode: "12.2.0"
+      xcode: "13.0.0"
     environment:
       PLATFORM: mac
 
@@ -111,6 +113,7 @@ commands:
                   mkdir -p /tmp/node_modules_cache
                   mv ~/cypress/node_modules /tmp/node_modules_cache/root_node_modules
                   mv ~/cypress/cli/node_modules /tmp/node_modules_cache/cli_node_modules
+                  mv ~/cypress/system-tests/node_modules /tmp/node_modules_cache/system-tests_node_modules
                   mv ~/cypress/globbed_node_modules /tmp/node_modules_cache/globbed_node_modules
 
   build-and-persist:
@@ -141,6 +144,7 @@ commands:
             if [[ -d "/tmp/node_modules_cache" ]]; then
               mv /tmp/node_modules_cache/root_node_modules ~/cypress/node_modules
               mv /tmp/node_modules_cache/cli_node_modules ~/cypress/cli/node_modules
+              mv /tmp/node_modules_cache/system-tests_node_modules ~/cypress/system-tests/node_modules
               mv /tmp/node_modules_cache/globbed_node_modules ~/cypress/globbed_node_modules
               rm -rf /tmp/node_modules_cache
             fi
@@ -193,6 +197,7 @@ commands:
                 paths:
                   - node_modules
                   - cli/node_modules
+                  - system-tests/node_modules
                   - globbed_node_modules
       - unless:
           condition: <<parameters.is-mac>>
@@ -258,31 +263,33 @@ commands:
           # Deps needed by circle-cache.js, before we "yarn" or unpack cached node_modules
           name: Cache Helper Deps
           working_directory: ~/
-          command: npm i globby fs-extra minimist fast-json-stable-stringify
+          command: npm i globby@11.0.4 fs-extra@10.0.0 minimist@1.2.5 fast-json-stable-stringify@2.1.0
 
   install-required-node:
     # https://discuss.circleci.com/t/switch-nodejs-version-on-machine-executor-solved/26675/2
-    description: Install Node version matching .node-version
+    description: Install Node version
+    parameters:
+      version:
+        type: string
+        default: ""
     steps:
       - run:
-          name: Install NVM
+          name: Install NVM + Node
           # TODO: determine why we get the missing .nvmrc file error
           command: |
-            export NODE_VERSION=$(cat .node-version)
+            export NODE_VERSION=<<parameters.version>>
+            export NODE_VERSION=${NODE_VERSION:-$(cat .node-version)}
             echo "Installing Node $NODE_VERSION"
+            echo $NODE_VERSION > .node-version
             cp .node-version .nvmrc
             curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.35.3/install.sh | bash
-      - run:
-          # https://github.com/nvm-sh/nvm#nvmrc
-          name: Install Node
-          command: |
             . ./scripts/load-nvm.sh
             echo "before nvm install"
-            nvm install
+            nvm install $NODE_VERSION
             echo "before nvm use"
-            nvm use
+            nvm use $NODE_VERSION
             echo "before nvm alias default"
-            nvm alias default
+            nvm alias default $NODE_VERSION
             node --version
 
   install-chrome:
@@ -303,6 +310,7 @@ commands:
             dpkg -i /usr/src/google-chrome-<<parameters.channel>>_<<parameters.version>>_amd64.deb ; \
             apt-get install -f -y && \
             rm -f /usr/src/google-chrome-<<parameters.channel>>_<<parameters.version>>_amd64.deb
+            which google-chrome-<<parameters.channel>> || (printf "\n\033[0;31mChrome was not successfully downloaded - bailing\033[0m\n\n" && exit 1)
             echo "Location of Google Chrome Installation: `which google-chrome-<<parameters.channel>>`"
             echo "Google Chrome Version: `google-chrome-<<parameters.channel>> --version`"
 
@@ -373,6 +381,7 @@ commands:
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             $cmd yarn workspace @packages/runner cypress:run --record --parallel --group runner-integration-<<parameters.browser>> --browser <<parameters.browser>>
+      - verify-mocha-results
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
@@ -407,13 +416,14 @@ commands:
             else
               echo "skipping percy screenshots uploading"
             fi
+      - verify-mocha-results
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
           path: ./packages/runner-ct/cypress/videos
       - store-npm-logs
 
-  run-e2e-tests:
+  run-system-tests:
     parameters:
       browser:
         description: browser shortname to target
@@ -421,7 +431,21 @@ commands:
     steps:
       - restore_cached_workspace
       - run:
-          command: yarn workspace @packages/server test ./test/e2e/$(( $CIRCLE_NODE_INDEX ))_*spec* --browser <<parameters.browser>>
+          name: Run system tests
+          command: |
+            ALL_SPECS=`circleci tests glob "/root/cypress/system-tests/test/*spec*"`
+            SPECS=
+            for file in $ALL_SPECS; do
+              # filter out non_root tests, they have their own stage
+              if [[ "$file" == *"non_root"* ]]; then
+                echo "Skipping $file"
+                continue
+              fi
+              SPECS="$SPECS $file"
+            done
+            SPECS=`echo $SPECS | xargs -n 1 | circleci tests split --split-by=timings`
+            echo SPECS=$SPECS
+            yarn workspace @tooling/system-tests test:ci $SPECS --browser <<parameters.browser>>
       - verify-mocha-results
       - store_test_results:
           path: /tmp/cypress
@@ -535,7 +559,7 @@ commands:
           working_directory: /tmp/<<parameters.repo>>
           # force installing the freshly built binary
           command: |
-            CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i ~/cypress/cypress.tgz && [[ -f yarn.lock ]] && yarn
+            CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i --legacy-peer-deps ~/cypress/cypress.tgz && [[ -f yarn.lock ]] && yarn
       - run:
           name: Print Cypress version
           working_directory: /tmp/<<parameters.repo>>
@@ -665,7 +689,7 @@ commands:
               CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip yarn add -D ~/cypress/cypress.tgz
             else
               npm install
-              CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm install ~/cypress/cypress.tgz
+              CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm install --legacy-peer-deps ~/cypress/cypress.tgz
             fi
           working_directory: /tmp/<<parameters.repo>>
       - run:
@@ -817,7 +841,7 @@ commands:
           paths:
             - cypress/binary-url.json
 
-  build-npm-package:
+  build-cypress-npm-package:
     steps:
       - run:
           name: bump NPM version
@@ -836,13 +860,12 @@ commands:
       - run:
           name: pack NPM package
           working_directory: cli/build
-          command: yarn pack
+          command: yarn pack --filename cypress.tgz
       - run:
           name: list created NPM package
           working_directory: cli/build
           command: ls -l
-      # created file should have filename cypress-<version>.tgz
-      - run: cp cli/build/cypress-v*.tgz cypress.tgz
+      - run: cp cli/build/cypress.tgz cypress.tgz
       - store-npm-logs
       - run: pwd
       - run: ls -l
@@ -939,11 +962,11 @@ jobs:
             fi
       - wait-on-circle-jobs:
           job-names: >
-            desktop-gui-integration-tests-2x,
+            desktop-gui-integration-tests-7x,
             desktop-gui-component-tests,
             cli-visual-tests,
             runner-integration-tests-chrome,
-            runner-ct-integration-tests-chrome
+            runner-ct-integration-tests-chrome,
             reporter-integration-tests,
       - run: yarn percy build:finalize
 
@@ -987,8 +1010,6 @@ jobs:
       - run: yarn lerna run build-prod --stream
       # run unit tests from each individual package
       - run: yarn test
-      # check for compile errors with the releaserc scripts
-      - run: yarn test-npm-package-release-script
       - verify-mocha-results:
           expectedResultCount: 9
       - store_test_results:
@@ -997,6 +1018,14 @@ jobs:
       - store_artifacts:
           path: cli/test/html
       - store-npm-logs
+
+  unit-tests-release:
+    <<: *defaults
+    resource_class: medium
+    parallelism: 1
+    steps:
+      - restore_cached_workspace
+      - run: yarn test-npm-package-release-script
 
   lint-types:
     <<: *defaults
@@ -1030,18 +1059,6 @@ jobs:
           path: /tmp/cypress
       - store-npm-logs
 
-  server-ct-unit-tests:
-    <<: *defaults
-    parallelism: 1
-    steps:
-      - restore_cached_workspace
-      - run: yarn test-unit --scope @packages/server-ct
-      - verify-mocha-results:
-          expectedResultCount: 1
-      - store_test_results:
-          path: /tmp/cypress
-      - store-npm-logs
-
   server-integration-tests:
     <<: *defaults
     resource_class: medium
@@ -1069,37 +1086,37 @@ jobs:
           path: /tmp/artifacts
       - store-npm-logs
 
-  server-e2e-tests-chrome:
+  system-tests-chrome:
     <<: *defaults
     resource_class: medium
     parallelism: 8
     steps:
-      - run-e2e-tests:
+      - run-system-tests:
           browser: chrome
 
-  server-e2e-tests-electron:
+  system-tests-electron:
     <<: *defaults
     resource_class: medium
     parallelism: 8
     steps:
-      - run-e2e-tests:
+      - run-system-tests:
           browser: electron
 
-  server-e2e-tests-firefox:
+  system-tests-firefox:
     <<: *defaults
     resource_class: medium
     parallelism: 8
     steps:
-      - run-e2e-tests:
+      - run-system-tests:
           browser: firefox
 
-  server-e2e-tests-non-root:
+  system-tests-non-root:
     <<: *defaults
     resource_class: medium
     steps:
       - restore_cached_workspace
       - run:
-          command: yarn workspace @packages/server test ./test/e2e/non_root*spec* --browser electron
+          command: yarn workspace @tooling/system-tests test:ci "test/non_root*spec*" --browser electron
       - verify-mocha-results
       - store_test_results:
           path: /tmp/cypress
@@ -1126,6 +1143,7 @@ jobs:
 
   runner-integration-tests-electron:
     <<: *defaults
+    resource_class: medium
     parallelism: 2
     steps:
       - run-runner-integration-tests:
@@ -1150,6 +1168,7 @@ jobs:
 
   driver-integration-tests-chrome-beta:
     <<: *defaults
+    resource_class: medium
     parallelism: 5
     steps:
       - run-driver-integration-tests:
@@ -1172,9 +1191,9 @@ jobs:
       - run-driver-integration-tests:
           browser: electron
 
-  desktop-gui-integration-tests-2x:
+  desktop-gui-integration-tests-7x:
     <<: *defaults
-    parallelism: 2
+    parallelism: 7
     steps:
       - restore_cached_workspace
       - run:
@@ -1271,9 +1290,6 @@ jobs:
           name: Build
           command: yarn workspace @cypress/webpack-preprocessor build
       - run:
-          name: Run tests
-          command: yarn workspace @cypress/webpack-preprocessor test
-      - run:
           name: Test babelrc
           command: yarn test
           working_directory: npm/webpack-preprocessor/examples/use-babelrc
@@ -1298,6 +1314,9 @@ jobs:
           name: Test React app
           command: yarn test
           working_directory: npm/webpack-preprocessor/examples/react-app
+      - run:
+          name: Run tests
+          command: yarn workspace @cypress/webpack-preprocessor test
       - store-npm-logs
 
   npm-webpack-dev-server:
@@ -1339,8 +1358,16 @@ jobs:
           name: Build
           command: yarn workspace @cypress/vue build
       - run:
-          name: Run tests
-          command: yarn test-ci
+          name: Type Check
+          command: yarn typecheck
+          working_directory: npm/vue
+      - run:
+          name: Run component tests
+          command: yarn test:ci:ct
+          working_directory: npm/vue
+      - run:
+          name: Run e2e tests
+          command: yarn test:ci:e2e
           working_directory: npm/vue
       - store_test_results:
           path: npm/vue/test_results
@@ -1443,20 +1470,27 @@ jobs:
       <<: *defaults
       steps:
         - restore_cached_workspace
+        - install-required-node:
+            version: "16.10"
         - run:
-            name: Build
-            command: yarn workspace @cypress/schematic build:all
-        - run:
-            name: Install @angular/cli
-            command: yarn policies set-version 1.19.0 && yarn add --dev @angular/cli
+            name: Build + Install
+            command: |
+              . ../../scripts/load-nvm.sh
+              yarn workspace @cypress/schematic build:all
+              yarn policies set-version 1.19.0
+              yarn add --dev @angular/cli
             working_directory: npm/cypress-schematic
         - run:
             name: Launch
-            command: yarn launch:test
+            command: |
+              . ../../scripts/load-nvm.sh
+              yarn launch:test
             working_directory: npm/cypress-schematic
         - run:
             name: Run unit tests
-            command: yarn test
+            command: |
+              . ../../scripts/load-nvm.sh
+              yarn test
             working_directory: npm/cypress-schematic
         - store-npm-logs
 
@@ -1476,11 +1510,11 @@ jobs:
     steps:
       - restore_cached_workspace
       - build-binary
-      - build-npm-package
+      - build-cypress-npm-package
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "9.0-release" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -1775,7 +1809,7 @@ jobs:
           name: Install Cypress
           working_directory: /tmp/cypress-test-tiny
           # force installing the freshly built binary
-          command: CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i ~/cypress/cypress.tgz
+          command: CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i --legacy-peer-deps ~/cypress/cypress.tgz
       - run:
           name: Run test project
           working_directory: /tmp/cypress-test-tiny
@@ -1872,6 +1906,7 @@ jobs:
           repo: cypress-example-conduit-app
           browser: chrome
           command: "npm run cypress:run"
+          wait-on: http://localhost:3000
 
   "test-binary-against-api-testing-firefox":
     <<: *defaults
@@ -1973,6 +2008,10 @@ linux-workflow: &linux-workflow
     - unit-tests:
         requires:
           - build
+    - unit-tests-release:
+        context: test-runner:npm-release
+        requires:
+          - build
     - server-unit-tests:
         requires:
           - build
@@ -1982,16 +2021,16 @@ linux-workflow: &linux-workflow
     - server-performance-tests:
         requires:
           - build
-    - server-e2e-tests-chrome:
+    - system-tests-chrome:
         requires:
           - build
-    - server-e2e-tests-electron:
+    - system-tests-electron:
         requires:
           - build
-    - server-e2e-tests-firefox:
+    - system-tests-firefox:
         requires:
           - build
-    - server-e2e-tests-non-root:
+    - system-tests-non-root:
         executor: non-root-docker-user
         requires:
           - build
@@ -2020,7 +2059,7 @@ linux-workflow: &linux-workflow
         requires:
           - build
 
-    - desktop-gui-integration-tests-2x:
+    - desktop-gui-integration-tests-7x:
         requires:
           - build
     - desktop-gui-component-tests:
@@ -2072,6 +2111,7 @@ linux-workflow: &linux-workflow
     # Any attempts to automate this are welcome
     # If CircleCI provided an "after all" hook, then this wouldn't be necessary
     - npm-release:
+        context: test-runner:npm-release
         requires:
           - build
           - npm-eslint-plugin-dev
@@ -2089,7 +2129,7 @@ linux-workflow: &linux-workflow
           - reporter-integration-tests
           - Linux lint
           - desktop-gui-component-tests
-          - desktop-gui-integration-tests-2x
+          - desktop-gui-integration-tests-7x
           - runner-ct-integration-tests-chrome
           - runner-integration-tests-firefox
           - runner-integration-tests-chrome
@@ -2097,14 +2137,15 @@ linux-workflow: &linux-workflow
           - driver-integration-tests-firefox
           - driver-integration-tests-chrome
           - driver-integration-tests-electron
-          - server-e2e-tests-non-root
-          - server-e2e-tests-firefox
-          - server-e2e-tests-electron
-          - server-e2e-tests-chrome
+          - system-tests-non-root
+          - system-tests-firefox
+          - system-tests-electron
+          - system-tests-chrome
           - server-performance-tests
           - server-integration-tests
           - server-unit-tests
           - unit-tests
+          - unit-tests-release
           - cli-visual-tests
 
     # various testing scenarios, like building full binary
@@ -2115,6 +2156,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - 9.0-release
         requires:
           - build
     - test-kitchensink:
@@ -2126,6 +2168,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - 9.0-release
         requires:
           - build
     - create-build-artifacts:
@@ -2175,6 +2218,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - 9.0-release
         requires:
           - create-build-artifacts
     - test-npm-module-and-verify-binary:
@@ -2182,6 +2226,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - 9.0-release
         requires:
           - create-build-artifacts
     - test-binary-against-staging:
@@ -2190,6 +2235,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - 9.0-release
         requires:
           - create-build-artifacts
 
@@ -2214,6 +2260,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - 9.0-release
         requires:
           - create-build-artifacts
 
@@ -2285,6 +2332,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
+              - 9.0-release
         requires:
           - darwin-create-build-artifacts
 
@@ -2296,6 +2344,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
+              - 9.0-release
         requires:
           - darwin-create-build-artifacts
 

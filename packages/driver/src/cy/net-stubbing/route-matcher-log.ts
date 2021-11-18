@@ -1,6 +1,6 @@
 import _ from 'lodash'
 
-import {
+import type {
   RouteMatcherOptions,
   StaticResponse,
 } from '@packages/net-stubbing/lib/types'

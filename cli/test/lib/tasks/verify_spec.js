@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-properties */
 require('../../spec_helper')
 
 const path = require('path')

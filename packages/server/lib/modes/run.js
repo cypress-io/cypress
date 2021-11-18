@@ -11,10 +11,9 @@ const logSymbols = require('log-symbols')
 
 const recordMode = require('./record')
 const errors = require('../errors')
-const { ProjectBase } = require('../project-base')
 const Reporter = require('../reporter')
 const browserUtils = require('../browsers')
-const openProject = require('../open_project')
+const { openProject } = require('../open_project')
 const videoCapture = require('../video_capture')
 const { fs } = require('../util/fs')
 const runEvents = require('../plugins/run_events')
@@ -543,8 +542,8 @@ const getChromeProps = (writeVideoFrame) => {
 const getElectronProps = (isHeaded, writeVideoFrame, onError) => {
   return _
   .chain({
-    width: 1920,
-    height: 1080,
+    width: 1280,
+    height: 720,
     show: isHeaded,
     onCrashed () {
       const err = errors.get('RENDERER_CRASHED')
@@ -606,32 +605,37 @@ const openProjectCreate = (projectRoot, socketId, args) => {
     onError: args.onError,
   }
 
-  return openProject
-  .create(projectRoot, args, options)
-  .catch({ portInUse: true }, (err) => {
-    // TODO: this needs to move to call exitEarly
-    // so we record the failure in CI
-    return errors.throw('PORT_IN_USE_LONG', err.port)
+  return openProject.create(projectRoot, args, options)
+}
+
+async function checkAccess (folderPath) {
+  return fs.access(folderPath, fs.W_OK).catch((err) => {
+    if (['EACCES', 'EPERM'].includes(err.code)) {
+      // we cannot write due to folder permissions
+      return errors.warning('FOLDER_NOT_WRITABLE', folderPath)
+    }
+
+    throw err
   })
 }
 
-const createAndOpenProject = function (socketId, options) {
+const createAndOpenProject = async (socketId, options) => {
   const { projectRoot, projectId } = options
 
-  return ProjectBase
-  .ensureExists(projectRoot, options)
-  .then(() => {
-    // open this project without
-    // adding it to the global cache
-    return openProjectCreate(projectRoot, socketId, options)
-  })
-  .call('getProject')
+  await checkAccess(projectRoot)
+
+  return openProjectCreate(projectRoot, socketId, options)
+  .then((open_project) => open_project.getProject())
   .then((project) => {
-    return Promise.props({
+    return Promise.all([
       project,
-      config: project.getConfig(),
-      projectId: getProjectId(project, projectId),
-    })
+      project.getConfig(),
+      getProjectId(project, projectId),
+    ]).then(([project, config, projectId]) => ({
+      project,
+      config,
+      projectId,
+    }))
   })
 }
 
@@ -973,10 +977,14 @@ module.exports = {
       return project.onWarning
     }
 
+    debug('browser launched')
+
     return openProject.launch(browser, spec, browserOpts)
   },
 
   navigateToNextSpec (spec) {
+    debug('navigating to next spec')
+
     return openProject.changeUrlToSpec(spec)
   },
 
@@ -1083,10 +1091,7 @@ module.exports = {
         // If we do not launch the browser,
         // we tell it that we are ready
         // to receive the next spec
-        return this.navigateToNextSpec(options.spec)
-        .tap(() => {
-          debug('navigated to next spec')
-        })
+        return Promise.resolve(this.navigateToNextSpec(options.spec))
       }
 
       return Promise.join(
@@ -1094,10 +1099,7 @@ module.exports = {
         .tap(() => {
           debug('socket connected', { socketId })
         }),
-        this.launchBrowser(options)
-        .tap(() => {
-          debug('browser launched')
-        }),
+        this.launchBrowser(options),
       )
       .timeout(browserTimeout)
       .catch(Promise.TimeoutError, (err) => {
@@ -1268,11 +1270,6 @@ module.exports = {
   },
 
   runSpecs (options = {}) {
-    _.defaults(options, {
-      // only non-Electron browsers run headed by default
-      headed: options.browser.name !== 'electron',
-    })
-
     const { config, browser, sys, headed, outputPath, specs, specPattern, beforeSpecRun, afterSpecRun, runUrl, parallel, group, tag, testingType } = options
 
     const isHeadless = !headed
@@ -1486,8 +1483,8 @@ module.exports = {
   },
 
   findSpecs (config, specPattern) {
-    return specsUtil
-    .find(config, specPattern)
+    return specsUtil.default
+    .findSpecs(config, specPattern)
     .tap((specs = []) => {
       if (debug.enabled) {
         const names = _.map(specs, 'name')
@@ -1561,10 +1558,16 @@ module.exports = {
           trashAssets(config),
         ])
         .spread((sys = {}, browser = {}, specs = []) => {
-        // return only what is return to the specPattern
+          // return only what is return to the specPattern
           if (specPattern) {
-            specPattern = specsUtil.getPatternRelativeToProjectRoot(specPattern, projectRoot)
+            specPattern = specsUtil.default.getPatternRelativeToProjectRoot(specPattern, projectRoot)
           }
+
+          specs = specs.filter((spec) => {
+            return options.testingType === 'component'
+              ? spec.specType === 'component'
+              : spec.specType === 'integration'
+          })
 
           if (!specs.length) {
             // did we use the spec pattern?
@@ -1576,14 +1579,12 @@ module.exports = {
             }
           }
 
-          if (browser.family === 'chromium') {
-            chromePolicyCheck.run(onWarning)
+          if (browser.unsupportedVersion && browser.warning) {
+            errors.throw('UNSUPPORTED_BROWSER_VERSION', browser.warning)
           }
 
-          if (options.testingType === 'component') {
-            specs = specs.filter((spec) => {
-              return spec.specType === 'component'
-            })
+          if (browser.family === 'chromium') {
+            chromePolicyCheck.run(onWarning)
           }
 
           const runAllSpecs = ({ beforeSpecRun, afterSpecRun, runUrl, parallel }) => {

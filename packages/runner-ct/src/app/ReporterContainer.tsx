@@ -39,7 +39,6 @@ export const ReporterContainer = namedObserver('ReporterContainer',
         specRunId={props.state.specRunId}
         allSpecs={props.state.multiSpecs}
         error={errorMessages.reporterError(props.state.scriptError, props.state.spec.relative)}
-        firefoxGcInterval={props.config.firefoxGcInterval}
         resetStatsOnSpecChange={props.state.runMode === 'single'}
         renderReporterHeader={renderReporterHeader}
         experimentalStudioEnabled={false}

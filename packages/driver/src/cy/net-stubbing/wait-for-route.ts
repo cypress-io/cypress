@@ -1,4 +1,4 @@
-import {
+import type {
   Interception,
   InterceptionState,
 } from './types'

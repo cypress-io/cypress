@@ -1,7 +1,8 @@
 import sinon from 'sinon'
 import $ from 'jquery'
 import driver from '@packages/driver'
-import { eventManager } from '@packages/runner-shared'
+import { eventManager } from '../event-manager'
+import { dom } from '../dom'
 
 import { StudioRecorder, studioRecorder } from './studio-recorder'
 
@@ -9,6 +10,8 @@ const createEvent = (props) => {
   return {
     isTrusted: true,
     type: 'click',
+    preventDefault: sinon.stub(),
+    stopPropagation: sinon.stub(),
     ...props,
   }
 }
@@ -16,6 +19,9 @@ const createEvent = (props) => {
 describe('StudioRecorder', () => {
   const cyVisitStub = sinon.stub()
   const getSelectorStub = sinon.stub().returns('.selector')
+  const setOnlyTestIdStub = sinon.stub()
+  const setOnlySuiteIdStub = sinon.stub()
+
   let instance
 
   beforeEach(() => {
@@ -23,6 +29,9 @@ describe('StudioRecorder', () => {
 
     sinon.stub(instance, 'attachListeners')
     sinon.stub(instance, 'removeListeners')
+
+    sinon.stub(dom, 'closeStudioAssertionsMenu')
+    sinon.stub(dom, 'openStudioAssertionsMenu')
 
     driver.$ = $
 
@@ -33,6 +42,10 @@ describe('StudioRecorder', () => {
       },
       SelectorPlayground: {
         getSelector: getSelectorStub,
+      },
+      runner: {
+        setOnlyTestId: setOnlyTestIdStub,
+        setOnlySuiteId: setOnlySuiteIdStub,
       },
       env: () => null,
     })
@@ -61,6 +74,7 @@ describe('StudioRecorder', () => {
 
       expect(instance.testId).to.equal('r2')
       expect(instance.hasRunnableId).to.be.true
+      expect(instance.state.testId).to.equal('r2')
     })
 
     it('does not clear suite id', () => {
@@ -77,6 +91,7 @@ describe('StudioRecorder', () => {
 
       expect(instance.suiteId).to.equal('r1')
       expect(instance.hasRunnableId).to.be.true
+      expect(instance.state.suiteId).to.equal('r1')
     })
 
     it('clears test id', () => {
@@ -84,6 +99,141 @@ describe('StudioRecorder', () => {
       instance.setSuiteId('r1')
 
       expect(instance.testId).to.be.null
+    })
+  })
+
+  context('#initialize', () => {
+    const config = {
+      spec: {
+        absolute: '/path/to/spec.js',
+      },
+    }
+
+    it('restores state, grabs config info, and initializes driver when extending test', () => {
+      const state = {
+        studio: {
+          testId: 'r2',
+          suiteId: null,
+          url: null,
+        },
+      }
+
+      instance.initialize(config, state)
+
+      expect(instance.testId).to.equal('r2')
+      expect(instance.absoluteFile).to.equal('/path/to/spec.js')
+      expect(instance.isLoading).to.be.true
+      expect(setOnlyTestIdStub).to.be.calledWith('r2')
+    })
+
+    it('restores state, grabs config info, and initializes driver when adding to suite', () => {
+      const state = {
+        studio: {
+          testId: null,
+          suiteId: 'r1',
+          url: 'https://example.com',
+        },
+      }
+
+      instance.initialize(config, state)
+
+      expect(instance.suiteId).to.equal('r1')
+      expect(instance.url).to.equal('https://example.com')
+      expect(instance.absoluteFile).to.equal('/path/to/spec.js')
+      expect(instance.isLoading).to.be.true
+      expect(setOnlySuiteIdStub).to.be.calledWith('r1')
+    })
+
+    it('grabs config info and initializes driver when state already exists while extending test', () => {
+      instance.setTestId('r2')
+
+      instance.initialize(config, {})
+
+      expect(instance.absoluteFile).to.equal('/path/to/spec.js')
+      expect(instance.isLoading).to.be.true
+      expect(setOnlyTestIdStub).to.be.calledWith('r2')
+    })
+
+    it('grabs config info and initializes driver when state already exists while adding to suite', () => {
+      instance.setSuiteId('r1')
+
+      instance.initialize(config, {})
+
+      expect(instance.absoluteFile).to.equal('/path/to/spec.js')
+      expect(instance.isLoading).to.be.true
+      expect(setOnlySuiteIdStub).to.be.calledWith('r1')
+    })
+  })
+
+  context('#interceptTest', () => {
+    it('grabs test data when extending test', () => {
+      const invocationDetails = {
+        absoluteFile: '/path/to/spec',
+        line: 20,
+        column: 5,
+      }
+
+      const test = {
+        id: 'r2',
+        title: 'my test',
+        invocationDetails,
+      }
+
+      instance.setTestId('r2')
+
+      instance.interceptTest(test)
+
+      expect(instance.fileDetails).to.equal(invocationDetails)
+      expect(instance.runnableTitle).to.equal('my test')
+    })
+
+    it('grabs test and suite data when adding to suite', () => {
+      const invocationDetails = {
+        absoluteFile: '/path/to/spec',
+        line: 20,
+        column: 5,
+      }
+
+      const suite = {
+        id: 'r2',
+        title: 'my suite',
+      }
+
+      const test = {
+        id: 'r3',
+        title: 'my test',
+        invocationDetails,
+        parent: suite,
+      }
+
+      instance.setSuiteId('r2')
+
+      instance.interceptTest(test)
+
+      expect(instance.testId).to.equal('r3')
+      expect(instance.fileDetails).to.equal(invocationDetails)
+      expect(instance.runnableTitle).to.equal('my suite')
+    })
+
+    it('does not grab parent title when adding to root', () => {
+      const root = {
+        id: 'r1',
+        title: '',
+      }
+
+      const test = {
+        id: 'r2',
+        title: 'my test',
+        parent: root,
+      }
+
+      instance.setSuiteId('r1')
+
+      instance.interceptTest(test)
+
+      expect(instance.testId).to.equal('r2')
+      expect(instance.fileDetails).to.be.null
+      expect(instance.runnableTitle).to.be.null
     })
   })
 
@@ -262,9 +412,13 @@ describe('StudioRecorder', () => {
         line: 10,
         column: 4,
       }
+      const absoluteFile = '/path/to/spec.js'
+      const runnableTitle = 'my test'
       const logs = ['log 1', 'log 2']
 
       instance.setFileDetails(fileDetails)
+      instance.setAbsoluteFile(absoluteFile)
+      instance.setRunnableTitle(runnableTitle)
       instance.logs = logs
       instance.testId = 'r2'
 
@@ -272,8 +426,11 @@ describe('StudioRecorder', () => {
 
       expect(eventManager.emit).to.be.calledWith('studio:save', {
         fileDetails,
+        absoluteFile,
+        runnableTitle,
         commands: logs,
         isSuite: false,
+        isRoot: false,
         testName: null,
       })
     })
@@ -284,18 +441,46 @@ describe('StudioRecorder', () => {
         line: 10,
         column: 4,
       }
+      const absoluteFile = '/path/to/spec.js'
+      const runnableTitle = 'my suite'
       const logs = ['log 1', 'log 2']
 
       instance.setFileDetails(fileDetails)
+      instance.setAbsoluteFile(absoluteFile)
+      instance.setRunnableTitle(runnableTitle)
+      instance.logs = logs
+      instance.suiteId = 'r2'
+
+      instance.save('new test name')
+
+      expect(eventManager.emit).to.be.calledWith('studio:save', {
+        fileDetails,
+        absoluteFile,
+        runnableTitle,
+        commands: logs,
+        isSuite: true,
+        isRoot: false,
+        testName: 'new test name',
+      })
+    })
+
+    it('emits studio:save with relevant suite information for root suite', () => {
+      const absoluteFile = '/path/to/spec.js'
+      const logs = ['log 1', 'log 2']
+
+      instance.setAbsoluteFile(absoluteFile)
       instance.logs = logs
       instance.suiteId = 'r1'
 
       instance.save('new test name')
 
       expect(eventManager.emit).to.be.calledWith('studio:save', {
-        fileDetails,
+        fileDetails: null,
+        absoluteFile,
+        runnableTitle: null,
         commands: logs,
         isSuite: true,
+        isRoot: true,
         testName: 'new test name',
       })
     })
@@ -313,6 +498,7 @@ describe('StudioRecorder', () => {
       instance.visitUrl('example.com')
 
       expect(instance.url).to.equal('example.com')
+      expect(instance.state.url).to.equal('example.com')
       expect(cyVisitStub).to.be.calledWith('example.com')
     })
 
@@ -531,6 +717,18 @@ describe('StudioRecorder', () => {
       expect(instance.logs).to.be.empty
     })
 
+    it('does not prevent the action from reaching other event listeners', () => {
+      const $el = $('<div />')
+
+      const preventDefault = sinon.stub()
+      const stopPropagation = sinon.stub()
+
+      instance._recordEvent(createEvent({ target: $el, preventDefault, stopPropagation }))
+
+      expect(preventDefault).not.to.be.called
+      expect(stopPropagation).not.to.be.called
+    })
+
     it('does not record events if the test has failed', () => {
       instance.testFailed()
 
@@ -539,6 +737,30 @@ describe('StudioRecorder', () => {
       instance._recordEvent(createEvent({ target: $el }))
 
       expect(instance.logs).to.be.empty
+    })
+
+    it('does not record events inside the assertions menu', () => {
+      const $el = $('<div class="__cypress-studio-assertions-menu" />')
+
+      instance._recordEvent(createEvent({ target: $el }))
+
+      expect(instance.logs).to.be.empty
+    })
+
+    it('closes the assertions menu when recording an event', () => {
+      const $el = $('<div />')
+
+      instance._recordEvent(createEvent({ target: $el }))
+
+      expect(dom.closeStudioAssertionsMenu).to.be.called
+    })
+
+    it('does not close the assertions menu on events inside the assertions menu', () => {
+      const $el = $('<div class="__cypress-studio-assertions-menu" />')
+
+      instance._recordEvent(createEvent({ target: $el }))
+
+      expect(dom.closeStudioAssertionsMenu).not.to.be.called
     })
 
     it('uses the selector playground to get a selector for the element', () => {
@@ -839,6 +1061,363 @@ describe('StudioRecorder', () => {
         testId: 'r2',
         type: 'child',
       })
+    })
+  })
+
+  context('#addAssertion', () => {
+    beforeEach(() => {
+      instance.testId = 'r2'
+    })
+
+    it('uses the selector playground to get a selector for the element', () => {
+      const $el = $('<div />')
+
+      instance._addAssertion($el, 'be.visible')
+
+      expect(getSelectorStub).to.be.calledWith($el)
+    })
+
+    it('closes the assertions menu', () => {
+      const $el = $('<div />')
+
+      instance._addAssertion($el, 'be.visible')
+
+      expect(dom.closeStudioAssertionsMenu).to.be.called
+    })
+
+    it('records assertions with one parameter', () => {
+      const $el = $('<div />')
+
+      instance._addAssertion($el, 'be.visible')
+
+      expect(instance.logs.length).to.equal(1)
+      expect(instance.logs[0].selector).to.equal('.selector')
+      expect(instance.logs[0].name).to.equal('should')
+      expect(instance.logs[0].message).to.have.ordered.members(['be.visible'])
+      expect(instance.logs[0].isAssertion).to.be.true
+    })
+
+    it('records assertions with two parameters', () => {
+      const $el = $('<div />')
+
+      instance._addAssertion($el, 'have.text', 'my message')
+
+      expect(instance.logs.length).to.equal(1)
+      expect(instance.logs[0].selector).to.equal('.selector')
+      expect(instance.logs[0].name).to.equal('should')
+      expect(instance.logs[0].message).to.have.ordered.members(['have.text', 'my message'])
+      expect(instance.logs[0].isAssertion).to.be.true
+    })
+
+    it('records assertions with three parameters', () => {
+      const $el = $('<div />')
+
+      instance._addAssertion($el, 'have.attr', 'data-target', '#my-div')
+
+      expect(instance.logs.length).to.equal(1)
+      expect(instance.logs[0].selector).to.equal('.selector')
+      expect(instance.logs[0].name).to.equal('should')
+      expect(instance.logs[0].message).to.have.ordered.members(['have.attr', 'data-target', '#my-div'])
+      expect(instance.logs[0].isAssertion).to.be.true
+    })
+
+    it('adds assertions to the command log with incrementing ids', () => {
+      const $el = $('<div />')
+
+      instance._addAssertion($el, 'be.visible')
+      instance._addAssertion($el, 'have.text', 'my message')
+
+      expect(instance.logs.length).to.equal(2)
+
+      expect(instance.logs[0].selector).to.equal('.selector')
+      expect(instance.logs[0].name).to.equal('should')
+      expect(instance.logs[0].message).to.have.ordered.members(['be.visible'])
+      expect(instance.logs[0].isAssertion).to.be.true
+
+      expect(instance.logs[1].selector).to.equal('.selector')
+      expect(instance.logs[1].name).to.equal('should')
+      expect(instance.logs[1].message).to.have.ordered.members(['have.text', 'my message'])
+      expect(instance.logs[1].isAssertion).to.be.true
+    })
+
+    it('emits the first reporter:log:add event with get and the selector', () => {
+      const $el = $('<div />')
+
+      instance._addAssertion($el, 'be.visible')
+
+      expect(eventManager.emit).to.be.calledTwice
+
+      expect(eventManager.emit).to.be.calledWith('reporter:log:add', {
+        hookId: 'r2-studio',
+        id: 's1-get',
+        instrument: 'command',
+        isStudio: true,
+        message: '.selector',
+        name: 'get',
+        numElements: 1,
+        number: 1,
+        state: 'passed',
+        testId: 'r2',
+        type: 'parent',
+      })
+    })
+
+    it('emits the second reporter:log:add for an assertion with one parameter', () => {
+      const $el = $('<input type="radio" id="my-input" />')
+      const message = 'expect **<input#my-input>** to not be checked'
+
+      instance._addAssertion($el, 'not.be.checked')
+
+      expect(eventManager.emit).to.be.calledTwice
+
+      expect(eventManager.emit).to.be.calledWith('reporter:log:add', {
+        hookId: 'r2-studio',
+        id: 's1',
+        instrument: 'command',
+        isStudio: true,
+        message,
+        name: 'assert',
+        numElements: 1,
+        number: undefined,
+        state: 'passed',
+        testId: 'r2',
+        type: 'child',
+      })
+    })
+
+    it('emits the second reporter:log:add for an assertion with two parameters', () => {
+      const $el = $('<div class="container" />')
+      const message = 'expect **<div.container>** to have text **my message**'
+
+      instance._addAssertion($el, 'have.text', 'my message')
+
+      expect(eventManager.emit).to.be.calledTwice
+
+      expect(eventManager.emit).to.be.calledWith('reporter:log:add', {
+        hookId: 'r2-studio',
+        id: 's1',
+        instrument: 'command',
+        isStudio: true,
+        message,
+        name: 'assert',
+        numElements: 1,
+        number: undefined,
+        state: 'passed',
+        testId: 'r2',
+        type: 'child',
+      })
+    })
+
+    it('emits the second reporter:log:add for an assertion with three parameters', () => {
+      const $el = $('<button data-target="#my-div" />')
+      const message = 'expect **<button>** to have attr **data-target** with the value **#my-div**'
+
+      instance._addAssertion($el, 'have.attr', 'data-target', '#my-div')
+
+      expect(eventManager.emit).to.be.calledTwice
+
+      expect(eventManager.emit).to.be.calledWith('reporter:log:add', {
+        hookId: 'r2-studio',
+        id: 's1',
+        instrument: 'command',
+        isStudio: true,
+        message,
+        name: 'assert',
+        numElements: 1,
+        number: undefined,
+        state: 'passed',
+        testId: 'r2',
+        type: 'child',
+      })
+    })
+  })
+
+  context('#openAssertionsMenu', () => {
+    it('prevents the default right click event and propagation', () => {
+      const $el = $('<div />')
+
+      const preventDefault = sinon.stub()
+      const stopPropagation = sinon.stub()
+
+      instance._openAssertionsMenu(createEvent({ target: $el, preventDefault, stopPropagation }))
+
+      expect(preventDefault).to.be.called
+      expect(stopPropagation).to.be.called
+    })
+
+    it('closes existing assertions menu', () => {
+      const $el = $('<div />')
+
+      instance._openAssertionsMenu(createEvent({ target: $el }))
+
+      expect(dom.closeStudioAssertionsMenu).to.be.called
+    })
+
+    it('opens the assertions menu', () => {
+      const $el = $('<div />')
+
+      instance._openAssertionsMenu(createEvent({ target: $el }))
+
+      expect(dom.openStudioAssertionsMenu).to.be.called
+    })
+
+    it('does not close existing assertions menu or open another one if right click within menu', () => {
+      const $el = $('<div class="__cypress-studio-assertions-menu" />')
+
+      instance._openAssertionsMenu(createEvent({ target: $el }))
+
+      expect(dom.closeStudioAssertionsMenu).not.to.be.called
+      expect(dom.openStudioAssertionsMenu).not.to.be.called
+    })
+  })
+
+  context('#generatePossibleAssertions', () => {
+    it('generates assertions for an element with many attributes', () => {
+      const $el = $('<div id="wrapper" class="container container-wide" data-channel="a1" data-content="pg-container">page content</div>')
+
+      const possibleAssertions = instance._generatePossibleAssertions($el)
+
+      expect(possibleAssertions.length).to.equal(5)
+
+      expect(possibleAssertions[0].type).to.equal('have.text')
+      expect(possibleAssertions[0].options.length).to.equal(1)
+      expect(possibleAssertions[0].options[0].value).to.equal('page content')
+
+      expect(possibleAssertions[1].type).to.equal('have.id')
+      expect(possibleAssertions[1].options.length).to.equal(1)
+      expect(possibleAssertions[1].options[0].value).to.equal('wrapper')
+
+      expect(possibleAssertions[2].type).to.equal('have.class')
+      expect(possibleAssertions[2].options.length).to.equal(2)
+      expect(possibleAssertions[2].options[0].value).to.equal('container')
+      expect(possibleAssertions[2].options[1].value).to.equal('container-wide')
+
+      expect(possibleAssertions[3].type).to.equal('have.attr')
+      expect(possibleAssertions[3].options.length).to.equal(2)
+      expect(possibleAssertions[3].options[0].name).to.equal('data-channel')
+      expect(possibleAssertions[3].options[0].value).to.equal('a1')
+      expect(possibleAssertions[3].options[1].name).to.equal('data-content')
+      expect(possibleAssertions[3].options[1].value).to.equal('pg-container')
+
+      expect(possibleAssertions[4].type).to.equal('be.visible')
+      expect(possibleAssertions[4].options).to.be.undefined
+    })
+
+    it('always generates be.visible but not have.text or have.value for elements without them', () => {
+      const $el = $('<span />')
+
+      const possibleAssertions = instance._generatePossibleAssertions($el)
+
+      expect(possibleAssertions.length).to.equal(1)
+
+      expect(possibleAssertions[0].type).to.equal('be.visible')
+      expect(possibleAssertions[0].options).to.be.undefined
+    })
+
+    it('does not generate have.text for elements that cannot have text', () => {
+      const $el = $('<textarea>placeholder</textarea>')
+
+      const possibleAssertions = instance._generatePossibleAssertions($el)
+
+      expect(possibleAssertions.length).to.equal(3)
+
+      expect(possibleAssertions[0].type).to.equal('have.value')
+      expect(possibleAssertions[0].options.length).to.equal(1)
+      expect(possibleAssertions[0].options[0].value).to.equal('placeholder')
+
+      expect(possibleAssertions[1].type).to.equal('be.visible')
+      expect(possibleAssertions[1].options).to.be.undefined
+
+      expect(possibleAssertions[2].type).to.equal('be.enabled')
+      expect(possibleAssertions[2].options).to.be.undefined
+    })
+
+    it('generates be.enabled for enabled elements', () => {
+      const $el = $('<button>button</button>')
+
+      const possibleAssertions = instance._generatePossibleAssertions($el)
+
+      expect(possibleAssertions.length).to.equal(3)
+
+      expect(possibleAssertions[0].type).to.equal('have.text')
+      expect(possibleAssertions[0].options.length).to.equal(1)
+      expect(possibleAssertions[0].options[0].value).to.equal('button')
+
+      expect(possibleAssertions[1].type).to.equal('be.visible')
+      expect(possibleAssertions[1].options).to.be.undefined
+
+      expect(possibleAssertions[2].type).to.equal('be.enabled')
+      expect(possibleAssertions[2].options).to.be.undefined
+    })
+
+    it('generates be.disabled for disabled elements', () => {
+      const $el = $('<button disabled>button</button>')
+
+      const possibleAssertions = instance._generatePossibleAssertions($el)
+
+      expect(possibleAssertions.length).to.equal(3)
+
+      expect(possibleAssertions[0].type).to.equal('have.text')
+      expect(possibleAssertions[0].options.length).to.equal(1)
+      expect(possibleAssertions[0].options[0].value).to.equal('button')
+
+      expect(possibleAssertions[1].type).to.equal('be.visible')
+      expect(possibleAssertions[1].options).to.be.undefined
+
+      expect(possibleAssertions[2].type).to.equal('be.disabled')
+      expect(possibleAssertions[2].options).to.be.undefined
+    })
+
+    it('generates not.be.checked for unchecked elements', () => {
+      const $el = $('<input type="radio" value="option1">')
+
+      const possibleAssertions = instance._generatePossibleAssertions($el)
+
+      expect(possibleAssertions.length).to.equal(5)
+
+      expect(possibleAssertions[0].type).to.equal('have.value')
+      expect(possibleAssertions[0].options.length).to.equal(1)
+      expect(possibleAssertions[0].options[0].value).to.equal('option1')
+
+      expect(possibleAssertions[1].type).to.equal('have.attr')
+      expect(possibleAssertions[1].options.length).to.equal(1)
+      expect(possibleAssertions[1].options[0].name).to.equal('type')
+      expect(possibleAssertions[1].options[0].value).to.equal('radio')
+
+      expect(possibleAssertions[2].type).to.equal('be.visible')
+      expect(possibleAssertions[2].options).to.be.undefined
+
+      expect(possibleAssertions[3].type).to.equal('be.enabled')
+      expect(possibleAssertions[3].options).to.be.undefined
+
+      expect(possibleAssertions[4].type).to.equal('not.be.checked')
+      expect(possibleAssertions[4].options).to.be.undefined
+    })
+
+    it('generates be.checked for checked elements', () => {
+      const $el = $('<input type="checkbox" value="option1" checked>')
+
+      const possibleAssertions = instance._generatePossibleAssertions($el)
+
+      expect(possibleAssertions.length).to.equal(5)
+
+      expect(possibleAssertions[0].type).to.equal('have.value')
+      expect(possibleAssertions[0].options.length).to.equal(1)
+      expect(possibleAssertions[0].options[0].value).to.equal('option1')
+
+      expect(possibleAssertions[1].type).to.equal('have.attr')
+      expect(possibleAssertions[1].options.length).to.equal(1)
+      expect(possibleAssertions[1].options[0].name).to.equal('type')
+      expect(possibleAssertions[1].options[0].value).to.equal('checkbox')
+
+      expect(possibleAssertions[2].type).to.equal('be.visible')
+      expect(possibleAssertions[2].options).to.be.undefined
+
+      expect(possibleAssertions[3].type).to.equal('be.enabled')
+      expect(possibleAssertions[3].options).to.be.undefined
+
+      expect(possibleAssertions[4].type).to.equal('be.checked')
+      expect(possibleAssertions[4].options).to.be.undefined
     })
   })
 })

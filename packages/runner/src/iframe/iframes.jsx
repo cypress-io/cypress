@@ -2,7 +2,7 @@ import cs from 'classnames'
 import { action, autorun } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
-import { $ } from '@packages/driver'
+import $Cypress from '@packages/driver'
 import {
   SnapshotControls,
   ScriptError,
@@ -14,6 +14,8 @@ import {
 } from '@packages/runner-shared'
 
 import util from '../lib/util'
+
+const $ = $Cypress.$
 
 @observer
 export default class Iframes extends Component {
@@ -75,6 +77,7 @@ export default class Iframes extends Component {
     this.props.eventManager.on('before:screenshot', this.autIframe.beforeScreenshot)
     this.props.eventManager.on('after:screenshot', this.autIframe.afterScreenshot)
     this.props.eventManager.on('script:error', this._setScriptError)
+    this.props.eventManager.on('visit:blank', this.autIframe.visitBlank)
 
     this.props.eventManager.on('run:end', this.autIframe.startStudio)
     this.props.eventManager.on('page:loading', (isLoading) => {
@@ -148,11 +151,11 @@ export default class Iframes extends Component {
   // jQuery is a better fit for managing these iframes, since they need to get
   // wiped out and reset on re-runs and the snapshots are from dom we don't control
   _loadIframes (specPath) {
-    const specSrc = `/${this.props.config.namespace}/iframes/${specPath}`
+    const specSrc = `/${this.props.config.namespace}/iframes/${encodeURIComponent(specPath)}`
     const $container = $(this.refs.container).empty()
     const $autIframe = this.autIframe.create(this.props.config).appendTo($container)
 
-    this.autIframe.showBlankContents()
+    this.autIframe.showInitialBlankContents()
 
     const $specIframe = $('<iframe />', {
       id: `Your Spec: '${specSrc}'`,

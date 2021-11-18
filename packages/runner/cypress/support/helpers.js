@@ -265,6 +265,8 @@ function createCypress (defaultOptions = {}) {
           isHtml: true,
           url: opts.visitUrl,
         } })
+        .withArgs('backend:request')
+        .yieldsAsync({})
 
         .withArgs('set:runnables:and:maybe:record:tests')
         .callsFake((...args) => {

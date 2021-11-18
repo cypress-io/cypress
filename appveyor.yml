@@ -4,12 +4,13 @@ branches:
     - develop
     - windows-code-signing
     - tgriesser/build/root-yarn-install
+    - 9.0-release
     - /win*/
 
 # https://www.appveyor.com/docs/lang/nodejs-iojs/
 environment:
   # use matching version of Node.js
-  nodejs_version: "14.16.0"
+  nodejs_version: "16.5.0"
   # encode secure variables which will NOT be used
   # in pull requests
   # https://www.appveyor.com/docs/build-configuration/#secure-variables
@@ -39,7 +40,6 @@ environment:
 
 platform:
   - x64
-  - x86
 
 # https://www.appveyor.com/docs/build-cache/
 # hmm, seems there is NPM on windows problem

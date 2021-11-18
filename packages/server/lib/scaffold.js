@@ -7,7 +7,7 @@ const { fs } = require('./util/fs')
 const glob = require('./util/glob')
 const cwd = require('./cwd')
 const debug = require('debug')('cypress:server:scaffold')
-const { isEmpty } = require('ramda')
+const errors = require('./errors')
 const { isDefault } = require('./util/config')
 
 const getExampleSpecsFullPaths = cypressEx.getPathToExamples()
@@ -115,8 +115,8 @@ const isNewProject = (config) => {
     debug('determine if we should scaffold:')
 
     // TODO: add tests for this
-    debug('- empty?', isEmpty(files))
-    if (isEmpty(files)) {
+    debug('- empty?', _.isEmpty(files))
+    if (_.isEmpty(files)) {
       return true
     }
 
@@ -232,7 +232,6 @@ module.exports = {
 
   plugins (folder, config) {
     debug(`plugins folder ${folder}`)
-
     // skip if user has explicitly set pluginsFile
     if (!config.pluginsFile || !isDefault(config, 'pluginsFile')) {
       return Promise.resolve()
@@ -254,6 +253,12 @@ module.exports = {
     return this._assertInFileTree(dest, config)
     .then(() => {
       return fs.copyAsync(src, dest)
+    }).catch((error) => {
+      if (error.code === 'EACCES') {
+        error = errors.get('ERROR_WRITING_FILE', dest, error)
+      }
+
+      throw error
     })
   },
 

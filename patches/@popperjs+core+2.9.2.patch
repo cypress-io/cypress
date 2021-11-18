@@ -1,0 +1,91 @@
+diff --git a/node_modules/@popperjs/core/lib/modifiers/preventOverflow.js b/node_modules/@popperjs/core/lib/modifiers/preventOverflow.js
+index 1776c09..e08aad1 100644
+--- a/node_modules/@popperjs/core/lib/modifiers/preventOverflow.js
++++ b/node_modules/@popperjs/core/lib/modifiers/preventOverflow.js
+@@ -52,26 +52,27 @@ function preventOverflow(_ref) {
+     return;
+   }
+ 
+-  if (checkMainAxis || checkAltAxis) {
+-    var mainSide = mainAxis === 'y' ? top : left;
+-    var altSide = mainAxis === 'y' ? bottom : right;
+-    var len = mainAxis === 'y' ? 'height' : 'width';
+-    var offset = popperOffsets[mainAxis];
+-    var min = popperOffsets[mainAxis] + overflow[mainSide];
+-    var max = popperOffsets[mainAxis] - overflow[altSide];
++  function setOffset(axis) {
++    var isMainAxis = axis === mainAxis;
++    var mainSide = axis === 'y' ? top : left;
++    var altSide = axis === 'y' ? bottom : right;
++    var len = axis === 'y' ? 'height' : 'width';
++    var offset = popperOffsets[axis];
++    var min = popperOffsets[axis] + overflow[mainSide];
++    var max = popperOffsets[axis] - overflow[altSide];
+     var additive = tether ? -popperRect[len] / 2 : 0;
+     var minLen = variation === start ? referenceRect[len] : popperRect[len];
+     var maxLen = variation === start ? -popperRect[len] : -referenceRect[len]; // We need to include the arrow in the calculation so the arrow doesn't go
+-    // outside the reference bounds
++    // outside the reference bounds when on the main axis
+ 
+     var arrowElement = state.elements.arrow;
+-    var arrowRect = tether && arrowElement ? getLayoutRect(arrowElement) : {
++    var arrowRect = tether && arrowElement && isMainAxis ? getLayoutRect(arrowElement) : {
+       width: 0,
+       height: 0
+     };
+     var arrowPaddingObject = state.modifiersData['arrow#persistent'] ? state.modifiersData['arrow#persistent'].padding : getFreshSideObject();
+-    var arrowPaddingMin = arrowPaddingObject[mainSide];
+-    var arrowPaddingMax = arrowPaddingObject[altSide]; // If the reference length is smaller than the arrow length, we don't want
++    var arrowPaddingMin = isMainAxis ? arrowPaddingObject[mainSide] : 0;
++    var arrowPaddingMax = isMainAxis ? arrowPaddingObject[altSide] : 0; // If the reference length is smaller than the arrow length, we don't want
+     // to include its full size in the calculation. If the reference is small
+     // and near the edge of a boundary, the popper can overflow even if the
+     // reference is not overflowing as well (e.g. virtual elements with no
+@@ -81,33 +82,22 @@ function preventOverflow(_ref) {
+     var minOffset = isBasePlacement ? referenceRect[len] / 2 - additive - arrowLen - arrowPaddingMin - tetherOffsetValue : minLen - arrowLen - arrowPaddingMin - tetherOffsetValue;
+     var maxOffset = isBasePlacement ? -referenceRect[len] / 2 + additive + arrowLen + arrowPaddingMax + tetherOffsetValue : maxLen + arrowLen + arrowPaddingMax + tetherOffsetValue;
+     var arrowOffsetParent = state.elements.arrow && getOffsetParent(state.elements.arrow);
+-    var clientOffset = arrowOffsetParent ? mainAxis === 'y' ? arrowOffsetParent.clientTop || 0 : arrowOffsetParent.clientLeft || 0 : 0;
+-    var offsetModifierValue = state.modifiersData.offset ? state.modifiersData.offset[state.placement][mainAxis] : 0;
+-    var tetherMin = popperOffsets[mainAxis] + minOffset - offsetModifierValue - clientOffset;
+-    var tetherMax = popperOffsets[mainAxis] + maxOffset - offsetModifierValue;
+-
+-    if (checkMainAxis) {
+-      var preventedOffset = within(tether ? mathMin(min, tetherMin) : min, offset, tether ? mathMax(max, tetherMax) : max);
+-      popperOffsets[mainAxis] = preventedOffset;
+-      data[mainAxis] = preventedOffset - offset;
+-    }
+-
+-    if (checkAltAxis) {
+-      var _mainSide = mainAxis === 'x' ? top : left;
+-
+-      var _altSide = mainAxis === 'x' ? bottom : right;
+-
+-      var _offset = popperOffsets[altAxis];
+-
+-      var _min = _offset + overflow[_mainSide];
+-
+-      var _max = _offset - overflow[_altSide];
++    var clientOffset = arrowOffsetParent ? axis === 'y' ? arrowOffsetParent.clientTop || 0 : arrowOffsetParent.clientLeft || 0 : 0;
++    var offsetModifierValue = state.modifiersData.offset ? state.modifiersData.offset[state.placement][axis] : 0;
++    var referenceRectEnd = referenceRect[axis] + referenceRect[len];
++    var tetherMin = !isMainAxis && referenceRect[axis] < popperRect[axis] ? popperOffsets[axis] + minOffset - offsetModifierValue - clientOffset : referenceRectEnd;
++    var tetherMax = !isMainAxis && referenceRectEnd < popperRect[axis] ? popperOffsets[axis] + maxOffset - offsetModifierValue : referenceRect[axis];
++    var preventedOffset = within(tether ? mathMin(min, tetherMin) : min, offset, tether ? mathMax(max, tetherMax) : max);
++    popperOffsets[axis] = preventedOffset;
++    data[axis] = preventedOffset - offset;
++  }
+ 
+-      var _preventedOffset = within(tether ? mathMin(_min, tetherMin) : _min, _offset, tether ? mathMax(_max, tetherMax) : _max);
++  if (checkMainAxis) {
++    setOffset(mainAxis);
++  }
+ 
+-      popperOffsets[altAxis] = _preventedOffset;
+-      data[altAxis] = _preventedOffset - _offset;
+-    }
++  if (checkAltAxis) {
++    setOffset(altAxis);
+   }
+ 
+   state.modifiersData[name] = data;

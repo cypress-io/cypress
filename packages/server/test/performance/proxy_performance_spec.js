@@ -9,7 +9,7 @@ const { expect } = require('chai')
 const debug = require('debug')('test:proxy-performance')
 const DebuggingProxy = require('@cypress/debugging-proxy')
 const HarCapturer = require('chrome-har-capturer')
-const performance = require('../support/helpers/performance')
+const performance = require('@tooling/system-tests/lib/performance')
 const Promise = require('bluebird')
 const sanitizeFilename = require('sanitize-filename')
 const { createRoutes } = require(`${root}lib/routes`)
@@ -357,7 +357,7 @@ describe('Proxy Performance', function () {
             SocketCtor: SocketE2E,
             createRoutes,
             specsStore: new SpecsStore({}, 'e2e'),
-            projectType: 'e2e',
+            testingType: 'e2e',
           })
         }),
       )

@@ -1,8 +1,9 @@
 import debugModule from 'debug'
-import { HttpMiddleware } from '.'
+import type { HttpMiddleware } from '.'
+import type { Readable } from 'stream'
 import { InterceptError } from '@packages/net-stubbing'
-import { Readable } from 'stream'
-import { Request } from '@cypress/request'
+import type { Request } from '@cypress/request'
+import errors from '@packages/server/lib/errors'
 
 const debug = debugModule('cypress:proxy:http:error-middleware')
 
@@ -18,6 +19,17 @@ const LogError: ErrorMiddleware = function () {
     url: this.req.url,
     headers: this.req.headers,
   })
+
+  this.next()
+}
+
+const SendToDriver: ErrorMiddleware = function () {
+  if (this.req.browserPreRequest) {
+    this.socket.toDriver('request:event', 'request:error', {
+      requestId: this.req.browserPreRequest.requestId,
+      error: errors.clone(this.error),
+    })
+  }
 
   this.next()
 }
@@ -47,6 +59,7 @@ export const DestroyResponse: ErrorMiddleware = function () {
 
 export default {
   LogError,
+  SendToDriver,
   InterceptError,
   AbortRequest,
   UnpipeResponse,

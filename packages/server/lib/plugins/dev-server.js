@@ -16,8 +16,8 @@ plugins.registerHandler((ipc) => {
     baseEmitter.emit('dev-server:compile:error', error)
   })
 
-  ipc.on('dev-server:compile:success', () => {
-    baseEmitter.emit('dev-server:compile:success')
+  ipc.on('dev-server:compile:success', ({ specFile } = {}) => {
+    baseEmitter.emit('dev-server:compile:success', { specFile })
   })
 
   return baseEmitter.on('dev-server:close', () => {

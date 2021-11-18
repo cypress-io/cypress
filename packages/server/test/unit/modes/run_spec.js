@@ -1,20 +1,19 @@
 require('../../spec_helper')
 
+const _ = require('lodash')
 const Promise = require('bluebird')
 const electron = require('electron')
 const stripAnsi = require('strip-ansi')
 const snapshot = require('snap-shot-it')
-const R = require('ramda')
 const pkg = require('@packages/root')
 const { fs } = require(`${root}../lib/util/fs`)
 const user = require(`${root}../lib/user`)
 const errors = require(`${root}../lib/errors`)
-const config = require(`${root}../lib/config`)
 const ProjectBase = require(`${root}../lib/project-base`).ProjectBase
 const browsers = require(`${root}../lib/browsers`)
 const Reporter = require(`${root}../lib/reporter`)
 const runMode = require(`${root}../lib/modes/run`)
-const openProject = require(`${root}../lib/open_project`)
+const { openProject } = require(`${root}../lib/open_project`)
 const videoCapture = require(`${root}../lib/video_capture`)
 const env = require(`${root}../lib/util/env`)
 const random = require(`${root}../lib/util/random`)
@@ -24,7 +23,7 @@ const { experimental } = require(`${root}../lib/experiments`)
 
 describe('lib/modes/run', () => {
   beforeEach(function () {
-    this.projectInstance = new ProjectBase({ projectRoot: '/_test-output/path/to/project-e2e', projectType: 'e2e' })
+    this.projectInstance = new ProjectBase({ projectRoot: '/_test-output/path/to/project-e2e', testingType: 'e2e' })
   })
 
   context('.getProjectId', () => {
@@ -100,9 +99,9 @@ describe('lib/modes/run', () => {
     it('sets width and height', () => {
       const props = runMode.getElectronProps()
 
-      expect(props.width).to.eq(1920)
+      expect(props.width).to.eq(1280)
 
-      expect(props.height).to.eq(1080)
+      expect(props.height).to.eq(720)
     })
 
     it('sets show to boolean', () => {
@@ -646,23 +645,7 @@ describe('lib/modes/run', () => {
 
   context('.run browser vs video recording', () => {
     beforeEach(function () {
-      sinon.stub(electron.app, 'on').withArgs('ready').yieldsAsync()
-      sinon.stub(user, 'ensureAuthToken')
-      sinon.stub(ProjectBase, 'ensureExists').resolves()
-      sinon.stub(random, 'id').returns(1234)
-      sinon.stub(openProject, 'create').resolves(openProject)
-      sinon.stub(runMode, 'waitForSocketConnection').resolves()
-      sinon.stub(runMode, 'waitForTestsToFinishRunning').resolves({
-        stats: { failures: 10 },
-        spec: {},
-      })
-
-      sinon.spy(runMode, 'waitForBrowserToConnect')
-      sinon.stub(videoCapture, 'start').resolves()
-      sinon.stub(openProject, 'launch').resolves()
-      sinon.stub(openProject, 'getProject').resolves(this.projectInstance)
-      sinon.spy(errors, 'warning')
-      sinon.stub(config, 'get').resolves({
+      const config = {
         proxyUrl: 'http://localhost:12345',
         video: true,
         videosFolder: 'videos',
@@ -672,13 +655,32 @@ describe('lib/modes/run', () => {
             integrationFolder: { value: '/path/to/integrationFolder', from: 'config' },
           },
         },
+      }
+
+      sinon.stub(electron.app, 'on').withArgs('ready').yieldsAsync()
+      sinon.stub(user, 'ensureAuthToken')
+      sinon.stub(random, 'id').returns(1234)
+      sinon.stub(openProject, 'create').resolves(openProject)
+      sinon.stub(runMode, 'waitForSocketConnection').resolves()
+      sinon.stub(fs, 'access').resolves()
+      sinon.stub(runMode, 'waitForTestsToFinishRunning').resolves({
+        stats: { failures: 10 },
+        spec: {},
       })
 
-      sinon.stub(specsUtil, 'find').resolves([
+      sinon.spy(runMode, 'waitForBrowserToConnect')
+      sinon.stub(videoCapture, 'start').resolves()
+      sinon.stub(openProject, 'launch').resolves()
+      this.projectInstance.__setConfig(config)
+      sinon.stub(openProject, 'getProject').resolves(this.projectInstance)
+      sinon.spy(errors, 'warning')
+
+      sinon.stub(specsUtil.default, 'findSpecs').resolves([
         {
           name: 'foo_spec.js',
           path: 'cypress/integration/foo_spec.js',
           absolute: '/path/to/spec.js',
+          specType: 'integration',
         },
       ])
     })
@@ -697,6 +699,15 @@ describe('lib/modes/run', () => {
 
       return expect(runMode.run({ browser: 'opera' }))
       .to.be.rejectedWith(/invalid browser family in/)
+    })
+
+    it('throws an error if unsupportedVersion', () => {
+      const browser = { displayName: 'SomeBrowser', warning: 'blah blah', unsupportedVersion: true }
+
+      sinon.stub(browsers, 'ensureAndGetByNameOrPath').resolves(browser)
+
+      return expect(runMode.run())
+      .to.be.rejectedWith('blah blah')
     })
 
     it('shows no warnings for chrome browser', () => {
@@ -726,7 +737,7 @@ describe('lib/modes/run', () => {
 
       sinon.stub(electron.app, 'on').withArgs('ready').yieldsAsync()
       sinon.stub(user, 'ensureAuthToken')
-      sinon.stub(ProjectBase, 'ensureExists').resolves()
+      sinon.stub(fs, 'access').resolves()
       sinon.stub(random, 'id').returns(1234)
       sinon.stub(openProject, 'create').resolves(openProject)
       sinon.stub(system, 'info').resolves({ osName: 'osFoo', osVersion: 'fooVersion' })
@@ -747,11 +758,12 @@ describe('lib/modes/run', () => {
       sinon.spy(runMode, 'runSpecs')
       sinon.stub(openProject, 'launch').resolves()
       sinon.stub(openProject, 'getProject').resolves(this.projectInstance)
-      sinon.stub(specsUtil, 'find').resolves([
+      sinon.stub(specsUtil.default, 'findSpecs').resolves([
         {
           name: 'foo_spec.js',
           path: 'cypress/integration/foo_spec.js',
           absolute: '/path/to/spec.js',
+          specType: 'integration',
         },
       ])
     })
@@ -850,7 +862,7 @@ describe('lib/modes/run', () => {
     // for some reason I cannot stub property value using Sinon
     let version
     // save a copy of "true" experiments right away
-    const names = R.clone(experimental.names)
+    const names = _.cloneDeep(experimental.names)
 
     before(() => {
       // reset experiments names before each test

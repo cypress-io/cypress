@@ -10,7 +10,7 @@ import FirefoxProfile from 'firefox-profile'
 import firefoxUtil from './firefox-util'
 import utils from './utils'
 import * as launcherDebug from '@packages/launcher/lib/log'
-import { Browser, BrowserInstance } from './types'
+import type { Browser, BrowserInstance } from './types'
 import { EventEmitter } from 'events'
 import os from 'os'
 import treeKill from 'tree-kill'
@@ -503,10 +503,10 @@ export async function open (browser: Browser, url, options: any = {}, automation
   debug('launch in firefox', { url, args: launchOptions.args })
 
   const browserInstance = await launch(browser, 'about:blank', launchOptions.args, {
-    // sets headless resolution to 1920x1080 by default
+    // sets headless resolution to 1280x720 by default
     // user can overwrite this default with these env vars or --height, --width arguments
-    MOZ_HEADLESS_WIDTH: '1920',
-    MOZ_HEADLESS_HEIGHT: '1081',
+    MOZ_HEADLESS_WIDTH: '1280',
+    MOZ_HEADLESS_HEIGHT: '721',
   })
 
   try {

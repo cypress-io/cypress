@@ -3,7 +3,8 @@
 
 declare namespace Cypress {
   interface Actions {
-    (action: 'net:event', frame: any)
+    (action: 'net:stubbing:event', frame: any)
+    (action: 'request:event', data: any)
   }
 
   interface cy {
@@ -15,10 +16,17 @@ declare namespace Cypress {
     queue: any
     retry: (fn: () => any, opts: any) => any
     state: State
+    pauseTimers: <T>(shouldPause: boolean) => Cypress.Chainable<T>
+    // TODO: this function refers to clearTimeout at cy/timeouts.ts, which doesn't have any argument.
+    // But in many cases like cy/commands/screenshot.ts, it's called with a timeout id string.
+    // We should decide whether calling with id is correct or not.
+    clearTimeout: <T>(timeoutId?: string) => Cypress.Chainable<T>
   }
 
   interface Cypress {
     backend: (eventName: string, ...args: any[]) => Promise<any>
+    // TODO: how to pull this from proxy-logging.ts? can't import in a d.ts file...
+    ProxyLogging: any
     // TODO: how to pull these from resolvers.ts? can't import in a d.ts file...
     resolveWindowReference: any
     resolveLocationReference: any
@@ -44,6 +52,7 @@ declare namespace Cypress {
     isStubbed?: boolean
     alias?: string
     aliasType?: 'route'
+    commandName?: string
     type?: 'parent'
     event?: boolean
     method?: string
@@ -55,6 +64,7 @@ declare namespace Cypress {
       indicator?: 'aborted' | 'pending' | 'successful' | 'bad'
       message?: string
     }
+    browserPreRequest?: any
   }
 
   interface State {

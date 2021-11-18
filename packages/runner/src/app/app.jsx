@@ -5,7 +5,7 @@ import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import { findDOMNode } from 'react-dom'
 import { Reporter } from '@packages/reporter'
-import { $ } from '@packages/driver'
+import $ from 'jquery'
 import {
   Message,
   errorMessages,
@@ -87,7 +87,6 @@ class App extends Component {
             spec={spec}
             autoScrollingEnabled={this.props.config.state.autoScrollingEnabled}
             error={errorMessages.reporterError(this.props.state.scriptError, spec.relative)}
-            firefoxGcInterval={this.props.config.firefoxGcInterval}
             experimentalStudioEnabled={this.props.config.experimentalStudio}
           />}
         </div>

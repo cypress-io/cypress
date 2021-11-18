@@ -3,7 +3,7 @@ import { JsonObject } from '@angular-devkit/core'
 export interface CypressBuilderOptions extends JsonObject {
   baseUrl: string
   configFile: string | false
-  browser: 'electron' | 'chrome' | 'chromium' | 'canary' | 'firefox' | string
+  browser: 'electron' | 'chrome' | 'chromium' | 'canary' | 'firefox' | 'edge' | string
   devServerTarget: string
   env: Record<string, string>
   quiet: boolean
@@ -13,6 +13,8 @@ export interface CypressBuilderOptions extends JsonObject {
   parallel: boolean
   projectPath: string
   record: boolean
+  reporter: string
+  reporterOptions: JsonObject
   spec: string
   tsConfig: string
   watch: boolean

@@ -62,17 +62,31 @@ namespace CypressIsCyTests {
   })
 }
 
+declare namespace Cypress {
+  interface Chainable {
+    newCommand: (arg: string) => void
+  }
+}
+
 namespace CypressCommandsTests {
-  Cypress.Commands.add('newCommand', () => {
+  Cypress.Commands.add('newCommand', (arg) => {
+    // $ExpectType string
+    arg
     return
   })
-  Cypress.Commands.add('newCommand', { prevSubject: true }, () => {
+  Cypress.Commands.add('newCommand', { prevSubject: true }, (arg) => {
+    // $ExpectType string
+    arg
     return
   })
-  Cypress.Commands.add('newCommand', () => {
+  Cypress.Commands.add('newCommand', (arg) => {
+    // $ExpectType string
+    arg
     return new Promise((resolve) => {})
   })
-  Cypress.Commands.overwrite('newCommand', () => {
+  Cypress.Commands.overwrite('newCommand', (arg) => {
+    // $ExpectType string
+    arg
     return
   })
 }
@@ -255,6 +269,15 @@ describe('then', () => {
     })
     .then({timeout: 3000}, ($p) => {
       $p // $ExpectType JQuery<HTMLParagraphElement>
+    })
+  })
+
+  // https://github.com/cypress-io/cypress/issues/16669
+  it('any as default', () => {
+    cy.get('body')
+    .then(() => ({} as any))
+    .then(v => {
+      v // $ExpectType any
     })
   })
 })
@@ -474,6 +497,11 @@ namespace CypressLocationTests {
   cy.location('pathname') // $ExpectType Chainable<string>
 }
 
+// https://github.com/cypress-io/cypress/issues/17399
+namespace CypressUrlTests {
+  cy.url({decode: true}).should('contain', '사랑')
+}
+
 namespace CypressBrowserTests {
   Cypress.isBrowser('chrome')// $ExpectType boolean
   Cypress.isBrowser('firefox')// $ExpectType boolean
@@ -675,6 +703,28 @@ namespace CypressTaskTests {
   cy.task('foo').then((val) => {
     val // $ExpectType unknown
   })
+}
+
+namespace CypressSessionsTests {
+  Cypress.config('experimentalSessionSupport') // $ExpectType boolean
+  cy.session('user')
+  cy.session('user', () => {})
+  cy.session({ name: 'bob' }, () => {})
+  cy.session('user', () => {}, {})
+  cy.session('user', () => {}, {
+    validate: () => {}
+  })
+
+  cy.session() // $ExpectError
+  cy.session(null) // $ExpectError
+  cy.session('user', () => {}, {
+    validate: { foo: true } // $ExpectError
+  })
+}
+namespace CypressCurrentTest {
+  Cypress.currentTest.title // $ExpectType string
+  Cypress.currentTest.titlePath // $ExpectType string[]
+  Cypress.currentTest() // $ExpectError
 }
 
 namespace CypressKeyboardTests {

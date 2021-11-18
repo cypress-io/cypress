@@ -4,8 +4,8 @@ import Debug from 'debug'
 import * as path from 'path'
 import os from 'os'
 import { MessageChannel, Worker } from 'worker_threads'
-import { RewriteRequest, RewriteResponse } from './types'
-import { DeferSourceMapRewriteFn } from '../js'
+import type { RewriteRequest, RewriteResponse } from './types'
+import type { DeferSourceMapRewriteFn } from '../js'
 
 const debug = Debug('cypress:rewriter:threads')
 

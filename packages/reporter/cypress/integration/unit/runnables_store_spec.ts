@@ -158,13 +158,6 @@ describe('runnables store', () => {
       expect(instance.hasSingleTest).to.be.false
     })
 
-    it('starts rendering the runnables on requestAnimationFrame', () => {
-      instance.setRunnables({ tests: [], suites: [createSuite('1', [], []), createSuite('2', [createTest('1')], [])] })
-      expect(instance.runnables[0].shouldRender).to.be.true
-      expect(instance.runnables[1].shouldRender).to.be.true
-      expect((instance.runnables[1] as SuiteModel).children[0].shouldRender).to.be.true
-    })
-
     it('sets scrollTop when app is running and initial scrollTop has been set', () => {
       instance.setInitialScrollTop(234)
       instance.setRunnables({})

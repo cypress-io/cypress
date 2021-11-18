@@ -1,8 +1,10 @@
 # Cypress
 
+Fast, easy and reliable testing for anything that runs in a browser.
+
 ## What is this?
 
-Cypress comes packaged as an `npm` module, which is all you need to get started.
+[Cypress](https://www.cypress.io/) comes packaged as an `npm` module, which is all you need to get started testing.
 
 After installing you'll be able to:
 
@@ -12,7 +14,7 @@ After installing you'll be able to:
 
 ## Install
 
-Requires Node version >= 10.0.0
+Please check our [system requirements](https://on.cypress.io/installing-cypress).
 
 ```sh
 npm install --save-dev cypress

@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { FoundBrowser } from '@packages/launcher'
+import type { FoundBrowser } from '@packages/launcher'
 // @ts-ignore
 import errors from '../errors'
 // @ts-ignore
@@ -224,6 +224,10 @@ export = {
       .then(() => {
         debug('copied extension')
 
+        // ensure write access before overwriting
+        return fs.chmod(extensionBg, 0o0644)
+      })
+      .then(() => {
         // and overwrite background.js with the final string bytes
         return fs.writeFileAsync(extensionBg, str)
       })

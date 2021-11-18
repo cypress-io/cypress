@@ -1,12 +1,12 @@
-export function create (Cypress) {
+export const initVideoRecorder = (Cypress) => {
   // Only start recording with getUserMedia API if we're in firefox and video-enabled and run mode.
   // TODO: this logic should be cleaned up or gotten from some video-specific config value
   if (
     Cypress.isBrowser('firefox')
-    && Cypress.config('video')
-    && !Cypress.config('isInteractive')
-    // navigator.mediaDevices will be undefined if the browser does not support display capture
-    && window.navigator.mediaDevices
+      && Cypress.config('video')
+      && !Cypress.config('isInteractive')
+      // navigator.mediaDevices will be undefined if the browser does not support display capture
+      && window.navigator.mediaDevices
   ) {
     window.navigator.mediaDevices.getUserMedia({
       audio: false,
@@ -24,6 +24,7 @@ export function create (Cypress) {
         mimeType: 'video/webm',
       }
 
+      // TODO: update TypeScript to 4.4+.
       // @ts-ignore
       const mediaRecorder = new window.MediaRecorder(stream, options)
 

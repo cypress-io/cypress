@@ -30,7 +30,7 @@ const resolve = require(`${root}lib/util/resolve`)
 const { fs } = require(`${root}lib/util/fs`)
 const glob = require(`${root}lib/util/glob`)
 const CacheBuster = require(`${root}lib/util/cache_buster`)
-const Fixtures = require(`${root}test/support/helpers/fixtures`)
+const Fixtures = require('@tooling/system-tests/lib/fixtures')
 /**
  * @type {import('@packages/resolve-dist')}
  */
@@ -60,6 +60,23 @@ const cleanResponseBody = (body) => {
   return replaceAbsolutePaths(removeWhitespace(body))
 }
 
+function getHugeJsFile () {
+  const pathToHugeAppJs = Fixtures.path('server/libs/huge_app.js')
+
+  const getHugeFile = () => {
+    return rp('https://s3.amazonaws.com/internal-test-runner-assets.cypress.io/huge_app.js')
+    .then((resp) => {
+      return fs
+      .outputFileAsync(pathToHugeAppJs, resp)
+      .return(resp)
+    })
+  }
+
+  return fs
+  .readFileAsync(pathToHugeAppJs, 'utf8')
+  .catch(getHugeFile)
+}
+
 describe('Routes', () => {
   require('mocha-banner').register()
 
@@ -72,7 +89,7 @@ describe('Routes', () => {
 
     nock.enableNetConnect()
 
-    this.setup = (initialUrl, obj = {}) => {
+    this.setup = (initialUrl, obj = {}, spec) => {
       if (_.isObject(initialUrl)) {
         obj = initialUrl
         initialUrl = null
@@ -128,7 +145,7 @@ describe('Routes', () => {
         }
 
         const open = () => {
-          this.project = new ProjectBase({ projectRoot: '/path/to/project-e2e', projectType: 'e2e' })
+          this.project = new ProjectBase({ projectRoot: '/path/to/project-e2e', testingType: 'e2e' })
 
           cfg.pluginsFile = false
 
@@ -141,10 +158,12 @@ describe('Routes', () => {
 
             this.server.open(cfg, {
               SocketCtor: SocketE2E,
-              project: this.project,
+              getSpec: () => spec,
+              getCurrentBrowser: () => null,
               specsStore: new SpecsStore({}, 'e2e'),
               createRoutes,
-              projectType: 'e2e',
+              testingType: 'e2e',
+              exit: false,
             })
             .spread(async (port) => {
               const automationStub = {
@@ -376,6 +395,21 @@ describe('Routes', () => {
         })
       })
     })
+
+    it('sends exit config', function () {
+      return this.setup({ baseUrl: 'http://localhost:9999/app' })
+      .then(() => {
+        return this.rp('http://localhost:9999/__')
+        .then((res) => {
+          expect(res.statusCode).to.eq(200)
+
+          const base64Config = /Runner\.start\(.*, "(.*)"\)/.exec(res.body)[1]
+          const configStr = Buffer.from(base64Config, 'base64').toString()
+
+          expect(configStr).to.include('"exit":false')
+        })
+      })
+    })
   })
 
   context('GET /__cypress/runner/*', () => {
@@ -402,6 +436,37 @@ describe('Routes', () => {
     })
   })
 
+  context('GET /__cypress/automation', () => {
+    beforeEach(function () {
+      return this.setup('http://localhost:8443')
+    })
+
+    it('sends getLocalStorage', function () {
+      return this.rp(`http://localhost:8443/__cypress/automation/getLocalStorage`)
+      .then((res) => {
+        expect(res.statusCode).to.eq(200)
+
+        expect(res.body).to
+        .match(/parent\.postMessage/)
+        .match(/localStorage/)
+        .match(/sessionStorage/)
+      })
+    })
+
+    it('sends setLocalStorage', function () {
+      return this.rp(`http://localhost:8443/__cypress/automation/setLocalStorage`)
+      .then((res) => {
+        expect(res.statusCode).to.eq(200)
+
+        expect(res.body).to
+        .match(/parent\.postMessage/)
+        .match(/set:storage/)
+        .match(/localStorage/)
+        .match(/sessionStorage/)
+      })
+    })
+  })
+
   context('GET /__cypress/files', () => {
     beforeEach(() => {
       Fixtures.scaffold('todos')
@@ -417,13 +482,12 @@ describe('Routes', () => {
             integrationFolder: 'tests',
             fixturesFolder: 'tests/_fixtures',
             supportFile: 'tests/_support/spec_helper.js',
-            javascripts: ['tests/etc/**/*'],
           },
         })
       })
 
       it('returns base json file path objects of only tests', function () {
-        // this should omit any _fixture files, _support files and javascripts
+        // this should omit any _fixture files, _support files
         return glob(path.join(Fixtures.projectPath('todos'), 'tests', '_fixtures', '**', '*'))
         .then((files) => {
           // make sure there are fixtures in here!
@@ -445,7 +509,7 @@ describe('Routes', () => {
                 body,
               } = res
 
-              expect(body.integration).to.have.length(4)
+              expect(body.integration).to.have.length(5)
 
               // remove the absolute path key
               body.integration = _.map(body.integration, (obj) => {
@@ -455,8 +519,12 @@ describe('Routes', () => {
               expect(res.body).to.deep.eq({
                 integration: [
                   {
-                    'name': 'sub/a&b%c.js',
-                    'relative': 'tests/sub/a&b%c.js',
+                    name: 'etc/etc.js',
+                    relative: 'tests/etc/etc.js',
+                  },
+                  {
+                    name: 'sub/a&b%c.js',
+                    relative: 'tests/sub/a&b%c.js',
                   },
                   {
                     name: 'sub/sub_test.coffee',
@@ -706,7 +774,7 @@ describe('Routes', () => {
           projectRoot: Fixtures.projectPath('no-server'),
           config: {
             integrationFolder: 'my-tests',
-            javascripts: ['helpers/includes.js'],
+            supportFile: 'helpers/includes.js',
           },
         })
       })
@@ -720,7 +788,7 @@ describe('Routes', () => {
         })
       })
 
-      it('processes helpers/includes.js javascripts', function () {
+      it('processes helpers/includes.js supportFile', function () {
         return this.rp('http://localhost:2020/__cypress/tests?p=helpers/includes.js')
         .then((res) => {
           expect(res.statusCode).to.eq(200)
@@ -1069,18 +1137,20 @@ describe('Routes', () => {
 
     describe('todos', () => {
       beforeEach(function () {
-        return this.setup({
-          projectRoot: Fixtures.projectPath('todos'),
-          config: {
-            integrationFolder: 'tests',
-            fixturesFolder: 'tests/_fixtures',
-            supportFile: 'tests/_support/spec_helper.js',
-            javascripts: ['tests/etc/etc.js'],
-          },
-        })
+        this.setupServer = (spec = null) => {
+          return this.setup({
+            projectRoot: Fixtures.projectPath('todos'),
+            config: {
+              integrationFolder: 'tests',
+              fixturesFolder: 'tests/_fixtures',
+              supportFile: 'tests/_support/spec_helper.js',
+            },
+          }, {}, spec)
+        }
       })
 
-      it('renders iframe with variables passed in', function () {
+      it('renders iframe with variables passed in', async function () {
+        await this.setupServer()
         const contents = removeWhitespace(Fixtures.get('server/expected_todos_iframe.html'))
 
         return this.rp('http://localhost:2020/__cypress/iframes/integration/test2.coffee')
@@ -1093,7 +1163,8 @@ describe('Routes', () => {
         })
       })
 
-      it('can send back all tests', function () {
+      it('can send back all tests', async function () {
+        await this.setupServer()
         const contents = removeWhitespace(Fixtures.get('server/expected_todos_all_tests_iframe.html'))
 
         return this.rp('http://localhost:2020/__cypress/iframes/__all')
@@ -1106,11 +1177,15 @@ describe('Routes', () => {
         })
       })
 
-      it('can send back tests matching spec filter', function () {
+      it('can send back tests matching spec filter', async function () {
+        await this.setupServer({
+          specFilter: 'sub_test',
+        })
+
         // only returns tests with "sub_test" in their names
         const contents = removeWhitespace(Fixtures.get('server/expected_todos_filtered_tests_iframe.html'))
 
-        this.project.spec = {
+        this.spec = {
           specFilter: 'sub_test',
         }
 
@@ -1119,8 +1194,6 @@ describe('Routes', () => {
           expect(res.statusCode).to.eq(200)
 
           const body = cleanResponseBody(res.body)
-
-          console.log(body)
 
           expect(body).to.eq(contents)
         })
@@ -3260,20 +3333,7 @@ describe('Routes', () => {
         })
 
         it('does not die rewriting a huge JS file', function () {
-          const pathToHugeAppJs = Fixtures.path('server/libs/huge_app.js')
-
-          const getHugeFile = () => {
-            return rp('https://s3.amazonaws.com/internal-test-runner-assets.cypress.io/huge_app.js')
-            .then((resp) => {
-              return fs
-              .outputFileAsync(pathToHugeAppJs, resp)
-              .return(resp)
-            })
-          }
-
-          return fs
-          .readFileAsync(pathToHugeAppJs, 'utf8')
-          .catch(getHugeFile)
+          return getHugeJsFile()
           .then((hugeJsFile) => {
             nock(this.server._remoteOrigin)
             .get('/app.js')
@@ -3767,8 +3827,7 @@ describe('Routes', () => {
       })
 
       it('aborts the proxied request', function (done) {
-        fs
-        .readFileAsync(Fixtures.path('server/libs/huge_app.js'), 'utf8')
+        getHugeJsFile()
         .then((str) => {
           const server = http.createServer((req, res) => {
             // when the incoming message to our

@@ -83,7 +83,11 @@ const init = (config, options) => {
     const childIndexFilename = path.join(__dirname, 'child', 'index.js')
     const childArguments = ['--file', pluginsFile, '--projectRoot', options.projectRoot]
     const childOptions = {
-      stdio: 'inherit',
+      stdio: 'pipe',
+      env: {
+        ...process.env,
+        NODE_OPTIONS: process.env.ORIGINAL_NODE_OPTIONS || '',
+      },
     }
 
     if (config.resolvedNodePath) {
@@ -101,6 +105,16 @@ const init = (config, options) => {
     }
 
     pluginsProcess = cp.fork(childIndexFilename, childArguments, childOptions)
+
+    if (pluginsProcess.stdout && pluginsProcess.stderr) {
+      // manually pipe plugin stdout and stderr for dashboard capture
+      // @see https://github.com/cypress-io/cypress/issues/7434
+      pluginsProcess.stdout.on('data', (data) => process.stdout.write(data))
+      pluginsProcess.stderr.on('data', (data) => process.stderr.write(data))
+    } else {
+      debug('stdout and stderr not available on subprocess, the plugin launch should error')
+    }
+
     const ipc = util.wrapIpc(pluginsProcess)
 
     for (let handler of handlers) {

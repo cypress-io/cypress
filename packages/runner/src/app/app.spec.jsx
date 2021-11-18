@@ -1,7 +1,7 @@
 import React from 'react'
 import { shallow } from 'enzyme'
 import sinon from 'sinon'
-import driver from '@packages/driver'
+import $Cypress from '@packages/driver'
 
 import { Message } from '@packages/runner-shared'
 import * as reporter from '@packages/reporter'
@@ -46,7 +46,7 @@ const shallowRender = (component) => {
 
 describe('<App />', () => {
   beforeEach(() => {
-    driver.$.returns({
+    $Cypress.$.returns({
       outerHeight () {
         return 10
       },
@@ -85,15 +85,6 @@ describe('<App />', () => {
     const component = shallowRender(<App {...props} />)
 
     expect(component.find(Reporter)).to.have.prop('autoScrollingEnabled', true)
-  })
-
-  it('renders the <Reporter /> with the firefoxGcInterval flag', () => {
-    const props = createProps()
-
-    props.config.firefoxGcInterval = 111
-    const component = shallowRender(<App {...props} />)
-
-    expect(component.find(Reporter)).to.have.prop('firefoxGcInterval', 111)
   })
 
   it('renders the runner container with `left` set as the width of the reporter', () => {

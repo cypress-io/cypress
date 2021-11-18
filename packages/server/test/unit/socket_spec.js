@@ -15,7 +15,7 @@ const exec = require(`${root}lib/exec`)
 const preprocessor = require(`${root}lib/plugins/preprocessor`)
 const { fs } = require(`${root}lib/util/fs`)
 const open = require(`${root}lib/util/open`)
-const Fixtures = require(`${root}/test/support/helpers/fixtures`)
+const Fixtures = require('@tooling/system-tests/lib/fixtures')
 const firefoxUtil = require(`${root}lib/browsers/firefox-util`).default
 const { createRoutes } = require(`${root}lib/routes`)
 
@@ -46,7 +46,7 @@ describe('lib/socket', () => {
         SocketCtor: SocketE2E,
         createRoutes,
         specsStore: new SpecsStore({}, 'e2e'),
-        projectType: 'e2e',
+        testingType: 'e2e',
       })
       .then(() => {
         this.options = {
@@ -456,6 +456,16 @@ describe('lib/socket', () => {
 
         return this.client.emit('backend:request', 'get:fixture', 'does-not-exist.txt', {}, cb)
       })
+
+      it('passes Buffers through intact', function (done) {
+        const cb = function (resp) {
+          expect(resp.response).to.eql(Buffer.from('[{"json": true}]'))
+
+          return done()
+        }
+
+        return this.client.emit('backend:request', 'get:fixture', 'foo', { encoding: null }, cb)
+      })
     })
 
     context('on(http:request)', () => {
@@ -567,7 +577,7 @@ describe('lib/socket', () => {
         SocketCtor: SocketE2E,
         createRoutes,
         specsStore: new SpecsStore({}, 'e2e'),
-        projectType: 'e2e',
+        testingType: 'e2e',
       })
       .then(() => {
         this.automation = new Automation(this.cfg.namespace, this.cfg.socketIoCookie, this.cfg.screenshotsFolder)

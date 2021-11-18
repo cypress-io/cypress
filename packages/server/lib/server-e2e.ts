@@ -10,11 +10,12 @@ import { concatStream, cors } from '@packages/network'
 import errors from './errors'
 import fileServer from './file_server'
 import { OpenServerOptions, ServerBase } from './server-base'
-import { SocketE2E } from './socket-e2e'
+import type { SocketE2E } from './socket-e2e'
 import appData from './util/app_data'
 import * as ensureUrl from './util/ensure-url'
 import headersUtil from './util/headers'
 import statusCode from './util/status_code'
+import type { Cfg } from './project-base'
 
 type WarningErr = Record<string, any>
 
@@ -49,11 +50,11 @@ export class ServerE2E extends ServerBase<SocketE2E> {
     this._urlResolver = null
   }
 
-  open (config: Record<string, any> = {}, options: OpenServerOptions) {
-    return super.open(config, { ...options, projectType: 'e2e' })
+  open (config: Cfg, options: OpenServerOptions) {
+    return super.open(config, { ...options, testingType: 'e2e' })
   }
 
-  createServer (app, config, project, request, onWarning): Bluebird<[number, WarningErr?]> {
+  createServer (app, config, onWarning): Bluebird<[number, WarningErr?]> {
     return new Bluebird((resolve, reject) => {
       const { port, fileServerFolder, socketIoRoute, baseUrl } = config
 

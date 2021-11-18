@@ -1,7 +1,9 @@
-import Bluebird from 'bluebird'
+import type Bluebird from 'bluebird'
 import chokidar, { FSWatcher } from 'chokidar'
 import _ from 'lodash'
-import { findSpecsOfType } from './util/specs'
+import specsUtil from './util/specs'
+/* eslint-disable no-duplicate-imports */
+import type { CommonSearchOptions } from './util/specs'
 
 type SpecFile = Cypress.Cypress['spec']
 type SpecFiles = SpecFile[]
@@ -10,12 +12,8 @@ interface SpecsWatcherOptions {
   onSpecsChanged: (specFiles: SpecFiles) => void
 }
 
-const COMMON_SEARCH_OPTIONS = ['fixturesFolder', 'supportFile', 'projectRoot', 'javascripts', 'testFiles', 'ignoreTestFiles']
-
 // TODO: shouldn't this be on the trailing edge, not leading?
 const debounce = (fn) => _.debounce(fn, 250, { leading: true })
-
-export type RunnerType = 'ct' | 'e2e'
 
 export class SpecsStore {
   watcher: FSWatcher | null = null
@@ -23,7 +21,7 @@ export class SpecsStore {
 
   constructor (
     private cypressConfig: Record<string, any>,
-    private runner: RunnerType,
+    private runner: Cypress.TestingType,
   ) {}
 
   get specDirectory () {
@@ -31,7 +29,7 @@ export class SpecsStore {
       return this.cypressConfig.resolved.integrationFolder.value
     }
 
-    if (this.runner === 'ct') {
+    if (this.runner === 'component') {
       return this.cypressConfig.resolved.componentFolder.value
     }
   }
@@ -56,12 +54,17 @@ export class SpecsStore {
   }
 
   getSpecFiles (): Bluebird<SpecFiles> {
-    const searchOptions = _.pick(this.cypressConfig, COMMON_SEARCH_OPTIONS)
+    const searchOptions: CommonSearchOptions = {
+      projectRoot: this.cypressConfig.projectRoot,
+      fixturesFolder: this.cypressConfig.fixturesFolder,
+      supportFile: this.cypressConfig.supportFile,
+      testFiles: this.cypressConfig.testFiles,
+      ignoreTestFiles: this.cypressConfig.ignoreTestFiles,
+    }
 
-    searchOptions.searchFolder = this.specDirectory
     searchOptions.testFiles = this.testFiles
 
-    return findSpecsOfType(searchOptions)
+    return specsUtil.findSpecsOfType(this.specDirectory, searchOptions)
   }
 
   watch (options: SpecsWatcherOptions) {

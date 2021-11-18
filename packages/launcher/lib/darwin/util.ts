@@ -1,10 +1,13 @@
 import { log } from '../log'
 import { notInstalledErr } from '../errors'
-import { prop, tap } from 'ramda'
 import { utils } from '../utils'
-import fs from 'fs-extra'
+import * as fs from 'fs-extra'
+import * as os from 'os'
 import * as path from 'path'
 import * as plist from 'plist'
+import * as semver from 'semver'
+import type { FoundBrowser } from '../types'
+import * as findSystemNode from '@packages/server/lib/util/find_system_node'
 
 /** parses Info.plist file from given application and returns a property */
 export function parsePlist (p: string, property: string): Promise<string> {
@@ -23,7 +26,7 @@ export function parsePlist (p: string, property: string): Promise<string> {
   return fs
   .readFile(pl, 'utf8')
   .then(plist.parse)
-  .then(prop(property))
+  .then((val) => val[property])
   .then(String) // explicitly convert value to String type
   .catch(failed) // to make TS compiler happy
 }
@@ -46,8 +49,14 @@ export function mdfind (id: string): Promise<string> {
   }
 
   return utils.execa(cmd)
-  .then(prop('stdout'))
-  .then(tap(logFound))
+  .then((val) => {
+    return val.stdout
+  })
+  .then((val) => {
+    logFound(val)
+
+    return val
+  })
   .catch(failedToFind)
 }
 
@@ -95,4 +104,21 @@ export function findApp ({ appName, executable, appId, versionProperty }: FindAp
   }
 
   return tryMdFind().catch(tryFullApplicationFind)
+}
+
+export function needsDarwinWorkaround (): boolean {
+  return os.platform() === 'darwin' && semver.gte(os.release(), '20.0.0')
+}
+
+export async function darwinDetectionWorkaround (): Promise<FoundBrowser[]> {
+  const nodePath = await findSystemNode.findNodeInFullPath()
+  let args = ['./detection-workaround.js']
+
+  if (process.env.CYPRESS_INTERNAL_ENV === 'development') {
+    args = ['-r', '@packages/ts/register.js'].concat(args)
+  }
+
+  const { stdout } = await utils.execa(nodePath, args, { cwd: __dirname })
+
+  return JSON.parse(stdout)
 }

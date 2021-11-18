@@ -1,3 +1,31 @@
+# [@cypress/schematic-v1.5.3](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v1.5.2...@cypress/schematic-v1.5.3) (2021-10-29)
+
+
+### Bug Fixes
+
+* remove outdated registry link ([#18710](https://github.com/cypress-io/cypress/issues/18710)) ([e2a869d](https://github.com/cypress-io/cypress/commit/e2a869d2a984abb6703aec966dd9124ee693b8c1))
+
+# [@cypress/schematic-v1.5.2](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v1.5.1...@cypress/schematic-v1.5.2) (2021-10-29)
+
+
+### Bug Fixes
+
+* revive type checker ([#18172](https://github.com/cypress-io/cypress/issues/18172)) ([af472b6](https://github.com/cypress-io/cypress/commit/af472b6419ecb2aec1abdb09df99b2fa5f56e033))
+
+# [@cypress/schematic-v1.5.1](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v1.5.0...@cypress/schematic-v1.5.1) (2021-09-10)
+
+
+### Bug Fixes
+
+* **cypress/schematic:** add edge to list of allowed browsers ([#17637](https://github.com/cypress-io/cypress/issues/17637)) ([49de24f](https://github.com/cypress-io/cypress/commit/49de24f6178e0ef7bfd654c3efc0bfa8008e962e))
+
+# [@cypress/schematic-v1.5.0](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v1.4.2...@cypress/schematic-v1.5.0) (2021-07-20)
+
+
+### Features
+
+* **cypress/schematic:** add reporter and reporter-options to builder schematic ([#17353](https://github.com/cypress-io/cypress/issues/17353)) ([b7783e6](https://github.com/cypress-io/cypress/commit/b7783e627be23120c0944eb3f186ed54256a9c93))
+
 # [@cypress/schematic-v1.4.2](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v1.4.1...@cypress/schematic-v1.4.2) (2021-06-29)
 
 

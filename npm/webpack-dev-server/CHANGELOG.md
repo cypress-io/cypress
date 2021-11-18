@@ -1,3 +1,24 @@
+# [@cypress/webpack-dev-server-v1.7.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v1.6.0...@cypress/webpack-dev-server-v1.7.0) (2021-10-15)
+
+
+### Features
+
+* normalized signatures webpack & vite servers ([#18379](https://github.com/cypress-io/cypress/issues/18379)) ([8f5308f](https://github.com/cypress-io/cypress/commit/8f5308f7068b80fb877da539ce34fb67ba497c4f))
+
+# [@cypress/webpack-dev-server-v1.6.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v1.5.0...@cypress/webpack-dev-server-v1.6.0) (2021-09-10)
+
+
+### Features
+
+* allow usage of @react/plugins with cypress.config.js ([#17738](https://github.com/cypress-io/cypress/issues/17738)) ([da4b1e0](https://github.com/cypress-io/cypress/commit/da4b1e06ce33945aabddda0e6e175dc0e1b488a5))
+
+# [@cypress/webpack-dev-server-v1.5.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v1.4.0...@cypress/webpack-dev-server-v1.5.0) (2021-08-30)
+
+
+### Features
+
+* support webpack-dev-server v4 ([#17918](https://github.com/cypress-io/cypress/issues/17918)) ([16e4759](https://github.com/cypress-io/cypress/commit/16e4759e0196f68c5f0525efb020211337748f94))
+
 # [@cypress/webpack-dev-server-v1.4.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v1.3.1...@cypress/webpack-dev-server-v1.4.0) (2021-06-17)
 
 

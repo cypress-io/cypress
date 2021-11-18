@@ -2,7 +2,6 @@ import _ from 'lodash'
 import React from 'react'
 import { mount, shallow } from 'enzyme'
 import sinon from 'sinon'
-import driver from '@packages/driver'
 import Tooltip from '@cypress/react-tooltip'
 
 import { eventManager } from '../event-manager'
@@ -24,10 +23,7 @@ const propsWithState = (stateProps, configProps = {}) =>
 
 describe('<Header />', () => {
   beforeEach(() => {
-    driver.$.returns({ outerHeight: () => 42 })
-
     sinon.stub(eventManager, 'emit')
-
     sinon.stub(studioRecorder, 'removeListeners')
     sinon.stub(studioRecorder, 'visitUrl')
   })
@@ -89,7 +85,7 @@ describe('<Header />', () => {
 
       mount(<Header {...props} />)
       selectorPlaygroundModel.isOpen = true
-      expect(props.state.updateWindowDimensions).to.be.calledWith({ headerHeight: 42 })
+      expect(props.state.updateWindowDimensions).to.be.called
     })
 
     it('does not show tooltip if selector playground is open', () => {

@@ -1,14 +1,14 @@
 import _ from 'lodash'
 
 import {
+  PLAIN_FIELDS,
+  STRING_MATCHER_FIELDS,
+  DICT_STRING_MATCHER_FIELDS,
   RouteHandler,
   RouteMatcherOptions,
   RouteMatcher,
   StaticResponse,
   HttpRequestInterceptor,
-  PLAIN_FIELDS,
-  STRING_MATCHER_FIELDS,
-  DICT_STRING_MATCHER_FIELDS,
   AnnotatedRouteMatcherOptions,
   AnnotatedStringMatcher,
   NetEvent,
@@ -28,6 +28,7 @@ import { registerEvents } from './events'
 import $errUtils from '../../cypress/error_utils'
 import $utils from '../../cypress/utils'
 import isValidDomain from 'is-valid-domain'
+import isValidHostname from 'is-valid-hostname'
 
 const lowercaseFieldNames = (headers: { [fieldName: string]: any }) => _.mapKeys(headers, (v, k) => _.toLower(k))
 
@@ -131,7 +132,7 @@ function validateRouteMatcherOptions (routeMatcher: RouteMatcherOptions): { isVa
     }
   }
 
-  if (_.isString(routeMatcher.hostname) && !isValidDomain(routeMatcher.hostname, { allowUnicode: true })) {
+  if (_.isString(routeMatcher.hostname) && !(isValidHostname(routeMatcher.hostname) || isValidDomain(routeMatcher.hostname, { allowUnicode: true }))) {
     return err('`hostname` must be a valid host name or domain name.')
   }
 
@@ -198,7 +199,7 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
       staticResponse = handler as StaticResponse
     } else if (!_.isUndefined(handler)) {
       // a handler was passed but we dunno what it's supposed to be
-      return $errUtils.throwErrByPath('net_stubbing.intercept.invalid_handler', { args: { handler } })
+      $errUtils.throwErrByPath('net_stubbing.intercept.invalid_handler', { args: { handler } })
     }
 
     const routeMatcher = annotateMatcherOptionsTypes(matcher)
@@ -210,7 +211,7 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
     }
 
     if (routeMatcher.middleware && !hasInterceptor) {
-      return $errUtils.throwErrByPath('net_stubbing.intercept.invalid_middleware_handler', { args: { handler } })
+      $errUtils.throwErrByPath('net_stubbing.intercept.invalid_middleware_handler', { args: { handler } })
     }
 
     const frame: NetEvent.ToServer.AddRoute<BackendStaticResponseWithArrayBuffer> = {
@@ -256,11 +257,11 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
         // url, mergeRouteMatcher, handler
         // @ts-ignore
         if (handler.url) {
-          return $errUtils.throwErrByPath('net_stubbing.intercept.no_duplicate_url')
+          $errUtils.throwErrByPath('net_stubbing.intercept.no_duplicate_url')
         }
 
         if (!arg2) {
-          return $errUtils.throwErrByPath('net_stubbing.intercept.handler_required')
+          $errUtils.throwErrByPath('net_stubbing.intercept.handler_required')
         }
 
         checkExtraArguments(['url', 'mergeRouteMatcher', 'handler'])

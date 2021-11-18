@@ -1,7 +1,7 @@
 const Cookie = require('js-cookie')
 const { stripIndent } = require('common-tags')
-const helpers = require('../../support/helpers')
 
+const { assertLogLength } = require('../../support/utils')
 const { _, Promise, $ } = Cypress
 
 describe('src/cy/commands/navigation', () => {
@@ -85,7 +85,7 @@ describe('src/cy/commands/navigation', () => {
     })
 
     // TODO: fix this
-    it.skip('(FLAKY) sets timeout to Cypress.config(pageLoadTimeout)', {
+    it('sets timeout to Cypress.config(pageLoadTimeout)', {
       pageLoadTimeout: 4567,
     }, () => {
       const timeout = cy.spy(Promise.prototype, 'timeout')
@@ -141,7 +141,7 @@ describe('src/cy/commands/navigation', () => {
         defaultCommandTimeout: 200,
       }, function (done) {
         cy.on('fail', (err) => {
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
 
           done()
         })
@@ -303,7 +303,7 @@ describe('src/cy/commands/navigation', () => {
     })
 
     // TODO: fix this
-    it.skip('(FLAKY) sets timeout to Cypress.config(pageLoadTimeout)', {
+    it('sets timeout to Cypress.config(pageLoadTimeout)', {
       pageLoadTimeout: 4567,
     }, () => {
       const timeout = cy.spy(Promise.prototype, 'timeout')
@@ -456,7 +456,7 @@ describe('src/cy/commands/navigation', () => {
 
       it('only logs once on error', function (done) {
         cy.on('fail', (err) => {
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(this.logs[0].get('error')).to.eq(err)
 
           done()
@@ -546,7 +546,7 @@ describe('src/cy/commands/navigation', () => {
 
   context('#visit', () => {
     // TODO: fix this
-    it.skip('(FLAKY) sets timeout to Cypress.config(pageLoadTimeout)', {
+    it('sets timeout to Cypress.config(pageLoadTimeout)', {
       pageLoadTimeout: 4567,
     }, () => {
       const timeout = cy.spy(Promise.prototype, 'timeout')
@@ -694,7 +694,7 @@ describe('src/cy/commands/navigation', () => {
     })
 
     it('does not support file:// protocol', {
-      baseUrl: '',
+      baseUrl: null,
     }, (done) => {
       cy.on('fail', (err) => {
         expect(err.message).to.contain('`cy.visit()` failed because the \'file://...\' protocol is not supported by Cypress.')
@@ -1251,7 +1251,7 @@ describe('src/cy/commands/navigation', () => {
         .rejects(new Error)
 
         cy.on('fail', (err) => {
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
 
           done()
         })
@@ -1263,7 +1263,7 @@ describe('src/cy/commands/navigation', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(err.message).to.include('Your page did not fire its `load` event within `20ms`.')
           expect(lastLog.get('error')).to.eq(err)
 
@@ -1392,7 +1392,7 @@ describe('src/cy/commands/navigation', () => {
           expect(err.message).to.include('The new URL is considered a different origin because the following parts of the URL are different:')
           expect(err.message).to.include('> port')
           expect(err.docsUrl).to.eq('https://on.cypress.io/cannot-visit-different-origin-domain')
-          expect(this.logs.length).to.eq(2)
+          assertLogLength(this.logs, 2)
           expect(lastLog.get('error')).to.eq(err)
 
           done()
@@ -1411,7 +1411,7 @@ describe('src/cy/commands/navigation', () => {
           expect(err.message).to.include('The new URL is considered a different origin because the following parts of the URL are different:')
           expect(err.message).to.include('> protocol')
           expect(err.docsUrl).to.eq('https://on.cypress.io/cannot-visit-different-origin-domain')
-          expect(this.logs.length).to.eq(2)
+          assertLogLength(this.logs, 2)
           expect(lastLog.get('error')).to.eq(err)
 
           done()
@@ -1429,7 +1429,7 @@ describe('src/cy/commands/navigation', () => {
           expect(err.message).to.include('The new URL is considered a different origin because the following parts of the URL are different:')
           expect(err.message).to.include('> superdomain')
           expect(err.docsUrl).to.eq('https://on.cypress.io/cannot-visit-different-origin-domain')
-          expect(this.logs.length).to.eq(2)
+          assertLogLength(this.logs, 2)
           expect(lastLog.get('error')).to.eq(err)
 
           done()
@@ -1439,7 +1439,7 @@ describe('src/cy/commands/navigation', () => {
         cy.visit('http://google.com:3500/fixtures/generic.html')
       })
 
-      it('throws attemping to visit 2 unique ip addresses', function (done) {
+      it('throws attempting to visit 2 unique ip addresses', function (done) {
         const $autIframe = cy.state('$autIframe')
 
         const load = () => {
@@ -1469,7 +1469,7 @@ describe('src/cy/commands/navigation', () => {
 
           expect(err.message).to.include('`cy.visit()` failed because you are attempting to visit a URL that is of a different origin.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/cannot-visit-different-origin-domain')
-          expect(this.logs.length).to.eq(2)
+          assertLogLength(this.logs, 2)
           expect(lastLog.get('error')).to.eq(err)
 
           done()
@@ -1480,7 +1480,7 @@ describe('src/cy/commands/navigation', () => {
         .visit('http://126.0.0.1:3500/fixtures/generic.html')
       })
 
-      it('does not call resolve:url when throws attemping to visit a 2nd domain', (done) => {
+      it('does not call resolve:url when throws attempting to visit a 2nd domain', (done) => {
         const backend = cy.spy(Cypress, 'backend')
 
         cy.on('fail', (err) => {
@@ -1527,7 +1527,7 @@ describe('src/cy/commands/navigation', () => {
 
           expect(err1.url).to.include('/foo.html')
           expect(emit).to.be.calledWith('visit:failed', err1)
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
 
           done()
@@ -1574,7 +1574,7 @@ describe('src/cy/commands/navigation', () => {
               > 404: Not Found`)
 
           expect(emit).to.be.calledWithMatch('visit:failed', obj)
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
 
           done()
@@ -1627,7 +1627,7 @@ describe('src/cy/commands/navigation', () => {
               - 301: http://localhost:3500/bar/`)
 
           expect(emit).to.be.calledWithMatch('visit:failed', obj)
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
 
           done()
@@ -1673,7 +1673,7 @@ describe('src/cy/commands/navigation', () => {
             If you do not want status codes to cause failures pass the option: \`failOnStatusCode: false\``)
 
           expect(emit).to.be.calledWithMatch('visit:failed', obj)
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
 
           done()
@@ -1727,7 +1727,7 @@ describe('src/cy/commands/navigation', () => {
             If you do not want status codes to cause failures pass the option: \`failOnStatusCode: false\``)
 
           expect(emit).to.be.calledWithMatch('visit:failed', obj)
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
 
           done()
@@ -1769,7 +1769,7 @@ describe('src/cy/commands/navigation', () => {
 
               \`cy.request()\` will automatically get and set cookies and enable you to parse responses.`)
 
-            expect(this.logs.length).to.eq(1)
+            assertLogLength(this.logs, 1)
             expect(lastLog.get('error')).to.eq(err)
 
             done()
@@ -1818,7 +1818,7 @@ describe('src/cy/commands/navigation', () => {
             \`cy.request()\` will automatically get and set cookies and enable you to parse responses.`)
 
           expect(emit).to.be.calledWithMatch('visit:failed', obj)
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
 
           done()
@@ -1845,7 +1845,7 @@ describe('src/cy/commands/navigation', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
           expect(err.message).to.eq(stripIndent`\
@@ -1971,12 +1971,10 @@ describe('src/cy/commands/navigation', () => {
     })
 
     describe('errors', () => {
-      helpers.registerCypressConfigBackupRestore()
-
       beforeEach(function () {
         this.logs = []
 
-        cy.on('log:added', (attrs, log) => {
+        cy.on('log:added', (_attrs, log) => {
           this.lastLog = log
           this.logs.push(log)
         })
@@ -1984,42 +1982,57 @@ describe('src/cy/commands/navigation', () => {
         return null
       })
 
-      it('can time out', function (done) {
-        let thenCalled = false
+      describe('can time out', () => {
+        let pageLoadTimeout
 
-        cy.on('fail', (err) => {
-          const { lastLog } = this
-
-          // visit, window, page loading
-          expect(this.logs.length).to.eq(3)
-          expect(err.message).to.include('Your page did not fire its `load` event within `50ms`.')
-          expect(lastLog.get('name')).to.eq('page load')
-          expect(lastLog.get('error')).to.eq(err)
-
-          return Promise
-          .delay(100)
-          .then(() => {
-            expect(cy.state('onPageLoadErr')).to.be.null
-            expect(cy.isStopped()).to.be.true // make sure we ran our cleanup routine
-            expect(thenCalled).to.be.false
-
-            done()
-          })
+        before(() => {
+          pageLoadTimeout = Cypress.config().pageLoadTimeout
         })
 
-        cy
-        .visit('/fixtures/jquery.html')
-        .window().then((win) => {
-          Cypress.config('pageLoadTimeout', 50)
+        after(() => {
+          Cypress.config('pageLoadTimeout', pageLoadTimeout)
+        })
 
-          const $a = win.$('<a href=\'/timeout?ms=500\'>jquery</a>')
-          .appendTo(win.document.body)
+        it('times out', function (done) {
+          let thenCalled = false
 
-          causeSynchronousBeforeUnload($a)
+          cy.on('fail', (err, test) => {
+            if (test._currentRetry < 1) {
+              const { lastLog } = this
 
-          return null
-        }).wrap(null).then(() => {
-          thenCalled = true
+              // visit, window, page loading
+              assertLogLength(this.logs, 3)
+
+              expect(lastLog.get('name')).to.eq('page load')
+              expect(lastLog.get('error')).to.eq(err)
+            }
+
+            expect(err.message).to.include('Your page did not fire its `load` event within `50ms`.')
+
+            return Promise
+            .delay(100)
+            .then(() => {
+              expect(cy.state('onPageLoadErr')).to.be.null
+              expect(cy.isStopped()).to.be.true // make sure we ran our cleanup routine
+              expect(thenCalled).to.be.false
+
+              done()
+            })
+          })
+
+          cy
+          .visit('/fixtures/jquery.html')
+          .window().then((win) => {
+            Cypress.config('pageLoadTimeout', 50)
+            const $a = win.$('<a href=\'/timeout?ms=500\'>jquery</a>')
+            .appendTo(win.document.body)
+
+            causeSynchronousBeforeUnload($a)
+
+            return null
+          }).wrap(null).then(() => {
+            thenCalled = true
+          })
         })
       })
 
@@ -2086,8 +2099,7 @@ describe('src/cy/commands/navigation', () => {
           }
         })
 
-        cy
-        .visit('/fixtures/jquery.html')
+        cy.visit('/fixtures/jquery.html')
 
         // make get timeout after only 200ms
         .get('#does-not-exist', { timeout: 200 }).should('have.class', 'foo')
@@ -2097,7 +2109,7 @@ describe('src/cy/commands/navigation', () => {
         cy.once('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(2)
+          assertLogLength(this.logs, 2)
           expect(err.message).to.include('Cypress detected a cross origin error happened on page load')
           expect(err.docsUrl).to.eq('https://on.cypress.io/cross-origin-violation')
           expect(lastLog.get('name')).to.eq('page load')
@@ -2368,7 +2380,7 @@ describe('src/cy/commands/navigation', () => {
         .visit('/fixtures/generic.html')
         .get('#dimensions').click()
         .then(function () {
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
 
           expect(this.logs[0].get('message')).to.eq(
             'http://localhost:3500/fixtures/dimensions.html',
@@ -2487,7 +2499,7 @@ describe('src/cy/commands/navigation', () => {
             })
           })
         }).then(function () {
-          expect(this.logs.length).to.eq(3)
+          assertLogLength(this.logs, 3)
 
           expect(this.logs[0].get('message')).to.eq(
             'http://localhost:3500/fixtures/generic.html#hashchange',
@@ -2614,7 +2626,7 @@ describe('src/cy/commands/navigation', () => {
         cy
         .get('#click-me').find('input[type=submit]').click()
         .then(function () {
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
 
           expect(this.logs[0].get('message')).to.eq(
             '--submitting form--',

@@ -7,7 +7,7 @@ $cy-tooltip-background-color: #333;
 $cy-tooltip-color: #e3e3e3;
 $cy-tooltip-border-color: #333;
 
-@import '../../node_modules/@cypress/react-tooltip/dist/tooltip.scss';
+@import '~@cypress/react-tooltip/dist/tooltip.scss';
 
 .highlight {
   background: rgba(159, 196, 231, 0.6);

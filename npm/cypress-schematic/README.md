@@ -146,6 +146,31 @@ Read our docs to learn more about all the [configuration options](https://on.cyp
 
 Read our docs to learn more about speeding up test execution in CI via [Cypress parallelization](https://on.cypress.io/parallelization)
 
+### Specifying a custom reporter and options
+
+You may want to specify a custom reporter. Cypress works with any reporters built for Mocha: built-in, third-party, or custom. In addition to specifying reporters, you can specify reporter options. These differ based on the reporter, and you should refer to its documentation for supported options.
+
+```json
+"cypress-run": {
+  "builder": "@cypress/schematic:cypress",
+  "options": {
+    "devServerTarget": "{project-name}:serve",
+    "reporter": "junit",
+    "reporterOptions": {
+      "mochaFile": "results/my-test-output.xml",
+      "toConsole": true
+    }
+  },
+  "configurations": {
+    "production": {
+      "devServerTarget": "{project-name}:production"
+    }
+  }
+}
+```
+
+Read our docs to learn more about working with [reporters](https://on.cypress.io/reporters).
+
 ## Generator Options
 
 ### Specify Filename (bypassing CLI prompt)

@@ -1,5 +1,6 @@
 /* eslint-disable no-case-declarations */
 const _ = require('lodash')
+const path = require('path')
 const ipc = require('electron').ipcMain
 const { clipboard } = require('electron')
 const debug = require('debug')('cypress:server:events')
@@ -16,8 +17,9 @@ const open = require('../util/open')
 const user = require('../user')
 const errors = require('../errors')
 const Updater = require('../updater')
-const { ProjectBase } = require('../project-base')
-const openProject = require('../open_project')
+const ProjectStatic = require('../project_static')
+
+const { openProject } = require('../open_project')
 const ensureUrl = require('../util/ensure-url')
 const chromePolicyCheck = require('../util/chrome_policy_check')
 const browsers = require('../browsers')
@@ -236,37 +238,37 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       return send(null)
 
     case 'get:orgs':
-      return ProjectBase.getOrgs()
+      return ProjectStatic.getOrgs()
       .then(send)
       .catch(sendErr)
 
     case 'get:projects':
-      return ProjectBase.getPathsAndIds()
+      return ProjectStatic.getPathsAndIds()
       .then(send)
       .catch(sendErr)
 
     case 'get:project:statuses':
-      return ProjectBase.getProjectStatuses(arg)
+      return ProjectStatic.getProjectStatuses(arg)
       .then(send)
       .catch(sendErr)
 
     case 'get:project:status':
-      return ProjectBase.getProjectStatus(arg)
+      return ProjectStatic.getProjectStatus(arg)
       .then(send)
       .catch(sendErr)
 
     case 'get:dashboard:projects':
-      return ProjectBase.getDashboardProjects()
+      return ProjectStatic.getDashboardProjects()
       .then(send)
       .catch(sendErr)
 
     case 'add:project':
-      return ProjectBase.add(arg, options)
+      return ProjectStatic.add(arg, options)
       .then(send)
       .catch(sendErr)
 
     case 'remove:project':
-      return ProjectBase.remove(arg)
+      return ProjectStatic.remove(arg)
       .then(() => {
         return send(arg)
       })
@@ -322,6 +324,20 @@ const handleEvent = function (options, bus, event, id, type, arg) {
           onWarning,
         })
       }).call('getConfig')
+      .then((config) => {
+        if (config.configFile && path.isAbsolute(config.configFile)) {
+          config.configFile = path.relative(arg, config.configFile)
+        }
+
+        // those two values make no sense to display in
+        // the GUI
+        if (config.resolved) {
+          config.resolved.configFile = undefined
+          config.resolved.testingType = undefined
+        }
+
+        return config
+      })
       .then(send)
       .catch(sendErr)
 
@@ -331,12 +347,12 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       .catch(sendErr)
 
     case 'setup:dashboard:project':
-      return openProject.createCiProject(arg)
+      return ProjectStatic.createCiProject(arg, arg.projectRoot)
       .then(send)
       .catch(sendErr)
 
     case 'set:project:id':
-      return openProject.writeProjectId(arg)
+      return ProjectStatic.writeProjectId(arg)
       .then(send)
       .catch(sendErr)
 
@@ -479,6 +495,9 @@ module.exports = {
     return ipc.removeAllListeners()
   },
 
+  /**
+   * @param options {open_project.LaunchArgs}
+   */
   start (options, bus) {
     // curry left options
     return ipc.on('request', _.partial(this.handleEvent, options, bus))

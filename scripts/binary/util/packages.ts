@@ -6,7 +6,6 @@ import Promise from 'bluebird'
 import la from 'lazy-ass'
 import check from 'check-more-types'
 import execa from 'execa'
-import R from 'ramda'
 import debugLib from 'debug'
 
 import externalUtils, { globby } from './3rd-party'
@@ -32,7 +31,7 @@ const createCLIExecutable = (command) => {
 
     return execa(command, args, { stdio: 'inherit', cwd })
     // if everything is ok, resolve with nothing
-    .then(R.always(undefined))
+    .then(() => undefined)
     .catch((result) => {
       const msg = `${commandToExecute} failed with exit code: ${result.code}`
 

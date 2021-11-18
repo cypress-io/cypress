@@ -11,11 +11,11 @@ import { launch } from '@packages/launcher'
 
 import appData from '../util/app_data'
 import { fs } from '../util/fs'
-import { CdpAutomation } from './cdp_automation'
+import { CdpAutomation, screencastOpts } from './cdp_automation'
 import * as CriClient from './cri-client'
 import * as protocol from './protocol'
 import utils from './utils'
-import { Browser } from './types'
+import type { Browser } from './types'
 
 // TODO: this is defined in `cypress-npm-api` but there is currently no way to get there
 type CypressConfiguration = any
@@ -25,6 +25,7 @@ const debug = debugModule('cypress:server:browsers:chrome')
 const LOAD_EXTENSION = '--load-extension='
 const CHROME_VERSIONS_WITH_BUGGY_ROOT_LAYER_SCROLLING = '66 67'.split(' ')
 const CHROME_VERSION_INTRODUCING_PROXY_BYPASS_ON_LOOPBACK = 72
+const CHROME_VERSION_WITH_FPS_INCREASE = 89
 
 const CHROME_PREFERENCE_PATHS = {
   default: path.join('Default', 'Preferences'),
@@ -206,7 +207,7 @@ const _normalizeArgExtensions = function (extPath, args, pluginExtensions, brows
     userExtensions = userExtensions.concat(pluginExtensions)
   }
 
-  const extensions = [].concat(userExtensions, extPath, pathToTheme)
+  const extensions = ([] as any).concat(userExtensions, extPath, pathToTheme)
 
   args.push(LOAD_EXTENSION + _.compact(extensions).join(','))
 
@@ -260,7 +261,7 @@ const _connectToChromeRemoteInterface = function (port, onError, browserDisplayN
   })
 }
 
-const _maybeRecordVideo = async function (client, options) {
+const _maybeRecordVideo = async function (client, options, browserMajorVersion) {
   if (!options.onScreencastFrame) {
     debug('options.onScreencastFrame is false')
 
@@ -273,9 +274,7 @@ const _maybeRecordVideo = async function (client, options) {
     client.send('Page.screencastFrameAck', { sessionId: meta.sessionId })
   })
 
-  await client.send('Page.startScreencast', {
-    format: 'jpeg',
-  })
+  await client.send('Page.startScreencast', browserMajorVersion >= CHROME_VERSION_WITH_FPS_INCREASE ? screencastOpts() : screencastOpts(1))
 
   return client
 }
@@ -377,6 +376,7 @@ export = {
 
     // copy the extension src to the extension dist
     await utils.copyExtension(pathToExtension, extensionDest)
+    await fs.chmod(extensionBg, 0o0644)
     await fs.writeFileAsync(extensionBg, str)
 
     return extensionDest
@@ -426,9 +426,13 @@ export = {
     if (isHeadless) {
       args.push('--headless')
 
-      // set default headless size to 1920x1080
+      // set default headless size to 1280x720
       // https://github.com/cypress-io/cypress/issues/6210
-      args.push('--window-size=1920,1080')
+      args.push('--window-size=1280,720')
+
+      // set default headless DPR to 1
+      // https://github.com/cypress-io/cypress/issues/17375
+      args.push('--force-device-scale-factor=1')
     }
 
     // force ipv4
@@ -525,7 +529,7 @@ export = {
       await originalBrowserKill.apply(launchedBrowser, args)
     }
 
-    await this._maybeRecordVideo(criClient, options)
+    await this._maybeRecordVideo(criClient, options, browser.majorVersion)
     await this._navigateUsingCRI(criClient, url)
     await this._handleDownloads(criClient, options.downloadsFolder, automation)
 

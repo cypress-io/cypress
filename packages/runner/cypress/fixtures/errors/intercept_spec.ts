@@ -3,12 +3,23 @@ import './setup'
 describe('cy.intercept', () => {
   const { $ } = Cypress
 
+  const emitProxyLog = () => Cypress.emit('request:event', 'incoming:request', {
+    requestId: 1,
+    method: 'GET',
+    url: '',
+    headers: {},
+    resourceType: 'other',
+    originalResourceType: 'other',
+  })
+
   it('assertion failure in req callback', () => {
     cy.intercept('/json-content-type', () => {
       expect('a').to.eq('b')
     })
     .then(() => {
-      Cypress.emit('net:event', 'before:request', {
+      emitProxyLog()
+      Cypress.emit('net:stubbing:event', 'before:request', {
+        browserRequestId: 1,
         eventId: '1',
         subscription: {
           // @ts-ignore
@@ -30,7 +41,9 @@ describe('cy.intercept', () => {
       })
     })
     .then(() => {
-      Cypress.emit('net:event', 'before:request', {
+      emitProxyLog()
+      Cypress.emit('net:stubbing:event', 'before:request', {
+        browserRequestId: 1,
         eventId: '1',
         requestId: '1',
         subscription: {
@@ -43,7 +56,7 @@ describe('cy.intercept', () => {
         },
       })
 
-      Cypress.emit('net:event', 'before:response', {
+      Cypress.emit('net:stubbing:event', 'before:response', {
         eventId: '1',
         requestId: '1',
         subscription: {
@@ -68,7 +81,9 @@ describe('cy.intercept', () => {
       })
     })
     .then(() => {
-      Cypress.emit('net:event', 'before:request', {
+      emitProxyLog()
+      Cypress.emit('net:stubbing:event', 'before:request', {
+        browserRequestId: 1,
         eventId: '1',
         requestId: '1',
         subscription: {
@@ -81,7 +96,7 @@ describe('cy.intercept', () => {
         },
       })
 
-      Cypress.emit('net:event', 'network:error', {
+      Cypress.emit('net:stubbing:event', 'network:error', {
         eventId: '1',
         requestId: '1',
         subscription: {
