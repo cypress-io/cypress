@@ -422,28 +422,7 @@ commands:
           # ' >> ~/.bash_profile
 
   # run this step in an interactive bash shell
-  setup-nvm-windows:
-    # https://discuss.circleci.com/t/switch-nodejs-version-on-machine-executor-solved/26675/2
-    description: Install Node version matching .node-version
-    parameters:
-      version:
-        type: string
-        default: ""
-    steps:
-      - run:
-          name: Setup Node
-          command: |
-              node_version=<<parameters.version>>
-              node_version=${node_version:-$(cat ~/cypress/.node-version)}
-              echo "Installing Node $node_version"
-              nvm install ${node_version} || exit 1
-              echo "Using Node $node_version"
-              nvm use ${node_version} || exit 1
-              node --version
-              echo "Installing Yarn"
-              npm install yarn -g # ensure yarn is installed with the correct node engine
-
-  setup-nvm:
+  setup-node:
     # https://discuss.circleci.com/t/switch-nodejs-version-on-machine-executor-solved/26675/2
     description: Install Node version matching .node-version
     parameters:
@@ -470,100 +449,9 @@ commands:
               node --version
               echo "Installing Yarn"
               npm install yarn -g # ensure yarn is installed with the correct node engine
+              yarn check-node-version
+      # - when:
 
-  setup-node:
-    # https://discuss.circleci.com/t/switch-nodejs-version-on-machine-executor-solved/26675/2
-    description: Install Node version matching .node-version
-    parameters:
-      version:
-        type: string
-        default: ""
-      arch:
-        type: enum
-        enum: ['linux', 'darwin', 'win32']
-    steps:
-      - when:
-          condition:
-            # nvm is pre-installed on windows
-            equal: ['win32', <<parameters.arch>>]
-          steps:
-            - setup-windows-nvm
-            - persist_to_workspace:
-              root: c/ProgramData/
-              paths:
-                - nvm
-      - unless:
-          condition:
-            # nvm is pre-installed on windows
-            equal: ['win32', <<parameters.arch>>]
-          steps:
-            - setup-nvm
-          - persist_to_workspace:
-              root: ~/
-              paths:
-                - .nvm
-      - run:
-          # https://github.com/nvm-sh/nvm#nvmrc
-          name: Verify Node
-          command: |
-            yarn check-node-version
-
-        # echo '
-          #   cdnvm() {
-          #     command cd "$@";
-
-          #     # `nvm ls` will check all locally-available versions
-          #     # If there are multiple matching versions, take the latest one
-          #     # Remove the `->` and `*` characters and spaces
-          #     # `locally_resolved_nvm_version` will be `N/A` if no local versions are found
-          #     declare locally_resolved_nvm_version
-          #     locally_resolved_nvm_version=$(nvm ls --no-colors "$NODE_VERSION" | tail -1 | tr -d "\->*" | tr -d "[:space:]")
-
-          #     # If it is not already installed, install it
-          #     # `nvm install` will implicitly use the newly-installed version
-          #     if [[ "$locally_resolved_nvm_version" == "N/A" ]]; then
-          #         nvm install "$NODE_VERSION";
-          #         npm install yarn -g
-          #     elif [[ $(nvm current) != "$locally_resolved_nvm_version" ]]; then
-          #         nvm use "$nvm_version";
-          #     fi
-          #   }
-          #   alias cd="cdnvm"
-          #   cd "$PWD"
-          # ' >> ~/.bash_profile
-
-  setup-node:
-    # https://discuss.circleci.com/t/switch-nodejs-version-on-machine-executor-solved/26675/2
-    description: Install Node version matching .node-version
-    parameters:
-      version:
-        type: string
-        default: ""
-    steps:
-      - when:
-          c
-      - run:
-          name: Setup NVM
-          command: |
-              node_version=<<parameters.version>>
-              node_version=${node_version:-$(cat ~/cypress/.node-version)}
-              touch ~/.nvm
-              [ -s "${HOME}/.nvm/nvm.sh" ] && \. "${HOME}/.nvm/nvm.sh" # This loads nvm
-              if ! type nvm > /dev/null; then
-                echo "Installing NVM"
-                curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.30.0/install.sh | bash
-                [ -s "${HOME}/.nvm/nvm.sh" ] && \. "${HOME}/.nvm/nvm.sh" # This loads nvm
-              fi
-              nvm root ~/.nvm || echo "not nvm-windows"
-              echo "Installing Node $node_version"
-              nvm install ${node_version} || exit 1
-              echo "Using Node $node_version"
-              nvm use ${node_version} || exit 1
-              nvm alias default ${node_version} || exit 1
-              node --version
-              echo "Installing Yarn"
-              npm install yarn -g # ensure yarn is installed with the correct node engine
-              yarn check-node-version  
       # - persist_to_workspace:
       #     root: ~/
       #     paths:
