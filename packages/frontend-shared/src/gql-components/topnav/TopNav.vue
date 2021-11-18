@@ -211,9 +211,7 @@ import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLo
 import { gql, useMutation } from '@urql/vue'
 import { TopNavFragment, TopNav_LaunchOpenProjectDocument, TopNav_SetBrowserDocument } from '../../generated/graphql'
 import { useI18n } from '@cy/i18n'
-import { computed, ref } from 'vue'
-// eslint-disable-next-line no-duplicate-imports
-import type { Ref } from 'vue'
+import { computed, ref, Ref } from 'vue'
 const { t } = useI18n()
 import { onClickOutside, onKeyStroke, useTimeAgo } from '@vueuse/core'
 import DocsMenuContent from './DocsMenuContent.vue'
@@ -284,13 +282,6 @@ const props = defineProps<{
   showBrowsers?: boolean
 }>()
 
-const docsMenuVariant: Ref<'main' | 'orchestration' | 'ci'> = ref('main')
-
-const promptsEl: Ref<HTMLElement | null> = ref(null)
-
-// reset docs menu if click or keyboard navigation happens outside
-// so it doesn't reopen on the one of the prompts
-
 const versions = computed(() => {
   if (!props.gql.versions) {
     return null
@@ -311,6 +302,13 @@ const versions = computed(() => {
 const runningOldVersion = computed(() => {
   return props.gql.versions ? props.gql.versions.current.released < props.gql.versions.latest.released : false
 })
+
+const docsMenuVariant: Ref<'main' | 'orchestration' | 'ci'> = ref('main')
+
+const promptsEl: Ref<HTMLElement | null> = ref(null)
+
+// reset docs menu if click or keyboard navigation happens outside
+// so it doesn't reopen on the one of the prompts
 
 onClickOutside(promptsEl, () => {
   setTimeout(() => {
