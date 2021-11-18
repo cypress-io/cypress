@@ -2340,17 +2340,11 @@ linux-workflow: &linux-workflow
           - npm-design-system
           - npm-webpack-batteries-included-preprocessor
           - npm-webpack-preprocessor
-          # - npm-vite-dev-server
           - npm-webpack-dev-server
           - npm-cypress-schematic
           - ui-components-integration-tests
-          # - reporter-integration-tests
           - Linux lint
-          # - desktop-gui-component-tests
-          # - desktop-gui-integration-tests-7x
-          # - runner-ct-integration-tests-chrome
           - runner-integration-tests-firefox
-          # - runner-integration-tests-chrome
           - runner-integration-tests-electron
           - driver-integration-tests-firefox
           - driver-integration-tests-chrome
@@ -2365,14 +2359,6 @@ linux-workflow: &linux-workflow
           - server-unit-tests
           - unit-tests
           - unit-tests-release
-          # - cli-visual-tests
-
-      #       desktop-gui-integration-tests-7x,
-      #       desktop-gui-component-tests,
-      #       cli-visual-tests,
-      #       runner-integration-tests-chrome,
-      #       runner-ct-integration-tests-chrome,
-      #       reporter-integration-tests
 
     # various testing scenarios, like building full binary
     # and testing it on a real project
@@ -2624,7 +2610,7 @@ linux-2-workflow: &linux-2-workflow
       
 workflows:
   linux:
-    <<: *linux-2-workflow
+    <<: *linux-workflow
   windows:
     <<: *windows-workflow
   mac:
