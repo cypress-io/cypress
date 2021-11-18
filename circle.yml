@@ -441,7 +441,7 @@ commands:
                 echo "Installing NVM"
                 curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.30.0/install.sh | bash
               fi
-              [ -s ${HOME}/.nvm/nvm.sh" ] && \. "${HOME}/.nvm/nvm.sh" # This loads nvm
+              [ -s "${HOME}/.nvm/nvm.sh" ] && \. "${HOME}/.nvm/nvm.sh" # This loads nvm
               echo "Installing Node $node_version"
               nvm install ${node_version} || exit 1
               echo "Using Node $node_version"
