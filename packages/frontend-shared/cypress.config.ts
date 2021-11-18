@@ -23,18 +23,7 @@ export default defineConfig({
 
       return startDevServer({
         options: cypressConfig,
-        viteConfig: {
-          // TODO(tim): Figure out why this isn't being picked up
-          optimizeDeps: {
-            include: [
-              '@headlessui/vue',
-              'vue3-file-selector',
-              'just-my-luck',
-              'combine-properties',
-              'faker',
-            ],
-          },
-        },
+        viteConfig: require('./vite.config'),
       })
     },
   },
