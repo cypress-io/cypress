@@ -1,9 +1,4 @@
 // checks if the terminal has all the variables set (especially on Linux Docker)
-// make sure the TERM is set to 'xterm' in node (Linux only)
-// else colors (and tests) will fail
-// See the following information
-//  * http://andykdocs.de/development/Docker/Fixing+the+Docker+TERM+variable+issue
-//  * https://unix.stackexchange.com/questions/43945/whats-the-difference-between-various-term-variables
 
 const assert = require('assert')
 const isLinux = process.platform === 'linux'

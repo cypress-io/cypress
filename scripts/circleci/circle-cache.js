@@ -23,7 +23,6 @@ async function circleCache () {
 
 const BASE_DIR = path.join(__dirname, '..', '..')
 const CACHE_DIR = path.join(BASE_DIR, 'globbed_node_modules')
-// const TMP_CACHE_DIR = path.join(BASE_DIR, 'tmp', 'node_modules_cache')
 const p = (str) => path.join(BASE_DIR, str)
 
 const workspacePaths = rootPackageJson.workspaces.packages
@@ -85,25 +84,8 @@ async function prepareCircleCache () {
 }
 
 async function unpackCircleCache () {
-  // const tmpPaths = await globby(
-  //   `${TMP_CACHE_DIR}/*`,
-  //   { onlyDirectories: true },
-  // )
-
-  // await Promise.all(
-  //   tmpPaths.map(async (cache) => {
-  //     const updatedPath = cache.replace(TMP_CACHE_DIR, BASE_DIR)
-
-  //     console.log(`copying ${cache} to ${updatedPath}`)
-  //     await fsExtra.move(cache, updatedPath)
-  //   }),
-  // )
-
-  // fs.rmdir(TMP_CACHE_DIR, { recursive: true })
-
   const paths = await globby(
     p(`globbed_node_modules/*/*`),
-    // p(`${CACHE_DIR}/*/*`),
     { onlyDirectories: true },
   )
 
