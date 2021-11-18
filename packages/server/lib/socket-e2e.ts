@@ -5,6 +5,7 @@ import { SocketBase } from './socket-base'
 import { fs } from './util/fs'
 import type { DestroyableHttpServer } from './util/server_destroy'
 import * as studio from './studio'
+import type { DataContext } from '@packages/data-context'
 
 const debug = Debug('cypress:server:socket-e2e')
 
@@ -15,8 +16,8 @@ const isSpecialSpec = (name) => {
 export class SocketE2E extends SocketBase {
   private testFilePath: string | null
 
-  constructor (config: Record<string, any>) {
-    super(config)
+  constructor (config: Record<string, any>, ctx: DataContext) {
+    super(config, ctx)
 
     this.testFilePath = null
 
