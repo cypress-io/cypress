@@ -7,6 +7,9 @@
 
 	// List of extensions which are recommended for Cypress contributors using VS Code:
 	"recommendations": [
+		// Name: Apollo GraphQL
+		// Description: Rich editor support for GraphQL client and server development that seamlessly integrates with the Apollo platform
+		"apollographql.vscode-apollo",
 		// Name: ESLint
 		// Description: Integrates ESLint JavaScript into VS Code.
 		"dbaeumer.vscode-eslint",
