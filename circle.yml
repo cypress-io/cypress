@@ -433,28 +433,28 @@ commands:
         enum: ['linux', 'darwin', 'win32']
     steps:
       - run:
-        name: Setup Node
-        command: |
-            node_version=<<parameters.version>>
-            node_version=${node_version:-$(cat ~/cypress/.node-version)}
-            if ! type nvm > /dev/null; then
-              echo "Installing NVM"
-              curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.30.0/install.sh | bash
+          name: Setup Node
+          command: |
+              node_version=<<parameters.version>>
+              node_version=${node_version:-$(cat ~/cypress/.node-version)}
+              if ! type nvm > /dev/null; then
+                echo "Installing NVM"
+                curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.30.0/install.sh | bash
 
-              echo "
-                echo "Running bash_profile for ${node_version}"
-                export NODE_VERSION=${node_version}
-                export NVM_DIR="${HOME}/.nvm"
-                [ -s "$NVM_DIR/nvm.sh" ] && \. "${HOME}/.nvm/nvm.sh" # This loads nvm
-              " >> ~/.bash_profile
-            fi
-            echo "Installing Node $node_version"
-            nvm install ${node_version} || exit 1
-            nvm use ${node_version} || exit 1
-            nvm alias default ${node_version} || exit 1
-            node --version
-            npm install yarn -g # ensure yarn is installed with the correct node engine
-            yarn check-node-version
+                echo "
+                  echo "Running bash_profile for ${node_version}"
+                  export NODE_VERSION=${node_version}
+                  export NVM_DIR="${HOME}/.nvm"
+                  [ -s "$NVM_DIR/nvm.sh" ] && \. "${HOME}/.nvm/nvm.sh" # This loads nvm
+                " >> ~/.bash_profile
+              fi
+              echo "Installing Node $node_version"
+              nvm install ${node_version} || exit 1
+              nvm use ${node_version} || exit 1
+              nvm alias default ${node_version} || exit 1
+              node --version
+              npm install yarn -g # ensure yarn is installed with the correct node engine
+              yarn check-node-version
       - persist_to_workspace:
           root: ~/
           paths:
