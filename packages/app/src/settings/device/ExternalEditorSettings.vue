@@ -6,43 +6,80 @@
     <template #description>
       {{ t('settingsPage.editor.description') }}
     </template>
-    <Select
-      :model-value="selectedEditor"
-      :options="externalEditors"
-      item-value="name"
-      item-key="id"
-      :placeholder="t('settingsPage.editor.noEditorSelectedPlaceholder')"
-      class="w-300px"
-      @update:model-value="updateEditor"
-    >
-      <template #input-prefix="{ value }">
-        <Icon
-          v-if="value"
-          :icon="icons[value.id]"
-          class="text-md"
-        />
-        <Icon
-          v-else
-          :icon="IconTerminal"
-          class="text-gray-600 text-md"
-        />
-      </template>
-      <template #item-prefix="{ value }">
-        <Icon
-          :icon="value.icon"
-          class="text-md"
-        />
-      </template>
-    </Select>
+
+    <div class="flex items-center">
+      <input 
+        type="radio" 
+        v-model="editorToUse" 
+        class="mr-5px"
+        value="found"
+      />
+
+      <Select
+        :model-value="selectedWellKnownEditor"
+        :options="externalEditors"
+        item-value="name"
+        item-key="id"
+        :placeholder="t('settingsPage.editor.noEditorSelectedPlaceholder')"
+        class="w-400px"
+        @update:model-value="updateEditor"
+      >
+        <template #input-prefix="{ value }">
+          <Icon
+            v-if="value"
+            :icon="icons[value.id]"
+            class="text-md"
+          />
+          <Icon
+            v-else
+            :icon="IconTerminal"
+            class="text-gray-600 text-md"
+          />
+        </template>
+        <template #item-prefix="{ value }">
+          <Icon
+            :icon="value.icon"
+            class="text-md"
+          />
+        </template>
+      </Select>
+    </div>
+
+    <div class="flex items-center py-2">
+      <input 
+        type="radio" 
+        class="mr-5px"
+        v-model="editorToUse" 
+        value="custom"
+      />
+
+      <div class="w-400px">
+        <Input 
+          v-model="customBinary" 
+          inputClasses="text-sm"
+          placeholder="Custom path..."
+          @blur="setCustomBinary"
+        >
+          <template #prefix>
+            <Icon
+              :icon="IconTerminal"
+              class="text-gray-600 text-md"
+            />
+          </template>
+        </Input>
+      </div>
+    </div>
   </SettingsSection>
 </template>
 
 <script lang="ts" setup>
-import { computed, FunctionalComponent, SVGAttributes } from 'vue'
+import { ref, computed, watch, FunctionalComponent, SVGAttributes } from 'vue'
 import Icon from '@cy/components/Icon.vue'
 import SettingsSection from '../SettingsSection.vue'
 import { useI18n } from '@cy/i18n'
 import Select from '@cy/components/Select.vue'
+import Button from '@cy/components/Button.vue'
+import Input from '@cy/components/Input.vue'
 import VSCode from '~icons/logos/visual-studio-code'
 import Atom from '~icons/logos/atom-icon'
 import Webstorm from '~icons/logos/webstorm'
@@ -98,11 +135,48 @@ const props = defineProps<{
 
 const { t } = useI18n()
 
-const selectedEditor = computed(() => {
-  return props.gql.localSettings.availableEditors.find((x) => x.binary === props.gql.localSettings.preferences.preferredEditorBinary)
+type Editor = ExternalEditorSettingsFragment['localSettings']['availableEditors'][number]
+
+const customBinary = ref<string>('')
+const selectedWellKnownEditor = ref<Editor>()
+const editorToUse = ref<'found' | 'custom'>('found')
+
+
+watch(
+  () => props.gql.localSettings.preferences.preferredEditorBinary, 
+  (perferredEditorBinary) => {
+    const isWellKnownEditor = props.gql.localSettings.availableEditors.find((x) => 
+      x.binary === perferredEditorBinary
+    )
+    editorToUse.value = isWellKnownEditor ? 'found' : 'custom'
+
+    if (isWellKnownEditor) {
+      selectedWellKnownEditor.value = isWellKnownEditor
+    }
+
+    if (editorToUse.value === 'custom' && perferredEditorBinary) {
+      customBinary.value = perferredEditorBinary
+    }
+  }, { immediate: true }
+)
+
+watch(editorToUse, (val) => {
+  if (val === 'custom') {
+    setPreferredEditor.executeMutation({ value: customBinary.value })
+  }
 })
 
-const updateEditor = (editor: ExternalEditorSettingsFragment['localSettings']['availableEditors'][number]) => {
+const setCustomBinary = () => {
+  if (editorToUse.value === 'custom') {
+    setPreferredEditor.executeMutation({ value: customBinary.value })
+  }
+}
+
+const updateEditor = (editor: Editor) => {
+  if (editorToUse.value !== 'found') {
+    editorToUse.value = 'found'
+  }
+
   setPreferredEditor.executeMutation({ value: editor.binary })
 }
 </script>

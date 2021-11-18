@@ -38,4 +38,9 @@ describe('Settings', { viewportWidth: 1200 }, () => {
     cy.findByText('Reconfigure Project').click()
     cy.wait('@ReconfigureProject')
   })
+
+  it.only('selects well known editor', () => {
+    cy.visitApp()
+    cy.get('[href="#/settings"]').click()
+  })
 })
