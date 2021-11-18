@@ -334,13 +334,14 @@ commands:
                     if [[ "$locally_resolved_nvm_version" == "N/A" ]]; then
                         echo "locally_resolved_nvm_version is n/a. try to install"
 
-                        nvm install "$node_version";
+                        nvm install "$node_version"
                         npm install yarn -g
                     elif [[ $(nvm current) != "$locally_resolved_nvm_version" ]]; then
                         echo "locally_resolved_nvm_version does not match current version of $(nvm current). use that instead"
-                        nvm use "${nvm_version}";
+                        nvm use "${nvm_version}"
                     fi
                   ' >> ~/.bash_profile
+                  cat ~/.bash_profile
       - unless:
           condition:
             # nvm is pre-installed on windows
