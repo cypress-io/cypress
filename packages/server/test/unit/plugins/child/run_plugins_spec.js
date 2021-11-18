@@ -1,7 +1,6 @@
 require('../../../spec_helper')
 
 const _ = require('lodash')
-const snapshot = require('snap-shot-it')
 const Promise = require('bluebird')
 
 const preprocessor = require(`${root}../../lib/plugins/child/preprocessor`)
@@ -40,14 +39,6 @@ describe('lib/plugins/child/run_plugins', () => {
 
   afterEach(() => {
     mockery.deregisterMock('@cypress/webpack-batteries-included-preprocessor')
-  })
-
-  it('sends error message if setupNodeEvents is not a function', function () {
-    runPlugins.runSetupNodeEvents('plugins-file')
-
-    expect(this.ipc.send).to.be.calledWith('load:error:plugins', 'SETUP_NODE_EVENTS_IS_NOT_FUNCTION', 'cypress.config.js')
-
-    return snapshot(this.ipc.send.lastCall.args[3].split('\n')[0])
   })
 
   describe('on \'load\' message', () => {

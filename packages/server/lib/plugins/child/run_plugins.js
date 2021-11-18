@@ -142,12 +142,6 @@ class RunPlugins {
   }
 
   runSetupNodeEvents (setupNodeEvents) {
-    if (setupNodeEvents && typeof setupNodeEvents !== 'function') {
-      this.ipc.send('load:error:plugins', 'SETUP_NODE_EVENTS_IS_NOT_FUNCTION', this.requiredFile, setupNodeEvents)
-    }
-
-    setupNodeEvents = setupNodeEvents ?? ((on, config) => {})
-
     debug('project root:', this.projectRoot)
     if (!this.projectRoot) {
       throw new Error('Unexpected: projectRoot should be a string')
