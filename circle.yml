@@ -1481,7 +1481,7 @@ jobs:
   npm-cypress-schematic:
       <<: *defaults
       steps:
-        - restore_cached_workspace
+        - restore_cached_workspace:
             node-version: "16.10"
         - run:
             name: Build + Install
