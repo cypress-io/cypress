@@ -2616,7 +2616,7 @@ windows-workflow: &windows-workflow
 
 linux-2-workflow: &linux-2-workflow
   jobs:
-    - node_modules_install:
+    - node_modules_install
     - build:
         requires:
           - node_modules_install
