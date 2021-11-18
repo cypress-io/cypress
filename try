@@ -1,0 +1,38 @@
+
+              cdnvm() {
+                command cd "$@";
+
+                declare locally_resolved_nvm_version
+                locally_resolved_nvm_version=$(nvm ls --no-colors \"$NODE_VERSION" | tail -1 | tr -d "\->*" | tr -d "[:space:]")
+
+                if [[ "$locally_resolved_nvm_version" == "N/A" ]]; then
+                    nvm install "$NODE_VERSION";
+                elif [[ $(nvm current) != "$locally_resolved_nvm_version" ]]; then
+                    nvm use "$nvm_version";
+                fi
+              }
+              alias cd="cdnvm"
+              cd "$PWD"
+            
+
+              cdnvm() {
+                command cd "$@";
+
+                # `nvm ls` will check all locally-available versions
+                # If there are multiple matching versions, take the latest one
+                # Remove the `->` and `*` characters and spaces
+                # `locally_resolved_nvm_version` will be `N/A` if no local versions are found
+                declare locally_resolved_nvm_version
+                locally_resolved_nvm_version=$(nvm ls --no-colors \"$NODE_VERSION" | tail -1 | tr -d "\->*" | tr -d "[:space:]")
+
+                # If it is not already installed, install it
+                # `nvm install` will implicitly use the newly-installed version
+                if [[ "$locally_resolved_nvm_version" == "N/A" ]]; then
+                    nvm install "$NODE_VERSION";
+                elif [[ $(nvm current) != "$locally_resolved_nvm_version" ]]; then
+                    nvm use "$nvm_version";
+                fi
+              }
+              alias cd="cdnvm"
+              cd "$PWD"
+            
