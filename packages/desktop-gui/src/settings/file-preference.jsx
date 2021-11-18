@@ -39,7 +39,7 @@ const FilePreference = observer(() => {
     setOtherPath: action((otherPath) => {
       const otherOption = _.find(state.editors, { isOther: true })
 
-      otherOption.openerId = otherPath
+      otherOption.binary = otherPath
       save(otherOption)
     }),
   }))

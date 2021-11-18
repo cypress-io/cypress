@@ -15,13 +15,13 @@ describe('<EditorPicker />', () => {
 
   beforeEach(() => {
     defaultProps = {
-      chosen: { id: 'vscode', name: 'VS Code', openerId: 'vscode', isOther: false },
+      chosen: { id: 'vscode', name: 'VS Code', binary: 'vscode', isOther: false },
       editors: [
-        { id: 'computer', name: 'On Computer', openerId: 'computer', isOther: false, description: 'Opens on computer etc etc' },
-        { id: 'atom', name: 'Atom', openerId: 'atom', isOther: false },
-        { id: 'sublime', name: 'Sublime Text', openerId: 'sublime', isOther: false },
-        { id: 'vscode', name: 'VS Code', openerId: 'vscode', isOther: false },
-        { id: 'other', name: 'Other', openerId: '', isOther: true, description: 'Enter the full path etc etc' },
+        { id: 'computer', name: 'On Computer', binary: 'computer', isOther: false, description: 'Opens on computer etc etc' },
+        { id: 'atom', name: 'Atom', binary: 'atom', isOther: false },
+        { id: 'sublime', name: 'Sublime Text', binary: 'sublime', isOther: false },
+        { id: 'vscode', name: 'VS Code', binary: 'vscode', isOther: false },
+        { id: 'other', name: 'Other', binary: '', isOther: true, description: 'Enter the full path etc etc' },
       ],
       onSelect: () => {},
     }
@@ -89,7 +89,7 @@ describe('<EditorPicker />', () => {
     })
 
     it('populates path if specified', () => {
-      defaultProps.editors[4].openerId = '/path/to/my/editor'
+      defaultProps.editors[4].binary = '/path/to/my/editor'
       cy.render(render, <EditorPicker {...defaultProps} chosen={defaultProps.editors[4]}/>)
 
       cy.contains('Other').find('input[type="text"]').should('have.value', '/path/to/my/editor')
@@ -106,7 +106,7 @@ describe('<EditorPicker />', () => {
           setOtherPath: action((otherPath) => {
             const otherOption = _.find(state.editors, { isOther: true })
 
-            otherOption.openerId = otherPath
+            otherOption.binary = otherPath
           }),
         }))
 
@@ -133,7 +133,7 @@ describe('<EditorPicker />', () => {
 
         cy.contains('Other').find('input[type="text"]').type(`   ${path}  `, { delay: 0 })
         .should(() => {
-          expect(onSelect.lastCall.args[0].openerId).to.equal(path)
+          expect(onSelect.lastCall.args[0].binary).to.equal(path)
         })
       })
 
@@ -148,7 +148,7 @@ describe('<EditorPicker />', () => {
           cy.contains('Other').find('input[type="text"]').type(letter, { delay: 0 })
           .should(() => {
             expect(onSelect.lastCall.args[0].id).to.equal('other')
-            expect(onSelect.lastCall.args[0].openerId).to.equal(pathSoFar)
+            expect(onSelect.lastCall.args[0].binary).to.equal(pathSoFar)
           })
         })
       })

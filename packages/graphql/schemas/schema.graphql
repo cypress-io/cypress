@@ -344,6 +344,16 @@ type DevState {
   needsRelaunch: Boolean
 }
 
+"""Represents an editor on the local machine"""
+type Editor {
+  """Binary that opens the editor"""
+  binary: String!
+  id: String!
+
+  """name of editor"""
+  name: String!
+}
+
 """Represents a spec on the file system"""
 type FileParts implements Node {
   """
@@ -420,6 +430,22 @@ The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://
 """
 scalar JSON
 
+"""local settings on a device-by-device basis"""
+type LocalSettings {
+  availableEditors: [Editor!]!
+  preferences: LocalSettingsPreferences!
+}
+
+"""local setting preferences"""
+type LocalSettingsPreferences {
+  autoScrollingEnabled: Boolean
+  preferredEditorBinary: String
+  proxyBypass: String
+  proxyServer: String
+  useDarkSidebar: Boolean
+  watchForSpecChange: Boolean
+}
+
 type Mutation {
   """Add project to projects array and cache it"""
   addProject(
@@ -430,9 +456,6 @@ type Mutation {
 
   """Create an Index HTML file for a new component testing project"""
   appCreateComponentIndexHtml(template: String!): Boolean
-
-  """Create a Cypress config file for a new project"""
-  appCreateConfigFile(code: String!, configFilename: String!): Boolean
   clearActiveProject: Boolean
 
   """
@@ -482,9 +505,13 @@ type Mutation {
 
   """Set active project to run tests on"""
   setActiveProject(path: String!): Boolean
+  setAutoScrollingEnabled(value: Boolean!): Boolean
+  setPreferredEditorBinary(value: String!): Boolean
 
   """Save the projects preferences to cache"""
   setProjectPreferences(browserPath: String!, testingType: TestingTypeEnum!): Query!
+  setUseDarkSidebar(value: Boolean!): Boolean
+  setWatchForSpecChange(value: Boolean!): Boolean
 
   """show the launchpad at the browser picker step"""
   showElectronOnAppExit: Boolean
@@ -601,11 +628,14 @@ type Query {
   """Whether the app is in global mode or not"""
   isInGlobalMode: Boolean!
 
+  """editors on the user local machine"""
+  localSettings: LocalSettings!
+
   """All known projects for the app"""
   projects: [ProjectLike!]!
 
   """Previous versions of cypress and their release date"""
-  versions: VersionData!
+  versions: VersionData
 
   """Metadata about the wizard, null if we arent showing the wizard"""
   wizard: Wizard!

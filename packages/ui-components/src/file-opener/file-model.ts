@@ -12,7 +12,7 @@ export interface FileDetails {
 export interface Editor {
   id: string
   name: string
-  openerId: string
+  binary: string
   isOther: boolean
   description?: string
 }

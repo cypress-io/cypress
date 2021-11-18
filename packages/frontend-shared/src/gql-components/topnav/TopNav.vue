@@ -292,6 +292,10 @@ const promptsEl: Ref<HTMLElement | null> = ref(null)
 // so it doesn't reopen on the one of the prompts
 
 const versions = computed(() => {
+  if (!props.gql.versions) {
+    return null
+  }
+
   return {
     current: {
       released: useTimeAgo(new Date(props.gql.versions.current.released)).value,
@@ -305,7 +309,7 @@ const versions = computed(() => {
 })
 
 const runningOldVersion = computed(() => {
-  return props.gql.versions.current.released < props.gql.versions.latest.released
+  return props.gql.versions ? props.gql.versions.current.released < props.gql.versions.latest.released : false
 })
 
 onClickOutside(promptsEl, () => {

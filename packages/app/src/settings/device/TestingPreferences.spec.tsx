@@ -1,7 +1,10 @@
+import { TestingPreferencesFragmentDoc } from '../../generated/graphql-test'
 import TestingPreferences from './TestingPreferences.vue'
 
 describe('<TestingPreferences />', () => {
   it('renders', () => {
-    cy.mount(() => <div class="p-24px"><TestingPreferences /></div>)
+    cy.mountFragment(TestingPreferencesFragmentDoc, {
+      render: (gql) => <TestingPreferences gql={gql} />,
+    })
   })
 })

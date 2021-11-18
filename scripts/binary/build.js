@@ -113,7 +113,10 @@ const buildCypressApp = function (platform, version, options = {}) {
   const buildPackages = function () {
     log('#buildPackages')
 
-    return packages.runAllBuild()
+    return packages.runAllBuildUI().then(() => {
+      return packages.runAllBuild()
+    })
+
     // Promise.resolve()
     .then((val) => {
       logBuiltAllPackages(val)

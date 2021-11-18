@@ -50,12 +50,12 @@ export const itHandlesFileOpening = ({ getRunner, selector, file, stackTrace = f
 
   describe('when user has not already set opener and opens file', () => {
     const availableEditors = [
-      { id: 'computer', name: 'On Computer', isOther: false, openerId: 'computer' },
-      { id: 'atom', name: 'Atom', isOther: false, openerId: 'atom' },
-      { id: 'vim', name: 'Vim', isOther: false, openerId: 'vim' },
-      { id: 'sublime', name: 'Sublime Text', isOther: false, openerId: 'sublime' },
-      { id: 'vscode', name: 'Visual Studio Code', isOther: false, openerId: 'vscode' },
-      { id: 'other', name: 'Other', isOther: true, openerId: '' },
+      { id: 'computer', name: 'On Computer', isOther: false, binary: 'computer' },
+      { id: 'atom', name: 'Atom', isOther: false, binary: 'atom' },
+      { id: 'vim', name: 'Vim', isOther: false, binary: 'vim' },
+      { id: 'sublime', name: 'Sublime Text', isOther: false, binary: 'sublime' },
+      { id: 'vscode', name: 'Visual Studio Code', isOther: false, binary: 'vscode' },
+      { id: 'other', name: 'Other', isOther: true, binary: '' },
     ]
 
     beforeEach(() => {
