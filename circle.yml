@@ -904,6 +904,10 @@ commands:
           name: "Waiting on Circle CI jobs: <<parameters.job-names>>"
           command: node ./scripts/wait-on-circle-jobs.js --job-names="<<parameters.job-names>>"
   build-binary:
+    parameters:
+      arch:
+        type: enum
+        enum: ['linux', 'darwin', 'win32']
     steps:
       - run:
           name: Check environment variables before code sign (if on Mac)
@@ -931,7 +935,8 @@ commands:
             else
               echo "Not Mac platform, skipping code sign setup"
             fi
-      - install-required-node
+      - install-required-node:
+          arch: << parameters.arch >>
       - run:
           environment:
             DEBUG: electron-builder,electron-osx-sign*
@@ -1035,7 +1040,8 @@ jobs:
           root: ~/
           paths:
             - cypress
-      - install-required-node
+      - install-required-node:
+          arch: << parameters.arch >>
       - verify-build-setup
       - caching-dependency-installer:
           arch: << parameters.arch >>
@@ -1608,6 +1614,7 @@ jobs:
       steps:
         - restore_cached_workspace
         - install-required-node:
+            arch: << parameters.arch >>
             version: "16.10"
         - run:
             name: Build + Install
@@ -1643,7 +1650,8 @@ jobs:
     # shell: /bin/bash --login
     steps:
       - restore_cached_workspace
-      - build-binary
+      - build-binary:
+          arch: << parameters.arch >>
       - build-cypress-npm-package
       - run:
           name: Check current branch to persist artifacts
@@ -1662,7 +1670,8 @@ jobs:
     steps:
       - clone-repo-and-checkout-release-branch:
           repo: cypress-example-kitchensink
-      - install-required-node
+      - install-required-node:
+          arch: << parameters.arch >>
       - run:
           name: Install prod dependencies
           command: yarn --production
@@ -1689,7 +1698,8 @@ jobs:
     steps:
       - clone-repo-and-checkout-release-branch:
           repo: cypress-example-kitchensink
-      - install-required-node
+      - install-required-node:
+          arch: << parameters.arch >>
       - run:
           name: Install prod dependencies
           command: yarn --production
