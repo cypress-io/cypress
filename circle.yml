@@ -1994,7 +1994,7 @@ jobs:
 
 linux-workflow: &linux-workflow
   jobs:
-    - node_modules_install:
+    - node_modules_install
         # arch: 'linux'
     - build:
         requires:
