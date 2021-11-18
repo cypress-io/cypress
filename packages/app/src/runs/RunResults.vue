@@ -18,7 +18,7 @@
 <script lang="ts" setup>
 import type { RunResultsFragment } from '../generated/graphql'
 import { gql } from '@urql/core'
-import FlakyIcon from '~icons/cy/status-flaky_x12.svg'
+// import FlakyIcon from '~icons/cy/status-flaky_x12.svg'
 import SkippedIcon from '~icons/cy/status-skipped_x12.svg'
 import PassedIcon from '~icons/cy/status-passed_x12.svg'
 import FailedIcon from '~icons/cy/status-failed_x12.svg'
@@ -39,13 +39,13 @@ const props = defineProps<{
 }>()
 
 const results = [
-  {
-    // TODO: Is flake even exposed via the API?
-    // value: props.gql.totalFlaky,
-    value: 0,
-    class: 'icon-dark-gray-400',
-    icon: FlakyIcon,
-  },
+  // {
+  //   // TODO: Is flake even exposed via the API?
+  //   // value: props.gql.totalFlaky,
+  //   value: 0,
+  //   class: 'icon-dark-gray-400',
+  //   icon: FlakyIcon,
+  // },
   {
     value: props.gql.totalSkipped,
     class: 'icon-dark-gray-400',
