@@ -33,7 +33,7 @@ describe('lib/plugins/child/run_plugins', () => {
       removeListener: sinon.spy(),
     }
 
-    runPlugins = new RunPlugins(this.ipc, 'proj-root', 'cypress.config.js')
+    runPlugins = new RunPlugins(this.ipc, 'proj-root', 'cypress.config.js', { projectRoot: '/project/root' })
 
     runPlugins.__reset()
   })
@@ -63,8 +63,6 @@ describe('lib/plugins/child/run_plugins', () => {
       }
 
       runPlugins.runSetupNodeEvents(setupNodeEventsFn)
-
-      this.ipc.on.withArgs('load:plugins').yield(config)
 
       pluginsDeferred.resolve(config)
 
@@ -104,8 +102,6 @@ describe('lib/plugins/child/run_plugins', () => {
       mockery.registerMock('@cypress/webpack-batteries-included-preprocessor', webpackPreprocessor)
 
       runPlugins.runSetupNodeEvents(setupNodeEventsFn)
-
-      this.ipc.on.withArgs('load:plugins').yield(config)
 
       pluginsDeferred.resolve(config)
 
@@ -147,8 +143,6 @@ describe('lib/plugins/child/run_plugins', () => {
       mockery.registerMock('@cypress/webpack-batteries-included-preprocessor', webpackPreprocessor)
       runPlugins.runSetupNodeEvents(setupNodeEventsFn)
 
-      this.ipc.on.withArgs('load:plugins').yield(config)
-
       pluginsDeferred.resolve(config)
 
       return Promise
@@ -185,13 +179,14 @@ describe('lib/plugins/child/run_plugins', () => {
     })
 
     it('calls function exported by pluginsFile with register function and config', function () {
+      const config = {}
+
       const setupNodeEventsFn = sinon.spy()
+
+      runPlugins = new RunPlugins(this.ipc, 'proj-root', 'cypress.config.js', config)
 
       runPlugins.runSetupNodeEvents(setupNodeEventsFn)
 
-      const config = {}
-
-      this.ipc.on.withArgs('load:plugins').yield(config)
       expect(setupNodeEventsFn).to.be.called
       expect(setupNodeEventsFn.lastCall.args[0]).to.be.a('function')
 
@@ -206,8 +201,6 @@ describe('lib/plugins/child/run_plugins', () => {
       }
 
       runPlugins.runSetupNodeEvents(setupNodeEventsFn)
-
-      this.ipc.on.withArgs('load:plugins').yield({})
 
       this.ipc.send = _.once((event, errorType, stack) => {
         expect(event).to.eq('load:error:plugins')
@@ -235,8 +228,6 @@ describe('lib/plugins/child/run_plugins', () => {
       }
 
       runPlugins.runSetupNodeEvents(setupNodeEventsFn)
-
-      return this.ipc.on.withArgs('load:plugins').yield({})
     })
 
     context('file:preprocessor', () => {

@@ -16,12 +16,13 @@ let registeredEventsById = {}
 let registeredEventsByName = {}
 
 class RunPlugins {
-  constructor (ipc, projectRoot, requiredFile) {
+  constructor (ipc, projectRoot, requiredFile, config) {
     this.ipc = ipc
     this.projectRoot = projectRoot
     this.requiredFile = requiredFile
     this.eventIdCount = 0
     this.registrations = []
+    this.config = config
   }
 
   invoke (eventId, args = []) {
@@ -43,13 +44,13 @@ class RunPlugins {
     return webpackPreprocessor(options)
   }
 
-  load (config, setupNodeEvents) {
+  load (setupNodeEvents) {
     debug('run plugins function')
 
     // we track the register calls and then send them all at once
     // to the parent process
     const register = (event, handler) => {
-      const { isValid, error } = validateEvent(event, handler, config)
+      const { isValid, error } = validateEvent(event, handler, this.config)
 
       if (!isValid) {
         this.ipc.send('load:error:plugins', 'PLUGINS_VALIDATION_ERROR', this.requiredFile, error.stack)
@@ -90,12 +91,12 @@ class RunPlugins {
     .try(() => {
       debug('run plugins function')
 
-      return setupNodeEvents(register, config)
+      return setupNodeEvents(register, this.config)
     })
     .tap(() => {
       if (!registeredEventsByName['file:preprocessor']) {
         debug('register default preprocessor')
-        register('file:preprocessor', this.getDefaultPreprocessor(config))
+        register('file:preprocessor', this.getDefaultPreprocessor(this.config))
       }
     })
     .then((modifiedCfg) => {
@@ -141,7 +142,7 @@ class RunPlugins {
     }
   }
 
-  runSetupNodeEvents (setupNodeEvents) {
+  runSetupNodeEvents (setupNodeEvents, config) {
     if (setupNodeEvents && typeof setupNodeEvents !== 'function') {
       this.ipc.send('load:error:plugins', 'SETUP_NODE_EVENTS_IS_NOT_FUNCTION', this.requiredFile, setupNodeEvents)
     }
@@ -153,10 +154,7 @@ class RunPlugins {
       throw new Error('Unexpected: projectRoot should be a string')
     }
 
-    this.ipc.on('load:plugins', (config) => {
-      debug('passing config %o', config)
-      this.load(config, setupNodeEvents)
-    })
+    this.load(setupNodeEvents)
 
     this.ipc.on('execute:plugins', (event, ids, args) => {
       this.execute(event, ids, args)

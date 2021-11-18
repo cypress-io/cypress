@@ -267,7 +267,7 @@ const getFrameworkConfigFile = (opts: GetCodeOptsCt) => {
         const { getWebpackConfig } = require('nuxt')
 
         module.exports = {
-          devServer (cypressConfig, devServerConfig) {
+          async devServer (cypressConfig, devServerConfig) {
             let webpackConfig = await getWebpackConfig('modern', 'dev')
 
             return startDevServer({
