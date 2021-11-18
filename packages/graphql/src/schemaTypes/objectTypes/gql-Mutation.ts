@@ -300,6 +300,54 @@ export const mutation = mutationType({
       },
     })
 
+    t.liveMutation('setAutoScrollingEnabled', {
+      type: 'Boolean',
+      args: {
+        value: nonNull(booleanArg()),
+      },
+      resolve: async (_, args, ctx) => {
+        await ctx.actions.localSettings.setDevicePreference('autoScrollingEnabled', args.value)
+
+        return true
+      },
+    })
+
+    t.liveMutation('setUseDarkSidebar', {
+      type: 'Boolean',
+      args: {
+        value: nonNull(booleanArg()),
+      },
+      resolve: async (_, args, ctx) => {
+        await ctx.actions.localSettings.setDevicePreference('useDarkSidebar', args.value)
+
+        return true
+      },
+    })
+
+    t.liveMutation('setWatchForSpecChange', {
+      type: 'Boolean',
+      args: {
+        value: nonNull(booleanArg()),
+      },
+      resolve: async (_, args, ctx) => {
+        await ctx.actions.localSettings.setDevicePreference('watchForSpecChange', args.value)
+
+        return true
+      },
+    })
+
+    t.liveMutation('setPreferredEditorBinary', {
+      type: 'Boolean',
+      args: {
+        value: nonNull(stringArg()),
+      },
+      resolve: async (_, args, ctx) => {
+        await ctx.actions.localSettings.setDevicePreference('preferredEditorBinary', args.value)
+
+        return true
+      },
+    })
+
     t.liveMutation('showElectronOnAppExit', {
       description: 'show the launchpad at the browser picker step',
       resolve: (_, args, ctx) => {
