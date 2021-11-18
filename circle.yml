@@ -326,7 +326,7 @@ commands:
               # `locally_resolved_nvm_version` will be `N/A` if no local versions are found
               declare locally_resolved_nvm_version
               echo "checking if current nvm versions matches $node_version"
-              locally_resolved_nvm_version=$(nvm ls --no-colors "$node_version" | tail -1 | tr -d "\->*" | tr -d "[:space:]")
+              locally_resolved_nvm_version=$(nvm list --no-colors "$node_version" | tail -1 | tr -d "\->*" | tr -d "[:space:]" || "N/A")
 
               # If it is not already installed, install it
               # `nvm install` will implicitly use the newly-installed version
