@@ -334,6 +334,7 @@ commands:
                   nvm use "$nvm_version";
               fi
             ' >> ~/.bash_profile
+            nvm list "$node_version" || echo "something went wrong"
             cat ~/.bash_profile
     
       - persist_to_workspace:
