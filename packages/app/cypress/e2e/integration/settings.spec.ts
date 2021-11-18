@@ -41,15 +41,31 @@ describe('Settings', { viewportWidth: 600 }, () => {
 
   it('selects well known editor', () => {
     cy.visitApp()
+    cy.withCtx(async (ctx) => {
+      ctx.coreData.localSettings.availableEditors = [
+        ...ctx.coreData.localSettings.availableEditors,
+        // don't rely on CI machines to have specific editors installed
+        // so just adding one here
+        {
+          id: 'well-known-editor',
+          binary: '/usr/bin/well-known',
+          name: 'Well known editor',
+        },
+      ]
+
+      ctx.coreData.localSettings.preferences.preferredEditorBinary = undefined
+    })
+
     cy.get('[href="#/settings"]').click()
     cy.contains('Device Settings').click()
     cy.findByPlaceholderText('Custom path...').clear().type('/usr/local/bin/vim')
 
-    cy.intercept('POST', 'mutation-SetPreferredEditorBinary', (req) => {
-      expect(req.body.variables).to.eql({ 'value': '/usr/local/bin/vim' })
-    }).as('SetPreferred')
-
+    cy.intercept('POST', 'mutation-SetPreferredEditorBinary').as('SetPreferred')
     cy.get('[data-cy="use-custom-editor"]').click()
-    cy.wait('@SetPreferred')
+    cy.wait('@SetPreferred').its('request.body.variables.value').should('include', '/usr/local/bin/vim')
+
+    cy.contains('Choose your editor...').click()
+    cy.contains('Well known editor').click()
+    cy.wait('@SetPreferred').its('request.body.variables.value').should('include', '/usr/bin/well-known')
   })
 })

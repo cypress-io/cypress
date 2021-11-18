@@ -30,6 +30,33 @@
     v-else
     @add-project="handleAddProject"
   />
+
+  <StandardModal
+    v-model="isChooseEditorOpen"
+    variant="bare"
+    help-link=""
+  >
+    <template #title>
+      {{ t("globalPage.selectPreferredEditor") }}
+    </template>
+
+    <div class="m-24px">
+      <ChooseExternalEditor
+        v-if="props.gql.localSettings"
+        :gql="props.gql"
+      />
+      <div
+        v-else
+        class="h-full flex items-center justify-center"
+      >
+        <i-cy-loading_x16 class="animate-spin icon-dark-white icon-light-gray-400" />
+      </div>
+    </div>
+  </StandardModal>
+
+  <button @click="isChooseEditorOpen = !isChooseEditorOpen">
+    toggle
+  </button>
 </template>
 
 <script setup lang="ts">
@@ -40,6 +67,8 @@ import GlobalProjectCard from './GlobalProjectCard.vue'
 import GlobalPageHeader from './GlobalPageHeader.vue'
 import GlobalEmpty from './GlobalEmpty.vue'
 import { GlobalPageFragment, GlobalPage_AddProjectDocument, GlobalPage_RemoveProjectDocument, GlobalProjectCardFragment } from '../generated/graphql'
+import StandardModal from '@packages/frontend-shared/src/components/StandardModal.vue'
+import ChooseExternalEditor from '@packages/frontend-shared/src/gql-components/ChooseExternalEditor.vue'
 
 gql`
 mutation GlobalPage_addProject($path: String!, $open: Boolean = true) {
@@ -52,6 +81,7 @@ fragment GlobalPage on Query {
   projects {
     ...GlobalProjectCard
   }
+  ...ChooseExternalEditor
 }
 `
 
@@ -90,5 +120,6 @@ const filteredProjects = computed(() => {
 })
 
 const match = ref('')
+const isChooseEditorOpen = ref(false)
 const { t } = useI18n()
 </script>
