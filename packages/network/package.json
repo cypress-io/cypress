@@ -20,7 +20,7 @@
     "fs-extra": "^8.1.0",
     "lodash": "^4.17.21",
     "node-forge": "^0.10.0",
-    "proxy-from-env": "^1.0.0"
+    "proxy-from-env": "1.0.0"
   },
   "devDependencies": {
     "@cypress/debugging-proxy": "2.0.1",
