@@ -1,7 +1,7 @@
 // type helpers
 type Nullable<T> = T | null
 
-https://github.com/sindresorhus/type-fest/blob/c8ee2d262fa970ed358e2f07b9ecc06524cac2be/source/conditional-keys.d.ts#L31-L45
+// https://github.com/sindresorhus/type-fest/blob/c8ee2d262fa970ed358e2f07b9ecc06524cac2be/source/conditional-keys.d.ts#L31-L45
 type ConditionalKeys<Base, Condition> = NonNullable<
 	// Wrap in `NonNullable` to strip away the `undefined` type from the produced union.
 	{
