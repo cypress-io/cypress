@@ -123,7 +123,7 @@ commands:
     steps:
       - attach_workspace:
           at: ~/
-      - run: ls -a ~/
+      - setup-node
       - unpack-dependencies
 
   restore_cached_binary:
