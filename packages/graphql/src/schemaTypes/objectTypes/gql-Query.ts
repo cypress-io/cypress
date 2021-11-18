@@ -6,19 +6,6 @@ import { DevState } from './gql-DevState'
 import { VersionData } from './gql-VersionData'
 import { Wizard } from './gql-Wizard'
 
-const BrowserWarning = objectType({
-  name: 'BrowserWarning',
-  description: 'Browser warning',
-  definition (t) {
-    t.string('title')
-    t.string('message')
-  },
-  sourceType: {
-    module: '@packages/types',
-    export: 'BrowserWarning',
-  },
-})
-
 export const Query = objectType({
   name: 'Query',
   description: 'The root "Query" type containing all entry fields for our querying',
@@ -58,14 +45,6 @@ export const Query = objectType({
       type: ProjectLike,
       description: 'All known projects for the app',
       resolve: (root, args, ctx) => ctx.appData.projects,
-    })
-
-    t.field('browserWarning', {
-      type: BrowserWarning,
-      description: 'A warning related to finding a browser',
-      resolve: (source, args, ctx) => {
-        return ctx.wizardData.browserWarning
-      },
     })
 
     t.nonNull.boolean('isInGlobalMode', {

@@ -173,8 +173,3 @@ export const browsers: Browser[] = [
     minSupportedVersion: MIN_EDGE_VERSION,
   },
 ]
-
-export interface BrowserWarning {
-  title: string
-  message: string
-}

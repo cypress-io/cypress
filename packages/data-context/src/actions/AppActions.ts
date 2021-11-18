@@ -36,10 +36,11 @@ export class AppActions {
       this.ctx.debug('Error getting browser by name or path (%s): %s', browserNameOrPath, err?.stack || err)
       const message = err.details ? `${err.message}\n\n\`\`\`\n${err.details}\n\`\`\`` : err.message
 
-      this.ctx.coreData.wizard.browserWarning = {
-        title: 'Browser Warning',
+      this.ctx.coreData.wizard.warnings.push({
+        title: 'Warning: Browser Not Found',
         message,
-      }
+        setupStep: 'setupComplete',
+      })
     }
 
     if (browser) {

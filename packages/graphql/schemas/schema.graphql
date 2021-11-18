@@ -30,12 +30,6 @@ enum BrowserFamily {
   firefox
 }
 
-"""Browser warning"""
-type BrowserWarning {
-  message: String
-  title: String
-}
-
 """
 A CloudOrganization represents an Organization stored in the Cypress Cloud
 """
@@ -577,9 +571,6 @@ type ProjectPreferences {
 type Query {
   baseError: BaseError
 
-  """A warning related to finding a browser"""
-  browserWarning: BrowserWarning
-
   """Returns an object conforming to the Relay spec"""
   cloudNode(
     """An ID for a Node conforming to the Relay spec"""
@@ -734,6 +725,13 @@ type VersionData {
   latest: Version!
 }
 
+"""A warning"""
+type Warning {
+  message: String!
+  setupStep: String
+  title: String!
+}
+
 """
 The Wizard is a container for any state associated with initial onboarding to Cypress
 """
@@ -785,6 +783,9 @@ type Wizard {
 
   """The title of the page, given the current step of the wizard"""
   title: String
+
+  """A list of warnings"""
+  warnings: [Warning!]!
 }
 
 """Wizard bundler"""
