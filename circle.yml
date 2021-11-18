@@ -336,7 +336,27 @@ commands:
                   nvm use "$nvm_version";
               fi
             ' >> ~/.bash_profile
-          # echo '
+            cat ~/.bash_profile
+    
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - .bash_profile
+            - .nvm
+      - run:
+          # https://github.com/nvm-sh/nvm#nvmrc
+          name: Install Node
+          command: |
+            echo "Installing Node $NODE_VERSION"
+            nvm install ${NODE_VERSION} || exit 1
+            nvm use ${NODE_VERSION} || exit 1
+            nvm alias default ${NODE_VERSION} || exit 1
+            node --version
+            npm install yarn -g # ensure yarn is installed with the correct node engine
+            yarn check-node-version
+        # node ./scripts/circleci/check-node-version.js
+
+        # echo '
           #   cdnvm() {
           #     command cd "$@";
 
@@ -359,25 +379,7 @@ commands:
           #   alias cd="cdnvm"
           #   cd "$PWD"
           # ' >> ~/.bash_profile
-            cat ~/.bash_profile
-      - persist_to_workspace:
-          root: ~/
-          paths:
-            - .bash_profile
-            - .nvm
-      - run:
-          # https://github.com/nvm-sh/nvm#nvmrc
-          name: Install Node
-          command: |
-            echo "Installing Node $NODE_VERSION"
-            nvm install ${NODE_VERSION} || exit 1
-            nvm use ${NODE_VERSION} || exit 1
-            nvm alias default ${NODE_VERSION} || exit 1
-            node --version
-            npm install yarn -g # ensure yarn is installed with the correct node engine
-            yarn check-node-version
-        # node ./scripts/circleci/check-node-version.js
-
+          
   install-chrome:
     description: Install Google Chrome
     parameters:
