@@ -18,5 +18,6 @@ export const urqlCacheKeys: Partial<CacheExchangeOpts> = {
     ProjectPreferences: (data) => data.__typename,
     VersionData: () => null,
     LocalSettings: (data) => data.__typename,
+    LocalSettingsPreferences: () => null,
   },
 }

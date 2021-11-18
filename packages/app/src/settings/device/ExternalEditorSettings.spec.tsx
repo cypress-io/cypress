@@ -5,24 +5,34 @@ import { ExternalEditorSettingsFragmentDoc } from '../../generated/graphql-test'
 const editorText = defaultMessages.settingsPage.editor
 
 describe('<ExternalEditorSettings />', () => {
-  beforeEach(() => {
+  it('renders the placeholder by default', () => {
     cy.mountFragment(ExternalEditorSettingsFragmentDoc, {
       render: (gqlVal) => {
         return <ExternalEditorSettings gql={gqlVal} />
       },
     })
-  })
 
-  it('renders the placeholder by default', () => {
     cy.findByText(editorText.noEditorSelectedPlaceholder).should('be.visible')
   })
 
   it('renders the title and description', () => {
+    cy.mountFragment(ExternalEditorSettingsFragmentDoc, {
+      render: (gqlVal) => {
+        return <ExternalEditorSettings gql={gqlVal} />
+      },
+    })
+
     cy.findByText(editorText.description).should('be.visible')
     cy.findByText(editorText.title).should('be.visible')
   })
 
   it('can select an editor', () => {
+    cy.mountFragment(ExternalEditorSettingsFragmentDoc, {
+      render: (gqlVal) => {
+        return <ExternalEditorSettings gql={gqlVal} />
+      },
+    })
+
     const optionsSelector = '[role=option]'
     const inputSelector = '[aria-haspopup=true]'
 
@@ -31,5 +41,20 @@ describe('<ExternalEditorSettings />', () => {
     .get(optionsSelector).then(($options) => {
       cy.wrap($options.first()).click()
     })
+  })
+
+  it('can input a custom binary', () => {
+    cy.mountFragment(ExternalEditorSettingsFragmentDoc, {
+      render: (gqlVal) => {
+        return <ExternalEditorSettings gql={gqlVal} />
+      },
+    })
+
+    cy.findByPlaceholderText('Custom path...').type('/usr/bin')
+    cy.get('[data-cy="use-custom-editor"]').as('custom')
+    cy.get('@custom').click()
+
+    cy.get('@custom').should('be.focused')
+    cy.get('[data-cy="use-well-known-editor"]').should('not.be.focused')
   })
 })

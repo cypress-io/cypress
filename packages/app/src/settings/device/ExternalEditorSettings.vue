@@ -8,12 +8,13 @@
     </template>
 
     <div class="flex items-center">
-      <input 
-        type="radio" 
-        v-model="editorToUse" 
+      <input
+        v-model="editorToUse"
+        type="radio"
         class="mr-5px"
+        data-cy="use-well-known-editor"
         value="found"
-      />
+      >
 
       <Select
         :model-value="selectedWellKnownEditor"
@@ -46,17 +47,18 @@
     </div>
 
     <div class="flex items-center py-2">
-      <input 
-        type="radio" 
+      <input
+        v-model="editorToUse"
+        type="radio"
         class="mr-5px"
-        v-model="editorToUse" 
         value="custom"
-      />
+        data-cy="use-custom-editor"
+      >
 
       <div class="w-400px">
-        <Input 
-          v-model="customBinary" 
-          inputClasses="text-sm"
+        <Input
+          v-model="customBinary"
+          input-classes="text-sm"
           placeholder="Custom path..."
           @blur="setCustomBinary"
         >
@@ -78,7 +80,6 @@ import Icon from '@cy/components/Icon.vue'
 import SettingsSection from '../SettingsSection.vue'
 import { useI18n } from '@cy/i18n'
 import Select from '@cy/components/Select.vue'
-import Button from '@cy/components/Button.vue'
 import Input from '@cy/components/Input.vue'
 import VSCode from '~icons/logos/visual-studio-code'
 import Atom from '~icons/logos/atom-icon'
@@ -141,13 +142,13 @@ const customBinary = ref<string>('')
 const selectedWellKnownEditor = ref<Editor>()
 const editorToUse = ref<'found' | 'custom'>('found')
 
-
 watch(
-  () => props.gql.localSettings.preferences.preferredEditorBinary, 
+  () => props.gql.localSettings.preferences.preferredEditorBinary,
   (perferredEditorBinary) => {
-    const isWellKnownEditor = props.gql.localSettings.availableEditors.find((x) => 
-      x.binary === perferredEditorBinary
-    )
+    const isWellKnownEditor = props.gql.localSettings.availableEditors.find((x) => {
+      return x.binary === perferredEditorBinary
+    })
+
     editorToUse.value = isWellKnownEditor ? 'found' : 'custom'
 
     if (isWellKnownEditor) {
@@ -157,7 +158,7 @@ watch(
     if (editorToUse.value === 'custom' && perferredEditorBinary) {
       customBinary.value = perferredEditorBinary
     }
-  }, { immediate: true }
+  }, { immediate: true },
 )
 
 watch(editorToUse, (val) => {
