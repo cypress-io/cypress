@@ -51,6 +51,7 @@ export interface ActiveProjectShape extends ProjectShape {
   configChildProcess?: ConfigChildProcessShape | null
   preferences?: Preferences | null
   browsers: FoundBrowser[] | null
+  isMissingConfigFile: boolean
 }
 
 export interface AppDataShape {
