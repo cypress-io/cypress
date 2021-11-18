@@ -12,54 +12,63 @@
       @newSpec="showModal = true"
     />
 
-    <div class="grid items-center divide-y-1 children:h-40px">
-      <div class="grid grid-cols-2 children:text-gray-800 children:font-medium">
-        <div class="flex justify-between items-center">
-          {{ t('specPage.componentSpecsHeader') }}
-        </div>
-        <div class="flex justify-between items-center">
-          <div>{{ t('specPage.gitStatusHeader') }}</div>
-        </div>
+    <div class="grid grid-cols-2 children:text-gray-800 children:font-medium">
+      <div class="flex justify-between items-center">
+        {{ t('specPage.componentSpecsHeader') }}
       </div>
-
-      <template
-        v-for="(row, idx) in treeSpecList"
-        :key="idx"
+      <div class="flex justify-between items-center">
+        <div>{{ t('specPage.gitStatusHeader') }}</div>
+      </div>
+    </div>
+    <div
+      class="grid"
+      :style="[{
+        height: 'calc(100vh - 144px)',
+      }]"
+      v-bind="containerProps"
+    >
+      <div
+        v-bind="wrapperProps"
+        class="divide-y-1 children:h-40px"
       >
-        <SpecsListRowItem>
+        <SpecsListRowItem
+          v-for="row in list"
+          :key="row.index"
+          style="height: 40px"
+        >
           <template #file>
             <RouterLink
-              v-if="row.isLeaf && row.data"
-              :key="row.data.absolute"
-              :to="{ path: 'runner', query: { file: row.data?.relative } }"
+              v-if="row.data.isLeaf && row.data"
+              :key="row.data.data?.absolute"
+              :to="{ path: 'runner', query: { file: row.data.data?.relative } }"
             >
               <SpecItem
-                :file-name="row.data?.fileName || row.name"
-                :extension="row.data?.specFileExtension || ''"
-                :indexes="getIndexes(row)"
-                :style="{ paddingLeft: `${((row.depth - 2) * 10) + 16 + 22}px` }"
+                :file-name="row.data.data?.fileName || row.data.name"
+                :extension="row.data.data?.specFileExtension || ''"
+                :indexes="getIndexes(row.data)"
+                :style="{ paddingLeft: `${((row.data.depth - 2) * 10) + 16 + 22}px` }"
               />
             </RouterLink>
 
             <RowDirectory
               v-else
-              :name="row.name"
-              :expanded="row.expanded.value"
-              :depth="row.depth - 2"
-              :style="{ paddingLeft: `${((row.depth - 2) * 10) + 16}px` }"
-              :indexes="getIndexes(row)"
-              @click="row.toggle"
+              :name="row.data.name"
+              :expanded="row.data.expanded"
+              :depth="row.data.depth - 2"
+              :style="{ paddingLeft: `${((row.data.depth - 2) * 10) + 16}px` }"
+              :indexes="getIndexes(row.data)"
+              @click="row.data.toggle"
             />
           </template>
 
           <template #git-info>
             <SpecListGitInfo
-              v-if="row.data?.gitInfo"
-              :gql="row.data.gitInfo"
+              v-if="row.data.data?.gitInfo"
+              :gql="row.data.data.gitInfo"
             />
           </template>
         </SpecsListRowItem>
-      </template>
+      </div>
     </div>
   </div>
 </template>
@@ -69,7 +78,7 @@ import SpecsListHeader from './SpecsListHeader.vue'
 import SpecListGitInfo from './SpecListGitInfo.vue'
 import SpecsListRowItem from './SpecsListRowItem.vue'
 import { gql } from '@urql/vue'
-import { computed, ComputedRef, ref } from 'vue'
+import { computed, ComputedRef, ref, watch } from 'vue'
 import CreateSpecModal from './CreateSpecModal.vue'
 import type { Specs_SpecsListFragment, SpecListRowFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
@@ -78,6 +87,7 @@ import { useCollapsibleTree } from '@packages/frontend-shared/src/composables/us
 import RowDirectory from './RowDirectory.vue'
 import SpecItem from './SpecItem.vue'
 import fuzzySort from 'fuzzysort'
+import { useVirtualList } from '@packages/frontend-shared/src/composables/useVirtualList'
 
 const { t } = useI18n()
 
@@ -138,4 +148,13 @@ const specTree = computed(() => buildSpecTree<FuzzyFoundSpec & { gitInfo: SpecLi
 const collapsible = computed(() => useCollapsibleTree(specTree.value, { dropRoot: true }))
 
 const treeSpecList = computed(() => collapsible.value.tree.filter(((item) => !item.hidden.value)))
+
+const { containerProps, list, wrapperProps } = useVirtualList(treeSpecList, { itemHeight: 40, overscan: 10 })
+
+// watch(list, (newList) => {
+//   if (newList.length) {
+//     debugger
+//     containerProps
+//   }
+// })
 </script>

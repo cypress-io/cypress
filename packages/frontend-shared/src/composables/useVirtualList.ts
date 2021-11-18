@@ -1,5 +1,5 @@
-import { watch, Ref, ref, computed } from 'vue'
-import { useElementSize } from '@vueuse/core'
+import { watch, Ref, ref, computed, shallowRef } from 'vue'
+import { MaybeRef, useElementSize } from '@vueuse/core'
 
 export interface UseVirtualListOptions {
   /**
@@ -21,20 +21,15 @@ export type UseVirtualListItem<T> = {
   index: number
 }
 
-export function useVirtualList <T = any> (list: Ref<T[]>, options: UseVirtualListOptions) {
+export function useVirtualList<T = any> (list: MaybeRef<T[]>, options: UseVirtualListOptions) {
   const containerRef: Ref = ref<HTMLElement | null>()
   const size = useElementSize(containerRef)
 
   const currentList: Ref<UseVirtualListItem<T>[]> = ref([])
-  const _list = ref(list)
+  const source = shallowRef(list)
 
   const state: Ref = ref({ start: 0, end: 10 })
   const { itemHeight, overscan = 5 } = options
-
-  if (!itemHeight) {
-    // eslint-disable-next-line
-    console.warn('please enter a valid itemHeight')
-  }
 
   const getViewCapacity = (containerHeight: number) => {
     if (typeof itemHeight === 'number') {
@@ -45,7 +40,7 @@ export function useVirtualList <T = any> (list: Ref<T[]>, options: UseVirtualLis
     let sum = 0
     let capacity = 0
 
-    for (let i = start; i < _list.value.length; i++) {
+    for (let i = start; i < source.value.length; i++) {
       const height = (itemHeight as (index: number) => number)(i)
 
       sum += height
@@ -66,7 +61,7 @@ export function useVirtualList <T = any> (list: Ref<T[]>, options: UseVirtualLis
     let sum = 0
     let offset = 0
 
-    for (let i = 0; i < _list.value.length; i++) {
+    for (let i = 0; i < source.value.length; i++) {
       const height = (itemHeight as (index: number) => number)(i)
 
       sum += height
@@ -91,33 +86,32 @@ export function useVirtualList <T = any> (list: Ref<T[]>, options: UseVirtualLis
 
       state.value = {
         start: from < 0 ? 0 : from,
-        end: to > _list.value.length ? _list.value.length : to,
+        end: to > source.value.length
+          ? source.value.length
+          : to,
       }
 
-      currentList.value = _list.value.slice(state.value.start, state.value.end).map((ele, index) => {
+      currentList.value = source.value
+      .slice(state.value.start, state.value.end)
+      .map((ele, index) => {
         return {
-          data: ele as T,
+          data: ele,
           index: index + state.value.start,
         }
       })
     }
   }
 
-  watch(list, (newList) => {
-    _list.value = newList as typeof _list.value
-    calculateRange()
-  })
-
-  watch([size.width, size.height], () => {
+  watch([size.width, size.height, list], () => {
     calculateRange()
   })
 
   const totalHeight = computed(() => {
     if (typeof itemHeight === 'number') {
-      return _list.value.length * itemHeight
+      return source.value.length * itemHeight
     }
 
-    return _list.value.reduce((sum, _, index) => sum + itemHeight(index), 0)
+    return source.value.reduce((sum, _, index) => sum + itemHeight(index), 0)
   })
 
   const getDistanceTop = (index: number) => {
@@ -127,7 +121,9 @@ export function useVirtualList <T = any> (list: Ref<T[]>, options: UseVirtualLis
       return height
     }
 
-    const height = _list.value.slice(0, index).reduce((sum, _, i) => sum + itemHeight(i), 0)
+    const height = source.value
+    .slice(0, index)
+    .reduce((sum, _, i) => sum + itemHeight(i), 0)
 
     return height
   }
