@@ -226,8 +226,6 @@
       "system-tests"
     ],
     "nohoist": [
-      "**/@ffmpeg-installer",
-      "**/@ffmpeg-installer/**",
       "**/webpack-preprocessor/babel-loader",
       "**/webpack-batteries-included-preprocessor/ts-loader",
       "**/@vue/runtime-dom",
