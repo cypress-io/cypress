@@ -213,7 +213,7 @@ commands:
           # Dependencies needed by circle-cache.js, before we "yarn" or unpack cached node_modules
           name: Cache Helper Dependencies
           working_directory: ~/
-          command: npm install -g globby@11.0.4 fs-extra@10.0.0 minimist@1.2.5 fast-json-stable-stringify@2.1.0
+          command: npm install globby@11.0.4 fs-extra@10.0.0 minimist@1.2.5 fast-json-stable-stringify@2.1.0
       - run:
           working_directory: scripts/circleci
           name: Generate Circle Cache Key
