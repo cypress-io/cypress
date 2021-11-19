@@ -31,6 +31,7 @@ class Shortcuts {
         break
       case 'a': action('set:scrolling', () => {
         appState.setAutoScrolling(!appState.autoScrollingEnabled)
+        events.emit('save:state')
       })()
 
         break
