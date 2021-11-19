@@ -1,19 +1,21 @@
+// TODO: remove this if unused
+
 import { defineStore } from 'pinia'
 
 export interface RunnerStoreState {
-  showSpecList: boolean
+  isSpecListShown: boolean
 }
 
 export const useRunnerStore = defineStore({
   id: 'runner',
   state: (): RunnerStoreState => {
     return {
-      showSpecList: true,
+      isSpecListShown: true,
     }
   },
   actions: {
     toggleSpecList () {
-      this.showSpecList = !this.showSpecList
+      this.isSpecListShown = !this.isSpecListShown
     },
   },
 })

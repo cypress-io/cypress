@@ -565,6 +565,7 @@ export class EventManager {
       numFailed: state.failed,
       numPending: state.pending,
       autoScrollingEnabled: state.autoScrollingEnabled,
+      // TODO: maybe this is what comes out of savedState?
       scrollTop: state.scrollTop,
       studioActive: this.studioRecorder.hasRunnableId,
     })

@@ -19,6 +19,7 @@ const defaults: DefaultAppState = {
 
 class AppState {
   @observable autoScrollingEnabled = true
+  @observable isSpecListOpen = true // TODO: consider moving where the default lives
   @observable isPaused = defaults.isPaused
   @observable isRunning = defaults.isRunning
   @observable nextCommandName = defaults.nextCommandName
@@ -61,6 +62,10 @@ class AppState {
 
   toggleAutoScrolling () {
     this.setAutoScrolling(!this.autoScrollingEnabled)
+  }
+
+  toggleSpecList () {
+    this.isSpecListOpen = !this.isSpecListOpen
   }
 
   setAutoScrolling (isEnabled?: boolean | null) {

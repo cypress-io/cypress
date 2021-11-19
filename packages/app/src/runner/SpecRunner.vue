@@ -1,7 +1,7 @@
 <template>
   <RemovePositioningDuringScreenshot
     id="main-pane"
-    class="flex border-l-1 border-gray-900"
+    class="flex border-gray-900 border-l-1"
   >
     <HideDuringScreenshot
       id="inline-spec-list"
@@ -21,16 +21,16 @@
       ref="runnerPane"
       class="relative w-full"
     >
-      <HideDuringScreenshot class="bg-white p-4">
+      <HideDuringScreenshot class="p-4 bg-white">
         <SpecRunnerHeader :gql="props.gql" />
       </HideDuringScreenshot>
 
       <RemoveClassesDuringScreenshotting
-        class="flex justify-center bg-gray-100 h-full p-4"
+        class="flex justify-center h-full p-4 bg-gray-100"
       >
         <div
           :id="RUNNER_ID"
-          class="viewport origin-top-left"
+          class="origin-top-left viewport"
           :style="viewportStyle"
         />
       </RemoveClassesDuringScreenshotting>
@@ -118,7 +118,7 @@ onMounted(() => {
     runSpec()
   })
 
-  eventManager.on('toggle:spec:list', () => {
+  eventManager.on('toggle:spec:list', () => { // TODO: why does this live here?
     runnerStore.toggleSpecList()
   })
 

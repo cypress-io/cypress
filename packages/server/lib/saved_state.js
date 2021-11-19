@@ -11,6 +11,8 @@ const stateFiles = {}
 
 // TODO: remove `showedOnBoardingModal` from this list - it is only included so that misleading `allowed` are not thrown
 // now that it has been removed from use
+// TODO: add state to here, then treat it like autoScrollingEnabled, except actually make sure it syncs using onSavedStateChanged
+// TODO: throw an error if we use something outside this list
 const allowed = `
 appWidth
 appHeight
@@ -38,7 +40,7 @@ promptsShown
 watchForSpecChange
 useDarkSidebar
 preferredEditorBinary
-
+isSpecListOpen
 `.trim().split(/\s+/)
 
 const formStatePath = (projectRoot) => {

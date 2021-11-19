@@ -26,6 +26,7 @@ export interface ProjectApiShape {
   clearProjectPreferences(projectTitle: string): Promise<unknown>
   clearAllProjectPreferences(): Promise<unknown>
   closeActiveProject(): Promise<unknown>
+  getCurrentProjectSavedState(): {} | undefined
   error: {
     throw: (type: string, ...args: any) => Error
     get(type: string, ...args: any): Error & { code: string, isCypressErr: boolean}
