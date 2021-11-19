@@ -1,14 +1,12 @@
-import type { FoundSpec } from '@packages/types'
+import type { FuzzyFoundSpec } from '@packages/frontend-shared/src/utils/spec-utils'
 import { ref } from 'vue'
 import InlineSpecListTree from './InlineSpecListTree.vue'
 
 describe('InlineSpecListTree', () => {
-  let foundSpecs: FoundSpec[]
+  let foundSpecs: FuzzyFoundSpec[]
 
   before(() => {
-    cy.fixture('found-specs').then((specs) => {
-      foundSpecs = specs
-    })
+    cy.fixture('found-specs').then((specs) => foundSpecs = specs.map((spec) => ({ ...spec, indexes: [] })))
   })
 
   it('should handle keyboard navigation', () => {
@@ -38,7 +36,7 @@ describe('InlineSpecListTree', () => {
       </div>
     ))
 
-    cy.get('li').first().should('contain', 'src / components')
+    cy.get('li').first().should('contain', 'src/components')
     cy.then(() => specProp.value = foundSpecs.slice(0, 4))
     cy.get('li').should('have.length', 7).first().should('contain', 'src').and('not.contain', '/components')
   })

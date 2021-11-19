@@ -5,29 +5,20 @@
       :class="{'transform rotate-270': !expanded}"
     />
     <i-cy-folder_x16 class="mr-8px w-16px h-16px" />
-    <template
-      v-for="(directory, idx) in directories"
-      :key="directory"
-    >
-      <span class="font-medium text-gray-400">{{ directory }}</span>
-      <span
-        v-if="idx !== directories.length - 1"
-        class="font-medium text-gray-800 px-4px"
-      >
-        /
-      </span>
-    </template>
+    <HighlightedText
+      :text="props.name"
+      :indexes="props.indexes"
+      class="text-gray-400"
+    />
   </div>
 </template>
 
 <script lang="ts" setup>
-interface Props {
-  directories: string[],
-  expanded: boolean
-}
+import HighlightedText from './HighlightedText.vue'
 
-withDefaults(defineProps<Props>(), {
-  directories: () => [],
+const props = withDefaults(defineProps<{ name: string, expanded: boolean, indexes: number[] }>(), {
+  name: '',
   expanded: false,
+  indexes: () => [],
 })
 </script>
