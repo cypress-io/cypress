@@ -434,7 +434,6 @@ commands:
     steps:
       - store_artifacts:
           path: ~/.npm/_logs
-          
 
   post-install-comment:
     description: Post GitHub comment with a blurb on how to install pre-release version
@@ -856,7 +855,6 @@ jobs:
   ## skips ahead to the build step, otherwise installs and caches the node_modules
   node_modules_install:
     <<: *defaults
-    resource_class: medium+
     steps:
       - checkout
       - unless:
@@ -1451,14 +1449,6 @@ jobs:
           name: Release packages after all jobs pass
           command: yarn npm-release
 
-  # upload-build-artifacts:
-  #   <<: *mainBuildFilters
-  #   resource_class: medium+
-  #   steps:
-  #     - upload-binary
-  #     - upload-npm-package
-  #     - post-install-comment
-
   create-build-artifacts:
     <<: *defaults
     resource_class: medium+
@@ -1476,7 +1466,6 @@ jobs:
       - upload-binary
       - upload-npm-package
       - post-install-comment
-      # - upload-build-artifacts
 
   test-kitchensink:
     <<: *defaults
@@ -1546,7 +1535,7 @@ jobs:
 
   test-binary-and-npm-against-other-projects:
     <<: *defaults
-    # resource_class: medium
+    resource_class: medium
     steps:
       # needs uploaded NPM and test binary
       - restore_cached_workspace
@@ -1806,7 +1795,7 @@ jobs:
 
   test-binary-against-kitchensink:
     <<: *defaults
-    # resource_class: medium
+    resource_class: medium
     steps:
       - test-binary-against-repo:
           repo: cypress-example-kitchensink
