@@ -8,23 +8,31 @@
       class="icon-light-gray-50 icon-dark-gray-200 document-icon"
     />
 
-    <div
-      class="text-gray-400 text-indigo-500 group-hocus:text-indigo-500"
-      :title="`${spec.fileName}${spec.specFileExtension}`"
-    >
-      <span class="font-medium text-indigo-500 group-hocus:text-indigo-500">{{ spec.fileName }}</span>
-      <span class="font-light group-hocus:text-indigo-500">{{ spec.specFileExtension }}</span>
+    <div class="text-gray-400 text-indigo-500 group-hocus:text-indigo-500">
+      <HighlightedText
+        :text="fileName"
+        :indexes="indexes.filter((idx) => idx < fileName.length)"
+        class="font-medium text-indigo-500 group-hocus:text-indigo-500"
+        highlight-classes="text-gray-1000"
+      />
+      <HighlightedText
+        :text="extension"
+        :indexes="indexes.filter((idx) => idx >= fileName.length).map(idx => idx - fileName.length)"
+        class="font-light group-hocus:text-indigo-500"
+        highlight-classes="text-gray-1000"
+      />
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
 import DocumentIconBlank from '~icons/cy/document-blank_x16'
+import HighlightedText from './HighlightedText.vue'
 
-defineProps<{
-  spec: {
-    fileName: string
-    specFileExtension: string
-  }
-}>()
+withDefaults(defineProps<{
+  fileName: string
+  extension: string
+  selected?: boolean
+  indexes: number[]
+}>(), { indexes: () => [], selected: false })
 </script>
