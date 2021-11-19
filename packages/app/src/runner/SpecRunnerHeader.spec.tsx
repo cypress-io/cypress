@@ -1,6 +1,9 @@
 import SpecRunnerHeader from './SpecRunnerHeader.vue'
-import { useAutStore } from '../store'
+import { useAutStore, useSpecStore } from '../store'
 import { SpecRunnerHeaderFragmentDoc } from '../generated/graphql-test'
+import { createEventManager, createTestAutIframe } from '../../cypress/e2e/support/ctSupport'
+
+const getProps = (eventManager = createEventManager(), autIframe = createTestAutIframe()) => ({ eventManager, getAutIframe: () => autIframe })
 
 describe('SpecRunnerHeader', () => {
   it('renders', () => {
@@ -9,7 +12,7 @@ describe('SpecRunnerHeader', () => {
     autStore.updateUrl('http://localhost:4000')
     cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
       render: (gqlVal) => {
-        return <SpecRunnerHeader gql={gqlVal} />
+        return <SpecRunnerHeader gql={gqlVal} {...getProps()}/>
       },
     })
   })
@@ -21,11 +24,12 @@ describe('SpecRunnerHeader', () => {
 
     cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
       render: (gqlVal) => {
-        return <SpecRunnerHeader gql={gqlVal} />
+        return <SpecRunnerHeader gql={gqlVal} {...getProps()}/>
       },
     })
 
-    cy.get('[data-cy="header-studio"]').should('be.disabled')
+    // TODO: Studio. Out of scope for GA.
+    // cy.get('[data-cy="header-studio"]').should('be.disabled')
     cy.get('[data-cy="header-selector"]').should('be.disabled')
   })
 
@@ -36,22 +40,24 @@ describe('SpecRunnerHeader', () => {
 
     cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
       render: (gqlVal) => {
-        return <SpecRunnerHeader gql={gqlVal} />
+        return <SpecRunnerHeader gql={gqlVal} {...getProps()}/>
       },
     })
 
-    cy.get('[data-cy="header-studio"]').should('be.disabled')
+    // TODO: Studio. Out of scope for GA.
+    // cy.get('[data-cy="header-studio"]').should('be.disabled')
     cy.get('[data-cy="header-selector"]').should('be.disabled')
   })
 
   it('enables selector playground and studio buttons by default', () => {
     cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
       render: (gqlVal) => {
-        return <SpecRunnerHeader gql={gqlVal} />
+        return <SpecRunnerHeader gql={gqlVal} {...getProps()}/>
       },
     })
 
-    cy.get('[data-cy="header-studio"]').should('not.be.disabled')
+    // TODO: Studio. Out of scope for GA.
+    // cy.get('[data-cy="header-studio"]').should('be.disabled')
     cy.get('[data-cy="header-selector"]').should('not.be.disabled')
   })
 
@@ -65,7 +71,7 @@ describe('SpecRunnerHeader', () => {
         gql.currentTestingType = 'e2e'
       },
       render: (gqlVal) => {
-        return <SpecRunnerHeader gql={gqlVal} />
+        return <SpecRunnerHeader gql={gqlVal} {...getProps()}/>
       },
     })
 
@@ -82,26 +88,33 @@ describe('SpecRunnerHeader', () => {
         gql.currentTestingType = 'component'
       },
       render: (gqlVal) => {
-        return <SpecRunnerHeader gql={gqlVal} />
+        return <SpecRunnerHeader gql={gqlVal} {...getProps()}/>
       },
     })
 
     cy.get('[data-cy="aut-url"]').should('not.exist')
   })
 
-  it('shows current browser and viewport', () => {
-    const autStore = useAutStore()
+  it('shows current browser and possible browsers', () => {
+    const specStore = useSpecStore()
 
-    autStore.updateDimensions(555, 777)
+    specStore.setActiveSpec({
+      relative: 'packages/app/src/runner/SpecRunnerHeader.spec.tsx',
+      absolute: '/Users/zachjw/work/cypress/packages/app/src/runner/SpecRunnerHeader.spec.tsx',
+      name: 'SpecRunnerHeader.spec.tsx',
+    })
+
     cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
       onResult: (ctx) => {
         ctx.currentBrowser = ctx.browsers?.find((x) => x.displayName === 'Chrome') ?? null
       },
       render: (gqlVal) => {
-        return <SpecRunnerHeader gql={gqlVal} />
+        return <SpecRunnerHeader gql={gqlVal} {...getProps()}/>
       },
     })
 
-    cy.get('[data-cy="select-browser"]').contains('Chrome 555x777')
+    cy.get('[data-cy="select-browser"]').click()
+    cy.findByRole('listbox').within(() =>
+      ['Chrome', 'Electron', 'Firefox'].forEach((browser) => cy.findAllByText(browser)))
   })
 })

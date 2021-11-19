@@ -1,6 +1,8 @@
 import type { DebouncedFunc } from 'lodash'
-import { useSelectorPlaygroundStore } from '../store/selector-playground-store'
+// import { useSelectorPlaygroundStore } from '../store/selector-playground-store'
 import type JQuery from 'jquery'
+
+const useSelectorPlaygroundStore = () => {}
 
 // JQuery bundled w/ Cypress
 type $CypressJQuery = any

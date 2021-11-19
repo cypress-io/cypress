@@ -43,10 +43,11 @@
       </div>
 
       <Select
-        v-model="browser"
+        :model-value="{...props.gql.currentBrowser}"
         data-cy="select-browser"
         :options="browsers"
-        item-value="name"
+        item-value="displayName"
+        @update:model-value="changeBrowser"
       />
     </div>
 
@@ -63,16 +64,17 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
-import { useAutStore } from '../store'
+import { computed, ref, watch } from 'vue'
+import { useAutStore, useSpecStore } from '../store'
 import Select from '@packages/frontend-shared/src/components/Select.vue'
-import { gql } from '@urql/vue'
+import { gql, useMutation } from '@urql/vue'
 import IconCrosshairsGPS from '~icons/mdi/crosshairs-gps'
 import Icon from '@packages/frontend-shared/src/components/Icon.vue'
-import type { SpecRunnerHeaderFragment } from '../generated/graphql'
+import { SpecRunnerHeaderFragment, SpecRunnerHeader_SetBrowserDocument, SpecRunnerHeader_BrowserFragment } from '../generated/graphql'
 import SelectorPlayground from './selector-playground/SelectorPlayground.vue'
-import { getAutIframeModel, getEventManager } from '.'
 import { useSelectorPlaygroundStore } from '../store/selector-playground-store'
+import type { EventManager } from './event-manager'
+import type { AutIframe } from './aut-iframe'
 
 gql`
 fragment SpecRunnerHeader on CurrentProject {
@@ -85,19 +87,35 @@ fragment SpecRunnerHeader on CurrentProject {
   }
   browsers {
     id
-    name
-    displayName
+    ...SpecRunnerHeader_Browser
   }
 }
 `
 
+gql`
+fragment SpecRunnerHeader_Browser on Browser {
+  id
+  name
+  displayName
+}
+`
+
+gql`
+mutation SpecRunnerHeader_SetBrowser($browserId: ID!, $specPath: String!) {
+  launchpadSetBrowser(id: $browserId)
+  launchOpenProject(specPath: $specPath)
+}
+`
+
+const setBrowser = useMutation(SpecRunnerHeader_SetBrowserDocument)
+
 const props = defineProps<{
   gql: SpecRunnerHeaderFragment
+  eventManager: EventManager
+  getAutIframe: () => AutIframe
 }>()
 
-const eventManager = getEventManager()
-const autIframe = getAutIframeModel()
-const getAutIframe = getAutIframeModel
+const autIframe = props.getAutIframe()
 
 const selectorPlaygroundStore = useSelectorPlaygroundStore()
 
@@ -113,20 +131,19 @@ const togglePlayground = () => {
   }
 }
 
-const browser = computed(() => {
-  if (!props.gql.currentBrowser) {
+const specStore = useSpecStore()
+
+const browsers = computed(() => props.gql.browsers?.slice().map((browser) => ({ ...browser })) ?? [])
+
+function changeBrowser (browser: SpecRunnerHeader_BrowserFragment) {
+  const activeSpec = specStore.activeSpec
+
+  if (props.gql.currentBrowser?.id === browser.id || !activeSpec) {
     return
   }
 
-  const dimensions = `${autStore.viewportDimensions.width}x${autStore.viewportDimensions.height}`
-
-  return {
-    id: props.gql.currentBrowser.id,
-    name: `${props.gql.currentBrowser.displayName} ${dimensions}`,
-  }
-})
-
-const browsers = computed(() => props.gql.browsers?.slice() ?? [])
+  setBrowser.executeMutation({ browserId: browser.id, specPath: activeSpec.absolute })
+}
 
 const autStore = useAutStore()
 

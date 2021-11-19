@@ -46,6 +46,14 @@ export class ProjectDataSource {
     return specs.filter((spec) => spec.specType === specType)
   }
 
+  async getCurrentSpecByAbsolute (projectRoot: string, absolute: string) {
+    // TODO: should cache current specs so we don't need to
+    // call findSpecs each time we ask for the current spec.
+    const specs = await this.findSpecs(projectRoot, null)
+
+    return specs.find((x) => x.absolute === absolute) ?? null
+  }
+
   async getCurrentSpecById (projectRoot: string, base64Id: string) {
     // TODO: should cache current specs so we don't need to
     // call findSpecs each time we ask for the current spec.

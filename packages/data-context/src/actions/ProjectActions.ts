@@ -204,7 +204,7 @@ export class ProjectActions {
     }
   }
 
-  async launchProject (testingType: TestingTypeEnum | null, options: LaunchOpts) {
+  async launchProject (testingType: TestingTypeEnum | null, options: LaunchOpts, specPath?: string) {
     if (!this.ctx.currentProject) {
       return null
     }
@@ -213,6 +213,12 @@ export class ProjectActions {
 
     if (!testingType) {
       return null
+    }
+
+    let activeSpec: FoundSpec | null = null
+
+    if (specPath) {
+      activeSpec = await this.ctx.project.getCurrentSpecByAbsolute(this.ctx.currentProject.projectRoot, specPath)
     }
 
     // Ensure that we have loaded browsers to choose from
@@ -226,7 +232,9 @@ export class ProjectActions {
       return null
     }
 
-    const spec: Cypress.Spec = {
+    // launchProject expects a spec when opening browser for url navigation.
+    // We give it an empty spec if none is passed so as to land on home page
+    const emptySpec: Cypress.Spec = {
       name: '',
       absolute: '',
       relative: '',
@@ -235,7 +243,7 @@ export class ProjectActions {
 
     this.ctx.appData.currentTestingType = testingType
 
-    return this.api.launchProject(browser, spec, options)
+    return this.api.launchProject(browser, activeSpec ?? emptySpec, options)
   }
 
   async launchProjectWithoutElectron () {
