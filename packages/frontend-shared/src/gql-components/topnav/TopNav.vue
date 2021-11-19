@@ -313,6 +313,8 @@ const runningOldVersion = computed(() => {
   return props.gql.versions ? props.gql.versions.current.released < props.gql.versions.latest.released : false
 })
 
+const showUpdateModal = ref(false)
+
 const docsMenuVariant: Ref<'main' | 'orchestration' | 'ci'> = ref('main')
 
 const promptsEl: Ref<HTMLElement | null> = ref(null)
