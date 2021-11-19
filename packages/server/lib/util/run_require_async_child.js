@@ -3,7 +3,7 @@ const stripAnsi = require('strip-ansi')
 const debug = require('debug')('cypress:server:require_async:child')
 const tsNodeUtil = require('./ts_node')
 const util = require('../plugins/util')
-const runSetupNodeEvents = require('../plugins/child/run_plugins')
+const RunPlugins = require('../plugins/child/run_plugins')
 
 let tsRegistered = false
 
@@ -47,6 +47,16 @@ function run (ipc, requiredFile, projectRoot) {
     return false
   })
 
+  const isValidSetupNodeEvents = (setupNodeEvents) => {
+    if (setupNodeEvents && typeof setupNodeEvents !== 'function') {
+      ipc.send('load:error:plugins', 'SETUP_NODE_EVENTS_IS_NOT_FUNCTION', requiredFile, setupNodeEvents)
+
+      return false
+    }
+
+    return true
+  }
+
   ipc.on('load', () => {
     try {
       debug('try loading', requiredFile)
@@ -57,11 +67,31 @@ function run (ipc, requiredFile, projectRoot) {
       ipc.send('loaded', result)
 
       ipc.on('plugins', (testingType) => {
+        const runPlugins = new RunPlugins(ipc, projectRoot, requiredFile)
+
         areSetupNodeEventsLoaded = true
         if (testingType === 'component') {
-          runSetupNodeEvents(ipc, result.component?.setupNodeEvents, projectRoot, requiredFile)
+          if (!isValidSetupNodeEvents(result.component?.setupNodeEvents)) {
+            return
+          }
+
+          runPlugins.runSetupNodeEvents((on, config) => {
+            if (result.component?.devServer) {
+              on('dev-server:start', (options) => result.component.devServer(options, result.component?.devServerConfig))
+            }
+
+            const setupNodeEvents = result.component?.setupNodeEvents ?? ((on, config) => {})
+
+            return setupNodeEvents(on, config)
+          })
         } else if (testingType === 'e2e') {
-          runSetupNodeEvents(ipc, result.e2e?.setupNodeEvents, projectRoot, requiredFile)
+          if (!isValidSetupNodeEvents(result.e2e?.setupNodeEvents)) {
+            return
+          }
+
+          const setupNodeEvents = result.e2e?.setupNodeEvents ?? ((on, config) => {})
+
+          runPlugins.runSetupNodeEvents(setupNodeEvents)
         } else {
           // Notify the plugins init that there's no plugins to resolve
           ipc.send('empty:plugins')

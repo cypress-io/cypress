@@ -1,19 +1,17 @@
 module.exports = {
   'componentFolder': 'src',
-  'e2e': {
-    setupNodeEvents (on, config) {
+  'component': {
+    devServer (cypressConfig, devServerConfig) {
       const { startDevServer } = require('@cypress/webpack-dev-server')
 
-      const webpackConfig = {
+      return startDevServer({ options: cypressConfig, ...devServerConfig })
+    },
+    devServerConfig: {
+      webpackConfig: {
         output: {
           publicPath: '/',
         },
-      }
-
-      require('@cypress/code-coverage/task')(on, config)
-      on('dev-server:start', (options) => startDevServer({ options, webpackConfig }))
-
-      return config
+      },
     },
   },
 }

@@ -576,6 +576,23 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         It exported:`
 
       return { msg, details: JSON.stringify(arg2) }
+    case 'SETUP_NODE_EVENTS_DO_NOT_SUPPORT_DEV_SERVER':
+      msg = stripIndent`\
+        The \`setupNodeEvents\` method do not support \`dev-server:start\`, use \`devServer\` instead:
+
+        \`\`\`
+        devServer (cypressConfig, devServerConfig) {
+          // configure plugins here
+        }
+        \`\`\`
+
+        Learn more: https://on.cypress.io/plugins-api
+
+        We loaded the \`setupNodeEvents\` from: \`${arg1}\`
+
+        It exported:`
+
+      return { msg, details: JSON.stringify(arg2) }
     case 'PLUGINS_FUNCTION_ERROR':
       msg = stripIndent`\
         The function exported by the plugins file threw an error.
