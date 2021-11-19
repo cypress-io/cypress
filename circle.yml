@@ -363,7 +363,7 @@ commands:
       - restore_cached_workspace
       - run:
           command: |
-            cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --parallel') || true
+            cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --parallel --') || true
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
@@ -390,7 +390,7 @@ commands:
       - restore_cached_workspace
       - run:
           command: |
-            cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec') || true
+            cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --') || true
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
@@ -1182,7 +1182,7 @@ jobs:
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
-            yarn percy exec --parallel \
+            yarn percy exec --parallel -- \
             yarn cypress:run --record --parallel --group 2x-desktop-gui
           working_directory: packages/desktop-gui
       - verify-mocha-results
@@ -1205,7 +1205,7 @@ jobs:
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
-            yarn percy exec --parallel \
+            yarn percy exec --parallel -- \
             yarn cypress:run:ct
           working_directory: packages/desktop-gui
       - verify-mocha-results
@@ -1227,7 +1227,7 @@ jobs:
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
-            yarn percy exec --parallel \
+            yarn percy exec --parallel -- \
             yarn cypress:run --record --parallel --group reporter
           working_directory: packages/reporter
       - verify-mocha-results
@@ -1367,7 +1367,7 @@ jobs:
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
-            yarn percy exec --parallel \
+            yarn percy exec --parallel -- \
             yarn test --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json
           working_directory: npm/design-system
       - store_test_results:
@@ -1445,7 +1445,6 @@ jobs:
             name: Build + Install
             command: |
               yarn workspace @cypress/schematic build:all
-              yarn policies set-version 1.19.0
               yarn add --dev @angular/cli
             working_directory: npm/cypress-schematic
         - run:
