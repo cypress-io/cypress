@@ -2,7 +2,6 @@ import _ from 'lodash'
 import fs from 'fs-extra'
 import path from 'path'
 // we wrap glob to handle EMFILE error
-import Promise from 'bluebird'
 import la from 'lazy-ass'
 import check from 'check-more-types'
 import execa from 'execa'
