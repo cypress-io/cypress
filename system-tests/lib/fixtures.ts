@@ -131,6 +131,7 @@ function getYarnCommand (opts: {
 
   // in CircleCI, this offline cache can be used
   if (opts.isCI) cmd += ` --cache-folder=~/.yarn-${process.platform} `
+  else cmd += ` --cache-folder=${_path.join(os.tmpdir(), 'cy-system-tests-yarn-cache', String(Date.now()))}`
 
   return cmd
 }
