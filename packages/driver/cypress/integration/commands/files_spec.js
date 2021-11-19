@@ -11,7 +11,7 @@ const okResponse = {
 describe('src/cy/commands/files', () => {
   beforeEach(() => {
     // call through normally on everything
-    cy.stub(Cypress, 'backend').callThrough()
+    cy.stub(Cypress, 'backend').callThrough().log(false)
   })
 
   describe('#readFile', () => {
@@ -22,7 +22,7 @@ describe('src/cy/commands/files', () => {
         expect(Cypress.backend).to.be.calledWith(
           'read:file',
           'foo.json',
-          { encoding: 'utf8' },
+          { encoding: 'utf8', timeout: Cypress.config('defaultCommandTimeout') },
         )
       })
     })
@@ -34,7 +34,19 @@ describe('src/cy/commands/files', () => {
         expect(Cypress.backend).to.be.calledWith(
           'read:file',
           'foo.json',
-          { encoding: 'ascii' },
+          { encoding: 'ascii', timeout: Cypress.config('defaultCommandTimeout') },
+        )
+      })
+    })
+
+    it('can take a timeout option', () => {
+      Cypress.backend.resolves(okResponse)
+
+      cy.readFile('foo.json', { timeout: 12345 }).then(() => {
+        expect(Cypress.backend).to.be.calledWith(
+          'read:file',
+          'foo.json',
+          { encoding: 'utf8', timeout: 12345 },
         )
       })
     })
@@ -50,7 +62,7 @@ describe('src/cy/commands/files', () => {
         expect(Cypress.backend).to.be.calledWith(
           'read:file',
           'foo.json',
-          { encoding: null },
+          { encoding: null, timeout: Cypress.config('defaultCommandTimeout') },
         )
       }).should('eql', Buffer.from('\n'))
     })
@@ -322,6 +334,57 @@ describe('src/cy/commands/files', () => {
 
         cy.readFile('foo.json').should('equal', 'contents')
       })
+
+      it('throws when the read timeout expires', function (done) {
+        const err = new Error('TimeoutError: The Promise timed out')
+
+        err.name = 'TimeoutError'
+
+        Cypress.backend.rejects(err)
+
+        cy.on('fail', (err) => {
+          const { lastLog } = this
+
+          assertLogLength(this.logs, 1)
+          expect(lastLog.get('error')).to.eq(err)
+          expect(lastLog.get('state')).to.eq('failed')
+          expect(err.message).to.eq(stripIndent`\
+            \`cy.readFile("foo")\` timed out after waiting \`50ms\`.
+          `)
+
+          expect(err.docsUrl).to.eq('https://on.cypress.io/readfile')
+
+          done()
+        })
+
+        cy.readFile('foo')
+      })
+
+      it('throws when the server read aborts', function (done) {
+        const err = new Error('AbortError: The readFile operation was aborted on the server')
+
+        err.name = 'AbortError'
+        err.aborted = true
+
+        Cypress.backend.rejects(err)
+
+        cy.on('fail', (err) => {
+          const { lastLog } = this
+
+          assertLogLength(this.logs, 1)
+          expect(lastLog.get('error')).to.eq(err)
+          expect(lastLog.get('state')).to.eq('failed')
+          expect(err.message).to.eq(stripIndent`\
+            \`cy.readFile("foo")\` timed out after waiting \`50ms\`.
+          `)
+
+          expect(err.docsUrl).to.eq('https://on.cypress.io/readfile')
+
+          done()
+        })
+
+        cy.readFile('foo')
+      })
     })
   })
 
@@ -337,7 +400,7 @@ describe('src/cy/commands/files', () => {
           {
             encoding: 'utf8',
             flag: 'w',
-            timeout: 4000,
+            timeout: Cypress.config('defaultCommandTimeout'),
           },
         )
       })
@@ -354,7 +417,7 @@ describe('src/cy/commands/files', () => {
           {
             encoding: 'ascii',
             flag: 'w',
-            timeout: 4000,
+            timeout: Cypress.config('defaultCommandTimeout'),
           },
         )
       })
@@ -372,7 +435,7 @@ describe('src/cy/commands/files', () => {
           {
             encoding: null,
             flag: 'w',
-            timeout: 4000,
+            timeout: Cypress.config('defaultCommandTimeout'),
           },
         )
       })
@@ -389,7 +452,7 @@ describe('src/cy/commands/files', () => {
           {
             encoding: 'ascii',
             flag: 'w',
-            timeout: 4000,
+            timeout: Cypress.config('defaultCommandTimeout'),
           },
         )
       })
@@ -458,7 +521,7 @@ describe('src/cy/commands/files', () => {
             {
               encoding: 'utf8',
               flag: 'a+',
-              timeout: 4000,
+              timeout: Cypress.config('defaultCommandTimeout'),
             },
           )
         })
@@ -625,7 +688,7 @@ describe('src/cy/commands/files', () => {
         cy.writeFile('foo.txt', 'contents')
       })
 
-      it('throws when the driver timeout expires', function (done) {
+      it('throws when the write timeout expires', function (done) {
         const err = new Error('TimeoutError')
 
         err.name = 'TimeoutError'
@@ -677,7 +740,9 @@ describe('src/cy/commands/files', () => {
     })
   })
 
-  describe('#writeFile-error', () => {
+  describe('#writeFile-error', {
+    defaultCommandTimeout: 5000,
+  }, () => {
     const bigString = JSON.stringify(Cypress._.times((10 ** 6), () => 'hehehehe'), null, 2)
     const tooBigString = JSON.stringify(Cypress._.times(15000000, '😈'), null, 2) // 72MB
     // afterEach(() => {
@@ -704,24 +769,16 @@ describe('src/cy/commands/files', () => {
     //   })
     // })
 
-    // afterEach(() => {
-    //   cy.writeFile('./fixtures/my-long-file.txt', bigString, { timeout: 1 })
-    // })
+    afterEach(() => {
+      cy.writeFile('./fixtures/my-long-file.txt', bigString, { timeout: 1000 })
+    })
 
-    // it('writes until timeout', () => {
-    //   cy.visit('/fixtures/dom.html')
+    it('writes until timeout', () => {
+      cy.visit('/fixtures/dom.html')
 
-    //   cy.get('body').then((bodyElement) => {
-    //     expect(true).to.equal(true)
-    //   })
-
-    //   cy.get('body').then((bodyElement) => {
-    //     expect(true).to.equal(true)
-    //   })
-
-    //   cy.get('body').then((bodyElement) => {
-    //     expect(true).to.equal(true)
-    //   })
-    // })
+      cy.get('body').then((bodyElement) => {
+        expect(true).to.equal(true)
+      })
+    })
   })
 })

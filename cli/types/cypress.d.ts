@@ -2228,7 +2228,7 @@ declare namespace Cypress {
     })
     ```
      */
-    writeFile<C extends FileContents>(filePath: string, contents: C, options?: Partial<WriteFileOptions>): Chainable<C>
+    writeFile<C extends FileContents>(filePath: string, contents: C, options?: Partial<WriteFileOptions & Timeoutable>): Chainable<C>
     /**
      * Write to a file with the specified encoding and contents.
      *
@@ -3249,7 +3249,6 @@ declare namespace Cypress {
   interface WriteFileOptions extends Loggable {
     flag: string
     encoding: Encodings
-    timeout: number
   }
 
   // Kind of onerous, but has a nice auto-complete.
