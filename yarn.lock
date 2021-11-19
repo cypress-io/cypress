@@ -2495,10 +2495,10 @@
   resolved "https://registry.yarnpkg.com/@cypress/sinon-chai/-/sinon-chai-2.9.1.tgz#1705c0341bc286740979b1b1cac89b7f5d34d6bc"
   integrity sha512-qwFQ1urghF3mv7CFSDw/LEqIQP12qqKLuW7p6mXR92HP5fPNlgNiZVITWVsupDg7JpOEKfeRTVearo9mkk/5eg==
 
-"@cypress/unique-selector@0.4.2":
-  version "0.4.2"
-  resolved "https://registry.yarnpkg.com/@cypress/unique-selector/-/unique-selector-0.4.2.tgz#ac4f12d2a0306e9d8ac1d49a12ad40dfbf2f1aeb"
-  integrity sha512-eTzoodaUESR8lAJkgvTVnF9bs7M1P4aiDsH4jbywcszb3IjJRLLvrMRZp7VDWID33to79EiqyfOudOzXXpuJjQ==
+"@cypress/unique-selector@0.4.4":
+  version "0.4.4"
+  resolved "https://registry.yarnpkg.com/@cypress/unique-selector/-/unique-selector-0.4.4.tgz#5e14be46ba5d7a4dad8eda07c0fd431a99227d83"
+  integrity sha512-hAvSShXUzIRpYDJNIC/OoQA/8stGcYGG2surkY/pMVElqWmAcfccjOWYbuii/ktP8zqUcPzxWKWCuFauJYWEfQ==
   dependencies:
     css.escape "^1.5.1"
 
