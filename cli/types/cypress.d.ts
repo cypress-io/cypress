@@ -7,12 +7,28 @@ declare namespace Cypress {
   type HttpMethod = string
   type RequestBody = string | object
   type ViewportOrientation = 'portrait' | 'landscape'
-  type PrevSubject = 'optional' | 'element' | 'document' | 'window'
+  type PrevSubject = keyof PrevSubjectMap
   type TestingType = 'e2e' | 'component'
   type PluginConfig = (on: PluginEvents, config: PluginConfigOptions) => void | ConfigOptions | Promise<ConfigOptions>
 
+  interface PrevSubjectMap {
+    optional: unknown
+    element: JQuery
+    document: JQuery<HTMLDocument>
+    window: Window
+  }
+
   interface CommandOptions {
     prevSubject: boolean | PrevSubject | PrevSubject[]
+  }
+  interface CommandFn<T extends keyof ChainableMethods> {
+    (...args: Parameters<ChainableMethods[T]>): ReturnType<ChainableMethods[T]> | void
+  }
+  interface CommandFnWithSubject<T extends keyof ChainableMethods, S = JQuery> {
+    (prevSubject: S, ...args: Parameters<ChainableMethods[T]>): ReturnType<ChainableMethods[T]> | void
+  }
+  interface CommandFnWithOriginalFn<T extends keyof Chainable> {
+    (originalFn: ChainableMethods[T], ...args: Parameters<ChainableMethods[T]>): ReturnType<ChainableMethods[T]> | void
   }
   interface ObjectLike {
     [key: string]: any
@@ -420,9 +436,11 @@ declare namespace Cypress {
      * @see https://on.cypress.io/api/commands
      */
     Commands: {
-      add<T extends keyof Chainable>(name: T, fn: Chainable[T]): void
-      add<T extends keyof Chainable>(name: T, options: CommandOptions, fn: Chainable[T]): void
-      overwrite<T extends keyof Chainable>(name: T, fn: Chainable[T]): void
+      add<T extends keyof Chainable>(name: T, fn: CommandFn<T>): void
+      add<T extends keyof Chainable, S extends PrevSubject>(name: T, options: { prevSubject: S | Array<Exclude<S, 'optional'>> }, fn: CommandFnWithSubject<T, PrevSubjectMap[S]>): void
+      add<T extends keyof Chainable, S extends PrevSubject>(name: T, options: { prevSubject: 'optional' | ['optional', ...S[]] }, fn: CommandFnWithSubject<T, PrevSubjectMap[S] | void>): void
+      add<T extends keyof Chainable, S>(name: T, options: CommandOptions, fn: CommandFnWithSubject<T, S>): void
+      overwrite<T extends keyof Chainable>(name: T, fn: CommandFnWithOriginalFn<T>): void
     }
 
     /**
@@ -2253,6 +2271,12 @@ declare namespace Cypress {
      *    cy.$$('p')
      */
     $$<TElement extends Element = HTMLElement>(selector: JQuery.Selector, context?: Element | Document | JQuery): JQuery<TElement>
+  }
+
+  type ChainableMethods<Subject = any> = {
+    [P in keyof Chainable<Subject>]: Chainable<Subject>[P] extends ((...args: any[]) => any)
+        ? Chainable<Subject>[P]
+        : never
   }
 
   interface SinonSpyAgent<A extends sinon.SinonSpy> {

@@ -74,20 +74,53 @@ namespace CypressCommandsTests {
     arg
     return
   })
-  Cypress.Commands.add('newCommand', { prevSubject: true }, (arg) => {
+  Cypress.Commands.add('newCommand', (arg) => {
     // $ExpectType string
     arg
+  })
+  Cypress.Commands.add('newCommand', { prevSubject: true }, (subject, arg) => {
+    subject // $ExpectType unknown
+    arg // $ExpectType string
     return
+  })
+  Cypress.Commands.add('newCommand', { prevSubject: 'optional' }, (subject, arg) => {
+    subject // $ExpectType unknown
+    arg // $ExpectType string
+    return
+  })
+  Cypress.Commands.add('newCommand', { prevSubject: 'optional' }, (subject, arg) => {
+    subject // $ExpectType unknown
+    arg // $ExpectType string
+  })
+  Cypress.Commands.add('newCommand', { prevSubject: 'document' }, (subject, arg) => {
+    subject // $ExpectType JQuery<HTMLDocument>
+    arg // $ExpectType string
+  })
+  Cypress.Commands.add('newCommand', { prevSubject: 'window' }, (subject, arg) => {
+    subject // $ExpectType Window
+    arg // $ExpectType string
+  })
+  Cypress.Commands.add('newCommand', { prevSubject: 'element' }, (subject, arg) => {
+    subject // $ExpectType JQuery<HTMLElement>
+    arg // $ExpectType string
+  })
+  Cypress.Commands.add('newCommand', { prevSubject: ['element', 'document', 'window'] }, (subject, arg) => {
+    subject // $ExpectType Window | JQuery<HTMLElement> | JQuery<HTMLDocument>
+    arg // $ExpectType string
+  })
+  Cypress.Commands.add('newCommand', { prevSubject: ['optional', 'window', 'document', 'element'] }, (subject, arg) => {
+    subject // $ExpectType void | Window | JQuery<HTMLElement> | JQuery<HTMLDocument>
+    arg // $ExpectType string
   })
   Cypress.Commands.add('newCommand', (arg) => {
     // $ExpectType string
     arg
     return new Promise((resolve) => {})
   })
-  Cypress.Commands.overwrite('newCommand', (arg) => {
-    // $ExpectType string
-    arg
-    return
+  Cypress.Commands.overwrite('newCommand', (originalFn, arg) => {
+    arg // $ExpectType string
+    originalFn // $ExpectedType Chainable['newCommand']
+    originalFn(arg) // $ExpectType void
   })
 }
 
