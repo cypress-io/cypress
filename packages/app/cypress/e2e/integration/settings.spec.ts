@@ -58,10 +58,12 @@ describe('Settings', { viewportWidth: 600 }, () => {
 
     cy.get('[href="#/settings"]').click()
     cy.contains('Device Settings').click()
-    cy.findByPlaceholderText('Custom path...').clear().type('/usr/local/bin/vim')
 
-    cy.intercept('POST', 'mutation-SetPreferredEditorBinary').as('SetPreferred')
-    cy.get('[data-cy="use-custom-editor"]').click()
+    cy.intercept('POST', 'mutation-ExternalEditorSettings_SetPreferredEditorBinary').as('SetPreferred')
+    // doing invoke instead of `type` since `type` enters keys on-by-one, triggering a mutation
+    // for each keystroke, making it hard to intercept **only** the final request, which I want to
+    // assert contains `/usr/local/bin/vim'
+    cy.findByPlaceholderText('Custom path...').clear().invoke('val', '/usr/local/bin/vim').trigger('input').trigger('change')
     cy.wait('@SetPreferred').its('request.body.variables.value').should('include', '/usr/local/bin/vim')
 
     cy.contains('Choose your editor...').click()

@@ -3,6 +3,7 @@
     :model-value="props.open"
     variant="bare"
     help-link=""
+    data-cy="choose-editor-modal"
     @update:model-value="close"
   >
     <template #title>

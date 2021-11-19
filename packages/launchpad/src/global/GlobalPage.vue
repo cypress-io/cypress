@@ -37,10 +37,6 @@
     @close="isChooseEditorOpen = false"
     @selected="editorChosen"
   />
-
-  <button @click="isChooseEditorOpen = !isChooseEditorOpen">
-    toggle
-  </button>
 </template>
 
 <script setup lang="ts">
@@ -51,7 +47,6 @@ import GlobalProjectCard from './GlobalProjectCard.vue'
 import GlobalPageHeader from './GlobalPageHeader.vue'
 import GlobalEmpty from './GlobalEmpty.vue'
 import { GlobalPageFragment, GlobalPage_AddProjectDocument, GlobalPage_OpenDirectoryInIdeDocument, GlobalPage_RemoveProjectDocument, GlobalProjectCardFragment, GlobalPage_OpenInFinderDocument } from '../generated/graphql'
-import Button from '@packages/frontend-shared/src/components/Button.vue'
 import ChooseExternalEditorModal from '@packages/frontend-shared/src/gql-components/ChooseExternalEditorModal.vue'
 
 gql`
@@ -89,10 +84,6 @@ const openInFinder = useMutation(GlobalPage_OpenInFinderDocument)
 
 function handleAddProject (path: string) {
   addProject.executeMutation({ path })
-}
-
-function showInIde () {
-  isChooseEditorOpen.value = false
 }
 
 function handleOpenInFinder (path: string) {
