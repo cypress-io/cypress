@@ -349,14 +349,14 @@ export const mutation = mutationType({
       },
     })
 
-    t.field('openInIDE', {
+    t.field('openDirectoryInIDE', {
       description: 'Open a path in preferred IDE',
       type: 'Boolean',
       args: {
         path: nonNull(stringArg()),
       },
       resolve: (_, args, ctx) => {
-        ctx.actions.project.openInIDE(args.path)
+        ctx.actions.project.openDirectoryInIDE(args.path)
 
         return true
       },

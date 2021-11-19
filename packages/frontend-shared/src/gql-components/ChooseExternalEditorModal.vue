@@ -29,7 +29,7 @@
           :disabled="!preferredEditor?.length"
           @click="selectEditor"
         >
-          Done
+          {{ t("globalPage.done") }}
         </Button>
       </div>
     </template>

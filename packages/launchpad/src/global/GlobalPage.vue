@@ -50,7 +50,7 @@ import { gql, useMutation } from '@urql/vue'
 import GlobalProjectCard from './GlobalProjectCard.vue'
 import GlobalPageHeader from './GlobalPageHeader.vue'
 import GlobalEmpty from './GlobalEmpty.vue'
-import { GlobalPageFragment, GlobalPage_AddProjectDocument, GlobalPage_OpenInIdeDocument, GlobalPage_RemoveProjectDocument, GlobalProjectCardFragment, GlobalPage_OpenInFinderDocument } from '../generated/graphql'
+import { GlobalPageFragment, GlobalPage_AddProjectDocument, GlobalPage_OpenDirectoryInIdeDocument, GlobalPage_RemoveProjectDocument, GlobalProjectCardFragment, GlobalPage_OpenInFinderDocument } from '../generated/graphql'
 import Button from '@packages/frontend-shared/src/components/Button.vue'
 import ChooseExternalEditorModal from '@packages/frontend-shared/src/gql-components/ChooseExternalEditorModal.vue'
 
@@ -74,8 +74,8 @@ mutation GlobalPage_RemoveProject($path: String!) {
   removeProject(path: $path) 
 }
 
-mutation GlobalPage_OpenInIDE ($path: String!) {
-  openInIDE(path: $path)
+mutation GlobalPage_OpenDirectoryInIDE ($path: String!) {
+  openDirectoryInIDE(path: $path)
 }
 
 mutation GlobalPage_OpenInFinder ($path: String!) {
@@ -84,7 +84,7 @@ mutation GlobalPage_OpenInFinder ($path: String!) {
 `
 
 const addProject = useMutation(GlobalPage_AddProjectDocument)
-const openInIDE = useMutation(GlobalPage_OpenInIdeDocument)
+const openDirectoryInIDE = useMutation(GlobalPage_OpenDirectoryInIdeDocument)
 const openInFinder = useMutation(GlobalPage_OpenInFinderDocument)
 
 function handleAddProject (path: string) {
@@ -103,7 +103,7 @@ let projectPathToOpen: string
 
 function editorChosen () {
   isChooseEditorOpen.value = false
-  openInIDE.executeMutation({ path: projectPathToOpen })
+  openDirectoryInIDE.executeMutation({ path: projectPathToOpen })
 }
 
 function handleOpenInIDE (path: string) {
@@ -111,7 +111,7 @@ function handleOpenInIDE (path: string) {
     projectPathToOpen = path
     isChooseEditorOpen.value = true
   } else {
-    openInIDE.executeMutation({ path })
+    openDirectoryInIDE.executeMutation({ path })
   }
 }
 

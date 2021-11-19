@@ -497,6 +497,9 @@ type Mutation {
 
   """Log out of Cypress Cloud"""
   logout: Boolean
+
+  """Open a path in preferred IDE"""
+  openDirectoryInIDE(path: String!): Boolean
   openExternal(url: String!): Boolean
 
   """Open a file on specified line and column in preferred IDE"""
@@ -504,9 +507,6 @@ type Mutation {
 
   """Open a path in the local file explorer"""
   openInFinder(path: String!): Boolean
-
-  """Open a path in preferred IDE"""
-  openInIDE(path: String!): Boolean
 
   """show the launchpad windows"""
   reconfigureProject: Boolean!

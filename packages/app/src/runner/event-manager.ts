@@ -190,10 +190,6 @@ export class EventManager {
 
     this.reporterBus.on('focus:tests', this.focusTests)
 
-    this.reporterBus.on('get:user:editor', (cb) => {
-      // ws.emit('get:user:editor', cb)
-    })
-
     this.reporterBus.on('set:user:editor', (editor) => {
       ws.emit('set:user:editor', editor)
     })

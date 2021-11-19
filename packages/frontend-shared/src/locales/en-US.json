@@ -222,6 +222,7 @@
       "dropText": "Drag your project directory here or {0}",
       "browseManually": "browse manually."
     },
+    "done": "Done",
     "selectPreferredEditor": "Select Preferred Editor",
     "recentProjectsHeader": "Recent Projects",
     "searchPlaceholder": "Search projects",

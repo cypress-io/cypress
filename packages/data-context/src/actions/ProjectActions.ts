@@ -57,7 +57,7 @@ export class ProjectActions {
     this.ctx.coreData.app.projects = projects
   }
 
-  openInIDE (projectPath: string) {
+  openDirectoryInIDE (projectPath: string) {
     this.ctx.debug(`opening ${projectPath} in ${this.ctx.coreData.localSettings.preferences.preferredEditorBinary}`)
 
     if (!this.ctx.coreData.localSettings.preferences.preferredEditorBinary) {

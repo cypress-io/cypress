@@ -55,7 +55,6 @@
         input-classes="text-sm"
         placeholder="Custom path..."
       >
-        <!-- @input="setCustomBinary" -->
         <template #prefix>
           <Icon
             :icon="IconTerminal"
@@ -81,11 +80,8 @@ import Sublime from '~icons/logos/sublimetext-icon'
 import Emacs from '~icons/logos/emacs'
 import IconTerminal from '~icons/mdi/terminal'
 import { gql } from '@urql/core'
-import { SetPreferredEditorBinaryDocument, ChooseExternalEditorFragment } from '../generated/graphql'
-import { useMutation } from '@urql/vue'
-import { debounce } from 'lodash'
+import type { ChooseExternalEditorFragment } from '../generated/graphql'
 
-// @ts-ignore (lachlan): add all icons for all editors such as RubyMine, etc
 const icons: Record<string, FunctionalComponent<SVGAttributes, {}>> = {
   'code': VSCode,
   'webstorm': Webstorm,
@@ -121,25 +117,13 @@ fragment ChooseExternalEditor on Query {
   }
 }`
 
-const setPreferredEditor = useMutation(SetPreferredEditorBinaryDocument)
-
 const props = defineProps<{
   gql: ChooseExternalEditorFragment
 }>()
 
-
 const { t } = useI18n()
 
 type Editor = ChooseExternalEditorFragment['localSettings']['availableEditors'][number]
-
-const preferredEditorBinary = ref(props.gql.localSettings.preferences.preferredEditorBinary ?? '')
-
-watch(
-  () => props.gql.localSettings.preferences.preferredEditorBinary,
-  (perferred) => {
-  }
-)
-
 
 type EditorType = 'found' | 'custom'
 
@@ -147,30 +131,6 @@ const customBinary = ref<string>('')
 const selectedWellKnownEditor = ref<Editor>()
 const editorToUse = ref<EditorType>('found')
 
-// watch(
-//   () => props.gql.localSettings.preferences.preferredEditorBinary,
-//   (perferredEditorBinary) => {
-//     const isWellKnownEditor = props.gql.localSettings.availableEditors.find((x) => {
-//       return x.binary === perferredEditorBinary
-//     })
-
-//     editorToUse.value = isWellKnownEditor ? 'found' : 'custom'
-
-//     if (isWellKnownEditor) {
-//       selectedWellKnownEditor.value = isWellKnownEditor
-//     }
-
-//     if (editorToUse.value === 'custom' && perferredEditorBinary) {
-//       customBinary.value = perferredEditorBinary
-//     }
-//   }, { immediate: true },
-// )
-
-// const setCustomBinary = debounce(() => {
-//   if (editorToUse.value === 'custom') {
-//     setPreferredEditor.executeMutation({ value: customBinary.value })
-//   }
-// }, 250)
 const emit = defineEmits<{
   (e: 'choseEditor', binary: string): void
 }>()
@@ -183,14 +143,7 @@ const saveEditor = () => {
   if (editorToUse.value === 'custom' && customBinary.value) {
     emit('choseEditor', customBinary.value)
   }
-    // setPreferredEditor.executeMutation({ value: selectedWellKnownEditor.value.binary })
-  // }
-
-  // if (editorToUse.value === 'custom' && customBinary.value) {
-  //   setPreferredEditor.executeMutation({ value: customBinary.value })
-  // }
 }
-
 
 watch(customBinary, (val) => {
   if (editorToUse.value !== 'custom') {
