@@ -1,5 +1,8 @@
 <template>
-  <SpecRunnerContainer v-if="queryResult" :gql="queryResult" />
+  <SpecRunnerContainer
+    v-if="queryResult"
+    :gql="queryResult"
+  />
 </template>
 
 <script lang="ts" setup>

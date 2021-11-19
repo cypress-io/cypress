@@ -17,13 +17,13 @@ export const useRunnerUiStore = defineStore({
 
   state (): RunnerUiStore {
     return {
-      showChooseExternalEditorModal: false
+      showChooseExternalEditorModal: false,
     }
   },
 
   actions: {
     setShowChooseExternalEditorModal (value: boolean) {
       this.showChooseExternalEditorModal = value
-    }
+    },
   },
 })

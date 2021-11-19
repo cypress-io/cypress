@@ -5,7 +5,6 @@ import Tooltip from '@cypress/react-tooltip'
 import type { FileDetails } from '@packages/types'
 import events from './events'
 
-
 import TextIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/document-text_x16.svg'
 
 interface Props {
@@ -15,7 +14,6 @@ interface Props {
 }
 
 const OpenFileInIDE = observer((props: Props) => {
-
   return (
     <Tooltip title={'Open in IDE'} className='cy-tooltip'>
       <span onClick={() => events.emit('open:file', props.fileDetails)}>
