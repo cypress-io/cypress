@@ -14,32 +14,22 @@
       :is="IconFolder"
       class="icon-dark-gray-50 icon-light-gray-200 document-icon"
     />
-
-    <div>
-      <template
-        v-for="(directory, idx) in directories || []"
-        :key="directory"
-      >
-        <span class="font-medium text-gray-600 px-4px">
-          {{ directory }}
-        </span>
-        <span
-          v-if="idx !== directories.length - 1"
-          class="text-gray-700 px-2px"
-        >
-          /
-        </span>
-      </template>
-    </div>
+    <HighlightedText
+      :text="props.name"
+      :indexes="props.indexes"
+      class="text-gray-600 font-medium"
+      highlight-classes="text-gray-1000"
+    />
   </div>
 </template>
 
 <script lang="ts" setup>
 import IconFolder from '~icons/cy/folder_x16.svg'
+import HighlightedText from './HighlightedText.vue'
 
-defineProps<{
-  directories: string[]
-  expanded: boolean
-  depth: number
-}>()
+const props = withDefaults(defineProps<{ name: string, expanded: boolean, indexes: number[], depth: number }>(), {
+  name: '',
+  expanded: false,
+  indexes: () => [],
+})
 </script>

@@ -13,7 +13,8 @@ import type { LaunchArgs, PlatformName } from '@packages/types'
 import EventEmitter from 'events'
 
 const isDev = () => {
-  return process.env['CYPRESS_INTERNAL_ENV'] === 'development'
+  // TODO: (tim) ensure the process.env.LAUNCHPAD gets removed before release
+  return Boolean(process.env['CYPRESS_INTERNAL_ENV'] === 'development' || process.env.LAUNCHPAD)
 }
 
 export = {

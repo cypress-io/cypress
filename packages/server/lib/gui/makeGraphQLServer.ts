@@ -12,6 +12,15 @@ export async function makeGraphQLServer (ctx: DataContext) {
 
   app.use(cors())
 
+  app.get('/__cypress/launchpad-preload', (req, res) => {
+    ctx.html.fetchLaunchpadInitialData().then((data) => {
+      res.json(data)
+    }).catch((e) => {
+      ctx.logError(e)
+      res.json({})
+    })
+  })
+
   // TODO: Figure out how we want to cleanup & juggle the config, so
   // it's not jammed into the projects
   addGraphQLHTTP(app, ctx)

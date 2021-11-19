@@ -210,9 +210,7 @@ import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLo
 import { gql, useMutation } from '@urql/vue'
 import { TopNavFragment, TopNav_LaunchOpenProjectDocument, TopNav_SetBrowserDocument } from '../../generated/graphql'
 import { useI18n } from '@cy/i18n'
-import { computed, ref } from 'vue'
-// eslint-disable-next-line no-duplicate-imports
-import type { Ref } from 'vue'
+import { computed, ref, Ref } from 'vue'
 const { t } = useI18n()
 import { onClickOutside, onKeyStroke, useTimeAgo } from '@vueuse/core'
 import DocsMenuContent from './DocsMenuContent.vue'
@@ -285,7 +283,35 @@ const props = defineProps<{
   showBrowsers?: boolean
 }>()
 
-const showUpdateModal = ref(false)
+const versions = (() => {
+  if (!props.gql.versions) {
+    return ref(null)
+  }
+
+  const currentReleased = useTimeAgo(new Date(props.gql.versions.current.released))
+  const latestReleased = useTimeAgo(new Date(props.gql.versions.latest.released))
+
+  return computed(() => {
+    if (!props.gql.versions) {
+      return null
+    }
+
+    return {
+      current: {
+        released: currentReleased.value,
+        version: props.gql.versions.current.version,
+      },
+      latest: {
+        released: latestReleased.value,
+        version: props.gql.versions.latest.version,
+      },
+    }
+  })
+})()
+
+const runningOldVersion = computed(() => {
+  return props.gql.versions ? props.gql.versions.current.released < props.gql.versions.latest.released : false
+})
 
 const docsMenuVariant: Ref<'main' | 'orchestration' | 'ci'> = ref('main')
 
@@ -293,23 +319,6 @@ const promptsEl: Ref<HTMLElement | null> = ref(null)
 
 // reset docs menu if click or keyboard navigation happens outside
 // so it doesn't reopen on the one of the prompts
-
-const versions = computed(() => {
-  return {
-    current: {
-      released: useTimeAgo(new Date(props.gql.versions.current.released)).value,
-      version: props.gql.versions.current.version,
-    },
-    latest: {
-      released: useTimeAgo(new Date(props.gql.versions.latest.released)).value,
-      version: props.gql.versions.latest.version,
-    },
-  }
-})
-
-const runningOldVersion = computed(() => {
-  return props.gql.versions.current.released < props.gql.versions.latest.released
-})
 
 onClickOutside(promptsEl, () => {
   setTimeout(() => {

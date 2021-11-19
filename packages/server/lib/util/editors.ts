@@ -2,64 +2,46 @@ import _ from 'lodash'
 import Bluebird from 'bluebird'
 import debugModule from 'debug'
 
-import { getEnvEditors, Editor } from './env-editors'
+import type { Editor, EditorsResult } from '@packages/types'
+import { getEnvEditors } from './env-editors'
 import shell from './shell'
 import savedState from '../saved_state'
 
+export const osFileSystemExplorer = {
+  darwin: 'Finder',
+  win32: 'File Explorer',
+  linux: 'File System',
+} as const
+
 const debug = debugModule('cypress:server:editors')
 
-interface CyEditor {
-  id: string
-  name: string
-  openerId: string
-  isOther: boolean
-}
-
-interface EditorsResult {
-  preferredOpener?: CyEditor
-  availableEditors?: CyEditor[]
-}
-
-const createEditor = (editor: Editor): CyEditor => {
+const createEditor = (editor: Editor): Editor => {
   return {
     id: editor.id,
     name: editor.name,
-    openerId: editor.binary,
-    isOther: false,
+    binary: editor.binary,
   }
 }
 
-const getOtherEditor = (preferredOpener?: CyEditor) => {
+const getOtherEditor = (preferredOpener?: Editor): Editor | undefined => {
   // if preferred editor is the 'other' option, use it since it has the
-  // path (openerId) saved with it
-  if (preferredOpener && preferredOpener.isOther) {
+  // path (binary) saved with it
+  if (preferredOpener && preferredOpener.id === 'other') {
     return preferredOpener
   }
 
-  return {
-    id: 'other',
-    name: 'Other',
-    openerId: '',
-    isOther: true,
-  }
+  return
 }
 
-const computerOpener = (): CyEditor => {
-  const names = {
-    darwin: 'Finder',
-    win32: 'File Explorer',
-    linux: 'File System',
-  }
-
+const computerOpener = (): Editor => {
   return {
     id: 'computer',
-    name: names[process.platform] || names.linux,
-    openerId: 'computer',
-    isOther: false,
+    name: osFileSystemExplorer[process.platform] || osFileSystemExplorer.linux,
+    binary: 'computer',
   }
 }
 
-const getUserEditors = (): Bluebird<CyEditor[]> => {
+const getUserEditors = async (): Promise<Editor[]> => {
   return Bluebird.filter(getEnvEditors(), (editor) => {
     debug('check if user has editor %s with binary %s', editor.name, editor.binary)
 
@@ -72,18 +54,22 @@ const getUserEditors = (): Bluebird<CyEditor[]> => {
     .then((state) => {
       return state.get('preferredOpener')
     })
-    .then((preferredOpener?: CyEditor) => {
+    .then((preferredOpener?: Editor) => {
       debug('saved preferred editor: %o', preferredOpener)
 
       const cyEditors = _.map(editors, createEditor)
+      const preferred = getOtherEditor(preferredOpener)
 
-      // @ts-ignore
-      return [computerOpener()].concat(cyEditors).concat([getOtherEditor(preferredOpener)])
+      if (!preferred) {
+        return [computerOpener()].concat(cyEditors)
+      }
+
+      return [computerOpener()].concat(cyEditors, preferred)
     })
   })
 }
 
-export const getUserEditor = (alwaysIncludeEditors = false): Bluebird<EditorsResult> => {
+export const getUserEditor = async (alwaysIncludeEditors = false): Promise<EditorsResult> => {
   debug('get user editor')
 
   return savedState.create()
@@ -106,11 +92,10 @@ export const getUserEditor = (alwaysIncludeEditors = false): Bluebird<EditorsRes
   })
 }
 
-export const setUserEditor = (editor) => {
+export const setUserEditor = async (editor: Editor) => {
   debug('set user editor: %o', editor)
 
-  return savedState.create()
-  .then((state) => {
-    state.set('preferredOpener', editor)
-  })
+  const state = await savedState.create()
+
+  state.set('preferredOpener', editor)
 }

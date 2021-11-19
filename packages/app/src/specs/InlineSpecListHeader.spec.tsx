@@ -1,24 +1,17 @@
 import InlineSpecListHeader from './InlineSpecListHeader.vue'
-import type { SpecViewType } from './SpecsList.vue'
 import { ref } from 'vue'
 
 describe('InlineSpecListHeader', () => {
   beforeEach(() => {
     const search = ref('')
-    const tab = ref<SpecViewType>('flat')
     const onAddSpec = cy.spy().as('new-spec')
 
     cy.wrap(search).as('search')
-    cy.wrap(tab).as('tab')
 
     const methods = {
       search: search.value,
       'onUpdate:search': (val: string) => {
         search.value = val
-      },
-      tab: tab.value,
-      'onUpdate:tab': (val: SpecViewType) => {
-        tab.value = val
       },
       onAddSpec,
     }
@@ -35,12 +28,6 @@ describe('InlineSpecListHeader', () => {
     cy.get('input')
     .type(searchString, { delay: 0 })
     .get('@search').its('value').should('eq', searchString)
-  })
-
-  it('should toggle radio group', () => {
-    cy.get('[data-cy="file-tree-radio-option"]')
-    .click()
-    .get('@tab').its('value').should('eq', 'tree')
   })
 
   it('should emit add spec', () => {

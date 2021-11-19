@@ -16,16 +16,16 @@ const fileDetails = {
 const preferredOpener = {
   id: 'vscode',
   name: 'VS Code',
-  openerId: 'vscode',
+  binary: 'vscode',
   isOther: false,
 }
 
 const availableEditors = [
-  { id: 'computer', name: 'On Computer', openerId: 'computer', isOther: false, description: 'Opens on computer etc etc' },
-  { id: 'atom', name: 'Atom', openerId: 'atom', isOther: false },
-  { id: 'sublime', name: 'Sublime Text', openerId: 'sublime', isOther: false },
-  { id: 'vscode', name: 'VS Code', openerId: 'vscode', isOther: false },
-  { id: 'other', name: 'Other', openerId: '', isOther: true, description: 'Enter the full path etc etc' },
+  { id: 'computer', name: 'On Computer', binary: 'computer', isOther: false, description: 'Opens on computer etc etc' },
+  { id: 'atom', name: 'Atom', binary: 'atom', isOther: false },
+  { id: 'sublime', name: 'Sublime Text', binary: 'sublime', isOther: false },
+  { id: 'vscode', name: 'VS Code', binary: 'vscode', isOther: false },
+  { id: 'other', name: 'Other', binary: '', isOther: true, description: 'Enter the full path etc etc' },
 ]
 
 describe('<FileOpener />', () => {

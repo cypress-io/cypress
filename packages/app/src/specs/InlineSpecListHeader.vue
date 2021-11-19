@@ -1,5 +1,5 @@
 <template>
-  <div class="h-64px items-center gap-8px mx-16px border-b-1 border-gray-900 grid grid-cols-[minmax(0,1fr),63px,24px]">
+  <div class="h-64px items-center gap-8px mx-16px border-b-1 border-gray-900 grid grid-cols-[minmax(0,1fr),24px]">
     <div class="relative items-center group">
       <div class="absolute inset-y-0 flex items-center pointer-events-none">
         <i-cy-magnifying-glass_x16
@@ -25,12 +25,6 @@
       >
     </div>
 
-    <SelectSpecListView
-      :model-value="tab"
-      class="flex border-1 border-gray-900 rounded-md h-24px w-64px text-md cursor-pointer"
-      @update:tab="updateTab"
-    />
-
     <button
       class="
         border-1 border-gray-900
@@ -55,23 +49,15 @@
 import Input from '@cy/components/Input.vue'
 import Button from '@cy/components/Button.vue'
 import { ref } from 'vue'
-import SelectSpecListView from './SelectSpecListView.vue'
-import type { SpecViewType } from './SpecsList.vue'
 
 defineProps<{
-  tab: SpecViewType
   search: string
 }>()
 
 const emit = defineEmits<{
-  (e: 'update:tab', tab: SpecViewType): void
   (e: 'update:search', search: string): void
   (e: 'addSpec'): void
 }>()
-
-const updateTab = (tab: SpecViewType) => {
-  emit('update:tab', tab)
-}
 
 const inputFocused = ref(false)
 

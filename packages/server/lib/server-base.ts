@@ -197,7 +197,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
       target: config.baseUrl && testingType === 'component' ? config.baseUrl : undefined,
     })
 
-    this._socket = new SocketCtor(config) as TSocket
+    this._socket = new SocketCtor(config, this.ctx) as TSocket
 
     clientCertificates.loadClientCertificateConfig(config)
 

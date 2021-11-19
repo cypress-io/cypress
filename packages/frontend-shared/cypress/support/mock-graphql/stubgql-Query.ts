@@ -6,6 +6,9 @@ export const stubQuery: MaybeResolver<Query> = {
   dev () {
     return {}
   },
+  localSettings (source, args, ctx) {
+    return ctx.localSettings
+  },
   wizard (source, args, ctx) {
     return ctx.wizard
   },
