@@ -43,6 +43,8 @@ async function cacheKey () {
     ignore: ['**/node_modules/**', '**/*_node_modules/**'],
   })
 
+  console.log('package.jsons', packageJsons)
+
   // Concat the stable stringify of all of the package.json dependencies that make up
   const hashedPackageDeps = packageJsons.sort().map((abs) => require(abs)).map(
     ({ name, dependencies, devDependencies, peerDependencies }) => {
@@ -69,8 +71,10 @@ async function prepareCircleCache () {
     { onlyDirectories: true },
   )
 
+  console.log('found paths', paths)
   await Promise.all(
     paths.map(async (src) => {
+      console.log('moving', src)
       await fsExtra.move(
         src,
         src
@@ -80,7 +84,7 @@ async function prepareCircleCache () {
     }),
   )
 
-  console.log(`Moved globbed node_modules for ${packageGlobs.join(', ')} to ${CACHE_DIR}`)
+  console.log(`Moved globbed node_modules for ${paths.join(', ')} to ${CACHE_DIR}`)
 }
 
 async function unpackCircleCache () {
@@ -89,8 +93,11 @@ async function unpackCircleCache () {
     { onlyDirectories: true },
   )
 
+  console.log('found paths', paths)
+
   await Promise.all(
     paths.map(async (src) => {
+      console.log('moving', src)
       await fsExtra.move(
         src,
         src
@@ -101,8 +108,6 @@ async function unpackCircleCache () {
   )
 
   console.log(`Unpacked globbed node_modules from ${CACHE_DIR} to ${packageGlobs.join(', ')}`)
-
-  await fsExtra.remove(CACHE_DIR)
 }
 
 function hashFile (filePath) {
