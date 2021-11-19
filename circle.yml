@@ -81,7 +81,7 @@ commands:
       - run: node --version
       - run: npm --version
 
-  restore_cached_workspace
+  restore_cached_workspace:
     steps:
       - attach_workspace:
           at: ~/
