@@ -253,6 +253,10 @@ export class EventManager {
       ws.emit('external:open', url)
     })
 
+    this.reporterBus.on('get:user:editor', (cb) => {
+      ws.emit('get:user:editor', cb)
+    })
+
     this.reporterBus.on('open:file:unified', (file: FileDetails) => {
       this.emit('open:file', file)
     })
