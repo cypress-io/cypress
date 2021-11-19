@@ -27,7 +27,19 @@ module.exports = {
     }
 
     try {
-      const contents = await readFn(filePath, readOptions)
+      // graceful-fs does not support the standard fs Promise API.
+      // Errors must be intercepted using a callback parameter.
+      const readPromise = new Promise((resolve, reject) => {
+        readFn(filePath, readOptions, (err, data) => {
+          if (err) {
+            reject(err)
+          } else {
+            resolve(data)
+          }
+        })
+      })
+
+      const contents = await readPromise
 
       return {
         contents,
@@ -58,7 +70,7 @@ module.exports = {
     let writeFileTimeout
 
     if (options.timeout !== undefined) {
-      setTimeout(() => {
+      writeFileTimeout = setTimeout(() => {
         writeFileAbortController.abort()
       }, options.timeout)
     }
