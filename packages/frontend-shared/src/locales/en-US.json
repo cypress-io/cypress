@@ -337,6 +337,7 @@
         },
         "selectProject": {
           "organization": "Organization",
+          "noOrganizationSelectedError": "required when creating a new project",
           "manageOrgs": "Manage organizations",
           "project": "Project",
           "projectName": "Project Name",

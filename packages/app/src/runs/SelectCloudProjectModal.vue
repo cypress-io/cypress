@@ -13,19 +13,33 @@
         item-value="name"
         item-key="id"
         :placeholder="orgPlaceholder"
+        data-cy="selectOrganization"
+        :error="noPickedOrganizationError"
       >
         <template #label>
-          <span class="flex justify-between items-center text-16px leading-24px font-normal">
-            <span class="text-gray-800">
+          <span class="flex items-end text-16px font-normal my-8px leading-24px">
+            <span class="">
               {{ t('runs.connect.modal.selectProject.organization') }}
             </span>
+            <span
+              v-if="noPickedOrganizationError"
+              class="ml-8px text-red-400 text-14px leading-22px"
+            >
+              {{ t('runs.connect.modal.selectProject.noOrganizationSelectedError') }}
+            </span>
             <ExternalLink
-              class="my-8px cursor-pointer text-indigo-500 hover:underline"
+              class="flex-grow text-right cursor-pointer text-indigo-500 hover:underline"
               :href="organizationUrl"
             >
               {{ t('runs.connect.modal.selectProject.manageOrgs') }}
             </ExternalLink>
           </span>
+        </template>
+        <template #input-prefix>
+          <OrganizationIcon class="icon-dark-gray-500 h-16px w-16px" />
+        </template>
+        <template #item-prefix>
+          <OrganizationIcon class="icon-dark-gray-500 h-16px w-16px" />
         </template>
       </Select>
       <Select
@@ -38,19 +52,27 @@
         item-key="id"
         :disabled="!pickedOrganization"
         :placeholder="projectPlaceholder"
+        data-cy="selectProject"
       >
         <template #label>
-          <div class="flex justify-between items-center text-16px leading-24px font-normal">
+          <div class="flex items-center text-16px leading-24px font-normal">
             <p class="text-gray-800">
               {{ t('runs.connect.modal.selectProject.project') }}
             </p>
+            <span class="text-red-500 ml-4px">*</span>
             <a
-              class="my-8px cursor-pointer text-indigo-500 hover:underline"
+              class="my-8px flex-grow text-right cursor-pointer text-indigo-500 hover:underline"
               @click="newProject = true"
             >
               {{ t('runs.connect.modal.selectProject.createNewProject') }}
             </a>
           </div>
+        </template>
+        <template #input-prefix>
+          <FolderIcon class="icon-dark-gray-500 h-16px w-16px" />
+        </template>
+        <template #item-prefix>
+          <FolderIcon class="icon-dark-gray-500 h-16px w-16px" />
         </template>
       </Select>
       <template v-else>
@@ -64,6 +86,7 @@
             <span class="text-gray-800">
               {{ t('runs.connect.modal.selectProject.projectName') }}
             </span>
+            <span class="text-red-500 ml-4px">*</span>
             <span class="text-gray-500 ml-8px">
               {{ t('runs.connect.modal.selectProject.projectNameDisclaimer') }}
             </span>
@@ -80,6 +103,8 @@
           class="mt-8px"
           input-classes="h-38px"
           :model-value="projectName"
+          :prefix-icon="FolderIcon"
+          prefix-icon-classes="icon-dark-gray-500"
         />
         <Radio
           v-model:value="projectAccess"
@@ -106,6 +131,7 @@
           size="lg"
           :prefix-icon="newProject ? CreateIcon : ConnectIcon"
           prefix-icon-class="icon-dark-white"
+          @click="createProject"
         >
           {{ newProject
             ? t('runs.connect.modal.selectProject.createProject')
@@ -134,6 +160,8 @@ import Input from '@cy/components/Input.vue'
 import Radio from '@cy/components/Radio.vue'
 import ConnectIcon from '~icons/cy/chain-link_x16.svg'
 import CreateIcon from '~icons/cy/add-large_x16.svg'
+import FolderIcon from '~icons/cy/folder-outline_x16.svg'
+import OrganizationIcon from '~icons/cy/office-building_x16.svg'
 import { useI18n } from '@cy/i18n'
 import type { SelectCloudProjectModalFragment } from '../generated/graphql'
 
@@ -169,8 +197,19 @@ const emit = defineEmits<{
 const newProject = ref(false)
 const projectName = ref('')
 const projectAccess = ref<'private' | 'public'>('private')
-const organizations = computed(() => props.gql.organizations?.nodes || [])
+const organizations = computed(() => {
+  return props.gql.organizations?.nodes.map((org) => {
+    return {
+      ...org,
+      icon: FolderIcon,
+    }
+  }) || []
+})
 const pickedOrganization = ref(props.gql.organizations?.nodes.length === 1 ? props.gql.organizations.nodes[0] : undefined)
+const watchingPickedOrganizationError = ref(false)
+const noPickedOrganizationError = computed(() => {
+  return watchingPickedOrganizationError.value && !pickedOrganization.value
+})
 
 const projects = computed(() => pickedOrganization.value?.projects?.nodes || [])
 const pickedProject = ref()
@@ -182,5 +221,15 @@ const projectPlaceholder = computed(() => {
     : t('runs.connect.modal.selectProject.placeholderProjectsPending')
 })
 
+// TODO: update this url with one coming from gql
 const organizationUrl = '#'
+
+function createProject () {
+  if (pickedOrganization.value) {
+    // eslint-disable-next-line no-console
+    console.log('mutate to create a project')
+  } else {
+    watchingPickedOrganizationError.value = true
+  }
+}
 </script>

@@ -1,5 +1,6 @@
 import { SelectCloudProjectModalFragmentDoc } from '../generated/graphql-test'
 import SelectCloudProjectModal from './SelectCloudProjectModal.vue'
+import { defaultMessages } from '@cy/i18n'
 
 describe('<SelectCloudProjectModal />', () => {
   const organizations = {
@@ -8,7 +9,7 @@ describe('<SelectCloudProjectModal />', () => {
       {
         __typename: 'CloudOrganization' as const,
         id: '1',
-        name: 'Test Org',
+        name: 'Test Org 1',
         projects: {
           __typename: 'CloudProjectConnection' as const,
           nodes: [
@@ -32,7 +33,7 @@ describe('<SelectCloudProjectModal />', () => {
     ],
   }
 
-  it('playground', () => {
+  beforeEach(() => {
     cy.mountFragment(SelectCloudProjectModalFragmentDoc, {
       onResult: (result) => {
         result.organizations = organizations
@@ -43,7 +44,20 @@ describe('<SelectCloudProjectModal />', () => {
         </div>)
       },
     })
+  })
 
+  it('should disable the project selection when no organization is selected', () => {
+    cy.get('[data-cy="selectProject"] button').should('be.disabled')
+    cy.get('[data-cy="selectOrganization"] button').click()
+    cy.contains('Test Org 1').click()
+    cy.get('[data-cy="selectProject"] button').click()
+    cy.contains('test-project').click()
+  })
+
+  it('should show an error when creating a project without an organization', () => {
     cy.contains('Create new').click()
+    cy.get('#projectName').type('new project')
+    cy.contains('button', 'Create project').click()
+    cy.contains(defaultMessages.runs.connect.modal.selectProject.noOrganizationSelectedError).should('be.visible')
   })
 })

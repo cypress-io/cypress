@@ -5,7 +5,10 @@
     @update:modelValue="handleUpdate"
   >
     <template #default="{ open }">
-      <ListboxLabel class="block text-sm font-medium text-gray-700">
+      <ListboxLabel
+        class="block text-sm font-medium"
+        :class="error ? 'text-red-500' : 'text-gray-800'"
+      >
         <template v-if="label">
           {{ label }}
         </template>
@@ -18,9 +21,10 @@
       <div class="relative">
         <ListboxButton
           class="bg-white text-gray-800 relative w-full
-              border border-gray-100 rounded pl-3 pr-4 py-2 text-left cursor-default
+              border rounded pl-12px pr-16px py-8px text-left cursor-default
               focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500
               sm:text-sm"
+          :class="error ? 'text-red-500 border-red-500' : 'border-gray-100 text-gray-700'"
         >
           <span class="absolute inset-y-0 flex items-center">
             <slot
@@ -30,10 +34,10 @@
             />
           </span>
           <span
-            class="pr-4"
+            class="pr-24px text-16px leading-24px"
             :class="
               {
-                'pl-8': $slots['input-prefix'],
+                'pl-24px': $slots['input-prefix'],
               }
             "
           >
@@ -55,7 +59,7 @@
             >
               <Icon
                 :icon="IconCaret"
-                class="text-lg transform transition-transform"
+                class="text-16px leading-24px transform transition-transform"
                 data-testid="icon-caret"
                 aria-hidden="true"
                 :class="{
@@ -78,7 +82,7 @@
               overflow-auto focus:outline-none sm:text-sm"
           >
             <ListboxOption
-              v-for="option in options"
+              v-for="option in props.options"
               :key="get(option, itemKey ?? '')"
               v-slot="{ active, selected }"
               as="ul"
@@ -86,7 +90,7 @@
               :disabled="option.disabled"
             >
               <li
-                class="cursor-default block truncate select-none relative py-2 pl-3 pr-9"
+                class="cursor-default block truncate select-none relative py-8px pl-12px pr-36px text-16px leading-24px"
                 :class="[{
                   'font-medium': selected,
                   'bg-gray-50': active,
@@ -105,8 +109,8 @@
                 <span
                   class="inline-block"
                   :class="{
-                    'pl-8': $slots['item-prefix'],
-                    'pr-4': $slots['item-suffix'],
+                    'pl-24px': $slots['item-prefix'],
+                    'pr-16px': $slots['item-suffix'],
                   }"
                 >
                   <slot
@@ -175,6 +179,7 @@ const props = withDefaults(defineProps<{
   label?: string
   itemValue?: string // The key of the modelValue to render
   itemKey?: string
+  error?: boolean
 }>(), {
   placeholder: '',
   label: '',
