@@ -65,7 +65,7 @@ executors:
   windows: &windows-executor
     machine:  
       image: windows-server-2019-vs2019:stable
-      shell: bash.exe -eo pipefail
+      shell: bash.exe --login -eo pipefail
     resource_class: windows.medium
     environment:
       PLATFORM: windows
@@ -263,10 +263,12 @@ commands:
               [ -s "${HOME}/.nvm/nvm.sh" ] && \. "${HOME}/.nvm/nvm.sh" # This loads nvm
             fi
             echo "Installing Node $node_version"
-            nvm install ${node_version} || exit 1
+            nvm install ${node_version}
+            nvm off || true
+            nvm on || true
             echo "Using Node $node_version"
-            nvm use ${node_version} || exit 1
-            nvm alias default ${node_version} || exit 1
+            nvm use ${node_version}
+            nvm alias default ${node_version}
             echo $PATH
             node --version
             echo "Installing Yarn"
