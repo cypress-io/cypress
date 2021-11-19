@@ -855,6 +855,12 @@ jobs:
   ## skips ahead to the build step, otherwise installs and caches the node_modules
   node_modules_install:
     <<: *defaults
+    parameters:
+      <<: *defaultsParameters
+      resource_class:
+        type: string
+        default: medium
+    resource_class: << parameters.resource_class >>
     steps:
       - checkout
       - unless:
@@ -2277,29 +2283,34 @@ windows-workflow: &windows-workflow
     - node_modules_install:
         name: windows-node-modules-install
         executor: windows
+        resource_class: windows.medium
         only-cache-for-root-user: true
 
     - build:
         name: windows-build
         executor: windows
+        resource_class: windows.medium
         requires:
           - windows-node-modules-install
 
     - lint:
         name: windows-lint
         executor: windows
+        resource_class: windows.medium
         requires:
           - windows-build
       
     - unit-tests:
         name: windows-unit-tests
         executor: windows
+        resource_class: windows.medium
         requires:
           - windows-build
     
     - create-build-artifacts:
         name: windows-create-build-artifacts
         executor: windows
+        resource_class: windows.medium
         context:
           - test-runner:upload
           - test-runner:commit-status-checks
