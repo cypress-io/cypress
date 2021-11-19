@@ -55,7 +55,6 @@ executors:
     macos:
       # Executor should have Node >= required version
       xcode: "13.0.0"
-    resource_class: medium
     environment:
       PLATFORM: mac
 
@@ -885,6 +884,12 @@ jobs:
   ## restores node_modules from previous step & builds if first step skipped
   build:
     <<: *defaults
+    parameters:
+      <<: *defaultsParameters
+      resource_class:
+        type: string
+        default: medium+
+    resource_class: << parameters.resource_class >>
     steps:
       - restore_cached_workspace
       - run:
@@ -961,7 +966,12 @@ jobs:
 
   unit-tests:
     <<: *defaults
-    resource_class: medium
+    parameters:
+      <<: *defaultsParameters
+      resource_class:
+        type: string
+        default: medium
+    resource_class: << parameters.resource_class >>
     parallelism: 1
     steps:
       - restore_cached_workspace
@@ -1457,7 +1467,12 @@ jobs:
 
   create-build-artifacts:
     <<: *defaults
-    resource_class: medium+
+    parameters:
+      <<: *defaultsParameters
+      resource_class:
+        type: string
+        default: medium+
+    resource_class: << parameters.resource_class >>
     steps:
       - restore_cached_workspace
       - build-binary
@@ -2289,6 +2304,7 @@ windows-workflow: &windows-workflow
     - build:
         name: windows-build
         executor: windows
+        resource_class: windows.medium
         requires:
           - windows-node-modules-install
 
@@ -2301,12 +2317,14 @@ windows-workflow: &windows-workflow
     - unit-tests:
         name: windows-unit-tests
         executor: windows
+        resource_class: windows.medium
         requires:
           - windows-build
     
     - create-build-artifacts:
         name: windows-create-build-artifacts
         executor: windows
+        resource_class: windows.medium
         context:
           - test-runner:upload
           - test-runner:commit-status-checks
@@ -2314,8 +2332,8 @@ windows-workflow: &windows-workflow
           - windows-build
 
 workflows:
-  linux:
-    <<: *linux-workflow
+  # linux:
+    # <<: *linux-workflow
   windows:
     <<: *windows-workflow
     when:
