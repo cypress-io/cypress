@@ -3,6 +3,7 @@ import { defineStore } from 'pinia'
 
 export interface SpecState {
   activeSpec: BaseSpec | null
+  isRunnerInitialized: boolean
 }
 
 export const useSpecStore = defineStore({
@@ -11,12 +12,16 @@ export const useSpecStore = defineStore({
   state (): SpecState {
     return {
       activeSpec: null,
+      isRunnerInitialized: false,
     }
   },
 
   actions: {
     setActiveSpec (activeSpec: BaseSpec | null) {
       this.activeSpec = activeSpec
+    },
+    setIsRunnerInitialized (isRunnerInitialized: boolean) {
+      this.isRunnerInitialized = isRunnerInitialized
     },
   },
 })

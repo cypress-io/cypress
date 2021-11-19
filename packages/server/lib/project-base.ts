@@ -622,7 +622,9 @@ export class ProjectBase<TServer extends Server> extends EE {
       onReloadBrowser: options.onReloadBrowser,
       onFocusTests: options.onFocusTests,
       onSpecChanged: options.onSpecChanged,
-      onSavedStateChanged: (state: any) => this.saveState(state),
+      onSavedStateChanged: (state: any) => {
+        return this.saveState(state)
+      },
 
       onCaptureVideoFrames: (data: any) => {
         // TODO: move this to browser automation middleware

@@ -188,7 +188,7 @@ export class EventManager {
     })
 
     this.reporterBus.on('toggle:spec:list', () => {
-      this.emit('toggle:spec:list')
+      ws.emit('toggle:spec:list')
     })
 
     this.reporterBus.on('get:user:editor', (cb) => {
@@ -693,6 +693,7 @@ export class EventManager {
 
   saveState (state) {
     ws.emit('save:app:state', state)
+    this.localBus.emit('save:app:state', state)
   }
 
   // usefulf for testing

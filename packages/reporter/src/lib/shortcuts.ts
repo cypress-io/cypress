@@ -26,7 +26,7 @@ class Shortcuts {
       case 'f': action('toggle:spec:list', () => {
         appState.toggleSpecList()
         events.emit('save:state')
-      })
+      })()
 
         break
       case 'c': events.emit('resume')

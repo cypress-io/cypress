@@ -118,10 +118,6 @@ onMounted(() => {
     runSpec()
   })
 
-  eventManager.on('toggle:spec:list', () => { // TODO: why does this live here?
-    runnerStore.toggleSpecList()
-  })
-
   eventManager.on('before:screenshot', (payload) => {
     if (payload.appOnly) {
       screenshotStore.setScreenshotting(true)

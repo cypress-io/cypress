@@ -3,6 +3,7 @@
     v-if="props?.gql?.savedState?.isSpecListOpen"
     class="w-280px"
   >
+    <span class="text-white">{{ props?.gql?.savedState?.isSpecListOpen }}</span>
     <InlineSpecListHeader
       v-model:search="search"
     />
