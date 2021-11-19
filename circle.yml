@@ -2283,34 +2283,30 @@ windows-workflow: &windows-workflow
     - node_modules_install:
         name: windows-node-modules-install
         executor: windows
-        resource_class: windows.medium
+        # resource_class: windows.medium
         only-cache-for-root-user: true
 
     - build:
         name: windows-build
         executor: windows
-        resource_class: windows.medium
         requires:
           - windows-node-modules-install
 
     - lint:
         name: windows-lint
         executor: windows
-        resource_class: windows.medium
         requires:
           - windows-build
       
     - unit-tests:
         name: windows-unit-tests
         executor: windows
-        resource_class: windows.medium
         requires:
           - windows-build
     
     - create-build-artifacts:
         name: windows-create-build-artifacts
         executor: windows
-        resource_class: windows.medium
         context:
           - test-runner:upload
           - test-runner:commit-status-checks
