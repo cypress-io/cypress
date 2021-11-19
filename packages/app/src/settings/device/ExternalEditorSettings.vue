@@ -7,7 +7,11 @@
       {{ t('settingsPage.editor.description') }}
     </template>
 
-    <ChooseExternalEditor :gql="props.gql" />
+    <ChooseExternalEditor 
+      v-if="props.gql.localSettings"
+      :gql="props.gql" 
+      @chose-editor="handleChoseEditor"
+    />
   </SettingsSection>
 </template>
 
@@ -17,8 +21,21 @@ import ChooseExternalEditor from '@packages/frontend-shared/src/gql-components/C
 import { useI18n } from '@cy/i18n'
 import { gql } from '@urql/core'
 import type { ExternalEditorSettingsFragment } from '../../generated/graphql'
+import { ExternalEditorSettings_SetPreferredEditorBinaryDocument } from '@packages/data-context/src/gen/all-operations.gen'
+import { useMutation } from '@urql/vue'
+
+gql`
+mutation ExternalEditorSettings_SetPreferredEditorBinary ($value: String!) {
+  setPreferredEditorBinary (value: $value)
+}`
 
 const { t } = useI18n()
+
+const setPreferredBinaryEditor = useMutation(ExternalEditorSettings_SetPreferredEditorBinaryDocument)
+
+function handleChoseEditor (binary: string) {
+  setPreferredBinaryEditor.executeMutation({ value: binary })
+}
 
 gql`
 fragment ExternalEditorSettings on Query {

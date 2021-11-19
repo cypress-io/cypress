@@ -54,8 +54,8 @@
         v-model="customBinary"
         input-classes="text-sm"
         placeholder="Custom path..."
-        @input="setCustomBinary"
       >
+        <!-- @input="setCustomBinary" -->
         <template #prefix>
           <Icon
             :icon="IconTerminal"
@@ -127,54 +127,85 @@ const props = defineProps<{
   gql: ChooseExternalEditorFragment
 }>()
 
+
 const { t } = useI18n()
 
 type Editor = ChooseExternalEditorFragment['localSettings']['availableEditors'][number]
 
-const customBinary = ref<string>('')
-const selectedWellKnownEditor = ref<Editor>()
-const editorToUse = ref<'found' | 'custom'>('found')
+const preferredEditorBinary = ref(props.gql.localSettings.preferences.preferredEditorBinary ?? '')
 
 watch(
   () => props.gql.localSettings.preferences.preferredEditorBinary,
-  (perferredEditorBinary) => {
-    const isWellKnownEditor = props.gql.localSettings.availableEditors.find((x) => {
-      return x.binary === perferredEditorBinary
-    })
-
-    editorToUse.value = isWellKnownEditor ? 'found' : 'custom'
-
-    if (isWellKnownEditor) {
-      selectedWellKnownEditor.value = isWellKnownEditor
-    }
-
-    if (editorToUse.value === 'custom' && perferredEditorBinary) {
-      customBinary.value = perferredEditorBinary
-    }
-  }, { immediate: true },
+  (perferred) => {
+  }
 )
 
-const setCustomBinary = debounce(() => {
-  if (editorToUse.value === 'custom') {
-    setPreferredEditor.executeMutation({ value: customBinary.value })
-  }
-}, 250)
+
+type EditorType = 'found' | 'custom'
+
+const customBinary = ref<string>('')
+const selectedWellKnownEditor = ref<Editor>()
+const editorToUse = ref<EditorType>('found')
+
+// watch(
+//   () => props.gql.localSettings.preferences.preferredEditorBinary,
+//   (perferredEditorBinary) => {
+//     const isWellKnownEditor = props.gql.localSettings.availableEditors.find((x) => {
+//       return x.binary === perferredEditorBinary
+//     })
+
+//     editorToUse.value = isWellKnownEditor ? 'found' : 'custom'
+
+//     if (isWellKnownEditor) {
+//       selectedWellKnownEditor.value = isWellKnownEditor
+//     }
+
+//     if (editorToUse.value === 'custom' && perferredEditorBinary) {
+//       customBinary.value = perferredEditorBinary
+//     }
+//   }, { immediate: true },
+// )
+
+// const setCustomBinary = debounce(() => {
+//   if (editorToUse.value === 'custom') {
+//     setPreferredEditor.executeMutation({ value: customBinary.value })
+//   }
+// }, 250)
+const emit = defineEmits<{
+  (e: 'choseEditor', binary: string): void
+}>()
 
 const saveEditor = () => {
   if (editorToUse.value === 'found' && selectedWellKnownEditor.value) {
-    setPreferredEditor.executeMutation({ value: selectedWellKnownEditor.value.binary })
+    emit('choseEditor', selectedWellKnownEditor.value.binary)
   }
 
   if (editorToUse.value === 'custom' && customBinary.value) {
-    setPreferredEditor.executeMutation({ value: customBinary.value })
+    emit('choseEditor', customBinary.value)
   }
+    // setPreferredEditor.executeMutation({ value: selectedWellKnownEditor.value.binary })
+  // }
+
+  // if (editorToUse.value === 'custom' && customBinary.value) {
+  //   setPreferredEditor.executeMutation({ value: customBinary.value })
+  // }
 }
+
+
+watch(customBinary, (val) => {
+  if (editorToUse.value !== 'custom') {
+    editorToUse.value = 'custom'
+  }
+
+  emit('choseEditor', val)
+})
 
 const updateEditor = (editor: Editor) => {
   if (editorToUse.value !== 'found') {
     editorToUse.value = 'found'
   }
 
-  setPreferredEditor.executeMutation({ value: editor.binary })
+  selectedWellKnownEditor.value = editor
+  emit('choseEditor', selectedWellKnownEditor.value.binary)
 }
 </script>

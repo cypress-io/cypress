@@ -2,7 +2,7 @@ import { observer } from 'mobx-react'
 import React from 'react'
 // @ts-ignore
 import Tooltip from '@cypress/react-tooltip'
-import { FileDetails } from '@packages/ui-components'
+import { FileDetails } from '@packages/types'
 
 import FileOpener from './file-opener'
 

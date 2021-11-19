@@ -31,7 +31,14 @@
     @add-project="handleAddProject"
   />
 
-  <StandardModal
+  <ChooseExternalEditorModal 
+    :open="isChooseEditorOpen"
+    @close="isChooseEditorOpen = false"
+    @selected="editorChosen"
+    :gql="props.gql"
+  />
+  
+  <!-- <StandardModal
     v-model="isChooseEditorOpen"
     variant="bare"
     help-link=""
@@ -52,7 +59,13 @@
         <i-cy-loading_x16 class="animate-spin icon-dark-white icon-light-gray-400" />
       </div>
     </div>
-  </StandardModal>
+
+    <template #footer>
+      <div class="flex justify-end">
+        <Button @click="showInIde">Done</Button>
+      </div>
+    </template>
+  </StandardModal> -->
 
   <button @click="isChooseEditorOpen = !isChooseEditorOpen">
     toggle
@@ -67,8 +80,8 @@ import GlobalProjectCard from './GlobalProjectCard.vue'
 import GlobalPageHeader from './GlobalPageHeader.vue'
 import GlobalEmpty from './GlobalEmpty.vue'
 import { GlobalPageFragment, GlobalPage_AddProjectDocument, GlobalPage_OpenInIdeDocument, GlobalPage_RemoveProjectDocument, GlobalProjectCardFragment, GlobalPage_OpenInFinderDocument } from '../generated/graphql'
-import StandardModal from '@packages/frontend-shared/src/components/StandardModal.vue'
-import ChooseExternalEditor from '@packages/frontend-shared/src/gql-components/ChooseExternalEditor.vue'
+import Button from '@packages/frontend-shared/src/components/Button.vue'
+import ChooseExternalEditorModal from '@packages/frontend-shared/src/gql-components/ChooseExternalEditorModal.vue'
 
 gql`
 mutation GlobalPage_addProject($path: String!, $open: Boolean = true) {
@@ -107,12 +120,28 @@ function handleAddProject (path: string) {
   addProject.executeMutation({ path })
 }
 
+function showInIde () {
+  isChooseEditorOpen.value = false
+}
+
 function handleOpenInFinder (path: string) {
   openInFinder.executeMutation({ path })
 }
 
+let projectPathToOpen: string
+
+function editorChosen () {
+  isChooseEditorOpen.value = false
+  openInIDE.executeMutation({ path: projectPathToOpen })
+}
+
 function handleOpenInIDE (path: string) {
-  openInIDE.executeMutation({ path })
+  if (!props.gql.localSettings.preferences.preferredEditorBinary) {
+    projectPathToOpen = path
+    isChooseEditorOpen.value = true
+  } else {
+    openInIDE.executeMutation({ path })
+  }
 }
 
 const removeProject = useMutation(GlobalPage_RemoveProjectDocument)

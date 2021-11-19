@@ -3,7 +3,8 @@ import Promise from 'bluebird'
 import type { BaseStore } from '@packages/runner-shared/src/store'
 import type { RunState } from '@packages/types/src/driver'
 import type MobX from 'mobx'
-import type { LocalBusEventMap } from './event-manager-types'
+import type { LocalBusEmitsMap, LocalBusEventMap } from './event-manager-types'
+import type { FileDetails } from '@packages/types'
 
 import { client } from '@packages/socket/lib/browser'
 
@@ -190,7 +191,7 @@ export class EventManager {
     this.reporterBus.on('focus:tests', this.focusTests)
 
     this.reporterBus.on('get:user:editor', (cb) => {
-      ws.emit('get:user:editor', cb)
+      // ws.emit('get:user:editor', cb)
     })
 
     this.reporterBus.on('set:user:editor', (editor) => {
@@ -256,8 +257,8 @@ export class EventManager {
       ws.emit('external:open', url)
     })
 
-    this.reporterBus.on('open:file', (url) => {
-      ws.emit('open:file', url)
+    this.reporterBus.on('open:file', (file: FileDetails) => {
+      this.emit('open:file', file)
     })
 
     const studioInit = () => {
@@ -637,6 +638,7 @@ export class EventManager {
     })
   }
 
+  emit<K extends Extract<keyof LocalBusEmitsMap, string>>(k: K, v: LocalBusEmitsMap[K]): void
   emit (event: string, ...args: any[]) {
     this.localBus.emit(event, ...args)
   }

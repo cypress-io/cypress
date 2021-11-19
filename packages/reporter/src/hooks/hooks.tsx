@@ -2,7 +2,7 @@ import cs from 'classnames'
 import _ from 'lodash'
 import { observer } from 'mobx-react'
 import React from 'react'
-import { FileDetails } from '@packages/ui-components'
+import { FileDetails } from '@packages/types'
 
 import appState, { AppState } from '../lib/app-state'
 import Command from '../commands/command'

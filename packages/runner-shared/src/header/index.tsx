@@ -9,7 +9,7 @@ import { ViewportInfo } from '../viewport-info'
 import { SelectorPlayground } from '../selector-playground/SelectorPlayground'
 import { selectorPlaygroundModel } from '../selector-playground'
 import { Studio } from '../studio'
-import type { EventManager } from '../event-manager'
+import type { EventManager } from '@packages/app/src/runner/event-manager'
 
 interface BaseState {
   isLoading: boolean

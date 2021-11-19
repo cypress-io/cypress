@@ -19,6 +19,7 @@ import { getAutIframeModel, UnifiedRunnerAPI } from '../runner'
 import { useSpecStore } from '../store'
 import { useSelectorPlaygroundStore } from '../store/selector-playground-store'
 import SpecRunner from './SpecRunner.vue'
+import type { GqlWithCurrentProject } from '../pages/Runner.vue'
 
 const initialized = ref(false)
 const specStore = useSpecStore()
@@ -31,11 +32,11 @@ onMounted(async () => {
 })
 
 const props = defineProps<{
-  gql: SpecRunnerFragment
+  gql: GqlWithCurrentProject
 }>()
 
 watch(() => route.query.file, (queryParam) => {
-  const spec = props.gql.specs?.edges.find((x) => x.node.relative === queryParam)?.node
+  const spec = props.gql.currentProject.specs?.edges.find((x) => x.node.relative === queryParam)?.node
 
   if (selectorPlaygroundStore.show) {
     const autIframe = getAutIframeModel()
