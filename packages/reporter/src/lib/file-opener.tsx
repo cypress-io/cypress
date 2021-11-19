@@ -21,7 +21,6 @@ const openFile = (where: Editor, { absoluteFile: file, line, column }: FileDetai
 }
 
 const getUserEditor = (callback: (result: GetUserEditorResult) => any) => {
-  console.log('emit!!')
   events.emit('get:user:editor', callback)
 }
 
