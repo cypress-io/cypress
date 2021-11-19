@@ -14,7 +14,7 @@ interface Props {
 const OpenFileInIDE: React.FC<Props> = observer((props) => {
   return (
     <Tooltip title={'Open in IDE'} className='cy-tooltip'>
-      <span onClick={() => events.emit('open:file', props.fileDetails)}>
+      <span onClick={() => events.emit('open:file:unified', props.fileDetails)}>
         {props.children}
       </span>
     </Tooltip>

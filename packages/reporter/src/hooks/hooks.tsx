@@ -12,6 +12,7 @@ import HookModel, { HookName } from './hook-model'
 import ArrowRightIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/arrow-right_x16.svg'
 import OpenIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/technology-code-editor_x16.svg'
 import OpenFileInIDE from '../lib/open-file-in-ide'
+import FileOpener from '../lib/file-opener'
 
 export interface HookHeaderProps {
   model: HookModel
@@ -28,11 +29,21 @@ export interface HookOpenInIDEProps {
   invocationDetails: FileDetails
 }
 
-const HookOpenInIDE = ({ invocationDetails }: HookOpenInIDEProps) => (
-  <OpenFileInIDE fileDetails={invocationDetails}>
-    <OpenIcon viewBox="0 0 16 16" width="12" height="12" /> <span>Open in IDE</span>
-  </OpenFileInIDE>
-)
+const HookOpenInIDE = ({ invocationDetails }: HookOpenInIDEProps) => {
+  if ('__vite__' in window) {
+    return (
+      <OpenFileInIDE fileDetails={invocationDetails} className='hook-open-in-ide'>
+        <OpenIcon viewBox="0 0 16 16" width="12" height="12" /> <span>Open in IDE</span>
+      </OpenFileInIDE>
+    )
+  }
+
+  return (
+    <FileOpener fileDetails={invocationDetails} className='hook-open-in-ide'>
+      <OpenIcon viewBox="0 0 16 16" width="12" height="12" /> <span>Open in IDE</span>
+    </FileOpener>
+  )
+}
 
 const StudioNoCommands = () => (
   <li className='command command-name-get command-state-pending command-type-parent studio-prompt'>

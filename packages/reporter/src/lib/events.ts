@@ -214,8 +214,8 @@ const events: Events = {
       runner.emit('external:open', url)
     })
 
-    localBus.on('open:file', (fileDetails) => {
-      runner.emit('open:file', fileDetails)
+    localBus.on('open:file:unified', (fileDetails) => {
+      runner.emit('open:file:unified', fileDetails)
     })
 
     localBus.on('studio:init:test', (testId) => {

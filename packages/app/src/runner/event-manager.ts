@@ -253,8 +253,12 @@ export class EventManager {
       ws.emit('external:open', url)
     })
 
-    this.reporterBus.on('open:file', (file: FileDetails) => {
+    this.reporterBus.on('open:file:unified', (file: FileDetails) => {
       this.emit('open:file', file)
+    })
+
+    this.reporterBus.on('open:file', (url) => {
+      ws.emit('open:file', url)
     })
 
     const studioInit = () => {
