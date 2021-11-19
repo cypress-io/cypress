@@ -13,21 +13,15 @@
         >
           {{ installedVersion }}
         </i18n-t>
+        <i18n-t :keypath="props.projectName ? 'topNav.updateCypress.pasteToUpgradeProject' : 'topNav.updateCypress.pasteToUpgradeGlobal'">
+          <span class="font-bold">{{ t('topNav.updateCypress.rememberToCloseInsert') }}</span>
+        </i18n-t>
       </p>
-      <p class="mb-16px">
-        {{ t('topNav.updateCypress.pasteToUpgrade') }}
-      </p>
+
       <TerminalPrompt
         :command="installCommand + 'cypress@' + latestVersion"
         :project-folder-name="projectName"
       />
-      <p
-        class="pt-16px"
-      >
-        <i18n-t keypath="topNav.updateCypress.rememberToClose">
-          <span class="font-bold">{{ t('topNav.updateCypress.rememberToCloseInsert') }}</span>
-        </i18n-t>
-      </p>
     </div>
   </StandardModal>
 </template>

@@ -176,9 +176,9 @@
     },
     "updateCypress": {
       "title": "Upgrade to Cypress",
-      "currentlyRunning": "You are currently running Version {0} of Cypress.",
-      "pasteToUpgrade": "Paste the command below into your terminal to upgrade to the latest version of Cypress for this project.*",
-      "rememberToClose": "*Remember to {0} before installing.",
+      "currentlyRunning": "You are currently running Version {0} of Cypress. ",
+      "pasteToUpgradeProject": "To upgrade to the latest version for your project, first {0}, then paste the command below into your terminal:",
+      "pasteToUpgradeGlobal": "To upgrade to the latest version, first {0}, then paste the command below into your terminal:",
       "rememberToCloseInsert": "close this app"
     }
   },

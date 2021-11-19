@@ -2,22 +2,25 @@ import UpdateCypressModal from './UpdateCypressModal.vue'
 import { defaultMessages } from '@cy/i18n'
 
 describe('<UpdateCypressModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
-  it('renders expected content & emits expected events', () => {
-    const installedVersion = '8.2.0'
-    const latestVersion = '10.0.0'
+  const installedVersion = '8.2.0'
+  const latestVersion = '10.0.0'
 
-    cy.mount({
-      render: () => <UpdateCypressModal installedVersion={installedVersion} latestVersion={latestVersion} show={true}></UpdateCypressModal>,
-    })
+  it('renders expected content & emits expected events', () => {
+    const handleClose = cy.stub()
+
+    cy.mount(() => <UpdateCypressModal installedVersion={installedVersion} latestVersion={latestVersion} show={true} onClose={handleClose}></UpdateCypressModal>)
 
     cy.contains(`${defaultMessages.topNav.updateCypress.title} ${latestVersion}`).should('be.visible')
     cy.contains(`${defaultMessages.topNav.updateCypress.currentlyRunning}`.replace('{0}', installedVersion)).should('be.visible')
-    cy.contains(`${defaultMessages.topNav.updateCypress.pasteToUpgrade}`).should('be.visible')
+    cy.contains(`${defaultMessages.topNav.updateCypress.pasteToUpgradeGlobal.replace('{0}', defaultMessages.topNav.updateCypress.rememberToCloseInsert)}`).should('be.visible')
     cy.contains(`cypress@${latestVersion}`).should('be.visible')
-    cy.contains('Remember to close').should('be.visible')
     cy.findByLabelText('Close').click().then(() => {
-      cy.wrap(Cypress.vueWrapper.emitted('close')?.[0])
-      .should('deep.equal', [])
+      expect(handleClose).to.have.been.calledOnce
     })
+  })
+
+  it('renders project-specific instructions when a project name prop is present', () => {
+    cy.mount(() => <UpdateCypressModal projectName="test-project" installedVersion={installedVersion} latestVersion={latestVersion} show={true}></UpdateCypressModal>)
+    cy.contains(`${defaultMessages.topNav.updateCypress.pasteToUpgradeProject.replace('{0}', defaultMessages.topNav.updateCypress.rememberToCloseInsert)}`).should('be.visible')
   })
 })
