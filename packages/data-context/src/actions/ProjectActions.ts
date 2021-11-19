@@ -1,4 +1,4 @@
-import type { CodeGenType, MutationAddProjectArgs, MutationAppCreateConfigFileArgs, MutationSetProjectPreferencesArgs, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
+import type { CodeGenType, MutationAddProjectArgs, MutationSetProjectPreferencesArgs, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
 import type { FindSpecs, FoundBrowser, FoundSpec, FullConfig, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions, Preferences, SettingsOptions } from '@packages/types'
 import execa from 'execa'
 import path from 'path'
@@ -77,22 +77,38 @@ export class ProjectActions {
     await this.clearActiveProject()
 
     // Set initial properties, so we can set the config object on the active project
-    this.setCurrentProjectProperties({
+    await this.setCurrentProjectProperties({
       projectRoot,
       title,
       ctPluginsInitialized: false,
       e2ePluginsInitialized: false,
       config: null,
       configChildProcess: null,
-    })
-
-    this.setCurrentProjectProperties({
-      isCTConfigured: await this.ctx.project.isTestingTypeConfigured(projectRoot, 'component'),
-      isE2EConfigured: await this.ctx.project.isTestingTypeConfigured(projectRoot, 'e2e'),
+      isMissingConfigFile: false,
       preferences: await this.ctx.project.getProjectPreferences(title),
     })
 
-    return this
+    try {
+      // read the config and cache it
+      await this.ctx.project.getConfig(projectRoot)
+
+      this.setCurrentProjectProperties({
+        isCTConfigured: await this.ctx.project.isTestingTypeConfigured(projectRoot, 'component'),
+        isE2EConfigured: await this.ctx.project.isTestingTypeConfigured(projectRoot, 'e2e'),
+      })
+
+      return this
+    } catch (error: any) {
+      if (error.type === 'NO_DEFAULT_CONFIG_FILE_FOUND') {
+        this.setCurrentProjectProperties({
+          isMissingConfigFile: true,
+        })
+
+        return this
+      }
+
+      throw error
+    }
   }
 
   // Temporary: remove after other refactor lands
@@ -292,14 +308,29 @@ export class ProjectActions {
     //
   }
 
-  createConfigFile (args: MutationAppCreateConfigFileArgs) {
+  async createConfigFile (type?: 'component' | 'e2e' | null) {
     const project = this.ctx.currentProject
 
     if (!project) {
       throw Error(`Cannot create config file without currentProject.`)
     }
 
-    this.ctx.fs.writeFileSync(path.resolve(project.projectRoot, args.configFilename), args.code)
+    let obj: { [k: string]: object } = {
+      e2e: {},
+      component: {},
+    }
+
+    if (type) {
+      obj = {
+        [type]: {},
+      }
+    }
+
+    await this.ctx.fs.writeFile(path.resolve(project.projectRoot, 'cypress.config.js'), `module.exports = ${JSON.stringify(obj, null, 2)}`)
+
+    this.setCurrentProjectProperties({
+      isMissingConfigFile: false,
+    })
   }
 
   async clearLatestProjectCache () {

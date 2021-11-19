@@ -88,21 +88,29 @@ export class ProjectDataSource {
   }
 
   async isTestingTypeConfigured (projectRoot: string, testingType: 'e2e' | 'component') {
-    const config = await this.getConfig(projectRoot)
+    try {
+      const config = await this.getConfig(projectRoot)
 
-    if (!config) {
-      return true
+      if (!config) {
+        return true
+      }
+
+      if (testingType === 'e2e') {
+        return Boolean(Object.keys(config.e2e ?? {}).length)
+      }
+
+      if (testingType === 'component') {
+        return Boolean(Object.keys(config.component ?? {}).length)
+      }
+
+      return false
+    } catch (error: any) {
+      if (error.type === 'NO_DEFAULT_CONFIG_FILE_FOUND') {
+        return false
+      }
+
+      throw error
     }
-
-    if (testingType === 'e2e') {
-      return Boolean(Object.keys(config.e2e ?? {}).length)
-    }
-
-    if (testingType === 'component') {
-      return Boolean(Object.keys(config.component ?? {}).length)
-    }
-
-    return false
   }
 
   async getProjectPreferences (projectTitle: string) {
