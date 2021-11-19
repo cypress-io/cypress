@@ -14,7 +14,7 @@ import { pathToArray } from 'graphql/jsutils/Path'
 import dedent from 'dedent'
 import { stubQuery } from './stubgql-Query'
 import { stubGlobalProject, stubProject } from './stubgql-Project'
-import { CloudOrganizationStubs, CloudProjectStubs, CloudRecordKeyStubs, CloudRunStubs } from './stubgql-CloudTypes'
+import { CloudOrganizationStubs, CloudProjectStubs, CloudRecordKeyStubs, CloudRunStubs, CloudUserStubs } from './stubgql-CloudTypes'
 
 type MaybeResolveMap = {[K in keyof CodegenTypeMap]: MaybeResolver<CodegenTypeMap[K]>}
 
@@ -29,6 +29,7 @@ const GQLStubRegistry: Partial<MaybeResolveMap> = {
   CloudProject: CloudProjectStubs.componentProject,
   CloudRun: CloudRunStubs.allPassing,
   CloudRecordKey: CloudRecordKeyStubs.componentProject,
+  CloudUser: CloudUserStubs.me,
 }
 
 export function testUrqlClient (context: ClientTestContext, onResult?: (result: any, context: ClientTestContext) => any): Client {
