@@ -44,10 +44,5 @@ module.exports = async function (params) {
 
   await fs.copy(distNodeModules, appNodeModules)
 
-  // const packages = await globby('packages/*/node_modules', {
-  //   cwd: params.packager.info._appDir,
-  //   onlyFiles: false,
-  // })
-
   console.log('all node_modules subfolders copied to', outputFolder)
 }

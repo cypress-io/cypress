@@ -40,12 +40,7 @@ export const buildDir = function (...args: string[]) {
     case 'linux':
       return path.resolve(root, 'linux-unpacked', ...args)
     case 'win32':
-      if (os.arch() === 'x64') {
-        return path.resolve(root, 'win-unpacked', ...args)
-      }
-
-      // x86 32bit architecture
-      return path.resolve(root, 'win-ia32-unpacked', ...args)
+      return path.resolve(root, 'win-unpacked', ...args)
     default:
       throw new Error('unexpected platform')
   }
