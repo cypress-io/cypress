@@ -115,7 +115,7 @@ export async function darwinDetectionWorkaround (): Promise<FoundBrowser[]> {
   let args = ['./detection-workaround.js']
 
   if (process.env.CYPRESS_INTERNAL_ENV === 'development') {
-    args = ['-r', '@packages/ts/register.js'].concat(args)
+    args = ['-r', '@packages/ts/register.js'].concat(['./detection-workaround.ts'])
   }
 
   const { stdout } = await utils.execa(nodePath, args, { cwd: __dirname })

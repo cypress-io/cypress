@@ -9,7 +9,10 @@
     "hardenedRuntime": true,
     "entitlements": "./scripts/entitlements.mac.inherit.plist",
     "entitlementsInherit": "./scripts/entitlements.mac.inherit.plist",
-    "type": "distribution"
+    "type": "distribution",
+    "binaries": [
+      "./build/mac/Contents/Resources/app/node_modules/chokidar/node_modules/fsevents/build/Release/.node"
+    ]
   },
   "linux": {
     "target": "dir",
