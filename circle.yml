@@ -36,7 +36,7 @@ executors:
     docker:
       - image: cypress/browsers:node16.5.0-chrome94-ff93
     # by default, we use "small" to save on CI costs. bump on a per-job basis if needed.
-    resource_class: medium
+    resource_class: small
     environment:
       PLATFORM: linux
 
@@ -258,14 +258,12 @@ commands:
               curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.30.0/install.sh | bash
               [ -s "${HOME}/.nvm/nvm.sh" ] && \. "${HOME}/.nvm/nvm.sh" # This loads nvm
             fi
+            nvm current
             echo "Installing Node $node_version"
             nvm install ${node_version}
-            nvm off || true
-            nvm on || true
             echo "Using Node $node_version"
             nvm use ${node_version}
             nvm alias default ${node_version}
-            echo $PATH
             node --version
             echo "Installing Yarn"
             npm install yarn -g # ensure yarn is installed with the correct node engine
@@ -858,7 +856,7 @@ jobs:
   ## skips ahead to the build step, otherwise installs and caches the node_modules
   node_modules_install:
     <<: *defaults
-    # resource_class: medium+
+    resource_class: medium+
     steps:
       - checkout
       - unless:
@@ -959,7 +957,7 @@ jobs:
 
   unit-tests:
     <<: *defaults
-    # resource_class: medium
+    resource_class: medium
     parallelism: 1
     steps:
       - restore_cached_workspace
@@ -2319,52 +2317,18 @@ windows-workflow: &windows-workflow
         requires:
           - windows-build
 
-    - test-kitchensink:
-        name: windows-test-kitchensink
-        executor: windows
-        requires:
-          - windows-build
-
-    - test-binary-against-kitchensink:
-        name: windows-test-binary-against-kitchensink
-        executor: windows
-        requires:
-          - windows-create-build-artifacts
-
-    - test-binary-against-staging:
-        name: windows-test-binary-against-staging
-        executor: windows
-        context: test-runner:record-tests
-        requires:
-          - windows-create-build-artifacts
-
-    - test-binary-and-npm-against-other-projects:
-        name: windows-test-binary-and-npm-against-other-projects
-        executor: windows
-        context: test-runner:trigger-test-jobs
-        requires:
-          - windows-create-build-artifacts
-
-# matrix-workflow: &matrix-workflow
-  # jobs:
-  #   - node_modules_install:
-  #       matrix:
-  #           parameters:
-  #             executor: [mac, windows]
-  #             only-cache-for-root-user: true
-
-  #   - build:
-  #       matrix:
-  #           parameters:
-  #             executor: [mac, windows]
-  #       requires:
-  #         - node_modules_install
-
 workflows:
   linux:
     <<: *linux-workflow
   windows:
     <<: *windows-workflow
+    when:
+      or:
+      - equal: [ develop, << pipeline.git.branch >> ]
+      - equal: [ rm-appveyor, << pipeline.git.branch >> ]
+      - matches:
+            pattern: "-release$"
+            value: << pipeline.git.branch >>
   mac:
     <<: *mac-workflow
     # usually we don't build Mac app - it takes a long time

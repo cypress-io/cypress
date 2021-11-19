@@ -36,6 +36,7 @@
     "ensure-deps": "./scripts/ensure-dependencies.sh",
     "get-next-version": "node scripts/get-next-version.js",
     "postinstall": "if [[ $CI ]]; then yarn-deduplicate --list --fail; else yarn-deduplicate --strategy=highest; fi && patch-package && ./scripts/run-if-not-ci.sh yarn build",
+    "try": "yarn-deduplicate --list --fail",
     "jscodeshift": "jscodeshift -t ./node_modules/js-codemod/transforms/arrow-function-arguments.js",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json .",
     "lint-changed": "lint-changed",
