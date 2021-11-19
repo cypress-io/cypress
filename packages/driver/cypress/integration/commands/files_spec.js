@@ -1,6 +1,5 @@
 const { assertLogLength } = require('../../support/utils')
 const { stripIndent } = require('common-tags')
-const Promise = require('bluebird')
 const { _ } = Cypress
 
 const okResponse = {
@@ -361,7 +360,7 @@ describe('src/cy/commands/files', () => {
       })
 
       it('throws when the server read aborts', function (done) {
-        const err = new Error('AbortError: The readFile operation was aborted on the server')
+        const err = new Error('AbortError: The readFile operation was aborted by the server')
 
         err.name = 'AbortError'
         err.aborted = true
@@ -713,8 +712,8 @@ describe('src/cy/commands/files', () => {
         cy.writeFile('foo.txt', 'contents', { timeout: 1000 })
       })
 
-      it('throws when the server write is aborted', function (done) {
-        const err = new Error()
+      it('throws when the server write aborts', function (done) {
+        const err = new Error('AbortError: The writeFile operation was aborted by the server')
 
         err.aborted = true
 
@@ -740,45 +739,23 @@ describe('src/cy/commands/files', () => {
     })
   })
 
-  describe('#writeFile-error', {
-    defaultCommandTimeout: 5000,
-  }, () => {
-    const bigString = JSON.stringify(Cypress._.times((10 ** 6), () => 'hehehehe'), null, 2)
-    const tooBigString = JSON.stringify(Cypress._.times(15000000, '😈'), null, 2) // 72MB
-    // afterEach(() => {
-    //   return new Promise((resolve) => {
-    //     setTimeout(() => {
-    //       resolve(cy.writeFile('./fixtures/my-long-file.txt', bigString))
-    //     }, 5000)
-    //   })
-    // })
+  // TODO remove repro test case
+  // describe('#writeFile-error', {
+  //   defaultCommandTimeout: 5000,
+  // }, () => {
+  //   const bigString = JSON.stringify(Cypress._.times((10 ** 6), () => 'hehehehe'), null, 2)
+  //   const tooBigString = JSON.stringify(Cypress._.times(15000000, '😈'), null, 2) // 72MB
 
-    // afterEach(() => {
-    //   return cy.writeFile('./fixtures/my-long-file.txt', bigString)
-    // })
+  //   afterEach(() => {
+  //     cy.writeFile('./fixtures/my-long-file.txt', bigString, { timeout: 1000 })
+  //   })
 
-    // afterEach(() => {
-    //   cy.writeFile('./fixtures/my-long-file.txt', bigString)
-    // })
+  //   it('writes until timeout', () => {
+  //     cy.visit('/fixtures/dom.html')
 
-    // afterEach(() => {
-    //   return new Promise((resolve) => {
-    //     setTimeout(() => {
-    //       resolve(cy.writeFile('./fixtures/my-long-file.txt', Cypress._.times(9000000, '😈'), { timeout: 1000 }))
-    //     }, 5000)
-    //   })
-    // })
-
-    afterEach(() => {
-      cy.writeFile('./fixtures/my-long-file.txt', bigString, { timeout: 1000 })
-    })
-
-    it('writes until timeout', () => {
-      cy.visit('/fixtures/dom.html')
-
-      cy.get('body').then((bodyElement) => {
-        expect(true).to.equal(true)
-      })
-    })
-  })
+  //     cy.get('body').then((bodyElement) => {
+  //       expect(true).to.equal(true)
+  //     })
+  //   })
+  // })
 })
