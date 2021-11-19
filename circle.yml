@@ -2283,7 +2283,7 @@ windows-workflow: &windows-workflow
     - node_modules_install:
         name: windows-node-modules-install
         executor: windows
-        # resource_class: windows.medium
+        resource_class: windows.medium
         only-cache-for-root-user: true
 
     - build:
