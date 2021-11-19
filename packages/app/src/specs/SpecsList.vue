@@ -22,9 +22,6 @@
     </div>
     <div
       class="grid"
-      :style="[{
-        height: 'calc(100vh - 144px)',
-      }]"
       v-bind="containerProps"
     >
       <div
@@ -53,7 +50,7 @@
             <RowDirectory
               v-else
               :name="row.data.name"
-              :expanded="row.data.expanded"
+              :expanded="row.data.expanded.value"
               :depth="row.data.depth - 2"
               :style="{ paddingLeft: `${((row.data.depth - 2) * 10) + 16}px` }"
               :indexes="getIndexes(row.data)"
@@ -150,11 +147,4 @@ const collapsible = computed(() => useCollapsibleTree(specTree.value, { dropRoot
 const treeSpecList = computed(() => collapsible.value.tree.filter(((item) => !item.hidden.value)))
 
 const { containerProps, list, wrapperProps } = useVirtualList(treeSpecList, { itemHeight: 40, overscan: 10 })
-
-// watch(list, (newList) => {
-//   if (newList.length) {
-//     debugger
-//     containerProps
-//   }
-// })
 </script>

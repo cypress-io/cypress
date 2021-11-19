@@ -1,4 +1,4 @@
-import { watch, Ref, ref, computed, shallowRef } from 'vue'
+import { watch, Ref, ref, computed, shallowRef, CSSProperties } from 'vue'
 import { MaybeRef, useElementSize } from '@vueuse/core'
 
 export interface UseVirtualListOptions {
@@ -146,7 +146,7 @@ export function useVirtualList<T = any> (list: MaybeRef<T[]>, options: UseVirtua
     }
   })
 
-  const containerStyle: Partial<CSSStyleDeclaration> = { overflowY: 'auto' }
+  const containerStyle: CSSProperties = { overflowY: 'auto' }
 
   return {
     list: currentList,
