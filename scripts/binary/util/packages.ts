@@ -58,7 +58,15 @@ export async function copyAllToDist (distDir: string) {
     // copies the package to dist
     // including the default paths
     // and any specified in package.json files
-    const json = await fs.readJSON(pathToPackageJson(pkg))
+    let json
+
+    try {
+      json = await fs.readJSON(pathToPackageJson(pkg))
+    } catch (e) {
+      if (e.code === 'ENOENT') {
+        continue
+      }
+    }
 
     // grab all the files that match "files" wildcards
     // but without all negated files ("!src/**/*.spec.js" for example)
