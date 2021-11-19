@@ -81,16 +81,11 @@ commands:
       - run: node --version
       - run: npm --version
 
-  restore_cached_workspace:
-    parameters:
-      node-version:
-        type: string
-        default: ""
+  restore_cached_workspace
     steps:
       - attach_workspace:
           at: ~/
-      - install-required-node:
-         node-version: <<parameters.node-version>>
+      - install-required-node
       - unpack-dependencies
 
   restore_cached_binary:
@@ -256,16 +251,11 @@ commands:
   install-required-node:
     # https://discuss.circleci.com/t/switch-nodejs-version-on-machine-executor-solved/26675/2
     description: Install Node version matching .node-version
-    parameters:
-      node-version:
-        type: string
-        default: ""
     steps:
       - run:
           name: Install NVM + Node
           command: |
-            node_version=<<parameters.node-version>>
-            node_version=${node_version:-$(cat .node-version)}
+            node_version=$(cat .node-version)
             [ -s "${HOME}/.nvm/nvm.sh" ] && \. "${HOME}/.nvm/nvm.sh" # This loads nvm
             if ! type nvm > /dev/null; then
               echo "Installing NVM"
@@ -277,6 +267,7 @@ commands:
             echo "Using Node $node_version"
             nvm use ${node_version} || exit 1
             nvm alias default ${node_version} || exit 1
+            echo $PATH
             node --version
             echo "Installing Yarn"
             npm install yarn -g # ensure yarn is installed with the correct node engine
@@ -363,7 +354,7 @@ commands:
       - restore_cached_workspace
       - run:
           command: |
-            cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --parallel --') || true
+            cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --parallel -- --') || true
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
@@ -390,7 +381,7 @@ commands:
       - restore_cached_workspace
       - run:
           command: |
-            cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --') || true
+            cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec -- --') || true
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
@@ -1439,13 +1430,12 @@ jobs:
   npm-cypress-schematic:
       <<: *defaults
       steps:
-        - restore_cached_workspace:
-            node-version: "16.10"
+        - restore_cached_workspace
         - run:
             name: Build + Install
             command: |
               yarn workspace @cypress/schematic build:all
-              yarn add --dev @angular/cli @angular-devkit/architect
+              yarn add --dev @angular/cli@12
             working_directory: npm/cypress-schematic
         - run:
             name: Launch
