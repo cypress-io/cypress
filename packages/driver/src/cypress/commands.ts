@@ -13,9 +13,23 @@ const builtInCommands = [
   addCommand,
 ]
 
-const reservedCommandNames = [
-  'addChainer',
-]
+const reservedCommandNames = {
+  'queue': true,
+  'fail': true,
+  'isCy': true,
+  'isStopped': true,
+  'initialize': true,
+  'stop': true,
+  'reset': true,
+  'addCommandSync': true,
+  'addChainer': true,
+  'addCommand': true,
+  'now': true,
+  'replayCommandsFrom': true,
+  'onBeforeAppWindowLoad': true,
+  'onUncaughtException': true,
+  'setRunnable': true,
+}
 
 const getTypeByPrevSubject = (prevSubject) => {
   if (prevSubject === 'optional') {
@@ -149,7 +163,7 @@ export default {
           })
         }
 
-        if (reservedCommandNames.includes(name)) {
+        if (_.keys(reservedCommandNames).includes(name)) {
           $errUtils.throwErrByPath('miscellaneous.reserved_command', {
             args: {
               name,
