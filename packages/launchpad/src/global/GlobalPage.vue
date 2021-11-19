@@ -31,41 +31,12 @@
     @add-project="handleAddProject"
   />
 
-  <ChooseExternalEditorModal 
+  <ChooseExternalEditorModal
     :open="isChooseEditorOpen"
+    :gql="props.gql"
     @close="isChooseEditorOpen = false"
     @selected="editorChosen"
-    :gql="props.gql"
   />
-  
-  <!-- <StandardModal
-    v-model="isChooseEditorOpen"
-    variant="bare"
-    help-link=""
-  >
-    <template #title>
-      {{ t("globalPage.selectPreferredEditor") }}
-    </template>
-
-    <div class="m-24px">
-      <ChooseExternalEditor
-        v-if="props.gql.localSettings"
-        :gql="props.gql"
-      />
-      <div
-        v-else
-        class="h-full flex items-center justify-center"
-      >
-        <i-cy-loading_x16 class="animate-spin icon-dark-white icon-light-gray-400" />
-      </div>
-    </div>
-
-    <template #footer>
-      <div class="flex justify-end">
-        <Button @click="showInIde">Done</Button>
-      </div>
-    </template>
-  </StandardModal> -->
 
   <button @click="isChooseEditorOpen = !isChooseEditorOpen">
     toggle

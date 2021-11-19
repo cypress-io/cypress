@@ -9,34 +9,12 @@
     >
       <InlineSpecList :gql="props.gql.currentProject" />
 
-      <StandardModal
-        :model-value="runnerUiStore.showChooseExternalEditorModal"
-        @update:model-value="runnerUiStore.setShowChooseExternalEditorModal(false)"
-        variant="bare"
-        help-link=""
-      >
-        <template #title>
-          {{ t("globalPage.selectPreferredEditor") }}
-        </template>
-
-        <div class="m-24px">
-          <ChooseExternalEditor
-            v-if="props.gql.localSettings"
-            :gql="props.gql"
-          />
-          <div
-            v-else
-            class="h-full flex items-center justify-center"
-          >
-            <i-cy-loading_x16 class="animate-spin icon-dark-white icon-light-gray-400" />
-          </div>
-        </div>
-
-        <template #footer>
-          <Button @click="showFileInIDE">Done</Button>
-        </template>
-      </StandardModal>
-
+      <ChooseExternalEditorModal
+        :open="runnerUiStore.showChooseExternalEditorModal"
+        :gql="props.gql"
+        @close="runnerUiStore.setShowChooseExternalEditorModal(false)"
+        @selected="openFile"
+      />
     </HideDuringScreenshot>
 
     <HideDuringScreenshot class="w-128">
@@ -81,7 +59,7 @@ import { gql } from '@urql/core'
 import InlineSpecList from '../specs/InlineSpecList.vue'
 import { getAutIframeModel, getEventManager, UnifiedRunnerAPI } from '../runner'
 import { useAutStore } from '../store'
-import type { BaseSpec } from '@packages/types'
+import type { BaseSpec, FileDetails } from '@packages/types'
 import SnapshotControls from './SnapshotControls.vue'
 import SpecRunnerHeader from './SpecRunnerHeader.vue'
 import HideDuringScreenshot from './screenshot/HideDuringScreenshot.vue'
@@ -91,9 +69,9 @@ import ScreenshotHelperPixels from './screenshot/ScreenshotHelperPixels.vue'
 import { useScreenshotStore } from '../store/screenshot-store'
 import type { GqlWithCurrentProject } from '../pages/Runner.vue'
 import { useRunnerUiStore } from '../store/runner-ui-store'
-import StandardModal from '@packages/frontend-shared/src/components/StandardModal.vue'
-import ChooseExternalEditor from '@packages/frontend-shared/src/gql-components/ChooseExternalEditor.vue'
-import Button from '@packages/frontend-shared/src/components/Button.vue'
+import ChooseExternalEditorModal from '@packages/frontend-shared/src/gql-components/ChooseExternalEditorModal.vue'
+import { useMutation } from '@urql/vue'
+import { OpenFileInIdeDocument } from '@packages/data-context/src/gen/all-operations.gen'
 
 gql`
 fragment SpecRunner on Query {
@@ -103,6 +81,12 @@ fragment SpecRunner on Query {
     ...SpecRunnerHeader
   }
   ...ChooseExternalEditor
+}
+`
+
+gql`
+mutation OpenFileInIDE ($input: FileDetailsInput!) {
+  openFileInIDE (input: $input)
 }
 `
 
@@ -145,9 +129,25 @@ function runSpec () {
   UnifiedRunnerAPI.executeSpec(props.activeSpec)
 }
 
-function showFileInIDE () {
-  console.log('show')
+let fileToOpen: FileDetails
+
+const openFileInIDE = useMutation(OpenFileInIdeDocument)
+
+function openFile () {
   runnerUiStore.setShowChooseExternalEditorModal(false)
+
+  if (!fileToOpen) {
+    // should not be possible!
+    return
+  }
+
+  openFileInIDE.executeMutation({
+    input: {
+      absolute: fileToOpen.absoluteFile,
+      line: fileToOpen.line,
+      column: fileToOpen.column,
+    },
+  })
 }
 
 watch(() => props.activeSpec, (spec) => {
@@ -161,13 +161,13 @@ onMounted(() => {
     runSpec()
   })
 
-
   eventManager.on('open:file', (file) => {
-    if (!props.gql.localSettings.preferences.preferredEditorBinary) {
-      runnerUiStore.setShowChooseExternalEditorModal(true)
-      return
+    fileToOpen = file
+
+    if (props.gql.localSettings.preferences.preferredEditorBinary) {
+      openFile()
     } else {
-      console.log(`using ${props.gql.localSettings.preferences.preferredEditorBinary}`)
+      runnerUiStore.setShowChooseExternalEditorModal(true)
     }
   })
 

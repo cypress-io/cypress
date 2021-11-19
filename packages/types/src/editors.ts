@@ -10,7 +10,7 @@ export interface EditorsResult {
 }
 
 export interface FileDetails {
-  absoluteFile?: string
+  absoluteFile: string
   column: number
   displayFile?: any // ReactNode
   line: number

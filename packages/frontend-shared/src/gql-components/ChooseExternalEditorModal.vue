@@ -1,9 +1,9 @@
 <template>
   <StandardModal
     :model-value="props.open"
-    @update:model-value="emit('close')"
     variant="bare"
     help-link=""
+    @update:model-value="close"
   >
     <template #title>
       {{ t("globalPage.selectPreferredEditor") }}
@@ -13,8 +13,7 @@
       <ChooseExternalEditor
         v-if="props.gql.localSettings"
         :gql="props.gql"
-        @chose-editor="handleChoseEditor"
-        
+        @chose-editor="val => preferredEditor = val"
       />
       <div
         v-else
@@ -26,8 +25,8 @@
 
     <template #footer>
       <div class="flex justify-end">
-        <Button 
-          :disabled="!preferredEditor"
+        <Button
+          :disabled="!preferredEditor?.length"
           @click="selectEditor"
         >
           Done
@@ -59,18 +58,7 @@ mutation SetPreferredEditorBinary ($value: String!) {
   setPreferredEditorBinary (value: $value)
 }`
 
-const preferredEditor = ref('')
-
 const setPreferredBinaryEditor = useMutation(SetPreferredEditorBinaryDocument)
-
-async function selectEditor () {
-  await setPreferredBinaryEditor.executeMutation({ value: preferredEditor.value })
-  emit('selected')
-}
-
-function handleChoseEditor (binary: string) {
-  preferredEditor.value = binary
-}
 
 const props = defineProps<{
   open: boolean
@@ -81,4 +69,16 @@ const emit = defineEmits<{
   (e: 'selected'): void
   (e: 'close'): void
 }>()
+
+const preferredEditor = ref('')
+
+function close () {
+  preferredEditor.value = ''
+  emit('close')
+}
+
+async function selectEditor () {
+  await setPreferredBinaryEditor.executeMutation({ value: preferredEditor.value })
+  emit('selected')
+}
 </script>
