@@ -1,6 +1,5 @@
 import path from 'path'
 
-// @ts-expect-error - it has not types
 import launchEditor from 'launch-editor'
 import type { DataContext } from '..'
 

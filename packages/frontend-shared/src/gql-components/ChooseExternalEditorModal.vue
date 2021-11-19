@@ -40,12 +40,12 @@
 <script lang="ts" setup>
 import { useI18n } from '@cy/i18n'
 import { gql } from '@urql/core'
-import ChooseExternalEditor from '@packages/frontend-shared/src/gql-components/ChooseExternalEditor.vue'
 import { ref } from 'vue'
-import StandardModal from '@packages/frontend-shared/src/components/StandardModal.vue'
-import Button from '@packages/frontend-shared/src/components/Button.vue'
-import { ChooseExternalEditorModalFragment, SetPreferredEditorBinaryDocument } from '../generated/graphql'
 import { useMutation } from '@urql/vue'
+import ChooseExternalEditor from './ChooseExternalEditor.vue'
+import StandardModal from '../components/StandardModal.vue'
+import Button from '../components/Button.vue'
+import { ChooseExternalEditorModalFragment, SetPreferredEditorBinaryDocument } from '../generated/graphql'
 
 const { t } = useI18n()
 
