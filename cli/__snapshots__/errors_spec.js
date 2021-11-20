@@ -5,7 +5,7 @@ a solution
 
 ----------
 
-Platform: test platform (Foo-OsVersion)
+Platform: test platform-x64 (Foo-OsVersion)
 Cypress Version: 1.2.3
 `
 
@@ -22,9 +22,33 @@ If you are using Docker, we provide containers with all required dependencies in
 
 ----------
 
-Platform: test platform (Foo-OsVersion)
+Platform: test platform-x64 (Foo-OsVersion)
 Cypress Version: 1.2.3
 `
+
+exports['errors individual has the following errors 1'] = [
+  "CYPRESS_RUN_BINARY",
+  "binaryNotExecutable",
+  "childProcessKilled",
+  "failedDownload",
+  "failedUnzip",
+  "incompatibleHeadlessFlags",
+  "invalidCacheDirectory",
+  "invalidCypressEnv",
+  "invalidOS",
+  "invalidRunProjectPath",
+  "invalidSmokeTestDisplayError",
+  "invalidTestingType",
+  "missingApp",
+  "missingDependency",
+  "missingXvfb",
+  "nonZeroExitCodeXvfb",
+  "notInstalledCI",
+  "smokeTestFailure",
+  "unexpected",
+  "unknownError",
+  "versionMismatch"
+]
 
 exports['invalid display error'] = `
 Cypress verification failed.
@@ -45,7 +69,7 @@ Please refer to the error above for more detail.
 
 ----------
 
-Platform: test platform (Foo-OsVersion)
+Platform: test platform-x64 (Foo-OsVersion)
 Cypress Version: 1.2.3
 `
 
@@ -69,7 +93,7 @@ Consider opening a new issue.
 
 ----------
 
-Platform: test platform (Foo-OsVersion)
+Platform: test platform-x64 (Foo-OsVersion)
 Cypress Version: 1.2.3
 `
 

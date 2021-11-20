@@ -37,7 +37,7 @@
     "babel-preset-typescript-vue3": "^2.0.14",
     "css-loader": "3.4.2",
     "cypress": "0.0.0-development",
-    "debug": "4.3.2",
+    "debug": "^4.3.2",
     "eslint-plugin-vue": "7.18.0",
     "find-webpack": "2.1.0",
     "mocha": "7.1.1",

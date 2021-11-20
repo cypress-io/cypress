@@ -44,7 +44,6 @@ onlyMainBranches: &onlyMainBranches
       only:
         - develop
         - 10.0-release
-        - tgriesser/chore/fix-release
   requires:
     - create-build-artifacts
 
@@ -52,7 +51,7 @@ executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
     docker:
-      - image: cypress/browsers:node14.17.0-chrome91-ff89
+      - image: cypress/browsers:node16.5.0-chrome94-ff93
     # by default, we use "small" to save on CI costs. bump on a per-job basis if needed.
     resource_class: small
     environment:
@@ -61,7 +60,7 @@ executors:
   # Docker image with non-root "node" user
   non-root-docker-user:
     docker:
-      - image: cypress/browsers:node14.17.0-chrome91-ff89
+      - image: cypress/browsers:node16.5.0-chrome94-ff93
         user: node
     environment:
       PLATFORM: linux
@@ -72,7 +71,7 @@ executors:
   mac:
     macos:
       # Executor should have Node >= required version
-      xcode: "12.2.0"
+      xcode: "13.0.0"
     environment:
       PLATFORM: mac
 
@@ -271,27 +270,29 @@ commands:
 
   install-required-node:
     # https://discuss.circleci.com/t/switch-nodejs-version-on-machine-executor-solved/26675/2
-    description: Install Node version matching .node-version
+    description: Install Node version
+    parameters:
+      version:
+        type: string
+        default: ""
     steps:
       - run:
-          name: Install NVM
+          name: Install NVM + Node
           # TODO: determine why we get the missing .nvmrc file error
           command: |
-            export NODE_VERSION=$(cat .node-version)
+            export NODE_VERSION=<<parameters.version>>
+            export NODE_VERSION=${NODE_VERSION:-$(cat .node-version)}
             echo "Installing Node $NODE_VERSION"
+            echo $NODE_VERSION > .node-version
             cp .node-version .nvmrc
             curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.35.3/install.sh | bash
-      - run:
-          # https://github.com/nvm-sh/nvm#nvmrc
-          name: Install Node
-          command: |
             . ./scripts/load-nvm.sh
             echo "before nvm install"
-            nvm install
+            nvm install $NODE_VERSION
             echo "before nvm use"
-            nvm use
+            nvm use $NODE_VERSION
             echo "before nvm alias default"
-            nvm alias default
+            nvm alias default $NODE_VERSION
             node --version
 
   install-chrome:
@@ -611,7 +612,7 @@ commands:
           working_directory: /tmp/<<parameters.repo>>
           # force installing the freshly built binary
           command: |
-            CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i ~/cypress/cypress.tgz && [[ -f yarn.lock ]] && yarn
+            CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i --legacy-peer-deps ~/cypress/cypress.tgz && [[ -f yarn.lock ]] && yarn
       - run:
           name: Print Cypress version
           working_directory: /tmp/<<parameters.repo>>
@@ -732,7 +733,7 @@ commands:
               CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip yarn add -D ~/cypress/cypress.tgz
             else
               npm install
-              CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm install ~/cypress/cypress.tgz
+              CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm install --legacy-peer-deps ~/cypress/cypress.tgz
             fi
           working_directory: /tmp/<<parameters.repo>>
       - run:
@@ -894,7 +895,7 @@ commands:
           paths:
             - cypress/binary-url.json
 
-  build-npm-package:
+  build-cypress-npm-package:
     steps:
       - run:
           name: bump NPM version
@@ -913,13 +914,12 @@ commands:
       - run:
           name: pack NPM package
           working_directory: cli/build
-          command: yarn pack
+          command: yarn pack --filename cypress.tgz
       - run:
           name: list created NPM package
           working_directory: cli/build
           command: ls -l
-      # created file should have filename cypress-<version>.tgz
-      - run: cp cli/build/cypress-v*.tgz cypress.tgz
+      - run: cp cli/build/cypress.tgz cypress.tgz
       - store-npm-logs
       - run: pwd
       - run: ls -l
@@ -1585,20 +1585,27 @@ jobs:
       <<: *defaults
       steps:
         - restore_cached_workspace
+        - install-required-node:
+            version: "16.10"
         - run:
-            name: Build
-            command: yarn workspace @cypress/schematic build:all
-        - run:
-            name: Install @angular/cli
-            command: yarn add:angular-cli
+            name: Build + Install
+            command: |
+              . ../../scripts/load-nvm.sh
+              yarn workspace @cypress/schematic build:all
+              yarn policies set-version 1.19.0
+              yarn add --dev @angular/cli
             working_directory: npm/cypress-schematic
         - run:
             name: Launch
-            command: yarn launch:test
+            command: |
+              . ../../scripts/load-nvm.sh
+              yarn launch:test
             working_directory: npm/cypress-schematic
         - run:
             name: Run unit tests
-            command: yarn test
+            command: |
+              . ../../scripts/load-nvm.sh
+              yarn test
             working_directory: npm/cypress-schematic
         - store-npm-logs
 
@@ -1618,7 +1625,7 @@ jobs:
     steps:
       - restore_cached_workspace
       - build-binary
-      - build-npm-package
+      - build-cypress-npm-package
       - run:
           name: Check current branch to persist artifacts
           command: |
@@ -1947,7 +1954,7 @@ jobs:
           name: Install Cypress
           working_directory: /tmp/cypress-test-tiny
           # force installing the freshly built binary
-          command: CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i ~/cypress/cypress.tgz
+          command: CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i --legacy-peer-deps ~/cypress/cypress.tgz
       - run:
           name: Run test project
           working_directory: /tmp/cypress-test-tiny
@@ -2047,6 +2054,7 @@ jobs:
           repo: cypress-example-conduit-app
           browser: chrome
           command: "npm run cypress:run"
+          wait-on: http://localhost:3000
 
   "test-binary-against-api-testing-firefox":
     <<: *defaults
@@ -2329,7 +2337,6 @@ linux-workflow: &linux-workflow
             only:
               - develop
               - 10.0-release
-              - tgriesser/chore/fix-release
         requires:
           - build
     - test-kitchensink:
@@ -2342,7 +2349,6 @@ linux-workflow: &linux-workflow
             only:
               - develop
               - 10.0-release
-              - tgriesser/chore/fix-release
         requires:
           - build
     - create-build-artifacts:
@@ -2393,7 +2399,6 @@ linux-workflow: &linux-workflow
             only:
               - develop
               - 10.0-release
-              - tgriesser/chore/fix-release
         requires:
           - create-build-artifacts
     - test-npm-module-and-verify-binary:
@@ -2402,7 +2407,6 @@ linux-workflow: &linux-workflow
             only:
               - develop
               - 10.0-release
-              - tgriesser/chore/fix-release
         requires:
           - create-build-artifacts
     - test-binary-against-staging:
@@ -2412,7 +2416,6 @@ linux-workflow: &linux-workflow
             only:
               - develop
               - 10.0-release
-              - tgriesser/chore/fix-release
         requires:
           - create-build-artifacts
 
@@ -2438,7 +2441,6 @@ linux-workflow: &linux-workflow
             only:
               - develop
               - 10.0-release
-              - tgriesser/chore/fix-release
         requires:
           - create-build-artifacts
 
@@ -2511,7 +2513,6 @@ mac-workflow: &mac-workflow
             only:
               - develop
               - 10.0-release
-              - tgriesser/chore/fix-release
         requires:
           - darwin-create-build-artifacts
 
@@ -2524,7 +2525,6 @@ mac-workflow: &mac-workflow
             only:
               - develop
               - 10.0-release
-              - tgriesser/chore/fix-release
         requires:
           - darwin-create-build-artifacts
 

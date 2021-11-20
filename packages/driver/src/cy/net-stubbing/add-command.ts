@@ -199,7 +199,7 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
       staticResponse = handler as StaticResponse
     } else if (!_.isUndefined(handler)) {
       // a handler was passed but we dunno what it's supposed to be
-      return $errUtils.throwErrByPath('net_stubbing.intercept.invalid_handler', { args: { handler } })
+      $errUtils.throwErrByPath('net_stubbing.intercept.invalid_handler', { args: { handler } })
     }
 
     const routeMatcher = annotateMatcherOptionsTypes(matcher)
@@ -211,7 +211,7 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
     }
 
     if (routeMatcher.middleware && !hasInterceptor) {
-      return $errUtils.throwErrByPath('net_stubbing.intercept.invalid_middleware_handler', { args: { handler } })
+      $errUtils.throwErrByPath('net_stubbing.intercept.invalid_middleware_handler', { args: { handler } })
     }
 
     const frame: NetEvent.ToServer.AddRoute<BackendStaticResponseWithArrayBuffer> = {
@@ -257,11 +257,11 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
         // url, mergeRouteMatcher, handler
         // @ts-ignore
         if (handler.url) {
-          return $errUtils.throwErrByPath('net_stubbing.intercept.no_duplicate_url')
+          $errUtils.throwErrByPath('net_stubbing.intercept.no_duplicate_url')
         }
 
         if (!arg2) {
-          return $errUtils.throwErrByPath('net_stubbing.intercept.handler_required')
+          $errUtils.throwErrByPath('net_stubbing.intercept.handler_required')
         }
 
         checkExtraArguments(['url', 'mergeRouteMatcher', 'handler'])
