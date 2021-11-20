@@ -1,11 +1,12 @@
 /* eslint-disable no-console */
-const globby = require('globby')
+const glob = require('glob')
 const path = require('path')
 const fsExtra = require('fs-extra')
 const minimist = require('minimist')
 const crypto = require('crypto')
 const fs = require('fs')
 const stringify = require('fast-json-stable-stringify')
+
 const rootPackageJson = require('../package.json')
 
 const opts = minimist(process.argv.slice(2))
@@ -22,6 +23,7 @@ async function circleCache () {
 }
 
 const BASE_DIR = path.join(__dirname, '..')
+
 const CACHE_DIR = path.join(BASE_DIR, 'globbed_node_modules')
 const p = (str) => path.join(BASE_DIR, str)
 
@@ -32,18 +34,11 @@ const packageGlobs = workspacePaths.filter((s) => s.endsWith('/*'))
 // Otherwise, adding/editing a patch will not invalidate the CI cache we have for the yarn install
 async function cacheKey () {
   const yarnLocks = [p('yarn.lock')]
-  const patchFiles = await globby(p('**/*.patch'), {
-    ignore: ['**/node_modules/**', '**/*_node_modules/**'],
-  })
-  // TODO: base on workspaces or lerna
-  const packageJsons = await globby([
-    p('package.json'),
-    ...workspacePaths.map((dir) => p(`${dir}/package.json`)),
-  ], {
+  const patchFiles = glob.sync(p('**/*.patch'), {
     ignore: ['**/node_modules/**', '**/*_node_modules/**'],
   })
 
-  console.log('package.jsons', packageJsons)
+  const packageJsons = glob.sync(`${BASE_DIR}/{.,${workspacePaths.join(',')}}/package.json`)
 
   // Concat the stable stringify of all of the package.json dependencies that make up
   const hashedPackageDeps = packageJsons.sort().map((abs) => require(abs)).map(
@@ -66,15 +61,11 @@ async function cacheKey () {
 // Need to dynamically unpack and re-assemble all of the node_modules directories
 // https://discuss.circleci.com/t/dynamic-or-programmatic-caching-of-directories/1455
 async function prepareCircleCache () {
-  const paths = await globby(
-    packageGlobs.map((dir) => p(`${dir}/node_modules`)),
-    { onlyDirectories: true },
-  )
+  const paths = glob.sync(p(`{${packageGlobs.join(',')}}/node_modules/`))
 
-  console.log('found paths', paths)
+  console.log('found paths', paths.length)
   await Promise.all(
     paths.map(async (src) => {
-      console.log('moving', src)
       await fsExtra.move(
         src,
         src
@@ -84,20 +75,14 @@ async function prepareCircleCache () {
     }),
   )
 
-  console.log(`Moved globbed node_modules for ${paths.join(', ')} to ${CACHE_DIR}`)
+  console.log(`Finished moving globbed node_modules for ${packageGlobs.join(', ')} to ${CACHE_DIR}`)
 }
 
 async function unpackCircleCache () {
-  const paths = await globby(
-    p(`globbed_node_modules/*/*`),
-    { onlyDirectories: true },
-  )
-
-  console.log('found paths', paths)
+  const paths = glob.sync(p('globbed_node_modules/*/*/'))
 
   await Promise.all(
     paths.map(async (src) => {
-      console.log('moving', src)
       await fsExtra.move(
         src,
         src
