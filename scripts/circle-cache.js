@@ -66,12 +66,12 @@ async function prepareCircleCache () {
   console.log('found paths', paths.length)
   await Promise.all(
     paths.map(async (src) => {
-      await fsExtra.move(
-        src,
-        src
-        .replace(/(.*?)\/node_modules/, '$1_node_modules')
-        .replace(BASE_DIR, CACHE_DIR),
-      )
+      const updatedDir = src
+      .replace(/(.*?)\/node_modules/, '$1_node_modules')
+      .replace(BASE_DIR, CACHE_DIR)
+
+      console.log('moving', src, 'to', updatedDir)
+      await fsExtra.move(src, updatedDir)
     }),
   )
 
@@ -83,12 +83,12 @@ async function unpackCircleCache () {
 
   await Promise.all(
     paths.map(async (src) => {
-      await fsExtra.move(
-        src,
-        src
-        .replace(CACHE_DIR, BASE_DIR)
-        .replace(/(.*?)_node_modules/, `$1/node_modules`),
-      )
+      const updatedDir = src
+      .replace(CACHE_DIR, BASE_DIR)
+      .replace(/(.*?)_node_modules/, `$1/node_modules`)
+
+      console.log('moving', src, 'to', updatedDir)
+      await fsExtra.move(src, updatedDir)
     }),
   )
 

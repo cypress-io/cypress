@@ -11,7 +11,6 @@ const execa = require('execa')
 const prettyMs = require('pretty-ms')
 const pluralize = require('pluralize')
 const debug = require('debug')('cypress:binary')
-const externalUtils = require('./3rd-party')
 
 fs = Promise.promisifyAll(fs)
 glob = Promise.promisify(glob)
@@ -96,10 +95,10 @@ const copyAllToDist = function (distDir) {
       const globOptions = {
         cwd: pkg, // search in the package folder
         absolute: false, // and return relative file paths
-        followSymbolicLinks: false, // do not follow symlinks
+        follow: false, // do not follow symlinks
       }
 
-      return externalUtils.globby(pkgFileMasks, globOptions)
+      return glob(pkgFileMasks, globOptions)
     }).map((foundFileRelativeToPackageFolder) => {
       return path.join(pkg, foundFileRelativeToPackageFolder)
     })
@@ -122,12 +121,7 @@ const copyAllToDist = function (distDir) {
 
   return fs.ensureDirAsync(distDir)
   .then(() => {
-    const globs = ['./packages/*', './npm/*']
-    const globOptions = {
-      onlyFiles: false,
-    }
-
-    return Promise.resolve(externalUtils.globby(globs, globOptions))
+    return glob('./{packages,npm}/*')
   })
   .filter(notSkipped)
   .map(copyPackage, { concurrency: 1 })

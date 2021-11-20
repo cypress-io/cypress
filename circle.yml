@@ -894,7 +894,9 @@ jobs:
       - restore_cached_workspace
       - run:
           name: all packages
-          command: yarn list || true
+          command: |
+            ls
+            ls npm/webpack-dev-server/
       - run:
           name: Top level packages
           command: yarn list typescript webpack webpack-dev-server || true
