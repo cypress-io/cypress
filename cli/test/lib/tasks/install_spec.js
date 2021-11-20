@@ -472,6 +472,9 @@ describe('/lib/tasks/install', function () {
 
       expect(install._getBinaryUrlFromPrereleaseNpmUrl('https://cdn.cypress.io/beta/npm/5.1.1/circle-develop-3fdfc3b453eb38ad3c0b079531e4dde6668e3dd0-436710/cypress.tgz'))
       .to.eq('https://cdn.cypress.io/beta/binary/5.1.1/linux-x64/circle-develop-3fdfc3b453eb38ad3c0b079531e4dde6668e3dd0-436710/cypress.zip')
+
+      expect(install._getBinaryUrlFromPrereleaseNpmUrl('https://cdn.cypress.io/beta/npm/5.1.1/circle-develop/some/branch-3fdfc3b453eb38ad3c0b079531e4dde6668e3dd0-436710/cypress.tgz'))
+      .to.eq('https://cdn.cypress.io/beta/binary/5.1.1/linux-x64/circle-develop/some/branch-3fdfc3b453eb38ad3c0b079531e4dde6668e3dd0-436710/cypress.zip')
     })
 
     it('returns nothing for an invalid url', function () {
