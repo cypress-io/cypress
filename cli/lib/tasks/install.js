@@ -38,6 +38,10 @@ const getNpmArgv = () => {
 const getVersionSpecifier = (startDir = path.resolve(__dirname, '../..')) => {
   const argv = getNpmArgv()
 
+  if ((process.env.npm_package_resolved || '').endsWith('cypress.tgz')) {
+    return process.env.npm_package_resolved
+  }
+
   if (argv) {
     const tgz = _.find(argv, (t) => t.endsWith('cypress.tgz'))
 

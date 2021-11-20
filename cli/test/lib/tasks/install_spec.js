@@ -502,6 +502,14 @@ describe('/lib/tasks/install', function () {
       expect(await install._getVersionSpecifier('/foo/bar/baz')).to.eq('https://foo.com/cypress.tgz')
     })
 
+    it('resolves with cypress.tgz URL if specified in npm env npm_package_resolved', async function () {
+      restoreEnv = mockedEnv({
+        npm_package_resolved: 'https://foo.com/cypress.tgz',
+      })
+
+      expect(await install._getVersionSpecifier('/foo/bar/baz')).to.eq('https://foo.com/cypress.tgz')
+    })
+
     it('resolves with versionSpecifier from parent pkg.json', async function () {
       fs.readJSON.withArgs('/foo/bar/baz/package.json').resolves({
         dependencies: {
