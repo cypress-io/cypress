@@ -441,8 +441,6 @@ describe('lib/util/args', () => {
         '--ci=ci',
         '--ciBuildId=ciBuildId',
         '--clearLogs=clearLogs',
-        '--userNodePath=userNodePath',
-        '--userNodeVersion=userNodeVersion',
         '--config=config',
         '--configFile=configFile',
         '--cwd=cwd',
@@ -474,6 +472,8 @@ describe('lib/util/args', () => {
         '--tag=tag',
         '--testingType=testingType',
         '--updating=updating',
+        '--userNodePath=userNodePath',
+        '--userNodeVersion=userNodeVersion',
         '--version=version',
       ])
     })

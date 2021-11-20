@@ -120,12 +120,6 @@ export function isValidCypressInternalEnvValue (value) {
   return _.includes(names, value)
 }
 
-export function allowed (obj = {}) {
-  const propertyNames = publicConfigKeys.concat(breakingKeys)
-
-  return _.pick(obj, propertyNames)
-}
-
 export type FullConfig =
   Cypress.RuntimeConfigOptions &
   Cypress.ResolvedConfigOptions &

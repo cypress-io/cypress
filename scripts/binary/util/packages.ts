@@ -128,7 +128,7 @@ export const replaceLocalNpmVersions = async function (basePath: string) {
   async function updatePackageJson (pkg: string) {
     const pkgJsonPath = path.join(basePath, pkg)
 
-    visited.add(pkgJsonPath)
+    visited.add(pkg)
     const json = await fs.readJson(pkgJsonPath)
 
     const { dependencies } = json
@@ -137,17 +137,19 @@ export const replaceLocalNpmVersions = async function (basePath: string) {
       let shouldWriteFile = false
 
       for (const [depName, version] of Object.entries(dependencies)) {
-        if (!depName.startsWith('@cypress/') || version !== '0.0.0-development') {
+        const matchedPkg = Boolean(depName.startsWith('@cypress/') || depName === 'create-cypress-tests')
+
+        if (!matchedPkg || version !== '0.0.0-development') {
           continue
         }
 
-        const [, localPkg] = depName.split('/')
+        const pkgName = depName.startsWith('@cypress/') ? depName.split('/')[1] : depName
 
-        const localPkgJsonPath = path.join(basePath, 'npm', localPkg)
+        json.dependencies[depName] = `file:${path.join(basePath, 'npm', pkgName)}`
+        shouldWriteFile = true
 
-        dependencies[`@cypress/${localPkg}`] = `file:${localPkgJsonPath}`
-        if (!visited.has(localPkgJsonPath)) {
-          await updatePackageJson(`./npm/${localPkg}/package.json`)
+        if (!visited.has(depName)) {
+          await updatePackageJson(`./npm/${pkgName}/package.json`)
         }
 
         shouldWriteFile = true
@@ -165,7 +167,7 @@ export const replaceLocalNpmVersions = async function (basePath: string) {
 
 export async function removeLocalNpmDirs (distPath: string, except: string[]) {
   const toRemove = await globby(`${distPath}/npm/*`, {
-    ignore: except.map((e) => e.replace('/package.json', '')),
+    ignore: except.map((e) => path.join(distPath, e).replace('/package.json', '')),
     onlyDirectories: true,
   })
 

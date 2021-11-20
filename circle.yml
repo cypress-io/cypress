@@ -1032,8 +1032,10 @@ jobs:
             runner-integration-tests-chrome,
             runner-ct-integration-tests-chrome,
             reporter-integration-tests,
+            run-frontend-shared-component-tests-chrome,
             run-app-integration-tests-chrome,
-            run-launchpad-integration-tests-chrome
+            run-launchpad-integration-tests-chrome,
+            run-launchpad-component-tests-chrome,
       - run: yarn percy build:finalize
 
   cli-visual-tests:

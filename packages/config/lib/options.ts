@@ -1,4 +1,4 @@
-const validate = require('./validation')
+import validate from './validation'
 
 interface ResolvedConfigOption {
   name: string
