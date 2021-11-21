@@ -13,7 +13,8 @@ import type { LaunchArgs, PlatformName } from '@packages/types'
 import EventEmitter from 'events'
 
 const isDev = () => {
-  return process.env['CYPRESS_INTERNAL_ENV'] === 'development'
+  // TODO: (tim) ensure the process.env.LAUNCHPAD gets removed before release
+  return Boolean(process.env['CYPRESS_INTERNAL_ENV'] === 'development' || process.env.LAUNCHPAD)
 }
 
 export = {
@@ -131,7 +132,7 @@ export = {
   async ready (options: {projectRoot?: string} = {}) {
     const { projectRoot } = options
     const { bus, gqlPort, ctx } = process.env.LAUNCHPAD
-      ? await runInternalServer(options as LaunchArgs, 'open')
+      ? await runInternalServer(options as LaunchArgs, 'open', app)
       : { bus: new EventEmitter, gqlPort: undefined, ctx: null }
 
     // TODO: potentially just pass an event emitter

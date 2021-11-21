@@ -25,4 +25,14 @@ export class FileActions {
 
     await this.ctx.fs.remove(path.join(this.ctx.currentProject?.projectRoot, relativePath))
   }
+
+  async checkIfFileExists (relativePath: string) {
+    if (!this.ctx.currentProject) {
+      throw new Error(`Cannot check file in project exists without active project`)
+    }
+
+    const filePath = path.join(this.ctx.currentProject?.projectRoot, relativePath)
+
+    return await this.ctx.fs.stat(filePath)
+  }
 }

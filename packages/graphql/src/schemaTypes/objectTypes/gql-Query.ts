@@ -3,6 +3,8 @@ import { ApplicationError, WizardSampleConfigFile } from '.'
 import { ProjectLike, WizardSetupInput } from '..'
 import { CurrentProject } from './gql-CurrentProject'
 import { DevState } from './gql-DevState'
+import { LocalSettings } from './gql-LocalSettings'
+import { VersionData } from './gql-VersionData'
 
 export const Query = objectType({
   name: 'Query',
@@ -18,6 +20,14 @@ export const Query = objectType({
       type: DevState,
       description: 'The state of any info related to local development of the runner',
       resolve: (root, args, ctx) => ctx.coreData.dev,
+    })
+
+    t.field('versions', {
+      type: VersionData,
+      description: 'Previous versions of cypress and their release date',
+      resolve: (root, args, ctx) => {
+        return ctx.versions()
+      },
     })
 
     t.field('currentProject', {
@@ -62,6 +72,14 @@ export const Query = objectType({
     t.nonNull.boolean('isAuthBrowserOpened', {
       description: 'Whether the browser has been opened for auth or not',
       resolve: (source, args, ctx) => ctx.coreData.isAuthBrowserOpened,
+    })
+
+    t.nonNull.field('localSettings', {
+      type: LocalSettings,
+      description: 'editors on the user local machine',
+      resolve: (source, args, ctx) => {
+        return ctx.coreData.localSettings
+      },
     })
   },
 })

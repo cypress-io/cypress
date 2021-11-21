@@ -4,7 +4,7 @@ import path from 'path'
 import Bluebird from 'bluebird'
 import 'server-destroy'
 
-import { AppApiShape, ApplicationDataApiShape, DataEmitterActions, ProjectApiShape } from './actions'
+import { AppApiShape, ApplicationDataApiShape, DataEmitterActions, LocalSettingsApiShape, ProjectApiShape } from './actions'
 import type { NexusGenAbstractTypeMembers } from '@packages/graphql/src/gen/nxs.gen'
 import type { AuthApiShape } from './actions/AuthActions'
 import type { ElectronApiShape } from './actions/ElectronActions'
@@ -19,7 +19,7 @@ import {
   BrowserDataSource,
   StorybookDataSource,
   CloudDataSource,
-  ConfigDataSource,
+  ProjectConfigDataSource,
   EnvDataSource,
   GraphQLDataSource,
   HtmlDataSource,
@@ -32,6 +32,7 @@ import type { AddressInfo } from 'net'
 import EventEmitter from 'events'
 import type { App as ElectronApp } from 'electron'
 import type { SocketIOServer } from '@packages/socket'
+import { VersionsDataSource } from './sources/VersionsDataSource'
 
 const IS_DEV_ENV = process.env.CYPRESS_INTERNAL_ENV !== 'production'
 
@@ -41,13 +42,17 @@ export interface DataContextConfig {
   os: PlatformName
   launchArgs: LaunchArgs
   launchOptions: OpenProjectLaunchOptions
-  electronApp: ElectronApp
+  electronApp?: ElectronApp
+  /**
+   * Default is to
+   */
   coreData?: CoreDataShape
   /**
    * Injected from the server
    */
   appApi: AppApiShape
   appDataApi: ApplicationDataApiShape
+  localSettingsApi: LocalSettingsApiShape
   authApi: AuthApiShape
   projectApi: ProjectApiShape
   electronApi: ElectronApiShape
@@ -79,6 +84,13 @@ export class DataContext {
     return this._config.electronApi
   }
 
+  get localSettingsApi () {
+    return this._config.localSettingsApi
+  }
+
+  get isGlobalMode () {
+    return !this.currentProject
+  }
   resetLaunchArgs (launchArgs: LaunchArgs) {
     this._coreData = makeCoreData(launchArgs)
   }
@@ -111,6 +123,10 @@ export class DataContext {
     return this.coreData.app.machineBrowsers
   }
 
+  get nodePath () {
+    return this.coreData.app.nodePath
+  }
+
   @cached
   get file () {
     return new FileDataSource(this)
@@ -119,6 +135,10 @@ export class DataContext {
   @cached
   get git () {
     return new GitDataSource(this)
+  }
+
+  async versions () {
+    return new VersionsDataSource().versions()
   }
 
   @cached
@@ -143,7 +163,7 @@ export class DataContext {
   }
 
   get config () {
-    return new ConfigDataSource(this)
+    return new ProjectConfigDataSource(this)
   }
 
   get storybook () {
@@ -248,6 +268,7 @@ export class DataContext {
       authApi: this._config.authApi,
       projectApi: this._config.projectApi,
       electronApi: this._config.electronApi,
+      localSettingsApi: this._config.localSettingsApi,
       busApi: this._rootBus,
     }
   }
@@ -327,6 +348,7 @@ export class DataContext {
   }
 
   async initializeMode () {
+    // this.actions.app.refreshNodePath()
     if (this._config.mode === 'run') {
       await this.initializeRunMode()
     } else if (this._config.mode === 'open') {

@@ -1,9 +1,9 @@
-import type { FoundBrowser, FullConfig, LaunchArgs, Preferences } from '@packages/types'
 import type { NexusGenEnums, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
 import type { BrowserWindow } from 'electron'
 import type { ChildProcess } from 'child_process'
 import path from 'path'
 import type { ApplicationErrorSource } from '@packages/graphql/src/schemaTypes/objectTypes/gql-ApplicationError'
+import { devicePreferenceDefaults, DevicePreferences, Editor, FoundBrowser, FullConfig, LaunchArgs, Preferences } from '@packages/types'
 
 export type Maybe<T> = T | null | undefined
 
@@ -21,9 +21,25 @@ export interface DevStateShape {
   refreshState: null | string
 }
 
+export interface LocalSettingsDataShape {
+  refreshing: Promise<Editor[]> | null
+  availableEditors: Editor[]
+  preferences: DevicePreferences
+}
+
 export interface ConfigChildProcessShape {
+  /**
+   * Child process executing the config & sourcing plugin events
+   */
   process: ChildProcess
+  /**
+   * Keeps track of which plugins we have executed in the current config process
+   */
   executedPlugins: null | 'e2e' | 'ct'
+  /**
+   * Config from the initial module.exports
+   */
+  resolvedBaseConfig: Promise<Cypress.ConfigOptions>
 }
 
 export interface CurrentProjectShape extends ProjectShape {
@@ -91,6 +107,8 @@ export interface AppDataShape {
   isLoadingMachineBrowsers: boolean
   loadingMachineBrowsers: Promise<FoundBrowser[]> | null
   machineBrowsers: ReadonlyArray<FoundBrowser> | null
+  refreshingNodePath: Promise<string> | null
+  nodePath: string | null
 }
 
 export interface WizardDataShape {
@@ -113,6 +131,7 @@ export interface BaseErrorDataShape {
 export interface CoreDataShape {
   globalError: ApplicationErrorSource | null
   dev: DevStateShape
+  localSettings: LocalSettingsDataShape
   app: AppDataShape
   isLoadingGlobalProjects: boolean
   globalProjects: string[] | null
@@ -157,6 +176,13 @@ export function makeCoreData (launchArgs: LaunchArgs): CoreDataShape {
       isLoadingMachineBrowsers: false,
       loadingMachineBrowsers: null,
       machineBrowsers: null,
+      refreshingNodePath: null,
+      nodePath: null,
+    },
+    localSettings: {
+      availableEditors: [],
+      preferences: devicePreferenceDefaults,
+      refreshing: null,
     },
     globalProjects: null,
     isLoadingGlobalProjects: false,

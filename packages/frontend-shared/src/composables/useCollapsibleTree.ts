@@ -1,74 +1,61 @@
 import { ComputedRef, computed, Ref } from 'vue'
 import { useToggle } from '@vueuse/core'
 
-export interface UseCollapsibleTreeNode {
-  [key: string]: any
+export type RawNode <T> = {
+  name: string
+  children: RawNode<T>[]
+}
 
-  // make all parents open themselves
-  reveal: () => UseCollapsibleTreeNode[]
-
+export type UseCollapsibleTreeNode <T extends RawNode<T>> = {
   // control open/close state
   hidden: ComputedRef<boolean>
   expanded: Ref<boolean>
-  expand: () => boolean
-  collapse: () => boolean
-  toggleCollapsed: () => void
+  toggle: () => void
 
   // Depth of a particular node -- 1 indexed
   depth: number
 
-  parent?: UseCollapsibleTreeNode
-  children?: UseCollapsibleTreeNode[]
-}
+  parent?: UseCollapsibleTreeNode<T>
+  children: UseCollapsibleTreeNode<T>[]
+} & { [K in keyof T]: T[K]}
 
 export interface UseCollapsibleTreeOptions {
   expandInitially?: boolean
+  dropRoot?: boolean
 }
 
-function collectRoots (node, acc: UseCollapsibleTreeNode[] = []) {
-  acc.push(node)
-  if (!node.parent) {
+function collectRoots<T extends RawNode<T>> (node: UseCollapsibleTreeNode<T> | null, acc: UseCollapsibleTreeNode<T>[] = []) {
+  if (!node || !node.parent) {
     return acc
   }
 
-  collectRoots(node.parent, acc)
+  acc.push(node)
+
+  collectRoots<T>(node.parent, acc)
 
   return acc
 }
 
-export const useCollapsibleTreeNode = (rawNode, options, depth, parent) => {
-  const roots = parent ? collectRoots(parent) : []
+export const useCollapsibleTreeNode = <T extends RawNode<T>>(rawNode: T, options: UseCollapsibleTreeOptions, depth: number, parent: UseCollapsibleTreeNode<T> | null): UseCollapsibleTreeNode<T> => {
+  const treeNode = rawNode as UseCollapsibleTreeNode<T>
+  const roots = parent ? collectRoots<T>(parent) : []
   const [expanded, toggle] = useToggle(!!options.expandInitially)
   const hidden = computed(() => {
-    return roots.find((r) => r.expanded.value === false)
+    return !!roots.find((r) => r.expanded.value === false)
   })
 
-  const reveal = () => {
-    expanded.value = false
-    const parentNodes = collectRoots(parent)
-
-    for (const parentNode of parentNodes) {
-      parentNode.expand()
-    }
-
-    return parentNodes
-  }
-
   return {
-    ...rawNode,
+    ...treeNode,
     depth,
     parent,
     hidden,
     expanded,
-    reveal,
-    expand: () => expanded.value = true,
-    collapse: () => expanded.value = false,
     toggle,
   }
 }
 
-function buildTree (rawNode, options, acc: UseCollapsibleTreeNode[] = [], depth = 1, parent = null) {
-  const node = useCollapsibleTreeNode(rawNode, options, depth, parent)
+function buildTree<T extends RawNode<T>> (rawNode: T, options: UseCollapsibleTreeOptions, acc: UseCollapsibleTreeNode<T>[] = [], depth = 1, parent: UseCollapsibleTreeNode<T> | null = null) {
+  const node = useCollapsibleTreeNode<T>(rawNode, options, depth, parent)
 
   acc.push(node)
 
@@ -81,42 +68,46 @@ function buildTree (rawNode, options, acc: UseCollapsibleTreeNode[] = [], depth 
   return acc
 }
 
-export function useCollapsibleTree (tree, options: UseCollapsibleTreeOptions = {}) {
+function sortTree<T extends RawNode<T>> (tree: T) {
+  if (tree.children.length > 0) {
+    tree.children = tree.children.sort((a, b) => {
+      if (a.children.length === 0 && b.children.length === 0) {
+        return a.name > b.name ? 1 : -1
+      }
+
+      if (a.children.length === 0) {
+        return 1
+      }
+
+      if (b.children.length === 0) {
+        return -1
+      }
+
+      return a.name > b.name ? 1 : -1
+    })
+
+    tree.children.forEach(sortTree)
+  }
+}
+
+export function useCollapsibleTree <T extends RawNode<T>> (tree: T, options: UseCollapsibleTreeOptions = {}) {
   options.expandInitially = options.expandInitially || true
-  const collapsibleTree = buildTree(tree, options)
+  sortTree(tree)
+  const collapsibleTree = buildTree<T>(tree, options)
 
-  const expand = (matches?) => {
-    if (typeof matches === 'function') {
-      collapsibleTree.filter(matches).forEach((node) => node.expand())
-    } else {
-      collapsibleTree.forEach((node) => node.expand())
-    }
-  }
+  collapsibleTree.sort((a, b) => {
+    if (a.parent === b.parent) {
+      if (a.children.length && !b.children.length) {
+        return -1
+      }
 
-  const collapse = (matches?) => {
-    if (typeof matches === 'function') {
-      collapsibleTree.filter(matches).forEach((node) => node.collapse())
-    } else {
-      collapsibleTree.forEach((node) => node.collapse())
-    }
-  }
-
-  const reveal = (matches?) => {
-    if (typeof matches === 'function') {
-      const nodes: typeof collapsibleTree = matches ? collapsibleTree.filter(matches) : []
-
-      nodes.forEach((node) => node.reveal())
-
-      return nodes
+      return 0
     }
 
-    return
-  }
+    return 0
+  })
 
   return {
-    tree: collapsibleTree,
-    reveal,
-    expand,
-    collapse,
+    tree: options.dropRoot ? collapsibleTree.slice(1) : collapsibleTree,
   }
 }

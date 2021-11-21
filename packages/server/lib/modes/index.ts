@@ -24,6 +24,13 @@ export = (mode, options) => {
 
   if (mode === 'interactive') {
     makeLegacyDataContext(options, 'open')
+    // Change default for `cypress open` to be LAUNCHPAD=1
+    if (process.env.LAUNCHPAD === '0') {
+      delete process.env.LAUNCHPAD
+    } else {
+      process.env.LAUNCHPAD = '1'
+    }
+
     if (options.testingType === 'component' && !process.env.LAUNCHPAD) {
       return require('./interactive-ct').run(options)
     }

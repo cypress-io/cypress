@@ -61,18 +61,20 @@ let isShowingRelaunch = ref(false)
 const toast = useToast()
 
 watch(query.data, () => {
-  if (query.data.value?.dev.needsRelaunch && !isShowingRelaunch.value) {
-    isShowingRelaunch.value = true
-    toast.info('Server updated, click to relaunch', {
-      timeout: false,
-      onClick: () => {
-        relaunchMutation.executeMutation({ action: 'trigger' })
-      },
-      onClose: () => {
-        isShowingRelaunch.value = false
-        relaunchMutation.executeMutation({ action: 'dismiss' })
-      },
-    })
+  if (process.env.NODE_ENV !== 'production') {
+    if (query.data.value?.dev.needsRelaunch && !isShowingRelaunch.value) {
+      isShowingRelaunch.value = true
+      toast.info('Server updated, click to relaunch', {
+        timeout: false,
+        onClick: () => {
+          relaunchMutation.executeMutation({ action: 'trigger' })
+        },
+        onClose: () => {
+          isShowingRelaunch.value = false
+          relaunchMutation.executeMutation({ action: 'dismiss' })
+        },
+      })
+    }
   }
 })
 

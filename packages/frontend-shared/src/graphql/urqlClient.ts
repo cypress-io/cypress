@@ -46,9 +46,6 @@ function gqlPort () {
   throw new Error(`${window.location.href} cannot be visited without a gqlPort`)
 }
 
-/**
- * Fetch the initial launchpad data
- */
 export async function preloadLaunchpadData () {
   try {
     const resp = await fetch(`http://localhost:${gqlPort()}/__cypress/launchpad-preload`)
@@ -82,27 +79,28 @@ export function makeUrqlClient (target: 'launchpad' | 'app'): Client {
         ${error.stack ?? ''}
       `
 
-        toast.error(message, {
-          timeout: false,
-        })
+        if (process.env.NODE_ENV !== 'production') {
+          toast.error(message, {
+            timeout: false,
+          })
+        }
+
         // eslint-disable-next-line
         console.error(error)
       },
     }),
     // https://formidable.com/open-source/urql/docs/graphcache/errors/
     makeCacheExchange(),
-    namedRouteExchange,
-    // TODO(tim): add this when we want to use the socket as the GraphQL
-    // transport layer for all operations
-    // target === 'launchpad' ? fetchExchange : socketExchange(io),
     ssrExchange({
       isClient: true,
       initialState: window.__CYPRESS_INITIAL_DATA__ ?? {},
     }),
+    namedRouteExchange,
+    // TODO(tim): add this when we want to use the socket as the GraphQL
+    // transport layer for all operations
+    // target === 'launchpad' ? fetchExchange : socketExchange(io),
     fetchExchange,
   ]
-
-  exchanges.push(fetchExchange)
 
   if (import.meta.env.DEV) {
     exchanges.unshift(devtoolsExchange)

@@ -22,5 +22,6 @@ export function attachedFileWithPath (subject: HTMLInputElement, path: string) {
 Cypress.Commands.add(
   'attachFileWithPath',
   { prevSubject: true },
+  // @ts-ignore - fixed by https://github.com/cypress-io/cypress/pull/19003
   attachedFileWithPath,
 )

@@ -5,7 +5,7 @@ import path = require('path')
 import debugLib = require('debug')
 import minimist = require('minimist')
 import coerceUtil = require('./coerce')
-import configUtil = require('../config')
+import configUtils from '@packages/config'
 import proxyUtil = require('./proxy')
 import errors = require('../errors')
 import type { LaunchArgs } from '@packages/types'
@@ -16,7 +16,50 @@ const nestedObjectsInCurlyBracesRe = /\{(.+?)\}/g
 const nestedArraysInSquareBracketsRe = /\[(.+?)\]/g
 const everythingAfterFirstEqualRe = /=(.*)/
 
-const allowList = 'appPath apiKey browser ci ciBuildId clearLogs config configFile cwd env execPath exit exitWithCode global group headed inspectBrk key logs mode outputPath parallel ping port project proxySource quiet record reporter reporterOptions returnPkg runMode runProject smokeTest spec tag updating version testingType'.split(' ')
+const allowList = [
+  'apiKey',
+  'appPath',
+  'browser',
+  'ci',
+  'ciBuildId',
+  'clearLogs',
+  'config',
+  'configFile',
+  'cwd',
+  'env',
+  'execPath',
+  'exit',
+  'exitWithCode',
+  'global',
+  'group',
+  'headed',
+  'inspectBrk',
+  'key',
+  'logs',
+  'mode',
+  'outputPath',
+  'parallel',
+  'ping',
+  'port',
+  'project',
+  'proxySource',
+  'quiet',
+  'record',
+  'reporter',
+  'reporterOptions',
+  'returnPkg',
+  'runMode',
+  'runProject',
+  'smokeTest',
+  'spec',
+  'tag',
+  'testingType',
+  'updating',
+  'userNodePath',
+  'userNodeVersion',
+  'version',
+]
+
 // returns true if the given string has double quote character "
 // only at the last position.
 const hasStrayEndQuote = (s) => {
@@ -163,7 +206,7 @@ const sanitizeAndConvertNestedArgs = (str, argname) => {
     debug('could not pass config %s value %s', argname, str)
     debug('error %o', err)
 
-    throw errors.throw('COULD_NOT_PARSE_ARGUMENTS', argname, str, err.message)
+    throw errors.throw('COULD_NOT_PARSE_ARGUMENTS', argname, str, 'Cannot parse as valid JSON')
   }
 }
 
@@ -308,7 +351,7 @@ export = {
     }
 
     // get a list of the available config keys
-    const configKeys = configUtil.getConfigKeys()
+    const configKeys = configUtils.getPublicConfigKeys()
 
     // and if any of our options match this
     const configValues = _.pick(options, configKeys)

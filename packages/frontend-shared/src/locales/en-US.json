@@ -116,7 +116,10 @@
   "topNav": {
     "released": "Released",
     "version": "Version",
+    "installed": "Installed",
+    "latest": "Latest",
     "seeAllReleases": "See all releases",
+    "runningOldVersion": "You're currently running an old version of Cypress. Update to the latest version for the best experience.",
     "docsMenu": {
       "docsHeading": "Docs",
       "gettingStartedTitle": "Getting Started",
@@ -324,7 +327,23 @@
     },
     "testingPreferences": {
       "title": "Testing Preferences",
-      "description": "Configure your testing environment with these flags"
+      "description": "Configure your testing environment with these flags",
+      "autoScrollingEnabled": {
+        "title": "Auto Scrolling Enabled",
+        "description": "Scroll behavior when running tests."
+      },
+      "watchForSpecChange": {
+        "title": "Watch for Spec Change",
+        "description": "Re-run specs when a file changes."
+      },
+      "useDarkSidebar": {
+        "title": "Dark sidebar",
+        "description": "Select the color theme of the app sidebar."
+      }
+    },
+    "footer": {
+      "text": "You can reconfigure the settings for this project if you’re experiencing issues with your Cypress configuration.",
+      "button": "Reconfigure Project"
     }
   },
   "runs": {

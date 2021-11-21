@@ -659,5 +659,6 @@ module.exports = {
 if (!module.parent) {
   logger.error('This CLI module should be required from another Node module')
   logger.error('and not executed directly')
+
   process.exit(-1)
 }

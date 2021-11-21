@@ -24,6 +24,14 @@ const throwInvalidOptionError = (details) => {
  * @returns {string[]} The array of new exec arguments
  */
 const processTestingType = (options) => {
+  if (options.e2e && options.component) {
+    return throwInvalidOptionError(errors.incompatibleTestTypeFlags)
+  }
+
+  if (options.testingType && (options.component || options.e2e)) {
+    return throwInvalidOptionError(errors.incompatibleTestTypeFlags)
+  }
+
   if (options.testingType === 'component' || options.component || options.ct) {
     return ['--testing-type', 'component']
   }

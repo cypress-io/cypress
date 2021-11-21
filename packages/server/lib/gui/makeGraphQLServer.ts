@@ -19,7 +19,9 @@ export async function makeGraphQLServer (ctx: DataContext) {
   })
 
   app.get('/__cypress/launchpad-preload', (req, res) => {
-    ctx.html.fetchLaunchpadInitialData().then((data) => res.json(data)).catch((e) => {
+    ctx.html.fetchLaunchpadInitialData().then((data) => {
+      res.json(data)
+    }).catch((e) => {
       ctx.logError(e)
       res.json({})
     })

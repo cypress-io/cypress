@@ -7,6 +7,7 @@ import { createHmac } from 'crypto'
 
 import browsers from './browsers'
 import pkg from '@packages/root'
+import { allowed } from '@packages/config'
 import { ServerCt } from './server-ct'
 import { SocketCt } from './socket-ct'
 import { SocketE2E } from './socket-e2e'
@@ -123,6 +124,17 @@ export class ProjectBase<TServer extends Server> extends EE {
       onSettingsChanged: false,
       ...options,
     }
+
+    this.ctx.actions.projectConfig.killConfigProcess()
+    this.ctx.actions.project.setCurrentProjectProperties({
+      projectRoot: this.projectRoot,
+      configChildProcess: null,
+      ctPluginsInitialized: false,
+      e2ePluginsInitialized: false,
+      isCTConfigured: false,
+      isE2EConfigured: false,
+      config: null,
+    })
   }
 
   protected ensureProp = ensureProp
@@ -412,7 +424,7 @@ export class ProjectBase<TServer extends Server> extends EE {
     // allowed config values to
     // prevent tampering with the
     // internals and breaking cypress
-    const allowedCfg = config.allowed(cfg)
+    const allowedCfg = allowed(cfg)
 
     const modifiedCfg = await plugins.init(allowedCfg, {
       projectRoot: this.projectRoot,
@@ -420,7 +432,7 @@ export class ProjectBase<TServer extends Server> extends EE {
       testingType: options.testingType,
       onError: (err: Error) => this._onError(err, options),
       onWarning: options.onWarning,
-    })
+    }, this.ctx)
 
     debug('plugin config yielded: %o', modifiedCfg)
 
@@ -706,7 +718,7 @@ export class ProjectBase<TServer extends Server> extends EE {
       this.options.configFile = await getDefaultConfigFilePath(this.projectRoot, this.ctx)
     }
 
-    let theCfg: Cfg = await config.get(this.projectRoot, this.options)
+    let theCfg: Cfg = await config.get(this.projectRoot, this.options, this.ctx)
 
     if (!theCfg.browsers || theCfg.browsers.length === 0) {
       // @ts-ignore - we don't know if the browser is headed or headless at this point.
@@ -847,7 +859,10 @@ export class ProjectBase<TServer extends Server> extends EE {
 
     if (scaffoldExamples) {
       debug('will scaffold integration and fixtures folder')
-      push(scaffold.integration(cfg.integrationFolder, cfg))
+      if (!process.env.LAUNCHPAD) {
+        push(scaffold.integration(cfg.integrationFolder, cfg))
+      }
+
       push(scaffold.fixture(cfg.fixturesFolder, cfg))
     } else {
       debug('will not scaffold integration or fixtures folder')

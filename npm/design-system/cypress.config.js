@@ -13,4 +13,11 @@ module.exports = {
   ],
   componentFolder: 'src',
   fixturesFolder: false,
+  component: {
+    devServer (cypressConfig) {
+      const { startDevServer } = require('@cypress/vite-dev-server')
+
+      return startDevServer({ options: cypressConfig })
+    },
+  },
 }

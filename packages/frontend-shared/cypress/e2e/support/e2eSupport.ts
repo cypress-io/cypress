@@ -74,8 +74,8 @@ declare global {
        * Removes the sinon spy'ing on the remote GraphQL fake requests
        */
       disableRemoteGraphQLFakes(): void
-      visitApp(href?: string): Chainable<string>
-      visitLaunchpad(href?: string): Chainable<string>
+      visitApp(href?: string): Chainable<AUTWindow>
+      visitLaunchpad(href?: string): Chainable<AUTWindow>
     }
   }
 }
@@ -130,8 +130,8 @@ function visitApp (href?: string) {
     `)
   }
 
-  cy.withCtx(async (ctx) => {
-    return JSON.stringify(await ctx.html.fetchAppInitialData())
+  return cy.withCtx(async (ctx) => {
+    return JSON.stringify(ctx.html.fetchAppInitialData())
   }, { log: false }).then((ssrData) => {
     return cy.visit(`dist-app/index.html?serverPort=${e2e_serverPort}${href || ''}`, {
       onBeforeLoad (win) {

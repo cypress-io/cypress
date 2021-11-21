@@ -1,4 +1,5 @@
 const _ = require('lodash')
+const arch = require('arch')
 const os = require('os')
 const ospath = require('ospath')
 const crypto = require('crypto')
@@ -259,7 +260,7 @@ const getApplicationDataFolder = (...paths) => {
 
   const ELECTRON_APP_DATA_PATH = path.join(OS_DATA_PATH, PRODUCT_NAME)
 
-  if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF === 'true') {
+  if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {
     folder = `${folder}-e2e-test`
   }
 
@@ -437,8 +438,14 @@ const util = {
 
   getPlatformInfo () {
     return util.getOsVersionAsync().then((version) => {
+      let osArch = arch()
+
+      if (osArch === 'x86') {
+        osArch = 'ia32'
+      }
+
       return stripIndent`
-        Platform: ${os.platform()} (${version})
+        Platform: ${os.platform()}-${osArch} (${version})
         Cypress Version: ${util.pkgVersion()}
       `
     })

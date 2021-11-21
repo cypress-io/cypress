@@ -12,8 +12,5 @@ describe('Navigation', () => {
     cy.wait('@OpenExternal').then((interception: Interception) => {
       expect(interception.request.body.variables.url).to.equal('https://on.cypress.io/writing-first-test?utm_medium=Docs+Menu&utm_content=First+Test')
     })
-
-    cy.get('[href="#/runs"]').click()
-    cy.contains(defaultMessages.runs.connect.title).should('be.visible')
   })
 })

@@ -17,6 +17,7 @@ const Bluebird = require('bluebird')
 const debug = require('debug')('cypress:system-tests')
 const httpsProxy = require('@packages/https-proxy')
 const Fixtures = require('./fixtures')
+
 const { allowDestroy } = require(`@packages/server/lib/util/server_destroy`)
 const cypress = require(`@packages/server/lib/cypress`)
 const screenshots = require(`@packages/server/lib/screenshots`)
@@ -202,6 +203,14 @@ type ExecOptions = {
    * If set, a dummy `node_modules` project with this name will be set up.
    */
   stubPackage?: string
+  /**
+   * Run Cypress with a custom user node path.
+   */
+  userNodePath?: string
+  /**
+   * Run Cypress with a custom user node version.
+   */
+  userNodeVersion?: string
 }
 
 type Server = {
@@ -250,7 +259,7 @@ const pathUpToProjectName = Fixtures.projectPath('')
 
 const DEFAULT_BROWSERS = ['electron', 'chrome', 'firefox']
 
-const stackTraceLinesRe = /(\n?[^\S\n\r]*).*?(@|\bat\b).*\.(js|coffee|ts|html|jsx|tsx)(-\d+)?:\d+:\d+[\n\S\s]*?(\n\s*?\n|$)/g
+const stackTraceLinesRe = /(\n?[^\S\n\r]*).*?(@|\bat\b)(?:.*node:.*|.*\.(js|coffee|ts|html|jsx|tsx))(-\d+)?:\d+:\d+[\n\S\s]*?(\n\s*?\n|$)/g
 const browserNameVersionRe = /(Browser\:\s+)(Custom |)(Electron|Chrome|Canary|Chromium|Firefox)(\s\d+)(\s\(\w+\))?(\s+)/
 const availableBrowsersRe = /(Available browsers found on your system are:)([\s\S]+)/g
 const crossOriginErrorRe = /(Blocked a frame .* from accessing a cross-origin frame.*|Permission denied.*cross-origin object.*)/gm
@@ -337,7 +346,12 @@ const replaceDurationFromReporter = (str, p1, p2, p3) => {
   return p1 + _.padEnd('X', p2.length, 'X') + p3
 }
 
-const replaceNodeVersion = (str, p1, p2, p3) => _.padEnd(`${p1}X (/foo/bar/node)`, (p1.length + p2.length + p3.length))
+const replaceNodeVersion = (str, p1, p2, p3) => {
+  // Accounts for paths that break across lines
+  const p3Length = p3.includes('\n') ? p3.split('\n')[0].length - 1 : p3.length
+
+  return _.padEnd(`${p1}X (/foo/bar/node)`, (p1.length + p2.length + p3Length))
+}
 
 const replaceCypressVersion = (str, p1, p2) => {
   // Cypress: 12.10.10 -> Cypress: 1.2.3 (handling padding)
@@ -418,7 +432,7 @@ const normalizeStdout = function (str, options: any = {}) {
   // Cypress: 2.1.0 -> Cypress: 1.2.3
   .replace(/(Cypress\:\s+)(\d+\.\d+\.\d+)/g, replaceCypressVersion)
   // Node Version: 10.2.3 (Users/jane/node) -> Node Version: X (foo/bar/node)
-  .replace(/(Node Version\:\s+v)(\d+\.\d+\.\d+)( \(.*\)\s+)/g, replaceNodeVersion)
+  .replace(/(Node Version\:\s+v)(\d+\.\d+\.\d+)( \((?:.|\n)*?\)\s+)/g, replaceNodeVersion)
   // 15 seconds -> X second
   .replace(/(Duration\:\s+)(\d+\sminutes?,\s+)?(\d+\sseconds?)(\s+)/g, replaceDurationSeconds)
   // duration='1589' -> duration='XXXX'
@@ -432,6 +446,8 @@ const normalizeStdout = function (str, options: any = {}) {
   .replace(/^(\- )(\/.*\/packages\/server\/)(.*)$/gm, '$1$3')
   // Different browsers have different cross-origin error messages
   .replace(crossOriginErrorRe, '[Cross origin error message]')
+  // Replaces connection warning since Firefox sometimes takes longer to connect
+  .replace(/Still waiting to connect to Firefox, retrying in 1 second \(attempt .+\/.+\)/g, '')
 
   if (options.sanitizeScreenshotDimensions) {
     // screenshot dimensions
@@ -580,7 +596,7 @@ const localItFn = function (title: string, opts: ItOptions) {
     throw new Error('systemTests.it(...) must be passed a title as the first argument')
   }
 
-  // LOGIC FOR AUTOGENERATING DYNAMIC TESTS
+  // LOGIC FOR AUTO-GENERATING DYNAMIC TESTS
   // - create multiple tests for each default browser
   // - if browser is specified in options:
   //   ...skip the tests for each default browser if that browser
@@ -683,7 +699,7 @@ const systemTests = {
       const s = options.settings
 
       if (s) {
-        await settings.write(e2ePath, s)
+        await settings.writeOnly(e2ePath, s)
       }
     })
 
@@ -847,6 +863,14 @@ const systemTests = {
 
     if (options.configFile) {
       args.push(`--config-file=${options.configFile}`)
+    }
+
+    if (options.userNodePath) {
+      args.push(`--userNodePath=${options.userNodePath}`)
+    }
+
+    if (options.userNodeVersion) {
+      args.push(`--userNodeVersion=${options.userNodeVersion}`)
     }
 
     return args

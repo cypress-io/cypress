@@ -6,6 +6,7 @@ import type { DataContext } from '..'
 export interface AppApiShape {
   getBrowsers(): Promise<FoundBrowser[]>
   ensureAndGetByNameOrPath(nameOrPath: string, browsers: ReadonlyArray<FoundBrowser>): Promise<FoundBrowser>
+  findNodePath(): Promise<string>
 }
 
 export class AppActions {
@@ -55,5 +56,21 @@ export class AppActions {
     }
 
     return browsers.some((b) => this.idForBrowser(b) === this.idForBrowser(chosenBrowser))
+  }
+
+  async refreshNodePath () {
+    if (this.ctx.coreData.app.refreshingNodePath) {
+      return
+    }
+
+    const dfd = pDefer<string>()
+
+    this.ctx.coreData.app.refreshingNodePath = dfd.promise
+
+    const nodePath = await this.ctx._apis.appApi.findNodePath()
+
+    this.ctx.coreData.app.nodePath = nodePath
+
+    dfd.resolve(nodePath)
   }
 }

@@ -1,7 +1,7 @@
 import { createApp } from 'vue'
 import './main.scss'
 import 'virtual:windi.css'
-import urql from '@urql/vue'
+import urql, { Client } from '@urql/vue'
 import LaunchpadApp from './LaunchpadApp.vue'
 import Toast, { POSITION } from 'vue-toastification'
 import 'vue-toastification/dist/index.css'
@@ -19,13 +19,26 @@ app.use(Toast, {
 app.use(createI18n())
 app.use(createPinia())
 
+let launchpadClient: Client
+
+// TODO: (tim) remove this when we refactor to remove the retry plugin logic
+export function getLaunchpadClient () {
+  if (!launchpadClient) {
+    throw new Error(`Cannot access launchpadClient before app has been init`)
+  }
+
+  return launchpadClient
+}
+
 // Make sure highlighter is initialized before
 // we show any code to avoid jank at rendering
-// @ts-ignore
 Promise.all([
+  // @ts-ignore
   initHighlighter(),
   preloadLaunchpadData(),
 ]).then(() => {
-  app.use(urql, makeUrqlClient('launchpad'))
+  launchpadClient = makeUrqlClient('launchpad')
+  app.use(urql, launchpadClient)
+
   app.mount('#app')
 })

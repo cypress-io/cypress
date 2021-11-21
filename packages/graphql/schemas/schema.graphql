@@ -211,9 +211,41 @@ type CloudUser implements Node {
   userIsViewer: Boolean!
 }
 
+enum CodeGenGenResultType {
+  binary
+  text
+}
+
+"""Represents a spec on the file system"""
+type CodeGenResult implements Node {
+  """Content of generated file."""
+  content: String!
+
+  """Absolute path of generated file."""
+  file: String!
+
+  """Relay style Node ID field for the CodeGenResult field"""
+  id: ID!
+  status: CodeGenStatus!
+  type: CodeGenGenResultType!
+}
+
+"""Result of generated file with file parts"""
+type CodeGenResultWithFileParts {
+  codeGenResult: CodeGenResult!
+  fileParts: FileParts!
+}
+
+enum CodeGenStatus {
+  add
+  overwrite
+  skipped
+}
+
 enum CodeGenType {
   component
   integration
+  scaffoldIntegration
   story
 }
 
@@ -329,6 +361,16 @@ type DevState {
   needsRelaunch: Boolean
 }
 
+"""Represents an editor on the local machine"""
+type Editor {
+  """Binary that opens the editor"""
+  binary: String!
+  id: String!
+
+  """name of editor"""
+  name: String!
+}
+
 """Represents a spec on the file system"""
 type FileParts implements Node {
   """
@@ -405,6 +447,22 @@ The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://
 """
 scalar JSON
 
+"""local settings on a device-by-device basis"""
+type LocalSettings {
+  availableEditors: [Editor!]!
+  preferences: LocalSettingsPreferences!
+}
+
+"""local setting preferences"""
+type LocalSettingsPreferences {
+  autoScrollingEnabled: Boolean
+  preferredEditorBinary: String
+  proxyBypass: String
+  proxyServer: String
+  useDarkSidebar: Boolean
+  watchForSpecChange: Boolean
+}
+
 type Mutation {
   """Add project to projects array and cache it"""
   addProject(
@@ -474,15 +532,20 @@ type Mutation {
   Retries loading the plugins config, called when there was an error executing the plugins
   """
   retryLoadPlugins: Query
+  scaffoldIntegration: [CodeGenResultWithFileParts!]!
 
   """Updates the testing type for the current project"""
   selectProjectTestingType(type: TestingTypeEnum!): Query
 
   """Set active project to run tests on"""
   setActiveProject(path: String!): Query
+  setAutoScrollingEnabled(value: Boolean!): Boolean
+  setPreferredEditorBinary(value: String!): Boolean
 
   """Save the projects preferences to cache"""
   setProjectPreferences(browserPath: String!, testingType: TestingTypeEnum!): Query!
+  setUseDarkSidebar(value: Boolean!): Boolean
+  setWatchForSpecChange(value: Boolean!): Boolean
 
   """show the launchpad at the browser picker step"""
   showElectronOnAppExit: Boolean
@@ -593,6 +656,9 @@ type Query {
   """Whether we are loading the projects"""
   isLoadingGlobalProjects: Boolean!
 
+  """editors on the user local machine"""
+  localSettings: LocalSettings!
+
   """All known projects for the app"""
   projects: [ProjectLike!]
 
@@ -603,6 +669,9 @@ type Query {
 
   """IndexHtml file based on bundler and framework of choice"""
   sampleTemplate(input: WizardSetupInput!): String
+
+  """Previous versions of cypress and their release date"""
+  versions: VersionData
 }
 
 """Represents a spec on the file system"""
@@ -687,6 +756,27 @@ enum SupportedBundlers {
 enum TestingTypeEnum {
   component
   e2e
+}
+
+"""Version of Cypress and release date"""
+type Version {
+  """unique id"""
+  id: String!
+
+  """Release date as an iso8601 timestamp"""
+  released: String!
+
+  """Version number (follows semantic versioning)"""
+  version: String!
+}
+
+"""Version of Cypress and release date"""
+type VersionData {
+  """current version of cypress you are using"""
+  current: Version!
+
+  """latest version of cypress"""
+  latest: Version!
 }
 
 """

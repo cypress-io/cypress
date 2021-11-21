@@ -58,4 +58,27 @@ export const stubMutation: MaybeResolver<Mutation> = {
   reconfigureProject (src, args, ctx) {
     return true
   },
+  scaffoldIntegration (src, args, ctx) {
+    return [{
+      __typename: 'CodeGenResultWithFileParts',
+      codeGenResult: {
+        id: 'U3BlYzovVXNlcnMvbGFjaGxhbi9jb2RlL3dvcmsvY3lwcmVzczUvcGFja2FnZXMvYXBwL3NyYy9CYXNpYy5zcGVjLnRzeA==',
+        __typename: 'CodeGenResult',
+        file: '/Users/lachlan/code/work/cypress/packages/app/cypress/integration/basic/todo.spec.js',
+        status: 'add',
+        type: 'text',
+        content: 'it(\'should load todos\', () => {})',
+      },
+      fileParts: {
+        id: 'U3BlYzovVXNlcnMvbGFjaGxhbi9jb2RlL3dvcmsvY3lwcmVzczUvcGFja2FnZXMvYXBwL3NyYy9CYXNpYy5zcGVjLnRzeA==',
+        __typename: 'FileParts',
+        absolute: '/Users/lachlan/code/work/cypress/packages/app/cypress/integration/basic/todo.spec.js',
+        relative: 'cypress/integration/basic/todo.spec.js',
+        baseName: 'todo.spec.js',
+        name: 'basic/todo.spec.js',
+        fileName: 'todo',
+        fileExtension: '.js',
+      },
+    }]
+  },
 }

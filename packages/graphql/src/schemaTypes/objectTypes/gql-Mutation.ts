@@ -2,6 +2,7 @@ import debugLib from 'debug'
 import { arg, booleanArg, enumType, idArg, mutationType, nonNull, stringArg } from 'nexus'
 import { CodeGenTypeEnum } from '../enumTypes/gql-CodeGenTypeEnum'
 import { TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
+import { CodeGenResultWithFileParts } from './gql-CodeGenResult'
 import { GeneratedSpec } from './gql-GeneratedSpec'
 
 export const mutation = mutationType({
@@ -136,6 +137,13 @@ export const mutation = mutationType({
       },
     })
 
+    t.nonNull.list.nonNull.field('scaffoldIntegration', {
+      type: CodeGenResultWithFileParts,
+      resolve: (src, args, ctx) => {
+        return ctx.actions.project.scaffoldIntegration()
+      },
+    })
+
     t.liveMutation('login', {
       description: 'Auth with Cypress Cloud',
       resolve: async (_, args, ctx) => {
@@ -254,6 +262,54 @@ export const mutation = mutationType({
           await ctx.actions.currentProject?.switchTestingType(args.testingType)
         }
         // ctx.actions.currentProject?.reconfigureProject()
+
+        return true
+      },
+    })
+
+    t.liveMutation('setAutoScrollingEnabled', {
+      type: 'Boolean',
+      args: {
+        value: nonNull(booleanArg()),
+      },
+      resolve: async (_, args, ctx) => {
+        await ctx.actions.localSettings.setDevicePreference('autoScrollingEnabled', args.value)
+
+        return true
+      },
+    })
+
+    t.liveMutation('setUseDarkSidebar', {
+      type: 'Boolean',
+      args: {
+        value: nonNull(booleanArg()),
+      },
+      resolve: async (_, args, ctx) => {
+        await ctx.actions.localSettings.setDevicePreference('useDarkSidebar', args.value)
+
+        return true
+      },
+    })
+
+    t.liveMutation('setWatchForSpecChange', {
+      type: 'Boolean',
+      args: {
+        value: nonNull(booleanArg()),
+      },
+      resolve: async (_, args, ctx) => {
+        await ctx.actions.localSettings.setDevicePreference('watchForSpecChange', args.value)
+
+        return true
+      },
+    })
+
+    t.liveMutation('setPreferredEditorBinary', {
+      type: 'Boolean',
+      args: {
+        value: nonNull(stringArg()),
+      },
+      resolve: async (_, args, ctx) => {
+        await ctx.actions.localSettings.setDevicePreference('preferredEditorBinary', args.value)
 
         return true
       },
