@@ -1,7 +1,16 @@
 import type { DataContext } from '.'
-import { AppActions, ApplicationDataActions, ProjectConfigDataActions, ElectronActions, FileActions, ProjectActions, WizardActions } from './actions'
+import {
+  AppActions,
+  ApplicationDataActions,
+  ProjectConfigDataActions,
+  ElectronActions,
+  FileActions,
+  ProjectActions,
+  WizardActions,
+} from './actions'
 import { AuthActions } from './actions/AuthActions'
 import { DevActions } from './actions/DevActions'
+import { LocalSettingsActions } from './actions/LocalSettingsActions'
 import { cached } from './util'
 
 export class DataActions {
@@ -30,6 +39,11 @@ export class DataActions {
   @cached
   get auth () {
     return new AuthActions(this.ctx)
+  }
+
+  @cached
+  get localSettings () {
+    return new LocalSettingsActions(this.ctx)
   }
 
   @cached

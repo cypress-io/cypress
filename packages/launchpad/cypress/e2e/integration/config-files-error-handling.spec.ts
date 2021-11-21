@@ -1,15 +1,13 @@
 describe('Config files error handling', () => {
-  beforeEach(() => {
+  it('it handles multiples config files', () => {
     cy.openE2E('pristine-with-config-file')
     cy.visitLaunchpad()
-  })
 
-  it('it handles multiple config files', () => {
+    cy.get('[data-cy-testingType=e2e]').click()
+
     cy.withCtx(async (ctx) => {
       await ctx.actions.file.writeFileInProject('cypress.config.ts', 'export default {}')
     })
-
-    cy.get('[data-cy-testingType=e2e]').click()
 
     cy.get('body').should('contain.text', 'Configuration Files')
 
@@ -28,12 +26,15 @@ describe('Config files error handling', () => {
   })
 
   it('it handles legacy config file', () => {
+    cy.openE2E('pristine-with-config-file')
+    cy.visitLaunchpad()
+
+    cy.get('[data-cy-testingType=e2e]').click()
+
     cy.withCtx(async (ctx) => {
       await ctx.actions.file.writeFileInProject('cypress.json', '{}')
       await ctx.actions.file.removeFileInProject('cypress.config.js')
     })
-
-    cy.get('[data-cy-testingType=e2e]').click()
 
     cy.get('body').should('contain.text', 'Configuration Files')
 
@@ -62,11 +63,14 @@ describe('Config files error handling', () => {
   })
 
   it('it handles config files with legacy config file in same project', () => {
+    cy.openE2E('pristine-with-config-file')
+    cy.visitLaunchpad()
+
+    cy.get('[data-cy-testingType=e2e]').click()
+
     cy.withCtx(async (ctx) => {
       await ctx.actions.file.writeFileInProject('cypress.json', '{}')
     })
-
-    cy.get('[data-cy-testingType=e2e]').click()
 
     cy.get('body').should('contain.text', 'Configuration Files')
 
@@ -83,5 +87,23 @@ describe('Config files error handling', () => {
     cy.get('[data-testid=error-retry-button]').click()
     cy.get('body')
     .should('not.contain.text', 'Cypress Configuration Error')
+  })
+
+  it('creates config file if it do not exist', () => {
+    cy.openE2E('pristine')
+    cy.visitLaunchpad()
+
+    cy.get('[data-cy-testingType=e2e]').click()
+
+    cy.get('body').should('contain.text', 'Configuration Files')
+
+    cy.get('button').contains('Continue').click()
+
+    cy.get('body')
+    .should('contain.text', 'Initializing Config')
+
+    cy.withCtx(async (ctx) => {
+      await ctx.actions.file.checkIfFileExists('cypress.config.js')
+    })
   })
 })

@@ -3,6 +3,7 @@ import { BaseError } from '.'
 import { ProjectLike } from '..'
 import { CurrentProject } from './gql-CurrentProject'
 import { DevState } from './gql-DevState'
+import { LocalSettings } from './gql-LocalSettings'
 import { VersionData } from './gql-VersionData'
 import { Wizard } from './gql-Wizard'
 
@@ -62,6 +63,14 @@ export const Query = objectType({
     t.nonNull.boolean('isAuthBrowserOpened', {
       description: 'Whether the browser has been opened for auth or not',
       resolve: (source, args, ctx) => ctx.coreData.isAuthBrowserOpened,
+    })
+
+    t.nonNull.field('localSettings', {
+      type: LocalSettings,
+      description: 'editors on the user local machine',
+      resolve: (source, args, ctx) => {
+        return ctx.coreData.localSettings
+      },
     })
   },
 })

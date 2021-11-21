@@ -2,7 +2,7 @@ import type { LaunchArgs, OpenProjectLaunchOptions, PlatformName } from '@packag
 import fsExtra from 'fs-extra'
 import path from 'path'
 
-import { AppApiShape, ApplicationDataApiShape, DataEmitterActions, ProjectApiShape } from './actions'
+import { AppApiShape, ApplicationDataApiShape, DataEmitterActions, LocalSettingsApiShape, ProjectApiShape } from './actions'
 import type { NexusGenAbstractTypeMembers } from '@packages/graphql/src/gen/nxs.gen'
 import type { AuthApiShape } from './actions/AuthActions'
 import type { ElectronApiShape } from './actions/ElectronActions'
@@ -52,6 +52,7 @@ export interface DataContextConfig {
    */
   appApi: AppApiShape
   appDataApi: ApplicationDataApiShape
+  localSettingsApi: LocalSettingsApiShape
   authApi: AuthApiShape
   projectApi: ProjectApiShape
   electronApi: ElectronApiShape
@@ -81,6 +82,10 @@ export class DataContext {
     return this._config.electronApi
   }
 
+  get localSettingsApi () {
+    return this._config.localSettingsApi
+  }
+
   get isGlobalMode () {
     return !this.currentProject
   }
@@ -92,7 +97,8 @@ export class DataContext {
       this.actions.app.refreshBrowsers(),
       // load the cached user & validate the token on start
       this.actions.auth.getUser(),
-
+      // and grab the user device settings
+      this.actions.localSettings.refreshLocalSettings(),
       this.actions.app.refreshNodePathAndVersion(),
     ]
 
@@ -295,6 +301,7 @@ export class DataContext {
       authApi: this._config.authApi,
       projectApi: this._config.projectApi,
       electronApi: this._config.electronApi,
+      localSettingsApi: this._config.localSettingsApi,
       busApi: this._rootBus,
     }
   }

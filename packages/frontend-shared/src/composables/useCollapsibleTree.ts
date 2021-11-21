@@ -68,9 +68,44 @@ function buildTree<T extends RawNode<T>> (rawNode: T, options: UseCollapsibleTre
   return acc
 }
 
+function sortTree<T extends RawNode<T>> (tree: T) {
+  if (tree.children.length > 0) {
+    tree.children = tree.children.sort((a, b) => {
+      if (a.children.length === 0 && b.children.length === 0) {
+        return a.name > b.name ? 1 : -1
+      }
+
+      if (a.children.length === 0) {
+        return 1
+      }
+
+      if (b.children.length === 0) {
+        return -1
+      }
+
+      return a.name > b.name ? 1 : -1
+    })
+
+    tree.children.forEach(sortTree)
+  }
+}
+
 export function useCollapsibleTree <T extends RawNode<T>> (tree: T, options: UseCollapsibleTreeOptions = {}) {
   options.expandInitially = options.expandInitially || true
+  sortTree(tree)
   const collapsibleTree = buildTree<T>(tree, options)
+
+  collapsibleTree.sort((a, b) => {
+    if (a.parent === b.parent) {
+      if (a.children.length && !b.children.length) {
+        return -1
+      }
+
+      return 0
+    }
+
+    return 0
+  })
 
   return {
     tree: options.dropRoot ? collapsibleTree.slice(1) : collapsibleTree,

@@ -1,4 +1,4 @@
-describe('Settings', { viewportWidth: 1200 }, () => {
+describe('Settings', { viewportWidth: 600 }, () => {
   beforeEach(() => {
     cy.openE2E('component-tests')
 
@@ -37,5 +37,19 @@ describe('Settings', { viewportWidth: 1200 }, () => {
     cy.intercept('mutation-SettingsContainer_ReconfigureProject', { 'data': { 'reconfigureProject': true } }).as('ReconfigureProject')
     cy.findByText('Reconfigure Project').click()
     cy.wait('@ReconfigureProject')
+  })
+
+  it('selects well known editor', () => {
+    cy.visitApp()
+    cy.get('[href="#/settings"]').click()
+    cy.contains('Device Settings').click()
+    cy.findByPlaceholderText('Custom path...').clear().type('/usr/local/bin/vim')
+
+    cy.intercept('POST', 'mutation-SetPreferredEditorBinary', (req) => {
+      expect(req.body.variables).to.eql({ 'value': '/usr/local/bin/vim' })
+    }).as('SetPreferred')
+
+    cy.get('[data-cy="use-custom-editor"]').click()
+    cy.wait('@SetPreferred')
   })
 })
