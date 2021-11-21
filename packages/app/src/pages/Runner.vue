@@ -30,7 +30,7 @@ watchEffect(() => {
   if (specStore.isRunnerInitialized) {
     const eventManager = getEventManager()
 
-    eventManager.on('save:app:state', () => { // TODO: why does this live here?
+    eventManager.on('save:app:state', () => {
       query.executeQuery()
     })
   }
