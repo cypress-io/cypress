@@ -108,9 +108,6 @@ module.exports = {
     // // strip off the unit part
     // spec = path.relative("unit", spec)
 
-    // // now simply resolve this with our unitFolder
-    // // which makes it an absolute path
-    // path.join(config.unitFolder, spec)
     debug('returning default path %s', spec)
 
     return spec

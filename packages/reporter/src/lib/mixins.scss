@@ -1,0 +1,31 @@
+@mixin inner-header {
+  background: $gray-1000;
+  display: block;
+  font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
+  font-size: 14px;
+  line-height: 24px;
+  overflow-wrap: break-word;
+  padding: 16px;
+  position: sticky;
+  top: 0;
+  width: 100%;
+  z-index: 1;
+
+  &:before,
+  &:after {
+    background-color: $gray-900;
+    content: '';
+    left: 16px;
+    position: absolute;
+    width: calc(100% - 32px);
+    height: 1px;
+  }
+
+  &:before {
+    top: 0;
+  }
+
+  &:after {
+    bottom: 0;
+  }
+}

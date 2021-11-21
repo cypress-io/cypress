@@ -2,8 +2,6 @@ const _ = require('lodash')
 const debug = require('debug')('cypress:server:validation')
 const is = require('check-more-types')
 const { commaListsOr } = require('common-tags')
-const { URL } = require('url')
-
 const path = require('path')
 
 // validation functions take a key and a value and should:
@@ -11,6 +9,7 @@ const path = require('path')
 //  - return a error message if it fails validation
 
 const str = JSON.stringify
+const { isArray, isString, isFinite: isNumber } = _
 
 /**
  * Forms good Markdown-like string message.
@@ -36,10 +35,6 @@ const isArrayOfStrings = (value) => {
 const isFalse = (value) => {
   return value === false
 }
-
-const { isArray } = _
-const isNumber = _.isFinite
-const { isString } = _
 
 /**
  * Validates a single browser object.
@@ -130,30 +125,6 @@ const isPlainObject = (key, value) => {
   return errMsg(key, value, 'a plain object')
 }
 
-// options is passed in here in order to avoid a circular import
-// where validation depends on config_options and config_options depends on validation
-const isValidConfig = (options) => {
-  return (key, config) => {
-    const status = isPlainObject(key, config)
-
-    if (status !== true) {
-      return status
-    }
-
-    for (const rule of options) {
-      if (rule.name in config && rule.validation) {
-        const status = rule.validation(`${key}.${rule.name}`, config[rule.name])
-
-        if (status !== true) {
-          return status
-        }
-      }
-    }
-
-    return true
-  }
-}
-
 const isOneOf = (...values) => {
   return (key, value) => {
     if (values.some((v) => {
@@ -176,7 +147,7 @@ const isOneOf = (...values) => {
  * Validates whether the supplied set of cert information is valid
  * @returns {string|true} Returns `true` if the information set is valid. Returns an error message if it is not.
  */
-const isValidClientCertificatesSet = (key, certsForUrls) => {
+const isValidClientCertificatesSet = (_key, certsForUrls) => {
   debug('clientCerts: %o', certsForUrls)
 
   if (!Array.isArray(certsForUrls)) {
@@ -270,8 +241,6 @@ module.exports = {
   isValidBrowserList,
 
   isValidRetriesConfig,
-
-  isValidConfig,
 
   isPlainObject,
 

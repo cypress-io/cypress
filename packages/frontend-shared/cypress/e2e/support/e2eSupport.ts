@@ -68,8 +68,8 @@ declare global {
        * Removes the sinon spy'ing on the remote GraphQL fake requests
        */
       disableRemoteGraphQLFakes(): void
-      visitApp(href?: string): Chainable<string>
-      visitLaunchpad(href?: string): Chainable<string>
+      visitApp(href?: string): Chainable<AUTWindow>
+      visitLaunchpad(href?: string): Chainable<AUTWindow>
     }
   }
 }
@@ -142,8 +142,8 @@ function visitApp (href?: string) {
     throw new Error(`Missing serverPort - did you forget to call cy.initializeApp(...) ?`)
   }
 
-  cy.withCtx(async (ctx) => {
-    return JSON.stringify(await ctx.html.fetchAppInitialData())
+  return cy.withCtx(async (ctx) => {
+    return JSON.stringify(ctx.html.fetchAppInitialData())
   }, { log: false }).then((ssrData) => {
     return cy.visit(`dist-app/index.html?serverPort=${e2e_serverPort}${href || ''}`, {
       onBeforeLoad (win) {
@@ -156,7 +156,13 @@ function visitApp (href?: string) {
 }
 
 function visitLaunchpad () {
-  cy.visit(`dist-launchpad/index.html?gqlPort=${Cypress.env('e2e_gqlPort')}`)
+  const { e2e_gqlPort } = Cypress.env()
+
+  if (!e2e_gqlPort) {
+    throw new Error(`Missing gqlPort - did you forget to call cy.setupE2E(...) ?`)
+  }
+
+  return cy.visit(`dist-launchpad/index.html?gqlPort=${e2e_gqlPort}`)
 }
 
 type UnwrapPromise<R> = R extends PromiseLike<infer U> ? U : R

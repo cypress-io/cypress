@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@cypress/mount-utils": "0.0.0-development",
-    "debug": "4.3.2",
+    "debug": "^4.3.2",
     "find-webpack": "2.2.1",
     "find-yarn-workspace-root": "2.0.0"
   },
@@ -66,7 +66,7 @@
     "date-fns": "2.13.0",
     "framer-motion": "2.6.13",
     "i18next": "19.7.0",
-    "lodash": "4.17.15",
+    "lodash": "^4.17.15",
     "mobx": "6.0.0",
     "mobx-react-lite": "3.0.0",
     "mocha-junit-reporter": "^2.0.0",

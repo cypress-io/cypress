@@ -93,37 +93,48 @@ describe('header', () => {
         runner.emit('run:start')
       })
 
-      describe('auto-scrolling button', () => {
-        it('is displayed', () => {
-          cy.get('.toggle-auto-scrolling').should('be.visible')
+      describe('preferences menu', () => {
+        it('can be toggled', () => {
+          cy.get('.testing-preferences').should('not.exist')
+          cy.get('.testing-preferences-toggle').should('not.have.class', 'open')
+          cy.get('.testing-preferences-toggle').click()
+          cy.get('.testing-preferences-toggle').should('have.class', 'open')
+          cy.get('.testing-preferences').should('be.visible')
+          cy.get('.testing-preferences-toggle').click()
+          cy.get('.testing-preferences-toggle').should('not.have.class', 'open')
+          cy.get('.testing-preferences').should('not.exist')
         })
 
-        it('has auto-scrolling-enabled class when auto-scrolling is enabled', () => {
-          cy.get('.toggle-auto-scrolling').should('have.class', 'auto-scrolling-enabled')
+        it('has tooltip', () => {
+          cy.get('.testing-preferences-toggle').trigger('mouseover')
+          cy.get('.cy-tooltip').should('have.text', 'Open Testing Preferences')
         })
 
-        it('does not have auto-scrolling-enabled class when auto-scrolling is disabled', () => {
-          runner.emit('reporter:start', { autoScrollingEnabled: false })
+        it('shows when auto-scrolling is enabled and can disable it', () => {
+          const switchSelector = '[data-cy=auto-scroll-switch]'
 
-          cy.get('.toggle-auto-scrolling').should('not.have.class', 'auto-scrolling-enabled')
+          cy.get('.testing-preferences-toggle').click()
+          cy.get(switchSelector).invoke('attr', 'aria-checked').should('eq', 'true')
+          cy.get(switchSelector).click()
+          cy.get(switchSelector).invoke('attr', 'aria-checked').should('eq', 'false')
         })
 
-        it('has tooltip with right title when auto-scrolling is enabled', () => {
-          cy.get('.toggle-auto-scrolling').trigger('mouseover')
-          cy.get('.cy-tooltip').should('have.text', 'Disable Auto-scrolling A')
+        it('can be toggled with shortcut', () => {
+          const switchSelector = '[data-cy=auto-scroll-switch]'
+
+          cy.get('.testing-preferences-toggle').click()
+          cy.get(switchSelector).invoke('attr', 'aria-checked').should('eq', 'true')
+          cy.get('body').type('a').then(() => {
+            cy.get(switchSelector).invoke('attr', 'aria-checked').should('eq', 'false')
+          })
         })
 
-        it('has tooltip with right title when auto-scrolling is disabled', () => {
-          runner.emit('reporter:start', { autoScrollingEnabled: false })
-
-          cy.get('.toggle-auto-scrolling').trigger('mouseover')
-          cy.get('.cy-tooltip').should('have.text', 'Enable Auto-scrolling A')
-        })
-
-        it('emits save:state event when clicked', () => {
+        it('the auto-scroll toggle emits save:state event when clicked', () => {
           cy.spy(runner, 'emit')
-          cy.get('.toggle-auto-scrolling').click()
+          cy.get('.testing-preferences-toggle').click()
+          cy.get('[data-cy=auto-scroll-switch]').click()
           cy.wrap(runner.emit).should('be.calledWith', 'save:state')
+          cy.percySnapshot()
         })
       })
 

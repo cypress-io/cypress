@@ -63,8 +63,8 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
     appApi: {
       getBrowsers,
       ensureAndGetByNameOrPath,
-      findNodePathAndVersion () {
-        return findSystemNode.findNodePathAndVersion()
+      findNodePath () {
+        return findSystemNode.findNodeInFullPath()
       },
     },
     appDataApi: app_data,

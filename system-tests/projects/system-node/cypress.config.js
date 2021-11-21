@@ -1,5 +1,4 @@
 module.exports = {
-  'nodeVersion': 'system',
   'e2e': {
     setupNodeEvents (on, config) {
       process.stderr.write('Plugin Loaded\n')

@@ -1,4 +1,4 @@
-import Timeouts from '@packages/driver/src/cy/timeouts'
+import { create } from '@packages/driver/src/cy/timeouts'
 
 describe('driver/src/cy/timeouts', () => {
   beforeEach(() => {
@@ -7,7 +7,7 @@ describe('driver/src/cy/timeouts', () => {
 
   it('creates timeout and clearTimeout props', () => {
     const state = cy.state('window')
-    const timeouts = Timeouts.create(state)
+    const timeouts = create(state)
 
     expect(timeouts).to.have.property('timeout')
     expect(timeouts).to.have.property('clearTimeout')
@@ -16,7 +16,7 @@ describe('driver/src/cy/timeouts', () => {
   context('timeout', () => {
     it('throws when no runnable', () => {
       const state = () => { }
-      const timeouts = Timeouts.create(state)
+      const timeouts = create(state)
 
       const fn = () => {
         return timeouts.timeout(0)
@@ -31,7 +31,7 @@ describe('driver/src/cy/timeouts', () => {
   context('clearTimeout', () => {
     it('throws when no runnable', () => {
       const state = () => { }
-      const timeouts = Timeouts.create(state)
+      const timeouts = create(state)
 
       const fn = () => {
         return timeouts.clearTimeout()

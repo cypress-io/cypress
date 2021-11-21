@@ -32,16 +32,11 @@ module.exports = {
     },
   },
   'component': {
-    setupNodeEvents (on, config) {
+    devServer (cypressConfig) {
       const { startDevServer } = require('@cypress/webpack-dev-server')
-
       const webpackConfig = require('./webpack.config').default
 
-      on('dev-server:start', (options) => {
-        return startDevServer({ options, webpackConfig })
-      })
-
-      return config
+      return startDevServer({ options: cypressConfig, webpackConfig })
     },
   },
 }
