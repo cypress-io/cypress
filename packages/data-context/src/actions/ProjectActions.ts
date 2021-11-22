@@ -1,5 +1,5 @@
 import type { CodeGenType, MutationAddProjectArgs, MutationSetProjectPreferencesArgs, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
-import type { FindSpecs, FoundBrowser, FoundSpec, FullConfig, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions, Preferences, SettingsOptions } from '@packages/types'
+import type { BaseSpec, FindSpecs, FoundBrowser, FoundSpec, FullConfig, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions, Preferences, SettingsOptions } from '@packages/types'
 import path from 'path'
 import type { ActiveProjectShape, ProjectShape } from '../data/coreDataShape'
 
@@ -26,6 +26,9 @@ export interface ProjectApiShape {
   clearProjectPreferences(projectTitle: string): Promise<unknown>
   clearAllProjectPreferences(): Promise<unknown>
   closeActiveProject(): Promise<unknown>
+  getDevServer () : {
+    updateSpecs: (specs: BaseSpec[]) => void
+  }
   error: {
     throw: (type: string, ...args: any) => Error
     get(type: string, ...args: any): Error & { code: string, isCypressErr: boolean}
@@ -418,6 +421,13 @@ export class ProjectActions {
       projectRoot: project.projectRoot,
       specFileExtension,
     })
+
+    this.api.getDevServer().updateSpecs([spec])
+    if (project.specs) {
+      project.specs.push(spec)
+    } else {
+      project.specs = [spec]
+    }
 
     return {
       spec,

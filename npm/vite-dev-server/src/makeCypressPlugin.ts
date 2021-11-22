@@ -44,6 +44,7 @@ export const makeCypressPlugin = (
   let specsPathsSet = getSpecsPathsSet(specs)
 
   devServerEvents.on('dev-server:specs:changed', (specs: Spec[]) => {
+    console.log('got it', specs)
     specsPathsSet = getSpecsPathsSet(specs)
   })
 

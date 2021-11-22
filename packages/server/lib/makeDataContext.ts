@@ -10,6 +10,7 @@ import user from './user'
 import * as config from './config'
 import { EventEmitter } from 'events'
 import { openProject } from './open_project'
+import devServer from './plugins/dev-server'
 import cache from './cache'
 import errors from './errors'
 import findSystemNode from './util/find_system_node'
@@ -83,6 +84,9 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       },
       launchProject (browser: FoundBrowser, spec: Cypress.Spec, options?: LaunchOpts) {
         return openProject.launch({ ...browser }, spec, options)
+      },
+      getDevServer () {
+        return devServer
       },
       initializeProject (args: LaunchArgs, options: OpenProjectLaunchOptions, browsers: FoundBrowser[]) {
         return openProject.create(args.projectRoot, args, options, browsers)

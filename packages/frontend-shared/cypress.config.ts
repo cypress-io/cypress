@@ -10,14 +10,14 @@ export default defineConfig({
     'openMode': 0,
   },
   'nodeVersion': 'system',
-  'testFiles': '**/*.spec.{js,ts,tsx,jsx}',
+  'testFiles': '**/*.cy.ts',
   'reporter': '../../node_modules/cypress-multi-reporters/index.js',
   'reporterOptions': {
     'configFile': '../../mocha-reporter-config.json',
   },
   'componentFolder': 'src',
   'component': {
-    'testFiles': '**/*.spec.{js,ts,tsx,jsx}',
+    'testFiles': '**/*.cy.ts',
     devServer (cypressConfig) {
       const { startDevServer } = require('@cypress/vite-dev-server')
 

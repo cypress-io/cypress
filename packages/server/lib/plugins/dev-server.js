@@ -40,6 +40,7 @@ const API = {
   },
 
   updateSpecs (specs) {
+    console.log('updating...', specs)
     return baseEmitter.emit('dev-server:specs:changed', specs)
   },
 
