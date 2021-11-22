@@ -1,6 +1,6 @@
 // @ts-nocheck
 
-import { validate, validateNoReadOnlyConfig } from '@packages/config'
+import { validate, validateNoReadOnlyConfig, validateNoReadOnlyConfigEmily } from '@packages/config'
 import _ from 'lodash'
 import $ from 'jquery'
 import * as blobUtil from 'blob-util'
@@ -39,6 +39,7 @@ import ProxyLogging from './cypress/proxy-logging'
 import * as $Events from './cypress/events'
 import $Keyboard from './cy/keyboard'
 import * as resolvers from './cypress/resolvers'
+import { state } from '@packages/net-stubbing/lib/server/state'
 
 const debug = debugFn('cypress:driver:cypress')
 
@@ -143,11 +144,26 @@ class $Cypress {
 
     this.state = $SetterGetter.create({})
     this.originalConfig = _.cloneDeep(config)
-    this.config = validateNoReadOnlyConfig($SetterGetter.create(config, (config) => {
-      validate(config, (errMsg) => {
-        throw new this.state('specWindow').Error(errMsg)
-      })
-    }))
+
+    this.config = $SetterGetter.create(config, (config) => {
+      const handleError = (errMsg) => {
+        let errMessage
+
+        if (this.state('runnable')) {
+          errMessage = `used Cypress.config ${errMsg}`
+        }
+
+        throw new this.state('specWindow').Error(errMessage)
+      }
+
+      const err = validateNoReadOnlyConfigEmily(config)
+
+      if (err) {
+        handleError(err)
+      }
+
+      validate(config, handleError)
+    })
 
     this.env = $SetterGetter.create(env)
     this.getTestRetries = function () {

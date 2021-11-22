@@ -101,35 +101,58 @@ module.exports = {
       }
     })
   },
+  validateNoReadOnlyConfigEmily: (config) => {
+    console.log('config', config)
+    const writeableOptions = options.filter((option) => option.isWriteable).map((option) => option.name)
 
+    let errMessage
+
+    Object.keys(config).forEach((element) => {
+      console.log('emily', config, element)
+      console.log('emily', writeableOptions)
+      console.log('emily', writeableOptions.includes(element))
+      if (!writeableOptions.includes(element)) {
+        console.log('return error')
+
+        errMessage = `The configuration option \`${element}\` cannot be mutated because it is a read-only property.`
+        // throw new Error)
+      }
+    })
+
+    return errMessage
+  },
   validateNoReadOnlyConfig: (func) => {
     const writeableOptions = options.filter((option) => option.isWriteable).map((option) => option.name)
 
     return function (...args) {
       switch (args.length) {
         case 0:
-          return func()
+          func()
+          break
         case 1:
           if (_.isString(args[0])) {
-            return func(...args)
+            func(...args)
+            break
           }
 
           if (_.isObject(args[0])) {
             Object.keys(args[0]).forEach((element) => {
               if (!writeableOptions.includes(element)) {
-                throw new Error(`The configuration option \`${element}\` cannot be mutated because it is a read-only property.`)
+                return `The configuration option \`${element}\` cannot be mutated because it is a read-only property.`
+                // throw new Error)
               }
             })
           }
 
-          return func(...args)
-
+          func(...args)
+          break
         default:
           if (!writeableOptions.includes(args[0])) {
+            return `The configuration option \`${args[0]}}\` cannot be mutated because it is a read-only property.`
             throw new Error(`The configuration option \`${args[0]}\` cannot be mutated because it is a read-only property.`)
           }
 
-          return func(...args)
+          func(...args)
       }
     }
   },

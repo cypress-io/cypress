@@ -1520,6 +1520,7 @@ export default {
         // been fired before for this test
         return Promise.try(() => {
           if (!fired(TEST_BEFORE_RUN_EVENT, test)) {
+            console.log(state())
             cy.reset(test)
             test.slow(Cypress.config('slowTestThreshold'))
             test._retries = Cypress.getTestRetries() ?? -1
