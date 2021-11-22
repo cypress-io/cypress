@@ -72,7 +72,7 @@ export class BaseStore {
   }
 
   @action updateSpecByUrl (specUrl: string) {
-    const foundSpec = this.specs.find((x) => x.name === decodeURI(specUrl))
+    const foundSpec = this.specs.find((x) => x.name === specUrl)
 
     if (foundSpec) {
       this.spec = foundSpec

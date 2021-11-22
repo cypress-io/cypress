@@ -4,17 +4,16 @@ module.exports = {
   'testFiles': '**/*.spec.js',
   'video': false,
   'component': {
-    setupNodeEvents (on, config) {
+    devServer (cypressConfig) {
       const { startDevServer } = require('@cypress/webpack-dev-server')
       const webpackConfig = require('./webpack.config')
 
-      on('dev-server:start', (options) => {
-        return startDevServer({
-          options,
-          webpackConfig,
-        })
+      return startDevServer({
+        options: cypressConfig,
+        webpackConfig,
       })
-
+    },
+    setupNodeEvents (on, config) {
       require('@cypress/code-coverage/task')(on, config)
 
       return config

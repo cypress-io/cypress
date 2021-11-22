@@ -70,12 +70,7 @@ const deploy = {
 
   parseOptions (argv) {
     const opts = minimist(argv, {
-      boolean: ['skip-clean'],
-      default: {
-        'skip-clean': false,
-      },
       alias: {
-        skipClean: 'skip-clean',
         zip: ['zipFile', 'zip-file', 'filename'],
       },
     })
@@ -156,7 +151,6 @@ const deploy = {
     const systems = [
       { platform: 'linux', arch: 'x64' },
       { platform: 'darwin', arch: 'x64' },
-      { platform: 'win32', arch: 'ia32' },
       { platform: 'win32', arch: 'x64' },
     ]
 
@@ -237,7 +231,7 @@ const deploy = {
     .then(() => {
       debug('building binary: platform %s version %s', options.platform, options.version)
 
-      return build(options.platform, options.version, options)
+      return build.buildCypressApp(options)
     })
   },
 

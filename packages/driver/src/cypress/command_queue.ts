@@ -61,7 +61,7 @@ const commandRunningFailed = (Cypress, state, err) => {
 }
 
 export default {
-  create: (state, timeouts, stability, cleanup, fail, isCy) => {
+  create: (state, timeout, whenStable, cleanup, fail, isCy) => {
     const queue = $queue.create()
 
     const { get, slice, at, reset, clear, stop } = queue
@@ -127,7 +127,7 @@ export default {
       state('current', command)
       state('chainerId', command.get('chainerId'))
 
-      return stability.whenStable(() => {
+      return whenStable(() => {
         state('nestedIndex', state('index'))
 
         return command.get('args')
@@ -142,7 +142,7 @@ export default {
           return enqueuedCmd = obj
         }
 
-        // only check for command enqueing when none
+        // only check for command enqueuing when none
         // of our args are functions else commands
         // like cy.then or cy.each would always fail
         // since they return promises and queue more
@@ -224,8 +224,7 @@ export default {
 
         command.set({ subject })
 
-        // end / snapshot our logs
-        // if they need it
+        // end / snapshot our logs if they need it
         command.finishLogs()
 
         // reset the nestedIndex back to null
@@ -234,8 +233,7 @@ export default {
         // also reset recentlyReady back to null
         state('recentlyReady', null)
 
-        // we're finished with the current command
-        // so set it back to null
+        // we're finished with the current command so set it back to null
         state('current', null)
 
         state('subject', subject)
@@ -283,7 +281,7 @@ export default {
           // finished running if the application under
           // test is no longer stable because we cannot
           // move onto the next test until its finished
-          return stability.whenStable(() => {
+          return whenStable(() => {
             Cypress.action('cy:command:queue:end')
 
             return null
@@ -291,7 +289,7 @@ export default {
         }
 
         // store the previous timeout
-        const prevTimeout = timeouts.timeout()
+        const prevTimeout = timeout()
 
         // store the current runnable
         const runnable = state('runnable')
@@ -309,7 +307,7 @@ export default {
           let fn
 
           if (!runnable.state) {
-            timeouts.timeout(prevTimeout)
+            timeout(prevTimeout)
           }
 
           // mutate index by incrementing it

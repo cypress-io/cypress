@@ -200,8 +200,7 @@ export class Server {
     this.setHeader(xhr, 'response', route.response, responser)
     this.setHeader(xhr, 'matched', `${route.url}`)
     this.setHeader(xhr, 'delay', route.delay)
-
-    return this.setHeader(xhr, 'headers', route.headers, this.transformHeaders)
+    this.setHeader(xhr, 'headers', route.headers, this.transformHeaders.bind(this))
   }
 
   route (attrs = {}) {

@@ -3,6 +3,7 @@ import path from 'path'
 import Promise from 'bluebird'
 import deepDiff from 'return-deep-diff'
 import type { ResolvedConfigurationOptions, ResolvedFromConfig, ResolvedConfigurationOptionSource } from '@packages/types'
+import configUtils from '@packages/config'
 
 import errors from './errors'
 import scaffold from './scaffold'
@@ -12,34 +13,15 @@ import origin from './util/origin'
 import * as settings from './util/settings'
 import Debug from 'debug'
 import pathHelpers from './util/path_helpers'
-import findSystemNode from './util/find_system_node'
 
 const debug = Debug('cypress:server:config')
 
-import { options, breakingOptions } from './config_options'
 import { getProcessEnvVars, CYPRESS_SPECIAL_ENV_VARS } from './util/config'
 import type { DataContext } from '@packages/data-context'
 
-const dashesOrUnderscoresRe = /^(_-)+/
+const folders = _(configUtils.options).filter({ isFolder: true }).map('name').value()
 
-// takes an array and creates an index object of [keyKey]: [valueKey]
-const createIndex = (arr, keyKey, valueKey) => {
-  return _.reduce(arr, (memo, item) => {
-    if (item[valueKey] !== undefined) {
-      memo[item[keyKey]] = item[valueKey]
-    }
-
-    return memo
-  }, {})
-}
-
-const publicConfigKeys = _(options).reject({ isInternal: true }).map('name').value()
-const breakingKeys = _.map(breakingOptions, 'name')
-const folders = _(options).filter({ isFolder: true }).map('name').value()
-const validationRules = createIndex(options, 'name', 'validation')
-const defaultValues: Record<string, any> = createIndex(options, 'name', 'defaultValue')
-
-const convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) => {
+const convertRelativeToAbsolutePaths = (projectRoot, obj) => {
   return _.reduce(folders, (memo, folder) => {
     const val = obj[folder]
 
@@ -52,39 +34,9 @@ const convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) => {
   , {})
 }
 
-const validateNoBreakingConfig = (cfg) => {
-  return _.each(breakingOptions, ({ name, errorKey, newName, isWarning }) => {
-    if (_.has(cfg, name)) {
-      if (isWarning) {
-        return errors.warning(errorKey, name, newName)
-      }
-
-      return errors.throw(errorKey, name, newName)
-    }
-  })
-}
-
-const validate = (cfg, onErr) => {
-  return _.each(cfg, (value, key) => {
-    const validationFn = validationRules[key]
-
-    // does this key have a validation rule?
-    if (validationFn) {
-      // and is the value different from the default?
-      if (value !== defaultValues[key]) {
-        const result = validationFn(key, value)
-
-        if (result !== true) {
-          return onErr(result)
-        }
-      }
-    }
-  })
-}
-
 const validateFile = (file) => {
   return (settings) => {
-    return validate(settings, (errMsg) => {
+    return configUtils.validate(settings, (errMsg) => {
       return errors.throw('SETTINGS_VALIDATION_ERROR', file, errMsg)
     })
   }
@@ -98,8 +50,7 @@ const hideSpecialVals = function (val, key) {
   return val
 }
 
-// an object with a few utility methods
-// for easy stubbing from unit tests
+// an object with a few utility methods for easy stubbing from unit tests
 export const utils = {
   resolveModule (name) {
     return require.resolve(name)
@@ -162,21 +113,11 @@ export const utils = {
   },
 }
 
-export function getConfigKeys () {
-  return publicConfigKeys
-}
-
 export function isValidCypressInternalEnvValue (value) {
   // names of config environments, see "config/app.yml"
   const names = ['development', 'test', 'staging', 'production']
 
   return _.includes(names, value)
-}
-
-export function allowed (obj = {}) {
-  const propertyNames = publicConfigKeys.concat(breakingKeys)
-
-  return _.pick(obj, propertyNames)
 }
 
 export type FullConfig =
@@ -210,8 +151,7 @@ export function set (obj: Record<string, any> = {}) {
   debug('setting config object')
   let { projectRoot, projectName, config, envFile, options } = obj
 
-  // just force config to be an object
-  // so we dont have to do as much
+  // just force config to be an object so we dont have to do as much
   // work in our tests
   if (config == null) {
     config = {}
@@ -219,8 +159,7 @@ export function set (obj: Record<string, any> = {}) {
 
   debug('config is %o', config)
 
-  // flatten the object's properties
-  // into the master config object
+  // flatten the object's properties into the master config object
   config.envFile = envFile
   config.projectRoot = projectRoot
   config.projectName = projectName
@@ -237,7 +176,7 @@ export function mergeDefaults (config: Record<string, any> = {}, options: Record
   debug('merged config with options, got %o', config)
 
   _
-  .chain(allowed(options))
+  .chain(configUtils.allowed(options))
   .omit('env')
   .omit('browsers')
   .each((val, key) => {
@@ -254,18 +193,15 @@ export function mergeDefaults (config: Record<string, any> = {}, options: Record
     config.baseUrl = url.replace(/\/\/+$/, '/')
   }
 
-  _.defaults(config, defaultValues)
+  const defaultsForRuntime = configUtils.getDefaultValues(options)
 
-  // Default values can be functions, in which case they are evaluated
-  // at runtime - for example, slowTestThreshold where the default value
-  // varies between e2e and component testing.
-  config = _.mapValues(config, (value) => (typeof value === 'function' ? value(options) : value))
+  _.defaultsDeep(config, defaultsForRuntime)
 
   // split out our own app wide env from user env variables
   // and delete envFile
   config.env = parseEnv(config, options.env, resolved)
 
-  config.cypressEnv = process.env['CYPRESS_INTERNAL_ENV']
+  config.cypressEnv = process.env.CYPRESS_INTERNAL_ENV
   debug('using CYPRESS_INTERNAL_ENV %s', config.cypressEnv)
   if (!isValidCypressInternalEnvValue(config.cypressEnv)) {
     errors.throw('INVALID_CYPRESS_INTERNAL_ENV', config.cypressEnv)
@@ -283,34 +219,34 @@ export function mergeDefaults (config: Record<string, any> = {}, options: Record
     config.numTestsKeptInMemory = 0
   }
 
-  config = setResolvedConfigValues(config, defaultValues, resolved, options)
+  config = setResolvedConfigValues(config, defaultsForRuntime, resolved)
 
   if (config.port) {
     config = setUrls(config)
   }
 
-  config = setAbsolutePaths(config, defaultValues)
+  config = setAbsolutePaths(config)
 
   config = setParentTestsPaths(config)
 
-  // validate config again here so that we catch
-  // configuration errors coming from the CLI overrides
-  // or env var overrides
-  validate(config, (errMsg) => {
+  config = setNodeBinary(config, options.args?.userNodePath, options.args?.userNodeVersion)
+
+  // validate config again here so that we catch configuration errors coming
+  // from the CLI overrides or env var overrides
+  configUtils.validate(_.omit(config, 'browsers'), (errMsg) => {
     return errors.throw('CONFIG_VALIDATION_ERROR', errMsg)
   })
 
-  validateNoBreakingConfig(config)
+  configUtils.validateNoBreakingConfig(config, errors.warning, errors.throw)
 
-  return setSupportFileAndFolder(config)
+  return setSupportFileAndFolder(config, defaultsForRuntime)
   .then(setScaffoldPaths)
-  .then(_.partialRight(setNodeBinary, options.onWarning))
 }
 
-export function setResolvedConfigValues (config, defaults, resolved, options) {
+export function setResolvedConfigValues (config, defaults, resolved) {
   const obj = _.clone(config)
 
-  obj.resolved = resolveConfigValues(config, defaults, resolved, options)
+  obj.resolved = resolveConfigValues(config, defaults, resolved)
   debug('resolved config is %o', obj.resolved.browsers)
 
   return obj
@@ -345,7 +281,7 @@ export function updateWithPluginValues (cfg, overrides) {
 
   // make sure every option returned from the plugins file
   // passes our validation functions
-  validate(overrides, (errMsg) => {
+  configUtils.validate(overrides, (errMsg) => {
     if (cfg.configFile && cfg.projectRoot) {
       const relativeConfigPath = path.relative(cfg.projectRoot, cfg.configFile)
 
@@ -415,11 +351,11 @@ export function updateWithPluginValues (cfg, overrides) {
 // combines the default configuration object with values specified in the
 // configuration file like "cypress.{ts|js}". Values in configuration file
 // overwrite the defaults.
-export function resolveConfigValues (config, defaults, resolved = {}, options = {}) {
+export function resolveConfigValues (config, defaults, resolved = {}) {
   // pick out only known configuration keys
   return _
   .chain(config)
-  .pick(publicConfigKeys)
+  .pick(configUtils.getPublicConfigKeys())
   .mapValues((val, key) => {
     let r
     const source = (s: ResolvedConfigurationOptionSource): ResolvedFromConfig => {
@@ -439,11 +375,9 @@ export function resolveConfigValues (config, defaults, resolved = {}, options = 
       return source(r)
     }
 
-    const defaultValue = typeof defaults[key] === 'function' ? defaults[key](options) : defaults[key]
-
-    if (!(!_.isEqual(config[key], defaultValue) && key !== 'browsers')) {
+    if (!(!_.isEqual(config[key], defaults[key]) && key !== 'browsers')) {
       // "browsers" list is special, since it is dynamic by default
-      // and can only be ovewritten via plugins file
+      // and can only be overwritten via plugins file
       return source('default')
     }
 
@@ -452,22 +386,19 @@ export function resolveConfigValues (config, defaults, resolved = {}, options = 
 }
 
 // instead of the built-in Node process, specify a path to 3rd party Node
-export const setNodeBinary = Promise.method((obj, onWarning) => {
-  if (obj.nodeVersion !== 'system') {
-    obj.resolvedNodeVersion = process.versions.node
+export const setNodeBinary = (obj, userNodePath, userNodeVersion) => {
+  // if execPath isn't found we weren't executed from the CLI and should used the bundled node version.
+  if (userNodePath && userNodeVersion && obj.nodeVersion !== 'bundled') {
+    obj.resolvedNodePath = userNodePath
+    obj.resolvedNodeVersion = userNodeVersion
 
     return obj
   }
 
-  return findSystemNode.findNodePathAndVersion()
-  .then(({ path, version }) => {
-    obj.resolvedNodePath = path
-    obj.resolvedNodeVersion = version
-  }).catch((err) => {
-    onWarning(errors.get('COULD_NOT_FIND_SYSTEM_NODE', process.versions.node))
-    obj.resolvedNodeVersion = process.versions.node
-  }).return(obj)
-})
+  obj.resolvedNodeVersion = process.versions.node
+
+  return obj
+}
 
 export function setScaffoldPaths (obj) {
   obj = _.clone(obj)
@@ -484,7 +415,7 @@ export function setScaffoldPaths (obj) {
 }
 
 // async function
-export function setSupportFileAndFolder (obj) {
+export function setSupportFileAndFolder (obj, defaults) {
   if (!obj.supportFile) {
     return Promise.resolve(obj)
   }
@@ -518,7 +449,7 @@ export function setSupportFileAndFolder (obj) {
     return fs.pathExists(obj.supportFile)
     .then((found) => {
       if (!found) {
-        errors.throw('SUPPORT_FILE_NOT_FOUND', obj.supportFile, obj.configFile || defaultValues.configFile)
+        errors.throw('SUPPORT_FILE_NOT_FOUND', obj.supportFile, obj.configFile || defaults.configFile)
       }
 
       return debug('switching to found file %s', obj.supportFile)
@@ -526,7 +457,7 @@ export function setSupportFileAndFolder (obj) {
   }).catch({ code: 'MODULE_NOT_FOUND' }, () => {
     debug('support JS module %s does not load', sf)
 
-    const loadingDefaultSupportFile = sf === path.resolve(obj.projectRoot, defaultValues.supportFile)
+    const loadingDefaultSupportFile = sf === path.resolve(obj.projectRoot, defaults.supportFile)
 
     return utils.discoverModuleFile({
       filename: sf,
@@ -535,7 +466,7 @@ export function setSupportFileAndFolder (obj) {
     })
     .then((result) => {
       if (result === null) {
-        const configFile = obj.configFile || defaultValues.configFile
+        const configFile = obj.configFile || defaults.configFile
 
         return errors.throw('SUPPORT_FILE_NOT_FOUND', path.resolve(obj.projectRoot, sf), configFile)
       }
@@ -575,7 +506,7 @@ export function setParentTestsPaths (obj) {
   return obj
 }
 
-export function setAbsolutePaths (obj, defaults) {
+export function setAbsolutePaths (obj) {
   let pr
 
   obj = _.clone(obj)
@@ -588,7 +519,7 @@ export function setAbsolutePaths (obj, defaults) {
     // obj.fileServerFolder = path.resolve(pr, obj.fileServerFolder)
 
     // and do the same for all the rest
-    _.extend(obj, convertRelativeToAbsolutePaths(pr, obj, defaults))
+    _.extend(obj, convertRelativeToAbsolutePaths(pr, obj))
   }
 
   return obj
@@ -633,26 +564,13 @@ export function parseEnv (cfg: Record<string, any>, envCLI: Record<string, any>,
 
   envCLI = envCLI != null ? envCLI : {}
 
-  const matchesConfigKey = function (key) {
-    if (_.has(defaultValues, key)) {
-      return key
-    }
-
-    key = key.toLowerCase().replace(dashesOrUnderscoresRe, '')
-    key = _.camelCase(key)
-
-    if (_.has(defaultValues, key)) {
-      return key
-    }
-  }
-
   const configFromEnv = _.reduce(envProc, (memo: string[], val, key) => {
     let cfgKey: string
 
-    cfgKey = matchesConfigKey(key)
+    cfgKey = configUtils.matchesConfigKey(key)
 
     if (cfgKey) {
-      // only change the value if it hasnt been
+      // only change the value if it hasn't been
       // set by the CLI. override default + config
       if (resolved[cfgKey] !== 'cli') {
         cfg[cfgKey] = val

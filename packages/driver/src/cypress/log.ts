@@ -4,7 +4,7 @@ import _ from 'lodash'
 import $ from 'jquery'
 import clone from 'clone'
 
-import $Snapshots from '../cy/snapshots'
+import { HIGHLIGHT_ATTR } from '../cy/snapshots'
 import * as $Events from './events'
 import $dom from '../dom'
 import $utils from './utils'
@@ -19,8 +19,6 @@ const DISPLAY_PROPS = 'id alias aliasType callCount displayName end err event fu
 const BLACKLIST_PROPS = 'snapshots'.split(' ')
 
 let counter = 0
-
-const { HIGHLIGHT_ATTR } = $Snapshots
 
 // mutate attrs by nulling out
 // object properties
