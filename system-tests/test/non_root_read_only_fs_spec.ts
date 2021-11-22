@@ -22,13 +22,14 @@ describe('e2e readonly fs', function () {
     }
   }
 
-  const onRun = (exec) => {
-    Fixtures.scaffold('read-only-project-root')
+  const onRun = async (exec) => {
+    Fixtures.scaffoldProject('read-only-project-root')
+    await Fixtures.scaffoldCommonNodeModules()
     chmodr(projectPath, 0o500)
 
-    return exec().finally(() => {
-      chmodr(projectPath, 0o777)
-    })
+    await exec()
+
+    chmodr(projectPath, 0o777)
   }
 
   systemTests.it('warns when unable to write to disk', {
