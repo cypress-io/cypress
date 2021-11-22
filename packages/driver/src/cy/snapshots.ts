@@ -144,9 +144,7 @@ export const create = ($$, state) => {
       const isJqueryElement = $dom.isElement($elToHighlight) && $dom.isJquery($elToHighlight)
 
       if (isJqueryElement) {
-        // JQuery.attr doesn't support `true` as a value.
-        // @ts-ignore
-        ($elToHighlight as JQuery<HTMLElement>).attr(HIGHLIGHT_ATTR, true)
+        ($elToHighlight as JQuery<HTMLElement>).attr(HIGHLIGHT_ATTR, 'true')
       }
 
       // TODO: throw error here if cy is undefined!
