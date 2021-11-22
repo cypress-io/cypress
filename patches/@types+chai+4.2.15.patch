@@ -9,8 +9,8 @@ index da5992c..67bafac 100644
 -interface Object {
 -    should: Chai.Assertion;
 -}
-+//z const a = 1; a.should(1); doesn't work with Cypress
-+//z https://github.com/cypress-io/cypress/issues/16548
-+//z interface Object {
-+//z     should: Chai.Assertion;
-+//z }
++// const a = 1; a.should(1); doesn't work with Cypress
++// https://github.com/cypress-io/cypress/issues/16548
++// interface Object {
++//     should: Chai.Assertion;
++// }
