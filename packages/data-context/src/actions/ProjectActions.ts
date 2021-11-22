@@ -204,7 +204,7 @@ export class ProjectActions {
     }
   }
 
-  async launchProject (testingType: TestingTypeEnum | null, options: LaunchOpts, specPath?: string) {
+  async launchProject (testingType: TestingTypeEnum | null, options: LaunchOpts, specPath?: string | null) {
     if (!this.ctx.currentProject) {
       return null
     }
