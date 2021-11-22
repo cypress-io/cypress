@@ -383,6 +383,100 @@ describe('lib/util/args', () => {
         '--project=foo/bar',
       ])
     })
+
+    it('does not pick disallowed args', () => {
+      const result = argsUtil.toArray({ doNotPick: 'forbidden' })
+
+      expect(result).to.be.empty
+    })
+
+    it('does pick allowed args', () => {
+      const result = argsUtil.toArray({
+        apiKey: 'apiKey',
+        appPath: 'appPath',
+        browser: 'browser',
+        ci: 'ci',
+        ciBuildId: 'ciBuildId',
+        clearLogs: 'clearLogs',
+        userNodePath: 'userNodePath',
+        userNodeVersion: 'userNodeVersion',
+        config: 'config',
+        configFile: 'configFile',
+        cwd: 'cwd',
+        env: 'env',
+        execPath: 'execPath',
+        exit: 'exit',
+        exitWithCode: 'exitWithCode',
+        group: 'group',
+        headed: 'headed',
+        inspectBrk: 'inspectBrk',
+        key: 'key',
+        logs: 'logs',
+        mode: 'mode',
+        outputPath: 'outputPath',
+        parallel: 'parallel',
+        ping: 'ping',
+        port: 'port',
+        project: 'project',
+        proxySource: 'proxySource',
+        quiet: 'quiet',
+        record: 'record',
+        reporter: 'reporter',
+        reporterOptions: 'reporterOptions',
+        returnPkg: 'returnPkg',
+        runMode: 'runMode',
+        runProject: 'runProject',
+        smokeTest: 'smokeTest',
+        spec: 'spec',
+        tag: 'tag',
+        testingType: 'testingType',
+        updating: 'updating',
+        version: 'version',
+      })
+
+      expect(result).to.deep.eq([
+        '--apiKey=apiKey',
+        '--appPath=appPath',
+        '--browser=browser',
+        '--ci=ci',
+        '--ciBuildId=ciBuildId',
+        '--clearLogs=clearLogs',
+        '--config=config',
+        '--configFile=configFile',
+        '--cwd=cwd',
+        '--env=env',
+        '--execPath=execPath',
+        '--exit=exit',
+        '--exitWithCode=exitWithCode',
+        '--group=group',
+        '--headed=headed',
+        '--inspectBrk=inspectBrk',
+        '--key=key',
+        '--logs=logs',
+        '--mode=mode',
+        '--outputPath=outputPath',
+        '--parallel=parallel',
+        '--ping=ping',
+        '--port=port',
+        '--project=project',
+        '--proxySource=proxySource',
+        '--quiet=quiet',
+        '--record=record',
+        '--reporter=reporter',
+        '--reporterOptions=reporterOptions',
+        '--returnPkg=returnPkg',
+        '--runMode=runMode',
+        '--runProject=runProject',
+        '--smokeTest=smokeTest',
+        '--spec=spec',
+        '--tag=tag',
+        '--testingType=testingType',
+        '--updating=updating',
+        '--userNodePath=userNodePath',
+        '--userNodeVersion=userNodeVersion',
+        '--version=version',
+      ])
+    })
   })
 
   context('.toObject', () => {

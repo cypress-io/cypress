@@ -1,3 +1,4 @@
+const { assertLogLength } = require('../../support/utils')
 const { stripIndent } = require('common-tags')
 const { Promise } = Cypress
 
@@ -134,7 +135,7 @@ describe('src/cy/commands/cookies', () => {
         cy.on('fail', () => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error').message).to.contain(`\`cy.getCookies()\` had an unexpected error reading cookies from ${Cypress.browser.displayName}.`)
           expect(lastLog.get('error').message).to.contain('some err message')
 
@@ -150,7 +151,7 @@ describe('src/cy/commands/cookies', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
           expect(lastLog.get('name')).to.eq('getCookies')
@@ -305,7 +306,7 @@ describe('src/cy/commands/cookies', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
 
           expect(lastLog.get('error').message).to.contain(`\`cy.getCookie()\` had an unexpected error reading the requested cookie from ${Cypress.browser.displayName}.`)
           expect(lastLog.get('error').message).to.contain('some err message')
@@ -322,7 +323,7 @@ describe('src/cy/commands/cookies', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
           expect(lastLog.get('name')).to.eq('getCookie')
@@ -340,7 +341,7 @@ describe('src/cy/commands/cookies', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error').message).to.eq('`cy.getCookie()` must be passed a string argument for name.')
           expect(lastLog.get('error').docsUrl).to.eq('https://on.cypress.io/getcookie')
           expect(lastLog.get('error')).to.eq(err)
@@ -571,7 +572,7 @@ describe('src/cy/commands/cookies', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error').message).to.include('some err message')
           expect(lastLog.get('error').name).to.eq('CypressError')
 
@@ -587,7 +588,7 @@ describe('src/cy/commands/cookies', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
           expect(lastLog.get('name')).to.eq('setCookie')
@@ -605,7 +606,7 @@ describe('src/cy/commands/cookies', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error').message).to.eq('`cy.setCookie()` must be passed two string arguments for `name` and `value`.')
           expect(lastLog.get('error').docsUrl).to.eq('https://on.cypress.io/setcookie')
           expect(lastLog.get('error')).to.eq(err)
@@ -620,7 +621,7 @@ describe('src/cy/commands/cookies', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error').message).to.eq('`cy.setCookie()` must be passed two string arguments for `name` and `value`.')
           expect(lastLog.get('error').docsUrl).to.eq('https://on.cypress.io/setcookie')
           expect(lastLog.get('error')).to.eq(err)
@@ -635,7 +636,7 @@ describe('src/cy/commands/cookies', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error').message).to.eq(stripIndent`
             If a \`sameSite\` value is supplied to \`cy.setCookie()\`, it must be a string from the following list:
               > no_restriction, lax, strict
@@ -655,7 +656,7 @@ describe('src/cy/commands/cookies', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error').message).to.eq(stripIndent`
             Only cookies with the \`secure\` flag set to \`true\` can use \`sameSite: 'None'\`.
 
@@ -820,7 +821,7 @@ describe('src/cy/commands/cookies', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error').message).to.contain(`\`cy.clearCookie()\` had an unexpected error clearing the requested cookie in ${Cypress.browser.displayName}.`)
           expect(lastLog.get('error').message).to.contain('some err message')
 
@@ -836,7 +837,7 @@ describe('src/cy/commands/cookies', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
           expect(lastLog.get('name')).to.eq('clearCookie')
@@ -854,7 +855,7 @@ describe('src/cy/commands/cookies', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error').message).to.eq('`cy.clearCookie()` must be passed a string argument for name.')
           expect(lastLog.get('error').docsUrl).to.eq('https://on.cypress.io/clearcookie')
           expect(lastLog.get('error')).to.eq(err)
@@ -1088,7 +1089,7 @@ describe('src/cy/commands/cookies', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error').message).to.contain(`\`cy.clearCookies()\` had an unexpected error clearing cookies in ${Cypress.browser.displayName}.`)
           expect(lastLog.get('error').message).to.contain('some err message')
           expect(lastLog.get('error')).to.eq(err)
@@ -1106,7 +1107,7 @@ describe('src/cy/commands/cookies', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
           expect(lastLog.get('name')).to.eq('clearCookies')
@@ -1135,7 +1136,7 @@ describe('src/cy/commands/cookies', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error').message).to.contain(`\`cy.clearCookies()\` had an unexpected error clearing cookies in ${Cypress.browser.displayName}.`)
           expect(lastLog.get('error').message).to.contain('some err message')
           expect(lastLog.get('error')).to.eq(err)

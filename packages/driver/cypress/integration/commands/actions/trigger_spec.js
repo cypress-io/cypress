@@ -1,3 +1,4 @@
+const { assertLogLength } = require('../../../support/utils')
 const { _, $ } = Cypress
 
 describe('src/cy/commands/actions/trigger', () => {
@@ -1060,7 +1061,7 @@ describe('src/cy/commands/actions/trigger', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(2)
+          assertLogLength(this.logs, 2)
           expect(lastLog.get('error')).to.eq(err)
 
           done()
@@ -1075,7 +1076,7 @@ describe('src/cy/commands/actions/trigger', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(2)
+          assertLogLength(this.logs, 2)
           expect(lastLog.get('error')).to.eq(err)
           expect(err.message).to.include('`cy.trigger()` failed because this element is not visible')
 
@@ -1114,7 +1115,7 @@ describe('src/cy/commands/actions/trigger', () => {
 
       it('throws when provided invalid position', function (done) {
         cy.on('fail', (err) => {
-          expect(this.logs.length).to.eq(2)
+          assertLogLength(this.logs, 2)
           expect(err.message).to.eq('Invalid position argument: `foo`. Position may only be topLeft, top, topRight, left, center, right, bottomLeft, bottom, bottomRight.')
 
           done()
@@ -1125,7 +1126,7 @@ describe('src/cy/commands/actions/trigger', () => {
 
       it('throws when provided invalid event type', function (done) {
         cy.on('fail', (err) => {
-          expect(this.logs.length).to.eq(2)
+          assertLogLength(this.logs, 2)
           expect(err.message).to.eq('Timed out retrying after 100ms: `cy.trigger()` `eventConstructor` option must be a valid event (e.g. \'MouseEvent\', \'KeyboardEvent\'). You passed: `FooEvent`')
 
           done()
@@ -1175,7 +1176,7 @@ describe('src/cy/commands/actions/trigger', () => {
 
       it('does not log an additional log on failure', function (done) {
         cy.on('fail', () => {
-          expect(this.logs.length).to.eq(3)
+          assertLogLength(this.logs, 3)
 
           done()
         })

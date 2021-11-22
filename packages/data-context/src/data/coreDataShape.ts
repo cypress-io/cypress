@@ -1,4 +1,4 @@
-import { BUNDLERS, FoundBrowser, FoundSpec, FullConfig, Preferences, NodePathAndVersion, DevicePreferences, devicePreferenceDefaults, Editor, Warning } from '@packages/types'
+import { BUNDLERS, FoundBrowser, FoundSpec, FullConfig, Preferences, DevicePreferences, devicePreferenceDefaults, Editor, Warning } from '@packages/types'
 import type { NexusGenEnums, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
 import type { BrowserWindow } from 'electron'
 import type { ChildProcess } from 'child_process'
@@ -59,8 +59,8 @@ export interface AppDataShape {
   projects: ProjectShape[]
   currentTestingType: Maybe<TestingTypeEnum>
   refreshingBrowsers: Promise<FoundBrowser[]> | null
-  refreshingNodePathAndVersion: Promise<NodePathAndVersion> | null
-  nodePathAndVersion: NodePathAndVersion | null
+  refreshingNodePath: Promise<string> | null
+  nodePath: string | null
 }
 
 export interface WizardDataShape {
@@ -112,8 +112,8 @@ export function makeCoreData (): CoreDataShape {
       refreshingBrowsers: null,
       browsers: null,
       projects: [],
-      refreshingNodePathAndVersion: null,
-      nodePathAndVersion: null,
+      refreshingNodePath: null,
+      nodePath: null,
     },
     localSettings: {
       availableEditors: [],

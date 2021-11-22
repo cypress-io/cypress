@@ -98,7 +98,7 @@ export class DataContext {
       this.actions.auth.getUser(),
       // and grab the user device settings
       this.actions.localSettings.refreshLocalSettings(),
-      this.actions.app.refreshNodePathAndVersion(),
+      this.actions.app.refreshNodePath(),
     ]
 
     if (this._config._internalOptions.loadCachedProjects) {
@@ -161,8 +161,8 @@ export class DataContext {
     return this.coreData.app.browsers
   }
 
-  get nodePathAndVersion () {
-    return this.coreData.app.nodePathAndVersion
+  get nodePath () {
+    return this.coreData.app.nodePath
   }
 
   get baseError () {

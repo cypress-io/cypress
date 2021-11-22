@@ -11,7 +11,7 @@
     "test-watch": "echo 'no watching of tests'"
   },
   "dependencies": {
-    "debug": "4.3.2"
+    "debug": "^4.3.2"
   },
   "devDependencies": {
     "rimraf": "3.0.2",

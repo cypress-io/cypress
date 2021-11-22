@@ -79,8 +79,3 @@ export interface OpenProjectLaunchOptions {
 
   [key: string]: any
 }
-
-export interface NodePathAndVersion {
-  path: string
-  version: string
-}
