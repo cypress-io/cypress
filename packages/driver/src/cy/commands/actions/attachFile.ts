@@ -5,57 +5,6 @@ import $errUtils from '../../../cypress/error_utils'
 import $actionability from '../../actionability'
 import { addEventCoords, dispatch } from './trigger'
 
-// TODO: Does not currently need to be async, but will once we allow users to
-// load fixtures and read files. Writing it that way from the start to avoid
-// needing to change it later.
-/*
- * Turns a user-provided file - a string shorthand, Buffer, or object
- * into an object of form {
- *   contents,
- *   fileName,
- *   lastModified,
- *   mimeType?,
- * }.
- *
- * Or throws an error. Users do many strange things, and this is where
- * we warn them and suggest how to fix it.
- */
-const parseFile = (options) => {
-  return async (file: any, index: number, filesArray: any[]): Promise<Cypress.FileReferenceObject> => {
-    if (typeof file === 'string') {
-      throw new Error('Support for string shorthands is still TODO')
-    }
-
-    if (Buffer.isBuffer(file)) {
-      file = { contents: file }
-    }
-
-    if (!file || file.contents == null) {
-    // Different error messages if the user passed in one file vs. an array of files
-      if (filesArray.length > 1) {
-        $errUtils.throwErrByPath('attachFile.invalid_array_file_reference', {
-          onFail: options._log,
-          args: { file: JSON.stringify(file), index },
-        })
-      } else {
-        $errUtils.throwErrByPath('attachFile.invalid_single_file_reference', {
-          onFail: options._log,
-          args: { file: JSON.stringify(file) },
-        })
-      }
-    }
-
-    if (!_.isString(file.contents) && !Buffer.isBuffer(file.contents)) {
-      file.contents = JSON.stringify(file.contents)
-    }
-
-    return _.defaults({}, file, {
-      fileName: '',
-      lastModified: Date.now(),
-    })
-  }
-}
-
 const createFileList = (files: Cypress.FileReferenceObject[]): FileList => {
   const dataTransfer = new DataTransfer()
 
@@ -74,6 +23,100 @@ interface InternalAttachFileOptions extends Cypress.AttachFileOptions {
 }
 
 export default (Commands, Cypress, cy, state, config) => {
+  const handleAlias = (alias: string, options) => {
+    const aliasObj = cy.getAlias(alias, 'attachFile', options._log)
+
+    if (!aliasObj) {
+      return
+    }
+
+    if (aliasObj.subject == null) {
+      $errUtils.throwErrByPath('attachFile.invalid_alias', {
+        onFail: options._log,
+        args: { alias, subject: aliasObj.subject },
+      })
+    }
+
+    if ($dom.isElement(aliasObj.subject)) {
+      const subject = $dom.stringify(aliasObj.subject)
+
+      $errUtils.throwErrByPath('attachFile.invalid_alias', {
+        onFail: options._log,
+        args: { alias, subject },
+      })
+    }
+
+    return aliasObj.subject
+  }
+
+  // Uses backend read:file rather than cy.readFile because we don't want to retry
+  // loading a specific file until timeout, but rather retry the attachFile command as a whole
+  const handlePath = async (file: string, options) => {
+    return Cypress.backend('read:file', file, { encoding: null })
+    .then((file) => Buffer.from(file.contents))
+    .catch((err) => {
+      if (err.code === 'ENOENT') {
+        $errUtils.throwErrByPath('files.nonexistent', {
+          args: { cmd: 'attachFile', file, filePath: err.filePath },
+        })
+      }
+
+      $errUtils.throwErrByPath('files.unexpected_error', {
+        onFail: options._log,
+        args: { cmd: 'attachFile', action: 'read', file, filePath: err.filePath, error: err.message },
+      })
+    })
+  }
+
+  /*
+   * Turns a user-provided file - a string shorthand, Buffer, or object
+   * into an object of form {
+   *   contents,
+   *   fileName,
+   *   lastModified,
+   *   mimeType?,
+   * }.
+   *
+   * Or throws an error. Users do many strange things, and this is where
+   * we warn them and suggest how to fix it.
+   */
+  const parseFile = (options) => {
+    return async (file: any, index: number, filesArray: any[]): Promise<Cypress.FileReferenceObject> => {
+      if (typeof file === 'string' || Buffer.isBuffer(file)) {
+        file = { contents: file }
+      }
+
+      if (!file || file.contents == null) {
+        // Different error messages if the user passed in one file vs. an array of files
+        if (filesArray.length > 1) {
+          $errUtils.throwErrByPath('attachFile.invalid_array_file_reference', {
+            onFail: options._log,
+            args: { file: JSON.stringify(file), index },
+          })
+        } else {
+          $errUtils.throwErrByPath('attachFile.invalid_single_file_reference', {
+            onFail: options._log,
+            args: { file: JSON.stringify(file) },
+          })
+        }
+      }
+
+      if (typeof file.contents === 'string') {
+        file.contents = handleAlias(file.contents, options)
+          ?? await handlePath(file.contents, options)
+      }
+
+      if (!_.isString(file.contents) && !Buffer.isBuffer(file.contents)) {
+        file.contents = JSON.stringify(file.contents)
+      }
+
+      return _.defaults({}, file, {
+        fileName: '',
+        lastModified: Date.now(),
+      })
+    }
+  }
+
   Commands.addAll({ prevSubject: 'element' }, {
     async attachFile (subject: JQuery<any>, files: Cypress.FileReference | Cypress.FileReference[], options: Partial<InternalAttachFileOptions>): Promise<JQuery> {
       options = _.defaults({}, options, {

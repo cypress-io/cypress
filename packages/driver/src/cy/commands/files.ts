@@ -79,7 +79,7 @@ export default (Commands, Cypress, cy) => {
               // file exists but it shouldn't - or - file doesn't exist but it should
               const errPath = contents ? 'files.existent' : 'files.nonexistent'
               const { message, docsUrl } = $errUtils.cypressErrByPath(errPath, {
-                args: { file, filePath },
+                args: { cmd: 'readFile', file, filePath },
               })
 
               err.message = message
