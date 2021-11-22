@@ -19,7 +19,7 @@ describe('upload', () => {
     })
   })
 
-  context('getUploadeVersionFolder', () => {
+  context('getUploadVersionFolder', () => {
     it('returns folder', () => {
       const aws = {
         folder: 'desktop',

@@ -22,9 +22,10 @@ async function circleCache () {
   }
 }
 
-const BASE_DIR = path.resolve(__dirname, '..')
-
-const CACHE_DIR = path.join(BASE_DIR, 'globbed_node_modules')
+// On Windows, both the forward slash (/) and backward slash (\) are accepted as path segment separators
+// using forward slashes to match the returned globbed file path separators
+const BASE_DIR = `${__dirname}/..`
+const CACHE_DIR = `${BASE_DIR}/globbed_node_modules`
 const p = (str) => path.join(BASE_DIR, str)
 
 const workspacePaths = rootPackageJson.workspaces.packages
@@ -69,7 +70,7 @@ async function prepareCircleCache () {
   await Promise.all(
     paths.map(async (src) => {
       const updatedDir = src
-      .replace(/(.*?)(\/|\\)node_modules/, '$1_node_modules')
+      .replace(/(.*?)\/node_modules/, '$1_node_modules')
       .replace(BASE_DIR, CACHE_DIR)
 
       console.log('moving', src, 'to', updatedDir)
@@ -88,7 +89,7 @@ async function unpackCircleCache () {
     paths.map(async (src) => {
       const updatedDir = src
       .replace(CACHE_DIR, BASE_DIR)
-      .replace(/(.*?)_node_modules/, `$1${path.sep}node_modules`)
+      .replace(/(.*?)_node_modules/, `$1/node_modules`)
 
       console.log('moving', src, 'to', updatedDir)
       await fsExtra.move(src, updatedDir)
