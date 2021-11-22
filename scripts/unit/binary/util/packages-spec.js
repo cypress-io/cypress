@@ -274,8 +274,14 @@ afterEach(() => {
 })
 
 const getFs = () => {
-  const cwd = process.cwd().split(path.sep).slice(1)
+  let cwd = process.cwd()
 
+  // eslint-disable-next-line no-console
+  console.log('cwd', cwd)
+  cwd.replace(/\\\\/, path.sep).split(path.sep).slice(1)
+
+  // eslint-disable-next-line no-console
+  console.log('cwd', cwd)
   const recurse = (dir, d) => {
     if (_.isString(dir)) {
       return dir
