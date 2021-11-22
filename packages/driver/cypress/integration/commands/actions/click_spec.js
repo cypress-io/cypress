@@ -3987,7 +3987,7 @@ describe('shadow dom', () => {
   })
 
   // https://github.com/cypress-io/cypress/issues/18008
-  it('ignores the covering shadow host', () => {
+  it('does not fail actionability check when element is covered by its shadow host', () => {
     cy.visit('/fixtures/shadow-dom-button.html')
 
     cy.get('#element').shadow().find('[data-test-id="my-button"]').click()

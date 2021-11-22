@@ -332,7 +332,7 @@ export const create = (state, expect) => {
       // when an element inside a shadow root is covered by its shadow host
       if (
         $dom.isWithinShadowRoot($el1.get(0)) &&
-          $el1.get(0).getRootNode() === $el2.get(0).shadowRoot
+          $el1.get(0).getRootNode() === $el2?.get(0).shadowRoot
       ) {
         return
       }
@@ -341,7 +341,7 @@ export const create = (state, expect) => {
         const element1 = $dom.stringify($el1)
         const element2 = $dom.stringify($el2)
 
-        return $errUtils.throwErrByPath('dom.covered', {
+        $errUtils.throwErrByPath('dom.covered', {
           onFail,
           args: { cmd, element1, element2 },
           errProps: {
