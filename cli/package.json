@@ -4,6 +4,7 @@
   "private": true,
   "main": "index.js",
   "scripts": {
+    "clean": "node ./scripts/clean.js",
     "prebuild": "yarn postinstall && node ./scripts/start-build.js",
     "build": "node ./scripts/build.js",
     "dtslint": "dtslint types",
@@ -27,7 +28,7 @@
     "@types/sizzle": "^2.3.2",
     "arch": "^2.2.0",
     "blob-util": "^2.0.2",
-    "bluebird": "^3.7.2",
+    "bluebird": "3.7.2",
     "cachedir": "^2.3.0",
     "chalk": "^4.1.0",
     "check-more-types": "^2.24.0",

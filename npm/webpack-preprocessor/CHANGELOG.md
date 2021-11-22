@@ -1,3 +1,15 @@
+# [@cypress/webpack-preprocessor-v5.10.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.9.1...@cypress/webpack-preprocessor-v5.10.0) (2021-11-10)
+
+
+### Bug Fixes
+
+* remove outdated npm registry links ([#18727](https://github.com/cypress-io/cypress/issues/18727)) ([4ded6c9](https://github.com/cypress-io/cypress/commit/4ded6c9624134fe6203f5377d62d62809cd27cda))
+
+
+### Features
+
+* **deps:** update dependency electron to v15 🌟 ([#18317](https://github.com/cypress-io/cypress/issues/18317)) ([3095d73](https://github.com/cypress-io/cypress/commit/3095d733e92527ffd67344c6899211e058ceefa3))
+
 # [@cypress/webpack-preprocessor-v5.9.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.9.0...@cypress/webpack-preprocessor-v5.9.1) (2021-06-24)
 
 
