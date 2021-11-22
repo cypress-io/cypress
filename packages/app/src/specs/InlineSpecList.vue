@@ -2,6 +2,7 @@
   <div class="w-280px">
     <InlineSpecListHeader
       v-model:search="search"
+      :results-count="specs.length"
     />
     <div class="h-[calc(100vh-65px)] overflow-y-auto overflow-x-hidden pt-16px">
       <InlineSpecListTree

@@ -18,13 +18,12 @@
           outline-none
         "
         placeholder="Search Specs"
-        :value="search"
+        :value="props.search"
         @focus="inputFocused = true"
         @blur="inputFocused = false"
         @input="onInput"
       >
     </div>
-
     <button
       class="
         border-1 border-gray-900
@@ -50,8 +49,9 @@ import Input from '@cy/components/Input.vue'
 import Button from '@cy/components/Button.vue'
 import { ref } from 'vue'
 
-defineProps<{
+const props = defineProps<{
   search: string
+  resultsCount: number
 }>()
 
 const emit = defineEmits<{
