@@ -127,9 +127,19 @@ type Editor = ChooseExternalEditorFragment['localSettings']['availableEditors'][
 
 type EditorType = 'found' | 'custom'
 
-const customBinary = ref<string>('')
-const selectedWellKnownEditor = ref<Editor>()
-const editorToUse = ref<EditorType>('found')
+const selectedWellKnownEditor = ref<Editor | undefined>(
+  props.gql.localSettings.availableEditors.find((editor) => {
+    return editor.binary === props.gql.localSettings.preferences.preferredEditorBinary
+  }),
+)
+
+const customBinary = ref<string>(
+  selectedWellKnownEditor.value
+    ? ''
+    : props.gql.localSettings.preferences.preferredEditorBinary ?? '',
+)
+
+const editorToUse = ref<EditorType>(customBinary.value ? 'custom' : 'found')
 
 const emit = defineEmits<{
   (e: 'choseEditor', binary: string): void
