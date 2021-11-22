@@ -51,7 +51,7 @@ export class FileActions {
       try {
         this.ctx.electronApi.showItemInFolder(absolute)
       } catch (err) {
-        this.ctx.debug('error opening file: %s', err.stack)
+        this.ctx.debug('error opening file: %s', (err as Error).stack)
       }
 
       return
