@@ -164,15 +164,35 @@ commands:
 
   update_cached_system_tests_deps:
     steps:
+      - run:
+          name: Generate Circle Cache key for system tests
+          command: yarn workspace @tooling/system-tests cache:key > system_tests_cache_key
+      - restore_cache:
+          name: Restore cache state, to check for known modules cache existence
+          keys:
+            - v{{ .Environment.CACHE_VERSION }}-{{ arch }}-system-tests-node-modules-cache-state-{{ checksum "system_tests_cache_key" }}
+      - run:
+          name: Bail if specific cache exists
+          command: |
+            if [[ -f "system_tests_node_modules_installed" ]]; then
+              echo "No updates to system tests node modules, exiting"
+              circleci-agent step halt
+            fi
       - restore_cached_system_tests_deps
       - run:
-          name: Check+update system-tests node_modules cache
+          name: Update system-tests node_modules cache
           command: yarn workspace @tooling/system-tests projects:yarn:install
       - save_cache:
           name: Save system tests node_modules cache
           key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-system-tests-node-modules-cache-{{ checksum "system_tests_cache_key" }}
           paths:
             - ~/.cache/cy-system-tests-node-modules
+      - run: touch system_tests_node_modules_installed
+      - save_cache:
+          name: Save system tests node_modules cache state key
+          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-system-tests-node-modules-cache-state-{{ checksum "system_tests_cache_key" }}
+          paths:
+            - system_tests_node_modules_installed
 
   caching-dependency-installer:
     description: 'Installs & caches the dependencies based on yarn lock & package json dependencies'
@@ -208,10 +228,6 @@ commands:
             . ./scripts/load-nvm.sh
             yarn --prefer-offline --frozen-lockfile --cache-folder ~/.yarn-<< parameters.arch >>
           no_output_timeout: 20m
-      - unless:
-          condition: <<parameters.is-mac>>
-          steps:
-            - update_cached_system_tests_deps
       - prepare-modules-cache:
           dont-move: <<parameters.is-mac>> # we don't move, so we don't hit any issues unpacking symlinks
       - when:
@@ -1112,6 +1128,12 @@ jobs:
       - store_artifacts:
           path: /tmp/artifacts
       - store-npm-logs
+
+  system-tests-node-modules-install:
+    <<: *defaults
+    steps:
+      - restore_cached_workspace
+      - update_cached_system_tests_deps
 
   system-tests-chrome:
     <<: *defaults
@@ -2048,19 +2070,26 @@ linux-workflow: &linux-workflow
     - server-performance-tests:
         requires:
           - build
+    - system-tests-node-modules-install:
+        requires:
+          - build
     - system-tests-chrome:
         requires:
           - build
+          - system-tests-node-modules-install
     - system-tests-electron:
         requires:
           - build
+          - system-tests-node-modules-install
     - system-tests-firefox:
         requires:
           - build
+          - system-tests-node-modules-install
     - system-tests-non-root:
         executor: non-root-docker-user
         requires:
           - build
+          - system-tests-node-modules-install
     - driver-integration-tests-chrome:
         requires:
           - build
