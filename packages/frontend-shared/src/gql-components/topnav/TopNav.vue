@@ -79,8 +79,9 @@
       </ExternalLink>
     </TopNavListItem>
   </TopNavList>
+
   <ExternalLink
-    v-else
+    v-else-if="versions"
     :href="`${releasesUrl}/tag/v${versions.latest.version}`"
     class="text-gray-600 flex items-center gap-8px group hocus:text-indigo-500 hocus:outline-0 outline-transparent"
     :use-default-hocus="false"
@@ -194,6 +195,7 @@
     <slot name="login-panel" />
   </TopNavList>
   <UpdateCypressModal
+    v-if="versions"
     :show="showUpdateModal"
     :installed-version="versions.current.version"
     :latest-version="versions.latest.version"
@@ -283,31 +285,38 @@ const props = defineProps<{
   showBrowsers?: boolean
 }>()
 
-const versions = (() => {
+const currentReleased = useTimeAgo(
+  props.gql.versions?.current?.released
+    ? new Date(props.gql.versions.current.released)
+    : '',
+)
+
+const latestReleased = useTimeAgo(
+  props.gql.versions?.latest?.released
+    ? new Date(props.gql.versions.latest.released)
+    : '',
+)
+
+const versions = computed(() => {
   if (!props.gql.versions) {
-    return ref(null)
+    return
   }
 
-  const currentReleased = useTimeAgo(new Date(props.gql.versions.current.released))
-  const latestReleased = useTimeAgo(new Date(props.gql.versions.latest.released))
+  if (!props.gql.versions) {
+    return null
+  }
 
-  return computed(() => {
-    if (!props.gql.versions) {
-      return null
-    }
-
-    return {
-      current: {
-        released: currentReleased.value,
-        version: props.gql.versions.current.version,
-      },
-      latest: {
-        released: latestReleased.value,
-        version: props.gql.versions.latest.version,
-      },
-    }
-  })
-})()
+  return {
+    current: {
+      released: currentReleased.value,
+      version: props.gql.versions.current.version,
+    },
+    latest: {
+      released: latestReleased.value,
+      version: props.gql.versions.latest.version,
+    },
+  }
+})
 
 const runningOldVersion = computed(() => {
   return props.gql.versions ? props.gql.versions.current.released < props.gql.versions.latest.released : false
