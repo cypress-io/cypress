@@ -171,13 +171,13 @@ commands:
       - restore_cache:
           name: Restore cache state, to check for known modules cache existence
           key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-test2-node-modules-cache-state-{{ checksum "circle_cache_key" }}
-      # - run:
-          # name: Bail if cache exists
-          # command: |
-          #   if [[ -f "node_modules_installed" ]]; then
-          #     echo "Node modules already cached for dependencies, exiting"
-          #     circleci-agent step halt
-          #   fi
+      - run:
+          name: Bail if cache exists
+          command: |
+            if [[ -f "node_modules_installed" ]]; then
+              echo "Node modules already cached for dependencies, exiting"
+              circleci-agent step halt
+            fi
       - run: date +%Y-%U > cache_date
       - restore_cache:
           name: Restore weekly yarn cache
@@ -260,7 +260,7 @@ commands:
             echo "Using Node $node_version"
             nvm use ${node_version}
             nvm alias default ${node_version}
-            node --version
+            node --version | node --version
             echo "Installing Yarn"
             npm install yarn -g # ensure yarn is installed with the correct node engine
             yarn check-node-version

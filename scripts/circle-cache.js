@@ -50,6 +50,8 @@ async function cacheKey () {
     },
   ).join('')
 
+  console.log('bust the cACHE FOR THEIS')
+
   const filesToHash = yarnLocks.concat(patchFiles).sort()
   const hashedFiles = await Promise.all(filesToHash.map((p) => hashFile(p)))
   const cacheKeySource = hashedFiles.concat(hashedPackageDeps)

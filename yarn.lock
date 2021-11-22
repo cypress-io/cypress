@@ -8506,13 +8506,6 @@
   resolved "https://registry.yarnpkg.com/@types/webpack-env/-/webpack-env-1.16.0.tgz#8c0a9435dfa7b3b1be76562f3070efb3f92637b4"
   integrity sha512-Fx+NpfOO0CpeYX2g9bkvX8O5qh9wrU1sOF4g8sft4Mu7z+qfe387YlyY8w8daDyDsKY5vUxM0yxkAYnbkRbZEw==
 
-"@types/webpack-merge-and-include-globally@^2.1.3":
-  version "2.1.3"
-  resolved "https://registry.yarnpkg.com/@types/webpack-merge-and-include-globally/-/webpack-merge-and-include-globally-2.1.3.tgz#85ef1ff26af92bf4b33244db3e25198ccf7cc993"
-  integrity sha512-FMHTo+SJ/xsjnQmYUgbXluB56sTn7Ho5WGcG31gG/3cIEvTOibY/sks6FMjQK8ROs9ItFOEh4yy9ZYJ2XGf/Hg==
-  dependencies:
-    "@types/webpack" "^4"
-
 "@types/webpack-sources@*":
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/@types/webpack-sources/-/webpack-sources-2.1.0.tgz#8882b0bd62d1e0ce62f183d0d01b72e6e82e8c10"
