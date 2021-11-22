@@ -866,6 +866,7 @@ jobs:
           steps:
             - run:
                 name: Stop .only
+                 # this will catch ".only"s in js/coffee as well
                 command: yarn stop-only-all
       - install-required-node
       - persist_to_workspace:
@@ -899,7 +900,6 @@ jobs:
     <<: *defaults
     steps:
       - restore_cached_workspace
-      ## this will catch ".only"s in js/coffee as well
       - run:
           name: Linting 🧹
           command: |
@@ -2084,10 +2084,10 @@ linux-workflow: &linux-workflow
           - npm-react
           - npm-mount-utils
           - npm-vue
-          - npm-vite-dev-server
           - npm-design-system
           - npm-webpack-batteries-included-preprocessor
           - npm-webpack-preprocessor
+          - npm-vite-dev-server
           - npm-webpack-dev-server
           - npm-cypress-schematic
           - lint-types
@@ -2326,8 +2326,8 @@ windows-workflow: &windows-workflow
           - windows-build
 
 workflows:
-  # linux:
-    # <<: *linux-workflow
+  linux:
+    <<: *linux-workflow
   windows:
     <<: *windows-workflow
     when:
@@ -2345,6 +2345,7 @@ workflows:
     when:
       or:
       - equal: [ develop, << pipeline.git.branch >> ]
+      - equal: [ rm-appveyor, << pipeline.git.branch >> ]
       - matches:
             pattern: "-release$"
             value: << pipeline.git.branch >>
