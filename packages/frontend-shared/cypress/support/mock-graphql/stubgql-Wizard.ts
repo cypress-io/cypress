@@ -46,7 +46,7 @@ export const stubWizard: MaybeResolver<Wizard> = {
       ...testNodeId('WizardSampleConfigFile'),
       filePath: 'cypress/fixtures/example.json',
       description: 'Please do the necessary changes to your file',
-      content: dedent`{ 
+      content: dedent`{
         "foo": 1,
         "bar": 42
       }`,
@@ -97,4 +97,5 @@ export const stubWizard: MaybeResolver<Wizard> = {
       isSelected: idx === 0,
     }
   }),
+  warnings: [],
 }

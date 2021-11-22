@@ -1097,26 +1097,26 @@ jobs:
       - restore_cached_workspace
       - run: yarn test-npm-package-release-script
 
+  lint-types:
+    <<: *defaults
+    parallelism: 1
+    resource_class: medium
+    steps:
+      - restore_cached_workspace
+      - run:
+          command: ls -la types
+          working_directory: cli
+      - run:
+          command: ls -la chai
+          working_directory: cli/types
+      - run:
+          name: "Lint types 🧹"
+          command: yarn workspace cypress dtslint
   # todo(lachlan): do we need this? yarn check-ts does something very similar
-  # lint-types:
-  #   <<: *defaults
-  #   parallelism: 1
-  #   resource_class: medium
-  #   steps:
-  #     - restore_cached_workspace
-  #     - run:
-  #         command: ls -la types
-  #         working_directory: cli
-  #     - run:
-  #         command: ls -la chai
-  #         working_directory: cli/types
-  #     - run:
-  #         name: "Lint types 🧹"
-  #         command: yarn workspace cypress dtslint
   #     - run:
   #         name: "TypeScript check 🧩"
   #         command: yarn type-check --ignore-progress
-  #     - store-npm-logs
+      - store-npm-logs
 
   server-unit-tests:
     <<: *defaults
@@ -2159,10 +2159,9 @@ linux-workflow: &linux-workflow
         required_env_var: PERCY_TOKEN # skips job if not defined (external PR)
         requires:
           - build
-    # todo(lachlan): do we need this? yarn check-ts does something very similar
-    # - lint-types:
-    #     requires:
-    #       - build
+    - lint-types:
+        requires:
+          - build
     # unit, integration and e2e tests
     - cli-visual-tests:
         requires:
