@@ -12,7 +12,7 @@ export default defineConfig({
   },
   component: {
     testFiles: '**/*spec.{ts,tsx}',
-    setupNodeEvents (on, config) {
+    devServer (cypressConfig) {
       const { startDevServer } = require('@cypress/webpack-dev-server')
 
       function injectStylesInlineForPercyInPlace (webpackConfig) {
@@ -30,18 +30,14 @@ export default defineConfig({
         })
       }
 
-      on('dev-server:start', (options) => {
-        const { default: webpackConfig } = require('./webpack.config.ts')
+      const { default: webpackConfig } = require('./webpack.config.ts')
 
-        injectStylesInlineForPercyInPlace(webpackConfig)
+      injectStylesInlineForPercyInPlace(webpackConfig)
 
-        return startDevServer({
-          webpackConfig,
-          options,
-        })
+      return startDevServer({
+        webpackConfig,
+        options: cypressConfig,
       })
-
-      return config
     },
   },
 })

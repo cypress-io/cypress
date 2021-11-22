@@ -5,7 +5,7 @@ module.exports = {
   'viewportWidth': 500,
   'viewportHeight': 500,
   'component': {
-    setupNodeEvents (on, config) {
+    devServer (cypressConfig) {
       const path = require('path')
       const { startDevServer } = require('@cypress/webpack-dev-server')
       const babelConfig = require('./babel.config')
@@ -34,10 +34,8 @@ module.exports = {
       }
 
       process.env.BABEL_ENV = 'test' // this is required to load commonjs babel plugin
-      on('dev-server:start', (options) => startDevServer({ options, webpackConfig }))
 
-      // if adding code coverage, important to return updated config
-      return config
+      return startDevServer({ options: cypressConfig, webpackConfig })
     },
   },
 }

@@ -4,6 +4,7 @@ import { observable } from 'mobx'
 interface DefaultAppState {
   isPaused: boolean
   isRunning: boolean
+  isPreferencesMenuOpen: boolean
   nextCommandName: string | null | undefined
   pinnedSnapshotId: number | string | null
   studioActive: boolean
@@ -12,6 +13,7 @@ interface DefaultAppState {
 const defaults: DefaultAppState = {
   isPaused: false,
   isRunning: false,
+  isPreferencesMenuOpen: false,
   nextCommandName: null,
   pinnedSnapshotId: null,
   studioActive: false,
@@ -21,6 +23,7 @@ class AppState {
   @observable autoScrollingEnabled = true
   @observable isPaused = defaults.isPaused
   @observable isRunning = defaults.isRunning
+  @observable isPreferencesMenuOpen = defaults.isPreferencesMenuOpen
   @observable nextCommandName = defaults.nextCommandName
   @observable pinnedSnapshotId = defaults.pinnedSnapshotId
   @observable studioActive = defaults.studioActive
@@ -61,6 +64,10 @@ class AppState {
 
   toggleAutoScrolling () {
     this.setAutoScrolling(!this.autoScrollingEnabled)
+  }
+
+  togglePreferencesMenu () {
+    this.isPreferencesMenuOpen = !this.isPreferencesMenuOpen
   }
 
   setAutoScrolling (isEnabled?: boolean | null) {

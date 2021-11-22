@@ -1,7 +1,7 @@
 <template>
   <div v-if="query.data.value">
     <SpecsList
-      v-if="query.data.value.currentProject?.specs"
+      v-if="query.data.value.currentProject?.specs?.edges.length"
       :gql="query.data.value"
     />
     <CreateSpecPage

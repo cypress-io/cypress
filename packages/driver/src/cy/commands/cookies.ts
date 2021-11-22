@@ -160,7 +160,7 @@ export default function (Commands, Cypress, cy, state, config) {
   // stuff, or handling this in the runner itself?
   // Cypress sessions will clear cookies on its own before each test
   Cypress.on('test:before:run:async', () => {
-    if (!Cypress.config.experimentalSessionSupport) {
+    if (!Cypress.config('experimentalSessionSupport')) {
       return getAndClear()
     }
   })

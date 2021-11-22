@@ -25,7 +25,7 @@ const isRightBranch = () => {
     process.env.APPVEYOR_REPO_COMMIT_MESSAGE || ''
   ).includes('[build binary]')
 
-  const branchesToBuildBinary = ['develop', 'fix-test-other-projects']
+  const branchesToBuildBinary = ['develop', 'remove-win-32-support', 'tgriesser/build/root-yarn-install']
 
   return branchesToBuildBinary.includes(branch) || shouldForceBinaryBuild
 }
@@ -66,10 +66,14 @@ shell.exec(`yarn binary-build --platform windows --version ${version}`)
 
 // make sure we are not including dev dependencies accidentally
 // TODO how to get the server package folder?
-const serverPackageFolder = 'C:/projects/cypress/dist/win32/packages/server'
+const serverPackageFolder = path.join(os.tmpdir(), 'cypress-build', os.platform(), 'dist')
 
 shell.echo(`Checking prod and dev dependencies in ${serverPackageFolder}`)
 shell.exec('yarn list --prod --depth 0 || true')
+shell.exec('yarn list --prod --depth 0 || true', {
+  cwd: serverPackageFolder,
+})
+
 const result = shell.exec('yarn list --dev --depth 0 || true', {
   cwd: serverPackageFolder,
 })
@@ -83,22 +87,6 @@ if (result.stdout.includes('nodemon')) {
   console.error('see https://github.com/cypress-io/cypress/issues/2896')
   process.exit(1)
 }
-
-// const pathToExe = 'C:/projects/cypress/build/win32/Cypress/Cypress.exe'
-
-// // verify that Cypress.exe is either 32bit or 64bit based on node's arch
-// const dumpbin = shell.exec(`dumpbin /headers ${pathToExe}`)
-
-// // eslint-disable-next-line default-case
-// switch (arch) {
-//   case 'ia32':
-//     assert.ok(dumpbin.stdout.includes('machine (x86)'))
-//     break
-
-//   case 'x64':
-//     assert.ok(dumpbin.stdout.includes('machine (x64)'))
-//     break
-// }
 
 /**
  * Returns true if we are building a pull request

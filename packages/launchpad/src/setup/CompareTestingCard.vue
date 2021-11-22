@@ -10,9 +10,9 @@
           class="absolute block border w-6px h-6px bg-jade-300 -left-11px top-9px rounded-10px border-jade-400"
         />
         {{ listItems[0] }}
-        <InlineFragment class="text-14px">
+        <InlineCodeFragment class="text-14px">
           {{ codeFragment }}
-        </InlineFragment>
+        </InlineCodeFragment>
       </li>
       <li class="relative mb-4px ml-12px">
         <div
@@ -42,7 +42,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import ShikiHighlight from '@cy/components/ShikiHighlight.vue'
-import InlineFragment from '../components/code/InlineFragment.vue'
+import InlineCodeFragment from '@cy/components/InlineCodeFragment.vue'
 
 const props = withDefaults(defineProps<{
     title: string

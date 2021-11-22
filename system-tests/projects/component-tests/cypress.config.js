@@ -2,17 +2,20 @@ module.exports = {
   'projectId': 'abc123',
   'componentFolder': 'cypress/component-tests',
   'component': {
-    setupNodeEvents (on, config) {
+    devServer (cypressConfig, devServerConfig) {
       const { startDevServer } = require('@cypress/webpack-dev-server')
 
-      const webpackConfig = {
+      return startDevServer({ options: cypressConfig, ...devServerConfig })
+    },
+    devServerConfig: {
+      webpackConfig: {
         output: {
           publicPath: '/',
         },
-      }
-
+      },
+    },
+    setupNodeEvents (on, config) {
       require('@cypress/code-coverage/task')(on, config)
-      on('dev-server:start', (options) => startDevServer({ options, webpackConfig }))
 
       return config
     },

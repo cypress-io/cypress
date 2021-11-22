@@ -4,8 +4,9 @@ const is = require('check-more-types')
 const path = require('path')
 const debug = require('debug')('cypress:server:args')
 const minimist = require('minimist')
+const { getPublicConfigKeys } = require('@packages/config')
+
 const coerceUtil = require('./coerce')
-const configUtil = require('../config')
 const proxyUtil = require('./proxy')
 const errors = require('../errors')
 
@@ -13,7 +14,50 @@ const nestedObjectsInCurlyBracesRe = /\{(.+?)\}/g
 const nestedArraysInSquareBracketsRe = /\[(.+?)\]/g
 const everythingAfterFirstEqualRe = /=(.*)/
 
-const allowList = 'appPath apiKey browser ci ciBuildId clearLogs config configFile cwd env execPath exit exitWithCode global group headed inspectBrk key logs mode outputPath parallel ping port project proxySource quiet record reporter reporterOptions returnPkg runMode runProject smokeTest spec tag updating version testingType'.split(' ')
+const allowList = [
+  'apiKey',
+  'appPath',
+  'browser',
+  'ci',
+  'ciBuildId',
+  'clearLogs',
+  'config',
+  'configFile',
+  'cwd',
+  'env',
+  'execPath',
+  'exit',
+  'exitWithCode',
+  'global',
+  'group',
+  'headed',
+  'inspectBrk',
+  'key',
+  'logs',
+  'mode',
+  'outputPath',
+  'parallel',
+  'ping',
+  'port',
+  'project',
+  'proxySource',
+  'quiet',
+  'record',
+  'reporter',
+  'reporterOptions',
+  'returnPkg',
+  'runMode',
+  'runProject',
+  'smokeTest',
+  'spec',
+  'tag',
+  'testingType',
+  'updating',
+  'userNodePath',
+  'userNodeVersion',
+  'version',
+]
+
 // returns true if the given string has double quote character "
 // only at the last position.
 const hasStrayEndQuote = (s) => {
@@ -158,7 +202,7 @@ const sanitizeAndConvertNestedArgs = (str, argname) => {
     debug('could not pass config %s value %s', argname, str)
     debug('error %o', err)
 
-    return errors.throw('COULD_NOT_PARSE_ARGUMENTS', argname, str, err.message)
+    return errors.throw('COULD_NOT_PARSE_ARGUMENTS', argname, str, 'Cannot parse as valid JSON')
   }
 }
 
@@ -302,7 +346,7 @@ module.exports = {
     }
 
     // get a list of the available config keys
-    const configKeys = configUtil.getConfigKeys()
+    const configKeys = getPublicConfigKeys()
 
     // and if any of our options match this
     const configValues = _.pick(options, configKeys)
