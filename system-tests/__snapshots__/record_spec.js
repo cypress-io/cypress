@@ -2641,9 +2641,7 @@ exports['e2e record empty specs succeeds when empty spec file 1'] = `
 `
 
 exports['e2e record misconfiguration errors and exits when no browser found 1'] = `
-Can't run because you've entered an invalid browser name.
-
-Browser: 'browserDoesNotExist' was not found on your system or is not supported by Cypress.
+The specified browser was not found on your system or is not supported by Cypress: \`browserDoesNotExist\`
 
 Cypress supports the following browsers:
 - chrome
