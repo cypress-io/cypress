@@ -24,9 +24,8 @@
           :icon="icons[value.id]"
           class="text-md"
         />
-        <Icon
+        <i-cy-terminal_x16
           v-else
-          :icon="IconTerminal"
           class="text-gray-600 text-md"
         />
       </template>
@@ -52,14 +51,12 @@
     <div class="w-400px">
       <Input
         v-model="customBinary"
+        data-cy="custom-editor"
         input-classes="text-sm"
         placeholder="Custom path..."
       >
         <template #prefix>
-          <Icon
-            :icon="IconTerminal"
-            class="text-gray-600 text-md"
-          />
+          <i-cy-terminal_x16 class="text-gray-600 text-md" />
         </template>
       </Input>
     </div>
@@ -77,8 +74,8 @@ import Atom from '~icons/logos/atom-icon'
 import Webstorm from '~icons/logos/webstorm'
 import Vim from '~icons/logos/vim'
 import Sublime from '~icons/logos/sublimetext-icon'
+import Computer from '~icons/mdi/computer'
 import Emacs from '~icons/logos/emacs'
-import IconTerminal from '~icons/mdi/terminal'
 import { gql } from '@urql/core'
 import type { ChooseExternalEditorFragment } from '../generated/graphql'
 
@@ -91,6 +88,10 @@ const icons: Record<string, FunctionalComponent<SVGAttributes, {}>> = {
   'sublimetextdev': Sublime,
   'vim': Vim,
   'emacs': Emacs,
+  'finder': Computer,
+  'computer': Computer,
+  'File Explorer': Computer,
+  'File System': Computer,
 }
 
 const externalEditors = computed(() => {

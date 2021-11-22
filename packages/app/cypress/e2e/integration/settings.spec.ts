@@ -69,5 +69,30 @@ describe('Settings', { viewportWidth: 600 }, () => {
     cy.contains('Choose your editor...').click()
     cy.contains('Well known editor').click()
     cy.wait('@SetPreferred').its('request.body.variables.value').should('include', '/usr/bin/well-known')
+
+    // navigate away and come back
+    // preferred editor selected from dropdown should have been persisted
+    cy.get('[href="#/"]').click()
+    cy.get('[href="#/settings"]').click()
+    cy.wait(100)
+    cy.get('[data-cy="Device Settings"]').click()
+
+    cy.get('[data-cy="use-well-known-editor"]').should('be.checked')
+    cy.get('[data-cy="use-custom-editor"]').should('not.be.checked')
+
+    // change to custom editor using input
+    cy.findByPlaceholderText('Custom path...').clear().invoke('val', '/usr/local/bin/vim').trigger('input').trigger('change')
+
+    // navigate away and come back
+    // preferred editor entered from input should have been persisted
+    cy.get('[href="#/settings"]').click()
+    cy.wait(100)
+    cy.get('[data-cy="Device Settings"]').click()
+
+    cy.get('[data-cy="use-well-known-editor"]').should('not.be.checked')
+    cy.get('[data-cy="use-custom-editor"]').should('be.checked')
+
+    // change to custom editor using input
+    cy.get('[data-cy="custom-editor"]').should('have.value', '/usr/local/bin/vim')
   })
 })
