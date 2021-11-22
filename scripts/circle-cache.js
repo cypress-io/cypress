@@ -24,9 +24,9 @@ async function circleCache () {
 
 // On Windows, both the forward slash (/) and backward slash (\) are accepted as path segment separators
 // using forward slashes to match the returned globbed file path separators
-const BASE_DIR = path.join(__dirname, '..').replaceAll(/\\/, '/')
-const CACHE_DIR = path.join(BASE_DIR, 'globbed_node_modules').replaceAll(/\\/, '/')
-const p = (str) => path.join(BASE_DIR, str)
+const BASE_DIR = path.join(__dirname, '..').replaceAll(/\\/g, '/')
+const CACHE_DIR = `${BASE_DIR}/globbed_node_modules`
+const p = (str) => `${BASE_DIR}/${str}`
 
 const workspacePaths = rootPackageJson.workspaces.packages
 const packageGlobs = workspacePaths.filter((s) => s.endsWith('/*'))
