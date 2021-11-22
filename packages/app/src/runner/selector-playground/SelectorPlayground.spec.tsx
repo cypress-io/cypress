@@ -2,12 +2,12 @@ import { createEventManager, createTestAutIframe } from '../../../cypress/e2e/su
 import { useSelectorPlaygroundStore } from '../../store/selector-playground-store'
 import SelectorPlayground from './SelectorPlayground.vue'
 
+// TODO: Test is failing due to Percy conflict
 // eslint-disable-next-line
 describe.skip('SelectorPlayground', () => {
   const mountSelectorPlayground = (
     eventManager = createEventManager(),
     autIframe = createTestAutIframe(),
-    navigator = { clipboard: { write: cy.stub().as('writeClipboard') } },
   ) => {
     return {
       autIframe,
@@ -15,7 +15,6 @@ describe.skip('SelectorPlayground', () => {
         <SelectorPlayground
           eventManager={eventManager}
           getAutIframe={() => autIframe}
-          navigator={navigator}
         />
       )),
     }
