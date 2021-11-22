@@ -199,6 +199,8 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
   interceptBlur: ReturnType<typeof createFocused>['interceptBlur']
 
   constructor (specWindow, Cypress, Cookies, state, config) {
+    state('specWindow', specWindow)
+
     this.id = _.uniqueId('cy')
     this.state = state
     this.config = config
@@ -381,22 +383,20 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
       }
     } catch (error) { } // eslint-disable-line no-empty
   }
+
+  warnMixingPromisesAndCommands () {
+    const title = state('runnable').fullTitle()
+
+    $errUtils.warnByPath('miscellaneous.mixing_promises_and_commands', {
+      args: { title },
+    })
+  }
 }
 
 export default {
   create (specWindow, Cypress, Cookies, state, config, log) {
     let cy = new $Cy(specWindow, Cypress, Cookies, state, config)
     const commandFns = {}
-
-    state('specWindow', specWindow)
-
-    const warnMixingPromisesAndCommands = function () {
-      const title = state('runnable').fullTitle()
-
-      $errUtils.warnByPath('miscellaneous.mixing_promises_and_commands', {
-        args: { title },
-      })
-    }
 
     const testConfigOverride = new TestConfigOverride()
 
@@ -908,7 +908,7 @@ export default {
           // command, then kick off the run
           if (!state('promise')) {
             if (state('returnedCustomPromise')) {
-              warnMixingPromisesAndCommands()
+              cy.warnMixingPromisesAndCommands()
             }
 
             queue.run()
@@ -1184,7 +1184,7 @@ export default {
               // and we've already invoked multiple
               // commands and should warn
               if (queue.length > currentLength) {
-                warnMixingPromisesAndCommands()
+                cy.warnMixingPromisesAndCommands()
               }
 
               return ret
