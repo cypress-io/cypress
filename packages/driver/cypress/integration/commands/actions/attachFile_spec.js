@@ -229,6 +229,13 @@ describe('src/cy/commands/actions/attachFile', () => {
           expect(contents[0]).to.eql(validJsonString)
           expect(contents[1]).to.eql('{ \'bar\' }\n')
         })
+
+        cy.get('#multiple')
+        .should('include.value', 'valid.json')
+        .then((input) => {
+          expect(input[0].files[0].name).to.eq('valid.json')
+          expect(input[0].files[1].name).to.eq('app.js')
+        })
       })
     })
 

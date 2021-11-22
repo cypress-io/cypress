@@ -1,3 +1,4 @@
+import { basename } from 'path'
 import _ from 'lodash'
 
 import $dom from '../../../dom'
@@ -23,8 +24,8 @@ interface InternalAttachFileOptions extends Cypress.AttachFileOptions {
 }
 
 export default (Commands, Cypress, cy, state, config) => {
-  const handleAlias = (alias: string, options) => {
-    const aliasObj = cy.getAlias(alias, 'attachFile', options._log)
+  const handleAlias = (file, options) => {
+    const aliasObj = cy.getAlias(file.contents, 'attachFile', options._log)
 
     if (!aliasObj) {
       return
@@ -33,7 +34,7 @@ export default (Commands, Cypress, cy, state, config) => {
     if (aliasObj.subject == null) {
       $errUtils.throwErrByPath('attachFile.invalid_alias', {
         onFail: options._log,
-        args: { alias, subject: aliasObj.subject },
+        args: { alias: file.contents, subject: aliasObj.subject },
       })
     }
 
@@ -42,22 +43,32 @@ export default (Commands, Cypress, cy, state, config) => {
 
       $errUtils.throwErrByPath('attachFile.invalid_alias', {
         onFail: options._log,
-        args: { alias, subject },
+        args: { alias: file.contents, subject },
       })
     }
 
-    return aliasObj.subject
+    return {
+      ...file,
+      contents: aliasObj.subject,
+    }
   }
 
   // Uses backend read:file rather than cy.readFile because we don't want to retry
   // loading a specific file until timeout, but rather retry the attachFile command as a whole
-  const handlePath = async (file: string, options) => {
-    return Cypress.backend('read:file', file, { encoding: null })
-    .then((file) => Buffer.from(file.contents))
+  const handlePath = async (file, options) => {
+    return Cypress.backend('read:file', file.contents, { encoding: null })
+    .then(({ contents }) => {
+      return {
+      // We default to the filename on the path, but allow them to override
+        fileName: basename(file.contents),
+        ...file,
+        contents: Buffer.from(contents),
+      }
+    })
     .catch((err) => {
       if (err.code === 'ENOENT') {
         $errUtils.throwErrByPath('files.nonexistent', {
-          args: { cmd: 'attachFile', file, filePath: err.filePath },
+          args: { cmd: 'attachFile', file: file.contents, filePath: err.filePath },
         })
       }
 
@@ -102,8 +113,7 @@ export default (Commands, Cypress, cy, state, config) => {
       }
 
       if (typeof file.contents === 'string') {
-        file.contents = handleAlias(file.contents, options)
-          ?? await handlePath(file.contents, options)
+        file = handleAlias(file, options) ?? await handlePath(file, options)
       }
 
       if (!_.isString(file.contents) && !Buffer.isBuffer(file.contents)) {

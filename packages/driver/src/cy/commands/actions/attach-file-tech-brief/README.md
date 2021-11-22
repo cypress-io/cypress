@@ -20,7 +20,6 @@ In the simplest case, the user attaches a single file to an HTML5 input element.
   cy.fixture('users.json').as('myFixture')
 
   cy.get('input[type=file]').attachFile('path/to/file.json')
-  cy.get('input[type=file]').attachFile('fixture:users.json')
 
   // If the referenced alias is not a Buffer or string, cypress will use
   // JSON.stringify() before attaching it.
@@ -42,21 +41,21 @@ This triggers `input` and `change` events on the given input element, signaling 
 It also supports arrays of files, representing a user selecting multiple files at once. If the input element does not have `multiple` property, an error will be thrown.
 
 ```js
-  cy.get('input[type=file]').attachFile(['fixture:users.json', '@myFile'])
+  cy.get('input[type=file]').attachFile(['users.json', '@myFile'])
 ```
 
 For more precise control, a user can pass in an object (or array of objects) giving details about the files:
 ```js
   cy.get('input[type=file]').attachFile({
     contents: '@myBuffer',
-    filePath: '/imaginary/path/to/file.txt',
+    fileName: '/imaginary/path/to/file.txt',
     lastModified: Date.now(),
     mimeType: 'application/octet-stream',
   })
 ```
 
-- `contents` can be any of the above formats - `fixture:file.json`, an `@alias`, or a `Buffer()`. Required.
-- `filePath` is a string. If undefined, it defaults to the actual path (if we have one from `cy.readFile()` or `cy.fixture()`), or an empty string if none can be inferred.
+- `contents` can be any of the above formats - `file.json`, an `@alias`, a `Buffer()`, or an object to JSON.stringify(). Required.
+- `fileName` is a string. If undefined, it defaults to the actual name (if we have one because they loaded the file from a path), or an empty string if none can be inferred.
 - `lastModified` defaults to `Date.now()`.
 - `mimeType` does not have a default value, allowing the browser to infer it.
 
@@ -118,11 +117,10 @@ Currently, when a user (or a plugin they've installed) calls `Cypress.Commands.a
 
 This is done because the existing community solution, [cypress-upload-plugin](https://github.com/abramenal/cypress-file-upload), already adds `cy.attachFile`, and we believe a visible conflict is the best way forward. The maintainers of that project can simply switch from `add` to `overwite` in order to keep it working, which shouldn't be too onerous of a burden. For users, this error will serve as a way to notify users of that plugin that native functionality now exists, so they can decide which they prefer to use.
 
-As part of the changelog around this feature, we will need to write a migration guide for current users of the plugin. Since our version of `cy.attachFile` is extremely similar to that of the plugin, for many users this should be as simple as changing `subjectType` to `action`, prefixing their fixtures with `fixture:` and uninstalling cypress-upload-file.
+As part of the changelog around this feature, we will need to write a migration guide for current users of the plugin. Since our version of `cy.attachFile` is extremely similar to that of the plugin, for many users this should be as simple as changing `subjectType` to `action`, prefixing their fixtures with `cypress/fixtures/` and uninstalling cypress-upload-file.
 
 ### Synthetic events vs CDP
 Events triggered by Chrome Devtools Protocol and real users are identical, while those triggered via JS are different only in the `isTrusted` property (see below for more details on this conclusion). The same holds for the drag-and-drop related events, with the exact method to reproduce omitted here for brevity.
-
 
 Triggering the [`DOM.setFileInputFiles` event via CDP](https://chromedevtools.github.io/devtools-protocol/tot/DOM/#method-setFileInputFiles) also has a major limitation: it accepts only an array of file paths, which are read from disk. This has a benefit:
 1. The files are not read from disk until the application does so - this is how browsers actually behave, and is more performant, especially when dealing with large files.
