@@ -43,6 +43,10 @@ export default (Commands, Cypress, cy) => {
         })
       }
 
+      // We clear the default timeout because we are handling
+      // the timeout ourselves.
+      cy.clearTimeout()
+
       const verifyAssertions = async () => {
         let result
 
@@ -152,6 +156,10 @@ export default (Commands, Cypress, cy) => {
       if (_.isObject(contents) && !Buffer.isBuffer(contents)) {
         contents = JSON.stringify(contents, null, 2)
       }
+
+      // We clear the default timeout because we are handling
+      // the timeout ourselves.
+      cy.clearTimeout()
 
       try {
         await Cypress.backend('write:file', fileName, contents, _.pick(options, ['encoding', 'flag', 'timeout'])).timeout(options.timeout)
