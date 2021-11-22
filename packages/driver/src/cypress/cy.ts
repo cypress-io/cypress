@@ -125,6 +125,7 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
   id: string
   state: any
   config: any
+  Cypress: any
   devices: {
     keyboard: Keyboard
     mouse: Mouse
@@ -204,10 +205,12 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
     this.id = _.uniqueId('cy')
     this.state = state
     this.config = config
+    this.Cypress = Cypress
     initVideoRecorder(Cypress)
 
     // bind methods
     this.$$ = this.$$.bind(this)
+    this.isCy = this.isCy.bind(this)
 
     // init traits
 
@@ -323,6 +326,10 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
     return $dom.query(selector, context)
   }
 
+  isCy (val) {
+    return (val === this) || $utils.isInstanceOf(val, $Chainer)
+  }
+
   // private
   wrapNativeMethods (contentWindow) {
     try {
@@ -391,6 +398,16 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
       args: { title },
     })
   }
+
+  runnableCtx (name) {
+    this.ensureRunnable(name)
+
+    return this.state('runnable').ctx
+  }
+
+  urlNavigationEvent (event) {
+    return this.Cypress.action('app:navigation:changed', `page navigation event (${event})`)
+  }
 }
 
 export default {
@@ -402,20 +419,6 @@ export default {
 
     const isStopped = () => {
       return queue.stopped
-    }
-
-    const isCy = (val) => {
-      return (val === cy) || $utils.isInstanceOf(val, $Chainer)
-    }
-
-    const runnableCtx = function (name) {
-      cy.ensureRunnable(name)
-
-      return state('runnable').ctx
-    }
-
-    const urlNavigationEvent = (event) => {
-      return Cypress.action('app:navigation:changed', `page navigation event (${event})`)
     }
 
     const contentWindowListeners = function (contentWindow) {
@@ -707,7 +710,7 @@ export default {
       return finish(err)
     }
 
-    const queue = $CommandQueue.create(state, cy.timeout, cy.whenStable, cleanup, fail, isCy)
+    const queue = $CommandQueue.create(state, cy.timeout, cy.whenStable, cleanup, fail, cy.isCy)
 
     _.extend(cy, {
       // command queue instance
@@ -715,9 +718,6 @@ export default {
 
       // errors sync methods
       fail,
-
-      // is cy
-      isCy,
 
       isStopped,
 
@@ -751,7 +751,7 @@ export default {
             setWindowDocumentProps(getContentWindow($autIframe), state)
 
             // we may need to update the url now
-            urlNavigationEvent('load')
+            cy.urlNavigationEvent('load')
 
             // we normally DONT need to reapply contentWindow listeners
             // because they would have been automatically applied during
@@ -829,7 +829,7 @@ export default {
 
       addCommandSync (name, fn) {
         cy[name] = function () {
-          return fn.apply(runnableCtx(name), arguments)
+          return fn.apply(cy.runnableCtx(name), arguments)
         }
       },
 
@@ -863,7 +863,7 @@ export default {
             // push the subject into the args
             args = pushSubjectAndValidate(name, args, firstCall, prevSubject)
 
-            return fn.apply(runnableCtx(name), args)
+            return fn.apply(cy.runnableCtx(name), args)
           }
         }
 
@@ -1021,7 +1021,7 @@ export default {
         // from the time that happens BEFORE the load event occurs
         setWindowDocumentProps(contentWindow, state)
 
-        urlNavigationEvent('before:load')
+        cy.urlNavigationEvent('before:load')
 
         contentWindowListeners(contentWindow)
 
@@ -1149,7 +1149,7 @@ export default {
             // or a promise
             if (ret &&
               (queue.length > currentLength) &&
-              (!isCy(ret)) &&
+              (!cy.isCy(ret)) &&
               (!$utils.isPromiseLike(ret))) {
               // TODO: clean this up in the utility function
               // to conditionally stringify functions
@@ -1176,7 +1176,7 @@ export default {
             }
 
             // if we returned a promise like object
-            if ((!isCy(ret)) && $utils.isPromiseLike(ret)) {
+            if ((!cy.isCy(ret)) && $utils.isPromiseLike(ret)) {
               // indicate we've returned a custom promise
               state('returnedCustomPromise', true)
 
@@ -1191,7 +1191,7 @@ export default {
             }
 
             // if we're cy or we've enqueued commands
-            if (isCy(ret) || (queue.length > currentLength)) {
+            if (cy.isCy(ret) || (queue.length > currentLength)) {
               if (fn.length) {
                 // if user has passed done callback don't return anything
                 // so we don't get an 'overspecified' error from mocha
