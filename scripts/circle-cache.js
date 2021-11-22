@@ -22,7 +22,7 @@ async function circleCache () {
   }
 }
 
-const BASE_DIR = path.join(__dirname, '..')
+const BASE_DIR = path.resolve(__dirname, '..')
 
 const CACHE_DIR = path.join(BASE_DIR, 'globbed_node_modules')
 const p = (str) => path.join(BASE_DIR, str)
@@ -49,8 +49,6 @@ async function cacheKey () {
     },
   ).join('')
 
-  console.log('break cache')
-
   const filesToHash = yarnLocks.concat(patchFiles).sort()
   const hashedFiles = await Promise.all(filesToHash.map((p) => hashFile(p)))
   const cacheKeySource = hashedFiles.concat(hashedPackageDeps)
@@ -65,6 +63,8 @@ async function cacheKey () {
 async function prepareCircleCache () {
   const paths = glob.sync(p(`{${packageGlobs.join(',')}}/node_modules/`))
 
+  console.log('BASE_DIR', BASE_DIR)
+  console.log('CACHE_DIR', CACHE_DIR)
   console.log('found paths', paths.length)
   await Promise.all(
     paths.map(async (src) => {
@@ -81,7 +81,7 @@ async function prepareCircleCache () {
 }
 
 async function unpackCircleCache () {
-  const paths = glob.sync(p('globbed_node_modules/*/*/*/'))
+  const paths = glob.sync(p('globbed_node_modules/*/*/'))
 
   console.log('found paths', paths.length)
   await Promise.all(
