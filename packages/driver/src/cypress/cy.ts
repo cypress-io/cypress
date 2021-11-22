@@ -11,29 +11,29 @@ import $utils from './utils'
 import $errUtils from './error_utils'
 import $stackUtils from './stack_utils'
 
-import $Chai from '../cy/chai'
-import $Xhrs from '../cy/xhrs'
-import $jQuery from '../cy/jquery'
-import $Aliases from '../cy/aliases'
+import { create as createChai, IChai } from '../cy/chai'
+import { create as createXhr, IXhr } from '../cy/xhrs'
+import { create as createJQuery, IJQuery } from '../cy/jquery'
+import { create as createAliases, IAliases } from '../cy/aliases'
 import * as $Events from './events'
-import $Ensures from '../cy/ensures'
-import $Focused from '../cy/focused'
-import $Mouse from '../cy/mouse'
-import $Keyboard from '../cy/keyboard'
-import $Location from '../cy/location'
-import $Assertions from '../cy/assertions'
+import { create as createEnsures, IEnsures } from '../cy/ensures'
+import { create as createFocused, IFocused } from '../cy/focused'
+import { create as createMouse, Mouse } from '../cy/mouse'
+import { Keyboard } from '../cy/keyboard'
+import { create as createLocation, ILocation } from '../cy/location'
+import { create as createAssertions, IAssertions } from '../cy/assertions'
 import $Listeners from '../cy/listeners'
 import { $Chainer } from './chainer'
-import $Timers from '../cy/timers'
-import $Timeouts from '../cy/timeouts'
-import $Retries from '../cy/retries'
-import $Stability from '../cy/stability'
+import { create as createTimer, ITimer } from '../cy/timers'
+import { create as createTimeouts, ITimeouts } from '../cy/timeouts'
+import { create as createRetries, IRetries } from '../cy/retries'
+import { create as createStability, IStability } from '../cy/stability'
 import $selection from '../dom/selection'
-import $Snapshots from '../cy/snapshots'
+import { create as createSnapshots, ISnapshots } from '../cy/snapshots'
 import { $Command } from './command'
 import $CommandQueue from './command_queue'
-import $VideoRecorder from '../cy/video-recorder'
-import $TestConfigOverrides from '../cy/testConfigOverrides'
+import { initVideoRecorder } from '../cy/video-recorder'
+import { TestConfigOverride } from '../cy/testConfigOverrides'
 
 const debugErrors = debugFn('cypress:driver:errors')
 
@@ -59,10 +59,12 @@ function __stackReplacementMarker (fn, ctx, args) {
   return fn.apply(ctx, args)
 }
 
+declare let top: WindowProxy & { __alreadySetErrorHandlers__: boolean } | null
+
 // We only set top.onerror once since we make it configurable:false
 // but we update cy instance every run (page reload or rerun button)
-let curCy = null
-const setTopOnError = function (Cypress, cy) {
+let curCy: $Cy | null = null
+const setTopOnError = function (Cypress, cy: $Cy) {
   if (curCy) {
     curCy = cy
 
@@ -86,7 +88,7 @@ const setTopOnError = function (Cypress, cy) {
     // but they came from the spec, so we need to differentiate them
     const isSpecError = $errUtils.isSpecError(Cypress.config('spec'), err)
 
-    const handled = curCy.onUncaughtException({
+    const handled = curCy!.onUncaughtException({
       err,
       promise,
       handlerType,
@@ -119,18 +121,274 @@ const setTopOnError = function (Cypress, cy) {
 
 // NOTE: this makes the cy object an instance
 // TODO: refactor the 'create' method below into this class
-class $Cy {}
+class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILocation, ITimer, IChai, IXhr, IAliases, IEnsures, ISnapshots, IFocused {
+  id: string
+  state: any
+  config: any
+  devices: {
+    keyboard: Keyboard
+    mouse: Mouse
+  }
 
-export default {
-  create (specWindow, Cypress, Cookies, state, config, log) {
-    let cy = new $Cy()
-    const commandFns = {}
+  timeout: ITimeouts['timeout']
+  clearTimeout: ITimeouts['clearTimeout']
 
-    state('specWindow', specWindow)
+  isStable: IStability['isStable']
+  whenStable: IStability['whenStable']
+
+  assert: IAssertions['assert']
+  verifyUpcomingAssertions: IAssertions['verifyUpcomingAssertions']
+
+  retry: IRetries['retry']
+
+  getRemotejQueryInstance: IJQuery['getRemotejQueryInstance']
+
+  getRemoteLocation: ILocation['getRemoteLocation']
+
+  fireBlur: IFocused['fireBlur']
+  fireFocus: IFocused['fireFocus']
+  needsFocus: IFocused['needsFocus']
+  getFocused: IFocused['getFocused']
+
+  pauseTimers: ITimer['pauseTimers']
+
+  expect: IChai['expect']
+
+  getIndexedXhrByAlias: IXhr['getIndexedXhrByAlias']
+  getRequestsByAlias: IXhr['getRequestsByAlias']
+
+  addAlias: IAliases['addAlias']
+  getAlias: IAliases['getAlias']
+  getNextAlias: IAliases['getNextAlias']
+  validateAlias: IAliases['validateAlias']
+  aliasNotFoundFor: IAliases['aliasNotFoundFor']
+  getXhrTypeByAlias: IAliases['getXhrTypeByAlias']
+
+  ensureElement: IEnsures['ensureElement']
+  ensureAttached: IEnsures['ensureAttached']
+  ensureWindow: IEnsures['ensureWindow']
+  ensureDocument: IEnsures['ensureDocument']
+  ensureElDoesNotHaveCSS: IEnsures['ensureElDoesNotHaveCSS']
+  ensureElementIsNotAnimating: IEnsures['ensureElementIsNotAnimating']
+  ensureNotDisabled: IEnsures['ensureNotDisabled']
+  ensureVisibility: IEnsures['ensureVisibility']
+  ensureStrictVisibility: IEnsures['ensureStrictVisibility']
+  ensureNotHiddenByAncestors: IEnsures['ensureNotHiddenByAncestors']
+  ensureExistence: IEnsures['ensureExistence']
+  ensureElExistence: IEnsures['ensureElExistence']
+  ensureDescendents: IEnsures['ensureDescendents']
+  ensureValidPosition: IEnsures['ensureValidPosition']
+  ensureScrollability: IEnsures['ensureScrollability']
+  ensureNotReadonly: IEnsures['ensureNotReadonly']
+
+  createSnapshot: ISnapshots['createSnapshot']
+  detachDom: ISnapshots['detachDom']
+  getStyles: ISnapshots['getStyles']
+
+  // Private methods
+  resetTimer: ReturnType<typeof createTimer>['reset']
+
+  ensureSubjectByType: ReturnType<typeof createEnsures>['ensureSubjectByType']
+  ensureRunnable: ReturnType<typeof createEnsures>['ensureRunnable']
+
+  onCssModified: ReturnType<typeof createSnapshots>['onCssModified']
+  onBeforeWindowLoad: ReturnType<typeof createSnapshots>['onBeforeWindowLoad']
+
+  documentHasFocus: ReturnType<typeof createFocused>['documentHasFocus']
+  interceptFocus: ReturnType<typeof createFocused>['interceptFocus']
+  interceptBlur: ReturnType<typeof createFocused>['interceptBlur']
+
+  constructor (specWindow, Cypress, Cookies, state, config) {
+    this.id = _.uniqueId('cy')
+    this.state = state
+    this.config = config
+    initVideoRecorder(Cypress)
+
+    // bind methods
+    this.$$ = this.$$.bind(this)
+
+    // init traits
+
+    const timeouts = createTimeouts(state)
+
+    this.timeout = timeouts.timeout
+    this.clearTimeout = timeouts.clearTimeout
+
+    const statility = createStability(Cypress, state)
+
+    this.isStable = statility.isStable
+    this.whenStable = statility.whenStable
+
+    const assertions = createAssertions(Cypress, this)
+
+    this.assert = assertions.assert
+    this.verifyUpcomingAssertions = assertions.verifyUpcomingAssertions
 
     const onFinishAssertions = function () {
       return assertions.finishAssertions.apply(window, arguments)
     }
+
+    const retries = createRetries(Cypress, state, this.timeout, this.clearTimeout, this.whenStable, onFinishAssertions)
+
+    this.retry = retries.retry
+
+    const jquery = createJQuery(state)
+
+    this.getRemotejQueryInstance = jquery.getRemotejQueryInstance
+
+    const location = createLocation(state)
+
+    this.getRemoteLocation = location.getRemoteLocation
+
+    const focused = createFocused(state)
+
+    this.fireBlur = focused.fireBlur
+    this.fireFocus = focused.fireFocus
+    this.needsFocus = focused.needsFocus
+    this.getFocused = focused.getFocused
+
+    this.documentHasFocus = focused.documentHasFocus
+    this.interceptFocus = focused.interceptFocus
+    this.interceptBlur = focused.interceptBlur
+
+    const keyboard = new Keyboard(state)
+
+    this.devices = {
+      keyboard,
+      mouse: createMouse(state, keyboard, focused, Cypress),
+    }
+
+    const timer = createTimer(Cypress)
+
+    this.pauseTimers = timer.pauseTimers
+    this.resetTimer = timer.reset
+
+    const { expect } = createChai!(specWindow, state, this.assert)
+
+    this.expect = expect
+
+    const xhr = createXhr(state)
+
+    this.getIndexedXhrByAlias = xhr.getIndexedXhrByAlias
+    this.getRequestsByAlias = xhr.getRequestsByAlias
+
+    const aliases = createAliases(this)
+
+    this.addAlias = aliases.addAlias
+    this.getAlias = aliases.getAlias
+    this.getNextAlias = aliases.getNextAlias
+    this.validateAlias = aliases.validateAlias
+    this.aliasNotFoundFor = aliases.aliasNotFoundFor
+    this.getXhrTypeByAlias = aliases.getXhrTypeByAlias
+
+    const ensures = createEnsures(state, this.expect)
+
+    this.ensureElement = ensures.ensureElement
+    this.ensureAttached = ensures.ensureAttached
+    this.ensureWindow = ensures.ensureWindow
+    this.ensureDocument = ensures.ensureDocument
+    this.ensureElDoesNotHaveCSS = ensures.ensureElDoesNotHaveCSS
+    this.ensureElementIsNotAnimating = ensures.ensureElementIsNotAnimating
+    this.ensureNotDisabled = ensures.ensureNotDisabled
+    this.ensureVisibility = ensures.ensureVisibility
+    this.ensureStrictVisibility = ensures.ensureStrictVisibility
+    this.ensureNotHiddenByAncestors = ensures.ensureNotHiddenByAncestors
+    this.ensureExistence = ensures.ensureExistence
+    this.ensureElExistence = ensures.ensureElExistence
+    this.ensureDescendents = ensures.ensureDescendents
+    this.ensureValidPosition = ensures.ensureValidPosition
+    this.ensureScrollability = ensures.ensureScrollability
+    this.ensureNotReadonly = ensures.ensureNotReadonly
+
+    this.ensureSubjectByType = ensures.ensureSubjectByType
+    this.ensureRunnable = ensures.ensureRunnable
+
+    const snapshots = createSnapshots(this.$$, state)
+
+    this.createSnapshot = snapshots.createSnapshot
+    this.detachDom = snapshots.detachDom
+    this.getStyles = snapshots.getStyles
+
+    this.onCssModified = snapshots.onCssModified
+    this.onBeforeWindowLoad = snapshots.onBeforeWindowLoad
+  }
+
+  $$ (selector, context) {
+    if (context == null) {
+      context = this.state('document')
+    }
+
+    return $dom.query(selector, context)
+  }
+
+  // private
+  wrapNativeMethods (contentWindow) {
+    try {
+      // return null to trick contentWindow into thinking
+      // its not been iframed if modifyObstructiveCode is true
+      if (this.config('modifyObstructiveCode')) {
+        Object.defineProperty(contentWindow, 'frameElement', {
+          get () {
+            return null
+          },
+        })
+      }
+
+      const cy = this
+
+      contentWindow.HTMLElement.prototype.focus = function (focusOption) {
+        return cy.interceptFocus(this, contentWindow, focusOption)
+      }
+
+      contentWindow.HTMLElement.prototype.blur = function () {
+        return cy.interceptBlur(this)
+      }
+
+      contentWindow.SVGElement.prototype.focus = function (focusOption) {
+        return cy.interceptFocus(this, contentWindow, focusOption)
+      }
+
+      contentWindow.SVGElement.prototype.blur = function () {
+        return cy.interceptBlur(this)
+      }
+
+      contentWindow.HTMLInputElement.prototype.select = function () {
+        return $selection.interceptSelect.call(this)
+      }
+
+      contentWindow.document.hasFocus = function () {
+        return cy.documentHasFocus.call(this)
+      }
+
+      const cssModificationSpy = function (original, ...args) {
+        cy.onCssModified(this.href)
+
+        return original.apply(this, args)
+      }
+
+      const { insertRule } = contentWindow.CSSStyleSheet.prototype
+      const { deleteRule } = contentWindow.CSSStyleSheet.prototype
+
+      contentWindow.CSSStyleSheet.prototype.insertRule = _.wrap(insertRule, cssModificationSpy)
+      contentWindow.CSSStyleSheet.prototype.deleteRule = _.wrap(deleteRule, cssModificationSpy)
+
+      if (this.config('experimentalFetchPolyfill')) {
+        // drop "fetch" polyfill that replaces it with XMLHttpRequest
+        // from the app iframe that we wrap for network stubbing
+        contentWindow.fetch = registerFetch(contentWindow)
+        // flag the polyfill to test this experimental feature easier
+        this.state('fetchPolyfilled', true)
+      }
+    } catch (error) { } // eslint-disable-line no-empty
+  }
+}
+
+export default {
+  create (specWindow, Cypress, Cookies, state, config, log) {
+    let cy = new $Cy(specWindow, Cypress, Cookies, state, config)
+    const commandFns = {}
+
+    state('specWindow', specWindow)
 
     const warnMixingPromisesAndCommands = function () {
       const title = state('runnable').fullTitle()
@@ -140,37 +398,7 @@ export default {
       })
     }
 
-    const $$ = function (selector, context) {
-      if (context == null) {
-        context = state('document')
-      }
-
-      return $dom.query(selector, context)
-    }
-
-    $VideoRecorder.create(Cypress)
-    const timeouts = $Timeouts.create(state)
-    const stability = $Stability.create(Cypress, state)
-
-    const retries = $Retries.create(Cypress, state, timeouts.timeout, timeouts.clearTimeout, stability.whenStable, onFinishAssertions)
-    const assertions = $Assertions.create(Cypress, cy)
-
-    const jquery = $jQuery.create(state)
-    const location = $Location.create(state)
-    const focused = $Focused.create(state)
-    const keyboard = $Keyboard.create(state)
-    const mouse = $Mouse.create(state, keyboard, focused, Cypress)
-    const timers = $Timers.create(Cypress)
-
-    const { expect } = $Chai.create(specWindow, state, assertions.assert)
-
-    const xhrs = $Xhrs.create(state)
-    const aliases = $Aliases.create(cy)
-
-    const ensures = $Ensures.create(state, expect)
-
-    const snapshots = $Snapshots.create($$, state)
-    const testConfigOverrides = $TestConfigOverrides.create()
+    const testConfigOverride = new TestConfigOverride()
 
     const isStopped = () => {
       return queue.stopped
@@ -181,7 +409,7 @@ export default {
     }
 
     const runnableCtx = function (name) {
-      ensures.ensureRunnable(name)
+      cy.ensureRunnable(name)
 
       return state('runnable').ctx
     }
@@ -214,11 +442,11 @@ export default {
           return Cypress.action('app:form:submitted', e)
         },
         onBeforeUnload (e) {
-          stability.isStable(false, 'beforeunload')
+          cy.isStable(false, 'beforeunload')
 
           Cookies.setInitial()
 
-          timers.reset()
+          cy.resetTimer()
 
           Cypress.action('app:window:before:unload', e)
 
@@ -247,64 +475,6 @@ export default {
           return ret
         },
       })
-    }
-
-    const wrapNativeMethods = function (contentWindow) {
-      try {
-        // return null to trick contentWindow into thinking
-        // its not been iframed if modifyObstructiveCode is true
-        if (config('modifyObstructiveCode')) {
-          Object.defineProperty(contentWindow, 'frameElement', {
-            get () {
-              return null
-            },
-          })
-        }
-
-        contentWindow.HTMLElement.prototype.focus = function (focusOption) {
-          return focused.interceptFocus(this, contentWindow, focusOption)
-        }
-
-        contentWindow.HTMLElement.prototype.blur = function () {
-          return focused.interceptBlur(this)
-        }
-
-        contentWindow.SVGElement.prototype.focus = function (focusOption) {
-          return focused.interceptFocus(this, contentWindow, focusOption)
-        }
-
-        contentWindow.SVGElement.prototype.blur = function () {
-          return focused.interceptBlur(this)
-        }
-
-        contentWindow.HTMLInputElement.prototype.select = function () {
-          return $selection.interceptSelect.call(this)
-        }
-
-        contentWindow.document.hasFocus = function () {
-          return focused.documentHasFocus.call(this)
-        }
-
-        const cssModificationSpy = function (original, ...args) {
-          snapshots.onCssModified(this.href)
-
-          return original.apply(this, args)
-        }
-
-        const { insertRule } = contentWindow.CSSStyleSheet.prototype
-        const { deleteRule } = contentWindow.CSSStyleSheet.prototype
-
-        contentWindow.CSSStyleSheet.prototype.insertRule = _.wrap(insertRule, cssModificationSpy)
-        contentWindow.CSSStyleSheet.prototype.deleteRule = _.wrap(deleteRule, cssModificationSpy)
-
-        if (config('experimentalFetchPolyfill')) {
-          // drop "fetch" polyfill that replaces it with XMLHttpRequest
-          // from the app iframe that we wrap for network stubbing
-          contentWindow.fetch = registerFetch(contentWindow)
-          // flag the polyfill to test this experimental feature easier
-          state('fetchPolyfilled', true)
-        }
-      } catch (error) { } // eslint-disable-line no-empty
     }
 
     const enqueue = function (obj) {
@@ -387,7 +557,7 @@ export default {
       if (prevSubject) {
         // make sure our current subject is valid for
         // what we expect in this command
-        ensures.ensureSubjectByType(subject, prevSubject, name)
+        cy.ensureSubjectByType(subject, prevSubject, name)
       }
 
       args.unshift(subject)
@@ -537,97 +707,19 @@ export default {
       return finish(err)
     }
 
-    const queue = $CommandQueue.create(state, timeouts, stability, cleanup, fail, isCy)
+    const queue = $CommandQueue.create(state, cy.timeout, cy.whenStable, cleanup, fail, isCy)
 
     _.extend(cy, {
-      id: _.uniqueId('cy'),
-
-      // synchronous querying
-      $$,
-
-      state,
-
       // command queue instance
       queue,
 
       // errors sync methods
       fail,
 
-      // chai expect sync methods
-      expect,
-
       // is cy
       isCy,
 
       isStopped,
-
-      // timeout sync methods
-      timeout: timeouts.timeout,
-      clearTimeout: timeouts.clearTimeout,
-
-      // stability sync methods
-      isStable: stability.isStable,
-      whenStable: stability.whenStable,
-
-      // xhr sync methods
-      getRequestsByAlias: xhrs.getRequestsByAlias,
-      getIndexedXhrByAlias: xhrs.getIndexedXhrByAlias,
-
-      // alias sync methods
-      getAlias: aliases.getAlias,
-      addAlias: aliases.addAlias,
-      validateAlias: aliases.validateAlias,
-      getNextAlias: aliases.getNextAlias,
-      aliasNotFoundFor: aliases.aliasNotFoundFor,
-      getXhrTypeByAlias: aliases.getXhrTypeByAlias,
-
-      // location sync methods
-      getRemoteLocation: location.getRemoteLocation,
-
-      // jquery sync methods
-      getRemotejQueryInstance: jquery.getRemotejQueryInstance,
-
-      // focused sync methods
-      getFocused: focused.getFocused,
-      needsFocus: focused.needsFocus,
-      fireFocus: focused.fireFocus,
-      fireBlur: focused.fireBlur,
-
-      devices: {
-        mouse,
-        keyboard,
-      },
-
-      // timer sync methods
-      pauseTimers: timers.pauseTimers,
-
-      // snapshots sync methods
-      createSnapshot: snapshots.createSnapshot,
-
-      // retry sync methods
-      retry: retries.retry,
-
-      // assertions sync methods
-      assert: assertions.assert,
-      verifyUpcomingAssertions: assertions.verifyUpcomingAssertions,
-
-      // ensure sync methods
-      ensureWindow: ensures.ensureWindow,
-      ensureElement: ensures.ensureElement,
-      ensureDocument: ensures.ensureDocument,
-      ensureAttached: ensures.ensureAttached,
-      ensureExistence: ensures.ensureExistence,
-      ensureElExistence: ensures.ensureElExistence,
-      ensureElDoesNotHaveCSS: ensures.ensureElDoesNotHaveCSS,
-      ensureVisibility: ensures.ensureVisibility,
-      ensureStrictVisibility: ensures.ensureStrictVisibility,
-      ensureNotHiddenByAncestors: ensures.ensureNotHiddenByAncestors,
-      ensureDescendents: ensures.ensureDescendents,
-      ensureNotReadonly: ensures.ensureNotReadonly,
-      ensureNotDisabled: ensures.ensureNotDisabled,
-      ensureValidPosition: ensures.ensureValidPosition,
-      ensureScrollability: ensures.ensureScrollability,
-      ensureElementIsNotAnimating: ensures.ensureElementIsNotAnimating,
 
       initialize ($autIframe) {
         setRemoteIframeProps($autIframe, state)
@@ -672,7 +764,7 @@ export default {
             // we are now stable again which is purposefully
             // the last event we call here, to give our event
             // listeners time to be invoked prior to moving on
-            return stability.isStable(true, 'load')
+            return cy.isStable(true, 'load')
           } catch (err) {
             let e = err
 
@@ -726,9 +818,8 @@ export default {
 
           queue.reset()
           queue.clear()
-          timers.reset()
-
-          testConfigOverrides.restoreAndSetTestConfigOverrides(test, Cypress.config, Cypress.env)
+          cy.resetTimer()
+          testConfigOverride.restoreAndSetTestConfigOverrides(test, Cypress.config, Cypress.env)
 
           cy.removeAllListeners()
         } catch (err) {
@@ -781,7 +872,7 @@ export default {
 
           let ret
 
-          ensures.ensureRunnable(name)
+          cy.ensureRunnable(name)
 
           // this is the first call on cypress
           // so create a new chainer instance
@@ -934,9 +1025,9 @@ export default {
 
         contentWindowListeners(contentWindow)
 
-        wrapNativeMethods(contentWindow)
+        cy.wrapNativeMethods(contentWindow)
 
-        snapshots.onBeforeWindowLoad()
+        cy.onBeforeWindowLoad()
       },
 
       onUncaughtException ({ handlerType, frameType, err, promise }) {
@@ -986,14 +1077,6 @@ export default {
         }
       },
 
-      detachDom (...args) {
-        return snapshots.detachDom(...args)
-      },
-
-      getStyles (...args) {
-        return snapshots.getStyles(...args)
-      },
-
       setRunnable (runnable, hookId) {
         // when we're setting a new runnable
         // prepare to run again!
@@ -1023,7 +1106,7 @@ export default {
 
           // control timeouts on runnables ourselves
           if (_.isFinite(timeout)) {
-            timeouts.timeout(timeout)
+            cy.timeout(timeout)
           }
 
           // store the current length of our queue
