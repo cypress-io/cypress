@@ -237,7 +237,7 @@ const throwErrByPath = (errPath, options = {}) => {
     Error.captureStackTrace(err, throwErrByPath)
   }
 
-  return throwErr(err, options)
+  throwErr(err, options)
 }
 
 const warnByPath = (errPath, options = {}) => {
