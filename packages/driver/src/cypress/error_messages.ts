@@ -131,6 +131,29 @@ export default {
     },
   },
 
+  attachFile: {
+    invalid_action: {
+      message: `${cmd('attachFile')} \`action\` can only be \`input\` or \`drag-n-drop\`. You passed: \`{{action}}\`.`,
+      docsUrl: 'https://on.cypress.io/attachFile',
+    },
+    invalid_array_file_reference: {
+      message: `${cmd('attachFile')} must be passed an array of Buffers or objects with non-null \`contents\`. At files[{{index}}] you passed: \`{{file}}\`.`,
+      docsUrl: 'https://on.cypress.io/attachFile',
+    },
+    invalid_single_file_reference: {
+      message: `${cmd('attachFile')} must be passed a Buffer or an object with a non-null \`contents\` property as its 1st argument. You passed: \`{{file}}\`.`,
+      docsUrl: 'https://on.cypress.io/attachFile',
+    },
+    multiple_elements: {
+      message: `${cmd('attachFile')} can only be called on a single element. Your subject contained {{num}} elements.`,
+      docsUrl: 'https://on.cypress.io/attachFile',
+    },
+    not_file_input: {
+      message: `${cmd('attachFile')} can only be called on an \`<input type="file">\` or a \`<label for="fileInput">\` pointing to or containing one. Your subject is: \`{{node}}\``,
+      docsUrl: 'https://on.cypress.io/attachFile',
+    },
+  },
+
   blur: {
     multiple_elements: {
       message: `${cmd('blur')} can only be called on a single element. Your subject contained {{num}} elements.`,

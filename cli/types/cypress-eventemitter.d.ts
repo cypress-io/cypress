@@ -27,3 +27,8 @@ interface NodeEventEmitter {
   prependOnceListener(event: string | symbol, listener: (...args: any[]) => void): this
   eventNames(): Array<string | symbol>
 }
+
+// The Buffer type is automatically imported for the browser by webpack
+// and we use it for dealing with binary data, especially around the
+// attachFile interface.
+type BufferType = import("buffer/").Buffer
