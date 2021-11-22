@@ -1,0 +1,37 @@
+{
+	// To see these extensions in VS Code:
+	// 1. Open the Command Palette:
+	//      - Non-Mac Users: (Ctrl+Shift+P)
+	//      - Mac Users: (Cmd+Shift+P)
+	// 2. Select "Extensions: Show Recommended Extensions"
+
+	// See https://go.microsoft.com/fwlink/?LinkId=827846 to learn about workspace recommendations.
+
+	// List of extensions which are recommended for Cypress contributors using VS Code:
+	"recommendations": [
+		// Name: ESLint
+		// Description: Integrates ESLint JavaScript into VS Code.
+		"dbaeumer.vscode-eslint",
+		// Name: GitHub linker
+		// Description: Create links to fragments of code in GitHub
+		"gimenete.github-linker",
+		// Name: GitLens — Git supercharged
+		// Description: Supercharge the Git capabilities built into Visual Studio Code — Visualize code authorship at a glance via Git blame annotations and code lens, seamlessly navigate and explore Git repositories, gain valuable insights via powerful comparison commands, and so much more
+		"eamodio.gitlens",
+		// Name: Terminals Manager
+		// Description: An extension for setting-up multiple terminals at once, or just running some commands
+		// There are several Terminals defined in `.vscode/terminals.json` that can be used via this plugin.
+		"fabiospampinato.vscode-terminals",
+		// Name: Test Utils
+		// Description: Add, remove, and move .only in tests
+		"chrisbreiding.test-utils",
+		// Name: Toggle Quotes
+		// Description: Toggle cycle " -> ' -> `
+		"britesnow.vscode-toggle-quotes",
+	],
+
+	// List of extensions recommended by VS Code that should not be recommended for Cypress contributors using VS Code:
+	"unwantedRecommendations": [
+
+	]
+}

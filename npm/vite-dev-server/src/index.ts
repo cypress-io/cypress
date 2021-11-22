@@ -1,4 +1,5 @@
 import { debug as debugFn } from 'debug'
+import { InlineConfig } from 'vite'
 import { start as createDevServer, StartDevServerOptions } from './startServer'
 const debug = debugFn('cypress:vite-dev-server:vite')
 
@@ -13,4 +14,14 @@ export async function startDevServer (startDevServerArgs: StartDevServerOptions)
   debug('Component testing vite server started on port', port)
 
   return { port, close: app.httpServer!.close }
+}
+
+export type CypressViteDevServerConfig = Omit<InlineConfig, 'base' | 'root'>
+
+export function devServer (cypressDevServerConfig: Cypress.DevServerConfig, devServerConfig?: CypressViteDevServerConfig) {
+  return startDevServer({ options: cypressDevServerConfig, viteConfig: devServerConfig })
+}
+
+export function defineDevServerConfig (devServerConfig: CypressViteDevServerConfig) {
+  return devServerConfig
 }

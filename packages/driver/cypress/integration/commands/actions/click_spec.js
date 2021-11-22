@@ -1,5 +1,7 @@
 const { _, $, Promise } = Cypress
-const { getCommandLogWithText,
+const {
+  assertLogLength,
+  getCommandLogWithText,
   findReactInstance,
   withMutableReporterState,
   clickCommandLog,
@@ -1090,6 +1092,13 @@ describe('src/cy/commands/actions/click', () => {
         cy.get('#overflow-auto-container').contains('quux').click()
       })
 
+      // https://github.com/cypress-io/cypress/issues/4233
+      it('can click an element behind a sticky header', () => {
+        cy.viewport(400, 400)
+        cy.visit('./fixtures/sticky-header.html')
+        cy.get('p').click()
+      })
+
       it('does not scroll when being forced', () => {
         const scrolled = []
 
@@ -1221,6 +1230,42 @@ describe('src/cy/commands/actions/click', () => {
 
         cy.get('input:first').then((el) => {
           expect(el[0].scrollIntoView).not.to.be.called
+        })
+      })
+
+      it('can specify scrollBehavior bottom in config', { scrollBehavior: 'bottom' }, () => {
+        cy.get('input:first').then((el) => {
+          cy.spy(el[0], 'scrollIntoView')
+        })
+
+        cy.get('input:first').click()
+
+        cy.get('input:first').then((el) => {
+          expect(el[0].scrollIntoView).calledWith({ block: 'end' })
+        })
+      })
+
+      it('can specify scrollBehavior center in config', { scrollBehavior: 'center' }, () => {
+        cy.get('input:first').then((el) => {
+          cy.spy(el[0], 'scrollIntoView')
+        })
+
+        cy.get('input:first').click()
+
+        cy.get('input:first').then((el) => {
+          expect(el[0].scrollIntoView).calledWith({ block: 'center' })
+        })
+      })
+
+      it('can specify scrollBehavior nearest in config', { scrollBehavior: 'nearest' }, () => {
+        cy.get('input:first').then((el) => {
+          cy.spy(el[0], 'scrollIntoView')
+        })
+
+        cy.get('input:first').click()
+
+        cy.get('input:first').then((el) => {
+          expect(el[0].scrollIntoView).calledWith({ block: 'nearest' })
         })
       })
 
@@ -2120,7 +2165,7 @@ describe('src/cy/commands/actions/click', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
 
           done()
@@ -2155,7 +2200,8 @@ describe('src/cy/commands/actions/click', () => {
         cy.on('fail', (err) => {
           expect(this.logs.length).eq(2)
           expect(err.message).not.to.contain('CSS property: `opacity: 0`')
-          expect(err.message).to.contain('`cy.click()` failed because this element is not visible')
+          expect(err.message).to.contain('`cy.click()` failed because this element')
+          expect(err.message).to.contain('is being covered by another element')
 
           done()
         })
@@ -2282,16 +2328,9 @@ describe('src/cy/commands/actions/click', () => {
           expect(lastLog.get('snapshots')[0].name).to.eq('before')
           expect(lastLog.get('snapshots')[1]).to.be.an('object')
           expect(lastLog.get('snapshots')[1].name).to.eq('after')
-          expect(err.message).to.include('`cy.click()` failed because this element is not visible:')
-          expect(err.message).to.include('>button ...</button>')
-          expect(err.message).to.include('`<button#button-covered-in-span>` is not visible because it has CSS property: `position: fixed` and it\'s being covered')
-          expect(err.message).to.include('>span on...</span>')
+          expect(err.message).to.include('`cy.click()` failed because this element:')
+          expect(err.message).to.include('is being covered by another element:')
           expect(err.docsUrl).to.eq('https://on.cypress.io/element-cannot-be-interacted-with')
-
-          const console = lastLog.invoke('consoleProps')
-
-          expect(console['Tried to Click']).to.be.undefined
-          expect(console['But its Covered By']).to.be.undefined
 
           done()
         })
@@ -2319,7 +2358,7 @@ describe('src/cy/commands/actions/click', () => {
 
       it('throws when attempting to click a <select> element', function (done) {
         cy.on('fail', (err) => {
-          expect(this.logs.length).to.eq(2)
+          assertLogLength(this.logs, 2)
           expect(err.message).to.eq('`cy.click()` cannot be called on a `<select>` element. Use `cy.select()` command instead to change the value.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/select')
 
@@ -2331,7 +2370,7 @@ describe('src/cy/commands/actions/click', () => {
 
       it('throws when provided invalid position', function (done) {
         cy.on('fail', (err) => {
-          expect(this.logs.length).to.eq(2)
+          assertLogLength(this.logs, 2)
           expect(err.message).to.eq('Invalid position argument: `foo`. Position may only be topLeft, top, topRight, left, center, right, bottomLeft, bottom, bottomRight.')
 
           done()
@@ -2379,7 +2418,7 @@ describe('src/cy/commands/actions/click', () => {
 
       it('does not log an additional log on failure', function (done) {
         cy.on('fail', () => {
-          expect(this.logs.length).to.eq(3)
+          assertLogLength(this.logs, 3)
 
           done()
         })
@@ -3256,7 +3295,7 @@ describe('src/cy/commands/actions/click', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
 
           done()
@@ -3694,7 +3733,7 @@ describe('src/cy/commands/actions/click', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
 
           done()
@@ -3710,7 +3749,7 @@ describe('src/cy/commands/actions/click', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(4)
+          assertLogLength(this.logs, 4)
           expect(lastLog.get('error')).to.eq(err)
           expect(err.message).to.include('`cy.rightclick()` failed because this element is not visible')
 

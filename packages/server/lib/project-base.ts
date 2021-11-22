@@ -6,6 +6,7 @@ import path from 'path'
 
 import browsers from './browsers'
 import pkg from '@packages/root'
+import { allowed } from '@packages/config'
 import { ServerCt } from './server-ct'
 import { SocketCt } from './socket-ct'
 import { SocketE2E } from './socket-e2e'
@@ -23,14 +24,14 @@ import system from './util/system'
 import user from './user'
 import { ensureProp } from './util/class-helpers'
 import { fs } from './util/fs'
-import settings from './util/settings'
+import * as settings from './util/settings'
 import plugins from './plugins'
 import specsUtil from './util/specs'
 import Watchers from './watchers'
 import devServer from './plugins/dev-server'
 import preprocessor from './plugins/preprocessor'
 import { SpecsStore } from './specs-store'
-import { checkSupportFile } from './project_utils'
+import { checkSupportFile, getDefaultConfigFilePath } from './project_utils'
 import type { LaunchArgs } from './open_project'
 
 // Cannot just use RuntimeConfigOptions as is because some types are not complete.
@@ -43,6 +44,7 @@ type ReceivedCypressOptions =
 export interface Cfg extends ReceivedCypressOptions {
   projectRoot: string
   proxyServer?: Cypress.RuntimeConfigOptions['proxyUrl']
+  exit?: boolean
   state?: {
     firstOpened?: number
     lastOpened?: number
@@ -54,7 +56,7 @@ type WebSocketOptionsCallback = (...args: any[]) => any
 export interface OpenProjectLaunchOptions {
   args?: LaunchArgs
 
-  configFile?: string | boolean
+  configFile?: string | false
   browsers?: Cypress.Browser[]
 
   // Callback to reload the Desktop GUI when cypress.json is changed.
@@ -213,6 +215,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     const [port, warning] = await this._server.open(cfg, {
       getCurrentBrowser: () => this.browser,
       getSpec: () => this.spec,
+      exit: this.options.args?.exit,
       onError: this.options.onError,
       onWarning: this.options.onWarning,
       shouldCorrelatePreRequests: this.shouldCorrelatePreRequests,
@@ -408,7 +411,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     // allowed config values to
     // prevent tampering with the
     // internals and breaking cypress
-    const allowedCfg = config.allowed(cfg)
+    const allowedCfg = allowed(cfg)
 
     const modifiedCfg = await plugins.init(allowedCfg, {
       projectRoot: this.projectRoot,
@@ -516,7 +519,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     projectRoot,
   }: {
     projectRoot: string
-    configFile?: string | boolean
+    configFile?: string | false
     onSettingsChanged?: false | (() => void)
   }) {
     // bail if we havent been told to
@@ -690,6 +693,12 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   }
 
   async initializeConfig (): Promise<Cfg> {
+    // set default for "configFile" if undefined
+    if (this.options.configFile === undefined
+  || this.options.configFile === null) {
+      this.options.configFile = await getDefaultConfigFilePath(this.projectRoot, !this.options.args?.runProject)
+    }
+
     let theCfg: Cfg = await config.get(this.projectRoot, this.options)
 
     if (theCfg.browsers) {

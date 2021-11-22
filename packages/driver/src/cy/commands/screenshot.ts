@@ -18,10 +18,10 @@ const getViewportWidth = (state) => {
   return Math.min(state('viewportWidth'), window.innerWidth)
 }
 
-const automateScreenshot = (state, options = {}) => {
+const automateScreenshot = (state, options: TakeScreenshotOptions = {}) => {
   const { runnable, timeout } = options
 
-  const titles = []
+  const titles: string[] = []
 
   // if this a hook then push both the current test title
   // and our own hook title
@@ -150,7 +150,7 @@ const takeFullPageScreenshot = (state, automationOptions) => {
 
   const resetScrollOverrides = scrollOverrides(win, doc)
 
-  const docHeight = $(doc).height()
+  const docHeight = $(doc).height() as number
   const viewportHeight = getViewportHeight(state)
   const numScreenshots = Math.ceil(docHeight / viewportHeight)
 
@@ -279,11 +279,23 @@ const getBlackout = ({ capture, blackout }) => {
   return isAppOnly({ capture }) ? blackout : []
 }
 
-const takeScreenshot = (Cypress, state, screenshotConfig, options = {}) => {
+// TODO: anys should be removed.
+type TakeScreenshotOptions = {
+  name?: string
+  subject?: any
+  simple?: boolean
+  testFailure?: boolean
+  runnable?: any
+  log?: any
+  timeout?: number
+}
+
+const takeScreenshot = (Cypress, state, screenshotConfig, options: TakeScreenshotOptions = {}) => {
   const {
     capture,
     padding,
     clip,
+    overwrite,
     disableTimersAndAnimations,
     onBeforeScreenshot,
     onAfterScreenshot,
@@ -293,7 +305,8 @@ const takeScreenshot = (Cypress, state, screenshotConfig, options = {}) => {
 
   const startTime = new Date()
 
-  const send = (event, props, resolve) => {
+  // TODO: is this ok to make `resolve` undefined?
+  const send = (event, props, resolve?) => {
     Cypress.action(`cy:${event}`, props, resolve)
   }
 
@@ -313,6 +326,7 @@ const takeScreenshot = (Cypress, state, screenshotConfig, options = {}) => {
       waitForCommandSynchronization: !isAppOnly(screenshotConfig),
       disableTimersAndAnimations,
       blackout: getBlackout(screenshotConfig),
+      overwrite,
     }
   }
 
@@ -321,6 +335,8 @@ const takeScreenshot = (Cypress, state, screenshotConfig, options = {}) => {
       if (disableTimersAndAnimations) {
         return cy.pauseTimers(true)
       }
+
+      return null
     })
     .then(() => {
       return sendAsync('before:screenshot', getOptions(true))
@@ -334,6 +350,8 @@ const takeScreenshot = (Cypress, state, screenshotConfig, options = {}) => {
       if (disableTimersAndAnimations) {
         return cy.pauseTimers(false)
       }
+
+      return null
     })
   }
 
@@ -353,6 +371,7 @@ const takeScreenshot = (Cypress, state, screenshotConfig, options = {}) => {
     },
     scaled: getShouldScale(screenshotConfig),
     blackout: getBlackout(screenshotConfig),
+    overwrite,
     startTime: startTime.toISOString(),
   })
 
@@ -408,7 +427,7 @@ export default function (Commands, Cypress, cy, state, config) {
 
     // if a screenshot has not been taken (by cy.screenshot()) in the test
     // that failed, we can bypass UI-changing and pixel-checking (simple: true)
-    // otheriwse, we need to do all the standard checks
+    // otherwise, we need to do all the standard checks
     // to make sure the UI is in the right place (simple: false)
     screenshotConfig.capture = 'runner'
 
@@ -421,7 +440,8 @@ export default function (Commands, Cypress, cy, state, config) {
   })
 
   Commands.addAll({ prevSubject: ['optional', 'element', 'window', 'document'] }, {
-    screenshot (subject, name, options = {}) {
+    // TODO: any -> Partial<Loggable & Timeoutable & ScreenshotOptions>
+    screenshot (subject, name, options: any = {}) {
       let userOptions = options
 
       if (_.isObject(name)) {
@@ -450,7 +470,7 @@ export default function (Commands, Cypress, cy, state, config) {
 
       const isWin = $dom.isWindow(subject)
 
-      let screenshotConfig = _.pick(options, 'capture', 'scale', 'disableTimersAndAnimations', 'blackout', 'waitForCommandSynchronization', 'padding', 'clip', 'onBeforeScreenshot', 'onAfterScreenshot')
+      let screenshotConfig: any = _.pick(options, 'capture', 'scale', 'disableTimersAndAnimations', 'overwrite', 'blackout', 'waitForCommandSynchronization', 'padding', 'clip', 'onBeforeScreenshot', 'onAfterScreenshot')
 
       screenshotConfig = $Screenshot.validate(screenshotConfig, 'screenshot', options._log)
       screenshotConfig = _.extend($Screenshot.getConfig(), screenshotConfig)

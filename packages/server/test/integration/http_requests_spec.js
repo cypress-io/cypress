@@ -30,7 +30,7 @@ const resolve = require(`${root}lib/util/resolve`)
 const { fs } = require(`${root}lib/util/fs`)
 const glob = require(`${root}lib/util/glob`)
 const CacheBuster = require(`${root}lib/util/cache_buster`)
-const Fixtures = require(`${root}test/support/helpers/fixtures`)
+const Fixtures = require('@tooling/system-tests/lib/fixtures')
 /**
  * @type {import('@packages/resolve-dist')}
  */
@@ -58,6 +58,23 @@ const removeWhitespace = function (c) {
 
 const cleanResponseBody = (body) => {
   return replaceAbsolutePaths(removeWhitespace(body))
+}
+
+function getHugeJsFile () {
+  const pathToHugeAppJs = Fixtures.path('server/libs/huge_app.js')
+
+  const getHugeFile = () => {
+    return rp('https://s3.amazonaws.com/internal-test-runner-assets.cypress.io/huge_app.js')
+    .then((resp) => {
+      return fs
+      .outputFileAsync(pathToHugeAppJs, resp)
+      .return(resp)
+    })
+  }
+
+  return fs
+  .readFileAsync(pathToHugeAppJs, 'utf8')
+  .catch(getHugeFile)
 }
 
 describe('Routes', () => {
@@ -146,6 +163,7 @@ describe('Routes', () => {
               specsStore: new SpecsStore({}, 'e2e'),
               createRoutes,
               testingType: 'e2e',
+              exit: false,
             })
             .spread(async (port) => {
               const automationStub = {
@@ -374,6 +392,21 @@ describe('Routes', () => {
           expect(configStr).to.include('version')
 
           expect(configStr).to.include(pkg.version)
+        })
+      })
+    })
+
+    it('sends exit config', function () {
+      return this.setup({ baseUrl: 'http://localhost:9999/app' })
+      .then(() => {
+        return this.rp('http://localhost:9999/__')
+        .then((res) => {
+          expect(res.statusCode).to.eq(200)
+
+          const base64Config = /Runner\.start\(.*, "(.*)"\)/.exec(res.body)[1]
+          const configStr = Buffer.from(base64Config, 'base64').toString()
+
+          expect(configStr).to.include('"exit":false')
         })
       })
     })
@@ -3300,20 +3333,7 @@ describe('Routes', () => {
         })
 
         it('does not die rewriting a huge JS file', function () {
-          const pathToHugeAppJs = Fixtures.path('server/libs/huge_app.js')
-
-          const getHugeFile = () => {
-            return rp('https://s3.amazonaws.com/internal-test-runner-assets.cypress.io/huge_app.js')
-            .then((resp) => {
-              return fs
-              .outputFileAsync(pathToHugeAppJs, resp)
-              .return(resp)
-            })
-          }
-
-          return fs
-          .readFileAsync(pathToHugeAppJs, 'utf8')
-          .catch(getHugeFile)
+          return getHugeJsFile()
           .then((hugeJsFile) => {
             nock(this.server._remoteOrigin)
             .get('/app.js')
@@ -3807,8 +3827,7 @@ describe('Routes', () => {
       })
 
       it('aborts the proxied request', function (done) {
-        fs
-        .readFileAsync(Fixtures.path('server/libs/huge_app.js'), 'utf8')
+        getHugeJsFile()
         .then((str) => {
           const server = http.createServer((req, res) => {
             // when the incoming message to our

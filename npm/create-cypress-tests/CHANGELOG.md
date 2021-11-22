@@ -1,3 +1,17 @@
+# [create-cypress-tests-v1.2.0](https://github.com/cypress-io/cypress/compare/create-cypress-tests-v1.1.3...create-cypress-tests-v1.2.0) (2021-11-10)
+
+
+### Features
+
+* **deps:** update dependency electron to v15 🌟 ([#18317](https://github.com/cypress-io/cypress/issues/18317)) ([3095d73](https://github.com/cypress-io/cypress/commit/3095d733e92527ffd67344c6899211e058ceefa3))
+
+# [create-cypress-tests-v1.1.3](https://github.com/cypress-io/cypress/compare/create-cypress-tests-v1.1.2...create-cypress-tests-v1.1.3) (2021-10-29)
+
+
+### Bug Fixes
+
+* revive type checker ([#18172](https://github.com/cypress-io/cypress/issues/18172)) ([af472b6](https://github.com/cypress-io/cypress/commit/af472b6419ecb2aec1abdb09df99b2fa5f56e033))
+
 # [create-cypress-tests-v1.1.2](https://github.com/cypress-io/cypress/compare/create-cypress-tests-v1.1.1...create-cypress-tests-v1.1.2) (2021-06-17)
 
 

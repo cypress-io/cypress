@@ -2,7 +2,7 @@ require('../spec_helper')
 
 const config = require(`${root}lib/config`)
 const files = require(`${root}lib/files`)
-const FixturesHelper = require(`${root}/test/support/helpers/fixtures`)
+const FixturesHelper = require('@tooling/system-tests/lib/fixtures')
 
 describe('lib/files', () => {
   beforeEach(function () {
@@ -41,6 +41,13 @@ describe('lib/files', () => {
       })
     })
 
+    // https://github.com/cypress-io/cypress/issues/1558
+    it('explicit null encoding is sent to driver as a Buffer', function () {
+      return files.readFile(this.projectRoot, 'tests/_fixtures/ascii.foo', { encoding: null }).then(({ contents }) => {
+        expect(contents).to.eql(Buffer.from('\n'))
+      })
+    })
+
     it('parses json to valid JS object', function () {
       return files.readFile(this.projectRoot, 'tests/_fixtures/users.json').then(({ contents }) => {
         expect(contents).to.eql([
@@ -71,6 +78,15 @@ describe('lib/files', () => {
       return files.writeFile(this.projectRoot, '.projects/write_file.txt', '', { encoding: 'ascii' }).then(() => {
         return files.readFile(this.projectRoot, '.projects/write_file.txt').then(({ contents }) => {
           expect(contents).to.equal('�')
+        })
+      })
+    })
+
+    // https://github.com/cypress-io/cypress/issues/1558
+    it('explicit null encoding is written exactly as received', function () {
+      return files.writeFile(this.projectRoot, '.projects/write_file.txt', Buffer.from(''), { encoding: null }).then(() => {
+        return files.readFile(this.projectRoot, '.projects/write_file.txt', { encoding: null }).then(({ contents }) => {
+          expect(contents).to.eql(Buffer.from(''))
         })
       })
     })

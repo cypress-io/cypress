@@ -6,7 +6,12 @@ import $errUtils from './error_utils'
 
 const SELECTOR_PRIORITIES = 'data-cy data-test data-testid id class tag attributes nth-child'.split(' ')
 
-const reset = () => {
+type Defaults = {
+  onElement: Cypress.SelectorPlaygroundDefaultsOptions['onElement'] | null
+  selectorPriority: Cypress.SelectorPlaygroundDefaultsOptions['selectorPriority']
+}
+
+const reset = (): Defaults => {
   return {
     onElement: null,
     selectorPriority: SELECTOR_PRIORITIES,
@@ -53,16 +58,25 @@ export default {
       })
     }
 
-    const { selectorPriority: priority, onElement } = props
+    const { selectorPriority, onElement } = props
 
-    if (priority) {
-      if (!_.isArray(priority)) {
-        $errUtils.throwErrByPath('selector_playground.defaults_invalid_priority', {
-          args: { arg: $utils.stringify(priority) },
+    if (selectorPriority) {
+      if (!_.isArray(selectorPriority)) {
+        $errUtils.throwErrByPath('selector_playground.defaults_invalid_priority_type', {
+          args: { arg: $utils.stringify(selectorPriority) },
         })
       }
+      // Validate that the priority is one of: "data-*", "id", "class", "tag", "attributes", "nth-child"
 
-      defaults.selectorPriority = priority
+      selectorPriority.forEach((priority) => {
+        if (!/^(data\-.*|id|class|tag|attributes|nth\-child)$/.test(priority)) {
+          $errUtils.throwErrByPath('selector_playground.defaults_invalid_priority', {
+            args: { arg: priority },
+          })
+        }
+      })
+
+      defaults.selectorPriority = selectorPriority
     }
 
     if (onElement) {

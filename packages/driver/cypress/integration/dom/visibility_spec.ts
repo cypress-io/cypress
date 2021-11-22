@@ -1,3 +1,4 @@
+// @ts-ignore
 const { $, dom } = Cypress
 
 describe('src/cypress/dom/visibility', () => {

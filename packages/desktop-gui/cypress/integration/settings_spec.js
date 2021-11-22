@@ -358,34 +358,52 @@ describe('Settings', () => {
   })
 
   describe('project id panel', () => {
-    beforeEach(function () {
-      this.openProject.resolve(this.config)
-      this.projectStatuses[0].id = this.config.projectId
-      this.getProjectStatus.resolve(this.projectStatuses[0])
+    context('with json file', () => {
+      beforeEach(function () {
+        this.openProject.resolve(this.config)
+        this.projectStatuses[0].id = this.config.projectId
+        this.getProjectStatus.resolve(this.projectStatuses[0])
 
-      this.goToSettings()
-      cy.contains('Project ID').click()
+        this.goToSettings()
+        cy.contains('Project ID').click()
+      })
+
+      it('displays project id section', function () {
+        cy.contains(this.config.projectId)
+        cy.percySnapshot()
+      })
+
+      it('shows tooltip on hover of copy to clipboard', () => {
+        cy.get('.action-copy').trigger('mouseover')
+        cy.get('.cy-tooltip').should('contain', 'Copy to clipboard')
+      })
+
+      it('copies project id config to clipboard', function () {
+        cy.get('.action-copy').click()
+        .then(() => {
+          const expectedJsonConfig = {
+            projectId: this.config.projectId,
+          }
+          const expectedCopyCommand = JSON.stringify(expectedJsonConfig, null, 2)
+
+          expect(this.ipc.setClipboardText).to.be.calledWith(expectedCopyCommand)
+        })
+      })
     })
 
-    it('displays project id section', function () {
-      cy.contains(this.config.projectId)
-      cy.percySnapshot()
-    })
+    context('with js file', () => {
+      beforeEach(function () {
+        this.openProject.resolve({ ...this.config, configFile: 'custom.cypress.js' })
+        this.projectStatuses[0].id = this.config.projectId
+        this.getProjectStatus.resolve(this.projectStatuses[0])
 
-    it('shows tooltip on hover of copy to clipboard', () => {
-      cy.get('.action-copy').trigger('mouseover')
-      cy.get('.cy-tooltip').should('contain', 'Copy to clipboard')
-    })
+        this.goToSettings()
+        cy.contains('Project ID').click()
+      })
 
-    it('copies project id config to clipboard', function () {
-      cy.get('.action-copy').click()
-      .then(() => {
-        const expectedJsonConfig = {
-          projectId: this.config.projectId,
-        }
-        const expectedCopyCommand = JSON.stringify(expectedJsonConfig, null, 2)
-
-        expect(this.ipc.setClipboardText).to.be.calledWith(expectedCopyCommand)
+      it('displays project id section', function () {
+        cy.get('[data-cy="project-id"] pre').contains('module.exports = {')
+        cy.percySnapshot()
       })
     })
   })
@@ -585,6 +603,17 @@ describe('Settings', () => {
       .should('contain', systemNodePath)
       .should('contain', systemNodeVersion)
       .should('not.contain', bundledNodeVersion)
+    })
+
+    it('should display an additional line when configFile is not JSON', function () {
+      const configFile = 'notjson.js'
+
+      this.navigateWithConfig({
+        configFile,
+      })
+
+      cy.contains(`Node.js Version (${bundledNodeVersion})`).click()
+      cy.get('.node-version li').should('contain', configFile)
     })
   })
 
@@ -789,12 +818,10 @@ describe('Settings', () => {
       })
     })
 
-    it('loads preferred editor and available editors', function () {
-      expect(this.ipc.getUserEditor).to.be.called
-    })
-
-    it('shows spinner', () => {
-      cy.get('.loading-editors')
+    it('loads preferred editor, available editors and shows spinner', () => {
+      cy.get('.loading-editors').then(function () {
+        expect(this.ipc.getUserEditor).to.be.called
+      })
     })
 
     describe('when editors load with preferred editor', () => {

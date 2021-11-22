@@ -6,7 +6,7 @@ import $errUtils from '../cypress/error_utils'
 import { USKeyboard } from '../cypress/UsKeyboardLayout'
 import $dom from '../dom'
 import $document from '../dom/document'
-import $elements from '../dom/elements'
+import $elements, { HTMLTextLikeInputElement } from '../dom/elements'
 // eslint-disable-next-line no-duplicate-imports
 import type { HTMLTextLikeElement } from '../dom/elements'
 import $selection from '../dom/selection'
@@ -803,7 +803,7 @@ export class Keyboard {
                   debug('setting element value', valToSet, activeEl)
 
                   return $elements.setNativeProp(
-                    activeEl as $elements.HTMLTextLikeInputElement,
+                    activeEl as HTMLTextLikeInputElement,
                     'value',
                     valToSet,
                   )
@@ -1312,10 +1312,6 @@ export class Keyboard {
   }
 }
 
-const create = (state) => {
-  return new Keyboard(state)
-}
-
 let _defaults
 
 const reset = () => {
@@ -1360,7 +1356,6 @@ const defaults = (props: Partial<Cypress.KeyboardDefaultsOptions>) => {
 }
 
 export default {
-  create,
   defaults,
   getConfig,
   getKeymap,

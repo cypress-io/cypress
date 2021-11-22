@@ -25,6 +25,7 @@ const debug = debugModule('cypress:server:browsers:chrome')
 const LOAD_EXTENSION = '--load-extension='
 const CHROME_VERSIONS_WITH_BUGGY_ROOT_LAYER_SCROLLING = '66 67'.split(' ')
 const CHROME_VERSION_INTRODUCING_PROXY_BYPASS_ON_LOOPBACK = 72
+const CHROME_VERSION_WITH_FPS_INCREASE = 89
 
 const CHROME_PREFERENCE_PATHS = {
   default: path.join('Default', 'Preferences'),
@@ -206,7 +207,7 @@ const _normalizeArgExtensions = function (extPath, args, pluginExtensions, brows
     userExtensions = userExtensions.concat(pluginExtensions)
   }
 
-  const extensions = [].concat(userExtensions, extPath, pathToTheme)
+  const extensions = ([] as any).concat(userExtensions, extPath, pathToTheme)
 
   args.push(LOAD_EXTENSION + _.compact(extensions).join(','))
 
@@ -260,7 +261,7 @@ const _connectToChromeRemoteInterface = function (port, onError, browserDisplayN
   })
 }
 
-const _maybeRecordVideo = async function (client, options) {
+const _maybeRecordVideo = async function (client, options, browserMajorVersion) {
   if (!options.onScreencastFrame) {
     debug('options.onScreencastFrame is false')
 
@@ -273,7 +274,7 @@ const _maybeRecordVideo = async function (client, options) {
     client.send('Page.screencastFrameAck', { sessionId: meta.sessionId })
   })
 
-  await client.send('Page.startScreencast', screencastOpts)
+  await client.send('Page.startScreencast', browserMajorVersion >= CHROME_VERSION_WITH_FPS_INCREASE ? screencastOpts() : screencastOpts(1))
 
   return client
 }
@@ -528,7 +529,7 @@ export = {
       await originalBrowserKill.apply(launchedBrowser, args)
     }
 
-    await this._maybeRecordVideo(criClient, options)
+    await this._maybeRecordVideo(criClient, options, browser.majorVersion)
     await this._navigateUsingCRI(criClient, url)
     await this._handleDownloads(criClient, options.downloadsFolder, automation)
 

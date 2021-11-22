@@ -9,8 +9,8 @@ const task = require(`${root}../../lib/plugins/child/task`)
 const util = require(`${root}../../lib/plugins/util`)
 const resolve = require(`${root}../../lib/util/resolve`)
 const browserUtils = require(`${root}../../lib/browsers/utils`)
-const Fixtures = require(`${root}../../test/support/helpers/fixtures`)
-const tsNodeUtil = require(`${root}../../lib/plugins/child/ts_node`)
+const Fixtures = require('@tooling/system-tests/lib/fixtures')
+const tsNodeUtil = require(`${root}../../lib/util/ts_node`)
 
 const runPlugins = require(`${root}../../lib/plugins/child/run_plugins`)
 

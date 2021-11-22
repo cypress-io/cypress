@@ -1,10 +1,10 @@
-const e2e = require('../support/helpers/e2e').default
+const systemTests = require('@tooling/system-tests/lib/system-tests').default
 
 // https://github.com/cypress-io/cypress/issues/4313
 context('cy.visit performance tests', function () {
   this.retries(3)
 
-  e2e.setup({
+  systemTests.setup({
     servers: {
       port: 3434,
       onServer (app) {
@@ -27,7 +27,7 @@ context('cy.visit performance tests', function () {
     return stdout.replace(/^\d+%\s+of visits to [^\s]+ finished in less than.*$/gm, 'histogram line')
   }
 
-  e2e.it('passes', {
+  systemTests.it('passes', {
     onStdout,
     spec: 'fast_visit_spec.js',
     snapshot: true,

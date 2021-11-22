@@ -1,7 +1,6 @@
 /* eslint-disable no-restricted-properties */
 require('../spec_helper')
 
-const R = require('ramda')
 const _ = require('lodash')
 const path = require('path')
 const EE = require('events')
@@ -9,7 +8,7 @@ const http = require('http')
 const Promise = require('bluebird')
 const electron = require('electron')
 const commitInfo = require('@cypress/commit-info')
-const Fixtures = require('../support/helpers/fixtures')
+const Fixtures = require('@tooling/system-tests/lib/fixtures')
 const snapshot = require('snap-shot-it')
 const stripAnsi = require('strip-ansi')
 const debug = require('debug')('test')
@@ -17,6 +16,8 @@ const pkg = require('@packages/root')
 const detect = require('@packages/launcher/lib/detect')
 const launch = require('@packages/launcher/lib/browsers')
 const extension = require('@packages/extension')
+const v = require('@packages/config/lib/validation')
+
 const argsUtil = require(`${root}lib/util/args`)
 const { fs } = require(`${root}lib/util/fs`)
 const ciProvider = require(`${root}lib/util/ci_provider`)
@@ -44,7 +45,6 @@ const browserUtils = require(`${root}lib/browsers/utils`)
 const chromeBrowser = require(`${root}lib/browsers/chrome`)
 const { openProject } = require(`${root}lib/open_project`)
 const env = require(`${root}lib/util/env`)
-const v = require(`${root}lib/util/validation`)
 const system = require(`${root}lib/util/system`)
 const appData = require(`${root}lib/util/app_data`)
 const electronApp = require('../../lib/util/electron-app')
@@ -108,6 +108,7 @@ describe('lib/cypress', () => {
   require('mocha-banner').register()
 
   beforeEach(function () {
+    process.chdir(previousCwd)
     this.timeout(8000)
 
     cache.__removeSync()
@@ -499,7 +500,7 @@ describe('lib/cypress', () => {
         ])
       }).each(ensureDoesNotExist)
       .then(() => {
-        this.expectExitWithErr('CONFIG_FILE_NOT_FOUND', this.pristinePath)
+        this.expectExitWithErr('NO_DEFAULT_CONFIG_FILE_FOUND', this.pristinePath)
       })
     })
 
@@ -839,17 +840,18 @@ describe('lib/cypress', () => {
     // also make sure we test the rest of the integration functionality
     // for headed errors! <-- not unit tests, but integration tests!
     it('logs error and exits when project folder has read permissions only and cannot write cypress.json', function () {
-      // test disabled if running as root - root can write all things at all times
+      // test disabled if running as root (such as inside docker) - root can write all things at all times
       if (process.geteuid() === 0) {
         return
       }
 
       const permissionsPath = path.resolve('./permissions')
-
       const cypressJson = path.join(permissionsPath, 'cypress.json')
 
-      return fs.outputFileAsync(cypressJson, '{}')
+      return fs.mkdirAsync(permissionsPath)
       .then(() => {
+        return fs.outputFileAsync(cypressJson, '{}')
+      }).then(() => {
         // read only
         return fs.chmodAsync(permissionsPath, '555')
       }).then(() => {
@@ -857,9 +859,9 @@ describe('lib/cypress', () => {
       }).then(() => {
         return fs.chmodAsync(permissionsPath, '777')
       }).then(() => {
-        return fs.removeAsync(permissionsPath)
-      }).then(() => {
-        this.expectExitWithErr('ERROR_READING_FILE', path.join(permissionsPath, 'cypress.json'))
+        this.expectExitWithErr('ERROR_WRITING_FILE', permissionsPath)
+      }).finally(() => {
+        return fs.rmdir(permissionsPath, { recursive: true })
       })
     })
 
@@ -1052,7 +1054,7 @@ describe('lib/cypress', () => {
 
             // when we work with the browsers we set a few extra flags
             const chrome = _.find(TYPICAL_BROWSERS, { name: 'chrome' })
-            const launchedChrome = R.merge(chrome, {
+            const launchedChrome = _.defaults({}, chrome, {
               isHeadless: true,
               isHeaded: false,
             })

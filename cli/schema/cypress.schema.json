@@ -7,6 +7,7 @@
       "properties": {
         "baseUrl": {
           "type": "string",
+          "default": null,
           "description": "Url used as prefix for cy.visit() or cy.request() command’s url. Example http://localhost:3030 or https://test.my-domain.com"
         },
         "env": {
@@ -43,6 +44,11 @@
           "type": "object",
           "default": null,
           "description": "The reporter options used. Supported options depend on the reporter. See https://on.cypress.io/reporters#Reporter-Options"
+        },
+        "slowTestThreshold": {
+          "type": "number",
+          "default": 10000,
+          "description": "Slow test threshold in milliseconds. Only affects the visual output of some reporters. For example, the spec reporter will display the test time in yellow if over the threshold. See https://on.cypress.io/configuration#Timeouts"
         },
         "testFiles": {
           "type": [
@@ -239,8 +245,8 @@
             "system",
             "bundled"
           ],
-          "default": "bundled",
-          "description": "If set to 'system', Cypress will try to find a Node.js executable on your path to use when executing your plugins. Otherwise, Cypress will use the Node version bundled with Cypress."
+          "default": "system",
+          "description": "DEPRECATED: If set to 'bundled', Cypress will use the Node version bundled with Cypress. Otherwise, Cypress will use the Node version that was used to launch the Cypress. This Node version is used when executing your plugins file and building spec files."
         },
         "experimentalInteractiveRunEvents": {
           "type": "boolean",

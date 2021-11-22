@@ -92,6 +92,10 @@ declare namespace CypressCommandLine {
      */
     reporterOptions: any
     /**
+     * Slow test threshold in milliseconds. Only affects the visual output of some reporters. For example, the spec reporter will display the test time in yellow if over the threshold.
+     */
+    slowTestThreshold: number
+    /**
      * Specify the specs to run
      */
     spec: string
@@ -377,6 +381,21 @@ declare module 'cypress' {
      * Cypress does
      */
     cli: CypressCommandLine.CypressCliParser
+
+    /**
+     * Provides automatic code completion for configuration in many popular code editors.
+     * While it's not strictly necessary for Cypress to parse your configuration, we
+     * recommend wrapping your config object with `defineConfig()`
+     * @example
+     * module.exports = defineConfig({
+     *   viewportWith: 400
+     * })
+     *
+     * @see ../types/cypress-npm-api.d.ts
+     * @param {Cypress.ConfigOptions} config
+     * @returns {Cypress.ConfigOptions} the configuration passed in parameter
+     */
+    defineConfig(config: Cypress.ConfigOptions): Cypress.ConfigOptions
   }
 
   // export Cypress NPM module interface

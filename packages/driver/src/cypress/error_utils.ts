@@ -79,7 +79,7 @@ const isSpecError = (spec, err) => {
   return _.includes(err.stack, spec.relative)
 }
 
-const mergeErrProps = (origErr, ...newProps) => {
+const mergeErrProps = (origErr: Error, ...newProps) => {
   return _.extend(origErr, ...newProps)
 }
 
@@ -205,7 +205,7 @@ const throwErr = (err, options = {}) => {
   let { onFail, errProps } = options
 
   // assume onFail is a command if
-  //# onFail is present and isnt a function
+  //# onFail is present and isn't a function
   if (onFail && !_.isFunction(onFail)) {
     const command = onFail
 
@@ -230,12 +230,14 @@ const throwErr = (err, options = {}) => {
 const throwErrByPath = (errPath, options = {}) => {
   const err = errByPath(errPath, options.args)
 
-  // gets rid of internal stack lines that just build the error
-  if (Error.captureStackTrace) {
+  if (options.stack) {
+    err.stack = $stackUtils.replacedStack(err, options.stack)
+  } else if (Error.captureStackTrace) {
+    // gets rid of internal stack lines that just build the error
     Error.captureStackTrace(err, throwErrByPath)
   }
 
-  return throwErr(err, options)
+  throwErr(err, options)
 }
 
 const warnByPath = (errPath, options = {}) => {
@@ -262,6 +264,8 @@ export class InternalCypressError extends Error {
 }
 
 export class CypressError extends Error {
+  docsUrl?: string
+
   constructor (message) {
     super(message)
 
@@ -283,13 +287,13 @@ const getUserInvocationStackFromError = (err) => {
   return err.userInvocationStack
 }
 
-const internalErr = (err) => {
+const internalErr = (err): InternalCypressError => {
   const newErr = new InternalCypressError(err.message)
 
   return mergeErrProps(newErr, err)
 }
 
-const cypressErr = (err) => {
+const cypressErr = (err): CypressError => {
   const newErr = new CypressError(err.message)
 
   return mergeErrProps(newErr, err)
@@ -339,7 +343,7 @@ const docsUrlByParents = (msgPath) => {
   return docsUrlByParents(msgPath)
 }
 
-const errByPath = (msgPath, args) => {
+const errByPath = (msgPath, args?) => {
   let msgValue = _.get($errorMessages, msgPath)
 
   if (!msgValue) {
@@ -539,6 +543,7 @@ const logError = (Cypress, handlerType, err, handled = false) => {
 }
 
 export default {
+  stackWithReplacedProps,
   appendErrMsg,
   createUncaughtException,
   cypressErr,

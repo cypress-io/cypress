@@ -1,3 +1,24 @@
+# [@cypress/schematic-v1.6.0](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v1.5.3...@cypress/schematic-v1.6.0) (2021-11-10)
+
+
+### Features
+
+* **deps:** update dependency electron to v15 🌟 ([#18317](https://github.com/cypress-io/cypress/issues/18317)) ([3095d73](https://github.com/cypress-io/cypress/commit/3095d733e92527ffd67344c6899211e058ceefa3))
+
+# [@cypress/schematic-v1.5.3](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v1.5.2...@cypress/schematic-v1.5.3) (2021-10-29)
+
+
+### Bug Fixes
+
+* remove outdated registry link ([#18710](https://github.com/cypress-io/cypress/issues/18710)) ([e2a869d](https://github.com/cypress-io/cypress/commit/e2a869d2a984abb6703aec966dd9124ee693b8c1))
+
+# [@cypress/schematic-v1.5.2](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v1.5.1...@cypress/schematic-v1.5.2) (2021-10-29)
+
+
+### Bug Fixes
+
+* revive type checker ([#18172](https://github.com/cypress-io/cypress/issues/18172)) ([af472b6](https://github.com/cypress-io/cypress/commit/af472b6419ecb2aec1abdb09df99b2fa5f56e033))
+
 # [@cypress/schematic-v1.5.1](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v1.5.0...@cypress/schematic-v1.5.1) (2021-09-10)
 
 

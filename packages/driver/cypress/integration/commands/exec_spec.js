@@ -1,3 +1,4 @@
+const { assertLogLength } = require('../../support/utils')
 const { _, Promise } = Cypress
 
 describe('src/cy/commands/exec', () => {
@@ -142,7 +143,7 @@ describe('src/cy/commands/exec', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
           expect(err.message).to.eq('`cy.exec()` must be passed a non-empty string as its 1st argument. You passed: \'\'.')
@@ -158,7 +159,7 @@ describe('src/cy/commands/exec', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
           expect(err.message).to.eq('`cy.exec()` must be passed a non-empty string as its 1st argument. You passed: \'3\'.')
@@ -174,7 +175,7 @@ describe('src/cy/commands/exec', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
           expect(err.message).to.eq('`cy.exec()` must be passed a non-empty string as its 1st argument. You passed: \'\'.')
@@ -192,7 +193,7 @@ describe('src/cy/commands/exec', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
 
@@ -211,7 +212,7 @@ describe('src/cy/commands/exec', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
           expect(err.message).to.eq('`cy.exec(\'ls\')` timed out after waiting `50ms`.')
@@ -229,7 +230,7 @@ describe('src/cy/commands/exec', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
 

@@ -566,17 +566,17 @@ describe('studio record', () => {
         getFrame().find('p').click()
 
         verifyCommandLog(1, {
-          selector: '[data-cy=btn1]',
+          selector: '[data-cy="btn1"]',
           name: 'click',
         })
 
         verifyCommandLog(2, {
-          selector: '[data-test=btn2]',
+          selector: '[data-test="btn2"]',
           name: 'click',
         })
 
         verifyCommandLog(3, {
-          selector: '[data-testid=btn3]',
+          selector: '[data-testid="btn3"]',
           name: 'click',
         })
 

@@ -274,7 +274,7 @@ describe('per-test config', () => {
     })
   })
 
-  describe('in mulitple nested suites', () => {
+  describe('in multiple nested suites', () => {
     describe('config in suite', {
       foo: true,
     }, () => {
@@ -295,7 +295,7 @@ describe('per-test config', () => {
     })
   })
 
-  describe('emtpy config', {}, () => {
+  describe('empty config', {}, () => {
     it('empty config in test', {}, () => {
       expect(true).ok
     })

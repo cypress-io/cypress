@@ -1,3 +1,4 @@
+const { assertLogLength } = require('../../../support/utils')
 const { _, $ } = Cypress
 
 describe('src/cy/commands/actions/select', () => {
@@ -109,6 +110,14 @@ describe('src/cy/commands/actions/select', () => {
     it('can select an array of same value and index', () => {
       cy.get('select[name=movies]').select(['thc', 1]).then(($select) => {
         expect($select.val()).to.deep.eq(['thc'])
+      })
+    })
+
+    it('unselects all options if called with empty array', () => {
+      cy.get('select[name=movies]').select(['apoc', 'br'])
+
+      cy.get('select[name=movies]').select([]).then(($select) => {
+        expect($select.val()).to.deep.eq([])
       })
     })
 
@@ -505,17 +514,6 @@ describe('src/cy/commands/actions/select', () => {
         cy.get('select[name=foods]').select('')
       })
 
-      it('throws invalid array argument error when called with empty array', (done) => {
-        cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.select()` must be passed an array containing only strings and/or numbers. You passed: `[]`')
-          expect(err.docsUrl).to.eq('https://on.cypress.io/select')
-
-          done()
-        })
-
-        cy.get('select[name=foods]').select([])
-      })
-
       it('throws invalid array argument error when called with invalid array', (done) => {
         cy.on('fail', (err) => {
           expect(err.message).to.include('`cy.select()` must be passed an array containing only strings and/or numbers. You passed: `[true,false]`')
@@ -589,7 +587,7 @@ describe('src/cy/commands/actions/select', () => {
 
       it('does not log an additional log on failure', function (done) {
         cy.on('fail', () => {
-          expect(this.logs.length).to.eq(3)
+          assertLogLength(this.logs, 3)
 
           done()
         })
@@ -600,7 +598,7 @@ describe('src/cy/commands/actions/select', () => {
       it('only logs once on failure', function (done) {
         cy.on('fail', (err) => {
           // 2 logs, 1 for cy.get, 1 for cy.select
-          expect(this.logs.length).to.eq(2)
+          assertLogLength(this.logs, 2)
 
           done()
         })
@@ -705,7 +703,7 @@ describe('src/cy/commands/actions/select', () => {
         })
 
         cy.get('#select-maps').select('de_dust2').then(function () {
-          expect(this.logs.length).to.eq(2)
+          assertLogLength(this.logs, 2)
           expect(types.length).to.eq(1)
         })
       })

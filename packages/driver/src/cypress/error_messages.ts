@@ -78,7 +78,7 @@ const getRedirects = (obj, phrase, listIndentSize) => {
 const getHttpProps = (fields: { value: string, key: string }[] = []) => {
   return _
   .chain(fields)
-  .reduce(formatProp, [])
+  .reduce<string[]>(formatProp, [])
   .join('\n')
   .value()
 }
@@ -242,6 +242,17 @@ export default {
     invalid_2nd_arg: {
       message: `${cmd('clock')} only accepts an array of function names or an \`options\` object for its second argument. You passed: \`{{arg}}\``,
       docsUrl: 'https://on.cypress.io/clock',
+    },
+  },
+
+  config: {
+    invalid_argument: {
+      message: `Setting the config via ${cmd('Cypress.config')} failed with the following validation error:\n\n{{errMsg}}`,
+      docsUrl: 'https://on.cypress.io/config',
+    },
+    'invalid_test_override': {
+      message: `The config override passed to your test has the following validation error:\n\n{{errMsg}}`,
+      docsUrl: 'https://on.cypress.io/config',
     },
   },
 
@@ -803,6 +814,10 @@ export default {
       message: 'Could not find a command for: `{{name}}`.\n\nAvailable commands are: {{cmds}}.\n',
       docsUrl: 'https://on.cypress.io/api',
     },
+    invalid_new_command: {
+      message: '`Cypress.Commands.add()` is used to create new commands, but `{{name}}` is an existing Cypress command.\n\nPlease use `Cypress.Commands.overwrite()` if you would like to overwrite an existing command.\n',
+      docsUrl: 'https://on.cypress.io/custom-commands',
+    },
     invalid_overwrite: {
       message: 'Cannot overwite command for: `{{name}}`. An existing command does not exist by that name.',
       docsUrl: 'https://on.cypress.io/api',
@@ -1095,11 +1110,7 @@ export default {
       message: stripIndent`\
         ${cmd('request')} was invoked with \`{ failOnStatusCode: false, retryOnStatusCodeFailure: true }\`.
 
-        These options are incompatible with each other.
-
-        - To retry on non-2xx status codes, pass \`{ failOnStatusCode: true, retryOnStatusCodeFailure: true }\`.
-        - To not retry on non-2xx status codes, pass \`{ failOnStatusCode: true, retryOnStatusCodeFailure: true }\`.
-        - To fail on non-2xx status codes without retrying (the default behavior), pass \`{ failOnStatusCode: true, retryOnStatusCodeFailure: false }\``,
+        \`failOnStatusCode\` must be \`true\` if \`retryOnStatusCodeFailure\` is \`true\`.`,
       docsUrl: 'https://on.cypress.io/request',
     },
     auth_invalid: {
@@ -1432,8 +1443,12 @@ export default {
       message: '`Cypress.SelectorPlayground.defaults()` must be called with an object. You passed: `{{arg}}`',
       docsUrl: 'https://on.cypress.io/selector-playground-api',
     },
-    defaults_invalid_priority: {
+    defaults_invalid_priority_type: {
       message: '`Cypress.SelectorPlayground.defaults()` called with invalid `selectorPriority` property. It must be an array. You passed: `{{arg}}`',
+      docsUrl: 'https://on.cypress.io/selector-playground-api',
+    },
+    defaults_invalid_priority: {
+      message: '`Cypress.SelectorPlayground.defaults()` called with invalid `selectorPriority` property. It must be one of: `data-*`, `id`, `class`, `tag`, `attributes`, `nth-child`. You passed: `{{arg}}`. Consider using the `onElement` property if a specific selector is desired.',
       docsUrl: 'https://on.cypress.io/selector-playground-api',
     },
     defaults_invalid_on_element: {

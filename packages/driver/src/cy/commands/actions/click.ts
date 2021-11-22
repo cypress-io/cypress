@@ -33,10 +33,21 @@ const formatMouseEvents = (events) => {
   })
 }
 
+// TODO: remove any, Function, Record
+type MouseActionOptions = {
+  subject: any
+  positionOrX: string | number
+  y: number
+  userOptions: Record<string, any>
+  onReady: Function
+  onTable: Function
+  defaultOptions?: Record<string, any>
+}
+
 export default (Commands, Cypress, cy, state, config) => {
   const { mouse, keyboard } = cy.devices
 
-  const mouseAction = (eventName, { subject, positionOrX, y, userOptions, onReady, onTable, defaultOptions }) => {
+  const mouseAction = (eventName, { subject, positionOrX, y, userOptions, onReady, onTable, defaultOptions }: MouseActionOptions) => {
     let position
     let x
 
@@ -54,7 +65,6 @@ export default (Commands, Cypress, cy, state, config) => {
       errorOnSelect: true,
       waitForAnimations: config('waitForAnimations'),
       animationDistanceThreshold: config('animationDistanceThreshold'),
-      scrollBehavior: config('scrollBehavior'),
       ctrlKey: false,
       controlKey: false,
       altKey: false,
@@ -172,13 +182,15 @@ export default (Commands, Cypress, cy, state, config) => {
       // properties like `total` and `_retries` are mutated by
       // $actionability.verify and retrying, but each click should
       // have its own full timeout
-      const individualOptions = { ... options }
+      const individualOptions = {
+        ...options,
+      }
 
       // must use callbacks here instead of .then()
       // because we're issuing the clicks synchronously
       // once we establish the coordinates and the element
       // passes all of the internal checks
-      return $actionability.verify(cy, $el, individualOptions, {
+      return $actionability.verify(cy, $el, config, individualOptions, {
         onScroll ($el, type) {
           return Cypress.action('cy:scrolled', $el, type)
         },
