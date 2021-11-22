@@ -1,3 +1,4 @@
+const { assertLogLength } = require('../../support/utils')
 const { _, $ } = Cypress
 
 describe('src/cy/commands/angular', () => {
@@ -198,7 +199,7 @@ describe('src/cy/commands/angular', () => {
           .ng('repeater', 'foo in foos').should('have.length', 2)
           .url().should('include', ':')
           .then(() => {
-            expect(this.logs.length).to.eq(2)
+            assertLogLength(this.logs, 2)
             expect(this.logs[0].get('state')).to.eq('passed')
             expect(this.logs[1].get('state')).to.eq('passed')
           })

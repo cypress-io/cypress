@@ -2,9 +2,13 @@ export * from './cache'
 
 export * from './constants'
 
+export * from './devicePreferences'
+
 export * from './driver'
 
 export * from './spec'
+
+export * from './editors'
 
 export type {
   AllPackages,
@@ -32,3 +36,5 @@ export {
 export * from './server'
 
 export * from './storybook'
+
+export * from './warning'

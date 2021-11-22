@@ -35,6 +35,10 @@ ctSpecListWidth
 firstOpened
 lastOpened
 promptsShown
+watchForSpecChange
+useDarkSidebar
+preferredEditorBinary
+
 `.trim().split(/\s+/)
 
 const formStatePath = (projectRoot) => {

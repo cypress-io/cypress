@@ -1,4 +1,4 @@
-import type { CloudUser } from '../generated/test-cloud-graphql-types.gen'
+import type { AuthenticatedUserShape } from '@packages/data-context/src/data'
 import type {
   WizardStep,
   CurrentProject,
@@ -8,6 +8,7 @@ import type {
   TestingTypeEnum,
   GlobalProject,
   VersionData,
+  LocalSettings,
 } from '../generated/test-graphql-types.gen'
 import { resetTestNodeIdx } from './clientTestUtils'
 import { stubBrowsers } from './stubgql-Browser'
@@ -24,6 +25,7 @@ export interface ClientTestContext {
   }
   versions: VersionData
   isAuthBrowserOpened: boolean
+  localSettings: LocalSettings
   wizard: {
     step: WizardStep
     canNavigateForward: boolean
@@ -35,9 +37,9 @@ export interface ClientTestContext {
     allBundlers: WizardBundler[]
     history: WizardStep[]
     chosenBrowser: null
-    browserErrorMessage: null
+    warnings: []
   }
-  user: Partial<CloudUser> | null
+  user: AuthenticatedUserShape | null
   cloudTypes: typeof cloudTypes
   __mockPartial: any
 }
@@ -85,10 +87,33 @@ export function makeClientTestContext (): ClientTestContext {
       allBundlers,
       history: ['welcome'],
       chosenBrowser: null,
-      browserErrorMessage: null,
+      warnings: [],
     },
     user: null,
     cloudTypes,
+    localSettings: {
+      __typename: 'LocalSettings',
+      preferences: {
+        __typename: 'LocalSettingsPreferences',
+        autoScrollingEnabled: true,
+        useDarkSidebar: true,
+        watchForSpecChange: true,
+      },
+      availableEditors: [
+        {
+          __typename: 'Editor',
+          id: 'code',
+          name: 'VS Code',
+          binary: 'code',
+        },
+        {
+          __typename: 'Editor',
+          id: 'vim',
+          name: 'Vim',
+          binary: 'vim',
+        },
+      ],
+    },
     __mockPartial: {},
   }
 }

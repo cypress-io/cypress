@@ -1,4 +1,4 @@
-import { BUNDLERS, FoundBrowser, FoundSpec, FullConfig, Preferences } from '@packages/types'
+import { BUNDLERS, FoundBrowser, FoundSpec, FullConfig, Preferences, DevicePreferences, devicePreferenceDefaults, Editor, Warning } from '@packages/types'
 import type { NexusGenEnums, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
 import type { BrowserWindow } from 'electron'
 import type { ChildProcess } from 'child_process'
@@ -19,9 +19,25 @@ export interface DevStateShape {
   refreshState: null | string
 }
 
+export interface LocalSettingsDataShape {
+  refreshing: Promise<Editor[]> | null
+  availableEditors: Editor[]
+  preferences: DevicePreferences
+}
+
 export interface ConfigChildProcessShape {
+  /**
+   * Child process executing the config & sourcing plugin events
+   */
   process: ChildProcess
+  /**
+   * Keeps track of which plugins we have executed in the current config process
+   */
   executedPlugins: null | 'e2e' | 'ct'
+  /**
+   * Config from the initial module.exports
+   */
+  resolvedBaseConfig: Promise<Cypress.ConfigOptions>
 }
 
 export interface ActiveProjectShape extends ProjectShape {
@@ -32,9 +48,10 @@ export interface ActiveProjectShape extends ProjectShape {
   isE2EConfigured: Maybe<boolean>
   specs?: FoundSpec[]
   config: Promise<FullConfig> | null
-  configChildProcess: ConfigChildProcessShape | null
-  preferences?: Preferences| null
+  configChildProcess?: ConfigChildProcessShape | null
+  preferences?: Preferences | null
   browsers: FoundBrowser[] | null
+  isMissingConfigFile: boolean
 }
 
 export interface AppDataShape {
@@ -42,6 +59,8 @@ export interface AppDataShape {
   projects: ProjectShape[]
   currentTestingType: Maybe<TestingTypeEnum>
   refreshingBrowsers: Promise<FoundBrowser[]> | null
+  refreshingNodePath: Promise<string> | null
+  nodePath: string | null
 }
 
 export interface WizardDataShape {
@@ -54,7 +73,7 @@ export interface WizardDataShape {
   chosenLanguage: NexusGenEnums['CodeLanguageEnum']
   chosenManualInstall: boolean
   chosenBrowser: FoundBrowser | null
-  browserErrorMessage: string | null
+  warnings: Warning[]
 }
 
 export interface ElectronShape {
@@ -70,6 +89,7 @@ export interface BaseErrorDataShape {
 export interface CoreDataShape {
   baseError: BaseErrorDataShape | null
   dev: DevStateShape
+  localSettings: LocalSettingsDataShape
   app: AppDataShape
   currentProject: ActiveProjectShape | null
   wizard: WizardDataShape
@@ -92,6 +112,13 @@ export function makeCoreData (): CoreDataShape {
       refreshingBrowsers: null,
       browsers: null,
       projects: [],
+      refreshingNodePath: null,
+      nodePath: null,
+    },
+    localSettings: {
+      availableEditors: [],
+      preferences: devicePreferenceDefaults,
+      refreshing: null,
     },
     isAuthBrowserOpened: false,
     currentProject: null,
@@ -105,7 +132,7 @@ export function makeCoreData (): CoreDataShape {
       allBundlers: BUNDLERS,
       history: ['welcome'],
       chosenBrowser: null,
-      browserErrorMessage: null,
+      warnings: [],
     },
     user: null,
     electron: {

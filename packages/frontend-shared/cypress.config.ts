@@ -18,6 +18,14 @@ export default defineConfig({
   'componentFolder': 'src',
   'component': {
     'testFiles': '**/*.spec.{js,ts,tsx,jsx}',
+    devServer (cypressConfig) {
+      const { startDevServer } = require('@cypress/vite-dev-server')
+
+      return startDevServer({
+        options: cypressConfig,
+        viteConfig: require('./vite.config'),
+      })
+    },
   },
   'e2e': {
     'supportFile': 'cypress/e2e/support/e2eSupport.ts',

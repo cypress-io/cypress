@@ -1,12 +1,17 @@
 {
 	// To see these extensions in VS Code:
-	// 1. Open the Command Palette (Ctrl+Shift+P)
+	// 1. Open the Command Palette:
+	//      - Non-Mac Users: (Ctrl+Shift+P)
+	//      - Mac Users: (Cmd+Shift+P)
 	// 2. Select "Extensions: Show Recommended Extensions"
 
 	// See https://go.microsoft.com/fwlink/?LinkId=827846 to learn about workspace recommendations.
 
 	// List of extensions which are recommended for Cypress contributors using VS Code:
 	"recommendations": [
+		// Name: Apollo GraphQL
+		// Description: Rich editor support for GraphQL client and server development that seamlessly integrates with the Apollo platform
+		"apollographql.vscode-apollo",
 		// Name: ESLint
 		// Description: Integrates ESLint JavaScript into VS Code.
 		"dbaeumer.vscode-eslint",

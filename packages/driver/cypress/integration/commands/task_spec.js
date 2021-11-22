@@ -1,4 +1,6 @@
+const { assertLogLength } = require('../../support/utils')
 const { _, Promise } = Cypress
+const path = require('path')
 
 describe('src/cy/commands/task', () => {
   context('#task', {
@@ -138,7 +140,7 @@ describe('src/cy/commands/task', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
           expect(err.message).to.eq('`cy.task()` must be passed a non-empty string as its 1st argument. You passed: ``.')
@@ -154,7 +156,7 @@ describe('src/cy/commands/task', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
           expect(err.message).to.eq('`cy.task()` must be passed a non-empty string as its 1st argument. You passed: `3`.')
@@ -170,7 +172,7 @@ describe('src/cy/commands/task', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
           expect(err.message).to.eq('`cy.task()` must be passed a non-empty string as its 1st argument. You passed: ``.')
@@ -188,7 +190,7 @@ describe('src/cy/commands/task', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
 
@@ -205,11 +207,11 @@ describe('src/cy/commands/task', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
 
-          expect(err.message).to.eq(`\`cy.task('bar')\` failed with the following error:\n\nThe task 'bar' was not handled in the plugins file. The following tasks are registered: return:arg, arg:is:undefined, wait, create:long:file\n\nFix this in your plugins file here:\n${Cypress.config('pluginsFile')}`)
+          expect(err.message).to.eq(`\`cy.task('bar')\` failed with the following error:\n\nThe task 'bar' was not handled in the setupNodeEvents method. The following tasks are registered: return:arg, arg:is:undefined, wait, create:long:file\n\nFix this in your setupNodeEvents method here:\n${path.join(Cypress.config('projectRoot'), Cypress.config('configFile'))}`)
 
           done()
         })
@@ -223,7 +225,7 @@ describe('src/cy/commands/task', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
           expect(err.message).to.eq('`cy.task(\'foo\')` timed out after waiting `50ms`.')
@@ -241,7 +243,7 @@ describe('src/cy/commands/task', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
 

@@ -1,4 +1,4 @@
-import type { CodeGenType, MutationAddProjectArgs, MutationAppCreateConfigFileArgs, MutationSetProjectPreferencesArgs, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
+import type { CodeGenType, MutationAddProjectArgs, MutationSetProjectPreferencesArgs, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
 import type { FindSpecs, FoundBrowser, FoundSpec, FullConfig, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions, Preferences, SettingsOptions } from '@packages/types'
 import path from 'path'
 import type { ActiveProjectShape, ProjectShape } from '../data/coreDataShape'
@@ -26,7 +26,10 @@ export interface ProjectApiShape {
   clearProjectPreferences(projectTitle: string): Promise<unknown>
   clearAllProjectPreferences(): Promise<unknown>
   closeActiveProject(): Promise<unknown>
-  error(type: string, ...args: any): Error
+  error: {
+    throw: (type: string, ...args: any) => Error
+    get(type: string, ...args: any): Error & { code: string, isCypressErr: boolean}
+  }
 }
 
 export class ProjectActions {
@@ -37,7 +40,7 @@ export class ProjectActions {
   }
 
   async clearActiveProject () {
-    this.ctx.coreData.currentProject = null
+    this.ctx.actions.projectConfig.killConfigProcess()
     await this.api.closeActiveProject()
 
     // TODO(tim): Improve general state management w/ immutability (immer) & updater fn
@@ -59,6 +62,47 @@ export class ProjectActions {
     await this.clearActiveProject()
 
     // Set initial properties, so we can set the config object on the active project
+    await this.setCurrentProjectProperties({
+      projectRoot,
+      title,
+      ctPluginsInitialized: false,
+      e2ePluginsInitialized: false,
+      config: null,
+      configChildProcess: null,
+      isMissingConfigFile: false,
+      preferences: await this.ctx.project.getProjectPreferences(title),
+    })
+
+    try {
+      // read the config and cache it
+      await this.ctx.project.getConfig(projectRoot)
+
+      this.setCurrentProjectProperties({
+        isCTConfigured: await this.ctx.project.isTestingTypeConfigured(projectRoot, 'component'),
+        isE2EConfigured: await this.ctx.project.isTestingTypeConfigured(projectRoot, 'e2e'),
+      })
+
+      return this
+    } catch (error: any) {
+      if (error.type === 'NO_DEFAULT_CONFIG_FILE_FOUND') {
+        this.setCurrentProjectProperties({
+          isMissingConfigFile: true,
+        })
+
+        return this
+      }
+
+      throw error
+    }
+  }
+
+  // Temporary: remove after other refactor lands
+  setActiveProjectForTestSetup (projectRoot: string) {
+    this.ctx.actions.projectConfig.killConfigProcess()
+
+    const title = this.ctx.project.projectTitle(projectRoot)
+
+    // Set initial properties, so we can set the config object on the active project
     this.setCurrentProjectProperties({
       projectRoot,
       title,
@@ -67,17 +111,9 @@ export class ProjectActions {
       config: null,
       configChildProcess: null,
     })
-
-    this.setCurrentProjectProperties({
-      isCTConfigured: await this.ctx.project.isTestingTypeConfigured(projectRoot, 'component'),
-      isE2EConfigured: await this.ctx.project.isTestingTypeConfigured(projectRoot, 'e2e'),
-      preferences: await this.ctx.project.getProjectPreferences(title),
-    })
-
-    return this
   }
 
-  private setCurrentProjectProperties (currentProjectProperties: Partial<ActiveProjectShape>) {
+  setCurrentProjectProperties (currentProjectProperties: Partial<ActiveProjectShape>) {
     this.ctx.coreData.currentProject = {
       browsers: this.ctx.coreData.app.browsers,
       ...this.ctx.coreData.currentProject,
@@ -257,14 +293,29 @@ export class ProjectActions {
     //
   }
 
-  createConfigFile (args: MutationAppCreateConfigFileArgs) {
+  async createConfigFile (type?: 'component' | 'e2e' | null) {
     const project = this.ctx.currentProject
 
     if (!project) {
       throw Error(`Cannot create config file without currentProject.`)
     }
 
-    this.ctx.fs.writeFileSync(path.resolve(project.projectRoot, args.configFilename), args.code)
+    let obj: { [k: string]: object } = {
+      e2e: {},
+      component: {},
+    }
+
+    if (type) {
+      obj = {
+        [type]: {},
+      }
+    }
+
+    await this.ctx.fs.writeFile(path.resolve(project.projectRoot, 'cypress.config.js'), `module.exports = ${JSON.stringify(obj, null, 2)}`)
+
+    this.setCurrentProjectProperties({
+      isMissingConfigFile: false,
+    })
   }
 
   async clearLatestProjectCache () {

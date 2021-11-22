@@ -118,9 +118,7 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         This option will not have an effect in ${_.capitalize(arg1)}. Tests that rely on web security being disabled will not run as expected.`
     case 'BROWSER_NOT_FOUND_BY_NAME':
       str = stripIndent`\
-        Can't run because you've entered an invalid browser name.
-
-        Browser: '${arg1}' was not found on your system or is not supported by Cypress.
+        The specified browser was not found on your system or is not supported by Cypress: \`${arg1}\`
 
         Cypress supports the following browsers:
         - chrome
@@ -129,10 +127,12 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         - electron
         - firefox
 
-        You can also use a custom browser: https://on.cypress.io/customize-browsers
+        You can also [use a custom browser](https://on.cypress.io/customize-browsers).
 
         Available browsers found on your system are:
-        ${arg2}`
+        ${arg2}
+
+        Read more about [how to troubleshoot launching browsers](https://on.cypress.io/troubleshooting-launching-browsers).`
 
       if (arg1 === 'canary') {
         str += '\n\n'
@@ -145,7 +145,9 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
       return str
     case 'BROWSER_NOT_FOUND_BY_PATH':
       msg = stripIndent`\
-        We could not identify a known browser at the path you provided: \`${arg1}\`
+        We could not identify a known browser at the path you specified: \`${arg1}\`
+
+        Read more about [how to troubleshoot launching browsers](https://on.cypress.io/troubleshooting-launching-browsers).
 
         The output from the command we ran was:`
 
@@ -559,34 +561,36 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         Or you might have renamed the extension of your \`supportFile\` to \`.ts\`. If that's the case, restart the test runner.
 
         Learn more at https://on.cypress.io/support-file-missing-or-invalid`
-    case 'PLUGINS_FILE_ERROR':
+    case 'SETUP_NODE_EVENTS_IS_NOT_FUNCTION':
       msg = stripIndent`\
-        The plugins file is missing or invalid.
-
-        Your \`pluginsFile\` is set to \`${arg1}\`, but either the file is missing, it contains a syntax error, or threw an error when required. The \`pluginsFile\` must be a \`.js\`, \`.ts\`, or \`.coffee\` file.
-
-        Or you might have renamed the extension of your \`pluginsFile\`. If that's the case, restart the test runner.
-
-        Please fix this, or set \`pluginsFile\` to \`false\` if a plugins file is not necessary for your project.`.trim()
-
-      if (arg2) {
-        return { msg, details: arg2 }
-      }
-
-      return msg
-    case 'PLUGINS_DIDNT_EXPORT_FUNCTION':
-      msg = stripIndent`\
-        The \`pluginsFile\` must export a function with the following signature:
+        The \`setupNodeEvents\` method must BE a function with the following signature:
 
         \`\`\`
-        module.exports = function (on, config) {
+        setupNodeEvents (on, config) {
           // configure plugins here
         }
         \`\`\`
 
         Learn more: https://on.cypress.io/plugins-api
 
-        We loaded the \`pluginsFile\` from: \`${arg1}\`
+        We loaded the \`setupNodeEvents\` from: \`${arg1}\`
+
+        It exported:`
+
+      return { msg, details: JSON.stringify(arg2) }
+    case 'SETUP_NODE_EVENTS_DO_NOT_SUPPORT_DEV_SERVER':
+      msg = stripIndent`\
+        The \`setupNodeEvents\` method do not support \`dev-server:start\`, use \`devServer\` instead:
+
+        \`\`\`
+        devServer (cypressConfig, devServerConfig) {
+          // configure plugins here
+        }
+        \`\`\`
+
+        Learn more: https://on.cypress.io/plugins-api
+
+        We loaded the \`setupNodeEvents\` from: \`${arg1}\`
 
         It exported:`
 
@@ -598,10 +602,10 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         We invoked the function exported by \`${arg1}\`, but it threw an error.`
 
       return { msg, details: arg2 }
-    case 'PLUGINS_UNEXPECTED_ERROR':
-      msg = `The following error was thrown by a plugin. We stopped running your tests because a plugin crashed. Please check your plugins file (\`${arg1}\`)`
+    case 'SETUP_NODE_EVENTS_UNEXPECTED_ERROR':
+      msg = `The following error was thrown by a plugin. We stopped running your tests because a plugin crashed. Please check your setupNodeEvents method for (\`${arg1}\`) on file (\`${arg2}\`)`
 
-      return { msg, details: arg2 }
+      return { msg, details: arg3 }
     case 'PLUGINS_VALIDATION_ERROR':
       msg = `The following validation error was thrown by your plugins file (\`${arg1}\`).`
 
@@ -633,13 +637,13 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         We found an invalid value in the file: ${chalk.blue(filePath)}
 
         ${chalk.yellow(arg2)}`
-    // happens when there is an invalid config value returnes from the
+    // happens when there is an invalid config value is returned from the
     // project's plugins file like "cypress/plugins.index.js"
     case 'PLUGINS_CONFIG_VALIDATION_ERROR':
       filePath = `\`${arg1}\``
 
       return stripIndent`\
-        An invalid configuration value returned from the plugins file: ${chalk.blue(filePath)}
+        An invalid configuration value returned from the setupNodeEvents on config file: ${chalk.blue(filePath)}
 
         ${chalk.yellow(arg2)}`
     // general configuration error not-specific to configuration or plugins files
@@ -650,9 +654,9 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         ${chalk.yellow(arg1)}`
     case 'RENAMED_CONFIG_OPTION':
       return stripIndent`\
-        The ${chalk.yellow(arg1)} configuration option you have supplied has been renamed.
+        The ${chalk.yellow(arg1.name)} configuration option you have supplied has been renamed.
 
-        Please rename ${chalk.yellow(arg1)} to ${chalk.blue(arg2)}`
+        Please rename ${chalk.yellow(arg1.name)} to ${chalk.blue(arg1.newName)}`
     case 'CANNOT_CONNECT_BASE_URL':
       return stripIndent`\
         Cypress failed to verify that your server is running.
@@ -893,7 +897,7 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
 
         ${arg1.stack}`
     case 'CDP_RETRYING_CONNECTION':
-      return `Failed to connect to ${arg2}, retrying in 1 second (attempt ${chalk.yellow(arg1)}/62)`
+      return `Still waiting to connect to ${arg2}, retrying in 1 second (attempt ${chalk.yellow(arg1)}/62)`
     case 'DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS':
       return stripIndent`\
         Deprecation Warning: The \`before:browser:launch\` plugin event changed its signature in version \`4.0.0\`
@@ -946,7 +950,7 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         You can safely remove this option from your config.`
     case 'EXPERIMENTAL_COMPONENT_TESTING_REMOVED':
       return stripIndent`\
-        The ${chalk.yellow(`\`experimentalComponentTesting\``)} configuration option was removed in Cypress version \`7.0.0\`. Please remove this flag from \`cypress.config.{ts|js}\`.
+        The ${chalk.yellow(`\`experimentalComponentTesting\``)} configuration option was removed in Cypress version \`7.0.0\`. Please remove this flag from ${chalk.yellow(`\`${arg1.configFile}\``)}.
 
         Cypress Component Testing is now a standalone command. You can now run your component tests with:
 
@@ -1017,15 +1021,23 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         `
     case 'UNSUPPORTED_BROWSER_VERSION':
       return arg1
-    case 'WIN32_DEPRECATION':
+    case 'WIN32_UNSUPPORTED':
       return stripIndent`\
-        You are running a 32-bit build of Cypress. Cypress will remove Windows 32-bit support in a future release.
+        You are attempting to run Cypress on Windows 32-bit. Cypress has removed Windows 32-bit support.
 
         ${arg1 ? 'Try installing Node.js 64-bit and reinstalling Cypress to use the 64-bit build.'
-        : 'Consider upgrading to a 64-bit OS to continue using Cypress in future releases.'}
-
-        For more information, see: https://on.cypress.io/win32-removal
+        : 'Consider upgrading to a 64-bit OS to continue using Cypress.'}
         `
+    case 'NODE_VERSION_DEPRECATION_SYSTEM':
+      return stripIndent`\
+      Deprecation Warning: ${chalk.yellow(`\`${arg1.name}\``)} is currently set to ${chalk.yellow(`\`${arg1.value}\``)} in the ${chalk.yellow(`\`${arg1.configFile}\``)} configuration file. As of Cypress version \`9.0.0\` the default behavior of ${chalk.yellow(`\`${arg1.name}\``)} has changed to always use the version of Node used to start cypress via the cli.
+      Please remove the ${chalk.yellow(`\`${arg1.name}\``)} configuration option from ${chalk.yellow(`\`${arg1.configFile}\``)}.
+      `
+    case 'NODE_VERSION_DEPRECATION_BUNDLED':
+      return stripIndent`\
+      Deprecation Warning: ${chalk.yellow(`\`${arg1.name}\``)} is currently set to ${chalk.yellow(`\`${arg1.value}\``)} in the ${chalk.yellow(`\`${arg1.configFile}\``)} configuration file. As of Cypress version \`9.0.0\` the default behavior of ${chalk.yellow(`\`${arg1.name}\``)} has changed to always use the version of Node used to start cypress via the cli. When ${chalk.yellow(`\`${arg1.name}\``)} is set to ${chalk.yellow(`\`${arg1.value}\``)}, Cypress will use the version of Node bundled with electron. This can cause problems running certain plugins or integrations. 
+      As the ${chalk.yellow(`\`${arg1.name}\``)} configuration option will be removed in a future release, it is recommended to remove the ${chalk.yellow(`\`${arg1.name}\``)} configuration option from ${chalk.yellow(`\`${arg1.configFile}\``)}.
+      `
     default:
   }
 }
@@ -1097,8 +1109,23 @@ const clone = function (err, options = {}) {
   return obj
 }
 
+const markdownLinkRegex = /\[(.*)\]\((.*)\)(.*)\.?[^\S\r\n]*/gm
+const dotColonRegex = /\.\:/g
+
+/**
+ * Changes markdown links to a more stdout-friendly format. Given the following:
+ *   A line with [a link](https://on.cypress.io) in it.
+ * it will convert it to:
+ *   A line with a link in it: https://on.cypress.io
+ */
+const delinkify = (text) => {
+  return text
+  .replace(markdownLinkRegex, '$1$3: $2')
+  .replace(dotColonRegex, ':')
+}
+
 const log = function (err, color = 'red') {
-  console.log(chalk[color](err.message))
+  console.log(chalk[color](delinkify(err.message)))
 
   if (err.details) {
     console.log('\n', chalk['yellow'](err.details))

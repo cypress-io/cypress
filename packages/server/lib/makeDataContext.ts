@@ -1,9 +1,9 @@
 import { DataContext } from '@packages/data-context'
 import os from 'os'
-import { app } from 'electron'
+import type { App } from 'electron'
 
 import specsUtil from './util/specs'
-import type { FindSpecs, FoundBrowser, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions, PlatformName, Preferences, SettingsOptions } from '@packages/types'
+import type { Editor, FindSpecs, FoundBrowser, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions, PlatformName, Preferences, SettingsOptions } from '@packages/types'
 import browserUtils from './browsers/utils'
 import auth from './gui/auth'
 import user from './user'
@@ -12,13 +12,17 @@ import { EventEmitter } from 'events'
 import { openProject } from './open_project'
 import cache from './cache'
 import errors from './errors'
+import findSystemNode from './util/find_system_node'
 import { graphqlSchema } from '@packages/graphql/src/schema'
 import type { InternalDataContextOptions } from '@packages/data-context/src/DataContext'
 import { openExternal } from '@packages/server/lib/gui/links'
+import { getDevicePreferences, setDevicePreference } from './util/device_preferences'
+import { getUserEditor, setUserEditor } from './util/editors'
 
 const { getBrowsers, ensureAndGetByNameOrPath } = browserUtils
 
 interface MakeDataContextOptions {
+  electronApp?: App
   os: PlatformName
   rootBus: EventEmitter
   launchArgs: LaunchArgs
@@ -28,7 +32,8 @@ interface MakeDataContextOptions {
 let legacyDataContext: DataContext | undefined
 
 // For testing
-export function clearLegacyDataContext () {
+export async function clearLegacyDataContext () {
+  await legacyDataContext?.destroy()
   legacyDataContext = undefined
 }
 
@@ -49,15 +54,17 @@ export function makeLegacyDataContext (launchArgs: LaunchArgs = {} as LaunchArgs
   return legacyDataContext
 }
 
-export function makeDataContext (options: MakeDataContextOptions) {
-  return new DataContext({
+export function makeDataContext (options: MakeDataContextOptions): DataContext {
+  const ctx = new DataContext({
     schema: graphqlSchema,
     ...options,
     launchOptions: {},
-    electronApp: app,
     appApi: {
       getBrowsers,
       ensureAndGetByNameOrPath,
+      findNodePath () {
+        return findSystemNode.findNodeInFullPath()
+      },
     },
     authApi: {
       getUser () {
@@ -72,7 +79,7 @@ export function makeDataContext (options: MakeDataContextOptions) {
     },
     projectApi: {
       getConfig (projectRoot: string, options?: SettingsOptions) {
-        return config.get(projectRoot, options)
+        return config.get(projectRoot, options, ctx)
       },
       launchProject (browser: FoundBrowser, spec: Cypress.Spec, options?: LaunchOpts) {
         return openProject.launch({ ...browser }, spec, options)
@@ -110,8 +117,8 @@ export function makeDataContext (options: MakeDataContextOptions) {
       closeActiveProject () {
         return openProject.closeActiveProject()
       },
-      error (type: string, ...args: any) {
-        throw errors.throw(type, ...args)
+      get error () {
+        return errors
       },
     },
     electronApi: {
@@ -119,5 +126,24 @@ export function makeDataContext (options: MakeDataContextOptions) {
         openExternal(url)
       },
     },
+    localSettingsApi: {
+      setDevicePreference (key, value) {
+        return setDevicePreference(key, value)
+      },
+
+      async getPreferences () {
+        return getDevicePreferences()
+      },
+      async setPreferredOpener (editor: Editor) {
+        await setUserEditor(editor)
+      },
+      async getAvailableEditors () {
+        const { availableEditors } = await getUserEditor(true)
+
+        return availableEditors
+      },
+    },
   })
+
+  return ctx
 }

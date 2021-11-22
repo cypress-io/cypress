@@ -29,8 +29,8 @@ export const mutation = mutationType({
 
     t.field('internal_clearLatestProjectCache', {
       type: 'Boolean',
-      resolve: (_, args, ctx) => {
-        ctx.actions.project.clearLatestProjectCache()
+      resolve: async (_, args, ctx) => {
+        await ctx.actions.project.clearLatestProjectCache()
 
         return true
       },
@@ -53,8 +53,8 @@ export const mutation = mutationType({
       args: {
         projectTitle: nonNull(stringArg()),
       },
-      resolve: (_, args, ctx) => {
-        ctx.actions.project.clearProjectPreferencesCache(args.projectTitle)
+      resolve: async (_, args, ctx) => {
+        await ctx.actions.project.clearProjectPreferencesCache(args.projectTitle)
 
         return true
       },
@@ -62,8 +62,8 @@ export const mutation = mutationType({
 
     t.field('internal_clearAllProjectPreferencesCache', {
       type: 'Boolean',
-      resolve: (_, args, ctx) => {
-        ctx.actions.project.clearAllProjectPreferencesCache()
+      resolve: async (_, args, ctx) => {
+        await ctx.actions.project.clearAllProjectPreferencesCache()
 
         return true
       },
@@ -84,12 +84,16 @@ export const mutation = mutationType({
         })),
       },
       resolve: async (_, args, ctx) => {
+        if (ctx.coreData.currentProject?.isMissingConfigFile) {
+          await ctx.actions.project.createConfigFile(args.input.testingType)
+        }
+
         if (args.input.testingType) {
-          await ctx.actions.wizard.setTestingType(args.input.testingType)
+          ctx.actions.wizard.setTestingType(args.input.testingType)
         }
 
         if (args.input.direction) {
-          await ctx.actions.wizard.navigate(args.input.direction)
+          ctx.actions.wizard.navigate(args.input.direction)
         }
       },
     })
@@ -130,17 +134,6 @@ export const mutation = mutationType({
       },
       resolve: async (_, args, ctx) => {
         await ctx.actions.app.setActiveBrowserById(args.id)
-      },
-    })
-
-    t.liveMutation('appCreateConfigFile', {
-      args: {
-        code: nonNull('String'),
-        configFilename: nonNull('String'),
-      },
-      description: 'Create a Cypress config file for a new project',
-      resolve: async (_, args, ctx) => {
-        await ctx.actions.project.createConfigFile(args)
       },
     })
 
@@ -295,6 +288,54 @@ export const mutation = mutationType({
       description: 'show the launchpad windows',
       resolve: (_, args, ctx) => {
         ctx.actions.project.reconfigureProject()
+
+        return true
+      },
+    })
+
+    t.liveMutation('setAutoScrollingEnabled', {
+      type: 'Boolean',
+      args: {
+        value: nonNull(booleanArg()),
+      },
+      resolve: async (_, args, ctx) => {
+        await ctx.actions.localSettings.setDevicePreference('autoScrollingEnabled', args.value)
+
+        return true
+      },
+    })
+
+    t.liveMutation('setUseDarkSidebar', {
+      type: 'Boolean',
+      args: {
+        value: nonNull(booleanArg()),
+      },
+      resolve: async (_, args, ctx) => {
+        await ctx.actions.localSettings.setDevicePreference('useDarkSidebar', args.value)
+
+        return true
+      },
+    })
+
+    t.liveMutation('setWatchForSpecChange', {
+      type: 'Boolean',
+      args: {
+        value: nonNull(booleanArg()),
+      },
+      resolve: async (_, args, ctx) => {
+        await ctx.actions.localSettings.setDevicePreference('watchForSpecChange', args.value)
+
+        return true
+      },
+    })
+
+    t.liveMutation('setPreferredEditorBinary', {
+      type: 'Boolean',
+      args: {
+        value: nonNull(stringArg()),
+      },
+      resolve: async (_, args, ctx) => {
+        await ctx.actions.localSettings.setDevicePreference('preferredEditorBinary', args.value)
 
         return true
       },

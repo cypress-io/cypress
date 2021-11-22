@@ -3,11 +3,14 @@ import Promise from 'bluebird'
 import path from 'path'
 import errors from '../errors'
 import { fs } from '../util/fs'
-import { requireAsync } from './require_async'
 import Debug from 'debug'
 import type { SettingsOptions } from '@packages/types'
+import type { DataContext } from '@packages/data-context'
+import { makeLegacyDataContext } from '../makeDataContext'
 
 const debug = Debug('cypress:server:settings')
+
+type ChangedConfig = { projectId?: string, component?: {}, e2e?: {} }
 
 function configCode (obj, isTS?: boolean) {
   const objJSON = obj && !_.isEmpty(obj)
@@ -87,7 +90,7 @@ function _logWriteErr (file, err) {
   return _err('ERROR_WRITING_FILE', file, err)
 }
 
-function _write (file, obj = {}) {
+function _write (file, obj: any = {}) {
   if (/\.json$/.test(file)) {
     debug('writing json file')
 
@@ -137,17 +140,14 @@ export function id (projectRoot, options = {}) {
   })
 }
 
-export function read (projectRoot, options: SettingsOptions = {}) {
+export function read (projectRoot, options: SettingsOptions = {}, ctx: DataContext = makeLegacyDataContext()) {
   if (options.configFile === false) {
     return Promise.resolve({})
   }
 
   const file = pathToConfigFile(projectRoot, options)
 
-  return requireAsync(file, {
-    projectRoot,
-    loadErrorCode: 'CONFIG_FILE_ERROR',
-  })
+  return ctx.config.getOrCreateBaseConfig(file)
   .catch((err) => {
     if (err.type === 'MODULE_NOT_FOUND' || err.code === 'ENOENT') {
       return Promise.reject(errors.get('CONFIG_FILE_NOT_FOUND', options.configFile, projectRoot))
@@ -165,7 +165,7 @@ export function read (projectRoot, options: SettingsOptions = {}) {
     }
 
     debug('resolved configObject', configObject)
-    const changed: { projectId?: string, component?: {}, e2e?: {} } = _applyRewriteRules(configObject)
+    const changed: ChangedConfig = _applyRewriteRules(configObject)
 
     // if our object is unchanged
     // then just return it
@@ -179,7 +179,7 @@ export function read (projectRoot, options: SettingsOptions = {}) {
       return config
     })
   }).catch((err) => {
-    debug('an error occured when reading config', err)
+    debug('an error occurred when reading config', err)
     if (errors.isCypressErr(err)) {
       throw err
     }
@@ -205,19 +205,14 @@ export function readEnv (projectRoot) {
   })
 }
 
-export function write (projectRoot, obj = {}, options: SettingsOptions = {}) {
+export function writeOnly (projectRoot, obj = {}, options: SettingsOptions = {}) {
   if (options.configFile === false) {
     return Promise.resolve({})
   }
 
-  return read(projectRoot, options)
-  .then((settings) => {
-    _.extend(settings, obj)
+  const file = pathToConfigFile(projectRoot, options)
 
-    const file = pathToConfigFile(projectRoot, options)
-
-    return _write(file, settings)
-  })
+  return _write(file, obj)
 }
 
 export function pathToConfigFile (projectRoot, options: SettingsOptions = {}) {

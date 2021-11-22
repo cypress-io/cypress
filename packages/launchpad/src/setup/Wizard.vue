@@ -1,9 +1,5 @@
 <template>
-  <Warning
-    v-if="props.gql.wizard.step === 'setupComplete' && props.gql.browserErrorMessage"
-    title="Browser Error"
-    :message="props.gql.browserErrorMessage"
-  />
+  <WarningList :gql="props.gql.wizard" />
   <WizardHeader
     v-if="props.gql.wizard"
     :gql="props.gql.wizard"
@@ -38,7 +34,7 @@ import OpenBrowser from './OpenBrowser.vue'
 import { gql } from '@urql/core'
 import type { WizardFragment } from '../generated/graphql'
 import InitializeConfig from './InitializeConfig.vue'
-import Warning from '../error/Warning.vue'
+import WarningList from '../warning/WarningList.vue'
 
 gql`
 fragment Wizard on Query {
@@ -49,8 +45,8 @@ fragment Wizard on Query {
     testingType
     ...EnvironmentSetup
     ...ConfigFiles
+    ...WarningList
   }
-  browserErrorMessage
   ...InstallDependencies
   ...InitializeConfig_Config
 }`

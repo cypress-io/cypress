@@ -28,6 +28,7 @@ export interface MountFnOptions {
 export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
   Cypress.Commands.add(
     'mount',
+    // @ts-ignore todo: figure out the correct types
     <C extends Parameters<typeof mount>[0]>(comp: C, options: CyMountOptions<C> = {}) => {
       options.global = options.global || {}
       options.global.stubs = options.global.stubs || {}
@@ -129,6 +130,7 @@ export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
   Cypress.Commands.add('mountFragment', mountFragment)
 
   Cypress.Commands.add('mountFragmentList', (source, options) => {
+    // @ts-expect-error - todo: tim fix
     return mountFragment(source, options, true)
   })
 }

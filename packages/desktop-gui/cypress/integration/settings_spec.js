@@ -782,11 +782,11 @@ describe('Settings', () => {
 
   describe('file preference panel', () => {
     const availableEditors = [
-      { id: 'atom', name: 'Atom', isOther: false, openerId: 'atom' },
-      { id: 'vim', name: 'Vim', isOther: false, openerId: 'vim' },
-      { id: 'sublime', name: 'Sublime Text', isOther: false, openerId: 'sublime' },
-      { id: 'vscode', name: 'Visual Studio Code', isOther: false, openerId: 'vscode' },
-      { id: 'other', name: 'Other', isOther: true, openerId: '' },
+      { id: 'atom', name: 'Atom', isOther: false, binary: 'atom' },
+      { id: 'vim', name: 'Vim', isOther: false, binary: 'vim' },
+      { id: 'sublime', name: 'Sublime Text', isOther: false, binary: 'sublime' },
+      { id: 'vscode', name: 'Visual Studio Code', isOther: false, binary: 'vscode' },
+      { id: 'other', name: 'Other', isOther: true, binary: '' },
     ]
 
     beforeEach(function () {
@@ -813,12 +813,10 @@ describe('Settings', () => {
       })
     })
 
-    it('loads preferred editor and available editors', function () {
-      expect(this.ipc.getUserEditor).to.be.called
-    })
-
-    it('shows spinner', () => {
-      cy.get('.loading-editors')
+    it('loads preferred editor, available editors and shows spinner', () => {
+      cy.get('.loading-editors').then(function () {
+        expect(this.ipc.getUserEditor).to.be.called
+      })
     })
 
     describe('when editors load with preferred editor', () => {

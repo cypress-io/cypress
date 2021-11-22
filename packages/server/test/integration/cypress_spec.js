@@ -15,6 +15,8 @@ const pkg = require('@packages/root')
 const detect = require('@packages/launcher/lib/detect')
 const launch = require('@packages/launcher/lib/browsers')
 const extension = require('@packages/extension')
+const v = require('@packages/config/lib/validation')
+
 const argsUtil = require(`${root}lib/util/args`)
 const { fs } = require(`${root}lib/util/fs`)
 const ciProvider = require(`${root}lib/util/ci_provider`)
@@ -42,11 +44,11 @@ const browserUtils = require(`${root}lib/browsers/utils`)
 const chromeBrowser = require(`${root}lib/browsers/chrome`)
 const { openProject } = require(`${root}lib/open_project`)
 const env = require(`${root}lib/util/env`)
-const v = require(`${root}lib/util/validation`)
 const system = require(`${root}lib/util/system`)
 const appData = require(`${root}lib/util/app_data`)
 const electronApp = require('../../lib/util/electron-app')
 const savedState = require(`${root}lib/saved_state`)
+const { makeLegacyDataContext } = require(`${root}lib/makeDataContext`)
 
 const TYPICAL_BROWSERS = [
   {
@@ -102,10 +104,13 @@ const snapshotConsoleLogs = function (name) {
   return snapshot(name, stripAnsi(args))
 }
 
+let ctx
+
 describe('lib/cypress', () => {
   require('mocha-banner').register()
 
   beforeEach(function () {
+    ctx = makeLegacyDataContext()
     process.chdir(previousCwd)
     this.timeout(8000)
 
@@ -456,6 +461,8 @@ describe('lib/cypress', () => {
     })
 
     it('scaffolds out integration and example specs if they do not exist when not runMode', function () {
+      ctx.actions.project.setActiveProjectForTestSetup(this.pristineWithConfigPath)
+
       return config.get(this.pristineWithConfigPath)
       .then((cfg) => {
         return fs.statAsync(cfg.integrationFolder)
@@ -517,6 +524,8 @@ describe('lib/cypress', () => {
     })
 
     it('scaffolds out fixtures + files if they do not exist', function () {
+      ctx.actions.project.setActiveProjectForTestSetup(this.pristineWithConfigPath)
+
       return config.get(this.pristineWithConfigPath)
       .then((cfg) => {
         return fs.statAsync(cfg.fixturesFolder)
@@ -534,6 +543,8 @@ describe('lib/cypress', () => {
 
     it('scaffolds out support + files if they do not exist', function () {
       const supportFolder = path.join(this.pristineWithConfigPath, 'cypress/support')
+
+      ctx.actions.project.setActiveProjectForTestSetup(this.pristineWithConfigPath)
 
       return config.get(this.pristineWithConfigPath)
       .then(() => {
@@ -553,6 +564,8 @@ describe('lib/cypress', () => {
     })
 
     it('removes fixtures when they exist and fixturesFolder is false', function (done) {
+      ctx.actions.project.setActiveProjectForTestSetup(this.idsPath)
+
       config.get(this.idsPath)
       .then((cfg) => {
         this.cfg = cfg
@@ -563,7 +576,7 @@ describe('lib/cypress', () => {
       }).then((json) => {
         json.fixturesFolder = false
 
-        return settings.write(this.idsPath, json)
+        return settings.writeOnly(this.idsPath, json)
       }).then(() => {
         return cypress.start([`--run-project=${this.idsPath}`])
       }).then(() => {
@@ -611,6 +624,8 @@ describe('lib/cypress', () => {
     it('can change the reporter with cypress.config.js', function () {
       sinon.spy(Reporter, 'create')
 
+      ctx.actions.project.setActiveProjectForTestSetup(this.idsPath)
+
       return config.get(this.idsPath)
       .then((cfg) => {
         this.cfg = cfg
@@ -619,7 +634,7 @@ describe('lib/cypress', () => {
       }).then((json) => {
         json.reporter = 'dot'
 
-        return settings.write(this.idsPath, json)
+        return settings.writeOnly(this.idsPath, json)
       }).then(() => {
         return cypress.start([`--run-project=${this.idsPath}`])
       }).then(() => {
@@ -677,7 +692,7 @@ describe('lib/cypress', () => {
     })
 
     it('logs error when supportFile doesn\'t exist', function () {
-      return settings.write(this.idsPath, { supportFile: '/does/not/exist' })
+      return settings.writeOnly(this.idsPath, { supportFile: '/does/not/exist' })
       .then(() => {
         return cypress.start([`--run-project=${this.idsPath}`])
       }).then(() => {
@@ -698,7 +713,7 @@ describe('lib/cypress', () => {
         const found1 = _.find(argsSet, (args) => {
           return _.find(args, (arg) => {
             return arg.message && arg.message.includes(
-              'Browser: \'foo\' was not found on your system or is not supported by Cypress.',
+              'The specified browser was not found on your system or is not supported by Cypress: `foo`',
             )
           })
         })
@@ -783,7 +798,7 @@ describe('lib/cypress', () => {
     })
 
     it('logs error and exits when project has invalid cypress.config.js values', function () {
-      return settings.write(this.todosPath, { baseUrl: 'localhost:9999' })
+      return settings.writeOnly(this.todosPath, { baseUrl: 'localhost:9999' })
       .then(() => {
         return cypress.start([`--run-project=${this.todosPath}`])
       }).then(() => {
@@ -1690,15 +1705,19 @@ describe('lib/cypress', () => {
       process.env.CYPRESS_responseTimeout = '5555'
       process.env.CYPRESS_watch_for_file_changes = 'false'
 
+      ctx.actions.project.setActiveProjectForTestSetup(this.todosPath)
+
       return user.set({ name: 'brian', authToken: 'auth-token-123' })
-      .then(() => {
-        return settings.read(this.todosPath)
-      }).then((json) => {
+      .then(() => settings.read(this.todosPath))
+      .then((json) => {
         // this should be overriden by the env argument
         json.baseUrl = 'http://localhost:8080'
 
-        return settings.write(this.todosPath, json)
+        return settings.writeOnly(this.todosPath, json)
       }).then(() => {
+        // TODO(tim): this shouldn't be needed when we refactor the ctx setup
+        process.env.LAUNCHPAD = '0'
+
         return cypress.start([
           '--port=2121',
           '--config',
@@ -1707,6 +1726,7 @@ describe('lib/cypress', () => {
           '--env=baz=baz',
         ])
       }).then(() => {
+        delete process.env.LAUNCHPAD
         const options = Events.start.firstCall.args[0]
 
         return Events.handleEvent(options, {}, {}, 123, 'open:project', this.todosPath)
@@ -1779,8 +1799,12 @@ describe('lib/cypress', () => {
 
       sinon.stub(ServerE2E.prototype, 'open').resolves([2121, warning])
 
+      // TODO(tim): this shouldn't be needed when we refactor the ctx setup
+      process.env.LAUNCHPAD = '0'
+
       return cypress.start(['--port=2121', '--config', 'pageLoadTimeout=1000', '--foo=bar', '--env=baz=baz'])
       .then(() => {
+        delete process.env.LAUNCHPAD
         const options = Events.start.firstCall.args[0]
 
         Events.handleEvent(options, bus, event, 123, 'on:project:warning')

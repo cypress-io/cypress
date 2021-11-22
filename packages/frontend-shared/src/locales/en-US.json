@@ -173,6 +173,13 @@
       "actionWaiting": "Waiting for you to log in",
       "actionTryAgain": "Try again",
       "actionCancel": "Cancel"
+    },
+    "updateCypress": {
+      "title": "Upgrade to Cypress",
+      "currentlyRunning": "You are currently running Version {0} of Cypress. ",
+      "pasteToUpgradeProject": "To upgrade to the latest version for your project, first {0}, then paste the command below into your terminal:",
+      "pasteToUpgradeGlobal": "To upgrade to the latest version, first {0}, then paste the command below into your terminal:",
+      "rememberToCloseInsert": "close this app"
     }
   },
   "launchpadErrors": {
@@ -312,7 +319,19 @@
     },
     "testingPreferences": {
       "title": "Testing Preferences",
-      "description": "Configure your testing environment with these flags"
+      "description": "Configure your testing environment with these flags",
+      "autoScrollingEnabled": {
+        "title": "Auto Scrolling Enabled",
+        "description": "Scroll behavior when running tests."
+      },
+      "watchForSpecChange": {
+        "title": "Watch for Spec Change",
+        "description": "Re-run specs when a file changes."
+      },
+      "useDarkSidebar": {
+        "title": "Dark sidebar",
+        "description": "Select the color theme of the app sidebar."
+      }
     },
     "footer": {
       "text": "You can reconfigure the settings for this project if you’re experiencing issues with your Cypress configuration.",

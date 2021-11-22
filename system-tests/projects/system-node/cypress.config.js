@@ -1,3 +1,11 @@
 module.exports = {
-  'nodeVersion': 'system',
+  'e2e': {
+    setupNodeEvents (on, config) {
+      process.stderr.write('Plugin Loaded\n')
+      process.stderr.write(`Plugin Node version: ${process.versions.node}\n`)
+      process.stderr.write(`Plugin Electron version: ${process.versions.electron}\n`)
+
+      return config
+    },
+  },
 }

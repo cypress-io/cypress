@@ -7,6 +7,7 @@ import type { DataContext } from '..'
 export interface AppApiShape {
   getBrowsers(): Promise<FoundBrowser[]>
   ensureAndGetByNameOrPath(nameOrPath: string, returnAll?: boolean, browsers?: FoundBrowser[]): Bluebird<FoundBrowser | FoundBrowser[] | undefined>
+  findNodePath(): Promise<string>
 }
 
 export class AppActions {
@@ -34,7 +35,13 @@ export class AppActions {
       browser = (await this.ctx._apis.appApi.ensureAndGetByNameOrPath(browserNameOrPath)) as FoundBrowser | undefined
     } catch (err: unknown?) {
       this.ctx.debug('Error getting browser by name or path (%s): %s', browserNameOrPath, err?.stack || err)
-      this.ctx.coreData.wizard.browserErrorMessage = `The browser '${browserNameOrPath}' was not found on your system or is not supported by Cypress. Choose a browser below.`
+      const message = err.details ? `${err.message}\n\n\`\`\`\n${err.details}\n\`\`\`` : err.message
+
+      this.ctx.coreData.wizard.warnings.push({
+        title: 'Warning: Browser Not Found',
+        message,
+        setupStep: 'setupComplete',
+      })
     }
 
     if (browser) {
@@ -84,5 +91,21 @@ export class AppActions {
     }
 
     return browsers.some((b) => this.idForBrowser(b) === this.idForBrowser(chosenBrowser))
+  }
+
+  async refreshNodePath () {
+    if (this.ctx.coreData.app.refreshingNodePath) {
+      return
+    }
+
+    const dfd = pDefer<string>()
+
+    this.ctx.coreData.app.refreshingNodePath = dfd.promise
+
+    const nodePath = await this.ctx._apis.appApi.findNodePath()
+
+    this.ctx.coreData.app.nodePath = nodePath
+
+    dfd.resolve(nodePath)
   }
 }
