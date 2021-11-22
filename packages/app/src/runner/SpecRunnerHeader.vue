@@ -43,7 +43,7 @@
       </div>
 
       <Select
-        :model-value="{...props.gql.currentBrowser}"
+        :model-value="browser"
         data-cy="select-browser"
         :options="browsers"
         item-value="displayName"
@@ -64,7 +64,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch } from 'vue'
+import { computed, ref } from 'vue'
 import { useAutStore, useSpecStore } from '../store'
 import Select from '@packages/frontend-shared/src/components/Select.vue'
 import { gql, useMutation } from '@urql/vue'
@@ -133,6 +133,8 @@ const togglePlayground = () => {
 
 const specStore = useSpecStore()
 
+// Have to spread gql props since binding it to v-model causes error when testing
+const browser = ref({ ...props.gql.currentBrowser })
 const browsers = computed(() => props.gql.browsers?.slice().map((browser) => ({ ...browser })) ?? [])
 
 function changeBrowser (browser: SpecRunnerHeader_BrowserFragment) {
