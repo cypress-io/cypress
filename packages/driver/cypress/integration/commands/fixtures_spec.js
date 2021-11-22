@@ -103,7 +103,7 @@ describe('src/cy/commands/fixtures', () => {
 
       it('throws if fixturesFolder is set to false', function (done) {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`Cypress.config()` cannot be called with option `fixturesFolder` because it is a read-only property.')
+          expect(err.message).to.include('The configuration option `fixturesFolder` cannot be mutated because it is a read-only property.')
 
           done()
         })

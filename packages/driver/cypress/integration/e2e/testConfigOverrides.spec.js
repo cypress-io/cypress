@@ -374,6 +374,27 @@ describe('testConfigOverrides baseUrl @slow', () => {
   })
 })
 
+describe('cannot set read-only properties', () => {
+  it('throws if mutating read-only config with test configuration', () => {
+    try {
+      it('fails to set chromeWebSecurity', { chromeWebSecurity: false }, () => {
+        return
+      })
+    } catch (err) {
+      expect(err.message).to.include('The configuration option `chromeWebSecurity` cannot be mutated because it is a read-only property.')
+    }
+  })
+
+  it('throws if mutating read-only config with Cypress.config()', (done) => {
+    cy.on('fail', (err) => {
+      expect(err.message).to.include('The configuration option `chromeWebSecurity` cannot be mutated because it is a read-only property.')
+      done()
+    })
+
+    Cypress.config('chromeWebSecurity', false)
+  })
+})
+
 function hasOnly (test) {
   let curSuite = test.parent
   let hasOnly = false

@@ -117,7 +117,7 @@ module.exports = {
           if (_.isObject(args[0])) {
             Object.keys(args[0]).forEach((element) => {
               if (!writeableOptions.includes(element)) {
-                throw new Error(`\`Cypress.config()\` cannot be called with option \`${element}\` because it is a read-only property.`)
+                throw new Error(`The configuration option \`${element}\` cannot be mutated because it is a read-only property.`)
               }
             })
           }
@@ -126,7 +126,7 @@ module.exports = {
 
         default:
           if (!writeableOptions.includes(args[0])) {
-            throw new Error(`\`Cypress.config()\` cannot be called with option \`${args[0]}\` because it is a read-only property.`)
+            throw new Error(`The configuration option \`${args[0]}\` cannot be mutated because it is a read-only property.`)
           }
 
           return func(...args)

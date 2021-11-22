@@ -172,7 +172,7 @@ describe('src/index', () => {
       try {
         returnFunc({ 'chromeWebSecurity': true })
       } catch (err) {
-        expect(err.message.includes('`Cypress.config()` cannot be called with option `chromeWebSecurity` because it is a read-only property.'))
+        expect(err.message.includes('The configuration option `chromeWebSecurity` cannot be mutated because it is a read-only property.'))
       }
     })
 
