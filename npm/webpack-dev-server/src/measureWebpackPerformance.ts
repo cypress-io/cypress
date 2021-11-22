@@ -34,13 +34,8 @@ export function measureWebpackPerformance (webpackConfig: Configuration): Config
 
       console.log(delimiter)
       console.log(`${chalk.bold('WEBPACK_PERF_MEASURE')}`)
-
-      const before = oldStats.misc.compileTime / 1000
-      const after = newStats.misc.compileTime / 1000
-
-      console.log(`Before: ${chalk.bold(before.toString())}s`)
-      console.log(`After: ${chalk.bold(after.toString())}s`)
-
+      console.log(`Before: ${chalk.bold(oldStats.misc.compileTime / 1000)}s`)
+      console.log(`After: ${chalk.bold(newStats.misc.compileTime / 1000)}s`)
       console.log(result)
       console.log(delimiter)
     }

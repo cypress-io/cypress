@@ -98,7 +98,7 @@ const copyAllToDist = function (distDir) {
         follow: false, // do not follow symlinks
       }
 
-      return glob(pkgFileMasks, globOptions)
+      return glob(`{${pkgFileMasks.join(',')}}`, globOptions)
     }).map((foundFileRelativeToPackageFolder) => {
       return path.join(pkg, foundFileRelativeToPackageFolder)
     })

@@ -161,9 +161,6 @@ commands:
         default: false
     steps:
       - run:
-          name: check yarn version
-          command: nvm list || true && yarn versions || true
-      - run:
           # Dependencies needed by circle-cache.js, before we "yarn" or unpack cached node_modules
           name: Cache Helper Dependencies
           working_directory: ~/
@@ -893,13 +890,8 @@ jobs:
     steps:
       - restore_cached_workspace
       - run:
-          name: all packages
-          command: |
-            ls
-            ls npm/webpack-dev-server/
-      - run:
           name: Top level packages
-          command: yarn list typescript webpack webpack-dev-server || true
+          command: yarn list --depth=0 || true
       - build-and-persist
       - store-npm-logs
 
