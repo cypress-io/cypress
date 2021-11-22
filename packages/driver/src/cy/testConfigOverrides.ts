@@ -37,7 +37,7 @@ function setConfig (testConfigList: Array<TestConfig>, config, localConfigOverri
 
       try {
         config(testConfigOverride)
-      } catch (e) {
+      } catch (e: any) {
         let err = $errUtils.errByPath('config.invalid_test_override', {
           errMsg: e.message,
         })
@@ -109,27 +109,29 @@ function mutateConfiguration (testConfig: ResolvedTestConfigOverride, config, en
 // in order to resolve the test config upfront before test runs
 // note: must return as an object to meet the dashboard recording API
 export function getResolvedTestConfigOverride (test): ResolvedTestConfigOverride {
-  let curParent = test.parent
-  const testConfigList = [{
-    overrides: test._testConfig,
-    invocationDetails: test.invocationDetails,
-  }]
+  let curr = test
+  let testConfigList: TestConfig[] = []
 
-  while (curParent) {
-    if (curParent._testConfig) {
-      testConfigList.unshift({
-        overrides: curParent._testConfig,
-        invocationDetails: curParent.invocationDetails,
-      })
+  while (curr) {
+    if (curr._testConfig) {
+      if (curr._testConfig.testConfigList) {
+        // configuration for mocha function has already been processed
+        testConfigList = testConfigList.concat(curr._testConfig.testConfigList)
+      } else {
+        testConfigList.unshift({
+          overrides: curr._testConfig,
+          invocationDetails: curr.invocationDetails,
+        })
+      }
     }
 
-    curParent = curParent.parent
+    curr = curr.parent
   }
 
   const testConfig = {
-    testConfigList: testConfigList.filter((opt) => opt.overrides !== undefined),
+    testConfigList: testConfigList.filter(({ overrides }) => overrides !== undefined),
     // collect test overrides to send to the dashboard api when @packages/server is ran in record mode
-    unverifiedTestConfig: _.reduce(testConfigList, (acc, opts) => _.extend(acc, opts.overrides), {}),
+    unverifiedTestConfig: _.reduce(testConfigList, (acc, { overrides }) => _.extend(acc, overrides), {}),
   }
 
   return testConfig
