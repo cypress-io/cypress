@@ -38,6 +38,10 @@ const getNpmArgv = () => {
 const getVersionSpecifier = (startDir = path.resolve(__dirname, '../..')) => {
   const argv = getNpmArgv()
 
+  if ((process.env.npm_package_resolved || '').endsWith('cypress.tgz')) {
+    return process.env.npm_package_resolved
+  }
+
   if (argv) {
     const tgz = _.find(argv, (t) => t.endsWith('cypress.tgz'))
 
@@ -81,7 +85,7 @@ const getVersionSpecifier = (startDir = path.resolve(__dirname, '../..')) => {
   })
 }
 
-const betaNpmUrlRe = /^\/beta\/npm\/(?<version>[0-9.]+)\/(?<artifactSlug>[^/]+)\/cypress\.tgz$/
+const betaNpmUrlRe = /^\/beta\/npm\/(?<version>[0-9.]+)\/(?<artifactSlug>.+?)\/cypress\.tgz$/
 
 // convert a prerelease NPM package .tgz URL to the corresponding binary .zip URL
 const getBinaryUrlFromPrereleaseNpmUrl = (npmUrl) => {

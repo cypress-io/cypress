@@ -37,7 +37,7 @@ function setConfig (testConfigList: Array<TestConfig>, config, localConfigOverri
 
       try {
         config(testConfigOverride)
-      } catch (e) {
+      } catch (e: any) {
         let err = $errUtils.errByPath('config.invalid_test_override', {
           errMsg: e.message,
         })
