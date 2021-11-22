@@ -43,6 +43,27 @@ const createApp = (port) => {
     })
   })
 
+  const flakyRouteState = []
+
+  app.get('/flakyRoute', (req, res) => {
+    if (req.query.reset) {
+      flakyRouteState[req.query.id] = 0
+
+      return res.send(`<html><body>flakyRoute Call: reset </body></html>`)
+    }
+
+    const flakyRouteTimesCalled = flakyRouteState[req.query.id] || 0
+    const flakeTimes = parseInt(req.query.flake)
+
+    if (flakyRouteTimesCalled < flakeTimes) {
+      flakyRouteState[req.query.id] = flakyRouteTimesCalled + 1
+
+      return res.destroy()
+    }
+
+    return res.send(`<html><body>flakyRoute Call: ${flakyRouteTimesCalled + 1}</body></html>`)
+  })
+
   app.get('/custom-headers', (req, res) => {
     return res.set('x-foo', 'bar')
     .send('<html><body>hello there</body></html>')
