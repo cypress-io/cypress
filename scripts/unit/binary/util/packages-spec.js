@@ -274,7 +274,7 @@ afterEach(() => {
 })
 
 const getFs = () => {
-  let cwd = process.cwd().split(path.sep).slice(1)
+  const cwd = process.cwd().split(path.sep).slice(1)
 
   const recurse = (dir, d) => {
     if (_.isString(dir)) {
@@ -307,6 +307,7 @@ const getFs = () => {
     }))
   }
 
+  // ignore C:// when on windows
   const depth = process.env.PLATFORM === 'windows' ? -2 : -1
 
   return recurse({ root: mockfs.getMockRoot() }, depth).root

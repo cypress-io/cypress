@@ -169,7 +169,7 @@ commands:
           name: Generate Circle Cache Key
           command: node scripts/circle-cache.js --action cacheKey > circle_cache_key
       - restore_cache:
-          name: Restore cache state
+          name: Restore cache state, to check for known modules cache existence
           key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-test2-node-modules-cache-state-{{ checksum "circle_cache_key" }}
       - run:
           name: Bail if cache exists
@@ -2352,8 +2352,8 @@ windows-workflow: &windows-workflow
           - windows-build
 
 workflows:
-  # linux:
-  #   <<: *linux-workflow
+  linux:
+    <<: *linux-workflow
   windows:
     <<: *windows-workflow
     when:
