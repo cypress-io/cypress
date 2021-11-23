@@ -223,6 +223,10 @@ commands:
 
   verify-build-setup:
     description: Common commands run when setting up for build or yarn install
+    parameters:
+      executor:
+        type: executor
+        default: cy-doc
     steps:
       - run: pwd
       - run:
@@ -231,6 +235,15 @@ commands:
       - run:
           name: print yarn version
           command: yarn versions
+      - unless:
+          condition:
+            # stop-only does not correctly match on windows: https://github.com/bahmutov/stop-only/issues/78
+            equal: [ *windows-executor, << parameters.executor >> ]
+          steps:
+            - run:
+                name: Stop .only
+                 # this will catch ".only"s in js/coffee as well
+                command: yarn stop-only-all
       - run:
           name: Check terminal variables
           ## make sure the TERM is set to 'xterm' in node (Linux only)
@@ -859,22 +872,14 @@ jobs:
     resource_class: << parameters.resource_class >>
     steps:
       - checkout
-      - unless:
-          condition:
-            # stop-only does not correctly match on windows: https://github.com/bahmutov/stop-only/issues/78
-            equal: [ *windows-executor, << parameters.executor >> ]
-          steps:
-            - run:
-                name: Stop .only
-                 # this will catch ".only"s in js/coffee as well
-                command: yarn stop-only-all
       - install-required-node
+      - verify-build-setup:
+          executor: << parameters.executor >>
       - persist_to_workspace:
           root: ~/
           paths:
             - cypress
             - .nvm
-      - verify-build-setup
       - caching-dependency-installer:
           only-cache-for-root-user: <<parameters.only-cache-for-root-user>>
       - store-npm-logs
