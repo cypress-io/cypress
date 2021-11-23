@@ -274,14 +274,17 @@ afterEach(() => {
 })
 
 const getFs = () => {
-  let cwd = process.cwd().split(path.sep).slice(1)
+  let cwd = process.cwd().split(path.sep)
+
+  if (process.env.PLATFORM !== 'windows') {
+    cwd = process.cwd().split(path.sep).slice(1)
+  }
 
   // eslint-disable-next-line no-console
   console.log('cwd', cwd)
 
   const recurse = (dir, d) => {
   // eslint-disable-next-line no-console
-    console.log('d....', d)
     if (_.isString(dir)) {
       return dir
     }
