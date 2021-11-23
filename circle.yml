@@ -993,7 +993,7 @@ jobs:
             - run: yarn test-scripts scripts/**/*spec.js
             # make sure our snapshots are compared correctly
             - run: yarn test-mocha-snapshot
-       - unless:
+      - unless:
           condition:
             # several snapshots fails for windows
             equal: [ *windows-executor, << parameters.executor >> ]
