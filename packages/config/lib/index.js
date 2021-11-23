@@ -102,35 +102,17 @@ module.exports = {
     })
   },
 
-  validateNoReadOnlyConfig: (func) => {
+  validateNoReadOnlyConfig: (config) => {
     const writeableOptions = options.filter((option) => option.isWriteable).map((option) => option.name)
 
-    return function (...args) {
-      switch (args.length) {
-        case 0:
-          return func()
-        case 1:
-          if (_.isString(args[0])) {
-            return func(...args)
-          }
+    let errProperty
 
-          if (_.isObject(args[0])) {
-            Object.keys(args[0]).forEach((element) => {
-              if (!writeableOptions.includes(element)) {
-                throw new Error(`The configuration option \`${element}\` cannot be mutated because it is a read-only property.`)
-              }
-            })
-          }
-
-          return func(...args)
-
-        default:
-          if (!writeableOptions.includes(args[0])) {
-            throw new Error(`The configuration option \`${args[0]}\` cannot be mutated because it is a read-only property.`)
-          }
-
-          return func(...args)
+    Object.keys(config).forEach((element) => {
+      if (!writeableOptions.includes(element)) {
+        errProperty = element
       }
-    }
+    })
+
+    return errProperty
   },
 }
