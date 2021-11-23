@@ -41,6 +41,10 @@ export class ProjectConfigDataActions {
       projectRoot: this.ctx.currentProject.projectRoot,
       configFilePath,
     }).then((process) => {
+      if (!this.ctx.currentProject) {
+        throw new Error('current project removed while in the middle of refreshing')
+      }
+
       const dfd = pDefer<Cypress.ConfigOptions>()
 
       this.ctx.currentProject.configChildProcess = {
@@ -58,14 +62,9 @@ export class ProjectConfigDataActions {
   private async forkConfigProcess (opts: ForkConfigProcessOptions) {
     const configProcessArgs = ['--projectRoot', opts.projectRoot, '--file', opts.configFilePath]
 
-    const childOptions: ForkOptions = {
-      stdio: 'pipe',
-      cwd: path.dirname(opts.configFilePath),
-      env: {
-        ...process.env,
-        NODE_OPTIONS: process.env.ORIGINAL_NODE_OPTIONS || '',
-      },
-      execPath: this.ctx.nodePath ?? undefined,
+    const env = {
+      ...process.env,
+      NODE_OPTIONS: process.env.ORIGINAL_NODE_OPTIONS || '',
     }
 
     // https://github.com/cypress-io/cypress/issues/18914
@@ -77,16 +76,25 @@ export class ProjectConfigDataActions {
 
     // To be removed up update to webpack >= 5.61, which no longer relies on
     // node's builtin crypto.hash function.
-    const { stdout } = await execFile(this.ctx.nodePath, ['-v'])
+    if (this.ctx.nodePath) {
+      const { stdout } = await execFile(this.ctx.nodePath, ['-v'])
 
-    try {
-      const nodeMajorVersion = parseInt(stdout.match(/v(\d+)/)[1], 10)
+      try {
+        const nodeMajorVersion = stdout.match(/v(\d+)/)
 
-      if (nodeMajorVersion >= 17) {
-        childOptions.env.NODE_OPTIONS += ' --openssl-legacy-provider'
+        if (nodeMajorVersion && parseInt(nodeMajorVersion[1] as string, 10) >= 17) {
+          env.NODE_OPTIONS += ' --openssl-legacy-provider'
+        }
+      } catch (e) {
+        this.ctx.debug('child node version error, unable to parse from stdout', stdout)
       }
-    } catch (e) {
-      this.ctx.debug('child node version error, unable to parse from stdout', data)
+    }
+
+    const childOptions: ForkOptions = {
+      stdio: 'pipe',
+      cwd: path.dirname(opts.configFilePath),
+      env,
+      execPath: this.ctx.nodePath ?? undefined,
     }
 
     if (inspector.url()) {
