@@ -3,7 +3,20 @@ import os from 'os'
 import type { App } from 'electron'
 
 import specsUtil from './util/specs'
-import type { Editor, FindSpecs, FoundBrowser, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions, PlatformName, Preferences, SettingsOptions } from '@packages/types'
+import type {
+  Editor,
+  FindSpecs,
+  FoundBrowser,
+  LaunchArgs,
+  LaunchOpts,
+  OpenProjectLaunchOptions,
+  PlatformName,
+  Preferences,
+  SettingsOptions,
+  CypressError,
+  CypressErrorLike,
+  CypressErrorIdentifier,
+} from '@packages/types'
 import browserUtils from './browsers/utils'
 import auth from './gui/auth'
 import user from './user'
@@ -94,7 +107,9 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
         return openProject.launch({ ...browser }, spec, options)
       },
       initializeProject (args: LaunchArgs, options: OpenProjectLaunchOptions<DataContext>, browsers: FoundBrowser[]) {
-        return openProject.create(args.projectRoot, args, options, browsers).then((p) => p.getConfig().browsers as FoundBrowser[])
+        return openProject.create(args.projectRoot, args, options, browsers).then((p) => {
+          return (p.getConfig()?.browsers ?? []) as FoundBrowser[]
+        })
       },
       insertProjectToCache (projectRoot: string) {
         cache.insertProject(projectRoot)
@@ -126,8 +141,8 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       closeActiveProject () {
         return openProject.closeActiveProject()
       },
-      get error () {
-        return errors.get
+      error (type: CypressErrorIdentifier, ...args: any[]) {
+        return errors.get(type, ...args) as CypressError | CypressErrorLike
       },
     },
     electronApi: {

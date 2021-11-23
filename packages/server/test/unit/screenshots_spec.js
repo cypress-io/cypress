@@ -60,7 +60,7 @@ describe('lib/screenshots', () => {
     Jimp.prototype.composite = sinon.stub()
     // Jimp.prototype.getBuffer = sinon.stub().resolves(@buffer)
 
-    ctx.actions.project.setActiveProjectForTestSetup(this.todosPath)
+    ctx.actions.globalProject.setActiveProjectForTestSetup(this.todosPath)
 
     return config.get(this.todosPath)
     .then((config1) => {

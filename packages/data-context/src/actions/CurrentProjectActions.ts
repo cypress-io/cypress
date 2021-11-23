@@ -25,7 +25,7 @@ export interface ProjectApiShape {
   clearProjectPreferences(projectTitle: string): Promise<unknown>
   clearAllProjectPreferences(): Promise<unknown>
   closeActiveProject(): Promise<unknown>
-  error(type: CypressErrorIdentifier, ...args: any): CypressError | CypressErrorLike
+  error(type: CypressErrorIdentifier, ...args: any[]): CypressError | CypressErrorLike
 }
 
 /**

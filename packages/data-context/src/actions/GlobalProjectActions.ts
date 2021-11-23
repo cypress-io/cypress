@@ -56,6 +56,24 @@ export class GlobalProjectActions {
     this.ctx.actions.currentProject?.loadConfig()
   }
 
+  setActiveProjectForTestSetup (projectRoot: string) {
+    const title = this.ctx.project.projectTitle(projectRoot)
+
+    // Set initial properties, so we can set the config object on the active project
+    this.ctx.coreData.currentProject = {
+      title,
+      projectRoot,
+      config: null,
+      cliBrowser: null,
+      currentTestingType: null,
+      isLoadingConfig: false,
+      isLoadingConfigPromise: null,
+      isLoadingPlugins: false,
+      errorLoadingConfig: null,
+      errorLoadingPlugins: null,
+    }
+  }
+
   /**
    * Adds a project directory to the list of "projects" if it doesn't exist already
    */

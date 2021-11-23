@@ -461,7 +461,7 @@ describe('lib/cypress', () => {
     })
 
     it('scaffolds out integration and example specs if they do not exist when not runMode', function () {
-      ctx.actions.project.setActiveProjectForTestSetup(this.pristineWithConfigPath)
+      ctx.actions.globalProject.setActiveProjectForTestSetup(this.pristineWithConfigPath)
 
       return config.get(this.pristineWithConfigPath)
       .then((cfg) => {
@@ -524,7 +524,7 @@ describe('lib/cypress', () => {
     })
 
     it('scaffolds out fixtures + files if they do not exist', function () {
-      ctx.actions.project.setActiveProjectForTestSetup(this.pristineWithConfigPath)
+      ctx.actions.globalProject.setActiveProjectForTestSetup(this.pristineWithConfigPath)
 
       return config.get(this.pristineWithConfigPath)
       .then((cfg) => {
@@ -544,7 +544,7 @@ describe('lib/cypress', () => {
     it('scaffolds out support + files if they do not exist', function () {
       const supportFolder = path.join(this.pristineWithConfigPath, 'cypress/support')
 
-      ctx.actions.project.setActiveProjectForTestSetup(this.pristineWithConfigPath)
+      ctx.actions.globalProject.setActiveProjectForTestSetup(this.pristineWithConfigPath)
 
       return config.get(this.pristineWithConfigPath)
       .then(() => {
@@ -564,7 +564,7 @@ describe('lib/cypress', () => {
     })
 
     it('removes fixtures when they exist and fixturesFolder is false', function (done) {
-      ctx.actions.project.setActiveProjectForTestSetup(this.idsPath)
+      ctx.actions.globalProject.setActiveProjectForTestSetup(this.idsPath)
 
       config.get(this.idsPath)
       .then((cfg) => {
@@ -624,7 +624,7 @@ describe('lib/cypress', () => {
     it('can change the reporter with cypress.config.js', function () {
       sinon.spy(Reporter, 'create')
 
-      ctx.actions.project.setActiveProjectForTestSetup(this.idsPath)
+      ctx.actions.globalProject.setActiveProjectForTestSetup(this.idsPath)
 
       return config.get(this.idsPath)
       .then((cfg) => {
@@ -1705,7 +1705,7 @@ describe('lib/cypress', () => {
       process.env.CYPRESS_responseTimeout = '5555'
       process.env.CYPRESS_watch_for_file_changes = 'false'
 
-      ctx.actions.project.setActiveProjectForTestSetup(this.todosPath)
+      ctx.actions.globalProject.setActiveProjectForTestSetup(this.todosPath)
 
       return user.set({ name: 'brian', authToken: 'auth-token-123' })
       .then(() => settings.read(this.todosPath))

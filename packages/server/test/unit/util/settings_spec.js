@@ -20,7 +20,7 @@ describe('lib/util/settings', () => {
   context('with default configFile option', () => {
     beforeEach(function () {
       this.setup = (obj = {}) => {
-        ctx.actions.project.setActiveProjectForTestSetup(projectRoot)
+        ctx.actions.globalProject.setActiveProjectForTestSetup(projectRoot)
 
         return fs.writeFileAsync('cypress.config.js', `module.exports = ${JSON.stringify(obj)}`)
       }
@@ -89,7 +89,7 @@ describe('lib/util/settings', () => {
       beforeEach(function () {
         this.projectRoot = path.join(projectRoot, '_test-output/path/to/project/')
 
-        ctx.actions.project.setActiveProjectForTestSetup(this.projectRoot)
+        ctx.actions.globalProject.setActiveProjectForTestSetup(this.projectRoot)
 
         return fs.ensureDirAsync(this.projectRoot)
       })
@@ -246,7 +246,7 @@ describe('lib/util/settings', () => {
     it('.read returns from configFile when its a JavaScript file', function () {
       this.projectRoot = path.join(projectRoot, '_test-output/path/to/project/')
 
-      ctx.actions.project.setActiveProjectForTestSetup(this.projectRoot)
+      ctx.actions.globalProject.setActiveProjectForTestSetup(this.projectRoot)
 
       return fs.writeFile(path.join(this.projectRoot, 'cypress.custom.js'), `module.exports = { baz: 'lurman' }`)
       .then(() => {

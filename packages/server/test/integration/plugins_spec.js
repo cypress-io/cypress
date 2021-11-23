@@ -11,7 +11,7 @@ describe('lib/plugins', () => {
     ctx = makeLegacyDataContext()
     Fixtures.scaffold()
 
-    ctx.actions.project.setActiveProjectForTestSetup(Fixtures.projectPath('plugin-before-browser-launch-deprecation'))
+    ctx.actions.globalProject.setActiveProjectForTestSetup(Fixtures.projectPath('plugin-before-browser-launch-deprecation'))
   })
 
   afterEach(() => {

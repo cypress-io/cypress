@@ -25,20 +25,27 @@ describe('lib/config', () => {
 
   context('environment name check', () => {
     it('throws an error for unknown CYPRESS_INTERNAL_ENV', () => {
-      sinon.stub(errors, 'throw').withArgs('INVALID_CYPRESS_INTERNAL_ENV', 'foo-bar')
+      sinon.stub(errors, 'get').withArgs('INVALID_CYPRESS_INTERNAL_ENV', 'foo-bar')
       process.env.CYPRESS_INTERNAL_ENV = 'foo-bar'
       const cfg = {
         projectRoot: '/foo/bar/',
       }
       const options = {}
 
-      config.mergeDefaults(cfg, options)
-
-      expect(errors.throw).have.been.calledOnce
+      try {
+        config.mergeDefaults(cfg, options)
+        throw new Error('Unreachable')
+      } catch (e) {
+        if (e.message === 'Unreachable') {
+          throw e
+        }
+      } finally {
+        expect(errors.get).have.been.calledOnce
+      }
     })
 
     it('allows production CYPRESS_INTERNAL_ENV', () => {
-      sinon.stub(errors, 'throw')
+      sinon.stub(errors, 'get')
       process.env.CYPRESS_INTERNAL_ENV = 'production'
       const cfg = {
         projectRoot: '/foo/bar/',
@@ -47,7 +54,7 @@ describe('lib/config', () => {
 
       config.mergeDefaults(cfg, options)
 
-      expect(errors.throw).not.to.be.called
+      expect(errors.get).not.to.be.called
     })
   })
 
@@ -1821,10 +1828,17 @@ describe('lib/config', () => {
         browsers: null,
       }
 
-      sinon.stub(errors, 'throw')
-      config.updateWithPluginValues(cfg, overrides)
-
-      expect(errors.throw).to.have.been.calledWith('CONFIG_VALIDATION_ERROR')
+      sinon.stub(errors, 'get')
+      try {
+        config.updateWithPluginValues(cfg, overrides)
+        throw new Error('Unreachable')
+      } catch (e) {
+        if (e.message === 'Unreachable') {
+          throw e
+        }
+      } finally {
+        expect(errors.get).to.have.been.calledWith('CONFIG_VALIDATION_ERROR')
+      }
     })
 
     it('allows user to filter browsers', () => {

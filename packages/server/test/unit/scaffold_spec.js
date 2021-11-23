@@ -136,7 +136,7 @@ describe('lib/scaffold', () => {
     beforeEach(function () {
       const pristinePath = Fixtures.projectPath('pristine-with-config-file')
 
-      ctx.actions.project.setActiveProjectForTestSetup(pristinePath)
+      ctx.actions.globalProject.setActiveProjectForTestSetup(pristinePath)
 
       return config.get(pristinePath)
       .then((cfg) => {
@@ -222,7 +222,7 @@ describe('lib/scaffold', () => {
     beforeEach(function () {
       const pristinePath = Fixtures.projectPath('pristine-with-config-file')
 
-      ctx.actions.project.setActiveProjectForTestSetup(pristinePath)
+      ctx.actions.globalProject.setActiveProjectForTestSetup(pristinePath)
 
       return config.get(pristinePath)
       .then((cfg) => {
@@ -336,7 +336,7 @@ describe('lib/scaffold', () => {
     beforeEach(function () {
       const pristinePath = Fixtures.projectPath('pristine-with-config-file')
 
-      ctx.actions.project.setActiveProjectForTestSetup(pristinePath)
+      ctx.actions.globalProject.setActiveProjectForTestSetup(pristinePath)
 
       return config.get(pristinePath)
       .then((cfg) => {
@@ -416,7 +416,7 @@ describe('lib/scaffold', () => {
     beforeEach(function () {
       const pristinePath = Fixtures.projectPath('pristine-with-config-file')
 
-      ctx.actions.project.setActiveProjectForTestSetup(pristinePath)
+      ctx.actions.globalProject.setActiveProjectForTestSetup(pristinePath)
 
       return config.get(pristinePath)
       .then((cfg) => {
@@ -475,7 +475,7 @@ describe('lib/scaffold', () => {
     beforeEach(function () {
       const pristinePath = Fixtures.projectPath('pristine-with-config-file')
 
-      ctx.actions.project.setActiveProjectForTestSetup(pristinePath)
+      ctx.actions.globalProject.setActiveProjectForTestSetup(pristinePath)
 
       return config.get(pristinePath)
       .then((cfg) => {
@@ -553,7 +553,7 @@ describe('lib/scaffold', () => {
     beforeEach(function () {
       const todosPath = Fixtures.projectPath('todos')
 
-      ctx.actions.project.setActiveProjectForTestSetup(todosPath)
+      ctx.actions.globalProject.setActiveProjectForTestSetup(todosPath)
 
       return config.get(todosPath)
       .then((cfg) => {
