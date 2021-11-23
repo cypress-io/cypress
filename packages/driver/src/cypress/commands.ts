@@ -215,7 +215,7 @@ export default {
           })
         }
 
-        if (_.keys(reservedCommandNames).includes(name)) {
+        if (reservedCommandNames[name]) {
           $errUtils.throwErrByPath('miscellaneous.reserved_command', {
             args: {
               name,
