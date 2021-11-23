@@ -31,7 +31,7 @@ import { create as createStability, IStability } from '../cy/stability'
 import $selection from '../dom/selection'
 import { create as createSnapshots, ISnapshots } from '../cy/snapshots'
 import { $Command } from './command'
-import $CommandQueue from './command_queue'
+import { CommandQueue } from './command_queue'
 import { initVideoRecorder } from '../cy/video-recorder'
 import { TestConfigOverride } from '../cy/testConfigOverrides'
 
@@ -710,7 +710,7 @@ export default {
       return finish(err)
     }
 
-    const queue = $CommandQueue.create(state, cy.timeout, cy.whenStable, cleanup, fail, cy.isCy)
+    const queue = new CommandQueue(state, cy.timeout, cy.whenStable, cleanup, fail, cy.isCy)
 
     _.extend(cy, {
       // command queue instance
