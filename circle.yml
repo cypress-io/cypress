@@ -419,7 +419,6 @@ commands:
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
-            yarn percy exec --parallel -- -- \
             yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --record --parallel --group <<parameters.package>>-<<parameters.type>>
       - store_test_results:
           path: /tmp/cypress
@@ -1256,14 +1255,14 @@ jobs:
           package: launchpad
           type: e2e
 
-  # run-app-component-tests-chrome:
-  #   <<: *defaults
-  #   parallelism: 1
-  #   steps:
-  #     - run-new-ui-tests:
-  #         browser: chrome
-  #         package: app
-  #         type: ct
+  run-app-component-tests-chrome:
+    <<: *defaults
+    parallelism: 1
+    steps:
+      - run-new-ui-tests:
+          browser: chrome
+          package: app
+          type: ct
 
   run-app-integration-tests-chrome:
     <<: *defaults
@@ -2235,10 +2234,10 @@ linux-workflow: &linux-workflow
         context: test-runner:launchpad-tests
         requires:
           - build
-    # - run-app-component-tests-chrome:
-    #     context: test-runner:launchpad-tests
-    #     requires:
-    #       - build
+    - run-app-component-tests-chrome:
+        context: test-runner:launchpad-tests
+        requires:
+          - build
     - desktop-gui-integration-tests-7x:
         requires:
           - build
