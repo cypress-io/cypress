@@ -54,4 +54,15 @@ describe('e2e specs', () => {
       expectedExitCode: 0,
     })
   })
+
+  it('handles the testFiles inside e2e config property', function () {
+    const project = Fixtures.projectPath('testFiles-config')
+
+    return systemTests.exec(this, {
+      project,
+      testingType: 'e2e',
+      snapshot: true,
+      expectedExitCode: 0,
+    })
+  })
 })
