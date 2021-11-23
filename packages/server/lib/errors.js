@@ -1,4 +1,4 @@
-import type { CypressErrorIdentifier, CypressError } from '@packages/types'
+// import type { CypressErrorIdentifier, CypressError } from '@packages/types'
 
 /* eslint-disable no-console */
 const _ = require('lodash')
@@ -82,7 +82,8 @@ const isCypressErr = (err) => {
   return Boolean(err.isCypressErr)
 }
 
-const getMsgByType = function (type: CypressErrorIdentifier, arg1: any = {}, arg2?: any, arg3?: any) {
+// const getMsgByType = function (type: CypressErrorIdentifier, arg1: any = {}, arg2?: any, arg3?: any) {
+const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
   // NOTE: declarations in case blocks are forbidden so we declare them up front
   let filePath; let err; let msg; let str
 
@@ -1046,7 +1047,8 @@ const getMsgByType = function (type: CypressErrorIdentifier, arg1: any = {}, arg
   }
 }
 
-const get = function (type: CypressErrorIdentifier, arg1: any = {}, arg2?: any, arg3?: any) {
+// const get = function (type: CypressErrorIdentifier, arg1: any = {}, arg2?: any, arg3?: any) {
+const get = function (type, arg1 = {}, arg2, arg3) {
   let details
   let msg = getMsgByType(type, arg1, arg2, arg3)
 
@@ -1062,7 +1064,7 @@ const get = function (type: CypressErrorIdentifier, arg1: any = {}, arg2?: any, 
 
   msg = trimMultipleNewLines(msg)
 
-  const err = new Error(msg) as CypressError
+  const err = new Error(msg) // as CypressError
 
   err.isCypressErr = true
   err.type = type
@@ -1083,7 +1085,7 @@ const throwErr = function (type, arg1, arg2, arg3) {
   throw get(type, arg1, arg2, arg3)
 }
 
-const clone = function (err, options: any = {}) {
+const clone = function (err, options = {}) {
   _.defaults(options, {
     html: false,
   })
@@ -1146,7 +1148,7 @@ const log = function (err, color = 'red') {
   return err
 }
 
-const logException = Promise.method(function (this: typeof errors, err) {
+const logException = Promise.method(function (err) {
   // TODO: remove context here
   if (this.log(err) && isProduction()) {
     // log this exception since
@@ -1181,4 +1183,6 @@ const errors = {
   displayFlags,
 }
 
-export = errors
+// export = errors
+
+module.exports = errors

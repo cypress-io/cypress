@@ -94,7 +94,7 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
         return openProject.launch({ ...browser }, spec, options)
       },
       initializeProject (args: LaunchArgs, options: OpenProjectLaunchOptions<DataContext>, browsers: FoundBrowser[]) {
-        return openProject.create(args.projectRoot, args, options, browsers).then((p) => p.browsers as FoundBrowser[])
+        return openProject.create(args.projectRoot, args, options, browsers).then((p) => p.getConfig().browsers as FoundBrowser[])
       },
       insertProjectToCache (projectRoot: string) {
         cache.insertProject(projectRoot)

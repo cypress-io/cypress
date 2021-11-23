@@ -4,7 +4,7 @@ import Debug from 'debug'
 import Bluebird from 'bluebird'
 import chokidar from 'chokidar'
 import pluralize from 'pluralize'
-import { Cfg, ProjectBase } from './project-base'
+import { ProjectBase } from './project-base'
 import browsers from './browsers'
 import specsUtil from './util/specs'
 import preprocessor from './plugins/preprocessor'
@@ -400,7 +400,7 @@ export class OpenProject {
 
   _ctx?: DataContext
 
-  async create (path: string, args: LaunchArgs, options: OpenProjectLaunchOptions<DataContext>, browsers: FoundBrowser[] = []): Promise<Cfg> {
+  async create (path: string, args: LaunchArgs, options: OpenProjectLaunchOptions<DataContext>, browsers: FoundBrowser[] = []) {
     this._ctx = options.ctx ?? makeLegacyDataContext()
     debug('open_project create %s', path)
 
@@ -451,7 +451,7 @@ export class OpenProject {
       this.openProject = project
     }
 
-    return project.getConfig()
+    return this
   }
 
   // for testing purposes
