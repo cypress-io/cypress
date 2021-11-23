@@ -37,7 +37,7 @@ export interface ClientTestContext {
     allBundlers: WizardBundler[]
     history: WizardStep[]
     chosenBrowser: null
-    browserErrorMessage: null
+    warnings: []
   }
   user: AuthenticatedUserShape | null
   cloudTypes: typeof cloudTypes
@@ -87,7 +87,7 @@ export function makeClientTestContext (): ClientTestContext {
       allBundlers,
       history: ['welcome'],
       chosenBrowser: null,
-      browserErrorMessage: null,
+      warnings: [],
     },
     user: null,
     cloudTypes,

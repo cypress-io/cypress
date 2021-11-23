@@ -419,7 +419,6 @@ commands:
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
-            yarn percy exec --parallel -- -- \
             yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --record --parallel --group <<parameters.package>>-<<parameters.type>>
       - store_test_results:
           path: /tmp/cypress
@@ -1097,26 +1096,26 @@ jobs:
       - restore_cached_workspace
       - run: yarn test-npm-package-release-script
 
+  lint-types:
+    <<: *defaults
+    parallelism: 1
+    resource_class: medium
+    steps:
+      - restore_cached_workspace
+      - run:
+          command: ls -la types
+          working_directory: cli
+      - run:
+          command: ls -la chai
+          working_directory: cli/types
+      - run:
+          name: "Lint types 🧹"
+          command: yarn workspace cypress dtslint
   # todo(lachlan): do we need this? yarn check-ts does something very similar
-  # lint-types:
-  #   <<: *defaults
-  #   parallelism: 1
-  #   resource_class: medium
-  #   steps:
-  #     - restore_cached_workspace
-  #     - run:
-  #         command: ls -la types
-  #         working_directory: cli
-  #     - run:
-  #         command: ls -la chai
-  #         working_directory: cli/types
-  #     - run:
-  #         name: "Lint types 🧹"
-  #         command: yarn workspace cypress dtslint
   #     - run:
   #         name: "TypeScript check 🧩"
   #         command: yarn type-check --ignore-progress
-  #     - store-npm-logs
+      - store-npm-logs
 
   server-unit-tests:
     <<: *defaults
@@ -1256,14 +1255,14 @@ jobs:
           package: launchpad
           type: e2e
 
-  # run-app-component-tests-chrome:
-  #   <<: *defaults
-  #   parallelism: 1
-  #   steps:
-  #     - run-new-ui-tests:
-  #         browser: chrome
-  #         package: app
-  #         type: ct
+  run-app-component-tests-chrome:
+    <<: *defaults
+    parallelism: 1
+    steps:
+      - run-new-ui-tests:
+          browser: chrome
+          package: app
+          type: ct
 
   run-app-integration-tests-chrome:
     <<: *defaults
@@ -2159,10 +2158,9 @@ linux-workflow: &linux-workflow
         required_env_var: PERCY_TOKEN # skips job if not defined (external PR)
         requires:
           - build
-    # todo(lachlan): do we need this? yarn check-ts does something very similar
-    # - lint-types:
-    #     requires:
-    #       - build
+    - lint-types:
+        requires:
+          - build
     # unit, integration and e2e tests
     - cli-visual-tests:
         requires:
@@ -2236,10 +2234,10 @@ linux-workflow: &linux-workflow
         context: test-runner:launchpad-tests
         requires:
           - build
-    # - run-app-component-tests-chrome:
-    #     context: test-runner:launchpad-tests
-    #     requires:
-    #       - build
+    - run-app-component-tests-chrome:
+        context: test-runner:launchpad-tests
+        requires:
+          - build
     - desktop-gui-integration-tests-7x:
         requires:
           - build

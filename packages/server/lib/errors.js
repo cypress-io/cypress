@@ -118,9 +118,7 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         This option will not have an effect in ${_.capitalize(arg1)}. Tests that rely on web security being disabled will not run as expected.`
     case 'BROWSER_NOT_FOUND_BY_NAME':
       str = stripIndent`\
-        Can't run because you've entered an invalid browser name.
-
-        Browser: '${arg1}' was not found on your system or is not supported by Cypress.
+        The specified browser was not found on your system or is not supported by Cypress: \`${arg1}\`
 
         Cypress supports the following browsers:
         - chrome
@@ -129,10 +127,12 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         - electron
         - firefox
 
-        You can also use a custom browser: https://on.cypress.io/customize-browsers
+        You can also [use a custom browser](https://on.cypress.io/customize-browsers).
 
         Available browsers found on your system are:
-        ${arg2}`
+        ${arg2}
+
+        Read more about [how to troubleshoot launching browsers](https://on.cypress.io/troubleshooting-launching-browsers).`
 
       if (arg1 === 'canary') {
         str += '\n\n'
@@ -145,7 +145,9 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
       return str
     case 'BROWSER_NOT_FOUND_BY_PATH':
       msg = stripIndent`\
-        We could not identify a known browser at the path you provided: \`${arg1}\`
+        We could not identify a known browser at the path you specified: \`${arg1}\`
+
+        Read more about [how to troubleshoot launching browsers](https://on.cypress.io/troubleshooting-launching-browsers).
 
         The output from the command we ran was:`
 
@@ -1107,8 +1109,23 @@ const clone = function (err, options = {}) {
   return obj
 }
 
+const markdownLinkRegex = /\[(.*)\]\((.*)\)(.*)\.?[^\S\r\n]*/gm
+const dotColonRegex = /\.\:/g
+
+/**
+ * Changes markdown links to a more stdout-friendly format. Given the following:
+ *   A line with [a link](https://on.cypress.io) in it.
+ * it will convert it to:
+ *   A line with a link in it: https://on.cypress.io
+ */
+const delinkify = (text) => {
+  return text
+  .replace(markdownLinkRegex, '$1$3: $2')
+  .replace(dotColonRegex, ':')
+}
+
 const log = function (err, color = 'red') {
-  console.log(chalk[color](err.message))
+  console.log(chalk[color](delinkify(err.message)))
 
   if (err.details) {
     console.log('\n', chalk['yellow'](err.details))
