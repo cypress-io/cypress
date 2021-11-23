@@ -2263,8 +2263,8 @@ linux-workflow: &linux-workflow
           - ui-components-integration-tests
           - reporter-integration-tests
           - Linux lint
-          - desktop-gui-component-tests
-          - desktop-gui-integration-tests-7x
+          # - desktop-gui-component-tests
+          # - desktop-gui-integration-tests-7x
           - runner-ct-integration-tests-chrome
           - runner-integration-tests-firefox
           - runner-integration-tests-chrome
