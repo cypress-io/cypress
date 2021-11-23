@@ -63,7 +63,8 @@ shikiWrapperClasses computed property.
       v-if="copyButton"
       variant="outline"
       tabindex="-1"
-      class="absolute bottom-8px right-8px"
+      class="absolute"
+      :class="numberOfLines === 1 ? 'bottom-5px right-5px' : 'bottom-8px right-8px'"
       :text="code"
       no-icon
     />
@@ -146,7 +147,7 @@ const highlightedCode = computed(() => {
 
 const codeEl: Ref<HTMLElement | null> = ref(null)
 
-const { copy, copied } = useClipboard()
+const { copy } = useClipboard()
 
 const copyCode = () => {
   if (codeEl.value) {
@@ -155,6 +156,8 @@ const copyCode = () => {
     copy(text)
   }
 }
+
+const numberOfLines = computed(() => props.code.trim().split('\n').length)
 
 </script>
 
