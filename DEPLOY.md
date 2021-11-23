@@ -73,9 +73,9 @@ You can build the Cypress binary locally by running `yarn binary-build`. You can
 In order to publish a new `cypress` package to the npm registry, we must build and test it across multiple platforms and test projects. This makes publishing *directly* into the npm registry impossible. Instead, we have CI set up to do the following on every commit to `develop`:
 
 1. Build the npm package with the new target version baked in.
-2. Build the Linux/Mac binaries on CircleCI and build Windows on AppVeyor.
 3. Upload the binaries and the new npm package to `cdn.cypress.io` under the "beta" folder.
 4. Launch the test projects like [cypress-test-node-versions](https://github.com/cypress-io/cypress-test-node-versions) and [cypress-test-example-repos](https://github.com/cypress-io/cypress-test-example-repos) using the newly-uploaded package & binary instead of installing from the npm registry. That installation looks like this:
+2. Build the Linux, Mac & Windows binaries on CircleCI.
     ```shell
     export CYPRESS_INSTALL_BINARY=https://cdn.../binary/<new version>/<commit hash>/cypress.zip
     npm i https://cdn.../npm/<new version>/<commit hash>/cypress.tgz

@@ -985,19 +985,28 @@ jobs:
       - restore_cached_workspace
       # make sure mocha runs
       - run: yarn test-mocha
-      # test binary build code
-      - run: yarn test-scripts  || true
-      - run: yarn test-scripts1  || true
-      - run: yarn test-scripts2  || true
-      - run: yarn test-scripts3  || true
-      # make sure our snapshots are compared correctly
-      - run: yarn test-mocha-snapshot || ture
-      # make sure packages with TypeScript can be transpiled to JS
-      - run: yarn lerna run build-prod --stream
-      # run unit tests from each individual package
-      - run: yarn test || true
-      - verify-mocha-results:
-          expectedResultCount: 9
+      - when:
+          condition:
+            # several snapshots fails for windows
+            equal: [ *windows-executor, << parameters.executor >> ]
+          steps:
+            - run: yarn test-scripts scripts/**/*spec.js
+            # make sure our snapshots are compared correctly
+            - run: yarn test-mocha-snapshot
+       - unless:
+          condition:
+            # several snapshots fails for windows
+            equal: [ *windows-executor, << parameters.executor >> ]
+          steps:
+            - run: yarn test-scripts
+            # make sure our snapshots are compared correctly
+            - run: yarn test-mocha-snapshot
+            # make sure packages with TypeScript can be transpiled to JS
+            - run: yarn lerna run build-prod --stream
+            # run unit tests from each individual package
+            - run: yarn test
+            - verify-mocha-results:
+                expectedResultCount: 9
       - store_test_results:
           path: /tmp/cypress
       # CLI tests generate HTML files with sample CLI command output

@@ -294,7 +294,7 @@ const getFs = () => {
       let nextDepth = null
 
       if (d !== null) {
-        if (d === -1) {
+        if (d < 0) {
           nextDepth = d + 1
         } else if (!(d > cwd.length) && key === cwd[d]) {
           key = 'foo'
