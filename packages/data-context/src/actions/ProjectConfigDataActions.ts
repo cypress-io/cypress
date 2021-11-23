@@ -64,6 +64,10 @@ export class ProjectConfigDataActions {
       execPath: this.ctx.nodePath ?? undefined,
     }
 
+    // https://github.com/cypress-io/cypress/issues/18914
+    // To be removed up update to webpack >= 5.61
+    childOptions.env.NODE_OPTIONS += ' --openssl-legacy-provider'
+
     if (inspector.url()) {
       childOptions.execArgv = _.chain(process.execArgv.slice(0))
       .remove('--inspect-brk')

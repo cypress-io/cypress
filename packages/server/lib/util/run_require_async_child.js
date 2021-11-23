@@ -39,7 +39,7 @@ function run (ipc, requiredFile, projectRoot) {
   })
 
   process.on('unhandledRejection', (event) => {
-    const err = (event && event.reason) || event
+    const err = (event && event.reason && event.reason.message) ? event.reason : event
 
     debug('unhandled rejection:', util.serializeError(err))
     ipc.send('error', util.serializeError(err))
