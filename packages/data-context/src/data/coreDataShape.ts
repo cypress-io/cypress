@@ -1,4 +1,4 @@
-import { BUNDLERS, FoundBrowser, FoundSpec, FullConfig, Preferences, DevicePreferences, devicePreferenceDefaults, Editor } from '@packages/types'
+import { BUNDLERS, FoundBrowser, FoundSpec, FullConfig, Preferences, DevicePreferences, devicePreferenceDefaults, Editor, Warning } from '@packages/types'
 import type { NexusGenEnums, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
 import type { BrowserWindow } from 'electron'
 import type { ChildProcess } from 'child_process'
@@ -73,7 +73,7 @@ export interface WizardDataShape {
   chosenLanguage: NexusGenEnums['CodeLanguageEnum']
   chosenManualInstall: boolean
   chosenBrowser: FoundBrowser | null
-  browserErrorMessage: string | null
+  warnings: Warning[]
 }
 
 export interface ElectronShape {
@@ -132,7 +132,7 @@ export function makeCoreData (): CoreDataShape {
       allBundlers: BUNDLERS,
       history: ['welcome'],
       chosenBrowser: null,
-      browserErrorMessage: null,
+      warnings: [],
     },
     user: null,
     electron: {

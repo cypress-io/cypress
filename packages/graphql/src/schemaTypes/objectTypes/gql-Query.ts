@@ -48,13 +48,6 @@ export const Query = objectType({
       resolve: (root, args, ctx) => ctx.appData.projects,
     })
 
-    t.string('browserErrorMessage', {
-      description: 'An error related to finding a browser',
-      resolve: (source, args, ctx) => {
-        return ctx.wizardData.browserErrorMessage
-      },
-    })
-
     t.nonNull.boolean('isInGlobalMode', {
       description: 'Whether the app is in global mode or not',
       resolve: (source, args, ctx) => !ctx.currentProject,

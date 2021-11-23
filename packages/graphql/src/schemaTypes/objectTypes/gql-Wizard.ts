@@ -7,6 +7,20 @@ import { TestingTypeEnum, WizardStepEnum } from '../enumTypes/gql-WizardEnums'
 import { WizardCodeLanguage } from './gql-WizardCodeLanguage'
 import { WizardSampleConfigFile } from './gql-WizardSampleConfigFile'
 
+const Warning = objectType({
+  name: 'Warning',
+  description: 'A warning',
+  definition (t) {
+    t.nonNull.string('title')
+    t.nonNull.string('message')
+    t.string('setupStep')
+  },
+  sourceType: {
+    module: '@packages/types',
+    export: 'Warning',
+  },
+})
+
 export const Wizard = objectType({
   name: 'Wizard',
   description: 'The Wizard is a container for any state associated with initial onboarding to Cypress',
@@ -97,6 +111,14 @@ export const Wizard = objectType({
     t.string('title', {
       description: 'The title of the page, given the current step of the wizard',
       resolve: (source, args, ctx) => ctx.wizard.title ?? null,
+    })
+
+    t.nonNull.list.nonNull.field('warnings', {
+      type: Warning,
+      description: 'A list of warnings',
+      resolve: (source, args, ctx) => {
+        return ctx.coreData.wizard.warnings
+      },
     })
   },
   sourceType: {

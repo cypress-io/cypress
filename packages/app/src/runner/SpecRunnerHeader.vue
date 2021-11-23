@@ -28,7 +28,7 @@
         data-cy="aut-url"
       >
         <div
-          class="rounded-md flex shadow-md mx-2 url px-4"
+          class="flex px-4 mx-2 rounded-md shadow-md url"
           :class="{
             'bg-yellow-50': autStore.isLoadingUrl,
             'bg-white': !autStore.isLoadingUrl,

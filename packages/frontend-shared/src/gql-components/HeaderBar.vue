@@ -5,6 +5,7 @@
     :show-browsers="props.showBrowsers"
     :page-name="pageName"
   />
+  <div v-else />
 </template>
 
 <script setup lang="ts">
