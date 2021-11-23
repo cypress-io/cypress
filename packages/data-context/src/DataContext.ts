@@ -1,4 +1,4 @@
-import type { LaunchArgs, OpenProjectLaunchOptions, PlatformName } from '@packages/types'
+import type { CypressError, CypressErrorLike, LaunchArgs, OpenProjectLaunchOptions, PlatformName } from '@packages/types'
 import fsExtra from 'fs-extra'
 import path from 'path'
 import Bluebird from 'bluebird'
@@ -330,12 +330,16 @@ export class DataContext {
   /**
    * Convert an error into a plain object
    */
-  prepError (err: Error, title = 'Something went wrong') {
+  prepError (err: CypressErrorLike | CypressError, title = 'Something went wrong') {
     return {
       title,
       name: err.name,
       message: err.message,
       stack: err.stack,
+      isCypressError: err.isCypressErr,
+      details: err.details,
+      code: err.code,
+      errno: err.errno,
     }
   }
 

@@ -2,7 +2,6 @@ import type { NexusGenEnums, TestingTypeEnum } from '@packages/graphql/src/gen/n
 import type { BrowserWindow } from 'electron'
 import type { ChildProcess } from 'child_process'
 import path from 'path'
-import type { ApplicationErrorSource } from '@packages/graphql/src/schemaTypes/objectTypes/gql-ApplicationError'
 import { devicePreferenceDefaults, DevicePreferences, Editor, FoundBrowser, FullConfig, LaunchArgs, Preferences, Warning } from '@packages/types'
 import type { Immutable, Patch } from 'immer'
 
@@ -147,6 +146,12 @@ export type CoreDataShape = Immutable<{
   isAuthBrowserOpened: boolean
   warnings: Warning[]
 }>
+
+export interface ApplicationErrorSource {
+  title?: string
+  message: string
+  stack?: string
+}
 
 function makeCurrentProject (launchArgs: LaunchArgs): Immutable<CurrentProjectShape | null> {
   if (launchArgs.global || !launchArgs.projectRoot) {
