@@ -37,7 +37,7 @@ function setConfig (testConfigList: Array<TestConfig>, config, localConfigOverri
 
       try {
         config(testConfigOverride)
-      } catch (e) {
+      } catch (e: any) {
         let err = $errUtils.errByPath('config.invalid_test_override', {
           errMsg: e.message,
         })
@@ -129,15 +129,15 @@ export function getResolvedTestConfigOverride (test): ResolvedTestConfigOverride
   }
 
   const testConfig = {
-    testConfigList: testConfigList.filter((opt) => opt.overrides !== undefined),
+    testConfigList: testConfigList.filter(({ overrides }) => overrides !== undefined),
     // collect test overrides to send to the dashboard api when @packages/server is ran in record mode
-    unverifiedTestConfig: _.reduce(testConfigList, (acc, opts) => _.extend(acc, opts.overrides), {}),
+    unverifiedTestConfig: _.reduce(testConfigList, (acc, { overrides }) => _.extend(acc, overrides), {}),
   }
 
   return testConfig
 }
 
-class TestConfigOverride {
+export class TestConfigOverride {
   private restoreTestConfigFn: Nullable<() => void> = null
 
   restoreAndSetTestConfigOverrides (test, config, env) {
@@ -149,10 +149,4 @@ class TestConfigOverride {
       this.restoreTestConfigFn = mutateConfiguration(resolvedTestConfig, config, env)
     }
   }
-}
-
-export default {
-  create () {
-    return new TestConfigOverride()
-  },
 }

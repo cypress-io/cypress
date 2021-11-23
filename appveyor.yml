@@ -2,6 +2,7 @@ branches:
   only:
     - master
     - develop
+    - windows-code-signing
     - 9.0-release
     - /win*/
 

@@ -14,8 +14,8 @@
   "dependencies": {
     "check-more-types": "2.24.0",
     "common-tags": "1.8.0",
-    "debug": "4.3.2",
-    "lodash": "4.17.21"
+    "debug": "^4.3.2",
+    "lodash": "^4.17.21"
   },
   "devDependencies": {
     "@packages/ts": "0.0.0-development",

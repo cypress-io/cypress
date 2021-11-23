@@ -59,7 +59,7 @@ module.exports = {
   options,
 
   validate: (cfg, onErr) => {
-    debug('validating configuration')
+    debug('validating configuration', cfg)
 
     return _.each(cfg, (value, key) => {
       const validationFn = validationRules[key]
