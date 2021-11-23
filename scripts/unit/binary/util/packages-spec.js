@@ -280,7 +280,10 @@ const getFs = () => {
   console.log('cwd', cwd)
 
   const recurse = (dir, d) => {
-  // eslint-disable-next-line no-console
+    // eslint-disable-next-line no-console
+    console.log('dir', dir)
+    // eslint-disable-next-line no-console
+    console.log('d', d)
     if (_.isString(dir)) {
       return dir
     }
