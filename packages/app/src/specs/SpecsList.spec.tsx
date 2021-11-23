@@ -37,20 +37,24 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
     })
 
     it('should filter specs', () => {
-      const spec = specs[0].node
+      const longestSpec = specs.reduce((acc, spec) =>
+        acc.node.relative.length < spec.node.relative.length ? spec : acc
+      , specs[0]).node
 
       cy.get(inputSelector).type('garbage 🗑', { delay: 0 })
       .get(rowSelector)
       .should('not.exist')
 
-      cy.get(inputSelector).clear().type(spec.relative)
-      cy.get(rowSelector).first().should('contain', spec.relative.replace(`/${spec.fileName}${spec.specFileExtension}`, ''))
-      cy.get(rowSelector).last().should('contain', `${spec.fileName}${spec.specFileExtension}`)
+      cy.get(inputSelector).clear().type(longestSpec.relative)
+      cy.get(rowSelector).first().should('contain', longestSpec.relative.replace(`/${longestSpec.fileName}${longestSpec.specFileExtension}`, ''))
+      cy.get(rowSelector).last().should('contain', `${longestSpec.fileName}${longestSpec.specFileExtension}`)
     })
 
     it('should close directories', () => {
       // close all directories
-      ['src', 'packages', 'frontend', '__test__', 'lib', 'tests'].forEach((dir) => {
+      const directories: string[] = Array.from(new Set(specs.map((spec) => spec.node.relative.split('/')[0]))).sort()
+
+      directories.forEach((dir) => {
         cy.get('[data-cy="row-directory-depth-0"]').contains(dir).click()
       })
 
