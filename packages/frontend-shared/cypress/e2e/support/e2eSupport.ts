@@ -179,12 +179,16 @@ function withCtx<T extends Partial<WithCtxOptions>, R> (fn: (ctx: DataContext, o
 function loginUser (userShape: Partial<AuthenticatedUserShape> = {}) {
   return logInternal({ name: 'loginUser', message: JSON.stringify(userShape) }, () => {
     return cy.withCtx((ctx, o) => {
-      ctx.coreData.user = {
-        authToken: '1234',
-        email: 'test@example.com',
-        name: 'Test User',
-        ...o.userShape,
-      }
+      ctx.update((d) => {
+        d.user = {
+          authToken: '1234',
+          email: 'test@example.com',
+          name: 'Test User',
+          ...o.userShape,
+        }
+      })
+
+      ctx.coreData.user
     }, { log: false, userShape })
   })
 }

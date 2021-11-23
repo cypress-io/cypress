@@ -57,10 +57,12 @@ describe('App', () => {
     cy.visitApp()
     cy.withCtx(async (ctx) => {
       // TODO: (Alejandro) This should be removed when we add a file listener to update the config file
-      if (ctx.currentProject) {
-        ctx.currentProject.config = null
-        ctx.currentProject.configChildProcess = null
-      }
+      ctx.update((d) => {
+        if (d.currentProject) {
+          d.currentProject.config = null
+          d.currentProject.configChildProcess = null
+        }
+      })
 
       await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {}')
     })
