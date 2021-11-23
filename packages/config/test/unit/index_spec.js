@@ -149,15 +149,19 @@ describe('src/index', () => {
 
   describe('.validateNoReadOnlyConfig', () => {
     it('returns an error if validation fails', () => {
-      const err = configUtil.validateNoReadOnlyConfig({ chromeWebSecurity: false })
+      const errorFn = sinon.spy()
 
-      expect(err).to.eq('chromeWebSecurity')
+      configUtil.validateNoReadOnlyConfig({ chromeWebSecurity: false }, errorFn)
+
+      expect(errorFn).to.have.been.callCount(1)
     })
 
     it('does not return an error if validation succeeds', () => {
-      const err = configUtil.validateNoReadOnlyConfig({ requestTimeout: 1000 })
+      const errorFn = sinon.spy()
 
-      expect(err).to.be.undefined
+      configUtil.validateNoReadOnlyConfig({ requestTimeout: 1000 }, errorFn)
+
+      expect(errorFn).to.have.been.callCount(0)
     })
   })
 })
