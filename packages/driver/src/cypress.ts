@@ -22,7 +22,7 @@ import $errUtils from './cypress/error_utils'
 import $Log from './cypress/log'
 import $LocalStorage from './cypress/local_storage'
 import $Mocha from './cypress/mocha'
-import $Mouse from './cy/mouse'
+import { create as createMouse } from './cy/mouse'
 import $Runner from './cypress/runner'
 import $Screenshot from './cypress/screenshot'
 import $SelectorPlayground from './cypress/selector_playground'
@@ -680,7 +680,10 @@ $Cypress.prototype.LocalStorage = $LocalStorage
 $Cypress.prototype.Mocha = $Mocha
 $Cypress.prototype.resolveWindowReference = resolvers.resolveWindowReference
 $Cypress.prototype.resolveLocationReference = resolvers.resolveLocationReference
-$Cypress.prototype.Mouse = $Mouse
+$Cypress.prototype.Mouse = {
+  create: createMouse,
+}
+
 $Cypress.prototype.Runner = $Runner
 $Cypress.prototype.Server = $Server
 $Cypress.prototype.Screenshot = $Screenshot

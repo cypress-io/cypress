@@ -99,7 +99,7 @@ describe('driver/src/cy/snapshots', () => {
 
       cy.createSnapshot(null, this.$el)
 
-      expect(attr).to.be.calledWith('data-cypress-el', true)
+      expect(attr).to.be.calledWith('data-cypress-el', 'true')
     })
 
     it('removes data-cypress-el attr', function () {
