@@ -215,10 +215,10 @@ export class ProjectActions {
       return null
     }
 
-    let activeSpec: FoundSpec | null = null
+    let activeSpec: FoundSpec | undefined
 
     if (specPath) {
-      activeSpec = await this.ctx.project.getCurrentSpecByAbsolute(this.ctx.currentProject.projectRoot, specPath)
+      activeSpec = this.ctx.project.getCurrentSpecByAbsolute(specPath)
     }
 
     // Ensure that we have loaded browsers to choose from
