@@ -274,11 +274,7 @@ afterEach(() => {
 })
 
 const getFs = () => {
-  let cwd = process.cwd().split(path.sep)
-
-  if (process.env.PLATFORM !== 'windows') {
-    cwd = process.cwd().split(path.sep).slice(1)
-  }
+  let cwd = process.cwd().split(path.sep).slice(1)
 
   // eslint-disable-next-line no-console
   console.log('cwd', cwd)
@@ -317,5 +313,7 @@ const getFs = () => {
     }))
   }
 
-  return recurse({ root: mockfs.getMockRoot() }, -1).root
+  const depth = process.env.PLATFORM === 'windows' ? -2 : -1
+
+  return recurse({ root: mockfs.getMockRoot() }, depth).root
 }

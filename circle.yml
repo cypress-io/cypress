@@ -2360,7 +2360,6 @@ workflows:
     when:
       or:
       - equal: [ develop, << pipeline.git.branch >> ]
-      - equal: [ rm-appveyor, << pipeline.git.branch >> ]
       - matches:
             pattern: "-release$"
             value: << pipeline.git.branch >>
