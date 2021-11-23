@@ -22,7 +22,11 @@
       class="relative w-full"
     >
       <HideDuringScreenshot class="bg-white p-4">
-        <SpecRunnerHeader :gql="props.gql" />
+        <SpecRunnerHeader
+          :gql="props.gql"
+          :event-manager="eventManager"
+          :get-aut-iframe="getAutIframeModel"
+        />
       </HideDuringScreenshot>
 
       <RemoveClassesDuringScreenshotting

@@ -4,18 +4,20 @@
     class="relative flex flex-col bg-gray-1000 transition-all duration-300"
     :class="mainStore.navBarExpanded ? 'w-248px' : 'w-64px'"
   >
-    <div
-      class="absolute cursor-pointer w-16px bottom-0 top-0 left-full group"
+    <button
+      class="absolute cursor-pointer w-16px bottom-0 top-0 left-full group hocus:outline-transparent"
+      role="button"
+      aria-label="toggle navigation"
       @click="mainStore.toggleNavBar"
     >
-      <div class="w-16px origin-left transform scale-x-0 group-hover:scale-x-100 h-full transition-transform duration-300 flex items-center">
+      <div class="w-16px origin-left transform scale-x-0 group-hocus:scale-x-100 h-full transition-transform duration-300 flex items-center">
         <div class="h-full w-3px bg-indigo-400" />
         <i-cy-chevron-right_x16
           class="icon-dark-indigo-400 h-16px w-16px"
           :class="mainStore.navBarExpanded ? 'transform rotate-180': ''"
         />
       </div>
-    </div>
+    </button>
     <div class="flex flex-col flex-1 overflow-y-auto ">
       <SidebarTooltip
         class="flex items-center h-64px flex-shrink-0 border-b border-gray-900"
