@@ -22,3 +22,11 @@ import '@purge-icons/generated'
 
 import './commands'
 import './attachFileWithPath'
+import { Pinia, setActivePinia, createPinia } from 'pinia'
+
+let pinia: Pinia
+
+beforeEach(() => {
+  pinia = createPinia()
+  setActivePinia(pinia)
+})

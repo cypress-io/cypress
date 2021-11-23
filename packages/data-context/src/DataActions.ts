@@ -45,7 +45,7 @@ export class DataActions {
       throw new Error('Current Project is required')
     }
 
-    return new CurrentProjectActions(this.ctx, this.ctx.currentProject)
+    return this.ctx.currentProject ? new CurrentProjectActions(this.ctx, this.ctx.currentProject) : null
   }
 
   @cached
