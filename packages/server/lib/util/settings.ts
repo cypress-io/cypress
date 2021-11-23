@@ -122,10 +122,6 @@ function _applyRewriteRules (obj = {}) {
   }, _.cloneDeep(obj))
 }
 
-export function isComponentTesting (options: SettingsOptions = {}) {
-  return options.testingType === 'component'
-}
-
 export function configFile (options: SettingsOptions = {}) {
   // default is only used in tests.
   // This prevents a the change from becoming bigger than it should
@@ -156,14 +152,6 @@ export function read (projectRoot, options: SettingsOptions = {}, ctx: DataConte
     return Promise.reject(err)
   })
   .then((configObject = {}) => {
-    if (isComponentTesting(options) && 'component' in configObject) {
-      configObject = { ...configObject, ...configObject.component }
-    }
-
-    if (!isComponentTesting(options) && 'e2e' in configObject) {
-      configObject = { ...configObject, ...configObject.e2e }
-    }
-
     debug('resolved configObject', configObject)
     const changed: ChangedConfig = _applyRewriteRules(configObject)
 
