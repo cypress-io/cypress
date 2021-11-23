@@ -5,6 +5,7 @@ import { CurrentProject } from './gql-CurrentProject'
 import { DevState } from './gql-DevState'
 import { LocalSettings } from './gql-LocalSettings'
 import { VersionData } from './gql-VersionData'
+import { Warning } from './gql-Warning'
 
 export const Query = objectType({
   name: 'Query',
@@ -45,6 +46,14 @@ export const Query = objectType({
       type: ProjectLike,
       description: 'All known projects for the app',
       resolve: (root, args, ctx) => ctx.projectsList,
+    })
+
+    t.nonNull.list.nonNull.field('warnings', {
+      type: Warning,
+      description: 'A list of warnings',
+      resolve: (source, args, ctx) => {
+        return ctx.coreData.warnings
+      },
     })
 
     t.list.nonNull.field('sampleConfigFiles', {

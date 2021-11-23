@@ -25,6 +25,7 @@ export interface ClientTestContext {
     chosenManualInstall: boolean
     chosenBrowser: null
   }
+  warnings: []
   user: AuthenticatedUserShape | null
   cloudTypes: typeof cloudTypes
   __mockPartial: any
@@ -66,6 +67,7 @@ export function makeClientTestContext (): ClientTestContext {
       chosenManualInstall: false,
       chosenBrowser: null,
     },
+    warnings: [],
     user: null,
     cloudTypes,
     localSettings: {

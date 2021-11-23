@@ -3,7 +3,7 @@ import type { BrowserWindow } from 'electron'
 import type { ChildProcess } from 'child_process'
 import path from 'path'
 import type { ApplicationErrorSource } from '@packages/graphql/src/schemaTypes/objectTypes/gql-ApplicationError'
-import { devicePreferenceDefaults, DevicePreferences, Editor, FoundBrowser, FullConfig, LaunchArgs, Preferences } from '@packages/types'
+import { devicePreferenceDefaults, DevicePreferences, Editor, FoundBrowser, FullConfig, LaunchArgs, Preferences, Warning } from '@packages/types'
 
 export type Maybe<T> = T | null | undefined
 
@@ -141,6 +141,7 @@ export interface CoreDataShape {
   electron: ElectronShape
   hasIntializedMode: 'open' | 'run' | null
   isAuthBrowserOpened: boolean
+  warnings: Warning[]
 }
 
 function makeCurrentProject (launchArgs: LaunchArgs): CurrentProjectShape | null {
@@ -194,6 +195,7 @@ export function makeCoreData (launchArgs: LaunchArgs): CoreDataShape {
       chosenLanguage: 'js',
       chosenManualInstall: false,
     },
+    warnings: [],
     user: null,
     electron: {
       browserWindow: null,

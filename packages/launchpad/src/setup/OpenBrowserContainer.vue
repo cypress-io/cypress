@@ -1,9 +1,4 @@
 <template>
-  <Warning
-    v-if="props.gql?.browserErrorMessage"
-    title="Browser Error"
-    :message="props.gql?.browserErrorMessage"
-  />
   <HeadingText
     :title="heading.title"
     :description="heading.description"
@@ -15,7 +10,7 @@
 </template>
 
 <script lang="ts" setup>
-import Warning from '../error/Warning.vue'
+import WarningList from '../warning/Warning.vue'
 import OpenBrowser from './OpenBrowser.vue'
 import { gql } from '@urql/vue'
 import HeadingText from './HeadingText.vue'

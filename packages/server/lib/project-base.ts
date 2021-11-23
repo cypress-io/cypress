@@ -126,15 +126,6 @@ export class ProjectBase<TServer extends Server> extends EE {
     }
 
     this.ctx.actions.projectConfig.killConfigProcess()
-    this.ctx.actions.project.setCurrentProjectProperties({
-      projectRoot: this.projectRoot,
-      configChildProcess: null,
-      ctPluginsInitialized: false,
-      e2ePluginsInitialized: false,
-      isCTConfigured: false,
-      isE2EConfigured: false,
-      config: null,
-    })
   }
 
   protected ensureProp = ensureProp

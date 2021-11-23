@@ -33,15 +33,15 @@ describe.skip('lib/plugins/index', () => {
       configFile: `${todosPath}/cypress.config.js`,
     }
 
-    ctx.actions.project.setCurrentProjectProperties({
-      projectRoot: todosPath,
-      configChildProcess: null,
-      ctPluginsInitialized: false,
-      e2ePluginsInitialized: false,
-      isCTConfigured: false,
-      isE2EConfigured: false,
-      config: null,
-    })
+    // ctx.actions.project.setCurrentProjectProperties({
+    //   projectRoot: todosPath,
+    //   configChildProcess: null,
+    //   ctPluginsInitialized: false,
+    //   e2ePluginsInitialized: false,
+    //   isCTConfigured: false,
+    //   isE2EConfigured: false,
+    //   config: null,
+    // })
 
     getOptions = (overrides = {}) => {
       return {

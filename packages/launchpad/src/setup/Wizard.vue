@@ -1,4 +1,5 @@
 <template>
+  <WarningList :gql="props.gql.wizard" />
   <div class="mb-5 children:relative">
     <EnvironmentSetup
       v-if="wizardStore.wizardStep === 'selectFramework'"
@@ -27,6 +28,7 @@ const wizardStore = useWizardStore()
 
 gql`
 fragment Wizard on Query {
+  ...WarningList
   ...InstallDependencies
 }`
 

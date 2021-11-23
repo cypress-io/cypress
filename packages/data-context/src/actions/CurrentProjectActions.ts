@@ -155,6 +155,15 @@ export class CurrentProjectActions {
     //
   }
 
+  // this.ctx.debug('Error getting browser by name or path (%s): %s', browserNameOrPath, err?.stack || err)
+  // const message = err.details ? `${err.message}\n\n\`\`\`\n${err.details}\n\`\`\`` : err.message
+
+  // this.ctx.coreData.warnings.push({
+  //   title: 'Warning: Browser Not Found',
+  //   message,
+  //   setupStep: 'setupComplete',
+  // })
+
   /**
    * Launches the project in the browser, based on the current testing type
    * @param options

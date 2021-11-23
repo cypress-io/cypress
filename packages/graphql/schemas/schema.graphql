@@ -672,6 +672,9 @@ type Query {
 
   """Previous versions of cypress and their release date"""
   versions: VersionData
+
+  """A list of warnings"""
+  warnings: [Warning!]!
 }
 
 """Represents a spec on the file system"""
@@ -779,17 +782,11 @@ type VersionData {
   latest: Version!
 }
 
-"""
-The Wizard is a container for any state associated with initial onboarding to Cypress
-"""
-type Wizard {
-  """
-  Set of sample configuration files based bundler, framework and language of choice
-  """
-  sampleConfigFiles(input: WizardSetupInput!): [WizardSampleConfigFile!]
-
-  """IndexHtml file based on bundler and framework of choice"""
-  sampleTemplate(input: WizardSetupInput!): String
+"""A warning"""
+type Warning {
+  message: String!
+  setupStep: String
+  title: String!
 }
 
 enum WizardConfigFileStatusEnum {

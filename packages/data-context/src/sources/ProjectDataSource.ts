@@ -2,6 +2,7 @@ import type { CodeGenType, SpecType } from '@packages/graphql/src/gen/nxs.gen'
 import { FrontendFramework, FRONTEND_FRAMEWORKS, ResolvedFromConfig, RESOLVED_FROM, SpecFileWithExtension, STORYBOOK_GLOB } from '@packages/types'
 import { scanFSForAvailableDependency } from 'create-cypress-tests'
 import path from 'path'
+import _ from 'lodash'
 
 import type { DataContext } from '..'
 import type { Maybe } from '../data/coreDataShape'
@@ -105,11 +106,11 @@ export class ProjectDataSource {
       }
 
       if (testingType === 'e2e') {
-        return Boolean(Object.keys(config.e2e ?? {}).length)
+        return _.has(config, 'e2e')
       }
 
       if (testingType === 'component') {
-        return Boolean(Object.keys(config.component ?? {}).length)
+        return _.has(config, 'component')
       }
 
       return false
