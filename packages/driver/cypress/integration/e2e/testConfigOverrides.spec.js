@@ -374,7 +374,7 @@ describe('testConfigOverrides baseUrl @slow', () => {
   })
 })
 
-describe('cannot set read-only properties', () => {
+describe.only('cannot set read-only properties', () => {
   it('throws if mutating read-only config with test configuration', () => {
     try {
       it('fails to set chromeWebSecurity', { chromeWebSecurity: false }, () => {
