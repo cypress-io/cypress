@@ -144,7 +144,7 @@ class $Cypress {
     this.state = $SetterGetter.create({})
     this.originalConfig = _.cloneDeep(config)
     this.config = $SetterGetter.create(config, (config) => {
-      const handleError = (errProperty) => {
+      validateNoReadOnlyConfig(config, (errProperty) => {
         let errMessage
 
         if (this.state('runnable')) {
@@ -154,15 +154,11 @@ class $Cypress {
         }
 
         throw new this.state('specWindow').Error(errMessage)
-      }
+      })
 
-      const err = validateNoReadOnlyConfig(config)
-
-      if (err) {
-        handleError(err)
-      }
-
-      validate(config, handleError)
+      validate(config, (errMsg) => {
+        throw new this.state('specWindow').Error(errMsg)
+      })
     })
 
     this.env = $SetterGetter.create(env)

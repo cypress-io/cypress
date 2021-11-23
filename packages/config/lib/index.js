@@ -102,7 +102,7 @@ module.exports = {
     })
   },
 
-  validateNoReadOnlyConfig: (config) => {
+  validateNoReadOnlyConfig: (config, onErr) => {
     const writeableOptions = options.filter((option) => option.isWriteable).map((option) => option.name)
 
     let errProperty
@@ -113,6 +113,8 @@ module.exports = {
       }
     })
 
-    return errProperty
+    if (errProperty) {
+      return onErr(errProperty)
+    }
   },
 }
