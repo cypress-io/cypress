@@ -41,10 +41,6 @@ export class DataActions {
   }
 
   get currentProject () {
-    if (!this.ctx.currentProject) {
-      throw new Error('Current Project is required')
-    }
-
     return this.ctx.currentProject ? new CurrentProjectActions(this.ctx, this.ctx.currentProject) : null
   }
 
