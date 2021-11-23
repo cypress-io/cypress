@@ -124,15 +124,19 @@ commands:
             - cypress
             - .ssh
             - node_modules # contains the npm i -g modules
-
-  unpack-dependencies:
-    description: 'Unpacks dependencies associated with the current workflow'
+  
+  install_cache_helpers_dependencies:
     steps:
       - run:
           # Dependencies needed by circle-cache.js, before we "yarn" or unpack cached node_modules
           name: Cache Helper Dependencies
           working_directory: ~/
           command: npm i glob@7.1.6 fs-extra@10.0.0 minimist@1.2.5 fast-json-stable-stringify@2.1.0
+
+  unpack-dependencies:
+    description: 'Unpacks dependencies associated with the current workflow'
+    steps:
+      - install_cache_helpers_dependencies
       - run:
           name: Generate Circle Cache Key
           command: node scripts/circle-cache.js --action cacheKey > circle_cache_key
@@ -160,16 +164,12 @@ commands:
         type: boolean
         default: false
     steps:
-      - run:
-          # Dependencies needed by circle-cache.js, before we "yarn" or unpack cached node_modules
-          name: Cache Helper Dependencies
-          working_directory: ~/
-          command: npm install glob@7.1.6 fs-extra@10.0.0 minimist@1.2.5 fast-json-stable-stringify@2.1.0
+      - install_cache_helpers_dependencies
       - run:
           name: Generate Circle Cache Key
           command: node scripts/circle-cache.js --action cacheKey > circle_cache_key
       - restore_cache:
-          name: Restore cache state, to check for known modules cache existence
+          name: Restore cache state
           key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-test2-node-modules-cache-state-{{ checksum "circle_cache_key" }}
       - run:
           name: Bail if cache exists
@@ -258,7 +258,7 @@ commands:
     description: Install Node version matching .node-version
     steps:
       - run:
-          name: Install NVM + Node
+          name: Install Node
           command: |
             node_version=$(cat .node-version)
             [ -s "${HOME}/.nvm/nvm.sh" ] && \. "${HOME}/.nvm/nvm.sh" # This loads nvm
@@ -267,13 +267,11 @@ commands:
               curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.30.0/install.sh | bash
               [ -s "${HOME}/.nvm/nvm.sh" ] && \. "${HOME}/.nvm/nvm.sh" # This loads nvm
             fi
-            nvm current
             echo "Installing Node $node_version"
             nvm install ${node_version}
             echo "Using Node $node_version"
             nvm use ${node_version}
-            nvm alias default ${node_version}
-            node --version | node --version
+            [[ $PLATFORM != 'windows' ]] && nvm alias default ${node_version}
             echo "Installing Yarn"
             npm install yarn -g # ensure yarn is installed with the correct node engine
             yarn check-node-version
@@ -831,7 +829,6 @@ commands:
           working_directory: cli/build
       - unless:
           condition:
-            # stop-only does not correctly match on windows: https://github.com/bahmutov/stop-only/issues/78
             equal: [ *windows-executor, << parameters.executor >> ]
           steps:
             - run:
@@ -987,7 +984,8 @@ jobs:
       - run: yarn test-mocha
       - when:
           condition:
-            # several snapshots fails for windows
+            # several snapshots fails for windows due to paths.
+            # until these are fixed, run the tests that are working.
             equal: [ *windows-executor, << parameters.executor >> ]
           steps:
             - run: yarn test-scripts scripts/**/*spec.js
@@ -995,7 +993,6 @@ jobs:
             - run: yarn test-mocha-snapshot
       - unless:
           condition:
-            # several snapshots fails for windows
             equal: [ *windows-executor, << parameters.executor >> ]
           steps:
             - run: yarn test-scripts
@@ -2267,6 +2264,7 @@ mac-workflow: &mac-workflow
     - build:
         name: darwin-build
         executor: mac
+        resource_class: medium
         requires:
           - darwin-node-modules-install
 
@@ -2285,6 +2283,7 @@ mac-workflow: &mac-workflow
           - test-runner:upload
           - test-runner:commit-status-checks
         executor: mac
+        resource_class: medium
         requires:
           - darwin-build
 

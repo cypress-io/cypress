@@ -276,21 +276,12 @@ afterEach(() => {
 const getFs = () => {
   let cwd = process.cwd().split(path.sep).slice(1)
 
-  // eslint-disable-next-line no-console
-  console.log('cwd', cwd)
-
   const recurse = (dir, d) => {
-    // eslint-disable-next-line no-console
-    console.log('dir', dir)
-    // eslint-disable-next-line no-console
-    console.log('d', d)
     if (_.isString(dir)) {
       return dir
     }
 
     return _.extend({}, ..._.map(dir, (val, key) => {
-      // eslint-disable-next-line no-console
-      console.log('key', key)
       let nextDepth = null
 
       if (d !== null) {

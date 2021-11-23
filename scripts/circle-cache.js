@@ -50,8 +50,6 @@ async function cacheKey () {
     },
   ).join('')
 
-  console.log('bust the cACHE FOR THEIS')
-
   const filesToHash = yarnLocks.concat(patchFiles).sort()
   const hashedFiles = await Promise.all(filesToHash.map((p) => hashFile(p)))
   const cacheKeySource = hashedFiles.concat(hashedPackageDeps)
@@ -66,17 +64,14 @@ async function cacheKey () {
 async function prepareCircleCache () {
   const paths = glob.sync(p(`{${packageGlobs.join(',')}}/node_modules/`))
 
-  console.log('BASE_DIR', BASE_DIR)
-  console.log('CACHE_DIR', CACHE_DIR)
-  console.log('found paths', paths.length)
   await Promise.all(
     paths.map(async (src) => {
-      const updatedDir = src
-      .replace(/(.*?)\/node_modules/, '$1_node_modules')
-      .replace(BASE_DIR, CACHE_DIR)
-
-      console.log('moving', src, 'to', updatedDir)
-      await fsExtra.move(src, updatedDir)
+      await fsExtra.move(
+        src,
+        src
+        .replace(/(.*?)\/node_modules/, '$1_node_modules')
+        .replace(BASE_DIR, CACHE_DIR),
+      )
     }),
   )
 
@@ -92,12 +87,12 @@ async function unpackCircleCache () {
 
   await Promise.all(
     paths.map(async (src) => {
-      const updatedDir = src
-      .replace(CACHE_DIR, BASE_DIR)
-      .replace(/(.*?)_node_modules/, `$1/node_modules`)
-
-      console.log('moving', src, 'to', updatedDir)
-      await fsExtra.move(src, updatedDir)
+      await fsExtra.move(
+        src,
+        src
+        .replace(CACHE_DIR, BASE_DIR)
+        .replace(/(.*?)_node_modules/, `$1/node_modules`),
+      )
     }),
   )
 
