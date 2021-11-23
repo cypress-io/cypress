@@ -14,7 +14,10 @@ export class AuthActions {
   async getUser () {
     return this.authApi.getUser().then((obj) => {
       if (obj.authToken) {
-        this.ctx.coreData.user = obj
+        this.ctx.update((o) => {
+          o.user = obj
+        })
+
         // When we get the user at startup, check the auth by
         // hitting the network
         this.checkAuth()
@@ -34,20 +37,28 @@ export class AuthActions {
     })
 
     if (!result.data?.cloudViewer) {
-      this.ctx.coreData.user = null
+      this.ctx.update((o) => {
+        o.user = null
+      })
+
       this.logout()
     }
   }
 
   async login () {
     this.setAuthenticatedUser(await this.authApi.logIn(({ browserOpened }) => {
-      this.ctx.coreData.isAuthBrowserOpened = browserOpened
+      this.ctx.update((o) => {
+        o.isAuthBrowserOpened = browserOpened
+      })
     }))
   }
 
   async logout () {
     try {
-      this.ctx.coreData.isAuthBrowserOpened = false
+      this.ctx.update((o) => {
+        o.isAuthBrowserOpened = false
+      })
+
       await this.authApi.logOut()
     } catch {
       //
@@ -56,7 +67,9 @@ export class AuthActions {
   }
 
   private setAuthenticatedUser (authUser: AuthenticatedUserShape | null) {
-    this.ctx.coreData.user = authUser
+    this.ctx.update((o) => {
+      o.user = authUser
+    })
 
     return this
   }

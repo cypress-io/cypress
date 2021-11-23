@@ -4,8 +4,11 @@ import type { ChildProcess } from 'child_process'
 import path from 'path'
 import type { ApplicationErrorSource } from '@packages/graphql/src/schemaTypes/objectTypes/gql-ApplicationError'
 import { devicePreferenceDefaults, DevicePreferences, Editor, FoundBrowser, FullConfig, LaunchArgs, Preferences, Warning } from '@packages/types'
+import type { Immutable, Patch } from 'immer'
 
 export type Maybe<T> = T | null | undefined
+
+export type DevStatePatchShape = Patch
 
 export interface AuthenticatedUserShape {
   name?: string
@@ -21,11 +24,11 @@ export interface DevStateShape {
   refreshState: null | string
 }
 
-export interface LocalSettingsDataShape {
+export type LocalSettingsDataShape = Immutable<{
   refreshing: Promise<Editor[]> | null
   availableEditors: Editor[]
   preferences: DevicePreferences
-}
+}>
 
 export interface ConfigChildProcessShape {
   /**
@@ -42,7 +45,8 @@ export interface ConfigChildProcessShape {
   resolvedBaseConfig: Promise<Cypress.ConfigOptions>
 }
 
-export interface CurrentProjectShape extends ProjectShape {
+export type CurrentProjectShape = Immutable<{
+  projectRoot: string
   /**
    * Title of the project is the "basename" of the project
    */
@@ -101,7 +105,7 @@ export interface CurrentProjectShape extends ProjectShape {
    * Chosen browser for the current project
    */
   currentBrowser?: FoundBrowser | null
-}
+}>
 
 export interface AppDataShape {
   isLoadingMachineBrowsers: boolean
@@ -128,7 +132,7 @@ export interface BaseErrorDataShape {
   stack?: string
 }
 
-export interface CoreDataShape {
+export type CoreDataShape = Immutable<{
   globalError: ApplicationErrorSource | null
   dev: DevStateShape
   localSettings: LocalSettingsDataShape
@@ -142,9 +146,9 @@ export interface CoreDataShape {
   hasIntializedMode: 'open' | 'run' | null
   isAuthBrowserOpened: boolean
   warnings: Warning[]
-}
+}>
 
-function makeCurrentProject (launchArgs: LaunchArgs): CurrentProjectShape | null {
+function makeCurrentProject (launchArgs: LaunchArgs): Immutable<CurrentProjectShape | null> {
   if (launchArgs.global || !launchArgs.projectRoot) {
     return null
   }
@@ -166,7 +170,7 @@ function makeCurrentProject (launchArgs: LaunchArgs): CurrentProjectShape | null
 /**
  * All state for the app should live here for now
  */
-export function makeCoreData (launchArgs: LaunchArgs): CoreDataShape {
+export function makeCoreData (launchArgs: LaunchArgs): Immutable<CoreDataShape> {
   return {
     globalError: null,
     hasIntializedMode: null,

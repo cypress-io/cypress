@@ -15,8 +15,9 @@ export class LocalSettingsActions {
   constructor (private ctx: DataContext) {}
 
   setDevicePreference<K extends keyof DevicePreferences> (key: K, value: DevicePreferences[K]) {
-    // update local data
-    this.ctx.coreData.localSettings.preferences[key] = value
+    this.ctx.update((o) => {
+      o.localSettings.preferences[key] = value
+    })
 
     // persist to appData
     return this.ctx._apis.localSettingsApi.setDevicePreference(key, value)
@@ -29,13 +30,22 @@ export class LocalSettingsActions {
 
     const dfd = pDefer<Editor[]>()
 
-    this.ctx.coreData.localSettings.refreshing = dfd.promise
+    this.ctx.update((o) => {
+      o.localSettings.refreshing = dfd.promise
+    })
 
     // TODO(tim): global unhandled error concept
     const availableEditors = await this.ctx._apis.localSettingsApi.getAvailableEditors()
 
-    this.ctx.coreData.localSettings.availableEditors = availableEditors
-    this.ctx.coreData.localSettings.preferences = await this.ctx._apis.localSettingsApi.getPreferences()
+    this.ctx.update((o) => {
+      o.localSettings.availableEditors = availableEditors
+    })
+
+    const preferences = await this.ctx._apis.localSettingsApi.getPreferences()
+
+    this.ctx.update((o) => {
+      o.localSettings.preferences = preferences
+    })
 
     dfd.resolve(availableEditors)
   }

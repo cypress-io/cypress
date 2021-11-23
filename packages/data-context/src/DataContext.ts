@@ -2,8 +2,8 @@ import type { LaunchArgs, OpenProjectLaunchOptions, PlatformName } from '@packag
 import fsExtra from 'fs-extra'
 import path from 'path'
 import Bluebird from 'bluebird'
+import { Immutable, Draft, produceWithPatches, Patch, enablePatches } from 'immer'
 import 'server-destroy'
-
 import { AppApiShape, ApplicationDataApiShape, DataEmitterActions, LocalSettingsApiShape, ProjectApiShape } from './actions'
 import type { NexusGenAbstractTypeMembers } from '@packages/graphql/src/gen/nxs.gen'
 import type { AuthApiShape } from './actions/AuthActions'
@@ -34,6 +34,8 @@ import type { App as ElectronApp } from 'electron'
 import type { SocketIOServer } from '@packages/socket'
 import { VersionsDataSource } from './sources/VersionsDataSource'
 
+enablePatches()
+
 const IS_DEV_ENV = process.env.CYPRESS_INTERNAL_ENV !== 'production'
 
 export interface DataContextConfig {
@@ -60,7 +62,8 @@ export interface DataContextConfig {
 
 export class DataContext {
   private _rootBus: EventEmitter
-  private _coreData: CoreDataShape
+  private _coreData: Immutable<CoreDataShape>
+  private _patches: Patch[][] = []
   private _gqlServer: Server | undefined
   private _gqlSocketServer: SocketIOServer | undefined
   private _appServerPort: number | undefined
@@ -91,6 +94,22 @@ export class DataContext {
   get isGlobalMode () {
     return !this.currentProject
   }
+
+  get patches () {
+    return this._patches
+  }
+
+  /**
+   * Run all of the "updates" through a single method to track the timeline of mutations
+   * for debuggability, testing, etc
+   */
+  update = (updater: (proj: Draft<CoreDataShape>) => void) => {
+    const [state, patches] = produceWithPatches(this._coreData, updater)
+
+    this._coreData = state
+    this._patches.push(patches)
+  }
+
   resetLaunchArgs (launchArgs: LaunchArgs) {
     this._coreData = makeCoreData(launchArgs)
   }
@@ -364,7 +383,9 @@ export class DataContext {
       throw new Error(`Mode already initialized`)
     }
 
-    this._coreData.hasIntializedMode = 'run'
+    this.update((o) => {
+      o.hasIntializedMode = 'run'
+    })
     // TODO: figure out what this needs to be... sourcing & validating config?
   }
 
@@ -380,7 +401,9 @@ export class DataContext {
 
     this.debug('initializeOpenMode: coreData', this._coreData)
 
-    this._coreData.hasIntializedMode = 'open'
+    this.update((o) => {
+      o.hasIntializedMode = 'open'
+    })
 
     const toAwait: Array<Promise<any> | undefined> = []
 

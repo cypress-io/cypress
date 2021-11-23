@@ -359,6 +359,16 @@ type DevState {
   When we have edited server related files, we may want to relaunch the client.
   """
   needsRelaunch: Boolean
+  patches: [[DevStatePatch]]
+}
+
+"""An immer patch"""
+type DevStatePatch {
+  op: String
+  path: [JSON]
+  pathStr: String
+  value(slice: Int): String
+  valueJson: JSON
 }
 
 """Represents an editor on the local machine"""
@@ -759,6 +769,23 @@ enum SupportedBundlers {
 enum TestingTypeEnum {
   component
   e2e
+}
+
+"""Current state of a given testing type"""
+enum TestingTypeState {
+  """We are loading the config"""
+  LOADING
+
+  """
+  We have detected errors when looking at the configuration and need to suggest changes
+  """
+  NEEDS_CHANGES
+
+  """We have not yet setup this testing type yet"""
+  NEW
+
+  """Everything looks good and we can move on to finding browsers"""
+  READY
 }
 
 """Version of Cypress and release date"""

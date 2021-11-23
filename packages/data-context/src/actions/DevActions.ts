@@ -25,7 +25,10 @@ export class DevActions {
       })
 
       this._chokidar.on('change', () => {
-        this.ctx.coreData.dev.refreshState = new Date().toISOString()
+        this.ctx.update((o) => {
+          o.dev.refreshState = new Date().toISOString()
+        })
+
         this.ctx.emitter.toApp()
         this.ctx.emitter.toLaunchpad()
       })
@@ -47,7 +50,9 @@ export class DevActions {
   }
 
   dismissRelaunch () {
-    this.ctx.coreData.dev.refreshState = null
+    this.ctx.update((o) => {
+      o.dev.refreshState = null
+    })
   }
 
   dispose () {

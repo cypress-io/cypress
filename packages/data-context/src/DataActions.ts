@@ -53,8 +53,7 @@ export class DataActions {
     return new ElectronActions(this.ctx)
   }
 
-  @cached
   get projectConfig () {
-    return new ProjectConfigDataActions(this.ctx)
+    return this.ctx.currentProject ? new ProjectConfigDataActions(this.ctx, this.ctx.currentProject) : null
   }
 }

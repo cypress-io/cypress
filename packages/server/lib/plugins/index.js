@@ -73,7 +73,7 @@ const init = (config, options, ctx) => {
     executedPlugins = ctx.currentProject?.configChildProcess?.executedPlugins
 
     const killPluginsProcess = () => {
-      ctx.actions.projectConfig.killConfigProcess()
+      ctx.actions.projectConfig?.killConfigProcess()
       pluginsProcess = null
     }
 

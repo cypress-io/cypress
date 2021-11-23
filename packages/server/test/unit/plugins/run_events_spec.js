@@ -9,7 +9,7 @@ describe('lib/plugins/run_events', () => {
     beforeEach(() => {
       sinon.stub(plugins, 'execute')
       sinon.stub(plugins, 'has').returns(false)
-      sinon.stub(errors, 'throw')
+      sinon.spy(errors, 'get')
     })
 
     it('returns a promise noop if event is not registered', () => {
@@ -45,7 +45,14 @@ describe('lib/plugins/run_events', () => {
 
       return runEvents.execute('before:spec', {}, 'arg1', 'arg2')
       .then(() => {
-        expect(errors.throw).to.be.calledWith('PLUGINS_RUN_EVENT_ERROR', 'before:spec', 'The event threw an error')
+        throw new Error('Unhandled')
+      })
+      .catch((e) => {
+        if (e.message === 'Unhandled') {
+          throw e
+        }
+
+        expect(errors.get).to.be.calledWith('PLUGINS_RUN_EVENT_ERROR', 'before:spec', 'The event threw an error')
       })
     })
   })

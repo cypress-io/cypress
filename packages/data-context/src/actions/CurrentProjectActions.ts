@@ -1,6 +1,7 @@
 import type { CodeGenType, MutationSetProjectPreferencesArgs, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
 import type { CypressError, CypressErrorIdentifier, CypressErrorLike, FindSpecs, FoundBrowser, FoundSpec, FullConfig, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions, Preferences, SettingsOptions } from '@packages/types'
 import path from 'path'
+import type { Draft, Immutable } from 'immer'
 import type { DataContext } from '..'
 import { codeGenerator, SpecOptions } from '../codegen'
 import templates from '../codegen/templates'
@@ -33,7 +34,7 @@ export interface ProjectApiShape {
  * project specified. Also isolates the project
  */
 export class CurrentProjectActions {
-  constructor (private ctx: DataContext, private readonly currentProject: Readonly<CurrentProjectShape>) {}
+  constructor (private ctx: DataContext, private currentProject: Immutable<CurrentProjectShape>) {}
 
   private get projectRoot () {
     return this.currentProject.projectRoot
@@ -44,8 +45,16 @@ export class CurrentProjectActions {
    * being able to funnel all mutations through a single place. Will eventually
    * replace with immer
    */
-  private update (updater: (proj: CurrentProjectShape) => void) {
-    updater(this.currentProject)
+  private update (updater: (proj: Draft<CurrentProjectShape>) => void) {
+    this.ctx.update((o) => {
+      if (o.currentProject?.projectRoot === this.currentProject.projectRoot) {
+        updater(o.currentProject)
+      }
+    })
+
+    if (this.ctx.coreData.currentProject?.projectRoot === this.currentProject.projectRoot) {
+      this.currentProject = this.ctx.coreData.currentProject
+    }
   }
 
   private get api () {
@@ -63,8 +72,9 @@ export class CurrentProjectActions {
   async clearCurrentProject () {
     await this.api.closeActiveProject()
 
-    // TODO(tim): Improve general state management w/ immutability (immer) & updater fn
-    this.ctx.coreData.currentProject = null
+    this.ctx.update((o) => {
+      o.currentProject = null
+    })
   }
 
   setCurrentTestingType (type: TestingTypeEnum) {

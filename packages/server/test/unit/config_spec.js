@@ -25,7 +25,7 @@ describe('lib/config', () => {
 
   context('environment name check', () => {
     it('throws an error for unknown CYPRESS_INTERNAL_ENV', () => {
-      sinon.stub(errors, 'get').withArgs('INVALID_CYPRESS_INTERNAL_ENV', 'foo-bar')
+      sinon.spy(errors, 'get').withArgs('INVALID_CYPRESS_INTERNAL_ENV', 'foo-bar')
       process.env.CYPRESS_INTERNAL_ENV = 'foo-bar'
       const cfg = {
         projectRoot: '/foo/bar/',
@@ -45,7 +45,7 @@ describe('lib/config', () => {
     })
 
     it('allows production CYPRESS_INTERNAL_ENV', () => {
-      sinon.stub(errors, 'get')
+      sinon.spy(errors, 'get')
       process.env.CYPRESS_INTERNAL_ENV = 'production'
       const cfg = {
         projectRoot: '/foo/bar/',
@@ -1828,7 +1828,7 @@ describe('lib/config', () => {
         browsers: null,
       }
 
-      sinon.stub(errors, 'get')
+      sinon.spy(errors, 'get')
       try {
         config.updateWithPluginValues(cfg, overrides)
         throw new Error('Unreachable')

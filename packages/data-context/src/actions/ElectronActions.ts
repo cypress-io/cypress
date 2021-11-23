@@ -17,7 +17,9 @@ export class ElectronActions {
   }
 
   setBrowserWindow (window: BrowserWindow) {
-    this.electron.browserWindow = window
+    this.ctx.update((o) => {
+      o.electron.browserWindow = window
+    })
   }
 
   hideBrowserWindow () {

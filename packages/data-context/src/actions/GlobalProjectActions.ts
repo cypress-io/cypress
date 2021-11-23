@@ -12,15 +12,28 @@ export class GlobalProjectActions {
   async loadGlobalProjects () {
     this.ctx.debug('loadGlobalProjects from %s', this.ctx._apis.appDataApi.path())
     if (!this.ctx.coreData.isLoadingGlobalProjects) {
-      this.ctx.coreData.isLoadingGlobalProjects = true
+      this.ctx.update((o) => {
+        o.isLoadingGlobalProjects = true
+      })
+
       try {
-        this.ctx.coreData.globalProjects = await this.ctx._apis.projectApi.getProjectRootsFromCache()
+        const globalProjects = await this.ctx._apis.projectApi.getProjectRootsFromCache()
+
+        this.ctx.update((o) => {
+          o.globalProjects = globalProjects
+        })
+
         this.ctx.debug('loadGlobalProjects %o', this.ctx.coreData.globalProjects)
       } catch (e) {
         this.ctx.debug('loadGlobalProjects error %o', e)
-        this.ctx.coreData.globalError = this.ctx.prepError(e as Error)
+        this.ctx.update((o) => {
+          o.globalError = this.ctx.prepError(e as Error)
+        })
       } finally {
-        this.ctx.coreData.isLoadingGlobalProjects = false
+        this.ctx.update((o) => {
+          o.isLoadingGlobalProjects = false
+        })
+
         this.ctx.emitter.toLaunchpad()
       }
     }
@@ -38,18 +51,7 @@ export class GlobalProjectActions {
     const title = this.ctx.project.projectTitle(projectRoot)
 
     // Set initial properties, so we can set the config object on the active project
-    this.ctx.coreData.currentProject = {
-      title,
-      projectRoot,
-      config: null,
-      cliBrowser: null,
-      currentTestingType: null,
-      isLoadingConfig: false,
-      isLoadingConfigPromise: null,
-      isLoadingPlugins: false,
-      errorLoadingConfig: null,
-      errorLoadingPlugins: null,
-    }
+    this.resetCurrentProject(projectRoot, title)
 
     // Load the project config, but don't block on this - it will alert
     // its status separately via updating coreData.currentProject
@@ -60,18 +62,24 @@ export class GlobalProjectActions {
     const title = this.ctx.project.projectTitle(projectRoot)
 
     // Set initial properties, so we can set the config object on the active project
-    this.ctx.coreData.currentProject = {
-      title,
-      projectRoot,
-      config: null,
-      cliBrowser: null,
-      currentTestingType: null,
-      isLoadingConfig: false,
-      isLoadingConfigPromise: null,
-      isLoadingPlugins: false,
-      errorLoadingConfig: null,
-      errorLoadingPlugins: null,
-    }
+    this.resetCurrentProject(projectRoot, title)
+  }
+
+  private resetCurrentProject (projectRoot: string, title: string) {
+    this.ctx.update((o) => {
+      o.currentProject = {
+        title,
+        projectRoot,
+        config: null,
+        cliBrowser: null,
+        currentTestingType: null,
+        isLoadingConfig: false,
+        isLoadingConfigPromise: null,
+        isLoadingPlugins: false,
+        errorLoadingConfig: null,
+        errorLoadingPlugins: null,
+      }
+    })
   }
 
   /**
@@ -82,7 +90,10 @@ export class GlobalProjectActions {
     const found = this.ctx.projectsList?.find((x) => x.projectRoot === projectRoot)
 
     if (!found && this.ctx.coreData.globalProjects) {
-      this.ctx.coreData.globalProjects.push(projectRoot)
+      this.ctx.update((o) => {
+        o.globalProjects?.push(projectRoot)
+      })
+
       this.ctx._apis.projectApi.insertProjectToCache(projectRoot)
     }
 
@@ -98,7 +109,10 @@ export class GlobalProjectActions {
       throw new Error(`Cannot remove ${projectRoot}, it is not a known project`)
     }
 
-    this.ctx.coreData.globalProjects = this.ctx.coreData.globalProjects?.filter((project) => project !== projectRoot) ?? null
+    this.ctx.update((o) => {
+      o.globalProjects = this.ctx.coreData.globalProjects?.filter((project) => project !== projectRoot) ?? null
+    })
+
     this.ctx._apis.projectApi.removeProjectFromCache(projectRoot)
   }
 

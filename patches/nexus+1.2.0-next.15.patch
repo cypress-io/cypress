@@ -1,0 +1,44 @@
+diff --git a/node_modules/nexus/dist/typegenPrinter.js b/node_modules/nexus/dist/typegenPrinter.js
+index 2f14ac8..a0e1b71 100644
+--- a/node_modules/nexus/dist/typegenPrinter.js
++++ b/node_modules/nexus/dist/typegenPrinter.js
+@@ -64,6 +64,7 @@ class TypegenPrinter {
+     }
+     printCommon() {
+         return [
++            'type TArray<T> = Array<T> | ReadonlyArray<T>',
+             this.printInputTypeMap(),
+             this.printEnumTypeMap(),
+             this.printScalarTypeMap(),
+@@ -603,13 +604,13 @@ class TypegenPrinter {
+             if (item.length === 1) {
+                 if (Array.isArray(item[0])) {
+                     const toPrint = combine(item[0]);
+-                    return toPrint.indexOf('null') === -1 ? `${toPrint}[]` : `Array<${toPrint}>`;
++                    return toPrint.indexOf('null') === -1 ? `TArray<${toPrint}>` : `TArray<${toPrint}>`;
+                 }
+                 return item[0];
+             }
+             if (Array.isArray(item[1])) {
+                 const toPrint = combine(item[1]);
+-                return toPrint.indexOf('null') === -1 ? `${toPrint}[] | null` : `Array<${toPrint}> | null`;
++                return toPrint.indexOf('null') === -1 ? `TArray<${toPrint}> | null` : `TArray<${toPrint}> | null`;
+             }
+             return `${item[1]} | null`;
+         }
+@@ -663,13 +664,13 @@ class TypegenPrinter {
+             if (item.length === 1) {
+                 if (Array.isArray(item[0])) {
+                     const toPrint = combine(item[0]);
+-                    return toPrint.indexOf('null') === -1 ? `${toPrint}[]` : `Array<${toPrint}>`;
++                    return toPrint.indexOf('null') === -1 ? `TArray<${toPrint}>` : `TArray<${toPrint}>`;
+                 }
+                 return item[0];
+             }
+             if (Array.isArray(item[1])) {
+                 const toPrint = combine(item[1]);
+-                return toPrint.indexOf('null') === -1 ? `${toPrint}[] | null` : `Array<${toPrint}> | null`;
++                return toPrint.indexOf('null') === -1 ? `TArray<${toPrint}> | null` : `TArray<${toPrint}> | null`;
+             }
+             return `${item[1]} | null`;
+         }

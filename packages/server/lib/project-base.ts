@@ -125,8 +125,10 @@ export class ProjectBase<TServer extends Server> extends EE {
       ...options,
     }
 
-    this.ctx.actions.projectConfig.killConfigProcess()
-    this.ctx.actions.globalProject.setActiveProject(this.projectRoot)
+    this.ctx.actions.projectConfig?.killConfigProcess()
+    if (this.ctx.coreData.currentProject?.projectRoot !== this.projectRoot) {
+      this.ctx.actions.globalProject.setActiveProject(this.projectRoot)
+    }
   }
 
   protected ensureProp = ensureProp

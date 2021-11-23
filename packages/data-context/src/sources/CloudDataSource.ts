@@ -75,24 +75,29 @@ export class CloudDataSource {
       const pipeline = pipe(
         executingQuery,
         subscribe((res) => {
+          const { error } = res
           // this.ctx.debug('executeRemoteGraphQL subscribe res %o', res)
 
           if (!resolvedData) {
             resolvedData = res
-            if (res.error) {
-              dfd.reject(res.error)
+            if (error) {
+              dfd.reject(error)
             } else {
               dfd.resolve(res)
             }
-          } else if (!_.isEqual(resolvedData.data, res.data) || !_.isEqual(resolvedData.error, res.error)) {
-            if (res.error) {
-              this.ctx.coreData.globalError = {
-                title: res.error.graphQLErrors[0]?.originalError?.name,
-                message: res.error.message,
-                stack: res.error.stack,
-              }
+          } else if (!_.isEqual(resolvedData.data, res.data) || !_.isEqual(resolvedData.error, error)) {
+            if (error) {
+              this.ctx.update((o) => {
+                o.globalError = {
+                  title: error.graphQLErrors[0]?.originalError?.name,
+                  message: error.message,
+                  stack: error.stack,
+                }
+              })
             } else {
-              this.ctx.coreData.globalError = null
+              this.ctx.update((o) => {
+                o.globalError = null
+              })
             }
 
             // TODO(tim): send a signal to the frontend so when it refetches it does 'cache-only' request,

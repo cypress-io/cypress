@@ -4,9 +4,11 @@ import path from 'path'
 import { EventEmitter } from 'events'
 import pDefer from 'p-defer'
 import { isCypressError } from '@packages/types'
+import type { Immutable } from 'immer'
 
 import type { DataContext } from '..'
 import inspector from 'inspector'
+import type { CurrentProjectShape } from '../data'
 
 interface ForkConfigProcessOptions {
   projectRoot: string
@@ -17,14 +19,18 @@ interface ForkConfigProcessOptions {
  * Manages the lifecycle of the Config sourcing & Plugin execution
  */
 export class ProjectConfigDataActions {
-  constructor (private ctx: DataContext) {}
+  constructor (private ctx: DataContext, private currentProject: Immutable<CurrentProjectShape>) {}
 
   static CHILD_PROCESS_FILE_PATH = path.join(__dirname, '../../../server/lib/util', 'require_async_child.js')
 
   killConfigProcess () {
     if (this.ctx.currentProject?.configChildProcess) {
       this.ctx.currentProject.configChildProcess.process.kill()
-      this.ctx.currentProject.configChildProcess = null
+      this.ctx.update((o) => {
+        if (o.currentProject?.projectRoot === this.currentProject.projectRoot) {
+          o.currentProject.configChildProcess = null
+        }
+      })
     }
   }
 
@@ -41,11 +47,17 @@ export class ProjectConfigDataActions {
     })
     const dfd = pDefer<Cypress.ConfigOptions>()
 
-    this.ctx.currentProject.configChildProcess = {
-      process,
-      executedPlugins: null,
-      resolvedBaseConfig: dfd.promise,
-    }
+    this.ctx.update((o) => {
+      if (o.currentProject?.projectRoot === this.currentProject.projectRoot) {
+        o.currentProject.configChildProcess = {
+          process,
+          executedPlugins: null,
+          resolvedBaseConfig: dfd.promise,
+        }
+      } else {
+        process.kill()
+      }
+    })
 
     this.wrapConfigProcess(process, dfd)
 

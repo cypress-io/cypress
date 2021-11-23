@@ -1,4 +1,3 @@
-import type { FullConfig } from '@packages/types'
 import path from 'path'
 import type { DataContext } from '..'
 
@@ -17,26 +16,10 @@ export class ProjectConfigDataSource {
         await this.ctx.actions.app.refreshNodePath()
       }
 
-      return this.ctx.deref.actions.projectConfig.refreshProjectConfig(configFilePath)
+      return this.ctx.deref.actions.projectConfig?.refreshProjectConfig(configFilePath)
     }
 
     return configChildProcess.resolvedBaseConfig
-  }
-
-  async getConfigForProject (projectRoot: string): Promise<FullConfig> {
-    if (!this.ctx.coreData.currentProject) {
-      throw new Error(`Cannot access config without currentProject`)
-    }
-
-    if (!this.ctx.coreData.currentProject.isLoadingConfigPromise) {
-      this.ctx.coreData.currentProject.isLoadingConfigPromise = (async () => {
-        const configFile = await this.ctx.config.getDefaultConfigBasename(projectRoot)
-
-        return this.ctx._apis.projectApi.getConfig(projectRoot, { configFile })
-      })()
-    }
-
-    return this.ctx.coreData.currentProject.isLoadingConfigPromise
   }
 
   async getDefaultConfigBasename (projectRoot: string) {
@@ -79,7 +62,7 @@ export class ProjectConfigDataSource {
     const projectRoot = this.ctx.currentProject?.projectRoot
 
     if (!projectRoot) {
-      throw new Error('Can\'t het the config file path without current project root')
+      throw new Error('Can\'t get the config file path without current project root')
     }
 
     const defaultConfigBasename = await this.getDefaultConfigBasename(projectRoot)

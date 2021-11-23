@@ -11,15 +11,15 @@ import { computed } from 'vue'
 import MarkdownIt from 'markdown-it'
 import MarkdownItClass from '@toycode/markdown-it-class'
 import { gql, useMutation } from '@urql/vue'
-import { ExternalLink_OpenExternalDocument } from '../../generated/graphql'
+import { Markdown_OpenExternalDocument } from '../../generated/graphql'
 
 gql`
-mutation ExternalLink_OpenExternal ($url: String!) {
+mutation Markdown_OpenExternal ($url: String!) {
   openExternal(url: $url)
 }
 `
 
-const openExternalMutation = useMutation(ExternalLink_OpenExternalDocument)
+const openExternalMutation = useMutation(Markdown_OpenExternalDocument)
 
 const props = withDefaults(defineProps<{
   class: string,

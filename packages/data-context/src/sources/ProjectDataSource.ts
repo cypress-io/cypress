@@ -39,7 +39,7 @@ export class ProjectDataSource {
       projectRoot: this.ctx.currentProject.projectRoot,
       fixturesFolder: config.fixturesFolder ?? false,
       supportFile: config.supportFile ?? false,
-      testFiles: config.testFiles ?? [],
+      testFiles: Array.from(config.testFiles ?? []),
       ignoreTestFiles: config.ignoreTestFiles as string[] ?? [],
       componentFolder: config.projectRoot ?? false,
       integrationFolder: config.integrationFolder ?? '',

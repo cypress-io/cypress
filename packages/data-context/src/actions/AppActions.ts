@@ -19,22 +19,31 @@ export class AppActions {
 
     const dfd = pDefer<FoundBrowser[]>()
 
-    this.ctx.coreData.app.loadingMachineBrowsers = dfd.promise
+    this.ctx.update((o) => {
+      o.app.loadingMachineBrowsers = dfd.promise
+    })
 
     this.ctx.debug('loadMachineBrowsers')
     try {
       const browsers = await this.ctx._apis.appApi.getBrowsers()
 
-      this.ctx.coreData.app.machineBrowsers = browsers
+      this.ctx.update((o) => {
+        o.app.machineBrowsers = browsers
+      })
 
       this.ctx.debug('loadMachineBrowsers: %o', browsers)
       dfd.resolve(browsers)
     } catch (e) {
       this.ctx.debug('loadMachineBrowsers error %o', e)
-      this.ctx.coreData.globalError = this.ctx.prepError(e as Error)
+      this.ctx.update((o) => {
+        o.globalError = this.ctx.prepError(e as Error)
+      })
+
       dfd.resolve([])
     } finally {
-      this.ctx.coreData.app.loadingMachineBrowsers = null
+      this.ctx.update((o) => {
+        o.app.loadingMachineBrowsers = null
+      })
     }
 
     return dfd.promise
@@ -65,11 +74,15 @@ export class AppActions {
 
     const dfd = pDefer<string>()
 
-    this.ctx.coreData.app.refreshingNodePath = dfd.promise
+    this.ctx.update((o) => {
+      o.app.refreshingNodePath = dfd.promise
+    })
 
     const nodePath = await this.ctx._apis.appApi.findNodePath()
 
-    this.ctx.coreData.app.nodePath = nodePath
+    this.ctx.update((o) => {
+      o.app.nodePath = nodePath
+    })
 
     dfd.resolve(nodePath)
   }

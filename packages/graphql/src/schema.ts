@@ -29,6 +29,15 @@ export const graphqlSchema = makeSchema({
       Mutation: ['test'],
     },
   },
+  sourceTypes: {
+    modules: [
+      {
+        alias: 'm',
+        module: '@packages/data-context/src/data/coreDataShape',
+        typeMatch: (type) => new RegExp(`(?:interface|type|class|enum)\\s+(${type.name}Shape)\\W`, 'g'),
+      },
+    ],
+  },
   plugins: [
     connectionPlugin({
       nonNullDefaults: {
