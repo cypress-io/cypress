@@ -41,6 +41,12 @@
     >
       <i-cy-add-small_x16 class="icon-light-gray-50 icon-dark-gray-200" />
     </button>
+    <div
+      class="sr-only"
+      aria-live="polite"
+    >
+      {{ resultCount }} {{ resultCount === 1 ? t('specPage.matchSingular') : t('specPage.matchPlural') }}
+    </div>
   </div>
 </template>
 
@@ -48,10 +54,12 @@
 import Input from '@cy/components/Input.vue'
 import Button from '@cy/components/Button.vue'
 import { ref } from 'vue'
+import { useI18n } from '@cy/i18n'
 
+const { t } = useI18n()
 const props = defineProps<{
   search: string
-  resultsCount: number
+  resultCount: number
 }>()
 
 const emit = defineEmits<{

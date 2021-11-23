@@ -1,5 +1,5 @@
 <template>
-  <div class="flex w-full gap-16px">
+  <div class="flex w-full gap-16px relative">
     <Input
       type="search"
       class="flex-grow h-full min-w-200px"
@@ -8,7 +8,16 @@
       :model-value="props.modelValue"
       :placeholder="t('specPage.searchPlaceholder')"
       @input="onInput"
-    />
+    >
+      <template #suffix>
+        <div
+          class="text-gray-500 border-l border-l-gray-100 pl-16px"
+          aria-live="polite"
+        >
+          {{ resultCount }} {{ resultCount === 1 ? t('specPage.matchSingular') : t('specPage.matchPlural') }}
+        </div>
+      </template>
+    </Input>
 
     <div class="flex h-40px gap-16px min-w-127px">
       <Button
@@ -34,9 +43,12 @@ import IconAdd from '~icons/cy/add-large_x16'
 
 const { t } = useI18n()
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   modelValue: string
-}>()
+  resultCount?: number
+}>(), {
+  resultCount: 0,
+})
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: string): void,
