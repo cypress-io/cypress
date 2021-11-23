@@ -814,6 +814,10 @@ commands:
             - cypress/binary-url.json
 
   build-cypress-npm-package:
+    parameters:
+      executor:
+        type: executor
+        default: cy-doc
     steps:
       - run:
           name: bump NPM version
@@ -825,9 +829,14 @@ commands:
       - run:
           command: ls -la types
           working_directory: cli/build
-      - run:
-          name: list NPM package contents
-          command: yarn workspace cypress size
+      - unless:
+          condition:
+            # stop-only does not correctly match on windows: https://github.com/bahmutov/stop-only/issues/78
+            equal: [ *windows-executor, << parameters.executor >> ]
+          steps:
+            - run:
+                name: list NPM package contents
+                command: yarn workspace cypress size
       - run:
           name: pack NPM package
           working_directory: cli/build
@@ -1475,7 +1484,8 @@ jobs:
     steps:
       - restore_cached_workspace
       - build-binary
-      - build-cypress-npm-package
+      - build-cypress-npm-package:
+          executor: << parameters.executor >>
       - run:
           name: Check current branch to persist artifacts
           command: |
