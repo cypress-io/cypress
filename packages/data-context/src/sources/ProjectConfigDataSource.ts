@@ -32,7 +32,10 @@ export class ProjectConfigDataSource {
       this.ctx.coreData.currentProject.config = Promise.resolve().then(async () => {
         const configFile = await this.ctx.config.getDefaultConfigBasename(projectRoot)
 
-        return this.ctx._apis.projectApi.getConfig(projectRoot, { configFile })
+        return this.ctx._apis.projectApi.getConfig(projectRoot, {
+          configFile,
+          testingType: this.ctx.wizardData.chosenTestingType ?? undefined,
+        })
       })
     }
 
