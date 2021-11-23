@@ -2,10 +2,13 @@ import childProcess, { ChildProcess, ForkOptions } from 'child_process'
 import _ from 'lodash'
 import path from 'path'
 import { EventEmitter } from 'events'
+import { promisify } from 'util'
 import pDefer from 'p-defer'
 
 import type { DataContext } from '..'
 import inspector from 'inspector'
+
+const execFile = promisify(childProcess.execFile)
 
 interface ForkConfigProcessOptions {
   projectRoot: string
@@ -34,24 +37,25 @@ export class ProjectConfigDataActions {
 
     this.killConfigProcess()
 
-    const process = this.forkConfigProcess({
+    return this.forkConfigProcess({
       projectRoot: this.ctx.currentProject.projectRoot,
       configFilePath,
+    }).then((process) => {
+      const dfd = pDefer<Cypress.ConfigOptions>()
+
+      this.ctx.currentProject.configChildProcess = {
+        process,
+        executedPlugins: null,
+        resolvedBaseConfig: dfd.promise,
+      }
+
+      this.wrapConfigProcess(process, dfd)
+
+      return dfd.promise as Cypress.ConfigOptions
     })
-    const dfd = pDefer<Cypress.ConfigOptions>()
-
-    this.ctx.currentProject.configChildProcess = {
-      process,
-      executedPlugins: null,
-      resolvedBaseConfig: dfd.promise,
-    }
-
-    this.wrapConfigProcess(process, dfd)
-
-    return dfd.promise as Cypress.ConfigOptions
   }
 
-  private forkConfigProcess (opts: ForkConfigProcessOptions) {
+  private async forkConfigProcess (opts: ForkConfigProcessOptions) {
     const configProcessArgs = ['--projectRoot', opts.projectRoot, '--file', opts.configFilePath]
 
     const childOptions: ForkOptions = {
@@ -65,8 +69,25 @@ export class ProjectConfigDataActions {
     }
 
     // https://github.com/cypress-io/cypress/issues/18914
-    // To be removed up update to webpack >= 5.61
-    childOptions.env.NODE_OPTIONS += ' --openssl-legacy-provider'
+    // If we're on node version 17 or higher, we need the
+    // NODE_ENV --openssl-legacy-provider so that webpack can continue to use
+    // the md4 hash function. This would cause an error in node <=16 though,
+    // so we have to detect node's major version before spawning the plugins
+    // process.
+
+    // To be removed up update to webpack >= 5.61, which no longer relies on
+    // node's builtin crypto.hash function.
+    const { stdout } = await execFile(this.ctx.nodePath, ['-v'])
+
+    try {
+      const nodeMajorVersion = parseInt(stdout.match(/v(\d+)/)[1], 10)
+
+      if (nodeMajorVersion >= 17) {
+        childOptions.env.NODE_OPTIONS += ' --openssl-legacy-provider'
+      }
+    } catch (e) {
+      this.ctx.debug('child node version error, unable to parse from stdout', data)
+    }
 
     if (inspector.url()) {
       childOptions.execArgv = _.chain(process.execArgv.slice(0))
