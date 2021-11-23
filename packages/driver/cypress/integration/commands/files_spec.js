@@ -21,7 +21,6 @@ describe('src/cy/commands/files', () => {
         expect(Cypress.backend).to.be.calledWith(
           'read:file',
           'foo.json',
-          { encoding: 'utf8', timeout: Cypress.config('defaultCommandTimeout') },
         )
       })
     })
@@ -33,19 +32,6 @@ describe('src/cy/commands/files', () => {
         expect(Cypress.backend).to.be.calledWith(
           'read:file',
           'foo.json',
-          { encoding: 'ascii', timeout: Cypress.config('defaultCommandTimeout') },
-        )
-      })
-    })
-
-    it('can take a timeout option', () => {
-      Cypress.backend.resolves(okResponse)
-
-      cy.readFile('foo.json', { timeout: 12345 }).then(() => {
-        expect(Cypress.backend).to.be.calledWith(
-          'read:file',
-          'foo.json',
-          { encoding: 'utf8', timeout: 12345 },
         )
       })
     })
@@ -61,7 +47,6 @@ describe('src/cy/commands/files', () => {
         expect(Cypress.backend).to.be.calledWith(
           'read:file',
           'foo.json',
-          { encoding: null, timeout: Cypress.config('defaultCommandTimeout') },
         )
       }).should('eql', Buffer.from('\n'))
     })
@@ -169,7 +154,7 @@ describe('src/cy/commands/files', () => {
     })
 
     describe('errors', {
-      defaultCommandTimeout: 50,
+      responseTimeout: 50,
     }, () => {
       beforeEach(function () {
         this.logs = []
@@ -335,11 +320,9 @@ describe('src/cy/commands/files', () => {
       })
 
       it('throws when the read timeout expires', function (done) {
-        const err = new Error('TimeoutError: The Promise timed out')
-
-        err.name = 'TimeoutError'
-
-        Cypress.backend.rejects(err)
+        Cypress.backend.callsFake(() => {
+          return new Cypress.Promise(() => { /* Broken promise for timeout */ })
+        })
 
         cy.on('fail', (err) => {
           const { lastLog } = this
@@ -348,7 +331,7 @@ describe('src/cy/commands/files', () => {
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
           expect(err.message).to.eq(stripIndent`\
-            \`cy.readFile("foo")\` timed out after waiting \`50ms\`.
+            \`cy.readFile("foo")\` timed out after waiting \`10ms\`.
           `)
 
           expect(err.docsUrl).to.eq('https://on.cypress.io/readfile')
@@ -356,16 +339,15 @@ describe('src/cy/commands/files', () => {
           done()
         })
 
-        cy.readFile('foo')
+        cy.readFile('foo', { timeout: 10 })
       })
 
-      it('throws when the server read aborts', function (done) {
-        const err = new Error('AbortError: The readFile operation was aborted by the server')
-
-        err.name = 'AbortError'
-        err.aborted = true
-
-        Cypress.backend.rejects(err)
+      it('uses responseTimeout config value if option not provided', {
+        responseTimeout: 42,
+      }, function (done) {
+        Cypress.backend.callsFake(() => {
+          return new Cypress.Promise(() => { /* Broken promise for timeout */ })
+        })
 
         cy.on('fail', (err) => {
           const { lastLog } = this
@@ -374,7 +356,7 @@ describe('src/cy/commands/files', () => {
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
           expect(err.message).to.eq(stripIndent`\
-            \`cy.readFile("foo")\` timed out after waiting \`50ms\`.
+            \`cy.readFile("foo")\` timed out after waiting \`42ms\`.
           `)
 
           expect(err.docsUrl).to.eq('https://on.cypress.io/readfile')
@@ -399,7 +381,6 @@ describe('src/cy/commands/files', () => {
           {
             encoding: 'utf8',
             flag: 'w',
-            timeout: Cypress.config('defaultCommandTimeout'),
           },
         )
       })
@@ -416,7 +397,6 @@ describe('src/cy/commands/files', () => {
           {
             encoding: 'ascii',
             flag: 'w',
-            timeout: Cypress.config('defaultCommandTimeout'),
           },
         )
       })
@@ -434,7 +414,6 @@ describe('src/cy/commands/files', () => {
           {
             encoding: null,
             flag: 'w',
-            timeout: Cypress.config('defaultCommandTimeout'),
           },
         )
       })
@@ -451,24 +430,6 @@ describe('src/cy/commands/files', () => {
           {
             encoding: 'ascii',
             flag: 'w',
-            timeout: Cypress.config('defaultCommandTimeout'),
-          },
-        )
-      })
-    })
-
-    it('can take timeout as part of options', () => {
-      Cypress.backend.resolves(okResponse)
-
-      cy.writeFile('foo.txt', 'contents', { timeout: 12345 }).then(() => {
-        expect(Cypress.backend).to.be.calledWith(
-          'write:file',
-          'foo.txt',
-          'contents',
-          {
-            encoding: 'utf8',
-            flag: 'w',
-            timeout: 12345,
           },
         )
       })
@@ -520,7 +481,6 @@ describe('src/cy/commands/files', () => {
             {
               encoding: 'utf8',
               flag: 'a+',
-              timeout: Cypress.config('defaultCommandTimeout'),
             },
           )
         })
@@ -578,7 +538,7 @@ describe('src/cy/commands/files', () => {
     })
 
     describe('errors', {
-      defaultCommandTimeout: 50,
+      responseTimeout: 50,
     }, () => {
       beforeEach(function () {
         this.logs = []
@@ -688,11 +648,9 @@ describe('src/cy/commands/files', () => {
       })
 
       it('throws when the write timeout expires', function (done) {
-        const err = new Error('TimeoutError')
-
-        err.name = 'TimeoutError'
-
-        Cypress.backend.rejects(err)
+        Cypress.backend.callsFake(() => {
+          return new Cypress.Promise(() => {})
+        })
 
         cy.on('fail', (err) => {
           const { lastLog } = this
@@ -701,7 +659,7 @@ describe('src/cy/commands/files', () => {
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
           expect(err.message).to.eq(stripIndent`
-            \`cy.writeFile("foo.txt")\` timed out after waiting \`1000ms\`.
+            \`cy.writeFile("foo.txt")\` timed out after waiting \`10ms\`.
           `)
 
           expect(err.docsUrl).to.eq('https://on.cypress.io/writefile')
@@ -709,15 +667,15 @@ describe('src/cy/commands/files', () => {
           done()
         })
 
-        cy.writeFile('foo.txt', 'contents', { timeout: 1000 })
+        cy.writeFile('foo.txt', 'contents', { timeout: 10 })
       })
 
-      it('throws when the server write aborts', function (done) {
-        const err = new Error('AbortError: The writeFile operation was aborted by the server')
-
-        err.aborted = true
-
-        Cypress.backend.rejects(err)
+      it('uses responseTimeout config value if option not provided', {
+        responseTimeout: 42,
+      }, function (done) {
+        Cypress.backend.callsFake(() => {
+          return new Cypress.Promise(() => { /* Broken promise for timeout */ })
+        })
 
         cy.on('fail', (err) => {
           const { lastLog } = this
@@ -726,7 +684,7 @@ describe('src/cy/commands/files', () => {
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
           expect(err.message).to.eq(stripIndent`
-            \`cy.writeFile("foo.txt")\` timed out after waiting \`1000ms\`.  
+            \`cy.writeFile("foo.txt")\` timed out after waiting \`42ms\`.
           `)
 
           expect(err.docsUrl).to.eq('https://on.cypress.io/writefile')
@@ -734,27 +692,37 @@ describe('src/cy/commands/files', () => {
           done()
         })
 
-        cy.writeFile('foo.txt', 'contents', { timeout: 1000 })
+        cy.writeFile('foo.txt', 'contents')
       })
     })
   })
 
   // TODO remove repro test case
-  // describe('#writeFile-error', {
-  //   defaultCommandTimeout: 5000,
-  // }, () => {
-  //   const bigString = JSON.stringify(Cypress._.times((10 ** 6), () => 'hehehehe'), null, 2)
-  //   const tooBigString = JSON.stringify(Cypress._.times(15000000, '😈'), null, 2) // 72MB
+  // describe.only('#writeFile-error', () => {
+  //   describe('error', () => {
+  //     const bigString = JSON.stringify(Cypress._.times(10000000, '😈'), null, 2) // 72MB
+  //     const tooBigString = JSON.stringify(Cypress._.times(15000000, '😈'), null, 2) // 72MB
 
-  //   afterEach(() => {
-  //     cy.writeFile('./fixtures/my-long-file.txt', bigString, { timeout: 1000 })
+  //     afterEach(() => {
+  //       cy.writeFile('./fixtures/my-long-file.txt', tooBigString, { timeout: 30000 })
+  //     })
+
+  //     it('writes until timeout', () => {
+  //       cy.visit('/fixtures/dom.html')
+
+  //       cy.get('body').then((bodyElement) => {
+  //         expect(true).to.equal(true)
+  //       })
+  //     })
   //   })
 
-  //   it('writes until timeout', () => {
-  //     cy.visit('/fixtures/dom.html')
+  //   describe('should pass', () => {
+  //     it('writes until timeout', () => {
+  //       cy.visit('/fixtures/dom.html')
 
-  //     cy.get('body').then((bodyElement) => {
-  //       expect(true).to.equal(true)
+  //       cy.get('body').then((bodyElement) => {
+  //         expect(true).to.equal(true)
+  //       })
   //     })
   //   })
   // })

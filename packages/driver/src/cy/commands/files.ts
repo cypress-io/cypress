@@ -21,7 +21,7 @@ export default (Commands, Cypress, cy) => {
         // to restore the default node behavior.
         encoding: encoding === undefined ? 'utf8' : encoding,
         log: true,
-        timeout: Cypress.config('defaultCommandTimeout'),
+        timeout: Cypress.config('responseTimeout'),
       })
 
       const consoleProps = {}
@@ -51,14 +51,14 @@ export default (Commands, Cypress, cy) => {
         let result
 
         try {
-          result = await Cypress.backend('read:file', file, _.pick(options, ['encoding', 'timeout'])).timeout(options.timeout)
+          result = await Cypress.backend('read:file', file, _.pick(options, ['encoding'])).timeout(options.timeout)
         } catch (err) {
           if (err.code === 'ENOENT') {
             result = {
               contents: null,
               filePath: err.filePath,
             }
-          } else if (err.aborted || err.name === 'TimeoutError') {
+          } else if (err.name === 'TimeoutError') {
             return $errUtils.throwErrByPath('files.timed_out', {
               onFail: options._log,
               args: { cmd: 'readFile', file, timeout: options.timeout },
@@ -124,7 +124,7 @@ export default (Commands, Cypress, cy) => {
         encoding: encoding === undefined ? 'utf8' : encoding,
         flag: userOptions.flag ? userOptions.flag : 'w',
         log: true,
-        timeout: Cypress.config('defaultCommandTimeout'),
+        timeout: Cypress.config('responseTimeout'),
       })
 
       const consoleProps = {}
@@ -162,9 +162,9 @@ export default (Commands, Cypress, cy) => {
       cy.clearTimeout()
 
       try {
-        await Cypress.backend('write:file', fileName, contents, _.pick(options, ['encoding', 'flag', 'timeout'])).timeout(options.timeout)
+        await Cypress.backend('write:file', fileName, contents, _.pick(options, ['encoding', 'flag'])).timeout(options.timeout)
       } catch (err) {
-        if (err.aborted || err.name === 'TimeoutError') {
+        if (err.name === 'TimeoutError') {
           return $errUtils.throwErrByPath('files.timed_out', {
             onFail: options._log,
             args: { cmd: 'writeFile', file: fileName, timeout: options.timeout },
