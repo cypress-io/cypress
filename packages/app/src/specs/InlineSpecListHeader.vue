@@ -8,6 +8,7 @@
         />
       </div>
       <input
+        id="inline-spec-list-header-search"
         class="
           w-full
           bg-gray-1000
@@ -17,12 +18,21 @@
           font-light
           outline-none
         "
-        placeholder="Search Specs"
         :value="props.search"
+        minlength="1"
         @focus="inputFocused = true"
         @blur="inputFocused = false"
         @input="onInput"
       >
+      <label
+        for="inline-spec-list-header-search"
+        class="search-label absolute left-24px text-gray-300 pointer-events-none font-light"
+        :class="{
+          'opacity-0': inputFocused || props.search.length
+        }"
+      >
+        {{ t('specPage.searchPlaceholder') }}
+      </label>
     </div>
     <button
       class="
@@ -36,7 +46,7 @@
         items-center
         justify-center
       "
-      data-cy="runner-spec-list-add-spec"
+      :aria-label="t('specPage.newSpecButton')"
       @click="emit('addSpec')"
     >
       <i-cy-add-small_x16 class="icon-light-gray-50 icon-dark-gray-200" />
