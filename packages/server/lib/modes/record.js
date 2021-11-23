@@ -73,7 +73,7 @@ const throwDashboardCannotProceed = ({ parallel, ciBuildId, group, err }) => {
 
 const throwIfIndeterminateCiBuildId = (ciBuildId, parallel, group) => {
   if ((!ciBuildId && !ciProvider.provider()) && (parallel || group)) {
-    errors.throw(
+    throw errors.get(
       'INDETERMINATE_CI_BUILD_ID',
       {
         group,
@@ -86,7 +86,7 @@ const throwIfIndeterminateCiBuildId = (ciBuildId, parallel, group) => {
 
 const throwIfRecordParamsWithoutRecording = (record, ciBuildId, parallel, group, tag) => {
   if (!record && _.some([ciBuildId, parallel, group, tag])) {
-    errors.throw('RECORD_PARAMS_WITHOUT_RECORDING', {
+    throw errors.get('RECORD_PARAMS_WITHOUT_RECORDING', {
       ciBuildId,
       tag,
       group,
@@ -99,13 +99,13 @@ const throwIfIncorrectCiBuildIdUsage = (ciBuildId, parallel, group) => {
   // we've been given an explicit ciBuildId
   // but no parallel or group flag
   if (ciBuildId && (!parallel && !group)) {
-    errors.throw('INCORRECT_CI_BUILD_ID_USAGE', { ciBuildId })
+    throw errors.get('INCORRECT_CI_BUILD_ID_USAGE', { ciBuildId })
   }
 }
 
 const throwIfNoProjectId = (projectId, configFile) => {
   if (!projectId) {
-    errors.throw('CANNOT_RECORD_NO_PROJECT_ID', configFile)
+    throw errors.get('CANNOT_RECORD_NO_PROJECT_ID', configFile)
   }
 }
 
@@ -297,7 +297,7 @@ const createRun = Promise.method((options = {}) => {
     }
 
     // else throw
-    errors.throw('RECORD_KEY_MISSING')
+    throw errors.get('RECORD_KEY_MISSING')
   }
 
   // go back to being a string
@@ -406,7 +406,7 @@ const createRun = Promise.method((options = {}) => {
           recordKey = 'undefined'
         }
 
-        return errors.throw('DASHBOARD_RECORD_KEY_NOT_VALID', recordKey, projectId)
+        throw errors.get('DASHBOARD_RECORD_KEY_NOT_VALID', recordKey, projectId)
       case 402: {
         const { code, payload } = err.error
 
@@ -415,25 +415,25 @@ const createRun = Promise.method((options = {}) => {
 
         switch (code) {
           case 'FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS':
-            return errors.throw('FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS', {
+            throw errors.get('FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS', {
               usedTestsMessage: usedTestsMessage(limit, 'private test'),
               link: billingLink(orgId),
             })
           case 'FREE_PLAN_EXCEEDS_MONTHLY_TESTS':
-            return errors.throw('FREE_PLAN_EXCEEDS_MONTHLY_TESTS', {
+            throw errors.get('FREE_PLAN_EXCEEDS_MONTHLY_TESTS', {
               usedTestsMessage: usedTestsMessage(limit, 'test'),
               link: billingLink(orgId),
             })
           case 'PARALLEL_FEATURE_NOT_AVAILABLE_IN_PLAN':
-            return errors.throw('PARALLEL_FEATURE_NOT_AVAILABLE_IN_PLAN', {
+            throw errors.get('PARALLEL_FEATURE_NOT_AVAILABLE_IN_PLAN', {
               link: billingLink(orgId),
             })
           case 'RUN_GROUPING_FEATURE_NOT_AVAILABLE_IN_PLAN':
-            return errors.throw('RUN_GROUPING_FEATURE_NOT_AVAILABLE_IN_PLAN', {
+            throw errors.get('RUN_GROUPING_FEATURE_NOT_AVAILABLE_IN_PLAN', {
               link: billingLink(orgId),
             })
           default:
-            return errors.throw('DASHBOARD_UNKNOWN_INVALID_REQUEST', {
+            throw errors.get('DASHBOARD_UNKNOWN_INVALID_REQUEST', {
               response: err,
               flags: {
                 group,
@@ -445,9 +445,9 @@ const createRun = Promise.method((options = {}) => {
         }
       }
       case 404:
-        return errors.throw('DASHBOARD_PROJECT_NOT_FOUND', projectId, settings.configFile(options))
+        throw errors.get('DASHBOARD_PROJECT_NOT_FOUND', projectId, settings.configFile(options))
       case 412:
-        return errors.throw('DASHBOARD_INVALID_RUN_REQUEST', err.error)
+        throw errors.get('DASHBOARD_INVALID_RUN_REQUEST', err.error)
       case 422: {
         const { code, payload } = err.error
 
@@ -455,7 +455,7 @@ const createRun = Promise.method((options = {}) => {
 
         switch (code) {
           case 'RUN_GROUP_NAME_NOT_UNIQUE':
-            return errors.throw('DASHBOARD_RUN_GROUP_NAME_NOT_UNIQUE', {
+            throw errors.get('DASHBOARD_RUN_GROUP_NAME_NOT_UNIQUE', {
               group,
               runUrl,
               ciBuildId,
@@ -463,7 +463,7 @@ const createRun = Promise.method((options = {}) => {
           case 'PARALLEL_GROUP_PARAMS_MISMATCH': {
             const { browserName, browserVersion, osName, osVersion } = platform
 
-            return errors.throw('DASHBOARD_PARALLEL_GROUP_PARAMS_MISMATCH', {
+            throw errors.get('DASHBOARD_PARALLEL_GROUP_PARAMS_MISMATCH', {
               group,
               runUrl,
               ciBuildId,
@@ -477,21 +477,21 @@ const createRun = Promise.method((options = {}) => {
             })
           }
           case 'PARALLEL_DISALLOWED':
-            return errors.throw('DASHBOARD_PARALLEL_DISALLOWED', {
+            throw errors.get('DASHBOARD_PARALLEL_DISALLOWED', {
               tags,
               group,
               runUrl,
               ciBuildId,
             })
           case 'PARALLEL_REQUIRED':
-            return errors.throw('DASHBOARD_PARALLEL_REQUIRED', {
+            throw errors.get('DASHBOARD_PARALLEL_REQUIRED', {
               tags,
               group,
               runUrl,
               ciBuildId,
             })
           case 'ALREADY_COMPLETE':
-            return errors.throw('DASHBOARD_ALREADY_COMPLETE', {
+            throw errors.get('DASHBOARD_ALREADY_COMPLETE', {
               runUrl,
               tags,
               group,
@@ -499,7 +499,7 @@ const createRun = Promise.method((options = {}) => {
               ciBuildId,
             })
           case 'STALE_RUN':
-            return errors.throw('DASHBOARD_STALE_RUN', {
+            throw errors.get('DASHBOARD_STALE_RUN', {
               runUrl,
               tags,
               group,
@@ -507,7 +507,7 @@ const createRun = Promise.method((options = {}) => {
               ciBuildId,
             })
           default:
-            return errors.throw('DASHBOARD_UNKNOWN_INVALID_REQUEST', {
+            throw errors.get('DASHBOARD_UNKNOWN_INVALID_REQUEST', {
               response: err,
               flags: {
                 tags,

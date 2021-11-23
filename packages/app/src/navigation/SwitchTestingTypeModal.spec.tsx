@@ -5,10 +5,8 @@ describe('SidebarNavigationRow', () => {
   it('renders something', () => {
     cy.mountFragment(SwitchTestingTypeModalFragmentDoc, {
       onResult (result) {
-        if (result.currentProject) {
-          result.currentProject.isCTConfigured = true
-          result.currentProject.isE2EConfigured = false
-        }
+        result.isCTConfigured = true
+        result.isE2EConfigured = false
       },
       render: (gql) => {
         return <SwitchTestingTypeModal gql={gql} show />

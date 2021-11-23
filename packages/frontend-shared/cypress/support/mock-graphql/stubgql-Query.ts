@@ -5,6 +5,7 @@ import { MaybeResolver, testNodeId } from './clientTestUtils'
 export const stubQuery: MaybeResolver<Query> = {
   __typename: 'Query',
   warnings: [],
+  isLoadingGlobalProjects: false,
   dev () {
     return {}
   },

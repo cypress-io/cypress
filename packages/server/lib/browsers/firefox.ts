@@ -512,7 +512,7 @@ export async function open (browser: Browser, url, options: any = {}, automation
   try {
     await firefoxUtil.setup({ automation, extensions: launchOptions.extensions, url, foxdriverPort, marionettePort, remotePort, onError: options.onError })
   } catch (err) {
-    errors.throw('FIREFOX_COULD_NOT_CONNECT', err)
+    throw errors.get('FIREFOX_COULD_NOT_CONNECT', err)
   }
 
   if (os.platform() === 'win32') {

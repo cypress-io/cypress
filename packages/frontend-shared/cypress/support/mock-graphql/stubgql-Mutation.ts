@@ -16,7 +16,7 @@ export const stubMutation: MaybeResolver<Mutation> = {
 
     ctx.currentProject = project ? createTestCurrentProject(project.title) : null
 
-    return true
+    return {}
   },
   clearCurrentProject (source, args, ctx) {
     ctx.currentProject = null

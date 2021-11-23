@@ -1,4 +1,3 @@
-import type { DataContext } from '@packages/data-context'
 import type { FoundBrowser } from './browser'
 import type { PlatformName } from './platform'
 
@@ -50,8 +49,8 @@ export interface AutomationMiddleware {
 
 type WebSocketOptionsCallback = (...args: any[]) => any
 
-export interface OpenProjectLaunchOptions {
-  ctx?: DataContext
+export interface OpenProjectLaunchOptions<Ctx extends object> {
+  ctx?: Ctx
   args?: LaunchArgs
   /**
    * Whether to skip the plugin initialization, useful when

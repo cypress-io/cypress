@@ -1,7 +1,7 @@
 describe('Index', () => {
   beforeEach(() => {
-    cy.setupE2E('component-tests')
-    cy.initializeApp()
+    cy.openModeSystemTest('component-tests')
+    cy.visitApp()
   })
 
   context('with no specs', () => {

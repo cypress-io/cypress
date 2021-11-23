@@ -159,7 +159,7 @@ function extendLaunchOptionsFromPlugins (launchOptions, pluginConfigResult, opti
     .value()
 
     if (unexpectedProperties.length) {
-      errors.throw('UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES', unexpectedProperties, KNOWN_LAUNCH_OPTION_PROPERTIES)
+      throw errors.get('UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES', unexpectedProperties, KNOWN_LAUNCH_OPTION_PROPERTIES)
     }
   }
 
@@ -278,7 +278,7 @@ const ensureAndGetByNameOrPath = (nameOrPath: string, returnAll = false, browser
 
         return browser
       }).catch((err) => {
-        throw errors.throw('BROWSER_NOT_FOUND_BY_PATH', nameOrPath, err.message)
+        throw errors.get('BROWSER_NOT_FOUND_BY_PATH', nameOrPath, err.message)
       })
     }
 
@@ -300,7 +300,7 @@ const formatBrowsersToOptions = (browsers) => {
 const throwBrowserNotFound = (browserName, browsers: FoundBrowser[] = []) => {
   const names = `- ${formatBrowsersToOptions(browsers).join('\n- ')}`
 
-  errors.throw('BROWSER_NOT_FOUND_BY_NAME', browserName, names)
+  throw errors.get('BROWSER_NOT_FOUND_BY_NAME', browserName, names)
 }
 
 export = {

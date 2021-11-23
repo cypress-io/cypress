@@ -1,5 +1,5 @@
 <template>
-  <WarningList :gql="props.gql.wizard" />
+  <WarningList :gql="props.gql" />
   <div class="mb-5 children:relative">
     <EnvironmentSetup
       v-if="wizardStore.wizardStep === 'selectFramework'"

@@ -61,8 +61,8 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
 import { ClickOutside as vClickOutside } from '../../directives/ClickOutside'
-import type { FRONTEND_FRAMEWORKS } from '@packages/types/src/constants'
-import type { EnvironmentSetupFragment, FrontendFrameworkEnum } from '../../generated/graphql'
+import type { FrontendFramework, FRONTEND_FRAMEWORKS } from '@packages/types/src/constants'
+import type { FrontendFrameworkEnum } from '../../generated/graphql'
 import { FrameworkBundlerLogos } from '../../utils/icons'
 
 export interface Option {
@@ -79,7 +79,7 @@ const props = withDefaults(defineProps<{
   name: string
   value?: FrontendFrameworkEnum | null
   placeholder?: string
-  options: typeof FRONTEND_FRAMEWORKS
+  options: ReadonlyArray<FrontendFramework> | FrontendFramework[]
   disabled?: boolean
 }>(), {
   disabled: false,

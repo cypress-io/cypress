@@ -162,6 +162,7 @@ export class OpenProject {
         return Bluebird.resolve()
       }
 
+      // @ts-ignore
       return runEvents.execute('after:spec', cfg, spec)
     }
 
@@ -193,6 +194,7 @@ export class OpenProject {
 
       return Bluebird.try(() => {
         if (!cfg.isTextTerminal && cfg.experimentalInteractiveRunEvents) {
+          // @ts-ignore
           return runEvents.execute('before:spec', cfg, spec)
         }
 
@@ -257,7 +259,7 @@ export class OpenProject {
     })
   }
 
-  getSpecChanges (options: OpenProjectLaunchOptions = {}) {
+  getSpecChanges (options: OpenProjectLaunchOptions<DataContext> = {}) {
     let currentSpecs: SpecsByType
 
     _.defaults(options, {
@@ -398,7 +400,7 @@ export class OpenProject {
 
   _ctx?: DataContext
 
-  async create (path: string, args: LaunchArgs, options: OpenProjectLaunchOptions, browsers: FoundBrowser[] = []): Promise<Cfg> {
+  async create (path: string, args: LaunchArgs, options: OpenProjectLaunchOptions<DataContext>, browsers: FoundBrowser[] = []): Promise<Cfg> {
     this._ctx = options.ctx ?? makeLegacyDataContext()
     debug('open_project create %s', path)
 
@@ -440,7 +442,7 @@ export class OpenProject {
       await project.open()
     } catch (err: any) {
       if (err.isCypressErr && err.portInUse) {
-        throw errors.throw(err.type, err.port)
+        throw errors.get(err.type, err.port)
       } else {
         // rethrow and handle elsewhere
         throw err

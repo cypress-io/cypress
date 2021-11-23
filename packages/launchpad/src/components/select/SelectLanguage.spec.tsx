@@ -1,21 +1,8 @@
+import { CODE_LANGUAGES } from '@packages/types/src'
 import { ref } from 'vue'
-import type { CodeLanguageEnum } from '../../generated/graphql-test'
 import Select from './SelectLanguage.vue'
 
-const manyOptions = [
-  {
-    id: 'js',
-    name: 'JavaScript',
-    isSelected: true,
-    type: 'js' as CodeLanguageEnum,
-  },
-  {
-    id: 'ts',
-    name: 'TypeScript',
-    isSelected: false,
-    type: 'ts' as CodeLanguageEnum,
-  },
-]
+const manyOptions = CODE_LANGUAGES
 
 describe('<SelectLanguage />', () => {
   it('playground', () => {

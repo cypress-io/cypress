@@ -14,7 +14,6 @@ import { Response } from 'cross-fetch'
 
 import { CloudRunQuery } from '../support/mock-graphql/stubgql-CloudTypes'
 import { getOperationName } from '@urql/core'
-import argUtils from '@packages/server/lib/util/args'
 
 const cloudSchema = buildSchema(fs.readFileSync(path.join(__dirname, '../../../graphql/schemas/cloud.graphql'), 'utf8'))
 
@@ -52,6 +51,7 @@ export async function e2ePluginSetup (projectRoot: string, on: Cypress.PluginEve
   const cli = require('../../../../cli/lib/cli')
   const cliOpen = require('../../../../cli/lib/exec/open')
   const tmpDir = path.join(__dirname, '.projects')
+  const argUtils = require('@packages/server/lib/util/args')
 
   await util.promisify(rimraf)(tmpDir)
 

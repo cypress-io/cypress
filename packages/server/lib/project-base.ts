@@ -77,7 +77,7 @@ export class ProjectBase<TServer extends Server> extends EE {
   private _isServerOpen: boolean = false
 
   public browser: any
-  public options: OpenProjectLaunchOptions
+  public options: OpenProjectLaunchOptions<DataContext>
   public testingType: Cypress.TestingType
   public spec: Cypress.Cypress['spec'] | null
   public isOpen: boolean = false
@@ -91,7 +91,7 @@ export class ProjectBase<TServer extends Server> extends EE {
   }: {
     projectRoot: string
     testingType: Cypress.TestingType
-    options: OpenProjectLaunchOptions
+    options: OpenProjectLaunchOptions<DataContext>
   }) {
     super()
 
@@ -126,6 +126,7 @@ export class ProjectBase<TServer extends Server> extends EE {
     }
 
     this.ctx.actions.projectConfig.killConfigProcess()
+    this.ctx.actions.globalProject.setActiveProject(this.projectRoot)
   }
 
   protected ensureProp = ensureProp
@@ -580,7 +581,7 @@ export class ProjectBase<TServer extends Server> extends EE {
       // else include the whole stack
       const errorMsg = err.code === 'MODULE_NOT_FOUND' ? err.message : err.stack
 
-      errors.throw('INVALID_REPORTER_NAME', {
+      throw errors.get('INVALID_REPORTER_NAME', {
         paths,
         error: errorMsg,
         name: reporter,
@@ -590,7 +591,7 @@ export class ProjectBase<TServer extends Server> extends EE {
     return Reporter.create(reporter, reporterOptions, projectRoot)
   }
 
-  startWebsockets (options: Omit<OpenProjectLaunchOptions, 'args'>, { socketIoCookie, namespace, screenshotsFolder, report, reporter, reporterOptions, projectRoot }: StartWebsocketOptions) {
+  startWebsockets (options: Omit<OpenProjectLaunchOptions<DataContext>, 'args'>, { socketIoCookie, namespace, screenshotsFolder, report, reporter, reporterOptions, projectRoot }: StartWebsocketOptions) {
   // if we've passed down reporter
   // then record these via mocha reporter
     const reporterInstance = this.initializeReporter({
@@ -873,14 +874,14 @@ export class ProjectBase<TServer extends Server> extends EE {
       return readSettings.projectId
     }
 
-    errors.throw('NO_PROJECT_ID', settings.configFile(this.options), this.projectRoot)
+    throw errors.get('NO_PROJECT_ID', settings.configFile(this.options), this.projectRoot)
   }
 
   async verifyExistence () {
     try {
       await fs.statAsync(this.projectRoot)
     } catch (err) {
-      errors.throw('NO_PROJECT_FOUND_AT_PROJECT_ROOT', this.projectRoot)
+      throw errors.get('NO_PROJECT_FOUND_AT_PROJECT_ROOT', this.projectRoot)
     }
   }
 
@@ -902,7 +903,7 @@ export class ProjectBase<TServer extends Server> extends EE {
   // For testing
   // Do not use this method outside of testing
   // pass all your options when you create a new instance!
-  __setOptions (options: OpenProjectLaunchOptions) {
+  __setOptions (options: OpenProjectLaunchOptions<DataContext>) {
     this.options = options
   }
 

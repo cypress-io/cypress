@@ -1,12 +1,12 @@
 import { defineStore } from 'pinia'
 import { Bundler, BUNDLERS, CodeLanguage, FrontendFramework, FRONTEND_FRAMEWORKS, PACKAGES_DESCRIPTIONS } from '@packages/types/src/constants'
-import { WizardSetupInput } from '../generated/graphql'
+import type { WizardSetupInput } from '../generated/graphql'
 
 const WIZARD_STEPS = ['selectFramework', 'installDependencies', 'configFiles'] as const
 
 export interface WizardStoreState {
   testingType: 'component' | 'e2e' | null
-  wizardStep: typeof WIZARD_STEPS[number]
+  wizardStep: typeof WIZARD_STEPS[number] | null
   wizardBundler: Bundler['type'] | null
   wizardFramework: FrontendFramework['type'] | null
   wizardCodeLanguage: CodeLanguage['type']
@@ -54,6 +54,10 @@ export const useWizardStore = defineStore({
       const framework = FRONTEND_FRAMEWORKS.find((f) => f.type === this.wizardFramework)
       const bundler = BUNDLERS.find((f) => f.type === this.wizardBundler)
 
+      if (!framework || !bundler) {
+        return []
+      }
+
       return [framework.package, bundler.package].map((p) => {
         return {
           package: p,
@@ -64,14 +68,14 @@ export const useWizardStore = defineStore({
   },
   actions: {
     next (this: S) {
-      const idx = WIZARD_STEPS.indexOf(this.wizardStep)
+      const idx = WIZARD_STEPS.indexOf(this.wizardStep as any)
 
       if (idx < WIZARD_STEPS.length - 1) {
         this.wizardStep = WIZARD_STEPS[idx + 1]
       }
     },
     previous (this: S) {
-      const idx = WIZARD_STEPS.indexOf(this.wizardStep)
+      const idx = WIZARD_STEPS.indexOf(this.wizardStep as any)
 
       if (idx > 0) {
         this.wizardStep = WIZARD_STEPS[idx - 1]
@@ -93,7 +97,7 @@ export const useWizardStore = defineStore({
       this.wizardFramework = wizardFramework
       const framework = FRONTEND_FRAMEWORKS.find((f) => f.type === wizardFramework)
 
-      if (framework.supportedBundlers.length === 1) {
+      if (framework?.supportedBundlers.length === 1) {
         this.wizardBundler = framework.supportedBundlers[0]
       }
     },

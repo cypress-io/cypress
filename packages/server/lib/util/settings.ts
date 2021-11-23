@@ -83,7 +83,7 @@ function _err (type, file, err) {
 }
 
 function _logReadErr (file, err) {
-  errors.throw('ERROR_READING_FILE', file, err)
+  throw errors.get('ERROR_READING_FILE', file, err)
 }
 
 function _logWriteErr (file, err) {

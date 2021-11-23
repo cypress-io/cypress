@@ -6,7 +6,7 @@ import browsers from '../browsers'
 import { openProject } from '../open_project'
 import type { LaunchArgs } from '@packages/types'
 import * as Updater from '../updater'
-import * as errors from '../errors'
+import errors from '../errors'
 
 const debug = Debug('cypress:server:interactive-ct')
 
@@ -33,6 +33,7 @@ const start = async (projectRoot: string, args: LaunchArgs) => {
 
   // add chrome as a default browser if none has been specified
   return browsers.ensureAndGetByNameOrPath(args.browser)
+  // @ts-ignore
   .then((browser: Cypress.Browser) => {
     const spec = {
       name: 'All Specs',

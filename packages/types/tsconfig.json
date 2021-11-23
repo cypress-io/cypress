@@ -12,8 +12,10 @@
     "noUnusedParameters": false,
     "experimentalDecorators": true,
     "allowJs": true,
-    "types": [],
+    "types": [
+      "@types/node"
+    ],
     "noUncheckedIndexedAccess": true,
     "importsNotUsedAsValues": "error"
-  },
+  }
 }

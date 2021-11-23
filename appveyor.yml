@@ -3,7 +3,7 @@ branches:
     - master
     - develop
     - windows-code-signing
-    - 9.0-release
+    - 10.0-release
     - /win*/
 
 # https://www.appveyor.com/docs/lang/nodejs-iojs/

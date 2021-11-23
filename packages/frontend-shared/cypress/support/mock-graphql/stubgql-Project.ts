@@ -28,6 +28,7 @@ export const createTestCurrentProject = (title: string, currentProject: Partial<
   return {
     ...globalProject,
     __typename: 'CurrentProject',
+    isLoadingPlugins: false,
     isCTConfigured: true,
     isE2EConfigured: true,
     currentTestingType: 'e2e',

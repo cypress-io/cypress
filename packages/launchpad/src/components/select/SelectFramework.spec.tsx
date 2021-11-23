@@ -1,3 +1,5 @@
+// @ts-nocheck
+import { FRONTEND_FRAMEWORKS } from '@packages/types/src'
 import { ref } from 'vue'
 import Select from './SelectFramework.vue'
 
@@ -23,7 +25,7 @@ describe('<BigSelect />', () => {
       <div class="m-10">
         <Select
           name="Front-end Framework"
-          options={manyOptions}
+          options={FRONTEND_FRAMEWORKS}
           value="react"
         />
       </div>
@@ -45,7 +47,7 @@ describe('<BigSelect />', () => {
         placeholder="placeholder"
         options={[
           {
-            name: 'VueJs',
+            name: 'Vue.js',
             id: 'vue',
             isSelected: false,
             type: 'vuecli',

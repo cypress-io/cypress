@@ -28,15 +28,15 @@ export class ProjectConfigDataSource {
       throw new Error(`Cannot access config without currentProject`)
     }
 
-    if (!this.ctx.coreData.currentProject.config) {
-      this.ctx.coreData.currentProject.config = Promise.resolve().then(async () => {
+    if (!this.ctx.coreData.currentProject.isLoadingConfigPromise) {
+      this.ctx.coreData.currentProject.isLoadingConfigPromise = (async () => {
         const configFile = await this.ctx.config.getDefaultConfigBasename(projectRoot)
 
         return this.ctx._apis.projectApi.getConfig(projectRoot, { configFile })
-      })
+      })()
     }
 
-    return this.ctx.coreData.currentProject.config
+    return this.ctx.coreData.currentProject.isLoadingConfigPromise
   }
 
   async getDefaultConfigBasename (projectRoot: string) {
@@ -51,11 +51,11 @@ export class ProjectConfigDataSource {
       const configFile = foundConfigFiles[0]
 
       if (!configFile) {
-        throw this.ctx._apis.projectApi.error.throw('NO_DEFAULT_CONFIG_FILE_FOUND', projectRoot)
+        throw this.ctx._apis.projectApi.error('NO_DEFAULT_CONFIG_FILE_FOUND', projectRoot)
       }
 
       if (configFile === legacyConfigFile) {
-        throw this.ctx._apis.projectApi.error.throw('CONFIG_FILE_MIGRATION_NEEDED', projectRoot, configFile)
+        throw this.ctx._apis.projectApi.error('CONFIG_FILE_MIGRATION_NEEDED', projectRoot, configFile)
       }
 
       return configFile
@@ -66,13 +66,13 @@ export class ProjectConfigDataSource {
       if (foundConfigFiles.includes(legacyConfigFile)) {
         const foundFiles = foundConfigFiles.filter((f) => f !== legacyConfigFile)
 
-        throw this.ctx._apis.projectApi.error.throw('LEGACY_CONFIG_FILE', projectRoot, ...foundFiles)
+        throw this.ctx._apis.projectApi.error('LEGACY_CONFIG_FILE', projectRoot, ...foundFiles)
       }
 
-      throw this.ctx._apis.projectApi.error.throw('CONFIG_FILES_LANGUAGE_CONFLICT', projectRoot, ...foundConfigFiles)
+      throw this.ctx._apis.projectApi.error('CONFIG_FILES_LANGUAGE_CONFLICT', projectRoot, ...foundConfigFiles)
     }
 
-    throw this.ctx._apis.projectApi.error.throw('NO_DEFAULT_CONFIG_FILE_FOUND', projectRoot)
+    throw this.ctx._apis.projectApi.error('NO_DEFAULT_CONFIG_FILE_FOUND', projectRoot)
   }
 
   protected async getConfigFilePath () {

@@ -311,11 +311,11 @@ gulplog.warn = function (...args: string[]) {
 }
 
 process.on('exit', () => {
-  if (didntExitCorrectly && !process.env.CI) {
-    execSync('killall Cypress')
-    execSync('killall node')
-    process.exitCode = 1
-  } else {
-    console.log(`Issue exiting correctly`)
+  if (didntExitCorrectly) {
+    if (!process.env.CI) {
+      execSync('killall Cypress')
+      execSync('killall node')
+      process.exitCode = 1
+    }
   }
 })

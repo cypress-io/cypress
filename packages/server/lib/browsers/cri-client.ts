@@ -206,7 +206,7 @@ export const create = Bluebird.method((target: websocketUrl, onAsynchronousError
         const minimum = getMajorMinorVersion(protocolVersion)
 
         if (!isVersionGte(actual, minimum)) {
-          errors.throw('CDP_VERSION_TOO_OLD', protocolVersion, actual)
+          throw errors.get('CDP_VERSION_TOO_OLD', protocolVersion, actual)
         }
       })
     }

@@ -80,6 +80,6 @@ const props = defineProps<{
 const openElectron = useMutation(SettingsContainer_ReconfigureProjectDocument)
 
 function reconfigure () {
-  openElectron.executeMutation({})
+  openElectron.executeMutation({ testingType: 'component' })
 }
 </script>

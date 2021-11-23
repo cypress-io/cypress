@@ -12,7 +12,7 @@ describe('<WarningList />', () => {
   it('does not render warning if there are none', () => {
     cy.mountFragment(WarningListFragmentDoc, {
       onResult (result) {
-        result.step = 'setupComplete'
+        // result.step = 'setupComplete'
       },
       render: (gqlVal) => <div class="p-4"><WarningList gql={gqlVal} /></div>,
     })
@@ -23,7 +23,7 @@ describe('<WarningList />', () => {
   it('does not render warning if on different step', () => {
     cy.mountFragment(WarningListFragmentDoc, {
       onResult (result) {
-        result.step = 'setupComplete'
+        // result.step = 'setupComplete'
         // @ts-ignore
         result.warnings = [createWarning()]
       },
@@ -36,7 +36,7 @@ describe('<WarningList />', () => {
   it('renders warning if on same step', () => {
     cy.mountFragment(WarningListFragmentDoc, {
       onResult (result) {
-        result.step = 'setupComplete'
+        // result.step = 'setupComplete'
         // @ts-ignore
         result.warnings = [createWarning({
           setupStep: 'setupComplete',
@@ -51,7 +51,7 @@ describe('<WarningList />', () => {
   it('renders warning if no step specified', () => {
     cy.mountFragment(WarningListFragmentDoc, {
       onResult (result) {
-        result.step = 'setupComplete'
+        // result.step = 'setupComplete'
         // @ts-ignore
         result.warnings = [createWarning({
           setupStep: null,
@@ -66,7 +66,7 @@ describe('<WarningList />', () => {
   it('renders multiple warnings', () => {
     cy.mountFragment(WarningListFragmentDoc, {
       onResult (result) {
-        result.step = 'setupComplete'
+        // result.step = 'setupComplete'
         // @ts-ignore
         result.warnings = [createWarning({
           title: 'Warning title 1',
@@ -88,7 +88,7 @@ describe('<WarningList />', () => {
   it('removes warning when dismissed', () => {
     cy.mountFragment(WarningListFragmentDoc, {
       onResult (result) {
-        result.step = 'setupComplete'
+        // result.step = 'setupComplete'
         // @ts-ignore
         result.warnings = [createWarning({
           title: 'Warning title 1',

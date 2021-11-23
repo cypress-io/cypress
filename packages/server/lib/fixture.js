@@ -59,7 +59,7 @@ module.exports = {
         if (matches.length === 0) {
           const relativePath = path.relative('.', p)
 
-          errors.throw('FIXTURE_NOT_FOUND', relativePath, extensions)
+          throw errors.get('FIXTURE_NOT_FOUND', relativePath, extensions)
         }
 
         debug('fixture matches found, using the first', matches)

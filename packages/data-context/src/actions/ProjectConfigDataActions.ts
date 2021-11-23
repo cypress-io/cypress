@@ -3,6 +3,7 @@ import _ from 'lodash'
 import path from 'path'
 import { EventEmitter } from 'events'
 import pDefer from 'p-defer'
+import { isCypressError } from '@packages/types'
 
 import type { DataContext } from '..'
 import inspector from 'inspector'
@@ -95,10 +96,10 @@ export class ProjectConfigDataActions {
       this.ctx.debug('load:error %s, rejecting', type)
       this.killConfigProcess()
 
-      const err = this.ctx._apis.projectApi.error.get(type, ...args)
+      const err = this.ctx._apis.projectApi.error(type, ...args)
 
       // if it's a non-cypress error, restore the initial error
-      if (!(err.message?.length)) {
+      if (!isCypressError(err)) {
         err.isCypressErr = false
         err.message = args[1]
         err.code = type

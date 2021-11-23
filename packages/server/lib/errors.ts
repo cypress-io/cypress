@@ -1,3 +1,5 @@
+import type { CypressErrorIdentifier, CypressError } from '@packages/types'
+
 /* eslint-disable no-console */
 const _ = require('lodash')
 const strip = require('strip-ansi')
@@ -36,6 +38,8 @@ const displayFlags = (obj, mapper) => {
     if (v) {
       return `The ${flag} flag you passed was: ${chalk.blue(v)}`
     }
+
+    return null
   }).compact()
   .join('\n')
   .value()
@@ -78,7 +82,7 @@ const isCypressErr = (err) => {
   return Boolean(err.isCypressErr)
 }
 
-const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
+const getMsgByType = function (type: CypressErrorIdentifier, arg1: any = {}, arg2?: any, arg3?: any) {
   // NOTE: declarations in case blocks are forbidden so we declare them up front
   let filePath; let err; let msg; let str
 
@@ -1042,7 +1046,7 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
   }
 }
 
-const get = function (type, arg1, arg2, arg3) {
+const get = function (type: CypressErrorIdentifier, arg1: any = {}, arg2?: any, arg3?: any) {
   let details
   let msg = getMsgByType(type, arg1, arg2, arg3)
 
@@ -1058,7 +1062,7 @@ const get = function (type, arg1, arg2, arg3) {
 
   msg = trimMultipleNewLines(msg)
 
-  const err = new Error(msg)
+  const err = new Error(msg) as CypressError
 
   err.isCypressErr = true
   err.type = type
@@ -1079,7 +1083,7 @@ const throwErr = function (type, arg1, arg2, arg3) {
   throw get(type, arg1, arg2, arg3)
 }
 
-const clone = function (err, options = {}) {
+const clone = function (err, options: any = {}) {
   _.defaults(options, {
     html: false,
   })
@@ -1142,7 +1146,7 @@ const log = function (err, color = 'red') {
   return err
 }
 
-const logException = Promise.method(function (err) {
+const logException = Promise.method(function (this: typeof errors, err) {
   // TODO: remove context here
   if (this.log(err) && isProduction()) {
     // log this exception since
@@ -1153,7 +1157,7 @@ const logException = Promise.method(function (err) {
   }
 })
 
-module.exports = {
+const errors = {
   get,
 
   log,
@@ -1176,3 +1180,5 @@ module.exports = {
 
   displayFlags,
 }
+
+export = errors

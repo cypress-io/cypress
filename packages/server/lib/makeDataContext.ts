@@ -67,8 +67,8 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
     launchOptions: {},
     appApi: {
       getBrowsers,
-      ensureAndGetByNameOrPath (nameOrPath: string, browsers: FoundBrowser[]) {
-        return ensureAndGetByNameOrPath(nameOrPath, false, browsers)
+      ensureAndGetByNameOrPath (nameOrPath: string, browsers: ReadonlyArray<FoundBrowser>) {
+        return ensureAndGetByNameOrPath(nameOrPath, false, browsers as FoundBrowser[]) as Promise<FoundBrowser>
       },
       findNodePath () {
         return findSystemNode.findNodeInFullPath()
@@ -93,7 +93,7 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       launchProject (browser: FoundBrowser, spec: Cypress.Spec, options?: LaunchOpts) {
         return openProject.launch({ ...browser }, spec, options)
       },
-      initializeProject (args: LaunchArgs, options: OpenProjectLaunchOptions, browsers: FoundBrowser[]) {
+      initializeProject (args: LaunchArgs, options: OpenProjectLaunchOptions<DataContext>, browsers: FoundBrowser[]) {
         return openProject.create(args.projectRoot, args, options, browsers).then((p) => p.browsers as FoundBrowser[])
       },
       insertProjectToCache (projectRoot: string) {
@@ -127,7 +127,7 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
         return openProject.closeActiveProject()
       },
       get error () {
-        return errors
+        return errors.get
       },
     },
     electronApi: {

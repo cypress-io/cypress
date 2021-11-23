@@ -43,7 +43,7 @@ const convertRelativeToAbsolutePaths = (projectRoot, obj) => {
 const validateFile = (file) => {
   return (settings) => {
     return configUtils.validate(settings, (errMsg) => {
-      return errors.throw('SETTINGS_VALIDATION_ERROR', file, errMsg)
+      throw errors.get('SETTINGS_VALIDATION_ERROR', file, errMsg)
     })
   }
 }
@@ -210,7 +210,7 @@ export function mergeDefaults (config: Record<string, any> = {}, options: Record
   config.cypressEnv = process.env.CYPRESS_INTERNAL_ENV
   debug('using CYPRESS_INTERNAL_ENV %s', config.cypressEnv)
   if (!isValidCypressInternalEnvValue(config.cypressEnv)) {
-    errors.throw('INVALID_CYPRESS_INTERNAL_ENV', config.cypressEnv)
+    throw errors.get('INVALID_CYPRESS_INTERNAL_ENV', config.cypressEnv)
   }
 
   delete config.envFile
@@ -240,7 +240,7 @@ export function mergeDefaults (config: Record<string, any> = {}, options: Record
   // validate config again here so that we catch configuration errors coming
   // from the CLI overrides or env var overrides
   configUtils.validate(_.omit(config, 'browsers'), (errMsg) => {
-    return errors.throw('CONFIG_VALIDATION_ERROR', errMsg)
+    throw errors.get('CONFIG_VALIDATION_ERROR', errMsg)
   })
 
   configUtils.validateNoBreakingConfig(config, errors.warning, errors.throw)
@@ -291,10 +291,10 @@ export function updateWithPluginValues (cfg, overrides) {
     if (cfg.configFile && cfg.projectRoot) {
       const relativeConfigPath = path.relative(cfg.projectRoot, cfg.configFile)
 
-      return errors.throw('PLUGINS_CONFIG_VALIDATION_ERROR', relativeConfigPath, errMsg)
+      throw errors.get('PLUGINS_CONFIG_VALIDATION_ERROR', relativeConfigPath, errMsg)
     }
 
-    return errors.throw('CONFIG_VALIDATION_ERROR', errMsg)
+    throw errors.get('CONFIG_VALIDATION_ERROR', errMsg)
   })
 
   let originalResolvedBrowsers = cfg && cfg.resolved && cfg.resolved.browsers && _.cloneDeep(cfg.resolved.browsers)
@@ -455,7 +455,7 @@ export function setSupportFileAndFolder (obj, defaults) {
     return fs.pathExists(obj.supportFile)
     .then((found) => {
       if (!found) {
-        errors.throw('SUPPORT_FILE_NOT_FOUND', obj.supportFile, obj.configFile || defaults.configFile)
+        throw errors.get('SUPPORT_FILE_NOT_FOUND', obj.supportFile, obj.configFile || defaults.configFile)
       }
 
       return debug('switching to found file %s', obj.supportFile)
@@ -474,7 +474,7 @@ export function setSupportFileAndFolder (obj, defaults) {
       if (result === null) {
         const configFile = obj.configFile || defaults.configFile
 
-        return errors.throw('SUPPORT_FILE_NOT_FOUND', path.resolve(obj.projectRoot, sf), configFile)
+        throw errors.get('SUPPORT_FILE_NOT_FOUND', path.resolve(obj.projectRoot, sf), configFile)
       }
 
       debug('setting support file to %o', { result })

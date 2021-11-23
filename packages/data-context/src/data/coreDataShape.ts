@@ -67,7 +67,7 @@ export interface CurrentProjectShape extends ProjectShape {
   /**
    * Promise indicating the value of the loading config
    */
-  isLoadingConfigPromise: Promise<FullConfig | null> | null
+  isLoadingConfigPromise: Promise<FullConfig> | null
   /**
    * Set to true while we are loading the project's plugins
    */

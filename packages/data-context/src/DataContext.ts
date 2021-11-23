@@ -41,7 +41,7 @@ export interface DataContextConfig {
   schema: GraphQLSchema
   os: PlatformName
   launchArgs: LaunchArgs
-  launchOptions: OpenProjectLaunchOptions
+  launchOptions: OpenProjectLaunchOptions<DataContext>
   electronApp?: ElectronApp
   /**
    * Default is to

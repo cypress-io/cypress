@@ -1,10 +1,10 @@
 import type { CodeGenType, MutationSetProjectPreferencesArgs, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
-import type { FindSpecs, FoundBrowser, FoundSpec, FullConfig, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions, Preferences, SettingsOptions } from '@packages/types'
+import type { CypressError, CypressErrorIdentifier, CypressErrorLike, FindSpecs, FoundBrowser, FoundSpec, FullConfig, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions, Preferences, SettingsOptions } from '@packages/types'
 import path from 'path'
 import type { DataContext } from '..'
 import { codeGenerator, SpecOptions } from '../codegen'
 import templates from '../codegen/templates'
-import type { CurrentProjectShape } from '../data'
+import type { CurrentProjectShape } from '../data/coreDataShape'
 
 export interface ProjectApiShape {
   getConfig(projectRoot: string, options?: SettingsOptions): Promise<FullConfig>
@@ -14,7 +14,7 @@ export interface ProjectApiShape {
    * TODO(tim): figure out what this is actually doing, it seems it's necessary in
    *   order for CT to startup
    */
-  initializeProject(args: LaunchArgs, options: OpenProjectLaunchOptions, browsers: FoundBrowser[]): Promise<FoundBrowser[]>
+  initializeProject(args: LaunchArgs, options: OpenProjectLaunchOptions<DataContext>, browsers: FoundBrowser[]): Promise<FoundBrowser[]>
   launchProject(browser: FoundBrowser, spec: Cypress.Spec, options: LaunchOpts): void
   insertProjectToCache(projectRoot: string): void
   removeProjectFromCache(projectRoot: string): void
@@ -25,7 +25,7 @@ export interface ProjectApiShape {
   clearProjectPreferences(projectTitle: string): Promise<unknown>
   clearAllProjectPreferences(): Promise<unknown>
   closeActiveProject(): Promise<unknown>
-  error(type: string, ...args: any): Error
+  error(type: CypressErrorIdentifier, ...args: any): CypressError | CypressErrorLike
 }
 
 /**
@@ -34,6 +34,10 @@ export interface ProjectApiShape {
  */
 export class CurrentProjectActions {
   constructor (private ctx: DataContext, private readonly currentProject: Readonly<CurrentProjectShape>) {}
+
+  private get projectRoot () {
+    return this.currentProject.projectRoot
+  }
 
   /**
    * Update function, ensures that we keep the readonly currentProject while
@@ -119,7 +123,7 @@ export class CurrentProjectActions {
     const browsers = [...(machineBrowsers ?? [])]
     const launchArgs: LaunchArgs = {
       ...this.ctx.launchArgs,
-      projectRoot: this.currentProject.projectRoot,
+      projectRoot: this.projectRoot,
       testingType: this.currentProject.currentTestingType,
     }
 
@@ -301,7 +305,7 @@ export class CurrentProjectActions {
     const getCodeGenPath = () => {
       return codeGenType === 'integration'
         ? this.ctx.path.join(
-          config.integrationFolder || this.currentProject.projectRoot,
+          config.integrationFolder || this.projectRoot,
           codeGenCandidate,
         )
         : codeGenCandidate
@@ -309,7 +313,7 @@ export class CurrentProjectActions {
     const getSearchFolder = () => {
       return (codeGenType === 'integration'
         ? config.integrationFolder
-        : config.componentFolder) || this.currentProject.projectRoot
+        : config.componentFolder) || this.projectRoot
     }
 
     const specFileExtension = getFileExtension()
@@ -338,7 +342,7 @@ export class CurrentProjectActions {
       absolute: newSpec.file,
       searchFolder,
       specType: codeGenType === 'integration' ? 'integration' : 'component',
-      projectRoot: this.currentProject.projectRoot,
+      projectRoot: this.projectRoot,
       specFileExtension,
     })
 
@@ -352,11 +356,11 @@ export class CurrentProjectActions {
    * Loads the config for the project, signaling the state of loading via the
    * isLoadingConfig property on the project
    */
-  loadConfig (): Promise<FullConfig | null> {
+  loadConfig (): Promise<FullConfig> {
     let isLoadingConfigPromise = this.currentProject.isLoadingConfigPromise
 
     if (!isLoadingConfigPromise) {
-      isLoadingConfigPromise = this.loadConfigExecution()
+      this.loadConfigExecution()
       this.update((proj) => {
         proj.isLoadingConfig = true
         proj.errorLoadingConfig = null
@@ -364,7 +368,7 @@ export class CurrentProjectActions {
       })
     }
 
-    return isLoadingConfigPromise
+    return isLoadingConfigPromise as Promise<FullConfig>
   }
 
   private async loadConfigExecution (): Promise<FullConfig | null> {
@@ -414,6 +418,33 @@ export class CurrentProjectActions {
   reconfigureProject () {
     this.ctx.actions.electron.refreshBrowserWindow()
     this.ctx.actions.electron.showBrowserWindow()
+  }
+
+  async scaffoldIntegration () {
+    const config = await this.loadConfig()
+    const integrationFolder = config.integrationFolder || this.projectRoot
+
+    const results = await codeGenerator(
+      { templateDir: templates['scaffoldIntegration'], target: integrationFolder },
+      {},
+    )
+
+    if (results.failed.length) {
+      throw new Error(`Failed generating files: ${results.failed.map((e) => `${e}`)}`)
+    }
+
+    const withFileParts = results.files.map((res) => {
+      return {
+        fileParts: this.ctx.file.normalizeFileToFileParts({
+          absolute: res.file,
+          projectRoot: this.projectRoot,
+          searchFolder: integrationFolder,
+        }),
+        codeGenResult: res,
+      }
+    })
+
+    return withFileParts
   }
 
   async switchTestingType (testingType: TestingTypeEnum) {

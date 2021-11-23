@@ -10,6 +10,8 @@ export * from './spec'
 
 export * from './editors'
 
+export * from './error'
+
 export type {
   AllPackages,
   AllPackageTypes,

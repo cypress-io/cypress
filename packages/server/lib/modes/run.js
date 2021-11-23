@@ -1583,15 +1583,15 @@ module.exports = {
           if (!specs.length) {
             // did we use the spec pattern?
             if (specPattern) {
-              errors.throw('NO_SPECS_FOUND', projectRoot, specPattern)
+              throw errors.get('NO_SPECS_FOUND', projectRoot, specPattern)
             } else {
               // else we looked in the integration folder
-              errors.throw('NO_SPECS_FOUND', config.integrationFolder, specPattern)
+              throw errors.get('NO_SPECS_FOUND', config.integrationFolder, specPattern)
             }
           }
 
           if (browser.unsupportedVersion && browser.warning) {
-            errors.throw('UNSUPPORTED_BROWSER_VERSION', browser.warning)
+            throw errors.get('UNSUPPORTED_BROWSER_VERSION', browser.warning)
           }
 
           if (browser.family === 'chromium') {
