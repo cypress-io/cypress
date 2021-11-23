@@ -29,11 +29,18 @@ export class ProjectDataSource {
 
   async findSpecs (projectRoot: string, specType: Maybe<SpecType>) {
     const config = await this.getConfig(projectRoot)
+
+    let testFiles: string | string[] | undefined = []
+
+    if (this.ctx.appData.currentTestingType) {
+      testFiles = config[this.ctx.appData.currentTestingType]?.testFiles
+    }
+
     const specs = await this.api.findSpecs({
       projectRoot,
       fixturesFolder: config.fixturesFolder ?? false,
       supportFile: config.supportFile ?? false,
-      testFiles: config.testFiles ?? [],
+      testFiles: testFiles ?? [],
       ignoreTestFiles: config.ignoreTestFiles as string[] ?? [],
       componentFolder: config.projectRoot ?? false,
       integrationFolder: config.integrationFolder ?? '',

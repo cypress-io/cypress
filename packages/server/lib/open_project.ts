@@ -212,7 +212,12 @@ export class OpenProject {
   }
 
   getSpecs (cfg) {
-    return specsUtil.findSpecs(cfg)
+    const componentTestingEnabled = _.get(cfg, 'resolved.testingType.value', 'e2e') === 'component'
+
+    return specsUtil.findSpecs({
+      ...cfg,
+      testFiles: cfg[componentTestingEnabled ? 'component' : 'e2e']?.testFiles ?? [],
+    })
     .then((_specs: Cypress.Spec[] = []) => {
       // only want these properties
       const specs = _specs.map((x) => {
@@ -235,8 +240,6 @@ export class OpenProject {
           names,
         )
       }
-
-      const componentTestingEnabled = _.get(cfg, 'resolved.testingType.value', 'e2e') === 'component'
 
       if (componentTestingEnabled) {
         // separate specs into integration and component lists
