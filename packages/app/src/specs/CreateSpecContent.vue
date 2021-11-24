@@ -18,7 +18,7 @@
       prefix-icon-class="icon-light-gray-50 icon-dark-gray-400"
       :prefix-icon="SettingsIcon"
       class="mx-auto duration-300 hocus:ring-gray-50 hocus:border-gray-200"
-      @click.prevent="showCypressConfigInIDE"
+      @click.prevent="emit('viewSpecPattern')"
     >
       {{ t('createSpec.viewSpecPatternButton') }}
     </Button>
@@ -40,25 +40,6 @@ const { t } = useI18n()
 gql`
 fragment CreateSpecContent on Query {
   ...CreateSpecCards
-  ...CreateSpecModal
-  ...ChooseExternalEditor
-
-   currentProject {
-     id
-     currentTestingType
-     configFileAbsolutePath
-  }
-  localSettings {
-    preferences {
-      preferredEditorBinary
-    }
-  }
-}
-`
-
-gql`
-mutation CreateSpecPage_OpenFileInIDE ($input: FileDetailsInput!) {
-  openFileInIDE (input: $input)
 }
 `
 
@@ -66,42 +47,14 @@ const props = defineProps<{
   gql: CreateSpecContentFragment
 }>()
 
-const openFileInIDE = useMutation(CreateSpecPage_OpenFileInIdeDocument)
-
-const showModal = ref(false)
-
-const generator = ref()
-
-const openInIde = (absolute: string) => {
-  openFileInIDE.executeMutation({
-    input: {
-      absolute,
-      line: 1,
-      column: 1,
-    },
-  })
-}
+const emit = defineEmits<{
+  (e: 'choose', id: string): void
+  (e: 'viewSpecPattern'): void
+}>()
 
 const runnerUiStore = useRunnerUiStore()
 
-const openFile = () => {
-  runnerUiStore.setShowChooseExternalEditorModal(false)
-
-  if (props.gql.currentProject?.configFileAbsolutePath) {
-    openInIde(props.gql.currentProject.configFileAbsolutePath)
-  }
-}
-
-const showCypressConfigInIDE = () => {
-  if (props.gql.localSettings.preferences.preferredEditorBinary && props.gql.currentProject?.configFileAbsolutePath) {
-    openInIde(props.gql.currentProject.configFileAbsolutePath)
-  } else {
-    runnerUiStore.setShowChooseExternalEditorModal(true)
-  }
-}
-
-const choose = (id) => {
-  showModal.value = true
-  generator.value = id
+const choose = (id: string) => {
+  emit('choose', id)
 }
 </script>

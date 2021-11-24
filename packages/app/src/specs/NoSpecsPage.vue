@@ -31,7 +31,11 @@
       @selected="openFile"
     />
 
-    <CreateSpecContent :gql="props.gql" />
+    <CreateSpecContent
+      :gql="props.gql"
+      @choose="choose"
+      @viewSpecPattern="showCypressConfigInIDE"
+    />
   </div>
 </template>
 
@@ -119,7 +123,7 @@ const closeModal = () => {
   generator.value = null
 }
 
-const choose = (id) => {
+const choose = (id: string) => {
   showModal.value = true
   generator.value = id
 }
