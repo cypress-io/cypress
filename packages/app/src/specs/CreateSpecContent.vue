@@ -29,11 +29,9 @@
 import { useI18n } from '@cy/i18n'
 import SettingsIcon from '~icons/cy/settings_x16'
 import Button from '@cy/components/Button.vue'
-import { ref } from 'vue'
 import CreateSpecCards from './CreateSpecCards.vue'
-import { gql, useMutation } from '@urql/vue'
+import { gql } from '@urql/vue'
 import type { CreateSpecContentFragment } from '../generated/graphql'
-import { CreateSpecPage_OpenFileInIdeDocument } from '@packages/data-context/src/gen/all-operations.gen'
 import { useRunnerUiStore } from '../store/runner-ui-store'
 const { t } = useI18n()
 
