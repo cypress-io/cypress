@@ -110,4 +110,55 @@ describe('Launchpad: Open Mode', () => {
       cy.contains(defaultMessages.topNav.docsMenu.gettingStartedTitle).should('be.visible')
     })
   })
+
+  describe('open in ide', () => {
+    it('configures an editor if one is not configured', () => {
+      cy.setupE2E('todos')
+      cy.withCtx(async (ctx, o) => {
+        ctx.coreData.localSettings.preferences.preferredEditorBinary = undefined
+        ctx.coreData.localSettings.availableEditors = [
+          // don't rely on CI machines to have specific editors installed
+          // so just adding one here
+          {
+            id: 'well-known-editor',
+            binary: '/usr/bin/well-known',
+            name: 'Well known editor',
+          },
+        ]
+
+        ctx.coreData.app.projects = [{ projectRoot: '/some/project' }]
+      })
+
+      cy.visitLaunchpad()
+      cy.get('a').contains('Projects').click()
+      cy.findByTestId('project-card')
+      cy.get('[aria-label="Project Actions"]').click()
+      cy.get('button').contains('Open In IDE').click()
+
+      cy.get('[data-cy="choose-editor-modal"]').as('modal')
+
+      cy.intercept('POST', 'mutation-SetPreferredEditorBinary').as('SetPreferred')
+      cy.get('@modal').contains('Choose your editor...').click()
+      cy.get('@modal').contains('Well known editor').click()
+      cy.get('@modal').contains('Done').click()
+      cy.wait('@SetPreferred').its('request.body.variables.value').should('include', '/usr/bin/well-known')
+    })
+
+    it('opens using finder', () => {
+      cy.setupE2E('todos')
+      cy.withCtx(async (ctx, o) => {
+        ctx.coreData.app.projects = [{ projectRoot: '/some/project' }]
+      })
+
+      cy.visitLaunchpad()
+      cy.get('a').contains('Projects').click()
+      cy.findByTestId('project-card')
+      cy.get('[aria-label="Project Actions"]').click()
+
+      cy.intercept('POST', 'mutation-GlobalPage_OpenInFinder').as('OpenInFinder')
+      cy.get('button').contains('Open In Finder').click()
+
+      cy.wait('@OpenInFinder')
+    })
+  })
 })

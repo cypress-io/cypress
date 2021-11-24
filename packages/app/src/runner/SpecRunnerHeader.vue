@@ -28,7 +28,7 @@
         data-cy="aut-url"
       >
         <div
-          class="rounded-md flex shadow-md mx-2 url px-4"
+          class="flex px-4 mx-2 rounded-md shadow-md url"
           :class="{
             'bg-yellow-50': autStore.isLoadingUrl,
             'bg-white': !autStore.isLoadingUrl,
@@ -43,10 +43,11 @@
       </div>
 
       <Select
-        v-model="browser"
+        :model-value="browser"
         data-cy="select-browser"
         :options="browsers"
-        item-value="name"
+        item-value="displayName"
+        @update:model-value="changeBrowser"
       />
     </div>
 
@@ -63,15 +64,14 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
-import { useAutStore } from '../store'
+import { computed, ref } from 'vue'
+import { useAutStore, useSpecStore } from '../store'
 import Select from '@packages/frontend-shared/src/components/Select.vue'
-import { gql } from '@urql/vue'
+import { gql, useMutation } from '@urql/vue'
 import IconCrosshairsGPS from '~icons/mdi/crosshairs-gps'
 import Icon from '@packages/frontend-shared/src/components/Icon.vue'
-import type { SpecRunnerHeaderFragment } from '../generated/graphql'
+import { SpecRunnerHeaderFragment, SpecRunnerHeader_SetBrowserDocument, SpecRunnerHeader_BrowserFragment } from '../generated/graphql'
 import SelectorPlayground from './selector-playground/SelectorPlayground.vue'
-import { getAutIframeModel } from '.'
 import { useSelectorPlaygroundStore } from '../store/selector-playground-store'
 import type { EventManager } from './event-manager'
 import type { AutIframe } from './aut-iframe'
@@ -87,11 +87,27 @@ fragment SpecRunnerHeader on CurrentProject {
   }
   browsers {
     id
-    name
-    displayName
+    ...SpecRunnerHeader_Browser
   }
 }
 `
+
+gql`
+fragment SpecRunnerHeader_Browser on Browser {
+  id
+  name
+  displayName
+}
+`
+
+gql`
+mutation SpecRunnerHeader_SetBrowser($browserId: ID!, $specPath: String!) {
+  launchpadSetBrowser(id: $browserId)
+  launchOpenProject(specPath: $specPath)
+}
+`
+
+const setBrowser = useMutation(SpecRunnerHeader_SetBrowserDocument)
 
 const props = defineProps<{
   gql: SpecRunnerHeaderFragment
@@ -115,20 +131,21 @@ const togglePlayground = () => {
   }
 }
 
-const browser = computed(() => {
-  if (!props.gql.currentBrowser) {
+const specStore = useSpecStore()
+
+// Have to spread gql props since binding it to v-model causes error when testing
+const browser = ref({ ...props.gql.currentBrowser })
+const browsers = computed(() => props.gql.browsers?.slice().map((browser) => ({ ...browser })) ?? [])
+
+function changeBrowser (browser: SpecRunnerHeader_BrowserFragment) {
+  const activeSpec = specStore.activeSpec
+
+  if (props.gql.currentBrowser?.id === browser.id || !activeSpec) {
     return
   }
 
-  const dimensions = `${autStore.viewportDimensions.width}x${autStore.viewportDimensions.height}`
-
-  return {
-    id: props.gql.currentBrowser.id,
-    name: `${props.gql.currentBrowser.displayName} ${dimensions}`,
-  }
-})
-
-const browsers = computed(() => props.gql.browsers?.slice() ?? [])
+  setBrowser.executeMutation({ browserId: browser.id, specPath: activeSpec.absolute })
+}
 
 const autStore = useAutStore()
 

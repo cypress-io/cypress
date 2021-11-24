@@ -1,9 +1,11 @@
 import { observer } from 'mobx-react'
 import React, { Component, ReactElement } from 'react'
 
-import FileNameOpener from '../lib/file-name-opener'
 import { StatsStore } from '../header/stats-store'
 import { formatDuration, getFilenameParts } from '../lib/util'
+import OpenFileInIDE from '../lib/open-file-in-ide'
+import FileNameOpener from '../lib/file-name-opener'
+import TextIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/document-text_x16.svg'
 
 const renderRunnableHeader = (children: ReactElement) => <div className="runnable-header">{children}</div>
 
@@ -50,9 +52,17 @@ class RunnableHeader extends Component<RunnableHeaderProps> {
       relativeFile: relativeSpecPath,
     }
 
+    const openInIde = '__vite__' in window
+      ? (
+        <OpenFileInIDE fileDetails={fileDetails}>
+          <TextIcon />
+        </OpenFileInIDE>
+      )
+      : <FileNameOpener fileDetails={fileDetails} hasIcon />
+
     return renderRunnableHeader(
       <>
-        <FileNameOpener fileDetails={fileDetails} hasIcon />
+        {openInIde}
         {Boolean(statsStore.duration) && (
           <span className='duration'>{formatDuration(statsStore.duration)}</span>
         )}

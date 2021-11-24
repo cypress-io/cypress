@@ -9,6 +9,7 @@
     <SpecsListHeader
       v-model="search"
       class="pb-32px"
+      :result-count="specs.length"
       @newSpec="showModal = true"
     />
 
