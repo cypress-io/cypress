@@ -41,15 +41,58 @@ describe('Settings', { viewportWidth: 600 }, () => {
 
   it('selects well known editor', () => {
     cy.visitApp()
+    cy.withCtx(async (ctx) => {
+      ctx.coreData.localSettings.availableEditors = [
+        ...ctx.coreData.localSettings.availableEditors,
+        // don't rely on CI machines to have specific editors installed
+        // so just adding one here
+        {
+          id: 'well-known-editor',
+          binary: '/usr/bin/well-known',
+          name: 'Well known editor',
+        },
+      ]
+
+      ctx.coreData.localSettings.preferences.preferredEditorBinary = undefined
+    })
+
     cy.get('[href="#/settings"]').click()
     cy.contains('Device Settings').click()
-    cy.findByPlaceholderText('Custom path...').clear().type('/usr/local/bin/vim')
 
-    cy.intercept('POST', 'mutation-SetPreferredEditorBinary', (req) => {
-      expect(req.body.variables).to.eql({ 'value': '/usr/local/bin/vim' })
-    }).as('SetPreferred')
+    cy.intercept('POST', 'mutation-ExternalEditorSettings_SetPreferredEditorBinary').as('SetPreferred')
+    // doing invoke instead of `type` since `type` enters keys on-by-one, triggering a mutation
+    // for each keystroke, making it hard to intercept **only** the final request, which I want to
+    // assert contains `/usr/local/bin/vim'
+    cy.findByPlaceholderText('Custom path...').clear().invoke('val', '/usr/local/bin/vim').trigger('input').trigger('change')
+    cy.wait('@SetPreferred').its('request.body.variables.value').should('include', '/usr/local/bin/vim')
 
-    cy.get('[data-cy="use-custom-editor"]').click()
-    cy.wait('@SetPreferred')
+    cy.contains('Choose your editor...').click()
+    cy.contains('Well known editor').click()
+    cy.wait('@SetPreferred').its('request.body.variables.value').should('include', '/usr/bin/well-known')
+
+    // navigate away and come back
+    // preferred editor selected from dropdown should have been persisted
+    cy.get('[href="#/"]').click()
+    cy.get('[href="#/settings"]').click()
+    cy.wait(100)
+    cy.get('[data-cy="Device Settings"]').click()
+
+    cy.get('[data-cy="use-well-known-editor"]').should('be.checked')
+    cy.get('[data-cy="use-custom-editor"]').should('not.be.checked')
+
+    // change to custom editor using input
+    cy.findByPlaceholderText('Custom path...').clear().invoke('val', '/usr/local/bin/vim').trigger('input').trigger('change')
+
+    // navigate away and come back
+    // preferred editor entered from input should have been persisted
+    cy.get('[href="#/settings"]').click()
+    cy.wait(100)
+    cy.get('[data-cy="Device Settings"]').click()
+
+    cy.get('[data-cy="use-well-known-editor"]').should('not.be.checked')
+    cy.get('[data-cy="use-custom-editor"]').should('be.checked')
+
+    // change to custom editor using input
+    cy.get('[data-cy="custom-editor"]').should('have.value', '/usr/local/bin/vim')
   })
 })

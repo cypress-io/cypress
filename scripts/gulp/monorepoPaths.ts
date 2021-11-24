@@ -5,6 +5,7 @@ export const monorepoPaths = {
   root: path.join(__dirname, '../..'),
   pkgDir: path.join(__dirname, '../../packages'),
   pkgApp: path.join(__dirname, '../../packages/app'),
+  pkgConfig: path.join(__dirname, '../../packages/config'),
   pkgDataContext: path.join(__dirname, '../../packages/data-context'),
   pkgDesktopGui: path.join(__dirname, '../../packages/desktop-gui'),
   pkgDriver: path.join(__dirname, '../../packages/driver'),
