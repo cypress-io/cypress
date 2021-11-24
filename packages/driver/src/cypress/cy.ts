@@ -126,6 +126,7 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
   state: any
   config: any
   Cypress: any
+  Cookies: any
   devices: {
     keyboard: Keyboard
     mouse: Mouse
@@ -207,6 +208,7 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
     this.state = state
     this.config = config
     this.Cypress = Cypress
+    this.Cookies = Cookies
     initVideoRecorder(Cypress)
 
     // bind methods
@@ -214,6 +216,7 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
     this.isCy = this.isCy.bind(this)
     this.cleanup = this.cleanup.bind(this)
     this.fail = this.fail.bind(this)
+    this.isStopped = this.isStopped.bind(this)
 
     // init traits
 
@@ -333,6 +336,10 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
 
   isCy (val) {
     return (val === this) || $utils.isInstanceOf(val, $Chainer)
+  }
+
+  isStopped () {
+    return this.queue.stopped
   }
 
   fail (err, options = {}) {
@@ -535,6 +542,67 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
     // which need to run
     return this.state('index', this.queue.length)
   }
+
+  contentWindowListeners (contentWindow) {
+    const cy = this
+
+    $Listeners.bindTo(contentWindow, {
+      // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
+      onError: (handlerType) => (event) => {
+        const { originalErr, err, promise } = $errUtils.errorFromUncaughtEvent(handlerType, event)
+        const handled = cy.onUncaughtException({
+          err,
+          promise,
+          handlerType,
+          frameType: 'app',
+        })
+
+        debugErrors('uncaught AUT error: %o', originalErr)
+
+        $errUtils.logError(cy.Cypress, handlerType, originalErr, handled)
+
+        // return undefined so the browser does its default
+        // uncaught exception behavior (logging to console)
+        return undefined
+      },
+      onSubmit (e) {
+        return cy.Cypress.action('app:form:submitted', e)
+      },
+      onBeforeUnload (e) {
+        cy.isStable(false, 'beforeunload')
+
+        cy.Cookies.setInitial()
+
+        cy.resetTimer()
+
+        cy.Cypress.action('app:window:before:unload', e)
+
+        // return undefined so our beforeunload handler
+        // doesn't trigger a confirmation dialog
+        return undefined
+      },
+      onUnload (e) {
+        return cy.Cypress.action('app:window:unload', e)
+      },
+      onNavigation (...args) {
+        return cy.Cypress.action('app:navigation:changed', ...args)
+      },
+      onAlert (str) {
+        return cy.Cypress.action('app:window:alert', str)
+      },
+      onConfirm (str) {
+        const results = cy.Cypress.action('app:window:confirm', str)
+
+        // return false if ANY results are false
+        // else true
+        const ret = !_.some(results, returnedFalse)
+
+        cy.Cypress.action('app:window:confirmed', str, ret)
+
+        return ret
+      },
+    })
+  }
 }
 
 export default {
@@ -543,69 +611,6 @@ export default {
     const commandFns = {}
 
     const testConfigOverride = new TestConfigOverride()
-
-    const isStopped = () => {
-      return cy.queue.stopped
-    }
-
-    const contentWindowListeners = function (contentWindow) {
-      $Listeners.bindTo(contentWindow, {
-        // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
-        onError: (handlerType) => (event) => {
-          const { originalErr, err, promise } = $errUtils.errorFromUncaughtEvent(handlerType, event)
-          const handled = cy.onUncaughtException({
-            err,
-            promise,
-            handlerType,
-            frameType: 'app',
-          })
-
-          debugErrors('uncaught AUT error: %o', originalErr)
-
-          $errUtils.logError(Cypress, handlerType, originalErr, handled)
-
-          // return undefined so the browser does its default
-          // uncaught exception behavior (logging to console)
-          return undefined
-        },
-        onSubmit (e) {
-          return Cypress.action('app:form:submitted', e)
-        },
-        onBeforeUnload (e) {
-          cy.isStable(false, 'beforeunload')
-
-          Cookies.setInitial()
-
-          cy.resetTimer()
-
-          Cypress.action('app:window:before:unload', e)
-
-          // return undefined so our beforeunload handler
-          // doesn't trigger a confirmation dialog
-          return undefined
-        },
-        onUnload (e) {
-          return Cypress.action('app:window:unload', e)
-        },
-        onNavigation (...args) {
-          return Cypress.action('app:navigation:changed', ...args)
-        },
-        onAlert (str) {
-          return Cypress.action('app:window:alert', str)
-        },
-        onConfirm (str) {
-          const results = Cypress.action('app:window:confirm', str)
-
-          // return false if ANY results are false
-          // else true
-          const ret = !_.some(results, returnedFalse)
-
-          Cypress.action('app:window:confirmed', str, ret)
-
-          return ret
-        },
-      })
-    }
 
     const enqueue = function (obj) {
       // if we have a nestedIndex it means we're processing
@@ -718,8 +723,6 @@ export default {
     }
 
     _.extend(cy, {
-      isStopped,
-
       initialize ($autIframe) {
         setRemoteIframeProps($autIframe, state)
 
@@ -731,7 +734,7 @@ export default {
         // initially set the content window listeners too
         // so we can tap into all the normal flow of events
         // like before:unload, navigation events, etc
-        contentWindowListeners(getContentWindow($autIframe))
+        cy.contentWindowListeners(getContentWindow($autIframe))
 
         // the load event comes from the autIframe anytime any window
         // inside of it loads.
@@ -756,7 +759,7 @@ export default {
             // because they would have been automatically applied during
             // onBeforeAppWindowLoad, but in the case where we visited
             // about:blank in a visit, we do need these
-            contentWindowListeners(getContentWindow($autIframe))
+            cy.contentWindowListeners(getContentWindow($autIframe))
 
             Cypress.action('app:window:load', state('window'))
 
@@ -1022,7 +1025,7 @@ export default {
 
         cy.urlNavigationEvent('before:load')
 
-        contentWindowListeners(contentWindow)
+        cy.contentWindowListeners(contentWindow)
 
         cy.wrapNativeMethods(contentWindow)
 
