@@ -3,6 +3,7 @@ const fs = require('fs-extra')
 const { join } = require('path')
 const glob = require('glob')
 const os = require('os')
+const path = require('path')
 
 module.exports = async function (params) {
   console.log('****************************')
@@ -34,6 +35,13 @@ module.exports = async function (params) {
 
     await fs.copy(sourceFolder, destinationFolder)
   }
+
+  const distNodeModules = path.join(params.packager.info._appDir, 'node_modules')
+  const appNodeModules = path.join(outputFolder, 'node_modules')
+
+  console.log('copying ', distNodeModules, ' to', appNodeModules)
+
+  await fs.copy(distNodeModules, appNodeModules)
 
   console.log('all node_modules subfolders copied to', outputFolder)
 }

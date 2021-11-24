@@ -1876,17 +1876,6 @@ jobs:
           repo: cypress-example-todomvc
           browser: firefox
 
-  test-binary-against-documentation-firefox:
-    <<: *defaults
-    resource_class: medium
-    steps:
-      - test-binary-against-repo:
-          repo: cypress-documentation
-          browser: firefox
-          command: "yarn cypress run"
-          wait-on: http://localhost:3000
-          server-start-command: yarn serve:dist
-
   test-binary-against-conduit-chrome:
     <<: *defaults
     resource_class: medium
@@ -2215,10 +2204,12 @@ linux-workflow: &linux-workflow
         <<: *mainBuildFilters
         requires:
           - create-build-artifacts
-    - test-binary-against-conduit-chrome:
-        <<: *mainBuildFilters
-        requires:
-          - create-build-artifacts
+    # Re-enable when the cypress-example-conduit-app project is fixed.
+    # https://github.com/cypress-io/cypress-example-conduit-app/issues/346
+    # - test-binary-against-conduit-chrome:
+    #     <<: *mainBuildFilters
+    #     requires:
+    #       - create-build-artifacts
     - test-binary-against-recipes-firefox:
         <<: *mainBuildFilters
         requires:

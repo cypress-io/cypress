@@ -218,7 +218,7 @@ export function loadClientCertificateConfig (config) {
 
               try {
                 pki.certificateFromPem(caRaw)
-              } catch (error) {
+              } catch (error: any) {
                 throw new Error(`Cannot parse CA cert: ${error.message}`)
               }
 
@@ -251,7 +251,7 @@ export function loadClientCertificateConfig (config) {
 
             try {
               pemParsed = pki.certificateFromPem(pemRaw)
-            } catch (error) {
+            } catch (error: any) {
               throw new Error(`Cannot parse PEM cert: ${error.message}`)
             }
 
@@ -279,7 +279,7 @@ export function loadClientCertificateConfig (config) {
                   throw new Error('Cannot load PEM key')
                 }
               }
-            } catch (error) {
+            } catch (error: any) {
               throw new Error(`Cannot parse PEM key: ${error.message}`)
             }
 
@@ -332,7 +332,7 @@ export function loadClientCertificateConfig (config) {
         `loaded client certificates for ${clientCertificateStore.getCertCount()} URL(s)`,
       )
     }
-  } catch (e) {
+  } catch (e: any) {
     debug(
       `Failed to load client certificate for clientCertificates[${index}]: ${e.message} ${e.stack}`,
     )
@@ -363,7 +363,7 @@ function extractSubjectFromPem (pem): string {
     return pem.subject.attributes
     .map((attr) => [attr.shortName, attr.value].join('='))
     .join(', ')
-  } catch (e) {
+  } catch (e: any) {
     throw new Error(`Unable to extract subject from PEM file: ${e.message}`)
   }
 }
@@ -377,7 +377,7 @@ function loadPfx (pfx: Buffer, passphrase: string | undefined) {
     const certAsn1 = asn1.fromDer(certDer)
 
     return pkcs12.pkcs12FromAsn1(certAsn1, passphrase)
-  } catch (e) {
+  } catch (e: any) {
     debug(`loadPfx fail: ${e.message} ${e.stackTrace}`)
     throw new Error(`Unable to load PFX file: ${e.message}`)
   }
@@ -391,7 +391,7 @@ function extractSubjectFromPfx (pfx) {
     const certs = pfx.getBags({ bagType: pki.oids.certBag })[pki.oids.certBag].map((item) => item.cert)
 
     return certs[0].subject.attributes.map((attr) => [attr.shortName, attr.value].join('=')).join(', ')
-  } catch (e) {
+  } catch (e: any) {
     throw new Error(`Unable to extract subject from PFX file: ${e.message}`)
   }
 }
