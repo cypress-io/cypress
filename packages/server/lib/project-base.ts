@@ -49,9 +49,9 @@ export interface Cfg extends ReceivedCypressOptions {
   proxyServer?: Cypress.RuntimeConfigOptions['proxyUrl']
   exit?: boolean
   state?: {
-    firstOpened?: number
-    lastOpened?: number
-    promptsShown?: object
+    firstOpened?: number | null
+    lastOpened?: number | null
+    promptsShown?: object | null
   }
 }
 
