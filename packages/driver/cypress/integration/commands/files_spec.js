@@ -10,7 +10,7 @@ const okResponse = {
 describe('src/cy/commands/files', () => {
   beforeEach(() => {
     // call through normally on everything
-    cy.stub(Cypress, 'backend').callThrough().log(false)
+    cy.stub(Cypress, 'backend').callThrough()
   })
 
   describe('#readFile', () => {
@@ -21,6 +21,7 @@ describe('src/cy/commands/files', () => {
         expect(Cypress.backend).to.be.calledWith(
           'read:file',
           'foo.json',
+          { encoding: 'utf8' },
         )
       })
     })
@@ -32,6 +33,7 @@ describe('src/cy/commands/files', () => {
         expect(Cypress.backend).to.be.calledWith(
           'read:file',
           'foo.json',
+          { encoding: 'ascii' },
         )
       })
     })
@@ -47,6 +49,7 @@ describe('src/cy/commands/files', () => {
         expect(Cypress.backend).to.be.calledWith(
           'read:file',
           'foo.json',
+          { encoding: null },
         )
       }).should('eql', Buffer.from('\n'))
     })
@@ -696,34 +699,4 @@ describe('src/cy/commands/files', () => {
       })
     })
   })
-
-  // TODO remove repro test case
-  // describe.only('#writeFile-error', () => {
-  //   describe('error', () => {
-  //     const bigString = JSON.stringify(Cypress._.times(10000000, '😈'), null, 2) // 72MB
-  //     const tooBigString = JSON.stringify(Cypress._.times(15000000, '😈'), null, 2) // 72MB
-
-  //     afterEach(() => {
-  //       cy.writeFile('./fixtures/my-long-file.txt', tooBigString, { timeout: 30000 })
-  //     })
-
-  //     it('writes until timeout', () => {
-  //       cy.visit('/fixtures/dom.html')
-
-  //       cy.get('body').then((bodyElement) => {
-  //         expect(true).to.equal(true)
-  //       })
-  //     })
-  //   })
-
-  //   describe('should pass', () => {
-  //     it('writes until timeout', () => {
-  //       cy.visit('/fixtures/dom.html')
-
-  //       cy.get('body').then((bodyElement) => {
-  //         expect(true).to.equal(true)
-  //       })
-  //     })
-  //   })
-  // })
 })
