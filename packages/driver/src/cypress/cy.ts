@@ -392,7 +392,7 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
   }
 
   warnMixingPromisesAndCommands () {
-    const title = state('runnable').fullTitle()
+    const title = this.state('runnable').fullTitle()
 
     $errUtils.warnByPath('miscellaneous.mixing_promises_and_commands', {
       args: { title },
