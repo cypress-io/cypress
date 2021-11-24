@@ -51,10 +51,6 @@ const setWindowDocumentProps = function (contentWindow, state) {
   return state('document', contentWindow.document)
 }
 
-const setRemoteIframeProps = ($autIframe, state) => {
-  return state('$autIframe', $autIframe)
-}
-
 function __stackReplacementMarker (fn, ctx, args) {
   return fn.apply(ctx, args)
 }
@@ -440,6 +436,71 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
     return finish(err)
   }
 
+  initialize ($autIframe) {
+    this.state('$autIframe', $autIframe)
+
+    // dont need to worry about a try/catch here
+    // because this is during initialize and its
+    // impossible something is wrong here
+    setWindowDocumentProps(getContentWindow($autIframe), this.state)
+
+    // initially set the content window listeners too
+    // so we can tap into all the normal flow of events
+    // like before:unload, navigation events, etc
+    this.contentWindowListeners(getContentWindow($autIframe))
+
+    // the load event comes from the autIframe anytime any window
+    // inside of it loads.
+    // when this happens we need to check for cross origin errors
+    // by trying to talk to the contentWindow document to see if
+    // its accessible.
+    // when we find ourselves in a cross origin situation, then our
+    // proxy has not injected Cypress.action('window:before:load')
+    // so Cypress.onBeforeAppWindowLoad() was never called
+    return $autIframe.on('load', () => {
+      // if setting these props failed
+      // then we know we're in a cross origin failure
+      try {
+        setWindowDocumentProps(getContentWindow($autIframe), this.state)
+
+        // we may need to update the url now
+        this.urlNavigationEvent('load')
+
+        // we normally DONT need to reapply contentWindow listeners
+        // because they would have been automatically applied during
+        // onBeforeAppWindowLoad, but in the case where we visited
+        // about:blank in a visit, we do need these
+        this.contentWindowListeners(getContentWindow($autIframe))
+
+        cy.Cypress.action('app:window:load', this.state('window'))
+
+        // we are now stable again which is purposefully
+        // the last event we call here, to give our event
+        // listeners time to be invoked prior to moving on
+        return this.isStable(true, 'load')
+      } catch (err) {
+        let e = err
+
+        // we failed setting the remote window props
+        // which means we're in a cross domain failure
+        // check first to see if you have a callback function
+        // defined and let the page load change the error
+        const onpl = this.state('onPageLoadErr')
+
+        if (onpl) {
+          e = onpl(e)
+        }
+
+        // and now reject with it
+        const r = this.state('reject')
+
+        if (r) {
+          return r(e)
+        }
+      }
+    })
+  }
+
   // private
   wrapNativeMethods (contentWindow) {
     try {
@@ -717,73 +778,6 @@ export default {
     const testConfigOverride = new TestConfigOverride()
 
     _.extend(cy, {
-      initialize ($autIframe) {
-        setRemoteIframeProps($autIframe, state)
-
-        // dont need to worry about a try/catch here
-        // because this is during initialize and its
-        // impossible something is wrong here
-        setWindowDocumentProps(getContentWindow($autIframe), state)
-
-        // initially set the content window listeners too
-        // so we can tap into all the normal flow of events
-        // like before:unload, navigation events, etc
-        cy.contentWindowListeners(getContentWindow($autIframe))
-
-        // the load event comes from the autIframe anytime any window
-        // inside of it loads.
-        // when this happens we need to check for cross origin errors
-        // by trying to talk to the contentWindow document to see if
-        // its accessible.
-        // when we find ourselves in a cross origin situation, then our
-        // proxy has not injected Cypress.action('window:before:load')
-        // so Cypress.onBeforeAppWindowLoad() was never called
-        return $autIframe.on('load', () => {
-          // if setting these props failed
-          // then we know we're in a cross origin failure
-          let onpl; let r
-
-          try {
-            setWindowDocumentProps(getContentWindow($autIframe), state)
-
-            // we may need to update the url now
-            cy.urlNavigationEvent('load')
-
-            // we normally DONT need to reapply contentWindow listeners
-            // because they would have been automatically applied during
-            // onBeforeAppWindowLoad, but in the case where we visited
-            // about:blank in a visit, we do need these
-            cy.contentWindowListeners(getContentWindow($autIframe))
-
-            Cypress.action('app:window:load', state('window'))
-
-            // we are now stable again which is purposefully
-            // the last event we call here, to give our event
-            // listeners time to be invoked prior to moving on
-            return cy.isStable(true, 'load')
-          } catch (err) {
-            let e = err
-
-            // we failed setting the remote window props
-            // which means we're in a cross domain failure
-            // check first to see if you have a callback function
-            // defined and let the page load change the error
-            onpl = state('onPageLoadErr')
-
-            if (onpl) {
-              e = onpl(e)
-            }
-
-            // and now reject with it
-            r = state('reject')
-
-            if (r) {
-              return r(e)
-            }
-          }
-        })
-      },
-
       stop () {
         // don't do anything if we've already stopped
         if (cy.queue.stopped) {
