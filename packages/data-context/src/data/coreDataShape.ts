@@ -1,4 +1,4 @@
-import { BUNDLERS, FoundBrowser, FoundSpec, FullConfig, Preferences, DevicePreferences, devicePreferenceDefaults, Editor, Warning } from '@packages/types'
+import { BUNDLERS, FoundBrowser, FoundSpec, FullConfig, Preferences, defaultPreferences, Editor, Warning, AllowedState } from '@packages/types'
 import type { NexusGenEnums, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
 import type { BrowserWindow } from 'electron'
 import type { ChildProcess } from 'child_process'
@@ -22,7 +22,7 @@ export interface DevStateShape {
 export interface LocalSettingsDataShape {
   refreshing: Promise<Editor[]> | null
   availableEditors: Editor[]
-  preferences: DevicePreferences
+  preferences: AllowedState
 }
 
 export interface ConfigChildProcessShape {
@@ -117,7 +117,7 @@ export function makeCoreData (): CoreDataShape {
     },
     localSettings: {
       availableEditors: [],
-      preferences: devicePreferenceDefaults,
+      preferences: defaultPreferences,
       refreshing: null,
     },
     isAuthBrowserOpened: false,

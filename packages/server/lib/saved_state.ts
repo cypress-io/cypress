@@ -6,6 +6,7 @@ import appData from './util/app_data'
 import cwd from './cwd'
 import FileUtil from './util/file'
 import { fs } from './util/fs'
+import { AllowedState, allowed } from '@packages/types'
 
 const debug = Debug('cypress:server:saved_state')
 
@@ -13,34 +14,6 @@ const stateFiles: Record<string, typeof FileUtil> = {}
 
 // TODO: remove `showedOnBoardingModal` from this list - it is only included so that misleading `allowed` are not thrown
 // now that it has been removed from use
-const allowed = [
-  'appWidth',
-  'appHeight',
-  'appX',
-  'appY',
-  'autoScrollingEnabled',
-  'browserWidth',
-  'browserHeight',
-  'browserX',
-  'browserY',
-  'isAppDevToolsOpen',
-  'isBrowserDevToolsOpen',
-  'reporterWidth',
-  'specListWidth',
-  'showedNewProjectBanner',
-  'firstOpenedCypress',
-  'showedStudioModal',
-  'preferredOpener',
-  'ctReporterWidth',
-  'ctIsSpecsListOpen',
-  'ctSpecListWidth',
-  'firstOpened',
-  'lastOpened',
-  'promptsShown',
-  'watchForSpecChange',
-  'useDarkSidebar',
-  'preferredEditorBinary',
-] as const
 
 export const formStatePath = (projectRoot) => {
   return Bluebird.try(() => {
@@ -117,38 +90,9 @@ const normalizeAndAllowSet = (set, key, value) => {
   return set(_.pick(valueObject, allowed))
 }
 
-interface AllowedState {
-  appWidth: any
-  appHeight: any
-  appX: any
-  appY: any
-  autoScrollingEnabled: any
-  browserWidth: any
-  browserHeight: any
-  browserX: any
-  browserY: any
-  isAppDevToolsOpen: any
-  isBrowserDevToolsOpen: any
-  reporterWidth: any
-  specListWidth: any
-  showedNewProjectBanner: any
-  firstOpenedCypress: any
-  showedStudioModal: any
-  preferredOpener: any
-  ctReporterWidth: any
-  ctIsSpecsListOpen: any
-  ctSpecListWidth: any
-  firstOpened: any
-  lastOpened: any
-  promptsShown: any
-  watchForSpecChange: any
-  useDarkSidebar: any
-  preferredEditorBinary: any
-}
-
 interface SavedStateAPI {
-  get: () => Bluebird<Partial<AllowedState>>
-  set: (stateToSet: Partial<AllowedState>) => Bluebird<void>
+  get: () => Bluebird<AllowedState>
+  set: (stateToSet: AllowedState) => Bluebird<void>
 }
 
 export const create = (projectRoot?: string, isTextTerminal: boolean = false): Bluebird<SavedStateAPI> => {

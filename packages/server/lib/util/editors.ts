@@ -54,7 +54,7 @@ const getUserEditors = async (): Promise<Editor[]> => {
     .then((state) => {
       return state.get().then((state) => state.preferredOpener)
     })
-    .then((preferredOpener?: Editor) => {
+    .then((preferredOpener: Editor | undefined) => {
       debug('saved preferred editor: %o', preferredOpener)
 
       const cyEditors = _.map(editors, createEditor)
@@ -75,7 +75,7 @@ export const getUserEditor = async (alwaysIncludeEditors = false): Promise<Edito
   return savedState.create()
   .then((state) => state.get())
   .then((state) => {
-    const preferredOpener = state.preferredOpener
+    const preferredOpener = state.preferredOpener ?? undefined
 
     if (preferredOpener) {
       debug('return preferred editor: %o', preferredOpener)

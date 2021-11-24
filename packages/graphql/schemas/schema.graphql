@@ -445,6 +445,7 @@ type LocalSettings {
 """local setting preferences"""
 type LocalSettingsPreferences {
   autoScrollingEnabled: Boolean
+  isSpecsListOpen: Boolean
   preferredEditorBinary: String
   proxyBypass: String
   proxyServer: String
@@ -520,13 +521,10 @@ type Mutation {
 
   """Set active project to run tests on"""
   setActiveProject(path: String!): Boolean
-  setAutoScrollingEnabled(value: Boolean!): Boolean
-  setPreferredEditorBinary(value: String!): Boolean
+  setPreferences(value: String!): Boolean
 
   """Save the projects preferences to cache"""
   setProjectPreferences(browserPath: String!, testingType: TestingTypeEnum!): Query!
-  setUseDarkSidebar(value: Boolean!): Boolean
-  setWatchForSpecChange(value: Boolean!): Boolean
 
   """show the launchpad at the browser picker step"""
   showElectronOnAppExit: Boolean
