@@ -1400,6 +1400,7 @@ jobs:
 
   npm-webpack-preprocessor:
     <<: *defaults
+    resource_class: medium
     steps:
       - restore_cached_workspace
       - run:
@@ -1437,6 +1438,7 @@ jobs:
 
   npm-webpack-dev-server:
     <<: *defaults
+    resource_class: medium
     steps:
       - restore_cached_workspace
       - run:
@@ -1640,6 +1642,7 @@ jobs:
 
   test-kitchensink:
     <<: *defaults
+    resource_class: medium
     steps:
       - clone-repo-and-checkout-branch:
           repo: cypress-example-kitchensink
