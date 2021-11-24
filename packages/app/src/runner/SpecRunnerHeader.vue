@@ -71,8 +71,9 @@ import IconCrosshairsGPS from '~icons/mdi/crosshairs-gps'
 import Icon from '@packages/frontend-shared/src/components/Icon.vue'
 import type { SpecRunnerHeaderFragment } from '../generated/graphql'
 import SelectorPlayground from './selector-playground/SelectorPlayground.vue'
-import { getAutIframeModel, getEventManager } from '.'
 import { useSelectorPlaygroundStore } from '../store/selector-playground-store'
+import type { EventManager } from './event-manager'
+import type { AutIframe } from './aut-iframe'
 
 gql`
 fragment SpecRunnerHeader on CurrentProject {
@@ -93,11 +94,11 @@ fragment SpecRunnerHeader on CurrentProject {
 
 const props = defineProps<{
   gql: SpecRunnerHeaderFragment
+  eventManager: EventManager
+  getAutIframe: () => AutIframe
 }>()
 
-const eventManager = getEventManager()
-const autIframe = getAutIframeModel()
-const getAutIframe = getAutIframeModel
+const autIframe = props.getAutIframe()
 
 const selectorPlaygroundStore = useSelectorPlaygroundStore()
 

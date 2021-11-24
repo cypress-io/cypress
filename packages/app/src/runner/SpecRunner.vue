@@ -7,7 +7,10 @@
       id="inline-spec-list"
       class="bg-gray-1000"
     >
-      <InlineSpecList :gql="props.gql.currentProject" />
+      <InlineSpecList
+        v-if="props.gql.currentProject "
+        :gql="props.gql.currentProject"
+      />
 
       <ChooseExternalEditorModal
         :open="runnerUiStore.showChooseExternalEditorModal"
@@ -29,7 +32,12 @@
       class="relative w-full"
     >
       <HideDuringScreenshot class="bg-white p-4">
-        <SpecRunnerHeader :gql="props.gql.currentProject" />
+        <SpecRunnerHeader
+          v-if="props.gql.currentProject"
+          :gql="props.gql.currentProject"
+          :event-manager="eventManager"
+          :get-aut-iframe="getAutIframeModel"
+        />
       </HideDuringScreenshot>
 
       <RemoveClassesDuringScreenshotting
@@ -67,11 +75,11 @@ import RemoveClassesDuringScreenshotting from './screenshot/RemoveClassesDuringS
 import RemovePositioningDuringScreenshot from './screenshot/RemovePositioningDuringScreenshot.vue'
 import ScreenshotHelperPixels from './screenshot/ScreenshotHelperPixels.vue'
 import { useScreenshotStore } from '../store/screenshot-store'
-import type { GqlWithCurrentProject } from '../pages/Runner.vue'
 import { useRunnerUiStore } from '../store/runner-ui-store'
 import ChooseExternalEditorModal from '@packages/frontend-shared/src/gql-components/ChooseExternalEditorModal.vue'
 import { useMutation } from '@urql/vue'
 import { OpenFileInIdeDocument } from '@packages/data-context/src/gen/all-operations.gen'
+import type { SpecRunnerFragment } from '../generated/graphql'
 
 gql`
 fragment SpecRunner on Query {
@@ -121,7 +129,7 @@ const viewportStyle = computed(() => {
 })
 
 const props = defineProps<{
-  gql: GqlWithCurrentProject
+  gql: SpecRunnerFragment
   activeSpec: BaseSpec
 }>()
 
