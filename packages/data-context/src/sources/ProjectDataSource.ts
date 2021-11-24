@@ -31,9 +31,16 @@ export class ProjectDataSource {
     const config = await this.getConfig(projectRoot)
 
     let testFiles: string | string[] | undefined = []
+    let componentFolder: string | false = false
 
     if (this.ctx.appData.currentTestingType) {
-      testFiles = config[this.ctx.appData.currentTestingType]?.testFiles
+      if (config[this.ctx.appData.currentTestingType]?.testFiles) {
+        testFiles = config[this.ctx.appData.currentTestingType]?.testFiles
+      }
+
+      if (config[this.ctx.appData.currentTestingType]?.componentFolder) {
+        componentFolder = `${config.projectRoot}/${config[this.ctx.appData.currentTestingType]?.componentFolder}`
+      }
     }
 
     const specs = await this.api.findSpecs({
@@ -42,7 +49,7 @@ export class ProjectDataSource {
       supportFile: config.supportFile ?? false,
       testFiles: testFiles ?? [],
       ignoreTestFiles: config.ignoreTestFiles as string[] ?? [],
-      componentFolder: config.projectRoot ?? false,
+      componentFolder,
       integrationFolder: config.integrationFolder ?? '',
     })
 
