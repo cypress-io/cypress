@@ -100,3 +100,30 @@ index bb27d60..a4f244f 100644
 +//     getRecordData: (index: number) => TNodePublicState;
 +//     treeData: any;
 +// }>) => string;
+diff --git a/node_modules/react-vtree/dist/lib/utils.d.ts b/node_modules/react-vtree/dist/lib/utils.d.ts
+index bb27d60..d5ac63c 100644
+--- a/node_modules/react-vtree/dist/lib/utils.d.ts
++++ b/node_modules/react-vtree/dist/lib/utils.d.ts
+@@ -12,14 +12,14 @@ export declare type RequestIdleCallbackDeadline = Readonly<{
+     didTimeout: boolean;
+     timeRemaining: () => number;
+ }>;
+-declare global {
+-    const requestIdleCallback: (callback: (deadline: RequestIdleCallbackDeadline) => void, opts?: RequestIdleCallbackOptions) => RequestIdleCallbackHandle;
+-    const cancelIdleCallback: (handle: RequestIdleCallbackHandle) => void;
+-    interface Window {
+-        requestIdleCallback: typeof requestIdleCallback;
+-        cancelIdleCallback: typeof cancelIdleCallback;
+-    }
+-}
++// declare global {
++//     const requestIdleCallback: (callback: (deadline: RequestIdleCallbackDeadline) => void, opts?: RequestIdleCallbackOptions) => RequestIdleCallbackHandle;
++//     const cancelIdleCallback: (handle: RequestIdleCallbackHandle) => void;
++//     interface Window {
++//         requestIdleCallback: typeof requestIdleCallback;
++//         cancelIdleCallback: typeof cancelIdleCallback;
++//     }
++// }
+ export declare type DefaultTreeProps = TreeProps<NodeData, NodePublicState<NodeData>, FixedSizeList>;
+ export declare type DefaultTreeState = TreeState<NodeData, NodePublicState<NodeData>, FixedSizeList>;
+ export declare type DefaultTreeCreatorOptions = TreeCreatorOptions<NodeData, NodePublicState<NodeData>, DefaultTreeState>;
