@@ -736,6 +736,21 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
     return null
   }
 
+  onBeforeAppWindowLoad (contentWindow) {
+    // we set window / document props before the window load event
+    // so that we properly handle events coming from the application
+    // from the time that happens BEFORE the load event occurs
+    setWindowDocumentProps(contentWindow, this.state)
+
+    this.urlNavigationEvent('before:load')
+
+    this.contentWindowListeners(contentWindow)
+
+    this.wrapNativeMethods(contentWindow)
+
+    this.onBeforeWindowLoad()
+  }
+
   // private
   wrapNativeMethods (contentWindow) {
     try {
@@ -1010,21 +1025,6 @@ export default {
     let cy = new $Cy(specWindow, Cypress, Cookies, state, config)
 
     _.extend(cy, {
-      onBeforeAppWindowLoad (contentWindow) {
-        // we set window / document props before the window load event
-        // so that we properly handle events coming from the application
-        // from the time that happens BEFORE the load event occurs
-        setWindowDocumentProps(contentWindow, state)
-
-        cy.urlNavigationEvent('before:load')
-
-        cy.contentWindowListeners(contentWindow)
-
-        cy.wrapNativeMethods(contentWindow)
-
-        cy.onBeforeWindowLoad()
-      },
-
       onUncaughtException ({ handlerType, frameType, err, promise }) {
         err = $errUtils.createUncaughtException({
           handlerType,
