@@ -2222,10 +2222,6 @@ linux-workflow: &linux-workflow
         <<: *mainBuildFilters
         requires:
           - create-build-artifacts
-    - test-binary-against-documentation-firefox:
-        <<: *mainBuildFilters
-        requires:
-          - create-build-artifacts
     - test-binary-against-api-testing-firefox:
         <<: *mainBuildFilters
         requires:
@@ -2354,10 +2350,14 @@ workflows:
     <<: *windows-workflow
     when:
       or:
+      - equal: [ master, << pipeline.git.branch >> ]
       - equal: [ develop, << pipeline.git.branch >> ]
       - equal: [ rm-appveyor, << pipeline.git.branch >> ]
       - matches:
             pattern: "-release$"
+            value: << pipeline.git.branch >>
+      - matches:
+            pattern: "win*"
             value: << pipeline.git.branch >>
   mac:
     <<: *mac-workflow
