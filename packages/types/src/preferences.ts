@@ -7,7 +7,7 @@ export const defaultPreferences: AllowedState = {
   isSpecsListOpen: true,
 }
 
-export const allowed = [
+export const allowedKeys: Readonly<Array<keyof AllowedState>> = [
   'appWidth',
   'appHeight',
   'appX',

@@ -1,4 +1,4 @@
-import type { AllowedState, Editor, allowed } from '@packages/types'
+import type { AllowedState, Editor } from '@packages/types'
 import pDefer from 'p-defer'
 
 import type { DataContext } from '..'
@@ -18,7 +18,7 @@ export class LocalSettingsActions {
 
     // update local data
     for (const [key, value] of Object.entries(toJson)) {
-      this.ctx.coreData.localSettings.preferences[key as typeof allowed[number]] = value as any
+      this.ctx.coreData.localSettings.preferences[key as keyof AllowedState] = value as any
     }
 
     // persist to appData

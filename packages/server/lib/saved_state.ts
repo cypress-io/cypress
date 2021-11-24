@@ -6,7 +6,7 @@ import appData from './util/app_data'
 import cwd from './cwd'
 import FileUtil from './util/file'
 import { fs } from './util/fs'
-import { AllowedState, allowed } from '@packages/types'
+import { AllowedState, allowedKeys } from '@packages/types'
 
 const debug = Debug('cypress:server:saved_state')
 
@@ -79,7 +79,7 @@ const normalizeAndAllowSet = (set, key, value) => {
   })()
 
   const invalidKeys = _.filter(_.keys(valueObject), (key) => {
-    return !_.includes(allowed, key)
+    return !_.includes(allowedKeys, key)
   })
 
   if (invalidKeys.length) {
@@ -87,7 +87,7 @@ const normalizeAndAllowSet = (set, key, value) => {
     console.error(`WARNING: attempted to save state for non-allowed key(s): ${invalidKeys.join(', ')}. All keys must be allowed in server/lib/saved_state.js`)
   }
 
-  return set(_.pick(valueObject, allowed))
+  return set(_.pick(valueObject, allowedKeys))
 }
 
 interface SavedStateAPI {
