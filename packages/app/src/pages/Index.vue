@@ -4,9 +4,10 @@
       v-if="query.data.value.currentProject?.specs?.edges.length"
       :gql="query.data.value"
     />
-    <CreateSpecPage
+    <NoSpecsPage
       v-else
       :gql="query.data.value"
+      title="test title"
     />
   </div>
 
@@ -20,6 +21,7 @@ import { gql, useQuery } from '@urql/vue'
 import SpecsList from '../specs/SpecsList.vue'
 import { SpecsPageContainerDocument } from '../generated/graphql'
 import CreateSpecPage from '../specs/CreateSpecPage.vue'
+import NoSpecsPage from '../specs/NoSpecsPage.vue'
 
 gql`
 query SpecsPageContainer {
