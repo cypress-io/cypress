@@ -41,7 +41,7 @@ preferredEditorBinary
 
 `.trim().split(/\s+/)
 
-const formStatePath = (projectRoot) => {
+export const formStatePath = (projectRoot) => {
   return Promise.try(() => {
     debug('making saved state from %s', cwd())
 
@@ -116,7 +116,7 @@ const normalizeAndAllowSet = (set, key, value) => {
   return set(_.pick(valueObject, allowed))
 }
 
-const create = (projectRoot, isTextTerminal) => {
+export const create = (projectRoot?: string, isTextTerminal: boolean = false) => {
   if (isTextTerminal) {
     debug('noop saved state')
 
@@ -143,9 +143,4 @@ const create = (projectRoot, isTextTerminal) => {
 
     return stateFile
   })
-}
-
-module.exports = {
-  create,
-  formStatePath,
 }

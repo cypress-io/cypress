@@ -1,4 +1,4 @@
-import savedState from './saved_state'
+import * as savedState from './saved_state'
 import { Command, SaveDetails, createNewTestInFile, appendCommandsToTest, createNewTestInSuite, convertCommandsToText } from './util/spec_writer'
 
 interface SaveInfo extends SaveDetails {

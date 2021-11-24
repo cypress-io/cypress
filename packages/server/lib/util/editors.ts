@@ -5,7 +5,7 @@ import debugModule from 'debug'
 import type { Editor, EditorsResult } from '@packages/types'
 import { getEnvEditors } from './env-editors'
 import shell from './shell'
-import savedState from '../saved_state'
+import * as savedState from '../saved_state'
 
 export const osFileSystemExplorer = {
   darwin: 'Finder',

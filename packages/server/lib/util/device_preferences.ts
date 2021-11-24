@@ -1,5 +1,5 @@
 import debugModule from 'debug'
-import savedState from '../saved_state'
+import * as savedState from '../saved_state'
 import { DevicePreferences, devicePreferenceDefaults } from '@packages/types/src/devicePreferences'
 
 const debug = debugModule('cypress:server:preferences')
