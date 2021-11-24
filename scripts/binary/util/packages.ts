@@ -1,15 +1,20 @@
 import _ from 'lodash'
 import fs from 'fs-extra'
 import path from 'path'
-// we wrap glob to handle EMFILE error
+import glob from 'glob'
 import la from 'lazy-ass'
 import check from 'check-more-types'
 import execa from 'execa'
 import debugLib from 'debug'
 
-import externalUtils, { globby } from './3rd-party'
-
 const debug = debugLib('cypress:binary')
+
+type globAsyncType = (p: string, o?: object) => Promise<string[]>;
+const globAsync: globAsyncType = async (pattern, options = {}) => {
+  return new Promise((resolve, reject) => {
+    glob(pattern, options, (err, files) => err === null ? resolve(files) : reject(err))
+  })
+}
 
 const pathToPackageJson = function (packageFolder) {
   la(check.unemptyString(packageFolder), 'expected package path', packageFolder)
@@ -49,9 +54,7 @@ export async function copyAllToDist (distDir: string) {
   await fs.ensureDir(distDir)
 
   const started = new Date().valueOf()
-  const globbed = await externalUtils.globby(['./packages/*', './npm/*'], {
-    onlyFiles: false,
-  })
+  const globbed = await globAsync('./{packages,npm}/*')
 
   for (const pkg of globbed) {
     // copies the package to dist
@@ -74,10 +77,10 @@ export async function copyAllToDist (distDir: string) {
     const pkgFileMasks = [].concat(json.files || []).concat(json.main || [])
 
     debug('for pkg %s have the following file masks %o', pkg, pkgFileMasks)
-    const foundFileRelativeToPackageFolder = await externalUtils.globby(pkgFileMasks, {
+    const foundFileRelativeToPackageFolder = await globAsync(`{${pkgFileMasks.join(',')}}`, {
       cwd: pkg, // search in the package folder
       absolute: false, // and return relative file paths
-      followSymbolicLinks: false, // do not follow symlinks
+      follow: false, // do not follow symlinks
     })
 
     console.log(`Copying ${pkg} to ${path.join(distDir, pkg)}`)
@@ -123,7 +126,7 @@ export async function copyAllToDist (distDir: string) {
 export const replaceLocalNpmVersions = async function (basePath: string) {
   const visited = new Set<string>()
 
-  const pkgPaths = await globby('./packages/*/package.json', { cwd: basePath })
+  const pkgPaths = await globAsync('./packages/*/package.json', { cwd: basePath })
 
   async function updatePackageJson (pkg: string) {
     const pkgJsonPath = path.join(basePath, pkg)
@@ -164,9 +167,8 @@ export const replaceLocalNpmVersions = async function (basePath: string) {
 }
 
 export async function removeLocalNpmDirs (distPath: string, except: string[]) {
-  const toRemove = await globby(`${distPath}/npm/*`, {
+  const toRemove = await globAsync(`${distPath}/npm/*/`, {
     ignore: except.map((e) => e.replace('/package.json', '')),
-    onlyDirectories: true,
   })
 
   for (const dir of toRemove) {
