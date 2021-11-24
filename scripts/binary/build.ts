@@ -84,7 +84,7 @@ export async function buildCypressApp (options: BuildCypressAppOpts) {
   log('#replace local npm versions')
   const dirsSeen = await packages.replaceLocalNpmVersions(DIST_DIR)
 
-  log('#remove npm dirs that are not needed')
+  log('#remove local npm dirs that are not needed')
   await packages.removeLocalNpmDirs(DIST_DIR, dirsSeen)
 
   log('#install production dependencies')
