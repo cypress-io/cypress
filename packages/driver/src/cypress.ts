@@ -149,9 +149,13 @@ class $Cypress {
           let errMessage
 
           if (this.state('runnable')) {
-            errMessage = `\`Cypress.config()\` cannot mutate option \`${errProperty}\` because it is a read-only property.`
+            errMessage = $errUtils.errByPath('config.invalid_cypress_config_override', {
+              errProperty,
+            })
           } else {
-            errMessage = `Cypress test configuration cannot mutate option \`${errProperty}\` because it is a read-only property.`
+            errMessage = $errUtils.errByPath('config.invalid_test_config_override', {
+              errProperty,
+            })
           }
 
           throw new this.state('specWindow').Error(errMessage)
