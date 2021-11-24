@@ -139,7 +139,6 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     name: 'exit',
     defaultValue: true,
     validation: validate.isBoolean,
-    isWriteable: true,
   },
   {
     name: 'experimentalFetchPolyfill',
