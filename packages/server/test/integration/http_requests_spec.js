@@ -43,7 +43,7 @@ zlib = Promise.promisifyAll(zlib)
 // force supertest-session to use promises provided in supertest
 const session = proxyquire('supertest-session', { supertest })
 
-const absolutePathRegex = /"\/[^{}]*?\.projects/g
+const absolutePathRegex = /"\/[^{}]*?cy-projects/g
 let sourceMapRegex = /\n\/\/# sourceMappingURL\=.*/
 
 const replaceAbsolutePaths = (content) => {

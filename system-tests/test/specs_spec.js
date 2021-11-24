@@ -1,5 +1,4 @@
 const systemTests = require('../lib/system-tests').default
-const Fixtures = require('../lib/fixtures')
 
 describe('e2e specs', () => {
   systemTests.setup()
@@ -24,32 +23,34 @@ describe('e2e specs', () => {
 
   // @see https://github.com/cypress-io/cypress/issues/14226
   it('handles the same integration and fixtures folders', function () {
-    const project = Fixtures.projectPath('same-fixtures-integration-folders')
-
     return systemTests.exec(this, {
+<<<<<<< HEAD
       project,
       testingType: 'e2e',
+=======
+      project: 'same-fixtures-integration-folders',
+>>>>>>> 71d92e0e49 (test: node_modules installs for system-tests, other improvements (#18574))
       snapshot: false,
       expectedExitCode: 0,
     })
   })
 
   it('handles the fixtures folder being the subfolder of integration', function () {
-    const project = Fixtures.projectPath('fixture-subfolder-of-integration')
-
     return systemTests.exec(this, {
+<<<<<<< HEAD
       project,
       testingType: 'e2e',
+=======
+      project: 'fixture-subfolder-of-integration',
+>>>>>>> 71d92e0e49 (test: node_modules installs for system-tests, other improvements (#18574))
       snapshot: false,
       expectedExitCode: 0,
     })
   })
 
   it('handles specs with special characters in the file name', function () {
-    const project = Fixtures.projectPath('spec-name-special-characters')
-
     return systemTests.exec(this, {
-      project,
+      project: 'spec-name-special-characters',
       snapshot: false,
       expectedExitCode: 0,
     })
