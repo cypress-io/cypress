@@ -17,7 +17,7 @@ describe('Index', () => {
     it('shows "Create your first spec" title', () => {
     // after removing the default scaffolded spec, we should be prompted to create a first spec
       cy.visitApp()
-      cy.contains(defaultMessages.createSpec.page.title).should('be.visible')
+      cy.contains(defaultMessages.createSpec.page.defaultPatternNoSpecs.title).should('be.visible')
     })
   })
 })

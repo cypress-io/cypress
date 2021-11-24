@@ -32,9 +32,15 @@
     />
 
     <CreateSpecContent
+      v-if="props.isUsingDefaultSpecs"
       :gql="props.gql"
       @choose="choose"
-      @viewSpecPattern="showCypressConfigInIDE"
+      @showCypressConfigInIDE="showCypressConfigInIDE"
+    />
+    <CustomPatternNoSpecContent
+      v-else
+      @showCypressConfigInIDE="showCypressConfigInIDE"
+      @newSpec="showModal = true"
     />
   </div>
 </template>
@@ -48,6 +54,7 @@ import type { NoSpecsPageFragment } from '../generated/graphql'
 import { NoSpecsPage_OpenFileInIdeDocument } from '@packages/data-context/src/gen/all-operations.gen'
 import { useRunnerUiStore } from '../store/runner-ui-store'
 import ChooseExternalEditorModal from '@packages/frontend-shared/src/gql-components/ChooseExternalEditorModal.vue'
+import CustomPatternNoSpecContent from './CustomPatternNoSpecContent.vue'
 
 gql`
 fragment NoSpecsPage on Query {
@@ -78,6 +85,7 @@ const props = defineProps<{
   gql: NoSpecsPageFragment
   title: string
   description: string
+  isUsingDefaultSpecs: boolean
 }>()
 
 const openFileInIDE = useMutation(NoSpecsPage_OpenFileInIdeDocument)
