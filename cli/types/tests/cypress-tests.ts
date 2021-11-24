@@ -78,6 +78,10 @@ namespace CypressCommandsTests {
     // $ExpectType string
     arg
   })
+  Cypress.Commands.add('newCommand', function(arg) {
+    this // $ExpectType Context
+    arg // $ExpectType string
+  })
   Cypress.Commands.add('newCommand', { prevSubject: true }, (subject, arg) => {
     subject // $ExpectType unknown
     arg // $ExpectType string
@@ -121,6 +125,12 @@ namespace CypressCommandsTests {
     arg // $ExpectType string
     originalFn // $ExpectedType Chainable['newCommand']
     originalFn(arg) // $ExpectType void
+  })
+  Cypress.Commands.overwrite('newCommand', function(originalFn, arg) {
+    this // $ExpectType Context
+    arg // $ExpectType string
+    originalFn // $ExpectedType Chainable['newCommand']
+    originalFn.apply(this, [arg]) // $ExpectType void
   })
 }
 

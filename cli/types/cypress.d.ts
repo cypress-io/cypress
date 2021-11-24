@@ -22,13 +22,13 @@ declare namespace Cypress {
     prevSubject: boolean | PrevSubject | PrevSubject[]
   }
   interface CommandFn<T extends keyof ChainableMethods> {
-    (...args: Parameters<ChainableMethods[T]>): ReturnType<ChainableMethods[T]> | void
+    (this: Mocha.Context, ...args: Parameters<ChainableMethods[T]>): ReturnType<ChainableMethods[T]> | void
   }
   interface CommandFnWithSubject<T extends keyof ChainableMethods, S = JQuery> {
-    (prevSubject: S, ...args: Parameters<ChainableMethods[T]>): ReturnType<ChainableMethods[T]> | void
+    (this: Mocha.Context, prevSubject: S, ...args: Parameters<ChainableMethods[T]>): ReturnType<ChainableMethods[T]> | void
   }
   interface CommandFnWithOriginalFn<T extends keyof Chainable> {
-    (originalFn: ChainableMethods[T], ...args: Parameters<ChainableMethods[T]>): ReturnType<ChainableMethods[T]> | void
+    (this: Mocha.Context, originalFn: CallableFunction & ChainableMethods[T], ...args: Parameters<ChainableMethods[T]>): ReturnType<ChainableMethods[T]> | void
   }
   interface ObjectLike {
     [key: string]: any
