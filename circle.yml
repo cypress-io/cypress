@@ -58,13 +58,14 @@ executors:
     environment:
       PLATFORM: mac
 
-  # executor to run on Windows
-  # https://circleci.com/docs/2.0/executor-types/#using-the-windows-executor
+  # executor to run on Windows - based off of the windows-orb default executor since it is
+  # not customizable enough to align with our existing setup.
+  # https://github.com/CircleCI-Public/windows-orb/blob/master/src/executors/default.yml
   # https://circleci.com/docs/2.0/hello-world-windows/#software-pre-installed-in-the-windows-image
   windows: &windows-executor
     machine:  
       image: windows-server-2019-vs2019:stable
-      shell: bash.exe --login -eo pipefail
+      shell: bash.exe -eo pipefail
     resource_class: windows.medium
     environment:
       PLATFORM: windows
