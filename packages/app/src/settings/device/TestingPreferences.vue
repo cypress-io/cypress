@@ -20,7 +20,7 @@
             class="mx-8px"
             :value="props.gql.localSettings.preferences[pref.id] ?? false"
             :name="pref.title"
-            @update="(value) => updatePref(pref, value)"
+            @update="(value) => updatePref(pref.id, value)"
           />
         </h4>
         <p class="text-size-14px leading-24px text-gray-600">
@@ -60,30 +60,29 @@ mutation SetTestingPreferences($value: String!) {
   setPreferences (value: $value)
 }`
 
+const setPreferences = useMutation(SetTestingPreferencesDocument)
+
 const prefs = [
   {
     id: 'autoScrollingEnabled',
     title: t('settingsPage.testingPreferences.autoScrollingEnabled.title'),
-    mutation: useMutation(SetTestingPreferencesDocument),
     description: t('settingsPage.testingPreferences.autoScrollingEnabled.description'),
   },
   {
     id: 'useDarkSidebar',
     title: t('settingsPage.testingPreferences.useDarkSidebar.title'),
-    mutation: useMutation(SetTestingPreferencesDocument),
     description: t('settingsPage.testingPreferences.useDarkSidebar.description'),
   },
   {
     id: 'watchForSpecChange',
     title: t('settingsPage.testingPreferences.watchForSpecChange.title'),
-    mutation: useMutation(SetTestingPreferencesDocument),
     description: t('settingsPage.testingPreferences.watchForSpecChange.description'),
   },
 ] as const
 
-function updatePref (pref: typeof prefs[number], value: boolean) {
-  pref.mutation.executeMutation({
-    value: JSON.stringify({ [pref.id]: value }),
+function updatePref (preferenceId: typeof prefs[number]['id'], value: boolean) {
+  setPreferences.executeMutation({
+    value: JSON.stringify({ [preferenceId]: value }),
   })
 }
 
