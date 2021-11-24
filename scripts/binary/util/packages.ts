@@ -77,11 +77,17 @@ export async function copyAllToDist (distDir: string) {
     const pkgFileMasks = [].concat(json.files || []).concat(json.main || [])
 
     debug('for pkg %s have the following file masks %o', pkg, pkgFileMasks)
-    const foundFileRelativeToPackageFolder = await globAsync(`{${pkgFileMasks.join(',')}}`, {
-      cwd: pkg, // search in the package folder
-      absolute: false, // and return relative file paths
-      follow: false, // do not follow symlinks
-    })
+    let foundFileRelativeToPackageFolder = []
+
+    if (pkgFileMasks.length > 0) {
+      const pattern = pkgFileMasks.length > 1 ? `{${pkgFileMasks.join(',')}}` : pkgFileMasks[0]
+
+      foundFileRelativeToPackageFolder = await globAsync(pattern, {
+        cwd: pkg, // search in the package folder
+        absolute: false, // and return relative file paths
+        follow: false, // do not follow symlinks
+      })
+    }
 
     console.log(`Copying ${pkg} to ${path.join(distDir, pkg)}`)
 
