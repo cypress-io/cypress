@@ -6,10 +6,13 @@
     <ul
       v-bind="wrapperProps"
       class="children:h-28px"
+      tabindex="0"
     >
       <li
         v-for="row in list"
         :key="row.index"
+        :ref="el => setItemRef(el, row.index)"
+        v-bind="rowProps"
         class="
         flex
         outline-none
@@ -26,8 +29,9 @@
       "
         :style="{ paddingLeft: `${(row.data.depth - 2) * 10 + 16}px` }"
         :class="{'before:hover:(transitional-all duration-250 ease-in-out border-r-indigo-300) before:focus:(border-r-indigo-300)': row.data.isLeaf, 'before:border-r-indigo-300': isCurrentSpec(row.data)}"
-        @click="onRowClick(row.data)"
-        @keypress.enter.space.prevent="onRowClick(row.data)"
+        data-testid="spec-row-item"
+        @click="onRowClick(row.data, row.index)"
+        @keypress.enter.space.prevent="onRowClick(row.data, row.index)"
       >
         <SpecFileItem
           v-if="row.data.isLeaf"
@@ -59,6 +63,7 @@ import DirectoryItem from './DirectoryItem.vue'
 import { useRouter } from 'vue-router'
 import { useSpecStore } from '../store'
 import { useVirtualList } from '@packages/frontend-shared/src/composables/useVirtualList'
+import { useVirtualListNavigation } from '@packages/frontend-shared/src/composables/useVirtualListNavigation'
 
 const props = defineProps<{
   specs: FuzzyFoundSpec[]
@@ -79,7 +84,8 @@ const isCurrentSpec = (row: UseCollapsibleTreeNode<SpecTreeNode<FuzzyFoundSpec>>
 const collapsible = computed(() => useCollapsibleTree(buildSpecTree<FuzzyFoundSpec>(props.specs), { dropRoot: true }))
 const treeSpecList = computed(() => collapsible.value.tree.filter(((item) => !item.hidden.value)))
 
-const onRowClick = (row: UseCollapsibleTreeNode<SpecTreeNode<FuzzyFoundSpec>>) => {
+const onRowClick = (row: UseCollapsibleTreeNode<SpecTreeNode<FuzzyFoundSpec>>, idx: number) => {
+  activeItem.value = idx
   if (row.isLeaf) {
     if (!row.data) {
       return
@@ -91,11 +97,16 @@ const onRowClick = (row: UseCollapsibleTreeNode<SpecTreeNode<FuzzyFoundSpec>>) =
   }
 }
 
-const { containerProps, list, wrapperProps, scrollTo } = useVirtualList(treeSpecList, { itemHeight: 28, overscan: 15 })
+const { containerProps, list, wrapperProps, scrollTo, api } = useVirtualList(treeSpecList, { itemHeight: 28, overscan: 15 })
+const { activeItem, rowProps, setItemRef } = useVirtualListNavigation(api)
 
 // If you are scrolled down the virtual list and list changes,
 // reset scroll position to top of list
-watch(() => treeSpecList.value, () => scrollTo(0))
+watch(collapsible, () => {
+  activeItem.value = null
+  scrollTo(0)
+})
+
 </script>
 
 <style scoped>
