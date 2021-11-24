@@ -18,7 +18,7 @@
       prefix-icon-class="icon-light-gray-50 icon-dark-gray-400"
       :prefix-icon="SettingsIcon"
       class="mx-auto duration-300 hocus:ring-gray-50 hocus:border-gray-200"
-      @click.prevent="emit('viewSpecPattern')"
+      @click.prevent="emit('showCypressConfigInIDE')"
     >
       {{ t('createSpec.viewSpecPatternButton') }}
     </Button>
@@ -47,7 +47,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'choose', id: string): void
-  (e: 'viewSpecPattern'): void
+  (e: 'showCypressConfigInIDE'): void
 }>()
 
 const runnerUiStore = useRunnerUiStore()
