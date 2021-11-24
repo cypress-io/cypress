@@ -5,7 +5,6 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "cache:key": "bash -c 'cat ./projects/**/{package.json,yarn.lock}'",
     "projects:yarn:install": "node ./scripts/projects-yarn-install.js",
     "test": "node ./scripts/run.js --glob-in-dir=test",
     "test:ci": "node ./scripts/run.js"

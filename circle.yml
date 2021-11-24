@@ -156,19 +156,14 @@ commands:
     steps:
       - run:
           name: Generate Circle Cache key for system tests
-          command: yarn workspace @tooling/system-tests cache:key > system_tests_cache_key
-      - restore_cache:
-          name: Restore system tests node_modules cache
-          keys:
-            - v{{ .Environment.CACHE_VERSION }}-{{ arch }}-system-tests-projects-node-modules-cache-{{ checksum "system_tests_cache_key" }}
-            - v{{ .Environment.CACHE_VERSION }}-{{ arch }}-system-tests-projects-node-modules-cache-
+          command: ./system-tests/scripts/cache-key.sh > system_tests_cache_key
 
   update_cached_system_tests_deps:
     description: 'Update the cached node_modules for projects in "system-tests/projects/**"'
     steps:
       - run:
           name: Generate Circle Cache key for system tests
-          command: yarn workspace @tooling/system-tests cache:key > system_tests_cache_key
+          command: ./system-tests/scripts/cache-key.sh > system_tests_cache_key
       - restore_cache:
           name: Restore cache state, to check for known modules cache existence
           keys:
@@ -180,7 +175,11 @@ commands:
               echo "No updates to system tests node modules, exiting"
               circleci-agent step halt
             fi
-      - restore_cached_system_tests_deps
+      - restore_cache:
+          name: Restore system tests node_modules cache
+          keys:
+            - v{{ .Environment.CACHE_VERSION }}-{{ arch }}-system-tests-projects-node-modules-cache-{{ checksum "system_tests_cache_key" }}
+            - v{{ .Environment.CACHE_VERSION }}-{{ arch }}-system-tests-projects-node-modules-cache-
       - run:
           name: Update system-tests node_modules cache
           command: yarn workspace @tooling/system-tests projects:yarn:install
