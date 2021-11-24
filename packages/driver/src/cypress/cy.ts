@@ -197,6 +197,8 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
   interceptFocus: ReturnType<typeof createFocused>['interceptFocus']
   interceptBlur: ReturnType<typeof createFocused>['interceptBlur']
 
+  private testConfigOverride: TestConfigOverride
+
   constructor (specWindow, Cypress, Cookies, state, config) {
     state('specWindow', specWindow)
 
@@ -206,6 +208,8 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
     this.Cypress = Cypress
     this.Cookies = Cookies
     initVideoRecorder(Cypress)
+
+    this.testConfigOverride = new TestConfigOverride()
 
     // bind methods
     this.$$ = this.$$.bind(this)
@@ -501,6 +505,45 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
     })
   }
 
+  stop () {
+    // don't do anything if we've already stopped
+    if (this.queue.stopped) {
+      return
+    }
+
+    return this.doneEarly()
+  }
+
+  // reset is called before each test
+  reset (test) {
+    try {
+      const s = this.state()
+
+      const backup = {
+        window: s.window,
+        document: s.document,
+        $autIframe: s.$autIframe,
+        specWindow: s.specWindow,
+        activeSessions: s.activeSessions,
+      }
+
+      // reset state back to empty object
+      this.state.reset()
+
+      // and then restore these backed up props
+      this.state(backup)
+
+      this.queue.reset()
+      this.queue.clear()
+      this.resetTimer()
+      this.testConfigOverride.restoreAndSetTestConfigOverrides(test, this.Cypress.config, this.Cypress.env)
+
+      this.removeAllListeners()
+    } catch (err) {
+      this.fail(err)
+    }
+  }
+
   // private
   wrapNativeMethods (contentWindow) {
     try {
@@ -775,48 +818,7 @@ export default {
     let cy = new $Cy(specWindow, Cypress, Cookies, state, config)
     const commandFns = {}
 
-    const testConfigOverride = new TestConfigOverride()
-
     _.extend(cy, {
-      stop () {
-        // don't do anything if we've already stopped
-        if (cy.queue.stopped) {
-          return
-        }
-
-        return cy.doneEarly()
-      },
-
-      // reset is called before each test
-      reset (test) {
-        try {
-          const s = state()
-
-          const backup = {
-            window: s.window,
-            document: s.document,
-            $autIframe: s.$autIframe,
-            specWindow: s.specWindow,
-            activeSessions: s.activeSessions,
-          }
-
-          // reset state back to empty object
-          state.reset()
-
-          // and then restore these backed up props
-          state(backup)
-
-          cy.queue.reset()
-          cy.queue.clear()
-          cy.resetTimer()
-          testConfigOverride.restoreAndSetTestConfigOverrides(test, Cypress.config, Cypress.env)
-
-          cy.removeAllListeners()
-        } catch (err) {
-          cy.fail(err)
-        }
-      },
-
       addCommandSync (name, fn) {
         cy[name] = function () {
           return fn.apply(cy.runnableCtx(name), arguments)
