@@ -54,7 +54,7 @@ export async function copyAllToDist (distDir: string) {
   await fs.ensureDir(distDir)
 
   const started = new Date().valueOf()
-  const globbed = await globAsync('./{packages,npm}/*')
+  const globbed = glob.sync('./{packages,npm}/*')
 
   for (const pkg of globbed) {
     // copies the package to dist
@@ -132,7 +132,7 @@ export async function copyAllToDist (distDir: string) {
 export const replaceLocalNpmVersions = async function (basePath: string) {
   const visited = new Set<string>()
 
-  const pkgPaths = await globAsync('./packages/*/package.json', { cwd: basePath })
+  const pkgPaths = glob.sync('./packages/*/package.json', { cwd: basePath })
 
   async function updatePackageJson (pkg: string) {
     const pkgJsonPath = path.join(basePath, pkg)
