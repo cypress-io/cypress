@@ -153,7 +153,7 @@ describe('src/index', () => {
 
       configUtil.validateNoReadOnlyConfig({ chromeWebSecurity: false }, errorFn)
 
-      expect(errorFn).to.have.been.callCount(1)
+      expect(errorFn).to.have.callCount(1)
     })
 
     it('does not return an error if validation succeeds', () => {
@@ -161,7 +161,7 @@ describe('src/index', () => {
 
       configUtil.validateNoReadOnlyConfig({ requestTimeout: 1000 }, errorFn)
 
-      expect(errorFn).to.have.been.callCount(0)
+      expect(errorFn).to.been.callCount(0)
     })
   })
 })
