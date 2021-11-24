@@ -130,6 +130,7 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
     keyboard: Keyboard
     mouse: Mouse
   }
+  queue: CommandQueue
 
   timeout: ITimeouts['timeout']
   clearTimeout: ITimeouts['clearTimeout']
@@ -211,6 +212,8 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
     // bind methods
     this.$$ = this.$$.bind(this)
     this.isCy = this.isCy.bind(this)
+    this.cleanup = this.cleanup.bind(this)
+    this.fail = this.fail.bind(this)
 
     // init traits
 
@@ -316,6 +319,8 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
 
     this.onCssModified = snapshots.onCssModified
     this.onBeforeWindowLoad = snapshots.onBeforeWindowLoad
+
+    this.queue = new CommandQueue(state, this.timeout, this.whenStable, this.cleanup, this.fail, this.isCy)
   }
 
   $$ (selector, context) {
@@ -328,6 +333,104 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
 
   isCy (val) {
     return (val === this) || $utils.isInstanceOf(val, $Chainer)
+  }
+
+  fail (err, options = {}) {
+    // this means the error has already been through this handler and caught
+    // again. but we don't need to run it through again, so we can re-throw
+    // it and it will fail the test as-is
+    if (err && err.hasFailed) {
+      delete err.hasFailed
+
+      throw err
+    }
+
+    options = _.defaults(options, {
+      async: false,
+    })
+
+    let rets
+
+    this.queue.stop()
+
+    if (typeof err === 'string') {
+      err = new Error(err)
+    }
+
+    err.stack = $stackUtils.normalizedStack(err)
+
+    err = $errUtils.enhanceStack({
+      err,
+      userInvocationStack: $errUtils.getUserInvocationStack(err, this.state),
+      projectRoot: this.config('projectRoot'),
+    })
+
+    err = $errUtils.processErr(err, this.config)
+
+    err.hasFailed = true
+
+    // store the error on state now
+    this.state('error', err)
+
+    const cy = this
+
+    const finish = function (err) {
+      // if the test has a (done) callback, we fail the test with that
+      const d = cy.state('done')
+
+      if (d) {
+        return d(err)
+      }
+
+      // if this failure was asynchronously called (outside the promise chain)
+      // but the promise chain is still active, reject it. if we're inside
+      // the promise chain, this isn't necessary and will actually mess it up
+      const r = cy.state('reject')
+
+      if (options.async && r) {
+        return r(err)
+      }
+
+      // we're in the promise chain, so throw the error and it will
+      // get caught by mocha and fail the test
+      throw err
+    }
+
+    // this means the error came from a 'fail' handler, so don't send
+    // 'cy:fail' action again, just finish up
+    if (err.isCyFailErr) {
+      delete err.isCyFailErr
+
+      return finish(err)
+    }
+
+    // if we have a "fail" handler
+    // 1. catch any errors it throws and fail the test
+    // 2. otherwise swallow any errors
+    // 3. but if the test is not ended with a done()
+    //    then it should fail
+    // 4. and tests without a done will pass
+
+    // if we dont have a "fail" handler
+    // 1. callback with state("done") when async
+    // 2. throw the error for the promise chain
+    try {
+      // collect all of the callbacks for 'fail'
+      rets = this.Cypress.action('cy:fail', err, this.state('runnable'))
+    } catch (cyFailErr) {
+      // and if any of these throw synchronously immediately error
+      cyFailErr.isCyFailErr = true
+
+      return this.fail(cyFailErr)
+    }
+
+    // bail if we had callbacks attached
+    if (rets && rets.length) {
+      return
+    }
+
+    // else figure out how to finish this failure
+    return finish(err)
   }
 
   // private
@@ -408,6 +511,30 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
   urlNavigationEvent (event) {
     return this.Cypress.action('app:navigation:changed', `page navigation event (${event})`)
   }
+
+  cleanup () {
+    // cleanup could be called during a 'stop' event which
+    // could happen in between a runnable because they are async
+    if (this.state('runnable')) {
+      // make sure we reset the runnable's timeout now
+      this.state('runnable').resetTimeout()
+    }
+
+    // if a command fails then after each commands
+    // could also fail unless we clear this out
+    this.state('commandIntermediateValue', undefined)
+
+    // reset the nestedIndex back to null
+    this.state('nestedIndex', null)
+
+    // also reset recentlyReady back to null
+    this.state('recentlyReady', null)
+
+    // and forcibly move the index needle to the
+    // end in case we have after / afterEach hooks
+    // which need to run
+    return this.state('index', this.queue.length)
+  }
 }
 
 export default {
@@ -418,7 +545,7 @@ export default {
     const testConfigOverride = new TestConfigOverride()
 
     const isStopped = () => {
-      return queue.stopped
+      return cy.queue.stopped
     }
 
     const contentWindowListeners = function (contentWindow) {
@@ -505,9 +632,9 @@ export default {
       // we look at whether or not nestedIndex is a number, because if it
       // is then we need to insert inside of our commands, else just push
       // it onto the end of the queue
-      const index = _.isNumber(nestedIndex) ? nestedIndex : queue.length
+      const index = _.isNumber(nestedIndex) ? nestedIndex : cy.queue.length
 
-      queue.insert(index, $Command.create(obj))
+      cy.queue.insert(index, $Command.create(obj))
 
       return Cypress.action('cy:command:enqueued', obj)
     }
@@ -571,7 +698,7 @@ export default {
     }
 
     const doneEarly = function () {
-      queue.stop()
+      cy.queue.stop()
 
       // we only need to worry about doneEarly when
       // it comes from a manual event such as stopping
@@ -587,138 +714,10 @@ export default {
         state('cancel')()
       }
 
-      return cleanup()
+      return cy.cleanup()
     }
-
-    const cleanup = function () {
-      // cleanup could be called during a 'stop' event which
-      // could happen in between a runnable because they are async
-      if (state('runnable')) {
-        // make sure we reset the runnable's timeout now
-        state('runnable').resetTimeout()
-      }
-
-      // if a command fails then after each commands
-      // could also fail unless we clear this out
-      state('commandIntermediateValue', undefined)
-
-      // reset the nestedIndex back to null
-      state('nestedIndex', null)
-
-      // also reset recentlyReady back to null
-      state('recentlyReady', null)
-
-      // and forcibly move the index needle to the
-      // end in case we have after / afterEach hooks
-      // which need to run
-      return state('index', queue.length)
-    }
-
-    const fail = (err, options = {}) => {
-      // this means the error has already been through this handler and caught
-      // again. but we don't need to run it through again, so we can re-throw
-      // it and it will fail the test as-is
-      if (err && err.hasFailed) {
-        delete err.hasFailed
-
-        throw err
-      }
-
-      options = _.defaults(options, {
-        async: false,
-      })
-
-      let rets
-
-      queue.stop()
-
-      if (typeof err === 'string') {
-        err = new Error(err)
-      }
-
-      err.stack = $stackUtils.normalizedStack(err)
-
-      err = $errUtils.enhanceStack({
-        err,
-        userInvocationStack: $errUtils.getUserInvocationStack(err, state),
-        projectRoot: config('projectRoot'),
-      })
-
-      err = $errUtils.processErr(err, config)
-
-      err.hasFailed = true
-
-      // store the error on state now
-      state('error', err)
-
-      const finish = function (err) {
-        // if the test has a (done) callback, we fail the test with that
-        const d = state('done')
-
-        if (d) {
-          return d(err)
-        }
-
-        // if this failure was asynchronously called (outside the promise chain)
-        // but the promise chain is still active, reject it. if we're inside
-        // the promise chain, this isn't necessary and will actually mess it up
-        const r = state('reject')
-
-        if (options.async && r) {
-          return r(err)
-        }
-
-        // we're in the promise chain, so throw the error and it will
-        // get caught by mocha and fail the test
-        throw err
-      }
-
-      // this means the error came from a 'fail' handler, so don't send
-      // 'cy:fail' action again, just finish up
-      if (err.isCyFailErr) {
-        delete err.isCyFailErr
-
-        return finish(err)
-      }
-
-      // if we have a "fail" handler
-      // 1. catch any errors it throws and fail the test
-      // 2. otherwise swallow any errors
-      // 3. but if the test is not ended with a done()
-      //    then it should fail
-      // 4. and tests without a done will pass
-
-      // if we dont have a "fail" handler
-      // 1. callback with state("done") when async
-      // 2. throw the error for the promise chain
-      try {
-        // collect all of the callbacks for 'fail'
-        rets = Cypress.action('cy:fail', err, state('runnable'))
-      } catch (cyFailErr) {
-        // and if any of these throw synchronously immediately error
-        cyFailErr.isCyFailErr = true
-
-        return fail(cyFailErr)
-      }
-
-      // bail if we had callbacks attached
-      if (rets && rets.length) {
-        return
-      }
-
-      // else figure out how to finish this failure
-      return finish(err)
-    }
-
-    const queue = new CommandQueue(state, cy.timeout, cy.whenStable, cleanup, fail, cy.isCy)
 
     _.extend(cy, {
-      // command queue instance
-      queue,
-
-      // errors sync methods
-      fail,
-
       isStopped,
 
       initialize ($autIframe) {
@@ -790,7 +789,7 @@ export default {
 
       stop () {
         // don't do anything if we've already stopped
-        if (queue.stopped) {
+        if (cy.queue.stopped) {
           return
         }
 
@@ -816,8 +815,8 @@ export default {
           // and then restore these backed up props
           state(backup)
 
-          queue.reset()
-          queue.clear()
+          cy.queue.reset()
+          cy.queue.clear()
           cy.resetTimer()
           testConfigOverride.restoreAndSetTestConfigOverrides(test, Cypress.config, Cypress.env)
 
@@ -911,7 +910,7 @@ export default {
               cy.warnMixingPromisesAndCommands()
             }
 
-            queue.run()
+            cy.queue.run()
           }
 
           return chain
@@ -1080,7 +1079,7 @@ export default {
       setRunnable (runnable, hookId) {
         // when we're setting a new runnable
         // prepare to run again!
-        queue.reset()
+        cy.queue.reset()
 
         // reset the promise again
         state('promise', undefined)
@@ -1111,7 +1110,7 @@ export default {
 
           // store the current length of our queue
           // before we invoke the runnable.fn
-          const currentLength = queue.length
+          const currentLength = cy.queue.length
 
           try {
             // if we have a fn.length that means we
@@ -1148,7 +1147,7 @@ export default {
             // and the value isn't currently cy
             // or a promise
             if (ret &&
-              (queue.length > currentLength) &&
+              (cy.queue.length > currentLength) &&
               (!cy.isCy(ret)) &&
               (!$utils.isPromiseLike(ret))) {
               // TODO: clean this up in the utility function
@@ -1183,7 +1182,7 @@ export default {
               // this means we instantiated a promise
               // and we've already invoked multiple
               // commands and should warn
-              if (queue.length > currentLength) {
+              if (cy.queue.length > currentLength) {
                 cy.warnMixingPromisesAndCommands()
               }
 
@@ -1191,7 +1190,7 @@ export default {
             }
 
             // if we're cy or we've enqueued commands
-            if (cy.isCy(ret) || (queue.length > currentLength)) {
+            if (cy.isCy(ret) || (cy.queue.length > currentLength)) {
               if (fn.length) {
                 // if user has passed done callback don't return anything
                 // so we don't get an 'overspecified' error from mocha
