@@ -28,12 +28,6 @@ export class ProjectDataSource {
   }
 
   async findSpecs (projectRoot: string, specType: Maybe<SpecType>) {
-    const project = this.ctx.currentProject
-
-    if (!project) {
-      throw new Error('Cant find specs without current project.')
-    }
-
     const config = await this.getConfig(projectRoot)
     const specs = await this.api.findSpecs({
       projectRoot,
@@ -49,13 +43,15 @@ export class ProjectDataSource {
       return specs
     }
 
-    project.specs = !specType ? specs : specs.filter((spec) => spec.specType === specType)
-
-    return project.specs
+    return specs.filter((spec) => spec.specType === specType)
   }
 
-  getCurrentSpecByAbsolute (absolute: string) {
-    return (this.ctx.currentProject?.specs ?? []).find((x) => x.absolute === absolute)
+  async getCurrentSpecByAbsolute (projectRoot: string, absolute: string) {
+    // TODO: should cache current specs so we don't need to
+    // call findSpecs each time we ask for the current spec.
+    const specs = await this.findSpecs(projectRoot, null)
+
+    return specs.find((x) => x.absolute === absolute)
   }
 
   async getCurrentSpecById (projectRoot: string, base64Id: string) {

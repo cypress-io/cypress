@@ -218,7 +218,7 @@ export class ProjectActions {
     let activeSpec: FoundSpec | undefined
 
     if (specPath) {
-      activeSpec = this.ctx.project.getCurrentSpecByAbsolute(specPath)
+      activeSpec = await this.ctx.project.getCurrentSpecByAbsolute(this.ctx.currentProject.projectRoot, specPath)
     }
 
     // Ensure that we have loaded browsers to choose from
