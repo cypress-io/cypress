@@ -1,3 +1,5 @@
+import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
+
 describe('Index', () => {
   beforeEach(() => {
     cy.setupE2E('component-tests')
@@ -12,10 +14,10 @@ describe('Index', () => {
       })
     })
 
-    it('shows "Create your first spec"', () => {
+    it('shows "Create your first spec" title', () => {
     // after removing the default scaffolded spec, we should be prompted to create a first spec
       cy.visitApp()
-      cy.contains('Create your first spec')
+      cy.contains(defaultMessages.createSpec.page.title).should('be.visible')
     })
   })
 })
