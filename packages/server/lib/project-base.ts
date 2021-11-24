@@ -796,19 +796,17 @@ export class ProjectBase<TServer extends Server> extends EE {
     let state = await savedState.create(this.projectRoot, this.cfg.isTextTerminal)
 
     state.set(stateChanges)
-    state = await state.get()
-    this.cfg.state = state
+    this.cfg.state = await state.get()
 
-    return state
+    return this.cfg.state
   }
 
   async _setSavedState (cfg: Cfg) {
     debug('get saved state')
 
-    let state = await savedState.create(this.projectRoot, cfg.isTextTerminal)
+    const state = await savedState.create(this.projectRoot, cfg.isTextTerminal)
 
-    state = await state.get()
-    cfg.state = state
+    cfg.state = await state.get()
 
     return cfg
   }
