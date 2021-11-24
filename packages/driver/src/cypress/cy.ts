@@ -603,6 +603,54 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
       },
     })
   }
+
+  enqueue (obj) {
+    // if we have a nestedIndex it means we're processing
+    // nested commands and need to insert them into the
+    // index past the current index as opposed to
+    // pushing them to the end we also dont want to
+    // reset the run defer because splicing means we're
+    // already in a run loop and dont want to create another!
+    // we also reset the .next property to properly reference
+    // our new obj
+
+    // we had a bug that would bomb on custom commands when it was the
+    // first command. this was due to nestedIndex being undefined at that
+    // time. so we have to ensure to check that its any kind of number (even 0)
+    // in order to know to insert it into the existing array.
+    let nestedIndex = this.state('nestedIndex')
+
+    // if this is a number, then we know we're about to insert this
+    // into our commands and need to reset next + increment the index
+    if (_.isNumber(nestedIndex)) {
+      this.state('nestedIndex', (nestedIndex += 1))
+    }
+
+    // we look at whether or not nestedIndex is a number, because if it
+    // is then we need to insert inside of our commands, else just push
+    // it onto the end of the queue
+    const index = _.isNumber(nestedIndex) ? nestedIndex : this.queue.length
+
+    this.queue.insert(index, $Command.create(obj))
+
+    return this.Cypress.action('cy:command:enqueued', obj)
+  }
+
+  getCommandsUntilFirstParentOrValidSubject (command, memo = []) {
+    if (!command) {
+      return null
+    }
+
+    // push these onto the beginning of the commands array
+    memo.unshift(command)
+
+    // break and return the memo
+    if ((command.get('type') === 'parent') || $dom.isAttached(command.get('subject'))) {
+      return memo
+    }
+
+    return getCommandsUntilFirstParentOrValidSubject(command.get('prev'), memo)
+  }
 }
 
 export default {
@@ -611,58 +659,6 @@ export default {
     const commandFns = {}
 
     const testConfigOverride = new TestConfigOverride()
-
-    const enqueue = function (obj) {
-      // if we have a nestedIndex it means we're processing
-      // nested commands and need to insert them into the
-      // index past the current index as opposed to
-      // pushing them to the end we also dont want to
-      // reset the run defer because splicing means we're
-      // already in a run loop and dont want to create another!
-      // we also reset the .next property to properly reference
-      // our new obj
-
-      // we had a bug that would bomb on custom commands when it was the
-      // first command. this was due to nestedIndex being undefined at that
-      // time. so we have to ensure to check that its any kind of number (even 0)
-      // in order to know to insert it into the existing array.
-      let nestedIndex = state('nestedIndex')
-
-      // if this is a number, then we know we're about to insert this
-      // into our commands and need to reset next + increment the index
-      if (_.isNumber(nestedIndex)) {
-        state('nestedIndex', (nestedIndex += 1))
-      }
-
-      // we look at whether or not nestedIndex is a number, because if it
-      // is then we need to insert inside of our commands, else just push
-      // it onto the end of the queue
-      const index = _.isNumber(nestedIndex) ? nestedIndex : cy.queue.length
-
-      cy.queue.insert(index, $Command.create(obj))
-
-      return Cypress.action('cy:command:enqueued', obj)
-    }
-
-    const getCommandsUntilFirstParentOrValidSubject = function (command, memo = []) {
-      if (!command) {
-        return null
-      }
-
-      // push these onto the beginning of the commands array
-      memo.unshift(command)
-
-      // break and return the memo
-      if ((command.get('type') === 'parent') || $dom.isAttached(command.get('subject'))) {
-        return memo
-      }
-
-      return getCommandsUntilFirstParentOrValidSubject(command.get('prev'), memo)
-    }
-
-    const removeSubject = () => {
-      return state('subject', undefined)
-    }
 
     const pushSubjectAndValidate = function (name, args, firstCall, prevSubject) {
       if (firstCall) {
@@ -684,7 +680,7 @@ export default {
         // else if this is the very first call
         // on the chainer then make the first
         // argument undefined (we have no subject)
-        removeSubject()
+        this.state('subject', undefined)
       }
 
       const subject = state('subject')
@@ -933,7 +929,7 @@ export default {
             }
           }
 
-          enqueue({
+          cy.enqueue({
             name,
             args,
             type,
@@ -963,7 +959,7 @@ export default {
 
           // clone the command to prevent
           // mutating its properties
-          return enqueue(command.clone())
+          return cy.enqueue(command.clone())
         }
 
         // - starting with the aliased command
@@ -976,7 +972,7 @@ export default {
         //   inserted if the previous command should
         //   be replayed
 
-        const commands = getCommandsUntilFirstParentOrValidSubject(current)
+        const commands = cy.getCommandsUntilFirstParentOrValidSubject(current)
 
         if (commands) {
           let initialCommand = commands.shift()
