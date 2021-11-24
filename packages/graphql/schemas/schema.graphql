@@ -273,6 +273,9 @@ type CurrentProject implements Node & ProjectLike {
   """Project configuration"""
   config: JSON!
 
+  """Config File Absolute Path"""
+  configFileAbsolutePath: String
+
   """Config File Path"""
   configFilePath: String
 
