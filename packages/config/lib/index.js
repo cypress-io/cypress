@@ -20,7 +20,7 @@ const breakingKeys = _.map(breakingOptions, 'name')
 const defaultValues = createIndex(options, 'name', 'defaultValue')
 const publicConfigKeys = _(options).reject({ isInternal: true }).map('name').value()
 const validationRules = createIndex(options, 'name', 'validation')
-const writeableOptions = options.filter((option) => option.isWriteable).map((option) => option.name)
+const writeableOptions = options.filter((option) => option.isWriteable).map((option) => option.name).reduce((name, val) => ({ ...name, [val]: true }), {})
 
 module.exports = {
   allowed: (obj = {}) => {
@@ -106,10 +106,8 @@ module.exports = {
   validateNoReadOnlyConfig: (config, onErr) => {
     let errProperty
 
-    Object.keys(config).forEach((element) => {
-      if (!writeableOptions.includes(element)) {
-        errProperty = element
-      }
+    Object.keys(config).some((option) => {
+      return errProperty = !writeableOptions[option] ? option : undefined
     })
 
     if (errProperty) {
