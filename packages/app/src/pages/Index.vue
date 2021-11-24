@@ -7,7 +7,8 @@
     <NoSpecsPage
       v-else
       :gql="query.data.value"
-      title="test title"
+      :title="title"
+      :description="description"
     />
   </div>
 
@@ -20,17 +21,30 @@
 import { gql, useQuery } from '@urql/vue'
 import SpecsList from '../specs/SpecsList.vue'
 import { SpecsPageContainerDocument } from '../generated/graphql'
-import CreateSpecPage from '../specs/CreateSpecPage.vue'
 import NoSpecsPage from '../specs/NoSpecsPage.vue'
+import { computed } from 'vue'
+import { useI18n } from '@cy/i18n'
+const { t } = useI18n()
 
 gql`
 query SpecsPageContainer {
   ...Specs_SpecsList
-  ...CreateSpecPage
+  ...NoSpecsPage
 }
 `
 
 const query = useQuery({ query: SpecsPageContainerDocument })
+
+const title = computed(() => {
+  // TODO: add logic here based on if default spec pattern is used
+  // to determine the correct title
+  return t('createSpec.page.title')
+})
+const description = computed(() => {
+  // TODO: add logic here based on if default spec pattern is used
+  // to determine the correct title
+  return t(`createSpec.page.${query.data.value?.currentProject?.currentTestingType}.description`)
+})
 
 </script>
 

@@ -1,37 +1,27 @@
 <template>
-  <CreateSpecModal
-    v-if="props.gql.currentProject?.currentTestingType"
-    :key="generator"
-    :initial-generator="generator"
-    :show="showModal"
+  <CreateSpecCards
+    data-testid="create-spec-page-cards"
     :gql="props.gql"
-    @close="closeModal"
+    @select="choose"
   />
 
-  <div
-    v-if="props.gql.currentProject?.currentTestingType"
-    class="overflow-scroll text-center max-w-600px mx-auto py-40px"
-  >
-    <h1
-      data-testid="create-spec-page-title"
-      class="text-gray-900 text-32px mb-12px"
-    >
-      {{ props.title }}
-    </h1>
+  <div class="text-center border-t-1 pt-32px mt-32px">
     <p
-      data-testid="create-spec-page-description"
-      class="leading-normal text-gray-600 text-18px mb-32px"
+      data-testid="no-specs-message"
+      class="leading-normal text-gray-600 text-16px mb-16px"
     >
-      {{ props.description }}
+      {{ t('createSpec.noSpecsMessage') }}
     </p>
-    <ChooseExternalEditorModal
-      :open="runnerUiStore.showChooseExternalEditorModal"
-      :gql="props.gql"
-      @close="runnerUiStore.setShowChooseExternalEditorModal(false)"
-      @selected="openFile"
-    />
-
-    <CreateSpecContent :gql="props.gql" />
+    <Button
+      data-testid="view-spec-pattern"
+      variant="outline"
+      prefix-icon-class="icon-light-gray-50 icon-dark-gray-400"
+      :prefix-icon="SettingsIcon"
+      class="mx-auto duration-300 hocus:ring-gray-50 hocus:border-gray-200"
+      @click.prevent="showCypressConfigInIDE"
+    >
+      {{ t('createSpec.viewSpecPatternButton') }}
+    </Button>
   </div>
 </template>
 
@@ -40,17 +30,15 @@ import { useI18n } from '@cy/i18n'
 import SettingsIcon from '~icons/cy/settings_x16'
 import Button from '@cy/components/Button.vue'
 import { ref } from 'vue'
-import CreateSpecModal from './CreateSpecModal.vue'
-import CreateSpecContent from './CreateSpecContent.vue'
+import CreateSpecCards from './CreateSpecCards.vue'
 import { gql, useMutation } from '@urql/vue'
-import type { NoSpecsPageFragment } from '../generated/graphql'
-import { NoSpecsPage_OpenFileInIdeDocument } from '@packages/data-context/src/gen/all-operations.gen'
+import type { CreateSpecContentFragment } from '../generated/graphql'
+import { CreateSpecPage_OpenFileInIdeDocument } from '@packages/data-context/src/gen/all-operations.gen'
 import { useRunnerUiStore } from '../store/runner-ui-store'
-import ChooseExternalEditorModal from '@packages/frontend-shared/src/gql-components/ChooseExternalEditorModal.vue'
 const { t } = useI18n()
 
 gql`
-fragment NoSpecsPage on Query {
+fragment CreateSpecContent on Query {
   ...CreateSpecCards
   ...CreateSpecModal
   ...ChooseExternalEditor
@@ -69,18 +57,16 @@ fragment NoSpecsPage on Query {
 `
 
 gql`
-mutation NoSpecsPage_OpenFileInIDE ($input: FileDetailsInput!) {
+mutation CreateSpecPage_OpenFileInIDE ($input: FileDetailsInput!) {
   openFileInIDE (input: $input)
 }
 `
 
 const props = defineProps<{
-  gql: NoSpecsPageFragment
-  title: string
-  description: string
+  gql: CreateSpecContentFragment
 }>()
 
-const openFileInIDE = useMutation(NoSpecsPage_OpenFileInIdeDocument)
+const openFileInIDE = useMutation(CreateSpecPage_OpenFileInIdeDocument)
 
 const showModal = ref(false)
 
@@ -112,11 +98,6 @@ const showCypressConfigInIDE = () => {
   } else {
     runnerUiStore.setShowChooseExternalEditorModal(true)
   }
-}
-
-const closeModal = () => {
-  showModal.value = false
-  generator.value = null
 }
 
 const choose = (id) => {

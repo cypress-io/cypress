@@ -1,4 +1,4 @@
-import CreateSpecPage from './CreateSpecPage.vue'
+import CreateSpecPage from './CreateSpecContent.vue'
 import { defaultMessages } from '@cy/i18n'
 import { CreateSpecPageFragmentDoc } from '../generated/graphql-test'
 
