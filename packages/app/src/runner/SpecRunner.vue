@@ -7,8 +7,14 @@
       id="inline-spec-list"
       class="bg-gray-1000"
     >
+      <button
+        class="text-white"
+        @click="handleToggleClick"
+      >
+        toggle {{ props.gql.localSettings.preferences.isSpecsListOpen }}
+      </button>
       <InlineSpecList
-        v-if="props.gql.currentProject "
+        v-if="props.gql.currentProject && props.gql.localSettings.preferences.isSpecsListOpen"
         :gql="props.gql.currentProject"
       />
 
@@ -77,7 +83,7 @@ import { useScreenshotStore } from '../store/screenshot-store'
 import { useRunnerUiStore } from '../store/runner-ui-store'
 import ChooseExternalEditorModal from '@packages/frontend-shared/src/gql-components/ChooseExternalEditorModal.vue'
 import { useMutation } from '@urql/vue'
-import { OpenFileInIdeDocument } from '@packages/data-context/src/gen/all-operations.gen'
+import { OpenFileInIdeDocument, SetSpecsListOpenDocument } from '@packages/data-context/src/gen/all-operations.gen'
 import type { SpecRunnerFragment } from '../generated/graphql'
 
 gql`
@@ -88,12 +94,23 @@ fragment SpecRunner on Query {
     ...SpecRunnerHeader
   }
   ...ChooseExternalEditor
+  localSettings {
+    preferences {
+      isSpecsListOpen
+    }
+  }
 }
 `
 
 gql`
 mutation OpenFileInIDE ($input: FileDetailsInput!) {
   openFileInIDE (input: $input)
+}
+`
+
+gql`
+mutation SetSpecsListOpen ($value: String!) {
+  setPreferences (value: $value)
 }
 `
 
@@ -138,6 +155,13 @@ function runSpec () {
 let fileToOpen: FileDetails
 
 const openFileInIDE = useMutation(OpenFileInIdeDocument)
+const setSpecsListOpen = useMutation(SetSpecsListOpenDocument)
+
+const handleToggleClick = () => {
+  setSpecsListOpen.executeMutation({
+    value: JSON.stringify({ isSpecsListOpen: !props.gql.localSettings.preferences.isSpecsListOpen }),
+  })
+}
 
 function openFile () {
   runnerUiStore.setShowChooseExternalEditorModal(false)
