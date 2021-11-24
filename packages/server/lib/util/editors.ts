@@ -52,7 +52,7 @@ const getUserEditors = async (): Promise<Editor[]> => {
 
     return savedState.create()
     .then((state) => {
-      return state.get('preferredOpener')
+      return state.get().then((state) => state.preferredOpener)
     })
     .then((preferredOpener?: Editor) => {
       debug('saved preferred editor: %o', preferredOpener)
@@ -80,7 +80,7 @@ export const getUserEditor = async (alwaysIncludeEditors = false): Promise<Edito
     if (preferredOpener) {
       debug('return preferred editor: %o', preferredOpener)
       if (!alwaysIncludeEditors) {
-        return { preferredOpener }
+        return { preferredOpener, availableEditors: [] }
       }
     }
 
@@ -97,5 +97,5 @@ export const setUserEditor = async (editor: Editor) => {
 
   const state = await savedState.create()
 
-  state.set('preferredOpener', editor)
+  state.set({ preferredOpener: editor })
 }

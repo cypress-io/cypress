@@ -1,48 +1,49 @@
-const _ = require('lodash')
-const debug = require('debug')('cypress:server:saved_state')
-const path = require('path')
-const Promise = require('bluebird')
-const appData = require('./util/app_data')
-const cwd = require('./cwd')
-const FileUtil = require('./util/file')
-const { fs } = require('./util/fs')
+import _ from 'lodash'
+import path from 'path'
+import Debug from 'debug'
+import Bluebird from 'bluebird'
+import appData from './util/app_data'
+import cwd from './cwd'
+import FileUtil from './util/file'
+import { fs } from './util/fs'
 
-const stateFiles = {}
+const debug = Debug('cypress:server:saved_state')
+
+const stateFiles: Record<string, typeof FileUtil> = {}
 
 // TODO: remove `showedOnBoardingModal` from this list - it is only included so that misleading `allowed` are not thrown
 // now that it has been removed from use
-const allowed = `
-appWidth
-appHeight
-appX
-appY
-autoScrollingEnabled
-browserWidth
-browserHeight
-browserX
-browserY
-isAppDevToolsOpen
-isBrowserDevToolsOpen
-reporterWidth
-specListWidth
-showedNewProjectBanner
-firstOpenedCypress
-showedStudioModal
-preferredOpener
-ctReporterWidth
-ctIsSpecsListOpen
-ctSpecListWidth
-firstOpened
-lastOpened
-promptsShown
-watchForSpecChange
-useDarkSidebar
-preferredEditorBinary
-
-`.trim().split(/\s+/)
+const allowed = [
+  'appWidth',
+  'appHeight',
+  'appX',
+  'appY',
+  'autoScrollingEnabled',
+  'browserWidth',
+  'browserHeight',
+  'browserX',
+  'browserY',
+  'isAppDevToolsOpen',
+  'isBrowserDevToolsOpen',
+  'reporterWidth',
+  'specListWidth',
+  'showedNewProjectBanner',
+  'firstOpenedCypress',
+  'showedStudioModal',
+  'preferredOpener',
+  'ctReporterWidth',
+  'ctIsSpecsListOpen',
+  'ctSpecListWidth',
+  'firstOpened',
+  'lastOpened',
+  'promptsShown',
+  'watchForSpecChange',
+  'useDarkSidebar',
+  'preferredEditorBinary',
+] as const
 
 export const formStatePath = (projectRoot) => {
-  return Promise.try(() => {
+  return Bluebird.try(() => {
     debug('making saved state from %s', cwd())
 
     if (projectRoot) {
@@ -116,15 +117,49 @@ const normalizeAndAllowSet = (set, key, value) => {
   return set(_.pick(valueObject, allowed))
 }
 
-export const create = (projectRoot?: string, isTextTerminal: boolean = false) => {
+interface AllowedState {
+  appWidth: any
+  appHeight: any
+  appX: any
+  appY: any
+  autoScrollingEnabled: any
+  browserWidth: any
+  browserHeight: any
+  browserX: any
+  browserY: any
+  isAppDevToolsOpen: any
+  isBrowserDevToolsOpen: any
+  reporterWidth: any
+  specListWidth: any
+  showedNewProjectBanner: any
+  firstOpenedCypress: any
+  showedStudioModal: any
+  preferredOpener: any
+  ctReporterWidth: any
+  ctIsSpecsListOpen: any
+  ctSpecListWidth: any
+  firstOpened: any
+  lastOpened: any
+  promptsShown: any
+  watchForSpecChange: any
+  useDarkSidebar: any
+  preferredEditorBinary: any
+}
+
+interface SavedStateAPI {
+  get: () => Bluebird<Partial<AllowedState>>
+  set: (stateToSet: Partial<AllowedState>) => Bluebird<void>
+}
+
+export const create = (projectRoot?: string, isTextTerminal: boolean = false): Bluebird<SavedStateAPI> => {
   if (isTextTerminal) {
     debug('noop saved state')
 
-    return Promise.resolve(FileUtil.noopFile)
+    return Bluebird.resolve(FileUtil.noopFile)
   }
 
   return formStatePath(projectRoot)
-  .then((statePath) => {
+  .then((statePath: string) => {
     const fullStatePath = appData.projectsPath(statePath)
 
     debug('full state path %s', fullStatePath)
@@ -141,6 +176,6 @@ export const create = (projectRoot?: string, isTextTerminal: boolean = false) =>
 
     stateFiles[fullStatePath] = stateFile
 
-    return stateFile
+    return stateFile as SavedStateAPI
   })
 }

@@ -9,7 +9,7 @@ export async function setDevicePreference<K extends keyof DevicePreferences> (ke
 
   const state = await savedState.create()
 
-  state.set(key, value)
+  state.set({ [key]: value })
 }
 
 export async function getDevicePreferences (): Promise<DevicePreferences> {
