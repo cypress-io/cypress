@@ -101,14 +101,19 @@ describe('src/cy/commands/fixtures', () => {
         return null
       })
 
-      it('throws if fixturesFolder is set to false', function (done) {
-        cy.on('fail', (err) => {
-          expect(err.message).to.include('`Cypress.config()` cannot mutate option `fixturesFolder` because it is a read-only property.')
+      it('throws if fixturesFolder is set to false', { fixturesFolder: false }, function (done) {
+        cy.on('fail', () => {
+          const { lastLog } = this
+
+          assertLogLength(this.logs, 1)
+          expect(lastLog.get('error').message).to.eq('`cy.fixture()` is not valid because you have configured `fixturesFolder` to `false`.')
+          expect(lastLog.get('error').docsUrl).to.eq('https://on.cypress.io/fixture')
+          expect(lastLog.get('state')).to.eq('failed')
+          expect(lastLog.get('name')).to.eq('fixture')
 
           done()
         })
 
-        Cypress.config('fixturesFolder', false)
         cy.fixture('foo')
       })
 
