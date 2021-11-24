@@ -5,7 +5,7 @@ describe('<SettingsCard />', () => {
   const title = 'My Device Settings'
   const description = 'The configuration I\'m passing in.'
   const headerSelector = '[data-cy="collapsible-header"]'
-  const collapsibleSelector = '[data-cy="collapsible"]'
+  const collapsibleSelector = `[data-cy="${title}"]`
 
   it('renders', () => {
     const contentSelector = '[data-testid=content]'

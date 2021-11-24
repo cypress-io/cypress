@@ -8,6 +8,7 @@
         />
       </div>
       <input
+        id="inline-spec-list-header-search"
         class="
           w-full
           bg-gray-1000
@@ -17,14 +18,22 @@
           font-light
           outline-none
         "
-        placeholder="Search Specs"
-        :value="search"
+        :value="props.search"
+        minlength="1"
         @focus="inputFocused = true"
         @blur="inputFocused = false"
         @input="onInput"
       >
+      <label
+        for="inline-spec-list-header-search"
+        class="search-label absolute left-24px text-gray-300 pointer-events-none font-light"
+        :class="{
+          'opacity-0': inputFocused || props.search.length
+        }"
+      >
+        {{ t('specPage.searchPlaceholder') }}
+      </label>
     </div>
-
     <button
       class="
         border-1 border-gray-900
@@ -37,11 +46,17 @@
         items-center
         justify-center
       "
-      data-cy="runner-spec-list-add-spec"
+      :aria-label="t('specPage.newSpecButton')"
       @click="emit('addSpec')"
     >
       <i-cy-add-small_x16 class="icon-light-gray-50 icon-dark-gray-200" />
     </button>
+    <div
+      class="sr-only"
+      aria-live="polite"
+    >
+      {{ resultCount }} {{ resultCount === 1 ? t('specPage.matchSingular') : t('specPage.matchPlural') }}
+    </div>
   </div>
 </template>
 
@@ -49,9 +64,12 @@
 import Input from '@cy/components/Input.vue'
 import Button from '@cy/components/Button.vue'
 import { ref } from 'vue'
+import { useI18n } from '@cy/i18n'
 
-defineProps<{
+const { t } = useI18n()
+const props = defineProps<{
   search: string
+  resultCount: number
 }>()
 
 const emit = defineEmits<{

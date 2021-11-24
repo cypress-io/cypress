@@ -113,3 +113,10 @@ const _inputClasses = computed(() => {
 })
 
 </script>
+
+<style scoped>
+::-webkit-search-cancel-button{
+    display: none;
+}
+
+</style>

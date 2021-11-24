@@ -218,6 +218,10 @@ const events: Events = {
       runner.emit('open:file', fileDetails)
     })
 
+    localBus.on('open:file:unified', (fileDetails) => {
+      runner.emit('open:file:unified', fileDetails)
+    })
+
     localBus.on('studio:init:test', (testId) => {
       runner.emit('studio:init:test', testId)
     })
