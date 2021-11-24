@@ -25,6 +25,8 @@ Error: Webpack Compilation Error
 ./cypress/support/index.js
 Module not found: Error: Can't resolve './does/not/exist' in '/foo/bar/.projects/busted-support-file/cypress/support'
 Looked for and couldn't find the file at the following paths:
+[/foo/bar/.projects/busted-support-file/cypress/support/package.json]
+[/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist/package.json]
 [/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist]
 [/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.js]
 [/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.json]
