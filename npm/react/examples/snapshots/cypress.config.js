@@ -1,7 +1,6 @@
 module.exports = {
   'video': false,
   'fixturesFolder': false,
-  'testFiles': '**/*-spec.js',
   'viewportWidth': 500,
   'viewportHeight': 500,
   'ignoreTestFiles': [
@@ -14,6 +13,7 @@ module.exports = {
     },
   },
   'component': {
+    'testFiles': '**/*-spec.js',
     setupNodeEvents (on, config) {
       // load file devServer that comes with this plugin
       // https://github.com/bahmutov/cypress-react-unit-test#install

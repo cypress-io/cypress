@@ -10,7 +10,6 @@ export default defineConfig({
     'openMode': 0,
   },
   'nodeVersion': 'system',
-  'testFiles': '**/*.spec.{js,ts,tsx,jsx}',
   'reporter': '../../node_modules/cypress-multi-reporters/index.js',
   'reporterOptions': {
     'configFile': '../../mocha-reporter-config.json',

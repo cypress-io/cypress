@@ -1,7 +1,6 @@
 import { defineConfig } from 'cypress'
 
 export default defineConfig({
-  testFiles: '**/*spec.{ts,tsx}',
   video: true,
   env: {
     reactDevtools: false,

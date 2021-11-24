@@ -12,13 +12,13 @@ module.exports = {
     'openMode': 0,
   },
   'nodeVersion': 'system',
-  'testFiles': '**/*_spec.{js,jsx}',
   'componentFolder': 'src',
   'reporter': '../../node_modules/cypress-multi-reporters/index.js',
   'reporterOptions': {
     'configFile': '../../mocha-reporter-config.json',
   },
   'e2e': {
+    'testFiles': '**/*_spec.{js,jsx}',
     setupNodeEvents (on, config) {
       const express = require('express')
 
@@ -32,6 +32,7 @@ module.exports = {
     },
   },
   'component': {
+    'testFiles': '**/*_spec.{js,jsx}',
     devServer (cypressConfig) {
       const { startDevServer } = require('@cypress/webpack-dev-server')
       const webpackConfig = require('./webpack.config').default
