@@ -119,6 +119,7 @@ const setTopOnError = function (Cypress, cy: $Cy) {
 // TODO: refactor the 'create' method below into this class
 class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILocation, ITimer, IChai, IXhr, IAliases, IEnsures, ISnapshots, IFocused {
   id: string
+  specWindow: any
   state: any
   config: any
   Cypress: any
@@ -198,10 +199,12 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
   interceptBlur: ReturnType<typeof createFocused>['interceptBlur']
 
   private testConfigOverride: TestConfigOverride
+  private commandFns: Record<string, Function> = {}
 
   constructor (specWindow, Cypress, Cookies, state, config) {
     state('specWindow', specWindow)
 
+    this.specWindow = specWindow
     this.id = _.uniqueId('cy')
     this.state = state
     this.config = config
@@ -544,6 +547,132 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
     }
   }
 
+  addCommandSync (name, fn) {
+    const cy = this
+
+    cy[name] = function () {
+      return fn.apply(cy.runnableCtx(name), arguments)
+    }
+  }
+
+  addChainer (name, fn) {
+    // add this function to our chainer class
+    return $Chainer.add(name, fn)
+  }
+
+  addCommand ({ name, fn, type, prevSubject }) {
+    const cy = this
+
+    // TODO: prob don't need this anymore
+    this.commandFns[name] = fn
+
+    const wrap = function (firstCall) {
+      fn = cy.commandFns[name]
+      const wrapped = wrapByType(fn, firstCall)
+
+      wrapped.originalFn = fn
+
+      return wrapped
+    }
+
+    const wrapByType = function (fn, firstCall) {
+      if (type === 'parent') {
+        return fn
+      }
+
+      // child, dual, assertion, utility command
+      // pushes the previous subject into them
+      // after verifying its of the correct type
+      return function (...args) {
+        // push the subject into the args
+        args = cy.pushSubjectAndValidate(name, args, firstCall, prevSubject)
+
+        return fn.apply(cy.runnableCtx(name), args)
+      }
+    }
+
+    cy[name] = function (...args) {
+      const userInvocationStack = $stackUtils.captureUserInvocationStack(cy.specWindow.Error)
+
+      cy.ensureRunnable(name)
+
+      // this is the first call on cypress
+      // so create a new chainer instance
+      const chain = $Chainer.create(name, userInvocationStack, cy.specWindow, args)
+
+      // store the chain so we can access it later
+      cy.state('chain', chain)
+
+      // if we are in the middle of a command
+      // and its return value is a promise
+      // that means we are attempting to invoke
+      // a cypress command within another cypress
+      // command and we should error
+      const ret = cy.state('commandIntermediateValue')
+
+      if (ret) {
+        const current = cy.state('current')
+
+        // if this is a custom promise
+        if ($utils.isPromiseLike(ret) && $utils.noArgsAreAFunction(current.get('args'))) {
+          $errUtils.throwErrByPath(
+            'miscellaneous.command_returned_promise_and_commands', {
+              args: {
+                current: current.get('name'),
+                called: name,
+              },
+            },
+          )
+        }
+      }
+
+      // if we're the first call onto a cy
+      // command, then kick off the run
+      if (!cy.state('promise')) {
+        if (cy.state('returnedCustomPromise')) {
+          cy.warnMixingPromisesAndCommands()
+        }
+
+        cy.queue.run()
+      }
+
+      return chain
+    }
+
+    return this.addChainer(name, (chainer, userInvocationStack, args) => {
+      const { firstCall, chainerId } = chainer
+
+      // dont enqueue / inject any new commands if
+      // onInjectCommand returns false
+      const onInjectCommand = cy.state('onInjectCommand')
+      const injected = _.isFunction(onInjectCommand)
+
+      if (injected) {
+        if (onInjectCommand.call(cy, name, ...args) === false) {
+          return
+        }
+      }
+
+      cy.enqueue({
+        name,
+        args,
+        type,
+        chainerId,
+        userInvocationStack,
+        injected,
+        fn: wrap(firstCall),
+      })
+
+      return true
+    })
+  }
+
+  now (name, ...args) {
+    return Promise.resolve(
+      this.commandFns[name].apply(this, args),
+    )
+  }
+
   // private
   wrapNativeMethods (contentWindow) {
     try {
@@ -816,133 +945,8 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
 export default {
   create (specWindow, Cypress, Cookies, state, config, log) {
     let cy = new $Cy(specWindow, Cypress, Cookies, state, config)
-    const commandFns = {}
 
     _.extend(cy, {
-      addCommandSync (name, fn) {
-        cy[name] = function () {
-          return fn.apply(cy.runnableCtx(name), arguments)
-        }
-      },
-
-      addChainer (name, fn) {
-        // add this function to our chainer class
-        return $Chainer.add(name, fn)
-      },
-
-      addCommand ({ name, fn, type, prevSubject }) {
-        // TODO: prob don't need this anymore
-        commandFns[name] = fn
-
-        const wrap = function (firstCall) {
-          fn = commandFns[name]
-          const wrapped = wrapByType(fn, firstCall)
-
-          wrapped.originalFn = fn
-
-          return wrapped
-        }
-
-        const wrapByType = function (fn, firstCall) {
-          if (type === 'parent') {
-            return fn
-          }
-
-          // child, dual, assertion, utility command
-          // pushes the previous subject into them
-          // after verifying its of the correct type
-          return function (...args) {
-            // push the subject into the args
-            args = cy.pushSubjectAndValidate(name, args, firstCall, prevSubject)
-
-            return fn.apply(cy.runnableCtx(name), args)
-          }
-        }
-
-        cy[name] = function (...args) {
-          const userInvocationStack = $stackUtils.captureUserInvocationStack(specWindow.Error)
-
-          let ret
-
-          cy.ensureRunnable(name)
-
-          // this is the first call on cypress
-          // so create a new chainer instance
-          const chain = $Chainer.create(name, userInvocationStack, specWindow, args)
-
-          // store the chain so we can access it later
-          state('chain', chain)
-
-          // if we are in the middle of a command
-          // and its return value is a promise
-          // that means we are attempting to invoke
-          // a cypress command within another cypress
-          // command and we should error
-          ret = state('commandIntermediateValue')
-
-          if (ret) {
-            const current = state('current')
-
-            // if this is a custom promise
-            if ($utils.isPromiseLike(ret) && $utils.noArgsAreAFunction(current.get('args'))) {
-              $errUtils.throwErrByPath(
-                'miscellaneous.command_returned_promise_and_commands', {
-                  args: {
-                    current: current.get('name'),
-                    called: name,
-                  },
-                },
-              )
-            }
-          }
-
-          // if we're the first call onto a cy
-          // command, then kick off the run
-          if (!state('promise')) {
-            if (state('returnedCustomPromise')) {
-              cy.warnMixingPromisesAndCommands()
-            }
-
-            cy.queue.run()
-          }
-
-          return chain
-        }
-
-        return cy.addChainer(name, (chainer, userInvocationStack, args) => {
-          const { firstCall, chainerId } = chainer
-
-          // dont enqueue / inject any new commands if
-          // onInjectCommand returns false
-          const onInjectCommand = state('onInjectCommand')
-          const injected = _.isFunction(onInjectCommand)
-
-          if (injected) {
-            if (onInjectCommand.call(cy, name, ...args) === false) {
-              return
-            }
-          }
-
-          cy.enqueue({
-            name,
-            args,
-            type,
-            chainerId,
-            userInvocationStack,
-            injected,
-            fn: wrap(firstCall),
-          })
-
-          return true
-        })
-      },
-
-      now (name, ...args) {
-        return Promise.resolve(
-          commandFns[name].apply(cy, args),
-        )
-      },
-
       replayCommandsFrom (current) {
         // reset each chainerId to the
         // current value
