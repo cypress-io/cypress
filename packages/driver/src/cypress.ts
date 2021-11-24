@@ -144,17 +144,19 @@ class $Cypress {
     this.state = $SetterGetter.create({})
     this.originalConfig = _.cloneDeep(config)
     this.config = $SetterGetter.create(config, (config) => {
-      validateNoReadOnlyConfig(config, (errProperty) => {
-        let errMessage
+      if (this.config('cypressEnv') !== 'development') {
+        validateNoReadOnlyConfig(config, (errProperty) => {
+          let errMessage
 
-        if (this.state('runnable')) {
-          errMessage = `\`Cypress.config()\` cannot mutate option \`${errProperty}\` because it is a read-only property.`
-        } else {
-          errMessage = `Cypress test configuration cannot mutate option \`${errProperty}\` because it is a read-only property.`
-        }
+          if (this.state('runnable')) {
+            errMessage = `\`Cypress.config()\` cannot mutate option \`${errProperty}\` because it is a read-only property.`
+          } else {
+            errMessage = `Cypress test configuration cannot mutate option \`${errProperty}\` because it is a read-only property.`
+          }
 
-        throw new this.state('specWindow').Error(errMessage)
-      })
+          throw new this.state('specWindow').Error(errMessage)
+        })
+      }
 
       validate(config, (errMsg) => {
         throw new this.state('specWindow').Error(errMsg)
