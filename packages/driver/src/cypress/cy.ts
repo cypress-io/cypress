@@ -680,7 +680,7 @@ export default {
         // else if this is the very first call
         // on the chainer then make the first
         // argument undefined (we have no subject)
-        this.state('subject', undefined)
+        state('subject', undefined)
       }
 
       const subject = state('subject')
