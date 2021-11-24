@@ -26,7 +26,7 @@ describe('lib/util/editors', () => {
 
   beforeEach(() => {
     stateMock = {
-      get: sinon.stub().returns({}),
+      get: sinon.stub().resolves({}),
       set: sinon.spy(),
     }
 
@@ -70,13 +70,8 @@ describe('lib/util/editors', () => {
       // @ts-ignore
       savedState.create.resolves({
         get () {
-          return { isOther: true, binary: '/path/to/editor', id: 'other' }
+          return Bluebird.resolve({ isOther: true, binary: '/path/to/editor', id: 'other' })
         },
-      })
-
-      return getUserEditor().then(({ availableEditors }) => {
-        console.log(availableEditors)
-        expect(availableEditors[4].binary).to.equal('/path/to/editor')
       })
     })
 
@@ -117,7 +112,7 @@ describe('lib/util/editors', () => {
         // @ts-ignore
         savedState.create.resolves({
           get () {
-            return { preferredOpener }
+            return Bluebird.resolve({ preferredOpener })
           },
         })
 
@@ -135,7 +130,7 @@ describe('lib/util/editors', () => {
         // @ts-ignore
         savedState.create.resolves({
           get () {
-            return { preferredOpener }
+            return Bluebird.resolve({ preferredOpener })
           },
         })
 
@@ -166,7 +161,7 @@ describe('lib/util/editors', () => {
       const editor = {}
 
       return setUserEditor(editor).then(() => {
-        expect(stateMock.set).to.be.calledWith('preferredOpener', editor)
+        expect(stateMock.set).to.be.calledWith({ preferredOpener: editor })
       })
     })
   })
