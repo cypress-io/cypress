@@ -710,7 +710,7 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
       return memo
     }
 
-    return getCommandsUntilFirstParentOrValidSubject(command.get('prev'), memo)
+    return this.getCommandsUntilFirstParentOrValidSubject(command.get('prev'), memo)
   }
 
   pushSubjectAndValidate (name, args, firstCall, prevSubject) {
@@ -813,7 +813,7 @@ export default {
 
           cy.removeAllListeners()
         } catch (err) {
-          fail(err)
+          cy.fail(err)
         }
       },
 
@@ -1057,7 +1057,7 @@ export default {
         }
 
         try {
-          fail(err)
+          cy.fail(err)
         } catch (failErr) {
           const r = state('reject')
 
@@ -1198,7 +1198,7 @@ export default {
             // if runnable.fn threw synchronously, then it didnt fail from
             // a cypress command, but we should still teardown and handle
             // the error
-            return fail(err)
+            return cy.fail(err)
           }
         }
       },
