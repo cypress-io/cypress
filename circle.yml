@@ -155,6 +155,11 @@ commands:
       - run:
           name: Generate Circle Cache key for system tests
           command: ./system-tests/scripts/cache-key.sh > system_tests_cache_key
+      - restore_cache:
+          name: Restore system tests node_modules cache
+          keys:
+            - v{{ .Environment.CACHE_VERSION }}-{{ arch }}-system-tests-projects-node-modules-cache-{{ checksum "system_tests_cache_key" }}
+            - v{{ .Environment.CACHE_VERSION }}-{{ arch }}-system-tests-projects-node-modules-cache-
 
   update_cached_system_tests_deps:
     description: 'Update the cached node_modules for projects in "system-tests/projects/**"'
