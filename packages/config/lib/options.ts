@@ -193,12 +193,6 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     isFolder: true,
   },
   {
-    name: 'isInteractive',
-    defaultValue: true,
-    validation: validate.isBoolean,
-    isWriteable: true,
-  },
-  {
     name: 'keystrokeDelay',
     defaultValue: 0,
     validation: validate.isNumberOrFalse,
@@ -208,7 +202,6 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     name: 'modifyObstructiveCode',
     defaultValue: true,
     validation: validate.isBoolean,
-    isWriteable: true,
   }, {
     name: 'nodeVersion',
     validation: validate.isOneOf('bundled', 'system'),
@@ -317,7 +310,6 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     name: 'trashAssetsBeforeRuns',
     defaultValue: true,
     validation: validate.isBoolean,
-    isWriteable: true,
   }, {
     name: 'userAgent',
     defaultValue: null,
@@ -383,7 +375,6 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     // not truly internal, but can only be set via cli,
     // so we don't consider it a "public" option
     isInternal: true,
-    isWriteable: true,
   }, {
     name: 'devServerPublicPathRoute',
     defaultValue: '/__cypress/src',
@@ -398,7 +389,6 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     defaultValue: false,
     validation: validate.isBoolean,
     isInternal: true,
-    isWriteable: true,
   }, {
     name: 'morgan',
     defaultValue: true,
