@@ -651,6 +651,62 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
 
     return getCommandsUntilFirstParentOrValidSubject(command.get('prev'), memo)
   }
+
+  pushSubjectAndValidate (name, args, firstCall, prevSubject) {
+    if (firstCall) {
+      // if we have a prevSubject then error
+      // since we're invoking this improperly
+      if (prevSubject && ![].concat(prevSubject).includes('optional')) {
+        const stringifiedArg = $utils.stringifyActual(args[0])
+
+        $errUtils.throwErrByPath('miscellaneous.invoking_child_without_parent', {
+          args: {
+            cmd: name,
+            args: _.isString(args[0]) ? `\"${stringifiedArg}\"` : stringifiedArg,
+          },
+        })
+      }
+
+      // else if this is the very first call
+      // on the chainer then make the first
+      // argument undefined (we have no subject)
+      this.state('subject', undefined)
+    }
+
+    const subject = this.state('subject')
+
+    if (prevSubject) {
+      // make sure our current subject is valid for
+      // what we expect in this command
+      this.ensureSubjectByType(subject, prevSubject, name)
+    }
+
+    args.unshift(subject)
+
+    this.Cypress.action('cy:next:subject:prepared', subject, args, firstCall)
+
+    return args
+  }
+
+  doneEarly () {
+    this.queue.stop()
+
+    // we only need to worry about doneEarly when
+    // it comes from a manual event such as stopping
+    // Cypress or when we yield a (done) callback
+    // and could arbitrarily call it whenever we want
+    const p = this.state('promise')
+
+    // if our outer promise is pending
+    // then cancel outer and inner
+    // and set canceled to be true
+    if (p && p.isPending()) {
+      this.state('canceled', true)
+      this.state('cancel')()
+    }
+
+    return this.cleanup()
+  }
 }
 
 export default {
@@ -659,64 +715,6 @@ export default {
     const commandFns = {}
 
     const testConfigOverride = new TestConfigOverride()
-
-    const pushSubjectAndValidate = function (name, args, firstCall, prevSubject) {
-      if (firstCall) {
-        // if we have a prevSubject then error
-        // since we're invoking this improperly
-        let needle
-
-        if (prevSubject && ((needle = 'optional', ![].concat(prevSubject).includes(needle)))) {
-          const stringifiedArg = $utils.stringifyActual(args[0])
-
-          $errUtils.throwErrByPath('miscellaneous.invoking_child_without_parent', {
-            args: {
-              cmd: name,
-              args: _.isString(args[0]) ? `\"${stringifiedArg}\"` : stringifiedArg,
-            },
-          })
-        }
-
-        // else if this is the very first call
-        // on the chainer then make the first
-        // argument undefined (we have no subject)
-        state('subject', undefined)
-      }
-
-      const subject = state('subject')
-
-      if (prevSubject) {
-        // make sure our current subject is valid for
-        // what we expect in this command
-        cy.ensureSubjectByType(subject, prevSubject, name)
-      }
-
-      args.unshift(subject)
-
-      Cypress.action('cy:next:subject:prepared', subject, args, firstCall)
-
-      return args
-    }
-
-    const doneEarly = function () {
-      cy.queue.stop()
-
-      // we only need to worry about doneEarly when
-      // it comes from a manual event such as stopping
-      // Cypress or when we yield a (done) callback
-      // and could arbitrarily call it whenever we want
-      const p = state('promise')
-
-      // if our outer promise is pending
-      // then cancel outer and inner
-      // and set canceled to be true
-      if (p && p.isPending()) {
-        state('canceled', true)
-        state('cancel')()
-      }
-
-      return cy.cleanup()
-    }
 
     _.extend(cy, {
       initialize ($autIframe) {
@@ -792,7 +790,7 @@ export default {
           return
         }
 
-        return doneEarly()
+        return cy.doneEarly()
       },
 
       // reset is called before each test
@@ -859,7 +857,7 @@ export default {
           // after verifying its of the correct type
           return function (...args) {
             // push the subject into the args
-            args = pushSubjectAndValidate(name, args, firstCall, prevSubject)
+            args = cy.pushSubjectAndValidate(name, args, firstCall, prevSubject)
 
             return fn.apply(cy.runnableCtx(name), args)
           }
@@ -1123,7 +1121,7 @@ export default {
 
               arguments[0] = (done = function (err) {
                 // TODO: handle no longer error when ended early
-                doneEarly()
+                cy.doneEarly()
 
                 originalDone(err)
 
