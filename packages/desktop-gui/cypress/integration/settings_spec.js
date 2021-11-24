@@ -818,12 +818,10 @@ describe('Settings', () => {
       })
     })
 
-    it('loads preferred editor and available editors', function () {
-      expect(this.ipc.getUserEditor).to.be.called
-    })
-
-    it('shows spinner', () => {
-      cy.get('.loading-editors')
+    it('loads preferred editor, available editors and shows spinner', () => {
+      cy.get('.loading-editors').then(function () {
+        expect(this.ipc.getUserEditor).to.be.called
+      })
     })
 
     describe('when editors load with preferred editor', () => {

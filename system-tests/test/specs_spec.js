@@ -35,4 +35,12 @@ describe('e2e specs', () => {
       expectedExitCode: 0,
     })
   })
+
+  it('handles specs with special characters in the file name', function () {
+    return systemTests.exec(this, {
+      project: 'spec-name-special-characters',
+      snapshot: false,
+      expectedExitCode: 0,
+    })
+  })
 })

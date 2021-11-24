@@ -46,17 +46,17 @@ const onInvoke = function (Cypress, obj, args) {
   const { agent } = obj
   const agentName = agent._cyName
 
-  // bail if we've turned off logging this agent
-  if (agent._log === false) {
-    return
-  }
-
   // fakes are children of the agent created with `withArgs`
   const fakes = agent.matchingFakes(args)
 
   agent._cyLog.set('callCount', agent.callCount)
   for (let fake of fakes) {
     fake._cyLog.set('callCount', fake.callCount)
+  }
+
+  // bail if we've turned off logging this agent
+  if (agent._log === false) {
+    return
   }
 
   const logProps = {

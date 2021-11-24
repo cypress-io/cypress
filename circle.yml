@@ -8,7 +8,6 @@ macBuildFilters: &macBuildFilters
     branches:
       only:
         - develop
-        - 9.0-release
 
 defaults: &defaults
   parallelism: 1
@@ -42,7 +41,6 @@ onlyMainBranches: &onlyMainBranches
     branches:
       only:
         - develop
-        - 9.0-release
   requires:
     - create-build-artifacts
 
@@ -1564,7 +1562,7 @@ jobs:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "9.0-release" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "tgriesser/build/root-yarn-install" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -1937,17 +1935,6 @@ jobs:
           repo: cypress-example-todomvc
           browser: firefox
 
-  "test-binary-against-documentation-firefox":
-    <<: *defaults
-    resource_class: medium
-    steps:
-      - test-binary-against-repo:
-          repo: cypress-documentation
-          browser: firefox
-          command: "yarn cypress run"
-          wait-on: http://localhost:3000
-          server-start-command: yarn serve:dist
-
   "test-binary-against-conduit-chrome":
     <<: *defaults
     resource_class: medium
@@ -2209,7 +2196,6 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - 9.0-release
         requires:
           - build
     - test-kitchensink:
@@ -2221,7 +2207,6 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - 9.0-release
         requires:
           - build
     - create-build-artifacts:
@@ -2271,7 +2256,6 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - 9.0-release
         requires:
           - create-build-artifacts
     - test-npm-module-and-verify-binary:
@@ -2279,7 +2263,6 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - 9.0-release
         requires:
           - create-build-artifacts
     - test-binary-against-staging:
@@ -2288,21 +2271,20 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - 9.0-release
         requires:
           - create-build-artifacts
 
     - test-binary-against-kitchensink-chrome:
         <<: *onlyMainBranches
-    - test-binary-against-conduit-chrome:
-        <<: *onlyMainBranches
+    # Re-enable when the cypress-example-conduit-app project is fixed.
+    # https://github.com/cypress-io/cypress-example-conduit-app/issues/346
+    # - test-binary-against-conduit-chrome:
+    #     <<: *onlyMainBranches
     - test-binary-against-recipes-firefox:
         <<: *onlyMainBranches
     - test-binary-against-kitchensink-firefox:
         <<: *onlyMainBranches
     - test-binary-against-todomvc-firefox:
-        <<: *onlyMainBranches
-    - test-binary-against-documentation-firefox:
         <<: *onlyMainBranches
     - test-binary-against-api-testing-firefox:
         <<: *onlyMainBranches
@@ -2313,7 +2295,6 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - 9.0-release
         requires:
           - create-build-artifacts
 
@@ -2385,7 +2366,6 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
-              - 9.0-release
         requires:
           - darwin-create-build-artifacts
 
@@ -2397,7 +2377,6 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
-              - 9.0-release
         requires:
           - darwin-create-build-artifacts
 
