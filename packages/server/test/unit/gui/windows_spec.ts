@@ -9,7 +9,7 @@ import Promise from 'bluebird'
 import { EventEmitter } from 'events'
 import { BrowserWindow } from 'electron'
 import * as Windows from '../../../lib/gui/windows'
-import savedState from '../../../lib/saved_state'
+import * as savedState from '../../../lib/saved_state'
 import { getPathToDesktopIndex } from '@packages/resolve-dist'
 
 const DEFAULT_USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Cypress/0.0.0 Chrome/59.0.3071.115 Electron/1.8.2 Safari/537.36'

@@ -7,7 +7,7 @@ import sinon from 'sinon'
 
 import shellUtil from '../../../lib/util/shell.js'
 import * as envEditors from '../../../lib/util/env-editors'
-import savedState from '../../../lib/saved_state'
+import * as savedState from '../../../lib/saved_state'
 
 import { getUserEditor, setUserEditor } from '../../../lib/util/editors'
 
