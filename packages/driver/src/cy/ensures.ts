@@ -328,6 +328,15 @@ export const create = (state, expect) => {
     const cmd = state('current').get('name')
 
     if (!$dom.isDescendent($el1, $el2)) {
+      // https://github.com/cypress-io/cypress/issues/18008
+      // when an element inside a shadow root is covered by its shadow host
+      if (
+        $dom.isWithinShadowRoot($el1.get(0)) &&
+          $el1.get(0).getRootNode() === $el2?.get(0).shadowRoot
+      ) {
+        return
+      }
+
       if ($el2) {
         const element1 = $dom.stringify($el1)
         const element2 = $dom.stringify($el2)
