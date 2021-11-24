@@ -46,15 +46,13 @@ const createCLIExecutable = (command) => {
 
 const yarn = createCLIExecutable('yarn')
 
-export const runAllBuild = _.partial(yarn, ['lerna', 'run', 'build-prod', '--ignore', 'cli'])
-
 export const runAllCleanJs = _.partial(yarn, ['lerna', 'run', 'clean-js', '--ignore', 'cli'])
 
 export async function copyAllToDist (distDir: string) {
   await fs.ensureDir(distDir)
 
   const started = new Date().valueOf()
-  const globbed = glob.sync('./{packages,npm}/*')
+  const globbed = await globAsync('./{packages,npm}/*')
 
   for (const pkg of globbed) {
     // copies the package to dist
@@ -132,12 +130,13 @@ export async function copyAllToDist (distDir: string) {
 export const replaceLocalNpmVersions = async function (basePath: string) {
   const visited = new Set<string>()
 
-  const pkgPaths = glob.sync('./packages/*/package.json', { cwd: basePath })
+  const pkgPaths = await globAsync('./packages/*/', { cwd: basePath })
 
   async function updatePackageJson (pkg: string) {
-    const pkgJsonPath = path.join(basePath, pkg)
+    const pkgPath = path.join(basePath, pkg)
+    const pkgJsonPath = path.join(basePath, pkg, 'package.json')
 
-    visited.add(pkgJsonPath)
+    visited.add(pkgPath)
     const json = await fs.readJson(pkgJsonPath)
 
     const { dependencies } = json
@@ -152,15 +151,16 @@ export const replaceLocalNpmVersions = async function (basePath: string) {
 
         const [, localPkg] = depName.split('/')
 
-        const localPkgJsonPath = path.join(basePath, 'npm', localPkg)
+        const localPkgPath = path.join(basePath, 'npm', localPkg)
 
-        dependencies[`@cypress/${localPkg}`] = `file:${localPkgJsonPath}`
-        if (!visited.has(localPkgJsonPath)) {
-          await updatePackageJson(`./npm/${localPkg}/package.json`)
+        dependencies[`@cypress/${localPkg}`] = `file:${localPkgPath}`
+        if (!visited.has(localPkgPath)) {
+          await updatePackageJson(`./npm/${localPkg}`)
         }
 
         shouldWriteFile = true
       }
+
       if (shouldWriteFile) {
         await fs.writeJson(pkgJsonPath, json, { spaces: 2 })
       }
@@ -174,7 +174,7 @@ export const replaceLocalNpmVersions = async function (basePath: string) {
 
 export async function removeLocalNpmDirs (distPath: string, except: string[]) {
   const toRemove = await globAsync(`${distPath}/npm/*/`, {
-    ignore: except.map((e) => e.replace('/package.json', '')),
+    ignore: except,
   })
 
   for (const dir of toRemove) {

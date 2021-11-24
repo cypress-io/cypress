@@ -81,12 +81,13 @@ export async function buildCypressApp (options: BuildCypressAppOpts) {
   // Copy the yarn.lock file so we have a consistent install
   fs.copySync(path.join(CY_ROOT_DIR, 'yarn.lock'), meta.distDir('yarn.lock'))
 
-  // replaceLocalNpmVersions
+  log('#replace local npm versions')
   const dirsSeen = await packages.replaceLocalNpmVersions(DIST_DIR)
 
-  // remove local npm dirs that aren't needed
+  log('#remove npm dirs that are not needed')
   await packages.removeLocalNpmDirs(DIST_DIR, dirsSeen)
 
+  log('#install production dependencies')
   execSync('yarn --production', {
     cwd: DIST_DIR,
     stdio: 'inherit',
