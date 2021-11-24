@@ -673,6 +673,69 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
     )
   }
 
+  replayCommandsFrom (current) {
+    const cy = this
+
+    // reset each chainerId to the
+    // current value
+    const chainerId = this.state('chainerId')
+
+    const insert = function (command) {
+      command.set('chainerId', chainerId)
+
+      // clone the command to prevent
+      // mutating its properties
+      return cy.enqueue(command.clone())
+    }
+
+    // - starting with the aliased command
+    // - walk up to each prev command
+    // - until you reach a parent command
+    // - or until the subject is in the DOM
+    // - from that command walk down inserting
+    //   every command which changed the subject
+    // - coming upon an assertion should only be
+    //   inserted if the previous command should
+    //   be replayed
+
+    const commands = cy.getCommandsUntilFirstParentOrValidSubject(current)
+
+    if (commands) {
+      let initialCommand = commands.shift()
+
+      const commandsToInsert = _.reduce(commands, (memo, command, index) => {
+        const push = () => {
+          return memo.push(command)
+        }
+
+        if (!(command.get('type') !== 'assertion')) {
+          // if we're an assertion and the prev command
+          // is in the memo, then push this one
+          if (memo.includes(command.get('prev'))) {
+            push()
+          }
+        } else if (!(command.get('subject') === initialCommand.get('subject'))) {
+          // when our subjects dont match then
+          // reset the initialCommand to this command
+          // so the next commands can compare against
+          // this one to figure out the changing subjects
+          initialCommand = command
+
+          push()
+        }
+
+        return memo
+      }, [initialCommand])
+
+      for (let c of commandsToInsert) {
+        insert(c)
+      }
+    }
+
+    // prevent loop comprehension
+    return null
+  }
+
   // private
   wrapNativeMethods (contentWindow) {
     try {
@@ -947,70 +1010,6 @@ export default {
     let cy = new $Cy(specWindow, Cypress, Cookies, state, config)
 
     _.extend(cy, {
-      replayCommandsFrom (current) {
-        // reset each chainerId to the
-        // current value
-        const chainerId = state('chainerId')
-
-        const insert = function (command) {
-          command.set('chainerId', chainerId)
-
-          // clone the command to prevent
-          // mutating its properties
-          return cy.enqueue(command.clone())
-        }
-
-        // - starting with the aliased command
-        // - walk up to each prev command
-        // - until you reach a parent command
-        // - or until the subject is in the DOM
-        // - from that command walk down inserting
-        //   every command which changed the subject
-        // - coming upon an assertion should only be
-        //   inserted if the previous command should
-        //   be replayed
-
-        const commands = cy.getCommandsUntilFirstParentOrValidSubject(current)
-
-        if (commands) {
-          let initialCommand = commands.shift()
-
-          const commandsToInsert = _.reduce(commands, (memo, command, index) => {
-            let needle
-            const push = () => {
-              return memo.push(command)
-            }
-
-            if (!(command.get('type') !== 'assertion')) {
-              // if we're an assertion and the prev command
-              // is in the memo, then push this one
-              if ((needle = command.get('prev'), memo.includes(needle))) {
-                push()
-              }
-            } else if (!(command.get('subject') === initialCommand.get('subject'))) {
-              // when our subjects dont match then
-              // reset the initialCommand to this command
-              // so the next commands can compare against
-              // this one to figure out the changing subjects
-              initialCommand = command
-
-              push()
-            }
-
-            return memo
-          }
-
-          , [initialCommand])
-
-          for (let c of commandsToInsert) {
-            insert(c)
-          }
-        }
-
-        // prevent loop comprehension
-        return null
-      },
-
       onBeforeAppWindowLoad (contentWindow) {
         // we set window / document props before the window load event
         // so that we properly handle events coming from the application
