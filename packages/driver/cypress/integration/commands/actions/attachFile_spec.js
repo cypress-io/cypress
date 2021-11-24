@@ -169,6 +169,20 @@ describe('src/cy/commands/actions/attachFile', () => {
       })
     })
 
+    it('works with shadow DOMs', () => {
+      cy.get('#shadow')
+      .shadow()
+      .find('input')
+      .as('shadowInput')
+      .attachFile('@foo')
+
+      cy.get('@shadowInput')
+      .then(getFileContents)
+      .then((contents) => {
+        expect(contents[0]).to.eql('foo')
+      })
+    })
+
     describe('shorthands', () => {
       const validJsonString = `{
   "foo": 1,

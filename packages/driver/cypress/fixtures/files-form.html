@@ -3,6 +3,26 @@
   <head>
     <title>Generic File Inputs</title>
   </head>
+  <script>
+    const template = document.createElement('template')
+    template.innerHTML = `
+      <label for="file-input">Shadow DOM</label>
+      <input name="file-input" id="file-input" type="file" />
+    `
+
+    class FileInput extends HTMLElement {
+      constructor() {
+        super()
+        this.root = this.attachShadow({ mode: 'open' })
+      }
+
+      connectedCallback() {
+        this.root.appendChild(template.content.cloneNode(true))
+      }
+    }
+
+    window.customElements.define('file-input', FileInput);
+  </script>
   <body>
     <style>
       form {
@@ -55,6 +75,10 @@
     <form>
       <label for="hidden" id="hidden-label">Label for Hidden</label>
       <input id="hidden" type="file" />
+    </form>
+
+    <form>
+      <file-input id="shadow"></file-input>
     </form>
 
     <form>
