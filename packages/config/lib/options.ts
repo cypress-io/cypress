@@ -6,6 +6,9 @@ interface ResolvedConfigOption {
   validation: Function
   isFolder?: boolean
   isExperimental?: boolean
+  /**
+   * Can be mutated with Cypress.config() or test-specific configuration overrides
+   */
   isWriteable?: boolean
 }
 
@@ -14,6 +17,9 @@ interface RuntimeConfigOption {
   defaultValue: any
   validation: Function
   isInternal?: boolean
+  /**
+   * Can be mutated with Cypress.config() or test-specific configuration overrides
+   */
   isWriteable?: boolean
 }
 
