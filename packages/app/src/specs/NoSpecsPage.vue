@@ -40,9 +40,6 @@
 </template>
 
 <script lang="ts" setup>
-import { useI18n } from '@cy/i18n'
-import SettingsIcon from '~icons/cy/settings_x16'
-import Button from '@cy/components/Button.vue'
 import { ref } from 'vue'
 import CreateSpecModal from './CreateSpecModal.vue'
 import CreateSpecContent from './CreateSpecContent.vue'
@@ -51,7 +48,6 @@ import type { NoSpecsPageFragment } from '../generated/graphql'
 import { NoSpecsPage_OpenFileInIdeDocument } from '@packages/data-context/src/gen/all-operations.gen'
 import { useRunnerUiStore } from '../store/runner-ui-store'
 import ChooseExternalEditorModal from '@packages/frontend-shared/src/gql-components/ChooseExternalEditorModal.vue'
-const { t } = useI18n()
 
 gql`
 fragment NoSpecsPage on Query {
