@@ -135,7 +135,7 @@ describe('lib/util/editors', () => {
         })
 
         return getUserEditor(false).then(({ availableEditors, preferredOpener }) => {
-          expect(availableEditors).to.be.undefined
+          expect(availableEditors).to.have.length(0)
           expect(preferredOpener).to.equal(preferredOpener)
         })
       })

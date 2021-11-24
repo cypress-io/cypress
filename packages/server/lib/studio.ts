@@ -18,7 +18,7 @@ class StudioSaveError extends Error {
 export const setStudioModalShown = () => {
   return savedState.create()
   .then((state) => {
-    state.set('showedStudioModal', true)
+    state.set({ showedStudioModal: true })
   })
 }
 

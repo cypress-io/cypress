@@ -80,7 +80,7 @@ export const getUserEditor = async (alwaysIncludeEditors = false): Promise<Edito
     if (preferredOpener) {
       debug('return preferred editor: %o', preferredOpener)
       if (!alwaysIncludeEditors) {
-        return { preferredOpener }
+        return { preferredOpener, availableEditors: [] }
       }
     }
 
