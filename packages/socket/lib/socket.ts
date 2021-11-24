@@ -3,7 +3,7 @@ import type http from 'http'
 import server, { Server as SocketIOBaseServer, ServerOptions } from 'socket.io'
 import { client } from './browser'
 
-const FIVE_HUNDRED_MEGABYTES = 5 * 1e8 // 500000000
+const HUNDRED_MEGABYTES = 1e8 // 100000000
 
 const { version } = require('socket.io-client/package.json')
 const clientSource = require.resolve('socket.io-client/dist/socket.io.js')
@@ -15,14 +15,13 @@ type PatchedServerOptions = ServerOptions & { cookie: { name: string | boolean }
 
 class SocketIOServer extends SocketIOBaseServer {
   constructor (srv: http.Server, opts?: Partial<PatchedServerOptions>) {
-    // in socket.io v4, the default maxHttpBufferSize is set to 1 MB to mitigate
-    // the potential of DoS attacks. given that our usage is limited to a local network,
-    // we can safely increase the buffer size to allow larger payloads over the
-    // socket. this is particularly helpful for large I/O processes (readFile/writeFile).
+    // in socket.io v3, they reduced down the max buffer size
+    // from 100mb to 1mb, so we reset it back to the previous value
     //
-    // related issue: https://github.com/cypress-io/cypress/issues/3350
+    // previous commit for reference:
+    // https://github.com/socketio/engine.io/blame/61b949259ed966ef6fc8bfd61f14d1a2ef06d319/lib/server.js#L29
     opts = opts ?? {}
-    opts.maxHttpBufferSize = opts.maxHttpBufferSize ?? FIVE_HUNDRED_MEGABYTES
+    opts.maxHttpBufferSize = opts.maxHttpBufferSize ?? HUNDRED_MEGABYTES
 
     super(srv, opts)
   }
