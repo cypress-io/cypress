@@ -117,7 +117,7 @@ const setTopOnError = function (Cypress, cy: $Cy) {
 
 // NOTE: this makes the cy object an instance
 // TODO: refactor the 'create' method below into this class
-class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILocation, ITimer, IChai, IXhr, IAliases, IEnsures, ISnapshots, IFocused {
+export class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILocation, ITimer, IChai, IXhr, IAliases, IEnsures, ISnapshots, IFocused {
   id: string
   specWindow: any
   state: any
@@ -228,7 +228,7 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
     this.replayCommandsFrom = this.replayCommandsFrom.bind(this)
     this.onBeforeAppWindowLoad = this.onBeforeAppWindowLoad.bind(this)
     this.onUncaughtException = this.onUncaughtException.bind(this)
-
+    this.setRunnable = this.setRunnable.bind(this)
     this.cleanup = this.cleanup.bind(this)
 
     // init traits
@@ -337,6 +337,13 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
     this.onBeforeWindowLoad = snapshots.onBeforeWindowLoad
 
     this.queue = new CommandQueue(state, this.timeout, this.whenStable, this.cleanup, this.fail, this.isCy)
+
+    setTopOnError(Cypress, this)
+
+    // make cy global in the specWindow
+    specWindow.cy = this
+
+    $Events.extend(this)
   }
 
   $$ (selector, context) {
@@ -945,8 +952,7 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
     }
   }
 
-  // private
-  wrapNativeMethods (contentWindow) {
+  private wrapNativeMethods (contentWindow) {
     try {
       // return null to trick contentWindow into thinking
       // its not been iframed if modifyObstructiveCode is true
@@ -1006,7 +1012,7 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
     } catch (error) { } // eslint-disable-line no-empty
   }
 
-  warnMixingPromisesAndCommands () {
+  private warnMixingPromisesAndCommands () {
     const title = this.state('runnable').fullTitle()
 
     $errUtils.warnByPath('miscellaneous.mixing_promises_and_commands', {
@@ -1014,17 +1020,17 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
     })
   }
 
-  runnableCtx (name) {
+  private runnableCtx (name) {
     this.ensureRunnable(name)
 
     return this.state('runnable').ctx
   }
 
-  urlNavigationEvent (event) {
+  private urlNavigationEvent (event) {
     return this.Cypress.action('app:navigation:changed', `page navigation event (${event})`)
   }
 
-  cleanup () {
+  private cleanup () {
     // cleanup could be called during a 'stop' event which
     // could happen in between a runnable because they are async
     if (this.state('runnable')) {
@@ -1048,7 +1054,7 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
     return this.state('index', this.queue.length)
   }
 
-  contentWindowListeners (contentWindow) {
+  private contentWindowListeners (contentWindow) {
     const cy = this
 
     $Listeners.bindTo(contentWindow, {
@@ -1109,7 +1115,7 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
     })
   }
 
-  enqueue (obj) {
+  private enqueue (obj) {
     // if we have a nestedIndex it means we're processing
     // nested commands and need to insert them into the
     // index past the current index as opposed to
@@ -1141,7 +1147,7 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
     return this.Cypress.action('cy:command:enqueued', obj)
   }
 
-  getCommandsUntilFirstParentOrValidSubject (command, memo = []) {
+  private getCommandsUntilFirstParentOrValidSubject (command, memo = []) {
     if (!command) {
       return null
     }
@@ -1157,7 +1163,7 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
     return this.getCommandsUntilFirstParentOrValidSubject(command.get('prev'), memo)
   }
 
-  pushSubjectAndValidate (name, args, firstCall, prevSubject) {
+  private pushSubjectAndValidate (name, args, firstCall, prevSubject) {
     if (firstCall) {
       // if we have a prevSubject then error
       // since we're invoking this improperly
@@ -1193,7 +1199,7 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
     return args
   }
 
-  doneEarly () {
+  private doneEarly () {
     this.queue.stop()
 
     // we only need to worry about doneEarly when
@@ -1212,19 +1218,4 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
 
     return this.cleanup()
   }
-}
-
-export default {
-  create (specWindow, Cypress, Cookies, state, config, log) {
-    let cy = new $Cy(specWindow, Cypress, Cookies, state, config)
-
-    setTopOnError(Cypress, cy)
-
-    // make cy global in the specWindow
-    specWindow.cy = cy
-
-    $Events.extend(cy)
-
-    return cy
-  },
 }
