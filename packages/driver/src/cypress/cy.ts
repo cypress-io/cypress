@@ -226,6 +226,8 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
     this.addCommand = this.addCommand.bind(this)
     this.now = this.now.bind(this)
     this.replayCommandsFrom = this.replayCommandsFrom.bind(this)
+    this.onBeforeAppWindowLoad = this.onBeforeAppWindowLoad.bind(this)
+    this.onUncaughtException = this.onUncaughtException.bind(this)
 
     this.cleanup = this.cleanup.bind(this)
 
@@ -759,6 +761,53 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
     this.onBeforeWindowLoad()
   }
 
+  onUncaughtException ({ handlerType, frameType, err, promise }) {
+    err = $errUtils.createUncaughtException({
+      handlerType,
+      frameType,
+      state,
+      err,
+    })
+
+    const runnable = this.state('runnable')
+
+    // don't do anything if we don't have a current runnable
+    if (!runnable) return
+
+    // uncaught exceptions should be only be catchable in the AUT (app)
+    // or if in component testing mode, since then the spec frame and
+    // AUT frame are the same
+    if (frameType === 'app' || this.config('componentTesting')) {
+      try {
+        const results = this.Cypress.action('app:uncaught:exception', err, runnable, promise)
+
+        // dont do anything if any of our uncaught:exception
+        // listeners returned false
+        if (_.some(results, returnedFalse)) {
+          // return true to signal that the user handled this error
+          return true
+        }
+      } catch (uncaughtExceptionErr) {
+        err = $errUtils.createUncaughtException({
+          err: uncaughtExceptionErr,
+          handlerType: 'error',
+          frameType: 'spec',
+          state,
+        })
+      }
+    }
+
+    try {
+      this.fail(err)
+    } catch (failErr) {
+      const r = this.state('reject')
+
+      if (r) {
+        r(err)
+      }
+    }
+  }
+
   // private
   wrapNativeMethods (contentWindow) {
     try {
@@ -1033,53 +1082,6 @@ export default {
     let cy = new $Cy(specWindow, Cypress, Cookies, state, config)
 
     _.extend(cy, {
-      onUncaughtException ({ handlerType, frameType, err, promise }) {
-        err = $errUtils.createUncaughtException({
-          handlerType,
-          frameType,
-          state,
-          err,
-        })
-
-        const runnable = state('runnable')
-
-        // don't do anything if we don't have a current runnable
-        if (!runnable) return
-
-        // uncaught exceptions should be only be catchable in the AUT (app)
-        // or if in component testing mode, since then the spec frame and
-        // AUT frame are the same
-        if (frameType === 'app' || config('componentTesting')) {
-          try {
-            const results = Cypress.action('app:uncaught:exception', err, runnable, promise)
-
-            // dont do anything if any of our uncaught:exception
-            // listeners returned false
-            if (_.some(results, returnedFalse)) {
-              // return true to signal that the user handled this error
-              return true
-            }
-          } catch (uncaughtExceptionErr) {
-            err = $errUtils.createUncaughtException({
-              err: uncaughtExceptionErr,
-              handlerType: 'error',
-              frameType: 'spec',
-              state,
-            })
-          }
-        }
-
-        try {
-          cy.fail(err)
-        } catch (failErr) {
-          const r = state('reject')
-
-          if (r) {
-            r(err)
-          }
-        }
-      },
-
       setRunnable (runnable, hookId) {
         // when we're setting a new runnable
         // prepare to run again!
