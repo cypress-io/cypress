@@ -246,16 +246,18 @@ export default (Commands, Cypress, cy, state) => {
       if (_.isString(presetOrWidth) && _.isBlank(presetOrWidth)) {
         $errUtils.throwErrByPath('viewport.empty_string', { onFail: options._log })
       } else if (_.isString(presetOrWidth)) {
-        const getPresetDimensions = (preset) => {
+        const getPresetDimensions = (preset): number[] => {
           try {
             return _.map(viewports[presetOrWidth].split('x'), Number)
           } catch (e) {
             const presets = _.keys(viewports).join(', ')
 
-            return $errUtils.throwErrByPath('viewport.missing_preset', {
+            $errUtils.throwErrByPath('viewport.missing_preset', {
               onFail: options._log,
               args: { preset, presets },
             })
+
+            return [] // dummy code to silence TS
           }
         }
 
