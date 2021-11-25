@@ -115,8 +115,6 @@ const setTopOnError = function (Cypress, cy: $Cy) {
   top.__alreadySetErrorHandlers__ = true
 }
 
-// NOTE: this makes the cy object an instance
-// TODO: refactor the 'create' method below into this class
 export class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILocation, ITimer, IChai, IXhr, IAliases, IEnsures, ISnapshots, IFocused {
   id: string
   specWindow: any
