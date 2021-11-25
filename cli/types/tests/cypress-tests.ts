@@ -87,6 +87,10 @@ namespace CypressCommandsTests {
     arg // $ExpectType string
     return
   })
+  Cypress.Commands.add('newCommand', { prevSubject: false }, (arg) => {
+    arg // $ExpectType string
+    return
+  })
   Cypress.Commands.add('newCommand', { prevSubject: 'optional' }, (subject, arg) => {
     subject // $ExpectType unknown
     arg // $ExpectType string
@@ -97,7 +101,7 @@ namespace CypressCommandsTests {
     arg // $ExpectType string
   })
   Cypress.Commands.add('newCommand', { prevSubject: 'document' }, (subject, arg) => {
-    subject // $ExpectType JQuery<HTMLDocument>
+    subject // $ExpectType Document
     arg // $ExpectType string
   })
   Cypress.Commands.add('newCommand', { prevSubject: 'window' }, (subject, arg) => {
@@ -109,11 +113,25 @@ namespace CypressCommandsTests {
     arg // $ExpectType string
   })
   Cypress.Commands.add('newCommand', { prevSubject: ['element', 'document', 'window'] }, (subject, arg) => {
-    subject // $ExpectType Window | JQuery<HTMLElement> | JQuery<HTMLDocument>
+    if (subject instanceof Window) {
+      subject // $ExpectType Window
+    } else if (subject instanceof Document) {
+      subject // $ExpectType Document
+    } else {
+      subject // $ExpectType JQuery<HTMLElement>
+    }
     arg // $ExpectType string
   })
   Cypress.Commands.add('newCommand', { prevSubject: ['optional', 'window', 'document', 'element'] }, (subject, arg) => {
-    subject // $ExpectType void | Window | JQuery<HTMLElement> | JQuery<HTMLDocument>
+    if (subject instanceof Window) {
+      subject // $ExpectType Window
+    } else if (subject instanceof Document) {
+      subject // $ExpectType Document
+    } else if (subject) {
+      subject // $ExpectType JQuery<HTMLElement>
+    } else {
+      subject // $ExpectType void
+    }
     arg // $ExpectType string
   })
   Cypress.Commands.add('newCommand', (arg) => {

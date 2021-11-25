@@ -14,7 +14,7 @@ declare namespace Cypress {
   interface PrevSubjectMap {
     optional: unknown
     element: JQuery
-    document: JQuery<HTMLDocument>
+    document: Document
     window: Window
   }
 
@@ -24,7 +24,7 @@ declare namespace Cypress {
   interface CommandFn<T extends keyof ChainableMethods> {
     (this: Mocha.Context, ...args: Parameters<ChainableMethods[T]>): ReturnType<ChainableMethods[T]> | void
   }
-  interface CommandFnWithSubject<T extends keyof ChainableMethods, S = JQuery> {
+  interface CommandFnWithSubject<T extends keyof ChainableMethods, S> {
     (this: Mocha.Context, prevSubject: S, ...args: Parameters<ChainableMethods[T]>): ReturnType<ChainableMethods[T]> | void
   }
   interface CommandFnWithOriginalFn<T extends keyof Chainable> {
@@ -437,9 +437,14 @@ declare namespace Cypress {
      */
     Commands: {
       add<T extends keyof Chainable>(name: T, fn: CommandFn<T>): void
-      add<T extends keyof Chainable, S extends PrevSubject>(name: T, options: { prevSubject: S | Array<Exclude<S, 'optional'>> }, fn: CommandFnWithSubject<T, PrevSubjectMap[S]>): void
-      add<T extends keyof Chainable, S extends PrevSubject>(name: T, options: { prevSubject: 'optional' | ['optional', ...S[]] }, fn: CommandFnWithSubject<T, PrevSubjectMap[S] | void>): void
-      add<T extends keyof Chainable, S>(name: T, options: CommandOptions, fn: CommandFnWithSubject<T, S>): void
+      add<T extends keyof Chainable>(name: T, options: CommandOptions & {prevSubject: false}, fn: CommandFn<T>): void
+      add<T extends keyof Chainable>(name: T, options: CommandOptions & {prevSubject: true}, fn: CommandFnWithSubject<T, unknown>): void
+      add<T extends keyof Chainable, S extends PrevSubject>(
+          name: T, options: CommandOptions & { prevSubject: S | Array<Exclude<S, 'optional'>> }, fn: CommandFnWithSubject<T, PrevSubjectMap[S]>,
+      ): void
+      add<T extends keyof Chainable, S extends PrevSubject>(
+          name: T, options: CommandOptions & { prevSubject: 'optional' | ['optional', ...S[]] }, fn: CommandFnWithSubject<T, void | PrevSubjectMap[S]>,
+      ): void
       overwrite<T extends keyof Chainable>(name: T, fn: CommandFnWithOriginalFn<T>): void
     }
 
