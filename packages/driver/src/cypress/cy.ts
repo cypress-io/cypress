@@ -808,6 +808,143 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
     }
   }
 
+  setRunnable (runnable, hookId) {
+    // when we're setting a new runnable
+    // prepare to run again!
+    this.queue.reset()
+
+    // reset the promise again
+    this.state('promise', undefined)
+
+    this.state('hookId', hookId)
+
+    this.state('runnable', runnable)
+
+    this.state('test', $utils.getTestFromRunnable(runnable))
+
+    this.state('ctx', runnable.ctx)
+
+    const { fn } = runnable
+
+    const restore = () => {
+      return runnable.fn = fn
+    }
+
+    const cy = this
+
+    runnable.fn = function () {
+      restore()
+
+      const timeout = cy.config('defaultCommandTimeout')
+
+      // control timeouts on runnables ourselves
+      if (_.isFinite(timeout)) {
+        cy.timeout(timeout)
+      }
+
+      // store the current length of our queue
+      // before we invoke the runnable.fn
+      const currentLength = cy.queue.length
+
+      try {
+        // if we have a fn.length that means we
+        // are accepting a done callback and need
+        // to change the semantics around how we
+        // attach the run queue
+        let done
+
+        if (fn.length) {
+          const originalDone = arguments[0]
+
+          arguments[0] = (done = function (err) {
+            // TODO: handle no longer error when ended early
+            cy.doneEarly()
+
+            originalDone(err)
+
+            // return null else we there are situations
+            // where returning a regular bluebird promise
+            // results in a warning about promise being created
+            // in a handler but not returned
+            return null
+          })
+
+          // store this done property
+          // for async tests
+          cy.state('done', done)
+        }
+
+        let ret = __stackReplacementMarker(fn, this, arguments)
+
+        // if we returned a value from fn
+        // and enqueued some new commands
+        // and the value isn't currently cy
+        // or a promise
+        if (ret &&
+          cy.queue.length > currentLength &&
+          !cy.isCy(ret) &&
+          !$utils.isPromiseLike(ret)) {
+          // TODO: clean this up in the utility function
+          // to conditionally stringify functions
+          ret = _.isFunction(ret)
+            ? ret.toString()
+            : $utils.stringify(ret)
+
+          $errUtils.throwErrByPath('miscellaneous.returned_value_and_commands', {
+            args: { returned: ret },
+          })
+        }
+
+        // if we attached a done callback
+        // and returned a promise then we
+        // need to automatically bind to
+        // .catch() and return done(err)
+        // TODO: this has gone away in mocha 3.x.x
+        // due to overspecifying a resolution.
+        // in those cases we need to remove
+        // returning a promise
+        if (fn.length && ret && ret.catch) {
+          ret = ret.catch(done)
+        }
+
+        // if we returned a promise like object
+        if (!cy.isCy(ret) && $utils.isPromiseLike(ret)) {
+          // indicate we've returned a custom promise
+          cy.state('returnedCustomPromise', true)
+
+          // this means we instantiated a promise
+          // and we've already invoked multiple
+          // commands and should warn
+          if (cy.queue.length > currentLength) {
+            cy.warnMixingPromisesAndCommands()
+          }
+
+          return ret
+        }
+
+        // if we're cy or we've enqueued commands
+        if (cy.isCy(ret) || cy.queue.length > currentLength) {
+          if (fn.length) {
+            // if user has passed done callback don't return anything
+            // so we don't get an 'overspecified' error from mocha
+            return
+          }
+
+          // otherwise, return the 'queue promise', so mocha awaits it
+          return cy.state('promise')
+        }
+
+        // else just return ret
+        return ret
+      } catch (err) {
+        // if runnable.fn threw synchronously, then it didnt fail from
+        // a cypress command, but we should still teardown and handle
+        // the error
+        return cy.fail(err)
+      }
+    }
+  }
+
   // private
   wrapNativeMethods (contentWindow) {
     try {
@@ -1080,144 +1217,6 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
 export default {
   create (specWindow, Cypress, Cookies, state, config, log) {
     let cy = new $Cy(specWindow, Cypress, Cookies, state, config)
-
-    _.extend(cy, {
-      setRunnable (runnable, hookId) {
-        // when we're setting a new runnable
-        // prepare to run again!
-        cy.queue.reset()
-
-        // reset the promise again
-        state('promise', undefined)
-
-        state('hookId', hookId)
-
-        state('runnable', runnable)
-
-        state('test', $utils.getTestFromRunnable(runnable))
-
-        state('ctx', runnable.ctx)
-
-        const { fn } = runnable
-
-        const restore = () => {
-          return runnable.fn = fn
-        }
-
-        runnable.fn = function () {
-          restore()
-
-          const timeout = config('defaultCommandTimeout')
-
-          // control timeouts on runnables ourselves
-          if (_.isFinite(timeout)) {
-            cy.timeout(timeout)
-          }
-
-          // store the current length of our queue
-          // before we invoke the runnable.fn
-          const currentLength = cy.queue.length
-
-          try {
-            // if we have a fn.length that means we
-            // are accepting a done callback and need
-            // to change the semantics around how we
-            // attach the run queue
-            let done
-
-            if (fn.length) {
-              const originalDone = arguments[0]
-
-              arguments[0] = (done = function (err) {
-                // TODO: handle no longer error when ended early
-                cy.doneEarly()
-
-                originalDone(err)
-
-                // return null else we there are situations
-                // where returning a regular bluebird promise
-                // results in a warning about promise being created
-                // in a handler but not returned
-                return null
-              })
-
-              // store this done property
-              // for async tests
-              state('done', done)
-            }
-
-            let ret = __stackReplacementMarker(fn, this, arguments)
-
-            // if we returned a value from fn
-            // and enqueued some new commands
-            // and the value isn't currently cy
-            // or a promise
-            if (ret &&
-              (cy.queue.length > currentLength) &&
-              (!cy.isCy(ret)) &&
-              (!$utils.isPromiseLike(ret))) {
-              // TODO: clean this up in the utility function
-              // to conditionally stringify functions
-              ret = _.isFunction(ret) ?
-                ret.toString()
-                :
-                $utils.stringify(ret)
-
-              $errUtils.throwErrByPath('miscellaneous.returned_value_and_commands', {
-                args: { returned: ret },
-              })
-            }
-
-            // if we attached a done callback
-            // and returned a promise then we
-            // need to automatically bind to
-            // .catch() and return done(err)
-            // TODO: this has gone away in mocha 3.x.x
-            // due to overspecifying a resolution.
-            // in those cases we need to remove
-            // returning a promise
-            if (fn.length && ret && ret.catch) {
-              ret = ret.catch(done)
-            }
-
-            // if we returned a promise like object
-            if ((!cy.isCy(ret)) && $utils.isPromiseLike(ret)) {
-              // indicate we've returned a custom promise
-              state('returnedCustomPromise', true)
-
-              // this means we instantiated a promise
-              // and we've already invoked multiple
-              // commands and should warn
-              if (cy.queue.length > currentLength) {
-                cy.warnMixingPromisesAndCommands()
-              }
-
-              return ret
-            }
-
-            // if we're cy or we've enqueued commands
-            if (cy.isCy(ret) || (cy.queue.length > currentLength)) {
-              if (fn.length) {
-                // if user has passed done callback don't return anything
-                // so we don't get an 'overspecified' error from mocha
-                return
-              }
-
-              // otherwise, return the 'queue promise', so mocha awaits it
-              return state('promise')
-            }
-
-            // else just return ret
-            return ret
-          } catch (err) {
-            // if runnable.fn threw synchronously, then it didnt fail from
-            // a cypress command, but we should still teardown and handle
-            // the error
-            return cy.fail(err)
-          }
-        }
-      },
-    })
 
     setTopOnError(Cypress, cy)
 
