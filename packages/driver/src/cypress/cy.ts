@@ -217,9 +217,17 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
     // bind methods
     this.$$ = this.$$.bind(this)
     this.isCy = this.isCy.bind(this)
-    this.cleanup = this.cleanup.bind(this)
     this.fail = this.fail.bind(this)
     this.isStopped = this.isStopped.bind(this)
+    this.stop = this.stop.bind(this)
+    this.reset = this.reset.bind(this)
+    this.addCommandSync = this.addCommandSync.bind(this)
+    this.addChainer = this.addChainer.bind(this)
+    this.addCommand = this.addCommand.bind(this)
+    this.now = this.now.bind(this)
+    this.replayCommandsFrom = this.replayCommandsFrom.bind(this)
+
+    this.cleanup = this.cleanup.bind(this)
 
     // init traits
 
