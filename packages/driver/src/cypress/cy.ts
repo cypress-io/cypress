@@ -765,7 +765,7 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
     err = $errUtils.createUncaughtException({
       handlerType,
       frameType,
-      state,
+      state: this.state,
       err,
     })
 
