@@ -792,7 +792,7 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
           err: uncaughtExceptionErr,
           handlerType: 'error',
           frameType: 'spec',
-          state,
+          state: this.state,
         })
       }
     }
