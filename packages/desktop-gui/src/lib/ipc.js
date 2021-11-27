@@ -28,7 +28,6 @@ const register = (eventName, isPromiseApi = true) => {
   }
 }
 
-register('open:finder')
 register('open:project', false)
 register('on:config:changed', false)
 register('on:spec:changed', false)

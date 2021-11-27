@@ -13,7 +13,6 @@ const Updater = require(`${root}../lib/updater`)
 const errors = require(`${root}../lib/errors`)
 const browsers = require(`${root}../lib/browsers`)
 const { openProject } = require('../../../lib/open_project')
-const open = require(`${root}../lib/util/open`)
 const events = require(`${root}../lib/gui/events`)
 const dialog = require(`${root}../lib/gui/dialog`)
 const files = require(`${root}../lib/gui/files`)
@@ -285,43 +284,6 @@ describe('lib/gui/events', () => {
   })
 
   context('user events', () => {
-    describe('open:finder', () => {
-      it('opens with open lib', function () {
-        sinon.stub(open, 'opn').resolves('okay')
-
-        return this.handleEvent('open:finder', 'path').then((assert) => {
-          expect(open.opn).to.be.calledWith('path')
-
-          return assert.sendCalledWith('okay')
-        })
-      })
-
-      it('catches errors', function () {
-        const err = new Error('foo')
-
-        sinon.stub(open, 'opn').rejects(err)
-
-        return this.handleEvent('open:finder', 'path').then((assert) => {
-          return assert.sendErrCalledWith(err)
-        })
-      })
-
-      it('works even after project is opened (issue #227)', function () {
-        sinon.stub(open, 'opn').resolves('okay')
-        sinon.stub(ProjectBase.prototype, 'open').resolves()
-        sinon.stub(ProjectBase.prototype, 'getConfig').resolves({ some: 'config' })
-
-        return this.handleEvent('open:project', '/_test-output/path/to/project-e2e')
-        .then(() => {
-          return this.handleEvent('open:finder', 'path')
-        }).then((assert) => {
-          expect(open.opn).to.be.calledWith('path')
-
-          return assert.sendCalledWith('okay')
-        })
-      })
-    })
-
     describe('has:opened:cypress', function () {
       beforeEach(function () {
         this.state = {

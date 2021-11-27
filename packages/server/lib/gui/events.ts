@@ -11,7 +11,6 @@ const dialog = require('./dialog')
 const logs = require('./logs')
 const Windows = require('./windows')
 const files = require('./files')
-const open = require('../util/open')
 const errors = require('../errors')
 const Updater = require('../updater')
 const ProjectStatic = require('../project_static')
@@ -145,11 +144,6 @@ const handleEvent = function (options, bus, event, id, type, arg) {
 
     case 'window:close':
       return options.getWindowByWebContentsFn(event.sender).destroy()
-
-    case 'open:finder':
-      return open.opn(arg)
-      .then(send)
-      .catch(sendErr)
 
     case 'updater:check':
       return Updater.check({
