@@ -415,26 +415,6 @@ describe('lib/gui/events', () => {
   })
 
   context('project events', () => {
-    describe('get:projects', () => {
-      it('returns array of projects', function () {
-        sinon.stub(ProjectStatic, 'getPathsAndIds').resolves([])
-
-        return this.handleEvent('get:projects').then((assert) => {
-          return assert.sendCalledWith([])
-        })
-      })
-
-      it('catches errors', function () {
-        const err = new Error('foo')
-
-        sinon.stub(ProjectStatic, 'getPathsAndIds').rejects(err)
-
-        return this.handleEvent('get:projects').then((assert) => {
-          return assert.sendErrCalledWith(err)
-        })
-      })
-    })
-
     describe('get:project:statuses', () => {
       it('returns array of projects with statuses', function () {
         sinon.stub(ProjectStatic, 'getProjectStatuses').resolves([])

@@ -19,7 +19,6 @@ const {
   remove,
   add,
   getId,
-  getPathsAndIds,
   getProjectStatus,
   getProjectStatuses,
   createCiProject,
@@ -1113,32 +1112,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         expect(ret).to.deep.eq([])
 
         expect(cache.getProjectRoots).to.be.calledOnce
-      })
-    })
-  })
-
-  context('.getPathsAndIds', () => {
-    beforeEach(() => {
-      sinon.stub(cache, 'getProjectRoots').resolves([
-        '/path/to/first',
-        '/path/to/second',
-      ])
-
-      sinon.stub(settings, 'id').resolves('id-123')
-    })
-
-    it('returns array of objects with paths and ids', () => {
-      return getPathsAndIds().then((pathsAndIds) => {
-        expect(pathsAndIds).to.eql([
-          {
-            path: '/path/to/first',
-            id: 'id-123',
-          },
-          {
-            path: '/path/to/second',
-            id: 'id-123',
-          },
-        ])
       })
     })
   })

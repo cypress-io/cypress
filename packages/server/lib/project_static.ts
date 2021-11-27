@@ -17,19 +17,6 @@ export function paths () {
   return cache.getProjectRoots()
 }
 
-export async function getPathsAndIds () {
-  const projectRoots: string[] = await cache.getProjectRoots()
-
-  // this assumes that the configFile for a cached project is 'cypress.config.{ts|js}'
-  // https://git.io/JeGyF
-  return Promise.all(projectRoots.map(async (projectRoot) => {
-    return {
-      path: projectRoot,
-      id: await settings.id(projectRoot),
-    }
-  }))
-}
-
 export async function getDashboardProjects () {
   const authToken = await user.ensureAuthToken()
 
