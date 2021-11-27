@@ -5,7 +5,6 @@ const { clipboard } = require('electron')
 const debug = require('debug')('cypress:server:events')
 
 const logs = require('./logs')
-const Windows = require('./windows')
 const errors = require('../errors')
 const ProjectStatic = require('../project_static')
 
@@ -29,11 +28,6 @@ const nullifyUnserializableValues = (obj) => {
 
 const handleEvent = function (options, bus, event, id, type, arg) {
   debug('got request for event: %s, %o', type, arg)
-
-  _.defaults(options, {
-    windowOpenFn: Windows.open,
-    getWindowByWebContentsFn: Windows.getByWebContents,
-  })
 
   const sendResponse = function (originalData = {}) {
     try {
@@ -104,14 +98,6 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       //   return sendErr(err)
       // })
       return
-
-    case 'window:open':
-      return options.windowOpenFn(options.projectRoot, arg)
-      .then(send)
-      .catch(sendErr)
-
-    case 'window:close':
-      return options.getWindowByWebContentsFn(event.sender).destroy()
 
     case 'get:logs':
       return logs.get()

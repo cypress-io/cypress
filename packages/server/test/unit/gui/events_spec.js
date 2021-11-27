@@ -89,53 +89,6 @@ describe('lib/gui/events', () => {
     })
   })
 
-  context('window', () => {
-    describe('window:open', () => {
-      beforeEach(function () {
-        this.options.projectRoot = '/path/to/my/project'
-
-        this.win = sinon.stub({
-          on () {},
-          once () {},
-          loadURL () {},
-          webContents: {},
-        })
-      })
-
-      it('calls windowOpenFn with args and resolves with return', function () {
-        this.options.windowOpenFn = sinon.stub().rejects().withArgs({ type: 'INDEX ' }).resolves(this.win)
-
-        return this.handleEvent('window:open', { type: 'INDEX' })
-        .then((assert) => {
-          return assert.sendCalledWith(events.nullifyUnserializableValues(this.win))
-        })
-      })
-
-      it('catches errors', function () {
-        const err = new Error('foo')
-
-        this.options.windowOpenFn = sinon.stub().withArgs(this.options.projectRoot, { foo: 'bar' }).rejects(err)
-
-        return this.handleEvent('window:open', { foo: 'bar' }).then((assert) => {
-          return assert.sendErrCalledWith(err)
-        })
-      })
-    })
-
-    describe('window:close', () => {
-      it('calls destroy on Windows#getByWebContents', function () {
-        const win = {
-          destroy: sinon.stub(),
-        }
-
-        this.options.getWindowByWebContentsFn = sinon.stub().withArgs(this.event.sender).returns(win)
-        this.handleEvent('window:close')
-
-        expect(win.destroy).to.be.calledOnce
-      })
-    })
-  })
-
   context('log events', () => {
     describe('get:logs', () => {
       it('returns array of logs', function () {

@@ -214,9 +214,7 @@ export function create (projectRoot, _options: WindowOptions = {}, newBrowserWin
 export function open (projectRoot, graphqlPort: number | undefined, options: WindowOptions = {}, newBrowserWindow = _newBrowserWindow): Bluebird<BrowserWindow> {
   // if we already have a window open based
   // on that type then just show + focus it!
-  let win
-
-  win = getByType(options.type)
+  let win = getByType(options.type)
 
   if (win) {
     win.show()
@@ -321,7 +319,7 @@ export function trackState (projectRoot, isTextTerminal, win, keys) {
     })
   })
 
-  return win.webContents.on('devtools-closed', () => {
+  win.webContents.on('devtools-closed', () => {
     const newState = {}
 
     newState[keys.devTools] = false
