@@ -57,44 +57,6 @@ export async function _getProject (clientProject, authToken) {
   }
 }
 
-export async function getProjectStatuses (clientProjects: any = []) {
-  debug(`get project statuses for ${clientProjects.length} projects`)
-
-  const authToken = await user.ensureAuthToken()
-
-  debug('got auth token: %o', { authToken: keys.hide(authToken) })
-
-  const projects = (await api.getProjects(authToken) || [])
-
-  debug(`got ${projects.length} projects`)
-  const projectsIndex = _.keyBy(projects, 'id')
-
-  return Promise.all(_.map(clientProjects, (clientProject) => {
-    debug('looking at', clientProject.path)
-    // not a CI project, just mark as valid and return
-    if (!clientProject.id) {
-      debug('no project id')
-
-      return _mergeState(clientProject, 'VALID')
-    }
-
-    const project = projectsIndex[clientProject.id]
-
-    if (project) {
-      debug('found matching:', project)
-
-      // merge in details for matching project
-      return _mergeDetails(clientProject, project)
-    }
-
-    debug('did not find matching:', project)
-
-    // project has id, but no matching project found
-    // check if it doesn't exist or if user isn't authorized
-    return _getProject(clientProject, authToken)
-  }))
-}
-
 export async function getProjectStatus (clientProject) {
   debug('get project status for client id %s at path %s', clientProject.id, clientProject.path)
 

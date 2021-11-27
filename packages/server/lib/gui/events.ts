@@ -201,11 +201,6 @@ const handleEvent = function (options, bus, event, id, type, arg) {
 
       return send(null)
 
-    case 'get:project:statuses':
-      return ProjectStatic.getProjectStatuses(arg)
-      .then(send)
-      .catch(sendErr)
-
     case 'get:project:status':
       return ProjectStatic.getProjectStatus(arg)
       .then(send)
