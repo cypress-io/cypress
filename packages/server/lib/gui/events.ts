@@ -7,7 +7,6 @@ const debug = require('debug')('cypress:server:events')
 const logs = require('./logs')
 const Windows = require('./windows')
 const errors = require('../errors')
-const Updater = require('../updater')
 const ProjectStatic = require('../project_static')
 
 const savedState = require('../saved_state')
@@ -113,17 +112,6 @@ const handleEvent = function (options, bus, event, id, type, arg) {
 
     case 'window:close':
       return options.getWindowByWebContentsFn(event.sender).destroy()
-
-    case 'updater:check':
-      return Updater.check({
-        ...arg,
-        onNewVersion ({ version }) {
-          return send(version)
-        },
-        onNoNewVersion () {
-          return send(false)
-        },
-      })
 
     case 'get:logs':
       return logs.get()

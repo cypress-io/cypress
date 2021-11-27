@@ -7,7 +7,6 @@ const Promise = require('bluebird')
 const chromePolicyCheck = require(`${root}../lib/util/chrome_policy_check`)
 const logger = require(`${root}../lib/logger`)
 const ProjectBase = require(`${root}../lib/project-base`).ProjectBase
-const Updater = require(`${root}../lib/updater`)
 const errors = require(`${root}../lib/errors`)
 const browsers = require(`${root}../lib/browsers`)
 const { openProject } = require('../../../lib/open_project')
@@ -133,26 +132,6 @@ describe('lib/gui/events', () => {
         this.handleEvent('window:close')
 
         expect(win.destroy).to.be.calledOnce
-      })
-    })
-  })
-
-  context('updating', () => {
-    describe('updater:check', () => {
-      it('returns version when new version', function () {
-        sinon.stub(Updater, 'check').yieldsTo('onNewVersion', { version: '1.2.3' })
-
-        return this.handleEvent('updater:check').then((assert) => {
-          return assert.sendCalledWith('1.2.3')
-        })
-      })
-
-      it('returns false when no new version', function () {
-        sinon.stub(Updater, 'check').yieldsTo('onNoNewVersion')
-
-        return this.handleEvent('updater:check').then((assert) => {
-          return assert.sendCalledWith(false)
-        })
       })
     })
   })
