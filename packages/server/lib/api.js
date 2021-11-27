@@ -215,26 +215,6 @@ module.exports = {
     .catch(tagError)
   },
 
-  getProjectRuns (projectId, authToken, options = {}) {
-    if (options.page == null) {
-      options.page = 1
-    }
-
-    return rp.get({
-      url: apiRoutes.projectRuns(projectId),
-      json: true,
-      timeout: options.timeout != null ? options.timeout : 10000,
-      auth: {
-        bearer: authToken,
-      },
-      headers: {
-        'x-route-version': '3',
-      },
-    })
-    .catch(RequestErrors.StatusCodeError, formatResponseBody)
-    .catch(tagError)
-  },
-
   createRun (options = {}) {
     return retryWithBackoff((attemptIndex) => {
       const body = {

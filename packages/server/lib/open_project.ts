@@ -54,8 +54,6 @@ export class OpenProject {
 
   getRecordKeys = this.tryToCall('getRecordKeys')
 
-  getRuns = this.tryToCall('getRuns')
-
   requestAccess = this.tryToCall('requestAccess')
 
   getProject () {

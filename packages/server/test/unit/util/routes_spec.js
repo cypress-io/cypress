@@ -40,10 +40,6 @@ describe('lib/util/routes', () => {
       expect(apiRoutes.project('123-foo')).to.eq('http://localhost:1234/projects/123-foo')
     })
 
-    it('projectRuns', () => {
-      expect(apiRoutes.projectRuns('123-foo')).to.eq('http://localhost:1234/projects/123-foo/runs')
-    })
-
     it('exceptions', () => {
       expect(apiRoutes.exceptions()).to.eq('http://localhost:1234/exceptions')
     })

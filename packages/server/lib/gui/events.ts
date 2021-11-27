@@ -349,22 +349,6 @@ const handleEvent = function (options, bus, event, id, type, arg) {
         onError: sendErr,
       })
 
-    case 'get:runs':
-      return openProject.getRuns()
-      .then(send)
-      .catch((err) => {
-        err.type = _.get(err, 'statusCode') === 401 ?
-          'UNAUTHENTICATED'
-          : _.get(err, 'cause.code') === 'ESOCKETTIMEDOUT' ?
-            'TIMED_OUT'
-            : _.get(err, 'code') === 'ENOTFOUND' ?
-              'NO_CONNECTION'
-              :
-              err.type || 'UNKNOWN'
-
-        return sendErr(err)
-      })
-
     case 'request:access':
       return openProject.requestAccess(arg)
       .then(send)

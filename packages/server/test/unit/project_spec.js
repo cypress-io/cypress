@@ -612,23 +612,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     })
   })
 
-  context('#getRuns', () => {
-    beforeEach(function () {
-      this.project = new ProjectBase({ projectRoot: this.pristinePath, testingType: 'e2e' })
-      sinon.stub(settings, 'read').resolves({ projectId: 'id-123' })
-      sinon.stub(api, 'getProjectRuns').resolves('runs')
-      sinon.stub(user, 'ensureAuthToken').resolves('auth-token-123')
-    })
-
-    it('calls api.getProjectRuns with project id + session', function () {
-      return this.project.getRuns().then((runs) => {
-        expect(api.getProjectRuns).to.be.calledWith('id-123', 'auth-token-123')
-
-        expect(runs).to.equal('runs')
-      })
-    })
-  })
-
   context('#scaffold', () => {
     beforeEach(function () {
       this.project = new ProjectBase({ projectRoot: '/_test-output/path/to/project-e2e', testingType: 'e2e' })

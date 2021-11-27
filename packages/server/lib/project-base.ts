@@ -322,15 +322,6 @@ export class ProjectBase<TServer extends Server> extends EE {
     return runEvents.execute('before:run', cfg, beforeRunDetails)
   }
 
-  async getRuns () {
-    const [projectId, authToken] = await Promise.all([
-      this.getProjectId(),
-      user.ensureAuthToken(),
-    ])
-
-    return api.getProjectRuns(projectId, authToken)
-  }
-
   reset () {
     debug('resetting project instance %s', this.projectRoot)
 
