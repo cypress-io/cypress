@@ -834,38 +834,6 @@ describe('lib/api', () => {
     })
   })
 
-  context('.getProjectRecordKeys', () => {
-    it('GET /projects/:id/keys + returns keys', () => {
-      const recordKeys = []
-
-      nock(API_BASEURL)
-      .matchHeader('authorization', 'Bearer auth-token-123')
-      .matchHeader('accept-encoding', /gzip/)
-      .get('/projects/id-123/keys')
-      .reply(200, recordKeys)
-
-      return api.getProjectRecordKeys('id-123', 'auth-token-123')
-      .then((ret) => {
-        expect(ret).to.deep.eq(recordKeys)
-      })
-    })
-
-    it('tags errors', () => {
-      nock(API_BASEURL)
-      .matchHeader('authorization', 'Bearer auth-token-123')
-      .matchHeader('accept-encoding', /gzip/)
-      .get('/projects/id-123/keys')
-      .reply(500, {})
-
-      return api.getProjectRecordKeys('id-123', 'auth-token-123')
-      .then(() => {
-        throw new Error('should have thrown here')
-      }).catch((err) => {
-        expect(err.isApiError).to.be.true
-      })
-    })
-  })
-
   context('.requestAccess', () => {
     it('POST /projects/:id/membership_requests + returns response', () => {
       nock(API_BASEURL)

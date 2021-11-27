@@ -285,11 +285,6 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       .then(send)
       .catch(sendErr)
 
-    case 'get:record:keys':
-      return openProject.getRecordKeys()
-      .then(send)
-      .catch(sendErr)
-
     case 'get:user:editor':
       return editors.getUserEditor(true)
       .then((data) => {

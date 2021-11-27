@@ -1038,28 +1038,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     })
   })
 
-  context('#getRecordKeys', () => {
-    beforeEach(function () {
-      this.recordKeys = []
-      this.project = new ProjectBase({ projectRoot: this.pristinePath, testingType: 'e2e' })
-      sinon.stub(settings, 'read').resolves({ projectId: 'id-123' })
-      sinon.stub(user, 'ensureAuthToken').resolves('auth-token-123')
-      sinon.stub(api, 'getProjectRecordKeys').resolves(this.recordKeys)
-    })
-
-    it('calls api.getProjectRecordKeys with project id + session', function () {
-      return this.project.getRecordKeys().then(() => {
-        expect(api.getProjectRecordKeys).to.be.calledWith('id-123', 'auth-token-123')
-      })
-    })
-
-    it('returns ci keys', function () {
-      return this.project.getRecordKeys().then((recordKeys) => {
-        expect(recordKeys).to.equal(this.recordKeys)
-      })
-    })
-  })
-
   context('#requestAccess', () => {
     beforeEach(function () {
       this.project = new ProjectBase({ projectRoot: this.pristinePath, testingType: 'e2e' })

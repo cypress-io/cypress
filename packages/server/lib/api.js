@@ -393,17 +393,6 @@ module.exports = {
     .catch(tagError)
   },
 
-  getProjectRecordKeys (projectId, authToken) {
-    return rp.get({
-      url: apiRoutes.projectRecordKeys(projectId),
-      json: true,
-      auth: {
-        bearer: authToken,
-      },
-    })
-    .catch(tagError)
-  },
-
   requestAccess (projectId, authToken) {
     return rp.post({
       url: apiRoutes.membershipRequests(projectId),

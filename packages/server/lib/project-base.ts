@@ -884,15 +884,6 @@ export class ProjectBase<TServer extends Server> extends EE {
     }
   }
 
-  async getRecordKeys () {
-    const [projectId, authToken] = await Promise.all([
-      this.getProjectId(),
-      user.ensureAuthToken(),
-    ])
-
-    return api.getProjectRecordKeys(projectId, authToken)
-  }
-
   async requestAccess (projectId) {
     const authToken = await user.ensureAuthToken()
 

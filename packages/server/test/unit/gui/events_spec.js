@@ -634,26 +634,6 @@ describe('lib/gui/events', () => {
       })
     })
 
-    describe('get:record:keys', () => {
-      it('returns result of project.getRecordKeys', function () {
-        sinon.stub(openProject, 'getRecordKeys').resolves(['ci-key-123'])
-
-        return this.handleEvent('get:record:keys').then((assert) => {
-          return assert.sendCalledWith(['ci-key-123'])
-        })
-      })
-
-      it('catches errors', function () {
-        const err = new Error('foo')
-
-        sinon.stub(openProject, 'getRecordKeys').rejects(err)
-
-        return this.handleEvent('get:record:keys').then((assert) => {
-          return assert.sendErrCalledWith(err)
-        })
-      })
-    })
-
     describe('request:access', () => {
       it('returns result of project.requestAccess', function () {
         sinon.stub(openProject, 'requestAccess').resolves('response')

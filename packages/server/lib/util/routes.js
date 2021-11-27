@@ -55,7 +55,6 @@ const apiRoutes = makeRoutes(apiUrl, {
   instanceStdout: 'instances/:id/stdout',
   projects: 'projects',
   project: 'projects/:id',
-  projectRecordKeys: 'projects/:id/keys',
   exceptions: 'exceptions',
   membershipRequests: 'projects/:id/membership_requests',
 })
