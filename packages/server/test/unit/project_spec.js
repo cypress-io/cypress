@@ -19,7 +19,6 @@ const {
   remove,
   add,
   getId,
-  getProjectStatus,
   createCiProject,
   writeProjectId,
 } = require(`${root}lib/project_static`)
@@ -1111,98 +1110,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         expect(ret).to.deep.eq([])
 
         expect(cache.getProjectRoots).to.be.calledOnce
-      })
-    })
-  })
-
-  context('.getProjectStatus', () => {
-    beforeEach(function () {
-      this.clientProject = {
-        id: 'id-123',
-        path: '/_test-output/path/to/project',
-      }
-
-      sinon.stub(user, 'ensureAuthToken').resolves('auth-token-123')
-    })
-
-    it('gets project from api', function () {
-      sinon.stub(api, 'getProject').resolves([])
-
-      return getProjectStatus(this.clientProject)
-      .then(() => {
-        expect(api.getProject).to.have.been.calledWith('id-123', 'auth-token-123')
-      })
-    })
-
-    it('returns project merged with details', function () {
-      sinon.stub(api, 'getProject').resolves({
-        lastBuildStatus: 'passing',
-      })
-
-      return getProjectStatus(this.clientProject)
-      .then((project) => {
-        expect(project).to.eql({
-          id: 'id-123',
-          path: '/_test-output/path/to/project',
-          lastBuildStatus: 'passing',
-          state: 'VALID',
-        })
-      })
-    })
-
-    it('returns project, marked as valid, if it does not have an id, without querying api', function () {
-      sinon.stub(api, 'getProject')
-
-      this.clientProject.id = undefined
-
-      return getProjectStatus(this.clientProject)
-      .then((project) => {
-        expect(project).to.eql({
-          id: undefined,
-          path: '/_test-output/path/to/project',
-          state: 'VALID',
-        })
-
-        expect(api.getProject).not.to.be.called
-      })
-    })
-
-    it('marks project as invalid if api 404s', function () {
-      sinon.stub(api, 'getProject').rejects({ name: '', message: '', statusCode: 404 })
-
-      return getProjectStatus(this.clientProject)
-      .then((project) => {
-        expect(project).to.eql({
-          id: 'id-123',
-          path: '/_test-output/path/to/project',
-          state: 'INVALID',
-        })
-      })
-    })
-
-    it('marks project as unauthorized if api 403s', function () {
-      sinon.stub(api, 'getProject').rejects({ name: '', message: '', statusCode: 403 })
-
-      return getProjectStatus(this.clientProject)
-      .then((project) => {
-        expect(project).to.eql({
-          id: 'id-123',
-          path: '/_test-output/path/to/project',
-          state: 'UNAUTHORIZED',
-        })
-      })
-    })
-
-    it('throws error if not accounted for', function () {
-      const error = { name: '', message: '' }
-
-      sinon.stub(api, 'getProject').rejects(error)
-
-      return getProjectStatus(this.clientProject)
-      .then(() => {
-        throw new Error('should have caught error but did not')
-      }).catch((err) => {
-        expect(err).to.equal(error)
       })
     })
   })

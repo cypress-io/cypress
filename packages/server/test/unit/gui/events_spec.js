@@ -415,26 +415,6 @@ describe('lib/gui/events', () => {
   })
 
   context('project events', () => {
-    describe('get:project:status', () => {
-      it('returns project returned by Project.getProjectStatus', function () {
-        sinon.stub(ProjectStatic, 'getProjectStatus').resolves('project')
-
-        return this.handleEvent('get:project:status').then((assert) => {
-          return assert.sendCalledWith('project')
-        })
-      })
-
-      it('catches errors', function () {
-        const err = new Error('foo')
-
-        sinon.stub(ProjectStatic, 'getProjectStatus').rejects(err)
-
-        return this.handleEvent('get:project:status').then((assert) => {
-          return assert.sendErrCalledWith(err)
-        })
-      })
-    })
-
     describe('remove:project', () => {
       it('remove project + returns arg', function () {
         sinon.stub(cache, 'removeProject').withArgs('/_test-output/path/to/project-e2e').resolves()

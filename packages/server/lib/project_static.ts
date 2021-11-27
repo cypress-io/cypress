@@ -33,46 +33,6 @@ export function _mergeState (clientProject, state) {
   return _.extend({}, clientProject, { state })
 }
 
-export async function _getProject (clientProject, authToken) {
-  debug('get project from api', clientProject.id, clientProject.path)
-
-  try {
-    const project = await api.getProject(clientProject.id, authToken)
-
-    debug('got project from api')
-
-    return _mergeDetails(clientProject, project)
-  } catch (err: any) {
-    debug('failed to get project from api', err.statusCode)
-    switch (err.statusCode) {
-      case 404:
-        // project doesn't exist
-        return _mergeState(clientProject, 'INVALID')
-      case 403:
-        // project exists, but user isn't authorized for it
-        return _mergeState(clientProject, 'UNAUTHORIZED')
-      default:
-        throw err
-    }
-  }
-}
-
-export async function getProjectStatus (clientProject) {
-  debug('get project status for client id %s at path %s', clientProject.id, clientProject.path)
-
-  if (!clientProject.id) {
-    debug('no project id')
-
-    return Promise.resolve(_mergeState(clientProject, 'VALID'))
-  }
-
-  const authToken = await user.ensureAuthToken()
-
-  debug('got auth token: %o', { authToken: keys.hide(authToken) })
-
-  return _getProject(clientProject, authToken)
-}
-
 export function remove (path) {
   return cache.removeProject(path)
 }
