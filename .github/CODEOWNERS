@@ -6,7 +6,6 @@
 /cli/  @cypress-io/test-runner
 /packages/coffee/  @cypress-io/test-runner
 /packages/datetime-utils/  @cypress-io/test-runner
-/packages/desktop-gui/  @cypress-io/test-runner
 /packages/driver/  @cypress-io/test-runner
 /packages/electron/  @cypress-io/test-runner
 /packages/example/  @cypress-io/test-runner
