@@ -49,7 +49,6 @@ export interface Cfg extends ReceivedCypressOptions {
   state?: {
     firstOpened?: number
     lastOpened?: number
-    promptsShown?: object
   }
 }
 

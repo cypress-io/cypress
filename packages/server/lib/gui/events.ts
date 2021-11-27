@@ -5,9 +5,7 @@ const debug = require('debug')('cypress:server:events')
 
 const logs = require('./logs')
 const errors = require('../errors')
-const ProjectStatic = require('../project_static')
 
-import { openProject } from '../open_project'
 import type { LaunchArgs } from '@packages/types'
 import type { EventEmitter } from 'events'
 
@@ -114,13 +112,6 @@ const handleEvent = function (options, bus, event, id, type, arg) {
 
       return send(null)
 
-    case 'remove:project':
-      return ProjectStatic.remove(arg)
-      .then(() => {
-        return send(arg)
-      })
-      .catch(sendErr)
-
     case 'open:project':
       // debug('open:project')
 
@@ -206,16 +197,6 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       // })
       // .then(send)
       return
-
-    case 'set:prompt:shown':
-      return openProject.getProject()
-      ?.saveState({
-        promptsShown: {
-          ...(openProject.getProject()?.state?.promptsShown ?? {}),
-          [arg]: Date.now(),
-        },
-      })
-      .then(sendNull)
 
     case 'ping:baseUrl':
       // NOTE: Keeping this code around to ensure we keep this for v10
