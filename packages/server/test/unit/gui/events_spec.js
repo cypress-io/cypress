@@ -198,26 +198,6 @@ describe('lib/gui/events', () => {
     })
   })
 
-  context('external shell', () => {
-    describe('external:open', () => {
-      it('shell.openExternal with string arg', function () {
-        electron.shell.openExternal = sinon.spy()
-
-        return this.handleEvent('external:open', 'https://cypress.io/').then(() => {
-          expect(electron.shell.openExternal).to.be.calledWith('https://cypress.io/')
-        })
-      })
-
-      it('shell.openExternal with obj arg', function () {
-        electron.shell.openExternal = sinon.spy()
-
-        return this.handleEvent('external:open', { url: 'https://cypress.io/' }).then(() => {
-          expect(electron.shell.openExternal).to.be.calledWith('https://cypress.io/')
-        })
-      })
-    })
-  })
-
   context('window', () => {
     describe('window:open', () => {
       beforeEach(function () {

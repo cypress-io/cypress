@@ -11,7 +11,6 @@ const dialog = require('./dialog')
 const pkg = require('./package')
 const logs = require('./logs')
 const Windows = require('./windows')
-const { openExternal } = require('./links')
 const files = require('./files')
 const open = require('../util/open')
 const errors = require('../errors')
@@ -128,9 +127,6 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       return user.getSafely()
       .then(send)
       .catch(sendErr)
-
-    case 'external:open':
-      return openExternal(arg)
 
     case 'launch:browser':
       // is there a way to lint the arguments received?
