@@ -22,11 +22,7 @@ let recentlyCreatedWindow = false
 const getUrl = function (type, port?: number) {
   switch (type) {
     case 'INDEX':
-      if (process.env.LAUNCHPAD) {
-        return getPathToDesktopIndex('launchpad', port)
-      }
-
-      return getPathToDesktopIndex('desktop-gui', port)
+      return getPathToDesktopIndex(port)
 
     default:
       throw new Error(`No acceptable window type found for: '${type}'`)
@@ -214,7 +210,7 @@ export function create (projectRoot, _options: WindowOptions = {}, newBrowserWin
   return win
 }
 
-// open desktop-gui BrowserWindow
+// open launchpad BrowserWindow
 export function open (projectRoot, graphqlPort: number | undefined, options: WindowOptions = {}, newBrowserWindow = _newBrowserWindow): Bluebird<BrowserWindow> {
   // if we already have a window open based
   // on that type then just show + focus it!

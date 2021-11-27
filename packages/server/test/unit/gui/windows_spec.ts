@@ -54,7 +54,7 @@ describe('lib/gui/windows', () => {
           width: 600,
           type: 'INDEX',
           show: true,
-          url: getPathToDesktopIndex('desktop-gui'),
+          url: getPathToDesktopIndex(1234),
         })
 
         expect(options.webPreferences).to.include({
@@ -62,7 +62,7 @@ describe('lib/gui/windows', () => {
         })
 
         expect(win.loadURL).to.be.calledWith(getPathToDesktopIndex(
-          'desktop-gui',
+          1234,
         ))
       })
     })
