@@ -190,17 +190,6 @@ module.exports = {
     .catch(tagError)
   },
 
-  getOrgs (authToken) {
-    return rp.get({
-      url: apiRoutes.orgs(),
-      json: true,
-      auth: {
-        bearer: authToken,
-      },
-    })
-    .catch(tagError)
-  },
-
   getProjects (authToken) {
     return rp.get({
       url: apiRoutes.projects(),

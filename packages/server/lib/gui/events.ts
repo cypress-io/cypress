@@ -212,11 +212,6 @@ const handleEvent = function (options, bus, event, id, type, arg) {
 
       return send(null)
 
-    case 'get:orgs':
-      return ProjectStatic.getOrgs()
-      .then(send)
-      .catch(sendErr)
-
     case 'get:projects':
       return ProjectStatic.getPathsAndIds()
       .then(send)

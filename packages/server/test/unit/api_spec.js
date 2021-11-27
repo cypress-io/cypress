@@ -92,38 +92,6 @@ describe('lib/api', () => {
     })
   })
 
-  context('.getOrgs', () => {
-    it('GET /orgs + returns orgs', () => {
-      const orgs = []
-
-      nock(API_BASEURL)
-      .matchHeader('authorization', 'Bearer auth-token-123')
-      .matchHeader('accept-encoding', /gzip/)
-      .get('/organizations')
-      .reply(200, orgs)
-
-      return api.getOrgs('auth-token-123')
-      .then((ret) => {
-        expect(ret).to.deep.eq(orgs)
-      })
-    })
-
-    it('tags errors', () => {
-      nock(API_BASEURL)
-      .matchHeader('authorization', 'Bearer auth-token-123')
-      .matchHeader('accept-encoding', /gzip/)
-      .get('/organizations')
-      .reply(500, {})
-
-      return api.getOrgs('auth-token-123')
-      .then(() => {
-        throw new Error('should have thrown here')
-      }).catch((err) => {
-        expect(err.isApiError).to.be.true
-      })
-    })
-  })
-
   context('.getProjects', () => {
     it('GET /projects + returns projects', () => {
       const projects = []

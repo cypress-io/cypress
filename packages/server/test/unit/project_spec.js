@@ -15,7 +15,6 @@ const scaffold = require(`${root}lib/scaffold`)
 const { ServerE2E } = require(`${root}lib/server-e2e`)
 const { ProjectBase } = require(`${root}lib/project-base`)
 const {
-  getOrgs,
   paths,
   remove,
   add,
@@ -1117,21 +1116,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     it('returns project id', function () {
       return getId(this.todosPath).then((id) => {
         expect(id).to.eq(this.projectId)
-      })
-    })
-  })
-
-  context('.getOrgs', () => {
-    beforeEach(() => {
-      sinon.stub(user, 'ensureAuthToken').resolves('auth-token-123')
-      sinon.stub(api, 'getOrgs').resolves([])
-    })
-
-    it('calls api.getOrgs', () => {
-      return getOrgs().then((orgs) => {
-        expect(orgs).to.deep.eq([])
-        expect(api.getOrgs).to.be.calledOnce
-        expect(api.getOrgs).to.be.calledWith('auth-token-123')
       })
     })
   })

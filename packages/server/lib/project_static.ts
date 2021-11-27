@@ -13,12 +13,6 @@ import { getDefaultConfigFilePath } from './project_utils'
 
 const debug = Debug('cypress:server:project_static')
 
-export async function getOrgs () {
-  const authToken = await user.ensureAuthToken()
-
-  return api.getOrgs(authToken)
-}
-
 export function paths () {
   return cache.getProjectRoots()
 }

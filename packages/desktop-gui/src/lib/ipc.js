@@ -28,7 +28,6 @@ const register = (eventName, isPromiseApi = true) => {
   }
 }
 
-register('get:orgs')
 register('gui:error')
 register('get:runs')
 register('get:options')

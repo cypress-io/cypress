@@ -53,7 +53,6 @@ const apiRoutes = makeRoutes(apiUrl, {
   instanceTests: 'instances/:id/tests',
   instanceResults: 'instances/:id/results',
   instanceStdout: 'instances/:id/stdout',
-  orgs: 'organizations',
   projects: 'projects',
   project: 'projects/:id',
   projectRuns: 'projects/:id/runs',

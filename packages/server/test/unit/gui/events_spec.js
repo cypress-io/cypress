@@ -380,26 +380,6 @@ describe('lib/gui/events', () => {
   })
 
   context('user events', () => {
-    describe('get:orgs', () => {
-      it('returns array of orgs', function () {
-        sinon.stub(ProjectStatic, 'getOrgs').resolves([])
-
-        return this.handleEvent('get:orgs').then((assert) => {
-          return assert.sendCalledWith([])
-        })
-      })
-
-      it('catches errors', function () {
-        const err = new Error('foo')
-
-        sinon.stub(ProjectStatic, 'getOrgs').rejects(err)
-
-        return this.handleEvent('get:orgs').then((assert) => {
-          return assert.sendErrCalledWith(err)
-        })
-      })
-    })
-
     describe('open:finder', () => {
       it('opens with open lib', function () {
         sinon.stub(open, 'opn').resolves('okay')
