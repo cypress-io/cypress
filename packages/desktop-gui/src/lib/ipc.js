@@ -28,7 +28,6 @@ const register = (eventName, isPromiseApi = true) => {
   }
 }
 
-register('add:project')
 register('begin:auth')
 register('on:auth:message', false)
 register('close:browser')

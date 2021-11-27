@@ -134,26 +134,6 @@ export function remove (path) {
   return cache.removeProject(path)
 }
 
-export async function add (path, options) {
-  // don't cache a project if a non-default configFile is set
-  // https://git.io/JeGyF
-  if (options.configFile !== undefined && settings.configFile(options) !== 'cypress.config.js' && settings.configFile(options) !== 'cypress.config.ts') {
-    return Promise.resolve({ path })
-  }
-
-  try {
-    await cache.insertProject(path)
-    const id = await getId(path)
-
-    return {
-      id,
-      path,
-    }
-  } catch (e) {
-    return { path }
-  }
-}
-
 export async function getId (path) {
   const configFile = await getDefaultConfigFilePath(path)
 

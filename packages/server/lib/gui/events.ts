@@ -264,11 +264,6 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       .then(send)
       .catch(sendErr)
 
-    case 'add:project':
-      return ProjectStatic.add(arg, options)
-      .then(send)
-      .catch(sendErr)
-
     case 'remove:project':
       return ProjectStatic.remove(arg)
       .then(() => {

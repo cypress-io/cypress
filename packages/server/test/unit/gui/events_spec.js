@@ -606,26 +606,6 @@ describe('lib/gui/events', () => {
       })
     })
 
-    describe('add:project', () => {
-      it('adds project + returns result', function () {
-        sinon.stub(ProjectStatic, 'add').withArgs('/_test-output/path/to/project', this.options).resolves('result')
-
-        return this.handleEvent('add:project', '/_test-output/path/to/project').then((assert) => {
-          return assert.sendCalledWith('result')
-        })
-      })
-
-      it('catches errors', function () {
-        const err = new Error('foo')
-
-        sinon.stub(ProjectStatic, 'add').withArgs('/_test-output/path/to/project', this.options).rejects(err)
-
-        return this.handleEvent('add:project', '/_test-output/path/to/project').then((assert) => {
-          return assert.sendErrCalledWith(err)
-        })
-      })
-    })
-
     describe('remove:project', () => {
       it('remove project + returns arg', function () {
         sinon.stub(cache, 'removeProject').withArgs('/_test-output/path/to/project-e2e').resolves()
