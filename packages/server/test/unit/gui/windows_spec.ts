@@ -4,7 +4,6 @@ import { expect } from 'chai'
 import 'sinon-chai'
 
 import _ from 'lodash'
-import path from 'path'
 import Promise from 'bluebird'
 import { EventEmitter } from 'events'
 import { BrowserWindow } from 'electron'
@@ -47,7 +46,7 @@ describe('lib/gui/windows', () => {
         type: 'INDEX',
       }
 
-      return Windows.open('/path/to/project', undefined, options, () => this.win)
+      return Windows.open('/path/to/project', 1234, options, () => this.win)
       .then((win) => {
         expect(options).to.include({
           height: 500,
@@ -55,10 +54,6 @@ describe('lib/gui/windows', () => {
           type: 'INDEX',
           show: true,
           url: getPathToDesktopIndex(1234),
-        })
-
-        expect(options.webPreferences).to.include({
-          preload: path.resolve('lib', 'ipc', 'ipc.js'),
         })
 
         expect(win.loadURL).to.be.calledWith(getPathToDesktopIndex(

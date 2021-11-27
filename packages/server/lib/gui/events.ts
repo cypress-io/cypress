@@ -3,9 +3,6 @@ const _ = require('lodash')
 const ipc = require('electron').ipcMain
 const debug = require('debug')('cypress:server:events')
 
-const logs = require('./logs')
-const errors = require('../errors')
-
 import type { LaunchArgs } from '@packages/types'
 import type { EventEmitter } from 'events'
 
@@ -24,40 +21,7 @@ const nullifyUnserializableValues = (obj) => {
 const handleEvent = function (options, bus, event, id, type, arg) {
   debug('got request for event: %s, %o', type, arg)
 
-  const sendResponse = function (originalData = {}) {
-    try {
-      const data = nullifyUnserializableValues(originalData)
-
-      debug('sending ipc data %o', { type, data, originalData })
-
-      return event.sender.send('response', data)
-    } catch (error) {} // eslint-disable-line no-empty
-  }
-
-  const sendErr = function (err) {
-    debug('send error: %o', err)
-
-    return sendResponse({ id, __error: errors.clone(err, { html: true }) })
-  }
-
-  const send = (data) => {
-    return sendResponse({ id, data })
-  }
-
-  const sendNull = () => {
-    return send(null)
-  }
-
-  const onBus = function (event) {
-    bus.removeAllListeners(event)
-
-    return bus.on(event, send)
-  }
-
   switch (type) {
-    case 'on:app:event':
-      return onBus('app:events')
-
     case 'launch:browser':
       // TIM: Commented out for reference w/ the new implementation
       // // is there a way to lint the arguments received?
@@ -93,24 +57,6 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       //   return sendErr(err)
       // })
       return
-
-    case 'get:logs':
-      return logs.get()
-      .then(send)
-      .catch(sendErr)
-
-    case 'clear:logs':
-      return logs.clear()
-      .then(sendNull)
-      .catch(sendErr)
-
-    case 'on:log':
-      return logs.onLog(send)
-
-    case 'off:log':
-      logs.off()
-
-      return send(null)
 
     case 'open:project':
       // debug('open:project')

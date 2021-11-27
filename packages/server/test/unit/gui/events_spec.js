@@ -5,7 +5,6 @@ const extension = require('@packages/extension')
 const electron = require('electron')
 const Promise = require('bluebird')
 const chromePolicyCheck = require(`${root}../lib/util/chrome_policy_check`)
-const logger = require(`${root}../lib/logger`)
 const ProjectBase = require(`${root}../lib/project-base`).ProjectBase
 const errors = require(`${root}../lib/errors`)
 const browsers = require(`${root}../lib/browsers`)
@@ -84,71 +83,6 @@ describe('lib/gui/events', () => {
     it('throws', function () {
       return this.handleEvent('no:such:event').catch((err) => {
         expect(err.message).to.include('No ipc event registered for: \'no:such:event\'')
-      })
-    })
-  })
-
-  context('log events', () => {
-    describe('get:logs', () => {
-      it('returns array of logs', function () {
-        sinon.stub(logger, 'getLogs').resolves([])
-
-        return this.handleEvent('get:logs').then((assert) => {
-          return assert.sendCalledWith([])
-        })
-      })
-
-      it('catches errors', function () {
-        const err = new Error('foo')
-
-        sinon.stub(logger, 'getLogs').rejects(err)
-
-        return this.handleEvent('get:logs').then((assert) => {
-          return assert.sendErrCalledWith(err)
-        })
-      })
-    })
-
-    describe('clear:logs', () => {
-      it('returns null', function () {
-        sinon.stub(logger, 'clearLogs').resolves()
-
-        return this.handleEvent('clear:logs').then((assert) => {
-          return assert.sendCalledWith(null)
-        })
-      })
-
-      it('catches errors', function () {
-        const err = new Error('foo')
-
-        sinon.stub(logger, 'clearLogs').rejects(err)
-
-        return this.handleEvent('clear:logs').then((assert) => {
-          return assert.sendErrCalledWith(err)
-        })
-      })
-    })
-
-    describe('on:log', () => {
-      it('sets send to onLog', function () {
-        const onLog = sinon.stub(logger, 'onLog')
-
-        this.handleEvent('on:log')
-        expect(onLog).to.be.called
-
-        expect(onLog.getCall(0).args[0]).to.be.a('function')
-      })
-    })
-
-    describe('off:log', () => {
-      it('calls logger#off and returns null', function () {
-        sinon.stub(logger, 'off')
-
-        return this.handleEvent('off:log').then((assert) => {
-          expect(logger.off).to.be.calledOnce
-
-          return assert.sendCalledWith(null)
-        })
       })
     })
   })

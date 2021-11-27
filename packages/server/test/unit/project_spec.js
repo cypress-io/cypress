@@ -7,16 +7,10 @@ const pkg = require('@packages/root')
 const Fixtures = require('@tooling/system-tests/lib/fixtures')
 const { sinon } = require('../spec_helper')
 const user = require(`${root}lib/user`)
-const cache = require(`${root}lib/cache`)
 const config = require(`${root}lib/config`)
 const scaffold = require(`${root}lib/scaffold`)
 const { ServerE2E } = require(`${root}lib/server-e2e`)
 const { ProjectBase } = require(`${root}lib/project-base`)
-const {
-  paths,
-  add,
-  getId,
-} = require(`${root}lib/project_static`)
 const ProjectUtils = require(`${root}lib/project_utils`)
 const { Automation } = require(`${root}lib/automation`)
 const savedState = require(`${root}lib/saved_state`)
@@ -892,81 +886,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         throw new Error('expected to fail, but did not')
       }).catch((err) => {
         expect(err.code).to.eq('EPERM')
-      })
-    })
-  })
-
-  context('.add', () => {
-    beforeEach(function () {
-      this.pristinePath = Fixtures.projectPath('pristine-with-config-file')
-    })
-
-    it('inserts path into cache', function () {
-      return add(this.pristinePath, {})
-      .then(() => cache.read()).then((json) => {
-        expect(json.PROJECTS).to.deep.eq([this.pristinePath])
-      })
-    })
-
-    describe('if project at path has id', () => {
-      it('returns object containing path and id', function () {
-        sinon.stub(settings, 'read').resolves({ projectId: 'id-123' })
-
-        return add(this.pristinePath, {})
-        .then((project) => {
-          expect(project.id).to.equal('id-123')
-
-          expect(project.path).to.equal(this.pristinePath)
-        })
-      })
-    })
-
-    describe('if project at path does not have id', () => {
-      it('returns object containing just the path', function () {
-        sinon.stub(settings, 'read').rejects()
-
-        return add(this.pristinePath, {})
-        .then((project) => {
-          expect(project.id).to.be.undefined
-
-          expect(project.path).to.equal(this.pristinePath)
-        })
-      })
-    })
-
-    describe('if configFile is non-default', () => {
-      it('doesn\'t cache anything and returns object containing just the path', function () {
-        return add(this.pristinePath, { configFile: false })
-        .then((project) => {
-          expect(project.id).to.be.undefined
-          expect(project.path).to.equal(this.pristinePath)
-
-          return cache.read()
-        }).then((json) => {
-          expect(json.PROJECTS).to.deep.eq([])
-        })
-      })
-    })
-  })
-
-  context('.getId', () => {
-    it('returns project id', function () {
-      return getId(this.todosPath).then((id) => {
-        expect(id).to.eq(this.projectId)
-      })
-    })
-  })
-
-  context('.paths', () => {
-    beforeEach(() => {
-      sinon.stub(cache, 'getProjectRoots').resolves([])
-    })
-
-    it('calls cache.getProjectRoots', () => {
-      return paths().then((ret) => {
-        expect(ret).to.deep.eq([])
-
-        expect(cache.getProjectRoots).to.be.calledOnce
       })
     })
   })

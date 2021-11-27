@@ -26,16 +26,6 @@ export class OpenProject {
     this.relaunchBrowser = null
   }
 
-  tryToCall (method: keyof ProjectBase<any>) {
-    return (...args: unknown[]) => {
-      if (this.openProject && this.openProject[method]) {
-        return this.openProject[method](...args)
-      }
-
-      return Bluebird.resolve(null)
-    }
-  }
-
   reset () {
     this.resetOpenProject()
   }

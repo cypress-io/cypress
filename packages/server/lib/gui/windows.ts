@@ -3,7 +3,6 @@ import Bluebird from 'bluebird'
 import contextMenu from 'electron-context-menu'
 import { BrowserWindow } from 'electron'
 import Debug from 'debug'
-import cwd from '../cwd'
 import savedState from '../saved_state'
 import { getPathToDesktopIndex } from '@packages/resolve-dist'
 
@@ -230,7 +229,6 @@ export function open (projectRoot, graphqlPort: number | undefined, options: Win
     show: true,
     webPreferences: {
       contextIsolation: true,
-      preload: cwd('lib', 'ipc', 'ipc.js'),
     },
   })
 
