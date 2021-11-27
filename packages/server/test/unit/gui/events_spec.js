@@ -5,7 +5,6 @@ const extension = require('@packages/extension')
 const electron = require('electron')
 const Promise = require('bluebird')
 const chromePolicyCheck = require(`${root}../lib/util/chrome_policy_check`)
-const cache = require(`${root}../lib/cache`)
 const logger = require(`${root}../lib/logger`)
 const ProjectBase = require(`${root}../lib/project-base`).ProjectBase
 const ProjectStatic = require(`${root}../lib/project_static`)
@@ -330,26 +329,6 @@ describe('lib/gui/events', () => {
   })
 
   context('project events', () => {
-    describe('remove:project', () => {
-      it('remove project + returns arg', function () {
-        sinon.stub(cache, 'removeProject').withArgs('/_test-output/path/to/project-e2e').resolves()
-
-        return this.handleEvent('remove:project', '/_test-output/path/to/project-e2e').then((assert) => {
-          return assert.sendCalledWith('/_test-output/path/to/project-e2e')
-        })
-      })
-
-      it('catches errors', function () {
-        const err = new Error('foo')
-
-        sinon.stub(cache, 'removeProject').withArgs('/_test-output/path/to/project-e2e').rejects(err)
-
-        return this.handleEvent('remove:project', '/_test-output/path/to/project-e2e').then((assert) => {
-          return assert.sendErrCalledWith(err)
-        })
-      })
-    })
-
     // NOTE: Skipped because we want to take a look and make sure we have the same functionality in v10
     describe.skip('open:project', () => {
       beforeEach(function () {

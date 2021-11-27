@@ -24,10 +24,6 @@ export function _mergeState (clientProject, state) {
   return _.extend({}, clientProject, { state })
 }
 
-export function remove (path) {
-  return cache.removeProject(path)
-}
-
 export async function getId (path) {
   const configFile = await getDefaultConfigFilePath(path)
 

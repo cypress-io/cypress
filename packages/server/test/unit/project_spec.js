@@ -16,7 +16,6 @@ const { ServerE2E } = require(`${root}lib/server-e2e`)
 const { ProjectBase } = require(`${root}lib/project-base`)
 const {
   paths,
-  remove,
   add,
   getId,
   createCiProject,
@@ -1054,18 +1053,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     it('returns response', function () {
       return this.project.requestAccess('project-id-123').then((response) => {
         expect(response).to.equal('response')
-      })
-    })
-  })
-
-  context('.remove', () => {
-    beforeEach(() => {
-      sinon.stub(cache, 'removeProject').resolves()
-    })
-
-    it('calls cache.removeProject with path', () => {
-      return remove('/_test-output/path/to/project-e2e').then(() => {
-        expect(cache.removeProject).to.be.calledWith('/_test-output/path/to/project-e2e')
       })
     })
   })
