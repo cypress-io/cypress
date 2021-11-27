@@ -3,7 +3,6 @@ const UrlParse = require('url-parse')
 const konfig = require('../konfig')
 
 const apiUrl = konfig('api_url')
-const onUrl = konfig('on_url')
 
 const parseArgs = function (url, args = []) {
   _.each(args, (value) => {
@@ -59,11 +58,6 @@ const apiRoutes = makeRoutes(apiUrl, {
   membershipRequests: 'projects/:id/membership_requests',
 })
 
-const onRoutes = makeRoutes(onUrl, {
-  releaseNotes: 'release-notes/:id', // :id is the version (e.g. 1.2.3)
-})
-
 module.exports = {
   apiRoutes,
-  onRoutes,
 }

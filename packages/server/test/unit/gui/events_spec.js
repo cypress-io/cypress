@@ -21,7 +21,6 @@ const dialog = require(`${root}../lib/gui/dialog`)
 const files = require(`${root}../lib/gui/files`)
 const ensureUrl = require(`${root}../lib/util/ensure-url`)
 const konfig = require(`${root}../lib/konfig`)
-const api = require(`${root}../lib/api`)
 const savedState = require(`${root}../lib/saved_state`)
 
 describe('lib/gui/events', () => {
@@ -239,26 +238,6 @@ describe('lib/gui/events', () => {
 
         return this.handleEvent('updater:check').then((assert) => {
           return assert.sendCalledWith(false)
-        })
-      })
-    })
-
-    describe('get:release:notes', () => {
-      it('returns release notes from api', function () {
-        const releaseNotes = { title: 'New in 1.2.3!' }
-
-        sinon.stub(api, 'getReleaseNotes').resolves(releaseNotes)
-
-        return this.handleEvent('get:release:notes').then((assert) => {
-          return assert.sendCalledWith(releaseNotes)
-        })
-      })
-
-      it('sends null if there is an error', function () {
-        sinon.stub(api, 'getReleaseNotes').rejects(new Error('failed to get release notes'))
-
-        return this.handleEvent('get:release:notes').then((assert) => {
-          return assert.sendCalledWith(null)
         })
       })
     })

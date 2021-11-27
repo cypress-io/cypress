@@ -10,7 +10,7 @@ const pkg = require('@packages/root')
 const machineId = require('./util/machine_id')
 const humanTime = require('./util/human_time')
 const errors = require('./errors')
-const { apiRoutes, onRoutes } = require('./util/routes')
+const { apiRoutes } = require('./util/routes')
 
 const THIRTY_SECONDS = humanInterval('30 seconds')
 const SIXTY_SECONDS = humanInterval('60 seconds')
@@ -403,19 +403,6 @@ module.exports = {
     })
     .catch(RequestErrors.StatusCodeError, formatResponseBody)
     .catch(tagError)
-  },
-
-  getReleaseNotes (version) {
-    return rp.get({
-      url: onRoutes.releaseNotes(version),
-      json: true,
-    })
-    .catch((err) => {
-      // log and ignore by sending an empty response if there's an error
-      debug('error getting release notes for version %s: %s', version, err.stack || err.message || err)
-
-      return {}
-    })
   },
 
   clearCache () {
