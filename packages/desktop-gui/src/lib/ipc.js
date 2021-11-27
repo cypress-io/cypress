@@ -28,7 +28,6 @@ const register = (eventName, isPromiseApi = true) => {
   }
 }
 
-register('ping:api:server')
 register('ping:baseUrl')
 register('remove:project')
 register('request:access')

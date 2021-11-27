@@ -16,8 +16,6 @@ const { openProject } = require('../../../lib/open_project')
 const events = require(`${root}../lib/gui/events`)
 const dialog = require(`${root}../lib/gui/dialog`)
 const files = require(`${root}../lib/gui/files`)
-const ensureUrl = require(`${root}../lib/util/ensure-url`)
-const konfig = require(`${root}../lib/konfig`)
 const savedState = require(`${root}../lib/saved_state`)
 
 describe('lib/gui/events', () => {
@@ -563,52 +561,6 @@ describe('lib/gui/events', () => {
           expect(this.send).to.be.calledWith('response')
 
           expect(this.send.firstCall.args[1].__error.type).to.equal('UNKNOWN')
-        })
-      })
-    })
-
-    describe('ping:api:server', () => {
-      it('returns ensures url', function () {
-        sinon.stub(ensureUrl, 'isListening').resolves()
-
-        return this.handleEvent('ping:api:server').then((assert) => {
-          expect(ensureUrl.isListening).to.be.calledWith(konfig('api_url'))
-
-          return assert.sendCalledWith()
-        })
-      })
-
-      it('catches errors', function () {
-        const err = new Error('foo')
-
-        sinon.stub(ensureUrl, 'isListening').rejects(err)
-
-        return this.handleEvent('ping:api:server').then((assert) => {
-          assert.sendErrCalledWith(err)
-
-          expect(err.apiUrl).to.equal(konfig('api_url'))
-        })
-      })
-
-      it('sends first of aggregate error', function () {
-        const err = new Error('AggregateError')
-
-        err.message = 'aggregate error'
-        err[0] = {
-          code: 'ECONNREFUSED',
-          port: 1234,
-          address: '127.0.0.1',
-        }
-
-        err.length = 1
-        sinon.stub(ensureUrl, 'isListening').rejects(err)
-
-        return this.handleEvent('ping:api:server').then((assert) => {
-          assert.sendErrCalledWith(err)
-          expect(err.name).to.equal('ECONNREFUSED 127.0.0.1:1234')
-          expect(err.message).to.equal('ECONNREFUSED 127.0.0.1:1234')
-
-          expect(err.apiUrl).to.equal(konfig('api_url'))
         })
       })
     })

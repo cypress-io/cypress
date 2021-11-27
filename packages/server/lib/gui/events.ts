@@ -13,7 +13,6 @@ const Updater = require('../updater')
 const ProjectStatic = require('../project_static')
 
 const ensureUrl = require('../util/ensure-url')
-const konfig = require('../konfig')
 const savedState = require('../saved_state')
 
 import { openProject } from '../open_project'
@@ -292,25 +291,6 @@ const handleEvent = function (options, bus, event, id, type, arg) {
         },
       })
       .then(sendNull)
-
-    case 'ping:api:server':
-      const apiUrl = konfig('api_url')
-
-      return ensureUrl.isListening(apiUrl)
-      .then(send)
-      .catch((err) => {
-        // if it's an aggegrate error, just send the first one
-        if (err.length) {
-          const subErr = err[0]
-
-          err.name = subErr.name || `${subErr.code} ${subErr.address}:${subErr.port}`
-          err.message = subErr.message || `${subErr.code} ${subErr.address}:${subErr.port}`
-        }
-
-        err.apiUrl = apiUrl
-
-        return sendErr(err)
-      })
 
     case 'ping:baseUrl':
       const baseUrl = arg
