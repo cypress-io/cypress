@@ -77,9 +77,6 @@ const handleEvent = function (options, bus, event, id, type, arg) {
     case 'on:spec:changed':
       return onBus('spec:changed')
 
-    case 'on:config:changed':
-      return onBus('config:changed')
-
     case 'on:project:error':
       return onBus('project:error')
 

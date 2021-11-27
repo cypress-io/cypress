@@ -397,17 +397,6 @@ describe('lib/gui/events', () => {
         })
       })
 
-      it('sends \'config:changed\' onSettingsChanged', function () {
-        const bus = busStub()
-
-        return this.handleEvent('open:project', '/_test-output/path/to/project-e2e', bus)
-        .then(() => {
-          return this.handleEvent('on:config:changed', '', bus)
-        }).then(() => {
-          expect(bus.on).to.have.been.calledWith('config:changed')
-        })
-      })
-
       it('sends \'spec:changed\' onSpecChanged', function () {
         const bus = busStub()
 

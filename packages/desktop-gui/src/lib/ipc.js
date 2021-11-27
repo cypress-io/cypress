@@ -28,7 +28,6 @@ const register = (eventName, isPromiseApi = true) => {
   }
 }
 
-register('on:config:changed', false)
 register('on:spec:changed', false)
 register('on:project:error', false)
 register('on:project:warning', false)
