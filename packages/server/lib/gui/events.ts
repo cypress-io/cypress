@@ -123,11 +123,6 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       .then(send)
       .catch(sendErr)
 
-    case 'get:current:user':
-      return user.getSafely()
-      .then(send)
-      .catch(sendErr)
-
     case 'launch:browser':
       // is there a way to lint the arguments received?
       debug('launching browser for \'%s\' spec: %o', arg.specType, arg.spec)
