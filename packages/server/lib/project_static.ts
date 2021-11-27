@@ -6,7 +6,6 @@ import logger from './logger'
 import api from './api'
 import cache from './cache'
 import user from './user'
-import keys from './util/keys'
 import * as settings from './util/settings'
 import { ProjectBase } from './project-base'
 import { getDefaultConfigFilePath } from './project_utils'
@@ -15,14 +14,6 @@ const debug = Debug('cypress:server:project_static')
 
 export function paths () {
   return cache.getProjectRoots()
-}
-
-export async function getDashboardProjects () {
-  const authToken = await user.ensureAuthToken()
-
-  debug('got auth token: %o', { authToken: keys.hide(authToken) })
-
-  return api.getProjects(authToken)
 }
 
 export function _mergeDetails (clientProject, project) {

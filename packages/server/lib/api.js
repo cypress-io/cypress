@@ -190,17 +190,6 @@ module.exports = {
     .catch(tagError)
   },
 
-  getProjects (authToken) {
-    return rp.get({
-      url: apiRoutes.projects(),
-      json: true,
-      auth: {
-        bearer: authToken,
-      },
-    })
-    .catch(tagError)
-  },
-
   getProject (projectId, authToken) {
     return rp.get({
       url: apiRoutes.project(projectId),

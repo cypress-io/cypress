@@ -201,11 +201,6 @@ const handleEvent = function (options, bus, event, id, type, arg) {
 
       return send(null)
 
-    case 'get:dashboard:projects':
-      return ProjectStatic.getDashboardProjects()
-      .then(send)
-      .catch(sendErr)
-
     case 'remove:project':
       return ProjectStatic.remove(arg)
       .then(() => {
