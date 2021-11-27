@@ -765,39 +765,6 @@ describe('lib/gui/events', () => {
       })
     })
 
-    describe('close:project', () => {
-      beforeEach(() => {
-        return sinon.stub(ProjectBase.prototype, 'close').withArgs({ sync: true }).resolves()
-      })
-
-      it('closes down open project and returns null', function () {
-        sinon.stub(ProjectBase.prototype, 'getConfig').resolves({})
-        sinon.stub(ProjectBase.prototype, 'open').resolves()
-
-        return this.handleEvent('open:project', '/_test-output/path/to/project-e2e')
-        .then(() => {
-          // it should store the opened project
-          expect(openProject.getProject()).not.to.be.null
-
-          return this.handleEvent('close:project')
-        }).then((assert) => {
-          // it should store the opened project
-          expect(openProject.getProject()).to.be.null
-
-          return assert.sendCalledWith(null)
-        })
-      })
-
-      it('is noop and returns null when no project is open', function () {
-        openProject.__reset()
-        expect(openProject.getProject()).to.be.null
-
-        return this.handleEvent('close:project').then((assert) => {
-          return assert.sendCalledWith(null)
-        })
-      })
-    })
-
     describe('get:runs', () => {
       it('calls openProject.getRuns', function () {
         sinon.stub(openProject, 'getRuns').resolves([])

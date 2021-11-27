@@ -320,11 +320,6 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       .then(send)
       .catch(sendErr)
 
-    case 'close:project':
-      return openProject.close()
-      .then(send)
-      .catch(sendErr)
-
     case 'setup:dashboard:project':
       return ProjectStatic.createCiProject(arg, arg.projectRoot)
       .then(send)
