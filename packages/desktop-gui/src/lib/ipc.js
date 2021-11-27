@@ -28,7 +28,6 @@ const register = (eventName, isPromiseApi = true) => {
   }
 }
 
-register('on:project:error', false)
 register('on:project:warning', false)
 register('ping:api:server')
 register('ping:baseUrl')

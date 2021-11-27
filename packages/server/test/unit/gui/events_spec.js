@@ -408,17 +408,6 @@ describe('lib/gui/events', () => {
         })
       })
 
-      it('sends \'project:error\' onError', function () {
-        const bus = busStub()
-
-        return this.handleEvent('open:project', '/_test-output/path/to/project-e2e')
-        .then(() => {
-          return this.handleEvent('on:project:error', '', bus)
-        }).then((assert) => {
-          expect(bus.on).to.have.been.calledWith('project:error')
-        })
-      })
-
       it('calls browsers.getAllBrowsersWith with no args when no browser specified', function () {
         return this.handleEvent('open:project', '/_test-output/path/to/project-e2e').then(() => {
           expect(browsers.getAllBrowsersWith).to.be.calledWith()
