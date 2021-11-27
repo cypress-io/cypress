@@ -10,7 +10,6 @@ const logger = require(`${root}../lib/logger`)
 const ProjectBase = require(`${root}../lib/project-base`).ProjectBase
 const ProjectStatic = require(`${root}../lib/project_static`)
 const Updater = require(`${root}../lib/updater`)
-const user = require(`${root}../lib/user`)
 const errors = require(`${root}../lib/errors`)
 const browsers = require(`${root}../lib/browsers`)
 const { openProject } = require('../../../lib/open_project')
@@ -147,28 +146,6 @@ describe('lib/gui/events', () => {
         sinon.stub(files, 'showDialogAndCreateSpec').rejects(err)
 
         return this.handleEvent('show:new:spec:dialog').then((assert) => {
-          return assert.sendErrCalledWith(err)
-        })
-      })
-    })
-  })
-
-  context('user', () => {
-    describe('log:out', () => {
-      it('calls user.logOut and returns user', function () {
-        sinon.stub(user, 'logOut').resolves({ foo: 'bar' })
-
-        return this.handleEvent('log:out').then((assert) => {
-          return assert.sendCalledWith({ foo: 'bar' })
-        })
-      })
-
-      it('catches errors', function () {
-        const err = new Error('foo')
-
-        sinon.stub(user, 'logOut').rejects(err)
-
-        return this.handleEvent('log:out').then((assert) => {
           return assert.sendErrCalledWith(err)
         })
       })

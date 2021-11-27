@@ -23,7 +23,6 @@ const konfig = require('../konfig')
 const fileOpener = require('../util/file-opener')
 const savedState = require('../saved_state')
 
-import user from '../user'
 import { openProject } from '../open_project'
 import type { LaunchArgs } from '@packages/types'
 import type { EventEmitter } from 'events'
@@ -107,11 +106,6 @@ const handleEvent = function (options, bus, event, id, type, arg) {
 
     case 'show:new:spec:dialog':
       return files.showDialogAndCreateSpec()
-      .then(send)
-      .catch(sendErr)
-
-    case 'log:out':
-      return user.logOut()
       .then(send)
       .catch(sendErr)
 
