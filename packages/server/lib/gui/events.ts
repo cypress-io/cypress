@@ -306,12 +306,6 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       .then(send)
       .catch(sendErr)
 
-    case 'get:specs':
-      return openProject.getSpecChanges({
-        onChange: send,
-        onError: sendErr,
-      })
-
     case 'request:access':
       return openProject.requestAccess(arg)
       .then(send)

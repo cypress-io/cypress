@@ -28,7 +28,6 @@ const register = (eventName, isPromiseApi = true) => {
   }
 }
 
-register('get:specs', false)
 register('get:user:editor')
 register('set:user:editor')
 register('launch:browser', false)
