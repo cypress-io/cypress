@@ -8,8 +8,6 @@ const logs = require('./logs')
 const errors = require('../errors')
 const ProjectStatic = require('../project_static')
 
-const savedState = require('../saved_state')
-
 import { openProject } from '../open_project'
 import type { LaunchArgs } from '@packages/types'
 import type { EventEmitter } from 'events'
@@ -193,21 +191,22 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       return
 
     case 'has:opened:cypress':
-      return savedState.create()
-      .then(async (state) => {
-        const currentState = await state.get()
+      // return savedState.create()
+      // .then(async (state) => {
+      //   const currentState = await state.get()
 
-        // we check if there is any state at all so users existing before
-        // we added firstOpenedCypress are not marked as new
-        const hasOpenedCypress = !!Object.keys(currentState).length
+      //   // we check if there is any state at all so users existing before
+      //   // we added firstOpenedCypress are not marked as new
+      //   const hasOpenedCypress = !!Object.keys(currentState).length
 
-        if (!currentState.firstOpenedCypress) {
-          await state.set('firstOpenedCypress', Date.now())
-        }
+      //   if (!currentState.firstOpenedCypress) {
+      //     await state.set('firstOpenedCypress', Date.now())
+      //   }
 
-        return hasOpenedCypress
-      })
-      .then(send)
+      //   return hasOpenedCypress
+      // })
+      // .then(send)
+      return
 
     case 'remove:scaffolded:files':
       return openProject.getProject()
