@@ -28,7 +28,6 @@ const register = (eventName, isPromiseApi = true) => {
   }
 }
 
-register('new:project:banner:closed')
 register('has:opened:cypress')
 register('remove:scaffolded:files')
 register('set:clipboard:text')

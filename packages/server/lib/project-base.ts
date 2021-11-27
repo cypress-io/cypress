@@ -745,10 +745,9 @@ export class ProjectBase<TServer extends Server> extends EE {
     }
 
     const untouchedScaffold = await this.determineIsNewProject(theCfg)
-    const userHasSeenBanner = _.get(theCfg, 'state.showedNewProjectBanner', false)
 
-    debugScaffold(`untouched scaffold ${untouchedScaffold} banner closed ${userHasSeenBanner}`)
-    theCfg.isNewProject = untouchedScaffold && !userHasSeenBanner
+    debugScaffold(`untouched scaffold ${untouchedScaffold} banner closed`)
+    theCfg.isNewProject = untouchedScaffold
 
     const cfgWithSaved = await this._setSavedState(theCfg)
 

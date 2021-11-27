@@ -192,11 +192,6 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       // .catch(sendErr)
       return
 
-    case 'new:project:banner:closed':
-      return openProject.getProject()
-      ?.saveState({ showedNewProjectBanner: true })
-      .then(sendNull)
-
     case 'has:opened:cypress':
       return savedState.create()
       .then(async (state) => {

@@ -183,30 +183,6 @@ describe('lib/project-base', () => {
       })
     })
 
-    it('sets cfg.isNewProject to false when state.showedNewProjectBanner is true', function () {
-      this.project.__setOptions({ foo: 'bar' })
-
-      return savedState.create(this.todosPath)
-      .then((state) => {
-        sinon.stub(state, 'get').resolves({ showedNewProjectBanner: true })
-
-        return this.project.initializeConfig()
-        .then((cfg) => {
-          expect(cfg).to.deep.eq({
-            integrationFolder,
-            browsers: [],
-            isNewProject: false,
-            baz: 'quux',
-            state: {
-              showedNewProjectBanner: true,
-            },
-          })
-
-          this.project._cfg = cfg
-        })
-      })
-    })
-
     it('does not set cfg.isNewProject when cfg.isTextTerminal', function () {
       const cfg = { isTextTerminal: true, browsers: [] }
 
