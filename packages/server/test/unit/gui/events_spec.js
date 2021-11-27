@@ -352,7 +352,8 @@ describe('lib/gui/events', () => {
       })
     })
 
-    describe('open:project', () => {
+    // NOTE: Skipped because we want to take a look and make sure we have the same functionality in v10
+    describe.skip('open:project', () => {
       function busStub () {
         return {
           on: sinon.stub(),

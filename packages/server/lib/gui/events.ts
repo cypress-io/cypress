@@ -1,11 +1,8 @@
 /* eslint-disable no-case-declarations */
 const _ = require('lodash')
-const path = require('path')
 const ipc = require('electron').ipcMain
 const { clipboard } = require('electron')
 const debug = require('debug')('cypress:server:events')
-const pluralize = require('pluralize')
-const stripAnsi = require('strip-ansi')
 
 const dialog = require('./dialog')
 const logs = require('./logs')
@@ -16,8 +13,6 @@ const Updater = require('../updater')
 const ProjectStatic = require('../project_static')
 
 const ensureUrl = require('../util/ensure-url')
-const chromePolicyCheck = require('../util/chrome_policy_check')
-const browsers = require('../browsers')
 const konfig = require('../konfig')
 const savedState = require('../saved_state')
 
@@ -182,71 +177,72 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       .catch(sendErr)
 
     case 'open:project':
-      debug('open:project')
+      // debug('open:project')
 
-      const onSettingsChanged = () => {
-        return bus.emit('config:changed')
-      }
+      // const onSettingsChanged = () => {
+      //   return bus.emit('config:changed')
+      // }
 
-      const onSpecChanged = (spec) => {
-        return bus.emit('spec:changed', spec)
-      }
+      // const onSpecChanged = (spec) => {
+      //   return bus.emit('spec:changed', spec)
+      // }
 
-      const onFocusTests = function () {
-        if (_.isFunction(options.onFocusTests)) {
-          options.onFocusTests()
-        }
+      // const onFocusTests = function () {
+      //   if (_.isFunction(options.onFocusTests)) {
+      //     options.onFocusTests()
+      //   }
 
-        return bus.emit('focus:tests')
-      }
+      //   return bus.emit('focus:tests')
+      // }
 
-      const onError = (err) => {
-        return bus.emit('project:error', errors.clone(err, { html: true }))
-      }
+      // const onError = (err) => {
+      //   return bus.emit('project:error', errors.clone(err, { html: true }))
+      // }
 
-      const onWarning = function (warning) {
-        warning.message = stripAnsi(warning.message)
+      // const onWarning = function (warning) {
+      //   warning.message = stripAnsi(warning.message)
 
-        return bus.emit('project:warning', errors.clone(warning, { html: true }))
-      }
+      //   return bus.emit('project:warning', errors.clone(warning, { html: true }))
+      // }
 
-      return browsers.getAllBrowsersWith(options.browser)
-      .then((browsers = []) => {
-        debug('setting found %s on the config', pluralize('browser', browsers.length, true))
-        options.config = _.assign(options.config, { browsers })
-      }).then(() => {
-        chromePolicyCheck.run((err) => {
-          return options.config.browsers.forEach((browser) => {
-            if (browser.family === 'chromium') {
-              browser.warning = errors.getMsgByType('BAD_POLICY_WARNING_TOOLTIP')
-            }
-          })
-        })
+      // return browsers.getAllBrowsersWith(options.browser)
+      // .then((browsers = []) => {
+      //   debug('setting found %s on the config', pluralize('browser', browsers.length, true))
+      //   options.config = _.assign(options.config, { browsers })
+      // }).then(() => {
+      //   chromePolicyCheck.run((err) => {
+      //     return options.config.browsers.forEach((browser) => {
+      //       if (browser.family === 'chromium') {
+      //         browser.warning = errors.getMsgByType('BAD_POLICY_WARNING_TOOLTIP')
+      //       }
+      //     })
+      //   })
 
-        return openProject.create(arg, options, {
-          onFocusTests,
-          onSpecChanged,
-          onSettingsChanged,
-          onError,
-          onWarning,
-        })
-      }).call('getConfig')
-      .then((config) => {
-        if (config.configFile && path.isAbsolute(config.configFile)) {
-          config.configFile = path.relative(arg, config.configFile)
-        }
+      //   return openProject.create(arg, options, {
+      //     onFocusTests,
+      //     onSpecChanged,
+      //     onSettingsChanged,
+      //     onError,
+      //     onWarning,
+      //   })
+      // }).call('getConfig')
+      // .then((config) => {
+      //   if (config.configFile && path.isAbsolute(config.configFile)) {
+      //     config.configFile = path.relative(arg, config.configFile)
+      //   }
 
-        // those two values make no sense to display in
-        // the GUI
-        if (config.resolved) {
-          config.resolved.configFile = undefined
-          config.resolved.testingType = undefined
-        }
+      //   // those two values make no sense to display in
+      //   // the GUI
+      //   if (config.resolved) {
+      //     config.resolved.configFile = undefined
+      //     config.resolved.testingType = undefined
+      //   }
 
-        return config
-      })
-      .then(send)
-      .catch(sendErr)
+      //   return config
+      // })
+      // .then(send)
+      // .catch(sendErr)
+      return
 
     case 'setup:dashboard:project':
       return ProjectStatic.createCiProject(arg, arg.projectRoot)
