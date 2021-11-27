@@ -20,7 +20,6 @@ const ensureUrl = require('../util/ensure-url')
 const chromePolicyCheck = require('../util/chrome_policy_check')
 const browsers = require('../browsers')
 const konfig = require('../konfig')
-const fileOpener = require('../util/file-opener')
 const savedState = require('../saved_state')
 
 import { openProject } from '../open_project'
@@ -146,9 +145,6 @@ const handleEvent = function (options, bus, event, id, type, arg) {
 
     case 'window:close':
       return options.getWindowByWebContentsFn(event.sender).destroy()
-
-    case 'open:file':
-      return fileOpener.openFile(arg)
 
     case 'open:finder':
       return open.opn(arg)
