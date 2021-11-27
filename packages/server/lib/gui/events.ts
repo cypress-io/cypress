@@ -12,7 +12,6 @@ const errors = require('../errors')
 const Updater = require('../updater')
 const ProjectStatic = require('../project_static')
 
-const ensureUrl = require('../util/ensure-url')
 const savedState = require('../saved_state')
 
 import { openProject } from '../open_project'
@@ -293,15 +292,17 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       .then(sendNull)
 
     case 'ping:baseUrl':
-      const baseUrl = arg
+      // NOTE: Keeping this code around to ensure we keep this for v10
+      // const baseUrl = arg
 
-      return ensureUrl.isListening(baseUrl)
-      .then(send)
-      .catch((err) => {
-        const warning = errors.get('CANNOT_CONNECT_BASE_URL_WARNING', baseUrl)
+      // return ensureUrl.isListening(baseUrl)
+      // .then(send)
+      // .catch((err) => {
+      //   const warning = errors.get('CANNOT_CONNECT_BASE_URL_WARNING', baseUrl)
 
-        return sendErr(warning)
-      })
+      //   return sendErr(warning)
+      // })
+      return
 
     case 'set:clipboard:text':
       clipboard.writeText(arg)
