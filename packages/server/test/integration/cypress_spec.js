@@ -1792,7 +1792,8 @@ describe('lib/cypress', () => {
       })
     })
 
-    it('sends warning when baseUrl cannot be verified', function () {
+    // NOTE: skipped because we want to ensure this is captured in v10
+    it.skip('sends warning when baseUrl cannot be verified', function () {
       const bus = new EE()
       const event = { sender: { send: sinon.stub() } }
       const warning = { message: 'Blah blah baseUrl blah blah' }

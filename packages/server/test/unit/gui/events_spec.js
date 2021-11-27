@@ -354,13 +354,6 @@ describe('lib/gui/events', () => {
 
     // NOTE: Skipped because we want to take a look and make sure we have the same functionality in v10
     describe.skip('open:project', () => {
-      function busStub () {
-        return {
-          on: sinon.stub(),
-          removeAllListeners: sinon.stub(),
-        }
-      }
-
       beforeEach(function () {
         sinon.stub(extension, 'setHostAndPath').resolves()
         sinon.stub(browsers, 'getAllBrowsersWith')
@@ -394,17 +387,6 @@ describe('lib/gui/events', () => {
         return this.handleEvent('open:project', '/_test-output/path/to/project-e2e')
         .then((assert) => {
           return assert.sendErrCalledWith(err)
-        })
-      })
-
-      it('sends \'project:warning\' onWarning', function () {
-        const bus = busStub()
-
-        return this.handleEvent('open:project', '/_test-output/path/to/project-e2e')
-        .then(() => {
-          return this.handleEvent('on:project:warning', '', bus)
-        }).then(() => {
-          expect(bus.on).to.have.been.calledWith('project:warning')
         })
       })
 
