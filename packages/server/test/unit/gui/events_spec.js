@@ -12,7 +12,6 @@ const errors = require(`${root}../lib/errors`)
 const browsers = require(`${root}../lib/browsers`)
 const { openProject } = require('../../../lib/open_project')
 const events = require(`${root}../lib/gui/events`)
-const files = require(`${root}../lib/gui/files`)
 const savedState = require(`${root}../lib/saved_state`)
 
 describe('lib/gui/events', () => {
@@ -87,41 +86,6 @@ describe('lib/gui/events', () => {
     it('throws', function () {
       return this.handleEvent('no:such:event').catch((err) => {
         expect(err.message).to.include('No ipc event registered for: \'no:such:event\'')
-      })
-    })
-  })
-
-  context('dialog', () => {
-    describe('show:new:spec:dialog', () => {
-      it('calls files.showDialogAndCreateSpec and returns', function () {
-        const response = {
-          path: '/path/to/project/cypress/integration/my_new_spec.js',
-          specs: {
-            integration: [
-              {
-                name: 'app_spec.js',
-                absolute: '/path/to/project/cypress/integration/app_spec.js',
-                relative: 'cypress/integration/app_spec.js',
-              },
-            ],
-          },
-        }
-
-        sinon.stub(files, 'showDialogAndCreateSpec').resolves(response)
-
-        return this.handleEvent('show:new:spec:dialog').then((assert) => {
-          return assert.sendCalledWith(response)
-        })
-      })
-
-      it('catches errors', function () {
-        const err = new Error('foo')
-
-        sinon.stub(files, 'showDialogAndCreateSpec').rejects(err)
-
-        return this.handleEvent('show:new:spec:dialog').then((assert) => {
-          return assert.sendErrCalledWith(err)
-        })
       })
     })
   })

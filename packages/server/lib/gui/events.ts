@@ -6,7 +6,6 @@ const debug = require('debug')('cypress:server:events')
 
 const logs = require('./logs')
 const Windows = require('./windows')
-const files = require('./files')
 const errors = require('../errors')
 const Updater = require('../updater')
 const ProjectStatic = require('../project_static')
@@ -70,11 +69,6 @@ const handleEvent = function (options, bus, event, id, type, arg) {
   switch (type) {
     case 'on:app:event':
       return onBus('app:events')
-
-    case 'show:new:spec:dialog':
-      return files.showDialogAndCreateSpec()
-      .then(send)
-      .catch(sendErr)
 
     case 'launch:browser':
       // TIM: Commented out for reference w/ the new implementation
