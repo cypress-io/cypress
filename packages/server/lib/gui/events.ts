@@ -27,7 +27,6 @@ const fileOpener = require('../util/file-opener')
 const api = require('../api')
 const savedState = require('../saved_state')
 
-import auth from './auth'
 import user from '../user'
 import { openProject } from '../open_project'
 import type { LaunchArgs } from '@packages/types'
@@ -102,9 +101,6 @@ const handleEvent = function (options, bus, event, id, type, arg) {
     case 'on:project:error':
       return onBus('project:error')
 
-    case 'on:auth:message':
-      return onBus('auth:message')
-
     case 'on:project:warning':
       return onBus('project:warning')
 
@@ -174,15 +170,6 @@ const handleEvent = function (options, bus, event, id, type, arg) {
 
         return sendErr(err)
       })
-
-    case 'begin:auth':
-      const onMessage = (msg) => {
-        return bus.emit('auth:message', msg)
-      }
-
-      return auth.start(onMessage, arg)
-      .then(send)
-      .catch(sendErr)
 
     case 'window:open':
       return options.windowOpenFn(options.projectRoot, arg)

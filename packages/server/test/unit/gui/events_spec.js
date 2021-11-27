@@ -16,7 +16,6 @@ const errors = require(`${root}../lib/errors`)
 const browsers = require(`${root}../lib/browsers`)
 const { openProject } = require('../../../lib/open_project')
 const open = require(`${root}../lib/util/open`)
-const auth = require(`${root}../lib/gui/auth`)
 const logs = require(`${root}../lib/gui/logs`)
 const events = require(`${root}../lib/gui/events`)
 const dialog = require(`${root}../lib/gui/dialog`)
@@ -158,26 +157,6 @@ describe('lib/gui/events', () => {
   })
 
   context('user', () => {
-    describe('begin:auth', () => {
-      it('calls auth.start and returns user', function () {
-        sinon.stub(auth, 'start').resolves({ foo: 'bar' })
-
-        return this.handleEvent('begin:auth').then((assert) => {
-          return assert.sendCalledWith({ foo: 'bar' })
-        })
-      })
-
-      it('catches errors', function () {
-        const err = new Error('foo')
-
-        sinon.stub(auth, 'start').rejects(err)
-
-        return this.handleEvent('begin:auth').then((assert) => {
-          return assert.sendErrCalledWith(err)
-        })
-      })
-    })
-
     describe('log:out', () => {
       it('calls user.logOut and returns user', function () {
         sinon.stub(user, 'logOut').resolves({ foo: 'bar' })
