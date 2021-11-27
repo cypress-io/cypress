@@ -397,17 +397,6 @@ describe('lib/gui/events', () => {
         })
       })
 
-      it('sends \'spec:changed\' onSpecChanged', function () {
-        const bus = busStub()
-
-        return this.handleEvent('open:project', '/_test-output/path/to/project-e2e')
-        .then(() => {
-          return this.handleEvent('on:spec:changed', '', bus)
-        }).then((assert) => {
-          expect(bus.on).to.have.been.calledWith('spec:changed')
-        })
-      })
-
       it('sends \'project:warning\' onWarning', function () {
         const bus = busStub()
 
