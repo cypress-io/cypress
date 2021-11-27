@@ -833,65 +833,6 @@ describe('lib/api', () => {
     })
   })
 
-  context('.requestAccess', () => {
-    it('POST /projects/:id/membership_requests + returns response', () => {
-      nock(API_BASEURL)
-      .matchHeader('authorization', 'Bearer auth-token-123')
-      .matchHeader('accept-encoding', /gzip/)
-      .post('/projects/project-id-123/membership_requests')
-      .reply(200)
-
-      return api.requestAccess('project-id-123', 'auth-token-123')
-      .then((ret) => {
-        expect(ret).to.be.undefined
-      })
-    })
-
-    it('POST /projects/:id/membership_requests failure formatting', () => {
-      nock(API_BASEURL)
-      .matchHeader('authorization', 'Bearer auth-token-123')
-      .matchHeader('accept-encoding', /gzip/)
-      .post('/projects/project-id-123/membership_requests')
-      .reply(422, {
-        errors: {
-          access: ['already requested'],
-        },
-      })
-
-      return api.requestAccess('project-id-123', 'auth-token-123')
-      .then(() => {
-        throw new Error('should have thrown here')
-      }).catch((err) => {
-        expect(err.message).to.eq(`\
-422
-
-{
-  "errors": {
-    "access": [
-      "already requested"
-    ]
-  }
-}\
-`)
-      })
-    })
-
-    it('tags errors', () => {
-      nock(API_BASEURL)
-      .matchHeader('authorization', 'Bearer auth-token-123')
-      .matchHeader('accept-encoding', /gzip/)
-      .post('/projects/project-id-123/membership_requests')
-      .reply(500, {})
-
-      return api.requestAccess('project-id-123', 'auth-token-123')
-      .then(() => {
-        throw new Error('should have thrown here')
-      }).catch((err) => {
-        expect(err.isApiError).to.be.true
-      })
-    })
-  })
-
   context('.createCrashReport', () => {
     beforeEach(function () {
       this.setup = (body, authToken, delay = 0) => {
