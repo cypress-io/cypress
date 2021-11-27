@@ -132,11 +132,6 @@ const handleEvent = function (options, bus, event, id, type, arg) {
     case 'external:open':
       return openExternal(arg)
 
-    case 'close:browser':
-      return openProject.closeBrowser()
-      .then(send)
-      .catch(sendErr)
-
     case 'launch:browser':
       // is there a way to lint the arguments received?
       debug('launching browser for \'%s\' spec: %o', arg.specType, arg.spec)

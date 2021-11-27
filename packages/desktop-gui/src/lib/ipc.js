@@ -28,7 +28,6 @@ const register = (eventName, isPromiseApi = true) => {
   }
 }
 
-register('close:browser')
 register('close:project')
 register('external:open')
 register('get:current:user')
