@@ -134,7 +134,6 @@
     "@ffprobe-installer/ffprobe": "1.1.0",
     "@packages/config": "0.0.0-development",
     "@packages/data-context": "0.0.0-development",
-    "@packages/desktop-gui": "0.0.0-development",
     "@packages/electron": "0.0.0-development",
     "@packages/example": "0.0.0-development",
     "@packages/extension": "0.0.0-development",
