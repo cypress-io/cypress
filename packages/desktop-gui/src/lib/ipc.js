@@ -28,7 +28,6 @@ const register = (eventName, isPromiseApi = true) => {
   }
 }
 
-register('remove:scaffolded:files')
 register('set:clipboard:text')
 register('set:prompt:shown')
 

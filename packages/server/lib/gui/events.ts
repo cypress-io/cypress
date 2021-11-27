@@ -208,11 +208,6 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       // .then(send)
       return
 
-    case 'remove:scaffolded:files':
-      return openProject.getProject()
-      ?.removeScaffoldedFiles()
-      .then(sendNull)
-
     case 'set:prompt:shown':
       return openProject.getProject()
       ?.saveState({
