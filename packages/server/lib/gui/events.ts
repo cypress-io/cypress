@@ -116,38 +116,40 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       .catch(sendErr)
 
     case 'launch:browser':
-      // is there a way to lint the arguments received?
-      debug('launching browser for \'%s\' spec: %o', arg.specType, arg.spec)
-      debug('full list of options %o', arg)
+      // TIM: Commented out for reference w/ the new implementation
+      // // is there a way to lint the arguments received?
+      // debug('launching browser for \'%s\' spec: %o', arg.specType, arg.spec)
+      // debug('full list of options %o', arg)
 
-      // the "arg" should have objects for
-      //   - browser
-      //   - spec (with fields)
-      //       name, absolute, relative
-      //   - specType: "integration" | "component"
-      //   - specFilter (optional): the string user searched for
-      const fullSpec = _.merge({}, arg.spec, {
-        specType: arg.specType,
-        specFilter: arg.specFilter,
-      })
+      // // the "arg" should have objects for
+      // //   - browser
+      // //   - spec (with fields)
+      // //       name, absolute, relative
+      // //   - specType: "integration" | "component"
+      // //   - specFilter (optional): the string user searched for
+      // const fullSpec = _.merge({}, arg.spec, {
+      //   specType: arg.specType,
+      //   specFilter: arg.specFilter,
+      // })
 
-      return openProject.launch(arg.browser, fullSpec, {
-        // TODO: Tim see why this "projectRoot" is passed along
-        projectRoot: options.projectRoot,
-        onBrowserOpen () {
-          return send({ browserOpened: true })
-        },
-        onBrowserClose () {
-          return send({ browserClosed: true })
-        },
-      })
-      .catch((err) => {
-        if (err.title == null) {
-          err.title = 'Error launching browser'
-        }
+      // return openProject.launch(arg.browser, fullSpec, {
+      //   // TODO: Tim see why this "projectRoot" is passed along
+      //   projectRoot: options.projectRoot,
+      //   onBrowserOpen () {
+      //     return send({ browserOpened: true })
+      //   },
+      //   onBrowserClose () {
+      //     return send({ browserClosed: true })
+      //   },
+      // })
+      // .catch((err) => {
+      //   if (err.title == null) {
+      //     err.title = 'Error launching browser'
+      //   }
 
-        return sendErr(err)
-      })
+      //   return sendErr(err)
+      // })
+      return
 
     case 'window:open':
       return options.windowOpenFn(options.projectRoot, arg)

@@ -4,7 +4,6 @@ const EE = require('events')
 const extension = require('@packages/extension')
 const electron = require('electron')
 const Promise = require('bluebird')
-const debug = require('debug')('test')
 const chromePolicyCheck = require(`${root}../lib/util/chrome_policy_check`)
 const cache = require(`${root}../lib/cache`)
 const logger = require(`${root}../lib/logger`)
@@ -732,91 +731,6 @@ describe('lib/gui/events', () => {
           expect(err.message).to.equal('ECONNREFUSED 127.0.0.1:1234')
 
           expect(err.apiUrl).to.equal(konfig('api_url'))
-        })
-      })
-    })
-
-    describe('launch:browser', () => {
-      it('launches browser via openProject', function () {
-        sinon.stub(openProject, 'launch').callsFake((browser, spec, opts) => {
-          debug('spec was %o', spec)
-          expect(browser, 'browser').to.eq('foo')
-          expect(spec, 'spec').to.deep.equal({
-            name: 'bar',
-            absolute: '/path/to/bar',
-            relative: 'to/bar',
-            specType: 'integration',
-            specFilter: undefined,
-          })
-
-          opts.onBrowserOpen()
-          opts.onBrowserClose()
-
-          return Promise.resolve()
-        })
-
-        const spec = {
-          name: 'bar',
-          absolute: '/path/to/bar',
-          relative: 'to/bar',
-        }
-        const arg = {
-          browser: 'foo',
-          spec,
-          specType: 'integration',
-        }
-
-        return this.handleEvent('launch:browser', arg).then(() => {
-          expect(this.send.getCall(0).args[1].data).to.include({ browserOpened: true })
-
-          expect(this.send.getCall(1).args[1].data).to.include({ browserClosed: true })
-        })
-      })
-
-      it('passes specFilter', function () {
-        sinon.stub(openProject, 'launch').callsFake((browser, spec, opts) => {
-          debug('spec was %o', spec)
-          expect(browser, 'browser').to.eq('foo')
-          expect(spec, 'spec').to.deep.equal({
-            name: 'bar',
-            absolute: '/path/to/bar',
-            relative: 'to/bar',
-            specType: 'integration',
-            specFilter: 'network',
-          })
-
-          opts.onBrowserOpen()
-          opts.onBrowserClose()
-
-          return Promise.resolve()
-        })
-
-        const spec = {
-          name: 'bar',
-          absolute: '/path/to/bar',
-          relative: 'to/bar',
-        }
-        const arg = {
-          browser: 'foo',
-          spec,
-          specType: 'integration',
-          specFilter: 'network',
-        }
-
-        return this.handleEvent('launch:browser', arg).then(() => {
-          expect(this.send.getCall(0).args[1].data).to.include({ browserOpened: true })
-
-          expect(this.send.getCall(1).args[1].data).to.include({ browserClosed: true })
-        })
-      })
-
-      it('wraps error titles if not set', function () {
-        const err = new Error('foo')
-
-        sinon.stub(openProject, 'launch').rejects(err)
-
-        return this.handleEvent('launch:browser', {}).then(() => {
-          expect(this.send.getCall(0).args[1].__error).to.include({ message: 'foo', title: 'Error launching browser' })
         })
       })
     })

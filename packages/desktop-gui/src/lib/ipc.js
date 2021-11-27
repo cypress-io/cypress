@@ -28,7 +28,6 @@ const register = (eventName, isPromiseApi = true) => {
   }
 }
 
-register('launch:browser', false)
 register('log:out')
 register('on:focus:tests', false)
 register('on:menu:clicked', false)
