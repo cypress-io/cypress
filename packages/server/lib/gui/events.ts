@@ -1,7 +1,6 @@
 /* eslint-disable no-case-declarations */
 const _ = require('lodash')
 const ipc = require('electron').ipcMain
-const { clipboard } = require('electron')
 const debug = require('debug')('cypress:server:events')
 
 const logs = require('./logs')
@@ -231,10 +230,11 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       // })
       return
 
-    case 'set:clipboard:text':
-      clipboard.writeText(arg)
+      // TODO: setClipboardText mutation
+      // case 'set:clipboard:text':
+      //   clipboard.writeText(arg)
 
-      return sendNull()
+      //   return sendNull()
 
     default:
       throw new Error(`No ipc event registered for: '${type}'`)
