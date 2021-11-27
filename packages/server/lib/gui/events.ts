@@ -4,7 +4,6 @@ const ipc = require('electron').ipcMain
 const { clipboard } = require('electron')
 const debug = require('debug')('cypress:server:events')
 
-const dialog = require('./dialog')
 const logs = require('./logs')
 const Windows = require('./windows')
 const files = require('./files')
@@ -71,11 +70,6 @@ const handleEvent = function (options, bus, event, id, type, arg) {
   switch (type) {
     case 'on:app:event':
       return onBus('app:events')
-
-    case 'show:directory:dialog':
-      return dialog.show()
-      .then(send)
-      .catch(sendErr)
 
     case 'show:new:spec:dialog':
       return files.showDialogAndCreateSpec()

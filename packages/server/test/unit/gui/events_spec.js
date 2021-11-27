@@ -12,7 +12,6 @@ const errors = require(`${root}../lib/errors`)
 const browsers = require(`${root}../lib/browsers`)
 const { openProject } = require('../../../lib/open_project')
 const events = require(`${root}../lib/gui/events`)
-const dialog = require(`${root}../lib/gui/dialog`)
 const files = require(`${root}../lib/gui/files`)
 const savedState = require(`${root}../lib/saved_state`)
 
@@ -93,26 +92,6 @@ describe('lib/gui/events', () => {
   })
 
   context('dialog', () => {
-    describe('show:directory:dialog', () => {
-      it('calls dialog.show and returns', function () {
-        sinon.stub(dialog, 'show').resolves({ foo: 'bar' })
-
-        return this.handleEvent('show:directory:dialog').then((assert) => {
-          return assert.sendCalledWith({ foo: 'bar' })
-        })
-      })
-
-      it('catches errors', function () {
-        const err = new Error('foo')
-
-        sinon.stub(dialog, 'show').rejects(err)
-
-        return this.handleEvent('show:directory:dialog').then((assert) => {
-          return assert.sendErrCalledWith(err)
-        })
-      })
-    })
-
     describe('show:new:spec:dialog', () => {
       it('calls files.showDialogAndCreateSpec and returns', function () {
         const response = {
