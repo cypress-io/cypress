@@ -16,7 +16,6 @@ const errors = require(`${root}../lib/errors`)
 const browsers = require(`${root}../lib/browsers`)
 const { openProject } = require('../../../lib/open_project')
 const open = require(`${root}../lib/util/open`)
-const logs = require(`${root}../lib/gui/logs`)
 const events = require(`${root}../lib/gui/events`)
 const dialog = require(`${root}../lib/gui/dialog`)
 const files = require(`${root}../lib/gui/files`)
@@ -325,55 +324,6 @@ describe('lib/gui/events', () => {
           expect(logger.off).to.be.calledOnce
 
           return assert.sendCalledWith(null)
-        })
-      })
-    })
-  })
-
-  context('gui errors', () => {
-    describe('gui:error', () => {
-      it('calls logs.error with arg', function () {
-        const err = new Error('foo')
-
-        sinon.stub(logs, 'error').withArgs(err).resolves()
-
-        return this.handleEvent('gui:error', err).then((assert) => {
-          return assert.sendCalledWith(null)
-        })
-      })
-
-      it('calls logger.createException with error', function () {
-        const err = new Error('foo')
-
-        sinon.stub(logger, 'createException').withArgs(err).resolves()
-
-        return this.handleEvent('gui:error', err).then((assert) => {
-          expect(logger.createException).to.be.calledOnce
-
-          return assert.sendCalledWith(null)
-        })
-      })
-
-      it('swallows logger.createException errors', function () {
-        const err = new Error('foo')
-
-        sinon.stub(logger, 'createException').withArgs(err).rejects(new Error('err'))
-
-        return this.handleEvent('gui:error', err).then((assert) => {
-          expect(logger.createException).to.be.calledOnce
-
-          return assert.sendCalledWith(null)
-        })
-      })
-
-      it('catches errors', function () {
-        const err = new Error('foo')
-        const err2 = new Error('bar')
-
-        sinon.stub(logs, 'error').withArgs(err).rejects(err2)
-
-        return this.handleEvent('gui:error', err).then((assert) => {
-          return assert.sendErrCalledWith(err2)
         })
       })
     })

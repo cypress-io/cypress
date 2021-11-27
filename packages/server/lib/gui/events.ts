@@ -103,11 +103,6 @@ const handleEvent = function (options, bus, event, id, type, arg) {
     case 'on:project:warning':
       return onBus('project:warning')
 
-    case 'gui:error':
-      return logs.error(arg)
-      .then(sendNull)
-      .catch(sendErr)
-
     case 'show:directory:dialog':
       return dialog.show()
       .then(send)
