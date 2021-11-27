@@ -28,7 +28,6 @@ const register = (eventName, isPromiseApi = true) => {
   }
 }
 
-register('updater:run', false)
 register('window:open')
 register('window:close')
 register('new:project:banner:closed')
