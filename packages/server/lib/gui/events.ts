@@ -78,9 +78,6 @@ const handleEvent = function (options, bus, event, id, type, arg) {
   }
 
   switch (type) {
-    case 'on:menu:clicked':
-      return onBus('menu:item:clicked')
-
     case 'on:app:event':
       return onBus('app:events')
 
