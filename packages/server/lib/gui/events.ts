@@ -279,28 +279,6 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       .then(send)
       .catch(sendErr)
 
-    case 'get:user:editor':
-      return editors.getUserEditor(true)
-      .then((data) => {
-        // todo(lachlan): remove post 10.0
-        // just here to support an assumption in desktop-gui
-        // that there will be a "placeholder" empty editor
-        // where binary is null.
-        // moving forward, `binary` is non nullable (doesn't make sense).
-        data = {
-          ...data,
-          availableEditors: data.availableEditors.concat({
-            id: 'other',
-            name: 'Other',
-            binary: null,
-            isOther: true,
-          }),
-        }
-
-        return send(data)
-      })
-      .catch(sendErr)
-
     case 'set:user:editor':
       return editors.setUserEditor(arg)
       .then(send)
