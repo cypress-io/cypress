@@ -44,8 +44,6 @@ export class OpenProject {
     return this.openProject?.getConfig()
   }
 
-  requestAccess = this.tryToCall('requestAccess')
-
   getProject () {
     return this.openProject
   }

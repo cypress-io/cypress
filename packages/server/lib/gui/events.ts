@@ -240,20 +240,6 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       .then(send)
       .catch(sendErr)
 
-    case 'request:access':
-      return openProject.requestAccess(arg)
-      .then(send)
-      .catch((err) => {
-        err.type = _.get(err, 'statusCode') === 403 ?
-          'ALREADY_MEMBER'
-          : (_.get(err, 'statusCode') === 422) && /existing/.test(err.errors?.userId?.join('')) ?
-            'ALREADY_REQUESTED'
-            :
-            err.type || 'UNKNOWN'
-
-        return sendErr(err)
-      })
-
     case 'new:project:banner:closed':
       return openProject.getProject()
       ?.saveState({ showedNewProjectBanner: true })

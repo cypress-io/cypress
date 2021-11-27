@@ -11,7 +11,6 @@ import { allowed } from '@packages/config'
 import { ServerCt } from './server-ct'
 import { SocketCt } from './socket-ct'
 import { SocketE2E } from './socket-e2e'
-import api from './api'
 import { Automation } from './automation'
 import * as config from './config'
 import cwd from './cwd'
@@ -22,7 +21,6 @@ import savedState from './saved_state'
 import scaffold from './scaffold'
 import { ServerE2E } from './server-e2e'
 import system from './util/system'
-import user from './user'
 import { ensureProp } from './util/class-helpers'
 import { fs } from './util/fs'
 import * as settings from './util/settings'
@@ -882,12 +880,6 @@ export class ProjectBase<TServer extends Server> extends EE {
     } catch (err) {
       errors.throw('NO_PROJECT_FOUND_AT_PROJECT_ROOT', this.projectRoot)
     }
-  }
-
-  async requestAccess (projectId) {
-    const authToken = await user.ensureAuthToken()
-
-    return api.requestAccess(projectId, authToken)
   }
 
   // For testing

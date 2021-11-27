@@ -393,18 +393,6 @@ module.exports = {
     .catch(tagError)
   },
 
-  requestAccess (projectId, authToken) {
-    return rp.post({
-      url: apiRoutes.membershipRequests(projectId),
-      json: true,
-      auth: {
-        bearer: authToken,
-      },
-    })
-    .catch(RequestErrors.StatusCodeError, formatResponseBody)
-    .catch(tagError)
-  },
-
   clearCache () {
     responseCache = {}
   },

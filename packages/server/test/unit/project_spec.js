@@ -1037,26 +1037,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     })
   })
 
-  context('#requestAccess', () => {
-    beforeEach(function () {
-      this.project = new ProjectBase({ projectRoot: this.pristinePath, testingType: 'e2e' })
-      sinon.stub(user, 'ensureAuthToken').resolves('auth-token-123')
-      sinon.stub(api, 'requestAccess').resolves('response')
-    })
-
-    it('calls api.requestAccess with project id + auth token', function () {
-      return this.project.requestAccess('project-id-123').then(() => {
-        expect(api.requestAccess).to.be.calledWith('project-id-123', 'auth-token-123')
-      })
-    })
-
-    it('returns response', function () {
-      return this.project.requestAccess('project-id-123').then((response) => {
-        expect(response).to.equal('response')
-      })
-    })
-  })
-
   context('.getId', () => {
     it('returns project id', function () {
       return getId(this.todosPath).then((id) => {

@@ -55,7 +55,6 @@ const apiRoutes = makeRoutes(apiUrl, {
   projects: 'projects',
   project: 'projects/:id',
   exceptions: 'exceptions',
-  membershipRequests: 'projects/:id/membership_requests',
 })
 
 module.exports = {
