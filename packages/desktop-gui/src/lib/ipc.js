@@ -28,7 +28,6 @@ const register = (eventName, isPromiseApi = true) => {
   }
 }
 
-register('get:options')
 register('get:projects')
 register('get:project:statuses')
 register('get:project:status')

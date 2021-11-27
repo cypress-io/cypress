@@ -8,7 +8,6 @@ const pluralize = require('pluralize')
 const stripAnsi = require('strip-ansi')
 
 const dialog = require('./dialog')
-const pkg = require('./package')
 const logs = require('./logs')
 const Windows = require('./windows')
 const files = require('./files')
@@ -165,11 +164,6 @@ const handleEvent = function (options, bus, event, id, type, arg) {
 
     case 'open:finder':
       return open.opn(arg)
-      .then(send)
-      .catch(sendErr)
-
-    case 'get:options':
-      return pkg(options)
       .then(send)
       .catch(sendErr)
 
