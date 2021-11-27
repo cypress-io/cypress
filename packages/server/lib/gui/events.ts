@@ -20,7 +20,6 @@ const ensureUrl = require('../util/ensure-url')
 const chromePolicyCheck = require('../util/chrome_policy_check')
 const browsers = require('../browsers')
 const konfig = require('../konfig')
-const editors = require('../util/editors')
 const fileOpener = require('../util/file-opener')
 const savedState = require('../saved_state')
 
@@ -276,11 +275,6 @@ const handleEvent = function (options, bus, event, id, type, arg) {
 
     case 'set:project:id':
       return ProjectStatic.writeProjectId(arg)
-      .then(send)
-      .catch(sendErr)
-
-    case 'set:user:editor':
-      return editors.setUserEditor(arg)
       .then(send)
       .catch(sendErr)
 
