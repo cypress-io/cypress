@@ -2,12 +2,10 @@ require('../spec_helper')
 
 const mockedEnv = require('mocked-env')
 const path = require('path')
-const commitInfo = require('@cypress/commit-info')
 const chokidar = require('chokidar')
 const pkg = require('@packages/root')
 const Fixtures = require('@tooling/system-tests/lib/fixtures')
 const { sinon } = require('../spec_helper')
-const api = require(`${root}lib/api`)
 const user = require(`${root}lib/user`)
 const cache = require(`${root}lib/cache`)
 const config = require(`${root}lib/config`)
@@ -18,7 +16,6 @@ const {
   paths,
   add,
   getId,
-  createCiProject,
   writeProjectId,
 } = require(`${root}lib/project_static`)
 const ProjectUtils = require(`${root}lib/project_utils`)
@@ -997,42 +994,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         }).then((json) => {
           expect(json.PROJECTS).to.deep.eq([])
         })
-      })
-    })
-  })
-
-  // TODO: remove, createCiProject is no longer used in the new project / will be built separately
-  context.skip('#createCiProject', () => {
-    const projectRoot = '/_test-output/path/to/project-e2e'
-    const configFile = 'cypress.config.js'
-
-    beforeEach(function () {
-      this.project = new ProjectBase({ projectRoot, testingType: 'e2e' })
-      this.newProject = { id: 'project-id-123' }
-
-      sinon.stub(user, 'ensureAuthToken').resolves('auth-token-123')
-      sinon.stub(settings, 'writeOnly').resolves()
-      sinon.stub(commitInfo, 'getRemoteOrigin').resolves('remoteOrigin')
-      sinon.stub(api, 'createProject')
-      .withArgs({ foo: 'bar' }, 'remoteOrigin', 'auth-token-123')
-      .resolves(this.newProject)
-    })
-
-    it('calls api.createProject with user session', function () {
-      return createCiProject({ foo: 'bar', projectRoot }).then(() => {
-        expect(api.createProject).to.be.calledWith({ foo: 'bar' }, 'remoteOrigin', 'auth-token-123')
-      })
-    })
-
-    it('calls writeProjectId with id', function () {
-      return createCiProject({ foo: 'bar', projectRoot, configFile }).then(() => {
-        expect(settings.writeOnly).to.be.calledWith(projectRoot, { projectId: 'project-id-123' }, { configFile })
-      })
-    })
-
-    it('returns project id', function () {
-      return createCiProject({ foo: 'bar', projectRoot }).then((projectId) => {
-        expect(projectId).to.eql(this.newProject)
       })
     })
   })

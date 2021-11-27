@@ -441,30 +441,5 @@ describe('lib/gui/events', () => {
         })
       })
     })
-
-    describe('setup:dashboard:project', () => {
-      it('returns result of ProjectStatic.createCiProject', function () {
-        const arg = { projectRoot: '/project/root/', configFile: 'cypress.config.js' }
-        const stubCreateCiProject = sinon.stub(ProjectStatic, 'createCiProject').resolves()
-
-        return this.handleEvent('setup:dashboard:project', arg)
-        .then(() => {
-          expect(stubCreateCiProject).to.be.calledWith(arg)
-          expect(this.send.firstCall.args[0]).to.eq('response')
-          expect(this.send.firstCall.args[1].id).to.match(/setup:dashboard:project-/)
-        })
-      })
-
-      it('catches errors', function () {
-        const err = new Error('foo')
-
-        sinon.stub(ProjectStatic, 'createCiProject').rejects(err)
-
-        return this.handleEvent('setup:dashboard:project', { projectRoot: '/foo/bar' })
-        .then((assert) => {
-          return assert.sendErrCalledWith(err)
-        })
-      })
-    })
   })
 })
