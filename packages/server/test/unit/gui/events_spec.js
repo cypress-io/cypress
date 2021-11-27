@@ -434,17 +434,6 @@ describe('lib/gui/events', () => {
         })
       })
 
-      it('sends \'focus:tests\' onFocusTests', function () {
-        const bus = busStub()
-
-        return this.handleEvent('open:project', '/_test-output/path/to/project-e2e', bus)
-        .then(() => {
-          return this.handleEvent('on:focus:tests', '', bus)
-        }).then(() => {
-          expect(bus.on).to.have.been.calledWith('focus:tests')
-        })
-      })
-
       it('sends \'config:changed\' onSettingsChanged', function () {
         const bus = busStub()
 

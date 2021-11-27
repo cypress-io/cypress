@@ -28,7 +28,6 @@ const register = (eventName, isPromiseApi = true) => {
   }
 }
 
-register('on:focus:tests', false)
 register('on:menu:clicked', false)
 register('open:file')
 register('open:finder')
