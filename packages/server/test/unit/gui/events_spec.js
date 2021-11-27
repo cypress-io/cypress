@@ -7,7 +7,6 @@ const Promise = require('bluebird')
 const chromePolicyCheck = require(`${root}../lib/util/chrome_policy_check`)
 const logger = require(`${root}../lib/logger`)
 const ProjectBase = require(`${root}../lib/project-base`).ProjectBase
-const ProjectStatic = require(`${root}../lib/project_static`)
 const Updater = require(`${root}../lib/updater`)
 const errors = require(`${root}../lib/errors`)
 const browsers = require(`${root}../lib/browsers`)
@@ -424,20 +423,6 @@ describe('lib/gui/events', () => {
               },
             },
           )
-        })
-      })
-    })
-
-    describe('set:project:id', () => {
-      it('calls writeProjectId with projectRoot', function () {
-        const arg = { id: '1', projectRoot: '/project/root/', configFile: 'cypress.config.js' }
-        const stubWriteProjectId = sinon.stub(ProjectStatic, 'writeProjectId').resolves()
-
-        return this.handleEvent('set:project:id', arg)
-        .then(() => {
-          expect(stubWriteProjectId).to.be.calledWith(arg)
-          expect(this.send.firstCall.args[0]).to.eq('response')
-          expect(this.send.firstCall.args[1].id).to.match(/set:project:id-/)
         })
       })
     })

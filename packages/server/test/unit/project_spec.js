@@ -16,7 +16,6 @@ const {
   paths,
   add,
   getId,
-  writeProjectId,
 } = require(`${root}lib/project_static`)
 const ProjectUtils = require(`${root}lib/project_utils`)
 const { Automation } = require(`${root}lib/automation`)
@@ -917,30 +916,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         throw new Error('expected to fail, but did not')
       }).catch((err) => {
         expect(err.code).to.eq('EPERM')
-      })
-    })
-  })
-
-  // TODO: (tim) figure out what we want to do about project ID writing
-  context.skip('#writeProjectId', () => {
-    beforeEach(function () {
-      this.project = new ProjectBase({ projectRoot: '/_test-output/path/to/project-e2e', testingType: 'e2e' })
-
-      sinon.stub(settings, 'writeOnly')
-      .withArgs(this.project.projectRoot, { projectId: 'id-123' })
-      .resolves({ projectId: 'id-123' })
-    })
-
-    it('calls Settings.writeOnly with projectRoot and attrs', function () {
-      return writeProjectId({ id: 'id-123' }).then((id) => {
-        expect(id).to.eq('id-123')
-      })
-    })
-
-    // TODO: This
-    xit('sets generatedProjectIdTimestamp', function () {
-      return writeProjectId({ id: 'id-123' }).then(() => {
-        expect(this.project.generatedProjectIdTimestamp).to.be.a('date')
       })
     })
   })

@@ -230,11 +230,6 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       // .catch(sendErr)
       return
 
-    case 'set:project:id':
-      return ProjectStatic.writeProjectId(arg)
-      .then(send)
-      .catch(sendErr)
-
     case 'new:project:banner:closed':
       return openProject.getProject()
       ?.saveState({ showedNewProjectBanner: true })

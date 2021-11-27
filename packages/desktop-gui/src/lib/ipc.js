@@ -28,7 +28,6 @@ const register = (eventName, isPromiseApi = true) => {
   }
 }
 
-register('set:project:id')
 register('show:directory:dialog')
 register('show:new:spec:dialog')
 register('updater:check', false)
