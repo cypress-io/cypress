@@ -1,5 +1,4 @@
 const systemTests = require('../lib/system-tests').default
-const Fixtures = require('../lib/fixtures')
 
 describe('e2e issue 8111 iframe input focus', function () {
   systemTests.setup()
@@ -8,7 +7,7 @@ describe('e2e issue 8111 iframe input focus', function () {
     // this test is dependent on the browser being Chrome headed
     // and also having --auto-open-devtools-for-tabs plugins option
     // (which pulls focus from main browser window)
-    project: Fixtures.projectPath('issue-8111-iframe-input'),
+    project: 'issue-8111-iframe-input',
     spec: 'iframe_input_spec.js',
     browser: 'chrome',
     headed: true,

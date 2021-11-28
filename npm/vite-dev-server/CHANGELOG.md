@@ -1,3 +1,10 @@
+# [@cypress/vite-dev-server-v2.2.1](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v2.2.0...@cypress/vite-dev-server-v2.2.1) (2021-11-19)
+
+
+### Bug Fixes
+
+* compile npm packages for node 12 ([#18989](https://github.com/cypress-io/cypress/issues/18989)) ([30b3eb2](https://github.com/cypress-io/cypress/commit/30b3eb2376bc1ed69087ba96f60448687e8489e6))
+
 # [@cypress/vite-dev-server-v2.2.0](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v2.1.1...@cypress/vite-dev-server-v2.2.0) (2021-10-15)
 
 

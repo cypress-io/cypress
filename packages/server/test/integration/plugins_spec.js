@@ -8,9 +8,10 @@ let ctx
 
 describe('lib/plugins', () => {
   beforeEach(() => {
-    ctx = makeLegacyDataContext()
-    Fixtures.scaffold()
+    Fixtures.scaffoldProject('plugin-before-browser-launch-deprecation')
+    await Fixtures.scaffoldCommonNodeModules()
 
+    ctx = makeLegacyDataContext()
     ctx.actions.project.setActiveProjectForTestSetup(Fixtures.projectPath('plugin-before-browser-launch-deprecation'))
   })
 
