@@ -9,7 +9,7 @@ interface ResolvedConfigOption {
   /**
    * Can be mutated with Cypress.config() or test-specific configuration overrides
    */
-  isWriteable?: boolean
+  canUpdateDuringTestTime?: boolean
 }
 
 interface RuntimeConfigOption {
@@ -76,17 +76,17 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     name: 'animationDistanceThreshold',
     defaultValue: 5,
     validation: validate.isNumber,
-    isWriteable: true,
+    canUpdateDuringTestTime: true,
   }, {
     name: 'baseUrl',
     defaultValue: null,
     validation: validate.isFullyQualifiedUrl,
-    isWriteable: true,
+    canUpdateDuringTestTime: true,
   }, {
     name: 'blockHosts',
     defaultValue: null,
     validation: validate.isStringOrArrayOfStrings,
-    isWriteable: true,
+    canUpdateDuringTestTime: true,
   }, {
     name: 'chromeWebSecurity',
     defaultValue: true,
@@ -109,7 +109,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     name: 'defaultCommandTimeout',
     defaultValue: 4000,
     validation: validate.isNumber,
-    isWriteable: true,
+    canUpdateDuringTestTime: true,
   }, {
     name: 'downloadsFolder',
     defaultValue: 'cypress/downloads',
@@ -124,12 +124,12 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     name: 'env',
     defaultValue: {},
     validation: validate.isPlainObject,
-    isWriteable: true,
+    canUpdateDuringTestTime: true,
   }, {
     name: 'execTimeout',
     defaultValue: 60000,
     validation: validate.isNumber,
-    isWriteable: true,
+    canUpdateDuringTestTime: true,
   },
   {
     name: 'exit',
@@ -151,7 +151,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     defaultValue: false,
     validation: validate.isBoolean,
     isExperimental: true,
-    isWriteable: true,
+    canUpdateDuringTestTime: true,
   }, {
     name: 'experimentalSourceRewriting',
     defaultValue: false,
@@ -180,7 +180,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     name: 'includeShadowDom',
     defaultValue: false,
     validation: validate.isBoolean,
-    isWriteable: true,
+    canUpdateDuringTestTime: true,
   }, {
     name: 'integrationFolder',
     defaultValue: 'cypress/integration',
@@ -188,10 +188,15 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     isFolder: true,
   },
   {
+    name: 'isInteractive',
+    defaultValue: true,
+    validation: validate.isBoolean,
+  },
+  {
     name: 'keystrokeDelay',
     defaultValue: 0,
     validation: validate.isNumberOrFalse,
-    isWriteable: true,
+    canUpdateDuringTestTime: true,
   },
   {
     name: 'modifyObstructiveCode',
@@ -204,12 +209,12 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     name: 'numTestsKeptInMemory',
     defaultValue: 50,
     validation: validate.isNumber,
-    isWriteable: true,
+    canUpdateDuringTestTime: true,
   }, {
     name: 'pageLoadTimeout',
     defaultValue: 60000,
     validation: validate.isNumber,
-    isWriteable: true,
+    canUpdateDuringTestTime: true,
   }, {
     name: 'pluginsFile',
     defaultValue: 'cypress/plugins',
@@ -227,7 +232,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     name: 'redirectionLimit',
     defaultValue: 20,
     validation: validate.isNumber,
-    isWriteable: true,
+    canUpdateDuringTestTime: true,
   }, {
     name: 'reporter',
     defaultValue: 'spec',
@@ -240,7 +245,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     name: 'requestTimeout',
     defaultValue: 5000,
     validation: validate.isNumber,
-    isWriteable: true,
+    canUpdateDuringTestTime: true,
   }, {
     name: 'resolvedNodePath',
     defaultValue: null,
@@ -253,7 +258,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     name: 'responseTimeout',
     defaultValue: 30000,
     validation: validate.isNumber,
-    isWriteable: true,
+    canUpdateDuringTestTime: true,
   }, {
     name: 'retries',
     defaultValue: {
@@ -261,12 +266,12 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
       openMode: 0,
     },
     validation: validate.isValidRetriesConfig,
-    isWriteable: true,
+    canUpdateDuringTestTime: true,
   }, {
     name: 'screenshotOnRunFailure',
     defaultValue: true,
     validation: validate.isBoolean,
-    isWriteable: true,
+    canUpdateDuringTestTime: true,
   }, {
     name: 'screenshotsFolder',
     defaultValue: 'cypress/screenshots',
@@ -276,12 +281,12 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     name: 'slowTestThreshold',
     defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? 250 : 10000,
     validation: validate.isNumber,
-    isWriteable: true,
+    canUpdateDuringTestTime: true,
   }, {
     name: 'scrollBehavior',
     defaultValue: 'top',
     validation: validate.isOneOf('center', 'top', 'bottom', 'nearest', false),
-    isWriteable: true,
+    canUpdateDuringTestTime: true,
   }, {
     name: 'supportFile',
     defaultValue: 'cypress/support',
@@ -296,7 +301,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     name: 'taskTimeout',
     defaultValue: 60000,
     validation: validate.isNumber,
-    isWriteable: true,
+    canUpdateDuringTestTime: true,
   }, {
     name: 'testFiles',
     defaultValue: '**/*.*',
@@ -330,17 +335,17 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     name: 'viewportHeight',
     defaultValue: 660,
     validation: validate.isNumber,
-    isWriteable: true,
+    canUpdateDuringTestTime: true,
   }, {
     name: 'viewportWidth',
     defaultValue: 1000,
     validation: validate.isNumber,
-    isWriteable: true,
+    canUpdateDuringTestTime: true,
   }, {
     name: 'waitForAnimations',
     defaultValue: true,
     validation: validate.isBoolean,
-    isWriteable: true,
+    canUpdateDuringTestTime: true,
   }, {
     name: 'watchForFileChanges',
     defaultValue: true,
