@@ -188,6 +188,11 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     isFolder: true,
   },
   {
+    name: 'isInteractive',
+    defaultValue: true,
+    validation: validate.isBoolean,
+  },
+  {
     name: 'keystrokeDelay',
     defaultValue: 0,
     validation: validate.isNumberOrFalse,
