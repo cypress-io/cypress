@@ -117,7 +117,7 @@ type CloudRecordKey implements Node {
 """A Recorded run of the Test Runner, typically to the cloud"""
 type CloudRun implements Node {
   commitInfo: CloudRunCommitInfo
-  createdAt: Date
+  createdAt: DateTime
 
   """Globally unique identifier representing a concrete GraphQL ObjectType"""
   id: ID!
@@ -463,6 +463,7 @@ type Mutation {
   """Create an Index HTML file for a new component testing project"""
   appCreateComponentIndexHtml(template: String!): Boolean
   clearActiveProject: Boolean
+  cloudProjectCreate(ciProviders: [String!], name: String!, orgId: ID!, public: Boolean!): CloudProject
 
   """
   Development only: Triggers or dismisses a prompted refresh by touching the file watched by our development scripts
