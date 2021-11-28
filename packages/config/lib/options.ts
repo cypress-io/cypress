@@ -151,7 +151,6 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     defaultValue: false,
     validation: validate.isBoolean,
     isExperimental: true,
-    canUpdateDuringTestTime: true,
   }, {
     name: 'experimentalSourceRewriting',
     defaultValue: false,
