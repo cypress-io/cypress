@@ -75,20 +75,6 @@
       "onlySingle": true,
       "cwd": "[cwd]/packages/driver",
       "command": "yarn cypress:open"
-    },
-    {
-      "name": "packages/desktop-gui cypress open",
-      "focus": true,
-      "onlySingle": true,
-      "cwd": "[cwd]/packages/desktop-gui",
-      "command": "yarn cypress:open"
-    },
-    {
-      "name": "packages/desktop-gui watch",
-      "focus": true,
-      "onlySingle": true,
-      "cwd": "[cwd]/packages/desktop-gui",
-      "command": "yarn watch"
     }
   ]
 }
