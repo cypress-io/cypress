@@ -59,7 +59,7 @@
     "ts-loader": "^8.0.5",
     "ts-node": "^10.2.1",
     "watch": "^1.0.2",
-    "webpack": "4.44.2"
+    "webpack": "^4.44.2"
   },
   "peerDependencies": {
     "webpack": "^4.0.0 || ^5.0.0",
