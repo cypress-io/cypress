@@ -60,7 +60,7 @@ export const Query = objectType({
 
     t.nonNull.field('localSettings', {
       type: LocalSettings,
-      description: 'editors on the user local machine',
+      description: 'local settings on a device-by-device basis',
       resolve: (source, args, ctx) => {
         return ctx.coreData.localSettings
       },

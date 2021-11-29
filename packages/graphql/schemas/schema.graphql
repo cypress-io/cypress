@@ -649,7 +649,7 @@ type Query {
   """Whether the app is in global mode or not"""
   isInGlobalMode: Boolean!
 
-  """editors on the user local machine"""
+  """local settings on a device-by-device basis"""
   localSettings: LocalSettings!
 
   """All known projects for the app"""
