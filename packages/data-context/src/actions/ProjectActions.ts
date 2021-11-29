@@ -230,10 +230,13 @@ export class ProjectActions {
       return null
     }
 
+    // cache specs for testingType
+    this.ctx.currentProject.specs = await this.ctx.project.findSpecs(this.ctx.currentProject.projectRoot, testingType === 'component' ? 'component' : 'integration')
+
     let activeSpec: FoundSpec | undefined
 
     if (specPath) {
-      activeSpec = await this.ctx.project.getCurrentSpecByAbsolute(this.ctx.currentProject.projectRoot, specPath)
+      activeSpec = await this.ctx.project.getCurrentSpecByAbsolute(specPath)
     }
 
     // Ensure that we have loaded browsers to choose from
@@ -249,12 +252,7 @@ export class ProjectActions {
 
     // launchProject expects a spec when opening browser for url navigation.
     // We give it an empty spec if none is passed so as to land on home page
-    const emptySpec: Cypress.Spec = {
-      name: '',
-      absolute: '',
-      relative: '',
-      specType: testingType === 'e2e' ? 'integration' : 'component',
-    }
+    const emptySpec = this.makeSpec(testingType)
 
     this.ctx.appData.currentTestingType = testingType
 
@@ -284,6 +282,8 @@ export class ProjectActions {
     this.ctx.coreData.wizard.chosenTestingType = testingType
     await this.initializeActiveProject()
     this.ctx.appData.currentTestingType = testingType
+
+    this.ctx.currentProject.specs = await this.ctx.project.findSpecs(this.ctx.currentProject.projectRoot, testingType === 'component' ? 'component' : 'integration')
 
     return this.api.launchProject(browser, spec, {})
   }

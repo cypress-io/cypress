@@ -74,7 +74,7 @@ export const CurrentProject = objectType({
       description: 'Specs for a project conforming to Relay Connection specification',
       type: 'Spec',
       nodes: (source, args, ctx) => {
-        return ctx.project.findSpecs(source.projectRoot, ctx.appData.currentTestingType === 'component' ? 'component' : 'integration')
+        return ctx.project.currentProjectSpecs
       },
     })
 

@@ -1,5 +1,5 @@
 import type { CodeGenType, SpecType } from '@packages/graphql/src/gen/nxs.gen'
-import { FrontendFramework, FRONTEND_FRAMEWORKS, ResolvedFromConfig, RESOLVED_FROM, SpecFileWithExtension, STORYBOOK_GLOB } from '@packages/types'
+import { FoundSpec, FrontendFramework, FRONTEND_FRAMEWORKS, ResolvedFromConfig, RESOLVED_FROM, SpecFileWithExtension, STORYBOOK_GLOB } from '@packages/types'
 import { scanFSForAvailableDependency } from 'create-cypress-tests'
 import path from 'path'
 
@@ -27,6 +27,14 @@ export class ProjectDataSource {
     return this.ctx.config.getConfigForProject(projectRoot)
   }
 
+  get currentProjectSpecs (): FoundSpec[] {
+    if (!this.ctx.currentProject?.specs) {
+      throw Error('currentProject or specs are undefined.')
+    }
+
+    return this.ctx.currentProject.specs
+  }
+
   async findSpecs (projectRoot: string, specType: Maybe<SpecType>) {
     const config = await this.getConfig(projectRoot)
     const specs = await this.api.findSpecs({
@@ -46,24 +54,16 @@ export class ProjectDataSource {
     return specs.filter((spec) => spec.specType === specType)
   }
 
-  async getCurrentSpecByAbsolute (projectRoot: string, absolute: string) {
-    // TODO: should cache current specs so we don't need to
-    // call findSpecs each time we ask for the current spec.
-    const specs = await this.findSpecs(projectRoot, null)
-
-    return specs.find((x) => x.absolute === absolute)
+  async getCurrentSpecByAbsolute (absolute: string) {
+    return this.currentProjectSpecs.find((x) => x.absolute === absolute)
   }
 
   async getCurrentSpecById (projectRoot: string, base64Id: string) {
-    // TODO: should cache current specs so we don't need to
-    // call findSpecs each time we ask for the current spec.
-    const specs = await this.findSpecs(projectRoot, null)
-
     // id is base64 formatted as per Relay: <type>:<string>
     // in this case, Spec:/my/abs/path
     const currentSpecAbs = Buffer.from(base64Id, 'base64').toString().split(':')[1]
 
-    return specs.find((x) => x.absolute === currentSpecAbs) ?? null
+    return this.currentProjectSpecs.find((x) => x.absolute === currentSpecAbs) ?? null
   }
 
   async getResolvedConfigFields (projectRoot: string): Promise<ResolvedFromConfig[]> {
