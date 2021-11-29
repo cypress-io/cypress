@@ -2,7 +2,6 @@ const path = require('path')
 const { exec } = require('child_process')
 
 const systemTests = require('../lib/system-tests').default
-const Fixtures = require('../lib/fixtures')
 const launcher = require('@packages/launcher')
 
 const absPath = (pathStr) => {
@@ -26,7 +25,7 @@ describe('e2e launching browsers by path', () => {
 
   it('fails with bad browser path', function () {
     return systemTests.exec(this, {
-      project: Fixtures.projectPath('e2e'),
+      project: 'e2e',
       spec: 'simple_spec.js',
       browser: '/this/aint/gonna/be/found',
       expectedExitCode: 1,
@@ -53,7 +52,7 @@ describe('e2e launching browsers by path', () => {
     .then((absPath))
     .then((foundPath) => {
       return systemTests.exec(this, {
-        project: Fixtures.projectPath('e2e'),
+        project: 'e2e',
         spec: 'simple_spec.js',
         browser: foundPath,
         snapshot: true,

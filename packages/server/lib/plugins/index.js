@@ -42,7 +42,7 @@ const init = (config, options) => {
 
   // test and warn for incompatible plugin
   try {
-    const retriesPluginPath = path.dirname(resolve.sync('cypress-plugin-retries', {
+    const retriesPluginPath = path.dirname(resolve.sync('cypress-plugin-retries/package.json', {
       basedir: options.projectRoot,
     }))
 
