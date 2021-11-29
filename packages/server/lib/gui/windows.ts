@@ -3,7 +3,6 @@ import Bluebird from 'bluebird'
 import contextMenu from 'electron-context-menu'
 import { BrowserWindow } from 'electron'
 import Debug from 'debug'
-import cwd from '../cwd'
 import * as savedState from '../saved_state'
 import { getPathToDesktopIndex } from '@packages/resolve-dist'
 
@@ -22,11 +21,7 @@ let recentlyCreatedWindow = false
 const getUrl = function (type, port?: number) {
   switch (type) {
     case 'INDEX':
-      if (process.env.LAUNCHPAD) {
-        return getPathToDesktopIndex('launchpad', port)
-      }
-
-      return getPathToDesktopIndex('desktop-gui', port)
+      return getPathToDesktopIndex(port)
 
     default:
       throw new Error(`No acceptable window type found for: '${type}'`)
@@ -214,13 +209,11 @@ export function create (projectRoot, _options: WindowOptions = {}, newBrowserWin
   return win
 }
 
-// open desktop-gui BrowserWindow
+// open launchpad BrowserWindow
 export function open (projectRoot, graphqlPort: number | undefined, options: WindowOptions = {}, newBrowserWindow = _newBrowserWindow): Bluebird<BrowserWindow> {
   // if we already have a window open based
   // on that type then just show + focus it!
-  let win
-
-  win = getByType(options.type)
+  let win = getByType(options.type)
 
   if (win) {
     win.show()
@@ -236,7 +229,6 @@ export function open (projectRoot, graphqlPort: number | undefined, options: Win
     show: true,
     webPreferences: {
       contextIsolation: true,
-      preload: cwd('lib', 'ipc', 'ipc.js'),
     },
   })
 
@@ -325,7 +317,7 @@ export function trackState (projectRoot, isTextTerminal, win, keys) {
     })
   })
 
-  return win.webContents.on('devtools-closed', () => {
+  win.webContents.on('devtools-closed', () => {
     const newState = {}
 
     newState[keys.devTools] = false

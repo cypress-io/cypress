@@ -1,5 +1,5 @@
 import SpecRunnerHeader from './SpecRunnerHeader.vue'
-import { useAutStore } from '../store'
+import { useAutStore, useSpecStore } from '../store'
 import { SpecRunnerHeaderFragment, SpecRunnerHeaderFragmentDoc } from '../generated/graphql-test'
 import { createEventManager, createTestAutIframe } from '../../cypress/e2e/support/ctSupport'
 
@@ -96,10 +96,15 @@ describe('SpecRunnerHeader', () => {
     cy.get('[data-cy="aut-url"]').should('not.exist')
   })
 
-  it('shows current browser and viewport', () => {
-    const autStore = useAutStore()
+  it('shows current browser and possible browsers', () => {
+    const specStore = useSpecStore()
 
-    autStore.updateDimensions(555, 777)
+    specStore.setActiveSpec({
+      relative: 'packages/app/src/runner/SpecRunnerHeader.spec.tsx',
+      absolute: '/Users/zachjw/work/cypress/packages/app/src/runner/SpecRunnerHeader.spec.tsx',
+      name: 'SpecRunnerHeader.spec.tsx',
+    })
+
     cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
       onResult: (ctx) => {
         ctx.currentBrowser = ctx.browsers?.find((x) => x.displayName === 'Chrome') ?? null
@@ -109,6 +114,8 @@ describe('SpecRunnerHeader', () => {
       },
     })
 
-    cy.get('[data-cy="select-browser"]').contains('Chrome 555x777')
+    cy.get('[data-cy="select-browser"]').click()
+    cy.findByRole('listbox').within(() =>
+      ['Chrome', 'Electron', 'Firefox'].forEach((browser) => cy.findAllByText(browser)))
   })
 })

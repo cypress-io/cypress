@@ -1025,8 +1025,6 @@ jobs:
             fi
       - wait-on-circle-jobs:
           job-names: >
-            desktop-gui-integration-tests-7x,
-            desktop-gui-component-tests,
             cli-visual-tests,
             runner-integration-tests-chrome,
             runner-ct-integration-tests-chrome,
@@ -1307,52 +1305,6 @@ jobs:
       - run-driver-integration-tests:
           browser: electron
 
-  desktop-gui-integration-tests-7x:
-    <<: *defaults
-    parallelism: 7
-    steps:
-      - restore_cached_workspace
-      - run:
-          command: yarn build-prod
-          working_directory: packages/desktop-gui
-      - run:
-          command: |
-            CYPRESS_KONFIG_ENV=production \
-            CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
-            PERCY_ENABLE=${PERCY_TOKEN:-0} \
-            PERCY_PARALLEL_TOTAL=-1 \
-            yarn percy exec --parallel -- -- \
-            yarn cypress:run --record --parallel --group 2x-desktop-gui
-          working_directory: packages/desktop-gui
-      - verify-mocha-results
-      - store_test_results:
-          path: /tmp/cypress
-      - store_artifacts:
-          path: /tmp/artifacts
-      - store-npm-logs
-
-
-  desktop-gui-component-tests:
-    <<: *defaults
-    resource_class: medium
-    parallelism: 1
-    steps:
-      - restore_cached_workspace
-      - run:
-          # will use PERCY_TOKEN environment variable if available
-          command: |
-            CYPRESS_KONFIG_ENV=production \
-            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
-            PERCY_ENABLE=${PERCY_TOKEN:-0} \
-            PERCY_PARALLEL_TOTAL=-1 \
-            yarn percy exec --parallel -- -- \
-            yarn cypress:run:ct
-          working_directory: packages/desktop-gui
-      - verify-mocha-results
-      # we don't really need any artifacts - we are only interested in visual screenshots
-      - store-npm-logs
-
   reporter-integration-tests:
     <<: *defaults
     resource_class: medium
@@ -1400,6 +1352,7 @@ jobs:
 
   npm-webpack-preprocessor:
     <<: *defaults
+    resource_class: medium
     steps:
       - restore_cached_workspace
       - run:
@@ -1437,6 +1390,7 @@ jobs:
 
   npm-webpack-dev-server:
     <<: *defaults
+    resource_class: medium
     steps:
       - restore_cached_workspace
       - run:
@@ -1640,6 +1594,7 @@ jobs:
 
   test-kitchensink:
     <<: *defaults
+    resource_class: medium
     steps:
       - clone-repo-and-checkout-branch:
           repo: cypress-example-kitchensink
@@ -2238,12 +2193,6 @@ linux-workflow: &linux-workflow
         context: test-runner:launchpad-tests
         requires:
           - build
-    - desktop-gui-integration-tests-7x:
-        requires:
-          - build
-    - desktop-gui-component-tests:
-        requires:
-          - build
     - reporter-integration-tests:
         requires:
           - build
@@ -2308,8 +2257,6 @@ linux-workflow: &linux-workflow
           - ui-components-integration-tests
           - reporter-integration-tests
           - Linux lint
-          - desktop-gui-component-tests
-          - desktop-gui-integration-tests-7x
           - runner-ct-integration-tests-chrome
           - runner-integration-tests-firefox
           - runner-integration-tests-chrome
