@@ -525,6 +525,17 @@ type Mutation {
 
   """Set active project to run tests on"""
   setActiveProject(path: String!): Boolean
+
+  """
+  
+          Update local preferences (also known as  appData).
+          The payload, `value`, should be a JSON.stirngified
+          object of the new values you'd like to persist.
+  
+          Example usage:
+            mutation setPreferences (value: JSON.stringify({ firstTimeOpening: Date.now(), specListOpen: true })
+        
+  """
   setPreferences(value: String!): Boolean
 
   """Save the projects preferences to cache"""
