@@ -14,6 +14,7 @@ import { Response } from 'cross-fetch'
 
 import { CloudRunQuery } from '../support/mock-graphql/stubgql-CloudTypes'
 import { getOperationName } from '@urql/core'
+import { makeGraphQLServer } from '@packages/graphql/src/makeGraphQLServer'
 
 const cloudSchema = buildSchema(fs.readFileSync(path.join(__dirname, '../../../graphql/schemas/cloud.graphql'), 'utf8'))
 
@@ -38,20 +39,25 @@ interface InternalAddProjectOpts {
   open?: boolean
 }
 
-export async function e2ePluginSetup (projectRoot: string, on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) {
+export async function e2ePluginSetup (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) {
   process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF = 'true'
   delete process.env.CYPRESS_INTERNAL_GRAPHQL_PORT
   delete process.env.CYPRESS_INTERNAL_VITE_DEV
   delete process.env.CYPRESS_INTERNAL_VITE_APP_PORT
   delete process.env.CYPRESS_INTERNAL_VITE_LAUNCHPAD_PORT
-  // require'd so we don't import the types from @packages/server which would
-  // pollute strict type checking
-  const { runInternalServer } = require('@packages/server/lib/modes/internal-server')
+
+  // Set this to a dedicate port so we can debug the state of the tests
+  process.env.CYPRESS_INTERNAL_GRAPHQL_PORT = '5555'
+
+  // require'd from @packages/server & @tooling/system-tests so we don't import
+  // types which would pollute strict type checking
+  const argUtils = require('@packages/server/lib/util/args')
+  const { makeDataContext } = require('@packages/server/lib/makeDataContext')
+
   const Fixtures = require('@tooling/system-tests/lib/fixtures')
   const cli = require('../../../../cli/lib/cli')
   const cliOpen = require('../../../../cli/lib/exec/open')
   const tmpDir = path.join(__dirname, '.projects')
-  const argUtils = require('@packages/server/lib/util/args')
 
   await util.promisify(rimraf)(tmpDir)
 
@@ -65,28 +71,34 @@ export async function e2ePluginSetup (projectRoot: string, on: Cypress.PluginEve
   }
 
   let ctx: DataContext
-  let gqlPort: number
   let testState: Record<string, any> = {}
   let remoteGraphQLIntercept: RemoteGraphQLInterceptor | undefined
 
   on('task', {
     /**
+     * Called before all tests, sets up the global context once
+     */
+    async __internal__before () {
+      await ctx?.destroy()
+      ctx = makeDataContext({ mode: 'open' })
+
+      const gqlPort = await makeGraphQLServer(ctx)
+
+      return { gqlPort }
+    },
+
+    /**
      * Called before each test to do global setup/cleanup
      */
     async __internal__beforeEach () {
       testState = {}
-      await ctx?.destroy()
-      sinon.reset()
-      remoteGraphQLIntercept = undefined;
-
-      ({ gqlPort, ctx } = await runInternalServer({
-        projectRoot: null,
-      }, 'open') as {ctx: DataContext, gqlPort: number })
-
-      const fetchApi = ctx.util.fetch
-
       await ctx.actions.applicationData.removeAppDir()
       await ctx.actions.applicationData.ensureAppDirExists()
+      await ctx.resetForTest()
+      sinon.reset()
+      remoteGraphQLIntercept = undefined
+
+      const fetchApi = ctx.util.fetch
 
       sinon.stub(ctx.util, 'fetch').get(() => {
         return async (url: RequestInfo, init?: RequestInit) => {
@@ -129,9 +141,7 @@ export async function e2ePluginSetup (projectRoot: string, on: Cypress.PluginEve
         }
       })
 
-      return {
-        gqlPort,
-      }
+      return null
     },
     __internal_remoteGraphQLIntercept (fn: string) {
       remoteGraphQLIntercept = new Function('console', 'obj', `return (${fn})(obj)`).bind(null, console) as RemoteGraphQLInterceptor

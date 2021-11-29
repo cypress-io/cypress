@@ -12,7 +12,7 @@
         "string",
         "boolean"
       ],
-      "description": "Specify a path to a JSON file where configuration values are set or pass false to disable the use of a configuration file entirely."
+      "description": "Specify a path to a script file where configuration values are set or pass false to disable the use of a configuration file entirely."
     },
     "quiet": {
       "type": "boolean",

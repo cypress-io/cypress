@@ -11,7 +11,6 @@ import {
 import { AuthActions } from './actions/AuthActions'
 import { DevActions } from './actions/DevActions'
 import { LocalSettingsActions } from './actions/LocalSettingsActions'
-import { cached } from './util'
 
 export class DataActions {
   constructor (private ctx: DataContext) {}
@@ -41,10 +40,9 @@ export class DataActions {
   }
 
   get currentProject () {
-    return this.ctx.currentProject ? new CurrentProjectActions(this.ctx, this.ctx.currentProject) : null
+    return this.ctx.project ? new CurrentProjectActions(this.ctx, this.ctx.project) : null
   }
 
-  @cached
   get localSettings () {
     return new LocalSettingsActions(this.ctx)
   }
@@ -54,6 +52,6 @@ export class DataActions {
   }
 
   get projectConfig () {
-    return this.ctx.currentProject ? new ProjectConfigDataActions(this.ctx, this.ctx.currentProject) : null
+    return this.ctx.project ? new ProjectConfigDataActions(this.ctx, this.ctx.project) : null
   }
 }

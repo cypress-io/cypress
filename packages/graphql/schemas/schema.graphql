@@ -258,10 +258,9 @@ enum CodeLanguageEnum {
 The currently opened Cypress project, represented by a cypress.config.{ts|js} file
 """
 type CurrentProject implements Node & ProjectLike {
-  """An error related to finding a browser"""
-  browserErrorMessage: String
-
-  """Browsers found that are compatible with Cypress"""
+  """
+  Browsers for the project that are configured to run with Cypress. Null if config hasnt been sourced
+  """
   browsers: [Browser!]
 
   """The remote associated project from Cypress Cloud"""
@@ -273,10 +272,17 @@ type CurrentProject implements Node & ProjectLike {
   """Glob pattern for component searching"""
   codeGenGlob(type: CodeGenType!): String!
 
-  """Project configuration"""
+  """
+  Project configuration, sourced from the config file, or returned from the plugin
+  """
   config: JSON
 
-  """Config File Path"""
+  """
+  Whether the config file has already been created. Helps determine description
+  """
+  configFileExists: Boolean
+
+  """Config file path"""
   configFilePath: String
 
   """The currently selected browser for the application"""
@@ -306,9 +312,6 @@ type CurrentProject implements Node & ProjectLike {
   """Whether we are currently loading the plugins"""
   isLoadingPlugins: Boolean!
 
-  """Whether this is a newly setup project and needs onboarding"""
-  needsOnboarding: Boolean!
-
   """Cached preferences for this project"""
   preferences: ProjectPreferences
 
@@ -333,6 +336,11 @@ type CurrentProject implements Node & ProjectLike {
     last: Int
   ): SpecConnection
   storybook: Storybook
+
+  """
+  Folder containing storybook configuration files, null if the project does not use storybook
+  """
+  storybookRoot: String
   title: String!
 }
 
@@ -463,6 +471,22 @@ The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://
 """
 scalar JSON
 
+"""A loadable can be in a loading state, before being a resolved value"""
+interface Loadable {
+  error: Boolean
+  status: Boolean!
+}
+
+type LoadableConfig implements Loadable {
+  error: Boolean
+  status: Boolean!
+}
+
+type LoadablePlugins implements Loadable {
+  error: Boolean
+  status: Boolean!
+}
+
 """local settings on a device-by-device basis"""
 type LocalSettings {
   availableEditors: [Editor!]!
@@ -565,7 +589,7 @@ type Mutation {
 
   """Set active project to run tests on"""
   setActiveProject(path: String!): Query
-  setAutoScrollingEnabled(value: Boolean!): Boolean
+  setAutoScrollingEnabled(value: Boolean!): LocalSettingsPreferences
   setPreferredEditorBinary(value: String!): Boolean
 
   """Save the projects preferences to cache"""
@@ -747,6 +771,9 @@ type SpecConnection {
   https://facebook.github.io/relay/graphql/connections.htm#sec-Edge-Types
   """
   edges: [SpecEdge!]!
+
+  """Flattened list of Spec type"""
+  nodes: [Spec!]!
 
   """
   https://facebook.github.io/relay/graphql/connections.htm#sec-undefined.PageInfo

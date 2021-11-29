@@ -59,7 +59,9 @@ fragment TestingPreferences on Query {
 
 gql`
 mutation SetAutoScrollingEnabled($value: Boolean!) {
-  setAutoScrollingEnabled(value: $value)
+  setAutoScrollingEnabled(value: $value) {
+    autoScrollingEnabled
+  }
 }`
 
 gql`

@@ -10,8 +10,15 @@ export class DataEmitterActions {
   constructor (private ctx: DataContext, private opts: DataEmitterActionsOptions) {}
 
   init () {
-    this.ctx.rootBus.on('menu:item:clicked', (logout) => {
+    this.ctx.rootBus.on('menu:item:clicked', (item) => {
+      if (item === 'log:out') {
+        this.ctx._apis.authApi.logOut()
+      }
     })
+  }
+
+  destroy () {
+    this.ctx.rootBus.removeAllListeners()
   }
 
   /**

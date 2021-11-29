@@ -22,11 +22,10 @@ fragment TestingTypeCards on CurrentProject {
 `
 
 gql`
-  mutation TestingTypeCards_selectTestingType($type: TestingTypeEnum!) {
+mutation TestingTypeCards_selectTestingType($type: TestingTypeEnum!) {
   selectProjectTestingType(type: $type) {
     currentProject {
       id
-      needsOnboarding
       isLoadingConfig
       isLoadingPlugins
       config

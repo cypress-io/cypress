@@ -3,7 +3,8 @@
   "version": "0.0.0-development",
   "description": "Config contains the configuration types and validation function used in the cypress electron application.",
   "private": true,
-  "main": "lib/index.js",
+  "main": "index.js",
+  "browser": "lib/index.ts",
   "scripts": {
     "build-prod": "tsc --project .",
     "clean": "rm lib/options.js || echo 'ok'",
@@ -27,5 +28,6 @@
   },
   "files": [
     "lib"
-  ]
+  ],
+  "types": "lib/index.ts"
 }

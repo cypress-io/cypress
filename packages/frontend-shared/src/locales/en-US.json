@@ -234,6 +234,7 @@
     },
     "testingCard": {
       "configured": "Configured",
+      "needsChanges": "Needs Changes",
       "notConfigured": "Not Configured"
     }
   },

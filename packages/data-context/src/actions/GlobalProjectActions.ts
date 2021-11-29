@@ -1,6 +1,7 @@
 import type { MutationAddProjectArgs } from '@packages/graphql/src/gen/nxs.gen'
 import path from 'path'
 import type { DataContext } from '..'
+import { makeCurrentProject } from '../data'
 
 export class GlobalProjectActions {
   constructor (private ctx: DataContext) {}
@@ -11,32 +12,8 @@ export class GlobalProjectActions {
    */
   async loadGlobalProjects () {
     this.ctx.debug('loadGlobalProjects from %s', this.ctx._apis.appDataApi.path())
-    if (!this.ctx.coreData.isLoadingGlobalProjects) {
-      this.ctx.update((o) => {
-        o.isLoadingGlobalProjects = true
-      })
 
-      try {
-        const globalProjects = await this.ctx._apis.projectApi.getProjectRootsFromCache()
-
-        this.ctx.update((o) => {
-          o.globalProjects = globalProjects
-        })
-
-        this.ctx.debug('loadGlobalProjects %o', this.ctx.coreData.globalProjects)
-      } catch (e) {
-        this.ctx.debug('loadGlobalProjects error %o', e)
-        this.ctx.update((o) => {
-          o.globalError = this.ctx.prepError(e as Error)
-        })
-      } finally {
-        this.ctx.update((o) => {
-          o.isLoadingGlobalProjects = false
-        })
-
-        this.ctx.emitter.toLaunchpad()
-      }
-    }
+    await this.ctx.loadingManager.globalProjects.load().toPromise()
   }
 
   /**
@@ -48,37 +25,25 @@ export class GlobalProjectActions {
     this.ctx.debug('setActiveProject')
     await this.ctx.actions.currentProject?.clearCurrentProject()
 
-    const title = this.ctx.project.projectTitle(projectRoot)
-
     // Set initial properties, so we can set the config object on the active project
-    this.resetCurrentProject(projectRoot, title)
+    this.resetCurrentProject(projectRoot)
+  }
 
+  setAndLoadActiveProject () {
     // Load the project config, but don't block on this - it will alert
     // its status separately via updating coreData.currentProject
-    this.ctx.actions.currentProject?.loadConfig()
+    this.ctx.loadingManager.projectConfig.load()
   }
 
   setActiveProjectForTestSetup (projectRoot: string) {
-    const title = this.ctx.project.projectTitle(projectRoot)
-
     // Set initial properties, so we can set the config object on the active project
-    this.resetCurrentProject(projectRoot, title)
+    this.resetCurrentProject(projectRoot)
   }
 
-  private resetCurrentProject (projectRoot: string, title: string) {
+  private resetCurrentProject (projectRoot: string) {
+    this.ctx.loadingManager.resetCurrentProject()
     this.ctx.update((o) => {
-      o.currentProject = {
-        title,
-        projectRoot,
-        config: null,
-        cliBrowser: null,
-        currentTestingType: null,
-        isLoadingConfig: false,
-        isLoadingConfigPromise: null,
-        isLoadingPlugins: false,
-        errorLoadingConfig: null,
-        errorLoadingPlugins: null,
-      }
+      o.currentProject = makeCurrentProject({ projectRoot }, this.ctx.loadingManager)
     })
   }
 
@@ -89,9 +54,11 @@ export class GlobalProjectActions {
     const projectRoot = await this.getDirectoryPath(args.path)
     const found = this.ctx.projectsList?.find((x) => x.projectRoot === projectRoot)
 
-    if (!found && this.ctx.coreData.globalProjects) {
+    if (!found) {
       this.ctx.update((o) => {
-        o.globalProjects?.push(projectRoot)
+        if (o.globalProjects.state === 'LOADED') {
+          o.globalProjects.value.push(projectRoot)
+        }
       })
 
       this.ctx._apis.projectApi.insertProjectToCache(projectRoot)
@@ -110,7 +77,9 @@ export class GlobalProjectActions {
     }
 
     this.ctx.update((o) => {
-      o.globalProjects = this.ctx.coreData.globalProjects?.filter((project) => project !== projectRoot) ?? null
+      if (o.globalProjects.state === 'LOADED') {
+        o.globalProjects.value = o.globalProjects.value.filter((project) => project !== projectRoot) ?? null
+      }
     })
 
     this.ctx._apis.projectApi.removeProjectFromCache(projectRoot)

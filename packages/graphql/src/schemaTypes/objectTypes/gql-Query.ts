@@ -34,12 +34,12 @@ export const Query = objectType({
     t.field('currentProject', {
       type: CurrentProject,
       description: 'The currently opened project',
-      resolve: (root, args, ctx) => ctx.coreData.currentProject,
+      resolve: (root, args, ctx) => ctx.project,
     })
 
     t.nonNull.boolean('isLoadingGlobalProjects', {
       description: 'Whether we are loading the projects',
-      resolve: (root, args, ctx) => ctx.coreData.isLoadingGlobalProjects,
+      resolve: (root, args, ctx) => ctx.coreData.globalProjects.state !== 'LOADED',
     })
 
     t.list.nonNull.field('projects', {
@@ -86,9 +86,7 @@ export const Query = objectType({
     t.nonNull.field('localSettings', {
       type: LocalSettings,
       description: 'editors on the user local machine',
-      resolve: (source, args, ctx) => {
-        return ctx.coreData.localSettings
-      },
+      resolve: (source, args, ctx) => ctx.loadingManager.localSettings.toPromise(),
     })
   },
 })

@@ -108,7 +108,7 @@ class File {
 
       const value = _.get(contents, key)
 
-      return value === undefined ? defaultValue : value
+      return _.clone(value === undefined ? defaultValue : value)
     })
   }
 

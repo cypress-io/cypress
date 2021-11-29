@@ -1,0 +1,13 @@
+diff --git a/node_modules/check-more-types/dist/check-more-types.d.ts b/node_modules/check-more-types/dist/check-more-types.d.ts
+index 6ba8050..4ae406a 100644
+--- a/node_modules/check-more-types/dist/check-more-types.d.ts
++++ b/node_modules/check-more-types/dist/check-more-types.d.ts
+@@ -7,6 +7,8 @@ declare module 'check-more-types' {
+     empty: predicate,
+     object: predicate,
+     number: predicate,
++    string: predicate,
++    positive: predicate,
+     fn: predicate,
+     // for now, should be curried functions
+     oneOf: any,

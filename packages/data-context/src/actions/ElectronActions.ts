@@ -1,4 +1,4 @@
-import type { BrowserWindow } from 'electron'
+import type { App, BrowserWindow } from 'electron'
 import type { DataContext } from '..'
 
 export interface ElectronApiShape {
@@ -15,6 +15,12 @@ export class ElectronActions {
 
   private get isMac () {
     return this.ctx.os === 'darwin'
+  }
+
+  setElectronApp (app: App) {
+    this.ctx.update((o) => {
+      o.electron.app = app
+    })
   }
 
   setBrowserWindow (window: BrowserWindow) {

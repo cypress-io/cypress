@@ -11,7 +11,7 @@ import fs from 'fs-extra'
 import { DevActions } from '@packages/data-context/src/actions/DevActions'
 
 import { monorepoPaths } from '../monorepoPaths'
-import { ENV_VARS, getGulpGlobal } from '../gulpConstants'
+import { ENV_VARS } from '../gulpConstants'
 import { forked } from '../utils/childProcessUtils'
 import { exitAndRemoveProcess } from './gulpRegistry'
 import { ChildProcess, exec } from 'child_process'
@@ -65,11 +65,15 @@ async function spawnCypressWithMode (
   env: Record<string, string> = {},
   additionalArgv: string[] = [],
 ) {
-  let argv = process.argv.slice(3).concat(additionalArgv)
+  let argv = [...additionalArgv]
 
-  const debugFlag = getGulpGlobal('debug')
+  let debugFlag = process.execArgv.find((s) => s.startsWith('--inspect'))
 
   if (debugFlag) {
+    if (process.debugPort) {
+      debugFlag = `${debugFlag}=${process.debugPort + 1}`
+    }
+
     env = { ...env, CYPRESS_INTERNAL_DEV_DEBUG: debugFlag }
   }
 
@@ -108,6 +112,7 @@ async function spawnCypressWithMode (
     cwd: monorepoPaths.root,
     env: finalEnv,
     waitForData: false,
+    execArgv: [],
   })
 }
 

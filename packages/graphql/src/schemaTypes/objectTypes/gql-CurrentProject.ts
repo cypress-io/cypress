@@ -1,5 +1,4 @@
 import { nonNull, objectType, stringArg } from 'nexus'
-import path from 'path'
 import { ApplicationError } from '.'
 import { cloudProjectBySlug } from '../../stitching/remoteGraphQLCalls'
 import { CodeGenTypeEnum } from '../enumTypes/gql-CodeGenTypeEnum'
@@ -17,24 +16,20 @@ export const CurrentProject = objectType({
     t.field('currentTestingType', {
       description: 'The mode the interactive runner was launched in',
       type: 'TestingTypeEnum',
-      resolve: (source, args, ctx) => source.currentTestingType ?? null,
     })
 
     t.field('currentBrowser', {
       type: Browser,
       description: 'The currently selected browser for the application',
-      resolve: (source, args, ctx) => source.currentBrowser ?? null,
     })
 
     t.list.nonNull.field('browsers', {
       type: Browser,
-      description: 'Browsers found that are compatible with Cypress',
+      description: 'Browsers for the project that are configured to run with Cypress. Null if config hasnt been sourced',
       resolve: (source, args, ctx) => {
-        if (source.isLoadingConfig) {
-          return null
+        if (source) {
+          return source.browsers ?? null
         }
-
-        return source.browsers ?? null
       },
     })
 
@@ -42,7 +37,7 @@ export const CurrentProject = objectType({
       type: 'CloudProject',
       description: 'The remote associated project from Cypress Cloud',
       resolve: async (source, args, ctx, info) => {
-        const projectId = await ctx.project.projectId(source.projectRoot)
+        const projectId = source.projectId()
 
         if (!projectId) {
           return null
@@ -54,14 +49,7 @@ export const CurrentProject = objectType({
 
     t.string('projectId', {
       description: 'Used to associate project with Cypress cloud',
-      resolve: (source, args, ctx) => ctx.project.projectId(source.projectRoot),
-    })
-
-    t.string('browserErrorMessage', {
-      description: 'An error related to finding a browser',
-      resolve: (source, args, ctx) => {
-        return source.browserErrorMessage ?? null
-      },
+      resolve: (source, args, ctx) => source.projectId(),
     })
 
     t.nonNull.boolean('isCTConfigured', {
@@ -82,15 +70,9 @@ export const CurrentProject = objectType({
       description: 'Specs for a project conforming to Relay Connection specification',
       type: 'Spec',
       nodes: (source, args, ctx) => {
-        return ctx.project.findSpecs(ctx.currentProject?.currentTestingType === 'component' ? 'component' : 'integration').then(() => {
-          return []
-        })
+        return source.findSpecs(ctx.currentProject?.currentTestingType === 'component' ? 'component' : 'integration')
+        .then((val) => val ?? [])
       },
-    })
-
-    t.nonNull.boolean('needsOnboarding', {
-      description: 'Whether this is a newly setup project and needs onboarding',
-      resolve: (source, args, ctx) => ctx.project.needsOnboarding(),
     })
 
     t.nonNull.boolean('isLoadingConfig', {
@@ -100,6 +82,7 @@ export const CurrentProject = objectType({
     t.field('errorLoadingConfig', {
       type: ApplicationError,
       description: 'An error encountered while loading the config',
+      resolve: (o, args, ctx) => ctx.loadingErr(o.data.config),
     })
 
     t.nonNull.boolean('isLoadingPlugins', {
@@ -109,27 +92,29 @@ export const CurrentProject = objectType({
     t.field('errorLoadingPlugins', {
       type: ApplicationError,
       description: 'An error encountered while loading the plugins',
+      resolve: (o, args, ctx) => ctx.loadingErr(o.data.pluginLoad),
     })
 
     t.json('config', {
-      description: 'Project configuration',
+      description: 'Project configuration, sourced from the config file, or returned from the plugin',
       resolve: (source, args, ctx) => {
-        return ctx.project.getResolvedConfigFields()
+        return source.getResolvedConfigFields()
       },
     })
 
     t.string('configFilePath', {
-      description: 'Config File Path',
-      resolve: async (source, args, ctx) => {
-        return source.config?.configFile ?? null
-      },
+      description: 'Config file path',
+    })
+
+    t.boolean('configFileExists', {
+      description: 'Whether the config file has already been created. Helps determine description',
     })
 
     t.field('preferences', {
       type: ProjectPreferences,
       description: 'Cached preferences for this project',
       resolve: (source, args, ctx) => {
-        return ctx.project.getProjectPreferences(path.basename(source.projectRoot))
+        return source.getProjectPreferences()
       },
     })
 
@@ -138,12 +123,16 @@ export const CurrentProject = objectType({
       resolve: (source, args, ctx) => ctx.storybook.loadStorybookInfo(),
     })
 
+    t.string('storybookRoot', {
+      description: 'Folder containing storybook configuration files, null if the project does not use storybook',
+    })
+
     t.nonNull.string('codeGenGlob', {
       description: 'Glob pattern for component searching',
       args: {
         type: nonNull(CodeGenTypeEnum),
       },
-      resolve: (src, args, ctx) => ctx.project.getCodeGenGlob(args.type),
+      resolve: (source, args) => source.getCodeGenGlob(args.type),
     })
 
     t.list.field('codeGenCandidates', {
@@ -152,13 +141,11 @@ export const CurrentProject = objectType({
       args: {
         glob: nonNull(stringArg()),
       },
-      resolve: (source, args, ctx) => {
-        return ctx.project.getCodeGenCandidates(args.glob)
-      },
+      resolve: (source, args) => source.getCodeGenCandidates(args.glob),
     })
   },
   sourceType: {
-    module: '@packages/data-context/src/data/coreDataShape',
-    export: 'CurrentProjectShape',
+    module: '@packages/data-context/src/sources/ProjectDataSource',
+    export: 'ProjectDataSource',
   },
 })

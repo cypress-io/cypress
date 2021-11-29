@@ -21,10 +21,6 @@ export interface ClientTestContext {
   versions: VersionData
   isAuthBrowserOpened: boolean
   localSettings: LocalSettings
-  wizard: {
-    chosenManualInstall: boolean
-    chosenBrowser: null
-  }
   warnings: []
   user: AuthenticatedUserShape | null
   cloudTypes: typeof cloudTypes
@@ -63,10 +59,6 @@ export function makeClientTestContext (): ClientTestContext {
       },
     },
     isAuthBrowserOpened: false,
-    wizard: {
-      chosenManualInstall: false,
-      chosenBrowser: null,
-    },
     warnings: [],
     user: null,
     cloudTypes,

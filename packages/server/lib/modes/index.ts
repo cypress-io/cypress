@@ -10,7 +10,7 @@ export = (mode, options) => {
   }
 
   if (mode === 'run') {
-    makeLegacyDataContext(options, 'run')
+    makeLegacyDataContext({ launchArgs: options, mode: 'run' })
     if (options.testingType === 'component') {
       return require('./run-ct').run(options)
     }
@@ -23,7 +23,6 @@ export = (mode, options) => {
   }
 
   if (mode === 'interactive') {
-    makeLegacyDataContext(options, 'open')
     // Change default for `cypress open` to be LAUNCHPAD=1
     if (process.env.LAUNCHPAD === '0') {
       delete process.env.LAUNCHPAD
@@ -35,7 +34,9 @@ export = (mode, options) => {
       return require('./interactive-ct').run(options)
     }
 
+    const ctx = makeLegacyDataContext({ launchArgs: options, mode: 'open' })
+
     // Either launchpad or straight to e2e tests
-    return require('./interactive-e2e').run(options)
+    return require('./interactive-e2e').run(options, ctx)
   }
 }

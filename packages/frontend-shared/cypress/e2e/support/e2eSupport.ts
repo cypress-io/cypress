@@ -1,3 +1,4 @@
+import i18n from '../../../src/locales/en-US.json'
 import '@testing-library/cypress/add-commands'
 import type { DataContext } from '@packages/data-context'
 import { e2eProjectDirs } from './e2eProjectDirs'
@@ -40,6 +41,7 @@ export type RemoteGraphQLInterceptor = (obj: RemoteGraphQLInterceptPayload) => E
 declare global {
   namespace Cypress {
     interface Chainable {
+      i18n: typeof i18n
       /**
        * Calls a function block with the "ctx" object from the server,
        * and an object containing any options passed into the server context
@@ -80,14 +82,20 @@ declare global {
   }
 }
 
+cy.i18n = i18n
+
+before(() => {
+  Cypress.env('e2e_gqlPort', undefined)
+  cy.task<{ gqlPort: number }>('__internal__before', {}, { log: false }).then(({ gqlPort }) => {
+    Cypress.env('e2e_gqlPort', gqlPort)
+  })
+})
+
 // Reset the ports, and call the __internal__beforeEach which sets up a
 // fresh data context / GraphQL server for each test
 beforeEach(() => {
   Cypress.env('e2e_serverPort', undefined)
-  Cypress.env('e2e_gqlPort', undefined)
-  cy.task<{ gqlPort: number }>('__internal__beforeEach', {}, { log: false }).then(({ gqlPort }) => {
-    Cypress.env('e2e_gqlPort', gqlPort)
-  })
+  cy.task('__internal__beforeEach', {}, { log: false })
 })
 
 function addProject (projectName: ProjectFixture, open = false) {

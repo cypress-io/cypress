@@ -30,9 +30,10 @@ import type { GraphQLSchema } from 'graphql'
 import type { Server } from 'http'
 import type { AddressInfo } from 'net'
 import EventEmitter from 'events'
-import type { App as ElectronApp } from 'electron'
 import type { SocketIOServer } from '@packages/socket'
 import { VersionsDataSource } from './sources/VersionsDataSource'
+import { LoadingManager } from './data/LoadingManager'
+import type { LoadingState } from './util'
 
 enablePatches()
 
@@ -41,23 +42,17 @@ const IS_DEV_ENV = process.env.CYPRESS_INTERNAL_ENV !== 'production'
 export interface DataContextConfig {
   mode: 'open' | 'run'
   schema: GraphQLSchema
-  os: PlatformName
-  launchArgs: LaunchArgs
-  launchOptions: OpenProjectLaunchOptions<DataContext>
-  electronApp?: ElectronApp
-  /**
-   * Default is to
-   */
-  coreData?: CoreDataShape
-  /**
-   * Injected from the server
-   */
-  appApi: AppApiShape
-  appDataApi: ApplicationDataApiShape
-  localSettingsApi: LocalSettingsApiShape
-  authApi: AuthApiShape
-  projectApi: ProjectApiShape
-  electronApi: ElectronApiShape
+  os?: PlatformName
+  launchArgs?: Partial<LaunchArgs>
+  launchOptions?: OpenProjectLaunchOptions<DataContext>
+  apis: {
+    appApi: AppApiShape
+    appDataApi: ApplicationDataApiShape
+    localSettingsApi: LocalSettingsApiShape
+    authApi: AuthApiShape
+    projectApi: ProjectApiShape
+    electronApi: ElectronApiShape
+  }
 }
 
 export class DataContext {
@@ -69,26 +64,32 @@ export class DataContext {
   private _appServerPort: number | undefined
   private _appSocketServer: SocketIOServer | undefined
   private _gqlServerPort: number | undefined
+  private _loadingManager: LoadingManager
 
   constructor (private _config: DataContextConfig) {
+    this._loadingManager = new LoadingManager(this)
     this._rootBus = new EventEmitter()
-    this._coreData = _config.coreData ?? makeCoreData(_config.launchArgs)
+    this._coreData = makeCoreData(_config.launchArgs, this._loadingManager)
 
     if (IS_DEV_ENV) {
       this.actions.dev.watchForRelaunch()
     }
   }
 
+  get loadingManager () {
+    return this._loadingManager
+  }
+
   get electronApp () {
-    return this._config.electronApp
+    return this.coreData.electron.app
   }
 
   get electronApi () {
-    return this._config.electronApi
+    return this._config.apis.electronApi
   }
 
   get localSettingsApi () {
-    return this._config.localSettingsApi
+    return this._config.apis.localSettingsApi
   }
 
   get isGlobalMode () {
@@ -100,10 +101,10 @@ export class DataContext {
   }
 
   /**
-   * Run all of the "updates" through a single method to track the timeline of mutations
-   * for debuggability, testing, etc
+   * Run all of the "updates" through a single method to track the timeline
+   * of mutations for debuggability, testing, etc
    */
-  update = (updater: (proj: Draft<CoreDataShape>) => void) => {
+  update = (updater: (proj: Draft<CoreDataShape>) => void | undefined | CoreDataShape) => {
     const [state, patches] = produceWithPatches(this._coreData, updater)
 
     this._coreData = state
@@ -111,7 +112,7 @@ export class DataContext {
   }
 
   resetLaunchArgs (launchArgs: LaunchArgs) {
-    this._coreData = makeCoreData(launchArgs)
+    this._coreData = makeCoreData(launchArgs, this._loadingManager)
   }
 
   get rootBus () {
@@ -139,11 +140,7 @@ export class DataContext {
   }
 
   get browserList () {
-    return this.coreData.app.machineBrowsers
-  }
-
-  get nodePath () {
-    return this.coreData.app.nodePath
+    return this.coreData.machineBrowsers
   }
 
   @cached
@@ -189,10 +186,6 @@ export class DataContext {
     return new StorybookDataSource(this)
   }
 
-  get wizardData () {
-    return this.coreData.wizard
-  }
-
   get currentProject () {
     return this.coreData.currentProject
   }
@@ -201,9 +194,8 @@ export class DataContext {
     return this.coreData.currentProject?.currentTestingType ?? null
   }
 
-  @cached
   get project () {
-    return new ProjectDataSource(this)
+    return this.currentProject ? new ProjectDataSource(this) : null
   }
 
   get cloud () {
@@ -235,12 +227,16 @@ export class DataContext {
   }
 
   get projectsList () {
-    return this.coreData.globalProjects?.map((p) => {
-      return {
-        title: this.project.projectTitle(p),
-        projectRoot: p,
-      }
-    }) ?? null
+    if (this.coreData.globalProjects.state === 'LOADED') {
+      return this.coreData.globalProjects.value.map((p) => {
+        return {
+          title: path.basename(p),
+          projectRoot: p,
+        }
+      })
+    }
+
+    return null
   }
 
   // Servers
@@ -281,15 +277,7 @@ export class DataContext {
   }
 
   get _apis () {
-    return {
-      appApi: this._config.appApi,
-      appDataApi: this._config.appDataApi,
-      authApi: this._config.authApi,
-      projectApi: this._config.projectApi,
-      electronApi: this._config.electronApi,
-      localSettingsApi: this._config.localSettingsApi,
-      busApi: this._rootBus,
-    }
+    return this._config.apis
   }
 
   makeId<T extends NexusGenAbstractTypeMembers['Node']> (typeName: T, nodeString: string) {
@@ -330,7 +318,7 @@ export class DataContext {
   /**
    * Convert an error into a plain object
    */
-  prepError (err: CypressErrorLike | CypressError, title = 'Something went wrong') {
+  prepError (err: CypressErrorLike | CypressError | Error & Record<string, any>, title = 'Something went wrong') {
     return {
       title,
       name: err.name,
@@ -343,10 +331,49 @@ export class DataContext {
     }
   }
 
+  /**
+   * Resets all of the state for the data context,
+   * so we can initialize fresh for each E2E test
+   */
+  resetForTest () {
+    this.debug('DataContext resetForTest')
+    if (!process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {
+      throw new Error(`DataContext.reset is only meant to be called in E2E testing mode, there's no good use for it outside of that`)
+    }
+
+    return this._reset()
+  }
+
+  isLoading<V> (val: LoadingState<V>): boolean {
+    return val.state === 'LOADING'
+  }
+
+  /**
+   * If there's an error with a "Loading Container" value, this unwraps it
+   */
+  loadingErr <V> (val: LoadingState<V>) {
+    return val.state === 'ERRORED' ? this.prepError(val.error) : null
+  }
+
+  loadedVal <V> (val: LoadingState<V>): V | null {
+    return val.state === 'LOADED' ? val.value : null
+  }
+
   async destroy () {
     this.debug('DataContext destroy')
 
     await this.destroyServers()
+
+    return this._reset()
+  }
+
+  private _reset () {
+    this.emitter.destroy()
+    this._loadingManager.destroy()
+    this._loadingManager = new LoadingManager(this)
+    this.coreData.currentProject?.watcher
+    this._coreData = makeCoreData({}, this._loadingManager)
+    this._patches = []
 
     return Promise.all([
       this.util.disposeLoaders(),
@@ -371,7 +398,8 @@ export class DataContext {
   }
 
   async initializeMode () {
-    // this.actions.app.refreshNodePath()
+    this.emitter.init()
+
     if (this._config.mode === 'run') {
       await this.initializeRunMode()
     } else if (this._config.mode === 'open') {

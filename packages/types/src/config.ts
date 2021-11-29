@@ -38,3 +38,66 @@ export interface SettingsOptions {
     runProject?: string
   }
 }
+
+export type ClientCertificate = Cypress.ClientCertificate
+
+export type ModeConfig = {
+  mode: 'open'
+  options: OpenModeOptions
+} | {
+  mode: 'run'
+  options: RunModeOptions
+}
+
+export interface OpenModeOptions {
+  _?: (string | null)[] | null
+  config: OpenModeConfig
+  cwd: string
+  invokedFromCli: boolean
+  updating?: boolean | null
+  foo?: string | null
+  configFile?: string | null
+}
+
+export interface OpenModeConfig {
+  test?: boolean | null
+  foo?: string | null
+  trashAssetsBeforeRuns?: boolean | null
+  pageLoadTimeout?: number | null
+  port?: number | null
+  env?: Record<string, string> | null
+}
+
+export interface RunModeOptions {
+  _?: (null)[] | null
+  runProject: string
+  invokedFromCli: boolean
+  cwd: string
+  config: RunModeConfig
+  projectRoot: string
+  headless?: boolean | null
+  headed?: boolean | null
+  spec?: (string)[] | null
+  isTextTerminal?: boolean | null
+  key?: string | null
+  record?: boolean | null
+  browser?: string | null
+  configFile?: boolean | string
+  group?: string | null
+  parallel?: boolean | null
+  ciBuildId?: string | null
+  tag?: (string)[] | null
+}
+
+export interface RunModeConfig {
+  port?: number | null
+  testFiles?: string | (string)[] | null
+  reporter?: string | null
+  baseUrl?: string | null
+  blacklistHosts?: string | null
+  integrationFolder?: string | null
+  requestTimeout?: number | null
+  videoCompression?: boolean | null
+  env?: Record<string, string> | null
+  video?: boolean | null
+}

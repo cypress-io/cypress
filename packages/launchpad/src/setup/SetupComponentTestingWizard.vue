@@ -21,18 +21,18 @@ import EnvironmentSetup from './EnvironmentSetup.vue'
 import InstallDependencies from './InstallDependencies.vue'
 import ConfigFiles from './ConfigFiles.vue'
 import { gql } from '@urql/core'
-import type { WizardFragment } from '../generated/graphql'
+import type { SetupComponentTestingWizardFragment } from '../generated/graphql'
 import { useWizardStore } from '../store/wizardStore'
 
 const wizardStore = useWizardStore()
 
 gql`
-fragment Wizard on Query {
+fragment SetupComponentTestingWizard on Query {
   ...WarningList
   ...InstallDependencies
 }`
 
 const props = defineProps<{
-  gql: WizardFragment
+  gql: SetupComponentTestingWizardFragment
 }>()
 </script>

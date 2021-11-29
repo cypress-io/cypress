@@ -1,13 +1,22 @@
-import type { NexusGenEnums, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
-import type { BrowserWindow } from 'electron'
+import type { TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
+import type { App, BrowserWindow } from 'electron'
 import type { ChildProcess } from 'child_process'
 import path from 'path'
-import { devicePreferenceDefaults, DevicePreferences, Editor, FoundBrowser, FullConfig, LaunchArgs, Preferences, Warning } from '@packages/types'
-import type { Immutable, Patch } from 'immer'
+import type { DevicePreferences, Editor, FoundBrowser, FullConfig, LaunchArgs, Preferences, Warning } from '@packages/types'
+import type { Draft, Immutable, Patch } from 'immer'
+import type { LoadingState } from '../util'
+import type { LoadingManager } from './LoadingManager'
+import type { ProjectWatcher } from './ProjectWatcher'
 
 export type Maybe<T> = T | null | undefined
 
 export type DevStatePatchShape = Patch
+
+export interface ApplicationErrorShape {
+  title?: string
+  message: string
+  stack?: string
+}
 
 export interface AuthenticatedUserShape {
   name?: string
@@ -24,7 +33,6 @@ export interface DevStateShape {
 }
 
 export type LocalSettingsDataShape = Immutable<{
-  refreshing: Promise<Editor[]> | null
   availableEditors: Editor[]
   preferences: DevicePreferences
 }>
@@ -45,6 +53,9 @@ export interface ConfigChildProcessShape {
 }
 
 export type CurrentProjectShape = Immutable<{
+  /**
+   * The directory on the filesystem containing the cypress.config.{js,ts} file
+   */
   projectRoot: string
   /**
    * Title of the project is the "basename" of the project
@@ -59,42 +70,23 @@ export type CurrentProjectShape = Immutable<{
    */
   cliBrowser: string | null
   /**
-   * Warning when the cliBrowser doesn't match up with the browsers
-   * that are available after sourcing the config
+   * When we call the plugin, we get back the final config
    */
-  browserErrorMessage?: string | null
-  /**
-   * Set to true while we are resolving the config
-   */
-  isLoadingConfig: boolean
-  /**
-   * Promise indicating the value of the loading config
-   */
-  isLoadingConfigPromise: Promise<FullConfig> | null
-  /**
-   * Set to true while we are loading the project's plugins
-   */
-  isLoadingPlugins: boolean
-  /**
-   * Set if there is an error loading the plugins
-   */
-  errorLoadingPlugins: BaseErrorDataShape | null
-  /**
-   * Captures an error found when sourcing the config
-   */
-  errorLoadingConfig: BaseErrorDataShape | null
+  pluginLoad: LoadingState<FullConfig>
   /**
    * The full config resolved for the project
    */
-  config: FullConfig | null
+  config: LoadingState<FullConfig>
   /**
-   * The child process used for loading the config / executing the plugins
+   * The child process used for loading the config / executing the plugins,
+   * kept as internal state so we can re-use the same child process for the
+   * sourcing of initial config, and the loading of plugins
    */
-  configChildProcess?: ConfigChildProcessShape | null
+  configChildProcess: ConfigChildProcessShape | null
   /**
    * Preferences loaded for the user
    */
-  preferences?: Preferences | null
+  preferences: Preferences | null
   /**
    * All browsers loaded for this project, we get this after the plugins config is loaded
    * for the given testing type, since this value can be manipulated by that
@@ -104,24 +96,14 @@ export type CurrentProjectShape = Immutable<{
    * Chosen browser for the current project
    */
   currentBrowser?: FoundBrowser | null
+  /**
+   * A watcher for files in the current project
+   */
+  watcher: ProjectWatcher | null
 }>
 
-export interface AppDataShape {
-  isLoadingMachineBrowsers: boolean
-  loadingMachineBrowsers: Promise<FoundBrowser[]> | null
-  machineBrowsers: ReadonlyArray<FoundBrowser> | null
-  refreshingNodePath: Promise<string> | null
-  nodePath: string | null
-}
-
-export interface WizardDataShape {
-  chosenBundler: NexusGenEnums['SupportedBundlers'] | null
-  chosenFramework: NexusGenEnums['FrontendFrameworkEnum'] | null
-  chosenLanguage: NexusGenEnums['CodeLanguageEnum']
-  chosenManualInstall: boolean
-}
-
 export interface ElectronShape {
+  app: App | null
   browserWindow: BrowserWindow | null
 }
 
@@ -132,82 +114,93 @@ export interface BaseErrorDataShape {
 }
 
 export type CoreDataShape = Immutable<{
-  globalError: ApplicationErrorSource | null
+  /**
+   * Set to guard against double-initializing the context
+   */
+  hasIntializedMode: 'open' | 'run' | null
+  /**
+   * If there is an unhandled error
+   */
+  globalError: ApplicationErrorShape | null
+  /**
+   * Any data associated with internal development processes
+   */
   dev: DevStateShape
-  localSettings: LocalSettingsDataShape
-  app: AppDataShape
-  isLoadingGlobalProjects: boolean
-  globalProjects: string[] | null
+  /**
+   * All of the browsers that we have found on the machine
+   */
+  machineBrowsers: LoadingState<FoundBrowser[]>
+  /**
+   * Local cache data
+   */
+  localSettings: LoadingState<LocalSettingsDataShape>
+  globalProjects: LoadingState<string[]>
   currentProject: CurrentProjectShape | null
-  wizard: WizardDataShape
   user: AuthenticatedUserShape | null
   electron: ElectronShape
-  hasIntializedMode: 'open' | 'run' | null
+  /**
+   *
+   */
   isAuthBrowserOpened: boolean
+  /**
+   * Any warnings that have been
+   */
   warnings: Warning[]
+  /**
+   * Path to the Node.JS executable we should use to source config / plugins events
+   */
+  userNodePath: string | null
+  /**
+   * Version of the Node.JS executable we are using to source config / plugin events
+   */
+  userNodeVersion: string | null
 }>
 
-export interface ApplicationErrorSource {
-  title?: string
-  message: string
-  stack?: string
-}
-
-function makeCurrentProject (launchArgs: LaunchArgs): Immutable<CurrentProjectShape | null> {
+export function makeCurrentProject (launchArgs: Partial<LaunchArgs> = {}, loadingManager: LoadingManager): Draft<CurrentProjectShape> | null {
   if (launchArgs.global || !launchArgs.projectRoot) {
     return null
   }
+
+  // Synchronously check file paths. This is only done synchronously because they are:
+  // - very few / quick file lookups
+  // - simpler than forcing this to be async
+  // - typically paired with loading the project which takes awhile anyway
 
   return {
     cliBrowser: null,
     title: path.basename(launchArgs.projectRoot),
     projectRoot: launchArgs.projectRoot,
     currentTestingType: launchArgs.testingType ?? null,
-    isLoadingConfig: false,
-    isLoadingConfigPromise: null,
-    isLoadingPlugins: false,
-    config: null,
-    errorLoadingConfig: null,
-    errorLoadingPlugins: null,
+    preferences: null,
+    configChildProcess: null,
+    config: loadingManager.projectConfig.getState(),
+    pluginLoad: loadingManager.projectEventSetup.getState(),
+    watcher: null,
   }
 }
 
 /**
  * All state for the app should live here for now
  */
-export function makeCoreData (launchArgs: LaunchArgs): Immutable<CoreDataShape> {
+export function makeCoreData (launchArgs: Partial<LaunchArgs> = {}, loadingManager: LoadingManager): Immutable<CoreDataShape> {
   return {
     globalError: null,
     hasIntializedMode: null,
     dev: {
       refreshState: null,
     },
-    app: {
-      isLoadingMachineBrowsers: false,
-      loadingMachineBrowsers: null,
-      machineBrowsers: null,
-      refreshingNodePath: null,
-      nodePath: null,
-    },
-    localSettings: {
-      availableEditors: [],
-      preferences: devicePreferenceDefaults,
-      refreshing: null,
-    },
-    globalProjects: null,
-    isLoadingGlobalProjects: false,
+    machineBrowsers: loadingManager.machineBrowsers.getState(),
+    localSettings: loadingManager.localSettings.getState(),
+    globalProjects: loadingManager.globalProjects.getState(),
     isAuthBrowserOpened: false,
-    currentProject: makeCurrentProject(launchArgs),
-    wizard: {
-      chosenBundler: null,
-      chosenFramework: null,
-      chosenLanguage: 'js',
-      chosenManualInstall: false,
-    },
+    currentProject: makeCurrentProject(launchArgs, loadingManager),
     warnings: [],
     user: null,
     electron: {
+      app: null,
       browserWindow: null,
     },
+    userNodePath: null,
+    userNodeVersion: null,
   }
 }

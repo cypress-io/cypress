@@ -6,40 +6,89 @@ import _ from 'lodash'
 
 import type { DataContext } from '..'
 import type { Maybe } from '../data/coreDataShape'
+import assert from 'assert'
 
 export class ProjectDataSource {
   constructor (private ctx: DataContext) {}
+
+  private get currentProject () {
+    const p = this.ctx.currentProject
+
+    assert(p, `Expected currentProject to exist`)
+
+    return p
+  }
+
+  get data () {
+    return this.currentProject
+  }
+
+  get projectRoot () {
+    return this.currentProject.projectRoot
+  }
+
+  get currentTestingType () {
+    return this.currentProject.currentTestingType ?? null
+  }
+
+  get currentBrowser () {
+    return this.currentProject.currentBrowser ?? null
+  }
+
+  get isLoadingPlugins () {
+    return this.currentProject.pluginLoad.state === 'LOADING'
+  }
+
+  get isLoadingConfig () {
+    return this.currentProject.config.state === 'LOADING'
+  }
+
+  get configFilePath (): string {
+    // return
+  }
+
+  get configFileExists (): string {
+    // return
+  }
 
   private get api () {
     return this.ctx._apis.projectApi
   }
 
-  async projectId (projectRoot: string) {
-    const config = this.getLoadedConfig()
+  projectId () {
+    const config = this.loadedConfig()
 
     return config?.projectId ?? null
   }
 
-  projectTitle (projectRoot: string) {
-    return path.basename(projectRoot)
+  get projectTitle () {
+    return path.basename(this.projectRoot)
   }
 
-  getLoadedConfig () {
-    return this.ctx.currentProject?.config
+  loadedConfig () {
+    if (this.currentProject.pluginLoad.state === 'LOADED') {
+      return this.currentProject.pluginLoad.value
+    }
+
+    if (this.currentProject.config.state === 'LOADED') {
+      return this.currentProject.config.value
+    }
+
+    return null
   }
 
   async findSpecs (specType: Maybe<SpecType> = null) {
-    const config = this.ctx.currentProject?.config
+    const config = this.loadedConfig()
 
-    if (!this.ctx.currentProject || !config) {
+    if (!this.currentProject || !config) {
       return null
     }
 
     const specs = await this.api.findSpecs({
-      projectRoot: this.ctx.currentProject.projectRoot,
+      projectRoot: this.currentProject.projectRoot,
       fixturesFolder: config.fixturesFolder ?? false,
       supportFile: config.supportFile ?? false,
-      testFiles: Array.from(config.testFiles ?? []),
+      testFiles: (config.testFiles as string[]) ?? [],
       ignoreTestFiles: config.ignoreTestFiles as string[] ?? [],
       componentFolder: config.projectRoot ?? false,
       integrationFolder: config.integrationFolder ?? '',
@@ -73,7 +122,7 @@ export class ProjectDataSource {
   }
 
   getResolvedConfigFields (): ResolvedFromConfig[] | null {
-    const config = this.ctx.currentProject?.config
+    const config = this.loadedConfig()
 
     if (!config) {
       return null
@@ -96,13 +145,17 @@ export class ProjectDataSource {
       })
     }
 
-    return Object.entries(config.resolved).map(([key, value]) => {
+    return Object.entries(config).map(([key, value]) => {
       if (key === 'env' && value) {
         return mapEnvResolvedConfigToObj(value)
       }
 
       return { ...value, field: key }
     }) as ResolvedFromConfig[]
+  }
+
+  needsCypressJsonMigration () {
+    //
   }
 
   isCTConfigured () {
@@ -114,15 +167,15 @@ export class ProjectDataSource {
   }
 
   private async isTestingTypeConfigured (testingType: 'e2e' | 'component') {
-    if (!this.ctx.currentProject) {
+    if (!this.currentProject) {
       return false
     }
 
-    const config = this.ctx.currentProject.config
+    const config = this.currentProject.config
 
     try {
       if (!config) {
-        return true
+        return false
       }
 
       if (testingType === 'e2e') {
@@ -143,10 +196,10 @@ export class ProjectDataSource {
     }
   }
 
-  async getProjectPreferences (projectTitle: string) {
+  async getProjectPreferences () {
     const preferences = await this.api.getProjectPreferencesFromCache()
 
-    return preferences[projectTitle] ?? null
+    return preferences[this.projectTitle] ?? null
   }
 
   frameworkLoader = this.ctx.loader<string, FrontendFramework | null>((projectRoots) => {
@@ -167,19 +220,13 @@ export class ProjectDataSource {
   }
 
   async getCodeGenGlob (type: CodeGenType) {
-    const project = this.ctx.currentProject
-
-    if (!project) {
-      throw Error(`Cannot find glob without currentProject.`)
-    }
-
     const looseComponentGlob = '/**/*.{js,jsx,ts,tsx,.vue}'
 
     if (type === 'story') {
       return STORYBOOK_GLOB
     }
 
-    const framework = await this.frameworkLoader.load(project.projectRoot)
+    const framework = await this.frameworkLoader.load(this.currentProject.projectRoot)
 
     return framework?.glob ?? looseComponentGlob
   }
@@ -191,39 +238,23 @@ export class ProjectDataSource {
       return this.ctx.storybook.getStories()
     }
 
-    const project = this.ctx.currentProject
+    const project = this.currentProject
 
     if (!project || !project.config) {
       throw Error(`Cannot find components without currentProject.`)
     }
 
-    const config = project.config
-    const codeGenCandidates = await this.ctx.file.getFilesByGlob(config.projectRoot || process.cwd(), glob)
+    const config = this.ctx.loadedVal(project.config)
+    const codeGenCandidates = await this.ctx.file.getFilesByGlob(this.projectRoot || process.cwd(), glob)
 
     return codeGenCandidates.map(
       (file) => {
         return this.ctx.file.normalizeFileToFileParts({
           absolute: file,
           projectRoot: project.projectRoot,
-          searchFolder: project.projectRoot ?? config.componentFolder,
+          searchFolder: project.projectRoot ?? config?.componentFolder,
         })
       },
     )
-  }
-
-  async needsOnboarding () {
-    if (this.ctx.currentProject?.currentTestingType === 'e2e') {
-      if (await this.ctx.project.isE2EConfigured()) {
-        return false
-      }
-    }
-
-    if (this.ctx.currentProject?.currentTestingType === 'component') {
-      if (await this.ctx.project.isCTConfigured()) {
-        return false
-      }
-    }
-
-    return true
   }
 }

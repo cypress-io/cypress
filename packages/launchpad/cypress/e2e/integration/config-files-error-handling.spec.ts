@@ -1,5 +1,5 @@
 describe('Config files error handling', () => {
-  it('it handles multiples config files', () => {
+  it('it handles multiple config files', () => {
     cy.openModeSystemTest('pristine-with-config-file')
     cy.visitLaunchpad()
 

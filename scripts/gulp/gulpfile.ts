@@ -15,7 +15,6 @@ import { viteApp, viteCleanApp, viteCleanLaunchpad, viteLaunchpad, viteBuildApp,
 import { checkTs } from './tasks/gulpTsc'
 import { makePathMap } from './utils/makePathMap'
 import { makePackage } from './tasks/gulpMakePackage'
-import { setGulpGlobal } from './gulpConstants'
 import { exitAfterAll } from './tasks/gulpRegistry'
 import { execSync } from 'child_process'
 import { webpackRunner } from './tasks/gulpWebpack'
@@ -60,48 +59,29 @@ gulp.task(
 
 gulp.task(
   'dev',
-  gulp.series(
-    makePathMap,
-    gulp.parallel(
-      viteClean,
-      'codegen',
+  gulp.parallel(
+    webpackRunner,
+    gulp.series(
+      gulp.parallel(
+        viteClean,
+        'codegen',
+      ),
+
+      killExistingCypress,
+
+      // Now that we have the codegen, we can start the frontend(s)
+      gulp.parallel(
+        viteApp,
+        viteLaunchpad,
+        e2eTestScaffoldWatch,
+      ),
+
+      symlinkViteProjects,
+
+      // And we're finally ready for electron, watching for changes in
+      // /graphql to auto-restart the server
+      startCypressWatch,
     ),
-
-    killExistingCypress,
-
-    // Now that we have the codegen, we can start the frontend(s)
-    gulp.parallel(
-      viteApp,
-      viteLaunchpad,
-      webpackRunner,
-      e2eTestScaffoldWatch,
-    ),
-
-    symlinkViteProjects,
-
-    // And we're finally ready for electron, watching for changes in
-    // /graphql to auto-restart the server
-    startCypressWatch,
-  ),
-)
-
-gulp.task(
-  'debug',
-  gulp.series(
-    async function setupDebug () {
-      setGulpGlobal('debug', '--inspect')
-    },
-    'dev',
-  ),
-)
-
-gulp.task(
-  'debugBrk',
-  gulp.series(
-    async function setupDebugBrk () {
-      setGulpGlobal('debug', '--inspect-brk')
-    },
-    'dev',
   ),
 )
 
@@ -137,15 +117,18 @@ gulp.task(
 
 gulp.task('watchForE2E', gulp.series(
   'codegen',
-  gulp.parallel(
-    gulp.series(
-      viteBuildAndWatchLaunchpad,
-      viteBuildAndWatchApp,
+  gulp.series(
+    makePathMap,
+    gulp.parallel(
+      gulp.series(
+        viteBuildAndWatchLaunchpad,
+        viteBuildAndWatchApp,
+      ),
+      webpackRunner,
     ),
-    webpackRunner,
+    symlinkViteProjects,
+    e2eTestScaffold,
   ),
-  symlinkViteProjects,
-  e2eTestScaffold,
 ))
 
 /**------------------------------------------------------------------------
@@ -277,13 +260,6 @@ gulp.task(viteBuildApp)
 gulp.task(viteBuildLaunchpad)
 gulp.task(viteBuildAndWatchApp)
 gulp.task(viteBuildAndWatchLaunchpad)
-
-gulp.task('debugCypressLaunchpad', gulp.series(
-  async function setupDebugBrk () {
-    setGulpGlobal('debug', '--inspect-brk')
-  },
-  openCypressLaunchpad,
-))
 
 gulp.task(e2eTestScaffoldWatch)
 gulp.task(e2eTestScaffold)

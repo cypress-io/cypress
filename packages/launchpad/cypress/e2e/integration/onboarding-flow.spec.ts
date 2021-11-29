@@ -11,17 +11,17 @@ describe('Onboarding Flow', () => {
     cy.get('[data-cy=select-bundler]').click()
     cy.get('[data-cy-bundler=webpack]').click()
     cy.get('[data-cy=select-bundler]').should('contain', 'Webpack')
-    cy.reload()
-    cy.get('[data-cy=select-framework]').should('contain', 'Vue')
-    cy.get('[data-cy=select-bundler]').should('contain', 'Webpack')
     cy.findByText('Next Step').click()
     cy.get('h1').should('contain', 'Dependencies')
   })
 
   it('redirects to initialize plugin if CT is configured', () => {
     cy.openModeSystemTest('unify-onboarding-with-config')
-
     cy.visitLaunchpad()
+    cy.withCtx((ctx) => {
+      // console.log(ctx.coreData.currentProject)
+    })
+
     cy.get('[data-cy-testingType=component]').click()
     cy.get('h1').should('contain', 'Initializing Browsers...')
   })

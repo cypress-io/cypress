@@ -1,8 +1,12 @@
-const _ = require('lodash')
-const debug = require('debug')('cypress:server:validation')
-const is = require('check-more-types')
-const { commaListsOr } = require('common-tags')
-const path = require('path')
+import _ from 'lodash'
+import debugLib from 'debug'
+import is from 'check-more-types'
+import { commaListsOr } from 'common-tags'
+import path from 'path'
+import { URL } from 'url'
+import type { ClientCertificate } from '@packages/types'
+
+const debug = debugLib('cypress:server:validation')
 
 // validation functions take a key and a value and should:
 //  - return true if it passes validation
@@ -125,7 +129,7 @@ const isPlainObject = (key, value) => {
   return errMsg(key, value, 'a plain object')
 }
 
-const isOneOf = (...values) => {
+const isOneOf = (...values: any[]) => {
   return (key, value) => {
     if (values.some((v) => {
       if (typeof value === 'function') {
@@ -137,7 +141,7 @@ const isOneOf = (...values) => {
       return true
     }
 
-    const strings = values.map(str).join(', ')
+    const strings = values.map((v) => str(v)).join(', ')
 
     return errMsg(key, value, `one of these values: ${strings}`)
   }
@@ -147,14 +151,14 @@ const isOneOf = (...values) => {
  * Validates whether the supplied set of cert information is valid
  * @returns {string|true} Returns `true` if the information set is valid. Returns an error message if it is not.
  */
-const isValidClientCertificatesSet = (_key, certsForUrls) => {
+const isValidClientCertificatesSet = (_key, certsForUrls: ClientCertificate[]) => {
   debug('clientCerts: %o', certsForUrls)
 
   if (!Array.isArray(certsForUrls)) {
     return errMsg(`clientCertificates.certs`, certsForUrls, 'an array of certs for URLs')
   }
 
-  let urls = []
+  let urls: string[] = []
 
   for (let i = 0; i < certsForUrls.length; i++) {
     debug(`Processing clientCertificates: ${i}`)
@@ -223,9 +227,11 @@ const isValidClientCertificatesSet = (_key, certsForUrls) => {
       }
     }
 
-    for (let k = 0; k < certsForUrl.ca.length; k++) {
-      if (path.isAbsolute(certsForUrl.ca[k])) {
-        return errMsg(`clientCertificates[${k}].ca[${k}]`, certsForUrl.ca[k], 'a relative filepath')
+    if (certsForUrl.ca?.length) {
+      for (let k = 0; k < certsForUrl.ca?.length; k++) {
+        if (path.isAbsolute(certsForUrl.ca[k])) {
+          return errMsg(`clientCertificates[${k}].ca[${k}]`, certsForUrl.ca[k], 'a relative filepath')
+        }
       }
     }
   }
@@ -233,7 +239,7 @@ const isValidClientCertificatesSet = (_key, certsForUrls) => {
   return true
 }
 
-module.exports = {
+export default {
   isValidClientCertificatesSet,
 
   isValidBrowser,

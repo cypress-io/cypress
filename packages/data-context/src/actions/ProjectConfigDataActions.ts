@@ -4,11 +4,9 @@ import path from 'path'
 import { EventEmitter } from 'events'
 import pDefer from 'p-defer'
 import { isCypressError } from '@packages/types'
-import type { Immutable } from 'immer'
-
 import type { DataContext } from '..'
 import inspector from 'inspector'
-import type { CurrentProjectShape } from '../data'
+import type { ProjectDataSource } from '../sources'
 
 interface ForkConfigProcessOptions {
   projectRoot: string
@@ -19,7 +17,7 @@ interface ForkConfigProcessOptions {
  * Manages the lifecycle of the Config sourcing & Plugin execution
  */
 export class ProjectConfigDataActions {
-  constructor (private ctx: DataContext, private currentProject: Immutable<CurrentProjectShape>) {}
+  constructor (private ctx: DataContext, private currentProject: ProjectDataSource) {}
 
   static CHILD_PROCESS_FILE_PATH = path.join(__dirname, '../../../server/lib/util', 'require_async_child.js')
 
@@ -34,16 +32,12 @@ export class ProjectConfigDataActions {
     }
   }
 
-  refreshProjectConfig (configFilePath: string) {
-    if (!this.ctx.currentProject) {
-      throw new Error('Can\'t refresh project config without current project')
-    }
-
+  refreshProjectConfig () {
     this.killConfigProcess()
 
     const process = this.forkConfigProcess({
-      projectRoot: this.ctx.currentProject.projectRoot,
-      configFilePath,
+      projectRoot: this.currentProject.projectRoot,
+      configFilePath: this.currentProject.configFilePath,
     })
     const dfd = pDefer<Cypress.ConfigOptions>()
 
@@ -61,7 +55,7 @@ export class ProjectConfigDataActions {
 
     this.wrapConfigProcess(process, dfd)
 
-    return dfd.promise as Cypress.ConfigOptions
+    return dfd.promise
   }
 
   private forkConfigProcess (opts: ForkConfigProcessOptions) {
@@ -74,7 +68,7 @@ export class ProjectConfigDataActions {
         ...process.env,
         NODE_OPTIONS: process.env.ORIGINAL_NODE_OPTIONS || '',
       },
-      execPath: this.ctx.nodePath ?? undefined,
+      execPath: this.ctx.coreData.userNodePath ?? undefined,
     }
 
     if (inspector.url()) {

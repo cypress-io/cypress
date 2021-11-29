@@ -4,13 +4,14 @@ import { app, nativeImage as image } from 'electron'
 // eslint-disable-next-line no-duplicate-imports
 import type { WebContents } from 'electron'
 import cyIcons from '@cypress/icons'
+import { makeGraphQLServer } from '@packages/graphql/src/makeGraphQLServer'
+
 import savedState from '../saved_state'
 import menu from '../gui/menu'
 import Events from '../gui/events'
 import * as Windows from '../gui/windows'
-import { runInternalServer } from './internal-server'
 import type { LaunchArgs, PlatformName } from '@packages/types'
-import EventEmitter from 'events'
+import type { DataContext } from '@packages/data-context'
 
 const isDev = () => {
   // TODO: (tim) ensure the process.env.LAUNCHPAD gets removed before release
@@ -129,18 +130,20 @@ export = {
    * @param {import('@packages/types').LaunchArgs} options
    * @returns
    */
-  async ready (options: {projectRoot?: string} = {}) {
+  async ready (options: {projectRoot?: string} = {}, ctx: DataContext) {
+    ctx.actions.electron.setElectronApp(app)
     const { projectRoot } = options
-    const { bus, gqlPort, ctx } = process.env.LAUNCHPAD
-      ? await runInternalServer(options as LaunchArgs, 'open', app)
-      : { bus: new EventEmitter, gqlPort: undefined, ctx: null }
+    const [gqlPort] = await Promise.all([
+      makeGraphQLServer(ctx),
+      ctx.initializeMode(),
+    ])
 
     // TODO: potentially just pass an event emitter
     // instance here instead of callback functions
     menu.set({
       withDevTools: isDev(),
       onLogOutClicked () {
-        return bus.emit('menu:item:clicked', 'log:out')
+        return ctx.rootBus.emit('menu:item:clicked', 'log:out')
       },
       getGraphQLPort: () => {
         return ctx?.gqlServerPort
@@ -159,16 +162,16 @@ export = {
             return app.focus({ steal: true }) || win.focus()
           },
           os: os.platform() as PlatformName,
-        }, bus)
+        }, ctx.rootBus)
 
         return win
       })
     })
   },
 
-  async run (options) {
+  async run (options, ctx: DataContext) {
     await app.whenReady()
 
-    return this.ready(options)
+    return this.ready(options, ctx)
   },
 }

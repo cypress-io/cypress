@@ -1,11 +1,13 @@
 import type { CodeGenType, MutationSetProjectPreferencesArgs, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
-import type { CypressError, CypressErrorIdentifier, CypressErrorLike, FindSpecs, FoundBrowser, FoundSpec, FullConfig, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions, Preferences, SettingsOptions } from '@packages/types'
+import type { Ensure, CypressError, CypressErrorIdentifier, CypressErrorLike, FindSpecs, FoundBrowser, FoundSpec, FullConfig, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions, Preferences, SettingsOptions } from '@packages/types'
 import path from 'path'
-import type { Draft, Immutable } from 'immer'
+import type { Draft } from 'immer'
+
 import type { DataContext } from '..'
 import { codeGenerator, SpecOptions } from '../codegen'
 import templates from '../codegen/templates'
 import type { CurrentProjectShape } from '../data/coreDataShape'
+import type { ProjectDataSource } from '../sources'
 
 export interface ProjectApiShape {
   getConfig(projectRoot: string, options?: SettingsOptions): Promise<FullConfig>
@@ -15,7 +17,7 @@ export interface ProjectApiShape {
    * TODO(tim): figure out what this is actually doing, it seems it's necessary in
    *   order for CT to startup
    */
-  initializeProject(args: LaunchArgs, options: OpenProjectLaunchOptions<DataContext>, browsers: FoundBrowser[]): Promise<FoundBrowser[]>
+  initializeProject(args: Ensure<LaunchArgs, 'projectRoot' | 'testingType'>, options: OpenProjectLaunchOptions<DataContext>, browsers: FoundBrowser[]): Promise<FoundBrowser[]>
   launchProject(browser: FoundBrowser, spec: Cypress.Spec, options: LaunchOpts): void
   insertProjectToCache(projectRoot: string): void
   removeProjectFromCache(projectRoot: string): void
@@ -34,32 +36,7 @@ export interface ProjectApiShape {
  * project specified. Also isolates the project
  */
 export class CurrentProjectActions {
-  constructor (private ctx: DataContext, private currentProject: Immutable<CurrentProjectShape>) {}
-
-  private get projectRoot () {
-    return this.currentProject.projectRoot
-  }
-
-  /**
-   * Update function, ensures that we keep the readonly currentProject while
-   * being able to funnel all mutations through a single place. Will eventually
-   * replace with immer
-   */
-  private update (updater: (proj: Draft<CurrentProjectShape>) => void) {
-    this.ctx.update((o) => {
-      if (o.currentProject?.projectRoot === this.currentProject.projectRoot) {
-        updater(o.currentProject)
-      }
-    })
-
-    if (this.ctx.coreData.currentProject?.projectRoot === this.currentProject.projectRoot) {
-      this.currentProject = this.ctx.coreData.currentProject
-    }
-  }
-
-  private get api () {
-    return this.ctx._apis.projectApi
-  }
+  constructor (private ctx: DataContext, private currentProject: ProjectDataSource) {}
 
   async clearCurrentTestingType () {
     await this.api.closeActiveProject()
@@ -77,12 +54,16 @@ export class CurrentProjectActions {
     })
   }
 
+  /**
+   * When we set the current testing type, which happens as a mutation from the frontend,
+   * we want to kickoff the "loading" of any plugin events for the given testing type
+   */
   setCurrentTestingType (type: TestingTypeEnum) {
     this.update((p) => {
       p.currentTestingType = type
     })
 
-    this.setupPluginEvents()
+    this.ctx.loadingManager.projectEventSetup.reload()
   }
 
   /**
@@ -90,7 +71,7 @@ export class CurrentProjectActions {
    * ready to start the application
    */
   private isReadyForLaunch () {
-    return this.currentProject.currentBrowser && !(this.currentProject.errorLoadingConfig || this.currentProject.errorLoadingPlugins)
+    return this.currentProject.currentBrowser && this.ctx.loadedVal(this.currentProject.data.config)
   }
 
   /**
@@ -116,14 +97,6 @@ export class CurrentProjectActions {
    * the development server if we are in component testing mode
    */
   async setupPluginEvents () {
-    if (!this.currentProject.currentTestingType) {
-      throw Error('Cannot initialize project without choosing testingType')
-    }
-
-    if (this.currentProject.isLoadingPlugins) {
-      return
-    }
-
     this.update((p) => {
       p.isLoadingPlugins = true
       p.errorLoadingPlugins = null
@@ -131,9 +104,9 @@ export class CurrentProjectActions {
 
     const machineBrowsers = await this.ctx.actions.app.loadMachineBrowsers()
     const browsers = [...(machineBrowsers ?? [])]
-    const launchArgs: LaunchArgs = {
+    const launchArgs: Ensure<LaunchArgs, 'projectRoot' | 'testingType'> = {
       ...this.ctx.launchArgs,
-      projectRoot: this.projectRoot,
+      projectRoot: this.currentProject.projectRoot,
       testingType: this.currentProject.currentTestingType,
     }
 
@@ -256,7 +229,7 @@ export class CurrentProjectActions {
   }
 
   private findBrowerByPath (browserPath: string) {
-    return this.ctx.coreData?.app?.machineBrowsers?.find((browser) => browser.path === browserPath)
+    return this.ctx.loadedVal(this.ctx.coreData?.machineBrowsers)?.find((browser) => browser.path === browserPath)
   }
 
   createConfigFile (args: { configFilename: string, code: string }) {
@@ -282,17 +255,9 @@ export class CurrentProjectActions {
   }
 
   async createComponentIndexHtml (template: string) {
-    const project = this.currentProject
+    const indexHtmlPath = path.resolve(this.currentProject.projectRoot, 'cypress/component/support/index.html')
 
-    if (!project) {
-      throw Error(`Cannot create index.html without currentProject.`)
-    }
-
-    if (await this.ctx.project.isCTConfigured()) {
-      const indexHtmlPath = path.resolve(project.projectRoot, 'cypress/component/support/index.html')
-
-      await this.ctx.fs.outputFile(indexHtmlPath, template)
-    }
+    await this.ctx.fs.outputFile(indexHtmlPath, template)
   }
 
   async setProjectPreferences (args: MutationSetProjectPreferencesArgs) {
@@ -323,7 +288,7 @@ export class CurrentProjectActions {
     const getCodeGenPath = () => {
       return codeGenType === 'integration'
         ? this.ctx.path.join(
-          config.integrationFolder || this.projectRoot,
+          config.integrationFolder || this.currentProject.projectRoot,
           codeGenCandidate,
         )
         : codeGenCandidate
@@ -331,7 +296,7 @@ export class CurrentProjectActions {
     const getSearchFolder = () => {
       return (codeGenType === 'integration'
         ? config.integrationFolder
-        : config.componentFolder) || this.projectRoot
+        : config.componentFolder) || this.currentProject.projectRoot
     }
 
     const specFileExtension = getFileExtension()
@@ -360,7 +325,7 @@ export class CurrentProjectActions {
       absolute: newSpec.file,
       searchFolder,
       specType: codeGenType === 'integration' ? 'integration' : 'component',
-      projectRoot: this.projectRoot,
+      projectRoot: this.currentProject.projectRoot,
       specFileExtension,
     })
 
@@ -374,57 +339,15 @@ export class CurrentProjectActions {
    * Loads the config for the project, signaling the state of loading via the
    * isLoadingConfig property on the project
    */
-  loadConfig (): Promise<FullConfig> {
-    let isLoadingConfigPromise = this.currentProject.isLoadingConfigPromise
-
-    if (!isLoadingConfigPromise) {
-      this.loadConfigExecution()
-      this.update((proj) => {
-        proj.isLoadingConfig = true
-        proj.errorLoadingConfig = null
-        proj.isLoadingConfigPromise = isLoadingConfigPromise
-      })
-    }
-
-    return isLoadingConfigPromise as Promise<FullConfig>
-  }
-
-  private async loadConfigExecution (): Promise<FullConfig | null> {
-    const { projectRoot } = this.currentProject
-
-    try {
-      const configFile = await this.ctx.config.getDefaultConfigBasename(projectRoot)
-      const fullConfig = await this.ctx._apis.projectApi.getConfig(projectRoot, { configFile })
-
-      this.ctx.debug('loadConfig %o', fullConfig)
-
-      this.update((proj) => {
-        proj.config = fullConfig
-      })
-
-      return fullConfig
-    } catch (e) {
-      this.ctx.debug('loadConfig error %o', e)
-      this.update((proj) => {
-        proj.errorLoadingConfig = this.ctx.prepError(e as Error, 'Cypress Configuration Error')
-      })
-
-      return null
-    } finally {
-      this.update((proj) => {
-        proj.isLoadingConfig = false
-        proj.isLoadingConfigPromise = null
-      })
-
-      this.ctx.emitter.toLaunchpad()
-    }
+  reloadConfig () {
+    this.ctx.loadingManager.projectConfig.reload()
   }
 
   setActiveBrowserById (id: string) {
     const browserId = this.ctx.fromId(id, 'Browser')
 
     // Ensure that this is a valid ID to set
-    const browser = this.ctx.appData.machineBrowsers?.find((b) => this.ctx.browser.idForBrowser(b) === browserId)
+    const browser = this.ctx.loadedVal(this.ctx.coreData.machineBrowsers)?.find((b) => this.ctx.browser.idForBrowser(b) === browserId)
 
     if (browser) {
       this.update((p) => {
@@ -439,8 +362,8 @@ export class CurrentProjectActions {
   }
 
   async scaffoldIntegration () {
-    const config = await this.loadConfig()
-    const integrationFolder = config.integrationFolder || this.projectRoot
+    const config = this.currentProject.loadedConfig()
+    const integrationFolder = config?.integrationFolder || this.currentProject.projectRoot
 
     const results = await codeGenerator(
       { templateDir: templates['scaffoldIntegration'], target: integrationFolder },
@@ -455,7 +378,7 @@ export class CurrentProjectActions {
       return {
         fileParts: this.ctx.file.normalizeFileToFileParts({
           absolute: res.file,
-          projectRoot: this.projectRoot,
+          projectRoot: this.currentProject.projectRoot,
           searchFolder: integrationFolder,
         }),
         codeGenResult: res,
@@ -474,32 +397,19 @@ export class CurrentProjectActions {
     await this.launchAppInBrowser()
   }
 
-  async setActiveBrowserFromCLI (finalBrowsers: FoundBrowser[]) {
-    const browserNameOrPath = this.currentProject.cliBrowser
-
-    if (!browserNameOrPath) {
-      return
-    }
-
-    this.update((p) => {
-      p.cliBrowser = null
-    })
-
-    try {
-      const browser = await this.ctx._apis.appApi.ensureAndGetByNameOrPath(browserNameOrPath, finalBrowsers)
-
-      if (browser) {
-        this.update((p) => {
-          p.currentBrowser = browser
-        })
+  /**
+   * Update function, ensures that we are only updating the current project if
+   * it hasn't been swapped out (we can remove this guard when we refactor closeActiveProject)
+   */
+  private update (updater: (proj: Draft<CurrentProjectShape>) => void) {
+    this.ctx.update((o) => {
+      if (o.currentProject?.projectRoot === this.currentProject.projectRoot) {
+        updater(o.currentProject)
       }
-    } catch (err) {
-      const e = err as Error
+    })
+  }
 
-      this.ctx.debug('Error getting browser by name or path (%s): %s', browserNameOrPath, e?.stack || e)
-      this.update((p) => {
-        p.browserErrorMessage = `The browser '${browserNameOrPath}' was not found on your system or is not supported by Cypress. Choose a browser below.`
-      })
-    }
+  private get api () {
+    return this.ctx._apis.projectApi
   }
 }

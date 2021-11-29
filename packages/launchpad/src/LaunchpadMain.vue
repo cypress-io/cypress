@@ -26,8 +26,12 @@
           v-else-if="!data.currentProject.currentTestingType"
           :gql="data.currentProject"
         />
-        <Wizard
-          v-else-if="data.currentProject.needsOnboarding"
+        <SetupComponentTestingWizard
+          v-else-if="data.currentProject.currentTestingType === 'component' && data.currentProject"
+          :gql="data"
+        />
+        <MigrationWizard
+          v-else-if="data.currentProject"
           :gql="data"
         />
         <OpenBrowserContainer
@@ -45,7 +49,7 @@
 <script lang="ts" setup>
 import { gql, useMutation, useQuery } from '@urql/vue'
 import { LaunchpadMainDocument, LaunchpadMain_ReloadConfigDocument, LaunchpadMain_ReloadPluginsDocument } from './generated/graphql'
-import Wizard from './setup/Wizard.vue'
+import SetupComponentTestingWizard from './setup/SetupComponentTestingWizard.vue'
 import GlobalPage from './global/GlobalPage.vue'
 import ErrorDisplay from './error/ErrorDisplay.vue'
 import OpenBrowserContainer from './setup/OpenBrowserContainer.vue'
@@ -90,7 +94,6 @@ fragment LaunchpadMain_Data on Query {
   currentProject {
     id
     currentTestingType
-    needsOnboarding
     isLoadingConfig
     ...TestingTypeCards
     errorLoadingConfig {
@@ -106,7 +109,7 @@ fragment LaunchpadMain_Data on Query {
   }
   isInGlobalMode
   ...GlobalPage
-  ...Wizard
+  ...SetupComponentTestingWizard
 }
 `
 

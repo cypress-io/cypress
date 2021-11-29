@@ -201,7 +201,7 @@ const findComponentSpecs = (searchFolder: string | undefined | false, integratio
   const ignoreTestFiles = [
     // test files can either be string[] or string.
     ...ignorePatternFromConfig,
-    `${integrationFolder }/**/*`,
+    `${integrationFolder}/**/*`,
   ]
 
   return findSpecsOfType(searchFolder, { ...commonSearchOptions, ignoreTestFiles }, specPattern)

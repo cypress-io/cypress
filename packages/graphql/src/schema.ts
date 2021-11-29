@@ -40,6 +40,7 @@ export const graphqlSchema = makeSchema({
   },
   plugins: [
     connectionPlugin({
+      includeNodesField: true,
       nonNullDefaults: {
         output: true,
       },

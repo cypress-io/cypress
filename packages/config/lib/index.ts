@@ -1,7 +1,7 @@
 const _ = require('lodash')
 const debug = require('debug')('cypress:config:validator')
 
-const { options, breakingOptions } = require('./options')
+import { options, breakingOptions } from './options'
 
 const dashesOrUnderscoresRe = /^(_-)+/
 
@@ -21,7 +21,24 @@ const defaultValues = createIndex(options, 'name', 'defaultValue')
 const publicConfigKeys = _(options).reject({ isInternal: true }).map('name').value()
 const validationRules = createIndex(options, 'name', 'validation')
 
-module.exports = {
+export function validate (cfg, onErr) {
+  debug('validating configuration')
+
+  return _.each(cfg, (value, key) => {
+    const validationFn = validationRules[key]
+
+    // key has a validation rule & value different from the default
+    if (validationFn && value !== defaultValues[key]) {
+      const result = validationFn(key, value)
+
+      if (result !== true) {
+        return onErr(result)
+      }
+    }
+  })
+}
+
+export default {
   allowed: (obj = {}) => {
     const propertyNames = publicConfigKeys.concat(breakingKeys)
 
@@ -58,22 +75,7 @@ module.exports = {
 
   options,
 
-  validate: (cfg, onErr) => {
-    debug('validating configuration')
-
-    return _.each(cfg, (value, key) => {
-      const validationFn = validationRules[key]
-
-      // key has a validation rule & value different from the default
-      if (validationFn && value !== defaultValues[key]) {
-        const result = validationFn(key, value)
-
-        if (result !== true) {
-          return onErr(result)
-        }
-      }
-    })
-  },
+  validate,
 
   validateNoBreakingConfig: (cfg, onWarning, onErr) => {
     breakingOptions.forEach(({ name, errorKey, newName, isWarning, value }) => {

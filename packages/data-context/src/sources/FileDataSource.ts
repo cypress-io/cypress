@@ -15,8 +15,6 @@ interface CreateFoundSpec extends CreateFileParts {
 }
 
 export class FileDataSource {
-  private watchedFilePaths = new Set<string>()
-
   constructor (private ctx: DataContext) {}
 
   readFile (absoluteFilePath: string) {
@@ -65,12 +63,6 @@ export class FileDataSource {
     } catch (e) {
       return []
     }
-  }
-
-  private trackFile () {
-    // this.watchedFilePaths.clear()
-    // this.fileLoader.clear()
-    // this.jsonFileLoader.clear()
   }
 
   private fileLoader = this.ctx.loader<string, string>((files) => {

@@ -23,7 +23,6 @@ const { t } = useI18n()
 gql`
 fragment OpenBrowserContainer on CurrentProject {
   id
-  browserErrorMessage
   currentTestingType
   isLoadingPlugins
   ...OpenBrowser

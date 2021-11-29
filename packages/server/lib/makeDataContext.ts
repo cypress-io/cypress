@@ -1,7 +1,5 @@
 import { DataContext } from '@packages/data-context'
 import os from 'os'
-import electron, { App } from 'electron'
-
 import specsUtil from './util/specs'
 import type {
   Editor,
@@ -21,7 +19,6 @@ import browserUtils from './browsers/utils'
 import auth from './gui/auth'
 import user from './user'
 import * as config from './config'
-import { EventEmitter } from 'events'
 import { openProject } from './open_project'
 import cache from './cache'
 import errors from './errors'
@@ -36,10 +33,7 @@ const { getBrowsers, ensureAndGetByNameOrPath } = browserUtils
 
 interface MakeDataContextOptions {
   mode: 'run' | 'open'
-  electronApp?: App
-  os: PlatformName
-  rootBus: EventEmitter
-  launchArgs: LaunchArgs
+  launchArgs?: Partial<LaunchArgs>
 }
 
 let legacyDataContext: DataContext | undefined
@@ -50,16 +44,11 @@ export async function clearLegacyDataContext () {
   legacyDataContext = undefined
 }
 
-export function makeLegacyDataContext (launchArgs: LaunchArgs = {} as LaunchArgs, mode: 'open' | 'run' = 'run'): DataContext {
+export function makeLegacyDataContext (options: MakeDataContextOptions = { mode: 'run' }): DataContext {
   if (legacyDataContext && process.env.LAUNCHPAD) {
     throw new Error(`Expected ctx to be passed as an arg, but used legacy data context`)
   } else if (!legacyDataContext) {
-    legacyDataContext = makeDataContext({
-      mode,
-      rootBus: new EventEmitter,
-      launchArgs,
-      os: os.platform() as PlatformName,
-    })
+    legacyDataContext = makeDataContext(options)
   }
 
   return legacyDataContext
@@ -75,99 +64,103 @@ export function getLegacyDataContext () {
 
 export function makeDataContext (options: MakeDataContextOptions): DataContext {
   const ctx = new DataContext({
+    os: os.platform() as PlatformName,
     schema: graphqlSchema,
     ...options,
+    launchArgs: options.launchArgs ?? {},
     launchOptions: {},
-    appApi: {
-      getBrowsers,
-      ensureAndGetByNameOrPath (nameOrPath: string, browsers: ReadonlyArray<FoundBrowser>) {
-        return ensureAndGetByNameOrPath(nameOrPath, false, browsers as FoundBrowser[]) as Promise<FoundBrowser>
+    apis: {
+      appApi: {
+        getBrowsers,
+        ensureAndGetByNameOrPath (nameOrPath: string, browsers: ReadonlyArray<FoundBrowser>) {
+          return ensureAndGetByNameOrPath(nameOrPath, false, browsers as FoundBrowser[]) as Promise<FoundBrowser>
+        },
+        findNodePath () {
+          return findSystemNode.findNodeInFullPath()
+        },
       },
-      findNodePath () {
-        return findSystemNode.findNodeInFullPath()
+      appDataApi: app_data,
+      authApi: {
+        getUser () {
+          return user.get()
+        },
+        logIn (onMessage) {
+          return auth.start(onMessage, 'launchpad')
+        },
+        logOut () {
+          return user.logOut()
+        },
       },
-    },
-    appDataApi: app_data,
-    authApi: {
-      getUser () {
-        return user.get()
+      projectApi: {
+        getConfig (projectRoot: string, options?: SettingsOptions) {
+          return config.get(projectRoot, options, ctx)
+        },
+        launchProject (browser: FoundBrowser, spec: Cypress.Spec, options?: LaunchOpts) {
+          return openProject.launch({ ...browser }, spec, options)
+        },
+        initializeProject (args: LaunchArgs, options: OpenProjectLaunchOptions<DataContext>, browsers: FoundBrowser[]) {
+          return openProject.create(args.projectRoot, args, options, browsers).then((p) => {
+            return (p.getConfig()?.browsers ?? []) as FoundBrowser[]
+          })
+        },
+        insertProjectToCache (projectRoot: string) {
+          cache.insertProject(projectRoot)
+        },
+        getProjectRootsFromCache () {
+          return cache.getProjectRoots()
+        },
+        findSpecs (payload: FindSpecs) {
+          return specsUtil.findSpecs(payload)
+        },
+        clearLatestProjectsCache () {
+          return cache.removeLatestProjects()
+        },
+        getProjectPreferencesFromCache () {
+          return cache.getProjectPreferences()
+        },
+        clearProjectPreferences (projectTitle: string) {
+          return cache.removeProjectPreferences(projectTitle)
+        },
+        clearAllProjectPreferences () {
+          return cache.removeAllProjectPreferences()
+        },
+        insertProjectPreferencesToCache (projectTitle: string, preferences: Preferences) {
+          cache.insertProjectPreferences(projectTitle, preferences)
+        },
+        removeProjectFromCache (path: string) {
+          return cache.removeProject(path)
+        },
+        closeActiveProject () {
+          return openProject.closeActiveProject()
+        },
+        error (type: CypressErrorIdentifier, ...args: any[]) {
+          return errors.get(type, ...args) as CypressError | CypressErrorLike
+        },
       },
-      logIn (onMessage) {
-        return auth.start(onMessage, 'launchpad')
+      electronApi: {
+        openExternal (url: string) {
+          return openExternal(url)
+        },
+        showItemInFolder (folder: string) {
+          require('electron').shell.showItemInFolder(folder)
+        },
       },
-      logOut () {
-        return user.logOut()
-      },
-    },
-    projectApi: {
-      getConfig (projectRoot: string, options?: SettingsOptions) {
-        return config.get(projectRoot, options, ctx)
-      },
-      launchProject (browser: FoundBrowser, spec: Cypress.Spec, options?: LaunchOpts) {
-        return openProject.launch({ ...browser }, spec, options)
-      },
-      initializeProject (args: LaunchArgs, options: OpenProjectLaunchOptions<DataContext>, browsers: FoundBrowser[]) {
-        return openProject.create(args.projectRoot, args, options, browsers).then((p) => {
-          return (p.getConfig()?.browsers ?? []) as FoundBrowser[]
-        })
-      },
-      insertProjectToCache (projectRoot: string) {
-        cache.insertProject(projectRoot)
-      },
-      getProjectRootsFromCache () {
-        return cache.getProjectRoots()
-      },
-      findSpecs (payload: FindSpecs) {
-        return specsUtil.findSpecs(payload)
-      },
-      clearLatestProjectsCache () {
-        return cache.removeLatestProjects()
-      },
-      getProjectPreferencesFromCache () {
-        return cache.getProjectPreferences()
-      },
-      clearProjectPreferences (projectTitle: string) {
-        return cache.removeProjectPreferences(projectTitle)
-      },
-      clearAllProjectPreferences () {
-        return cache.removeAllProjectPreferences()
-      },
-      insertProjectPreferencesToCache (projectTitle: string, preferences: Preferences) {
-        cache.insertProjectPreferences(projectTitle, preferences)
-      },
-      removeProjectFromCache (path: string) {
-        return cache.removeProject(path)
-      },
-      closeActiveProject () {
-        return openProject.closeActiveProject()
-      },
-      error (type: CypressErrorIdentifier, ...args: any[]) {
-        return errors.get(type, ...args) as CypressError | CypressErrorLike
-      },
-    },
-    electronApi: {
-      openExternal (url: string) {
-        return openExternal(url)
-      },
-      showItemInFolder (folder: string) {
-        electron.shell.showItemInFolder(folder)
-      },
-    },
-    localSettingsApi: {
-      setDevicePreference (key, value) {
-        return setDevicePreference(key, value)
-      },
+      localSettingsApi: {
+        setDevicePreference (key, value) {
+          return setDevicePreference(key, value)
+        },
 
-      async getPreferences () {
-        return getDevicePreferences()
-      },
-      async setPreferredOpener (editor: Editor) {
-        await setUserEditor(editor)
-      },
-      async getAvailableEditors () {
-        const { availableEditors } = await getUserEditor(true)
+        async getPreferences () {
+          return getDevicePreferences()
+        },
+        async setPreferredOpener (editor: Editor) {
+          await setUserEditor(editor)
+        },
+        async getAvailableEditors () {
+          const { availableEditors } = await getUserEditor(true)
 
-        return availableEditors
+          return availableEditors
+        },
       },
     },
   })

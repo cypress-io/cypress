@@ -90,11 +90,11 @@ export class SocketBase {
   }
 
   toReporter (event: string, data?: any) {
-    return this.io && this.io.to('reporter').emit(event, data)
+    return this._io && this._io.to('reporter').emit(event, data)
   }
 
   toRunner (event: string, data?: any) {
-    return this.io && this.io.to('runner').emit(event, data)
+    return this._io && this._io.to('runner').emit(event, data)
   }
 
   isSocketConnected (socket) {
@@ -102,7 +102,7 @@ export class SocketBase {
   }
 
   toDriver (event, ...data) {
-    return this.io && this.io.emit(event, ...data)
+    return this._io && this._io.emit(event, ...data)
   }
 
   onAutomation (socket, message, data, id) {
@@ -496,8 +496,10 @@ export class SocketBase {
         // adding this conditional to maintain backwards compat with
         // existing runner and reporter API.
         if (process.env.LAUNCHPAD) {
+          const { preferences } = await this.ctx.loadingManager.localSettings.toPromise()
+
           fileDetails.where = {
-            binary: this.ctx.coreData.localSettings.preferences.preferredEditorBinary || 'computer',
+            binary: preferences.preferredEditorBinary || 'computer',
           }
         }
 

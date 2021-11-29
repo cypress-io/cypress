@@ -5,6 +5,7 @@ import { TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
 import { FileDetailsInput } from '../inputTypes/gql-FileDetailsInput'
 import { CodeGenResultWithFileParts } from './gql-CodeGenResult'
 import { GeneratedSpec } from './gql-GeneratedSpec'
+import { LocalSettingsPreferences } from './gql-LocalSettings'
 
 export const mutation = mutationType({
   definition (t) {
@@ -206,7 +207,7 @@ export const mutation = mutationType({
       type: 'Query',
       description: 'Retries loading the project config, called when there was an error sourcing the config',
       resolve: (source, args, ctx) => {
-        ctx.actions.currentProject?.loadConfig()
+        ctx.actions.currentProject?.reloadConfig()
 
         return {}
       },
@@ -274,15 +275,15 @@ export const mutation = mutationType({
       },
     })
 
-    t.liveMutation('setAutoScrollingEnabled', {
-      type: 'Boolean',
+    t.field('setAutoScrollingEnabled', {
+      type: LocalSettingsPreferences,
       args: {
         value: nonNull(booleanArg()),
       },
       resolve: async (_, args, ctx) => {
         await ctx.actions.localSettings.setDevicePreference('autoScrollingEnabled', args.value)
 
-        return true
+        return ctx.loadedVal(ctx.coreData.localSettings)?.preferences ?? null
       },
     })
 

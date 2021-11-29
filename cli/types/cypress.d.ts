@@ -2501,6 +2501,7 @@ declare namespace Cypress {
   }
 
   interface PEMCert {
+    pfx?: never
     /**
      * Path to the certificate file, relative to project root.
      */
@@ -2516,6 +2517,8 @@ declare namespace Cypress {
   }
 
   interface PFXCert {
+    key?: never
+    cert?: never
     /**
      * Path to the certificate container, relative to project root.
      */
