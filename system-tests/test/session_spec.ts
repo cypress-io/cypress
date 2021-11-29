@@ -4,6 +4,8 @@ import BodyParser from 'body-parser'
 
 const it = systemTests.it
 
+process.env.CYPRESS_INTERNAL_ENV = 'development'
+
 const onServer = function (app) {
   app.use(parser())
 
