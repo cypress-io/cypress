@@ -280,6 +280,8 @@ const expectedAddedVideoSnapshotLines = [
 const expectedDeletedVideoSnapshotLines = [
   '(Video)', '',
   '-  Started processing:  Compressing to 32 CRF',
+  '-  Finished processing: /XXX/XXX/XXX/cypress/videos/form_submission_passing_spec.js     (X second)',
+  '                        .mp4',
 ]
 const sometimesAddedVideoSnapshotLine = '│ Video:        false                                                                            │'
 const sometimesDeletedVideoSnapshotLine = '│ Video:        true                                                                             │'
