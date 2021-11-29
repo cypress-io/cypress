@@ -91,7 +91,7 @@ describe('Launchpad: Open Mode', () => {
 
       cy.get('[data-cy="choose-editor-modal"]').as('modal')
 
-      cy.intercept('POST', 'mutation-SetPreferredEditorBinary').as('SetPreferred')
+      cy.intercept('POST', 'mutation-ChooseExternalEditorModal_SetPreferredEditorBinary').as('SetPreferred')
       cy.get('@modal').contains('Choose your editor...').click()
       cy.get('@modal').contains('Well known editor').click()
       cy.get('@modal').contains('Done').click()

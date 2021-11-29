@@ -1,24 +1,31 @@
-import type { DevicePreferences, Editor } from '@packages/types'
+import type { AllowedState, Editor } from '@packages/types'
+
 import type { DataContext } from '..'
 
 export interface LocalSettingsApiShape {
-  setPreferredOpener(editor: Editor): Promise<void>
   getAvailableEditors(): Promise<Editor[]>
-  getPreferences (): Promise<DevicePreferences>
-  setDevicePreference<K extends keyof DevicePreferences> (key: K, value: DevicePreferences[K]): Promise<void>
+
+  getPreferences (): Promise<AllowedState>
+  setPreferences (object: AllowedState): Promise<void>
 }
 
 export class LocalSettingsActions {
   constructor (private ctx: DataContext) {}
 
-  setDevicePreference<K extends keyof DevicePreferences> (key: K, value: DevicePreferences[K]) {
+  setDevicePreference (stringifiedJson: string) {
+    const toJson = JSON.parse(stringifiedJson) as AllowedState
+
     this.ctx.update((o) => {
       if (o.localSettings.state === 'LOADED') {
+        for (const [key, value] of Object.entries(toJson)) {
+          o.localSettings.value[key as keyof AllowedState] = value as any
+        }
+
         o.localSettings.value.preferences[key] = value
       }
     })
 
-    return this.ctx._apis.localSettingsApi.setDevicePreference(key, value)
+    return this.ctx._apis.localSettingsApi.setPreferences(toJson)
   }
 
   async refreshLocalSettings () {

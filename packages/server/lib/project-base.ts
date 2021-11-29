@@ -17,7 +17,7 @@ import cwd from './cwd'
 import errors from './errors'
 import Reporter from './reporter'
 import runEvents from './plugins/run_events'
-import savedState from './saved_state'
+import * as savedState from './saved_state'
 import scaffold from './scaffold'
 import { ServerE2E } from './server-e2e'
 import system from './util/system'
@@ -47,8 +47,8 @@ export interface Cfg extends ReceivedCypressOptions {
   proxyServer?: Cypress.RuntimeConfigOptions['proxyUrl']
   exit?: boolean
   state?: {
-    firstOpened?: number
-    lastOpened?: number
+    firstOpened?: number | null
+    lastOpened?: number | null
   }
 }
 
@@ -777,19 +777,17 @@ export class ProjectBase<TServer extends Server> extends EE {
     let state = await savedState.create(this.projectRoot, this.cfg.isTextTerminal)
 
     state.set(stateChanges)
-    state = await state.get()
-    this.cfg.state = state
+    this.cfg.state = await state.get()
 
-    return state
+    return this.cfg.state
   }
 
   async _setSavedState (cfg: Cfg) {
     debug('get saved state')
 
-    let state = await savedState.create(this.projectRoot, cfg.isTextTerminal)
+    const state = await savedState.create(this.projectRoot, cfg.isTextTerminal)
 
-    state = await state.get()
-    cfg.state = state
+    cfg.state = await state.get()
 
     return cfg
   }

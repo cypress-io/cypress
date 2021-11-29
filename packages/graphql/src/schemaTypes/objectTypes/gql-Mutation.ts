@@ -5,7 +5,6 @@ import { TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
 import { FileDetailsInput } from '../inputTypes/gql-FileDetailsInput'
 import { CodeGenResultWithFileParts } from './gql-CodeGenResult'
 import { GeneratedSpec } from './gql-GeneratedSpec'
-import { LocalSettingsPreferences } from './gql-LocalSettings'
 
 export const mutation = mutationType({
   definition (t) {
@@ -275,51 +274,19 @@ export const mutation = mutationType({
       },
     })
 
-    t.field('setAutoScrollingEnabled', {
-      type: LocalSettingsPreferences,
-      args: {
-        value: nonNull(booleanArg()),
-      },
-      resolve: async (_, args, ctx) => {
-        await ctx.actions.localSettings.setDevicePreference('autoScrollingEnabled', args.value)
-
-        return ctx.loadedVal(ctx.coreData.localSettings)?.preferences ?? null
-      },
-    })
-
-    t.liveMutation('setUseDarkSidebar', {
+    t.liveMutation('setPreferences', {
       type: 'Boolean',
-      args: {
-        value: nonNull(booleanArg()),
-      },
-      resolve: async (_, args, ctx) => {
-        await ctx.actions.localSettings.setDevicePreference('useDarkSidebar', args.value)
-
-        return true
-      },
-    })
-
-    t.liveMutation('setWatchForSpecChange', {
-      type: 'Boolean',
-      args: {
-        value: nonNull(booleanArg()),
-      },
-      resolve: async (_, args, ctx) => {
-        await ctx.actions.localSettings.setDevicePreference('watchForSpecChange', args.value)
-
-        return true
-      },
-    })
-
-    t.liveMutation('setPreferredEditorBinary', {
-      type: 'Boolean',
+      description: [
+        'Update local preferences (also known as  appData).',
+        'The payload, `value`, should be a `JSON.stringified()`',
+        'object of the new values you\'d like to persist.',
+        'Example: `setPreferences (value: JSON.stringify({ lastOpened: Date.now() }))`',
+      ].join(' '),
       args: {
         value: nonNull(stringArg()),
       },
       resolve: async (_, args, ctx) => {
-        await ctx.actions.localSettings.setDevicePreference('preferredEditorBinary', args.value)
-
-        return true
+        await ctx.actions.localSettings.setPreferences(args.value)
       },
     })
 

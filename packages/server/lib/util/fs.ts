@@ -11,6 +11,7 @@ interface PromisifiedFsExtra {
   ensureSymlinkAsync: Promisified<typeof fsExtra.ensureSymlink>
   ensureDirAsync: Promisified<typeof fsExtra.ensureDir>
   writeFileAsync: Promisified<typeof fsExtra.writeFileSync>
+  pathExistsAsync: Promisified<typeof fsExtra.pathExistsSync>
 }
 
 // warn users if somehow synchronous file methods are invoked

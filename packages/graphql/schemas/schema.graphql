@@ -277,6 +277,9 @@ type CurrentProject implements Node & ProjectLike {
   """
   config: JSON
 
+  """Config File Absolute Path"""
+  configFileAbsolutePath: String
+
   """
   Whether the config file has already been created. Helps determine description
   """
@@ -496,6 +499,7 @@ type LocalSettings {
 """local setting preferences"""
 type LocalSettingsPreferences {
   autoScrollingEnabled: Boolean
+  isSpecsListOpen: Boolean
   preferredEditorBinary: String
   proxyBypass: String
   proxyServer: String
@@ -589,13 +593,14 @@ type Mutation {
 
   """Set active project to run tests on"""
   setActiveProject(path: String!): Query
-  setAutoScrollingEnabled(value: Boolean!): LocalSettingsPreferences
-  setPreferredEditorBinary(value: String!): Boolean
+
+  """
+  Update local preferences (also known as  appData). The payload, `value`, should be a `JSON.stringified()` object of the new values you'd like to persist. Example: `setPreferences (value: JSON.stringify({ lastOpened: Date.now() }))`
+  """
+  setPreferences(value: String!): Boolean
 
   """Save the projects preferences to cache"""
   setProjectPreferences(browserPath: String!, testingType: TestingTypeEnum!): Query!
-  setUseDarkSidebar(value: Boolean!): Boolean
-  setWatchForSpecChange(value: Boolean!): Boolean
 
   """show the launchpad at the browser picker step"""
   showElectronOnAppExit: Boolean
@@ -706,7 +711,7 @@ type Query {
   """Whether we are loading the projects"""
   isLoadingGlobalProjects: Boolean!
 
-  """editors on the user local machine"""
+  """local settings on a device-by-device basis"""
   localSettings: LocalSettings!
 
   """All known projects for the app"""

@@ -61,7 +61,6 @@
 
 <script lang="ts" setup>
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { useI18n } from '@cy/i18n'
 import { REPORTER_ID, RUNNER_ID, getRunnerElement, getReporterElement, empty } from '../runner/utils'
 import { gql } from '@urql/core'
 import InlineSpecList from '../specs/InlineSpecList.vue'
@@ -103,7 +102,6 @@ const eventManager = getEventManager()
 const autStore = useAutStore()
 const screenshotStore = useScreenshotStore()
 const runnerUiStore = useRunnerUiStore()
-const { t } = useI18n()
 
 const runnerPane = ref<HTMLDivElement>()
 

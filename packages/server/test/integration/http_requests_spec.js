@@ -43,7 +43,7 @@ zlib = Promise.promisifyAll(zlib)
 // force supertest-session to use promises provided in supertest
 const session = proxyquire('supertest-session', { supertest })
 
-const absolutePathRegex = /"\/[^{}]*?\.projects/g
+const absolutePathRegex = /"\/[^{}]*?cy-projects/g
 let sourceMapRegex = /\n\/\/# sourceMappingURL\=.*/
 
 const replaceAbsolutePaths = (content) => {
@@ -83,7 +83,8 @@ let ctx
 describe('Routes', () => {
   require('mocha-banner').register()
 
-  beforeEach(function () {
+  beforeEach(async function () {
+    await Fixtures.scaffoldCommonNodeModules()
     ctx = makeLegacyDataContext()
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 

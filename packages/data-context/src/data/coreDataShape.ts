@@ -1,8 +1,8 @@
-import type { TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
 import type { App, BrowserWindow } from 'electron'
+import type { FoundBrowser, FullConfig, Preferences, Editor, Warning, AllowedState, LaunchArgs } from '@packages/types'
+import type { TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
 import type { ChildProcess } from 'child_process'
 import path from 'path'
-import type { DevicePreferences, Editor, FoundBrowser, FullConfig, LaunchArgs, Preferences, Warning } from '@packages/types'
 import type { Draft, Immutable, Patch } from 'immer'
 import type { LoadingState } from '../util'
 import type { LoadingManager } from './LoadingManager'
@@ -34,7 +34,7 @@ export interface DevStateShape {
 
 export type LocalSettingsDataShape = Immutable<{
   availableEditors: Editor[]
-  preferences: DevicePreferences
+  preferences: AllowedState
 }>
 
 export interface ConfigChildProcessShape {

@@ -6,7 +6,7 @@ import type { WebContents } from 'electron'
 import cyIcons from '@cypress/icons'
 import { makeGraphQLServer } from '@packages/graphql/src/makeGraphQLServer'
 
-import savedState from '../saved_state'
+import * as savedState from '../saved_state'
 import menu from '../gui/menu'
 import Events from '../gui/events'
 import * as Windows from '../gui/windows'

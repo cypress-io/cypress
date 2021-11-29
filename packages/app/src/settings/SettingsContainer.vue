@@ -64,7 +64,7 @@ mutation SettingsContainer_ReconfigureProject($testingType: TestingTypeEnum!) {
 
 gql`
 fragment SettingsContainer on Query {
-  ... TestingPreferences
+  ...TestingPreferences
   currentProject {
     id
     ...ProjectSettings

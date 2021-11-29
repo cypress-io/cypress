@@ -22,7 +22,7 @@ const publicConfigKeys = _(options).reject({ isInternal: true }).map('name').val
 const validationRules = createIndex(options, 'name', 'validation')
 
 export function validate (cfg, onErr) {
-  debug('validating configuration')
+  debug('validating configuration', cfg)
 
   return _.each(cfg, (value, key) => {
     const validationFn = validationRules[key]

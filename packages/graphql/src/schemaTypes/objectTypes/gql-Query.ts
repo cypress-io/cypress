@@ -85,8 +85,10 @@ export const Query = objectType({
 
     t.nonNull.field('localSettings', {
       type: LocalSettings,
-      description: 'editors on the user local machine',
-      resolve: (source, args, ctx) => ctx.loadingManager.localSettings.toPromise(),
+      description: 'local settings on a device-by-device basis',
+      resolve: (source, args, ctx) => {
+        return ctx.loadingManager.localSettings.toPromise()
+      },
     })
   },
 })
