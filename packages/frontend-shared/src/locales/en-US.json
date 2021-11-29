@@ -380,6 +380,11 @@
         }
       }
     },
+    "connectSuccessAlert": {
+      "title": "This project is now connected to the Cypress Dashboard!",
+      "item1": "We automatically added the {projectId} to your {configFile} file.",
+      "item2": "Please ensure that your {0} file is checked into source control."
+    },
     "empty": {
       "title": "Record your first run to the Cypress Dashboard",
       "description": "Run the command below in your local development terminal or in CI."

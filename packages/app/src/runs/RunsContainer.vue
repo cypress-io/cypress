@@ -1,4 +1,8 @@
 <template>
+  <RunsConnectSuccessAlert
+    v-if="currentProject"
+    :gql="currentProject"
+  />
   <RunsConnect
     v-if="!currentProject?.projectId || !cloudViewer?.id"
     :gql="props.gql"
@@ -24,6 +28,7 @@ import { computed } from 'vue'
 import { gql } from '@urql/vue'
 import RunCard from './RunCard.vue'
 import RunsConnect from './RunsConnect.vue'
+import RunsConnectSuccessAlert from './RunsConnectSuccessAlert.vue'
 import RunsEmpty from './RunsEmpty.vue'
 import type { RunsContainerFragment } from '../generated/graphql'
 
@@ -31,7 +36,9 @@ gql`
 fragment RunsContainer on Query {
   currentProject {
     id
+    projectId
     ...RunsEmpty
+    ...RunsConnectSuccessAlert
     cloudProject {
       id
       runs(first: 10) {
