@@ -194,6 +194,7 @@
     </template>
     <slot name="login-panel" />
   </TopNavList>
+
   <UpdateCypressModal
     v-if="versions"
     :show="showUpdateModal"
@@ -322,7 +323,18 @@ const runningOldVersion = computed(() => {
   return props.gql.versions ? props.gql.versions.current.released < props.gql.versions.latest.released : false
 })
 
-const showUpdateModal = ref(false)
+const showUpdateModal = ref(runningOldVersion.value)
+
+// allow overriding during e2e tests to ensure
+// tests are deterministic
+if ('__CYPRESS_FORCE_HIDE_UPDATE_MODAL__' in window) {
+  if (window.__CYPRESS_FORCE_HIDE_UPDATE_MODAL__ === true) {
+    showUpdateModal.value = false
+  }
+} else if (import.meta.env.DEV) {
+  // don't show by default during local development
+  showUpdateModal.value = false
+}
 
 const docsMenuVariant: Ref<'main' | 'orchestration' | 'ci'> = ref('main')
 

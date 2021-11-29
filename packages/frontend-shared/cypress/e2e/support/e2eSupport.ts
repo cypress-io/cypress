@@ -61,7 +61,7 @@ declare global {
        * Removes the sinon spy'ing on the remote GraphQL fake requests
        */
       disableRemoteGraphQLFakes(): void
-      visitApp(href?: string): Chainable<AUTWindow>
+      visitApp(href?: string, options?: VisitAppOptions): Chainable<AUTWindow>
       visitLaunchpad(href?: string): Chainable<AUTWindow>
     }
   }
@@ -119,7 +119,11 @@ function initializeApp (mode: 'component' | 'e2e' = 'e2e') {
   })
 }
 
-function visitApp (href?: string) {
+interface VisitAppOptions {
+  shouldForceHideUpdateModal?: boolean
+}
+
+function visitApp (href?: string, options?: VisitAppOptions) {
   const { e2e_serverPort, e2e_gqlPort } = Cypress.env()
 
   if (!e2e_gqlPort) {
@@ -138,6 +142,7 @@ function visitApp (href?: string) {
         // Simulates the inject SSR data when we're loading the page normally in the app
         win.__CYPRESS_INITIAL_DATA__ = JSON.parse(ssrData)
         win.__CYPRESS_GRAPHQL_PORT__ = e2e_gqlPort
+        win.__CYPRESS_FORCE_HIDE_UPDATE_MODAL__ = options?.shouldForceHideUpdateModal ?? true
       },
     })
   })

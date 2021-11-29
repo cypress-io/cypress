@@ -32,6 +32,7 @@ declare global {
   interface Window {
     __CYPRESS_INITIAL_DATA__: SSRData
     __CYPRESS_GRAPHQL_PORT__?: string
+    __CYPRESS_FORCE_HIDE_UPDATE_MODAL__: boolean
   }
 }
 
