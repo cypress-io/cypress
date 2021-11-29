@@ -1,4 +1,4 @@
-import { BUNDLERS, FoundBrowser, FoundSpec, FullConfig, Preferences, defaultPreferences, Editor, Warning, AllowedState } from '@packages/types'
+import { BUNDLERS, FoundBrowser, FoundSpec, FullConfig, Preferences, Editor, Warning, AllowedState } from '@packages/types'
 import type { NexusGenEnums, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
 import type { BrowserWindow } from 'electron'
 import type { ChildProcess } from 'child_process'
@@ -117,7 +117,7 @@ export function makeCoreData (): CoreDataShape {
     },
     localSettings: {
       availableEditors: [],
-      preferences: defaultPreferences,
+      preferences: {},
       refreshing: null,
     },
     isAuthBrowserOpened: false,

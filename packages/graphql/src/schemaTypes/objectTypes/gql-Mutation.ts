@@ -299,8 +299,15 @@ export const mutation = mutationType({
 
     t.liveMutation('setPreferences', {
       type: 'Boolean',
+      description: `
+        Update local preferences (also known as  appData).
+        The payload, \`value\`, should be a JSON.stirngified
+        object of the new values you'd like to persist.
+
+        Example usage:
+          mutation setPreferences (value: JSON.stringify({ firstTimeOpening: Date.now(), specListOpen: true })
+      `,
       args: {
-        // Stringify JSON, eg JSON.stringify({ firstTimeOpening: Date.now() })
         value: nonNull(stringArg()),
       },
       resolve: async (_, args, ctx) => {
