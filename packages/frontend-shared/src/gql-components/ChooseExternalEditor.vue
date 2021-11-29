@@ -99,11 +99,6 @@ const externalEditors = computed(() => {
 })
 
 gql`
-mutation SetPreferredEditorBinary ($value: String!) {
-  setPreferredEditorBinary (value: $value)
-}`
-
-gql`
 fragment ChooseExternalEditor on Query {
   localSettings {
     availableEditors {

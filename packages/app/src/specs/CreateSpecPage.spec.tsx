@@ -1,8 +1,6 @@
-import Button from '@cy/components/Button.vue'
 import CreateSpecPage from './CreateSpecPage.vue'
-import { ref, Ref } from 'vue'
 import { defaultMessages } from '@cy/i18n'
-import type { TestingTypeEnum } from '../generated/graphql-test'
+import { CreateSpecPageFragmentDoc } from '../generated/graphql-test'
 
 const pageTitleSelector = '[data-testid=create-spec-page-title]'
 const pageDescriptionSelector = '[data-testid=create-spec-page-description]'
@@ -14,14 +12,21 @@ const messages = defaultMessages.createSpec
 describe('<CreateSpecPage />', () => {
   describe('mounting in component type', () => {
     beforeEach(() => {
-      cy.mount(() => (<div class="p-12"><CreateSpecPage gql={{
-        currentProject: {
-          id: 'id',
-          storybook: null,
-          codeGenGlob: '**.vue',
-          currentTestingType: 'component',
+      cy.mountFragment(CreateSpecPageFragmentDoc, {
+        onResult: (ctx) => {
+          ctx.currentProject = {
+            ...ctx.currentProject,
+            id: 'id',
+            storybook: null,
+            configFileAbsolutePath: '/usr/bin/cypress.config.ts',
+            codeGenGlob: '**.vue',
+            currentTestingType: 'component',
+          }
         },
-      }} /></div>))
+        render: (gql) => {
+          return <CreateSpecPage gql={gql} />
+        },
+      })
     })
 
     it('renders the "No Specs" footer', () => {
@@ -44,14 +49,21 @@ describe('<CreateSpecPage />', () => {
 
   describe('mounting in e2e mode', () => {
     beforeEach(() => {
-      cy.mount(() => (<div class="p-12"><CreateSpecPage gql={{
-        currentProject: {
-          id: 'id',
-          storybook: null,
-          codeGenGlob: '**.vue',
-          currentTestingType: 'e2e',
+      cy.mountFragment(CreateSpecPageFragmentDoc, {
+        onResult: (ctx) => {
+          ctx.currentProject = {
+            ...ctx.currentProject,
+            configFileAbsolutePath: '/usr/bin/cypress.config.ts',
+            id: 'id',
+            storybook: null,
+            codeGenGlob: '**.vue',
+            currentTestingType: 'e2e',
+          }
         },
-      }} /></div>))
+        render: (gql) => {
+          return <CreateSpecPage gql={gql} />
+        },
+      })
     })
 
     it('renders e2e mode', () => {
@@ -63,30 +75,5 @@ describe('<CreateSpecPage />', () => {
       .should('contain.text', messages.page.title)
       .get(pageDescriptionSelector).should('contain.text', messages.page.e2e.description)
     })
-  })
-
-  it('playground', () => {
-    const testingType: Ref<TestingTypeEnum> = ref('component')
-
-    cy.mount(() => (
-      <div class="p-12 space-y-10 resize overflow-auto">
-        { /* Testing Utils */ }
-        <Button variant="outline"
-          size="md"
-          // @ts-ignore
-          onClick={() => testingType.value = testingType.value === 'component' ? 'e2e' : 'component'}>
-          Toggle Testing Types
-        </Button>
-
-        { /* Subject Under Test */ }
-        <CreateSpecPage gql={{
-          currentProject: {
-            id: 'id',
-            storybook: null,
-            codeGenGlob: '**.vue',
-            currentTestingType: testingType.value,
-          },
-        }} />
-      </div>))
   })
 })
