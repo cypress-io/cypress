@@ -2895,7 +2895,7 @@ declare namespace Cypress {
    * All configuration items are optional.
    */
   type CoreConfigOptions = Partial<Omit<ResolvedConfigOptions, TestingType>>
-  type ConfigOptions = CoreConfigOptions & { e2e?: CoreConfigOptions, component?: CoreConfigOptions }
+  type ConfigOptions = CoreConfigOptions & RuntimeConfigOptions & { e2e?: CoreConfigOptions, component?: CoreConfigOptions }
 
   interface PluginConfigOptions extends ResolvedConfigOptions {
     /**
