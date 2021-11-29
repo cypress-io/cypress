@@ -691,11 +691,11 @@ const systemTests = {
         this.servers = null
       }
 
-      const s = options.settings
+      // const s = options.settings
 
-      if (s) {
-        await settings.writeOnly(e2ePath, s)
-      }
+      // if (s) {
+      //   await settings.writeOnly(e2ePath, s)
+      // }
     })
 
     afterEach(async function () {
@@ -779,10 +779,6 @@ const systemTests = {
       `--run-project=${Fixtures.projectPath(options.project)}`,
       `--testingType=${options.testingType || 'e2e'}`,
     ]
-
-    if (options.testingType) {
-      args.push(`--testingType=${options.testingType}`)
-    }
 
     if (options.spec) {
       args.push(`--spec=${options.spec}`)
@@ -925,7 +921,7 @@ const systemTests = {
     }
 
     if (ctx.settings) {
-      await settings.write(e2ePath, ctx.settings)
+      await settings.writeOnly(e2ePath, ctx.settings)
     }
 
     args = options.args || ['index.js'].concat(args)

@@ -77,11 +77,12 @@ describe('e2e config', () => {
   })
 
   it('throws error when multiple default config file are found in project', function () {
+    Fixtures.scaffoldProject('pristine-with-config-file')
     const projectRoot = Fixtures.projectPath('pristine-with-config-file')
 
     return fs.writeFile(path.join(projectRoot, 'cypress.config.ts'), 'export default {}').then(() => {
       return systemTests.exec(this, {
-        project: projectRoot,
+        project: 'pristine-with-config-file',
         expectedExitCode: 1,
         snapshot: true,
       })

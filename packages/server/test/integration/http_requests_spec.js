@@ -83,7 +83,8 @@ let ctx
 describe('Routes', () => {
   require('mocha-banner').register()
 
-  beforeEach(function () {
+  beforeEach(async function () {
+    await Fixtures.scaffoldCommonNodeModules()
     ctx = makeLegacyDataContext()
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 
