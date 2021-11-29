@@ -1,3 +1,5 @@
+import type { FileDetails } from '@packages/types'
+
 interface BeforeScreenshot {
   appOnly: boolean
   blackout: string[]
@@ -12,4 +14,9 @@ interface BeforeScreenshot {
 
 export type LocalBusEventMap = {
   'before:screenshot': BeforeScreenshot
+  'open:file': FileDetails
+}
+
+export type LocalBusEmitsMap = {
+  'open:file': FileDetails
 }

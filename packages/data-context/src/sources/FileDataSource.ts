@@ -1,7 +1,7 @@
 import type { DataContext } from '..'
 import * as path from 'path'
-import type { FoundSpec, SpecFile } from '@packages/types'
 import globby, { GlobbyOptions } from 'globby'
+import type { FoundSpec, SpecFile } from '@packages/types'
 
 interface CreateFileParts {
   absolute: string

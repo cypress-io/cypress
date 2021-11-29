@@ -2,7 +2,7 @@ export * from './cache'
 
 export * from './constants'
 
-export * from './devicePreferences'
+export * from './preferences'
 
 export * from './driver'
 
@@ -36,5 +36,7 @@ export {
 export * from './server'
 
 export * from './storybook'
+
+export * from './util'
 
 export * from './warning'

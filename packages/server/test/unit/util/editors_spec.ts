@@ -7,7 +7,7 @@ import sinon from 'sinon'
 
 import shellUtil from '../../../lib/util/shell.js'
 import * as envEditors from '../../../lib/util/env-editors'
-import savedState from '../../../lib/saved_state'
+import * as savedState from '../../../lib/saved_state'
 
 import { getUserEditor, setUserEditor } from '../../../lib/util/editors'
 
@@ -26,7 +26,7 @@ describe('lib/util/editors', () => {
 
   beforeEach(() => {
     stateMock = {
-      get: sinon.stub().returns({}),
+      get: sinon.stub().resolves({}),
       set: sinon.spy(),
     }
 
@@ -70,13 +70,8 @@ describe('lib/util/editors', () => {
       // @ts-ignore
       savedState.create.resolves({
         get () {
-          return { isOther: true, binary: '/path/to/editor', id: 'other' }
+          return Bluebird.resolve({ isOther: true, binary: '/path/to/editor', id: 'other' })
         },
-      })
-
-      return getUserEditor().then(({ availableEditors }) => {
-        console.log(availableEditors)
-        expect(availableEditors[4].binary).to.equal('/path/to/editor')
       })
     })
 
@@ -117,7 +112,7 @@ describe('lib/util/editors', () => {
         // @ts-ignore
         savedState.create.resolves({
           get () {
-            return { preferredOpener }
+            return Bluebird.resolve({ preferredOpener })
           },
         })
 
@@ -135,12 +130,12 @@ describe('lib/util/editors', () => {
         // @ts-ignore
         savedState.create.resolves({
           get () {
-            return { preferredOpener }
+            return Bluebird.resolve({ preferredOpener })
           },
         })
 
         return getUserEditor(false).then(({ availableEditors, preferredOpener }) => {
-          expect(availableEditors).to.be.undefined
+          expect(availableEditors).to.have.length(0)
           expect(preferredOpener).to.equal(preferredOpener)
         })
       })
@@ -166,7 +161,7 @@ describe('lib/util/editors', () => {
       const editor = {}
 
       return setUserEditor(editor).then(() => {
-        expect(stateMock.set).to.be.calledWith('preferredOpener', editor)
+        expect(stateMock.set).to.be.calledWith({ preferredOpener: editor })
       })
     })
   })

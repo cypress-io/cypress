@@ -1,5 +1,4 @@
 import systemTests from '../lib/system-tests'
-import Fixtures from '../lib/fixtures'
 
 describe('e2e runnable execution', () => {
   systemTests.setup({
@@ -21,14 +20,14 @@ describe('e2e runnable execution', () => {
   // but throws correct error
   // https://github.com/cypress-io/cypress/issues/1987
   systemTests.it('cannot navigate in before hook and test', {
-    project: Fixtures.projectPath('hooks-after-rerun'),
+    project: 'hooks-after-rerun',
     spec: 'beforehook-and-test-navigation.js',
     snapshot: true,
     expectedExitCode: 2,
   })
 
   systemTests.it('runnables run correct number of times with navigation', {
-    project: Fixtures.projectPath('hooks-after-rerun'),
+    project: 'hooks-after-rerun',
     spec: 'runnable-run-count.spec.js',
     snapshot: true,
   })

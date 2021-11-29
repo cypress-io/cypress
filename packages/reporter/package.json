@@ -36,7 +36,7 @@
     "react-svg-loader": "3.0.3",
     "rimraf": "3.0.2",
     "sinon": "7.5.0",
-    "webpack": "4.35.3",
+    "webpack": "^4.44.2",
     "webpack-cli": "3.3.2"
   },
   "files": []

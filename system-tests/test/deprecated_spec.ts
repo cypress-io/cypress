@@ -1,7 +1,6 @@
 import systemTests from '../lib/system-tests'
-import Fixtures from '../lib/fixtures'
 
-const beforeBrowserLaunchProject = Fixtures.projectPath('plugin-before-browser-launch-deprecation')
+const beforeBrowserLaunchProject = 'plugin-before-browser-launch-deprecation'
 
 describe('deprecated before:browser:launch args', () => {
   systemTests.setup()
