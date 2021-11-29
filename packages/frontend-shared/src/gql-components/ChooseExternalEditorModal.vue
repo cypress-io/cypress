@@ -45,7 +45,10 @@ import { useMutation } from '@urql/vue'
 import ChooseExternalEditor from './ChooseExternalEditor.vue'
 import StandardModal from '../components/StandardModal.vue'
 import Button from '../components/Button.vue'
-import { ChooseExternalEditorModalFragment, SetPreferredEditorBinaryDocument } from '../generated/graphql'
+import {
+  ChooseExternalEditorModalFragment,
+  ChooseExternalEditorModal_SetPreferredEditorBinaryDocument,
+} from '../generated/graphql'
 
 const { t } = useI18n()
 
@@ -55,11 +58,11 @@ fragment ChooseExternalEditorModal on Query {
 }`
 
 gql`
-mutation SetPreferredEditorBinary ($value: String!) {
-  setPreferredEditorBinary (value: $value)
+mutation ChooseExternalEditorModal_SetPreferredEditorBinary ($value: String!) {
+  setPreferences (value: $value)
 }`
 
-const setPreferredBinaryEditor = useMutation(SetPreferredEditorBinaryDocument)
+const setPreferredBinaryEditor = useMutation(ChooseExternalEditorModal_SetPreferredEditorBinaryDocument)
 
 const props = defineProps<{
   open: boolean
@@ -79,7 +82,10 @@ function close () {
 }
 
 async function selectEditor () {
-  await setPreferredBinaryEditor.executeMutation({ value: preferredEditor.value })
+  await setPreferredBinaryEditor.executeMutation({
+    value: JSON.stringify({ preferredEditorBinary: preferredEditor.value }),
+  })
+
   emit('selected')
 }
 </script>

@@ -19,10 +19,6 @@ packages/config/lib/*.js
 # from data-context, compiled .js files
 packages/data-context/src/**/*.js
 
-# from desktop-gui
-packages/desktop-gui/cypress/videos
-packages/desktop-gui/src/jsconfig.json
-
 # from driver
 packages/driver/cypress/videos
 packages/driver/cypress/screenshots
