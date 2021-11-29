@@ -8,7 +8,6 @@
       v-else
       :gql="query.data.value"
       :title="title"
-      :description="description"
       :is-using-default-specs="isUsingDefaultSpecs"
     />
   </div>
@@ -43,11 +42,6 @@ const title = computed(() => {
   return isUsingDefaultSpecs.value ?
     t('createSpec.page.defaultPatternNoSpecs.title') :
     t('createSpec.page.customPatternNoSpecs.title')
-})
-const description = computed(() => {
-  return isUsingDefaultSpecs.value ?
-    t(`createSpec.page.defaultPatternNoSpecs.${query.data.value?.currentProject?.currentTestingType}.description`) :
-    t('createSpec.page.customPatternNoSpecs.description')
 })
 
 </script>

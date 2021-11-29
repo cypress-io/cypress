@@ -23,7 +23,14 @@
         data-testid="create-spec-page-description"
         class="leading-normal text-gray-600 text-18px mb-32px"
       >
-        {{ props.description }}
+        <i18n-t :keypath="descriptionKeyPath">
+          <button
+            class="hocus-link-default text-purple-500"
+            @click.prevent="showCypressConfigInIDE"
+          >
+            {{ t('createSpec.viewSpecPatternButton') }}
+          </button>
+        </i18n-t>
       </p>
     </div>
 
@@ -49,7 +56,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import CreateSpecModal from './CreateSpecModal.vue'
 import CreateSpecContent from './CreateSpecContent.vue'
 import { gql, useMutation } from '@urql/vue'
@@ -58,6 +65,8 @@ import { NoSpecsPage_OpenFileInIdeDocument } from '@packages/data-context/src/ge
 import { useRunnerUiStore } from '../store/runner-ui-store'
 import ChooseExternalEditorModal from '@packages/frontend-shared/src/gql-components/ChooseExternalEditorModal.vue'
 import CustomPatternNoSpecContent from './CustomPatternNoSpecContent.vue'
+import { useI18n } from '@cy/i18n'
+const { t } = useI18n()
 
 gql`
 fragment NoSpecsPage on Query {
@@ -87,7 +96,6 @@ mutation NoSpecsPage_OpenFileInIDE ($input: FileDetailsInput!) {
 const props = defineProps<{
   gql: NoSpecsPageFragment
   title: string
-  description: string
   isUsingDefaultSpecs: boolean
 }>()
 
@@ -124,6 +132,12 @@ const showCypressConfigInIDE = () => {
     runnerUiStore.setShowChooseExternalEditorModal(true)
   }
 }
+
+const descriptionKeyPath = computed(() => {
+  return props.isUsingDefaultSpecs ?
+    `createSpec.page.defaultPatternNoSpecs.${props.gql.currentProject?.currentTestingType}.description` :
+    'createSpec.page.customPatternNoSpecs.description'
+})
 
 const closeModal = () => {
   showModal.value = false
