@@ -23,11 +23,8 @@
           variant="pending"
         >
           <template #prefix>
-            <ProgressCircle
-              :progress="25"
-              :radius="8"
-              :stroke="2"
-              class="icon-light-gray-400 h-16px w-16px"
+            <i-cy-loading_x16
+              class="animate-spin icon-dark-white icon-light-gray-400"
             />
           </template>
           {{ t('runs.connect.modal.createOrg.waitingButton') }}
@@ -35,7 +32,7 @@
         <Button
           variant="outline"
           size="lg"
-          @click="emit('cancel')"
+          @click="() => emit('cancel')"
         >
           {{ t('runs.connect.modal.cancel') }}
         </Button>
@@ -47,7 +44,6 @@
 <script lang="ts" setup>
 import StandardModal from '@cy/components/StandardModal.vue'
 import Button from '@cy/components/Button.vue'
-import ProgressCircle from '@cy/components/ProgressCircle.vue'
 import OrganizationIcon from '~icons/cy/office-building_x16.svg'
 import { useI18n } from '@cy/i18n'
 
