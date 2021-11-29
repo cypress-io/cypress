@@ -382,13 +382,26 @@ export class ProjectBase<TServer extends Server> extends EE {
     ctDevServerPort: number | undefined
     startSpecWatcher: () => void
   }> {
+    let testFiles: string | string[] = updatedConfig.testFiles
+    let componentFolder: string | false = updatedConfig.componentFolder
+
+    if (this.testingType) {
+      if (updatedConfig[this.testingType]?.testFiles) {
+        testFiles = updatedConfig[this.testingType]?.testFiles
+      }
+
+      if (updatedConfig[this.testingType]?.componentFolder) {
+        componentFolder = `${updatedConfig.projectRoot}/${updatedConfig[this.testingType]?.componentFolder}`
+      }
+    }
+
     const allSpecs = await specsUtil.findSpecs({
       projectRoot: updatedConfig.projectRoot,
       fixturesFolder: updatedConfig.fixturesFolder,
       supportFile: updatedConfig.supportFile,
-      testFiles: updatedConfig[this.testingType]?.testFiles ?? updatedConfig.testFiles,
+      testFiles,
       ignoreTestFiles: updatedConfig.ignoreTestFiles,
-      componentFolder: updatedConfig.componentFolder,
+      componentFolder,
       integrationFolder: updatedConfig.integrationFolder,
     })
     const specs = allSpecs.filter((spec: Cypress.Cypress['spec']) => {
