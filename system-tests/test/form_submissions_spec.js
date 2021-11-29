@@ -89,7 +89,7 @@ describe('e2e forms', () => {
   context('submissions with jquery XHR POST', () => {
     systemTests.setup()
 
-    systemTests.it.only('passing', {
+    systemTests.it('passing', {
       spec: 'form_submission_passing_spec.js',
       snapshot: true,
     })
