@@ -24,12 +24,8 @@ describe('e2e specs', () => {
   // @see https://github.com/cypress-io/cypress/issues/14226
   it('handles the same integration and fixtures folders', function () {
     return systemTests.exec(this, {
-<<<<<<< HEAD
-      project,
       testingType: 'e2e',
-=======
       project: 'same-fixtures-integration-folders',
->>>>>>> 71d92e0e49 (test: node_modules installs for system-tests, other improvements (#18574))
       snapshot: false,
       expectedExitCode: 0,
     })
@@ -37,12 +33,8 @@ describe('e2e specs', () => {
 
   it('handles the fixtures folder being the subfolder of integration', function () {
     return systemTests.exec(this, {
-<<<<<<< HEAD
-      project,
       testingType: 'e2e',
-=======
       project: 'fixture-subfolder-of-integration',
->>>>>>> 71d92e0e49 (test: node_modules installs for system-tests, other improvements (#18574))
       snapshot: false,
       expectedExitCode: 0,
     })

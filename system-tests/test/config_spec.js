@@ -77,7 +77,6 @@ describe('e2e config', () => {
   })
 
   it('throws error when multiple default config file are found in project', function () {
-<<<<<<< HEAD
     const projectRoot = Fixtures.projectPath('pristine-with-config-file')
 
     return fs.writeFile(path.join(projectRoot, 'cypress.config.ts'), 'export default {}').then(() => {
@@ -90,9 +89,7 @@ describe('e2e config', () => {
   })
 
   it('throws error when cypress.json is found in project and need migration', function () {
-=======
     Fixtures.scaffoldProject('pristine')
->>>>>>> 71d92e0e49 (test: node_modules installs for system-tests, other improvements (#18574))
     const projectRoot = Fixtures.projectPath('pristine')
 
     return fs.writeFile(path.join(projectRoot, 'cypress.json'), '{}').then(() => {

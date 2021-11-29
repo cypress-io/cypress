@@ -690,15 +690,12 @@ const systemTests = {
       } else {
         this.servers = null
       }
-<<<<<<< HEAD
 
       const s = options.settings
 
       if (s) {
         await settings.writeOnly(e2ePath, s)
       }
-=======
->>>>>>> 71d92e0e49 (test: node_modules installs for system-tests, other improvements (#18574))
     })
 
     afterEach(async function () {
@@ -779,12 +776,8 @@ const systemTests = {
     const args = [
       // hides a user warning to go through NPM module
       `--cwd=${serverPath}`,
-<<<<<<< HEAD
-      `--run-project=${options.project}`,
-=======
       `--run-project=${Fixtures.projectPath(options.project)}`,
       `--testingType=${options.testingType || 'e2e'}`,
->>>>>>> 71d92e0e49 (test: node_modules installs for system-tests, other improvements (#18574))
     ]
 
     if (options.testingType) {

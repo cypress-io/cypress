@@ -7,17 +7,12 @@ const { makeLegacyDataContext } = require('../../lib/makeDataContext')
 let ctx
 
 describe('lib/plugins', () => {
-<<<<<<< HEAD
-  beforeEach(() => {
+  beforeEach(async () => {
     ctx = makeLegacyDataContext()
     Fixtures.scaffold()
-
-    ctx.actions.project.setActiveProjectForTestSetup(Fixtures.projectPath('plugin-before-browser-launch-deprecation'))
-=======
-  beforeEach(async () => {
     Fixtures.scaffoldProject('plugin-before-browser-launch-deprecation')
     await Fixtures.scaffoldCommonNodeModules()
->>>>>>> 71d92e0e49 (test: node_modules installs for system-tests, other improvements (#18574))
+    ctx.actions.project.setActiveProjectForTestSetup(Fixtures.projectPath('plugin-before-browser-launch-deprecation'))
   })
 
   afterEach(() => {
