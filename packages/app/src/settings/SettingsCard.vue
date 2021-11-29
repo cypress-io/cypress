@@ -4,6 +4,7 @@
   bg-light-50 hocus-default"
     :max-height="maxHeight"
     lazy
+    :data-cy="title"
   >
     <template #target="{ open }">
       <ListRowHeader

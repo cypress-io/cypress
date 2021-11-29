@@ -3,6 +3,7 @@ import type { DataContext } from '..'
 
 export interface ElectronApiShape {
   openExternal(url: string): void
+  showItemInFolder(folder: string): void
 }
 
 export class ElectronActions {
@@ -53,5 +54,9 @@ export class ElectronActions {
 
   openExternal (url: string) {
     this.ctx.electronApi.openExternal(url)
+  }
+
+  showItemInFolder (url: string) {
+    this.ctx.electronApi.showItemInFolder(url)
   }
 }

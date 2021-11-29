@@ -10,6 +10,7 @@ import { makeLegacyDataContext } from './makeDataContext'
 const debug = Debug('cypress:server:project_utils')
 
 const multipleForwardSlashesRe = /[^:\/\/](\/{2,})/g
+const multipleForwardSlashesReplacer = (match: string) => match.replace('//', '/')
 const backSlashesRe = /\\/g
 
 const normalizeSpecUrl = (browserUrl: string, specUrl: string) => {
@@ -17,14 +18,12 @@ const normalizeSpecUrl = (browserUrl: string, specUrl: string) => {
     return browserUrl
   }
 
-  const replacer = (match: string) => match.replace('//', '/')
-
   return [
     browserUrl,
     '#/tests',
     escapeFilenameInUrl(specUrl),
   ].join('/')
-  .replace(multipleForwardSlashesRe, replacer)
+  .replace(multipleForwardSlashesRe, multipleForwardSlashesReplacer)
 }
 
 const getPrefixedPathToSpec = ({
@@ -86,6 +85,19 @@ export const getSpecUrl = ({
 }) => {
   specType ??= 'integration'
   browserUrl ??= ''
+
+  // App routes to spec with convention {browserUrl}#/runner?file={relativeSpecPath}
+  if (process.env.LAUNCHPAD) {
+    if (!absoluteSpecPath) {
+      return browserUrl
+    }
+
+    const relativeSpecPath = path.relative(projectRoot, path.resolve(projectRoot, absoluteSpecPath))
+    .replace(backSlashesRe, '/')
+
+    return `${browserUrl}/#/runner?file=${relativeSpecPath}`
+    .replace(multipleForwardSlashesRe, multipleForwardSlashesReplacer)
+  }
 
   debug('get spec url: %s for spec type %s', absoluteSpecPath, specType)
 

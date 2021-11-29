@@ -117,7 +117,7 @@ type CloudRecordKey implements Node {
 """A Recorded run of the Test Runner, typically to the cloud"""
 type CloudRun implements Node {
   commitInfo: CloudRunCommitInfo
-  createdAt: Date
+  createdAt: DateTime
 
   """Globally unique identifier representing a concrete GraphQL ObjectType"""
   id: ID!
@@ -381,6 +381,12 @@ type Editor {
   name: String!
 }
 
+input FileDetailsInput {
+  absolute: String!
+  column: Int
+  line: Int
+}
+
 """Represents a spec on the file system"""
 type FileParts implements Node {
   """
@@ -488,6 +494,7 @@ type Mutation {
 
   """Clears the current testing type, closing any active project"""
   clearCurrentTestingType: Query
+  cloudProjectCreate(ciProviders: [String!], name: String!, orgId: ID!, public: Boolean!): CloudProject
 
   """
   Signal the completion of the onboarding steps, assumes the config is correct now and attempts to launch the project
@@ -512,7 +519,7 @@ type Mutation {
   internal_clearProjectPreferencesCache(projectTitle: String!): Boolean
 
   """Launches project from open_project global singleton"""
-  launchOpenProject: Boolean
+  launchOpenProject(specPath: String): Boolean
 
   """Sets the active browser"""
   launchpadSetBrowser(
@@ -525,7 +532,16 @@ type Mutation {
 
   """Log out of Cypress Cloud"""
   logout: Boolean
+
+  """Open a path in preferred IDE"""
+  openDirectoryInIDE(path: String!): Boolean
   openExternal(url: String!): Boolean
+
+  """Open a file on specified line and column in preferred IDE"""
+  openFileInIDE(input: FileDetailsInput!): Boolean
+
+  """Open a path in the local file explorer"""
+  openInFinder(path: String!): Boolean
 
   """show the launchpad windows"""
   reconfigureProject(testingType: TestingTypeEnum!): Boolean!

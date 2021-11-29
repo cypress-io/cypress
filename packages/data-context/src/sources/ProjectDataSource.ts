@@ -52,6 +52,26 @@ export class ProjectDataSource {
     return specs.filter((spec) => spec.specType === specType)
   }
 
+  async getCurrentSpecByAbsolute (absolute: string) {
+    // TODO: should cache current specs so we don't need to
+    // call findSpecs each time we ask for the current spec.
+    const specs = await this.findSpecs()
+
+    return specs?.find((x) => x.absolute === absolute)
+  }
+
+  async getCurrentSpecById (base64Id: string) {
+    // TODO: should cache current specs so we don't need to
+    // call findSpecs each time we ask for the current spec.
+    const specs = await this.findSpecs()
+
+    // id is base64 formatted as per Relay: <type>:<string>
+    // in this case, Spec:/my/abs/path
+    const currentSpecAbs = Buffer.from(base64Id, 'base64').toString().split(':')[1]
+
+    return specs?.find((x) => x.absolute === currentSpecAbs) ?? null
+  }
+
   getResolvedConfigFields (): ResolvedFromConfig[] | null {
     const config = this.ctx.currentProject?.config
 

@@ -11,35 +11,35 @@ const stateFiles = {}
 
 // TODO: remove `showedOnBoardingModal` from this list - it is only included so that misleading `allowed` are not thrown
 // now that it has been removed from use
-const allowed = `
-appWidth
-appHeight
-appX
-appY
-autoScrollingEnabled
-browserWidth
-browserHeight
-browserX
-browserY
-isAppDevToolsOpen
-isBrowserDevToolsOpen
-reporterWidth
-specListWidth
-showedNewProjectBanner
-firstOpenedCypress
-showedStudioModal
-preferredOpener
-ctReporterWidth
-ctIsSpecsListOpen
-ctSpecListWidth
-firstOpened
-lastOpened
-promptsShown
-watchForSpecChange
-useDarkSidebar
-preferredEditorBinary
-
-`.trim().split(/\s+/)
+const allowed = [
+  'appWidth',
+  'appHeight',
+  'appX',
+  'appY',
+  'autoScrollingEnabled',
+  'browserWidth',
+  'browserHeight',
+  'browserX',
+  'browserY',
+  'isAppDevToolsOpen',
+  'isBrowserDevToolsOpen',
+  'reporterWidth',
+  'specListWidth',
+  'showedOnBoardingModal',
+  'showedNewProjectBanner',
+  'firstOpenedCypress',
+  'showedStudioModal',
+  'preferredOpener',
+  'ctReporterWidth',
+  'ctIsSpecsListOpen',
+  'ctSpecListWidth',
+  'firstOpened',
+  'lastOpened',
+  'promptsShown',
+  'watchForSpecChange',
+  'useDarkSidebar',
+  'preferredEditorBinary',
+]
 
 const formStatePath = (projectRoot) => {
   return Promise.try(() => {

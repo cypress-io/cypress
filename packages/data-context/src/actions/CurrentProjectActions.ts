@@ -183,7 +183,7 @@ export class CurrentProjectActions {
    * @param options
    * @returns
    */
-  async launchAppInBrowser () {
+  async launchAppInBrowser (specPath?: string | null) {
     const currentTestingType = this.currentProject.currentTestingType
     const browsers = this.currentProject.browsers
 
@@ -197,14 +197,22 @@ export class CurrentProjectActions {
       return null
     }
 
-    const spec: Cypress.Spec = {
+    // launchProject expects a spec when opening browser for url navigation.
+    // We give it an empty spec if none is passed so as to land on home page
+    const emptySpec: Cypress.Spec = {
       name: '',
       absolute: '',
       relative: '',
       specType: currentTestingType === 'e2e' ? 'integration' : 'component',
     }
 
-    return this.api.launchProject(browser, spec, {
+    let activeSpec: FoundSpec | undefined
+
+    if (specPath) {
+      activeSpec = await this.ctx.project.getCurrentSpecByAbsolute(specPath)
+    }
+
+    return this.api.launchProject(browser, activeSpec ?? emptySpec, {
       onError: (err) => {
 
       },

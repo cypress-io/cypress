@@ -92,6 +92,8 @@
     "pageTitle": "Specs",
     "newSpecButton": "New Spec",
     "searchPlaceholder": "Search Specs",
+    "matchPlural": "Matches",
+    "matchSingular": "Match",
     "componentSpecsHeader": "Component Specs",
     "e2eSpecsHeader": "E2E Specs",
     "gitStatusHeader": "Git Status",
@@ -242,6 +244,8 @@
       "dropText": "Drag your project directory here or {0}",
       "browseManually": "browse manually."
     },
+    "done": "Done",
+    "selectPreferredEditor": "Select Preferred Editor",
     "recentProjectsHeader": "Recent Projects",
     "searchPlaceholder": "Search projects",
     "addProjectButton": "Add Project",

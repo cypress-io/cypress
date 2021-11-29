@@ -2,6 +2,7 @@ import debugLib from 'debug'
 import { arg, booleanArg, enumType, idArg, mutationType, nonNull, stringArg } from 'nexus'
 import { CodeGenTypeEnum } from '../enumTypes/gql-CodeGenTypeEnum'
 import { TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
+import { FileDetailsInput } from '../inputTypes/gql-FileDetailsInput'
 import { CodeGenResultWithFileParts } from './gql-CodeGenResult'
 import { GeneratedSpec } from './gql-GeneratedSpec'
 
@@ -172,8 +173,11 @@ export const mutation = mutationType({
 
     t.liveMutation('launchOpenProject', {
       description: 'Launches project from open_project global singleton',
+      args: {
+        specPath: stringArg(),
+      },
       resolve: async (_, args, ctx) => {
-        await ctx.actions.currentProject?.launchAppInBrowser()
+        await ctx.actions.currentProject?.launchAppInBrowser(args.specPath)
       },
     })
 
@@ -322,6 +326,51 @@ export const mutation = mutationType({
       description: 'show the launchpad at the browser picker step',
       resolve: (_, args, ctx) => {
         ctx.actions.electron.showElectronOnAppExit()
+      },
+    })
+
+    t.field('openDirectoryInIDE', {
+      description: 'Open a path in preferred IDE',
+      type: 'Boolean',
+      args: {
+        path: nonNull(stringArg()),
+      },
+      resolve: (_, args, ctx) => {
+        ctx.actions.project.openDirectoryInIDE(args.path)
+
+        return true
+      },
+    })
+
+    t.field('openInFinder', {
+      description: 'Open a path in the local file explorer',
+      type: 'Boolean',
+      args: {
+        path: nonNull(stringArg()),
+      },
+      resolve: (_, args, ctx) => {
+        ctx.actions.electron.showItemInFolder(args.path)
+
+        return true
+      },
+    })
+
+    t.field('openFileInIDE', {
+      description: 'Open a file on specified line and column in preferred IDE',
+      type: 'Boolean',
+      args: {
+        input: nonNull(arg({
+          type: FileDetailsInput,
+        })),
+      },
+      resolve: (_, args, ctx) => {
+        ctx.actions.file.openFile(
+          args.input.absolute,
+          args.input.line || 1,
+          args.input.column || 1,
+        )
+
+        return true
       },
     })
   },

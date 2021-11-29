@@ -1352,6 +1352,7 @@ jobs:
 
   npm-webpack-preprocessor:
     <<: *defaults
+    resource_class: medium
     steps:
       - restore_cached_workspace
       - run:
@@ -1389,6 +1390,7 @@ jobs:
 
   npm-webpack-dev-server:
     <<: *defaults
+    resource_class: medium
     steps:
       - restore_cached_workspace
       - run:
@@ -1592,6 +1594,7 @@ jobs:
 
   test-kitchensink:
     <<: *defaults
+    resource_class: medium
     steps:
       - clone-repo-and-checkout-branch:
           repo: cypress-example-kitchensink
@@ -2190,14 +2193,6 @@ linux-workflow: &linux-workflow
         context: test-runner:launchpad-tests
         requires:
           - build
-    
-    # Removing desktop-gui tests in release-10
-    # - desktop-gui-integration-tests-7x:
-    #     requires:
-    #       - build
-    # - desktop-gui-component-tests:
-    #     requires:
-    #       - build
     - reporter-integration-tests:
         requires:
           - build
@@ -2262,8 +2257,6 @@ linux-workflow: &linux-workflow
           - ui-components-integration-tests
           - reporter-integration-tests
           - Linux lint
-          # - desktop-gui-component-tests
-          # - desktop-gui-integration-tests-7x
           - runner-ct-integration-tests-chrome
           - runner-integration-tests-firefox
           - runner-integration-tests-chrome

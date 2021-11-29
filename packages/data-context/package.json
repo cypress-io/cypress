@@ -33,6 +33,7 @@
     "graphql": "^15.5.1",
     "immer": "^9.0.6",
     "isbinaryfile": "^4.0.8",
+    "launch-editor": "2.2.1",
     "lodash": "4.17.21",
     "p-defer": "^3.0.0",
     "server-destroy": "^1.0.1",
