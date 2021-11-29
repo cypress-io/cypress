@@ -113,67 +113,56 @@ export default {
   },
 
   as: {
+    docsUrl: 'https://on.cypress.io/as',
     empty_string: {
       message: `${cmd('as')} cannot be passed an empty string.`,
-      docsUrl: 'https://on.cypress.io/as',
     },
     invalid_type: {
       message: `${cmd('as')} can only accept a string.`,
-      docsUrl: 'https://on.cypress.io/as',
     },
     invalid_first_token: {
       message: '`{{alias}}` cannot be named starting with the `@` symbol. Try renaming the alias to `{{suggestedName}}`, or something else that does not start with the `@` symbol.',
-      docsUrl: 'https://on.cypress.io/as',
     },
     reserved_word: {
       message: `${cmd('as')} cannot be aliased as: \`{{alias}}\`. This word is reserved.`,
-      docsUrl: 'https://on.cypress.io/as',
     },
   },
 
   attachFile: {
+    docsUrl: 'https://on.cypress.io/attachfile',
     invalid_action: {
       message: `${cmd('attachFile')} \`action\` can only be \`input\` or \`drag-n-drop\`. You passed: \`{{action}}\`.`,
-      docsUrl: 'https://on.cypress.io/attachfile',
     },
     invalid_array_file_reference: {
       message: `${cmd('attachFile')} must be passed an array of Buffers or objects with non-null \`contents\`. At files[{{index}}] you passed: \`{{file}}\`.`,
-      docsUrl: 'https://on.cypress.io/attachfile',
     },
     invalid_single_file_reference: {
       message: `${cmd('attachFile')} must be passed a Buffer or an object with a non-null \`contents\` property as its 1st argument. You passed: \`{{file}}\`.`,
-      docsUrl: 'https://on.cypress.io/attachfile',
     },
     multiple_elements: {
       message: `${cmd('attachFile')} can only be called on a single element. Your subject contained {{num}} elements.`,
-      docsUrl: 'https://on.cypress.io/attachfile',
     },
     not_file_input: {
       message: `${cmd('attachFile')} can only be called on an \`<input type="file">\` or a \`<label for="fileInput">\` pointing to or containing one. Your subject is: \`{{node}}\`.`,
-      docsUrl: 'https://on.cypress.io/attachfile',
     },
     invalid_alias: {
       message: `${cmd('attachFile')} can only attach strings, Buffers or objects, while your alias \`{{alias}}\` resolved to: \`{{subject}}\`.`,
-      docsUrl: 'https://on.cypress.io/attachfile',
     },
   },
 
   blur: {
+    docsUrl: 'https://on.cypress.io/blur',
     multiple_elements: {
       message: `${cmd('blur')} can only be called on a single element. Your subject contained {{num}} elements.`,
-      docsUrl: 'https://on.cypress.io/blur',
     },
     no_focused_element: {
       message: `${cmd('blur')} can only be called when there is a currently focused element.`,
-      docsUrl: 'https://on.cypress.io/blur',
     },
     timed_out: {
       message: `${cmd('blur')} timed out because your browser did not receive any \`blur\` events. This is a known bug in Chrome when it is not the currently focused window.`,
-      docsUrl: 'https://on.cypress.io/blur',
     },
     wrong_focused_element: {
       message: `${cmd('blur')} can only be called on the focused element. Currently the focused element is a: \`{{node}}\``,
-      docsUrl: 'https://on.cypress.io/blur',
     },
   },
 
