@@ -1,6 +1,6 @@
 import path from 'path'
 import systemTests from '../lib/system-tests'
-import { projectPath } from '../lib/fixtures'
+import Fixtures, { projectPath } from '../lib/fixtures'
 import { promises as fs } from 'fs'
 
 const snapshotFile = (project, file, folder = 'integration') => {
@@ -20,7 +20,7 @@ describe.skip('e2e studio', function () {
   systemTests.setup()
 
   systemTests.it('extends test', {
-    project: projectPath('studio'),
+    project: 'studio',
     spec: 'extend.spec.js',
     snapshot: true,
     browser: 'electron',
@@ -32,7 +32,7 @@ describe.skip('e2e studio', function () {
   // includes "New Test" in snapshot
   // this is the blank new test that's being created
   systemTests.it('creates new test', {
-    project: projectPath('studio'),
+    project: 'studio',
     spec: 'new.spec.js',
     browser: 'electron',
     snapshot: true,
@@ -42,7 +42,7 @@ describe.skip('e2e studio', function () {
   })
 
   systemTests.it('can write to imported files', {
-    project: projectPath('studio'),
+    project: 'studio',
     spec: 'external.spec.js',
     snapshot: true,
     browser: 'electron',
@@ -55,21 +55,25 @@ describe.skip('e2e studio', function () {
   })
 
   systemTests.it('extends test without source maps', {
-    project: projectPath('studio-no-source-maps'),
+    project: 'studio-no-source-maps',
     spec: 'extend.spec.js',
     snapshot: true,
     browser: 'electron',
     onRun (exec) {
+      Fixtures.scaffoldProject('studio')
+
       return exec().then(() => snapshotFile('studio-no-source-maps', 'extend.spec.js'))
     },
   })
 
   systemTests.it('creates new test without source maps', {
-    project: projectPath('studio-no-source-maps'),
+    project: 'studio-no-source-maps',
     spec: 'new.spec.js',
     browser: 'electron',
     snapshot: true,
     onRun (exec) {
+      Fixtures.scaffoldProject('studio')
+
       return exec().then(() => snapshotFile('studio-no-source-maps', 'new.spec.js'))
     },
   })
