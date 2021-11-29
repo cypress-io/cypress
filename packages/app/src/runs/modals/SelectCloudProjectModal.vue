@@ -163,7 +163,7 @@ import CreateIcon from '~icons/cy/add-large_x16.svg'
 import FolderIcon from '~icons/cy/folder-outline_x16.svg'
 import OrganizationIcon from '~icons/cy/office-building_x16.svg'
 import { useI18n } from '@cy/i18n'
-import type { SelectCloudProjectModalFragment } from '../generated/graphql'
+import type { SelectCloudProjectModalFragment } from '../../generated/graphql'
 
 const { t } = useI18n()
 

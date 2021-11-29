@@ -54,8 +54,8 @@
 import { computed } from 'vue'
 import StandardModal from '@cy/components/StandardModal.vue'
 import Button from '@cy/components/Button.vue'
-import ShikiHighlight from '../../../frontend-shared/src/components/ShikiHighlight.vue'
-import ExternalLink from '../../../frontend-shared/src/gql-components/ExternalLink.vue'
+import ShikiHighlight from '@cy/components/ShikiHighlight.vue'
+import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 
 const emit = defineEmits<{
   (event:'close'): void

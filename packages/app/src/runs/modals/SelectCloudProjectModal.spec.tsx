@@ -1,5 +1,5 @@
-import { SelectCloudProjectModalFragmentDoc } from '../generated/graphql-test'
-import SelectCloudProjectModal from './SelectCloudProjectModal.vue'
+import { SelectCloudProjectModalFragmentDoc } from '../../generated/graphql-test'
+import SelectCloudProjectModal from '../modals/SelectCloudProjectModal.vue'
 import { defaultMessages } from '@cy/i18n'
 
 describe('<SelectCloudProjectModal />', () => {

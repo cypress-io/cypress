@@ -50,7 +50,7 @@ import Button from '@cy/components/Button.vue'
 import LoginModal from '@cy/gql-components/topnav/LoginModal.vue'
 import { useI18n } from '@cy/i18n'
 import type { RunsConnectFragment } from '../generated/graphql'
-import SelectCloudProjectModal from './SelectCloudProjectModal.vue'
+import SelectCloudProjectModal from './modals/SelectCloudProjectModal.vue'
 
 const { t } = useI18n()
 
