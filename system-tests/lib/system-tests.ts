@@ -780,10 +780,6 @@ const systemTests = {
       `--testingType=${options.testingType || 'e2e'}`,
     ]
 
-    if (options.testingType) {
-      args.push(`--testingType=${options.testingType}`)
-    }
-
     if (options.spec) {
       args.push(`--spec=${options.spec}`)
     }
