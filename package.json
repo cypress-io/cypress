@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "9.0.0",
+  "version": "9.1.0",
   "description": "Cypress.io end to end testing tool",
   "private": true,
   "scripts": {
@@ -48,7 +48,7 @@
     "npm-release": "node scripts/npm-release.js",
     "prestart": "yarn ensure-deps",
     "start": "cypress open --dev --global",
-    "stop-only": "npx stop-only --skip .cy,.publish,.projects,node_modules,dist,dist-test,fixtures,lib,bower_components,src,__snapshots__ --exclude e2e.ts,cypress-tests.ts",
+    "stop-only": "npx stop-only --skip .cy,.publish,.projects,node_modules,dist,dist-test,fixtures,lib,bower_components,src,__snapshots__ --exclude e2e.ts,cypress-tests.ts,*only_spec.js",
     "stop-only-all": "yarn stop-only --folder packages",
     "pretest": "yarn ensure-deps",
     "test": "yarn lerna exec yarn test --scope cypress --scope \"'@packages/{config,electron,extension,https-proxy,launcher,net-stubbing,network,proxy,rewriter,runner,runner-shared,socket}'\"",
@@ -127,7 +127,7 @@
     "arg": "4.1.2",
     "ascii-table": "0.0.9",
     "autobarrel": "^1.1.0",
-    "aws-sdk": "2.447.0",
+    "aws-sdk": "2.814.0",
     "babel-eslint": "10.1.0",
     "bluebird": "3.5.3",
     "bluebird-retry": "0.11.0",

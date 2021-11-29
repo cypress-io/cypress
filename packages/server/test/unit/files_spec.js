@@ -32,7 +32,7 @@ describe('lib/files', () => {
       return files.readFile(this.projectRoot, 'tests/_fixtures/message.txt').then(({ contents, filePath }) => {
         expect(contents).to.eq('foobarbaz')
 
-        expect(filePath).to.include('/.projects/todos/tests/_fixtures/message.txt')
+        expect(filePath).to.include('/cy-projects/todos/tests/_fixtures/message.txt')
       })
     })
 
@@ -76,7 +76,7 @@ describe('lib/files', () => {
         return files.readFile(this.projectRoot, '.projects/write_file.txt').then(({ contents, filePath }) => {
           expect(contents).to.equal('foo')
 
-          expect(filePath).to.include('/.projects/todos/.projects/write_file.txt')
+          expect(filePath).to.include('/cy-projects/todos/.projects/write_file.txt')
         })
       })
     })
