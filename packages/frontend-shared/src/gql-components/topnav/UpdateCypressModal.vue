@@ -4,6 +4,7 @@
     variant="bare"
     :title="title"
     :model-value="show"
+    data-cy="update-cypress-modal"
     @update:model-value="emits('close')"
   >
     <div class="p-24px text-gray-700">
