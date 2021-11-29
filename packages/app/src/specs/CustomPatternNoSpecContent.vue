@@ -4,10 +4,11 @@
       <InlineCodeFragment>specPattern</InlineCodeFragment>
       <div>
         <button
-          class="text-indigo-500"
+          class="text-indigo-500 flex gap-8px items-center group outline-transparent"
           @click="emit('showCypressConfigInIDE')"
         >
-          cypress.config.js
+          <i-cy-document-text_x16 class="icon-light-gray-100 icon-dark-gray-500" />
+          <span class="group-hocus:underline">cypress.config.js</span>
         </button>
       </div>
     </div>
@@ -27,6 +28,9 @@
       size="lg"
       @click="emit('showCypressConfigInIDE')"
     >
+      <template #prefix>
+        <i-cy-code-editor_x16 class="icon-dark-white" />
+      </template>
       Update spec pattern
     </Button>
     <Button
@@ -34,6 +38,9 @@
       variant="outline"
       @click="emit('newSpec')"
     >
+      <template #prefix>
+        <i-cy-add-large_x16 class="icon-dark-gray-500" />
+      </template>
       New Spec
     </Button>
   </div>
