@@ -107,7 +107,7 @@ function overloadMochaFnForConfig (fnName, specWindow) {
   overrideMochaFn(replacementFn)
 }
 
-const ui = (specWindow, _mocha, config) => {
+const ui = (specWindow, _mocha) => {
   // Override mocha.ui so that the pre-require event is emitted
   // with the iframe's `window` reference, rather than the parent's.
   _mocha.ui = function (name) {

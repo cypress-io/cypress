@@ -1186,19 +1186,8 @@ exports['src/cypress/runner tests finish with correct state mocha grep fail with
     "test:before:run",
     {
       "_testConfig": {
-        "testConfigList": [
-          {
-            "overrides": {
-              "testConfigList": [],
-              "unverifiedTestConfig": {}
-            },
-            "invocationDetails": "{Object 9}"
-          }
-        ],
-        "unverifiedTestConfig": {
-          "testConfigList": [],
-          "unverifiedTestConfig": {}
-        }
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
       },
       "id": "r3",
       "order": 1,
@@ -1236,19 +1225,8 @@ exports['src/cypress/runner tests finish with correct state mocha grep fail with
     "test",
     {
       "_testConfig": {
-        "testConfigList": [
-          {
-            "overrides": {
-              "testConfigList": [],
-              "unverifiedTestConfig": {}
-            },
-            "invocationDetails": "{Object 9}"
-          }
-        ],
-        "unverifiedTestConfig": {
-          "testConfigList": [],
-          "unverifiedTestConfig": {}
-        }
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
       },
       "id": "r3",
       "order": 1,
@@ -1338,19 +1316,8 @@ exports['src/cypress/runner tests finish with correct state mocha grep fail with
     "fail",
     {
       "_testConfig": {
-        "testConfigList": [
-          {
-            "overrides": {
-              "testConfigList": [],
-              "unverifiedTestConfig": {}
-            },
-            "invocationDetails": "{Object 9}"
-          }
-        ],
-        "unverifiedTestConfig": {
-          "testConfigList": [],
-          "unverifiedTestConfig": {}
-        }
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
       },
       "id": "r3",
       "order": 1,
@@ -1491,19 +1458,8 @@ exports['src/cypress/runner tests finish with correct state mocha grep fail with
     "test end",
     {
       "_testConfig": {
-        "testConfigList": [
-          {
-            "overrides": {
-              "testConfigList": [],
-              "unverifiedTestConfig": {}
-            },
-            "invocationDetails": "{Object 9}"
-          }
-        ],
-        "unverifiedTestConfig": {
-          "testConfigList": [],
-          "unverifiedTestConfig": {}
-        }
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
       },
       "id": "r3",
       "order": 1,
@@ -1582,19 +1538,8 @@ exports['src/cypress/runner tests finish with correct state mocha grep fail with
     "test:after:run",
     {
       "_testConfig": {
-        "testConfigList": [
-          {
-            "overrides": {
-              "testConfigList": [],
-              "unverifiedTestConfig": {}
-            },
-            "invocationDetails": "{Object 9}"
-          }
-        ],
-        "unverifiedTestConfig": {
-          "testConfigList": [],
-          "unverifiedTestConfig": {}
-        }
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
       },
       "id": "r3",
       "order": 1,
@@ -1734,19 +1679,8 @@ exports['src/cypress/runner tests finish with correct state mocha grep pass with
     "test:before:run",
     {
       "_testConfig": {
-        "testConfigList": [
-          {
-            "overrides": {
-              "testConfigList": [],
-              "unverifiedTestConfig": {}
-            },
-            "invocationDetails": "{Object 9}"
-          }
-        ],
-        "unverifiedTestConfig": {
-          "testConfigList": [],
-          "unverifiedTestConfig": {}
-        }
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
       },
       "id": "r3",
       "order": 1,
@@ -1784,19 +1718,8 @@ exports['src/cypress/runner tests finish with correct state mocha grep pass with
     "test",
     {
       "_testConfig": {
-        "testConfigList": [
-          {
-            "overrides": {
-              "testConfigList": [],
-              "unverifiedTestConfig": {}
-            },
-            "invocationDetails": "{Object 9}"
-          }
-        ],
-        "unverifiedTestConfig": {
-          "testConfigList": [],
-          "unverifiedTestConfig": {}
-        }
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
       },
       "id": "r3",
       "order": 1,
@@ -1956,19 +1879,8 @@ exports['src/cypress/runner tests finish with correct state mocha grep pass with
     "pass",
     {
       "_testConfig": {
-        "testConfigList": [
-          {
-            "overrides": {
-              "testConfigList": [],
-              "unverifiedTestConfig": {}
-            },
-            "invocationDetails": "{Object 9}"
-          }
-        ],
-        "unverifiedTestConfig": {
-          "testConfigList": [],
-          "unverifiedTestConfig": {}
-        }
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
       },
       "id": "r3",
       "order": 1,
@@ -2026,19 +1938,8 @@ exports['src/cypress/runner tests finish with correct state mocha grep pass with
     "test end",
     {
       "_testConfig": {
-        "testConfigList": [
-          {
-            "overrides": {
-              "testConfigList": [],
-              "unverifiedTestConfig": {}
-            },
-            "invocationDetails": "{Object 9}"
-          }
-        ],
-        "unverifiedTestConfig": {
-          "testConfigList": [],
-          "unverifiedTestConfig": {}
-        }
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
       },
       "id": "r3",
       "order": 1,
@@ -2110,19 +2011,8 @@ exports['src/cypress/runner tests finish with correct state mocha grep pass with
     "test:after:run",
     {
       "_testConfig": {
-        "testConfigList": [
-          {
-            "overrides": {
-              "testConfigList": [],
-              "unverifiedTestConfig": {}
-            },
-            "invocationDetails": "{Object 9}"
-          }
-        ],
-        "unverifiedTestConfig": {
-          "testConfigList": [],
-          "unverifiedTestConfig": {}
-        }
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
       },
       "id": "r3",
       "order": 1,
