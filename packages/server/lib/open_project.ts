@@ -192,7 +192,7 @@ export class OpenProject {
 
     return specsUtil.findSpecs({
       ...cfg,
-      testFiles: cfg[componentTestingEnabled ? 'component' : 'e2e']?.testFiles ?? [],
+      testFiles: cfg[componentTestingEnabled ? 'component' : 'e2e']?.testFiles ?? cfg.testFiles,
     })
     .then((_specs: Cypress.Spec[] = []) => {
       // only want these properties

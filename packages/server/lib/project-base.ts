@@ -386,7 +386,7 @@ export class ProjectBase<TServer extends Server> extends EE {
       projectRoot: updatedConfig.projectRoot,
       fixturesFolder: updatedConfig.fixturesFolder,
       supportFile: updatedConfig.supportFile,
-      testFiles: updatedConfig[this.testingType]?.testFiles ?? [],
+      testFiles: updatedConfig[this.testingType]?.testFiles ?? updatedConfig.testFiles,
       ignoreTestFiles: updatedConfig.ignoreTestFiles,
       componentFolder: updatedConfig.componentFolder,
       integrationFolder: updatedConfig.integrationFolder,
