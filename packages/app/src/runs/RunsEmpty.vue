@@ -73,7 +73,7 @@ const props = defineProps<{
 
 const route = useRoute()
 
-const _showSuccess = ref(route.params.showSuccess === 'true')
+const _showSuccess = ref(route.query.showSuccess === 'true')
 
 const projectName = computed(() => props.gql.title)
 const firstRecordKey = computed(() => {
