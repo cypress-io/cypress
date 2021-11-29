@@ -7,7 +7,7 @@ const { makeLegacyDataContext } = require('../../lib/makeDataContext')
 let ctx
 
 describe('lib/plugins', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     Fixtures.scaffoldProject('plugin-before-browser-launch-deprecation')
     await Fixtures.scaffoldCommonNodeModules()
 
