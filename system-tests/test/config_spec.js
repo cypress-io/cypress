@@ -20,7 +20,7 @@ describe('e2e config', () => {
 
   it('applies defaultCommandTimeout globally', function () {
     return systemTests.exec(this, {
-      project: Fixtures.projectPath('config-with-short-timeout'),
+      project: 'config-with-short-timeout',
       snapshot: true,
       expectedExitCode: 1,
     })
@@ -30,7 +30,7 @@ describe('e2e config', () => {
 
   it('throws error when invalid viewportWidth in the configuration file', function () {
     return systemTests.exec(this, {
-      project: Fixtures.projectPath('config-with-invalid-viewport'),
+      project: 'config-with-invalid-viewport',
       expectedExitCode: 1,
       snapshot: true,
     })
@@ -38,7 +38,7 @@ describe('e2e config', () => {
 
   it('throws error when invalid browser in the configuration file', function () {
     return systemTests.exec(this, {
-      project: Fixtures.projectPath('config-with-invalid-browser'),
+      project: 'config-with-invalid-browser',
       expectedExitCode: 1,
       snapshot: true,
     })
@@ -46,42 +46,43 @@ describe('e2e config', () => {
 
   it('supports global shadow dom inclusion', function () {
     return systemTests.exec(this, {
-      project: Fixtures.projectPath('shadow-dom-global-inclusion'),
+      project: 'shadow-dom-global-inclusion',
     })
   })
 
   it('supports custom configFile in JavaScript', function () {
     return systemTests.exec(this, {
-      project: Fixtures.projectPath('config-with-custom-file-js'),
+      project: 'config-with-custom-file-js',
       configFile: 'cypress.config.custom.js',
     })
   })
 
   it('supports custom configFile in TypeScript', function () {
     return systemTests.exec(this, {
-      project: Fixtures.projectPath('config-with-custom-file-ts'),
+      project: 'config-with-custom-file-ts',
       configFile: 'cypress.config.custom.ts',
     })
   })
 
   it('supports custom configFile in a default JavaScript file', function () {
     return systemTests.exec(this, {
-      project: Fixtures.projectPath('config-with-js'),
+      project: 'config-with-js',
     })
   })
 
   it('supports custom configFile in a default TypeScript file', function () {
     return systemTests.exec(this, {
-      project: Fixtures.projectPath('config-with-ts'),
+      project: 'config-with-ts',
     })
   })
 
   it('throws error when multiple default config file are found in project', function () {
+    Fixtures.scaffoldProject('pristine-with-config-file')
     const projectRoot = Fixtures.projectPath('pristine-with-config-file')
 
     return fs.writeFile(path.join(projectRoot, 'cypress.config.ts'), 'export default {}').then(() => {
       return systemTests.exec(this, {
-        project: projectRoot,
+        project: 'pristine-with-config-file',
         expectedExitCode: 1,
         snapshot: true,
       })
@@ -89,11 +90,12 @@ describe('e2e config', () => {
   })
 
   it('throws error when cypress.json is found in project and need migration', function () {
+    Fixtures.scaffoldProject('pristine')
     const projectRoot = Fixtures.projectPath('pristine')
 
     return fs.writeFile(path.join(projectRoot, 'cypress.json'), '{}').then(() => {
       return systemTests.exec(this, {
-        project: projectRoot,
+        project: 'pristine',
         expectedExitCode: 1,
         snapshot: true,
       })
@@ -101,10 +103,11 @@ describe('e2e config', () => {
   })
 
   it('throws error when cypress.json is found in project and cypress.config.{ts|js} exists as well', function () {
-    const projectRoot = Fixtures.projectPath('multiples-config-files-with-json')
+    Fixtures.scaffoldProject('multiples-config-files-with-json')
+    Fixtures.projectPath('multiples-config-files-with-json')
 
     return systemTests.exec(this, {
-      project: projectRoot,
+      project: 'multiples-config-files-with-json',
       expectedExitCode: 1,
       snapshot: true,
     })

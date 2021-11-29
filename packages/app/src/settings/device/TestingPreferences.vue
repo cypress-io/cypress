@@ -20,7 +20,7 @@
             class="mx-8px"
             :value="props.gql.localSettings.preferences[pref.id] ?? false"
             :name="pref.title"
-            @update="(value) => pref.mutation.executeMutation({ value })"
+            @update="(value) => updatePref(pref.id, value)"
           />
         </h4>
         <p class="text-size-14px leading-24px text-gray-600">
@@ -37,9 +37,7 @@ import { useI18n } from '@cy/i18n'
 import Switch from '@packages/frontend-shared/src/components/Switch.vue'
 import { gql, useMutation } from '@urql/vue'
 import {
-  SetAutoScrollingEnabledDocument,
-  SetUseDarkSidebarDocument,
-  SetWatchForSpecChangeDocument,
+  SetTestingPreferencesDocument,
 } from '@packages/data-context/src/gen/all-operations.gen'
 import type { TestingPreferencesFragment } from '../../generated/graphql'
 
@@ -58,40 +56,35 @@ fragment TestingPreferences on Query {
 `
 
 gql`
-mutation SetAutoScrollingEnabled($value: Boolean!) {
-  setAutoScrollingEnabled(value: $value)
+mutation SetTestingPreferences($value: String!) {
+  setPreferences (value: $value)
 }`
 
-gql`
-mutation SetUseDarkSidebar($value: Boolean!) {
-  setUseDarkSidebar(value: $value)
-}`
-
-gql`
-mutation SetWatchForSpecChange($value: Boolean!) {
-  setWatchForSpecChange(value: $value)
-}`
+const setPreferences = useMutation(SetTestingPreferencesDocument)
 
 const prefs = [
   {
     id: 'autoScrollingEnabled',
     title: t('settingsPage.testingPreferences.autoScrollingEnabled.title'),
-    mutation: useMutation(SetAutoScrollingEnabledDocument),
     description: t('settingsPage.testingPreferences.autoScrollingEnabled.description'),
   },
   {
     id: 'useDarkSidebar',
     title: t('settingsPage.testingPreferences.useDarkSidebar.title'),
-    mutation: useMutation(SetUseDarkSidebarDocument),
     description: t('settingsPage.testingPreferences.useDarkSidebar.description'),
   },
   {
     id: 'watchForSpecChange',
     title: t('settingsPage.testingPreferences.watchForSpecChange.title'),
-    mutation: useMutation(SetWatchForSpecChangeDocument),
     description: t('settingsPage.testingPreferences.watchForSpecChange.description'),
   },
 ] as const
+
+function updatePref (preferenceId: typeof prefs[number]['id'], value: boolean) {
+  setPreferences.executeMutation({
+    value: JSON.stringify({ [preferenceId]: value }),
+  })
+}
 
 const props = defineProps<{
   gql: TestingPreferencesFragment

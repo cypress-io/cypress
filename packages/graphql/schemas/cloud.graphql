@@ -146,7 +146,7 @@ A Recorded run of the Test Runner, typically to the cloud
 """
 type CloudRun implements Node {
   commitInfo: CloudRunCommitInfo
-  createdAt: Date
+  createdAt: DateTime
 
   """
   Globally unique identifier representing a concrete GraphQL ObjectType
@@ -299,6 +299,13 @@ scalar DateTime
 Mutations for the Cypress Cloud
 """
 type Mutation {
+  cloudProjectCreate(
+    ciProviders: [String!]
+    name: String!
+    orgId: ID!
+    public: Boolean!
+  ): CloudProject
+
   """
   Adding as a test
   """
