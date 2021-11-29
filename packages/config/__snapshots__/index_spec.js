@@ -111,7 +111,6 @@ exports['src/index .getPublicConfigKeys returns list of public config keys 1'] =
   "ignoreTestFiles",
   "includeShadowDom",
   "integrationFolder",
-  "isInteractive",
   "keystrokeDelay",
   "modifyObstructiveCode",
   "nodeVersion",

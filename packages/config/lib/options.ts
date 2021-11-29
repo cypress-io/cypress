@@ -130,13 +130,11 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     defaultValue: 60000,
     validation: validate.isNumber,
     canUpdateDuringTestTime: true,
-  },
-  {
+  }, {
     name: 'exit',
     defaultValue: true,
     validation: validate.isBoolean,
-  },
-  {
+  }, {
     name: 'experimentalFetchPolyfill',
     defaultValue: false,
     validation: validate.isBoolean,
@@ -185,19 +183,12 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     defaultValue: 'cypress/integration',
     validation: validate.isString,
     isFolder: true,
-  },
-  {
-    name: 'isInteractive',
-    defaultValue: true,
-    validation: validate.isBoolean,
-  },
-  {
+  }, {
     name: 'keystrokeDelay',
     defaultValue: 0,
     validation: validate.isNumberOrFalse,
     canUpdateDuringTestTime: true,
-  },
-  {
+  }, {
     name: 'modifyObstructiveCode',
     defaultValue: true,
     validation: validate.isBoolean,
@@ -383,6 +374,11 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     name: 'hosts',
     defaultValue: null,
     validation: validate.isPlainObject,
+  }, {
+    name: 'isInteractive',
+    defaultValue: true,
+    validation: validate.isBoolean,
+    isInternal: true,
   }, {
     name: 'isTextTerminal',
     defaultValue: false,
