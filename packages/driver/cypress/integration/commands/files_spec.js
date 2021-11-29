@@ -145,6 +145,7 @@ describe('src/cy/commands/files', () => {
           if (attrs.name === 'readFile') {
             expect(log.get('state')).to.eq('pending')
             expect(log.get('message')).to.eq('foo.json')
+            expect(log.get('timeout')).to.eq(Cypress.config('responseTimeout'))
           }
         })
 
@@ -529,6 +530,7 @@ describe('src/cy/commands/files', () => {
           if (attrs.name === 'writeFile') {
             expect(log.get('state')).to.eq('pending')
             expect(log.get('message')).to.eq('foo.txt', 'contents')
+            expect(log.get('timeout')).to.eq(Cypress.config('responseTimeout'))
           }
         })
 

@@ -136,7 +136,7 @@ export default (Commands, Cypress, cy) => {
       if (options.log) {
         options._log = Cypress.log({
           message: fileName,
-          timeout: 0,
+          timeout: options.timeout,
           consoleProps () {
             return consoleProps
           },
