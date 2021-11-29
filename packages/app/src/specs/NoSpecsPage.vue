@@ -10,20 +10,23 @@
 
   <div
     v-if="props.gql.currentProject?.currentTestingType"
-    class="overflow-scroll text-center max-w-600px mx-auto py-40px"
+    class="overflow-scroll text-center max-w-642px mx-auto py-40px"
   >
-    <h1
-      data-testid="create-spec-page-title"
-      class="text-gray-900 text-32px mb-12px"
-    >
-      {{ props.title }}
-    </h1>
-    <p
-      data-testid="create-spec-page-description"
-      class="leading-normal text-gray-600 text-18px mb-32px"
-    >
-      {{ props.description }}
-    </p>
+    <div class="max-w-600px m-x-auto">
+      <h1
+        data-testid="create-spec-page-title"
+        class="text-gray-900 text-32px mb-12px"
+      >
+        {{ props.title }}
+      </h1>
+      <p
+        data-testid="create-spec-page-description"
+        class="leading-normal text-gray-600 text-18px mb-32px"
+      >
+        {{ props.description }}
+      </p>
+    </div>
+
     <ChooseExternalEditorModal
       :open="runnerUiStore.showChooseExternalEditorModal"
       :gql="props.gql"
