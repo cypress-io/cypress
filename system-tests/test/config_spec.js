@@ -103,10 +103,11 @@ describe('e2e config', () => {
   })
 
   it('throws error when cypress.json is found in project and cypress.config.{ts|js} exists as well', function () {
-    const projectRoot = Fixtures.projectPath('multiples-config-files-with-json')
+    Fixtures.scaffoldProject('multiples-config-files-with-json')
+    Fixtures.projectPath('multiples-config-files-with-json')
 
     return systemTests.exec(this, {
-      project: projectRoot,
+      project: 'multiples-config-files-with-json',
       expectedExitCode: 1,
       snapshot: true,
     })
