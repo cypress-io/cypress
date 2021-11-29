@@ -13,7 +13,6 @@ const recordMode = require('./record')
 const errors = require('../errors')
 const Reporter = require('../reporter')
 const browserUtils = require('../browsers')
-const { openProject } = require('../open_project')
 const videoCapture = require('../video_capture')
 const { fs } = require('../util/fs')
 const runEvents = require('../plugins/run_events')
@@ -32,6 +31,8 @@ const experiments = require('../experiments')
 const objUtils = require('../util/obj_utils')
 
 const DELAY_TO_LET_VIDEO_FINISH_MS = 1000
+
+let openProject
 
 const color = (val, c) => {
   return chalk[c](val)
@@ -1666,7 +1667,9 @@ module.exports = {
     })
   },
 
-  async run (options) {
+  async run (options, ctx) {
+    openProject = ctx.legacyOpenProject
+
     if (require('../util/electron-app').isRunningAsElectronProcess({ debug })) {
       const app = require('electron').app
 

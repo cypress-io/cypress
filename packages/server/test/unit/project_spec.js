@@ -18,16 +18,15 @@ const plugins = require(`${root}lib/plugins`)
 const runEvents = require(`${root}lib/plugins/run_events`)
 const system = require(`${root}lib/util/system`)
 const { fs } = require(`${root}lib/util/fs`)
-const settings = require(`${root}lib/util/settings`)
 const Watchers = require(`${root}lib/watchers`)
 const { SocketE2E } = require(`${root}lib/socket-e2e`)
-const { makeLegacyDataContext } = require(`${root}lib/makeDataContext`)
+const { testOpenCtx } = require('../../lib/makeDataContext')
+const settings = require('../../lib/util/settings')
 
 let ctx
 
 describe('lib/project-base', () => {
   beforeEach(function () {
-    ctx = makeLegacyDataContext()
     Fixtures.scaffold()
 
     this.todosPath = Fixtures.projectPath('todos')
@@ -42,16 +41,16 @@ describe('lib/project-base', () => {
 
     sinon.stub(runEvents, 'execute').resolves()
 
-    ctx.actions.globalProject.setActiveProjectForTestSetup(this.todosPath)
+    ctx = testOpenCtx(this.todosPath)
 
-    return settings.read(this.todosPath)
+    return settings.read(ctx, this.todosPath)
     .then((obj = {}) => {
-      ({ projectId: this.projectId } = obj)
+      console.log(obj)({ projectId: this.projectId } = obj)
 
       return config.set({ projectName: 'project', projectRoot: '/foo/bar' })
       .then((config1) => {
         this.config = config1
-        this.project = new ProjectBase({ projectRoot: this.todosPath, testingType: 'e2e' })
+        this.project = new ProjectBase({ ctx, projectRoot: this.todosPath, testingType: 'e2e' })
         this.project._server = { close () {} }
         this.project._cfg = config1
       })

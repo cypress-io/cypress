@@ -16,11 +16,14 @@ export const ProjectLike = interfaceType({
 
     t.string('projectId', {
       description: 'Used to associate project with Cypress cloud',
-      resolve: (source, args, ctx) => ctx.project.projectId(source.projectRoot).then((val) => val ?? null),
+      resolve: (source, args, ctx) => {
+        // TODO
+        return null
+      },
     })
 
     t.nonNull.string('title', {
-      resolve: (source, args, ctx) => source.title,
+      resolve: (source, args, ctx) => ctx.path.basename(source.projectRoot),
     })
   },
   resolveType (root) {

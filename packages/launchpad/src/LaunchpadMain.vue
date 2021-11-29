@@ -49,6 +49,7 @@
 <script lang="ts" setup>
 import { gql, useMutation, useQuery } from '@urql/vue'
 import { LaunchpadMainDocument, LaunchpadMain_ReloadConfigDocument, LaunchpadMain_ReloadPluginsDocument } from './generated/graphql'
+import MigrationWizard from './setup/MigrationWizard.vue'
 import SetupComponentTestingWizard from './setup/SetupComponentTestingWizard.vue'
 import GlobalPage from './global/GlobalPage.vue'
 import ErrorDisplay from './error/ErrorDisplay.vue'

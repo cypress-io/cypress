@@ -79,6 +79,8 @@ export function makeUrqlClient (target: 'launchpad' | 'app'): Client {
         ${error.stack ?? ''}
       `
 
+        console.log(process.env.NODE_ENV)
+
         if (process.env.NODE_ENV !== 'production') {
           toast.error(message, {
             timeout: false,

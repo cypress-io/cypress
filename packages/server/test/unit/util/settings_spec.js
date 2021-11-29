@@ -1,9 +1,10 @@
 const path = require('path')
+// const @toolingSystemTests = require('@tooling/system-tests')
 
 require('../../spec_helper')
 const { fs } = require('../../../lib/util/fs')
 const settings = require(`../../../lib/util/settings`)
-const { makeLegacyDataContext } = require('../../../lib/makeDataContext')
+const { testOpenCtx } = require('../../../lib/makeDataContext')
 
 const projectRoot = process.cwd()
 const defaultOptions = {
@@ -14,27 +15,25 @@ let ctx
 
 describe('lib/util/settings', () => {
   beforeEach(() => {
-    ctx = makeLegacyDataContext()
+    ctx = testOpenCtx(projectRoot, { testingType: 'e2e' })
   })
 
   context('with default configFile option', () => {
     beforeEach(function () {
       this.setup = (obj = {}) => {
-        ctx.actions.globalProject.setActiveProjectForTestSetup(projectRoot)
-
-        return fs.writeFileAsync('cypress.config.js', `module.exports = ${JSON.stringify(obj)}`)
+        return fs.writeFileAsync(path.join(projectRoot, 'cypress.config.js'), `module.exports = ${JSON.stringify(obj)}`)
       }
     })
 
     afterEach(() => {
-      return fs.removeAsync('cypress.config.js')
+      return fs.removeAsync(path.join(projectRoot, 'cypress.config.js'))
     })
 
     context('nested cypress object', () => {
       it('flattens object on read', function () {
         return this.setup({ cypress: { foo: 'bar' } })
         .then(() => {
-          return settings.read(projectRoot, defaultOptions)
+          return settings.read(ctx, defaultOptions)
         }).then((obj) => {
           expect(obj).to.deep.eq({ foo: 'bar' })
 
@@ -85,36 +84,11 @@ describe('lib/util/settings', () => {
       })
     })
 
-    context('.id', () => {
-      beforeEach(function () {
-        this.projectRoot = path.join(projectRoot, '_test-output/path/to/project/')
-
-        ctx.actions.globalProject.setActiveProjectForTestSetup(this.projectRoot)
-
-        return fs.ensureDirAsync(this.projectRoot)
-      })
-
-      afterEach(function () {
-        return fs.removeAsync(`${this.projectRoot}cypress.config.js`)
-      })
-
-      it('returns project id for project', function () {
-        return fs.writeFileAsync(`${this.projectRoot}cypress.config.js`, `module.exports = {
-          projectId: 'id-123',
-        }`)
-        .then(() => {
-          return settings.id(this.projectRoot, defaultOptions)
-        }).then((id) => {
-          expect(id).to.equal('id-123')
-        })
-      })
-    })
-
     context('.read', () => {
       it('promises cypress.config.js', function () {
         return this.setup({ foo: 'bar' })
         .then(() => {
-          return settings.read(projectRoot, defaultOptions)
+          return settings.read(ctx, defaultOptions)
         }).then((obj) => {
           expect(obj).to.deep.eq({ foo: 'bar' })
         })
@@ -123,7 +97,7 @@ describe('lib/util/settings', () => {
       it('promises cypress.config.js and merges CT specific properties for via testingType: component', function () {
         return this.setup({ a: 'b', component: { a: 'c' } })
         .then(() => {
-          return settings.read(projectRoot, { ...defaultOptions, testingType: 'component' })
+          return settings.read(ctx, { ...defaultOptions, testingType: 'component' })
         }).then((obj) => {
           expect(obj).to.deep.eq({ a: 'c', component: { a: 'c' } })
         })
@@ -132,7 +106,7 @@ describe('lib/util/settings', () => {
       it('promises cypress.config.js and merges e2e specific properties', function () {
         return this.setup({ a: 'b', e2e: { a: 'c' } })
         .then(() => {
-          return settings.read(projectRoot, defaultOptions)
+          return settings.read(ctx, defaultOptions)
         }).then((obj) => {
           expect(obj).to.deep.eq({ a: 'c', e2e: { a: 'c' } })
         })
@@ -191,26 +165,6 @@ describe('lib/util/settings', () => {
         })
       })
     })
-
-    context('.write', () => {
-      it('promises cypress.config.js updates', function () {
-        return this.setup().then(() => {
-          return settings.writeOnly(projectRoot, { foo: 'bar' }, defaultOptions)
-        }).then((obj) => {
-          expect(obj).to.deep.eq({ foo: 'bar' })
-        })
-      })
-
-      // TODO: Figure out how / what we want to write to settings files
-      it.skip('only writes over conflicting keys', function () {
-        return this.setup({ projectId: '12345', autoOpen: true })
-        .then(() => {
-          return settings.writeOnly(projectRoot, { projectId: 'abc123' }, defaultOptions)
-        }).then((obj) => {
-          expect(obj).to.deep.eq({ projectId: 'abc123', autoOpen: true })
-        })
-      })
-    })
   })
 
   context('with configFile: false', () => {
@@ -246,7 +200,7 @@ describe('lib/util/settings', () => {
     it('.read returns from configFile when its a JavaScript file', function () {
       this.projectRoot = path.join(projectRoot, '_test-output/path/to/project/')
 
-      ctx.actions.globalProject.setActiveProjectForTestSetup(this.projectRoot)
+      ctx.setCurrentProject(this.projectRoot)
 
       return fs.writeFile(path.join(this.projectRoot, 'cypress.custom.js'), `module.exports = { baz: 'lurman' }`)
       .then(() => {

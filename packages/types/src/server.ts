@@ -12,8 +12,8 @@ export interface LaunchOpts {
 }
 
 export interface LaunchArgs {
-  _: [string] // Cypress App binary location
-  config: Record<string, unknown>
+  _?: [string] // Cypress App binary location
+  config?: Record<string, unknown>
   cwd: string
   browser?: string
   configFile?: string
@@ -49,8 +49,7 @@ export interface AutomationMiddleware {
 
 type WebSocketOptionsCallback = (...args: any[]) => any
 
-export interface OpenProjectLaunchOptions<Ctx extends object> {
-  ctx?: Ctx
+export interface OpenProjectLaunchOptions {
   args?: LaunchArgs
   /**
    * Whether to skip the plugin initialization, useful when

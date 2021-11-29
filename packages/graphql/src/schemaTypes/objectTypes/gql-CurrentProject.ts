@@ -27,9 +27,14 @@ export const CurrentProject = objectType({
       type: Browser,
       description: 'Browsers for the project that are configured to run with Cypress. Null if config hasnt been sourced',
       resolve: (source, args, ctx) => {
-        if (source) {
-          return source.browsers ?? null
-        }
+        return source.loadedConfig()?.browsers ?? null
+      },
+    })
+
+    t.field('currentTestingTypeState', {
+      description: 'For the given "currentTestingType", what is the state',
+      resolve: () => {
+        // TestingTypeState
       },
     })
 
@@ -113,13 +118,7 @@ export const CurrentProject = objectType({
     t.string('configFileAbsolutePath', {
       description: 'Config File Absolute Path',
       resolve: async (source, args, ctx) => {
-        const config = await ctx.project.getConfig(source.projectRoot)
-
-        if (!ctx.currentProject || !config.configFile) {
-          return null
-        }
-
-        return path.join(ctx.currentProject.projectRoot, config.configFile)
+        return source.configFilePath
       },
     })
 

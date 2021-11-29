@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import path from 'path'
-import Promise from 'bluebird'
+import Bluebird from 'bluebird'
 import deepDiff from 'return-deep-diff'
 import type { ResolvedConfigurationOptions, ResolvedFromConfig, ResolvedConfigurationOptionSource } from '@packages/types'
 import configUtils from '@packages/config'
@@ -24,6 +24,8 @@ const debug = Debug('cypress:server:config')
 import { getProcessEnvVars, CYPRESS_SPECIAL_ENV_VARS } from './util/config'
 import type { TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
 import type { DataContext } from '@packages/data-context'
+import type { CurrentProjectShape } from '@packages/data-context/src/data'
+import assert from 'assert'
 
 const folders = _(configUtils.options).filter({ isFolder: true }).map('name').value()
 
@@ -133,18 +135,35 @@ export type FullConfig =
     resolved: ResolvedConfigurationOptions
   }
 
+export async function makeConfig (opts: Cypress.ConfigOptions, currentProject: CurrentProjectShape): Promise<FullConfig> {
+  return Bluebird.all([
+    Bluebird.resolve(opts).then(validateFile(currentProject.configFile ?? 'cypress.config.{ts|js}')),
+    settings.readEnv(currentProject.projectRoot).then(validateFile('cypress.env.json')),
+  ]).then(([settings, envFile]) => {
+    return set({
+      projectName: path.basename(currentProject.projectRoot),
+      projectRoot: currentProject.projectRoot,
+      config: _.cloneDeep(settings),
+      envFile: _.cloneDeep(envFile),
+      options: {},
+    })
+  })
+}
+
 export function get (
-  projectRoot,
-  options: { configFile?: string | false } = { configFile: undefined },
   ctx: DataContext,
-): Promise<FullConfig> {
-  return Promise.all([
-    settings.read(projectRoot, options, ctx).then(validateFile(options.configFile ?? 'cypress.config.{ts|js}')),
+  options: { configFile?: string | false } = { configFile: undefined },
+): Bluebird<FullConfig> {
+  assert(ctx.currentProject?.projectRoot, 'expected ctx.currentProject in config.get')
+  const projectRoot = ctx.currentProject.projectRoot
+
+  return Bluebird.all([
+    settings.read(ctx, options).then(),
     settings.readEnv(projectRoot).then(validateFile('cypress.env.json')),
   ])
   .spread((settings, envFile) => {
     return set({
-      projectName: getNameFromRoot(projectRoot),
+      projectName: path.basename(projectRoot),
       projectRoot,
       config: _.cloneDeep(settings),
       envFile: _.cloneDeep(envFile),
@@ -423,7 +442,7 @@ export function setScaffoldPaths (obj) {
 // async function
 export function setSupportFileAndFolder (obj, defaults) {
   if (!obj.supportFile) {
-    return Promise.resolve(obj)
+    return Bluebird.resolve(obj)
   }
 
   obj = _.clone(obj)
@@ -434,7 +453,7 @@ export function setSupportFileAndFolder (obj, defaults) {
   debug(`setting support file ${sf}`)
   debug(`for project root ${obj.projectRoot}`)
 
-  return Promise
+  return Bluebird
   .try(() => {
     // resolve full path with extension
     obj.supportFile = utils.resolveModule(sf)
@@ -618,8 +637,4 @@ export function getResolvedRuntimeConfig (config, runtimeConfig) {
     ...runtimeConfig,
     resolved: { ...config.resolved, ...resolvedRuntimeFields },
   }
-}
-
-export function getNameFromRoot (root = '') {
-  return path.basename(root)
 }

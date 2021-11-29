@@ -36,19 +36,19 @@ export class ProjectDataSource {
   }
 
   get isLoadingPlugins () {
-    return this.currentProject.pluginLoad.state === 'LOADING'
+    return !this.currentProject.pluginLoad.settled
   }
 
   get isLoadingConfig () {
-    return this.currentProject.config.state === 'LOADING'
+    return !this.currentProject.config.settled
   }
 
-  get configFilePath (): string {
-    // return
+  get configFilePath (): string | null {
+    return this.ctx.currentProject?.configFile ?? null
   }
 
-  get configFileExists (): string {
-    // return
+  get configFileExists () {
+    return this.ctx.currentProject?.configFiles.length ?? 0 > 0
   }
 
   private get api () {

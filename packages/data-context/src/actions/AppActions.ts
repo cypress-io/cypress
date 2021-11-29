@@ -31,8 +31,4 @@ export class AppActions {
 
     return browsers.some((b) => this.idForBrowser(b) === this.idForBrowser(chosenBrowser))
   }
-
-  async refreshNodePath () {
-    return this.ctx.loadingManager.nodePath.toPromise()
-  }
 }

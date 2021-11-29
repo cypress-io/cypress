@@ -11,12 +11,12 @@ import type {
   Preferences,
   SettingsOptions,
   AllowedState,
+  CypressErrorIdentifier,
 } from '@packages/types'
 import browserUtils from './browsers/utils'
 import auth from './gui/auth'
 import user from './user'
 import * as config from './config'
-import { openProject } from './open_project'
 import cache from './cache'
 import errors from './errors'
 import findSystemNode from './util/find_system_node'
@@ -24,50 +24,67 @@ import { graphqlSchema } from '@packages/graphql/src/schema'
 import { openExternal } from '@packages/server/lib/gui/links'
 import { getUserEditor } from './util/editors'
 import * as savedState from './saved_state'
+import assert from 'assert'
+import { OpenProject } from './open_project'
+import app_data from './util/app_data'
 
 const { getBrowsers, ensureAndGetByNameOrPath } = browserUtils
 
 interface MakeDataContextOptions {
   mode: 'run' | 'open'
-  launchArgs?: Partial<LaunchArgs>
+  options: Partial<LaunchArgs>
 }
 
-let legacyDataContext: DataContext | undefined
-
-// For testing
-export async function clearLegacyDataContext () {
-  await legacyDataContext?.destroy()
-  legacyDataContext = undefined
+export function testOpenCtx (projectRoot: string, options?: Partial<LaunchArgs>) {
+  return makeDataContext({
+    mode: 'open',
+    options: {
+      projectRoot,
+      testingType: 'e2e',
+      ...options,
+    },
+  })
 }
 
-export function makeLegacyDataContext (options: MakeDataContextOptions = { mode: 'run' }): DataContext {
-  if (legacyDataContext && process.env.LAUNCHPAD) {
-    throw new Error(`Expected ctx to be passed as an arg, but used legacy data context`)
-  } else if (!legacyDataContext) {
-    legacyDataContext = makeDataContext(options)
-  }
-
-  return legacyDataContext
+export function testRunCtx (projectRoot: string, options?: Partial<LaunchArgs>) {
+  return makeDataContext({
+    mode: 'run',
+    options: {
+      projectRoot,
+      testingType: 'e2e',
+      ...options,
+    },
+  })
 }
 
-export function getLegacyDataContext () {
-  if (!legacyDataContext) {
-    throw new Error(`legacyDataContext`)
-  }
+let lastSeenCtx: DataContext | null = null
 
-  return legacyDataContext
+export function getCtx () {
+  return lastSeenCtx
+}
+
+export async function clearLastSeenCtx () {
+  await lastSeenCtx?.destroy()
+
+  lastSeenCtx = null
 }
 
 export function makeDataContext (options: MakeDataContextOptions): DataContext {
   let ctx: DataContext
 
+  // Hacks to get around TypeScript & all of the injection we're doing here.
+  // Remove when we refactor to the data-context layer
+  function legacyOpenProject () {
+    return ctx.legacyOpenProject as OpenProject
+  }
+
   ctx = new DataContext({
     os: os.platform() as PlatformName,
     schema: graphqlSchema,
     ...options,
-    launchArgs: options.launchArgs ?? {},
-    launchOptions: {},
+    launchArgs: options.options ?? {},
     apis: {
+      appDataApi: app_data,
       appApi: {
         getBrowsers,
         ensureAndGetByNameOrPath (nameOrPath, browsers) {
@@ -89,14 +106,24 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
         },
       },
       projectApi: {
-        getConfig (projectRoot: string, options?: SettingsOptions) {
-          return config.get(projectRoot, options, ctx)
+        makeLegacyOpenProject () {
+          return new OpenProject(ctx)
+        },
+        makeConfig (cfg: Cypress.ConfigOptions) {
+          assert(ctx.currentProject, 'currentProject should exist')
+
+          return config.makeConfig(cfg, ctx.currentProject)
+        },
+        getConfig (options?: SettingsOptions) {
+          return config.get(ctx, options)
         },
         launchProject (browser: FoundBrowser, spec: Cypress.Spec, options?: LaunchOpts) {
-          return openProject.launch({ ...browser }, spec, options)
+          return legacyOpenProject().launch({ ...browser }, spec, options)
         },
         initializeProject (args: LaunchArgs, options: OpenProjectLaunchOptions, browsers: FoundBrowser[]) {
-          return openProject.create(args.projectRoot, args, options, browsers)
+          return legacyOpenProject().create(args.projectRoot, args, options, browsers).then((p) => {
+            return (p.getConfig()?.browsers ?? []) as FoundBrowser[]
+          })
         },
         insertProjectToCache (projectRoot: string) {
           cache.insertProject(projectRoot)
@@ -126,10 +153,10 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
           return cache.removeProject(path)
         },
         closeActiveProject () {
-          return openProject.closeActiveProject()
+          return legacyOpenProject().closeActiveProject()
         },
-        get error () {
-          return errors
+        error (key: CypressErrorIdentifier, ...args: any[]) {
+          return errors.get(key, ...args)
         },
       },
       electronApi: {
@@ -157,6 +184,8 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       },
     },
   })
+
+  lastSeenCtx = ctx
 
   return ctx
 }

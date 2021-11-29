@@ -133,10 +133,6 @@ export = {
   async ready (options: {projectRoot?: string} = {}, ctx: DataContext) {
     ctx.actions.electron.setElectronApp(app)
     const { projectRoot } = options
-    const [gqlPort] = await Promise.all([
-      makeGraphQLServer(ctx),
-      ctx.initializeMode(),
-    ])
 
     // TODO: potentially just pass an event emitter
     // instance here instead of callback functions
@@ -146,13 +142,13 @@ export = {
         return ctx.rootBus.emit('menu:item:clicked', 'log:out')
       },
       getGraphQLPort: () => {
-        return ctx?.gqlServerPort
+        return ctx.gqlServerPort
       },
     })
 
     return savedState.create(projectRoot, false).then((state) => state.get())
     .then((state) => {
-      return Windows.open(projectRoot, gqlPort, this.getWindowArgs(state))
+      return Windows.open(projectRoot, ctx.gqlServerPort, this.getWindowArgs(state))
       .then((win) => {
         ctx?.actions.electron.setBrowserWindow(win)
         Events.start({
@@ -170,7 +166,10 @@ export = {
   },
 
   async run (options, ctx: DataContext) {
-    await app.whenReady()
+    await Promise.all([
+      app.whenReady(),
+      makeGraphQLServer(ctx).then(() => ctx.initializeMode()),
+    ])
 
     return this.ready(options, ctx)
   },

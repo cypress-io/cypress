@@ -8,7 +8,7 @@
     "check-ts": "tsc --noEmit",
     "clean-deps": "rimraf node_modules",
     "codecov": "codecov",
-    "dev": "node index.js",
+    "dev": "cd ../.. && yarn gulp startCypressWatch",
     "docker": "cd ../.. && WORKING_DIR=/packages/server ./scripts/run-docker-local.sh",
     "postinstall": "patch-package",
     "repl": "node repl.js",

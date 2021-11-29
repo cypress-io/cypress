@@ -1,12 +1,11 @@
 import Debug from 'debug'
 import _ from 'lodash'
-import browserUtils from '../browsers/utils'
 import human from 'human-interval'
 import browsers from '../browsers'
-import { openProject } from '../open_project'
 import type { LaunchArgs } from '@packages/types'
 import * as Updater from '../updater'
 import errors from '../errors'
+import type { DataContext } from '@packages/data-context'
 
 const debug = Debug('cypress:server:interactive-ct')
 
@@ -24,7 +23,7 @@ const registerCheckForUpdates = () => {
   checkForUpdates(true)
 }
 
-const start = async (projectRoot: string, args: LaunchArgs) => {
+const start = async (projectRoot: string, args: LaunchArgs, ctx: DataContext) => {
   if (process.env['CYPRESS_INTERNAL_ENV'] === 'production') {
     registerCheckForUpdates()
   }
@@ -48,7 +47,9 @@ const start = async (projectRoot: string, args: LaunchArgs) => {
 
     debug('create project')
 
-    return openProject.create(projectRoot, args, options)
+    const openProject = ctx.legacyOpenProject
+
+    return ctx.legacyOpenProject.create(projectRoot, args, options)
     .then(() => {
       debug('launch project')
 
@@ -84,12 +85,12 @@ export const returnDefaultBrowser = (
   return undefined
 }
 
-export const run = async (options: LaunchArgs) => {
-  const installedBrowsers = await browserUtils.getBrowsers()
+export const run = async (options: LaunchArgs, ctx: DataContext) => {
+  const installedBrowsers = await ctx.loadingManager.machineBrowsers.toPromise()
 
   options.browser = options.browser || returnDefaultBrowser(browsersForCtInteractive, installedBrowsers)
 
-  return start(options.projectRoot, options).catch((e: Error) => {
+  return start(options.projectRoot, options, ctx).catch((e: Error) => {
     // Usually this kind of error management is doen inside cypress.js start
     // But here we bypassed this since we don't use the window of the gui
     // Handle errors here to avoid multiple errors appearing.

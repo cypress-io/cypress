@@ -245,7 +245,7 @@ export const mutation = mutationType({
       async resolve (_, args, ctx) {
         await ctx.actions.currentProject?.setProjectPreferences(args)
 
-        return ctx.appData
+        return {}
       },
     })
 
@@ -304,7 +304,7 @@ export const mutation = mutationType({
         path: nonNull(stringArg()),
       },
       resolve: (_, args, ctx) => {
-        ctx.actions.project.openDirectoryInIDE(args.path)
+        ctx.actions.currentProject?.openDirectoryInIDE(args.path)
 
         return true
       },

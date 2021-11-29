@@ -59,8 +59,7 @@ describe('App', () => {
       // TODO: (Alejandro) This should be removed when we add a file listener to update the config file
       ctx.update((d) => {
         if (d.currentProject) {
-          d.currentProject.config = null
-          d.currentProject.configChildProcess = null
+          d.currentProject.config = ctx.loadingManager.projectConfig.reset().getState()
         }
       })
 

@@ -15,7 +15,7 @@ const pkg = require('@packages/root')
 const detect = require('@packages/launcher/lib/detect')
 const launch = require('@packages/launcher/lib/browsers')
 const extension = require('@packages/extension')
-const v = require('@packages/config/lib/validation')
+const v = require('@packages/config/lib/validation').default
 
 const argsUtil = require(`${root}lib/util/args`)
 const { fs } = require(`${root}lib/util/fs`)
@@ -47,7 +47,7 @@ const system = require(`${root}lib/util/system`)
 const appData = require(`${root}lib/util/app_data`)
 const electronApp = require('../../lib/util/electron-app')
 const savedState = require(`${root}lib/saved_state`)
-const { makeLegacyDataContext } = require(`${root}lib/makeDataContext`)
+const { testOpenCtx } = require('../../lib/makeDataContext')
 
 const TYPICAL_BROWSERS = [
   {
@@ -109,7 +109,7 @@ describe('lib/cypress', () => {
   require('mocha-banner').register()
 
   beforeEach(function () {
-    ctx = makeLegacyDataContext()
+    ctx = makeDataContext({ mode: 'open' })
     process.chdir(previousCwd)
     this.timeout(8000)
 
@@ -173,14 +173,6 @@ describe('lib/cypress', () => {
   })
 
   afterEach(async () => {
-    try {
-      // make sure every project
-      // we spawn is closed down
-      await openProject.close()
-    } catch (e) {
-      // ...
-    }
-
     Fixtures.remove()
   })
 
@@ -253,7 +245,7 @@ describe('lib/cypress', () => {
         },
       }
 
-      sinon.stub(electron.app, 'on').withArgs('ready').yieldsAsync()
+      // sinon.stub(electron.app, 'on').withArgs('ready').yieldsAsync()
       sinon.stub(Windows, 'open').resolves(this.win)
     })
 
@@ -288,7 +280,7 @@ describe('lib/cypress', () => {
 
   context('--run-project', () => {
     beforeEach(() => {
-      sinon.stub(electron.app, 'on').withArgs('ready').yieldsAsync()
+      // sinon.stub(electron.app, 'on').withArgs('ready').yieldsAsync()
       sinon.stub(runMode, 'waitForSocketConnection').resolves()
       sinon.stub(runMode, 'listenForProjectEnd').resolves({ stats: { failures: 0 } })
       sinon.stub(browsers, 'open')
@@ -459,10 +451,9 @@ describe('lib/cypress', () => {
       })
     })
 
-    it('scaffolds out integration and example specs if they do not exist when not runMode', function () {
-      ctx.actions.globalProject.setActiveProjectForTestSetup(this.pristineWithConfigPath)
-
-      return config.get(this.pristineWithConfigPath)
+    // NOTE: Does not happen in v10
+    it.skip('scaffolds out integration and example specs if they do not exist when not runMode', function () {
+      return config.get(testOpenCtx(this.pristineWithConfigPath))
       .then((cfg) => {
         return fs.statAsync(cfg.integrationFolder)
         .then(() => {
@@ -523,9 +514,7 @@ describe('lib/cypress', () => {
     })
 
     it('scaffolds out fixtures + files if they do not exist', function () {
-      ctx.actions.globalProject.setActiveProjectForTestSetup(this.pristineWithConfigPath)
-
-      return config.get(this.pristineWithConfigPath)
+      return config.get(testOpenCtx(this.pristineWithConfigPath))
       .then((cfg) => {
         return fs.statAsync(cfg.fixturesFolder)
         .then(() => {
@@ -540,12 +529,11 @@ describe('lib/cypress', () => {
       })
     })
 
-    it('scaffolds out support + files if they do not exist', function () {
+    // NOTE: Not the behavior in v10
+    it.skip('scaffolds out support + files if they do not exist', function () {
       const supportFolder = path.join(this.pristineWithConfigPath, 'cypress/support')
 
-      ctx.actions.globalProject.setActiveProjectForTestSetup(this.pristineWithConfigPath)
-
-      return config.get(this.pristineWithConfigPath)
+      return config.get(testOpenCtx(this.pristineWithConfigPath))
       .then(() => {
         return fs.statAsync(supportFolder)
         .then(() => {
@@ -563,9 +551,7 @@ describe('lib/cypress', () => {
     })
 
     it('removes fixtures when they exist and fixturesFolder is false', function (done) {
-      ctx.actions.globalProject.setActiveProjectForTestSetup(this.idsPath)
-
-      config.get(this.idsPath)
+      config.get(testOpenCtx(this.idsPath))
       .then((cfg) => {
         this.cfg = cfg
 
@@ -623,9 +609,7 @@ describe('lib/cypress', () => {
     it('can change the reporter with cypress.config.js', function () {
       sinon.spy(Reporter, 'create')
 
-      ctx.actions.globalProject.setActiveProjectForTestSetup(this.idsPath)
-
-      return config.get(this.idsPath)
+      return config.get(testOpenCtx(this.idsPath))
       .then((cfg) => {
         this.cfg = cfg
 
@@ -1189,22 +1173,6 @@ describe('lib/cypress', () => {
     })
 
     describe('--config-file', () => {
-      it('false does not require cypress.config.js to run', function () {
-        return fs.statAsync(path.join(this.pristinePath, 'cypress.config.js'))
-        .then(() => {
-          throw new Error('cypress.config.js should not exist')
-        }).catch({ code: 'ENOENT' }, () => {
-          return cypress.start([
-            `--run-project=${this.pristinePath}`,
-            '--no-run-mode',
-            '--config-file',
-            'false',
-          ]).then(() => {
-            this.expectExitWith(0)
-          })
-        })
-      })
-
       it('with a custom config file fails when it doesn\'t exist', function () {
         this.filename = 'abcdefgh.test.json'
 
@@ -1230,7 +1198,7 @@ describe('lib/cypress', () => {
   context('--record', () => {
     beforeEach(function () {
       sinon.stub(api, 'createRun').resolves()
-      sinon.stub(electron.app, 'on').withArgs('ready').yieldsAsync()
+      // sinon.stub(electron.app, 'on').withArgs('ready').yieldsAsync()
       sinon.stub(browsers, 'open')
       sinon.stub(runMode, 'waitForSocketConnection').resolves()
       sinon.stub(runMode, 'waitForTestsToFinishRunning').resolves({
@@ -1662,7 +1630,7 @@ describe('lib/cypress', () => {
         },
       }
 
-      sinon.stub(electron.app, 'on').withArgs('ready').yieldsAsync()
+      // sinon.stub(electron.app, 'on').withArgs('ready').yieldsAsync()
       sinon.stub(Windows, 'open').resolves(this.win)
       sinon.stub(ServerE2E.prototype, 'startWebsockets')
       sinon.spy(Events, 'start')
@@ -1705,7 +1673,7 @@ describe('lib/cypress', () => {
       process.env.CYPRESS_responseTimeout = '5555'
       process.env.CYPRESS_watch_for_file_changes = 'false'
 
-      ctx.actions.globalProject.setActiveProjectForTestSetup(this.todosPath)
+      ctx.setCurrentProject(this.todosPath)
 
       return user.set({ name: 'brian', authToken: 'auth-token-123' })
       .then(() => settings.read(this.todosPath))
@@ -1715,9 +1683,6 @@ describe('lib/cypress', () => {
 
         return settings.writeOnly(this.todosPath, json)
       }).then(() => {
-        // TODO(tim): this shouldn't be needed when we refactor the ctx setup
-        process.env.LAUNCHPAD = '0'
-
         return cypress.start([
           '--port=2121',
           '--config',
@@ -1726,7 +1691,6 @@ describe('lib/cypress', () => {
           '--env=baz=baz',
         ])
       }).then(() => {
-        delete process.env.LAUNCHPAD
         const options = Events.start.firstCall.args[0]
 
         return openProject.create(this.todosPath, options, {}, [])
@@ -1800,12 +1764,8 @@ describe('lib/cypress', () => {
 
       sinon.stub(ServerE2E.prototype, 'open').resolves([2121, warning])
 
-      // TODO(tim): this shouldn't be needed when we refactor the ctx setup
-      process.env.LAUNCHPAD = '0'
-
       return cypress.start(['--port=2121', '--config', 'pageLoadTimeout=1000', '--foo=bar', '--env=baz=baz'])
       .then(() => {
-        delete process.env.LAUNCHPAD
         const options = Events.start.firstCall.args[0]
 
         Events.handleEvent(options, bus, event, 123, 'on:project:warning')
@@ -1851,7 +1811,7 @@ describe('lib/cypress', () => {
   context('--cwd', () => {
     beforeEach(() => {
       errors.warning.restore()
-      sinon.stub(electron.app, 'on').withArgs('ready').yieldsAsync()
+      // sinon.stub(electron.app, 'on').withArgs('ready').yieldsAsync()
       sinon.stub(interactiveMode, 'ready').resolves()
       sinon.spy(errors, 'warning')
     })
@@ -1873,7 +1833,7 @@ describe('lib/cypress', () => {
 
   context('no args', () => {
     beforeEach(() => {
-      sinon.stub(electron.app, 'on').withArgs('ready').yieldsAsync()
+      // sinon.stub(electron.app, 'on').withArgs('ready').yieldsAsync()
       sinon.stub(interactiveMode, 'ready').resolves()
     })
 

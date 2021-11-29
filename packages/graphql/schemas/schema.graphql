@@ -478,16 +478,33 @@ scalar JSON
 interface Loadable {
   error: Boolean
   status: Boolean!
-}
 
-type LoadableConfig implements Loadable {
-  error: Boolean
-  status: Boolean!
+  """
+  A warning associated with the current asynchronous action, e.g. if an invalid browser is found
+  """
+  warning: Warning
 }
 
 type LoadablePlugins implements Loadable {
   error: Boolean
   status: Boolean!
+
+  """
+  A warning associated with the current asynchronous action, e.g. if an invalid browser is found
+  """
+  warning: Warning
+}
+
+"""A "loadable" for sourcing the Project Config"""
+type LoadableProjectConfig implements Loadable {
+  config: JSON
+  error: Boolean
+  status: Boolean!
+
+  """
+  A warning associated with the current asynchronous action, e.g. if an invalid browser is found
+  """
+  warning: Warning
 }
 
 """local settings on a device-by-device basis"""
@@ -859,6 +876,8 @@ type VersionData {
 
 """A warning"""
 type Warning {
+  """If true, we have the ability to dismiss this warning"""
+  dismissable: Boolean
   message: String!
   setupStep: String
   title: String!

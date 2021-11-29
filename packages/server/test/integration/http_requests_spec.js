@@ -19,7 +19,6 @@ const httpsServer = require(`${root}../https-proxy/test/helpers/https_server`)
 const pkg = require('@packages/root')
 const SseStream = require('ssestream')
 const EventSource = require('eventsource')
-const config = require(`${root}lib/config`)
 const { ServerE2E } = require(`${root}lib/server-e2e`)
 const ProjectBase = require(`${root}lib/project-base`).ProjectBase
 const { SpecsStore } = require(`${root}/lib/specs-store`)
@@ -31,12 +30,14 @@ const { fs } = require(`${root}lib/util/fs`)
 const glob = require(`${root}lib/util/glob`)
 const CacheBuster = require(`${root}lib/util/cache_buster`)
 const Fixtures = require('@tooling/system-tests/lib/fixtures')
+const { testOpenCtx } = require('../../lib/makeDataContext')
+const config = require('../../lib/config')
+
 /**
  * @type {import('@packages/resolve-dist')}
  */
 const { getRunnerInjectionContents } = require(`@packages/resolve-dist`)
 const { createRoutes } = require(`${root}lib/routes`)
-const { makeLegacyDataContext } = require(`${root}lib/makeDataContext`)
 
 zlib = Promise.promisifyAll(zlib)
 
@@ -85,7 +86,6 @@ describe('Routes', () => {
 
   beforeEach(async function () {
     await Fixtures.scaffoldCommonNodeModules()
-    ctx = makeLegacyDataContext()
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 
     sinon.stub(CacheBuster, 'get').returns('-123')
@@ -106,12 +106,12 @@ describe('Routes', () => {
         obj.projectRoot = Fixtures.projectPath('e2e')
       }
 
-      ctx.actions.globalProject.setActiveProjectForTestSetup(obj.projectRoot)
+      ctx = testOpenCtx(obj.projectRoot, { ...obj, testingType: 'e2e' })
 
       // get all the config defaults
       // and allow us to override them
       // for each test
-      return config.set(obj)
+      return config.get(ctx, obj)
       .then((cfg) => {
         // use a jar for each test
         // but reset it automatically
@@ -223,7 +223,6 @@ describe('Routes', () => {
     return Promise.join(
       this.server.close(),
       httpsServer.stop(),
-      ctx.actions.project.clearActiveProject(),
     )
   })
 
@@ -246,7 +245,7 @@ describe('Routes', () => {
       })
     })
 
-    it('does not redirect with _remoteOrigin set', function () {
+    it.only('does not redirect with _remoteOrigin set', function () {
       return this.setup('http://www.github.com')
       .then(() => {
         nock(this.server._remoteOrigin)

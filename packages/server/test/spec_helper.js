@@ -15,6 +15,7 @@ const _ = require('lodash')
 const Promise = require('bluebird')
 const path = require('path')
 const cache = require('../lib/cache')
+const { clearLastSeenCtx } = require('../lib/makeDataContext')
 
 require('chai')
 .use(require('@cypress/sinon-chai'))
@@ -109,10 +110,8 @@ beforeEach(function () {
   return cache.remove()
 })
 
-const { clearLegacyDataContext } = require('../lib/makeDataContext')
-
 afterEach(async () => {
-  await clearLegacyDataContext()
+  await clearLastSeenCtx()
   sinon.restore()
 
   nock.cleanAll()

@@ -1,7 +1,6 @@
 import type { MutationAddProjectArgs } from '@packages/graphql/src/gen/nxs.gen'
 import path from 'path'
 import type { DataContext } from '..'
-import { makeCurrentProject } from '../data'
 
 export class GlobalProjectActions {
   constructor (private ctx: DataContext) {}
@@ -13,7 +12,7 @@ export class GlobalProjectActions {
   async loadGlobalProjects () {
     this.ctx.debug('loadGlobalProjects from %s', this.ctx._apis.appDataApi.path())
 
-    await this.ctx.loadingManager.globalProjects.load().toPromise()
+    await this.ctx.loadingManager.globalProjects.toPromise()
   }
 
   /**
@@ -26,7 +25,7 @@ export class GlobalProjectActions {
     await this.ctx.actions.currentProject?.clearCurrentProject()
 
     // Set initial properties, so we can set the config object on the active project
-    this.resetCurrentProject(projectRoot)
+    this.ctx.setCurrentProject(projectRoot)
   }
 
   setAndLoadActiveProject () {
@@ -37,22 +36,16 @@ export class GlobalProjectActions {
 
   setActiveProjectForTestSetup (projectRoot: string) {
     // Set initial properties, so we can set the config object on the active project
-    this.resetCurrentProject(projectRoot)
-  }
-
-  private resetCurrentProject (projectRoot: string) {
-    this.ctx.loadingManager.resetCurrentProject()
-    this.ctx.update((o) => {
-      o.currentProject = makeCurrentProject({ projectRoot }, this.ctx.loadingManager)
-    })
+    this.ctx.setCurrentProject(projectRoot)
   }
 
   /**
    * Adds a project directory to the list of "projects" if it doesn't exist already
    */
   async addProject (args: MutationAddProjectArgs) {
+    const projectsList = await this.ctx.loadingManager.globalProjects.toPromise()
     const projectRoot = await this.getDirectoryPath(args.path)
-    const found = this.ctx.projectsList?.find((x) => x.projectRoot === projectRoot)
+    const found = projectsList?.find((x) => x === projectRoot)
 
     if (!found) {
       this.ctx.update((o) => {

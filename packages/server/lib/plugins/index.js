@@ -36,6 +36,13 @@ const registerHandler = (handler) => {
   handlers.push(handler)
 }
 
+/**
+ *
+ * @param {object} config
+ * @param {object} options
+ * @param {import('@packages/data-context').DataContext} ctx
+ * @returns
+ */
 const init = (config, options, ctx) => {
   // test and warn for incompatible plugin
   try {
@@ -73,7 +80,7 @@ const init = (config, options, ctx) => {
     executedPlugins = ctx.currentProject?.configChildProcess?.executedPlugins
 
     const killPluginsProcess = () => {
-      ctx.actions.projectConfig?.killConfigProcess()
+      ctx.actions.projectConfig?.killChildProcess()
       pluginsProcess = null
     }
 
@@ -132,7 +139,7 @@ const init = (config, options, ctx) => {
         debug('register plugins process event', registration.event, 'with id', registration.eventId)
 
         register(registration.event, (...args) => {
-          return util.wrapParentPromise(ipc, registration.eventId, (invocationId) => {
+          util.wrapParentPromise(ipc, registration.eventId, (invocationId) => {
             debug('call event', registration.event, 'for invocation id', invocationId)
             const ids = {
               eventId: registration.eventId,

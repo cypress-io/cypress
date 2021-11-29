@@ -30,9 +30,8 @@ import Watchers from './watchers'
 import devServer from './plugins/dev-server'
 import preprocessor from './plugins/preprocessor'
 import { SpecsStore } from './specs-store'
-import { checkSupportFile, getDefaultConfigFilePath } from './project_utils'
+import { checkSupportFile } from './project_utils'
 import type { FoundBrowser, OpenProjectLaunchOptions } from '@packages/types'
-import { makeLegacyDataContext } from './makeDataContext'
 import type { DataContext } from '@packages/data-context'
 
 // Cannot just use RuntimeConfigOptions as is because some types are not complete.
@@ -74,7 +73,7 @@ export class ProjectBase<TServer extends Server> extends EE {
   private _isServerOpen: boolean = false
 
   public browser: any
-  public options: OpenProjectLaunchOptions<DataContext>
+  public options: OpenProjectLaunchOptions
   public testingType: Cypress.TestingType
   public spec: Cypress.Cypress['spec'] | null
   public isOpen: boolean = false
@@ -82,13 +81,15 @@ export class ProjectBase<TServer extends Server> extends EE {
   projectRoot: string
 
   constructor ({
+    ctx,
     projectRoot,
     testingType,
     options = {},
   }: {
+    ctx: DataContext
     projectRoot: string
     testingType: Cypress.TestingType
-    options: OpenProjectLaunchOptions<DataContext>
+    options: OpenProjectLaunchOptions
   }) {
     super()
 
@@ -106,7 +107,7 @@ export class ProjectBase<TServer extends Server> extends EE {
     this.spec = null
     this.browser = null
     this.id = createHmac('sha256', 'secret-key').update(projectRoot).digest('hex')
-    this.ctx = options.ctx ?? makeLegacyDataContext()
+    this.ctx = ctx
 
     debug('Project created %o', {
       testingType: this.testingType,
@@ -120,11 +121,6 @@ export class ProjectBase<TServer extends Server> extends EE {
       onWarning () {},
       onSettingsChanged: false,
       ...options,
-    }
-
-    this.ctx.actions.projectConfig?.killConfigProcess()
-    if (this.ctx.coreData.currentProject?.projectRoot !== this.projectRoot) {
-      this.ctx.actions.globalProject.setActiveProject(this.projectRoot)
     }
   }
 
@@ -581,7 +577,7 @@ export class ProjectBase<TServer extends Server> extends EE {
     return Reporter.create(reporter, reporterOptions, projectRoot)
   }
 
-  startWebsockets (options: Omit<OpenProjectLaunchOptions<DataContext>, 'args'>, { socketIoCookie, namespace, screenshotsFolder, report, reporter, reporterOptions, projectRoot }: StartWebsocketOptions) {
+  startWebsockets (options: Omit<OpenProjectLaunchOptions, 'args'>, { socketIoCookie, namespace, screenshotsFolder, report, reporter, reporterOptions, projectRoot }: StartWebsocketOptions) {
   // if we've passed down reporter
   // then record these via mocha reporter
     const reporterInstance = this.initializeReporter({
@@ -697,10 +693,10 @@ export class ProjectBase<TServer extends Server> extends EE {
   async initializeConfig (browsers: FoundBrowser[] = []): Promise<Cfg> {
     // set default for "configFile" if undefined
     if (this.options.configFile === undefined || this.options.configFile === null) {
-      this.options.configFile = await getDefaultConfigFilePath(this.projectRoot, this.ctx)
+      throw new Error(`Missing configFile in ProjectBase.initializeConfig`)
     }
 
-    let theCfg: Cfg = await config.get(this.projectRoot, this.options, this.ctx)
+    let theCfg: Cfg = await config.get(this.ctx, this.options)
 
     if (!theCfg.browsers || theCfg.browsers.length === 0) {
       // @ts-ignore - we don't know if the browser is headed or headless at this point.
@@ -866,7 +862,7 @@ export class ProjectBase<TServer extends Server> extends EE {
   // For testing
   // Do not use this method outside of testing
   // pass all your options when you create a new instance!
-  __setOptions (options: OpenProjectLaunchOptions<DataContext>) {
+  __setOptions (options: OpenProjectLaunchOptions) {
     this.options = options
   }
 

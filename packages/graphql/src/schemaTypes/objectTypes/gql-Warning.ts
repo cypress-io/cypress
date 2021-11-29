@@ -7,6 +7,9 @@ export const Warning = objectType({
     t.nonNull.string('title')
     t.nonNull.string('message')
     t.string('setupStep')
+    t.boolean('dismissable', {
+      description: 'If true, we have the ability to dismiss this warning',
+    })
   },
   sourceType: {
     module: '@packages/types',

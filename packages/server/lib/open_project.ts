@@ -13,13 +13,14 @@ import { getSpecUrl } from './project_utils'
 import errors from './errors'
 import type { LaunchOpts, LaunchArgs, OpenProjectLaunchOptions, FoundBrowser } from '@packages/types'
 import type { DataContext } from '@packages/data-context'
-import { makeLegacyDataContext } from './makeDataContext'
 
 const debug = Debug('cypress:server:open_project')
 
 export class OpenProject {
   openProject: ProjectBase<any> | null = null
   relaunchBrowser: ((...args: unknown[]) => Bluebird<void>) | null = null
+
+  constructor (readonly ctx: DataContext) {}
 
   resetOpenProject () {
     this.openProject = null
@@ -255,7 +256,6 @@ export class OpenProject {
     debug('closing opened project')
 
     return Promise.all([
-      this._ctx?.destroy(),
       this.closeOpenProjectAndBrowsers(),
     ]).then(() => null)
   }
@@ -267,10 +267,7 @@ export class OpenProject {
     await this.closeOpenProjectAndBrowsers()
   }
 
-  _ctx?: DataContext
-
-  async create (path: string, args: LaunchArgs, options: OpenProjectLaunchOptions<DataContext>, browsers: FoundBrowser[] = []) {
-    this._ctx = options.ctx ?? makeLegacyDataContext()
+  async create (path: string, args: LaunchArgs, options: OpenProjectLaunchOptions, browsers: FoundBrowser[] = []) {
     debug('open_project create %s', path)
 
     _.defaults(options, {
@@ -298,6 +295,7 @@ export class OpenProject {
 
     // store the currently open project
     const project = this.openProject = new ProjectBase({
+      ctx: this.ctx,
       testingType,
       projectRoot: path,
       options: {
@@ -328,5 +326,3 @@ export class OpenProject {
     this.resetOpenProject()
   }
 }
-
-export const openProject = new OpenProject()

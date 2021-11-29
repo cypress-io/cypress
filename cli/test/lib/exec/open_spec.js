@@ -56,15 +56,6 @@ describe('exec open', function () {
       })
     })
 
-    it('spawns with --config-file false', function () {
-      return open.start({ configFile: false })
-      .then(() => {
-        expect(spawn.start).to.be.calledWith(
-          ['--config-file', false],
-        )
-      })
-    })
-
     it('spawns with --config-file set', function () {
       return open.start({ configFile: 'special-cypress.config.js' })
       .then(() => {

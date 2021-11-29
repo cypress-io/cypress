@@ -38,12 +38,14 @@ export function validate (cfg, onErr) {
   })
 }
 
-export default {
-  allowed: (obj = {}) => {
-    const propertyNames = publicConfigKeys.concat(breakingKeys)
+export function allowed (obj = {}) {
+  const propertyNames = publicConfigKeys.concat(breakingKeys)
 
-    return _.pick(obj, propertyNames)
-  },
+  return _.pick(obj, propertyNames)
+}
+
+export default {
+  allowed,
 
   getBreakingKeys: () => {
     return breakingKeys

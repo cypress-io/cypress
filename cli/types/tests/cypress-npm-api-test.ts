@@ -22,10 +22,6 @@ cypress.run().then(results => {
 cypress.open() // $ExpectType Promise<void>
 cypress.run() // $ExpectType Promise<CypressRunResult | CypressFailedRunResult>
 
-cypress.open({
-  configFile: false
-})
-
 cypress.run({
   configFile: "abc123"
 })

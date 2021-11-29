@@ -4,20 +4,6 @@ import type { DataContext } from '..'
 export class ProjectConfigDataSource {
   constructor (private ctx: DataContext) {}
 
-  async getOrCreateBaseConfig (configFilePath?: string) {
-    const configChildProcess = this.ctx.currentProject?.configChildProcess
-
-    if (!configChildProcess) {
-      if (!configFilePath) {
-        configFilePath = await this.getConfigFilePath()
-      }
-
-      return this.ctx.deref.actions.projectConfig?.refreshProjectConfig()
-    }
-
-    return configChildProcess.resolvedBaseConfig
-  }
-
   async getDefaultConfigBasename (projectRoot: string) {
     const cypressConfigFiles = ['cypress.config.js', 'cypress.config.ts']
     const legacyConfigFile = 'cypress.json'

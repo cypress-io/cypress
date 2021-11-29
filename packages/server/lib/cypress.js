@@ -14,7 +14,6 @@ const debug = require('debug')('cypress:server:cypress')
 const { getPublicConfigKeys } = require('@packages/config')
 const argsUtils = require('./util/args')
 const chalk = require('chalk')
-const { openProject } = require('../lib/open_project')
 
 const warning = (code, args) => {
   return require('./errors').warning(code, args)
@@ -114,9 +113,11 @@ module.exports = {
   },
 
   openProject (options) {
+    const { makeDataContext } = require('./makeDataContext')
+
     // this code actually starts a project
     // and is spawned from nodemon
-    openProject.open(options.project, options)
+    makeDataContext({ mode: 'open', options }).legacyOpenProject.open(options.project, options)
   },
 
   start (argv = []) {

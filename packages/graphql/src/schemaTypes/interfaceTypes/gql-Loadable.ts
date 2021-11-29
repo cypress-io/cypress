@@ -1,4 +1,5 @@
 import { interfaceType } from 'nexus'
+import { Warning } from '..'
 
 export const Loadable = interfaceType({
   name: 'Loadable',
@@ -6,6 +7,10 @@ export const Loadable = interfaceType({
   definition (t) {
     t.nonNull.boolean('status')
     t.boolean('error')
+    t.field('warning', {
+      type: Warning,
+      description: `A warning associated with the current asynchronous action, e.g. if an invalid browser is found`,
+    })
   },
   resolveType (o) {
     return o.__typename

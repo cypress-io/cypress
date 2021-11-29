@@ -1,26 +1,29 @@
-import type Observable from 'zen-observable'
-import pDefer from 'p-defer'
-import { isObservable } from '@packages/types'
-
 export type IsPending = {
+  settled: false
   state: 'PENDING'
+  error?: never
 }
 
-export type IsLoading = {
+export type IsLoading<V> = {
+  settled: false
   state: 'LOADING'
+  promise: Promise<V>
 }
 
 export type IsLoaded<V> = {
+  settled: true
   state: 'LOADED'
   value: V
+  error?: never
 }
 
 export type IsErrored<E> = {
+  settled: true
   state: 'ERRORED'
   error: E
 }
 
-export type LoadingState<V, E = any> = IsPending | IsLoading | IsLoaded<V> | IsErrored<E>
+export type LoadingState<V, E = any> = IsPending | IsLoading<V> | IsLoaded<V> | IsErrored<E>
 
 let withinLoadingAction = false
 
@@ -36,13 +39,9 @@ export interface LoadingConfig<V, E = any> {
    */
   name: string
   /**
-   *
-   */
-  onCreate?: () => void
-  /**
    * The action to take to update the value
    */
-  action: () => Promise<V> | Observable<V>
+  action: () => Promise<V>
   /**
    * When we update the value
    */
@@ -55,11 +54,6 @@ export interface LoadingConfig<V, E = any> {
    * Optional callback after there's an error
    */
   onError?: (err: E) => void
-  /**
-   * Called when we "cancel" the loading state, cleans up
-   * the created server, kills a PID, etc.
-   */
-  onCancel?: () => void
 }
 
 /**
@@ -70,22 +64,25 @@ export interface LoadingConfig<V, E = any> {
  * In our application we have a few of these: "project config",
  */
 export class LoadingContainer<V, E = any> {
+  private _inFlight = { cancelled: false }
   /**
    * Caches the "loading" value on the class, so we can
    */
-  private _loading: Promise<V> | ZenObservable.Subscription | undefined
+  private _loading: Promise<V> | undefined
   private _data: LoadingState<V, E>;
   private cancelled = false
 
   constructor (private config: LoadingConfig<V, E>) {
-    this._data = { state: 'PENDING' }
-    this.config.onCreate?.(this)
+    this._data = { state: 'PENDING', settled: false }
   }
 
   load () {
     if (this._data.state === 'PENDING') {
-      this._data = { state: 'LOADING' }
-      this.startLoading()
+      this._data = {
+        settled: false,
+        state: 'LOADING',
+        promise: this.startLoading(),
+      }
 
       return this
     }
@@ -98,36 +95,32 @@ export class LoadingContainer<V, E = any> {
       withinLoadingAction = true
       const actionVal = this.config.action()
 
-      if (isObservable(actionVal)) {
-        this._loading = actionVal.subscribe({
-          next () {},
-          error () {},
-          complete () {},
-        })
-      } else {
-        this._loading = actionVal
-      }
+      this._loading = actionVal
 
       withinLoadingAction = false
 
-      const value = await actionVal
+      const value = await this._loading
 
       if (this.cancelled) {
-        return
+        return value
       }
 
       this._data = {
+        settled: true,
         state: 'LOADED',
         value,
       }
 
       this.config.onUpdate(this._data)
+
+      return value
     } catch (e: unknown?) {
       if (this.cancelled) {
-        return
+        return Promise.reject(e)
       }
 
       this._data = {
+        settled: true,
         state: 'ERRORED',
         error: e,
       }
@@ -135,6 +128,8 @@ export class LoadingContainer<V, E = any> {
       this.config.onUpdate(this._data)
 
       this.config.onError?.(e)
+
+      return Promise.reject(e)
     } finally {
       this._loading = undefined
       withinLoadingAction = false
@@ -142,21 +137,34 @@ export class LoadingContainer<V, E = any> {
   }
 
   reload (force = false) {
-    if (this.cancelled) {
-      throw new Error(`Cannot reload a cancelled loading container`)
-    }
-
-    if (this.cancelled || this._data.state === 'LOADING') {
+    if (this._data.state === 'LOADING' && !force) {
       return this
     }
+
+    this._inFlight.cancelled = true
+    this._inFlight = { cancelled: false }
+    this._data = { state: 'PENDING', settled: false }
+    this.startLoading()
 
     return this
   }
 
-  toPromise () {
-    const dfd = pDefer<V>()
+  toPromise (): Promise<V> {
+    if (this._data.state === 'LOADED') {
+      return Promise.resolve(this._data.value)
+    }
 
-    return dfd.promise
+    if (this._data.state === 'ERRORED') {
+      return Promise.reject(this._data.error)
+    }
+
+    if (this._data.state === 'LOADING') {
+      return this._data.promise
+    }
+
+    this.load()
+
+    return this.toPromise()
   }
 
   getState () {
@@ -164,8 +172,8 @@ export class LoadingContainer<V, E = any> {
   }
 
   cancel () {
+    this._inFlight.cancelled = true
     this.cancelled = true
-    this.config.onCancel?.()
   }
 
   reset () {

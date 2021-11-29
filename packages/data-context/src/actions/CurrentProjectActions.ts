@@ -8,16 +8,25 @@ import { codeGenerator, SpecOptions } from '../codegen'
 import templates from '../codegen/templates'
 import type { CurrentProjectShape } from '../data/coreDataShape'
 import type { ProjectDataSource } from '../sources'
+import execa from 'execa'
+
+export interface LegacyOpenProjectShape {
+  close(): Promise<null>
+  create(...args: any[]): Promise<unknown>
+  launch(...args: any[]): Promise<unknown>
+}
 
 export interface ProjectApiShape {
-  getConfig(projectRoot: string, options?: SettingsOptions): Promise<FullConfig>
+  makeLegacyOpenProject(): LegacyOpenProjectShape
+  makeConfig(config: Cypress.ConfigOptions): Promise<FullConfig>
+  getConfig(options?: SettingsOptions): Promise<FullConfig>
   findSpecs(payload: FindSpecs): Promise<FoundSpec[]>
   /**
    * "Initializes" the given mode, since plugins can define the browsers available
    * TODO(tim): figure out what this is actually doing, it seems it's necessary in
    *   order for CT to startup
    */
-  initializeProject(args: Ensure<LaunchArgs, 'projectRoot' | 'testingType'>, options: OpenProjectLaunchOptions<DataContext>, browsers: FoundBrowser[]): Promise<FoundBrowser[]>
+  initializeProject(args: Ensure<LaunchArgs, 'projectRoot' | 'testingType'>, options: OpenProjectLaunchOptions, browsers: FoundBrowser[]): Promise<FoundBrowser[]>
   launchProject(browser: FoundBrowser, spec: Cypress.Spec, options: LaunchOpts): void
   insertProjectToCache(projectRoot: string): void
   removeProjectFromCache(projectRoot: string): void
@@ -63,7 +72,7 @@ export class CurrentProjectActions {
       p.currentTestingType = type
     })
 
-    this.ctx.loadingManager.projectEventSetup.reload()
+    this.ctx.loadingManager.projectEventSetup.load(type)
   }
 
   /**
@@ -359,6 +368,22 @@ export class CurrentProjectActions {
   reconfigureProject () {
     this.ctx.actions.electron.refreshBrowserWindow()
     this.ctx.actions.electron.showBrowserWindow()
+  }
+
+  async openDirectoryInIDE (projectPath: string) {
+    const { preferences } = await this.ctx.loadingManager.localSettings.toPromise()
+
+    this.ctx.debug(`opening ${projectPath} in ${preferences.preferredEditorBinary}`)
+
+    if (!preferences.preferredEditorBinary) {
+      return
+    }
+
+    if (preferences.preferredEditorBinary === 'computer') {
+      this.ctx.actions.electron.showItemInFolder(projectPath)
+    }
+
+    return execa(preferences.preferredEditorBinary, [projectPath])
   }
 
   async scaffoldIntegration () {

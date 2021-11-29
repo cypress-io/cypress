@@ -6,7 +6,7 @@ import { fs } from '../util/fs'
 import Debug from 'debug'
 import type { SettingsOptions } from '@packages/types'
 import type { DataContext } from '@packages/data-context'
-import { makeLegacyDataContext } from '../makeDataContext'
+import assert from 'assert'
 
 const debug = Debug('cypress:server:settings')
 
@@ -129,38 +129,30 @@ export function isComponentTesting (options: SettingsOptions = {}) {
 export function configFile (options: SettingsOptions = {}) {
   // default is only used in tests.
   // This prevents a the change from becoming bigger than it should
-  return options.configFile === false ? false : (options.configFile || 'cypress.config.js')
+  return options.configFile || 'cypress.config.js'
 }
 
-export function id (projectRoot, options = {}) {
-  return read(projectRoot, options)
-  .then((config) => config.projectId)
-  .catch(() => {
-    return null
-  })
-}
+export function read (ctx: DataContext, options: SettingsOptions = {}) {
+  assert(ctx.currentProject?.currentTestingType, 'expected ctx.currentProject.currentTestingType in settings.read')
+  assert(ctx.currentProject?.projectRoot, 'expected ctx.currentProject.projectRoot in settings.read')
 
-export function read (projectRoot, options: SettingsOptions = {}, ctx: DataContext = makeLegacyDataContext()) {
-  if (options.configFile === false) {
-    return Promise.resolve({})
-  }
-
+  const projectRoot = ctx.currentProject.projectRoot
   const file = pathToConfigFile(projectRoot, options)
 
-  return ctx.config.getOrCreateBaseConfig(file)
+  return ctx.loadingManager.projectConfig.toPromise()
   .catch((err) => {
     if (err.type === 'MODULE_NOT_FOUND' || err.code === 'ENOENT') {
-      return Promise.reject(errors.get('CONFIG_FILE_NOT_FOUND', options.configFile, projectRoot))
+      return Promise.reject(errors.get('CONFIG_FILE_NOT_FOUND', file, projectRoot))
     }
 
     return Promise.reject(err)
   })
-  .then((configObject = {}) => {
-    if (isComponentTesting(options) && 'component' in configObject) {
+  .then((configObject) => {
+    if (ctx.currentTestingType === 'component' && 'component' in configObject) {
       configObject = { ...configObject, ...configObject.component }
     }
 
-    if (!isComponentTesting(options) && 'e2e' in configObject) {
+    if (ctx.currentTestingType !== 'component' && 'e2e' in configObject) {
       configObject = { ...configObject, ...configObject.e2e }
     }
 
@@ -206,10 +198,6 @@ export function readEnv (projectRoot) {
 }
 
 export function writeOnly (projectRoot, obj = {}, options: SettingsOptions = {}) {
-  if (options.configFile === false) {
-    return Promise.resolve({})
-  }
-
   const file = pathToConfigFile(projectRoot, options)
 
   return _write(file, obj)

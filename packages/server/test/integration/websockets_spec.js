@@ -14,7 +14,7 @@ const { SpecsStore } = require(`${root}/lib/specs-store`)
 const { Automation } = require(`${root}lib/automation`)
 const Fixtures = require('@tooling/system-tests/lib/fixtures')
 const { createRoutes } = require(`${root}lib/routes`)
-const { makeLegacyDataContext } = require(`${root}lib/makeDataContext`)
+const { testOpenCtx } = require('../../lib/makeDataContext')
 
 const cyPort = 12345
 const otherPort = 55551
@@ -27,19 +27,17 @@ describe('Web Sockets', () => {
   require('mocha-banner').register()
 
   beforeEach(function () {
-    ctx = makeLegacyDataContext()
     Fixtures.scaffold()
 
     this.idsPath = Fixtures.projectPath('ids')
+    ctx = testOpenCtx(this.idsPath)
 
-    ctx.actions.globalProject.setActiveProjectForTestSetup(this.idsPath)
-
-    return config.get(this.idsPath, { port: cyPort, configFile: 'cypress.config.js' })
+    return config.get(ctx, { port: cyPort, configFile: 'cypress.config.js' })
     .then((cfg) => {
       this.cfg = cfg
       this.ws = new ws.Server({ port: wsPort })
 
-      this.server = new ServerE2E()
+      this.server = new ServerE2E(ctx)
 
       return this.server.open(this.cfg, {
         SocketCtor: SocketE2E,

@@ -1,10 +1,8 @@
-import Observable from 'zen-observable'
-
+import assert from 'assert'
 import Bluebird from 'bluebird'
 
 import type { DataContext } from '..'
 import { LoadingConfig, LoadingContainer, makeLoadingContainer } from '../util/makeLoadingContainer'
-import type { FullConfig } from '@packages/types'
 
 /**
  * Standardizes handling asynchronous actions which take long enough
@@ -32,7 +30,8 @@ export class LoadingManager {
   }
 
   /**
-   * Loads the global projects from the cache
+   * In global open mode, loads the project paths from the cache
+   * so we can access them
    */
   globalProjects = this.loadingContainer({
     name: 'globalProjects',
@@ -46,6 +45,9 @@ export class LoadingManager {
     },
   })
 
+  /**
+   * Loads the preferences for the user
+   */
   localSettings = this.loadingContainer({
     name: 'localSettings',
     action: () => {
@@ -61,25 +63,31 @@ export class LoadingManager {
     },
   })
 
+  /**
+   * Fetches the global browsers on the machine
+   */
   machineBrowsers = this.loadingContainer({
     name: 'machineBrowsers',
     action: () => this.ctx._apis.appApi.getBrowsers(),
     onUpdate: (val) => {
       this.ctx.update((o) => {
-        o.app.machineBrowsers = val
+        o.machineBrowsers = val
       })
     },
   })
 
+  /**
+   * Sources the project config by executing the script containing the config,
+   * and returning that data once it's sourced, or handling the error if one exists
+   */
   projectConfig = this.loadingContainer({
     name: 'projectConfig',
-    action: () => {
-      // Explicitly throwing here since this should never happen
-      if (!this.ctx.currentProject?.projectRoot) {
-        throw new Error('Cannot load projectConfig without active project')
-      }
+    action: async () => {
+      await this.ctx.loadingManager.machineBrowsers.toPromise()
+      assert(this.ctx.actions.projectConfig, 'projectConfig should exist')
+      const { configPromise } = this._refeshConfigProcess()
 
-      return this.ctx._apis.projectApi.getConfig(this.ctx.currentProject.projectRoot)
+      return this._makeFullConfig(configPromise)
     },
     onUpdate: (val) => {
       this.ctx.update((o) => {
@@ -90,18 +98,35 @@ export class LoadingManager {
     },
   })
 
+  private _makeFullConfig (configPromise: Promise<Cypress.ConfigOptions>) {
+    return configPromise.then((val) => {
+      return this.ctx._apis.projectApi.makeConfig(val)
+    })
+  }
+
+  private _refeshConfigProcess () {
+    assert(this.ctx.actions.projectConfig)
+    // Kill the existing child process, if one already exists
+    this.ctx.currentProject?.configChildProcess?.process.kill()
+
+    return this.ctx.actions.projectConfig.refreshConfigProcess()
+  }
+
+  /**
+   * The project event setup involves sourcing the child-process containing the config,
+   * and then using that to
+   */
   projectEventSetup = this.loadingContainer({
     name: 'projectEventSetup',
-    action: () => {
-      return new Observable<FullConfig>((o) => {
-        this.ctx.actions.projectConfig?.refreshProjectConfig()
+    action: async () => {
+      // If we have already executed plugins for the config file, we need to source a new one
+      if (this.ctx.currentProject?.configChildProcess?.executedPlugins || !this.ctx.currentProject?.configChildProcess) {
+        const { configPromise } = this._refeshConfigProcess()
 
-        return () => {
-          this.ctx.update((o) => {
-            o.currentProject
-          })
-        }
-      })
+        return await this._makeFullConfig(configPromise)
+      }
+
+      return await this._makeFullConfig(this.ctx.currentProject.configChildProcess.baseConfigPromise)
     },
     onUpdate: (val) => {
       this.ctx.update((o) => {
@@ -124,7 +149,7 @@ export class LoadingManager {
    * of a long-lived async operation, including the ability to "cancel"
    * the operation while in-flight.
    */
-  private loadingContainer<T, E> (config: LoadingConfig<T, E>) {
+  private loadingContainer<T, E = any> (config: LoadingConfig<T, E>) {
     const container = makeLoadingContainer(config)
 
     if (this._loadingContainers.has(config.name) && !this._withinReset) {

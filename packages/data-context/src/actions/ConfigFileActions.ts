@@ -7,63 +7,54 @@ import { isCypressError } from '@packages/types'
 import type { DataContext } from '..'
 import inspector from 'inspector'
 import type { ProjectDataSource } from '../sources'
-
-interface ForkConfigProcessOptions {
-  projectRoot: string
-  configFilePath: string
-}
+import assert from 'assert'
 
 /**
  * Manages the lifecycle of the Config sourcing & Plugin execution
  */
-export class ProjectConfigDataActions {
+export class ConfigFileActions {
   constructor (private ctx: DataContext, private currentProject: ProjectDataSource) {}
 
   static CHILD_PROCESS_FILE_PATH = path.join(__dirname, '../../../server/lib/util', 'require_async_child.js')
 
-  killConfigProcess () {
-    if (this.ctx.currentProject?.configChildProcess) {
-      this.ctx.currentProject.configChildProcess.process.kill()
-      this.ctx.update((o) => {
-        if (o.currentProject?.projectRoot === this.currentProject.projectRoot) {
-          o.currentProject.configChildProcess = null
-        }
-      })
-    }
+  killChildProcess () {
+    this.ctx.update((o) => {
+      if (o.currentProject?.configChildProcess) {
+        o.currentProject.configChildProcess.process.kill()
+      }
+    })
   }
 
-  refreshProjectConfig () {
-    this.killConfigProcess()
+  refreshConfigProcess () {
+    assert(this.ctx.actions.projectConfig, 'Expected projectConfig for refreshConfigProcess')
 
-    const process = this.forkConfigProcess({
-      projectRoot: this.currentProject.projectRoot,
-      configFilePath: this.currentProject.configFilePath,
-    })
-    const dfd = pDefer<Cypress.ConfigOptions>()
+    const { child, ipc, configPromise } = this.ctx.actions.projectConfig.forkConfigProcess()
 
     this.ctx.update((o) => {
-      if (o.currentProject?.projectRoot === this.currentProject.projectRoot) {
+      if (o.currentProject) {
         o.currentProject.configChildProcess = {
-          process,
+          ipc,
+          baseConfigPromise: configPromise,
           executedPlugins: null,
-          resolvedBaseConfig: dfd.promise,
+          process: child,
         }
-      } else {
-        process.kill()
       }
     })
 
-    this.wrapConfigProcess(process, dfd)
-
-    return dfd.promise
+    return { child, ipc, configPromise }
   }
 
-  private forkConfigProcess (opts: ForkConfigProcessOptions) {
-    const configProcessArgs = ['--projectRoot', opts.projectRoot, '--file', opts.configFilePath]
+  forkConfigProcess () {
+    const { projectRoot, configFilePath } = this.currentProject
+
+    assert(projectRoot, 'projectRoot needed to forkConfigProcess')
+    assert(configFilePath, 'configFilePath needed to forkConfigProcess')
+
+    const configProcessArgs = ['--projectRoot', projectRoot, '--file', configFilePath]
 
     const childOptions: ForkOptions = {
       stdio: 'pipe',
-      cwd: path.dirname(opts.configFilePath),
+      cwd: path.dirname(configFilePath),
       env: {
         ...process.env,
         NODE_OPTIONS: process.env.ORIGINAL_NODE_OPTIONS || '',
@@ -78,9 +69,16 @@ export class ProjectConfigDataActions {
       .value()
     }
 
-    this.ctx.debug('fork child process', ProjectConfigDataActions.CHILD_PROCESS_FILE_PATH, configProcessArgs, childOptions)
+    this.ctx.debug('fork child process', ConfigFileActions.CHILD_PROCESS_FILE_PATH, configProcessArgs, childOptions)
 
-    return childProcess.fork(ProjectConfigDataActions.CHILD_PROCESS_FILE_PATH, configProcessArgs, childOptions)
+    const child = childProcess.fork(ConfigFileActions.CHILD_PROCESS_FILE_PATH, configProcessArgs, childOptions)
+    const dfd = pDefer<Cypress.ConfigOptions>()
+
+    return {
+      child,
+      ipc: this.wrapConfigProcess(child, dfd),
+      configPromise: dfd.promise,
+    }
   }
 
   private wrapConfigProcess (child: ChildProcess, dfd: pDefer.DeferredPromise<Cypress.ConfigOptions>) {
@@ -100,7 +98,7 @@ export class ProjectConfigDataActions {
 
     ipc.on('load:error', (type, ...args) => {
       this.ctx.debug('load:error %s, rejecting', type)
-      this.killConfigProcess()
+      child.kill()
 
       const err = this.ctx._apis.projectApi.error(type, ...args)
 
@@ -117,6 +115,8 @@ export class ProjectConfigDataActions {
 
     this.ctx.debug('trigger the load of the file')
     ipc.send('load')
+
+    return ipc
   }
 
   protected wrapIpc (aProcess: ChildProcess) {

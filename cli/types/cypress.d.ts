@@ -2923,7 +2923,7 @@ declare namespace Cypress {
     /**
     * Absolute path to the config file (default: <projectRoot>/cypress.config.{ts|js}) or false
     */
-    configFile: string | false
+    configFile: string
     /**
     * Absolute path to the root of the project
     */

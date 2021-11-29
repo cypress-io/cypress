@@ -2,7 +2,7 @@ import type { DataContext } from '.'
 import {
   AppActions,
   ApplicationDataActions,
-  ProjectConfigDataActions,
+  ConfigFileActions,
   ElectronActions,
   FileActions,
   GlobalProjectActions,
@@ -52,6 +52,6 @@ export class DataActions {
   }
 
   get projectConfig () {
-    return this.ctx.project ? new ProjectConfigDataActions(this.ctx, this.ctx.project) : null
+    return this.ctx.project ? new ConfigFileActions(this.ctx, this.ctx.project) : null
   }
 }

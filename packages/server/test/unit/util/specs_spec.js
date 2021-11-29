@@ -6,21 +6,23 @@ const config = require('../../../lib/config')
 const specsUtil = require(`${root}../lib/util/specs`).default
 const FixturesHelper = require('@tooling/system-tests/lib/fixtures')
 const debug = require('debug')('test')
-const { makeLegacyDataContext } = require('../../../lib/makeDataContext')
+const { testOpenCtx } = require('../../../lib/makeDataContext')
+// eslint-disable-next-line
+const { DataContext } = require('@packages/data-context')
 
+/**
+ * @type {DataContext}
+ */
 let ctx
 
 describe('lib/util/specs', () => {
   beforeEach(function () {
-    ctx = makeLegacyDataContext()
     FixturesHelper.scaffold()
-
     this.todosPath = FixturesHelper.projectPath('todos')
+    ctx = testOpenCtx(this.todosPath)
 
-    ctx.actions.globalProject.setActiveProjectForTestSetup(this.todosPath)
-
-    return config.get(this.todosPath)
-    .then((cfg) => {
+    return ctx.loadingManager.projectConfig.toPromise().then((cfg) => {
+      // console.log(cfg)
       this.config = cfg
     })
   })
@@ -55,9 +57,9 @@ describe('lib/util/specs', () => {
     it('by default, returns all files as long as they have a name and extension', () => {
       const filePath = FixturesHelper.projectPath('various-file-types')
 
-      ctx.actions.globalProject.setActiveProjectForTestSetup(filePath)
+      ctx.setCurrentProject(filePath)
 
-      return config.get(filePath)
+      return config.get(ctx)
       .then((cfg) => {
         return specsUtil.findSpecs(cfg)
       }).then((files) => {
@@ -72,9 +74,9 @@ describe('lib/util/specs', () => {
     it('finds integration and component tests and assigns correct specType', () => {
       const filePath = FixturesHelper.projectPath('component-tests')
 
-      ctx.actions.globalProject.setActiveProjectForTestSetup(filePath)
+      ctx.setCurrentProject(filePath)
 
-      return config.get(filePath)
+      return config.get(ctx)
       .then((cfg) => {
         cfg.resolved.testingType = { value: 'component' }
 
@@ -101,9 +103,9 @@ describe('lib/util/specs', () => {
     it('returns files matching config.testFiles', () => {
       const filePath = FixturesHelper.projectPath('various-file-types')
 
-      ctx.actions.globalProject.setActiveProjectForTestSetup(filePath)
+      ctx.setCurrentProject(filePath)
 
-      return config.get(filePath)
+      return config.get(ctx)
       .then((cfg) => {
         cfg.testFiles = '**/*.coffee'
 
@@ -118,9 +120,9 @@ describe('lib/util/specs', () => {
     it('uses glob to process config.testFiles', () => {
       const filePath = FixturesHelper.projectPath('various-file-types')
 
-      ctx.actions.globalProject.setActiveProjectForTestSetup(filePath)
+      ctx.setCurrentProject(filePath)
 
-      return config.get(filePath)
+      return config.get(ctx)
       .then((cfg) => {
         cfg.testFiles = '{coffee_*.coffee,js_spec.js}'
 
@@ -137,9 +139,9 @@ describe('lib/util/specs', () => {
     it('allows array in config.testFiles', () => {
       const filePath = FixturesHelper.projectPath('various-file-types')
 
-      ctx.actions.globalProject.setActiveProjectForTestSetup(filePath)
+      ctx.setCurrentProject(filePath)
 
-      return config.get(filePath)
+      return config.get(ctx)
       .then((cfg) => {
         cfg.testFiles = ['coffee_*.coffee', 'js_spec.js']
 
@@ -156,9 +158,9 @@ describe('lib/util/specs', () => {
     it('filters using specPattern', () => {
       const filePath = FixturesHelper.projectPath('various-file-types')
 
-      ctx.actions.globalProject.setActiveProjectForTestSetup(filePath)
+      ctx.setCurrentProject(filePath)
 
-      return config.get(filePath)
+      return config.get(ctx)
       .then((cfg) => {
         const specPattern = [
           path.join(cfg.projectRoot, 'cypress', 'integration', 'js_spec.js'),
@@ -175,9 +177,9 @@ describe('lib/util/specs', () => {
     it('filters using specPattern as array of glob patterns', () => {
       const filePath = FixturesHelper.projectPath('various-file-types')
 
-      ctx.actions.globalProject.setActiveProjectForTestSetup(filePath)
+      ctx.setCurrentProject(filePath)
 
-      return config.get(filePath)
+      return config.get(ctx)
       .then((cfg) => {
         debug('test config testFiles is %o', cfg.testFiles)
         const specPattern = [
@@ -197,9 +199,9 @@ describe('lib/util/specs', () => {
     it('properly handles directories with names including \'.\'', () => {
       const filePath = FixturesHelper.projectPath('odd-directory-name')
 
-      ctx.actions.globalProject.setActiveProjectForTestSetup(filePath)
+      ctx.setCurrentProject(filePath)
 
-      return config.get(filePath)
+      return config.get(ctx)
       .then((cfg) => {
         return specsUtil.findSpecs(cfg)
       }).then((files) => {

@@ -1,15 +1,15 @@
-import type { CypressError, CypressErrorLike, LaunchArgs, OpenProjectLaunchOptions, PlatformName } from '@packages/types'
+import type { CypressError, CypressErrorLike, LaunchArgs, PlatformName } from '@packages/types'
 import fsExtra from 'fs-extra'
 import path from 'path'
 import Bluebird from 'bluebird'
 import { Immutable, Draft, produceWithPatches, Patch, enablePatches } from 'immer'
 import 'server-destroy'
-import { AppApiShape, ApplicationDataApiShape, DataEmitterActions, LocalSettingsApiShape, ProjectApiShape } from './actions'
+import { AppApiShape, ApplicationDataApiShape, DataEmitterActions, LegacyOpenProjectShape, LocalSettingsApiShape, ProjectApiShape } from './actions'
 import type { NexusGenAbstractTypeMembers } from '@packages/graphql/src/gen/nxs.gen'
 import type { AuthApiShape } from './actions/AuthActions'
 import type { ElectronApiShape } from './actions/ElectronActions'
 import debugLib from 'debug'
-import { CoreDataShape, makeCoreData } from './data/coreDataShape'
+import { CoreDataShape, makeCoreData, makeCurrentProject } from './data/coreDataShape'
 import { DataActions } from './DataActions'
 import {
   GitDataSource,
@@ -34,6 +34,7 @@ import type { SocketIOServer } from '@packages/socket'
 import { VersionsDataSource } from './sources/VersionsDataSource'
 import { LoadingManager } from './data/LoadingManager'
 import type { LoadingState } from './util'
+import { DataFormatters } from './DataFormatters'
 
 enablePatches()
 
@@ -44,7 +45,6 @@ export interface DataContextConfig {
   schema: GraphQLSchema
   os?: PlatformName
   launchArgs?: Partial<LaunchArgs>
-  launchOptions?: OpenProjectLaunchOptions<DataContext>
   apis: {
     appApi: AppApiShape
     appDataApi: ApplicationDataApiShape
@@ -65,6 +65,7 @@ export class DataContext {
   private _appSocketServer: SocketIOServer | undefined
   private _gqlServerPort: number | undefined
   private _loadingManager: LoadingManager
+  private _legacyOpenProject: LegacyOpenProjectShape | null = null
 
   constructor (private _config: DataContextConfig) {
     this._loadingManager = new LoadingManager(this)
@@ -74,6 +75,14 @@ export class DataContext {
     if (IS_DEV_ENV) {
       this.actions.dev.watchForRelaunch()
     }
+  }
+
+  get legacyOpenProject () {
+    if (!this._legacyOpenProject) {
+      this._legacyOpenProject = this._apis.projectApi.makeLegacyOpenProject()
+    }
+
+    return this._legacyOpenProject
   }
 
   get loadingManager () {
@@ -100,15 +109,29 @@ export class DataContext {
     return this._patches
   }
 
+  get formatters () {
+    return new DataFormatters()
+  }
+
   /**
    * Run all of the "updates" through a single method to track the timeline
    * of mutations for debuggability, testing, etc
    */
-  update = (updater: (proj: Draft<CoreDataShape>) => void | undefined | CoreDataShape) => {
-    const [state, patches] = produceWithPatches(this._coreData, updater)
+  update = (updater: (proj: Draft<CoreDataShape>) => void | undefined | CoreDataShape, throwError: boolean = false): void => {
+    try {
+      const [state, patches] = produceWithPatches(this._coreData, updater)
 
-    this._coreData = state
-    this._patches.push(patches)
+      this._coreData = state
+      this._patches.push(patches)
+    } catch (e) {
+      if (throwError) {
+        throw e
+      }
+
+      this.update((o) => {
+        o.globalError = this.prepError(e)
+      }, true)
+    }
   }
 
   resetLaunchArgs (launchArgs: LaunchArgs) {
@@ -125,10 +148,6 @@ export class DataContext {
 
   get launchArgs () {
     return this._config.launchArgs
-  }
-
-  get launchOptions () {
-    return this._config.launchOptions
   }
 
   get coreData () {
@@ -171,7 +190,7 @@ export class DataContext {
   }
 
   get appData () {
-    return this.coreData.app
+    return this.coreData
   }
 
   get wizard () {
@@ -331,6 +350,13 @@ export class DataContext {
     }
   }
 
+  setCurrentProject (projectRoot: string) {
+    this.loadingManager.resetCurrentProject()
+    this.update((o) => {
+      o.currentProject = makeCurrentProject({ projectRoot }, this.loadingManager)
+    })
+  }
+
   /**
    * Resets all of the state for the data context,
    * so we can initialize fresh for each E2E test
@@ -404,6 +430,8 @@ export class DataContext {
       await this.initializeRunMode()
     } else if (this._config.mode === 'open') {
       await this.initializeOpenMode()
+    } else {
+      throw new Error(`Missing DataContext config "mode" setting, expected run | open`)
     }
   }
 

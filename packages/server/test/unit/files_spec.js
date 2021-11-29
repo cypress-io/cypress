@@ -14,12 +14,12 @@ describe('lib/files', () => {
 
     this.todosPath = FixturesHelper.projectPath('todos')
 
-    ctx.actions.globalProject.setActiveProjectForTestSetup(this.todosPath)
+    ctx.setCurrentProject(this.todosPath)
 
     return config.get(this.todosPath).then((cfg) => {
       this.config = cfg;
       ({ projectRoot: this.projectRoot } = cfg)
-      ctx.actions.globalProject.setActiveProjectForTestSetup(this.projectRoot)
+      ctx.setCurrentProject(this.projectRoot)
     })
   })
 

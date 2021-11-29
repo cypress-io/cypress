@@ -5,7 +5,6 @@ import * as settings from './util/settings'
 import errors from './errors'
 import { fs } from './util/fs'
 import { escapeFilenameInUrl } from './util/escape_filename'
-import { makeLegacyDataContext } from './makeDataContext'
 
 const debug = Debug('cypress:server:project_utils')
 
@@ -147,8 +146,4 @@ export const checkSupportFile = async ({
   }
 
   return
-}
-
-export async function getDefaultConfigFilePath (projectRoot: string, ctx = makeLegacyDataContext()): Promise<string | undefined> {
-  return ctx.config.getDefaultConfigBasename(projectRoot)
 }

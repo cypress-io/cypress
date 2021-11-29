@@ -1,9 +1,11 @@
 import type { App, BrowserWindow } from 'electron'
-import type { FoundBrowser, FullConfig, Preferences, Editor, Warning, AllowedState, LaunchArgs } from '@packages/types'
 import type { TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
 import type { ChildProcess } from 'child_process'
 import path from 'path'
+import type { AllowedState, Editor, Ensure, FoundBrowser, FullConfig, LaunchArgs, Preferences } from '@packages/types'
 import type { Draft, Immutable, Patch } from 'immer'
+import fs from 'fs'
+
 import type { LoadingState } from '../util'
 import type { LoadingManager } from './LoadingManager'
 import type { ProjectWatcher } from './ProjectWatcher'
@@ -37,11 +39,25 @@ export type LocalSettingsDataShape = Immutable<{
   preferences: AllowedState
 }>
 
+export interface WarningShape {
+  title: string
+  message: string
+  setupStep?: string
+}
+
+export interface IpcShape {
+
+}
+
 export interface ConfigChildProcessShape {
   /**
    * Child process executing the config & sourcing plugin events
    */
   process: ChildProcess
+  /**
+   * The faux IPC interface established with the config / plugin event child process
+   */
+  ipc: IpcShape
   /**
    * Keeps track of which plugins we have executed in the current config process
    */
@@ -49,7 +65,7 @@ export interface ConfigChildProcessShape {
   /**
    * Config from the initial module.exports
    */
-  resolvedBaseConfig: Promise<Cypress.ConfigOptions>
+  baseConfigPromise: Promise<Cypress.ConfigOptions>
 }
 
 export type CurrentProjectShape = Immutable<{
@@ -57,6 +73,16 @@ export type CurrentProjectShape = Immutable<{
    * The directory on the filesystem containing the cypress.config.{js,ts} file
    */
   projectRoot: string
+  /**
+   * The path to the config file on the disk. The presence of this indicates that
+   * this project has exists
+   */
+  configFile: string | null
+  /**
+   * A list of config files that we see. We expect this to be an array of length 1
+   * in a good config. Otherwise it's considered a warning
+   */
+  configFiles: string[]
   /**
    * Title of the project is the "basename" of the project
    */
@@ -73,6 +99,10 @@ export type CurrentProjectShape = Immutable<{
    * When we call the plugin, we get back the final config
    */
   pluginLoad: LoadingState<FullConfig>
+  /**
+   * Any data associated with plugins
+   */
+  pluginDataProcess: null // TODO
   /**
    * The full config resolved for the project
    */
@@ -134,9 +164,21 @@ export type CoreDataShape = Immutable<{
    * Local cache data
    */
   localSettings: LoadingState<LocalSettingsDataShape>
+  /**
+   * List of projects loaded from disk
+   */
   globalProjects: LoadingState<string[]>
+  /**
+   *
+   */
   currentProject: CurrentProjectShape | null
+  /**
+   *
+   */
   user: AuthenticatedUserShape | null
+  /**
+   * Container type for the electron app / browser window
+   */
   electron: ElectronShape
   /**
    *
@@ -145,7 +187,7 @@ export type CoreDataShape = Immutable<{
   /**
    * Any warnings that have been
    */
-  warnings: Warning[]
+  warnings: WarningShape[]
   /**
    * Path to the Node.JS executable we should use to source config / plugins events
    */
@@ -161,11 +203,6 @@ export function makeCurrentProject (launchArgs: Partial<LaunchArgs> = {}, loadin
     return null
   }
 
-  // Synchronously check file paths. This is only done synchronously because they are:
-  // - very few / quick file lookups
-  // - simpler than forcing this to be async
-  // - typically paired with loading the project which takes awhile anyway
-
   return {
     cliBrowser: null,
     title: path.basename(launchArgs.projectRoot),
@@ -175,7 +212,9 @@ export function makeCurrentProject (launchArgs: Partial<LaunchArgs> = {}, loadin
     configChildProcess: null,
     config: loadingManager.projectConfig.getState(),
     pluginLoad: loadingManager.projectEventSetup.getState(),
+    pluginDataProcess: null,
     watcher: null,
+    ...sourceProjectFilePaths(launchArgs as LaunchArgs),
   }
 }
 
@@ -202,5 +241,33 @@ export function makeCoreData (launchArgs: Partial<LaunchArgs> = {}, loadingManag
     },
     userNodePath: null,
     userNodeVersion: null,
+  }
+}
+
+// Synchronously check config file paths. This is done synchronously here
+// because these are:
+// - very few / quick file lookups
+// - simpler than forcing this fn & callers to be async
+// - typically done infrequently / paired with loading the config which takes awhile relative to the sync access
+export function sourceProjectFilePaths (launchArgs: Ensure<LaunchArgs, 'projectRoot'>) {
+  const possibleConfigFiles = ['cypress.config.ts', 'cypress.config.js', 'cypress.json']
+
+  let configFile: string | null = null
+  const configFiles: string[] = []
+
+  for (const file of possibleConfigFiles) {
+    const filePath = path.join(launchArgs.projectRoot, file)
+
+    if (fs.existsSync(filePath)) {
+      configFiles.push(filePath)
+      if (!configFile && file !== 'cypress.json') {
+        configFile = filePath
+      }
+    }
+  }
+
+  return {
+    configFile,
+    configFiles,
   }
 }

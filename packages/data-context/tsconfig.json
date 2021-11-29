@@ -13,6 +13,7 @@
     "resolveJsonModule": true,
     "experimentalDecorators": true,
     "noUnusedLocals": false,
+    "useUnknownInCatchVariables": false,
     "noUncheckedIndexedAccess": true,
     "importsNotUsedAsValues": "error",
     "types": []
