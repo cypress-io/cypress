@@ -32,7 +32,6 @@ import Button from '@cy/components/Button.vue'
 import CreateSpecCards from './CreateSpecCards.vue'
 import { gql } from '@urql/vue'
 import type { CreateSpecContentFragment } from '../generated/graphql'
-import { useRunnerUiStore } from '../store/runner-ui-store'
 const { t } = useI18n()
 
 gql`
@@ -49,8 +48,6 @@ const emit = defineEmits<{
   (e: 'choose', id: string): void
   (e: 'showCypressConfigInIDE'): void
 }>()
-
-const runnerUiStore = useRunnerUiStore()
 
 const choose = (id: string) => {
   emit('choose', id)

@@ -306,7 +306,6 @@ export const mutation = mutationType({
         'Example: `setPreferences (value: JSON.stringify({ lastOpened: Date.now() }))`',
       ].join(' '),
       args: {
-        // Stringify JSON, eg JSON.stringify({ firstTimeOpening: Date.now() })
         value: nonNull(stringArg()),
       },
       resolve: async (_, args, ctx) => {
