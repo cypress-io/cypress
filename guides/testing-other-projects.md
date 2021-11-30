@@ -9,10 +9,13 @@ For a list of the projects, see the definition of `_PROVIDERS` in [`/scripts/bin
 
 For each project and operating system combo in `_PROVIDERS`, the script:
 
-1. Creates a commit to that test project's GitHub repo using the API. [An example of such a commit.](https://github.com/cypress-io/cypress-test-tiny/commit/5b39f3f43f6b7598f0d57cffcba71a7048d1d809)
+1. Creates a commit to the test project's GitHub repo using the API. [An example of such a commit.](https://github.com/cypress-io/cypress-test-tiny/commit/5b39f3f43f6b7598f0d57cffcba71a7048d1d809)
     * Note the commit is specifically for `linux`, and only the `linux-tests` job runs to completion.
+    * If a branch exists that is named after the [next version](./next-version.md) (`X.Y.Z`), the commit will be made to that branch.
+        * This is useful to test a release's breaking changes or new features against an example project without having to have the project's main branch in a broken state.
+    * Otherwise, the default branch is used for the commit.
 2. Creates a status check in this GitHub repo (`cypress-io/cypress`) and marks it `pending`.
-3. Waits for that project's CI workflow to finish running.
+3. Waits for the test project's CI workflow to finish running.
     * Each test project is configured to use [`@cypress/commit-message-install`](https://github.com/cypress-io/commit-message-install) to configure the exact test required via the information in the commit message.
     * Each test project is configured to update the `pending` CI job in `cypress-io/cypress` to a `success` when the CI workflow successfully finishes.
 
