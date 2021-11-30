@@ -377,6 +377,12 @@
           "placeholderOrganizations": "Pick an organization",
           "placeholderProjects": "Pick an project",
           "placeholderProjectsPending": "Pick an organization first"
+        },
+        "connectManually": {
+          "title": "Connect Project Manually",
+          "warning": "We couldn’t add the projectId to your cypress.config.js file automatically.",
+          "mainMessage": "Manually add the {projectId} to the root of the config object in your {configFile} file.",
+          "waitingButton": "Waiting for you to add the projectId..."
         }
       }
     },

@@ -1,12 +1,16 @@
+import { NeedManualUpdateModalFragmentDoc } from '../../generated/graphql-test'
 import NeedManualUpdateModal from './NeedManualUpdateModal.vue'
 
 describe('<NeedManualUpdateModal />', () => {
   it('should show a normal error', () => {
-    cy.mount({
-      name: 'NeedManualUpdateModal',
-      render () {
+    cy.mountFragment(NeedManualUpdateModalFragmentDoc, {
+      onResult: (result) => {
+        result.projectId = null
+        // result.newCloudProject = { projectId: 'asdfgh' }
+      },
+      render (gql) {
         return (<div class="h-screen">
-          <NeedManualUpdateModal show />
+          <NeedManualUpdateModal gql={gql} />
         </div>)
       },
     })
