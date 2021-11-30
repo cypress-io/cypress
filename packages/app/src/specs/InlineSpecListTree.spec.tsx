@@ -18,13 +18,9 @@ describe('InlineSpecListTree', () => {
       </div>
     ))
 
-    cy.get('li').should('have.length', 7).first().focus().type('{enter}')
-    cy.get('li').should('have.length', 1).type('{enter}').focused().type('{downarrow}').focused().type('{enter}')
-    cy.get('li').should('have.length', 4)
-
-    cy.then(() => {
-      specProp.value = foundSpecs.slice(0, 3)
-    })
+    cy.findAllByTestId('spec-row-item').should('have.length', 7).first().focus().type('{enter}')
+    cy.findAllByTestId('spec-row-item').should('have.length', 1).type('{enter}').focused().type('{downarrow}').focused().type('{enter}')
+    cy.findAllByTestId('spec-row-item').should('have.length', 4)
   })
 
   it('should collapse and rebuild tree on specs change', () => {
@@ -36,8 +32,13 @@ describe('InlineSpecListTree', () => {
       </div>
     ))
 
-    cy.get('li').first().should('contain', 'src/components')
-    cy.then(() => specProp.value = foundSpecs.slice(0, 4))
-    cy.get('li').should('have.length', 7).first().should('contain', 'src').and('not.contain', '/components')
+    cy.findByTestId('directory-item').should('contain', 'src/components')
+    cy.findAllByTestId('spec-file-item').should('have.length', specProp.value.length)
+
+    cy.then(() => {
+      specProp.value = foundSpecs.slice(0, 4)
+      cy.findAllByTestId('directory-item').first().should('contain', 'src').and('not.contain', '/components')
+      cy.findAllByTestId('spec-file-item').should('have.length', specProp.value.length)
+    })
   })
 })
