@@ -125,6 +125,14 @@ describe('src/cy/commands/clock', () => {
       })
     })
 
+    it('overwrite gracefully', () => {
+      Cypress.Commands.overwrite('clock', (originalCommand, ...args) => {
+        return originalCommand(...args)
+      })
+
+      cy.clock()
+    })
+
     context('errors', () => {
       it('throws if now is not a number (or options object)', (done) => {
         cy.on('fail', (err) => {
