@@ -6,7 +6,7 @@ import ComponentGeneratorCard from './ComponentGeneratorCard.vue'
 export const ComponentGenerator: SpecGenerator = {
   card: ComponentGeneratorCard,
   entry: ComponentGeneratorStepOne,
-  disabled: () => { },
+  disabled: () => false,
   matches: filters.matchesCT,
   id: 'component-generator',
 }

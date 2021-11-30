@@ -18,8 +18,8 @@
       <component
         :is="generator.entry"
         v-if="generator"
-        :key="generator.id"
         v-model:title="title"
+        :disabled="false"
         :code-gen-glob="props.gql.currentProject?.codeGenGlob"
         @restart="currentGeneratorId = undefined"
       />
@@ -29,7 +29,7 @@
       >
         <CreateSpecCards
           :gql="props.gql"
-          @select="currentGeneratorId = $event"
+          @select="id => currentGeneratorId = id"
         />
       </div>
     </div>
@@ -67,10 +67,17 @@ fragment CreateSpecModal on Query {
 }
 `
 
-const currentGeneratorId: Ref<GeneratorId | undefined> = ref(props.initialGenerator)
+const currentGeneratorId = ref<GeneratorId | undefined>(props.initialGenerator)
 
 const { t } = useI18n()
-const title = ref(t('createSpec.newSpecModalTitle'))
+// const title = ref()
+const title = computed(() => {
+  if (!generator.value) {
+    return t('createSpec.newSpecModalTitle')
+  }
+
+  return
+})
 
 const generator = computed(() => {
   if (currentGeneratorId.value) return generators[currentGeneratorId.value]
