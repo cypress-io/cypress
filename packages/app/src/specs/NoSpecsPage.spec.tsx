@@ -73,16 +73,6 @@ describe('<NoSpecsPage />', () => {
     //mode doesn't matter now as content is the same in each mode
     beforeEach(() => {
       cy.mountFragment(NoSpecsPageFragmentDoc, {
-        onResult: (ctx) => {
-          ctx.currentProject = {
-            ...ctx.currentProject,
-            id: 'id',
-            storybook: null,
-            configFileAbsolutePath: '/usr/bin/cypress.config.ts',
-            codeGenGlob: '**.vue',
-            currentTestingType: 'component',
-          }
-        },
         render: (gql) => {
           return <NoSpecsPage gql={gql} isUsingDefaultSpecs={false} title={messages.page.customPatternNoSpecs.title} />
         },
