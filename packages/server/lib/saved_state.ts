@@ -1,48 +1,21 @@
-const _ = require('lodash')
-const debug = require('debug')('cypress:server:saved_state')
-const path = require('path')
-const Promise = require('bluebird')
-const appData = require('./util/app_data')
-const cwd = require('./cwd')
-const FileUtil = require('./util/file')
-const { fs } = require('./util/fs')
+import _ from 'lodash'
+import path from 'path'
+import Debug from 'debug'
+import Bluebird from 'bluebird'
+import appData from './util/app_data'
+import cwd from './cwd'
+import FileUtil from './util/file'
+import { fs } from './util/fs'
+import { AllowedState, allowedKeys } from '@packages/types'
 
-const stateFiles = {}
+const debug = Debug('cypress:server:saved_state')
+
+const stateFiles: Record<string, typeof FileUtil> = {}
 
 // TODO: remove `showedOnBoardingModal` from this list - it is only included so that misleading `allowed` are not thrown
 // now that it has been removed from use
-const allowed = [
-  'appWidth',
-  'appHeight',
-  'appX',
-  'appY',
-  'autoScrollingEnabled',
-  'browserWidth',
-  'browserHeight',
-  'browserX',
-  'browserY',
-  'isAppDevToolsOpen',
-  'isBrowserDevToolsOpen',
-  'reporterWidth',
-  'specListWidth',
-  'showedOnBoardingModal',
-  'showedNewProjectBanner',
-  'firstOpenedCypress',
-  'showedStudioModal',
-  'preferredOpener',
-  'ctReporterWidth',
-  'ctIsSpecsListOpen',
-  'ctSpecListWidth',
-  'firstOpened',
-  'lastOpened',
-  'promptsShown',
-  'watchForSpecChange',
-  'useDarkSidebar',
-  'preferredEditorBinary',
-]
-
-const formStatePath = (projectRoot) => {
-  return Promise.try(() => {
+export const formStatePath = (projectRoot?: string) => {
+  return Bluebird.try(() => {
     debug('making saved state from %s', cwd())
 
     if (projectRoot) {
@@ -105,7 +78,7 @@ const normalizeAndAllowSet = (set, key, value) => {
   })()
 
   const invalidKeys = _.filter(_.keys(valueObject), (key) => {
-    return !_.includes(allowed, key)
+    return !_.includes(allowedKeys, key)
   })
 
   if (invalidKeys.length) {
@@ -113,18 +86,23 @@ const normalizeAndAllowSet = (set, key, value) => {
     console.error(`WARNING: attempted to save state for non-allowed key(s): ${invalidKeys.join(', ')}. All keys must be allowed in server/lib/saved_state.js`)
   }
 
-  return set(_.pick(valueObject, allowed))
+  return set(_.pick(valueObject, allowedKeys))
 }
 
-const create = (projectRoot, isTextTerminal) => {
+interface SavedStateAPI {
+  get: () => Bluebird<AllowedState>
+  set: (stateToSet: AllowedState) => Bluebird<void>
+}
+
+export const create = (projectRoot?: string, isTextTerminal: boolean = false): Bluebird<SavedStateAPI> => {
   if (isTextTerminal) {
     debug('noop saved state')
 
-    return Promise.resolve(FileUtil.noopFile)
+    return Bluebird.resolve(FileUtil.noopFile)
   }
 
   return formStatePath(projectRoot)
-  .then((statePath) => {
+  .then((statePath: string) => {
     const fullStatePath = appData.projectsPath(statePath)
 
     debug('full state path %s', fullStatePath)
@@ -141,11 +119,6 @@ const create = (projectRoot, isTextTerminal) => {
 
     stateFiles[fullStatePath] = stateFile
 
-    return stateFile
+    return stateFile as SavedStateAPI
   })
-}
-
-module.exports = {
-  create,
-  formStatePath,
 }

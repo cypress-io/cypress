@@ -25,7 +25,7 @@ import { useMutation } from '@urql/vue'
 
 gql`
 mutation ExternalEditorSettings_SetPreferredEditorBinary ($value: String!) {
-  setPreferredEditorBinary (value: $value)
+  setPreferences (value: $value)
 }`
 
 const { t } = useI18n()
@@ -33,7 +33,7 @@ const { t } = useI18n()
 const setPreferredBinaryEditor = useMutation(ExternalEditorSettings_SetPreferredEditorBinaryDocument)
 
 function handleChoseEditor (binary: string) {
-  setPreferredBinaryEditor.executeMutation({ value: binary })
+  setPreferredBinaryEditor.executeMutation({ value: JSON.stringify({ preferredEditorBinary: binary }) })
 }
 
 gql`

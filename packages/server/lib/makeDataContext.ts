@@ -3,7 +3,7 @@ import os from 'os'
 import electron, { App } from 'electron'
 
 import specsUtil from './util/specs'
-import type { Editor, FindSpecs, FoundBrowser, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions, PlatformName, Preferences, SettingsOptions } from '@packages/types'
+import type { AllowedState, FindSpecs, FoundBrowser, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions, PlatformName, Preferences, SettingsOptions } from '@packages/types'
 import browserUtils from './browsers/utils'
 import auth from './gui/auth'
 import user from './user'
@@ -16,8 +16,8 @@ import findSystemNode from './util/find_system_node'
 import { graphqlSchema } from '@packages/graphql/src/schema'
 import type { InternalDataContextOptions } from '@packages/data-context/src/DataContext'
 import { openExternal } from '@packages/server/lib/gui/links'
-import { getDevicePreferences, setDevicePreference } from './util/device_preferences'
-import { getUserEditor, setUserEditor } from './util/editors'
+import { getUserEditor } from './util/editors'
+import * as savedState from './saved_state'
 
 const { getBrowsers, ensureAndGetByNameOrPath } = browserUtils
 
@@ -130,15 +130,13 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       },
     },
     localSettingsApi: {
-      setDevicePreference (key, value) {
-        return setDevicePreference(key, value)
-      },
+      async setPreferences (object: AllowedState) {
+        const state = await savedState.create()
 
-      async getPreferences () {
-        return getDevicePreferences()
+        return state.set(object)
       },
-      async setPreferredOpener (editor: Editor) {
-        await setUserEditor(editor)
+      async getPreferences () {
+        return (await savedState.create()).get()
       },
       async getAvailableEditors () {
         const { availableEditors } = await getUserEditor(true)
