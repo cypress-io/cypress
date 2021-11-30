@@ -414,7 +414,7 @@ const setDefaults = (opts) => {
   .chain(opts)
   .defaults({
     requestId: _.uniqueId('request'),
-    retryIntervals: [0, 1000, 2000, 2000],
+    retryIntervals: [],
     retryOnNetworkFailure: true,
     retryOnStatusCodeFailure: false,
   })
