@@ -17,6 +17,7 @@ import { graphqlSchema } from '@packages/graphql/src/schema'
 import type { InternalDataContextOptions } from '@packages/data-context/src/DataContext'
 import { openExternal } from '@packages/server/lib/gui/links'
 import { getUserEditor } from './util/editors'
+import devServer from './plugins/dev-server'
 import * as savedState from './saved_state'
 
 const { getBrowsers, ensureAndGetByNameOrPath } = browserUtils
@@ -86,6 +87,9 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       },
       initializeProject (args: LaunchArgs, options: OpenProjectLaunchOptions, browsers: FoundBrowser[]) {
         return openProject.create(args.projectRoot, args, options, browsers)
+      },
+      getDevServer () {
+        return devServer
       },
       insertProjectToCache (projectRoot: string) {
         cache.insertProject(projectRoot)
