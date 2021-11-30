@@ -1,0 +1,21 @@
+{
+    "version": "0.2",
+    "ignorePaths": [],
+    "dictionaryDefinitions": [],
+    "dictionaries": [],
+    "words": [
+        "Iconify",
+        "Lachlan",
+        "msapplication",
+        "Pinia",
+        "Screenshotting",
+        "shiki",
+        "testid",
+        "unplugin",
+        "vite",
+        "vitejs",
+        "vueuse"
+    ],
+    "ignoreWords": [],
+    "import": []
+}
