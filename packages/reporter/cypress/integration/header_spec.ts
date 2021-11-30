@@ -42,16 +42,11 @@ describe('header', () => {
       // { force: true } is necessary for click to work, apparently because
       // of the tooltip popping up and getting in the way
       cy.get('.toggle-specs-wrapper button').click({ force: true })
-      cy.wrap(runner.emit).should('be.calledWith', 'toggle:spec:list')
+      cy.wrap(runner.emit).should('be.calledWith', 'save:state')
     })
 
     it('shows \'Tests\' when >= 398px wide', () => {
       cy.get('.toggle-specs-wrapper span').should('be.visible')
-    })
-
-    it('hides \'Tests\' < 398px wide', () => {
-      cy.viewport(397, 450)
-      cy.get('.toggle-specs-wrapper span').should('not.be.visible')
     })
   })
 
