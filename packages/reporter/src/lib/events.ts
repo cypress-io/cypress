@@ -207,7 +207,7 @@ const events: Events = {
     localBus.on('save:state', () => {
       runner.emit('save:state', {
         autoScrollingEnabled: appState.autoScrollingEnabled,
-        isSpecListOpen: appState.isSpecListOpen,
+        isSpecsListOpen: appState.isSpecsListOpen,
       })
     })
 

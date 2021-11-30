@@ -9,10 +9,6 @@
 import { gql, useQuery } from '@urql/vue'
 import { SpecPageContainerDocument } from '../generated/graphql'
 import SpecRunnerContainer from '../runner/SpecRunnerContainer.vue'
-import { getEventManager } from '../runner'
-import { useSpecStore } from '../store'
-
-import { watchEffect } from 'vue'
 
 gql`
 query SpecPageContainer {
@@ -21,17 +17,6 @@ query SpecPageContainer {
 `
 
 const query = useQuery({ query: SpecPageContainerDocument })
-const specStore = useSpecStore()
-
-watchEffect(() => {
-  if (specStore.isRunnerInitialized) {
-    const eventManager = getEventManager()
-
-    eventManager.on('save:app:state', () => {
-      query.executeQuery()
-    })
-  }
-})
 
 </script>
 

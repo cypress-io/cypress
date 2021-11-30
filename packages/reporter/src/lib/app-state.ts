@@ -21,7 +21,7 @@ const defaults: DefaultAppState = {
 
 class AppState {
   @observable autoScrollingEnabled = true
-  @observable isSpecListOpen = true // TODO: consider moving where the default lives
+  @observable isSpecsListOpen = true // TODO: consider moving where the default lives
   @observable isPaused = defaults.isPaused
   @observable isRunning = defaults.isRunning
   @observable isPreferencesMenuOpen = defaults.isPreferencesMenuOpen
@@ -68,7 +68,7 @@ class AppState {
   }
 
   toggleSpecList () {
-    this.isSpecListOpen = !this.isSpecListOpen
+    this.isSpecsListOpen = !this.isSpecsListOpen
   }
 
   togglePreferencesMenu () {

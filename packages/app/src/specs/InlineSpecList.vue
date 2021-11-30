@@ -1,9 +1,5 @@
 <template>
-  <div
-    v-if="props?.gql?.savedState?.isSpecListOpen"
-    class="w-280px"
-  >
-    <span class="text-white">{{ props?.gql?.savedState?.isSpecListOpen }}</span>
+  <div class="w-280px">
     <InlineSpecListHeader
       v-model:search="search"
       :result-count="specs.length"

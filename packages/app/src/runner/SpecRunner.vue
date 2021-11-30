@@ -8,7 +8,7 @@
       class="bg-gray-1000"
     >
       <InlineSpecList
-        v-if="props.gql.currentProject "
+        v-if="props.gql.currentProject && props.gql.localSettings.preferences.isSpecsListOpen"
         :gql="props.gql.currentProject"
       />
 
@@ -77,7 +77,7 @@ import { useScreenshotStore } from '../store/screenshot-store'
 import { useRunnerUiStore } from '../store/runner-ui-store'
 import ChooseExternalEditorModal from '@packages/frontend-shared/src/gql-components/ChooseExternalEditorModal.vue'
 import { useMutation } from '@urql/vue'
-import { OpenFileInIdeDocument } from '@packages/data-context/src/gen/all-operations.gen'
+import { OpenFileInIdeDocument, SpecRunner_SetPreferencesDocument } from '@packages/data-context/src/gen/all-operations.gen'
 import type { SpecRunnerFragment } from '../generated/graphql'
 
 gql`
@@ -88,6 +88,11 @@ fragment SpecRunner on Query {
     ...SpecRunnerHeader
   }
   ...ChooseExternalEditor
+  localSettings {
+    preferences {
+      isSpecsListOpen
+    }
+  }
 }
 `
 
@@ -97,11 +102,18 @@ mutation OpenFileInIDE ($input: FileDetailsInput!) {
 }
 `
 
+gql`
+mutation SpecRunner_SetPreferences ($value: String!) {
+  setPreferences (value: $value)
+}`
+
 const eventManager = getEventManager()
 
 const autStore = useAutStore()
 const screenshotStore = useScreenshotStore()
 const runnerUiStore = useRunnerUiStore()
+
+const setPreferences = useMutation(SpecRunner_SetPreferencesDocument)
 
 const runnerPane = ref<HTMLDivElement>()
 
@@ -185,6 +197,11 @@ onMounted(() => {
 
   eventManager.on('after:screenshot', () => {
     screenshotStore.setScreenshotting(false)
+  })
+
+  eventManager.on('save:app:state', (state) => {
+    // TODO: review if this is the best place for this listener.
+    setPreferences.executeMutation({ value: JSON.stringify(state) })
   })
 })
 
