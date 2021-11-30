@@ -89,7 +89,9 @@ filesToUncomment.forEach((file) => {
   const filePath = join(__dirname, '../types', file)
   const str = fs.readFileSync(filePath).toString()
 
-  const result = str.split('\n').map((line) => line.substring(3)).join('\n')
+  const result = str.split('\n').map((line) => {
+    return line.startsWith('//z ') ? line.substring(4) : line
+  }).join('\n')
 
   fs.writeFileSync(filePath, result)
 })

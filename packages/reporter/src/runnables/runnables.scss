@@ -347,35 +347,7 @@
   }
 
   .runnable-header {
-    background: $gray-1000;
-    display: block;
-    font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
-    font-size: 14px;
-    line-height: 24px;
-    overflow-wrap: break-word;
-    padding: 16px;
-    position: sticky;
-    top: 0;
-    width: 100%;
-    z-index: 1;
-
-    &:before,
-    &:after {
-      background-color: $gray-900;
-      content: '';
-      position: absolute;
-      width: calc(100% - 32px);
-      height: 1px;
-      left: 16px;
-    }
-
-    &:before {
-      top: 0;
-    }
-
-    &:after {
-      bottom: 0;
-    }
+    @include inner-header;
 
     span > span > a > svg {
       margin-bottom: -2px;

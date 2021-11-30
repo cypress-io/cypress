@@ -6,12 +6,12 @@
     <span class="text-white">{{ props?.gql?.savedState?.isSpecListOpen }}</span>
     <InlineSpecListHeader
       v-model:search="search"
+      :result-count="specs.length"
+      class="mb-16px"
     />
-    <div class="h-[calc(100vh-65px)] overflow-y-auto overflow-x-hidden pt-16px">
-      <InlineSpecListTree
-        :specs="specs"
-      />
-    </div>
+    <InlineSpecListTree
+      :specs="specs"
+    />
   </div>
 </template>
 

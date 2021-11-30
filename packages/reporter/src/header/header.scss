@@ -125,30 +125,11 @@ $color-transition: color 150ms ease-out;
     justify-content: center;
     margin-left: 8px;
 
-    .toggle-auto-scrolling {
-      line-height: 22px;
-      padding: 0 10px;
+    .testing-preferences-toggle {
+      padding: 1px 8px;
 
-      i {
-        font-size: 100%;
-      }
-
-      i:first-child {
-        @extend .far;
-        @extend .#{$fa-css-prefix}-circle;
-        color: $gray-500;
-        font-size: 80%;
-        margin-right: 3px;
-        position: relative;
-        top: -1px;
-      }
-
-      &.auto-scrolling-enabled {
-        i:first-child {
-          @extend .fas;
-          @extend .#{$fa-css-prefix}-circle;
-          color: $orange-400;
-        }
+      &.open {
+        background-color: $gray-900;
       }
     }
 

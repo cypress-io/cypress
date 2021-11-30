@@ -1,5 +1,7 @@
 const { _, $, Promise } = Cypress
-const { getCommandLogWithText,
+const {
+  assertLogLength,
+  getCommandLogWithText,
   findReactInstance,
   withMutableReporterState,
   clickCommandLog,
@@ -2163,7 +2165,7 @@ describe('src/cy/commands/actions/click', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
 
           done()
@@ -2356,7 +2358,7 @@ describe('src/cy/commands/actions/click', () => {
 
       it('throws when attempting to click a <select> element', function (done) {
         cy.on('fail', (err) => {
-          expect(this.logs.length).to.eq(2)
+          assertLogLength(this.logs, 2)
           expect(err.message).to.eq('`cy.click()` cannot be called on a `<select>` element. Use `cy.select()` command instead to change the value.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/select')
 
@@ -2368,7 +2370,7 @@ describe('src/cy/commands/actions/click', () => {
 
       it('throws when provided invalid position', function (done) {
         cy.on('fail', (err) => {
-          expect(this.logs.length).to.eq(2)
+          assertLogLength(this.logs, 2)
           expect(err.message).to.eq('Invalid position argument: `foo`. Position may only be topLeft, top, topRight, left, center, right, bottomLeft, bottom, bottomRight.')
 
           done()
@@ -2416,7 +2418,7 @@ describe('src/cy/commands/actions/click', () => {
 
       it('does not log an additional log on failure', function (done) {
         cy.on('fail', () => {
-          expect(this.logs.length).to.eq(3)
+          assertLogLength(this.logs, 3)
 
           done()
         })
@@ -3293,7 +3295,7 @@ describe('src/cy/commands/actions/click', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
 
           done()
@@ -3731,7 +3733,7 @@ describe('src/cy/commands/actions/click', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
 
           done()
@@ -3747,7 +3749,7 @@ describe('src/cy/commands/actions/click', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(4)
+          assertLogLength(this.logs, 4)
           expect(lastLog.get('error')).to.eq(err)
           expect(err.message).to.include('`cy.rightclick()` failed because this element is not visible')
 
@@ -3982,6 +3984,13 @@ describe('shadow dom', () => {
     cy.$$('#shadow-element-1').css({ display: 'block' })
 
     cy.get('#shadow-element-1').click()
+  })
+
+  // https://github.com/cypress-io/cypress/issues/18008
+  it('does not fail actionability check when element is covered by its shadow host', () => {
+    cy.visit('/fixtures/shadow-dom-button.html')
+
+    cy.get('#element').shadow().find('[data-test-id="my-button"]').click()
   })
 })
 

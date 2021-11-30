@@ -1,5 +1,6 @@
 import type { CodeGenType, MutationAddProjectArgs, MutationSetProjectPreferencesArgs, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
 import type { FindSpecs, FoundBrowser, FoundSpec, FullConfig, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions, Preferences, SettingsOptions } from '@packages/types'
+import execa from 'execa'
 import path from 'path'
 import type { ActiveProjectShape, ProjectShape } from '../data/coreDataShape'
 
@@ -55,6 +56,20 @@ export class ProjectActions {
 
   private set projects (projects: ProjectShape[]) {
     this.ctx.coreData.app.projects = projects
+  }
+
+  openDirectoryInIDE (projectPath: string) {
+    this.ctx.debug(`opening ${projectPath} in ${this.ctx.coreData.localSettings.preferences.preferredEditorBinary}`)
+
+    if (!this.ctx.coreData.localSettings.preferences.preferredEditorBinary) {
+      return
+    }
+
+    if (this.ctx.coreData.localSettings.preferences.preferredEditorBinary === 'computer') {
+      this.ctx.actions.electron.showItemInFolder(projectPath)
+    }
+
+    execa(this.ctx.coreData.localSettings.preferences.preferredEditorBinary, [projectPath])
   }
 
   async setActiveProject (projectRoot: string) {
@@ -205,7 +220,7 @@ export class ProjectActions {
     }
   }
 
-  async launchProject (testingType: TestingTypeEnum | null, options: LaunchOpts) {
+  async launchProject (testingType: TestingTypeEnum | null, options: LaunchOpts, specPath?: string | null) {
     if (!this.ctx.currentProject) {
       return null
     }
@@ -214,6 +229,12 @@ export class ProjectActions {
 
     if (!testingType) {
       return null
+    }
+
+    let activeSpec: FoundSpec | undefined
+
+    if (specPath) {
+      activeSpec = await this.ctx.project.getCurrentSpecByAbsolute(this.ctx.currentProject.projectRoot, specPath)
     }
 
     // Ensure that we have loaded browsers to choose from
@@ -227,7 +248,9 @@ export class ProjectActions {
       return null
     }
 
-    const spec: Cypress.Spec = {
+    // launchProject expects a spec when opening browser for url navigation.
+    // We give it an empty spec if none is passed so as to land on home page
+    const emptySpec: Cypress.Spec = {
       name: '',
       absolute: '',
       relative: '',
@@ -236,7 +259,7 @@ export class ProjectActions {
 
     this.ctx.appData.currentTestingType = testingType
 
-    return this.api.launchProject(browser, spec, options)
+    return this.api.launchProject(browser, activeSpec ?? emptySpec, options)
   }
 
   async launchProjectWithoutElectron () {

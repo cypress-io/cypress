@@ -101,6 +101,19 @@ export const CurrentProject = objectType({
       },
     })
 
+    t.string('configFileAbsolutePath', {
+      description: 'Config File Absolute Path',
+      resolve: async (source, args, ctx) => {
+        const config = await ctx.project.getConfig(source.projectRoot)
+
+        if (!ctx.currentProject || !config.configFile) {
+          return null
+        }
+
+        return path.join(ctx.currentProject.projectRoot, config.configFile)
+      },
+    })
+
     t.field('preferences', {
       type: ProjectPreferences,
       description: 'Cached preferences for this project',

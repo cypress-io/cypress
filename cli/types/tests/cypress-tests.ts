@@ -62,17 +62,31 @@ namespace CypressIsCyTests {
   })
 }
 
+declare namespace Cypress {
+  interface Chainable {
+    newCommand: (arg: string) => void
+  }
+}
+
 namespace CypressCommandsTests {
-  Cypress.Commands.add('newCommand', () => {
+  Cypress.Commands.add('newCommand', (arg) => {
+    // $ExpectType string
+    arg
     return
   })
-  Cypress.Commands.add('newCommand', { prevSubject: true }, () => {
+  Cypress.Commands.add('newCommand', { prevSubject: true }, (arg) => {
+    // $ExpectType string
+    arg
     return
   })
-  Cypress.Commands.add('newCommand', () => {
+  Cypress.Commands.add('newCommand', (arg) => {
+    // $ExpectType string
+    arg
     return new Promise((resolve) => {})
   })
-  Cypress.Commands.overwrite('newCommand', () => {
+  Cypress.Commands.overwrite('newCommand', (arg) => {
+    // $ExpectType string
+    arg
     return
   })
 }

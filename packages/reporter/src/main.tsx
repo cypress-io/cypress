@@ -17,6 +17,7 @@ import shortcuts from './lib/shortcuts'
 
 import Header, { ReporterHeaderProps } from './header/header'
 import Runnables from './runnables/runnables'
+import TestingPreferences from './preferences/testing-preferences'
 
 let runnerListenersAdded = false
 
@@ -70,13 +71,17 @@ class Reporter extends Component<SingleReporterProps> {
         'studio-active': appState.studioActive,
       })}>
         {renderReporterHeader({ appState, statsStore })}
-        <Runnables
-          appState={appState}
-          error={error}
-          runnablesStore={runnablesStore}
-          scroller={scroller}
-          spec={this.props.spec}
-        />
+        {appState?.isPreferencesMenuOpen ? (
+          <TestingPreferences appState={appState} />
+        ) : (
+          <Runnables
+            appState={appState}
+            error={error}
+            runnablesStore={runnablesStore}
+            scroller={scroller}
+            spec={this.props.spec}
+          />
+        )}
       </div>
     )
   }

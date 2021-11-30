@@ -1,5 +1,5 @@
 import '@percy/cypress'
-import type { Component } from 'vue'
+import type { ComponentPublicInstance } from 'vue'
 
 // Add cy.mount, cy.mountFragment, cy.mountFragmentList
 export * from './mock-graphql/mountFragment'
@@ -20,7 +20,7 @@ declare global {
       /**
        * return Vue Test Utils wrapper wrapped in a cypress chainable
        */
-      vue(componentToFind?: Component): Cypress.Chainable<any>
+      vue<T extends ComponentPublicInstance>(componentToFind?: (new () => T) | null): Cypress.Chainable<any>
     }
   }
 }

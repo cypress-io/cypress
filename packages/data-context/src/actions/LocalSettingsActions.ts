@@ -1,25 +1,28 @@
-import type { DevicePreferences, Editor } from '@packages/types'
+import { AllowedState, defaultPreferences, Editor } from '@packages/types'
 import pDefer from 'p-defer'
 
 import type { DataContext } from '..'
 
 export interface LocalSettingsApiShape {
-  setPreferredOpener(editor: Editor): Promise<void>
   getAvailableEditors(): Promise<Editor[]>
 
-  getPreferences (): Promise<DevicePreferences>
-  setDevicePreference<K extends keyof DevicePreferences> (key: K, value: DevicePreferences[K]): Promise<void>
+  getPreferences (): Promise<AllowedState>
+  setPreferences (object: AllowedState): Promise<void>
 }
 
 export class LocalSettingsActions {
   constructor (private ctx: DataContext) {}
 
-  setDevicePreference<K extends keyof DevicePreferences> (key: K, value: DevicePreferences[K]) {
+  setPreferences (stringifiedJson: string) {
+    const toJson = JSON.parse(stringifiedJson) as AllowedState
+
     // update local data
-    this.ctx.coreData.localSettings.preferences[key] = value
+    for (const [key, value] of Object.entries(toJson)) {
+      this.ctx.coreData.localSettings.preferences[key as keyof AllowedState] = value as any
+    }
 
     // persist to appData
-    return this.ctx._apis.localSettingsApi.setDevicePreference(key, value)
+    return this.ctx._apis.localSettingsApi.setPreferences(toJson)
   }
 
   async refreshLocalSettings () {
@@ -35,8 +38,11 @@ export class LocalSettingsActions {
     const availableEditors = await this.ctx._apis.localSettingsApi.getAvailableEditors()
 
     this.ctx.coreData.localSettings.availableEditors = availableEditors
-    this.ctx.coreData.localSettings.preferences = await this.ctx._apis.localSettingsApi.getPreferences()
+    this.ctx.coreData.localSettings.preferences = {
+      ...defaultPreferences,
+      ...(await this.ctx._apis.localSettingsApi.getPreferences()),
+    }
 
-    dfd.resolve(availableEditors)
+    dfd.resolve()
   }
 }

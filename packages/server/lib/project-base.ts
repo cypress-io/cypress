@@ -7,21 +7,20 @@ import { createHmac } from 'crypto'
 
 import browsers from './browsers'
 import pkg from '@packages/root'
+import { allowed } from '@packages/config'
 import { ServerCt } from './server-ct'
 import { SocketCt } from './socket-ct'
 import { SocketE2E } from './socket-e2e'
-import api from './api'
 import { Automation } from './automation'
 import * as config from './config'
 import cwd from './cwd'
 import errors from './errors'
 import Reporter from './reporter'
 import runEvents from './plugins/run_events'
-import savedState from './saved_state'
+import * as savedState from './saved_state'
 import scaffold from './scaffold'
 import { ServerE2E } from './server-e2e'
 import system from './util/system'
-import user from './user'
 import { ensureProp } from './util/class-helpers'
 import { fs } from './util/fs'
 import * as settings from './util/settings'
@@ -48,9 +47,8 @@ export interface Cfg extends ReceivedCypressOptions {
   proxyServer?: Cypress.RuntimeConfigOptions['proxyUrl']
   exit?: boolean
   state?: {
-    firstOpened?: number
-    lastOpened?: number
-    promptsShown?: object
+    firstOpened?: number | null
+    lastOpened?: number | null
   }
 }
 
@@ -321,15 +319,6 @@ export class ProjectBase<TServer extends Server> extends EE {
     return runEvents.execute('before:run', cfg, beforeRunDetails)
   }
 
-  async getRuns () {
-    const [projectId, authToken] = await Promise.all([
-      this.getProjectId(),
-      user.ensureAuthToken(),
-    ])
-
-    return api.getProjectRuns(projectId, authToken)
-  }
-
   reset () {
     debug('resetting project instance %s', this.projectRoot)
 
@@ -423,7 +412,7 @@ export class ProjectBase<TServer extends Server> extends EE {
     // allowed config values to
     // prevent tampering with the
     // internals and breaking cypress
-    const allowedCfg = config.allowed(cfg)
+    const allowedCfg = allowed(cfg)
 
     const modifiedCfg = await plugins.init(allowedCfg, {
       projectRoot: this.projectRoot,
@@ -757,10 +746,9 @@ export class ProjectBase<TServer extends Server> extends EE {
     }
 
     const untouchedScaffold = await this.determineIsNewProject(theCfg)
-    const userHasSeenBanner = _.get(theCfg, 'state.showedNewProjectBanner', false)
 
-    debugScaffold(`untouched scaffold ${untouchedScaffold} banner closed ${userHasSeenBanner}`)
-    theCfg.isNewProject = untouchedScaffold && !userHasSeenBanner
+    debugScaffold(`untouched scaffold ${untouchedScaffold} banner closed`)
+    theCfg.isNewProject = untouchedScaffold
 
     const cfgWithSaved = await this._setSavedState(theCfg)
 
@@ -797,30 +785,19 @@ export class ProjectBase<TServer extends Server> extends EE {
     let state = await savedState.create(this.projectRoot, this.cfg.isTextTerminal)
 
     state.set(stateChanges)
-    state = await state.get()
-    this.cfg.state = state
+    this.cfg.state = await state.get()
 
-    return state
+    return this.cfg.state
   }
 
   async _setSavedState (cfg: Cfg) {
     debug('get saved state')
 
-    let state = await savedState.create(this.projectRoot, cfg.isTextTerminal)
+    const state = await savedState.create(this.projectRoot, cfg.isTextTerminal)
 
-    state = await state.get()
-    cfg.state = state
+    cfg.state = await state.get()
 
     return cfg
-  }
-
-  // Scaffolding
-  removeScaffoldedFiles () {
-    if (!this.cfg) {
-      throw new Error('Missing project config')
-    }
-
-    return scaffold.removeIntegration(this.cfg.integrationFolder, this.cfg)
   }
 
   // do not check files again and again - keep previous promise
@@ -892,21 +869,6 @@ export class ProjectBase<TServer extends Server> extends EE {
     } catch (err) {
       errors.throw('NO_PROJECT_FOUND_AT_PROJECT_ROOT', this.projectRoot)
     }
-  }
-
-  async getRecordKeys () {
-    const [projectId, authToken] = await Promise.all([
-      this.getProjectId(),
-      user.ensureAuthToken(),
-    ])
-
-    return api.getProjectRecordKeys(projectId, authToken)
-  }
-
-  async requestAccess (projectId) {
-    const authToken = await user.ensureAuthToken()
-
-    return api.requestAccess(projectId, authToken)
   }
 
   // For testing

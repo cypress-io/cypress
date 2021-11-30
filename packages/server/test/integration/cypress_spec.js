@@ -15,6 +15,8 @@ const pkg = require('@packages/root')
 const detect = require('@packages/launcher/lib/detect')
 const launch = require('@packages/launcher/lib/browsers')
 const extension = require('@packages/extension')
+const v = require('@packages/config/lib/validation')
+
 const argsUtil = require(`${root}lib/util/args`)
 const { fs } = require(`${root}lib/util/fs`)
 const ciProvider = require(`${root}lib/util/ci_provider`)
@@ -32,7 +34,6 @@ const errors = require(`${root}lib/errors`)
 const plugins = require(`${root}lib/plugins`)
 const cypress = require(`${root}lib/cypress`)
 const ProjectBase = require(`${root}lib/project-base`).ProjectBase
-const { getId } = require(`${root}lib/project_static`)
 const { ServerE2E } = require(`${root}lib/server-e2e`)
 const Reporter = require(`${root}lib/reporter`)
 const Watchers = require(`${root}lib/watchers`)
@@ -42,7 +43,6 @@ const browserUtils = require(`${root}lib/browsers/utils`)
 const chromeBrowser = require(`${root}lib/browsers/chrome`)
 const { openProject } = require(`${root}lib/open_project`)
 const env = require(`${root}lib/util/env`)
-const v = require(`${root}lib/util/validation`)
 const system = require(`${root}lib/util/system`)
 const appData = require(`${root}lib/util/app_data`)
 const electronApp = require('../../lib/util/electron-app')
@@ -712,7 +712,7 @@ describe('lib/cypress', () => {
         const found1 = _.find(argsSet, (args) => {
           return _.find(args, (arg) => {
             return arg.message && arg.message.includes(
-              'Browser: \'foo\' was not found on your system or is not supported by Cypress.',
+              'The specified browser was not found on your system or is not supported by Cypress: `foo`',
             )
           })
         })
@@ -1255,9 +1255,10 @@ describe('lib/cypress', () => {
         // make sure we have no user object
         user.set({}),
 
-        getId(this.todosPath)
-        .then((id) => {
-          this.projectId = id
+        Promise.resolve()
+        .then(() => {
+          // Hardcoded so we don't need to create a project to source the config
+          this.projectId = 'abc123'
         }),
       ])
     })
@@ -1728,7 +1729,7 @@ describe('lib/cypress', () => {
         delete process.env.LAUNCHPAD
         const options = Events.start.firstCall.args[0]
 
-        return Events.handleEvent(options, {}, {}, 123, 'open:project', this.todosPath)
+        return openProject.create(this.todosPath, options, {}, [])
       }).then(() => {
         const projectOptions = openProject.getProject().options
 
@@ -1791,7 +1792,8 @@ describe('lib/cypress', () => {
       })
     })
 
-    it('sends warning when baseUrl cannot be verified', function () {
+    // NOTE: skipped because we want to ensure this is captured in v10
+    it.skip('sends warning when baseUrl cannot be verified', function () {
       const bus = new EE()
       const event = { sender: { send: sinon.stub() } }
       const warning = { message: 'Blah blah baseUrl blah blah' }

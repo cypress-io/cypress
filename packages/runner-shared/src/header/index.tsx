@@ -9,7 +9,7 @@ import { ViewportInfo } from '../viewport-info'
 import { SelectorPlayground } from '../selector-playground/SelectorPlayground'
 import { selectorPlaygroundModel } from '../selector-playground'
 import { Studio } from '../studio'
-import type { EventManager } from '../event-manager'
+import type { EventManager } from '@packages/app/src/runner/event-manager'
 
 interface BaseState {
   isLoading: boolean
@@ -263,6 +263,10 @@ export class Header extends Component<HeaderProps> {
 
     if (!this._studioNeedsUrl) return
 
+    // Note: changes in TypeScript 4.4.4 made the code below fail the type check.
+    // ts interprets visitUrl below as (url: null | undefined) => never
+    // TODO: studio/studio-recorder.js should be converted to ts. And add proper type.
+    // @ts-ignore
     this.props.eventManager.studioRecorder.visitUrl(this.urlInput)
 
     this.urlInput = ''

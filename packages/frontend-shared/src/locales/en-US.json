@@ -92,6 +92,8 @@
     "pageTitle": "Specs",
     "newSpecButton": "New Spec",
     "searchPlaceholder": "Search Specs",
+    "matchPlural": "Matches",
+    "matchSingular": "Match",
     "componentSpecsHeader": "Component Specs",
     "e2eSpecsHeader": "E2E Specs",
     "gitStatusHeader": "Git Status",
@@ -173,6 +175,13 @@
       "actionWaiting": "Waiting for you to log in",
       "actionTryAgain": "Try again",
       "actionCancel": "Cancel"
+    },
+    "updateCypress": {
+      "title": "Upgrade to Cypress",
+      "currentlyRunning": "You are currently running Version {0} of Cypress. ",
+      "pasteToUpgradeProject": "To upgrade to the latest version for your project, first {0}, then paste the command below into your terminal:",
+      "pasteToUpgradeGlobal": "To upgrade to the latest version, first {0}, then paste the command below into your terminal:",
+      "rememberToCloseInsert": "close this app"
     }
   },
   "launchpadErrors": {
@@ -222,6 +231,8 @@
       "dropText": "Drag your project directory here or {0}",
       "browseManually": "browse manually."
     },
+    "done": "Done",
+    "selectPreferredEditor": "Select Preferred Editor",
     "recentProjectsHeader": "Recent Projects",
     "searchPlaceholder": "Search projects",
     "addProjectButton": "Add Project",

@@ -11,7 +11,7 @@
     "@babel/preset-react": "7.9.4",
     "@babel/preset-typescript": "7.9.0",
     "@babel/register": "7.9.0",
-    "@types/jsdom": "12.2.4",
+    "@types/jsdom": "16.2.13",
     "@types/mock-require": "2.0.0",
     "@types/webpack": "4.41.0",
     "@types/webpack-dev-server": "^4.0.0",
@@ -39,7 +39,7 @@
     "sass": "1.32.0",
     "sass-loader": "10.1.0",
     "sinon-chai": "3.3.0",
-    "webpack": "4.41.6",
+    "webpack": "^4.44.2",
     "webpack-cli": "3.3.11",
     "webpack-livereload-plugin": "2.3.0"
   }

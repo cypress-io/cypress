@@ -20,28 +20,24 @@ export default defineConfig({
   'component': {
     'testFiles': '**/*.{spec,cy}.{js,ts,tsx,jsx}',
     'supportFile': 'cypress/component/support/index.ts',
-    setupNodeEvents (on, config) {
+    devServer (cypressConfig, devServerConfig) {
       const { startDevServer } = require('@cypress/vite-dev-server')
 
-      on('dev-server:start', async (options) => {
-        return startDevServer({
-          options,
-          viteConfig: {
-            // TODO(tim): Figure out why this isn't being picked up
-            optimizeDeps: {
-              include: [
-                '@headlessui/vue',
-                'vue3-file-selector',
-                'just-my-luck',
-                'combine-properties',
-                'faker',
-              ],
-            },
-          },
-        })
-      })
-
-      return config
+      return startDevServer({ options: cypressConfig, ...devServerConfig })
+    },
+    devServerConfig: {
+      viteConfig: {
+        // TODO(tim): Figure out why this isn't being picked up
+        optimizeDeps: {
+          include: [
+            '@headlessui/vue',
+            'vue3-file-selector',
+            'just-my-luck',
+            'combine-properties',
+            'faker',
+          ],
+        },
+      },
     },
   },
   'e2e': {

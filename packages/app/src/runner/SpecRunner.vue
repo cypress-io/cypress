@@ -7,7 +7,17 @@
       id="inline-spec-list"
       class="bg-gray-1000"
     >
-      <InlineSpecList :gql="props.gql" />
+      <InlineSpecList
+        v-if="props.gql.currentProject "
+        :gql="props.gql.currentProject"
+      />
+
+      <ChooseExternalEditorModal
+        :open="runnerUiStore.showChooseExternalEditorModal"
+        :gql="props.gql"
+        @close="runnerUiStore.setShowChooseExternalEditorModal(false)"
+        @selected="openFile"
+      />
     </HideDuringScreenshot>
 
     <HideDuringScreenshot class="min-w-320px">
@@ -21,8 +31,13 @@
       ref="runnerPane"
       class="relative w-full"
     >
-      <HideDuringScreenshot class="p-4 bg-white">
-        <SpecRunnerHeader :gql="props.gql" />
+      <HideDuringScreenshot class="bg-white p-4">
+        <SpecRunnerHeader
+          v-if="props.gql.currentProject"
+          :gql="props.gql.currentProject"
+          :event-manager="eventManager"
+          :get-aut-iframe="getAutIframeModel"
+        />
       </HideDuringScreenshot>
 
       <RemoveClassesDuringScreenshotting
@@ -48,11 +63,10 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { REPORTER_ID, RUNNER_ID, getRunnerElement, getReporterElement, empty } from '../runner/utils'
 import { gql } from '@urql/core'
-import type { SpecRunnerFragment } from '../generated/graphql'
 import InlineSpecList from '../specs/InlineSpecList.vue'
 import { getAutIframeModel, getEventManager, UnifiedRunnerAPI } from '../runner'
-import { useAutStore, useRunnerStore } from '../store'
-import type { BaseSpec } from '@packages/types'
+import { useAutStore } from '../store'
+import type { BaseSpec, FileDetails } from '@packages/types'
 import SnapshotControls from './SnapshotControls.vue'
 import SpecRunnerHeader from './SpecRunnerHeader.vue'
 import HideDuringScreenshot from './screenshot/HideDuringScreenshot.vue'
@@ -60,12 +74,26 @@ import RemoveClassesDuringScreenshotting from './screenshot/RemoveClassesDuringS
 import RemovePositioningDuringScreenshot from './screenshot/RemovePositioningDuringScreenshot.vue'
 import ScreenshotHelperPixels from './screenshot/ScreenshotHelperPixels.vue'
 import { useScreenshotStore } from '../store/screenshot-store'
+import { useRunnerUiStore } from '../store/runner-ui-store'
+import ChooseExternalEditorModal from '@packages/frontend-shared/src/gql-components/ChooseExternalEditorModal.vue'
+import { useMutation } from '@urql/vue'
+import { OpenFileInIdeDocument } from '@packages/data-context/src/gen/all-operations.gen'
+import type { SpecRunnerFragment } from '../generated/graphql'
 
 gql`
-fragment SpecRunner on CurrentProject {
-  id
-  ...Specs_InlineSpecList
-  ...SpecRunnerHeader
+fragment SpecRunner on Query {
+  currentProject {
+    id
+    ...Specs_InlineSpecList
+    ...SpecRunnerHeader
+  }
+  ...ChooseExternalEditor
+}
+`
+
+gql`
+mutation OpenFileInIDE ($input: FileDetailsInput!) {
+  openFileInIDE (input: $input)
 }
 `
 
@@ -73,7 +101,7 @@ const eventManager = getEventManager()
 
 const autStore = useAutStore()
 const screenshotStore = useScreenshotStore()
-const runnerStore = useRunnerStore()
+const runnerUiStore = useRunnerUiStore()
 
 const runnerPane = ref<HTMLDivElement>()
 
@@ -107,6 +135,27 @@ function runSpec () {
   UnifiedRunnerAPI.executeSpec(props.activeSpec)
 }
 
+let fileToOpen: FileDetails
+
+const openFileInIDE = useMutation(OpenFileInIdeDocument)
+
+function openFile () {
+  runnerUiStore.setShowChooseExternalEditorModal(false)
+
+  if (!fileToOpen) {
+    // should not be possible!
+    return
+  }
+
+  openFileInIDE.executeMutation({
+    input: {
+      absolute: fileToOpen.absoluteFile,
+      line: fileToOpen.line,
+      column: fileToOpen.column,
+    },
+  })
+}
+
 watch(() => props.activeSpec, (spec) => {
   runSpec()
 }, { immediate: true, flush: 'post' })
@@ -116,6 +165,16 @@ onMounted(() => {
 
   eventManager.on('restart', () => {
     runSpec()
+  })
+
+  eventManager.on('open:file', (file) => {
+    fileToOpen = file
+
+    if (props.gql.localSettings.preferences.preferredEditorBinary) {
+      openFile()
+    } else {
+      runnerUiStore.setShowChooseExternalEditorModal(true)
+    }
   })
 
   eventManager.on('before:screenshot', (payload) => {

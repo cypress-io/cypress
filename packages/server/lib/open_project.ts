@@ -2,7 +2,6 @@ import _ from 'lodash'
 import la from 'lazy-ass'
 import Debug from 'debug'
 import Bluebird from 'bluebird'
-import chokidar from 'chokidar'
 import pluralize from 'pluralize'
 import { ProjectBase } from './project-base'
 import browsers from './browsers'
@@ -13,65 +12,18 @@ import * as session from './session'
 import { getSpecUrl } from './project_utils'
 import errors from './errors'
 import type { LaunchOpts, LaunchArgs, OpenProjectLaunchOptions, FoundBrowser } from '@packages/types'
-import { fs } from './util/fs'
-import path from 'path'
-import os from 'os'
 import type { DataContext } from '@packages/data-context'
 import { makeLegacyDataContext } from './makeDataContext'
 
 const debug = Debug('cypress:server:open_project')
 
-interface SpecsByType {
-  component: Cypress.Spec[]
-  integration: Cypress.Spec[]
-}
-
-// @see https://github.com/cypress-io/cypress/issues/18094
-async function win32BitWarning (onWarning: (error: Error) => void) {
-  if (os.platform() !== 'win32' || os.arch() !== 'ia32') return
-
-  // adapted from https://github.com/feross/arch/blob/master/index.js
-  let useEnv = false
-
-  try {
-    useEnv = !!(process.env.SYSTEMROOT && await fs.stat(process.env.SYSTEMROOT))
-  } catch (err) {
-    // pass
-  }
-
-  const sysRoot = useEnv ? process.env.SYSTEMROOT! : 'C:\\Windows'
-
-  // If %SystemRoot%\SysNative exists, we are in a WOW64 FS Redirected application.
-  let hasX64 = false
-
-  try {
-    hasX64 = !!(await fs.stat(path.join(sysRoot, 'sysnative')))
-  } catch (err) {
-    // pass
-  }
-
-  onWarning(errors.get('WIN32_DEPRECATION', hasX64))
-}
-
 export class OpenProject {
   openProject: ProjectBase<any> | null = null
   relaunchBrowser: ((...args: unknown[]) => Bluebird<void>) | null = null
-  specsWatcher: chokidar.FSWatcher | null = null
-  componentSpecsWatcher: chokidar.FSWatcher | null = null
 
   resetOpenProject () {
     this.openProject = null
     this.relaunchBrowser = null
-  }
-
-  tryToCall (method: keyof ProjectBase<any>) {
-    return (...args: unknown[]) => {
-      if (this.openProject && this.openProject[method]) {
-        return this.openProject[method](...args)
-      }
-
-      return Bluebird.resolve(null)
-    }
   }
 
   reset () {
@@ -81,12 +33,6 @@ export class OpenProject {
   getConfig () {
     return this.openProject?.getConfig()
   }
-
-  getRecordKeys = this.tryToCall('getRecordKeys')
-
-  getRuns = this.tryToCall('getRuns')
-
-  requestAccess = this.tryToCall('requestAccess')
 
   getProject () {
     return this.openProject
@@ -287,106 +233,6 @@ export class OpenProject {
     })
   }
 
-  getSpecChanges (options: OpenProjectLaunchOptions = {}) {
-    let currentSpecs: SpecsByType
-
-    _.defaults(options, {
-      onChange: () => { },
-      onError: () => { },
-    })
-
-    const sendIfChanged = (specs: SpecsByType = { component: [], integration: [] }) => {
-      // dont do anything if the specs haven't changed
-      if (_.isEqual(specs, currentSpecs)) {
-        return
-      }
-
-      currentSpecs = specs
-
-      return options?.onChange?.(specs)
-    }
-
-    const checkForSpecUpdates = _.debounce(() => {
-      if (!this.openProject) {
-        return this.stopSpecsWatcher()
-      }
-
-      debug('check for spec updates')
-
-      return get()
-      .then(sendIfChanged)
-      .catch(options?.onError)
-    }, 250, { leading: true })
-
-    const createSpecsWatcher = (cfg) => {
-      // TODO I keep repeating this to get the resolved value
-      // probably better to have a single function that does this
-      const componentTestingEnabled = _.get(cfg, 'resolved.testingType.value', 'e2e') === 'component'
-
-      debug('createSpecWatch component testing enabled', componentTestingEnabled)
-
-      if (!this.specsWatcher) {
-        debug('watching integration test files: %s in %s', cfg.testFiles, cfg.integrationFolder)
-
-        this.specsWatcher = chokidar.watch(cfg.testFiles, {
-          cwd: cfg.integrationFolder,
-          ignored: cfg.ignoreTestFiles,
-          ignoreInitial: true,
-        })
-
-        this.specsWatcher.on('add', checkForSpecUpdates)
-
-        this.specsWatcher.on('unlink', checkForSpecUpdates)
-      }
-
-      if (componentTestingEnabled && !this.componentSpecsWatcher) {
-        debug('watching component test files: %s in %s', cfg.testFiles, cfg.componentFolder)
-
-        this.componentSpecsWatcher = chokidar.watch(cfg.testFiles, {
-          cwd: cfg.componentFolder,
-          ignored: cfg.ignoreTestFiles,
-          ignoreInitial: true,
-        })
-
-        this.componentSpecsWatcher.on('add', checkForSpecUpdates)
-
-        this.componentSpecsWatcher.on('unlink', checkForSpecUpdates)
-      }
-    }
-
-    const get = (): Bluebird<SpecsByType> => {
-      if (!this.openProject) {
-        return Bluebird.resolve({
-          component: [],
-          integration: [],
-        })
-      }
-
-      const cfg = this.openProject.getConfig()
-
-      createSpecsWatcher(cfg)
-
-      return this.getSpecs(cfg)
-    }
-
-    // immediately check the first time around
-    return checkForSpecUpdates()
-  }
-
-  stopSpecsWatcher () {
-    debug('stop spec watcher')
-
-    if (this.specsWatcher) {
-      this.specsWatcher.close()
-      this.specsWatcher = null
-    }
-
-    if (this.componentSpecsWatcher) {
-      this.componentSpecsWatcher.close()
-      this.componentSpecsWatcher = null
-    }
-  }
-
   closeBrowser () {
     return browsers.close()
   }
@@ -406,8 +252,6 @@ export class OpenProject {
   close () {
     debug('closing opened project')
 
-    this.stopSpecsWatcher()
-
     return Promise.all([
       this._ctx?.destroy(),
       this.closeOpenProjectAndBrowsers(),
@@ -419,11 +263,6 @@ export class OpenProject {
   // used by launchpad
   async closeActiveProject () {
     await this.closeOpenProjectAndBrowsers()
-
-    // When closing a project, we should teardown any spec watchers.
-    // TODO: move all file system watching to a centralize
-    // location with a well defined setup and teardown API.
-    this.stopSpecsWatcher()
   }
 
   _ctx?: DataContext
@@ -464,8 +303,6 @@ export class OpenProject {
         testingType,
       },
     })
-
-    await win32BitWarning(options.onWarning)
 
     try {
       await this.openProject.initializeConfig(browsers)

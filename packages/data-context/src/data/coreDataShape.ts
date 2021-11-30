@@ -1,4 +1,4 @@
-import { BUNDLERS, FoundBrowser, FoundSpec, FullConfig, Preferences, NodePathAndVersion, DevicePreferences, devicePreferenceDefaults, Editor } from '@packages/types'
+import { BUNDLERS, FoundBrowser, FoundSpec, FullConfig, Preferences, Editor, Warning, AllowedState } from '@packages/types'
 import type { NexusGenEnums, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
 import type { BrowserWindow } from 'electron'
 import type { ChildProcess } from 'child_process'
@@ -22,7 +22,7 @@ export interface DevStateShape {
 export interface LocalSettingsDataShape {
   refreshing: Promise<Editor[]> | null
   availableEditors: Editor[]
-  preferences: DevicePreferences
+  preferences: AllowedState
 }
 
 export interface ConfigChildProcessShape {
@@ -59,8 +59,8 @@ export interface AppDataShape {
   projects: ProjectShape[]
   currentTestingType: Maybe<TestingTypeEnum>
   refreshingBrowsers: Promise<FoundBrowser[]> | null
-  refreshingNodePathAndVersion: Promise<NodePathAndVersion> | null
-  nodePathAndVersion: NodePathAndVersion | null
+  refreshingNodePath: Promise<string> | null
+  nodePath: string | null
 }
 
 export interface WizardDataShape {
@@ -73,7 +73,7 @@ export interface WizardDataShape {
   chosenLanguage: NexusGenEnums['CodeLanguageEnum']
   chosenManualInstall: boolean
   chosenBrowser: FoundBrowser | null
-  browserErrorMessage: string | null
+  warnings: Warning[]
 }
 
 export interface ElectronShape {
@@ -112,12 +112,12 @@ export function makeCoreData (): CoreDataShape {
       refreshingBrowsers: null,
       browsers: null,
       projects: [],
-      refreshingNodePathAndVersion: null,
-      nodePathAndVersion: null,
+      refreshingNodePath: null,
+      nodePath: null,
     },
     localSettings: {
       availableEditors: [],
-      preferences: devicePreferenceDefaults,
+      preferences: {},
       refreshing: null,
     },
     isAuthBrowserOpened: false,
@@ -132,7 +132,7 @@ export function makeCoreData (): CoreDataShape {
       allBundlers: BUNDLERS,
       history: ['welcome'],
       chosenBrowser: null,
-      browserErrorMessage: null,
+      warnings: [],
     },
     user: null,
     electron: {

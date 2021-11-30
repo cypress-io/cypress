@@ -117,7 +117,7 @@ type CloudRecordKey implements Node {
 """A Recorded run of the Test Runner, typically to the cloud"""
 type CloudRun implements Node {
   commitInfo: CloudRunCommitInfo
-  createdAt: Date
+  createdAt: DateTime
 
   """Globally unique identifier representing a concrete GraphQL ObjectType"""
   id: ID!
@@ -273,6 +273,9 @@ type CurrentProject implements Node & ProjectLike {
   """Project configuration"""
   config: JSON!
 
+  """Config File Absolute Path"""
+  configFileAbsolutePath: String
+
   """Config File Path"""
   configFilePath: String
 
@@ -355,6 +358,12 @@ type Editor {
 
   """name of editor"""
   name: String!
+}
+
+input FileDetailsInput {
+  absolute: String!
+  column: Int
+  line: Int
 }
 
 """Represents a spec on the file system"""
@@ -442,6 +451,7 @@ type LocalSettings {
 """local setting preferences"""
 type LocalSettingsPreferences {
   autoScrollingEnabled: Boolean
+  isSpecsListOpen: Boolean
   preferredEditorBinary: String
   proxyBypass: String
   proxyServer: String
@@ -460,6 +470,7 @@ type Mutation {
   """Create an Index HTML file for a new component testing project"""
   appCreateComponentIndexHtml(template: String!): Boolean
   clearActiveProject: Boolean
+  cloudProjectCreate(ciProviders: [String!], name: String!, orgId: ID!, public: Boolean!): CloudProject
 
   """
   Development only: Triggers or dismisses a prompted refresh by touching the file watched by our development scripts
@@ -481,7 +492,7 @@ type Mutation {
   internal_clearProjectPreferencesCache(projectTitle: String!): Boolean
 
   """Launches project from open_project global singleton"""
-  launchOpenProject: Boolean
+  launchOpenProject(specPath: String): Boolean
 
   """Sets the active browser"""
   launchpadSetBrowser(
@@ -494,7 +505,16 @@ type Mutation {
 
   """Log out of Cypress Cloud"""
   logout: Boolean
+
+  """Open a path in preferred IDE"""
+  openDirectoryInIDE(path: String!): Boolean
   openExternal(url: String!): Boolean
+
+  """Open a file on specified line and column in preferred IDE"""
+  openFileInIDE(input: FileDetailsInput!): Boolean
+
+  """Open a path in the local file explorer"""
+  openInFinder(path: String!): Boolean
 
   """show the launchpad windows"""
   reconfigureProject: Boolean!
@@ -508,13 +528,14 @@ type Mutation {
 
   """Set active project to run tests on"""
   setActiveProject(path: String!): Boolean
-  setAutoScrollingEnabled(value: Boolean!): Boolean
-  setPreferredEditorBinary(value: String!): Boolean
+
+  """
+  Update local preferences (also known as  appData). The payload, `value`, should be a `JSON.stringified()` object of the new values you'd like to persist. Example: `setPreferences (value: JSON.stringify({ lastOpened: Date.now() }))`
+  """
+  setPreferences(value: String!): Boolean
 
   """Save the projects preferences to cache"""
   setProjectPreferences(browserPath: String!, testingType: TestingTypeEnum!): Query!
-  setUseDarkSidebar(value: Boolean!): Boolean
-  setWatchForSpecChange(value: Boolean!): Boolean
 
   """show the launchpad at the browser picker step"""
   showElectronOnAppExit: Boolean
@@ -601,9 +622,6 @@ type ProjectPreferences {
 type Query {
   baseError: BaseError
 
-  """An error related to finding a browser"""
-  browserErrorMessage: String
-
   """Returns an object conforming to the Relay spec"""
   cloudNode(
     """An ID for a Node conforming to the Relay spec"""
@@ -634,7 +652,7 @@ type Query {
   """Whether the app is in global mode or not"""
   isInGlobalMode: Boolean!
 
-  """editors on the user local machine"""
+  """local settings on a device-by-device basis"""
   localSettings: LocalSettings!
 
   """All known projects for the app"""
@@ -761,6 +779,13 @@ type VersionData {
   latest: Version!
 }
 
+"""A warning"""
+type Warning {
+  message: String!
+  setupStep: String
+  title: String!
+}
+
 """
 The Wizard is a container for any state associated with initial onboarding to Cypress
 """
@@ -812,6 +837,9 @@ type Wizard {
 
   """The title of the page, given the current step of the wizard"""
   title: String
+
+  """A list of warnings"""
+  warnings: [Warning!]!
 }
 
 """Wizard bundler"""
