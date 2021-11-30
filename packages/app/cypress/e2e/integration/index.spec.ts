@@ -27,5 +27,7 @@ describe('Index', () => {
     cy.contains('Hello.jsx').click()
     cy.contains('Great! The spec was successfully added')
     cy.get('[aria-label="Close"]').click()
+    // TODO: find out why urql is not fetching updates specs automatically
+    // Works fine in the live app but not in e2e testing.
   })
 })
