@@ -1,5 +1,4 @@
-Next Version
-===
+# Next Version
 
 When the Cypress CLI and binary are built in CI, their versions are determined by the script in [`/scripts/get-next-version.js`](../scripts/get-next-version.js).
 

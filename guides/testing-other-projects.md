@@ -1,5 +1,4 @@
-Testing other projects
-===
+# Testing other projects
 
 In CI, the Cypress binary and npm package are built and uploaded to `cdn.cypress.io`. Then, [`/scripts/test-other-projects.js`](../scripts/test-other-projects.js) is run.
 
