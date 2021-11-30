@@ -125,7 +125,7 @@ describe('src/cy/commands/clock', () => {
       })
     })
 
-    it('overwrite gracefully', () => {
+    it('overwrites without crashing', () => {
       Cypress.Commands.overwrite('clock', (originalCommand, ...args) => {
         return originalCommand(...args)
       })
