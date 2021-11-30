@@ -11,8 +11,8 @@ declare namespace Cypress {
   type TestingType = 'e2e' | 'component'
   type PluginConfig = (on: PluginEvents, config: PluginConfigOptions) => void | ConfigOptions | Promise<ConfigOptions>
 
-  interface PrevSubjectMap {
-    optional: unknown
+  interface PrevSubjectMap<O = unknown> {
+    optional: O
     element: JQuery
     document: Document
     window: Window
@@ -447,12 +447,11 @@ declare namespace Cypress {
     Commands: {
       add<T extends keyof Chainable>(name: T, fn: CommandFn<T>): void
       add<T extends keyof Chainable>(name: T, options: CommandOptions & {prevSubject: false}, fn: CommandFn<T>): void
-      add<T extends keyof Chainable>(name: T, options: CommandOptions & {prevSubject: true}, fn: CommandFnWithSubject<T, unknown>): void
       add<T extends keyof Chainable, S extends PrevSubject>(
-          name: T, options: CommandOptions & { prevSubject: S | Array<Exclude<S, 'optional'>> }, fn: CommandFnWithSubject<T, PrevSubjectMap[S]>,
+          name: T, options: CommandOptions & { prevSubject: true | S | ['optional'] }, fn: CommandFnWithSubject<T, PrevSubjectMap[S]>,
       ): void
       add<T extends keyof Chainable, S extends PrevSubject>(
-          name: T, options: CommandOptions & { prevSubject: 'optional' | ['optional', ...S[]] }, fn: CommandFnWithSubject<T, void | PrevSubjectMap[S]>,
+          name: T, options: CommandOptions & { prevSubject: S[] }, fn: CommandFnWithSubject<T, PrevSubjectMap<void>[S]>,
       ): void
       overwrite<T extends keyof Chainable>(name: T, fn: CommandFnWithOriginalFn<T>): void
       overwrite<T extends keyof Chainable, S extends PrevSubject>(name: T, fn: CommandFnWithOriginalFnAndSubject<T, PrevSubjectMap[S]>): void
