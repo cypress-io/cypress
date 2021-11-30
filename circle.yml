@@ -29,6 +29,7 @@ mainBuildFilters: &mainBuildFilters
       only:
         - develop
         - 10.0-release
+        - rm-appveyor
 
 executors:
   # the Docker image with Cypress dependencies and Chrome browser
@@ -157,6 +158,55 @@ commands:
       - run:
           name: Restore all node_modules to proper workspace folders
           command: node scripts/circle-cache.js --action unpack
+
+  restore_cached_system_tests_deps:
+    description: 'Restore the cached node_modules for projects in "system-tests/projects/**"'
+    steps:
+      - run:
+          name: Generate Circle Cache key for system tests
+          command: ./system-tests/scripts/cache-key.sh > system_tests_cache_key
+      - restore_cache:
+          name: Restore system tests node_modules cache
+          keys:
+            - v{{ .Environment.CACHE_VERSION }}-{{ arch }}-system-tests-projects-node-modules-cache-{{ checksum "system_tests_cache_key" }}
+            - v{{ .Environment.CACHE_VERSION }}-{{ arch }}-system-tests-projects-node-modules-cache-
+
+  update_cached_system_tests_deps:
+    description: 'Update the cached node_modules for projects in "system-tests/projects/**"'
+    steps:
+      - run:
+          name: Generate Circle Cache key for system tests
+          command: ./system-tests/scripts/cache-key.sh > system_tests_cache_key
+      - restore_cache:
+          name: Restore cache state, to check for known modules cache existence
+          keys:
+            - v{{ .Environment.CACHE_VERSION }}-{{ arch }}-system-tests-projects-node-modules-cache-state-{{ checksum "system_tests_cache_key" }}
+      - run:
+          name: Bail if specific cache exists
+          command: |
+            if [[ -f "system_tests_node_modules_installed" ]]; then
+              echo "No updates to system tests node modules, exiting"
+              circleci-agent step halt
+            fi
+      - restore_cache:
+          name: Restore system tests node_modules cache
+          keys:
+            - v{{ .Environment.CACHE_VERSION }}-{{ arch }}-system-tests-projects-node-modules-cache-{{ checksum "system_tests_cache_key" }}
+            - v{{ .Environment.CACHE_VERSION }}-{{ arch }}-system-tests-projects-node-modules-cache-
+      - run:
+          name: Update system-tests node_modules cache
+          command: yarn workspace @tooling/system-tests projects:yarn:install
+      - save_cache:
+          name: Save system tests node_modules cache
+          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-system-tests-projects-node-modules-cache-{{ checksum "system_tests_cache_key" }}
+          paths:
+            - ~/.cache/cy-system-tests-node-modules
+      - run: touch system_tests_node_modules_installed
+      - save_cache:
+          name: Save system tests node_modules cache state key
+          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-system-tests-projects-node-modules-cache-state-{{ checksum "system_tests_cache_key" }}
+          paths:
+            - system_tests_node_modules_installed
 
   caching-dependency-installer:
     description: 'Installs & caches the dependencies based on yarn lock & package json dependencies'
@@ -417,6 +467,7 @@ commands:
         type: string
     steps:
       - restore_cached_workspace
+      - restore_cached_system_tests_deps
       - run:
           name: Run system tests
           command: |
@@ -1083,6 +1134,12 @@ jobs:
           path: /tmp/artifacts
       - store-npm-logs
 
+  system-tests-node-modules-install:
+    <<: *defaults
+    steps:
+      - restore_cached_workspace
+      - update_cached_system_tests_deps
+
   system-tests-chrome:
     <<: *defaults
     resource_class: medium
@@ -1503,7 +1560,7 @@ jobs:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "10.0-release" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "10.0-release" && "$CIRCLE_BRANCH" != "rm-appveyor" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -2003,19 +2060,22 @@ linux-workflow: &linux-workflow
     - server-performance-tests:
         requires:
           - build
+    - system-tests-node-modules-install:
+        requires:
+          - build
     - system-tests-chrome:
         requires:
-          - build
+          - system-tests-node-modules-install
     - system-tests-electron:
         requires:
-          - build
+          - system-tests-node-modules-install
     - system-tests-firefox:
         requires:
-          - build
+          - system-tests-node-modules-install
     - system-tests-non-root:
         executor: non-root-docker-user
         requires:
-          - build
+          - system-tests-node-modules-install
     - driver-integration-tests-chrome:
         requires:
           - build
@@ -2338,6 +2398,7 @@ windows-workflow: &windows-workflow
         executor: windows
         resource_class: windows.medium
         context:
+          - test-runner:sign-windows-binary
           - test-runner:upload
           - test-runner:commit-status-checks
         requires:

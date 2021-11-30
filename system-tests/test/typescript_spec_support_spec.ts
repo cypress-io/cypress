@@ -1,5 +1,4 @@
 import systemTests from '../lib/system-tests'
-import Fixtures from '../lib/fixtures'
 
 describe('e2e typescript in spec and support file', function () {
   systemTests.setup()
@@ -16,15 +15,17 @@ describe('e2e typescript in spec and support file', function () {
       spec: 'typescript_syntax_error_spec.ts',
       snapshot: true,
       expectedExitCode: 1,
-      onStdout: systemTests.normalizeWebpackErrors,
+      onStdout: (stdout) => {
+        stdout = stdout.replace(new RegExp('^(.*)npm/(webpack-batteries-included-preprocessor/node_modules/ts-loader/index.js)$', 'm'), ' * relative/path/to/$2')
+
+        return systemTests.normalizeWebpackErrors(stdout)
+      },
     })
   })
 
   it('project passes', function () {
-    const projPath = Fixtures.projectPath('ts-proj')
-
     return systemTests.exec(this, {
-      project: projPath,
+      project: 'ts-proj',
       snapshot: true,
     })
   })
@@ -34,7 +35,7 @@ describe('e2e typescript in spec and support file', function () {
   // @see https://github.com/cypress-io/cypress/issues/8555
   it('respects tsconfig paths', function () {
     return systemTests.exec(this, {
-      project: Fixtures.projectPath('ts-proj-with-paths'),
+      project: 'ts-proj-with-paths',
     })
   })
 })
