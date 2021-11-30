@@ -90,7 +90,7 @@ const projectIdCode = computed(() => `projectId: '${props.gql.projectId}'`)
 
 const helpCode = computed(() => {
   return `
-export default {
+export ${'default'} {
   ${projectIdCode.value}, // <- add this line
 }`
 })
