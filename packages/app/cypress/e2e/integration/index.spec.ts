@@ -14,10 +14,13 @@ describe('Index', () => {
       })
     })
 
-    it('shows "Create your first spec" title', () => {
-    // after removing the default scaffolded spec, we should be prompted to create a first spec
+    it('shows "No specs found" title', () => {
+      // TODO: we need more e2e tests around this, but it requires changes to how we set up config in our
+      // gql mock, which would likely conflict with other ongoing changes.
+      // In the meantime, the Create Spec vs No Specs Found differences are covered in component tests,
+      // we just can't mock config values in GQL yet.
       cy.visitApp()
-      cy.contains(defaultMessages.createSpec.page.defaultPatternNoSpecs.title).should('be.visible')
+      cy.contains(defaultMessages.createSpec.page.customPatternNoSpecs.title).should('be.visible')
     })
   })
 })
