@@ -2398,6 +2398,7 @@ windows-workflow: &windows-workflow
         executor: windows
         resource_class: windows.medium
         context:
+          - test-runner:sign-windows-binary
           - test-runner:upload
           - test-runner:commit-status-checks
         requires:
