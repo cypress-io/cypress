@@ -24,7 +24,7 @@ The steps above:
 
 - Build the `cypress` npm package
 - Transpile the code into ES5 to be compatible with the common Node versions
-- Put the result into the [`cli/build`](./cli/build) folder.
+- Put the result into the [`cli/build`](../cli/build) folder.
 
 ### Building the binary
 
@@ -91,7 +91,7 @@ In the following instructions, "X.Y.Z" is used to denote the [next version of Cy
 
 1. `develop` should contain all of the changes made in `master`. However, this occasionally may not be the case. Ensure that `master` does not have any additional commits that are not on `develop` and all auto-generated pull requests designed to merge master into develop have been successfully merged.
 
-2. If there is a new [`cypress-example-kitchensink`](https://github.com/cypress-io/cypress-example-kitchensink/releases) version, update the corresponding dependency in [`packages/example`](./packages/example) to that new version.
+2. If there is a new [`cypress-example-kitchensink`](https://github.com/cypress-io/cypress-example-kitchensink/releases) version, update the corresponding dependency in [`packages/example`](../packages/example) to that new version.
 
 3. Use the `move-binaries` script to move the binaries for `<commit sha>` from `beta` to the `desktop` folder for `<new target version>`. This also purges the cloudflare cache for this version.
     ```shell
@@ -153,7 +153,7 @@ In the following instructions, "X.Y.Z" is used to denote the [next version of Cy
 
 11. If needed, push out any updated changes to the links manifest to [`on.cypress.io`](https://github.com/cypress-io/cypress-services/tree/develop/packages/on).
 
-12. If needed, deploy the updated [`cypress-example-kitchensink`][cypress-example-kitchensink] to `example.cypress.io` by following [these instructions under "Deployment"](./packages/example/README.md).
+12. If needed, deploy the updated [`cypress-example-kitchensink`][cypress-example-kitchensink] to `example.cypress.io` by following [these instructions under "Deployment"](../packages/example/README.md).
 
 13. Update the releases in [ZenHub](https://app.zenhub.com/workspaces/test-runner-5c3ea3baeb1e75374f7b0708/reports/release):
     - Close the current release in ZenHub.

@@ -1,7 +1,7 @@
 Testing other projects
 ===
 
-In CI, the Cypress binary and npm package are built and uploaded to `cdn.cypress.io`. Then, [`/scripts/test-other-projects.js`](../scripts/test-other-proejcts.js) is run.
+In CI, the Cypress binary and npm package are built and uploaded to `cdn.cypress.io`. Then, [`/scripts/test-other-projects.js`](../scripts/test-other-projects.js) is run.
 
 This script creates commits inside of several test projects in order to trigger a realistic, continous-integration test of Cypress.
 
@@ -20,6 +20,6 @@ These tests add coverage to the Cypress code base by:
 
 * Providing a super-close-to-real-world usage of Cypress (i.e. installing fresh from an NPM package and running in a bare repo using the repo's CI setup)
 * Testing in a variety of environments
-    * Different Node.js versions
-    * Different operating systems
-    * A multitude of CI providers
+  * Different Node.js versions
+  * Different operating systems
+  * A multitude of CI providers
