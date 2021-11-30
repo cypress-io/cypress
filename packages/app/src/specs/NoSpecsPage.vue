@@ -41,7 +41,7 @@
       @selected="openFile"
     />
 
-    <CreateSpecContent
+    <DefatultPatternNoSpecContent
       v-if="props.isUsingDefaultSpecs"
       :gql="props.gql"
       @choose="choose"
@@ -58,7 +58,7 @@
 <script lang="ts" setup>
 import { ref, computed } from 'vue'
 import CreateSpecModal from './CreateSpecModal.vue'
-import CreateSpecContent from './CreateSpecContent.vue'
+import DefatultPatternNoSpecContent from './DefatultPatternNoSpecContent.vue'
 import { gql, useMutation } from '@urql/vue'
 import type { NoSpecsPageFragment } from '../generated/graphql'
 import { NoSpecsPage_OpenFileInIdeDocument } from '@packages/data-context/src/gen/all-operations.gen'
