@@ -2,20 +2,10 @@ const debug = require('debug')('cypress:server:user')
 const api = require('./api')
 const cache = require('./cache')
 const errors = require('./errors')
-const keys = require('./util/keys')
 
 export = {
   get () {
     return cache.getUser()
-  },
-
-  getSafely () {
-    return this.get()
-    .tap((user) => {
-      if (user.authToken) {
-        user.authToken = keys.hide(user.authToken)
-      }
-    })
   },
 
   set (user) {

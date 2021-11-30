@@ -14,8 +14,7 @@ const stateFiles: Record<string, typeof FileUtil> = {}
 
 // TODO: remove `showedOnBoardingModal` from this list - it is only included so that misleading `allowed` are not thrown
 // now that it has been removed from use
-
-export const formStatePath = (projectRoot) => {
+export const formStatePath = (projectRoot?: string) => {
   return Bluebird.try(() => {
     debug('making saved state from %s', cwd())
 

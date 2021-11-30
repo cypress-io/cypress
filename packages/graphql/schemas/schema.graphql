@@ -489,7 +489,7 @@ type Mutation {
   internal_clearProjectPreferencesCache(projectTitle: String!): Boolean
 
   """Launches project from open_project global singleton"""
-  launchOpenProject: Boolean
+  launchOpenProject(specPath: String): Boolean
 
   """Sets the active browser"""
   launchpadSetBrowser(
@@ -525,6 +525,10 @@ type Mutation {
 
   """Set active project to run tests on"""
   setActiveProject(path: String!): Boolean
+
+  """
+  Update local preferences (also known as  appData). The payload, `value`, should be a `JSON.stringified()` object of the new values you'd like to persist. Example: `setPreferences (value: JSON.stringify({ lastOpened: Date.now() }))`
+  """
   setPreferences(value: String!): Boolean
 
   """Save the projects preferences to cache"""
@@ -645,7 +649,7 @@ type Query {
   """Whether the app is in global mode or not"""
   isInGlobalMode: Boolean!
 
-  """editors on the user local machine"""
+  """local settings on a device-by-device basis"""
   localSettings: LocalSettings!
 
   """All known projects for the app"""

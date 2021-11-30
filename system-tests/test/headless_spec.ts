@@ -1,5 +1,4 @@
 import systemTests from '../lib/system-tests'
-import Fixtures from '../lib/fixtures'
 
 describe('e2e headless', function () {
   systemTests.setup()
@@ -81,13 +80,13 @@ describe('e2e headless', function () {
 
   systemTests.it('launches maximized by default in headless mode (1920x1080)', {
     headed: false,
-    project: Fixtures.projectPath('screen-size'),
+    project: 'screen-size',
     spec: 'default_size.spec.js',
   })
 
   systemTests.it('launches at DPR 1x', {
     headed: false,
-    project: Fixtures.projectPath('screen-size'),
+    project: 'screen-size',
     spec: 'device_pixel_ratio.spec.js',
   })
 })

@@ -155,6 +155,55 @@ commands:
           name: Restore all node_modules to proper workspace folders
           command: node scripts/circle-cache.js --action unpack
 
+  restore_cached_system_tests_deps:
+    description: 'Restore the cached node_modules for projects in "system-tests/projects/**"'
+    steps:
+      - run:
+          name: Generate Circle Cache key for system tests
+          command: ./system-tests/scripts/cache-key.sh > system_tests_cache_key
+      - restore_cache:
+          name: Restore system tests node_modules cache
+          keys:
+            - v{{ .Environment.CACHE_VERSION }}-{{ arch }}-system-tests-projects-node-modules-cache-{{ checksum "system_tests_cache_key" }}
+            - v{{ .Environment.CACHE_VERSION }}-{{ arch }}-system-tests-projects-node-modules-cache-
+
+  update_cached_system_tests_deps:
+    description: 'Update the cached node_modules for projects in "system-tests/projects/**"'
+    steps:
+      - run:
+          name: Generate Circle Cache key for system tests
+          command: ./system-tests/scripts/cache-key.sh > system_tests_cache_key
+      - restore_cache:
+          name: Restore cache state, to check for known modules cache existence
+          keys:
+            - v{{ .Environment.CACHE_VERSION }}-{{ arch }}-system-tests-projects-node-modules-cache-state-{{ checksum "system_tests_cache_key" }}
+      - run:
+          name: Bail if specific cache exists
+          command: |
+            if [[ -f "system_tests_node_modules_installed" ]]; then
+              echo "No updates to system tests node modules, exiting"
+              circleci-agent step halt
+            fi
+      - restore_cache:
+          name: Restore system tests node_modules cache
+          keys:
+            - v{{ .Environment.CACHE_VERSION }}-{{ arch }}-system-tests-projects-node-modules-cache-{{ checksum "system_tests_cache_key" }}
+            - v{{ .Environment.CACHE_VERSION }}-{{ arch }}-system-tests-projects-node-modules-cache-
+      - run:
+          name: Update system-tests node_modules cache
+          command: yarn workspace @tooling/system-tests projects:yarn:install
+      - save_cache:
+          name: Save system tests node_modules cache
+          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-system-tests-projects-node-modules-cache-{{ checksum "system_tests_cache_key" }}
+          paths:
+            - ~/.cache/cy-system-tests-node-modules
+      - run: touch system_tests_node_modules_installed
+      - save_cache:
+          name: Save system tests node_modules cache state key
+          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-system-tests-projects-node-modules-cache-state-{{ checksum "system_tests_cache_key" }}
+          paths:
+            - system_tests_node_modules_installed
+
   caching-dependency-installer:
     description: 'Installs & caches the dependencies based on yarn lock & package json dependencies'
     parameters:
@@ -468,6 +517,7 @@ commands:
         type: string
     steps:
       - restore_cached_workspace
+      - restore_cached_system_tests_deps
       - run:
           name: Run system tests
           command: |
@@ -1025,8 +1075,6 @@ jobs:
             fi
       - wait-on-circle-jobs:
           job-names: >
-            desktop-gui-integration-tests-7x,
-            desktop-gui-component-tests,
             cli-visual-tests,
             runner-integration-tests-chrome,
             runner-ct-integration-tests-chrome,
@@ -1155,6 +1203,12 @@ jobs:
       - store_artifacts:
           path: /tmp/artifacts
       - store-npm-logs
+
+  system-tests-node-modules-install:
+    <<: *defaults
+    steps:
+      - restore_cached_workspace
+      - update_cached_system_tests_deps
 
   system-tests-chrome:
     <<: *defaults
@@ -1307,52 +1361,6 @@ jobs:
       - run-driver-integration-tests:
           browser: electron
 
-  desktop-gui-integration-tests-7x:
-    <<: *defaults
-    parallelism: 7
-    steps:
-      - restore_cached_workspace
-      - run:
-          command: yarn build-prod
-          working_directory: packages/desktop-gui
-      - run:
-          command: |
-            CYPRESS_KONFIG_ENV=production \
-            CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
-            PERCY_ENABLE=${PERCY_TOKEN:-0} \
-            PERCY_PARALLEL_TOTAL=-1 \
-            yarn percy exec --parallel -- -- \
-            yarn cypress:run --record --parallel --group 2x-desktop-gui
-          working_directory: packages/desktop-gui
-      - verify-mocha-results
-      - store_test_results:
-          path: /tmp/cypress
-      - store_artifacts:
-          path: /tmp/artifacts
-      - store-npm-logs
-
-
-  desktop-gui-component-tests:
-    <<: *defaults
-    resource_class: medium
-    parallelism: 1
-    steps:
-      - restore_cached_workspace
-      - run:
-          # will use PERCY_TOKEN environment variable if available
-          command: |
-            CYPRESS_KONFIG_ENV=production \
-            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
-            PERCY_ENABLE=${PERCY_TOKEN:-0} \
-            PERCY_PARALLEL_TOTAL=-1 \
-            yarn percy exec --parallel -- -- \
-            yarn cypress:run:ct
-          working_directory: packages/desktop-gui
-      - verify-mocha-results
-      # we don't really need any artifacts - we are only interested in visual screenshots
-      - store-npm-logs
-
   reporter-integration-tests:
     <<: *defaults
     resource_class: medium
@@ -1400,6 +1408,7 @@ jobs:
 
   npm-webpack-preprocessor:
     <<: *defaults
+    resource_class: medium
     steps:
       - restore_cached_workspace
       - run:
@@ -1437,6 +1446,7 @@ jobs:
 
   npm-webpack-dev-server:
     <<: *defaults
+    resource_class: medium
     steps:
       - restore_cached_workspace
       - run:
@@ -1640,6 +1650,7 @@ jobs:
 
   test-kitchensink:
     <<: *defaults
+    resource_class: medium
     steps:
       - clone-repo-and-checkout-branch:
           repo: cypress-example-kitchensink
@@ -2036,17 +2047,6 @@ jobs:
           repo: cypress-example-todomvc
           browser: firefox
 
-  "test-binary-against-documentation-firefox":
-    <<: *defaults
-    resource_class: medium
-    steps:
-      - test-binary-against-repo:
-          repo: cypress-documentation
-          browser: firefox
-          command: "yarn cypress run"
-          wait-on: http://localhost:3000
-          server-start-command: yarn serve:dist
-
   "test-binary-against-conduit-chrome":
     <<: *defaults
     resource_class: medium
@@ -2181,19 +2181,22 @@ linux-workflow: &linux-workflow
     - server-performance-tests:
         requires:
           - build
+    - system-tests-node-modules-install:
+        requires:
+          - build
     - system-tests-chrome:
         requires:
-          - build
+          - system-tests-node-modules-install
     - system-tests-electron:
         requires:
-          - build
+          - system-tests-node-modules-install
     - system-tests-firefox:
         requires:
-          - build
+          - system-tests-node-modules-install
     - system-tests-non-root:
         executor: non-root-docker-user
         requires:
-          - build
+          - system-tests-node-modules-install
     - driver-integration-tests-chrome:
         requires:
           - build
@@ -2236,12 +2239,6 @@ linux-workflow: &linux-workflow
           - build
     - run-app-component-tests-chrome:
         context: test-runner:launchpad-tests
-        requires:
-          - build
-    - desktop-gui-integration-tests-7x:
-        requires:
-          - build
-    - desktop-gui-component-tests:
         requires:
           - build
     - reporter-integration-tests:
@@ -2308,8 +2305,6 @@ linux-workflow: &linux-workflow
           - ui-components-integration-tests
           - reporter-integration-tests
           - Linux lint
-          - desktop-gui-component-tests
-          - desktop-gui-integration-tests-7x
           - runner-ct-integration-tests-chrome
           - runner-integration-tests-firefox
           - runner-integration-tests-chrome
@@ -2421,15 +2416,15 @@ linux-workflow: &linux-workflow
 
     - test-binary-against-kitchensink-chrome:
         <<: *onlyMainBranches
-    - test-binary-against-conduit-chrome:
-        <<: *onlyMainBranches
+    # Re-enable when the cypress-example-conduit-app project is fixed.
+    # https://github.com/cypress-io/cypress-example-conduit-app/issues/346
+    # - test-binary-against-conduit-chrome:
+    #     <<: *onlyMainBranches
     - test-binary-against-recipes-firefox:
         <<: *onlyMainBranches
     - test-binary-against-kitchensink-firefox:
         <<: *onlyMainBranches
     - test-binary-against-todomvc-firefox:
-        <<: *onlyMainBranches
-    - test-binary-against-documentation-firefox:
         <<: *onlyMainBranches
     - test-binary-against-api-testing-firefox:
         <<: *onlyMainBranches

@@ -1,4 +1,4 @@
-import type { AllowedState, Editor } from '@packages/types'
+import { AllowedState, defaultPreferences, Editor } from '@packages/types'
 import pDefer from 'p-defer'
 
 import type { DataContext } from '..'
@@ -38,8 +38,11 @@ export class LocalSettingsActions {
     const availableEditors = await this.ctx._apis.localSettingsApi.getAvailableEditors()
 
     this.ctx.coreData.localSettings.availableEditors = availableEditors
-    this.ctx.coreData.localSettings.preferences = await this.ctx._apis.localSettingsApi.getPreferences()
+    this.ctx.coreData.localSettings.preferences = {
+      ...defaultPreferences,
+      ...(await this.ctx._apis.localSettingsApi.getPreferences()),
+    }
 
-    dfd.resolve(availableEditors)
+    dfd.resolve()
   }
 }

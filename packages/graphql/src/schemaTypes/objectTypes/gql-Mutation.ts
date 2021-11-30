@@ -201,8 +201,11 @@ export const mutation = mutationType({
 
     t.liveMutation('launchOpenProject', {
       description: 'Launches project from open_project global singleton',
+      args: {
+        specPath: stringArg(),
+      },
       resolve: async (_, args, ctx) => {
-        await ctx.actions.project.launchProject(ctx.wizardData.chosenTestingType, {})
+        await ctx.actions.project.launchProject(ctx.wizardData.chosenTestingType, {}, args.specPath)
       },
     })
 
@@ -296,6 +299,12 @@ export const mutation = mutationType({
 
     t.liveMutation('setPreferences', {
       type: 'Boolean',
+      description: [
+        'Update local preferences (also known as  appData).',
+        'The payload, `value`, should be a `JSON.stringified()`',
+        'object of the new values you\'d like to persist.',
+        'Example: `setPreferences (value: JSON.stringify({ lastOpened: Date.now() }))`',
+      ].join(' '),
       args: {
         // Stringify JSON, eg JSON.stringify({ firstTimeOpening: Date.now() })
         value: nonNull(stringArg()),
