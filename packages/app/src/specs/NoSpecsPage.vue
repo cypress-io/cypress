@@ -28,7 +28,7 @@
             class="hocus-link-default text-purple-500"
             @click.prevent="showCypressConfigInIDE"
           >
-            {{ t('createSpec.viewSpecPatternButton') }}
+            specPattern
           </button>
         </i18n-t>
       </p>
