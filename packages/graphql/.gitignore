@@ -1,1 +1,2 @@
 src/**/*.js
+schemas/*.graphql
