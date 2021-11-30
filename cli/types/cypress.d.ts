@@ -2209,12 +2209,9 @@ declare namespace Cypress {
      * @see https://on.cypress.io/writefile
     ```
     cy.writeFile('path/to/message.txt', 'Hello World')
-      .then((text) => {
-        expect(text).to.equal('Hello World') // true
-      })
     ```
      */
-    writeFile<C extends FileContents>(filePath: string, contents: C, encoding: Encodings): Chainable<C>
+    writeFile(filePath: string, contents: FileContents, encoding: Encodings): Chainable<null>
     /**
      * Write to a file with the specified encoding and contents.
      *
@@ -2223,12 +2220,10 @@ declare namespace Cypress {
     cy.writeFile('path/to/ascii.txt', 'Hello World', {
       flag: 'a+',
       encoding: 'ascii'
-    }).then((text) => {
-      expect(text).to.equal('Hello World') // true
     })
     ```
      */
-    writeFile<C extends FileContents>(filePath: string, contents: C, options?: Partial<WriteFileOptions & Timeoutable>): Chainable<C>
+    writeFile(filePath: string, contents: FileContents, options?: Partial<WriteFileOptions & Timeoutable>): Chainable<null>
     /**
      * Write to a file with the specified encoding and contents.
      *
@@ -2238,12 +2233,10 @@ declare namespace Cypress {
     ```
     cy.writeFile('path/to/ascii.txt', 'Hello World', 'utf8', {
       flag: 'a+',
-    }).then((text) => {
-      expect(text).to.equal('Hello World') // true
     })
     ```
      */
-    writeFile<C extends FileContents>(filePath: string, contents: C, encoding: Encodings, options?: Partial<WriteFileOptions>): Chainable<C>
+    writeFile(filePath: string, contents: FileContents, encoding: Encodings, options?: Partial<WriteFileOptions & Timeoutable>): Chainable<null>
 
     /**
      * jQuery library bound to the AUT
