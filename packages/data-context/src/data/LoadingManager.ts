@@ -5,8 +5,8 @@ import type { DataContext } from '..'
 import { LoadingConfig, LoadingContainer, makeLoadingContainer } from '../util/makeLoadingContainer'
 
 /**
- * Standardizes handling asynchronous actions which take long enough
- * to warrant a UI loading state / error handling.
+ * Standardizes handling asynchronous actions which either need "reloading", or
+ * take long enough to warrant a UI loading state / error handling.
  */
 export class LoadingManager {
   constructor (private ctx: DataContext) {}
@@ -83,7 +83,7 @@ export class LoadingManager {
   projectConfig = this.loadingContainer({
     name: 'projectConfig',
     action: async () => {
-      await this.ctx.loadingManager.machineBrowsers.toPromise()
+      // await this.ctx.loadingManager.machineBrowsers.load()
       assert(this.ctx.actions.projectConfig, 'projectConfig should exist')
       const { configPromise } = this._refeshConfigProcess()
 
@@ -123,15 +123,23 @@ export class LoadingManager {
       if (this.ctx.currentProject?.configChildProcess?.executedPlugins || !this.ctx.currentProject?.configChildProcess) {
         const { configPromise } = this._refeshConfigProcess()
 
-        return await this._makeFullConfig(configPromise)
+        await this._makeFullConfig(configPromise)
       }
 
-      return await this._makeFullConfig(this.ctx.currentProject.configChildProcess.baseConfigPromise)
+      assert(this.ctx.actions.projectConfig, 'expected projectConfig in projectEventSetup')
+      assert(this.ctx.currentProject?.configChildProcess?.ipc, 'Expected config ipc in projectEventSetup')
+
+      return this.ctx.actions.projectConfig.runSetupNodeEvents(
+        this.ctx.currentProject.configChildProcess.ipc,
+      )
     },
     onUpdate: (val) => {
       this.ctx.update((o) => {
         if (o.currentProject) {
           o.currentProject.pluginLoad = val
+          if (val.state === 'LOADED' && val.value?.registeredEvents) {
+            o.currentProject.pluginRegistry = val.value.registeredEvents
+          }
         }
       })
     },

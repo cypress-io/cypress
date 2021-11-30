@@ -272,6 +272,9 @@ type CurrentProject implements Node & ProjectLike {
   """Glob pattern for component searching"""
   codeGenGlob(type: CodeGenType!): String!
 
+  """For the given "currentTestingType", determine the state of the project"""
+  componentSetupState: TestingTypeState
+
   """
   Project configuration, sourced from the config file, or returned from the plugin
   """
@@ -294,6 +297,9 @@ type CurrentProject implements Node & ProjectLike {
   """The mode the interactive runner was launched in"""
   currentTestingType: TestingTypeEnum
 
+  """For the given "currentTestingType", determine the state of the project"""
+  e2eSetupState: TestingTypeState
+
   """An error encountered while loading the config"""
   errorLoadingConfig: ApplicationError
 
@@ -303,17 +309,16 @@ type CurrentProject implements Node & ProjectLike {
   """Relay style Node ID field for the CurrentProject field"""
   id: ID!
 
-  """Whether the user configured this project to use Component Testing"""
-  isCTConfigured: Boolean!
-
-  """Whether the user configured this project to use e2e Testing"""
-  isE2EConfigured: Boolean!
-
   """Whether we are currently loading the config"""
   isLoadingConfig: Boolean!
 
   """Whether we are currently loading the plugins"""
   isLoadingPlugins: Boolean!
+
+  """
+  Whether we need to show the Migration screen, if they have a cypress.json file but not cypress.config.js file
+  """
+  needsProjectMigration: Boolean
 
   """Cached preferences for this project"""
   preferences: ProjectPreferences
@@ -370,11 +375,15 @@ type DevState {
   When we have edited server related files, we may want to relaunch the client.
   """
   needsRelaunch: Boolean
-  patches: [[DevStatePatch]]
+
+  """A list of state change "patches" via Immer, useful for debugging"""
+  patches(afterIndex: Int = 0): [[DevStatePatch]]
 }
 
 """An immer patch"""
 type DevStatePatch {
+  """The Array index in the list of state change patches"""
+  index: Int
   op: String
   path: [JSON]
   pathStr: String
@@ -474,42 +483,9 @@ The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://
 """
 scalar JSON
 
-"""A loadable can be in a loading state, before being a resolved value"""
-interface Loadable {
-  error: Boolean
-  status: Boolean!
-
-  """
-  A warning associated with the current asynchronous action, e.g. if an invalid browser is found
-  """
-  warning: Warning
-}
-
-type LoadablePlugins implements Loadable {
-  error: Boolean
-  status: Boolean!
-
-  """
-  A warning associated with the current asynchronous action, e.g. if an invalid browser is found
-  """
-  warning: Warning
-}
-
-"""A "loadable" for sourcing the Project Config"""
-type LoadableProjectConfig implements Loadable {
-  config: JSON
-  error: Boolean
-  status: Boolean!
-
-  """
-  A warning associated with the current asynchronous action, e.g. if an invalid browser is found
-  """
-  warning: Warning
-}
-
 """local settings on a device-by-device basis"""
 type LocalSettings {
-  availableEditors: [Editor!]!
+  availableEditors: [Editor!]
   preferences: LocalSettingsPreferences!
 }
 
@@ -725,11 +701,8 @@ type Query {
   """Whether the app is in global mode or not"""
   isInGlobalMode: Boolean!
 
-  """Whether we are loading the projects"""
-  isLoadingGlobalProjects: Boolean!
-
   """local settings on a device-by-device basis"""
-  localSettings: LocalSettings!
+  localSettings: LocalSettings
 
   """All known projects for the app"""
   projects: [ProjectLike!]
@@ -838,9 +811,6 @@ enum TestingTypeEnum {
 
 """Current state of a given testing type"""
 enum TestingTypeState {
-  """We are loading the config"""
-  LOADING
-
   """
   We have detected errors when looking at the configuration and need to suggest changes
   """

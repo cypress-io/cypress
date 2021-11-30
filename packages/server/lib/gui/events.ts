@@ -27,7 +27,6 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       // // is there a way to lint the arguments received?
       // debug('launching browser for \'%s\' spec: %o', arg.specType, arg.spec)
       // debug('full list of options %o', arg)
-
       // // the "arg" should have objects for
       // //   - browser
       // //   - spec (with fields)
@@ -38,7 +37,6 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       //   specType: arg.specType,
       //   specFilter: arg.specFilter,
       // })
-
       // return openProject.launch(arg.browser, fullSpec, {
       //   // TODO: Tim see why this "projectRoot" is passed along
       //   projectRoot: options.projectRoot,
@@ -53,40 +51,31 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       //   if (err.title == null) {
       //     err.title = 'Error launching browser'
       //   }
-
       //   return sendErr(err)
       // })
       return
 
     case 'open:project':
       // debug('open:project')
-
       // const onSettingsChanged = () => {
       //   return bus.emit('config:changed')
       // }
-
       // const onSpecChanged = (spec) => {
       //   return bus.emit('spec:changed', spec)
       // }
-
       // const onFocusTests = function () {
       //   if (_.isFunction(options.onFocusTests)) {
       //     options.onFocusTests()
       //   }
-
       //   return bus.emit('focus:tests')
       // }
-
       // const onError = (err) => {
       //   return bus.emit('project:error', errors.clone(err, { html: true }))
       // }
-
       // const onWarning = function (warning) {
       //   warning.message = stripAnsi(warning.message)
-
       //   return bus.emit('project:warning', errors.clone(warning, { html: true }))
       // }
-
       // return browsers.getAllBrowsersWith(options.browser)
       // .then((browsers = []) => {
       //   debug('setting found %s on the config', pluralize('browser', browsers.length, true))
@@ -99,7 +88,6 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       //       }
       //     })
       //   })
-
       //   return openProject.create(arg, options, {
       //     onFocusTests,
       //     onSpecChanged,
@@ -130,15 +118,12 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       // return savedState.create()
       // .then(async (state) => {
       //   const currentState = await state.get()
-
       //   // we check if there is any state at all so users existing before
       //   // we added firstOpenedCypress are not marked as new
       //   const hasOpenedCypress = !!Object.keys(currentState).length
-
       //   if (!currentState.firstOpenedCypress) {
       //     await state.set('firstOpenedCypress', Date.now())
       //   }
-
       //   return hasOpenedCypress
       // })
       // .then(send)
@@ -147,12 +132,10 @@ const handleEvent = function (options, bus, event, id, type, arg) {
     case 'ping:baseUrl':
       // NOTE: Keeping this code around to ensure we keep this for v10
       // const baseUrl = arg
-
       // return ensureUrl.isListening(baseUrl)
       // .then(send)
       // .catch((err) => {
       //   const warning = errors.get('CANNOT_CONNECT_BASE_URL_WARNING', baseUrl)
-
       //   return sendErr(warning)
       // })
       return

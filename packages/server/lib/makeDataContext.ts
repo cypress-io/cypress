@@ -27,6 +27,7 @@ import * as savedState from './saved_state'
 import assert from 'assert'
 import { OpenProject } from './open_project'
 import app_data from './util/app_data'
+import plugins from './plugins'
 
 const { getBrowsers, ensureAndGetByNameOrPath } = browserUtils
 
@@ -106,13 +107,9 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
         },
       },
       projectApi: {
+        getPluginIpcHandlers: plugins.getPluginIpcHandlers,
         makeLegacyOpenProject () {
           return new OpenProject(ctx)
-        },
-        makeConfig (cfg: Cypress.ConfigOptions) {
-          assert(ctx.currentProject, 'currentProject should exist')
-
-          return config.makeConfig(cfg, ctx.currentProject)
         },
         getConfig (options?: SettingsOptions) {
           return config.get(ctx, options)

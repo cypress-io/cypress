@@ -86,7 +86,7 @@ export const returnDefaultBrowser = (
 }
 
 export const run = async (options: LaunchArgs, ctx: DataContext) => {
-  const installedBrowsers = await ctx.loadingManager.machineBrowsers.toPromise()
+  const installedBrowsers = await ctx.loadingManager.machineBrowsers.load()
 
   options.browser = options.browser || returnDefaultBrowser(browsersForCtInteractive, installedBrowsers)
 

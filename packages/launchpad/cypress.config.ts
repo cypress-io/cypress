@@ -8,7 +8,6 @@ export default defineConfig({
     'runMode': 2,
     'openMode': 0,
   },
-  'nodeVersion': 'system',
   'testFiles': '**/*.spec.{js,ts,tsx,jsx}',
   'reporter': '../../node_modules/cypress-multi-reporters/index.js',
   'reporterOptions': {
@@ -18,7 +17,9 @@ export default defineConfig({
   'component': {
     'testFiles': '**/*.spec.{js,ts,tsx,jsx}',
     'supportFile': 'cypress/component/support/index.ts',
-    'pluginsFile': 'cypress/component/plugins/index.js',
+    setupNodeEvents (on, config) {
+      //
+    },
     devServer (cypressConfig) {
       const { startDevServer } = require('@cypress/vite-dev-server')
 
@@ -31,7 +32,6 @@ export default defineConfig({
   'e2e': {
     'supportFile': 'cypress/e2e/support/e2eSupport.ts',
     'integrationFolder': 'cypress/e2e/integration',
-    'pluginsFile': 'cypress/e2e/plugins/index.ts',
     async setupNodeEvents (on, config) {
       const { e2ePluginSetup } = require('@packages/frontend-shared/cypress/e2e/e2ePluginSetup')
 

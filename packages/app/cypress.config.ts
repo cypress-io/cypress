@@ -8,7 +8,6 @@ export default defineConfig({
     'runMode': 2,
     'openMode': 0,
   },
-  'nodeVersion': 'system',
   'testFiles': '**/*.{spec,cy}.{js,ts,tsx,jsx}',
   'reporter': '../../node_modules/cypress-multi-reporters/index.js',
   'reporterOptions': {
@@ -41,7 +40,6 @@ export default defineConfig({
     },
   },
   'e2e': {
-    'pluginsFile': 'cypress/e2e/plugins/index.ts',
     'supportFile': 'cypress/e2e/support/e2eSupport.ts',
     setupNodeEvents (on, config) {
       const { e2ePluginSetup } = require('@packages/frontend-shared/cypress/e2e/e2ePluginSetup')

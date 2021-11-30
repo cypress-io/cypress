@@ -1,13 +1,19 @@
+/* eslint-disable no-dupe-class-members */
+import assert from 'assert'
+
 export type IsPending = {
   settled: false
   state: 'PENDING'
   error?: never
+  value?: undefined
 }
 
-export type IsLoading<V> = {
+export type IsLoading<V, E = any> = {
   settled: false
   state: 'LOADING'
-  promise: Promise<V>
+  promise: Promise<Settled<V, E>>
+  value?: undefined
+  cancelled: boolean
 }
 
 export type IsLoaded<V> = {
@@ -20,10 +26,13 @@ export type IsLoaded<V> = {
 export type IsErrored<E> = {
   settled: true
   state: 'ERRORED'
+  value?: undefined
   error: E
 }
 
-export type LoadingState<V, E = any> = IsPending | IsLoading<V> | IsLoaded<V> | IsErrored<E>
+export type Settled<V, E> = IsLoaded<V> | IsErrored<E>
+
+export type LoadingState<V, E = any> = IsPending | IsLoading<V, E> | IsLoaded<V> | IsErrored<E>
 
 let withinLoadingAction = false
 
@@ -64,7 +73,6 @@ export interface LoadingConfig<V, E = any> {
  * In our application we have a few of these: "project config",
  */
 export class LoadingContainer<V, E = any> {
-  private _inFlight = { cancelled: false }
   /**
    * Caches the "loading" value on the class, so we can
    */
@@ -76,21 +84,10 @@ export class LoadingContainer<V, E = any> {
     this._data = { state: 'PENDING', settled: false }
   }
 
-  load () {
-    if (this._data.state === 'PENDING') {
-      this._data = {
-        settled: false,
-        state: 'LOADING',
-        promise: this.startLoading(),
-      }
-
-      return this
-    }
-
-    return this
-  }
-
   private async startLoading () {
+    const state = this._data
+
+    assert(state.state === 'LOADING', 'Cannot call startLoading unless the value is LOADING')
     try {
       withinLoadingAction = true
       const actionVal = this.config.action()
@@ -101,7 +98,7 @@ export class LoadingContainer<V, E = any> {
 
       const value = await this._loading
 
-      if (this.cancelled) {
+      if (this.cancelled || state.cancelled) {
         return value
       }
 
@@ -115,21 +112,23 @@ export class LoadingContainer<V, E = any> {
 
       return value
     } catch (e: unknown?) {
-      if (this.cancelled) {
-        return Promise.reject(e)
-      }
-
-      this._data = {
+      const errorPayload = {
         settled: true,
         state: 'ERRORED',
         error: e,
+      } as IsErrored<E>
+
+      if (this.cancelled || state.cancelled) {
+        return Promise.resolve(undefined)
       }
+
+      this._data = errorPayload
 
       this.config.onUpdate(this._data)
 
       this.config.onError?.(e)
 
-      return Promise.reject(e)
+      return Promise.resolve(e)
     } finally {
       this._loading = undefined
       withinLoadingAction = false
@@ -141,30 +140,46 @@ export class LoadingContainer<V, E = any> {
       return this
     }
 
-    this._inFlight.cancelled = true
-    this._inFlight = { cancelled: false }
+    if (this._data.state === 'LOADING') {
+      this._data.cancelled = true
+    }
+
     this._data = { state: 'PENDING', settled: false }
     this.startLoading()
 
     return this
   }
 
-  toPromise (): Promise<V> {
+  /**
+   * If we set to "false", it will
+   * @param asPromise
+   * @returns
+   */
+  load (): Promise<V | undefined> {
+    if (this._data.state === 'PENDING') {
+      const promise = Promise.resolve().then(() => this.startLoading())
+
+      this._data = {
+        settled: false,
+        state: 'LOADING',
+        promise,
+        cancelled: false,
+      }
+    }
+
     if (this._data.state === 'LOADED') {
       return Promise.resolve(this._data.value)
     }
 
     if (this._data.state === 'ERRORED') {
-      return Promise.reject(this._data.error)
+      return Promise.resolve(undefined)
     }
 
     if (this._data.state === 'LOADING') {
-      return this._data.promise
+      return this._data.promise.then((val) => val.value)
     }
 
-    this.load()
-
-    return this.toPromise()
+    throw new Error(`Unexpected state`)
   }
 
   getState () {
@@ -172,7 +187,6 @@ export class LoadingContainer<V, E = any> {
   }
 
   cancel () {
-    this._inFlight.cancelled = true
     this.cancelled = true
   }
 

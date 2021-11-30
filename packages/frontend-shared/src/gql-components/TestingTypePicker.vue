@@ -16,9 +16,8 @@
       <template #footer>
         <StatusBadge
           class="mt-16px"
-          :title-on="t('setupPage.testingCard.configured')"
-          :title-off="t('setupPage.testingCard.notConfigured')"
-          :status="tt.configured || false"
+          :title="tt.title"
+          :status="tt.configured"
         />
       </template>
     </Card>
@@ -41,8 +40,8 @@ const { t } = useI18n()
 gql`
 fragment TestingTypePicker on CurrentProject {
   id
-  isCTConfigured
-  isE2EConfigured
+  componentSetupState
+  e2eSetupState
   currentTestingType
 }
 `
@@ -55,6 +54,17 @@ const emits = defineEmits<{
   (eventName: 'pick', testingType: 'component' | 'e2e'): void
 }>()
 
+const StateMapping = {
+  NEW: 'off',
+  NEEDS_CHANGES: 'warning',
+  READY: 'on',
+} as const
+const StateTitleMapping = {
+  NEW: t('setupPage.testingCard.notConfigured'),
+  NEEDS_CHANGES: t('setupPage.testingCard.needsChanges'),
+  READY: t('setupPage.testingCard.configured'),
+} as const
+
 const TESTING_TYPES = [
   {
     key: 'e2e',
@@ -62,7 +72,8 @@ const TESTING_TYPES = [
     description: t('testingType.e2e.description'),
     icon: IconE2E,
     iconSolid: IconE2ESolid,
-    configured: props.gql.isE2EConfigured,
+    configured: props.gql.e2eSetupState ? StateMapping[props.gql.e2eSetupState] : null,
+    title: props.gql.e2eSetupState ? StateTitleMapping[props.gql.e2eSetupState] : null,
   },
   {
     key: 'component',
@@ -70,7 +81,9 @@ const TESTING_TYPES = [
     description: t('testingType.component.description'),
     icon: IconComponent,
     iconSolid: IconComponentSolid,
-    configured: props.gql.isCTConfigured,
+    configured: props.gql.componentSetupState ? StateMapping[props.gql.componentSetupState] : null,
+    title: props.gql.componentSetupState ? StateTitleMapping[props.gql.componentSetupState] : null,
+
   },
 ] as const
 

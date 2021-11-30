@@ -33,6 +33,7 @@ import { SpecsStore } from './specs-store'
 import { checkSupportFile } from './project_utils'
 import type { FoundBrowser, OpenProjectLaunchOptions } from '@packages/types'
 import type { DataContext } from '@packages/data-context'
+import assert from 'assert'
 
 // Cannot just use RuntimeConfigOptions as is because some types are not complete.
 // Instead, this is an interface of values that have been manually validated to exist
@@ -306,7 +307,9 @@ export class ProjectBase<TServer extends Server> extends EE {
 
     this.isOpen = true
 
-    return runEvents.execute('before:run', cfg, beforeRunDetails)
+    assert(this.ctx.actions.projectConfig, 'expected projectConfig in ProjectBase.open')
+
+    return this.ctx.actions.projectConfig.execute('before:run', cfg, beforeRunDetails)
   }
 
   reset () {
@@ -674,16 +677,6 @@ export class ProjectBase<TServer extends Server> extends EE {
   setCurrentSpecAndBrowser (spec, browser: Cypress.Browser) {
     this.spec = spec
     this.browser = browser
-  }
-
-  async setBrowsers (browsers = []) {
-    debug('getting config before setting browsers %o', browsers)
-
-    const cfg = this.getConfig()
-
-    debug('setting config browsers to %o', browsers)
-
-    cfg.browsers = browsers
   }
 
   getAutomation () {

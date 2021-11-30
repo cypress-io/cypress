@@ -22,6 +22,9 @@ class RunPlugins {
     this.requiredFile = requiredFile
     this.eventIdCount = 0
     this.registrations = []
+    this.ipc.on('execute:plugins', (event, ids, args) => {
+      this.execute(event, ids, args)
+    })
   }
 
   invoke (eventId, args = []) {
@@ -156,10 +159,6 @@ class RunPlugins {
     this.ipc.on('load:plugins', (config) => {
       debug('passing config %o', config)
       this.load(config, setupNodeEvents)
-    })
-
-    this.ipc.on('execute:plugins', (event, ids, args) => {
-      this.execute(event, ids, args)
     })
   }
 

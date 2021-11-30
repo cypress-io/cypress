@@ -24,7 +24,7 @@ export const LocalSettings = objectType({
   name: 'LocalSettings',
   description: 'local settings on a device-by-device basis',
   definition (t) {
-    t.nonNull.list.nonNull.field('availableEditors', {
+    t.list.nonNull.field('availableEditors', {
       type: Editor,
     })
 

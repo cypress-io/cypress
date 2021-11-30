@@ -4,6 +4,7 @@
 export * from './AppActions'
 export * from './ApplicationDataActions'
 export * from './AuthActions'
+export * from './BrowserActions'
 export * from './ConfigFileActions'
 export * from './CurrentProjectActions'
 export * from './DataEmitterActions'

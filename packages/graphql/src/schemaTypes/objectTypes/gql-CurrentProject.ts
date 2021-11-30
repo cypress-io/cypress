@@ -1,7 +1,7 @@
 import { nonNull, objectType, stringArg } from 'nexus'
-import { ApplicationError } from '.'
 import { cloudProjectBySlug } from '../../stitching/remoteGraphQLCalls'
-import { CodeGenTypeEnum } from '../enumTypes/gql-CodeGenTypeEnum'
+import { TestingTypeEnum, TestingTypeState, CodeGenTypeEnum } from '../enumTypes'
+import { ApplicationError } from './gql-ApplicationError'
 import { Browser } from './gql-Browser'
 import { FileParts } from './gql-FileParts'
 import { ProjectPreferences } from './gql-ProjectPreferences'
@@ -13,9 +13,23 @@ export const CurrentProject = objectType({
   definition (t) {
     t.implements('ProjectLike')
 
+    t.boolean('needsProjectMigration', {
+      description: 'Whether we need to show the Migration screen, if they have a cypress.json file but not cypress.config.js file',
+    })
+
     t.field('currentTestingType', {
       description: 'The mode the interactive runner was launched in',
-      type: 'TestingTypeEnum',
+      type: TestingTypeEnum,
+    })
+
+    t.field('e2eSetupState', {
+      type: TestingTypeState,
+      description: 'For the given "currentTestingType", determine the state of the project',
+    })
+
+    t.field('componentSetupState', {
+      type: TestingTypeState,
+      description: 'For the given "currentTestingType", determine the state of the project',
     })
 
     t.field('currentBrowser', {
@@ -28,13 +42,6 @@ export const CurrentProject = objectType({
       description: 'Browsers for the project that are configured to run with Cypress. Null if config hasnt been sourced',
       resolve: (source, args, ctx) => {
         return source.loadedConfig()?.browsers ?? null
-      },
-    })
-
-    t.field('currentTestingTypeState', {
-      description: 'For the given "currentTestingType", what is the state',
-      resolve: () => {
-        // TestingTypeState
       },
     })
 
@@ -55,20 +62,6 @@ export const CurrentProject = objectType({
     t.string('projectId', {
       description: 'Used to associate project with Cypress cloud',
       resolve: (source, args, ctx) => source.projectId(),
-    })
-
-    t.nonNull.boolean('isCTConfigured', {
-      description: 'Whether the user configured this project to use Component Testing',
-      resolve: (source, args, ctx) => {
-        return ctx.project.isCTConfigured()
-      },
-    })
-
-    t.nonNull.boolean('isE2EConfigured', {
-      description: 'Whether the user configured this project to use e2e Testing',
-      resolve: (source, args, ctx) => {
-        return ctx.project.isE2EConfigured()
-      },
     })
 
     t.connectionField('specs', {
@@ -103,7 +96,7 @@ export const CurrentProject = objectType({
     t.json('config', {
       description: 'Project configuration, sourced from the config file, or returned from the plugin',
       resolve: (source, args, ctx) => {
-        return source.getResolvedConfigFields()
+        return source.data.config.value ?? null
       },
     })
 
@@ -155,9 +148,5 @@ export const CurrentProject = objectType({
       },
       resolve: (source, args) => source.getCodeGenCandidates(args.glob),
     })
-  },
-  sourceType: {
-    module: '@packages/data-context/src/sources/ProjectDataSource',
-    export: 'ProjectDataSource',
   },
 })

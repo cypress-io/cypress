@@ -31,7 +31,7 @@
           :gql="data"
         />
         <MigrationWizard
-          v-else-if="data.currentProject"
+          v-else-if="data.currentProject.needsProjectMigration"
           :gql="data"
         />
         <OpenBrowserContainer
@@ -96,6 +96,9 @@ fragment LaunchpadMain_Data on Query {
     id
     currentTestingType
     isLoadingConfig
+    configFilePath
+    componentSetupState
+    needsProjectMigration
     ...TestingTypeCards
     errorLoadingConfig {
       ...ErrorDisplay

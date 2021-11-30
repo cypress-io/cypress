@@ -37,11 +37,6 @@ export const Query = objectType({
       resolve: (root, args, ctx) => ctx.project,
     })
 
-    t.nonNull.boolean('isLoadingGlobalProjects', {
-      description: 'Whether we are loading the projects',
-      resolve: (root, args, ctx) => ctx.coreData.globalProjects.state !== 'LOADED',
-    })
-
     t.list.nonNull.field('projects', {
       type: ProjectLike,
       description: 'All known projects for the app',
@@ -83,11 +78,11 @@ export const Query = objectType({
       resolve: (source, args, ctx) => ctx.coreData.isAuthBrowserOpened,
     })
 
-    t.nonNull.field('localSettings', {
+    t.field('localSettings', {
       type: LocalSettings,
       description: 'local settings on a device-by-device basis',
       resolve: (source, args, ctx) => {
-        return ctx.loadingManager.localSettings.toPromise()
+        return ctx.loadingManager.localSettings.load().then((val) => val ?? null)
       },
     })
   },

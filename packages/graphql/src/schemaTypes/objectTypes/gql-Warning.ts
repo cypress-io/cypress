@@ -11,8 +11,4 @@ export const Warning = objectType({
       description: 'If true, we have the ability to dismiss this warning',
     })
   },
-  sourceType: {
-    module: '@packages/types',
-    export: 'Warning',
-  },
 })

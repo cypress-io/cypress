@@ -229,7 +229,7 @@ export const mutation = mutationType({
         path: nonNull(stringArg()),
       },
       resolve: async (_, args, ctx) => {
-        await ctx.actions.globalProject.setActiveProject(args.path)
+        await ctx.actions.globalProject.setAndLoadActiveProject(args.path)
 
         return {}
       },

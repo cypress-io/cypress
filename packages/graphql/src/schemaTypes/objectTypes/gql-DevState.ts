@@ -2,10 +2,14 @@ import { intArg, objectType } from 'nexus'
 import debugLib from 'debug'
 import util from 'util'
 
-export const Patch = objectType({
+export const DevStatePatch = objectType({
   name: 'DevStatePatch',
   description: 'An immer patch',
   definition (t) {
+    t.int('index', {
+      description: 'The Array index in the list of state change patches',
+    })
+
     t.string('op')
     t.list.json('path')
     t.string('pathStr', {
@@ -51,9 +55,13 @@ export const DevState = objectType({
   description: 'State associated/helpful for local development of Cypress',
   definition (t) {
     t.list.list.field('patches', {
-      type: Patch,
+      description: 'A list of state change "patches" via Immer, useful for debugging',
+      type: DevStatePatch,
+      args: {
+        afterIndex: intArg({ default: 0 }),
+      },
       resolve: (source, args, ctx) => {
-        return ctx.patches
+        return ctx.dev.patches(args.afterIndex ?? 0)
       },
     })
 
@@ -67,10 +75,5 @@ export const DevState = objectType({
         return Boolean(source.refreshState)
       },
     })
-  },
-
-  sourceType: {
-    module: '@packages/data-context/src/data/coreDataShape',
-    export: 'DevStateShape',
   },
 })

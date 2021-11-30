@@ -11,7 +11,7 @@ export class AppActions {
   constructor (private ctx: DataContext) {}
 
   async loadMachineBrowsers (): Promise<FoundBrowser[]> {
-    return this.ctx.loadingManager.machineBrowsers.toPromise()
+    return this.ctx.loadingManager.machineBrowsers.load()
   }
 
   private idForBrowser (obj: FoundBrowser) {

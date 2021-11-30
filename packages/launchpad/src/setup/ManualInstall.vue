@@ -28,6 +28,7 @@
 
 <script lang="ts" setup>
 import { computed } from 'vue'
+import TerminalPrompt from '@packages/frontend-shared/src/components/TerminalPrompt.vue'
 import ExternalLink from '@packages/frontend-shared/src/gql-components/ExternalLink.vue'
 import { useWizardStore } from '../store/wizardStore'
 import { gql } from '@urql/core'

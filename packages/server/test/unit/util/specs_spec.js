@@ -21,7 +21,7 @@ describe('lib/util/specs', () => {
     this.todosPath = FixturesHelper.projectPath('todos')
     ctx = testOpenCtx(this.todosPath)
 
-    return ctx.loadingManager.projectConfig.toPromise().then((cfg) => {
+    return ctx.loadingManager.projectConfig.load().then((cfg) => {
       // console.log(cfg)
       this.config = cfg
     })

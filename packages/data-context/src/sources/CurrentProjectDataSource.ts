@@ -1,22 +1,20 @@
-import type { CodeGenType, SpecType } from '@packages/graphql/src/gen/nxs.gen'
+import type { CodeGenType, SpecType, TestingTypeState } from '@packages/graphql/src/gen/nxs.gen'
 import { FrontendFramework, FRONTEND_FRAMEWORKS, ResolvedFromConfig, RESOLVED_FROM, SpecFileWithExtension, STORYBOOK_GLOB } from '@packages/types'
 import { scanFSForAvailableDependency } from 'create-cypress-tests'
 import path from 'path'
-import _ from 'lodash'
 
 import type { DataContext } from '..'
 import type { Maybe } from '../data/coreDataShape'
 import assert from 'assert'
+import _ from 'lodash'
 
-export class ProjectDataSource {
+export class CurrentProjectDataSource {
   constructor (private ctx: DataContext) {}
 
   private get currentProject () {
-    const p = this.ctx.currentProject
+    assert(this.ctx.currentProject, `Expected currentProject to exist`)
 
-    assert(p, `Expected currentProject to exist`)
-
-    return p
+    return this.ctx.currentProject
   }
 
   get data () {
@@ -36,11 +34,11 @@ export class ProjectDataSource {
   }
 
   get isLoadingPlugins () {
-    return !this.currentProject.pluginLoad.settled
+    return this.configFileExists && !this.currentProject.pluginLoad.settled
   }
 
   get isLoadingConfig () {
-    return !this.currentProject.config.settled
+    return this.configFileExists && !this.currentProject.config.settled
   }
 
   get configFilePath (): string | null {
@@ -154,46 +152,51 @@ export class ProjectDataSource {
     }) as ResolvedFromConfig[]
   }
 
-  needsCypressJsonMigration () {
-    //
-  }
-
-  isCTConfigured () {
-    return this.isTestingTypeConfigured('component')
-  }
-
-  isE2EConfigured () {
-    return this.isTestingTypeConfigured('e2e')
-  }
-
-  private async isTestingTypeConfigured (testingType: 'e2e' | 'component') {
-    if (!this.currentProject) {
-      return false
+  get e2eSetupState (): TestingTypeState | null {
+    if (!this.currentProject.configFiles.length) {
+      return 'NEW'
     }
 
-    const config = this.currentProject.config
-
-    try {
-      if (!config) {
-        return false
-      }
-
-      if (testingType === 'e2e') {
-        return _.has(config, 'e2e')
-      }
-
-      if (testingType === 'component') {
-        return _.has(config, 'component')
-      }
-
-      return false
-    } catch (error: any) {
-      if (error.type === 'NO_DEFAULT_CONFIG_FILE_FOUND') {
-        return false
-      }
-
-      throw error
+    if (!this.currentProject.config.value) {
+      return null
     }
+
+    if (this.currentProject.config.value.e2e?.testFiles) {
+      return 'NEEDS_CHANGES'
+    }
+
+    if (_.has(this.currentProject.config.value, 'e2e')) {
+      return 'READY'
+    }
+
+    return 'NEW'
+  }
+
+  get componentSetupState (): TestingTypeState | null {
+    if (!this.currentProject.configFiles.length) {
+      return 'NEW'
+    }
+
+    if (!this.currentProject.config.value) {
+      return null
+    }
+
+    if (this.currentProject.config.value.component?.testFiles) {
+      return 'NEEDS_CHANGES'
+    }
+
+    if (_.has(this.currentProject.config.value, 'component')) {
+      return 'READY'
+    }
+
+    return 'NEW'
+  }
+
+  get needsCypressJsonMigration (): boolean {
+    return Boolean(
+      this.currentProject.configFiles.length === 1 &&
+      this.currentProject.configFiles[0]?.endsWith('.json'),
+    )
   }
 
   async getProjectPreferences () {

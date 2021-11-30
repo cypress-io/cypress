@@ -44,6 +44,7 @@ const registerHandler = (handler) => {
  * @returns
  */
 const init = (config, options, ctx) => {
+  throw new Error('should be called from data context')
   // test and warn for incompatible plugin
   try {
     const retriesPluginPath = path.dirname(resolve.sync('cypress-plugin-retries/package.json', {
@@ -231,6 +232,10 @@ const _setPluginsProcess = (_pluginsProcess) => {
   pluginsProcess = _pluginsProcess
 }
 
+const getPluginIpcHandlers = () => {
+  return handlers
+}
+
 module.exports = {
   getPluginPid,
   execute,
@@ -238,6 +243,7 @@ module.exports = {
   init,
   register,
   registerHandler,
+  getPluginIpcHandlers,
 
   // for testing purposes
   _reset,

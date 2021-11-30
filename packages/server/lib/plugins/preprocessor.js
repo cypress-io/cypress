@@ -39,7 +39,7 @@ plugins.registerHandler((ipc) => {
     return baseEmitter.emit('file:updated', filePath)
   })
 
-  return baseEmitter.on('close', (filePath) => {
+  baseEmitter.on('close', (filePath) => {
     debug('base emitter plugin close event')
 
     return ipc.send('preprocessor:close', filePath)

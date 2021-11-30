@@ -1,8 +1,9 @@
-import type { CypressError, CypressErrorLike, LaunchArgs, PlatformName } from '@packages/types'
+import type { CypressError, CypressErrorIdentifier, CypressErrorLike, LaunchArgs, PlatformName } from '@packages/types'
 import fsExtra from 'fs-extra'
 import path from 'path'
 import Bluebird from 'bluebird'
 import { Immutable, Draft, produceWithPatches, Patch, enablePatches } from 'immer'
+
 import 'server-destroy'
 import { AppApiShape, ApplicationDataApiShape, DataEmitterActions, LegacyOpenProjectShape, LocalSettingsApiShape, ProjectApiShape } from './actions'
 import type { NexusGenAbstractTypeMembers } from '@packages/graphql/src/gen/nxs.gen'
@@ -14,7 +15,7 @@ import { DataActions } from './DataActions'
 import {
   GitDataSource,
   FileDataSource,
-  ProjectDataSource,
+  CurrentProjectDataSource,
   WizardDataSource,
   BrowserDataSource,
   StorybookDataSource,
@@ -35,10 +36,13 @@ import { VersionsDataSource } from './sources/VersionsDataSource'
 import { LoadingManager } from './data/LoadingManager'
 import type { LoadingState } from './util'
 import { DataFormatters } from './DataFormatters'
+import { DevDataSource } from './sources/DevDataSource'
 
 enablePatches()
 
 const IS_DEV_ENV = process.env.CYPRESS_INTERNAL_ENV !== 'production'
+
+type Updater = (proj: Draft<CoreDataShape>) => void | undefined | CoreDataShape
 
 export interface DataContextConfig {
   mode: 'open' | 'run'
@@ -54,6 +58,10 @@ export interface DataContextConfig {
     electronApi: ElectronApiShape
   }
 }
+
+type DebugNs = 'plugin'
+
+const debugNamespaces: Partial<Record<DebugNs, debugLib.Debugger>> = {}
 
 export class DataContext {
   private _rootBus: EventEmitter
@@ -75,6 +83,12 @@ export class DataContext {
     if (IS_DEV_ENV) {
       this.actions.dev.watchForRelaunch()
     }
+  }
+
+  formatters = new DataFormatters()
+
+  get dev () {
+    return new DevDataSource(this, this._patches)
   }
 
   get legacyOpenProject () {
@@ -105,19 +119,11 @@ export class DataContext {
     return !this.currentProject
   }
 
-  get patches () {
-    return this._patches
-  }
-
-  get formatters () {
-    return new DataFormatters()
-  }
-
   /**
    * Run all of the "updates" through a single method to track the timeline
    * of mutations for debuggability, testing, etc
    */
-  update = (updater: (proj: Draft<CoreDataShape>) => void | undefined | CoreDataShape, throwError: boolean = false): void => {
+  update = (updater: Updater, throwError: boolean = false): void => {
     try {
       const [state, patches] = produceWithPatches(this._coreData, updater)
 
@@ -134,8 +140,16 @@ export class DataContext {
     }
   }
 
+  updateAtomically (fn: (s: CoreDataShape) => unknown, handler: (fn: Updater) => Promise<any>): void {
+    //
+  }
+
   resetLaunchArgs (launchArgs: LaunchArgs) {
     this._coreData = makeCoreData(launchArgs, this._loadingManager)
+  }
+
+  error (type: CypressErrorIdentifier, ...args: any[]): CypressError | CypressErrorLike {
+    return this._apis.projectApi.error(type, ...args)
   }
 
   get rootBus () {
@@ -214,7 +228,7 @@ export class DataContext {
   }
 
   get project () {
-    return this.currentProject ? new ProjectDataSource(this) : null
+    return this.currentProject ? new CurrentProjectDataSource(this) : null
   }
 
   get cloud () {
@@ -317,6 +331,11 @@ export class DataContext {
   }
 
   debug = debugLib('cypress:data-context')
+
+  debugNs = (ns: DebugNs, str: string, ...args: any[]) => {
+    debugNamespaces[ns] ??= debugLib(`cypress:data-context:${ns}`)
+    debugNamespaces[ns]?.(str, ...args)
+  }
 
   logError (e: unknown) {
     // TODO(tim): handle this consistently

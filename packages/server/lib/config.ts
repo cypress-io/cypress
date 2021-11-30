@@ -24,7 +24,7 @@ const debug = Debug('cypress:server:config')
 import { getProcessEnvVars, CYPRESS_SPECIAL_ENV_VARS } from './util/config'
 import type { TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
 import type { DataContext } from '@packages/data-context'
-import type { CurrentProjectShape } from '@packages/data-context/src/data'
+import type { CurrentProjectDataShape } from '@packages/data-context/src/data'
 import assert from 'assert'
 
 const folders = _(configUtils.options).filter({ isFolder: true }).map('name').value()
@@ -135,7 +135,7 @@ export type FullConfig =
     resolved: ResolvedConfigurationOptions
   }
 
-export async function makeConfig (opts: Cypress.ConfigOptions, currentProject: CurrentProjectShape): Promise<FullConfig> {
+export async function makeConfig (opts: Cypress.ConfigOptions, currentProject: CurrentProjectDataShape): Promise<FullConfig> {
   return Bluebird.all([
     Bluebird.resolve(opts).then(validateFile(currentProject.configFile ?? 'cypress.config.{ts|js}')),
     settings.readEnv(currentProject.projectRoot).then(validateFile('cypress.env.json')),

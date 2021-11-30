@@ -139,7 +139,7 @@ export function read (ctx: DataContext, options: SettingsOptions = {}) {
   const projectRoot = ctx.currentProject.projectRoot
   const file = pathToConfigFile(projectRoot, options)
 
-  return ctx.loadingManager.projectConfig.toPromise()
+  return ctx.loadingManager.projectConfig.load()
   .catch((err) => {
     if (err.type === 'MODULE_NOT_FOUND' || err.code === 'ENOENT') {
       return Promise.reject(errors.get('CONFIG_FILE_NOT_FOUND', file, projectRoot))

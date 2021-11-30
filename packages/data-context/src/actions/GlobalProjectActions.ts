@@ -12,7 +12,7 @@ export class GlobalProjectActions {
   async loadGlobalProjects () {
     this.ctx.debug('loadGlobalProjects from %s', this.ctx._apis.appDataApi.path())
 
-    await this.ctx.loadingManager.globalProjects.toPromise()
+    await this.ctx.loadingManager.globalProjects.load()
   }
 
   /**
@@ -20,18 +20,21 @@ export class GlobalProjectActions {
    * @param projectRoot
    * @returns
    */
-  async setActiveProject (projectRoot: string) {
+  async setAndLoadActiveProject (projectRoot: string) {
     this.ctx.debug('setActiveProject')
     await this.ctx.actions.currentProject?.clearCurrentProject()
 
     // Set initial properties, so we can set the config object on the active project
     this.ctx.setCurrentProject(projectRoot)
-  }
 
-  setAndLoadActiveProject () {
-    // Load the project config, but don't block on this - it will alert
-    // its status separately via updating coreData.currentProject
-    this.ctx.loadingManager.projectConfig.load()
+    if (this.ctx.currentProject?.configFile) {
+      // Load the project config, but don't block on this - it will alert
+      // its status separately via updating coreData.currentProject
+      this.ctx.loadingManager.projectConfig.load().finally(() => {
+        // Trigger the launchpad to re-render
+        this.ctx.emitter.toLaunchpad()
+      })
+    }
   }
 
   setActiveProjectForTestSetup (projectRoot: string) {
@@ -43,9 +46,9 @@ export class GlobalProjectActions {
    * Adds a project directory to the list of "projects" if it doesn't exist already
    */
   async addProject (args: MutationAddProjectArgs) {
-    const projectsList = await this.ctx.loadingManager.globalProjects.toPromise()
+    const projectList = await this.ctx.loadingManager.globalProjects.load()
     const projectRoot = await this.getDirectoryPath(args.path)
-    const found = projectsList?.find((x) => x === projectRoot)
+    const found = projectList?.find((x) => x === projectRoot)
 
     if (!found) {
       this.ctx.update((o) => {
@@ -58,7 +61,7 @@ export class GlobalProjectActions {
     }
 
     if (args.open) {
-      await this.setActiveProject(projectRoot)
+      await this.setAndLoadActiveProject(projectRoot)
     }
   }
 

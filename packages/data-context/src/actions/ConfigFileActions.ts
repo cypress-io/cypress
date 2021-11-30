@@ -3,19 +3,42 @@ import _ from 'lodash'
 import path from 'path'
 import { EventEmitter } from 'events'
 import pDefer from 'p-defer'
-import { isCypressError } from '@packages/types'
+import { CypressErrorLike, isCypressError } from '@packages/types'
+import Bluebird from 'bluebird'
+
 import type { DataContext } from '..'
 import inspector from 'inspector'
-import type { ProjectDataSource } from '../sources'
+import type { CurrentProjectDataSource } from '../sources'
 import assert from 'assert'
+import type { ConfigIpc, EventRegistration, RegisteredEvents } from '../data/coreDataShape'
+
+const UNDEFINED_SERIALIZED = '__cypress_undefined__'
 
 /**
  * Manages the lifecycle of the Config sourcing & Plugin execution
  */
 export class ConfigFileActions {
-  constructor (private ctx: DataContext, private currentProject: ProjectDataSource) {}
+  constructor (private ctx: DataContext, private currentProject: CurrentProjectDataSource) {}
 
   static CHILD_PROCESS_FILE_PATH = path.join(__dirname, '../../../server/lib/util', 'require_async_child.js')
+
+  execute (eventName: string, config: object = {}, ...args: any[]) {
+    // Bluebird, for backward compat
+    return Bluebird.try(async () => {
+      const pluginFn = this.ctx.coreData.currentProject?.pluginRegistry?.[eventName]
+
+      try {
+        if (!pluginFn) {
+          return
+        }
+
+        this.ctx.debugNs('plugin', `execute plugin event '${event}' Node '${process.version}' with args: %o %o %o`, ...args)
+        await pluginFn(...args)
+      } catch (e) {
+        throw this.ctx.error('PLUGINS_RUN_EVENT_ERROR', eventName, e?.stack || e?.message || e || '')
+      }
+    })
+  }
 
   killChildProcess () {
     this.ctx.update((o) => {
@@ -23,6 +46,37 @@ export class ConfigFileActions {
         o.currentProject.configChildProcess.process.kill()
       }
     })
+  }
+
+  /**
+   * Called after the config is sourced, once we've determined a testing type
+   */
+  runSetupNodeEvents (ipc: ConfigIpc) {
+    const dfd = pDefer<null | { newConfig: Cypress.ResolvedConfigOptions, registeredEvents: RegisteredEvents }>()
+    const handlers = this.ctx._apis.projectApi.getPluginIpcHandlers()
+
+    assert(this.ctx.currentProject?.config.value, 'expect currentProject.config in runSetupNodeEvents')
+    assert(this.ctx.currentProject.currentTestingType, 'expected testing type in runSetupNodeEvents')
+
+    ipc.on('empty:plugins', () => dfd.resolve(null))
+
+    ipc.on('load:error:plugins', (type, ...args) => {
+      this.ctx.debugNs('plugin', 'load:error %s, rejecting', type)
+
+      dfd.reject(this.ctx.error(type, ...args))
+    })
+
+    ipc.on('loaded:plugins', (cfg, registrations) => {
+      dfd.resolve(this._handleLoadedPlugins(ipc, cfg, registrations))
+    })
+
+    for (const handler of handlers) {
+      handler(ipc)
+    }
+
+    ipc.send('plugins', this.ctx.currentProject.currentTestingType, this.ctx.currentProject.config.value)
+
+    return dfd.promise
   }
 
   refreshConfigProcess () {
@@ -37,6 +91,7 @@ export class ConfigFileActions {
           baseConfigPromise: configPromise,
           executedPlugins: null,
           process: child,
+          registeredEvents: {},
         }
       }
     })
@@ -119,7 +174,7 @@ export class ConfigFileActions {
     return ipc
   }
 
-  protected wrapIpc (aProcess: ChildProcess) {
+  protected wrapIpc (aProcess: ChildProcess): ConfigIpc {
     const emitter = new EventEmitter()
 
     aProcess.on('message', (message: { event: string, args: any}) => {
@@ -131,9 +186,9 @@ export class ConfigFileActions {
     emitter.setMaxListeners(Infinity)
 
     return {
-      send (event: string, ...args: any) {
+      send (event: any, ...args: any) {
         if (aProcess.killed) {
-          return
+          return false
         }
 
         return aProcess.send({
@@ -145,5 +200,57 @@ export class ConfigFileActions {
       on: emitter.on.bind(emitter),
       removeListener: emitter.removeListener.bind(emitter),
     }
+  }
+
+  private _handleLoadedPlugins (ipc: ConfigIpc, newCfg: Cypress.ResolvedConfigOptions, registrations: EventRegistration[]) {
+    const newConfig = _.omit(newCfg, 'projectRoot', 'configFile')
+    const registeredEvents: Record<string, Function> = {}
+
+    // For every registration event, we want to turn into an RPC with the child process
+    for (const registration of registrations) {
+      this.ctx.debug('register plugins process event', registration.event, 'with id', registration.eventId)
+      registeredEvents[registration.event] = (...args: any[]) => {
+        const dfd = pDefer()
+        const invocationId = _.uniqueId('inv')
+
+        this.ctx.debug('call event', registration.event, 'for invocation id', invocationId)
+
+        const handlePromise = (err: undefined | CypressErrorLike, value: any) => {
+          ipc.removeListener(`promise:fulfilled:${invocationId}`, handlePromise)
+
+          if (err) {
+            this.ctx.debug('promise rejected for id %s %o', invocationId, ':', err.stack)
+            dfd.reject(_.extend(new Error(err.message), err))
+
+            return
+          }
+
+          if (value === UNDEFINED_SERIALIZED) {
+            value = undefined
+          }
+
+          this.ctx.debugNs('plugin', `promise resolved for id '${invocationId}' with value`, value)
+
+          return dfd.resolve(value)
+        }
+
+        ipc.on(`promise:fulfilled:${invocationId}`, handlePromise)
+        const ids = { invocationId, eventId: registration.eventId }
+
+        // no argument is passed for cy.task()
+        // This is necessary because undefined becomes null when it is sent through ipc.
+        if (registration.event === 'task' && args[1] === undefined) {
+          args[1] = {
+            __cypress_task_no_argument__: true,
+          }
+        }
+
+        ipc.send('execute:plugins', registration.event, ids, args)
+
+        return dfd.promise
+      }
+    }
+
+    return { newConfig, registeredEvents }
   }
 }

@@ -13,6 +13,7 @@ import { getSpecUrl } from './project_utils'
 import errors from './errors'
 import type { LaunchOpts, LaunchArgs, OpenProjectLaunchOptions, FoundBrowser } from '@packages/types'
 import type { DataContext } from '@packages/data-context'
+import assert from 'assert'
 
 const debug = Debug('cypress:server:open_project')
 
@@ -139,8 +140,9 @@ export class OpenProject {
         return Bluebird.resolve()
       }
 
-      // @ts-ignore
-      return runEvents.execute('after:spec', cfg, spec)
+      assert(this.ctx.actions.projectConfig, 'expected projectConfig in afterSpec')
+
+      return this.ctx.actions.projectConfig.execute('after:spec', cfg, spec)
     }
 
     const { onBrowserClose } = options

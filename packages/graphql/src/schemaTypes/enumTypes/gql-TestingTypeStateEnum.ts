@@ -5,10 +5,6 @@ export const TestingTypeState = enumType({
   description: 'Current state of a given testing type',
   members: [
     {
-      name: 'LOADING',
-      description: 'We are loading the config',
-    },
-    {
       name: 'NEW',
       description: 'We have not yet setup this testing type yet',
     },

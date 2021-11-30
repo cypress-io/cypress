@@ -20,10 +20,10 @@ plugins.registerHandler((ipc) => {
     baseEmitter.emit('dev-server:compile:success', { specFile })
   })
 
-  return baseEmitter.on('dev-server:close', () => {
+  baseEmitter.on('dev-server:close', () => {
     debug('base emitter plugin close event')
 
-    return ipc.send('dev-server:close')
+    ipc.send('dev-server:close')
   })
 })
 

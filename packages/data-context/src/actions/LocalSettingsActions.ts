@@ -25,8 +25,4 @@ export class LocalSettingsActions {
 
     return this.ctx._apis.localSettingsApi.setPreferences(toJson)
   }
-
-  async refreshLocalSettings () {
-    this.ctx.loadingManager.localSettings.reload()
-  }
 }

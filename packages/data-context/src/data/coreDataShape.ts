@@ -2,17 +2,48 @@ import type { App, BrowserWindow } from 'electron'
 import type { TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
 import type { ChildProcess } from 'child_process'
 import path from 'path'
-import type { AllowedState, Editor, Ensure, FoundBrowser, FullConfig, LaunchArgs, Preferences } from '@packages/types'
+import type { AllowedState, CypressErrorIdentifier, Editor, Ensure, FoundBrowser, FullConfig, LaunchArgs, Preferences } from '@packages/types'
 import type { Draft, Immutable, Patch } from 'immer'
 import fs from 'fs'
 
 import type { LoadingState } from '../util'
 import type { LoadingManager } from './LoadingManager'
 import type { ProjectWatcher } from './ProjectWatcher'
+import type { CurrentProjectDataSource } from '../sources'
+
+type Handler<T> = (val: T, ...rest: any[]) => any
+type Handler2<A, B> = (val: A, val2: B) => any
+
+export interface EventRegistration {
+  eventId: string
+  event: string
+}
+
+export type RegisteredEvents = Record<string, Function>
+
+export interface ConfigIpc {
+  send(event: 'load'): boolean
+  send(event: 'plugins', testingType: TestingTypeEnum, config: Immutable<Cypress.ConfigOptions>): boolean
+  send(event: 'load:plugins', options: Cypress.PluginConfigOptions): boolean
+  send(event: 'execute:plugins', evt: string, ids: {eventId: string, invocationId: string}, args: any[]): boolean
+  on(evt: `promise:fulfilled:${string}`, fn: Function): boolean
+  on(evt: 'loaded', fn: Handler<Cypress.ConfigOptions>): any
+  on(evt: 'load:error', fn: Handler<CypressErrorIdentifier>): any
+  on(evt: 'load:error:plugins', fn: Handler<CypressErrorIdentifier>): any
+  on(evt: 'loaded:plugins', fn: Handler2<Cypress.ResolvedConfigOptions, EventRegistration[]>): any
+  on(evt: 'empty:plugins', fn: Handler<undefined>): any
+  removeListener(event: string, listener: Function): any
+}
+
+export type PluginIpcHandler = (ipc: ConfigIpc) => void
 
 export type Maybe<T> = T | null | undefined
 
-export type DevStatePatchShape = Patch
+export type CurrentProjectShape = CurrentProjectDataSource
+
+export type DevStatePatchShape = Patch & {
+  index: number
+}
 
 export interface ApplicationErrorShape {
   title?: string
@@ -42,11 +73,6 @@ export type LocalSettingsDataShape = Immutable<{
 export interface WarningShape {
   title: string
   message: string
-  setupStep?: string
-}
-
-export interface IpcShape {
-
 }
 
 export interface ConfigChildProcessShape {
@@ -57,7 +83,7 @@ export interface ConfigChildProcessShape {
   /**
    * The faux IPC interface established with the config / plugin event child process
    */
-  ipc: IpcShape
+  ipc: ConfigIpc
   /**
    * Keeps track of which plugins we have executed in the current config process
    */
@@ -66,16 +92,20 @@ export interface ConfigChildProcessShape {
    * Config from the initial module.exports
    */
   baseConfigPromise: Promise<Cypress.ConfigOptions>
+  /**
+   * All registered events from the Plugin layer
+   */
+  registeredEvents: Record<string, Function>
 }
 
-export type CurrentProjectShape = Immutable<{
+export type CurrentProjectDataShape = Immutable<{
   /**
    * The directory on the filesystem containing the cypress.config.{js,ts} file
    */
   projectRoot: string
   /**
    * The path to the config file on the disk. The presence of this indicates that
-   * this project has exists
+   * this project has a loadable config file that we can execute
    */
   configFile: string | null
   /**
@@ -98,15 +128,19 @@ export type CurrentProjectShape = Immutable<{
   /**
    * When we call the plugin, we get back the final config
    */
-  pluginLoad: LoadingState<FullConfig>
+  pluginLoad: LoadingState<{ newConfig: Cypress.ResolvedConfigOptions, registeredEvents: RegisteredEvents } | null>
+  /**
+   * The events that have been registered on the plugin
+   */
+  pluginRegistry: RegisteredEvents | null
   /**
    * Any data associated with plugins
    */
   pluginDataProcess: null // TODO
   /**
-   * The full config resolved for the project
+   * The config loaded from calling the config file
    */
-  config: LoadingState<FullConfig>
+  config: LoadingState<Cypress.ConfigOptions>
   /**
    * The child process used for loading the config / executing the plugins,
    * kept as internal state so we can re-use the same child process for the
@@ -171,7 +205,7 @@ export type CoreDataShape = Immutable<{
   /**
    *
    */
-  currentProject: CurrentProjectShape | null
+  currentProject: CurrentProjectDataShape | null
   /**
    *
    */
@@ -198,7 +232,7 @@ export type CoreDataShape = Immutable<{
   userNodeVersion: string | null
 }>
 
-export function makeCurrentProject (launchArgs: Partial<LaunchArgs> = {}, loadingManager: LoadingManager): Draft<CurrentProjectShape> | null {
+export function makeCurrentProject (launchArgs: Partial<LaunchArgs> = {}, loadingManager: LoadingManager): Draft<CurrentProjectDataShape> | null {
   if (launchArgs.global || !launchArgs.projectRoot) {
     return null
   }
@@ -212,6 +246,7 @@ export function makeCurrentProject (launchArgs: Partial<LaunchArgs> = {}, loadin
     configChildProcess: null,
     config: loadingManager.projectConfig.getState(),
     pluginLoad: loadingManager.projectEventSetup.getState(),
+    pluginRegistry: null,
     pluginDataProcess: null,
     watcher: null,
     ...sourceProjectFilePaths(launchArgs as LaunchArgs),

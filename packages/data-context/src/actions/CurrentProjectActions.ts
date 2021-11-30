@@ -6,8 +6,8 @@ import type { Draft } from 'immer'
 import type { DataContext } from '..'
 import { codeGenerator, SpecOptions } from '../codegen'
 import templates from '../codegen/templates'
-import type { CurrentProjectShape } from '../data/coreDataShape'
-import type { ProjectDataSource } from '../sources'
+import type { CurrentProjectDataShape, PluginIpcHandler } from '../data/coreDataShape'
+import type { CurrentProjectDataSource } from '../sources'
 import execa from 'execa'
 
 export interface LegacyOpenProjectShape {
@@ -17,8 +17,8 @@ export interface LegacyOpenProjectShape {
 }
 
 export interface ProjectApiShape {
+  getPluginIpcHandlers(): PluginIpcHandler[]
   makeLegacyOpenProject(): LegacyOpenProjectShape
-  makeConfig(config: Cypress.ConfigOptions): Promise<FullConfig>
   getConfig(options?: SettingsOptions): Promise<FullConfig>
   findSpecs(payload: FindSpecs): Promise<FoundSpec[]>
   /**
@@ -45,7 +45,7 @@ export interface ProjectApiShape {
  * project specified. Also isolates the project
  */
 export class CurrentProjectActions {
-  constructor (private ctx: DataContext, private currentProject: ProjectDataSource) {}
+  constructor (private ctx: DataContext, private currentProject: CurrentProjectDataSource) {}
 
   async clearCurrentTestingType () {
     await this.api.closeActiveProject()
@@ -72,7 +72,11 @@ export class CurrentProjectActions {
       p.currentTestingType = type
     })
 
-    this.ctx.loadingManager.projectEventSetup.load(type)
+    debugger
+
+    this.ctx.loadingManager.projectEventSetup.load().finally(() => {
+      debugger
+    })
   }
 
   /**
@@ -169,7 +173,7 @@ export class CurrentProjectActions {
     const currentTestingType = this.currentProject.currentTestingType
     const browsers = this.currentProject.browsers
 
-    if (!currentTestingType || !browsers?.length) {
+    if (!currentTestingType || !browsers?.length || !this.ctx.project) {
       return null
     }
 
@@ -371,7 +375,13 @@ export class CurrentProjectActions {
   }
 
   async openDirectoryInIDE (projectPath: string) {
-    const { preferences } = await this.ctx.loadingManager.localSettings.toPromise()
+    const result = await this.ctx.loadingManager.localSettings.load()
+
+    if (!result) {
+      return
+    }
+
+    const { preferences } = result
 
     this.ctx.debug(`opening ${projectPath} in ${preferences.preferredEditorBinary}`)
 
@@ -426,7 +436,7 @@ export class CurrentProjectActions {
    * Update function, ensures that we are only updating the current project if
    * it hasn't been swapped out (we can remove this guard when we refactor closeActiveProject)
    */
-  private update (updater: (proj: Draft<CurrentProjectShape>) => void) {
+  private update (updater: (proj: Draft<CurrentProjectDataShape>) => void) {
     this.ctx.update((o) => {
       if (o.currentProject?.projectRoot === this.currentProject.projectRoot) {
         updater(o.currentProject)
