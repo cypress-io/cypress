@@ -51,12 +51,18 @@
       "createAnotherSpecButton": "Create another spec"
     },
     "page": {
-      "title": "Create your first spec",
-      "component": {
-        "description": "Since this project looks new, we recommend that you get started by creating a spec for one of your components."
+      "defaultPatternNoSpecs": {
+        "title": "Create your first spec",
+        "component": {
+          "description": "Since this project looks new, we recommend that you get started by creating a spec for one of your components."
+        },
+        "e2e": {
+          "description": "Since this project looks new, we recommend that you use the specs and tests that we've written for you to get started."
+        }
       },
-      "e2e": {
-        "description": "Since this project looks new, we recommend that you use the specs and tests that we've written for you to get started."
+      "customPatternNoSpecs": {
+        "title": "No Specs Found",
+        "description": "We couldn’t find any files matching the following spec patterns. You may need to move your specs or update your {0} to find them."
       }
     },
     "noSpecsMessage": "If you feel that you're seeing this screen in error, and there should be specs listed here, you likely need to update the spec pattern.",
