@@ -1,6 +1,8 @@
 import systemTests, { expect } from '../lib/system-tests'
 import Fixtures from '../lib/fixtures'
 
+process.env.CYPRESS_INTERNAL_ENV = 'development'
+
 const verifyPassedAndFailedAreSame = (expectedFailures) => {
   return ({ stdout }) => {
     const passes = stdout.match(/✓ ✓ VERIFY/g)

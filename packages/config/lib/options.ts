@@ -378,7 +378,6 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     name: 'isInteractive',
     defaultValue: true,
     validation: validate.isBoolean,
-    isInternal: true,
   }, {
     name: 'isTextTerminal',
     defaultValue: false,
