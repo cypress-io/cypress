@@ -41,7 +41,7 @@ export const createTestCurrentProject = (title: string, currentProject: Partial<
       },
       __typename: 'SpecConnection' as const,
       edges: [
-        ...randomComponents(50, 'Spec').map((c) => {
+        ...randomComponents(200, 'Spec').map((c) => {
           return {
             __typename: 'SpecEdge' as const,
             cursor: 'eoifjew',
