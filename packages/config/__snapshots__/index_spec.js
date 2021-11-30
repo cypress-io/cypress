@@ -147,5 +147,6 @@ exports['src/index .getPublicConfigKeys returns list of public config keys 1'] =
   "watchForFileChanges",
   "browsers",
   "hosts",
+  "isInteractive",
   "modifyObstructiveCode"
 ]
