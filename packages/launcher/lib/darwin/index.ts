@@ -1,5 +1,5 @@
 import { findApp, FindAppParams } from './util'
-import type { Browser, DetectedBrowser } from '../types'
+import type { Browser, DetectedBrowser } from '@packages/types'
 import * as linuxHelper from '../linux'
 import { log } from '../log'
 import { get } from 'lodash'

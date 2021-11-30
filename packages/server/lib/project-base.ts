@@ -3,6 +3,7 @@ import Debug from 'debug'
 import EE from 'events'
 import _ from 'lodash'
 import path from 'path'
+import { createHmac } from 'crypto'
 
 import browsers from './browsers'
 import pkg from '@packages/root'
@@ -10,18 +11,16 @@ import { allowed } from '@packages/config'
 import { ServerCt } from './server-ct'
 import { SocketCt } from './socket-ct'
 import { SocketE2E } from './socket-e2e'
-import api from './api'
 import { Automation } from './automation'
 import * as config from './config'
 import cwd from './cwd'
 import errors from './errors'
 import Reporter from './reporter'
 import runEvents from './plugins/run_events'
-import savedState from './saved_state'
+import * as savedState from './saved_state'
 import scaffold from './scaffold'
 import { ServerE2E } from './server-e2e'
 import system from './util/system'
-import user from './user'
 import { ensureProp } from './util/class-helpers'
 import { fs } from './util/fs'
 import * as settings from './util/settings'
@@ -32,7 +31,9 @@ import devServer from './plugins/dev-server'
 import preprocessor from './plugins/preprocessor'
 import { SpecsStore } from './specs-store'
 import { checkSupportFile, getDefaultConfigFilePath } from './project_utils'
-import type { LaunchArgs } from './open_project'
+import type { FoundBrowser, OpenProjectLaunchOptions } from '@packages/types'
+import { makeLegacyDataContext } from './makeDataContext'
+import type { DataContext } from '@packages/data-context'
 
 // Cannot just use RuntimeConfigOptions as is because some types are not complete.
 // Instead, this is an interface of values that have been manually validated to exist
@@ -46,30 +47,9 @@ export interface Cfg extends ReceivedCypressOptions {
   proxyServer?: Cypress.RuntimeConfigOptions['proxyUrl']
   exit?: boolean
   state?: {
-    firstOpened?: number
-    lastOpened?: number
+    firstOpened?: number | null
+    lastOpened?: number | null
   }
-}
-
-type WebSocketOptionsCallback = (...args: any[]) => any
-
-export interface OpenProjectLaunchOptions {
-  args?: LaunchArgs
-
-  configFile?: string | false
-  browsers?: Cypress.Browser[]
-
-  // Callback to reload the Desktop GUI when cypress.json is changed.
-  onSettingsChanged?: false | (() => void)
-
-  // Optional callbacks used for triggering events via the web socket
-  onReloadBrowser?: WebSocketOptionsCallback
-  onFocusTests?: WebSocketOptionsCallback
-  onSpecChanged?: WebSocketOptionsCallback
-  onSavedStateChanged?: WebSocketOptionsCallback
-  onChange?: WebSocketOptionsCallback
-
-  [key: string]: any
 }
 
 const localCwd = cwd()
@@ -79,8 +59,14 @@ const debugScaffold = Debug('cypress:server:scaffold')
 
 type StartWebsocketOptions = Pick<Cfg, 'socketIoCookie' | 'namespace' | 'screenshotsFolder' | 'report' | 'reporter' | 'reporterOptions' | 'projectRoot'>
 
-export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
+export type Server = ServerE2E | ServerCt
+
+export class ProjectBase<TServer extends Server> extends EE {
+  // id is sha256 of projectRoot
+  public id: string
+
   protected watchers: Watchers
+  protected ctx: DataContext
   protected _cfg?: Cfg
   protected _server?: TServer
   protected _automation?: Automation
@@ -91,13 +77,14 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   public options: OpenProjectLaunchOptions
   public testingType: Cypress.TestingType
   public spec: Cypress.Cypress['spec'] | null
+  public isOpen: boolean = false
   private generatedProjectIdTimestamp: any
   projectRoot: string
 
   constructor ({
     projectRoot,
     testingType,
-    options,
+    options = {},
   }: {
     projectRoot: string
     testingType: Cypress.TestingType
@@ -118,6 +105,8 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     this.watchers = new Watchers()
     this.spec = null
     this.browser = null
+    this.id = createHmac('sha256', 'secret-key').update(projectRoot).digest('hex')
+    this.ctx = options.ctx ?? makeLegacyDataContext()
 
     debug('Project created %o', {
       testingType: this.testingType,
@@ -132,6 +121,17 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       onSettingsChanged: false,
       ...options,
     }
+
+    this.ctx.actions.projectConfig.killConfigProcess()
+    this.ctx.actions.project.setCurrentProjectProperties({
+      projectRoot: this.projectRoot,
+      configChildProcess: null,
+      ctPluginsInitialized: false,
+      e2ePluginsInitialized: false,
+      isCTConfigured: false,
+      isE2EConfigured: false,
+      config: null,
+    })
   }
 
   protected ensureProp = ensureProp
@@ -176,8 +176,8 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
   createServer (testingType: Cypress.TestingType) {
     return testingType === 'e2e'
-      ? new ServerE2E() as TServer
-      : new ServerCt() as TServer
+      ? new ServerE2E(this.ctx) as TServer
+      : new ServerCt(this.ctx) as TServer
   }
 
   async open () {
@@ -200,7 +200,9 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
     this._server = this.createServer(this.testingType)
 
-    cfg = await this.initializePlugins(cfg, this.options)
+    if (!this.options.skipPluginIntializeForTesting) {
+      cfg = await this.initializePlugins(cfg, this.options)
+    }
 
     const {
       specsStore,
@@ -224,6 +226,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       specsStore,
     })
 
+    this.ctx.setAppServerPort(port)
     this._isServerOpen = true
 
     // if we didnt have a cfg.port
@@ -311,16 +314,9 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       system: _.pick(sys, 'osName', 'osVersion'),
     }
 
+    this.isOpen = true
+
     return runEvents.execute('before:run', cfg, beforeRunDetails)
-  }
-
-  async getRuns () {
-    const [projectId, authToken] = await Promise.all([
-      this.getProjectId(),
-      user.ensureAuthToken(),
-    ])
-
-    return api.getProjectRuns(projectId, authToken)
   }
 
   reset () {
@@ -350,7 +346,10 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       return
     }
 
-    const closePreprocessor = (this.testingType === 'e2e' && preprocessor.close) ?? undefined
+    const closePreprocessor = this.testingType === 'e2e' ? preprocessor.close : undefined
+
+    this.ctx.setAppServerPort(undefined)
+    this.ctx.emitter.setAppSocketServer(undefined)
 
     await Promise.all([
       this.server?.close(),
@@ -361,6 +360,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     this._isServerOpen = false
 
     process.chdir(localCwd)
+    this.isOpen = false
 
     const config = this.getConfig()
 
@@ -406,7 +406,8 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     return this.initSpecStore({ specs, config: updatedConfig })
   }
 
-  async initializePlugins (cfg, options) {
+  // TODO(tim): Improve this when we completely overhaul the rest of the code here,
+  async initializePlugins (cfg = this._cfg, options = this.options) {
     // only init plugins with the
     // allowed config values to
     // prevent tampering with the
@@ -419,7 +420,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       testingType: options.testingType,
       onError: (err: Error) => this._onError(err, options),
       onWarning: options.onWarning,
-    })
+    }, this.ctx)
 
     debug('plugin config yielded: %o', modifiedCfg)
 
@@ -447,7 +448,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     config,
   }: {
     specs: Cypress.Cypress['spec'][]
-    config: any
+    config: Cfg
   }) {
     const specsStore = new SpecsStore(config, this.testingType)
 
@@ -469,7 +470,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
     let ctDevServerPort: number | undefined
 
-    if (this.testingType === 'component') {
+    if (this.testingType === 'component' && !this.options.skipPluginIntializeForTesting) {
       const { port } = await this.startCtDevServer(specs, config)
 
       ctDevServerPort = port
@@ -489,6 +490,11 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       return Promise.resolve()
     }
 
+    // TODO(tim): remove this when we properly clean all of this up
+    if (options) {
+      this.options = options
+    }
+
     const found = await fs.pathExists(cfg.pluginsFile)
 
     debug(`plugins file found? ${found}`)
@@ -505,7 +511,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
         debug('plugins file changed')
 
         // re-init plugins after a change
-        this.initializePlugins(cfg, options)
+        this.initializePlugins(cfg)
         .catch((err) => {
           options.onError(err)
         })
@@ -601,7 +607,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
     this._automation = new Automation(namespace, socketIoCookie, screenshotsFolder, onBrowserPreRequest, onRequestEvent)
 
-    this.server.startWebsockets(this.automation, this.cfg, {
+    const io = this.server.startWebsockets(this.automation, this.cfg, {
       onReloadBrowser: options.onReloadBrowser,
       onFocusTests: options.onFocusTests,
       onSpecChanged: options.onSpecChanged,
@@ -657,6 +663,8 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
         return
       },
     })
+
+    this.ctx.emitter.setAppSocketServer(io)
   }
 
   changeToUrl (url) {
@@ -692,14 +700,19 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     return this.automation
   }
 
-  async initializeConfig (): Promise<Cfg> {
+  async initializeConfig (browsers: FoundBrowser[] = []): Promise<Cfg> {
     // set default for "configFile" if undefined
-    if (this.options.configFile === undefined
-  || this.options.configFile === null) {
-      this.options.configFile = await getDefaultConfigFilePath(this.projectRoot, !this.options.args?.runProject)
+    if (this.options.configFile === undefined || this.options.configFile === null) {
+      this.options.configFile = await getDefaultConfigFilePath(this.projectRoot, this.ctx)
     }
 
-    let theCfg: Cfg = await config.get(this.projectRoot, this.options)
+    let theCfg: Cfg = await config.get(this.projectRoot, this.options, this.ctx)
+
+    if (!theCfg.browsers || theCfg.browsers.length === 0) {
+      // @ts-ignore - we don't know if the browser is headed or headless at this point.
+      // this is handled in open_project#launch.
+      theCfg.browsers = browsers
+    }
 
     if (theCfg.browsers) {
       theCfg.browsers = theCfg.browsers?.map((browser) => {
@@ -731,10 +744,9 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     }
 
     const untouchedScaffold = await this.determineIsNewProject(theCfg)
-    const userHasSeenBanner = _.get(theCfg, 'state.showedNewProjectBanner', false)
 
-    debugScaffold(`untouched scaffold ${untouchedScaffold} banner closed ${userHasSeenBanner}`)
-    theCfg.isNewProject = untouchedScaffold && !userHasSeenBanner
+    debugScaffold(`untouched scaffold ${untouchedScaffold} banner closed`)
+    theCfg.isNewProject = untouchedScaffold
 
     const cfgWithSaved = await this._setSavedState(theCfg)
 
@@ -743,7 +755,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     return this._cfg
   }
 
-  // returns project config (user settings + defaults + cypress.json)
+  // returns project config (user settings + defaults + cypress.config.{ts|js})
   // with additional object "state" which are transient things like
   // window width and height, DevTools open or not, etc.
   getConfig (): Cfg {
@@ -771,36 +783,29 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     let state = await savedState.create(this.projectRoot, this.cfg.isTextTerminal)
 
     state.set(stateChanges)
-    state = await state.get()
-    this.cfg.state = state
+    this.cfg.state = await state.get()
 
-    return state
+    return this.cfg.state
   }
 
   async _setSavedState (cfg: Cfg) {
     debug('get saved state')
 
-    let state = await savedState.create(this.projectRoot, cfg.isTextTerminal)
+    const state = await savedState.create(this.projectRoot, cfg.isTextTerminal)
 
-    state = await state.get()
-    cfg.state = state
+    cfg.state = await state.get()
 
     return cfg
-  }
-
-  // Scaffolding
-  removeScaffoldedFiles () {
-    if (!this.cfg) {
-      throw new Error('Missing project config')
-    }
-
-    return scaffold.removeIntegration(this.cfg.integrationFolder, this.cfg)
   }
 
   // do not check files again and again - keep previous promise
   // to refresh it - just close and open the project again.
   determineIsNewProject (folder) {
     return scaffold.isNewProject(folder)
+  }
+
+  writeConfigFile ({ code, configFilename }: { code: string, configFilename: string }) {
+    fs.writeFileSync(path.resolve(this.projectRoot, configFilename), code)
   }
 
   scaffold (cfg: Cfg) {
@@ -830,7 +835,10 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
     if (scaffoldExamples) {
       debug('will scaffold integration and fixtures folder')
-      push(scaffold.integration(cfg.integrationFolder, cfg))
+      if (!process.env.LAUNCHPAD) {
+        push(scaffold.integration(cfg.integrationFolder, cfg))
+      }
+
       push(scaffold.fixture(cfg.fixturesFolder, cfg))
     } else {
       debug('will not scaffold integration or fixtures folder')
@@ -843,6 +851,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
   async getProjectId () {
     await this.verifyExistence()
+
     const readSettings = await settings.read(this.projectRoot, this.options)
 
     if (readSettings && readSettings.projectId) {
@@ -858,21 +867,6 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     } catch (err) {
       errors.throw('NO_PROJECT_FOUND_AT_PROJECT_ROOT', this.projectRoot)
     }
-  }
-
-  async getRecordKeys () {
-    const [projectId, authToken] = await Promise.all([
-      this.getProjectId(),
-      user.ensureAuthToken(),
-    ])
-
-    return api.getProjectRecordKeys(projectId, authToken)
-  }
-
-  async requestAccess (projectId) {
-    const authToken = await user.ensureAuthToken()
-
-    return api.requestAccess(projectId, authToken)
   }
 
   // For testing

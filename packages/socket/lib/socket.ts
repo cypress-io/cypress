@@ -1,7 +1,8 @@
 import fs from 'fs'
 import type http from 'http'
-import server, { Server as SocketIOBaseServer, ServerOptions } from 'socket.io'
-import { client } from './browser'
+import server, { Server as SocketIOBaseServer, ServerOptions, Socket } from 'socket.io'
+
+export type { Socket }
 
 const HUNDRED_MEGABYTES = 1e8 // 100000000
 
@@ -28,7 +29,6 @@ class SocketIOServer extends SocketIOBaseServer {
 }
 
 export {
-  client,
   server,
   SocketIOServer,
 }

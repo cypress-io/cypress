@@ -35,7 +35,7 @@ export const verify = (ctx, options) => {
       preferredOpener: {
         id: 'foo-editor',
         name: 'Foo',
-        openerId: 'foo-editor',
+        binary: 'foo-editor',
         isOther: false,
       },
     })

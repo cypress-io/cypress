@@ -1,38 +1,31 @@
-@mixin runnable-state-active {
-    @extend .#{$fa-css-prefix}-sync-alt;
-    @extend .#{$fa-css-prefix}-spin;
-}
+@mixin inner-header {
+  background: $gray-1000;
+  display: block;
+  font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
+  font-size: 14px;
+  line-height: 24px;
+  overflow-wrap: break-word;
+  padding: 16px;
+  position: sticky;
+  top: 0;
+  width: 100%;
+  z-index: 1;
 
-@mixin runnable-state-processing {
-    @extend .far;
-    @extend .#{$fa-css-prefix}-square;
-    color: #888;
+  &:before,
+  &:after {
+    background-color: $gray-900;
+    content: '';
+    left: 16px;
+    position: absolute;
+    width: calc(100% - 32px);
+    height: 1px;
+  }
 
-    // @extend .far overrides line-height, and so do many other specific selectors.
-    line-height: 18px !important;
-}
+  &:before {
+    top: 0;
+  }
 
-@mixin runnable-state-skipped {
-    @extend .#{$fa-css-prefix}-ban;
-    color: #888;
-}
-
-@mixin runnable-state-failed {
-    @extend .#{$fa-css-prefix}-times;
-    color: $fail;
-}
-
-@mixin runnable-state-passed {
-    @extend .#{$fa-css-prefix}-check;
-    color: $pass;
-}
-
-@mixin runnable-state-pending {
-    @extend .#{$fa-css-prefix}-circle-notch;
-    color: lighten($pending, 20%);
-}
-
-@mixin studio-state-passed {
-    @extend .#{$fa-css-prefix}-magic;
-    color: #3386d4;
+  &:after {
+    bottom: 0;
+  }
 }

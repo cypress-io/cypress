@@ -10,7 +10,6 @@ import {
   selectorPlaygroundModel,
   AutIframe,
   logger,
-  studioRecorder,
 } from '@packages/runner-shared'
 
 import util from '../lib/util'
@@ -30,10 +29,10 @@ export default class Iframes extends Component {
           'iframes-container',
           {
             'has-error': !!scriptError,
-            'studio-is-open': studioRecorder.isOpen,
-            'studio-is-loading': studioRecorder.isLoading,
-            'studio-is-ready': studioRecorder.isReady,
-            'studio-is-failed': studioRecorder.isFailed,
+            'studio-is-open': this.props.eventManager.studioRecorder.isOpen,
+            'studio-is-loading': this.props.eventManager.studioRecorder.isLoading,
+            'studio-is-ready': this.props.eventManager.studioRecorder.isReady,
+            'studio-is-failed': this.props.eventManager.studioRecorder.isFailed,
           },
         )}
         style={{
@@ -53,7 +52,7 @@ export default class Iframes extends Component {
         />
         <ScriptError error={scriptError} />
         <div className='cover' />
-        {studioRecorder.isLoading && (
+        {this.props.eventManager.studioRecorder.isLoading && (
           <div
             className='studio-loading-cover'
             style={{
@@ -71,7 +70,7 @@ export default class Iframes extends Component {
   }
 
   componentDidMount () {
-    this.autIframe = new AutIframe(this.props.config)
+    this.autIframe = new AutIframe(this.props.config, this.props.eventManager)
 
     this.props.eventManager.on('visit:failed', this.autIframe.showVisitFailure)
     this.props.eventManager.on('before:screenshot', this.autIframe.beforeScreenshot)
@@ -109,6 +108,7 @@ export default class Iframes extends Component {
       restoreDom: this.autIframe.restoreDom,
       highlightEl: this.autIframe.highlightEl,
       detachDom: this.autIframe.detachDom,
+      eventManager: this.props.eventManager,
       snapshotControls: (snapshotProps) => (
         <SnapshotControls
           eventManager={this.props.eventManager}
@@ -151,7 +151,7 @@ export default class Iframes extends Component {
   // jQuery is a better fit for managing these iframes, since they need to get
   // wiped out and reset on re-runs and the snapshots are from dom we don't control
   _loadIframes (specPath) {
-    const specSrc = `/${this.props.config.namespace}/iframes/${specPath}`
+    const specSrc = `/${this.props.config.namespace}/iframes/${encodeURIComponent(specPath)}`
     const $container = $(this.refs.container).empty()
     const $autIframe = this.autIframe.create(this.props.config).appendTo($container)
 
@@ -193,7 +193,7 @@ export default class Iframes extends Component {
   }
 
   componentDidUpdate () {
-    const cb = this.props.state.callbackAfterUpdate
+    const cb = this.props.state.viewportUpdateCallback
 
     if (cb) {
       cb()

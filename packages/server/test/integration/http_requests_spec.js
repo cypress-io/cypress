@@ -36,13 +36,14 @@ const Fixtures = require('@tooling/system-tests/lib/fixtures')
  */
 const { getRunnerInjectionContents } = require(`@packages/resolve-dist`)
 const { createRoutes } = require(`${root}lib/routes`)
+const { makeLegacyDataContext } = require(`${root}lib/makeDataContext`)
 
 zlib = Promise.promisifyAll(zlib)
 
 // force supertest-session to use promises provided in supertest
 const session = proxyquire('supertest-session', { supertest })
 
-const absolutePathRegex = /"\/[^{}]*?\.projects/g
+const absolutePathRegex = /"\/[^{}]*?cy-projects/g
 let sourceMapRegex = /\n\/\/# sourceMappingURL\=.*/
 
 const replaceAbsolutePaths = (content) => {
@@ -77,10 +78,14 @@ function getHugeJsFile () {
   .catch(getHugeFile)
 }
 
+let ctx
+
 describe('Routes', () => {
   require('mocha-banner').register()
 
-  beforeEach(function () {
+  beforeEach(async function () {
+    await Fixtures.scaffoldCommonNodeModules()
+    ctx = makeLegacyDataContext()
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 
     sinon.stub(CacheBuster, 'get').returns('-123')
@@ -89,6 +94,8 @@ describe('Routes', () => {
 
     nock.enableNetConnect()
 
+    Fixtures.scaffold()
+
     this.setup = (initialUrl, obj = {}, spec) => {
       if (_.isObject(initialUrl)) {
         obj = initialUrl
@@ -96,8 +103,10 @@ describe('Routes', () => {
       }
 
       if (!obj.projectRoot) {
-        obj.projectRoot = '/foo/bar/'
+        obj.projectRoot = Fixtures.projectPath('e2e')
       }
+
+      ctx.actions.project.setActiveProjectForTestSetup(obj.projectRoot)
 
       // get all the config defaults
       // and allow us to override them
@@ -145,7 +154,7 @@ describe('Routes', () => {
         }
 
         const open = () => {
-          this.project = new ProjectBase({ projectRoot: '/path/to/project-e2e', testingType: 'e2e' })
+          this.project = new ProjectBase({ projectRoot: Fixtures.projectPath('e2e'), testingType: 'e2e' })
 
           cfg.pluginsFile = false
 
@@ -185,7 +194,8 @@ describe('Routes', () => {
 
             pluginsModule.init(cfg, {
               projectRoot: cfg.projectRoot,
-            }),
+              testingType: 'e2e',
+            }, ctx),
           ])
         }
 
@@ -213,6 +223,7 @@ describe('Routes', () => {
     return Promise.join(
       this.server.close(),
       httpsServer.stop(),
+      ctx.actions.project.clearActiveProject(),
     )
   })
 
@@ -3945,9 +3956,11 @@ describe('Routes', () => {
     })
 
     context('when body should be empty', function () {
-      this.timeout(1000)
+      this.timeout(10000) // TODO(tim): figure out why this is flaky now?
 
       beforeEach(function (done) {
+        Fixtures.scaffold('e2e')
+
         this.httpSrv = http.createServer((req, res) => {
           const { query } = url.parse(req.url, true)
 

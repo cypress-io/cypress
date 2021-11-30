@@ -2,6 +2,7 @@ import _ from 'lodash'
 import path from 'path'
 import Promise from 'bluebird'
 import deepDiff from 'return-deep-diff'
+import type { ResolvedConfigurationOptions, ResolvedFromConfig, ResolvedConfigurationOptionSource } from '@packages/types'
 import configUtils from '@packages/config'
 
 import errors from './errors'
@@ -16,19 +17,7 @@ import pathHelpers from './util/path_helpers'
 const debug = Debug('cypress:server:config')
 
 import { getProcessEnvVars, CYPRESS_SPECIAL_ENV_VARS } from './util/config'
-
-export const RESOLVED_FROM = ['plugin', 'env', 'default', 'runtime', 'config'] as const
-
-export type ResolvedConfigurationOptionSource = typeof RESOLVED_FROM[number]
-
-export type ResolvedFromConfig = {
-  from: ResolvedConfigurationOptionSource
-  value: ResolvedConfigurationOptionSource
-}
-
-export type ResolvedConfigurationOptions = Partial<{
-  [x in keyof Cypress.ResolvedConfigOptions]: ResolvedFromConfig
-}>
+import type { DataContext } from '@packages/data-context'
 
 const folders = _(configUtils.options).filter({ isFolder: true }).map('name').value()
 
@@ -131,9 +120,20 @@ export function isValidCypressInternalEnvValue (value) {
   return _.includes(names, value)
 }
 
-export function get (projectRoot, options = {}) {
+export type FullConfig =
+  Cypress.RuntimeConfigOptions &
+  Cypress.ResolvedConfigOptions &
+  {
+    resolved: ResolvedConfigurationOptions
+  }
+
+export function get (
+  projectRoot,
+  options: { configFile?: string | false } = { configFile: undefined },
+  ctx: DataContext,
+): Promise<FullConfig> {
   return Promise.all([
-    settings.read(projectRoot, options).then(validateFile('cypress.json')),
+    settings.read(projectRoot, options, ctx).then(validateFile(options.configFile ?? 'cypress.config.{ts|js}')),
     settings.readEnv(projectRoot).then(validateFile('cypress.env.json')),
   ])
   .spread((settings, envFile) => {
@@ -240,7 +240,6 @@ export function mergeDefaults (config: Record<string, any> = {}, options: Record
   configUtils.validateNoBreakingConfig(config, errors.warning, errors.throw)
 
   return setSupportFileAndFolder(config, defaultsForRuntime)
-  .then((obj) => setPluginsFile(obj, defaultsForRuntime))
   .then(setScaffoldPaths)
 }
 
@@ -283,10 +282,10 @@ export function updateWithPluginValues (cfg, overrides) {
   // make sure every option returned from the plugins file
   // passes our validation functions
   configUtils.validate(overrides, (errMsg) => {
-    if (cfg.pluginsFile && cfg.projectRoot) {
-      const relativePluginsPath = path.relative(cfg.projectRoot, cfg.pluginsFile)
+    if (cfg.configFile && cfg.projectRoot) {
+      const relativeConfigPath = path.relative(cfg.projectRoot, cfg.configFile)
 
-      return errors.throw('PLUGINS_CONFIG_VALIDATION_ERROR', relativePluginsPath, errMsg)
+      return errors.throw('PLUGINS_CONFIG_VALIDATION_ERROR', relativeConfigPath, errMsg)
     }
 
     return errors.throw('CONFIG_VALIDATION_ERROR', errMsg)
@@ -350,7 +349,7 @@ export function updateWithPluginValues (cfg, overrides) {
 }
 
 // combines the default configuration object with values specified in the
-// configuration file like "cypress.json". Values in configuration file
+// configuration file like "cypress.{ts|js}". Values in configuration file
 // overwrite the defaults.
 export function resolveConfigValues (config, defaults, resolved = {}) {
   // pick out only known configuration keys
@@ -489,63 +488,6 @@ export function setSupportFileAndFolder (obj, defaults) {
   })
 }
 
-// set pluginsFile to an absolute path with the following rules:
-// - do nothing if pluginsFile is falsey
-// - look up the absolute path via node, so 'cypress/plugins' can resolve
-//   to 'cypress/plugins/index.js' or 'cypress/plugins/index.coffee'
-// - if not found
-//   * and the pluginsFile is set to the default
-//     - and the path to the pluginsFile directory exists
-//       * assume the user doesn't need a pluginsFile, set it to false
-//         so it's ignored down the pipeline
-//     - and the path to the pluginsFile directory does not exist
-//       * set it to cypress/plugins/index.js, it will get scaffolded
-//   * and the pluginsFile is NOT set to the default
-//     - throw an error, because it should be there if the user
-//       explicitly set it
-export const setPluginsFile = Promise.method((obj, defaults) => {
-  if (!obj.pluginsFile) {
-    return obj
-  }
-
-  obj = _.clone(obj)
-
-  const {
-    pluginsFile,
-  } = obj
-
-  debug(`setting plugins file ${pluginsFile}`)
-  debug(`for project root ${obj.projectRoot}`)
-
-  return Promise
-  .try(() => {
-    // resolve full path with extension
-    obj.pluginsFile = utils.resolveModule(pluginsFile)
-
-    return debug(`set pluginsFile to ${obj.pluginsFile}`)
-  }).catch({ code: 'MODULE_NOT_FOUND' }, () => {
-    debug('plugins module does not exist %o', { pluginsFile })
-
-    const isLoadingDefaultPluginsFile = pluginsFile === path.resolve(obj.projectRoot, defaults.pluginsFile)
-
-    return utils.discoverModuleFile({
-      filename: pluginsFile,
-      isDefault: isLoadingDefaultPluginsFile,
-      projectRoot: obj.projectRoot,
-    })
-    .then((result) => {
-      if (result === null) {
-        return errors.throw('PLUGINS_FILE_ERROR', path.resolve(obj.projectRoot, pluginsFile))
-      }
-
-      debug('setting plugins file to %o', { result })
-      obj.pluginsFile = result
-
-      return obj
-    })
-  }).return(obj)
-})
-
 export function setParentTestsPaths (obj) {
   // projectRoot:              "/path/to/project"
   // integrationFolder:        "/path/to/project/cypress/integration"
@@ -655,7 +597,7 @@ export function parseEnv (cfg: Record<string, any>, envCLI: Record<string, any>,
   resolveFrom('env', envProc)
   resolveFrom('cli', envCLI)
 
-  // envCfg is from cypress.json
+  // envCfg is from cypress.config.{ts|js}
   // envFile is from cypress.env.json
   // envProc is from process env vars
   // envCLI is from CLI arguments

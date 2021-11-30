@@ -1,18 +1,25 @@
 require('../spec_helper')
 
-const config = require(`${root}lib/config`)
-const files = require(`${root}lib/files`)
+const files = require('../../lib/files')
+const config = require('../../lib/config')
 const FixturesHelper = require('@tooling/system-tests/lib/fixtures')
+const { makeLegacyDataContext } = require('../../lib/makeDataContext')
+
+let ctx
 
 describe('lib/files', () => {
   beforeEach(function () {
+    ctx = makeLegacyDataContext()
     FixturesHelper.scaffold()
 
     this.todosPath = FixturesHelper.projectPath('todos')
 
+    ctx.actions.project.setActiveProjectForTestSetup(this.todosPath)
+
     return config.get(this.todosPath).then((cfg) => {
       this.config = cfg;
       ({ projectRoot: this.projectRoot } = cfg)
+      ctx.actions.project.setActiveProjectForTestSetup(this.projectRoot)
     })
   })
 
@@ -25,7 +32,7 @@ describe('lib/files', () => {
       return files.readFile(this.projectRoot, 'tests/_fixtures/message.txt').then(({ contents, filePath }) => {
         expect(contents).to.eq('foobarbaz')
 
-        expect(filePath).to.include('/.projects/todos/tests/_fixtures/message.txt')
+        expect(filePath).to.include('/cy-projects/todos/tests/_fixtures/message.txt')
       })
     })
 
@@ -69,7 +76,7 @@ describe('lib/files', () => {
         return files.readFile(this.projectRoot, '.projects/write_file.txt').then(({ contents, filePath }) => {
           expect(contents).to.equal('foo')
 
-          expect(filePath).to.include('/.projects/todos/.projects/write_file.txt')
+          expect(filePath).to.include('/cy-projects/todos/.projects/write_file.txt')
         })
       })
     })

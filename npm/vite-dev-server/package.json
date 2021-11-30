@@ -4,10 +4,11 @@
   "description": "Launches Vite Dev Server for Component Testing",
   "main": "index.js",
   "scripts": {
-    "build": "tsc",
-    "build-prod": "tsc",
-    "cy:open": "node ../../scripts/cypress.js open-ct --project ${PWD}",
-    "cy:run": "node ../../scripts/cypress.js run-ct --project ${PWD}",
+    "build": "tsc || echo 'built, with type errors'",
+    "build-prod": "tsc || echo 'built, with type errors'",
+    "check-ts": "tsc --noEmit",
+    "cy:open": "node ../../scripts/cypress.js open --component --project ${PWD}",
+    "cy:run": "node ../../scripts/cypress.js run --component --project ${PWD}",
     "cy:run-signature": "yarn cy:run --config=\"{\\\"pluginsFile\\\":\\\"cypress/new-signature/plugins.js\\\"}\"",
     "test": "yarn cy:run && yarn cy:run-signature",
     "watch": "tsc -w"
@@ -20,14 +21,16 @@
     "@cypress/react": "0.0.0-development",
     "@cypress/vue": "0.0.0-development",
     "@testing-library/cypress": "7.0.4",
-    "@vitejs/plugin-vue": "1.2.0",
-    "@vue/compiler-sfc": "3.0.9",
+    "@vitejs/plugin-vue": "1.2.4",
+    "@vue/compiler-sfc": "3.2.6",
     "cypress": "0.0.0-development",
+    "eslint-plugin-vue": "7.18.0",
     "mocha-junit-reporter": "^2.0.0",
     "mocha-multi-reporters": "^1.5.1",
     "react": "17.0.2",
-    "vite": "2.2.3",
-    "vue": "3.0.11"
+    "vite": "2.4.4",
+    "vue": "3.2.6",
+    "vue-eslint-parser": "7.11.0"
   },
   "peerDependencies": {
     "vite": ">= 2.1.3"

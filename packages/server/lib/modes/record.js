@@ -621,6 +621,7 @@ const createRunAndRecordSpecs = (options = {}) => {
       projectId,
       specPattern,
       testingType,
+      configFile: config ? config.configFile : null,
     })
     .then((resp) => {
       if (!resp) {

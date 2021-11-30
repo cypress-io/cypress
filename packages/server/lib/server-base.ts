@@ -31,6 +31,7 @@ import type { Browser } from '@packages/server/lib/browsers/types'
 import { InitializeRoutes, createCommonRoutes } from './routes'
 import { createRoutesE2E } from './routes-e2e'
 import { createRoutesCT } from './routes-ct'
+import type { DataContext } from '@packages/data-context/src/DataContext'
 
 const ALLOWED_PROXY_BYPASS_URLS = [
   '/',
@@ -127,7 +128,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
   protected _remoteDomainName: unknown
   protected _remoteFileServer: unknown
 
-  constructor () {
+  constructor (private ctx: DataContext) {
     this.isListening = false
     // @ts-ignore
     this.request = Request()
@@ -184,64 +185,63 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     la(_.isPlainObject(config), 'expected plain config object', config)
 
-    return Bluebird.try(() => {
-      if (!config.baseUrl && testingType === 'component') {
-        throw new Error('ServerCt#open called without config.baseUrl.')
-      }
+    if (!config.baseUrl && testingType === 'component') {
+      throw new Error('ServerCt#open called without config.baseUrl.')
+    }
 
-      const app = this.createExpressApp(config)
+    const app = this.createExpressApp(config)
 
-      logger.setSettings(config)
+    logger.setSettings(config)
 
-      this._nodeProxy = httpProxy.createProxyServer({
-        target: config.baseUrl && testingType === 'component' ? config.baseUrl : undefined,
-      })
-
-      this._socket = new SocketCtor(config) as TSocket
-
-      clientCertificates.loadClientCertificateConfig(config)
-
-      const getRemoteState = () => {
-        return this._getRemoteState()
-      }
-
-      this.createNetworkProxy(config, getRemoteState, shouldCorrelatePreRequests)
-
-      if (config.experimentalSourceRewriting) {
-        createInitialWorkers()
-      }
-
-      this.createHosts(config.hosts)
-
-      const routeOptions: InitializeRoutes = {
-        config,
-        specsStore,
-        getRemoteState,
-        nodeProxy: this.nodeProxy,
-        networkProxy: this._networkProxy!,
-        onError,
-        getSpec,
-        getCurrentBrowser,
-        testingType,
-        exit,
-      }
-
-      const runnerSpecificRouter = testingType === 'e2e'
-        ? createRoutesE2E(routeOptions)
-        : createRoutesCT(routeOptions)
-
-      app.use(runnerSpecificRouter)
-      app.use(createCommonRoutes(routeOptions))
-
-      return this.createServer(app, config, onWarning)
+    this._nodeProxy = httpProxy.createProxyServer({
+      target: config.baseUrl && testingType === 'component' ? config.baseUrl : undefined,
     })
+
+    this._socket = new SocketCtor(config, this.ctx) as TSocket
+
+    clientCertificates.loadClientCertificateConfig(config)
+
+    const getRemoteState = () => {
+      return this._getRemoteState()
+    }
+
+    this.createNetworkProxy(config, getRemoteState, shouldCorrelatePreRequests)
+
+    if (config.experimentalSourceRewriting) {
+      createInitialWorkers()
+    }
+
+    this.createHosts(config.hosts)
+
+    const routeOptions: InitializeRoutes = {
+      ctx: this.ctx,
+      config,
+      specsStore,
+      getRemoteState,
+      nodeProxy: this.nodeProxy,
+      networkProxy: this._networkProxy!,
+      onError,
+      getSpec,
+      getCurrentBrowser,
+      testingType,
+      exit,
+    }
+
+    const runnerSpecificRouter = testingType === 'e2e'
+      ? createRoutesE2E(routeOptions)
+      : createRoutesCT(routeOptions)
+
+    app.use(runnerSpecificRouter)
+    app.use(createCommonRoutes(routeOptions))
+
+    return this.createServer(app, config, onWarning)
   }
 
   createExpressApp (config) {
     const { morgan, clientRoute } = config
     const app = express()
 
-    // set the cypress config from the cypress.json file
+    // set the cypress config from the cypress.config.{ts|js} file
     app.set('view engine', 'html')
 
     // since we use absolute paths, configure express-handlebars to not automatically find layouts
@@ -268,7 +268,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     app.use(require('cookie-parser')())
     app.use(compression({ filter: notSSE }))
     if (morgan) {
-      app.use(require('morgan')('dev'))
+      app.use(this.useMorgan())
     }
 
     // errorhandler
@@ -278,6 +278,10 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     app.disable('x-powered-by')
 
     return app
+  }
+
+  useMorgan () {
+    return require('morgan')('dev')
   }
 
   getHttpServer () {

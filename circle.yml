@@ -8,7 +8,8 @@ macBuildFilters: &macBuildFilters
     branches:
       only:
         - develop
-        - 9.0-release
+        - 10.0-release
+        - tgriesser/chore/fix-release
 
 defaults: &defaults
   parallelism: 1
@@ -42,7 +43,7 @@ onlyMainBranches: &onlyMainBranches
     branches:
       only:
         - develop
-        - 9.0-release
+        - 10.0-release
   requires:
     - create-build-artifacts
 
@@ -119,6 +120,9 @@ commands:
     description: Save entire folder as artifact for other jobs to run without reinstalling
     steps:
       - run:
+          name: Build all codegen
+          command: yarn gulp buildProd
+      - run:
           name: Build packages
           command: yarn build
       - prepare-modules-cache # So we don't throw these in the workspace cache
@@ -150,6 +154,55 @@ commands:
       - run:
           name: Restore all node_modules to proper workspace folders
           command: node scripts/circle-cache.js --action unpack
+
+  restore_cached_system_tests_deps:
+    description: 'Restore the cached node_modules for projects in "system-tests/projects/**"'
+    steps:
+      - run:
+          name: Generate Circle Cache key for system tests
+          command: ./system-tests/scripts/cache-key.sh > system_tests_cache_key
+      - restore_cache:
+          name: Restore system tests node_modules cache
+          keys:
+            - v{{ .Environment.CACHE_VERSION }}-{{ arch }}-system-tests-projects-node-modules-cache-{{ checksum "system_tests_cache_key" }}
+            - v{{ .Environment.CACHE_VERSION }}-{{ arch }}-system-tests-projects-node-modules-cache-
+
+  update_cached_system_tests_deps:
+    description: 'Update the cached node_modules for projects in "system-tests/projects/**"'
+    steps:
+      - run:
+          name: Generate Circle Cache key for system tests
+          command: ./system-tests/scripts/cache-key.sh > system_tests_cache_key
+      - restore_cache:
+          name: Restore cache state, to check for known modules cache existence
+          keys:
+            - v{{ .Environment.CACHE_VERSION }}-{{ arch }}-system-tests-projects-node-modules-cache-state-{{ checksum "system_tests_cache_key" }}
+      - run:
+          name: Bail if specific cache exists
+          command: |
+            if [[ -f "system_tests_node_modules_installed" ]]; then
+              echo "No updates to system tests node modules, exiting"
+              circleci-agent step halt
+            fi
+      - restore_cache:
+          name: Restore system tests node_modules cache
+          keys:
+            - v{{ .Environment.CACHE_VERSION }}-{{ arch }}-system-tests-projects-node-modules-cache-{{ checksum "system_tests_cache_key" }}
+            - v{{ .Environment.CACHE_VERSION }}-{{ arch }}-system-tests-projects-node-modules-cache-
+      - run:
+          name: Update system-tests node_modules cache
+          command: yarn workspace @tooling/system-tests projects:yarn:install
+      - save_cache:
+          name: Save system tests node_modules cache
+          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-system-tests-projects-node-modules-cache-{{ checksum "system_tests_cache_key" }}
+          paths:
+            - ~/.cache/cy-system-tests-node-modules
+      - run: touch system_tests_node_modules_installed
+      - save_cache:
+          name: Save system tests node_modules cache state key
+          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-system-tests-projects-node-modules-cache-state-{{ checksum "system_tests_cache_key" }}
+          paths:
+            - system_tests_node_modules_installed
 
   caching-dependency-installer:
     description: 'Installs & caches the dependencies based on yarn lock & package json dependencies'
@@ -387,6 +440,41 @@ commands:
           path: /tmp/artifacts
       - store-npm-logs
 
+  run-new-ui-tests:
+    parameters:
+      package:
+        description: package to target
+        type: enum
+        enum: ['frontend-shared', 'launchpad', 'app']
+      browser:
+        description: browser shortname to target
+        type: string
+      type:
+        description: ct or e2e
+        type: enum
+        enum: ['ct', 'e2e']
+      debug:
+        description: debug option
+        type: string
+        default: ''
+    steps:
+      - restore_cached_workspace
+      - run: 
+          command: |
+            DEBUG=<<parameters.debug>> \
+            CYPRESS_INTERNAL_FORCE_BROWSER_RELAUNCH='true' \
+            CYPRESS_KONFIG_ENV=production \
+            CYPRESS_RECORD_KEY=$TEST_LAUNCHPAD_RECORD_KEY \
+            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
+            PERCY_ENABLE=${PERCY_TOKEN:-0} \
+            PERCY_PARALLEL_TOTAL=-1 \
+            yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --record --parallel --group <<parameters.package>>-<<parameters.type>>
+      - store_test_results:
+          path: /tmp/cypress
+      - store_artifacts:
+          path: ./packages/launchpad/cypress/videos
+      - store-npm-logs
+
   run-runner-ct-integration-tests:
     parameters:
       browser:
@@ -429,6 +517,7 @@ commands:
         type: string
     steps:
       - restore_cached_workspace
+      - restore_cached_system_tests_deps
       - run:
           name: Run system tests
           command: |
@@ -483,13 +572,17 @@ commands:
     steps:
       - run: yarn verify:mocha:results <<parameters.expectedResultCount>>
 
-  clone-repo-and-checkout-release-branch:
+  clone-repo-and-checkout-branch:
     description: |
       Clones an external repo and then checks out the branch that matches the next version otherwise uses 'master' branch.
     parameters:
       repo:
         description: "Name of the github repo to clone like: cypress-example-kitchensink"
         type: string
+      pull_request_id:
+        description: Pull request number to check out before installing and testing
+        type: integer
+        default: 0
     steps:
       - restore_cached_binary
       - run:
@@ -497,6 +590,16 @@ commands:
           command: |
             git clone --depth 1 --no-single-branch https://github.com/cypress-io/<<parameters.repo>>.git /tmp/<<parameters.repo>>
             cd /tmp/<<parameters.repo>> && (git checkout $(node ./scripts/get-next-version) || true)
+      - when:
+            condition: <<parameters.pull_request_id>>
+            steps:
+              - run:
+                  name: Check out PR <<parameters.pull_request_id>>
+                  working_directory: /tmp/<<parameters.repo>>
+                  command: |
+                    git fetch origin pull/<<parameters.pull_request_id>>/head:pr-<<parameters.pull_request_id>>
+                    git checkout pr-<<parameters.pull_request_id>>
+                    git log -n 2
 
   test-binary-against-rwa:
     description: |
@@ -538,7 +641,7 @@ commands:
         type: string
         default: "CI=true yarn start"
     steps:
-      - clone-repo-and-checkout-release-branch:
+      - clone-repo-and-checkout-branch:
           repo: <<parameters.repo>>
       - when:
           condition: <<parameters.pull_request_id>>
@@ -668,18 +771,9 @@ commands:
         type: string
         default: "npm start --if-present"
     steps:
-      - clone-repo-and-checkout-release-branch:
+      - clone-repo-and-checkout-branch:
           repo: <<parameters.repo>>
-      - when:
-          condition: <<parameters.pull_request_id>>
-          steps:
-            - run:
-                name: Check out PR <<parameters.pull_request_id>>
-                working_directory: /tmp/<<parameters.repo>>
-                command: |
-                  git fetch origin pull/<<parameters.pull_request_id>>/head:pr-<<parameters.pull_request_id>>
-                  git checkout pr-<<parameters.pull_request_id>>
-                  git log -n 2
+          pull_request_id: <<parameters.pull_request_id>>
       - run:
           # Install deps + Cypress binary with yarn if yarn.lock present
           command: |
@@ -691,6 +785,16 @@ commands:
               CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm install --legacy-peer-deps ~/cypress/cypress.tgz
             fi
           working_directory: /tmp/<<parameters.repo>>
+      - run:
+          name: Scaffold new config file
+          working_directory: /tmp/<<parameters.repo>>
+          environment:
+            CYPRESS_INTERNAL_FORCE_SCAFFOLD: "1"
+          command: |
+            if [[ -f cypress.json ]]; then
+              rm -rf cypress.json
+              echo 'module.exports = {}' > cypress.config.js
+            fi
       - run:
           name: Print Cypress version
           working_directory: /tmp/<<parameters.repo>>
@@ -937,6 +1041,16 @@ jobs:
           command: node cli/bin/cypress info --dev
       - store-npm-logs
 
+  check-ts:
+    <<: *defaults
+    steps:
+      - restore_cached_workspace
+      - install-required-node
+      - run:
+          name: Check TS Types
+          command: NODE_OPTIONS=--max_old_space_size=4096 yarn gulp checkTs
+
+
   # a special job that keeps polling Circle and when all
   # individual jobs are finished, it closes the Percy build
   percy-finalize:
@@ -961,12 +1075,14 @@ jobs:
             fi
       - wait-on-circle-jobs:
           job-names: >
-            desktop-gui-integration-tests-7x,
-            desktop-gui-component-tests,
             cli-visual-tests,
             runner-integration-tests-chrome,
             runner-ct-integration-tests-chrome,
             reporter-integration-tests,
+            run-frontend-shared-component-tests-chrome,
+            run-app-integration-tests-chrome,
+            run-launchpad-integration-tests-chrome,
+            run-launchpad-component-tests-chrome,
       - run: yarn percy build:finalize
 
   cli-visual-tests:
@@ -1009,6 +1125,8 @@ jobs:
       - run: yarn lerna run build-prod --stream
       # run unit tests from each individual package
       - run: yarn test
+      # run type checking for each individual package
+      - run: yarn lerna run types
       - verify-mocha-results:
           expectedResultCount: 9
       - store_test_results:
@@ -1041,9 +1159,10 @@ jobs:
       - run:
           name: "Lint types 🧹"
           command: yarn workspace cypress dtslint
-      - run:
-          name: "TypeScript check 🧩"
-          command: yarn type-check --ignore-progress
+  # todo(lachlan): do we need this? yarn check-ts does something very similar
+  #     - run:
+  #         name: "TypeScript check 🧩"
+  #         command: yarn type-check --ignore-progress
       - store-npm-logs
 
   server-unit-tests:
@@ -1084,6 +1203,12 @@ jobs:
       - store_artifacts:
           path: /tmp/artifacts
       - store-npm-logs
+
+  system-tests-node-modules-install:
+    <<: *defaults
+    steps:
+      - restore_cached_workspace
+      - update_cached_system_tests_deps
 
   system-tests-chrome:
     <<: *defaults
@@ -1155,6 +1280,52 @@ jobs:
       - run-runner-ct-integration-tests:
           browser: chrome
           percy: true
+  
+  run-frontend-shared-component-tests-chrome:
+    <<: *defaults
+    parallelism: 1
+    steps:
+      - run-new-ui-tests:
+          browser: chrome
+          package: frontend-shared
+          type: ct
+
+  run-launchpad-component-tests-chrome:
+    <<: *defaults
+    parallelism: 7
+    steps:
+      - run-new-ui-tests:
+          browser: chrome
+          package: launchpad
+          type: ct
+          # debug: cypress:*,engine:socket
+
+  run-launchpad-integration-tests-chrome:
+    <<: *defaults
+    parallelism: 1
+    steps:
+      - run-new-ui-tests:
+          browser: chrome
+          package: launchpad
+          type: e2e
+
+  run-app-component-tests-chrome:
+    <<: *defaults
+    parallelism: 1
+    steps:
+      - run-new-ui-tests:
+          browser: chrome
+          package: app
+          type: ct
+
+  run-app-integration-tests-chrome:
+    <<: *defaults
+    parallelism: 1
+    steps:
+      - run-new-ui-tests:
+          browser: chrome
+          package: app
+          type: e2e
 
   driver-integration-tests-chrome:
     <<: *defaults
@@ -1189,52 +1360,6 @@ jobs:
     steps:
       - run-driver-integration-tests:
           browser: electron
-
-  desktop-gui-integration-tests-7x:
-    <<: *defaults
-    parallelism: 7
-    steps:
-      - restore_cached_workspace
-      - run:
-          command: yarn build-prod
-          working_directory: packages/desktop-gui
-      - run:
-          command: |
-            CYPRESS_KONFIG_ENV=production \
-            CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
-            PERCY_ENABLE=${PERCY_TOKEN:-0} \
-            PERCY_PARALLEL_TOTAL=-1 \
-            yarn percy exec --parallel -- -- \
-            yarn cypress:run --record --parallel --group 2x-desktop-gui
-          working_directory: packages/desktop-gui
-      - verify-mocha-results
-      - store_test_results:
-          path: /tmp/cypress
-      - store_artifacts:
-          path: /tmp/artifacts
-      - store-npm-logs
-
-
-  desktop-gui-component-tests:
-    <<: *defaults
-    resource_class: medium
-    parallelism: 1
-    steps:
-      - restore_cached_workspace
-      - run:
-          # will use PERCY_TOKEN environment variable if available
-          command: |
-            CYPRESS_KONFIG_ENV=production \
-            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
-            PERCY_ENABLE=${PERCY_TOKEN:-0} \
-            PERCY_PARALLEL_TOTAL=-1 \
-            yarn percy exec --parallel -- -- \
-            yarn cypress:run:ct
-          working_directory: packages/desktop-gui
-      - verify-mocha-results
-      # we don't really need any artifacts - we are only interested in visual screenshots
-      - store-npm-logs
 
   reporter-integration-tests:
     <<: *defaults
@@ -1283,6 +1408,7 @@ jobs:
 
   npm-webpack-preprocessor:
     <<: *defaults
+    resource_class: medium
     steps:
       - restore_cached_workspace
       - run:
@@ -1320,6 +1446,7 @@ jobs:
 
   npm-webpack-dev-server:
     <<: *defaults
+    resource_class: medium
     steps:
       - restore_cached_workspace
       - run:
@@ -1513,7 +1640,7 @@ jobs:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "9.0-release" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "10.0-release" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -1523,10 +1650,19 @@ jobs:
 
   test-kitchensink:
     <<: *defaults
+    resource_class: medium
     steps:
-      - clone-repo-and-checkout-release-branch:
+      - clone-repo-and-checkout-branch:
           repo: cypress-example-kitchensink
+          pull_request_id: 510
       - install-required-node
+      - run:
+          name: Remove cypress.json
+          description: Remove cypress.json in case it exists
+          working_directory: /tmp/cypress-example-kitchensink
+          environment:
+            CYPRESS_INTERNAL_FORCE_SCAFFOLD: "1"
+          command: rm -rf cypress.json
       - run:
           name: Install prod dependencies
           command: yarn --production
@@ -1551,7 +1687,7 @@ jobs:
     <<: *defaults
     resource_class: medium
     steps:
-      - clone-repo-and-checkout-release-branch:
+      - clone-repo-and-checkout-branch:
           repo: cypress-example-kitchensink
       - run:
           name: Install prod dependencies
@@ -1576,7 +1712,7 @@ jobs:
     <<: *defaults
     resource_class: medium
     steps:
-      - clone-repo-and-checkout-release-branch:
+      - clone-repo-and-checkout-branch:
           repo: cypress-test-tiny
       - run:
           name: Run test project
@@ -1760,7 +1896,7 @@ jobs:
           environment:
             CYPRESS_INTERNAL_FORCE_SCAFFOLD: "1"
           command: |
-            echo '{}' > cypress.json
+            echo 'module.exports = {}' > cypress.config.js
             npx cypress run
 
   test-full-typescript-project:
@@ -1793,6 +1929,28 @@ jobs:
           working_directory: <<parameters.wd>>
           command: npx @bahmutov/cly@1 init --typescript
       - run:
+          name: Scaffold new config file
+          working_directory: <<parameters.wd>>
+          environment:
+            CYPRESS_INTERNAL_FORCE_SCAFFOLD: "1"
+          command: |
+            rm -rf cypress.json
+            echo "export default {
+                    e2e: {
+                      setupNodeEvents (on, config) {
+                        on('task', {
+                          log (x) {
+                            console.log(x)
+
+                            return null
+                          },
+                        })
+
+                        return config
+                      },
+                    },
+                  }" > cypress.config.ts
+      - run:
           name: Run project tests 🗳
           working_directory: <<parameters.wd>>
           command: npx cypress run
@@ -1802,7 +1960,7 @@ jobs:
     <<: *defaults
     steps:
       - restore_workspace_binaries
-      - clone-repo-and-checkout-release-branch:
+      - clone-repo-and-checkout-branch:
           repo: cypress-test-tiny
       - run:
           name: Install Cypress
@@ -1854,6 +2012,7 @@ jobs:
       - test-binary-against-repo:
           repo: cypress-example-kitchensink
           browser: "electron"
+          pull_request_id: 510
 
   test-binary-against-awesome-typescript-loader:
     <<: *defaults
@@ -1869,6 +2028,7 @@ jobs:
       - test-binary-against-repo:
           repo: cypress-example-kitchensink
           browser: firefox
+          pull_request_id: 510
 
   "test-binary-against-kitchensink-chrome":
     <<: *defaults
@@ -1877,6 +2037,7 @@ jobs:
       - test-binary-against-repo:
           repo: cypress-example-kitchensink
           browser: chrome
+          pull_request_id: 510
 
   "test-binary-against-todomvc-firefox":
     <<: *defaults
@@ -1885,17 +2046,6 @@ jobs:
       - test-binary-against-repo:
           repo: cypress-example-todomvc
           browser: firefox
-
-  "test-binary-against-documentation-firefox":
-    <<: *defaults
-    resource_class: medium
-    steps:
-      - test-binary-against-repo:
-          repo: cypress-documentation
-          browser: firefox
-          command: "yarn cypress run"
-          wait-on: http://localhost:3000
-          server-start-command: yarn serve:dist
 
   "test-binary-against-conduit-chrome":
     <<: *defaults
@@ -1972,6 +2122,14 @@ jobs:
           working_directory: test-binary
           command: npx @bahmutov/cly init
       - run:
+          name: Scaffold new config file
+          working_directory: test-binary
+          environment:
+            CYPRESS_INTERNAL_FORCE_SCAFFOLD: "1"
+          command: |
+            rm -rf cypress.json
+            echo 'module.exports = {}' > cypress.config.js
+      - run:
           name: Verify Cypress binary
           working_directory: test-binary
           command: DEBUG=cypress:cli $(yarn bin)/cypress verify
@@ -1988,6 +2146,9 @@ linux-workflow: &linux-workflow
     - build:
         requires:
           - node_modules_install
+    - check-ts:
+        requires:
+          - build
     - lint:
         name: Linux lint
         requires:
@@ -2020,19 +2181,22 @@ linux-workflow: &linux-workflow
     - server-performance-tests:
         requires:
           - build
+    - system-tests-node-modules-install:
+        requires:
+          - build
     - system-tests-chrome:
         requires:
-          - build
+          - system-tests-node-modules-install
     - system-tests-electron:
         requires:
-          - build
+          - system-tests-node-modules-install
     - system-tests-firefox:
         requires:
-          - build
+          - system-tests-node-modules-install
     - system-tests-non-root:
         executor: non-root-docker-user
         requires:
-          - build
+          - system-tests-node-modules-install
     - driver-integration-tests-chrome:
         requires:
           - build
@@ -2057,11 +2221,24 @@ linux-workflow: &linux-workflow
     - runner-ct-integration-tests-chrome:
         requires:
           - build
-
-    - desktop-gui-integration-tests-7x:
+    - run-frontend-shared-component-tests-chrome:
+        context: test-runner:launchpad-tests
         requires:
           - build
-    - desktop-gui-component-tests:
+    - run-launchpad-integration-tests-chrome:
+        context: test-runner:launchpad-tests
+        requires:
+          - build
+    - run-launchpad-component-tests-chrome:
+        context: test-runner:launchpad-tests
+        requires:
+          - build
+    - run-app-integration-tests-chrome:
+        context: test-runner:launchpad-tests
+        requires:
+          - build
+    - run-app-component-tests-chrome:
+        context: test-runner:launchpad-tests
         requires:
           - build
     - reporter-integration-tests:
@@ -2113,6 +2290,7 @@ linux-workflow: &linux-workflow
         context: test-runner:npm-release
         requires:
           - build
+          - check-ts
           - npm-eslint-plugin-dev
           - npm-create-cypress-tests
           - npm-react
@@ -2127,8 +2305,6 @@ linux-workflow: &linux-workflow
           - ui-components-integration-tests
           - reporter-integration-tests
           - Linux lint
-          - desktop-gui-component-tests
-          - desktop-gui-integration-tests-7x
           - runner-ct-integration-tests-chrome
           - runner-integration-tests-firefox
           - runner-integration-tests-chrome
@@ -2155,7 +2331,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - 9.0-release
+              - 10.0-release
         requires:
           - build
     - test-kitchensink:
@@ -2167,7 +2343,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - 9.0-release
+              - 10.0-release
         requires:
           - build
     - create-build-artifacts:
@@ -2217,7 +2393,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - 9.0-release
+              - 10.0-release
         requires:
           - create-build-artifacts
     - test-npm-module-and-verify-binary:
@@ -2225,7 +2401,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - 9.0-release
+              - 10.0-release
         requires:
           - create-build-artifacts
     - test-binary-against-staging:
@@ -2234,21 +2410,21 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - 9.0-release
+              - 10.0-release
         requires:
           - create-build-artifacts
 
     - test-binary-against-kitchensink-chrome:
         <<: *onlyMainBranches
-    - test-binary-against-conduit-chrome:
-        <<: *onlyMainBranches
+    # Re-enable when the cypress-example-conduit-app project is fixed.
+    # https://github.com/cypress-io/cypress-example-conduit-app/issues/346
+    # - test-binary-against-conduit-chrome:
+    #     <<: *onlyMainBranches
     - test-binary-against-recipes-firefox:
         <<: *onlyMainBranches
     - test-binary-against-kitchensink-firefox:
         <<: *onlyMainBranches
     - test-binary-against-todomvc-firefox:
-        <<: *onlyMainBranches
-    - test-binary-against-documentation-firefox:
         <<: *onlyMainBranches
     - test-binary-against-api-testing-firefox:
         <<: *onlyMainBranches
@@ -2259,7 +2435,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - 9.0-release
+              - 10.0-release
         requires:
           - create-build-artifacts
 
@@ -2331,7 +2507,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
-              - 9.0-release
+              - 10.0-release
         requires:
           - darwin-create-build-artifacts
 
@@ -2343,7 +2519,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
-              - 9.0-release
+              - 10.0-release
         requires:
           - darwin-create-build-artifacts
 

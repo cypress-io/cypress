@@ -71,7 +71,7 @@ exports['src/index .getDefaultValues returns list of public config keys 1'] = {
   "autoOpen": false,
   "browsers": [],
   "clientRoute": "/__/",
-  "configFile": "cypress.json",
+  "configFile": "cypress.config.js",
   "devServerPublicPathRoute": "/__cypress/src",
   "hosts": null,
   "isTextTerminal": false,

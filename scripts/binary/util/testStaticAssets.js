@@ -47,21 +47,6 @@ const testStaticAssets = async (buildResourcePath) => {
         ['-ms-', 20],
       ],
     }),
-
-    testPackageStaticAssets({
-      assetGlob: `${buildResourcePath}/packages/desktop-gui/dist/index.html`,
-      goodStrings: [
-        // make sure webpack is run with NODE_ENV=production
-        `window.env = 'production'`,
-      ],
-    }),
-    testPackageStaticAssets({
-      assetGlob: `${buildResourcePath}/packages/desktop-gui/dist/app.js`,
-      goodStrings: [
-        // make sure webpack is run with NODE_ENV=production
-        'react.production.min.js',
-      ],
-    }),
   ])
 }
 

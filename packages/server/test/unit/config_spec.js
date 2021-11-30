@@ -100,21 +100,21 @@ describe('lib/config', () => {
       })
 
       it('can override default port', function () {
-        return config.get(this.projectRoot, { port: 8080 })
+        return config.get(this.projectRoot, { port: 8080, configFile: 'cypress.config.js' })
         .then((obj) => {
           expect(obj.port).to.eq(8080)
         })
       })
 
       it('updates browserUrl', function () {
-        return config.get(this.projectRoot, { port: 8080 })
+        return config.get(this.projectRoot, { port: 8080, configFile: 'cypress.config.js' })
         .then((obj) => {
           expect(obj.browserUrl).to.eq('http://localhost:8080/__/')
         })
       })
 
       it('updates proxyUrl', function () {
-        return config.get(this.projectRoot, { port: 8080 })
+        return config.get(this.projectRoot, { port: 8080, configFile: 'cypress.config.js' })
         .then((obj) => {
           expect(obj.proxyUrl).to.eq('http://localhost:8080')
         })
@@ -143,10 +143,10 @@ describe('lib/config', () => {
         return this.expectValidationPasses()
       })
 
-      it('validates cypress.json', function () {
+      it('validates cypress.config.js', function () {
         this.setup({ reporter: 5 })
 
-        return this.expectValidationFails('cypress.json')
+        return this.expectValidationFails('cypress.config.{ts|js}')
       })
 
       it('validates cypress.env.json', function () {
@@ -2143,137 +2143,6 @@ describe('lib/config', () => {
           projectRoot,
           supportFolder,
           supportFile: supportFilename,
-        })
-      })
-    })
-  })
-
-  context('.setPluginsFile', () => {
-    const mockPluginDefaults = {
-      pluginsFile: 'cypress/plugins',
-      configFile: 'cypress.json',
-    }
-
-    it('does nothing if pluginsFile is falsey', () => {
-      const obj = {
-        projectRoot: '/_test-output/path/to/project',
-      }
-
-      return config.setPluginsFile(obj)
-      .then((result) => {
-        expect(result).to.eql(obj)
-      })
-    })
-
-    it('sets the pluginsFile to default index.js if does not exist', () => {
-      const projectRoot = Fixtures.projectPath('no-scaffolding')
-
-      const obj = {
-        projectRoot,
-        pluginsFile: `${projectRoot}/cypress/plugins`,
-      }
-
-      return config.setPluginsFile(obj, mockPluginDefaults)
-      .then((result) => {
-        expect(result).to.eql({
-          projectRoot,
-          pluginsFile: `${projectRoot}/cypress/plugins/index.js`,
-        })
-      })
-    })
-
-    it('sets the pluginsFile to index.ts if it exists', () => {
-      const projectRoot = Fixtures.projectPath('ts-proj-with-module-esnext')
-
-      const obj = {
-        projectRoot,
-        pluginsFile: `${projectRoot}/cypress/plugins`,
-      }
-
-      return config.setPluginsFile(obj, mockPluginDefaults)
-      .then((result) => {
-        expect(result).to.eql({
-          projectRoot,
-          pluginsFile: `${projectRoot}/cypress/plugins/index.ts`,
-        })
-      })
-    })
-
-    it('sets the pluginsFile to index.ts if it exists (without ts require hook)', () => {
-      const projectRoot = Fixtures.projectPath('ts-proj-with-module-esnext')
-      const pluginsFolder = `${projectRoot}/cypress/plugins`
-      const pluginsFilename = `${pluginsFolder}/index.ts`
-
-      const e = new Error('Cannot resolve TS file by default')
-
-      e.code = 'MODULE_NOT_FOUND'
-      sinon.stub(config.utils, 'resolveModule').withArgs(pluginsFolder).throws(e)
-
-      const obj = {
-        projectRoot,
-        pluginsFile: pluginsFolder,
-      }
-
-      return config.setPluginsFile(obj, mockPluginDefaults)
-      .then((result) => {
-        expect(result).to.eql({
-          projectRoot,
-          pluginsFile: pluginsFilename,
-        })
-      })
-    })
-
-    it('set the pluginsFile to false if it does not exist, plugins folder exists, and pluginsFile is the default', () => {
-      const projectRoot = Fixtures.projectPath('empty-folders')
-
-      const obj = config.setAbsolutePaths({
-        projectRoot,
-        pluginsFile: `${projectRoot}/cypress/plugins`,
-      })
-
-      return config.setPluginsFile(obj, mockPluginDefaults)
-      .then((result) => {
-        expect(result).to.eql({
-          projectRoot,
-          pluginsFile: false,
-        })
-      })
-    })
-
-    it('throws error if pluginsFile is not default and does not exist', () => {
-      const projectRoot = process.cwd()
-
-      const obj = {
-        projectRoot,
-        pluginsFile: 'does/not/exist',
-      }
-
-      return config.setPluginsFile(obj, mockPluginDefaults)
-      .catch((err) => {
-        expect(err.message).to.include('The plugins file is missing or invalid.')
-      })
-    })
-
-    it('uses custom TS pluginsFile if it exists (without ts require hook)', () => {
-      const projectRoot = Fixtures.projectPath('ts-proj-custom-names')
-      const pluginsFolder = `${projectRoot}/cypress`
-      const pluginsFile = `${pluginsFolder}/plugins.ts`
-
-      const e = new Error('Cannot resolve TS file by default')
-
-      e.code = 'MODULE_NOT_FOUND'
-      sinon.stub(config.utils, 'resolveModule').withArgs(pluginsFile).throws(e)
-
-      const obj = {
-        projectRoot,
-        pluginsFile,
-      }
-
-      return config.setPluginsFile(obj, mockPluginDefaults)
-      .then((result) => {
-        expect(result).to.eql({
-          projectRoot,
-          pluginsFile,
         })
       })
     })

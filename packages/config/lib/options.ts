@@ -1,4 +1,4 @@
-const validate = require('./validation')
+import validate from './validation'
 
 interface ResolvedConfigOption {
   name: string
@@ -327,7 +327,7 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     isInternal: true,
   }, {
     name: 'configFile',
-    defaultValue: 'cypress.json',
+    defaultValue: 'cypress.config.js',
     validation: validate.isStringOrFalse,
     // not truly internal, but can only be set via cli,
     // so we don't consider it a "public" option

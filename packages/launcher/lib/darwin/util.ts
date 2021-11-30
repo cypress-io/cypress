@@ -6,7 +6,7 @@ import * as os from 'os'
 import * as path from 'path'
 import * as plist from 'plist'
 import * as semver from 'semver'
-import type { FoundBrowser } from '../types'
+import type { FoundBrowser } from '@packages/types'
 import * as findSystemNode from '@packages/server/lib/util/find_system_node'
 
 /** parses Info.plist file from given application and returns a property */
@@ -115,7 +115,7 @@ export async function darwinDetectionWorkaround (): Promise<FoundBrowser[]> {
   let args = ['./detection-workaround.js']
 
   if (process.env.CYPRESS_INTERNAL_ENV === 'development') {
-    args = ['-r', '@packages/ts/register.js'].concat(args)
+    args = ['-r', '@packages/ts/register.js', './detection-workaround.ts']
   }
 
   const { stdout } = await utils.execa(nodePath, args, { cwd: __dirname })

@@ -1,6 +1,6 @@
 import React from 'react'
 
-export const automationElementId = '__cypress-string'
+export const automationElementId = '__cypress-string' as const
 
 interface AutomationElementProps {
   randomString: string

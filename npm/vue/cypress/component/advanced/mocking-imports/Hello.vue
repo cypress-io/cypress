@@ -3,14 +3,14 @@
 </template>
 
 <script>
-import { greeting } from "./greeting";
+import { greeting } from './greeting'
 
 export default {
-  name: "Hello",
-  data() {
+  name: 'Hello',
+  data () {
     return {
-      greeting: greeting()
-    };
-  }
-};
+      greeting: greeting(),
+    }
+  },
+}
 </script>

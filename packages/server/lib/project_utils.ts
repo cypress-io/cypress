@@ -5,22 +5,25 @@ import * as settings from './util/settings'
 import errors from './errors'
 import { fs } from './util/fs'
 import { escapeFilenameInUrl } from './util/escape_filename'
-import { CYPRESS_CONFIG_FILES } from './configFiles'
+import { makeLegacyDataContext } from './makeDataContext'
 
 const debug = Debug('cypress:server:project_utils')
 
 const multipleForwardSlashesRe = /[^:\/\/](\/{2,})/g
+const multipleForwardSlashesReplacer = (match: string) => match.replace('//', '/')
 const backSlashesRe = /\\/g
 
 const normalizeSpecUrl = (browserUrl: string, specUrl: string) => {
-  const replacer = (match: string) => match.replace('//', '/')
+  if (process.env.LAUNCHPAD) {
+    return browserUrl
+  }
 
   return [
     browserUrl,
     '#/tests',
     escapeFilenameInUrl(specUrl),
   ].join('/')
-  .replace(multipleForwardSlashesRe, replacer)
+  .replace(multipleForwardSlashesRe, multipleForwardSlashesReplacer)
 }
 
 const getPrefixedPathToSpec = ({
@@ -83,10 +86,23 @@ export const getSpecUrl = ({
   specType ??= 'integration'
   browserUrl ??= ''
 
+  // App routes to spec with convention {browserUrl}#/runner?file={relativeSpecPath}
+  if (process.env.LAUNCHPAD) {
+    if (!absoluteSpecPath) {
+      return browserUrl
+    }
+
+    const relativeSpecPath = path.relative(projectRoot, path.resolve(projectRoot, absoluteSpecPath))
+    .replace(backSlashesRe, '/')
+
+    return `${browserUrl}/#/runner?file=${relativeSpecPath}`
+    .replace(multipleForwardSlashesRe, multipleForwardSlashesReplacer)
+  }
+
   debug('get spec url: %s for spec type %s', absoluteSpecPath, specType)
 
   // if we don't have a absoluteSpecPath or its __all
-  if (!absoluteSpecPath || (absoluteSpecPath === '__all')) {
+  if (!absoluteSpecPath || absoluteSpecPath === '__all') {
     const url = normalizeSpecUrl(browserUrl, '/__all')
 
     debug('returning url to run all specs: %s', url)
@@ -133,25 +149,6 @@ export const checkSupportFile = async ({
   return
 }
 
-export async function getDefaultConfigFilePath (projectRoot: string, returnDefaultValueIfNotFound: boolean = true): Promise<string | undefined> {
-  const filesInProjectDir = await fs.readdir(projectRoot)
-
-  const foundConfigFiles = CYPRESS_CONFIG_FILES.filter((file) => filesInProjectDir.includes(file))
-
-  // if we only found one default file, it is the one
-  if (foundConfigFiles.length === 1) {
-    return foundConfigFiles[0]
-  }
-
-  // if we found more than one, throw a language conflict
-  if (foundConfigFiles.length > 1) {
-    throw errors.throw('CONFIG_FILES_LANGUAGE_CONFLICT', projectRoot, ...foundConfigFiles)
-  }
-
-  if (returnDefaultValueIfNotFound) {
-    // Default is to create a new `cypress.json` file if one does not exist.
-    return CYPRESS_CONFIG_FILES[0]
-  }
-
-  throw errors.get('NO_DEFAULT_CONFIG_FILE_FOUND', projectRoot)
+export async function getDefaultConfigFilePath (projectRoot: string, ctx = makeLegacyDataContext()): Promise<string | undefined> {
+  return ctx.config.getDefaultConfigBasename(projectRoot)
 }

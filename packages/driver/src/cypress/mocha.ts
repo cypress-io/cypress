@@ -107,7 +107,7 @@ function overloadMochaFnForConfig (fnName, specWindow) {
   overrideMochaFn(replacementFn)
 }
 
-const ui = (specWindow, _mocha, config) => {
+const ui = (specWindow, _mocha) => {
   // Override mocha.ui so that the pre-require event is emitted
   // with the iframe's `window` reference, rather than the parent's.
   _mocha.ui = function (name) {
@@ -147,7 +147,7 @@ const setMochaProps = (specWindow, _mocha) => {
   // to the mocha instance for clarity
   m.Mocha = M
 
-  // this needs to be part of the configuration of cypress.json
+  // this needs to be part of the configuration of cypress.config.{ts|js}
   // we can't just forcibly use bdd
   return ui(specWindow, _mocha)
 }

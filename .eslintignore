@@ -6,7 +6,7 @@
 **/build
 **/cypress/fixtures
 **/dist
-**/dist-test
+**/dist-*
 **/node_modules
 **/support/fixtures/*
 !**/support/fixtures/projects

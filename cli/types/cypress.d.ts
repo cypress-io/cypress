@@ -143,7 +143,7 @@ declare namespace Cypress {
 
   /**
    * Spec type for the given test. "integration" is the default, but
-   * tests run using `open-ct` will be "component"
+   * tests run using `open --component` will be "component"
    *
    * @see https://on.cypress.io/experiments
    */
@@ -353,7 +353,7 @@ declare namespace Cypress {
 
     // no real way to type without generics
     /**
-     * Returns all environment variables set with CYPRESS_ prefix or in "env" object in "cypress.json"
+     * Returns all environment variables set with CYPRESS_ prefix or in "env" object in "cypress.config.{ts|js}"
      *
      * @see https://on.cypress.io/env
      */
@@ -362,7 +362,7 @@ declare namespace Cypress {
      * Returns specific environment variable or undefined
      * @see https://on.cypress.io/env
      * @example
-     *    // cypress.json
+     *    // cypress.config.js
      *    { "env": { "foo": "bar" } }
      *    Cypress.env("foo") // => bar
      */
@@ -2761,7 +2761,7 @@ declare namespace Cypress {
     retries: Nullable<number | { runMode?: Nullable<number>, openMode?: Nullable<number> }>
     /**
      * Enables including elements within the shadow DOM when using querying
-     * commands (e.g. cy.get(), cy.find()). Can be set globally in cypress.json,
+     * commands (e.g. cy.get(), cy.find()). Can be set globally in cypress.config.{ts|js},
      * per-suite or per-test in the test configuration object, or programmatically
      * with Cypress.config()
      * @default false
@@ -2813,6 +2813,11 @@ declare namespace Cypress {
      * An array of objects defining the certificates
      */
     clientCertificates: ClientCertificate[]
+
+     /**
+     * Handle Cypress plugins
+     */
+    setupNodeEvents: (on: PluginEvents, config: PluginConfigOptions) => Promise<PluginConfigOptions> | PluginConfigOptions
   }
 
   /**
@@ -2895,11 +2900,25 @@ declare namespace Cypress {
    * All configuration items are optional.
    */
   type CoreConfigOptions = Partial<Omit<ResolvedConfigOptions, TestingType>>
-  type ConfigOptions = CoreConfigOptions & { e2e?: CoreConfigOptions, component?: CoreConfigOptions }
+
+  interface ComponentConfigOptions<ComponentDevServerOpts = any> extends CoreConfigOptions {
+    // TODO(tim): Keeping optional until we land the implementation
+    devServer?: (cypressConfig: DevServerConfig, devServerConfig: ComponentDevServerOpts) => ResolvedDevServerConfig | Promise<ResolvedDevServerConfig>
+    devServerConfig?: ComponentDevServerOpts
+  }
+
+  /**
+   * Takes ComponentDevServerOpts to track the signature of the devServerConfig for the provided `devServer`,
+   * so we have proper completion for `devServerConfig`
+   */
+  type ConfigOptions<ComponentDevServerOpts = any> = CoreConfigOptions & {
+    e2e?: CoreConfigOptions,
+    component?: ComponentConfigOptions<ComponentDevServerOpts>
+  }
 
   interface PluginConfigOptions extends ResolvedConfigOptions {
     /**
-    * Absolute path to the config file (default: <projectRoot>/cypress.json) or false
+    * Absolute path to the config file (default: <projectRoot>/cypress.config.{ts|js}) or false
     */
     configFile: string | false
     /**

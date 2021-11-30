@@ -36,7 +36,7 @@ module.exports = {
       args.push('--project', options.project)
     }
 
-    args.push(...processTestingType(options.testingType))
+    args.push(...processTestingType(options))
 
     debug('opening from options %j', options)
     debug('command line arguments %j', args)

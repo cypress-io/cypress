@@ -1,0 +1,27 @@
+@use '@packages/frontend-shared/src/styles/shared.scss';
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.15s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+/**
+ * Utilities
+ * -------------------------
+ */
+
+// Hides the scrollbar when overflow: auto. Use this sparingly -- it's not accessible!
+.hide-scrollbar {
+  scrollbar-width: 0; // Firefox
+
+  // Chrome
+  &::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
+}

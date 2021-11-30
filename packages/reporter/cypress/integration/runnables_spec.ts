@@ -59,20 +59,6 @@ describe('runnables', () => {
     cy.percySnapshot()
   })
 
-  it('displays multi-spec reporters', () => {
-    start({ runMode: 'multi', allSpecs: [
-      {
-        relative: 'fizz',
-      },
-      {
-        relative: 'buzz',
-      },
-    ] })
-
-    cy.contains('buzz').should('be.visible')
-    cy.percySnapshot()
-  })
-
   it('displays bundle error if specified', () => {
     const error = {
       title: 'Oops...we found an error preparing this test file:',
@@ -126,6 +112,25 @@ describe('runnables', () => {
     cy.get('.error strong').should('have.text', 'found')
     cy.get('.error em').should('have.text', 'error')
     cy.get('.error li').should('have.length', 2)
+  })
+
+  it('displays the time taken in seconds', () => {
+    start()
+
+    const startTime = new Date(2000, 0, 1)
+    const now = new Date(2000, 0, 1, 0, 0, 12, 340)
+
+    cy.clock(now).then(() => {
+      runner.emit('reporter:start', { startTime: startTime.toISOString() })
+    })
+
+    cy.get('.runnable-header span:last').should('have.text', '00:12')
+  })
+
+  it('does not display time if no time taken', () => {
+    start()
+    cy.get('.runnable-header span:first').should('have.text', 'foo')
+    cy.get('.runnable-header span:last').should('not.have.text', '--')
   })
 
   describe('when there are no tests', () => {

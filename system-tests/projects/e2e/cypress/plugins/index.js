@@ -4,24 +4,12 @@ const _ = require('lodash')
 const Jimp = require('jimp')
 const path = require('path')
 const Promise = require('bluebird')
-const { useFixedBrowserLaunchSize } = require('../../../utils')
-
-const { startDevServer } = require('@cypress/webpack-dev-server')
-
-const webpackConfig = {
-  output: {
-    publicPath: '/',
-  },
-}
+const { useFixedBrowserLaunchSize } = require('@tooling/system-tests/lib/pluginUtils')
 
 /**
  * @type {Cypress.PluginConfig}
  */
 module.exports = (on, config) => {
-  if (config.testingType === 'component') {
-    on('dev-server:start', (options) => startDevServer({ options, webpackConfig }))
-  }
-
   let performance = {
     track: () => Promise.resolve(),
   }
@@ -208,4 +196,6 @@ module.exports = (on, config) => {
       return config[key]
     },
   })
+
+  return config
 }

@@ -128,7 +128,7 @@ export default {
       // store the backup again now
       commandBackups[name] = original
 
-      const originalFn = (...args) => {
+      function originalFn (...args) {
         const current = state('current')
         let storedArgs = args
 
@@ -138,7 +138,7 @@ export default {
 
         current.set('args', storedArgs)
 
-        return original.fn(...args)
+        return original.fn.apply(this, args)
       }
 
       const overridden = _.clone(original)
