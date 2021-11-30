@@ -10,4 +10,4 @@ For general contributor information, check out [`CONTRIBUTING.md`](../CONTRIBUTI
 
 * [Determining the next version of Cypress to be released](./next-version.md)
 * [Testing other projects](./testing-other-projects.md)
-* [Release process steps](./release-process.md)
+* [Release process](./release-process.md)

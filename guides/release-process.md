@@ -1,8 +1,8 @@
-# Deployment
+# Release Process
 
-These deployment procedures mainly concern the Cypress binary and `cypress` npm module.
+These procedures concern the release process for the Cypress binary and `cypress` npm module.
 
-Independent `@cypress/` packages that live inside the [`npm`](./npm) directory are automatically published to npm (with [`semantic-release`](https://semantic-release.gitbook.io/semantic-release/)) upon being merged into master. You can read more about this in [CONTRIBUTING.md](./CONTRIBUTING.md#committing-code)
+The `@cypress/`-namespaced NPM packages that live inside the [`/npm`](../npm) directory are automatically published to npm (with [`semantic-release`](https://semantic-release.gitbook.io/semantic-release/)) upon being merged into `master`. You can read more about this in [CONTRIBUTING.md](../CONTRIBUTING.md#independent-packages-ci-workflow).
 
 Anyone can build the binary and npm package, but you can only deploy the Cypress application and publish the npm module `cypress` if you are a member of the `cypress` npm organization.
 
@@ -70,16 +70,12 @@ You can build the Cypress binary locally by running `yarn binary-build`. You can
 
 ### Before Publishing a New Version
 
-In order to publish a new `cypress` package to the npm registry, we must build and test it across multiple platforms and test projects. This makes publishing *directly* into the npm registry impossible. Instead, we have CI set up to do the following on every commit to `develop`:
+In order to publish a new `cypress` package to the npm registry, CI must build and test it across multiple platforms and test projects. CI is set up to do the following on every commit to `develop`:
 
-1. Build the npm package with the new target version baked in.
+1. Build the npm package with the [next target version](./next-version.md) baked in.
 2. Build the Linux/Mac binaries on CircleCI and build Windows on AppVeyor.
 3. Upload the binaries and the new npm package to `cdn.cypress.io` under the "beta" folder.
-4. Launch the test projects like [cypress-test-node-versions](https://github.com/cypress-io/cypress-test-node-versions) and [cypress-test-example-repos](https://github.com/cypress-io/cypress-test-example-repos) using the newly-uploaded package & binary instead of installing from the npm registry. That installation looks like this:
-    ```shell
-    export CYPRESS_INSTALL_BINARY=https://cdn.../binary/<new version>/<commit hash>/cypress.zip
-    npm i https://cdn.../npm/<new version>/<commit hash>/cypress.tgz
-    ```
+4. [Launch test projects](./testing-other-projects.md) using the newly-uploaded package & binary instead of installing from the npm registry.
 
 Multiple test projects are launched for each target operating system and the results are reported
 back to GitHub using status checks so that you can see if a change has broken real-world usage
@@ -91,7 +87,7 @@ Once the `develop` branch for all test projects are reliably passing with the ne
 
 ### Steps to Publish a New Version
 
-In the following instructions, "X.Y.Z" is used to denote the version of Cypress being published.
+In the following instructions, "X.Y.Z" is used to denote the [next version of Cypress being published](./next-version.md).
 
 1. `develop` should contain all of the changes made in `master`. However, this occasionally may not be the case. Ensure that `master` does not have any additional commits that are not on `develop` and all auto-generated pull requests designed to merge master into develop have been successfully merged.
 
