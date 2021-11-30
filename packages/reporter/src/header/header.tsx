@@ -30,7 +30,7 @@ const Header = observer(({ appState, events = defaultEvents, statsStore }: Repor
       }
 
       }>
-        <MenuExpandRightIcon style={{ transform: `rotate(0deg)` }} />
+        <MenuExpandRightIcon style={{ transform: appState.isSpecsListOpen ? 'rotate(180deg)' : 'rotate(0deg)' }} />
 
         <span className='toggle-specs-text'>Specs</span>
       </button>
