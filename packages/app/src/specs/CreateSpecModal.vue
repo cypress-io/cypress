@@ -18,9 +18,10 @@
       <component
         :is="generator.entry"
         v-if="generator"
+        :key="generator.id"
         v-model:title="title"
-        :disabled="false"
         :code-gen-glob="props.gql.currentProject?.codeGenGlob"
+        :project-config="props.gql.currentProject?.config"
         @restart="currentGeneratorId = undefined"
       />
       <div
@@ -63,21 +64,15 @@ fragment CreateSpecModal on Query {
   currentProject {
     id
     ...ComponentGeneratorStepOne_codeGenGlob
+    ...EmptyGeneratorCardStepOne
   }
 }
 `
 
-const currentGeneratorId = ref<GeneratorId | undefined>(props.initialGenerator)
+const currentGeneratorId: Ref<GeneratorId | undefined> = ref(props.initialGenerator)
 
 const { t } = useI18n()
-// const title = ref()
-const title = computed(() => {
-  if (!generator.value) {
-    return t('createSpec.newSpecModalTitle')
-  }
-
-  return
-})
+const title = ref(t('createSpec.newSpecModalTitle'))
 
 const generator = computed(() => {
   if (currentGeneratorId.value) return generators[currentGeneratorId.value]

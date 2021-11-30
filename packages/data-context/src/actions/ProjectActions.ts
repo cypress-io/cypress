@@ -74,6 +74,14 @@ export class ProjectActions {
     execa(this.ctx.coreData.localSettings.preferences.preferredEditorBinary, [projectPath])
   }
 
+  async writeFile (relative: string, content?: string) {
+    if (!this.ctx.currentProject) {
+      return false
+    }
+
+    return this.ctx.fs.writeFile(path.join(this.ctx.currentProject.projectRoot, relative), content)
+  }
+
   async setActiveProject (projectRoot: string) {
     const title = this.ctx.project.projectTitle(projectRoot)
 

@@ -503,6 +503,9 @@ type Mutation {
   """Log out of Cypress Cloud"""
   logout: Boolean
 
+  """Check if a give spec file will match the project spec pattern"""
+  matchesSpecPattern(specFile: String!): Boolean!
+
   """Open a path in preferred IDE"""
   openDirectoryInIDE(path: String!): Boolean
   openExternal(url: String!): Boolean
@@ -548,6 +551,9 @@ type Mutation {
 
   """Updates the different fields of the wizard data store"""
   wizardUpdate(input: WizardUpdateInput!): Boolean
+
+  """Create a file relative to the current project root"""
+  writeFileRelativeToProjectRoot(content: String, file: String!): Boolean!
 }
 
 """Implements the Relay Node spec"""

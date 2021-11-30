@@ -346,6 +346,33 @@ export const mutation = mutationType({
       },
     })
 
+    t.nonNull.boolean('matchesSpecPattern', {
+      description: 'Check if a give spec file will match the project spec pattern',
+      args: {
+        specFile: nonNull(stringArg())
+      },
+      resolve: (source, args, ctx) => {
+        if (!ctx.currentProject) {
+          return false
+        }
+        return ctx.project.matchesSpecPattern(args.specFile)
+      }
+    })
+
+    t.nonNull.boolean('writeFileRelativeToProjectRoot', {
+      description: 'Create a file relative to the current project root',
+      args: {
+        file: nonNull(stringArg()),
+        content: stringArg()
+      },
+      resolve: (source, args, ctx) => {
+        if (!ctx.currentProject) {
+          return false
+        }
+        return ctx.actions.project.writeFile(args.file, args.content)
+      }
+    })
+
     t.field('openFileInIDE', {
       description: 'Open a file on specified line and column in preferred IDE',
       type: 'Boolean',

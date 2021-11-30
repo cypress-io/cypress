@@ -1,4 +1,5 @@
 import type { CodeGenType, SpecType } from '@packages/graphql/src/gen/nxs.gen'
+import minimatch from 'minimatch'
 import { FoundSpec, FrontendFramework, FRONTEND_FRAMEWORKS, ResolvedFromConfig, RESOLVED_FROM, SpecFileWithExtension, STORYBOOK_GLOB } from '@packages/types'
 import { scanFSForAvailableDependency } from 'create-cypress-tests'
 import path from 'path'
@@ -25,6 +26,38 @@ export class ProjectDataSource {
 
   getConfig (projectRoot: string) {
     return this.ctx.config.getConfigForProject(projectRoot)
+  }
+
+  async matchesSpecPattern (specFile: string): Promise<boolean> {
+    if (!this.ctx.currentProject) {
+      return false
+    }
+
+    const MINIMATCH_OPTIONS = { dot: true, matchBase: true }
+
+    let { testFiles = [], ignoreTestFiles = [] } = await this.getConfig(this.ctx.currentProject.projectRoot)
+
+    if (typeof testFiles === 'string') {
+      testFiles = [testFiles]
+    }
+
+    if (typeof ignoreTestFiles === 'string') {
+      ignoreTestFiles = [ignoreTestFiles]
+    }
+
+    for (const pattern of ignoreTestFiles) {
+      if (minimatch(specFile, pattern, MINIMATCH_OPTIONS)) {
+        return false
+      }
+    }
+
+    for (const pattern of testFiles) {
+      if (minimatch(specFile, pattern, MINIMATCH_OPTIONS)) {
+        return true
+      }
+    }
+
+    return false
   }
 
   get currentProjectSpecs (): FoundSpec[] {

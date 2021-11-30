@@ -16,6 +16,7 @@ export const e2eProjectDirs = [
   'default-layout',
   'downloads',
   'e2e',
+  'e2e-with-config-no-specs',
   'empty-folders',
   'failures',
   'firefox-memory',
