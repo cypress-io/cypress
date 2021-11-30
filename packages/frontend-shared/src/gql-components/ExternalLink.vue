@@ -18,7 +18,7 @@ export default defineComponent({
 
 <script setup lang="ts">
 import BaseLink from '../components/BaseLink.vue'
-import { useExternalLink } from '../gql-composables/useExternalLink'
+import { useExternalLink } from '../gql-components/useExternalLink'
 
 const props = withDefaults(defineProps<{
   href: string,

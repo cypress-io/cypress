@@ -2,7 +2,7 @@ import { computed, Ref } from 'vue'
 import MarkdownIt from 'markdown-it'
 import MarkdownItClass from '@toycode/markdown-it-class'
 import { useEventListener, whenever } from '@vueuse/core'
-import { useExternalLink } from '../gql-composables/useExternalLink'
+import { useExternalLink } from '../gql-components/useExternalLink'
 
 export interface UseMarkdownOptions {
   openExternal?: boolean

@@ -41,25 +41,41 @@ type CloudOrganization implements Node {
   name: String
 
   """A connection for cloud projects associated with this organization"""
-  projects(after: String, before: String, first: Int, last: Int): CloudProjectConnection
+  projects(
+    """Returns the elements in the list that come after the specified cursor"""
+    after: String
+
+    """Returns the elements in the list that come before the specified cursor"""
+    before: String
+
+    """Returns the first n elements from the list."""
+    first: Int
+
+    """Returns the last n elements from the list."""
+    last: Int
+  ): CloudProjectConnection
 }
 
-"""A Connection adhering to the Relay Specification"""
 type CloudOrganizationConnection {
-  """A list of edges."""
+  """
+  https://facebook.github.io/relay/graphql/connections.htm#sec-Edge-Types
+  """
   edges: [CloudOrganizationEdge!]!
 
-  """A list of nodes."""
+  """Flattened list of CloudOrganization type"""
   nodes: [CloudOrganization!]!
 
-  """PageInfo result for the connection"""
+  """
+  https://facebook.github.io/relay/graphql/connections.htm#sec-undefined.PageInfo
+  """
   pageInfo: PageInfo!
 }
 
 type CloudOrganizationEdge {
+  """https://facebook.github.io/relay/graphql/connections.htm#sec-Cursor"""
   cursor: String!
 
-  """An edge adhering to the Relay Connection spec"""
+  """https://facebook.github.io/relay/graphql/connections.htm#sec-Node"""
   node: CloudOrganization!
 }
 
@@ -78,28 +94,46 @@ type CloudProject implements Node {
   recordKeys: [CloudRecordKey!]
 
   """A connection field type"""
-  runs(after: String, before: String, cypressVersion: String, first: Int, last: Int, status: CloudRunStatus): CloudRunConnection
+  runs(
+    """Returns the elements in the list that come after the specified cursor"""
+    after: String
+
+    """Returns the elements in the list that come before the specified cursor"""
+    before: String
+    cypressVersion: String
+
+    """Returns the first n elements from the list."""
+    first: Int
+
+    """Returns the last n elements from the list."""
+    last: Int
+    status: CloudRunStatus
+  ): CloudRunConnection
 
   """Unique identifier for a Project"""
   slug: String!
 }
 
-"""A Connection adhering to the Relay Specification"""
 type CloudProjectConnection {
-  """A list of edges."""
+  """
+  https://facebook.github.io/relay/graphql/connections.htm#sec-Edge-Types
+  """
   edges: [CloudProjectEdge!]!
 
-  """A list of nodes."""
+  """Flattened list of CloudProject type"""
   nodes: [CloudProject!]!
 
-  """PageInfo result for the connection"""
+  """
+  https://facebook.github.io/relay/graphql/connections.htm#sec-undefined.PageInfo
+  """
   pageInfo: PageInfo!
 }
 
 type CloudProjectEdge {
+  """https://facebook.github.io/relay/graphql/connections.htm#sec-Cursor"""
   cursor: String!
 
-  """An edge adhering to the Relay Connection spec"""
+  """https://facebook.github.io/relay/graphql/connections.htm#sec-Node"""
   node: CloudProject!
 }
 
@@ -162,23 +196,26 @@ type CloudRunCommitInfo {
   url: String
 }
 
-"""Connection type for CloudRun, adhering to the Relay Connection spec"""
 type CloudRunConnection {
-  """A list of edges."""
+  """
+  https://facebook.github.io/relay/graphql/connections.htm#sec-Edge-Types
+  """
   edges: [CloudRunEdge!]!
 
-  """A list of nodes."""
+  """Flattened list of CloudRun type"""
   nodes: [CloudRun!]!
 
-  """PageInfo result for the connection"""
+  """
+  https://facebook.github.io/relay/graphql/connections.htm#sec-undefined.PageInfo
+  """
   pageInfo: PageInfo!
 }
 
-"""Represents an individual Cloud test Run"""
 type CloudRunEdge {
+  """https://facebook.github.io/relay/graphql/connections.htm#sec-Cursor"""
   cursor: String!
 
-  """The item at the end of the edge."""
+  """https://facebook.github.io/relay/graphql/connections.htm#sec-Node"""
   node: CloudRun!
 }
 
@@ -205,7 +242,19 @@ type CloudUser implements Node {
   id: ID!
 
   """A connection field type"""
-  organizations(after: String, before: String, first: Int, last: Int): CloudOrganizationConnection
+  organizations(
+    """Returns the elements in the list that come after the specified cursor"""
+    after: String
+
+    """Returns the elements in the list that come before the specified cursor"""
+    before: String
+
+    """Returns the first n elements from the list."""
+    first: Int
+
+    """Returns the last n elements from the list."""
+    last: Int
+  ): CloudOrganizationConnection
 
   """Whether this user is the currently authenticated user"""
   userIsViewer: Boolean!
@@ -557,34 +606,26 @@ interface Node {
 }
 
 """
-PageInfo object, adhering to the Relay Connection Spec:
-
-https://relay.dev/graphql/connections.htm#sec-undefined.PageInfo
+PageInfo cursor, as defined in https://facebook.github.io/relay/graphql/connections.htm#sec-undefined.PageInfo
 """
 type PageInfo {
   """
-  Must be the cursor corresponding to the last node in edges. Null if no such node exists
+  The cursor corresponding to the last nodes in edges. Null if the connection is empty.
   """
   endCursor: String
 
   """
   Used to indicate whether more edges exist following the set defined by the clients arguments.
-  If the client is paginating with first/after, then the server must return true if further edges
-  exist, otherwise false. If the client is paginating with last/before, then the client may return
-  true if edges further from before exist, if it can do so efficiently, otherwise may return false.
   """
   hasNextPage: Boolean!
 
   """
   Used to indicate whether more edges exist prior to the set defined by the clients arguments.
-  If the client is paginating with last/before, then the server must return true if prior edges exist,
-  otherwise false. If the client is paginating with first/after, then the client may return true if
-  edges prior to after exist, if it can do so efficiently, otherwise may return false.
   """
   hasPreviousPage: Boolean!
 
   """
-  Must be the cursor corresponding to the first node in edges. Null if no such node exists
+  The cursor corresponding to the first nodes in edges. Null if the connection is empty.
   """
   startCursor: String
 }
