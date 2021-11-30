@@ -31,6 +31,30 @@ mainBuildFilters: &mainBuildFilters
         - 10.0-release
         - rm-appveyor
 
+# usually we don't build Mac app - it takes a long time
+# but sometimes we want to really confirm we are doing the right thing
+# so just add your branch to the list here to build and test on Mac
+macWorkflowFilters: &mac-workflow-filters
+  when:
+    or:
+    - equal: [ develop, << pipeline.git.branch >> ]
+    - matches:
+          pattern: "-release$"
+          value: << pipeline.git.branch >>
+
+windowsWorkflowFilters: &windows-workflow-filters
+  when:
+    or:
+    - equal: [ master, << pipeline.git.branch >> ]
+    - equal: [ develop, << pipeline.git.branch >> ]
+    - equal: [ rm-appveyor, << pipeline.git.branch >> ]
+    - matches:
+          pattern: "-release$"
+          value: << pipeline.git.branch >>
+    - matches:
+          pattern: "win*"
+          value: << pipeline.git.branch >>
+
 executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
@@ -2407,27 +2431,9 @@ windows-workflow: &windows-workflow
 workflows:
   linux:
     <<: *linux-workflow
-  windows:
-    <<: *windows-workflow
-    when:
-      or:
-      - equal: [ master, << pipeline.git.branch >> ]
-      - equal: [ develop, << pipeline.git.branch >> ]
-      - equal: [ rm-appveyor, << pipeline.git.branch >> ]
-      - matches:
-            pattern: "-release$"
-            value: << pipeline.git.branch >>
-      - matches:
-            pattern: "win*"
-            value: << pipeline.git.branch >>
   mac:
     <<: *mac-workflow
-    # usually we don't build Mac app - it takes a long time
-    # but sometimes we want to really confirm we are doing the right thing
-    # so just add your branch to the list here to build and test on Mac
-    when:
-      or:
-      - equal: [ develop, << pipeline.git.branch >> ]
-      - matches:
-            pattern: "-release$"
-            value: << pipeline.git.branch >>
+    <<: *mac-workflow-filters
+  windows:
+    <<: *windows-workflow
+    <<: *windows-workflow-filters
