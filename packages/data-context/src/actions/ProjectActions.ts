@@ -1,5 +1,5 @@
 import type { CodeGenType, MutationAddProjectArgs, MutationSetProjectPreferencesArgs, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
-import type { FindSpecs, FoundBrowser, FoundSpec, FullConfig, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions, Preferences, SettingsOptions } from '@packages/types'
+import type { BaseSpec, FindSpecs, FoundBrowser, FoundSpec, FullConfig, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions, Preferences, SettingsOptions } from '@packages/types'
 import execa from 'execa'
 import path from 'path'
 import type { ActiveProjectShape, ProjectShape } from '../data/coreDataShape'
@@ -27,6 +27,9 @@ export interface ProjectApiShape {
   clearProjectPreferences(projectTitle: string): Promise<unknown>
   clearAllProjectPreferences(): Promise<unknown>
   closeActiveProject(): Promise<unknown>
+  getDevServer (): {
+    updateSpecs: (specs: BaseSpec[]) => void
+  }
   error: {
     throw: (type: string, ...args: any) => Error
     get(type: string, ...args: any): Error & { code: string, isCypressErr: boolean}
@@ -435,12 +438,17 @@ export class ProjectActions {
     const [newSpec] = codeGenResults.files
 
     const spec = this.ctx.file.normalizeFileToSpec({
-      absolute: newSpec.file,
+      absolute: path.join(project.projectRoot, newSpec.file),
       searchFolder,
       specType: codeGenType === 'integration' ? 'integration' : 'component',
       projectRoot: project.projectRoot,
       specFileExtension,
     })
+
+    const allSpecs = this.ctx.project.currentProjectSpecs.concat(spec)
+
+    this.api.getDevServer().updateSpecs(allSpecs)
+    project.specs = allSpecs
 
     return {
       spec,

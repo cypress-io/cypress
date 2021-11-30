@@ -60,7 +60,7 @@ export class SpecOptions {
     const componentName = capitalize(camelCase(this.parsedPath.name))
     const frameworkOptions = {
       react: {
-        imports: ['import { mount } from "@cypress/react"', `import ${componentName} from "./${this.parsedPath.name}"`],
+        imports: ['import React from "react"', 'import { mount } from "@cypress/react"', `import ${componentName} from "./${this.parsedPath.name}"`],
         componentName,
         docsLink: '// see: https://reactjs.org/docs/test-utils.html',
         mount: `mount(<${componentName} />)`,
