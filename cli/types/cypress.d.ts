@@ -27,8 +27,17 @@ declare namespace Cypress {
   interface CommandFnWithSubject<T extends keyof ChainableMethods, S> {
     (this: Mocha.Context, prevSubject: S, ...args: Parameters<ChainableMethods[T]>): ReturnType<ChainableMethods[T]> | void
   }
+  interface CommandOriginalFn<T extends keyof ChainableMethods> extends CallableFunction {
+    (...args: Parameters<ChainableMethods[T]>): ReturnType<ChainableMethods[T]>
+  }
+  interface CommandOriginalFnWithSubject<T extends keyof ChainableMethods, S> extends CallableFunction {
+    (prevSubject: S, ...args: Parameters<ChainableMethods[T]>): ReturnType<ChainableMethods[T]>
+  }
   interface CommandFnWithOriginalFn<T extends keyof Chainable> {
-    (this: Mocha.Context, originalFn: CallableFunction & ChainableMethods[T], ...args: Parameters<ChainableMethods[T]>): ReturnType<ChainableMethods[T]> | void
+    (this: Mocha.Context, originalFn: CommandOriginalFn<T>, ...args: Parameters<ChainableMethods[T]>): ReturnType<ChainableMethods[T]> | void
+  }
+  interface CommandFnWithOriginalFnAndSubject<T extends keyof Chainable, S> {
+    (this: Mocha.Context, originalFn: CommandOriginalFnWithSubject<T, S>, prevSubject: S, ...args: Parameters<ChainableMethods[T]>): ReturnType<ChainableMethods[T]> | void
   }
   interface ObjectLike {
     [key: string]: any
@@ -446,6 +455,7 @@ declare namespace Cypress {
           name: T, options: CommandOptions & { prevSubject: 'optional' | ['optional', ...S[]] }, fn: CommandFnWithSubject<T, void | PrevSubjectMap[S]>,
       ): void
       overwrite<T extends keyof Chainable>(name: T, fn: CommandFnWithOriginalFn<T>): void
+      overwrite<T extends keyof Chainable, S extends PrevSubject>(name: T, fn: CommandFnWithOriginalFnAndSubject<T, PrevSubjectMap[S]>): void
     }
 
     /**

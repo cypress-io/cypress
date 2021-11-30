@@ -64,7 +64,7 @@ namespace CypressIsCyTests {
 
 declare namespace Cypress {
   interface Chainable {
-    newCommand: (arg: string) => void
+    newCommand: (arg: string) => Chainable<number>
   }
 }
 
@@ -137,18 +137,35 @@ namespace CypressCommandsTests {
   Cypress.Commands.add('newCommand', (arg) => {
     // $ExpectType string
     arg
-    return new Promise((resolve) => {})
+    return cy.wrap(new Promise<number>((resolve) => { resolve(5) }))
   })
   Cypress.Commands.overwrite('newCommand', (originalFn, arg) => {
     arg // $ExpectType string
     originalFn // $ExpectedType Chainable['newCommand']
-    originalFn(arg) // $ExpectType void
+    originalFn(arg) // $ExpectType Chainable<number>
   })
   Cypress.Commands.overwrite('newCommand', function(originalFn, arg) {
     this // $ExpectType Context
     arg // $ExpectType string
     originalFn // $ExpectedType Chainable['newCommand']
-    originalFn.apply(this, [arg]) // $ExpectType void
+    originalFn.apply(this, [arg]) // $ExpectType Chainable<number>
+  })
+  Cypress.Commands.overwrite<'type', 'element'>('type', (originalFn, element, text, options?: Partial<Cypress.TypeOptions & {sensitive: boolean}>) => {
+    element // $ExpectType JQuery<HTMLElement>
+    text // $ExpectType string
+
+    if (options && options.sensitive) {
+      // turn off original log
+      options.log = false
+      // create our own log with masked message
+      Cypress.log({
+        $el: element,
+        name: 'type',
+        message: '*'.repeat(text.length),
+      })
+    }
+
+    return originalFn(element, text, options)
   })
 }
 
