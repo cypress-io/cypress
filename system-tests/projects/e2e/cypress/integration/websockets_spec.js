@@ -24,7 +24,7 @@ describe('websockets', () => {
   it('does not crash', () => {
     cy.visit('http://localhost:3038/foo')
     cy.log('should not crash on ECONNRESET websocket upgrade')
-    cy.window().then({ timeout: 20000 }, (win) => {
+    cy.window().then({ timeout: 10000 }, (win) => {
       // see https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent
       return Cypress.Promise.all([
         shouldCloseUrlWithCode(win, 'ws://localhost:3038/websocket', 1006),
