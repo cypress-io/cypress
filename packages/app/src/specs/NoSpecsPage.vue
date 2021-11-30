@@ -78,6 +78,7 @@ fragment NoSpecsPage on Query {
      id
      currentTestingType
      configFileAbsolutePath
+     config
   }
   localSettings {
     preferences {

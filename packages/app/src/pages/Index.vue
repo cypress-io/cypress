@@ -11,7 +11,6 @@
       :is-using-default-specs="isUsingDefaultSpecs"
     />
   </div>
-
   <div v-else>
     Loading...
   </div>
@@ -24,6 +23,8 @@ import { SpecsPageContainerDocument } from '../generated/graphql'
 import NoSpecsPage from '../specs/NoSpecsPage.vue'
 import { computed, ref } from 'vue'
 import { useI18n } from '@cy/i18n'
+import { values } from '@packages/../cli/types/lodash'
+import { ValuesOfCorrectTypeRule } from 'graphql'
 const { t } = useI18n()
 
 gql`
@@ -35,8 +36,22 @@ query SpecsPageContainer {
 
 const query = useQuery({ query: SpecsPageContainerDocument })
 
-// TODO: add logic here based on if default spec pattern is used
-const isUsingDefaultSpecs = ref(false)
+const DEFAULT_SPEC_PATTERN = '**/*.{spec,cy}.{js,ts,tsx,jsx}'
+const isUsingDefaultSpecs = computed(() => {
+  const currentTestingType = query.data.value?.currentProject?.currentTestingType
+  const config = query.data.value?.currentProject?.config
+
+  if (!config || !currentTestingType) {
+    return true
+  }
+
+  const specPatternsInConfig = {
+    component: config.find((item: { field: string }) => item.field === 'component')?.value?.testFiles,
+    e2e: config.find((item: { field: string }) => item.field === 'testFiles')?.value,
+  }
+
+  return specPatternsInConfig[currentTestingType] === DEFAULT_SPEC_PATTERN
+})
 
 const title = computed(() => {
   return isUsingDefaultSpecs.value ?
