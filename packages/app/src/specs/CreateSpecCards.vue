@@ -27,7 +27,13 @@ defineEmits<{
   (eventName: 'select', id: GeneratorId): void
 }>()
 
-const generators = computed(() => generatorList.filter((g) => g.matches(props.gql.currentProject?.currentTestingType)))
+const generators = computed(() => generatorList.filter((g) => {
+  if (!props.gql.currentProject?.currentTestingType) {
+    return false
+  }
+
+  return props.gql.currentProject && g.matches(props.gql.currentProject.currentTestingType)
+}))
 
 gql`
 fragment CreateSpecCards on Query {
