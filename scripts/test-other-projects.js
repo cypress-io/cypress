@@ -9,7 +9,7 @@ const { getInstallJson } = require('@cypress/commit-message-install')
 
 /* eslint-disable no-console */
 
-// See ../guides/other-repo-testing.md for documentation.
+// See ../guides/testing-other-projects.md for documentation.
 
 const { npm, binary } = getNameAndBinary(process.argv)
 
