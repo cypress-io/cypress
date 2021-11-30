@@ -7,6 +7,7 @@ import MenuExpandRightIcon from '-!react-svg-loader!@packages/frontend-shared/sr
 
 import defaultEvents, { Events } from '../lib/events'
 import { AppState } from '../lib/app-state'
+import { action } from 'mobx'
 
 import Controls from './controls'
 import Stats from './stats'
@@ -21,7 +22,14 @@ export interface ReporterHeaderProps {
 const Header = observer(({ appState, events = defaultEvents, statsStore }: ReporterHeaderProps) => (
   <header>
     <Tooltip placement='bottom' title={<p>View All Specs <span className='kbd'>F</span></p>} wrapperClassName='toggle-specs-wrapper' className='cy-tooltip'>
-      <button onClick={() => events.emit('toggle:spec:list')}>
+      <button onClick={() => {
+        action('toggle:spec:list', () => {
+          appState.toggleSpecList()
+          events.emit('save:state')
+        })()
+      }
+
+      }>
         <MenuExpandRightIcon style={{ transform: `rotate(0deg)` }} />
 
         <span className='toggle-specs-text'>Specs</span>
