@@ -228,7 +228,9 @@ export class OpenProject {
         }
 
         // clear all session data before each spec
-        session.clearSessions()
+        if (!cfg.experimentalSessionKeepCache) {
+          session.clearSessions()
+        }
       })
       .then(() => {
         return browsers.open(browser, options, automation)

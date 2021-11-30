@@ -2738,6 +2738,11 @@ declare namespace Cypress {
      */
     experimentalSessionSupport: boolean
     /**
+     * Maintain the experimental session cache between spec files in run mode.
+     * @default false
+     */
+    experimentalSessionKeepCache: boolean
+    /**
      * Allows listening to the `before:run`, `after:run`, `before:spec`, and `after:spec` events in the plugins file during interactive mode.
      * @default false
      */

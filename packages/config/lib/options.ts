@@ -136,6 +136,11 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     validation: validate.isBoolean,
     isExperimental: true,
   }, {
+    name: 'experimentalSessionKeepCache',
+    defaultValue: false,
+    validation: validate.isBoolean,
+    isExperimental: true,
+  }, {
     name: 'experimentalSourceRewriting',
     defaultValue: false,
     validation: validate.isBoolean,
