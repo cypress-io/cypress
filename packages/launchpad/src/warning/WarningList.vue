@@ -1,15 +1,15 @@
 <template>
   <Warning
     v-for="warning in warnings"
-    :key="warningKey(warning)"
+    :key="warning.key"
     :title="warning.title"
     :message="warning.message"
-    :dismiss="onDismiss(warning)"
+    @dismiss="dismissed[warning.key] = true"
   />
 </template>
 
 <script lang="ts" setup>
-import { computed, reactive } from 'vue'
+import { computed, ref } from 'vue'
 import { gql } from '@urql/core'
 import type { WarningListFragment } from '../generated/graphql'
 import Warning from '../warning/Warning.vue'
@@ -28,25 +28,14 @@ const props = defineProps<{
   gql: WarningListFragment
 }>()
 
-const dismissed = reactive({})
-
-const warningKey = (warning) => `${warning.title}${warning.message}`
-
-const onDismiss = (warning) => {
-  return () => {
-    dismissed[warningKey(warning)] = true
-  }
-}
-
+const dismissed = ref({})
 const warnings = computed(() => {
-  return props.gql.warnings.filter((warning) => {
-    return (
-      !dismissed[warningKey(warning)]
-      && (
-        !warning.setupStep
-        || warning.setupStep === props.gql.step
-      )
-    )
+  return props.gql.warnings
+  .map((w) => ({ ...w, key: `${w.title}${w.message}` }))
+  .filter((warning) => {
+    const hasBeenDismissed = dismissed.value[warning.key]
+
+    return !hasBeenDismissed && !warning.setupStep || warning.setupStep === props.gql.step
   })
 })
 </script>
