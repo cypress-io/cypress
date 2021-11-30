@@ -161,8 +161,10 @@ export default (Commands, Cypress, cy) => {
         contents = JSON.stringify(contents, null, 2)
       }
 
+      let result
+
       try {
-        await Cypress.backend('write:file', fileName, contents, _.pick(options, ['encoding', 'flag'])).timeout(options.timeout)
+        result = await Cypress.backend('write:file', fileName, contents, _.pick(options, ['encoding', 'flag'])).timeout(options.timeout)
       } catch (err) {
         if (err.name === 'TimeoutError') {
           return $errUtils.throwErrByPath('files.timed_out', {
@@ -176,6 +178,11 @@ export default (Commands, Cypress, cy) => {
           args: { cmd: 'writeFile', action: 'write', file: fileName, filePath: err.filePath, error: err.message },
         })
       }
+
+      consoleProps['File Path'] = result?.filePath
+      consoleProps['Contents'] = result?.contents
+
+      return null
     },
   })
 }

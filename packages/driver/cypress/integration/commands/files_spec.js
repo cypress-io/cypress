@@ -443,7 +443,7 @@ describe('src/cy/commands/files', () => {
       Cypress.backend.resolves(okResponse)
 
       cy.writeFile('foo.txt', 'contents').then((subject) => {
-        expect(subject).to.not.exist
+        expect(subject).to.eq(null)
       })
     })
 
