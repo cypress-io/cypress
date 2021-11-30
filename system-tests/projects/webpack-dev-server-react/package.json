@@ -1,0 +1,18 @@
+{
+  "name": "@test-project/webpack-dev-server-react",
+  "version": "0.0.0-test",
+  "devDependencies": {
+    "@babel/preset-react": "7.9.4",
+    "@cypress/webpack-dev-server": "file:../../../npm/webpack-dev-server",
+    "babel-loader": "8.1.0",
+    "colorette": "1.2.2",
+    "cypress": "file:../../../cli/build",
+    "fsevents": "2.3.2",
+    "html-webpack-plugin": "4.x",
+    "react": "16.8.6",
+    "react-dom": "16.8.6",
+    "schema-utils": "3.x",
+    "webpack": "^4.44.2",
+    "webpack-dev-server": "^3.0.0"
+  }
+}
