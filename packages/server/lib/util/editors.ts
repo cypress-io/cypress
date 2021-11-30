@@ -5,7 +5,7 @@ import debugModule from 'debug'
 import type { Editor, EditorsResult } from '@packages/types'
 import { getEnvEditors } from './env-editors'
 import shell from './shell'
-import savedState from '../saved_state'
+import * as savedState from '../saved_state'
 
 export const osFileSystemExplorer = {
   darwin: 'Finder',
@@ -52,9 +52,9 @@ const getUserEditors = async (): Promise<Editor[]> => {
 
     return savedState.create()
     .then((state) => {
-      return state.get('preferredOpener')
+      return state.get().then((state) => state.preferredOpener)
     })
-    .then((preferredOpener?: Editor) => {
+    .then((preferredOpener: Editor | undefined) => {
       debug('saved preferred editor: %o', preferredOpener)
 
       const cyEditors = _.map(editors, createEditor)
@@ -75,12 +75,12 @@ export const getUserEditor = async (alwaysIncludeEditors = false): Promise<Edito
   return savedState.create()
   .then((state) => state.get())
   .then((state) => {
-    const preferredOpener = state.preferredOpener
+    const preferredOpener = state.preferredOpener ?? undefined
 
     if (preferredOpener) {
       debug('return preferred editor: %o', preferredOpener)
       if (!alwaysIncludeEditors) {
-        return { preferredOpener }
+        return { preferredOpener, availableEditors: [] }
       }
     }
 
@@ -97,5 +97,5 @@ export const setUserEditor = async (editor: Editor) => {
 
   const state = await savedState.create()
 
-  state.set('preferredOpener', editor)
+  state.set({ preferredOpener: editor })
 }

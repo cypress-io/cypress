@@ -1,7 +1,6 @@
 require('../spec_helper')
 
 const path = require('path')
-const chokidar = require('chokidar')
 const browsers = require(`${root}lib/browsers`)
 const ProjectBase = require(`${root}lib/project-base`).ProjectBase
 const { openProject } = require('../../lib/open_project')
@@ -212,74 +211,6 @@ describe('lib/open_project', () => {
         .then(() => {
           expect(runEvents.execute).to.be.calledWith('after:spec')
           expect(onError).to.be.calledWith(err)
-        })
-      })
-    })
-  })
-
-  context('#getSpecChanges', () => {
-    beforeEach(function () {
-      this.watcherStub = {
-        on: sinon.stub(),
-        close: sinon.stub(),
-      }
-
-      sinon.stub(chokidar, 'watch').returns(this.watcherStub)
-    })
-
-    it('watches spec files', function () {
-      return openProject.getSpecChanges({}).then(() => {
-        expect(chokidar.watch).to.be.calledWith(this.config.testFiles, {
-          cwd: this.config.integrationFolder,
-          ignored: this.config.ignoreTestFiles,
-          ignoreInitial: true,
-        })
-      })
-    })
-
-    it('calls onChange callback when file is added', function () {
-      const onChange = sinon.spy()
-
-      this.watcherStub.on.withArgs('add').yields()
-
-      return openProject.getSpecChanges({ onChange }).then(() => {
-        expect(onChange).to.be.called
-      })
-    })
-
-    it('calls onChange callback when file is removed', function () {
-      const onChange = sinon.spy()
-
-      this.watcherStub.on.withArgs('unlink').yields()
-
-      return openProject.getSpecChanges({ onChange }).then(() => {
-        expect(onChange).to.be.called
-      })
-    })
-
-    it('only calls onChange once if there are multiple changes in a row', function () {
-      const onChange = sinon.spy()
-
-      this.watcherStub.on.withArgs('unlink').yields()
-      this.watcherStub.on.withArgs('add').yields()
-      this.watcherStub.on.withArgs('unlink').yields()
-      this.watcherStub.on.withArgs('add').yields()
-
-      return openProject.getSpecChanges({ onChange }).then(() => {
-        expect(onChange).to.be.calledOnce
-      })
-    })
-
-    it('destroys and creates specsWatcher as expected', function () {
-      return openProject.getSpecChanges()
-      .then(() => {
-        expect(openProject.specsWatcher).to.exist
-        openProject.stopSpecsWatcher()
-        expect(openProject.specsWatcher).to.be.null
-
-        return openProject.getSpecChanges()
-        .then(() => {
-          expect(openProject.specsWatcher).to.exist
         })
       })
     })

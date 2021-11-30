@@ -169,30 +169,6 @@ module.exports = {
     })
   },
 
-  removeIntegration (folder, config) {
-    debug(`integration folder ${folder}`)
-
-    // skip if user has explicitly set integrationFolder
-    // since we wouldn't have scaffolded anything
-    if (!isDefault(config, 'integrationFolder')) {
-      return Promise.resolve()
-    }
-
-    return getExampleSpecs()
-    .then(({ shortPaths, index }) => {
-      return Promise.all(_.map(shortPaths, (file) => {
-        return this._removeFile(file, folder, index)
-      }))
-    }).then(() => {
-      // remove folders after we've removed all files
-      return getExampleSpecs(true).then(({ shortPaths }) => {
-        return Promise.all(_.map(shortPaths, (folderPath) => {
-          return this._removeFolder(folderPath, folder)
-        }))
-      })
-    })
-  },
-
   fixture (folder, config) {
     debug(`fixture folder ${folder}`)
 

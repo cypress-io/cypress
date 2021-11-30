@@ -135,8 +135,8 @@ When an issue is opened in [cypress](https://github.com/cypress-io/cypress), we 
 Some opened issues are questions, not bug reports or feature requests. Issues are reserved for potential bugs or feature requests *only*. If this is the case, you should:
 
 - Explain that issues in our GitHub repo are reserved for potential bugs or feature requests and that the issue will be closed since it appears to be neither a bug nor a feature request.
-- Guide them to existing resources where their questions can be asked like our [Discussions](https://github.com/cypress-io/cypress/discussions), [community chat](https://on.cypress.io/chat), [Discord](https://on.cypress.io/discord),, or [Stack Overflow](https://stackoverflow.com/questions/tagged/cypress).
-- Cypress offers support via email when signing up for any of our our [paid plans](https://www.cypress.io/pricing/), so remind them that this is an option if they already have a paid account.
+- Guide them to existing resources where their questions can be asked like our [Discussions](https://github.com/cypress-io/cypress/discussions), [community chat](https://on.cypress.io/chat), [Discord](https://on.cypress.io/discord), or [Stack Overflow](https://stackoverflow.com/questions/tagged/cypress).
+- Cypress offers support via email when signing up for any of our [paid plans](https://www.cypress.io/pricing/), so remind them that this is an option if they already have a paid account.
 - Move the issue to [Discussions](https://github.com/cypress-io/cypress/discussions).
 
 ### Does this issue belong in this repository?
@@ -219,7 +219,7 @@ The best way to determine the validity of a bug is to recreate it yourself. Foll
 If you can recreate the bug you should:
 
 - Thank them for their contribution.
-- Explain that you're' able to recreate the bug. Provide the exact test code ran and the versions of Cypress, OS, and browser you used to recreate it.
+- Explain that you're able to recreate the bug. Provide the exact test code ran and the versions of Cypress, OS, and browser you used to recreate it.
 - If you know where the code is that could possibly fix this issue - link to the file or line of code from the [cypress](https://github.com/cypress-io/cypress) repo and remind the user that we are open source and that we gladly accept PRs, even if they are a work in progress.
 - Add the `stage: ready for work` label to the issue.
 
@@ -274,7 +274,6 @@ Here is a list of the core packages in this repository with a short description,
  | Folder Name                           | Package Name            | Purpose                                                                      |
  | :------------------------------------ | :---------------------- | :--------------------------------------------------------------------------- |
  | [cli](./cli)                          | `cypress`               | The command-line tool that is packaged as an `npm` module.                   |
- | [desktop-gui](./packages/desktop-gui) | `@packages/desktop-gui` | The front-end code for the Cypress Desktop GUI.                              |
  | [driver](./packages/driver)           | `@packages/driver`      | The code that is used to drive the behavior of the API commands.             |
  | [electron](./packages/electron)       | `@packages/electron`    | The Cypress implementation of Electron.                                      |
  | [example](./packages/example)         | `@packages/example`     | Our example kitchen-sink application.                                        |

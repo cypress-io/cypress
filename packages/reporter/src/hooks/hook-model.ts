@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import { observable, computed } from 'mobx'
 
-import { FileDetails } from '@packages/ui-components'
+import { FileDetails } from '@packages/types'
 
 import { Alias } from '../instruments/instrument-model'
 import Err from '../errors/err-model'
