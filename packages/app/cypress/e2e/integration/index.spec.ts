@@ -1,27 +1,31 @@
 describe('Index', () => {
-  function initializeAndVisit (project: Parameters<typeof cy.setupE2E>[0]) {
-    cy.setupE2E(project)
-    cy.initializeApp()
-    cy.visitApp()
-  }
+  beforeEach(() => {
+    cy.setupE2E('react-project-no-specs')
+    cy.initializeApp('component')
+    cy.withCtx(async (ctx) => {
+      await ctx.actions.file.removeFileInProject('src/Hello.cy.js')
+      if (!ctx.currentProject) {
+        return
+      }
 
-  it('shows "Create your first spec"', () => {
-    initializeAndVisit('component-tests')
-    cy.withCtx((ctx, o) => {
-      ctx.actions.file.removeFileInProject('cypress/integration/integration-spec.js')
+      ctx.currentProject.specs = []
     })
 
-    // after removing the default scaffolded spec, we should be prompted to create a first spec
+    cy.visitApp()
+  })
+
+  it('shows "Create your first spec"', () => {
     cy.visitApp()
     cy.contains('Create your first spec')
   })
 
-  it('creates a spec from component', () => {
-    initializeAndVisit('webpack-dev-server-react')
-    cy.withCtx((ctx, o) => {
-      ctx.actions.file.removeFileInProject('src/Hello.cy.jsx')
-    })
-
+  it('creates a spec from a React component', () => {
     cy.visitApp()
+    cy.contains('Create from component').click()
+    cy.get('[data-testid="file-match-button"]').click()
+    cy.get('[data-cy="file-match-input"]').clear().type('**/*.jsx')
+    cy.contains('Hello.jsx').click()
+    cy.contains('Great! The spec was successfully added')
+    cy.get('[aria-label="Close"]').click()
   })
 })

@@ -45,6 +45,7 @@
           v-if="expanded"
           v-model="localExtensionPattern"
           class="ml-12px"
+          data-cy="file-match-input"
           :placeholder="t('components.fileSearch.byExtensionInput')"
         />
         <FileMatchInput
