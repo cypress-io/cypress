@@ -3,13 +3,10 @@ import chokidar, { FSWatcher } from 'chokidar'
 import _ from 'lodash'
 import specsUtil from './util/specs'
 /* eslint-disable no-duplicate-imports */
-import type { CommonSearchOptions } from '@packages/types'
-
-type SpecFile = Cypress.Cypress['spec']
-type SpecFiles = SpecFile[]
+import type { CommonSearchOptions, FoundSpec } from '@packages/types'
 
 interface SpecsWatcherOptions {
-  onSpecsChanged: (specFiles: SpecFiles) => void
+  onSpecsChanged: (specFiles: FoundSpec[]) => void
 }
 
 // TODO: shouldn't this be on the trailing edge, not leading?
@@ -17,7 +14,7 @@ const debounce = (fn) => _.debounce(fn, 250, { leading: true })
 
 export class SpecsStore {
   watcher: FSWatcher | null = null
-  specFiles: SpecFiles = []
+  specFiles: FoundSpec[] = []
 
   constructor (
     private cypressConfig: Record<string, any>,
@@ -53,7 +50,7 @@ export class SpecsStore {
     })
   }
 
-  getSpecFiles (): Bluebird<SpecFiles> {
+  getSpecFiles (): Bluebird<FoundSpec[]> {
     const searchOptions: CommonSearchOptions = {
       projectRoot: this.cypressConfig.projectRoot,
       fixturesFolder: this.cypressConfig.fixturesFolder,

@@ -4,6 +4,7 @@ import path from 'path'
 
 import { AppApiShape, DataEmitterActions, LocalSettingsApiShape, ProjectApiShape } from './actions'
 import type { NexusGenAbstractTypeMembers } from '@packages/graphql/src/gen/nxs.gen'
+import type { SpecsStore } from '@packages/server/lib/specs-store'
 import type { AuthApiShape } from './actions/AuthActions'
 import type { ElectronApiShape } from './actions/ElectronActions'
 import debugLib from 'debug'
@@ -67,6 +68,7 @@ export class DataContext {
   private _gqlServer?: Server
   private _appServerPort: number | undefined
   private _gqlServerPort: number | undefined
+  private _specStore: SpecsStore | undefined
 
   constructor (private _config: DataContextConfig) {
     this._rootBus = new EventEmitter()
@@ -351,5 +353,13 @@ export class DataContext {
 
   get loader () {
     return this.util.loader
+  }
+
+  setSpecStore (store: SpecsStore) {
+    this._specStore = store
+  }
+
+  get specStore () {
+    return this._specStore
   }
 }

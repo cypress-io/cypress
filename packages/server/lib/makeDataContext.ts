@@ -2,8 +2,7 @@ import { DataContext } from '@packages/data-context'
 import os from 'os'
 import electron, { App } from 'electron'
 
-import specsUtil from './util/specs'
-import type { AllowedState, FindSpecs, FoundBrowser, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions, PlatformName, Preferences, SettingsOptions } from '@packages/types'
+import type { AllowedState, FoundBrowser, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions, PlatformName, Preferences, SettingsOptions } from '@packages/types'
 import browserUtils from './browsers/utils'
 import auth from './gui/auth'
 import user from './user'
@@ -92,9 +91,6 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       },
       getProjectRootsFromCache () {
         return cache.getProjectRoots()
-      },
-      findSpecs (payload: FindSpecs) {
-        return specsUtil.findSpecs(payload)
       },
       clearLatestProjectsCache () {
         return cache.removeLatestProjects()

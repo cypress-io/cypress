@@ -128,8 +128,6 @@ export class ProjectBase<TServer extends Server> extends EE {
       configChildProcess: null,
       ctPluginsInitialized: false,
       e2ePluginsInitialized: false,
-      isCTConfigured: false,
-      isE2EConfigured: false,
       config: null,
     })
   }
@@ -209,6 +207,8 @@ export class ProjectBase<TServer extends Server> extends EE {
       startSpecWatcher,
       ctDevServerPort,
     } = await this.initializeSpecStore(cfg)
+
+    this.ctx.setSpecStore(specsStore)
 
     if (this.testingType === 'component') {
       cfg.baseUrl = `http://localhost:${ctDevServerPort}`
@@ -455,8 +455,10 @@ export class ProjectBase<TServer extends Server> extends EE {
     const startSpecWatcher = () => {
       return specsStore.watch({
         onSpecsChanged: (specs) => {
-        // both e2e and CT watch the specs and send them to the
-        // client to be shown in the SpecList.
+          this.ctx.emitter.toApp()
+
+          // both e2e and CT watch the specs and send them to the
+          // client to be shown in the SpecList.
           this.server.sendSpecList(specs, this.testingType)
 
           if (this.testingType === 'component') {

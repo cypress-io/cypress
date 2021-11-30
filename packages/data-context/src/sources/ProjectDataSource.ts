@@ -1,5 +1,5 @@
 import type { CodeGenType, SpecType } from '@packages/graphql/src/gen/nxs.gen'
-import { FrontendFramework, FRONTEND_FRAMEWORKS, ResolvedFromConfig, RESOLVED_FROM, SpecFileWithExtension, STORYBOOK_GLOB } from '@packages/types'
+import { FoundSpec, FrontendFramework, FRONTEND_FRAMEWORKS, ResolvedFromConfig, RESOLVED_FROM, SpecFileWithExtension, STORYBOOK_GLOB } from '@packages/types'
 import { scanFSForAvailableDependency } from 'create-cypress-tests'
 import path from 'path'
 
@@ -27,37 +27,30 @@ export class ProjectDataSource {
     return this.ctx.config.getConfigForProject(projectRoot)
   }
 
-  async findSpecs (projectRoot: string, specType: Maybe<SpecType>) {
-    const config = await this.getConfig(projectRoot)
-    const specs = await this.api.findSpecs({
-      projectRoot,
-      fixturesFolder: config.fixturesFolder ?? false,
-      supportFile: config.supportFile ?? false,
-      testFiles: config.testFiles ?? [],
-      ignoreTestFiles: config.ignoreTestFiles as string[] ?? [],
-      componentFolder: config.projectRoot ?? false,
-      integrationFolder: config.integrationFolder ?? '',
-    })
-
-    if (!specType) {
-      return specs
+  async findSpecs (specType: Maybe<SpecType>): Promise<FoundSpec[]> {
+    if (!this.ctx.specStore) {
+      return [] as FoundSpec[]
     }
 
-    return specs.filter((spec) => spec.specType === specType)
+    if (!specType) {
+      return this.ctx.specStore.specFiles
+    }
+
+    return this.ctx.specStore.specFiles.map((spec) => ({ ...spec, specType }))
   }
 
-  async getCurrentSpecByAbsolute (projectRoot: string, absolute: string) {
+  async getCurrentSpecByAbsolute (absolute: string) {
     // TODO: should cache current specs so we don't need to
     // call findSpecs each time we ask for the current spec.
-    const specs = await this.findSpecs(projectRoot, null)
+    const specs = await this.findSpecs(null)
 
     return specs.find((x) => x.absolute === absolute)
   }
 
-  async getCurrentSpecById (projectRoot: string, base64Id: string) {
+  async getCurrentSpecById (base64Id: string) {
     // TODO: should cache current specs so we don't need to
     // call findSpecs each time we ask for the current spec.
-    const specs = await this.findSpecs(projectRoot, null)
+    const specs = await this.findSpecs(null)
 
     // id is base64 formatted as per Relay: <type>:<string>
     // in this case, Spec:/my/abs/path
