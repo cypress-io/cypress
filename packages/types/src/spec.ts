@@ -34,3 +34,7 @@ export interface FoundSpec extends SpecFile {
   fileExtension: string
   specType: Cypress.CypressSpecType
 }
+
+export interface SpecsStore {
+  specFiles: FoundSpec[]
+}

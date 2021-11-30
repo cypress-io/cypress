@@ -28,15 +28,15 @@ export class ProjectDataSource {
   }
 
   async findSpecs (specType: Maybe<SpecType>): Promise<FoundSpec[]> {
-    if (!this.ctx.specStore) {
-      return [] as FoundSpec[]
+    if (!this.ctx.specsStore) {
+      throw new Error('Can\'t find specs without specsStore')
     }
 
     if (!specType) {
-      return this.ctx.specStore.specFiles
+      return this.ctx.specsStore.specFiles
     }
 
-    return this.ctx.specStore.specFiles.map((spec) => ({ ...spec, specType }))
+    return this.ctx.specsStore.specFiles.map((spec) => ({ ...spec, specType }))
   }
 
   async getCurrentSpecByAbsolute (absolute: string) {

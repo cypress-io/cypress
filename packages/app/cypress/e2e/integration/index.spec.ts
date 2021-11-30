@@ -17,7 +17,7 @@ describe('Index', () => {
       cy.visitApp()
 
       cy.withCtx((ctx, { testState }) => {
-        const addedSpec = ctx.specStore?.specFiles.find((spec) => spec.absolute.includes(testState.newFilePath))
+        const addedSpec = ctx.specsStore?.specFiles.find((spec) => spec.absolute.includes(testState.newFilePath))
 
         expect(addedSpec).be.equal(undefined)
       })
@@ -31,9 +31,9 @@ describe('Index', () => {
       // ctx.emitter.toApp is not triggering a requery, so we can't test against UI (yet)
       cy.wait(200)
       cy.withCtx((ctx, { testState }) => {
-        expect(ctx.specStore?.specFiles).have.length(2)
+        expect(ctx.specsStore?.specFiles).have.length(2)
 
-        const addedSpec = ctx.specStore?.specFiles.find((spec) => spec.absolute.includes(testState.newFilePath))
+        const addedSpec = ctx.specsStore?.specFiles.find((spec) => spec.absolute.includes(testState.newFilePath))
 
         expect(addedSpec).not.be.equal(undefined)
       })

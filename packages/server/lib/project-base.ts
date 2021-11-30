@@ -208,7 +208,7 @@ export class ProjectBase<TServer extends Server> extends EE {
       ctDevServerPort,
     } = await this.initializeSpecStore(cfg)
 
-    this.ctx.setSpecStore(specsStore)
+    this.ctx.setSpecsStore(specsStore)
 
     if (this.testingType === 'component') {
       cfg.baseUrl = `http://localhost:${ctDevServerPort}`
