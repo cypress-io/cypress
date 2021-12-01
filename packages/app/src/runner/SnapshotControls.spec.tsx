@@ -1,7 +1,7 @@
 import SnapshotControls from './SnapshotControls.vue'
 import { autSnapshot } from '../../cypress/support/fixtures'
 import { useSnapshotStore } from './snapshot-store'
-import { createEventManager, createTestAutIframe } from '../../cypress/e2e/support/ctSupport'
+import { createEventManager, createTestAutIframe } from '../../cypress/component/support/ctSupport'
 
 // function createTestAutIframe () {
 //   return new class {
