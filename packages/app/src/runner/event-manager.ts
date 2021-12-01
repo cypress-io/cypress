@@ -570,7 +570,7 @@ export class EventManager {
       numFailed: state.failed,
       numPending: state.pending,
       autoScrollingEnabled: state.autoScrollingEnabled,
-      // TODO: maybe this is what comes out of savedState?
+      isSpecsListOpen: state.isSpecsListOpen,
       scrollTop: state.scrollTop,
       studioActive: this.studioRecorder.hasRunnableId,
     })
@@ -698,7 +698,6 @@ export class EventManager {
   }
 
   saveState (state) {
-    ws.emit('save:app:state', state)
     this.localBus.emit('save:app:state', state)
   }
 
