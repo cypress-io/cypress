@@ -1,6 +1,6 @@
 # Next Version
 
-When the Cypress CLI and binary are built in CI, their versions are determined by the script in [`/scripts/get-next-version.js`](../scripts/get-next-version.js).
+When the Cypress CLI and binary are built in CI, the version number they share is determined by the script in [`/scripts/get-next-version.js`](../scripts/get-next-version.js).
 
 In most cases, the script will correctly determine the next version. If it needs to be overridden, the environment variable `NEXT_VERSION` can be set to the desired version (`NEXT_VERSION=1.2.3`). This is commonly desired on a release branch or when trying to force a specific major version.
 
