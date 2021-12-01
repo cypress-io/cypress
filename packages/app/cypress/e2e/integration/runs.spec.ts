@@ -74,14 +74,12 @@ describe('App', () => {
   it('if logged in and connected', { viewportWidth: 1200 }, () => {
     cy.loginUser()
     cy.visitApp()
-    cy.intercept('mutation-ExternalLink_OpenExternal', {
-      data: {
-        url: 'http://dummy.cypress.io/runs/4',
-      },
-    }).as('OpenExternal')
+    cy.intercept('mutation-ExternalLink_OpenExternal', { 'data': { 'openExternal': true } }).as('OpenExternal')
 
     cy.get('[href="#/runs"]').click()
     cy.contains('a', 'OVERLIMIT').click()
     cy.wait('@OpenExternal')
+    .its('request.body.variables.url')
+    .should('equal', 'http://dummy.cypress.io/runs/4')
   })
 })
