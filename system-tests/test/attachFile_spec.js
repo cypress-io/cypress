@@ -1,5 +1,4 @@
 const systemTests = require('../lib/system-tests').default
-const Fixtures = require('../lib/fixtures')
 
 // While these tests are fairly simple and could be normal cypress tests,
 // they also depend on 3rd party libraries used only for the test that we
@@ -9,10 +8,8 @@ describe('attachFile', () => {
   systemTests.setup()
 
   it('works with 3rd party libraries', function () {
-    const project = Fixtures.projectPath('attachFile')
-
     return systemTests.exec(this, {
-      project,
+      project: 'attachFile',
       snapshot: false,
       expectedExitCode: 0,
     })
