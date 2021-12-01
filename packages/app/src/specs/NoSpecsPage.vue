@@ -49,6 +49,7 @@
     />
     <CustomPatternNoSpecContent
       v-else
+      :gql="props.gql.currentProject"
       @showCypressConfigInIDE="showCypressConfigInIDE"
       @newSpec="showModal = true"
     />
@@ -65,8 +66,6 @@ import { NoSpecsPage_OpenFileInIdeDocument } from '@packages/data-context/src/ge
 import { useRunnerUiStore } from '../store/runner-ui-store'
 import ChooseExternalEditorModal from '@packages/frontend-shared/src/gql-components/ChooseExternalEditorModal.vue'
 import CustomPatternNoSpecContent from './CustomPatternNoSpecContent.vue'
-import { useI18n } from '@cy/i18n'
-const { t } = useI18n()
 
 gql`
 fragment NoSpecsPage on Query {
@@ -78,6 +77,7 @@ fragment NoSpecsPage on Query {
      id
      currentTestingType
      configFileAbsolutePath
+     ...SpecPatterns
   }
   localSettings {
     preferences {
