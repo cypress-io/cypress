@@ -4,7 +4,7 @@ import { EmptyGeneratorCardStepOneFragmentDoc } from '../../../generated/graphql
 describe('', () => {
   it('', () => {
     cy.mountFragment(EmptyGeneratorCardStepOneFragmentDoc, {
-      render: (gql) => <EmptyGeneratorCardStepOne gql={gql} />,
+      render: (gql) => <EmptyGeneratorCardStepOne gql={gql} title='title' />,
     })
   })
 })
