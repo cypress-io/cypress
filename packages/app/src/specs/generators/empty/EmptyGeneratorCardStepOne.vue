@@ -1,28 +1,23 @@
 <template>
   <div class="px-24px">
-    <Input 
+    <Input
       v-model="specFile"
       placeholder="Enter spec file ..."
     />
-
-    <div>
-      Your spec pattern is: {{ testFiles }}.
-    </div>
-
-    <div>
+    <!-- <div>
       You are ignoring: {{ ignoreTestFiles }}.
-    </div>
+    </div> -->
 
-     <div> 
-      Proposed spec matches?: {{ isValidSpecFile }}.
-     </div> 
+    <Error v-if="!isValidSpecFile">
+      Your filename is invalid because it doesn't match the follow <b>specPattern</b>.
+    </Error>
 
-     <Button
-      @click="createSpec"
+    <Button
       :disabled="!isValidSpecFile"
-     >
-       Create
-     </Button>
+      @click="createSpec"
+    >
+      Create
+    </Button>
   </div>
 </template>
 
@@ -31,6 +26,7 @@ import { ref, computed, watch } from 'vue'
 import { useI18n } from '@packages/frontend-shared/src/locales/i18n'
 import Input from '@packages/frontend-shared/src/components/Input.vue'
 import Button from '@packages/frontend-shared/src/components/Button.vue'
+import Error from '@packages/frontend-shared/src/components/Error.vue'
 import { useVModels } from '@vueuse/core'
 import { gql, useMutation } from '@urql/vue'
 import { EmptyGeneratorCardStepOne_MatchSpecFileDocument } from '../../../generated/graphql'
@@ -42,9 +38,9 @@ const props = defineProps<{
 
 const { t } = useI18n()
 
-
 gql`
 fragment EmptyGeneratorCardStepOne on CurrentProject {
+  id
   config
 }
 `
@@ -63,14 +59,16 @@ const emits = defineEmits<{
 
 const { title } = useVModels(props, emits)
 
-const testFiles = computed<string>(() => {
-  const val = props.projectConfig.find(x => x.field === 'testFiles')?.value ?? []
-  return (typeof val === 'string' ? [val] : val).join(', ')
+const testFiles = computed<string[]>(() => {
+  const val = props.projectConfig.find((x) => x.field === 'testFiles')?.value ?? []
+
+  return typeof val === 'string' ? [val] : val
 })
 
-const ignoreTestFiles = computed<string>(() => {
-  const val = props.projectConfig.find(x => x.field === 'ignoreTestFiles')?.value ?? []
-  return (typeof val === 'string' ? [val] : val).join(', ')
+const ignoreTestFiles = computed<string[]>(() => {
+  const val = props.projectConfig.find((x) => x.field === 'ignoreTestFiles')?.value ?? []
+
+  return typeof val === 'string' ? [val] : val
 })
 
 const specFile = ref('')
@@ -81,8 +79,9 @@ const isValidSpecFile = ref(false)
 const createSpec = () => {
 }
 
-watch(specFile, async value => {
+watch(specFile, async (value) => {
   const result = await matches.executeMutation({ specFile: value })
+
   isValidSpecFile.value = result.data?.matchesSpecPattern ?? false
 })
 
