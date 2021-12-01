@@ -833,30 +833,33 @@ commands:
   build-binary:
     steps:
       - run:
-          name: Check environment variables before code sign (if on Mac)
+          name: Check environment variables before code sign (if on Mac/Windows)
           # NOTE
-          # our Mac code sign works via electron-builder
+          # our code sign works via electron-builder
           # by default, electron-builder will NOT sign app built in a pull request
           # even our internal one (!)
           # Usually this is not a problem, since we only build and test binary
           # built on "develop" and "master" branches
-          # but if you need to really build and sign a Mac binary in a PR
+          # but if you need to really build and sign a binary in a PR
           # set variable CSC_FOR_PULL_REQUEST=true
           command: |
             set -e
-            if [[ "$OSTYPE" == "darwin"* ]]; then
+            NEEDS_CODE_SIGNING=`node -p 'process.platform === "win32" || process.platform === "darwin"'`
+            if [[ "$NEEDS_CODE_SIGNING" == "true" ]]; then
+              echo "Checking for required environment variables..."
               if [ -z "$CSC_LINK" ]; then
                 echo "Need to provide environment variable CSC_LINK"
-                  echo "with base64 encoded certificate .p12 file"
+                echo "with base64 encoded certificate .p12 file"
                 exit 1
               fi
               if [ -z "$CSC_KEY_PASSWORD" ]; then
                 echo "Need to provide environment variable CSC_KEY_PASSWORD"
-                  echo "with password for unlocking certificate .p12 file"
+                echo "with password for unlocking certificate .p12 file"
                 exit 1
               fi
+              echo "Succeeded."
             else
-              echo "Not Mac platform, skipping code sign setup"
+              echo "Not code signing for this platform"
             fi
       - run:
           environment:
