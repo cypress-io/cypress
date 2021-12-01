@@ -10,6 +10,8 @@ interface DefaultAppState {
   studioActive: boolean
 }
 
+// these are used for the `reset` method
+// so only a subset of the initial values are declared here
 const defaults: DefaultAppState = {
   isPaused: false,
   isRunning: false,
@@ -21,7 +23,7 @@ const defaults: DefaultAppState = {
 
 class AppState {
   @observable autoScrollingEnabled = true
-  @observable isSpecsListOpen = true // TODO: consider moving where the default lives
+  @observable isSpecsListOpen = true
   @observable isPaused = defaults.isPaused
   @observable isRunning = defaults.isRunning
   @observable isPreferencesMenuOpen = defaults.isPreferencesMenuOpen
@@ -73,6 +75,10 @@ class AppState {
 
   togglePreferencesMenu () {
     this.isPreferencesMenuOpen = !this.isPreferencesMenuOpen
+  }
+
+  setSpecsList (status: boolean) {
+    this.isSpecsListOpen = status
   }
 
   setAutoScrolling (isEnabled?: boolean | null) {
