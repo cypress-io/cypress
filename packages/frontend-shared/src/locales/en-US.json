@@ -47,6 +47,8 @@
     "disabled": "Disabled"
   },
   "createSpec": {
+    "newSpec": "New Spec",
+    "updateSpecPattern": "Update Spec Pattern",
     "newSpecModalTitle": "Create a new spec",
     "successPage": {
       "header": "Great! The spec was successfully added",
