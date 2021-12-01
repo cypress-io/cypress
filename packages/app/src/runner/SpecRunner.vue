@@ -7,10 +7,14 @@
       id="inline-spec-list"
       class="bg-gray-1000"
     >
-      <InlineSpecList
-        v-if="props.gql.currentProject && props.gql.localSettings.preferences.isSpecsListOpen"
-        :gql="props.gql.currentProject"
-      />
+      <template
+        v-if="props.gql.currentProject"
+      >
+        <InlineSpecList
+          v-show="runnerUiStore.isSpecsListOpen"
+          :gql="props.gql.currentProject"
+        />
+      </template>
 
       <ChooseExternalEditorModal
         :open="runnerUiStore.showChooseExternalEditorModal"
@@ -62,10 +66,9 @@
 <script lang="ts" setup>
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { REPORTER_ID, RUNNER_ID, getRunnerElement, getReporterElement, empty } from '../runner/utils'
-import { gql } from '@urql/core'
 import InlineSpecList from '../specs/InlineSpecList.vue'
 import { getAutIframeModel, getEventManager, UnifiedRunnerAPI } from '../runner'
-import { useAutStore } from '../store'
+import { useAutStore, useRunnerUiStore } from '../store'
 import type { BaseSpec, FileDetails } from '@packages/types'
 import SnapshotControls from './SnapshotControls.vue'
 import SpecRunnerHeader from './SpecRunnerHeader.vue'
@@ -74,9 +77,8 @@ import RemoveClassesDuringScreenshotting from './screenshot/RemoveClassesDuringS
 import RemovePositioningDuringScreenshot from './screenshot/RemovePositioningDuringScreenshot.vue'
 import ScreenshotHelperPixels from './screenshot/ScreenshotHelperPixels.vue'
 import { useScreenshotStore } from '../store/screenshot-store'
-import { useRunnerUiStore } from '../store/runner-ui-store'
 import ChooseExternalEditorModal from '@packages/frontend-shared/src/gql-components/ChooseExternalEditorModal.vue'
-import { useMutation } from '@urql/vue'
+import { useMutation, gql, useClientHandle } from '@urql/vue'
 import { OpenFileInIdeDocument, SpecRunner_SetPreferencesDocument } from '@packages/data-context/src/gen/all-operations.gen'
 import type { SpecRunnerFragment } from '../generated/graphql'
 
@@ -91,6 +93,7 @@ fragment SpecRunner on Query {
   localSettings {
     preferences {
       isSpecsListOpen
+      autoScrollingEnabled
     }
   }
 }
@@ -107,11 +110,19 @@ mutation SpecRunner_SetPreferences ($value: String!) {
   setPreferences (value: $value)
 }`
 
+const props = defineProps<{
+  gql: SpecRunnerFragment
+  activeSpec: BaseSpec
+}>()
+
 const eventManager = getEventManager()
 
 const autStore = useAutStore()
 const screenshotStore = useScreenshotStore()
 const runnerUiStore = useRunnerUiStore()
+
+runnerUiStore.setAutoScrollingEnabled(props.gql.localSettings.preferences.autoScrollingEnabled ?? true)
+runnerUiStore.setIsSpecsListOpen(props.gql.localSettings.preferences.isSpecsListOpen ?? true)
 
 const setPreferences = useMutation(SpecRunner_SetPreferencesDocument)
 
@@ -137,11 +148,6 @@ const viewportStyle = computed(() => {
   height: ${autStore.viewportDimensions.height}px;
   transform: scale(${scale});`
 })
-
-const props = defineProps<{
-  gql: SpecRunnerFragment
-  activeSpec: BaseSpec
-}>()
 
 function runSpec () {
   UnifiedRunnerAPI.executeSpec(props.activeSpec)
@@ -201,6 +207,8 @@ onMounted(() => {
 
   eventManager.on('save:app:state', (state) => {
     // TODO: review if this is the best place for this listener.
+    runnerUiStore.setIsSpecsListOpen(state.isSpecsListOpen)
+    runnerUiStore.setAutoScrollingEnabled(state.autoScrollingEnabled)
     setPreferences.executeMutation({ value: JSON.stringify(state) })
   })
 })
