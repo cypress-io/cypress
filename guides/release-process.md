@@ -30,7 +30,7 @@ The `@cypress/`-namespaced NPM packages that live inside the [`/npm`](../npm) di
         GITHUB_TOKEN="..."
         ZENHUB_API_TOKEN="..."
         ```
-    - The `cypress-bot` GitHub app credentials are also needed . Ask another team member who has done a deploy for those.
+    - The `cypress-bot` GitHub app credentials are also needed. Ask another team member who has done a deploy for those.
         ```text
         GITHUB_APP_CYPRESS_INSTALLATION_ID=
         GITHUB_APP_ID=
@@ -81,7 +81,7 @@ In the following instructions, "X.Y.Z" is used to denote the [next version of Cy
             ![cdn-tgz-link](https://user-images.githubusercontent.com/1157043/80608736-3791e800-8a05-11ea-8d75-e4f80128e857.png)
     - Publish to the npm registry straight from the URL:
         ```shell
-        npm publish https://cdn.../npm/X.Y.Z/<long sha>/cypress.tgz --tag dev
+        npm publish https://cdn.cypress.io/beta/npm/X.Y.Z/<long sha>/cypress.tgz --tag dev
         ```
 
 5. Double-check that the new version has been published under the `dev` tag using `npm info cypress` or [available-versions](https://github.com/bahmutov/available-versions). `latest` should still point to the previous version. Example output:
