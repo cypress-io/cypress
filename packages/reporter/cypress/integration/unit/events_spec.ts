@@ -370,9 +370,11 @@ describe('events', () => {
 
     it('emits save:state on save:state', () => {
       appState.autoScrollingEnabled = false
+      appState.isSpecsListOpen = true
       events.emit('save:state')
       expect(runner.emit).to.have.been.calledWith('save:state', {
         autoScrollingEnabled: false,
+        isSpecsListOpen: true,
       })
     })
 

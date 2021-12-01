@@ -37,7 +37,7 @@ describe('header', () => {
       cy.get('.cy-tooltip').should('have.text', 'View All Specs F')
     })
 
-    it('focuses tests on click', () => {
+    it('emits save state on click', () => {
       cy.spy(runner, 'emit')
       // { force: true } is necessary for click to work, apparently because
       // of the tooltip popping up and getting in the way
