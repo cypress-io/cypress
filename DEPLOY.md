@@ -50,10 +50,9 @@ You can build the Cypress binary locally by running `yarn binary-build`. You can
         ```text
         aws_credentials_json={"bucket":"cdn.cypress.io","folder":"desktop","key":"...","secret":"..."}
         ```
-    - A [GitHub token](https://github.com/settings/tokens), a [CircleCI token](https://circleci.com/account/api),
-      and a `cypress-io` account-specific [AppVeyor token](https://ci.appveyor.com/api-keys) in `ci_json`:
+    - A [GitHub token](https://github.com/settings/tokens) and a [CircleCI token](https://circleci.com/account/api) in `ci_json`:
         ```text
-        ci_json={"githubToken":"...","circleToken":"...","appVeyorToken":"..."}
+        ci_json={"githubToken":"...","circleToken":"..."}
         ```
     - You'll also need to put the GitHub token under its own variable and get a [ZenHub API token](https://app.zenhub.com/dashboard/tokens) for the `release-automations` step.
         ```text
