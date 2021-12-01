@@ -13,7 +13,7 @@
       <template #prefix>
         <i-cy-code-editor_x16 class="icon-dark-white" />
       </template>
-      Update spec pattern
+      {{ t('createSpec.updateSpecPattern') }}
     </Button>
     <Button
       size="lg"
@@ -23,7 +23,7 @@
       <template #prefix>
         <i-cy-add-large_x16 class="icon-dark-gray-500" />
       </template>
-      New Spec
+      {{ t('createSpec.newSpec') }}
     </Button>
   </div>
 </template>
@@ -33,6 +33,9 @@ import Button from '@cy/components/Button.vue'
 import { gql } from '@urql/core'
 import type { SpecPatternsFragment } from '../generated/graphql'
 import SpecPatterns from './SpecPatterns.vue'
+import { useI18n } from '@cy/i18n'
+
+const { t } = useI18n()
 
 const emit = defineEmits<{
   (e: 'showCypressConfigInIDE'): void
