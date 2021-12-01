@@ -11,6 +11,12 @@ export const stubMutation: MaybeResolver<Mutation> = {
 
     return true
   },
+  matchesSpecPattern () {
+    return true
+  },
+  writeFileRelativeToProjectRoot () {
+    return true
+  },
   setActiveProject (source, args, ctx) {
     const project = ctx.projects.find((p) => p.projectRoot === args.path)
 

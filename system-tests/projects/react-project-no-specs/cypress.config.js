@@ -4,5 +4,5 @@ module.exports = {
   component: {
     componentFolder: 'src',
     testFiles: 'src/**/*.cy.{js,jsx}',
-  }
+  },
 }
