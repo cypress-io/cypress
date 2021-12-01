@@ -14,7 +14,7 @@
     <template #target="{ open }">
       <div
         data-testid="alert-header"
-        class="grid grid-cols-1 group cursor-pointer"
+        class="cursor-pointer grid grid-cols-1 group"
         :class="{
 
         }"
@@ -25,11 +25,11 @@
           :header-class="canCollapse ? 'group-hocus:underline' : ''"
           :prefix-icon="prefix?.icon"
           :prefix-icon-class="open ? prefix?.classes + ' rotate-180' : prefix?.classes"
-          :suffix-icon-aria-label="type === 'dismissible' ? t('components.alert.dismissAriaLabel') : ''"
-          :suffix-icon="type === 'dismissible' ? DeleteIcon : null"
+          :suffix-icon-aria-label="props.dismissible ? t('components.alert.dismissAriaLabel') : ''"
+          :suffix-icon="props.dismissible ? DeleteIcon : null"
           data-testid="alert"
           class="rounded min-w-200px p-16px"
-          @suffixIconClicked="toggle() && $emit('suffixIconClicked')"
+          @suffixIconClicked="toggle() && emits('suffixIconClicked')"
         >
           <template
             v-if="$slots.prefixIcon"
@@ -53,14 +53,14 @@
         <div
           v-if="open"
           data-testid="alert-body-divider"
-          class="mx-auto h-1px w-[calc(100%-32px)] transform translate-y-1px"
+          class="mx-auto h-1px transform w-[calc(100%-32px)] translate-y-1px"
           :class="[classes.dividerClass]"
         />
       </div>
     </template>
     <div
       v-if="$slots.default"
-      class="p-16px text-left"
+      class="text-left p-16px"
       data-testid="alert-body"
     >
       <slot />
@@ -70,8 +70,6 @@
 
 <script lang="ts">
 export type AlertStatus = 'error' | 'warning' | 'info' | 'default' | 'success'
-
-export type AlertType = 'collapsible' | 'dismissible' | 'static'
 
 export type AlertClasses = {
   headerClass: string,
@@ -95,7 +93,7 @@ import Collapsible from './Collapsible.vue'
 const { t } = useI18n()
 const slots = useSlots()
 
-defineEmits<{
+const emits = defineEmits<{
   (eventName: 'suffixIconClicked'): void
 }>()
 
@@ -105,12 +103,12 @@ const props = withDefaults(defineProps<{
   icon?: FunctionalComponent<SVGAttributes, {}>,
   headerClass?: string,
   alertClass?: string,
-  type?: AlertType,
+  dismissible?: boolean
+  collapsible?: boolean
 }>(), {
   title: 'Alert',
   alertClass: undefined,
   status: 'info',
-  type: 'static',
   icon: undefined,
   headerClass: undefined,
 })
@@ -166,8 +164,8 @@ const classes = computed(() => {
     alertClass: props.alertClass ?? alertStyles[props.status].alertClass,
   }
 })
-const canCollapse = computed(() => slots.default && props.type === 'collapsible')
-const initiallyOpen = computed(() => slots.default && props.type !== 'collapsible')
+const canCollapse = computed(() => slots.default && props.collapsible)
+const initiallyOpen = computed(() => slots.default && !props.collapsible)
 
 const prefix = computed(() => {
   if (props.icon) return { icon: props.icon }

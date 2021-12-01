@@ -1,7 +1,7 @@
 import CoffeeIcon from '~icons/mdi/coffee'
 import LoadingIcon from '~icons/mdi/loading'
 import faker from 'faker'
-import Alert, { AlertType } from './Alert.vue'
+import Alert from './Alert.vue'
 import { defaultMessages } from '../locales/i18n'
 import Select from '@cy/components/Select.vue'
 
@@ -61,8 +61,8 @@ describe('<Alert />', () => {
   describe('static', () => {
     it('renders any body content and is open by default', () => {
       cy.mount(() => (
-        <div class="p-4 text-center space-y-2">
-          <Alert type="static">
+        <div class="space-y-2 text-center p-4">
+          <Alert>
             <p data-testid="body-content">{ faker.lorem.paragraphs(5) }</p>
           </Alert>
         </div>
@@ -75,8 +75,8 @@ describe('<Alert />', () => {
   describe('dismissible', () => {
     it('renders any body content and is open by default', () => {
       cy.mount(() => (
-        <div class="p-4 text-center space-y-2">
-          <Alert type="dismissible">
+        <div class="space-y-2 text-center p-4">
+          <Alert dismissible>
             <p data-testid="body-content">{ faker.lorem.paragraphs(5) }</p>
           </Alert>
         </div>
@@ -86,7 +86,7 @@ describe('<Alert />', () => {
     })
 
     it('cannot be collapsed', () => {
-      cy.mount(() => (<Alert type="dismissible">
+      cy.mount(() => (<Alert dismissible>
         <p data-testid="body-content">{ faker.lorem.paragraphs(5) }</p>
       </Alert>))
       .get(alertBodySelector).should('be.visible')
@@ -96,8 +96,8 @@ describe('<Alert />', () => {
 
     it('has a "dismiss" suffixIcon by default', () => {
       cy.mount(() => (
-        <div class="p-4 text-center space-y-2">
-          <Alert status="info" type="dismissible"/>
+        <div class="space-y-2 text-center p-4">
+          <Alert status="info" dismissible/>
         </div>
       ))
 
@@ -108,8 +108,8 @@ describe('<Alert />', () => {
 
     it('can be dismissed', () => {
       cy.mount(() => (
-        <div class="p-4 text-center space-y-2">
-          <Alert type="dismissible" />
+        <div class="space-y-2 text-center p-4">
+          <Alert dismissible />
         </div>
       ))
 
@@ -118,7 +118,7 @@ describe('<Alert />', () => {
     })
 
     it('accepts a custom dismiss icon, via slot', () => {
-      cy.mount(() => <Alert type="dismissible" v-slots={{ suffixIcon }}/>)
+      cy.mount(() => <Alert dismissible v-slots={{ suffixIcon }}/>)
     })
 
     it('can create a dismiss button via the suffixIcons slot props', () => {
@@ -128,7 +128,7 @@ describe('<Alert />', () => {
         },
       }
 
-      cy.mount(() => <Alert type="dismissible" v-slots={slots} />)
+      cy.mount(() => <Alert dismissible v-slots={slots} />)
       cy.get(dismissSelector).click()
       cy.get(alertHeaderSelector).should('not.exist')
     })
@@ -136,38 +136,38 @@ describe('<Alert />', () => {
 
   describe('with body content', () => {
     it('shows the body content initially', () => {
-      const types: AlertType[] = ['dismissible', 'static']
+      const types = [{ 'dismissible': true }, { 'static': true }] as const
 
       const alerts = types.map((type) => (<div>
-        <h2 class="capitalize">{type}</h2>
-        <Alert type={type} title={alertTitle}>
+        <h2 class="capitalize">{Object.keys(type)[0]}</h2>
+        <Alert {...type} title={alertTitle}>
           <p>{ faker.lorem.paragraphs(2) }</p>
         </Alert>
       </div>
       ))
 
-      cy.mount(() => <div class="p-4 space-y-2">{ alerts }</div>)
+      cy.mount(() => <div class="space-y-2 p-4">{ alerts }</div>)
       cy.get(alertBodySelector).each((el) => cy.wrap(el).should('be.visible').get(dividerLineSelector).should('be.visible'))
     })
   })
 
   describe('without body content', () => {
     it('cannot be collapsed, even when the alert type is collapsible', () => {
-      cy.mount(<Alert type="collapsible" title={alertTitle}/>)
+      cy.mount(<Alert collapsible title={alertTitle}/>)
       cy.get(alertBodySelector).should('not.exist')
       cy.get(alertHeaderSelector).click().get(alertBodySelector).should('not.exist')
     })
 
     it('renders each alert type without the divider line', () => {
-      const types: AlertType[] = ['collapsible', 'dismissible', 'static']
+      const types = [{ 'dismissible': true }, { 'collapsible': true }, { 'static': true }]
 
       const alerts = types.map((type) => (<div>
-        <h2 class="capitalize">{type}</h2>
-        <Alert type={type} title={alertTitle}/>
+        <h2 class="capitalize">{Object.keys(type)[0]}</h2>
+        <Alert {...type} title={alertTitle} />
       </div>
       ))
 
-      cy.mount(() => <div class="p-4 space-y-2">{ alerts }</div>)
+      cy.mount(() => <div class="space-y-2 p-4">{ alerts }</div>)
       cy.get(alertHeaderSelector).each((el) => cy.wrap(el).click()).get(dividerLineSelector).should('not.exist')
     })
   })
@@ -175,8 +175,8 @@ describe('<Alert />', () => {
   describe('collapsible', () => {
     beforeEach(() => {
       cy.mount(() => (
-        <div class="p-4 text-center space-y-2">
-          <Alert status="success" type="collapsible" icon={CoffeeIcon} title={alertTitle}>{alertBodyContent}</Alert>
+        <div class="space-y-2 text-center p-4">
+          <Alert status="success" collapsible icon={CoffeeIcon} title={alertTitle}>{alertBodyContent}</Alert>
         </div>
       ))
     })
@@ -206,17 +206,17 @@ describe('<Alert />', () => {
 describe('playground', () => {
   it('renders', () => {
     cy.mount(() => (
-      <div class="p-4 text-center space-y-2">
+      <div class="space-y-2 text-center p-4">
         <Select/>
         <hr/>
-        <Alert status="success" type="collapsible" icon={CoffeeIcon} title="Coffee, please">
+        <Alert status="success" collapsible icon={CoffeeIcon} title="Coffee, please">
           Delicious. Yum.
-          <button class="px-2 ml-2 bg-white rounded">Focusable</button>
+          <button class="bg-white rounded ml-2 px-2">Focusable</button>
         </Alert>
-        <Alert status="info" type="collapsible" title="An info alert">Just letting you know what's up.</Alert>
-        <Alert status="warning" type="static">Nothing good is happening here!</Alert>
-        <Alert icon={CoffeeIcon} type="dismissible" status="error">Close me, please!</Alert>
-        <Alert v-slots={{ suffixIcon }} type="collapsible" status="default">A notice.</Alert>
+        <Alert status="info" collapsible title="An info alert">Just letting you know what's up.</Alert>
+        <Alert status="warning">Nothing good is happening here!</Alert>
+        <Alert icon={CoffeeIcon} dismissible status="error">Close me, please!</Alert>
+        <Alert v-slots={{ suffixIcon }} collapsible status="default">A notice.</Alert>
       </div>
     ))
   })
