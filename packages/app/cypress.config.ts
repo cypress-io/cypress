@@ -9,12 +9,12 @@ export default defineConfig({
     'openMode': 0,
   },
   'nodeVersion': 'system',
-  'testFiles': 'cypress/e2e/integration/**/*.{spec,cy}.ts',
+  'testFiles': '**/*.{spec,cy}.{js,ts,tsx,jsx}',
   'reporter': '../../node_modules/cypress-multi-reporters/index.js',
   'reporterOptions': {
     'configFile': '../../mocha-reporter-config.json',
   },
-  'integrationFolder': '',
+  'integrationFolder': 'cypress/e2e/integration',
   'componentFolder': 'src',
   'supportFile': false,
   'component': {
