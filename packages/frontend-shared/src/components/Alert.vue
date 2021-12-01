@@ -14,12 +14,13 @@
     <template #target="{ open }">
       <div
         data-testid="alert-header"
-        class="cursor-pointer grid grid-cols-1 group"
+        class="grid grid-cols-1 group"
         :class="{
-
+          'cursor-pointer': canCollapse,
         }"
       >
         <AlertHeader
+          v-if="showHeader"
           :title="title"
           v-bind="classes"
           :header-class="canCollapse ? 'group-hocus:underline' : ''"
@@ -106,12 +107,15 @@ const props = withDefaults(defineProps<{
   dismissible?: boolean
   collapsible?: boolean
 }>(), {
-  title: 'Alert',
+  title: undefined,
   alertClass: undefined,
   status: 'info',
   icon: undefined,
   headerClass: undefined,
 })
+
+const showHeader = computed(() => props.title || props.dismissible || props.collapsible)
+const title = computed(() => props.title ?? 'Alert')
 
 const alertStyles: Record<AlertStatus, AlertClasses> = {
   default: {

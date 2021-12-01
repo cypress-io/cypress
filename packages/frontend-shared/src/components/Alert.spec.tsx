@@ -3,7 +3,6 @@ import LoadingIcon from '~icons/mdi/loading'
 import faker from 'faker'
 import Alert from './Alert.vue'
 import { defaultMessages } from '../locales/i18n'
-import Select from '@cy/components/Select.vue'
 
 const messages = defaultMessages.components.alert
 
@@ -207,8 +206,6 @@ describe('playground', () => {
   it('renders', () => {
     cy.mount(() => (
       <div class="space-y-2 text-center p-4">
-        <Select/>
-        <hr/>
         <Alert status="success" collapsible icon={CoffeeIcon} title="Coffee, please">
           Delicious. Yum.
           <button class="bg-white rounded ml-2 px-2">Focusable</button>
@@ -217,6 +214,7 @@ describe('playground', () => {
         <Alert status="warning">Nothing good is happening here!</Alert>
         <Alert icon={CoffeeIcon} dismissible status="error">Close me, please!</Alert>
         <Alert v-slots={{ suffixIcon }} collapsible status="default">A notice.</Alert>
+        <Alert>Default alert</Alert>
       </div>
     ))
   })
