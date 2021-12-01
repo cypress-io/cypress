@@ -49,6 +49,7 @@
     />
     <CustomPatternNoSpecContent
       v-else
+      :gql="props.gql.currentProject"
       @showCypressConfigInIDE="showCypressConfigInIDE"
       @newSpec="showModal = true"
     />
@@ -78,6 +79,7 @@ fragment NoSpecsPage on Query {
      id
      currentTestingType
      configFileAbsolutePath
+     ...SpecPatterns
   }
   localSettings {
     preferences {

@@ -82,6 +82,12 @@ describe('<NoSpecsPage />', () => {
     it('renders the correct text for component testing', () => {
       cy.get(pageTitleSelector).should('contain.text', messages.page.customPatternNoSpecs.title)
       .get(pageDescriptionSelector).should('contain.text', messages.page.customPatternNoSpecs.description.replace('{0}', ' specPattern '))
+
+      // show spec pattern
+      cy.contains('**/*.spec.{js,ts,tsx,jsx}')
+      cy.contains('Update spec pattern')
+      cy.contains('New Spec').click()
+      cy.contains('Create a new spec')
     })
   })
 })
