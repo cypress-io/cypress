@@ -117,6 +117,7 @@ import { useMainStore } from '../store'
 import { SideBarNavigationDocument } from '../generated/graphql'
 import CypressLogo from '@packages/frontend-shared/src/assets/logos/cypress_s.png'
 import { useI18n } from '@cy/i18n'
+import { useIntervalFn } from '@vueuse/core'
 
 const { t } = useI18n()
 
@@ -137,7 +138,13 @@ query SideBarNavigation {
 }
 `
 
-const query = useQuery({ query: SideBarNavigationDocument })
+const query = useQuery({ query: SideBarNavigationDocument, requestPolicy: 'network-only' })
+
+// TODO(tgriesser): Push this to the frontend when the value has changed.
+useIntervalFn(() => {
+  query.executeQuery()
+}, 10000)
+
 const currentProject = computed(() => query.data.value?.currentProject)
 
 const bindingsOpen = ref(false)
