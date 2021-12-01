@@ -17,6 +17,7 @@ describe('<CreateSpecModal />', () => {
         gql={{
           currentProject: {
             id: 'id',
+            config: {},
             codeGenGlob: '**.vue',
             storybook: null,
             currentTestingType: 'component',
@@ -66,6 +67,7 @@ describe('playground', () => {
       <CreateSpecModal
         gql={{
           currentProject: {
+            config: {},
             id: 'id',
             codeGenGlob: '**.vue',
             storybook: null,
