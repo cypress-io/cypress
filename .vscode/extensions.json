@@ -57,7 +57,7 @@
     // Name: Terminals Manager
 		// Description: An extension for setting-up multiple terminals at once, or just running some commands
 		// There are several Terminals defined in `.vscode/terminals.json` that can be used via this plugin.
-		"fabiospampinato.vscode-terminals",
+    "fabiospampinato.vscode-terminals",
 
     // Name: GitHub linker
 		// Description: Create links to fragments of code in GitHub
