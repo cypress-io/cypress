@@ -1,10 +1,9 @@
 import type { CodeGenType, SpecType } from '@packages/graphql/src/gen/nxs.gen'
-import { FrontendFramework, FRONTEND_FRAMEWORKS, ResolvedFromConfig, RESOLVED_FROM, SpecFileWithExtension, STORYBOOK_GLOB } from '@packages/types'
+import { FoundSpec, FrontendFramework, FRONTEND_FRAMEWORKS, ResolvedFromConfig, RESOLVED_FROM, SpecFileWithExtension, STORYBOOK_GLOB } from '@packages/types'
 import { scanFSForAvailableDependency } from 'create-cypress-tests'
 import path from 'path'
 
 import type { DataContext } from '..'
-import type { Maybe } from '../data/coreDataShape'
 
 export class ProjectDataSource {
   constructor (private ctx: DataContext) {}
@@ -27,29 +26,42 @@ export class ProjectDataSource {
     return this.ctx.config.getConfigForProject(projectRoot)
   }
 
-  async findSpecs (projectRoot: string, specType: Maybe<SpecType>) {
+  async findSpecs (projectRoot: string, specType: SpecType): Promise<FoundSpec[]> {
     const config = await this.getConfig(projectRoot)
-    const specs = await this.api.findSpecs({
-      projectRoot,
-      fixturesFolder: config.fixturesFolder ?? false,
-      supportFile: config.supportFile ?? false,
-      testFiles: config.testFiles ?? [],
-      ignoreTestFiles: config.ignoreTestFiles as string[] ?? [],
-      componentFolder: config.projectRoot ?? false,
-      integrationFolder: config.integrationFolder ?? '',
+    const type = specType === 'component' ? 'component' : 'e2e'
+    const specPattern = config[type]?.specPattern
+
+    const specAbsolutePaths = await this.ctx.file.getFilesByGlob(projectRoot, specPattern ?? [], { absolute: true })
+
+    const specs = specAbsolutePaths.map<FoundSpec>((absolute) => {
+      const relative = path.relative(projectRoot, absolute).replace(/\\/g, '/')
+      const parsedFile = path.parse(absolute)
+      const fileExtension = path.extname(absolute)
+
+      const specFileExtension = ['.spec', '.test', '-spec', '-test', '.cy']
+      .map((ext) => ext + fileExtension)
+      .find((ext) => absolute.endsWith(ext)) || fileExtension
+
+      return {
+        fileExtension,
+        baseName: parsedFile.base,
+        fileName: parsedFile.base.replace(specFileExtension, ''),
+        specFileExtension,
+        specType,
+        name: relative,
+        relative,
+        absolute,
+      }
     })
 
-    if (!specType) {
-      return specs
-    }
-
-    return specs.filter((spec) => spec.specType === specType)
+    return specs
   }
 
   async getCurrentSpecByAbsolute (projectRoot: string, absolute: string) {
     // TODO: should cache current specs so we don't need to
     // call findSpecs each time we ask for the current spec.
-    const specs = await this.findSpecs(projectRoot, null)
+    const specs = await this.findSpecs(projectRoot,
+      this.ctx.appData.currentTestingType === 'component' ? 'component' : 'integration')
 
     return specs.find((x) => x.absolute === absolute)
   }
@@ -57,7 +69,9 @@ export class ProjectDataSource {
   async getCurrentSpecById (projectRoot: string, base64Id: string) {
     // TODO: should cache current specs so we don't need to
     // call findSpecs each time we ask for the current spec.
-    const specs = await this.findSpecs(projectRoot, null)
+    const specs = await this.findSpecs(
+      projectRoot, this.ctx.appData.currentTestingType === 'component' ? 'component' : 'integration',
+    )
 
     // id is base64 formatted as per Relay: <type>:<string>
     // in this case, Spec:/my/abs/path
