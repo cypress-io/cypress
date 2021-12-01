@@ -100,7 +100,11 @@ export function createCloudProject (config: ConfigFor<CloudProject>) {
         return createCloudRun({
           status,
           totalPassed: i,
-          commitInfo: createCloudRunCommitInfo({ sha: `fake-sha-${getNodeIdx('CloudRun')}`, summary: `fix: make gql work ${status}` }),
+          url: `http://dummy.cypress.io/runs/${i}`,
+          commitInfo: createCloudRunCommitInfo({
+            sha: `fake-sha-${getNodeIdx('CloudRun')}`,
+            summary: `fix: make gql work ${status}`,
+          }),
         })
       })
 
