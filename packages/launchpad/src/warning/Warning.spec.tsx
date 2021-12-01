@@ -1,6 +1,7 @@
 import { defaultMessages } from '@cy/i18n'
 import Warning from './Warning.vue'
 import faker from 'faker'
+import { ref } from 'vue'
 
 const title = faker.hacker.noun()
 const message = `
@@ -26,12 +27,18 @@ describe('<Warning />', () => {
   })
 
   it('calls dismiss when X is clicked', () => {
-    const onDismiss = cy.stub().as('onDismissSpy')
+    const show = ref(true)
+    const methods = {
+      'onUpdate:modelValue': (value) => {
+        show.value = value
+      },
+    }
 
     cy.mount(() => (<div class="p-4"><Warning
       title={title}
       message={message}
-      onDismiss={onDismiss}
+      modelValue={show.value}
+      {...methods}
     /></div>))
 
     // @ts-ignore

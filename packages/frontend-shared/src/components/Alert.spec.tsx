@@ -144,7 +144,7 @@ describe('<Alert />', () => {
       const { modelValue, methods } = makeDismissibleProps()
       const slots = {
         suffixIcon ({ onClick, ariaLabel }) {
-          return <CoffeeIcon title="Alert" onClick={onClick} aria-label={ariaLabel}/>
+          return <CoffeeIcon onClick={onClick} aria-label={ariaLabel}/>
         },
       }
 
