@@ -53,21 +53,24 @@ export default (Commands, Cypress, cy) => {
         try {
           result = await Cypress.backend('read:file', file, _.pick(options, ['encoding'])).timeout(options.timeout)
         } catch (err) {
-          if (err.code === 'ENOENT') {
-            result = {
-              contents: null,
-              filePath: err.filePath,
-            }
-          } else if (err.name === 'TimeoutError') {
+          if (err.name === 'TimeoutError') {
             return $errUtils.throwErrByPath('files.timed_out', {
               onFail: options._log,
               args: { cmd: 'readFile', file, timeout: options.timeout },
             })
-          } else {
+          }
+
+          // Non-ENOENT errors are not retried
+          if (err.code !== 'ENOENT') {
             return $errUtils.throwErrByPath('files.unexpected_error', {
               onFail: options._log,
               args: { cmd: 'readFile', action: 'read', file, filePath: err.filePath, error: err.message },
             })
+          }
+
+          result = {
+            contents: null,
+            filePath: err.filePath,
           }
         }
 
