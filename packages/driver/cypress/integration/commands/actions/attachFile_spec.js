@@ -20,12 +20,13 @@ function getFileContents (subject) {
 describe('src/cy/commands/actions/attachFile', () => {
   beforeEach(() => {
     cy.visit('/fixtures/files-form.html')
+    cy.wrap(Buffer.from('foo')).as('foo')
   })
 
   context('#attachFile', () => {
     it('attaches a single file', () => {
       cy.get('#basic')
-      .attachFile({ contents: 'foo', fileName: 'foo.txt' })
+      .attachFile({ contents: '@foo', fileName: 'foo.txt' })
 
       cy.get('#basic')
       .then((input) => {
@@ -46,10 +47,10 @@ describe('src/cy/commands/actions/attachFile', () => {
       cy.get('#multiple')
       .attachFile([
         {
-          contents: 'foo',
+          contents: '@foo',
           fileName: 'foo.txt',
         }, {
-          contents: { a: 'bar' },
+          contents: Buffer.from('{"a":"bar"}'),
           fileName: 'bar.json',
         },
         Buffer.from('baz'),
@@ -74,7 +75,7 @@ describe('src/cy/commands/actions/attachFile', () => {
 
     it('attaches files with custom lastModified and mimeType', () => {
       cy.get('#basic').attachFile({
-        contents: 'foo',
+        contents: '@foo',
         mimeType: 'text/plain',
         lastModified: 1234,
       })
@@ -86,7 +87,7 @@ describe('src/cy/commands/actions/attachFile', () => {
     })
 
     it('attaches files to an input from a label', () => {
-      cy.get('#basic-label').attachFile({ contents: 'foo' })
+      cy.get('#basic-label').attachFile({ contents: '@foo' })
 
       cy.get('#basic')
       .then(getFileContents)
@@ -96,7 +97,7 @@ describe('src/cy/commands/actions/attachFile', () => {
     })
 
     it('attaches files to an input from a containing label', () => {
-      cy.get('#containing-label').attachFile({ contents: 'foo' })
+      cy.get('#containing-label').attachFile({ contents: '@foo' })
 
       cy.get('#contained')
       .then(getFileContents)
@@ -134,7 +135,7 @@ describe('src/cy/commands/actions/attachFile', () => {
         })
       })
 
-      cy.get('#basic').attachFile({ contents: 'foo' })
+      cy.get('#basic').attachFile({ contents: '@foo' })
     })
 
     it('bubbles events', (done) => {
@@ -144,7 +145,7 @@ describe('src/cy/commands/actions/attachFile', () => {
         })
       })
 
-      cy.get('#basic').attachFile({ contents: 'foo' })
+      cy.get('#basic').attachFile({ contents: '@foo' })
     })
 
     it('invokes events on the input without changing subject when passed a label', (done) => {
@@ -156,15 +157,99 @@ describe('src/cy/commands/actions/attachFile', () => {
         done()
       })
 
-      cy.get('#basic-label').attachFile({ contents: 'foo' })
+      cy.get('#basic-label').attachFile({ contents: '@foo' })
       .should('have.id', 'basic-label')
     })
 
     it('can empty previously filled input', () => {
-      cy.get('#basic').attachFile({ contents: 'foo' })
+      cy.get('#basic').attachFile({ contents: '@foo' })
       cy.get('#basic').attachFile([])
       .then((input) => {
         expect(input[0].files.length).to.eq(0)
+      })
+    })
+
+    it('works with shadow DOMs', () => {
+      cy.get('#shadow')
+      .shadow()
+      .find('input')
+      .as('shadowInput')
+      .attachFile('@foo')
+
+      cy.get('@shadowInput')
+      .then(getFileContents)
+      .then((contents) => {
+        expect(contents[0]).to.eql('foo')
+      })
+    })
+
+    describe('shorthands', () => {
+      const validJsonString = `{
+  "foo": 1,
+  "bar": {
+    "baz": "cypress"
+  }
+}
+`
+
+      it('works with aliased strings', () => {
+        cy.wrap('foobar').as('alias')
+
+        cy.get('#basic').attachFile('@alias')
+        .then(getFileContents)
+        .then((contents) => {
+          expect(contents[0]).to.eql('foobar')
+        })
+      })
+
+      it('works with aliased objects', () => {
+        cy.wrap({ foo: 'bar' }).as('alias')
+
+        cy.get('#basic').attachFile('@alias')
+        .then(getFileContents)
+        .then((contents) => {
+          expect(contents[0]).to.eql('{"foo":"bar"}')
+        })
+      })
+
+      it('works with aliased fixtures', () => {
+        cy.fixture('valid.json').as('myFixture')
+
+        cy.get('#basic').attachFile('@myFixture')
+        .then(getFileContents)
+        .then((contents) => {
+          // Because json files are loaded as objects, they get reencoded before
+          // being attached, stripping spaces and newlines
+          expect(contents[0]).to.eql('{"foo":1,"bar":{"baz":"cypress"}}')
+        })
+      })
+
+      // Because this is such an important recipe for users, it gets a separate test
+      // even though readFile already has unit tests around reading files as buffers.
+      it('works with files read with null encoding', () => {
+        cy.readFile('cypress/fixtures/valid.json', { encoding: null }).as('myFile')
+
+        cy.get('#basic').attachFile('@myFile')
+        .then(getFileContents)
+        .then((contents) => {
+          expect(contents[0]).to.eql(validJsonString)
+        })
+      })
+
+      it('works with passed in paths', () => {
+        cy.get('#multiple').attachFile(['cypress/fixtures/valid.json', 'cypress/fixtures/app.js'])
+        .then(getFileContents)
+        .then((contents) => {
+          expect(contents[0]).to.eql(validJsonString)
+          expect(contents[1]).to.eql('{ \'bar\' }\n')
+        })
+
+        cy.get('#multiple')
+        .should('include.value', 'valid.json')
+        .then((input) => {
+          expect(input[0].files[0].name).to.eq('valid.json')
+          expect(input[0].files[1].name).to.eq('app.js')
+        })
       })
     })
 
@@ -176,7 +261,7 @@ describe('src/cy/commands/actions/attachFile', () => {
           done()
         })
 
-        cy.attachFile({ contents: 'foo' })
+        cy.attachFile({ contents: '@foo' })
       })
 
       it('throws when non dom subject', (done) => {
@@ -184,37 +269,37 @@ describe('src/cy/commands/actions/attachFile', () => {
           done()
         })
 
-        cy.noop({}).attachFile({ contents: 'foo' })
+        cy.noop({}).attachFile({ contents: '@foo' })
       })
 
       it('throws when non-input subject', function (done) {
         cy.on('fail', (err) => {
           expect(err.message).to.include('`cy.attachFile()` can only be called on an `<input type="file">` or a `<label for="fileInput">` pointing to or containing one. Your subject is: `<body>...</body>`')
-          expect(err.docsUrl).to.eq('https://on.cypress.io/attachFile')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/attachfile')
           done()
         })
 
-        cy.get('body').attachFile({ contents: 'foo' })
+        cy.get('body').attachFile({ contents: '@foo' })
       })
 
       it('throws when non-file input', function (done) {
         cy.on('fail', (err) => {
           expect(err.message).to.include('`cy.attachFile()` can only be called on an `<input type="file">` or a `<label for="fileInput">` pointing to or containing one. Your subject is: `<input type="text" id="text-input">`')
-          expect(err.docsUrl).to.eq('https://on.cypress.io/attachFile')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/attachfile')
           done()
         })
 
-        cy.get('#text-input').attachFile({ contents: 'foo' })
+        cy.get('#text-input').attachFile({ contents: '@foo' })
       })
 
       it('throws when label for non-file input', function (done) {
         cy.on('fail', (err) => {
           expect(err.message).to.include('`cy.attachFile()` can only be called on an `<input type="file">` or a `<label for="fileInput">` pointing to or containing one. Your subject is: `<label for="text-input" id="text-label">Text label</label>`')
-          expect(err.docsUrl).to.eq('https://on.cypress.io/attachFile')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/attachfile')
           done()
         })
 
-        cy.get('#text-label').attachFile({ contents: 'foo' })
+        cy.get('#text-label').attachFile({ contents: '@foo' })
       })
 
       it('throws when label without an attached input', function (done) {
@@ -222,27 +307,27 @@ describe('src/cy/commands/actions/attachFile', () => {
         // does *not* activate the contained input.
         cy.on('fail', (err) => {
           expect(err.message).to.include('`cy.attachFile()` can only be called on an `<input type="file">` or a `<label for="fileInput">` pointing to or containing one. Your subject is: `<label for="nonexistent" id="nonexistent-label">...</label>`')
-          expect(err.docsUrl).to.eq('https://on.cypress.io/attachFile')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/attachfile')
           done()
         })
 
-        cy.get('#nonexistent-label').attachFile({ contents: 'foo' })
+        cy.get('#nonexistent-label').attachFile({ contents: '@foo' })
       })
 
       it('throws when subject is collection of elements', function (done) {
         cy.on('fail', (err) => {
           expect(err.message).to.include('`cy.attachFile()` can only be called on a single element. Your subject contained')
-          expect(err.docsUrl).to.eq('https://on.cypress.io/attachFile')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/attachfile')
           done()
         })
 
-        cy.get('input[type="file"]').attachFile({ contents: 'foo' })
+        cy.get('input[type="file"]').attachFile({ contents: '@foo' })
       })
 
       it('throws when no arguments given', function (done) {
         cy.on('fail', (err) => {
           expect(err.message).to.include('`cy.attachFile()` must be passed a Buffer or an object with a non-null `contents` property as its 1st argument. You passed: `undefined`.')
-          expect(err.docsUrl).to.eq('https://on.cypress.io/attachFile')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/attachfile')
           done()
         })
 
@@ -252,7 +337,7 @@ describe('src/cy/commands/actions/attachFile', () => {
       it('throws when file is null', function (done) {
         cy.on('fail', (err) => {
           expect(err.message).to.include('`cy.attachFile()` must be passed a Buffer or an object with a non-null `contents` property as its 1st argument. You passed: `null`.')
-          expect(err.docsUrl).to.eq('https://on.cypress.io/attachFile')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/attachfile')
           done()
         })
 
@@ -262,31 +347,83 @@ describe('src/cy/commands/actions/attachFile', () => {
       it('throws when single file.contents is null', function (done) {
         cy.on('fail', (err) => {
           expect(err.message).to.include('`cy.attachFile()` must be passed a Buffer or an object with a non-null `contents` property as its 1st argument. You passed: `{"contents":null}`.')
-          expect(err.docsUrl).to.eq('https://on.cypress.io/attachFile')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/attachfile')
           done()
         })
 
         cy.get('#basic').attachFile({ contents: null })
       })
 
-      it('throws when any of multiple files contents is undefined', function (done) {
+      it('throws when file is an unknown alias', function (done) {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.attachFile()` must be passed an array of Buffers or objects with non-null `contents`. At files[1] you passed: `{}`.')
-          expect(err.docsUrl).to.eq('https://on.cypress.io/attachFile')
+          expect(err.message).to.include('`cy.attachFile()` could not find a registered alias for: `@unknown`.')
           done()
         })
 
-        cy.get('#basic').attachFile([{ contents: 'foo' }, {}])
+        cy.get('#basic').attachFile('@unknown')
+      })
+
+      it('throws when file is an alias for a DOM node', function (done) {
+        cy.on('fail', (err) => {
+          expect(err.message).to.include('`cy.attachFile()` can only attach strings, Buffers or objects, while your alias `@body` resolved to: `<body>...</body>`.')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/attachfile')
+          done()
+        })
+
+        cy.get('body').as('body')
+        cy.get('#basic').attachFile('@body')
+      })
+
+      it('throws when file is an alias for null', function (done) {
+        cy.on('fail', (err) => {
+          expect(err.message).to.include('`cy.attachFile()` can only attach strings, Buffers or objects, while your alias `@null` resolved to: `null`.')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/attachfile')
+          done()
+        })
+
+        cy.wrap(null).as('null')
+        cy.get('#basic').attachFile('@null')
+      })
+
+      it('throws with aliased intercepts', function (done) {
+        cy.on('fail', (err) => {
+          expect(err.message).to.include('`cy.attachFile()` can only attach strings, Buffers or objects, while your alias `@postUser` resolved to: `null`.')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/attachfile')
+          done()
+        })
+
+        cy.intercept('POST', '/users', {}).as('postUser')
+        cy.get('#basic').attachFile('@postUser')
+      })
+
+      it('throws when any path does not exist', function (done) {
+        cy.on('fail', (err) => {
+          expect(err.message).to.include('`cy.attachFile("this/file/doesNotExist.json")` failed because the file does not exist at the following path:')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/attachfile')
+          done()
+        })
+
+        cy.get('#basic').attachFile(['cypress/fixtures/valid.json', 'this/file/doesNotExist.json'])
+      })
+
+      it('throws when any file\'s contents is undefined', function (done) {
+        cy.on('fail', (err) => {
+          expect(err.message).to.include('`cy.attachFile()` must be passed an array of Buffers or objects with non-null `contents`. At files[1] you passed: `{}`.')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/attachfile')
+          done()
+        })
+
+        cy.get('#basic').attachFile([{ contents: '@foo' }, {}])
       })
 
       it('throws on invalid action', function (done) {
         cy.on('fail', (err) => {
           expect(err.message).to.include('`cy.attachFile()` `action` can only be `input` or `drag-n-drop`. You passed: `foobar`.')
-          expect(err.docsUrl).to.eq('https://on.cypress.io/attachFile')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/attachfile')
           done()
         })
 
-        cy.get('#basic').attachFile({ contents: 'foo' }, { action: 'foobar' })
+        cy.get('#basic').attachFile({ contents: '@foo' }, { action: 'foobar' })
       })
     })
 
@@ -301,7 +438,7 @@ describe('src/cy/commands/actions/attachFile', () => {
       defaultCommandTimeout: 50,
     }, () => {
       it('attaches files to a hidden input from a visible label', () => {
-        cy.get('#hidden-label').attachFile({ contents: 'foo' })
+        cy.get('#hidden-label').attachFile({ contents: '@foo' })
 
         cy.get('#hidden')
         .then(getFileContents)
@@ -316,11 +453,11 @@ describe('src/cy/commands/actions/attachFile', () => {
           done()
         })
 
-        cy.get('#hidden').attachFile({ contents: 'foo' })
+        cy.get('#hidden').attachFile({ contents: '@foo' })
       })
 
       it('can force on hidden inputs', () => {
-        cy.get('#hidden').attachFile({ contents: 'foo' }, { force: true })
+        cy.get('#hidden').attachFile({ contents: '@foo' }, { force: true })
       })
 
       it('does not work on covered inputs by default', (done) => {
@@ -334,11 +471,11 @@ is being covered by another element:
           done()
         })
 
-        cy.get('#covered').attachFile({ contents: 'foo' })
+        cy.get('#covered').attachFile({ contents: '@foo' })
       })
 
       it('can force on covered inputs', () => {
-        cy.get('#covered').attachFile({ contents: 'foo' }, { force: true })
+        cy.get('#covered').attachFile({ contents: '@foo' }, { force: true })
       })
 
       it('does not work on disabled inputs by default', (done) => {
@@ -347,11 +484,11 @@ is being covered by another element:
           done()
         })
 
-        cy.get('#disabled-label').attachFile({ contents: 'foo' })
+        cy.get('#disabled-label').attachFile({ contents: '@foo' })
       })
 
       it('can force on disabled inputs', () => {
-        cy.get('#disabled-label').attachFile({ contents: 'foo' }, { force: true })
+        cy.get('#disabled-label').attachFile({ contents: '@foo' }, { force: true })
       })
 
       it('does not work on hidden labels by default', (done) => {
@@ -360,11 +497,11 @@ is being covered by another element:
           done()
         })
 
-        cy.get('#hidden-basic-label').attachFile({ contents: 'foo' })
+        cy.get('#hidden-basic-label').attachFile({ contents: '@foo' })
       })
 
       it('can force on hidden labels', () => {
-        cy.get('#hidden-basic-label').attachFile({ contents: 'foo' }, { force: true })
+        cy.get('#hidden-basic-label').attachFile({ contents: '@foo' }, { force: true })
       })
 
       it('can scroll to input', () => {
@@ -374,7 +511,7 @@ is being covered by another element:
           scrolled.push(type)
         })
 
-        cy.get('#scroll').attachFile({ contents: 'foo' })
+        cy.get('#scroll').attachFile({ contents: '@foo' })
         .then(() => {
           expect(scrolled).not.to.be.empty
         })
@@ -387,7 +524,7 @@ is being covered by another element:
           scrolled.push(type)
         })
 
-        cy.get('#scroll-label').attachFile({ contents: 'foo' })
+        cy.get('#scroll-label').attachFile({ contents: '@foo' })
         .then(() => {
           expect(scrolled).not.to.be.empty
         })
@@ -400,7 +537,7 @@ is being covered by another element:
           scrolled.push(type)
         })
 
-        cy.get('#scroll-label').attachFile({ contents: 'foo' }, { force: true })
+        cy.get('#scroll-label').attachFile({ contents: '@foo' }, { force: true })
         .then(() => {
           expect(scrolled).to.be.empty
         })
@@ -419,7 +556,7 @@ is being covered by another element:
         .throws(new Error('animating!'))
         .onThirdCall().returns()
 
-        cy.get('#basic').attachFile({ contents: 'foo' }).then(() => {
+        cy.get('#basic').attachFile({ contents: '@foo' }).then(() => {
           expect(retries).to.eq(3)
           expect(cy.ensureElementIsNotAnimating).to.be.calledThrice
         })
@@ -430,7 +567,7 @@ is being covered by another element:
           cy.spy(el[0], 'scrollIntoView')
         })
 
-        cy.get('#scroll').attachFile({ contents: 'foo' }, { scrollBehavior: 'bottom' })
+        cy.get('#scroll').attachFile({ contents: '@foo' }, { scrollBehavior: 'bottom' })
 
         cy.get('#scroll').then((el) => {
           expect(el[0].scrollIntoView).to.be.calledWith({ block: 'end' })

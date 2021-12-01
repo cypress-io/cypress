@@ -24,8 +24,8 @@ describe('attachFile', () => {
     // handler - there's no way for cypress know that a button should trigger
     // the file input. We have to target the hidden input and `force` it.
     cy.get('input').first().attachFile([
-      { contents: 'foo', fileName: 'bar.txt' },
-      { contents: 'foo2', fileName: 'baz.txt' },
+      { contents: Buffer.from('foo'), fileName: 'bar.txt' },
+      { contents: Buffer.from('foo2'), fileName: 'baz.txt' },
     ], { force: true })
 
     cy.get('#uppy')
@@ -55,8 +55,8 @@ describe('attachFile', () => {
     // handler - there's no way for cypress know that a button should trigger
     // the file input. We have to target the hidden input and `force` it.
     cy.get('input').first().attachFile([
-      { contents: 'foo', fileName: 'bar.txt' },
-      { contents: 'foo2', fileName: 'baz.txt' },
+      { contents: Buffer.from('foo'), fileName: 'bar.txt' },
+      { contents: Buffer.from('foo2'), fileName: 'baz.txt' },
     ], { force: true })
 
     cy.get('.dz-preview')
