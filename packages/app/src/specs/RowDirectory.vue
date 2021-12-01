@@ -12,7 +12,7 @@
     />
     <component
       :is="IconFolder"
-      class="icon-dark-gray-50 icon-light-gray-200 document-icon"
+      class="icon-dark-white icon-light-gray-200 document-icon"
     />
     <HighlightedText
       :text="props.name"

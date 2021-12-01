@@ -6,7 +6,7 @@
     :title="title"
     :model-value="show"
     data-testid="create-spec-modal"
-    @update:model-value="$emit('close')"
+    @update:model-value="close"
   >
     <template #overlay="{classes}">
       <DialogOverlay
@@ -22,6 +22,7 @@
         v-model:title="title"
         :code-gen-glob="props.gql.currentProject?.codeGenGlob"
         @restart="currentGeneratorId = undefined"
+        @close="close"
       />
       <div
         v-else
@@ -53,7 +54,7 @@ const props = defineProps<{
   gql: CreateSpecModalFragment
 }>()
 
-defineEmits<{
+const emits = defineEmits<{
   (eventName: 'close'): void
 }>()
 
@@ -81,4 +82,9 @@ const generator = computed(() => {
 whenever(not(generator), () => {
   title.value = t('createSpec.newSpecModalTitle')
 })
+
+function close () {
+  currentGeneratorId.value = undefined
+  emits('close')
+}
 </script>
