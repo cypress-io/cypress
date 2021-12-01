@@ -16,6 +16,7 @@ describe('<NoSpecsPage />', () => {
         onResult: (ctx) => {
           ctx.currentProject = {
             ...ctx.currentProject,
+            config: {},
             id: 'id',
             storybook: null,
             configFileAbsolutePath: '/usr/bin/cypress.config.ts',
@@ -49,6 +50,7 @@ describe('<NoSpecsPage />', () => {
         onResult: (ctx) => {
           ctx.currentProject = {
             ...ctx.currentProject,
+            config: {},
             configFileAbsolutePath: '/usr/bin/cypress.config.ts',
             id: 'id',
             storybook: null,
@@ -82,6 +84,12 @@ describe('<NoSpecsPage />', () => {
     it('renders the correct text for component testing', () => {
       cy.get(pageTitleSelector).should('contain.text', messages.page.customPatternNoSpecs.title)
       .get(pageDescriptionSelector).should('contain.text', messages.page.customPatternNoSpecs.description.replace('{0}', ' specPattern '))
+
+      // show spec pattern
+      cy.contains('**/*.spec.{js,ts,tsx,jsx}')
+      cy.contains(defaultMessages.createSpec.updateSpecPattern)
+      cy.contains(defaultMessages.createSpec.newSpec).click()
+      cy.contains(defaultMessages.createSpec.newSpecModalTitle)
     })
   })
 })
