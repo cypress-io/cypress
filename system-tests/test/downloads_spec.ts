@@ -10,7 +10,7 @@ describe('e2e downloads', () => {
   systemTests.setup()
 
   systemTests.it('handles various file downloads', {
-    project: downloadsProject,
+    project: 'downloads',
     spec: 'downloads_spec.ts',
     config: {
       video: false,
@@ -18,11 +18,11 @@ describe('e2e downloads', () => {
   })
 
   const fileExists = (fileName) => {
-    return fs.pathExists(path.join(Fixtures.projectPath('downloads'), 'cypress', 'dls', fileName))
+    return fs.pathExists(path.join(downloadsProject, 'cypress', 'dls', fileName))
   }
 
   systemTests.it('allows changing the downloads folder', {
-    project: Fixtures.projectPath('downloads'),
+    project: 'downloads',
     spec: '*',
     config: {
       downloadsFolder: 'cypress/dls',
@@ -39,13 +39,13 @@ describe('e2e downloads', () => {
 
   it('trashes downloads between runs', async function () {
     await systemTests.exec(this, {
-      project: downloadsProject,
+      project: 'downloads',
       spec: 'download_csv_spec.ts',
     })
 
     // this run should trash the downloads from the above run
     await systemTests.exec(this, {
-      project: downloadsProject,
+      project: 'downloads',
       spec: 'simple_passing_spec.ts',
     })
 
@@ -57,13 +57,13 @@ describe('e2e downloads', () => {
 
   it('does not trash downloads between runs if trashAssetsBeforeRuns: false', async function () {
     await systemTests.exec(this, {
-      project: downloadsProject,
+      project: 'downloads',
       spec: 'download_csv_spec.ts',
     })
 
     // this run should _not_ trash the downloads from the above run
     await systemTests.exec(this, {
-      project: downloadsProject,
+      project: 'downloads',
       spec: 'simple_passing_spec.ts',
       config: {
         trashAssetsBeforeRuns: false,
