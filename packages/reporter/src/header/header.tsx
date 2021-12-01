@@ -22,14 +22,16 @@ export interface ReporterHeaderProps {
 const Header = observer(({ appState, events = defaultEvents, statsStore }: ReporterHeaderProps) => (
   <header>
     <Tooltip placement='bottom' title={<p>View All Specs <span className='kbd'>F</span></p>} wrapperClassName='toggle-specs-wrapper' className='cy-tooltip'>
-      <button onClick={() => {
-        action('toggle:spec:list', () => {
-          appState.toggleSpecList()
-          events.emit('save:state')
-        })()
-      }
-
-      }>
+      <button
+        aria-controls="reporter-inline-specs-list"
+        aria-expanded={appState.isSpecsListOpen}
+        onClick={() => {
+          action('toggle:spec:list', () => {
+            appState.toggleSpecList()
+            events.emit('save:state')
+          })()
+        }
+        }>
         <MenuExpandRightIcon style={{ transform: appState.isSpecsListOpen ? 'rotate(180deg)' : 'rotate(0deg)' }} />
 
         <span className='toggle-specs-text'>Specs</span>

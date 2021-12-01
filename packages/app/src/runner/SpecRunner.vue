@@ -12,6 +12,7 @@
       >
         <InlineSpecList
           v-show="runnerUiStore.isSpecsListOpen"
+          id="reporter-inline-specs-list"
           :gql="props.gql.currentProject"
         />
       </template>
@@ -33,7 +34,7 @@
 
     <div
       ref="runnerPane"
-      class="relative w-full"
+      class="w-full relative"
     >
       <HideDuringScreenshot class="bg-white p-4">
         <SpecRunnerHeader
@@ -45,7 +46,7 @@
       </HideDuringScreenshot>
 
       <RemoveClassesDuringScreenshotting
-        class="flex justify-center h-full p-4 bg-gray-100"
+        class="flex h-full bg-gray-100 p-4 justify-center"
       >
         <div
           :id="RUNNER_ID"

@@ -73,13 +73,24 @@ describe('shortcuts', function () {
       })
     })
 
-    it('focuses on specs', () => {
+    it('toggles the specs list', () => {
+      // 1. save:state should be emitted to preserve the change in state
+      // 2. the reporter appSate should be also be updated with the new value,
+      // checking the aria-expanded state of the button confirms thos
+
       cy.get('body').then(() => {
-        expect(runner.emit).not.to.have.been.calledWith('toggle:spec:list')
+        expect(runner.emit).not.to.have.been.calledWith('save:state')
+        cy.contains('button', 'Specs').should('have.attr', 'aria-expanded', 'true')
       })
 
       cy.get('body').type('f').then(() => {
-        expect(runner.emit).to.have.been.calledWith('toggle:spec:list')
+        expect(runner.emit).to.have.been.calledWith('save:state')
+        cy.contains('button', 'Specs').should('have.attr', 'aria-expanded', 'false')
+      })
+
+      cy.get('body').type('f').then(() => {
+        expect(runner.emit).to.have.been.calledWith('save:state')
+        cy.contains('button', 'Specs').should('have.attr', 'aria-expanded', 'true')
       })
     })
 
