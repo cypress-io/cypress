@@ -179,6 +179,9 @@ type CloudRun implements Node {
 
   """This is the number of tests across all groups in the run"""
   totalTests: Int
+
+  """A link to the run page"""
+  url: String
 }
 
 type CloudRunCommitInfo {

@@ -20,6 +20,9 @@
     },
     "select": {
       "placeholder": "Choose an option..."
+    },
+    "alert": {
+      "dismissAriaLabel": "Dismiss"
     }
   },
   "clipboard": {

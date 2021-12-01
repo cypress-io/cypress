@@ -1,17 +1,22 @@
 <template>
   <Collapsible
     v-if="isOpen"
+    lazy
     :initially-open="initiallyOpen"
     :disable="!canCollapse"
     class="rounded-t rounded-b outline-none overflow-hidden group"
-    :class="[classes.alertClass, classes.headerClass]"
+    :class="[
+      classes.alertClass,
+      classes.headerClass,
+      {[`hocus-default border-1 border-transparent rounded ${classes.ring}`]: canCollapse}]"
     height="300"
   >
     <template #target="{ open }">
       <div
-        class="grid grid-cols-1 border-1 border-transparent group"
+        data-testid="alert-header"
+        class="grid grid-cols-1 group cursor-pointer"
         :class="{
-          [`hocus-default cursor-pointer m-2px rounded ${classes.ring}`]: canCollapse,
+
         }"
       >
         <AlertHeader
@@ -20,27 +25,34 @@
           :header-class="canCollapse ? 'group-hocus:underline' : ''"
           :prefix-icon="prefix?.icon"
           :prefix-icon-class="open ? prefix?.classes + ' rotate-180' : prefix?.classes"
-          :suffix-icon-aria-label="type === 'dismissible' ? t('components.modal.dismiss') : ''"
+          :suffix-icon-aria-label="type === 'dismissible' ? t('components.alert.dismissAriaLabel') : ''"
           :suffix-icon="type === 'dismissible' ? DeleteIcon : null"
           data-testid="alert"
           class="rounded min-w-200px p-16px"
-          @suffixIconClicked="toggle && $emit('suffixIconClicked')"
+          @suffixIconClicked="toggle() && $emit('suffixIconClicked')"
         >
           <template
             v-if="$slots.prefixIcon"
-            #prefixIcon
+            #prefixIcon="slotProps"
           >
-            <slot name="prefixIcon" />
+            <slot
+              name="prefixIcon"
+              v-bind="slotProps"
+            />
           </template>
           <template
             v-if="$slots.suffixIcon"
-            #suffixIcon
+            #suffixIcon="slotProps"
           >
-            <slot name="suffixIcon" />
+            <slot
+              name="suffixIcon"
+              v-bind="slotProps"
+            />
           </template>
         </AlertHeader>
         <div
           v-if="open"
+          data-testid="alert-body-divider"
           class="mx-auto h-1px w-[calc(100%-32px)] transform translate-y-1px"
           :class="[classes.dividerClass]"
         />
@@ -49,6 +61,7 @@
     <div
       v-if="$slots.default"
       class="p-16px text-left"
+      data-testid="alert-body"
     >
       <slot />
     </div>
@@ -57,6 +70,8 @@
 
 <script lang="ts">
 export type AlertStatus = 'error' | 'warning' | 'info' | 'default' | 'success'
+
+export type AlertType = 'collapsible' | 'dismissible' | 'static'
 
 export type AlertClasses = {
   headerClass: string,
@@ -86,12 +101,19 @@ defineEmits<{
 
 const props = withDefaults(defineProps<{
   title?: string
-  status: AlertStatus
+  status?: AlertStatus
   icon?: FunctionalComponent<SVGAttributes, {}>,
-  initiallyOpen?: boolean,
-  headerClass?: string
-  type?: 'collapsible' | 'dismissible' | 'static',
-}>(), { title: 'Alert', status: 'default', type: 'static', icon: undefined, headerClass: undefined })
+  headerClass?: string,
+  alertClass?: string,
+  type?: AlertType,
+}>(), {
+  title: 'Alert',
+  alertClass: undefined,
+  status: 'info',
+  type: 'static',
+  icon: undefined,
+  headerClass: undefined,
+})
 
 const alertStyles: Record<AlertStatus, AlertClasses> = {
   default: {
@@ -141,6 +163,7 @@ const classes = computed(() => {
   return {
     ...alertStyles[props.status],
     headerClass: props.headerClass ?? alertStyles[props.status].headerClass,
+    alertClass: props.alertClass ?? alertStyles[props.status].alertClass,
   }
 })
 const canCollapse = computed(() => slots.default && props.type === 'collapsible')

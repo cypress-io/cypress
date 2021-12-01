@@ -3,10 +3,11 @@
     class="group flex items-center relative gap-8px"
     :class="[alertClass, headerClass]"
   >
-    <slot name="prefix-icon">
+    <slot name="prefixIcon">
       <component
         :is="prefixIcon"
         v-if="prefixIcon"
+        data-testid="alert-prefix-icon"
         class="h-16px w-16px icon-dark-current"
         :class="prefixIconClass"
       />
@@ -20,13 +21,17 @@
       </slot>
     </h3>
     <div class="relative shrink">
-      <slot name="suffix-icon">
+      <slot
+        name="suffixIcon"
+        v-bind="{ ariaLabel: suffixIconAriaLabel, buttonClasses: suffixButtonClass, iconClasses: suffixIconClass, onClick: onSuffixIconClicked }"
+      >
         <button
           v-if="suffixIcon"
+          data-testid="alert-suffix-icon"
           :aria-label="suffixIconAriaLabel"
           class="outline-none rounded-full hocus:ring-1 hocus:ring-current flex items-center justify-center absolute h-32px w-32px -top-16px -right-8px"
           :class="suffixButtonClass"
-          @click="$emit('suffixIconClicked')"
+          @click="onSuffixIconClicked"
         >
           <component
             :is="suffixIcon"
@@ -42,7 +47,7 @@
 <script lang="ts" setup>
 import type { FunctionalComponent, SVGAttributes } from 'vue'
 
-defineEmits<{
+const emit = defineEmits<{
   (eventName: 'suffixIconClicked'): void
 }>()
 
@@ -57,4 +62,8 @@ withDefaults(defineProps<{
   headerClass?: string
   suffixButtonClass?: string
 }>(), { title: 'Alert' })
+
+const onSuffixIconClicked = () => {
+  emit('suffixIconClicked')
+}
 </script>
