@@ -18,7 +18,7 @@
         <StandardModalHeader
           :help-link="helpLink"
           :help-text="helpText"
-          @close="setIsOpen(false)"
+          @close="closeModal"
         >
           <slot name="title">
             {{ title }}
@@ -64,6 +64,7 @@ const emit = defineEmits<{
 const props = withDefaults(defineProps<{
   modelValue?: boolean
   helpLink?: string
+  closeCallback?: () => any
   helpText?: string
   clickOutside?: boolean
   variant?: 'bare'
@@ -81,6 +82,11 @@ const props = withDefaults(defineProps<{
 
 const setIsOpen = (val: boolean) => {
   emit('update:modelValue', val)
+}
+
+const closeModal = () => {
+  props.closeCallback?.()
+  setIsOpen(false)
 }
 
 </script>

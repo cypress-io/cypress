@@ -3,6 +3,7 @@
     class="transition duration-200 transition-all"
     :click-outside="false"
     variant="bare"
+    :close-callback="closeCallback"
     :title="title"
     :model-value="show"
     data-testid="create-spec-modal"
@@ -39,7 +40,7 @@
 </template>
 
 <script lang  ="ts" setup>
-import { generators, GeneratorId } from './generators'
+import { generators, GeneratorId, generatorList } from './generators'
 import { DialogOverlay } from '@headlessui/vue'
 import StandardModal from '@cy/components/StandardModal.vue'
 import CreateSpecCards from './CreateSpecCards.vue'
@@ -55,8 +56,9 @@ const props = defineProps<{
   gql: CreateSpecModalFragment
 }>()
 
-defineEmits<{
+const emit = defineEmits<{
   (eventName: 'close'): void
+  (eventName: 'restart'): void
 }>()
 
 gql`
@@ -80,6 +82,10 @@ const generator = computed(() => {
 
   return null
 })
+
+const closeCallback = () => {
+  currentGeneratorId.value = undefined
+}
 
 whenever(not(generator), () => {
   title.value = t('createSpec.newSpecModalTitle')

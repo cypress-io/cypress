@@ -25,7 +25,7 @@
         v-if="!isValidSpecFile"
         class="mt-16px"
       >
-        Your filename is invalid because it doesn't match the follow <b>specPattern</b>.
+        Your filename is invalid because it doesn't match the following <b>specPattern</b>.
       </Error>
 
       <div class="mt-16px">
@@ -111,14 +111,17 @@ const isValidSpecFile = ref(false)
 const done = ref(false)
 
 const recommendedFilename = computed(() => {
-  if (isValidSpecFile.value && specFile.value.includes('.cy.')) {
-    return false
-  }
-
+  // if the proposed filename is not valid, no need to warn them
   if (!isValidSpecFile.value) {
     return false
   }
 
+  // if the proposed file name IS valid, and it includes .cy, no warning
+  if (isValidSpecFile.value && specFile.value.includes('.cy.')) {
+    return false
+  }
+
+  // recommend .cy extension for E2E specs.
   if (specFile.value.endsWith('ts')) {
     return 'filename.cy.ts'
   }
