@@ -2,7 +2,7 @@
 
 Code signing is done for the Windows and Mac distributions of Cypress when they are built in CI.
 
-`electron-builder` handles code signing. Most of the information in here assumes that the reader is already familiar with [`electron-build`'s Code Signing documentation](https://www.electron.build/code-signing).
+`electron-builder` handles code signing during the `create-build-artifacts` jobs. This guide assumes that the reader is already familiar with [`electron-builder`'s Code Signing documentation](https://www.electron.build/code-signing).
 
 ## Installing a new Mac code signing key
 

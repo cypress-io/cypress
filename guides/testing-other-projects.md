@@ -1,8 +1,27 @@
 # Testing other projects
 
-In CI, the Cypress binary and npm package are built and uploaded to `cdn.cypress.io`. Then, [`/scripts/test-other-projects.js`](../scripts/test-other-projects.js) is run.
+In `develop`, `master`, and any other branch configured in [`circle.yml`](../circle.yml), the Cypress binary and npm package are built and uploaded to `cdn.cypress.io`. Then, tests are run, using a variety of real-world example repositories.
 
-This script creates commits inside of several test projects in order to trigger a realistic, continous-integration test of Cypress.
+Two main strategies are used to spawn these test projects:
+
+1. Local CI
+2. Remote CI
+
+## Local CI
+
+A number of CI jobs in `circle.yml` clone test projects and run tests as part of `cypress-io/cypress`'s CI pipeline.
+
+You can find a list of test projects that do this by searching for usage of the `test-binary-against-repo` step.
+
+Similarly to "Remote CI" test projects, Local CI test projects will attempt to check out a branch that is named after the [next version](./next-version.md) (`X.Y.Z`) if one exists in the test project git repo.
+
+One advantage to local CI is that it does not require creating commits to another repo.
+
+## Remote CI
+
+After the production binary and NPM package are build and uploaded in CI, [`/scripts/test-other-projects.js`](../scripts/test-other-projects.js) is run as part of the `test-other-projects` `circle.yml` step.
+
+This script creates commits inside of several test projects (hence "Remote CI") in order to trigger a realistic, continous-integration test of Cypress.
 
 For a list of the projects, see the definition of `_PROVIDERS` in [`/scripts/binary/bump.js`](../scripts/binary/bump.js).
 
