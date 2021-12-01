@@ -188,10 +188,6 @@ export class EventManager {
       logCommand(logId)
     })
 
-    this.reporterBus.on('toggle:spec:list', () => {
-      ws.emit('toggle:spec:list')
-    })
-
     this.reporterBus.on('set:user:editor', (editor) => {
       ws.emit('set:user:editor', editor)
     })

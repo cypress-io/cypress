@@ -358,9 +358,6 @@ type CurrentProject implements Node & ProjectLike {
   """Absolute path to the project on the filesystem"""
   projectRoot: String!
 
-  """Project saved state"""
-  savedState: JSON
-
   """Specs for a project conforming to Relay Connection specification"""
   specs(
     """Returns the elements in the list that come after the specified cursor"""

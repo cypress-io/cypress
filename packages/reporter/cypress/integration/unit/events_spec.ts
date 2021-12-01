@@ -363,11 +363,6 @@ describe('events', () => {
       expect(runner.emit).to.have.been.calledWith('runner:unpin:snapshot', 'command id')
     })
 
-    it('emits toggle:spec:list on toggle:spec:list', () => {
-      events.emit('toggle:spec:list')
-      expect(runner.emit).to.have.been.calledWith('toggle:spec:list')
-    })
-
     it('emits save:state on save:state', () => {
       appState.autoScrollingEnabled = false
       appState.isSpecsListOpen = true
