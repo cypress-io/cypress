@@ -39,8 +39,6 @@ function findSpecsOfType (searchFolder: string, commonSearchOptions: CommonSearc
   // @ts-ignore - types are incorrect
   la(check.maybe.strings(specPattern), 'invalid spec pattern', specPattern)
 
-  la(check.unemptyString(searchFolder), 'expected spec folder path in', commonSearchOptions)
-
   debug(
     'looking for test specs in the folder:',
     searchFolder,
@@ -183,8 +181,8 @@ function findSpecsOfType (searchFolder: string, commonSearchOptions: CommonSearc
   return Bluebird.mapSeries(testFilesPatterns, findOnePattern).then(_.flatten)
 }
 
-const findIntegrationSpecs = (searchFolder: string | undefined, commonSearchOptions: CommonSearchOptions, specPattern: string | undefined) => {
-  if (!searchFolder) {
+const findIntegrationSpecs = (searchFolder: string | undefined | false, commonSearchOptions: CommonSearchOptions, specPattern: string | undefined) => {
+  if (searchFolder === false || searchFolder === undefined) {
     return []
   }
 
