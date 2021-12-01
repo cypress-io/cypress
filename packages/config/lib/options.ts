@@ -17,6 +17,10 @@ interface RuntimeConfigOption {
   defaultValue: any
   validation: Function
   isInternal?: boolean
+  /**
+   * Can be mutated with Cypress.config() or test-specific configuration overrides
+   */
+  canUpdateDuringTestTime?: boolean
 }
 
 interface BreakingOption {
@@ -91,20 +95,24 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     name: 'chromeWebSecurity',
     defaultValue: true,
     validation: validate.isBoolean,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'clientCertificates',
     defaultValue: [],
     validation: validate.isValidClientCertificatesSet,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'component',
     // runner-ct overrides
     defaultValue: {},
     validation: isValidConfig,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'componentFolder',
     defaultValue: 'cypress/component',
     validation: validate.isStringOrFalse,
     isFolder: true,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'defaultCommandTimeout',
     defaultValue: 4000,
@@ -115,11 +123,13 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     defaultValue: 'cypress/downloads',
     validation: validate.isString,
     isFolder: true,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'e2e',
     // e2e runner overrides
     defaultValue: {},
     validation: isValidConfig,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'env',
     defaultValue: {},
@@ -134,45 +144,54 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     name: 'exit',
     defaultValue: true,
     validation: validate.isBoolean,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'experimentalFetchPolyfill',
     defaultValue: false,
     validation: validate.isBoolean,
     isExperimental: true,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'experimentalInteractiveRunEvents',
     defaultValue: false,
     validation: validate.isBoolean,
     isExperimental: true,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'experimentalSessionSupport',
     defaultValue: false,
     validation: validate.isBoolean,
     isExperimental: true,
+    canUpdateDuringTestTime: true,
   }, {
     name: 'experimentalSourceRewriting',
     defaultValue: false,
     validation: validate.isBoolean,
     isExperimental: true,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'experimentalStudio',
     defaultValue: false,
     validation: validate.isBoolean,
     isExperimental: true,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'fileServerFolder',
     defaultValue: '',
     validation: validate.isString,
     isFolder: true,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'fixturesFolder',
     defaultValue: 'cypress/fixtures',
     validation: validate.isStringOrFalse,
     isFolder: true,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'ignoreTestFiles',
     defaultValue: '*.hot-update.js',
     validation: validate.isStringOrArrayOfStrings,
+    canUpdateDuringTestTime: true,
   }, {
     name: 'includeShadowDom',
     defaultValue: false,
@@ -183,6 +202,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     defaultValue: 'cypress/integration',
     validation: validate.isString,
     isFolder: true,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'keystrokeDelay',
     defaultValue: 0,
@@ -192,9 +212,11 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     name: 'modifyObstructiveCode',
     defaultValue: true,
     validation: validate.isBoolean,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'nodeVersion',
     validation: validate.isOneOf('bundled', 'system'),
+    canUpdateDuringTestTime: false,
   }, {
     name: 'numTestsKeptInMemory',
     defaultValue: 50,
@@ -210,14 +232,17 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     defaultValue: 'cypress/plugins',
     validation: validate.isStringOrFalse,
     isFolder: true,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'port',
     defaultValue: null,
     validation: validate.isNumber,
+    canUpdateDuringTestTime: true,
   }, {
     name: 'projectId',
     defaultValue: null,
     validation: validate.isString,
+    canUpdateDuringTestTime: true,
   }, {
     name: 'redirectionLimit',
     defaultValue: 20,
@@ -227,10 +252,12 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     name: 'reporter',
     defaultValue: 'spec',
     validation: validate.isString,
+    canUpdateDuringTestTime: true,
   }, {
     name: 'reporterOptions',
     defaultValue: null,
     validation: validate.isPlainObject,
+    canUpdateDuringTestTime: true,
   }, {
     name: 'requestTimeout',
     defaultValue: 5000,
@@ -240,10 +267,12 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     name: 'resolvedNodePath',
     defaultValue: null,
     validation: validate.isString,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'resolvedNodeVersion',
     defaultValue: null,
     validation: validate.isString,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'responseTimeout',
     defaultValue: 30000,
@@ -267,6 +296,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     defaultValue: 'cypress/screenshots',
     validation: validate.isStringOrFalse,
     isFolder: true,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'slowTestThreshold',
     defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? 250 : 10000,
@@ -282,11 +312,13 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     defaultValue: 'cypress/support',
     validation: validate.isStringOrFalse,
     isFolder: true,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'supportFolder',
     defaultValue: false,
     validation: validate.isStringOrFalse,
     isFolder: true,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'taskTimeout',
     defaultValue: 60000,
@@ -296,31 +328,38 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     name: 'testFiles',
     defaultValue: '**/*.*',
     validation: validate.isStringOrArrayOfStrings,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'trashAssetsBeforeRuns',
     defaultValue: true,
     validation: validate.isBoolean,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'userAgent',
     defaultValue: null,
     validation: validate.isString,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'video',
     defaultValue: true,
     validation: validate.isBoolean,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'videoCompression',
     defaultValue: 32,
     validation: validate.isNumberOrFalse,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'videosFolder',
     defaultValue: 'cypress/videos',
     validation: validate.isString,
     isFolder: true,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'videoUploadOnPasses',
     defaultValue: true,
     validation: validate.isBoolean,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'viewportHeight',
     defaultValue: 660,
@@ -340,6 +379,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     name: 'watchForFileChanges',
     defaultValue: true,
     validation: validate.isBoolean,
+    canUpdateDuringTestTime: false,
   },
 ]
 
@@ -349,15 +389,18 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     defaultValue: false,
     validation: validate.isBoolean,
     isInternal: true,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'browsers',
     defaultValue: [],
     validation: validate.isValidBrowserList,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'clientRoute',
     defaultValue: '/__/',
     validation: validate.isString,
     isInternal: true,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'configFile',
     defaultValue: 'cypress.json',
@@ -365,63 +408,76 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     // not truly internal, but can only be set via cli,
     // so we don't consider it a "public" option
     isInternal: true,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'devServerPublicPathRoute',
     defaultValue: '/__cypress/src',
     validation: validate.isString,
     isInternal: true,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'hosts',
     defaultValue: null,
     validation: validate.isPlainObject,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'isInteractive',
     defaultValue: true,
     validation: validate.isBoolean,
+    canUpdateDuringTestTime: true,
   }, {
     name: 'isTextTerminal',
     defaultValue: false,
     validation: validate.isBoolean,
     isInternal: true,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'morgan',
     defaultValue: true,
     validation: validate.isBoolean,
     isInternal: true,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'modifyObstructiveCode',
     defaultValue: true,
     validation: validate.isBoolean,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'namespace',
     defaultValue: '__cypress',
     validation: validate.isString,
     isInternal: true,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'reporterRoute',
     defaultValue: '/__cypress/reporter',
     validation: validate.isString,
     isInternal: true,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'socketId',
     defaultValue: null,
     validation: validate.isString,
     isInternal: true,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'socketIoCookie',
     defaultValue: '__socket.io',
     validation: validate.isString,
     isInternal: true,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'socketIoRoute',
     defaultValue: '/__socket.io',
     validation: validate.isString,
     isInternal: true,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'xhrRoute',
     defaultValue: '/xhrs/',
     validation: validate.isString,
     isInternal: true,
+    canUpdateDuringTestTime: false,
   },
 ]
 
