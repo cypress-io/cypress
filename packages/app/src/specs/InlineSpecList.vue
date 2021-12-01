@@ -42,7 +42,6 @@ gql`
 fragment Specs_InlineSpecList on CurrentProject {
   id
   projectRoot
-  savedState
   specs: specs(first: 1000) {
     edges {
       ...SpecNode_InlineSpecList

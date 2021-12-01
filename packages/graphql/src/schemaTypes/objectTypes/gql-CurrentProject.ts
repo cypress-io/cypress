@@ -85,13 +85,6 @@ export const CurrentProject = objectType({
       },
     })
 
-    t.json('savedState', {
-      description: 'Project saved state',
-      resolve: (source, args, ctx) => {
-        return ctx.project.getCurrentProjectSavedState()
-      },
-    })
-
     t.string('configFilePath', {
       description: 'Config File Path',
       resolve: async (source, args, ctx) => {
