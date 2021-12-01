@@ -6,8 +6,7 @@ import EmptyGeneratorCardStepOne from './EmptyGeneratorCardStepOne.vue'
 export const EmptyGenerator: SpecGenerator = {
   card: EmptyGeneratorCard,
   entry: EmptyGeneratorCardStepOne,
-  matches: filters.matchesCT,
-  // matches: filters.matchesE2E,
+  matches: filters.matchesE2E,
   disabled: () => false,
   id: 'empty-generator',
 }
