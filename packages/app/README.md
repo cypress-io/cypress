@@ -8,7 +8,7 @@ This is the front-end for the Cypress App.
 2. It will open launchpad
 3. Select Component or E2E Testing
 3. Open chrome (or another browser)
-4. It should show the new Vite powered app 
+4. It will show the new Vite powered app 
 
 ## Using existing, Vite-incompatible modules
 
