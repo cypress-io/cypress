@@ -16,6 +16,7 @@ describe('<NoSpecsPage />', () => {
         onResult: (ctx) => {
           ctx.currentProject = {
             ...ctx.currentProject,
+            config: {},
             id: 'id',
             storybook: null,
             configFileAbsolutePath: '/usr/bin/cypress.config.ts',
@@ -49,6 +50,7 @@ describe('<NoSpecsPage />', () => {
         onResult: (ctx) => {
           ctx.currentProject = {
             ...ctx.currentProject,
+            config: {},
             configFileAbsolutePath: '/usr/bin/cypress.config.ts',
             id: 'id',
             storybook: null,
