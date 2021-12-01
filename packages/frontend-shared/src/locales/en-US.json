@@ -45,6 +45,8 @@
   },
   "createSpec": {
     "newSpec": "New Spec",
+    "createSpec": "Create Spec",
+    "done": "Done!",
     "updateSpecPattern": "Update Spec Pattern",
     "newSpecModalTitle": "Create a new spec",
     "successPage": {

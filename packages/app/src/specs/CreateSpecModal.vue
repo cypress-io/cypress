@@ -14,14 +14,15 @@
         class="bg-gray-900 opacity-[0.97]"
       />
     </template>
-    <div class="min-h-280px sm:min-w-640px flex flex-col">
+
+    <div class="min-h-260px sm:min-w-640px flex flex-col">
       <component
         :is="generator.entry"
         v-if="generator"
         :key="generator.id"
         v-model:title="title"
         :code-gen-glob="props.gql.currentProject?.codeGenGlob"
-        :project-config="props.gql.currentProject?.config"
+        :gql="props.gql.currentProject"
         @restart="currentGeneratorId = undefined"
       />
       <div

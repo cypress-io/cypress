@@ -74,12 +74,14 @@ export class ProjectActions {
     execa(this.ctx.coreData.localSettings.preferences.preferredEditorBinary, [projectPath])
   }
 
-  async writeFile (relative: string, content?: string) {
+  async writeFile (relative: string, content: string = ''): Promise<boolean> {
     if (!this.ctx.currentProject) {
       return false
     }
 
-    return this.ctx.fs.writeFile(path.join(this.ctx.currentProject.projectRoot, relative), content)
+    await this.ctx.fs.writeFile(path.join(this.ctx.currentProject.projectRoot, relative), content)
+
+    return true
   }
 
   async setActiveProject (projectRoot: string) {

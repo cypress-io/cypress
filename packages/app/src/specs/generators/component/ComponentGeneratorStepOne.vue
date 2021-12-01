@@ -61,7 +61,7 @@ import FileChooser from '../FileChooser.vue'
 import GeneratorSuccess from '../GeneratorSuccess.vue'
 import { computed, ref, ComputedRef } from 'vue'
 import { gql, useQuery, useMutation } from '@urql/vue'
-import { ComponentGeneratorStepOneDocument, ComponentGeneratorStepOne_GenerateSpecDocument } from '../../../generated/graphql'
+import { ComponentGeneratorStepOneDocument, ComponentGeneratorStepOne_CodeGenGlobFragment, ComponentGeneratorStepOne_GenerateSpecDocument } from '../../../generated/graphql'
 import StandardModalFooter from '@cy/components/StandardModalFooter.vue'
 import Button from '@cy/components/Button.vue'
 import PlusButtonIcon from '~icons/cy/add-large_x16.svg'
@@ -69,6 +69,7 @@ import TestResultsIcon from '~icons/cy/test-results_x24.svg'
 
 const props = defineProps<{
   title: string,
+  gql: ComponentGeneratorStepOne_CodeGenGlobFragment
   codeGenGlob: any
 }>()
 
