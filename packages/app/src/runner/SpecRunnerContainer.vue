@@ -28,7 +28,6 @@ const route = useRoute()
 onMounted(async () => {
   await UnifiedRunnerAPI.initialize()
   initialized.value = true
-  specStore.setIsRunnerInitialized(true)
 })
 
 const props = defineProps<{

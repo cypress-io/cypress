@@ -207,7 +207,6 @@ onMounted(() => {
   })
 
   eventManager.on('save:app:state', (state) => {
-    // TODO: review if this is the best place for this listener.
     runnerUiStore.setIsSpecsListOpen(state.isSpecsListOpen)
     runnerUiStore.setAutoScrollingEnabled(state.autoScrollingEnabled)
     setPreferences.executeMutation({ value: JSON.stringify(state) })
