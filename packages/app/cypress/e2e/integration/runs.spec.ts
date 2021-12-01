@@ -70,4 +70,18 @@ describe('App', () => {
     cy.get('[href="#/runs"]').click()
     cy.contains('Connect your project').should('exist')
   })
+
+  it('if logged in and connected', { viewportWidth: 1200 }, () => {
+    cy.loginUser()
+    cy.visitApp()
+    cy.intercept('mutation-ExternalLink_OpenExternal', {
+      data: {
+        url: 'http://dummy.cypress.io/runs/4',
+      },
+    }).as('OpenExternal')
+
+    cy.get('[href="#/runs"]').click()
+    cy.contains('a', 'OVERLIMIT').click()
+    cy.wait('@OpenExternal')
+  })
 })
