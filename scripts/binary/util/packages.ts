@@ -1,5 +1,6 @@
 import _ from 'lodash'
 import fs from 'fs-extra'
+import util from 'util'
 import path from 'path'
 import glob from 'glob'
 import la from 'lazy-ass'
@@ -9,12 +10,7 @@ import debugLib from 'debug'
 
 const debug = debugLib('cypress:binary')
 
-type globAsyncType = (p: string, o?: object) => Promise<string[]>;
-const globAsync: globAsyncType = async (pattern, options = {}) => {
-  return new Promise((resolve, reject) => {
-    glob(pattern, options, (err, files) => err === null ? resolve(files) : reject(err))
-  })
-}
+const globAsync = util.promisify(glob)
 
 const pathToPackageJson = function (packageFolder) {
   la(check.unemptyString(packageFolder), 'expected package path', packageFolder)
