@@ -4,37 +4,7 @@ These procedures concern the release process for the Cypress binary and `cypress
 
 The `@cypress/`-namespaced NPM packages that live inside the [`/npm`](../npm) directory are automatically published to npm (with [`semantic-release`](https://semantic-release.gitbook.io/semantic-release/)) upon being merged into `master`. You can read more about this in [CONTRIBUTING.md](../CONTRIBUTING.md#independent-packages-ci-workflow).
 
-Anyone can build the binary and npm package, but you can only deploy the Cypress application and publish the npm module `cypress` if you are a member of the `cypress` npm organization.
-
-> :information_source: See the [publishing](#publishing) section for how to build, test and publish a
-new official version of the binary and `cypress` npm package.
-
-## Building Locally
-
-### Building the npm package
-
-> :warning: Note: The steps in this section are automated in CI, and you should not need to do them yourself when publishing.
-
-Building a new npm package is very quick.
-
-- Increment the version in the root `package.json`
-- `yarn build --scope cypress`
-
-The steps above:
-
-- Build the `cypress` npm package
-- Transpile the code into ES5 to be compatible with the common Node versions
-- Put the result into the [`cli/build`](../cli/build) folder.
-
-### Building the binary
-
-> :warning: Note: The steps in this section are automated in CI, and you should not need to do them yourself when publishing.
-
-The npm package requires a corresponding binary of the same version. In production, it will try to retrieve the binary from the Cypress CDN if it is not cached locally.
-
-You can build the Cypress binary locally by running `yarn binary-build`. You can use Linux to build the Cypress binary (just like it is in CI) by running `yarn binary-build` inside of  `yarn docker`.
-
-`yarn binary-zip` can be used to zip the built binary together.
+[Anyone can build the binary and npm package locally](./building-release-artifacts.md), but you can only deploy the Cypress application and publish the npm module `cypress` if you are a member of the `cypress` npm organization.
 
 ## Publishing
 
