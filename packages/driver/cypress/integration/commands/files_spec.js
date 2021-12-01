@@ -145,7 +145,7 @@ describe('src/cy/commands/files', () => {
           if (attrs.name === 'readFile') {
             expect(log.get('state')).to.eq('pending')
             expect(log.get('message')).to.eq('foo.json')
-            expect(log.get('timeout')).to.eq(Cypress.config('responseTimeout'))
+            expect(log.get('timeout')).to.eq(Cypress.config('defaultCommandTimeout'))
           }
         })
 
@@ -158,7 +158,7 @@ describe('src/cy/commands/files', () => {
     })
 
     describe('errors', {
-      responseTimeout: 50,
+      defaultCommandTimeout: 50,
     }, () => {
       beforeEach(function () {
         this.logs = []
@@ -346,8 +346,8 @@ describe('src/cy/commands/files', () => {
         cy.readFile('foo', { timeout: 10 })
       })
 
-      it('uses responseTimeout config value if option not provided', {
-        responseTimeout: 42,
+      it('uses defaultCommandTimeout config value if option not provided', {
+        defaultCommandTimeout: 42,
       }, function (done) {
         Cypress.backend.callsFake(() => {
           return new Cypress.Promise(() => { /* Broken promise for timeout */ })
@@ -530,7 +530,7 @@ describe('src/cy/commands/files', () => {
           if (attrs.name === 'writeFile') {
             expect(log.get('state')).to.eq('pending')
             expect(log.get('message')).to.eq('foo.txt', 'contents')
-            expect(log.get('timeout')).to.eq(Cypress.config('responseTimeout'))
+            expect(log.get('timeout')).to.eq(Cypress.config('defaultCommandTimeout'))
           }
         })
 
@@ -543,7 +543,7 @@ describe('src/cy/commands/files', () => {
     })
 
     describe('errors', {
-      responseTimeout: 50,
+      defaultCommandTimeout: 50,
     }, () => {
       beforeEach(function () {
         this.logs = []
@@ -675,8 +675,8 @@ describe('src/cy/commands/files', () => {
         cy.writeFile('foo.txt', 'contents', { timeout: 10 })
       })
 
-      it('uses responseTimeout config value if option not provided', {
-        responseTimeout: 42,
+      it('uses defaultCommandTimeout config value if option not provided', {
+        defaultCommandTimeout: 42,
       }, function (done) {
         Cypress.backend.callsFake(() => {
           return new Cypress.Promise(() => { /* Broken promise for timeout */ })
