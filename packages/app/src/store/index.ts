@@ -9,6 +9,8 @@ export * from './aut-store'
 
 export * from './runner-store'
 
+export * from './runner-ui-store'
+
 // Mobx Store Wrapper from @packages/runner-shared
 export * from './mobx-runner-store'
 
