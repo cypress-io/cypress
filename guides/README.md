@@ -11,6 +11,7 @@ For general contributor information, check out [`CONTRIBUTING.md`](../CONTRIBUTI
 ## Table of Contents
 
 * [Building release artifacts](./building-release-artifacts.md)
+* [Code signing](./code-signing.md)
 * [Determining the next version of Cypress to be released](./next-version.md)
 * [Release process](./release-process.md)
 * [Testing other projects](./testing-other-projects.md)
