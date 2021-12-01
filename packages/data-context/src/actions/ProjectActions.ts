@@ -448,7 +448,7 @@ export class ProjectActions {
     const [newSpec] = codeGenResults.files
 
     const spec = this.ctx.file.normalizeFileToSpec({
-      absolute: path.join(project.projectRoot, newSpec.file),
+      absolute: newSpec.file,
       searchFolder,
       specType: codeGenType === 'integration' ? 'integration' : 'component',
       projectRoot: project.projectRoot,

@@ -66,6 +66,7 @@ import StandardModalFooter from '@cy/components/StandardModalFooter.vue'
 import Button from '@cy/components/Button.vue'
 import PlusButtonIcon from '~icons/cy/add-large_x16.svg'
 import TestResultsIcon from '~icons/cy/test-results_x24.svg'
+import type { FoundSpec } from '@packages/types/src/spec'
 
 const props = defineProps<{
   title: string,
@@ -146,9 +147,9 @@ whenever(result, () => {
   title.value = t('createSpec.successPage.header')
 })
 
-const makeSpec = async (file) => {
+const makeSpec = async (file: FoundSpec) => {
   const { data } = await mutation.executeMutation({
-    codeGenCandidate: file.relative,
+    codeGenCandidate: file.absolute,
     type: 'component',
   })
 
