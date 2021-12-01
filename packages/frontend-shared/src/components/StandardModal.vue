@@ -78,6 +78,7 @@ const props = withDefaults(defineProps<{
   class: undefined,
   variant: undefined,
   title: '',
+  closeCallback: undefined,
 })
 
 const setIsOpen = (val: boolean) => {
