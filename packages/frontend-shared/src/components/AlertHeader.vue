@@ -1,6 +1,6 @@
 <template>
   <div
-    class="group flex items-center relative gap-8px"
+    class="flex gap-8px group items-center relative"
     :class="[alertClass, headerClass]"
   >
     <slot name="prefixIcon">
@@ -13,7 +13,7 @@
       />
     </slot>
     <h3
-      class="font-medium underline-current leading-normal flex-grow text-left"
+      class="flex-grow font-medium text-left leading-normal underline-current"
       :class="headerClass"
     >
       <slot name="title">
@@ -29,13 +29,13 @@
           v-if="suffixIcon"
           data-testid="alert-suffix-icon"
           :aria-label="suffixIconAriaLabel"
-          class="outline-none rounded-full hocus:ring-1 hocus:ring-current flex items-center justify-center absolute h-32px w-32px -top-16px -right-8px"
+          class="rounded-full flex outline-none h-32px -top-16px -right-8px w-32px hocus:ring-current items-center justify-center absolute hocus:ring-1"
           :class="suffixButtonClass"
           @click="onSuffixIconClicked"
         >
           <component
             :is="suffixIcon"
-            class="w-16px h-16px"
+            class="h-16px w-16px"
             :class="suffixIconClass"
           />
         </button>
@@ -51,6 +51,7 @@ const emit = defineEmits<{
   (eventName: 'suffixIconClicked'): void
 }>()
 
+/* eslint-disable vue/require-default-prop */
 withDefaults(defineProps<{
   title?: string
   prefixIcon?: FunctionalComponent<SVGAttributes, {}> | null
