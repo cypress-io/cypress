@@ -30,7 +30,12 @@ The `@cypress/`-namespaced NPM packages that live inside the [`/npm`](../npm) di
         GITHUB_TOKEN="..."
         ZENHUB_API_TOKEN="..."
         ```
-    - The `cypress-bot` GitHub app credentials are also needed. Ask another team member who has done a deploy for those.
+    - The `cypress-bot` GitHub app credentials are also needed . Ask another team member who has done a deploy for those.
+        ```text
+        GITHUB_APP_CYPRESS_INSTALLATION_ID=
+        GITHUB_APP_ID=
+        GITHUB_PRIVATE_KEY=
+        ```
     - For purging the Cloudflare cache (part of the `move-binaries` step), you'll need `CF_ZONEID` and `CF_TOKEN` set. These can be found in 1Password. If you don't have access, ask a team member who has done a deploy.
        ```text
         CF_ZONEID="..."
