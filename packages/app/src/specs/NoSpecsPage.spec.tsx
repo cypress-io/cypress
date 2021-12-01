@@ -87,9 +87,9 @@ describe('<NoSpecsPage />', () => {
 
       // show spec pattern
       cy.contains('**/*.spec.{js,ts,tsx,jsx}')
-      cy.contains('Update spec pattern')
-      cy.contains('New Spec').click()
-      cy.contains('Create a new spec')
+      cy.contains(defaultMessages.createSpec.updateSpecPattern)
+      cy.contains(defaultMessages.createSpec.newSpec).click()
+      cy.contains(defaultMessages.createSpec.newSpecModalTitle)
     })
   })
 })
