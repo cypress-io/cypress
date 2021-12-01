@@ -12,7 +12,7 @@ export class DataEmitterActions {
   init () {
     this.ctx.rootBus.on('menu:item:clicked', (item) => {
       if (item === 'log:out') {
-        this.ctx._apis.authApi.logOut()
+        this.ctx._apis.authApi.logOut().catch((e) => this.ctx.logError(e))
       }
     })
   }

@@ -99,8 +99,10 @@ export class LoadingManager {
   })
 
   private _makeFullConfig (configPromise: Promise<Cypress.ConfigOptions>) {
+    assert(this.ctx.currentProject)
+
     return configPromise.then((val) => {
-      return this.ctx._apis.projectApi.makeConfig(val)
+      return this.ctx._apis.projectApi.makeConfig(val, this.ctx.currentProject!)
     })
   }
 

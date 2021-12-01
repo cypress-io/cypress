@@ -1,7 +1,9 @@
-const _ = require('lodash')
-const debug = require('debug')('cypress:config:validator')
+import _ from 'lodash'
+import debugLib from 'debug'
 
 import { options, breakingOptions } from './options'
+
+const debug = debugLib('cypress:config:validator')
 
 const dashesOrUnderscoresRe = /^(_-)+/
 
@@ -55,7 +57,7 @@ export default {
     // Default values can be functions, in which case they are evaluated
     // at runtime - for example, slowTestThreshold where the default value
     // varies between e2e and component testing.
-    return _.mapValues(defaultValues, (value) => (typeof value === 'function' ? value(runtimeOptions) : value))
+    return _.mapValues(defaultValues, (value: any) => (typeof value === 'function' ? value(runtimeOptions) : value))
   },
 
   getPublicConfigKeys: () => {

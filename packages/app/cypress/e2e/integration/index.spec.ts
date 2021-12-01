@@ -13,7 +13,7 @@ describe('Index', () => {
     })
 
     it('shows "Create your first spec"', () => {
-    // after removing the default scaffolded spec, we should be prompted to create a first spec
+      // after removing the default scaffolded spec, we should be prompted to create a first spec
       cy.visitApp()
       cy.contains('Create your first spec')
     })

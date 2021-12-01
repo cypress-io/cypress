@@ -24,10 +24,10 @@ import { graphqlSchema } from '@packages/graphql/src/schema'
 import { openExternal } from '@packages/server/lib/gui/links'
 import { getUserEditor } from './util/editors'
 import * as savedState from './saved_state'
-import assert from 'assert'
 import { OpenProject } from './open_project'
 import app_data from './util/app_data'
 import plugins from './plugins'
+import type { CurrentProjectDataShape } from '@packages/data-context/src/data'
 
 const { getBrowsers, ensureAndGetByNameOrPath } = browserUtils
 
@@ -154,6 +154,9 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
         },
         error (key: CypressErrorIdentifier, ...args: any[]) {
           return errors.get(key, ...args)
+        },
+        makeConfig (opts: Cypress.ConfigOptions, currentProject: CurrentProjectDataShape) {
+          return config.makeConfig(opts, currentProject)
         },
       },
       electronApi: {

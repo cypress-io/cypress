@@ -12,17 +12,21 @@ export class AuthActions {
   constructor (private ctx: DataContext) {}
 
   async getUser () {
-    return this.authApi.getUser().then((obj) => {
-      if (obj.authToken) {
-        this.ctx.update((o) => {
-          o.user = obj
-        })
+    const obj = await this.authApi.getUser()
 
-        // When we get the user at startup, check the auth by
-        // hitting the network
-        this.checkAuth()
-      }
-    })
+    if (obj.authToken) {
+      this.ctx.update((o) => {
+        o.user = obj
+      })
+
+      // When we get the user at startup, check the auth by
+      // hitting the network
+      this.checkAuth().catch((e) => {
+        this.ctx.logError(e)
+      })
+    }
+
+    return obj
   }
 
   get authApi () {
@@ -41,7 +45,9 @@ export class AuthActions {
         o.user = null
       })
 
-      this.logout()
+      this.logout().catch((e) => {
+        this.ctx.logError(e)
+      })
     }
   }
 

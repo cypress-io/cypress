@@ -2,7 +2,7 @@ import type { App, BrowserWindow } from 'electron'
 import type { TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
 import type { ChildProcess } from 'child_process'
 import path from 'path'
-import type { AllowedState, CypressErrorIdentifier, Editor, Ensure, FoundBrowser, FullConfig, LaunchArgs, Preferences } from '@packages/types'
+import type { AllowedState, CypressErrorIdentifier, Editor, Ensure, FoundBrowser, LaunchArgs, Preferences } from '@packages/types'
 import type { Draft, Immutable, Patch } from 'immer'
 import fs from 'fs'
 
@@ -23,7 +23,7 @@ export type RegisteredEvents = Record<string, Function>
 
 export interface ConfigIpc {
   send(event: 'load'): boolean
-  send(event: 'plugins', testingType: TestingTypeEnum, config: Immutable<Cypress.ConfigOptions>): boolean
+  send(event: 'plugins', testingType: TestingTypeEnum): boolean
   send(event: 'load:plugins', options: Cypress.PluginConfigOptions): boolean
   send(event: 'execute:plugins', evt: string, ids: {eventId: string, invocationId: string}, args: any[]): boolean
   on(evt: `promise:fulfilled:${string}`, fn: Function): boolean

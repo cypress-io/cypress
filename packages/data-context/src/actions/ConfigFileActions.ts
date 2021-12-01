@@ -22,7 +22,7 @@ export class ConfigFileActions {
 
   static CHILD_PROCESS_FILE_PATH = path.join(__dirname, '../../../server/lib/util', 'require_async_child.js')
 
-  execute (eventName: string, config: object = {}, ...args: any[]) {
+  execute (eventName: string, ...args: any[]) {
     // Bluebird, for backward compat
     return Bluebird.try(async () => {
       const pluginFn = this.ctx.coreData.currentProject?.pluginRegistry?.[eventName]
@@ -32,7 +32,7 @@ export class ConfigFileActions {
           return
         }
 
-        this.ctx.debugNs('plugin', `execute plugin event '${event}' Node '${process.version}' with args: %o %o %o`, ...args)
+        this.ctx.debugNs('plugin', `execute plugin event '${eventName}' Node '${process.version}' with args: %o %o %o`, ...args)
         await pluginFn(...args)
       } catch (e) {
         throw this.ctx.error('PLUGINS_RUN_EVENT_ERROR', eventName, e?.stack || e?.message || e || '')
@@ -55,8 +55,7 @@ export class ConfigFileActions {
     const dfd = pDefer<null | { newConfig: Cypress.ResolvedConfigOptions, registeredEvents: RegisteredEvents }>()
     const handlers = this.ctx._apis.projectApi.getPluginIpcHandlers()
 
-    assert(this.ctx.currentProject?.config.value, 'expect currentProject.config in runSetupNodeEvents')
-    assert(this.ctx.currentProject.currentTestingType, 'expected testing type in runSetupNodeEvents')
+    assert(this.ctx.currentProject?.currentTestingType, 'expected testing type in runSetupNodeEvents')
 
     ipc.on('empty:plugins', () => dfd.resolve(null))
 
@@ -74,7 +73,7 @@ export class ConfigFileActions {
       handler(ipc)
     }
 
-    ipc.send('plugins', this.ctx.currentProject.currentTestingType, this.ctx.currentProject.config.value)
+    ipc.send('plugins', this.ctx.currentProject.currentTestingType)
 
     return dfd.promise
   }
@@ -82,7 +81,7 @@ export class ConfigFileActions {
   refreshConfigProcess () {
     assert(this.ctx.actions.projectConfig, 'Expected projectConfig for refreshConfigProcess')
 
-    const { child, ipc, configPromise } = this.ctx.actions.projectConfig.forkConfigProcess()
+    const { child, ipc, configPromise } = this.forkConfigProcess()
 
     this.ctx.update((o) => {
       if (o.currentProject) {

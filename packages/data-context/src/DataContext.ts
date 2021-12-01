@@ -487,7 +487,7 @@ export class DataContext {
     const toAwait: Array<Promise<any> | undefined> = []
 
     // Load the cached user & validate the token on start
-    this.actions.auth.getUser()
+    toAwait.push(this.actions.auth.getUser())
 
     // Fetch the machine browsers right when the app starts, so we have some by
     // the time we're attempting to source the project

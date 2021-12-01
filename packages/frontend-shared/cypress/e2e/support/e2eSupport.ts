@@ -138,7 +138,7 @@ function visitApp (href?: string) {
     `)
   }
 
-  return cy.withCtx(async (ctx) => {
+  return cy.withCtx((ctx) => {
     return JSON.stringify(ctx.html.fetchAppInitialData())
   }, { log: false }).then((ssrData) => {
     return cy.visit(`dist-app/index.html?serverPort=${e2e_serverPort}${href || ''}`, {

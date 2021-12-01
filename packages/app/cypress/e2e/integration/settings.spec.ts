@@ -39,7 +39,7 @@ describe('Settings', { viewportWidth: 600 }, () => {
 
   it('selects well known editor', () => {
     cy.visitApp()
-    cy.withCtx(async (ctx) => {
+    cy.withCtx((ctx) => {
       ctx.coreData.localSettings.availableEditors = [
         ...ctx.coreData.localSettings.availableEditors,
         // don't rely on CI machines to have specific editors installed

@@ -38,6 +38,7 @@ export interface ProjectApiShape {
   clearAllProjectPreferences(): Promise<unknown>
   closeActiveProject(): Promise<unknown>
   error(type: CypressErrorIdentifier, ...args: any[]): CypressError | CypressErrorLike
+  makeConfig (opts: Cypress.ConfigOptions, currentProject: CurrentProjectDataShape): Promise<FullConfig>
 }
 
 /**
