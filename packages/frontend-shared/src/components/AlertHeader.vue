@@ -52,8 +52,8 @@ const emit = defineEmits<{
 }>()
 
 /* eslint-disable vue/require-default-prop */
-withDefaults(defineProps<{
-  title?: string
+defineProps<{
+  title: string
   prefixIcon?: FunctionalComponent<SVGAttributes, {}> | null
   suffixIcon?: FunctionalComponent<SVGAttributes, {}> | null
   suffixIconAriaLabel?: string
@@ -62,7 +62,7 @@ withDefaults(defineProps<{
   suffixIconClass?: string
   headerClass?: string
   suffixButtonClass?: string
-}>(), { title: 'Alert' })
+}>()
 
 const onSuffixIconClicked = () => {
   emit('suffixIconClicked')

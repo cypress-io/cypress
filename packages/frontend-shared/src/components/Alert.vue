@@ -1,6 +1,6 @@
 <template>
   <Collapsible
-    v-if="isOpen"
+    v-if="modelValue"
     lazy
     :initially-open="initiallyOpen"
     :disable="!canCollapse"
@@ -20,7 +20,6 @@
         }"
       >
         <AlertHeader
-          v-if="showHeader"
           :title="title"
           v-bind="classes"
           :header-class="canCollapse ? 'group-hocus:underline' : ''"
@@ -30,7 +29,7 @@
           :suffix-icon="props.dismissible ? DeleteIcon : null"
           data-testid="alert"
           class="rounded min-w-200px p-16px"
-          @suffixIconClicked="toggle() && emits('suffixIconClicked')"
+          @suffixIconClicked="$emit('update:modelValue', !modelValue)"
         >
           <template
             v-if="$slots.prefixIcon"
@@ -83,7 +82,6 @@ export type AlertClasses = {
 </script>
 
 <script lang="ts" setup>
-import { useToggle } from '@vueuse/core'
 import AlertHeader from './AlertHeader.vue'
 import DeleteIcon from '~icons/cy/delete_x16.svg'
 import { computed, useSlots, FunctionalComponent, SVGAttributes } from 'vue'
@@ -94,8 +92,8 @@ import Collapsible from './Collapsible.vue'
 const { t } = useI18n()
 const slots = useSlots()
 
-const emits = defineEmits<{
-  (eventName: 'suffixIconClicked'): void
+defineEmits<{
+  (eventName: 'update:modelValue', value: boolean): void
 }>()
 
 const props = withDefaults(defineProps<{
@@ -104,17 +102,17 @@ const props = withDefaults(defineProps<{
   icon?: FunctionalComponent<SVGAttributes, {}>,
   headerClass?: string,
   alertClass?: string,
-  dismissible?: boolean
-  collapsible?: boolean
+  dismissible?: boolean,
+  collapsible?: boolean,
+  modelValue?: boolean,
 }>(), {
-  title: undefined,
+  modelValue: true,
   alertClass: undefined,
   status: 'info',
   icon: undefined,
   headerClass: undefined,
 })
 
-const showHeader = computed(() => props.title || props.dismissible || props.collapsible)
 const title = computed(() => props.title ?? 'Alert')
 
 const alertStyles: Record<AlertStatus, AlertClasses> = {
@@ -160,7 +158,6 @@ const alertStyles: Record<AlertStatus, AlertClasses> = {
   },
 }
 
-const [isOpen, toggle] = useToggle(true)
 const classes = computed(() => {
   return {
     ...alertStyles[props.status],

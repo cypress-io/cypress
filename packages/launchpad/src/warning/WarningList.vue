@@ -4,7 +4,8 @@
     :key="warning.key"
     :title="warning.title"
     :message="warning.message"
-    @dismiss="dismissed[warning.key] = true"
+    dismissible
+    @update:modelValue="dismiss(warning.key)"
   />
 </template>
 
@@ -38,4 +39,10 @@ const warnings = computed(() => {
     return !hasBeenDismissed && !warning.setupStep || warning.setupStep === props.gql.step
   })
 })
+
+const dismiss = (key) => {
+  // TODO, call a mutation here so that the server persists the result of the mutation.
+  // However, we still intend to keep the "warnings" dismissal so that the client updates immediately before the server responds.
+  dismissed.value[key] = true
+}
 </script>
