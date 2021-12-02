@@ -8,7 +8,7 @@ export default (Commands, Cypress, cy) => {
     async readFile (file, encoding, options = {}) {
       // We clear the default timeout because we are handling
       // the timeout ourselves.
-      cy.clearTimeout()
+      // cy.clearTimeout()
 
       let userOptions = options
 
@@ -51,7 +51,7 @@ export default (Commands, Cypress, cy) => {
         let result
 
         try {
-          result = await Cypress.backend('read:file', file, _.pick(options, ['encoding'])).timeout(options.timeout)
+          result = await Cypress.backend('read:file', file, _.pick(options, ['encoding', 'timeout']))
         } catch (err) {
           if (err.name === 'TimeoutError') {
             return $errUtils.throwErrByPath('files.timed_out', {
@@ -113,7 +113,7 @@ export default (Commands, Cypress, cy) => {
     async writeFile (fileName, contents, encoding, options = {}) {
       // We clear the default timeout because we are handling
       // the timeout ourselves.
-      cy.clearTimeout()
+      // cy.clearTimeout()
 
       let userOptions = options
 
@@ -167,7 +167,7 @@ export default (Commands, Cypress, cy) => {
       let result
 
       try {
-        result = await Cypress.backend('write:file', fileName, contents, _.pick(options, ['encoding', 'flag'])).timeout(options.timeout)
+        result = await Cypress.backend('write:file', fileName, contents, _.pick(options, ['encoding', 'flag', 'timeout']))
       } catch (err) {
         if (err.name === 'TimeoutError') {
           return $errUtils.throwErrByPath('files.timed_out', {
