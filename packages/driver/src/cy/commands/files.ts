@@ -8,7 +8,7 @@ export default (Commands, Cypress, cy) => {
     async readFile (file, encoding, options = {}) {
       // We clear the default timeout because we are handling
       // the timeout ourselves.
-      // cy.clearTimeout()
+      cy.clearTimeout()
 
       let userOptions = options
 
@@ -113,7 +113,7 @@ export default (Commands, Cypress, cy) => {
     async writeFile (fileName, contents, encoding, options = {}) {
       // We clear the default timeout because we are handling
       // the timeout ourselves.
-      // cy.clearTimeout()
+      cy.clearTimeout()
 
       let userOptions = options
 
