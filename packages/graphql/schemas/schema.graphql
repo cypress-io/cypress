@@ -310,6 +310,9 @@ enum CodeLanguageEnum {
 The currently opened Cypress project, represented by a cypress.config.{ts|js} file
 """
 type CurrentProject implements Node & ProjectLike {
+  """The current branch of the project"""
+  branch: String
+
   """Browsers found that are compatible with Cypress"""
   browsers: [Browser!]
 

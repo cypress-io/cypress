@@ -74,7 +74,8 @@
         "header": "Scaffold example specs",
         "description": "We'll generate several example specs to help guide you on how to write tests in Cypress.",
         "specsAddedHeader": "Great! We added the following files to your project:",
-        "specsAddedButton": "Okay, I got it!"
+        "specsAddedButton": "Okay, I got it!",
+        "specsAddingHeader": "Adding Specs..."
       },
       "importEmptySpec": {
         "header": "Create new empty spec",
