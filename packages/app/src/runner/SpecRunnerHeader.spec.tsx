@@ -1,7 +1,7 @@
 import SpecRunnerHeader from './SpecRunnerHeader.vue'
 import { useAutStore, useSpecStore } from '../store'
 import { SpecRunnerHeaderFragment, SpecRunnerHeaderFragmentDoc } from '../generated/graphql-test'
-import { createEventManager, createTestAutIframe } from '../../cypress/e2e/support/ctSupport'
+import { createEventManager, createTestAutIframe } from '../../cypress/component/support/ctSupport'
 
 function renderWithGql (gqlVal: SpecRunnerHeaderFragment) {
   const eventManager = createEventManager()
