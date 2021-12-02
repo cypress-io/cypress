@@ -1,5 +1,6 @@
 const _ = require('lodash')
 const path = require('path')
+const fs = require('fs')
 const stackUtils = require('./util/stack_utils')
 // mocha-* is used to allow us to have later versions of mocha specified in devDependencies
 // and prevents accidently upgrading this one
@@ -226,6 +227,19 @@ const orNull = function (prop) {
   if (prop == null) return null
 
   return prop
+}
+
+const resolvePath = function (name, context) {
+  try {
+    return require.resolve(
+      name,
+      {
+        paths: [context],
+      },
+    )
+  } catch (err) {
+    return path.resolve(context, name)
+  }
 }
 
 const events = {
@@ -524,40 +538,18 @@ class Reporter {
       return reporterName
     }
 
-    // it's likely a custom reporter
-    // that is local (./custom-reporter.js)
-    // or one installed by the user through npm
-    try {
-      p = path.resolve(projectRoot, reporterName)
+    p = Reporter.getSearchPathsForReporter(reporterName, projectRoot).find((p) => fs.existsSync(p))
 
-      // try local
-      debug('trying to require local reporter with path:', p)
+    debug('trying to require local reporter with path:', p)
 
-      // using path.resolve() here so we can just pass an
-      // absolute path as the reporterName which avoids
-      // joining projectRoot unnecessarily
-      return require(p)
-    } catch (err) {
-      if (err.code !== 'MODULE_NOT_FOUND') {
-        // bail early if the error wasn't MODULE_NOT_FOUND
-        // because that means theres something actually wrong
-        // with the found reporter
-        throw err
-      }
-
-      p = path.resolve(projectRoot, 'node_modules', reporterName)
-
-      // try npm. if this fails, we're out of options, so let it throw
-      debug('trying to require local reporter with path:', p)
-
-      return require(p)
-    }
+    return require(p)
   }
 
   static getSearchPathsForReporter (reporterName, projectRoot) {
     return _.uniq([
       path.resolve(projectRoot, reporterName),
-      path.resolve(projectRoot, 'node_modules', reporterName),
+      resolvePath(reporterName, path.resolve(projectRoot, 'node_modules')),
+      resolvePath(reporterName, path.resolve(projectRoot, 'node_modules/.pnpm')),
     ])
   }
 }
