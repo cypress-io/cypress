@@ -35,7 +35,7 @@ describe('e2e record', () => {
     it('passes', async function () {
       const { stdout } = await systemTests.exec(this, {
         key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-        configFile: 'cypress.config-with-project-id.js',
+        configFile: 'cypress-with-project-id.config.js',
         spec: 'record*',
         record: true,
         snapshot: true,
@@ -349,7 +349,7 @@ describe('e2e record', () => {
       return Promise.all([
         systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-          configFile: 'cypress.config-with-project-id.js',
+          configFile: 'cypress-with-project-id.config.js',
           spec: 'record*',
           group: 'prod-e2e',
           record: true,
@@ -371,7 +371,7 @@ describe('e2e record', () => {
         .then(() => {
           return systemTests.exec(this, {
             key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-            configFile: 'cypress.config-with-project-id.js',
+            configFile: 'cypress-with-project-id.config.js',
             spec: 'record*',
             group: 'prod-e2e',
             record: true,
@@ -395,7 +395,7 @@ describe('e2e record', () => {
     it('sends Studio usage metadata', function () {
       return systemTests.exec(this, {
         key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-        configFile: 'cypress.config-with-project-id.js',
+        configFile: 'cypress-with-project-id.config.js',
         spec: 'studio_written.spec.js',
         record: true,
         snapshot: true,
@@ -445,7 +445,7 @@ describe('e2e record', () => {
     it('succeeds when empty spec file', async function () {
       await systemTests.exec(this, {
         key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-        configFile: 'cypress.config-with-project-id.js',
+        configFile: 'cypress-with-project-id.config.js',
         record: true,
         spec: 'empty_suite.spec.js,empty.spec.js',
         snapshot: true,
@@ -475,7 +475,6 @@ describe('e2e record', () => {
     it('errors and exits without projectId', function () {
       return systemTests.exec(this, {
         key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-        configFile: 'cypress.config-with-project-id.js',
         spec: 'record_pass*',
         record: true,
         snapshot: true,
@@ -490,7 +489,7 @@ describe('e2e record', () => {
     it('respects quiet mode', function () {
       return systemTests.exec(this, {
         key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-        configFile: 'cypress.config-with-project-id.js',
+        configFile: 'cypress-with-project-id.config.js',
         spec: 'record_pass*',
         record: true,
         snapshot: true,
@@ -505,6 +504,7 @@ describe('e2e record', () => {
 
     it('errors and exits without recordKey', function () {
       return systemTests.exec(this, {
+        configFile: 'cypress-with-project-id.config.js',
         spec: 'record_pass*',
         record: true,
         snapshot: true,
@@ -523,6 +523,7 @@ describe('e2e record', () => {
       process.env.CYPRESS_INTERNAL_SYSTEM_TESTS = '0'
 
       return systemTests.exec(this, {
+        configFile: 'cypress-with-project-id.config.js',
         spec: 'record_pass*',
         record: true,
         snapshot: true,
@@ -543,6 +544,7 @@ describe('e2e record', () => {
       process.env.CYPRESS_INTERNAL_SYSTEM_TESTS = '0'
 
       return systemTests.exec(this, {
+        configFile: 'cypress-with-project-id.config.js',
         spec: 'record_pass*',
         record: true,
         parallel: true,
@@ -560,7 +562,7 @@ describe('e2e record', () => {
     it('config from runtime, testOptions', async function () {
       await systemTests.exec(this, {
         key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-        configFile: 'cypress.config-with-project-id-without-video.js',
+        configFile: 'cypress-with-project-id-without-video.config.js',
         spec: 'config_record_spec*',
         record: true,
         snapshot: false,
@@ -616,7 +618,7 @@ describe('e2e record', () => {
       it('changes spec run order', async function () {
         await systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-          configFile: 'cypress.config-with-project-id-without-video.js',
+          configFile: 'cypress-with-project-id-without-video.config.js',
           spec: 'a_record.spec.js,b_record.spec.js',
           record: true,
           snapshot: false,
@@ -657,7 +659,7 @@ describe('e2e record', () => {
     it('records tests and exits without executing', async function () {
       await systemTests.exec(this, {
         key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-        configFile: 'cypress.config-with-project-id-without-video.js',
+        configFile: 'cypress-with-project-id-without-video.config.js',
         spec: 'a_record_instantfail.spec.js,b_record.spec.js',
         record: true,
         snapshot: true,
@@ -685,7 +687,7 @@ describe('e2e record', () => {
     it('records tests and exits without executing in parallel', async function () {
       await systemTests.exec(this, {
         key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-        configFile: 'cypress.config-with-project-id-without-video.js',
+        configFile: 'cypress-with-project-id-without-video.config.js',
         spec: 'a_record_instantfail.spec.js,b_record.spec.js',
         record: true,
         snapshot: true,
@@ -714,7 +716,7 @@ describe('e2e record', () => {
     it('does not upload when not enabled', function () {
       return systemTests.exec(this, {
         key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-        configFile: 'cypress.config-with-project-id-without-video.js',
+        configFile: 'cypress-with-project-id-without-video.config.js',
         spec: 'record_pass*',
         record: true,
         snapshot: true,
@@ -737,7 +739,7 @@ describe('e2e record', () => {
       it('errors and exits on 401', function () {
         return systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-          configFile: 'cypress.config-with-project-id.js',
+          configFile: 'cypress-with-project-id.config.js',
           spec: 'record_pass*',
           record: true,
           snapshot: true,
@@ -760,7 +762,7 @@ describe('e2e record', () => {
       it('errors and exits', function () {
         return systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-          configFile: 'cypress.config-with-project-id.js',
+          configFile: 'cypress-with-project-id.config.js',
           spec: 'record_pass*',
           record: true,
           snapshot: true,
@@ -785,7 +787,7 @@ describe('e2e record', () => {
 
         return systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-          configFile: 'cypress.config-with-project-id.js',
+          configFile: 'cypress-with-project-id.config.js',
           spec: 'record_pass*',
           record: true,
           snapshot: true,
@@ -805,7 +807,7 @@ describe('e2e record', () => {
 
         return systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-          configFile: 'cypress.config-with-project-id.js',
+          configFile: 'cypress-with-project-id.config.js',
           spec: 'record_pass*',
           group: 'foo',
           record: true,
@@ -827,7 +829,7 @@ describe('e2e record', () => {
 
         return systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-          configFile: 'cypress.config-with-project-id.js',
+          configFile: 'cypress-with-project-id.config.js',
           spec: 'record_pass*',
           group: 'foo',
           tag: 'nightly',
@@ -863,7 +865,7 @@ describe('e2e record', () => {
 
         return systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-          configFile: 'cypress.config-with-project-id.js',
+          configFile: 'cypress-with-project-id.config.js',
           spec: 'record_pass*',
           group: 'foo',
           tag: 'nightly',
@@ -888,7 +890,7 @@ describe('e2e record', () => {
 
         await systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-          configFile: 'cypress.config-with-project-id.js',
+          configFile: 'cypress-with-project-id.config.js',
           spec: '*_record.spec.js',
           record: true,
           snapshot: true,
@@ -932,7 +934,7 @@ describe('e2e record', () => {
 
         return systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-          configFile: 'cypress.config-with-project-id.js',
+          configFile: 'cypress-with-project-id.config.js',
           spec: 'record_pass*',
           group: 'foo',
           tag: 'nightly',
@@ -976,7 +978,7 @@ describe('e2e record', () => {
 
         return systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-          configFile: 'cypress.config-with-project-id.js',
+          configFile: 'cypress-with-project-id.config.js',
           spec: 'record_pass*',
           group: 'e2e-tests',
           record: true,
@@ -1008,7 +1010,7 @@ describe('e2e record', () => {
       it('errors and exits when there is an unknown 422 response', function () {
         return systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-          configFile: 'cypress.config-with-project-id.js',
+          configFile: 'cypress-with-project-id.config.js',
           spec: 'record_pass*',
           group: 'e2e-tests',
           tag: 'nightly',
@@ -1047,7 +1049,7 @@ describe('e2e record', () => {
       it('errors and exits when on free plan and over recorded runs limit', function () {
         return systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-          configFile: 'cypress.config-with-project-id.js',
+          configFile: 'cypress-with-project-id.config.js',
           spec: 'record_pass*',
           record: true,
           snapshot: true,
@@ -1075,7 +1077,7 @@ describe('e2e record', () => {
       it('errors and exits when on free plan and over recorded tests limit', function () {
         return systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-          configFile: 'cypress.config-with-project-id.js',
+          configFile: 'cypress-with-project-id.config.js',
           spec: 'record_pass*',
           record: true,
           snapshot: true,
@@ -1100,7 +1102,7 @@ describe('e2e record', () => {
       it('errors and exits when attempting parallel run when not available in plan', function () {
         return systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-          configFile: 'cypress.config-with-project-id.js',
+          configFile: 'cypress-with-project-id.config.js',
           spec: 'record_pass*',
           record: true,
           snapshot: true,
@@ -1124,7 +1126,7 @@ describe('e2e record', () => {
       it('errors and exits when attempting parallel run when not available in plan', function () {
         return systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-          configFile: 'cypress.config-with-project-id.js',
+          configFile: 'cypress-with-project-id.config.js',
           spec: 'record_pass*',
           record: true,
           snapshot: true,
@@ -1145,7 +1147,7 @@ describe('e2e record', () => {
       it('errors and exits when there\'s an unknown 402 error', function () {
         return systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-          configFile: 'cypress.config-with-project-id.js',
+          configFile: 'cypress-with-project-id.config.js',
           spec: 'record_pass*',
           record: true,
           snapshot: true,
@@ -1168,7 +1170,7 @@ describe('e2e record', () => {
 
         return systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-          configFile: 'cypress.config-with-project-id.js',
+          configFile: 'cypress-with-project-id.config.js',
           spec: '*_record_*',
           record: true,
           snapshot: true,
@@ -1199,7 +1201,7 @@ describe('e2e record', () => {
 
       //   return systemTests.exec(this, {
       //     key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-      'cypress.config-with-project-id.js',
+      'cypress-with-project-id.config.js',
       //     spec: '*_record.spec*',
       //     record: true,
       //     snapshot: true,
@@ -1222,7 +1224,7 @@ describe('e2e record', () => {
 
         return systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-          configFile: 'cypress.config-with-project-id.js',
+          configFile: 'cypress-with-project-id.config.js',
           spec: '*_record.spec*',
           group: 'foo',
           ciBuildId: 1,
@@ -1246,7 +1248,7 @@ describe('e2e record', () => {
 
         await systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-          configFile: 'cypress.config-with-project-id.js',
+          configFile: 'cypress-with-project-id.config.js',
           spec: '*_record.spec.js',
           record: true,
           group: 'foo',
@@ -1283,7 +1285,7 @@ describe('e2e record', () => {
 
         return systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-          configFile: 'cypress.config-with-project-id.js',
+          configFile: 'cypress-with-project-id.config.js',
           spec: 'record_pass*',
           record: true,
           snapshot: true,
@@ -1318,7 +1320,7 @@ describe('e2e record', () => {
 
         return systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-          configFile: 'cypress.config-with-project-id.js',
+          configFile: 'cypress-with-project-id.config.js',
           spec: 'record_pass*',
           record: true,
           snapshot: true,
@@ -1362,7 +1364,7 @@ describe('e2e record', () => {
       it('warns but proceeds', function () {
         return systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-          configFile: 'cypress.config-with-project-id-uploading-assets.js',
+          configFile: 'cypress-with-project-id-uploading-assets.config.js',
           spec: 'record_pass*',
           record: true,
           snapshot: true,
@@ -1435,7 +1437,7 @@ describe('e2e record', () => {
 
         return systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-          configFile: 'cypress.config-with-project-id.js',
+          configFile: 'cypress-with-project-id.config.js',
           spec: 'record_pass*',
           group: 'foo',
           tag: 'nightly',
@@ -1496,7 +1498,7 @@ describe('e2e record', () => {
         it('warns when over private test results', function () {
           return systemTests.exec(this, {
             key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-            configFile: 'cypress.config-with-project-id.js',
+            configFile: 'cypress-with-project-id.config.js',
             spec: 'record_pass*',
             record: true,
             snapshot: true,
@@ -1532,7 +1534,7 @@ describe('e2e record', () => {
         it('warns when over test results', function () {
           return systemTests.exec(this, {
             key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-            configFile: 'cypress.config-with-project-id.js',
+            configFile: 'cypress-with-project-id.config.js',
             spec: 'record_pass*',
             record: true,
             snapshot: true,
@@ -1567,7 +1569,7 @@ describe('e2e record', () => {
         it('warns when using parallel feature', function () {
           return systemTests.exec(this, {
             key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-            configFile: 'cypress.config-with-project-id.js',
+            configFile: 'cypress-with-project-id.config.js',
             spec: 'record_pass*',
             record: true,
             snapshot: true,
@@ -1602,7 +1604,7 @@ describe('e2e record', () => {
         it('warns when using parallel feature', function () {
           return systemTests.exec(this, {
             key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-            configFile: 'cypress.config-with-project-id.js',
+            configFile: 'cypress-with-project-id.config.js',
             spec: 'record_pass*',
             record: true,
             snapshot: true,
@@ -1638,7 +1640,7 @@ describe('e2e record', () => {
         it('warns when over private test results', function () {
           return systemTests.exec(this, {
             key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-            configFile: 'cypress.config-with-project-id.js',
+            configFile: 'cypress-with-project-id.config.js',
             spec: 'record_pass*',
             record: true,
             snapshot: true,
@@ -1674,7 +1676,7 @@ describe('e2e record', () => {
         it('warns when over test results', function () {
           return systemTests.exec(this, {
             key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-            configFile: 'cypress.config-with-project-id.js',
+            configFile: 'cypress-with-project-id.config.js',
             spec: 'record_pass*',
             record: true,
             snapshot: true,
@@ -1710,7 +1712,7 @@ describe('e2e record', () => {
         it('warns when over test results', function () {
           return systemTests.exec(this, {
             key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-            configFile: 'cypress.config-with-project-id.js',
+            configFile: 'cypress-with-project-id.config.js',
             spec: 'record_pass*',
             record: true,
             snapshot: true,
@@ -1731,7 +1733,7 @@ describe('e2e record', () => {
         it('warns with unknown warning code', function () {
           return systemTests.exec(this, {
             key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-            configFile: 'cypress.config-with-project-id.js',
+            configFile: 'cypress-with-project-id.config.js',
             spec: 'record_pass*',
             record: true,
             snapshot: true,
