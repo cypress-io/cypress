@@ -29,9 +29,6 @@ export const useRunnerUiStore = defineStore({
     setShowChooseExternalEditorModal (value: boolean) {
       this.showChooseExternalEditorModal = value
     },
-    setAutoScrollingEnabled (value: boolean) {
-      this.autoScrollingEnabled = value
-    },
     setPreference (preference: string, value: boolean) {
       this[preference] = value
     },
