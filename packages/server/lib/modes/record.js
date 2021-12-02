@@ -561,6 +561,11 @@ const _postInstanceTests = ({
   ciBuildId,
   group,
 }) => {
+  /* eslint-disable no-console */
+  console.log('--- _postInstanceTests HOOKS ---')
+  console.log(hooks)
+  /* eslint-enable no-console */
+
   return api.postInstanceTests({
     runId,
     instanceId,
