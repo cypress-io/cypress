@@ -1,7 +1,7 @@
 <template>
   <Alert
     v-model="show"
-    type="dismissible"
+    dismissible
     status="warning"
     data-testid="warning-alert"
     header-class="text-warning-600"

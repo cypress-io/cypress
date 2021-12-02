@@ -43,8 +43,7 @@ describe('<Warning />', () => {
       {...methods}
     /></div>))
 
-    // @ts-ignore
-    cy.findAllByLabelText(defaultMessages.components.alert.dismissAriaLabel).first().click()
+    cy.get(`[aria-label=${defaultMessages.components.alert.dismissAriaLabel}`).first().click()
     cy.wrap(onUpdate).should('be.called')
   })
 })
