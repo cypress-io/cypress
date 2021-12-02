@@ -13,6 +13,7 @@ module.exports = {
     'configFile': '../../mocha-reporter-config.json',
   },
   'e2e': {
+    'specPattern': 'cypress/integration/**/*',
     'setupNodeEvents': require('./cypress/plugins'),
   },
 }

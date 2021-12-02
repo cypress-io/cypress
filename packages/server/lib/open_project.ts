@@ -44,10 +44,8 @@ export class OpenProject {
     }
 
     const newSpecUrl = getSpecUrl({
-      absoluteSpecPath: spec.absolute,
-      specType: spec.specType,
+      spec,
       browserUrl: this.openProject.cfg.browserUrl,
-      integrationFolder: this.openProject.cfg.integrationFolder || 'integration',
       componentFolder: this.openProject.cfg.componentFolder || 'component',
       projectRoot: this.openProject.projectRoot,
     })
@@ -72,10 +70,8 @@ export class OpenProject {
     this.openProject!.reset()
 
     let url = getSpecUrl({
-      absoluteSpecPath: spec.absolute,
-      specType: spec.specType,
+      spec,
       browserUrl: this.openProject.cfg.browserUrl,
-      integrationFolder: this.openProject.cfg.integrationFolder || 'integration',
       componentFolder: this.openProject.cfg.componentFolder || 'component?',
       projectRoot: this.openProject.projectRoot,
     })

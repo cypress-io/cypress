@@ -164,11 +164,6 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     defaultValue: false,
     validation: validate.isBoolean,
   }, {
-    name: 'integrationFolder',
-    defaultValue: 'cypress/integration',
-    validation: validate.isString,
-    isFolder: true,
-  }, {
     name: 'modifyObstructiveCode',
     defaultValue: true,
     validation: validate.isBoolean,
@@ -262,10 +257,6 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     name: 'taskTimeout',
     defaultValue: 60000,
     validation: validate.isNumber,
-  }, {
-    name: 'testFiles',
-    defaultValue: '**/*.*',
-    validation: validate.isStringOrArrayOfStrings,
   }, {
     name: 'trashAssetsBeforeRuns',
     defaultValue: true,

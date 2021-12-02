@@ -6,7 +6,6 @@ import type { ResolvedConfigurationOptions, ResolvedFromConfig, ResolvedConfigur
 import configUtils from '@packages/config'
 
 import errors from './errors'
-import scaffold from './scaffold'
 import { fs } from './util/fs'
 import keys from './util/keys'
 import origin from './util/origin'
@@ -227,8 +226,6 @@ export function mergeDefaults (config: Record<string, any> = {}, options: Record
 
   config = setAbsolutePaths(config)
 
-  config = setParentTestsPaths(config)
-
   config = setNodeBinary(config, options.args?.userNodePath, options.args?.userNodeVersion)
 
   // validate config again here so that we catch configuration errors coming
@@ -401,17 +398,18 @@ export const setNodeBinary = (obj, userNodePath, userNodeVersion) => {
 }
 
 export function setScaffoldPaths (obj) {
-  obj = _.clone(obj)
+  return obj
+  // obj = _.clone(obj)
 
-  debug('set scaffold paths')
+  // debug('set scaffold paths')
 
-  return scaffold.fileTree(obj)
-  .then((fileTree) => {
-    debug('got file tree')
-    obj.scaffoldedFiles = fileTree
+  // return scaffold.fileTree(obj)
+  // .then((fileTree) => {
+  //   debug('got file tree')
+  //   obj.scaffoldedFiles = fileTree
 
-    return obj
-  })
+  //   return obj
+  // })
 }
 
 // async function
@@ -486,24 +484,6 @@ export function setSupportFileAndFolder (obj, defaults) {
 
     return obj
   })
-}
-
-export function setParentTestsPaths (obj) {
-  // projectRoot:              "/path/to/project"
-  // integrationFolder:        "/path/to/project/cypress/integration"
-  // componentFolder:          "/path/to/project/cypress/components"
-  // parentTestsFolder:        "/path/to/project/cypress"
-  // parentTestsFolderDisplay: "project/cypress"
-
-  obj = _.clone(obj)
-
-  const ptfd = (obj.parentTestsFolder = path.dirname(obj.integrationFolder))
-
-  const prd = path.dirname(obj.projectRoot != null ? obj.projectRoot : '')
-
-  obj.parentTestsFolderDisplay = path.relative(prd, ptfd)
-
-  return obj
 }
 
 export function setAbsolutePaths (obj) {

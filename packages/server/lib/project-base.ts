@@ -25,13 +25,12 @@ import { ensureProp } from './util/class-helpers'
 import { fs } from './util/fs'
 import * as settings from './util/settings'
 import plugins from './plugins'
-import specsUtil from './util/specs'
 import Watchers from './watchers'
 import devServer from './plugins/dev-server'
 import preprocessor from './plugins/preprocessor'
 import { SpecsStore } from './specs-store'
 import { checkSupportFile, getDefaultConfigFilePath } from './project_utils'
-import type { FoundBrowser, OpenProjectLaunchOptions } from '@packages/types'
+import type { FoundBrowser, FoundSpec, OpenProjectLaunchOptions } from '@packages/types'
 import { makeLegacyDataContext } from './makeDataContext'
 import type { DataContext } from '@packages/data-context'
 
@@ -382,26 +381,28 @@ export class ProjectBase<TServer extends Server> extends EE {
     ctDevServerPort: number | undefined
     startSpecWatcher: () => void
   }> {
-    const allSpecs = await specsUtil.findSpecs({
-      projectRoot: updatedConfig.projectRoot,
-      fixturesFolder: updatedConfig.fixturesFolder,
-      supportFile: updatedConfig.supportFile,
-      testFiles: updatedConfig.testFiles,
-      ignoreTestFiles: updatedConfig.ignoreTestFiles,
-      componentFolder: updatedConfig.componentFolder,
-      integrationFolder: updatedConfig.integrationFolder,
-    })
-    const specs = allSpecs.filter((spec: Cypress.Cypress['spec']) => {
-      if (this.testingType === 'component') {
-        return spec.specType === 'component'
-      }
+    // const specs = await this.
+    const specs = await this.ctx.project.findSpecs(this.projectRoot, 'integration')
+    // const allSpecs = await specsUtil.findSpecs({
+    //   projectRoot: updatedConfig.projectRoot,
+    //   fixturesFolder: updatedConfig.fixturesFolder,
+    //   supportFile: updatedConfig.supportFile,
+    //   testFiles: updatedConfig.testFiles,
+    //   ignoreTestFiles: updatedConfig.ignoreTestFiles,
+    //   componentFolder: updatedConfig.componentFolder,
+    //   integrationFolder: updatedConfig.integrationFolder,
+    // })
+    // const specs = allSpecs.filter((spec: Cypress.Cypress['spec']) => {
+    //   if (this.testingType === 'component') {
+    //     return spec.specType === 'component'
+    //   }
 
-      if (this.testingType === 'e2e') {
-        return spec.specType === 'integration'
-      }
+    //   if (this.testingType === 'e2e') {
+    //     return spec.specType === 'integration'
+    //   }
 
-      throw Error(`Cannot return specType for testingType: ${this.testingType}`)
-    })
+    //   throw Error(`Cannot return specType for testingType: ${this.testingType}`)
+    // })
 
     return this.initSpecStore({ specs, config: updatedConfig })
   }
@@ -447,25 +448,17 @@ export class ProjectBase<TServer extends Server> extends EE {
     specs,
     config,
   }: {
-    specs: Cypress.Cypress['spec'][]
+    specs: FoundSpec[]
     config: Cfg
   }) {
     const specsStore = new SpecsStore(config, this.testingType)
 
     const startSpecWatcher = () => {
-      return specsStore.watch({
-        onSpecsChanged: (specs) => {
-        // both e2e and CT watch the specs and send them to the
-        // client to be shown in the SpecList.
-          this.server.sendSpecList(specs, this.testingType)
-
-          if (this.testingType === 'component') {
-          // ct uses the dev-server to build and bundle the speces.
-          // send new files to dev server
-            devServer.updateSpecs(specs)
-          }
-        },
-      })
+      if (this.testingType === 'component') {
+      // ct uses the dev-server to build and bundle the speces.
+      // send new files to dev server
+        devServer.updateSpecs(specs)
+      }
     }
 
     let ctDevServerPort: number | undefined
@@ -476,12 +469,13 @@ export class ProjectBase<TServer extends Server> extends EE {
       ctDevServerPort = port
     }
 
-    return specsStore.storeSpecFiles()
-    .return({
+    specsStore.storeSpecFiles(specs)
+
+    return {
       specsStore,
       ctDevServerPort,
       startSpecWatcher,
-    })
+    }
   }
 
   async watchPluginsFile (cfg, options) {

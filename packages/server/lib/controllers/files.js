@@ -4,7 +4,6 @@ const Promise = require('bluebird')
 const cwd = require('../cwd')
 const glob = require('../util/glob')
 const specsUtil = require('../util/specs')
-const pathHelpers = require('../util/path_helpers')
 const debug = require('debug')('cypress:server:controllers')
 const { escapeFilenameInUrl } = require('../util/escape_filename')
 
@@ -58,7 +57,8 @@ module.exports = {
     const convertSpecPath = (spec) => {
       // get the absolute path to this spec and
       // get the browser url + cache buster
-      const convertedSpec = pathHelpers.getAbsolutePathToSpec(spec, config)
+      const convertedSpec = path.join(config.projectRoot, spec)
+      // pathHelpers.getAbsolutePathToSpec(spec, config)
 
       debug('converted %s to %s', spec, convertedSpec)
 
@@ -78,8 +78,6 @@ module.exports = {
 
     const getSpecsHelper = () => {
       // grab all of the specs if this is ci
-      const componentTestingEnabled = _.get(config, 'resolved.testingType.value', 'e2e') === 'component'
-
       if (spec === '__all') {
         debug('returning all specs')
 
@@ -90,19 +88,14 @@ module.exports = {
           return specs
         })
         .filter(specFilterFn)
-        .filter((foundSpec) => {
-          return componentTestingEnabled
-            ? foundSpec.specType === 'component'
-            : foundSpec.specType === 'integration'
-        }).then((specs) => {
+        .then((specs) => {
           debug('filtered __all specs %o', specs)
 
           return specs
-        }).map((spec) => {
-          // grab the name of each
-          return spec.absolute
         }).map(convertSpecPath)
       }
+
+      debug('normalizing spec %o', { spec })
 
       // normalize by sending in an array of 1
       return [convertSpecPath(spec)]

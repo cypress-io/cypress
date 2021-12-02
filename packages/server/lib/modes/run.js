@@ -1535,7 +1535,7 @@ module.exports = {
       options.browsers = browsers
 
       return createAndOpenProject(socketId, options)
-      .then(({ project, projectId, config, configFile }) => {
+      .then(async ({ project, projectId, config, configFile }) => {
         debug('project created and opened with config %o', config)
 
         // if we have a project id and a key but record hasnt been given
@@ -1557,7 +1557,9 @@ module.exports = {
         return Promise.all([
           system.info(),
           browserUtils.ensureAndGetByNameOrPath(browserName, false, userBrowsers).tap(removeOldProfiles),
-          this.findSpecs(config, specPattern),
+          project.ctx.project.findSpecs(
+            projectRoot, options.testingType === 'component' ? 'component' : 'e2e',
+          ),
           trashAssets(config),
         ])
         .spread((sys = {}, browser = {}, specs = []) => {
@@ -1569,26 +1571,22 @@ module.exports = {
             specType: x.specType,
           }))
 
-          // return only what is return to the specPattern
-          if (specPattern) {
-            specPattern = specsUtil.default.getPatternRelativeToProjectRoot(specPattern, projectRoot)
-          }
+          console.log('specs are', specs)
 
-          specs = specs.filter((spec) => {
-            return options.testingType === 'component'
-              ? spec.specType === 'component'
-              : spec.specType === 'integration'
-          })
+          // // return only what is return to the specPattern
+          // if (specPattern) {
+          //   specPattern = specsUtil.default.getPatternRelativeToProjectRoot(specPattern, projectRoot)
+          // }
 
-          if (!specs.length) {
-            // did we use the spec pattern?
-            if (specPattern) {
-              errors.throw('NO_SPECS_FOUND', projectRoot, specPattern)
-            } else {
-              // else we looked in the integration folder
-              errors.throw('NO_SPECS_FOUND', config.integrationFolder, specPattern)
-            }
-          }
+          // if (!specs.length) {
+          //   // did we use the spec pattern?
+          //   if (specPattern) {
+          //     errors.throw('NO_SPECS_FOUND', projectRoot, specPattern)
+          //   } else {
+          //     // else we looked in the integration folder
+          //     errors.throw('NO_SPECS_FOUND', config.integrationFolder, specPattern)
+          //   }
+          // }
 
           if (browser.unsupportedVersion && browser.warning) {
             errors.throw('UNSUPPORTED_BROWSER_VERSION', browser.warning)
