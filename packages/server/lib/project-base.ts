@@ -381,8 +381,10 @@ export class ProjectBase<TServer extends Server> extends EE {
     startSpecWatcher: () => void
   }> {
     // const specs = await this.
-    const specs = await this.ctx.project.findSpecs(this.projectRoot, 'integration')
+    const specs = await this.ctx.project.findSpecs(this.projectRoot, 
+      this.testingType === 'component' ? 'component' : 'integration')
 
+console.log('gogogog', {specs})
     return this.initSpecStore({ specs, config: updatedConfig })
   }
 
@@ -430,7 +432,7 @@ export class ProjectBase<TServer extends Server> extends EE {
     specs: FoundSpec[]
     config: Cfg
   }) {
-    const specsStore = new SpecsStore(config, this.testingType)
+    const specsStore = new SpecsStore()
 
     const startSpecWatcher = () => {
       if (this.testingType === 'component') {

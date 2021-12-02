@@ -37,8 +37,10 @@ export class ProjectDataSource {
       specAbsolutePaths = await this.ctx.file.getFilesByGlob(projectRoot, specPatternFromCliArg, { absolute: true })
     } else {
       const testingType = specType === 'component' ? 'component' : 'e2e'
+      console.log('asdfsad', testingType)
       const config = await this.getConfig(projectRoot)
       const specPattern = config[testingType]?.specPattern
+      console.log('aasfdas', specPattern)
 
       debug('pattern passed from config : %s', specPattern)
 
