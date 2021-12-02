@@ -200,7 +200,7 @@ export class ProjectBase<TServer extends Server> extends EE {
 
     this._server = this.createServer(this.testingType)
 
-    if (!this.options.skipPluginIntializeForTesting) {
+    if (!this.options.skipPluginInitializeForTesting) {
       cfg = await this.initializePlugins(cfg, this.options)
     }
 
@@ -470,7 +470,7 @@ export class ProjectBase<TServer extends Server> extends EE {
 
     let ctDevServerPort: number | undefined
 
-    if (this.testingType === 'component' && !this.options.skipPluginIntializeForTesting) {
+    if (this.testingType === 'component' && !this.options.skipPluginInitializeForTesting) {
       const { port } = await this.startCtDevServer(specs, config)
 
       ctDevServerPort = port
