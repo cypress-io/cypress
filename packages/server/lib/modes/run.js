@@ -1,3 +1,4 @@
+// @ts-check
 /* eslint-disable no-console, @cypress/dev/arrow-body-multiline-braces  */
 const _ = require('lodash')
 const la = require('lazy-ass')
@@ -32,8 +33,17 @@ const objUtils = require('../util/obj_utils')
 
 const DELAY_TO_LET_VIDEO_FINISH_MS = 1000
 
+/**
+ * @type {import('@packages/server/lib/open_project').OpenProject}
+ */
 let openProject
 
+/**
+ *
+ * @param {*} val
+ * @param {*} c
+ * @returns {string}
+ */
 const color = (val, c) => {
   return chalk[c](val)
 }
@@ -620,7 +630,14 @@ async function checkAccess (folderPath) {
   })
 }
 
-const createAndOpenProject = async (socketId, options) => {
+/**
+ *
+ * @param {string} socketId
+ * @param {*} options
+ * @param {import('@packages/data-context').DataContext} ctx
+ * @returns
+ */
+const createAndOpenProject = async (socketId, options, ctx) => {
   const { projectRoot, projectId } = options
 
   await checkAccess(projectRoot)
@@ -630,7 +647,7 @@ const createAndOpenProject = async (socketId, options) => {
 
   const [_project, _config, _projectId] = await Promise.all([
     project,
-    project.getConfig(),
+    ctx.projectConfig.getRuntimeConfig(),
     getProjectId(project, projectId),
   ])
 
@@ -1503,7 +1520,7 @@ module.exports = {
     })
   },
 
-  ready (options = {}) {
+  ready (options = {}, ctx) {
     debug('run mode ready with options %o', options)
 
     if (process.env.ELECTRON_RUN_AS_NODE && !process.env.DISPLAY) {
@@ -1535,7 +1552,7 @@ module.exports = {
       debug('found all system browsers %o', browsers)
       options.browsers = browsers
 
-      return createAndOpenProject(socketId, options)
+      return createAndOpenProject(socketId, options, ctx)
       .then(({ project, projectId, config, configFile }) => {
         debug('project created and opened with config %o', config)
 
@@ -1683,6 +1700,6 @@ module.exports = {
       await app.whenReady()
     }
 
-    return this.ready(options)
+    return this.ready(options, ctx)
   },
 }

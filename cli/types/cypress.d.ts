@@ -2867,12 +2867,9 @@ declare namespace Cypress {
     configFile: string
     cypressEnv: string
     devServerPublicPathRoute: string
-    isNewProject: boolean
     isTextTerminal: boolean
     morgan: boolean
     namespace: string
-    parentTestsFolder: string
-    parentTestsFolderDisplay: string
     projectName: string
     projectRoot: string
     proxyUrl: string
@@ -2912,6 +2909,15 @@ declare namespace Cypress {
   type ConfigOptions<ComponentDevServerOpts = any> = CoreConfigOptions & {
     e2e?: CoreConfigOptions,
     component?: ComponentConfigOptions<ComponentDevServerOpts>
+  }
+
+  /**
+   * When we respond with the config options from the child process, we stringify the functions 
+   * on the config object
+   */
+  type ConfigOptionsIpcResponse = CoreConfigOptions & {
+    e2e?: Omit<CoreConfigOptions, 'setupNodeEvents'> & { setupNodeEvents?: string },
+    component?: Omit<ComponentConfigOptions, 'setupNodeEvents' | 'devServer'> & { setupNodeEvents?: string, devServer?: string }
   }
 
   interface PluginConfigOptions extends ResolvedConfigOptions {

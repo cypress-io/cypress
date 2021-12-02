@@ -7,6 +7,7 @@ import {
   FileActions,
   GlobalProjectActions,
   CurrentProjectActions,
+  BrowserActions,
 } from './actions'
 import { AuthActions } from './actions/AuthActions'
 import { DevActions } from './actions/DevActions'
@@ -14,6 +15,10 @@ import { LocalSettingsActions } from './actions/LocalSettingsActions'
 
 export class DataActions {
   constructor (private ctx: DataContext) {}
+
+  get browser () {
+    return new BrowserActions(this.ctx)
+  }
 
   get globalProject () {
     return new GlobalProjectActions(this.ctx)

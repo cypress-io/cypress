@@ -22,7 +22,7 @@ export interface FullConfig extends Partial<Cypress.RuntimeConfigOptions & Cypre
   resolved: ResolvedConfigurationOptions
 }
 
-export interface SampleConfigFile{
+export interface SampleConfigFile {
   status: 'changes' | 'valid' | 'skipped' | 'error'
   filePath: string
   content: string

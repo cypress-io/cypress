@@ -6,6 +6,7 @@
   "main": "index.js",
   "browser": "lib/index.ts",
   "scripts": {
+    "check-ts": "tsc --noEmit",
     "build-prod": "tsc --project .",
     "clean": "rm lib/options.js || echo 'ok'",
     "test": "yarn test-unit",

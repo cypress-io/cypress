@@ -2524,7 +2524,7 @@ mac-workflow: &mac-workflow
           - darwin-create-build-artifacts
 
 workflows:
-  linux:
-    <<: *linux-workflow
-  mac:
-    <<: *mac-workflow
+  # linux:
+  #   <<: *linux-workflow
+  # mac:
+  #   <<: *mac-workflow

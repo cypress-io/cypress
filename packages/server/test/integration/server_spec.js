@@ -21,7 +21,7 @@ const expectToEqDetails = function (actual, expected) {
   expect(actual).to.deep.eq(expected)
 }
 
-describe('Server', () => {
+describe.skip('Server', () => {
   require('mocha-banner').register()
 
   beforeEach(() => {

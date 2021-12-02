@@ -1,6 +1,7 @@
 import assert from 'assert'
 import Bluebird from 'bluebird'
-
+import { castDraft } from 'immer'
+import configUtils from '@packages/config'
 import type { DataContext } from '..'
 import { LoadingConfig, LoadingContainer, makeLoadingContainer } from '../util/makeLoadingContainer'
 
@@ -29,6 +30,11 @@ export class LoadingManager {
     })
   }
 
+  // appState = this.loadingContainer({
+  //   name: 'appState',
+  //   action: () => this.ctx._apis.appApi.
+  // })
+
   /**
    * In global open mode, loads the project paths from the cache
    * so we can access them
@@ -38,7 +44,7 @@ export class LoadingManager {
     action: () => this.ctx._apis.projectApi.getProjectRootsFromCache(),
     onUpdate: (val) => {
       this.ctx.update((o) => {
-        o.globalProjects = val
+        o.globalProjects = castDraft(val)
       })
 
       this.ctx.emitter.toLaunchpad()
@@ -58,7 +64,7 @@ export class LoadingManager {
     },
     onUpdate: (val) => {
       this.ctx.update((o) => {
-        o.localSettings = val
+        o.localSettings = castDraft(val)
       })
     },
   })
@@ -71,7 +77,7 @@ export class LoadingManager {
     action: () => this.ctx._apis.appApi.getBrowsers(),
     onUpdate: (val) => {
       this.ctx.update((o) => {
-        o.machineBrowsers = val
+        o.machineBrowsers = castDraft(val)
       })
     },
   })
@@ -83,33 +89,32 @@ export class LoadingManager {
   projectConfig = this.loadingContainer({
     name: 'projectConfig',
     action: async () => {
-      // await this.ctx.loadingManager.machineBrowsers.load()
       assert(this.ctx.actions.projectConfig, 'projectConfig should exist')
-      const { configPromise } = this._refeshConfigProcess()
 
-      return this._makeFullConfig(configPromise)
+      return this._refeshConfigProcess()
     },
     onUpdate: (val) => {
       this.ctx.update((o) => {
         if (o.currentProject) {
-          o.currentProject.config = val
+          o.currentProject.config = castDraft(val)
         }
       })
     },
   })
 
-  private _makeFullConfig (configPromise: Promise<Cypress.ConfigOptions>) {
-    return configPromise.then((val) => {
-      return this.ctx._apis.projectApi.makeConfig(val)
-    })
-  }
-
-  private _refeshConfigProcess () {
+  private async _refeshConfigProcess () {
     assert(this.ctx.actions.projectConfig)
     // Kill the existing child process, if one already exists
     this.ctx.currentProject?.configChildProcess?.process.kill()
 
-    return this.ctx.actions.projectConfig.refreshConfigProcess()
+    const { configPromise } = this.ctx.actions.projectConfig.refreshConfigProcess()
+    const result = await configPromise
+
+    configUtils.validate(result, (errMsg) => {
+      throw this.ctx.error('SETTINGS_VALIDATION_ERROR', this.ctx.currentProject?.configFile, errMsg)
+    })
+
+    return result
   }
 
   /**
@@ -119,15 +124,13 @@ export class LoadingManager {
   projectEventSetup = this.loadingContainer({
     name: 'projectEventSetup',
     action: async () => {
-      // If we have already executed plugins for the config file, we need to source a new one
-      if (this.ctx.currentProject?.configChildProcess?.executedPlugins || !this.ctx.currentProject?.configChildProcess) {
-        const { configPromise } = this._refeshConfigProcess()
-
-        await this._makeFullConfig(configPromise)
-      }
-
       assert(this.ctx.actions.projectConfig, 'expected projectConfig in projectEventSetup')
       assert(this.ctx.currentProject?.configChildProcess?.ipc, 'Expected config ipc in projectEventSetup')
+
+      // If we have already executed plugins for the config file, we need to source a new one
+      if (this.ctx.currentProject.configChildProcess.executedPlugins || !this.ctx.currentProject?.configChildProcess) {
+        await this._refeshConfigProcess()
+      }
 
       return this.ctx.actions.projectConfig.runSetupNodeEvents(
         this.ctx.currentProject.configChildProcess.ipc,
@@ -136,7 +139,7 @@ export class LoadingManager {
     onUpdate: (val) => {
       this.ctx.update((o) => {
         if (o.currentProject) {
-          o.currentProject.pluginLoad = val
+          o.currentProject.pluginLoad = castDraft(val)
           if (val.state === 'LOADED' && val.value?.registeredEvents) {
             o.currentProject.pluginRegistry = val.value.registeredEvents
           }

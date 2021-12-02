@@ -21,7 +21,6 @@ export class GlobalProjectActions {
    * @returns
    */
   async setAndLoadActiveProject (projectRoot: string) {
-    this.ctx.debug('setActiveProject')
     await this.ctx.actions.currentProject?.clearCurrentProject()
 
     // Set initial properties, so we can set the config object on the active project

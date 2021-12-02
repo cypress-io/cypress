@@ -3,4 +3,9 @@
   "include": [
     "lib/*",
   ],
+  "compilerOptions": {
+    "strict": true,
+    "noImplicitAny": true,
+    "skipDefaultLibCheck": false
+  }
 }

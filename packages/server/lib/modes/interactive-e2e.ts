@@ -153,10 +153,6 @@ export = {
         ctx?.actions.electron.setBrowserWindow(win)
         Events.start({
           ...(options as LaunchArgs),
-          onFocusTests () {
-            // @ts-ignore
-            return app.focus({ steal: true }) || win.focus()
-          },
           os: os.platform() as PlatformName,
         }, ctx.rootBus)
 

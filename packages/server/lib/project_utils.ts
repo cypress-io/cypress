@@ -1,9 +1,5 @@
 import Debug from 'debug'
 import path from 'path'
-
-import * as settings from './util/settings'
-import errors from './errors'
-import { fs } from './util/fs'
 import { escapeFilenameInUrl } from './util/escape_filename'
 
 const debug = Debug('cypress:server:project_utils')
@@ -128,22 +124,4 @@ export const getSpecUrl = ({
   debug('return path to spec %o', { specType, absoluteSpecPath, prefixedPath, url })
 
   return url
-}
-
-export const checkSupportFile = async ({
-  supportFile,
-  configFile,
-}: {
-  supportFile?: string | boolean
-  configFile?: string | false
-}) => {
-  if (supportFile && typeof supportFile === 'string') {
-    const found = await fs.pathExists(supportFile)
-
-    if (!found) {
-      throw errors.get('SUPPORT_FILE_NOT_FOUND', supportFile, settings.configFile({ configFile }))
-    }
-  }
-
-  return
 }

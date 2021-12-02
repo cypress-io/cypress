@@ -17,6 +17,11 @@ export class ElectronActions {
     return this.ctx.os === 'darwin'
   }
 
+  //
+  focusLaunchpad () {
+    // return this.ctx.app.focus({ steal: true }) || this.ctx.win.focus()
+  }
+
   setElectronApp (app: App) {
     this.ctx.update((o) => {
       o.electron.app = app

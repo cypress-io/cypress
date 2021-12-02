@@ -23,6 +23,10 @@ export class OpenProject {
 
   constructor (readonly ctx: DataContext) {}
 
+  getProject () {
+    return this.openProject
+  }
+
   resetOpenProject () {
     this.openProject = null
     this.relaunchBrowser = null
@@ -30,14 +34,6 @@ export class OpenProject {
 
   reset () {
     this.resetOpenProject()
-  }
-
-  getConfig () {
-    return this.openProject?.getConfig()
-  }
-
-  getProject () {
-    return this.openProject
   }
 
   changeUrlToSpec (spec: Cypress.Cypress['spec']) {
@@ -272,34 +268,15 @@ export class OpenProject {
   async create (path: string, args: LaunchArgs, options: OpenProjectLaunchOptions, browsers: FoundBrowser[] = []) {
     debug('open_project create %s', path)
 
-    _.defaults(options, {
-      onReloadBrowser: () => {
-        if (this.relaunchBrowser) {
-          return this.relaunchBrowser()
-        }
-
-        return
-      },
-    })
-
     if (!_.isUndefined(args.configFile)) {
       options.configFile = args.configFile
     }
 
     options = _.extend({}, args.config, options, { args })
 
-    // open the project and return
-    // the config for the project instance
-    debug('opening project %s', path)
-    debug('and options %o', options)
-
-    const testingType = args.testingType === 'component' ? 'component' : 'e2e'
-
     // store the currently open project
     const project = this.openProject = new ProjectBase({
       ctx: this.ctx,
-      testingType,
-      projectRoot: path,
       options: {
         ...options,
         testingType,

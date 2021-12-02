@@ -11,8 +11,13 @@ import inspector from 'inspector'
 import type { CurrentProjectDataSource } from '../sources'
 import assert from 'assert'
 import type { ConfigIpc, EventRegistration, RegisteredEvents } from '../data/coreDataShape'
+import type { Immutable } from 'immer'
 
 const UNDEFINED_SERIALIZED = '__cypress_undefined__'
+
+// ERROR_WRITING_FILE
+// ERROR_READING_FILE
+// CONFIG_FILE_NOT_FOUND
 
 /**
  * Manages the lifecycle of the Config sourcing & Plugin execution
@@ -21,6 +26,31 @@ export class ConfigFileActions {
   constructor (private ctx: DataContext, private currentProject: CurrentProjectDataSource) {}
 
   static CHILD_PROCESS_FILE_PATH = path.join(__dirname, '../../../server/lib/util', 'require_async_child.js')
+
+  updateFromServerStart () {
+    // if we didnt have a cfg.port
+    // then get the port once we
+    // open the server
+    if (!cfg.port) {
+      cfg.port = port
+
+      // and set all the urls again
+      _.extend(cfg, config.setUrls(cfg))
+    }
+
+    cfg.proxyServer = cfg.proxyUrl
+
+    // save the last time they opened the project
+    // along with the first time they opened it
+    const now = Date.now()
+    const stateToSave = {
+      lastOpened: now,
+    } as any
+
+    if (!cfg.state || !cfg.state.firstOpened) {
+      stateToSave.firstOpened = now
+    }
+  }
 
   execute (eventName: string, config: object = {}, ...args: any[]) {
     // Bluebird, for backward compat
@@ -53,10 +83,11 @@ export class ConfigFileActions {
    */
   runSetupNodeEvents (ipc: ConfigIpc) {
     const dfd = pDefer<null | { newConfig: Cypress.ResolvedConfigOptions, registeredEvents: RegisteredEvents }>()
+
+    // TODO: Move these into the Data Context
     const handlers = this.ctx._apis.projectApi.getPluginIpcHandlers()
 
-    assert(this.ctx.currentProject?.config.value, 'expect currentProject.config in runSetupNodeEvents')
-    assert(this.ctx.currentProject.currentTestingType, 'expected testing type in runSetupNodeEvents')
+    assert(this.currentProject.currentTestingType, 'expected testing type in runSetupNodeEvents')
 
     ipc.on('empty:plugins', () => dfd.resolve(null))
 
@@ -74,7 +105,13 @@ export class ConfigFileActions {
       handler(ipc)
     }
 
-    ipc.send('plugins', this.ctx.currentProject.currentTestingType, this.ctx.currentProject.config.value)
+    const configOpts = this.ctx.projectConfig.makeSetupNodeEventsConfig()
+
+    ipc.send(
+      'plugins',
+      this.currentProject.currentTestingType,
+      configOpts,
+    )
 
     return dfd.promise
   }
@@ -127,7 +164,7 @@ export class ConfigFileActions {
     this.ctx.debug('fork child process', ConfigFileActions.CHILD_PROCESS_FILE_PATH, configProcessArgs, childOptions)
 
     const child = childProcess.fork(ConfigFileActions.CHILD_PROCESS_FILE_PATH, configProcessArgs, childOptions)
-    const dfd = pDefer<Cypress.ConfigOptions>()
+    const dfd = pDefer<Immutable<Cypress.ConfigOptionsIpcResponse>>()
 
     return {
       child,
@@ -136,7 +173,7 @@ export class ConfigFileActions {
     }
   }
 
-  private wrapConfigProcess (child: ChildProcess, dfd: pDefer.DeferredPromise<Cypress.ConfigOptions>) {
+  private wrapConfigProcess (child: ChildProcess, dfd: pDefer.DeferredPromise<Immutable<Cypress.ConfigOptionsIpcResponse>>) {
     const ipc = this.wrapIpc(child)
 
     if (child.stdout && child.stderr) {
@@ -155,7 +192,7 @@ export class ConfigFileActions {
       this.ctx.debug('load:error %s, rejecting', type)
       child.kill()
 
-      const err = this.ctx._apis.projectApi.error(type, ...args)
+      const err = this.ctx.error(type, ...args)
 
       // if it's a non-cypress error, restore the initial error
       if (!isCypressError(err)) {

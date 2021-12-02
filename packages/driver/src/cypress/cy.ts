@@ -1046,7 +1046,7 @@ export default {
         // uncaught exceptions should be only be catchable in the AUT (app)
         // or if in component testing mode, since then the spec frame and
         // AUT frame are the same
-        if (frameType === 'app' || config('componentTesting')) {
+        if (frameType === 'app' || config('testingType') === 'component') {
           try {
             const results = Cypress.action('app:uncaught:exception', err, runnable, promise)
 

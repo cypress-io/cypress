@@ -2,9 +2,10 @@ import type { App, BrowserWindow } from 'electron'
 import type { TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
 import type { ChildProcess } from 'child_process'
 import path from 'path'
-import type { AllowedState, CypressErrorIdentifier, Editor, Ensure, FoundBrowser, FullConfig, LaunchArgs, Preferences } from '@packages/types'
+import type { AllowedState, CypressErrorIdentifier, Editor, Ensure, FoundBrowser, LaunchArgs, Preferences } from '@packages/types'
 import type { Draft, Immutable, Patch } from 'immer'
 import fs from 'fs'
+import { castDraft } from 'immer'
 
 import type { LoadingState } from '../util'
 import type { LoadingManager } from './LoadingManager'
@@ -27,7 +28,7 @@ export interface ConfigIpc {
   send(event: 'load:plugins', options: Cypress.PluginConfigOptions): boolean
   send(event: 'execute:plugins', evt: string, ids: {eventId: string, invocationId: string}, args: any[]): boolean
   on(evt: `promise:fulfilled:${string}`, fn: Function): boolean
-  on(evt: 'loaded', fn: Handler<Cypress.ConfigOptions>): any
+  on(evt: 'loaded', fn: Handler<Immutable<Cypress.ConfigOptionsIpcResponse>>): any
   on(evt: 'load:error', fn: Handler<CypressErrorIdentifier>): any
   on(evt: 'load:error:plugins', fn: Handler<CypressErrorIdentifier>): any
   on(evt: 'loaded:plugins', fn: Handler2<Cypress.ResolvedConfigOptions, EventRegistration[]>): any
@@ -91,7 +92,7 @@ export interface ConfigChildProcessShape {
   /**
    * Config from the initial module.exports
    */
-  baseConfigPromise: Promise<Cypress.ConfigOptions>
+  baseConfigPromise: Promise<Immutable<Cypress.ConfigOptionsIpcResponse>>
   /**
    * All registered events from the Plugin layer
    */
@@ -138,9 +139,17 @@ export type CurrentProjectDataShape = Immutable<{
    */
   pluginDataProcess: null // TODO
   /**
-   * The config loaded from calling the config file
+   * The exported value from cypress.config.{js|ts}
    */
-  config: LoadingState<Cypress.ConfigOptions>
+  config: LoadingState<Cypress.ConfigOptionsIpcResponse>
+  /**
+   * Any config saved / sourced from the filesystem in open-mode
+   */
+  configAppState: LoadingState<object>
+  /**
+   * The result of invoking the "config child process" to modify the config
+   */
+  configSetupNodeEvents: LoadingState<Cypress.PluginConfigOptions | undefined>
   /**
    * The child process used for loading the config / executing the plugins,
    * kept as internal state so we can re-use the same child process for the
@@ -230,6 +239,10 @@ export type CoreDataShape = Immutable<{
    * Version of the Node.JS executable we are using to source config / plugin events
    */
   userNodeVersion: string | null
+  /**
+   * Options passed through the CLI flag
+   */
+   configCli: Cypress.ConfigOptions
 }>
 
 export function makeCurrentProject (launchArgs: Partial<LaunchArgs> = {}, loadingManager: LoadingManager): Draft<CurrentProjectDataShape> | null {
@@ -244,8 +257,9 @@ export function makeCurrentProject (launchArgs: Partial<LaunchArgs> = {}, loadin
     currentTestingType: launchArgs.testingType ?? null,
     preferences: null,
     configChildProcess: null,
-    config: loadingManager.projectConfig.getState(),
-    pluginLoad: loadingManager.projectEventSetup.getState(),
+    config: castDraft(loadingManager.projectConfig.getState()),
+    pluginLoad: castDraft(loadingManager.projectEventSetup.getState()),
+    configCli: null,
     pluginRegistry: null,
     pluginDataProcess: null,
     watcher: null,
@@ -276,6 +290,7 @@ export function makeCoreData (launchArgs: Partial<LaunchArgs> = {}, loadingManag
     },
     userNodePath: null,
     userNodeVersion: null,
+    configCli: null,
   }
 }
 

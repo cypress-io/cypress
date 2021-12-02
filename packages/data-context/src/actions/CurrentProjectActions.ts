@@ -1,5 +1,5 @@
 import type { CodeGenType, MutationSetProjectPreferencesArgs, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
-import type { Ensure, CypressError, CypressErrorIdentifier, CypressErrorLike, FindSpecs, FoundBrowser, FoundSpec, FullConfig, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions, Preferences, SettingsOptions } from '@packages/types'
+import type { Ensure, FindSpecs, FoundBrowser, FoundSpec, FullConfig, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions, Preferences, SettingsOptions } from '@packages/types'
 import path from 'path'
 import type { Draft } from 'immer'
 
@@ -17,16 +17,12 @@ export interface LegacyOpenProjectShape {
 }
 
 export interface ProjectApiShape {
+  // TODO: type this
+  saveState(state: object): Promise<unknown>
   getPluginIpcHandlers(): PluginIpcHandler[]
   makeLegacyOpenProject(): LegacyOpenProjectShape
   getConfig(options?: SettingsOptions): Promise<FullConfig>
   findSpecs(payload: FindSpecs): Promise<FoundSpec[]>
-  /**
-   * "Initializes" the given mode, since plugins can define the browsers available
-   * TODO(tim): figure out what this is actually doing, it seems it's necessary in
-   *   order for CT to startup
-   */
-  initializeProject(args: Ensure<LaunchArgs, 'projectRoot' | 'testingType'>, options: OpenProjectLaunchOptions, browsers: FoundBrowser[]): Promise<FoundBrowser[]>
   launchProject(browser: FoundBrowser, spec: Cypress.Spec, options: LaunchOpts): void
   insertProjectToCache(projectRoot: string): void
   removeProjectFromCache(projectRoot: string): void
@@ -37,7 +33,6 @@ export interface ProjectApiShape {
   clearProjectPreferences(projectTitle: string): Promise<unknown>
   clearAllProjectPreferences(): Promise<unknown>
   closeActiveProject(): Promise<unknown>
-  error(type: CypressErrorIdentifier, ...args: any[]): CypressError | CypressErrorLike
 }
 
 /**
@@ -46,6 +41,32 @@ export interface ProjectApiShape {
  */
 export class CurrentProjectActions {
   constructor (private ctx: DataContext, private currentProject: CurrentProjectDataSource) {}
+
+  // // TODO(tim): Improve this when we completely overhaul the rest of the code here,
+  async initializePlugins (cfg = this._cfg, options = this.options) {
+    // only init plugins with the
+    // allowed config values to
+    // prevent tampering with the
+    // internals and breaking cypress
+    const allowedCfg = allowed(cfg)
+
+    const modifiedCfg = await plugins.init(allowedCfg, {
+      projectRoot: this.projectRoot,
+      configFile: settings.pathToConfigFile(this.projectRoot, options),
+      testingType: options.testingType,
+      onError: (err: Error) => this._onError(err, options),
+      onWarning: options.onWarning,
+    }, this.ctx)
+
+    debug('plugin config yielded: %o', modifiedCfg)
+
+    return config.updateWithPluginValues(cfg, modifiedCfg)
+  }
+
+  // TODO: get proper typings for this?
+  saveState (state: object) {
+    return this.ctx._apis.projectApi.saveState(state)
+  }
 
   async clearCurrentTestingType () {
     await this.api.closeActiveProject()
@@ -71,8 +92,6 @@ export class CurrentProjectActions {
     this.update((p) => {
       p.currentTestingType = type
     })
-
-    debugger
 
     this.ctx.loadingManager.projectEventSetup.load().finally(() => {
       debugger
@@ -102,52 +121,6 @@ export class CurrentProjectActions {
     // If we're on initial load, we want to open the browser immediately after choosing
     if (launchOnReady && this.isReadyForLaunch()) {
       await this.launchAppInBrowser()
-    }
-  }
-
-  /**
-   * Starts the plugins for a given project, and launches
-   * the development server if we are in component testing mode
-   */
-  async setupPluginEvents () {
-    this.update((p) => {
-      p.isLoadingPlugins = true
-      p.errorLoadingPlugins = null
-    })
-
-    const machineBrowsers = await this.ctx.actions.app.loadMachineBrowsers()
-    const browsers = [...(machineBrowsers ?? [])]
-    const launchArgs: Ensure<LaunchArgs, 'projectRoot' | 'testingType'> = {
-      ...this.ctx.launchArgs,
-      projectRoot: this.currentProject.projectRoot,
-      testingType: this.currentProject.currentTestingType,
-    }
-
-    try {
-      this.ctx.debug('setupPluginEvents')
-      await this.api.closeActiveProject()
-      const finalBrowsers = await this.api.initializeProject(launchArgs, {
-        ...this.ctx.launchOptions,
-        ctx: this.ctx,
-      }, browsers)
-
-      this.update((p) => {
-        p.browsers = finalBrowsers
-      })
-
-      this.ctx.debug('setupPluginEvents finalBrowsers %o', finalBrowsers)
-      await this.setActiveBrowserFromCLI(finalBrowsers)
-    } catch (e) {
-      this.ctx.debug('setupPluginEvents error %o', e)
-      this.update((p) => {
-        p.errorLoadingPlugins = this.ctx.prepError(e as Error, 'Cypress Configuration Error')
-      })
-    } finally {
-      this.update((p) => {
-        p.isLoadingPlugins = false
-      })
-
-      this.ctx.emitter.toLaunchpad()
     }
   }
 

@@ -5,7 +5,7 @@ import Bluebird from 'bluebird'
 import { Immutable, Draft, produceWithPatches, Patch, enablePatches } from 'immer'
 
 import 'server-destroy'
-import { AppApiShape, ApplicationDataApiShape, DataEmitterActions, LegacyOpenProjectShape, LocalSettingsApiShape, ProjectApiShape } from './actions'
+import { AppApiShape, ApplicationDataApiShape, BrowserApiShape, DataEmitterActions, LegacyOpenProjectShape, LocalSettingsApiShape, ProjectApiShape } from './actions'
 import type { NexusGenAbstractTypeMembers } from '@packages/graphql/src/gen/nxs.gen'
 import type { AuthApiShape } from './actions/AuthActions'
 import type { ElectronApiShape } from './actions/ElectronActions'
@@ -35,7 +35,6 @@ import type { SocketIOServer } from '@packages/socket'
 import { VersionsDataSource } from './sources/VersionsDataSource'
 import { LoadingManager } from './data/LoadingManager'
 import type { LoadingState } from './util'
-import { DataFormatters } from './DataFormatters'
 import { DevDataSource } from './sources/DevDataSource'
 
 enablePatches()
@@ -50,6 +49,7 @@ export interface DataContextConfig {
   os?: PlatformName
   launchArgs?: Partial<LaunchArgs>
   apis: {
+    browserApi: BrowserApiShape
     appApi: AppApiShape
     appDataApi: ApplicationDataApiShape
     localSettingsApi: LocalSettingsApiShape
@@ -79,13 +79,12 @@ export class DataContext {
     this._loadingManager = new LoadingManager(this)
     this._rootBus = new EventEmitter()
     this._coreData = makeCoreData(_config.launchArgs, this._loadingManager)
+    this._patches.push([{ op: 'add', path: [], value: this._coreData }])
 
     if (IS_DEV_ENV) {
       this.actions.dev.watchForRelaunch()
     }
   }
-
-  formatters = new DataFormatters()
 
   get dev () {
     return new DevDataSource(this, this._patches)
@@ -149,7 +148,7 @@ export class DataContext {
   }
 
   error (type: CypressErrorIdentifier, ...args: any[]): CypressError | CypressErrorLike {
-    return this._apis.projectApi.error(type, ...args)
+    return this._apis.appApi.error(type, ...args)
   }
 
   get rootBus () {
@@ -211,7 +210,7 @@ export class DataContext {
     return new WizardDataSource(this)
   }
 
-  get config () {
+  get projectConfig () {
     return new ProjectConfigDataSource(this)
   }
 
@@ -419,6 +418,7 @@ export class DataContext {
     this.coreData.currentProject?.watcher
     this._coreData = makeCoreData({}, this._loadingManager)
     this._patches = []
+    this._patches.push([{ op: 'add', path: [], value: this._coreData }])
 
     return Promise.all([
       this.util.disposeLoaders(),
@@ -465,7 +465,31 @@ export class DataContext {
     this.update((o) => {
       o.hasIntializedMode = 'run'
     })
-    // TODO: figure out what this needs to be... sourcing & validating config?
+
+    const project = this.project
+
+    if (!project || !project.configFilePath) {
+      throw this.error('NO_PROJECT_FOUND_AT_PROJECT_ROOT', project?.projectRoot ?? '(unknown)')
+    }
+
+    if (project.needsCypressJsonMigration) {
+      throw this.error('CONFIG_FILE_MIGRATION_NEEDED', project.projectRoot)
+    }
+
+    if (project.hasLegacyJson) {
+      this._apis.appApi.warn('LEGACY_CONFIG_FILE', project.configFilePath)
+    }
+
+    if (project.hasMultipleConfigPaths) {
+      this._apis.appApi.warn('CONFIG_FILES_LANGUAGE_CONFLICT', project.projectRoot, ...project.nonJsonConfigPaths)
+    }
+
+    const toAwait: Array<Promise<any> | undefined> = [
+      this.actions.app.loadMachineBrowsers(),
+      this.actions.currentProject?.loadConfigAndPlugins(),
+    ]
+
+    return toAwait
   }
 
   /**
@@ -500,8 +524,8 @@ export class DataContext {
     } else if (this.currentProject?.currentTestingType) {
       // Otherwise, if we know the testing type we want to
       // which will kick off the process of sourcing the config, if we have
-      // a config file for this project
-      toAwait.push(this.actions.currentProject?.loadConfigAndPlugins())
+      // a config file for this project.
+      this.actions.currentProject?.loadConfigAndPlugins()
     }
 
     // this.actions.currentProject?.launchProjectWithoutElectron()

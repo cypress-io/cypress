@@ -721,7 +721,8 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
           There is both a \`${arg2}\` and a cypress.json file at the location below:
           ${arg1}
 
-          Cypress no longer supports 'cypress.json' config, please remove it from your project.
+          Cypress no longer supports 'cypress.json' config, it will be ignored.
+          Please remove it from your project.
           `
       // TODO: update with vetted cypress language
     case 'CONFIG_FILES_LANGUAGE_CONFLICT':

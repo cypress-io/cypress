@@ -42,11 +42,11 @@ export class CurrentProjectDataSource {
   }
 
   get configFilePath (): string | null {
-    return this.ctx.currentProject?.configFile ?? null
+    return this.currentProject.configFile ?? null
   }
 
   get configFileExists () {
-    return this.ctx.currentProject?.configFiles.length ?? 0 > 0
+    return this.currentProject.configFiles.length > 0
   }
 
   private get api () {
@@ -76,7 +76,7 @@ export class CurrentProjectDataSource {
   }
 
   async findSpecs (specType: Maybe<SpecType> = null) {
-    const config = this.loadedConfig()
+    const config = this.ctx.projectConfig.loadedConfig()
 
     if (!this.currentProject || !config) {
       return null
@@ -192,11 +192,26 @@ export class CurrentProjectDataSource {
     return 'NEW'
   }
 
+  get nonJsonConfigPaths (): string[] {
+    return this.currentProject.configFiles.filter((s) => !s.endsWith('.json'))
+  }
+
   get needsCypressJsonMigration (): boolean {
     return Boolean(
       this.currentProject.configFiles.length === 1 &&
       this.currentProject.configFiles[0]?.endsWith('.json'),
     )
+  }
+
+  get hasLegacyJson (): boolean {
+    return Boolean(
+      this.configFilePath &&
+      this.currentProject.configFiles.some((s) => s.endsWith('.json')),
+    )
+  }
+
+  get hasMultipleConfigPaths (): boolean {
+    return this.nonJsonConfigPaths.length > 1
   }
 
   async getProjectPreferences () {

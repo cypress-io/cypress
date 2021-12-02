@@ -1,5 +1,6 @@
 /* eslint-disable no-dupe-class-members */
 import assert from 'assert'
+import type { Immutable } from 'immer'
 
 export type IsPending = {
   settled: false
@@ -11,7 +12,7 @@ export type IsPending = {
 export type IsLoading<V, E = any> = {
   settled: false
   state: 'LOADING'
-  promise: Promise<Settled<V, E>>
+  promise: Promise<Settled<Immutable<V>, E>>
   value?: undefined
   cancelled: boolean
 }
@@ -19,7 +20,7 @@ export type IsLoading<V, E = any> = {
 export type IsLoaded<V> = {
   settled: true
   state: 'LOADED'
-  value: V
+  value: Immutable<V>
   error?: never
 }
 
@@ -50,11 +51,11 @@ export interface LoadingConfig<V, E = any> {
   /**
    * The action to take to update the value
    */
-  action: () => Promise<V>
+  action: () => Promise<Immutable<V>>
   /**
    * When we update the value
    */
-  onUpdate: (val: IsLoaded<V> | IsErrored<E>) => any
+  onUpdate: (val: Immutable<IsLoaded<V> | IsErrored<E>>) => any
   /**
    * Called when we call "reload" on the
    */
@@ -76,7 +77,7 @@ export class LoadingContainer<V, E = any> {
   /**
    * Caches the "loading" value on the class, so we can
    */
-  private _loading: Promise<V> | undefined
+  private _loading: Promise<Immutable<V>> | undefined
   private _data: LoadingState<V, E>;
   private cancelled = false
 
@@ -145,7 +146,7 @@ export class LoadingContainer<V, E = any> {
     }
 
     this._data = { state: 'PENDING', settled: false }
-    this.startLoading()
+    this.load()
 
     return this
   }
@@ -155,7 +156,7 @@ export class LoadingContainer<V, E = any> {
    * @param asPromise
    * @returns
    */
-  load (): Promise<V | undefined> {
+  load (): Promise<Immutable<V> | undefined> {
     if (this._data.state === 'PENDING') {
       const promise = Promise.resolve().then(() => this.startLoading())
 

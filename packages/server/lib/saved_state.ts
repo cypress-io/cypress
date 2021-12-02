@@ -10,6 +10,7 @@ import { AllowedState, allowedKeys } from '@packages/types'
 
 const debug = Debug('cypress:server:saved_state')
 
+// TODO(tim): Eventually move this into data-context
 const stateFiles: Record<string, typeof FileUtil> = {}
 
 // TODO: remove `showedOnBoardingModal` from this list - it is only included so that misleading `allowed` are not thrown

@@ -1,44 +1,6 @@
 import validate from './validation'
 
-interface ResolvedConfigOption {
-  name: string
-  defaultValue?: any
-  validation: Function
-  isFolder?: boolean
-  isExperimental?: boolean
-}
-
-interface RuntimeConfigOption {
-  name: string
-  defaultValue: any
-  validation: Function
-  isInternal?: boolean
-}
-
-interface BreakingOption {
-  /**
-   * The non-passive configuration option.
-   */
-  name: string
-  /**
-   * String to summarize the error messaging that is logged.
-   */
-  errorKey: string
-  /**
-   * Configuration value of the configuration option to check against.
-   */
-  value?: string
-  /**
-   * The new configuration key that is replacing the existing configuration key.
-   */
-  newName?: string
-  /**
-   * Whether to log the error message as a warning instead of throwing an error.
-   */
-  isWarning?: boolean
-}
-
-const isValidConfig = (key, config) => {
+const isValidConfig = (key: string, config: any): true | string => {
   const status = validate.isPlainObject(key, config)
 
   if (status !== true) {
@@ -58,6 +20,14 @@ const isValidConfig = (key, config) => {
   return true
 }
 
+export interface ResolvedConfigOption {
+  name: string
+  defaultValue?: any
+  validation: (key: any, value: any) => true | string // If it' a string, it's a validation error. Otherwise
+  isFolder?: boolean
+  isExperimental?: boolean
+}
+
 // NOTE:
 // If you add/remove/change a config value, make sure to update the following
 // - cli/types/index.d.ts (including allowed config options on TestOptions)
@@ -67,7 +37,7 @@ const isValidConfig = (key, config) => {
 
 // TODO - add boolean attribute to indicate read-only / static vs mutable options
 // that can be updated during test executions
-const resolvedOptions: Array<ResolvedConfigOption> = [
+const resolvedOptions = [
   {
     name: 'animationDistanceThreshold',
     defaultValue: 5,
@@ -184,11 +154,11 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     defaultValue: 60000,
     validation: validate.isNumber,
   }, {
-    name: 'pluginsFile',
-    defaultValue: 'cypress/plugins',
-    validation: validate.isStringOrFalse,
-    isFolder: true,
-  }, {
+  //   name: 'pluginsFile',
+  //   defaultValue: 'cypress/plugins',
+  //   validation: validate.isStringOrFalse,
+  //   isFolder: true,
+  // }, {
     name: 'port',
     defaultValue: null,
     validation: validate.isNumber,
@@ -308,9 +278,23 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     defaultValue: true,
     validation: validate.isBoolean,
   },
-]
+] as const
 
-const runtimeOptions: Array<RuntimeConfigOption> = [
+export type RuntimeOrResolvedOption = RuntimeConfigOption | ResolvedConfigOption
+
+// Used to ensure that the above is valid, without losing the ability to index the shape on `name`
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _checkTsResolvedOptions: ReadonlyArray<ResolvedConfigOption> = resolvedOptions
+
+export interface RuntimeConfigOption {
+  name: string
+  defaultValue: any
+  // If it' a string, it's a validation error
+  validation: (key: any, value: any) => true | string
+  isInternal?: boolean
+}
+
+export const runtimeOptions = [
   {
     name: 'autoOpen',
     defaultValue: false,
@@ -386,14 +370,41 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     validation: validate.isString,
     isInternal: true,
   },
-]
+] as const
 
-export const options: Array<ResolvedConfigOption|RuntimeConfigOption> = [
+// Used to ensure that the above is valid, without losing the ability to index the shape on `name`
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _checkTsRuntimeOptions: ReadonlyArray<RuntimeConfigOption> = runtimeOptions
+
+export const options = [
   ...resolvedOptions,
   ...runtimeOptions,
-]
+] as const
 
-export const breakingOptions: Array<BreakingOption> = [
+export interface BreakingOption {
+  /**
+   * The non-passive configuration option.
+   */
+  name: string
+  /**
+   * String to summarize the error messaging that is logged.
+   */
+  errorKey: string
+  /**
+   * Configuration value of the configuration option to check against.
+   */
+  value?: string
+  /**
+   * The new configuration key that is replacing the existing configuration key.
+   */
+  newName?: string
+  /**
+   * Whether to log the error message as a warning instead of throwing an error.
+   */
+  isWarning?: boolean
+}
+
+export const breakingOptions = [
   {
     name: 'blacklistHosts',
     errorKey: 'RENAMED_CONFIG_OPTION',
@@ -433,4 +444,8 @@ export const breakingOptions: Array<BreakingOption> = [
     errorKey: 'NODE_VERSION_DEPRECATION_BUNDLED',
     isWarning: true,
   },
-]
+] as const
+
+// Used to ensure that the above is valid, without losing the ability to index the shape on `name`
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _checkTsBreakingOptions: ReadonlyArray<BreakingOption> = breakingOptions

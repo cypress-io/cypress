@@ -150,10 +150,7 @@ export class SocketBase {
       onConnect () {},
       onRequest () {},
       onResolveUrl () {},
-      onFocusTests () {},
-      onSpecChanged () {},
       onChromiumRun () {},
-      onReloadBrowser () {},
       checkForAppErrors () {},
       onSavedStateChanged () {},
       onTestFileChange () {},
@@ -300,7 +297,7 @@ export class SocketBase {
       // TODO: what to do about runner disconnections?
 
       socket.on('spec:changed', (spec) => {
-        return options.onSpecChanged(spec)
+        // return options.onSpecChanged(spec)
       })
 
       socket.on('app:connect', (socketId) => {
@@ -327,11 +324,11 @@ export class SocketBase {
       })
 
       socket.on('reload:browser', (url: string, browser: any) => {
-        return options.onReloadBrowser(url, browser)
+        this.ctx.actions.browser.reloadBrowser(url, browser)
       })
 
       socket.on('focus:tests', () => {
-        return options.onFocusTests()
+        //
       })
 
       socket.on('is:automation:client:connected', (
@@ -496,7 +493,7 @@ export class SocketBase {
         // adding this conditional to maintain backwards compat with
         // existing runner and reporter API.
         if (process.env.LAUNCHPAD) {
-          const { preferences } = await this.ctx.loadingManager.localSettings.toPromise()
+          const { preferences } = await this.ctx.loadingManager.localSettings.load()
 
           fileDetails.where = {
             binary: preferences.preferredEditorBinary || 'computer',

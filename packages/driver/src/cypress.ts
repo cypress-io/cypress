@@ -137,7 +137,7 @@ class $Cypress {
     // change this in the NEXT_BREAKING
     const { env } = config
 
-    config = _.omit(config, 'env', 'remote', 'resolved', 'scaffoldedFiles', 'state', 'testingType')
+    config = _.omit(config, 'env', 'remote', 'resolved', 'state', 'testingType')
 
     _.extend(this, browserInfo(config))
 

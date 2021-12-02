@@ -1,16 +1,19 @@
-import type { FoundBrowser } from '@packages/types'
+import type { CypressError, CypressErrorIdentifier, CypressErrorLike, FoundBrowser } from '@packages/types'
+import type { Immutable } from 'immer'
 import type { DataContext } from '..'
 
 export interface AppApiShape {
+  warn(type: CypressErrorIdentifier, ...args: any[]): void
+  error(type: CypressErrorIdentifier, ...args: any[]): CypressError | CypressErrorLike
+  errorString(type: CypressErrorIdentifier, ...args: any[]): string
   getBrowsers(): Promise<FoundBrowser[]>
   ensureAndGetByNameOrPath(nameOrPath: string, browsers: ReadonlyArray<FoundBrowser>): Promise<FoundBrowser>
-  findNodePath(): Promise<string>
 }
 
 export class AppActions {
   constructor (private ctx: DataContext) {}
 
-  async loadMachineBrowsers (): Promise<FoundBrowser[]> {
+  async loadMachineBrowsers (): Promise<Immutable<FoundBrowser[]> | undefined> {
     return this.ctx.loadingManager.machineBrowsers.load()
   }
 

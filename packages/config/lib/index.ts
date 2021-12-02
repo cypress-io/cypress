@@ -1,12 +1,12 @@
-const _ = require('lodash')
-const debug = require('debug')('cypress:config:validator')
+import _ from 'lodash'
+import debugLib from 'debug'
+import { options, breakingOptions, ResolvedConfigOption, BreakingOption } from './options'
 
-import { options, breakingOptions } from './options'
-
+const debug = debugLib('cypress:config:validator')
 const dashesOrUnderscoresRe = /^(_-)+/
 
 // takes an array and creates an index object of [keyKey]: [valueKey]
-const createIndex = (arr, keyKey, valueKey) => {
+const createIndex = (arr: ReadonlyArray<ResolvedConfigOption>, keyKey, valueKey) => {
   return _.reduce(arr, (memo, item) => {
     if (item[valueKey] !== undefined) {
       memo[item[keyKey]] = item[valueKey]
@@ -16,15 +16,24 @@ const createIndex = (arr, keyKey, valueKey) => {
   }, {})
 }
 
-const breakingKeys = _.map(breakingOptions, 'name')
-const defaultValues = createIndex(options, 'name', 'defaultValue')
-const publicConfigKeys = _(options).reject({ isInternal: true }).map('name').value()
-const validationRules = createIndex(options, 'name', 'validation')
+// type ResolvedOpts = ReadonlyArray<ResolvedConfigOption>
 
-export function validate (cfg, onErr) {
+type TOptions = typeof options
+type AllOptions = TOptions[number]
+type OptionsWithDefaults = {[K in keyof TOptions]: TOptions[K] extends { defaultValue: any } ? TOptions[K] : never}[keyof TOptions]
+type OptionNames = AllOptions['name']
+type OptionValidations = {[K in OptionNames]: AllOptions['validation']}
+type OptionDefaultValues = {[K in OptionsWithDefaults['name']]: OptionsWithDefaults}
+
+const breakingKeys = _.map(breakingOptions, 'name')
+const defaultValues = createIndex(options, 'name', 'defaultValue') as OptionDefaultValues
+const publicConfigKeys = _.filter(options, (opt) => opt)
+const validationRules = createIndex(options, 'name', 'validation') as OptionValidations
+
+export function validate <C extends object> (cfg: C, onErr: (msg: string) => void) {
   debug('validating configuration', cfg)
 
-  return _.each(cfg, (value, key) => {
+  _.each(cfg, (value: any, key: keyof OptionValidations) => {
     const validationFn = validationRules[key]
 
     // key has a validation rule & value different from the default
@@ -32,7 +41,7 @@ export function validate (cfg, onErr) {
       const result = validationFn(key, value)
 
       if (result !== true) {
-        return onErr(result)
+        onErr(result)
       }
     }
   })
@@ -80,7 +89,7 @@ export default {
   validate,
 
   validateNoBreakingConfig: (cfg, onWarning, onErr) => {
-    breakingOptions.forEach(({ name, errorKey, newName, isWarning, value }) => {
+    breakingOptions.forEach(({ name, errorKey, newName, isWarning, value }: BreakingOption) => {
       if (cfg.hasOwnProperty(name)) {
         if (value && cfg[name] !== value) {
           // Bail if a value is specified but the config does not have that value.

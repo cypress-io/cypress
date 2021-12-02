@@ -4,6 +4,7 @@ branches:
     - develop
     - windows-code-signing
     - 10.0-release
+    - 10.0-release-fix-appveyor
     - /win*/
 
 # https://www.appveyor.com/docs/lang/nodejs-iojs/

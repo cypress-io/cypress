@@ -190,20 +190,6 @@ module.exports = {
     .catch(tagError)
   },
 
-  getProject (projectId, authToken) {
-    return rp.get({
-      url: apiRoutes.project(projectId),
-      json: true,
-      auth: {
-        bearer: authToken,
-      },
-      headers: {
-        'x-route-version': '2',
-      },
-    })
-    .catch(tagError)
-  },
-
   createRun (options = {}) {
     return retryWithBackoff((attemptIndex) => {
       const body = {

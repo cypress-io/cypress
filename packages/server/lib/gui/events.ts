@@ -60,9 +60,6 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       // const onSettingsChanged = () => {
       //   return bus.emit('config:changed')
       // }
-      // const onSpecChanged = (spec) => {
-      //   return bus.emit('spec:changed', spec)
-      // }
       // const onFocusTests = function () {
       //   if (_.isFunction(options.onFocusTests)) {
       //     options.onFocusTests()
@@ -90,7 +87,6 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       //   })
       //   return openProject.create(arg, options, {
       //     onFocusTests,
-      //     onSpecChanged,
       //     onSettingsChanged,
       //     onError,
       //     onWarning,
@@ -152,7 +148,6 @@ const handleEvent = function (options, bus, event, id, type, arg) {
 }
 
 interface EventsStartArgs extends LaunchArgs {
-  onFocusTests: () => void
 }
 
 export = {

@@ -6,25 +6,20 @@ import type {
   FoundBrowser,
   LaunchArgs,
   LaunchOpts,
-  OpenProjectLaunchOptions,
   PlatformName,
   Preferences,
-  SettingsOptions,
   AllowedState,
   CypressErrorIdentifier,
 } from '@packages/types'
 import browserUtils from './browsers/utils'
 import auth from './gui/auth'
 import user from './user'
-import * as config from './config'
 import cache from './cache'
 import errors from './errors'
-import findSystemNode from './util/find_system_node'
 import { graphqlSchema } from '@packages/graphql/src/schema'
 import { openExternal } from '@packages/server/lib/gui/links'
 import { getUserEditor } from './util/editors'
 import * as savedState from './saved_state'
-import assert from 'assert'
 import { OpenProject } from './open_project'
 import app_data from './util/app_data'
 import plugins from './plugins'
@@ -85,14 +80,21 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
     ...options,
     launchArgs: options.options ?? {},
     apis: {
+      browserApi: {},
       appDataApi: app_data,
       appApi: {
+        errorString (key: CypressErrorIdentifier, ...args: any[]) {
+          return errors.getMsgByType(key, ...args)
+        },
+        warn (key: CypressErrorIdentifier, ...args: any[]) {
+          errors.warning(key, ...args)
+        },
+        error (key: CypressErrorIdentifier, ...args: any[]) {
+          return errors.get(key, ...args)
+        },
         getBrowsers,
         ensureAndGetByNameOrPath (nameOrPath, browsers) {
           return ensureAndGetByNameOrPath(nameOrPath, false, browsers as FoundBrowser[]) as Promise<FoundBrowser>
-        },
-        findNodePath () {
-          return findSystemNode.findNodeInFullPath()
         },
       },
       authApi: {
@@ -111,16 +113,8 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
         makeLegacyOpenProject () {
           return new OpenProject(ctx)
         },
-        getConfig (options?: SettingsOptions) {
-          return config.get(ctx, options)
-        },
         launchProject (browser: FoundBrowser, spec: Cypress.Spec, options?: LaunchOpts) {
           return legacyOpenProject().launch({ ...browser }, spec, options)
-        },
-        initializeProject (args: LaunchArgs, options: OpenProjectLaunchOptions, browsers: FoundBrowser[]) {
-          return legacyOpenProject().create(args.projectRoot, args, options, browsers).then((p) => {
-            return (p.getConfig()?.browsers ?? []) as FoundBrowser[]
-          })
         },
         insertProjectToCache (projectRoot: string) {
           cache.insertProject(projectRoot)
@@ -152,8 +146,13 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
         closeActiveProject () {
           return legacyOpenProject().closeActiveProject()
         },
-        error (key: CypressErrorIdentifier, ...args: any[]) {
-          return errors.get(key, ...args)
+        saveState (state) {
+          // let state = await savedState.create(this.projectRoot, this.cfg.isTextTerminal)
+
+          // state.set(stateChanges)
+          // this.cfg.state = await state.get()
+
+          // return this.cfg.state
         },
       },
       electronApi: {

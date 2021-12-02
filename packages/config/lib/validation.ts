@@ -22,21 +22,21 @@ const { isArray, isString, isFinite: isNumber } = _
  * @param {any} value - The actual value
  * @returns {string} Formatted error message
 */
-const errMsg = (key, value, type) => {
+const errMsg = (key: string, value: string, type: string) => {
   return `Expected \`${key}\` to be ${type}. Instead the value was: \`${str(
     value,
   )}\``
 }
 
-const isFullyQualifiedUrl = (value) => {
+const isFullyQualifiedUrl = (value: any) => {
   return isString(value) && /^https?\:\/\//.test(value)
 }
 
-const isArrayOfStrings = (value) => {
+const isArrayOfStrings = (value: any): value is string[] => {
   return isArray(value) && _.every(value, isString)
 }
 
-const isFalse = (value) => {
+const isFalse = (value: any): value is false => {
   return value === false
 }
 
@@ -310,7 +310,7 @@ export default {
     return errMsg(key, value, 'a string or false')
   },
 
-  isStringOrArrayOfStrings (key, value) {
+  isStringOrArrayOfStrings (key: any, value: any) {
     if (isString(value) || isArrayOfStrings(value)) {
       return true
     }
