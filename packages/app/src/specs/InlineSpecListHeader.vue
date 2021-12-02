@@ -16,17 +16,20 @@
           text-gray-500
           placeholder-gray-700
           font-light
-          outline-none
+          border-none
         "
         :value="props.search"
         minlength="1"
+        type="search"
+        :spellcheck="false"
+        autocomplete="off"
         @focus="inputFocused = true"
         @blur="inputFocused = false"
         @input="onInput"
       >
       <label
         for="inline-spec-list-header-search"
-        class="search-label absolute left-24px text-gray-300 pointer-events-none font-light"
+        class="search-label absolute left-24px bottom-6px text-gray-300 pointer-events-none font-light"
         :class="{
           'opacity-0': inputFocused || props.search.length
         }"
@@ -96,4 +99,9 @@ const onInput = (e: Event) => {
 .add-button:hover {
   box-shadow: 0 0 4px rgba(191, 194, 212, 0.6);
 }
+
+input[type="search"]::-webkit-search-decoration,
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-results-button,
+input[type="search"]::-webkit-search-results-decoration { display: none !important; }
 </style>

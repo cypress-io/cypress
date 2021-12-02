@@ -1,5 +1,6 @@
 import { Specs_InlineSpecListFragmentDoc } from '../generated/graphql-test'
 import InlineSpecList from './InlineSpecList.vue'
+import { defaultMessages } from '@cy/i18n'
 
 let specs: Array<any> = []
 
@@ -28,12 +29,12 @@ describe('InlineSpecList', () => {
   })
 
   it('should render a list of spec', () => {
-    cy.get('li').should('exist').and('have.length', 7)
+    cy.findAllByTestId('spec-row-item').should('exist').and('have.length', 7)
   })
 
   it('should support fuzzy sort', () => {
-    cy.get('input').type('scomeA')
+    cy.findByLabelText(defaultMessages.specPage.searchPlaceholder).type('scomeA')
 
-    cy.get('li').should('have.length', 2).should('contain', 'src/components').and('contain', 'Spec-A.spec.tsx')
+    cy.findAllByTestId('spec-row-item').should('have.length', 2).should('contain', 'src/components').and('contain', 'Spec-A.spec.tsx')
   })
 })
