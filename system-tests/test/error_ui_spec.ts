@@ -32,6 +32,11 @@ describe('e2e error ui', function () {
       onRun (exec) {
         return exec().then(verifyPassedAndFailedAreSame(1))
       },
+      config: {
+        env: {
+          CYPRESS_INTERNAL_ENV: 'development',
+        },
+      },
     })
   })
 

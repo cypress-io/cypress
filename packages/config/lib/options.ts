@@ -424,7 +424,7 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     name: 'isInteractive',
     defaultValue: true,
     validation: validate.isBoolean,
-    canUpdateDuringTestTime: true,
+    canUpdateDuringTestTime: false,
   }, {
     name: 'isTextTerminal',
     defaultValue: false,
