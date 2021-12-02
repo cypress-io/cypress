@@ -188,7 +188,7 @@ export default (Commands, Cypress, cy, state, config) => {
         options._log.snapshot('before', { next: 'after' })
       }
 
-      if (!ACTIONS[options.action]) {
+      if (!options.action || !ACTIONS[options.action]) {
         $errUtils.throwErrByPath('attachFile.invalid_action', {
           onFail: options._log,
           args: { action: options.action },
@@ -251,7 +251,7 @@ export default (Commands, Cypress, cy, state, config) => {
 
           const dataTransfer = createDataTransfer(filesArray)
 
-          ACTIONS[options.action](eventTarget.get(0), dataTransfer, coords, state)
+          ACTIONS[options.action as string](eventTarget.get(0), dataTransfer, coords, state)
 
           return $elToClick
         },
