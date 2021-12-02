@@ -129,9 +129,11 @@ function setupRunner () {
 
 /**
  * Get the URL for the spec. This is the URL of the AUT IFrame.
+ * CT uses absolute URLs, and serves from the dev server.
+ * E2E uses relative, serving from our internal server's spec controller.
  */
-function getSpecUrl (namespace: string, spec: BaseSpec, prefix = '') {
-  return spec ? `${prefix}/${namespace}/iframes/${spec.relative}` : ''
+function getSpecUrl (namespace: string, specSrc: string) {
+  return `/${namespace}/iframes/${specSrc}`
 }
 
 /**
@@ -174,7 +176,7 @@ function runSpecCT (spec: BaseSpec) {
   // create new AUT
   const autIframe = getAutIframeModel()
   const $autIframe: JQuery<HTMLIFrameElement> = autIframe.create().appendTo($container)
-  const specSrc = getSpecUrl(config.namespace, spec)
+  const specSrc = getSpecUrl(config.namespace, spec.absolute)
 
   autIframe.showInitialBlankContents()
   $autIframe.prop('src', specSrc)
@@ -229,7 +231,7 @@ function runSpecE2E (spec: BaseSpec) {
   const $autIframe: JQuery<HTMLIFrameElement> = autIframe.create().appendTo($container)
 
   // create Spec IFrame
-  const specSrc = getSpecUrl(config.namespace, spec)
+  const specSrc = getSpecUrl(config.namespace, spec.relative)
   const $specIframe = createSpecIFrame(specSrc)
 
   // append to document, so the iframe will execute the spec
