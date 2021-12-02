@@ -76,7 +76,7 @@ describe('shortcuts', function () {
     it('toggles the specs list', () => {
       // 1. save:state should be emitted to preserve the change in state
       // 2. the reporter appSate should be also be updated with the new value,
-      // checking the aria-expanded state of the button confirms thos
+      // checking the aria-expanded state of the button confirms this
 
       cy.get('body').then(() => {
         expect(runner.emit).not.to.have.been.calledWith('save:state')
@@ -139,7 +139,7 @@ describe('shortcuts', function () {
 
     it('has shortcut in tooltips', () => {
       cy.get('.toggle-specs-wrapper > button').trigger('mouseover')
-      cy.get('.cy-tooltip').should('have.text', 'View All Specs F')
+      cy.get('.cy-tooltip').should('have.text', 'Collapse Specs List F')
       cy.get('.toggle-specs-wrapper > button').trigger('mouseout')
 
       cy.get('button.restart').trigger('mouseover')

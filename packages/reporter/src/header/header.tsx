@@ -21,7 +21,7 @@ export interface ReporterHeaderProps {
 
 const Header = observer(({ appState, events = defaultEvents, statsStore }: ReporterHeaderProps) => (
   <header>
-    <Tooltip placement='bottom' title={<p>View All Specs <span className='kbd'>F</span></p>} wrapperClassName='toggle-specs-wrapper' className='cy-tooltip'>
+    <Tooltip placement='bottom' title={<p>{appState.isSpecsListOpen ? 'Collapse' : 'Expand'} Specs Lists <span className='kbd'>F</span></p>} wrapperClassName='toggle-specs-wrapper' className='cy-tooltip'>
       <button
         aria-controls="reporter-inline-specs-list"
         aria-expanded={appState.isSpecsListOpen}
