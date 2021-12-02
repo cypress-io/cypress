@@ -38,6 +38,6 @@ const heres = {
     />)
 
     cy.get('ul').should('have.class', 'list-disc')
-    cy.get('code').should('have.class', 'bg-pink text-pink-600')
+    cy.get('code').first().should('have.class', 'bg-pink text-pink-600')
   })
 })
