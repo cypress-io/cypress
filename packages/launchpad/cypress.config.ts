@@ -1,7 +1,7 @@
 import { defineConfig } from 'cypress'
 
 export default defineConfig({
-  'projectId': 'sehy69',
+  'projectId': process.env.CYPRESS_INTERNAL_ENV === 'production' ? 'sehy69' : 'ypt4pf',
   'viewportWidth': 800,
   'viewportHeight': 850,
   'retries': {
