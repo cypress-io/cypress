@@ -74,7 +74,8 @@
         "header": "Scaffold example specs",
         "description": "We'll generate several example specs to help guide you on how to write tests in Cypress.",
         "specsAddedHeader": "Great! We added the following files to your project:",
-        "specsAddedButton": "Okay, I got it!"
+        "specsAddedButton": "Okay, I got it!",
+        "specsAddingHeader": "Adding Specs..."
       },
       "importEmptySpec": {
         "header": "Create new empty spec",
@@ -364,6 +365,12 @@
       "step1": "Ensure that your {0} file contains the following code:",
       "step2": "Ensure that your {0} file is checked into source control:",
       "step3": "Run this command in your local development terminal or in CI:"
+    },
+    "results": {
+      "skipped": "skipped",
+      "pending": "pending",
+      "passed": "passed",
+      "failed": "failed"
     }
   },
   "testingType": {
