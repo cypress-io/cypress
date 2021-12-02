@@ -90,7 +90,7 @@ export const makeConfig = (config: Partial<UserConfig> = {}, plugins: PluginOpti
     css: {
       preprocessorOptions: {
         scss: {
-          additionalData: `@use "${path.resolve(__dirname, '../reporter/src/lib/variables.scss')}" as *;`,
+          additionalData: `@use "@packages/reporter/src/lib/variables.scss" as *;\n`,
         },
       },
     },
