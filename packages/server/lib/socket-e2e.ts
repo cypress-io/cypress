@@ -94,10 +94,6 @@ export class SocketE2E extends SocketBase {
   }
 
   startListening (server: DestroyableHttpServer, automation, config, options) {
-    const { integrationFolder } = config
-
-    this.testsDir = integrationFolder
-
     return super.startListening(server, automation, config, options, {
       onSocketConnection: (socket) => {
         socket.on('watch:test:file', (specInfo, cb = function () { }) => {

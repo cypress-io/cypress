@@ -46,7 +46,6 @@ export class OpenProject {
     const newSpecUrl = getSpecUrl({
       spec,
       browserUrl: this.openProject.cfg.browserUrl,
-      componentFolder: this.openProject.cfg.componentFolder || 'component',
       projectRoot: this.openProject.projectRoot,
     })
 
@@ -72,7 +71,6 @@ export class OpenProject {
     let url = getSpecUrl({
       spec,
       browserUrl: this.openProject.cfg.browserUrl,
-      componentFolder: this.openProject.cfg.componentFolder || 'component?',
       projectRoot: this.openProject.projectRoot,
     })
 

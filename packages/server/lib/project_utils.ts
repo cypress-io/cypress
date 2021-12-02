@@ -26,15 +26,7 @@ const normalizeSpecUrl = (browserUrl: string, specUrl: string) => {
   .replace(multipleForwardSlashesRe, multipleForwardSlashesReplacer)
 }
 
-const getPrefixedPathToSpec = ({
-  componentFolder,
-  projectRoot,
-  spec,
-}: {
-  componentFolder: string
-  projectRoot: string
-  spec: Cypress.Spec
-}) => {
+const getPrefixedPathToSpec = (spec: Cypress.Spec) => {
   // strip out the integration folder and prepend with "/"
   // example:
   //
@@ -58,11 +50,9 @@ const getPrefixedPathToSpec = ({
 export const getSpecUrl = ({
   spec,
   browserUrl,
-  componentFolder,
   projectRoot,
 }: {
   browserUrl?: string
-  componentFolder: string
   projectRoot: string
   spec: Cypress.Spec
 }) => {
@@ -99,11 +89,7 @@ export const getSpecUrl = ({
   // the unit folder?
   // once we determine that we can then prefix it correctly
   // with either integration or unit
-  const prefixedPath = getPrefixedPathToSpec({
-    spec,
-    componentFolder,
-    projectRoot,
-  })
+  const prefixedPath = getPrefixedPathToSpec(spec)
   const url = normalizeSpecUrl(browserUrl, prefixedPath)
 
   debug('return path to spec %o', { prefixedPath, url })
