@@ -44,7 +44,7 @@ describe('<Warning />', () => {
     /></div>))
 
     // @ts-ignore
-    cy.findAllByLabelText(defaultMessages.components.alert.dismiss).first().click()
+    cy.findAllByLabelText(defaultMessages.components.alert.dismissAriaLabel).first().click()
     cy.wrap(onUpdate).should('be.called')
   })
 })
