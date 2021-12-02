@@ -6,7 +6,7 @@ import $errUtils from '../../../cypress/error_utils'
 import $actionability from '../../actionability'
 import { addEventCoords, dispatch } from './trigger'
 
-const createFileList = (files: Cypress.FileReferenceObject[]): FileList => {
+const createDataTransfer = (files: Cypress.FileReferenceObject[]): DataTransfer => {
   const dataTransfer = new DataTransfer()
 
   files.forEach(({ contents, fileName, lastModified, mimeType }) => {
@@ -15,12 +15,50 @@ const createFileList = (files: Cypress.FileReferenceObject[]): FileList => {
     dataTransfer.items.add(file)
   })
 
-  return dataTransfer.files
+  return dataTransfer
 }
 
 interface InternalAttachFileOptions extends Cypress.AttachFileOptions {
   _log: any
   $el: JQuery
+}
+
+const ACTIONS = {
+  input: (element, dataTransfer, coords, state) => {
+    (element as HTMLInputElement).files = dataTransfer.files
+    const inputEventOptions = addEventCoords({
+      bubbles: true,
+      composed: true,
+    }, coords)
+
+    const changeEventOptions = addEventCoords({
+      bubbles: true,
+    }, coords)
+
+    dispatch(element, state('window'), 'input', inputEventOptions)
+    dispatch(element, state('window'), 'change', changeEventOptions)
+  },
+  'drag-n-drop': (element, dataTransfer, coords, state) => {
+    const dragEventOptions = addEventCoords({
+      bubbles: true,
+      composed: true,
+      cancelable: true,
+      dataTransfer,
+    }, coords)
+
+    dispatch(element, state('window'), 'drag', dragEventOptions)
+    dispatch(element, state('window'), 'dragenter', dragEventOptions)
+    dispatch(element, state('window'), 'dragover', dragEventOptions)
+    dispatch(element, state('window'), 'drop', dragEventOptions)
+
+    // If a user drops file over an <input type="file"> element, browsers attach the file
+    // to it, exactly as if they'd selected one from a file list.
+    // If a user drops multiple files over an input without the "multiple" attribute,
+    // the browser does nothing, and we want to mimic this behavior.
+    if ($dom.isInputType(element, 'file') && (dataTransfer.files.length === 1 || element.multiple)) {
+      ACTIONS['input'](element, dataTransfer, coords, state)
+    }
+  },
 }
 
 export default (Commands, Cypress, cy, state, config) => {
@@ -150,8 +188,7 @@ export default (Commands, Cypress, cy, state, config) => {
         options._log.snapshot('before', { next: 'after' })
       }
 
-      // TODO: Support for drag-n-drop to come at a later date
-      if (options.action !== 'input') {
+      if (!ACTIONS[options.action]) {
         $errUtils.throwErrByPath('attachFile.invalid_action', {
           onFail: options._log,
           args: { action: options.action },
@@ -165,29 +202,33 @@ export default (Commands, Cypress, cy, state, config) => {
         })
       }
 
-      let input = subject
+      let eventTarget = subject
 
-      if (input.is('label')) {
-        input = $dom.getInputFromLabel(input)
-      }
+      // drag-n-drop always targets the subject directly, but input
+      // may switch <label> -> <input> element
+      if (options.action === 'input') {
+        if (eventTarget.is('label')) {
+          eventTarget = $dom.getInputFromLabel(eventTarget)
+        }
 
-      if (input.length < 1 || !$dom.isInputType(input, 'file')) {
-        const node = $dom.stringify(options.$el)
+        if (eventTarget.length < 1 || !$dom.isInputType(eventTarget, 'file')) {
+          const node = $dom.stringify(options.$el)
 
-        $errUtils.throwErrByPath('attachFile.not_file_input', {
-          onFail: options._log,
-          args: { node },
-        })
+          $errUtils.throwErrByPath('attachFile.not_file_input', {
+            onFail: options._log,
+            args: { node },
+          })
+        }
       }
 
       if (!options.force) {
-        cy.ensureNotDisabled(input, options._log)
+        cy.ensureNotDisabled(eventTarget, options._log)
       }
 
       // Make sure files is an array even if the user only passed in one
       const filesArray = await Promise.all(([] as Cypress.FileReference[]).concat(files).map(parseFile(options)))
 
-      // We verify actionability on the subject, rather than the input,
+      // We verify actionability on the subject, rather than the eventTarget,
       // in order to allow for a hidden <input> with a visible <label>
       // Similarly, this is why we implement something similar, but not identical to,
       // cy.trigger() to dispatch our events.
@@ -197,11 +238,9 @@ export default (Commands, Cypress, cy, state, config) => {
         },
 
         onReady ($elToClick, coords) {
-          // $elToClick is either the <label> or <input> - the original subject
-          // while `element` is always the <input>
-          const element = input.get(0);
-
-          (element as HTMLInputElement).files = createFileList(filesArray)
+          // We dispatch the events on the eventTarget element, but target the red dot
+          // based on $elToClick (the coords $actionability.verify gave us),
+          // which is the original subject.
 
           if (options._log) {
             // display the red dot at these coords
@@ -210,20 +249,9 @@ export default (Commands, Cypress, cy, state, config) => {
             })
           }
 
-          // We dispatch the events on the input element, but target the red dot
-          // based on $elToClick (the coords $actionability.verify gave us),
-          // which may be the input or a label pointing to it.
-          const inputEventOptions = addEventCoords({
-            bubbles: true,
-            composed: true,
-          }, coords)
+          const dataTransfer = createDataTransfer(filesArray)
 
-          const changeEventOptions = addEventCoords({
-            bubbles: true,
-          }, coords)
-
-          dispatch(element, state('window'), 'input', inputEventOptions)
-          dispatch(element, state('window'), 'change', changeEventOptions)
+          ACTIONS[options.action](eventTarget.get(0), dataTransfer, coords, state)
 
           return $elToClick
         },
