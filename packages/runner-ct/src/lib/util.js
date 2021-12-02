@@ -4,12 +4,12 @@ export default {
   },
 
   updateSpecPath (specName) {
-    location.hash = `/tests/component/${specName}`
+    location.hash = `/tests/${specName}`
   },
 
   specPath () {
     if (location.hash) {
-      const match = location.hash.match(/tests\/component\/(.*)$/)
+      const match = location.hash.match(/tests\/(.*)$/)
 
       return match && match[1] || ''
     }
