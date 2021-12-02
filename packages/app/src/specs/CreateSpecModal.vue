@@ -1,12 +1,12 @@
 <template>
   <StandardModal
-    class="transition duration-200 transition-all"
+    class="transition transition-all duration-200"
     :click-outside="false"
     variant="bare"
     :title="title"
     :model-value="show"
     data-testid="create-spec-modal"
-    @update:model-value="$emit('close')"
+    @update:model-value="close"
   >
     <template #overlay="{classes}">
       <DialogOverlay
@@ -14,7 +14,7 @@
         class="bg-gray-900 opacity-[0.97]"
       />
     </template>
-    <div class="min-h-280px sm:min-w-640px flex flex-col">
+    <div class="flex flex-col min-h-280px sm:min-w-640px">
       <component
         :is="generator.entry"
         v-if="generator"
@@ -22,6 +22,7 @@
         v-model:title="title"
         :code-gen-glob="props.gql.currentProject?.codeGenGlob"
         @restart="currentGeneratorId = undefined"
+        @close="close"
       />
       <div
         v-else
@@ -53,7 +54,7 @@ const props = defineProps<{
   gql: CreateSpecModalFragment
 }>()
 
-defineEmits<{
+const emits = defineEmits<{
   (eventName: 'close'): void
 }>()
 
@@ -81,4 +82,9 @@ const generator = computed(() => {
 whenever(not(generator), () => {
   title.value = t('createSpec.newSpecModalTitle')
 })
+
+function close () {
+  currentGeneratorId.value = undefined
+  emits('close')
+}
 </script>
