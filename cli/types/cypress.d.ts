@@ -2630,6 +2630,7 @@ declare namespace Cypress {
     /**
      * Path to folder containing integration test files
      * @default "cypress/integration"
+     * @deprecated
      */
     integrationFolder: string
     /**
@@ -2774,6 +2775,7 @@ declare namespace Cypress {
     blockHosts: null | string | string[]
     /**
      * Path to folder containing component test files.
+     * @deprecated
      */
     componentFolder: false | string
     /**
