@@ -33,7 +33,7 @@ const heres = {
     `
 
     cy.mount(<UseMarkdownExample
-      options={{ classes: { code: ['bg-pink-200 text-pink-600'] } }}
+      options={{ classes: { code: ['bg-pink-200 text-pink-600'], pre: ['bg-orange-100', 'text-orange-500'] } }}
       text={text}
     />)
 
