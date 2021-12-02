@@ -238,6 +238,10 @@ type Server = {
 
 type SetupOptions = {
   servers?: Server | Array<Server>
+  /**
+   * Set default Cypress config.
+   */
+  settings?: CypressConfig
 }
 
 const serverPath = path.dirname(require.resolve('@packages/server'))
@@ -675,8 +679,11 @@ const systemTests = {
 
       sinon.stub(process, 'exit')
 
+      this.settings = options.settings
+
       if (options.servers) {
         const optsServers = [].concat(options.servers)
+
         const servers = await Bluebird.map(optsServers, startServer)
 
         this.servers = servers
