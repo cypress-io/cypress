@@ -28,9 +28,11 @@ describe('<Warning />', () => {
 
   it('calls dismiss when X is clicked', () => {
     const show = ref(true)
+    const onUpdate = cy.spy()
     const methods = {
       'onUpdate:modelValue': (value) => {
         show.value = value
+        onUpdate()
       },
     }
 
@@ -42,7 +44,7 @@ describe('<Warning />', () => {
     /></div>))
 
     // @ts-ignore
-    cy.findAllByLabelText(defaultMessages.components.modal.dismiss).first().click()
-    cy.wrap(onDismiss).should('be.called')
+    cy.findAllByLabelText(defaultMessages.components.alert.dismiss).first().click()
+    cy.wrap(onUpdate).should('be.called')
   })
 })
