@@ -9,6 +9,8 @@ const { getInstallJson } = require('@cypress/commit-message-install')
 
 /* eslint-disable no-console */
 
+// See ../guides/testing-other-projects.md for documentation.
+
 const { npm, binary } = getNameAndBinary(process.argv)
 
 la(is.unemptyString(npm), 'missing npm url')

@@ -1,40 +1,10 @@
-# Deployment
+# Release Process
 
-These deployment procedures mainly concern the Cypress binary and `cypress` npm module.
+These procedures concern the release process for the Cypress binary and `cypress` npm module.
 
-Independent `@cypress/` packages that live inside the [`npm`](./npm) directory are automatically published to npm (with [`semantic-release`](https://semantic-release.gitbook.io/semantic-release/)) upon being merged into master. You can read more about this in [CONTRIBUTING.md](./CONTRIBUTING.md#committing-code)
+The `@cypress/`-namespaced NPM packages that live inside the [`/npm`](../npm) directory are automatically published to npm (with [`semantic-release`](https://semantic-release.gitbook.io/semantic-release/)) upon being merged into `master`. You can read more about this in [CONTRIBUTING.md](../CONTRIBUTING.md#independent-packages-ci-workflow).
 
-Anyone can build the binary and npm package, but you can only deploy the Cypress application and publish the npm module `cypress` if you are a member of the `cypress` npm organization.
-
-> :information_source: See the [publishing](#publishing) section for how to build, test and publish a
-new official version of the binary and `cypress` npm package.
-
-## Building Locally
-
-### Building the npm package
-
-> :warning: Note: The steps in this section are automated in CI, and you should not need to do them yourself when publishing.
-
-Building a new npm package is very quick.
-
-- Increment the version in the root `package.json`
-- `yarn build --scope cypress`
-
-The steps above:
-
-- Build the `cypress` npm package
-- Transpile the code into ES5 to be compatible with the common Node versions
-- Put the result into the [`cli/build`](./cli/build) folder.
-
-### Building the binary
-
-> :warning: Note: The steps in this section are automated in CI, and you should not need to do them yourself when publishing.
-
-The npm package requires a corresponding binary of the same version. In production, it will try to retrieve the binary from the Cypress CDN if it is not cached locally.
-
-You can build the Cypress binary locally by running `yarn binary-build`. You can use Linux to build the Cypress binary (just like it is in CI) by running `yarn binary-build` inside of  `yarn docker`.
-
-`yarn binary-zip` can be used to zip the built binary together.
+[Anyone can build the binary and npm package locally](./building-release-artifacts.md), but you can only deploy the Cypress application and publish the npm module `cypress` if you are a member of the `cypress` npm organization.
 
 ## Publishing
 
@@ -60,6 +30,11 @@ You can build the Cypress binary locally by running `yarn binary-build`. You can
         ZENHUB_API_TOKEN="..."
         ```
     - The `cypress-bot` GitHub app credentials are also needed. Ask another team member who has done a deploy for those.
+        ```text
+        GITHUB_APP_CYPRESS_INSTALLATION_ID=
+        GITHUB_APP_ID=
+        GITHUB_PRIVATE_KEY=
+        ```
     - For purging the Cloudflare cache (part of the `move-binaries` step), you'll need `CF_ZONEID` and `CF_TOKEN` set. These can be found in 1Password. If you don't have access, ask a team member who has done a deploy.
        ```text
         CF_ZONEID="..."
@@ -69,16 +44,12 @@ You can build the Cypress binary locally by running `yarn binary-build`. You can
 
 ### Before Publishing a New Version
 
-In order to publish a new `cypress` package to the npm registry, we must build and test it across multiple platforms and test projects. This makes publishing *directly* into the npm registry impossible. Instead, we have CI set up to do the following on every commit to `develop`:
+In order to publish a new version of the `cypress` package to the npm registry, CI must build and test it across multiple platforms and test projects. CI is set up to do the following on every commit to `develop`:
 
-1. Build the npm package with the new target version baked in.
+1. Build the npm package with the [next target version](./next-version.md) baked in.
 2. Build the Linux, Mac & Windows binaries on CircleCI.
-3. Upload the binaries and the new npm package to `cdn.cypress.io` under the "beta" folder.
-4. Launch the test projects like [cypress-test-node-versions](https://github.com/cypress-io/cypress-test-node-versions) and [cypress-test-example-repos](https://github.com/cypress-io/cypress-test-example-repos) using the newly-uploaded package & binary instead of installing from the npm registry. That installation looks like this:
-    ```shell
-    export CYPRESS_INSTALL_BINARY=https://cdn.../binary/<new version>/<commit hash>/cypress.zip
-    npm i https://cdn.../npm/<new version>/<commit hash>/cypress.tgz
-    ```
+3. Upload the binaries and the new npm package to the AWS S3 Bucket `cdn.cypress.io` under the "beta" folder.
+4. [Launch test projects](./testing-other-projects.md) using the newly-uploaded package & binary instead of installing from the npm registry.
 
 Multiple test projects are launched for each target operating system and the results are reported
 back to GitHub using status checks so that you can see if a change has broken real-world usage
@@ -90,11 +61,11 @@ Once the `develop` branch for all test projects are reliably passing with the ne
 
 ### Steps to Publish a New Version
 
-In the following instructions, "X.Y.Z" is used to denote the version of Cypress being published.
+In the following instructions, "X.Y.Z" is used to denote the [next version of Cypress being published](./next-version.md).
 
 1. `develop` should contain all of the changes made in `master`. However, this occasionally may not be the case. Ensure that `master` does not have any additional commits that are not on `develop` and all auto-generated pull requests designed to merge master into develop have been successfully merged.
 
-2. If there is a new [`cypress-example-kitchensink`](https://github.com/cypress-io/cypress-example-kitchensink/releases) version, update the corresponding dependency in [`packages/example`](./packages/example) to that new version.
+2. If there is a new [`cypress-example-kitchensink`](https://github.com/cypress-io/cypress-example-kitchensink/releases) version, update the corresponding dependency in [`packages/example`](../packages/example) to that new version.
 
 3. Use the `move-binaries` script to move the binaries for `<commit sha>` from `beta` to the `desktop` folder for `<new target version>`. This also purges the cloudflare cache for this version.
     ```shell
@@ -109,7 +80,7 @@ In the following instructions, "X.Y.Z" is used to denote the version of Cypress 
             ![cdn-tgz-link](https://user-images.githubusercontent.com/1157043/80608736-3791e800-8a05-11ea-8d75-e4f80128e857.png)
     - Publish to the npm registry straight from the URL:
         ```shell
-        npm publish https://cdn.../npm/X.Y.Z/<long sha>/cypress.tgz --tag dev
+        npm publish https://cdn.cypress.io/beta/npm/X.Y.Z/<long sha>/cypress.tgz --tag dev
         ```
 
 5. Double-check that the new version has been published under the `dev` tag using `npm info cypress` or [available-versions](https://github.com/bahmutov/available-versions). `latest` should still point to the previous version. Example output:
@@ -156,7 +127,7 @@ In the following instructions, "X.Y.Z" is used to denote the version of Cypress 
 
 11. If needed, push out any updated changes to the links manifest to [`on.cypress.io`](https://github.com/cypress-io/cypress-services/tree/develop/packages/on).
 
-12. If needed, deploy the updated [`cypress-example-kitchensink`][cypress-example-kitchensink] to `example.cypress.io` by following [these instructions under "Deployment"](./packages/example/README.md).
+12. If needed, deploy the updated [`cypress-example-kitchensink`][cypress-example-kitchensink] to `example.cypress.io` by following [these instructions under "Deployment"](../packages/example/README.md).
 
 13. Update the releases in [ZenHub](https://app.zenhub.com/workspaces/test-runner-5c3ea3baeb1e75374f7b0708/reports/release):
     - Close the current release in ZenHub.
