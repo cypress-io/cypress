@@ -7,8 +7,8 @@ describe('Index', () => {
   context('with no specs', () => {
     beforeEach(() => {
       cy.visitApp()
-      cy.withCtx((ctx, o) => {
-        ctx.actions.file.removeFileInProject('cypress/integration/integration-spec.js')
+      cy.withCtx(async (ctx, o) => {
+        await ctx.actions.file.removeFileInProject('cypress/integration/integration-spec.js')
       })
     })
 

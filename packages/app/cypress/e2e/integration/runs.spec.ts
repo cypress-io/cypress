@@ -55,7 +55,7 @@ describe('App', () => {
   it('when no project Id in the config file, shows call to action', () => {
     cy.loginUser()
     cy.visitApp()
-    cy.withCtx((ctx) => {
+    cy.withCtx(async (ctx) => {
       // TODO: (Alejandro) This should be removed when we add a file listener to update the config file
       ctx.update((d) => {
         if (d.currentProject) {
@@ -63,7 +63,7 @@ describe('App', () => {
         }
       })
 
-      ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {}')
+      await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {}')
     })
 
     cy.get('[href="#/runs"]').click()
