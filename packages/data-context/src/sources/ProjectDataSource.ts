@@ -26,12 +26,18 @@ export class ProjectDataSource {
     return this.ctx.config.getConfigForProject(projectRoot)
   }
 
-  async findSpecs (projectRoot: string, specType: SpecType): Promise<FoundSpec[]> {
-    const config = await this.getConfig(projectRoot)
-    const type = specType === 'component' ? 'component' : 'e2e'
-    const specPattern = config[type]?.specPattern
+  async findSpecs (projectRoot: string, specType: SpecType, specPatternFromCliArg?: string[]): Promise<FoundSpec[]> {
+    let specAbsolutePaths: string[] = []
 
-    const specAbsolutePaths = await this.ctx.file.getFilesByGlob(projectRoot, specPattern ?? [], { absolute: true })
+    if (specPatternFromCliArg) {
+      specAbsolutePaths = await this.ctx.file.getFilesByGlob(projectRoot, specPatternFromCliArg, { absolute: true })
+    } else {
+      const type = specType === 'component' ? 'component' : 'e2e'
+      const config = await this.getConfig(projectRoot)
+      const specPattern = config[type]?.specPattern
+
+      specAbsolutePaths = await this.ctx.file.getFilesByGlob(projectRoot, specPattern ?? [], { absolute: true })
+    }
 
     const specs = specAbsolutePaths.map<FoundSpec>((absolute) => {
       const relative = path.relative(projectRoot, absolute).replace(/\\/g, '/')

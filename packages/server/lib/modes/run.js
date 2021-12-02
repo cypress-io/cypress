@@ -1558,7 +1558,9 @@ module.exports = {
           system.info(),
           browserUtils.ensureAndGetByNameOrPath(browserName, false, userBrowsers).tap(removeOldProfiles),
           project.ctx.project.findSpecs(
-            projectRoot, options.testingType === 'component' ? 'component' : 'e2e',
+            projectRoot,
+            options.testingType === 'component' ? 'component' : 'e2e',
+            specPattern,
           ),
           trashAssets(config),
         ])
@@ -1570,8 +1572,6 @@ module.exports = {
             absolute: x.absolute,
             specType: x.specType,
           }))
-
-          console.log('specs are', specs)
 
           // // return only what is return to the specPattern
           // if (specPattern) {
