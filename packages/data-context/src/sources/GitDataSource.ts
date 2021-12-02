@@ -69,7 +69,7 @@ export class GitDataSource {
       // file is not under source control
       // ... etc ...
       // just return an empty map
-      return []
+      return new Array(absolutePaths.length).fill(null)
     }
   }
 
