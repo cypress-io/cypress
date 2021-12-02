@@ -1,23 +1,23 @@
 <template>
   <div
-    class="h-full grid grid-cols-[14px,16px,auto] items-center gap-8px"
+    class="h-full grid gap-8px grid-cols-[14px,16px,auto] items-center"
     :data-cy="`row-directory-depth-${depth}`"
   >
     <i-cy-chevron-down-small_x16
       class="
-        icon-dark-gray-300 mr-8px text-sm
+        mr-8px text-sm icon-dark-gray-300
         group-hocus:(icon-dark-gray-700)
       "
       :class="{'transform rotate-270': !expanded}"
     />
     <component
       :is="IconFolder"
-      class="icon-dark-white icon-light-gray-200 document-icon"
+      class="icon-dark-white icon-light-gray-200"
     />
     <HighlightedText
       :text="props.name"
       :indexes="props.indexes"
-      class="text-gray-600 font-medium"
+      class="font-medium text-gray-600"
       highlight-classes="text-gray-1000"
     />
   </div>

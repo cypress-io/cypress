@@ -1,6 +1,6 @@
 <template>
   <StandardModal
-    class="transition duration-200 transition-all"
+    class="transition transition-all duration-200"
     :click-outside="false"
     variant="bare"
     :title="title"
@@ -14,7 +14,7 @@
         class="bg-gray-900 opacity-[0.97]"
       />
     </template>
-    <div class="min-h-280px sm:min-w-640px flex flex-col">
+    <div class="flex flex-col min-h-280px sm:min-w-640px">
       <component
         :is="generator.entry"
         v-if="generator"
