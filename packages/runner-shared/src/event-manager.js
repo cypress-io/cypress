@@ -403,7 +403,20 @@ export const eventManager = {
 
     _.each(driverToSocketEvents, (event) => {
       Cypress.on(event, (...args) => {
-        return ws.emit(event, ...args)
+        const cb = args.pop()
+
+        const handleDisconnect = function (disconnectReason) {
+          cb({
+            error: new Error(disconnectReason),
+          })
+        }
+
+        ws.once('disconnect', handleDisconnect)
+
+        return ws.emit(event, ...args, (...cbArgs) => {
+          ws.off('disconnect', handleDisconnect)
+          cb(...cbArgs)
+        })
       })
     })
 

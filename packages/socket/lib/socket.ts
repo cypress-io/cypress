@@ -1,9 +1,8 @@
 import fs from 'fs'
+import buffer from 'buffer'
 import type http from 'http'
 import server, { Server as SocketIOBaseServer, ServerOptions } from 'socket.io'
 import { client } from './browser'
-
-const HUNDRED_MEGABYTES = 1e8 // 100000000
 
 const { version } = require('socket.io-client/package.json')
 const clientSource = require.resolve('socket.io-client/dist/socket.io.js')
@@ -21,7 +20,7 @@ class SocketIOServer extends SocketIOBaseServer {
     // previous commit for reference:
     // https://github.com/socketio/engine.io/blame/61b949259ed966ef6fc8bfd61f14d1a2ef06d319/lib/server.js#L29
     opts = opts ?? {}
-    opts.maxHttpBufferSize = opts.maxHttpBufferSize ?? HUNDRED_MEGABYTES
+    opts.maxHttpBufferSize = opts.maxHttpBufferSize ?? buffer.constants.MAX_LENGTH
 
     super(srv, opts)
   }
