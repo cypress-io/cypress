@@ -7,7 +7,6 @@ import CacheBuster from './util/cache_buster'
 import specController from './controllers/spec'
 import reporter from './controllers/reporter'
 import client from './controllers/client'
-import files from './controllers/files'
 import type { InitializeRoutes } from './routes'
 
 const debug = Debug('cypress:server:routes-e2e')
@@ -103,11 +102,6 @@ export const createRoutesE2E = ({
     }).toString()})()</script></body></html>`)
   })
   /* eslint-enable no-undef */
-
-  // routing for /files JSON endpoint
-  routesE2E.get('/__cypress/files', (req, res) => {
-    files.handleFiles(req, res, config)
-  })
 
   routesE2E.get('/__cypress/source-maps/:id.map', (req, res) => {
     networkProxy.handleSourceMapRequest(req, res)

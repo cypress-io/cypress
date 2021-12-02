@@ -10,17 +10,6 @@ const { escapeFilenameInUrl } = require('../util/escape_filename')
 const SPEC_URL_PREFIX = '/__cypress/tests?p'
 
 module.exports = {
-  handleFiles (req, res, config) {
-    debug('handle files')
-
-    return specsUtil.default.findSpecs(config)
-    .then((files) => {
-      return res.json({
-        integration: files,
-      })
-    })
-  },
-
   handleIframe (req, res, config, getRemoteState, extraOptions) {
     const test = req.params[0]
     const iframePath = cwd('lib', 'html', 'iframe.html')
