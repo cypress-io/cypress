@@ -1,9 +1,16 @@
 <template>
   <div class="w-280px">
+    <CreateSpecModal
+      v-if="props.gql.currentProject?.currentTestingType"
+      :show="showModal"
+      :gql="props.gql"
+      @close="showModal = false"
+    />
     <InlineSpecListHeader
       v-model:search="search"
       :result-count="specs.length"
       class="mb-16px"
+      @newSpec="showModal = true"
     />
     <InlineSpecListTree
       :specs="specs"
@@ -17,7 +24,7 @@ import { gql } from '@urql/vue'
 import type { Specs_InlineSpecListFragment } from '../generated/graphql'
 import InlineSpecListHeader from './InlineSpecListHeader.vue'
 import InlineSpecListTree from './InlineSpecListTree.vue'
-
+import CreateSpecModal from './CreateSpecModal.vue'
 import fuzzySort from 'fuzzysort'
 import type { FuzzyFoundSpec } from '@packages/frontend-shared/src/utils/spec-utils'
 
@@ -28,22 +35,26 @@ fragment SpecNode_InlineSpecList on SpecEdge {
     name
     specType
     absolute
-    relative
     baseName
+    fileName
     specFileExtension
     fileExtension
-    fileName
+    relative
   }
 }
 `
 
 gql`
-fragment Specs_InlineSpecList on CurrentProject {
-  id
-  projectRoot
-  specs: specs(first: 1000) {
-    edges {
-      ...SpecNode_InlineSpecList
+fragment Specs_InlineSpecList on Query {
+  ...CreateSpecModal
+  currentProject {
+    id
+    projectRoot
+    currentTestingType
+    specs: specs(first: 1000) {
+      edges {
+        ...SpecNode_InlineSpecList
+      }
     }
   }
 }
@@ -53,10 +64,11 @@ const props = defineProps<{
   gql: Specs_InlineSpecListFragment
 }>()
 
+const showModal = ref(false)
 const search = ref('')
 
 const specs = computed<FuzzyFoundSpec[]>(() => {
-  const specs = props.gql.specs?.edges.map((x) => ({ ...x.node, indexes: [] })) || []
+  const specs = props.gql.currentProject?.specs?.edges.map((x) => ({ ...x.node, indexes: [] })) || []
 
   if (!search.value) {
     return specs
