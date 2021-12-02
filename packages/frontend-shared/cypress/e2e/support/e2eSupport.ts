@@ -106,7 +106,7 @@ function initializeApp (mode: 'component' | 'e2e' = 'e2e') {
   return cy.withCtx(async (ctx, o) => {
     ctx.actions.wizard.setTestingType(o.mode)
     await ctx.actions.project.initializeActiveProject({
-      skipPluginIntializeForTesting: true,
+      skipPluginInitializeForTesting: true,
     })
 
     await ctx.actions.project.launchProject(o.mode, {
