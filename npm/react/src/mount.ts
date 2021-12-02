@@ -102,7 +102,7 @@ const _mount = (type: 'mount' | 'rerender', jsx: React.ReactNode, options: Mount
         name: type,
         type: 'parent',
         message: [message],
-        $el: (el.children.item(0) as unknown) as JQuery<HTMLElement>,
+        $el: el.children.item(0) as any,
         consoleProps: () => {
           return {
             // @ts-ignore protect the use of jsx functional components use ReactNode
