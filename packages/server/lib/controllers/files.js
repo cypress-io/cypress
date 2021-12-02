@@ -58,7 +58,6 @@ module.exports = {
       // get the absolute path to this spec and
       // get the browser url + cache buster
       const convertedSpec = path.join(config.projectRoot, spec)
-      // pathHelpers.getAbsolutePathToSpec(spec, config)
 
       debug('converted %s to %s', spec, convertedSpec)
 

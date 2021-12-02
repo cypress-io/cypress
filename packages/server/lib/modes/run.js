@@ -1554,17 +1554,19 @@ module.exports = {
 
         // all these operations are independent and should be run in parallel to
         // speed the initial booting time
+        const specType = options.testingType === 'component' ? 'component' : 'integration'
+
         return Promise.all([
           system.info(),
           browserUtils.ensureAndGetByNameOrPath(browserName, false, userBrowsers).tap(removeOldProfiles),
           project.ctx.project.findSpecs(
             projectRoot,
-            options.testingType === 'component' ? 'component' : 'e2e',
+            specType,
             specPattern,
           ),
           trashAssets(config),
         ])
-        .spread((sys = {}, browser = {}, specs = []) => {
+        .spread(async (sys = {}, browser = {}, specs = []) => {
           // only want these properties
           specs = specs.map((x) => ({
             name: x.name,
@@ -1573,20 +1575,19 @@ module.exports = {
             specType: x.specType,
           }))
 
-          // // return only what is return to the specPattern
-          // if (specPattern) {
-          //   specPattern = specsUtil.default.getPatternRelativeToProjectRoot(specPattern, projectRoot)
-          // }
+          if (!specs.length) {
+            // did we use the spec pattern?
+            if (specPattern) {
+              errors.throw('NO_SPECS_FOUND', projectRoot, specPattern)
+            } else {
+              const type = specType === 'component' ? 'component' : 'e2e'
+              const config = await this.getConfig(projectRoot)
+              const configSpecPattern = config[type]?.specPattern
 
-          // if (!specs.length) {
-          //   // did we use the spec pattern?
-          //   if (specPattern) {
-          //     errors.throw('NO_SPECS_FOUND', projectRoot, specPattern)
-          //   } else {
-          //     // else we looked in the integration folder
-          //     errors.throw('NO_SPECS_FOUND', config.integrationFolder, specPattern)
-          //   }
-          // }
+              // else we looked in the integration folder
+              errors.throw('NO_SPECS_FOUND', projectRoot, configSpecPattern)
+            }
+          }
 
           if (browser.unsupportedVersion && browser.warning) {
             errors.throw('UNSUPPORTED_BROWSER_VERSION', browser.warning)

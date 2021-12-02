@@ -237,7 +237,6 @@ export function mergeDefaults (config: Record<string, any> = {}, options: Record
   configUtils.validateNoBreakingConfig(config, errors.warning, errors.throw)
 
   return setSupportFileAndFolder(config, defaultsForRuntime)
-  .then(setScaffoldPaths)
 }
 
 export function setResolvedConfigValues (config, defaults, resolved) {
@@ -395,21 +394,6 @@ export const setNodeBinary = (obj, userNodePath, userNodeVersion) => {
   obj.resolvedNodeVersion = process.versions.node
 
   return obj
-}
-
-export function setScaffoldPaths (obj) {
-  return obj
-  // obj = _.clone(obj)
-
-  // debug('set scaffold paths')
-
-  // return scaffold.fileTree(obj)
-  // .then((fileTree) => {
-  //   debug('got file tree')
-  //   obj.scaffoldedFiles = fileTree
-
-  //   return obj
-  // })
 }
 
 // async function

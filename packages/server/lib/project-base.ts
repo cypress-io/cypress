@@ -383,26 +383,6 @@ export class ProjectBase<TServer extends Server> extends EE {
   }> {
     // const specs = await this.
     const specs = await this.ctx.project.findSpecs(this.projectRoot, 'integration')
-    // const allSpecs = await specsUtil.findSpecs({
-    //   projectRoot: updatedConfig.projectRoot,
-    //   fixturesFolder: updatedConfig.fixturesFolder,
-    //   supportFile: updatedConfig.supportFile,
-    //   testFiles: updatedConfig.testFiles,
-    //   ignoreTestFiles: updatedConfig.ignoreTestFiles,
-    //   componentFolder: updatedConfig.componentFolder,
-    //   integrationFolder: updatedConfig.integrationFolder,
-    // })
-    // const specs = allSpecs.filter((spec: Cypress.Cypress['spec']) => {
-    //   if (this.testingType === 'component') {
-    //     return spec.specType === 'component'
-    //   }
-
-    //   if (this.testingType === 'e2e') {
-    //     return spec.specType === 'integration'
-    //   }
-
-    //   throw Error(`Cannot return specType for testingType: ${this.testingType}`)
-    // })
 
     return this.initSpecStore({ specs, config: updatedConfig })
   }

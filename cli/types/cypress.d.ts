@@ -2791,9 +2791,7 @@ declare namespace Cypress {
     /**
      * Glob pattern to determine what test files to load.
      * 
-     * @deprecated Use `cy.intercept()` instead.
-     *
-     * Use `specPattern` under `component` or `e2e`
+     * @deprecated Use `specPattern` under `component` or `e2e`
      */
     testFiles: string | string[]
     /**

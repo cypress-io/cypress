@@ -2,6 +2,9 @@ import type { CodeGenType, SpecType } from '@packages/graphql/src/gen/nxs.gen'
 import { FoundSpec, FrontendFramework, FRONTEND_FRAMEWORKS, ResolvedFromConfig, RESOLVED_FROM, SpecFileWithExtension, STORYBOOK_GLOB } from '@packages/types'
 import { scanFSForAvailableDependency } from 'create-cypress-tests'
 import path from 'path'
+import Debug from 'debug'
+
+const debug = Debug('cypress:data-context:project-data-source')
 
 import type { DataContext } from '..'
 
@@ -30,14 +33,19 @@ export class ProjectDataSource {
     let specAbsolutePaths: string[] = []
 
     if (specPatternFromCliArg) {
+      debug('pattern passed via --spec: %s', specPatternFromCliArg)
       specAbsolutePaths = await this.ctx.file.getFilesByGlob(projectRoot, specPatternFromCliArg, { absolute: true })
     } else {
-      const type = specType === 'component' ? 'component' : 'e2e'
+      const testingType = specType === 'component' ? 'component' : 'e2e'
       const config = await this.getConfig(projectRoot)
-      const specPattern = config[type]?.specPattern
+      const specPattern = config[testingType]?.specPattern
+
+      debug('pattern passed from config : %s', specPattern)
 
       specAbsolutePaths = await this.ctx.file.getFilesByGlob(projectRoot, specPattern ?? [], { absolute: true })
     }
+
+    debug('found specs %o', specAbsolutePaths)
 
     const specs = specAbsolutePaths.map<FoundSpec>((absolute) => {
       const relative = path.relative(projectRoot, absolute).replace(/\\/g, '/')
