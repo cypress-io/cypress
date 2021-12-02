@@ -7,7 +7,6 @@ const Fixtures = require('@tooling/system-tests/lib/fixtures')
 const config = require(`${root}lib/config`)
 const errors = require(`${root}lib/errors`)
 const configUtil = require(`${root}lib/util/config`)
-const scaffold = require(`${root}lib/scaffold`)
 let settings = require(`${root}lib/util/settings`)
 
 describe('lib/config', () => {
@@ -1986,25 +1985,6 @@ describe('lib/config', () => {
       expect(urls.browserUrl).to.eq('http://localhost:9999/__/')
 
       expect(urls.proxyUrl).to.eq('http://localhost:65432')
-    })
-  })
-
-  context('.setScaffoldPaths', () => {
-    it('sets scaffoldedFiles', () => {
-      const obj = {
-        integrationFolder: '/_test-output/path/to/project/cypress/integration',
-      }
-
-      const scaffoldedFiles = ['/_test-output/path/to/project/cypress/integration/example.spec.js']
-
-      sinon.stub(scaffold, 'fileTree').resolves(scaffoldedFiles)
-
-      return config.setScaffoldPaths(obj).then((result) => {
-        expect(result).to.deep.eq({
-          integrationFolder: '/_test-output/path/to/project/cypress/integration',
-          scaffoldedFiles,
-        })
-      })
     })
   })
 

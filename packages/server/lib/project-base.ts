@@ -54,7 +54,6 @@ export interface Cfg extends ReceivedCypressOptions {
 const localCwd = cwd()
 
 const debug = Debug('cypress:server:project')
-const debugScaffold = Debug('cypress:server:scaffold')
 
 type StartWebsocketOptions = Pick<Cfg, 'socketIoCookie' | 'namespace' | 'screenshotsFolder' | 'report' | 'reporter' | 'reporterOptions' | 'projectRoot'>
 
@@ -711,17 +710,6 @@ export class ProjectBase<TServer extends Server> extends EE {
       return this._cfg
     }
 
-    // decide if new project by asking scaffold
-    // and looking at previously saved user state
-    if (!theCfg.integrationFolder) {
-      throw new Error('Missing integration folder')
-    }
-
-    const untouchedScaffold = await this.determineIsNewProject(theCfg)
-
-    debugScaffold(`untouched scaffold ${untouchedScaffold} banner closed`)
-    theCfg.isNewProject = untouchedScaffold
-
     const cfgWithSaved = await this._setSavedState(theCfg)
 
     this._cfg = cfgWithSaved
@@ -772,12 +760,6 @@ export class ProjectBase<TServer extends Server> extends EE {
     return cfg
   }
 
-  // do not check files again and again - keep previous promise
-  // to refresh it - just close and open the project again.
-  determineIsNewProject (folder) {
-    return scaffold.isNewProject(folder)
-  }
-
   writeConfigFile ({ code, configFilename }: { code: string, configFilename: string }) {
     fs.writeFileSync(path.resolve(this.projectRoot, configFilename), code)
   }
@@ -798,25 +780,6 @@ export class ProjectBase<TServer extends Server> extends EE {
     // ensure support dir is created
     // and example support file if dir doesnt exist
     push(scaffold.support(cfg.supportFolder, cfg))
-
-    // if we're in headed mode add these other scaffolding tasks
-    debug('scaffold flags %o', {
-      isTextTerminal: cfg.isTextTerminal,
-      CYPRESS_INTERNAL_FORCE_SCAFFOLD: process.env.CYPRESS_INTERNAL_FORCE_SCAFFOLD,
-    })
-
-    const scaffoldExamples = !cfg.isTextTerminal || process.env.CYPRESS_INTERNAL_FORCE_SCAFFOLD
-
-    if (scaffoldExamples) {
-      debug('will scaffold integration and fixtures folder')
-      if (!process.env.LAUNCHPAD) {
-        push(scaffold.integration(cfg.integrationFolder, cfg))
-      }
-
-      push(scaffold.fixture(cfg.fixturesFolder, cfg))
-    } else {
-      debug('will not scaffold integration or fixtures folder')
-    }
 
     return Promise.all(scaffolds)
   }

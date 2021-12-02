@@ -131,7 +131,7 @@ function setupRunner () {
  * Get the URL for the spec. This is the URL of the AUT IFrame.
  */
 function getSpecUrl (namespace: string, spec: BaseSpec, prefix = '') {
-  return spec ? `${prefix}/${namespace}/iframes/${spec.absolute}` : ''
+  return spec ? `${prefix}/${namespace}/iframes/${spec.relative}` : ''
 }
 
 /**
