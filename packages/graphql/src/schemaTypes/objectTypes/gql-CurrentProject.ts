@@ -138,6 +138,15 @@ export const CurrentProject = objectType({
         return ctx.project.getCodeGenCandidates(args.glob)
       },
     })
+
+    t.string('branch', {
+      description: 'The current branch of the project',
+      resolve: async (source, args, ctx) => {
+        const branchName = await ctx.git.getBranch(source.projectRoot)
+
+        return branchName
+      },
+    })
   },
 
 })
