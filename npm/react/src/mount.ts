@@ -1,3 +1,5 @@
+/// <reference types="cypress" />
+
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import getDisplayName from './getDisplayName'
