@@ -2,10 +2,8 @@ import _ from 'lodash'
 import la from 'lazy-ass'
 import Debug from 'debug'
 import Bluebird from 'bluebird'
-import pluralize from 'pluralize'
 import { ProjectBase } from './project-base'
 import browsers from './browsers'
-import specsUtil from './util/specs'
 import preprocessor from './plugins/preprocessor'
 import runEvents from './plugins/run_events'
 import * as session from './session'
@@ -179,52 +177,6 @@ export class OpenProject {
     }
 
     return this.relaunchBrowser()
-  }
-
-  getSpecs (cfg) {
-    return specsUtil.findSpecs(cfg)
-    .then((_specs: Cypress.Spec[] = []) => {
-      // only want these properties
-      const specs = _specs.map((x) => {
-        return {
-          name: x.name,
-          relative: x.relative,
-          absolute: x.absolute,
-          specType: x.specType,
-        }
-      })
-
-      // TODO merge logic with "run.js"
-      if (debug.enabled) {
-        const names = _.map(specs, 'name')
-
-        debug(
-          'found %s using spec pattern \'%s\': %o',
-          pluralize('spec', names.length, true),
-          cfg.testFiles,
-          names,
-        )
-      }
-
-      const componentTestingEnabled = _.get(cfg, 'resolved.testingType.value', 'e2e') === 'component'
-
-      if (componentTestingEnabled) {
-        // separate specs into integration and component lists
-        // note: _.remove modifies the array in place and returns removed elements
-        const component = _.remove(specs, { specType: 'component' })
-
-        return {
-          integration: specs,
-          component,
-        }
-      }
-
-      // assumes all specs are integration specs
-      return {
-        integration: specs.filter((x) => x.specType === 'integration'),
-        component: [],
-      }
-    })
   }
 
   closeBrowser () {
