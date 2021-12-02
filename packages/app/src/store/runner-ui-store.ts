@@ -32,8 +32,8 @@ export const useRunnerUiStore = defineStore({
     setAutoScrollingEnabled (value: boolean) {
       this.autoScrollingEnabled = value
     },
-    setIsSpecsListOpen (value: boolean) {
-      this.isSpecsListOpen = value
+    setPreference (preference: string, value: boolean) {
+      this[preference] = value
     },
   },
 })

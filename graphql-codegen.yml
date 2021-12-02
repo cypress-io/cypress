@@ -50,9 +50,9 @@ generates:
       flattenGeneratedTypes: true
     schema: 'packages/graphql/schemas/schema.graphql'
     documents:
-      - './packages/frontend-shared/src/gql-components/**/*.vue'
-      - './packages/app/src/**/*.vue'
-      - './packages/launchpad/src/**/*.vue'
+      - './packages/frontend-shared/src/gql-components/**/*.{vue,ts,tsx,js,jsx}'
+      - './packages/app/src/**/*.{vue,ts,tsx,js,jsx}'
+      - './packages/launchpad/src/**/*.{vue,ts,tsx,js,jsx}'
     plugins:
       - add:
           content: '/* eslint-disable */'

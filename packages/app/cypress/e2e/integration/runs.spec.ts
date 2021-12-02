@@ -23,7 +23,7 @@ describe('App', () => {
 
     cy.visitApp()
     cy.get('[href="#/runs"]').click()
-    cy.get('[data-cy="runs-loader"]')
+    cy.get('[data-cy="runs-loader"]').pause()
     cy.get('[data-cy="runs"]')
   })
 

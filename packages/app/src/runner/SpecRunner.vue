@@ -82,6 +82,7 @@ import ChooseExternalEditorModal from '@packages/frontend-shared/src/gql-compone
 import { useMutation, gql } from '@urql/vue'
 import { OpenFileInIdeDocument, SpecRunner_SetPreferencesDocument } from '@packages/data-context/src/gen/all-operations.gen'
 import type { SpecRunnerFragment } from '../generated/graphql'
+import { usePreferences } from '../composables/usePreferences'
 
 gql`
 fragment SpecRunner on Query {
@@ -121,9 +122,10 @@ const eventManager = getEventManager()
 const autStore = useAutStore()
 const screenshotStore = useScreenshotStore()
 const runnerUiStore = useRunnerUiStore()
+const preferences = usePreferences()
 
-runnerUiStore.setAutoScrollingEnabled(props.gql.localSettings.preferences.autoScrollingEnabled ?? true)
-runnerUiStore.setIsSpecsListOpen(props.gql.localSettings.preferences.isSpecsListOpen ?? true)
+preferences.update('autoScrollingEnabled', props.gql.localSettings.preferences.autoScrollingEnabled ?? true)
+preferences.update('isSpecsListOpen', props.gql.localSettings.preferences.isSpecsListOpen ?? true)
 
 const setPreferences = useMutation(SpecRunner_SetPreferencesDocument)
 
@@ -207,9 +209,8 @@ onMounted(() => {
   })
 
   eventManager.on('save:app:state', (state) => {
-    runnerUiStore.setIsSpecsListOpen(state.isSpecsListOpen)
-    runnerUiStore.setAutoScrollingEnabled(state.autoScrollingEnabled)
-    setPreferences.executeMutation({ value: JSON.stringify(state) })
+    preferences.update('isSpecsListOpen', state.isSpecsListOpen)
+    preferences.update('autoScrollingEnabled', state.autoScrollingEnabled)
   })
 })
 
