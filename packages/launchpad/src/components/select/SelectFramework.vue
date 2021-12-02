@@ -1,7 +1,7 @@
 <template>
   <div class="text-left relative">
     <label
-      class="text-gray-800 text-sm my-3 block"
+      class="font-medium  mt-14px mb-10px text-gray-800 block"
       :class="{ 'opacity-50': disabled }"
     >
       {{
@@ -10,7 +10,7 @@
     </label>
     <button
       v-click-outside="() => (isOpen = false)"
-      class="h-10 text-left flex justify-between items-center border-1 px-2 py-1 rounded w-full focus:border-indigo-600 focus:outline-transparent"
+      class="rounded flex border-1 h-10 text-left w-full py-8px px-16px justify-between items-center focus:outline-transparent focus:border-indigo-600"
       data-cy="select-framework"
       :class="
         [isOpen ? ' border-indigo-600' : ' border-gray-100',
@@ -26,7 +26,7 @@
       <template v-if="selectedOptionObject">
         <img
           :src="FrameworkBundlerLogos[selectedOptionObject.type]"
-          class="w-5 h-5 mr-3"
+          class="h-16px pr-8px"
         >
         <span>{{ selectedOptionObject.name }}</span>
       </template>
@@ -39,20 +39,20 @@
     </button>
     <ul
       v-if="isOpen"
-      class="w-full absolute bg-white border-1 border-indigo-600 border-t-1 border-t-gray-100 rounded-b flex flex-col gap-0 z-10"
+      class="bg-white rounded-b flex flex-col border-1 border-indigo-600 border-t-1 border-t-gray-100 w-full z-10 gap-0 absolute"
       style="margin-top: -3px"
     >
       <li
         v-for="opt in options"
         :key="opt.id"
         focus="1"
-        class="cursor-pointer flex items-center py-1 px-2 hover:bg-gray-10"
+        class="cursor-pointer flex py-8px px-16px items-center hover:bg-gray-10"
         :data-cy-framework="opt.type"
         @click="selectOption(opt.type)"
       >
         <img
           :src="FrameworkBundlerLogos[opt.type]"
-          class="w-5 h-5 mr-3"
+          class="h-16px pr-8px"
         >
         <span>{{ opt.name }}</span>
       </li>

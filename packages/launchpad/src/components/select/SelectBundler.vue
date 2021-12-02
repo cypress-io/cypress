@@ -1,7 +1,7 @@
 <template>
   <div class="text-left relative">
     <label
-      class="text-gray-800 text-sm my-3 block"
+      class="font-medium mt-14px mb-10px text-gray-800 block"
       :class="disabledClass"
     >{{
       props.name
@@ -9,22 +9,21 @@
     <button
       v-click-outside="() => (isOpen = false)"
       class="
+        rounded
+        flex
+        border-1
         h-10
         text-left
-        flex
+        w-full
+         py-8px px-16px
         justify-between
         items-center
-        border-1
-        px-2
-        py-1
-        rounded
-        w-full
-        focus:border-indigo-600 focus:outline-transparent
+        focus:outline-transparent focus:border-indigo-600
       "
       data-cy="select-bundler"
       :class="disabledClass
-        + (isOpen ? ' border-indigo-600' : ' border-gray-200')
-        + (props.disabled ? ' bg-gray-100 text-gray-800' : '')"
+        + (isOpen ? ' border-indigo-600' : ' border-gray-100')
+        + (props.disabled ? ' bg-gray-50 text-gray-800' : '')"
       :disabled="props.disabled"
       @click="
         if (!props.disabled) {
@@ -35,7 +34,7 @@
       <template v-if="selectedOptionObject">
         <img
           :src="FrameworkBundlerLogos[selectedOptionObject.type]"
-          class="w-5 h-5 mr-3"
+          class="h-16px pr-8px"
         >
         <span>
           {{ selectedOptionObject.name }}
@@ -53,14 +52,14 @@
     <ul
       v-if="isOpen"
       class="
-        w-full
-        absolute
         bg-white
-        border-1 border-indigo-600 border-t-1 border-t-gray-100
         rounded-b
-        flex flex-col
+        flex
+        flex-col border-1 border-indigo-600 border-t-1
+        border-t-gray-100
+        w-full z-10
         gap-0
-        z-10
+        absolute
       "
       style="margin-top: -3px"
     >
@@ -68,13 +67,13 @@
         v-for="opt in props.options"
         :key="opt.type"
         focus="1"
-        class="cursor-pointer flex items-center py-1 px-2 hover:bg-gray-10"
+        class="cursor-pointer flex py-8px px-16px items-center hover:bg-gray-10"
         :data-cy-bundler="opt.type"
         @click="selectOption(opt.type)"
       >
         <img
           :src="FrameworkBundlerLogos[opt.type]"
-          class="w-5 h-5 mr-3"
+          class="h-16px pr-8px"
         >
         <span>
           {{ opt.name }}
