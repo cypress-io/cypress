@@ -114,17 +114,6 @@ const getStatusAndMessage = (projectRepoName) => {
     `
   }
 
-  if (process.env.APPVEYOR) {
-    const account = process.env.APPVEYOR_ACCOUNT_NAME
-    const slug = process.env.APPVEYOR_PROJECT_SLUG
-    const build = process.env.APPVEYOR_BUILD_NUMBER
-
-    message += '\n'
-    message += stripIndent`
-      AppVeyor: ${account}/${slug} ${build}
-    `
-  }
-
   console.log('commit message:')
   console.log(message)
 

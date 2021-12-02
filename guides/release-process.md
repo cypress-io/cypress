@@ -20,10 +20,9 @@ The `@cypress/`-namespaced NPM packages that live inside the [`/npm`](../npm) di
         ```text
         aws_credentials_json={"bucket":"cdn.cypress.io","folder":"desktop","key":"...","secret":"..."}
         ```
-    - A [GitHub token](https://github.com/settings/tokens), a [CircleCI token](https://circleci.com/account/api),
-      and a `cypress-io` account-specific [AppVeyor token](https://ci.appveyor.com/api-keys) in `ci_json`:
+    - A [GitHub token](https://github.com/settings/tokens) and a [CircleCI token](https://circleci.com/account/api) in `ci_json`:
         ```text
-        ci_json={"githubToken":"...","circleToken":"...","appVeyorToken":"..."}
+        ci_json={"githubToken":"...","circleToken":"..."}
         ```
     - You'll also need to put the GitHub token under its own variable and get a [ZenHub API token](https://app.zenhub.com/dashboard/tokens) for the `release-automations` step.
         ```text
@@ -48,7 +47,7 @@ The `@cypress/`-namespaced NPM packages that live inside the [`/npm`](../npm) di
 In order to publish a new version of the `cypress` package to the npm registry, CI must build and test it across multiple platforms and test projects. CI is set up to do the following on every commit to `develop`:
 
 1. Build the npm package with the [next target version](./next-version.md) baked in.
-2. Build the Linux/Mac binaries on CircleCI and build Windows on AppVeyor.
+2. Build the Linux, Mac & Windows binaries on CircleCI.
 3. Upload the binaries and the new npm package to the AWS S3 Bucket `cdn.cypress.io` under the "beta" folder.
 4. [Launch test projects](./testing-other-projects.md) using the newly-uploaded package & binary instead of installing from the npm registry.
 
