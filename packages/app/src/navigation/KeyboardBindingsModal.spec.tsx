@@ -1,9 +1,16 @@
 import KeyboardBindingsModal from './KeyboardBindingsModal.vue'
+import { defaultMessages } from '@cy/i18n'
 
 describe('SidebarNavigationRow', () => {
-  it('renders something', () => {
+  it('renders expected content', () => {
     cy.mount(() => {
       return <KeyboardBindingsModal show />
+    })
+
+    const expectedContent = defaultMessages.sideBar.keyboardShortcuts
+
+    Object.values(expectedContent).forEach((text) => {
+      cy.contains(text).should('be.visible')
     })
   })
 })

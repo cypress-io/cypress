@@ -79,7 +79,7 @@ import RemovePositioningDuringScreenshot from './screenshot/RemovePositioningDur
 import ScreenshotHelperPixels from './screenshot/ScreenshotHelperPixels.vue'
 import { useScreenshotStore } from '../store/screenshot-store'
 import ChooseExternalEditorModal from '@packages/frontend-shared/src/gql-components/ChooseExternalEditorModal.vue'
-import { useMutation, gql, useClientHandle } from '@urql/vue'
+import { useMutation, gql } from '@urql/vue'
 import { OpenFileInIdeDocument, SpecRunner_SetPreferencesDocument } from '@packages/data-context/src/gen/all-operations.gen'
 import type { SpecRunnerFragment } from '../generated/graphql'
 

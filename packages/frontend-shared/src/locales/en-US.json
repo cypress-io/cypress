@@ -119,8 +119,7 @@
       "title": "Keyboard Shortcuts",
       "rerun": "Re-run tests",
       "stop": "Stop tests",
-      "toggle": "Toggle between specs",
-      "collapse": "Toggle specs list"
+      "toggle": "Toggle specs list"
     }
   },
   "topNav": {
