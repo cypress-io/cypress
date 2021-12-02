@@ -6,13 +6,52 @@ import $errUtils from '../../../cypress/error_utils'
 import $actionability from '../../actionability'
 import { addEventCoords, dispatch } from './trigger'
 
+/* dropzone.js relies on an experimental, nonstandard API, webkitGetAsEntry().
+ * https://developer.mozilla.org/en-US/docs/Web/API/DataTransferItem/webkitGetAsEntry
+ * The behavior here varies between browsers, and though unpleasant, we have to attempt
+ * to replicate it as far as possible.
+ *
+ * In Firefox, attempting to set webkitGetAsEntry() fails - but this is fine, because
+ * Firefox also returns a useful value from item.webkitGetAsEntry().
+ *
+ * In webkit browsers however, item.webkitGetAsEntry() returns null, because our File()
+ * instances don't actually correspond with a file on disk. But the property is writeable,
+ * so we're able to override it with our own implementation that returns a proper object.
+ */
+const tryMockWebkit = (item) => {
+  try {
+    item.webkitGetAsEntry = () => {
+      return {
+        isFile: true,
+        file: (callback) => callback(item.getAsFile()),
+      }
+    }
+  } catch (e) {
+    // We're in Firefox, this is fine.
+  }
+
+  return item
+}
+
 const createDataTransfer = (files: Cypress.FileReferenceObject[]): DataTransfer => {
   const dataTransfer = new DataTransfer()
 
   files.forEach(({ contents, fileName, lastModified, mimeType }) => {
-    const file = new File([contents], fileName || '', { lastModified, type: mimeType })
+    dataTransfer.items.add(new File([contents], fileName || '', {
+      lastModified,
+      type: mimeType,
+    }))
+  })
 
-    dataTransfer.items.add(file)
+  const oldItems = dataTransfer.items
+
+  // dataTransfer.items is a getter, and it - and the items read from its
+  // returned DataTransferItemList - cannot be assigned to. DataTransferItemLists
+  // also cannot be constructed, so we have to use an array instead.
+  Object.defineProperty(dataTransfer, 'items', {
+    get () {
+      return _.map(oldItems, tryMockWebkit)
+    },
   })
 
   return dataTransfer
