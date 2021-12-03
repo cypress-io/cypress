@@ -3220,8 +3220,8 @@ describe('network stubbing', function () {
         $.get('/foo')
         $.get('/foo')
       })
-      .wait('@foo.bar', { timeout: 100 })
-      .wait('@foo.bar', { timeout: 100 })
+      .wait('@foo.bar', { timeout: 500 })
+      .wait('@foo.bar', { timeout: 500 })
     })
 
     it('can incrementally wait on requests', function () {
