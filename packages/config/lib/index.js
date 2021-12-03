@@ -20,7 +20,7 @@ const breakingKeys = _.map(breakingOptions, 'name')
 const defaultValues = createIndex(options, 'name', 'defaultValue')
 const publicConfigKeys = _(options).reject({ isInternal: true }).map('name').value()
 const validationRules = createIndex(options, 'name', 'validation')
-const readOnlyConfigOptions = options.filter((option) => !option.canUpdateDuringTestTime).map((option) => option.name).reduce((name, val) => ({ ...name, [val]: true }), {})
+const readOnlyConfigOptions = createIndex(options, 'name', 'canUpdateDuringTestTime')
 
 module.exports = {
   allowed: (obj = {}) => {
