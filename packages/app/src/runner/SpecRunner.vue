@@ -36,7 +36,7 @@
       ref="runnerPane"
       class="w-full relative"
     >
-      <HideDuringScreenshot class="bg-white p-4">
+      <HideDuringScreenshot class="bg-white p-16px">
         <SpecRunnerHeader
           v-if="props.gql.currentProject"
           :gql="props.gql.currentProject"
@@ -46,7 +46,7 @@
       </HideDuringScreenshot>
 
       <RemoveClassesDuringScreenshotting
-        class="flex h-full bg-gray-100 p-4 justify-center"
+        class="flex h-full bg-gray-100 p-16px justify-center"
       >
         <div
           :id="RUNNER_ID"

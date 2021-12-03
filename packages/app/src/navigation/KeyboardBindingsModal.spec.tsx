@@ -1,7 +1,7 @@
 import KeyboardBindingsModal from './KeyboardBindingsModal.vue'
 import { defaultMessages } from '@cy/i18n'
 
-describe('SidebarNavigationRow', () => {
+describe('KeyboardBindingsModal', () => {
   it('renders expected content', () => {
     cy.mount(() => {
       return <KeyboardBindingsModal show />
