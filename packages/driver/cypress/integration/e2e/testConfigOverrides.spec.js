@@ -390,6 +390,7 @@ describe('cannot set read-only properties', () => {
 
   it('throws if mutating read-only config with Cypress.config()', (done) => {
     cy.on('fail', (err) => {
+      Cypress.config('cypressEnv', 'development')
       expect(err.message).to.include('`Cypress.config()` cannot mutate option `chromeWebSecurity` because it is a read-only property.')
       done()
     })
@@ -400,10 +401,14 @@ describe('cannot set read-only properties', () => {
   })
 
   it('does not throw for non-Cypress config values', () => {
-    Cypress.config('cypressEnv', 'test')
-    expect(() => {
-      Cypress.config('foo', 'bar')
-    }).to.not.throw()
+    try {
+      Cypress.config('cypressEnv', 'test')
+      expect(() => {
+        Cypress.config('foo', 'bar')
+      }).to.not.throw()
+    } finally {
+      Cypress.config('cypressEnv', 'development')
+    }
   })
 })
 

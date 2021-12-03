@@ -135,9 +135,9 @@ describe('e2e sessions', () => {
     config: {
       experimentalSessionSupport: true,
       video: false,
-      env: {
-        CYPRESS_INTERNAL_ENV: 'development',
-      },
+    },
+    processEnv: {
+      CYPRESS_INTERNAL_ENV: 'development',
     },
   })
 
