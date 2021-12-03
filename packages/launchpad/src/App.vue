@@ -1,10 +1,14 @@
 <template>
-  <div v-if="!backendInitialized">
+  <BaseError
+    v-if="query.data.value?.baseError"
+    :gql="query.data.value.baseError"
+  />
+  <div v-else-if="!backendInitialized">
     Loading...
   </div>
   <div
     v-else
-    class="h-full mx-auto bg-white"
+    class="bg-white h-full mx-auto"
   >
     <Main />
   </div>
@@ -12,8 +16,9 @@
 
 <script lang="ts" setup>
 import { computed, ref, watch } from 'vue'
-import { useToast } from 'vue-toastification'
+// import { useToast } from 'vue-toastification'
 import { gql, useMutation, useQuery } from '@urql/vue'
+import BaseError from './error/BaseError.vue'
 import Main from './Main.vue'
 import { AppQueryDocument, App_DevRelaunchDocument } from './generated/graphql'
 
@@ -22,6 +27,9 @@ query AppQuery {
   __typename
   dev {
     needsRelaunch
+  }
+  baseError {
+    ...BaseError
   }
 }
 `
@@ -59,25 +67,25 @@ const poll = () => {
 
 let isShowingRelaunch = ref(false)
 
-const toast = useToast()
+// const toast = useToast()
 
-watch(query.data, () => {
-  if (process.env.NODE_ENV !== 'production') {
-    if (query.data.value?.dev.needsRelaunch && !isShowingRelaunch.value) {
-      isShowingRelaunch.value = true
-      toast.info('Server updated, click to relaunch', {
-        timeout: false,
-        onClick: () => {
-          relaunchMutation.executeMutation({ action: 'trigger' })
-        },
-        onClose: () => {
-          isShowingRelaunch.value = false
-          relaunchMutation.executeMutation({ action: 'dismiss' })
-        },
-      })
-    }
-  }
-})
+// watch(query.data, () => {
+//   if (process.env.NODE_ENV !== 'production') {
+//     if (query.data.value?.dev.needsRelaunch && !isShowingRelaunch.value) {
+//       isShowingRelaunch.value = true
+//       toast.info('Server updated, click to relaunch', {
+//         timeout: false,
+//         onClick: () => {
+//           relaunchMutation.executeMutation({ action: 'trigger' })
+//         },
+//         onClose: () => {
+//           isShowingRelaunch.value = false
+//           relaunchMutation.executeMutation({ action: 'dismiss' })
+//         },
+//       })
+//     }
+//   }
+// })
 
 interval = window.setInterval(poll, 200)
 
@@ -89,7 +97,7 @@ const backendInitialized = computed(() => !!query.data?.value?.__typename)
 html,
 body,
 #app {
-  @apply h-full bg-white;
+  @apply bg-white h-full;
 }
 
 @font-face {

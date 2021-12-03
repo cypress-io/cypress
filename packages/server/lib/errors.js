@@ -705,14 +705,15 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
 
         We looked but did not find a default config file in this folder: ${chalk.blue(arg1)}`
     case 'CONFIG_FILE_MIGRATION_NEEDED':
-      return stripIndent`
-          There is a cypress.json file at the location below:
-          ${arg1}
+      return stripIndent`\
+          There is a \`cypress.json\` file at the location below:
 
-          Cypress no longer supports 'cypress.json', please migrate to 'cypress.config.{ts|js}'.
+          \`${arg1}\`
+
+          Cypress no longer supports \`cypress.json\`, please migrate to \`cypress.config.{ts|js}\`.
           `
     case 'LEGACY_CONFIG_FILE':
-      return stripIndent`
+      return stripIndent`\
           There is both a \`${arg2}\` and a cypress.json file at the location below:
           ${arg1}
 

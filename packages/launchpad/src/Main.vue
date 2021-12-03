@@ -2,21 +2,17 @@
   <template v-if="query.data.value">
     <HeaderBar />
     <div class="p-24px">
-      <template v-if="query.data.value.baseError">
-        <BaseError :gql="query.data.value.baseError" />
-      </template>
-      <template
-        v-else-if="query.data.value.isInGlobalMode && !query.data.value?.currentProject"
-      >
-        <GlobalPage :gql="query.data.value" />
-      </template>
+      <GlobalPage
+        v-if="query.data.value.isInGlobalMode && !query.data.value?.currentProject"
+        :gql="query.data.value"
+      />
 
       <template v-else>
         <template v-if="query.data.value?.wizard.step === 'welcome'">
           <WizardHeader :gql="query.data.value.wizard" />
           <StandardModal
             v-model="isTestingTypeModalOpen"
-            class="h-full sm:h-auto sm:w-auto w-full sm:mx-[5%]"
+            class="h-full w-full sm:h-auto sm:mx-[5%] sm:w-auto"
           >
             <template #title>
               Key Differences
@@ -25,11 +21,11 @@
             <CompareTestingTypes />
           </StandardModal>
           <button
-            class="block mx-auto text-indigo-500 text-18px hocus-link-default group mt-12px"
+            class="mx-auto mt-12px text-indigo-500 text-18px block hocus-link-default group"
             @click="isTestingTypeModalOpen = true"
           >
             {{ t('welcomePage.review') }}<i-cy-arrow-right_x16
-              class="inline-block transition-transform duration-200 ease-in transform -translate-y-1px ml-4px icon-dark-current group-hocus:translate-x-2px"
+              class="ml-4px transform transition-transform ease-in -translate-y-1px duration-200 inline-block icon-dark-current group-hocus:translate-x-2px"
             />
           </button>
           <TestingTypeCards
@@ -73,10 +69,6 @@ query MainLaunchpadQuery {
 
   currentProject {
     id
-  }
-
-  baseError {
-    ...BaseError
   }
 
   wizard {

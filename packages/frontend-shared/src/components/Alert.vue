@@ -39,9 +39,12 @@
     >
       <slot name="details" />
     </div>
+    <hr
+      v-if="props.stackTrace && slots.details"
+      class="border-error-200"
+    >
     <div
       v-if="props.stackTrace"
-      class="border-t border-error-200"
       :class="typeDefinition.detailsClass"
     >
       <button
@@ -54,14 +57,16 @@
         />
         Stack Trace
       </button>
-      <div class="rounded border-2px border-error-100 mt-16px relative">
+      <div
+        v-if="stackOpen"
+        class="rounded border-2px border-error-100 mt-16px relative"
+      >
         <CopyButton
-          class="m-16px top-0 right-0 absolute"
+          class="bg-white m-16px top-0 right-0 absolute"
           :text="props.stackTrace"
           variant="outline"
         />
         <pre
-          v-if="stackOpen"
           class="bg-white border rounded border-error-300 p-16px overflow-auto"
         >{{ props.stackTrace }}</pre>
       </div>

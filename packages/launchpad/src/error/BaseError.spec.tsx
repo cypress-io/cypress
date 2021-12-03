@@ -50,29 +50,13 @@ describe('<BaseError />', () => {
     .get(headerSelector)
     .should('contain.text', messages.header)
     .get(messageSelector)
-    .should('contain.text', messages.message.replace('{0}', 'cypress.config.js'))
+    .should('contain.text', messages.message.replace('{0}', ' cypress.config.js '))
     .get(retryButtonSelector)
     .should('contain.text', messages.retryButton)
     .get(docsButtonSelector)
     .should('contain.text', messages.readTheDocsButton)
     .get(docsLinkSelector)
     .should('have.attr', 'href', docsLink)
-  })
-
-  // NOTE: Figure out how to stub the graphql mutation call
-  it.skip('emits the retry event by default', () => {
-    cy.mountFragment(BaseErrorFragmentDoc, {
-      onResult: (result) => {
-        result.title = messages.header
-        result.message = null
-      },
-      render: (gqlVal) => <BaseError gql={gqlVal} />,
-    })
-    .get(retryButtonSelector)
-    .click()
-    .click()
-    .get('@retry')
-    .should('have.been.calledTwice')
   })
 
   it('renders custom error messages and headers with props', () => {
@@ -87,7 +71,9 @@ describe('<BaseError />', () => {
     .get('body')
     .should('contain.text', customHeaderMessage)
     .and('contain.text', customMessage)
-    .and('contain.text', customStack)
+
+    cy.contains('button', 'Stack Trace').click()
+    cy.contains(customStack.trim()).should('be.visible')
   })
 
   it('renders the header, message, and footer slots', () => {
@@ -101,8 +87,9 @@ describe('<BaseError />', () => {
           gql={gqlVal}
           v-slots={{
             footer: () => <Button size="lg" data-testid="custom-error-footer">{ customFooterText }</Button>,
-            header: () => <>{customHeaderMessage}</>,
-            message: () => <>{customMessage}</> }}
+            header: customHeaderMessage,
+            message: customMessage,
+          }}
         />),
     })
     .get('body')

@@ -72,6 +72,7 @@ describe('<Alert />', { viewportHeight: 1500 }, () => {
             anim id est laborum.
           </div>),
         }} stackTrace={exampleStackTrace}/>
+        <Alert type="error" title="No details" stackTrace={exampleStackTrace}/>
       </div>
     ))
 
