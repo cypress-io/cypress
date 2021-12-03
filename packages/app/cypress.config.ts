@@ -11,7 +11,6 @@ export default defineConfig({
     'runMode': 2,
     'openMode': 0,
   },
-  'nodeVersion': 'system',
   'testFiles': '**/*.{spec,cy}.{js,ts,tsx,jsx}',
   'reporter': '../../node_modules/cypress-multi-reporters/index.js',
   'reporterOptions': {

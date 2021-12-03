@@ -166,6 +166,10 @@ export const cyColors = {
     ...customColors.red,
     DEFAULT: customColors.red[500],
   },
+  info: {
+    ...customColors.indigo,
+    DEFAULT: customColors.indigo[500],
+  },
   warning: {
     ...customColors.orange,
     DEFAULT: customColors.orange[500],
