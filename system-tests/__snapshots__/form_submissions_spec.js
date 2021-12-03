@@ -7,15 +7,14 @@ exports['e2e forms / <form> submissions / passes with https on localhost'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (cypress/integration/form_submission_multipart_spec.js)                    │
-  │ Searched:   /foo/bar/.projects/e2e/cypress/integrati │
-  │             on/form_submission_multipart_spec.js                                               │
+  │ Specs:      1 found (form_submission_multipart_spec.js)                                        │
+  │ Searched:   cypress/integration/form_submission_multipart_spec.js                              │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  cypress/integration/form_submission_multipart_spec.js                           (1 of 1)
+  Running:  form_submission_multipart_spec.js                                               (1 of 1)
 
 
   <form> submissions
@@ -31,13 +30,6 @@ exports['e2e forms / <form> submissions / passes with https on localhost'] = `
 
   7 passing
 
-Warning: We failed processing this video.
-
-This error will not alter the exit code.
-
-TimeoutError: operation timed out
-      [stack trace lines]
-
 
   (Results)
 
@@ -48,10 +40,17 @@ TimeoutError: operation timed out
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        false                                                                            │
+  │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     cypress/integration/form_submission_multipart_spec.js                            │
+  │ Spec Ran:     form_submission_multipart_spec.js                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/form_submission_multipart_spec.     (X second)
+                          js.mp4                                                                    
 
 
 ====================================================================================================
@@ -61,8 +60,7 @@ TimeoutError: operation timed out
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  cypress/integration/form_submission      XX:XX        7        7        -        -        - │
-  │    _multipart_spec.js                                                                          │
+  │ ✔  form_submission_multipart_spec.js        XX:XX        7        7        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        7        7        -        -        -  
 
@@ -78,15 +76,14 @@ exports['e2e forms / <form> submissions / passes with http on localhost'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (cypress/integration/form_submission_multipart_spec.js)                    │
-  │ Searched:   /foo/bar/.projects/e2e/cypress/integrati │
-  │             on/form_submission_multipart_spec.js                                               │
+  │ Specs:      1 found (form_submission_multipart_spec.js)                                        │
+  │ Searched:   cypress/integration/form_submission_multipart_spec.js                              │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  cypress/integration/form_submission_multipart_spec.js                           (1 of 1)
+  Running:  form_submission_multipart_spec.js                                               (1 of 1)
 
 
   <form> submissions
@@ -102,13 +99,6 @@ exports['e2e forms / <form> submissions / passes with http on localhost'] = `
 
   7 passing
 
-Warning: We failed processing this video.
-
-This error will not alter the exit code.
-
-TimeoutError: operation timed out
-      [stack trace lines]
-
 
   (Results)
 
@@ -119,10 +109,17 @@ TimeoutError: operation timed out
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        false                                                                            │
+  │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     cypress/integration/form_submission_multipart_spec.js                            │
+  │ Spec Ran:     form_submission_multipart_spec.js                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/form_submission_multipart_spec.     (X second)
+                          js.mp4                                                                    
 
 
 ====================================================================================================
@@ -132,8 +129,7 @@ TimeoutError: operation timed out
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  cypress/integration/form_submission      XX:XX        7        7        -        -        - │
-  │    _multipart_spec.js                                                                          │
+  │ ✔  form_submission_multipart_spec.js        XX:XX        7        7        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        7        7        -        -        -  
 
@@ -149,15 +145,14 @@ exports['e2e forms / submissions with jquery XHR POST / failing'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (cypress/integration/form_submission_failing_spec.js)                      │
-  │ Searched:   /foo/bar/.projects/e2e/cypress/integrati │
-  │             on/form_submission_failing_spec.js                                                 │
+  │ Specs:      1 found (form_submission_failing_spec.js)                                          │
+  │ Searched:   cypress/integration/form_submission_failing_spec.js                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  cypress/integration/form_submission_failing_spec.js                             (1 of 1)
+  Running:  form_submission_failing_spec.js                                                 (1 of 1)
 
 
   form submission fails
@@ -174,13 +169,6 @@ exports['e2e forms / submissions with jquery XHR POST / failing'] = `
 
 
 
-Warning: We failed processing this video.
-
-This error will not alter the exit code.
-
-TimeoutError: operation timed out
-      [stack trace lines]
-
 
   (Results)
 
@@ -191,18 +179,24 @@ TimeoutError: operation timed out
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  1                                                                                │
-  │ Video:        false                                                                            │
+  │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     cypress/integration/form_submission_failing_spec.js                              │
+  │ Spec Ran:     form_submission_failing_spec.js                                                  │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  -  /foo/bar/.projects/e2e/cypress/screens     (1280x720)
-     hots/cypress/integration/form_submission_failing_spec.js/form submission fails -               
-     - fails without an explicit wait when an element is immediately found (failed).p               
-     ng                                                                                             
+  -  /XXX/XXX/XXX/cypress/screenshots/form_submission_failing_spec.js/form submission     (1280x720)
+      fails -- fails without an explicit wait when an element is immediately found (f               
+     ailed).png                                                                                     
+
+
+  (Video)
+
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/form_submission_failing_spec.js     (X second)
+                          .mp4                                                                      
 
 
 ====================================================================================================
@@ -212,8 +206,7 @@ TimeoutError: operation timed out
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  cypress/integration/form_submission      XX:XX        1    │    _failing_spec.js                                                                            │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+  │ ✖  form_submission_failing_spec.js          XX:XX        1    └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  1 of 1 failed (100%)                     XX:XX        1  
 
 `
@@ -227,15 +220,14 @@ exports['e2e forms / submissions with jquery XHR POST / passing'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (cypress/integration/form_submission_passing_spec.js)                      │
-  │ Searched:   /foo/bar/.projects/e2e/cypress/integrati │
-  │             on/form_submission_passing_spec.js                                                 │
+  │ Specs:      1 found (form_submission_passing_spec.js)                                          │
+  │ Searched:   cypress/integration/form_submission_passing_spec.js                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  cypress/integration/form_submission_passing_spec.js                             (1 of 1)
+  Running:  form_submission_passing_spec.js                                                 (1 of 1)
 
 
   form submissions
@@ -244,13 +236,6 @@ exports['e2e forms / submissions with jquery XHR POST / passing'] = `
 
 
   2 passing
-
-Warning: We failed processing this video.
-
-This error will not alter the exit code.
-
-TimeoutError: operation timed out
-      [stack trace lines]
 
 
   (Results)
@@ -262,10 +247,17 @@ TimeoutError: operation timed out
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        false                                                                            │
+  │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     cypress/integration/form_submission_passing_spec.js                              │
+  │ Spec Ran:     form_submission_passing_spec.js                                                  │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/form_submission_passing_spec.js     (X second)
+                          .mp4                                                                      
 
 
 ====================================================================================================
@@ -275,8 +267,7 @@ TimeoutError: operation timed out
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  cypress/integration/form_submission      XX:XX        2        2        -        -        - │
-  │    _passing_spec.js                                                                            │
+  │ ✔  form_submission_passing_spec.js          XX:XX        2        2        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        2        2        -        -        -  
 
