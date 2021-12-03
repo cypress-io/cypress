@@ -34,7 +34,7 @@ class Server {
   }
 
   connect (req, browserSocket, head, options = {}) {
-    // the SNI server requires a hostname, so if the hostname is blank, 
+    // the SNI server requires a hostname, so if the hostname is blank,
     // destroy the socket and fail fast
     const { hostname } = url.parse(`https://${req.url}`)
 
@@ -210,6 +210,8 @@ class Server {
         return makeConnection(port)
       })
       .catch((err) => {
+        debug('Error making connection %o', { err })
+
         browserSocket.destroy(err)
 
         leave()
