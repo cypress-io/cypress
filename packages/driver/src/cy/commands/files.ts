@@ -48,7 +48,7 @@ export default (Commands, Cypress, cy) => {
       cy.clearTimeout()
 
       const verifyAssertions = () => {
-        return Cypress.backend('read:file', file, _.pick(options, 'encoding', 'timeout')).timeout(options.timeout)
+        return Cypress.backend('read:file', file, _.pick(options, 'encoding')).timeout(options.timeout)
         .catch((err) => {
           if (err.name === 'TimeoutError') {
             return $errUtils.throwErrByPath('files.timed_out', {
@@ -159,7 +159,7 @@ export default (Commands, Cypress, cy) => {
       // the timeout ourselves
       cy.clearTimeout()
 
-      return Cypress.backend('write:file', fileName, contents, _.pick(options, 'encoding', 'flag', 'timeout')).timeout(options.timeout)
+      return Cypress.backend('write:file', fileName, contents, _.pick(options, 'encoding', 'flag')).timeout(options.timeout)
       .then(({ filePath, contents }) => {
         consoleProps['File Path'] = filePath
         consoleProps['Contents'] = contents
