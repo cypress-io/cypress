@@ -1,20 +1,19 @@
 <template>
   <StandardModal
     :title="t('runs.connect.modal.title')"
-    :model-value="show"
   >
-    <div class="w-592px rounded border border-dashed border-gray-100 p-24px ">
-      <p class="text-gray-700 text-center">
+    <div class="border border-dashed rounded border-gray-100 p-24px w-592px ">
+      <p class="text-center text-gray-700">
         {{ t('runs.connect.modal.createOrg.description') }}
       </p>
-      <Button
-        size="lg"
+      <ExternalLink
         class="mx-auto mt-16px"
+        :href="createOrgUrl"
         :prefix-icon="OrganizationIcon"
         prefix-icon-class="icon-light-transparent icon-dark-white"
       >
         {{ t('runs.connect.modal.createOrg.button') }}
-      </Button>
+      </ExternalLink>
     </div>
     <template #footer>
       <div class="flex gap-16px">
@@ -32,7 +31,7 @@
         <Button
           variant="outline"
           size="lg"
-          @click="() => emit('cancel')"
+          @click="emit('cancel')"
         >
           {{ t('runs.connect.modal.cancel') }}
         </Button>
@@ -44,16 +43,16 @@
 <script lang="ts" setup>
 import StandardModal from '@cy/components/StandardModal.vue'
 import Button from '@cy/components/Button.vue'
+import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import OrganizationIcon from '~icons/cy/office-building_x16.svg'
 import { useI18n } from '@cy/i18n'
 
 const { t } = useI18n()
 
-defineProps<{
-  show: boolean
-}>()
-
 const emit = defineEmits<{
   (event: 'cancel'): void
 }>()
+
+// TODO: https://dashboard-staging.cypress.io/organizations/new
+const createOrgUrl = '#'
 </script>

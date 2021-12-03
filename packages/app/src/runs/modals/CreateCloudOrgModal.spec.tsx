@@ -6,7 +6,7 @@ describe('<CreateCloudOrgModal />', () => {
       name: 'CreateCloudOrgModal',
       render () {
         return (<div class="h-screen">
-          <CreateCloudOrgModal show />
+          <CreateCloudOrgModal />
         </div>)
       },
     })

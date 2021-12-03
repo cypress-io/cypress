@@ -1,5 +1,6 @@
 <template>
   <StandardModal
+    v-if="organizations.length > 0"
     :model-value="show"
     :title="newProject
       ? t('runs.connect.modal.selectProject.createProject')
@@ -17,7 +18,7 @@
         :error="noPickedOrganizationError"
       >
         <template #label>
-          <span class="flex items-end text-16px font-normal my-8px leading-24px">
+          <span class="flex font-normal my-8px text-16px leading-24px items-end">
             <span class="">
               {{ t('runs.connect.modal.selectProject.organization') }}
             </span>
@@ -28,7 +29,7 @@
               {{ t('runs.connect.modal.selectProject.noOrganizationSelectedError') }}
             </span>
             <ExternalLink
-              class="flex-grow text-right cursor-pointer text-indigo-500 hover:underline"
+              class="cursor-pointer flex-grow text-right text-indigo-500 hover:underline"
               :href="organizationUrl"
             >
               {{ t('runs.connect.modal.selectProject.manageOrgs') }}
@@ -36,10 +37,10 @@
           </span>
         </template>
         <template #input-prefix>
-          <OrganizationIcon class="icon-dark-gray-500 h-16px w-16px" />
+          <OrganizationIcon class="h-16px w-16px icon-dark-gray-500" />
         </template>
         <template #item-prefix>
-          <OrganizationIcon class="icon-dark-gray-500 h-16px w-16px" />
+          <OrganizationIcon class="h-16px w-16px icon-dark-gray-500" />
         </template>
       </Select>
       <Select
@@ -55,13 +56,13 @@
         data-cy="selectProject"
       >
         <template #label>
-          <div class="flex items-center text-16px leading-24px font-normal">
+          <div class="flex font-normal text-16px leading-24px items-center">
             <p class="text-gray-800">
               {{ t('runs.connect.modal.selectProject.project') }}
             </p>
-            <span class="text-red-500 ml-4px">*</span>
+            <span class="ml-4px text-red-500">*</span>
             <a
-              class="my-8px flex-grow text-right cursor-pointer text-indigo-500 hover:underline"
+              class="cursor-pointer flex-grow my-8px text-right text-indigo-500 hover:underline"
               @click="newProject = true"
             >
               {{ t('runs.connect.modal.selectProject.createNewProject') }}
@@ -69,15 +70,15 @@
           </div>
         </template>
         <template #input-prefix>
-          <FolderIcon class="icon-dark-gray-500 h-16px w-16px" />
+          <FolderIcon class="h-16px w-16px icon-dark-gray-500" />
         </template>
         <template #item-prefix>
-          <FolderIcon class="icon-dark-gray-500 h-16px w-16px" />
+          <FolderIcon class="h-16px w-16px icon-dark-gray-500" />
         </template>
       </Select>
       <template v-else>
         <div
-          class="mt-24px flex text-16px leading-24px items-center font-normal"
+          class="flex font-normal mt-24px text-16px leading-24px items-center"
         >
           <label
             class="flex-grow"
@@ -86,8 +87,8 @@
             <span class="text-gray-800">
               {{ t('runs.connect.modal.selectProject.projectName') }}
             </span>
-            <span class="text-red-500 ml-4px">*</span>
-            <span class="text-gray-500 ml-8px">
+            <span class="ml-4px text-red-500">*</span>
+            <span class="ml-8px text-gray-500">
               {{ t('runs.connect.modal.selectProject.projectNameDisclaimer') }}
             </span>
           </label>
@@ -147,6 +148,10 @@
       </div>
     </template>
   </StandardModal>
+  <CreateCloudOrgModal
+    v-else
+    @cancel="emit('cancel')"
+  />
 </template>
 
 <script lang="ts" setup>
@@ -162,8 +167,9 @@ import ConnectIcon from '~icons/cy/chain-link_x16.svg'
 import CreateIcon from '~icons/cy/add-large_x16.svg'
 import FolderIcon from '~icons/cy/folder-outline_x16.svg'
 import OrganizationIcon from '~icons/cy/office-building_x16.svg'
-import { useI18n } from '@cy/i18n'
 import type { SelectCloudProjectModalFragment } from '../../generated/graphql'
+import CreateCloudOrgModal from './CreateCloudOrgModal.vue'
+import { useI18n } from '@cy/i18n'
 
 const { t } = useI18n()
 
@@ -222,6 +228,7 @@ const projectPlaceholder = computed(() => {
 })
 
 // TODO: update this url with one coming from gql
+// TODO: https://dashboard-staging.cypress.io/organizations
 const organizationUrl = '#'
 
 function createProject () {
