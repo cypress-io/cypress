@@ -3,21 +3,20 @@ const path = require('path')
 const Promise = require('bluebird')
 const cwd = require('../cwd')
 const glob = require('../util/glob')
-const specsUtil = require('../util/specs')
 const debug = require('debug')('cypress:server:controllers')
 const { escapeFilenameInUrl } = require('../util/escape_filename')
 
 const SPEC_URL_PREFIX = '/__cypress/tests?p'
 
 module.exports = {
-  handleIframe (req, res, config, getRemoteState, extraOptions) {
+  handleIframe (req, res, ctx, config, getRemoteState, extraOptions) {
     const test = req.params[0]
     const iframePath = cwd('lib', 'html', 'iframe.html')
     const specFilter = _.get(extraOptions, 'specFilter')
 
     debug('handle iframe %o', { test, specFilter })
 
-    return this.getSpecs(test, config, extraOptions)
+    return this.getSpecs(test, ctx, config, extraOptions)
     .then((specs) => {
       return this.getSupportFile(config)
       .then((js) => {
@@ -38,7 +37,7 @@ module.exports = {
     })
   },
 
-  getSpecs (spec, config, extraOptions = {}) {
+  getSpecs (spec, ctx, config, extraOptions = {}) {
     // when asking for all specs: spec = "__all"
     // otherwise it is a relative spec filename like "integration/spec.js"
     debug('get specs %o', { spec, extraOptions })
@@ -69,7 +68,7 @@ module.exports = {
       if (spec === '__all') {
         debug('returning all specs')
 
-        return specsUtil.default.findSpecs(config)
+        return ctx.project.findSpecs(config.projectRoot, 'integration')
         .then((specs) => {
           debug('found __all specs %o', specs)
 

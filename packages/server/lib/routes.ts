@@ -110,7 +110,7 @@ export const createCommonRoutes = ({
 
   router.get('/__cypress/iframes/*', (req, res) => {
     if (testingType === 'e2e') {
-      iframesController.e2e({ config, getSpec, getRemoteState }, req, res)
+      iframesController.e2e({ config, getSpec, ctx, getRemoteState }, req, res)
     }
 
     if (testingType === 'component') {

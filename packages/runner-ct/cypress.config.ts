@@ -1,7 +1,6 @@
 import { defineConfig } from 'cypress'
 
 export default defineConfig({
-  testFiles: '**/*spec.{ts,tsx}',
   video: true,
   env: {
     reactDevtools: false,
@@ -11,7 +10,7 @@ export default defineConfig({
     configFile: '../../mocha-reporter-config.json',
   },
   component: {
-    testFiles: '**/*spec.{ts,tsx}',
+    specPattern: 'cypress/component/**/*spec.{ts,tsx}',
     devServer (cypressConfig) {
       const { startDevServer } = require('@cypress/webpack-dev-server')
 

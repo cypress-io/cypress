@@ -10,14 +10,12 @@ export default defineConfig({
     'openMode': 0,
   },
   'nodeVersion': 'system',
-  'testFiles': '**/*.spec.{js,ts,tsx,jsx}',
   'reporter': '../../node_modules/cypress-multi-reporters/index.js',
   'reporterOptions': {
     'configFile': '../../mocha-reporter-config.json',
   },
-  'componentFolder': 'src',
   'component': {
-    'testFiles': '**/*.spec.{js,ts,tsx,jsx}',
+    'specPattern': 'src/**/*.spec.{js,ts,tsx,jsx}',
     devServer (cypressConfig) {
       const { startDevServer } = require('@cypress/vite-dev-server')
 
@@ -29,5 +27,6 @@ export default defineConfig({
   },
   'e2e': {
     'supportFile': 'cypress/e2e/support/e2eSupport.ts',
+    'specPattern': 'cypress/integration/**/*.spec.{js,ts,tsx,jsx}',
   },
 })

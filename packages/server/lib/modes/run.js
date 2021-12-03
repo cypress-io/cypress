@@ -1581,7 +1581,7 @@ module.exports = {
               errors.throw('NO_SPECS_FOUND', projectRoot, specPattern)
             } else {
               const type = specType === 'component' ? 'component' : 'e2e'
-              const config = await this.getConfig(projectRoot)
+              const config = project.getConfig(projectRoot)
               const configSpecPattern = config[type]?.specPattern
 
               // else we looked in the integration folder
