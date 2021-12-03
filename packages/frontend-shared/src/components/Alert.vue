@@ -59,7 +59,7 @@
       </button>
       <div
         v-if="stackOpen"
-        class="rounded border-2px border-error-100 mt-16px relative"
+        class="border-2px border-error-100 rounded-5px mt-16px relative"
       >
         <CopyButton
           class="bg-white m-16px top-0 right-0 absolute"
@@ -67,7 +67,7 @@
           variant="outline"
         />
         <pre
-          class="bg-white border rounded border-error-300 p-16px overflow-auto"
+          class="bg-white border border-error-300 rounded-4px p-16px overflow-auto"
         >{{ props.stackTrace }}</pre>
       </div>
     </div>

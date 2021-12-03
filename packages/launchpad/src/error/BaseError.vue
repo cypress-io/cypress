@@ -94,7 +94,7 @@ const props = defineProps<{
 }>()
 
 const markdownTarget = ref()
-const { markdown: errorMessageRendered } = useMarkdown(markdownTarget, props.gql.message || '', { classes: { code: ['bg-error-200 text-error-600 py-0 font-14px'] } })
+const { markdown: errorMessageRendered } = useMarkdown(markdownTarget, props.gql.message || '', { classes: { code: ['bg-error-200 text-error-600 py-0'] } })
 
 const latestOperation = window.localStorage.getItem('latestGQLOperation')
 
