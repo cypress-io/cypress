@@ -2319,9 +2319,6 @@ linux-workflow: &linux-workflow
     - test-types-cypress-and-jest:
         requires:
           - create-build-artifacts
-    - test-cypress-scaffold:
-        requires:
-          - create-build-artifacts
     - test-full-typescript-project:
         requires:
           - create-build-artifacts
