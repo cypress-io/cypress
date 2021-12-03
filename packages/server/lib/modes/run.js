@@ -24,7 +24,6 @@ const system = require('../util/system')
 const duration = require('../util/duration')
 const newlines = require('../util/newlines')
 const terminal = require('../util/terminal')
-const specsUtil = require('../util/specs')
 const humanTime = require('../util/human_time')
 const settings = require('../util/settings')
 const chromePolicyCheck = require('../util/chrome_policy_check')
@@ -1482,23 +1481,6 @@ module.exports = {
           // TODO(tim): investigate the socket disconnect
         }, process.env.CYPRESS_INTERNAL_FORCE_BROWSER_RELAUNCH || options.testingType === 'e2e' || firstSpec),
       })
-    })
-  },
-
-  findSpecs (config, specPattern) {
-    return specsUtil.default
-    .findSpecs(config, specPattern)
-    .tap((specs = []) => {
-      if (debug.enabled) {
-        const names = _.map(specs, 'name')
-
-        return debug(
-          'found \'%d\' specs using spec pattern \'%s\': %o',
-          names.length,
-          specPattern,
-          names,
-        )
-      }
     })
   },
 
