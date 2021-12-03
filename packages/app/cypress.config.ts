@@ -20,7 +20,7 @@ export default defineConfig({
   integrationFolder: 'cypress/e2e/integration',
   componentFolder: 'src',
   supportFile: false,
-  experimentalFetchPolyfill: true,
+  experimentalInteractiveRunEvents: true,
   component: {
     testFiles: '**/*.{spec,cy}.{js,ts,tsx,jsx}',
     supportFile: 'cypress/component/support/index.ts',

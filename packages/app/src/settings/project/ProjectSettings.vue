@@ -30,7 +30,6 @@ import type { ProjectSettingsFragment } from '../../generated/graphql'
 gql`
 fragment ProjectSettings on CurrentProject {
   id
-  config
   ...ProjectId
   ...SpecPatterns
   ...Experiments
