@@ -3,8 +3,8 @@ export default {
     return !!location.hash
   },
 
-  updateSpecPath (specName) {
-    location.hash = `/tests/${specName}`
+  updateSpecPath (specRelative) {
+    location.hash = `/tests/${specRelative}`
   },
 
   specPath () {

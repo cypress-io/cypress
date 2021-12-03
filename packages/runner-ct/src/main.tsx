@@ -118,7 +118,7 @@ const Runner: any = {
         const { spec } = state
 
         if (spec) {
-          util.updateSpecPath(spec.name)
+          util.updateSpecPath(spec.relative)
         }
       })
 
