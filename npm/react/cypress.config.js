@@ -14,7 +14,7 @@ module.exports = {
   ],
   'experimentalFetchPolyfill': true,
   'component': {
-    'specPattern': 'component/**/*spec.{js,jsx,ts,tsx}',
+    'specPattern': 'cypress/component/**/*spec.{js,jsx,ts,tsx}',
     devServer (cypressConfig, devServerConfig) {
       const { startDevServer } = require('@cypress/webpack-dev-server')
       const path = require('path')
