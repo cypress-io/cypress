@@ -68,6 +68,7 @@ export async function buildCypressApp (options: BuildCypressAppOpts) {
   // Copy Packages: We want to copy the package.json, files, and output
   log('#copyAllToDist')
   await packages.copyAllToDist(DIST_DIR)
+  fs.copySync(path.join(CY_ROOT_DIR, 'patches'), path.join(DIST_DIR, 'patches'))
 
   const jsonRoot = fs.readJSONSync(path.join(CY_ROOT_DIR, 'package.json'))
 

@@ -50,8 +50,6 @@ export async function copyAllToDist (distDir: string) {
   const started = new Date().valueOf()
   const globbed = await globAsync('./{packages,npm}/*')
 
-  fs.copySync(path.resolve('patches'), path.join(distDir, 'patches'))
-
   for (const pkg of globbed) {
     // copies the package to dist
     // including the default paths
