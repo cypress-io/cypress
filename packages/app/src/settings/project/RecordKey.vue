@@ -6,7 +6,7 @@
     <template #description>
       <i18n-t keypath="settingsPage.recordKey.description">
         <ExternalLink
-          href="https://docs.cypress.io"
+          href="https://on.cypress.io/what-is-a-record-key"
         >
           {{ t('links.learnMore') }}
         </ExternalLink>

@@ -1,57 +1,57 @@
 <template>
   <HideDuringScreenshot
     :aria-expanded="mainStore.navBarExpanded"
-    class="relative flex flex-col bg-gray-1000 transition-all duration-300 z-10"
+    class="flex flex-col bg-gray-1000 transition-all duration-300 relative"
     :class="mainStore.navBarExpanded ? 'w-248px' : 'w-64px'"
   >
     <button
-      class="absolute cursor-pointer w-16px bottom-0 top-0 left-full group hocus:outline-transparent"
+      class="cursor-pointer left-full top-0 bottom-0 w-16px absolute group hocus:outline-transparent"
       role="button"
       aria-label="toggle navigation"
       @click="mainStore.toggleNavBar"
     >
-      <div class="w-16px origin-left transform scale-x-0 group-hocus:scale-x-100 h-full transition-transform duration-300 flex items-center">
-        <div class="h-full w-3px bg-indigo-400" />
+      <div class="flex h-full transform origin-left transition-transform w-16px scale-x-0 duration-300 items-center group-hocus:scale-x-100">
+        <div class="h-full bg-indigo-400 w-3px" />
         <i-cy-chevron-right_x16
-          class="icon-dark-indigo-400 h-16px w-16px"
+          class="h-16px w-16px icon-dark-indigo-400"
           :class="mainStore.navBarExpanded ? 'transform rotate-180': ''"
         />
       </div>
     </button>
     <div class="flex flex-col flex-1 overflow-y-auto ">
       <SidebarTooltip
-        class="flex items-center h-64px flex-shrink-0 border-b border-gray-900"
+        class="border-b flex border-gray-900 flex-shrink-0 h-64px items-center"
         :disabled="mainStore.navBarExpanded"
         :popper-top-offset="4"
         popper-class="h-56px"
         data-cy="sidebar-header"
       >
         <i-cy-bookmark_x24
-          class="icon-dark-gray-200
-          icon-light-gray-900
-          w-24px
+          class="flex-shrink-0
           h-24px
-          flex-shrink-0 mx-20px"
+          mx-20px
+          w-24px
+          icon-dark-gray-200 icon-light-gray-900"
         />
-        <div class="text-gray-50 truncate leading-24px text-size-16px">
-          {{ query.data.value?.currentProject?.title ?? 'Cypress' }}
-          <p class="text-gray-600 truncate leading-20px text-size-14px">
-            chore/use-import-types-for-gql
+        <div class="text-gray-50 text-size-16px leading-24px truncate">
+          {{ currentProject?.title ?? 'Cypress' }}
+          <p class="text-gray-600 text-size-14px leading-20px truncate">
+            {{ currentProject?.branch }}
           </p>
         </div>
 
         <template #popper>
-          <div class="text-left text-gray-50 truncate leading-16px text-size-16px">
-            {{ query.data.value?.currentProject?.title ?? 'Cypress' }}
-            <p class="text-gray-600 truncate leading-20px text-size-14px">
-              chore/use-import-types-for-gql
+          <div class="text-left text-gray-50 text-size-16px leading-16px truncate">
+            {{ currentProject?.title ?? 'Cypress' }}
+            <p class="text-gray-600 text-size-14px leading-20px truncate">
+              {{ currentProject?.branch }}
             </p>
           </div>
         </template>
       </SidebarTooltip>
 
       <nav
-        class="flex-1 space-y-1 bg-gray-1000"
+        class="space-y-1 bg-gray-1000 flex-1"
         aria-label="Sidebar"
       >
         <SwitchTestingTypeButton
@@ -73,18 +73,18 @@
         </RouterLink>
       </nav>
       <SidebarTooltip
-        class="cursor-pointer inline-block rounded
-              absolute right-0 bottom-0
-              p-7px m-16px w-32px
-              border border-transparent hover:border-gray-500
-              transform transition-all duration-300"
+        class="border border-transparent rounded
+              cursor-pointer m-16px p-7px
+              transform transition-all right-0
+              bottom-0 w-32px duration-300
+              inline-block absolute hover:border-gray-500"
         :class="{ '-translate-y-48px': !mainStore.navBarExpanded }"
         :disabled="mainStore.navBarExpanded"
         :popper-top-offset="-4"
         @click="bindingsOpen = true"
       >
         <i-cy-command-key_x16
-          class="w-16px h-16px icon-dark-gray-500"
+          class="h-16px w-16px icon-dark-gray-500"
         />
         <template #popper>
           {{ t('sideBar.keyboardShortcuts.title') }}
@@ -96,14 +96,14 @@
       </SidebarTooltip>
       <img
         :src="CypressLogo"
-        class="w-32px h-32px m-16px"
+        class="h-32px m-16px w-32px"
       >
     </div>
   </HideDuringScreenshot>
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { gql, useQuery } from '@urql/vue'
 import SidebarNavigationRow from './SidebarNavigationRow.vue'
 import SwitchTestingTypeButton from './SwitchTestingTypeButton.vue'
@@ -117,6 +117,7 @@ import { useMainStore } from '../store'
 import { SideBarNavigationDocument } from '../generated/graphql'
 import CypressLogo from '@packages/frontend-shared/src/assets/logos/cypress_s.png'
 import { useI18n } from '@cy/i18n'
+import { useIntervalFn } from '@vueuse/core'
 
 const { t } = useI18n()
 
@@ -132,11 +133,19 @@ query SideBarNavigation {
   currentProject {
     id
     title
+    branch
   }
 }
 `
 
-const query = useQuery({ query: SideBarNavigationDocument })
+const query = useQuery({ query: SideBarNavigationDocument, requestPolicy: 'network-only' })
+
+// TODO(tgriesser): Push this to the frontend when the value has changed.
+useIntervalFn(() => {
+  query.executeQuery()
+}, 10000)
+
+const currentProject = computed(() => query.data.value?.currentProject)
 
 const bindingsOpen = ref(false)
 

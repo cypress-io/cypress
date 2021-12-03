@@ -1,6 +1,8 @@
 import { watch, Ref, ref, computed, shallowRef, CSSProperties } from 'vue'
 import { MaybeRef, useElementSize } from '@vueuse/core'
 
+export type UseVirtualListApi = ReturnType<typeof useVirtualList>['api']
+
 export interface UseVirtualListOptions {
   /**
    * item height, accept a pixel value or a function that returns the height
@@ -159,5 +161,12 @@ export function useVirtualList<T = any> (list: MaybeRef<T[]>, options: UseVirtua
       style: containerStyle,
     },
     wrapperProps,
+    api: {
+      containerRef,
+      getOffset,
+      getViewCapacity,
+      source,
+      scrollTo,
+    },
   }
 }

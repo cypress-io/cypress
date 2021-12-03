@@ -20,6 +20,9 @@
     },
     "select": {
       "placeholder": "Choose an option..."
+    },
+    "alert": {
+      "dismissAriaLabel": "Dismiss"
     }
   },
   "clipboard": {
@@ -44,6 +47,8 @@
     "disabled": "Disabled"
   },
   "createSpec": {
+    "newSpec": "New Spec",
+    "updateSpecPattern": "Update Spec Pattern",
     "newSpecModalTitle": "Create a new spec",
     "successPage": {
       "header": "Great! The spec was successfully added",
@@ -51,12 +56,18 @@
       "createAnotherSpecButton": "Create another spec"
     },
     "page": {
-      "title": "Create your first spec",
-      "component": {
-        "description": "Since this project looks new, we recommend that you get started by creating a spec for one of your components."
+      "defaultPatternNoSpecs": {
+        "title": "Create your first spec",
+        "component": {
+          "description": "Since this project looks new, we recommend that you get started by creating a spec for one of your components."
+        },
+        "e2e": {
+          "description": "Since this project looks new, we recommend that you use the specs and tests that we've written for you to get started."
+        }
       },
-      "e2e": {
-        "description": "Since this project looks new, we recommend that you use the specs and tests that we've written for you to get started."
+      "customPatternNoSpecs": {
+        "title": "No Specs Found",
+        "description": "We couldn’t find any files matching the following spec patterns. You may need to move your specs or update your {0} to find them."
       }
     },
     "noSpecsMessage": "If you feel that you're seeing this screen in error, and there should be specs listed here, you likely need to update the spec pattern.",
@@ -66,7 +77,8 @@
         "header": "Scaffold example specs",
         "description": "We'll generate several example specs to help guide you on how to write tests in Cypress.",
         "specsAddedHeader": "Great! We added the following files to your project:",
-        "specsAddedButton": "Okay, I got it!"
+        "specsAddedButton": "Okay, I got it!",
+        "specsAddingHeader": "Adding Specs..."
       },
       "importEmptySpec": {
         "header": "Create new empty spec",
@@ -394,6 +406,12 @@
     "empty": {
       "title": "Record your first run to the Cypress Dashboard",
       "description": "Run the command below in your local development terminal or in CI."
+    },
+    "results": {
+      "skipped": "skipped",
+      "pending": "pending",
+      "passed": "passed",
+      "failed": "failed"
     }
   },
   "testingType": {
