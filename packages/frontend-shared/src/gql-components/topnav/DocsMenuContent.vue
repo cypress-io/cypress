@@ -91,7 +91,7 @@ const docsMenu: {
   {
     text: t('topNav.docsMenu.organizingTests'),
     link: {
-      url: 'https://docs.cypress.io/guides/core-concepts/writing-and-organizing-tests',
+      url: 'https://on.cypress.io/writing-and-organizing-tests',
       params: {
         utm_medium,
         utm_content: 'Organizing Tests',
@@ -154,7 +154,7 @@ const docsMenu: {
     text: t('topNav.docsMenu.smartOrchestration'),
     changeContent: 'orchestration',
     link: {
-      url: 'https://docs.cypress.io/guides/dashboard/smart-orchestration',
+      url: 'https://on.cypress.io/smart-orchestration',
       params: {
         utm_medium,
         utm_content: 'Smart Orchestration',
