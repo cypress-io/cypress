@@ -1,9 +1,8 @@
 module.exports = {
-  'componentFolder': 'src',
   'fixturesFolder': false,
-  'testFiles': '**/*.spec.js',
   'video': false,
   'component': {
+    'specPattern': 'src/**/*.spec.js',
     devServer (cypressConfig) {
       const { startDevServer } = require('@cypress/webpack-dev-server')
       const webpackConfig = require('./webpack.config')
