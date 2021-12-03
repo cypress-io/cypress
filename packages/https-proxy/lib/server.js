@@ -34,8 +34,8 @@ class Server {
   }
 
   connect (req, browserSocket, head, options = {}) {
-    // the SNI server requires a hostname, so if the hostname is blank, go
-    // ahead and make the connection. the socket will then later error out
+    // the SNI server requires a hostname, so if the hostname is blank, 
+    // destroy the socket and fail fast
     const { hostname } = url.parse(`https://${req.url}`)
 
     if (!hostname) {
