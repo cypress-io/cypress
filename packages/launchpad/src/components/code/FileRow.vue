@@ -93,7 +93,7 @@ const props = defineProps<{
   description?: string
 }>()
 
-const openDocs = () => window.open('https://docs.cypress.io/config')
+const openDocs = () => window.open('https://on.cypress.io/guides/configuration')
 
 // TODO: Remove this. Use FileParts when available
 const language = computed(() => {
