@@ -50,10 +50,17 @@ export default (Commands, Cypress, cy) => {
       const verifyAssertions = () => {
         return Cypress.backend('read:file', file, _.pick(options, 'encoding', 'timeout'))
         .catch((err) => {
-          if (err.name === 'TimeoutError') {
+          if (err.name === 'AbortError') {
             return $errUtils.throwErrByPath('files.timed_out', {
               onFail: options._log,
               args: { cmd: 'readFile', file, timeout: options.timeout },
+            })
+          }
+
+          if (err.name === 'SocketDisconnected') {
+            return $errUtils.throwErrByPath('files.socket_disconnected', {
+              onFail: options._log,
+              args: { cmd: 'readFile', file, message: err.message },
             })
           }
 
@@ -69,7 +76,7 @@ export default (Commands, Cypress, cy) => {
             contents: null,
             filePath: err.filePath,
           }
-        }).then(({ contents, filePath }) => {
+        }).then(({ filePath, contents }) => {
           // https://github.com/cypress-io/cypress/issues/1558
           // We invoke Buffer.from() in order to transform this from an ArrayBuffer -
           // which socket.io uses to transfer the file over the websocket - into a
@@ -160,17 +167,24 @@ export default (Commands, Cypress, cy) => {
       }
 
       return Cypress.backend('write:file', fileName, contents, _.pick(options, 'encoding', 'flag', 'timeout'))
-      .then(({ contents, filePath }) => {
+      .then(({ filePath, contents }) => {
         consoleProps['File Path'] = filePath
         consoleProps['Contents'] = contents
 
         return null
       })
       .catch((err) => {
-        if (err.name === 'TimeoutError') {
+        if (err.name === 'AbortError') {
           return $errUtils.throwErrByPath('files.timed_out', {
             onFail: options._log,
             args: { cmd: 'writeFile', file: fileName, timeout: options.timeout },
+          })
+        }
+
+        if (err.name === 'SocketDisconnected') {
+          return $errUtils.throwErrByPath('files.socket_disconnected', {
+            onFail: options._log,
+            args: { cmd: 'writeFile', file: fileName, message: err.message },
           })
         }
 

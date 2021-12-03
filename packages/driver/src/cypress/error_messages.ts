@@ -493,6 +493,12 @@ export default {
         docsUrl: `https://on.cypress.io/${_.toLower(obj.cmd)}`,
       }
     },
+    socket_disconnected (obj) {
+      return {
+        message: `${cmd('{{cmd}}', '"{{file}}"')} failed because the socket disconnected due to: \`{{message}}\`.`,
+        docsUrl: `https://on.cypress.io/${_.toLower(obj.cmd)}`,
+      }
+    },
   },
 
   fixture: {
