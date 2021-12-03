@@ -81,6 +81,15 @@ const testStaticAssets = async (buildResourcePath) => {
         'return callback((data instanceof ArrayBuffer || isArrayBuffer(data)) ? data : data.buffer);',
       ],
     }),
+    testPackageStaticAssets({
+      assetGlob: `${buildResourcePath}/node_modules/winston/lib/winston/common.js`,
+      badStrings: [
+        `if (target.padLevels) {`,
+      ],
+      goodStrings: [
+        `if (target.hasOwnProperty('padLevels') && target.padLevels) {`,
+      ],
+    }),
   ])
 }
 

@@ -71,11 +71,19 @@ export async function buildCypressApp (options: BuildCypressAppOpts) {
 
   const jsonRoot = fs.readJSONSync(path.join(CY_ROOT_DIR, 'package.json'))
 
-  fs.writeJsonSync(meta.distDir('package.json'), _.omit(jsonRoot, [
+  const packageJsonContents = _.omit(jsonRoot, [
     'devDependencies',
     'lint-staged',
     'engines',
-  ]), { spaces: 2 })
+    'scripts',
+  ])
+
+  fs.writeJsonSync(meta.distDir('package.json'), {
+    ...packageJsonContents,
+    scripts: {
+      postinstall: 'patch-package',
+    },
+  }, { spaces: 2 })
 
   // Copy the yarn.lock file so we have a consistent install
   fs.copySync(path.join(CY_ROOT_DIR, 'yarn.lock'), meta.distDir('yarn.lock'))
