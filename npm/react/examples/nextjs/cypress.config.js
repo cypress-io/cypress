@@ -1,6 +1,5 @@
 module.exports = {
   'video': false,
-  'testFiles': '**/*.spec.{js,jsx}',
   'viewportWidth': 500,
   'viewportHeight': 800,
   'experimentalFetchPolyfill': true,
@@ -9,6 +8,7 @@ module.exports = {
     'coverage': true,
   },
   'component': {
+    'specPattern': '**/*.spec.{js,jsx}',
     setupNodeEvents (on, config) {
       const devServer = require('@cypress/react/plugins/next')
 
