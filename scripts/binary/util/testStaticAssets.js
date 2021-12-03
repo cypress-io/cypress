@@ -62,6 +62,34 @@ const testStaticAssets = async (buildResourcePath) => {
         'react.production.min.js',
       ],
     }),
+    testPackageStaticAssets({
+      assetGlob: `${buildResourcePath}/packages/socket/node_modules/socket.io-parser/dist/binary.js`,
+      badStrings: [
+        'pack.data = _deconstructPacket(packetData, buffers);',
+      ],
+      goodStrings: [
+        'pack.data = _deconstructPacket(packetData, buffers, [], new WeakMap());',
+      ],
+    }),
+    testPackageStaticAssets({
+      assetGlob: `${buildResourcePath}/packages/socket/node_modules/engine.io-parser/lib/encodePacket.browser.js`,
+      badStrings: [
+        'return callback(data instanceof ArrayBuffer ? data : data.buffer);',
+      ],
+      goodStrings: [
+        'This extra check is made because the "instanceof ArrayBuffer" check does not work',
+        'return callback((data instanceof ArrayBuffer || isArrayBuffer(data)) ? data : data.buffer);',
+      ],
+    }),
+    testPackageStaticAssets({
+      assetGlob: `${buildResourcePath}/node_modules/winston/lib/winston/common.js`,
+      badStrings: [
+        `if (target.padLevels) {`,
+      ],
+      goodStrings: [
+        `if (target.hasOwnProperty('padLevels') && target.padLevels) {`,
+      ],
+    }),
   ])
 }
 
