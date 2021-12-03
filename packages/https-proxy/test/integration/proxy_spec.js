@@ -216,7 +216,7 @@ describe('Proxy', () => {
       })
     })
 
-    //
+    // https://github.com/cypress-io/cypress/issues/9220
     it('handles errors with addContext', async function () {
       this.sandbox.spy(this.proxy, 'connect')
       this.sandbox.stub(this.proxy._sniServer, 'addContext').throws(new Error('error adding context'))
