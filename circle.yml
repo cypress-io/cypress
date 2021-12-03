@@ -1860,46 +1860,6 @@ jobs:
             echo "console.log('hello world')" > hello.ts
             npx tsc hello.ts --noEmit
 
-  # testing scaffolding examples and running them
-  # against example.cypress.io
-  test-cypress-scaffold:
-    resource_class: medium
-    parameters:
-      executor:
-        description: Executor name to use
-        type: executor
-        default: cy-doc
-      wd:
-        description: Working directory, should be OUTSIDE cypress monorepo folder
-        type: string
-        default: /root/test-scaffold
-    <<: *defaults
-    steps:
-      - restore_workspace_binaries
-      - run: mkdir <<parameters.wd>>
-      - run:
-          name: Create new NPM package ⚗️
-          working_directory: <<parameters.wd>>
-          command: npm init -y
-      - run:
-          name: Install dependencies 📦
-          working_directory: <<parameters.wd>>
-          environment:
-            CYPRESS_INSTALL_BINARY: /root/cypress/cypress.zip
-          # let's install Cypress, Jest and any other package that might conflict
-          # https://github.com/cypress-io/cypress/issues/6690
-          command: |
-            npm install /root/cypress/cypress.tgz \
-              typescript jest @types/jest enzyme @types/enzyme
-      - run:
-          name: Scaffold and test examples 🏗
-          working_directory: <<parameters.wd>>
-          environment:
-            CYPRESS_INTERNAL_FORCE_SCAFFOLD: "1"
-          command: |
-            echo 'module.exports = {}' > cypress.config.js
-            npx cypress run
-
   test-full-typescript-project:
     parameters:
       executor:
