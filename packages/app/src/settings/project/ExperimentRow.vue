@@ -56,7 +56,7 @@ const descriptionRef = ref()
 const { markdown } = useMarkdown(descriptionRef, props.experiment.description, {
   classes: {
     overwrite: true,
-    code: ['text-purple-500 text-14px bg-gray-50 font-normal px-4px rounded'],
+    code: ['text-purple-500 text-12px bg-gray-50 font-normal px-4px rounded'],
     pre: ['text-indigo-500'],
   },
 })
