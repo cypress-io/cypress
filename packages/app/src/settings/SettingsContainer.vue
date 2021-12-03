@@ -18,7 +18,7 @@
         :title="t('settingsPage.project.title')"
         :description="t('settingsPage.project.description')"
         :icon="IconFolder"
-        max-height="3200px"
+        max-height="3328px"
       >
         <ProjectSettings
           v-if="props.gql.currentProject"
@@ -31,7 +31,7 @@
       {{ t('settingsPage.footer.text') }}
     </p>
     <Button
-      class="mx-auto my-16px"
+      class="mx-auto"
       variant="outline"
       :prefix-icon="SettingsIcon"
       prefix-icon-class="icon-dark-gray-500 icon-light-gray-50"

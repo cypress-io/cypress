@@ -16,8 +16,15 @@
     </div>
     <span
       role="definition"
-      class="text-sm text-gray-600"
-    >{{ experiment.description }}</span>
+      class="text-gray-600"
+    >
+
+      <span
+        ref="descriptionRef"
+        class="description children:text-sm children:leading-24px"
+        v-html="markdown"
+      />
+    </span>
     <div
       class="ml-20px col-end-auto col-start-2 row-start-1 row-end-3 inline-grid items-center justify-self-end"
     >
@@ -31,6 +38,8 @@
 <script lang="ts" setup>
 import StatusIndicator from '@cy/components/StatusIndicator.vue'
 import { useI18n } from '@cy/i18n'
+import { useMarkdown } from '@packages/frontend-shared/src/composables/useMarkdown'
+import { ref } from 'vue'
 
 export interface Experiment {
   key: string
@@ -39,9 +48,27 @@ export interface Experiment {
   enabled: boolean
 }
 
-defineProps<{
+const props = defineProps<{
   experiment: Experiment
 }>()
 
+const descriptionRef = ref()
+const { markdown } = useMarkdown(descriptionRef, props.experiment.description, {
+  classes: {
+    overwrite: true,
+    code: ['text-purple-500 text-14px bg-gray-50 font-normal px-4px rounded'],
+    pre: ['text-indigo-500'],
+  },
+})
 const { t } = useI18n()
 </script>
+
+<style scoped>
+.description /deep/ a code {
+  @apply text-indigo-500;
+}
+
+.description /deep/ a {
+  @apply outline-none text-indigo-500 hocus:underline hocus:underline-indigo-500;
+}
+</style>

@@ -9,7 +9,6 @@
     />
 
     <main
-      class="overflow-y-auto"
       aria-labelledby="primary-heading"
     >
       <router-view v-slot="{ Component, route }">
