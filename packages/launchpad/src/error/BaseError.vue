@@ -27,7 +27,7 @@
           data-testid="error-message"
         >
           <ExternalLink
-            href="https://docs.cypress.io"
+            href="https://on.cypress.io/guides/configuration"
             data-testid="error-docs-link"
           >cypress.config.js</ExternalLink>
         </i18n-t>
@@ -85,7 +85,7 @@ fragment BaseError on BaseError {
 `
 
 const openDocs = () => {
-  document.location.href = 'https://docs.cypress.io'
+  document.location.href = 'https://on.cypress.io'
 }
 
 const { t } = useI18n()
