@@ -660,7 +660,6 @@ is being covered by another element:
         $body.on('dragover', (e) => events.push(e))
         $body.on('drop', (e) => {
           events.push(e)
-
           expect(_.map(events, 'originalEvent.type')).to.deep.eql(['drag', 'dragenter', 'dragover', 'drop'])
           expect(_.every(events, ['originalEvent.bubbles', true])).to.be.true
           expect(_.every(events, ['originalEvent.cancelable', true])).to.be.true
@@ -671,6 +670,15 @@ is being covered by another element:
         })
 
         cy.get('body').attachFile('@foo', { action: 'drag-n-drop' })
+      })
+
+      it('includes an entry in `dataTransfer.types`', (done) => {
+        cy.$$('#multiple').on('drop', (e) => {
+          expect(e.originalEvent.dataTransfer.types).to.contain('Files')
+          done()
+        })
+
+        cy.get('#multiple').attachFile({ contents: '@foo' }, { action: 'drag-n-drop' })
       })
     })
   })

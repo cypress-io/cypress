@@ -54,6 +54,17 @@ const createDataTransfer = (files: Cypress.FileReferenceObject[]): DataTransfer 
     },
   })
 
+  // When a real user drags file(s) over an element, dataTransfer.types always contains `['Files']`.
+  // In Firefox however, the 'types' array is not properly populated when we construct our dataTransfer.
+  if (files.length !== 0 && dataTransfer.types.length === 0) {
+    Object.defineProperty(dataTransfer, 'types', {
+      get () {
+        // This is the value observed from real user events in Firefox 90.
+        return ['application/x-moz-file', 'Files']
+      },
+    })
+  }
+
   return dataTransfer
 }
 
