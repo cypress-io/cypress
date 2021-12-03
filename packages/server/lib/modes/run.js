@@ -197,11 +197,11 @@ const displayRunStarting = function (options = {}) {
     type: 'outsideBorder',
   })
 
-  const formatSpecPattern = () => {
+  const formatSpecPattern = (projectRoot, specPattern) => {
     // foo.spec.js, bar.spec.js, baz.spec.js
     // also inserts newlines at col width
     if (specPattern) {
-      return formatPath(specPattern.join(', '), getWidth(table, 1))
+      return formatPath(specPattern.map((x) => x.replace(`${projectRoot}/`, '')).join(', '), getWidth(table, 1))
     }
   }
 
@@ -227,7 +227,7 @@ const displayRunStarting = function (options = {}) {
     [gray('Browser:'), formatBrowser(browser)],
     [gray('Node Version:'), formatNodeVersion(config, getWidth(table, 1))],
     [gray('Specs:'), formatSpecs(specs)],
-    [gray('Searched:'), formatSpecPattern(specPattern)],
+    [gray('Searched:'), formatSpecPattern(config.projectRoot, specPattern)],
     [gray('Params:'), formatRecordParams(runUrl, parallel, group, tag)],
     [gray('Run URL:'), runUrl ? formatPath(runUrl, getWidth(table, 1)) : ''],
     [gray('Experiments:'), hasExperiments ? experiments.formatExperiments(enabledExperiments) : ''],
