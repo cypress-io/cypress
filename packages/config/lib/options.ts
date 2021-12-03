@@ -110,7 +110,9 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
   }, {
     name: 'e2e',
     // e2e runner overrides
-    defaultValue: {},
+    defaultValue: {
+      specPattern: 'cypress/integration/**/*',
+    },
     validation: isValidConfig,
   }, {
     name: 'env',
