@@ -78,7 +78,6 @@ describe('lib/files', () => {
 
       return files.readFile(this.projectRoot, 'tests/_fixtures/message.txt', { timeout: 100 }).catch((err) => {
         expect(err.name).to.equal('AbortError')
-        expect(err.aborted).to.equal(true)
         expect(err.filePath).to.include('tests/_fixtures/message.txt')
         expect(global.clearTimeout).to.have.been.calledWith(mockTimeoutId)
       })
@@ -93,7 +92,6 @@ describe('lib/files', () => {
 
       return files.readFile(this.projectRoot, 'tests/_fixtures/message.txt').catch((err) => {
         expect(err.message).to.equal('UnexpectedError: How could this happen')
-        expect(err.aborted).to.equal(undefined)
         expect(err.filePath).to.include('tests/_fixtures/message.txt')
         expect(global.clearTimeout).to.have.been.calledWith(undefined)
       })
@@ -170,7 +168,6 @@ describe('lib/files', () => {
 
       return files.writeFile(this.projectRoot, '.projects/write_file.txt', 'foo', { timeout: 100 }).catch((err) => {
         expect(err.name).to.equal('AbortError')
-        expect(err.aborted).to.equal(true)
         expect(err.filePath).to.include('.projects/todos/.projects/write_file.txt')
         expect(global.clearTimeout).to.have.been.calledWith(12345)
       })
@@ -182,7 +179,6 @@ describe('lib/files', () => {
 
       return files.writeFile(this.projectRoot, '.projects/write_file.txt', 'foo').catch((err) => {
         expect(err.message).to.equal('UnexpectedError: How could this happen')
-        expect(err.aborted).to.equal(undefined)
         expect(err.filePath).to.include('.projects/todos/.projects/write_file.txt')
         expect(global.clearTimeout).to.have.been.calledWith(undefined)
       })

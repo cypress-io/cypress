@@ -14,12 +14,13 @@ type PatchedServerOptions = ServerOptions & { cookie: { name: string | boolean }
 
 class SocketIOServer extends SocketIOBaseServer {
   constructor (srv: http.Server, opts?: Partial<PatchedServerOptions>) {
-    // in socket.io v3, they reduced down the max buffer size
-    // from 100mb to 1mb, so we reset it back to the previous value
-    //
-    // previous commit for reference:
-    // https://github.com/socketio/engine.io/blame/61b949259ed966ef6fc8bfd61f14d1a2ef06d319/lib/server.js#L29
     opts = opts ?? {}
+
+    // the maxHttpBufferSize is used to limit the message size sent over
+    // the socket. Small values can be used to mitigate exposure to
+    // denial of service attacks; the default as of v3.0 is 1MB.
+    // because our server is local, we do not need to arbitrarily limit
+    // the message size and can use the theoretical maximum value.
     opts.maxHttpBufferSize = opts.maxHttpBufferSize ?? buffer.constants.MAX_LENGTH
 
     super(srv, opts)
