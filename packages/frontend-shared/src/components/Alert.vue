@@ -59,7 +59,7 @@
       </button>
       <div
         v-if="stackOpen"
-        class="border-2px border-error-100 rounded-5px mt-16px relative"
+        class="border-2px border-error-100 rounded-6px mt-16px relative"
       >
         <CopyButton
           class="bg-white m-16px top-0 right-0 absolute"
