@@ -13,6 +13,7 @@
         @select="setFEFramework"
       />
       <SelectFwOrBundler
+        class="pt-3px"
         :name="t('setupPage.projectSetup.bundlerLabel')"
         :disabled="bundlers.length === 1"
         :options="bundlers || []"
