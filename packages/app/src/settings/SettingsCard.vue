@@ -1,6 +1,6 @@
 <template>
   <Collapsible
-    class="border rounded bg-light-50 border-gray-100 mb-4 w-full block
+    class="border rounded bg-light-50 border-gray-100 w-full block
   overflow-hidden hocus-default"
     :max-height="maxHeight"
     lazy
@@ -32,7 +32,7 @@
         </template>
       </ListRowHeader>
     </template>
-    <div class="divide-y divide-gray-100 px-24px children:py-32px">
+    <div class="divide-y space-y-32px divide-gray-100 p-24px">
       <slot />
     </div>
   </Collapsible>
