@@ -209,6 +209,15 @@ class Server {
 
         return makeConnection(port)
       })
+      .catch((err) => {
+        browserSocket.destroy(err)
+
+        leave()
+
+        if (this._onError) {
+          return this._onError(err, browserSocket, head)
+        }
+      })
     })
   }
 

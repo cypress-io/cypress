@@ -215,6 +215,25 @@ describe('Proxy', () => {
         expect(this.proxy._generateMissingCertificates).to.be.calledTwice
       })
     })
+
+    //
+    it('handles errors with addContext', async function () {
+      this.sandbox.spy(this.proxy, 'connect')
+      this.sandbox.stub(this.proxy._sniServer, 'addContext').throws(new Error('error adding context'))
+
+      return request({
+        strictSSL: false,
+        url: 'https://localhost:8443/',
+        proxy: 'http://localhost:3333',
+      }).catch(() => {
+        // This scenario will cause an error but we should clean
+        // ensure the outgoing socket created for this connection was destroyed
+        expect(this.proxy.connect).calledOnce
+        const socket = this.proxy.connect.getCalls()[0].args[1]
+
+        expect(socket.destroyed).to.be.true
+      })
+    })
   })
 
   context('closing', () => {
@@ -229,7 +248,7 @@ describe('Proxy', () => {
       }).then(() => {
         return proxy.start(3333)
       }).then(() => {
-      // force this to reject if its called
+        // force this to reject if its called
         this.sandbox.stub(this.proxy, '_generateMissingCertificates').rejects(new Error('should not call'))
 
         return request({
