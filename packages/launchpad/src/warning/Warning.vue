@@ -1,12 +1,12 @@
 <template>
   <Alert
-    v-model="show"
+    v-if="show"
     dismissible
-    status="warning"
+    type="warning"
     data-testid="warning-alert"
     header-class="text-warning-600"
     :title="title"
-    :icon="ErrorOutlineIcon"
+    @dismiss="dismiss"
   >
     <div
       ref="markdownTarget"
@@ -16,11 +16,9 @@
 </template>
 
 <script lang="ts" setup>
-import ErrorOutlineIcon from '~icons/cy/status-errored-outline_x16.svg'
+import { ref } from 'vue'
 import { useMarkdown } from '@packages/frontend-shared/src/composables/useMarkdown'
 import Alert from '@cy/components/Alert.vue'
-import { ref } from 'vue'
-import { useVModels } from '@vueuse/core'
 
 const emits = defineEmits<{
   (eventName: 'update:modelValue', value: boolean): void
@@ -32,7 +30,14 @@ const props = withDefaults(defineProps<{
   modelValue: boolean
 }>(), { modelValue: true })
 
-const { modelValue: show } = useVModels(props, emits)
 const markdownTarget = ref()
 const { markdown } = useMarkdown(markdownTarget, props.message, { classes: { code: ['bg-warning-200'] } })
+
+const show = ref(true)
+
+function dismiss () {
+  // TODO, call a mutation here so that the server persists the result of the mutation.
+  // However, we still intend to keep the "warnings" dismissal so that the client updates immediately before the server responds.
+  show.value = false
+}
 </script>

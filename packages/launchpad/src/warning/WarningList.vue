@@ -4,8 +4,6 @@
     :key="warning.key"
     :title="warning.title"
     :message="warning.message"
-    dismissible
-    @update:modelValue="dismiss(warning.key)"
   />
 </template>
 
@@ -29,20 +27,8 @@ const props = defineProps<{
   gql: WarningListFragment
 }>()
 
-const dismissed = ref({})
 const warnings = computed(() => {
   return props.gql.warnings
   .map((w) => ({ ...w, key: `${w.title}${w.message}` }))
-  .filter((warning) => {
-    const hasBeenDismissed = dismissed.value[warning.key]
-
-    return !hasBeenDismissed && !warning.setupStep || warning.setupStep === props.gql.step
-  })
 })
-
-const dismiss = (key) => {
-  // TODO, call a mutation here so that the server persists the result of the mutation.
-  // However, we still intend to keep the "warnings" dismissal so that the client updates immediately before the server responds.
-  dismissed.value[key] = true
-}
 </script>

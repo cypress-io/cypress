@@ -1,183 +1,134 @@
 <template>
-  <Collapsible
-    v-if="modelValue"
-    lazy
-    :initially-open="initiallyOpen"
-    :disable="!canCollapse"
-    class="rounded-t rounded-b outline-none overflow-hidden group"
-    :class="[
-      classes.alertClass,
-      classes.headerClass,
-      {[`hocus-default border-1 border-transparent rounded ${classes.ring}`]: canCollapse}]"
-    height="300"
+  <div
+    class="rounded text-16px leading-24px overflow-hidden"
+    :class="typeDefinition.class"
   >
-    <template #target="{ open }">
-      <div
-        data-testid="alert-header"
-        class="grid grid-cols-1 group"
-        :class="{
-          'cursor-pointer': canCollapse,
-        }"
-      >
-        <AlertHeader
-          :title="title"
-          v-bind="classes"
-          :header-class="canCollapse ? 'group-hocus:underline' : ''"
-          :prefix-icon="prefix?.icon"
-          :prefix-icon-class="open ? prefix?.classes + ' rotate-180' : prefix?.classes"
-          :suffix-icon-aria-label="props.dismissible ? t('components.alert.dismissAriaLabel') : ''"
-          :suffix-icon="props.dismissible ? DeleteIcon : null"
-          data-testid="alert"
-          class="rounded min-w-200px p-16px"
-          @suffixIconClicked="$emit('update:modelValue', !modelValue)"
-        >
-          <template
-            v-if="$slots.prefixIcon"
-            #prefixIcon="slotProps"
-          >
-            <slot
-              name="prefixIcon"
-              v-bind="slotProps"
-            />
-          </template>
-          <template
-            v-if="$slots.suffixIcon"
-            #suffixIcon="slotProps"
-          >
-            <slot
-              name="suffixIcon"
-              v-bind="slotProps"
-            />
-          </template>
-        </AlertHeader>
-        <div
-          v-if="open"
-          data-testid="alert-body-divider"
-          class="mx-auto h-1px transform w-[calc(100%-32px)] translate-y-1px"
-          :class="[classes.dividerClass]"
-        />
-      </div>
-    </template>
     <div
-      v-if="$slots.default"
-      class="text-left p-16px"
-      data-testid="alert-body"
+      class="rounded flex p-16px items-center"
     >
-      <slot />
+      <component
+        :is="typeDefinition.icon"
+        v-if="typeDefinition.icon"
+        class="flex-shrink-0 h-16px mr-8px w-16px"
+        :class="typeDefinition.iconClass"
+      />
+      <div
+        v-if="slots.default"
+        class="flex-grow"
+      >
+        <slot />
+      </div>
+      <p
+        v-else
+        class="flex-grow"
+      >
+        {{ title }}
+      </p>
+      <button
+        v-if="props.dismissible"
+        aria-label="Close"
+        class="border rounded-full p-5px hocus:outline-none"
+        :class="typeDefinition.closeButtonClass"
+        @click="emit('dismiss')"
+      >
+        <i-cy-delete_x12
+          class="h-12px m-4px w-12px"
+          :class="typeDefinition.iconClass"
+        />
+      </button>
     </div>
-  </Collapsible>
+    <div
+      v-if="slots.details"
+      :class="typeDefinition.detailsClass"
+    >
+      <slot name="details" />
+    </div>
+  </div>
 </template>
-
-<script lang="ts">
-export type AlertStatus = 'error' | 'warning' | 'info' | 'default' | 'success'
-
-export type AlertClasses = {
-  headerClass: string,
-  suffixIconClass: string
-  suffixButtonClass: string
-  alertClass: string
-  dividerClass: string
-  ring: string
-}
-</script>
-
 <script lang="ts" setup>
-import AlertHeader from './AlertHeader.vue'
-import DeleteIcon from '~icons/cy/delete_x16.svg'
-import { computed, useSlots, FunctionalComponent, SVGAttributes } from 'vue'
-import ChevronDown from '~icons/cy/chevron-down-small_x16.svg'
-import { useI18n } from '@cy/i18n'
-import Collapsible from './Collapsible.vue'
+import { computed, FunctionalComponent, SVGAttributes, useSlots } from 'vue'
+import ErrorIcon from '~icons/cy/errored-outline_x16.svg'
+import SuccessIcon from '~icons/cy/circle-check_x16.svg'
+import Button from './Button.vue'
 
-const { t } = useI18n()
-const slots = useSlots()
-
-defineEmits<{
-  (eventName: 'update:modelValue', value: boolean): void
-}>()
+export type AlertType = 'default' | 'error' | 'warning' | 'success' | 'info'
 
 const props = withDefaults(defineProps<{
-  title?: string
-  status?: AlertStatus
-  icon?: FunctionalComponent<SVGAttributes, {}>,
-  headerClass?: string,
-  alertClass?: string,
+  type?: AlertType,
+  title?: string,
+  icon?: FunctionalComponent<SVGAttributes>,
+  iconClass?: string,
+  detailsClass?: string,
   dismissible?: boolean,
-  collapsible?: boolean,
-  modelValue?: boolean,
 }>(), {
-  modelValue: true,
-  alertClass: undefined,
-  status: 'info',
+  type: 'default',
+  title: '',
   icon: undefined,
-  headerClass: undefined,
+  iconClass: undefined,
+  detailsClass: undefined,
 })
 
-const title = computed(() => props.title ?? 'Alert')
+const emit = defineEmits<{
+  (event: 'dismiss'): void,
+}>()
 
-const alertStyles: Record<AlertStatus, AlertClasses> = {
-  default: {
-    headerClass: 'text-gray-800',
-    suffixIconClass: 'icon-dark-gray-600',
-    suffixButtonClass: 'text-gray-600',
-    alertClass: 'bg-gray-100',
-    dividerClass: 'bg-gray-300',
-    ring: 'hocus:(ring-gray-200 border-gray-300)',
-  },
-  info: {
-    headerClass: 'text-info-700',
-    suffixIconClass: 'icon-dark-info-500',
-    suffixButtonClass: 'text-info-500',
-    alertClass: 'bg-info-100',
-    dividerClass: 'bg-info-300',
-    ring: 'hocus:(ring-info-200 border-info-300)',
+const typeDefinition = computed(() => {
+  const def = typeDefs[props.type]
+
+  if (props.icon) {
+    def.icon = props.icon
+  }
+
+  if (props.iconClass) {
+    def.iconClass = props.iconClass
+  }
+
+  if (props.detailsClass) {
+    def.detailsClass = props.detailsClass
+  }
+
+  return def
+})
+
+const slots = useSlots()
+
+const typeDefs: Record<AlertType, {
+  class: string,
+  iconClass?: string,
+  icon?: FunctionalComponent<SVGAttributes>
+  detailsClass?: string,
+  closeButtonClass?: string
+}> = {
+  error: {
+    class: 'bg-error-100 text-error-600',
+    icon: ErrorIcon,
+    iconClass: 'icon-dark-error-500',
+    detailsClass: 'bg-error-50 font-light',
+    closeButtonClass: 'border-transparent hocus:border-error-400',
   },
   warning: {
-    headerClass: 'text-warning-500',
-    suffixIconClass: 'icon-dark-warning-500',
-    suffixButtonClass: 'text-warning-500',
-    alertClass: 'bg-warning-100',
-    dividerClass: 'bg-warning-300',
-    ring: 'hocus:(ring-warning-200 border-warning-300)',
-  },
-  error: {
-    headerClass: 'text-error-600',
-    suffixIconClass: 'icon-dark-error-500',
-    suffixButtonClass: 'text-error-500',
-    alertClass: 'bg-error-100',
-    dividerClass: 'bg-error-300',
-    ring: 'hocus:(ring-error-200 border-error-300)',
+    class: 'bg-warning-100 text-warning-600',
+    icon: ErrorIcon,
+    iconClass: 'icon-dark-warning-500',
+    detailsClass: 'bg-warning-50 font-light',
+    closeButtonClass: 'border-transparent hocus:border-warning-400',
   },
   success: {
-    headerClass: 'text-success-600',
-    suffixIconClass: 'icon-dark-success-500',
-    suffixButtonClass: 'text-success-500',
-    alertClass: 'bg-success-100',
-    dividerClass: 'bg-success-300',
-    ring: 'hocus:(ring-success-200 border-success-300)',
+    class: 'bg-success-100 text-success-600',
+    icon: SuccessIcon,
+    iconClass: 'icon-dark-success-500',
+    detailsClass: 'bg-success-50 font-light',
+    closeButtonClass: 'border-transparent hocus:border-success-400',
+  },
+  info: {
+    class: 'bg-blue-100 text-blue-600',
+    detailsClass: 'bg-blue-50 font-light',
+    closeButtonClass: 'border-transparent hocus:border-blue-400',
+  },
+  default: {
+    class: 'bg-gray-100 text-gray-700',
+    detailsClass: 'bg-gray-50 font-light',
+    closeButtonClass: 'border-transparent hocus:border-gray-400',
   },
 }
-
-const classes = computed(() => {
-  return {
-    ...alertStyles[props.status],
-    headerClass: props.headerClass ?? alertStyles[props.status].headerClass,
-    alertClass: props.alertClass ?? alertStyles[props.status].alertClass,
-  }
-})
-const canCollapse = computed(() => slots.default && props.collapsible)
-const initiallyOpen = computed(() => slots.default && !props.collapsible)
-
-const prefix = computed(() => {
-  if (props.icon) return { icon: props.icon }
-
-  if (canCollapse.value) {
-    return {
-      icon: ChevronDown,
-      classes: 'transition transform duration-150 w-16px h-16px',
-    }
-  }
-
-  return {}
-})
 </script>
