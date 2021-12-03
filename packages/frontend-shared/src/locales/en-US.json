@@ -330,23 +330,23 @@
       "description": "If you'd like to try out new features that we're working on, you can enable beta features for your project by turning on the experimental features you'd like to try. {0}",
       "experimentalFetchPolyfill": {
         "name": "Fetch Polyfill",
-        "description": "Automatically replaces window.fetch with a polyfill that Cypress can spy on and stub"
+        "description": "Automatically replaces `window.fetch` with a polyfill that Cypress can spy on and stub. Note: `experimentalFetchPolyfill` has been deprecated in Cypress 6.0.0 and will be removed in a future release. Consider using [`cy.intercept()`](https://on.cypress.io/intercept) to intercept `fetch` requests instead."
       },
       "experimentalInteractiveRunEvents": {
         "name": "Interactive Run Events",
-        "description": "Changes the way some events can be listened to in plugins"
+        "description": "Allows listening to the [`before:run`](https://on.cypress.io/before-run), [`after:run`](https://on.cypress.io/after-run), [`before:spec`](https://on.cypress.io/before-spec), and [`after:spec`](https://on.cypress.io/after-spec) events in plugins during interactive mode."
       },
       "experimentalSessionSupport": {
-        "name": "Session Support",
-        "description": "Enable use of cy.session()"
+        "name": "Session",
+        "description": "Enable use of [`cy.session()`](https://on.cypress.io/session) and new behavior to handle caching and restoring cookies, localStorage, and sessionStorage."
       },
       "experimentalSourceRewriting": {
-        "name": "AST based test Source Rewriting",
-        "description": "This may fix issues caused by the existing regex-based JS/HTML replacement algorithm"
+        "name": "Source Rewriting",
+        "description": "Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement algorithm. See [#5273](https://github.com/cypress-io/cypress/issues/5273) for details."
       },
       "experimentalStudio": {
-        "name": "Studio Mode",
-        "description": "Use cypress GUI to write tests."
+        "name": "Studio",
+        "description": "Generate and save commands directly to your test suite by interacting with your app as an end user would. See [Cypress Studio](https://on.cypress.io/studio) for more details."
       }
     },
     "device": {
