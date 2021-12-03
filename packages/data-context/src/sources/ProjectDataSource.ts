@@ -62,7 +62,7 @@ export class ProjectDataSource {
         fileName: parsedFile.base.replace(specFileExtension, ''),
         specFileExtension,
         specType,
-        name: relative,
+        name: parsedFile.base,
         relative,
         absolute,
       }
