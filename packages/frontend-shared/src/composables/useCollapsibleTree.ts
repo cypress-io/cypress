@@ -11,7 +11,6 @@ export type UseCollapsibleTreeNode <T extends RawNode<T>> = {
   hidden: ComputedRef<boolean>
   expanded: Ref<boolean>
   toggle: () => void
-  reveal: () => void
 
   // Depth of a particular node -- 1 indexed
   depth: number
@@ -44,13 +43,6 @@ export const useCollapsibleTreeNode = <T extends RawNode<T>>(rawNode: T, options
   const hidden = computed(() => {
     return !!roots.find((r) => r.expanded.value === false)
   })
-  const reveal = () => {
-    if (hidden.value) {
-      roots.forEach((root) => {
-        root.expanded.value = true
-      })
-    }
-  }
 
   return {
     ...treeNode,
@@ -59,7 +51,6 @@ export const useCollapsibleTreeNode = <T extends RawNode<T>>(rawNode: T, options
     hidden,
     expanded,
     toggle,
-    reveal,
   }
 }
 
