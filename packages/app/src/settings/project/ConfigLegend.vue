@@ -13,7 +13,7 @@
     >
       <i18n-t :keypath="legendText.config.descriptionKey">
         <ExternalLink
-          href="https://docs.cypress.io"
+          href="https://on.cypress.io/guides/configuration"
           class="text-purple-500"
         >
           cypress.config.js
@@ -41,7 +41,7 @@
     >
       <i18n-t :keypath="legendText.dynamic.descriptionKey">
         <ExternalLink
-          href="https://docs.cypress.io"
+          href="https://on.cypress.io"
           class="text-purple-500"
         >
           setupNodeEnv

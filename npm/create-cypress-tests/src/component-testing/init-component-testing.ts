@@ -84,7 +84,7 @@ async function injectAndShowPluginConfig<T> (template: Template<T>, {
     code: await getPluginsSourceExample(ast),
     language: 'js',
     filePath: pluginsFilePath,
-    fallbackFileMessage: 'plugins file (https://docs.cypress.io/guides/core-concepts/writing-and-organizing-tests.html#Plugin-files)',
+    fallbackFileMessage: 'plugins file (https://on.cypress.io/plugins-file)',
   })
 }
 

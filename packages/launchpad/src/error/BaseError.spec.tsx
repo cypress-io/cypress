@@ -12,7 +12,7 @@ const docsLinkSelector = '[data-testid=error-docs-link]'
 const customFooterSelector = '[data-testid=custom-error-footer]'
 
 // Constants
-const docsLink = 'https://docs.cypress.io'
+const docsLink = 'https://on.cypress.io'
 const messages = defaultMessages.launchpadErrors.generic
 const customHeaderMessage = 'Well, this was unexpected!'
 const customMessage = `Don't worry, just click the "It's fixed now" button to try again.`

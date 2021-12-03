@@ -10,7 +10,7 @@ import { mount } from '@cypress/react'
 
 describe('<${spec.baseName} />', () => {
   it('renders', () => {
-    // https://docs.cypress.io
+    // https://on.cypress.io/mount
     mount(<${spec.baseName} />)
   })
 })
