@@ -18,7 +18,6 @@ const videoCapture = require(`${root}../lib/video_capture`)
 const env = require(`${root}../lib/util/env`)
 const random = require(`${root}../lib/util/random`)
 const system = require(`${root}../lib/util/system`)
-const specsUtil = require(`${root}../lib/util/specs`)
 const { experimental } = require(`${root}../lib/experiments`)
 
 describe('lib/modes/run', () => {
@@ -674,15 +673,6 @@ describe('lib/modes/run', () => {
       this.projectInstance.__setConfig(config)
       sinon.stub(openProject, 'getProject').resolves(this.projectInstance)
       sinon.spy(errors, 'warning')
-
-      sinon.stub(specsUtil.default, 'findSpecs').resolves([
-        {
-          name: 'foo_spec.js',
-          path: 'cypress/integration/foo_spec.js',
-          absolute: '/path/to/spec.js',
-          specType: 'integration',
-        },
-      ])
     })
 
     it('shows no warnings for default browser', () => {
@@ -758,14 +748,6 @@ describe('lib/modes/run', () => {
       sinon.spy(runMode, 'runSpecs')
       sinon.stub(openProject, 'launch').resolves()
       sinon.stub(openProject, 'getProject').resolves(this.projectInstance)
-      sinon.stub(specsUtil.default, 'findSpecs').resolves([
-        {
-          name: 'foo_spec.js',
-          path: 'cypress/integration/foo_spec.js',
-          absolute: '/path/to/spec.js',
-          specType: 'integration',
-        },
-      ])
     })
 
     it('no longer ensures user session', () => {

@@ -94,11 +94,6 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     defaultValue: {},
     validation: isValidConfig,
   }, {
-    name: 'componentFolder',
-    defaultValue: 'cypress/component',
-    validation: validate.isStringOrFalse,
-    isFolder: true,
-  }, {
     name: 'defaultCommandTimeout',
     defaultValue: 4000,
     validation: validate.isNumber,
