@@ -160,7 +160,7 @@ require('./packages/server')\
   log(`#testVersion ${meta.distDir()}`)
   await testVersion(meta.distDir(), version)
 
-  // testBuiltStaticAssets
+  log('#testStaticAssets')
   await testStaticAssets(meta.distDir())
 
   log('#removeCyAndBinFolders')
