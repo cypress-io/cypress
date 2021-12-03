@@ -1,15 +1,5 @@
 version: 2.1
 
-# usually we don't build Mac app - it takes a long time
-# but sometimes we want to really confirm we are doing the right thing
-# so just add your branch to the list here to build and test on Mac
-macBuildFilters: &macBuildFilters
-  filters:
-    branches:
-      only:
-        - develop
-        - renovate/cypress-request-2.x
-
 defaults: &defaults
   parallelism: 1
   working_directory: ~/cypress
@@ -17,13 +7,9 @@ defaults: &defaults
     executor:
       type: executor
       default: cy-doc
-    is-mac:
+    only-cache-for-root-user:
       type: boolean
       default: false
-    arch:
-      type: enum
-      default: 'linux'
-      enum: ['linux', 'darwin']
   executor: <<parameters.executor>>
   environment:
     ## set specific timezone
@@ -37,13 +23,36 @@ defaults: &defaults
     LINES: 24
 
 # filters and requires for testing binary with Firefox
-onlyMainBranches: &onlyMainBranches
+mainBuildFilters: &mainBuildFilters
   filters:
     branches:
       only:
         - develop
-  requires:
-    - create-build-artifacts
+        - 10.0-release
+
+# usually we don't build Mac app - it takes a long time
+# but sometimes we want to really confirm we are doing the right thing
+# so just add your branch to the list here to build and test on Mac
+macWorkflowFilters: &mac-workflow-filters
+  when:
+    or:
+    - equal: [ develop, << pipeline.git.branch >> ]
+    - equal: [ renovate/cypress-request-2.x, << pipeline.git.branch >> ]
+    - matches:
+          pattern: "-release$"
+          value: << pipeline.git.branch >>
+
+windowsWorkflowFilters: &windows-workflow-filters
+  when:
+    or:
+    - equal: [ master, << pipeline.git.branch >> ]
+    - equal: [ develop, << pipeline.git.branch >> ]
+    - matches:
+          pattern: "-release$"
+          value: << pipeline.git.branch >>
+    - matches:
+          pattern: "win*"
+          value: << pipeline.git.branch >>
 
 executors:
   # the Docker image with Cypress dependencies and Chrome browser
@@ -73,6 +82,18 @@ executors:
     environment:
       PLATFORM: mac
 
+  # executor to run on Windows - based off of the windows-orb default executor since it is
+  # not customizable enough to align with our existing setup.
+  # https://github.com/CircleCI-Public/windows-orb/blob/master/src/executors/default.yml
+  # https://circleci.com/docs/2.0/hello-world-windows/#software-pre-installed-in-the-windows-image
+  windows: &windows-executor
+    machine:  
+      image: windows-server-2019-vs2019:stable
+      shell: bash.exe -eo pipefail
+    resource_class: windows.medium
+    environment:
+      PLATFORM: windows
+
 commands:
   restore_workspace_binaries:
     steps:
@@ -88,6 +109,7 @@ commands:
     steps:
       - attach_workspace:
           at: ~/
+      - install-required-node
       - unpack-dependencies
 
   restore_cached_binary:
@@ -127,14 +149,24 @@ commands:
             - cypress
             - .ssh
             - node_modules # contains the npm i -g modules
+  
+  install_cache_helpers_dependencies:
+    steps:
+      - run:
+          # Dependencies needed by circle-cache.js, before we "yarn" or unpack cached node_modules
+          name: Cache Helper Dependencies
+          working_directory: ~/
+          command: npm i glob@7.1.6 fs-extra@10.0.0 minimist@1.2.5 fast-json-stable-stringify@2.1.0
 
   unpack-dependencies:
     description: 'Unpacks dependencies associated with the current workflow'
     steps:
+      - install_cache_helpers_dependencies
       - run:
           name: Generate Circle Cache Key
           command: node scripts/circle-cache.js --action cacheKey > circle_cache_key
       - restore_cache:
+          name: Restore cache state, to check for known modules cache existence
           key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-test2-node-modules-cache-{{ checksum "circle_cache_key" }}
       - run:
           name: Move node_modules back from /tmp
@@ -202,13 +234,11 @@ commands:
   caching-dependency-installer:
     description: 'Installs & caches the dependencies based on yarn lock & package json dependencies'
     parameters:
-      is-mac:
+      only-cache-for-root-user:
         type: boolean
         default: false
-      arch:
-        type: enum
-        enum: ['linux', 'darwin']
     steps:
+      - install_cache_helpers_dependencies
       - run:
           name: Generate Circle Cache Key
           command: node scripts/circle-cache.js --action cacheKey > circle_cache_key
@@ -230,13 +260,12 @@ commands:
       - run:
           name: Install Node Modules
           command: |
-            . ./scripts/load-nvm.sh
-            yarn --prefer-offline --frozen-lockfile --cache-folder ~/.yarn-<< parameters.arch >>
+            yarn --prefer-offline --frozen-lockfile --cache-folder ~/.yarn
           no_output_timeout: 20m
       - prepare-modules-cache:
-          dont-move: <<parameters.is-mac>> # we don't move, so we don't hit any issues unpacking symlinks
+          dont-move: <<parameters.only-cache-for-root-user>> # we don't move, so we don't hit any issues unpacking symlinks
       - when:
-          condition: <<parameters.is-mac>> # on mac, we don't move to /tmp since we don't need to worry about different users
+          condition: <<parameters.only-cache-for-root-user>> # we don't move to /tmp since we don't need to worry about different users
           steps:
             - save_cache:
                 name: Saving node modules for root, cli, and all globbed workspace packages
@@ -247,7 +276,7 @@ commands:
                   - system-tests/node_modules
                   - globbed_node_modules
       - unless:
-          condition: <<parameters.is-mac>>
+          condition: <<parameters.only-cache-for-root-user>>
           steps:
             - save_cache:
                 name: Saving node modules for root, cli, and all globbed workspace packages
@@ -264,80 +293,65 @@ commands:
           name: Save weekly yarn cache
           key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-test2-deps-root-weekly-{{ checksum "cache_date" }}
           paths:
-            - ~/.yarn-<< parameters.arch >>
+            - ~/.yarn
 
-  install-build-setup:
+  verify-build-setup:
     description: Common commands run when setting up for build or yarn install
+    parameters:
+      executor:
+        type: executor
+        default: cy-doc
     steps:
-      - run:
-          name: Print working folder
-          command: echo $PWD
+      - run: pwd
       - run:
           name: print global yarn cache path
           command: echo $(yarn global bin)
       - run:
-          name: print Node version
-          command: |
-            . ./scripts/load-nvm.sh
-            echo "nvm use default"
-            nvm use default
-            node -v
-      - run:
           name: print yarn version
-          command: yarn -v
+          command: yarn versions
+      - unless:
+          condition:
+            # stop-only does not correctly match on windows: https://github.com/bahmutov/stop-only/issues/78
+            equal: [ *windows-executor, << parameters.executor >> ]
+          steps:
+            - run:
+                name: Stop .only
+                 # this will catch ".only"s in js/coffee as well
+                command: yarn stop-only-all
       - run:
-          name: check Node version
-          command: |
-            . ./scripts/load-nvm.sh
-            yarn check-node-version
-
-      ## make sure the TERM is set to 'xterm' in node (Linux only)
-      ## else colors (and tests) will fail
-      ## See the following information
-      ##   * http://andykdocs.de/development/Docker/Fixing+the+Docker+TERM+variable+issue
-      ##   * https://unix.stackexchange.com/questions/43945/whats-the-difference-between-various-term-variables
-      - run:
-          name: Check terminal
-          command: |
-            . ./scripts/load-nvm.sh
-            yarn check-terminal
-      - run:
-          name: Stop .only
-          command: |
-            . ./scripts/load-nvm.sh
-            yarn stop-only-all
-      - run:
-          # Deps needed by circle-cache.js, before we "yarn" or unpack cached node_modules
-          name: Cache Helper Deps
-          working_directory: ~/
-          command: npm i globby@11.0.4 fs-extra@10.0.0 minimist@1.2.5 fast-json-stable-stringify@2.1.0
+          name: Check terminal variables
+          ## make sure the TERM is set to 'xterm' in node (Linux only)
+          ## else colors (and tests) will fail
+          ## See the following information
+          ##   * http://andykdocs.de/development/Docker/Fixing+the+Docker+TERM+variable+issue
+          ##   * https://unix.stackexchange.com/questions/43945/whats-the-difference-between-various-term-variables
+          command: yarn check-terminal
 
   install-required-node:
     # https://discuss.circleci.com/t/switch-nodejs-version-on-machine-executor-solved/26675/2
-    description: Install Node version
-    parameters:
-      version:
-        type: string
-        default: ""
+    description: Install Node version matching .node-version
     steps:
       - run:
-          name: Install NVM + Node
-          # TODO: determine why we get the missing .nvmrc file error
+          name: Install Node
           command: |
-            export NODE_VERSION=<<parameters.version>>
-            export NODE_VERSION=${NODE_VERSION:-$(cat .node-version)}
-            echo "Installing Node $NODE_VERSION"
-            echo $NODE_VERSION > .node-version
-            cp .node-version .nvmrc
-            curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.35.3/install.sh | bash
-            . ./scripts/load-nvm.sh
-            echo "before nvm install"
-            nvm install $NODE_VERSION
-            echo "before nvm use"
-            nvm use $NODE_VERSION
-            echo "before nvm alias default"
-            nvm alias default $NODE_VERSION
-            node --version
+            node_version=$(cat .node-version)
+            [ -s "${HOME}/.nvm/nvm.sh" ] && \. "${HOME}/.nvm/nvm.sh" # This loads nvm
+            if ! type nvm > /dev/null; then
+              echo "Installing NVM"
+              curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.30.0/install.sh | bash
+              [ -s "${HOME}/.nvm/nvm.sh" ] && \. "${HOME}/.nvm/nvm.sh" # This loads nvm
+            fi
+            echo "Installing Node $node_version"
+            nvm install ${node_version}
+            echo "Using Node $node_version"
+            nvm use ${node_version}
+            [[ $PLATFORM != 'windows' ]] && nvm alias default ${node_version} || sleep 2s
+            echo "Installing Yarn"
+            npm install yarn -g # ensure yarn is installed with the correct node engine
+            yarn check-node-version
+      - run:
+          name: Check  Node
+          command: yarn check-node-version
 
   install-chrome:
     description: Install Google Chrome
@@ -421,7 +435,6 @@ commands:
       - run:
           command: |
             cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --parallel -- --') || true
-
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
@@ -545,7 +558,7 @@ commands:
           name: "Cloning test project: <<parameters.repo>>"
           command: |
             git clone --depth 1 --no-single-branch https://github.com/cypress-io/<<parameters.repo>>.git /tmp/<<parameters.repo>>
-            cd /tmp/<<parameters.repo>> && (git checkout $(node ./scripts/get-next-version) || true)
+            cd /tmp/<<parameters.repo>> && (git checkout $(node ./scripts/get-next-version.js) || true)
 
   test-binary-against-rwa:
     description: |
@@ -815,58 +828,48 @@ commands:
                 path: /tmp/<<parameters.repo>>/cypress/videos
       - store-npm-logs
 
-  wait-on-circle-jobs:
-    description: Polls certain Circle CI jobs until they finish
-    parameters:
-      job-names:
-        description: comma separated list of circle ci job names to wait for
-        type: string
-    steps:
-      - run:
-          name: "Waiting on Circle CI jobs: <<parameters.job-names>>"
-          command: node ./scripts/wait-on-circle-jobs.js --job-names="<<parameters.job-names>>"
   build-binary:
     steps:
       - run:
-          name: Check environment variables before code sign (if on Mac)
+          name: Check environment variables before code sign (if on Mac/Windows)
           # NOTE
-          # our Mac code sign works via electron-builder
+          # our code sign works via electron-builder
           # by default, electron-builder will NOT sign app built in a pull request
           # even our internal one (!)
           # Usually this is not a problem, since we only build and test binary
           # built on "develop" and "master" branches
-          # but if you need to really build and sign a Mac binary in a PR
+          # but if you need to really build and sign a binary in a PR
           # set variable CSC_FOR_PULL_REQUEST=true
           command: |
             set -e
-            if [[ "$OSTYPE" == "darwin"* ]]; then
+            NEEDS_CODE_SIGNING=`node -p 'process.platform === "win32" || process.platform === "darwin"'`
+            if [[ "$NEEDS_CODE_SIGNING" == "true" ]]; then
+              echo "Checking for required environment variables..."
               if [ -z "$CSC_LINK" ]; then
                 echo "Need to provide environment variable CSC_LINK"
-                  echo "with base64 encoded certificate .p12 file"
+                echo "with base64 encoded certificate .p12 file"
                 exit 1
               fi
               if [ -z "$CSC_KEY_PASSWORD" ]; then
                 echo "Need to provide environment variable CSC_KEY_PASSWORD"
-                  echo "with password for unlocking certificate .p12 file"
+                echo "with password for unlocking certificate .p12 file"
                 exit 1
               fi
+              echo "Succeeded."
             else
-              echo "Not Mac platform, skipping code sign setup"
+              echo "Not code signing for this platform"
             fi
-      - install-required-node
       - run:
           environment:
             DEBUG: electron-builder,electron-osx-sign*
           # notarization on Mac can take a while
           no_output_timeout: "45m"
           command: |
-            . ./scripts/load-nvm.sh
             node --version
             yarn binary-build --platform $PLATFORM --version $(node ./scripts/get-next-version.js)
       - run:
           name: Zip the binary
           command: |
-            . ./scripts/load-nvm.sh
             yarn binary-zip --platform $PLATFORM
       - store-npm-logs
       - persist_to_workspace:
@@ -890,6 +893,10 @@ commands:
             - cypress/binary-url.json
 
   build-cypress-npm-package:
+    parameters:
+      executor:
+        type: executor
+        default: cy-doc
     steps:
       - run:
           name: bump NPM version
@@ -897,26 +904,26 @@ commands:
       - run:
           name: build NPM package
           command: |
-            . ./scripts/load-nvm.sh
             yarn build --scope cypress
       - run:
           command: ls -la types
           working_directory: cli/build
-      - run:
-          name: list NPM package contents
-          command: yarn workspace cypress size
+      - unless:
+          condition:
+            equal: [ *windows-executor, << parameters.executor >> ]
+          steps:
+            - run:
+                name: list NPM package contents
+                command: yarn workspace cypress size
       - run:
           name: pack NPM package
           working_directory: cli/build
-          command: yarn pack --filename cypress.tgz
+          command: yarn pack --filename ../../cypress.tgz
       - run:
           name: list created NPM package
-          working_directory: cli/build
           command: ls -l
-      - run: cp cli/build/cypress.tgz cypress.tgz
       - store-npm-logs
       - run: pwd
-      - run: ls -l
       - persist_to_workspace:
           root: ~/
           paths:
@@ -944,25 +951,38 @@ jobs:
   ## skips ahead to the build step, otherwise installs and caches the node_modules
   node_modules_install:
     <<: *defaults
-    resource_class: medium+
+    parameters:
+      <<: *defaultsParameters
+      resource_class:
+        type: string
+        default: medium
+    resource_class: << parameters.resource_class >>
     steps:
       - checkout
       - install-required-node
-      - install-build-setup
+      - verify-build-setup:
+          executor: << parameters.executor >>
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - cypress
+            - .nvm # mac / linux
+            - ProgramData/nvm # windows
       - caching-dependency-installer:
-          arch: << parameters.arch >>
-          is-mac: <<parameters.is-mac>>
+          only-cache-for-root-user: <<parameters.only-cache-for-root-user>>
       - store-npm-logs
 
   ## restores node_modules from previous step & builds if first step skipped
   build:
     <<: *defaults
-    resource_class: medium+
+    parameters:
+      <<: *defaultsParameters
+      resource_class:
+        type: string
+        default: medium+
+    resource_class: << parameters.resource_class >>
     steps:
-      - checkout
-      - install-required-node
-      - install-build-setup
-      - unpack-dependencies
+      - restore_cached_workspace
       - run:
           name: Top level packages
           command: yarn list --depth=0 || true
@@ -973,12 +993,9 @@ jobs:
     <<: *defaults
     steps:
       - restore_cached_workspace
-      - install-required-node
-      ## this will catch ".only"s in js/coffee as well
       - run:
           name: Linting 🧹
           command: |
-            . ./scripts/load-nvm.sh
             git clean -df
             yarn lint
       - run:
@@ -1008,14 +1025,6 @@ jobs:
               echo "This is an external PR, cannot access other services"
               circleci-agent step halt
             fi
-      - wait-on-circle-jobs:
-          job-names: >
-            desktop-gui-integration-tests-7x,
-            desktop-gui-component-tests,
-            cli-visual-tests,
-            runner-integration-tests-chrome,
-            runner-ct-integration-tests-chrome,
-            reporter-integration-tests,
       - run: yarn percy build:finalize
 
   cli-visual-tests:
@@ -1044,22 +1053,39 @@ jobs:
 
   unit-tests:
     <<: *defaults
-    resource_class: medium
+    parameters:
+      <<: *defaultsParameters
+      resource_class:
+        type: string
+        default: medium
+    resource_class: << parameters.resource_class >>
     parallelism: 1
     steps:
       - restore_cached_workspace
       # make sure mocha runs
       - run: yarn test-mocha
-      # test binary build code
-      - run: yarn test-scripts
-      # make sure our snapshots are compared correctly
-      - run: yarn test-mocha-snapshot
-      # make sure packages with TypeScript can be transpiled to JS
-      - run: yarn lerna run build-prod --stream
-      # run unit tests from each individual package
-      - run: yarn test
-      - verify-mocha-results:
-          expectedResultCount: 9
+      - when:
+          condition:
+            # several snapshots fails for windows due to paths.
+            # until these are fixed, run the tests that are working.
+            equal: [ *windows-executor, << parameters.executor >> ]
+          steps:
+            - run: yarn test-scripts scripts/**/*spec.js
+            # make sure our snapshots are compared correctly
+            - run: yarn test-mocha-snapshot
+      - unless:
+          condition:
+            equal: [ *windows-executor, << parameters.executor >> ]
+          steps:
+            - run: yarn test-scripts
+            # make sure our snapshots are compared correctly
+            - run: yarn test-mocha-snapshot
+            # make sure packages with TypeScript can be transpiled to JS
+            - run: yarn lerna run build-prod --stream
+            # run unit tests from each individual package
+            - run: yarn test
+            - verify-mocha-results:
+                expectedResultCount: 9
       - store_test_results:
           path: /tmp/cypress
       # CLI tests generate HTML files with sample CLI command output
@@ -1270,7 +1296,6 @@ jobs:
           path: /tmp/artifacts
       - store-npm-logs
 
-
   desktop-gui-component-tests:
     <<: *defaults
     resource_class: medium
@@ -1380,6 +1405,7 @@ jobs:
       - run:
           name: Run tests
           command: yarn workspace @cypress/webpack-dev-server test
+
   npm-vite-dev-server:
     <<: *defaults
     steps:
@@ -1456,9 +1482,6 @@ jobs:
     <<: *defaults
     steps:
       - restore_cached_workspace
-      - restore_cache:
-          name: Restore yarn cache
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-npm-angular-babel-cache
       - run:
           name: Build
           command: yarn workspace @cypress/angular build
@@ -1478,9 +1501,6 @@ jobs:
     resource_class: medium
     steps:
       - restore_cached_workspace
-      - restore_cache:
-          name: Restore yarn cache
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-npm-react-babel-cache
       - run:
           name: Build
           command: yarn workspace @cypress/react build
@@ -1524,26 +1544,19 @@ jobs:
       <<: *defaults
       steps:
         - restore_cached_workspace
-        - install-required-node:
-            version: "16.10"
         - run:
             name: Build + Install
             command: |
-              . ../../scripts/load-nvm.sh
               yarn workspace @cypress/schematic build:all
-              yarn policies set-version 1.19.0
-              yarn add --dev @angular/cli
             working_directory: npm/cypress-schematic
         - run:
             name: Launch
             command: |
-              . ../../scripts/load-nvm.sh
               yarn launch:test
             working_directory: npm/cypress-schematic
         - run:
             name: Run unit tests
             command: |
-              . ../../scripts/load-nvm.sh
               yarn test
             working_directory: npm/cypress-schematic
         - store-npm-logs
@@ -1559,16 +1572,21 @@ jobs:
 
   create-build-artifacts:
     <<: *defaults
-    resource_class: medium+
-    shell: /bin/bash --login
+    parameters:
+      <<: *defaultsParameters
+      resource_class:
+        type: string
+        default: medium+
+    resource_class: << parameters.resource_class >>
     steps:
       - restore_cached_workspace
       - build-binary
-      - build-cypress-npm-package
+      - build-cypress-npm-package:
+          executor: << parameters.executor >>
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "renovate/cypress-request-2.x" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -1594,7 +1612,6 @@ jobs:
       - run:
           name: Run Kitchensink example project
           command: |
-            . ./scripts/load-nvm.sh
             yarn cypress:run --project /tmp/cypress-example-kitchensink
       - store_artifacts:
           path: /tmp/cypress-example-kitchensink/cypress/screenshots
@@ -1602,12 +1619,13 @@ jobs:
           path: /tmp/cypress-example-kitchensink/cypress/videos
       - store-npm-logs
 
-  "test-kitchensink-against-staging":
+  test-kitchensink-against-staging:
     <<: *defaults
     resource_class: medium
     steps:
       - clone-repo-and-checkout-release-branch:
           repo: cypress-example-kitchensink
+      - install-required-node
       - run:
           name: Install prod dependencies
           command: yarn --production
@@ -1627,7 +1645,7 @@ jobs:
             yarn cypress:run --project /tmp/cypress-example-kitchensink --record
       - store-npm-logs
 
-  "test-against-staging":
+  test-against-staging:
     <<: *defaults
     resource_class: medium
     steps:
@@ -1642,7 +1660,7 @@ jobs:
             yarn cypress:run --project /tmp/cypress-test-tiny --record
       - store-npm-logs
 
-  "test-binary-and-npm-against-other-projects":
+  test-binary-and-npm-against-other-projects:
     <<: *defaults
     resource_class: medium
     steps:
@@ -1679,7 +1697,7 @@ jobs:
               --provider circle
       - store-npm-logs
 
-  "test-npm-module-and-verify-binary":
+  test-npm-module-and-verify-binary:
     <<: *defaults
     steps:
       - restore_cached_workspace
@@ -1853,7 +1871,7 @@ jobs:
           command: npx cypress run
 
   # install NPM + binary zip and run against staging API
-  "test-binary-against-staging":
+  test-binary-against-staging:
     <<: *defaults
     steps:
       - restore_workspace_binaries
@@ -1874,7 +1892,7 @@ jobs:
             $(yarn bin)/cypress run --record
       - store-npm-logs
 
-  "test-binary-against-recipes-firefox":
+  test-binary-against-recipes-firefox:
     <<: *defaults
     steps:
       - test-binary-against-repo:
@@ -1902,7 +1920,7 @@ jobs:
   #         pull_request_id: 515
   #         folder: examples/fundamentals__typescript
 
-  "test-binary-against-kitchensink":
+  test-binary-against-kitchensink:
     <<: *defaults
     resource_class: medium
     steps:
@@ -1917,7 +1935,7 @@ jobs:
           repo: cypress-test-awesome-typescript-loader
           browser: "electron"
 
-  "test-binary-against-kitchensink-firefox":
+  test-binary-against-kitchensink-firefox:
     <<: *defaults
     resource_class: medium
     steps:
@@ -1925,7 +1943,7 @@ jobs:
           repo: cypress-example-kitchensink
           browser: firefox
 
-  "test-binary-against-kitchensink-chrome":
+  test-binary-against-kitchensink-chrome:
     <<: *defaults
     resource_class: medium
     steps:
@@ -1933,7 +1951,7 @@ jobs:
           repo: cypress-example-kitchensink
           browser: chrome
 
-  "test-binary-against-todomvc-firefox":
+  test-binary-against-todomvc-firefox:
     <<: *defaults
     resource_class: medium
     steps:
@@ -1941,7 +1959,7 @@ jobs:
           repo: cypress-example-todomvc
           browser: firefox
 
-  "test-binary-against-conduit-chrome":
+  test-binary-against-conduit-chrome:
     <<: *defaults
     resource_class: medium
     steps:
@@ -1951,7 +1969,7 @@ jobs:
           command: "npm run cypress:run"
           wait-on: http://localhost:3000
 
-  "test-binary-against-api-testing-firefox":
+  test-binary-against-api-testing-firefox:
     <<: *defaults
     steps:
       - test-binary-against-repo:
@@ -1959,7 +1977,7 @@ jobs:
           browser: firefox
           command: "npm run cy:run"
 
-  "test-binary-against-piechopper-firefox":
+  test-binary-against-piechopper-firefox:
     <<: *defaults
     resource_class: medium
     steps:
@@ -1968,7 +1986,7 @@ jobs:
           browser: firefox
           command: "npm run cypress:run"
 
-  "test-binary-against-cypress-realworld-app":
+  test-binary-against-cypress-realworld-app:
     <<: *defaults
     resource_class: medium+
     steps:
@@ -2027,20 +2045,24 @@ jobs:
 
 linux-workflow: &linux-workflow
   jobs:
-    - node_modules_install:
-        arch: 'linux'
+    - node_modules_install
     - build:
         requires:
           - node_modules_install
     - lint:
-        name: Linux lint
+        name: linux-lint
         requires:
           - build
     - percy-finalize:
         context: test-runner:poll-circle-workflow
         required_env_var: PERCY_TOKEN # skips job if not defined (external PR)
         requires:
-          - build
+          - desktop-gui-integration-tests-7x
+          - desktop-gui-component-tests
+          - cli-visual-tests
+          - runner-integration-tests-chrome
+          - runner-ct-integration-tests-chrome
+          - reporter-integration-tests
     - lint-types:
         requires:
           - build
@@ -2160,6 +2182,7 @@ linux-workflow: &linux-workflow
         context: test-runner:npm-release
         requires:
           - build
+          - npm-angular
           - npm-eslint-plugin-dev
           - npm-create-cypress-tests
           - npm-react
@@ -2168,20 +2191,17 @@ linux-workflow: &linux-workflow
           - npm-design-system
           - npm-webpack-batteries-included-preprocessor
           - npm-webpack-preprocessor
-          # - npm-vite-dev-server
+          - npm-vite-dev-server
           - npm-webpack-dev-server
           - npm-cypress-schematic
-          - ui-components-integration-tests
-          - reporter-integration-tests
-          - Linux lint
-          - desktop-gui-component-tests
-          - desktop-gui-integration-tests-7x
-          - runner-ct-integration-tests-chrome
+          - lint-types
+          - linux-lint
+          - percy-finalize
           - runner-integration-tests-firefox
-          - runner-integration-tests-chrome
           - runner-integration-tests-electron
           - driver-integration-tests-firefox
           - driver-integration-tests-chrome
+          - driver-integration-tests-chrome-beta
           - driver-integration-tests-electron
           - system-tests-non-root
           - system-tests-firefox
@@ -2190,18 +2210,16 @@ linux-workflow: &linux-workflow
           - server-performance-tests
           - server-integration-tests
           - server-unit-tests
+          - test-kitchensink
+          - ui-components-integration-tests
           - unit-tests
           - unit-tests-release
-          - cli-visual-tests
 
     # various testing scenarios, like building full binary
     # and testing it on a real project
     - test-against-staging:
         context: test-runner:record-tests
-        filters:
-          branches:
-            only:
-              - develop
+        <<: *mainBuildFilters
         requires:
           - build
     - test-kitchensink:
@@ -2209,10 +2227,7 @@ linux-workflow: &linux-workflow
           - build
     - test-kitchensink-against-staging:
         context: test-runner:record-tests
-        filters:
-          branches:
-            only:
-              - develop
+        <<: *mainBuildFilters
         requires:
           - build
     - create-build-artifacts:
@@ -2258,49 +2273,51 @@ linux-workflow: &linux-workflow
           - create-build-artifacts
     - test-binary-and-npm-against-other-projects:
         context: test-runner:trigger-test-jobs
-        filters:
-          branches:
-            only:
-              - develop
+        <<: *mainBuildFilters
         requires:
           - create-build-artifacts
     - test-npm-module-and-verify-binary:
-        filters:
-          branches:
-            only:
-              - develop
+        <<: *mainBuildFilters
         requires:
           - create-build-artifacts
     - test-binary-against-staging:
         context: test-runner:record-tests
-        filters:
-          branches:
-            only:
-              - develop
+        <<: *mainBuildFilters
         requires:
           - create-build-artifacts
 
     - test-binary-against-kitchensink-chrome:
-        <<: *onlyMainBranches
+        <<: *mainBuildFilters
+        requires:
+          - create-build-artifacts
     # Re-enable when the cypress-example-conduit-app project is fixed.
     # https://github.com/cypress-io/cypress-example-conduit-app/issues/346
     # - test-binary-against-conduit-chrome:
-    #     <<: *onlyMainBranches
+    #     <<: *mainBuildFilters
+    #     requires:
+    #       - create-build-artifacts
     - test-binary-against-recipes-firefox:
-        <<: *onlyMainBranches
+        <<: *mainBuildFilters
+        requires:
+          - create-build-artifacts
     - test-binary-against-kitchensink-firefox:
-        <<: *onlyMainBranches
+        <<: *mainBuildFilters
+        requires:
+          - create-build-artifacts
     - test-binary-against-todomvc-firefox:
-        <<: *onlyMainBranches
+        <<: *mainBuildFilters
+        requires:
+          - create-build-artifacts
     - test-binary-against-api-testing-firefox:
-        <<: *onlyMainBranches
+        <<: *mainBuildFilters
+        requires:
+          - create-build-artifacts
     - test-binary-against-piechopper-firefox:
-        <<: *onlyMainBranches
+        <<: *mainBuildFilters
+        requires:
+          - create-build-artifacts
     - test-binary-against-cypress-realworld-app:
-        filters:
-          branches:
-            only:
-              - develop
+        <<: *mainBuildFilters
         requires:
           - create-build-artifacts
 
@@ -2309,6 +2326,7 @@ linux-workflow: &linux-workflow
         executor: non-root-docker-user
         requires:
           - create-build-artifacts
+
     - test-binary-as-specific-user:
         name: "test binary as a root user"
         requires:
@@ -2319,21 +2337,18 @@ mac-workflow: &mac-workflow
     - node_modules_install:
         name: darwin-node-modules-install
         executor: mac
-        arch: darwin
-        is-mac: true
-        <<: *macBuildFilters
+        only-cache-for-root-user: true
 
     - build:
         name: darwin-build
         executor: mac
+        resource_class: medium
         requires:
           - darwin-node-modules-install
-        <<: *macBuildFilters
 
     - lint:
         name: darwin-lint
         executor: mac
-        <<: *macBuildFilters
         requires:
           - darwin-build
 
@@ -2346,21 +2361,19 @@ mac-workflow: &mac-workflow
           - test-runner:upload
           - test-runner:commit-status-checks
         executor: mac
-        <<: *macBuildFilters
+        resource_class: medium
         requires:
           - darwin-build
 
     - test-kitchensink:
         name: darwin-test-kitchensink
         executor: mac
-        <<: *macBuildFilters
         requires:
           - darwin-build
 
     - test-binary-against-kitchensink:
         name: darwin-test-binary-against-kitchensink
         executor: mac
-        <<: *macBuildFilters
         requires:
           - darwin-create-build-artifacts
 
@@ -2368,10 +2381,6 @@ mac-workflow: &mac-workflow
         context: test-runner:record-tests
         name: darwin-test-binary-against-staging
         executor: mac
-        filters:
-          branches:
-            only:
-              - develop
         requires:
           - darwin-create-build-artifacts
 
@@ -2379,15 +2388,54 @@ mac-workflow: &mac-workflow
         context: test-runner:trigger-test-jobs
         name: darwin-test-binary-and-npm-against-other-projects
         executor: mac
-        filters:
-          branches:
-            only:
-              - develop
         requires:
           - darwin-create-build-artifacts
+
+windows-workflow: &windows-workflow
+  jobs:
+    - node_modules_install:
+        name: windows-node-modules-install
+        executor: windows
+        resource_class: windows.medium
+        only-cache-for-root-user: true
+
+    - build:
+        name: windows-build
+        executor: windows
+        resource_class: windows.medium
+        requires:
+          - windows-node-modules-install
+
+    - lint:
+        name: windows-lint
+        executor: windows
+        requires:
+          - windows-build
+      
+    - unit-tests:
+        name: windows-unit-tests
+        executor: windows
+        resource_class: windows.medium
+        requires:
+          - windows-build
+    
+    - create-build-artifacts:
+        name: windows-create-build-artifacts
+        executor: windows
+        resource_class: windows.medium
+        context:
+          - test-runner:sign-windows-binary
+          - test-runner:upload
+          - test-runner:commit-status-checks
+        requires:
+          - windows-build
 
 workflows:
   linux:
     <<: *linux-workflow
   mac:
     <<: *mac-workflow
+    <<: *mac-workflow-filters
+  windows:
+    <<: *windows-workflow
+    <<: *windows-workflow-filters
