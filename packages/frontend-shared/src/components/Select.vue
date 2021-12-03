@@ -5,7 +5,7 @@
     @update:modelValue="handleUpdate"
   >
     <template #default="{ open }">
-      <ListboxLabel class="block text-sm font-medium text-gray-700">
+      <ListboxLabel class="font-medium text-sm text-gray-700 block">
         <template v-if="label">
           {{ label }}
         </template>
@@ -16,8 +16,8 @@
         />
       </ListboxLabel>
       <div class="relative">
-        <ListboxButton class="bg-white text-gray-800 relative w-full border border-gray-100 rounded pl-3 pr-4 py-2 text-left cursor-default focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-          <span class="absolute inset-y-0 flex items-center">
+        <ListboxButton class="bg-white border rounded cursor-default border-gray-100 text-left w-full py-2 pr-4 pl-3 text-gray-800 relative hocus-default sm:text-sm">
+          <span class="flex inset-y-0 absolute items-center">
             <slot
               name="input-prefix"
               :value="modelValue"
@@ -42,7 +42,7 @@
               {{ get(modelValue, itemValue || '') }}
             </slot>
           </span>
-          <span class="absolute inset-y-0 right-0 pr-2 flex items-center">
+          <span class="flex pr-2 inset-y-0 right-0 absolute items-center">
             <slot
               name="input-suffix"
               :value="modelValue"
@@ -67,7 +67,7 @@
           leave-from-class="opacity-100"
           leave-to-class="opacity-0"
         >
-          <ListboxOptions class="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
+          <ListboxOptions class="bg-white rounded-md shadow-lg ring-black mt-1 text-base w-full max-h-60 py-1 ring-1 ring-opacity-5 z-10 absolute overflow-auto sm:text-sm focus:outline-none">
             <ListboxOption
               v-for="option in options"
               :key="get(option, itemKey ?? '')"
@@ -77,7 +77,7 @@
               :disabled="option.disabled"
             >
               <li
-                class="cursor-default block truncate select-none relative py-2 pl-3 pr-9"
+                class="cursor-default py-2 pr-9 pl-3 block truncate select-none relative"
                 :class="[{
                   'font-medium': selected,
                   'bg-gray-50': active,
@@ -85,7 +85,7 @@
                   'text-opacity-40': option.disabled
                 }]"
               >
-                <span class="absolute inset-y-0 flex items-center">
+                <span class="flex inset-y-0 absolute items-center">
                   <slot
                     name="item-prefix"
                     :selected="selected"
@@ -110,7 +110,7 @@
                   </slot>
                 </span>
 
-                <span class="absolute inset-y-0 right-0 pr-8 flex text-sm items-center">
+                <span class="flex text-sm pr-8 inset-y-0 right-0 absolute items-center">
                   <slot
                     name="item-suffix"
                     :selected="selected"
@@ -119,7 +119,7 @@
                   >
                     <span
                       v-if="selected"
-                      class="text-indigo-500 absolute flex items-center"
+                      class="flex text-indigo-500 absolute items-center"
                     >
                       <Icon
                         :icon="IconCheck"
