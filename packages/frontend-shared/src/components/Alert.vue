@@ -41,16 +41,38 @@
     </div>
     <div
       v-if="props.stackTrace"
+      class="border-t border-error-200"
+      :class="typeDefinition.detailsClass"
     >
-      {{ props.stackTrace }}
+      <button
+        class="flex gap-8px items-center hocus:outline-none"
+        @click="stackOpen = !stackOpen"
+      >
+        <i-cy-chevron-right_x16
+          class="h-16px w-16px icon-dark-error-400"
+          :class="stackOpen ? 'transform rotate-90': ''"
+        />
+        Stack Trace
+      </button>
+      <div class="rounded border-2px border-error-100 mt-16px relative">
+        <CopyButton
+          class="m-16px top-0 right-0 absolute"
+          :text="props.stackTrace"
+          variant="outline"
+        />
+        <pre
+          v-if="stackOpen"
+          class="bg-white border rounded border-error-300 p-16px overflow-auto"
+        >{{ props.stackTrace }}</pre>
+      </div>
     </div>
   </div>
 </template>
 <script lang="ts" setup>
-import { computed, FunctionalComponent, SVGAttributes, useSlots } from 'vue'
+import { computed, FunctionalComponent, ref, SVGAttributes, useSlots } from 'vue'
 import ErrorIcon from '~icons/cy/status-errored-outline_x16.svg'
 import SuccessIcon from '~icons/cy/circle-check_x16.svg'
-import Button from './Button.vue'
+import CopyButton from './CopyButton.vue'
 
 export type AlertType = 'default' | 'error' | 'warning' | 'success' | 'info'
 
@@ -94,6 +116,8 @@ const typeDefinition = computed(() => {
 })
 
 const slots = useSlots()
+
+const stackOpen = ref(false)
 
 const typeDefs: Record<AlertType, {
   class: string,

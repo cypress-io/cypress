@@ -74,5 +74,7 @@ describe('<Alert />', { viewportHeight: 1500 }, () => {
         }} stackTrace={exampleStackTrace}/>
       </div>
     ))
+
+    cy.contains('button', 'Stack Trace').click()
   })
 })
