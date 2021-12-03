@@ -21,7 +21,7 @@ export default (Commands, Cypress, cy) => {
         // to restore the default node behavior.
         encoding: encoding === undefined ? 'utf8' : encoding,
         log: true,
-        timeout: Cypress.config('defaultCommandTimeout'),
+        timeout: Cypress.config('responseTimeout'),
       })
 
       const consoleProps = {}
@@ -130,7 +130,7 @@ export default (Commands, Cypress, cy) => {
         encoding: encoding === undefined ? 'utf8' : encoding,
         flag: userOptions.flag ? userOptions.flag : 'w',
         log: true,
-        timeout: Cypress.config('defaultCommandTimeout'),
+        timeout: Cypress.config('responseTimeout'),
       })
 
       const consoleProps = {}

@@ -406,8 +406,11 @@ export const eventManager = {
         const cb = args.pop()
 
         const handleDisconnect = function (disconnectReason) {
+          const disconnectError = new Error(disconnectReason)
+
+          disconnectError.name = 'SocketDisconnected'
           cb({
-            error: new Error(disconnectReason),
+            error: disconnectError,
           })
         }
 
