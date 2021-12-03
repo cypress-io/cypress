@@ -48,5 +48,8 @@ describe('e2e error ui', function () {
 
       return exec().then(verifyPassedAndFailedAreSame(1))
     },
+    processEnv: {
+      CYPRESS_INTERNAL_ENV: 'development',
+    },
   })
 })
