@@ -17,7 +17,17 @@ const messages = defaultMessages.launchpadErrors.generic
 const customHeaderMessage = 'Well, this was unexpected!'
 const customMessage = `Don't worry, just click the "It's fixed now" button to try again.`
 const customFooterText = `Yikes, try again!`
-const customStack = 'some err message\n  at fn (foo.js:1:1)'
+const customStack = `some err message\n  at fn (foo.js:1:1)
+    at Context.<anonymous> (BaseError.spec.tsx:57)
+    at Context.runnable.fn (cypress:///../driver/src/cypress/cy.ts:1064)
+    at callFn (cypress:///../driver/node_modules/mocha/lib/runnable.js:395)
+    at Test.Runnable.run (cypress:///../driver/node_modules/mocha/lib/runnable.js:382)
+    at eval (cypress:///../driver/src/cypress/runner.ts:1463)
+    at PassThroughHandlerContext.finallyHandler (cypress:////Users/bart/Documents/github/cypress/node_modules/bluebird/js/release/finally.js:56)
+    at PassThroughHandlerContext.tryCatcher (cypress:////Users/bart/Documents/github/cypress/node_modules/bluebird/js/release/util.js:16)
+    at Promise._settlePromiseFromHandler (cypress:////Users/bart/Documents/github/cypress/node_modules/bluebird/js/release/promise.js:512)
+    at Promise._settlePromise (cypress:////Users/bart/Documents/github/cypress/node_modules/bluebird/js/release/promise.js:569)
+`
 
 describe('<BaseError />', () => {
   beforeEach(() => {
