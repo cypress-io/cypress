@@ -1,6 +1,6 @@
-import Markdown from './Markdown.vue'
+import UseMarkdownExample from './UseMarkdownExample.vue'
 
-describe('<Markdown />', () => {
+describe('useMarkdown', () => {
   it('renders styled markdown', () => {
     const text = `
 # Heading 1
@@ -32,13 +32,12 @@ const heres = {
 
     `
 
-    cy.mount(<Markdown
+    cy.mount(<UseMarkdownExample
+      options={{ classes: { code: ['bg-pink-200 text-pink-600'], pre: ['bg-orange-100', 'text-orange-500'] } }}
       text={text}
-      codeClass='bg-gray-100 border-gray-300'
     />)
 
-    cy.get('code').first().should('have.class', 'bg-gray-100 border-gray-300')
-    cy.get('pre').first().should('have.class', 'bg-gray-100 border-gray-300')
     cy.get('ul').should('have.class', 'list-disc')
+    cy.get('code').first().should('have.class', 'bg-pink-200').and('have.class', 'text-pink-600')
   })
 })

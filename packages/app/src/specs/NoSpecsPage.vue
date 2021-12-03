@@ -10,7 +10,7 @@
 
   <div
     v-if="props.gql.currentProject?.currentTestingType"
-    class="overflow-scroll text-center max-w-642px mx-auto py-40px"
+    class="text-center max-w-642px mx-auto py-40px"
   >
     <div class="max-w-600px m-x-auto">
       <h1

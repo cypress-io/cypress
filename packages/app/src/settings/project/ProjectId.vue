@@ -9,7 +9,7 @@
     <template #description>
       <i18n-t keypath="settingsPage.projectId.description">
         <ExternalLink
-          href="https://docs.cypress.io"
+          href="https://on.cypress.io/what-is-a-project-id"
         >
           {{ t('links.learnMore') }}
         </ExternalLink>

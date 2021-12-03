@@ -6,7 +6,7 @@
     <template #description>
       <i18n-t keypath="settingsPage.config.description">
         <ExternalLink
-          href="https://docs.cypress.io"
+          href="https://on.cypress.io/guides/configuration"
           class="text-purple-500"
         >
           cypress.config.js
