@@ -31,12 +31,6 @@
         </div>
       </Dropzone>
     </FileSelector>
-    <div
-      data-testid="upload-name"
-      class="hidden"
-    >
-      {{ uploadName }}
-    </div>
     <button
       v-if="closeButton"
       aria-label="Close"
@@ -96,8 +90,6 @@ withDefaults(defineProps<{
 }>(), {
   closeButton: false,
 })
-
-const uploadName = ref('')
 
 onMounted(() => {
   // TODO: remove this when vue3-file-selector supports setting this attribute
