@@ -16,7 +16,7 @@
 
 <script lang="ts" setup>
 import { computed, ref, watch } from 'vue'
-// import { useToast } from 'vue-toastification'
+import { useToast } from 'vue-toastification'
 import { gql, useMutation, useQuery } from '@urql/vue'
 import BaseError from './error/BaseError.vue'
 import Main from './Main.vue'
@@ -67,25 +67,25 @@ const poll = () => {
 
 let isShowingRelaunch = ref(false)
 
-// const toast = useToast()
+const toast = useToast()
 
-// watch(query.data, () => {
-//   if (process.env.NODE_ENV !== 'production') {
-//     if (query.data.value?.dev.needsRelaunch && !isShowingRelaunch.value) {
-//       isShowingRelaunch.value = true
-//       toast.info('Server updated, click to relaunch', {
-//         timeout: false,
-//         onClick: () => {
-//           relaunchMutation.executeMutation({ action: 'trigger' })
-//         },
-//         onClose: () => {
-//           isShowingRelaunch.value = false
-//           relaunchMutation.executeMutation({ action: 'dismiss' })
-//         },
-//       })
-//     }
-//   }
-// })
+watch(query.data, () => {
+  if (process.env.NODE_ENV !== 'production') {
+    if (query.data.value?.dev.needsRelaunch && !isShowingRelaunch.value) {
+      isShowingRelaunch.value = true
+      toast.info('Server updated, click to relaunch', {
+        timeout: false,
+        onClick: () => {
+          relaunchMutation.executeMutation({ action: 'trigger' })
+        },
+        onClose: () => {
+          isShowingRelaunch.value = false
+          relaunchMutation.executeMutation({ action: 'dismiss' })
+        },
+      })
+    }
+  }
+})
 
 interval = window.setInterval(poll, 200)
 
