@@ -5,7 +5,7 @@ import $errUtils from '../../cypress/error_utils'
 
 export default (Commands, Cypress, cy) => {
   Commands.addAll({
-    async readFile (file, encoding, options = {}) {
+    readFile (file, encoding, options = {}) {
       // We clear the default timeout because we are handling
       // the timeout ourselves.
       cy.clearTimeout()
@@ -47,12 +47,9 @@ export default (Commands, Cypress, cy) => {
         })
       }
 
-      const verifyAssertions = async () => {
-        let result
-
-        try {
-          result = await Cypress.backend('read:file', file, _.pick(options, ['encoding', 'timeout']))
-        } catch (err) {
+      const verifyAssertions = () => {
+        return Cypress.backend('read:file', file, _.pick(options, 'encoding', 'timeout'))
+        .catch((err) => {
           if (err.name === 'TimeoutError') {
             return $errUtils.throwErrByPath('files.timed_out', {
               onFail: options._log,
@@ -68,49 +65,47 @@ export default (Commands, Cypress, cy) => {
             })
           }
 
-          result = {
+          return {
             contents: null,
             filePath: err.filePath,
           }
-        }
+        }).then(({ contents, filePath }) => {
+          // https://github.com/cypress-io/cypress/issues/1558
+          // We invoke Buffer.from() in order to transform this from an ArrayBuffer -
+          // which socket.io uses to transfer the file over the websocket - into a
+          // `Buffer`, which webpack polyfills in the browser.
+          if (options.encoding === null) {
+            contents = Buffer.from(contents)
+          }
 
-        let { contents, filePath } = result
+          consoleProps['File Path'] = filePath
+          consoleProps['Contents'] = contents
 
-        // https://github.com/cypress-io/cypress/issues/1558
-        // We invoke Buffer.from() in order to transform this from an ArrayBuffer -
-        // which socket.io uses to transfer the file over the websocket - into a
-        // `Buffer`, which webpack polyfills in the browser.
-        if (options.encoding === null) {
-          contents = Buffer.from(contents)
-        }
+          return cy.verifyUpcomingAssertions(contents, options, {
+            ensureExistenceFor: 'subject',
+            onFail (err) {
+              if (err.type !== 'existence') {
+                return
+              }
 
-        consoleProps['File Path'] = filePath
-        consoleProps['Contents'] = contents
+              // file exists but it shouldn't - or - file doesn't exist but it should
+              const errPath = contents ? 'files.existent' : 'files.nonexistent'
+              const { message, docsUrl } = $errUtils.cypressErrByPath(errPath, {
+                args: { file, filePath },
+              })
 
-        return cy.verifyUpcomingAssertions(contents, options, {
-          ensureExistenceFor: 'subject',
-          onFail (err) {
-            if (err.type !== 'existence') {
-              return
-            }
-
-            // file exists but it shouldn't - or - file doesn't exist but it should
-            const errPath = contents ? 'files.existent' : 'files.nonexistent'
-            const { message, docsUrl } = $errUtils.cypressErrByPath(errPath, {
-              args: { file, filePath },
-            })
-
-            err.message = message
-            err.docsUrl = docsUrl
-          },
-          onRetry: verifyAssertions,
+              err.message = message
+              err.docsUrl = docsUrl
+            },
+            onRetry: verifyAssertions,
+          })
         })
       }
 
       return verifyAssertions()
     },
 
-    async writeFile (fileName, contents, encoding, options = {}) {
+    writeFile (fileName, contents, encoding, options = {}) {
       // We clear the default timeout because we are handling
       // the timeout ourselves.
       cy.clearTimeout()
@@ -164,11 +159,14 @@ export default (Commands, Cypress, cy) => {
         contents = JSON.stringify(contents, null, 2)
       }
 
-      let result
+      return Cypress.backend('write:file', fileName, contents, _.pick(options, 'encoding', 'flag', 'timeout'))
+      .then(({ contents, filePath }) => {
+        consoleProps['File Path'] = filePath
+        consoleProps['Contents'] = contents
 
-      try {
-        result = await Cypress.backend('write:file', fileName, contents, _.pick(options, ['encoding', 'flag', 'timeout']))
-      } catch (err) {
+        return null
+      })
+      .catch((err) => {
         if (err.name === 'TimeoutError') {
           return $errUtils.throwErrByPath('files.timed_out', {
             onFail: options._log,
@@ -180,12 +178,7 @@ export default (Commands, Cypress, cy) => {
           onFail: options._log,
           args: { cmd: 'writeFile', action: 'write', file: fileName, filePath: err.filePath, error: err.message },
         })
-      }
-
-      consoleProps['File Path'] = result?.filePath
-      consoleProps['Contents'] = result?.contents
-
-      return null
+      })
     },
   })
 }
