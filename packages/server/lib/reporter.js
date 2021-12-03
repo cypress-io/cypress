@@ -545,8 +545,13 @@ class Reporter {
         throw err
       }
 
-      p = path.resolve(projectRoot, 'node_modules', reporterName)
-
+      try {
+        p = path.resolve(projectRoot, 'node_modules', reporterName)
+      } catch (err) {
+        // If we are not able to import with path.resolve, try with the require.resolve
+        // useful for example when Yarn PnP is used. See: #18922
+        p = require.resolve(reporterName, { paths: [projectRoot] })
+      }
       // try npm. if this fails, we're out of options, so let it throw
       debug('trying to require local reporter with path:', p)
 
@@ -555,10 +560,18 @@ class Reporter {
   }
 
   static getSearchPathsForReporter (reporterName, projectRoot) {
-    return _.uniq([
-      path.resolve(projectRoot, reporterName),
-      path.resolve(projectRoot, 'node_modules', reporterName),
-    ])
+    try {
+      return _.uniq([
+        path.resolve(projectRoot, reporterName),
+        path.resolve(projectRoot, 'node_modules', reporterName),
+        require.resolve(reporterName, { paths: [projectRoot] }),
+      ])
+    } catch (err) {
+      return _.uniq([
+        path.resolve(projectRoot, reporterName),
+        path.resolve(projectRoot, 'node_modules', reporterName),
+      ])
+    }
   }
 }
 
