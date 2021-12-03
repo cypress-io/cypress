@@ -2,7 +2,6 @@ module.exports = {
   'video': false,
   'viewportWidth': 400,
   'viewportHeight': 700,
-  'componentFolder': 'src',
   'component': {
     'specPattern': 'src/**/*cy-spec.js',
     setupNodeEvents (on, config) {

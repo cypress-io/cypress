@@ -2,10 +2,9 @@ module.exports = {
   'video': false,
   'viewportWidth': 500,
   'viewportHeight': 800,
-  'componentFolder': 'cypress/components',
   'pluginsFile': 'cypress/plugins.js',
   'component': {
-    'specPattern': '**/*.spec.{js,jsx}',
+    'specPattern': 'cypress/component/**/*.spec.{js,jsx}',
     setupNodeEvents (on, config) {
       const devServer = require('@cypress/react/plugins/next')
 

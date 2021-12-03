@@ -4,7 +4,7 @@ module.exports = {
   'viewportWidth': 500,
   'viewportHeight': 500,
   'component': {
-    'specPattern': 'component/**/*spec.js',
+    'specPattern': 'cypress/component/**/*spec.js',
     setupNodeEvents (on, config) {
       // load file devServer that comes with this plugin
       // https://github.com/bahmutov/cypress-react-unit-test#install
