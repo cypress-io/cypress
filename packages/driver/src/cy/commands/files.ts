@@ -6,10 +6,6 @@ import $errUtils from '../../cypress/error_utils'
 export default (Commands, Cypress, cy) => {
   Commands.addAll({
     readFile (file, encoding, options = {}) {
-      // We clear the default timeout because we are handling
-      // the timeout ourselves.
-      cy.clearTimeout()
-
       let userOptions = options
 
       if (_.isObject(encoding)) {
@@ -46,6 +42,11 @@ export default (Commands, Cypress, cy) => {
           args: { cmd: 'readFile', file },
         })
       }
+
+      // We clear the default timeout because the read:file command will
+      // perform its own timeout in the server. If the server command times out,
+      // it will throw an AbortError.
+      cy.clearTimeout()
 
       const verifyAssertions = () => {
         return Cypress.backend('read:file', file, _.pick(options, 'encoding', 'timeout'))
@@ -113,10 +114,6 @@ export default (Commands, Cypress, cy) => {
     },
 
     writeFile (fileName, contents, encoding, options = {}) {
-      // We clear the default timeout because we are handling
-      // the timeout ourselves.
-      cy.clearTimeout()
-
       let userOptions = options
 
       if (_.isObject(encoding)) {
@@ -165,6 +162,11 @@ export default (Commands, Cypress, cy) => {
       if (_.isObject(contents) && !Buffer.isBuffer(contents)) {
         contents = JSON.stringify(contents, null, 2)
       }
+
+      // We clear the default timeout because the read:file command will
+      // perform its own timeout in the server. If the server command times out,
+      // it will throw an AbortError.
+      cy.clearTimeout()
 
       return Cypress.backend('write:file', fileName, contents, _.pick(options, 'encoding', 'flag', 'timeout'))
       .then(({ filePath, contents }) => {

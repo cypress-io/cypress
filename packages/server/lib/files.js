@@ -36,10 +36,6 @@ module.exports = {
     .catch((err) => {
       err.filePath = filePath
 
-      if (err.name === 'AbortError') {
-        err.name = 'TimeoutError'
-      }
-
       throw err
     })
     .finally(() => {
@@ -72,10 +68,6 @@ module.exports = {
     })
     .catch((err) => {
       err.filePath = filePath
-
-      if (err.name === 'AbortError') {
-        err.name = 'TimeoutError'
-      }
 
       throw err
     })
