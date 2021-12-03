@@ -21,7 +21,7 @@ export default (Commands, Cypress, cy) => {
         // to restore the default node behavior.
         encoding: encoding === undefined ? 'utf8' : encoding,
         log: true,
-        timeout: Cypress.config('responseTimeout'),
+        timeout: Cypress.config('defaultCommandTimeout'),
       })
 
       const consoleProps = {}
@@ -43,9 +43,8 @@ export default (Commands, Cypress, cy) => {
         })
       }
 
-      // We clear the default timeout because the read:file command will
-      // perform its own timeout in the server. If the server command times out,
-      // it will throw an AbortError.
+      // We clear the default timeout so we can handle
+      // the timeout ourselves
       cy.clearTimeout()
 
       const verifyAssertions = () => {
@@ -123,7 +122,7 @@ export default (Commands, Cypress, cy) => {
         encoding: encoding === undefined ? 'utf8' : encoding,
         flag: userOptions.flag ? userOptions.flag : 'w',
         log: true,
-        timeout: Cypress.config('responseTimeout'),
+        timeout: Cypress.config('defaultCommandTimeout'),
       })
 
       const consoleProps = {}
@@ -156,9 +155,8 @@ export default (Commands, Cypress, cy) => {
         contents = JSON.stringify(contents, null, 2)
       }
 
-      // We clear the default timeout because the write:file command will
-      // perform its own timeout in the server. If the server command times out,
-      // it will throw an AbortError.
+      // We clear the default timeout so we can handle
+      // the timeout ourselves
       cy.clearTimeout()
 
       return Cypress.backend('write:file', fileName, contents, _.pick(options, 'encoding', 'flag', 'timeout')).timeout(options.timeout)
