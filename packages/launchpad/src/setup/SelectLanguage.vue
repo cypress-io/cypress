@@ -1,18 +1,18 @@
 <template>
   <div class="text-left relative">
-    <label
-      class="font-medium  mt-14px mb-10px text-gray-800 block"
+    <div
+      class="font-medium mt-14px mb-10px text-gray-800 block"
       :class="{ 'opacity-50': disabled }"
     >
       {{
         name
       }}
-    </label>
-    <div class="border rounded border-gray-100 p-1 gap-1 inline-flex">
+    </div>
+    <div class="border rounded border-gray-100 p-3px gap-1 inline-flex">
       <button
         v-for="opt in options"
         :key="opt.type"
-        class="rounded-sm py-4px px-12px focus:outline-none"
+        class="border-transparent rounded-sm border-1 py-4px px-12px hocus-default focus:outline-none"
         :class="opt.id === value ? 'bg-secondary-50 text-secondary-600': 'text-gray-700'"
         @click="() => selectOption(opt.type)"
       >

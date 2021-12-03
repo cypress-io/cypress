@@ -1,5 +1,5 @@
 <template>
-  <div class="px-5 py-5 flex gap-3 bg-gray-50 border-t border-t-1 border-t-gray-100 rounded-b">
+  <div class="border-t rounded-b flex bg-gray-50 border-t-1 border-t-gray-100 py-16px px-24px gap-3">
     <slot>
       <Button
         v-if="showNext"
@@ -19,11 +19,11 @@
       <div class="flex-grow" />
       <div
         v-if="altFn && alt"
-        class="flex items-center px-3"
+        class="flex px-3 items-center"
       >
         <label
           for="altFn"
-          class="text-gray-500 px-3"
+          class="px-3 text-gray-500"
           @click="handleAlt"
         >{{ alt }}</label>
         <Switch

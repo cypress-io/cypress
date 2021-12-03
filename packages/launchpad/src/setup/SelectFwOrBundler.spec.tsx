@@ -1,5 +1,5 @@
 import { ref } from 'vue'
-import Select from './SelectFramework.vue'
+import Select from './SelectFwOrBundler.vue'
 
 const manyOptions = [
   {

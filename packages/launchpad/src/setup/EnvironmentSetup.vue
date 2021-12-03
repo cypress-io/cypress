@@ -3,20 +3,22 @@
     :can-navigate-forward="props.gql.canNavigateForward"
     class="max-w-640px"
   >
-    <div class="m-5">
-      <SelectFramework
+    <div class="m-24px">
+      <SelectFwOrBundler
         :name="t('setupPage.projectSetup.frameworkLabel')"
         :options="frameworks ?? []"
         :value="props.gql.framework?.id ?? undefined"
         :placeholder="t('setupPage.projectSetup.frameworkPlaceholder')"
+        :label="t('setupPage.projectSetup.frameworkLabel')"
         @select="setFEFramework"
       />
-      <SelectBundler
+      <SelectFwOrBundler
         :name="t('setupPage.projectSetup.bundlerLabel')"
         :disabled="bundlers.length === 1"
         :options="bundlers || []"
         :value="props.gql.bundler?.id ?? undefined"
         :placeholder="t('setupPage.projectSetup.bundlerPlaceholder')"
+        :label="t('setupPage.projectSetup.bundlerLabel')"
         @select="setFEBundler"
       />
       <SelectLanguage
@@ -32,9 +34,8 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 import WizardLayout from './WizardLayout.vue'
-import SelectFramework from '../components/select/SelectFramework.vue'
-import SelectBundler from '../components/select/SelectBundler.vue'
-import SelectLanguage from '../components/select/SelectLanguage.vue'
+import SelectFwOrBundler from './SelectFwOrBundler.vue'
+import SelectLanguage from './SelectLanguage.vue'
 import { gql } from '@urql/core'
 import {
   EnvironmentSetupFragment,
