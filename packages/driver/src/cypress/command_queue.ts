@@ -19,6 +19,11 @@ interface Command {
   finishLogs(): void
 }
 
+interface Log {
+  error(e: any): any
+  get(key: string): any
+}
+
 const __stackReplacementMarker = (fn, ctx, args) => {
   return fn.apply(ctx, args)
 }
@@ -35,6 +40,15 @@ const commandRunningFailed = (Cypress, state, err) => {
   }
 
   const current = state('current')
+  let existingLog = _.last(current.attributes.logs) as Log
+
+  // if the cy.current property already has associated logs that
+  // have not ended, we fail the most recent log
+  if (existingLog && !existingLog.get('ended')) {
+    existingLog.error(err)
+
+    return
+  }
 
   return Cypress.log({
     end: true,

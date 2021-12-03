@@ -22,6 +22,24 @@ ws.on('connect', () => {
   ws.emit('runner:connected')
 })
 
+ws.on('disconnect', (reason) => {
+  if (!Cypress || !Cypress.currentTest) {
+    return
+  }
+
+  let message = `Cypress command failed after socket disconnection due to: ${reason}.`
+
+  if (reason === 'transport error' || reason === 'transport close') {
+    message = `${message}\n\nThis usually happens when your command's arguments exceed the socket's buffer limits.`
+  }
+
+  const err = new Error(message)
+
+  err.name = 'CypressError'
+
+  Cypress.cy.fail(err, { async: true })
+})
+
 const driverToReporterEvents = 'paused session:add'.split(' ')
 const driverToLocalAndReporterEvents = 'run:start run:end'.split(' ')
 const driverToSocketEvents = 'backend:request automation:request mocha recorder:frame'.split(' ')
@@ -403,23 +421,7 @@ export const eventManager = {
 
     _.each(driverToSocketEvents, (event) => {
       Cypress.on(event, (...args) => {
-        const cb = args.pop()
-
-        const handleDisconnect = function (disconnectReason) {
-          const disconnectError = new Error(disconnectReason)
-
-          disconnectError.name = 'SocketDisconnected'
-          cb({
-            error: disconnectError,
-          })
-        }
-
-        ws.once('disconnect', handleDisconnect)
-
-        return ws.emit(event, ...args, (...cbArgs) => {
-          ws.off('disconnect', handleDisconnect)
-          cb(...cbArgs)
-        })
+        return ws.emit(event, ...args)
       })
     })
 

@@ -49,19 +49,12 @@ export default (Commands, Cypress, cy) => {
       cy.clearTimeout()
 
       const verifyAssertions = () => {
-        return Cypress.backend('read:file', file, _.pick(options, 'encoding', 'timeout'))
+        return Cypress.backend('read:file', file, _.pick(options, 'encoding', 'timeout')).timeout(options.timeout)
         .catch((err) => {
-          if (err.name === 'AbortError') {
+          if (err.name === 'TimeoutError') {
             return $errUtils.throwErrByPath('files.timed_out', {
               onFail: options._log,
               args: { cmd: 'readFile', file, timeout: options.timeout },
-            })
-          }
-
-          if (err.name === 'SocketDisconnected') {
-            return $errUtils.throwErrByPath('files.socket_disconnected', {
-              onFail: options._log,
-              args: { cmd: 'readFile', file, message: err.message },
             })
           }
 
@@ -163,12 +156,12 @@ export default (Commands, Cypress, cy) => {
         contents = JSON.stringify(contents, null, 2)
       }
 
-      // We clear the default timeout because the read:file command will
+      // We clear the default timeout because the write:file command will
       // perform its own timeout in the server. If the server command times out,
       // it will throw an AbortError.
       cy.clearTimeout()
 
-      return Cypress.backend('write:file', fileName, contents, _.pick(options, 'encoding', 'flag', 'timeout'))
+      return Cypress.backend('write:file', fileName, contents, _.pick(options, 'encoding', 'flag', 'timeout')).timeout(options.timeout)
       .then(({ filePath, contents }) => {
         consoleProps['File Path'] = filePath
         consoleProps['Contents'] = contents
@@ -176,17 +169,10 @@ export default (Commands, Cypress, cy) => {
         return null
       })
       .catch((err) => {
-        if (err.name === 'AbortError') {
+        if (err.name === 'TimeoutError') {
           return $errUtils.throwErrByPath('files.timed_out', {
             onFail: options._log,
             args: { cmd: 'writeFile', file: fileName, timeout: options.timeout },
-          })
-        }
-
-        if (err.name === 'SocketDisconnected') {
-          return $errUtils.throwErrByPath('files.socket_disconnected', {
-            onFail: options._log,
-            args: { cmd: 'writeFile', file: fileName, message: err.message },
           })
         }
 
