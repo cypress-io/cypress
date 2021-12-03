@@ -6,7 +6,7 @@
     <template #description>
       <i18n-t keypath="settingsPage.experiments.description">
         <ExternalLink
-          href="https://docs.cypress.io"
+          href="https://on.cypress.io/experiments"
         >
           {{ t('links.learnMore') }}
         </ExternalLink>

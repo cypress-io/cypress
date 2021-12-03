@@ -9,7 +9,7 @@
     <template #description>
       <i18n-t keypath="settingsPage.specPattern.description">
         <ExternalLink
-          href="https://docs.cypress.io"
+          href="https://on.cypress.io"
         >
           {{ t('links.learnMore') }}
         </ExternalLink>
