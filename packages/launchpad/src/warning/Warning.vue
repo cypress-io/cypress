@@ -1,38 +1,38 @@
 <template>
-  <div
-    data-cy="warning"
-    class="rounded min-w-200px bg-warning-100 mb-5"
+  <Alert
+    v-model="show"
+    dismissible
+    status="warning"
+    data-testid="warning-alert"
+    header-class="text-warning-600"
+    :title="title"
+    :icon="ErrorOutlineIcon"
   >
-    <h3 class="text-lg text-warning-600 font-medium flex items-center p-5 relative">
-      <i-cy-status-errored-outline_x16 class="w-24px h-24px mr-2" /> {{ props.title }}
-      <button
-        aria-label="Dismiss"
-        data-cy="dismiss"
-        class="text-warning-500 hocus:text-warning-600 outline-none absolute w-32px
-      h-32px right-8px top-8px flex items-center justify-center"
-        @click="onDismiss"
-      >
-        <i-cy-delete_x12 class="icon-dark-current w-12px h-12px" />
-      </button>
-    </h3>
-    <Markdown
-      class="border-t border-warning-200 text-warning-500 py-5 mt-0 mx-5"
-      code-class="bg-white bg-opacity-25 border-warning-300"
-      :text="props.message"
+    <div
+      ref="markdownTarget"
+      v-html="markdown"
     />
-  </div>
+  </Alert>
 </template>
 
 <script lang="ts" setup>
-import Markdown from '../components/markdown/Markdown.vue'
+import ErrorOutlineIcon from '~icons/cy/status-errored-outline_x16.svg'
+import { useMarkdown } from '@packages/frontend-shared/src/composables/useMarkdown'
+import Alert from '@cy/components/Alert.vue'
+import { ref } from 'vue'
+import { useVModels } from '@vueuse/core'
 
-const props = defineProps<{
-  title: string,
-  message: string,
-  dismiss: Function,
+const emits = defineEmits<{
+  (eventName: 'update:modelValue', value: boolean): void
 }>()
 
-const onDismiss = () => {
-  props.dismiss()
-}
+const props = withDefaults(defineProps<{
+  title: string,
+  message: string,
+  modelValue: boolean
+}>(), { modelValue: true })
+
+const { modelValue: show } = useVModels(props, emits)
+const markdownTarget = ref()
+const { markdown } = useMarkdown(markdownTarget, props.message, { classes: { code: ['bg-warning-200'] } })
 </script>
