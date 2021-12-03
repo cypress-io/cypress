@@ -104,7 +104,6 @@ export async function copyAllToDist (distDir: string) {
     try {
       // Strip out dev-dependencies & scripts for everything in /packages so we can yarn install in there
       await fs.writeJson(path.join(distDir, pkg, 'package.json'), _.omit(json, [
-        'scripts',
         'devDependencies',
         'lint-staged',
         'engines',

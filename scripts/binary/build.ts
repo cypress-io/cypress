@@ -72,7 +72,6 @@ export async function buildCypressApp (options: BuildCypressAppOpts) {
   const jsonRoot = fs.readJSONSync(path.join(CY_ROOT_DIR, 'package.json'))
 
   fs.writeJsonSync(meta.distDir('package.json'), _.omit(jsonRoot, [
-    'scripts',
     'devDependencies',
     'lint-staged',
     'engines',
