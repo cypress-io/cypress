@@ -1,16 +1,16 @@
 <template>
   <div
-    tabindex="0"
+    :tabindex="disable ? '-1' : '0'"
     data-cy="collapsible"
-    @keypress.space.enter.self="toggle"
+    @keypress.space.enter.self="!disable && toggle()"
   >
     <div
       data-cy="collapsible-header"
       :aria-expanded="isOpen"
       class="rounded-t focus:outline-indigo-500"
       :class="{'rounded-b': !isOpen}"
-      @click="toggle"
-      @keypress.space.enter.self="toggle"
+      @click="!disable && toggle()"
+      @keypress.space.enter.self="!disable && toggle()"
     >
       <slot
         name="target"
@@ -41,11 +41,13 @@ import { useToggle } from '@vueuse/core'
 const props = withDefaults(defineProps<{
   maxHeight?: string
   initiallyOpen?: boolean
-  lazy?: boolean
+  lazy?: boolean,
+  disable?: boolean,
 }>(), {
   initiallyOpen: false,
   maxHeight: '500px',
   lazy: false,
+  disable: false,
 })
 
 const [isOpen, toggle] = useToggle(props.initiallyOpen)
