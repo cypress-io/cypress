@@ -1,54 +1,63 @@
 <template>
   <div
     v-bind="containerProps"
-    class="specs-list-container"
+    class="specs-list-container overscroll-contain"
   >
     <ul
       v-bind="wrapperProps"
-      class="children:h-28px"
-      tabindex="0"
+      class="overflow-x-hidden children:h-30px"
     >
       <li
         v-for="row in list"
         :key="row.index"
-        :ref="el => setItemRef(el, row.index)"
-        v-bind="rowProps"
         class="
+        border-transparent cursor-pointer
         flex
-        outline-none
-        group
-        cursor-pointer
+        border-1
         relative
-        before:(absolute
-        w-8px
-        left-[-4px]
-        h-28px
-        border-r-4 border-r-gray-1000
-        rounded-lg)
-        item
-      "
-        :style="{ paddingLeft: `${(row.data.depth - 2) * 10 + 16}px` }"
-        :class="{'before:hover:(transitional-all duration-250 ease-in-out border-r-indigo-300) before:focus:(border-r-indigo-300)': row.data.isLeaf, 'before:border-r-indigo-300': isCurrentSpec(row.data)}"
+        group
+        hover:border-gray-900
+        focus-within:border-indigo-300
+        hover:focus-within:border-indigo-300"
+        :class="{
+          'hover:border-gray-1000': isCurrentSpec(row.data),
+        }"
         data-testid="spec-row-item"
-        @click="onRowClick(row.data, row.index)"
-        @keypress.enter.space.prevent="onRowClick(row.data, row.index)"
+        @click.self="submit(row.data, row.index)"
       >
-        <SpecFileItem
-          v-if="row.data.isLeaf"
-          :file-name="row.data.data?.fileName || row.data.name"
-          :extension="row.data.data?.specFileExtension || ''"
-          :selected="isCurrentSpec(row.data)"
-          :indexes="getIndexes(row.data)"
-          class="pl-22px"
-          data-testid="spec-file-item"
-        />
-        <DirectoryItem
-          v-else
-          :name="row.data.name"
-          :expanded="treeSpecList[row.index].expanded.value"
-          :indexes="getIndexes(row.data)"
-          data-testid="directory-item"
-        />
+        <RouterLink
+          :ref="el => setItemRef(el, row.index)"
+          :key="row.data.data?.absolute"
+          :tabindex="isTabbable(row, row.index) ? '0' : '-1'"
+          :style="{ paddingLeft: `${(row.data.depth - 2) * 10 + 16}px` }"
+          class="outline-none w-full group before:(border-r-4 h-27px rounded-r-4px absolute left-[-4px] w-8px) "
+          :class="{'before:border-r-indigo-300 before:border-r-4': isCurrentSpec(row.data),
+                   'group-hocus:bg-gray-900 focus:bg-gray-900 before:focus-within:(border-r-0) before:(border-r-gray-1000) before:group-hover:(h-26px border-r-gray-900)': !isCurrentSpec(row.data)
+          }"
+          :to="{ path: 'runner', query: { file: row.data.data?.relative } }"
+          @focus="resetFocusIfNecessary(row, row.index)"
+          @click.capture.prevent="submit(row.data, row.index)"
+          @keydown.enter.space.prevent.stop="submit(row.data, row.index)"
+          @keydown.left.right.prevent.stop="toggle(row.data, row.index)"
+        >
+          <SpecFileItem
+            v-if="row.data.isLeaf"
+            :file-name="row.data.data?.fileName || row.data.name"
+            :extension="row.data.data?.specFileExtension || ''"
+            :selected="isCurrentSpec(row.data)"
+            :indexes="getIndexes(row.data)"
+            class="pl-22px"
+            data-testid="spec-file-item"
+          />
+          <DirectoryItem
+            v-else
+            class="children:truncate"
+            :name="row.data.name"
+            :expanded="treeSpecList[row.index].expanded.value"
+            :indexes="getIndexes(row.data)"
+            data-testid="directory-item"
+          />
+        </RouterLink>
       </li>
     </ul>
   </div>
@@ -58,9 +67,9 @@
 import { useCollapsibleTree, UseCollapsibleTreeNode } from '@packages/frontend-shared/src/composables/useCollapsibleTree'
 import { buildSpecTree, FuzzyFoundSpec, SpecTreeNode, getIndexes } from '@packages/frontend-shared/src/utils/spec-utils'
 import SpecFileItem from './SpecFileItem.vue'
-import { computed, watch } from 'vue'
+import { computed, watch, onMounted, onUpdated } from 'vue'
 import DirectoryItem from './DirectoryItem.vue'
-import { useRouter } from 'vue-router'
+import { RouterLink, useRouter } from 'vue-router'
 import { useSpecStore } from '../store'
 import { useVirtualList } from '@packages/frontend-shared/src/composables/useVirtualList'
 import { useVirtualListNavigation } from '@packages/frontend-shared/src/composables/useVirtualListNavigation'
@@ -84,8 +93,32 @@ const isCurrentSpec = (row: UseCollapsibleTreeNode<SpecTreeNode<FuzzyFoundSpec>>
 const collapsible = computed(() => useCollapsibleTree(buildSpecTree<FuzzyFoundSpec>(props.specs), { dropRoot: true }))
 const treeSpecList = computed(() => collapsible.value.tree.filter(((item) => !item.hidden.value)))
 
-const onRowClick = (row: UseCollapsibleTreeNode<SpecTreeNode<FuzzyFoundSpec>>, idx: number) => {
+const findCurrentSpecIndex = computed(() => {
+  return treeSpecList.value.findIndex((s) => isCurrentSpec(s))
+})
+
+const hasAnyCurrentSpec = computed(() => {
+  return findCurrentSpecIndex.value > -1
+})
+
+const isTabbable = (row, index) => {
+  if (!hasAnyCurrentSpec.value) {
+    if (index === 0) return true
+  } else if (isCurrentSpec(row.data)) {
+    return true
+  }
+
+  return false
+}
+
+const toggle = (row: UseCollapsibleTreeNode<SpecTreeNode<FuzzyFoundSpec>>, idx: number) => {
   activeItem.value = idx
+  row.toggle()
+}
+
+const submit = (row: UseCollapsibleTreeNode<SpecTreeNode<FuzzyFoundSpec>>, idx: number) => {
+  activeItem.value = idx
+
   if (row.isLeaf) {
     if (!row.data) {
       return
@@ -95,10 +128,16 @@ const onRowClick = (row: UseCollapsibleTreeNode<SpecTreeNode<FuzzyFoundSpec>>, i
   } else {
     row.toggle()
   }
+
+  return false
 }
 
-const { containerProps, list, wrapperProps, scrollTo, api } = useVirtualList(treeSpecList, { itemHeight: 28, overscan: 15 })
-const { activeItem, rowProps, setItemRef } = useVirtualListNavigation(api)
+const { containerProps, list, wrapperProps, scrollTo, api } = useVirtualList(treeSpecList, { itemHeight: 30, overscan: 15 })
+const { activeItem, setItemRef } = useVirtualListNavigation(api)
+
+onMounted(() => {
+  activeItem.value = findCurrentSpecIndex.value
+})
 
 // If you are scrolled down the virtual list and list changes,
 // reset scroll position to top of list
@@ -107,17 +146,23 @@ watch(collapsible, () => {
   scrollTo(0)
 })
 
+const resetFocusIfNecessary = (row, index) => {
+  if (isTabbable(row, index)) {
+    activeItem.value = index
+  }
+}
+
 </script>
 
 <style scoped>
-li::before {
+a::before {
   content: "";
 }
 
-/** h-[calc] was getting dropped so moved to styles. Virtual list requires defined height */
-
-/** Header is 80px */
+/** h-[calc] was getting dropped so moved to styles. Virtual list requires defined height. */
+/** Header is 80px, padding-bottom is 8px **/
 .specs-list-container {
-  height: calc(100vh - 80px)
+  height: calc(100vh - 80px - 8px);
 }
+
 </style>
