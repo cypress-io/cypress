@@ -17,7 +17,8 @@ const messages = defaultMessages.launchpadErrors.generic
 const customHeaderMessage = 'Well, this was unexpected!'
 const customMessage = `Don't worry, just click the "It's fixed now" button to try again.`
 const customFooterText = `Yikes, try again!`
-const customStack = `some err message\n  at fn (foo.js:1:1)
+const customStack = `some err message
+    at fn (foo.js:1:1)
     at Context.<anonymous> (BaseError.spec.tsx:57)
     at Context.runnable.fn (cypress:///../driver/src/cypress/cy.ts:1064)
     at callFn (cypress:///../driver/node_modules/mocha/lib/runnable.js:395)
