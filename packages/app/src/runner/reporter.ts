@@ -2,7 +2,7 @@ import { getMobxRunnerStore, MobxRunnerStore } from '../store'
 import { getReporterElement } from './utils'
 import { getEventManager } from '.'
 import type { EventManager } from './event-manager'
-
+import { useRunnerUiStore } from '../store/runner-ui-store'
 let hasInitializeReporter = false
 
 async function unmountReporter () {
@@ -29,12 +29,16 @@ function renderReporter (
   store: MobxRunnerStore,
   eventManager: EventManager,
 ) {
+  const runnerUiStore = useRunnerUiStore()
+
   const reporter = window.UnifiedRunner.React.createElement(window.UnifiedRunner.Reporter, {
     runMode: 'single' as const,
     runner: eventManager.reporterBus,
     key: store.specRunId,
     spec: store.spec,
     specRunId: store.specRunId,
+    autoScrollingEnabled: runnerUiStore.autoScrollingEnabled,
+    isSpecsListOpen: runnerUiStore.isSpecsListOpen,
     error: null, // errorMessages.reporterError(props.state.scriptError, props.state.spec.relative),
     resetStatsOnSpecChange: true,
     experimentalStudioEnabled: false,
