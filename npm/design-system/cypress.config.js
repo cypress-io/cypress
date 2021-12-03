@@ -3,7 +3,6 @@ module.exports = {
   viewportHeight: 800,
   video: false,
   projectId: 'z9dxah',
-  testFiles: '**/*spec.{js,jsx,ts,tsx}',
   env: {
     reactDevtools: true,
   },
@@ -11,9 +10,9 @@ module.exports = {
     '**/__snapshots__/*',
     '**/__image_snapshots__/*',
   ],
-  componentFolder: 'src',
   fixturesFolder: false,
   component: {
+    specPattern: 'src/**/*spec.{js,jsx,ts,tsx}',
     devServer (cypressConfig) {
       const { startDevServer } = require('@cypress/vite-dev-server')
 
