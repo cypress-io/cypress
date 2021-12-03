@@ -1,22 +1,24 @@
 <template>
-  <div class="flex items-center w-full text-left rounded py-12px">
-    <div class="flex items-center h-40px px-24px">
+  <div
+    class="rounded flex text-left w-full py-14px items-center"
+  >
+    <div class="flex h-40px px-24px items-center">
       <slot name="icon">
         <component
           :is="icon"
-          class="w-24px h-24px"
+          class="h-24px w-24px"
         />
       </slot>
     </div>
-    <div class="h-40px w-1px bg-gray-100" />
-    <div class="flex-grow px-16px h-auto">
+    <div class="bg-gray-100 h-40px w-1px" />
+    <div class="flex-grow h-auto px-16px">
       <h2
         class="text-indigo-500 whitespace-nowrap"
-        :class="{'text-size-18px': bigHeader}"
+        :class="{'text-size-18px leading-24px': bigHeader}"
       >
         <slot name="header" />
       </h2>
-      <p class="text-sm font-light select-none text-gray-500">
+      <p class="font-normal text-sm text-gray-600 select-none">
         <slot name="description">
           <span>{{ description }}</span>
         </slot>
@@ -24,7 +26,7 @@
     </div>
     <div
       v-if="slots.right"
-      class="flex items-center px-16px"
+      class="flex px-16px items-center"
     >
       <slot name="right" />
     </div>
