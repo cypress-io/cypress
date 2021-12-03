@@ -7,6 +7,9 @@ export default defineConfig({
   'responseTimeout': 2500,
   'projectId': '134ej7',
   'experimentalFetchPolyfill': true,
+  'e2e': {
+    'specPattern': 'cypress/integration/**/*',
+  },
   'component': {
     'specPattern': 'cypress/component/**/*spec.{js,ts,tsx}',
     devServer (cypressConfig) {
