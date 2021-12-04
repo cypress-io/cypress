@@ -68,15 +68,23 @@ export async function buildCypressApp (options: BuildCypressAppOpts) {
   // Copy Packages: We want to copy the package.json, files, and output
   log('#copyAllToDist')
   await packages.copyAllToDist(DIST_DIR)
+  fs.copySync(path.join(CY_ROOT_DIR, 'patches'), path.join(DIST_DIR, 'patches'))
 
   const jsonRoot = fs.readJSONSync(path.join(CY_ROOT_DIR, 'package.json'))
 
-  fs.writeJsonSync(meta.distDir('package.json'), _.omit(jsonRoot, [
-    'scripts',
+  const packageJsonContents = _.omit(jsonRoot, [
     'devDependencies',
     'lint-staged',
     'engines',
-  ]), { spaces: 2 })
+    'scripts',
+  ])
+
+  fs.writeJsonSync(meta.distDir('package.json'), {
+    ...packageJsonContents,
+    scripts: {
+      postinstall: 'patch-package',
+    },
+  }, { spaces: 2 })
 
   // Copy the yarn.lock file so we have a consistent install
   fs.copySync(path.join(CY_ROOT_DIR, 'yarn.lock'), meta.distDir('yarn.lock'))
@@ -153,7 +161,7 @@ require('./packages/server')\
   log(`#testVersion ${meta.distDir()}`)
   await testVersion(meta.distDir(), version)
 
-  // testBuiltStaticAssets
+  log('#testStaticAssets')
   await testStaticAssets(meta.distDir())
 
   log('#removeCyAndBinFolders')
