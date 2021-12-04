@@ -33,10 +33,20 @@ describe('<SelectCloudProjectModal />', () => {
     ],
   }
 
-  beforeEach(() => {
+  function mountDialog (noorgs = false) {
     cy.mountFragment(SelectCloudProjectModalFragmentDoc, {
       onResult: (result) => {
-        result.organizations = organizations
+        result.currentProject = {
+          __typename: 'CurrentProject' as const,
+          id: '1',
+          title: 'Test Project',
+        }
+
+        result.cloudViewer = {
+          __typename: 'CloudUser' as const,
+          id: '2',
+          organizations: noorgs ? null : organizations,
+        }
       },
       render (gql) {
         return (<div class="h-screen">
@@ -44,20 +54,23 @@ describe('<SelectCloudProjectModal />', () => {
         </div>)
       },
     })
-  })
+  }
 
-  it('should disable the project selection when no organization is selected', () => {
-    cy.get('[data-cy="selectProject"] button').should('be.disabled')
-    cy.get('[data-cy="selectOrganization"] button').click()
-    cy.contains('Test Org 1').click()
+  it('selects the first organization by default', () => {
+    mountDialog()
+    cy.get('[data-cy="selectOrganization"] button').should('contain.text', 'Test Org 1')
     cy.get('[data-cy="selectProject"] button').click()
     cy.contains('test-project').click()
   })
 
-  it('should show an error when creating a project without an organization', () => {
-    cy.contains('Create new').click()
-    cy.get('#projectName').type('new project')
-    cy.contains('button', 'Create project').click()
-    cy.contains(defaultMessages.runs.connect.modal.selectProject.noOrganizationSelectedError).should('be.visible')
+  it('prefills new project name with the current one', () => {
+    mountDialog()
+    cy.contains('a', defaultMessages.runs.connect.modal.selectProject.createNewProject).click()
+    cy.get('#projectName').should('have.value', 'Test Project')
+  })
+
+  it('show the create org modal when no org is there', () => {
+    mountDialog(true)
+    cy.contains('button', defaultMessages.runs.connect.modal.createOrg.waitingButton).should('be.visible')
   })
 })

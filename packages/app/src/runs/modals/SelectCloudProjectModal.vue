@@ -22,12 +22,6 @@
             <span class="">
               {{ t('runs.connect.modal.selectProject.organization') }}
             </span>
-            <span
-              v-if="noPickedOrganizationError"
-              class="ml-8px text-red-400 text-14px leading-22px"
-            >
-              {{ t('runs.connect.modal.selectProject.noOrganizationSelectedError') }}
-            </span>
             <ExternalLink
               class="cursor-pointer flex-grow text-right text-indigo-500 hover:underline"
               :href="organizationUrl"
@@ -132,7 +126,7 @@
           size="lg"
           :prefix-icon="newProject ? CreateIcon : ConnectIcon"
           prefix-icon-class="icon-dark-white"
-          @click="createProject"
+          @click="createOrConnectProject"
         >
           {{ newProject
             ? t('runs.connect.modal.selectProject.createProject')
@@ -174,19 +168,25 @@ import { useI18n } from '@cy/i18n'
 const { t } = useI18n()
 
 gql`
-fragment SelectCloudProjectModal on CloudUser {
-  id
-  organizations(first: 10) {
-    nodes {
-      id
-      name
-      projects(first: 10) {
-        nodes {
-          id
-          slug
+fragment SelectCloudProjectModal on Query {
+  cloudViewer {
+    id
+    organizations(first: 10) {
+      nodes {
+        id
+        name
+        projects(first: 10) {
+          nodes {
+            id
+            slug
+          }
         }
       }
     }
+  }
+  currentProject{
+    id
+    title
   }
 }
 `
@@ -201,21 +201,17 @@ const emit = defineEmits<{
 }>()
 
 const newProject = ref(false)
-const projectName = ref('')
+const projectName = ref(props.gql.currentProject?.title || '')
 const projectAccess = ref<'private' | 'public'>('private')
 const organizations = computed(() => {
-  return props.gql.organizations?.nodes.map((org) => {
+  return props.gql.cloudViewer?.organizations?.nodes.map((org) => {
     return {
       ...org,
       icon: FolderIcon,
     }
   }) || []
 })
-const pickedOrganization = ref(props.gql.organizations?.nodes.length === 1 ? props.gql.organizations.nodes[0] : undefined)
-const watchingPickedOrganizationError = ref(false)
-const noPickedOrganizationError = computed(() => {
-  return watchingPickedOrganizationError.value && !pickedOrganization.value
-})
+const pickedOrganization = ref(organizations.value.length >= 1 ? organizations.value[0] : undefined)
 
 const projects = computed(() => pickedOrganization.value?.projects?.nodes || [])
 const pickedProject = ref()
@@ -231,12 +227,13 @@ const projectPlaceholder = computed(() => {
 // TODO: https://dashboard-staging.cypress.io/organizations
 const organizationUrl = '#'
 
-function createProject () {
-  if (pickedOrganization.value) {
+function createOrConnectProject () {
+  if (newProject.value) {
     // eslint-disable-next-line no-console
     console.log('mutate to create a project')
   } else {
-    watchingPickedOrganizationError.value = true
+    // eslint-disable-next-line no-console
+    console.log('mutate to connect a project')
   }
 }
 </script>

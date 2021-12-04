@@ -1,6 +1,6 @@
 <template>
-  <div class="h-full text-center flex flex-col justify-center max-w-714px mx-auto">
-    <h2 class="text-18px mb-40px text-gray-900">
+  <div class="flex flex-col h-full mx-auto text-center max-w-714px justify-center">
+    <h2 class="mb-40px text-18px text-gray-900">
       {{ t("runs.connect.title") }}
     </h2>
     <div class="flex gap-32px">
@@ -10,9 +10,9 @@
       >
         <component
           :is="block.icon"
-          class="h-120px w-120px mx-auto"
+          class="mx-auto h-120px w-120px"
         />
-        <p class="h-48px text-gray-600 mt-8px">
+        <p class="h-48px mt-8px text-gray-600">
           {{ block.description }}
         </p>
       </div>
@@ -30,9 +30,9 @@
       :gql="props.gql"
     />
     <SelectCloudProjectModal
-      v-if="props.gql.cloudViewer && isProjectConnectOpen"
+      v-if="isProjectConnectOpen"
       :show="isProjectConnectOpen"
-      :gql="props.gql.cloudViewer"
+      :gql="props.gql"
       @cancel="isProjectConnectOpen = false"
     />
   </div>
@@ -56,9 +56,9 @@ const { t } = useI18n()
 
 gql`
 fragment RunsConnect on Query {
+  ...SelectCloudProjectModal
   cloudViewer{
     id
-    ...SelectCloudProjectModal
   }
   ...LoginModal
 }

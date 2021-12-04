@@ -1,6 +1,7 @@
 <template>
   <StandardModal
     :title="t('runs.connect.modal.title')"
+    :model-value="show"
   >
     <div class="border border-dashed rounded border-gray-100 p-24px w-592px ">
       <p class="text-center text-gray-700">
@@ -46,12 +47,15 @@ import Button from '@cy/components/Button.vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import OrganizationIcon from '~icons/cy/office-building_x16.svg'
 import { useI18n } from '@cy/i18n'
+import { ref } from 'vue'
 
 const { t } = useI18n()
 
 const emit = defineEmits<{
   (event: 'cancel'): void
 }>()
+
+const show = ref(true)
 
 // TODO: https://dashboard-staging.cypress.io/organizations/new
 const createOrgUrl = '#'
