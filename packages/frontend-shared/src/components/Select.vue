@@ -160,7 +160,7 @@ interface Option {
 }
 
 const props = withDefaults(defineProps<{
-  options: Option[],
+  options: Option[] | readonly Option[],
   modelValue?: Option // Current object being selected
   placeholder?: string
   label?: string

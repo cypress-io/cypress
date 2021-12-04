@@ -32,27 +32,30 @@
 
 <script lang="ts" setup>
 import { computed } from 'vue'
-import type { EnvironmentSetupFragment, FrontendFrameworkEnum, SupportedBundlers } from '../generated/graphql'
 import { FrameworkBundlerLogos } from '../utils/icons'
 import Select from '@cy/components/Select.vue'
+import type {
+  FrontendFrameworkEnum,
+  SupportedBundlers,
+} from '../generated/graphql'
+import { Portal } from '@headlessui/vue'
 
 export interface Option {
   name: string;
   description?: string;
   id: string;
+  type?: string
+  isSelected?: boolean
 }
-
-const emit = defineEmits<{
-  (event: 'select', type: string)
-}>()
 
 const props = withDefaults(defineProps<{
   name: string
   value?: string
   placeholder?: string
-  options: EnvironmentSetupFragment['frameworks']
+  options: readonly Option[]
   disabled?: boolean
   label?: string
+  selectorType: 'framework' | 'bundler'
 }>(), {
   disabled: false,
   value: undefined,
@@ -60,12 +63,21 @@ const props = withDefaults(defineProps<{
   label: undefined,
 })
 
+const emit = defineEmits<{
+  (event: 'selectFramework', type: FrontendFrameworkEnum)
+  (event: 'selectBundler', type: SupportedBundlers)
+}>()
+
 const selectedOptionObject = computed(() => {
   return props.options.find((opt) => opt.id === props.value)
 })
 
 const selectOption = (opt) => {
-  emit('select', opt.type)
+  if (props.selectorType === 'framework') {
+    emit('selectFramework', opt.type)
+  } else {
+    emit('selectBundler', opt.type)
+  }
 }
 
 </script>

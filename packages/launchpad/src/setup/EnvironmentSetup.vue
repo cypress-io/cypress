@@ -10,7 +10,8 @@
         :value="props.gql.framework?.id ?? undefined"
         :placeholder="t('setupPage.projectSetup.frameworkPlaceholder')"
         :label="t('setupPage.projectSetup.frameworkLabel')"
-        @select="setFEFramework"
+        selector-type="framework"
+        @select-framework="setFEFramework"
       />
       <SelectFwOrBundler
         class="pt-3px"
@@ -20,7 +21,8 @@
         :value="props.gql.bundler?.id ?? undefined"
         :placeholder="t('setupPage.projectSetup.bundlerPlaceholder')"
         :label="t('setupPage.projectSetup.bundlerLabel')"
-        @select="setFEBundler"
+        selector-type="bundler"
+        @select-bundler="setFEBundler"
       />
       <SelectLanguage
         :name="t('setupPage.projectSetup.languageLabel')"

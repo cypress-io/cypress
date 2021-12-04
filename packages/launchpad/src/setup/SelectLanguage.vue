@@ -23,7 +23,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { EnvironmentSetupFragment, CodeLanguageEnum } from '../../generated/graphql'
+import type { EnvironmentSetupFragment, CodeLanguageEnum } from '../generated/graphql'
 
 const emit = defineEmits<{
   (event: 'select', type: CodeLanguageEnum)
