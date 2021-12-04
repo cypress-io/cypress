@@ -55,7 +55,7 @@
           class="h-16px w-16px icon-dark-error-400"
           :class="stackOpen ? 'transform rotate-90': ''"
         />
-        Stack Trace
+        {{ t('components.alert.stackTrace') }}
       </button>
       <div
         v-if="stackOpen"
@@ -78,6 +78,9 @@ import { computed, FunctionalComponent, ref, SVGAttributes, useSlots } from 'vue
 import ErrorIcon from '~icons/cy/status-errored-outline_x16.svg'
 import SuccessIcon from '~icons/cy/circle-check_x16.svg'
 import CopyButton from './CopyButton.vue'
+import { useI18n } from '@cy/i18n'
+
+const { t } = useI18n()
 
 export type AlertType = 'default' | 'error' | 'warning' | 'success' | 'info'
 
