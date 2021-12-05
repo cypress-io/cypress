@@ -34,7 +34,6 @@
 import { computed } from 'vue'
 import { FrameworkBundlerLogos } from '../utils/icons'
 import Select from '@cy/components/Select.vue'
-import IconCheck from '~icons/cy/circle-check_x24.svg'
 import type {
   FrontendFrameworkEnum,
   SupportedBundlers,
