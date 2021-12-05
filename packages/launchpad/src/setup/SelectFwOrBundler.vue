@@ -7,7 +7,7 @@
     @update:model-value="selectOption"
   >
     <template #label>
-      <div class="mt-18px mb-11px text-16px">
+      <div class="my-8px text-16px leading-24px">
         {{ props.label }}
       </div>
     </template>
@@ -15,17 +15,17 @@
       v-if="value"
       #input-prefix="{ value: itemValue }"
     >
-      <img
-        class="w-16px"
-        :src="FrameworkBundlerLogos[itemValue?.type]"
-      >
+      <component
+        :is="FrameworkBundlerLogos[itemValue?.type]"
+        class="h-20px w-20px"
+      />
     </template>
 
     <template #item-prefix="{ value: itemValue }">
-      <img
-        class="w-16px"
-        :src="FrameworkBundlerLogos[itemValue?.type]"
-      >
+      <component
+        :is="FrameworkBundlerLogos[itemValue?.type]"
+        class="h-20px w-20px"
+      />
     </template>
   </Select>
 </template>
@@ -34,11 +34,11 @@
 import { computed } from 'vue'
 import { FrameworkBundlerLogos } from '../utils/icons'
 import Select from '@cy/components/Select.vue'
+import IconCheck from '~icons/cy/circle-check_x24.svg'
 import type {
   FrontendFrameworkEnum,
   SupportedBundlers,
 } from '../generated/graphql'
-import { Portal } from '@headlessui/vue'
 
 export interface Option {
   name: string;
@@ -46,6 +46,7 @@ export interface Option {
   id: string;
   type?: string
   isSelected?: boolean
+  disabled?: boolean
 }
 
 const props = withDefaults(defineProps<{
@@ -53,11 +54,9 @@ const props = withDefaults(defineProps<{
   value?: string
   placeholder?: string
   options: readonly Option[]
-  disabled?: boolean
   label?: string
   selectorType: 'framework' | 'bundler'
 }>(), {
-  disabled: false,
   value: undefined,
   placeholder: undefined,
   label: undefined,

@@ -14,9 +14,9 @@
         @select-framework="setFEFramework"
       />
       <SelectFwOrBundler
+        v-if="!props.gql.bundler || bundlers.length > 1"
         class="pt-3px"
         :name="t('setupPage.projectSetup.bundlerLabel')"
-        :disabled="bundlers.length === 1"
         :options="bundlers || []"
         :value="props.gql.bundler?.id ?? undefined"
         :placeholder="t('setupPage.projectSetup.bundlerPlaceholder')"
@@ -51,6 +51,7 @@ import {
 } from '../generated/graphql'
 import { useMutation } from '@urql/vue'
 import { useI18n } from '@cy/i18n'
+import { sortBy } from 'lodash'
 
 gql`
 mutation EnvironmentSetupSetFramework($framework: FrontendFrameworkEnum!) {
@@ -89,12 +90,14 @@ fragment EnvironmentSetup on Wizard {
       type
       name
     }
+    category
   }
   frameworks {
     id
     name
     isSelected
     type
+    category
   }
   allBundlers {
     id
@@ -137,7 +140,20 @@ const setLanguage = (language: CodeLanguageEnum) => {
 
 const { t } = useI18n()
 
-const bundlers = computed(() => props.gql.framework?.supportedBundlers ?? props.gql.allBundlers)
-const frameworks = computed(() => props.gql.frameworks ?? [])
+const bundlers = computed(() => {
+  const _bundlers = props.gql.framework?.supportedBundlers ?? props.gql.allBundlers
+
+  return _bundlers.map((b) => {
+    return {
+      disabled: _bundlers.length <= 1,
+      ...b,
+    }
+  })
+})
+const frameworks = computed(() => {
+  const _frameworks = props.gql.frameworks ?? []
+
+  return sortBy(_frameworks, 'category')
+})
 const languages = computed(() => props.gql.allLanguages ?? [])
 </script>

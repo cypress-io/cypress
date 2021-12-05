@@ -5,7 +5,7 @@
     @update:modelValue="handleUpdate"
   >
     <template #default="{ open }">
-      <ListboxLabel class="font-medium text-sm text-gray-700 block">
+      <ListboxLabel class="font-medium text-sm text-gray-800 block">
         <template v-if="label">
           {{ label }}
         </template>
@@ -15,8 +15,14 @@
           :open="open"
         />
       </ListboxLabel>
-      <div class="relative">
-        <ListboxButton class="bg-white border rounded cursor-default border-gray-100 text-left w-full py-2 pr-4 pl-3 text-gray-800 relative hocus-default sm:text-sm">
+      <div
+        class="relative"
+      >
+        <ListboxButton
+          class="bg-white border rounded text-left w-full py-2 pr-4 pl-3 text-gray-800 hocus-default group relative sm:text-sm"
+
+          :class="open ? 'cursor-default default-ring' : 'cursor-pointer border-gray-100'"
+        >
           <span class="flex inset-y-0 absolute items-center">
             <slot
               name="input-prefix"
@@ -42,21 +48,18 @@
               {{ get(modelValue, itemValue || '') }}
             </slot>
           </span>
-          <span class="flex pr-2 inset-y-0 right-0 absolute items-center">
+          <span class="flex pr-4 inset-y-0 right-0 absolute items-center">
             <slot
               name="input-suffix"
               :value="modelValue"
               :open="open"
             >
-              <Icon
-                :icon="IconCaret"
-                class="text-lg transform transition-transform"
-                data-testid="icon-caret"
-                aria-hidden="true"
+              <i-cy-chevron-down
                 :class="{
-                  'rotate-0 text-indigo-600': open,
-                  'rotate-180 text-gray-500': !open
+                  'rotate-180 icon-dark-indigo-600': open,
+                  'rotate-0 icon-dark-gray-500': !open
                 }"
+                class="max-w-20px transform transition duration-250 group-hocus:icon-dark-indigo-600"
               />
             </slot>
           </span>
@@ -67,7 +70,7 @@
           leave-from-class="opacity-100"
           leave-to-class="opacity-0"
         >
-          <ListboxOptions class="bg-white rounded-md shadow-lg ring-black mt-1 text-base w-full max-h-60 py-1 ring-1 ring-opacity-5 z-10 absolute overflow-auto sm:text-sm focus:outline-none">
+          <ListboxOptions class="bg-white rounded shadow-lg ring-black mt-1 text-base w-full max-h-60 ring-1 ring-opacity-5 z-10 absolute overflow-auto sm:text-sm focus:outline-none">
             <ListboxOption
               v-for="option in options"
               :key="get(option, itemKey ?? '')"
@@ -77,11 +80,11 @@
               :disabled="option.disabled"
             >
               <li
-                class="cursor-default py-2 pr-9 pl-3 block truncate select-none relative"
+                class="border-transparent cursor-pointer border-1 py-2 pr-9 pl-3 block truncate select-none relative "
                 :class="[{
-                  'font-medium': selected,
+                  'font-medium bg-jade-50': option.isSelected,
                   'bg-gray-50': active,
-                  'text-gray-900': !active,
+                  'text-gray-800': !option.isSelected && !active,
                   'text-opacity-40': option.disabled
                 }]"
               >
@@ -97,12 +100,12 @@
                   class="inline-block"
                   :class="{
                     'pl-8': $slots['item-prefix'],
-                    'pr-4': $slots['item-suffix'],
+                    'pr-8': $slots['item-suffix'],
                   }"
                 >
                   <slot
                     name="item-body"
-                    :selected="selected"
+                    :selected="option.isSelected"
                     :active="active"
                     :value="option"
                   >
@@ -113,17 +116,16 @@
                 <span class="flex text-sm pr-8 inset-y-0 right-0 absolute items-center">
                   <slot
                     name="item-suffix"
-                    :selected="selected"
+                    :selected="option.isSelected"
                     :active="active"
                     :value="option"
                   >
                     <span
-                      v-if="selected"
-                      class="flex text-indigo-500 absolute items-center"
+                      v-if="option.isSelected"
+                      class="flex text-jade-400 absolute items-center"
                     >
-                      <Icon
-                        :icon="IconCheck"
-                        class="text-sm"
+                      <i-mdi-check
+                        class="h-20px w-20px"
                         data-testid="icon-check"
                         aria-hidden="true"
                       />
