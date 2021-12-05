@@ -18,8 +18,10 @@ describe('InlineSpecListTree', () => {
       </div>
     ))
 
-    cy.findAllByTestId('spec-row-item').should('have.length', 7).first().focus().type('{enter}')
-    cy.findAllByTestId('spec-row-item').should('have.length', 1).type('{enter}').focused().type('{downarrow}').focused().type('{enter}')
+    cy.findAllByTestId('spec-row-item').should('have.length', 7).first().click().type('{enter}')
+    cy.findAllByTestId('spec-row-item').should('have.length', 1).focused().type('{rightarrow}')
+    .focused().type('{downarrow}').focused().type('{enter}')
+
     cy.findAllByTestId('spec-row-item').should('have.length', 4)
   })
 

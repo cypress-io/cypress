@@ -3,23 +3,30 @@
     role="row"
     class="grid grid-flow-row"
   >
-    <div class="inline leading-loose">
+    <div class="inline-flex items-baseline">
       <h3
-        class="text-indigo-600 text-md inline"
+        class="text-md text-indigo-500 inline"
         role="rowheader"
       >
         {{ experiment.name }}
       </h3>
       <span
-        class="bg-purple-100 text-purple-600 rounded-sm text-sm py-2px px-4px ml-12px font-mono"
+        class="rounded font-mono bg-gray-50 text-sm ml-8px py-2px px-4px text-purple-500"
       >{{ experiment.key }}</span>
     </div>
     <span
       role="definition"
-      class="text-cool-gray-500 text-sm"
-    >{{ experiment.description }}</span>
+      class="text-gray-600"
+    >
+
+      <span
+        ref="descriptionRef"
+        class="description children:text-sm children:leading-24px"
+        v-html="markdown"
+      />
+    </span>
     <div
-      class="row-start-1 row-end-3 col-start-2 col-end-auto inline-grid items-center justify-self-end ml-20px"
+      class="ml-20px col-end-auto col-start-2 row-start-1 row-end-3 inline-grid items-center justify-self-end"
     >
       <StatusIndicator :type="experiment.enabled ? 'success' : 'disabled'">
         {{ experiment.enabled ? t('status.enabled') : t('status.disabled') }}
@@ -31,6 +38,8 @@
 <script lang="ts" setup>
 import StatusIndicator from '@cy/components/StatusIndicator.vue'
 import { useI18n } from '@cy/i18n'
+import { useMarkdown } from '@packages/frontend-shared/src/composables/useMarkdown'
+import { ref } from 'vue'
 
 export interface Experiment {
   key: string
@@ -39,9 +48,27 @@ export interface Experiment {
   enabled: boolean
 }
 
-defineProps<{
+const props = defineProps<{
   experiment: Experiment
 }>()
 
+const descriptionRef = ref()
+const { markdown } = useMarkdown(descriptionRef, props.experiment.description, {
+  classes: {
+    overwrite: true,
+    code: ['text-purple-500 text-12px bg-gray-50 font-normal px-4px rounded'],
+    pre: ['text-indigo-500'],
+  },
+})
 const { t } = useI18n()
 </script>
+
+<style scoped>
+.description /deep/ a code {
+  @apply text-indigo-500;
+}
+
+.description /deep/ a {
+  @apply outline-none text-indigo-500 hocus:underline hocus:underline-indigo-500;
+}
+</style>

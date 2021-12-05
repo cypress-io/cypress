@@ -1,6 +1,15 @@
-import { onBeforeUpdate, onUpdated, ref } from 'vue'
+import { onBeforeUpdate, onUpdated, ref, unref } from 'vue'
 import { onKeyStroke } from '@vueuse/core'
 import type { UseVirtualListApi } from './useVirtualList'
+
+const focusEl = (itemRefs, activeItem) => {
+  const idx = unref(activeItem)
+  const el = itemRefs.value[idx]?.$el ?? itemRefs.value[idx]
+
+  if (typeof el?.focus === 'function') {
+    el.focus({ preventScroll: true })
+  }
+}
 
 export function useVirtualListNavigation ({
   containerRef,
@@ -9,7 +18,7 @@ export function useVirtualListNavigation ({
   source,
   scrollTo,
 }: UseVirtualListApi) {
-  const activeItem = ref<number | null>()
+  const activeItem = ref<number | null>(null)
   const itemRefs = ref<{[key: number]: any}>({})
   const setItemRef = (el, index: number) => {
     if (el) {
@@ -22,9 +31,7 @@ export function useVirtualListNavigation ({
   })
 
   onUpdated(() => {
-    if (activeItem.value != null) {
-      itemRefs.value[activeItem.value].focus({ preventScroll: true })
-    }
+    focusEl(itemRefs, activeItem)
   })
 
   onKeyStroke('ArrowDown', (event: KeyboardEvent) => {
@@ -51,7 +58,7 @@ export function useVirtualListNavigation ({
       if (activeItem.value >= toIdx) {
         scrollTo(fromIdx + 1)
       } else {
-        itemRefs.value[activeItem.value].focus({ preventScroll: true })
+        focusEl(itemRefs, activeItem)
       }
     }
   }, { target: containerRef })
@@ -78,16 +85,13 @@ export function useVirtualListNavigation ({
       if (activeItem.value < fromIndex) {
         scrollTo(fromIndex - 1)
       } else {
-        itemRefs.value[activeItem.value].focus({ preventScroll: true })
+        focusEl(itemRefs, activeItem)
       }
     }
   }, { target: containerRef })
 
   return {
     activeItem,
-    rowProps: {
-      tabindex: '-1',
-    },
     setItemRef,
   }
 }

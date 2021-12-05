@@ -1,7 +1,7 @@
 import SwitchTestingTypeModal from './SwitchTestingTypeModal.vue'
 import { SwitchTestingTypeModalFragmentDoc } from '../generated/graphql-test'
 
-describe('SidebarNavigationRow', () => {
+describe('SwitchTestingTypeModal', () => {
   it('renders something', () => {
     cy.mountFragment(SwitchTestingTypeModalFragmentDoc, {
       onResult (result) {
