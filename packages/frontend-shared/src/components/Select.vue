@@ -48,13 +48,14 @@
               {{ get(modelValue, itemValue || '') }}
             </slot>
           </span>
-          <span class="flex pr-4 inset-y-0 right-0 absolute items-center">
+          <span class="flex pr-3 inset-y-0 right-0 absolute items-center">
             <slot
               name="input-suffix"
               :value="modelValue"
               :open="open"
             >
               <i-cy-chevron-down
+                data-testid="icon-caret"
                 :class="{
                   'rotate-180 icon-dark-indigo-600': open,
                   'rotate-0 icon-dark-gray-500': !open
@@ -80,7 +81,7 @@
               :disabled="option.disabled"
             >
               <li
-                class="border-transparent cursor-pointer border-1 py-2 pr-9 pl-3 block truncate select-none relative "
+                class="border-transparent cursor-pointer border-1 py-2 pr-8 pl-3 block truncate select-none relative "
                 :class="[{
                   'font-medium bg-jade-50': option.isSelected,
                   'bg-gray-50': active,
@@ -100,7 +101,7 @@
                   class="inline-block"
                   :class="{
                     'pl-8': $slots['item-prefix'],
-                    'pr-8': $slots['item-suffix'],
+                    'pr-6': $slots['item-suffix'],
                   }"
                 >
                   <slot
@@ -113,7 +114,7 @@
                   </slot>
                 </span>
 
-                <span class="flex text-sm pr-8 inset-y-0 right-0 absolute items-center">
+                <span class="flex text-sm pr-3 inset-y-0 right-0 absolute items-center">
                   <slot
                     name="item-suffix"
                     :selected="option.isSelected"
