@@ -150,9 +150,6 @@ export default {
 
 <script lang="ts" setup>
 import { Listbox, ListboxButton, ListboxLabel, ListboxOption, ListboxOptions } from '@headlessui/vue'
-import IconCheck from '~icons/mdi/check'
-import IconCaret from '~icons/mdi/caret'
-import Icon from './Icon.vue'
 import { get } from 'lodash'
 import { useI18n } from '@cy/i18n'
 
@@ -160,6 +157,7 @@ const { t } = useI18n()
 
 interface Option {
   [key: string]: any
+  disabled?: boolean,
 }
 
 const props = withDefaults(defineProps<{

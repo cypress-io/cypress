@@ -1,5 +1,5 @@
 import { ref } from 'vue'
-import Select from './SelectFwOrBundler.vue'
+import SelectFwOrBundler from './SelectFwOrBundler.vue'
 
 const manyOptions = [
   {
@@ -7,6 +7,7 @@ const manyOptions = [
     id: 'vue',
     isSelected: false,
     type: 'vuecli',
+    category: 'vue',
   },
   {
     name: 'React.js',
@@ -14,6 +15,7 @@ const manyOptions = [
     id: 'react',
     isSelected: false,
     type: 'react',
+    category: 'react',
   },
 ] as const
 
@@ -21,7 +23,8 @@ describe('<BigSelect />', () => {
   it('playground', () => {
     cy.mount(() => (
       <div class="m-10">
-        <Select
+        <SelectFwOrBundler
+          selectorType="framework"
           name="Front-end Framework"
           options={manyOptions}
           value="react"
@@ -33,14 +36,15 @@ describe('<BigSelect />', () => {
   })
 
   it('renders the name', () => {
-    cy.mount(() => <Select name="Front-end Framework" options={[]} />)
+    cy.mount(() => <SelectFwOrBundler selectorType="framework" name="Front-end Framework" options={[]} />)
 
     cy.contains('Front-end Framework').should('exist')
   })
 
   it('shows a placeholder when no value is specified', () => {
     cy.mount(() => (
-      <Select
+      <SelectFwOrBundler
+        selectorType="framework"
         name="Front-end Framework"
         placeholder="placeholder"
         options={[
@@ -59,7 +63,7 @@ describe('<BigSelect />', () => {
 
   it('should select the value', () => {
     cy.mount(() => (
-      <Select name="Front-end Framework" options={manyOptions} value="react" />
+      <SelectFwOrBundler selectorType="framework" name="Front-end Framework" options={manyOptions} value="react" />
     ))
 
     cy.contains('button', 'React.js').should('exist')
@@ -69,8 +73,9 @@ describe('<BigSelect />', () => {
     let val = ref('react')
 
     cy.mount(() => (
-      <Select
+      <SelectFwOrBundler
         name="Front-end Framework"
+        selectorType="framework"
         options={manyOptions}
         value={val.value}
         // @ts-ignore
@@ -89,29 +94,13 @@ describe('<BigSelect />', () => {
     cy.mount(() => (
       <div>
         <div>click out</div>
-        <Select name="Front-end Framework" options={manyOptions} value="vue" />
+        <SelectFwOrBundler selectorType="framework" name="Front-end Framework" options={manyOptions} value="vue" />
       </div>
     ))
 
     cy.contains('button', 'Vue.js').click()
     cy.contains('React.js').should('be.visible')
     cy.contains('click out').click()
-    cy.contains('React.js').should('not.exist')
-  })
-
-  it('should not budge when disabled', () => {
-    cy.mount(() => (
-      <div class="m-10">
-        <Select
-          name="Front-end Framework"
-          options={manyOptions}
-          value="vue"
-          disabled
-        />
-      </div>
-    ))
-
-    cy.contains('button', 'Vue.js').click({ force: true })
     cy.contains('React.js').should('not.exist')
   })
 })
