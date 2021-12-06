@@ -17,14 +17,14 @@
     >
       <component
         :is="FrameworkBundlerLogos[itemValue?.type]"
-        class="h-20px w-20px"
+        class="h-16px w-16px"
       />
     </template>
 
     <template #item-prefix="{ value: itemValue }">
       <component
         :is="FrameworkBundlerLogos[itemValue?.type]"
-        class="h-20px w-20px"
+        class="h-16px w-16px"
       />
     </template>
   </Select>
@@ -49,7 +49,6 @@ export interface Option {
 }
 
 const props = withDefaults(defineProps<{
-  name: string
   value?: string
   placeholder?: string
   options: readonly Option[]

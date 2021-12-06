@@ -19,13 +19,13 @@ const manyOptions = [
   },
 ] as const
 
-describe('<BigSelect />', () => {
+describe('<SelectFwOrBundler />', () => {
   it('playground', () => {
     cy.mount(() => (
       <div class="m-10">
         <SelectFwOrBundler
           selectorType="framework"
-          name="Front-end Framework"
+          label="Front-end Framework"
           options={manyOptions}
           value="react"
         />
@@ -36,7 +36,7 @@ describe('<BigSelect />', () => {
   })
 
   it('renders the name', () => {
-    cy.mount(() => <SelectFwOrBundler selectorType="framework" name="Front-end Framework" options={[]} />)
+    cy.mount(() => <SelectFwOrBundler selectorType="framework" label="Front-end Framework" options={[]} />)
 
     cy.contains('Front-end Framework').should('exist')
   })
@@ -45,7 +45,7 @@ describe('<BigSelect />', () => {
     cy.mount(() => (
       <SelectFwOrBundler
         selectorType="framework"
-        name="Front-end Framework"
+        label="Front-end Framework"
         placeholder="placeholder"
         options={[
           {
@@ -63,7 +63,7 @@ describe('<BigSelect />', () => {
 
   it('should select the value', () => {
     cy.mount(() => (
-      <SelectFwOrBundler selectorType="framework" name="Front-end Framework" options={manyOptions} value="react" />
+      <SelectFwOrBundler selectorType="framework" label="Front-end Framework" options={manyOptions} value="react" />
     ))
 
     cy.contains('button', 'React.js').should('exist')
@@ -74,12 +74,12 @@ describe('<BigSelect />', () => {
 
     cy.mount(() => (
       <SelectFwOrBundler
-        name="Front-end Framework"
+        label="Front-end Framework"
         selectorType="framework"
         options={manyOptions}
         value={val.value}
         // @ts-ignore
-        onSelect={(newVal: FrontendFramework) => {
+        onSelectFramework={(newVal: FrontendFramework) => {
           val.value = newVal
         }}
       />
@@ -94,7 +94,7 @@ describe('<BigSelect />', () => {
     cy.mount(() => (
       <div>
         <div>click out</div>
-        <SelectFwOrBundler selectorType="framework" name="Front-end Framework" options={manyOptions} value="vue" />
+        <SelectFwOrBundler selectorType="framework" label="Front-end Framework" options={manyOptions} value="vue" />
       </div>
     ))
 

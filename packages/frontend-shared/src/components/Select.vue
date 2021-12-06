@@ -60,7 +60,7 @@
                   'rotate-180 icon-dark-indigo-600': open,
                   'rotate-0 icon-dark-gray-500': !open
                 }"
-                class="max-w-20px transform transition duration-250 group-hocus:icon-dark-indigo-600"
+                class="max-w-16px transform transition duration-250 group-hocus:icon-dark-indigo-600"
               />
             </slot>
           </span>
@@ -78,7 +78,7 @@
               v-slot="{ active, selected }"
               as="ul"
               :value="option"
-              :disabled="option.disabled"
+              :disabled="option.disabled || false"
             >
               <li
                 class="border-transparent cursor-pointer border-1 py-2 pr-8 pl-3 block truncate select-none relative "
@@ -86,7 +86,7 @@
                   'font-medium bg-jade-50': option.isSelected,
                   'bg-gray-50': active,
                   'text-gray-800': !option.isSelected && !active,
-                  'text-opacity-40': option.disabled
+                  'text-opacity-40': option.disabled || false
                 }]"
               >
                 <span class="flex inset-y-0 absolute items-center">
@@ -123,10 +123,10 @@
                   >
                     <span
                       v-if="option.isSelected"
-                      class="flex text-jade-400 absolute items-center"
+                      class="flex pr-3 right-0 text-jade-400 absolute items-center"
                     >
                       <i-mdi-check
-                        class="h-20px w-20px"
+                        class="h-16px w-16px"
                         data-testid="icon-check"
                         aria-hidden="true"
                       />

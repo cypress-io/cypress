@@ -5,23 +5,23 @@
   >
     <div class="m-24px">
       <SelectFwOrBundler
-        :name="t('setupPage.projectSetup.frameworkLabel')"
-        :options="frameworks ?? []"
+        :options="frameworks || []"
         :value="props.gql.framework?.id ?? undefined"
         :placeholder="t('setupPage.projectSetup.frameworkPlaceholder')"
         :label="t('setupPage.projectSetup.frameworkLabel')"
         selector-type="framework"
+        data-testid="select-framework"
         @select-framework="setFEFramework"
       />
       <SelectFwOrBundler
-        v-if="!props.gql.bundler || bundlers.length > 1"
+        v-if="props.gql.framework?.id && (!props.gql.bundler || bundlers.length > 1)"
         class="pt-3px"
-        :name="t('setupPage.projectSetup.bundlerLabel')"
         :options="bundlers || []"
         :value="props.gql.bundler?.id ?? undefined"
         :placeholder="t('setupPage.projectSetup.bundlerPlaceholder')"
         :label="t('setupPage.projectSetup.bundlerLabel')"
         selector-type="bundler"
+        data-testid="select-bundler"
         @select-bundler="setFEBundler"
       />
       <SelectLanguage
@@ -151,9 +151,8 @@ const bundlers = computed(() => {
   })
 })
 const frameworks = computed(() => {
-  const _frameworks = props.gql.frameworks ?? []
-
-  return sortBy(_frameworks, 'category')
+  return sortBy((props.gql.frameworks ?? []).map((f) => ({ ...f })), 'category')
 })
+
 const languages = computed(() => props.gql.allLanguages ?? [])
 </script>
