@@ -386,7 +386,9 @@ describe('Choose a Browser config', () => {
 
     cy.get('@launchButton').click()
 
-    cy.wait('@launchProject').then(({ response }) => {
+    cy.wait('@launchProject').then(({ request, response }) => {
+      expect(request?.body.variables.browserPath).to.contain('Google Chrome.app')
+      expect(request?.body.variables.testingType).to.eq('e2e')
       expect(response?.body.data.launchOpenProject).to.eq(true)
     })
   })
