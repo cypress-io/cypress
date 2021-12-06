@@ -1,6 +1,15 @@
 import validate from './validation'
 
-const isValidConfig = (key: string, config: any): true | string => {
+type DefaultValue = string | boolean | Record<string, any> | number | null | undefined
+
+type TestingType = 'component' | 'e2e'
+
+/**
+ * Validates the configuration shape for a given testing type
+ */
+function isValidConfig (configType: TestingType, key: string, config: any): true | string {
+  const options = configType === 'component' ? componentOptions : e2eOptions
+
   const status = validate.isPlainObject(key, config)
 
   if (status !== true) {
@@ -22,7 +31,7 @@ const isValidConfig = (key: string, config: any): true | string => {
 
 export interface ResolvedConfigOption {
   name: string
-  defaultValue?: any
+  defaultValue: DefaultValue
   validation: (key: any, value: any) => true | string // If it' a string, it's a validation error. Otherwise
   isFolder?: boolean
   isExperimental?: boolean
@@ -37,7 +46,7 @@ export interface ResolvedConfigOption {
 
 // TODO - add boolean attribute to indicate read-only / static vs mutable options
 // that can be updated during test executions
-const resolvedOptions = [
+export const resolvedOptions = [
   {
     name: 'animationDistanceThreshold',
     defaultValue: 5,
@@ -62,7 +71,7 @@ const resolvedOptions = [
     name: 'component',
     // runner-ct overrides
     defaultValue: {},
-    validation: isValidConfig,
+    validation: isValidConfig.bind(null, 'component'),
   }, {
     name: 'componentFolder',
     defaultValue: 'cypress/component',
@@ -81,7 +90,7 @@ const resolvedOptions = [
     name: 'e2e',
     // e2e runner overrides
     defaultValue: {},
-    validation: isValidConfig,
+    validation: isValidConfig.bind(null, 'e2e'),
   }, {
     name: 'env',
     defaultValue: {},
@@ -90,31 +99,6 @@ const resolvedOptions = [
     name: 'execTimeout',
     defaultValue: 60000,
     validation: validate.isNumber,
-  }, {
-    name: 'experimentalFetchPolyfill',
-    defaultValue: false,
-    validation: validate.isBoolean,
-    isExperimental: true,
-  }, {
-    name: 'experimentalInteractiveRunEvents',
-    defaultValue: false,
-    validation: validate.isBoolean,
-    isExperimental: true,
-  }, {
-    name: 'experimentalSessionSupport',
-    defaultValue: false,
-    validation: validate.isBoolean,
-    isExperimental: true,
-  }, {
-    name: 'experimentalSourceRewriting',
-    defaultValue: false,
-    validation: validate.isBoolean,
-    isExperimental: true,
-  }, {
-    name: 'experimentalStudio',
-    defaultValue: false,
-    validation: validate.isBoolean,
-    isExperimental: true,
   }, {
     name: 'fileServerFolder',
     defaultValue: '',
@@ -145,6 +129,7 @@ const resolvedOptions = [
   }, {
     name: 'nodeVersion',
     validation: validate.isOneOf('bundled', 'system'),
+    defaultValue: undefined,
   }, {
     name: 'numTestsKeptInMemory',
     defaultValue: 50,
@@ -211,10 +196,6 @@ const resolvedOptions = [
     validation: validate.isStringOrFalse,
     isFolder: true,
   }, {
-    name: 'slowTestThreshold',
-    defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? 250 : 10000,
-    validation: validate.isNumber,
-  }, {
     name: 'scrollBehavior',
     defaultValue: 'top',
     validation: validate.isOneOf('center', 'top', 'bottom', 'nearest', false),
@@ -280,6 +261,53 @@ const resolvedOptions = [
   },
 ] as const
 
+export const resolvedOptionsComponent = [
+  ...resolvedOptions,
+  {
+    name: 'slowTestThreshold',
+    defaultValue: 250,
+    validation: validate.isNumber,
+  },
+]
+
+export const resolvedOptionsE2E = [
+  ...resolvedOptions,
+  {
+    name: 'slowTestThreshold',
+    defaultValue: 10000,
+    validation: validate.isNumber,
+  },
+]
+
+export const experimentalOptions = [
+  {
+    name: 'experimentalFetchPolyfill',
+    defaultValue: false,
+    validation: validate.isBoolean,
+    isExperimental: true,
+  }, {
+    name: 'experimentalInteractiveRunEvents',
+    defaultValue: false,
+    validation: validate.isBoolean,
+    isExperimental: true,
+  }, {
+    name: 'experimentalSessionSupport',
+    defaultValue: false,
+    validation: validate.isBoolean,
+    isExperimental: true,
+  }, {
+    name: 'experimentalSourceRewriting',
+    defaultValue: false,
+    validation: validate.isBoolean,
+    isExperimental: true,
+  }, {
+    name: 'experimentalStudio',
+    defaultValue: false,
+    validation: validate.isBoolean,
+    isExperimental: true,
+  },
+]
+
 export type RuntimeOrResolvedOption = RuntimeConfigOption | ResolvedConfigOption
 
 // Used to ensure that the above is valid, without losing the ability to index the shape on `name`
@@ -291,50 +319,36 @@ export interface RuntimeConfigOption {
   defaultValue: any
   // If it' a string, it's a validation error
   validation: (key: any, value: any) => true | string
-  isInternal?: boolean
 }
 
-export const runtimeOptions = [
+export const internalRuntimeOptions = [
+  // TODO(tim): This is not even used
   {
     name: 'autoOpen',
     defaultValue: false,
     validation: validate.isBoolean,
-    isInternal: true,
-  }, {
-    name: 'browsers',
-    defaultValue: [],
-    validation: validate.isValidBrowserList,
   }, {
     name: 'clientRoute',
     defaultValue: '/__/',
     validation: validate.isString,
-    isInternal: true,
   }, {
     name: 'configFile',
     defaultValue: 'cypress.config.js',
     validation: validate.isStringOrFalse,
     // not truly internal, but can only be set via cli,
     // so we don't consider it a "public" option
-    isInternal: true,
   }, {
     name: 'devServerPublicPathRoute',
     defaultValue: '/__cypress/src',
     validation: validate.isString,
-    isInternal: true,
-  }, {
-    name: 'hosts',
-    defaultValue: null,
-    validation: validate.isPlainObject,
   }, {
     name: 'isTextTerminal',
     defaultValue: false,
     validation: validate.isBoolean,
-    isInternal: true,
   }, {
     name: 'morgan',
     defaultValue: true,
     validation: validate.isBoolean,
-    isInternal: true,
   }, {
     name: 'modifyObstructiveCode',
     defaultValue: true,
@@ -343,33 +357,40 @@ export const runtimeOptions = [
     name: 'namespace',
     defaultValue: '__cypress',
     validation: validate.isString,
-    isInternal: true,
   }, {
     name: 'reporterRoute',
     defaultValue: '/__cypress/reporter',
     validation: validate.isString,
-    isInternal: true,
   }, {
     name: 'socketId',
     defaultValue: null,
     validation: validate.isString,
-    isInternal: true,
   }, {
     name: 'socketIoCookie',
     defaultValue: '__socket.io',
     validation: validate.isString,
-    isInternal: true,
   }, {
     name: 'socketIoRoute',
     defaultValue: '/__socket.io',
     validation: validate.isString,
-    isInternal: true,
   }, {
     name: 'xhrRoute',
     defaultValue: '/xhrs/',
     validation: validate.isString,
-    isInternal: true,
   },
+]
+
+export const runtimeOptions = [
+  {
+    name: 'browsers',
+    defaultValue: [],
+    validation: validate.isValidBrowserList,
+  }, {
+    name: 'hosts',
+    defaultValue: null,
+    validation: validate.isPlainObject,
+  },
+  ...internalRuntimeOptions,
 ] as const
 
 // Used to ensure that the above is valid, without losing the ability to index the shape on `name`
@@ -380,6 +401,18 @@ export const options = [
   ...resolvedOptions,
   ...runtimeOptions,
 ] as const
+
+export const allConfigOptions = options
+
+export const componentOptions = [
+  ...resolvedOptionsComponent,
+  ...runtimeOptions,
+]
+
+export const e2eOptions = [
+  ...resolvedOptionsE2E,
+  ...runtimeOptions,
+]
 
 export interface BreakingOption {
   /**

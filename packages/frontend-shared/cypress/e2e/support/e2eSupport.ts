@@ -1,3 +1,4 @@
+import type { Draft } from 'immer'
 import i18n from '../../../src/locales/en-US.json'
 import '@testing-library/cypress/add-commands'
 import type { DataContext } from '@packages/data-context'
@@ -5,6 +6,7 @@ import { e2eProjectDirs } from './e2eProjectDirs'
 import type { AuthenticatedUserShape } from '@packages/data-context/src/data'
 import type { DocumentNode, ExecutionResult } from 'graphql'
 import type { LaunchArgs } from '@packages/types'
+import type { IsLoaded } from '@packages/data-context/src/util'
 
 const NO_TIMEOUT = 1000 * 1000
 const FOUR_SECONDS = 4 * 1000
@@ -22,6 +24,7 @@ export interface WithCtxOptions extends Cypress.Loggable, Cypress.Timeoutable {
 }
 
 export interface WithCtxInjected extends WithCtxOptions {
+  loaded: <V>(val: V) => Draft<IsLoaded<V>>
   require: typeof require
   process: typeof process
   testState: Record<string, any>

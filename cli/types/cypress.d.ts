@@ -73,10 +73,10 @@ declare namespace Cypress {
      */
     displayName: string
     version: string
-    majorVersion: number | string
+    majorVersion?: number | string | null
     path: string
-    isHeaded: boolean
-    isHeadless: boolean
+    isHeaded?: boolean
+    isHeadless?: boolean
     /**
      * Informational text to accompany this browser. Shown in desktop-gui.
      */
@@ -2815,13 +2815,41 @@ declare namespace Cypress {
      /**
      * Handle Cypress plugins
      */
-    setupNodeEvents: (on: PluginEvents, config: PluginConfigOptions) => Promise<PluginConfigOptions> | PluginConfigOptions | undefined | void
+    setupNodeEvents: (on: PluginEvents, config: PluginConfigOptions) => Promise<ResolvedConfigOptions> | ResolvedConfigOptions | undefined | void
+  }
+
+  // Internal or Unlisted at @packages/config/lib/options
+  interface InternalConfigOptions {
+    autoOpen: boolean
+    browserUrl: string
+    clientRoute: string
+    configFile: string
+    cypressEnv: string
+    devServerPublicPathRoute: string
+    isTextTerminal: boolean
+    morgan: boolean
+    namespace: string
+    projectName: string
+    projectRoot: string
+    proxyUrl: string
+    remote: RemoteState
+    report: boolean
+    proxyServer: string
+    reporterRoute: string
+    reporterUrl: string
+    socketId: null | string
+    socketIoCookie: string
+    socketIoRoute: string
+    spec: Cypress['spec'] | null
+    specs: Array<Cypress['spec']>
+    xhrRoute: string
+    xhrUrl: string    
   }
 
   /**
    * Options appended to config object on runtime.
    */
-  interface RuntimeConfigOptions {
+  interface RuntimeConfigOptions extends InternalConfigOptions {
     /**
      * CPU architecture, from Node `os.arch()`
      *
@@ -2859,31 +2887,6 @@ declare namespace Cypress {
      * The Cypress version being used.
      */
     version: string
-
-    // Internal or Unlisted at server/lib/config_options
-    autoOpen: boolean
-    browserUrl: string
-    clientRoute: string
-    configFile: string
-    cypressEnv: string
-    devServerPublicPathRoute: string
-    isTextTerminal: boolean
-    morgan: boolean
-    namespace: string
-    projectName: string
-    projectRoot: string
-    proxyUrl: string
-    remote: RemoteState
-    report: boolean
-    reporterRoute: string
-    reporterUrl: string
-    socketId: null | string
-    socketIoCookie: string
-    socketIoRoute: string
-    spec: Cypress['spec'] | null
-    specs: Array<Cypress['spec']>
-    xhrRoute: string
-    xhrUrl: string
   }
 
   interface TestConfigOverrides extends Partial<Pick<ConfigOptions, 'animationDistanceThreshold' | 'baseUrl' | 'defaultCommandTimeout' | 'env' | 'execTimeout' | 'includeShadowDom' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>> {

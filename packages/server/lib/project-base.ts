@@ -1,8 +1,6 @@
-import check from 'check-more-types'
 import Debug from 'debug'
 import EE from 'events'
 import _ from 'lodash'
-import path from 'path'
 import { createHmac } from 'crypto'
 
 import browsers from './browsers'
@@ -26,6 +24,7 @@ import { SpecsStore } from './specs-store'
 import type { OpenProjectLaunchOptions } from '@packages/types'
 import type { DataContext } from '@packages/data-context'
 import assert from 'assert'
+import type { CurrentProjectDataSource } from '@packages/data-context/src/sources'
 
 // Cannot just use RuntimeConfigOptions as is because some types are not complete.
 // Instead, this is an interface of values that have been manually validated to exist
@@ -50,16 +49,13 @@ const debug = Debug('cypress:server:project')
 
 type StartWebsocketOptions = Pick<Cfg, 'socketIoCookie' | 'namespace' | 'screenshotsFolder' | 'report' | 'reporter' | 'reporterOptions' | 'projectRoot'>
 
-export type Server = ServerE2E | ServerCt
-
-export class ProjectBase<TServer extends Server> extends EE {
+export class ProjectBase extends EE {
   // id is sha256 of projectRoot
   public id: string
 
   protected watchers: Watchers
-  protected ctx: DataContext
   protected _cfg?: Cfg
-  protected _server?: TServer
+  protected server: ServerE2E | ServerCt
   protected _automation?: Automation
   private _recordTests?: any = null
   private _isServerOpen: boolean = false
@@ -70,48 +66,20 @@ export class ProjectBase<TServer extends Server> extends EE {
   public spec: Cypress.Cypress['spec'] | null
   public isOpen: boolean = false
   private generatedProjectIdTimestamp: any
-  projectRoot: string
 
-  constructor ({
-    ctx,
-    projectRoot,
-    testingType,
-    options = {},
-  }: {
-    ctx: DataContext
-    projectRoot: string
-    testingType: Cypress.TestingType
-    options: OpenProjectLaunchOptions
-  }) {
+  constructor (private ctx: DataContext, private project: CurrentProjectDataSource) {
     super()
 
-    if (!projectRoot) {
-      throw new Error('Instantiating lib/project requires a projectRoot!')
-    }
-
-    if (!check.unemptyString(projectRoot)) {
-      throw new Error(`Expected project root path, not ${projectRoot}`)
-    }
-
-    this.testingType = testingType
-    this.projectRoot = path.resolve(projectRoot)
+    this.testingType = project.currentTestingType
     this.watchers = new Watchers()
     this.spec = null
     this.browser = null
-    this.id = createHmac('sha256', 'secret-key').update(projectRoot).digest('hex')
-    this.ctx = ctx
-
-    debug('Project created %o', {
-      testingType: this.testingType,
-      projectRoot: this.projectRoot,
-    })
-
+    this.id = createHmac('sha256', 'secret-key').update(project.projectRoot).digest('hex')
+    this.server = project.currentTestingType === 'component' ? new ServerCt(this.ctx) : new ServerE2E(this.ctx)
     this.options = {
       report: false,
       onError () {},
       onWarning () {},
-      onSettingsChanged: false,
-      ...options,
     }
   }
 
@@ -119,10 +87,6 @@ export class ProjectBase<TServer extends Server> extends EE {
 
   setOnTestsReceived (fn) {
     this._recordTests = fn
-  }
-
-  get server () {
-    return this.ensureProp(this._server, 'open')
   }
 
   get automation () {
@@ -137,38 +101,30 @@ export class ProjectBase<TServer extends Server> extends EE {
     return this.cfg.state
   }
 
-  createServer (testingType: Cypress.TestingType) {
-    return testingType === 'e2e'
-      ? new ServerE2E(this.ctx) as TServer
-      : new ServerCt(this.ctx) as TServer
-  }
-
   async open () {
     assert(this.ctx.actions.currentProject, 'Expected actions.currentProject in projectBase.open')
-    debug('opening project instance %s', this.projectRoot)
+    // debug('opening project instance %s', this.projectRoot)
     debug('project open options %o', this.options)
 
     let cfg = this.getConfig()
 
-    process.chdir(this.projectRoot)
+    process.chdir(this.project.projectRoot)
 
-    this._server = this.createServer(this.testingType)
-
-    if (!this.options.skipPluginIntializeForTesting) {
-      cfg = await this.initializePlugins(cfg, this.options)
-    }
-
-    const {
-      specsStore,
-      startSpecWatcher,
-      ctDevServerPort,
-    } = await this.initializeSpecStore(cfg)
+    // if (!this.options.skipPluginIntializeForTesting) {
+    //   cfg = await this.initializePlugins(cfg, this.options)
+    // }
+    //
+    // const {
+    //   specsStore,
+    //   startSpecWatcher,
+    //   ctDevServerPort,
+    // } = await this.initializeSpecStore(cfg)
 
     if (this.testingType === 'component') {
       cfg.baseUrl = `http://localhost:${ctDevServerPort}`
     }
 
-    const [port, warning] = await this._server.open(cfg, {
+    const [port, warning] = await this.server.open({
       getCurrentBrowser: () => this.browser,
       getSpec: () => this.spec,
       exit: this.options.args?.exit,
@@ -181,6 +137,12 @@ export class ProjectBase<TServer extends Server> extends EE {
     })
 
     this.ctx.setAppServerPort(port)
+    this.ctx.update((s) => {
+      if (s.currentProject) {
+        s.currentProject.serverPort = port
+      }
+    })
+
     this._isServerOpen = true
 
     this.ctx.actions.projectConfig?.updateFromServerStart()
@@ -244,7 +206,7 @@ export class ProjectBase<TServer extends Server> extends EE {
   }
 
   reset () {
-    debug('resetting project instance %s', this.projectRoot)
+    // debug('resetting project instance %s', this.projectRoot)
 
     this.spec = null
     this.browser = null
@@ -261,7 +223,8 @@ export class ProjectBase<TServer extends Server> extends EE {
   }
 
   async close () {
-    debug('closing project instance %s', this.projectRoot)
+    // debug('closing project instance %s', this.projectRoot)
+    process.chdir(localCwd)
 
     this.spec = null
     this.browser = null
@@ -283,7 +246,6 @@ export class ProjectBase<TServer extends Server> extends EE {
 
     this._isServerOpen = false
 
-    process.chdir(localCwd)
     this.isOpen = false
 
     const config = this.getConfig()
@@ -294,7 +256,11 @@ export class ProjectBase<TServer extends Server> extends EE {
   }
 
   getConfig () {
-    return this.ctx.projectConfig.settingsRead()
+    const cfg = this.ctx.coreData.derived.fullConfig
+
+    assert(cfg)
+
+    return cfg
   }
 
   _onError<Options extends Record<string, any>> (err: Error, options: Options) {

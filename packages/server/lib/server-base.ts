@@ -170,7 +170,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     onWarning: unknown,
   ): Bluebird<[number, WarningErr?]>
 
-  open (config: Cfg, {
+  open ({
     getSpec,
     getCurrentBrowser,
     onError,
@@ -182,12 +182,6 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     exit,
   }: OpenServerOptions) {
     debug('server open')
-
-    la(_.isPlainObject(config), 'expected plain config object', config)
-
-    if (!config.baseUrl && testingType === 'component') {
-      throw new Error('ServerCt#open called without config.baseUrl.')
-    }
 
     const app = this.createExpressApp(config)
 
@@ -237,8 +231,8 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return this.createServer(app, config, onWarning)
   }
 
-  createExpressApp (config) {
-    const { morgan, clientRoute } = config
+  createExpressApp () {
+    const { morgan, clientRoute } = this.ctx.projectConfig.fullConfig
     const app = express()
 
     // set the cypress config from the cypress.config.{ts|js} file
@@ -303,15 +297,14 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     }
 
     this._netStubbingState = netStubbingState()
-    // @ts-ignore
-    this._networkProxy = new NetworkProxy({
-      config,
+    this._networkProxy = new NetworkProxy(this.ctx, {
       shouldCorrelatePreRequests,
       getRemoteState,
       getFileServerToken,
       socket: this.socket,
       netStubbingState: this.netStubbingState,
       request: this.request,
+      getRenderedHTMLOrigins,
     })
   }
 

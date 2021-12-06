@@ -421,6 +421,7 @@ enum DevRelaunchAction {
 
 """State associated/helpful for local development of Cypress"""
 type DevState {
+  coreData(omit: [String!], pick: [String!]): JSON
   debugMatches: [String]
 
   """
@@ -429,13 +430,18 @@ type DevState {
   needsRelaunch: Boolean
 
   """A list of state change "patches" via Immer, useful for debugging"""
-  patches(afterIndex: Int = 0): [[DevStatePatch]]
+  patches(afterIndex: Int = 0, last: Int): [DevStateChange]
+}
+
+type DevStateChange {
+  changes: [DevStatePatch!]!
+
+  """The Array index in the list of state change patches"""
+  index: Int
 }
 
 """An immer patch"""
 type DevStatePatch {
-  """The Array index in the list of state change patches"""
-  index: Int
   op: String
   path: [JSON]
   pathStr: String
@@ -633,11 +639,11 @@ type Mutation {
   retryLoadPlugins: Query
   scaffoldIntegration: [CodeGenResultWithFileParts!]!
 
-  """Updates the testing type for the current project"""
-  selectProjectTestingType(type: TestingTypeEnum!): Query
-
   """Set active project to run tests on"""
   setActiveProject(path: String!): Query
+
+  """Updates the testing type for the current project"""
+  setCurrentTestingType(type: TestingTypeEnum!): Query
 
   """
   Update local preferences (also known as  appData). The payload, `value`, should be a `JSON.stringified()` object of the new values you'd like to persist. Example: `setPreferences (value: JSON.stringify({ lastOpened: Date.now() }))`
@@ -895,6 +901,15 @@ type Warning {
   message: String!
   setupStep: String
   title: String!
+}
+
+"""The origin of the warning, to show in context"""
+enum WarningType {
+  """Happens in relation to a browser being chosen"""
+  browser
+
+  """Happens in relation to config sourcing"""
+  config
 }
 
 enum WizardConfigFileStatusEnum {

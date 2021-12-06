@@ -17,10 +17,12 @@
     "check-more-types": "2.24.0",
     "common-tags": "1.8.0",
     "debug": "^4.3.2",
-    "lodash": "^4.17.21"
+    "lodash": "^4.17.21",
+    "underscore.string": "^3.3.5"
   },
   "devDependencies": {
     "@packages/ts": "0.0.0-development",
+    "@types/underscore.string": "0.0.38",
     "chai": "1.10.0",
     "mocha": "7.0.1",
     "sinon": "7.3.1",

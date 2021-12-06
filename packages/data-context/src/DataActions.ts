@@ -57,6 +57,6 @@ export class DataActions {
   }
 
   get projectConfig () {
-    return this.ctx.project ? new ConfigFileActions(this.ctx, this.ctx.project) : null
+    return this.ctx.project ? new ConfigFileActions(this.ctx) : null
   }
 }

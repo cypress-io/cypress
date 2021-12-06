@@ -26,6 +26,7 @@
     "electron": "14.1.0",
     "endent": "2.0.1",
     "execa": "1.0.0",
+    "fast-safe-stringify": "^2.1.1",
     "front-matter": "^4.0.2",
     "fs-extra": "8.1.0",
     "getenv": "1.0.0",

@@ -17,6 +17,10 @@ export class CurrentProjectDataSource {
     return this.ctx.currentProject
   }
 
+  get name () {
+    return path.basename(this.projectRoot)
+  }
+
   get data () {
     return this.currentProject
   }
@@ -34,11 +38,17 @@ export class CurrentProjectDataSource {
   }
 
   get isLoadingPlugins () {
-    return this.configFileExists && !this.currentProject.pluginLoad.settled
+    return this.configFileExists && !this.currentProject.configSetupNodeEvents.settled
   }
 
   get isLoadingConfig () {
-    return this.configFileExists && !this.currentProject.config.settled
+    return !this.currentProject.configFileContents.settled
+  }
+
+  get relativeConfigFilePath () {
+    return this.configFilePath
+      ? path.relative(this.currentProject.projectRoot, this.configFilePath)
+      : null
   }
 
   get configFilePath (): string | null {
@@ -47,6 +57,14 @@ export class CurrentProjectDataSource {
 
   get configFileExists () {
     return this.currentProject.configFiles.length > 0
+  }
+
+  get config () {
+    return this.ctx.coreData.derived.fullConfig ?? null
+  }
+
+  get browsers () {
+    return this.ctx.coreData.derived.fullConfig?.browsers ?? null
   }
 
   private get api () {
@@ -64,19 +82,19 @@ export class CurrentProjectDataSource {
   }
 
   loadedConfig () {
-    if (this.currentProject.pluginLoad.state === 'LOADED') {
-      return this.currentProject.pluginLoad.value
+    if (this.currentProject.configSetupNodeEvents.state === 'LOADED') {
+      return this.currentProject.configSetupNodeEvents.value
     }
 
-    if (this.currentProject.config.state === 'LOADED') {
-      return this.currentProject.config.value
+    if (this.currentProject.configFileContents.state === 'LOADED') {
+      return this.currentProject.configFileContents.value
     }
 
     return null
   }
 
   async findSpecs (specType: Maybe<SpecType> = null) {
-    const config = this.ctx.projectConfig.loadedConfig()
+    const config = await this.ctx.projectConfig.loadedConfig()
 
     if (!this.currentProject || !config) {
       return null
@@ -157,15 +175,15 @@ export class CurrentProjectDataSource {
       return 'NEW'
     }
 
-    if (!this.currentProject.config.value) {
+    if (!this.currentProject.configFileContents.value) {
       return null
     }
 
-    if (this.currentProject.config.value.e2e?.testFiles) {
-      return 'NEEDS_CHANGES'
+    if (this.currentProject.configFileContents.value.e2e?.testFiles) {
+      return 'READY' // 'NEEDS_CHANGES'
     }
 
-    if (_.has(this.currentProject.config.value, 'e2e')) {
+    if (_.has(this.currentProject.configFileContents.value, 'e2e')) {
       return 'READY'
     }
 
@@ -177,15 +195,15 @@ export class CurrentProjectDataSource {
       return 'NEW'
     }
 
-    if (!this.currentProject.config.value) {
+    if (!this.currentProject.configFileContents.value) {
       return null
     }
 
-    if (this.currentProject.config.value.component?.testFiles) {
-      return 'NEEDS_CHANGES'
+    if (this.currentProject.configFileContents.value.component?.testFiles) {
+      return 'READY' // 'NEEDS_CHANGES'
     }
 
-    if (_.has(this.currentProject.config.value, 'component')) {
+    if (_.has(this.currentProject.configFileContents.value, 'component')) {
       return 'READY'
     }
 
@@ -258,11 +276,11 @@ export class CurrentProjectDataSource {
 
     const project = this.currentProject
 
-    if (!project || !project.config) {
+    if (!project || !project.configFileContents) {
       throw Error(`Cannot find components without currentProject.`)
     }
 
-    const config = this.ctx.loadedVal(project.config)
+    const config = this.ctx.loadedVal(project.configFileContents)
     const codeGenCandidates = await this.ctx.file.getFilesByGlob(this.projectRoot || process.cwd(), glob)
 
     return codeGenCandidates.map(

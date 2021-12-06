@@ -33,7 +33,7 @@ export class StorybookDataSource {
       return []
     }
 
-    const config = project.config
+    const config = project.configFileContents
 
     if (!config) {
       return []
@@ -51,7 +51,7 @@ export class StorybookDataSource {
       const spec = this.ctx.file.normalizeFileToFileParts({
         absolute: file,
         projectRoot: project.projectRoot,
-        searchFolder: config.componentFolder || project.projectRoot,
+        searchFolder: config.value?.componentFolder || project.projectRoot,
       })
 
       return [...acc, spec]

@@ -16,8 +16,12 @@ const isSpecialSpec = (name) => {
 export class SocketE2E extends SocketBase {
   private testFilePath: string | null
 
-  constructor (config: Record<string, any>, ctx: DataContext) {
-    super(config, ctx)
+  get cfg () {
+    return this.ctx
+  }
+
+  constructor (private ctx: DataContext) {
+    super(ctx)
 
     this.testFilePath = null
 
@@ -25,7 +29,7 @@ export class SocketE2E extends SocketBase {
     this.onStudioTestFileChange = this.onStudioTestFileChange.bind(this)
     this.removeOnStudioTestFileChange = this.removeOnStudioTestFileChange.bind(this)
 
-    if (config.watchForFileChanges) {
+    if (this.ct.watchForFileChanges) {
       preprocessor.emitter.on('file:updated', this.onTestFileChange)
     }
   }

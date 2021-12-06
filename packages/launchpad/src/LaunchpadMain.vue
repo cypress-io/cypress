@@ -27,7 +27,7 @@
           :gql="data.currentProject"
         />
         <SetupComponentTestingWizard
-          v-else-if="data.currentProject.currentTestingType === 'component' && data.currentProject"
+          v-else-if="data.currentProject.currentTestingType === 'component' && data.currentProject.componentSetupState === 'NEW'"
           :gql="data"
         />
         <MigrationWizard

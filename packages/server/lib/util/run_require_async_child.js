@@ -66,7 +66,7 @@ function run (ipc, requiredFile, projectRoot) {
 
       ipc.send('loaded', result)
 
-      ipc.on('plugins', (testingType) => {
+      ipc.on('plugins', (testingType, setupConfig) => {
         const runPlugins = new RunPlugins(ipc, projectRoot, requiredFile)
 
         areSetupNodeEventsLoaded = true
@@ -75,15 +75,13 @@ function run (ipc, requiredFile, projectRoot) {
             return
           }
 
-          runPlugins.runSetupNodeEvents((on, config) => {
-            if (result.component?.devServer) {
-              on('dev-server:start', (options) => result.component.devServer(options, result.component?.devServerConfig))
-            }
+          if (result.component?.devServer) {
+            ipc.on('dev-server:start', (options) => result.component.devServer(options, result.component?.devServerConfig))
+          }
 
-            const setupNodeEvents = result.component?.setupNodeEvents ?? ((on, config) => {})
+          const setupNodeEvents = result.component?.setupNodeEvents ?? ((on, config) => {})
 
-            return setupNodeEvents(on, config)
-          })
+          runPlugins.load(setupConfig, setupNodeEvents)
         } else if (testingType === 'e2e') {
           if (!isValidSetupNodeEvents(result.e2e?.setupNodeEvents)) {
             return
@@ -91,7 +89,7 @@ function run (ipc, requiredFile, projectRoot) {
 
           const setupNodeEvents = result.e2e?.setupNodeEvents ?? ((on, config) => {})
 
-          runPlugins.runSetupNodeEvents(setupNodeEvents)
+          runPlugins.load(setupConfig, setupNodeEvents)
         } else {
           // Notify the plugins init that there's no plugins to resolve
           ipc.send('empty:plugins')

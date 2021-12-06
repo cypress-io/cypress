@@ -220,7 +220,7 @@
         "components": "Choose your preferred browser for testing your components",
         "application": "Choose your preferred browser for testing your application"
       },
-      "loadingTitle": "Initializing Browsers...",
+      "loadingTitle": "Initializing Project...",
       "loadingDescription": "Please wait while we load your project and find browsers installed on your system."
     },
     "configFile": {

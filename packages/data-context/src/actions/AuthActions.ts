@@ -14,8 +14,8 @@ export class AuthActions {
   async getUser () {
     return this.authApi.getUser().then((obj) => {
       if (obj.authToken) {
-        this.ctx.update((o) => {
-          o.user = obj
+        this.ctx.update((s) => {
+          s.user = obj
         })
 
         // When we get the user at startup, check the auth by
@@ -47,16 +47,16 @@ export class AuthActions {
 
   async login () {
     this.setAuthenticatedUser(await this.authApi.logIn(({ browserOpened }) => {
-      this.ctx.update((o) => {
-        o.isAuthBrowserOpened = browserOpened
+      this.ctx.update((s) => {
+        s.isAuthBrowserOpened = browserOpened
       })
     }))
   }
 
   async logout () {
     try {
-      this.ctx.update((o) => {
-        o.isAuthBrowserOpened = false
+      this.ctx.update((s) => {
+        s.isAuthBrowserOpened = false
       })
 
       await this.authApi.logOut()
@@ -67,8 +67,8 @@ export class AuthActions {
   }
 
   private setAuthenticatedUser (authUser: AuthenticatedUserShape | null) {
-    this.ctx.update((o) => {
-      o.user = authUser
+    this.ctx.update((s) => {
+      s.user = authUser
     })
 
     return this

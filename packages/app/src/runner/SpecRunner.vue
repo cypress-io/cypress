@@ -8,7 +8,7 @@
       class="bg-gray-1000"
     >
       <InlineSpecList
-        v-if="props.gql.currentProject "
+        v-if="props.gql.currentProject"
         :gql="props.gql.currentProject"
       />
 

@@ -5,10 +5,8 @@ import { EventEmitter } from 'events'
 import pDefer from 'p-defer'
 import { CypressErrorLike, isCypressError } from '@packages/types'
 import Bluebird from 'bluebird'
-
 import type { DataContext } from '..'
 import inspector from 'inspector'
-import type { CurrentProjectDataSource } from '../sources'
 import assert from 'assert'
 import type { ConfigIpc, EventRegistration, RegisteredEvents } from '../data/coreDataShape'
 import type { Immutable } from 'immer'
@@ -23,33 +21,37 @@ const UNDEFINED_SERIALIZED = '__cypress_undefined__'
  * Manages the lifecycle of the Config sourcing & Plugin execution
  */
 export class ConfigFileActions {
-  constructor (private ctx: DataContext, private currentProject: CurrentProjectDataSource) {}
+  constructor (private ctx: DataContext) {}
 
   static CHILD_PROCESS_FILE_PATH = path.join(__dirname, '../../../server/lib/util', 'require_async_child.js')
 
   updateFromServerStart () {
+    if (!this.ctx.coreData.derived.fullConfig?.port) {
+      this.ctx.update((s) => {
+        //
+      })
+    }
+
     // if we didnt have a cfg.port
     // then get the port once we
     // open the server
-    if (!cfg.port) {
-      cfg.port = port
+    // if (!cfg.port) {
+    //   cfg.port = port
 
-      // and set all the urls again
-      _.extend(cfg, config.setUrls(cfg))
-    }
-
-    cfg.proxyServer = cfg.proxyUrl
+    //   // and set all the urls again
+    //   _.extend(cfg, config.setUrls(cfg))
+    // }
 
     // save the last time they opened the project
     // along with the first time they opened it
-    const now = Date.now()
-    const stateToSave = {
-      lastOpened: now,
-    } as any
+    // const now = Date.now()
+    // const stateToSave = {
+    //   lastOpened: now,
+    // } as any
 
-    if (!cfg.state || !cfg.state.firstOpened) {
-      stateToSave.firstOpened = now
-    }
+    // if (!cfg.state || !cfg.state.firstOpened) {
+    //   stateToSave.firstOpened = now
+    // }
   }
 
   execute (eventName: string, config: object = {}, ...args: any[]) {
@@ -71,25 +73,51 @@ export class ConfigFileActions {
   }
 
   killChildProcess () {
-    this.ctx.update((o) => {
-      if (o.currentProject?.configChildProcess) {
-        o.currentProject.configChildProcess.process.kill()
+    this.ctx.update((s) => {
+      if (s.currentProject?.configChildProcess) {
+        s.currentProject.configChildProcess.process().kill()
+        s.currentProject.configChildProcess = null
       }
     })
   }
+
+  // startCtDevServer (specs: Cypress.Cypress['spec'][], config: any) {
+  //   // if (!plugins.has('dev-server:start')) {
+  //   //   throw errors.get('CT_NO_DEV_START_EVENT', config.pluginsFile)
+  //   // }
+
+  //   // return plugins.execute('dev-server:start', { specs, config })
+
+  //   // CT uses a dev-server to build the bundle.
+  //   // We start the dev server here.
+  //   const devServerOptions = await devServer.start({ specs, config })
+
+  //   if (!devServerOptions) {
+  //     throw new Error([
+  //       'It looks like nothing was returned from on(\'dev-server:start\', {here}).',
+  //       'Make sure that the dev-server:start function returns an object.',
+  //       'For example: on("dev-server:start", () => startWebpackDevServer({ webpackConfig }))',
+  //     ].join('\n'))
+  //   }
+
+  //   return { port: devServerOptions.port }
+  // }
 
   /**
    * Called after the config is sourced, once we've determined a testing type
    */
   runSetupNodeEvents (ipc: ConfigIpc) {
-    const dfd = pDefer<null | { newConfig: Cypress.ResolvedConfigOptions, registeredEvents: RegisteredEvents }>()
+    assert(this.ctx.currentProject, 'Expected currentProject in runSetupNodeEvents')
+    assert(this.ctx.coreData.derived.setupNodeEventsConfig, 'Expected derived setupNodeEventsConfig in runSetupNodeEvents')
+
+    const dfd = pDefer<{ result: Partial<Cypress.PluginConfigOptions> | null, registeredEvents: RegisteredEvents }>()
 
     // TODO: Move these into the Data Context
     const handlers = this.ctx._apis.projectApi.getPluginIpcHandlers()
 
-    assert(this.currentProject.currentTestingType, 'expected testing type in runSetupNodeEvents')
+    assert(this.ctx.currentProject.currentTestingType, 'expected testing type in runSetupNodeEvents')
 
-    ipc.on('empty:plugins', () => dfd.resolve(null))
+    ipc.on('empty:plugins', () => dfd.resolve({ result: null, registeredEvents: {} }))
 
     ipc.on('load:error:plugins', (type, ...args) => {
       this.ctx.debugNs('plugin', 'load:error %s, rejecting', type)
@@ -105,12 +133,10 @@ export class ConfigFileActions {
       handler(ipc)
     }
 
-    const configOpts = this.ctx.projectConfig.makeSetupNodeEventsConfig()
-
     ipc.send(
       'plugins',
-      this.currentProject.currentTestingType,
-      configOpts,
+      this.ctx.currentProject.currentTestingType,
+      this.ctx.coreData.derived.setupNodeEventsConfig,
     )
 
     return dfd.promise
@@ -121,13 +147,13 @@ export class ConfigFileActions {
 
     const { child, ipc, configPromise } = this.ctx.actions.projectConfig.forkConfigProcess()
 
-    this.ctx.update((o) => {
-      if (o.currentProject) {
-        o.currentProject.configChildProcess = {
+    this.ctx.update((s) => {
+      if (s.currentProject) {
+        s.currentProject.configChildProcess = {
           ipc,
           baseConfigPromise: configPromise,
           executedPlugins: null,
-          process: child,
+          process: () => child,
           registeredEvents: {},
         }
       }
@@ -137,7 +163,8 @@ export class ConfigFileActions {
   }
 
   forkConfigProcess () {
-    const { projectRoot, configFilePath } = this.currentProject
+    assert(this.ctx.project, 'Expected project for forkConfigProcess')
+    const { projectRoot, configFilePath } = this.ctx.project
 
     assert(projectRoot, 'projectRoot needed to forkConfigProcess')
     assert(configFilePath, 'configFilePath needed to forkConfigProcess')
@@ -239,8 +266,7 @@ export class ConfigFileActions {
     }
   }
 
-  private _handleLoadedPlugins (ipc: ConfigIpc, newCfg: Cypress.ResolvedConfigOptions, registrations: EventRegistration[]) {
-    const newConfig = _.omit(newCfg, 'projectRoot', 'configFile')
+  private _handleLoadedPlugins (ipc: ConfigIpc, result: Partial<Cypress.PluginConfigOptions>, registrations: EventRegistration[]) {
     const registeredEvents: Record<string, Function> = {}
 
     // For every registration event, we want to turn into an RPC with the child process
@@ -288,6 +314,6 @@ export class ConfigFileActions {
       }
     }
 
-    return { newConfig, registeredEvents }
+    return { result, registeredEvents }
   }
 }

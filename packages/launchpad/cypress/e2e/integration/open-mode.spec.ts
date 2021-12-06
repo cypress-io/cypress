@@ -67,20 +67,32 @@ describe('Launchpad: Open Mode', () => {
 
   describe('open in ide', () => {
     it('configures an editor if one is not configured', () => {
-      cy.setupE2E('todos')
+      cy.openModeSystemTest('todos')
       cy.withCtx(async (ctx, o) => {
-        ctx.coreData.localSettings.preferences.preferredEditorBinary = undefined
-        ctx.coreData.localSettings.availableEditors = [
-          // don't rely on CI machines to have specific editors installed
-          // so just adding one here
-          {
-            id: 'well-known-editor',
-            binary: '/usr/bin/well-known',
-            name: 'Well known editor',
-          },
-        ]
+        ctx.update((s) => {
+          s.localSettings = {
+            state: 'LOADED',
+            settled: true,
+            value: {
+              preferences: {
+                preferredEditorBinary: undefined,
+              },
+              availableEditors: [
+                {
+                  id: 'well-known-editor',
+                  binary: '/usr/bin/well-known',
+                  name: 'Well known editor',
+                },
+              ],
+            },
+          }
 
-        ctx.coreData.app.projects = [{ projectRoot: '/some/project' }]
+          o.globalProjects = {
+            state: 'LOADED',
+            value: ['/some/project'],
+            settled: true,
+          }
+        })
       })
 
       cy.visitLaunchpad()
@@ -99,9 +111,15 @@ describe('Launchpad: Open Mode', () => {
     })
 
     it('opens using finder', () => {
-      cy.setupE2E('todos')
+      cy.openModeSystemTest('todos')
       cy.withCtx(async (ctx, o) => {
-        ctx.coreData.app.projects = [{ projectRoot: '/some/project' }]
+        ctx.update((s) => {
+          s.globalProjects = {
+            settled: true,
+            state: 'LOADED',
+            value: ['/some/project'],
+          }
+        })
       })
 
       cy.visitLaunchpad()

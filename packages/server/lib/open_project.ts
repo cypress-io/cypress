@@ -11,29 +11,25 @@ import runEvents from './plugins/run_events'
 import * as session from './session'
 import { getSpecUrl } from './project_utils'
 import errors from './errors'
-import type { LaunchOpts, LaunchArgs, OpenProjectLaunchOptions, FoundBrowser } from '@packages/types'
+import type { LaunchOpts } from '@packages/types'
 import type { DataContext } from '@packages/data-context'
 import assert from 'assert'
 
 const debug = Debug('cypress:server:open_project')
 
 export class OpenProject {
-  openProject: ProjectBase<any> | null = null
-  relaunchBrowser: ((...args: unknown[]) => Bluebird<void>) | null = null
+  private openProject: ProjectBase
 
-  constructor (readonly ctx: DataContext) {}
+  constructor (readonly ctx: DataContext) {
+    this.openProject = new ProjectBase(this.ctx, this.ctx.ensure.project)
+  }
 
   getProject () {
     return this.openProject
   }
 
-  resetOpenProject () {
-    this.openProject = null
-    this.relaunchBrowser = null
-  }
-
   reset () {
-    this.resetOpenProject()
+    this.openProject = null
   }
 
   changeUrlToSpec (spec: Cypress.Cypress['spec']) {
@@ -47,7 +43,7 @@ export class OpenProject {
       browserUrl: this.openProject.cfg.browserUrl,
       integrationFolder: this.openProject.cfg.integrationFolder || 'integration',
       componentFolder: this.openProject.cfg.componentFolder || 'component',
-      projectRoot: this.openProject.projectRoot,
+      projectRoot: this.ctx.ensure.project.projectRoot,
     })
 
     this.openProject.changeToUrl(newSpecUrl)
@@ -75,7 +71,7 @@ export class OpenProject {
       browserUrl: this.openProject.cfg.browserUrl,
       integrationFolder: this.openProject.cfg.integrationFolder || 'integration',
       componentFolder: this.openProject.cfg.componentFolder || 'component?',
-      projectRoot: this.openProject.projectRoot,
+      projectRoot: this.ctx.ensure.project.projectRoot,
     })
 
     debug('open project url %s', url)
@@ -160,32 +156,28 @@ export class OpenProject {
 
     options.onError = this.openProject.options.onError
 
-    this.relaunchBrowser = () => {
-      debug(
-        'launching browser: %o, spec: %s',
-        browser,
-        spec.relative,
-      )
+    debug(
+      'launching browser: %o, spec: %s',
+      browser,
+      spec.relative,
+    )
 
-      return Bluebird.try(() => {
-        if (!cfg.isTextTerminal && cfg.experimentalInteractiveRunEvents) {
-          // @ts-ignore
-          return runEvents.execute('before:spec', cfg, spec)
-        }
+    return Bluebird.try(() => {
+      if (!cfg.isTextTerminal && cfg.experimentalInteractiveRunEvents) {
+        // @ts-ignore
+        return runEvents.execute('before:spec', cfg, spec)
+      }
 
-        // clear all session data before each spec
-        session.clearSessions()
-      })
-      .then(() => {
-        if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {
-          return
-        }
+      // clear all session data before each spec
+      session.clearSessions()
+    })
+    .then(() => {
+      if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {
+        return
+      }
 
-        return browsers.open(browser, options, automation)
-      })
-    }
-
-    return this.relaunchBrowser()
+      return browsers.open(browser, options, automation)
+    })
   }
 
   getSpecs (cfg) {
@@ -244,7 +236,7 @@ export class OpenProject {
       return this.openProject?.close()
     })
     .then(() => {
-      this.resetOpenProject()
+      this.openProject = null
 
       return null
     })
@@ -265,26 +257,9 @@ export class OpenProject {
     await this.closeOpenProjectAndBrowsers()
   }
 
-  async create (path: string, args: LaunchArgs, options: OpenProjectLaunchOptions, browsers: FoundBrowser[] = []) {
-    debug('open_project create %s', path)
-
-    if (!_.isUndefined(args.configFile)) {
-      options.configFile = args.configFile
-    }
-
-    options = _.extend({}, args.config, options, { args })
-
-    // store the currently open project
-    const project = this.openProject = new ProjectBase({
-      ctx: this.ctx,
-      options: {
-        ...options,
-        testingType,
-      },
-    })
-
+  async create () {
     try {
-      await project.initializeConfig(browsers)
+      // this.openProject
       await project.open()
     } catch (err: any) {
       if (err.isCypressErr && err.portInUse) {
@@ -298,10 +273,5 @@ export class OpenProject {
     }
 
     return this
-  }
-
-  // for testing purposes
-  __reset () {
-    this.resetOpenProject()
   }
 }

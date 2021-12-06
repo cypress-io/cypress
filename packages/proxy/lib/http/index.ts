@@ -17,6 +17,7 @@ import type { Request, Response } from 'express'
 import RequestMiddleware from './request-middleware'
 import ResponseMiddleware from './response-middleware'
 import { DeferredSourceMapCache } from '@packages/rewriter'
+import type { DataContext } from '@packages/data-context'
 
 const debugRequests = Debug('cypress-verbose:proxy:http')
 
@@ -189,7 +190,6 @@ function getUniqueRequestId (requestId: string) {
 
 export class Http {
   buffers: HttpBuffers
-  config: CyServer.Config
   shouldCorrelatePreRequests: () => boolean
   deferredSourceMapCache: DeferredSourceMapCache
   getFileServerToken: () => string
@@ -201,11 +201,10 @@ export class Http {
   socket: CyServer.Socket
   renderedHTMLOrigins: {[key: string]: boolean} = {}
 
-  constructor (opts: ServerCtx & { middleware?: HttpMiddlewareStacks }) {
+  constructor (private ctx: DataContext, opts: ServerCtx & { middleware?: HttpMiddlewareStacks }) {
     this.buffers = new HttpBuffers()
     this.deferredSourceMapCache = new DeferredSourceMapCache(opts.request)
 
-    this.config = opts.config
     this.shouldCorrelatePreRequests = opts.shouldCorrelatePreRequests || (() => false)
     this.getFileServerToken = opts.getFileServerToken
     this.getRemoteState = opts.getRemoteState
@@ -224,7 +223,7 @@ export class Http {
       req,
       res,
       buffers: this.buffers,
-      config: this.config,
+      config: this.ctx.projectConfig.fullConfig,
       shouldCorrelatePreRequests: this.shouldCorrelatePreRequests,
       getFileServerToken: this.getFileServerToken,
       getRemoteState: this.getRemoteState,

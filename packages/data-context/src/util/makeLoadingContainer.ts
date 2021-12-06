@@ -1,6 +1,5 @@
 /* eslint-disable no-dupe-class-members */
 import assert from 'assert'
-import type { Immutable } from 'immer'
 
 export type IsPending = {
   settled: false
@@ -9,10 +8,10 @@ export type IsPending = {
   value?: undefined
 }
 
-export type IsLoading<V, E = any> = {
+export type IsLoading<V> = {
   settled: false
   state: 'LOADING'
-  promise: Promise<Settled<Immutable<V>, E>>
+  promise: Promise<V>
   value?: undefined
   cancelled: boolean
 }
@@ -20,7 +19,7 @@ export type IsLoading<V, E = any> = {
 export type IsLoaded<V> = {
   settled: true
   state: 'LOADED'
-  value: Immutable<V>
+  value: V
   error?: never
 }
 
@@ -33,7 +32,7 @@ export type IsErrored<E> = {
 
 export type Settled<V, E> = IsLoaded<V> | IsErrored<E>
 
-export type LoadingState<V, E = any> = IsPending | IsLoading<V, E> | IsLoaded<V> | IsErrored<E>
+export type LoadingState<V, E = any> = IsPending | IsLoading<V> | IsLoaded<V> | IsErrored<E>
 
 let withinLoadingAction = false
 
@@ -46,24 +45,25 @@ export function assertWithinLoadingAction (name: string) {
 export interface LoadingConfig<V, E = any> {
   /**
    * A name for the loding container, for any dev errors we need to trigger
+   * and for the `LoadingManager` to ensure there is only a single loader with
+   * the given name
    */
   name: string
   /**
-   * The action to take to update the value
+   * The asynchronous action we are issuing in order to update the
+   * internal state of the application
    */
-  action: () => Promise<Immutable<V>>
+  action: () => Promise<V>
   /**
-   * When we update the value
+   * When we move between the various states, the `onUpdate` is called to communicate
+   * the current state of the loading item
    */
-  onUpdate: (val: Immutable<IsLoaded<V> | IsErrored<E>>) => any
+  onUpdate: (val: IsPending | IsLoading<V> | IsLoaded<V> | IsErrored<E>) => any
   /**
-   * Called when we call "reload" on the
+   * If there is any teardown we need to do with the resolved value, in the event
+   * that we have cancelled the `LoadingContainer`, it will be invoked here
    */
-  onReload?: () => {}
-  /**
-   * Optional callback after there's an error
-   */
-  onError?: (err: E) => void
+  onCancelled?: (val: V) => any
 }
 
 /**
@@ -77,18 +77,18 @@ export class LoadingContainer<V, E = any> {
   /**
    * Caches the "loading" value on the class, so we can
    */
-  private _loading: Promise<Immutable<V>> | undefined
+  private _loading: Promise<V> | undefined
   private _data: LoadingState<V, E>;
-  private cancelled = false
 
   constructor (private config: LoadingConfig<V, E>) {
     this._data = { state: 'PENDING', settled: false }
   }
 
-  private async startLoading () {
+  private async startLoading (): Promise<V> {
     const state = this._data
 
     assert(state.state === 'LOADING', 'Cannot call startLoading unless the value is LOADING')
+
     try {
       withinLoadingAction = true
       const actionVal = this.config.action()
@@ -99,8 +99,14 @@ export class LoadingContainer<V, E = any> {
 
       const value = await this._loading
 
-      if (this.cancelled || state.cancelled) {
-        return value
+      if (state.cancelled) {
+        try {
+          await this.config.onCancelled?.(value)
+        } catch (e) {
+          return Promise.reject(e)
+        } finally {
+          return Promise.reject(new Error(`LoadingContainer: ${this.config.name} cancelled`))
+        }
       }
 
       this._data = {
@@ -109,7 +115,7 @@ export class LoadingContainer<V, E = any> {
         value,
       }
 
-      this.config.onUpdate(this._data)
+      this.onUpdate(this._data)
 
       return value
     } catch (e: unknown?) {
@@ -119,21 +125,28 @@ export class LoadingContainer<V, E = any> {
         error: e,
       } as IsErrored<E>
 
-      if (this.cancelled || state.cancelled) {
-        return Promise.resolve(undefined)
+      if (state.cancelled) {
+        return Promise.reject()
       }
 
       this._data = errorPayload
 
-      this.config.onUpdate(this._data)
+      try {
+        this.onUpdate(this._data)
+      } catch (e) {
+        // eslint-disable-next-line
+        console.error(e)
+      }
 
-      this.config.onError?.(e)
-
-      return Promise.resolve(e)
+      return Promise.reject(e)
     } finally {
       this._loading = undefined
       withinLoadingAction = false
     }
+  }
+
+  private onUpdate (val: IsPending | IsLoading<V> | IsLoaded<V> | IsErrored<E>) {
+    this.config.onUpdate({ ...val })
   }
 
   reload (force = false) {
@@ -152,12 +165,15 @@ export class LoadingContainer<V, E = any> {
   }
 
   /**
-   * If we set to "false", it will
+   * Loads the latest value from the "action", or "undefined" if the value is errored.
+   * We resolve undefined because the error is exposed as part of the "ERRORED"
    * @param asPromise
    * @returns
    */
-  load (): Promise<Immutable<V> | undefined> {
+  load (): Promise<V | undefined> {
     if (this._data.state === 'PENDING') {
+      // Explicitly sent in the next tick, as this can be dispatched from
+      // the data shape updater, and we want the internal state to be consistent
       const promise = Promise.resolve().then(() => this.startLoading())
 
       this._data = {
@@ -166,6 +182,10 @@ export class LoadingContainer<V, E = any> {
         promise,
         cancelled: false,
       }
+
+      this.onUpdate(this._data)
+
+      return promise.catch(() => undefined)
     }
 
     if (this._data.state === 'LOADED') {
@@ -177,24 +197,36 @@ export class LoadingContainer<V, E = any> {
     }
 
     if (this._data.state === 'LOADING') {
-      return this._data.promise.then((val) => val.value)
+      return this._data.promise.catch(() => undefined)
     }
 
-    throw new Error(`Unexpected state`)
+    // @ts-expect-error
+    throw new Error(`Unexpected state ${this._data.state}`)
+  }
+
+  loadOrThrow () {
+    return this.load().then((val) => {
+      if (val === undefined && this._data.state === 'ERRORED') {
+        throw this._data.error
+      }
+
+      return val
+    })
   }
 
   getState () {
     return this._data
   }
 
-  cancel () {
-    this.cancelled = true
-  }
-
   reset () {
-    this.cancel()
+    if (this._data.state === 'LOADING') {
+      this._data.cancelled = true
+    }
 
-    return new LoadingContainer(this.config)
+    this._data = { state: 'PENDING', settled: false }
+    this.onUpdate(this._data)
+
+    return this
   }
 }
 

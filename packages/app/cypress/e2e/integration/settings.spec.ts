@@ -39,19 +39,24 @@ describe('Settings', { viewportWidth: 600 }, () => {
 
   it('selects well known editor', () => {
     cy.visitApp()
-    cy.withCtx(async (ctx) => {
-      ctx.coreData.localSettings.availableEditors = [
-        ...ctx.coreData.localSettings.availableEditors,
-        // don't rely on CI machines to have specific editors installed
-        // so just adding one here
-        {
-          id: 'well-known-editor',
-          binary: '/usr/bin/well-known',
-          name: 'Well known editor',
-        },
-      ]
-
-      ctx.coreData.localSettings.preferences.preferredEditorBinary = undefined
+    cy.withCtx(async (ctx, o) => {
+      ctx.update((s) => {
+        s.localSettings = o.loaded({
+          availableEditors: [
+            ...s.localSettings.value?.availableEditors ?? [],
+            // don't rely on CI machines to have specific editors installed
+            // so just adding one here
+            {
+              id: 'well-known-editor',
+              binary: '/usr/bin/well-known',
+              name: 'Well known editor',
+            },
+          ],
+          preferences: {
+            preferredEditorBinary: undefined,
+          },
+        })
+      })
     })
 
     cy.get('[href="#/settings"]').click()

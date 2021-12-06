@@ -14,11 +14,11 @@ export class LocalSettingsActions {
   setPreferences (stringifiedJson: string) {
     const toJson = JSON.parse(stringifiedJson) as Partial<AllowedState>
 
-    this.ctx.update((o) => {
-      if (o.localSettings.state === 'LOADED') {
+    this.ctx.update((s) => {
+      if (s.localSettings.state === 'LOADED') {
         for (const [key, value] of Object.entries(toJson)) {
           // @ts-expect-error
-          o.localSettings.value[key as keyof AllowedState] = value as any
+          s.localSettings.value[key as keyof AllowedState] = value as any
         }
       }
     })

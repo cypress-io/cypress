@@ -101,7 +101,7 @@ export const mutation = mutationType({
       },
     })
 
-    t.field('selectProjectTestingType', {
+    t.field('setCurrentTestingType', {
       type: 'Query',
       description: 'Updates the testing type for the current project',
       args: {
@@ -216,7 +216,7 @@ export const mutation = mutationType({
       type: 'Query',
       description: 'Retries loading the plugins config, called when there was an error executing the plugins',
       resolve: (source, args, ctx) => {
-        ctx.actions.currentProject?.setupPluginEvents()
+        // ctx.actions.currentProject?.setupNodeEvents()
 
         return {}
       },

@@ -2,22 +2,22 @@ import type { App, BrowserWindow } from 'electron'
 import type { TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
 import type { ChildProcess } from 'child_process'
 import path from 'path'
-import type { AllowedState, CypressErrorIdentifier, Editor, Ensure, FoundBrowser, LaunchArgs, Preferences } from '@packages/types'
-import type { Draft, Immutable, Patch } from 'immer'
+import type { AllowedState, CypressErrorIdentifier, Editor, Ensure, FoundBrowser, FullConfig, LaunchArgs, Preferences } from '@packages/types'
+import { Draft, Immutable, Patch, castDraft } from 'immer'
 import fs from 'fs'
-import { castDraft } from 'immer'
 
 import type { LoadingState } from '../util'
 import type { LoadingManager } from './LoadingManager'
 import type { ProjectWatcher } from './ProjectWatcher'
 import type { CurrentProjectDataSource } from '../sources'
+import type { LegacyOpenProjectShape } from '../actions'
 
 type Handler<T> = (val: T, ...rest: any[]) => any
 type Handler2<A, B> = (val: A, val2: B) => any
 
 export interface EventRegistration {
-  eventId: string
   event: string
+  eventId: string
 }
 
 export type RegisteredEvents = Record<string, Function>
@@ -25,7 +25,6 @@ export type RegisteredEvents = Record<string, Function>
 export interface ConfigIpc {
   send(event: 'load'): boolean
   send(event: 'plugins', testingType: TestingTypeEnum, config: Immutable<Cypress.ConfigOptions>): boolean
-  send(event: 'load:plugins', options: Cypress.PluginConfigOptions): boolean
   send(event: 'execute:plugins', evt: string, ids: {eventId: string, invocationId: string}, args: any[]): boolean
   on(evt: `promise:fulfilled:${string}`, fn: Function): boolean
   on(evt: 'loaded', fn: Handler<Immutable<Cypress.ConfigOptionsIpcResponse>>): any
@@ -78,9 +77,10 @@ export interface WarningShape {
 
 export interface ConfigChildProcessShape {
   /**
-   * Child process executing the config & sourcing plugin events
+   * Child process executing the config & sourcing plugin events.
+   * A function so we don't serialize this
    */
-  process: ChildProcess
+  process: () => ChildProcess
   /**
    * The faux IPC interface established with the config / plugin event child process
    */
@@ -88,7 +88,7 @@ export interface ConfigChildProcessShape {
   /**
    * Keeps track of which plugins we have executed in the current config process
    */
-  executedPlugins: null | 'e2e' | 'ct'
+  executedPlugins: null | 'component' | 'e2e'
   /**
    * Config from the initial module.exports
    */
@@ -101,6 +101,10 @@ export interface ConfigChildProcessShape {
 
 export type CurrentProjectDataShape = Immutable<{
   /**
+   * The port for the currently running server associated with the project
+   */
+  serverPort: number | null
+  /**
    * The directory on the filesystem containing the cypress.config.{js,ts} file
    */
   projectRoot: string
@@ -109,6 +113,10 @@ export type CurrentProjectDataShape = Immutable<{
    * this project has a loadable config file that we can execute
    */
   configFile: string | null
+  /**
+   * The path to the cypress.env.json file on the disk, if one exists
+   */
+  configEnvFile: LoadingState<Cypress.ConfigOptions | null>
   /**
    * A list of config files that we see. We expect this to be an array of length 1
    * in a good config. Otherwise it's considered a warning
@@ -121,15 +129,11 @@ export type CurrentProjectDataShape = Immutable<{
   /**
    * The "current testing type" chosen for the project
    */
-  currentTestingType: Maybe<TestingTypeEnum>
+  currentTestingType: TestingTypeEnum | null
   /**
    * the --browser flag, if specified by the CLI via LaunchArgs
    */
   cliBrowser: string | null
-  /**
-   * When we call the plugin, we get back the final config
-   */
-  pluginLoad: LoadingState<{ newConfig: Cypress.ResolvedConfigOptions, registeredEvents: RegisteredEvents } | null>
   /**
    * The events that have been registered on the plugin
    */
@@ -141,15 +145,15 @@ export type CurrentProjectDataShape = Immutable<{
   /**
    * The exported value from cypress.config.{js|ts}
    */
-  config: LoadingState<Cypress.ConfigOptionsIpcResponse>
+  configFileContents: LoadingState<Cypress.ConfigOptionsIpcResponse>
   /**
    * Any config saved / sourced from the filesystem in open-mode
    */
-  configAppState: LoadingState<object>
+  configAppState: LoadingState<object | null>
   /**
-   * The result of invoking the "config child process" to modify the config
+   * When we call the setupNodeEvents, we receive the user's updated config options, and the list of registered events
    */
-  configSetupNodeEvents: LoadingState<Cypress.PluginConfigOptions | undefined>
+  configSetupNodeEvents: LoadingState<{ result: Partial<Cypress.ResolvedConfigOptions> | null, registeredEvents: RegisteredEvents }>
   /**
    * The child process used for loading the config / executing the plugins,
    * kept as internal state so we can re-use the same child process for the
@@ -161,11 +165,6 @@ export type CurrentProjectDataShape = Immutable<{
    */
   preferences: Preferences | null
   /**
-   * All browsers loaded for this project, we get this after the plugins config is loaded
-   * for the given testing type, since this value can be manipulated by that
-   */
-  browsers?: FoundBrowser[] | null
-  /**
    * Chosen browser for the current project
    */
   currentBrowser?: FoundBrowser | null
@@ -173,6 +172,10 @@ export type CurrentProjectDataShape = Immutable<{
    * A watcher for files in the current project
    */
   watcher: ProjectWatcher | null
+  /**
+   * The legacy "Open Project" shape, will be removed soon
+   */
+  legacyOpenProject: LegacyOpenProjectShape | null
 }>
 
 export interface ElectronShape {
@@ -242,7 +245,27 @@ export type CoreDataShape = Immutable<{
   /**
    * Options passed through the CLI flag
    */
-   configCli: Cypress.ConfigOptions
+  cliConfig: Cypress.ConfigOptions
+  /**
+   * Derived state, from the updates in other keys
+   */
+  derived: {
+    /**
+     * Options sent to the "setupNodeEvents", re-derived everytime one of the sources feeding into the config changes.
+     * Set to "null" if there isn't a current project
+     */
+    setupNodeEventsConfig: Cypress.ConfigOptions | null
+    /**
+     * The "config" for starting the server, which provides us with the
+     * port necessary to
+     */
+    configForServerStart: Cypress.ConfigOptions | null
+    /**
+     * The "full" config, re-derived everytime one of the sources feeding into the config changes
+     * Set to "null" if all of the sources for the config haven't been loaded yet
+     */
+    fullConfig: FullConfig | null
+  }
 }>
 
 export function makeCurrentProject (launchArgs: Partial<LaunchArgs> = {}, loadingManager: LoadingManager): Draft<CurrentProjectDataShape> | null {
@@ -251,18 +274,21 @@ export function makeCurrentProject (launchArgs: Partial<LaunchArgs> = {}, loadin
   }
 
   return {
+    serverPort: null,
     cliBrowser: null,
     title: path.basename(launchArgs.projectRoot),
     projectRoot: launchArgs.projectRoot,
     currentTestingType: launchArgs.testingType ?? null,
     preferences: null,
+    configAppState: castDraft(loadingManager.configAppState.getState()),
+    configEnvFile: castDraft(loadingManager.projectEnvConfig.getState()),
+    configSetupNodeEvents: castDraft(loadingManager.setupNodeEvents.getState()),
+    configFileContents: castDraft(loadingManager.projectConfig.getState()),
     configChildProcess: null,
-    config: castDraft(loadingManager.projectConfig.getState()),
-    pluginLoad: castDraft(loadingManager.projectEventSetup.getState()),
-    configCli: null,
     pluginRegistry: null,
     pluginDataProcess: null,
     watcher: null,
+    legacyOpenProject: null,
     ...sourceProjectFilePaths(launchArgs as LaunchArgs),
   }
 }
@@ -290,12 +316,16 @@ export function makeCoreData (launchArgs: Partial<LaunchArgs> = {}, loadingManag
     },
     userNodePath: null,
     userNodeVersion: null,
-    configCli: null,
+    cliConfig: {},
+    derived: {
+      fullConfig: null,
+      configForServerStart: null,
+      setupNodeEventsConfig: null,
+    },
   }
 }
 
-// Synchronously check config file paths. This is done synchronously here
-// because these are:
+// Synchronously check config file paths. This is done synchronously here because these are:
 // - very few / quick file lookups
 // - simpler than forcing this fn & callers to be async
 // - typically done infrequently / paired with loading the config which takes awhile relative to the sync access

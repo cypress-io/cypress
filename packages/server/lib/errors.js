@@ -709,6 +709,12 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         Could not find a Cypress configuration file, exiting.
 
         We looked but did not find a default config file in this folder: ${chalk.blue(arg1)}`
+    case 'TESTING_TYPE_NEEDED_FOR_RUN':
+      return stripIndent`
+          You have both "e2e" & "component" tests configured for your project. 
+          
+          Please select which ones you want to run by passing --e2e or --component to cypress run
+          `
     case 'CONFIG_FILE_MIGRATION_NEEDED':
       return stripIndent`
           There is a cypress.json file at the location below:

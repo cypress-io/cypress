@@ -49,12 +49,6 @@ type WebSocketOptionsCallback = (...args: any[]) => any
 
 export interface OpenProjectLaunchOptions {
   args?: LaunchArgs
-  /**
-   * Whether to skip the plugin initialization, useful when
-   * we're using Cypress to test Cypress
-   */
-  skipPluginIntializeForTesting?: boolean
-
   configFile?: string | false
   browsers?: Cypress.Browser[]
 

@@ -1,22 +1,17 @@
-import { Draft, Immutable, produce } from 'immer'
-import assert from 'assert'
-import configUtils, { allowed } from '@packages/config'
-import debugLib from 'debug'
+import { Draft, Immutable, produce, produceWithPatches } from 'immer'
+import { defaultsForTestingType, allConfigOptions } from '@packages/config'
+import { coerce } from '@packages/config/lib/coerce'
 import _ from 'lodash'
-import url from 'url'
 import path from 'path'
 
 import type { DataContext } from '..'
-import type { CoreDataShape, CurrentProjectDataShape } from '../data'
-import type { ResolvedConfigurationOptions, ResolvedFromConfig } from '@packages/types'
+import type { CoreDataShape } from '../data'
+import type { FoundBrowser, FullConfig, FullConfigBase } from '@packages/types'
+import assert from 'assert'
 
-const debug = debugLib('projectConfigDataSource')
-
-const folders = _(configUtils.options).filter({ isFolder: true }).map('name').value()
+const folders = _(allConfigOptions).filter({ isFolder: true }).map('name').value()
 
 export const CYPRESS_ENV_PREFIX = 'CYPRESS_'
-
-export const CYPRESS_ENV_PREFIX_LENGTH = 'CYPRESS_'.length
 
 export const CYPRESS_RESERVED_ENV_VARS = [
   'CYPRESS_INTERNAL_ENV',
@@ -26,41 +21,71 @@ export const CYPRESS_SPECIAL_ENV_VARS = [
   'RECORD_KEY',
 ]
 
-export const isDefault = (config: Record<string, any>, prop: string) => {
-  return config.resolved[prop].from === 'default'
+export interface BuildSetupNodeEventsSources {
+  currentTestingType: string | null
+  projectConfig: Cypress.ConfigOptionsIpcResponse
+  cliConfig: Cypress.ConfigOptions
+  machineBrowsers: Array<FoundBrowser>
 }
 
-export type FullConfig =
-  Cypress.RuntimeConfigOptions &
-  Cypress.ResolvedConfigOptions &
-  {
-    resolved: ResolvedConfigurationOptions
-  }
+export interface BuildConfigSources extends BuildSetupNodeEventsSources {
+  configSetupNodeEvents: Partial<Cypress.ResolvedConfigOptions> | null
+}
 
 export class ProjectConfigDataSource {
-  private currentProjectData: CurrentProjectDataShape
+  // private currentProjectData: CurrentProjectDataShape
 
   constructor (private ctx: DataContext) {
-    assert(this.ctx.currentProject, `Expected currentProject to be set when calling ctx.projectConfig`)
-    this.currentProjectData = this.ctx.currentProject
+    // assert(this.ctx.currentProject, `Expected currentProject to be set when calling ctx.projectConfig`)
+    // this.currentProjectData = this.ctx.currentProject
+  }
+
+  get fullConfig () {
+    assert(this.ctx.coreData.derived.fullConfig, `Expected fullConfig to be defined`)
+
+    return this.ctx.coreData.derived.fullConfig
   }
 
   /**
-   * Whenever we have an Immer update, we compare the keys which form the "full config",
-   * and if any of them have changed, we re-compute & store the updated object
+   * The "Sourced" Config + CLI Config + Env Config all contribute to the values sent to the
+   * setupNodeEvents call in the config file. If any of these changed, we need to recompute everything
    */
-  shouldRebuildConfig (prevState: Immutable<CoreDataShape>, nextState: Immutable<CoreDataShape>): boolean {
+  shouldRebuildSetupNodeEventsConfig (prevState: Immutable<CoreDataShape>, nextState: Immutable<CoreDataShape>) {
     if (prevState === nextState) {
       return false
     }
 
-    if (prevState.machineBrowsers !== nextState.machineBrowsers) {
-      //
+    return (
+      prevState.currentProject?.currentTestingType !== nextState.currentProject?.currentTestingType ||
+      prevState.cliConfig !== nextState.cliConfig ||
+      prevState.currentProject?.configFileContents !== nextState.currentProject?.configFileContents ||
+      prevState.machineBrowsers !== nextState.machineBrowsers
+    )
+  }
+
+  /**
+   * Whenever we have an Immer update related to config, we compare the keys which form the "full config",
+   * and if any of them have changed, we re-compute & store the updated object
+   */
+  shouldRebuildFullConfig (prevState: Immutable<CoreDataShape>, nextState: Immutable<CoreDataShape>): boolean {
+    if (prevState === nextState) {
+      return false
     }
+
+    return Boolean(
+      this.shouldRebuildSetupNodeEventsConfig(prevState, nextState) ||
+      prevState.currentProject?.configSetupNodeEvents !== nextState.currentProject?.configSetupNodeEvents,
+    )
   }
 
   loadedConfig () {
     //
+  }
+
+  addRuntimeConfig () {
+    return {
+      ...this.ctx.coreData,
+    }
   }
 
   /**
@@ -68,681 +93,465 @@ export class ProjectConfigDataSource {
    * we combine these options with the options passed in the CLI, the "found browsers", the cypress.env.json
    * and make a Cypress.
    */
-  makeSetupNodeEventsConfig (): Immutable<Cypress.Config> {
-    // 1. Get the "config", by merging the defaults, the result of the config file sourcing, and the CLI vars
-    return produce({} as Immutable<Cypress.Config>, (obj) => {
-      if (this.currentProjectData.config.state === 'LOADED') {
-        Object.assign(obj, this.currentProjectData.config.value)
-      }
+  makeSetupNodeEventsConfig (sources: BuildSetupNodeEventsSources) {
+    const config = this._setupNodeEventsConfig(sources)
 
-      if (this.currentProjectData.pluginLoad.state === 'LOADED') {
-        const value = this.currentProjectData.pluginLoad.value
-        //
-      }
-    })
+    return config
   }
 
-  getConfig () {
+  buildSetupNodeEventsConfig (configSources: Immutable<BuildConfigSources>) {
+    if (!this.ctx.project) {
+      return null
+    }
 
-  }
+    const { config } = this._setupNodeEventsConfig(configSources)
 
-  private get (
-    options: { configFile?: string | false } = { configFile: undefined },
-    ctx: DataContext,
-  ): Promise<FullConfig> {
-    return Promise.all([
-      settings.read(projectRoot, options, ctx).then(validateFile(options.configFile ?? 'cypress.config.{ts|js}')),
-      settings.readEnv(projectRoot).then(validateFile('cypress.env.json')),
-    ])
-    .spread((settings, envFile) => {
-      return this.set({
-        projectName: path.basename(this.currentProjectData.projectRoot),
-        projectRoot,
-        config: _.cloneDeep(settings),
-        envFile: _.cloneDeep(envFile),
-        options,
-      })
-    })
+    return config
   }
 
   /**
+   * By this point, all config sources are already pre-sourced & validated,
+   * all we need to do is merge them together, and set the overrides as necessary.
    *
+   * Using "s" for state, as that's what we use elsewhere when doing ctx.update
+   * with immer
+   *
+   * @param configSources
+   * @returns
    */
-  private set (obj: Record<string, any> = {}) {
-    let { projectRoot, projectName, config, envFile, options } = obj
+  buildFullConfig (configSources: Immutable<BuildConfigSources>): FullConfig | null {
+    const project = this.ctx.project
 
-    // just force config to be an object so we dont have to do as much
-    // work in our tests
-    if (config == null) {
-      config = {}
+    if (!project || Object.values(configSources).some((v) => v === null)) {
+      return null
     }
 
-    // flatten the object's properties into the master config object
-    config.envFile = envFile
-    config.projectRoot = projectRoot
-    config.projectName = projectName
+    // const testingType = project.currentTestingType
 
-    return this.mergeDefaults(config, options)
-  }
+    // We layer these from bottom to top, which allows us to set the defaults, and then determine
+    // what has been overridden at any point in the layering, and pull that out as as ResolvedFromConfig option
+    const { config, patches } = this._setupNodeEventsConfig(configSources)
 
-  // make sure every option returned from the plugins file
-  // passes our validation functions
-  private updateWithPluginValues (cfg, overrides = {}) {
-    configUtils.validate(overrides, (errMsg) => {
-      if (cfg.configFile && cfg.projectRoot) {
-        const relativeConfigPath = path.relative(cfg.projectRoot, cfg.configFile)
-
-        throw this.ctx.error('PLUGINS_CONFIG_VALIDATION_ERROR', relativeConfigPath, errMsg)
-      }
-
-      throw this.ctx.error('CONFIG_VALIDATION_ERROR', errMsg)
+    // 5. Returned from SetupNodeEvents
+    const [stateFive, patchesSetupNodeEvents] = produceWithPatches(config, (s) => {
+      return s
     })
 
-    let originalResolvedBrowsers = cfg && cfg.resolved && cfg.resolved.browsers && _.cloneDeep(cfg.resolved.browsers)
-
-    if (!originalResolvedBrowsers) {
-      // have something to resolve with if plugins return nothing
-      originalResolvedBrowsers = {
-        value: cfg.browsers,
-        from: 'default',
-      } as ResolvedFromConfig
-    }
-
-    const diffs = deepDiff(cfg, overrides, true)
-
-    debug('config diffs %o', diffs)
-
-    const userBrowserList = diffs && diffs.browsers && _.cloneDeep(diffs.browsers)
-
-    if (userBrowserList) {
-      debug('user browser list %o', userBrowserList)
-    }
-
-    // for each override go through
-    // and change the resolved values of cfg
-    // to point to the plugin
-    if (diffs) {
-      debug('resolved config before diffs %o', cfg.resolved)
-      this.setPluginResolvedOn(cfg.resolved, diffs)
-      debug('resolved config object %o', cfg.resolved)
-    }
-
-    // merge cfg into overrides
-    const merged = _.defaultsDeep(diffs, cfg)
-
-    debug('merged config object %o', merged)
-
-    // the above _.defaultsDeep combines arrays,
-    // if diffs.browsers = [1] and cfg.browsers = [1, 2]
-    // then the merged result merged.browsers = [1, 2]
-    // which is NOT what we want
-    if (Array.isArray(userBrowserList) && userBrowserList.length) {
-      merged.browsers = userBrowserList
-      merged.resolved.browsers.value = userBrowserList
-    }
-
-    if (overrides.browsers === null) {
-      // null breaks everything when merging lists
-      debug('replacing null browsers with original list %o', originalResolvedBrowsers)
-      merged.browsers = cfg.browsers
-      if (originalResolvedBrowsers) {
-        merged.resolved.browsers = originalResolvedBrowsers
-      }
-    }
-
-    debug('merged plugins config %o', merged)
-
-    return merged
-  }
-
-  private setPluginResolvedOn (resolvedObj: Record<string, any>, obj: Record<string, any>): void {
-    for (const [key, val] of Object.entries(obj)) {
-      if (_.isObject(val) && !_.isArray(val) && resolvedObj[key]) {
-        this.setPluginResolvedOn()
-      }
-    }
-
-    return _.each(obj, (val, key) => {
-      if (_.isObject(val) && !_.isArray(val) && resolvedObj[key]) {
-        // recurse setting overrides
-        // inside of objected
-        return this.setPluginResolvedOn(resolvedObj[key], val)
-      }
-
-      const valueFrom: ResolvedFromConfig = {
-        value: val,
-        from: 'plugin',
-      }
-
-      resolvedObj[key] = valueFrom
-    })
-  }
-
-  private setUrls (obj) {
-    obj = _.clone(obj)
-
-    // TODO: rename this to be proxyServer
-    const proxyUrl = `http://localhost:${obj.port}`
-
-    const rootUrl = obj.baseUrl ?
-      this.origin(obj.baseUrl)
-      :
-      proxyUrl
-
-    _.extend(obj, {
-      proxyUrl,
-      browserUrl: rootUrl + obj.clientRoute,
-      reporterUrl: rootUrl + obj.reporterRoute,
-      xhrUrl: obj.namespace + obj.xhrRoute,
+    // 6. Returned from starting the server
+    const [stateSix, patchesSetupServer] = produceWithPatches(stateFive, (s) => {
+      return s
     })
 
-    return obj
-  }
-
-  private setAbsolutePaths (obj: Draft<Cypress.Config>) {
-    for (const folder of folders) {
-      const val = obj[folder]
-
-      if (typeof val === 'string') {
-        // @ts-expect-error
-        obj[folder] = path.isAbsolute(val) ? val : path.resolve(this.currentProjectData.projectRoot, val)
-      }
-    }
-  }
-
-  private mergeDefaults (config: Record<string, any> = {}, options: Record<string, any> = {}) {
-    const resolved = {}
-
-    config.rawJson = _.cloneDeep(config)
-
-    _.extend(config, _.pick(options, 'configFile', 'morgan', 'isTextTerminal', 'socketId', 'report', 'browsers'))
-    debug('merged config with options, got %o', config)
-
-    allowed(options)
-
-    _
-    .chain(configUtils.allowed(options))
-    .omit('env')
-    .omit('browsers')
-    .each((val, key) => {
-      resolved[key] = 'cli'
-      config[key] = val
-    }).value()
-
-    let url = config.baseUrl
-
-    if (url) {
-      // replace multiple slashes at the end of string to single slash
-      // so http://localhost/// will be http://localhost/
-      // https://regexr.com/48rvt
-      config.baseUrl = url.replace(/\/\/+$/, '/')
+    const patchMap = {
+      env: patches.patchesEnvJson,
+      plugin: patchesSetupNodeEvents,
+      config: patches.patchesConfig,
+      cli: patches.patchesCLI,
+      server: patchesSetupServer,
     }
 
-    const defaultsForRuntime = configUtils.getDefaultValues(options)
+    return produce(stateSix as FullConfig, (s: FullConfig) => {
+      const lastWrite: Record<string, unknown> = {}
 
-    _.defaultsDeep(config, defaultsForRuntime)
-
-    // split out our own app wide env from user env variables
-    // and delete envFile
-    config.env = this.parseEnv(config, options.env, resolved)
-
-    config.cypressEnv = process.env.CYPRESS_INTERNAL_ENV
-    debug('using CYPRESS_INTERNAL_ENV %s', config.cypressEnv)
-    if (!this.isValidCypressInternalEnvValue(config.cypressEnv)) {
-      throw this.ctx.error('INVALID_CYPRESS_INTERNAL_ENV', config.cypressEnv)
-    }
-
-    delete config.envFile
-
-    // when headless
-    if (config.isTextTerminal && !process.env.CYPRESS_INTERNAL_FORCE_FILEWATCH) {
-      // dont ever watch for file changes
-      config.watchForFileChanges = false
-
-      // and forcibly reset numTestsKeptInMemory
-      // to zero
-      config.numTestsKeptInMemory = 0
-    }
-
-    config.resolved = this.resolveConfigValues(config, defaults, resolved)
-
-    if (config.port) {
-      config = this.setUrls(config)
-    }
-
-    this.setAbsolutePaths(config)
-    this.setNodeBinary(config, options.args?.userNodePath, options.args?.userNodeVersion)
-
-    // validate config again here so that we catch configuration errors coming
-    // from the CLI overrides or env var overrides
-    configUtils.validate(_.omit(config, 'browsers'), (errMsg) => {
-      return errors.throw('CONFIG_VALIDATION_ERROR', errMsg)
-    })
-
-    configUtils.validateNoBreakingConfig(config, errors.warning, errors.throw)
-
-    return this.setSupportFileAndFolder(config, defaultsForRuntime)
-  }
-
-  // combines the default configuration object with values specified in the
-  // configuration file like "cypress.{ts|js}". Values in configuration file
-  // overwrite the defaults.
-  private resolveConfigValues (config, defaults, resolved = {}) {
-    // pick out only known configuration keys
-    return _
-    .chain(config)
-    .pick(configUtils.getPublicConfigKeys())
-    .mapValues((val, key) => {
-      let r
-      const source = (s: ResolvedConfigurationOptionSource): ResolvedFromConfig => {
-        return {
-          value: val,
-          from: s,
+      for (const patchSource of ['config', 'env', 'env', 'cli', 'plugin', 'server'] as const) {
+        for (const patch of patchMap[patchSource]) {
+          lastWrite[String(patch.path)] = {
+            value: patch.value,
+            from: patchSource,
+          }
         }
       }
 
-      r = resolved[key]
+      s.projectRoot = project.projectRoot
+      s.projectName = project.name
 
-      if (r) {
-        if (_.isObject(r)) {
-          return r
-        }
+      this.normalizeBrowsers(s)
+      this.setNodeBinary(s)
+      this.setUrls(s)
+      this.rewriteLegacyConfig(s)
+      this.setAbsolutePaths(s)
+      this.injectCtSpecificConfig(s)
+      this.hideSpecialVals(s)
 
-        return source(r)
+      // this.setSupportFileAndFolder()
+
+      // when headless
+      if (s.isTextTerminal && !process.env.CYPRESS_INTERNAL_FORCE_FILEWATCH) {
+        // dont ever watch for file changes
+        s.watchForFileChanges = false
+        // and forcibly reset numTestsKeptInMemory to zero
+        s.numTestsKeptInMemory = 0
       }
 
-      if (!(!_.isEqual(config[key], defaults[key]) && key !== 'browsers')) {
-        // "browsers" list is special, since it is dynamic by default
-        // and can only be overwritten via plugins file
-        return source('default')
+      if (process.env.CYPRESS_INTERNAL_ENV) {
+        s.cypressEnv = process.env.CYPRESS_INTERNAL_ENV
       }
 
-      return source('config')
-    }).value()
-  }
+      s.resolved = {}
 
-  private setNodeBinary = (obj, userNodePath, userNodeVersion) => {
-    // if execPath isn't found we weren't executed from the CLI and should used the bundled node version.
-    if (userNodePath && userNodeVersion && obj.nodeVersion !== 'bundled') {
-      obj.resolvedNodePath = userNodePath
-      obj.resolvedNodeVersion = userNodeVersion
-
-      return obj
-    }
-
-    obj.resolvedNodeVersion = process.versions.node
-
-    return obj
-  }
-
-  private isValidCypressInternalEnvValue (value) {
-    // names of config environments, see "config/app.yml"
-    const names = ['development', 'test', 'staging', 'production']
-
-    return _.includes(names, value)
-  }
-
-  private setSupportFileAndFolder (obj, defaults) {
-    try {
-      require.resolve(this.ctx.coreData.currentProject.config)
-    } catch (e) {
-      if (e.code === 'MODULE_NOT_FOUND') {
-
+      for (const [key, val] of Object.entries(lastWrite)) {
+        _.set(s.resolved, key, val)
       }
-    }
-
-    if (!obj.supportFile) {
-      return Bluebird.resolve(obj)
-    }
-
-    obj = _.clone(obj)
-
-    // TODO move this logic to find support file into util/path_helpers
-    const sf = obj.supportFile
-
-    debug(`setting support file ${sf}`)
-    debug(`for project root ${obj.projectRoot}`)
-
-    return Bluebird
-    .try(() => {
-      // resolve full path with extension
-      obj.supportFile = utils.resolveModule(sf)
-
-      return debug('resolved support file %s', obj.supportFile)
-    }).then(() => {
-      if (!pathHelpers.checkIfResolveChangedRootFolder(obj.supportFile, sf)) {
-        return
-      }
-
-      debug('require.resolve switched support folder from %s to %s', sf, obj.supportFile)
-      // this means the path was probably symlinked, like
-      // /tmp/foo -> /private/tmp/foo
-      // which can confuse the rest of the code
-      // switch it back to "normal" file
-      obj.supportFile = path.join(sf, path.basename(obj.supportFile))
-
-      return fs.pathExists(obj.supportFile)
-      .then((found) => {
-        if (!found) {
-          throw this.ctx.error('SUPPORT_FILE_NOT_FOUND', obj.supportFile, obj.configFile || defaults.configFile)
-        }
-
-        return debug('switching to found file %s', obj.supportFile)
-      })
-    }).catch({ code: 'MODULE_NOT_FOUND' }, () => {
-      debug('support JS module %s does not load', sf)
-
-      const loadingDefaultSupportFile = sf === path.resolve(obj.projectRoot, defaults.supportFile)
-
-      return utils.discoverModuleFile({
-        filename: sf,
-        isDefault: loadingDefaultSupportFile,
-        projectRoot: obj.projectRoot,
-      })
-      .then((result) => {
-        if (result === null) {
-          const configFile = obj.configFile || defaults.configFile
-
-          throw this.ctx.error('SUPPORT_FILE_NOT_FOUND', path.resolve(obj.projectRoot, sf), configFile)
-        }
-
-        debug('setting support file to %o', { result })
-        obj.supportFile = result
-
-        return obj
-      })
-    })
-    .then(() => {
-      if (obj.supportFile) {
-        // set config.supportFolder to its directory
-        obj.supportFolder = path.dirname(obj.supportFile)
-        debug(`set support folder ${obj.supportFolder}`)
-      }
-
-      return obj
     })
   }
 
-  private getProcessEnvVars = (obj: NodeJS.ProcessEnv) => {
-    return _.reduce(obj, (memo, value, key) => {
-      if (!value) {
-        return memo
-      }
+  private _setupNodeEventsConfig (sources: Immutable<BuildSetupNodeEventsSources>) {
+    const defaultValues = defaultsForTestingType(this.ctx.currentProject?.currentTestingType)
 
-      if (isCypressEnvLike(key)) {
-        memo[removeEnvPrefix(key)] = coerce(value)
-      }
-
-      return memo
-    }
-    , {})
-  }
-
-  private isCypressEnvLike = (key) => {
-    return _.chain(key)
-    .invoke('toUpperCase')
-    .startsWith(CYPRESS_ENV_PREFIX)
-    .value() &&
-    !_.includes(CYPRESS_RESERVED_ENV_VARS, key)
-  }
-
-  private removeEnvPrefix = (key: string) => {
-    return key.slice(CYPRESS_ENV_PREFIX_LENGTH)
-  }
-
-  private parseEnv (cfg: Record<string, any>, envCLI: Record<string, any>, resolved: Record<string, any> = {}) {
-    const envVars = (resolved.env = {})
-
-    const resolveFrom = (from, obj = {}) => {
-      return _.each(obj, (val, key) => {
-        return envVars[key] = {
-          value: val,
-          from,
-        }
-      })
+    // 1. Defaults, the base state of the config.
+    const stateOne: FullConfigBase = {
+      ...defaultValues,
     }
 
-    const envCfg = cfg.env != null ? cfg.env : {}
-    const envFile = cfg.envFile != null ? cfg.envFile : {}
-    let envProc = getProcessEnvVars(process.env) || {}
+    // 2. Sourced from cypress.config.{js|ts}, merging the "e2e" / "component"
+    // keys with the rest of the config, as necessary
+    const [stateTwo, patchesConfig] = produceWithPatches(stateOne, (s) => {
+      return s
+    })
 
-    envCLI = envCLI != null ? envCLI : {}
-
-    const configFromEnv = _.reduce(envProc, (memo: string[], val, key) => {
-      let cfgKey: string
-
-      cfgKey = configUtils.matchesConfigKey(key)
-
-      if (cfgKey) {
-        // only change the value if it hasn't been
-        // set by the CLI. override default + config
-        if (resolved[cfgKey] !== 'cli') {
-          cfg[cfgKey] = val
-          resolved[cfgKey] = {
-            value: val,
-            from: 'env',
-          } as ResolvedFromConfig
+    // 3. Sourced from cypress.env.json, and the process.env
+    const [stateThree, patchesEnvJson] = produceWithPatches(stateTwo, (s) => {
+      for (const [key, val] of Object.entries(process.env)) {
+        if (val === undefined) {
+          continue
         }
 
-        memo.push(key)
+        if (key.startsWith(CYPRESS_ENV_PREFIX) && key !== 'CYPRESS_INTERNAL_ENV') {
+          const toMatch = key.slice(CYPRESS_ENV_PREFIX.length)
+          const keyToSet = this.matchesConfigKey(toMatch, defaultValues)
+
+          if (keyToSet) {
+            // Not sure why the keyof is giving us a "string", hunch is b/c it's an
+            // interface and therefore can be modified elsewhere?
+            // @ts-expect-error
+            s[keyToSet] = coerce(val)
+          } else {
+            s.env[key] = coerce(val)
+          }
+        }
       }
 
-      return memo
-    }
-    , [])
+      return s
+    })
 
-    envProc = _.chain(envProc)
-    .omit(configFromEnv)
-    .mapValues(this.hideSpecialVals)
-    .value()
+    const withBrowsers = produce(stateThree, (s) => {
+      if (!s.browsers?.length) {
+        s.browsers = [...sources.machineBrowsers]
+      }
 
-    resolveFrom('config', envCfg)
-    resolveFrom('envFile', envFile)
-    resolveFrom('env', envProc)
-    resolveFrom('cli', envCLI)
+      return s
+    })
 
-    // envCfg is from cypress.json
-    // envFile is from cypress.env.json
-    // envProc is from process env vars
-    // envCLI is from CLI arguments
-    return _.extend(envCfg, envFile, envProc, envCLI)
-  }
+    // 4. Sourced from CLI - cypress open --browser
+    const [stateFour, patchesCLI] = produceWithPatches(withBrowsers, (s) => {
+      // this.ctx.coreData.cliConfig
 
-  private convertRelativeToAbsolutePaths = (projectRoot, obj) => {
-
-  }
-
-  private injectCtSpecificConfig (cfg) {
-    // cfg.resolved.testingType = { value: 'component' }
-
-    // This value is normally set up in the `packages/server/lib/plugins/index.js#110`
-    // But if we don't return it in the plugins function, it never gets set
-    // Since there is no chance that it will have any other value here, we set it to "component"
-    // This allows users to not return config in the `cypress/plugins/index.js` file
-    // https://github.com/cypress-io/cypress/issues/16860
-    const rawJson = cfg.rawJson as Cfg
+      return s
+    })
 
     return {
-      ...cfg,
-      viewportHeight: rawJson.viewportHeight ?? 500,
-      viewportWidth: rawJson.viewportWidth ?? 500,
+      config: stateFour,
+      patches: {
+        patchesCLI,
+        patchesEnvJson,
+        patchesConfig,
+      },
     }
   }
 
-  private hideSpecialVals = function (val, key) {
-    if (_.includes(CYPRESS_SPECIAL_ENV_VARS, key)) {
-      return keys.hide(val)
-    }
+  private hideSpecialVals (s: Draft<FullConfig>) {
+    const recordKey = s.env.RECORD_KEY
 
-    return val
-  }
-
-  // tries to find support or plugins file
-  // returns:
-  //   false - if the file should not be set
-  //   string - found filename
-  //   null - if there is an error finding the file
-  private discoverModuleFile (options) {
-    debug('discover module file %o', options)
-    const { filename, isDefault } = options
-
-    if (!isDefault) {
-      // they have it explicitly set, so it should be there
-      return fs.pathExists(filename)
-      .then((found) => {
-        if (found) {
-          debug('file exists, assuming it will load')
-
-          return filename
-        }
-
-        debug('could not find %o', { filename })
-
-        return null
-      })
-    }
-
-    // support or plugins file doesn't exist on disk?
-    debug(`support file is default, check if ${path.dirname(filename)} exists`)
-
-    return fs.pathExists(filename)
-    .then((found) => {
-      if (found) {
-        debug('is there index.ts in the support or plugins folder %s?', filename)
-        const tsFilename = path.join(filename, 'index.ts')
-
-        return fs.pathExists(tsFilename)
-        .then((foundTsFile) => {
-          if (foundTsFile) {
-            debug('found index TS file %s', tsFilename)
-
-            return tsFilename
-          }
-
-          // if the directory exists, set it to false so it's ignored
-          debug('setting support or plugins file to false')
-
-          return false
-        })
-      }
-
-      debug('folder does not exist, set to default index.js')
-
-      // otherwise, set it up to be scaffolded later
-      return path.join(filename, 'index.js')
-    })
-  }
-
-  private flattenCypress = (obj) => {
-    return obj.cypress ? obj.cypress : undefined
-  }
-
-  private renameVisitToPageLoad = (obj) => {
-    const v = obj.visitTimeout
-
-    if (v) {
-      obj = _.omit(obj, 'visitTimeout')
-      obj.pageLoadTimeout = v
-
-      return obj
+    if (recordKey) {
+      s.env.RECORD_KEY = [
+        recordKey.slice(0, 5),
+        recordKey.slice(-5),
+      ].join('...')
     }
   }
 
-  private renameCommandTimeout = (obj) => {
-    const c = obj.commandTimeout
+  private setNodeBinary (s: Draft<FullConfig>) {
+    if (this.ctx.coreData.userNodePath) {
+      s.resolvedNodePath = this.ctx.coreData.userNodePath
+    }
 
-    if (c) {
-      obj = _.omit(obj, 'commandTimeout')
-      obj.defaultCommandTimeout = c
+    s.resolvedNodeVersion = this.ctx.coreData.userNodeVersion ?? process.versions.node
+  }
 
-      return obj
+  // This value is normally set up in the `packages/server/lib/plugins/index.js#110`
+  // But if we don't return it in the plugins function, it never gets set
+  // Since there is no chance that it will have any other value here, we set it to "component"
+  // This allows users to not return config in the `cypress/plugins/index.js` file
+  // https://github.com/cypress-io/cypress/issues/16860
+  private injectCtSpecificConfig (s: FullConfig) {
+    // TODO: (if: s.currentTestingType)
+    if (s) {
+      s.viewportHeight ??= 500
+      s.viewportWidth ??= 500
     }
   }
 
-  private _pathToFile (projectRoot, file) {
-    return path.isAbsolute(file) ? file : path.join(projectRoot, file)
+  private rewriteLegacyConfig (s: Draft<FullConfig & Record<string, any>>) {
+    if (s.visitTimeout) {
+      s.pageLoadTimeout = s.visitTimeout
+      delete s.visitTimeout
+    }
+
+    if (s.commandTimeout) {
+      s.defaultCommandTimeout = s.commandTimeout
+      delete s.commandTimeout
+    }
+
+    // TODO: See how this interacts with the other method
+    // if (obj.supportFolder) {
+    //   obj.supportFile = obj.supportFolder
+    //   delete obj.supportFolder
+    // }
   }
 
-  private _err (type, file, err) {
-    const e = errors.get(type, file, err)
+  private setUrls (s: Draft<FullConfig>) {
+    // replace multiple slashes at the end of string to single slash
+    // so http://localhost/// will be http://localhost/
+    // https://regexr.com/48rvt
+    if (s.baseUrl) {
+      s.baseUrl = s.baseUrl.replace(/\/\/+$/, '/')
+    }
 
-    e.code = err.code
-    e.errno = err.errno
-    throw e
+    // TODO: rename this to be proxyServer
+    s.proxyUrl = `http://localhost:${s.port}`
+    const rootUrl = s.baseUrl
+      ? new URL(s.baseUrl).origin
+      : s.proxyUrl
+
+    s.browserUrl = rootUrl + s.clientRoute
+    s.reporterUrl = rootUrl + s.reporterRoute
+    s.xhrUrl = s.namespace + s.xhrRoute
+    s.proxyServer = s.proxyUrl
   }
 
-  private renameSupportFolder = (obj) => {
-    const sf = obj.supportFolder
+  private normalizeBrowsers (s: Draft<FullConfig>) {
+    for (const browser of s.browsers) {
+      if (browser.family !== 'chromium' && s.chromeWebSecurity) {
+        browser.warning = this.ctx.errorString('CHROME_WEB_SECURITY_NOT_SUPPORTED', browser.name)
+      }
 
-    if (sf) {
-      obj = _.omit(obj, 'supportFolder')
-      obj.supportFile = sf
-
-      return obj
+      // if we don't have the isHeaded property
+      // then we're in interactive mode and we
+      // can assume its a headed browser
+      if (!_.has(browser, 'isHeaded')) {
+        browser.isHeaded = true
+        browser.isHeadless = false
+      }
     }
   }
 
-  private _applyRewriteRules (obj = {}) {
-    return _.reduce([flattenCypress, renameVisitToPageLoad, renameCommandTimeout, renameSupportFolder], (memo, fn) => {
-      const ret = fn(memo)
+  private setAbsolutePaths (s: Draft<Cypress.Config>) {
+    for (const folder of folders) {
+      const val = s[folder]
 
-      return ret ? ret : memo
-    }, _.cloneDeep(obj))
+      if (typeof val === 'string' && this.ctx.currentProject?.projectRoot) {
+        // @ts-expect-error
+        s[folder] = path.isAbsolute(val) ? val : path.resolve(this.ctx.currentProject.projectRoot, val)
+      }
+    }
   }
 
-  private async settingsRead (options: SettingsOptions = {}) {
-    assert(ctx.currentProject?.currentTestingType, 'expected ctx.currentProject.currentTestingType in settings.read')
-    assert(ctx.currentProject?.projectRoot, 'expected ctx.currentProject.projectRoot in settings.read')
+  private matchesConfigKey (key: string, defaultValues: Record<string, any>): keyof Cypress.ResolvedConfigOptions | undefined {
+    if (_.has(defaultValues, key)) {
+      return key as keyof Cypress.ResolvedConfigOptions
+    }
 
-    const projectRoot = ctx.currentProject.projectRoot
-    const file = pathToConfigFile(projectRoot, options)
+    const dashesOrUnderscoresRe = /^(_-)+/
 
-    return ctx.loadingManager.projectConfig.load()
-    .catch((err) => {
-      if (err.type === 'MODULE_NOT_FOUND' || err.code === 'ENOENT') {
-        return Promise.reject(errors.get('CONFIG_FILE_NOT_FOUND', file, projectRoot))
-      }
+    key = key.toLowerCase().replace(dashesOrUnderscoresRe, '')
+    key = _.camelCase(key)
 
-      return Promise.reject(err)
-    })
-    .then((configObject) => {
-      if (ctx.currentTestingType === 'component' && 'component' in configObject) {
-        configObject = { ...configObject, ...configObject.component }
-      }
+    if (_.has(defaultValues, key)) {
+      return key as keyof Cypress.ResolvedConfigOptions
+    }
 
-      if (ctx.currentTestingType !== 'component' && 'e2e' in configObject) {
-        configObject = { ...configObject, ...configObject.e2e }
-      }
-
-      debug('resolved configObject', configObject)
-      const changed = this._applyRewriteRules(configObject)
-
-      // if our object is unchanged
-      // then just return it
-      if (_.isEqual(configObject, changed)) {
-        return configObject
-      }
-
-      return config
-    }).catch((err) => {
-      debug('an error occurred when reading config', err)
-      if (errors.isCypressErr(err)) {
-        throw err
-      }
-
-      throw this.ctx.error('ERROR_READING_FILE', file, err)
-    })
+    return undefined
   }
 
-  private origin (urlStr: string) {
-    const parsed = url.parse(urlStr)
+  // TODO: Check this elsewhere
+  // private isValidCypressInternalEnvValue (value) {
+  //   // names of config environments, see "config/app.yml"
+  //   const names = ['development', 'test', 'staging', 'production']
+  //   return _.includes(names, value)
+  // }
 
-    parsed.hash = null
-    parsed.search = null
-    parsed.query = null
-    parsed.path = null
-    parsed.pathname = null
+  // private setSupportFileAndFolder (obj, defaults) {
+  //   try {
+  //     require.resolve(this.ctx.coreData.currentProject)
+  //   } catch (e) {
+  //     if (e.code === 'MODULE_NOT_FOUND') {
+  //       //
+  //     }
+  //   }
 
-    return url.format(parsed)
-  }
+  //   if (!obj.supportFile) {
+  //     return Bluebird.resolve(obj)
+  //   }
+
+  //   obj = _.clone(obj)
+
+  //   // TODO move this logic to find support file into util/path_helpers
+  //   const sf = obj.supportFile
+
+  //   debug(`setting support file ${sf}`)
+  //   debug(`for project root ${obj.projectRoot}`)
+
+  //   return Bluebird
+  //   .try(() => {
+  //     // resolve full path with extension
+  //     obj.supportFile = require.resolve(sf)
+
+  //     return debug('resolved support file %s', obj.supportFile)
+  //   }).then(() => {
+  //     if (!pathHelpers.checkIfResolveChangedRootFolder(obj.supportFile, sf)) {
+  //       return
+  //     }
+
+  //     debug('require.resolve switched support folder from %s to %s', sf, obj.supportFile)
+  //     // this means the path was probably symlinked, like
+  //     // /tmp/foo -> /private/tmp/foo
+  //     // which can confuse the rest of the code
+  //     // switch it back to "normal" file
+  //     obj.supportFile = path.join(sf, path.basename(obj.supportFile))
+
+  //     return fs.pathExists(obj.supportFile)
+  //     .then((found) => {
+  //       if (!found) {
+  //         throw this.ctx.error('SUPPORT_FILE_NOT_FOUND', obj.supportFile, obj.configFile || defaults.configFile)
+  //       }
+
+  //       return debug('switching to found file %s', obj.supportFile)
+  //     })
+  //   }).catch({ code: 'MODULE_NOT_FOUND' }, () => {
+  //     debug('support JS module %s does not load', sf)
+
+  //     const loadingDefaultSupportFile = sf === path.resolve(obj.projectRoot, defaults.supportFile)
+
+  //     return utils.discoverModuleFile({
+  //       filename: sf,
+  //       isDefault: loadingDefaultSupportFile,
+  //       projectRoot: obj.projectRoot,
+  //     })
+  //     .then((result) => {
+  //       if (result === null) {
+  //         const configFile = obj.configFile || defaults.configFile
+
+  //         throw this.ctx.error('SUPPORT_FILE_NOT_FOUND', path.resolve(obj.projectRoot, sf), configFile)
+  //       }
+
+  //       debug('setting support file to %o', { result })
+  //       obj.supportFile = result
+
+  //       return obj
+  //     })
+  //   })
+  //   .then(() => {
+  //     if (obj.supportFile) {
+  //       // set config.supportFolder to its directory
+  //       obj.supportFolder = path.dirname(obj.supportFile)
+  //       debug(`set support folder ${obj.supportFolder}`)
+  //     }
+
+  //     return obj
+  //   })
+  // }
+
+  // private checkIfResolveChangedRootFolder (resolved: string, initial: string) {
+  //   return path.isAbsolute(resolved) &&
+  //   path.isAbsolute(initial) &&
+  //   !resolved.startsWith(initial)
+  // }
+
+  // private parseEnv (cfg: Record<string, any>, envCLI: Record<string, any>, resolved: Record<string, any> = {}) {
+  //   const envVars = (resolved.env = {})
+
+  //   const resolveFrom = (from, obj = {}) => {
+  //     return _.each(obj, (val, key) => {
+  //       return envVars[key] = {
+  //         value: val,
+  //         from,
+  //       }
+  //     })
+  //   }
+
+  //   const envCfg = cfg.env != null ? cfg.env : {}
+  //   const envFile = cfg.envFile != null ? cfg.envFile : {}
+  //   let envProc = getProcessEnvVars(process.env) || {}
+
+  //   envCLI = envCLI != null ? envCLI : {}
+
+  //   const configFromEnv = _.reduce(envProc, (memo: string[], val, key) => {
+  //     let cfgKey: string
+  //     return memo
+  //   }
+  //   , [])
+
+  //   envProc = _.chain(envProc)
+  //   .omit(configFromEnv)
+  //   .mapValues(this.hideSpecialVals)
+  //   .value()
+
+  //   resolveFrom('config', envCfg)
+  //   resolveFrom('envFile', envFile)
+  //   resolveFrom('env', envProc)
+  //   resolveFrom('cli', envCLI)
+
+  //   // envCfg is from cypress.json
+  //   // envFile is from cypress.env.json
+  //   // envProc is from process env vars
+  //   // envCLI is from CLI arguments
+  //   return _.extend(envCfg, envFile, envProc, envCLI)
+  // }
+
+  // // tries to find support or plugins file
+  // // returns:
+  // //   false - if the file should not be set
+  // //   string - found filename
+  // //   null - if there is an error finding the file
+  // async discoverModuleFile (supportFile: string) {
+  //   debug('discover module file %o', options)
+  //   const { filename, isDefault } = options
+
+  //   // they have it explicitly set, so it should be there
+  //   if (!isDefault) {
+  //     const found = await this.ctx.fs.pathExists(filename)
+
+  //     return found || null
+  //   }
+
+  //   // support or plugins file doesn't exist on disk?
+  //   debug(`support file is default, check if ${path.dirname(filename)} exists`)
+
+  //   return fs.pathExists(filename)
+  //   .then((found) => {
+  //     if (found) {
+  //       debug('is there index.ts in the support or plugins folder %s?', filename)
+  //       const tsFilename = path.join(filename, 'index.ts')
+
+  //       return fs.pathExists(tsFilename)
+  //       .then((foundTsFile) => {
+  //         if (foundTsFile) {
+  //           debug('found index TS file %s', tsFilename)
+
+  //           return tsFilename
+  //         }
+
+  //         // if the directory exists, set it to false so it's ignored
+  //         debug('setting support or plugins file to false')
+
+  //         return false
+  //       })
+  //     }
+
+  //     debug('folder does not exist, set to default index.js')
+
+  //     // otherwise, set it up to be scaffolded later
+  //     return path.join(filename, 'index.js')
+  //   })
+  // }
 }

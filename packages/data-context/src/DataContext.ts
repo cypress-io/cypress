@@ -2,10 +2,10 @@ import type { CypressError, CypressErrorIdentifier, CypressErrorLike, LaunchArgs
 import fsExtra from 'fs-extra'
 import path from 'path'
 import Bluebird from 'bluebird'
-import { Immutable, Draft, produceWithPatches, Patch, enablePatches } from 'immer'
-
+import { Immutable, produceWithPatches, Patch, castDraft } from 'immer'
 import 'server-destroy'
-import { AppApiShape, ApplicationDataApiShape, BrowserApiShape, DataEmitterActions, LegacyOpenProjectShape, LocalSettingsApiShape, ProjectApiShape } from './actions'
+
+import { AppApiShape, ApplicationDataApiShape, BrowserApiShape, DataEmitterActions, LocalSettingsApiShape, ProjectApiShape } from './actions'
 import type { NexusGenAbstractTypeMembers } from '@packages/graphql/src/gen/nxs.gen'
 import type { AuthApiShape } from './actions/AuthActions'
 import type { ElectronApiShape } from './actions/ElectronActions'
@@ -25,6 +25,7 @@ import {
   GraphQLDataSource,
   HtmlDataSource,
   UtilDataSource,
+  BuildConfigSources,
 } from './sources/'
 import { cached } from './util/cached'
 import type { GraphQLSchema } from 'graphql'
@@ -36,12 +37,17 @@ import { VersionsDataSource } from './sources/VersionsDataSource'
 import { LoadingManager } from './data/LoadingManager'
 import type { LoadingState } from './util'
 import { DevDataSource } from './sources/DevDataSource'
-
-enablePatches()
+import { coreDataShapeUpdater, Updater } from './data/coreDataShapeUpdater'
+import _ from 'lodash'
 
 const IS_DEV_ENV = process.env.CYPRESS_INTERNAL_ENV !== 'production'
 
-type Updater = (proj: Draft<CoreDataShape>) => void | undefined | CoreDataShape
+interface UpdateDerivedStateOptions {
+  state: CoreDataShape
+  patches: Patch[]
+  shouldRebuildFullConfig: boolean
+  shouldRebuildSetupNodeEventsConfig: boolean
+}
 
 export interface DataContextConfig {
   mode: 'open' | 'run'
@@ -73,7 +79,6 @@ export class DataContext {
   private _appSocketServer: SocketIOServer | undefined
   private _gqlServerPort: number | undefined
   private _loadingManager: LoadingManager
-  private _legacyOpenProject: LegacyOpenProjectShape | null = null
 
   constructor (private _config: DataContextConfig) {
     this._loadingManager = new LoadingManager(this)
@@ -88,14 +93,6 @@ export class DataContext {
 
   get dev () {
     return new DevDataSource(this, this._patches)
-  }
-
-  get legacyOpenProject () {
-    if (!this._legacyOpenProject) {
-      this._legacyOpenProject = this._apis.projectApi.makeLegacyOpenProject()
-    }
-
-    return this._legacyOpenProject
   }
 
   get loadingManager () {
@@ -120,27 +117,68 @@ export class DataContext {
 
   /**
    * Run all of the "updates" through a single method to track the timeline
-   * of mutations for debuggability, testing, etc
+   * of mutations for debuggability, testing, etc. If there is no result,
+   * it means that the updater was invoked within a nested update, which we
+   * will get back from the parent update as the full result.
+   *
+   * The caller should not expect to receive the internal state, but should assume
+   * that the state change will be made synchronously
    */
-  update = (updater: Updater, throwError: boolean = false): void => {
+  update = (updater: Updater): void => {
     try {
-      const [state, patches] = produceWithPatches(this._coreData, updater)
+      const result = coreDataShapeUpdater(this, updater)
 
-      this._coreData = state
-      this._patches.push(patches)
-    } catch (e) {
-      if (throwError) {
-        throw e
+      if (result) {
+        this._coreData = result.coreData
+        if (result.patches.length) {
+          this._patches = [...this._patches, result.patches]
+        }
       }
-
-      this.update((o) => {
-        o.globalError = this.prepError(e)
-      }, true)
+    } catch (e) {
+      this._coreData = {
+        ...this.coreData,
+        globalError: e,
+      }
     }
   }
 
-  updateAtomically (fn: (s: CoreDataShape) => unknown, handler: (fn: Updater) => Promise<any>): void {
-    //
+  private updateDerivedState (options: UpdateDerivedStateOptions) {
+    const { state, patches, shouldRebuildFullConfig, shouldRebuildSetupNodeEventsConfig } = options
+    let finalState = state
+    let finalPatches = patches
+
+    const buildConfigSources: Immutable<BuildConfigSources> = {
+      configSetupNodeEvents: state.currentProject?.configSetupNodeEvents.value?.result ?? null,
+      projectConfig: state.currentProject?.configFileContents.value ?? {},
+      machineBrowsers: state.machineBrowsers.value ?? [],
+      currentTestingType: state.currentProject?.currentTestingType ?? null,
+      cliConfig: state.cliConfig,
+    }
+
+    if (shouldRebuildSetupNodeEventsConfig) {
+      const result = produceWithPatches(finalState, (s) => {
+        s.derived.setupNodeEventsConfig = castDraft(this.projectConfig.buildSetupNodeEventsConfig(buildConfigSources))
+      })
+
+      if (result[0] !== finalState) {
+        finalState = result[0]
+        finalPatches = finalPatches.concat(result[1])
+      }
+    }
+
+    if (shouldRebuildFullConfig) {
+      const result = produceWithPatches(finalState, (s) => {
+        s.derived.fullConfig = this.projectConfig.buildFullConfig(buildConfigSources)
+      })
+
+      if (result[0] !== finalState) {
+        finalState = result[0]
+        finalPatches = finalPatches.concat(result[1])
+      }
+    }
+
+    this._coreData = finalState
+    this._patches.push(finalPatches)
   }
 
   resetLaunchArgs (launchArgs: LaunchArgs) {
@@ -149,6 +187,10 @@ export class DataContext {
 
   error (type: CypressErrorIdentifier, ...args: any[]): CypressError | CypressErrorLike {
     return this._apis.appApi.error(type, ...args)
+  }
+
+  errorString (type: CypressErrorIdentifier, ...args: any[]) {
+    return this._apis.appApi.errorString(type, ...args)
   }
 
   get rootBus () {
@@ -228,6 +270,24 @@ export class DataContext {
 
   get project () {
     return this.currentProject ? new CurrentProjectDataSource(this) : null
+  }
+
+  get ensure () {
+    function val<T> (val: T | null | undefined, name: string): T {
+      if (val == null) {
+        throw new Error(`Expected ${name} to be defined in DataContext`)
+      }
+
+      return val
+    }
+
+    const ctx = this
+
+    return {
+      get project () {
+        return val(ctx.project, 'project')
+      },
+    }
   }
 
   get cloud () {
@@ -468,7 +528,7 @@ export class DataContext {
 
     const project = this.project
 
-    if (!project || !project.configFilePath) {
+    if (!project || !project.configFilePath || !this.actions.currentProject) {
       throw this.error('NO_PROJECT_FOUND_AT_PROJECT_ROOT', project?.projectRoot ?? '(unknown)')
     }
 
@@ -484,12 +544,24 @@ export class DataContext {
       this._apis.appApi.warn('CONFIG_FILES_LANGUAGE_CONFLICT', project.projectRoot, ...project.nonJsonConfigPaths)
     }
 
+    if (!project.currentTestingType) {
+      throw this.error('TESTING_TYPE_NEEDED_FOR_RUN')
+    }
+
     const toAwait: Array<Promise<any> | undefined> = [
       this.actions.app.loadMachineBrowsers(),
-      this.actions.currentProject?.loadConfigAndPlugins(),
+      this.loadingManager.projectConfig.loadOrThrow().then((val) => {
+        const hasE2E = _.has(val, 'e2e')
+        const hasCT = _.has(val, 'component')
+
+        if (hasE2E && hasCT) {
+          throw this.error('TESTING_TYPE_NEEDED_FOR_RUN')
+        }
+        //
+      }),
     ]
 
-    return toAwait
+    return Promise.all([toAwait])
   }
 
   /**
@@ -508,27 +580,22 @@ export class DataContext {
       o.hasIntializedMode = 'open'
     })
 
-    const toAwait: Array<Promise<any> | undefined> = []
-
     // Load the cached user & validate the token on start
     this.actions.auth.getUser()
 
     // Fetch the machine browsers right when the app starts, so we have some by
     // the time we're attempting to source the project
-    toAwait.push(this.actions.app.loadMachineBrowsers())
+    this.actions.app.loadMachineBrowsers()
 
     // If there's no "current" project, we just want to launch global mode,
-    // which involves sourcing the current projects.
+    // which involves sourcing the current projects. Otherwise we want to load
+    // the configuration for the project, which will cascade into loading the
+    //
     if (!this.currentProject) {
-      toAwait.push(this.actions.globalProject.loadGlobalProjects())
-    } else if (this.currentProject?.currentTestingType) {
-      // Otherwise, if we know the testing type we want to
-      // which will kick off the process of sourcing the config, if we have
-      // a config file for this project.
-      this.actions.currentProject?.loadConfigAndPlugins()
+      this.actions.globalProject.loadGlobalProjects()
+    } else {
+      this.loadingManager.configAppState.load()
+      this.loadingManager.projectConfig.load()
     }
-
-    // this.actions.currentProject?.launchProjectWithoutElectron()
-    return Promise.all(toAwait)
   }
 }

@@ -23,7 +23,7 @@ fragment TestingTypeCards on CurrentProject {
 
 gql`
 mutation TestingTypeCards_selectTestingType($type: TestingTypeEnum!) {
-  selectProjectTestingType(type: $type) {
+  setCurrentTestingType(type: $type) {
     currentProject {
       id
       isLoadingConfig

@@ -23,14 +23,14 @@ export class ElectronActions {
   }
 
   setElectronApp (app: App) {
-    this.ctx.update((o) => {
-      o.electron.app = app
+    this.ctx.update((s) => {
+      s.electron.app = app
     })
   }
 
   setBrowserWindow (window: BrowserWindow) {
-    this.ctx.update((o) => {
-      o.electron.browserWindow = window
+    this.ctx.update((s) => {
+      s.electron.browserWindow = window
     })
   }
 

@@ -1,11 +1,12 @@
+import type { DataContext } from '@packages/data-context'
 import { Http, ServerCtx } from './http'
 import type { BrowserPreRequest } from './types'
 
 export class NetworkProxy {
   http: Http
 
-  constructor (opts: ServerCtx) {
-    this.http = new Http(opts)
+  constructor (ctx: DataContext, opts: ServerCtx) {
+    this.http = new Http(ctx, opts)
   }
 
   addPendingBrowserPreRequest (preRequest: BrowserPreRequest) {

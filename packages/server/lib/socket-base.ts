@@ -78,7 +78,7 @@ export class SocketBase {
   protected _io?: socketIo.SocketIOServer
   protected testsDir: string | null
 
-  constructor (config: Record<string, any>, private ctx: DataContext) {
+  constructor (private ctx: DataContext) {
     this.ended = false
     this.testsDir = null
   }

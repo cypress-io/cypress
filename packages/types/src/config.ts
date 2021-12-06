@@ -1,6 +1,6 @@
 /// <reference path="../../../cli/types/cypress.d.ts" />
 
-export const RESOLVED_FROM = ['plugin', 'env', 'default', 'runtime', 'config'] as const
+export const RESOLVED_FROM = ['plugin', 'env', 'default', 'runtime', 'config', 'cli'] as const
 
 export type ResolvedConfigurationOptionSource = typeof RESOLVED_FROM[number]
 
@@ -14,11 +14,18 @@ export type ResolvedConfigurationOptions = Partial<{
   [x in keyof Cypress.ResolvedConfigOptions]: ResolvedFromConfig
 }>
 
+export type ConfigOptions = Cypress.ConfigOptions
+
+export type FullConfigBase =
+  Cypress.InternalConfigOptions &
+  Cypress.RuntimeConfigOptions &
+  Cypress.ResolvedConfigOptions
+
 // This represents the full configuration object including a `resolved` key
 // which duplicates the config, addditional additional information such as how it was resolved
 // (eg from plugin, env, default etc...)
 // which is used for showing the config in the UI.
-export interface FullConfig extends Partial<Cypress.RuntimeConfigOptions & Cypress.ResolvedConfigOptions> {
+export interface FullConfig extends FullConfigBase {
   resolved: ResolvedConfigurationOptions
 }
 
@@ -41,6 +48,8 @@ export interface SettingsOptions {
 
 export type ClientCertificate = Cypress.ClientCertificate
 
+// Options that are passed when running through `cypress run` or `cypress open`
+
 export type ModeConfig = {
   mode: 'open'
   options: OpenModeOptions
@@ -55,17 +64,12 @@ export interface OpenModeOptions {
   cwd: string
   invokedFromCli: boolean
   updating?: boolean | null
-  foo?: string | null
   configFile?: string | null
+  [key: string]: unknown
 }
 
-export interface OpenModeConfig {
-  test?: boolean | null
-  foo?: string | null
-  trashAssetsBeforeRuns?: boolean | null
-  pageLoadTimeout?: number | null
-  port?: number | null
-  env?: Record<string, string> | null
+export interface OpenModeConfig extends Cypress.ConfigOptions {
+  [key: string]: unknown
 }
 
 export interface RunModeOptions {

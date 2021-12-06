@@ -50,9 +50,9 @@ export class GlobalProjectActions {
     const found = projectList?.find((x) => x === projectRoot)
 
     if (!found) {
-      this.ctx.update((o) => {
-        if (o.globalProjects.state === 'LOADED') {
-          o.globalProjects.value.push(projectRoot)
+      this.ctx.update((s) => {
+        if (s.globalProjects.state === 'LOADED') {
+          s.globalProjects.value.push(projectRoot)
         }
       })
 
@@ -71,9 +71,9 @@ export class GlobalProjectActions {
       throw new Error(`Cannot remove ${projectRoot}, it is not a known project`)
     }
 
-    this.ctx.update((o) => {
-      if (o.globalProjects.state === 'LOADED') {
-        o.globalProjects.value = o.globalProjects.value.filter((project) => project !== projectRoot) ?? null
+    this.ctx.update((s) => {
+      if (s.globalProjects.state === 'LOADED') {
+        s.globalProjects.value = s.globalProjects.value.filter((project) => project !== projectRoot) ?? null
       }
     })
 

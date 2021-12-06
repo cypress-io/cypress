@@ -1,14 +1,7 @@
 const _ = require('lodash')
-const path = require('path')
 const debug = require('debug')('cypress:server:plugins')
-const resolve = require('resolve')
-const Promise = require('bluebird')
-const errors = require('../errors')
-const util = require('./util')
-const pkg = require('@packages/root')
 
 let pluginsProcess
-let executedPlugins
 let registeredEvents = {}
 let handlers = []
 
@@ -70,7 +63,6 @@ module.exports = {
   getPluginPid,
   execute,
   has,
-  init,
   register,
   registerHandler,
   getPluginIpcHandlers,

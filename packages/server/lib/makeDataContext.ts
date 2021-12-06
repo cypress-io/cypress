@@ -5,7 +5,6 @@ import type {
   FindSpecs,
   FoundBrowser,
   LaunchArgs,
-  LaunchOpts,
   PlatformName,
   Preferences,
   AllowedState,
@@ -68,12 +67,6 @@ export async function clearLastSeenCtx () {
 export function makeDataContext (options: MakeDataContextOptions): DataContext {
   let ctx: DataContext
 
-  // Hacks to get around TypeScript & all of the injection we're doing here.
-  // Remove when we refactor to the data-context layer
-  function legacyOpenProject () {
-    return ctx.legacyOpenProject as OpenProject
-  }
-
   ctx = new DataContext({
     os: os.platform() as PlatformName,
     schema: graphqlSchema,
@@ -113,9 +106,6 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
         makeLegacyOpenProject () {
           return new OpenProject(ctx)
         },
-        launchProject (browser: FoundBrowser, spec: Cypress.Spec, options?: LaunchOpts) {
-          return legacyOpenProject().launch({ ...browser }, spec, options)
-        },
         insertProjectToCache (projectRoot: string) {
           cache.insertProject(projectRoot)
         },
@@ -143,10 +133,7 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
         removeProjectFromCache (path: string) {
           return cache.removeProject(path)
         },
-        closeActiveProject () {
-          return legacyOpenProject().closeActiveProject()
-        },
-        saveState (state) {
+        saveState () {
           // let state = await savedState.create(this.projectRoot, this.cfg.isTextTerminal)
 
           // state.set(stateChanges)

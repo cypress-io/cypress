@@ -1,7 +1,7 @@
 import assert from 'assert'
 import Bluebird from 'bluebird'
 import { castDraft } from 'immer'
-import configUtils from '@packages/config'
+import * as configUtils from '@packages/config'
 import type { DataContext } from '..'
 import { LoadingConfig, LoadingContainer, makeLoadingContainer } from '../util/makeLoadingContainer'
 
@@ -17,17 +17,15 @@ export class LoadingManager {
    * when we are cleaning up the context for testing purposes
    */
   private _loadingContainers: Map<string, LoadingContainer<any>> = new Map()
-  private _withinReset: boolean = false
 
   /**
    * Called when we switch the current project (global mode), clears any loaders
    * assocated with the current project
    */
   resetCurrentProject () {
-    this.withinReset(() => {
-      this.projectConfig = this.projectConfig.reset()
-      this.projectEventSetup = this.projectEventSetup.reset()
-    })
+    this.projectConfig.reset()
+    this.setupNodeEvents.reset()
+    this.projectEnvConfig.reset()
   }
 
   // appState = this.loadingContainer({
@@ -43,8 +41,8 @@ export class LoadingManager {
     name: 'globalProjects',
     action: () => this.ctx._apis.projectApi.getProjectRootsFromCache(),
     onUpdate: (val) => {
-      this.ctx.update((o) => {
-        o.globalProjects = castDraft(val)
+      this.ctx.update((s) => {
+        s.globalProjects = castDraft(val)
       })
 
       this.ctx.emitter.toLaunchpad()
@@ -63,21 +61,45 @@ export class LoadingManager {
       })
     },
     onUpdate: (val) => {
-      this.ctx.update((o) => {
-        o.localSettings = castDraft(val)
+      this.ctx.update((s) => {
+        s.localSettings = castDraft(val)
       })
     },
   })
 
-  /**
-   * Fetches the global browsers on the machine
-   */
+  configAppState = this.loadingContainer({
+    name: 'configAppState',
+    action: async () => null,
+    onUpdate: (val) => {
+      this.ctx.update((s) => {
+        if (s.currentProject) {
+          s.currentProject.configAppState = val
+        }
+      })
+    },
+  })
+
   machineBrowsers = this.loadingContainer({
     name: 'machineBrowsers',
     action: () => this.ctx._apis.appApi.getBrowsers(),
     onUpdate: (val) => {
-      this.ctx.update((o) => {
-        o.machineBrowsers = castDraft(val)
+      this.ctx.update((s) => {
+        s.machineBrowsers = castDraft(val)
+      })
+    },
+  })
+
+  projectEnvConfig = this.loadingContainer({
+    name: 'projectEnvConfig',
+    action: async () => {
+      //
+      return null
+    },
+    onUpdate: (val) => {
+      this.ctx.update((s) => {
+        if (s.currentProject) {
+          s.currentProject.configEnvFile = castDraft(val)
+        }
       })
     },
   })
@@ -94,54 +116,60 @@ export class LoadingManager {
       return this._refeshConfigProcess()
     },
     onUpdate: (val) => {
-      this.ctx.update((o) => {
-        if (o.currentProject) {
-          o.currentProject.config = castDraft(val)
+      this.ctx.update((s) => {
+        if (s.currentProject) {
+          s.currentProject.configFileContents = castDraft(val)
         }
       })
     },
+    onCancelled: (val) => {
+      this.ctx.actions.projectConfig?.killChildProcess()
+    },
   })
-
-  private async _refeshConfigProcess () {
-    assert(this.ctx.actions.projectConfig)
-    // Kill the existing child process, if one already exists
-    this.ctx.currentProject?.configChildProcess?.process.kill()
-
-    const { configPromise } = this.ctx.actions.projectConfig.refreshConfigProcess()
-    const result = await configPromise
-
-    configUtils.validate(result, (errMsg) => {
-      throw this.ctx.error('SETTINGS_VALIDATION_ERROR', this.ctx.currentProject?.configFile, errMsg)
-    })
-
-    return result
-  }
 
   /**
    * The project event setup involves sourcing the child-process containing the config,
    * and then using that to
    */
-  projectEventSetup = this.loadingContainer({
-    name: 'projectEventSetup',
+  setupNodeEvents = this.loadingContainer({
+    name: 'setupNodeEvents',
     action: async () => {
-      assert(this.ctx.actions.projectConfig, 'expected projectConfig in projectEventSetup')
-      assert(this.ctx.currentProject?.configChildProcess?.ipc, 'Expected config ipc in projectEventSetup')
+      assert(this.ctx.actions.projectConfig, 'expected projectConfig in setupNodeEvents')
+      assert(this.ctx.currentProject?.configChildProcess?.ipc, 'Expected config ipc in setupNodeEvents')
 
       // If we have already executed plugins for the config file, we need to source a new one
       if (this.ctx.currentProject.configChildProcess.executedPlugins || !this.ctx.currentProject?.configChildProcess) {
         await this._refeshConfigProcess()
       }
 
-      return this.ctx.actions.projectConfig.runSetupNodeEvents(
+      const data = await this.ctx.actions.projectConfig.runSetupNodeEvents(
         this.ctx.currentProject.configChildProcess.ipc,
       )
+
+      const configFilePath = this.ctx.project?.relativeConfigFilePath
+
+      if (data?.result) {
+        configUtils.validate(data.result, (errMsg) => {
+          throw this.ctx.error('PLUGINS_CONFIG_VALIDATION_ERROR', configFilePath, errMsg)
+        })
+
+        // configUtils.validateNoBreakingConfig(data.result)
+      }
+
+      return data
     },
     onUpdate: (val) => {
-      this.ctx.update((o) => {
-        if (o.currentProject) {
-          o.currentProject.pluginLoad = castDraft(val)
-          if (val.state === 'LOADED' && val.value?.registeredEvents) {
-            o.currentProject.pluginRegistry = val.value.registeredEvents
+      this.ctx.update((s) => {
+        if (s.currentProject) {
+          s.currentProject.configSetupNodeEvents = castDraft(val)
+          if (val.settled && s.currentProject.configChildProcess) {
+            s.currentProject.configChildProcess.executedPlugins = s.currentProject.currentTestingType
+          }
+
+          if (val.state === 'LOADED') {
+            s.currentProject.pluginRegistry = val.value.registeredEvents
+          } else {
+            s.currentProject.pluginRegistry = null
           }
         }
       })
@@ -150,9 +178,24 @@ export class LoadingManager {
 
   destroy () {
     for (const [k, v] of this._loadingContainers.entries()) {
-      v.cancel()
+      v.reset()
       this._loadingContainers.delete(k)
     }
+  }
+
+  private async _refeshConfigProcess () {
+    assert(this.ctx.actions.projectConfig)
+    // Kill the existing child process, if one already exists
+    this.ctx.currentProject?.configChildProcess?.process().kill()
+
+    const { configPromise } = this.ctx.actions.projectConfig.refreshConfigProcess()
+    const result = await configPromise
+
+    configUtils.validate(result, (errMsg) => {
+      throw this.ctx.error('SETTINGS_VALIDATION_ERROR', this.ctx.currentProject?.configFile, errMsg)
+    })
+
+    return result as Cypress.ConfigOptionsIpcResponse
   }
 
   /**
@@ -163,18 +206,12 @@ export class LoadingManager {
   private loadingContainer<T, E = any> (config: LoadingConfig<T, E>) {
     const container = makeLoadingContainer(config)
 
-    if (this._loadingContainers.has(config.name) && !this._withinReset) {
+    if (this._loadingContainers.has(config.name)) {
       throw new Error(`Cannot have multiple loaders named ${config.name}`)
     }
 
     this._loadingContainers.set(config.name, container)
 
     return container
-  }
-
-  private withinReset (fn: () => void) {
-    this._withinReset = true
-    fn()
-    this._withinReset = false
   }
 }

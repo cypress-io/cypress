@@ -1,5 +1,5 @@
 import type { CodeGenType, MutationSetProjectPreferencesArgs, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
-import type { Ensure, FindSpecs, FoundBrowser, FoundSpec, FullConfig, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions, Preferences, SettingsOptions } from '@packages/types'
+import type { FindSpecs, FoundBrowser, FoundSpec, FullConfig, LaunchOpts, Preferences, SettingsOptions } from '@packages/types'
 import path from 'path'
 import type { Draft } from 'immer'
 
@@ -32,7 +32,6 @@ export interface ProjectApiShape {
   clearLatestProjectsCache(): Promise<unknown>
   clearProjectPreferences(projectTitle: string): Promise<unknown>
   clearAllProjectPreferences(): Promise<unknown>
-  closeActiveProject(): Promise<unknown>
 }
 
 /**
@@ -42,25 +41,24 @@ export interface ProjectApiShape {
 export class CurrentProjectActions {
   constructor (private ctx: DataContext, private currentProject: CurrentProjectDataSource) {}
 
-  // // TODO(tim): Improve this when we completely overhaul the rest of the code here,
-  async initializePlugins (cfg = this._cfg, options = this.options) {
-    // only init plugins with the
-    // allowed config values to
-    // prevent tampering with the
-    // internals and breaking cypress
-    const allowedCfg = allowed(cfg)
+  async initializePlugins () {
+    // // only init plugins with the
+    // // allowed config values to
+    // // prevent tampering with the
+    // // internals and breaking cypress
+    // const allowedCfg = allowed(cfg)
 
-    const modifiedCfg = await plugins.init(allowedCfg, {
-      projectRoot: this.projectRoot,
-      configFile: settings.pathToConfigFile(this.projectRoot, options),
-      testingType: options.testingType,
-      onError: (err: Error) => this._onError(err, options),
-      onWarning: options.onWarning,
-    }, this.ctx)
+    // const modifiedCfg = await plugins.init(allowedCfg, {
+    //   projectRoot: this.projectRoot,
+    //   configFile: settings.pathToConfigFile(this.projectRoot, options),
+    //   testingType: options.testingType,
+    //   onError: (err: Error) => this._onError(err, options),
+    //   onWarning: options.onWarning,
+    // }, this.ctx)
 
-    debug('plugin config yielded: %o', modifiedCfg)
+    // debug('plugin config yielded: %o', modifiedCfg)
 
-    return config.updateWithPluginValues(cfg, modifiedCfg)
+    // return config.updateWithPluginValues(cfg, modifiedCfg)
   }
 
   // TODO: get proper typings for this?
@@ -69,18 +67,14 @@ export class CurrentProjectActions {
   }
 
   async clearCurrentTestingType () {
-    await this.api.closeActiveProject()
     this.update((p) => {
       p.currentTestingType = null
-      p.browsers = null
     })
   }
 
   async clearCurrentProject () {
-    await this.api.closeActiveProject()
-
-    this.ctx.update((o) => {
-      o.currentProject = null
+    this.ctx.update((s) => {
+      s.currentProject = null
     })
   }
 
@@ -92,10 +86,6 @@ export class CurrentProjectActions {
     this.update((p) => {
       p.currentTestingType = type
     })
-
-    this.ctx.loadingManager.projectEventSetup.load().finally(() => {
-      debugger
-    })
   }
 
   /**
@@ -103,26 +93,26 @@ export class CurrentProjectActions {
    * ready to start the application
    */
   private isReadyForLaunch () {
-    return this.currentProject.currentBrowser && this.ctx.loadedVal(this.currentProject.data.config)
+    return this.currentProject.currentBrowser && this.ctx.loadedVal(this.currentProject.data.configFileContents)
   }
 
-  /**
-   * Called when we choose the testing type, or at startup,
-   * loads the config, and assuming no-error, loads the plugin events
-   *
-   * @param {boolean} true if we are just starting the application via the CLI
-   */
-  async loadConfigAndPlugins (launchOnReady = false) {
-    await this.loadConfig()
-    if (!this.currentProject.errorLoadingConfig) {
-      await this.setupPluginEvents()
-    }
+  // /**
+  //  * Called when we choose the testing type, or at startup,
+  //  * loads the config, and assuming no-error, loads the plugin events
+  //  *
+  //  * @param {boolean} true if we are just starting the application via the CLI
+  //  */
+  // async loadConfigAndPlugins (launchOnReady = false) {
+  //   await this.loadConfig()
+  //   if (!this.currentProject.errorLoadingConfig) {
+  //     await this.setupNodeEvents()
+  //   }
 
-    // If we're on initial load, we want to open the browser immediately after choosing
-    if (launchOnReady && this.isReadyForLaunch()) {
-      await this.launchAppInBrowser()
-    }
-  }
+  //   // If we're on initial load, we want to open the browser immediately after choosing
+  //   if (launchOnReady && this.isReadyForLaunch()) {
+  //     await this.launchAppInBrowser()
+  //   }
+  // }
 
   createProject () {
     //
@@ -171,7 +161,7 @@ export class CurrentProjectActions {
       activeSpec = await this.ctx.project.getCurrentSpecByAbsolute(specPath)
     }
 
-    return this.api.launchProject(browser, activeSpec ?? emptySpec, {
+    this.ctx.currentProject?.legacyOpenProject?.launch(browser, activeSpec ?? emptySpec, {
       onError: (err) => {
 
       },
@@ -184,26 +174,26 @@ export class CurrentProjectActions {
     })
   }
 
-  async launchProjectWithoutElectron () {
-    const preferences = await this.api.getProjectPreferencesFromCache()
-    const { browserPath, testingType } = preferences[this.currentProject.title] ?? {}
+  // async launchProjectWithoutElectron () {
+  //   const preferences = await this.api.getProjectPreferencesFromCache()
+  //   const { browserPath, testingType } = preferences[this.currentProject.title] ?? {}
 
-    if (!browserPath || !testingType) {
-      throw Error('Cannot launch project without stored browserPath or testingType')
-    }
+  //   if (!browserPath || !testingType) {
+  //     throw Error('Cannot launch project without stored browserPath or testingType')
+  //   }
 
-    const spec = this.makeSpec(testingType)
-    const browser = this.findBrowerByPath(browserPath)
+  //   const spec = this.makeSpec(testingType)
+  //   const browser = this.findBrowerByPath(browserPath)
 
-    if (!browser) {
-      throw Error(`Cannot find specified browser at given path: ${browserPath}.`)
-    }
+  //   if (!browser) {
+  //     throw Error(`Cannot find specified browser at given path: ${browserPath}.`)
+  //   }
 
-    this.ctx.actions.electron.hideBrowserWindow()
-    await this.loadConfigAndPlugins()
+  //   this.ctx.actions.electron.hideBrowserWindow()
+  //   await this.loadConfigAndPlugins()
 
-    return this.api.launchProject(browser, spec, {})
-  }
+  //   return this.api.launchProject(browser, spec, {})
+  // }
 
   private makeSpec (testingType: TestingTypeEnum): Cypress.Spec {
     return {
@@ -401,7 +391,6 @@ export class CurrentProjectActions {
       p.currentTestingType = testingType
     })
 
-    await this.setupPluginEvents()
     await this.launchAppInBrowser()
   }
 
@@ -410,9 +399,9 @@ export class CurrentProjectActions {
    * it hasn't been swapped out (we can remove this guard when we refactor closeActiveProject)
    */
   private update (updater: (proj: Draft<CurrentProjectDataShape>) => void) {
-    this.ctx.update((o) => {
-      if (o.currentProject?.projectRoot === this.currentProject.projectRoot) {
-        updater(o.currentProject)
+    this.ctx.update((s) => {
+      if (s.currentProject?.projectRoot === this.currentProject.projectRoot) {
+        updater(s.currentProject)
       }
     })
   }

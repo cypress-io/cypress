@@ -25,8 +25,8 @@ export class DevActions {
       })
 
       this._chokidar.on('change', () => {
-        this.ctx.update((o) => {
-          o.dev.refreshState = new Date().toISOString()
+        this.ctx.update((s) => {
+          s.dev.refreshState = new Date().toISOString()
         })
 
         this.ctx.emitter.toApp()
@@ -50,8 +50,8 @@ export class DevActions {
   }
 
   dismissRelaunch () {
-    this.ctx.update((o) => {
-      o.dev.refreshState = null
+    this.ctx.update((s) => {
+      s.dev.refreshState = null
     })
   }
 

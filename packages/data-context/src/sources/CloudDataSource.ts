@@ -87,16 +87,16 @@ export class CloudDataSource {
             }
           } else if (!_.isEqual(resolvedData.data, res.data) || !_.isEqual(resolvedData.error, error)) {
             if (error) {
-              this.ctx.update((o) => {
-                o.globalError = {
+              this.ctx.update((s) => {
+                s.globalError = {
                   title: error.graphQLErrors[0]?.originalError?.name,
                   message: error.message,
                   stack: error.stack,
                 }
               })
             } else {
-              this.ctx.update((o) => {
-                o.globalError = null
+              this.ctx.update((s) => {
+                s.globalError = null
               })
             }
 

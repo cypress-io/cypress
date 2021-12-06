@@ -5,7 +5,7 @@ import path = require('path')
 import debugLib = require('debug')
 import minimist = require('minimist')
 import coerceUtil = require('./coerce')
-import configUtils from '@packages/config'
+import * as configUtils from '@packages/config'
 import proxyUtil = require('./proxy')
 import errors = require('../errors')
 import type { LaunchArgs } from '@packages/types'

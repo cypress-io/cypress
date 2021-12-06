@@ -44,7 +44,7 @@ const isFalse = (value: any): value is false => {
  * Validates a single browser object.
  * @returns {string|true} Returns `true` if the object is matching browser object schema. Returns an error message if it does not.
  */
-const isValidBrowser = (browser) => {
+const isValidBrowser = (browser: any) => {
   if (!is.unemptyString(browser.name)) {
     return errMsg('name', browser, 'a non-empty string')
   }
@@ -78,7 +78,7 @@ const isValidBrowser = (browser) => {
 /**
  * Validates the list of browsers.
  */
-const isValidBrowserList = (key, browsers) => {
+const isValidBrowserList = (key: string, browsers: any) => {
   debug('browsers %o', browsers)
   if (!browsers) {
     return 'Missing browsers list'
@@ -105,10 +105,10 @@ const isValidBrowserList = (key, browsers) => {
   return true
 }
 
-const isValidRetriesConfig = (key, value) => {
+const isValidRetriesConfig = (key: string, value: any) => {
   const optionalKeys = ['runMode', 'openMode']
-  const isValidRetryValue = (val) => _.isNull(val) || (Number.isInteger(val) && val >= 0)
-  const optionalKeysAreValid = (val, k) => optionalKeys.includes(k) && isValidRetryValue(val)
+  const isValidRetryValue = (val: any) => _.isNull(val) || (Number.isInteger(val) && val >= 0)
+  const optionalKeysAreValid = (val: any, k: string) => optionalKeys.includes(k) && isValidRetryValue(val)
 
   if (isValidRetryValue(value)) {
     return true
@@ -121,7 +121,7 @@ const isValidRetriesConfig = (key, value) => {
   return errMsg(key, value, 'a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls')
 }
 
-const isPlainObject = (key, value) => {
+const isPlainObject = (key: string, value: any) => {
   if (value == null || _.isPlainObject(value)) {
     return true
   }
@@ -130,7 +130,7 @@ const isPlainObject = (key, value) => {
 }
 
 const isOneOf = (...values: any[]) => {
-  return (key, value) => {
+  return (key: string, value: any) => {
     if (values.some((v) => {
       if (typeof value === 'function') {
         return value(v)
@@ -151,7 +151,7 @@ const isOneOf = (...values: any[]) => {
  * Validates whether the supplied set of cert information is valid
  * @returns {string|true} Returns `true` if the information set is valid. Returns an error message if it is not.
  */
-const isValidClientCertificatesSet = (_key, certsForUrls: ClientCertificate[]) => {
+const isValidClientCertificatesSet = (_key: string, certsForUrls: ClientCertificate[]) => {
   debug('clientCerts: %o', certsForUrls)
 
   if (!Array.isArray(certsForUrls)) {
@@ -250,7 +250,7 @@ export default {
 
   isPlainObject,
 
-  isNumber (key, value) {
+  isNumber (key: string, value: any) {
     if (value == null || isNumber(value)) {
       return true
     }
@@ -258,7 +258,7 @@ export default {
     return errMsg(key, value, 'a number')
   },
 
-  isNumberOrFalse (key, value) {
+  isNumberOrFalse (key: string, value: any) {
     if (isNumber(value) || isFalse(value)) {
       return true
     }
@@ -266,7 +266,7 @@ export default {
     return errMsg(key, value, 'a number or false')
   },
 
-  isFullyQualifiedUrl (key, value) {
+  isFullyQualifiedUrl (key: string, value: any) {
     if (value == null || isFullyQualifiedUrl(value)) {
       return true
     }
@@ -278,7 +278,7 @@ export default {
     )
   },
 
-  isBoolean (key, value) {
+  isBoolean (key: string, value: any) {
     if (value == null || _.isBoolean(value)) {
       return true
     }
@@ -286,7 +286,7 @@ export default {
     return errMsg(key, value, 'a boolean')
   },
 
-  isString (key, value) {
+  isString (key: string, value: any) {
     if (value == null || isString(value)) {
       return true
     }
@@ -294,7 +294,7 @@ export default {
     return errMsg(key, value, 'a string')
   },
 
-  isArray (key, value) {
+  isArray (key: string, value: any) {
     if (value == null || isArray(value)) {
       return true
     }
@@ -302,7 +302,7 @@ export default {
     return errMsg(key, value, 'an array')
   },
 
-  isStringOrFalse (key, value) {
+  isStringOrFalse (key: string, value: any) {
     if (isString(value) || isFalse(value)) {
       return true
     }

@@ -40,9 +40,6 @@ export const CurrentProject = objectType({
     t.list.nonNull.field('browsers', {
       type: Browser,
       description: 'Browsers for the project that are configured to run with Cypress. Null if config hasnt been sourced',
-      resolve: (source, args, ctx) => {
-        return source.loadedConfig()?.browsers ?? null
-      },
     })
 
     t.field('cloudProject', {
@@ -80,7 +77,7 @@ export const CurrentProject = objectType({
     t.field('errorLoadingConfig', {
       type: ApplicationError,
       description: 'An error encountered while loading the config',
-      resolve: (o, args, ctx) => ctx.loadingErr(o.data.config),
+      resolve: (o, args, ctx) => ctx.loadingErr(o.data.configFileContents),
     })
 
     t.nonNull.boolean('isLoadingPlugins', {
@@ -90,14 +87,11 @@ export const CurrentProject = objectType({
     t.field('errorLoadingPlugins', {
       type: ApplicationError,
       description: 'An error encountered while loading the plugins',
-      resolve: (o, args, ctx) => ctx.loadingErr(o.data.pluginLoad),
+      resolve: (o, args, ctx) => ctx.loadingErr(o.data.configSetupNodeEvents),
     })
 
     t.json('config', {
       description: 'Project configuration, sourced from the config file, or returned from the plugin',
-      resolve: (source, args, ctx) => {
-        return source.data.config.value ?? null
-      },
     })
 
     t.string('configFilePath', {
