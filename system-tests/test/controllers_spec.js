@@ -27,12 +27,12 @@ describe('e2e plugins', () => {
       return systemTests.exec(this, {
         spec: specPath,
         sanitizeScreenshotDimensions: true,
+        snapshot: true,
       })
     }).then(({ stdout }) => {
-      expect(stdout).to.include(`1 found (${relativeSpecPath})`)
-      expect(stdout).to.include(`Running:  ${relativeSpecPath}`)
-
-      expect(stdout).to.include(`Finished processing: /XXX/XXX/XXX/cypress/videos/${relativeSpecPath}.mp4`)
+      expect(stdout).to.include('1 found (s%p+ec&.js)')
+      expect(stdout).to.include('Searched:   cypress/integration/dir&1%/%dir2&/s%p+ec&.js')
+      expect(stdout).to.include('Running:  s%p+ec&.js')
     })
   })
 })
