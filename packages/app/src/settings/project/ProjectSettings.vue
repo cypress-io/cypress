@@ -1,10 +1,10 @@
 <template>
   <ProjectId
-    :gql="props.gql"
+    :gql="props.gql.currentProject"
   />
-  <template v-if="props.gql.cloudProject?.recordKeys?.length">
+  <template v-if="props.gql.currentProject?.cloudProject?.recordKeys?.length">
     <RecordKey
-      v-for="key of props.gql.cloudProject.recordKeys"
+      v-for="key of props.gql.currentProject.cloudProject.recordKeys"
       :key="key.id"
       :gql="key"
     />
@@ -13,8 +13,8 @@
     You don't have any record keys. You should make some so you can record
     on Cypress Cloud.
   </template>
-  <SpecPatterns :gql="props.gql" />
-  <Experiments :gql="props.gql" />
+  <SpecPatterns :gql="props.gql.currentProject" />
+  <Experiments :gql="props.gql.currentProject" />
   <Config :gql="props.gql" />
 </template>
 
@@ -28,19 +28,21 @@ import SpecPatterns from './SpecPatterns.vue'
 import type { ProjectSettingsFragment } from '../../generated/graphql'
 
 gql`
-fragment ProjectSettings on CurrentProject {
-  id
-  ...ProjectId
-  ...SpecPatterns
-  ...Experiments
-  ...Config
-  cloudProject {
+fragment ProjectSettings on Query {
+  currentProject {
     id
-    recordKeys {
+    ...ProjectId
+    ...SpecPatterns
+    ...Experiments
+    cloudProject {
       id
-      ...RecordKey
+      recordKeys {
+        id
+        ...RecordKey
+      }
     }
   }
+  ...Config
 }
 `
 

@@ -58,7 +58,7 @@ fragment SpecPatterns on CurrentProject {
 `
 
 defineProps<{
-  gql?: SpecPatternsFragment
+  gql?: SpecPatternsFragment | null
 }>()
 
 const defaultValues = true
