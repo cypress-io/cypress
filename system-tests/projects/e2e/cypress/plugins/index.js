@@ -33,7 +33,7 @@ module.exports = (on, config) => {
 
     if (cachedImage) return Promise.resolve(cachedImage)
 
-    const imagePath = path.join(__dirname, '..', 'screenshots', `${name}.png`)
+    const imagePath = path.join(__dirname, '..', 'screenshots', 'cypress', 'integration', `${name}.png`)
 
     return Jimp.read(imagePath).then((image) => {
       cache[name] = image
@@ -94,7 +94,7 @@ module.exports = (on, config) => {
     },
 
     'ensure:pixel:color' ({ name, colors, devicePixelRatio }) {
-      const imagePath = path.join(__dirname, '..', 'screenshots', `${name}.png`)
+      const imagePath = path.join(__dirname, '..', 'screenshots', 'cypress', 'integration', `${name}.png`)
 
       return Jimp.read(imagePath)
       .then((image) => {
@@ -122,7 +122,7 @@ module.exports = (on, config) => {
         return `${rgba.r}${rgba.g}${rgba.b}` === '000'
       }
 
-      const comparePath = path.join(__dirname, '..', 'screenshots', `${b}.png`)
+      const comparePath = path.join(__dirname, '..', 'screenshots', 'cypress', 'integration', `${b}.png`)
 
       return Promise.all([
         getCachedImage(a),
