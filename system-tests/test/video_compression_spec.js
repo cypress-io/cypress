@@ -34,10 +34,9 @@ describe('e2e video compression', () => {
   systemTests.setup()
 
   return [
-    true,
     false,
   ].forEach((headed) => {
-    systemTests.it(`passes (head${headed ? 'ed' : 'less'})`, {
+    systemTests.it.only(`passes (head${headed ? 'ed' : 'less'})`, {
       // videos are corrupted in firefox due to known issues
       browser: '!firefox',
       spec: 'video_compression_spec.js',
@@ -53,11 +52,10 @@ describe('e2e video compression', () => {
         process.env.VIDEO_COMPRESSION_THROTTLE = 10
 
         const { stdout } = await exec()
-        const videosPath = Fixtures.projectPath('e2e/cypress/videos/*')
+        const videosPath = Fixtures.projectPath('e2e/cypress/videos/cypress/integration/*')
         const files = await glob(videosPath)
 
         expect(files).to.have.length(1, `globbed for videos and found: ${files.length}. Expected to find 1 video. Search in videosPath: ${videosPath}.`)
-
         const lastFrameFile = path.join(path.dirname(files[0]), 'lastFrame.jpg')
 
         await outputFinalFrameAsJpg(files[0], lastFrameFile)
