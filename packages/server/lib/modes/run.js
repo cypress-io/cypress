@@ -219,7 +219,7 @@ const displayRunStarting = function (options = {}) {
 
   const formatSpecs = (specs) => {
     // 25 found: (foo.spec.js, bar.spec.js, baz.spec.js)
-    const names = _.map(specs, 'name')
+    const names = _.map(specs, 'baseName')
     const specsTruncated = _.truncate(names.join(', '), { length: 250 })
 
     const stringifiedSpecs = [
@@ -292,6 +292,7 @@ const displaySpecHeader = function (name, curr, total, estimated) {
 const collectTestResults = (obj = {}, estimated) => {
   return {
     name: _.get(obj, 'spec.name'),
+    baseName: _.get(obj, 'spec.baseName'),
     tests: _.get(obj, 'stats.tests'),
     passes: _.get(obj, 'stats.passes'),
     pending: _.get(obj, 'stats.pending'),
@@ -356,7 +357,7 @@ const renderSummaryTable = (runUrl) => {
 
         const ms = duration.format(stats.wallClockDuration || 0)
 
-        const formattedSpec = formatPath(spec.name, getWidth(table2, 1))
+        const formattedSpec = formatPath(spec.baseName, getWidth(table2, 1))
 
         if (run.skippedSpec) {
           return table2.push([
@@ -743,8 +744,6 @@ const warnVideoRecordingFailed = (err) => {
 }
 
 module.exports = {
-  collectTestResults,
-
   getProjectId,
 
   writeOutput,
@@ -795,7 +794,7 @@ module.exports = {
       ['Video:', results.video],
       ['Duration:', results.duration],
       estimated ? ['Estimated:', results.estimated] : undefined,
-      ['Spec Ran:', formatPath(results.name, getWidth(table, 1), c)],
+      ['Spec Ran:', formatPath(results.baseName, getWidth(table, 1), c)],
     ])
     .compact()
     .map((arr) => {
@@ -1328,7 +1327,7 @@ module.exports = {
 
     const runEachSpec = (spec, index, length, estimated) => {
       if (!options.quiet) {
-        displaySpecHeader(spec.name, index + 1, length, estimated)
+        displaySpecHeader(spec.baseName, index + 1, length, estimated)
       }
 
       return this.runSpec(config, spec, options, estimated, firstSpec)
@@ -1573,6 +1572,7 @@ module.exports = {
             relative: x.relative,
             absolute: x.absolute,
             specType: x.specType,
+            baseName: x.baseName,
           }))
 
           if (!specs.length) {
