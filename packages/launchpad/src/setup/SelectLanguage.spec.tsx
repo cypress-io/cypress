@@ -1,5 +1,4 @@
 import { ref } from 'vue'
-import type { CodeLanguageEnum } from '../../generated/graphql-test'
 import Select from './SelectLanguage.vue'
 
 const manyOptions = [
@@ -7,13 +6,13 @@ const manyOptions = [
     id: 'js',
     name: 'JavaScript',
     isSelected: true,
-    type: 'js' as CodeLanguageEnum,
+    type: 'js',
   },
   {
     id: 'ts',
     name: 'TypeScript',
     isSelected: false,
-    type: 'ts' as CodeLanguageEnum,
+    type: 'ts',
   },
 ]
 
@@ -23,6 +22,7 @@ describe('<SelectLanguage />', () => {
       <div class="m-10">
         <Select
           name="Language"
+          // @ts-ignore
           options={manyOptions}
           value="js"
         />
@@ -39,6 +39,7 @@ describe('<SelectLanguage />', () => {
       <div class="m-10">
         <Select
           name="Language"
+          // @ts-ignore
           options={manyOptions}
           value={val.value}
           onSelect={(newVal) => {

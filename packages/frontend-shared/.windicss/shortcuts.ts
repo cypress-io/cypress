@@ -15,6 +15,8 @@ const hocusDefault = focusDefault.replace(/focus:/g, 'hocus:')
 const focusWithinDefault = focusDefault.replace(/focus:/g, 'focus-within:')
 
 export const shortcuts = {
+  'default-ring': focusDefault.replace(/focus:/g, ''),
+  'hocus-within-default': focusDefault.replace(/focus:/g, 'hocus-within:'),
   'hocus-default': hocusDefault,
   'focus-within-default': focusWithinDefault,
   'focus-default': focusDefault,
