@@ -10,7 +10,7 @@
 
     <main
       aria-labelledby="primary-heading"
-      class="overflow-y-auto"
+      class="overflow-auto"
     >
       <router-view v-slot="{ Component, route }">
         <h1
