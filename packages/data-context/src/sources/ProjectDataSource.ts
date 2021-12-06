@@ -56,7 +56,8 @@ export class ProjectDataSource {
     .map((ext) => ext + fileExtension)
     .find((ext) => absolute.endsWith(ext)) || fileExtension
 
-    let name = absolute.split(projectRoot)[1]!.replace(/\\/g, '/')
+    const parts = absolute.split(projectRoot)
+    let name = parts[parts.length - 1]?.replace(/\\/g, '/') || ''
 
     if (name.startsWith('/')) {
       name = name.slice(1)
