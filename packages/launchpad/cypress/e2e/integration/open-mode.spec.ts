@@ -44,7 +44,7 @@ describe('Launchpad: Open Mode', () => {
     })
 
     // e2e testing is configured for the todo project, so we don't expect an error.
-    cy.get('h1').should('contain', 'Configuration Files')
+    cy.get('h1').should('contain', 'Initializing Config...')
   })
 
   it('goes directly to component tests when launched with --component', () => {
@@ -80,7 +80,6 @@ describe('Launchpad: Open Mode', () => {
     // Need to visit after args have been configured, todo: fix in #18776
     cy.visitLaunchpad()
 
-    cy.contains('Continue').click()
     cy.contains('Next Step').click()
     cy.get('h1').should('contain', 'Choose a Browser')
     cy.contains('Firefox').parent().should('have.class', 'border-jade-300')
