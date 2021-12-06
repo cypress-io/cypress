@@ -121,7 +121,7 @@ import { useI18n } from '@cy/i18n'
 const { t } = useI18n()
 
 const navigation = [
-  { name: 'Specs', icon: CodeIcon, href: '/' },
+  { name: 'Specs', icon: CodeIcon, href: '/specs' },
   { name: 'Runs', icon: RunsIcon, href: '/runs' },
   { name: 'Settings', icon: SettingsIcon, href: '/settings' },
 ]

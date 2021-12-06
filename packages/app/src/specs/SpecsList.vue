@@ -13,7 +13,7 @@
       @newSpec="showModal = true"
     />
 
-    <div class="grid grid-cols-2 children:text-gray-800 children:font-medium">
+    <div class="grid grid-cols-2 children:font-medium children:text-gray-800">
       <div
         class="flex justify-between items-center"
         data-cy="specs-testing-type-header"
@@ -41,7 +41,7 @@
             <RouterLink
               v-if="row.data.isLeaf && row.data"
               :key="row.data.data?.absolute"
-              :to="{ path: 'runner', query: { file: row.data.data?.relative } }"
+              :to="{ path: '/specs/runner', query: { file: row.data.data?.relative } }"
             >
               <SpecItem
                 :file-name="row.data.data?.fileName || row.data.name"

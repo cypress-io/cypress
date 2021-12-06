@@ -2,9 +2,9 @@
   <div class="flex-grow">
     <div
       v-if="mutation.fetching.value"
-      class="inline-flex items-center w-full justify-center mt-48px"
+      class="mt-48px w-full inline-flex items-center justify-center"
     >
-      <i-cy-loading_x16 class="animate-spin w-48px h-48px mr-12px" />
+      <i-cy-loading_x16 class="h-48px mr-12px animate-spin w-48px" />
       <p class="text-lg">
         Loading
       </p>
@@ -24,15 +24,15 @@
   <div>
     <div
       v-if="!result"
-      class="rounded-b w-full h-24px"
+      class="rounded-b h-24px w-full"
     />
     <StandardModalFooter
       v-else
-      class="h-72px flex gap-16px"
+      class="flex h-72px gap-16px"
     >
       <router-link
         class="outline-none"
-        :to="{ path: 'runner', query: { file: result.spec.relative } }
+        :to="{ path: 'specs/runner', query: { file: result.spec.relative } }
         "
       >
         <Button
