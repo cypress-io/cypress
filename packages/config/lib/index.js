@@ -107,7 +107,7 @@ module.exports = {
     let errProperty
 
     Object.keys(config).some((option) => {
-      return errProperty = !testConfigOverrideOptions[option] ? option : undefined
+      return errProperty = testConfigOverrideOptions[option] === false ? option : undefined
     })
 
     if (errProperty) {
