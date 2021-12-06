@@ -21,6 +21,8 @@ export const CODE_GEN_FRAMEWORKS = ['react', 'vue'] as const
 
 export type CodeGenFramework = typeof CODE_GEN_FRAMEWORKS[number]
 
+export const FRONTEND_FRAMEWORK_CATEGORIES = ['react', 'vue', 'other'] as const
+
 export const FRONTEND_FRAMEWORKS = [
   {
     type: 'cra',
@@ -29,6 +31,7 @@ export const FRONTEND_FRAMEWORKS = [
     package: '@cypress/react',
     glob: '**/*.{jsx,tsx}',
     deps: ['react-scripts', 'react', 'react-dom'],
+    category: FRONTEND_FRAMEWORK_CATEGORIES[0],
     codeGenFramework: CODE_GEN_FRAMEWORKS[0],
   },
   {
@@ -38,6 +41,7 @@ export const FRONTEND_FRAMEWORKS = [
     package: '@cypress/vue',
     glob: '**/*.vue',
     deps: ['@vue/cli-service', 'vue'],
+    category: FRONTEND_FRAMEWORK_CATEGORIES[1],
     codeGenFramework: CODE_GEN_FRAMEWORKS[1],
   },
   {
@@ -47,6 +51,7 @@ export const FRONTEND_FRAMEWORKS = [
     package: '@cypress/react',
     glob: '**/*.{jsx,tsx}',
     deps: ['react', 'react-dom'],
+    category: FRONTEND_FRAMEWORK_CATEGORIES[0],
     codeGenFramework: CODE_GEN_FRAMEWORKS[0],
   },
   {
@@ -56,6 +61,7 @@ export const FRONTEND_FRAMEWORKS = [
     package: '@cypress/vue',
     glob: '**/*.vue',
     deps: ['vue'],
+    category: FRONTEND_FRAMEWORK_CATEGORIES[1],
     codeGenFramework: CODE_GEN_FRAMEWORKS[1],
   },
   {
@@ -65,6 +71,7 @@ export const FRONTEND_FRAMEWORKS = [
     package: '@cypress/react',
     glob: '**/*.{jsx,tsx}',
     deps: ['next', 'react', 'react-dom'],
+    category: FRONTEND_FRAMEWORK_CATEGORIES[0],
     codeGenFramework: CODE_GEN_FRAMEWORKS[0],
   },
   {
@@ -74,6 +81,7 @@ export const FRONTEND_FRAMEWORKS = [
     package: '@cypress/vue',
     glob: '**/*.vue',
     deps: ['nuxt'],
+    category: FRONTEND_FRAMEWORK_CATEGORIES[1],
     codeGenFramework: CODE_GEN_FRAMEWORKS[1],
   },
 ] as const

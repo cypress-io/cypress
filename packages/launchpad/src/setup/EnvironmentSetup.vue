@@ -1,23 +1,28 @@
 <template>
   <WizardLayout
     :can-navigate-forward="props.gql.canNavigateForward"
-    class="max-w-776px"
+    class="max-w-640px"
   >
-    <div class="m-5">
-      <SelectFramework
-        :name="t('setupPage.projectSetup.frameworkLabel')"
-        :options="frameworks ?? []"
+    <div class="m-24px">
+      <SelectFwOrBundler
+        :options="frameworks || []"
         :value="props.gql.framework?.id ?? undefined"
         :placeholder="t('setupPage.projectSetup.frameworkPlaceholder')"
-        @select="setFEFramework"
+        :label="t('setupPage.projectSetup.frameworkLabel')"
+        selector-type="framework"
+        data-testid="select-framework"
+        @select-framework="setFEFramework"
       />
-      <SelectBundler
-        :name="t('setupPage.projectSetup.bundlerLabel')"
-        :disabled="bundlers.length === 1"
+      <SelectFwOrBundler
+        v-if="props.gql.framework?.id && (!props.gql.bundler || bundlers.length > 1)"
+        class="pt-3px"
         :options="bundlers || []"
         :value="props.gql.bundler?.id ?? undefined"
         :placeholder="t('setupPage.projectSetup.bundlerPlaceholder')"
-        @select="setFEBundler"
+        :label="t('setupPage.projectSetup.bundlerLabel')"
+        selector-type="bundler"
+        data-testid="select-bundler"
+        @select-bundler="setFEBundler"
       />
       <SelectLanguage
         :name="t('setupPage.projectSetup.languageLabel')"
@@ -32,9 +37,8 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 import WizardLayout from './WizardLayout.vue'
-import SelectFramework from '../components/select/SelectFramework.vue'
-import SelectBundler from '../components/select/SelectBundler.vue'
-import SelectLanguage from '../components/select/SelectLanguage.vue'
+import SelectFwOrBundler from './SelectFwOrBundler.vue'
+import SelectLanguage from './SelectLanguage.vue'
 import { gql } from '@urql/core'
 import {
   EnvironmentSetupFragment,
@@ -47,6 +51,7 @@ import {
 } from '../generated/graphql'
 import { useMutation } from '@urql/vue'
 import { useI18n } from '@cy/i18n'
+import { sortBy } from 'lodash'
 
 gql`
 mutation EnvironmentSetupSetFramework($framework: FrontendFrameworkEnum!) {
@@ -85,12 +90,14 @@ fragment EnvironmentSetup on Wizard {
       type
       name
     }
+    category
   }
   frameworks {
     id
     name
     isSelected
     type
+    category
   }
   allBundlers {
     id
@@ -133,7 +140,19 @@ const setLanguage = (language: CodeLanguageEnum) => {
 
 const { t } = useI18n()
 
-const bundlers = computed(() => props.gql.framework?.supportedBundlers ?? props.gql.allBundlers)
-const frameworks = computed(() => props.gql.frameworks ?? [])
+const bundlers = computed(() => {
+  const _bundlers = props.gql.framework?.supportedBundlers ?? props.gql.allBundlers
+
+  return _bundlers.map((b) => {
+    return {
+      disabled: _bundlers.length <= 1,
+      ...b,
+    }
+  })
+})
+const frameworks = computed(() => {
+  return sortBy((props.gql.frameworks ?? []).map((f) => ({ ...f })), 'category')
+})
+
 const languages = computed(() => props.gql.allLanguages ?? [])
 </script>
