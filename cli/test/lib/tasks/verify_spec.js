@@ -72,6 +72,14 @@ context('lib/tasks/verify', () => {
     expect(verify.VERIFY_TEST_RUNNER_TIMEOUT_MS).to.be.gt(10000)
   })
 
+  it('accepts custom verify task timeout', () => {
+    process.env.CYPRESS_VERIFY_TIMEOUT = '500000'
+    delete require.cache[require.resolve(`${lib}/tasks/verify`)]
+    const newVerifyInstance = require(`${lib}/tasks/verify`)
+
+    expect(newVerifyInstance.VERIFY_TEST_RUNNER_TIMEOUT_MS).to.be.gte(500000)
+  })
+
   it('logs error and exits when no version of Cypress is installed', () => {
     return verify
     .start()
