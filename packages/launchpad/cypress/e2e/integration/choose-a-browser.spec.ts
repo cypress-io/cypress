@@ -25,7 +25,7 @@ describe('Choose a Browser config', () => {
 
     cy.get('h1').should('contain', 'Choose a Browser')
 
-    // Recommend this be a list with radio group roles (role=radiogroup, role=radio + aria-checked for children, labels)
+    // TODO Recommend this be a list with radio group roles (role=radiogroup, role=radio + aria-checked for children, labels)
     cy.get('[data-testid="browser-radio-group"] [data-selected-browser]').eq(0).as('chromeRadioOption')
     cy.get('[data-testid="browser-radio-group"] [data-selected-browser]').eq(1).as('firefoxRadioOption')
 
@@ -98,7 +98,7 @@ describe('Choose a Browser config', () => {
     .should('have.attr', 'href')
     .and('equal', 'https://on.cypress.io/troubleshooting-launching-browsers')
 
-    // Alert looks to be dismissable, but the X button isn't hooked up yet
+    // TODO Alert looks to be dismissable, but the X button isn't hooked up yet
     // cy.get('[data-testid="alert-suffix-icon"]').click()
     // cy.get('[data-testid="alert-header"]').should('not.exist')
   })
@@ -128,7 +128,7 @@ describe('Choose a Browser config', () => {
     .should('have.attr', 'href')
     .and('equal', 'https://on.cypress.io/troubleshooting-launching-browsers')
 
-    // Alert looks to be dismissable, but the X button isn't hooked up yet
+    // TODO Alert looks to be dismissable, but the X button isn't hooked up yet
     // cy.get('[data-testid="alert-suffix-icon"]').click()
     // cy.get('[data-testid="alert-header"]').should('not.exist')
   })
@@ -152,7 +152,7 @@ describe('Choose a Browser config', () => {
     cy.get('h1').should('contain', 'Choose a Browser')
 
     cy.withCtx((ctx) => {
-      // TODO: woof, fixture for this?
+      // TODO: yikes, fixture for this?
       ctx.coreData.currentProject.browsers = [{
         'id': '1',
         'channel': 'stable',
@@ -361,5 +361,33 @@ describe('Choose a Browser config', () => {
     .and('contain', 'v12.x')
     .find('img')
     .should('have.attr', 'alt', 'Edge Dev')
+  })
+
+  it('should launch selected browser when launch button is clicked', () => {
+    cy.setupE2E('launchpad')
+    cy.visitLaunchpad()
+
+    cy.withCtx(async (ctx) => {
+      ctx.launchArgs.testingType = 'e2e'
+      await ctx.initializeData()
+    })
+
+    // Need to visit after args have been configured, todo: fix in #18776
+    cy.visitLaunchpad()
+
+    stepThroughConfigPages()
+
+    cy.get('h1').should('contain', 'Choose a Browser')
+
+    // TODO "external link" icon in button needs label
+    cy.get('[data-testid="launch-button"]').as('launchButton').should('contain', 'Launch Chrome')
+
+    cy.intercept('mutation-OpenBrowser_LaunchProject').as('launchProject')
+
+    cy.get('@launchButton').click()
+
+    cy.wait('@launchProject').then(({ response }) => {
+      expect(response?.body.data.launchOpenProject).to.eq(true)
+    })
   })
 })
