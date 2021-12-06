@@ -276,12 +276,8 @@ const onServer = (routes) => {
   })
 }
 
-export const setupStubbedServer = (routes, settings = {}) => {
+export const setupStubbedServer = (routes) => {
   systemTests.setup({
-    settings: _.extend({
-      projectId: 'pid123',
-      videoUploadOnPasses: false,
-    }, settings),
     servers: [{
       port: 1234,
       onServer: onServer(routes),
