@@ -67,10 +67,10 @@ const makeRuleForClass = ({ name, theme, weight, color }: RuleConfig) => {
       '> *[stroke].icon-dark': {
         stroke: resolvedColor,
       },
-      '> *[fill].icon-dark-fill': {
+      '> *[fill][stroke].icon-dark-fill': {
         fill: resolvedColor,
       },
-      '> *[fill].icon-dark-stroke': {
+      '> *[fill][stroke].icon-dark-stroke': {
         stroke: resolvedColor,
       },
     },

@@ -63,7 +63,7 @@
     "field": "experimentalFetchPolyfill"
   },
   {
-    "value": false,
+    "value": true,
     "from": "default",
     "field": "experimentalInteractiveRunEvents"
   },

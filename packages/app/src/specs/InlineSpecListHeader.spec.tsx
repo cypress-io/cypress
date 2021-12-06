@@ -28,7 +28,7 @@ describe('InlineSpecListHeader', () => {
     const searchString = 'my/component.cy.tsx'
 
     cy.findByLabelText(defaultMessages.specPage.searchPlaceholder)
-    .type(searchString, { delay: 0 })
+    .type(searchString, { delay: 0, force: true })
     .get('@search').its('value').should('eq', searchString)
   })
 

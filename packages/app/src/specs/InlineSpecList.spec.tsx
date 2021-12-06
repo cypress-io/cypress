@@ -33,7 +33,7 @@ describe('InlineSpecList', () => {
   })
 
   it('should support fuzzy sort', () => {
-    cy.findByLabelText(defaultMessages.specPage.searchPlaceholder).type('scomeA')
+    cy.findByLabelText(defaultMessages.specPage.searchPlaceholder).type('scomeA', { force: true })
 
     cy.findAllByTestId('spec-row-item').should('have.length', 2).should('contain', 'src/components').and('contain', 'Spec-A.spec.tsx')
   })

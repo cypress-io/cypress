@@ -1,53 +1,70 @@
 <template>
-  <div class="h-64px items-center gap-8px mx-16px border-b-1 border-gray-900 grid grid-cols-[minmax(0,1fr),24px]">
-    <div class="relative items-center group">
-      <div class="absolute inset-y-0 flex items-center pointer-events-none">
+  <div
+    class="border-b-1 border-gray-900 h-64px mx-16px grid gap-8px grid-cols-[minmax(0,1fr),24px] pointer-cursor items-center"
+  >
+    <div
+      class="cursor-pointer relative items-center group"
+      @click="input.focus()"
+    >
+      <div
+        class="flex h-full inset-y-0 w-32px absolute items-center"
+        @mousedown.prevent.stop
+      >
         <i-cy-magnifying-glass_x16
-          :class="inputFocused ? 'icon-dark-gray-200' : 'icon-dark-gray-900'"
+          :class="inputFocused ? 'icon-dark-indigo-300' : 'icon-dark-gray-700'"
           class="icon-light-gray-1000"
         />
       </div>
       <input
         id="inline-spec-list-header-search"
+        ref="input"
         class="
-          w-full
+          font-light
+          outline-none
           bg-gray-1000
+          border-0
           pl-6
-          text-gray-500
           placeholder-gray-700
           font-light
           border-none
+          text-gray-500
         "
+        :class="inputFocused || props.search.length ? 'w-full' : 'w-16px'"
         :value="props.search"
-        minlength="1"
         type="search"
-        :spellcheck="false"
+        minlength="1"
+        autocapitalize="off"
         autocomplete="off"
+        spellcheck="false"
         @focus="inputFocused = true"
         @blur="inputFocused = false"
         @input="onInput"
       >
       <label
         for="inline-spec-list-header-search"
-        class="search-label absolute left-24px bottom-6px text-gray-300 pointer-events-none font-light"
+        class="search-label absolute left-24px bottom-6px text-gray-700 pointer-events-none font-light select-none cursor-pointer"
         :class="{
-          'opacity-0': inputFocused || props.search.length
+          'hidden': inputFocused || props.search.length
         }"
       >
         {{ t('specPage.searchPlaceholder') }}
       </label>
     </div>
     <button
+      tabindex="-1"
       class="
-        border-1 border-gray-900
+        rounded-md flex
+        outline-none
+        border-1
+        border-gray-900
         h-24px
         w-24px
-        rounded-md
-        add-button
-        outline-none
-        flex
+        duration-300
+        hocus-default
         items-center
         justify-center
+        hocus:ring-0
+        hocus:border-indigo-300
       "
       :aria-label="t('specPage.newSpecButton')"
       @click="emit('addSpec')"
@@ -81,6 +98,7 @@ const emit = defineEmits<{
 }>()
 
 const inputFocused = ref(false)
+const input = ref()
 
 const onInput = (e: Event) => {
   const value = (e.target as HTMLInputElement).value
@@ -90,14 +108,9 @@ const onInput = (e: Event) => {
 
 </script>
 
-<style>
-/** Windi box shadows are dark, so styles are for lighter box shadows */
-.add-button {
-  transition: box-shadow 0.3s ease-in-out;
-}
-
-.add-button:hover {
-  box-shadow: 0 0 4px rgba(191, 194, 212, 0.6);
+<style scoped>
+::-webkit-search-cancel-button{
+    display: none;
 }
 
 input[type="search"]::-webkit-search-decoration,
