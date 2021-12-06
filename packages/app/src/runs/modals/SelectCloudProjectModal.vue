@@ -171,6 +171,7 @@ gql`
 fragment SelectCloudProjectModal on Query {
   cloudViewer {
     id
+    organizationsUrl
     organizations(first: 10) {
       nodes {
         id
@@ -223,9 +224,7 @@ const projectPlaceholder = computed(() => {
     : t('runs.connect.modal.selectProject.placeholderProjectsPending')
 })
 
-// TODO: update this url with one coming from gql
-// TODO: https://dashboard-staging.cypress.io/organizations
-const organizationUrl = '#'
+const organizationUrl = computed(() => props.gql.cloudViewer?.organizationsUrl)
 
 function createOrConnectProject () {
   if (newProject.value) {

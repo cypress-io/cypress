@@ -42,12 +42,14 @@
 </template>
 
 <script lang="ts" setup>
+import { gql } from '@urql/vue'
+import { computed, ref } from 'vue'
 import StandardModal from '@cy/components/StandardModal.vue'
 import Button from '@cy/components/Button.vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import OrganizationIcon from '~icons/cy/office-building_x16.svg'
+import type { CreateCloudOrgModalFragment } from '../../generated/graphql'
 import { useI18n } from '@cy/i18n'
-import { ref } from 'vue'
 
 const { t } = useI18n()
 
@@ -55,8 +57,18 @@ const emit = defineEmits<{
   (event: 'cancel'): void
 }>()
 
+gql`
+fragment CreateCloudOrgModal on CloudUser {
+  id
+  newOrganizationsUrl
+}
+`
+
 const show = ref(true)
 
-// TODO: https://dashboard-staging.cypress.io/organizations/new
-const createOrgUrl = '#'
+const props = defineProps({
+  gql: CreateCloudOrgModalFragment,
+})
+
+const createOrgUrl = computed(() => props.gql.newOrganizationsUrl)
 </script>
