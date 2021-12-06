@@ -3,5 +3,7 @@ module.exports = {
   'supportFile': false,
   'integrationFolder': 'test',
   'fixturesFolder': 'test/fixtures',
-  'testFiles': '**/*spec.js',
+  'e2e': {
+    'specPattern': '**/*spec.js',
+  },
 }

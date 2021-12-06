@@ -200,6 +200,10 @@ const displayRunStarting = function (options = {}) {
   const formatSpecPattern = (projectRoot, specPattern) => {
     // foo.spec.js, bar.spec.js, baz.spec.js
     // also inserts newlines at col width
+    if (typeof specPattern === 'string') {
+      specPattern = [specPattern]
+    }
+
     if (specPattern) {
       return formatPath(specPattern.map((x) => x.replace(`${projectRoot}/`, '')).join(', '), getWidth(table, 1))
     }
@@ -1507,7 +1511,7 @@ module.exports = {
     }
 
     // alias and coerce to null
-    let specPattern = options.spec || null
+    let specPatternFromCli = options.spec || null
 
     // ensure the project exists
     // and open up the project
@@ -1544,7 +1548,7 @@ module.exports = {
           project.ctx.project.findSpecs(
             projectRoot,
             specType,
-            specPattern,
+            specPatternFromCli,
           ),
           trashAssets(config),
         ])
@@ -1557,18 +1561,12 @@ module.exports = {
             specType: x.specType,
           }))
 
-          if (!specs.length) {
-            // did we use the spec pattern?
-            if (specPattern) {
-              errors.throw('NO_SPECS_FOUND', projectRoot, specPattern)
-            } else {
-              const type = specType === 'component' ? 'component' : 'e2e'
-              const config = project.getConfig(projectRoot)
-              const configSpecPattern = config[type]?.specPattern
+          const specPattern = specPatternFromCli || await project.ctx.project.specPatternForTestingType(
+            projectRoot, testingType,
+          )
 
-              // else we looked in the integration folder
-              errors.throw('NO_SPECS_FOUND', projectRoot, configSpecPattern)
-            }
+          if (!specs.length) {
+            errors.throw('NO_SPECS_FOUND', projectRoot, specPattern)
           }
 
           if (browser.unsupportedVersion && browser.warning) {

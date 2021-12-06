@@ -5,16 +5,7 @@ describe('e2e specs', () => {
 
   it('failing when no specs found', function () {
     return systemTests.exec(this, {
-      config: { integrationFolder: 'cypress/specs' },
-      testingType: 'e2e',
-      snapshot: true,
-      expectedExitCode: 1,
-    })
-  })
-
-  it('failing when no spec pattern found', function () {
-    return systemTests.exec(this, {
-      spec: 'cypress/integration/**notfound**',
+      project: 'no-specs-found',
       testingType: 'e2e',
       snapshot: true,
       expectedExitCode: 1,

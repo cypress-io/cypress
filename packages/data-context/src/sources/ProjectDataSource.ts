@@ -4,7 +4,7 @@ import { scanFSForAvailableDependency } from 'create-cypress-tests'
 import path from 'path'
 import Debug from 'debug'
 
-const debug = Debug('cypress:data-context:project-data-source')
+const debug = Debug('cypress:data-context')
 
 import type { DataContext } from '..'
 
@@ -29,6 +29,12 @@ export class ProjectDataSource {
     return this.ctx.config.getConfigForProject(projectRoot)
   }
 
+  async specPatternForTestingType (projectRoot: string, testingType: Cypress.TestingType) {
+    const config = await this.getConfig(projectRoot)
+
+    return config[testingType]?.specPattern
+  }
+
   async findSpecs (projectRoot: string, specType: SpecType, specPatternFromCliArg?: string[]): Promise<FoundSpec[]> {
     let specAbsolutePaths: string[] = []
 
@@ -36,9 +42,7 @@ export class ProjectDataSource {
       debug('pattern passed via --spec: %s', specPatternFromCliArg)
       specAbsolutePaths = await this.ctx.file.getFilesByGlob(projectRoot, specPatternFromCliArg, { absolute: true })
     } else {
-      const testingType = specType === 'component' ? 'component' : 'e2e'
-      const config = await this.getConfig(projectRoot)
-      const specPattern = config[testingType]?.specPattern
+      const specPattern = await this.specPatternForTestingType(projectRoot, specType === 'component' ? 'component' : 'e2e')
 
       debug('pattern passed from config : %s', specPattern)
 
