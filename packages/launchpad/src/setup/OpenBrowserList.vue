@@ -3,7 +3,10 @@
     v-if="props.gql.browsers"
     @submit.prevent="emit('launch', props.gql?.currentBrowser?.path)"
   >
-    <div class="flex flex-wrap justify-center gap-6 py-16">
+    <div
+      class="flex flex-wrap justify-center gap-6 py-16"
+      data-testid="browser-radio-group"
+    >
       <div
         v-for="browser of props.gql.browsers"
         :key="browser.id"
@@ -14,6 +17,7 @@
           'filter grayscale bg-gray-100': browser.disabled,
           'hover:border-indigo-200 hover:ring-2 hover:ring-indigo-50': !browser.disabled && !browser.isSelected
         }"
+        :data-selected-browser="browser.isSelected"
       >
         <input
           :id="browser.id"
