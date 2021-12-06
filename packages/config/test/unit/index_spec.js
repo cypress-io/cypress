@@ -163,5 +163,13 @@ describe('src/index', () => {
 
       expect(errorFn).to.been.callCount(0)
     })
+
+    it('does not return an error if configuration is a non-Cypress config option', () => {
+      const errorFn = sinon.spy()
+
+      configUtil.validateNoReadOnlyConfig({ foo: 'bar' }, errorFn)
+
+      expect(errorFn).to.been.callCount(0)
+    })
   })
 })
