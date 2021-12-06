@@ -99,7 +99,7 @@ describe('Choose a Browser config', () => {
     .should('have.attr', 'href')
     .and('equal', 'https://on.cypress.io/troubleshooting-launching-browsers')
 
-    // TODO Alert looks to be dismissable, but the X button isn't hooked up yet
+    // TODO Alert looks to be dismissible, doesn't work
     // cy.get('[data-testid="alert-suffix-icon"]').click()
     // cy.get('[data-testid="alert-header"]').should('not.exist')
   })
@@ -383,14 +383,28 @@ describe('Choose a Browser config', () => {
     // TODO "external link" icon in button needs label
     cy.get('[data-testid="launch-button"]').as('launchButton').should('contain', 'Launch Chrome')
 
-    cy.intercept('mutation-OpenBrowser_LaunchProject').as('launchProject')
+    // Stub out response to prevent browser launch but not break internals
+    cy.intercept('mutation-OpenBrowser_LaunchProject', {
+      body: {
+        data: {
+          launchOpenProject: true,
+          setProjectPreferences: {
+            currentProject: {
+              id: 'test-id',
+              title: 'launchpad',
+              __typename: 'CurrentProject',
+            },
+            __typename: 'Query',
+          },
+        },
+      },
+    }).as('launchProject')
 
     cy.get('@launchButton').click()
 
     cy.wait('@launchProject').then(({ request, response }) => {
       expect(request?.body.variables.browserPath).to.contain('Google Chrome.app')
       expect(request?.body.variables.testingType).to.eq('e2e')
-      expect(response?.body.data.launchOpenProject).to.eq(true)
     })
   })
 })
