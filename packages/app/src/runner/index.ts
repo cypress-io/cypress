@@ -166,11 +166,6 @@ function runSpecCT (spec: BaseSpec) {
   // clear AUT, if there is one.
   empty($runnerRoot)
 
-  // create root for new AUT
-  // const $container = document.createElement('div')
-
-  // $runnerRoot.append($container)
-
   // create new AUT
   const autIframe = getAutIframeModel()
   const $autIframe: JQuery<HTMLIFrameElement> = autIframe.create().appendTo($runnerRoot)
