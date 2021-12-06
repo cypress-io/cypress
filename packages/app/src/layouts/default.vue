@@ -5,7 +5,7 @@
     <HeaderBar
       v-if="showHeader"
       :show-browsers="true"
-      :page-name="pageName"
+      :page-name="currentRoute.name?.toString()"
     />
 
     <main
@@ -41,10 +41,6 @@ const currentRoute = useRoute()
 
 const showHeader = computed(() => {
   return currentRoute.meta.header !== false
-})
-
-const pageName = computed((): string | undefined => {
-  return currentRoute.meta?.title as string
 })
 </script>
 
