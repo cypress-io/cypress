@@ -1,5 +1,5 @@
 <template>
-  <div class="text-center mt-20 w-400px mx-auto p-20px border-1 rounded-md">
+  <div class="rounded-md mx-auto border-1 mt-20 text-center p-20px w-400px">
     <h1 class="text-2xl">
       You seem to have gotten lost...
     </h1>
@@ -10,7 +10,7 @@
       <li
         v-for="route in routes"
         :key="route.path"
-        class="text-left underline underline-2 underline-offset-1 underline-indigo-700 text-indigo-700 hover:text-indigo-500 hover:underline-indigo-500"
+        class="text-left text-indigo-700 underline underline-2 underline-offset-1 underline-indigo-700 hover:text-indigo-500 hover:underline-indigo-500"
       >
         <RouterLink :to="route.path">
           {{ route.name }}
@@ -36,7 +36,6 @@ const routes = computed(() => {
     layout: "default",
     error: true
   },
-  name: "404 Page",
   meta: {
     title: "404"
   }

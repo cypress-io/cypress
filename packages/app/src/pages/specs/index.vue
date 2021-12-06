@@ -48,10 +48,8 @@ const title = computed(() => {
 
 <route>
 {
-  name: "Specs Page",
   meta: {
     default: true,
-    title: "Specs"
   }
 }
 </route>
