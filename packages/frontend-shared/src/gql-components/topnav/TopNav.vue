@@ -2,7 +2,7 @@
   <TopNavList v-if="versions && runningOldVersion">
     <template #heading="{ open }">
       <i-cy-arrow-outline-down_x16
-        class="group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50 h-16px w-16px"
+        class="h-16px w-16px group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50"
         :class="open ? 'icon-dark-indigo-500 icon-light-indigo-50' : 'icon-dark-gray-500 icon-light-gray-100'"
       />
       <span data-cy="topnav-version-list">v{{ versions.current.version }} <span
@@ -12,7 +12,7 @@
     </template>
 
     <TopNavListItem
-      class="px-16px py-8px min-w-278px"
+      class="min-w-278px py-8px px-16px"
       data-cy="update-hint"
     >
       <div class="whitespace-nowrap">
@@ -24,19 +24,19 @@
           {{ versions.latest.version }}
         </ExternalLink>
         <br>
-        <span class="text-gray-500 leading-20px text-14px">{{ t('topNav.released') }} {{ versions.latest.released }}</span>
+        <span class="text-gray-500 text-14px leading-20px">{{ t('topNav.released') }} {{ versions.latest.released }}</span>
       </div>
       <template #suffix>
         <span class="rounded-md bg-indigo-50">
-          <span class=" text-indigo-500 p-5px">
+          <span class=" p-5px text-indigo-500">
             {{ t('topNav.latest') }}
           </span>
         </span>
       </template>
     </TopNavListItem>
 
-    <TopNavListItem class="px-16px py-8px pb-16px">
-      <p class="text-gray-500 text-14px py-8px pb-16px leading-normal">
+    <TopNavListItem class="py-8px px-16px pb-16px">
+      <p class="leading-normal py-8px pb-16px text-gray-500 text-14px">
         {{ t('topNav.runningOldVersion') }}
       </p>
       <Button
@@ -48,7 +48,7 @@
     </TopNavListItem>
 
     <TopNavListItem
-      class="bg-yellow-50 px-16px py-8px"
+      class="bg-yellow-50 py-8px px-16px"
     >
       <div class="whitespace-nowrap">
         <ExternalLink
@@ -63,7 +63,7 @@
       </div>
       <template #suffix>
         <span class="rounded-md bg-yellow-100">
-          <span class="text-amber-800 p-5px">
+          <span class="p-5px text-amber-800">
             {{ t('topNav.installed') }}
           </span>
         </span>
@@ -73,7 +73,7 @@
     <TopNavListItem class="text-center p-16px text-indigo-600">
       <ExternalLink
         :href="releasesUrl"
-        class="block w-full border-gray-100 py-8px text-12px whitespace-nowrap border-rounded border-1 hover:no-underline hover:border-gray-200"
+        class="border-rounded border-gray-100 border-1 w-full py-8px text-12px block whitespace-nowrap hover:border-gray-200 hover:no-underline"
       >
         {{ t('topNav.seeAllReleases') }}
       </ExternalLink>
@@ -83,11 +83,11 @@
   <ExternalLink
     v-else-if="versions"
     :href="`${releasesUrl}/tag/v${versions.latest.version}`"
-    class="text-gray-600 flex items-center gap-8px group hocus:text-indigo-500 hocus:outline-0 outline-transparent"
+    class="flex outline-transparent text-gray-600 gap-8px items-center group hocus:text-indigo-500 hocus:outline-0"
     :use-default-hocus="false"
   >
     <i-cy-box_x16
-      class="group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50 h-16px w-16px icon-dark-gray-500 icon-light-gray-100"
+      class="h-16px w-16px group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50 icon-dark-gray-500 icon-light-gray-100"
     />
     <span>
       v{{ versions.latest.version }}
@@ -108,7 +108,7 @@
     <TopNavListItem
       v-for="browser in props.gql.currentProject.browsers"
       :key="browser.id"
-      class="px-16px py-12px min-w-240px cursor-pointer"
+      class="cursor-pointer min-w-240px py-12px px-16px"
       :class="browser.isSelected ? 'bg-jade-50' : ''"
       :selectable="!browser.isSelected"
       @click="handleBrowserChoice(browser)"
@@ -129,7 +129,7 @@
           {{ browser.displayName }}
         </button>
         <div
-          class="font-normal text-gray-500 mr-20px whitespace-nowrap text-14px"
+          class="font-normal mr-20px text-gray-500 text-14px whitespace-nowrap"
         >
           {{ t('topNav.version') }} {{ browser.version }}
         </div>
@@ -139,7 +139,7 @@
         #suffix
       >
         <div>
-          <i-cy-circle-check_x24 class="icon-dark-jade-100 icon-light-jade-500 w-24px h-24px" />
+          <i-cy-circle-check_x24 class="h-24px w-24px icon-dark-jade-100 icon-light-jade-500" />
         </div>
       </template>
     </TopNavListItem>
@@ -152,7 +152,7 @@
   >
     <template #heading="{ open }">
       <i-cy-life-ring_x16
-        class=" group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50 h-16px w-16px"
+        class=" h-16px w-16px group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50"
         :class="open ? 'icon-dark-indigo-500 icon-light-indigo-50' : 'icon-dark-gray-500 icon-light-gray-100'"
       />
       <span :class="{'text-indigo-600': open}">{{ t('topNav.docsMenu.docsHeading') }}</span>
@@ -171,14 +171,14 @@
       ref="promptsEl"
       class="w-484px"
     >
-      <div class="relative border-b border-b-gray-50 px-24px py-18px text-18px">
+      <div class="border-b border-b-gray-50 py-18px px-24px text-18px relative">
         {{ t(`topNav.docsMenu.prompts.${docsMenuVariant}.title`) }}
         <button
           aria-label="Close"
-          class="absolute border-transparent rounded-full p-5px border-1 hover:border-indigo-300 hocus-default right-20px top-15px"
+          class="border-transparent rounded-full border-1 p-5px top-15px right-20px absolute hocus-default hover:border-indigo-300"
           @click="docsMenuVariant = 'main'"
         >
-          <i-cy-delete_x12 class="icon-dark-gray-400 w-12px h-12px" />
+          <i-cy-delete_x12 class="h-12px w-12px icon-dark-gray-400" />
         </button>
       </div>
       <PromptContent :type="docsMenuVariant" />

@@ -1,5 +1,5 @@
 <template>
-  <div class="flex justify-center m-24px">
+  <div class="flex m-24px justify-center">
     <Card
       v-for="tt in TESTING_TYPES"
       :key="tt.key"

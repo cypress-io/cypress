@@ -10,22 +10,22 @@
 
   <div
     v-if="props.gql.currentProject?.currentTestingType"
-    class="text-center max-w-642px mx-auto py-40px"
+    class="mx-auto text-center max-w-642px py-40px"
   >
-    <div class="max-w-600px m-x-auto">
+    <div class="m-x-auto max-w-600px">
       <h1
         data-testid="create-spec-page-title"
-        class="text-gray-900 text-32px mb-12px"
+        class="mb-12px text-gray-900 text-32px"
       >
         {{ props.title }}
       </h1>
       <p
         data-testid="create-spec-page-description"
-        class="leading-normal text-gray-600 text-18px mb-32px"
+        class="leading-normal mb-32px text-gray-600 text-18px"
       >
         <i18n-t :keypath="descriptionKeyPath">
           <button
-            class="hocus-link-default text-purple-500"
+            class="text-purple-500 hocus-link-default"
             @click.prevent="showCypressConfigInIDE"
           >
             specPattern
@@ -41,7 +41,7 @@
       @selected="openFile"
     />
 
-    <DefatultPatternNoSpecContent
+    <DefaultSpecPatternNoContent
       v-if="props.isUsingDefaultSpecs"
       :gql="props.gql"
       @choose="choose"
@@ -59,7 +59,7 @@
 <script lang="ts" setup>
 import { ref, computed } from 'vue'
 import CreateSpecModal from './CreateSpecModal.vue'
-import DefatultPatternNoSpecContent from './DefatultPatternNoSpecContent.vue'
+import DefaultSpecPatternNoContent from './DefaultSpecPatternNoContent.vue'
 import { gql, useMutation } from '@urql/vue'
 import type { NoSpecsPageFragment } from '../generated/graphql'
 import { NoSpecsPage_OpenFileInIdeDocument } from '@packages/data-context/src/gen/all-operations.gen'

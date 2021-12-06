@@ -6,7 +6,9 @@
       For now it's way more simple to just unmount and remount the components when changing page.
     -->
     <!-- <keep-alive> -->
-    <component :is="Component" />
+    <component
+      :is="Component"
+    />
     <!-- </keep-alive> -->
   </router-view>
 </template>

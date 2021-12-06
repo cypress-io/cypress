@@ -1,5 +1,5 @@
 <template>
-  <div class="h-screen layout-grid">
+  <div class="h-screen min-w-728px layout-grid">
     <SidebarNavigation class="row-span-full" />
 
     <HeaderBar
@@ -9,7 +9,6 @@
     />
 
     <main
-      class="overflow-y-auto"
       aria-labelledby="primary-heading"
     >
       <router-view v-slot="{ Component, route }">
