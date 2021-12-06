@@ -54,7 +54,6 @@
           :style="viewportStyle"
         />
       </RemoveClassesDuringScreenshotting>
-
       <SnapshotControls
         :event-manager="eventManager"
         :get-aut-iframe="getAutIframeModel"
@@ -80,9 +79,12 @@ import ScreenshotHelperPixels from './screenshot/ScreenshotHelperPixels.vue'
 import { useScreenshotStore } from '../store/screenshot-store'
 import ChooseExternalEditorModal from '@packages/frontend-shared/src/gql-components/ChooseExternalEditorModal.vue'
 import { useMutation, gql } from '@urql/vue'
-import { OpenFileInIdeDocument, SpecRunner_SetPreferencesDocument } from '@packages/data-context/src/gen/all-operations.gen'
+import { OpenFileInIdeDocument } from '@packages/data-context/src/gen/all-operations.gen'
 import type { SpecRunnerFragment } from '../generated/graphql'
 import { usePreferences } from '../composables/usePreferences'
+import { useWindowSize } from '@vueuse/core'
+
+const { width, height } = useWindowSize()
 
 gql`
 fragment SpecRunner on Query {
@@ -107,11 +109,6 @@ mutation OpenFileInIDE ($input: FileDetailsInput!) {
 }
 `
 
-gql`
-mutation SpecRunner_SetPreferences ($value: String!) {
-  setPreferences (value: $value)
-}`
-
 const props = defineProps<{
   gql: SpecRunnerFragment
   activeSpec: BaseSpec
@@ -127,8 +124,6 @@ const preferences = usePreferences()
 preferences.update('autoScrollingEnabled', props.gql.localSettings.preferences.autoScrollingEnabled ?? true)
 preferences.update('isSpecsListOpen', props.gql.localSettings.preferences.isSpecsListOpen ?? true)
 
-const setPreferences = useMutation(SpecRunner_SetPreferencesDocument)
-
 const runnerPane = ref<HTMLDivElement>()
 
 const viewportStyle = computed(() => {
@@ -136,14 +131,32 @@ const viewportStyle = computed(() => {
     return
   }
 
-  let scale: number
+  let scale: number = 1
+  // TODO: make these values reactive
+  const reporterWidth = 320
+  const navWidth = 64
+  const specsListWidth = runnerUiStore.isSpecsListOpen ? 280 : 0
+  const autMargin = 16
+  const autHeaderHeight = 70
+
+  const nonAutWidth = reporterWidth + navWidth + specsListWidth + (autMargin * 2)
+  const nonAutHeight = autHeaderHeight + (autMargin * 2)
 
   if (screenshotStore.isScreenshotting) {
     scale = 1
   } else {
-    scale = runnerPane.value.clientWidth < autStore.viewportDimensions.width
-      ? runnerPane.value.clientWidth / autStore.viewportDimensions.width
-      : 1
+    const horizontalDiff = width.value - nonAutWidth - autStore.viewportDimensions.width
+    const verticalDiff = height.value - nonAutHeight - autStore.viewportDimensions.height
+
+    if (horizontalDiff < 0 && (horizontalDiff < verticalDiff)) {
+      scale = (width.value - nonAutWidth) / autStore.viewportDimensions.width
+    } else if (verticalDiff < 0) {
+      scale = ((height.value - nonAutHeight) / autStore.viewportDimensions.height)
+    }
+
+    if (scale > 1) {
+      scale = 1
+    }
   }
 
   return `
@@ -234,7 +247,7 @@ $navbar-width: 80px;
     https://github.com/cypress-io/cypress/blob/develop/packages/driver/src/cy/actionability.ts#L375
     Basically `scrollIntoView` is applied even outside of the <iframe>,
     scrolling an element "upwards", messing up the UI
-    Easiest way to reprodudce is remove the `position: fixed`
+    Easiest way to reproduce is remove the `position: fixed`
     and run the `SpecList.spec.tsx` test in runner-ct
     in CT mode.
     Ideally we should not need `position: fixed`, but I don't see
