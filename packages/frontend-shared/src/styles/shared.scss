@@ -21,8 +21,8 @@
   }
 }
 
-html {
-  @apply antialiased;
+html, body {
+  @apply bg-white font-sans antialiased;
 }
 
 body {
