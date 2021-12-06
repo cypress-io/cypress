@@ -120,12 +120,18 @@ export class GitDataSource {
   }
 
   public async getBranch (absolutePath: string) {
-    const { stdout, exitCode = 0 } = await execa(GIT_BRANCH_COMMAND, { shell: true, cwd: absolutePath })
+    try {
+      const { stdout, exitCode = 0 } = await execa(GIT_BRANCH_COMMAND, { shell: true, cwd: absolutePath })
 
-    this.ctx.debug('executing command `%s`:', GIT_BRANCH_COMMAND)
-    this.ctx.debug('stdout for git branch', stdout)
-    this.ctx.debug('exitCode for git branch', exitCode)
+      this.ctx.debug('executing command `%s`:', GIT_BRANCH_COMMAND)
+      this.ctx.debug('stdout for git branch', stdout)
+      this.ctx.debug('exitCode for git branch', exitCode)
 
-    return exitCode === 0 ? stdout.trim() : null
+      return exitCode === 0 ? stdout.trim() : null
+    } catch (e) {
+      this.ctx.debug('Error getting git branch: %s', (e as Error).message)
+
+      return null
+    }
   }
 }

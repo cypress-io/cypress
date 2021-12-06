@@ -1,12 +1,22 @@
 import { WarningListFragmentDoc } from '../generated/graphql-test'
 import WarningList from './WarningList.vue'
+import faker from 'faker'
+import { defaultMessages } from '@cy/i18n'
 
-const createWarning = (props = {}) => Object.assign({
+const warningSelector = '[data-testid=warning-alert]'
+const message = faker.hacker.phrase()
+const title = faker.hacker.ingverb()
+
+const createWarning = (props = {}) => ({
   __typename: 'Warning',
-  title: 'Warning title',
-  message: 'Warning message',
+  title,
+  message,
   setupStep: 'welcome',
-}, props)
+  ...props,
+})
+
+const firstWarning = createWarning({ title: faker.hacker.ingverb(), message: faker.hacker.phrase(), setupStep: null })
+const secondWarning = createWarning({ title: faker.hacker.ingverb(), message: faker.hacker.phrase(), setupStep: null })
 
 describe('<WarningList />', () => {
   it('does not render warning if there are none', () => {
@@ -17,7 +27,7 @@ describe('<WarningList />', () => {
       render: (gqlVal) => <div class="p-4"><WarningList gql={gqlVal} /></div>,
     })
 
-    cy.get('[data-cy=warning]').should('not.exist')
+    cy.get(warningSelector).should('not.exist')
   })
 
   it('does not render warning if on different step', () => {
@@ -30,7 +40,7 @@ describe('<WarningList />', () => {
       render: (gqlVal) => <div class="p-4"><WarningList gql={gqlVal} /></div>,
     })
 
-    cy.contains('Warning message').should('not.exist')
+    cy.contains(message).should('not.exist')
   })
 
   it('renders warning if on same step', () => {
@@ -45,7 +55,7 @@ describe('<WarningList />', () => {
       render: (gqlVal) => <div class="p-4"><WarningList gql={gqlVal} /></div>,
     })
 
-    cy.contains('Warning message').should('be.visible')
+    cy.contains(message).should('be.visible')
   })
 
   it('renders warning if no step specified', () => {
@@ -60,7 +70,7 @@ describe('<WarningList />', () => {
       render: (gqlVal) => <div class="p-4"><WarningList gql={gqlVal} /></div>,
     })
 
-    cy.contains('Warning message').should('be.visible')
+    cy.contains(message).should('be.visible')
   })
 
   it('renders multiple warnings', () => {
@@ -68,21 +78,12 @@ describe('<WarningList />', () => {
       onResult (result) {
         result.step = 'setupComplete'
         // @ts-ignore
-        result.warnings = [createWarning({
-          title: 'Warning title 1',
-          message: 'Warning message 1',
-          setupStep: null,
-        // @ts-ignore
-        }), createWarning({
-          title: 'Warning title 2',
-          message: 'Warning message 2',
-          setupStep: null,
-        })]
+        result.warnings = [firstWarning, secondWarning]
       },
       render: (gqlVal) => <div class="p-4"><WarningList gql={gqlVal} /></div>,
     })
 
-    cy.get('[data-cy=warning]').should('have.length', 2)
+    cy.get(warningSelector).should('have.length', 2)
   })
 
   it('removes warning when dismissed', () => {
@@ -90,24 +91,17 @@ describe('<WarningList />', () => {
       onResult (result) {
         result.step = 'setupComplete'
         // @ts-ignore
-        result.warnings = [createWarning({
-          title: 'Warning title 1',
-          message: 'Warning message 1',
-          setupStep: null,
-        // @ts-ignore
-        }), createWarning({
-          title: 'Warning title 2',
-          message: 'Warning message 2',
-          setupStep: null,
-        })]
+        result.warnings = [firstWarning, secondWarning]
       },
       render: (gqlVal) => <div class="p-4"><WarningList gql={gqlVal} /></div>,
     })
 
-    cy.get('[data-cy=warning]').should('have.length', 2)
-    cy.contains('Warning message 1')
-    cy.get('[data-cy=dismiss]').first().click()
-    cy.get('[data-cy=warning]').should('have.length', 1)
-    cy.contains('Warning message 1').should('not.exist')
+    cy.get(warningSelector).should('have.length', 2)
+    cy.contains(firstWarning.message)
+
+    // @ts-ignore
+    cy.findAllByLabelText(defaultMessages.components.modal.dismiss).first().click()
+    cy.get(warningSelector).should('have.length', 1)
+    cy.contains(firstWarning.message).should('not.exist')
   })
 })

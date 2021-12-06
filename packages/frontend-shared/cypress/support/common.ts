@@ -1,4 +1,5 @@
 import '@percy/cypress'
+import '../../src/styles/shared.scss'
 import type { ComponentPublicInstance } from 'vue'
 
 // Add cy.mount, cy.mountFragment, cy.mountFragmentList

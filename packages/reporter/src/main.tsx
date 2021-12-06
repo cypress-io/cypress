@@ -28,6 +28,8 @@ interface BaseReporterProps {
   runner: Runner
   scroller?: Scroller
   statsStore?: StatsStore
+  autoScrollingEnabled?: boolean
+  isSpecsListOpen?: boolean
   events?: Events
   error?: RunnablesErrorModel
   resetStatsOnSpecChange?: boolean
@@ -101,10 +103,14 @@ class Reporter extends Component<SingleReporterProps> {
   }
 
   componentDidMount () {
-    const { spec, appState, runnablesStore, runner, scroller, statsStore } = this.props
+    const { spec, appState, runnablesStore, runner, scroller, statsStore, autoScrollingEnabled, isSpecsListOpen } = this.props
 
     action('set:scrolling', () => {
-      appState.setAutoScrolling(appState.autoScrollingEnabled)
+      appState.setAutoScrolling(autoScrollingEnabled)
+    })()
+
+    action('set:specs:list', () => {
+      appState.setSpecsList(isSpecsListOpen ?? true)
     })()
 
     this.props.events.init({

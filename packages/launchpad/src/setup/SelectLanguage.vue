@@ -1,18 +1,18 @@
 <template>
   <div class="text-left relative">
-    <label
-      class="text-gray-800 text-sm my-3 block"
+    <div
+      class="font-medium my-8px text-gray-800 leading-24px block"
       :class="{ 'opacity-50': disabled }"
     >
       {{
         name
       }}
-    </label>
-    <div class="inline-flex gap-1 border border-gray-200 rounded p-1">
+    </div>
+    <div class="border rounded border-gray-100 p-2px inline-flex">
       <button
         v-for="opt in options"
         :key="opt.type"
-        class="px-2 py-1 rounded-sm focus:outline-none"
+        class="border-transparent border-1 py-4px px-12px hocus-default hocus:z-10 hover:bg-indigo-50 focus:outline-none first:rounded-l last:rounded-r"
         :class="opt.id === value ? 'bg-secondary-50 text-secondary-600': 'text-gray-700'"
         @click="() => selectOption(opt.type)"
       >
@@ -23,7 +23,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { EnvironmentSetupFragment, CodeLanguageEnum } from '../../generated/graphql'
+import type { EnvironmentSetupFragment, CodeLanguageEnum } from '../generated/graphql'
 
 const emit = defineEmits<{
   (event: 'select', type: CodeLanguageEnum)

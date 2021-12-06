@@ -1,15 +1,15 @@
 <template>
   <section>
-    <h2 class="text-size-16px font-medium text-cool-gray-900 leading-24px align-middle flex">
+    <h2 class="font-medium text-size-16px text-gray-900 leading-24px inline-flex items-baseline align-middle">
       <slot name="title" />
       <code
         v-if="code"
-        class="mx-8px px-4px text-size-14px font-thin text-purple-500 bg-gray-50 rounded leading-24px "
+        class="rounded font-normal bg-gray-50 h-20px mx-8px px-4px text-size-14px text-purple-500 leading-24px"
       >
         {{ code }}
       </code>
     </h2>
-    <p class="text-sm text-cool-gray-600 leading-snug mb-16px">
+    <p class="text-sm mb-16px text-gray-600">
       <slot name="description" />
     </p>
     <slot />
