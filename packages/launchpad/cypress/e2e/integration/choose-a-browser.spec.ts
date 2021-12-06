@@ -11,15 +11,12 @@ describe('Choose a Browser config', () => {
 
   it('should highlight browser radio item when clicked', () => {
     cy.setupE2E('launchpad')
-    cy.visitLaunchpad()
 
     cy.withCtx(async (ctx) => {
       ctx.launchArgs.testingType = 'e2e'
       await ctx.initializeData()
     })
 
-    // Need to visit after args have been configured, todo: fix in #18776
-    // TODO determine need for this? seems flaky without
     cy.visitLaunchpad()
 
     stepThroughConfigPages()
@@ -54,7 +51,6 @@ describe('Choose a Browser config', () => {
 
   it('should preselect valid --browser option', () => {
     cy.setupE2E('launchpad')
-    cy.visitLaunchpad()
 
     cy.withCtx(async (ctx) => {
       ctx.launchArgs.testingType = 'e2e'
@@ -62,7 +58,6 @@ describe('Choose a Browser config', () => {
       await ctx.initializeData()
     })
 
-    // Need to visit after args have been configured, todo: fix in #18776
     cy.visitLaunchpad()
 
     stepThroughConfigPages()
@@ -76,7 +71,6 @@ describe('Choose a Browser config', () => {
 
   it('shows alert when launched with --browser option that cannot be found', () => {
     cy.setupE2E('launchpad')
-    cy.visitLaunchpad()
 
     cy.withCtx(async (ctx) => {
       ctx.launchArgs.testingType = 'e2e'
@@ -84,8 +78,6 @@ describe('Choose a Browser config', () => {
       await ctx.initializeData()
     })
 
-    // Need to visit after args have been configured, todo: fix in #18776
-    // Flaky without this
     cy.visitLaunchpad()
 
     stepThroughConfigPages()
@@ -99,14 +91,12 @@ describe('Choose a Browser config', () => {
     .should('have.attr', 'href')
     .and('equal', 'https://on.cypress.io/troubleshooting-launching-browsers')
 
-    // TODO Alert looks to be dismissible, doesn't work
-    // cy.get('[data-testid="alert-suffix-icon"]').click()
-    // cy.get('[data-testid="alert-header"]').should('not.exist')
+    cy.get('[data-testid="alert-suffix-icon"]').click()
+    cy.get('[data-testid="alert-header"]').should('not.exist')
   })
 
   it('shows alert when launched with --browser path option that cannot be found', () => {
     cy.setupE2E('launchpad')
-    cy.visitLaunchpad()
 
     cy.withCtx(async (ctx) => {
       ctx.launchArgs.testingType = 'e2e'
@@ -114,7 +104,6 @@ describe('Choose a Browser config', () => {
       await ctx.initializeData()
     })
 
-    // Need to visit after args have been configured, todo: fix in #18776
     cy.visitLaunchpad()
 
     stepThroughConfigPages()
@@ -129,23 +118,18 @@ describe('Choose a Browser config', () => {
     .should('have.attr', 'href')
     .and('equal', 'https://on.cypress.io/troubleshooting-launching-browsers')
 
-    // TODO Alert looks to be dismissable, but the X button isn't hooked up yet
-    // cy.get('[data-testid="alert-suffix-icon"]').click()
-    // cy.get('[data-testid="alert-header"]').should('not.exist')
+    cy.get('[data-testid="alert-suffix-icon"]').click()
+    cy.get('[data-testid="alert-header"]').should('not.exist')
   })
 
   it('should show all valid installed browsers with their relevant properties', () => {
     cy.setupE2E('launchpad')
-    cy.visitLaunchpad()
-
-    // cy.intercept('query-OpenBrowser').as('OpenBrowser')
 
     cy.withCtx(async (ctx) => {
       ctx.launchArgs.testingType = 'e2e'
       await ctx.initializeData()
     })
 
-    // Need to visit after args have been configured, todo: fix in #18776
     cy.visitLaunchpad()
 
     stepThroughConfigPages()
@@ -366,14 +350,12 @@ describe('Choose a Browser config', () => {
 
   it('should launch selected browser when launch button is clicked', () => {
     cy.setupE2E('launchpad')
-    cy.visitLaunchpad()
 
     cy.withCtx(async (ctx) => {
       ctx.launchArgs.testingType = 'e2e'
       await ctx.initializeData()
     })
 
-    // Need to visit after args have been configured, todo: fix in #18776
     cy.visitLaunchpad()
 
     stepThroughConfigPages()

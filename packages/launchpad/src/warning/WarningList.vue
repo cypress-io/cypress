@@ -36,7 +36,7 @@ const warnings = computed(() => {
   .filter((warning) => {
     const hasBeenDismissed = dismissed.value[warning.key]
 
-    return !hasBeenDismissed && !warning.setupStep || warning.setupStep === props.gql.step
+    return !hasBeenDismissed && (!warning.setupStep || warning.setupStep === props.gql.step)
   })
 })
 
