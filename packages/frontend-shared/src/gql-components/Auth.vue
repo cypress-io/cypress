@@ -5,7 +5,7 @@
 
   <div v-else-if="showLogout">
     <button
-      class="block w-full bg-white py-8px border-gray-100 text-14px text-indigo-500 whitespace-nowrap border-rounded border-1 hover:no-underline hocus:border-gray-200 outline-transparent"
+      class="bg-white border-rounded outline-transparent border-gray-100 border-1 w-full py-8px text-14px text-indigo-500 block whitespace-nowrap hocus:border-gray-200 hover:no-underline"
       @click="handleLogout"
     >
       {{ t('topNav.login.actionLogout') }}

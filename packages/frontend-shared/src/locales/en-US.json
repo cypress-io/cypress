@@ -67,7 +67,7 @@
       },
       "customPatternNoSpecs": {
         "title": "No Specs Found",
-        "description": "We couldn’t find any files matching the following spec patterns. You may need to move your specs or update your {0} to find them."
+        "description": "We couldn't find any files matching the following spec patterns. You may need to move your specs or update your {0} to find them."
       }
     },
     "noSpecsMessage": "If you feel that you're seeing this screen in error, and there should be specs listed here, you likely need to update the spec pattern.",
@@ -161,7 +161,7 @@
           "noParallelTime": "12 mins",
           "withParallelization": "with Parallelization",
           "withoutParallelization": "without Parallelization",
-          "intro": " With Smart Orchestration, you’ll be able to:",
+          "intro": "With Smart Orchestration, you'll be able to:",
           "bullet1": "Run spec files in parallel",
           "bullet2": "Prioritize failed specs to run first",
           "bullet3": "Cancel CI runs on test failure",
@@ -174,8 +174,8 @@
       "bodySuccess": "You are now logged in as {0}.",
       "bodyError": "An error occurred while attempting to log in:",
       "bodyBrowserError": "Cypress was unable to open your installed browser. To continue logging in, please paste this URL into your web browser:",
-      "dashboard": "Cypress Dashboard Service",
-      "titleInitial": "Log In To Cypress",
+      "cloud": "Cypress Cloud Service",
+      "titleInitial": "Log in to Cypress",
       "titleSuccess": "Login Successful",
       "titleFailed": "Login Failed",
       "titleBrowserError": "Browser Error",
@@ -193,7 +193,8 @@
       "pasteToUpgradeProject": "To upgrade to the latest version for your project, first {0}, then paste the command below into your terminal:",
       "pasteToUpgradeGlobal": "To upgrade to the latest version, first {0}, then paste the command below into your terminal:",
       "rememberToCloseInsert": "close this app"
-    }
+    },
+    "upgradeText": "Upgrade"
   },
   "launchpadErrors": {
     "generic": {
@@ -369,7 +370,7 @@
       }
     },
     "footer": {
-      "text": "You can reconfigure the settings for this project if you’re experiencing issues with your Cypress configuration.",
+      "text": "You can reconfigure the settings for this project if you're experiencing issues with your Cypress configuration.",
       "button": "Reconfigure Project"
     }
   },

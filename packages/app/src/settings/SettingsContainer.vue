@@ -18,7 +18,7 @@
         :title="t('settingsPage.project.title')"
         :description="t('settingsPage.project.description')"
         :icon="IconFolder"
-        max-height="3328px"
+        max-height="10000px"
       >
         <ProjectSettings
           v-if="props.gql.currentProject"

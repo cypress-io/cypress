@@ -1,24 +1,28 @@
 <template>
-  <TopNavList v-if="versions && runningOldVersion">
-    <template #heading="{ open }">
+  <TopNavList
+    v-if="versions && runningOldVersion"
+  >
+    <template #heading>
       <i-cy-arrow-outline-down_x16
-        class="h-16px w-16px group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50"
-        :class="open ? 'icon-dark-indigo-500 icon-light-indigo-50' : 'icon-dark-gray-500 icon-light-gray-100'"
+        class="h-16px text-indigo-500 w-16px icon-dark-indigo-500 icon-light-indigo-50"
       />
-      <span data-cy="topnav-version-list">v{{ versions.current.version }} <span
+      <span
+        data-cy="topnav-version-list"
+        class="font-semibold text-indigo-500"
+      >v{{ versions.current.version }} <span
         class="text-indigo-300"
         aria-hidden="true"
-      >•</span> Upgrade</span>
+      >•</span> {{ t('topNav.upgradeText') }}</span>
     </template>
 
     <TopNavListItem
       class="min-w-278px py-8px px-16px"
       data-cy="update-hint"
     >
-      <div class="whitespace-nowrap">
+      <div class="font-semibold whitespace-nowrap">
         <ExternalLink
           :href="`${releasesUrl}/tag/v${versions.latest.version}`"
-          class="font-semibold text-indigo-500"
+          class="text-indigo-500"
           data-cy="latest-version"
         >
           {{ versions.latest.version }}
@@ -108,7 +112,7 @@
     <TopNavListItem
       v-for="browser in props.gql.currentProject.browsers"
       :key="browser.id"
-      class="cursor-pointer min-w-240px py-12px px-16px"
+      class="cursor-pointer min-w-240px py-12px px-16px group"
       :class="browser.isSelected ? 'bg-jade-50' : ''"
       :selectable="!browser.isSelected"
       @click="handleBrowserChoice(browser)"
@@ -123,13 +127,13 @@
       </template>
       <div>
         <button
-          class="hocus-link-default box-border"
-          :class="browser.isSelected ? 'text-jade-600' : 'text-indigo-600'"
+          class="font-medium box-border"
+          :class="browser.isSelected ? 'text-jade-700' : 'text-indigo-500 group-hover:text-indigo-700'"
         >
           {{ browser.displayName }}
         </button>
         <div
-          class="font-normal mr-20px text-gray-500 text-14px whitespace-nowrap"
+          class="font-normal mr-20px text-gray-500 text-14px filter whitespace-nowrap group-hover:mix-blend-luminosity"
         >
           {{ t('topNav.version') }} {{ browser.version }}
         </div>
@@ -155,7 +159,10 @@
         class=" h-16px w-16px group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50"
         :class="open ? 'icon-dark-indigo-500 icon-light-indigo-50' : 'icon-dark-gray-500 icon-light-gray-100'"
       />
-      <span :class="{'text-indigo-600': open}">{{ t('topNav.docsMenu.docsHeading') }}</span>
+      <span
+        class="font-semibold"
+        :class="{'text-indigo-600': open}"
+      >{{ t('topNav.docsMenu.docsHeading') }}</span>
     </template>
     <div
       v-if="docsMenuVariant === 'main'"
