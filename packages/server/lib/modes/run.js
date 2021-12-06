@@ -1542,7 +1542,11 @@ module.exports = {
         // speed the initial booting time
         const specType = options.testingType === 'component' ? 'component' : 'integration'
 
-        const specPattern = specPatternFromCli || config[options.testingType].specPattern
+        let specPattern = specPatternFromCli || config[options.testingType].specPattern
+
+        if (typeof specPattern === 'string') {
+          specPattern = [specPattern]
+        }
 
         return Promise.all([
           system.info(),
