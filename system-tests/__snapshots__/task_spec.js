@@ -41,8 +41,8 @@ Warning: Multiple attempts to register the following task(s): two. Only the last
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/multiple_task_registrations_spe     (X second)
-                          c.js.mp4                                                                  
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/multiple_ta     (X second)
+                          sk_registrations_spec.js.mp4                                              
 
 
 ====================================================================================================
@@ -131,16 +131,17 @@ https://on.cypress.io/api/task
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/task_spec.js/throws when task returns undefined     (1280x720)
-      (failed).png                                                                                  
-  -  /XXX/XXX/XXX/cypress/screenshots/task_spec.js/includes stack trace in error (fai     (1280x720)
-     led).png                                                                                       
+  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/task_spec.js/throws when ta     (1280x720)
+     sk returns undefined (failed).png                                                              
+  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/task_spec.js/includes stack     (1280x720)
+      trace in error (failed).png                                                                   
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/task_spec.js.mp4                    (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/task_spec.j     (X second)
+                          s.mp4                                                                     
 
 
 ====================================================================================================

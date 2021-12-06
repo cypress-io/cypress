@@ -42,7 +42,8 @@ exports['e2e websockets / passes'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/websockets_spec.js.mp4              (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/websockets_     (X second)
+                          spec.js.mp4                                                               
 
 
 ====================================================================================================

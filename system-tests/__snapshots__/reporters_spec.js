@@ -57,7 +57,8 @@ exports['e2e reporters supports junit reporter and reporter options 1'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/simple_passing_spec.js.mp4          (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/simple_pass     (X second)
+                          ing_spec.js.mp4                                                           
 
 
 ====================================================================================================
@@ -112,7 +113,8 @@ finished!
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/simple_passing_spec.js.mp4          (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/simple_pass     (X second)
+                          ing_spec.js.mp4                                                           
 
 
 ====================================================================================================
@@ -179,7 +181,8 @@ exports['e2e reporters mochawesome passes with mochawesome-1.5.2 npm custom repo
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/simple_passing_spec.js.mp4          (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/simple_pass     (X second)
+                          ing_spec.js.mp4                                                           
 
 
 ====================================================================================================
@@ -281,18 +284,22 @@ Because this error occurred during a \`after all\` hook we are skipping the rema
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook_spec.js/simple failing hook     (1280x720)
-      spec -- beforeEach hooks -- never gets here -- before each hook (failed).png                  
-  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook_spec.js/simple failing hook     (1280x720)
-      spec -- afterEach hooks -- runs this -- after each hook (failed).png                          
-  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook_spec.js/simple failing hook     (1280x720)
-      spec -- after hooks -- fails on this -- after all hook (failed).png                           
+  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/simple_failing_hook_spec.js     (1280x720)
+     /simple failing hook spec -- beforeEach hooks -- never gets here -- before each                
+     hook (failed).png                                                                              
+  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/simple_failing_hook_spec.js     (1280x720)
+     /simple failing hook spec -- afterEach hooks -- runs this -- after each hook (fa               
+     iled).png                                                                                      
+  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/simple_failing_hook_spec.js     (1280x720)
+     /simple failing hook spec -- after hooks -- fails on this -- after all hook (fai               
+     led).png                                                                                       
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/simple_failing_hook_spec.js.mp4     (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/simple_fail     (X second)
+                          ing_hook_spec.js.mp4                                                      
 
 
 ====================================================================================================
@@ -357,7 +364,8 @@ exports['e2e reporters mochawesome passes with mochawesome-2.3.1 npm custom repo
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/simple_passing_spec.js.mp4          (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/simple_pass     (X second)
+                          ing_spec.js.mp4                                                           
 
 
 ====================================================================================================
@@ -457,18 +465,22 @@ Because this error occurred during a \`after all\` hook we are skipping the rema
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook_spec.js/simple failing hook     (1280x720)
-      spec -- beforeEach hooks -- never gets here -- before each hook (failed).png                  
-  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook_spec.js/simple failing hook     (1280x720)
-      spec -- afterEach hooks -- runs this -- after each hook (failed).png                          
-  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook_spec.js/simple failing hook     (1280x720)
-      spec -- after hooks -- fails on this -- after all hook (failed).png                           
+  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/simple_failing_hook_spec.js     (1280x720)
+     /simple failing hook spec -- beforeEach hooks -- never gets here -- before each                
+     hook (failed).png                                                                              
+  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/simple_failing_hook_spec.js     (1280x720)
+     /simple failing hook spec -- afterEach hooks -- runs this -- after each hook (fa               
+     iled).png                                                                                      
+  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/simple_failing_hook_spec.js     (1280x720)
+     /simple failing hook spec -- after hooks -- fails on this -- after all hook (fai               
+     led).png                                                                                       
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/simple_failing_hook_spec.js.mp4     (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/simple_fail     (X second)
+                          ing_hook_spec.js.mp4                                                      
 
 
 ====================================================================================================
@@ -533,7 +545,8 @@ exports['e2e reporters mochawesome passes with mochawesome-3.0.1 npm custom repo
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/simple_passing_spec.js.mp4          (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/simple_pass     (X second)
+                          ing_spec.js.mp4                                                           
 
 
 ====================================================================================================
@@ -633,18 +646,22 @@ Because this error occurred during a \`after all\` hook we are skipping the rema
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook_spec.js/simple failing hook     (1280x720)
-      spec -- beforeEach hooks -- never gets here -- before each hook (failed).png                  
-  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook_spec.js/simple failing hook     (1280x720)
-      spec -- afterEach hooks -- runs this -- after each hook (failed).png                          
-  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook_spec.js/simple failing hook     (1280x720)
-      spec -- after hooks -- fails on this -- after all hook (failed).png                           
+  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/simple_failing_hook_spec.js     (1280x720)
+     /simple failing hook spec -- beforeEach hooks -- never gets here -- before each                
+     hook (failed).png                                                                              
+  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/simple_failing_hook_spec.js     (1280x720)
+     /simple failing hook spec -- afterEach hooks -- runs this -- after each hook (fa               
+     iled).png                                                                                      
+  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/simple_failing_hook_spec.js     (1280x720)
+     /simple failing hook spec -- after hooks -- fails on this -- after all hook (fai               
+     led).png                                                                                       
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/simple_failing_hook_spec.js.mp4     (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/simple_fail     (X second)
+                          ing_hook_spec.js.mp4                                                      
 
 
 ====================================================================================================
@@ -720,7 +737,8 @@ exports['e2e reporters supports teamcity reporter and reporter options 1'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/simple_passing_spec.js.mp4          (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/simple_pass     (X second)
+                          ing_spec.js.mp4                                                           
 
 
 ====================================================================================================
