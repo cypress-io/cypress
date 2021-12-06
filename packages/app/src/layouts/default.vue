@@ -1,5 +1,5 @@
 <template>
-  <div class="h-screen min-w-728px layout-grid">
+  <div class="h-screen min-w-728px grid grid-rows-[64px,1fr] grid-cols-[auto,1fr]">
     <SidebarNavigation class="row-span-full" />
 
     <HeaderBar
@@ -43,11 +43,3 @@ const showHeader = computed(() => {
   return currentRoute.meta.header !== false
 })
 </script>
-
-<style lang="scss" scoped>
-.layout-grid {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  grid-template-rows: 64px 1fr;
-}
-</style>
