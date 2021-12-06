@@ -690,11 +690,6 @@ const systemTests = {
       } else {
         this.servers = null
       }
-      // const s = options.settings
-
-      // if (s) {
-      //   await settings.writeOnly(e2ePath, s)
-      // }
     })
 
     afterEach(async function () {
