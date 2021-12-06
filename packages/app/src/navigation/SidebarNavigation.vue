@@ -5,6 +5,7 @@
     :class="mainStore.navBarExpanded ? 'w-248px' : 'w-64px'"
   >
     <button
+      v-if="navIsAlwaysCollapsed"
       class="cursor-pointer left-full top-0 bottom-0 w-16px z-1 absolute group hocus:outline-transparent"
       role="button"
       aria-label="toggle navigation"
@@ -117,6 +118,7 @@ import { useMainStore } from '../store'
 import { SideBarNavigationDocument } from '../generated/graphql'
 import CypressLogo from '@packages/frontend-shared/src/assets/logos/cypress_s.png'
 import { useI18n } from '@cy/i18n'
+import { useRoute } from 'vue-router'
 
 const { t } = useI18n()
 
@@ -144,5 +146,9 @@ const currentProject = computed(() => query.data.value?.currentProject)
 const bindingsOpen = ref(false)
 
 const mainStore = useMainStore()
+
+const route = useRoute()
+
+const navIsAlwaysCollapsed = computed(() => route.meta?.navBarExpanded !== false)
 
 </script>

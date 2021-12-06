@@ -45,11 +45,3 @@ const title = computed(() => {
 })
 
 </script>
-
-<route>
-{
-  meta: {
-    default: true,
-  }
-}
-</route>
