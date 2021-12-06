@@ -64,6 +64,11 @@ export async function e2ePluginSetup (projectRoot: string, on: Cypress.PluginEve
 
       return null
     },
+    removedScaffoldedProjects () {
+      Fixtures.remove()
+
+      return null
+    },
     scaffoldProject (projectName: string) {
       Fixtures.scaffoldProject(projectName)
 
