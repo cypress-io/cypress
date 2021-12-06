@@ -7,14 +7,14 @@ exports['e2e screenshot in nested spec / passes'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (nested-1/nested-2/screenshot_nested_file_spec.js)                         │
+  │ Specs:      1 found (screenshot_nested_file_spec.js)                                           │
   │ Searched:   cypress/integration/nested-1/nested-2/screenshot_nested_file_spec.js               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  nested-1/nested-2/screenshot_nested_file_spec.js                                (1 of 1)
+  Running:  screenshot_nested_file_spec.js                                                  (1 of 1)
 
 
   ✓ nests the file based on spec path
@@ -33,21 +33,21 @@ exports['e2e screenshot in nested spec / passes'] = `
   │ Screenshots:  1                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     nested-1/nested-2/screenshot_nested_file_spec.js                                 │
+  │ Spec Ran:     screenshot_nested_file_spec.js                                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/nested-1/nested-2/screenshot_nested_file_spec.j     (1280x720)
-     s/nests the file based on spec path.png                                                        
+  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/nested-1/nested-2/screensho     (1280x720)
+     t_nested_file_spec.js/nests the file based on spec path.png                                    
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/nested-1/nested-2/screenshot_ne     (X second)
-                          sted_file_spec.js.mp4                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/nested-1/ne     (X second)
+                          sted-2/screenshot_nested_file_spec.js.mp4                                 
 
 
 ====================================================================================================
@@ -57,8 +57,7 @@ exports['e2e screenshot in nested spec / passes'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  nested-1/nested-2/screenshot_nested      XX:XX        1        1        -        -        - │
-  │    _file_spec.js                                                                               │
+  │ ✔  screenshot_nested_file_spec.js           XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
