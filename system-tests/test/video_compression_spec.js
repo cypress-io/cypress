@@ -34,9 +34,10 @@ describe('e2e video compression', () => {
   systemTests.setup()
 
   return [
+    true,
     false,
   ].forEach((headed) => {
-    systemTests.it.only(`passes (head${headed ? 'ed' : 'less'})`, {
+    systemTests.it(`passes (head${headed ? 'ed' : 'less'})`, {
       // videos are corrupted in firefox due to known issues
       browser: '!firefox',
       spec: 'video_compression_spec.js',
