@@ -41,15 +41,17 @@ exports['retries / supports retries'] = `
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/fail-twice.js/fail twice (failed).png               (1280x720)
-  -  /XXX/XXX/XXX/cypress/screenshots/fail-twice.js/fail twice (failed) (attempt 2).p     (1280x720)
-     ng                                                                                             
+  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/fail-twice.js/fail twice (f     (1280x720)
+     ailed).png                                                                                     
+  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/fail-twice.js/fail twice (f     (1280x720)
+     ailed) (attempt 2).png                                                                         
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/fail-twice.js.mp4                   (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/fail-twice.     (X second)
+                          js.mp4                                                                    
 
 
 ====================================================================================================
@@ -116,7 +118,8 @@ https://on.cypress.io/test-retries
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/main.spec.js.mp4                    (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/main.spec.j     (X second)
+                          s.mp4                                                                     
 
 
 ====================================================================================================

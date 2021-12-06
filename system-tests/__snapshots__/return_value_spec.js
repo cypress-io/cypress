@@ -88,18 +88,21 @@ Error: Resolution method is overspecified. Specify a callback *or* return a Prom
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/return_value_spec.js/errors when invoking comma     (1280x720)
-     nds and return a different value (failed).png                                                  
-  -  /XXX/XXX/XXX/cypress/screenshots/return_value_spec.js/errors when invoking comma     (1280x720)
-     nds in custom command and returning different value (failed).png                               
-  -  /XXX/XXX/XXX/cypress/screenshots/return_value_spec.js/errors when not invoking c     (1280x720)
-     ommands, invoking done callback, and returning a promise (failed).png                          
+  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/return_value_spec.js/errors     (1280x720)
+      when invoking commands and return a different value (failed).png                              
+  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/return_value_spec.js/errors     (1280x720)
+      when invoking commands in custom command and returning different value (failed)               
+     .png                                                                                           
+  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/return_value_spec.js/errors     (1280x720)
+      when not invoking commands, invoking done callback, and returning a promise (fa               
+     iled).png                                                                                      
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/return_value_spec.js.mp4            (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/return_valu     (X second)
+                          e_spec.js.mp4                                                             
 
 
 ====================================================================================================

@@ -42,7 +42,8 @@ exports['e2e issue 5475 history pushState hangs / fails when remote debugging po
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/issue_5475_spec_1.js.mp4            (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/issue_5475_     (X second)
+                          spec_1.js.mp4                                                             
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -82,15 +83,17 @@ exports['e2e issue 5475 history pushState hangs / fails when remote debugging po
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/issue_5475_spec_2.js/hangs.png                      (1000x660)
-  -  /XXX/XXX/XXX/cypress/screenshots/issue_5475_spec_2.js/issue #5475 -- hangs on ne     (1280x720)
-     xt spec after modifying history.pushState (failed).png                                         
+  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/issue_5475_spec_2.js/hangs.     (1000x660)
+     png                                                                                            
+  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/issue_5475_spec_2.js/issue      (1280x720)
+     #5475 -- hangs on next spec after modifying history.pushState (failed).png                     
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/issue_5475_spec_2.js.mp4            (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/issue_5475_     (X second)
+                          spec_2.js.mp4                                                             
 
 
 ====================================================================================================

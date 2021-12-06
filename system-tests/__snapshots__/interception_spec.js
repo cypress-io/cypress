@@ -61,7 +61,8 @@ exports['e2e interception spec character encodings does not mangle non-UTF-8 tex
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/character_encoding_spec.js.mp4      (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/character_e     (X second)
+                          ncoding_spec.js.mp4                                                       
 
 
 ====================================================================================================

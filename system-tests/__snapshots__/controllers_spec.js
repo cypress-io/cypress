@@ -49,7 +49,7 @@ Fix the error in your code and re-run your tests.
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/spec.js.mp4                         (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/spec.js.mp4     (X second)
 
 
 ====================================================================================================

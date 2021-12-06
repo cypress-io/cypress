@@ -64,7 +64,8 @@ exports['e2e visit / low response timeout / passes'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/visit_spec.js.mp4                   (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/visit_spec.     (X second)
+                          js.mp4                                                                    
 
 
 ====================================================================================================
@@ -151,15 +152,16 @@ Common situations why this would fail:
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/visit_http_network_error_failing_spec.js/when n     (1280x720)
-     etwork connection cannot be established -- fails (failed).png                                  
+  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/visit_http_network_error_fa     (1280x720)
+     iling_spec.js/when network connection cannot be established -- fails (failed).pn               
+     g                                                                                              
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/visit_http_network_error_failin     (X second)
-                          g_spec.js.mp4                                                             
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/visit_http_     (X second)
+                          network_error_failing_spec.js.mp4                                         
 
 
 ====================================================================================================
@@ -238,15 +240,15 @@ If you do not want status codes to cause failures pass the option: \`failOnStatu
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/visit_http_500_response_failing_spec.js/when se     (1280x720)
-     rver response is 500 -- fails (failed).png                                                     
+  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/visit_http_500_response_fai     (1280x720)
+     ling_spec.js/when server response is 500 -- fails (failed).png                                 
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/visit_http_500_response_failing     (X second)
-                          _spec.js.mp4                                                              
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/visit_http_     (X second)
+                          500_response_failing_spec.js.mp4                                          
 
 
 ====================================================================================================
@@ -325,15 +327,15 @@ The internal Cypress web server responded with:
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/visit_file_404_response_failing_spec.js/when fi     (1280x720)
-     le server response is 404 -- fails (failed).png                                                
+  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/visit_file_404_response_fai     (1280x720)
+     ling_spec.js/when file server response is 404 -- fails (failed).png                            
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/visit_file_404_response_failing     (X second)
-                          _spec.js.mp4                                                              
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/visit_file_     (X second)
+                          404_response_failing_spec.js.mp4                                          
 
 
 ====================================================================================================
@@ -414,15 +416,15 @@ However, you can likely use \`cy.request()\` instead of \`cy.visit()\`.
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/visit_non_html_content_type_failing_spec.js/whe     (1280x720)
-     n content type is plaintext -- fails (failed).png                                              
+  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/visit_non_html_content_type     (1280x720)
+     _failing_spec.js/when content type is plaintext -- fails (failed).png                          
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/visit_non_html_content_type_fai     (X second)
-                          ling_spec.js.mp4                                                          
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/visit_non_h     (X second)
+                          tml_content_type_failing_spec.js.mp4                                      
 
 
 ====================================================================================================
@@ -513,17 +515,19 @@ When this \`load\` event occurs, Cypress will continue running commands.
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/visit_http_timeout_failing_spec.js/when visit t     (1280x720)
-     imes out -- fails timeout exceeds pageLoadTimeout (failed).png                                 
-  -  /XXX/XXX/XXX/cypress/screenshots/visit_http_timeout_failing_spec.js/when visit t     (1280x720)
-     imes out -- fails timeout exceeds timeout option (failed).png                                  
+  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/visit_http_timeout_failing_     (1280x720)
+     spec.js/when visit times out -- fails timeout exceeds pageLoadTimeout (failed).p               
+     ng                                                                                             
+  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/visit_http_timeout_failing_     (1280x720)
+     spec.js/when visit times out -- fails timeout exceeds timeout option (failed).pn               
+     g                                                                                              
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/visit_http_timeout_failing_spec     (X second)
-                          .js.mp4                                                                   
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/visit_http_     (X second)
+                          timeout_failing_spec.js.mp4                                               
 
 
 ====================================================================================================
@@ -660,22 +664,22 @@ Common situations why this would fail:
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/visit_response_never_ends_failing_spec.js/respo     (1280x720)
-     nse timeouts result in an error -- handles no response errors on the initial vis               
-     it (failed).png                                                                                
-  -  /XXX/XXX/XXX/cypress/screenshots/visit_response_never_ends_failing_spec.js/respo     (1280x720)
-     nse timeouts result in an error -- handles no response errors when not initially               
-      visiting (failed).png                                                                         
-  -  /XXX/XXX/XXX/cypress/screenshots/visit_response_never_ends_failing_spec.js/respo     (1280x720)
-     nse timeouts result in an error -- fails after reducing the responseTimeout opti               
-     on (failed).png                                                                                
+  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/visit_response_never_ends_f     (1280x720)
+     ailing_spec.js/response timeouts result in an error -- handles no response error               
+     s on the initial visit (failed).png                                                            
+  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/visit_response_never_ends_f     (1280x720)
+     ailing_spec.js/response timeouts result in an error -- handles no response error               
+     s when not initially visiting (failed).png                                                     
+  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/visit_response_never_ends_f     (1280x720)
+     ailing_spec.js/response timeouts result in an error -- fails after reducing the                
+     responseTimeout option (failed).png                                                            
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/visit_response_never_ends_faili     (X second)
-                          ng_spec.js.mp4                                                            
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/visit_respo     (X second)
+                          nse_never_ends_failing_spec.js.mp4                                        
 
 
 ====================================================================================================
@@ -737,7 +741,8 @@ exports['e2e visit / low response timeout / calls onBeforeLoad when overwriting 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/issue_2196_spec.js.mp4              (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/issue_2196_     (X second)
+                          spec.js.mp4                                                               
 
 
 ====================================================================================================
@@ -826,7 +831,8 @@ exports['e2e visit / low response timeout / passes with experimentalSourceRewrit
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/source_rewriting_spec.js.mp4        (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/source_rewr     (X second)
+                          iting_spec.js.mp4                                                         
 
 
 ====================================================================================================

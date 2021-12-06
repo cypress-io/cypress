@@ -43,7 +43,8 @@ exports['e2e user agent / passes'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/user_agent_spec.js.mp4              (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/user_agent_     (X second)
+                          spec.js.mp4                                                               
 
 
 ====================================================================================================

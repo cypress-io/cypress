@@ -121,20 +121,22 @@ https://on.cypress.io/cross-origin-violation
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/web_security_spec.js/web security -- fails when     (1280x720)
-      clicking a to another origin (failed).png                                                     
-  -  /XXX/XXX/XXX/cypress/screenshots/web_security_spec.js/web security -- fails when     (1280x720)
-      submitted a form and being redirected to another origin (failed).png                          
-  -  /XXX/XXX/XXX/cypress/screenshots/web_security_spec.js/web security -- fails when     (1280x720)
-      using a javascript redirect to another origin (failed).png                                    
-  -  /XXX/XXX/XXX/cypress/screenshots/web_security_spec.js/web security -- fails when     (1280x720)
-      doing a CORS request cross-origin (failed).png                                                
+  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/web_security_spec.js/web se     (1280x720)
+     curity -- fails when clicking a to another origin (failed).png                                 
+  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/web_security_spec.js/web se     (1280x720)
+     curity -- fails when submitted a form and being redirected to another origin (fa               
+     iled).png                                                                                      
+  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/web_security_spec.js/web se     (1280x720)
+     curity -- fails when using a javascript redirect to another origin (failed).png                
+  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/web_security_spec.js/web se     (1280x720)
+     curity -- fails when doing a CORS request cross-origin (failed).png                            
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/web_security_spec.js.mp4            (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/web_securit     (X second)
+                          y_spec.js.mp4                                                             
 
 
 ====================================================================================================
@@ -198,7 +200,8 @@ exports['e2e web security / when disabled / passes'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/web_security_spec.js.mp4            (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/web_securit     (X second)
+                          y_spec.js.mp4                                                             
 
 
 ====================================================================================================
@@ -211,71 +214,6 @@ exports['e2e web security / when disabled / passes'] = `
   │ ✔  web_security_spec.js                     XX:XX        4        4        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        4        4        -        -        -  
-
-
-`
-
-exports['e2e web security / firefox / displays warning when firefox and chromeWebSecurity:false'] = `
-
-====================================================================================================
-
-  (Run Starting)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (simple_passing_spec.js)                                                   │
-  │ Searched:   cypress/integration/simple_passing_spec.js                                         │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  simple_passing_spec.js                                                          (1 of 1)
-
-Your project has set the configuration option: \`chromeWebSecurity: false\`
-
-This option will not have an effect in Firefox. Tests that rely on web security being disabled will not run as expected.
-
-
-  simple passing spec
-    ✓ passes
-
-
-  1 passing
-
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        1                                                                                │
-  │ Passing:      1                                                                                │
-  │ Failing:      0                                                                                │
-  │ Pending:      0                                                                                │
-  │ Skipped:      0                                                                                │
-  │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
-  │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     simple_passing_spec.js                                                           │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/simple_passing_spec.js.mp4          (X second)
-
-
-====================================================================================================
-
-  (Run Finished)
-
-
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  simple_passing_spec.js                   XX:XX        1        1        -        -        - │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
 
 `

@@ -89,18 +89,19 @@ The internal Cypress web server responded with:
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/stdout_failing_spec.js/stdout_failing_spec -- f     (1280x720)
-     ails (failed).png                                                                              
-  -  /XXX/XXX/XXX/cypress/screenshots/stdout_failing_spec.js/stdout_failing_spec -- f     (1280x720)
-     ailing hook -- is failing -- before each hook (failed).png                                     
-  -  /XXX/XXX/XXX/cypress/screenshots/stdout_failing_spec.js/stdout_failing_spec -- p     (1280x720)
-     assing hook -- is failing (failed).png                                                         
+  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/stdout_failing_spec.js/stdo     (1280x720)
+     ut_failing_spec -- fails (failed).png                                                          
+  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/stdout_failing_spec.js/stdo     (1280x720)
+     ut_failing_spec -- failing hook -- is failing -- before each hook (failed).png                 
+  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/stdout_failing_spec.js/stdo     (1280x720)
+     ut_failing_spec -- passing hook -- is failing (failed).png                                     
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/stdout_failing_spec.js.mp4          (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/stdout_fail     (X second)
+                          ing_spec.js.mp4                                                           
 
 
 ====================================================================================================
@@ -176,8 +177,8 @@ Fix the error in your code and re-run your tests.
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/stdout_exit_early_failing_spec.     (X second)
-                          js.mp4                                                                    
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/stdout_exit     (X second)
+                          _early_failing_spec.js.mp4                                                
 
 
 ====================================================================================================
@@ -249,7 +250,8 @@ exports['e2e stdout does not duplicate suites or tests between visits 1'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/stdout_passing_spec.js.mp4          (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/stdout_pass     (X second)
+                          ing_spec.js.mp4                                                           
 
 
 ====================================================================================================
@@ -275,17 +277,15 @@ exports['e2e stdout displays fullname of nested specfile 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      3 found (cypress/integration/nested-1/nested-2/nested-3/spec.js, cypress/integrati │
-  │             on/nested-1/nested-2/nested-3/stdout_specfile.js, cypress/integration/nested-1/nes │
-  │             ted-2/nested-3/stdout_specfile_display_spec_with_a_really_long_name_that_never_has │
-  │             _a_line_br...)                                                                     │
+  │ Specs:      3 found (spec.js, stdout_specfile.js, stdout_specfile_display_spec_with_a_really_l │
+  │             ong_name_that_never_has_a_line_break_or_new_line.js)                               │
   │ Searched:   cypress/integration/nested-1/nested-2/nested-3/*                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  cypress/integration/nested-1/nested-2/nested-3/spec.js                          (1 of 3)
+  Running:  spec.js                                                                         (1 of 3)
 
 
   stdout_specfile_display_spec
@@ -306,7 +306,7 @@ exports['e2e stdout displays fullname of nested specfile 1'] = `
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     cypress/integration/nested-1/nested-2/nested-3/spec.js                           │
+  │ Spec Ran:     spec.js                                                                          │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -319,7 +319,7 @@ exports['e2e stdout displays fullname of nested specfile 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  cypress/integration/nested-1/nested-2/nested-3/stdout_specfile.js               (2 of 3)
+  Running:  stdout_specfile.js                                                              (2 of 3)
 
 
   stdout_specfile_display_spec
@@ -340,7 +340,7 @@ exports['e2e stdout displays fullname of nested specfile 1'] = `
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     cypress/integration/nested-1/nested-2/nested-3/stdout_specfile.js                │
+  │ Spec Ran:     stdout_specfile.js                                                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -353,9 +353,8 @@ exports['e2e stdout displays fullname of nested specfile 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  cypress/integration/nested-1/nested-2/nested-3/stdout_specfile_displ            (3 of 3)
-            ay_spec_with_a_really_long_name_that_never_has_a_line_break_or_new_l                    
-            ine.js                                                                                  
+  Running:  stdout_specfile_display_spec_with_a_really_long_name_that_never_has_            (3 of 3)
+            a_line_break_or_new_line.js                                                             
 
 
   stdout_specfile_display_spec
@@ -376,8 +375,8 @@ exports['e2e stdout displays fullname of nested specfile 1'] = `
   │ Screenshots:  1                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     cypress/integration/nested-1/nested-2/nested-3/stdout_specfile_display_spec_with │
-  │               _a_really_long_name_that_never_has_a_line_break_or_new_line.js                   │
+  │ Spec Ran:     stdout_specfile_display_spec_with_a_really_long_name_that_never_has_a_line_break │
+  │               _or_new_line.js                                                                  │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -403,17 +402,13 @@ exports['e2e stdout displays fullname of nested specfile 1'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  cypress/integration/nested-1/nested      XX:XX        1        1        -        -        - │
-  │    -2/nested-3/spec.js                                                                         │
+  │ ✔  spec.js                                  XX:XX        1        1        -        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✔  cypress/integration/nested-1/nested      XX:XX        1        1        -        -        - │
-  │    -2/nested-3/stdout_specfile.js                                                              │
+  │ ✔  stdout_specfile.js                       XX:XX        1        1        -        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✔  cypress/integration/nested-1/nested      XX:XX        1        1        -        -        - │
-  │    -2/nested-3/stdout_specfile_display                                                         │
-  │    _spec_with_a_really_long_name_that_                                                         │
-  │    never_has_a_line_break_or_new_line.                                                         │
-  │    js                                                                                          │
+  │ ✔  stdout_specfile_display_spec_with_a      XX:XX        1        1        -        -        - │
+  │    _really_long_name_that_never_has_a_                                                         │
+  │    line_break_or_new_line.js                                                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        3        3        -        -        -  
 
@@ -501,21 +496,23 @@ exports['e2e stdout / displays assertion errors'] = `
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/stdout_assertion_errors_spec.js/assertion error     (1280x720)
-     s -- fails with assertion diff, no retries (failed).png                                        
-  -  /XXX/XXX/XXX/cypress/screenshots/stdout_assertion_errors_spec.js/assertion error     (1280x720)
-     s -- fails with assertion diff, with retries (failed).png                                      
-  -  /XXX/XXX/XXX/cypress/screenshots/stdout_assertion_errors_spec.js/assertion error     (1280x720)
-     s -- fails with dom assertion without diff, with retries (failed).png                          
-  -  /XXX/XXX/XXX/cypress/screenshots/stdout_assertion_errors_spec.js/assertion error     (1280x720)
-     s -- fails with dom assertion without diff, with retries (failed) (1).png                      
+  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/stdout_assertion_errors_spe     (1280x720)
+     c.js/assertion errors -- fails with assertion diff, no retries (failed).png                    
+  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/stdout_assertion_errors_spe     (1280x720)
+     c.js/assertion errors -- fails with assertion diff, with retries (failed).png                  
+  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/stdout_assertion_errors_spe     (1280x720)
+     c.js/assertion errors -- fails with dom assertion without diff, with retries (fa               
+     iled).png                                                                                      
+  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/stdout_assertion_errors_spe     (1280x720)
+     c.js/assertion errors -- fails with dom assertion without diff, with retries (fa               
+     iled) (1).png                                                                                  
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/stdout_assertion_errors_spec.js     (X second)
-                          .mp4                                                                      
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/stdout_asse     (X second)
+                          rtion_errors_spec.js.mp4                                                  
 
 
 ====================================================================================================

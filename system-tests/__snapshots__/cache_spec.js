@@ -45,7 +45,8 @@ exports['e2e cache passes 1'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cache_spec.js.mp4                   (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/cache_spec.     (X second)
+                          js.mp4                                                                    
 
 
 ====================================================================================================

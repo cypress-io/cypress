@@ -53,14 +53,16 @@ https://on.cypress.io/api/task
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/task_not_registered_spec.js/fails because the t          (YxX)
-     ask event is not registered in setupNodeEvents method (failed).png                             
+  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/task_not_registered_spec.js          (YxX)
+     /fails because the task event is not registered in setupNodeEvents method (faile               
+     d).png                                                                                         
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/task_not_registered_spec.js.mp4     (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/task_not_re     (X second)
+                          gistered_spec.js.mp4                                                      
 
 
 ====================================================================================================

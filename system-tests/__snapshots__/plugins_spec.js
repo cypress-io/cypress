@@ -41,7 +41,8 @@ exports['e2e plugins preprocessor passes with working preprocessor 1'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/app_spec.js.mp4                     (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/app_spec.js     (X second)
+                          .mp4                                                                      
 
 
 ====================================================================================================
@@ -101,7 +102,8 @@ exports['e2e plugins can modify config from plugins 1'] = `
   (Video)
 
   -  Started processing:  Compressing to 20 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/app_spec.js.mp4                     (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/app_spec.js     (X second)
+                          .mp4                                                                      
 
 
 ====================================================================================================
@@ -252,7 +254,8 @@ exports['e2e plugins handles absolute path to pluginsFile 1'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/absolute_spec.js.mp4                (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/absolute_sp     (X second)
+                          ec.js.mp4                                                                 
 
 
 ====================================================================================================
@@ -321,14 +324,17 @@ exports['e2e plugins calls after:screenshot for cy.screenshot() and failure scre
   (Screenshots)
 
   -  /XXX/XXX/XXX/screenshot-replacement.png                                                   (YxX)
-  -  /XXX/XXX/XXX/cypress/screenshots/after_screenshot_spec.js/ignored-values.png              (YxX)
-  -  /XXX/XXX/XXX/cypress/screenshots/after_screenshot_spec.js/invalid-return.png              (YxX)
+  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/after_screenshot_spec.js/ig          (YxX)
+     nored-values.png                                                                               
+  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/after_screenshot_spec.js/in          (YxX)
+     valid-return.png                                                                               
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/after_screenshot_spec.js.mp4        (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/after_scree     (X second)
+                          nshot_spec.js.mp4                                                         
 
 
 ====================================================================================================
@@ -493,8 +499,8 @@ exports['e2e plugins does not report more screenshots than exist if user overwri
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/after_screenshot_overwrite_spec     (X second)
-                          .js.mp4                                                                   
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/after_scree     (X second)
+                          nshot_overwrite_spec.js.mp4                                               
 
 
 ====================================================================================================
