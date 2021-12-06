@@ -59,7 +59,7 @@ const Runner = {
         const { spec } = state
 
         if (spec) {
-          util.updateIntegrationSpecPath(spec.name)
+          util.updateIntegrationSpecPath(spec.baseName)
         }
       })
 

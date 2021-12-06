@@ -118,7 +118,15 @@ const formatSymbolSummary = (failures) => {
   return getSymbol(failures)
 }
 
-const formatPath = (name, n, colour = 'reset') => {
+const macOSRemovePrivate = (str) => {
+  if (str.startsWith('/private')) {
+    return str.slice(8)
+  }
+
+  return str
+}
+
+const formatPath = (name, n, colour = 'reset', caller) => {
   if (!name) return ''
 
   const fakeCwdPath = env.get('FAKE_CWD_PATH')
@@ -130,7 +138,7 @@ const formatPath = (name, n, colour = 'reset') => {
     const cwdPath = process.cwd()
 
     name = name
-    .split(cwdPath)
+    .split(macOSRemovePrivate(cwdPath))
     .join(fakeCwdPath)
   }
 

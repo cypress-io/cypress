@@ -56,13 +56,19 @@ export class ProjectDataSource {
     .map((ext) => ext + fileExtension)
     .find((ext) => absolute.endsWith(ext)) || fileExtension
 
+    let name = absolute.split(projectRoot)[1]!.replace(/\\/g, '/')
+
+    if (name.startsWith('/')) {
+      name = name.slice(1)
+    }
+
     return {
       fileExtension,
       baseName: parsedFile.base,
       fileName: parsedFile.base.replace(specFileExtension, ''),
       specFileExtension,
       specType: testingType === 'component' ? 'component' : 'integration',
-      name: parsedFile.base,
+      name,
       relative,
       absolute,
     }
