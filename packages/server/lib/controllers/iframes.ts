@@ -4,6 +4,7 @@ import Debug from 'debug'
 import files from './files'
 import type { Cfg } from '../project-base'
 import type { DataContext } from '@packages/data-context'
+import type { FoundSpec } from '@packages/types'
 
 const debug = Debug('cypress:server:iframes')
 
@@ -13,7 +14,7 @@ interface IFramesController {
 
 interface E2E extends IFramesController {
   getRemoteState: () => any
-  getSpec: () => Cypress.Cypress['spec'] | null
+  getSpec: () => FoundSpec | null
   ctx: DataContext
 }
 
@@ -24,7 +25,6 @@ interface CT extends IFramesController {
 export const iframesController = {
   e2e: ({ getSpec, getRemoteState, config, ctx }: E2E, req: Request, res: Response) => {
     const extraOptions = {
-      specFilter: getSpec()?.specFilter,
       specType: 'integration',
     }
 

@@ -74,7 +74,7 @@ export class ProjectBase<TServer extends Server> extends EE {
   public browser: any
   public options: OpenProjectLaunchOptions
   public testingType: Cypress.TestingType
-  public spec: Cypress.Cypress['spec'] | null
+  public spec: FoundSpec | null
   public isOpen: boolean = false
   private generatedProjectIdTimestamp: any
   projectRoot: string

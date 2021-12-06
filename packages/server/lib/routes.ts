@@ -13,6 +13,7 @@ import xhrs from './controllers/xhrs'
 import { runner, ServeOptions } from './controllers/runner'
 import { iframesController } from './controllers/iframes'
 import type { DataContext } from '@packages/data-context/src/DataContext'
+import type { FoundSpec } from '@packages/types'
 
 const debug = Debug('cypress:server:routes')
 
@@ -20,7 +21,7 @@ export interface InitializeRoutes {
   ctx: DataContext
   specsStore: SpecsStore
   config: Cfg
-  getSpec: () => Cypress.Spec | null
+  getSpec: () => FoundSpec | null
   getCurrentBrowser: () => Browser
   nodeProxy: httpProxy
   networkProxy: NetworkProxy
