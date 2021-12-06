@@ -1205,6 +1205,12 @@ export default {
             // else just return ret
             return ret
           } catch (err) {
+            // If the runnable was marked as pending, this test was skipped
+            // go ahead and just return
+            // if (runnable.isPending()) {
+            //   return
+            // }
+
             // if runnable.fn threw synchronously, then it didnt fail from
             // a cypress command, but we should still teardown and handle
             // the error
