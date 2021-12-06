@@ -46,14 +46,24 @@ index b2886cd..7d199a0 100644
  const isSaveOptions = is.schema({
    sortSnapshots: is.bool
 diff --git a/node_modules/snap-shot-core/src/index.js b/node_modules/snap-shot-core/src/index.js
-index b0442f0..fbe55bf 100644
+index b0442f0..3682727 100644
 --- a/node_modules/snap-shot-core/src/index.js
 +++ b/node_modules/snap-shot-core/src/index.js
-@@ -332,6 +332,7 @@ function core (options) {
+@@ -330,17 +330,6 @@ function core (options) {
+       opts
+     })
      if (expected === undefined) {
-       if (opts.ci) {
-         console.log('current directory', process.cwd())
-+        console.log('cached cwd', global.CACHED_CWD_FOR_SNAP_SHOT_IT)
-         console.log('new value to save: %j', value)
-         return throwCannotSaveOnCI({
-           value,
+-      if (opts.ci) {
+-        console.log('current directory', process.cwd())
+-        console.log('new value to save: %j', value)
+-        return throwCannotSaveOnCI({
+-          value,
+-          fileParameter,
+-          exactSpecName,
+-          specName,
+-          index
+-        })
+-      }
+ 
+       const storedValue = store(value)
+       storeValue({
