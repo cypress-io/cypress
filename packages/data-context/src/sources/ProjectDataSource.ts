@@ -1,4 +1,4 @@
-import type { CodeGenType, SpecType } from '@packages/graphql/src/gen/nxs.gen'
+import type { CodeGenType } from '@packages/graphql/src/gen/nxs.gen'
 import { FoundSpec, FrontendFramework, FRONTEND_FRAMEWORKS, ResolvedFromConfig, RESOLVED_FROM, SpecFileWithExtension, STORYBOOK_GLOB } from '@packages/types'
 import { scanFSForAvailableDependency } from 'create-cypress-tests'
 import path from 'path'
@@ -35,67 +35,57 @@ export class ProjectDataSource {
     return config[testingType]?.specPattern
   }
 
-  async findSpecs (projectRoot: string, specType: SpecType, specPatternFromCliArg?: string[]): Promise<FoundSpec[]> {
-    let specAbsolutePaths: string[] = []
-
-    if (specPatternFromCliArg) {
-      debug('pattern passed via --spec: %s', specPatternFromCliArg)
-      specAbsolutePaths = await this.ctx.file.getFilesByGlob(projectRoot, specPatternFromCliArg, { absolute: true })
-    } else {
-      const specPattern = await this.specPatternForTestingType(projectRoot, specType === 'component' ? 'component' : 'e2e')
-
-      debug('pattern passed from config : %s', specPattern)
-
-      specAbsolutePaths = await this.ctx.file.getFilesByGlob(projectRoot, specPattern ?? [], { absolute: true })
-    }
+  async findSpecs (projectRoot: string, testingType: Cypress.TestingType, specPattern: string | string[]): Promise<FoundSpec[]> {
+    const specAbsolutePaths = await this.ctx.file.getFilesByGlob(projectRoot, specPattern, { absolute: true })
 
     debug('found specs %o', specAbsolutePaths)
 
     const specs = specAbsolutePaths.map<FoundSpec>((absolute) => {
-      const relative = path.relative(projectRoot, absolute).replace(/\\/g, '/')
-      const parsedFile = path.parse(absolute)
-      const fileExtension = path.extname(absolute)
-
-      const specFileExtension = ['.spec', '.test', '-spec', '-test', '.cy']
-      .map((ext) => ext + fileExtension)
-      .find((ext) => absolute.endsWith(ext)) || fileExtension
-
-      return {
-        fileExtension,
-        baseName: parsedFile.base,
-        fileName: parsedFile.base.replace(specFileExtension, ''),
-        specFileExtension,
-        specType,
-        name: parsedFile.base,
-        relative,
-        absolute,
-      }
+      return this.transformSpec(projectRoot, absolute, testingType)
     })
 
     return specs
   }
 
-  async getCurrentSpecByAbsolute (projectRoot: string, absolute: string) {
-    // TODO: should cache current specs so we don't need to
-    // call findSpecs each time we ask for the current spec.
-    const specs = await this.findSpecs(projectRoot,
-      this.ctx.appData.currentTestingType === 'component' ? 'component' : 'integration')
+  transformSpec (projectRoot: string, absolute: string, testingType: Cypress.TestingType): FoundSpec {
+    const relative = path.relative(projectRoot, absolute).replace(/\\/g, '/')
+    const parsedFile = path.parse(absolute)
+    const fileExtension = path.extname(absolute)
 
-    return specs.find((x) => x.absolute === absolute)
+    const specFileExtension = ['.spec', '.test', '-spec', '-test', '.cy']
+    .map((ext) => ext + fileExtension)
+    .find((ext) => absolute.endsWith(ext)) || fileExtension
+
+    return {
+      fileExtension,
+      baseName: parsedFile.base,
+      fileName: parsedFile.base.replace(specFileExtension, ''),
+      specFileExtension,
+      specType: testingType === 'component' ? 'component' : 'integration',
+      name: parsedFile.base,
+      relative,
+      absolute,
+    }
+  }
+
+  async getCurrentSpecByAbsolute (projectRoot: string, absolute: string) {
+    if (!this.ctx.appData.currentTestingType) {
+      return
+    }
+
+    return this.transformSpec(projectRoot, absolute, this.ctx.appData.currentTestingType)
   }
 
   async getCurrentSpecById (projectRoot: string, base64Id: string) {
-    // TODO: should cache current specs so we don't need to
-    // call findSpecs each time we ask for the current spec.
-    const specs = await this.findSpecs(
-      projectRoot, this.ctx.appData.currentTestingType === 'component' ? 'component' : 'integration',
-    )
-
     // id is base64 formatted as per Relay: <type>:<string>
     // in this case, Spec:/my/abs/path
     const currentSpecAbs = Buffer.from(base64Id, 'base64').toString().split(':')[1]
 
-    return specs.find((x) => x.absolute === currentSpecAbs) ?? null
+    if (!currentSpecAbs || !this.ctx.appData.currentTestingType) {
+      return null
+    }
+
+    return this.transformSpec(projectRoot, currentSpecAbs, this.ctx.appData.currentTestingType)
   }
 
   async getResolvedConfigFields (projectRoot: string): Promise<ResolvedFromConfig[]> {

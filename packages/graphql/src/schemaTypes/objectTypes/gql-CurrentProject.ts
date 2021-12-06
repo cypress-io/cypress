@@ -73,8 +73,22 @@ export const CurrentProject = objectType({
     t.connectionField('specs', {
       description: 'Specs for a project conforming to Relay Connection specification',
       type: 'Spec',
-      nodes: (source, args, ctx) => {
-        return ctx.project.findSpecs(source.projectRoot, ctx.appData.currentTestingType === 'component' ? 'component' : 'integration')
+      nodes: async (source, args, ctx) => {
+        if (!ctx.appData.currentTestingType) {
+          return []
+        }
+
+        const pattern = await ctx.project.specPatternForTestingType(source.projectRoot, ctx.appData.currentTestingType)
+
+        if (!pattern) {
+          return []
+        }
+
+        return ctx.project.findSpecs(
+          source.projectRoot,
+          ctx.appData.currentTestingType,
+          pattern,
+        )
       },
     })
 

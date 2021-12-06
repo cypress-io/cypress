@@ -380,9 +380,8 @@ export class ProjectBase<TServer extends Server> extends EE {
     ctDevServerPort: number | undefined
     startSpecWatcher: () => void
   }> {
-    // const specs = await this.
-    const specs = await this.ctx.project.findSpecs(this.projectRoot,
-      this.testingType === 'component' ? 'component' : 'integration')
+    const specPattern = updatedConfig[this.testingType].specPattern
+    const specs = await this.ctx.project.findSpecs(this.projectRoot, this.testingType, specPattern)
 
     return this.initSpecStore({ specs, config: updatedConfig })
   }

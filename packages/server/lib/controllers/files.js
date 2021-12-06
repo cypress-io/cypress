@@ -63,12 +63,14 @@ module.exports = {
     }
     const specFilterFn = specFilter ? specFilterContains : () => true
 
-    const getSpecsHelper = () => {
+    const getSpecsHelper = async () => {
       // grab all of the specs if this is ci
       if (spec === '__all') {
         debug('returning all specs')
 
-        return ctx.project.findSpecs(config.projectRoot, 'integration')
+        const pattern = await ctx.project.specPatternForTestingType(config.projectRoot, 'e2e')
+
+        return ctx.project.findSpecs(config.projectRoot, 'e2e', pattern)
         .then((specs) => {
           debug('found __all specs %o', specs)
 

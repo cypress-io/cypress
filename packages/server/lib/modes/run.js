@@ -1542,13 +1542,15 @@ module.exports = {
         // speed the initial booting time
         const specType = options.testingType === 'component' ? 'component' : 'integration'
 
+        const specPattern = specPatternFromCli || config[options.testingType].specPattern
+
         return Promise.all([
           system.info(),
           browserUtils.ensureAndGetByNameOrPath(browserName, false, userBrowsers).tap(removeOldProfiles),
           project.ctx.project.findSpecs(
             projectRoot,
             specType,
-            specPatternFromCli,
+            specPattern,
           ),
           trashAssets(config),
         ])
@@ -1560,10 +1562,6 @@ module.exports = {
             absolute: x.absolute,
             specType: x.specType,
           }))
-
-          const specPattern = specPatternFromCli || await project.ctx.project.specPatternForTestingType(
-            projectRoot, testingType,
-          )
 
           if (!specs.length) {
             errors.throw('NO_SPECS_FOUND', projectRoot, specPattern)
