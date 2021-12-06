@@ -19,6 +19,7 @@ describe('Choose a Browser config', () => {
     })
 
     // Need to visit after args have been configured, todo: fix in #18776
+    // TODO determine need for this? seems flaky without
     cy.visitLaunchpad()
 
     stepThroughConfigPages()
