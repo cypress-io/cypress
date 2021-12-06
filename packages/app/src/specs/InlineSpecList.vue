@@ -9,17 +9,20 @@
     <InlineSpecListHeader
       v-model:search="search"
       :result-count="specs.length"
-      class="mb-16px"
+      class="mb-12px"
       @newSpec="showModal = true"
     />
     <InlineSpecListTree
       :specs="specs"
     />
+    <!-- Fading top and bottom of the container. It may make sense for this to exist in a css utility or class. -->
+    <div class="bg-gradient-to-b to-transparent from-gray-1000 h-12px w-full top-66px right-0 left-0 scroller-fade absolute" />
+    <div class="bg-gradient-to-b from-transparent to-gray-1000 h-12px w-full right-0 bottom-12px scroller-fade absolute" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, Ref, ref } from 'vue'
 import { gql } from '@urql/vue'
 import type { Specs_InlineSpecListFragment } from '../generated/graphql'
 import InlineSpecListHeader from './InlineSpecListHeader.vue'
