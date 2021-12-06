@@ -9,7 +9,7 @@ macBuildFilters: &macBuildFilters
       only:
         - develop
         - 10.0-release
-        - dev/allow-devs-arm64
+        - tgriesser/chore/fix-release
         - renovate/cypress-request-2.x
 
 defaults: &defaults
@@ -45,7 +45,6 @@ onlyMainBranches: &onlyMainBranches
       only:
         - develop
         - 10.0-release
-        - dev/allow-devs-arm64
   requires:
     - create-build-artifacts
 
@@ -1642,7 +1641,7 @@ jobs:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "10.0-release" && "$CIRCLE_BRANCH" != "dev/allow-devs-arm64" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "10.0-release" && "$CIRCLE_BRANCH" != "renovate/cypress-request-2.x" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
