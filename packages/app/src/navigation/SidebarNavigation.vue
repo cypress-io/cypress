@@ -5,7 +5,7 @@
     :class="mainStore.navBarExpanded ? 'w-248px' : 'w-64px'"
   >
     <button
-      class="cursor-pointer left-full top-0 bottom-0 w-16px absolute group hocus:outline-transparent"
+      class="cursor-pointer left-full top-0 bottom-0 w-16px z-1 absolute group hocus:outline-transparent"
       role="button"
       aria-label="toggle navigation"
       @click="mainStore.toggleNavBar"
