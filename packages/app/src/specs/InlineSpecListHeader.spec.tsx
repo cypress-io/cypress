@@ -5,7 +5,7 @@ import { defaultMessages } from '@cy/i18n'
 describe('InlineSpecListHeader', () => {
   const mountWithResultCount = (resultCount = 0) => {
     const search = ref('')
-    const onAddSpec = cy.spy().as('new-spec')
+    const onNewSpec = cy.spy().as('new-spec')
 
     cy.wrap(search).as('search')
 
@@ -14,7 +14,7 @@ describe('InlineSpecListHeader', () => {
       'onUpdate:search': (val: string) => {
         search.value = val
       },
-      onAddSpec,
+      onNewSpec,
     }
 
     cy.mount(() =>
