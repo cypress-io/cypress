@@ -1,4 +1,2 @@
-import { registerMountFn, addVueCommand } from '@packages/frontend-shared/cypress/support/common'
-
-registerMountFn()
-addVueCommand()
+/// <reference path="../../../../frontend-shared/cypress/support/index.ts" />
+import '../../../../frontend-shared/cypress/support/index.ts'

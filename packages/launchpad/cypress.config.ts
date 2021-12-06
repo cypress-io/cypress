@@ -20,7 +20,6 @@ export default defineConfig({
   'component': {
     'testFiles': '**/*.spec.{js,ts,tsx,jsx}',
     'supportFile': 'cypress/component/support/index.ts',
-    'pluginsFile': 'cypress/component/plugins/index.js',
     devServer (cypressConfig) {
       const { startDevServer } = require('@cypress/vite-dev-server')
 

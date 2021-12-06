@@ -74,15 +74,14 @@ beforeEach(() => {
 })
 
 // function setup
-
 function setupE2E (projectName?: ProjectFixture) {
   const _log = Cypress.log({ name: 'setupE2E', message: projectName ?? '' })
 
-  if (projectName && !e2eProjectDirs.includes(projectName)) {
-    throw new Error(`Unknown project ${projectName}`)
-  }
-
   if (projectName) {
+    if (!e2eProjectDirs.includes(projectName)) {
+      throw new Error(`Unknown project ${projectName}`)
+    }
+
     cy.task('scaffoldProject', projectName, { log: false })
   }
 

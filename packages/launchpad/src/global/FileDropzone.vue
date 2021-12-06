@@ -13,6 +13,7 @@
           class="relative block w-full p-58px text-center border-1
         border-gray-200 border-dashed rounded-lg h-240px min-w-220px
         bg-gray-50 hocus-default"
+          data-testid="dropzone"
         >
           <i-cy-drag-project_x80
             class="mx-auto -mb-4px w-80px h-80px icon-dark-indigo-500 icon-light-indigo-200"
