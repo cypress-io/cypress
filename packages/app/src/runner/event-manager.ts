@@ -188,8 +188,6 @@ export class EventManager {
       logCommand(logId)
     })
 
-    this.reporterBus.on('focus:tests', this.focusTests)
-
     this.reporterBus.on('set:user:editor', (editor) => {
       ws.emit('set:user:editor', editor)
     })
@@ -568,6 +566,7 @@ export class EventManager {
       numFailed: state.failed,
       numPending: state.pending,
       autoScrollingEnabled: state.autoScrollingEnabled,
+      isSpecsListOpen: state.isSpecsListOpen,
       scrollTop: state.scrollTop,
       studioActive: this.studioRecorder.hasRunnableId,
     })
@@ -661,10 +660,6 @@ export class EventManager {
     ws.emit('spec:changed', specFile)
   }
 
-  focusTests () {
-    ws.emit('focus:tests')
-  }
-
   snapshotUnpinned () {
     this._unpinSnapshot()
     this._hideSnapshot()
@@ -699,7 +694,7 @@ export class EventManager {
   }
 
   saveState (state) {
-    ws.emit('save:app:state', state)
+    this.localBus.emit('save:app:state', state)
   }
 
   // usefulf for testing

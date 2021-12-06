@@ -22,6 +22,11 @@ export const FrontendFrameworkEnum = enumType({
   members: FRONTEND_FRAMEWORKS.map((t) => t.type),
 })
 
+export const FrontendFrameworkCategoryEnum = enumType({
+  name: 'FrontendFrameworkCategoryEnum',
+  members: FRONTEND_FRAMEWORKS.map((t) => t.category),
+})
+
 export const CodeLanguageEnum = enumType({
   name: 'CodeLanguageEnum',
   members: CODE_LANGUAGES.map((t) => t.type),

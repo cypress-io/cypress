@@ -1,14 +1,17 @@
 <template>
-  <div class="flex items-center py-4px text-sm">
+  <div
+    class="flex text-sm py-4px items-center"
+  >
     <i-cy-chevron-down-small_x16
-      class="icon-dark-gray-700 mr-8px group-hocus:(icon-dark-gray-300) group-hover:children:(transition-all ease-in-out duration-250)"
+      class="mr-8px icon-dark-gray-700 group-hocus:(icon-dark-indigo-300) group-hover:children:(transition-all ease-in-out) "
       :class="{'transform rotate-270': !expanded}"
     />
-    <i-cy-folder_x16 class="mr-8px w-16px h-16px" />
+    <i-cy-folder_x16 class="h-16px mr-8px w-16px group-hocus:icon-light-indigo-300 group-hocus:icon-dark-indigo-400" />
     <HighlightedText
       :text="props.name"
       :indexes="props.indexes"
-      class="text-gray-400"
+      class="text-gray-400 group-focus:text-indigo-300"
+      highlight-classes="font-bold text-white"
     />
   </div>
 </template>

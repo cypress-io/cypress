@@ -11,7 +11,7 @@ describe('<EnvironmentSetup />', () => {
       ),
     })
 
-    cy.get('[data-cy="select-framework"]').click()
+    cy.get('[data-testid="select-framework"]').click()
     cy.contains('Nuxt.js').click()
   })
 })

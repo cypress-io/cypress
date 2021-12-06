@@ -10,6 +10,8 @@ import { defineStore } from 'pinia'
  */
 export interface RunnerUiStore {
   showChooseExternalEditorModal: boolean
+  autoScrollingEnabled: boolean
+  isSpecsListOpen: boolean
 }
 
 export const useRunnerUiStore = defineStore({
@@ -18,12 +20,17 @@ export const useRunnerUiStore = defineStore({
   state (): RunnerUiStore {
     return {
       showChooseExternalEditorModal: false,
+      autoScrollingEnabled: true,
+      isSpecsListOpen: true,
     }
   },
 
   actions: {
     setShowChooseExternalEditorModal (value: boolean) {
       this.showChooseExternalEditorModal = value
+    },
+    setPreference (preference: string, value: boolean) {
+      this[preference] = value
     },
   },
 })
