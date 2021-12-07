@@ -39,6 +39,7 @@ fragment Config on Query {
     id
     config
   }
+  ...ConfigLegend
   ...OpenConfigFileInIDE
 }
 `

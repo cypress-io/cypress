@@ -52,11 +52,18 @@ import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import { computed } from 'vue'
 import { useI18n } from '@cy/i18n'
 import { CONFIG_LEGEND_COLOR_MAP } from './ConfigSourceColors'
-import type { ConfigFragment } from '../../generated/graphql'
+import type { ConfigLegendFragment } from '../../generated/graphql'
 import OpenConfigFileInIDE from '@packages/frontend-shared/src/gql-components/OpenConfigFileInIDE.vue'
+import { gql } from '@urql/vue'
+
+gql`
+fragment ConfigLegend on Query {
+  ...OpenConfigFileInIDE
+}
+`
 
 const props = defineProps<{
-  gql: ConfigFragment
+  gql: ConfigLegendFragment
 }>()
 
 const { t } = useI18n()

@@ -13,7 +13,7 @@
     You don't have any record keys. You should make some so you can record
     on Cypress Cloud.
   </template>
-  <SpecPatterns :gql="props.gql.currentProject" />
+  <SpecPatterns />
   <Experiments :gql="props.gql.currentProject" />
   <Config :gql="props.gql" />
 </template>
@@ -41,7 +41,6 @@ fragment ProjectSettings on Query {
       }
     }
   }
-  ...SpecPatterns
   ...Config
 }
 `

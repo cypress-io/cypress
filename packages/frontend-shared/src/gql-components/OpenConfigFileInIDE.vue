@@ -24,6 +24,7 @@ import { computed, ref } from 'vue'
 import { gql, useMutation } from '@urql/vue'
 import { OpenConfigFileDocument } from '@packages/data-context/src/gen/all-operations.gen'
 import type { OpenConfigFileInIdeFragment } from '../generated/graphql'
+import ChooseExternalEditorModal from './ChooseExternalEditorModal.vue'
 
 gql`
 fragment OpenConfigFileInIDE on Query {
@@ -37,6 +38,7 @@ fragment OpenConfigFileInIDE on Query {
       preferredEditorBinary
     }
   }
+  ...ChooseExternalEditorModal
 }
 `
 
