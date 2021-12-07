@@ -39,6 +39,7 @@ macWorkflowFilters: &mac-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ tgriesser/fix/patch-resolutions, << pipeline.git.branch >> ]
     - equal: [ renovate/cypress-request-2.x, << pipeline.git.branch >> ]
+    - equal: [ elevatebart/chore/merge-develop, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -49,6 +50,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     - equal: [ master, << pipeline.git.branch >> ]
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ tgriesser/fix/patch-resolutions, << pipeline.git.branch >> ]
+    - equal: [ elevatebart/chore/merge-develop, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
