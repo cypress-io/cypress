@@ -48,7 +48,12 @@
       <RemoveClassesDuringScreenshotting
         class="flex h-full bg-gray-100 p-16px justify-center"
       >
+        <ScriptError
+          v-if="autStore.scriptError"
+          :error="autStore.scriptError.error"
+        />
         <div
+          v-else
           :id="RUNNER_ID"
           class="origin-top-left viewport"
           :style="viewportStyle"
@@ -80,9 +85,10 @@ import ScreenshotHelperPixels from './screenshot/ScreenshotHelperPixels.vue'
 import { useScreenshotStore } from '../store/screenshot-store'
 import ChooseExternalEditorModal from '@packages/frontend-shared/src/gql-components/ChooseExternalEditorModal.vue'
 import { useMutation, gql } from '@urql/vue'
-import { OpenFileInIdeDocument, SpecRunner_SetPreferencesDocument } from '@packages/data-context/src/gen/all-operations.gen'
+import { OpenFileInIdeDocument } from '@packages/data-context/src/gen/all-operations.gen'
 import type { SpecRunnerFragment } from '../generated/graphql'
 import { usePreferences } from '../composables/usePreferences'
+import ScriptError from './ScriptError.vue'
 
 gql`
 fragment SpecRunner on Query {
@@ -127,8 +133,6 @@ const preferences = usePreferences()
 preferences.update('autoScrollingEnabled', props.gql.localSettings.preferences.autoScrollingEnabled ?? true)
 preferences.update('isSpecsListOpen', props.gql.localSettings.preferences.isSpecsListOpen ?? true)
 
-const setPreferences = useMutation(SpecRunner_SetPreferencesDocument)
-
 const runnerPane = ref<HTMLDivElement>()
 
 const viewportStyle = computed(() => {
@@ -153,6 +157,7 @@ const viewportStyle = computed(() => {
 })
 
 function runSpec () {
+  autStore.setScriptError(null)
   UnifiedRunnerAPI.executeSpec(props.activeSpec)
 }
 
@@ -211,6 +216,10 @@ onMounted(() => {
   eventManager.on('save:app:state', (state) => {
     preferences.update('isSpecsListOpen', state.isSpecsListOpen)
     preferences.update('autoScrollingEnabled', state.autoScrollingEnabled)
+  })
+
+  eventManager.on('script:error', (err) => {
+    autStore.scriptError = err
   })
 })
 
