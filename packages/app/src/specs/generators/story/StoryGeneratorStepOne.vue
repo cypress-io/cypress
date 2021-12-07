@@ -38,6 +38,7 @@
         <Button
           :prefix-icon="TestResultsIcon"
           prefix-icon-class="w-16px h-16px icon-dark-white"
+          @click="emits('close')"
         >
           {{ t('createSpec.successPage.runSpecButton') }}
         </Button>
@@ -78,6 +79,7 @@ const emits = defineEmits<{
   (event: 'update:title', value: string): void,
   (event: 'update:description', value: string): void
   (event: 'restart'): void
+  (event: 'close'): void
 }>()
 
 const { title } = useVModels(props, emits)

@@ -38,6 +38,7 @@
         <Button
           :prefix-icon="TestResultsIcon"
           prefix-icon-class="w-16px h-16px icon-dark-white"
+          @click="emits('close')"
         >
           {{ t('createSpec.successPage.runSpecButton') }}
         </Button>
@@ -59,7 +60,7 @@ import { useVModels, whenever } from '@vueuse/core'
 import { useI18n } from '@cy/i18n'
 import FileChooser from '../FileChooser.vue'
 import GeneratorSuccess from '../GeneratorSuccess.vue'
-import { computed, ref, ComputedRef } from 'vue'
+import { computed, ref } from 'vue'
 import { gql, useQuery, useMutation } from '@urql/vue'
 import { ComponentGeneratorStepOneDocument, ComponentGeneratorStepOne_GenerateSpecDocument } from '../../../generated/graphql'
 import StandardModalFooter from '@cy/components/StandardModalFooter.vue'
@@ -78,6 +79,7 @@ const emits = defineEmits<{
   (event: 'update:title', value: string): void,
   (event: 'update:description', value: string): void
   (event: 'restart'): void
+  (event: 'close'): void
 }>()
 
 const { title } = useVModels(props, emits)
