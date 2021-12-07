@@ -534,9 +534,7 @@ commands:
             done
             SPECS=`echo $SPECS | xargs -n 1 | circleci tests split --split-by=timings`
             echo SPECS=$SPECS
-            unset CI
-            echo "CI=$CI"
-            SNAPSHOT_UPDATE=1 CI=0 yarn workspace @tooling/system-tests test:ci $SPECS --browser <<parameters.browser>>
+            yarn workspace @tooling/system-tests test:ci $SPECS --browser <<parameters.browser>>
       - verify-mocha-results
       - store_test_results:
           path: /tmp/cypress
