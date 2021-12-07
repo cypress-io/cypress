@@ -92,5 +92,21 @@ describe('lib/server', () => {
         srv._makeConnection(socket, head, '443', '%7Balgolia_application_id%7D-dsn.algolia.net')
       })
     })
+
+    // https://github.com/cypress-io/cypress/issues/9220
+    it('does not crash when a blank URL is parsed and instead only destroys the socket', function (done) {
+      const socket = new EE()
+
+      socket.destroy = this.sandbox.stub()
+      const head = {}
+
+      this.setup()
+      .then((srv) => {
+        srv.connect({ url: '%20:443' }, socket, head)
+        expect(socket.destroy).to.be.calledOnce
+
+        done()
+      })
+    })
   })
 })

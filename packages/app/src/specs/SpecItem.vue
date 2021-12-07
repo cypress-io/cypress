@@ -1,11 +1,11 @@
 <template>
   <div
-    class="h-full grid grid-cols-[16px,auto,auto] items-center gap-8px"
+    class="h-full grid gap-8px grid-cols-[16px,auto,auto] items-center"
     data-cy="spec-item"
   >
     <component
       :is="DocumentIconBlank"
-      class="icon-light-gray-50 icon-dark-gray-200 document-icon"
+      class="icon-light-gray-50 icon-dark-gray-200"
     />
 
     <div class="text-gray-400 text-indigo-500 group-hocus:text-indigo-500">

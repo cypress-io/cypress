@@ -310,6 +310,9 @@ enum CodeLanguageEnum {
 The currently opened Cypress project, represented by a cypress.config.{ts|js} file
 """
 type CurrentProject implements Node & ProjectLike {
+  """The current branch of the project"""
+  branch: String
+
   """Browsers found that are compatible with Cypress"""
   browsers: [Browser!]
 
@@ -443,6 +446,11 @@ type FileParts implements Node {
 
   """Relative path to spec (e.g. src/component/MySpec.test.tsx)"""
   relative: String!
+}
+
+enum FrontendFrameworkCategoryEnum {
+  react
+  vue
 }
 
 enum FrontendFrameworkEnum {
@@ -927,6 +935,9 @@ enum WizardConfigFileStatusEnum {
 
 """A frontend framework that we can setup within the app"""
 type WizardFrontendFramework implements Node {
+  """Classification or label of framework. e.g. React, Vue, or Other"""
+  category: FrontendFrameworkCategoryEnum!
+
   """Relay style Node ID field for the WizardFrontendFramework field"""
   id: ID!
 

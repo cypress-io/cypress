@@ -1,4 +1,4 @@
-import { createEventManager, createTestAutIframe } from '../../../cypress/e2e/support/ctSupport'
+import { createEventManager, createTestAutIframe } from '../../../cypress/component/support/ctSupport'
 import { useSelectorPlaygroundStore } from '../../store/selector-playground-store'
 import SelectorPlayground from './SelectorPlayground.vue'
 

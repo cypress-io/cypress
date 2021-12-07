@@ -363,16 +363,13 @@ describe('events', () => {
       expect(runner.emit).to.have.been.calledWith('runner:unpin:snapshot', 'command id')
     })
 
-    it('emits focus:tests on focus:tests', () => {
-      events.emit('focus:tests')
-      expect(runner.emit).to.have.been.calledWith('focus:tests')
-    })
-
     it('emits save:state on save:state', () => {
       appState.autoScrollingEnabled = false
+      appState.isSpecsListOpen = true
       events.emit('save:state')
       expect(runner.emit).to.have.been.calledWith('save:state', {
         autoScrollingEnabled: false,
+        isSpecsListOpen: true,
       })
     })
 

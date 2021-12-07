@@ -62,7 +62,7 @@ export interface OpenProjectLaunchOptions {
    * Whether to skip the plugin initialization, useful when
    * we're using Cypress to test Cypress
    */
-  skipPluginIntializeForTesting?: boolean
+  skipPluginInitializeForTesting?: boolean
 
   configFile?: string | false
   browsers?: Cypress.Browser[]

@@ -4,7 +4,8 @@
     data-cy="external"
     :href="props.href"
     :use-default-hocus="props.useDefaultHocus"
-    @click.prevent="openExternal"
+    @click.prevent="open"
+    @keypress.space.enter.prevent="open"
   ><slot /></BaseLink>
 </template>
 
@@ -18,16 +19,7 @@ export default defineComponent({
 
 <script setup lang="ts">
 import BaseLink from '../components/BaseLink.vue'
-import { ExternalLink_OpenExternalDocument } from '../generated/graphql'
-import { gql, useMutation } from '@urql/vue'
-
-gql`
-mutation ExternalLink_OpenExternal ($url: String!) {
-  openExternal(url: $url)
-}
-`
-
-const openExternalMutation = useMutation(ExternalLink_OpenExternalDocument)
+import { useExternalLink } from '../gql-components/useExternalLink'
 
 const props = withDefaults(defineProps<{
   href: string,
@@ -36,7 +28,5 @@ const props = withDefaults(defineProps<{
   useDefaultHocus: true,
 })
 
-const openExternal = () => {
-  openExternalMutation.executeMutation({ url: props.href })
-}
+const open = useExternalLink(props.href)
 </script>

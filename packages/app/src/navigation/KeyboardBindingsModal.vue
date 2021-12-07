@@ -1,6 +1,6 @@
 <template>
   <StandardModal
-    class="transition duration-200 transition-all"
+    class="transition transition-all duration-200"
     :click-outside="false"
     variant="bare"
     :title="t('sideBar.keyboardShortcuts.title')"
@@ -13,7 +13,7 @@
       <li
         v-for="binding in keyBindings"
         :key="binding.key.join('-')"
-        class="flex items-center h-24px my-16px"
+        class="flex h-24px my-16px items-center"
       >
         <p class="flex-grow text-gray-700 text-16px leading-24px">
           {{ binding.description }}
@@ -21,7 +21,7 @@
         <span
           v-for="key in binding.key"
           :key="key"
-          class="inline-block rounded-sm border border-gray-100 bg-gray-50 h-24px w-24px text-indigo-500 text-14px leading-20px text-center ml-8px"
+          class="border rounded-sm bg-gray-50 border-gray-100 h-24px text-center ml-8px text-indigo-500 text-14px leading-20px w-24px inline-block"
         >
           {{ key }}
         </span>
@@ -56,10 +56,6 @@ const keyBindings = [
   {
     key: ['f'],
     description: t('sideBar.keyboardShortcuts.toggle'),
-  },
-  {
-    key: ['⌘', 'b'] as const,
-    description: t('sideBar.keyboardShortcuts.collapse'),
   },
 ]
 </script>

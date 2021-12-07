@@ -1,16 +1,21 @@
 <template>
   <RemovePositioningDuringScreenshot
     id="main-pane"
-    class="flex border-l-1 border-gray-900"
+    class="flex border-gray-900 border-l-1"
   >
     <HideDuringScreenshot
       id="inline-spec-list"
       class="bg-gray-1000"
     >
-      <InlineSpecList
-        v-if="props.gql.currentProject "
-        :gql="props.gql.currentProject"
-      />
+      <template
+        v-if="props.gql.currentProject"
+      >
+        <InlineSpecList
+          v-show="runnerUiStore.isSpecsListOpen"
+          id="reporter-inline-specs-list"
+          :gql="props.gql"
+        />
+      </template>
 
       <ChooseExternalEditorModal
         :open="runnerUiStore.showChooseExternalEditorModal"
@@ -20,7 +25,7 @@
       />
     </HideDuringScreenshot>
 
-    <HideDuringScreenshot class="w-128">
+    <HideDuringScreenshot class="min-w-320px">
       <div
         v-once
         :id="REPORTER_ID"
@@ -29,9 +34,9 @@
 
     <div
       ref="runnerPane"
-      class="relative w-full"
+      class="w-full relative"
     >
-      <HideDuringScreenshot class="bg-white p-4">
+      <HideDuringScreenshot class="bg-white p-16px">
         <SpecRunnerHeader
           v-if="props.gql.currentProject"
           :gql="props.gql.currentProject"
@@ -41,11 +46,11 @@
       </HideDuringScreenshot>
 
       <RemoveClassesDuringScreenshotting
-        class="flex justify-center bg-gray-100 h-full p-4"
+        class="flex h-full bg-gray-100 p-16px justify-center"
       >
         <div
           :id="RUNNER_ID"
-          class="viewport origin-top-left"
+          class="origin-top-left viewport"
           :style="viewportStyle"
         />
       </RemoveClassesDuringScreenshotting>
@@ -62,10 +67,9 @@
 <script lang="ts" setup>
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { REPORTER_ID, RUNNER_ID, getRunnerElement, getReporterElement, empty } from '../runner/utils'
-import { gql } from '@urql/core'
 import InlineSpecList from '../specs/InlineSpecList.vue'
 import { getAutIframeModel, getEventManager, UnifiedRunnerAPI } from '../runner'
-import { useAutStore } from '../store'
+import { useAutStore, useRunnerUiStore } from '../store'
 import type { BaseSpec, FileDetails } from '@packages/types'
 import SnapshotControls from './SnapshotControls.vue'
 import SpecRunnerHeader from './SpecRunnerHeader.vue'
@@ -74,20 +78,26 @@ import RemoveClassesDuringScreenshotting from './screenshot/RemoveClassesDuringS
 import RemovePositioningDuringScreenshot from './screenshot/RemovePositioningDuringScreenshot.vue'
 import ScreenshotHelperPixels from './screenshot/ScreenshotHelperPixels.vue'
 import { useScreenshotStore } from '../store/screenshot-store'
-import { useRunnerUiStore } from '../store/runner-ui-store'
 import ChooseExternalEditorModal from '@packages/frontend-shared/src/gql-components/ChooseExternalEditorModal.vue'
-import { useMutation } from '@urql/vue'
-import { OpenFileInIdeDocument } from '@packages/data-context/src/gen/all-operations.gen'
+import { useMutation, gql } from '@urql/vue'
+import { OpenFileInIdeDocument, SpecRunner_SetPreferencesDocument } from '@packages/data-context/src/gen/all-operations.gen'
 import type { SpecRunnerFragment } from '../generated/graphql'
+import { usePreferences } from '../composables/usePreferences'
 
 gql`
 fragment SpecRunner on Query {
+  ...Specs_InlineSpecList
   currentProject {
     id
-    ...Specs_InlineSpecList
     ...SpecRunnerHeader
   }
   ...ChooseExternalEditor
+  localSettings {
+    preferences {
+      isSpecsListOpen
+      autoScrollingEnabled
+    }
+  }
 }
 `
 
@@ -97,11 +107,27 @@ mutation OpenFileInIDE ($input: FileDetailsInput!) {
 }
 `
 
+gql`
+mutation SpecRunner_SetPreferences ($value: String!) {
+  setPreferences (value: $value)
+}`
+
+const props = defineProps<{
+  gql: SpecRunnerFragment
+  activeSpec: BaseSpec
+}>()
+
 const eventManager = getEventManager()
 
 const autStore = useAutStore()
 const screenshotStore = useScreenshotStore()
 const runnerUiStore = useRunnerUiStore()
+const preferences = usePreferences()
+
+preferences.update('autoScrollingEnabled', props.gql.localSettings.preferences.autoScrollingEnabled ?? true)
+preferences.update('isSpecsListOpen', props.gql.localSettings.preferences.isSpecsListOpen ?? true)
+
+const setPreferences = useMutation(SpecRunner_SetPreferencesDocument)
 
 const runnerPane = ref<HTMLDivElement>()
 
@@ -125,11 +151,6 @@ const viewportStyle = computed(() => {
   height: ${autStore.viewportDimensions.height}px;
   transform: scale(${scale});`
 })
-
-const props = defineProps<{
-  gql: SpecRunnerFragment
-  activeSpec: BaseSpec
-}>()
 
 function runSpec () {
   UnifiedRunnerAPI.executeSpec(props.activeSpec)
@@ -185,6 +206,11 @@ onMounted(() => {
 
   eventManager.on('after:screenshot', () => {
     screenshotStore.setScreenshotting(false)
+  })
+
+  eventManager.on('save:app:state', (state) => {
+    preferences.update('isSpecsListOpen', state.isSpecsListOpen)
+    preferences.update('autoScrollingEnabled', state.autoScrollingEnabled)
   })
 })
 

@@ -6,20 +6,20 @@
     <template #description>
       <i18n-t keypath="settingsPage.experiments.description">
         <ExternalLink
-          href="https://docs.cypress.io"
+          href="https://on.cypress.io/experiments"
         >
           {{ t('links.learnMore') }}
         </ExternalLink>
       </i18n-t>
     </template>
     <div
-      class="mx-auto first:border-t-0 border-gray-200 rounded grid gap-0 align-center border px-16px"
+      class="border rounded mx-auto border-gray-100 grid px-24px gap-0 align-center first:border-t-0"
     >
       <ExperimentRow
         v-for="experiment in localExperiments"
         :key="experiment.key"
         data-testid="experiment"
-        class="border-t-1 first:border-0 py-20px"
+        class="border-t-1 border-gray-100 py-24px first:border-0"
         :experiment="experiment"
       />
     </div>
@@ -28,19 +28,34 @@
 
 <script lang="ts" setup>
 import { computed } from 'vue'
+import { gql } from '@urql/vue'
 import ExperimentRow from './ExperimentRow.vue'
 import SettingsSection from '../SettingsSection.vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
-import { experiments as defaultExperiments } from './projectSettings'
-
-// eslint-disable-next-line no-duplicate-imports
-import type { Experiment } from './projectSettings'
+import type { ExperimentsFragment } from '../../generated/graphql'
 import { useI18n } from '@cy/i18n'
+import type { CypressResolvedConfig } from './projectSettings'
+const { t } = useI18n()
+
+gql`
+fragment Experiments on CurrentProject {
+  id
+  config
+}
+`
 
 const props = defineProps<{
-  experiments?: Experiment[]
+  gql?: ExperimentsFragment
 }>()
 
-const localExperiments = computed(() => props.experiments || defaultExperiments)
-const { t } = useI18n()
+const localExperiments = computed(() => {
+  return props.gql?.config ? (props.gql.config as CypressResolvedConfig).filter((item) => item.field.startsWith('experimental')).map((configItem) => {
+    return {
+      key: configItem.field,
+      name: t(`settingsPage.experiments.${configItem.field}.name`),
+      enabled: !!configItem.value,
+      description: t(`settingsPage.experiments.${configItem.field}.description`),
+    }
+  }) : []
+})
 </script>

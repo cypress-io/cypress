@@ -14,7 +14,7 @@
     on Cypress Cloud.
   </template>
   <SpecPatterns :gql="props.gql" />
-  <Experiments />
+  <Experiments :gql="props.gql" />
   <Config :gql="props.gql" />
 </template>
 
@@ -32,6 +32,7 @@ fragment ProjectSettings on CurrentProject {
   id
   ...ProjectId
   ...SpecPatterns
+  ...Experiments
   ...Config
   cloudProject {
     id

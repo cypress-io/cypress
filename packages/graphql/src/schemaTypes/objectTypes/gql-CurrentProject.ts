@@ -2,9 +2,11 @@ import { nonNull, objectType, stringArg } from 'nexus'
 import path from 'path'
 import { cloudProjectBySlug } from '../../stitching/remoteGraphQLCalls'
 import { CodeGenTypeEnum } from '../enumTypes/gql-CodeGenTypeEnum'
+import { TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
 import { Browser } from './gql-Browser'
 import { FileParts } from './gql-FileParts'
 import { ProjectPreferences } from './gql-ProjectPreferences'
+import { Storybook } from './gql-Storybook'
 
 export const CurrentProject = objectType({
   name: 'CurrentProject',
@@ -20,7 +22,7 @@ export const CurrentProject = objectType({
 
     t.field('currentTestingType', {
       description: 'The mode the interactive runner was launched in',
-      type: 'TestingTypeEnum',
+      type: TestingTypeEnum,
       resolve: (_, args, ctx) => ctx.wizard.chosenTestingType,
     })
 
@@ -130,7 +132,7 @@ export const CurrentProject = objectType({
     })
 
     t.field('storybook', {
-      type: 'Storybook',
+      type: Storybook,
       resolve: (source, args, ctx) => ctx.storybook.loadStorybookInfo(),
     })
 
@@ -150,6 +152,15 @@ export const CurrentProject = objectType({
       },
       resolve: (source, args, ctx) => {
         return ctx.project.getCodeGenCandidates(args.glob)
+      },
+    })
+
+    t.string('branch', {
+      description: 'The current branch of the project',
+      resolve: async (source, args, ctx) => {
+        const branchName = await ctx.git.getBranch(source.projectRoot)
+
+        return branchName
       },
     })
   },
