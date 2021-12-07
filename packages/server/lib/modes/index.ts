@@ -5,10 +5,6 @@ export = (mode, options) => {
     makeLegacyDataContext(options)
   }
 
-  if (mode === 'record') {
-    return require('./record').run(options)
-  }
-
   if (mode === 'smokeTest') {
     return require('./smoke_test').run(options)
   }
