@@ -75,9 +75,10 @@ export class ProjectActions {
     const title = this.ctx.project.projectTitle(projectRoot)
 
     await this.clearActiveProject()
+    this.ctx.actions.wizard.resetWizard()
 
     // Set initial properties, so we can set the config object on the active project
-    await this.setCurrentProjectProperties({
+    this.setCurrentProjectProperties({
       projectRoot,
       title,
       ctPluginsInitialized: false,

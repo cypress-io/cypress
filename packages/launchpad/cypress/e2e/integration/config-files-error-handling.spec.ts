@@ -1,4 +1,22 @@
 describe('Config files error handling', () => {
+  it('creates config file if it do not exist', () => {
+    cy.setupE2E('pristine')
+    cy.visitLaunchpad()
+
+    cy.get('[data-cy-testingType=e2e]').click()
+
+    cy.get('body').should('contain.text', 'Configuration Files')
+
+    cy.get('button').contains('Continue').click()
+
+    cy.get('body')
+    .should('contain.text', 'Initializing Config')
+
+    cy.withCtx(async (ctx) => {
+      await ctx.actions.file.checkIfFileExists('cypress.config.js')
+    })
+  })
+
   it('it handles multiples config files', () => {
     cy.setupE2E('pristine-with-config-file')
     cy.visitLaunchpad()
@@ -87,23 +105,5 @@ describe('Config files error handling', () => {
     cy.get('[data-testid=error-retry-button]').click()
     cy.get('body')
     .should('not.contain.text', 'Cypress Configuration Error')
-  })
-
-  it('creates config file if it do not exist', () => {
-    cy.setupE2E('pristine')
-    cy.visitLaunchpad()
-
-    cy.get('[data-cy-testingType=e2e]').click()
-
-    cy.get('body').should('contain.text', 'Configuration Files')
-
-    cy.get('button').contains('Continue').click()
-
-    cy.get('body')
-    .should('contain.text', 'Initializing Config')
-
-    cy.withCtx(async (ctx) => {
-      await ctx.actions.file.checkIfFileExists('cypress.config.js')
-    })
   })
 })
