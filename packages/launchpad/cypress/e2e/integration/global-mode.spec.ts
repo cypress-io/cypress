@@ -109,13 +109,6 @@ describe('Launchpad: Global Mode', () => {
       cy.get('[data-testid="dropzone"]').should('not.exist')
     })
 
-    // TODO: finish test
-    it.skip('can add an additional project by dragging and dropping folder into project dropzone', () => {
-      setupProjects(['todos'])
-      cy.get('[data-testid=addProjectButton').click()
-      cy.get('[data-testid="dropzone"]').should('exist')
-    })
-
     describe('Project card menu', () => {
       it('can be opened', () => {
         setupProjects(['todos'])
