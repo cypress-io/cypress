@@ -32,9 +32,6 @@ describe('e2e error ui', function () {
       onRun (exec) {
         return exec().then(verifyPassedAndFailedAreSame(1))
       },
-      processEnv: {
-        CYPRESS_INTERNAL_ENV: 'development',
-      },
     })
   })
 
@@ -47,9 +44,6 @@ describe('e2e error ui', function () {
       Fixtures.scaffoldProject('integration-outside-project-root')
 
       return exec().then(verifyPassedAndFailedAreSame(1))
-    },
-    processEnv: {
-      CYPRESS_INTERNAL_ENV: 'development',
     },
   })
 })

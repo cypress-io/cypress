@@ -136,9 +136,6 @@ describe('e2e sessions', () => {
       experimentalSessionSupport: true,
       video: false,
     },
-    processEnv: {
-      CYPRESS_INTERNAL_ENV: 'development',
-    },
   })
 
   it('sessions persist on reload, and clear between specs', {
