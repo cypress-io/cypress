@@ -14,6 +14,7 @@
     />
     <InlineSpecListTree
       :specs="specs"
+      class="pb-32px"
     />
     <!-- Fading top and bottom of the container. It may make sense for this to exist in a css utility or class. -->
     <div class="bg-gradient-to-b to-transparent from-gray-1000 h-12px w-full top-66px right-0 left-0 scroller-fade absolute" />

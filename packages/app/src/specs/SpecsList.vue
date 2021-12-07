@@ -26,7 +26,7 @@
       </div>
     </div>
     <div
-      class="grid spec-list-container"
+      class="grid pb-32px spec-list-container"
       v-bind="containerProps"
     >
       <div
