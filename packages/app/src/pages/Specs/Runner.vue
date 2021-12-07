@@ -23,7 +23,7 @@ const query = useQuery({ query: SpecPageContainerDocument })
   {
     meta: {
       header: false,
-      navBarExpanded: false
+      navBarExpandedAllowed: false
     }
   }
 </route>

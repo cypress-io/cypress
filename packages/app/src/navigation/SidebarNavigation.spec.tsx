@@ -4,7 +4,7 @@ import SidebarNavigation from './SidebarNavigation.vue'
 function mountComponent (initialNavExpandedVal = true) {
   const mainStore = useMainStore()
 
-  mainStore.navBarExpandedFlag = initialNavExpandedVal
+  mainStore.setNavBarExpandedByUser(initialNavExpandedVal)
 
   cy.mount(() => {
     return (

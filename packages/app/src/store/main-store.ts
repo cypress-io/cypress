@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { useRoute } from 'vue-router'
 
 export interface MainStoreState {
-  navBarExpandedFlag: boolean
+  navBarExpandedByUser: boolean
 }
 
 /**
@@ -14,19 +14,22 @@ export const useMainStore = defineStore({
   id: 'main',
   state: (): MainStoreState => {
     return {
-      navBarExpandedFlag: true,
+      navBarExpandedByUser: true,
     }
   },
   actions: {
     toggleNavBar () {
-      this.navBarExpandedFlag = !this.navBarExpandedFlag
+      this.navBarExpandedByUser = !this.navBarExpandedByUser
+    },
+    setNavBarExpandedByUser (value: boolean) {
+      this.navBarExpandedByUser = value
     },
   },
   getters: {
     navBarExpanded: (state) => {
       const route = useRoute()
 
-      return state.navBarExpandedFlag && route.meta?.navBarExpanded !== false
+      return state.navBarExpandedByUser && route.meta?.navBarExpandedAllowed !== false
     },
   },
 })
