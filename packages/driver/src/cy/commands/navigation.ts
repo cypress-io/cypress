@@ -712,7 +712,7 @@ export default (Commands, Cypress, cy, state, config) => {
         failOnStatusCode: true,
         retryOnNetworkFailure: true,
         retryOnStatusCodeFailure: false,
-        retryIntervals: [0, 0, 500, 1000],
+        retryIntervals: [0, 100, 200, 200],
         method: 'GET',
         body: null,
         headers: {},

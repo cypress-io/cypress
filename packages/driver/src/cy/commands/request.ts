@@ -28,7 +28,7 @@ const REQUEST_DEFAULTS = {
   timeout: null,
   followRedirect: true,
   failOnStatusCode: true,
-  retryIntervals: [0, 0, 500, 1000],
+  retryIntervals: [0, 100, 200, 200],
   retryOnNetworkFailure: true,
   retryOnStatusCodeFailure: false,
 }
