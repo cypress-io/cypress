@@ -132,7 +132,8 @@ const viewportStyle = computed(() => {
   }
 
   let scale: number = 1
-  // TODO: make these values reactive
+
+  // TODO: make these values dynamic in UNIFY-592:
   const reporterWidth = 320
   const navWidth = 64
   const specsListWidth = runnerUiStore.isSpecsListOpen ? 280 : 0
@@ -141,19 +142,13 @@ const viewportStyle = computed(() => {
 
   const nonAutWidth = reporterWidth + navWidth + specsListWidth + (autMargin * 2)
   const nonAutHeight = autHeaderHeight + (autMargin * 2)
+  const containerWidth = width.value - nonAutWidth
+  const containerHeight = height.value - nonAutHeight
 
   if (screenshotStore.isScreenshotting) {
     scale = 1
   } else {
-    const horizontalDiff = width.value - nonAutWidth - autStore.viewportDimensions.width
-    const verticalDiff = height.value - nonAutHeight - autStore.viewportDimensions.height
-
-    if (horizontalDiff < 0 && (horizontalDiff < verticalDiff)) {
-      scale = (width.value - nonAutWidth) / autStore.viewportDimensions.width
-    } else if (verticalDiff < 0) {
-      scale = ((height.value - nonAutHeight) / autStore.viewportDimensions.height)
-    }
-
+    scale = Math.min(containerWidth / autStore.viewportDimensions.width, containerHeight / autStore.viewportDimensions.height, 1)
     if (scale > 1) {
       scale = 1
     }
