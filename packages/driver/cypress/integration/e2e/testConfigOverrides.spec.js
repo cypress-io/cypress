@@ -378,16 +378,6 @@ describe('testConfigOverrides baseUrl @slow', () => {
 })
 
 describe('cannot set read-only properties', () => {
-  it('throws if mutating read-only config with test configuration', () => {
-    try {
-      it('fails to set chromeWebSecurity', { cypressEnv: 'test', chromeWebSecurity: false }, () => {
-        return
-      })
-    } catch (err) {
-      expect(err.message).to.include('Cypress test configuration cannot mutate option `chromeWebSecurity` because it is a read-only property.')
-    }
-  })
-
   it('throws if mutating read-only config with Cypress.config()', (done) => {
     cy.on('fail', (err) => {
       Cypress.config('cypressEnv', 'development')

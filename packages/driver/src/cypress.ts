@@ -144,7 +144,7 @@ class $Cypress {
     this.state = $SetterGetter.create({})
     this.originalConfig = _.cloneDeep(config)
     this.config = $SetterGetter.create(config, (config) => {
-      if (this.config('cypressEnv') !== 'development' && process.env.CYPRESS_INTERNAL_ENV !== 'development') {
+      if (process.env.CYPRESS_INTERNAL_ENV !== 'development' && env.CYPRESS_INTERNAL_ENV !== 'development') {
         validateNoReadOnlyConfig(config, (errProperty) => {
           let errMessage
 

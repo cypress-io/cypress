@@ -10,10 +10,19 @@ if (!isActuallyInteractive) {
 }
 
 beforeEach(() => {
+  const originalEnv = Cypress.config('env')
+
   // always set that we're interactive so we
   // get consistent passes and failures when running
   // from CI and when running in GUI mode
-  Cypress.config('isInteractive', true)
+  Cypress.config({
+    isInteractive: true,
+    env: {
+      CYPRESS_INTERNAL_ENV: 'development',
+    },
+  })
+
+  Cypress.config('env', originalEnv)
 
   if (!isActuallyInteractive) {
     // necessary or else snapshots will not be taken

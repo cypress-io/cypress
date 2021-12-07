@@ -104,6 +104,8 @@ module.exports = {
   },
 
   validateNoReadOnlyConfig: (config, onErr) => {
+    if (config.env?.CYPRESS_INTERNAL_ENV === 'development') return
+
     let errProperty
 
     Object.keys(config).some((option) => {
