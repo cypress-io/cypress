@@ -65,7 +65,7 @@
         hocus:border-indigo-300
       "
       :aria-label="t('specPage.newSpecButton')"
-      @click="emit('addSpec')"
+      @click="emit('newSpec')"
     >
       <i-cy-add-small_x16 class="icon-light-gray-50 icon-dark-gray-200" />
     </button>
@@ -92,7 +92,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'update:search', search: string): void
-  (e: 'addSpec'): void
+  (e: 'newSpec'): void
 }>()
 
 const inputFocused = ref(false)
