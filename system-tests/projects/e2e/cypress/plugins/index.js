@@ -151,7 +151,7 @@ module.exports = (on, config) => {
     },
 
     'check:screenshot:size' ({ name, width, height, devicePixelRatio }) {
-      return Jimp.read(path.join(__dirname, '..', 'screenshots', name))
+      return Jimp.read(path.join(__dirname, '..', 'screenshots', 'cypress', 'integration', name))
       .then((image) => {
         width = width * devicePixelRatio
         height = height * devicePixelRatio

@@ -174,10 +174,10 @@ describe('taking screenshots', () => {
     cy.screenshot({ capture: 'runner' })
     cy.screenshot({ capture: 'runner' })
     cy.screenshot({ capture: 'runner' })
-    cy.readFile(`cypress/screenshots/${path.basename(__filename)}/taking screenshots -- ensures unique paths for non-named screenshots.png`, 'base64')
-    cy.readFile(`cypress/screenshots/${path.basename(__filename)}/taking screenshots -- ensures unique paths for non-named screenshots (1).png`, 'base64')
+    cy.readFile(`cypress/screenshots/cypress/integration/${path.basename(__filename)}/taking screenshots -- ensures unique paths for non-named screenshots.png`, 'base64')
+    cy.readFile(`cypress/screenshots/cypress/integration/${path.basename(__filename)}/taking screenshots -- ensures unique paths for non-named screenshots (1).png`, 'base64')
 
-    cy.readFile(`cypress/screenshots/${path.basename(__filename)}/taking screenshots -- ensures unique paths for non-named screenshots (2).png`, 'base64')
+    cy.readFile(`cypress/screenshots/cypress/integration/${path.basename(__filename)}/taking screenshots -- ensures unique paths for non-named screenshots (2).png`, 'base64')
   })
 
   it('ensures unique paths when there\'s a non-named screenshot and a failure', () => {
