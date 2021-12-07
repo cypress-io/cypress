@@ -1,5 +1,6 @@
 <template>
   <button
+    data-testid="open-config-file"
     @click="showCypressConfigInIDE()"
   >
     <slot>

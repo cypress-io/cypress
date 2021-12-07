@@ -8,11 +8,10 @@ const headerSelector = '[data-testid=error-header]'
 const messageSelector = '[data-testid=error-message]'
 const retryButtonSelector = '[data-testid=error-retry-button]'
 const docsButtonSelector = '[data-testid=error-read-the-docs-button]'
-const docsLinkSelector = '[data-testid=error-docs-link]'
 const customFooterSelector = '[data-testid=custom-error-footer]'
+const openConfigFileSelector = '[data-testid=open-config-file]'
 
 // Constants
-const configLink = 'https://on.cypress.io/guides/configuration'
 const messages = defaultMessages.launchpadErrors.generic
 const customHeaderMessage = 'Well, this was unexpected!'
 const customMessage = `Don't worry, just click the "It's fixed now" button to try again.`
@@ -36,19 +35,25 @@ describe('<BaseError />', () => {
         if (result.baseError) {
           result.baseError.title = messages.header
         }
+
+        if (result.currentProject) {
+          result.currentProject.configFilePath = 'cypress.config.ts'
+        }
       },
       render: (gqlVal) => <BaseError gql={gqlVal} />,
     })
     .get(headerSelector)
     .should('contain.text', messages.header)
     .get(messageSelector)
-    .should('contain.text', messages.message.replace('{0}', 'cypress.config.js'))
+    .should('contain.text', messages.message.replace('{0}', 'cypress.config.ts'))
     .get(retryButtonSelector)
     .should('contain.text', messages.retryButton)
     .get(docsButtonSelector)
     .should('contain.text', messages.readTheDocsButton)
-    .get(docsLinkSelector)
-    .should('have.attr', 'href', configLink)
+    .get(openConfigFileSelector)
+    .click()
+
+    cy.get('#headlessui-dialog-title-3').contains('Select Preferred Editor')
   })
 
   // NOTE: Figure out how to stub the graphql mutation call
