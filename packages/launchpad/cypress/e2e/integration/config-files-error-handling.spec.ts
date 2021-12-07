@@ -90,7 +90,9 @@ describe('Config files error handling', () => {
 
     cy.get('[data-cy-testingType=e2e]').click()
 
-    cy.get('body').should('contain.text', 'Initializing Config...')
+    cy.get('body').should('contain.text', 'Configuration Files')
+
+    cy.get('button').contains('Continue').click()
 
     cy.get('body')
     .should('contain.text', 'Initializing Config')

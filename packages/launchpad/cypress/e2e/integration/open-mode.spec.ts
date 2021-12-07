@@ -79,7 +79,8 @@ describe('Launchpad: Open Mode', () => {
 
     // Need to visit after args have been configured, todo: fix in #18776
     cy.visitLaunchpad()
-
+    // Wait the plugins to initialize
+    cy.wait(4000)
     cy.contains('Next Step').click()
     cy.get('h1').should('contain', 'Choose a Browser')
     cy.contains('Firefox').parent().should('have.class', 'border-jade-300')
