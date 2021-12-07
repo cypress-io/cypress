@@ -118,6 +118,11 @@ const maybeRetryOnNetworkFailure = function (err, options = {}) {
     // https://github.com/cypress-io/cypress/pull/6705
     debug('detected TLS version error, setting min version to TLSv1')
     opts.minVersion = 'TLSv1'
+
+    if (retryIntervals.length === 0) {
+      // normally, this request would not be retried, but we need to retry in order to support TLSv1
+      return onNext(0, 1)
+    }
   }
 
   if (!isTlsVersionError && !isErrEmptyResponseError(err.originalErr || err) && !isRetriableError(err, retryOnNetworkFailure)) {
