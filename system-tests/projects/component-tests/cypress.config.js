@@ -1,7 +1,10 @@
 module.exports = {
   'projectId': 'abc123',
-  'componentFolder': 'cypress/component-tests',
-  'component': {
+  e2e: {
+    specPattern: 'cypress/integration/**/*',
+  },
+  component: {
+    specPattern: 'cypress/component-tests/**/*',
     devServer (cypressConfig, devServerConfig) {
       const { startDevServer } = require('@cypress/webpack-dev-server')
 

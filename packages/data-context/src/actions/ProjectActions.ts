@@ -460,8 +460,7 @@ export class ProjectActions {
       throw Error(`Cannot create spec without activeProject.`)
     }
 
-    const config = await this.ctx.project.getConfig(project.projectRoot)
-    const integrationFolder = config.integrationFolder || project.projectRoot
+    const integrationFolder = 'cypress/integration' || project.projectRoot
 
     const results = await codeGenerator(
       { templateDir: templates['scaffoldIntegration'], target: integrationFolder },
