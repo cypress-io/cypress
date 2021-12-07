@@ -159,9 +159,6 @@ const viewportStyle = computed(() => {
     scale = 1
   } else {
     scale = Math.min(containerWidth.value / autStore.viewportDimensions.width, containerHeight.value / autStore.viewportDimensions.height, 1)
-    if (scale > 1) {
-      scale = 1
-    }
   }
 
   return `
