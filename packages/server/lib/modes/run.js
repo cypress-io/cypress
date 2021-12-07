@@ -67,6 +67,14 @@ const getWidth = (table, index) => {
   }
 }
 
+const relativeSpecPattern = (projectRoot, pattern) => {
+  if (typeof pattern === 'string') {
+    return pattern.replace(`${projectRoot}/`, '')
+  }
+
+  return pattern.map((x) => x.replace(`${projectRoot}/`, ''))
+}
+
 const formatBrowser = (browser) => {
   // TODO: finish browser
   return _.compact([
@@ -212,8 +220,10 @@ const displayRunStarting = function (options = {}) {
       specPattern = [specPattern]
     }
 
+    specPattern = relativeSpecPattern(projectRoot, specPattern)
+
     if (specPattern) {
-      return formatPath(specPattern.map((x) => x.replace(`${projectRoot}/`, '')).join(', '), getWidth(table, 1))
+      return formatPath(specPattern.join(', '), getWidth(table, 1))
     }
   }
 
@@ -1551,9 +1561,7 @@ module.exports = {
 
         let specPattern = specPatternFromCli || config[options.testingType].specPattern
 
-        if (typeof specPattern === 'string') {
-          specPattern = [specPattern]
-        }
+        specPattern = relativeSpecPattern(projectRoot, specPattern)
 
         return Promise.all([
           system.info(),
