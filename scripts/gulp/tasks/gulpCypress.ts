@@ -11,7 +11,7 @@ import fs from 'fs-extra'
 import { DevActions } from '@packages/data-context/src/actions/DevActions'
 
 import { monorepoPaths } from '../monorepoPaths'
-import { ENV_VARS, getGulpGlobal } from '../gulpConstants'
+import { ENV_VARS } from '../gulpConstants'
 import { forked } from '../utils/childProcessUtils'
 import { exitAndRemoveProcess } from './gulpRegistry'
 import { ChildProcess, exec } from 'child_process'
@@ -63,17 +63,22 @@ async function spawnCypressWithMode (
   mode: 'open' | 'run',
   type: 'dev' | 'prod' | 'test',
   env: Record<string, string> = {},
-  additionalArgv: string[] = [],
+  additionalArgv: string[] = process.argv.slice(3).filter((a) => a !== '--no-respawning'),
 ) {
-  let argv = process.argv.slice(3).concat(additionalArgv)
+  let argv = [...additionalArgv]
 
-  const debugFlag = getGulpGlobal('debug')
+  let debugFlag = process.execArgv.find((s) => s.startsWith('--inspect'))
 
   if (debugFlag) {
+    if (process.debugPort) {
+      debugFlag = `${debugFlag}=${process.debugPort + 1}`
+    }
+
     env = { ...env, CYPRESS_INTERNAL_DEV_DEBUG: debugFlag }
   }
 
   if (mode === 'open') {
+    env.CYPRESS_INTERNAL_GRAPHQL_PORT = process.env.CYPRESS_INTERNAL_GRAPHQL_PORT ?? '4444'
     if (!argv.includes('--project') && !argv.includes('--global')) {
       argv.push('--global')
     }
@@ -106,6 +111,7 @@ async function spawnCypressWithMode (
     cwd: monorepoPaths.root,
     env: finalEnv,
     waitForData: false,
+    execArgv: [],
   })
 }
 
