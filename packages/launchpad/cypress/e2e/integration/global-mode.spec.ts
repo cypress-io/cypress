@@ -14,10 +14,6 @@ describe('Launchpad: Global Mode', () => {
     cy.setupE2E()
   })
 
-  afterEach(() => {
-    cy.task('removedScaffoldedProjects')
-  })
-
   describe('when no projects have been added', () => {
     it('shows "Add Project" view', () => {
       cy.visitLaunchpad()
@@ -38,6 +34,10 @@ describe('Launchpad: Global Mode', () => {
   })
 
   describe('when projects have been added', () => {
+    afterEach(() => {
+      cy.task('removedScaffoldedProjects')
+    })
+
     const setupProjects = (projectList) => {
       projectList.forEach((projectName) => {
         scaffoldProject(projectName)
