@@ -426,7 +426,6 @@ export function setSupportFileAndFolder (obj, defaults) {
     // /tmp/foo -> /private/tmp/foo
     // which can confuse the rest of the code
     // switch it back to "normal" file
-    obj.supportFile = path.join(sf, path.basename(obj.supportFile))
 
     return fs.pathExists(obj.supportFile)
     .then((found) => {

@@ -156,7 +156,6 @@ describe('lib/project-base', () => {
         expect(this.project.getConfig()).to.deep.eq({
           integrationFolder,
           browsers: [],
-          isNewProject: false,
           baz: 'quux',
           state: {
             reporterWidth: 225,
@@ -585,18 +584,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       this.obj = { projectRoot: 'pr', fixturesFolder: 'ff', integrationFolder: 'if', supportFolder: 'sf', pluginsFile: 'pf/index.js' }
     })
 
-    it('calls scaffold.integration with integrationFolder', function () {
-      return this.project.scaffold(this.obj).then(() => {
-        expect(scaffold.integration).to.be.calledWith(this.obj.integrationFolder)
-      })
-    })
-
-    it('calls fixture.scaffold with fixturesFolder', function () {
-      return this.project.scaffold(this.obj).then(() => {
-        expect(scaffold.fixture).to.be.calledWith(this.obj.fixturesFolder)
-      })
-    })
-
     it('calls support.scaffold with supportFolder', function () {
       return this.project.scaffold(this.obj).then(() => {
         expect(scaffold.support).to.be.calledWith(this.obj.supportFolder)
@@ -623,14 +610,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       afterEach(() => {
         resetEnv()
-      })
-
-      it('calls scaffold when forced by environment variable', function () {
-        return this.project.scaffold(this.obj).then(() => {
-          expect(scaffold.integration).to.be.calledWith(this.obj.integrationFolder)
-          expect(scaffold.fixture).to.be.calledWith(this.obj.fixturesFolder)
-          expect(scaffold.support).to.be.calledWith(this.obj.supportFolder)
-        })
       })
     })
 

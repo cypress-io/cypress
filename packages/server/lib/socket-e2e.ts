@@ -1,11 +1,11 @@
 import Debug from 'debug'
-import path from 'path'
 import preprocessor from './plugins/preprocessor'
 import { SocketBase } from './socket-base'
 import { fs } from './util/fs'
 import type { DestroyableHttpServer } from './util/server_destroy'
 import * as studio from './studio'
 import type { DataContext } from '@packages/data-context'
+import type { FoundSpec } from '@packages/types'
 
 const debug = Debug('cypress:server:socket-e2e')
 
@@ -53,28 +53,25 @@ export class SocketE2E extends SocketBase {
     })
   }
 
-  watchTestFileByPath (config, specConfig) {
+  watchTestFileByPath (config, specConfig: FoundSpec) {
     debug('watching spec with config %o', specConfig)
-
-    const cleanIntegrationPrefix = (s) => {
-      const removedIntegrationPrefix = path.join(config.integrationFolder, s.replace(`integration${path.sep}`, ''))
-
-      return path.relative(config.projectRoot, removedIntegrationPrefix)
-    }
 
     // previously we have assumed that we pass integration spec path with "integration/" prefix
     // now we pass spec config object that tells what kind of spec it is, has relative path already
     // so the only special handling remains for special paths like "integration/__all"
-    const filePath = typeof specConfig === 'string' ? cleanIntegrationPrefix(specConfig) : specConfig.relative
 
     // bail if this is special path like "__all"
     // maybe the client should not ask to watch non-spec files?
-    if (isSpecialSpec(filePath)) {
+    if (isSpecialSpec(specConfig.relative)) {
       return
     }
 
+    if (specConfig.relative.startsWith('/')) {
+      specConfig.relative = specConfig.relative.slice(1)
+    }
+
     // bail if we're already watching this exact file
-    if (filePath === this.testFilePath) {
+    if (specConfig.relative === this.testFilePath) {
       return
     }
 
@@ -84,10 +81,10 @@ export class SocketE2E extends SocketBase {
     }
 
     // store this location
-    this.testFilePath = filePath
-    debug('will watch test file path %o', filePath)
+    this.testFilePath = specConfig.relative
+    debug('will watch test file path %o', specConfig.relative)
 
-    return preprocessor.getFile(filePath, config)
+    return preprocessor.getFile(specConfig.relative, config)
     // ignore errors b/c we're just setting up the watching. errors
     // are handled by the spec controller
     .catch(() => {})
@@ -96,7 +93,7 @@ export class SocketE2E extends SocketBase {
   startListening (server: DestroyableHttpServer, automation, config, options) {
     return super.startListening(server, automation, config, options, {
       onSocketConnection: (socket) => {
-        socket.on('watch:test:file', (specInfo, cb = function () { }) => {
+        socket.on('watch:test:file', (specInfo: FoundSpec, cb = function () { }) => {
           debug('watch:test:file %o', specInfo)
 
           this.watchTestFileByPath(config, specInfo)

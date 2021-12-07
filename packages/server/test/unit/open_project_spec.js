@@ -51,6 +51,7 @@ describe('lib/open_project', () => {
 
       this.spec = {
         absolute: 'path/to/spec',
+        relative: 'path/to/spec',
       }
 
       this.browser = { name: 'chrome' }
