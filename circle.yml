@@ -2173,8 +2173,6 @@ linux-workflow: &linux-workflow
         context: test-runner:poll-circle-workflow
         required_env_var: PERCY_TOKEN # skips job if not defined (external PR)
         requires:
-          - desktop-gui-integration-tests-7x
-          - desktop-gui-component-tests
           - cli-visual-tests
           - runner-integration-tests-chrome
           - runner-ct-integration-tests-chrome
