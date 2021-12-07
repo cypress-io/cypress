@@ -67,7 +67,7 @@ describe('Launchpad: Global Mode', () => {
       const projectList = ['todos']
 
       setupProjects(projectList)
-      cy.get('[data-testid="project-card"]').within((list) => list.get(2).click())
+      cy.get('[data-testid="project-card"]').click()
       cy.get('[data-testid="project-card"]')
       .should('have.length', 0)
     })
@@ -126,12 +126,12 @@ describe('Launchpad: Global Mode', () => {
         const projectList = ['todos', 'cookies']
 
         setupProjects(projectList)
-        cy.get('[data-testid=project-card] > button').then((menuButtons) => {
-          menuButtons.get(0).click()
+        cy.get('[data-testid=project-card] > button').then((menu) => {
+          menu.get(0).click()
         })
 
-        cy.get('[data-testid=project-card-menu-items] > button').then((menu) => {
-          menu.get(0).click()
+        cy.get('[data-testid=project-card-menu-items] > button').then((menuItem) => {
+          menuItem.get(0).click()
         })
 
         cy.get('[data-testid=project-card]')

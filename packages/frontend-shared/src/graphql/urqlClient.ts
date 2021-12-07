@@ -74,7 +74,7 @@ export function makeUrqlClient (target: 'launchpad' | 'app'): Client {
     errorExchange({
       onError (error) {
         const message = `
-        GraphQL Field Path: [${error.graphQLErrors[0].path?.join(', ')}]:
+        GraphQL Field Path: [${(error.graphQLErrors[0] || {}).path?.join(', ')}]:
 
         ${error.message}
 

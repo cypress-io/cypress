@@ -87,7 +87,7 @@ export class CloudDataSource {
           } else if (!_.isEqual(resolvedData.data, res.data) || !_.isEqual(resolvedData.error, res.error)) {
             if (res.error) {
               this.ctx.coreData.baseError = {
-                title: res.error.graphQLErrors[0]?.originalError?.name,
+                title: (res.error.graphQLErrors[0] || {})?.originalError?.name,
                 message: res.error.message,
                 stack: res.error.stack,
               }
