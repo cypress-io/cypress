@@ -19,7 +19,7 @@ let hasVisitedAboutBlank = null
 let currentlyVisitingAboutBlank = null
 let knownCommandCausedInstability = null
 
-const REQUEST_URL_OPTS = 'auth failOnStatusCode retryOnNetworkFailure retryOnStatusCodeFailure method body headers'
+const REQUEST_URL_OPTS = 'auth failOnStatusCode retryOnNetworkFailure retryOnStatusCodeFailure retryIntervals method body headers'
 .split(' ')
 
 const VISIT_OPTS = 'url log onBeforeLoad onLoad timeout requestTimeout'
@@ -712,6 +712,7 @@ export default (Commands, Cypress, cy, state, config) => {
         failOnStatusCode: true,
         retryOnNetworkFailure: true,
         retryOnStatusCodeFailure: false,
+        retryIntervals: [0, 0, 500, 1000],
         method: 'GET',
         body: null,
         headers: {},
