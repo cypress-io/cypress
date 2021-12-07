@@ -17,7 +17,6 @@ let mitmProxy = require('http-mitm-proxy')
 const PORT = 13370
 const PROXY_PORT = 13371
 const HTTPS_PORT = 13372
-const ERR_HTTPS_PORT = 13373
 
 const start = Number(new Date())
 
@@ -405,80 +404,6 @@ describe('e2e network error handling', function () {
           '/print-body-third-time-form': 1,
           '/load-img-net-error.html': 1,
           '/load-script-net-error.html': 1,
-        })
-      })
-    })
-
-    it('retries HTTPS passthrough behind a proxy', function () {
-      // this tests retrying multiple times
-      // to connect to the upstream server
-      // as well as network errors when the
-      // upstream server is not accessible
-
-      const connectCounts = {}
-
-      const onConnect = function ({ host, port, socket }) {
-        const dest = `${host}:${port}`
-
-        if (connectCounts[dest] == null) {
-          connectCounts[dest] = 0
-        }
-
-        connectCounts[dest] += 1
-
-        switch (port) {
-          case HTTPS_PORT:
-            // this tests network related errors
-            // when we do immediately destroy the
-            // socket and prevent connecting to the
-            // upstream server
-            //
-            // on the 3rd time around, don't destroy the socket.
-            if (connectCounts[`localhost:${HTTPS_PORT}`] >= 3) {
-              return true
-            }
-
-            // else if this is the 1st or 2nd time destroy the
-            // socket so we retry connecting to the debug proxy
-            socket.destroy()
-
-            return false
-
-          case ERR_HTTPS_PORT:
-            // always destroy the socket attempting to connect
-            // to the upstream server to test that network errors
-            // are propagated correctly
-            socket.destroy()
-
-            return false
-
-          default:
-            // pass everything else on to the upstream
-            // server as expected
-            return true
-        }
-      }
-
-      this.debugProxy = new DebugProxy({
-        onConnect,
-      })
-
-      return this.debugProxy
-      .start(PROXY_PORT)
-      .then(() => {
-        process.env.HTTP_PROXY = `http://localhost:${PROXY_PORT}`
-        process.env.NO_PROXY = '<-loopback>' // proxy everything including localhost
-
-        return systemTests.exec(this, {
-          spec: 'https_passthru_spec.js',
-          snapshot: true,
-        })
-        .then(() => {
-          console.log('connect counts are', connectCounts)
-
-          expect(connectCounts[`localhost:${HTTPS_PORT}`]).to.be.gte(3)
-
-          expect(connectCounts[`localhost:${ERR_HTTPS_PORT}`]).to.be.gte(4)
         })
       })
     })
