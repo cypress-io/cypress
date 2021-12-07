@@ -17,7 +17,6 @@ exports['src/index .getDefaultValues returns list of public config keys 1'] = {
   "chromeWebSecurity": true,
   "clientCertificates": [],
   "component": {},
-  "componentFolder": "cypress/component",
   "defaultCommandTimeout": 4000,
   "downloadsFolder": "cypress/downloads",
   "e2e": {
@@ -91,7 +90,6 @@ exports['src/index .getPublicConfigKeys returns list of public config keys 1'] =
   "chromeWebSecurity",
   "clientCertificates",
   "component",
-  "componentFolder",
   "defaultCommandTimeout",
   "downloadsFolder",
   "e2e",
