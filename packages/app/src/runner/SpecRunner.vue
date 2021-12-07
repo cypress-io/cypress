@@ -46,7 +46,7 @@
       </HideDuringScreenshot>
 
       <RemoveClassesDuringScreenshotting
-        class="flex h-full bg-gray-100 p-16px justify-center"
+        class="h-full bg-gray-100 p-16px"
       >
         <div
           :id="RUNNER_ID"
@@ -126,6 +126,28 @@ preferences.update('isSpecsListOpen', props.gql.localSettings.preferences.isSpec
 
 const runnerPane = ref<HTMLDivElement>()
 
+const autMargin = 16
+
+const containerWidth = computed(() => {
+  // TODO: make these values dynamic in UNIFY-592:
+  const reporterWidth = 320
+  const navWidth = 64
+  const specsListWidth = runnerUiStore.isSpecsListOpen ? 280 : 0
+  const miscBorders = 4
+  const nonAutWidth = reporterWidth + navWidth + specsListWidth + (autMargin * 2) + miscBorders
+
+  return width.value - nonAutWidth
+})
+
+const containerHeight = computed(() => {
+  // TODO: make these values dynamic in UNIFY-592:
+  const autHeaderHeight = 70
+
+  const nonAutHeight = autHeaderHeight + (autMargin * 2)
+
+  return height.value - nonAutHeight
+})
+
 const viewportStyle = computed(() => {
   if (!runnerPane.value) {
     return
@@ -133,22 +155,10 @@ const viewportStyle = computed(() => {
 
   let scale: number = 1
 
-  // TODO: make these values dynamic in UNIFY-592:
-  const reporterWidth = 320
-  const navWidth = 64
-  const specsListWidth = runnerUiStore.isSpecsListOpen ? 280 : 0
-  const autMargin = 16
-  const autHeaderHeight = 70
-
-  const nonAutWidth = reporterWidth + navWidth + specsListWidth + (autMargin * 2)
-  const nonAutHeight = autHeaderHeight + (autMargin * 2)
-  const containerWidth = width.value - nonAutWidth
-  const containerHeight = height.value - nonAutHeight
-
   if (screenshotStore.isScreenshotting) {
     scale = 1
   } else {
-    scale = Math.min(containerWidth / autStore.viewportDimensions.width, containerHeight / autStore.viewportDimensions.height, 1)
+    scale = Math.min(containerWidth.value / autStore.viewportDimensions.width, containerHeight.value / autStore.viewportDimensions.height, 1)
     if (scale > 1) {
       scale = 1
     }
