@@ -148,11 +148,13 @@ export const replaceLocalNpmVersions = async function (basePath: string) {
 
         const pkgName = depName.startsWith('@cypress/') ? depName.split('/')[1] : depName
 
-        json.dependencies[depName] = `file:${path.join(basePath, 'npm', pkgName)}`
+        const localPkgPath = path.join(basePath, 'npm', pkgName)
+
+        json.dependencies[depName] = `file:${localPkgPath}`
         shouldWriteFile = true
 
-        if (!visited.has(depName)) {
-          await updatePackageJson(`./npm/${pkgName}/package.json`)
+        if (!visited.has(localPkgPath)) {
+          await updatePackageJson(`./npm/${pkgName}`)
         }
 
         shouldWriteFile = true
