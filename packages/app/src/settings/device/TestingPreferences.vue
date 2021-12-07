@@ -9,22 +9,18 @@
     <div
       class="rounded border border-gray-100 px-16px divide-y divide-gray-200"
     >
-      <div
-        v-for="pref in prefs"
-        :key="pref.id"
-        class="py-16px"
-      >
+      <div class="py-16px">
         <h4 class="text-gray-800 text-size-16px leading-24px flex items-center">
-          {{ pref.title }}
+          {{ autoScrollingPreference.title }}
           <Switch
             class="mx-8px"
-            :value="props.gql.localSettings.preferences[pref.id] ?? false"
-            :name="pref.title"
-            @update="(value) => updatePref(pref.id, value)"
+            :value="props.gql.localSettings.preferences[autoScrollingPreference.id] ?? false"
+            :name="autoScrollingPreference.title"
+            @update="(value) => updatePref(value)"
           />
         </h4>
         <p class="text-size-14px leading-24px text-gray-600">
-          {{ pref.description }}
+          {{ autoScrollingPreference.description }}
         </p>
       </div>
     </div>
@@ -60,17 +56,15 @@ mutation SetTestingPreferences($value: String!) {
 
 const setPreferences = useMutation(SetTestingPreferencesDocument)
 
-const prefs = [
-  {
-    id: 'autoScrollingEnabled',
-    title: t('settingsPage.testingPreferences.autoScrollingEnabled.title'),
-    description: t('settingsPage.testingPreferences.autoScrollingEnabled.description'),
-  },
-] as const
+const autoScrollingPreference = {
+  id: 'autoScrollingEnabled',
+  title: t('settingsPage.testingPreferences.autoScrollingEnabled.title'),
+  description: t('settingsPage.testingPreferences.autoScrollingEnabled.description'),
+} as const
 
-function updatePref (preferenceId: typeof prefs[number]['id'], value: boolean) {
+function updatePref (value: boolean) {
   setPreferences.executeMutation({
-    value: JSON.stringify({ [preferenceId]: value }),
+    value: JSON.stringify({ [autoScrollingPreference.id]: value }),
   })
 }
 
