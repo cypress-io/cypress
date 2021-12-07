@@ -192,7 +192,7 @@ describe('Launchpad: Global Mode', () => {
         cy.log('Clicking "clear search" in the empty search results will clear the searchbar and restore the project list')
         cy.get('[data-testid=no-results-clear]').click()
         cy.get('[data-testid="project-card"]')
-        .should('have.length', 4)
+        .should('have.length', projectList.length)
       })
 
       // FIXME: fix Search by project path logic
