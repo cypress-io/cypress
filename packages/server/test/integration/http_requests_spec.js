@@ -944,7 +944,7 @@ describe('Routes', () => {
   //       .expect("Content-Type", /application\/json/)
   //       .expect(JSON.parse(json))
 
-  context('GET /__cypress/iframes/*', () => {
+  xcontext('GET /__cypress/iframes/*', () => {
     beforeEach(() => {
       Fixtures.scaffold('e2e')
       Fixtures.scaffold('todos')
