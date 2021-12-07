@@ -13,7 +13,7 @@
         <InlineSpecList
           v-show="runnerUiStore.isSpecsListOpen"
           id="reporter-inline-specs-list"
-          :gql="props.gql.currentProject"
+          :gql="props.gql"
         />
       </template>
 
@@ -86,9 +86,9 @@ import { usePreferences } from '../composables/usePreferences'
 
 gql`
 fragment SpecRunner on Query {
+  ...Specs_InlineSpecList
   currentProject {
     id
-    ...Specs_InlineSpecList
     ...SpecRunnerHeader
   }
   ...ChooseExternalEditor
