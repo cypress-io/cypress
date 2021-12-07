@@ -29,7 +29,6 @@
     "@packages/frontend-shared": "0.0.0-development",
     "@percy/cypress": "^3.1.0",
     "@testing-library/cypress": "8.0.0",
-    "@toycode/markdown-it-class": "1.2.4",
     "@urql/core": "2.3.1",
     "@urql/devtools": "2.0.3",
     "@urql/vue": "0.4.3",
@@ -74,11 +73,6 @@
     "script",
     "src"
   ],
-  "workspaces": {
-    "nohoist": [
-      "@toycode/markdown-it-class"
-    ]
-  },
   "vite": {
     "optimizeDeps": {
       "include": [
