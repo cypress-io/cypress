@@ -1,3 +1,10 @@
+# [@cypress/react-v5.10.3](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.10.2...@cypress/react-v5.10.3) (2021-11-01)
+
+
+### Bug Fixes
+
+* **@cypress/react:** throw if using Next.js swc-loader without nodeVersion=system ([#18686](https://github.com/cypress-io/cypress/issues/18686)) ([d274a5b](https://github.com/cypress-io/cypress/commit/d274a5b5d92323cb6a9c9d0af3e41bf40e679ac1))
+
 # [@cypress/react-v5.10.2](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.10.1...@cypress/react-v5.10.2) (2021-10-29)
 
 

@@ -28,7 +28,7 @@ exports['src/cypress/runner retries mochaEvents simple retry #1'] = [
       "root": false,
       "type": "suite",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "retries": -1,
       "_slow": 10000
     }
@@ -37,13 +37,17 @@ exports['src/cypress/runner retries mochaEvents simple retry #1'] = [
     "mocha",
     "test",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
       "body": "[body]",
       "type": "test",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -53,6 +57,10 @@ exports['src/cypress/runner retries mochaEvents simple retry #1'] = [
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -60,9 +68,9 @@ exports['src/cypress/runner retries mochaEvents simple retry #1'] = [
       "type": "test",
       "wallClockStartedAt": "match.date",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
-      "retries": -1,
+      "retries": 1,
       "_slow": 10000
     }
   ],
@@ -70,6 +78,10 @@ exports['src/cypress/runner retries mochaEvents simple retry #1'] = [
     "mocha",
     "retry",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -93,7 +105,7 @@ exports['src/cypress/runner retries mochaEvents simple retry #1'] = [
         }
       },
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "final": false,
       "currentRetry": 0,
       "retries": 1,
@@ -111,6 +123,10 @@ exports['src/cypress/runner retries mochaEvents simple retry #1'] = [
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -135,7 +151,7 @@ exports['src/cypress/runner retries mochaEvents simple retry #1'] = [
         }
       },
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "final": false,
       "currentRetry": 0,
       "retries": 1,
@@ -146,6 +162,10 @@ exports['src/cypress/runner retries mochaEvents simple retry #1'] = [
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "title": "test 1",
       "body": "[body]",
@@ -161,6 +181,10 @@ exports['src/cypress/runner retries mochaEvents simple retry #1'] = [
     "mocha",
     "pass",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "title": "test 1",
       "state": "passed",
@@ -186,6 +210,10 @@ exports['src/cypress/runner retries mochaEvents simple retry #1'] = [
     "mocha",
     "test end",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "title": "test 1",
       "state": "passed",
@@ -216,7 +244,7 @@ exports['src/cypress/runner retries mochaEvents simple retry #1'] = [
       "root": false,
       "type": "suite",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "retries": -1,
       "_slow": 10000
     }
@@ -225,6 +253,10 @@ exports['src/cypress/runner retries mochaEvents simple retry #1'] = [
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "title": "test 1",
       "state": "passed",
@@ -299,7 +331,7 @@ exports['src/cypress/runner retries mochaEvents test retry with hooks #1'] = [
       "root": false,
       "type": "suite",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "retries": -1,
       "_slow": 10000
     }
@@ -315,7 +347,7 @@ exports['src/cypress/runner retries mochaEvents test retry with hooks #1'] = [
       "body": "[body]",
       "type": "hook",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -325,6 +357,10 @@ exports['src/cypress/runner retries mochaEvents test retry with hooks #1'] = [
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -332,9 +368,9 @@ exports['src/cypress/runner retries mochaEvents test retry with hooks #1'] = [
       "type": "test",
       "wallClockStartedAt": "match.date",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
-      "retries": -1,
+      "retries": 1,
       "_slow": 10000
     }
   ],
@@ -350,7 +386,7 @@ exports['src/cypress/runner retries mochaEvents test retry with hooks #1'] = [
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -360,6 +396,10 @@ exports['src/cypress/runner retries mochaEvents test retry with hooks #1'] = [
     "mocha",
     "test",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -395,7 +435,7 @@ exports['src/cypress/runner retries mochaEvents test retry with hooks #1'] = [
         ]
       },
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": 1,
       "_slow": 10000
@@ -412,7 +452,7 @@ exports['src/cypress/runner retries mochaEvents test retry with hooks #1'] = [
       "body": "[body]",
       "type": "hook",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -430,7 +470,7 @@ exports['src/cypress/runner retries mochaEvents test retry with hooks #1'] = [
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -440,6 +480,10 @@ exports['src/cypress/runner retries mochaEvents test retry with hooks #1'] = [
     "mocha",
     "retry",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -484,7 +528,7 @@ exports['src/cypress/runner retries mochaEvents test retry with hooks #1'] = [
         ]
       },
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "final": false,
       "currentRetry": 0,
       "retries": 1,
@@ -509,7 +553,7 @@ exports['src/cypress/runner retries mochaEvents test retry with hooks #1'] = [
       "body": "[body]",
       "type": "hook",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -527,7 +571,7 @@ exports['src/cypress/runner retries mochaEvents test retry with hooks #1'] = [
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -537,6 +581,10 @@ exports['src/cypress/runner retries mochaEvents test retry with hooks #1'] = [
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -582,7 +630,7 @@ exports['src/cypress/runner retries mochaEvents test retry with hooks #1'] = [
         ]
       },
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "final": false,
       "currentRetry": 0,
       "retries": 1,
@@ -601,7 +649,7 @@ exports['src/cypress/runner retries mochaEvents test retry with hooks #1'] = [
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -611,6 +659,10 @@ exports['src/cypress/runner retries mochaEvents test retry with hooks #1'] = [
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "title": "test 1",
       "body": "[body]",
@@ -634,7 +686,7 @@ exports['src/cypress/runner retries mochaEvents test retry with hooks #1'] = [
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -652,7 +704,7 @@ exports['src/cypress/runner retries mochaEvents test retry with hooks #1'] = [
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -670,7 +722,7 @@ exports['src/cypress/runner retries mochaEvents test retry with hooks #1'] = [
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -687,7 +739,7 @@ exports['src/cypress/runner retries mochaEvents test retry with hooks #1'] = [
       "body": "[body]",
       "type": "hook",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -705,7 +757,7 @@ exports['src/cypress/runner retries mochaEvents test retry with hooks #1'] = [
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -715,6 +767,10 @@ exports['src/cypress/runner retries mochaEvents test retry with hooks #1'] = [
     "mocha",
     "pass",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "title": "test 1",
       "state": "passed",
@@ -761,6 +817,10 @@ exports['src/cypress/runner retries mochaEvents test retry with hooks #1'] = [
     "mocha",
     "test end",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "title": "test 1",
       "state": "passed",
@@ -812,7 +872,7 @@ exports['src/cypress/runner retries mochaEvents test retry with hooks #1'] = [
       "root": false,
       "type": "suite",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "retries": -1,
       "_slow": 10000
     }
@@ -821,6 +881,10 @@ exports['src/cypress/runner retries mochaEvents test retry with hooks #1'] = [
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "title": "test 1",
       "state": "passed",
@@ -916,7 +980,7 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
       "root": false,
       "type": "suite",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "retries": -1,
       "_slow": 10000
     }
@@ -932,7 +996,7 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
       "body": "[body]",
       "type": "hook",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -942,6 +1006,10 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 2",
@@ -949,9 +1017,9 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
       "type": "test",
       "wallClockStartedAt": "match.date",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
-      "retries": -1,
+      "retries": 1,
       "_slow": 10000
     }
   ],
@@ -967,7 +1035,7 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -977,6 +1045,10 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
     "mocha",
     "test",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 2",
@@ -1012,7 +1084,7 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
         ]
       },
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": 1,
       "_slow": 10000
@@ -1029,7 +1101,7 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
       "body": "[body]",
       "type": "hook",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -1047,7 +1119,7 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -1057,6 +1129,10 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
     "mocha",
     "retry",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 2",
@@ -1101,7 +1177,7 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
         ]
       },
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "final": false,
       "currentRetry": 0,
       "retries": 1,
@@ -1126,7 +1202,7 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
       "body": "[body]",
       "type": "hook",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -1144,7 +1220,7 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -1154,6 +1230,10 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 2",
@@ -1199,7 +1279,7 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
         ]
       },
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "final": false,
       "currentRetry": 0,
       "retries": 1,
@@ -1218,7 +1298,7 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -1228,6 +1308,10 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "title": "test 2",
       "body": "[body]",
@@ -1251,7 +1335,7 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -1269,7 +1353,7 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -1287,7 +1371,7 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -1304,7 +1388,7 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
       "body": "[body]",
       "type": "hook",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -1322,7 +1406,7 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -1332,6 +1416,10 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
     "mocha",
     "pass",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "title": "test 2",
       "state": "passed",
@@ -1378,6 +1466,10 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
     "mocha",
     "test end",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "title": "test 2",
       "state": "passed",
@@ -1429,7 +1521,7 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
       "root": false,
       "type": "suite",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "retries": -1,
       "_slow": 10000
     }
@@ -1438,6 +1530,10 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "title": "test 2",
       "state": "passed",
@@ -1533,7 +1629,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
       "root": false,
       "type": "suite",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "retries": -1,
       "_slow": 10000
     }
@@ -1549,7 +1645,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
       "body": "[body]",
       "type": "hook",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -1559,6 +1655,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -1566,9 +1666,9 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
       "type": "test",
       "wallClockStartedAt": "match.date",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
-      "retries": -1,
+      "retries": 1,
       "_slow": 10000
     }
   ],
@@ -1584,7 +1684,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -1594,6 +1694,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
     "mocha",
     "test",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -1634,7 +1738,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
         ]
       },
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": 1,
       "_slow": 10000
@@ -1651,7 +1755,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
       "body": "[body]",
       "type": "hook",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -1669,7 +1773,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -1686,7 +1790,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
       "body": "[body]",
       "type": "hook",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -1704,7 +1808,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -1721,7 +1825,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
       "body": "[body]",
       "type": "hook",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -1738,7 +1842,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
       "body": "[body]",
       "type": "hook",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -1748,6 +1852,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
     "mocha",
     "retry",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -1799,7 +1907,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
         ]
       },
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "final": false,
       "currentRetry": 0,
       "retries": 1,
@@ -1824,7 +1932,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
       "body": "[body]",
       "type": "hook",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -1842,7 +1950,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -1852,6 +1960,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -1904,7 +2016,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
         ]
       },
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "final": false,
       "currentRetry": 0,
       "retries": 1,
@@ -1923,7 +2035,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -1933,6 +2045,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "title": "test 1",
       "body": "[body]",
@@ -1956,7 +2072,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -1974,7 +2090,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -1992,7 +2108,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -2009,7 +2125,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
       "body": "[body]",
       "type": "hook",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -2027,7 +2143,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -2045,7 +2161,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -2063,7 +2179,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -2080,7 +2196,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
       "body": "[body]",
       "type": "hook",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -2098,7 +2214,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -2108,6 +2224,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
     "mocha",
     "pass",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "title": "test 1",
       "state": "passed",
@@ -2164,6 +2284,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
     "mocha",
     "test end",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "title": "test 1",
       "state": "passed",
@@ -2225,7 +2349,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
       "root": false,
       "type": "suite",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "retries": -1,
       "_slow": 10000
     }
@@ -2234,6 +2358,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "title": "test 1",
       "state": "passed",
@@ -2339,7 +2467,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "root": false,
       "type": "suite",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "retries": -1,
       "_slow": 10000
     }
@@ -2355,7 +2483,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "body": "[body]",
       "type": "hook",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -2365,6 +2493,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -2372,9 +2504,9 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "type": "test",
       "wallClockStartedAt": "match.date",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
-      "retries": -1,
+      "retries": 2,
       "_slow": 10000
     }
   ],
@@ -2390,7 +2522,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -2400,6 +2532,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "test",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -2445,7 +2581,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
         ]
       },
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": 2,
       "_slow": 10000
@@ -2462,7 +2598,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "body": "[body]",
       "type": "hook",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -2480,7 +2616,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -2497,7 +2633,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "body": "[body]",
       "type": "hook",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -2515,7 +2651,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -2532,7 +2668,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "body": "[body]",
       "type": "hook",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -2550,7 +2686,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -2567,7 +2703,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "body": "[body]",
       "type": "hook",
       "file": "relative/path/to/spec.js",
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -2577,6 +2713,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "retry",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -2633,7 +2773,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
         ]
       },
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "final": false,
       "currentRetry": 0,
       "retries": 2,
@@ -2666,7 +2806,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "type": "hook",
       "duration": "match.number",
       "file": "relative/path/to/spec.js",
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -2676,6 +2816,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -2733,7 +2877,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
         ]
       },
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "final": false,
       "currentRetry": 0,
       "retries": 2,
@@ -2752,7 +2896,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -2762,6 +2906,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "title": "test 1",
       "body": "[body]",
@@ -2785,7 +2933,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -2803,7 +2951,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -2821,7 +2969,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -2839,7 +2987,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -2857,7 +3005,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -2882,7 +3030,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "type": "hook",
       "duration": "match.number",
       "file": "relative/path/to/spec.js",
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -2900,7 +3048,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "type": "hook",
       "duration": "match.number",
       "file": "relative/path/to/spec.js",
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -2910,6 +3058,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "pass",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "title": "test 1",
       "state": "passed",
@@ -2959,6 +3111,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "test end",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "title": "test 1",
       "state": "passed",
@@ -3008,6 +3164,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "title": "test 1",
       "state": "passed",
@@ -3058,13 +3218,17 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "test",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r4",
       "order": 2,
       "title": "test 2",
       "body": "[body]",
       "type": "test",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -3082,7 +3246,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -3092,6 +3256,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r4",
       "order": 2,
       "title": "test 2",
@@ -3099,9 +3267,9 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "type": "test",
       "wallClockStartedAt": "match.date",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
-      "retries": -1,
+      "retries": 2,
       "_slow": 10000
     }
   ],
@@ -3117,7 +3285,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -3135,7 +3303,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -3153,7 +3321,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -3171,7 +3339,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -3189,7 +3357,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -3207,7 +3375,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "type": "hook",
       "duration": "match.number",
       "file": "relative/path/to/spec.js",
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -3225,7 +3393,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "type": "hook",
       "duration": "match.number",
       "file": "relative/path/to/spec.js",
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -3235,6 +3403,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "pass",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r4",
       "order": 2,
       "title": "test 2",
@@ -3275,7 +3447,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
         ]
       },
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "final": true,
       "currentRetry": 0,
       "retries": 2,
@@ -3286,6 +3458,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "test end",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r4",
       "order": 2,
       "title": "test 2",
@@ -3326,7 +3502,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
         ]
       },
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "final": true,
       "currentRetry": 0,
       "retries": 2,
@@ -3337,6 +3513,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r4",
       "order": 2,
       "title": "test 2",
@@ -3378,7 +3558,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
         ]
       },
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "final": true,
       "currentRetry": 0,
       "retries": 2,
@@ -3389,13 +3569,17 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "test",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r5",
       "order": 3,
       "title": "test 3",
       "body": "[body]",
       "type": "test",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -3413,7 +3597,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -3423,6 +3607,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r5",
       "order": 3,
       "title": "test 3",
@@ -3430,9 +3618,9 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "type": "test",
       "wallClockStartedAt": "match.date",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
-      "retries": -1,
+      "retries": 2,
       "_slow": 10000
     }
   ],
@@ -3448,7 +3636,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -3466,7 +3654,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -3484,7 +3672,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -3502,7 +3690,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -3520,7 +3708,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -3538,7 +3726,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "type": "hook",
       "duration": "match.number",
       "file": "relative/path/to/spec.js",
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -3556,7 +3744,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "type": "hook",
       "duration": "match.number",
       "file": "relative/path/to/spec.js",
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -3573,7 +3761,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "body": "[body]",
       "type": "hook",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -3591,7 +3779,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -3601,6 +3789,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "pass",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r5",
       "order": 3,
       "title": "test 3",
@@ -3648,7 +3840,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
         ]
       },
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "final": true,
       "currentRetry": 0,
       "retries": 2,
@@ -3659,6 +3851,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "test end",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r5",
       "order": 3,
       "title": "test 3",
@@ -3706,7 +3902,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
         ]
       },
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "final": true,
       "currentRetry": 0,
       "retries": 2,
@@ -3717,6 +3913,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r5",
       "order": 3,
       "title": "test 3",
@@ -3765,7 +3965,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
         ]
       },
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "final": true,
       "currentRetry": 0,
       "retries": 2,
@@ -3781,7 +3981,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "root": false,
       "type": "suite",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "retries": -1,
       "_slow": 10000
     }
@@ -3795,7 +3995,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "root": false,
       "type": "suite",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "retries": -1,
       "_slow": 10000
     }
@@ -3804,13 +4004,17 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "test",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r7",
       "order": 4,
       "title": "test 1",
       "body": "[body]",
       "type": "test",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -3820,6 +4024,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r7",
       "order": 4,
       "title": "test 1",
@@ -3827,9 +4035,9 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "type": "test",
       "wallClockStartedAt": "match.date",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
-      "retries": -1,
+      "retries": 2,
       "_slow": 10000
     }
   ],
@@ -3844,7 +4052,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "body": "[body]",
       "type": "hook",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -3854,6 +4062,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "retry",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r7",
       "order": 4,
       "title": "test 1",
@@ -3891,7 +4103,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
         ]
       },
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "final": false,
       "currentRetry": 0,
       "retries": 2,
@@ -3924,7 +4136,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -3942,7 +4154,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "type": "hook",
       "duration": "match.number",
       "file": "relative/path/to/spec.js",
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -3960,7 +4172,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "type": "hook",
       "duration": "match.number",
       "file": "relative/path/to/spec.js",
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -3970,6 +4182,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r7",
       "order": 4,
       "title": "test 1",
@@ -4008,7 +4224,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
         ]
       },
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "final": false,
       "currentRetry": 0,
       "retries": 2,
@@ -4019,6 +4235,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r7",
       "title": "test 1",
       "body": "[body]",
@@ -4049,7 +4269,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -4059,6 +4279,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "retry",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r7",
       "title": "test 1",
       "hookName": "after each",
@@ -4127,7 +4351,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -4145,7 +4369,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "type": "hook",
       "duration": "match.number",
       "file": "relative/path/to/spec.js",
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -4163,7 +4387,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "type": "hook",
       "duration": "match.number",
       "file": "relative/path/to/spec.js",
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -4173,6 +4397,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r7",
       "title": "test 1",
       "hookName": "after each",
@@ -4220,6 +4448,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r7",
       "title": "test 1",
       "body": "[body]",
@@ -4250,7 +4482,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -4268,7 +4500,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -4286,7 +4518,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "type": "hook",
       "duration": "match.number",
       "file": "relative/path/to/spec.js",
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -4304,7 +4536,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "type": "hook",
       "duration": "match.number",
       "file": "relative/path/to/spec.js",
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -4314,6 +4546,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "pass",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r7",
       "title": "test 1",
       "state": "passed",
@@ -4351,6 +4587,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "test end",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r7",
       "title": "test 1",
       "state": "passed",
@@ -4388,6 +4628,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r7",
       "title": "test 1",
       "state": "passed",
@@ -4431,7 +4675,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "root": false,
       "type": "suite",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "retries": -1,
       "_slow": 10000
     }
@@ -4445,7 +4689,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "root": false,
       "type": "suite",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "retries": -1,
       "_slow": 10000
     }
@@ -4454,13 +4698,17 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "test",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r9",
       "order": 5,
       "title": "test 1",
       "body": "[body]",
       "type": "test",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -4470,6 +4718,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r9",
       "order": 5,
       "title": "test 1",
@@ -4477,9 +4729,9 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "type": "test",
       "wallClockStartedAt": "match.date",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
-      "retries": -1,
+      "retries": 2,
       "_slow": 10000
     }
   ],
@@ -4495,7 +4747,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "type": "hook",
       "duration": "match.number",
       "file": "relative/path/to/spec.js",
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -4513,7 +4765,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "type": "hook",
       "duration": "match.number",
       "file": "relative/path/to/spec.js",
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -4523,6 +4775,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "pass",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r9",
       "order": 5,
       "title": "test 1",
@@ -4546,7 +4802,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
         ]
       },
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "final": true,
       "currentRetry": 0,
       "retries": 2,
@@ -4557,6 +4813,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "test end",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r9",
       "order": 5,
       "title": "test 1",
@@ -4580,7 +4840,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
         ]
       },
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "final": true,
       "currentRetry": 0,
       "retries": 2,
@@ -4596,7 +4856,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "root": false,
       "type": "suite",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "retries": -1,
       "_slow": 10000
     }
@@ -4605,6 +4865,10 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r9",
       "order": 5,
       "title": "test 1",
@@ -4629,7 +4893,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
         ]
       },
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "final": true,
       "currentRetry": 0,
       "retries": 2,
@@ -4688,7 +4952,7 @@ exports['src/cypress/runner retries mochaEvents cant retry from [before] #1'] = 
       "root": false,
       "type": "suite",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "retries": -1,
       "_slow": 10000
     }
@@ -4704,7 +4968,7 @@ exports['src/cypress/runner retries mochaEvents cant retry from [before] #1'] = 
       "body": "[body]",
       "type": "hook",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -4714,6 +4978,10 @@ exports['src/cypress/runner retries mochaEvents cant retry from [before] #1'] = 
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -4721,9 +4989,9 @@ exports['src/cypress/runner retries mochaEvents cant retry from [before] #1'] = 
       "type": "test",
       "wallClockStartedAt": "match.date",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
-      "retries": -1,
+      "retries": 1,
       "_slow": 10000
     }
   ],
@@ -4748,7 +5016,7 @@ exports['src/cypress/runner retries mochaEvents cant retry from [before] #1'] = 
       "duration": "match.number",
       "file": null,
       "originalTitle": "\"before all\" hook",
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -4772,7 +5040,7 @@ exports['src/cypress/runner retries mochaEvents cant retry from [before] #1'] = 
       "body": "[body]",
       "type": "hook",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -4790,7 +5058,7 @@ exports['src/cypress/runner retries mochaEvents cant retry from [before] #1'] = 
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -4805,7 +5073,7 @@ exports['src/cypress/runner retries mochaEvents cant retry from [before] #1'] = 
       "root": false,
       "type": "suite",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "retries": -1,
       "_slow": 10000
     }
@@ -4814,6 +5082,10 @@ exports['src/cypress/runner retries mochaEvents cant retry from [before] #1'] = 
     "mocha",
     "test end",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -4849,7 +5121,7 @@ exports['src/cypress/runner retries mochaEvents cant retry from [before] #1'] = 
         ]
       },
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "final": true,
       "currentRetry": 0,
       "retries": 1,
@@ -4860,6 +5132,10 @@ exports['src/cypress/runner retries mochaEvents cant retry from [before] #1'] = 
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -4896,7 +5172,7 @@ exports['src/cypress/runner retries mochaEvents cant retry from [before] #1'] = 
         ]
       },
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "final": true,
       "currentRetry": 0,
       "retries": 1,
@@ -4955,7 +5231,7 @@ exports['src/cypress/runner retries mochaEvents cant retry from [after] #1'] = [
       "root": false,
       "type": "suite",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "retries": -1,
       "_slow": 10000
     }
@@ -4971,7 +5247,7 @@ exports['src/cypress/runner retries mochaEvents cant retry from [after] #1'] = [
       "body": "[body]",
       "type": "hook",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -4981,6 +5257,10 @@ exports['src/cypress/runner retries mochaEvents cant retry from [after] #1'] = [
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -4988,9 +5268,9 @@ exports['src/cypress/runner retries mochaEvents cant retry from [after] #1'] = [
       "type": "test",
       "wallClockStartedAt": "match.date",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
-      "retries": -1,
+      "retries": 1,
       "_slow": 10000
     }
   ],
@@ -5006,7 +5286,7 @@ exports['src/cypress/runner retries mochaEvents cant retry from [after] #1'] = [
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -5016,6 +5296,10 @@ exports['src/cypress/runner retries mochaEvents cant retry from [after] #1'] = [
     "mocha",
     "test",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -5068,7 +5352,7 @@ exports['src/cypress/runner retries mochaEvents cant retry from [after] #1'] = [
         ]
       },
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": 1,
       "_slow": 10000
@@ -5085,7 +5369,7 @@ exports['src/cypress/runner retries mochaEvents cant retry from [after] #1'] = [
       "body": "[body]",
       "type": "hook",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -5103,7 +5387,7 @@ exports['src/cypress/runner retries mochaEvents cant retry from [after] #1'] = [
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -5120,7 +5404,7 @@ exports['src/cypress/runner retries mochaEvents cant retry from [after] #1'] = [
       "body": "[body]",
       "type": "hook",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -5138,7 +5422,7 @@ exports['src/cypress/runner retries mochaEvents cant retry from [after] #1'] = [
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -5155,7 +5439,7 @@ exports['src/cypress/runner retries mochaEvents cant retry from [after] #1'] = [
       "body": "[body]",
       "type": "hook",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -5173,7 +5457,7 @@ exports['src/cypress/runner retries mochaEvents cant retry from [after] #1'] = [
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -5190,7 +5474,7 @@ exports['src/cypress/runner retries mochaEvents cant retry from [after] #1'] = [
       "body": "[body]",
       "type": "hook",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -5208,7 +5492,7 @@ exports['src/cypress/runner retries mochaEvents cant retry from [after] #1'] = [
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -5225,7 +5509,7 @@ exports['src/cypress/runner retries mochaEvents cant retry from [after] #1'] = [
       "body": "[body]",
       "type": "hook",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -5252,7 +5536,7 @@ exports['src/cypress/runner retries mochaEvents cant retry from [after] #1'] = [
       "duration": "match.number",
       "file": null,
       "originalTitle": "\"after all\" hook",
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -5269,6 +5553,10 @@ exports['src/cypress/runner retries mochaEvents cant retry from [after] #1'] = [
     "mocha",
     "test end",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -5332,7 +5620,7 @@ exports['src/cypress/runner retries mochaEvents cant retry from [after] #1'] = [
         ]
       },
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "final": true,
       "currentRetry": 0,
       "retries": 1,
@@ -5348,7 +5636,7 @@ exports['src/cypress/runner retries mochaEvents cant retry from [after] #1'] = [
       "root": false,
       "type": "suite",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "retries": -1,
       "_slow": 10000
     }
@@ -5357,6 +5645,10 @@ exports['src/cypress/runner retries mochaEvents cant retry from [after] #1'] = [
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -5421,7 +5713,7 @@ exports['src/cypress/runner retries mochaEvents cant retry from [after] #1'] = [
         ]
       },
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "final": true,
       "currentRetry": 0,
       "retries": 1,
@@ -5480,7 +5772,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
       "root": false,
       "type": "suite",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "retries": -1,
       "_slow": 10000
     }
@@ -5496,7 +5788,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
       "body": "[body]",
       "type": "hook",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -5506,6 +5798,10 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -5513,9 +5809,9 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
       "type": "test",
       "wallClockStartedAt": "match.date",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
-      "retries": -1,
+      "retries": 2,
       "_slow": 10000
     }
   ],
@@ -5531,7 +5827,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -5541,6 +5837,10 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
     "mocha",
     "test",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -5576,7 +5876,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
         ]
       },
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": 2,
       "_slow": 10000
@@ -5593,7 +5893,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
       "body": "[body]",
       "type": "hook",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -5611,7 +5911,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -5628,7 +5928,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
       "body": "[body]",
       "type": "hook",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -5646,7 +5946,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -5656,6 +5956,10 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
     "mocha",
     "pass",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -5693,7 +5997,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
         ]
       },
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "final": true,
       "currentRetry": 0,
       "retries": 2,
@@ -5704,6 +6008,10 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
     "mocha",
     "test end",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -5741,7 +6049,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
         ]
       },
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "final": true,
       "currentRetry": 0,
       "retries": 2,
@@ -5752,6 +6060,10 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r3",
       "order": 1,
       "title": "test 1",
@@ -5790,7 +6102,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
         ]
       },
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "final": true,
       "currentRetry": 0,
       "retries": 2,
@@ -5801,13 +6113,17 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
     "mocha",
     "test",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r4",
       "order": 2,
       "title": "test 2",
       "body": "[body]",
       "type": "test",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -5825,7 +6141,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -5835,6 +6151,10 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r4",
       "order": 2,
       "title": "test 2",
@@ -5842,9 +6162,9 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
       "type": "test",
       "wallClockStartedAt": "match.date",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
-      "retries": -1,
+      "retries": 2,
       "_slow": 10000
     }
   ],
@@ -5860,7 +6180,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -5870,6 +6190,10 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
     "mocha",
     "retry",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r4",
       "order": 2,
       "title": "test 2",
@@ -5907,7 +6231,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
         ]
       },
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "final": false,
       "currentRetry": 0,
       "retries": 2,
@@ -5933,7 +6257,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -5951,7 +6275,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -5961,6 +6285,10 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r4",
       "order": 2,
       "title": "test 2",
@@ -5999,7 +6327,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
         ]
       },
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "final": false,
       "currentRetry": 0,
       "retries": 2,
@@ -6018,7 +6346,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -6028,6 +6356,10 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r4",
       "title": "test 2",
       "body": "[body]",
@@ -6051,7 +6383,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -6061,6 +6393,10 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
     "mocha",
     "retry",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r4",
       "title": "test 2",
       "err": {
@@ -6122,7 +6458,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -6140,7 +6476,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -6150,6 +6486,10 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r4",
       "title": "test 2",
       "err": {
@@ -6205,7 +6545,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -6215,6 +6555,10 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r4",
       "title": "test 2",
       "body": "[body]",
@@ -6238,7 +6582,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -6256,7 +6600,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -6274,7 +6618,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -6284,6 +6628,10 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
     "mocha",
     "pass",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r4",
       "title": "test 2",
       "state": "passed",
@@ -6323,6 +6671,10 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
     "mocha",
     "test end",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r4",
       "title": "test 2",
       "state": "passed",
@@ -6362,6 +6714,10 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r4",
       "title": "test 2",
       "state": "passed",
@@ -6402,13 +6758,17 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
     "mocha",
     "test",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r5",
       "order": 3,
       "title": "test 3",
       "body": "[body]",
       "type": "test",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -6426,7 +6786,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -6436,6 +6796,10 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r5",
       "order": 3,
       "title": "test 3",
@@ -6443,9 +6807,9 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
       "type": "test",
       "wallClockStartedAt": "match.date",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
-      "retries": -1,
+      "retries": 2,
       "_slow": 10000
     }
   ],
@@ -6461,7 +6825,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -6479,7 +6843,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -6497,7 +6861,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -6514,7 +6878,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
       "body": "[body]",
       "type": "hook",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -6532,7 +6896,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -6542,6 +6906,10 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
     "mocha",
     "pass",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r5",
       "order": 3,
       "title": "test 3",
@@ -6579,7 +6947,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
         ]
       },
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "final": true,
       "currentRetry": 0,
       "retries": 2,
@@ -6590,6 +6958,10 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
     "mocha",
     "test end",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r5",
       "order": 3,
       "title": "test 3",
@@ -6627,7 +6999,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
         ]
       },
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "final": true,
       "currentRetry": 0,
       "retries": 2,
@@ -6643,7 +7015,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
       "root": false,
       "type": "suite",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "retries": -1,
       "_slow": 10000
     }
@@ -6652,6 +7024,10 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r5",
       "order": 3,
       "title": "test 3",
@@ -6690,7 +7066,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
         ]
       },
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "final": true,
       "currentRetry": 0,
       "retries": 2,
@@ -6785,13 +7161,17 @@ exports['src/cypress/runner retries mochaEvents cleanses errors before emitting 
     "mocha",
     "test",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r2",
       "order": 1,
       "title": "visits",
       "body": "[body]",
       "type": "test",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
       "retries": -1,
       "_slow": 10000
@@ -6801,6 +7181,10 @@ exports['src/cypress/runner retries mochaEvents cleanses errors before emitting 
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r2",
       "order": 1,
       "title": "visits",
@@ -6808,9 +7192,9 @@ exports['src/cypress/runner retries mochaEvents cleanses errors before emitting 
       "type": "test",
       "wallClockStartedAt": "match.date",
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "currentRetry": 0,
-      "retries": -1,
+      "retries": 2,
       "_slow": 10000
     }
   ],
@@ -6818,6 +7202,10 @@ exports['src/cypress/runner retries mochaEvents cleanses errors before emitting 
     "mocha",
     "retry",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r2",
       "order": 1,
       "title": "visits",
@@ -6841,7 +7229,7 @@ exports['src/cypress/runner retries mochaEvents cleanses errors before emitting 
         }
       },
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "final": false,
       "currentRetry": 0,
       "retries": 2,
@@ -6859,6 +7247,10 @@ exports['src/cypress/runner retries mochaEvents cleanses errors before emitting 
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r2",
       "order": 1,
       "title": "visits",
@@ -6883,7 +7275,7 @@ exports['src/cypress/runner retries mochaEvents cleanses errors before emitting 
         }
       },
       "file": null,
-      "invocationDetails": "{Object 8}",
+      "invocationDetails": "{Object 9}",
       "final": false,
       "currentRetry": 0,
       "retries": 2,
@@ -6894,6 +7286,10 @@ exports['src/cypress/runner retries mochaEvents cleanses errors before emitting 
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r2",
       "title": "visits",
       "body": "[body]",
@@ -6909,6 +7305,10 @@ exports['src/cypress/runner retries mochaEvents cleanses errors before emitting 
     "mocha",
     "retry",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r2",
       "title": "visits",
       "err": {
@@ -6948,6 +7348,10 @@ exports['src/cypress/runner retries mochaEvents cleanses errors before emitting 
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r2",
       "title": "visits",
       "err": {
@@ -6981,6 +7385,10 @@ exports['src/cypress/runner retries mochaEvents cleanses errors before emitting 
     "mocha",
     "test:before:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r2",
       "title": "visits",
       "body": "[body]",
@@ -6996,6 +7404,10 @@ exports['src/cypress/runner retries mochaEvents cleanses errors before emitting 
     "mocha",
     "fail",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r2",
       "title": "visits",
       "err": {
@@ -7034,6 +7446,10 @@ exports['src/cypress/runner retries mochaEvents cleanses errors before emitting 
     "mocha",
     "test end",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r2",
       "title": "visits",
       "err": {
@@ -7066,6 +7482,10 @@ exports['src/cypress/runner retries mochaEvents cleanses errors before emitting 
     "mocha",
     "test:after:run",
     {
+      "_testConfig": {
+        "testConfigList": [],
+        "unverifiedTestConfig": {}
+      },
       "id": "r2",
       "title": "visits",
       "err": {

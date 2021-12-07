@@ -1,3 +1,4 @@
+const { assertLogLength } = require('../../support/utils')
 const { stripIndent } = require('common-tags')
 const { _ } = Cypress
 
@@ -144,6 +145,7 @@ describe('src/cy/commands/files', () => {
           if (attrs.name === 'readFile') {
             expect(log.get('state')).to.eq('pending')
             expect(log.get('message')).to.eq('foo.json')
+            expect(log.get('timeout')).to.eq(Cypress.config('defaultCommandTimeout'))
           }
         })
 
@@ -175,7 +177,7 @@ describe('src/cy/commands/files', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
           expect(err.message).to.eq('`cy.readFile()` must be passed a non-empty string as its 1st argument. You passed: `undefined`.')
@@ -191,7 +193,7 @@ describe('src/cy/commands/files', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
           expect(err.message).to.eq('`cy.readFile()` must be passed a non-empty string as its 1st argument. You passed: `2`.')
@@ -207,7 +209,7 @@ describe('src/cy/commands/files', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
           expect(err.message).to.eq('`cy.readFile()` must be passed a non-empty string as its 1st argument. You passed: ``.')
@@ -231,7 +233,7 @@ describe('src/cy/commands/files', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
           expect(err.message).to.eq(stripIndent`\
@@ -263,7 +265,7 @@ describe('src/cy/commands/files', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
 
@@ -286,7 +288,7 @@ describe('src/cy/commands/files', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
           expect(err.message).to.eq(stripIndent`\
@@ -310,7 +312,7 @@ describe('src/cy/commands/files', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
           expect(err.message).to.eq('Timed out retrying after 50ms: expected \'foo\' to equal \'contents\'')
@@ -319,6 +321,54 @@ describe('src/cy/commands/files', () => {
         })
 
         cy.readFile('foo.json').should('equal', 'contents')
+      })
+
+      it('throws when the read timeout expires', function (done) {
+        Cypress.backend.callsFake(() => {
+          return new Cypress.Promise(() => { /* Broken promise for timeout */ })
+        })
+
+        cy.on('fail', (err) => {
+          const { lastLog } = this
+
+          assertLogLength(this.logs, 1)
+          expect(lastLog.get('error')).to.eq(err)
+          expect(lastLog.get('state')).to.eq('failed')
+          expect(err.message).to.eq(stripIndent`\
+            \`cy.readFile("foo")\` timed out after waiting \`10ms\`.
+          `)
+
+          expect(err.docsUrl).to.eq('https://on.cypress.io/readfile')
+
+          done()
+        })
+
+        cy.readFile('foo', { timeout: 10 })
+      })
+
+      it('uses defaultCommandTimeout config value if option not provided', {
+        defaultCommandTimeout: 42,
+      }, function (done) {
+        Cypress.backend.callsFake(() => {
+          return new Cypress.Promise(() => { /* Broken promise for timeout */ })
+        })
+
+        cy.on('fail', (err) => {
+          const { lastLog } = this
+
+          assertLogLength(this.logs, 1)
+          expect(lastLog.get('error')).to.eq(err)
+          expect(lastLog.get('state')).to.eq('failed')
+          expect(err.message).to.eq(stripIndent`\
+            \`cy.readFile("foo")\` timed out after waiting \`42ms\`.
+          `)
+
+          expect(err.docsUrl).to.eq('https://on.cypress.io/readfile')
+
+          done()
+        })
+
+        cy.readFile('foo')
       })
     })
   })
@@ -393,7 +443,7 @@ describe('src/cy/commands/files', () => {
       Cypress.backend.resolves(okResponse)
 
       cy.writeFile('foo.txt', 'contents').then((subject) => {
-        expect(subject).to.not.exist
+        expect(subject).to.eq(null)
       })
     })
 
@@ -480,6 +530,7 @@ describe('src/cy/commands/files', () => {
           if (attrs.name === 'writeFile') {
             expect(log.get('state')).to.eq('pending')
             expect(log.get('message')).to.eq('foo.txt', 'contents')
+            expect(log.get('timeout')).to.eq(Cypress.config('defaultCommandTimeout'))
           }
         })
 
@@ -511,7 +562,7 @@ describe('src/cy/commands/files', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
           expect(err.message).to.eq('`cy.writeFile()` must be passed a non-empty string as its 1st argument. You passed: `undefined`.')
@@ -527,7 +578,7 @@ describe('src/cy/commands/files', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
           expect(err.message).to.eq('`cy.writeFile()` must be passed a non-empty string as its 1st argument. You passed: `2`.')
@@ -543,7 +594,7 @@ describe('src/cy/commands/files', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
           expect(err.message).to.eq('`cy.writeFile()` must be passed a non-empty string, an object, or an array as its 2nd argument. You passed: `undefined`.')
@@ -558,7 +609,7 @@ describe('src/cy/commands/files', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
           expect(err.message).to.eq('`cy.writeFile()` must be passed a non-empty string, an object, or an array as its 2nd argument. You passed: `2`.')
@@ -581,7 +632,7 @@ describe('src/cy/commands/files', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
           expect(err.message).to.eq(stripIndent`
@@ -592,6 +643,54 @@ describe('src/cy/commands/files', () => {
             The following error occurred:
 
               > "WHOKNOWS: unable to write file"`)
+
+          expect(err.docsUrl).to.eq('https://on.cypress.io/writefile')
+
+          done()
+        })
+
+        cy.writeFile('foo.txt', 'contents')
+      })
+
+      it('throws when the write timeout expires', function (done) {
+        Cypress.backend.callsFake(() => {
+          return new Cypress.Promise(() => {})
+        })
+
+        cy.on('fail', (err) => {
+          const { lastLog } = this
+
+          assertLogLength(this.logs, 1)
+          expect(lastLog.get('error')).to.eq(err)
+          expect(lastLog.get('state')).to.eq('failed')
+          expect(err.message).to.eq(stripIndent`
+            \`cy.writeFile("foo.txt")\` timed out after waiting \`10ms\`.
+          `)
+
+          expect(err.docsUrl).to.eq('https://on.cypress.io/writefile')
+
+          done()
+        })
+
+        cy.writeFile('foo.txt', 'contents', { timeout: 10 })
+      })
+
+      it('uses defaultCommandTimeout config value if option not provided', {
+        defaultCommandTimeout: 42,
+      }, function (done) {
+        Cypress.backend.callsFake(() => {
+          return new Cypress.Promise(() => { /* Broken promise for timeout */ })
+        })
+
+        cy.on('fail', (err) => {
+          const { lastLog } = this
+
+          assertLogLength(this.logs, 1)
+          expect(lastLog.get('error')).to.eq(err)
+          expect(lastLog.get('state')).to.eq('failed')
+          expect(err.message).to.eq(stripIndent`
+            \`cy.writeFile("foo.txt")\` timed out after waiting \`42ms\`.
+          `)
 
           expect(err.docsUrl).to.eq('https://on.cypress.io/writefile')
 

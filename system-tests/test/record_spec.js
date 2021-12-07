@@ -61,7 +61,7 @@ describe('e2e record', () => {
 
         // spec 1
         `POST /runs/${runId}/instances`,
-        // no instances/:id/tests becuase spec failed during eval
+        // no instances/:id/tests because spec failed during eval
         `POST /instances/${instanceId}/results`,
         'PUT /videos/video.mp4',
         `PUT /instances/${instanceId}/stdout`,
@@ -360,7 +360,7 @@ describe('e2e record', () => {
             trashAssetsBeforeRuns: false,
           },
         })
-        .get('stdout'),
+        .then(({ stdout }) => stdout),
 
         // stagger the 2nd run
         // starting up a bit
@@ -380,7 +380,7 @@ describe('e2e record', () => {
               trashAssetsBeforeRuns: false,
             },
           })
-          .get('stdout')
+          .then(({ stdout }) => stdout)
         }),
       ])
     })

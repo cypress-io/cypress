@@ -3,6 +3,7 @@
 import _ from 'lodash'
 
 import $errUtils from './error_utils'
+import $stackUtils from './stack_utils'
 
 import { allCommands } from '../cy/commands'
 import { addCommand as addNetstubbingCommand } from '../cy/net-stubbing'
@@ -32,6 +33,10 @@ export default {
     // of commands
     const commands = {}
     const commandBackups = {}
+    // we track built in commands to ensure users cannot
+    // add custom commands with the same name
+    const builtInCommandNames = {}
+    let addingBuiltIns
 
     const store = (obj) => {
       commands[obj.name] = obj
@@ -55,7 +60,7 @@ export default {
       // store the backup again now
       commandBackups[name] = original
 
-      const originalFn = (...args) => {
+      function originalFn (...args) {
         const current = state('current')
         let storedArgs = args
 
@@ -65,7 +70,7 @@ export default {
 
         current.set('args', storedArgs)
 
-        return original.fn(...args)
+        return original.fn.apply(this, args)
       }
 
       const overridden = _.clone(original)
@@ -128,6 +133,24 @@ export default {
       },
 
       add (name, options, fn) {
+        if (builtInCommandNames[name]) {
+          $errUtils.throwErrByPath('miscellaneous.invalid_new_command', {
+            args: {
+              name,
+            },
+            stack: (new state('specWindow').Error('add command stack')).stack,
+            errProps: {
+              appendToStack: {
+                title: 'From Cypress Internals',
+                content: $stackUtils.stackWithoutMessage((new Error('add command internal stack')).stack),
+              } },
+          })
+        }
+
+        if (addingBuiltIns) {
+          builtInCommandNames[name] = true
+        }
+
         if (_.isFunction(options)) {
           fn = options
           options = {}
@@ -165,12 +188,14 @@ export default {
       },
     }
 
+    addingBuiltIns = true
     // perf loop
     for (let cmd of builtInCommands) {
       // support "export default" syntax
       cmd = cmd.default || cmd
       cmd(Commands, Cypress, cy, state, config)
     }
+    addingBuiltIns = false
 
     return Commands
   },

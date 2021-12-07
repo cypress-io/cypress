@@ -1,3 +1,4 @@
+const { assertLogLength } = require('../../../support/utils')
 const { _, $ } = Cypress
 
 describe('src/cy/commands/actions/trigger', () => {
@@ -654,6 +655,42 @@ describe('src/cy/commands/actions/trigger', () => {
         })
       })
 
+      it('can specify scrollBehavior bottom in config', { scrollBehavior: 'bottom' }, () => {
+        cy.get('button:first').then((el) => {
+          cy.spy(el[0], 'scrollIntoView')
+        })
+
+        cy.get('button:first').trigger('mouseover')
+
+        cy.get('button:first').then((el) => {
+          expect(el[0].scrollIntoView).to.be.calledWith({ block: 'end' })
+        })
+      })
+
+      it('can specify scrollBehavior center in config', { scrollBehavior: 'center' }, () => {
+        cy.get('button:first').then((el) => {
+          cy.spy(el[0], 'scrollIntoView')
+        })
+
+        cy.get('button:first').trigger('mouseover')
+
+        cy.get('button:first').then((el) => {
+          expect(el[0].scrollIntoView).to.be.calledWith({ block: 'center' })
+        })
+      })
+
+      it('can specify scrollBehavior nearest in config', { scrollBehavior: 'nearest' }, () => {
+        cy.get('button:first').then((el) => {
+          cy.spy(el[0], 'scrollIntoView')
+        })
+
+        cy.get('button:first').trigger('mouseover')
+
+        cy.get('button:first').then((el) => {
+          expect(el[0].scrollIntoView).to.be.calledWith({ block: 'nearest' })
+        })
+      })
+
       it('does not scroll when scrollBehavior is false in config', { scrollBehavior: false }, () => {
         cy.scrollTo('top')
         cy.get('button:first').then((el) => {
@@ -678,6 +715,13 @@ describe('src/cy/commands/actions/trigger', () => {
         cy.get('button:first').then((el) => {
           expect(el[0].scrollIntoView).to.be.calledWith({ block: 'start' })
         })
+      })
+
+      // https://github.com/cypress-io/cypress/issues/4233
+      it('can check an element behind a sticky header', () => {
+        cy.viewport(400, 400)
+        cy.visit('./fixtures/sticky-header.html')
+        cy.get('p').trigger('mouseover')
       })
 
       it('errors when scrollBehavior is false and element is out of view and is clicked', (done) => {
@@ -1017,7 +1061,7 @@ describe('src/cy/commands/actions/trigger', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(2)
+          assertLogLength(this.logs, 2)
           expect(lastLog.get('error')).to.eq(err)
 
           done()
@@ -1032,7 +1076,7 @@ describe('src/cy/commands/actions/trigger', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(2)
+          assertLogLength(this.logs, 2)
           expect(lastLog.get('error')).to.eq(err)
           expect(err.message).to.include('`cy.trigger()` failed because this element is not visible')
 
@@ -1046,7 +1090,8 @@ describe('src/cy/commands/actions/trigger', () => {
         cy.on('fail', (err) => {
           expect(this.logs.length).eq(2)
           expect(err.message).not.to.contain('CSS property: `opacity: 0`')
-          expect(err.message).to.contain('`cy.trigger()` failed because this element is not visible')
+          expect(err.message).to.contain('`cy.trigger()` failed because this element')
+          expect(err.message).to.contain('is being covered by another element')
 
           done()
         })
@@ -1070,7 +1115,7 @@ describe('src/cy/commands/actions/trigger', () => {
 
       it('throws when provided invalid position', function (done) {
         cy.on('fail', (err) => {
-          expect(this.logs.length).to.eq(2)
+          assertLogLength(this.logs, 2)
           expect(err.message).to.eq('Invalid position argument: `foo`. Position may only be topLeft, top, topRight, left, center, right, bottomLeft, bottom, bottomRight.')
 
           done()
@@ -1081,7 +1126,7 @@ describe('src/cy/commands/actions/trigger', () => {
 
       it('throws when provided invalid event type', function (done) {
         cy.on('fail', (err) => {
-          expect(this.logs.length).to.eq(2)
+          assertLogLength(this.logs, 2)
           expect(err.message).to.eq('Timed out retrying after 100ms: `cy.trigger()` `eventConstructor` option must be a valid event (e.g. \'MouseEvent\', \'KeyboardEvent\'). You passed: `FooEvent`')
 
           done()
@@ -1131,7 +1176,7 @@ describe('src/cy/commands/actions/trigger', () => {
 
       it('does not log an additional log on failure', function (done) {
         cy.on('fail', () => {
-          expect(this.logs.length).to.eq(3)
+          assertLogLength(this.logs, 3)
 
           done()
         })

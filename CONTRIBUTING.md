@@ -135,8 +135,8 @@ When an issue is opened in [cypress](https://github.com/cypress-io/cypress), we 
 Some opened issues are questions, not bug reports or feature requests. Issues are reserved for potential bugs or feature requests *only*. If this is the case, you should:
 
 - Explain that issues in our GitHub repo are reserved for potential bugs or feature requests and that the issue will be closed since it appears to be neither a bug nor a feature request.
-- Guide them to existing resources where their questions can be asked like our [Discussions](https://github.com/cypress-io/cypress/discussions), [community chat](https://on.cypress.io/chat), [Discord](https://on.cypress.io/discord),, or [Stack Overflow](https://stackoverflow.com/questions/tagged/cypress).
-- Cypress offers support via email when signing up for any of our our [paid plans](https://www.cypress.io/pricing/), so remind them that this is an option if they already have a paid account.
+- Guide them to existing resources where their questions can be asked like our [Discussions](https://github.com/cypress-io/cypress/discussions), [community chat](https://on.cypress.io/chat), [Discord](https://on.cypress.io/discord), or [Stack Overflow](https://stackoverflow.com/questions/tagged/cypress).
+- Cypress offers support via email when signing up for any of our [paid plans](https://www.cypress.io/pricing/), so remind them that this is an option if they already have a paid account.
 - Move the issue to [Discussions](https://github.com/cypress-io/cypress/discussions).
 
 ### Does this issue belong in this repository?
@@ -219,7 +219,7 @@ The best way to determine the validity of a bug is to recreate it yourself. Foll
 If you can recreate the bug you should:
 
 - Thank them for their contribution.
-- Explain that you're' able to recreate the bug. Provide the exact test code ran and the versions of Cypress, OS, and browser you used to recreate it.
+- Explain that you're able to recreate the bug. Provide the exact test code ran and the versions of Cypress, OS, and browser you used to recreate it.
 - If you know where the code is that could possibly fix this issue - link to the file or line of code from the [cypress](https://github.com/cypress-io/cypress) repo and remind the user that we are open source and that we gladly accept PRs, even if they are a work in progress.
 - Add the `stage: ready for work` label to the issue.
 
@@ -327,10 +327,6 @@ The project utilizes [yarn workspaces](https://yarnpkg.com/lang/en/docs/workspac
 > **⚠ Running on Windows?**
 >
 > Many of the NPM scripts used during development use commands designed for a Linux-like shell.If you are running a Windows operating system, you may encounter many commands that are not working. To fix this behavior, you have to set a Linux-like shell as the default `npm` script shell. If you have Git for Windows installed, you can set Git Bash as the default script shell by using the following command:
-> ```bash
-> yarn config set script-shell "C:\\Program Files (x86)\\git\\bin\\bash.exe"
-> ```
-> Git Bash may be installed in `Program Files`, if so, use the following command:
 >```bash
 > yarn config set script-shell "C:\\Program Files\\git\\bin\\bash.exe"
 >```
@@ -654,7 +650,7 @@ Below are some guidelines Cypress uses when reviewing dependency updates.
 
 ## Deployment
 
-We will try to review and merge pull requests quickly. If you want to know our build process or build your own Cypress binary, read [DEPLOY.md](./DEPLOY.md).
+We will try to review and merge pull requests quickly. If you want to know our build process or build your own Cypress binary, read [the "Release Process" guide](./guides/release-process.md).
 
 Independent packages are deployed immediately upon being merged into master. You can read more [above](#independent-packages-ci-workflow).
 
