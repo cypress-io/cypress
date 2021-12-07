@@ -68,12 +68,13 @@ Fix the error in your code and re-run your tests.
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/record_error_spec.js.mp4            (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/record_erro     (X second)
+                          r_spec.js.mp4                                                             
 
 
   (Uploading Results)
 
-  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/videos/record_error_spec.js.mp4
+  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/videos/cypress/integration/record_error_spec.js.mp4
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
@@ -116,20 +117,21 @@ Because this error occurred during a \`before each\` hook we are skipping the re
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/record_fail_spec.js/record fails -- fails 1 --      (1280x720)
-     before each hook (failed).png                                                                  
+  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/record_fail_spec.js/record      (1280x720)
+     fails -- fails 1 -- before each hook (failed).png                                              
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/record_fail_spec.js.mp4             (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/record_fail     (X second)
+                          _spec.js.mp4                                                              
 
 
   (Uploading Results)
 
-  - Done Uploading (*/2) /foo/bar/.projects/e2e/cypress/screenshots/record_fail_spec.js/record fails -- fails 1 -- before each hook (failed).png
-  - Done Uploading (*/2) /foo/bar/.projects/e2e/cypress/videos/record_fail_spec.js.mp4
+  - Done Uploading (*/2) /foo/bar/.projects/e2e/cypress/screenshots/cypress/integration/record_fail_spec.js/record fails -- fails 1 -- before each hook (failed).png
+  - Done Uploading (*/2) /foo/bar/.projects/e2e/cypress/videos/cypress/integration/record_fail_spec.js.mp4
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
@@ -165,12 +167,13 @@ plugin stdout
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/record_pass_spec.js/yay it passes.png               (400x1022)
+  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/record_pass_spec.js/yay it      (400x1022)
+     passes.png                                                                                     
 
 
   (Uploading Results)
 
-  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.js/yay it passes.png
+  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/cypress/integration/record_pass_spec.js/yay it passes.png
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
@@ -216,20 +219,21 @@ We dynamically generated a new test to display this failure.
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/record_uncaught_spec.js/An uncaught error was d     (1280x720)
-     etected outside of a test (failed).png                                                         
+  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/record_uncaught_spec.js/An      (1280x720)
+     uncaught error was detected outside of a test (failed).png                                     
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/record_uncaught_spec.js.mp4         (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/record_unca     (X second)
+                          ught_spec.js.mp4                                                          
 
 
   (Uploading Results)
 
-  - Done Uploading (*/2) /foo/bar/.projects/e2e/cypress/screenshots/record_uncaught_spec.js/An uncaught error was detected outside of a test (failed).png
-  - Done Uploading (*/2) /foo/bar/.projects/e2e/cypress/videos/record_uncaught_spec.js.mp4
+  - Done Uploading (*/2) /foo/bar/.projects/e2e/cypress/screenshots/cypress/integration/record_uncaught_spec.js/An uncaught error was detected outside of a test (failed).png
+  - Done Uploading (*/2) /foo/bar/.projects/e2e/cypress/videos/cypress/integration/record_uncaught_spec.js.mp4
 
 ====================================================================================================
 
