@@ -48,8 +48,6 @@ fragment TestingPreferences on Query {
   localSettings {
     preferences {
       autoScrollingEnabled
-      useDarkSidebar
-      watchForSpecChange
     }
   }
 }
@@ -67,16 +65,6 @@ const prefs = [
     id: 'autoScrollingEnabled',
     title: t('settingsPage.testingPreferences.autoScrollingEnabled.title'),
     description: t('settingsPage.testingPreferences.autoScrollingEnabled.description'),
-  },
-  {
-    id: 'useDarkSidebar',
-    title: t('settingsPage.testingPreferences.useDarkSidebar.title'),
-    description: t('settingsPage.testingPreferences.useDarkSidebar.description'),
-  },
-  {
-    id: 'watchForSpecChange',
-    title: t('settingsPage.testingPreferences.watchForSpecChange.title'),
-    description: t('settingsPage.testingPreferences.watchForSpecChange.description'),
   },
 ] as const
 
