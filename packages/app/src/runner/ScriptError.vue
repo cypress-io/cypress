@@ -22,5 +22,3 @@ const props = defineProps<{ error: string }>()
 const scriptError = computed(() => convert.toHtml(props.error))
 
 </script>
-
-<style scoped></style>
