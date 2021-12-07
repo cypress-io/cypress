@@ -383,19 +383,19 @@ describe('e2e network error handling', function () {
       }).then(({ stdout }) => {
         // sometimes <img>, <script> get retried 2x by chrome instead of 1x
 
-        if (counts['/immediate-reset?load-img'] === 10) {
-          counts['/immediate-reset?load-img'] = 5
+        if (counts['/immediate-reset?load-img'] === 2) {
+          counts['/immediate-reset?load-img'] = 1
         }
 
-        if (counts['/immediate-reset?load-js'] === 10) {
-          counts['/immediate-reset?load-js'] = 5
+        if (counts['/immediate-reset?load-js'] === 2) {
+          counts['/immediate-reset?load-js'] = 1
         }
 
         expect(counts).to.deep.eq({
           '/immediate-reset?visit': 5,
           '/immediate-reset?request': 5,
-          '/immediate-reset?load-img': 5,
-          '/immediate-reset?load-js': 5,
+          '/immediate-reset?load-img': 2,
+          '/immediate-reset?load-js': 2,
           '/works-third-time-else-500/500-for-request': 3,
           '/works-third-time/for-request': 3,
           '/works-third-time-else-500/500-for-visit': 3,
