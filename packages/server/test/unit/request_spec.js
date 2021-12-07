@@ -141,10 +141,10 @@ describe('lib/request', () => {
       expect(opts.delaysRemaining).to.deep.eq(retryIntervals)
     })
 
-    it('retryIntervals to [0, 1000, 2000, 2000] by default', () => {
+    it('retryIntervals to [] by default', () => {
       const opts = request.setDefaults({})
 
-      expect(opts.retryIntervals).to.deep.eq([0, 1000, 2000, 2000])
+      expect(opts.retryIntervals).to.deep.eq([])
     })
 
     it('delaysRemaining can be overridden', () => {
