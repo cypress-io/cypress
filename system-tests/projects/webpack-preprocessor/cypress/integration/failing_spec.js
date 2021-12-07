@@ -12,10 +12,6 @@ context('validation errors', function () {
     Cypress.config('isInteractive', true)
   })
 
-  after(() => {
-    window.top.__cySkipValidateConfig = false
-  })
-
   fail(this, () => {
     cy.viewport()
   })

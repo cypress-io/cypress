@@ -20,6 +20,7 @@ import { fail, verify } from '../../../e2e/cypress/support/util'
 
 context('validation errors', function () {
   beforeEach(() => {
+    window.top.__cySkipValidateConfig = true
     // @ts-ignore
     Cypress.config('isInteractive', true)
   })
