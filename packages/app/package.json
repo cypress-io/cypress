@@ -65,6 +65,7 @@
     "vue-i18n": "9.2.0-beta.7",
     "vue-router": "4",
     "vue-tsc": "^0.3.0",
+    "vue3-draggable-resizable": "^1.6.1",
     "windicss": "3.1.4",
     "wonka": "^4.0.15"
   },

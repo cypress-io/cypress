@@ -10,11 +10,20 @@
       <template
         v-if="props.gql.currentProject"
       >
-        <InlineSpecList
-          v-show="runnerUiStore.isSpecsListOpen"
-          id="reporter-inline-specs-list"
-          :gql="props.gql"
-        />
+        <Vue3DraggableResizable
+          :init-w="280"
+          :init-h="windowHeight"
+          :handles="['mr']"
+          :resizable="true"
+          class-name-handle="h-full bg-teal top-0 w-8px -left-8px block"
+          class="relative"
+        >
+          <InlineSpecList
+            v-show="runnerUiStore.isSpecsListOpen"
+            id="reporter-inline-specs-list"
+            :gql="props.gql"
+          />
+        </Vue3DraggableResizable>
       </template>
 
       <ChooseExternalEditorModal
@@ -26,10 +35,19 @@
     </HideDuringScreenshot>
 
     <HideDuringScreenshot class="min-w-320px">
-      <div
-        v-once
-        :id="REPORTER_ID"
-      />
+      <Vue3DraggableResizable
+        :init-w="280"
+        :init-h="windowHeight"
+        :handles="['mr']"
+        :resizable="true"
+        class-name-handle="h-full bg-teal top-0 w-8px -left-8px block"
+        class="relative"
+      >
+        <div
+          v-once
+          :id="REPORTER_ID"
+        />
+      </Vue3DraggableResizable>
     </HideDuringScreenshot>
 
     <div
@@ -67,6 +85,7 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { REPORTER_ID, RUNNER_ID, getRunnerElement, getReporterElement, empty } from '../runner/utils'
 import InlineSpecList from '../specs/InlineSpecList.vue'
+import Vue3DraggableResizable from 'vue3-draggable-resizable'
 import { getAutIframeModel, getEventManager, UnifiedRunnerAPI } from '../runner'
 import { useAutStore, useRunnerUiStore } from '../store'
 import type { BaseSpec, FileDetails } from '@packages/types'
@@ -84,7 +103,7 @@ import type { SpecRunnerFragment } from '../generated/graphql'
 import { usePreferences } from '../composables/usePreferences'
 import { useWindowSize } from '@vueuse/core'
 
-const { width, height } = useWindowSize()
+const { height: windowHeight, width: windowWidth } = useWindowSize()
 
 gql`
 fragment SpecRunner on Query {
@@ -136,7 +155,7 @@ const containerWidth = computed(() => {
   const miscBorders = 4
   const nonAutWidth = reporterWidth + navWidth + specsListWidth + (autMargin * 2) + miscBorders
 
-  return width.value - nonAutWidth
+  return windowWidth.value - nonAutWidth
 })
 
 const containerHeight = computed(() => {
@@ -145,7 +164,7 @@ const containerHeight = computed(() => {
 
   const nonAutHeight = autHeaderHeight + (autMargin * 2)
 
-  return height.value - nonAutHeight
+  return windowHeight.value - nonAutHeight
 })
 
 const viewportStyle = computed(() => {
@@ -155,9 +174,7 @@ const viewportStyle = computed(() => {
 
   let scale: number = 1
 
-  if (screenshotStore.isScreenshotting) {
-    scale = 1
-  } else {
+  if (!screenshotStore.isScreenshotting) {
     scale = Math.min(containerWidth.value / autStore.viewportDimensions.width, containerHeight.value / autStore.viewportDimensions.height, 1)
   }
 
