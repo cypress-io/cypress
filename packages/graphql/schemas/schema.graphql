@@ -448,6 +448,11 @@ type FileParts implements Node {
   relative: String!
 }
 
+enum FrontendFrameworkCategoryEnum {
+  react
+  vue
+}
+
 enum FrontendFrameworkEnum {
   cra
   nextjs
@@ -930,6 +935,9 @@ enum WizardConfigFileStatusEnum {
 
 """A frontend framework that we can setup within the app"""
 type WizardFrontendFramework implements Node {
+  """Classification or label of framework. e.g. React, Vue, or Other"""
+  category: FrontendFrameworkCategoryEnum!
+
   """Relay style Node ID field for the WizardFrontendFramework field"""
   id: ID!
 
