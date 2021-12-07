@@ -27,7 +27,6 @@ exports['packages can copy files from package.json 1'] = {
   }
 }
 
-
 exports['transformRequires can find and replace symlink requires 1'] = {
   "[cwd]": {
     "build": {

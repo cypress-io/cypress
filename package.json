@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "9.1.0",
+  "version": "9.1.1",
   "description": "Cypress.io end to end testing tool",
   "private": true,
   "scripts": {
@@ -133,8 +133,6 @@
     "fs-extra": "8.1.0",
     "gift": "0.10.2",
     "glob": "7.1.6",
-    "globby": "10.0.1",
-    "got": "11.5.1",
     "gulp": "4.0.2",
     "gulp-awspublish": "4.0.0",
     "gulp-debug": "4.0.0",

@@ -135,7 +135,7 @@ When an issue is opened in [cypress](https://github.com/cypress-io/cypress), we 
 Some opened issues are questions, not bug reports or feature requests. Issues are reserved for potential bugs or feature requests *only*. If this is the case, you should:
 
 - Explain that issues in our GitHub repo are reserved for potential bugs or feature requests and that the issue will be closed since it appears to be neither a bug nor a feature request.
-- Guide them to existing resources where their questions can be asked like our [Discussions](https://github.com/cypress-io/cypress/discussions), [community chat](https://on.cypress.io/chat), [Discord](https://on.cypress.io/discord),, or [Stack Overflow](https://stackoverflow.com/questions/tagged/cypress).
+- Guide them to existing resources where their questions can be asked like our [Discussions](https://github.com/cypress-io/cypress/discussions), [community chat](https://on.cypress.io/chat), [Discord](https://on.cypress.io/discord), or [Stack Overflow](https://stackoverflow.com/questions/tagged/cypress).
 - Cypress offers support via email when signing up for any of our [paid plans](https://www.cypress.io/pricing/), so remind them that this is an option if they already have a paid account.
 - Move the issue to [Discussions](https://github.com/cypress-io/cypress/discussions).
 
@@ -650,7 +650,7 @@ Below are some guidelines Cypress uses when reviewing dependency updates.
 
 ## Deployment
 
-We will try to review and merge pull requests quickly. If you want to know our build process or build your own Cypress binary, read [DEPLOY.md](./DEPLOY.md).
+We will try to review and merge pull requests quickly. If you want to know our build process or build your own Cypress binary, read [the "Release Process" guide](./guides/release-process.md).
 
 Independent packages are deployed immediately upon being merged into master. You can read more [above](#independent-packages-ci-workflow).
 
