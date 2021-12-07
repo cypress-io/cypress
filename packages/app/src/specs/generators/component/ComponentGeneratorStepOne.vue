@@ -32,7 +32,7 @@
     >
       <router-link
         class="outline-none"
-        :to="{ path: 'specs/runner', query: { file: result.spec.relative } }
+        :to="{ path: '/specs/runner', query: { file: result.spec.relative } }
         "
       >
         <Button
