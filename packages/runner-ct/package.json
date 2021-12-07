@@ -40,7 +40,6 @@
     "eslint-plugin-react-hooks": "^4.2.0",
     "express": "^4.17.1",
     "fuzzysort": "^1.1.4",
-    "globby": "^11.0.1",
     "hotkeys-js": "3.8.2",
     "html-webpack-plugin": "^4.5.0",
     "koa": "^2.13.0",

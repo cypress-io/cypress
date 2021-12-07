@@ -105,7 +105,7 @@ describe('Proxy Logging', () => {
     // @see https://github.com/cypress-io/cypress/issues/17656
     it('xhr log has response body/status code', (done) => {
       cy.window()
-      .then((win) => {
+      .then({ timeout: 10000 }, (win) => {
         cy.on('log:changed', (log) => {
           try {
             expect(log.snapshots.map((v) => v.name)).to.deep.eq(['request', 'response'])

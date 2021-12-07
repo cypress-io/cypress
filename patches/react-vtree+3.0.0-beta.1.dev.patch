@@ -1,0 +1,129 @@
+diff --git a/node_modules/react-vtree/dist/es/Tree.d.ts b/node_modules/react-vtree/dist/es/Tree.d.ts
+index 5e7f57e..5e764e9 100644
+--- a/node_modules/react-vtree/dist/es/Tree.d.ts
++++ b/node_modules/react-vtree/dist/es/Tree.d.ts
+@@ -1,6 +1,9 @@
+ import React, { Component, ComponentType, PropsWithChildren, PureComponent, ReactElement, ReactNode, Ref, RefCallback, RefObject } from 'react';
+ import { Align, FixedSizeList, ListChildComponentProps, ListProps, VariableSizeList } from 'react-window';
+-import { DefaultTreeProps, DefaultTreeState } from './utils';
++// import { DefaultTreeProps, DefaultTreeState } from './utils';
++interface DefaultTreeProps {}
++interface DefaultTreeState {}
++
+ export declare type NodeData = Readonly<{
+     /**
+      * Unique ID of the current node.
+diff --git a/node_modules/react-vtree/dist/es/utils.d.ts b/node_modules/react-vtree/dist/es/utils.d.ts
+index bb27d60..a4f244f 100644
+--- a/node_modules/react-vtree/dist/es/utils.d.ts
++++ b/node_modules/react-vtree/dist/es/utils.d.ts
+@@ -1,41 +1,41 @@
+-/// <reference types="react" />
+-import { FixedSizeList } from 'react-window';
+-import type { NodeData, NodePublicState, NodeRecord, TreeCreatorOptions, TreeProps, TreeState, TypedListChildComponentData } from './Tree';
+-export declare type Mutable<T> = {
+-    -readonly [P in keyof T]: T[P];
+-};
+-export declare type RequestIdleCallbackHandle = any;
+-export declare type RequestIdleCallbackOptions = Readonly<{
+-    timeout: number;
+-}>;
+-export declare type RequestIdleCallbackDeadline = Readonly<{
+-    didTimeout: boolean;
+-    timeRemaining: () => number;
+-}>;
+-declare global {
+-    const requestIdleCallback: (callback: (deadline: RequestIdleCallbackDeadline) => void, opts?: RequestIdleCallbackOptions) => RequestIdleCallbackHandle;
+-    const cancelIdleCallback: (handle: RequestIdleCallbackHandle) => void;
+-    interface Window {
+-        requestIdleCallback: typeof requestIdleCallback;
+-        cancelIdleCallback: typeof cancelIdleCallback;
+-    }
+-}
+-export declare type DefaultTreeProps = TreeProps<NodeData, NodePublicState<NodeData>, FixedSizeList>;
+-export declare type DefaultTreeState = TreeState<NodeData, NodePublicState<NodeData>, FixedSizeList>;
+-export declare type DefaultTreeCreatorOptions = TreeCreatorOptions<NodeData, NodePublicState<NodeData>, DefaultTreeState>;
+-export declare const noop: () => void;
+-export declare const identity: <T>(value: T) => T;
+-export declare const createBasicRecord: <TData extends Readonly<{
+-    id: string;
+-    isOpenByDefault: boolean;
+-}>, TNodePublicState extends NodePublicState<TData>>(pub: TNodePublicState, parent?: NodeRecord<TNodePublicState> | null) => NodeRecord<TNodePublicState>;
+-export declare const getIdByIndex: <TData extends Readonly<{
+-    id: string;
+-    isOpenByDefault: boolean;
+-}>, TNodePublicState extends NodePublicState<TData>>(index: number, { getRecordData }: Readonly<{
+-    component: import("react").ComponentType<Readonly<Pick<import("react-window").ListChildComponentProps, "style" | "isScrolling"> & TNodePublicState & {
+-        treeData?: any;
+-    }>>;
+-    getRecordData: (index: number) => TNodePublicState;
+-    treeData: any;
+-}>) => string;
++// /// <reference types="react" />
++// import { FixedSizeList } from 'react-window';
++// import type { NodeData, NodePublicState, NodeRecord, TreeCreatorOptions, TreeProps, TreeState, TypedListChildComponentData } from './Tree';
++// export declare type Mutable<T> = {
++//     -readonly [P in keyof T]: T[P];
++// };
++// export declare type RequestIdleCallbackHandle = any;
++// export declare type RequestIdleCallbackOptions = Readonly<{
++//     timeout: number;
++// }>;
++// export declare type RequestIdleCallbackDeadline = Readonly<{
++//     didTimeout: boolean;
++//     timeRemaining: () => number;
++// }>;
++// declare global {
++//     const requestIdleCallback: (callback: (deadline: RequestIdleCallbackDeadline) => void, opts?: RequestIdleCallbackOptions) => RequestIdleCallbackHandle;
++//     const cancelIdleCallback: (handle: RequestIdleCallbackHandle) => void;
++//     interface Window {
++//         requestIdleCallback: typeof requestIdleCallback;
++//         cancelIdleCallback: typeof cancelIdleCallback;
++//     }
++// }
++// export declare type DefaultTreeProps = TreeProps<NodeData, NodePublicState<NodeData>, FixedSizeList>;
++// export declare type DefaultTreeState = TreeState<NodeData, NodePublicState<NodeData>, FixedSizeList>;
++// export declare type DefaultTreeCreatorOptions = TreeCreatorOptions<NodeData, NodePublicState<NodeData>, DefaultTreeState>;
++// export declare const noop: () => void;
++// export declare const identity: <T>(value: T) => T;
++// export declare const createBasicRecord: <TData extends Readonly<{
++//     id: string;
++//     isOpenByDefault: boolean;
++// }>, TNodePublicState extends NodePublicState<TData>>(pub: TNodePublicState, parent?: NodeRecord<TNodePublicState> | null) => NodeRecord<TNodePublicState>;
++// export declare const getIdByIndex: <TData extends Readonly<{
++//     id: string;
++//     isOpenByDefault: boolean;
++// }>, TNodePublicState extends NodePublicState<TData>>(index: number, { getRecordData }: Readonly<{
++//     component: import("react").ComponentType<Readonly<Pick<import("react-window").ListChildComponentProps, "style" | "isScrolling"> & TNodePublicState & {
++//         treeData?: any;
++//     }>>;
++//     getRecordData: (index: number) => TNodePublicState;
++//     treeData: any;
++// }>) => string;
+diff --git a/node_modules/react-vtree/dist/lib/utils.d.ts b/node_modules/react-vtree/dist/lib/utils.d.ts
+index bb27d60..d5ac63c 100644
+--- a/node_modules/react-vtree/dist/lib/utils.d.ts
++++ b/node_modules/react-vtree/dist/lib/utils.d.ts
+@@ -12,14 +12,14 @@ export declare type RequestIdleCallbackDeadline = Readonly<{
+     didTimeout: boolean;
+     timeRemaining: () => number;
+ }>;
+-declare global {
+-    const requestIdleCallback: (callback: (deadline: RequestIdleCallbackDeadline) => void, opts?: RequestIdleCallbackOptions) => RequestIdleCallbackHandle;
+-    const cancelIdleCallback: (handle: RequestIdleCallbackHandle) => void;
+-    interface Window {
+-        requestIdleCallback: typeof requestIdleCallback;
+-        cancelIdleCallback: typeof cancelIdleCallback;
+-    }
+-}
++// declare global {
++//     const requestIdleCallback: (callback: (deadline: RequestIdleCallbackDeadline) => void, opts?: RequestIdleCallbackOptions) => RequestIdleCallbackHandle;
++//     const cancelIdleCallback: (handle: RequestIdleCallbackHandle) => void;
++//     interface Window {
++//         requestIdleCallback: typeof requestIdleCallback;
++//         cancelIdleCallback: typeof cancelIdleCallback;
++//     }
++// }
+ export declare type DefaultTreeProps = TreeProps<NodeData, NodePublicState<NodeData>, FixedSizeList>;
+ export declare type DefaultTreeState = TreeState<NodeData, NodePublicState<NodeData>, FixedSizeList>;
+ export declare type DefaultTreeCreatorOptions = TreeCreatorOptions<NodeData, NodePublicState<NodeData>, DefaultTreeState>;

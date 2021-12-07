@@ -13,14 +13,6 @@ let car = null
 
 // all the projects to trigger / run / change environment variables for
 const _PROVIDERS = {
-  appVeyor: {
-    main: 'cypress-io/cypress',
-    win32: [
-      'cypress-io/cypress-test-tiny',
-      'cypress-io/cypress-test-example-repos',
-    ],
-  },
-
   circle: {
     main: 'cypress-io/cypress',
     linux: [
@@ -32,6 +24,10 @@ const _PROVIDERS = {
       'cypress-io/cypress-test-example-repos',
     ],
     darwin: [
+      'cypress-io/cypress-test-tiny',
+      'cypress-io/cypress-test-example-repos',
+    ],
+    win32: [
       'cypress-io/cypress-test-tiny',
       'cypress-io/cypress-test-example-repos',
     ],
@@ -105,12 +101,6 @@ const awaitEachProjectAndProvider = function (projects, fn, filter = (val) => va
     }
   }
 
-  if (check.unemptyString(creds.appVeyorToken)) {
-    providers.appVeyor = {
-      appVeyorToken: creds.appVeyorToken,
-    }
-  }
-
   const providerNames = Object.keys(providers)
 
   console.log('configured providers', providerNames)
@@ -133,7 +123,6 @@ const awaitEachProjectAndProvider = function (projects, fn, filter = (val) => va
 }
 
 // do not trigger all projects if there is specific provider
-// for example appVeyor should be used for Windows testing
 const getFilterByProvider = function (providerName, platformName) {
   return (val) => {
     if (providerName && val.provider !== providerName) {
@@ -225,14 +214,6 @@ Testing new Cypress version ${version}
         if (process.env.CIRCLE_BUILD_URL) {
           message += '\n'
           message += `Circle CI build url ${process.env.CIRCLE_BUILD_URL}`
-        }
-
-        if (process.env.APPVEYOR) {
-          const slug = process.env.APPVEYOR_PROJECT_SLUG
-          const build = process.env.APPVEYOR_BUILD_ID
-
-          message += '\n'
-          message += `AppVeyor CI ${slug} ${build}`
         }
       }
 
