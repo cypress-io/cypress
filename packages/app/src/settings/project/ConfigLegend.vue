@@ -12,7 +12,7 @@
       :label="legendText.config.label"
     >
       <i18n-t :keypath="legendText.config.descriptionKey">
-        <OpenConfigFile :gql="props.gql" />
+        <OpenConfigFileInIDE :gql="props.gql" />
       </i18n-t>
     </ConfigBadge>
 
@@ -53,6 +53,7 @@ import { computed } from 'vue'
 import { useI18n } from '@cy/i18n'
 import { CONFIG_LEGEND_COLOR_MAP } from './ConfigSourceColors'
 import type { ConfigFragment } from '../../generated/graphql'
+import OpenConfigFileInIDE from '@packages/frontend-shared/src/gql-components/OpenConfigFileInIDE.vue'
 
 const props = defineProps<{
   gql: ConfigFragment

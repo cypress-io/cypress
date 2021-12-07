@@ -5,7 +5,7 @@
     </template>
     <template #description>
       <i18n-t keypath="settingsPage.config.description">
-        <OpenConfigFile :gql="props.gql" />
+        <OpenConfigFileInIDE :gql="props.gql" />
       </i18n-t>
     </template>
     <div class="flex w-full">
@@ -29,7 +29,7 @@ import { useI18n } from '@cy/i18n'
 import ConfigLegend from './ConfigLegend.vue'
 import ConfigCode from './ConfigCode.vue'
 import type { ConfigFragment } from '../../generated/graphql'
-import OpenConfigFile from '@packages/frontend-shared/src/gql-components/OpenConfigFile.vue'
+import OpenConfigFileInIDE from '@packages/frontend-shared/src/gql-components/OpenConfigFileInIDE.vue'
 
 const { t } = useI18n()
 
@@ -39,7 +39,7 @@ fragment Config on Query {
     id
     config
   }
-  ...OpenConfigFile
+  ...OpenConfigFileInIDE
 }
 `
 

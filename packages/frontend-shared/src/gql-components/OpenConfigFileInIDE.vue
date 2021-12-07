@@ -22,11 +22,11 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
 import { gql, useMutation } from '@urql/vue'
-import { NoSpecsPage_OpenFileInIdeDocument } from '@packages/data-context/src/gen/all-operations.gen'
-import type { OpenConfigFileFragment } from '../generated/graphql'
+import { OpenConfigFileDocument } from '@packages/data-context/src/gen/all-operations.gen'
+import type { OpenConfigFileInIdeFragment } from '../generated/graphql'
 
 gql`
-fragment OpenConfigFile on Query {
+fragment OpenConfigFileInIDE on Query {
   currentProject {
     id
     configFilePath
@@ -40,16 +40,22 @@ fragment OpenConfigFile on Query {
 }
 `
 
+gql`
+mutation OpenConfigFile ($input: FileDetailsInput!) {
+  openFileInIDE (input: $input)
+}
+`
+
 const props = defineProps<{
-  gql: OpenConfigFileFragment
+  gql: OpenConfigFileInIdeFragment
 }>()
 
 const configFile = computed(() => props.gql.currentProject?.configFilePath ?? 'cypress.config.js')
 
-const openFileInIDE = useMutation(NoSpecsPage_OpenFileInIdeDocument)
+const OpenConfigFileInIDE = useMutation(OpenConfigFileDocument)
 
-const openInIde = (absolute: string) => {
-  openFileInIDE.executeMutation({
+const openConfigFileInIDE = (absolute: string) => {
+  OpenConfigFileInIDE.executeMutation({
     input: {
       absolute,
       line: 1,
@@ -62,13 +68,13 @@ const openFile = () => {
   isChooseEditorOpen.value = false
 
   if (props.gql.currentProject?.configFileAbsolutePath) {
-    openInIde(props.gql.currentProject.configFileAbsolutePath)
+    openConfigFileInIDE(props.gql.currentProject.configFileAbsolutePath)
   }
 }
 
 const showCypressConfigInIDE = () => {
   if (props.gql.localSettings.preferences.preferredEditorBinary && props.gql.currentProject?.configFileAbsolutePath) {
-    openInIde(props.gql.currentProject.configFileAbsolutePath)
+    openConfigFileInIDE(props.gql.currentProject.configFileAbsolutePath)
   } else {
     isChooseEditorOpen.value = true
   }

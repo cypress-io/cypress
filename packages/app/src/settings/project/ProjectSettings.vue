@@ -32,7 +32,6 @@ fragment ProjectSettings on Query {
   currentProject {
     id
     ...ProjectId
-    ...SpecPatterns
     ...Experiments
     cloudProject {
       id
@@ -42,6 +41,7 @@ fragment ProjectSettings on Query {
       }
     }
   }
+  ...SpecPatterns
   ...Config
 }
 `

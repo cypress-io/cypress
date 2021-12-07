@@ -33,7 +33,9 @@ describe('<BaseError />', () => {
   it('renders the default error the correct messages', () => {
     cy.mountFragment(BaseErrorFragmentDoc, {
       onResult: (result) => {
-        result.title = messages.header
+        if (result.baseError) {
+          result.baseError.title = messages.header
+        }
       },
       render: (gqlVal) => <BaseError gql={gqlVal} />,
     })
@@ -53,8 +55,10 @@ describe('<BaseError />', () => {
   it.skip('emits the retry event by default', () => {
     cy.mountFragment(BaseErrorFragmentDoc, {
       onResult: (result) => {
-        result.title = messages.header
-        result.message = null
+        if (result.baseError) {
+          result.baseError.title = messages.header
+          result.baseError.message = null
+        }
       },
       render: (gqlVal) => <BaseError gql={gqlVal} />,
     })
@@ -68,9 +72,11 @@ describe('<BaseError />', () => {
   it('renders custom error messages and headers with props', () => {
     cy.mountFragment(BaseErrorFragmentDoc, {
       onResult: (result) => {
-        result.title = customHeaderMessage
-        result.message = customMessage
-        result.stack = customStack
+        if (result.baseError) {
+          result.baseError.title = customHeaderMessage
+          result.baseError.message = customMessage
+          result.baseError.stack = customStack
+        }
       },
       render: (gqlVal) => <BaseError gql={gqlVal} />,
     })
@@ -83,8 +89,10 @@ describe('<BaseError />', () => {
   it('renders the header, message, and footer slots', () => {
     cy.mountFragment(BaseErrorFragmentDoc, {
       onResult: (result) => {
-        result.title = messages.header
-        result.message = messages.message
+        if (result.baseError) {
+          result.baseError.title = messages.header
+          result.baseError.message = messages.message
+        }
       },
       render: (gqlVal) => (
         <BaseError

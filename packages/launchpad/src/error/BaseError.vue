@@ -26,7 +26,7 @@
           class="font-light"
           data-testid="error-message"
         >
-          <OpenConfigFile :gql="props.gql" />
+          <OpenConfigFileInIDE :gql="props.gql" />
         </i18n-t>
       </slot>
       <!-- eslint-enable vue/multiline-html-element-content-newline  -->
@@ -71,7 +71,7 @@ import Button from '@cy/components/Button.vue'
 import { computed } from 'vue'
 import { useI18n } from '@cy/i18n'
 import type { BaseErrorFragment } from '../generated/graphql'
-import OpenConfigFile from '@packages/frontend-shared/src/gql-components/OpenConfigFile.vue'
+import OpenConfigFileInIDE from '@packages/frontend-shared/src/gql-components/OpenConfigFileInIDE.vue'
 
 gql`
 fragment BaseError on Query {
@@ -80,7 +80,7 @@ fragment BaseError on Query {
     message
     stack
   }
-  ...OpenConfigFile
+  ...OpenConfigFileInIDE
 }
 `
 
