@@ -53,7 +53,7 @@
           :error="autStore.scriptError.error"
         />
         <div
-          v-else
+          v-show="!autStore.scriptError"
           :id="RUNNER_ID"
           class="origin-top-left viewport"
           :style="viewportStyle"
