@@ -68,7 +68,12 @@
       <RemoveClassesDuringScreenshotting
         class="h-full bg-gray-100 p-16px"
       >
+        <ScriptError
+          v-if="autStore.scriptError"
+          :error="autStore.scriptError.error"
+        />
         <div
+          v-show="!autStore.scriptError"
           :id="RUNNER_ID"
           class="origin-top-left viewport"
           :style="viewportStyle"
@@ -103,6 +108,7 @@ import { useMutation, gql } from '@urql/vue'
 import { OpenFileInIdeDocument } from '@packages/data-context/src/gen/all-operations.gen'
 import type { SpecRunnerFragment } from '../generated/graphql'
 import { usePreferences } from '../composables/usePreferences'
+import ScriptError from './ScriptError.vue'
 import { useWindowSize } from '@vueuse/core'
 
 const { height: windowHeight, width: windowWidth } = useWindowSize()
@@ -187,6 +193,7 @@ const viewportStyle = computed(() => {
 })
 
 function runSpec () {
+  autStore.setScriptError(null)
   UnifiedRunnerAPI.executeSpec(props.activeSpec)
 }
 
@@ -245,6 +252,10 @@ onMounted(() => {
   eventManager.on('save:app:state', (state) => {
     preferences.update('isSpecsListOpen', state.isSpecsListOpen)
     preferences.update('autoScrollingEnabled', state.autoScrollingEnabled)
+  })
+
+  eventManager.on('script:error', (err) => {
+    autStore.scriptError = err
   })
 })
 
