@@ -12,7 +12,6 @@
     "cypress:run:e2e": "echo 'no e2e in frontend-shared'",
     "cypress:run:ct": "cross-env TZ=America/New_York node ../../scripts/cypress run --component --project ${PWD}",
     "dev": "gulp dev --project ${PWD}",
-    "postinstall": "patch-package",
     "generate-shiki-theme": "node ./script/generate-shiki-theme.js"
   },
   "dependencies": {
@@ -66,11 +65,6 @@
     "wonka": "^4.0.15"
   },
   "module": "es2020",
-  "workspaces": {
-    "nohoist": [
-      "@toycode/markdown-it-class"
-    ]
-  },
   "vite": {
     "optimizeDeps": {
       "include": [

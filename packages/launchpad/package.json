@@ -5,7 +5,6 @@
   "scripts": {
     "check-ts": "vue-tsc --noEmit",
     "build-prod-ui": "cross-env NODE_ENV=production vite build",
-    "postinstall": "patch-package",
     "clean": "rimraf dist && rimraf ./node_modules/.vite && rimraf dist-e2e && echo 'cleaned'",
     "clean-deps": "rimraf node_modules",
     "test": "yarn cypress:run:ct && yarn types",
