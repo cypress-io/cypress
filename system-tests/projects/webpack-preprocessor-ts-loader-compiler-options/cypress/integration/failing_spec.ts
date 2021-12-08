@@ -1,5 +1,5 @@
 /// <reference types="cypress" />
-
+window.top.__cySkipValidateConfig = true
 /**
  * This tests the error UI for a certain webpack preprocessor setup.
  * It does this by having a test fail and then a subsequent test run that
@@ -16,7 +16,6 @@ import { fail, verify } from '../../../e2e/cypress/support/util'
 
 context('validation errors', function () {
   beforeEach(() => {
-    window.top.__cySkipValidateConfig = true
     // @ts-ignore
     Cypress.config('isInteractive', true)
   })
