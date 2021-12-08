@@ -6,8 +6,6 @@ const os = require('os')
 const Url = require('url')
 const path = require('path')
 const debug = require('debug')('cypress:cli')
-//const https = require('https')
-//const http = require('http')
 const Promise = require('bluebird')
 const requestProgress = require('request-progress')
 const { stripIndent } = require('common-tags')
@@ -201,18 +199,21 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca, version }) =>
     if (ca) debug('using custom CA details from npm config')
 
     let redirectVersion
+    let redirectUrl
     const reqOptions = {
       uri: url,
       ...(proxy ? { proxy } : {}),
       ...(ca ? { ca } : {}),
       method: 'GET',
       followRedirect (response) {
-        const redirectVersion = response.headers['x-version']
+        redirectVersion = response.headers['x-version']
+        redirectUrl = response.headers.location
 
         debug('redirect version:', redirectVersion)
+        debug('redirect url:', redirectUrl)
 
         // yes redirect
-        return true
+        return false
       },
     }
     //    const pkg = url.toLowerCase().startsWith('https:') ? https : http
@@ -227,7 +228,6 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca, version }) =>
       throttle: progress.throttle,
     })
     .on('response', (response) => {
-      debug("REASPONSEREASONAOSDFAKSDFJH", response.statusCode)
       // we have computed checksum and filesize during test runner binary build
       // and have set it on the S3 object as user meta data, available via
       // these custom headers "x-amz-meta-..."
@@ -252,18 +252,8 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca, version }) =>
       // response headers
       started = new Date()
 
-      if (response.statusCode === 302 || response.statusCode === 301) {
-        // Recursively follow redirects, only a 200 will resolve.
-        redirectVersion = response.headers['x-version']
-
-        debug('redirect version:', redirectVersion)
-
-        // yes redirect - recursively
-        debug('redirected to', response.headers.location)
-        // set the version in options if we have one.
-        // this insulates us from potential redirect
-        // problems where version would be set to undefined.
-        downloadFromUrl({ url: response.headers.location, progress, ca, downloadDestination, version: redirectVersion ? redirectVersion : version })
+      if (redirectVersion && redirectUrl) {
+        downloadFromUrl({ url: redirectUrl, progress, ca, downloadDestination, version: redirectVersion })
         .then(resolve).catch(reject)
         // if our status code does not start with 200
       } else if (!/^2/.test(response.statusCode)) {
@@ -294,7 +284,12 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca, version }) =>
         })
       }
     })
-    .on('error', reject)
+    .on('error', (e) => {
+      debug('got error', url, redirectUrl, redirectVersion)
+      if (redirectUrl && redirectVersion) return // yeah, we know
+
+      reject(e)
+    })
     .on('progress', (state) => {
       // total time we've elapsed
       // starting on our first progress notification

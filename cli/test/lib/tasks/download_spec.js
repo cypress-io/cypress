@@ -110,7 +110,7 @@ describe('lib/tasks/download', function () {
     })
   })
 
-  it.only('saves example.zip to options.downloadDestination', function () {
+  it('saves example.zip to options.downloadDestination', function () {
     nock('https://aws.amazon.com')
     .get('/some.zip')
     .reply(200, () => {
@@ -318,6 +318,39 @@ describe('lib/tasks/download', function () {
 
     beforeEach(function () {
       this.env = _.clone(process.env)
+      // prevent ambient environment masking of environment variables referenced in this test
+
+      ;([
+        'CYPRESS_DOWNLOAD_USE_CA', 'NO_PROXY', 'http_proxy',
+        'https_proxy', 'npm_config_ca', 'npm_config_cafile',
+        'npm_config_https_proxy', 'npm_config_proxy',
+      ]).forEach((e) => {
+        delete process.env[e.toLowerCase()]
+        delete process.env[e.toUpperCase()]
+      })
+
+      // add a default no_proxy which does not match the testUri
+      process.env.NO_PROXY = 'localhost,.org'
+    })
+
+    afterEach(function () {
+      process.env = this.env
+    })
+
+    it('uses http_proxy on http request', () => {
+      process.env.http_proxy = 'http://foo'
+      expect(download.getProxyForUrlWithNpmConfig(testUriHttp)).to.eq('http://foo')
+    })
+
+    it('ignores http_proxy on https request', () => {
+      delete process.env.CYPRESS_DOWNLOAD_USE_CA
+      delete process.env.NO_PROXY
+      delete process.env.http_proxy
+      delete process.env.https_proxy
+      delete process.env.npm_config_ca
+      delete process.env.npm_config_cafile
+      delete process.env.npm_config_https_proxy
+      delete process.env.npm_config_proxy
       // add a default no_proxy which does not match the testUri
       process.env.NO_PROXY = 'localhost,.org'
     })
