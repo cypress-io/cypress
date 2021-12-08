@@ -7,7 +7,6 @@ const path = require('path')
 const debug = require('debug')('cypress:cli')
 const https = require('https')
 const http = require('http')
-const request = require('@cypress/request')
 const Promise = require('bluebird')
 const requestProgress = require('request-progress')
 const { stripIndent } = require('common-tags')
@@ -198,12 +197,12 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca }) => {
       downloadDestination,
     })
 
-
     if (ca) debug('using custom CA details from npm config')
+
     const reqOptions = {
       ...Url.urlToHttpOptions(new URL(url)),
       proxy,
-      ...(ca ? {cert: ca} : {}),
+      ...(ca ? { cert: ca } : {}),
     }
     const pkg = url.toLowerCase().startsWith('https:') ? https : http
     const req = pkg.get(reqOptions)
@@ -222,6 +221,7 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca }) => {
       // and have set it on the S3 object as user meta data, available via
       // these custom headers "x-amz-meta-..."
       // see https://github.com/cypress-io/cypress/pull/4092
+
       expectedSize = response.headers['x-amz-meta-size'] ||
         response.headers['content-length']
 
@@ -254,14 +254,11 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca }) => {
         }
 
         // yes redirect - recursively
-        debug("redirected to", response.headers.location)
-        downloadFromUrl(
-            {url: response.headers.location, progress, ca, downloadDestination})
+        debug('redirected to', response.headers.location)
+        downloadFromUrl({ url: response.headers.location, progress, ca, downloadDestination })
         .then(resolve).catch(reject)
-      } else
-
-      // if our status code does not start with 200
-      if (!/^2/.test(response.statusCode)) {
+        // if our status code does not start with 200
+      } else if (!/^2/.test(response.statusCode)) {
         debug('response code %d', response.statusCode)
 
         const err = new Error(
@@ -273,10 +270,8 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca }) => {
         )
 
         reject(err)
-      }
-
-      // status codes here are all 2xx
-      else {
+        // status codes here are all 2xx
+      } else {
         // We only enable this pipe connection when we know we've got a successful return
         response.pipe(fs.createWriteStream(downloadDestination))
         // and handle the completion with verify and resolve
@@ -284,7 +279,7 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca }) => {
           debug('downloading finished')
 
           verifyDownloadedFile(downloadDestination, expectedSize,
-              expectedChecksum)
+            expectedChecksum)
           .then(() => debug('verified'))
           .then(() => resolve(redirectVersion))
         })
