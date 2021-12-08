@@ -53,7 +53,7 @@ describe('skipped test side effects', () => {
   })
 
   it('should still mark all tests with the correct state', () => {
-    expect(pendingTests).to.have.length(1)
+    expect(pendingTests).to.have.length(2)
     expect(passedTests).to.have.length(2)
   })
 })
