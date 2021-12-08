@@ -28,6 +28,7 @@ describe('src/cy/commands/request', () => {
             followRedirect: true,
             timeout: RESPONSE_TIMEOUT,
             method: 'GET',
+            retryIntervals: [0, 100, 200, 200],
           })
 
           const options = backend.firstCall.args[1]
