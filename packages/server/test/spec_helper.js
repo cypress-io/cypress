@@ -101,6 +101,7 @@ before(function () {
 const { setCtx, getCtx, clearCtx, makeDataContext } = require('../lib/makeDataContext')
 
 beforeEach(function () {
+  clearCtx()
   setCtx(makeDataContext({}))
   this.originalEnv = originalEnv
 

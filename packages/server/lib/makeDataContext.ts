@@ -45,7 +45,7 @@ export function makeDataContext (launchArgs: LaunchArgs): DataContext {
     },
     projectApi: {
       getConfig (projectRoot: string, options?: SettingsOptions) {
-        return config.get(projectRoot, options, ctx)
+        return config.get(projectRoot, options)
       },
       launchProject (browser: FoundBrowser, spec: Cypress.Spec, options?: LaunchOpts) {
         return openProject.launch({ ...browser }, spec, options)

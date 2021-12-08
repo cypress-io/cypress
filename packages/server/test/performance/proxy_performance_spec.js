@@ -14,6 +14,9 @@ const Promise = require('bluebird')
 const sanitizeFilename = require('sanitize-filename')
 const { createRoutes } = require(`${root}lib/routes`)
 const { SpecsStore } = require(`${root}/lib/specs-store`)
+const { setCtx, makeDataContext } = require('../../lib/makeDataContext')
+
+setCtx(makeDataContext({}))
 
 process.env.CYPRESS_INTERNAL_ENV = 'development'
 
