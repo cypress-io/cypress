@@ -5,8 +5,7 @@ import errors from '../errors'
 import { fs } from '../util/fs'
 import Debug from 'debug'
 import type { SettingsOptions } from '@packages/types'
-import type { DataContext } from '@packages/data-context'
-import { makeLegacyDataContext } from '../makeDataContext'
+import { DataContext, getCtx } from '@packages/data-context'
 
 const debug = Debug('cypress:server:settings')
 
@@ -140,7 +139,7 @@ export function id (projectRoot, options = {}) {
   })
 }
 
-export function read (projectRoot, options: SettingsOptions = {}, ctx: DataContext = makeLegacyDataContext()) {
+export function read (projectRoot, options: SettingsOptions = {}, ctx: DataContext = getCtx()) {
   if (options.configFile === false) {
     return Promise.resolve({})
   }

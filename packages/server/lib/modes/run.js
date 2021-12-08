@@ -1666,7 +1666,7 @@ module.exports = {
     })
   },
 
-  async run (options) {
+  async run (options, loading = Promise.resolve()) {
     if (require('../util/electron-app').isRunningAsElectronProcess({ debug })) {
       const app = require('electron').app
 
@@ -1680,6 +1680,6 @@ module.exports = {
       await app.whenReady()
     }
 
-    return this.ready(options)
+    return loading.then(() => this.ready(options))
   },
 }

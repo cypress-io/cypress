@@ -3,7 +3,7 @@ const path = require('path')
 require('../../spec_helper')
 const { fs } = require('../../../lib/util/fs')
 const settings = require(`../../../lib/util/settings`)
-const { makeLegacyDataContext } = require('../../../lib/makeDataContext')
+const { getCtx } = require('../../../lib/makeDataContext')
 
 const projectRoot = process.cwd()
 const defaultOptions = {
@@ -14,7 +14,7 @@ let ctx
 
 describe('lib/util/settings', () => {
   beforeEach(() => {
-    ctx = makeLegacyDataContext()
+    ctx = getCtx()
   })
 
   context('with default configFile option', () => {

@@ -10,13 +10,13 @@ const scaffold = require(`${root}lib/scaffold`)
 const { fs } = require(`${root}lib/util/fs`)
 const glob = require(`${root}lib/util/glob`)
 const Fixtures = require('@tooling/system-tests/lib/fixtures')
-const { makeLegacyDataContext } = require(`${root}lib/makeDataContext`)
+const { getCtx } = require(`${root}lib/makeDataContext`)
 
 let ctx
 
 describe('lib/scaffold', () => {
   beforeEach(() => {
-    ctx = makeLegacyDataContext()
+    ctx = getCtx()
 
     return Fixtures.scaffold()
   })
