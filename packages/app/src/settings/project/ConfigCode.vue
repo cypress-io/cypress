@@ -1,15 +1,15 @@
 <template>
-  <div class="relative grow-1 w-full hide-scrollbar rounded-bl-md rounded-tl-md mx-auto border-1 overflow-auto min-w-100px">
+  <div class="rounded-bl-md rounded-tl-md mx-auto border-1 w-full min-w-100px relative hide-scrollbar overflow-auto grow-1">
     <Button
       variant="outline"
-      class="absolute top-4 right-4"
+      class="top-4 right-4 absolute"
       :prefix-icon="IconCode"
       prefix-icon-class="text-gray-500"
     >
       {{ t('file.edit') }}
     </Button>
     <code
-      class="block p-16px text-gray-600 text-size-14px leading-24px font-thin"
+      class="font-thin p-16px text-gray-600 text-size-14px leading-24px block"
     >
       {<br>
       <div class="pl-24px">
@@ -60,13 +60,10 @@ import { CONFIG_LEGEND_COLOR_MAP } from './ConfigSourceColors'
 import Browsers from './renderers/Browsers.vue'
 import StringArray from './renderers/StringArray.vue'
 import StringRecords from './renderers/StringRecords.vue'
+import type { CypressResolvedConfig } from './projectSettings'
 
 defineProps<{
-  config: Array<{
-    field: string,
-    from: 'default'| 'config',
-    value: string | number | boolean | Record<string, string> | Array<string>
-  }>
+  config: CypressResolvedConfig
 }>()
 
 // a bug in vite demands that we do this passthrough

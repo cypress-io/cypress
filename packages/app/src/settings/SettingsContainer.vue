@@ -1,38 +1,40 @@
 <template>
   <div
-    class="p-24px h-full"
+    class="h-full space-y-32px p-32px"
     data-cy="settings"
   >
-    <SettingsCard
-      :title="t('settingsPage.device.title')"
-      :description="t('settingsPage.device.description')"
-      :icon="IconLaptop"
-      max-height="800px"
-    >
-      <ExternalEditorSettings :gql="props.gql" />
-      <ProxySettings :gql="props.gql" />
-      <TestingPreferences :gql="props.gql" />
-    </SettingsCard>
-    <SettingsCard
-      :title="t('settingsPage.project.title')"
-      :description="t('settingsPage.project.description')"
-      :icon="IconFolder"
-      max-height="3200px"
-    >
-      <ProjectSettings
-        v-if="props.gql.currentProject"
-        :gql="props.gql.currentProject"
-      />
-    </SettingsCard>
-    <hr class="border-gray-100 my-32px">
-    <p class="leading-24px text-16px text-light max-w-500px text-gray-500 mx-auto text-center">
+    <div class="space-y-24px">
+      <SettingsCard
+        :title="t('settingsPage.device.title')"
+        :description="t('settingsPage.device.description')"
+        :icon="IconLaptop"
+        max-height="800px"
+      >
+        <ExternalEditorSettings :gql="props.gql" />
+        <ProxySettings :gql="props.gql" />
+        <TestingPreferences :gql="props.gql" />
+      </SettingsCard>
+      <SettingsCard
+        :title="t('settingsPage.project.title')"
+        :description="t('settingsPage.project.description')"
+        :icon="IconFolder"
+        max-height="3328px"
+      >
+        <ProjectSettings
+          v-if="props.gql"
+          :gql="props.gql"
+        />
+      </SettingsCard>
+    </div>
+    <hr class="border-gray-100">
+    <p class="font-light mx-auto text-center max-w-500px text-16px text-gray-500 leading-24px">
       {{ t('settingsPage.footer.text') }}
     </p>
     <Button
-      class="my-16px mx-auto"
+      class="mx-auto group"
       variant="outline"
       :prefix-icon="SettingsIcon"
-      prefix-icon-class="icon-dark-gray-500 icon-light-gray-50"
+      prefix-icon-class="icon-dark-gray-500 icon-light-gray-50 group-hocus:icon-dark-indigo-400 group-hocus:icon-light-indigo-50"
       @click="reconfigure"
     >
       {{ t('settingsPage.footer.button') }}
@@ -64,11 +66,8 @@ mutation SettingsContainer_ReconfigureProject {
 
 gql`
 fragment SettingsContainer on Query {
-  ... TestingPreferences
-  currentProject {
-    id
-    ...ProjectSettings
-  }
+  ...TestingPreferences
+  ...ProjectSettings
   ...ExternalEditorSettings
   ...ProxySettings
 }`

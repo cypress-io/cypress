@@ -10,23 +10,22 @@
 
   <div
     v-if="props.gql.currentProject?.currentTestingType"
-    class="text-center max-w-642px mx-auto py-40px"
+    class="mx-auto text-center max-w-642px py-40px"
   >
-    <div class="max-w-600px m-x-auto">
+    <div class="m-x-auto max-w-600px">
       <h1
         data-testid="create-spec-page-title"
-        class="text-gray-900 text-32px mb-12px"
+        class="mb-12px text-gray-900 text-32px"
       >
         {{ props.title }}
       </h1>
       <p
         data-testid="create-spec-page-description"
-        class="leading-normal text-gray-600 text-18px mb-32px"
+        class="leading-normal mb-32px text-gray-600 text-18px"
       >
         <i18n-t :keypath="descriptionKeyPath">
           <button
-            class="hocus-link-default text-purple-500"
-            @click.prevent="showCypressConfigInIDE"
+            class="text-purple-500 hocus-link-default"
           >
             specPattern
           </button>
@@ -34,23 +33,14 @@
       </p>
     </div>
 
-    <ChooseExternalEditorModal
-      :open="runnerUiStore.showChooseExternalEditorModal"
-      :gql="props.gql"
-      @close="runnerUiStore.setShowChooseExternalEditorModal(false)"
-      @selected="openFile"
-    />
-
-    <DefatultPatternNoSpecContent
+    <DefaultSpecPatternNoContent
       v-if="props.isUsingDefaultSpecs"
       :gql="props.gql"
       @choose="choose"
-      @showCypressConfigInIDE="showCypressConfigInIDE"
     />
     <CustomPatternNoSpecContent
       v-else
-      :gql="props.gql.currentProject"
-      @showCypressConfigInIDE="showCypressConfigInIDE"
+      :gql="props.gql"
       @newSpec="showModal = true"
     />
   </div>
@@ -59,12 +49,9 @@
 <script lang="ts" setup>
 import { ref, computed } from 'vue'
 import CreateSpecModal from './CreateSpecModal.vue'
-import DefatultPatternNoSpecContent from './DefatultPatternNoSpecContent.vue'
-import { gql, useMutation } from '@urql/vue'
+import DefaultSpecPatternNoContent from './DefaultSpecPatternNoContent.vue'
+import { gql } from '@urql/vue'
 import type { NoSpecsPageFragment } from '../generated/graphql'
-import { NoSpecsPage_OpenFileInIdeDocument } from '@packages/data-context/src/gen/all-operations.gen'
-import { useRunnerUiStore } from '../store/runner-ui-store'
-import ChooseExternalEditorModal from '@packages/frontend-shared/src/gql-components/ChooseExternalEditorModal.vue'
 import CustomPatternNoSpecContent from './CustomPatternNoSpecContent.vue'
 
 gql`
@@ -72,24 +59,12 @@ fragment NoSpecsPage on Query {
   ...CreateSpecCards
   ...CreateSpecModal
   ...ChooseExternalEditor
-
-   currentProject {
-     id
-     currentTestingType
-     configFileAbsolutePath
-     ...SpecPatterns
+  ...CustomPatternNoSpecContent
+  currentProject {
+    id
+    currentTestingType
+    configFileAbsolutePath
   }
-  localSettings {
-    preferences {
-      preferredEditorBinary
-    }
-  }
-}
-`
-
-gql`
-mutation NoSpecsPage_OpenFileInIDE ($input: FileDetailsInput!) {
-  openFileInIDE (input: $input)
 }
 `
 
@@ -99,39 +74,9 @@ const props = defineProps<{
   isUsingDefaultSpecs: boolean
 }>()
 
-const openFileInIDE = useMutation(NoSpecsPage_OpenFileInIdeDocument)
-
 const showModal = ref(false)
 
 const generator = ref()
-
-const openInIde = (absolute: string) => {
-  openFileInIDE.executeMutation({
-    input: {
-      absolute,
-      line: 1,
-      column: 1,
-    },
-  })
-}
-
-const runnerUiStore = useRunnerUiStore()
-
-const openFile = () => {
-  runnerUiStore.setShowChooseExternalEditorModal(false)
-
-  if (props.gql.currentProject?.configFileAbsolutePath) {
-    openInIde(props.gql.currentProject.configFileAbsolutePath)
-  }
-}
-
-const showCypressConfigInIDE = () => {
-  if (props.gql.localSettings.preferences.preferredEditorBinary && props.gql.currentProject?.configFileAbsolutePath) {
-    openInIde(props.gql.currentProject.configFileAbsolutePath)
-  } else {
-    runnerUiStore.setShowChooseExternalEditorModal(true)
-  }
-}
 
 const descriptionKeyPath = computed(() => {
   return props.isUsingDefaultSpecs ?

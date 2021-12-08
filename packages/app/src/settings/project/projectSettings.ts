@@ -15,23 +15,8 @@ export interface Experiment {
   key: string
 }
 
-export const experiments: Experiment[] = [
-  {
-    name: 'Studio Mode',
-    description: 'Enable Studio Mode',
-    enabled: true,
-    key: 'experimentalStudio',
-  },
-  {
-    name: 'Fetch Polyfill',
-    description: 'Enable Fetch Polyfill',
-    enabled: true,
-    key: 'experimentalFetchPolyfill',
-  },
-  {
-    name: 'Interactive Run Events',
-    description: 'Enable Interactive Run Events',
-    enabled: false,
-    key: 'experimentalInteractiveRunEvents',
-  },
-]
+export type CypressResolvedConfig = Array<{
+  field: string
+  from: 'default'| 'config'
+  value: string | number | boolean | Record<string, string> | Array<string>
+}>

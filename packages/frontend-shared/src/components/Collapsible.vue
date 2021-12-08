@@ -2,7 +2,7 @@
   <div
     :tabindex="disable ? '-1' : '0'"
     data-cy="collapsible"
-    @keypress.space.enter.self="!disable && toggle()"
+    @keypress.space.enter.self.prevent="!disable && toggle()"
   >
     <div
       data-cy="collapsible-header"

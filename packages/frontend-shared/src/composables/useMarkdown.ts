@@ -13,6 +13,7 @@ import { mapValues, isArray, flatten } from 'lodash'
 export interface UseMarkdownOptions {
   openExternal?: boolean
   classes?: {
+    overwrite?: boolean
     h1?: string[] | string
     h2?: string[] | string
     h3?: string[] | string
@@ -69,6 +70,8 @@ const buildClasses = (options) => {
   if (options.classes) {
     return mapValues(_classes, (defaultValue, key) => {
       const inputClasses = buildFlat(options.classes[key])
+
+      if (options.classes.overwrite) return flatten([...inputClasses])
 
       return flatten([...buildFlat(defaultValue), ...inputClasses])
     })

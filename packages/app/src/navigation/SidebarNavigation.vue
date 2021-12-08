@@ -5,7 +5,8 @@
     :class="mainStore.navBarExpanded ? 'w-248px' : 'w-64px'"
   >
     <button
-      class="cursor-pointer left-full top-0 bottom-0 w-16px absolute group hocus:outline-transparent"
+      v-if="navIsAlwaysCollapsed"
+      class="cursor-pointer left-full top-0 bottom-0 w-16px z-1 absolute group hocus:outline-transparent"
       role="button"
       aria-label="toggle navigation"
       @click="mainStore.toggleNavBar"
@@ -117,12 +118,12 @@ import { useMainStore } from '../store'
 import { SideBarNavigationDocument } from '../generated/graphql'
 import CypressLogo from '@packages/frontend-shared/src/assets/logos/cypress_s.png'
 import { useI18n } from '@cy/i18n'
-import { useIntervalFn } from '@vueuse/core'
+import { useRoute } from 'vue-router'
 
 const { t } = useI18n()
 
 const navigation = [
-  { name: 'Specs', icon: CodeIcon, href: '/' },
+  { name: 'Specs', icon: CodeIcon, href: '/specs' },
   { name: 'Runs', icon: RunsIcon, href: '/runs' },
   { name: 'Settings', icon: SettingsIcon, href: '/settings' },
 ]
@@ -140,15 +141,14 @@ query SideBarNavigation {
 
 const query = useQuery({ query: SideBarNavigationDocument, requestPolicy: 'network-only' })
 
-// TODO(tgriesser): Push this to the frontend when the value has changed.
-useIntervalFn(() => {
-  query.executeQuery()
-}, 10000)
-
 const currentProject = computed(() => query.data.value?.currentProject)
 
 const bindingsOpen = ref(false)
 
 const mainStore = useMainStore()
+
+const route = useRoute()
+
+const navIsAlwaysCollapsed = computed(() => route.meta?.navBarExpandedAllowed !== false)
 
 </script>

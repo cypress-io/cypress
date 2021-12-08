@@ -1,16 +1,16 @@
 <template>
-  <div class="h-screen layout-grid">
+  <div class="h-screen min-w-728px grid grid-rows-[64px,1fr] grid-cols-[auto,1fr]">
     <SidebarNavigation class="row-span-full" />
 
     <HeaderBar
       v-if="showHeader"
       :show-browsers="true"
-      :page-name="pageName"
+      :page-name="currentRoute.name?.toString()"
     />
 
     <main
-      class="overflow-y-auto"
       aria-labelledby="primary-heading"
+      class="overflow-auto"
     >
       <router-view v-slot="{ Component, route }">
         <h1
@@ -42,16 +42,4 @@ const currentRoute = useRoute()
 const showHeader = computed(() => {
   return currentRoute.meta.header !== false
 })
-
-const pageName = computed((): string | undefined => {
-  return currentRoute.meta?.title as string
-})
 </script>
-
-<style lang="scss" scoped>
-.layout-grid {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  grid-template-rows: 64px 1fr;
-}
-</style>
