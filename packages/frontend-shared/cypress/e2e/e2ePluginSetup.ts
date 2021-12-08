@@ -2,7 +2,7 @@ import path from 'path'
 import type { RemoteGraphQLInterceptor, WithCtxInjected, WithCtxOptions } from './support/e2eSupport'
 import { e2eProjectDirs } from './support/e2eProjectDirs'
 import type { CloudExecuteRemote } from '@packages/data-context/src/sources'
-import type { DataContext } from '@packages/data-context'
+import { clearCtx, DataContext } from '@packages/data-context'
 import * as inspector from 'inspector'
 import sinonChai from '@cypress/sinon-chai'
 import sinon from 'sinon'
@@ -59,6 +59,12 @@ export async function e2ePluginSetup (projectRoot: string, on: Cypress.PluginEve
   let remoteGraphQLIntercept: RemoteGraphQLInterceptor | undefined
 
   on('task', {
+    beforeEach () {
+      clearCtx()
+      remoteGraphQLIntercept = undefined
+
+      return null
+    },
     remoteGraphQLIntercept (fn: string) {
       remoteGraphQLIntercept = new Function('console', 'obj', `return (${fn})(obj)`).bind(null, console) as RemoteGraphQLInterceptor
 
@@ -74,7 +80,7 @@ export async function e2ePluginSetup (projectRoot: string, on: Cypress.PluginEve
       if (obj.activeTestId !== currentTestId) {
         await ctx?.destroy()
         currentTestId = obj.activeTestId
-        remoteGraphQLIntercept = undefined
+
         testState = {};
         ({ serverPortPromise, ctx } = runInternalServer({
           projectRoot: null,

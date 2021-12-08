@@ -71,6 +71,7 @@ beforeEach(() => {
   // Reset the ports so we know we need to call "setupE2E" before each test
   Cypress.env('e2e_serverPort', undefined)
   Cypress.env('e2e_gqlPort', undefined)
+  cy.task('beforeEach', { log: false })
 })
 
 // function setup
@@ -131,7 +132,7 @@ function visitApp (href?: string) {
   }
 
   return cy.withCtx(async (ctx) => {
-    return JSON.stringify(ctx.html.fetchAppInitialData())
+    return JSON.stringify(await ctx.html.fetchAppInitialData())
   }, { log: false }).then((ssrData) => {
     return cy.visit(`dist-app/index.html?serverPort=${e2e_serverPort}${href || ''}`, {
       onBeforeLoad (win) {
