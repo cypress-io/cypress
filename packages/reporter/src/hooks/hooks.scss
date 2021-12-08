@@ -22,6 +22,7 @@
         }
 
         .hook-open-in-ide {
+          cursor: pointer;
           display: block;
         }
       }
@@ -53,7 +54,7 @@
         align-items: center;
         color: $gray-400;
         display: none;
-        padding: 4px 10px;
+        padding: 4px;
 
         &:hover, &:focus {
           background-color: rgba($gray-700, 0.2);
