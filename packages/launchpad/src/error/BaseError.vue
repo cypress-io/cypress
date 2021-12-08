@@ -26,10 +26,7 @@
           class="font-light"
           data-testid="error-message"
         >
-          <ExternalLink
-            href="https://on.cypress.io/guides/configuration"
-            data-testid="error-docs-link"
-          >cypress.config.js</ExternalLink>
+          <OpenConfigFileInIDE :gql="props.gql" />
         </i18n-t>
       </slot>
       <!-- eslint-enable vue/multiline-html-element-content-newline  -->
@@ -74,13 +71,16 @@ import Button from '@cy/components/Button.vue'
 import { computed } from 'vue'
 import { useI18n } from '@cy/i18n'
 import type { BaseErrorFragment } from '../generated/graphql'
-import ExternalLink from '@packages/frontend-shared/src/gql-components/ExternalLink.vue'
+import OpenConfigFileInIDE from '@packages/frontend-shared/src/gql-components/OpenConfigFileInIDE.vue'
 
 gql`
-fragment BaseError on BaseError {
-  title
-  message
-  stack
+fragment BaseError on Query {
+  baseError {
+    title
+    message
+    stack
+  }
+  ...OpenConfigFileInIDE
 }
 `
 
@@ -109,9 +109,9 @@ const retry = async () => {
   )
 }
 
-const headerText = computed(() => props.gql.title ? props.gql.title : t('launchpadErrors.generic.header'))
-const errorMessage = computed(() => props.gql.message ? props.gql.message : null)
-const stack = computed(() => props.gql.stack ? props.gql.stack : null)
+const headerText = computed(() => props.gql.baseError?.title ? props.gql.baseError.title : t('launchpadErrors.generic.header'))
+const errorMessage = computed(() => props.gql?.baseError?.message ? props.gql.baseError.message : null)
+const stack = computed(() => props.gql?.baseError?.stack ? props.gql.baseError.stack : null)
 const lastMutationDefined = computed(() => {
   return Boolean(latestOperation)
 })

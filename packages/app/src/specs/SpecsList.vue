@@ -13,7 +13,7 @@
       @newSpec="showModal = true"
     />
 
-    <div class="grid grid-cols-2 children:text-gray-800 children:font-medium">
+    <div class="grid grid-cols-2 children:font-medium children:text-gray-800">
       <div
         class="flex justify-between items-center"
         data-cy="specs-testing-type-header"
@@ -26,7 +26,7 @@
       </div>
     </div>
     <div
-      class="grid spec-list-container"
+      class="grid pb-32px spec-list-container"
       v-bind="containerProps"
     >
       <div

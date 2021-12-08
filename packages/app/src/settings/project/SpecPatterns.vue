@@ -43,23 +43,10 @@
 
 <script lang="ts" setup>
 import { useI18n } from '@cy/i18n'
-import { gql } from '@urql/vue'
 import StatusIndicator from '@cy/components/StatusIndicator.vue'
-import type { SpecPatternsFragment } from '../../generated/graphql'
 import SettingsSection from '../SettingsSection.vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 const { t } = useI18n()
-
-gql`
-fragment SpecPatterns on CurrentProject {
-  id
-  config
-}
-`
-
-defineProps<{
-  gql?: SpecPatternsFragment
-}>()
 
 const defaultValues = true
 
