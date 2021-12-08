@@ -11,12 +11,13 @@ import { addEventCoords, dispatch } from './trigger'
  * The behavior here varies between browsers, and though unpleasant, we have to attempt
  * to replicate it as far as possible.
  *
- * In Firefox, attempting to set webkitGetAsEntry() fails - but this is fine, because
- * Firefox also returns a useful value from item.webkitGetAsEntry().
- *
- * In webkit browsers however, item.webkitGetAsEntry() returns null, because our File()
+ * In webkit browsers, item.webkitGetAsEntry() returns null, because our File()
  * instances don't actually correspond with a file on disk. But the property is writeable,
  * so we're able to override it with our own implementation that returns a proper object.
+ *
+ * In Firefox, the builtin webkitGetAsEntry() returns a useful value, but attempting to
+ * override webkitGetAsEntry() throws an error.
+ *
  */
 const tryMockWebkit = (item) => {
   try {
@@ -27,7 +28,7 @@ const tryMockWebkit = (item) => {
       }
     }
   } catch (e) {
-    // We're in Firefox, this is fine.
+    // We're in a browser where webkitGetAsEntry cannot be mocked (probably Firefox).
   }
 
   return item
@@ -36,11 +37,10 @@ const tryMockWebkit = (item) => {
 const createDataTransfer = (files: Cypress.FileReferenceObject[]): DataTransfer => {
   const dataTransfer = new DataTransfer()
 
-  files.forEach(({ contents, fileName, lastModified, mimeType }) => {
-    dataTransfer.items.add(new File([contents], fileName || '', {
-      lastModified,
-      type: mimeType,
-    }))
+  files.forEach(({ contents, fileName = '', lastModified = Date.now() }) => {
+    const file = new File([contents], fileName, { lastModified })
+
+    dataTransfer.items.add(file)
   })
 
   const oldItems = dataTransfer.items
@@ -171,9 +171,8 @@ export default (Commands, Cypress, cy, state, config) => {
    * Turns a user-provided file - a string shorthand, Buffer, or object
    * into an object of form {
    *   contents,
-   *   fileName,
-   *   lastModified,
-   *   mimeType?,
+   *   fileName?,
+   *   lastModified?,
    * }.
    *
    * Or throws an error. Users do many strange things, and this is where
@@ -208,10 +207,7 @@ export default (Commands, Cypress, cy, state, config) => {
         file.contents = JSON.stringify(file.contents)
       }
 
-      return _.defaults({}, file, {
-        fileName: '',
-        lastModified: Date.now(),
-      })
+      return file
     }
   }
 

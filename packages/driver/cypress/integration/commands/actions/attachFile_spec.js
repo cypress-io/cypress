@@ -73,15 +73,13 @@ describe('src/cy/commands/actions/attachFile', () => {
       })
     })
 
-    it('attaches files with custom lastModified and mimeType', () => {
+    it('attaches files with custom lastModified', () => {
       cy.get('#basic').attachFile({
         contents: '@foo',
-        mimeType: 'text/plain',
         lastModified: 1234,
       })
 
       cy.get('#basic').then((input) => {
-        expect(input[0].files[0].type).to.eq('text/plain')
         expect(input[0].files[0].lastModified).to.eq(1234)
       })
     })
