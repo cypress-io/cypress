@@ -9,6 +9,8 @@ import { fail, verify } from '../../../e2e/cypress/support/util'
 window.top.__cySkipValidateConfig = true
 context('validation errors', function () {
   beforeEach(() => {
+    // @ts-ignore
+    window.top.__cySkipValidateConfig = true
     Cypress.config('isInteractive', true)
   })
 
