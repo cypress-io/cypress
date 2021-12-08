@@ -110,7 +110,7 @@ describe('lib/tasks/download', function () {
     })
   })
 
-  it('saves example.zip to options.downloadDestination', function () {
+  it.only('saves example.zip to options.downloadDestination', function () {
     nock('https://aws.amazon.com')
     .get('/some.zip')
     .reply(200, () => {

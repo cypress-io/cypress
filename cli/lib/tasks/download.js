@@ -1,12 +1,13 @@
 const arch = require('arch')
 const la = require('lazy-ass')
+const request = require('request')
 const is = require('check-more-types')
 const os = require('os')
 const Url = require('url')
 const path = require('path')
 const debug = require('debug')('cypress:cli')
-const https = require('https')
-const http = require('http')
+//const https = require('https')
+//const http = require('http')
 const Promise = require('bluebird')
 const requestProgress = require('request-progress')
 const { stripIndent } = require('common-tags')
@@ -126,7 +127,7 @@ const verifyDownloadedFile = (filename, expectedSize, expectedChecksum) => {
 
         debug(text)
 
-        throw new Error(text)
+        return Promise.reject(new Error(text))
       },
     )
   }
@@ -150,7 +151,7 @@ const verifyDownloadedFile = (filename, expectedSize, expectedChecksum) => {
         Computed checksum: ${checksum}
       `
 
-      throw new Error(text)
+      return Promise.reject(new Error(text))
     })
   }
 
@@ -175,7 +176,7 @@ const verifyDownloadedFile = (filename, expectedSize, expectedChecksum) => {
           Computed size: ${filesize}
         `
 
-      throw new Error(text)
+      return Promise.reject(new Error(text))
     })
   }
 
@@ -187,7 +188,7 @@ const verifyDownloadedFile = (filename, expectedSize, expectedChecksum) => {
 // downloads from given url
 // return an object with
 // {filename: ..., downloaded: true}
-const downloadFromUrl = ({ url, downloadDestination, progress, ca }) => {
+const downloadFromUrl = ({ url, downloadDestination, progress, ca, version }) => {
   return new Promise((resolve, reject) => {
     const proxy = getProxyForUrlWithNpmConfig(url)
 
@@ -199,13 +200,23 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca }) => {
 
     if (ca) debug('using custom CA details from npm config')
 
+    let redirectVersion
     const reqOptions = {
-      ...Url.urlToHttpOptions(new URL(url)),
-      proxy,
-      ...(ca ? { cert: ca } : {}),
+      uri: url,
+      ...(proxy ? { proxy } : {}),
+      ...(ca ? { ca } : {}),
+      method: 'GET',
+      followRedirect (response) {
+        const redirectVersion = response.headers['x-version']
+
+        debug('redirect version:', redirectVersion)
+
+        // yes redirect
+        return true
+      },
     }
-    const pkg = url.toLowerCase().startsWith('https:') ? https : http
-    const req = pkg.get(reqOptions)
+    //    const pkg = url.toLowerCase().startsWith('https:') ? https : http
+    const req = request(reqOptions)
 
     // closure
     let started = null
@@ -216,7 +227,7 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca }) => {
       throttle: progress.throttle,
     })
     .on('response', (response) => {
-      let redirectVersion
+      debug("REASPONSEREASONAOSDFAKSDFJH", response.statusCode)
       // we have computed checksum and filesize during test runner binary build
       // and have set it on the S3 object as user meta data, available via
       // these custom headers "x-amz-meta-..."
@@ -243,19 +254,16 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca }) => {
 
       if (response.statusCode === 302 || response.statusCode === 301) {
         // Recursively follow redirects, only a 200 will resolve.
-        const version = response.headers['x-version']
+        redirectVersion = response.headers['x-version']
 
-        debug('redirect version:', version)
-        if (version) {
-          // set the version in options if we have one.
-          // this insulates us from potential redirect
-          // problems where version would be set to undefined.
-          redirectVersion = version
-        }
+        debug('redirect version:', redirectVersion)
 
         // yes redirect - recursively
         debug('redirected to', response.headers.location)
-        downloadFromUrl({ url: response.headers.location, progress, ca, downloadDestination })
+        // set the version in options if we have one.
+        // this insulates us from potential redirect
+        // problems where version would be set to undefined.
+        downloadFromUrl({ url: response.headers.location, progress, ca, downloadDestination, version: redirectVersion ? redirectVersion : version })
         .then(resolve).catch(reject)
         // if our status code does not start with 200
       } else if (!/^2/.test(response.statusCode)) {
@@ -281,7 +289,8 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca }) => {
           verifyDownloadedFile(downloadDestination, expectedSize,
             expectedChecksum)
           .then(() => debug('verified'))
-          .then(() => resolve(redirectVersion))
+          .then(() => resolve(version))
+          .catch(reject)
         })
       }
     })
@@ -334,7 +343,7 @@ const start = (opts) => {
     return getCA()
   })
   .then((ca) => {
-    return downloadFromUrl({ url, downloadDestination, progress, ca })
+    return downloadFromUrl({ url, downloadDestination, progress, ca, version })
   })
   .catch((err) => {
     return prettyDownloadErr(err, version)
