@@ -512,6 +512,8 @@ type LocalSettingsPreferences {
   preferredEditorBinary: String
   proxyBypass: String
   proxyServer: String
+  reporterWidth: Int
+  specsListWidth: Int
   useDarkSidebar: Boolean
   watchForSpecChange: Boolean
 }

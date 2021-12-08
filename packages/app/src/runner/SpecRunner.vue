@@ -12,12 +12,13 @@
       >
         <Vue3DraggableResizable
           v-model:w="specsListWidth"
-          :init-w="280"
+          :init-w="runnerUiStore.specsListWidth"
           :init-h="windowHeight"
           :handles="['mr']"
           :draggable="false"
           class-name-handle="h-full bg-transparent border-transparent top-0 w-8px right-0 block cursor-ew-resize handle"
-          class="relative"
+          :class="{relative: runnerUiStore.isSpecsListOpen}"
+          @resize-end="handleResizeEnd('specsList')"
         >
           <InlineSpecList
             v-show="runnerUiStore.isSpecsListOpen"
@@ -38,12 +39,13 @@
     <HideDuringScreenshot>
       <Vue3DraggableResizable
         v-model:w="reporterWidth"
-        :init-w="320"
+        :init-w="runnerUiStore.reporterWidth"
         :init-h="windowHeight"
         :handles="['mr']"
         :draggable="false"
         class-name-handle="h-full bg-transparent border-transparent top-0 w-8px right-0 block z-40 cursor-ew-resize handle"
-        class="z-30 relative"
+        class="border-0 z-30 relative"
+        @resize-end="handleResizeEnd('reporter')"
       >
         <div
           v-once
@@ -125,6 +127,8 @@ fragment SpecRunner on Query {
     preferences {
       isSpecsListOpen
       autoScrollingEnabled
+      reporterWidth
+      specsListWidth
     }
   }
 }
@@ -148,8 +152,11 @@ const screenshotStore = useScreenshotStore()
 const runnerUiStore = useRunnerUiStore()
 const preferences = usePreferences()
 
+// Todo: maybe `update` should take an object, not just a key-value pair and do updates like this all in one batch
 preferences.update('autoScrollingEnabled', props.gql.localSettings.preferences.autoScrollingEnabled ?? true)
 preferences.update('isSpecsListOpen', props.gql.localSettings.preferences.isSpecsListOpen ?? true)
+preferences.update('reporterWidth', props.gql.localSettings.preferences.reporterWidth ?? 320)
+preferences.update('specsListWidth', props.gql.localSettings.preferences.specsListWidth ?? 280)
 
 const runnerPane = ref<HTMLDivElement>()
 const reporterWidth = ref<number>(320)
@@ -195,6 +202,14 @@ const viewportStyle = computed(() => {
 function runSpec () {
   autStore.setScriptError(null)
   UnifiedRunnerAPI.executeSpec(props.activeSpec)
+}
+
+function handleResizeEnd (pane: 'reporter' | 'specsList') {
+  if (pane === 'reporter') {
+    preferences.update('reporterWidth', reporterWidth.value)
+  } else {
+    preferences.update('specsListWidth', specsListWidth.value)
+  }
 }
 
 let fileToOpen: FileDetails
@@ -251,6 +266,7 @@ onMounted(() => {
 
   eventManager.on('save:app:state', (state) => {
     preferences.update('isSpecsListOpen', state.isSpecsListOpen)
+    specsListWidth.value = state.isSpecsListOpen ? runnerUiStore.specsListWidth : 0
     preferences.update('autoScrollingEnabled', state.autoScrollingEnabled)
   })
 

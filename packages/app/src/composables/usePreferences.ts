@@ -9,12 +9,17 @@ mutation Preferences_SetPreferences ($value: String!) {
   setPreferences (value: $value)
 }`
 
+type Preference = 'autoScrollingEnabled' | 'isSpecsListOpen' | 'reporterWidth' | 'specsListWidth'
+
 export function usePreferences () {
   const setPreferences = useMutation(Preferences_SetPreferencesDocument)
 
-  function update (preference: 'autoScrollingEnabled' | 'isSpecsListOpen', value: any) {
-    runnerUiStore.setPreference(preference, value)
-    setPreferences.executeMutation({ value: JSON.stringify({ [preference]: value }) })
+  function update (preference: Preference, value: any) {
+    if (runnerUiStore[preference] !== value) {
+      // only set the value and trigger the mutation if the value has actually changed
+      runnerUiStore.setPreference(preference, value)
+      setPreferences.executeMutation({ value: JSON.stringify({ [preference]: value }) })
+    }
   }
 
   return {
