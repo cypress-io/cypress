@@ -1,4 +1,4 @@
-import { DataContext } from '@packages/data-context'
+import { DataContext, getCtx, setCtx } from '@packages/data-context'
 import electron from 'electron'
 
 import specsUtil from './util/specs'
@@ -31,6 +31,8 @@ export async function clearLegacyDataContext () {
   await legacyDataContext?.destroy()
   legacyDataContext = undefined
 }
+
+export { getCtx, setCtx }
 
 export function makeDataContext (options: MakeDataContextOptions): DataContext {
   const ctx = new DataContext({

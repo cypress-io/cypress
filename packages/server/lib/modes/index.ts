@@ -21,7 +21,7 @@ export = (mode, options) => {
 
     // run must always be deterministic - if the user doesn't specify
     // a testingType, we default to e2e
-    options.testingType = 'e2e'
+    // options.testingType = 'e2e'
 
     return require('./run-e2e').run(options, loadingPromise)
   }

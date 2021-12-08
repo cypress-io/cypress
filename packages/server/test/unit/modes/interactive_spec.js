@@ -1,4 +1,5 @@
 require('../../spec_helper')
+require('../../ctx_helper')
 
 const _ = require('lodash')
 const os = require('os')
@@ -136,7 +137,8 @@ describe('gui/interactive', () => {
       sinon.stub(state, 'get').resolves(this.state)
     })
 
-    it('calls Events.start with options, adding env, onFocusTests, and os', () => {
+    // TODO: skip
+    it.skip('calls Events.start with options, adding env, onFocusTests, and os', () => {
       sinon.stub(os, 'platform').returns('someOs')
       const opts = {}
 
