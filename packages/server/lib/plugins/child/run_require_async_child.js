@@ -1,9 +1,9 @@
 require('graceful-fs').gracefulify(require('fs'))
 const stripAnsi = require('strip-ansi')
 const debug = require('debug')('cypress:server:plugins:child')
-const tsNodeUtil = require('./ts_node')
-const util = require('../plugins/util')
-const RunPlugins = require('../plugins/child/run_plugins')
+const tsNodeUtil = require('../../util/ts_node')
+const util = require('../util')
+const RunPlugins = require('./run_plugins')
 
 let tsRegistered = false
 

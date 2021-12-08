@@ -24,7 +24,7 @@
     "codegen": "yarn gulp codegen",
     "debug": "yarn gulp debug",
     "precypress:open": "yarn ensure-deps",
-    "cypress:open": "cypress open --dev --global",
+    "cypress:open": "yarn gulp open --dev --global",
     "precypress:open:debug": "yarn ensure-deps",
     "cypress:open:debug": "node ./scripts/debug.js cypress:open",
     "precypress:run": "yarn ensure-deps",
@@ -69,7 +69,7 @@
     "type-check": "node scripts/type_check",
     "verify:mocha:results": "node ./scripts/verify_mocha_results",
     "prewatch": "yarn ensure-deps",
-    "watch": "lerna exec yarn watch --parallel --stream",
+    "watch": "yarn gulp dev:watch",
     "prepare": "husky install"
   },
   "devDependencies": {

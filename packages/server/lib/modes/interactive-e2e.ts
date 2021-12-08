@@ -127,7 +127,7 @@ export = {
    * @param {import('@packages/types').LaunchArgs} options
    * @returns
    */
-  ready (options: {projectRoot?: string} = {}) {
+  ready (options: {projectRoot?: string} = {}, port: number) {
     const { projectRoot } = options
     const ctx = getCtx()
 
@@ -145,7 +145,7 @@ export = {
 
     return savedState.create(projectRoot, false).then((state) => state.get())
     .then((state) => {
-      return Windows.open(projectRoot, this.getWindowArgs(state))
+      return Windows.open(projectRoot, port, this.getWindowArgs(state))
       .then((win) => {
         ctx?.actions.electron.setBrowserWindow(win)
         // Events.start({
@@ -163,11 +163,11 @@ export = {
   },
 
   async run (options, ctx: DataContext) {
-    await Promise.all([
+    const [, port] = await Promise.all([
       app.whenReady(),
       makeGraphQLServer(),
     ])
 
-    return this.ready(options)
+    return this.ready(options, port)
   },
 }

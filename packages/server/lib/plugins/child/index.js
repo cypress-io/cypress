@@ -1,4 +1,4 @@
-// process.title = 'Cypress: Plugin Manager'
+process.title = 'Cypress: Config Manager'
 
 require('graceful-fs').gracefulify(require('fs'))
 

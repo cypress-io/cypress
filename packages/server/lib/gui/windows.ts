@@ -5,7 +5,6 @@ import { BrowserWindow } from 'electron'
 import Debug from 'debug'
 import * as savedState from '../saved_state'
 import { getPathToDesktopIndex } from '@packages/resolve-dist'
-import { getCtx } from '@packages/data-context'
 
 const debug = Debug('cypress:server:windows')
 
@@ -19,7 +18,7 @@ export type WindowOptions = Electron.BrowserWindowConstructorOptions & {
 let windows = {}
 let recentlyCreatedWindow = false
 
-const getUrl = function (type, port?: number) {
+const getUrl = function (type, port: number) {
   switch (type) {
     case 'INDEX':
       return getPathToDesktopIndex(port)
@@ -211,7 +210,7 @@ export function create (projectRoot, _options: WindowOptions = {}, newBrowserWin
 }
 
 // open launchpad BrowserWindow
-export function open (projectRoot, options: WindowOptions = {}, newBrowserWindow = _newBrowserWindow): Bluebird<BrowserWindow> {
+export function open (projectRoot, gqlPort: number, options: WindowOptions = {}, newBrowserWindow = _newBrowserWindow): Bluebird<BrowserWindow> {
   // if we already have a window open based
   // on that type then just show + focus it!
   let win = getByType(options.type)
@@ -234,7 +233,7 @@ export function open (projectRoot, options: WindowOptions = {}, newBrowserWindow
   })
 
   if (!options.url) {
-    options.url = getUrl(options.type, getCtx().gqlServerPort)
+    options.url = getUrl(options.type, gqlPort)
   }
 
   win = create(projectRoot, options, newBrowserWindow)

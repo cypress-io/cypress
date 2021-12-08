@@ -58,7 +58,7 @@ gulp.task(
 )
 
 gulp.task(
-  'dev:scripts',
+  'dev:watch',
   gulp.parallel(
     webpackRunner,
     gulp.series(
@@ -88,7 +88,7 @@ gulp.task(
 gulp.task(
   'dev',
   gulp.series(
-    'dev:scripts',
+    'dev:watch',
 
     // And we're finally ready for electron, watching for changes in
     // /graphql to auto-restart the server
