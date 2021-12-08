@@ -11,10 +11,11 @@
         v-if="props.gql.currentProject"
       >
         <Vue3DraggableResizable
+          v-model:w="specsListWidth"
           :init-w="280"
           :init-h="windowHeight"
           :handles="['mr']"
-          :resizable="true"
+          :draggable="true"
           class-name-handle="h-full bg-teal top-0 w-8px -left-8px block"
           class="relative"
         >
@@ -34,14 +35,15 @@
       />
     </HideDuringScreenshot>
 
-    <HideDuringScreenshot class="min-w-320px">
+    <HideDuringScreenshot>
       <Vue3DraggableResizable
-        :init-w="280"
+        v-model:w="reporterWidth"
+        :init-w="320"
         :init-h="windowHeight"
         :handles="['mr']"
         :resizable="true"
-        class-name-handle="h-full bg-teal top-0 w-8px -left-8px block"
-        class="relative"
+        class-name-handle="h-full bg-teal top-0 w-8px -left-8px block z-40"
+        class="z-30 relative"
       >
         <div
           v-once
@@ -144,16 +146,16 @@ preferences.update('autoScrollingEnabled', props.gql.localSettings.preferences.a
 preferences.update('isSpecsListOpen', props.gql.localSettings.preferences.isSpecsListOpen ?? true)
 
 const runnerPane = ref<HTMLDivElement>()
+const reporterWidth = ref<number>(320)
+const specsListWidth = ref<number>(280)
 
 const autMargin = 16
 
 const containerWidth = computed(() => {
   // TODO: make these values dynamic in UNIFY-592:
-  const reporterWidth = 320
   const navWidth = 64
-  const specsListWidth = runnerUiStore.isSpecsListOpen ? 280 : 0
   const miscBorders = 4
-  const nonAutWidth = reporterWidth + navWidth + specsListWidth + (autMargin * 2) + miscBorders
+  const nonAutWidth = reporterWidth.value + navWidth + specsListWidth.value + (autMargin * 2) + miscBorders
 
   return windowWidth.value - nonAutWidth
 })
