@@ -2,9 +2,11 @@ const arch = require('arch')
 const la = require('lazy-ass')
 const is = require('check-more-types')
 const os = require('os')
-const url = require('url')
+const Url = require('url')
 const path = require('path')
 const debug = require('debug')('cypress:cli')
+const https = require('https')
+const http = require('http')
 const request = require('@cypress/request')
 const Promise = require('bluebird')
 const requestProgress = require('request-progress')
@@ -61,7 +63,7 @@ const getCA = () => {
 }
 
 const prepend = (urlPath) => {
-  const endpoint = url.resolve(getBaseUrl(), urlPath)
+  const endpoint = Url.resolve(getBaseUrl(), urlPath)
   const platform = os.platform()
 
   return `${endpoint}?platform=${platform}&arch=${arch()}`
@@ -196,33 +198,15 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca }) => {
       downloadDestination,
     })
 
-    let redirectVersion
 
+    if (ca) debug('using custom CA details from npm config')
     const reqOptions = {
-      url,
+      ...Url.urlToHttpOptions(new URL(url)),
       proxy,
-      followRedirect (response) {
-        const version = response.headers['x-version']
-
-        debug('redirect version:', version)
-        if (version) {
-          // set the version in options if we have one.
-          // this insulates us from potential redirect
-          // problems where version would be set to undefined.
-          redirectVersion = version
-        }
-
-        // yes redirect
-        return true
-      },
+      ...(ca ? {cert: ca} : {}),
     }
-
-    if (ca) {
-      debug('using custom CA details from npm config')
-      reqOptions.agentOptions = { ca }
-    }
-
-    const req = request(reqOptions)
+    const pkg = url.toLowerCase().startsWith('https:') ? https : http
+    const req = pkg.get(reqOptions)
 
     // closure
     let started = null
@@ -233,6 +217,7 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca }) => {
       throttle: progress.throttle,
     })
     .on('response', (response) => {
+      let redirectVersion
       // we have computed checksum and filesize during test runner binary build
       // and have set it on the S3 object as user meta data, available via
       // these custom headers "x-amz-meta-..."
@@ -256,6 +241,25 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca }) => {
       // response headers
       started = new Date()
 
+      if (response.statusCode === 302 || response.statusCode === 301) {
+        // Recursively follow redirects, only a 200 will resolve.
+        const version = response.headers['x-version']
+
+        debug('redirect version:', version)
+        if (version) {
+          // set the version in options if we have one.
+          // this insulates us from potential redirect
+          // problems where version would be set to undefined.
+          redirectVersion = version
+        }
+
+        // yes redirect - recursively
+        debug("redirected to", response.headers.location)
+        downloadFromUrl(
+            {url: response.headers.location, progress, ca, downloadDestination})
+        .then(resolve).catch(reject)
+      } else
+
       // if our status code does not start with 200
       if (!/^2/.test(response.statusCode)) {
         debug('response code %d', response.statusCode)
@@ -269,6 +273,21 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca }) => {
         )
 
         reject(err)
+      }
+
+      // status codes here are all 2xx
+      else {
+        // We only enable this pipe connection when we know we've got a successful return
+        response.pipe(fs.createWriteStream(downloadDestination))
+        // and handle the completion with verify and resolve
+        response.on('end', () => {
+          debug('downloading finished')
+
+          verifyDownloadedFile(downloadDestination, expectedSize,
+              expectedChecksum)
+          .then(() => debug('verified'))
+          .then(() => resolve(redirectVersion))
+        })
       }
     })
     .on('error', reject)
@@ -284,16 +303,6 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca }) => {
 
       // send up our percent and seconds remaining
       progress.onProgress(percentage, util.secsRemaining(eta))
-    })
-    // save this download here
-    .pipe(fs.createWriteStream(downloadDestination))
-    .on('finish', () => {
-      debug('downloading finished')
-
-      verifyDownloadedFile(downloadDestination, expectedSize, expectedChecksum)
-      .then(() => {
-        return resolve(redirectVersion)
-      }, reject)
     })
   })
 }
