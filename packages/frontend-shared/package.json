@@ -49,6 +49,7 @@
     "graphql-tag": "^2.12.5",
     "lodash": "^4.17.21",
     "modern-normalize": "1.1.0",
+    "patch-package": "6.4.7",
     "rimraf": "3.0.2",
     "unplugin-icons": "^0.11.4",
     "unplugin-vue-components": "^0.15.4",
