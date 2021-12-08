@@ -149,6 +149,6 @@ const mainStore = useMainStore()
 
 const route = useRoute()
 
-const navIsAlwaysCollapsed = computed(() => route.meta?.navBarExpanded !== false)
+const navIsAlwaysCollapsed = computed(() => route.meta?.navBarExpandedAllowed !== false)
 
 </script>
