@@ -152,11 +152,17 @@ export const create = (Cypress, cy) => {
       obj.end = true
       obj.error = error
 
-      // No snapshot is taken at this time - if the assertion eventually
+      // No snapshot is taken when an error occurs - if the assertion eventually
       // fails entirely, retries.ts will take a single DOM snapshot at the end
       // while doing it in here would trigger several unnecessary snapshots per
       // second
       // https://github.com/cypress-io/cypress/issues/18549
+
+      // TODO: But if we're in an assertion that doesn't retry, then no snapshot gets taken.
+      // Oops?
+      if (!error) {
+        obj.snapshot = true
+      }
     }
 
     const isChildLike = (subject, current) => {
