@@ -14,7 +14,7 @@ const { SpecsStore } = require(`${root}/lib/specs-store`)
 const { Automation } = require(`${root}lib/automation`)
 const Fixtures = require('@tooling/system-tests/lib/fixtures')
 const { createRoutes } = require(`${root}lib/routes`)
-const { makeLegacyDataContext } = require(`${root}lib/makeDataContext`)
+const { getCtx } = require(`${root}lib/makeDataContext`)
 
 const cyPort = 12345
 const otherPort = 55551
@@ -27,7 +27,7 @@ describe('Web Sockets', () => {
   require('mocha-banner').register()
 
   beforeEach(function () {
-    ctx = makeLegacyDataContext()
+    ctx = getCtx()
     Fixtures.scaffold()
 
     this.idsPath = Fixtures.projectPath('ids')

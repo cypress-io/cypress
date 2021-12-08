@@ -5,6 +5,7 @@ import type { App } from 'electron'
 import { makeDataContext } from '../makeDataContext'
 import { makeGraphQLServer } from '../gui/makeGraphQLServer'
 import { assertValidPlatform } from '@packages/types/src/platform'
+import { DataContext, getCtx, setCtx } from '@packages/data-context'
 
 export function runInternalServer (launchArgs, _internalOptions = { loadCachedProjects: true }, electronApp?: App) {
   const bus = new EventEmitter()
@@ -12,13 +13,13 @@ export function runInternalServer (launchArgs, _internalOptions = { loadCachedPr
 
   assertValidPlatform(platform)
 
-  const ctx = makeDataContext({
-    electronApp,
-    os: platform,
-    rootBus: bus,
-    launchArgs,
-    _internalOptions,
-  })
+  let ctx: DataContext
+
+  try {
+    ctx = getCtx()
+  } catch {
+    ctx = setCtx(makeDataContext(launchArgs))
+  }
 
   // Initializing the data context, loading browsers, etc.
   ctx.initializeData()

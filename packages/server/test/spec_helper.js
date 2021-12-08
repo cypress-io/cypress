@@ -98,7 +98,10 @@ before(function () {
 
 // appData.ensure()
 
+const { setCtx, getCtx, clearCtx, makeDataContext } = require('../lib/makeDataContext')
+
 beforeEach(function () {
+  setCtx(makeDataContext({}))
   this.originalEnv = originalEnv
 
   nock.disableNetConnect()
@@ -109,10 +112,9 @@ beforeEach(function () {
   return cache.remove()
 })
 
-const { clearLegacyDataContext } = require('../lib/makeDataContext')
-
 afterEach(async () => {
-  await clearLegacyDataContext()
+  await getCtx().destroy()
+  clearCtx()
   sinon.restore()
 
   nock.cleanAll()

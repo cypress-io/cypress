@@ -18,13 +18,13 @@ const open = require(`${root}lib/util/open`)
 const Fixtures = require('@tooling/system-tests/lib/fixtures')
 const firefoxUtil = require(`${root}lib/browsers/firefox-util`).default
 const { createRoutes } = require(`${root}lib/routes`)
-const { makeLegacyDataContext } = require(`${root}lib/makeDataContext`)
+const { getCtx } = require(`${root}lib/makeDataContext`)
 
 let ctx
 
 describe('lib/socket', () => {
   beforeEach(function () {
-    ctx = makeLegacyDataContext()
+    ctx = getCtx()
     Fixtures.scaffold()
 
     this.todosPath = Fixtures.projectPath('todos')

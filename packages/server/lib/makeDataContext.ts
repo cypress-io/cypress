@@ -1,63 +1,29 @@
-import { DataContext } from '@packages/data-context'
-import os from 'os'
-import electron, { App } from 'electron'
+import { DataContext, getCtx, setCtx, clearCtx } from '@packages/data-context'
+import electron from 'electron'
 
 import specsUtil from './util/specs'
-import type { AllowedState, FindSpecs, FoundBrowser, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions, PlatformName, Preferences, SettingsOptions } from '@packages/types'
+import type { AllowedState, FindSpecs, FoundBrowser, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions, Preferences, SettingsOptions } from '@packages/types'
 import browserUtils from './browsers/utils'
 import auth from './gui/auth'
 import user from './user'
 import * as config from './config'
-import { EventEmitter } from 'events'
 import { openProject } from './open_project'
 import cache from './cache'
 import errors from './errors'
 import findSystemNode from './util/find_system_node'
 import { graphqlSchema } from '@packages/graphql/src/schema'
-import type { InternalDataContextOptions } from '@packages/data-context/src/DataContext'
 import { openExternal } from '@packages/server/lib/gui/links'
 import { getUserEditor } from './util/editors'
 import * as savedState from './saved_state'
 
 const { getBrowsers, ensureAndGetByNameOrPath } = browserUtils
 
-interface MakeDataContextOptions {
-  electronApp?: App
-  os: PlatformName
-  rootBus: EventEmitter
-  launchArgs: LaunchArgs
-  _internalOptions: InternalDataContextOptions
-}
+export { getCtx, setCtx, clearCtx }
 
-let legacyDataContext: DataContext | undefined
-
-// For testing
-export async function clearLegacyDataContext () {
-  await legacyDataContext?.destroy()
-  legacyDataContext = undefined
-}
-
-export function makeLegacyDataContext (launchArgs: LaunchArgs = {} as LaunchArgs): DataContext {
-  if (legacyDataContext && process.env.LAUNCHPAD) {
-    throw new Error(`Expected ctx to be passed as an arg, but used legacy data context`)
-  } else if (!legacyDataContext) {
-    legacyDataContext = makeDataContext({
-      rootBus: new EventEmitter,
-      launchArgs,
-      os: os.platform() as PlatformName,
-      _internalOptions: {
-        loadCachedProjects: true,
-      },
-    })
-  }
-
-  return legacyDataContext
-}
-
-export function makeDataContext (options: MakeDataContextOptions): DataContext {
+export function makeDataContext (launchArgs: LaunchArgs): DataContext {
   const ctx = new DataContext({
     schema: graphqlSchema,
-    ...options,
+    launchArgs,
     launchOptions: {},
     appApi: {
       getBrowsers,

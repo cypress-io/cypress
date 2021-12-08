@@ -6,13 +6,13 @@ const config = require('../../../lib/config')
 const specsUtil = require(`${root}../lib/util/specs`).default
 const FixturesHelper = require('@tooling/system-tests/lib/fixtures')
 const debug = require('debug')('test')
-const { makeLegacyDataContext } = require('../../../lib/makeDataContext')
+const { getCtx } = require('../../../lib/makeDataContext')
 
 let ctx
 
 describe('lib/util/specs', () => {
   beforeEach(function () {
-    ctx = makeLegacyDataContext()
+    ctx = getCtx()
     FixturesHelper.scaffold()
 
     this.todosPath = FixturesHelper.projectPath('todos')
