@@ -70,8 +70,7 @@ describe('e2e reporters', () => {
       spec: 'simple_passing_spec.js',
       reporter: 'reporters/uses-file.js',
     })
-    .get('stdout')
-    .then((stdout) => {
+    .then(({ stdout }) => {
       expect(stdout).to.include('suite.file: cypress/integration/simple_passing_spec.js')
     })
   })

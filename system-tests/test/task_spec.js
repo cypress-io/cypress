@@ -1,5 +1,4 @@
 const systemTests = require('../lib/system-tests').default
-const Fixtures = require('../lib/fixtures')
 
 describe('e2e task', () => {
   systemTests.setup()
@@ -22,7 +21,7 @@ describe('e2e task', () => {
 
   it('merges task events on subsequent registrations and logs warning for conflicts', function () {
     return systemTests.exec(this, {
-      project: Fixtures.projectPath('multiple-task-registrations'),
+      project: 'multiple-task-registrations',
       spec: 'multiple_task_registrations_spec.js',
       sanitizeScreenshotDimensions: true,
       snapshot: true,

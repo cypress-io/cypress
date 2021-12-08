@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import $Command from '../../../src/cypress/command'
-import $CommandQueue from '../../../src/cypress/command_queue'
+import { CommandQueue } from '../../../src/cypress/command_queue'
 
 const createCommand = (props = {}) => {
   return $Command.create(_.extend({
@@ -23,14 +23,14 @@ const log = (props = {}) => {
 describe('src/cypress/command_queue', () => {
   let queue
   const state = () => {}
-  const timeouts = { timeout () {} }
-  const stability = { whenStable () {} }
+  const timeout = () => {}
+  const whenStable = () => {}
   const cleanup = () => {}
   const fail = () => {}
   const isCy = () => {}
 
   beforeEach(() => {
-    queue = $CommandQueue.create(state, timeouts, stability, cleanup, fail, isCy)
+    queue = new CommandQueue(state, timeout, whenStable, cleanup, fail, isCy)
 
     queue.add(createCommand({
       name: 'get',
