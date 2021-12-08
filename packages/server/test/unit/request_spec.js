@@ -66,12 +66,12 @@ describe('lib/request', () => {
         code: 'ECONNREFUSED',
       }
 
-      const onNext = sinon.stub()
+      const retryFn = sinon.stub()
 
       retryIntervals.forEach(() => {
         return request.getDelayForRetry({
           err,
-          onNext,
+          retryFn,
           retryIntervals,
           delaysRemaining,
         })
@@ -79,11 +79,11 @@ describe('lib/request', () => {
 
       expect(delaysRemaining).to.be.empty
 
-      expect(onNext.args).to.deep.eq([
-        [0, 1],
-        [999, 2],
-        [100, 3],
-        [200, 4],
+      expect(retryFn.args).to.deep.eq([
+        [{ delay: 0, attempt: 1 }],
+        [{ delay: 999, attempt: 2 }],
+        [{ delay: 100, attempt: 3 }],
+        [{ delay: 200, attempt: 4 }],
       ])
     })
 
@@ -95,37 +95,37 @@ describe('lib/request', () => {
         code: 'ECONNRESET',
       }
 
-      const onNext = sinon.stub()
+      const retryFn = sinon.stub()
 
       request.getDelayForRetry({
         err,
-        onNext,
+        retryFn,
         retryIntervals,
         delaysRemaining,
       })
 
       expect(delaysRemaining).to.have.length(3)
 
-      expect(onNext).to.be.calledWith(2000, 1)
+      expect(retryFn).to.be.calledWith({ delay: 2000, attempt: 1 })
     })
 
-    it('calls onElse when delaysRemaining is exhausted', () => {
+    it('calls onEnd when delaysRemaining is exhausted', () => {
       const retryIntervals = [1, 2, 3, 4]
       const delaysRemaining = []
 
-      const onNext = sinon.stub()
-      const onElse = sinon.stub()
+      const retryFn = sinon.stub()
+      const onEnd = sinon.stub()
 
       request.getDelayForRetry({
-        onElse,
-        onNext,
+        onEnd,
+        retryFn,
         retryIntervals,
         delaysRemaining,
       })
 
-      expect(onElse).to.be.calledWithExactly()
+      expect(onEnd).to.be.calledWithExactly()
 
-      expect(onNext).not.to.be.called
+      expect(retryFn).not.to.be.called
     })
   })
 
