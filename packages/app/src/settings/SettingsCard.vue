@@ -5,6 +5,7 @@
     :max-height="maxHeight"
     lazy
     :data-cy="title"
+    :initially-open="initiallyOpen"
   >
     <template #target="{ open }">
       <ListRowHeader
@@ -48,6 +49,7 @@ defineProps<{
   description: string,
   icon: FunctionalComponent<SVGAttributes, {}>
   maxHeight: string
+  initiallyOpen?: boolean
 }>()
 
 </script>

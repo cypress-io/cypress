@@ -1,5 +1,5 @@
 <template>
-  <SettingsSection>
+  <SettingsSection anchor-id="testingPreferences">
     <template #title>
       {{ t('settingsPage.testingPreferences.title') }}
     </template>

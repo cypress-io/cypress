@@ -1,5 +1,5 @@
 <template>
-  <SettingsSection>
+  <SettingsSection anchor-id="proxy">
     <template #title>
       {{ t('settingsPage.proxy.title') }}
     </template>
