@@ -1,11 +1,11 @@
 const arch = require('arch')
 const la = require('lazy-ass')
-const request = require('request')
 const is = require('check-more-types')
 const os = require('os')
 const Url = require('url')
 const path = require('path')
 const debug = require('debug')('cypress:cli')
+const request = require('request')
 const Promise = require('bluebird')
 const requestProgress = require('request-progress')
 const { stripIndent } = require('common-tags')
@@ -212,7 +212,8 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca, version }) =>
         debug('redirect version:', redirectVersion)
         debug('redirect url:', redirectUrl)
 
-        // yes redirect
+        // no redirect, we'll handle it
+
         return false
       },
     }
