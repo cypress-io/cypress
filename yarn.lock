@@ -8366,10 +8366,10 @@
   resolved "https://registry.yarnpkg.com/@tootallnate/once/-/once-1.1.2.tgz#ccb91445360179a04e7fe6aff78c00ffc1eeaf82"
   integrity sha512-RbzJvlNzmRq5c3O09UipeuXno4tA1FE6ikOjxZK0tuxVv3412l64l5t1W5pj4+rJq9vpkm/kwiR07aZXnsKPxw==
 
-"@toycode/markdown-it-class@1.2.4":
-  version "1.2.4"
-  resolved "https://registry.yarnpkg.com/@toycode/markdown-it-class/-/markdown-it-class-1.2.4.tgz#6d9bc162d0b980695a2e6b2622f49eb1c3f349c8"
-  integrity sha512-hA4gHBK8moObkOYdWTjhy1wYcYy0MJeM3JjSKbsXHRpRMvIKhk6Jm+t3bXsSScTdz/byWqQbs8YIwVYjHp+SlQ==
+"@toycode/markdown-it-class@1.2.3":
+  version "1.2.3"
+  resolved "https://registry.yarnpkg.com/@toycode/markdown-it-class/-/markdown-it-class-1.2.3.tgz#272082b46d1242d2607a3aca281aae9d208fc182"
+  integrity sha512-9N7iI5iGzjmYpeEFE93/76SkiSZkywkIiKUxahoU4h5WDUJyruXO+Ce4o/nFkFdKQnmsTmyxhdCtXVikl67XGw==
 
 "@trysound/sax@0.1.1":
   version "0.1.1"
