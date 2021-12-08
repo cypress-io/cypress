@@ -144,14 +144,19 @@ export const create = (Cypress, cy) => {
     }
 
     // if we are simply verifying the upcoming
-    // assertions then do not immediately end or snapshot
+    // assertions then do not immediately end
     // else do
     if (verifying) {
       obj._error = error
     } else {
       obj.end = true
-      obj.snapshot = true
       obj.error = error
+
+      // No snapshot is taken at this time - if the assertion eventually
+      // fails entirely, retries.ts will take a single DOM snapshot at the end
+      // while doing it in here would trigger several unnecessary snapshots per
+      // second
+      // https://github.com/cypress-io/cypress/issues/18549
     }
 
     const isChildLike = (subject, current) => {
