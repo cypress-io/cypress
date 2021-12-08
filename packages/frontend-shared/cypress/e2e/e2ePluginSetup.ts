@@ -2,7 +2,6 @@ import path from 'path'
 import type { RemoteGraphQLInterceptor, WithCtxInjected, WithCtxOptions } from './support/e2eSupport'
 import { e2eProjectDirs } from './support/e2eProjectDirs'
 import type { CloudExecuteRemote } from '@packages/data-context/src/sources'
-import { clearCtx, DataContext } from '@packages/data-context'
 import * as inspector from 'inspector'
 import sinonChai from '@cypress/sinon-chai'
 import sinon from 'sinon'
@@ -14,6 +13,7 @@ import { Response } from 'cross-fetch'
 
 import { CloudRunQuery } from '../support/mock-graphql/stubgql-CloudTypes'
 import { getOperationName } from '@urql/core'
+import type { DataContext } from '@packages/data-context'
 
 const cloudSchema = buildSchema(fs.readFileSync(path.join(__dirname, '../../../graphql/schemas/cloud.graphql'), 'utf8'))
 
@@ -36,6 +36,7 @@ export async function e2ePluginSetup (projectRoot: string, on: Cypress.PluginEve
   delete process.env.CYPRESS_INTERNAL_VITE_LAUNCHPAD_PORT
   // require'd so we don't import the types from @packages/server which would
   // pollute strict type checking
+  const { clearCtx, makeDataContext, setCtx } = require('../../../server/lib/makeDataContext')
   const { runInternalServer } = require('@packages/server/lib/modes/internal-server')
   const Fixtures = require('@tooling/system-tests/lib/fixtures')
   const tmpDir = path.join(__dirname, '.projects')
@@ -61,6 +62,7 @@ export async function e2ePluginSetup (projectRoot: string, on: Cypress.PluginEve
   on('task', {
     beforeEach () {
       clearCtx()
+      setCtx(makeDataContext({}))
       remoteGraphQLIntercept = undefined
 
       return null

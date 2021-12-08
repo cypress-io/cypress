@@ -36,7 +36,7 @@ const packageGlobs = workspacePaths.filter((s) => s.endsWith('/*'))
 async function cacheKey () {
   const yarnLocks = [p('yarn.lock')]
   const patchFiles = glob.sync(p('**/*.patch'), {
-    ignore: ['**/node_modules/**', '**/*_node_modules/**'],
+    ignore: ['**/node_modules/**', '**/*_node_modules/**', '**/dist-{app,launchpad}/**'],
   })
 
   const packageJsons = glob.sync(`${BASE_DIR}/{.,${workspacePaths.join(',')}}/package.json`)
