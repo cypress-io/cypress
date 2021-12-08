@@ -15,8 +15,8 @@
           :init-w="280"
           :init-h="windowHeight"
           :handles="['mr']"
-          :draggable="true"
-          class-name-handle="h-full bg-indigo-300 top-0 w-8px -left-8px block"
+          :draggable="false"
+          class-name-handle="h-full bg-transparent border-transparent top-0 w-8px right-0 block cursor-ew-resize handle"
           class="relative"
         >
           <InlineSpecList
@@ -41,8 +41,8 @@
         :init-w="320"
         :init-h="windowHeight"
         :handles="['mr']"
-        :resizable="true"
-        class-name-handle="h-full bg-indigo-300 top-0 w-8px -left-8px block z-40"
+        :draggable="false"
+        class-name-handle="h-full bg-transparent border-transparent top-0 w-8px right-0 block z-40 cursor-ew-resize handle"
         class="z-30 relative"
       >
         <div
