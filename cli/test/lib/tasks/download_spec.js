@@ -343,28 +343,6 @@ describe('lib/tasks/download', function () {
     })
 
     it('ignores http_proxy on https request', () => {
-      delete process.env.CYPRESS_DOWNLOAD_USE_CA
-      delete process.env.NO_PROXY
-      delete process.env.http_proxy
-      delete process.env.https_proxy
-      delete process.env.npm_config_ca
-      delete process.env.npm_config_cafile
-      delete process.env.npm_config_https_proxy
-      delete process.env.npm_config_proxy
-      // add a default no_proxy which does not match the testUri
-      process.env.NO_PROXY = 'localhost,.org'
-    })
-
-    afterEach(function () {
-      process.env = this.env
-    })
-
-    it('uses http_proxy on http request', () => {
-      process.env.http_proxy = 'http://foo'
-      expect(download.getProxyForUrlWithNpmConfig(testUriHttp)).to.eq('http://foo')
-    })
-
-    it('ignores http_proxy on https request', () => {
       process.env.http_proxy = 'http://foo'
       expect(download.getProxyForUrlWithNpmConfig(testUriHttps)).to.eq(null)
       process.env.https_proxy = 'https://bar'

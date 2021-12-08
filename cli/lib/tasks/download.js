@@ -125,7 +125,7 @@ const verifyDownloadedFile = (filename, expectedSize, expectedChecksum) => {
 
         debug(text)
 
-        return Promise.reject(new Error(text))
+        throw new Error(text)
       },
     )
   }
@@ -149,7 +149,7 @@ const verifyDownloadedFile = (filename, expectedSize, expectedChecksum) => {
         Computed checksum: ${checksum}
       `
 
-      return Promise.reject(new Error(text))
+      throw new Error(text)
     })
   }
 
@@ -174,7 +174,7 @@ const verifyDownloadedFile = (filename, expectedSize, expectedChecksum) => {
           Computed size: ${filesize}
         `
 
-      return Promise.reject(new Error(text))
+      throw new Error(text)
     })
   }
 
@@ -216,7 +216,6 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca, version }) =>
         return false
       },
     }
-    //    const pkg = url.toLowerCase().startsWith('https:') ? https : http
     const req = request(reqOptions)
 
     // closure
@@ -232,7 +231,6 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca, version }) =>
       // and have set it on the S3 object as user meta data, available via
       // these custom headers "x-amz-meta-..."
       // see https://github.com/cypress-io/cypress/pull/4092
-
       expectedSize = response.headers['x-amz-meta-size'] ||
         response.headers['content-length']
 
@@ -285,8 +283,7 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca, version }) =>
       }
     })
     .on('error', (e) => {
-      debug('got error', url, redirectUrl, redirectVersion)
-      if (redirectUrl && redirectVersion) return // yeah, we know
+      if (e.code === 'ECONNRESET') return // sometimes proxies give ECONNRESET but we don't care
 
       reject(e)
     })
