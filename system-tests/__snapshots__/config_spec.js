@@ -75,6 +75,7 @@ exports['e2e config applies defaultCommandTimeout globally 1'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (dom_times_out_spec.js)                                                    │
+  │ Searched:   cypress/integration/**/*                                                           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
