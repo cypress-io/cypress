@@ -290,24 +290,6 @@ describe('lib/browsers/chrome', () => {
       })
     })
 
-    it('calls cri client close on kill', function () {
-      // need a reference here since the stub will be monkey-patched
-      const {
-        kill,
-      } = this.launchedBrowser
-
-      return chrome.open('chrome', 'http://', {}, this.automation)
-      .then(() => {
-        expect(this.launchedBrowser.kill).to.be.a('function')
-
-        return this.launchedBrowser.kill()
-      }).then(() => {
-        expect(this.criClient.close).to.be.calledOnce
-
-        expect(kill).to.be.calledOnce
-      })
-    })
-
     it('rejects if CDP version check fails', function () {
       this.criClient.ensureMinimumProtocolVersion.rejects()
 
