@@ -10,7 +10,7 @@ export = (mode, options) => {
   setCtx(ctx)
 
   if (mode === 'record') {
-    return require('./record').run(options)
+    throw new Error('Unused')
   }
 
   if (mode === 'smokeTest') {
