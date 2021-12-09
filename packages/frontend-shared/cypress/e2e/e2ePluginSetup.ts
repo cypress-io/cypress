@@ -60,9 +60,11 @@ export async function e2ePluginSetup (projectRoot: string, on: Cypress.PluginEve
   let remoteGraphQLIntercept: RemoteGraphQLInterceptor | undefined
 
   on('task', {
-    beforeEach () {
+    async beforeEach () {
+      await ctx?.destroy()
       clearCtx()
       setCtx(makeDataContext({}))
+      testState = {}
       remoteGraphQLIntercept = undefined
 
       return null
@@ -80,15 +82,13 @@ export async function e2ePluginSetup (projectRoot: string, on: Cypress.PluginEve
     async withCtx (obj: WithCtxObj) {
       // Ensure we spin up a completely isolated server/state for each test
       if (obj.activeTestId !== currentTestId) {
-        await ctx?.destroy()
-        currentTestId = obj.activeTestId
+        currentTestId = obj.activeTestId;
 
-        testState = {};
         ({ serverPortPromise, ctx } = runInternalServer({
           projectRoot: null,
         }, {
           loadCachedProjects: false,
-        }) as {ctx: DataContext, serverPortPromise: Promise<number> })
+        }) as { ctx: DataContext, serverPortPromise: Promise<number> })
 
         const fetchApi = ctx.util.fetch
 
