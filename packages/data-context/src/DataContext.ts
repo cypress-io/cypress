@@ -86,41 +86,7 @@ export class DataContext {
   }
 
   async initializeData () {
-    const toAwait: Promise<any>[] = [
-      // Fetch the browsers when the app starts, so we have some by
-      // the time we're continuing.
-      this.actions.app.refreshBrowsers(),
-      // load the cached user & validate the token on start
-      this.actions.auth.getUser(),
-      // and grab the user device settings
-      this.actions.localSettings.refreshLocalSettings(),
-    ]
 
-    // load projects from cache on start
-    toAwait.push(this.actions.project.loadProjects())
-
-    if (this.modeOptions.projectRoot) {
-      await this.actions.project.setActiveProject(this.modeOptions.projectRoot)
-
-      if (this.coreData.currentProject?.preferences) {
-        toAwait.push(this.actions.project.launchProjectWithoutElectron())
-      }
-    }
-
-    if (this.modeOptions.testingType) {
-      this.appData.currentTestingType = this.modeOptions.testingType
-      // It should be possible to skip the first step in the wizard, if the
-      // user already told us the testing type via command line argument
-      this.actions.wizard.setTestingType(this.modeOptions.testingType)
-      this.actions.wizard.navigate('forward')
-      this.emitter.toLaunchpad()
-    }
-
-    if (this.modeOptions.browser) {
-      toAwait.push(this.actions.app.setActiveBrowserByNameOrPath(this.modeOptions.browser))
-    }
-
-    return Promise.all(toAwait)
   }
 
   get modeOptions () {
@@ -397,7 +363,7 @@ export class DataContext {
 
   async initializeMode () {
     if (this._config.mode === 'run') {
-      await this.initializeData()
+      await this.actions.app.refreshBrowsers()
     } else if (this._config.mode === 'open') {
       await this.initializeOpenMode()
     } else {
@@ -414,7 +380,41 @@ export class DataContext {
       this.actions.dev.watchForRelaunch()
     }
 
-    return this.initializeData()
+    const toAwait: Promise<any>[] = [
+      // Fetch the browsers when the app starts, so we have some by
+      // the time we're continuing.
+      this.actions.app.refreshBrowsers(),
+      // load the cached user & validate the token on start
+      this.actions.auth.getUser(),
+      // and grab the user device settings
+      this.actions.localSettings.refreshLocalSettings(),
+    ]
+
+    // load projects from cache on start
+    toAwait.push(this.actions.project.loadProjects())
+
+    if (this.modeOptions.projectRoot) {
+      await this.actions.project.setActiveProject(this.modeOptions.projectRoot)
+
+      if (this.coreData.currentProject?.preferences) {
+        toAwait.push(this.actions.project.launchProjectWithoutElectron())
+      }
+    }
+
+    if (this.modeOptions.testingType) {
+      this.appData.currentTestingType = this.modeOptions.testingType
+      // It should be possible to skip the first step in the wizard, if the
+      // user already told us the testing type via command line argument
+      this.actions.wizard.setTestingType(this.modeOptions.testingType)
+      this.actions.wizard.navigate('forward')
+      this.emitter.toLaunchpad()
+    }
+
+    if (this.modeOptions.browser) {
+      toAwait.push(this.actions.app.setActiveBrowserByNameOrPath(this.modeOptions.browser))
+    }
+
+    return Promise.all(toAwait)
   }
 
   // async initializeRunMode () {
