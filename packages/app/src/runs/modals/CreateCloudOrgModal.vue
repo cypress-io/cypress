@@ -66,9 +66,9 @@ fragment CreateCloudOrgModal on CloudUser {
 
 const show = ref(true)
 
-const props = defineProps({
+const props = defineProps<{
   gql: CreateCloudOrgModalFragment,
-})
+}>()
 
 const createOrgUrl = computed(() => props.gql.createCloudOrganizationUrl)
 </script>
