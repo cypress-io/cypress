@@ -94,7 +94,7 @@ describe('src/index', () => {
         'baseUrl': 'https://',
       }, errorFn)
 
-      expect(errorFn).to.have.been.callCount(0)
+      expect(errorFn).to.have.callCount(0)
     })
 
     it('calls error callback if config is invalid', () => {
@@ -125,7 +125,7 @@ describe('src/index', () => {
         configFile: 'config.js',
       })
 
-      expect(errorFn).to.have.been.callCount(0)
+      expect(errorFn).to.have.callCount(0)
     })
 
     it('calls error callback if config contains breaking option that should throw an error', () => {
@@ -154,6 +154,7 @@ describe('src/index', () => {
       configUtil.validateNoReadOnlyConfig({ chromeWebSecurity: false }, errorFn)
 
       expect(errorFn).to.have.callCount(1)
+      expect(errorFn).to.have.been.calledWithMatch(/chromeWebSecurity/)
     })
 
     it('does not return an error if validation succeeds', () => {
@@ -161,7 +162,7 @@ describe('src/index', () => {
 
       configUtil.validateNoReadOnlyConfig({ requestTimeout: 1000 }, errorFn)
 
-      expect(errorFn).to.been.callCount(0)
+      expect(errorFn).to.have.callCount(0)
     })
 
     it('does not return an error if configuration is a non-Cypress config option', () => {
@@ -169,7 +170,7 @@ describe('src/index', () => {
 
       configUtil.validateNoReadOnlyConfig({ foo: 'bar' }, errorFn)
 
-      expect(errorFn).to.been.callCount(0)
+      expect(errorFn).to.have.callCount(0)
     })
   })
 })
