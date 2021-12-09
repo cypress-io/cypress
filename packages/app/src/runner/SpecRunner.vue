@@ -7,26 +7,23 @@
       id="inline-spec-list"
       class="bg-gray-1000"
     >
-      <template
+      <div
         v-if="props.gql.currentProject"
+        v-show="runnerUiStore.isSpecsListOpen"
+        class="relative"
+        :style="{width: `${specsListWidth -64}px`}"
       >
-        <Vue3DraggableResizable
-          v-model:w="specsListWidth"
-          :init-w="runnerUiStore.specsListWidth"
-          :init-h="windowHeight"
-          :handles="['mr']"
-          :draggable="false"
-          class-name-handle="h-full bg-transparent border-transparent top-0 w-8px right-0 block cursor-ew-resize handle"
-          :class="{relative: runnerUiStore.isSpecsListOpen}"
-          @resize-end="handleResizeEnd('specsList')"
-        >
-          <InlineSpecList
-            v-show="runnerUiStore.isSpecsListOpen"
-            id="reporter-inline-specs-list"
-            :gql="props.gql"
-          />
-        </Vue3DraggableResizable>
-      </template>
+        <InlineSpecList
+          id="reporter-inline-specs-list"
+          :gql="props.gql"
+          :class="{'select-none': isDragging}"
+        />
+        <div
+          v-show="runnerUiStore.isSpecsListOpen"
+          ref="draggable"
+          class="cursor-ew-resize h-full top-0 -right-6px w-16px z-30 absolute"
+        />
+      </div>
 
       <ChooseExternalEditorModal
         :open="runnerUiStore.showChooseExternalEditorModal"
@@ -36,22 +33,12 @@
       />
     </HideDuringScreenshot>
 
-    <HideDuringScreenshot>
-      <Vue3DraggableResizable
-        v-model:w="reporterWidth"
-        :init-w="runnerUiStore.reporterWidth"
-        :init-h="windowHeight"
-        :handles="['mr']"
-        :draggable="false"
-        class-name-handle="h-full bg-transparent border-transparent top-0 w-8px right-0 block z-40 cursor-ew-resize handle"
-        class="border-0 z-30 relative"
-        @resize-end="handleResizeEnd('reporter')"
-      >
-        <div
-          v-once
-          :id="REPORTER_ID"
-        />
-      </Vue3DraggableResizable>
+    <HideDuringScreenshot class="min-w-320px">
+      <div
+        v-once
+        :id="REPORTER_ID"
+        :class="{'select-none': isDragging}"
+      />
     </HideDuringScreenshot>
 
     <div
@@ -94,7 +81,6 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { REPORTER_ID, RUNNER_ID, getRunnerElement, getReporterElement, empty } from '../runner/utils'
 import InlineSpecList from '../specs/InlineSpecList.vue'
-import Vue3DraggableResizable from 'vue3-draggable-resizable'
 import { getAutIframeModel, getEventManager, UnifiedRunnerAPI } from '../runner'
 import { useAutStore, useRunnerUiStore } from '../store'
 import type { BaseSpec, FileDetails } from '@packages/types'
@@ -111,7 +97,7 @@ import { OpenFileInIdeDocument } from '@packages/data-context/src/gen/all-operat
 import type { SpecRunnerFragment } from '../generated/graphql'
 import { usePreferences } from '../composables/usePreferences'
 import ScriptError from './ScriptError.vue'
-import { useWindowSize } from '@vueuse/core'
+import { useWindowSize, useDraggable } from '@vueuse/core'
 
 const { height: windowHeight, width: windowWidth } = useWindowSize()
 
@@ -151,30 +137,48 @@ const autStore = useAutStore()
 const screenshotStore = useScreenshotStore()
 const runnerUiStore = useRunnerUiStore()
 const preferences = usePreferences()
+const initialSpecsListWidth: number = props.gql.localSettings.preferences.specsListWidth ?? 280
 
 // Todo: maybe `update` should take an object, not just a key-value pair and do updates like this all in one batch
 preferences.update('autoScrollingEnabled', props.gql.localSettings.preferences.autoScrollingEnabled ?? true)
 preferences.update('isSpecsListOpen', props.gql.localSettings.preferences.isSpecsListOpen ?? true)
 preferences.update('reporterWidth', props.gql.localSettings.preferences.reporterWidth ?? 320)
-preferences.update('specsListWidth', props.gql.localSettings.preferences.specsListWidth ?? 280)
+preferences.update('specsListWidth', initialSpecsListWidth)
 
 const runnerPane = ref<HTMLDivElement>()
 const reporterWidth = ref<number>(320)
-const specsListWidth = ref<number>(280)
+// const specsListWidth = ref<number>(280)
+const draggable = ref<HTMLElement | null>(null)
+const { x: draggableWidth, isDragging } = useDraggable(draggable, {
+  initialValue: { x: initialSpecsListWidth, y: 0 },
+})
+
+const specsListWidth = computed(() => {
+  if (!runnerUiStore.isSpecsListOpen) {
+    return 0
+  }
+
+  if (draggableWidth.value <= 500 && draggableWidth.value > 300) {
+    return draggableWidth.value
+  }
+
+  if (draggableWidth.value > 500) {
+    return 500
+  }
+
+  return 300
+})
 
 const autMargin = 16
 
 const containerWidth = computed(() => {
-  // TODO: make these values dynamic in UNIFY-592:
-  const navWidth = 64
   const miscBorders = 4
-  const nonAutWidth = reporterWidth.value + navWidth + specsListWidth.value + (autMargin * 2) + miscBorders
+  const nonAutWidth = reporterWidth.value + specsListWidth.value + (autMargin * 2) + miscBorders
 
   return windowWidth.value - nonAutWidth
 })
 
 const containerHeight = computed(() => {
-  // TODO: make these values dynamic in UNIFY-592:
   const autHeaderHeight = 70
 
   const nonAutHeight = autHeaderHeight + (autMargin * 2)
@@ -204,11 +208,17 @@ function runSpec () {
   UnifiedRunnerAPI.executeSpec(props.activeSpec)
 }
 
+watch(isDragging, (newVal) => {
+  if (newVal === false) {
+    handleResizeEnd('specsList')
+  }
+})
+
 function handleResizeEnd (pane: 'reporter' | 'specsList') {
   if (pane === 'reporter') {
     preferences.update('reporterWidth', reporterWidth.value)
   } else {
-    preferences.update('specsListWidth', specsListWidth.value)
+    preferences.update('specsListWidth', Math.round(specsListWidth.value))
   }
 }
 
