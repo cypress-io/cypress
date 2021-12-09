@@ -11,7 +11,7 @@ import runEvents from './plugins/run_events'
 import * as session from './session'
 import { getSpecUrl } from './project_utils'
 import errors from './errors'
-import type { LaunchOpts, OpenProjectLaunchOptions, FoundBrowser, AllModeOptions } from '@packages/types'
+import type { LaunchOpts, OpenProjectLaunchOptions, FoundBrowser, InitializeProjectOptions } from '@packages/types'
 import { DataContext, getCtx } from '@packages/data-context'
 
 const debug = Debug('cypress:server:open_project')
@@ -267,7 +267,7 @@ export class OpenProject {
 
   _ctx?: DataContext
 
-  async create (path: string, args: AllModeOptions, options: OpenProjectLaunchOptions, browsers: FoundBrowser[] = []) {
+  async create (path: string, args: InitializeProjectOptions, options: OpenProjectLaunchOptions, browsers: FoundBrowser[] = []) {
     this._ctx = getCtx()
     debug('open_project create %s', path)
 

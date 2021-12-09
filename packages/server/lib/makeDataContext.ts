@@ -2,7 +2,7 @@ import { DataContext, getCtx, clearCtx, setCtx } from '@packages/data-context'
 import electron from 'electron'
 
 import specsUtil from './util/specs'
-import type { AllModeOptions, AllowedState, FindSpecs, FoundBrowser, LaunchOpts, OpenProjectLaunchOptions, Preferences, SettingsOptions } from '@packages/types'
+import type { AllModeOptions, AllowedState, FindSpecs, FoundBrowser, InitializeProjectOptions, LaunchOpts, OpenProjectLaunchOptions, Preferences, SettingsOptions } from '@packages/types'
 import browserUtils from './browsers/utils'
 import auth from './gui/auth'
 import user from './user'
