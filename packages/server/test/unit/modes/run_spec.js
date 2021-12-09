@@ -672,7 +672,7 @@ describe('lib/modes/run', () => {
       sinon.stub(videoCapture, 'start').resolves()
       sinon.stub(openProject, 'launch').resolves()
       this.projectInstance.__setConfig(config)
-      sinon.stub(openProject, 'getProject').resolves(this.projectInstance)
+      sinon.stub(openProject, 'getProject').returns(this.projectInstance)
       sinon.spy(errors, 'warning')
 
       sinon.stub(specsUtil.default, 'findSpecs').resolves([
@@ -757,7 +757,7 @@ describe('lib/modes/run', () => {
       sinon.spy(runMode, 'waitForBrowserToConnect')
       sinon.spy(runMode, 'runSpecs')
       sinon.stub(openProject, 'launch').resolves()
-      sinon.stub(openProject, 'getProject').resolves(this.projectInstance)
+      sinon.stub(openProject, 'getProject').returns(this.projectInstance)
       sinon.stub(specsUtil.default, 'findSpecs').resolves([
         {
           name: 'foo_spec.js',
