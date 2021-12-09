@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="h-full">
     <RunsConnectSuccessAlert
       v-if="currentProject"
       :gql="currentProject"
