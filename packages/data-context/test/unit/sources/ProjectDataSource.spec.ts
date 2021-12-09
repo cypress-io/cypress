@@ -2,7 +2,7 @@
 // import { transformSpec, longestCommonPrefix } from '../../../src/sources/ProjectDataSource'
 
 describe('ProjectDataSource', () => {
-  // it.only('longestCommonPrefix', () => {
+  // it('longestCommonPrefix', () => {
   //   const result = longestCommonPrefix([
   //     '/Users/lachlan/code/work/cypress6/packages/app/a.js',
   //     '/Users/lachlan/code/work/cypress6/packages/app/b/foo.js',
