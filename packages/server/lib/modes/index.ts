@@ -1,9 +1,13 @@
-import { makeLegacyDataContext } from '../makeDataContext'
+import { clearCtx, setCtx } from '@packages/data-context'
+import { makeDataContext } from '../makeDataContext'
 
 export = (mode, options) => {
-  if (!process.env.LAUNCHPAD) {
-    makeLegacyDataContext(options)
-  }
+  // When we're in testing mode, this is setup automatically as a beforeEach
+  clearCtx()
+
+  const ctx = makeDataContext(options)
+
+  setCtx(ctx)
 
   if (mode === 'record') {
     return require('./record').run(options)

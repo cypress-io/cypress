@@ -6,7 +6,7 @@ const config = require(`${root}lib/config`)
 const fixture = require(`${root}lib/fixture`)
 const { fs } = require(`${root}lib/util/fs`)
 const FixturesHelper = require('@tooling/system-tests/lib/fixtures')
-const { makeLegacyDataContext } = require(`${root}lib/makeDataContext`)
+const { getCtx } = require(`${root}lib/makeDataContext`)
 const os = require('os')
 const eol = require('eol')
 
@@ -18,7 +18,7 @@ let ctx
 
 describe('lib/fixture', () => {
   beforeEach(function () {
-    ctx = makeLegacyDataContext()
+    ctx = getCtx()
     FixturesHelper.scaffold()
 
     this.todosPath = FixturesHelper.projectPath('todos')

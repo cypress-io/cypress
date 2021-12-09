@@ -1,4 +1,4 @@
-import type { LaunchArgs, OpenProjectLaunchOptions, PlatformName } from '@packages/types'
+import type { LaunchArgs, OpenProjectLaunchOptions } from '@packages/types'
 import fsExtra from 'fs-extra'
 import path from 'path'
 
@@ -28,7 +28,7 @@ import type { GraphQLSchema } from 'graphql'
 import type { Server } from 'http'
 import type { AddressInfo } from 'net'
 import EventEmitter from 'events'
-import type { App as ElectronApp } from 'electron'
+import type { App, App as ElectronApp } from 'electron'
 import { VersionsDataSource } from './sources/VersionsDataSource'
 
 const IS_DEV_ENV = process.env.CYPRESS_INTERNAL_ENV !== 'production'
@@ -39,7 +39,6 @@ export interface InternalDataContextOptions {
 
 export interface DataContextConfig {
   schema: GraphQLSchema
-  os: PlatformName
   launchArgs: LaunchArgs
   launchOptions: OpenProjectLaunchOptions
   electronApp?: ElectronApp
@@ -55,13 +54,10 @@ export interface DataContextConfig {
   authApi: AuthApiShape
   projectApi: ProjectApiShape
   electronApi: ElectronApiShape
-  /**
-   * Internal options used for testing purposes
-   */
-  _internalOptions: InternalDataContextOptions
 }
 
 export class DataContext {
+  private _app?: App
   private _rootBus: EventEmitter
   private _coreData: CoreDataShape
   private _gqlServer?: Server
@@ -71,6 +67,10 @@ export class DataContext {
   constructor (private _config: DataContextConfig) {
     this._rootBus = new EventEmitter()
     this._coreData = _config.coreData ?? makeCoreData()
+  }
+
+  setElectronApp (app: App) {
+    this._app = app
   }
 
   get electronApp () {
@@ -101,10 +101,8 @@ export class DataContext {
       this.actions.app.refreshNodePath(),
     ]
 
-    if (this._config._internalOptions.loadCachedProjects) {
-      // load projects from cache on start
-      toAwait.push(this.actions.project.loadProjects())
-    }
+    // load projects from cache on start
+    toAwait.push(this.actions.project.loadProjects())
 
     if (this._config.launchArgs.projectRoot) {
       await this.actions.project.setActiveProject(this._config.launchArgs.projectRoot)
@@ -135,10 +133,6 @@ export class DataContext {
 
   get rootBus () {
     return this._rootBus
-  }
-
-  get os () {
-    return this._config.os
   }
 
   get launchArgs () {
