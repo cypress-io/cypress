@@ -100,6 +100,11 @@ before(function () {
 
 const { setCtx, getCtx, clearCtx, makeDataContext } = require('../lib/makeDataContext')
 
+before(() => {
+  clearCtx()
+  setCtx(makeDataContext({}))
+})
+
 beforeEach(function () {
   clearCtx()
   setCtx(makeDataContext({}))
