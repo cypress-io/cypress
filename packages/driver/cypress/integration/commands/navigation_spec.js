@@ -1440,30 +1440,6 @@ describe('src/cy/commands/navigation', () => {
       })
 
       it('throws attempting to visit 2 unique ip addresses', function (done) {
-        const $autIframe = cy.state('$autIframe')
-
-        const load = () => {
-          return $autIframe.trigger('load')
-        }
-
-        cy.stub(Cypress, 'backend')
-        .withArgs('resolve:url')
-        .resolves({
-          isOkStatusCode: true,
-          isHtml: true,
-          url: 'http://127.0.0.1:3500',
-        })
-
-        // whenever we're told to change the src
-        // just fire the load event directly on the $autIframe
-        cy.stub(Cypress.utils, 'iframeSrc').callsFake(load)
-
-        // make it seem like we're already on http://127.0.0.1:3500
-        const one = Cypress.Location.create('http://127.0.0.1:3500/fixtures/generic.html')
-
-        cy.stub(Cypress.utils, 'locExisting')
-        .returns(one)
-
         cy.on('fail', (err) => {
           const { lastLog } = this
 
