@@ -1,6 +1,8 @@
-import type { DataContext } from '@packages/data-context'
 import type { FoundBrowser } from './browser'
 import type { PlatformName } from './platform'
+
+
+export type InteractiveOrRunMode = 'interactive' | 'run'
 
 export interface LaunchOpts {
   browser?: FoundBrowser
@@ -26,6 +28,7 @@ export interface LaunchArgs {
   // Global mode is triggered by CLI via `--global` or when there is no `projectRoot` (essentially when the Cypress Config file can't be found)
   global: boolean
   project: string // projectRoot
+  mode: 'run' | 'interactive'
   /**
    * in run mode, the path of the project run
    * path is relative if specified with --project,
@@ -56,7 +59,6 @@ export interface AutomationMiddleware {
 type WebSocketOptionsCallback = (...args: any[]) => any
 
 export interface OpenProjectLaunchOptions {
-  ctx?: DataContext
   args?: LaunchArgs
   /**
    * Whether to skip the plugin initialization, useful when

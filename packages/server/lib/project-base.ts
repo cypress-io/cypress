@@ -32,7 +32,6 @@ import preprocessor from './plugins/preprocessor'
 import { SpecsStore } from './specs-store'
 import { checkSupportFile, getDefaultConfigFilePath } from './project_utils'
 import type { FoundBrowser, OpenProjectLaunchOptions } from '@packages/types'
-import { makeLegacyDataContext } from './makeDataContext'
 import type { DataContext } from '@packages/data-context'
 
 // Cannot just use RuntimeConfigOptions as is because some types are not complete.
@@ -84,7 +83,7 @@ export class ProjectBase<TServer extends Server> extends EE {
   constructor ({
     projectRoot,
     testingType,
-    options = {},
+    options,
   }: {
     projectRoot: string
     testingType: Cypress.TestingType
@@ -106,7 +105,7 @@ export class ProjectBase<TServer extends Server> extends EE {
     this.spec = null
     this.browser = null
     this.id = createHmac('sha256', 'secret-key').update(projectRoot).digest('hex')
-    this.ctx = options.ctx ?? makeLegacyDataContext()
+    this.ctx = options.ctx
 
     debug('Project created %o', {
       testingType: this.testingType,
@@ -852,7 +851,7 @@ export class ProjectBase<TServer extends Server> extends EE {
   async getProjectId () {
     await this.verifyExistence()
 
-    const readSettings = await settings.read(this.projectRoot, this.options)
+    const readSettings = await settings.read(this.projectRoot, this.options, this.ctx)
 
     if (readSettings && readSettings.projectId) {
       return readSettings.projectId

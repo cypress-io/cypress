@@ -26,6 +26,7 @@ const selectorPlaygroundStore = useSelectorPlaygroundStore()
 const route = useRoute()
 
 onMounted(async () => {
+  console.log('init!!')
   await UnifiedRunnerAPI.initialize()
   initialized.value = true
 })

@@ -1,6 +1,6 @@
 <template>
   <div class="h-screen min-w-728px layout-grid">
-    <SidebarNavigation class="row-span-full" />
+    <!-- <SidebarNavigation class="row-span-full" /> -->
 
     <HeaderBar
       v-if="showHeader"

@@ -13,6 +13,14 @@
   </router-view>
 </template>
 
+<script lang="ts" setup>
+import { onMounted } from 'vue-demi'
+
+onMounted(() => {
+  console.log('app')
+})
+</script>
+
 <style>
 .reporter {
   position: relative;

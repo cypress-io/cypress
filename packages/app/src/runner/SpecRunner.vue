@@ -7,7 +7,7 @@
       id="inline-spec-list"
       class="bg-gray-1000"
     >
-      <template
+      <!-- <template
         v-if="props.gql.currentProject"
       >
         <InlineSpecList
@@ -22,7 +22,7 @@
         :gql="props.gql"
         @close="runnerUiStore.setShowChooseExternalEditorModal(false)"
         @selected="openFile"
-      />
+      /> -->
     </HideDuringScreenshot>
 
     <HideDuringScreenshot class="min-w-320px">
@@ -91,6 +91,8 @@ import ScriptError from './ScriptError.vue'
 import { useWindowSize } from '@vueuse/core'
 
 const { width, height } = useWindowSize()
+
+onMounted(() => console.log('spec runner'))
 
 gql`
 fragment SpecRunner on Query {

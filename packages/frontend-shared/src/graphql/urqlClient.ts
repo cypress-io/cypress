@@ -18,6 +18,7 @@ import { urqlCacheKeys } from '@packages/data-context/src/util/urqlCacheKeys'
 import { pubSubExchange } from './urqlExchangePubsub'
 import { namedRouteExchange } from './urqlExchangeNamedRoute'
 import { latestMutationExchange } from './urqlExchangeLatestMutation'
+import type { InteractiveOrRunMode } from '@packages/types'
 
 const GQL_PORT_MATCH = /gqlPort=(\d+)/.exec(window.location.search)
 const SERVER_PORT_MATCH = /serverPort=(\d+)/.exec(window.location.search)
@@ -32,6 +33,7 @@ declare global {
   interface Window {
     __CYPRESS_INITIAL_DATA__: SSRData
     __CYPRESS_GRAPHQL_PORT__?: string
+    __CYPRESS_MODE__: InteractiveOrRunMode
   }
 }
 
@@ -108,9 +110,13 @@ export function makeUrqlClient (target: 'launchpad' | 'app'): Client {
     exchanges.unshift(devtoolsExchange)
   }
 
+  const cypressInRunMode = window.top === window && window.__CYPRESS_MODE__ === 'run'
+
   return createClient({
     url: GRAPHQL_URL,
-    requestPolicy: 'cache-and-network',
+    // TODO(lachlan): 'cache-only' in run mode since we pre-hyrate
+    // the data
+    requestPolicy: cypressInRunMode ? 'cache-and-network' :  'cache-and-network',
     exchanges,
   })
 }

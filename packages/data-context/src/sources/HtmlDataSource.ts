@@ -49,7 +49,8 @@ export class HtmlDataSource {
 
     while (retryCount < 5) {
       try {
-        return await this.ctx.fs.readFile(getPathToDist('app', 'index.html'), 'utf8')
+        // return await this.ctx.fs.readFile(getPathToDist('app', 'index.html'), 'utf8')
+        return this.ctx.fs.readFile(getPathToDist('app', 'index.html'), 'utf8')
       } catch (e) {
         err = e
         await new Promise((resolve) => setTimeout(resolve, 1000))
@@ -72,11 +73,14 @@ export class HtmlDataSource {
   }
 
   private replaceBody (html: string, initialData: object) {
+    console.log('ctx!!!!', this.ctx.gqlServerPort, initialData)
+    console.log('here 2....', this. ctx._id)
     return html.replace('<body>', `
       <body>
         <script>
           window.__CYPRESS_GRAPHQL_PORT__ = ${JSON.stringify(this.ctx.gqlServerPort)};
           window.__CYPRESS_INITIAL_DATA__ = ${JSON.stringify(initialData)};
+          window.__CYPRESS_MODE__ = ${JSON.stringify(this.ctx.launchArgs.mode)};
         </script>
     `)
   }

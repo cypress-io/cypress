@@ -6,7 +6,6 @@ import { fs } from '../util/fs'
 import Debug from 'debug'
 import type { SettingsOptions } from '@packages/types'
 import type { DataContext } from '@packages/data-context'
-import { makeLegacyDataContext } from '../makeDataContext'
 
 const debug = Debug('cypress:server:settings')
 
@@ -132,15 +131,15 @@ export function configFile (options: SettingsOptions = {}) {
   return options.configFile === false ? false : (options.configFile || 'cypress.config.js')
 }
 
-export function id (projectRoot, options = {}) {
-  return read(projectRoot, options)
+export function id (projectRoot, options, ctx: DataContext) {
+  return read(projectRoot, options, ctx)
   .then((config) => config.projectId)
   .catch(() => {
     return null
   })
 }
 
-export function read (projectRoot, options: SettingsOptions = {}, ctx: DataContext = makeLegacyDataContext()) {
+export function read (projectRoot, options: SettingsOptions = {}, ctx: DataContext) {
   if (options.configFile === false) {
     return Promise.resolve({})
   }

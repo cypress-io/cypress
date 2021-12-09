@@ -7,6 +7,7 @@
 
 <script lang="ts" setup>
 import { gql, useQuery } from '@urql/vue'
+import { onMounted } from 'vue-demi'
 import { SpecPageContainerDocument } from '../generated/graphql'
 import SpecRunnerContainer from '../runner/SpecRunnerContainer.vue'
 
@@ -17,6 +18,10 @@ query SpecPageContainer {
 `
 
 const query = useQuery({ query: SpecPageContainerDocument })
+onMounted(() => {
+  query.then((res) => {console.log(res.data.value)})
+  console.log('gogogo', query.data.value)
+})
 </script>
 
 <route>

@@ -8,6 +8,8 @@ const human = require('human-interval')
 const debug = require('debug')('cypress:server:run')
 const Promise = require('bluebird')
 const logSymbols = require('log-symbols')
+const { runInternalServer } = require('./internal-server')
+const { app } = require('electron')
 
 const recordMode = require('./record')
 const errors = require('../errors')
@@ -588,7 +590,7 @@ const onWarning = (err) => {
   console.log(chalk.yellow(err.message))
 }
 
-const openProjectCreate = (projectRoot, socketId, args) => {
+const openProjectCreate = (projectRoot, socketId, args, ctx) => {
   // now open the project to boot the server
   // putting our web client app in headless mode
   // - NO  display server logs (via morgan)
@@ -603,6 +605,7 @@ const openProjectCreate = (projectRoot, socketId, args) => {
     browsers: args.browsers,
     onWarning,
     onError: args.onError,
+    ctx,
   }
 
   return openProject.create(projectRoot, args, options)
@@ -619,12 +622,12 @@ async function checkAccess (folderPath) {
   })
 }
 
-const createAndOpenProject = async (socketId, options) => {
+const createAndOpenProject = async (socketId, options, ctx) => {
   const { projectRoot, projectId } = options
 
   await checkAccess(projectRoot)
 
-  const open_project = await openProjectCreate(projectRoot, socketId, options)
+  const open_project = await openProjectCreate(projectRoot, socketId, options, ctx)
   const project = await open_project.getProject()
 
   const [_project, _config, _projectId] = await Promise.all([
@@ -1502,7 +1505,9 @@ module.exports = {
     })
   },
 
-  ready (options = {}) {
+  async ready (options = {}) {
+    const { serverPortPromise, bus, ctx } = runInternalServer(options, undefined, app)
+
     debug('run mode ready with options %o', options)
 
     if (process.env.ELECTRON_RUN_AS_NODE && !process.env.DISPLAY) {
@@ -1534,7 +1539,7 @@ module.exports = {
       debug('found all system browsers %o', browsers)
       options.browsers = browsers
 
-      return createAndOpenProject(socketId, options)
+      return createAndOpenProject(socketId, options, ctx)
       .then(({ project, projectId, config, configFile }) => {
         debug('project created and opened with config %o', config)
 
@@ -1559,8 +1564,9 @@ module.exports = {
           browserUtils.ensureAndGetByNameOrPath(browserName, false, userBrowsers).tap(removeOldProfiles),
           this.findSpecs(config, specPattern),
           trashAssets(config),
+          serverPortPromise
         ])
-        .spread((sys = {}, browser = {}, specs = []) => {
+        .spread((sys = {}, browser = {}, specs = [], gqlServerPort) => {
           // only want these properties
           specs = specs.map((x) => ({
             name: x.name,

@@ -5,8 +5,13 @@ import type { App } from 'electron'
 import { makeDataContext } from '../makeDataContext'
 import { makeGraphQLServer } from '../gui/makeGraphQLServer'
 import { assertValidPlatform } from '@packages/types/src/platform'
+import type { LaunchArgs } from '@packages/types'
 
-export function runInternalServer (launchArgs, _internalOptions = { loadCachedProjects: true }, electronApp?: App) {
+export function runInternalServer (
+  launchArgs: LaunchArgs, 
+  _internalOptions = { loadCachedProjects: true }, 
+  electronApp?: App
+) {
   const bus = new EventEmitter()
   const platform = os.platform()
 

@@ -1,4 +1,4 @@
-import type { LaunchArgs, OpenProjectLaunchOptions, PlatformName } from '@packages/types'
+import type { InteractiveOrRunMode, LaunchArgs, OpenProjectLaunchOptions, PlatformName } from '@packages/types'
 import fsExtra from 'fs-extra'
 import path from 'path'
 
@@ -67,8 +67,10 @@ export class DataContext {
   private _gqlServer?: Server
   private _appServerPort: number | undefined
   private _gqlServerPort: number | undefined
+  _id = Math.random()
 
   constructor (private _config: DataContextConfig) {
+    console.log('id is', this._id)
     this._rootBus = new EventEmitter()
     this._coreData = _config.coreData ?? makeCoreData()
   }
