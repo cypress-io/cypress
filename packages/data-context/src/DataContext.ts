@@ -43,7 +43,7 @@ export interface InternalDataContextOptions {
 export interface DataContextConfig {
   schema: GraphQLSchema
   mode: 'run' | 'open'
-  modeOptions: AllModeOptions
+  modeOptions: Partial<AllModeOptions>
   electronApp?: ElectronApp
   coreData?: CoreDataShape
   /**

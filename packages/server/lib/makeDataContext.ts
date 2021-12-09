@@ -56,7 +56,7 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       launchProject (browser: FoundBrowser, spec: Cypress.Spec, options?: LaunchOpts) {
         return openProject.launch({ ...browser }, spec, options)
       },
-      initializeProject (args: AllModeOptions, options: OpenProjectLaunchOptions, browsers: FoundBrowser[]) {
+      initializeProject (args: InitializeProjectOptions, options: OpenProjectLaunchOptions, browsers: FoundBrowser[]) {
         return openProject.create(args.projectRoot, args, options, browsers)
       },
       insertProjectToCache (projectRoot: string) {
