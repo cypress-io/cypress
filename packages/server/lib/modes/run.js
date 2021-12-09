@@ -624,6 +624,7 @@ const openProjectCreate = (projectRoot, socketId, args) => {
     // to give user's plugins file a chance to change it
     browsers: args.browsers,
     onWarning,
+    spec: args.spec,
     onError: args.onError,
   }
 
@@ -729,7 +730,7 @@ const maybeStartVideoRecording = Promise.method(function (options = {}) {
   }
 
   const videoPath = (suffix) => {
-    return path.join(videosFolder, spec.name + suffix)
+    return path.join(videosFolder, spec.relativeToCommonRoot + suffix)
   }
 
   const videoName = videoPath('.mp4')
@@ -1097,7 +1098,7 @@ module.exports = {
     // path for next spec in launch browser.
     // we need it to run on every spec even in single browser mode
     this.currentSetScreenshotMetadata = (data) => {
-      data.specName = spec.name
+      data.specName = spec.relativeToCommonRoot
 
       return data
     }
@@ -1279,6 +1280,7 @@ module.exports = {
   },
 
   screenshotMetadata (data, resp) {
+    console.log(data)
     return {
       screenshotId: random.id(),
       name: data.name || null,
@@ -1566,26 +1568,15 @@ module.exports = {
         return Promise.all([
           system.info(),
           browserUtils.ensureAndGetByNameOrPath(browserName, false, userBrowsers).tap(removeOldProfiles),
-          project.ctx.project.findSpecs(
-            projectRoot,
-            specType,
-            specPattern,
-          ),
           trashAssets(config),
         ])
-        .spread(async (sys = {}, browser = {}, specs = []) => {
-          // only want these properties
-          specs = specs.map((x) => ({
-            name: x.name,
-            relative: x.relative,
-            absolute: x.absolute,
-            specType: x.specType,
-            baseName: x.baseName,
-          }))
-
-          if (!specs.length) {
+        .spread(async (sys = {}, browser = {}) => {
+          if (!project.ctx.currentProject.specs?.length) {
             errors.throw('NO_SPECS_FOUND', projectRoot, specPattern)
           }
+
+          // only want these properties
+          const specs = project.ctx.currentProject.specs
 
           if (browser.unsupportedVersion && browser.warning) {
             errors.throw('UNSUPPORTED_BROWSER_VERSION', browser.warning)

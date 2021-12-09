@@ -76,21 +76,7 @@ export const CurrentProject = objectType({
       description: 'Specs for a project conforming to Relay Connection specification',
       type: 'Spec',
       nodes: async (source, args, ctx) => {
-        if (!ctx.appData.currentTestingType) {
-          return []
-        }
-
-        const pattern = await ctx.project.specPatternForTestingType(source.projectRoot, ctx.appData.currentTestingType)
-
-        if (!pattern) {
-          return []
-        }
-
-        return ctx.project.findSpecs(
-          source.projectRoot,
-          ctx.appData.currentTestingType,
-          pattern,
-        )
+        return ctx.currentProject?.specs || []
       },
     })
 

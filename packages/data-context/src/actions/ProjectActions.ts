@@ -232,7 +232,7 @@ export class ProjectActions {
     let activeSpec: FoundSpec | undefined
 
     if (specPath) {
-      activeSpec = await this.ctx.project.getCurrentSpecByAbsolute(this.ctx.currentProject.projectRoot, specPath)
+      activeSpec = await this.ctx.project.getCurrentSpecByAbsolute(specPath)
     }
 
     // Ensure that we have loaded browsers to choose from
@@ -364,6 +364,14 @@ export class ProjectActions {
 
       await this.ctx.fs.outputFile(indexHtmlPath, template)
     }
+  }
+
+  setSpecs (specs: FoundSpec[]) {
+    if (!this.ctx.currentProject) {
+      throw Error(`Cannot set specs without currentProject.`)
+    }
+
+    this.ctx.currentProject.specs = specs
   }
 
   async setProjectPreferences (args: MutationSetProjectPreferencesArgs) {

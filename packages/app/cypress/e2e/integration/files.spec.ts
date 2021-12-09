@@ -9,5 +9,6 @@ describe('App', () => {
     cy.wait(1000)
     cy.get('[href="#/runs"]').click()
     cy.get('[href="#/settings"]').click()
+    cy.screenshot()
   })
 })

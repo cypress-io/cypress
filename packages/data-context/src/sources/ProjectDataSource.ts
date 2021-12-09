@@ -8,6 +8,63 @@ const debug = Debug('cypress:data-context')
 
 import type { DataContext } from '..'
 
+function directoryWithinProject (projectRoot: string, globOrPath: string) {
+  if (globOrPath.includes('*')) {
+    const globPrefixDirectory = globOrPath.split('*')[0] ?? ''
+    return path.join(projectRoot, globPrefixDirectory)
+  }
+
+  return path.dirname(globOrPath)
+}
+
+// adapted from https://stackoverflow.com/a/68702966
+export function longestCommonPrefix (projectRoot: string, absolutes: string[]) {
+  let prefix = absolutes.reduce((longest, candidate) => {
+    if (candidate.length < longest.length) {
+      return candidate 
+    }
+    
+    return longest
+  }, projectRoot)
+  
+  for (let str of absolutes) {
+    while (str.slice(0, prefix.length) != prefix) {
+      prefix = prefix.slice(0, -1)
+    }
+  }
+  return prefix
+}
+
+export function transformSpec (projectRoot: string, absolute: string, testingType: Cypress.TestingType, commonRoot: string): FoundSpec {
+  const relative = path.relative(projectRoot, absolute).replace(/\\/g, '/')
+  const parsedFile = path.parse(absolute)
+  const fileExtension = path.extname(absolute)
+
+  const specFileExtension = ['.spec', '.test', '-spec', '-test', '.cy']
+  .map((ext) => ext + fileExtension)
+  .find((ext) => absolute.endsWith(ext)) || fileExtension
+
+  const parts = absolute.split(projectRoot)
+  let name = parts[parts.length - 1]?.replace(/\\/g, '/') || ''
+
+  if (name.startsWith('/')) {
+    name = name.slice(1)
+  }
+
+  return {
+    fileExtension,
+    relativeToCommonRoot: absolute.replace(commonRoot, ''),
+    baseName: parsedFile.base,
+    fileName: parsedFile.base.replace(specFileExtension, ''),
+    specFileExtension,
+    specType: testingType === 'component' ? 'component' : 'integration',
+    name,
+    relative,
+    absolute,
+  }
+}
+
+
 export class ProjectDataSource {
   constructor (private ctx: DataContext) {}
 
@@ -40,59 +97,26 @@ export class ProjectDataSource {
 
     debug('found specs %o', specAbsolutePaths)
 
+    let prefix = ''
+    if (typeof specPattern === 'string' || Array.isArray(specPattern) && specPattern.length === 1) {
+      prefix = directoryWithinProject(projectRoot, typeof specPattern === 'string' ? specPattern : specPattern[0]!)
+    } 
+
+    const commonRoot = longestCommonPrefix(prefix, specAbsolutePaths)
+
     const specs = specAbsolutePaths.map<FoundSpec>((absolute) => {
-      return this.transformSpec(projectRoot, absolute, testingType)
+      return transformSpec(projectRoot, absolute, testingType, commonRoot)
     })
 
     return specs
   }
 
-  transformSpec (projectRoot: string, absolute: string, testingType: Cypress.TestingType): FoundSpec {
-    const relative = path.relative(projectRoot, absolute).replace(/\\/g, '/')
-    const parsedFile = path.parse(absolute)
-    const fileExtension = path.extname(absolute)
-
-    const specFileExtension = ['.spec', '.test', '-spec', '-test', '.cy']
-    .map((ext) => ext + fileExtension)
-    .find((ext) => absolute.endsWith(ext)) || fileExtension
-
-    const parts = absolute.split(projectRoot)
-    let name = parts[parts.length - 1]?.replace(/\\/g, '/') || ''
-
-    if (name.startsWith('/')) {
-      name = name.slice(1)
-    }
-
-    return {
-      fileExtension,
-      baseName: parsedFile.base,
-      fileName: parsedFile.base.replace(specFileExtension, ''),
-      specFileExtension,
-      specType: testingType === 'component' ? 'component' : 'integration',
-      name,
-      relative,
-      absolute,
-    }
-  }
-
-  async getCurrentSpecByAbsolute (projectRoot: string, absolute: string) {
-    if (!this.ctx.appData.currentTestingType) {
+  async getCurrentSpecByAbsolute (absolute: string) {
+    if (!this.ctx.currentProject) {
       return
     }
 
-    return this.transformSpec(projectRoot, absolute, this.ctx.appData.currentTestingType)
-  }
-
-  async getCurrentSpecById (projectRoot: string, base64Id: string) {
-    // id is base64 formatted as per Relay: <type>:<string>
-    // in this case, Spec:/my/abs/path
-    const currentSpecAbs = Buffer.from(base64Id, 'base64').toString().split(':')[1]
-
-    if (!currentSpecAbs || !this.ctx.appData.currentTestingType) {
-      return null
-    }
-
-    return this.transformSpec(projectRoot, currentSpecAbs, this.ctx.appData.currentTestingType)
+    return this.ctx.currentProject.specs?.find(x => x.absolute === absolute) 
   }
 
   async getResolvedConfigFields (projectRoot: string): Promise<ResolvedFromConfig[]> {
