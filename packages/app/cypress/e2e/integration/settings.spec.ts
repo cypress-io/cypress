@@ -1,7 +1,6 @@
 describe('Settings', { viewportWidth: 1000 }, () => {
   beforeEach(() => {
     cy.setupE2E('component-tests')
-
     cy.initializeApp()
   })
 
@@ -12,38 +11,6 @@ describe('Settings', { viewportWidth: 1000 }, () => {
     cy.get('div[data-testid="header-bar"]').should('contain', 'Settings')
     cy.findByText('Device Settings').should('be.visible')
     cy.findByText('Project Settings').should('be.visible')
-  })
-
-  it('expands and collapses project settings', () => {
-    cy.visitApp('#settings')
-    cy.findByText('Project Settings').click()
-
-    cy.get('[data-cy="settings-config"]')
-    .scrollIntoView()
-    .should('be.visible')
-    .contains('animationDistanceThreshold')
-
-    cy.get('[data-cy="settings-projectId"]')
-    .findByText('abc123')
-    .should('be.visible')
-
-    cy.findByText('Resolved Configuration')
-    .should('be.visible')
-
-    cy.findByText('Project Settings').click()
-    cy.findByText('animationDistanceThreshold').should('not.exist')
-  })
-
-  it('expands and collapses device settings', () => {
-    cy.visitApp('#settings')
-    cy.findByText('Device Settings').click()
-
-    cy.findByText('External Editor').should('be.visible')
-    cy.findByText('Testing Preferences').should('be.visible')
-    cy.findByText('Proxy Settings').should('be.visible')
-
-    cy.findByText('Device Settings').click()
-    cy.findByText('External Editor').should('not.exist')
   })
 
   it('can reconfigure a project', () => {
