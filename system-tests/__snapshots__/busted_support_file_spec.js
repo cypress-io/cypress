@@ -1,20 +1,4 @@
 exports['e2e busted support file passes 1'] = `
-{ specPattern: 'cypress/integration/**/*' }
-{
-  matched: [
-    {
-      fileExtension: '.js',
-      baseName: 'app_spec.js',
-      fileName: 'app_spec',
-      specFileExtension: '.js',
-      relativeToCommonRoot: 'app_spec.js',
-      specType: 'integration',
-      name: 'cypress/integration/app_spec.js',
-      relative: 'cypress/integration/app_spec.js',
-      absolute: '/foo/bar/.projects/busted-support-file/cypress/integration/app_spec.js'
-    }
-  ]
-}
 
 ====================================================================================================
 
