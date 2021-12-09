@@ -144,7 +144,7 @@ export const create = (Cypress, cy) => {
     }
 
     // if we are simply verifying the upcoming
-    // assertions then do not immediately end
+    // assertions then do not immediately end or snapshot
     // else do
     if (verifying) {
       obj._error = error
@@ -524,7 +524,6 @@ export const create = (Cypress, cy) => {
     assert (...args) {
       // if we've temporarily overridden assertions
       // then just bail early with this function
-
       const fn = cy.state('overrideAssert') || assertFn
 
       return fn.apply(this, args)
