@@ -1,5 +1,6 @@
 import _ from 'lodash'
-import unfetch from 'unfetch'
+// @ts-ignore
+import { registerFetch } from 'unfetch'
 import $selection from '../dom/selection'
 
 export const create = (state, config, focused, snapshots) => {
@@ -54,7 +55,7 @@ export const create = (state, config, focused, snapshots) => {
       if (config('experimentalFetchPolyfill')) {
         // drop "fetch" polyfill that replaces it with XMLHttpRequest
         // from the app iframe that we wrap for network stubbing
-        contentWindow.fetch = unfetch
+        contentWindow.fetch = registerFetch(contentWindow)
         // flag the polyfill to test this experimental feature easier
         state('fetchPolyfilled', true)
       }
