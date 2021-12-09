@@ -1,7 +1,4 @@
 require('../spec_helper')
-const { setCtx, makeDataContext } = require('../../lib/makeDataContext')
-
-setCtx(makeDataContext({}))
 
 const cp = require('child_process')
 const fse = require('fs-extra')
