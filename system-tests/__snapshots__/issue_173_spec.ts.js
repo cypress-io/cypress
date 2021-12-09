@@ -47,15 +47,13 @@ exports['e2e issue 173 / failing'] = `
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/issue_173_spec.js/fails (fa     (1280x720)
-     iled).png                                                                                      
+  -  /XXX/XXX/XXX/cypress/screenshots/issue_173_spec.js/fails (failed).png                (1280x720)
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/issue_173_s     (X second)
-                          pec.js.mp4                                                                
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/issue_173_spec.js.mp4               (X second)
 
 
 ====================================================================================================

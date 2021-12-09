@@ -379,7 +379,6 @@ export class ProjectBase<TServer extends Server> extends EE {
     ctDevServerPort: number | undefined
     startSpecWatcher: () => void
   }> {
-    // const specPattern = updatedConfig[this.testingType].specPattern
     const specs = this.ctx.currentProject?.specs || []
 
     return this.initSpecStore({ specs, config: updatedConfig })

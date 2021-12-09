@@ -48,8 +48,7 @@ exports['e2e iframes / passes'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/iframe_spec     (X second)
-                          .js.mp4                                                                   
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/iframe_spec.js.mp4                  (X second)
 
 
 ====================================================================================================

@@ -123,17 +123,16 @@ https://on.cypress.io/cross-origin-script-error
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/js_error_handling_failing_s     (1280x720)
-     pec.js/s1 -- without an afterEach hook -- t1 (failed).png                                      
-  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/js_error_handling_failing_s     (1280x720)
-     pec.js/s1 -- without an afterEach hook -- t2 (failed).png                                      
-  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/js_error_handling_failing_s     (1280x720)
-     pec.js/s1 -- with an afterEach hook -- t4 (failed).png                                         
-  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/js_error_handling_failing_s     (1280x720)
-     pec.js/s1 -- with an afterEach hook -- t5 (failed).png                                         
-  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/js_error_handling_failing_s     (1280x720)
-     pec.js/s1 -- cross origin script errors -- explains where script errored (failed               
-     ).png                                                                                          
+  -  /XXX/XXX/XXX/cypress/screenshots/js_error_handling_failing_spec.js/s1 -- without     (1280x720)
+      an afterEach hook -- t1 (failed).png                                                          
+  -  /XXX/XXX/XXX/cypress/screenshots/js_error_handling_failing_spec.js/s1 -- without     (1280x720)
+      an afterEach hook -- t2 (failed).png                                                          
+  -  /XXX/XXX/XXX/cypress/screenshots/js_error_handling_failing_spec.js/s1 -- with an     (1280x720)
+      afterEach hook -- t4 (failed).png                                                             
+  -  /XXX/XXX/XXX/cypress/screenshots/js_error_handling_failing_spec.js/s1 -- with an     (1280x720)
+      afterEach hook -- t5 (failed).png                                                             
+  -  /XXX/XXX/XXX/cypress/screenshots/js_error_handling_failing_spec.js/s1 -- cross o     (1280x720)
+     rigin script errors -- explains where script errored (failed).png                              
 
 
 ====================================================================================================

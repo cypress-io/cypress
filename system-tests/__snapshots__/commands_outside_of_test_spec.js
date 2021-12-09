@@ -38,8 +38,8 @@ exports['e2e commands outside of test / passes on passing assertions'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/assertions_     (X second)
-                          passing_outside_of_test_spec.js.mp4                                       
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/assertions_passing_outside_of_t     (X second)
+                          est_spec.js.mp4                                                           
 
 
 ====================================================================================================
@@ -113,15 +113,15 @@ We dynamically generated a new test to display this failure.
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/assertions_failing_outside_     (1280x720)
-     of_test_spec.js/An uncaught error was detected outside of a test (failed).png                  
+  -  /XXX/XXX/XXX/cypress/screenshots/assertions_failing_outside_of_test_spec.js/An u     (1280x720)
+     ncaught error was detected outside of a test (failed).png                                      
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/assertions_     (X second)
-                          failing_outside_of_test_spec.js.mp4                                       
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/assertions_failing_outside_of_t     (X second)
+                          est_spec.js.mp4                                                           
 
 
 ====================================================================================================
@@ -203,15 +203,15 @@ https://on.cypress.io/cannot-execute-commands-outside-test
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/commands_outside_of_test_sp     (1280x720)
-     ec.js/An uncaught error was detected outside of a test (failed).png                            
+  -  /XXX/XXX/XXX/cypress/screenshots/commands_outside_of_test_spec.js/An uncaught er     (1280x720)
+     ror was detected outside of a test (failed).png                                                
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/commands_ou     (X second)
-                          tside_of_test_spec.js.mp4                                                 
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/commands_outside_of_test_spec.j     (X second)
+                          s.mp4                                                                     
 
 
 ====================================================================================================

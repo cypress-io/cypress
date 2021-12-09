@@ -54,8 +54,8 @@ We dynamically generated a new test to display this failure.
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/testConfigOverrides-invalid     (1280x720)
-     -browser.js/An uncaught error was detected outside of a test (failed).png                      
+  -  /XXX/XXX/XXX/cypress/screenshots/testConfigOverrides-invalid-browser.js/An uncau     (1280x720)
+     ght error was detected outside of a test (failed).png                                          
 
 
 ====================================================================================================
@@ -118,8 +118,8 @@ exports['testConfigOverrides / has originalTitle when skip due to browser config
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/testConfigO     (X second)
-                          verrides-skip-browser.js.mp4                                              
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/testConfigOverrides-skip-browse     (X second)
+                          r.js.mp4                                                                  
 
 
 ====================================================================================================
@@ -270,11 +270,10 @@ https://on.cypress.io/config
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/testConfigOverrides-invalid     (1280x720)
-     .js/inline test config override throws error (failed).png                                      
-  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/testConfigOverrides-invalid     (1280x720)
-     .js/inline test config override throws error when executed within cy cmd (failed               
-     ).png                                                                                          
+  -  /XXX/XXX/XXX/cypress/screenshots/testConfigOverrides-invalid.js/inline test conf     (1280x720)
+     ig override throws error (failed).png                                                          
+  -  /XXX/XXX/XXX/cypress/screenshots/testConfigOverrides-invalid.js/inline test conf     (1280x720)
+     ig override throws error when executed within cy cmd (failed).png                              
 
 
 ====================================================================================================
@@ -430,12 +429,11 @@ https://on.cypress.io/config
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/testConfigOverrides-before-     (1280x720)
-     invalid.js/runs all tests -- inline test config override throws error (failed).p               
-     ng                                                                                             
-  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/testConfigOverrides-before-     (1280x720)
-     invalid.js/runs all tests -- inline test config override throws error when execu               
-     ted within cy cmd (failed).png                                                                 
+  -  /XXX/XXX/XXX/cypress/screenshots/testConfigOverrides-before-invalid.js/runs all      (1280x720)
+     tests -- inline test config override throws error (failed).png                                 
+  -  /XXX/XXX/XXX/cypress/screenshots/testConfigOverrides-before-invalid.js/runs all      (1280x720)
+     tests -- inline test config override throws error when executed within cy cmd (f               
+     ailed).png                                                                                     
 
 
 ====================================================================================================

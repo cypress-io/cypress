@@ -80,19 +80,19 @@ Because this error occurred during a \`before all\` hook we are skipping the rem
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/hook_caught_error_failing_s     (1280x720)
-     pec.js/s1a -- t2a -- before each hook (failed).png                                             
-  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/hook_caught_error_failing_s     (1280x720)
-     pec.js/s3a -- t8a -- before all hook (failed).png                                              
-  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/hook_caught_error_failing_s     (1280x720)
-     pec.js/s4a -- t10a -- before all hook (failed).png                                             
+  -  /XXX/XXX/XXX/cypress/screenshots/hook_caught_error_failing_spec.js/s1a -- t2a --     (1280x720)
+      before each hook (failed).png                                                                 
+  -  /XXX/XXX/XXX/cypress/screenshots/hook_caught_error_failing_spec.js/s3a -- t8a --     (1280x720)
+      before all hook (failed).png                                                                  
+  -  /XXX/XXX/XXX/cypress/screenshots/hook_caught_error_failing_spec.js/s4a -- t10a -     (1280x720)
+     - before all hook (failed).png                                                                 
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/hook_caught     (X second)
-                          _error_failing_spec.js.mp4                                                
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/hook_caught_error_failing_spec.     (X second)
+                          js.mp4                                                                    
 
 
 ====================================================================================================
@@ -176,15 +176,15 @@ Because this error occurred during a \`before each\` hook we are skipping the re
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/hook_uncaught_error_failing     (1280x720)
-     _spec.js/s1b -- t2b -- before each hook (failed).png                                           
+  -  /XXX/XXX/XXX/cypress/screenshots/hook_uncaught_error_failing_spec.js/s1b -- t2b      (1280x720)
+     -- before each hook (failed).png                                                               
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/hook_uncaug     (X second)
-                          ht_error_failing_spec.js.mp4                                              
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/hook_uncaught_error_failing_spe     (X second)
+                          c.js.mp4                                                                  
 
 
 ====================================================================================================
@@ -259,15 +259,15 @@ Because this error occurred during a \`before each\` hook we are skipping all of
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/hook_uncaught_root_error_fa     (1280x720)
-     iling_spec.js/t1c -- before each hook (failed).png                                             
+  -  /XXX/XXX/XXX/cypress/screenshots/hook_uncaught_root_error_failing_spec.js/t1c --     (1280x720)
+      before each hook (failed).png                                                                 
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/hook_uncaug     (X second)
-                          ht_root_error_failing_spec.js.mp4                                         
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/hook_uncaught_root_error_failin     (X second)
+                          g_spec.js.mp4                                                             
 
 
 ====================================================================================================
@@ -351,16 +351,16 @@ Because this error occurred during a \`before each\` hook we are skipping the re
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/hook_uncaught_error_events_     (1280x720)
-     failing_spec.js/uncaught hook error should continue to fire all mocha events --                
-     s1 -- does not run -- before each hook (failed).png                                            
+  -  /XXX/XXX/XXX/cypress/screenshots/hook_uncaught_error_events_failing_spec.js/unca     (1280x720)
+     ught hook error should continue to fire all mocha events -- s1 -- does not run -               
+     - before each hook (failed).png                                                                
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/hook_uncaug     (X second)
-                          ht_error_events_failing_spec.js.mp4                                       
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/hook_uncaught_error_events_fail     (X second)
+                          ing_spec.js.mp4                                                           
 
 
 ====================================================================================================

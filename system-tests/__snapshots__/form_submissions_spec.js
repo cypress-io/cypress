@@ -49,8 +49,8 @@ exports['e2e forms / <form> submissions / passes with https on localhost'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/form_submis     (X second)
-                          sion_multipart_spec.js.mp4                                                
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/form_submission_multipart_spec.     (X second)
+                          js.mp4                                                                    
 
 
 ====================================================================================================
@@ -118,8 +118,8 @@ exports['e2e forms / <form> submissions / passes with http on localhost'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/form_submis     (X second)
-                          sion_multipart_spec.js.mp4                                                
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/form_submission_multipart_spec.     (X second)
+                          js.mp4                                                                    
 
 
 ====================================================================================================
@@ -187,16 +187,16 @@ exports['e2e forms / submissions with jquery XHR POST / failing'] = `
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/form_submission_failing_spe     (1280x720)
-     c.js/form submission fails -- fails without an explicit wait when an element is                
-     immediately found (failed).png                                                                 
+  -  /XXX/XXX/XXX/cypress/screenshots/form_submission_failing_spec.js/form submission     (1280x720)
+      fails -- fails without an explicit wait when an element is immediately found (f               
+     ailed).png                                                                                     
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/form_submis     (X second)
-                          sion_failing_spec.js.mp4                                                  
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/form_submission_failing_spec.js     (X second)
+                          .mp4                                                                      
 
 
 ====================================================================================================
@@ -256,8 +256,8 @@ exports['e2e forms / submissions with jquery XHR POST / passing'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/form_submis     (X second)
-                          sion_passing_spec.js.mp4                                                  
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/form_submission_passing_spec.js     (X second)
+                          .mp4                                                                      
 
 
 ====================================================================================================

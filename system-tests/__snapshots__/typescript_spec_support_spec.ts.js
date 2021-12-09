@@ -45,8 +45,7 @@ exports['e2e typescript in spec and support file spec passes 1'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/typescript_     (X second)
-                          passing_spec.ts.mp4                                                       
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/typescript_passing_spec.ts.mp4      (X second)
 
 
 ====================================================================================================
@@ -124,8 +123,8 @@ Fix the error in your code and re-run your tests.
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/typescript_     (X second)
-                          syntax_error_spec.ts.mp4                                                  
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/typescript_syntax_error_spec.ts     (X second)
+                          .mp4                                                                      
 
 
 ====================================================================================================
@@ -152,7 +151,6 @@ exports['e2e typescript in spec and support file project passes 1'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      2 found (app_spec.ts, math.ts)                                                     │
-  │ Searched:   cypress/integration/**/*                                                           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -184,8 +182,7 @@ exports['e2e typescript in spec and support file project passes 1'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/app_spec.ts     (X second)
-                          .mp4                                                                      
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/app_spec.ts.mp4                     (X second)
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -214,7 +211,7 @@ exports['e2e typescript in spec and support file project passes 1'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/math.ts.mp4     (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/math.ts.mp4                         (X second)
 
 
 ====================================================================================================

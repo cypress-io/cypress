@@ -55,19 +55,16 @@ exports['e2e issue 674 / fails'] = `
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/issue_674_spec.js/issue 674     (1280x720)
-      -- does not hang when both beforeEach and afterEach fail -- before each hook (f               
-     ailed).png                                                                                     
-  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/issue_674_spec.js/issue 674     (1280x720)
-      -- does not hang when both beforeEach and afterEach fail -- after each hook (fa               
-     iled).png                                                                                      
+  -  /XXX/XXX/XXX/cypress/screenshots/issue_674_spec.js/issue 674 -- does not hang wh     (1280x720)
+     en both beforeEach and afterEach fail -- before each hook (failed).png                         
+  -  /XXX/XXX/XXX/cypress/screenshots/issue_674_spec.js/issue 674 -- does not hang wh     (1280x720)
+     en both beforeEach and afterEach fail -- after each hook (failed).png                          
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/issue_674_s     (X second)
-                          pec.js.mp4                                                                
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/issue_674_spec.js.mp4               (X second)
 
 
 ====================================================================================================

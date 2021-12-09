@@ -48,8 +48,7 @@ exports['e2e domain / passes'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/domain_2_sp     (X second)
-                          ec.js.mp4                                                                 
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/domain_2_spec.js.mp4                (X second)
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -88,8 +87,7 @@ exports['e2e domain / passes'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/domain_spec     (X second)
-                          .js.mp4                                                                   
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/domain_spec.js.mp4                  (X second)
 
 
 ====================================================================================================

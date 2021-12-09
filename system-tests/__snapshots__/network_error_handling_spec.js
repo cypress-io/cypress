@@ -62,8 +62,7 @@ exports['e2e network error handling Cypress retries HTTPS passthrough behind a p
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/https_passt     (X second)
-                          hru_spec.js.mp4                                                           
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/https_passthru_spec.js.mp4          (X second)
 
 
 ====================================================================================================
@@ -125,8 +124,7 @@ exports['e2e network error handling Cypress does not connect to the upstream pro
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/https_passt     (X second)
-                          hru_spec.js.mp4                                                           
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/https_passthru_spec.js.mp4          (X second)
 
 
 ====================================================================================================
@@ -187,8 +185,8 @@ exports['e2e network error handling Cypress does not delay a 304 Not Modified in
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/network_err     (X second)
-                          or_304_handling_spec.js.mp4                                               
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/network_error_304_handling_spec     (X second)
+                          .js.mp4                                                                   
 
 
 ====================================================================================================
@@ -249,8 +247,8 @@ exports['e2e network error handling Cypress does not delay a 304 Not Modified be
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/network_err     (X second)
-                          or_304_handling_spec.js.mp4                                               
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/network_error_304_handling_spec     (X second)
+                          .js.mp4                                                                   
 
 
 ====================================================================================================
@@ -311,8 +309,8 @@ exports['e2e network error handling Cypress does not delay a 304 Not Modified be
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/network_err     (X second)
-                          or_304_handling_spec.js.mp4                                               
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/network_error_304_handling_spec     (X second)
+                          .js.mp4                                                                   
 
 
 ====================================================================================================
@@ -447,19 +445,17 @@ https://on.cypress.io/request
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/network_error_handling_spec     (1280x720)
-     .js/network error handling -- cy.visit() retries -- fails after retrying 5x (fai               
-     led).png                                                                                       
-  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/network_error_handling_spec     (1280x720)
-     .js/network error handling -- cy.request() retries -- fails after retrying 5x (f               
-     ailed).png                                                                                     
+  -  /XXX/XXX/XXX/cypress/screenshots/network_error_handling_spec.js/network error ha     (1280x720)
+     ndling -- cy.visit() retries -- fails after retrying 5x (failed).png                           
+  -  /XXX/XXX/XXX/cypress/screenshots/network_error_handling_spec.js/network error ha     (1280x720)
+     ndling -- cy.request() retries -- fails after retrying 5x (failed).png                         
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/network_err     (X second)
-                          or_handling_spec.js.mp4                                                   
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/network_error_handling_spec.js.     (X second)
+                          mp4                                                                       
 
 
 ====================================================================================================

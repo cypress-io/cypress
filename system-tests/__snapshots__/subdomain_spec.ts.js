@@ -51,8 +51,7 @@ exports['e2e subdomain / passes'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/subdomain_s     (X second)
-                          pec.js.mp4                                                                
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/subdomain_spec.js.mp4               (X second)
 
 
 ====================================================================================================

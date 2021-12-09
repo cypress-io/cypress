@@ -239,7 +239,7 @@ export class OpenProject {
     debug('and options %o', options)
 
     const testingType = args.testingType === 'component' ? 'component' : 'e2e'
-     
+
     // store the currently open project
     this.openProject = new ProjectBase({
       testingType,
@@ -260,6 +260,7 @@ export class OpenProject {
       }
 
       const specs = await this._ctx.project.findSpecs(path, testingType, specPattern)
+
       this._ctx.actions.project.setSpecs(specs)
 
       await this.openProject.open()

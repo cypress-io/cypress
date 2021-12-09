@@ -68,13 +68,12 @@ Fix the error in your code and re-run your tests.
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/record_erro     (X second)
-                          r_spec.js.mp4                                                             
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/record_error_spec.js.mp4            (X second)
 
 
   (Uploading Results)
 
-  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/videos/cypress/integration/record_error_spec.js.mp4
+  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/videos/record_error_spec.js.mp4
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
@@ -117,21 +116,20 @@ Because this error occurred during a \`before each\` hook we are skipping the re
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/record_fail_spec.js/record      (1280x720)
-     fails -- fails 1 -- before each hook (failed).png                                              
+  -  /XXX/XXX/XXX/cypress/screenshots/record_fail_spec.js/record fails -- fails 1 --      (1280x720)
+     before each hook (failed).png                                                                  
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/record_fail     (X second)
-                          _spec.js.mp4                                                              
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/record_fail_spec.js.mp4             (X second)
 
 
   (Uploading Results)
 
-  - Done Uploading (*/2) /foo/bar/.projects/e2e/cypress/screenshots/cypress/integration/record_fail_spec.js/record fails -- fails 1 -- before each hook (failed).png
-  - Done Uploading (*/2) /foo/bar/.projects/e2e/cypress/videos/cypress/integration/record_fail_spec.js.mp4
+  - Done Uploading (*/2) /foo/bar/.projects/e2e/cypress/screenshots/record_fail_spec.js/record fails -- fails 1 -- before each hook (failed).png
+  - Done Uploading (*/2) /foo/bar/.projects/e2e/cypress/videos/record_fail_spec.js.mp4
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
@@ -167,13 +165,12 @@ plugin stdout
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/record_pass_spec.js/yay it      (400x1022)
-     passes.png                                                                                     
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass_spec.js/yay it passes.png               (400x1022)
 
 
   (Uploading Results)
 
-  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/cypress/integration/record_pass_spec.js/yay it passes.png
+  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.js/yay it passes.png
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
@@ -219,21 +216,20 @@ We dynamically generated a new test to display this failure.
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/record_uncaught_spec.js/An      (1280x720)
-     uncaught error was detected outside of a test (failed).png                                     
+  -  /XXX/XXX/XXX/cypress/screenshots/record_uncaught_spec.js/An uncaught error was d     (1280x720)
+     etected outside of a test (failed).png                                                         
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/record_unca     (X second)
-                          ught_spec.js.mp4                                                          
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/record_uncaught_spec.js.mp4         (X second)
 
 
   (Uploading Results)
 
-  - Done Uploading (*/2) /foo/bar/.projects/e2e/cypress/screenshots/cypress/integration/record_uncaught_spec.js/An uncaught error was detected outside of a test (failed).png
-  - Done Uploading (*/2) /foo/bar/.projects/e2e/cypress/videos/cypress/integration/record_uncaught_spec.js.mp4
+  - Done Uploading (*/2) /foo/bar/.projects/e2e/cypress/screenshots/record_uncaught_spec.js/An uncaught error was detected outside of a test (failed).png
+  - Done Uploading (*/2) /foo/bar/.projects/e2e/cypress/videos/record_uncaught_spec.js.mp4
 
 ====================================================================================================
 
@@ -324,13 +320,12 @@ exports['e2e record api interaction errors update instance stdout warns but proc
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/record_pass_spec.js/yay it      (400x1022)
-     passes.png                                                                                     
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass_spec.js/yay it passes.png               (400x1022)
 
 
   (Uploading Results)
 
-  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/cypress/integration/record_pass_spec.js/yay it passes.png
+  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.js/yay it passes.png
 Warning: We encountered an error talking to our servers.
 
 This run will not be recorded.
@@ -446,13 +441,12 @@ exports['e2e record video recording does not upload when not enabled 1'] = `
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/record_pass_spec.js/yay it      (400x1022)
-     passes.png                                                                                     
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass_spec.js/yay it passes.png               (400x1022)
 
 
   (Uploading Results)
 
-  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/cypress/integration/record_pass_spec.js/yay it passes.png
+  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.js/yay it passes.png
 
 ====================================================================================================
 
@@ -522,21 +516,19 @@ exports['e2e record api interaction errors uploading assets warns but proceeds 1
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/record_pass_spec.js/yay it      (400x1022)
-     passes.png                                                                                     
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass_spec.js/yay it passes.png               (400x1022)
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/record_pass     (X second)
-                          _spec.js.mp4                                                              
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/record_pass_spec.js.mp4             (X second)
 
 
   (Uploading Results)
 
-  - Failed Uploading (*/2) /foo/bar/.projects/e2e/cypress/screenshots/cypress/integration/record_pass_spec.js/yay it passes.png
-  - Failed Uploading (*/2) /foo/bar/.projects/e2e/cypress/videos/cypress/integration/record_pass_spec.js.mp4
+  - Failed Uploading (*/2) /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.js/yay it passes.png
+  - Failed Uploading (*/2) /foo/bar/.projects/e2e/cypress/videos/record_pass_spec.js.mp4
 
 ====================================================================================================
 
@@ -562,7 +554,7 @@ Can't run because no spec files were found.
 
 We searched for any files matching this glob pattern:
 
-/foo/bar/.projects/e2e/cypress/integration/notfound/**
+cypress/integration/notfound/**
 
 Relative to the project root folder:
 
@@ -622,8 +614,7 @@ This error will not alter the exit code.
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/record_pass_spec.js/yay it      (400x1022)
-     passes.png                                                                                     
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass_spec.js/yay it passes.png               (400x1022)
 
 
 ====================================================================================================
@@ -690,13 +681,12 @@ exports['e2e record parallelization passes in parallel with group 1'] = `
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/record_pass_spec.js/yay it      (400x1022)
-     passes.png                                                                                     
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass_spec.js/yay it passes.png               (400x1022)
 
 
   (Uploading Results)
 
-  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/cypress/integration/record_pass_spec.js/yay it passes.png
+  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.js/yay it passes.png
 
 ====================================================================================================
 
@@ -787,13 +777,12 @@ Fix the error in your code and re-run your tests.
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/record_erro     (X second)
-                          r_spec.js.mp4                                                             
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/record_error_spec.js.mp4            (X second)
 
 
   (Uploading Results)
 
-  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/videos/cypress/integration/record_error_spec.js.mp4
+  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/videos/record_error_spec.js.mp4
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
@@ -836,21 +825,20 @@ Because this error occurred during a \`before each\` hook we are skipping the re
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/record_fail_spec.js/record      (1280x720)
-     fails -- fails 1 -- before each hook (failed).png                                              
+  -  /XXX/XXX/XXX/cypress/screenshots/record_fail_spec.js/record fails -- fails 1 --      (1280x720)
+     before each hook (failed).png                                                                  
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/record_fail     (X second)
-                          _spec.js.mp4                                                              
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/record_fail_spec.js.mp4             (X second)
 
 
   (Uploading Results)
 
-  - Done Uploading (*/2) /foo/bar/.projects/e2e/cypress/screenshots/cypress/integration/record_fail_spec.js/record fails -- fails 1 -- before each hook (failed).png
-  - Done Uploading (*/2) /foo/bar/.projects/e2e/cypress/videos/cypress/integration/record_fail_spec.js.mp4
+  - Done Uploading (*/2) /foo/bar/.projects/e2e/cypress/screenshots/record_fail_spec.js/record fails -- fails 1 -- before each hook (failed).png
+  - Done Uploading (*/2) /foo/bar/.projects/e2e/cypress/videos/record_fail_spec.js.mp4
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
@@ -896,21 +884,20 @@ We dynamically generated a new test to display this failure.
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/record_uncaught_spec.js/An      (1280x720)
-     uncaught error was detected outside of a test (failed).png                                     
+  -  /XXX/XXX/XXX/cypress/screenshots/record_uncaught_spec.js/An uncaught error was d     (1280x720)
+     etected outside of a test (failed).png                                                         
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/record_unca     (X second)
-                          ught_spec.js.mp4                                                          
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/record_uncaught_spec.js.mp4         (X second)
 
 
   (Uploading Results)
 
-  - Done Uploading (*/2) /foo/bar/.projects/e2e/cypress/screenshots/cypress/integration/record_uncaught_spec.js/An uncaught error was detected outside of a test (failed).png
-  - Done Uploading (*/2) /foo/bar/.projects/e2e/cypress/videos/cypress/integration/record_uncaught_spec.js.mp4
+  - Done Uploading (*/2) /foo/bar/.projects/e2e/cypress/screenshots/record_uncaught_spec.js/An uncaught error was detected outside of a test (failed).png
+  - Done Uploading (*/2) /foo/bar/.projects/e2e/cypress/videos/record_uncaught_spec.js.mp4
 
 ====================================================================================================
 
@@ -1060,8 +1047,7 @@ exports['e2e record api interaction errors update instance 500 does not proceed 
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/record_pass_spec.js/yay it      (400x1022)
-     passes.png                                                                                     
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass_spec.js/yay it passes.png               (400x1022)
 
 
   (Uploading Results)
@@ -1156,13 +1142,12 @@ StatusCodeError: 500 - "Internal Server Error"
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/record_pass_spec.js/yay it      (400x1022)
-     passes.png                                                                                     
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass_spec.js/yay it passes.png               (400x1022)
 
 
   (Uploading Results)
 
-  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/cypress/integration/record_pass_spec.js/yay it passes.png
+  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.js/yay it passes.png
 
 ====================================================================================================
 
@@ -1235,8 +1220,7 @@ This error will not alter the exit code.
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/record_pass_spec.js/yay it      (400x1022)
-     passes.png                                                                                     
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass_spec.js/yay it passes.png               (400x1022)
 
 
 ====================================================================================================
@@ -1360,13 +1344,12 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/record_pass_spec.js/yay it      (400x1022)
-     passes.png                                                                                     
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass_spec.js/yay it passes.png               (400x1022)
 
 
   (Uploading Results)
 
-  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/cypress/integration/record_pass_spec.js/yay it passes.png
+  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.js/yay it passes.png
 
 ====================================================================================================
 
@@ -1441,13 +1424,12 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/record_pass_spec.js/yay it      (400x1022)
-     passes.png                                                                                     
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass_spec.js/yay it passes.png               (400x1022)
 
 
   (Uploading Results)
 
-  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/cypress/integration/record_pass_spec.js/yay it passes.png
+  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.js/yay it passes.png
 
 ====================================================================================================
 
@@ -1526,13 +1508,12 @@ Details:
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/record_pass_spec.js/yay it      (400x1022)
-     passes.png                                                                                     
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass_spec.js/yay it passes.png               (400x1022)
 
 
   (Uploading Results)
 
-  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/cypress/integration/record_pass_spec.js/yay it passes.png
+  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.js/yay it passes.png
 
 ====================================================================================================
 
@@ -1863,13 +1844,12 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/record_pass_spec.js/yay it      (400x1022)
-     passes.png                                                                                     
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass_spec.js/yay it passes.png               (400x1022)
 
 
   (Uploading Results)
 
-  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/cypress/integration/record_pass_spec.js/yay it passes.png
+  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.js/yay it passes.png
 
 ====================================================================================================
 
@@ -1946,13 +1926,12 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/record_pass_spec.js/yay it      (400x1022)
-     passes.png                                                                                     
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass_spec.js/yay it passes.png               (400x1022)
 
 
   (Uploading Results)
 
-  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/cypress/integration/record_pass_spec.js/yay it passes.png
+  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.js/yay it passes.png
 
 ====================================================================================================
 
@@ -2027,13 +2006,12 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/record_pass_spec.js/yay it      (400x1022)
-     passes.png                                                                                     
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass_spec.js/yay it passes.png               (400x1022)
 
 
   (Uploading Results)
 
-  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/cypress/integration/record_pass_spec.js/yay it passes.png
+  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.js/yay it passes.png
 
 ====================================================================================================
 
@@ -2108,13 +2086,12 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/record_pass_spec.js/yay it      (400x1022)
-     passes.png                                                                                     
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass_spec.js/yay it passes.png               (400x1022)
 
 
   (Uploading Results)
 
-  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/cypress/integration/record_pass_spec.js/yay it passes.png
+  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.js/yay it passes.png
 
 ====================================================================================================
 
@@ -2189,13 +2166,12 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/record_pass_spec.js/yay it      (400x1022)
-     passes.png                                                                                     
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass_spec.js/yay it passes.png               (400x1022)
 
 
   (Uploading Results)
 
-  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/cypress/integration/record_pass_spec.js/yay it passes.png
+  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.js/yay it passes.png
 
 ====================================================================================================
 
@@ -2396,8 +2372,7 @@ exports['e2e record api interaction errors postInstanceResults errors and exits 
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/record_pass_spec.js/yay it      (400x1022)
-     passes.png                                                                                     
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass_spec.js/yay it passes.png               (400x1022)
 
 
   (Uploading Results)

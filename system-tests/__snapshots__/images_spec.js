@@ -43,8 +43,7 @@ exports['e2e images / passes'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/images_spec     (X second)
-                          .js.mp4                                                                   
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/images_spec.js.mp4                  (X second)
 
 
 ====================================================================================================

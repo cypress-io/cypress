@@ -55,8 +55,7 @@ exports['e2e requests / passes'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/request_spe     (X second)
-                          c.js.mp4                                                                  
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/request_spec.js.mp4                 (X second)
 
 
 ====================================================================================================
@@ -154,16 +153,15 @@ https://on.cypress.io/request
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/request_http_network_error_     (1280x720)
-     failing_spec.js/when network connection cannot be established -- fails (failed).               
-     png                                                                                            
+  -  /XXX/XXX/XXX/cypress/screenshots/request_http_network_error_failing_spec.js/when     (1280x720)
+      network connection cannot be established -- fails (failed).png                                
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/request_htt     (X second)
-                          p_network_error_failing_spec.js.mp4                                       
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/request_http_network_error_fail     (X second)
+                          ing_spec.js.mp4                                                           
 
 
 ====================================================================================================
@@ -274,15 +272,15 @@ https://on.cypress.io/request
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/request_status_code_failing     (1280x720)
-     _spec.js/when status code isnt 2xx or 3xx -- fails (failed).png                                
+  -  /XXX/XXX/XXX/cypress/screenshots/request_status_code_failing_spec.js/when status     (1280x720)
+      code isnt 2xx or 3xx -- fails (failed).png                                                    
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/request_sta     (X second)
-                          tus_code_failing_spec.js.mp4                                              
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/request_status_code_failing_spe     (X second)
+                          c.js.mp4                                                                  
 
 
 ====================================================================================================
@@ -401,15 +399,15 @@ https://on.cypress.io/request
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/request_long_http_props_fai     (1280x720)
-     ling_spec.js/when status code isnt 2xx or 3xx -- fails (failed).png                            
+  -  /XXX/XXX/XXX/cypress/screenshots/request_long_http_props_failing_spec.js/when st     (1280x720)
+     atus code isnt 2xx or 3xx -- fails (failed).png                                                
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/request_lon     (X second)
-                          g_http_props_failing_spec.js.mp4                                          
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/request_long_http_props_failing     (X second)
+                          _spec.js.mp4                                                              
 
 
 ====================================================================================================

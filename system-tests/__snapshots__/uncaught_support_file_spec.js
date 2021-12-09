@@ -8,7 +8,6 @@ exports['e2e uncaught support file errors failing 1'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (spec.js)                                                                  │
-  │ Searched:   cypress/integration/**/*                                                           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -54,14 +53,14 @@ We dynamically generated a new test to display this failure.
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/spec.js/An uncaught error w          (YxX)
-     as detected outside of a test (failed).png                                                     
+  -  /XXX/XXX/XXX/cypress/screenshots/spec.js/An uncaught error was detected outside           (YxX)
+     of a test (failed).png                                                                         
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/spec.js.mp4     (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/spec.js.mp4                         (X second)
 
 
 ====================================================================================================

@@ -40,8 +40,7 @@ exports['e2e issue 2891 passes 1'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/default_lay     (X second)
-                          out_spec.js.mp4                                                           
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/default_layout_spec.js.mp4          (X second)
 
 
 ====================================================================================================

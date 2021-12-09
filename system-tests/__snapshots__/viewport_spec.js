@@ -44,8 +44,7 @@ exports['e2e viewport / passes'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/viewport_sp     (X second)
-                          ec.js.mp4                                                                 
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/viewport_spec.js.mp4                (X second)
 
 
 ====================================================================================================

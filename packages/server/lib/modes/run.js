@@ -1280,7 +1280,6 @@ module.exports = {
   },
 
   screenshotMetadata (data, resp) {
-    console.log(data)
     return {
       screenshotId: random.id(),
       name: data.name || null,
@@ -1557,10 +1556,6 @@ module.exports = {
         // but be defensive about it
         const userBrowsers = _.get(config, 'resolved.browsers.value', browsers)
 
-        // all these operations are independent and should be run in parallel to
-        // speed the initial booting time
-        const specType = options.testingType === 'component' ? 'component' : 'integration'
-
         let specPattern = specPatternFromCli || config[options.testingType].specPattern
 
         specPattern = relativeSpecPattern(projectRoot, specPattern)
@@ -1575,7 +1570,6 @@ module.exports = {
             errors.throw('NO_SPECS_FOUND', projectRoot, specPattern)
           }
 
-          // only want these properties
           const specs = project.ctx.currentProject.specs
 
           if (browser.unsupportedVersion && browser.warning) {

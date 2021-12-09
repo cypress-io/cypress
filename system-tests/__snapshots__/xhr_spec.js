@@ -51,8 +51,7 @@ exports['e2e xhr / passes in global mode'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/xhr_spec.js     (X second)
-                          .mp4                                                                      
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/xhr_spec.js.mp4                     (X second)
 
 
 ====================================================================================================
@@ -122,8 +121,7 @@ exports['e2e xhr / passes through CLI'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/xhr_spec.js     (X second)
-                          .mp4                                                                      
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/xhr_spec.js.mp4                     (X second)
 
 
 ====================================================================================================

@@ -51,17 +51,16 @@ exports['e2e promises / failing1'] = `
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/promises_spec.js/catches re     (1280x720)
-     gular promise errors (failed).png                                                              
-  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/promises_spec.js/catches pr     (1280x720)
-     omise errors and calls done with err even when async (failed).png                              
+  -  /XXX/XXX/XXX/cypress/screenshots/promises_spec.js/catches regular promise errors     (1280x720)
+      (failed).png                                                                                  
+  -  /XXX/XXX/XXX/cypress/screenshots/promises_spec.js/catches promise errors and cal     (1280x720)
+     ls done with err even when async (failed).png                                                  
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/promises_sp     (X second)
-                          ec.js.mp4                                                                 
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/promises_spec.js.mp4                (X second)
 
 
 ====================================================================================================

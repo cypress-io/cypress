@@ -48,8 +48,7 @@ exports['e2e config provides various environment details 1'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/config_pass     (X second)
-                          ing_spec.js.mp4                                                           
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/config_passing_spec.js.mp4          (X second)
 
 
 ====================================================================================================
@@ -76,7 +75,6 @@ exports['e2e config applies defaultCommandTimeout globally 1'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (dom_times_out_spec.js)                                                    │
-  │ Searched:   cypress/integration/**/*                                                           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -117,15 +115,14 @@ exports['e2e config applies defaultCommandTimeout globally 1'] = `
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/dom_times_out_spec.js/short     (1280x720)
-      defaultCommandTimeout -- times out looking for a missing element (failed).png                 
+  -  /XXX/XXX/XXX/cypress/screenshots/dom_times_out_spec.js/short defaultCommandTimeo     (1280x720)
+     ut -- times out looking for a missing element (failed).png                                     
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/dom_times_o     (X second)
-                          ut_spec.js.mp4                                                            
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/dom_times_out_spec.js.mp4           (X second)
 
 
 ====================================================================================================

@@ -51,16 +51,15 @@ Because this error occurred during a \`before each\` hook we are skipping the re
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/issue_1669_spec.js/issue-16     (1280x720)
-     69 undefined err.stack in beforeEach hook -- cy.setCookie should fail with corre               
-     ct error -- before each hook (failed).png                                                      
+  -  /XXX/XXX/XXX/cypress/screenshots/issue_1669_spec.js/issue-1669 undefined err.sta     (1280x720)
+     ck in beforeEach hook -- cy.setCookie should fail with correct error -- before e               
+     ach hook (failed).png                                                                          
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/issue_1669_     (X second)
-                          spec.js.mp4                                                               
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/issue_1669_spec.js.mp4              (X second)
 
 
 ====================================================================================================

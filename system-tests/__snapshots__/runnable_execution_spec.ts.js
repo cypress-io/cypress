@@ -100,8 +100,8 @@ Because this error occurred during a \`before each\` hook we are skipping the re
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/beforehook-     (X second)
-                          and-test-navigation.js.mp4                                                
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/beforehook-and-test-navigation.     (X second)
+                          js.mp4                                                                    
 
 
 ====================================================================================================
@@ -172,8 +172,7 @@ exports['e2e runnable execution / runnables run correct number of times with nav
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/runnable-ru     (X second)
-                          n-count.spec.js.mp4                                                       
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/runnable-run-count.spec.js.mp4      (X second)
 
 
 ====================================================================================================
@@ -245,8 +244,8 @@ exports['e2e runnable execution / runs correctly after top navigation with alrea
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/cypress/integration/runnables_already_run_suite     (1280x720)
-     .js/Top level describe -- suite 2 -- should fail (failed).png                                  
+  -  /XXX/XXX/XXX/cypress/screenshots/runnables_already_run_suite.js/Top level descri     (1280x720)
+     be -- suite 2 -- should fail (failed).png                                                      
 
 
 ====================================================================================================

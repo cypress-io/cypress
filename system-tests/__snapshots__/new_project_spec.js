@@ -8,7 +8,6 @@ exports['e2e new project passes 1'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (app_spec.js)                                                              │
-  │ Searched:   cypress/integration/**/*                                                           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -40,8 +39,7 @@ exports['e2e new project passes 1'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cypress/integration/app_spec.js     (X second)
-                          .mp4                                                                      
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/app_spec.js.mp4                     (X second)
 
 
 ====================================================================================================
