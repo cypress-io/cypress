@@ -11,8 +11,8 @@ import type { DataContext } from '..'
 type SpecWithRelativeRoot = FoundSpec & { relativeToCommonRoot: string }
 
 function directoryWithinProject (projectRoot: string, globOrPath: string) {
-  if (globOrPath.includes('*')) {
-    const globPrefixDirectory = globOrPath.split('*')[0] ?? ''
+  if (globOrPath.includes('**')) {
+    const globPrefixDirectory = globOrPath.split('**')[0] ?? ''
 
     return path.join(projectRoot, globPrefixDirectory)
   }
@@ -28,7 +28,7 @@ export function longestCommonPrefix (projectRoot: string, absolutes: string[]) {
     }
 
     return longest
-  }, projectRoot)
+  }, absolutes[0] || projectRoot)
 
   for (let str of absolutes) {
     while (str.slice(0, prefix.length) !== prefix) {
@@ -100,7 +100,7 @@ export class ProjectDataSource {
 
     debug('found specs %o', specAbsolutePaths)
 
-    let prefix = ''
+    let prefix = projectRoot
 
     if (typeof specPattern === 'string' || Array.isArray(specPattern) && specPattern.length === 1) {
       prefix = directoryWithinProject(projectRoot, typeof specPattern === 'string' ? specPattern : specPattern[0]!)
