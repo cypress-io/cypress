@@ -3,7 +3,7 @@ module.exports = {
   'fixturesFolder': false,
   'viewportWidth': 500,
   'viewportHeight': 500,
-  'ignoreTestFiles': [
+  'ignoreSpecPattern': [
     '**/__snapshots__/*',
     '**/__image_snapshots__/*',
   ],

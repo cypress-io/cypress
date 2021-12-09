@@ -20,7 +20,7 @@ describe('lib/open_project', () => {
     this.config = {
       integrationFolder: '/user/foo/cypress/integration',
       testFiles: '**/*.*',
-      ignoreTestFiles: '**/*.nope',
+      ignoreSpecPattern: '**/*.nope',
       projectRoot: '/project/root',
     }
 

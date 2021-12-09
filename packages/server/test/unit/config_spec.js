@@ -382,27 +382,27 @@ describe('lib/config', () => {
         })
       })
 
-      context('ignoreTestFiles', () => {
+      context('ignoreSpecPattern', () => {
         it('passes if a string', function () {
-          this.setup({ ignoreTestFiles: '*.jsx' })
+          this.setup({ ignoreSpecPattern: '*.jsx' })
 
           return this.expectValidationPasses()
         })
 
         it('passes if an array of strings', function () {
-          this.setup({ ignoreTestFiles: ['*.jsx'] })
+          this.setup({ ignoreSpecPattern: ['*.jsx'] })
 
           return this.expectValidationPasses()
         })
 
         it('fails if not a string or array', function () {
-          this.setup({ ignoreTestFiles: 5 })
+          this.setup({ ignoreSpecPattern: 5 })
 
           return this.expectValidationFails('be a string or an array of strings')
         })
 
         it('fails if not an array of strings', function () {
-          this.setup({ ignoreTestFiles: [5] })
+          this.setup({ ignoreSpecPattern: [5] })
           this.expectValidationFails('be a string or an array of strings')
 
           return this.expectValidationFails('the value was: `[5]`')
@@ -1424,7 +1424,7 @@ describe('lib/config', () => {
             fileServerFolder: { value: '', from: 'default' },
             fixturesFolder: { value: 'cypress/fixtures', from: 'default' },
             hosts: { value: null, from: 'default' },
-            ignoreTestFiles: { value: '*.hot-update.js', from: 'default' },
+            ignoreSpecPattern: { value: '*.hot-update.js', from: 'default' },
             includeShadowDom: { value: false, from: 'default' },
             modifyObstructiveCode: { value: true, from: 'default' },
             numTestsKeptInMemory: { value: 50, from: 'default' },
@@ -1531,7 +1531,7 @@ describe('lib/config', () => {
             fileServerFolder: { value: '', from: 'default' },
             fixturesFolder: { value: 'cypress/fixtures', from: 'default' },
             hosts: { value: null, from: 'default' },
-            ignoreTestFiles: { value: '*.hot-update.js', from: 'default' },
+            ignoreSpecPattern: { value: '*.hot-update.js', from: 'default' },
             includeShadowDom: { value: false, from: 'default' },
             modifyObstructiveCode: { value: true, from: 'default' },
             numTestsKeptInMemory: { value: 50, from: 'default' },

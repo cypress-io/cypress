@@ -6,7 +6,7 @@ module.exports = {
   env: {
     reactDevtools: true,
   },
-  ignoreTestFiles: [
+  ignoreSpecPattern: [
     '**/__snapshots__/*',
     '**/__image_snapshots__/*',
   ],

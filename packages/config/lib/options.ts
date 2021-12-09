@@ -153,7 +153,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     validation: validate.isStringOrFalse,
     isFolder: true,
   }, {
-    name: 'ignoreTestFiles',
+    name: 'ignoreSpecPattern',
     defaultValue: '*.hot-update.js',
     validation: validate.isStringOrArrayOfStrings,
   }, {
