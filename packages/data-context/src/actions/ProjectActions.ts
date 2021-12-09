@@ -77,7 +77,7 @@ export class ProjectActions {
     await this.clearActiveProject()
 
     // Set initial properties, so we can set the config object on the active project
-    await this.setCurrentProjectProperties({
+    this.setCurrentProjectProperties({
       projectRoot,
       title,
       ctPluginsInitialized: false,

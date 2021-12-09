@@ -45,8 +45,8 @@ const isResponseHtml = function (contentType, responseBuffer) {
 export class ServerE2E extends ServerBase<SocketE2E> {
   private _urlResolver: Bluebird<Record<string, any>> | null
 
-  constructor (ctx: DataContext = getCtx()) {
-    super(ctx)
+  constructor (ctx: DataContext) {
+    super(ctx ?? getCtx())
 
     this._urlResolver = null
   }
