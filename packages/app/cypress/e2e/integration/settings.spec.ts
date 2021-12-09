@@ -14,30 +14,24 @@ describe('Settings', { viewportWidth: 1000 }, () => {
     cy.findByText('Project Settings').should('be.visible')
   })
 
-  describe('project settings', () => {
-    it('expands and collapses project settings', () => {
-      cy.visitApp('#settings')
-      cy.findByText('Project Settings').click()
+  it('expands and collapses project settings', () => {
+    cy.visitApp('#settings')
+    cy.findByText('Project Settings').click()
 
-      cy.get('[data-cy="settings-config"]')
-      .scrollIntoView()
-      .should('be.visible')
-      .contains('animationDistanceThreshold')
+    cy.get('[data-cy="settings-config"]')
+    .scrollIntoView()
+    .should('be.visible')
+    .contains('animationDistanceThreshold')
 
-      cy.findByText('Project Settings').click()
-      cy.findByText('animationDistanceThreshold').should('not.exist')
-    })
+    cy.get('[data-cy="settings-projectId"]')
+    .findByText('abc123')
+    .should('be.visible')
 
-    it('show the projectId', () => {
-      cy.visitApp('#settings')
-      cy.findByText('Project Settings').click()
+    cy.findByText('Resolved Configuration')
+    .should('be.visible')
 
-      cy.get('[data-cy="settings-projectId"]')
-      .findByText('abc123')
-      .should('be.visible')
-
-      cy.findByText('Copy').should('exist')
-    })
+    cy.findByText('Project Settings').click()
+    cy.findByText('animationDistanceThreshold').should('not.exist')
   })
 
   it('expands and collapses device settings', () => {
