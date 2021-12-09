@@ -5,8 +5,7 @@ import errors from '../errors'
 import { fs } from '../util/fs'
 import Debug from 'debug'
 import type { SettingsOptions } from '@packages/types'
-import type { DataContext } from '@packages/data-context'
-import { makeLegacyDataContext } from '../makeDataContext'
+import { getCtx } from '@packages/data-context'
 
 const debug = Debug('cypress:server:settings')
 
@@ -140,14 +139,14 @@ export function id (projectRoot, options = {}) {
   })
 }
 
-export function read (projectRoot, options: SettingsOptions = {}, ctx: DataContext = makeLegacyDataContext()) {
+export function read (projectRoot, options: SettingsOptions = {}) {
   if (options.configFile === false) {
     return Promise.resolve({})
   }
 
   const file = pathToConfigFile(projectRoot, options)
 
-  return ctx.config.getOrCreateBaseConfig(file)
+  return getCtx().config.getOrCreateBaseConfig(file)
   .catch((err) => {
     if (err.type === 'MODULE_NOT_FOUND' || err.code === 'ENOENT') {
       return Promise.reject(errors.get('CONFIG_FILE_NOT_FOUND', options.configFile, projectRoot))

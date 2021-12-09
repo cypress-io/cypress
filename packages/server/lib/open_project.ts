@@ -13,7 +13,7 @@ import { getSpecUrl } from './project_utils'
 import errors from './errors'
 import type { LaunchOpts, LaunchArgs, OpenProjectLaunchOptions, FoundBrowser } from '@packages/types'
 import type { DataContext } from '@packages/data-context'
-import { makeLegacyDataContext } from './makeDataContext'
+import { getCtx } from './makeDataContext'
 
 const debug = Debug('cypress:server:open_project')
 
@@ -268,7 +268,7 @@ export class OpenProject {
   _ctx?: DataContext
 
   async create (path: string, args: LaunchArgs, options: OpenProjectLaunchOptions, browsers: FoundBrowser[] = []) {
-    this._ctx = options.ctx ?? makeLegacyDataContext()
+    this._ctx = getCtx()
     debug('open_project create %s', path)
 
     _.defaults(options, {

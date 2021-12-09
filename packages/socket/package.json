@@ -16,6 +16,8 @@
   },
   "dependencies": {
     "circular-json": "0.5.9",
+    "engine.io": "5.0.0",
+    "engine.io-parser": "4.0.2",
     "socket.io": "4.0.1",
     "socket.io-client": "4.0.1"
   },
@@ -34,6 +36,8 @@
   "types": "lib/socket.ts",
   "workspaces": {
     "nohoist": [
+      "engine.io",
+      "engine.io-parser",
       "socket.io",
       "socket.io/socket.io-parser",
       "socket.io-client",

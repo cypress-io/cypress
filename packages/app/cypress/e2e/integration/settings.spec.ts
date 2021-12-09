@@ -90,7 +90,7 @@ describe('Settings', { viewportWidth: 1000 }, () => {
 
       // navigate away and come back
       // preferred editor selected from dropdown should have been persisted
-      cy.get('[href="#/"]').click()
+      cy.visitApp()
       cy.get('[href="#/settings"]').click()
       cy.wait(100)
       cy.get('[data-cy="Device Settings"]').click()
