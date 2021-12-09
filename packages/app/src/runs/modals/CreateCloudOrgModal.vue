@@ -60,7 +60,7 @@ const emit = defineEmits<{
 gql`
 fragment CreateCloudOrgModal on CloudUser {
   id
-  newOrganizationsUrl
+  createCloudOrganizationUrl
 }
 `
 
@@ -70,5 +70,5 @@ const props = defineProps({
   gql: CreateCloudOrgModalFragment,
 })
 
-const createOrgUrl = computed(() => props.gql.newOrganizationsUrl)
+const createOrgUrl = computed(() => props.gql.createCloudOrganizationUrl)
 </script>

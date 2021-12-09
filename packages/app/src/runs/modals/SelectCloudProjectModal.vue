@@ -1,6 +1,6 @@
 <template>
   <StandardModal
-    v-if="organizations.length > 0"
+    v-if="organizations.length > 0 && organizationUrl"
     :model-value="show"
     :title="newProject
       ? t('runs.connect.modal.selectProject.createProject')
@@ -15,7 +15,6 @@
         item-key="id"
         :placeholder="orgPlaceholder"
         data-cy="selectOrganization"
-        :error="noPickedOrganizationError"
       >
         <template #label>
           <span class="flex font-normal my-8px text-16px leading-24px items-end">
@@ -171,7 +170,7 @@ gql`
 fragment SelectCloudProjectModal on Query {
   cloudViewer {
     id
-    organizationsUrl
+    cloudOrganizationsUrl
     organizations(first: 10) {
       nodes {
         id
@@ -224,7 +223,7 @@ const projectPlaceholder = computed(() => {
     : t('runs.connect.modal.selectProject.placeholderProjectsPending')
 })
 
-const organizationUrl = computed(() => props.gql.cloudViewer?.organizationsUrl)
+const organizationUrl = computed(() => props.gql.cloudViewer?.cloudOrganizationsUrl)
 
 function createOrConnectProject () {
   if (newProject.value) {
