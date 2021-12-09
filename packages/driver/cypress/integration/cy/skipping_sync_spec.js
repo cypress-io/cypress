@@ -37,33 +37,33 @@ describe('generally skipped test', () => {
     this.skip()
   })
 
-  it('should not fail', function () {
+  it('does not fail', function () {
     expect(true).to.be.false
   })
 })
 
 describe('individually skipped tests', () => {
-  it('should not fail when using this.skip', function () {
+  it('does not fail when using this.skip', function () {
     this.skip()
     expect(true).to.be.false
   })
 
   // NOTE: We are skipping this test in order to test skip functionality
-  it.skip('should not fail when using it.skip', () => {
+  it.skip('does not fail when using it.skip', () => {
     expect(true).to.be.false
   })
 })
 
 describe('skipped test side effects', () => {
-  it('should not have a screenshot taken', () => {
+  it('does not have a screenshot taken', () => {
     expect(screenshotTaken).to.be.false
   })
 
-  it('should not fire failed event', () => {
+  it('does not fire failed event', () => {
     expect(failedEventFired).to.be.false
   })
 
-  it('should still mark all tests with the correct state', () => {
+  it('does still mark all tests with the correct state', () => {
     expect(pendingTests).to.have.length(3)
     expect(passedTests).to.have.length(2)
   })

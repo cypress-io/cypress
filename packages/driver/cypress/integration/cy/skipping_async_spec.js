@@ -33,7 +33,7 @@ beforeEach(() => {
 })
 
 describe('skipped test', () => {
-  it('should not fail', function () {
+  it('does not fail', function () {
     cy.then(() => {
       this.skip()
     }).then(() => {
@@ -41,21 +41,21 @@ describe('skipped test', () => {
     })
   })
 
-  it('should not prevent subsequent tests from running', () => {
+  it('does not prevent subsequent tests from running', () => {
     expect(true).to.be.true
   })
 })
 
 describe('skipped test side effects', () => {
-  it('should not have a screenshot taken', () => {
+  it('does not have a screenshot taken', () => {
     expect(screenshotTaken).to.be.false
   })
 
-  it('should not fire failed event', () => {
+  it('does not fire failed event', () => {
     expect(failedEventFired).to.be.false
   })
 
-  it('should still mark all tests with the correct state', () => {
+  it('does still mark all tests with the correct state', () => {
     expect(pendingTests).to.have.length(1)
     expect(passedTests).to.have.length(3)
   })
