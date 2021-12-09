@@ -104,16 +104,6 @@ describe('src/cy/commands/actions/attachFile', () => {
       })
     })
 
-    it('attaches files to an input when dragged to it', () => {
-      cy.get('#basic').attachFile({ contents: '@foo' }, { action: 'drag-n-drop' })
-
-      cy.get('#basic')
-      .then(getFileContents)
-      .then((contents) => {
-        expect(contents[0]).to.eql('foo')
-      })
-    })
-
     it('invokes change and input events on the input', (done) => {
       const $input = cy.$$('#basic')
 
