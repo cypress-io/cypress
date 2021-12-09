@@ -33,7 +33,7 @@ const eventHasReturnValue = (e) => {
   const val = e.returnValue
 
   // return false if val is an empty string
-  // of if its undinefed
+  // of if its undefined
   if (val === '' || _.isUndefined(val)) {
     return false
   }

@@ -15,13 +15,13 @@ exports['packages can copy files from package.json 1'] = {
   "tmp": {
     "packages": {
       "coffee": {
-        "package.json": "{\"main\":\"src/main.js\", \"name\": \"foo\", \"files\": [\"lib\"]}",
+        "lib": {
+          "foo.js": "{}"
+        },
         "src": {
           "main.js": "console.log()"
         },
-        "lib": {
-          "foo.js": "{}"
-        }
+        "package.json": "{\n  \"main\": \"src/main.js\",\n  \"name\": \"foo\",\n  \"files\": [\n    \"lib\"\n  ]\n}\n"
       }
     }
   }

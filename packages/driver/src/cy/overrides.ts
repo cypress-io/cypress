@@ -1,5 +1,6 @@
 import _ from 'lodash'
-import registerFetch from 'unfetch'
+// @ts-ignore
+import { registerFetch } from 'unfetch'
 import $selection from '../dom/selection'
 
 export const create = (state, config, focused, snapshots) => {
@@ -65,3 +66,5 @@ export const create = (state, config, focused, snapshots) => {
     wrapNativeMethods,
   }
 }
+
+export interface IOverrides extends ReturnType<typeof create> {}

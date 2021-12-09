@@ -1,3 +1,5 @@
+const { assertLogLength } = require('../../support/utils')
+
 describe('src/cy/commands/popups', () => {
   context('alert', () => {
     beforeEach(function () {
@@ -19,7 +21,7 @@ describe('src/cy/commands/popups', () => {
         win.alert('fooooo')
       })
       .then(function () {
-        expect(this.logs.length).to.eq(1)
+        assertLogLength(this.logs, 1)
         expect(this.logs[0].get('name')).to.eq('alert')
         expect(this.logs[0].get('message')).to.eq('fooooo')
 
@@ -52,7 +54,7 @@ describe('src/cy/commands/popups', () => {
       cy.window().then((win) => {
         win.confirm('Delete hard drive?')
       }).then(function () {
-        expect(this.logs.length).to.eq(1)
+        assertLogLength(this.logs, 1)
         expect(this.logs[0].get('name')).to.eq('confirm')
         expect(this.logs[0].get('message')).to.eq('Delete hard drive?')
 

@@ -17,6 +17,7 @@ const Bluebird = require('bluebird')
 const debug = require('debug')('cypress:system-tests')
 const httpsProxy = require('@packages/https-proxy')
 const Fixtures = require('./fixtures')
+
 const { allowDestroy } = require(`@packages/server/lib/util/server_destroy`)
 const cypress = require(`@packages/server/lib/cypress`)
 const screenshots = require(`@packages/server/lib/screenshots`)
@@ -199,9 +200,17 @@ type ExecOptions = {
    */
   noTypeScript?: boolean
   /**
-   * If set, a dummy `node_modules` project with this name will be set up.
+   * Skip scaffolding the project and node_modules.
    */
-  stubPackage?: string
+  skipScaffold?: boolean
+  /**
+   * Run Cypress with a custom user node path.
+   */
+  userNodePath?: string
+  /**
+   * Run Cypress with a custom user node version.
+   */
+  userNodeVersion?: string
 }
 
 type Server = {
@@ -250,7 +259,7 @@ const pathUpToProjectName = Fixtures.projectPath('')
 
 const DEFAULT_BROWSERS = ['electron', 'chrome', 'firefox']
 
-const stackTraceLinesRe = /(\n?[^\S\n\r]*).*?(@|\bat\b).*\.(js|coffee|ts|html|jsx|tsx)(-\d+)?:\d+:\d+[\n\S\s]*?(\n\s*?\n|$)/g
+const stackTraceLinesRe = /(\n?[^\S\n\r]*).*?(@|\bat\b)(?:.*node:.*|.*\.(js|coffee|ts|html|jsx|tsx))(-\d+)?:\d+:\d+[\n\S\s]*?(\n\s*?\n|$)/g
 const browserNameVersionRe = /(Browser\:\s+)(Custom |)(Electron|Chrome|Canary|Chromium|Firefox)(\s\d+)(\s\(\w+\))?(\s+)/
 const availableBrowsersRe = /(Available browsers found on your system are:)([\s\S]+)/g
 const crossOriginErrorRe = /(Blocked a frame .* from accessing a cross-origin frame.*|Permission denied.*cross-origin object.*)/gm
@@ -264,14 +273,15 @@ export const STDOUT_DURATION_IN_TABLES_RE = /(\s+?)(\d+ms|\d+:\d+:?\d+)/g
 const diffRe = /Difference\n-{10}\n([\s\S]*)\n-{19}\nSaved snapshot text/m
 const expectedAddedVideoSnapshotLines = [
   'Warning: We failed processing this video.',
-  'This error will not alter the exit code.', '',
+  'This error will not alter the exit code.',
   'TimeoutError: operation timed out',
-  '[stack trace lines]', '', '',
+  '[stack trace lines]',
 ]
 const expectedDeletedVideoSnapshotLines = [
-  '(Video)', '',
+  '(Video)',
   '-  Started processing:  Compressing to 32 CRF',
 ]
+const sometimesAddedSpacingLine = ''
 const sometimesAddedVideoSnapshotLine = '│ Video:        false                                                                            │'
 const sometimesDeletedVideoSnapshotLine = '│ Video:        true                                                                             │'
 
@@ -294,8 +304,8 @@ const isVideoSnapshotError = (err: Error) => {
     if (line.charAt(0) === '-') deleted.push(line.slice(1).trim())
   }
 
-  _.pull(added, sometimesAddedVideoSnapshotLine)
-  _.pull(deleted, sometimesDeletedVideoSnapshotLine)
+  _.pull(added, sometimesAddedVideoSnapshotLine, sometimesAddedSpacingLine)
+  _.pull(deleted, sometimesDeletedVideoSnapshotLine, sometimesAddedSpacingLine)
 
   return _.isEqual(added, expectedAddedVideoSnapshotLines) && _.isEqual(deleted, expectedDeletedVideoSnapshotLines)
 }
@@ -432,6 +442,8 @@ const normalizeStdout = function (str, options: any = {}) {
   .replace(/^(\- )(\/.*\/packages\/server\/)(.*)$/gm, '$1$3')
   // Different browsers have different cross-origin error messages
   .replace(crossOriginErrorRe, '[Cross origin error message]')
+  // Replaces connection warning since Firefox sometimes takes longer to connect
+  .replace(/Still waiting to connect to Firefox, retrying in 1 second \(attempt .+\/.+\)/g, '')
 
   if (options.sanitizeScreenshotDimensions) {
     // screenshot dimensions
@@ -464,12 +476,8 @@ const startServer = function (obj) {
     app.use(require('cors')())
   }
 
-  const s = obj.static
-
-  if (s) {
-    const opts = _.isObject(s) ? s : {}
-
-    app.use(express.static(e2ePath, opts))
+  if (obj.static) {
+    app.use(express.static(path.join(__dirname, '../projects/e2e'), {}))
   }
 
   return new Bluebird((resolve) => {
@@ -580,7 +588,7 @@ const localItFn = function (title: string, opts: ItOptions) {
     throw new Error('systemTests.it(...) must be passed a title as the first argument')
   }
 
-  // LOGIC FOR AUTOGENERATING DYNAMIC TESTS
+  // LOGIC FOR AUTO-GENERATING DYNAMIC TESTS
   // - create multiple tests for each default browser
   // - if browser is specified in options:
   //   ...skip the tests for each default browser if that browser
@@ -659,16 +667,15 @@ const systemTests = {
 
   setup (options: SetupOptions = {}) {
     beforeEach(async function () {
-      // after installing node modules copying all of the fixtures
-      // can take a long time (5-15 secs)
-      this.timeout(human('2 minutes'))
-      Fixtures.scaffold()
+      // // after installing node modules copying all of the fixtures
+      // // can take a long time (5-15 secs)
+      // this.timeout(human('2 minutes'))
 
-      if (process.env.NO_EXIT) {
-        Fixtures.scaffoldWatch()
-      }
+      Fixtures.remove()
 
       sinon.stub(process, 'exit')
+
+      this.settings = options.settings
 
       if (options.servers) {
         const optsServers = [].concat(options.servers)
@@ -679,20 +686,12 @@ const systemTests = {
       } else {
         this.servers = null
       }
-
-      const s = options.settings
-
-      if (s) {
-        await settings.write(e2ePath, s)
-      }
     })
 
     afterEach(async function () {
       process.env = _.clone(env)
 
       this.timeout(human('2 minutes'))
-
-      Fixtures.remove()
 
       const s = this.servers
 
@@ -714,7 +713,7 @@ const systemTests = {
     _.defaults(options, {
       browser: 'electron',
       headed: process.env.HEADED || false,
-      project: e2ePath,
+      project: 'e2e',
       timeout: 120000,
       originalTitle: null,
       expectedExitCode: 0,
@@ -723,6 +722,8 @@ const systemTests = {
       noExit: process.env.NO_EXIT,
       inspectBrk: process.env.CYPRESS_INSPECT_BRK,
     })
+
+    const projectPath = Fixtures.projectPath(options.project)
 
     if (options.exit != null) {
       throw new Error(`
@@ -749,7 +750,7 @@ const systemTests = {
 
         const specDir = options.testingType === 'component' ? 'component' : 'integration'
 
-        return path.join(options.project, 'cypress', specDir, spec)
+        return path.join(projectPath, 'cypress', specDir, spec)
       })
 
       // normalize the path to the spec
@@ -765,7 +766,7 @@ const systemTests = {
     const args = [
       // hides a user warning to go through NPM module
       `--cwd=${serverPath}`,
-      `--run-project=${options.project}`,
+      `--run-project=${Fixtures.projectPath(options.project)}`,
       `--testingType=${options.testingType || 'e2e'}`,
     ]
 
@@ -850,6 +851,14 @@ const systemTests = {
       args.push(`--config-file=${options.configFile}`)
     }
 
+    if (options.userNodePath) {
+      args.push(`--userNodePath=${options.userNodePath}`)
+    }
+
+    if (options.userNodeVersion) {
+      args.push(`--userNodeVersion=${options.userNodeVersion}`)
+    }
+
     return args
   },
 
@@ -883,7 +892,7 @@ const systemTests = {
         console.log(systemTests.normalizeStdout(result.stdout))
     ```
    */
-  exec (ctx, options: ExecOptions) {
+  async exec (ctx, options: ExecOptions) {
     debug('systemTests.exec options %o', options)
     options = this.options(ctx, options)
     debug('processed options %o', options)
@@ -895,8 +904,18 @@ const systemTests = {
       ctx.skip()
     }
 
-    if (options.stubPackage) {
-      Fixtures.installStubPackage(options.project, options.stubPackage)
+    if (!options.skipScaffold) {
+      await Fixtures.scaffoldCommonNodeModules()
+      Fixtures.scaffoldProject(options.project)
+      await Fixtures.scaffoldProjectNodeModules(options.project)
+    }
+
+    if (process.env.NO_EXIT) {
+      Fixtures.scaffoldWatch()
+    }
+
+    if (ctx.settings) {
+      await settings.write(e2ePath, ctx.settings)
     }
 
     args = options.args || ['index.js'].concat(args)
@@ -975,70 +994,73 @@ const systemTests = {
       }
     }
 
-    return new Bluebird((resolve, reject) => {
-      debug('spawning Cypress %o', { args })
-      const cmd = options.command || 'node'
-      const sp = cp.spawn(cmd, args, {
-        env: _.chain(process.env)
-        .omit('CYPRESS_DEBUG')
-        .extend({
-          // FYI: color will be disabled
-          // because we are piping the child process
-          COLUMNS: 100,
-          LINES: 24,
-        })
-        .defaults({
-          // match CircleCI's filesystem limits, so screenshot names in snapshots match
-          CYPRESS_MAX_SAFE_FILENAME_BYTES: 242,
-          FAKE_CWD_PATH: '/XXX/XXX/XXX',
-          DEBUG_COLORS: '1',
-          // prevent any Compression progress
-          // messages from showing up
-          VIDEO_COMPRESSION_THROTTLE: 120000,
-
-          // don't fail our own tests running from forked PR's
-          CYPRESS_INTERNAL_SYSTEM_TESTS: '1',
-
-          // Emulate no typescript environment
-          CYPRESS_INTERNAL_NO_TYPESCRIPT: options.noTypeScript ? '1' : '0',
-
-          // disable frame skipping to make quick Chromium tests have matching snapshots/working video
-          CYPRESS_EVERY_NTH_FRAME: 1,
-
-          // force file watching for use with --no-exit
-          ...(options.noExit ? { CYPRESS_INTERNAL_FORCE_FILEWATCH: '1' } : {}),
-        })
-        .extend(options.processEnv)
-        .value(),
-        ...options.spawnOpts,
+    debug('spawning Cypress %o', { args })
+    const cmd = options.command || 'node'
+    const sp = cp.spawn(cmd, args, {
+      env: _.chain(process.env)
+      .omit('CYPRESS_DEBUG')
+      .extend({
+        // FYI: color will be disabled
+        // because we are piping the child process
+        COLUMNS: 100,
+        LINES: 24,
       })
+      .defaults({
+        // match CircleCI's filesystem limits, so screenshot names in snapshots match
+        CYPRESS_MAX_SAFE_FILENAME_BYTES: 242,
+        FAKE_CWD_PATH: '/XXX/XXX/XXX',
+        DEBUG_COLORS: '1',
+        // prevent any Compression progress
+        // messages from showing up
+        VIDEO_COMPRESSION_THROTTLE: 120000,
 
-      const ColorOutput = function () {
-        const colorOutput = new stream.Transform()
+        // don't fail our own tests running from forked PR's
+        CYPRESS_INTERNAL_SYSTEM_TESTS: '1',
 
-        colorOutput._transform = (chunk, encoding, cb) => cb(null, chalk.magenta(chunk.toString()))
+        // Emulate no typescript environment
+        CYPRESS_INTERNAL_NO_TYPESCRIPT: options.noTypeScript ? '1' : '0',
 
-        return colorOutput
-      }
+        // disable frame skipping to make quick Chromium tests have matching snapshots/working video
+        CYPRESS_EVERY_NTH_FRAME: 1,
 
-      // pipe these to our current process
-      // so we can see them in the terminal
-      // color it so we can tell which is test output
-      sp.stdout
-      .pipe(ColorOutput())
-      .pipe(process.stdout)
+        // force file watching for use with --no-exit
+        ...(options.noExit ? { CYPRESS_INTERNAL_FORCE_FILEWATCH: '1' } : {}),
+      })
+      .extend(options.processEnv)
+      .value(),
+      ...options.spawnOpts,
+    })
 
-      sp.stderr
-      .pipe(ColorOutput())
-      .pipe(process.stderr)
+    const ColorOutput = function () {
+      const colorOutput = new stream.Transform()
 
-      sp.stdout.on('data', (buf) => stdout += buf.toString())
-      sp.stderr.on('data', (buf) => stderr += buf.toString())
+      colorOutput._transform = (chunk, encoding, cb) => cb(null, chalk.magenta(chunk.toString()))
+
+      return colorOutput
+    }
+
+    // pipe these to our current process
+    // so we can see them in the terminal
+    // color it so we can tell which is test output
+    sp.stdout
+    .pipe(ColorOutput())
+    .pipe(process.stdout)
+
+    sp.stderr
+    .pipe(ColorOutput())
+    .pipe(process.stderr)
+
+    sp.stdout.on('data', (buf) => stdout += buf.toString())
+    sp.stderr.on('data', (buf) => stderr += buf.toString())
+
+    const exitCode = await new Promise((resolve, reject) => {
       sp.on('error', reject)
+      sp.on('exit', resolve)
+    })
 
-      return sp.on('exit', resolve)
-    }).tap(copy)
-    .then(exit)
+    await copy()
+
+    return exit(exitCode)
   },
 
   sendHtml (contents) {

@@ -202,7 +202,7 @@ const PatchExpressSetHeader: ResponseMiddleware = function () {
     // set the header manually. this way we can retain Node's original error behavior
     try {
       return originalSetHeader.call(this, name, value)
-    } catch (err) {
+    } catch (err: any) {
       if (err.code !== 'ERR_INVALID_CHAR') {
         throw err
       }

@@ -5,7 +5,7 @@ import proxyquire from 'proxyquire'
 
 const ERROR_MESSAGE = 'Setting the NODE_TLS_REJECT_UNAUTHORIZED'
 
-const TLS_CONNECT = `require('tls').connect().on('error', ()=>{});`
+const TLS_CONNECT = `require('tls').connect('5000').on('error', ()=>{});`
 const SUPPRESS_WARNING = `require('${__dirname}/../../../lib/util/suppress_warnings').suppress();`
 
 describe('lib/util/suppress_warnings', function () {

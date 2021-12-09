@@ -4,16 +4,13 @@ const path = require('path')
 const systemTests = require('../lib/system-tests').default
 const Fixtures = require('../lib/fixtures')
 
-const nonExistentSpec = Fixtures.projectPath('non-existent-spec')
-const e2eProject = Fixtures.projectPath('e2e')
-
 describe('e2e plugins', () => {
   systemTests.setup()
 
   it('fails when spec does not exist', function () {
     return systemTests.exec(this, {
       spec: 'spec.js',
-      project: nonExistentSpec,
+      project: 'non-existent-spec',
       sanitizeScreenshotDimensions: true,
       snapshot: true,
       expectedExitCode: 1,
@@ -22,6 +19,7 @@ describe('e2e plugins', () => {
 
   it('handles specs with $, &, and + in file name', function () {
     const relativeSpecPath = path.join('dir&1%', '%dir2&', 's%p+ec&.js')
+    const e2eProject = Fixtures.projectPath('e2e')
     const specPath = path.join(e2eProject, 'cypress', 'integration', relativeSpecPath)
 
     return fs.outputFile(specPath, 'it(\'passes\', () => {})')

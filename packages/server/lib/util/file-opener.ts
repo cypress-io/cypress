@@ -11,7 +11,7 @@ export const openFile = (fileDetails) => {
   if (openerId === 'computer') {
     try {
       require('electron').shell.showItemInFolder(fileDetails.file)
-    } catch (err) {
+    } catch (err: any) {
       debug('error opening file: %s', err.stack)
     }
 

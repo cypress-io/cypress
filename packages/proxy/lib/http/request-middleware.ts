@@ -148,7 +148,7 @@ const SendRequestOutgoing: RequestMiddleware = function () {
     timeout: this.req.responseTimeout,
     strictSSL: false,
     followRedirect: this.req.followRedirect || false,
-    retryIntervals: [0, 100, 200, 200],
+    retryIntervals: [],
     url: this.req.proxiedUrl,
   }
 
@@ -170,7 +170,7 @@ const SendRequestOutgoing: RequestMiddleware = function () {
 
   req.on('error', this.onError)
   req.on('response', (incomingRes) => this.onResponse(incomingRes, req))
-  this.req.on('aborted', () => {
+  this.req.socket.on('close', () => {
     this.debug('request aborted')
     req.abort()
   })

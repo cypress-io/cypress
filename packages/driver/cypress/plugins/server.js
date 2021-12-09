@@ -45,6 +45,14 @@ const createApp = (port) => {
     })
   })
 
+  app.get('/redirect-timeout', (req, res) => {
+    return Promise
+    .delay(100)
+    .then(() => {
+      return res.send('<html><body>timeout</body></html>')
+    })
+  })
+
   app.get('/custom-headers', (req, res) => {
     return res.set('x-foo', 'bar')
     .send('<html><body>hello there</body></html>')

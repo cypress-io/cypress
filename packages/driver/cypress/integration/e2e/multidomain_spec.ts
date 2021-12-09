@@ -6,13 +6,13 @@ describe('multidomain', { experimentalSessionSupport: true }, () => {
         expect(event.data.host).to.equal('127.0.0.1:3501')
         expect(event.data.actual).to.equal(expected)
 
-        top.removeEventListener('message', onMessage)
+        top!.removeEventListener('message', onMessage)
 
         done()
       }
     }
 
-    top.addEventListener('message', onMessage, false)
+    top!.addEventListener('message', onMessage, false)
   }
 
   beforeEach(() => {
@@ -50,7 +50,7 @@ describe('multidomain', { experimentalSessionSupport: true }, () => {
       // @ts-ignore
       cy.switchToDomain('127.0.0.1:3501', () => {
         Cypress.on('form:submitted', () => {
-          top.postMessage({ host: location.host, actual: 'form:submitted' }, '*')
+          top!.postMessage({ host: location.host, actual: 'form:submitted' }, '*')
         })
 
         cy.get('form').submit()
@@ -63,7 +63,7 @@ describe('multidomain', { experimentalSessionSupport: true }, () => {
       // @ts-ignore
       cy.switchToDomain('127.0.0.1:3501', () => {
         Cypress.on('window:before:unload', () => {
-          top.postMessage({ host: location.host, actual: 'window:before:unload' }, '*')
+          top!.postMessage({ host: location.host, actual: 'window:before:unload' }, '*')
         })
 
         cy.window().then((window) => {
@@ -80,7 +80,7 @@ describe('multidomain', { experimentalSessionSupport: true }, () => {
       // @ts-ignore
       cy.switchToDomain('127.0.0.1:3501', () => {
         Cypress.on('window:unload', () => {
-          top.postMessage({ host: location.host, actual: 'window:unload' }, '*')
+          top!.postMessage({ host: location.host, actual: 'window:unload' }, '*')
         })
 
         cy.window().then((window) => {
@@ -95,7 +95,7 @@ describe('multidomain', { experimentalSessionSupport: true }, () => {
       // @ts-ignore
       cy.switchToDomain('127.0.0.1:3501', () => {
         Cypress.on('navigation:changed', () => {
-          top.postMessage({ host: location.host, actual: 'navigation:changed' }, '*')
+          top!.postMessage({ host: location.host, actual: 'navigation:changed' }, '*')
         })
 
         cy.window().then((window) => {
@@ -110,7 +110,7 @@ describe('multidomain', { experimentalSessionSupport: true }, () => {
       // @ts-ignore
       cy.switchToDomain('127.0.0.1:3501', () => {
         Cypress.on('window:alert', (text) => {
-          top.postMessage({ host: location.host, actual: `window:alert ${text}` }, '*')
+          top!.postMessage({ host: location.host, actual: `window:alert ${text}` }, '*')
         })
 
         cy.get('[data-cy="alert"]').then(($el) => {
@@ -125,7 +125,7 @@ describe('multidomain', { experimentalSessionSupport: true }, () => {
       // @ts-ignore
       cy.switchToDomain('127.0.0.1:3501', () => {
         Cypress.on('window:confirm', (text) => {
-          top.postMessage({ host: location.host, actual: `window:confirm ${text}` }, '*')
+          top!.postMessage({ host: location.host, actual: `window:confirm ${text}` }, '*')
         })
 
         cy.get('[data-cy="confirm"]').then(($el) => {
@@ -140,7 +140,7 @@ describe('multidomain', { experimentalSessionSupport: true }, () => {
       // @ts-ignore
       cy.switchToDomain('127.0.0.1:3501', () => {
         Cypress.on('window:confirmed', (text, returnedFalse) => {
-          top.postMessage({ host: location.host, actual: `window:confirmed ${text} - ${returnedFalse}` }, '*')
+          top!.postMessage({ host: location.host, actual: `window:confirmed ${text} - ${returnedFalse}` }, '*')
         })
 
         Cypress.on('window:confirm', () => {})
@@ -161,7 +161,7 @@ describe('multidomain', { experimentalSessionSupport: true }, () => {
       // @ts-ignore
       cy.switchToDomain('127.0.0.1:3501', () => {
         Cypress.on('window:confirmed', (text, returnedFalse) => {
-          top.postMessage({ host: location.host, actual: `window:confirmed ${text} - ${returnedFalse}` }, '*')
+          top!.postMessage({ host: location.host, actual: `window:confirmed ${text} - ${returnedFalse}` }, '*')
         })
 
         Cypress.on('window:confirm', () => {

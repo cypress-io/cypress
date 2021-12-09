@@ -1,91 +1,83 @@
 import Promise from 'bluebird'
 
-const tryFn = (fn) => {
-  // promisify this function
-  return Promise.try(fn)
-}
-
-export default {
-  create: (Cypress, state) => {
-    const isStable = (stable = true, event) => {
-      if (state('isStable') === stable) {
-        return
-      }
-
-      const whenStable = state('whenStable')
-
-      if (stable && whenStable) {
-        whenStable()
-      }
-
-      state('isStable', stable)
-
-      // we notify the outside world because this is what the runner uses to
-      // show the 'loading spinner' during an app page loading transition event
-      Cypress.action('cy:stability:changed', stable, event)
+// eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
+export const create = (Cypress, state) => ({
+  isStable: (stable: boolean = true, event: string) => {
+    if (state('isStable') === stable) {
+      return
     }
 
-    const whenStable = (fn) => {
-      if (state('isStable') !== false) {
-        return tryFn(fn)
-      }
+    const whenStable = state('whenStable')
 
-      return new Promise((resolve, reject) => {
-        state('whenStable', () => {
-          state('whenStable', null)
-
-          tryFn(fn)
-          .then(resolve)
-          .catch(reject)
-        })
-      })
+    if (stable && whenStable) {
+      whenStable()
     }
 
-    const isAnticipatingMultidomain = (anticipating) => {
-      if (state('anticipatingMultidomain') === anticipating) {
-        return
-      }
+    state('isStable', stable)
 
-      const whenAnticipatingMultidomain = state('whenAnticipatingMultidomain')
-
-      if (anticipating && whenAnticipatingMultidomain) {
-        whenAnticipatingMultidomain()
-      }
-
-      state('anticipatingMultidomain', anticipating)
-    }
-
-    const whenStableOrAnticipatingMultidomain = (fn) => {
-      if (state('anticipatingMultidomain') || state('isStable') !== false) {
-        return tryFn(fn)
-      }
-
-      return new Promise((resolve, reject) => {
-        let fulfilled = false
-
-        const onSignal = () => {
-          if (fulfilled) return
-
-          fulfilled = true
-
-          state('whenStable', null)
-          state('whenAnticipatingMultidomain', null)
-
-          tryFn(fn)
-          .then(resolve)
-          .catch(reject)
-        }
-
-        state('whenStable', onSignal)
-        state('whenAnticipatingMultidomain', onSignal)
-      })
-    }
-
-    return {
-      isStable,
-      whenStable,
-      isAnticipatingMultidomain,
-      whenStableOrAnticipatingMultidomain,
-    }
+    // we notify the outside world because this is what the runner uses to
+    // show the 'loading spinner' during an app page loading transition event
+    Cypress.action('cy:stability:changed', stable, event)
   },
-}
+
+  whenStable: (fn: () => any) => {
+    if (state('isStable') !== false) {
+      return Promise.try(fn)
+    }
+
+    return new Promise((resolve, reject) => {
+      // then when we become stable
+      state('whenStable', () => {
+        // reset this callback function
+        state('whenStable', null)
+
+        // and invoke the original function
+        Promise.try(fn)
+        .then(resolve)
+        .catch(reject)
+      })
+    })
+  },
+
+  isAnticipatingMultidomain (anticipating) {
+    if (state('anticipatingMultidomain') === anticipating) {
+      return
+    }
+
+    const whenAnticipatingMultidomain = state('whenAnticipatingMultidomain')
+
+    if (anticipating && whenAnticipatingMultidomain) {
+      whenAnticipatingMultidomain()
+    }
+
+    state('anticipatingMultidomain', anticipating)
+  },
+
+  whenStableOrAnticipatingMultidomain (fn) {
+    if (state('anticipatingMultidomain') || state('isStable') !== false) {
+      return Promise.try(fn)
+    }
+
+    return new Promise((resolve, reject) => {
+      let fulfilled = false
+
+      const onSignal = () => {
+        if (fulfilled) return
+
+        fulfilled = true
+
+        state('whenStable', null)
+        state('whenAnticipatingMultidomain', null)
+
+        Promise.try(fn)
+        .then(resolve)
+        .catch(reject)
+      }
+
+      state('whenStable', onSignal)
+      state('whenAnticipatingMultidomain', onSignal)
+    })
+  },
+})
+
+export interface IStability extends ReturnType<typeof create> {}

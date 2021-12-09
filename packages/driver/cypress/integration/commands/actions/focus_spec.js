@@ -1,3 +1,4 @@
+const { assertLogLength } = require('../../../support/utils')
 const { _, $ } = Cypress
 
 const getActiveElement = () => {
@@ -297,7 +298,7 @@ describe('src/cy/commands/actions/focus', () => {
         cy
         .get('input:first').focus()
         .get('button:first').focus().then(function () {
-          expect(this.logs.length).to.eq(2)
+          assertLogLength(this.logs, 2)
         })
       })
 
@@ -384,7 +385,7 @@ describe('src/cy/commands/actions/focus', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
 
           done()
@@ -467,7 +468,7 @@ describe('src/cy/commands/actions/focus', () => {
 
       it('does not log an additional log on failure', function (done) {
         cy.on('fail', () => {
-          expect(this.logs.length).to.eq(3)
+          assertLogLength(this.logs, 3)
 
           done()
         })
@@ -738,7 +739,7 @@ describe('src/cy/commands/actions/focus', () => {
 
       it('logs 1 blur event', () => {
         cy.get('input:first').focus().blur().then(function () {
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
         })
       })
 
@@ -866,7 +867,7 @@ describe('src/cy/commands/actions/focus', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
 
           done()
@@ -893,7 +894,7 @@ describe('src/cy/commands/actions/focus', () => {
 
       it('does not log an additional log on failure', function (done) {
         cy.on('fail', () => {
-          expect(this.logs.length).to.eq(4)
+          assertLogLength(this.logs, 4)
 
           done()
         })
