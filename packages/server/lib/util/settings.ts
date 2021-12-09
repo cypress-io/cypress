@@ -1,28 +1,26 @@
 import _ from 'lodash'
 import Promise from 'bluebird'
 import path from 'path'
-
 import errors from '../errors'
 import { fs } from '../util/fs'
-import { requireAsync } from './require_async'
 import Debug from 'debug'
+import type { SettingsOptions } from '@packages/types'
+import { getCtx } from '@packages/data-context'
 
 const debug = Debug('cypress:server:settings')
 
-interface SettingsOptions {
-  testingType?: 'component' |'e2e'
-  configFile?: string | false
-  args?: {
-    runProject?: string
-  }
-}
+type ChangedConfig = { projectId?: string, component?: {}, e2e?: {} }
 
-function jsCode (obj) {
+function configCode (obj, isTS?: boolean) {
   const objJSON = obj && !_.isEmpty(obj)
     ? JSON.stringify(_.omit(obj, 'configFile'), null, 2)
     : `{
 
 }`
+
+  if (isTS) {
+    return `export default ${objJSON}`
+  }
 
   return `module.exports = ${objJSON}
 `
@@ -91,7 +89,7 @@ function _logWriteErr (file, err) {
   return _err('ERROR_WRITING_FILE', file, err)
 }
 
-function _write (file, obj = {}) {
+function _write (file, obj: any = {}) {
   if (/\.json$/.test(file)) {
     debug('writing json file')
 
@@ -104,7 +102,11 @@ function _write (file, obj = {}) {
 
   debug('writing javascript file')
 
-  return fs.writeFileAsync(file, jsCode(obj))
+  const fileExtension = file?.split('.').pop()
+
+  const isTSFile = fileExtension === 'ts'
+
+  return fs.writeFileAsync(file, configCode(obj, isTSFile))
   .return(obj)
   .catch((err) => {
     return _logWriteErr(file, err)
@@ -126,14 +128,11 @@ export function isComponentTesting (options: SettingsOptions = {}) {
 export function configFile (options: SettingsOptions = {}) {
   // default is only used in tests.
   // This prevents a the change from becoming bigger than it should
-  // FIXME: remove the default
-  return options.configFile === false ? false : (options.configFile || 'cypress.json')
+  return options.configFile === false ? false : (options.configFile || 'cypress.config.js')
 }
 
 export function id (projectRoot, options = {}) {
-  const file = pathToConfigFile(projectRoot, options)
-
-  return fs.readJson(file)
+  return read(projectRoot, options)
   .then((config) => config.projectId)
   .catch(() => {
     return null
@@ -147,19 +146,10 @@ export function read (projectRoot, options: SettingsOptions = {}) {
 
   const file = pathToConfigFile(projectRoot, options)
 
-  const readPromise = /\.json$/.test(file) ? fs.readJSON(path.resolve(projectRoot, file)) : requireAsync(file, {
-    projectRoot,
-    loadErrorCode: 'CONFIG_FILE_ERROR',
-  })
-
-  return readPromise
+  return getCtx().config.getOrCreateBaseConfig(file)
   .catch((err) => {
     if (err.type === 'MODULE_NOT_FOUND' || err.code === 'ENOENT') {
-      if (options.args?.runProject) {
-        return Promise.reject(errors.get('CONFIG_FILE_NOT_FOUND', options.configFile, projectRoot))
-      }
-
-      return _write(file, {})
+      return Promise.reject(errors.get('CONFIG_FILE_NOT_FOUND', options.configFile, projectRoot))
     }
 
     return Promise.reject(err)
@@ -174,7 +164,7 @@ export function read (projectRoot, options: SettingsOptions = {}) {
     }
 
     debug('resolved configObject', configObject)
-    const changed = _applyRewriteRules(configObject)
+    const changed: ChangedConfig = _applyRewriteRules(configObject)
 
     // if our object is unchanged
     // then just return it
@@ -182,7 +172,7 @@ export function read (projectRoot, options: SettingsOptions = {}) {
       return configObject
     }
 
-    // else write the new reduced obj
+    // else write the new reduced obj and store the projectId on the cache
     return _write(file, changed)
     .then((config) => {
       return config
@@ -214,19 +204,14 @@ export function readEnv (projectRoot) {
   })
 }
 
-export function write (projectRoot, obj = {}, options: SettingsOptions = {}) {
+export function writeOnly (projectRoot, obj = {}, options: SettingsOptions = {}) {
   if (options.configFile === false) {
     return Promise.resolve({})
   }
 
-  return read(projectRoot, options)
-  .then((settings) => {
-    _.extend(settings, obj)
+  const file = pathToConfigFile(projectRoot, options)
 
-    const file = pathToConfigFile(projectRoot, options)
-
-    return _write(file, settings)
-  })
+  return _write(file, obj)
 }
 
 export function pathToConfigFile (projectRoot, options: SettingsOptions = {}) {

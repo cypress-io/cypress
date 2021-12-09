@@ -1,0 +1,25 @@
+<html>
+  <body>
+    <test-element id="element"></test-element>
+    <div id="result"></div>
+  </body>
+  <script>
+    class TestElement extends HTMLElement {
+      constructor() {
+        super();
+        this._shadow = this.attachShadow({mode: "open"});
+
+        const input = document.createElement("input");
+        this._shadow.appendChild(input);
+      }
+    }
+
+    customElements.define("test-element", TestElement);
+
+    const el = document.getElementById("element");
+
+    el.addEventListener('keydown', () =>{
+      document.getElementById('result').innerText = 'typed'
+    })
+  </script>
+</html>

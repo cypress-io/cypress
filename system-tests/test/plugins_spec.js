@@ -19,8 +19,7 @@ describe('e2e plugins', function () {
     expectedExitCode: 1,
     onRun (exec) {
       return exec().then(({ stdout }) => {
-        expect(stdout).to.include('The following error was thrown by a plugin. We stopped running your tests because a plugin crashed. Please check your plugins file')
-        expect(stdout).to.include('Error: Root async error from plugins file')
+        expect(stdout).to.include('Error: Root async error from config file')
       })
     },
   })
@@ -153,7 +152,7 @@ describe('e2e plugins', function () {
     })
   })
 
-  it('fails when there is no function exported', function () {
+  it('fails when setupNodeEvents is not a function', function () {
     return systemTests.exec(this, {
       spec: 'app_spec.js',
       project: 'plugin-empty',
@@ -194,7 +193,7 @@ describe('e2e plugins', function () {
         config: {
           env: {
             projectRoot: e2eProject,
-            configFile: path.join(e2eProject, 'cypress.json'),
+            configFile: path.join(e2eProject, 'cypress.config.js'),
           },
         },
       })
@@ -203,11 +202,11 @@ describe('e2e plugins', function () {
     it('passes custom configFile to plugins function', function () {
       return systemTests.exec(this, {
         spec: 'plugins_config_extras_spec.js',
-        configFile: 'cypress-alt.json',
+        configFile: 'cypress-alt.config.js',
         config: {
           env: {
             projectRoot: e2eProject,
-            configFile: path.join(e2eProject, 'cypress-alt.json'),
+            configFile: path.join(e2eProject, 'cypress-alt.config.js'),
           },
         },
       })

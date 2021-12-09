@@ -2,9 +2,8 @@ import _ from 'lodash'
 import la from 'lazy-ass'
 import Debug from 'debug'
 import Bluebird from 'bluebird'
-import chokidar from 'chokidar'
 import pluralize from 'pluralize'
-import { ProjectBase, OpenProjectLaunchOptions } from './project-base'
+import { ProjectBase } from './project-base'
 import browsers from './browsers'
 import specsUtil from './util/specs'
 import preprocessor from './plugins/preprocessor'
@@ -12,67 +11,19 @@ import runEvents from './plugins/run_events'
 import * as session from './session'
 import { getSpecUrl } from './project_utils'
 import errors from './errors'
-import type { Browser, FoundBrowser, PlatformName } from '@packages/launcher'
-import type { AutomationMiddleware } from './automation'
+import type { LaunchOpts, LaunchArgs, OpenProjectLaunchOptions, FoundBrowser } from '@packages/types'
+import type { DataContext } from '@packages/data-context'
+import { getCtx } from './makeDataContext'
 
 const debug = Debug('cypress:server:open_project')
 
-interface LaunchOpts {
-  browser?: FoundBrowser
-  url?: string
-  automationMiddleware?: AutomationMiddleware
-  onBrowserClose?: (...args: unknown[]) => void
-  onError?: (err: Error) => void
-}
-
-interface SpecsByType {
-  component: Cypress.Spec[]
-  integration: Cypress.Spec[]
-}
-
-export interface LaunchArgs {
-  _: [string] // Cypress App binary location
-  config: Record<string, unknown>
-  cwd: string
-  browser?: Browser['name']
-  configFile?: string
-  exit?: boolean
-  project: string // projectRoot
-  projectRoot: string // same as above
-  testingType: Cypress.TestingType
-  invokedFromCli: boolean
-  os: PlatformName
-  userNodePath?: string
-  userNodeVersion?: string
-
-  onFocusTests?: () => any
-  /**
-   * in run mode, the path of the project run
-   * path is relative if specified with --project,
-   * absolute if implied by current working directory
-   */
-  runProject?: string
-}
-
 export class OpenProject {
   openProject: ProjectBase<any> | null = null
-  relaunchBrowser: ((...args: unknown[]) => void) | null = null
-  specsWatcher: chokidar.FSWatcher | null = null
-  componentSpecsWatcher: chokidar.FSWatcher | null = null
+  relaunchBrowser: ((...args: unknown[]) => Bluebird<void>) | null = null
 
   resetOpenProject () {
     this.openProject = null
     this.relaunchBrowser = null
-  }
-
-  tryToCall (method: keyof ProjectBase<any>) {
-    return (...args: unknown[]) => {
-      if (this.openProject && this.openProject[method]) {
-        return this.openProject[method](...args)
-      }
-
-      return Bluebird.resolve(null)
-    }
   }
 
   reset () {
@@ -80,14 +31,8 @@ export class OpenProject {
   }
 
   getConfig () {
-    return this.openProject!.getConfig()
+    return this.openProject?.getConfig()
   }
-
-  getRecordKeys = this.tryToCall('getRecordKeys')
-
-  getRuns = this.tryToCall('getRuns')
-
-  requestAccess = this.tryToCall('requestAccess')
 
   getProject () {
     return this.openProject
@@ -126,7 +71,7 @@ export class OpenProject {
     // of potential domain changes, request buffers, etc
     this.openProject!.reset()
 
-    const url = getSpecUrl({
+    let url = getSpecUrl({
       absoluteSpecPath: spec.absolute,
       specType: spec.specType,
       browserUrl: this.openProject.cfg.browserUrl,
@@ -205,7 +150,7 @@ export class OpenProject {
 
       afterSpec()
       .catch((err) => {
-        this.openProject!.options.onError(err)
+        this.openProject?.options.onError(err)
       })
 
       if (onBrowserClose) {
@@ -231,6 +176,10 @@ export class OpenProject {
         session.clearSessions()
       })
       .then(() => {
+        if (options.skipBrowserOpenForTest) {
+          return
+        }
+
         return browsers.open(browser, options, automation)
       })
     }
@@ -240,7 +189,17 @@ export class OpenProject {
 
   getSpecs (cfg) {
     return specsUtil.findSpecs(cfg)
-    .then((specs: Cypress.Spec[] = []) => {
+    .then((_specs: Cypress.Spec[] = []) => {
+      // only want these properties
+      const specs = _specs.map((x) => {
+        return {
+          name: x.name,
+          relative: x.relative,
+          absolute: x.absolute,
+          specType: x.specType,
+        }
+      })
+
       // TODO merge logic with "run.js"
       if (debug.enabled) {
         const names = _.map(specs, 'name')
@@ -274,106 +233,6 @@ export class OpenProject {
     })
   }
 
-  getSpecChanges (options: OpenProjectLaunchOptions = {}) {
-    let currentSpecs: SpecsByType
-
-    _.defaults(options, {
-      onChange: () => { },
-      onError: () => { },
-    })
-
-    const sendIfChanged = (specs: SpecsByType = { component: [], integration: [] }) => {
-      // dont do anything if the specs haven't changed
-      if (_.isEqual(specs, currentSpecs)) {
-        return
-      }
-
-      currentSpecs = specs
-
-      return options?.onChange?.(specs)
-    }
-
-    const checkForSpecUpdates = _.debounce(() => {
-      if (!this.openProject) {
-        return this.stopSpecsWatcher()
-      }
-
-      debug('check for spec updates')
-
-      return get()
-      .then(sendIfChanged)
-      .catch(options?.onError)
-    }, 250, { leading: true })
-
-    const createSpecsWatcher = (cfg) => {
-      // TODO I keep repeating this to get the resolved value
-      // probably better to have a single function that does this
-      const componentTestingEnabled = _.get(cfg, 'resolved.testingType.value', 'e2e') === 'component'
-
-      debug('createSpecWatch component testing enabled', componentTestingEnabled)
-
-      if (!this.specsWatcher) {
-        debug('watching integration test files: %s in %s', cfg.testFiles, cfg.integrationFolder)
-
-        this.specsWatcher = chokidar.watch(cfg.testFiles, {
-          cwd: cfg.integrationFolder,
-          ignored: cfg.ignoreTestFiles,
-          ignoreInitial: true,
-        })
-
-        this.specsWatcher.on('add', checkForSpecUpdates)
-
-        this.specsWatcher.on('unlink', checkForSpecUpdates)
-      }
-
-      if (componentTestingEnabled && !this.componentSpecsWatcher) {
-        debug('watching component test files: %s in %s', cfg.testFiles, cfg.componentFolder)
-
-        this.componentSpecsWatcher = chokidar.watch(cfg.testFiles, {
-          cwd: cfg.componentFolder,
-          ignored: cfg.ignoreTestFiles,
-          ignoreInitial: true,
-        })
-
-        this.componentSpecsWatcher.on('add', checkForSpecUpdates)
-
-        this.componentSpecsWatcher.on('unlink', checkForSpecUpdates)
-      }
-    }
-
-    const get = (): Bluebird<SpecsByType> => {
-      if (!this.openProject) {
-        return Bluebird.resolve({
-          component: [],
-          integration: [],
-        })
-      }
-
-      const cfg = this.openProject.getConfig()
-
-      createSpecsWatcher(cfg)
-
-      return this.getSpecs(cfg)
-    }
-
-    // immediately check the first time around
-    return checkForSpecUpdates()
-  }
-
-  stopSpecsWatcher () {
-    debug('stop spec watcher')
-
-    if (this.specsWatcher) {
-      this.specsWatcher.close()
-      this.specsWatcher = null
-    }
-
-    if (this.componentSpecsWatcher) {
-      this.componentSpecsWatcher.close()
-      this.componentSpecsWatcher = null
-    }
-  }
-
   closeBrowser () {
     return browsers.close()
   }
@@ -393,12 +252,23 @@ export class OpenProject {
   close () {
     debug('closing opened project')
 
-    this.stopSpecsWatcher()
-
-    return this.closeOpenProjectAndBrowsers()
+    return Promise.all([
+      this._ctx?.destroy(),
+      this.closeOpenProjectAndBrowsers(),
+    ]).then(() => null)
   }
 
-  async create (path: string, args: LaunchArgs, options: OpenProjectLaunchOptions) {
+  // close existing open project if it exists, for example
+  // if  you are switching from CT to E2E or vice versa.
+  // used by launchpad
+  async closeActiveProject () {
+    await this.closeOpenProjectAndBrowsers()
+  }
+
+  _ctx?: DataContext
+
+  async create (path: string, args: LaunchArgs, options: OpenProjectLaunchOptions, browsers: FoundBrowser[] = []) {
+    this._ctx = getCtx()
     debug('open_project create %s', path)
 
     _.defaults(options, {
@@ -406,6 +276,8 @@ export class OpenProject {
         if (this.relaunchBrowser) {
           return this.relaunchBrowser()
         }
+
+        return
       },
     })
 
@@ -420,18 +292,20 @@ export class OpenProject {
     debug('opening project %s', path)
     debug('and options %o', options)
 
+    const testingType = args.testingType === 'component' ? 'component' : 'e2e'
+
     // store the currently open project
     this.openProject = new ProjectBase({
-      testingType: args.testingType === 'component' ? 'component' : 'e2e',
+      testingType,
       projectRoot: path,
       options: {
         ...options,
-        testingType: args.testingType,
+        testingType,
       },
     })
 
     try {
-      await this.openProject.initializeConfig()
+      await this.openProject.initializeConfig(browsers)
       await this.openProject.open()
     } catch (err: any) {
       if (err.isCypressErr && err.portInUse) {

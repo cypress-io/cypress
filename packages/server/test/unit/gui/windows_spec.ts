@@ -4,12 +4,11 @@ import { expect } from 'chai'
 import 'sinon-chai'
 
 import _ from 'lodash'
-import path from 'path'
 import Promise from 'bluebird'
 import { EventEmitter } from 'events'
 import { BrowserWindow } from 'electron'
 import * as Windows from '../../../lib/gui/windows'
-import savedState from '../../../lib/saved_state'
+import * as savedState from '../../../lib/saved_state'
 import { getPathToDesktopIndex } from '@packages/resolve-dist'
 
 const DEFAULT_USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Cypress/0.0.0 Chrome/59.0.3071.115 Electron/1.8.2 Safari/537.36'
@@ -47,21 +46,19 @@ describe('lib/gui/windows', () => {
         type: 'INDEX',
       }
 
-      return Windows.open('/path/to/project', options, () => this.win)
+      return Windows.open('/path/to/project', 1234, options, () => this.win)
       .then((win) => {
         expect(options).to.include({
           height: 500,
           width: 600,
           type: 'INDEX',
           show: true,
-          url: getPathToDesktopIndex(),
+          url: getPathToDesktopIndex(1234),
         })
 
-        expect(options.webPreferences).to.include({
-          preload: path.resolve('lib', 'ipc', 'ipc.js'),
-        })
-
-        expect(win.loadURL).to.be.calledWith(getPathToDesktopIndex())
+        expect(win.loadURL).to.be.calledWith(getPathToDesktopIndex(
+          1234,
+        ))
       })
     })
   })

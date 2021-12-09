@@ -9,7 +9,7 @@ import {
   IframeModel,
   selectorPlaygroundModel,
   AutIframe,
-  eventManager as EventManager,
+  EventManager,
 } from '@packages/runner-shared'
 
 import State from '../../src/lib/state'
@@ -32,7 +32,7 @@ export const Iframes = namedObserver('Iframes', ({
   eventManager,
 }: IFramesProps) => {
   const containerRef = useRef<HTMLDivElement>(null)
-  const autIframe = useRef(new AutIframe(config))
+  const autIframe = useRef(new AutIframe(config.projectName, eventManager))
 
   const _toggleSnapshotHighlights = (snapshotProps) => {
     state.setShowSnapshotHighlight(!state.snapshot.showingHighlights)
@@ -135,6 +135,7 @@ export const Iframes = namedObserver('Iframes', ({
       restoreDom: autIframe.current.restoreDom,
       highlightEl: autIframe.current.highlightEl,
       detachDom: autIframe.current.detachDom,
+      eventManager,
       snapshotControls: (snapshotProps) => (
         <SnapshotControls
           eventManager={eventManager}
@@ -167,7 +168,7 @@ export const Iframes = namedObserver('Iframes', ({
       return
     }
 
-    state.callbackAfterUpdate?.()
+    state.viewportUpdateCallback?.()
   })
 
   const { height, width, scriptError, scale, screenshotting } = state

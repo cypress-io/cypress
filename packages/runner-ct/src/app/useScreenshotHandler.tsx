@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { runInAction } from 'mobx'
-import { eventManager as EventManager } from '@packages/runner-shared'
+import type { EventManager } from '@packages/runner-shared'
 import State from '../lib/state'
 
 /**
@@ -14,7 +14,7 @@ import State from '../lib/state'
 * we need to set these to display: none during cy.screenshot.
 */
 export function useScreenshotHandler ({ eventManager, state, splitPaneRef }: {
-  eventManager: typeof EventManager
+  eventManager: EventManager
   state: State
   splitPaneRef: React.MutableRefObject<{ splitPane: HTMLDivElement }>
 }) {

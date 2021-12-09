@@ -36,10 +36,10 @@
     "node-sass-glob-importer": "5.3.2",
     "postcss-loader": "3.0.0",
     "resolve-url-loader": "3.1.0",
-    "sass": "1.32.0",
+    "sass": "1.44.0",
     "sass-loader": "10.1.0",
     "sinon-chai": "3.3.0",
-    "webpack": "4.41.6",
+    "webpack": "^4.44.2",
     "webpack-cli": "3.3.11",
     "webpack-livereload-plugin": "2.3.0"
   }

@@ -1,8 +1,8 @@
 .reporter {
   .hooks-container {
-    margin: 5px 0 5px 5px;
+    margin: 5px 0 5px 9px;
     padding-left: 10px;
-    border-left: 1px dotted #DDD;
+    border-left: 1px dotted $gray-900;
 
     .hook-item {
       margin-bottom: 5px;
@@ -18,17 +18,18 @@
 
       &:hover {
         .collapsible-header {
-          color: #6a6b6c;
+          color: $gray-300;
         }
 
         .hook-open-in-ide {
+          cursor: pointer;
           display: block;
         }
       }
 
       .collapsible-header {
         text-transform: uppercase;
-        color: #959595;
+        color: $gray-400;
         display: inline-block;
         flex-grow: 1;
         font-size: 11px;
@@ -45,26 +46,28 @@
       }
 
       .hook-failed-message {
-        color: #E94F5F;
+        color: $red-400;
         display: none;
       }
 
       .hook-open-in-ide {
         align-items: center;
-        color: #6a6b6c;
+        color: $gray-400;
         display: none;
-        padding: 4px 10px;
+        padding: 4px;
 
         &:hover, &:focus {
-          background-color: rgba(186, 186, 186, 0.2);
+          background-color: rgba($gray-700, 0.2);
           outline: none;
           text-decoration: none;
         }
-      }
-    }
 
-    i {
-      margin-right: 3px;
+        svg {
+          path:nth-child(2) {
+            fill: $gray-800;
+          }
+        }
+      }
     }
 
     .hook-failed .hook-failed-message {

@@ -4,8 +4,9 @@
   "description": "Launches Webpack Dev Server for Component Testing",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc",
-    "build-prod": "tsc",
+    "build": "tsc || echo 'built, with type errors'",
+    "build-prod": "tsc || echo 'built, with type errors'",
+    "check-ts": "tsc --noEmit",
     "test": "node ./test-wds-3.js",
     "test-all": "tsc && mocha -r @packages/ts/register test/**/*.spec.ts test/*.spec.ts --exit",
     "watch": "tsc -w"

@@ -1,15 +1,14 @@
 const _ = require('lodash')
-const cp = require('child_process')
 const path = require('path')
 const debug = require('debug')('cypress:server:plugins')
 const resolve = require('resolve')
 const Promise = require('bluebird')
-const inspector = require('inspector')
 const errors = require('../errors')
 const util = require('./util')
 const pkg = require('@packages/root')
 
-let pluginsProcess = null
+let pluginsProcess
+let executedPlugins
 let registeredEvents = {}
 let handlers = []
 
@@ -37,9 +36,7 @@ const registerHandler = (handler) => {
   handlers.push(handler)
 }
 
-const init = (config, options) => {
-  debug('plugins.init', config.pluginsFile)
-
+const init = (config, options, ctx) => {
   // test and warn for incompatible plugin
   try {
     const retriesPluginPath = path.dirname(resolve.sync('cypress-plugin-retries/package.json', {
@@ -51,7 +48,11 @@ const init = (config, options) => {
     // noop, incompatible plugin not installed
   }
 
-  return new Promise((_resolve, _reject) => {
+  if (!(ctx && ctx.currentProject)) {
+    throw new Error('No current project to initialize plugins')
+  }
+
+  return new Promise(async (_resolve, _reject) => {
     // provide a safety net for fulfilling the promise because the
     // 'handleError' function below can potentially be triggered
     // before or after the promise is already fulfilled
@@ -68,54 +69,38 @@ const init = (config, options) => {
     const resolve = fulfill(_resolve)
     const reject = fulfill(_reject)
 
-    if (!config.pluginsFile) {
-      debug('no user plugins file')
+    pluginsProcess = ctx.currentProject?.configChildProcess?.process
+    executedPlugins = ctx.currentProject?.configChildProcess?.executedPlugins
+
+    const killPluginsProcess = () => {
+      ctx.actions.projectConfig.killConfigProcess()
+      pluginsProcess = null
     }
 
-    if (pluginsProcess) {
+    if (executedPlugins && executedPlugins !== options.testingType) {
       debug('kill existing plugins process')
-      pluginsProcess.kill()
+      killPluginsProcess()
     }
 
     registeredEvents = {}
 
-    const pluginsFile = config.pluginsFile || path.join(__dirname, 'child', 'default_plugins_file.js')
-    const childIndexFilename = path.join(__dirname, 'child', 'index.js')
-    const childArguments = ['--file', pluginsFile, '--projectRoot', options.projectRoot]
-    const childOptions = {
-      stdio: 'pipe',
-      env: {
-        ...process.env,
-        NODE_OPTIONS: process.env.ORIGINAL_NODE_OPTIONS || '',
-      },
+    if (!pluginsProcess) {
+      // initialize process to read the config and re-use to run the plugins
+      await ctx.config.getOrCreateBaseConfig()
+      pluginsProcess = ctx.currentProject?.configChildProcess?.process
     }
 
-    if (config.resolvedNodePath) {
-      debug('launching using custom node version %o', _.pick(config, ['resolvedNodePath', 'resolvedNodeVersion']))
-      childOptions.execPath = config.resolvedNodePath
+    if (ctx.currentProject?.configChildProcess) {
+      ctx.currentProject.configChildProcess.executedPlugins = options.testingType
     }
 
-    debug('forking to run %s', childIndexFilename)
-
-    if (inspector.url()) {
-      childOptions.execArgv = _.chain(process.execArgv.slice(0))
-      .remove('--inspect-brk')
-      .push(`--inspect=${process.debugPort + 1}`)
-      .value()
-    }
-
-    pluginsProcess = cp.fork(childIndexFilename, childArguments, childOptions)
-
-    if (pluginsProcess.stdout && pluginsProcess.stderr) {
-      // manually pipe plugin stdout and stderr for dashboard capture
-      // @see https://github.com/cypress-io/cypress/issues/7434
-      pluginsProcess.stdout.on('data', (data) => process.stdout.write(data))
-      pluginsProcess.stderr.on('data', (data) => process.stderr.write(data))
-    } else {
-      debug('stdout and stderr not available on subprocess, the plugin launch should error')
+    if (!pluginsProcess) {
+      return
     }
 
     const ipc = util.wrapIpc(pluginsProcess)
+
+    ipc.send('plugins', options.testingType)
 
     for (let handler of handlers) {
       handler(ipc)
@@ -134,10 +119,14 @@ const init = (config, options) => {
     Object.keys(config).sort().forEach((key) => orderedConfig[key] = config[key])
     config = orderedConfig
 
-    ipc.send('load', config)
+    ipc.send('load:plugins', config)
 
-    ipc.on('loaded', (newCfg, registrations) => {
-      _.omit(config, 'projectRoot', 'configFile')
+    ipc.on('empty:plugins', () => {
+      resolve(null)
+    })
+
+    ipc.on('loaded:plugins', (newCfg, registrations) => {
+      newCfg = _.omit(newCfg, 'projectRoot', 'configFile')
 
       _.each(registrations, (registration) => {
         debug('register plugins process event', registration.event, 'with id', registration.eventId)
@@ -158,7 +147,7 @@ const init = (config, options) => {
               }
             }
 
-            ipc.send('execute', registration.event, ids, args)
+            ipc.send('execute:plugins', registration.event, ids, args)
           })
         })
       })
@@ -168,16 +157,11 @@ const init = (config, options) => {
       resolve(newCfg)
     })
 
-    ipc.on('load:error', (type, ...args) => {
+    ipc.on('load:error:plugins', (type, ...args) => {
       debug('load:error %s, rejecting', type)
 
       reject(errors.get(type, ...args))
     })
-
-    const killPluginsProcess = () => {
-      pluginsProcess && pluginsProcess.kill()
-      pluginsProcess = null
-    }
 
     const handleError = (err) => {
       debug('plugins process error:', err.stack)
@@ -186,7 +170,7 @@ const init = (config, options) => {
 
       killPluginsProcess()
 
-      err = errors.get('PLUGINS_UNEXPECTED_ERROR', config.pluginsFile, err.annotated || err.stack || err.message)
+      err = errors.get('SETUP_NODE_EVENTS_UNEXPECTED_ERROR', config.testingType, config.configFile, err.annotated || err.stack || err.message)
       err.title = 'Error running plugin'
 
       // this can sometimes trigger before the promise is fulfilled and
@@ -206,7 +190,7 @@ const init = (config, options) => {
     }
 
     pluginsProcess.on('error', handleError)
-    ipc.on('error', handleError)
+    ipc.on('error:plugins', handleError)
     ipc.on('warning', handleWarning)
 
     // see timers/parent.js line #93 for why this is necessary

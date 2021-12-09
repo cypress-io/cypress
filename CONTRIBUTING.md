@@ -274,7 +274,6 @@ Here is a list of the core packages in this repository with a short description,
  | Folder Name                           | Package Name            | Purpose                                                                      |
  | :------------------------------------ | :---------------------- | :--------------------------------------------------------------------------- |
  | [cli](./cli)                          | `cypress`               | The command-line tool that is packaged as an `npm` module.                   |
- | [desktop-gui](./packages/desktop-gui) | `@packages/desktop-gui` | The front-end code for the Cypress Desktop GUI.                              |
  | [driver](./packages/driver)           | `@packages/driver`      | The code that is used to drive the behavior of the API commands.             |
  | [electron](./packages/electron)       | `@packages/electron`    | The Cypress implementation of Electron.                                      |
  | [example](./packages/example)         | `@packages/example`     | Our example kitchen-sink application.                                        |
@@ -650,7 +649,7 @@ Below are some guidelines Cypress uses when reviewing dependency updates.
 
 ## Deployment
 
-We will try to review and merge pull requests quickly. If you want to know our build process or build your own Cypress binary, read [DEPLOY.md](./DEPLOY.md).
+We will try to review and merge pull requests quickly. If you want to know our build process or build your own Cypress binary, read [the "Release Process" guide](./guides/release-process.md).
 
 Independent packages are deployed immediately upon being merged into master. You can read more [above](#independent-packages-ci-workflow).
 

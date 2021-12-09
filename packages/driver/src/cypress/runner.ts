@@ -12,6 +12,7 @@ import $errUtils from './error_utils'
 import $stackUtils from './stack_utils'
 import { getResolvedTestConfigOverride } from '../cy/testConfigOverrides'
 import debugFn from 'debug'
+import { Emissions } from '@packages/types'
 
 const mochaCtxKeysRe = /^(_runnable|test)$/
 const betweenQuotesRe = /\"(.+?)\"/
@@ -1106,7 +1107,7 @@ export default {
     // only used during normalization
     const _runnables = []
     const _logsById = {}
-    let _emissions = {
+    let _emissions: Emissions = {
       started: {},
       ended: {},
     }
@@ -1666,7 +1667,7 @@ export default {
         }
       },
 
-      resumeAtTest (id, emissions = {}) {
+      resumeAtTest (id, emissions: Emissions = {}) {
         _resumedAtTestIndex = getTestIndexFromId(id)
 
         _emissions = emissions

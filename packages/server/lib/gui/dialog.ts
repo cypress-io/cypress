@@ -27,7 +27,7 @@ export const show = () => {
 }
 
 export const showSaveDialog = (integrationFolder: string) => {
-  // attach to the desktop-gui window so it displays as a modal rather than a standalone window
+  // attach to the launchpad window so it displays as a modal rather than a standalone window
   const window = getWindow('INDEX')
   const props: SaveDialogOptions = {
     defaultPath: path.join(integrationFolder, 'untitled.spec.js'),

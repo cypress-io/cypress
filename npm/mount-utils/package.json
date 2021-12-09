@@ -4,8 +4,9 @@
   "description": "Shared utilities for the various component testing adapters",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc",
-    "build-prod": "tsc",
+    "build": "tsc || echo 'built, with type errors'",
+    "build-prod": "tsc || echo 'built, with type errors'",
+    "check-ts": "tsc --noEmit",
     "watch": "tsc -w"
   },
   "dependencies": {},

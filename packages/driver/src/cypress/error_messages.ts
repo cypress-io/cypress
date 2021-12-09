@@ -21,7 +21,7 @@ const format = (data) => {
 
 const formatConfigFile = (configFile) => {
   if (configFile === false) {
-    return '`cypress.json` (currently disabled by --config-file=false)'
+    return '`cypress.config.{ts|js}` (currently disabled by --config-file=false)'
   }
 
   return `\`${format(configFile)}\``
@@ -836,6 +836,10 @@ export default {
     },
     invalid_new_command: {
       message: '`Cypress.Commands.add()` is used to create new commands, but `{{name}}` is an existing Cypress command.\n\nPlease use `Cypress.Commands.overwrite()` if you would like to overwrite an existing command.\n',
+      docsUrl: 'https://on.cypress.io/custom-commands',
+    },
+    reserved_command: {
+      message: '`Cypress.Commands.add()` cannot create a new command named `{{name}}` because that name is reserved internally by Cypress.',
       docsUrl: 'https://on.cypress.io/custom-commands',
     },
     invalid_overwrite: {

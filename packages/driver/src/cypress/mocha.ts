@@ -147,7 +147,7 @@ const setMochaProps = (specWindow, _mocha) => {
   // to the mocha instance for clarity
   m.Mocha = M
 
-  // this needs to be part of the configuration of cypress.json
+  // this needs to be part of the configuration of cypress.config.{ts|js}
   // we can't just forcibly use bdd
   return ui(specWindow, _mocha)
 }

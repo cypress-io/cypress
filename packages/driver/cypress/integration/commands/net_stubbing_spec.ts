@@ -968,7 +968,7 @@ describe('network stubbing', function () {
     context('cors preflight', function () {
       // a different domain from the page own domain
       // NOTE: this domain is redirected back to the local host test server
-      // using "hosts" setting in the "cypress.json" file
+      // using "hosts" setting in the "cypress.config.{ts|js}" file
       const corsUrl = 'http://diff.foobar.com:3501/no-cors'
 
       before(() => {
@@ -3220,8 +3220,8 @@ describe('network stubbing', function () {
         $.get('/foo')
         $.get('/foo')
       })
-      .wait('@foo.bar', { timeout: 100 })
-      .wait('@foo.bar', { timeout: 100 })
+      .wait('@foo.bar', { timeout: 500 })
+      .wait('@foo.bar', { timeout: 500 })
     })
 
     it('can incrementally wait on requests', function () {

@@ -34,8 +34,9 @@
 <script>
 import { ALL_TOPPINGS, PRESETS } from './toppings'
 
-const filterByName = (list, name) =>
-  list.filter(i => i.name === name)
+const filterByName = (list, name) => {
+  return list.filter((i) => i.name === name)
+}
 
 export default {
   data () {
@@ -51,22 +52,23 @@ export default {
     },
     getTopping (name) {
       return filterByName(ALL_TOPPINGS, name)[0]
-    }
+    },
   },
 
   created () {
     const presetName = this.$route.params.preset
-    this.selected = presetName ? PRESETS[presetName]: []
+
+    this.selected = presetName ? PRESETS[presetName] : []
 
     const selectedToppings = this.$route.query
+
     for (const toppingName of Object.keys(selectedToppings)) {
-      if(selectedToppings[toppingName] && !this.hasTopping(toppingName)) {
+      if (selectedToppings[toppingName] && !this.hasTopping(toppingName)) {
         const topping = this.getTopping(toppingName)
+
         this.selected.push(topping)
       }
     }
-  }
+  },
 }
 </script>
-
-

@@ -4,7 +4,8 @@ import { join, normalize, win32 } from 'path'
 import { get } from 'lodash'
 import { notInstalledErr } from '../errors'
 import { log } from '../log'
-import type { Browser, FoundBrowser, PathData } from '../types'
+import type { PathData } from '../types'
+import type { Browser, FoundBrowser } from '@packages/types'
 import { utils } from '../utils'
 
 function formFullAppPath (name: string) {
@@ -116,7 +117,7 @@ function getWindowsBrowser (browser: Browser): Promise<FoundBrowser> {
     const wmicVersion = /^Version=(\S+)$/
     const m = wmicVersion.exec(stdout)
 
-    if (m) {
+    if (m && m[1]) {
       return m[1]
     }
 
@@ -202,7 +203,11 @@ export function getVersionString (path: string) {
 
 export function getVersionNumber (version: string) {
   if (version.indexOf('Version=') > -1) {
-    return version.split('=')[1]
+    const split = version.split('=')
+
+    if (split[1]) {
+      return split[1]
+    }
   }
 
   return version

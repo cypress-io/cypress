@@ -2,13 +2,16 @@ require('../spec_helper')
 
 const plugins = require('../../lib/plugins')
 const Fixtures = require('@tooling/system-tests/lib/fixtures')
+const { getCtx } = require('../../lib/makeDataContext')
 
-const pluginsFile = Fixtures.projectPath('plugin-before-browser-launch-deprecation/cypress/plugins/index.js')
+let ctx
 
 describe('lib/plugins', () => {
   beforeEach(async () => {
+    ctx = getCtx()
     Fixtures.scaffoldProject('plugin-before-browser-launch-deprecation')
     await Fixtures.scaffoldCommonNodeModules()
+    ctx.actions.project.setActiveProjectForTestSetup(Fixtures.projectPath('plugin-before-browser-launch-deprecation'))
   })
 
   afterEach(() => {
@@ -19,7 +22,6 @@ describe('lib/plugins', () => {
     const onWarning = sinon.stub()
 
     const projectConfig = {
-      pluginsFile,
       env: {
         BEFORE_BROWSER_LAUNCH_HANDLER: 'return-array-mutation',
       },
@@ -30,7 +32,7 @@ describe('lib/plugins', () => {
       testingType: 'e2e',
     }
 
-    return plugins.init(projectConfig, options)
+    return plugins.init(projectConfig, options, ctx)
     .then(() => {
       return plugins.execute('before:browser:launch', {}, {
         args: [],

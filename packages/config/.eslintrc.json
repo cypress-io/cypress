@@ -1,6 +1,6 @@
 {
   "extends": [
-    "../../.eslintrc.json"
+    "../../.eslintrc.js"
   ],
   "parser": "@typescript-eslint/parser"
 }

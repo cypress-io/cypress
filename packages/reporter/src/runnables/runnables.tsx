@@ -8,9 +8,14 @@ import { RunnablesError, RunnablesErrorModel } from './runnable-error'
 import Runnable from './runnable-and-suite'
 import RunnableHeader from './runnable-header'
 import { RunnablesStore, RunnableArray } from './runnables-store'
+import statsStore, { StatsStore } from '../header/stats-store'
 import { Scroller } from '../lib/scroller'
 import { AppState } from '../lib/app-state'
 import FileOpener from '../lib/file-opener'
+
+import OpenIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/technology-code-editor_x16.svg'
+import StudioIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/object-magic-wand-dark-mode_x16.svg'
+import WarningIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/warning_x16.svg'
 
 const Loading = () => (
   <div className='runnable-loading'>
@@ -39,7 +44,7 @@ const RunnablesEmptyState = ({ spec, eventManager = events }: RunnablesEmptyStat
   return (
     <div className='no-tests'>
       <h2>
-        <i className='fas fa-exclamation-triangle' /> No tests found.
+        <WarningIcon className="warning-icon" />No tests found.
       </h2>
       <p>Cypress could not detect tests in this file.</p>
       { !isAllSpecs && (
@@ -51,10 +56,10 @@ const RunnablesEmptyState = ({ spec, eventManager = events }: RunnablesEmptyStat
             relativeFile: spec.relative,
             absoluteFile: spec.absolute,
           }}>
-            <h3><i className='fas fa-external-link-alt' /> Open file in IDE</h3>
+            <h3><OpenIcon />Open file in IDE</h3>
           </FileOpener>
           <p className='text-muted'>Write a test using your preferred text editor.</p>
-          <a className='open-studio' onClick={_launchStudio}><h3><i className='fas fa-magic' /> Create test with Cypress Studio</h3></a>
+          <a className='open-studio' onClick={_launchStudio}><h3><StudioIcon /> Create test with Cypress Studio</h3></a>
           <p className='open-studio-desc text-muted'>Use an interactive tool to author a test right here.</p>
         </>
       )}
@@ -109,6 +114,7 @@ const RunnablesContent = observer(({ runnablesStore, spec, error }: RunnablesCon
 export interface RunnablesProps {
   error?: RunnablesErrorModel
   runnablesStore: RunnablesStore
+  statsStore: StatsStore
   spec: Cypress.Cypress['spec']
   scroller: Scroller
   appState?: AppState
@@ -121,7 +127,7 @@ class Runnables extends Component<RunnablesProps> {
 
     return (
       <div ref='container' className='container'>
-        <RunnableHeader spec={spec} />
+        <RunnableHeader spec={spec} statsStore={statsStore} />
         <RunnablesContent
           runnablesStore={runnablesStore}
           spec={spec}

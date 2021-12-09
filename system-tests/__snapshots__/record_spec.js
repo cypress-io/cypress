@@ -259,7 +259,7 @@ We dynamically generated a new test to display this failure.
 exports['e2e record api interaction errors project 404 errors and exits 1'] = `
 We could not find a project with the ID: pid123
 
-This projectId came from your 'cypress.json' file or an environment variable.
+This projectId came from your 'cypress-with-project-id.config.js' file or an environment variable.
 
 Please log into the Dashboard and find your project.
 
@@ -369,7 +369,7 @@ https://on.cypress.io/how-do-i-record-runs
 exports['e2e record projectId errors and exits without projectId 1'] = `
 You passed the --record flag but this project has not been setup to record.
 
-This project is missing the 'projectId' inside of 'cypress.json'.
+This project is missing the 'projectId' inside of 'cypress.config.js'.
 
 We cannot uniquely identify this project without this id.
 
@@ -2641,9 +2641,7 @@ exports['e2e record empty specs succeeds when empty spec file 1'] = `
 `
 
 exports['e2e record misconfiguration errors and exits when no browser found 1'] = `
-Can't run because you've entered an invalid browser name.
-
-Browser: 'browserDoesNotExist' was not found on your system or is not supported by Cypress.
+The specified browser was not found on your system or is not supported by Cypress: \`browserDoesNotExist\`
 
 Cypress supports the following browsers:
 - chrome

@@ -102,13 +102,13 @@ module.exports = {
         const electronArgs = []
         const node11WindowsFix = isPlatform('win32')
 
+        let startScriptPath
+
         if (options.dev) {
+          executable = 'node'
           // if we're in dev then reset
           // the launch cmd to be 'npm run dev'
-          executable = 'node'
-          electronArgs.unshift(
-            path.resolve(__dirname, '..', '..', '..', 'scripts', 'start.js'),
-          )
+          startScriptPath = path.resolve(__dirname, '..', '..', '..', 'scripts', 'start.js'),
 
           debug('in dev mode the args became %o', args)
         }
@@ -118,6 +118,9 @@ module.exports = {
         }
 
         // strip dev out of child process options
+        /**
+         * @type {import('child_process').ForkOptions}
+         */
         let stdioOptions = _.pick(options, 'env', 'detached', 'stdio')
 
         // figure out if we're going to be force enabling or disabling colors.
@@ -141,9 +144,7 @@ module.exports = {
 
         if (stdioOptions.env.ELECTRON_RUN_AS_NODE) {
           // Since we are running electron as node, we need to add an entry point file.
-          const serverEntryPoint = path.join(state.getBinaryPkgPath(path.dirname(executable)), '..', 'index.js')
-
-          args = [serverEntryPoint, ...args]
+          startScriptPath = path.join(state.getBinaryPkgPath(path.dirname(executable)), '..', 'index.js')
         } else {
           // Start arguments with "--" so Electron knows these are OUR
           // arguments and does not try to sanitize them. Otherwise on Windows
@@ -152,8 +153,17 @@ module.exports = {
           args = [...electronArgs, '--', ...args]
         }
 
-        debug('spawning Cypress with executable: %s', executable)
+        if (startScriptPath) {
+          args.unshift(startScriptPath)
+        }
+
+        if (process.env.CYPRESS_INTERNAL_DEV_DEBUG) {
+          args.unshift(process.env.CYPRESS_INTERNAL_DEV_DEBUG)
+        }
+
         debug('spawn args %o %o', args, _.omit(stdioOptions, 'env'))
+        debug('spawning Cypress with executable: %s', executable)
+
         const child = cp.spawn(executable, args, stdioOptions)
 
         function resolveOn (event) {

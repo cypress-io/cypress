@@ -6,7 +6,7 @@
   "scripts": {
     "build": "webpack",
     "build-prod": "cross-env NODE_ENV=production yarn build",
-    "clean-deps": "rm -rf node_modules",
+    "clean-deps": "rimraf node_modules",
     "cypress:open": "node ../../scripts/cypress open",
     "cypress:run": "node ../../scripts/cypress run",
     "postinstall": "echo '@packages/runner needs: yarn build'",
@@ -55,10 +55,11 @@
     "prop-types": "15.7.2",
     "react": "16.8.6",
     "react-dom": "16.8.6",
+    "rimraf": "3.0.2",
     "sinon": "7.5.0",
     "sinon-chai": "3.3.0",
     "snap-shot-core": "10.2.1",
-    "webpack": "4.35.3",
+    "webpack": "^4.44.2",
     "webpack-cli": "3.3.2"
   },
   "files": [

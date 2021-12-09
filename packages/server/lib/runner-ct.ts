@@ -21,7 +21,7 @@ export const handle = (req, res) => {
   .pipe(res)
 }
 
-export const serve = (req, res, options: ServeOptions) => {
+export const makeServeConfig = (options) => {
   const config = {
     ...options.config,
     browser: options.getCurrentBrowser(),
@@ -37,19 +37,19 @@ export const serve = (req, res, options: ServeOptions) => {
 
   // base64 before embedding so user-supplied contents can't break out of <script>
   // https://github.com/cypress-io/cypress/issues/4952
+
   const base64Config = Buffer.from(JSON.stringify(config)).toString('base64')
+
+  return {
+    base64Config,
+    projectName: config.projectName,
+  }
+}
+
+export const serve = (req, res, options: ServeOptions) => {
+  const config = makeServeConfig(options)
 
   const runnerPath = process.env.CYPRESS_INTERNAL_RUNNER_PATH || getPathToIndex('runner-ct')
 
-  return res.render(runnerPath, {
-    base64Config,
-    projectName: config.projectName,
-  })
-}
-
-export const serveChunk = (req, res, options) => {
-  let { config } = options
-  let pathToFile = getPathToDist('runner-ct', req.originalUrl.replace(config.clientRoute, ''))
-
-  return send(req, pathToFile).pipe(res)
+  return res.render(runnerPath, config)
 }

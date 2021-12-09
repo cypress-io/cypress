@@ -7,7 +7,7 @@
     "build-for-tests": "webpack",
     "check-deps": "node ../../scripts/check-deps.js --verbose",
     "check-deps-pre": "npm run check-deps -- --prescript",
-    "clean-deps": "rm -rf node_modules",
+    "clean-deps": "rimraf node_modules",
     "cypress:open": "node ../../scripts/cypress open --project .",
     "cypress:run": "node ../../scripts/cypress run --project .",
     "pretest": "npm run check-deps-pre",
@@ -36,7 +36,8 @@
     "prop-types": "15.7.2",
     "react": "16.8.6",
     "react-dom": "16.8.6",
-    "webpack": "4.41.6",
+    "rimraf": "3.0.2",
+    "webpack": "^4.44.2",
     "webpack-cli": "3.3.11"
   }
 }

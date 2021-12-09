@@ -624,19 +624,21 @@ const createAndOpenProject = async (socketId, options) => {
 
   await checkAccess(projectRoot)
 
-  return openProjectCreate(projectRoot, socketId, options)
-  .then((open_project) => open_project.getProject())
-  .then((project) => {
-    return Promise.all([
-      project,
-      project.getConfig(),
-      getProjectId(project, projectId),
-    ]).then(([project, config, projectId]) => ({
-      project,
-      config,
-      projectId,
-    }))
-  })
+  const open_project = await openProjectCreate(projectRoot, socketId, options)
+  const project = await open_project.getProject()
+
+  const [_project, _config, _projectId] = await Promise.all([
+    project,
+    project.getConfig(),
+    getProjectId(project, projectId),
+  ])
+
+  return {
+    project: _project,
+    config: _config,
+    projectId: _projectId,
+    configFile: project.options.configFile,
+  }
 }
 
 const removeOldProfiles = (browser) => {
@@ -1477,7 +1479,8 @@ module.exports = {
           socketId: options.socketId,
           webSecurity: options.webSecurity,
           projectRoot: options.projectRoot,
-        }, options.testingType === 'e2e' || firstSpec),
+          // TODO(tim): investigate the socket disconnect
+        }, process.env.CYPRESS_INTERNAL_FORCE_BROWSER_RELAUNCH || options.testingType === 'e2e' || firstSpec),
       })
     })
   },
@@ -1532,7 +1535,7 @@ module.exports = {
       options.browsers = browsers
 
       return createAndOpenProject(socketId, options)
-      .then(({ project, projectId, config }) => {
+      .then(({ project, projectId, config, configFile }) => {
         debug('project created and opened with config %o', config)
 
         // if we have a project id and a key but record hasnt been given
@@ -1540,7 +1543,7 @@ module.exports = {
         recordMode.throwIfRecordParamsWithoutRecording(record, ciBuildId, parallel, group, tag)
 
         if (record) {
-          recordMode.throwIfNoProjectId(projectId, settings.configFile(options))
+          recordMode.throwIfNoProjectId(projectId, settings.configFile(options.configFile === undefined || options.configFile === null ? { configFile } : options))
           recordMode.throwIfIncorrectCiBuildIdUsage(ciBuildId, parallel, group)
           recordMode.throwIfIndeterminateCiBuildId(ciBuildId, parallel, group)
         }
@@ -1558,6 +1561,14 @@ module.exports = {
           trashAssets(config),
         ])
         .spread((sys = {}, browser = {}, specs = []) => {
+          // only want these properties
+          specs = specs.map((x) => ({
+            name: x.name,
+            relative: x.relative,
+            absolute: x.absolute,
+            specType: x.specType,
+          }))
+
           // return only what is return to the specPattern
           if (specPattern) {
             specPattern = specsUtil.default.getPatternRelativeToProjectRoot(specPattern, projectRoot)

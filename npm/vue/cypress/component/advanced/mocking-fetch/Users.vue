@@ -12,18 +12,18 @@
 
 <script>
 export default {
-  data() {
+  data () {
     return {
-      users: []
+      users: [],
     }
   },
 
-  created() {
+  created () {
     fetch('https://jsonplaceholder.cypress.io/users?_limit=3')
-    .then(response => response.json())
-    .then(list => {
+    .then((response) => response.json())
+    .then((list) => {
       this.users = list
     })
-  }
+  },
 }
 </script>

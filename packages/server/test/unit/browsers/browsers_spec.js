@@ -3,6 +3,7 @@ require('../../spec_helper')
 const browsers = require(`${root}../lib/browsers`)
 const utils = require(`${root}../lib/browsers/utils`)
 const snapshot = require('snap-shot-it')
+const { EventEmitter } = require('events')
 
 const normalizeBrowsers = (message) => {
   return message.replace(/(found on your system are:)(?:\n- .*)*/, '$1\n- chrome\n- firefox\n- electron')
@@ -22,7 +23,14 @@ after(() => {
 describe('lib/browsers/index', () => {
   context('.getBrowserInstance', () => {
     it('returns instance', () => {
-      const instance = { pid: 1234 }
+      const ee = new EventEmitter()
+
+      ee.kill = () => {
+        ee.emit('exit')
+      }
+
+      ee.pid = 1234
+      const instance = ee
 
       browsers._setInstance(instance)
 
@@ -49,19 +57,25 @@ describe('lib/browsers/index', () => {
 
   context('.ensureAndGetByNameOrPath', () => {
     it('returns browser by name', () => {
-      sinon.stub(utils, 'getBrowsers').resolves([
+      const foundBrowsers = [
         { name: 'foo', channel: 'stable' },
         { name: 'bar', channel: 'stable' },
-      ])
+      ]
 
-      return browsers.ensureAndGetByNameOrPath('foo')
+      return browsers.ensureAndGetByNameOrPath('foo', false, foundBrowsers)
       .then((browser) => {
         expect(browser).to.deep.eq({ name: 'foo', channel: 'stable' })
       })
     })
 
     it('throws when no browser can be found', () => {
-      return expect(browsers.ensureAndGetByNameOrPath('browserNotGonnaBeFound'))
+      const foundBrowsers = [
+        { name: 'chrome', channel: 'stable' },
+        { name: 'firefox', channel: 'stable' },
+        { name: 'electron', channel: 'stable' },
+      ]
+
+      return expect(browsers.ensureAndGetByNameOrPath('browserNotGonnaBeFound', false, foundBrowsers))
       .to.be.rejectedWith({ type: 'BROWSER_NOT_FOUND_BY_NAME' })
       .then((err) => {
         return snapshot(normalizeBrowsers(err.message))
@@ -69,13 +83,13 @@ describe('lib/browsers/index', () => {
     })
 
     it('throws a special error when canary is passed', () => {
-      sinon.stub(utils, 'getBrowsers').resolves([
+      const foundBrowsers = [
         { name: 'chrome', channel: 'stable' },
         { name: 'chrome', channel: 'canary' },
         { name: 'firefox', channel: 'stable' },
-      ])
+      ]
 
-      return expect(browsers.ensureAndGetByNameOrPath('canary'))
+      return expect(browsers.ensureAndGetByNameOrPath('canary', false, foundBrowsers))
       .to.be.rejectedWith({ type: 'BROWSER_NOT_FOUND_BY_NAME' })
       .then((err) => {
         return snapshot(err.message)
@@ -98,7 +112,7 @@ describe('lib/browsers/index', () => {
         // we will get good error message that includes the "err" object
         expect(err).to.have.property('type').to.eq('BROWSER_NOT_FOUND_BY_NAME')
 
-        expect(err).to.have.property('message').to.contain('\'foo-bad-bang\' was not found on your system')
+        expect(err).to.have.property('message').to.contain('The specified browser was not found on your system or is not supported by Cypress: `foo-bad-bang`')
       })
     })
   })

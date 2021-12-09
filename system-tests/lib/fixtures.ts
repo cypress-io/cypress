@@ -9,7 +9,7 @@ const root = _path.join(__dirname, '..')
 
 const serverRoot = _path.join(__dirname, '../../packages/server/')
 const projects = _path.join(root, 'projects')
-const tmpDir = _path.join(os.tmpdir(), 'cy-projects')
+let tmpDir = _path.join(os.tmpdir(), 'cy-projects')
 
 // copy contents instead of deleting+creating new file, which can cause
 // filewatchers to lose track of toFile.
@@ -175,7 +175,7 @@ export async function scaffoldProjectNodeModules (project: string, updateYarnLoc
 
   const runCmd = async (cmd) => {
     console.log(`📦 Running "${cmd}" in ${projectDir}`)
-    await execa.shell(cmd, { cwd: projectDir, stdio: 'inherit' })
+    await execa(cmd, { cwd: projectDir, stdio: 'inherit', shell: true })
   }
 
   const cacheDir = _path.join(cachedir('cy-system-tests-node-modules'), project, 'node_modules')
@@ -341,6 +341,10 @@ export function get (fixture, encoding: BufferEncoding = 'utf8') {
 
 export function path (fixture) {
   return _path.join(serverRoot, 'test', 'support', 'fixtures', fixture)
+}
+
+export function setTmpDir (dir: string) {
+  tmpDir = dir
 }
 
 export default module.exports

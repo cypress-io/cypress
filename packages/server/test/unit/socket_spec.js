@@ -3,7 +3,7 @@ require('../spec_helper')
 const _ = require('lodash')
 const path = require('path')
 const Promise = require('bluebird')
-const socketIo = require('@packages/socket')
+const socketIo = require('@packages/socket/lib/browser')
 const httpsAgent = require('https-proxy-agent')
 const errors = require(`${root}lib/errors`)
 const config = require(`${root}lib/config`)
@@ -18,13 +18,20 @@ const open = require(`${root}lib/util/open`)
 const Fixtures = require('@tooling/system-tests/lib/fixtures')
 const firefoxUtil = require(`${root}lib/browsers/firefox-util`).default
 const { createRoutes } = require(`${root}lib/routes`)
+const { getCtx } = require(`${root}lib/makeDataContext`)
+
+let ctx
 
 describe('lib/socket', () => {
   beforeEach(function () {
+    ctx = getCtx()
     Fixtures.scaffold()
 
     this.todosPath = Fixtures.projectPath('todos')
-    this.server = new ServerE2E(this.todosPath)
+
+    this.server = new ServerE2E(ctx)
+
+    ctx.actions.project.setActiveProjectForTestSetup(this.todosPath)
 
     return config.get(this.todosPath)
     .then((cfg) => {

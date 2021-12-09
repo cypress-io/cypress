@@ -35,7 +35,7 @@ Next, create a `cypress.json` with some basic configuration:
 
 Here we are adding some Component Testing specific options, hence the `"component"` key. `"componentFolder"` is where all the components and tests are located, and `"testFiles"` is the pattern to search for test files.
 
-The last thing we need to is tell Cypress to use `@cypress/webpack-dev-server` for component tests. Plugins are explained in detail in the [Cypress documentation](https://docs.cypress.io/guides/tooling/plugins-guide#Installing-plugins). By default plugins are loaded from `cypress/plugins/index.js`. Create that file and add:
+The last thing we need to is tell Cypress to use `@cypress/webpack-dev-server` for component tests. Plugins are explained in detail in the [Cypress documentation](https://on.cypress.io/installing-plugins). By default plugins are loaded from `cypress/plugins/index.js`. Create that file and add:
 
 ```js
 const devServer = require("@cypress/react/plugins/react-scripts")
@@ -66,12 +66,12 @@ it('renders learn react link', () => {
 });
 ```
 
-Most tests will start with `mount` from `@cypress/react`. This is similar to `render` in Testing Library. Once you've mounted your component, you can use Cypress' extensive [query and assertion APIs](https://docs.cypress.io/api/table-of-contents) to ensure everything behaves correctly. This example asserts an anchor tag with the text "Learn React" is rendered.
+Most tests will start with `mount` from `@cypress/react`. This is similar to `render` in Testing Library. Once you've mounted your component, you can use Cypress' extensive [query and assertion APIs](https://on.cypress.io/api) to ensure everything behaves correctly. This example asserts an anchor tag with the text "Learn React" is rendered.
 
 Open the component testing runner with:
 
 ```sh
-yarn cypress open-ct
+yarn cypress open --component
 ```
 
 And select the spec to run.
@@ -80,7 +80,7 @@ And select the spec to run.
 
 Try making a change - the tests will re-run instantly. You not only immediately know if the test passed or failed, but be able to visually inspect and debug any changes.
 
-You can run all the specs with `yarn cypress run-ct`. This is useful for executing all the specs in a CI environment, or one last check before you commit and push your code!
+You can run all the specs with `yarn cypress run --component`. This is useful for executing all the specs in a CI environment, or one last check before you commit and push your code!
 
 ## Discussion
 
@@ -90,13 +90,13 @@ Cypress Component Testing is an alternative to a jsdom based testing environment
 - Visual. You can see exactly what is rendered. No more scrolling through a cryptic terminal log to figure out what is rendered or to debug - just open the devtools and browse the DOM.
 - Powered by Cypress - the most popular and reliable E2E testing tool out there.
 
-It also doubles as a *design environment*. You can see the component as you develop it, and hot reload give you a near instance feedback loop. It can potentially take the place of not only your Jest based test infrastructure, but your Storybook based design infrastructure as well. 
+It also doubles as a *design environment*. You can see the component as you develop it, and hot reload give you a near instance feedback loop. It can potentially take the place of not only your Jest based test infrastructure, but your Storybook based design infrastructure as well.
 
 Cypress Component Testing is still in alpha but the product is quickly evolving and promises to change the landscape of Component Testing.
 
 ## Conclusion
 
-Cypress Component Testing brings everything that is great about Cypress to Component Testing. Since the underlying adapters are built on libraries like Webpack, you don't need to throw away your entire test suite - incremental migration is more than possible. 
+Cypress Component Testing brings everything that is great about Cypress to Component Testing. Since the underlying adapters are built on libraries like Webpack, you don't need to throw away your entire test suite - incremental migration is more than possible.
 
 The visual aspect united testing and design in a single tool. My days of grepping a messy console output to figure out what the user will see are over - I can see exactly what the component will look like as my tests run.
 

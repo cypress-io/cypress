@@ -9,7 +9,7 @@ import Bluebird from 'bluebird'
 import fse from 'fs-extra'
 import os from 'os'
 import snapshot from 'snap-shot-it'
-import { Browser } from '../../lib/types'
+import type { Browser } from '@packages/types'
 import { detectByPath } from '../../lib/detect'
 import { goalBrowsers } from '../fixtures'
 

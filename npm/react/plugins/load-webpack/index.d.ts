@@ -4,12 +4,13 @@ declare namespace legacyDevServer {
      * Location of the weppack.config Cypress should use
      */
     webpackFilename?: string
-  }
 
-  /**
-   * Type helper to make writing `CypressWebpackDevServerConfig` easier
-   */
-  function defineDevServerConfig(devServerConfig: CypressWebpackDevServerConfig): CypressWebpackDevServerConfig
+    /**
+     * Path to an index.html file that will serve as the template in
+     * which your components will be rendered.
+     */
+    indexHtml?: string
+  }
 
   /**
    * Sets up a webpack dev server with the proper configuration for babel transpilation

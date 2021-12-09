@@ -298,7 +298,7 @@ describe('lib/browsers/chrome', () => {
 
       return chrome.open('chrome', 'http://', {}, this.automation)
       .then(() => {
-        expect(this.launchedBrowser.kill).to.be.a('function')
+        expect(typeof this.launchedBrowser.kill).to.eq('function')
 
         return this.launchedBrowser.kill()
       }).then(() => {

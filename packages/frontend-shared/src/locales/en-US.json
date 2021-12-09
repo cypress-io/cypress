@@ -1,0 +1,401 @@
+{
+  "links": {
+    "learnMore": "Learn more.",
+    "needHelp": "Need help"
+  },
+  "components": {
+    "modal": {
+      "dismiss": "Dismiss"
+    },
+    "fileSearch": {
+      "noMatchesForExtension": "No files found when searching for the file extension",
+      "noMatchesForFileName": "",
+      "byFilenameInput": "Search by filename...",
+      "byExtensionInput": "Extensions to include e.g. *.tsx, *.vue",
+      "matchesIndicatorEmptyFileSearch": "No Matches | 1 Match | { denominator } Matches",
+      "matchesIndicator": "No Matches | {numerator} of {denominator} Matches | {numerator} of {denominator} Matches"
+    },
+    "button": {
+      "cancel": "Cancel"
+    },
+    "select": {
+      "placeholder": "Choose an option..."
+    },
+    "alert": {
+      "dismissAriaLabel": "Dismiss"
+    }
+  },
+  "clipboard": {
+    "copy": "Copy",
+    "copied": "Copied"
+  },
+  "actions": {
+    "close": "Close"
+  },
+  "file": {
+    "edit": "Edit",
+    "git": {
+      "modified": "Modified",
+      "added": "Added",
+      "created": "Created",
+      "unmodified": "Unmodified",
+      "deleted": "Deleted"
+    }
+  },
+  "status": {
+    "enabled": "Enabled",
+    "disabled": "Disabled"
+  },
+  "createSpec": {
+    "newSpec": "New Spec",
+    "updateSpecPattern": "Update Spec Pattern",
+    "newSpecModalTitle": "Create a new spec",
+    "successPage": {
+      "header": "Great! The spec was successfully added",
+      "runSpecButton": "Okay, run the spec",
+      "createAnotherSpecButton": "Create another spec"
+    },
+    "page": {
+      "defaultPatternNoSpecs": {
+        "title": "Create your first spec",
+        "component": {
+          "description": "Since this project looks new, we recommend that you get started by creating a spec for one of your components."
+        },
+        "e2e": {
+          "description": "Since this project looks new, we recommend that you use the specs and tests that we've written for you to get started."
+        }
+      },
+      "customPatternNoSpecs": {
+        "title": "No Specs Found",
+        "description": "We couldn’t find any files matching the following spec patterns. You may need to move your specs or update your {0} to find them."
+      }
+    },
+    "noSpecsMessage": "If you feel that you're seeing this screen in error, and there should be specs listed here, you likely need to update the spec pattern.",
+    "viewSpecPatternButton": "View spec pattern",
+    "e2e": {
+      "importFromScaffold": {
+        "header": "Scaffold example specs",
+        "description": "We'll generate several example specs to help guide you on how to write tests in Cypress.",
+        "specsAddedHeader": "Great! We added the following files to your project:",
+        "specsAddedButton": "Okay, I got it!",
+        "specsAddingHeader": "Adding Specs..."
+      },
+      "importEmptySpec": {
+        "header": "Create new empty spec",
+        "description": "We'll generate an empty spec file which can be used to start testing your application.",
+        "chooseFilenameHeader": "Choose a filename for this spec"
+      }
+    },
+    "component": {
+      "importFromStory": {
+        "header": "Create from story",
+        "description": "We'll generate a spec file from the Storybook files that you've written for each component in this project.",
+        "notSetupDescription": "We cannot import any stories because we couldn't detect Storybook in this project.",
+        "chooseAStoryHeader": "Choose a story"
+      },
+      "importFromComponent": {
+        "header": "Create from component",
+        "description": "We'll generate an empty spec file which can be used to import and test any component in this project.",
+        "chooseAComponentHeader": "Choose a component"
+      }
+    }
+  },
+  "specPage": {
+    "pageTitle": "Specs",
+    "newSpecButton": "New Spec",
+    "searchPlaceholder": "Search Specs",
+    "matchPlural": "Matches",
+    "matchSingular": "Match",
+    "componentSpecsHeader": "Component Specs",
+    "e2eSpecsHeader": "E2E Specs",
+    "gitStatusHeader": "Git Status",
+    "rows": {
+      "gitInfoWithAuthor": "{fileState} {timeAgo} by {author}",
+      "gitInfo": "{fileState} {timeAgo}"
+    }
+  },
+  "noResults": {
+    "defaultMessage": "No results matched your search",
+    "clearSearch": "Clear Search"
+  },
+  "sideBar": {
+    "keyboardShortcuts": {
+      "title": "Keyboard Shortcuts",
+      "rerun": "Re-run tests",
+      "stop": "Stop tests",
+      "toggle": "Toggle specs list"
+    }
+  },
+  "topNav": {
+    "released": "Released",
+    "version": "Version",
+    "installed": "Installed",
+    "latest": "Latest",
+    "seeAllReleases": "See all releases",
+    "runningOldVersion": "You're currently running an old version of Cypress. Update to the latest version for the best experience.",
+    "docsMenu": {
+      "docsHeading": "Docs",
+      "gettingStartedTitle": "Getting Started",
+      "firstTest": "Write your first test",
+      "testingApp": "Testing your app",
+      "organizingTests": "Organizing Tests",
+      "referencesTitle": "References",
+      "bestPractices": "Best Practices",
+      "configuration": "Configuration",
+      "api": "API",
+      "ciTitle": "Run in CI/CD",
+      "ciSetup": "Set up CI",
+      "fasterTests": "Run tests faster",
+      "smartOrchestration": "Smart Orchestration",
+      "prompts": {
+        "ci": {
+          "title": "Configure CI",
+          "description": "Optimize your tests in CI by following these guides.",
+          "seeOtherGuides": "See Other Guides",
+          "intro": "Introduction to CI",
+          "learnTheBasics": "Learn the basics of running Cypress in CI."
+        },
+        "orchestration": {
+          "title": "Run tests faster in CI",
+          "parallelTime": "5 mins",
+          "noParallelTime": "12 mins",
+          "withParallelization": "with Parallelization",
+          "withoutParallelization": "without Parallelization",
+          "intro": " With Smart Orchestration, you’ll be able to:",
+          "bullet1": "Run spec files in parallel",
+          "bullet2": "Prioritize failed specs to run first",
+          "bullet3": "Cancel CI runs on test failure",
+          "learnMore": "Learn more"
+        }
+      }
+    },
+    "login": {
+      "bodyInitial": "Logging in gives you access to the {0}. You can set up projects to be recorded and see test data from your project.",
+      "bodySuccess": "You are now logged in as {0}.",
+      "bodyError": "An error occurred while attempting to log in:",
+      "bodyBrowserError": "Cypress was unable to open your installed browser. To continue logging in, please paste this URL into your web browser:",
+      "dashboard": "Cypress Dashboard Service",
+      "titleInitial": "Log In To Cypress",
+      "titleSuccess": "Login Successful",
+      "titleFailed": "Login Failed",
+      "titleBrowserError": "Browser Error",
+      "actionLogin": "Log In",
+      "actionLogout": "Log Out",
+      "actionContinue": "Continue",
+      "actionOpening": "Opening Browser",
+      "actionWaiting": "Waiting for you to log in",
+      "actionTryAgain": "Try again",
+      "actionCancel": "Cancel"
+    },
+    "updateCypress": {
+      "title": "Upgrade to Cypress",
+      "currentlyRunning": "You are currently running Version {0} of Cypress. ",
+      "pasteToUpgradeProject": "To upgrade to the latest version for your project, first {0}, then paste the command below into your terminal:",
+      "pasteToUpgradeGlobal": "To upgrade to the latest version, first {0}, then paste the command below into your terminal:",
+      "rememberToCloseInsert": "close this app"
+    }
+  },
+  "launchpadErrors": {
+    "generic": {
+      "header": "Something went wrong",
+      "message": "It looks like there's some issues that need to be resolved before we continue. Please confirm that everything looks correct in your {0} file.",
+      "readTheDocsButton": "Read the docs",
+      "retryButton": "It's fixed now"
+    }
+  },
+  "setupPage": {
+    "projectSetup": {
+      "frameworkLabel": "Front-end Framework",
+      "frameworkPlaceholder": "Pick a framework",
+      "bundlerLabel": "Bundler",
+      "bundlerPlaceholder": "Pick a bundler",
+      "languageLabel": "Language"
+    },
+    "install": {
+      "startButton": "Install",
+      "confirmManualInstall": "I've installed them"
+    },
+    "step": {
+      "continue": "Continue",
+      "next": "Next Step",
+      "back": "Back"
+    },
+    "openBrowser": {
+      "launch": "Launch"
+    },
+    "configFile": {
+      "createManually": "Create file manually",
+      "skippedLabel": "Skipped",
+      "changesRequiredLabel": "Changes Required",
+      "changesRequiredBadge": "Changes required",
+      "changesRequiredDescription": "Please merge the code below with your existing {0}"
+    },
+    "testingCard": {
+      "configured": "Configured",
+      "notConfigured": "Not Configured"
+    }
+  },
+  "globalPage": {
+    "empty": {
+      "title": "Add Project",
+      "helper": "Get started by adding your first project below.",
+      "dropText": "Drag your project directory here or {0}",
+      "browseManually": "browse manually."
+    },
+    "done": "Done",
+    "selectPreferredEditor": "Select Preferred Editor",
+    "recentProjectsHeader": "Recent Projects",
+    "searchPlaceholder": "Search projects",
+    "addProjectButton": "Add Project",
+    "projectActions": "Project Actions",
+    "removeProject": "Remove Project",
+    "openInIDE": "Open In IDE",
+    "openInFinder": "Open In Finder",
+    "noResultsMessage": "No projects matched your search"
+  },
+  "welcomePage": {
+    "review": "Review the differences between each testing type",
+    "codeExample": "Code Example",
+    "compareTypes": {
+      "e2eTitle": "End-to-end Tests",
+      "e2ebullet1": "Visit URLs via",
+      "e2ebullet2": "Test flows and functionality across multiple pages.",
+      "e2ebullet3": "Ideal for testing integrated flows in CD workflows.",
+      "componentTitle": "Component Tests",
+      "ctBullet1": "Import components via",
+      "ctBullet2": "Test individual components of a design system in isolation",
+      "ctBullet3": "Ideal for testing isolated flows and components in CI"
+    }
+  },
+  "settingsPage": {
+    "config": {
+      "title": "Resolved Configuration",
+      "description": "Since the options in the {0} can be set dynamically by your development environment, please refer to the legend below to understand how the configuration options are resolved.",
+      "legend": {
+        "env": {
+          "label": "env",
+          "description": "Set from environment variables"
+        },
+        "default": {
+          "label": "default",
+          "description": "Default values"
+        },
+        "dynamic": {
+          "label": "dynamic",
+          "description": "Set by the {0} function"
+        },
+        "cli": {
+          "label": "cli",
+          "description": "Set from CLI arguments"
+        },
+        "config": {
+          "label": "config",
+          "description": "Set from {0}"
+        }
+      }
+    },
+    "proxy": {
+      "title": "Proxy Settings",
+      "description": "Cypress auto-detected the following proxy settings from your operating system.",
+      "bypassList": "Proxy Bypass List",
+      "proxyServer": "Proxy Server"
+    },
+    "editor": {
+      "title": "External Editor",
+      "description": "External editor to use for editing code opened when using Cypress.",
+      "noEditorSelectedPlaceholder": "Choose your editor..."
+    },
+    "projectId": {
+      "title": "Project ID",
+      "description": "The Project ID configured for this project inside of Cypress Cloud. {0}"
+    },
+    "specPattern": {
+      "title": "Spec Patterns",
+      "description": "The globs pointing Cypress App to your spec files configured for this project. {0}",
+      "defaultIndicator": "Default Values",
+      "matches": "{0} Matches"
+    },
+    "recordKey": {
+      "title": "Record Key",
+      "description": "The Record Key configured for this project inside of Cypress Cloud. {0}",
+      "manageKeys": "Manage Keys"
+    },
+    "project": {
+      "title": "Project Settings",
+      "description": "Review the configuration settings currently in use for this project."
+    },
+    "experiments": {
+      "title": "Experiments",
+      "description": "If you'd like to try out new features that we're working on, you can enable beta features for your project by turning on the experimental features you'd like to try. {0}",
+      "experimentalFetchPolyfill": {
+        "name": "Fetch Polyfill",
+        "description": "Automatically replaces `window.fetch` with a polyfill that Cypress can spy on and stub. Note: `experimentalFetchPolyfill` has been deprecated in Cypress 6.0.0 and will be removed in a future release. Consider using [`cy.intercept()`](https://on.cypress.io/intercept) to intercept `fetch` requests instead."
+      },
+      "experimentalInteractiveRunEvents": {
+        "name": "Interactive Run Events",
+        "description": "Allows listening to the [`before:run`](https://on.cypress.io/before-run), [`after:run`](https://on.cypress.io/after-run), [`before:spec`](https://on.cypress.io/before-spec), and [`after:spec`](https://on.cypress.io/after-spec) events in plugins during interactive mode."
+      },
+      "experimentalSessionSupport": {
+        "name": "Session",
+        "description": "Enable use of [`cy.session()`](https://on.cypress.io/session) and new behavior to handle caching and restoring cookies, localStorage, and sessionStorage."
+      },
+      "experimentalSourceRewriting": {
+        "name": "Source Rewriting",
+        "description": "Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement algorithm. See [#5273](https://github.com/cypress-io/cypress/issues/5273) for details."
+      },
+      "experimentalStudio": {
+        "name": "Studio",
+        "description": "Generate and save commands directly to your test suite by interacting with your app as an end user would. See [Cypress Studio](https://on.cypress.io/studio) for more details."
+      }
+    },
+    "device": {
+      "title": "Device Settings",
+      "description": "Review the configuration settings currently in use for this device."
+    },
+    "testingPreferences": {
+      "title": "Testing Preferences",
+      "description": "Configure your testing environment with these flags",
+      "autoScrollingEnabled": {
+        "title": "Auto Scrolling Enabled",
+        "description": "Scroll behavior when running tests."
+      }
+    },
+    "footer": {
+      "text": "You can reconfigure the settings for this project if you’re experiencing issues with your Cypress configuration.",
+      "button": "Reconfigure Project"
+    }
+  },
+  "runs": {
+    "connect": {
+      "title": "View your recorded runs from the Cypress Dashboard",
+      "smartText": "Scale your test runs with built-in smart orchestration.",
+      "debugText": "Debug tests that fail in CI with visual feedback.",
+      "chartText": "Keep your tests in tip-top shape with powerful analytics.",
+      "buttonUser": "Log in to the Cypress Dashboard",
+      "buttonProject": "Connect your project to the Cypress Dashboard"
+    },
+    "empty": {
+      "title": "Follow the steps below to record your first run to the Cypress Dashboard",
+      "step1": "Ensure that your {0} file contains the following code:",
+      "step2": "Ensure that your {0} file is checked into source control:",
+      "step3": "Run this command in your local development terminal or in CI:"
+    },
+    "results": {
+      "skipped": "skipped",
+      "pending": "pending",
+      "passed": "passed",
+      "failed": "failed"
+    }
+  },
+  "testingType": {
+    "modalTitle": "Choose a testing type",
+    "e2e": {
+      "name": "E2E Testing",
+      "description": "Build and test the entire experience of your application from end-to-end to each ensure each flow matches your expectations."
+    },
+    "component": {
+      "name": "Component Testing",
+      "description": "Build and test your components from your design system in isolation in order to ensure each state matches your expectations."
+    }
+  }
+}

@@ -232,12 +232,12 @@ describe('cypress', function () {
         })
       })
 
-      it('coerces --config-file cypress.json to string', async () => {
-        const args = 'cypress run --config-file cypress.json'.split(' ')
+      it('coerces --config-file cypress.config.js to string', async () => {
+        const args = 'cypress run --config-file cypress.config.js'.split(' ')
         const options = await cypress.cli.parseRunArguments(args)
 
         expect(options).to.deep.equal({
-          configFile: 'cypress.json',
+          configFile: 'cypress.config.js',
         })
       })
 

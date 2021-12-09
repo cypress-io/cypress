@@ -73,13 +73,24 @@ describe('shortcuts', function () {
       })
     })
 
-    it('focuses on specs', () => {
+    it('toggles the specs list', () => {
+      // 1. save:state should be emitted to preserve the change in state
+      // 2. the reporter appSate should be also be updated with the new value,
+      // checking the aria-expanded state of the button confirms this
+
       cy.get('body').then(() => {
-        expect(runner.emit).not.to.have.been.calledWith('focus:tests')
+        expect(runner.emit).not.to.have.been.calledWith('save:state')
+        cy.contains('button', 'Specs').should('have.attr', 'aria-expanded', 'true')
       })
 
       cy.get('body').type('f').then(() => {
-        expect(runner.emit).to.have.been.calledWith('focus:tests')
+        expect(runner.emit).to.have.been.calledWith('save:state')
+        cy.contains('button', 'Specs').should('have.attr', 'aria-expanded', 'false')
+      })
+
+      cy.get('body').type('f').then(() => {
+        expect(runner.emit).to.have.been.calledWith('save:state')
+        cy.contains('button', 'Specs').should('have.attr', 'aria-expanded', 'true')
       })
     })
 
@@ -105,9 +116,12 @@ describe('shortcuts', function () {
 
     it('toggles auto-scrolling', () => {
       cy.get('body').type('a')
-      cy.get('.toggle-auto-scrolling').should('not.have.class', 'auto-scrolling-enabled')
+      cy.get('.testing-preferences-toggle').click()
+      cy.get('[data-cy=auto-scroll-switch]').invoke('attr', 'aria-checked').should('eq', 'false')
+      cy.get('.testing-preferences-toggle').click()
       cy.get('body').type('a')
-      cy.get('.toggle-auto-scrolling').should('have.class', 'auto-scrolling-enabled')
+      cy.get('.testing-preferences-toggle').click()
+      cy.get('[data-cy=auto-scroll-switch]').invoke('attr', 'aria-checked').should('eq', 'true')
     })
 
     it('does not run shortcut if typed into an input', () => {
@@ -124,9 +138,9 @@ describe('shortcuts', function () {
     })
 
     it('has shortcut in tooltips', () => {
-      cy.get('.focus-tests > button').trigger('mouseover')
-      cy.get('.cy-tooltip').should('have.text', 'View All Tests F')
-      cy.get('.focus-tests > button').trigger('mouseout')
+      cy.get('.toggle-specs-wrapper > button').trigger('mouseover')
+      cy.get('.cy-tooltip').should('have.text', 'Collapse Specs List F')
+      cy.get('.toggle-specs-wrapper > button').trigger('mouseout')
 
       cy.get('button.restart').trigger('mouseover')
       cy.get('.cy-tooltip').should('have.text', 'Run All Tests R')

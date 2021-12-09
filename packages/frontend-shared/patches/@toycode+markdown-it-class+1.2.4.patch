@@ -1,0 +1,13 @@
+diff --git a/node_modules/@toycode/markdown-it-class/index.js b/node_modules/@toycode/markdown-it-class/index.js
+index 8e8c8f4..5e2539d 100644
+--- a/node_modules/@toycode/markdown-it-class/index.js
++++ b/node_modules/@toycode/markdown-it-class/index.js
+@@ -8,7 +8,7 @@ const toArray = a => (Array.isArray(a) ? a : [a])
+ 
+ function parseTokens(tokens) {
+   tokens.forEach(token => {
+-    if (/(_open$|image)/.test(token.type) && mapping[token.tag]) {
++    if (/(_open$|image|code_inline)/.test(token.type) && mapping[token.tag]) {
+       const orig = splitWithSpace(token.attrGet('class'))
+       const addition = toArray(mapping[token.tag])
+       token.attrSet('class', [...orig, ...addition].join(' '))

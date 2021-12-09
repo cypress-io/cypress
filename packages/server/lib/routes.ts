@@ -1,18 +1,23 @@
-import type httpProxy from 'http-proxy'
+import httpProxy from 'http-proxy'
+import _ from 'lodash'
 import Debug from 'debug'
 import { ErrorRequestHandler, Router } from 'express'
+import send from 'send'
+import { getPathToDist } from '@packages/resolve-dist'
 
 import type { SpecsStore } from './specs-store'
 import type { Browser } from './browsers/types'
 import type { NetworkProxy } from '@packages/proxy'
 import type { Cfg } from './project-base'
 import xhrs from './controllers/xhrs'
-import { runner } from './controllers/runner'
+import { runner, ServeOptions } from './controllers/runner'
 import { iframesController } from './controllers/iframes'
+import type { DataContext } from '@packages/data-context/src/DataContext'
 
 const debug = Debug('cypress:server:routes')
 
 export interface InitializeRoutes {
+  ctx: DataContext
   specsStore: SpecsStore
   config: Cfg
   getSpec: () => Cypress.Spec | null
@@ -34,9 +39,66 @@ export const createCommonRoutes = ({
   specsStore,
   getRemoteState,
   nodeProxy,
+  ctx,
   exit,
 }: InitializeRoutes) => {
+  const makeServeConfig = (options: Partial<ServeOptions>) => {
+    const config = {
+      ...options.config,
+      testingType,
+      browser: options.getCurrentBrowser?.(),
+      specs: options.specsStore?.specFiles,
+    } as Cfg
+
+    if (testingType === 'e2e') {
+      config.remote = getRemoteState()
+    }
+
+    // TODO: move the component file watchers in here
+    // and update them in memory when they change and serve
+    // them straight to the HTML on load
+
+    debug('serving runner index.html with config %o',
+      _.pick(config, 'version', 'platform', 'arch', 'projectName'))
+
+    // base64 before embedding so user-supplied contents can't break out of <script>
+    // https://github.com/cypress-io/cypress/issues/4952
+
+    const base64Config = Buffer.from(JSON.stringify(config)).toString('base64')
+
+    return {
+      base64Config,
+      projectName: config.projectName,
+    }
+  }
+
   const router = Router()
+
+  router.get(['/api', '/__/api'], (req, res) => {
+    const options = makeServeConfig({
+      config,
+      getCurrentBrowser,
+      specsStore,
+    })
+
+    res.json(options)
+  })
+
+  if (process.env.CYPRESS_INTERNAL_VITE_DEV) {
+    const proxy = httpProxy.createProxyServer({
+      target: `http://localhost:${process.env.CYPRESS_INTERNAL_VITE_APP_PORT}/`,
+    })
+
+    router.get('/__cypress/assets/*', (req, res) => {
+      proxy.web(req, res, {}, (e) => {})
+    })
+  } else {
+    router.get('/__cypress/assets/*', (req, res) => {
+      const pathToFile = getPathToDist('app', req.params[0])
+
+      return send(req, pathToFile).pipe(res)
+    })
+  }
 
   router.get('/__cypress/runner/*', (req, res) => {
     runner.handle(testingType, req, res)
@@ -65,15 +127,32 @@ export const createCommonRoutes = ({
   router.get(clientRoute, (req, res) => {
     debug('Serving Cypress front-end by requested URL:', req.url)
 
-    runner.serve(req, res, testingType === 'e2e' ? 'runner' : 'runner-ct', {
-      config,
-      testingType,
-      getSpec,
-      getCurrentBrowser,
-      getRemoteState,
-      specsStore,
-      exit,
-    })
+    if (process.env.LAUNCHPAD) {
+      ctx.html.appHtml()
+      .then((html) => res.send(html))
+      .catch((e) => res.status(500).send({ stack: e.stack }))
+    } else {
+      runner.serve(req, res, testingType === 'e2e' ? 'runner' : 'runner-ct', {
+        config,
+        testingType,
+        getSpec,
+        getCurrentBrowser,
+        getRemoteState,
+        specsStore,
+        exit,
+      })
+    }
+  })
+
+  // serve static assets from the dist'd Vite app
+  router.get([
+    `${clientRoute}assets/*`,
+    `${clientRoute}shiki/*`,
+  ], (req, res) => {
+    debug('proxying static assets %s, params[0] %s', req.url, req.params[0])
+    const pathToFile = getPathToDist('app', 'assets', req.params[0])
+
+    return send(req, pathToFile).pipe(res)
   })
 
   router.all('*', (req, res) => {
