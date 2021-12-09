@@ -127,7 +127,11 @@ export const create = (Cypress, state, timeout, clearTimeout, whenStable, finish
 
       // invoke the passed in retry fn
       // once we reach stability
-      return whenStable(fn)
+      state('inRetries', true)
+
+      return whenStable(fn).finally(() => {
+        state('inRetries', undefined)
+      })
     })
   },
 })

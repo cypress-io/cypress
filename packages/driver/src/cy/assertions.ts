@@ -152,15 +152,12 @@ export const create = (Cypress, cy) => {
       obj.end = true
       obj.error = error
 
-      // No snapshot is taken when an error occurs - if the assertion eventually
-      // fails entirely, retries.ts will take a single DOM snapshot at the end
-      // while doing it in here would trigger several unnecessary snapshots per
-      // second
+      // If we're in the middle of retrying a failing assertion, we don't want to
+      // take a snapshot every 50ms - we only need a snapshot when we pass or
+      // finally fail. If we're done retrying, retries.ts adds a snapshot to the
+      // as part of modifying the log message.
       // https://github.com/cypress-io/cypress/issues/18549
-
-      // TODO: But if we're in an assertion that doesn't retry, then no snapshot gets taken.
-      // Oops?
-      if (!error) {
+      if (!cy.state('inRetries')) {
         obj.snapshot = true
       }
     }
@@ -527,6 +524,7 @@ export const create = (Cypress, cy) => {
     assert (...args) {
       // if we've temporarily overridden assertions
       // then just bail early with this function
+
       const fn = cy.state('overrideAssert') || assertFn
 
       return fn.apply(this, args)
