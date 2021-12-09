@@ -515,7 +515,7 @@ export class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuer
         // temporary hack so that other tests expecting cross-origin
         // failures still fail as expected
         if (this.state('anticipateMultidomain')) {
-          return stability.isStable(true, 'load')
+          return cy.isStable(true, 'load')
         }
 
         let e = err
