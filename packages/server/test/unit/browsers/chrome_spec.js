@@ -300,10 +300,9 @@ describe('lib/browsers/chrome', () => {
       .then(() => {
         expect(this.launchedBrowser.kill).to.be.a('function')
 
-        return this.launchedBrowser.kill()
-      }).then(() => {
-        expect(this.criClient.close).to.be.calledOnce
+        this.launchedBrowser.kill()
 
+        expect(this.criClient.close).to.be.calledOnce
         expect(kill).to.be.calledOnce
       })
     })
