@@ -522,6 +522,8 @@ export = {
     /* @ts-expect-error */
     launchedBrowser.kill = (...args) => {
       debug('closing remote interface client')
+
+      criClient.close()
       debug('closing chrome')
 
       originalBrowserKill.apply(launchedBrowser, args)
