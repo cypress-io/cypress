@@ -21,11 +21,11 @@ process.once('exit', () => {
 })
 
 function removeOne<T> (a: Array<T>, predicate: (v: T) => boolean): T | void {
-  for (const i in a) {
+  for (let i = a.length - 1; i >= 0; i--) {
     const v = a[i]
 
     if (predicate(v)) {
-      a.splice(i as unknown as number, 1)
+      a.splice(i, 1)
 
       return v
     }
