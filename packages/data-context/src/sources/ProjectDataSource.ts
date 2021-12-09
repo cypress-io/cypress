@@ -11,6 +11,7 @@ import type { DataContext } from '..'
 function directoryWithinProject (projectRoot: string, globOrPath: string) {
   if (globOrPath.includes('*')) {
     const globPrefixDirectory = globOrPath.split('*')[0] ?? ''
+
     return path.join(projectRoot, globPrefixDirectory)
   }
 
@@ -21,17 +22,18 @@ function directoryWithinProject (projectRoot: string, globOrPath: string) {
 export function longestCommonPrefix (projectRoot: string, absolutes: string[]) {
   let prefix = absolutes.reduce((longest, candidate) => {
     if (candidate.length < longest.length) {
-      return candidate 
+      return candidate
     }
-    
+
     return longest
   }, projectRoot)
-  
+
   for (let str of absolutes) {
-    while (str.slice(0, prefix.length) != prefix) {
+    while (str.slice(0, prefix.length) !== prefix) {
       prefix = prefix.slice(0, -1)
     }
   }
+
   return prefix
 }
 
@@ -63,7 +65,6 @@ export function transformSpec (projectRoot: string, absolute: string, testingTyp
     absolute,
   }
 }
-
 
 export class ProjectDataSource {
   constructor (private ctx: DataContext) {}
@@ -98,9 +99,10 @@ export class ProjectDataSource {
     debug('found specs %o', specAbsolutePaths)
 
     let prefix = ''
+
     if (typeof specPattern === 'string' || Array.isArray(specPattern) && specPattern.length === 1) {
       prefix = directoryWithinProject(projectRoot, typeof specPattern === 'string' ? specPattern : specPattern[0]!)
-    } 
+    }
 
     const commonRoot = longestCommonPrefix(prefix, specAbsolutePaths)
 
@@ -116,7 +118,7 @@ export class ProjectDataSource {
       return
     }
 
-    return this.ctx.currentProject.specs?.find(x => x.absolute === absolute) 
+    return this.ctx.currentProject.specs?.find((x) => x.absolute === absolute)
   }
 
   async getResolvedConfigFields (projectRoot: string): Promise<ResolvedFromConfig[]> {
