@@ -65,3 +65,5 @@ export const create = (state, config, focused, snapshots) => {
     wrapNativeMethods,
   }
 }
+
+export interface IOverrides extends ReturnType<typeof create> {}

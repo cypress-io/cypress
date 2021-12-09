@@ -1,5 +1,5 @@
 import $Cypress from '../cypress'
-import $Cy from '../cypress/cy'
+import { $Cy } from '../cypress/cy'
 import $Commands from '../cypress/commands'
 import $Log from '../cypress/log'
 import { create as createFocused } from '../cy/focused'

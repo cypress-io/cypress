@@ -32,7 +32,7 @@ import { $Command } from './command'
 import { CommandQueue } from './command_queue'
 import { initVideoRecorder } from '../cy/video-recorder'
 import { TestConfigOverride } from '../cy/testConfigOverrides'
-import { create as createOverrides } from '../cy/overrides'
+import { create as createOverrides, IOverrides } from '../cy/overrides'
 
 const debugErrors = debugFn('cypress:driver:errors')
 
@@ -125,6 +125,8 @@ export class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuer
   config: any
   Cypress: any
   Cookies: any
+  autoRun: boolean
+
   devices: {
     keyboard: Keyboard
     mouse: Mouse
@@ -142,6 +144,7 @@ export class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuer
 
   retry: IRetries['retry']
 
+  $$: IJQuery['$$']
   getRemotejQueryInstance: IJQuery['getRemotejQueryInstance']
 
   getRemoteLocation: ILocation['getRemoteLocation']
@@ -198,6 +201,7 @@ export class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuer
   documentHasFocus: ReturnType<typeof createFocused>['documentHasFocus']
   interceptFocus: ReturnType<typeof createFocused>['interceptFocus']
   interceptBlur: ReturnType<typeof createFocused>['interceptBlur']
+  overrides: IOverrides
 
   private testConfigOverride: TestConfigOverride
   private commandFns: Record<string, Function> = {}
@@ -211,12 +215,12 @@ export class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuer
     this.config = config
     this.Cypress = Cypress
     this.Cookies = Cookies
+    this.autoRun = autoRun
     initVideoRecorder(Cypress)
 
     this.testConfigOverride = new TestConfigOverride()
 
     // bind methods
-    this.$$ = this.$$.bind(this)
     this.isCy = this.isCy.bind(this)
     this.fail = this.fail.bind(this)
     this.isStopped = this.isStopped.bind(this)
@@ -338,8 +342,9 @@ export class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuer
     this.onCssModified = snapshots.onCssModified
     this.onBeforeWindowLoad = snapshots.onBeforeWindowLoad
 
-    this.queue = new CommandQueue(state, this.timeout, this.whenStable, this.cleanup, this.fail, this.isCy)
     this.overrides = createOverrides(state, config, focused, snapshots)
+
+    this.queue = new CommandQueue(state, this.timeout, this.whenStable, this.cleanup, this.fail, this.isCy)
 
     setTopOnError(Cypress, this)
 
@@ -509,7 +514,7 @@ export class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuer
 
         // temporary hack so that other tests expecting cross-origin
         // failures still fail as expected
-        if (state('anticipateMultidomain')) {
+        if (this.state('anticipateMultidomain')) {
           return stability.isStable(true, 'load')
         }
 
@@ -660,7 +665,7 @@ export class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuer
           cy.warnMixingPromisesAndCommands()
         }
 
-        if (autoRun) {
+        if (cy.autoRun) {
           cy.queue.run()
         }
       }
