@@ -30,7 +30,7 @@ const onBeforeAppWindowLoad = (autWindow) => {
       version: '90.0.4430.212',
     },
   })
-  const cy = $Cy.create(specWindow, Cypress, Cypress.Cookies, Cypress.state, Cypress.config, false)
+  const cy = new $Cy(specWindow, Cypress, Cypress.Cookies, Cypress.state, Cypress.config, false)
 
   window.Cypress = Cypress
   window.cy = cy
