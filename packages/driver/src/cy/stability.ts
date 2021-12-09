@@ -9,10 +9,7 @@ export const create = (Cypress, state) => ({
 
     const whenStable = state('whenStable')
 
-    // if we are going back to stable and we have
-    // a whenStable callback
     if (stable && whenStable) {
-      // invoke it
       whenStable()
     }
 
@@ -20,28 +17,66 @@ export const create = (Cypress, state) => ({
 
     // we notify the outside world because this is what the runner uses to
     // show the 'loading spinner' during an app page loading transition event
-    return Cypress.action('cy:stability:changed', stable, event)
+    Cypress.action('cy:stability:changed', stable, event)
   },
 
   whenStable: (fn: () => any) => {
-    // if we are not stable
-    if (state('isStable') === false) {
-      return new Promise((resolve, reject) => {
-        // then when we become stable
-        return state('whenStable', () => {
-          // reset this callback function
-          state('whenStable', null)
-
-          // and invoke the original function
-          return Promise.try(fn)
-          .then(resolve)
-          .catch(reject)
-        })
-      })
+    if (state('isStable') !== false) {
+      return Promise.try(fn)
     }
 
-    // else invoke it right now
-    return Promise.try(fn)
+    return new Promise((resolve, reject) => {
+      // then when we become stable
+      state('whenStable', () => {
+        // reset this callback function
+        state('whenStable', null)
+
+        // and invoke the original function
+        Promise.try(fn)
+        .then(resolve)
+        .catch(reject)
+      })
+    })
+  },
+
+  isAnticipatingMultidomain (anticipating) {
+    if (state('anticipatingMultidomain') === anticipating) {
+      return
+    }
+
+    const whenAnticipatingMultidomain = state('whenAnticipatingMultidomain')
+
+    if (anticipating && whenAnticipatingMultidomain) {
+      whenAnticipatingMultidomain()
+    }
+
+    state('anticipatingMultidomain', anticipating)
+  },
+
+  whenStableOrAnticipatingMultidomain (fn) {
+    if (state('anticipatingMultidomain') || state('isStable') !== false) {
+      return Promise.try(fn)
+    }
+
+    return new Promise((resolve, reject) => {
+      let fulfilled = false
+
+      const onSignal = () => {
+        if (fulfilled) return
+
+        fulfilled = true
+
+        state('whenStable', null)
+        state('whenAnticipatingMultidomain', null)
+
+        Promise.try(fn)
+        .then(resolve)
+        .catch(reject)
+      }
+
+      state('whenStable', onSignal)
+      state('whenAnticipatingMultidomain', onSignal)
+    })
   },
 })
 

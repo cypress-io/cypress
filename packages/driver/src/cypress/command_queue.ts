@@ -63,16 +63,16 @@ const commandRunningFailed = (Cypress, state, err) => {
 export class CommandQueue extends Queue<Command> {
   state: any
   timeout: any
-  whenStable: any
+  stability: any
   cleanup: any
   fail: any
   isCy: any
 
-  constructor (state, timeout, whenStable, cleanup, fail, isCy) {
+  constructor (state, timeout, stability, cleanup, fail, isCy) {
     super()
     this.state = state
     this.timeout = timeout
-    this.whenStable = whenStable
+    this.stability = stability
     this.cleanup = cleanup
     this.fail = fail
     this.isCy = isCy
@@ -135,7 +135,7 @@ export class CommandQueue extends Queue<Command> {
     this.state('current', command)
     this.state('chainerId', command.get('chainerId'))
 
-    return this.whenStable(() => {
+    return this.stability.whenStableOrAnticipatingMultidomain(() => {
       this.state('nestedIndex', this.state('index'))
 
       return command.get('args')
@@ -315,7 +315,7 @@ export class CommandQueue extends Queue<Command> {
         // finished running if the application under
         // test is no longer stable because we cannot
         // move onto the next test until its finished
-        return this.whenStable(() => {
+        return this.stability.whenStableOrAnticipatingMultidomain(() => {
           Cypress.action('cy:command:queue:end')
 
           return null

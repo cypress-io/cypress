@@ -247,6 +247,8 @@ export class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuer
 
     this.isStable = stability.isStable
     this.whenStable = stability.whenStable
+    this.isAnticipatingMultidomain = stability.isAnticipatingMultidomain
+    this.whenAnticipatingMultidomain = stability.whenAnticipatingMultidomain
 
     const assertions = createAssertions(Cypress, this)
 
@@ -344,7 +346,7 @@ export class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuer
 
     this.overrides = createOverrides(state, config, focused, snapshots)
 
-    this.queue = new CommandQueue(state, this.timeout, this.whenStable, this.cleanup, this.fail, this.isCy)
+    this.queue = new CommandQueue(state, this.timeout, stability, this.cleanup, this.fail, this.isCy)
 
     setTopOnError(Cypress, this)
 
@@ -502,20 +504,23 @@ export class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuer
         // about:blank in a visit, we do need these
         this.contentWindowListeners(autWindow)
 
-        cy.Cypress.action('app:window:load', this.state('window'))
+        this.Cypress.action('app:window:load', this.state('window'))
 
         // we are now stable again which is purposefully
         // the last event we call here, to give our event
         // listeners time to be invoked prior to moving on
-        return this.isStable(true, 'load')
+        this.isStable(true, 'load')
       } catch (err) {
         // we failed setting the remote window props which
         // means the page navigated to a different domain
 
-        // temporary hack so that other tests expecting cross-origin
-        // failures still fail as expected
-        if (this.state('anticipateMultidomain')) {
-          return cy.isStable(true, 'load')
+        // we expect a cross-origin error and are setting things up
+        // elsewhere to handle running cross-domain, so don't fail
+        // because of it
+        if (this.state('anticipatingMultidomain')) {
+          this.isStable(true, 'load')
+
+          return
         }
 
         let e = err
