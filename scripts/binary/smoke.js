@@ -117,8 +117,8 @@ const runFailingProjectTest = function (buildAppExecutable, e2e) {
   console.log('running failing project test')
 
   const verifyScreenshots = function () {
-    const screenshot1 = path.join(e2e, 'cypress', 'screenshots', 'cypress', 'integration', 'simple_failing_spec.js', 'simple failing spec -- fails1 (failed).png')
-    const screenshot2 = path.join(e2e, 'cypress', 'screenshots', 'cypress', 'integration', 'simple_failing_spec.js', 'simple failing spec -- fails2 (failed).png')
+    const screenshot1 = path.join(e2e, 'cypress', 'screenshots', 'simple_failing_spec.js', 'simple failing spec -- fails1 (failed).png')
+    const screenshot2 = path.join(e2e, 'cypress', 'screenshots', 'simple_failing_spec.js', 'simple failing spec -- fails2 (failed).png')
 
     return Promise.all([
       fs.statAsync(screenshot1),

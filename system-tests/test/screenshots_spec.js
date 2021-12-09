@@ -70,7 +70,7 @@ describe('e2e screenshots', () => {
       return exec()
       .then(() => {
         const screenshot = (...paths) => {
-          return path.join(e2ePath, 'cypress', 'screenshots', 'cypress', 'integration', 'screenshots_spec.js', ...paths)
+          return path.join(e2ePath, 'cypress', 'screenshots', 'screenshots_spec.js', ...paths)
         }
 
         const screenshot1 = screenshot('black.png')
