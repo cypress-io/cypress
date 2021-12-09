@@ -20,6 +20,7 @@ describe('<NoSpecsPage />', () => {
             id: 'id',
             storybook: null,
             configFileAbsolutePath: '/usr/bin/cypress.config.ts',
+            configFilePath: 'cypress.config.ts',
             codeGenGlob: '**.vue',
             currentTestingType: 'component',
           }
@@ -52,6 +53,7 @@ describe('<NoSpecsPage />', () => {
             ...ctx.currentProject,
             config: {},
             configFileAbsolutePath: '/usr/bin/cypress.config.ts',
+            configFilePath: 'cypress.config.ts',
             id: 'id',
             storybook: null,
             codeGenGlob: '**.vue',

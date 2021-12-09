@@ -24,7 +24,7 @@
     "mocha-multi-reporters": "^1.5.1",
     "nyc": "14.1.1",
     "patch-package": "6.4.7",
-    "sass": "1.32.11",
+    "sass": "1.44.0",
     "sass-loader": "7.3.1",
     "vue": "3.2.6",
     "vue-loader": "16.2.0",

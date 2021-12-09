@@ -512,8 +512,6 @@ type LocalSettingsPreferences {
   preferredEditorBinary: String
   proxyBypass: String
   proxyServer: String
-  useDarkSidebar: Boolean
-  watchForSpecChange: Boolean
 }
 
 type Mutation {

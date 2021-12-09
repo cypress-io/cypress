@@ -34,7 +34,7 @@ const Fixtures = require('@tooling/system-tests/lib/fixtures')
  */
 const { getRunnerInjectionContents } = require(`@packages/resolve-dist`)
 const { createRoutes } = require(`${root}lib/routes`)
-const { makeLegacyDataContext } = require(`${root}lib/makeDataContext`)
+const { getCtx } = require(`${root}lib/makeDataContext`)
 
 zlib = Promise.promisifyAll(zlib)
 
@@ -83,7 +83,7 @@ describe('Routes', () => {
 
   beforeEach(async function () {
     await Fixtures.scaffoldCommonNodeModules()
-    ctx = makeLegacyDataContext()
+    ctx = getCtx()
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 
     sinon.stub(CacheBuster, 'get').returns('-123')

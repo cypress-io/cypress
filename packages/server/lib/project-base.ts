@@ -30,9 +30,8 @@ import devServer from './plugins/dev-server'
 import preprocessor from './plugins/preprocessor'
 import { SpecsStore } from './specs-store'
 import { checkSupportFile, getDefaultConfigFilePath } from './project_utils'
-import type { FoundBrowser, FoundSpec, OpenProjectLaunchOptions } from '@packages/types'
-import { makeLegacyDataContext } from './makeDataContext'
-import type { DataContext } from '@packages/data-context'
+import type { FoundBrowser, OpenProjectLaunchOptions, FoundSpec } from '@packages/types'
+import { DataContext, getCtx } from '@packages/data-context'
 
 // Cannot just use RuntimeConfigOptions as is because some types are not complete.
 // Instead, this is an interface of values that have been manually validated to exist
@@ -104,7 +103,7 @@ export class ProjectBase<TServer extends Server> extends EE {
     this.spec = null
     this.browser = null
     this.id = createHmac('sha256', 'secret-key').update(projectRoot).digest('hex')
-    this.ctx = options.ctx ?? makeLegacyDataContext()
+    this.ctx = getCtx()
 
     debug('Project created %o', {
       testingType: this.testingType,
@@ -676,10 +675,10 @@ export class ProjectBase<TServer extends Server> extends EE {
   async initializeConfig (browsers: FoundBrowser[] = []): Promise<Cfg> {
     // set default for "configFile" if undefined
     if (this.options.configFile === undefined || this.options.configFile === null) {
-      this.options.configFile = await getDefaultConfigFilePath(this.projectRoot, this.ctx)
+      this.options.configFile = await getDefaultConfigFilePath(this.projectRoot)
     }
 
-    let theCfg: Cfg = await config.get(this.projectRoot, this.options, this.ctx)
+    let theCfg: Cfg = await config.get(this.projectRoot, this.options)
 
     if (!theCfg.browsers || theCfg.browsers.length === 0) {
       // @ts-ignore - we don't know if the browser is headed or headless at this point.
