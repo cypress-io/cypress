@@ -517,7 +517,7 @@ export class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuer
         // we expect a cross-origin error and are setting things up
         // elsewhere to handle running cross-domain, so don't fail
         // because of it
-        if (this.state('anticipateMultidomain')) {
+        if (this.state('anticipatingMultidomain')) {
           this.isStable(true, 'load')
 
           return

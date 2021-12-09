@@ -13,15 +13,14 @@ describe('multidomain - rerun', () => {
     })
     .then(() => {
       const top = window.top!
-      const { hash } = top.location
 
       // @ts-ignore
       if (!top.hasRunOnce) {
         // @ts-ignore
         top.hasRunOnce = true
 
-        // hashchange causes the test to rerun
-        top.location.hash = `${hash}?rerun`
+        // cause a rerun event to occur by triggering a hash change
+        top.dispatchEvent(new Event('hashchange'))
 
         return
       }
