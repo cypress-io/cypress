@@ -8,6 +8,8 @@ const debug = Debug('cypress:data-context')
 
 import type { DataContext } from '..'
 
+type SpecWithRelativeRoot = FoundSpec & { relativeToCommonRoot: string }
+
 function directoryWithinProject (projectRoot: string, globOrPath: string) {
   if (globOrPath.includes('*')) {
     const globPrefixDirectory = globOrPath.split('*')[0] ?? ''
@@ -37,7 +39,7 @@ export function longestCommonPrefix (projectRoot: string, absolutes: string[]) {
   return prefix
 }
 
-export function transformSpec (projectRoot: string, absolute: string, testingType: Cypress.TestingType, commonRoot: string): FoundSpec {
+export function transformSpec (projectRoot: string, absolute: string, testingType: Cypress.TestingType, commonRoot: string): SpecWithRelativeRoot {
   const relative = path.relative(projectRoot, absolute).replace(/\\/g, '/')
   const parsedFile = path.parse(absolute)
   const fileExtension = path.extname(absolute)
