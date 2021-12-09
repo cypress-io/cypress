@@ -1,4 +1,4 @@
-import { DataContext, getCtx, setCtx } from '@packages/data-context'
+import { DataContext, getCtx, clearCtx, setCtx } from '@packages/data-context'
 import electron from 'electron'
 
 import specsUtil from './util/specs'
@@ -24,15 +24,7 @@ interface MakeDataContextOptions {
   modeOptions: AllModeOptions
 }
 
-let legacyDataContext: DataContext | undefined
-
-// For testing
-export async function clearLegacyDataContext () {
-  await legacyDataContext?.destroy()
-  legacyDataContext = undefined
-}
-
-export { getCtx, setCtx }
+export { getCtx, setCtx, clearCtx }
 
 export function makeDataContext (options: MakeDataContextOptions): DataContext {
   const ctx = new DataContext({
@@ -59,7 +51,7 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
     },
     projectApi: {
       getConfig (projectRoot: string, options?: SettingsOptions) {
-        return config.get(projectRoot, options, ctx)
+        return config.get(projectRoot, options)
       },
       launchProject (browser: FoundBrowser, spec: Cypress.Spec, options?: LaunchOpts) {
         return openProject.launch({ ...browser }, spec, options)

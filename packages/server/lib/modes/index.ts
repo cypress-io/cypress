@@ -1,4 +1,4 @@
-import { setCtx } from '@packages/data-context'
+import { clearCtx, setCtx } from '@packages/data-context'
 import { makeDataContext } from '../makeDataContext'
 
 export = (mode, options) => {
@@ -9,6 +9,9 @@ export = (mode, options) => {
   if (mode === 'smokeTest') {
     return require('./smoke_test').run(options)
   }
+
+  // When we're in testing mode, this is setup automatically as a beforeEach
+  clearCtx()
 
   const ctx = setCtx(makeDataContext({ mode: mode === 'run' ? mode : 'open', modeOptions: options }))
 

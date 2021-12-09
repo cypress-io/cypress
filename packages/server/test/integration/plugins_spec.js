@@ -9,7 +9,6 @@ let ctx
 describe('lib/plugins', () => {
   beforeEach(async () => {
     ctx = getCtx()
-    Fixtures.scaffold()
     Fixtures.scaffoldProject('plugin-before-browser-launch-deprecation')
     await Fixtures.scaffoldCommonNodeModules()
     ctx.actions.project.setActiveProjectForTestSetup(Fixtures.projectPath('plugin-before-browser-launch-deprecation'))

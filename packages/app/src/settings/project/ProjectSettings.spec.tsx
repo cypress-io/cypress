@@ -5,8 +5,8 @@ describe('<ProjectSettings />', () => {
   it('displays the project, record key, and experiments sections', () => {
     cy.mountFragment(ProjectSettingsFragmentDoc, {
       onResult (ctx) {
-        if (ctx.cloudProject) {
-          ctx.cloudProject.recordKeys = []
+        if (ctx.currentProject?.cloudProject) {
+          ctx.currentProject.cloudProject.recordKeys = []
         }
       },
       render: (gqlVal) => {

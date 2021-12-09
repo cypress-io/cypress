@@ -29,12 +29,3 @@ function reconfigure () {
   openElectron.executeMutation({})
 }
 </script>
-
-<route>
-{
-  name: "Settings Page",
-  meta: {
-    title: "Settings"
-  }
-}
-</route>

@@ -702,10 +702,10 @@ export class ProjectBase<TServer extends Server> extends EE {
   async initializeConfig (browsers: FoundBrowser[] = []): Promise<Cfg> {
     // set default for "configFile" if undefined
     if (this.options.configFile === undefined || this.options.configFile === null) {
-      this.options.configFile = await getDefaultConfigFilePath(this.projectRoot, this.ctx)
+      this.options.configFile = await getDefaultConfigFilePath(this.projectRoot)
     }
 
-    let theCfg: Cfg = await config.get(this.projectRoot, this.options, this.ctx)
+    let theCfg: Cfg = await config.get(this.projectRoot, this.options)
 
     if (!theCfg.browsers || theCfg.browsers.length === 0) {
       // @ts-ignore - we don't know if the browser is headed or headless at this point.

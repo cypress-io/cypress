@@ -273,14 +273,15 @@ export const STDOUT_DURATION_IN_TABLES_RE = /(\s+?)(\d+ms|\d+:\d+:?\d+)/g
 const diffRe = /Difference\n-{10}\n([\s\S]*)\n-{19}\nSaved snapshot text/m
 const expectedAddedVideoSnapshotLines = [
   'Warning: We failed processing this video.',
-  'This error will not alter the exit code.', '',
+  'This error will not alter the exit code.',
   'TimeoutError: operation timed out',
-  '[stack trace lines]', '', '',
+  '[stack trace lines]',
 ]
 const expectedDeletedVideoSnapshotLines = [
-  '(Video)', '',
+  '(Video)',
   '-  Started processing:  Compressing to 32 CRF',
 ]
+const sometimesAddedSpacingLine = ''
 const sometimesAddedVideoSnapshotLine = '│ Video:        false                                                                            │'
 const sometimesDeletedVideoSnapshotLine = '│ Video:        true                                                                             │'
 
@@ -303,8 +304,8 @@ const isVideoSnapshotError = (err: Error) => {
     if (line.charAt(0) === '-') deleted.push(line.slice(1).trim())
   }
 
-  _.pull(added, sometimesAddedVideoSnapshotLine)
-  _.pull(deleted, sometimesDeletedVideoSnapshotLine)
+  _.pull(added, sometimesAddedVideoSnapshotLine, sometimesAddedSpacingLine)
+  _.pull(deleted, sometimesDeletedVideoSnapshotLine, sometimesAddedSpacingLine)
 
   return _.isEqual(added, expectedAddedVideoSnapshotLines) && _.isEqual(deleted, expectedDeletedVideoSnapshotLines)
 }

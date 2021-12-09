@@ -86,7 +86,7 @@ export const getSpecUrl = ({
   specType ??= 'integration'
   browserUrl ??= ''
 
-  // App routes to spec with convention {browserUrl}#/runner?file={relativeSpecPath}
+  // App routes to spec with convention {browserUrl}#/specs/runner?file={relativeSpecPath}
   if (process.env.LAUNCHPAD) {
     if (!absoluteSpecPath) {
       return browserUrl
@@ -95,7 +95,7 @@ export const getSpecUrl = ({
     const relativeSpecPath = path.relative(projectRoot, path.resolve(projectRoot, absoluteSpecPath))
     .replace(backSlashesRe, '/')
 
-    return `${browserUrl}/#/runner?file=${relativeSpecPath}`
+    return `${browserUrl}/#/specs/runner?file=${relativeSpecPath}`
     .replace(multipleForwardSlashesRe, multipleForwardSlashesReplacer)
   }
 
