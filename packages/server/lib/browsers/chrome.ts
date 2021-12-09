@@ -520,13 +520,11 @@ export = {
     const originalBrowserKill = launchedBrowser.kill
 
     /* @ts-expect-error */
-    launchedBrowser.kill = async (...args) => {
+    launchedBrowser.kill = (...args) => {
       debug('closing remote interface client')
-
-      await criClient.close()
       debug('closing chrome')
 
-      await originalBrowserKill.apply(launchedBrowser, args)
+      originalBrowserKill.apply(launchedBrowser, args)
     }
 
     await this._maybeRecordVideo(criClient, options, browser.majorVersion)

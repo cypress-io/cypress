@@ -64,10 +64,6 @@ interface CRIWrapper {
    * @see https://github.com/cyrus-and/chrome-remote-interface#class-cdp
    */
   on (eventName: CRI.EventName, cb: Function): void
-  /**
-   * Calls underlying remote interface client close
-  */
-  close (): Bluebird<void>
 }
 
 interface Version {
@@ -191,7 +187,6 @@ export const create = Bluebird.method((target: websocketUrl, onAsynchronousError
       maybeDebugCdpMessages(cri)
 
       cri.send = Bluebird.promisify(cri.send, { context: cri })
-      cri.close = Bluebird.promisify(cri.close, { context: cri })
 
       // @see https://github.com/cyrus-and/chrome-remote-interface/issues/72
       cri._notifier.on('disconnect', reconnect)
@@ -254,11 +249,6 @@ export const create = Bluebird.method((target: websocketUrl, onAsynchronousError
         debug('registering CDP on event %o', { eventName })
 
         return cri.on(eventName, cb)
-      },
-      close () {
-        closed = true
-
-        return cri.close()
       },
     }
 
