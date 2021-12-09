@@ -3,6 +3,7 @@ import { FoundSpec, FrontendFramework, FRONTEND_FRAMEWORKS, ResolvedFromConfig, 
 import { scanFSForAvailableDependency } from 'create-cypress-tests'
 import path from 'path'
 import Debug from 'debug'
+import commonPathPrefix from 'common-path-prefix'
 
 const debug = Debug('cypress:data-context')
 
@@ -10,33 +11,22 @@ import type { DataContext } from '..'
 
 type SpecWithRelativeRoot = FoundSpec & { relativeToCommonRoot: string }
 
-function directoryWithinProject (projectRoot: string, globOrPath: string) {
-  if (globOrPath.includes('**')) {
-    const globPrefixDirectory = globOrPath.split('**')[0] ?? ''
+export function matchedSpecs (projectRoot: string, testingType: Cypress.TestingType, specAbsolutePaths: string[], specPattern: string | string[]): SpecWithRelativeRoot[] {
+  debug('found specs %o', specAbsolutePaths)
 
-    return path.join(projectRoot, globPrefixDirectory)
+  let commonRoot: string = ''
+
+  if (specAbsolutePaths.length === 1) {
+    commonRoot = path.dirname(specAbsolutePaths[0]!)
+  } else {
+    commonRoot = commonPathPrefix(specAbsolutePaths)
   }
 
-  return path.dirname(globOrPath)
-}
+  const specs = specAbsolutePaths.map((absolute) => {
+    return transformSpec(projectRoot, absolute, testingType, commonRoot)
+  })
 
-// adapted from https://stackoverflow.com/a/68702966
-export function longestCommonPrefix (projectRoot: string, absolutes: string[]) {
-  let prefix = absolutes.reduce((longest, candidate) => {
-    if (candidate.length < longest.length) {
-      return candidate
-    }
-
-    return longest
-  }, absolutes[0] || projectRoot)
-
-  for (let str of absolutes) {
-    while (str.slice(0, prefix.length) !== prefix) {
-      prefix = prefix.slice(0, -1)
-    }
-  }
-
-  return prefix
+  return specs
 }
 
 export function transformSpec (projectRoot: string, absolute: string, testingType: Cypress.TestingType, commonRoot: string): SpecWithRelativeRoot {
@@ -55,12 +45,15 @@ export function transformSpec (projectRoot: string, absolute: string, testingTyp
     name = name.slice(1)
   }
 
+  const LEADING_SLASH = /^\/|/g
+  const relativeToCommonRoot = absolute.replace(commonRoot, '').replace(LEADING_SLASH, '')
+
   return {
     fileExtension,
-    relativeToCommonRoot: absolute.replace(commonRoot, ''),
     baseName: parsedFile.base,
     fileName: parsedFile.base.replace(specFileExtension, ''),
     specFileExtension,
+    relativeToCommonRoot,
     specType: testingType === 'component' ? 'component' : 'integration',
     name,
     relative,
@@ -98,21 +91,7 @@ export class ProjectDataSource {
   async findSpecs (projectRoot: string, testingType: Cypress.TestingType, specPattern: string | string[]): Promise<FoundSpec[]> {
     const specAbsolutePaths = await this.ctx.file.getFilesByGlob(projectRoot, specPattern, { absolute: true })
 
-    debug('found specs %o', specAbsolutePaths)
-
-    let prefix = projectRoot
-
-    if (typeof specPattern === 'string' || Array.isArray(specPattern) && specPattern.length === 1) {
-      prefix = directoryWithinProject(projectRoot, typeof specPattern === 'string' ? specPattern : specPattern[0]!)
-    }
-
-    const commonRoot = longestCommonPrefix(prefix, specAbsolutePaths)
-
-    const specs = specAbsolutePaths.map<FoundSpec>((absolute) => {
-      return transformSpec(projectRoot, absolute, testingType, commonRoot)
-    })
-
-    return specs
+    return matchedSpecs(projectRoot, testingType, specAbsolutePaths, specPattern)
   }
 
   async getCurrentSpecByAbsolute (absolute: string) {

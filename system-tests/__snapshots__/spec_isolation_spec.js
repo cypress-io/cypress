@@ -82,17 +82,18 @@ Although you have test retries enabled, we do not retry tests when \`before all\
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/failing_hook_spec.js/simple failing hook spec -     (1280x720)
-     - beforeEach hooks -- never gets here (failed).png                                             
-  -  /XXX/XXX/XXX/cypress/screenshots/failing_hook_spec.js/simple failing hook spec -     (1280x720)
-     - beforeEach hooks -- never gets here -- before each hook (failed) (attempt 2).p               
-     ng                                                                                             
-  -  /XXX/XXX/XXX/cypress/screenshots/failing_hook_spec.js/simple failing hook spec -     (1280x720)
-     - afterEach hooks -- runs this -- after each hook (failed).png                                 
-  -  /XXX/XXX/XXX/cypress/screenshots/failing_hook_spec.js/simple failing hook spec -     (1280x720)
-     - afterEach hooks -- runs this -- after each hook (failed) (attempt 2).png                     
-  -  /XXX/XXX/XXX/cypress/screenshots/failing_hook_spec.js/simple failing hook spec -     (1280x720)
-     - after hooks -- fails on this -- after all hook (failed).png                                  
+  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook_spec.js/simple failing hook     (1280x720)
+      spec -- beforeEach hooks -- never gets here (failed).png                                      
+  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook_spec.js/simple failing hook     (1280x720)
+      spec -- beforeEach hooks -- never gets here -- before each hook (failed) (attem               
+     pt 2).png                                                                                      
+  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook_spec.js/simple failing hook     (1280x720)
+      spec -- afterEach hooks -- runs this -- after each hook (failed).png                          
+  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook_spec.js/simple failing hook     (1280x720)
+      spec -- afterEach hooks -- runs this -- after each hook (failed) (attempt 2).pn               
+     g                                                                                              
+  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook_spec.js/simple failing hook     (1280x720)
+      spec -- after hooks -- fails on this -- after all hook (failed).png                           
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -134,10 +135,10 @@ Although you have test retries enabled, we do not retry tests when \`before all\
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/retrying_spec.js/simple retrying spec -- t1 (fa     (1280x720)
-     iled).png                                                                                      
-  -  /XXX/XXX/XXX/cypress/screenshots/retrying_spec.js/simple retrying spec -- t1 (fa     (1280x720)
-     iled) (attempt 2).png                                                                          
+  -  /XXX/XXX/XXX/cypress/screenshots/simple_retrying_spec.js/simple retrying spec --     (1280x720)
+      t1 (failed).png                                                                               
+  -  /XXX/XXX/XXX/cypress/screenshots/simple_retrying_spec.js/simple retrying spec --     (1280x720)
+      t1 (failed) (attempt 2).png                                                                   
 
 
 ====================================================================================================
@@ -224,10 +225,10 @@ exports['e2e spec_isolation fails [electron] 1'] = {
       "video": null,
       "spec": {
         "fileExtension": ".js",
-        "relativeToCommonRoot": "passing_spec.js",
         "baseName": "simple_passing_spec.js",
         "fileName": "simple_passing_spec",
         "specFileExtension": ".js",
+        "relativeToCommonRoot": "simple_passing_spec.js",
         "specType": "integration",
         "name": "cypress/integration/simple_passing_spec.js",
         "relative": "cypress/integration/simple_passing_spec.js",
@@ -351,10 +352,10 @@ exports['e2e spec_isolation fails [electron] 1'] = {
       "video": null,
       "spec": {
         "fileExtension": ".js",
-        "relativeToCommonRoot": "hooks_spec.js",
         "baseName": "simple_hooks_spec.js",
         "fileName": "simple_hooks_spec",
         "specFileExtension": ".js",
+        "relativeToCommonRoot": "simple_hooks_spec.js",
         "specType": "integration",
         "name": "cypress/integration/simple_hooks_spec.js",
         "relative": "cypress/integration/simple_hooks_spec.js",
@@ -419,7 +420,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
                 {
                   "name": null,
                   "takenAt": "2018-02-01T20:14:19.323Z",
-                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/failing_spec.js/simple failing spec -- fails1 (failed).png",
+                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_spec.js/simple failing spec -- fails1 (failed).png",
                   "height": 720,
                   "width": 1280
                 }
@@ -459,7 +460,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
                 {
                   "name": null,
                   "takenAt": "2018-02-01T20:14:19.323Z",
-                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/failing_spec.js/simple failing spec -- fails2 (failed).png",
+                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_spec.js/simple failing spec -- fails2 (failed).png",
                   "height": 720,
                   "width": 1280
                 }
@@ -472,10 +473,10 @@ exports['e2e spec_isolation fails [electron] 1'] = {
       "video": null,
       "spec": {
         "fileExtension": ".js",
-        "relativeToCommonRoot": "failing_spec.js",
         "baseName": "simple_failing_spec.js",
         "fileName": "simple_failing_spec",
         "specFileExtension": ".js",
+        "relativeToCommonRoot": "simple_failing_spec.js",
         "specType": "integration",
         "name": "cypress/integration/simple_failing_spec.js",
         "relative": "cypress/integration/simple_failing_spec.js",
@@ -563,7 +564,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
                 {
                   "name": null,
                   "takenAt": "2018-02-01T20:14:19.323Z",
-                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/failing_hook_spec.js/simple failing hook spec -- beforeEach hooks -- never gets here -- before each hook (failed).png",
+                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.js/simple failing hook spec -- beforeEach hooks -- never gets here -- before each hook (failed).png",
                   "height": 720,
                   "width": 1280
                 }
@@ -624,7 +625,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
                 {
                   "name": null,
                   "takenAt": "2018-02-01T20:14:19.323Z",
-                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/failing_hook_spec.js/simple failing hook spec -- afterEach hooks -- runs this -- after each hook (failed).png",
+                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.js/simple failing hook spec -- afterEach hooks -- runs this -- after each hook (failed).png",
                   "height": 720,
                   "width": 1280
                 }
@@ -705,7 +706,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
                 {
                   "name": null,
                   "takenAt": "2018-02-01T20:14:19.323Z",
-                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/failing_hook_spec.js/simple failing hook spec -- after hooks -- fails on this -- after all hook (failed).png",
+                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.js/simple failing hook spec -- after hooks -- fails on this -- after all hook (failed).png",
                   "height": 720,
                   "width": 1280
                 }
@@ -718,10 +719,10 @@ exports['e2e spec_isolation fails [electron] 1'] = {
       "video": null,
       "spec": {
         "fileExtension": ".js",
-        "relativeToCommonRoot": "failing_hook_spec.js",
         "baseName": "simple_failing_hook_spec.js",
         "fileName": "simple_failing_hook_spec",
         "specFileExtension": ".js",
+        "relativeToCommonRoot": "simple_failing_hook_spec.js",
         "specType": "integration",
         "name": "cypress/integration/simple_failing_hook_spec.js",
         "relative": "cypress/integration/simple_failing_hook_spec.js",
@@ -831,7 +832,7 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
                 {
                   "name": null,
                   "takenAt": "2018-02-01T20:14:19.323Z",
-                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/failing_hook_spec.js/simple failing hook spec -- beforeEach hooks -- never gets here (failed).png",
+                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.js/simple failing hook spec -- beforeEach hooks -- never gets here (failed).png",
                   "height": 720,
                   "width": 1280
                 }
@@ -860,7 +861,7 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
                 {
                   "name": null,
                   "takenAt": "2018-02-01T20:14:19.323Z",
-                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/failing_hook_spec.js/simple failing hook spec -- beforeEach hooks -- never gets here -- before each hook (failed) (attempt 2).png",
+                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.js/simple failing hook spec -- beforeEach hooks -- never gets here -- before each hook (failed) (attempt 2).png",
                   "height": 720,
                   "width": 1280
                 }
@@ -921,7 +922,7 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
                 {
                   "name": null,
                   "takenAt": "2018-02-01T20:14:19.323Z",
-                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/failing_hook_spec.js/simple failing hook spec -- afterEach hooks -- runs this -- after each hook (failed).png",
+                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.js/simple failing hook spec -- afterEach hooks -- runs this -- after each hook (failed).png",
                   "height": 720,
                   "width": 1280
                 }
@@ -950,7 +951,7 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
                 {
                   "name": null,
                   "takenAt": "2018-02-01T20:14:19.323Z",
-                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/failing_hook_spec.js/simple failing hook spec -- afterEach hooks -- runs this -- after each hook (failed) (attempt 2).png",
+                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.js/simple failing hook spec -- afterEach hooks -- runs this -- after each hook (failed) (attempt 2).png",
                   "height": 720,
                   "width": 1280
                 }
@@ -1031,7 +1032,7 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
                 {
                   "name": null,
                   "takenAt": "2018-02-01T20:14:19.323Z",
-                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/failing_hook_spec.js/simple failing hook spec -- after hooks -- fails on this -- after all hook (failed).png",
+                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.js/simple failing hook spec -- after hooks -- fails on this -- after all hook (failed).png",
                   "height": 720,
                   "width": 1280
                 }
@@ -1044,10 +1045,10 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
       "video": null,
       "spec": {
         "fileExtension": ".js",
-        "relativeToCommonRoot": "failing_hook_spec.js",
         "baseName": "simple_failing_hook_spec.js",
         "fileName": "simple_failing_hook_spec",
         "specFileExtension": ".js",
+        "relativeToCommonRoot": "simple_failing_hook_spec.js",
         "specType": "integration",
         "name": "cypress/integration/simple_failing_hook_spec.js",
         "relative": "cypress/integration/simple_failing_hook_spec.js",
@@ -1112,7 +1113,7 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
                 {
                   "name": null,
                   "takenAt": "2018-02-01T20:14:19.323Z",
-                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/retrying_spec.js/simple retrying spec -- t1 (failed).png",
+                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_retrying_spec.js/simple retrying spec -- t1 (failed).png",
                   "height": 720,
                   "width": 1280
                 }
@@ -1141,7 +1142,7 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
                 {
                   "name": null,
                   "takenAt": "2018-02-01T20:14:19.323Z",
-                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/retrying_spec.js/simple retrying spec -- t1 (failed) (attempt 2).png",
+                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_retrying_spec.js/simple retrying spec -- t1 (failed) (attempt 2).png",
                   "height": 720,
                   "width": 1280
                 }
@@ -1173,10 +1174,10 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
       "video": null,
       "spec": {
         "fileExtension": ".js",
-        "relativeToCommonRoot": "retrying_spec.js",
         "baseName": "simple_retrying_spec.js",
         "fileName": "simple_retrying_spec",
         "specFileExtension": ".js",
+        "relativeToCommonRoot": "simple_retrying_spec.js",
         "specType": "integration",
         "name": "cypress/integration/simple_retrying_spec.js",
         "relative": "cypress/integration/simple_retrying_spec.js",
