@@ -25,7 +25,7 @@ export function fullMultidomain (domain) {
   return getRunnerMultidomainInjectionContents().then((contents) => {
     return oneLine`
       <script type='text/javascript'>
-        document.domain = '127.0.0.1';
+        document.domain = '${domain}';
 
         ${contents}
       </script>

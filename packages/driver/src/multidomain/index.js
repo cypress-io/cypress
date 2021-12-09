@@ -1,3 +1,9 @@
+import 'setimmediate'
+
+import '../config/bluebird'
+import '../config/jquery'
+import '../config/lodash'
+
 import $Cypress from '../cypress'
 import { $Cy } from '../cypress/cy'
 import $Commands from '../cypress/commands'

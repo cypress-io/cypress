@@ -8,7 +8,7 @@ describe('multidomain - rerun', () => {
   // https://github.com/cypress-io/cypress/issues/18043
   it('successfully reruns tests', () => {
     // @ts-ignore
-    cy.switchToDomain('127.0.0.1:3501', () => {
+    cy.switchToDomain('foobar.com', () => {
       cy.get('[data-cy="dom-check"]')
     })
     .then(() => {

@@ -13,7 +13,7 @@ import url from 'url'
 import la from 'lazy-ass'
 import type httpsProxy from '@packages/https-proxy'
 import { netStubbingState, NetStubbingState } from '@packages/net-stubbing'
-import { agent, clientCertificates, cors, httpUtils, uri } from '@packages/network'
+import { agent, clientCertificates, cors, httpUtils, uri, ParsedHost } from '@packages/network'
 import { NetworkProxy, BrowserPreRequest } from '@packages/proxy'
 import type { SocketCt } from './socket-ct'
 import errors from './errors'
@@ -122,7 +122,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
   protected _eventBus: EventEmitter
 
   protected _remoteAuth: unknown
-  protected _remoteProps: unknown
+  protected _remoteProps: ParsedHost | undefined | null
   protected _remoteOrigin: unknown
   protected _remoteStrategy: unknown
   protected _remoteVisitingUrl: unknown
@@ -486,9 +486,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
       // set an object with port, tld, and domain properties
       // as the remoteHostAndPort
       this._remoteProps = cors.parseUrlIntoDomainTldPort(this._remoteOrigin)
-
-      // @ts-ignore
-      this._remoteDomainName = _.compact([this._remoteProps.domain, this._remoteProps.tld]).join('.')
+      this._remoteDomainName = cors.getDomainNameFromParsedHost(this._remoteProps)
 
       l('remoteOrigin', this._remoteOrigin)
       l('remoteHostAndPort', this._remoteProps)

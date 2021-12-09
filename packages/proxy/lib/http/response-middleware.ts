@@ -48,8 +48,6 @@ function getNodeCharsetFromResponse (headers: IncomingHttpHeaders, body: Buffer)
 
 function reqMatchesOriginPolicy (req: CypressIncomingRequest, remoteState) {
   if (remoteState.strategy === 'http') {
-    if (req.proxiedUrl.includes('127.0.0.1:3501')) return true
-
     return cors.urlMatchesOriginPolicyProps(req.proxiedUrl, remoteState.props)
   }
 
@@ -228,12 +226,11 @@ const PatchExpressSetHeader: ResponseMiddleware = function () {
 }
 
 const MaybeDelayForMultidomain: ResponseMiddleware = function () {
+  const isCrossDomain = !reqMatchesOriginPolicy(this.req, this.getRemoteState())
   const isHTML = resContentTypeIs(this.incomingRes, 'text/html')
   const isRenderedHTML = reqWillRenderHtml(this.req)
 
-  // in the future, this will be any cross-origin url instead of
-  // a hard-coded one
-  if (this.req.proxiedUrl.includes('127.0.0.1:3501') && (isHTML || isRenderedHTML)) {
+  if (isCrossDomain && (isHTML || isRenderedHTML)) {
     this.debug('is cross-domain, delay until domain:ready event')
 
     this.serverBus.once('ready:for:domain', () => {
@@ -272,16 +269,16 @@ const SetInjectionLevel: ResponseMiddleware = function () {
 
     const isHTML = resContentTypeIs(this.incomingRes, 'text/html')
 
-    if (!isHTML || !isReqMatchOriginPolicy) {
-      this.debug('- no injection (%s, %s)', isHTML ? 'is html' : 'not html', isReqMatchOriginPolicy ? 'origin match' : 'no origin match')
-
-      return false
-    }
-
-    if (this.req.proxiedUrl.includes('127.0.0.1:3501')) {
+    if (!isReqMatchOriginPolicy && (isHTML || isRenderedHTML)) {
       this.debug('- multidomain injection')
 
       return 'fullMultidomain'
+    }
+
+    if (!isHTML) {
+      debug('- no injection (not html)')
+
+      return false
     }
 
     if (this.res.isInitial) {
@@ -438,7 +435,7 @@ const MaybeInjectHtml: ResponseMiddleware = function () {
     const nodeCharset = getNodeCharsetFromResponse(this.incomingRes.headers, body)
     const decodedBody = iconv.decode(body, nodeCharset)
     const injectedBody = await rewriter.html(decodedBody, {
-      domainName: this.getRemoteState().domainName,
+      domainName: cors.getDomainNameFromUrl(this.req.proxiedUrl),
       wantsInjection: this.res.wantsInjection,
       wantsSecurityRemoved: this.res.wantsSecurityRemoved,
       isHtml: isHtml(this.incomingRes),

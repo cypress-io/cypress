@@ -181,7 +181,7 @@ export default class Iframes extends Component {
     this._addIframe({
       id,
       $container: $(this.refs.container),
-      src: `http://${domain}/${this.props.config.namespace}/multidomain-iframes/${encodeURIComponent(domain)}`,
+      src: `//${domain}/${this.props.config.namespace}/multidomain-iframes/${encodeURIComponent(domain)}`,
     })
   }
 

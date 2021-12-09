@@ -3,7 +3,7 @@ describe('multidomain', { experimentalSessionSupport: true }, () => {
   const expectTextMessage = (expected, done) => {
     const onMessage = (event) => {
       if (event.data && event.data.actual !== undefined) {
-        expect(event.data.host).to.equal('127.0.0.1:3501')
+        expect(event.data.host).to.equal('foobar.com')
         expect(event.data.actual).to.equal(expected)
 
         top!.removeEventListener('message', onMessage)
@@ -23,7 +23,7 @@ describe('multidomain', { experimentalSessionSupport: true }, () => {
 
   it('runs commands in secondary domain', () => {
     // @ts-ignore
-    cy.switchToDomain('127.0.0.1:3501', () => {
+    cy.switchToDomain('foobar.com', () => {
       cy
       .get('[data-cy="dom-check"]')
       .invoke('text')
@@ -35,7 +35,7 @@ describe('multidomain', { experimentalSessionSupport: true }, () => {
 
   it('sets up window.Cypress in secondary domain', () => {
     // @ts-ignore
-    cy.switchToDomain('127.0.0.1:3501', () => {
+    cy.switchToDomain('foobar.com', () => {
       cy
       .get('[data-cy="cypress-check"]')
       .invoke('text')
@@ -48,7 +48,7 @@ describe('multidomain', { experimentalSessionSupport: true }, () => {
       expectTextMessage('form:submitted', done)
 
       // @ts-ignore
-      cy.switchToDomain('127.0.0.1:3501', () => {
+      cy.switchToDomain('foobar.com', () => {
         Cypress.on('form:submitted', () => {
           top!.postMessage({ host: location.host, actual: 'form:submitted' }, '*')
         })
@@ -61,7 +61,7 @@ describe('multidomain', { experimentalSessionSupport: true }, () => {
       expectTextMessage('window:before:unload', done)
 
       // @ts-ignore
-      cy.switchToDomain('127.0.0.1:3501', () => {
+      cy.switchToDomain('foobar.com', () => {
         Cypress.on('window:before:unload', () => {
           top!.postMessage({ host: location.host, actual: 'window:before:unload' }, '*')
         })
@@ -78,7 +78,7 @@ describe('multidomain', { experimentalSessionSupport: true }, () => {
       expectTextMessage('window:unload', done)
 
       // @ts-ignore
-      cy.switchToDomain('127.0.0.1:3501', () => {
+      cy.switchToDomain('foobar.com', () => {
         Cypress.on('window:unload', () => {
           top!.postMessage({ host: location.host, actual: 'window:unload' }, '*')
         })
@@ -93,7 +93,7 @@ describe('multidomain', { experimentalSessionSupport: true }, () => {
       expectTextMessage('navigation:changed', done)
 
       // @ts-ignore
-      cy.switchToDomain('127.0.0.1:3501', () => {
+      cy.switchToDomain('foobar.com', () => {
         Cypress.on('navigation:changed', () => {
           top!.postMessage({ host: location.host, actual: 'navigation:changed' }, '*')
         })
@@ -108,7 +108,7 @@ describe('multidomain', { experimentalSessionSupport: true }, () => {
       expectTextMessage('window:alert the alert text', done)
 
       // @ts-ignore
-      cy.switchToDomain('127.0.0.1:3501', () => {
+      cy.switchToDomain('foobar.com', () => {
         Cypress.on('window:alert', (text) => {
           top!.postMessage({ host: location.host, actual: `window:alert ${text}` }, '*')
         })
@@ -123,7 +123,7 @@ describe('multidomain', { experimentalSessionSupport: true }, () => {
       expectTextMessage('window:confirm the confirm text', done)
 
       // @ts-ignore
-      cy.switchToDomain('127.0.0.1:3501', () => {
+      cy.switchToDomain('foobar.com', () => {
         Cypress.on('window:confirm', (text) => {
           top!.postMessage({ host: location.host, actual: `window:confirm ${text}` }, '*')
         })
@@ -138,7 +138,7 @@ describe('multidomain', { experimentalSessionSupport: true }, () => {
       expectTextMessage('window:confirmed the confirm text - true', done)
 
       // @ts-ignore
-      cy.switchToDomain('127.0.0.1:3501', () => {
+      cy.switchToDomain('foobar.com', () => {
         Cypress.on('window:confirmed', (text, returnedFalse) => {
           top!.postMessage({ host: location.host, actual: `window:confirmed ${text} - ${returnedFalse}` }, '*')
         })
@@ -159,7 +159,7 @@ describe('multidomain', { experimentalSessionSupport: true }, () => {
       expectTextMessage('window:confirmed the confirm text - false', done)
 
       // @ts-ignore
-      cy.switchToDomain('127.0.0.1:3501', () => {
+      cy.switchToDomain('foobar.com', () => {
         Cypress.on('window:confirmed', (text, returnedFalse) => {
           top!.postMessage({ host: location.host, actual: `window:confirmed ${text} - ${returnedFalse}` }, '*')
         })
