@@ -6,26 +6,22 @@ describe('Launchpad: Setup Project', () => {
     cy.setupE2E('todos')
     cy.visitLaunchpad()
 
-    cy.get('h1').should('contain', WIZARD_STEPS.find((s) => s.type === 'welcome').title)
-    cy.get('h2').should('contain', 'E2E Testing')
-    cy.get('h2').should('contain', 'Component Testing')
+    cy.contains(WIZARD_STEPS.find((s) => s.type === 'welcome').title).should('be.visible')
+    cy.contains('E2E Testing').should('be.visible')
+    cy.contains('Component Testing').should('be.visible')
   })
 
   it('welcome page has button to learn about testing types', () => {
     cy.setupE2E('todos')
     cy.visitLaunchpad()
 
-    cy.get('button.hocus-link-default')
-    .should('contain', defaultMessages.welcomePage.review)
-    .click()
+    cy.contains(defaultMessages.welcomePage.review).click()
 
-    cy.get('h2').should('contain', 'Key Differences')
+    cy.contains('Key Differences').should('be.visible')
 
     cy.intercept('POST', 'mutation-GlobalPage_OpenInFinder').as('OpenInFinder')
 
-    cy.get('a[href="https://on.cypress.io"]')
-    .should('contain', 'Need help?')
-    .click()
+    cy.contais('button', 'Need help?').click()
 
     cy.wait('@OpenInFinder')
   })
