@@ -9,6 +9,9 @@ import menu from '../gui/menu'
 import * as Windows from '../gui/windows'
 import { makeGraphQLServer } from '@packages/graphql/src/makeGraphQLServer'
 import { DataContext, globalPubSub, getCtx } from '@packages/data-context'
+import type { LaunchArgs, PlatformName } from '@packages/types'
+import { EventEmitter } from 'events'
+import Events from '../gui/events'
 
 const isDev = () => {
   // TODO: (tim) ensure the process.env.LAUNCHPAD gets removed before release
@@ -148,14 +151,14 @@ export = {
       return Windows.open(projectRoot, port, this.getWindowArgs(state))
       .then((win) => {
         ctx?.actions.electron.setBrowserWindow(win)
-        // Events.start({
-        //   ...(options as LaunchArgs),
-        //   onFocusTests () {
-        //     // @ts-ignore
-        //     return app.focus({ steal: true }) || win.focus()
-        //   },
-        //   os: os.platform() as PlatformName,
-        // }, bus)
+        Events.start({
+          ...(options as LaunchArgs),
+          onFocusTests () {
+            // @ts-ignore
+            return app.focus({ steal: true }) || win.focus()
+          },
+          os: os.platform() as PlatformName,
+        }, new EventEmitter())
 
         return win
       })
