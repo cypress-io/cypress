@@ -364,5 +364,18 @@ export const mutation = mutationType({
         return true
       },
     })
+
+    t.field('setProjectIdInConfigFile', {
+      description: 'Set the projectId field in the config file of the current project',
+      type: 'Boolean',
+      args: {
+        projectId: nonNull(stringArg()),
+      },
+      resolve: (_, args, ctx) => {
+        ctx.actions.projectConfig.setProjectId(args.projectId)
+
+        return true
+      },
+    })
   },
 })

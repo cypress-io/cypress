@@ -6,6 +6,7 @@ import pDefer from 'p-defer'
 
 import type { DataContext } from '..'
 import inspector from 'inspector'
+import { insertValuesInConfigFile } from '../util/config-file-updater'
 
 interface ForkConfigProcessOptions {
   projectRoot: string
@@ -138,5 +139,23 @@ export class ProjectConfigDataActions {
       on: emitter.on.bind(emitter),
       removeListener: emitter.removeListener.bind(emitter),
     }
+  }
+
+  async setProjectId (projectId: string) {
+    const project = this.ctx.currentProject
+
+    if (!project) {
+      throw new Error('Can\'t update projectId without current project')
+    }
+
+    const configFilePath = await this.ctx.config.getDefaultConfigBasename(project.projectRoot)
+
+    await insertValuesInConfigFile(
+      path.resolve(project.projectRoot, configFilePath),
+      { projectId },
+      this.ctx._apis.projectApi.error,
+    )
+
+    // TODO: refresh config object
   }
 }
