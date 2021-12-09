@@ -371,8 +371,12 @@ export const mutation = mutationType({
       args: {
         projectId: nonNull(stringArg()),
       },
-      resolve: (_, args, ctx) => {
-        ctx.actions.projectConfig.setProjectId(args.projectId)
+      resolve: async (_, args, ctx) => {
+        try {
+          await ctx.actions.projectConfig.setProjectId(args.projectId)
+        } catch (e) {
+          return false
+        }
 
         return true
       },
