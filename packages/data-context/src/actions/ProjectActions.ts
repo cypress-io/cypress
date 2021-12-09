@@ -1,5 +1,5 @@
 import type { CodeGenType, MutationAddProjectArgs, MutationSetProjectPreferencesArgs, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
-import type { AllModeOptions, FindSpecs, FoundBrowser, FoundSpec, FullConfig, LaunchOpts, OpenProjectLaunchOptions, Preferences, SettingsOptions } from '@packages/types'
+import type { InitializeProjectOptions, FindSpecs, FoundBrowser, FoundSpec, FullConfig, LaunchOpts, OpenProjectLaunchOptions, Preferences, SettingsOptions } from '@packages/types'
 import execa from 'execa'
 import path from 'path'
 import type { ActiveProjectShape, ProjectShape } from '../data/coreDataShape'
@@ -16,7 +16,7 @@ export interface ProjectApiShape {
    * TODO(tim): figure out what this is actually doing, it seems it's necessary in
    *   order for CT to startup
    */
-  initializeProject(args: AllModeOptions, options: OpenProjectLaunchOptions, browsers: FoundBrowser[]): Promise<unknown>
+  initializeProject(args: InitializeProjectOptions, options: OpenProjectLaunchOptions, browsers: FoundBrowser[]): Promise<unknown>
   launchProject(browser: FoundBrowser, spec: Cypress.Spec, options: LaunchOpts): void
   insertProjectToCache(projectRoot: string): void
   removeProjectFromCache(projectRoot: string): void
@@ -163,7 +163,7 @@ export class ProjectActions {
 
     const browsers = [...(this.ctx.browserList ?? [])]
 
-    const allModeOptionsWithLatest: AllModeOptions = {
+    const allModeOptionsWithLatest: InitializeProjectOptions = {
       ...this.ctx.modeOptions,
       projectRoot: this.ctx.currentProject.projectRoot,
       testingType: this.ctx.wizardData.chosenTestingType,

@@ -38,3 +38,8 @@ export interface OpenModeOptions extends CommonModeOptions {
 }
 
 export type AllModeOptions = RunModeOptions & OpenModeOptions
+
+export type InitializeProjectOptions = Partial<AllModeOptions> & {
+  projectRoot: string
+  testingType: TestingType
+}
