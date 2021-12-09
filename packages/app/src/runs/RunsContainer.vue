@@ -1,25 +1,27 @@
 <template>
-  <RunsConnectSuccessAlert
-    v-if="currentProject"
-    :gql="currentProject"
-  />
-  <RunsConnect
-    v-if="!currentProject?.projectId || !cloudViewer?.id"
-    :gql="props.gql"
-  />
-  <RunsEmpty
-    v-else-if="!currentProject?.cloudProject?.runs?.nodes.length"
-    :gql="currentProject"
-  />
-  <div
-    v-else
-    data-cy="runs"
-  >
-    <RunCard
-      v-for="run of currentProject?.cloudProject?.runs?.nodes"
-      :key="run.id"
-      :gql="run"
+  <div>
+    <RunsConnectSuccessAlert
+      v-if="currentProject"
+      :gql="currentProject"
     />
+    <RunsConnect
+      v-if="!currentProject?.projectId || !cloudViewer?.id"
+      :gql="props.gql"
+    />
+    <RunsEmpty
+      v-else-if="!currentProject?.cloudProject?.runs?.nodes.length"
+      :gql="currentProject"
+    />
+    <div
+      v-else
+      data-cy="runs"
+    >
+      <RunCard
+        v-for="run of currentProject?.cloudProject?.runs?.nodes"
+        :key="run.id"
+        :gql="run"
+      />
+    </div>
   </div>
 </template>
 
