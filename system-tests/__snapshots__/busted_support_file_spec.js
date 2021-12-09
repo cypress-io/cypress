@@ -1,4 +1,20 @@
 exports['e2e busted support file passes 1'] = `
+{ specPattern: 'cypress/integration/**/*' }
+{
+  matched: [
+    {
+      fileExtension: '.js',
+      baseName: 'app_spec.js',
+      fileName: 'app_spec',
+      specFileExtension: '.js',
+      relativeToCommonRoot: 'app_spec.js',
+      specType: 'integration',
+      name: 'cypress/integration/app_spec.js',
+      relative: 'cypress/integration/app_spec.js',
+      absolute: '/foo/bar/.projects/busted-support-file/cypress/integration/app_spec.js'
+    }
+  ]
+}
 
 ====================================================================================================
 
@@ -8,6 +24,7 @@ exports['e2e busted support file passes 1'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (app_spec.js)                                                              │
+  │ Searched:   cypress/integration/**/*                                                           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -23,18 +40,18 @@ The error was:
 
 Error: Webpack Compilation Error
 ./cypress/support/index.js
-Module not found: Error: Can't resolve './does/not/exist' in '/foo/bar/.projects/busted-support-file/cypress/support'
+Module not found: Error: Can't resolve './does/not/exist' in '/private/foo/bar/.projects/busted-support-file/cypress/support'
 Looked for and couldn't find the file at the following paths:
-[/foo/bar/.projects/busted-support-file/cypress/support/package.json]
-[/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist/package.json]
-[/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist]
-[/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.js]
-[/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.json]
-[/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.jsx]
-[/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.mjs]
-[/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.coffee]
-[/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.ts]
-[/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.tsx]
+[/private/foo/bar/.projects/busted-support-file/cypress/support/package.json]
+[/private/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist/package.json]
+[/private/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist]
+[/private/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.js]
+[/private/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.json]
+[/private/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.jsx]
+[/private/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.mjs]
+[/private/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.coffee]
+[/private/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.ts]
+[/private/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.tsx]
  @ ./cypress/support/index.js 3:0-27
  
       [stack trace lines]

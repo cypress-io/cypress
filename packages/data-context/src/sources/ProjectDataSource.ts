@@ -11,7 +11,17 @@ import type { DataContext } from '..'
 
 type SpecWithRelativeRoot = FoundSpec & { relativeToCommonRoot: string }
 
-export function matchedSpecs (projectRoot: string, testingType: Cypress.TestingType, specAbsolutePaths: string[], specPattern: string | string[]): SpecWithRelativeRoot[] {
+interface MatchedSpecs {
+  projectRoot: string
+  testingType: Cypress.TestingType
+  specAbsolutePaths: string[]
+  specPattern: string | string[]
+}
+export function matchedSpecs ({
+  projectRoot,
+  testingType,
+  specAbsolutePaths,
+}: MatchedSpecs): SpecWithRelativeRoot[] {
   debug('found specs %o', specAbsolutePaths)
 
   let commonRoot: string = ''
@@ -91,7 +101,14 @@ export class ProjectDataSource {
   async findSpecs (projectRoot: string, testingType: Cypress.TestingType, specPattern: string | string[]): Promise<FoundSpec[]> {
     const specAbsolutePaths = await this.ctx.file.getFilesByGlob(projectRoot, specPattern, { absolute: true })
 
-    return matchedSpecs(projectRoot, testingType, specAbsolutePaths, specPattern)
+    const matched = matchedSpecs({
+      projectRoot,
+      testingType,
+      specAbsolutePaths,
+      specPattern,
+    })
+
+    return matched
   }
 
   async getCurrentSpecByAbsolute (absolute: string) {
