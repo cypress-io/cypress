@@ -480,7 +480,7 @@ export class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuer
     // proxy has not injected Cypress.action('window:before:load')
     // so Cypress.onBeforeAppWindowLoad() was never called
     return $autIframe.on('load', () => {
-      if (state('isStable')) {
+      if (this.state('isStable')) {
         // Chromium 97+ triggers fires iframe onload for cross-origin-initiated same-document
         // navigations to make it appear to be a cross-document navigation, even when it wasn't
         // to alleviate security risk where a cross-origin initiator can check whether
