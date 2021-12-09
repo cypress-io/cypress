@@ -1,73 +1,22 @@
-import * as path from 'path'
+import { stripIndent } from '@packages/server/lib/util/strip_indent'
 import { expect } from 'chai'
-import '../../spec_helper'
+import { insertValueInJSString } from '../../src/util/config-file-updater'
 
-import { fs } from '../../../lib/util/fs'
-import { insertValueInJSString, insertValuesInConfigFile } from '../../../lib/util/config-file-updater'
-import { stripIndent } from '../../../lib/util/strip_indent'
-const projectRoot = process.cwd()
-const defaultOptions = {
-  configFile: 'cypress.json',
+const errors = {
+  get (type: string) {
+    const err = new Error(type) as any
+
+    err.type = type
+
+    return err
+  },
 }
 
 describe('lib/util/config-file-updater', () => {
-  context('with default configFile option', () => {
-    beforeEach(function () {
-      this.setup = (obj = {}) => {
-        return fs.writeJson('cypress.json', obj)
-      }
-    })
-
-    afterEach(() => {
-      return fs.removeAsync('cypress.json')
-    })
-
-    context('.insertValuesInConfigFile', () => {
-      it('promises cypress.json updates', function () {
-        return this.setup().then(() => {
-          return insertValuesInConfigFile(projectRoot, { foo: 'bar' }, defaultOptions)
-        }).then((obj) => {
-          expect(obj).to.deep.eq({ foo: 'bar' })
-        })
-      })
-
-      it('only writes over conflicting keys', function () {
-        return this.setup({ projectId: '12345', autoOpen: true })
-        .then(() => {
-          return insertValuesInConfigFile(projectRoot, { projectId: 'abc123' }, defaultOptions)
-        }).then((obj) => {
-          expect(obj).to.deep.eq({ projectId: 'abc123', autoOpen: true })
-        })
-      })
-    })
-  })
-
-  context('with configFile: false', () => {
-    beforeEach(function () {
-      this.projectRoot = path.join(projectRoot, '_test-output/path/to/project/')
-
-      this.options = {
-        configFile: false,
-      }
-    })
-
-    it('.insertValuesInConfigFile does not create a file', function () {
-      return insertValuesInConfigFile(this.projectRoot, {}, this.options)
-      .then(() => {
-        return fs.access(path.join(this.projectRoot, 'cypress.json'))
-        .then(() => {
-          throw Error('file shuold not have been created here')
-        }).catch((err) => {
-          expect(err.code).to.equal('ENOENT')
-        })
-      })
-    })
-  })
-
   context('with js files', () => {
     describe('#insertValueInJSString', () => {
       describe('es6 vs es5', () => {
-        it('finds the object litteral and adds the values to it es6', async () => {
+        it('finds the object literal and adds the values to it es6', async () => {
           const src = stripIndent`\
               export default {
                 foo: 42,
@@ -82,7 +31,7 @@ describe('lib/util/config-file-updater', () => {
             }
           `
 
-          const output = await insertValueInJSString(src, { projectId: 'id1234', viewportWidth: 400 })
+          const output = await insertValueInJSString(src, { projectId: 'id1234', viewportWidth: 400 }, errors)
 
           expect(output).to.equal(expectedOutput)
         })
@@ -102,7 +51,7 @@ describe('lib/util/config-file-updater', () => {
             }
           `
 
-          const output = await insertValueInJSString(src, { projectId: 'id1234', viewportWidth: 400 })
+          const output = await insertValueInJSString(src, { projectId: 'id1234', viewportWidth: 400 }, errors)
 
           expect(output).to.equal(expectedOutput)
         })
@@ -122,7 +71,7 @@ describe('lib/util/config-file-updater', () => {
               }
             `
 
-          const output = await insertValueInJSString(src, { projectId: 'id1234', viewportWidth: 400 })
+          const output = await insertValueInJSString(src, { projectId: 'id1234', viewportWidth: 400 }, errors)
 
           expect(output).to.equal(expectedOutput)
         })
@@ -146,7 +95,7 @@ describe('lib/util/config-file-updater', () => {
               })
             `
 
-          const output = await insertValueInJSString(src, { projectId: 'id1234', viewportWidth: 400 })
+          const output = await insertValueInJSString(src, { projectId: 'id1234', viewportWidth: 400 }, errors)
 
           expect(output).to.equal(expectedOutput)
         })
@@ -168,7 +117,7 @@ describe('lib/util/config-file-updater', () => {
               })
             `
 
-          const output = await insertValueInJSString(src, { projectId: 'id1234', viewportWidth: 400 })
+          const output = await insertValueInJSString(src, { projectId: 'id1234', viewportWidth: 400 }, errors)
 
           expect(output).to.equal(expectedOutput)
         })
@@ -190,7 +139,7 @@ describe('lib/util/config-file-updater', () => {
               })
             `
 
-          const output = await insertValueInJSString(src, { projectId: 'id1234', viewportWidth: 400 })
+          const output = await insertValueInJSString(src, { projectId: 'id1234', viewportWidth: 400 }, errors)
 
           expect(output).to.equal(expectedOutput)
         })
@@ -209,7 +158,7 @@ describe('lib/util/config-file-updater', () => {
               }
             `
 
-          const output = await insertValueInJSString(src, { foo: 1000 })
+          const output = await insertValueInJSString(src, { foo: 1000 }, errors)
 
           expect(output).to.equal(expectedOutput)
         })
@@ -228,7 +177,7 @@ describe('lib/util/config-file-updater', () => {
               }
             `
 
-          const output = await insertValueInJSString(src, { foo: 1000 })
+          const output = await insertValueInJSString(src, { foo: 1000 }, errors)
 
           expect(output).to.equal(expectedOutput)
         })
@@ -247,7 +196,7 @@ describe('lib/util/config-file-updater', () => {
               }
             `
 
-          const output = await insertValueInJSString(src, { foo: 1000 })
+          const output = await insertValueInJSString(src, { foo: 1000 }, errors)
 
           expect(output).to.equal(expectedOutput)
         })
@@ -278,7 +227,7 @@ describe('lib/util/config-file-updater', () => {
             }
           `
 
-          const output = await insertValueInJSString(src, { foo: 1000, bar: 3000, projectId: 'id1234' })
+          const output = await insertValueInJSString(src, { foo: 1000, bar: 3000, projectId: 'id1234' }, errors)
 
           expect(output).to.equal(expectedOutput)
         })
@@ -292,7 +241,7 @@ describe('lib/util/config-file-updater', () => {
           }
         `
 
-          const output = await insertValueInJSString(src, { component: { specFilePattern: 'src/**/*.spec.cy.js' } })
+          const output = await insertValueInJSString(src, { component: { specFilePattern: 'src/**/*.spec.cy.js' } }, errors)
 
           const expectedOutput = stripIndent`\
               module.exports = {
@@ -316,7 +265,7 @@ describe('lib/util/config-file-updater', () => {
               }
             `
 
-          const output = await insertValueInJSString(src, { component: { specFilePattern: 'src/**/*.spec.cy.js' } })
+          const output = await insertValueInJSString(src, { component: { specFilePattern: 'src/**/*.spec.cy.js' } }, errors)
 
           const expectedOutput = stripIndent`\
             module.exports = {
@@ -341,7 +290,7 @@ describe('lib/util/config-file-updater', () => {
               }
             }`
 
-          const output = await insertValueInJSString(src, { component: { specFilePattern: 'src/**/*.spec.cy.js' } })
+          const output = await insertValueInJSString(src, { component: { specFilePattern: 'src/**/*.spec.cy.js' } }, errors)
 
           const expectedOutput = stripIndent`\
           module.exports = {
@@ -363,7 +312,7 @@ describe('lib/util/config-file-updater', () => {
             'export default foo',
           ].join('\n')
 
-          return insertValueInJSString(src, { bar: 10 })
+          return insertValueInJSString(src, { bar: 10 }, errors)
           .then(() => {
             throw Error('this should not succeed')
           })
@@ -380,7 +329,7 @@ describe('lib/util/config-file-updater', () => {
             '}',
           ].join('\n')
 
-          return insertValueInJSString(src, { foo: 10 })
+          return insertValueInJSString(src, { foo: 10 }, errors)
           .then(() => {
             throw Error('this should not succeed')
           })
@@ -397,7 +346,7 @@ describe('lib/util/config-file-updater', () => {
             }
             `
 
-          return insertValueInJSString(src, { foo: 10 })
+          return insertValueInJSString(src, { foo: 10 }, errors)
           .then(() => {
             throw Error('this should not succeed')
           })
@@ -415,7 +364,7 @@ describe('lib/util/config-file-updater', () => {
             }
             `
 
-          return insertValueInJSString(src, { bar: 10 })
+          return insertValueInJSString(src, { bar: 10 }, errors)
           .then(() => {
             throw Error('this should not succeed')
           })

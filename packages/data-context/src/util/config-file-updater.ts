@@ -1,77 +1,29 @@
-import _ from 'lodash'
 import { parse } from '@babel/parser'
 import type { File } from '@babel/types'
 import type { NodePath } from 'ast-types/lib/node-path'
 import { visit } from 'recast'
 import type { namedTypes } from 'ast-types'
 import Debug from 'debug'
-import { fs } from './fs'
-import errors from '../errors'
-import { pathToConfigFile, read } from './settings'
-import type { SettingsOptions } from '@packages/types'
+import * as fs from 'fs/promises'
 
 const debug = Debug('cypress:server:config-file-updater')
 
-function _err (type, file, err) {
-  const e = errors.get(type, file, err) as any
-
-  e.code = err.code
-  e.errno = err.errno
-  throw e
+interface ErrorObj {
+  get(type: string, ...args: any[]): Error
 }
 
-function _logWriteErr (file, err) {
-  return _err('ERROR_WRITING_FILE', file, err)
-}
-
-export async function insertValuesInConfigFile (projectRoot: string, obj = {}, options: SettingsOptions = {}) {
-  const { configFile } = options
-
-  if (configFile === false) {
-    return {}
-  }
-
-  if (configFile && /\.json$/.test(configFile)) {
-    return await insertValuesInJSON(projectRoot, obj, options)
-  }
-
-  return await insertValuesInJavaScript(projectRoot, obj, options)
-}
-
-export async function insertValuesInJSON (projectRoot: string, obj, options: SettingsOptions) {
-  const config = await read(projectRoot, options)
-
-  obj = _.extend(config, obj)
-
-  const file = pathToConfigFile(projectRoot, options)
-
-  debug('writing json file')
-  try {
-    await fs.outputJson(file, obj, { spaces: 2 })
-  } catch (err) {
-    return _logWriteErr(file, err)
-  }
-
-  return obj
-}
-
-export async function insertValuesInJavaScript (projectRoot: string, obj, options: SettingsOptions) {
-  const file = pathToConfigFile(projectRoot, options)
-
-  const config = await read(projectRoot, options)
+export async function insertValuesInConfigFile (file: string, obj: {}, errors: ErrorObj) {
   const fileContents = await fs.readFile(file, { encoding: 'utf8' })
 
-  await fs.writeFile(file, await insertValueInJSString(fileContents, obj))
-
-  return { ...config, ...obj }
+  await fs.writeFile(file, await insertValueInJSString(fileContents, obj, errors))
 }
 
-export async function insertValueInJSString (fileContents: string, obj: Record<string, any>): Promise<string> {
+export async function insertValueInJSString (fileContents: string, obj: Record<string, any>, errors: ErrorObj): Promise<string> {
   const ast = parse(fileContents, { plugins: ['typescript'], sourceType: 'module' })
 
   let objectLiteralNode: namedTypes.ObjectExpression | undefined
 
-  function handleExport (nodePath: NodePath<namedTypes.CallExpression, any> | NodePath<namedTypes.ObjectExpression, any>) {
+  function handleExport (nodePath: NodePath<namedTypes.CallExpression, any> | NodePath<namedTypes.ObjectExpression, any>): void {
     if (nodePath.node.type === 'CallExpression'
         && nodePath.node.callee.type === 'Identifier') {
       const functionName = nodePath.node.callee.name
@@ -83,7 +35,7 @@ export async function insertValueInJSString (fileContents: string, obj: Record<s
 
     if (nodePath.node.type === 'ObjectExpression' && !nodePath.node.properties.find((prop) => prop.type !== 'ObjectProperty')) {
       objectLiteralNode = nodePath.node
-      debug('found object litteral %o', objectLiteralNode)
+      debug('found object literal %o', objectLiteralNode)
 
       return
     }
@@ -116,8 +68,8 @@ export async function insertValueInJSString (fileContents: string, obj: Record<s
     throw errors.get('COULD_NOT_UPDATE_CONFIG_FILE', obj, 'No export could be found')
   }
 
-  setRootKeysSplicers(splicers, obj, objectLiteralNode, '  ')
-  setSubKeysSplicers(splicers, obj, objectLiteralNode, '  ', '  ')
+  setRootKeysSplicers(splicers, obj, objectLiteralNode, '  ', errors)
+  setSubKeysSplicers(splicers, obj, objectLiteralNode, '  ', '  ', errors)
 
   // sort splicers to keep the order of the original file
   const sortedSplicers = splicers.sort((a, b) => a.start === b.start ? 0 : a.start > b.start ? 1 : -1)
@@ -146,7 +98,7 @@ export function isDefineConfigFunction (ast: File, functionName: string): boolea
       if (nodePath.node.init?.type === 'CallExpression'
       && nodePath.node.init.callee.type === 'Identifier'
       && nodePath.node.init.callee.name === 'require'
-      && nodePath.node.init.arguments[0].type === 'StringLiteral'
+      && nodePath.node.init.arguments[0]?.type === 'StringLiteral'
       && nodePath.node.init.arguments[0].value === 'cypress') {
         if (nodePath.node.id?.type === 'ObjectPattern') {
           const defineConfigFunctionNode = nodePath.node.id.properties.find((prop) => {
@@ -189,6 +141,7 @@ function setRootKeysSplicers (
   obj: Record<string, any>,
   objectLiteralNode: namedTypes.ObjectExpression,
   lineStartSpacer: string,
+  errors: ErrorObj,
 ) {
   const objectLiteralStartIndex = (objectLiteralNode as any).start + 1
   // add values
@@ -210,7 +163,7 @@ function setRootKeysSplicers (
       const propertyToUpdate = propertyFromKey(objectLiteralNode, key)
 
       if (propertyToUpdate) {
-        setSplicerToUpdateProperty(splicers, propertyToUpdate, obj[key], key, obj)
+        setSplicerToUpdateProperty(splicers, propertyToUpdate, obj[key], key, obj, errors)
       }
     },
   )
@@ -236,6 +189,7 @@ function setSubKeysSplicers (
   objectLiteralNode: namedTypes.ObjectExpression,
   lineStartSpacer: string,
   parentLineStartSpacer: string,
+  errors: ErrorObj,
 ) {
   const objectLiteralStartIndex = (objectLiteralNode as any).start + 1
 
@@ -273,7 +227,7 @@ function setSubKeysSplicers (
 
   for (const key in keysToInsertForSubKeys) {
     subvaluesInserted += `\n${parentLineStartSpacer}${key}: {`
-    keysToInsertForSubKeys[key].forEach((subkey) => {
+    keysToInsertForSubKeys[key]?.forEach((subkey) => {
       subvaluesInserted += `\n${parentLineStartSpacer}${lineStartSpacer}${subkey}: ${JSON.stringify(obj[key][subkey])},`
     })
 
@@ -299,7 +253,7 @@ function setSubKeysSplicers (
     const propertyToUpdate = propertyFromKey(objectLiteralNode, key)
 
     if (propertyToUpdate?.value.type === 'ObjectExpression') {
-      setRootKeysSplicers(splicers, obj[key], propertyToUpdate.value, parentLineStartSpacer + lineStartSpacer)
+      setRootKeysSplicers(splicers, obj[key], propertyToUpdate.value, parentLineStartSpacer + lineStartSpacer, errors)
     }
   })
 }
@@ -308,7 +262,8 @@ function setSplicerToUpdateProperty (splicers: Splicer[],
   propertyToUpdate: namedTypes.ObjectProperty,
   updatedValue: any,
   key: string,
-  obj: Record<string, any>) {
+  obj: Record<string, any>,
+  errors: ErrorObj) {
   if (propertyToUpdate && (isPrimitive(propertyToUpdate.value) || isUndefinedOrNull(propertyToUpdate.value))) {
     splicers.push({
       start: (propertyToUpdate.value as any).start,
