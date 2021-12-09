@@ -1,6 +1,9 @@
 import type { AllModeOptions } from '@packages/types'
 import fsExtra from 'fs-extra'
 import path from 'path'
+import util from 'util'
+
+import 'server-destroy'
 
 import { AppApiShape, DataEmitterActions, LocalSettingsApiShape, ProjectApiShape } from './actions'
 import type { NexusGenAbstractTypeMembers } from '@packages/graphql/src/gen/nxs.gen'
@@ -305,20 +308,11 @@ export class DataContext {
   }
 
   async destroy () {
-    await new Promise<void>((resolve, reject) => {
-      return this.coreData.servers.gqlServer?.close((err) => {
-        if (err) {
-          reject(err)
-        } else {
-          resolve()
-        }
-      })
-    })
+    const destroy = util.promisify(this.coreData.servers.gqlServer?.destroy || (() => {}))
 
     return Promise.all([
-      this.util.disposeLoaders(),
-      this.actions.project.clearActiveProject(),
-      this.actions.dev.dispose(),
+      destroy(),
+      this._reset(),
     ])
   }
 

@@ -253,7 +253,6 @@ export class OpenProject {
     debug('closing opened project')
 
     return Promise.all([
-      this._ctx?.destroy(),
       this.closeOpenProjectAndBrowsers(),
     ]).then(() => null)
   }

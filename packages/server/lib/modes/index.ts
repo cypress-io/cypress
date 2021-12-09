@@ -14,7 +14,6 @@ export = (mode, options) => {
   clearCtx()
 
   const ctx = setCtx(makeDataContext({ mode: mode === 'run' ? mode : 'open', modeOptions: options }))
-
   const loadingPromise = ctx.initializeMode()
 
   if (mode === 'run') {
