@@ -1,6 +1,5 @@
 require('../spec_helper')
 
-const path = require('path')
 const browsers = require(`${root}lib/browsers`)
 const ProjectBase = require(`${root}lib/project-base`).ProjectBase
 const { openProject } = require('../../lib/open_project')
@@ -26,25 +25,31 @@ describe('lib/open_project', () => {
 
     sinon.stub(browsers, 'get').resolves()
     sinon.stub(browsers, 'open')
-    sinon.stub(ProjectBase.prototype, 'initializeConfig').resolves()
+    sinon.stub(ProjectBase.prototype, 'initializeConfig').resolves({
+      e2e: {
+        specPattern: 'cypress/integration/**/*',
+      },
+    })
+
     sinon.stub(ProjectBase.prototype, 'open').resolves()
     sinon.stub(ProjectBase.prototype, 'reset').resolves()
     sinon.stub(ProjectBase.prototype, 'getConfig').returns(this.config)
     sinon.stub(ProjectBase.prototype, 'getAutomation').returns(this.automation)
     sinon.stub(preprocessor, 'removeFile')
 
-    return openProject.create('/project/root', {}, {})
+    return openProject.create('/project/root', { testingType: 'e2e' }, {})
   })
 
   context('#launch', () => {
     beforeEach(async function () {
-      await openProject.create('/root', {}, {})
+      await openProject.create('/root', { testingType: 'e2e' }, {})
       openProject.getProject().__setConfig({
         browserUrl: 'http://localhost:8888/__/',
-        componentFolder: path.join(todosPath, 'component'),
-        integrationFolder: path.join(todosPath, 'tests'),
         projectRoot: todosPath,
         specType: 'integration',
+        e2e: {
+          specPattern: 'cypress/integration/**/*',
+        },
       })
 
       openProject.getProject().options = {}
@@ -107,7 +112,7 @@ describe('lib/open_project', () => {
     })
 
     describe('spec events', function () {
-      beforeEach(function () {
+      this.beforeEach(function () {
         sinon.stub(runEvents, 'execute').resolves()
       })
 
