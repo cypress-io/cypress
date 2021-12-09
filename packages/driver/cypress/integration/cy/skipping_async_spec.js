@@ -26,6 +26,12 @@ Cypress.on('test:after:run', (test) => {
   }
 })
 
+beforeEach(() => {
+  // Set isInteractive to false to ensure that screenshots will be
+  // triggered in both run and open mode
+  Cypress.config('isInteractive', false)
+})
+
 describe('skipped test', () => {
   it('should not fail', function () {
     cy.then(() => {

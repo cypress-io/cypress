@@ -26,6 +26,12 @@ Cypress.on('test:after:run', (test) => {
   }
 })
 
+beforeEach(() => {
+  // Set isInteractive to false to ensure that screenshots will be
+  // triggered in both run and open mode
+  Cypress.config('isInteractive', false)
+})
+
 describe('generally skipped test', () => {
   before(function () {
     this.skip()
@@ -36,9 +42,14 @@ describe('generally skipped test', () => {
   })
 })
 
-describe('individually skipped test', () => {
-  it('should not fail', function () {
+describe('individually skipped tests', () => {
+  it('should not fail when using this.skip', function () {
     this.skip()
+    expect(true).to.be.false
+  })
+
+  // NOTE: We are skipping this test in order to test skip functionality
+  it.skip('should not fail when using it.skip', () => {
     expect(true).to.be.false
   })
 })
@@ -53,7 +64,7 @@ describe('skipped test side effects', () => {
   })
 
   it('should still mark all tests with the correct state', () => {
-    expect(pendingTests).to.have.length(2)
+    expect(pendingTests).to.have.length(3)
     expect(passedTests).to.have.length(2)
   })
 })
