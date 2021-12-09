@@ -65,7 +65,7 @@ export class DataContext {
     const { modeOptions, ...rest } = _config
 
     this._config = rest
-    this._modeOptions = Object.freeze(modeOptions)
+    this._modeOptions = modeOptions
     this._coreData = _config.coreData ?? makeCoreData(this._modeOptions)
   }
 
@@ -372,7 +372,7 @@ export class DataContext {
 
     await this._reset()
 
-    this._modeOptions = Object.freeze(modeOptions)
+    this._modeOptions = modeOptions
     this._coreData = makeCoreData(modeOptions)
     globalPubSub.emit('reset:data-context', this)
   }
