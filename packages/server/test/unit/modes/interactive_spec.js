@@ -1,5 +1,4 @@
 require('../../spec_helper')
-require('../../ctx_helper')
 
 const _ = require('lodash')
 const os = require('os')
