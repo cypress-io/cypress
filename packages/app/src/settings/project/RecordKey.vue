@@ -14,12 +14,11 @@
     </template>
     <div
       v-if="recordKey"
-      class="inline-flex justify-start gap-10px"
+      class="gap-10px inline-flex justify-start"
     >
       <CodeBox
         :code="recordKey"
         :prefix-icon="IconKey"
-        confidential
       />
       <CopyButton
         :text="recordKey"
