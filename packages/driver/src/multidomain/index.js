@@ -2,10 +2,10 @@ import $Cypress from '../cypress'
 import $Cy from '../cypress/cy'
 import $Commands from '../cypress/commands'
 import $Log from '../cypress/log'
-import $Focused from '../cy/focused'
-import $jQuery from '../cy/jquery'
+import { create as createFocused } from '../cy/focused'
+import { create as createJQuery } from '../cy/jquery'
 import $Listeners from '../cy/listeners'
-import $Snapshots from '../cy/snapshots'
+import { create as createSnapshots } from '../cy/snapshots'
 import { create as createOverrides } from '../cy/overrides'
 
 const postMessage = (event, data) => {
@@ -50,9 +50,9 @@ const onBeforeAppWindowLoad = (autWindow) => {
   })
 
   const { state, config } = Cypress
-  const jquery = $jQuery.create(state)
-  const focused = $Focused.create(state)
-  const snapshots = $Snapshots.create(jquery.$$, state)
+  const jquery = createJQuery(state)
+  const focused = createFocused(state)
+  const snapshots = createSnapshots(jquery.$$, state)
 
   const overrides = createOverrides(state, config, focused, snapshots)
 

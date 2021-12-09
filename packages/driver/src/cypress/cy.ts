@@ -201,13 +201,11 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
   interceptFocus: ReturnType<typeof createFocused>['interceptFocus']
   interceptBlur: ReturnType<typeof createFocused>['interceptBlur']
 
-  constructor (specWindow, Cypress, Cookies, state, config, autoRun = true) {
+  constructor (specWindow, Cypress, Cookies, state, config) {
     this.id = _.uniqueId('cy')
     this.state = state
     this.config = config
     initVideoRecorder(Cypress)
-
-    this.$$ = jquery.$$
 
     const timeouts = createTimeouts(state)
 
@@ -234,6 +232,7 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
 
     const jquery = createJQuery(state)
 
+    this.$$ = jquery.$$
     this.getRemotejQueryInstance = jquery.getRemotejQueryInstance
 
     const location = createLocation(state)
@@ -322,8 +321,8 @@ class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILoc
 }
 
 export default {
-  create (specWindow, Cypress, Cookies, state, config, autoRun) {
-    let cy = new $Cy(specWindow, Cypress, Cookies, state, config, autoRun)
+  create (specWindow, Cypress, Cookies, state, config, autoRun = true) {
+    let cy = new $Cy(specWindow, Cypress, Cookies, state, config)
     const commandFns = {}
 
     state('specWindow', specWindow)
