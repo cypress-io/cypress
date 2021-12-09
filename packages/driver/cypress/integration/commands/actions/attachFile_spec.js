@@ -73,15 +73,13 @@ describe('src/cy/commands/actions/attachFile', () => {
       })
     })
 
-    it('attaches files with custom lastModified and mimeType', () => {
+    it('attaches files with custom lastModified', () => {
       cy.get('#basic').attachFile({
         contents: '@foo',
-        mimeType: 'text/plain',
         lastModified: 1234,
       })
 
       cy.get('#basic').then((input) => {
-        expect(input[0].files[0].type).to.eq('text/plain')
         expect(input[0].files[0].lastModified).to.eq(1234)
       })
     })
@@ -572,6 +570,103 @@ is being covered by another element:
         cy.get('#scroll').then((el) => {
           expect(el[0].scrollIntoView).to.be.calledWith({ block: 'end' })
         })
+      })
+    })
+
+    describe('drag-n-drop', () => {
+      it('attaches a file to an input when targeted', () => {
+        cy.get('#basic').attachFile({ contents: '@foo' }, { action: 'drag-n-drop' })
+
+        cy.get('#basic')
+        .then(getFileContents)
+        .then((contents) => {
+          expect(contents[0]).to.eql('foo')
+        })
+      })
+
+      it('invokes change and input events on an input when dropped over', (done) => {
+        const $input = cy.$$('#basic')
+
+        $input.on('input', (e) => {
+          const obj = _.pick(e.originalEvent, 'bubbles', 'cancelable', 'composed', 'target', 'type')
+
+          expect(obj).to.deep.eq({
+            bubbles: true,
+            cancelable: false,
+            composed: true,
+            target: $input.get(0),
+            type: 'input',
+          })
+
+          $input.on('change', (e) => {
+            const obj = _.pick(e.originalEvent, 'bubbles', 'cancelable', 'composed', 'target', 'type')
+
+            expect(obj).to.deep.eq({
+              bubbles: true,
+              cancelable: false,
+              composed: false,
+              target: $input.get(0),
+              type: 'change',
+            })
+
+            done()
+          })
+        })
+
+        cy.get('#basic').attachFile({ contents: '@foo' }, { action: 'drag-n-drop' })
+      })
+
+      it('does not follow labels to their inputs', () => {
+        cy.get('#basic-label').attachFile({ contents: '@foo' }, { action: 'drag-n-drop' })
+
+        cy.get('#basic').then((input) => {
+          expect(input[0].files.length).to.eql(0)
+        })
+      })
+
+      it('does not attach multiple files to a single input', () => {
+        cy.get('#basic').attachFile(['@foo', '@foo'], { action: 'drag-n-drop' })
+        cy.get('#basic').then((input) => {
+          expect(input[0].files.length).to.eql(0)
+        })
+      })
+
+      it('drops files onto any element and triggers events', (done) => {
+        const $body = cy.$$('body')
+        let events = []
+
+        $body.on('input', (e) => {
+          throw new Error('should not trigger input')
+        })
+
+        $body.on('change', (e) => {
+          throw new Error('should not trigger change')
+        })
+
+        $body.on('drag', (e) => events.push(e))
+        $body.on('dragenter', (e) => events.push(e))
+        $body.on('dragover', (e) => events.push(e))
+        $body.on('drop', (e) => {
+          events.push(e)
+          expect(_.map(events, 'originalEvent.type')).to.deep.eql(['drag', 'dragenter', 'dragover', 'drop'])
+          expect(_.every(events, ['originalEvent.bubbles', true])).to.be.true
+          expect(_.every(events, ['originalEvent.cancelable', true])).to.be.true
+          expect(_.every(events, ['originalEvent.composed', true])).to.be.true
+          expect(_.every(events, ['originalEvent.target', $body[0]])).to.be.true
+
+          done()
+        })
+
+        cy.get('body').attachFile('@foo', { action: 'drag-n-drop' })
+      })
+
+      it('includes an entry in `dataTransfer.types`', (done) => {
+        cy.$$('#multiple').on('drop', (e) => {
+          expect(e.originalEvent.dataTransfer.types).to.contain('Files')
+          done()
+        })
+
+        cy.get('#multiple').attachFile({ contents: '@foo' }, { action: 'drag-n-drop' })
       })
     })
   })

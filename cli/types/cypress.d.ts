@@ -5633,7 +5633,6 @@ declare namespace Cypress {
     contents: any
     fileName?: string
     lastModified?: number
-    mimeType?: string
   }
 
   interface LogAttrs {
