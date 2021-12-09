@@ -12,7 +12,7 @@ import * as session from './session'
 import { getSpecUrl } from './project_utils'
 import errors from './errors'
 import type { LaunchOpts, OpenProjectLaunchOptions, FoundBrowser, AllModeOptions } from '@packages/types'
-import { DataContext, getCtx, globalPubSub } from '@packages/data-context'
+import { DataContext, getCtx } from '@packages/data-context'
 
 const debug = Debug('cypress:server:open_project')
 
@@ -324,9 +324,5 @@ export class OpenProject {
     this.resetOpenProject()
   }
 }
-
-globalPubSub.on('cleanup', () => {
-  openProject.resetOpenProject()
-})
 
 export const openProject = new OpenProject()

@@ -13,7 +13,7 @@ type MenuItem = 'log:out'
 export class GlobalPubSub extends EventEmitter {
   on(msg: 'reset:data-context', listener: (ctx: DataContext) => void): this
   on(msg: 'menu:item:clicked', listener: (item: MenuItem) => void): this
-  on(msg: 'cleanup', listener: (...args: any[]) => void): this
+  on(msg: 'test:cleanup', listener: (...args: any[]) => void): this
   on (msg: string, listener: (...args: any[]) => void) {
     return super.on(msg, listener)
   }
@@ -24,7 +24,7 @@ export class GlobalPubSub extends EventEmitter {
     return super.emit(msg, ...args)
   }
 
-  emitThen(msg: 'cleanup'): Promise<void>
+  emitThen(msg: 'test:cleanup'): Promise<void>
   async emitThen (msg: string, ...args: any[]): Promise<void> {
     // @ts-expect-error
     const events = this._events

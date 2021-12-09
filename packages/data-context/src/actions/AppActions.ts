@@ -36,11 +36,11 @@ export class AppActions {
     }
   }
 
-  async removeAppDir () {
+  async removeAppDataDir () {
     await this.ctx._apis.appApi.appData.remove()
   }
 
-  async ensureAppDirExists () {
+  async ensureAppDataDirExists () {
     await this.ctx._apis.appApi.appData.ensure()
   }
 

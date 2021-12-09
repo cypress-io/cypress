@@ -119,7 +119,7 @@ beforeEach(function () {
 })
 
 afterEach(async () => {
-  await getCtx().destroy()
+  await getCtx()._reset()
   clearCtx()
   sinon.restore()
 

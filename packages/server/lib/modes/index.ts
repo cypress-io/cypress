@@ -1,6 +1,3 @@
-import { clearCtx, setCtx } from '@packages/data-context'
-import { makeDataContext } from '../makeDataContext'
-
 export = (mode, options) => {
   if (mode === 'record') {
     return require('./record').run(options)
@@ -9,6 +6,10 @@ export = (mode, options) => {
   if (mode === 'smokeTest') {
     return require('./smoke_test').run(options)
   }
+
+  // Required inline to not delay the `smokeTest`
+  const { clearCtx, setCtx } = require('@packages/data-context') as typeof import('@packages/data-context')
+  const { makeDataContext } = require('../makeDataContext') as typeof import('../makeDataContext')
 
   // When we're in testing mode, this is setup automatically as a beforeEach
   clearCtx()

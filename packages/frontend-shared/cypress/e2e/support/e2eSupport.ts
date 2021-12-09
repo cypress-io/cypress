@@ -48,6 +48,10 @@ declare global {
        */
       withCtx: typeof withCtx
       /**
+       * Scaffolds a project for use in tests
+       */
+      scaffoldProject: typeof scaffoldProject
+      /**
        * Takes the name of a "system" test directory, and mounts the project within open mode
        */
       setupE2E: typeof setupE2E
@@ -96,6 +100,12 @@ beforeEach(() => {
   cy.task('__internal__beforeEach', {}, { log: false })
 })
 
+function scaffoldProject (projectName: ProjectFixture) {
+  return logInternal({ name: 'scaffoldProject', message: projectName }, () => {
+    return cy.task('__internal_scaffoldProject', { projectName }, { log: false })
+  })
+}
+
 function addProject (projectName: ProjectFixture, open = false) {
   return logInternal({ name: 'addProject', message: projectName }, () => {
     return cy.task('__internal_addProject', { projectName, open }, { log: false })
@@ -104,7 +114,7 @@ function addProject (projectName: ProjectFixture, open = false) {
 
 // function openMode (argv: string[] = []) {
 //   return logInternal({ name: 'openMode', message: argv?.join(' ') }, () => {
-//     return cy.task<ResetLaunchArgsResult>('__internal_resetLaunchArgs', { argv }, { log: false })
+//     return cy.task<ResetLaunchArgsResult>('__internal_resetArgv', { argv }, { log: false })
 //     .then(({ launchArgs }) => launchArgs)
 //   })
 // }
@@ -119,7 +129,7 @@ export interface ResetLaunchArgsResult {
 
 function setupGlobalMode () {
   return logInternal({ name: 'setupGlobalMode', message: '' }, () => {
-    return cy.task<ResetLaunchArgsResult>('__internal_resetLaunchArgs', { argv: ['--global'] }, { log: false }).then((obj) => {
+    return cy.task<ResetLaunchArgsResult>('__internal_resetArgv', { argv: ['--global'] }, { log: false }).then((obj) => {
       Cypress.env('e2e_serverPort', obj.e2eServerPort)
 
       return obj.modeOptions
@@ -135,7 +145,7 @@ function setupE2E (projectName: ProjectFixture, argv: string[] = []) {
   return logInternal({ name: 'setupE2E', message: argv.join(' ') }, () => {
     cy.task('__internal_addProject', { projectName }, { log: false })
 
-    return cy.task<ResetLaunchArgsResult>('__internal_resetLaunchArgs', { projectName, argv }, { log: false }).then((obj) => {
+    return cy.task<ResetLaunchArgsResult>('__internal_resetArgv', { projectName, argv }, { log: false }).then((obj) => {
       Cypress.env('e2e_serverPort', obj.e2eServerPort)
 
       return obj.modeOptions
@@ -250,6 +260,7 @@ function logInternal<T> (name: string | Partial<Cypress.LogConfig>, cb: (log: Cy
   })
 }
 
+Cypress.Commands.add('scaffoldProject', scaffoldProject)
 Cypress.Commands.add('addProject', addProject)
 Cypress.Commands.add('setupGlobalMode', setupGlobalMode)
 Cypress.Commands.add('visitApp', visitApp)

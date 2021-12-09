@@ -81,13 +81,11 @@ export async function e2ePluginSetup (on: Cypress.PluginEvents, config: Cypress.
 
   on('task', {
     /**
-     * Called before all tests, sets up the global context once.
-     * Maintains the same GraphQL server for all tests, so we can
-     * visit GraphiQL for debugging
+     * Called before all tests, returns the global "gqlPort". The same GraphQL
+     * server is used for all integration tests, so we can go to http://localhost:5555/graphql
+     * and debug the internal state of the application
      */
     async __internal__before () {
-      // await ctx?.destroy()
-      // clearCtx()
       return { gqlPort }
     },
 
@@ -96,9 +94,9 @@ export async function e2ePluginSetup (on: Cypress.PluginEvents, config: Cypress.
      */
     async __internal__beforeEach () {
       testState = {}
-      await globalPubSub.emitThen('cleanup')
-      await ctx.actions.app.removeAppDir()
-      await ctx.actions.app.ensureAppDirExists()
+      await globalPubSub.emitThen('test:cleanup')
+      await ctx.actions.app.removeAppDataDir()
+      await ctx.actions.app.ensureAppDataDirExists()
       await ctx.resetForTest()
       sinon.reset()
       remoteGraphQLIntercept = undefined
@@ -166,7 +164,7 @@ export async function e2ePluginSetup (on: Cypress.PluginEvents, config: Cypress.
 
       return Fixtures.projectPath(projectName)
     },
-    async __internal_resetLaunchArgs ({ argv, projectName }: InternalResetLaunchArgs): Promise<ResetLaunchArgsResult> {
+    async __internal_resetArgv ({ argv, projectName }: InternalResetLaunchArgs): Promise<ResetLaunchArgsResult> {
       const openArgv = projectName && !argv.includes('--project') ? ['--project', Fixtures.projectPath(projectName), ...argv] : ['--global', ...argv]
 
       // Runs the launchArgs through the whole pipeline for the CLI open process,
@@ -176,7 +174,7 @@ export async function e2ePluginSetup (on: Cypress.PluginEvents, config: Cypress.
       const modeOptions = Object.freeze(argUtils.toObject(processedArgv))
 
       // Reset the state of the context
-      ctx.resetForTest(modeOptions)
+      await ctx.resetForTest(modeOptions)
 
       // Handle any pre-loading that should occur based on the launch arg settings
       await ctx.initializeMode()

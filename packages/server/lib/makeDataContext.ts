@@ -21,7 +21,7 @@ const { getBrowsers, ensureAndGetByNameOrPath } = browserUtils
 
 interface MakeDataContextOptions {
   mode: 'run' | 'open'
-  modeOptions: AllModeOptions
+  modeOptions: Partial<AllModeOptions>
 }
 
 export { getCtx, setCtx, clearCtx }
