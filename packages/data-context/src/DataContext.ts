@@ -364,17 +364,17 @@ export class DataContext {
    * Resets all of the state for the data context,
    * so we can initialize fresh for each E2E test
    */
-  resetForTest (modeOptions: Partial<AllModeOptions> = {}) {
+  async resetForTest (modeOptions: Partial<AllModeOptions> = {}) {
     this.debug('DataContext resetForTest')
     if (!process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {
       throw new Error(`DataContext.reset is only meant to be called in E2E testing mode, there's no good use for it outside of that`)
     }
 
+    await this._reset()
+
     this._modeOptions = Object.freeze(modeOptions)
     this._coreData = makeCoreData(modeOptions)
     globalPubSub.emit('reset:data-context', this)
-
-    return this._reset()
   }
 
   private _reset () {
@@ -397,7 +397,7 @@ export class DataContext {
 
   async initializeMode () {
     if (this._config.mode === 'run') {
-      // await this.initializeRunMode()
+      await this.initializeData()
     } else if (this._config.mode === 'open') {
       await this.initializeOpenMode()
     } else {
