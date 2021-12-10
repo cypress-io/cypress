@@ -8,6 +8,14 @@ export interface AppApiShape {
   getBrowsers(): Promise<FoundBrowser[]>
   ensureAndGetByNameOrPath(nameOrPath: string, returnAll?: boolean, browsers?: FoundBrowser[]): Bluebird<FoundBrowser | FoundBrowser[] | undefined>
   findNodePath(): Promise<string>
+  appData: ApplicationDataApiShape
+}
+
+export interface ApplicationDataApiShape {
+  path(): string
+  toHashName(projectRoot: string): string
+  ensure(): PromiseLike<unknown>
+  remove(): PromiseLike<unknown>
 }
 
 export class AppActions {
@@ -26,6 +34,14 @@ export class AppActions {
     if (browser) {
       this.setActiveBrowser(browser)
     }
+  }
+
+  async removeAppDataDir () {
+    await this.ctx._apis.appApi.appData.remove()
+  }
+
+  async ensureAppDataDirExists () {
+    await this.ctx._apis.appApi.appData.ensure()
   }
 
   async setActiveBrowserByNameOrPath (browserNameOrPath: string) {
@@ -91,21 +107,5 @@ export class AppActions {
     }
 
     return browsers.some((b) => this.idForBrowser(b) === this.idForBrowser(chosenBrowser))
-  }
-
-  async refreshNodePath () {
-    if (this.ctx.coreData.app.refreshingNodePath) {
-      return
-    }
-
-    const dfd = pDefer<string>()
-
-    this.ctx.coreData.app.refreshingNodePath = dfd.promise
-
-    const nodePath = await this.ctx._apis.appApi.findNodePath()
-
-    this.ctx.coreData.app.nodePath = nodePath
-
-    dfd.resolve(nodePath)
   }
 }

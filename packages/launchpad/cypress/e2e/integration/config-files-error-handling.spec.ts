@@ -1,6 +1,12 @@
-describe('Config files error handling', () => {
+// TODO: add when we land the lifecycle management
+describe.skip('Config files error handling', () => {
+  beforeEach(() => {
+    cy.scaffoldProject('pristine')
+    cy.scaffoldProject('pristine-with-config-file')
+  })
+
   it('it handles multiples config files', () => {
-    cy.setupE2E('pristine-with-config-file')
+    cy.openProject('pristine-with-config-file')
     cy.visitLaunchpad()
 
     cy.get('[data-cy-testingType=e2e]').click()
@@ -25,17 +31,19 @@ describe('Config files error handling', () => {
   })
 
   it('it handles legacy config file', () => {
-    cy.setupE2E('pristine-with-config-file')
-    cy.visitLaunchpad()
-
-    cy.get('[data-cy-testingType=e2e]').click()
-
+    cy.openProject('pristine-with-config-file')
     cy.withCtx(async (ctx) => {
       await ctx.actions.file.writeFileInProject('cypress.json', '{}')
       await ctx.actions.file.removeFileInProject('cypress.config.js')
     })
 
-    cy.get('body').should('contain.text', 'Initializing Config...')
+    cy.visitLaunchpad()
+
+    cy.get('[data-cy-testingType=e2e]').click()
+
+    cy.get('body').should('contain.text', 'Configuration Files')
+
+    cy.get('button').contains('Continue').click()
 
     cy.get('body')
     .should('contain.text', 'Cypress Configuration Error')
@@ -60,7 +68,7 @@ describe('Config files error handling', () => {
   })
 
   it('it handles config files with legacy config file in same project', () => {
-    cy.setupE2E('pristine-with-config-file')
+    cy.openProject('pristine-with-config-file')
     cy.visitLaunchpad()
 
     cy.get('[data-cy-testingType=e2e]').click()
@@ -85,7 +93,8 @@ describe('Config files error handling', () => {
   })
 
   it('creates config file if it do not exist', () => {
-    cy.setupE2E('pristine')
+    cy.scaffoldProject('pristine')
+    cy.openProject('pristine')
     cy.visitLaunchpad()
 
     cy.get('[data-cy-testingType=e2e]').click()

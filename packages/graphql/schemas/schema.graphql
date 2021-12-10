@@ -405,6 +405,9 @@ type DevState {
   When we have edited server related files, we may want to relaunch the client.
   """
   needsRelaunch: Boolean
+
+  """For debugging, the current application state"""
+  state: JSON
 }
 
 """Represents an editor on the local machine"""

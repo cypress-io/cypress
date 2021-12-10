@@ -1,8 +1,11 @@
-describe('Settings', { viewportWidth: 600 }, () => {
-  beforeEach(() => {
-    cy.setupE2E('component-tests')
+describe('App: Settings', { viewportWidth: 600 }, () => {
+  before(() => {
+    cy.scaffoldProject('todos')
+  })
 
-    cy.initializeApp()
+  beforeEach(() => {
+    cy.openProject('todos')
+    cy.startAppServer('e2e')
   })
 
   it('displays the settings for the current project', () => {

@@ -764,7 +764,7 @@ xdescribe('lib/modes/run', () => {
       sinon.spy(runMode, 'waitForBrowserToConnect')
       sinon.spy(runMode, 'runSpecs')
       sinon.stub(openProject, 'launch').resolves()
-      sinon.stub(openProject, 'getProject').resolves(this.projectInstance)
+      sinon.stub(openProject, 'getProject').returns(this.projectInstance)
     })
 
     it('no longer ensures user session', () => {

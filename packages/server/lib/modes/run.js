@@ -628,7 +628,7 @@ const openProjectCreate = (projectRoot, socketId, args) => {
     onError: args.onError,
   }
 
-  return openProject.create(projectRoot, args, options)
+  return openProject.create(projectRoot, args, options, args.browsers)
 }
 
 async function checkAccess (folderPath) {
@@ -648,7 +648,7 @@ const createAndOpenProject = async (socketId, options) => {
   await checkAccess(projectRoot)
 
   const open_project = await openProjectCreate(projectRoot, socketId, options)
-  const project = await open_project.getProject()
+  const project = open_project.getProject()
 
   const [_project, _config, _projectId] = await Promise.all([
     project,
@@ -1648,7 +1648,7 @@ module.exports = {
     })
   },
 
-  async run (options) {
+  async run (options, loading = Promise.resolve()) {
     if (require('../util/electron-app').isRunningAsElectronProcess({ debug })) {
       const app = require('electron').app
 
@@ -1662,6 +1662,6 @@ module.exports = {
       await app.whenReady()
     }
 
-    return this.ready(options)
+    return loading.then(() => this.ready(options))
   },
 }
