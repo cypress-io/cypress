@@ -97,6 +97,24 @@ const connect = function (host, path, extraOpts) {
     listenToCookieChanges()
     listenToDownloads()
 
+    browser.webRequest.onBeforeSendHeaders.addListener((details) => {
+      if (
+        details.parentFrameId === -1
+        || details.parentFrameId === 0
+        || details.type !== 'sub_frame'
+      ) return
+
+      return {
+        requestHeaders: [
+          ...details.requestHeaders,
+          {
+            name: 'X-Cypress-Is-Nested-Iframe',
+            value: 'true',
+          },
+        ],
+      }
+    }, { urls: ['<all_urls>'] }, ['blocking', 'requestHeaders'])
+
     return ws.emit('automation:client:connected')
   })
 

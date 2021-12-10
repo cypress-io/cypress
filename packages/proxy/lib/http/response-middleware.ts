@@ -229,8 +229,9 @@ const MaybeDelayForMultidomain: ResponseMiddleware = function () {
   const isCrossDomain = !reqMatchesOriginPolicy(this.req, this.getRemoteState())
   const isHTML = resContentTypeIs(this.incomingRes, 'text/html')
   const isRenderedHTML = reqWillRenderHtml(this.req)
+  const isNestedIframe = !!this.req.headers['x-cypress-is-nested-iframe']
 
-  if (isCrossDomain && (isHTML || isRenderedHTML)) {
+  if (isCrossDomain && !isNestedIframe && (isHTML || isRenderedHTML)) {
     this.debug('is cross-domain, delay until domain:ready event')
 
     this.serverBus.once('ready:for:domain', () => {
@@ -242,6 +243,8 @@ const MaybeDelayForMultidomain: ResponseMiddleware = function () {
 
     return
   }
+
+  delete this.req.headers['x-cypress-is-nested-iframe']
 
   this.next()
 }

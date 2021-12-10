@@ -256,6 +256,8 @@ module.exports = {
       return this._enableDebugger(win.webContents)
     })
     .then(() => {
+      this._markNestedIframes(win)
+
       return this._handleDownloads(win, options.downloadsFolder, automation)
     })
     .return(win)
@@ -340,6 +342,31 @@ module.exports = {
     return win.webContents.debugger.sendCommand('Page.setDownloadBehavior', {
       behavior: 'allow',
       downloadPath: dir,
+    })
+  },
+
+  _markNestedIframes (win) {
+    const { session } = win.webContents
+
+    const isNested = (frame, numParents = 0) => {
+      if (!frame.parent || numParents > 1) return numParents > 1
+
+      return isNested(frame.parent, numParents + 1)
+    }
+
+    session.webRequest.onBeforeSendHeaders((details, cb) => {
+      if (details.resourceType !== 'subFrame' || !isNested(details.frame)) {
+        cb({})
+
+        return
+      }
+
+      cb({
+        requestHeaders: {
+          ...details.requestHeaders,
+          'X-Cypress-Is-Nested-Iframe': 'true',
+        },
+      })
     })
   },
 
