@@ -1,4 +1,3 @@
-/// <reference path="./fixture-types.d.ts" />
 import path from 'path'
 import type { RemoteGraphQLInterceptor, ResetOptionsResult, WithCtxInjected, WithCtxOptions } from './support/e2eSupport'
 import { e2eProjectDirs } from './support/e2eProjectDirs'
@@ -6,7 +5,6 @@ import { e2eProjectDirs } from './support/e2eProjectDirs'
 import { makeGraphQLServer } from '@packages/graphql/src/makeGraphQLServer'
 import { DataContext, globalPubSub, setCtx } from '@packages/data-context'
 import * as inspector from 'inspector'
-import * as Fixtures from '@tooling/system-tests/lib/fixtures'
 import sinonChai from '@cypress/sinon-chai'
 import sinon from 'sinon'
 import fs from 'fs'
@@ -61,11 +59,23 @@ export async function e2ePluginSetup (on: Cypress.PluginEvents, config: Cypress.
 
 export type E2ETaskMap = ReturnType<typeof makeE2ETasks> extends Promise<infer U> ? U : never
 
+interface FixturesShape {
+  scaffold (): void
+  scaffoldProject (project: string): void
+  scaffoldWatch (): void
+  remove (): void
+  removeProject (name): void
+  projectPath (name): string
+  get (fixture, encoding?: BufferEncoding): string
+  path (fixture): string
+}
+
 async function makeE2ETasks () {
   // require'd from @packages/server & @tooling/system-tests so we don't import
   // types which would pollute strict type checking
   const argUtils = require('@packages/server/lib/util/args')
   const { makeDataContext } = require('@packages/server/lib/makeDataContext')
+  const Fixtures = require('@tooling/system-tests/lib/fixtures') as FixturesShape
 
   const cli = require('../../../../cli/lib/cli')
   const cliOpen = require('../../../../cli/lib/exec/open')

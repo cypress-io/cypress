@@ -119,7 +119,7 @@ export class ProjectActions {
         }
       })
 
-      // throw error
+      return this
     }
   }
 
