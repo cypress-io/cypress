@@ -44,9 +44,7 @@ describe('App: Runs Page', () => {
     })
 
     cy.visitApp()
-    cy.intercept('query-Runs').as('Runs')
     cy.get('[href="#/runs"]').click()
-    cy.wait('@Runs')
     cy.get('[data-cy="no-runs"]')
   })
 
