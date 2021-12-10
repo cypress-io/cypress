@@ -343,6 +343,14 @@ export class CommandQueue extends Queue<Command> {
     }
 
     const onError = (err: Error | string) => {
+      // If the runnable was marked as pending, this test was skipped
+      // go ahead and just return
+      const runnable = this.state('runnable')
+
+      if (runnable.isPending()) {
+        return
+      }
+
       if (this.state('onCommandFailed')) {
         return this.state('onCommandFailed')(err, this, next)
       }
