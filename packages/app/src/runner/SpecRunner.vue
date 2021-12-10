@@ -22,9 +22,7 @@
           v-show="runnerUiStore.isSpecsListOpen"
           ref="specsListResizeHandle"
           class="cursor-ew-resize h-full top-0 -right-6px w-16px z-30 absolute"
-        >
-          {{ specsListHandleX }}
-        </div>
+        />
       </div>
 
       <ChooseExternalEditorModal
@@ -51,15 +49,14 @@
           v-show="runnerUiStore.isSpecsListOpen"
           ref="reporterResizeHandle"
           class="cursor-ew-resize h-full top-0 -right-6px w-16px z-30 absolute"
-        >
-          {{ reporterHandleX }}
-        </div>
+        />
       </div>
     </HideDuringScreenshot>
 
     <div
       ref="runnerPane"
       class="w-full relative"
+      :class="{'pointer-events-none': specsListIsDragging || reporterIsDragging}"
     >
       <HideDuringScreenshot class="bg-white p-16px">
         <SpecRunnerHeader
