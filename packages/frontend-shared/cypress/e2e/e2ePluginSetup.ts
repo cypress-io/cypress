@@ -1,14 +1,12 @@
 import path from 'path'
-import type { RemoteGraphQLInterceptor, ResetLaunchArgsResult, WithCtxInjected, WithCtxOptions } from './support/e2eSupport'
+import type { RemoteGraphQLInterceptor, ResetOptionsResult, WithCtxInjected, WithCtxOptions } from './support/e2eSupport'
 import { e2eProjectDirs } from './support/e2eProjectDirs'
-import type { CloudExecuteRemote } from '@packages/data-context/src/sources'
+// import type { CloudExecuteRemote } from '@packages/data-context/src/sources'
 import { makeGraphQLServer } from '@packages/graphql/src/makeGraphQLServer'
 import { DataContext, globalPubSub, setCtx } from '@packages/data-context'
 import * as inspector from 'inspector'
 import sinonChai from '@cypress/sinon-chai'
 import sinon from 'sinon'
-import rimraf from 'rimraf'
-import util from 'util'
 import fs from 'fs'
 import { buildSchema, execute, GraphQLError, parse } from 'graphql'
 import { Response } from 'cross-fetch'
@@ -16,9 +14,9 @@ import { Response } from 'cross-fetch'
 import { CloudRunQuery } from '../support/mock-graphql/stubgql-CloudTypes'
 import { getOperationName } from '@urql/core'
 
-interface InternalResetLaunchArgs {
+interface InternalOpenProjectArgs {
   argv: string[]
-  projectName?: string
+  projectName: string
 }
 
 interface InternalAddProjectOpts {
@@ -49,43 +47,72 @@ export async function e2ePluginSetup (on: Cypress.PluginEvents, config: Cypress.
   // Set this to a dedicate port so we can debug the state of the tests
   process.env.CYPRESS_INTERNAL_GRAPHQL_PORT = '5555'
 
+  on('task', await makeE2ETasks())
+
+  return {
+    ...config,
+    env: {
+      e2e_isDebugging: Boolean(inspector.url()),
+    },
+  }
+}
+
+export type E2ETaskMap = ReturnType<typeof makeE2ETasks> extends Promise<infer U> ? U : never
+
+interface FixturesShape {
+  scaffold (): void
+  scaffoldProject (project: string): void
+  scaffoldWatch (): void
+  remove (): void
+  removeProject (name): void
+  projectPath (name): string
+  get (fixture, encoding?: BufferEncoding): string
+  path (fixture): string
+}
+
+async function makeE2ETasks () {
   // require'd from @packages/server & @tooling/system-tests so we don't import
   // types which would pollute strict type checking
   const argUtils = require('@packages/server/lib/util/args')
   const { makeDataContext } = require('@packages/server/lib/makeDataContext')
+  const Fixtures = require('@tooling/system-tests/lib/fixtures') as FixturesShape
 
-  const Fixtures = require('@tooling/system-tests/lib/fixtures')
   const cli = require('../../../../cli/lib/cli')
   const cliOpen = require('../../../../cli/lib/exec/open')
-  const tmpDir = path.join(__dirname, '.projects')
 
-  await util.promisify(rimraf)(tmpDir)
+  // Remove all the fixtures when the plugin starts
+  Fixtures.remove()
 
-  Fixtures.setTmpDir(tmpDir)
+  // const tmpDir = path.join(__dirname, '.projects')
+  // await util.promisify(rimraf)(tmpDir)
+  // Fixtures.setTmpDir(tmpDir)
 
   interface WithCtxObj {
     fn: string
     options: WithCtxOptions
-    activeTestId: string
     // TODO(tim): add an API for intercepting this
-    interceptCloudExecute: (config: CloudExecuteRemote) => {}
+    // interceptCloudExecute: (config: CloudExecuteRemote) => {}
   }
 
   let ctx: DataContext
   let testState: Record<string, any> = {}
   let remoteGraphQLIntercept: RemoteGraphQLInterceptor | undefined
+  let scaffoldedProjects = new Set<string>()
 
   ctx = setCtx(makeDataContext({ mode: 'open', modeOptions: { cwd: process.cwd() } }))
 
   const gqlPort = await makeGraphQLServer()
 
-  on('task', {
+  return {
     /**
-     * Called before all tests, returns the global "gqlPort". The same GraphQL
-     * server is used for all integration tests, so we can go to http://localhost:5555/graphql
-     * and debug the internal state of the application
+     * Called before all tests, cleans up any scaffolded projects and returns the global "gqlPort".
+     * The same GraphQL server is used for all integration tests, so we can
+     * go to http://localhost:5555/graphql and debug the internal state of the application
      */
     async __internal__before () {
+      Fixtures.remove()
+      scaffoldedProjects = new Set()
+
       return { gqlPort }
     },
 
@@ -153,25 +180,57 @@ export async function e2ePluginSetup (on: Cypress.PluginEvents, config: Cypress.
       return null
     },
     async __internal_addProject (opts: InternalAddProjectOpts) {
-      Fixtures.scaffoldProject(opts.projectName)
+      if (!scaffoldedProjects.has(opts.projectName)) {
+        this.__internal_scaffoldProject(opts.projectName)
+      }
 
       await ctx.actions.project.addProject({ path: Fixtures.projectPath(opts.projectName), open: opts.open })
 
       return Fixtures.projectPath(opts.projectName)
     },
     __internal_scaffoldProject (projectName: string) {
+      if (fs.existsSync(Fixtures.projectPath(projectName))) {
+        Fixtures.removeProject(projectName)
+      }
+
       Fixtures.scaffoldProject(projectName)
+
+      scaffoldedProjects.add(projectName)
 
       return Fixtures.projectPath(projectName)
     },
-    async __internal_resetArgv ({ argv, projectName }: InternalResetLaunchArgs): Promise<ResetLaunchArgsResult> {
-      const openArgv = projectName && !argv.includes('--project') ? ['--project', Fixtures.projectPath(projectName), ...argv] : ['--global', ...argv]
+    async __internal_openGlobal (argv: string[] = []): Promise<ResetOptionsResult> {
+      const openArgv = ['--global', ...argv]
 
       // Runs the launchArgs through the whole pipeline for the CLI open process,
       // which probably needs a bit of refactoring / consolidating
       const cliOptions = await cli.parseOpenCommand(['open', ...openArgv])
       const processedArgv = cliOpen.processOpenOptions(cliOptions)
-      const modeOptions = Object.freeze(argUtils.toObject(processedArgv))
+      const modeOptions = argUtils.toObject(processedArgv)
+
+      // Reset the state of the context
+      await ctx.resetForTest(modeOptions)
+
+      // Handle any pre-loading that should occur based on the launch arg settings
+      await ctx.initializeMode()
+
+      return {
+        modeOptions,
+        e2eServerPort: ctx.appServerPort,
+      }
+    },
+    async __internal_openProject ({ argv, projectName }: InternalOpenProjectArgs): Promise<ResetOptionsResult> {
+      if (!scaffoldedProjects.has(projectName)) {
+        throw new Error(`${projectName} has not been scaffolded. Be sure to call cy.scaffoldProject('${projectName}') in the test, a before, or beforeEach hook`)
+      }
+
+      const openArgv = [...argv, '--project', Fixtures.projectPath(projectName)]
+
+      // Runs the launchArgs through the whole pipeline for the CLI open process,
+      // which probably needs a bit of refactoring / consolidating
+      const cliOptions = await cli.parseOpenCommand(['open', ...openArgv])
+      const processedArgv = cliOpen.processOpenOptions(cliOptions)
+      const modeOptions = argUtils.toObject(processedArgv)
 
       // Reset the state of the context
       await ctx.resetForTest(modeOptions)
@@ -195,7 +254,7 @@ export async function e2ePluginSetup (on: Cypress.PluginEvents, config: Cypress.
             throw new Error(`${projectName} is not a fixture project`)
           }
 
-          return path.join(tmpDir, projectName)
+          return Fixtures.projectPath(projectName)
         },
       }
 
@@ -204,13 +263,6 @@ export async function e2ePluginSetup (on: Cypress.PluginEvents, config: Cypress.
       `).call(undefined, ctx, options, chai, expect, sinon))
 
       return val || null
-    },
-  })
-
-  return {
-    ...config,
-    env: {
-      e2e_isDebugging: Boolean(inspector.url()),
     },
   }
 }

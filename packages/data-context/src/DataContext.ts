@@ -72,6 +72,10 @@ export class DataContext {
     this._coreData = _config.coreData ?? makeCoreData(this._modeOptions)
   }
 
+  get isRunMode () {
+    return this._config.mode === 'run'
+  }
+
   get electronApp () {
     return this._config.electronApp
   }
@@ -348,6 +352,7 @@ export class DataContext {
     // this._patches.push([{ op: 'add', path: [], value: this._coreData }])
 
     return Promise.all([
+      this.cloud.reset(),
       this.util.disposeLoaders(),
       this.actions.project.clearActiveProject(),
       // this.actions.currentProject?.clearCurrentProject(),
@@ -391,7 +396,8 @@ export class DataContext {
       await this.actions.project.setActiveProject(this.modeOptions.projectRoot)
 
       if (this.coreData.currentProject?.preferences) {
-        toAwait.push(this.actions.project.launchProjectWithoutElectron())
+        // Skipping this until we sort out the lifecycle things
+        // toAwait.push(this.actions.project.launchProjectWithoutElectron())
       }
     }
 

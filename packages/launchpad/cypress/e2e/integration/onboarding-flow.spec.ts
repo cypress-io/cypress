@@ -1,6 +1,7 @@
 describe('Onboarding Flow', () => {
   it('can scaffold a project in e2e mode', () => {
-    cy.setupE2E('unify-onboarding')
+    cy.scaffoldProject('unify-onboarding')
+    cy.openProject('unify-onboarding')
     cy.loginUser()
 
     cy.visitLaunchpad()
@@ -19,7 +20,8 @@ describe('Onboarding Flow', () => {
   })
 
   it('redirects to initialize plugin if CT is configured', () => {
-    cy.setupE2E('unify-onboarding-with-config')
+    cy.scaffoldProject('unify-onboarding-with-config')
+    cy.openProject('unify-onboarding-with-config')
 
     cy.visitLaunchpad()
     cy.get('[data-cy-testingType=component]').click()
