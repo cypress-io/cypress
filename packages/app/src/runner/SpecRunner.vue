@@ -2,6 +2,7 @@
   <RemovePositioningDuringScreenshot
     id="main-pane"
     class="flex border-gray-900 border-l-1"
+    :class="{'select-none': specsListIsDragging || reporterIsDragging}"
   >
     <HideDuringScreenshot
       id="inline-spec-list"
@@ -11,18 +12,19 @@
         v-if="props.gql.currentProject"
         v-show="runnerUiStore.isSpecsListOpen"
         class="relative"
-        :style="{width: `${specsListWidth -64}px`}"
+        :style="{width: `${specsListWidth - 64}px`}"
       >
         <InlineSpecList
           id="reporter-inline-specs-list"
           :gql="props.gql"
-          :class="{'select-none': isDragging}"
         />
         <div
           v-show="runnerUiStore.isSpecsListOpen"
-          ref="draggable"
+          ref="specsListResizeHandle"
           class="cursor-ew-resize h-full top-0 -right-6px w-16px z-30 absolute"
-        />
+        >
+          {{ specsListHandleX }}
+        </div>
       </div>
 
       <ChooseExternalEditorModal
@@ -33,12 +35,26 @@
       />
     </HideDuringScreenshot>
 
-    <HideDuringScreenshot class="min-w-320px">
+    <HideDuringScreenshot>
       <div
-        v-once
-        :id="REPORTER_ID"
-        :class="{'select-none': isDragging}"
-      />
+        class="h-full relative"
+        :style="{width: `${reporterWidth}px`}"
+      >
+        <div
+          v-once
+          :id="REPORTER_ID"
+          :class="{'select-none': specsListIsDragging}"
+          class="w-full"
+        />
+
+        <div
+          v-show="runnerUiStore.isSpecsListOpen"
+          ref="reporterResizeHandle"
+          class="cursor-ew-resize h-full top-0 -right-6px w-16px z-30 absolute"
+        >
+          {{ reporterHandleX }}
+        </div>
+      </div>
     </HideDuringScreenshot>
 
     <div
@@ -138,37 +154,113 @@ const screenshotStore = useScreenshotStore()
 const runnerUiStore = useRunnerUiStore()
 const preferences = usePreferences()
 const initialSpecsListWidth: number = props.gql.localSettings.preferences.specsListWidth ?? 280
+const initialReporterWidth: number = props.gql.localSettings.preferences.reporterWidth ?? 320
 
 // Todo: maybe `update` should take an object, not just a key-value pair and do updates like this all in one batch
 preferences.update('autoScrollingEnabled', props.gql.localSettings.preferences.autoScrollingEnabled ?? true)
 preferences.update('isSpecsListOpen', props.gql.localSettings.preferences.isSpecsListOpen ?? true)
-preferences.update('reporterWidth', props.gql.localSettings.preferences.reporterWidth ?? 320)
+preferences.update('reporterWidth', initialReporterWidth)
 preferences.update('specsListWidth', initialSpecsListWidth)
 
 const runnerPane = ref<HTMLDivElement>()
-const reporterWidth = ref<number>(320)
-// const specsListWidth = ref<number>(280)
-const draggable = ref<HTMLElement | null>(null)
-const { x: draggableWidth, isDragging } = useDraggable(draggable, {
+
+const MIN_AUT_WIDTH = 200
+
+const specsListResizeHandle = ref<HTMLElement | null>(null)
+const reporterResizeHandle = ref<HTMLElement | null>(null)
+const lastReporterWidth = ref(initialReporterWidth)
+const lastSpecsListWidth = ref(initialSpecsListWidth)
+
+const { x: specsListHandleX, isDragging: specsListIsDragging } = useDraggable(specsListResizeHandle, {
   initialValue: { x: initialSpecsListWidth, y: 0 },
+  exact: true,
+  preventDefault: true,
+  onMove: () => {
+    lastSpecsListWidth.value = specsListWidth.value
+  },
+  onEnd: () => {
+    // console.log('end drag specs list x val', specsListHandleX.value)
+    // console.log('end drag specs list width val', specsListWidth.value)
+    specsListHandleX.value = specsListWidth.value
+    handleResizeEnd('specsList')
+  },
 })
 
+const { x: reporterHandleX, isDragging: reporterIsDragging } = useDraggable(reporterResizeHandle, {
+  initialValue: { x: initialReporterWidth + initialSpecsListWidth, y: 0 },
+  exact: true,
+  preventDefault: true,
+  onMove: () => {
+    lastReporterWidth.value = reporterWidth.value
+  },
+  onEnd: () => {
+    reporterHandleX.value = reporterWidth.value + specsListWidth.value
+    lastReporterWidth.value = reporterWidth.value
+    handleResizeEnd('reporter')
+  },
+})
 const specsListWidth = computed(() => {
   if (!runnerUiStore.isSpecsListOpen) {
     return 0
   }
 
-  if (draggableWidth.value <= 500 && draggableWidth.value > 300) {
-    return draggableWidth.value
+  if (!specsListIsDragging) {
+    return lastSpecsListWidth.value
   }
 
-  if (draggableWidth.value > 500) {
-    return 500
+  const nonSpecsListWidth = reporterWidth.value + MIN_AUT_WIDTH
+  const maxSpecsListWidth = windowWidth.value - nonSpecsListWidth
+
+  if (specsListHandleX.value <= maxSpecsListWidth && specsListHandleX.value > 300) {
+    return specsListHandleX.value
+  }
+
+  if (specsListHandleX.value > maxSpecsListWidth) {
+    return maxSpecsListWidth
   }
 
   return 300
 })
 
+const reporterWidth = computed(() => {
+  if (!reporterIsDragging.value) {
+    // console.log('reporter is not dragging, using last value ', lastReporterWidth.value)
+
+    return lastReporterWidth.value
+  }
+
+  const unavailableWidth = specsListWidth.value + MIN_AUT_WIDTH + 50
+  const maxReporterWidth = windowWidth.value - unavailableWidth
+  const currentReporterWidth = reporterHandleX.value - specsListWidth.value
+
+  if (!maxReporterWidth || !currentReporterWidth) {
+    // console.log('missing maxReporterWidth or currentReporterWidth')
+
+    return initialReporterWidth
+  }
+
+  if (currentReporterWidth <= maxReporterWidth && currentReporterWidth > 200) {
+    // console.log('safe zone, currentReporterWidth was less than maxReporterWidth and greater than 200', currentReporterWidth)
+
+    return currentReporterWidth
+  }
+
+  if (currentReporterWidth > maxReporterWidth) {
+    // console.log('currentReporterWidth was greater than maxReporterWidth, return max')
+
+    return maxReporterWidth
+  }
+
+  if (currentReporterWidth < 200) {
+    // console.log('currentReporterWidth less than 200')
+
+    return 200
+  }
+
+  // console.log('something else', reporterIsDragging.value, currentReporterWidth, maxReporterWidth)
+
+  return currentReporterWidth
+})
 const autMargin = 16
 
 const containerWidth = computed(() => {
@@ -208,15 +300,9 @@ function runSpec () {
   UnifiedRunnerAPI.executeSpec(props.activeSpec)
 }
 
-watch(isDragging, (newVal) => {
-  if (newVal === false) {
-    handleResizeEnd('specsList')
-  }
-})
-
 function handleResizeEnd (pane: 'reporter' | 'specsList') {
   if (pane === 'reporter') {
-    preferences.update('reporterWidth', reporterWidth.value)
+    preferences.update('reporterWidth', Math.round(reporterWidth.value))
   } else {
     preferences.update('specsListWidth', Math.round(specsListWidth.value))
   }
@@ -276,7 +362,7 @@ onMounted(() => {
 
   eventManager.on('save:app:state', (state) => {
     preferences.update('isSpecsListOpen', state.isSpecsListOpen)
-    specsListWidth.value = state.isSpecsListOpen ? runnerUiStore.specsListWidth : 0
+    reporterHandleX.value = state.isSpecsListOpen ? runnerUiStore.specsListWidth : 0
     preferences.update('autoScrollingEnabled', state.autoScrollingEnabled)
   })
 
