@@ -20,7 +20,7 @@ export const getPathToIndex = (pkg: RunnerPkg) => {
   return getPathToDist(pkg, 'index.html')
 }
 
-export const getPathToDesktopIndex = (graphqlPort?: number) => {
+export const getPathToDesktopIndex = (graphqlPort: number) => {
   // For now, if we see that there's a CYPRESS_INTERNAL_VITE_DEV
   // we assume we're running Cypress targeting that (dev server)
   if (process.env.CYPRESS_INTERNAL_VITE_DEV) {

@@ -89,9 +89,9 @@ export async function buildPackageTsc ({
     )
 
     try {
+      built++
       await execAsync('yarn check-ts', { cwd })
 
-      built++
       console.log(
         `${chalk.green(`Built`)} ${cwd} ${chalk.magenta(
           `${built} / ${packages.length}`,

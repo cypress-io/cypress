@@ -270,8 +270,7 @@ module.exports = {
         return this.runElectron(mode, options)
 
       case 'openProject':
-        // open + start the project
-        return this.openProject(options)
+        throw new Error('Unused')
 
       default:
         throw new Error(`Cannot start. Invalid mode: '${mode}'`)

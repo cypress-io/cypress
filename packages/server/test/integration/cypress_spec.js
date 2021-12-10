@@ -47,7 +47,7 @@ const system = require(`${root}lib/util/system`)
 const appData = require(`${root}lib/util/app_data`)
 const electronApp = require('../../lib/util/electron-app')
 const savedState = require(`${root}lib/saved_state`)
-const { makeLegacyDataContext } = require(`${root}lib/makeDataContext`)
+const { getCtx } = require(`${root}lib/makeDataContext`)
 
 const TYPICAL_BROWSERS = [
   {
@@ -109,7 +109,7 @@ describe('lib/cypress', () => {
   require('mocha-banner').register()
 
   beforeEach(function () {
-    ctx = makeLegacyDataContext()
+    ctx = getCtx()
     process.chdir(previousCwd)
     this.timeout(8000)
 

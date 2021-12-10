@@ -1,8 +1,11 @@
-describe('Settings', { viewportWidth: 600 }, () => {
-  beforeEach(() => {
-    cy.setupE2E('component-tests')
+describe('App: Settings', { viewportWidth: 600 }, () => {
+  before(() => {
+    cy.scaffoldProject('todos')
+  })
 
-    cy.initializeApp()
+  beforeEach(() => {
+    cy.openProject('todos')
+    cy.startAppServer('e2e')
   })
 
   it('displays the settings for the current project', () => {
@@ -40,7 +43,6 @@ describe('Settings', { viewportWidth: 600 }, () => {
   })
 
   it('selects well known editor', () => {
-    cy.visitApp()
     cy.withCtx(async (ctx) => {
       ctx.coreData.localSettings.availableEditors = [
         ...ctx.coreData.localSettings.availableEditors,
@@ -55,6 +57,8 @@ describe('Settings', { viewportWidth: 600 }, () => {
 
       ctx.coreData.localSettings.preferences.preferredEditorBinary = undefined
     })
+
+    cy.visitApp()
 
     cy.get('[href="#/settings"]').click()
     cy.contains('Device Settings').click()

@@ -3,7 +3,7 @@ require('../../spec_helper')
 const mockedEnv = require('mocked-env')
 const { omit } = require('lodash')
 const cp = require('child_process')
-const { makeLegacyDataContext } = require('../../../lib/makeDataContext')
+const { getCtx } = require('../../../lib/makeDataContext')
 const FixturesHelper = require('@tooling/system-tests/lib/fixtures')
 
 const plugins = require('../../../lib/plugins')
@@ -21,7 +21,7 @@ describe.skip('lib/plugins/index', () => {
   let getOptions
 
   beforeEach(() => {
-    ctx = makeLegacyDataContext()
+    ctx = getCtx()
     plugins._reset()
 
     FixturesHelper.scaffold()

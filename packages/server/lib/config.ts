@@ -17,7 +17,6 @@ import pathHelpers from './util/path_helpers'
 const debug = Debug('cypress:server:config')
 
 import { getProcessEnvVars, CYPRESS_SPECIAL_ENV_VARS } from './util/config'
-import type { DataContext } from '@packages/data-context'
 
 const folders = _(configUtils.options).filter({ isFolder: true }).map('name').value()
 
@@ -130,10 +129,9 @@ export type FullConfig =
 export function get (
   projectRoot,
   options: { configFile?: string | false } = { configFile: undefined },
-  ctx: DataContext,
 ): Promise<FullConfig> {
   return Promise.all([
-    settings.read(projectRoot, options, ctx).then(validateFile(options.configFile ?? 'cypress.config.{ts|js}')),
+    settings.read(projectRoot, options).then(validateFile(options.configFile ?? 'cypress.config.{ts|js}')),
     settings.readEnv(projectRoot).then(validateFile('cypress.env.json')),
   ])
   .spread((settings, envFile) => {
@@ -444,7 +442,10 @@ export function setSupportFileAndFolder (obj, defaults) {
     // /tmp/foo -> /private/tmp/foo
     // which can confuse the rest of the code
     // switch it back to "normal" file
-    obj.supportFile = path.join(sf, path.basename(obj.supportFile))
+    const supportFileName = path.basename(obj.supportFile)
+    const base = sf.endsWith(supportFileName) ? path.dirname(sf) : sf
+
+    obj.supportFile = path.join(base, supportFileName)
 
     return fs.pathExists(obj.supportFile)
     .then((found) => {
