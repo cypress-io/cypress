@@ -27,7 +27,7 @@
       >
         <button
           v-if="suffixIcon"
-          data-testid="alert-suffix-icon"
+          data-cy="alert-suffix-icon"
           :aria-label="suffixIconAriaLabel"
           class="rounded-full flex outline-none h-32px -top-16px -right-8px w-32px hocus:ring-current items-center justify-center absolute hocus:ring-1"
           :class="suffixButtonClass"

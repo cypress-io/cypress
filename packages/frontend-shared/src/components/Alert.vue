@@ -13,7 +13,7 @@
   >
     <template #target="{ open }">
       <div
-        data-testid="alert-header"
+        data-cy="alert-header"
         class="grid grid-cols-1 group"
         :class="{
           'cursor-pointer': canCollapse,
@@ -61,7 +61,7 @@
     <div
       v-if="$slots.default"
       class="text-left p-16px"
-      data-testid="alert-body"
+      data-cy="alert-body"
     >
       <slot />
     </div>

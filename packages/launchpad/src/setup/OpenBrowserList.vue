@@ -5,7 +5,7 @@
   >
     <div
       class="flex flex-wrap justify-center gap-6 py-16"
-      data-testid="browser-radio-group"
+      data-cy="open-browser-list"
     >
       <div
         v-for="browser of props.gql.browsers"
@@ -54,7 +54,7 @@
           type="submit"
           class="inline mr-2"
           :suffix-icon="openInNew"
-          data-testid="launch-button"
+          data-cy="launch-button"
           size="lg-wide"
         >
           {{ launchText }}
