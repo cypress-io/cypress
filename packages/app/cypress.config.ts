@@ -48,10 +48,9 @@ export default defineConfig({
     pluginsFile: 'cypress/e2e/plugins/index.ts',
     supportFile: 'cypress/e2e/support/e2eSupport.ts',
     async setupNodeEvents (on, config) {
-      const { monorepoPaths } = require('../../scripts/gulp/monorepoPaths')
       const { e2ePluginSetup } = require('@packages/frontend-shared/cypress/e2e/e2ePluginSetup')
 
-      return await e2ePluginSetup(monorepoPaths.pkgApp, on, config)
+      return await e2ePluginSetup(on, config)
     },
   },
 })

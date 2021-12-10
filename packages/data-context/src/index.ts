@@ -8,6 +8,14 @@ export type {
   DataContextConfig,
 } from './DataContext'
 
+export type {
+  GlobalPubSub,
+} from './globalPubSub'
+
+import { globalPubSub } from './globalPubSub'
+
+export { globalPubSub }
+
 let ctx: DataContext | null = null
 
 // globalPubSub.on('cleanup', clearCtx)

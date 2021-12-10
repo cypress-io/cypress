@@ -60,7 +60,7 @@ describe('lib/gui/events', () => {
     })
   })
 
-  context('.start', () => {
+  xcontext('.start', () => {
     it('ipc attaches callback on request', () => {
       sinon.stub(events, 'handleEvent')
 
