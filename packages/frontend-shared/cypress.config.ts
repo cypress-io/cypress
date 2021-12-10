@@ -30,6 +30,5 @@ export default defineConfig({
   },
   'e2e': {
     'supportFile': 'cypress/e2e/support/e2eSupport.ts',
-    'specPattern': 'cypress/integration/**/*.spec.{js,ts,tsx,jsx}',
   },
 })
