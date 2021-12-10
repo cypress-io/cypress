@@ -41,7 +41,6 @@ export default defineConfig({
     },
   },
   'e2e': {
-    specPattern: 'cypress/e2e/integration/**/*.spec.ts',
     pluginsFile: 'cypress/e2e/plugins/index.ts',
     supportFile: 'cypress/e2e/support/e2eSupport.ts',
     async setupNodeEvents (on, config) {
