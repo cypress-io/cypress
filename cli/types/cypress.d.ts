@@ -328,7 +328,7 @@ declare namespace Cypress {
     // 60000
     ```
      */
-    config<K extends keyof ConfigOptions>(key: K): ResolvedConfigOptions[K]
+    config<K extends keyof Config>(key: K): Config[K]
     /**
      * Sets one configuration value.
      * @see https://on.cypress.io/config
@@ -337,7 +337,7 @@ declare namespace Cypress {
     Cypress.config('viewportWidth', 800)
     ```
      */
-    config<K extends keyof ConfigOptions>(key: K, value: ResolvedConfigOptions[K]): void
+    config<K extends keyof TestConfigOverrides>(key: K, value: TestConfigOverrides[K]): void
     /**
      * Sets multiple configuration values at once.
      * @see https://on.cypress.io/config
@@ -2879,7 +2879,7 @@ declare namespace Cypress {
     xhrUrl: string
   }
 
-  interface TestConfigOverrides extends Partial<Pick<ConfigOptions, 'animationDistanceThreshold' | 'baseUrl' | 'defaultCommandTimeout' | 'env' | 'execTimeout' | 'includeShadowDom' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>> {
+  interface TestConfigOverrides extends Partial<Pick<ConfigOptions, 'animationDistanceThreshold' | 'baseUrl' | 'blockHosts' | 'defaultCommandTimeout' | 'env' | 'execTimeout' | 'includeShadowDom' | 'numTestsKeptInMemory' | 'pageLoadTimeout' | 'redirectionLimit' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'screenshotOnRunFailure' | 'slowTestThreshold' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>> {
     browser?: IsBrowserMatcher | IsBrowserMatcher[]
     keystrokeDelay?: number
   }
