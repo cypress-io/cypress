@@ -14,7 +14,7 @@ import browserInfo from './cypress/browser'
 import $scriptUtils from './cypress/script_utils'
 
 import $Commands from './cypress/commands'
-import $Cy from './cypress/cy'
+import { $Cy } from './cypress/cy'
 import $dom from './dom'
 import $Downloads from './cypress/downloads'
 import $errorMessages from './cypress/error_messages'
@@ -227,12 +227,8 @@ class $Cypress {
   // or parsed. we have not received any custom commands
   // at this point
   onSpecWindow (specWindow, scripts) {
-    const logFn = (...args) => {
-      return this.log.apply(this, args)
-    }
-
     // create cy and expose globally
-    this.cy = $Cy.create(specWindow, this, this.Cookies, this.state, this.config, logFn)
+    this.cy = new $Cy(specWindow, this, this.Cookies, this.state, this.config)
     window.cy = this.cy
     this.isCy = this.cy.isCy
     this.log = $Log.create(this, this.cy, this.state, this.config)
