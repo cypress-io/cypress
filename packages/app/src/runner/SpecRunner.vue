@@ -19,7 +19,7 @@
           :gql="props.gql"
         />
         <div
-          v-show="runnerUiStore.isSpecsListOpen"
+          v-show="runnerUiStore.isSpecsListOpen && !screenshotStore.isScreenshotting"
           ref="specsListResizeHandle"
           class="cursor-ew-resize h-full top-0 -right-6px w-16px z-30 absolute"
         />
@@ -46,7 +46,7 @@
         />
 
         <div
-          v-show="runnerUiStore.isSpecsListOpen"
+          v-show="!screenshotStore.isScreenshotting"
           ref="reporterResizeHandle"
           class="cursor-ew-resize h-full top-0 -right-6px w-16px z-30 absolute"
         />
