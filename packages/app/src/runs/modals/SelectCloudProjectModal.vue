@@ -42,7 +42,7 @@
         class="mt-16px transition-all"
         :class="pickedOrganization ? undefined : 'opacity-50'"
         :options="projects"
-        item-value="slug"
+        item-value="name"
         item-key="id"
         :disabled="!pickedOrganization"
         :placeholder="projectPlaceholder"
@@ -142,14 +142,15 @@
     </template>
   </StandardModal>
   <CreateCloudOrgModal
-    v-else
+    v-else-if="gql.cloudViewer"
+    :gql="gql.cloudViewer"
     @cancel="emit('cancel')"
   />
 </template>
 
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
-import { gql } from '@urql/vue'
+import { gql, useMutation } from '@urql/vue'
 import StandardModal from '@cy/components/StandardModal.vue'
 import Button from '@cy/components/Button.vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
@@ -160,7 +161,8 @@ import ConnectIcon from '~icons/cy/chain-link_x16.svg'
 import CreateIcon from '~icons/cy/add-large_x16.svg'
 import FolderIcon from '~icons/cy/folder-outline_x16.svg'
 import OrganizationIcon from '~icons/cy/office-building_x16.svg'
-import type { SelectCloudProjectModalFragment } from '../../generated/graphql'
+import { SelectCloudProjectModalFragment, SelectCloudProjectModal_CreateCloudProjectDocument } from '../../generated/graphql'
+import { SelectCloudProjectModal_SetProjectIdDocument } from '@packages/data-context/src/gen/all-operations.gen'
 import CreateCloudOrgModal from './CreateCloudOrgModal.vue'
 import { useI18n } from '@cy/i18n'
 
@@ -179,14 +181,28 @@ fragment SelectCloudProjectModal on Query {
           nodes {
             id
             slug
+            name
           }
         }
       }
     }
+    ...CreateCloudOrgModal
   }
   currentProject{
     id
     title
+  }
+}
+`
+
+gql`
+mutation SelectCloudProjectModal_SetProjectId( $projectId: String! ) {
+  setProjectIdInConfigFile(projectId: $projectId)
+}
+
+mutation SelectCloudProjectModal_CreateCloudProject( $name: String!, $orgId: ID!, $public: Boolean! ) {
+  cloudProjectCreate(name: $name, orgId: $orgId, public: $public) {
+    id
   }
 }
 `
@@ -198,6 +214,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (event: 'cancel'): void
+  (event: 'update-projectId-failed', projectId: string): void
 }>()
 
 const newProject = ref(false)
@@ -225,13 +242,30 @@ const projectPlaceholder = computed(() => {
 
 const organizationUrl = computed(() => props.gql.cloudViewer?.cloudOrganizationsUrl)
 
-function createOrConnectProject () {
-  if (newProject.value) {
-    // eslint-disable-next-line no-console
-    console.log('mutate to create a project')
+const createCloudProjectMutation = useMutation(SelectCloudProjectModal_CreateCloudProjectDocument)
+const setProjectIdMutation = useMutation(SelectCloudProjectModal_SetProjectIdDocument)
+
+async function createOrConnectProject () {
+  let projectId: string
+
+  if (newProject.value && pickedOrganization.value) {
+    const result = await createCloudProjectMutation.executeMutation({
+      orgId: pickedOrganization.value.id,
+      name: projectName.value,
+      public: projectAccess.value === 'public',
+    })
+
+    projectId = (result.data?.cloudProjectCreate as any)?.slug || '<undefined>'
   } else {
-    // eslint-disable-next-line no-console
-    console.log('mutate to connect a project')
+    projectId = pickedProject.value?.slug
+  }
+
+  const result = await setProjectIdMutation.executeMutation({ projectId })
+
+  if (result.data?.setProjectIdInConfigFile) {
+    emit('cancel')
+  } else {
+    emit('update-projectId-failed', projectId)
   }
 }
 </script>

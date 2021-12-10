@@ -34,6 +34,18 @@
       :show="isProjectConnectOpen"
       :gql="props.gql"
       @cancel="isProjectConnectOpen = false"
+      @update-project-id-failed="(projectId: string) => {
+        isProjectConnectOpen = false
+        isManualUpdateOpen = true
+        newProjectId = projectId
+      }"
+    />
+    <NeedManualUpdateModal
+      v-else-if="isManualUpdateOpen
+        && props.gql.currentProject"
+      :gql="props.gql.currentProject"
+      :new-project-id="newProjectId"
+      @cancel="isManualUpdateOpen = false"
     />
   </div>
 </template>
@@ -51,12 +63,17 @@ import LoginModal from '@cy/gql-components/topnav/LoginModal.vue'
 import { useI18n } from '@cy/i18n'
 import type { RunsConnectFragment } from '../generated/graphql'
 import SelectCloudProjectModal from './modals/SelectCloudProjectModal.vue'
+import NeedManualUpdateModal from './modals/NeedManualUpdateModal.vue'
 
 const { t } = useI18n()
 
 gql`
 fragment RunsConnect on Query {
   ...SelectCloudProjectModal
+  currentProject {
+    id
+    ...NeedManualUpdateModal
+  }
   cloudViewer{
     id
   }
@@ -81,6 +98,9 @@ function openConnection () {
     isProjectConnectOpen.value = true
   }
 }
+
+const isManualUpdateOpen = ref(false)
+const newProjectId = ref('')
 
 const notions = [
   {

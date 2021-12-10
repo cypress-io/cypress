@@ -7,10 +7,10 @@
     <Alert type="warning">
       {{ t('runs.connect.modal.connectManually.warning') }}
     </Alert>
-    <p class="mb-16px mt-24px leading-24px text-16px">
+    <p class="mt-24px mb-16px text-16px leading-24px">
       <i18n-t keypath="runs.connect.modal.connectManually.mainMessage">
         <template #projectId>
-          <code class="border border-gray-200 rounded px-3px py-2px m-2px text-purple-500 text-16px">projectId</code>
+          <code class="border rounded border-gray-200 m-2px py-2px px-3px text-purple-500 text-16px">projectId</code>
         </template>
         <template #configFile>
           <span class="text-indigo-500">cypress.config.js</span>
@@ -18,7 +18,7 @@
       </i18n-t>
     </p>
     <ShikiHighlight
-      class="border-1 border-gray-200 rounded"
+      class="rounded border-1 border-gray-200"
       lang="javascript"
       :code="helpCode"
       line-numbers
@@ -69,15 +69,11 @@ gql`
 fragment NeedManualUpdateModal on CurrentProject {
   id
   projectId
-  # TODO: there should be a fragment for newly created project
-  # newCloudProject {
-  #   id
-  #   projectId
-  # }
 }`
 
 const props = defineProps<{
   gql: NeedManualUpdateModalFragment
+  newProjectId: string
 }>()
 
 const show = computed(() => {
@@ -86,7 +82,7 @@ const show = computed(() => {
 })
 
 // TODO: make this projectId come form newCloudProject
-const projectIdCode = computed(() => `projectId: '${props.gql.projectId}'`)
+const projectIdCode = computed(() => `projectId: '${props.newProjectId}'`)
 
 const helpCode = computed(() => {
   return `
