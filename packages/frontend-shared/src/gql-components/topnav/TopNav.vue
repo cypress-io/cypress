@@ -85,6 +85,7 @@
     :href="`${releasesUrl}/tag/v${versions.latest.version}`"
     class="flex outline-transparent text-gray-600 gap-8px items-center group hocus:text-indigo-500 hocus:outline-0"
     :use-default-hocus="false"
+    data-cy="top-nav-cypress-version-current-link"
   >
     <i-cy-box_x16
       class="h-16px w-16px group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50 icon-dark-gray-500 icon-light-gray-100"
@@ -94,7 +95,10 @@
     </span>
   </ExternalLink>
 
-  <TopNavList v-if="props.gql?.currentProject?.currentBrowser && showBrowsers">
+  <TopNavList
+    v-if="props.gql?.currentProject?.currentBrowser && showBrowsers"
+    data-cy="topnav-browser-list"
+  >
     <template #heading="{ open }">
       <img
         class="w-16px filter group-hocus:grayscale-0"
@@ -102,7 +106,7 @@
         :src="allBrowsersIcons[props.gql?.currentProject?.currentBrowser?.displayName || '']"
       >
       <span
-        data-cy="topnav-browser-list"
+        data-cy="topnav-browser-list-active-browser"
       >{{ props.gql.currentProject?.currentBrowser?.displayName }} v{{ props.gql.currentProject?.currentBrowser?.majorVersion }}</span>
     </template>
     <TopNavListItem
