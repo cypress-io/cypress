@@ -34,6 +34,7 @@
       :show="isProjectConnectOpen"
       :gql="props.gql"
       @cancel="isProjectConnectOpen = false"
+      @success="isProjectConnectOpen = false; emit('success')"
       @update-project-id-failed="(projectId: string) => {
         isProjectConnectOpen = false
         isManualUpdateOpen = true
@@ -80,6 +81,10 @@ fragment RunsConnect on Query {
   ...LoginModal
 }
 `
+
+const emit = defineEmits<{
+  (event: 'success'): void
+}>()
 
 const props = defineProps<{
   gql: RunsConnectFragment,

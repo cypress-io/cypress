@@ -199,10 +199,13 @@ gql`
 mutation SelectCloudProjectModal_SetProjectId( $projectId: String! ) {
   setProjectIdInConfigFile(projectId: $projectId)
 }
+`
 
+gql`
 mutation SelectCloudProjectModal_CreateCloudProject( $name: String!, $orgId: ID!, $public: Boolean! ) {
   cloudProjectCreate(name: $name, orgId: $orgId, public: $public) {
     id
+    slug
   }
 }
 `
@@ -213,6 +216,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
+  (event: 'success'): void
   (event: 'cancel'): void
   (event: 'update-projectId-failed', projectId: string): void
 }>()
@@ -246,26 +250,28 @@ const createCloudProjectMutation = useMutation(SelectCloudProjectModal_CreateClo
 const setProjectIdMutation = useMutation(SelectCloudProjectModal_SetProjectIdDocument)
 
 async function createOrConnectProject () {
-  let projectId: string
+  let projectId: string | undefined
 
   if (newProject.value && pickedOrganization.value) {
-    const result = await createCloudProjectMutation.executeMutation({
+    const { data } = await createCloudProjectMutation.executeMutation({
       orgId: pickedOrganization.value.id,
       name: projectName.value,
       public: projectAccess.value === 'public',
     })
 
-    projectId = (result.data?.cloudProjectCreate as any)?.slug || '<undefined>'
+    projectId = data?.cloudProjectCreate?.slug
   } else {
     projectId = pickedProject.value?.slug
   }
 
-  const result = await setProjectIdMutation.executeMutation({ projectId })
+  if (projectId) {
+    const { data } = await setProjectIdMutation.executeMutation({ projectId })
 
-  if (result.data?.setProjectIdInConfigFile) {
-    emit('cancel')
-  } else {
-    emit('update-projectId-failed', projectId)
+    if (data?.setProjectIdInConfigFile) {
+      emit('success') // close the popup and show success alert
+    } else {
+      emit('update-projectId-failed', projectId)
+    }
   }
 }
 </script>

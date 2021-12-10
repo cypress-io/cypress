@@ -3,27 +3,27 @@
     <Alert
       v-if="showAlert"
       type="success"
-      class="absolute top-24px left-24px right-24px"
+      class="top-24px right-24px left-24px absolute"
       close-button
       @close="showAlert = false"
     >
       {{ t('runs.connectSuccessAlert.title') }}
       <template #details>
-        <p class="flex items-center leading-24px pt-16px px-16px">
-          <i-cy-arrow-outline-right_x16 class="inline align-middle h-16px w-16px mr-8px icon-dark-jade-500" />
+        <p class="flex px-16px pt-16px leading-24px items-center">
+          <i-cy-arrow-outline-right_x16 class="h-16px mr-8px w-16px inline align-middle icon-dark-jade-500" />
           <i18n-t keypath="runs.connectSuccessAlert.item1">
             <template #projectId>
-              <span class="font-normal text-jade-600 m-4px">projectId</span>
+              <span class="font-normal m-4px text-jade-600">projectId</span>
             </template>
             <template #configFile>
-              <span class="font-normal text-jade-600 m-4px">cypress.config.js</span>
+              <span class="font-normal m-4px text-jade-600">{{ configFilePath }}</span>
             </template>
           </i18n-t>
         </p>
-        <p class="flex items-center leading-24px pt-16px px-16px pb-16px">
-          <i-cy-arrow-outline-right_x16 class="inline align-middle h-16px w-16px mr-8px icon-dark-jade-500" />
+        <p class="flex px-16px pt-16px pb-16px leading-24px items-center">
+          <i-cy-arrow-outline-right_x16 class="h-16px mr-8px w-16px inline align-middle icon-dark-jade-500" />
           <i18n-t keypath="runs.connectSuccessAlert.item2">
-            <span class="font-normal text-jade-600 m-4px">cypress.config.js</span>
+            <span class="font-normal m-4px text-jade-600">{{ configFilePath }}</span>
           </i18n-t>
         </p>
       </template>
@@ -46,6 +46,7 @@ gql`
 fragment RunsConnectSuccessAlert on CurrentProject {
   id
   projectId
+  configFilePath
 }`
 
 const props = defineProps<{
@@ -55,6 +56,7 @@ const props = defineProps<{
 const showAlert = ref(false)
 
 const projectId = computed(() => props.gql.projectId)
+const configFilePath = computed(() => props.gql.configFilePath)
 
 whenever(projectId, () => {
   showAlert.value = true
