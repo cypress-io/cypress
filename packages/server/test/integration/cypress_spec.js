@@ -1,6 +1,5 @@
 /* eslint-disable no-restricted-properties */
 require('../spec_helper')
-
 const _ = require('lodash')
 const path = require('path')
 const EE = require('events')
@@ -406,7 +405,7 @@ describe('lib/cypress', () => {
       ])
       .then(() => {
         expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, {
-          url: 'http://localhost:8888/__/#/tests/integration/test2.coffee',
+          url: 'http://localhost:8888/__/#/tests/tests/test2.coffee',
         })
 
         this.expectExitWith(0)
@@ -416,7 +415,7 @@ describe('lib/cypress', () => {
     it('runs project by specific spec with default configuration', function () {
       return cypress.start([`--run-project=${this.idsPath}`, `--spec=${this.idsPath}/cypress/integration/bar.js`, '--config', 'port=2020'])
       .then(() => {
-        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:2020/__/#/tests/integration/bar.js' })
+        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:2020/__/#/tests/cypress/integration/bar.js' })
         this.expectExitWith(0)
       })
     })
@@ -424,7 +423,7 @@ describe('lib/cypress', () => {
     it('runs project by specific absolute spec and exits with status 0', function () {
       return cypress.start([`--run-project=${this.todosPath}`, `--spec=${this.todosPath}/tests/test2.coffee`])
       .then(() => {
-        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:8888/__/#/tests/integration/test2.coffee' })
+        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:8888/__/#/tests/tests/test2.coffee' })
         this.expectExitWith(0)
       })
     })
@@ -432,7 +431,7 @@ describe('lib/cypress', () => {
     it('runs project by limiting spec files via config.testFiles string glob pattern', function () {
       return cypress.start([`--run-project=${this.todosPath}`, `--config=testFiles=${this.todosPath}/tests/test2.coffee`])
       .then(() => {
-        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:8888/__/#/tests/integration/test2.coffee' })
+        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:8888/__/#/tests/tests/test2.coffee' })
         this.expectExitWith(0)
       })
     })
@@ -440,9 +439,9 @@ describe('lib/cypress', () => {
     it('runs project by limiting spec files via config.testFiles as a JSON array of string glob patterns', function () {
       return cypress.start([`--run-project=${this.todosPath}`, '--config=testFiles=["**/test2.coffee","**/test1.js"]'])
       .then(() => {
-        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:8888/__/#/tests/integration/test2.coffee' })
+        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:8888/__/#/tests/tests/test2.coffee' })
       }).then(() => {
-        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:8888/__/#/tests/integration/test1.js' })
+        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:8888/__/#/tests/tests/test1.js' })
         this.expectExitWith(0)
       })
     })
@@ -456,29 +455,6 @@ describe('lib/cypress', () => {
         expect(watchTree).not.to.be.called
         expect(watch).not.to.be.called
         this.expectExitWith(0)
-      })
-    })
-
-    it('scaffolds out integration and example specs if they do not exist when not runMode', function () {
-      ctx.actions.project.setActiveProjectForTestSetup(this.pristineWithConfigPath)
-
-      return config.get(this.pristineWithConfigPath)
-      .then((cfg) => {
-        return fs.statAsync(cfg.integrationFolder)
-        .then(() => {
-          throw new Error('integrationFolder should not exist!')
-        }).catch(() => {
-          return cypress.start([`--run-project=${this.pristineWithConfigPath}`, '--no-run-mode'])
-        }).then(() => {
-          return fs.statAsync(cfg.integrationFolder)
-        }).then(() => {
-          return Promise.join(
-            fs.statAsync(path.join(cfg.integrationFolder, '1-getting-started', 'todo.spec.js')),
-            fs.statAsync(path.join(cfg.integrationFolder, '2-advanced-examples', 'actions.spec.js')),
-            fs.statAsync(path.join(cfg.integrationFolder, '2-advanced-examples', 'files.spec.js')),
-            fs.statAsync(path.join(cfg.integrationFolder, '2-advanced-examples', 'viewport.spec.js')),
-          )
-        })
       })
     })
 
@@ -506,37 +482,6 @@ describe('lib/cypress', () => {
       }).each(ensureDoesNotExist)
       .then(() => {
         this.expectExitWithErr('NO_DEFAULT_CONFIG_FILE_FOUND', this.pristinePath)
-      })
-    })
-
-    it('does not scaffold integration or example specs when runMode', function () {
-      return cypress.start([`--run-project=${this.pristineWithConfigPath}`])
-      .then(() => {
-        return fs.statAsync(path.join(this.pristineWithConfigPath, 'cypress', 'integration'))
-      }).then(() => {
-        throw new Error('integration folder should not exist!')
-      }).catch((err) => {
-        if (err.code !== 'ENOENT') {
-          throw err
-        }
-      })
-    })
-
-    it('scaffolds out fixtures + files if they do not exist', function () {
-      ctx.actions.project.setActiveProjectForTestSetup(this.pristineWithConfigPath)
-
-      return config.get(this.pristineWithConfigPath)
-      .then((cfg) => {
-        return fs.statAsync(cfg.fixturesFolder)
-        .then(() => {
-          throw new Error('fixturesFolder should not exist!')
-        }).catch(() => {
-          return cypress.start([`--run-project=${this.pristineWithConfigPath}`, '--no-run-mode'])
-        }).then(() => {
-          return fs.statAsync(cfg.fixturesFolder)
-        }).then(() => {
-          return fs.statAsync(path.join(cfg.fixturesFolder, 'example.json'))
-        })
       })
     })
 
@@ -769,11 +714,11 @@ describe('lib/cypress', () => {
       it('logs error and exits when no specs were found at all', function () {
         return cypress.start([
           `--run-project=${this.todosPath}`,
-          '--config=integrationFolder=cypress/specs',
+          '--spec=/this/does/not/exist/**/*',
         ])
         .then(() => {
-          this.expectExitWithErr('NO_SPECS_FOUND', 'We searched for any files inside of this folder:')
-          this.expectExitWithErr('NO_SPECS_FOUND', 'cypress/specs')
+          this.expectExitWithErr('NO_SPECS_FOUND', 'We searched for any files matching this glob pattern')
+          this.expectExitWithErr('NO_SPECS_FOUND', 'this/does/not/exist/**/*')
         })
       })
     })
@@ -1200,7 +1145,11 @@ describe('lib/cypress', () => {
             '--config-file',
             'false',
           ]).then(() => {
-            this.expectExitWith(0)
+            // uses default specPattern which is cypress/integration/**/*
+            // exits with 1 since there are not specs for this pristine project.
+            this.expectExitWithErr('NO_SPECS_FOUND', 'We searched for any files matching this glob pattern:')
+            this.expectExitWithErr('NO_SPECS_FOUND', 'Can\'t run because no spec files were found')
+            this.expectExitWith(1)
           })
         })
       })
