@@ -2,7 +2,7 @@ import type { DataContext } from '..'
 import pDefer from 'p-defer'
 import getenv from 'getenv'
 import { pipe, subscribe, toPromise } from 'wonka'
-import type { DocumentNode } from 'graphql'
+import type { DocumentNode, OperationTypeNode } from 'graphql'
 import {
   createClient,
   cacheExchange,
@@ -24,6 +24,7 @@ const REMOTE_SCHEMA_URLS = {
 }
 
 export interface CloudExecuteRemote {
+  operationType: OperationTypeNode
   query: string
   document?: DocumentNode
   variables: any
@@ -58,7 +59,11 @@ export class CloudDataSource {
 
     const requestPolicy = config.requestPolicy ?? 'cache-and-network'
 
-    const executingQuery = this._cloudUrqlClient.executeQuery(createRequest(config.query, config.variables), {
+    const isQuery = config.operationType !== 'mutation'
+
+    const executeCall = isQuery ? 'executeQuery' : 'executeMutation'
+
+    const executingQuery = this._cloudUrqlClient[executeCall](createRequest(config.query, config.variables), {
       fetch: this.ctx.util.fetch,
       requestPolicy,
       fetchOptions: {
@@ -69,7 +74,7 @@ export class CloudDataSource {
       },
     })
 
-    if (requestPolicy === 'cache-and-network') {
+    if (requestPolicy === 'cache-and-network' && isQuery) {
       let resolvedData: OperationResult | undefined = undefined
       const dfd = pDefer<OperationResult>()
       const pipeline = pipe(

@@ -7,7 +7,7 @@ import type { DataContext } from '@packages/data-context'
  * @returns
  */
 export const remoteSchemaExecutor = async (obj: Record<string, any>) => {
-  const { document: _document, variables, context: _context } = obj
+  const { document: _document, operationType, variables, context: _context } = obj
 
   const document: DocumentNode = _document
   const context: DataContext = _context
@@ -17,6 +17,7 @@ export const remoteSchemaExecutor = async (obj: Record<string, any>) => {
   }
 
   const executorResult = await context.cloud.executeRemoteGraphQL({
+    operationType,
     document,
     variables,
     query: print(document),
