@@ -501,6 +501,15 @@ export class ProjectActions {
       }
     })
 
+    const specPattern = await this.ctx.project.specPatternForTestingType(project.projectRoot, 'e2e')
+
+    if (!specPattern || !this.ctx.currentProject) {
+      return
+    }
+
+    // created new specs - find and cache them!
+    this.ctx.currentProject.specs = await this.ctx.project.findSpecs(project.projectRoot, 'e2e', specPattern)
+
     return withFileParts
   }
 }
