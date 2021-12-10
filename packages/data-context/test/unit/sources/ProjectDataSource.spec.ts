@@ -1,16 +1,6 @@
 import { matchedSpecs } from '../../../src/sources'
 import { expect } from 'chai'
 
-//   {
-//   projectRoot: '/var/folders/T/cy-projects/e2e',
-//   testingType: 'e2e',
-//   specPattern: [
-//   ],
-//   specAbsolutePaths: [
-//
-//   ]
-// }
-
 describe('ProjectDataSource', () => {
   context('got a single spec pattern from --spec via cli', () => {
     it('returns spec name only', () => {
@@ -71,7 +61,7 @@ describe('ProjectDataSource', () => {
   })
 
   context('deeply nested test', () => {
-    xit('infers common path from glob and returns spec name', () => {
+    it('removes superfluous leading directories', () => {
       const result = matchedSpecs({
         projectRoot: '/var/folders/y5/T/cy-projects/e2e',
         testingType: 'e2e',
@@ -81,10 +71,7 @@ describe('ProjectDataSource', () => {
         specPattern: '/var/folders/y5/T/cy-projects/e2e/cypress/integration/nested-1/nested-2/screenshot_nested_file_spec.js',
       })
 
-      // previous was nested-1/nested-2/screenshot_nested_file_spec.js'
-      // now impossible to remove `cypress/integration`
-      // see system-tests/test/screenshot_nested_file_spec.js
-      expect(result[1].relativeToCommonRoot).to.eq('cypress/integration/nested-1/nested-2/screenshot_nested_file_spec.js')
+      expect(result[0].relativeToCommonRoot).to.eq('screenshot_nested_file_spec.js')
     })
   })
 })
