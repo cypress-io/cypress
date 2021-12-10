@@ -1,8 +1,8 @@
-describe('App', () => {
+describe('App: Runs Page', () => {
   beforeEach(() => {
-    cy.setupE2E('component-tests')
-
-    cy.initializeApp()
+    cy.scaffoldProject('component-tests')
+    cy.openProject('component-tests')
+    cy.startAppServer()
   })
 
   it('resolves the runs page', () => {
@@ -44,7 +44,9 @@ describe('App', () => {
     })
 
     cy.visitApp()
+    cy.intercept('query-Runs').as('Runs')
     cy.get('[href="#/runs"]').click()
+    cy.wait('@Runs')
     cy.get('[data-cy="no-runs"]')
   })
 
@@ -55,17 +57,18 @@ describe('App', () => {
   })
 
   it('when no project Id in the config file, shows call to action', () => {
-    cy.loginUser()
-    cy.visitApp()
     cy.withCtx(async (ctx) => {
-      // TODO: (Alejandro) This should be removed when we add a file listener to update the config file
       if (ctx.currentProject) {
+        ctx.currentProject.configChildProcess?.process.kill()
         ctx.currentProject.config = null
         ctx.currentProject.configChildProcess = null
       }
 
       await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {}')
     })
+
+    cy.loginUser()
+    cy.visitApp()
 
     cy.get('[href="#/runs"]').click()
     cy.contains('Connect your project').should('exist')

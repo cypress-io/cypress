@@ -107,7 +107,19 @@ export class ProjectActions {
         return this
       }
 
-      throw error
+      if (this.ctx.isRunMode) {
+        throw error
+      }
+
+      this.ctx.update((d) => {
+        d.baseError = {
+          title: 'Error',
+          message: error.message,
+          stack: error.stack,
+        }
+      })
+
+      // throw error
     }
   }
 

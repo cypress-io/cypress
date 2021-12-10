@@ -3,7 +3,7 @@ import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 describe('Launchpad: Open Mode', () => {
   describe('global mode', () => {
     beforeEach(() => {
-      cy.setupGlobalMode()
+      cy.openGlobalMode()
       cy.visitLaunchpad()
     })
 
@@ -19,7 +19,8 @@ describe('Launchpad: Open Mode', () => {
   })
 
   it('goes directly to e2e tests when launched with --e2e', () => {
-    cy.setupE2E('todos', ['--e2e'])
+    cy.scaffoldProject('todos')
+    cy.openProject('todos', ['--e2e'])
     cy.visitLaunchpad()
 
     cy.withCtx(async (ctx, o) => {
@@ -31,7 +32,8 @@ describe('Launchpad: Open Mode', () => {
   })
 
   it('goes directly to component tests when launched with --component', () => {
-    cy.setupE2E('launchpad', ['--component'])
+    cy.scaffoldProject('launchpad')
+    cy.openProject('launchpad', ['--component'])
     cy.visitLaunchpad()
 
     cy.withCtx(async (ctx, o) => {
@@ -43,7 +45,8 @@ describe('Launchpad: Open Mode', () => {
   })
 
   it('auto-selects the browser when launched with --browser', () => {
-    cy.setupE2E('launchpad', ['--browser', 'firefox', '--e2e'])
+    cy.scaffoldProject('launchpad')
+    cy.openProject('launchpad', ['--browser', 'firefox', '--e2e'])
     cy.visitLaunchpad()
 
     // Need to visit after args have been configured, todo: fix in #18776
@@ -58,7 +61,7 @@ describe('Launchpad: Open Mode', () => {
 
   describe('when there is a list of projects', () => {
     it('goes to an active project if one is added', () => {
-      cy.setupE2E('todos')
+      cy.openProject('todos')
       cy.visitLaunchpad()
 
       cy.withCtx(async (ctx, o) => {
@@ -71,7 +74,7 @@ describe('Launchpad: Open Mode', () => {
 
   describe('when a user interacts with the header', () => {
     it('the Docs menu opens when clicked', () => {
-      cy.setupE2E('todos')
+      cy.openProject('todos')
       cy.visitLaunchpad()
 
       cy.contains('Projects').should('be.visible')
@@ -82,7 +85,7 @@ describe('Launchpad: Open Mode', () => {
 
   describe('open in ide', () => {
     it('configures an editor if one is not configured', () => {
-      cy.setupE2E('todos')
+      cy.openProject('todos')
       cy.withCtx(async (ctx, o) => {
         ctx.coreData.localSettings.preferences.preferredEditorBinary = undefined
         ctx.coreData.localSettings.availableEditors = [
@@ -114,7 +117,7 @@ describe('Launchpad: Open Mode', () => {
     })
 
     it('opens using finder', () => {
-      cy.setupE2E('todos')
+      cy.openProject('todos')
       cy.withCtx(async (ctx, o) => {
         ctx.coreData.app.projects = [{ projectRoot: '/some/project' }]
       })
