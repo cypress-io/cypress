@@ -42,7 +42,7 @@
         class="mt-16px transition-all"
         :class="pickedOrganization ? undefined : 'opacity-50'"
         :options="projects"
-        item-value="slug"
+        item-value="name"
         item-key="id"
         :disabled="!pickedOrganization"
         :placeholder="projectPlaceholder"
@@ -181,7 +181,7 @@ fragment SelectCloudProjectModal on Query {
           nodes {
             id
             slug
-            # name
+            name
           }
         }
       }
