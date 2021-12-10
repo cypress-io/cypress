@@ -1,12 +1,13 @@
 <template>
   <div class="h-full">
     <RunsConnectSuccessAlert
-      v-if="currentProject"
+      v-if="currentProject && showConnectSuccessAlert"
       :gql="currentProject"
     />
     <RunsConnect
       v-if="!currentProject?.projectId || !cloudViewer?.id"
       :gql="props.gql"
+      @success="showConnectSuccessAlert = true"
     />
     <RunsEmpty
       v-else-if="!currentProject?.cloudProject?.runs?.nodes.length"
@@ -26,7 +27,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { gql } from '@urql/vue'
 import RunCard from './RunCard.vue'
 import RunsConnect from './RunsConnect.vue'
@@ -60,6 +61,8 @@ fragment RunsContainer on Query {
 const props = defineProps<{
   gql: RunsContainerFragment
 }>()
+
+const showConnectSuccessAlert = ref(false)
 
 const currentProject = computed(() => props.gql.currentProject)
 const cloudViewer = computed(() => props.gql.cloudViewer)
