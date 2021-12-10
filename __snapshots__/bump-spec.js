@@ -1,12 +1,12 @@
 exports['list of all projects'] = [
   {
     "repo": "cypress-io/cypress-test-tiny",
-    "provider": "appVeyor",
+    "provider": "circle",
     "platform": "win32"
   },
   {
     "repo": "cypress-io/cypress-test-example-repos",
-    "provider": "appVeyor",
+    "provider": "circle",
     "platform": "win32"
   },
   {

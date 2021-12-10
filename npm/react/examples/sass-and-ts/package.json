@@ -15,6 +15,6 @@
     "@cypress/react": "file:../../dist",
     "mocha-junit-reporter": "^2.0.0",
     "mocha-multi-reporters": "^1.5.1",
-    "sass": "1.32.0"
+    "sass": "1.44.0"
   }
 }

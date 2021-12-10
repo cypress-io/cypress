@@ -40,7 +40,6 @@ Upgrading `electron` involves more than just bumping this package's `package.jso
     - See [`cypress-docker-images`](https://github.com/cypress-io/cypress-docker-images/).
 - [ ] **Ensure that a matching Node.js version is enforced in the monorepo for local development and CI.** When Electron is upgraded, oftentimes, the bundled Node.js version that comes with Electron is updated as well. Because all unit and integration tests run in normal Node.js (not Electron's Node.js), it's important for this Node.js version to be synced with the monorepo. There are a few places where this needs to be done:
     - [ ] [`/.node-version`](../../.node-version) - used by `nvm` and other Node version managers
-    - [ ] [`/appveyor.yml`](../../appveyor.yml) - update the `nodejs_version`
     - [ ] [`/package.json`](../../package.json) - update `engines`
     - [ ] [`/scripts/run-docker-local.sh`](../../scripts/run-docker-local.sh) - update Docker image to the new matching `browsers` image
     - [ ] [`/circle.yml`](../../circle.yml)

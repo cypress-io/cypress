@@ -41,7 +41,7 @@
             <RouterLink
               v-if="row.data.isLeaf && row.data"
               :key="row.data.data?.absolute"
-              :to="{ path: 'runner', query: { file: row.data.data?.relative } }"
+              :to="{ path: '/specs/runner', query: { file: row.data.data?.relative } }"
             >
               <SpecItem
                 :file-name="row.data.data?.fileName || row.data.name"

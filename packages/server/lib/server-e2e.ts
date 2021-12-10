@@ -16,8 +16,7 @@ import * as ensureUrl from './util/ensure-url'
 import headersUtil from './util/headers'
 import statusCode from './util/status_code'
 import type { Cfg } from './project-base'
-import { makeLegacyDataContext } from './makeDataContext'
-import type { DataContext } from '@packages/data-context'
+import { DataContext, getCtx } from '@packages/data-context'
 
 type WarningErr = Record<string, any>
 
@@ -46,8 +45,8 @@ const isResponseHtml = function (contentType, responseBuffer) {
 export class ServerE2E extends ServerBase<SocketE2E> {
   private _urlResolver: Bluebird<Record<string, any>> | null
 
-  constructor (ctx: DataContext = makeLegacyDataContext()) {
-    super(ctx)
+  constructor (ctx: DataContext) {
+    super(ctx ?? getCtx())
 
     this._urlResolver = null
   }

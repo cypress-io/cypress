@@ -18,12 +18,12 @@
 </template>
 
 <script lang="ts" setup>
-import { gql, useQuery } from '@urql/vue'
-import SpecsList from '../specs/SpecsList.vue'
-import { SpecsPageContainerDocument } from '../generated/graphql'
-import NoSpecsPage from '../specs/NoSpecsPage.vue'
 import { computed, ref } from 'vue'
+import { gql, useQuery } from '@urql/vue'
 import { useI18n } from '@cy/i18n'
+import SpecsList from '../../specs/SpecsList.vue'
+import NoSpecsPage from '../../specs/NoSpecsPage.vue'
+import { SpecsPageContainerDocument } from '../../generated/graphql'
 const { t } = useI18n()
 
 gql`
@@ -45,12 +45,3 @@ const title = computed(() => {
 })
 
 </script>
-
-<route>
-{
-  name: "Specs Page",
-  meta: {
-    title: "Specs"
-  }
-}
-</route>
