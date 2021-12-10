@@ -91,7 +91,9 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
   }, {
     name: 'component',
     // runner-ct overrides
-    defaultValue: {},
+    defaultValue: {
+      specPattern: '**/*.cy.{js,jsx,ts,tsx}',
+    },
     validation: isValidConfig,
   }, {
     name: 'defaultCommandTimeout',
@@ -106,7 +108,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     name: 'e2e',
     // e2e runner overrides
     defaultValue: {
-      specPattern: 'cypress/integration/**/*',
+      specPattern: 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
     },
     validation: isValidConfig,
   }, {
