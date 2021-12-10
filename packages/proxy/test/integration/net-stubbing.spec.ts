@@ -41,6 +41,8 @@ context('network stubbing', () => {
       getRemoteState: () => remoteState,
       getFileServerToken: () => 'fake-token',
       request: new Request(),
+      getRenderedHTMLOrigins: () => ({}),
+      serverBus: new EventEmitter(),
     })
 
     app.use((req, res, next) => {
@@ -68,12 +70,26 @@ context('network stubbing', () => {
   })
 
   it('can make a vanilla request', (done) => {
+    remoteState.strategy = 'http'
+    remoteState.props = {
+      port: `${destinationPort}`,
+      tld: 'localhost',
+      domain: '',
+    }
+
     supertest(app)
     .get(`/http://localhost:${destinationPort}`)
     .expect('it worked', done)
   })
 
   it('does not add CORS headers to all responses', () => {
+    remoteState.strategy = 'http'
+    remoteState.props = {
+      port: `${destinationPort}`,
+      tld: 'localhost',
+      domain: '',
+    }
+
     return supertest(app)
     .get(`/http://localhost:${destinationPort}`)
     .then((res) => {
@@ -92,6 +108,7 @@ context('network stubbing', () => {
         body: 'foo',
       },
       getFixture: async () => {},
+      matches: 1,
     })
 
     return supertest(app)
@@ -120,6 +137,7 @@ context('network stubbing', () => {
         },
       },
       getFixture: async () => {},
+      matches: 1,
     })
 
     return supertest(app)
@@ -142,6 +160,7 @@ context('network stubbing', () => {
         body: 'foo',
       },
       getFixture: async () => {},
+      matches: 1,
     })
 
     return supertest(app)
@@ -162,6 +181,7 @@ context('network stubbing', () => {
       },
       hasInterceptor: true,
       getFixture,
+      matches: 1,
     })
 
     socket.toDriver.callsFake((_, event, data) => {
@@ -179,6 +199,9 @@ context('network stubbing', () => {
           state: netStubbingState,
           getFixture,
           args: [],
+          socket: {
+            toDriver () {},
+          },
         })
       }
     })
@@ -217,6 +240,13 @@ context('network stubbing', () => {
       })
     })
 
+    remoteState.strategy = 'http'
+    remoteState.props = {
+      port: `${destinationPort}`,
+      tld: 'localhost',
+      domain: '',
+    }
+
     // capture unintercepted content-length
     await supertest(app)
     .post(`/http://localhost:${destinationPort}`)
@@ -229,6 +259,7 @@ context('network stubbing', () => {
       },
       hasInterceptor: true,
       getFixture,
+      matches: 1,
     })
 
     socket.toDriver.callsFake((_, event, data) => {
@@ -246,6 +277,9 @@ context('network stubbing', () => {
           state: netStubbingState,
           getFixture,
           args: [],
+          socket: {
+            toDriver () {},
+          },
         })
       }
     })

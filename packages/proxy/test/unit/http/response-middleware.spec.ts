@@ -134,7 +134,13 @@ describe('http/response-middleware', function () {
     let ctx
 
     it('doesn\'t do anything when not html or rendered html', function () {
-      prepareContext({})
+      prepareContext({
+        getRemoteState () {
+          return {
+            strategy: 'foo',
+          }
+        },
+      })
 
       return testMiddleware([MaybeDelayForMultidomain], ctx)
       .then(() => {
@@ -148,6 +154,11 @@ describe('http/response-middleware', function () {
           headers: {
             'content-type': 'text/html',
           },
+        },
+        getRemoteState () {
+          return {
+            strategy: 'foo',
+          }
         },
       })
 
@@ -169,6 +180,11 @@ describe('http/response-middleware', function () {
               'application/xhtml+xml',
             ],
           },
+        },
+        getRemoteState () {
+          return {
+            strategy: 'foo',
+          }
         },
       })
 
@@ -201,6 +217,10 @@ describe('http/response-middleware', function () {
           once: sinon.stub(),
         },
         debug () {},
+        onError (error) {
+          throw error
+        },
+        ..._.omit(props, 'incomingRes', 'res', 'req'),
       }
     }
   })
