@@ -129,9 +129,14 @@ const navigationChanged = (Cypress, cy, state, source, arg) => {
   }
 
   // start storing the history entries
-  const urls = state('urls') || []
+  let urls = state('urls') || []
+  let urlPosition = state('urlPosition')
 
-  const previousUrl = _.last(urls)
+  if (urlPosition === undefined) {
+    urlPosition = -1
+  }
+
+  const previousUrl = urls[urlPosition]
 
   // ensure our new url doesnt match whatever
   // the previous was. this prevents logging
@@ -143,11 +148,20 @@ const navigationChanged = (Cypress, cy, state, source, arg) => {
   // else notify the world and log this event
   Cypress.action('cy:url:changed', url)
 
-  urls.push(url)
+  const historyNav = state('historyNav') || {}
+
+  if (historyNav.event) {
+    urlPosition = urlPosition + historyNav.delta
+    state('historyNav', {})
+  } else {
+    urls = urls.slice(0, urlPosition + 1)
+    urls.push(url)
+    urlPosition = urlPosition + 1
+  }
 
   state('urls', urls)
-
   state('url', url)
+  state('urlPosition', urlPosition)
 
   // don't output a command log for 'load' or 'before:load' events
   // return if source in command
@@ -573,10 +587,8 @@ export default (Commands, Cypress, cy, state, config) => {
       })
     },
 
-    go (numberOrString, options = {}) {
-      const userOptions = options
-
-      options = _.defaults({}, userOptions, {
+    go (numberOrString, userOptions = {}) {
+      const options = _.defaults({}, userOptions, {
         log: true,
         timeout: config('pageLoadTimeout'),
       })
