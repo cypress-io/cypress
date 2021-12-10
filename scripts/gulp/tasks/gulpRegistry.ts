@@ -10,7 +10,11 @@ let hasExited = false
 
 export function addChildProcess (child: ChildProcess) {
   if (hasExited) {
-    treeKill(child.pid)
+    treeKill(child.pid, 
+      err => {
+        console.log(err)
+      }
+    )
 
     return
   }

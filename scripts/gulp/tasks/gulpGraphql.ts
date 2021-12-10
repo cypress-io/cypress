@@ -43,8 +43,9 @@ export async function graphqlCodegen () {
 }
 
 export async function graphqlCodegenWatch () {
-  const spawned = spawn('graphql-codegen', ['--watch', '--config', 'graphql-codegen.yml'], {
+  const spawned = spawn('bash.exe', ['graphql-codegen','--watch', '--config', 'graphql-codegen.yml'], {
     cwd: monorepoPaths.root,
+    shell:true
   })
   const dfd = pDefer()
   let hasResolved = false

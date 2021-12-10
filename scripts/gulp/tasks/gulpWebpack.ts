@@ -22,14 +22,16 @@ type RunWebpackCfg = {
 
 export async function runWebpack (cfg: RunWebpackCfg) {
   const { cwd, args = [], env = process.env, devServer = false, prefix } = cfg
+  console.log(cwd);
   const dfd = pDefer()
   const spawned = spawn(
-    devServer
+  `bash.exe ${devServer
       ? './node_modules/.bin/webpack-dev-server'
-      : './node_modules/.bin/webpack',
+      : './node_modules/.bin/webpack'}`,
     args,
     {
       cwd,
+      shell:true,
       env: {
         ...(env || process.env),
         FORCE_COLOR: '1',
