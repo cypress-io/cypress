@@ -18,7 +18,28 @@ function getTranspileFolders (config) {
     folders.push(config.supportFolder)
   }
 
-  return folders
+  // attempt to add directories based on spec pattern
+  let componentDirs = config.component.specPattern || ''
+
+  // can be string or array
+  if (typeof componentDirs === 'string') {
+    componentDirs = [componentDirs]
+  }
+
+  const dirsFromSpecPattern = componentDirs.reduce((acc, curr) => {
+    // glob
+    if (curr.includes('*')) {
+      const parts = curr.slice(0, curr.indexOf('*') - 1)
+      const joined = parts.split(path.sep)
+      const dir = path.join(...joined)
+
+      return acc.concat(path.resolve(config.projectRoot, dir))
+    }
+
+    return acc
+  }, [])
+
+  return folders.concat(dirsFromSpecPattern)
 }
 
 module.exports = { getTranspileFolders }
