@@ -3,7 +3,14 @@
     id="main-pane"
     class="flex border-gray-900 border-l-1"
   >
-    <ResizablePanels :offset-left="64">
+    <ResizablePanels
+      :offset-left="64"
+      :max-total-width="windowWidth - 64"
+      :initial-panel1-width="initialSpecsListWidth"
+      :initial-panel2-width="initialReporterWidth"
+      @resize-end="handleResizeEnd"
+      @panel-width-updated="handlePanelWidthUpdated"
+    >
       <template #panel1>
         <HideDuringScreenshot
           id="inline-spec-list"
@@ -140,6 +147,8 @@ const runnerUiStore = useRunnerUiStore()
 const preferences = usePreferences()
 const initialSpecsListWidth: number = props.gql.localSettings.preferences.specsListWidth ?? 280
 const initialReporterWidth: number = props.gql.localSettings.preferences.reporterWidth ?? 320
+const reporterWidth = ref(initialReporterWidth)
+const specsListWidth = ref(initialSpecsListWidth)
 
 // Todo: maybe `update` should take an object, not just a key-value pair and do updates like this all in one batch
 preferences.update('autoScrollingEnabled', props.gql.localSettings.preferences.autoScrollingEnabled ?? true)
@@ -152,9 +161,8 @@ const runnerPane = ref<HTMLDivElement>()
 const autMargin = 16
 
 const containerWidth = computed(() => {
-  // const miscBorders = 4
-  // const nonAutWidth = reporterWidth.value + specsListWidth.value + (autMargin * 2) + miscBorders
-  const nonAutWidth = 600
+  const miscBorders = 4
+  const nonAutWidth = reporterWidth.value + specsListWidth.value + (autMargin * 2) + miscBorders + 64
 
   return windowWidth.value - nonAutWidth
 })
@@ -166,6 +174,18 @@ const containerHeight = computed(() => {
 
   return windowHeight.value - nonAutHeight
 })
+
+const handleResizeEnd = (panel: 'panel1' | 'panel2') => {
+  // save to prefs
+}
+
+const handlePanelWidthUpdated = ({ panel, width }) => {
+  if (panel === 'panel1') {
+    specsListWidth.value = width
+  } else {
+    reporterWidth.value = width
+  }
+}
 
 const viewportStyle = computed(() => {
   if (!runnerPane.value) {

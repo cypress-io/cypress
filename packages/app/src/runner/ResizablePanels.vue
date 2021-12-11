@@ -81,6 +81,11 @@ const props = withDefaults(defineProps<{
   offsetLeft: 0,
 })
 
+const emit = defineEmits<{
+  (e: 'resizeEnd', value: 'panel1' | 'panel2'): void,
+  (e: 'panelWidthUpdated', value: {panel:string, width: number}): void,
+}>()
+
 const panel1HandleX = ref(props.initialPanel1Width)
 const panel2HandleX = ref(props.initialPanel2Width + props.initialPanel1Width)
 const panel1IsDragging = ref(false)
@@ -100,9 +105,11 @@ const handleMousemove = (event: MouseEvent) => {
   if (isNewWidthAllowed(event.clientX, 'panel1')) {
     panel1HandleX.value = event.clientX
     cachedPanel1Width.value = event.clientX - props.offsetLeft
+    emit('panelWidthUpdated', { panel: 'panel1', width: panel1Width.value })
   } else if (isNewWidthAllowed(event.clientX, 'panel2')) {
     panel2HandleX.value = event.clientX
     panel2Width.value = event.clientX - props.offsetLeft - panel1Width.value
+    emit('panelWidthUpdated', { panel: 'panel2', width: panel2Width.value })
   }
 }
 const handleMouseup = () => {
@@ -138,12 +145,7 @@ const maxPanel2Width = computed(() => {
 })
 
 function handleResizeEnd (panel: 'panel1' | 'panel2') {
-  // TODO: emit events to save the state
-  if (panel === 'panel1') {
-    //    preferences.update('reporterWidth', Math.round(reporterWidth.value))
-  } else {
-    //   preferences.update('specsListWidth', Math.round(specsListWidth.value))
-  }
+  emit('resizeEnd', panel)
 }
 
 function isNewWidthAllowed (mouseClientX:number, panel: 'panel1' | 'panel2') {
