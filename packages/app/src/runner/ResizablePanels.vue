@@ -17,8 +17,8 @@
 
       <div
         data-cy="panel1ResizeHandle"
-        class="cursor-ew-resize h-full bg-teal-400 top-0 -right-6px w-16px z-30 absolute"
-        @mousedown="handleMousedown('panel1')"
+        class="cursor-ew-resize h-full top-0 -right-6px w-16px z-30 absolute"
+        @mousedown="handleMousedown('panel1', $event)"
       />
     </div>
 
@@ -34,8 +34,8 @@
 
       <div
         data-cy="panel2ResizeHandle"
-        class="cursor-ew-resize h-full bg-teal-400 top-0 -right-6px w-16px z-30 absolute"
-        @mousedown="handleMousedown('panel2')"
+        class="cursor-ew-resize h-full top-0 -right-6px w-16px z-30 absolute"
+        @mousedown="handleMousedown('panel2', $event)"
       />
     </div>
 
@@ -77,22 +77,23 @@ const props = withDefaults(defineProps<{
 })
 
 const panel1HandleX = ref(props.initialPanel1Width)
-const panel2HandleX = ref(props.initialPanel2Width)
+const panel2HandleX = ref(props.initialPanel2Width + props.initialPanel1Width)
 const panel1IsDragging = ref(false)
 const panel2IsDragging = ref(false)
 const cachedPanel2Width = ref(props.initialPanel2Width)
 
-const handleMousedown = (panel: 'panel1' | 'panel2') => {
+const handleMousedown = (panel: 'panel1' | 'panel2', event) => {
   if (panel === 'panel1') {
     panel1IsDragging.value = true
   } else {
     panel2IsDragging.value = true
+    panel2HandleX.value = event.clientX
   }
 }
 const handleMousemove = (event: MouseEvent) => {
-  if (panel1IsDragging.value) {
+  if (panel1IsDragging.value && event.clientX < maxPanel1Width.value) {
     panel1HandleX.value = event.clientX
-  } else if (panel2IsDragging.value) {
+  } else if (panel2IsDragging.value && event.clientX < (panel1Width.value + maxPanel2Width.value)) {
     panel2HandleX.value = event.clientX
     cachedPanel2Width.value = panel2Width.value
   }
@@ -102,23 +103,32 @@ const handleMouseup = () => {
   panel2IsDragging.value = false
 }
 
+const maxPanel1Width = computed(() => {
+  const unavailableWidth = panel2Width.value + props.minPanel3Width
+
+  return props.maxTotalWidth - unavailableWidth
+})
+
 const panel1Width = computed(() => {
   if (!props.showPanel1) {
     return 0
   }
 
-  const nonSpecsListWidth = panel2Width.value + props.minPanel3Width
-  const maxSpecsListWidth = props.maxTotalWidth - nonSpecsListWidth
-
-  if (panel1HandleX.value <= maxSpecsListWidth && panel1HandleX.value > props.minPanel1Width) {
+  if (panel1HandleX.value <= maxPanel1Width.value && panel1HandleX.value > props.minPanel1Width) {
     return panel1HandleX.value
   }
 
-  if (panel1HandleX.value > maxSpecsListWidth) {
-    return maxSpecsListWidth
+  if (panel1HandleX.value > maxPanel1Width.value) {
+    return maxPanel1Width.value
   }
 
   return props.minPanel1Width
+})
+
+const maxPanel2Width = computed(() => {
+  const unavailableWidth = panel1Width.value + props.minPanel3Width
+
+  return props.maxTotalWidth - unavailableWidth
 })
 
 const panel2Width = computed(() => {
@@ -126,20 +136,18 @@ const panel2Width = computed(() => {
     return cachedPanel2Width.value
   }
 
-  const unavailableWidth = panel1Width.value + props.minPanel3Width
-  const maxPanel2Width = props.maxTotalWidth - unavailableWidth
   const currentPanel2Width = panel2HandleX.value - panel1Width.value
 
-  if (!maxPanel2Width || !currentPanel2Width) {
+  if (!maxPanel2Width.value || !currentPanel2Width) {
     return props.initialPanel2Width
   }
 
-  if (currentPanel2Width <= maxPanel2Width && currentPanel2Width > props.minPanel2Width) {
+  if (currentPanel2Width <= maxPanel2Width.value && currentPanel2Width > props.minPanel2Width) {
     return currentPanel2Width
   }
 
-  if (currentPanel2Width > maxPanel2Width) {
-    return maxPanel2Width
+  if (currentPanel2Width > maxPanel2Width.value) {
+    return maxPanel2Width.value
   }
 
   if (currentPanel2Width < props.minPanel2Width) {
