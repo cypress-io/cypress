@@ -1,7 +1,7 @@
 <template>
   <div
     class="flex h-full"
-    :class="{'select-none': panel1IsDragging || panel1IsDragging}"
+    :class="{'select-none': panel1IsDragging || panel2IsDragging}"
     @mouseup="handleMouseup"
     @mousemove="handleMousemove"
   >
@@ -39,7 +39,10 @@
       />
     </div>
 
-    <div class="flex-grow h-full">
+    <div
+      class="flex-grow h-full"
+      :class="{'pointer-events-none':panel2IsDragging}"
+    >
       <slot name="panel3">
         Panel 3 default content
       </slot>
@@ -65,6 +68,7 @@ const props = withDefaults(defineProps<{
   minPanel2Width?: number
   minPanel3Width?: number
   maxTotalWidth?: number // windowWidth in runner
+  offsetLeft?: number,
 }>(), {
   showPanel1: true,
   showPanel2: true,
@@ -74,15 +78,17 @@ const props = withDefaults(defineProps<{
   minPanel2Width: 200,
   minPanel3Width: 100,
   maxTotalWidth: window.innerWidth,
+  offsetLeft: 0,
 })
 
 const panel1HandleX = ref(props.initialPanel1Width)
 const panel2HandleX = ref(props.initialPanel2Width + props.initialPanel1Width)
 const panel1IsDragging = ref(false)
 const panel2IsDragging = ref(false)
-const cachedPanel2Width = ref(props.initialPanel2Width)
+const cachedPanel1Width = ref(props.initialPanel1Width) // because panel 1 (the inline specs list) can be opened and closed in the UI, we cache the width
+const panel2Width = ref(props.initialPanel2Width)
 
-const handleMousedown = (panel: 'panel1' | 'panel2', event) => {
+const handleMousedown = (panel: 'panel1' | 'panel2', event: MouseEvent) => {
   if (panel === 'panel1') {
     panel1IsDragging.value = true
   } else {
@@ -91,20 +97,28 @@ const handleMousedown = (panel: 'panel1' | 'panel2', event) => {
   }
 }
 const handleMousemove = (event: MouseEvent) => {
-  if (panel1IsDragging.value && event.clientX < maxPanel1Width.value) {
+  if (isNewWidthAllowed(event.clientX, 'panel1')) {
     panel1HandleX.value = event.clientX
-  } else if (panel2IsDragging.value && event.clientX < (panel1Width.value + maxPanel2Width.value)) {
+    cachedPanel1Width.value = event.clientX - props.offsetLeft
+  } else if (isNewWidthAllowed(event.clientX, 'panel2')) {
     panel2HandleX.value = event.clientX
-    cachedPanel2Width.value = panel2Width.value
+    panel2Width.value = event.clientX - props.offsetLeft - panel1Width.value
   }
 }
 const handleMouseup = () => {
-  panel1IsDragging.value = false
+  if (panel1IsDragging.value) {
+    panel1IsDragging.value = false
+    handleResizeEnd('panel1')
+
+    return
+  }
+
+  handleResizeEnd('panel2')
   panel2IsDragging.value = false
 }
 
 const maxPanel1Width = computed(() => {
-  const unavailableWidth = panel2Width.value + props.minPanel3Width
+  const unavailableWidth = panel2Width.value + props.minPanel3Width + props.offsetLeft
 
   return props.maxTotalWidth - unavailableWidth
 })
@@ -114,47 +128,13 @@ const panel1Width = computed(() => {
     return 0
   }
 
-  if (panel1HandleX.value <= maxPanel1Width.value && panel1HandleX.value > props.minPanel1Width) {
-    return panel1HandleX.value
-  }
-
-  if (panel1HandleX.value > maxPanel1Width.value) {
-    return maxPanel1Width.value
-  }
-
-  return props.minPanel1Width
+  return cachedPanel1Width.value
 })
 
 const maxPanel2Width = computed(() => {
-  const unavailableWidth = panel1Width.value + props.minPanel3Width
+  const unavailableWidth = panel1Width.value + props.minPanel3Width + props.offsetLeft
 
   return props.maxTotalWidth - unavailableWidth
-})
-
-const panel2Width = computed(() => {
-  if (!panel2IsDragging.value) {
-    return cachedPanel2Width.value
-  }
-
-  const currentPanel2Width = panel2HandleX.value - panel1Width.value
-
-  if (!maxPanel2Width.value || !currentPanel2Width) {
-    return props.initialPanel2Width
-  }
-
-  if (currentPanel2Width <= maxPanel2Width.value && currentPanel2Width > props.minPanel2Width) {
-    return currentPanel2Width
-  }
-
-  if (currentPanel2Width > maxPanel2Width.value) {
-    return maxPanel2Width.value
-  }
-
-  if (currentPanel2Width < props.minPanel2Width) {
-    return props.minPanel2Width
-  }
-
-  return currentPanel2Width
 })
 
 function handleResizeEnd (panel: 'panel1' | 'panel2') {
@@ -164,6 +144,18 @@ function handleResizeEnd (panel: 'panel1' | 'panel2') {
   } else {
     //   preferences.update('specsListWidth', Math.round(specsListWidth.value))
   }
+}
+
+function isNewWidthAllowed (mouseClientX:number, panel: 'panel1' | 'panel2') {
+  if (panel === 'panel1') {
+    const newWidth = mouseClientX - props.offsetLeft
+
+    return panel1IsDragging.value && newWidth >= props.minPanel1Width && newWidth <= maxPanel1Width.value
+  }
+
+  const newWidth = mouseClientX - props.offsetLeft - panel1Width.value
+
+  return panel2IsDragging.value && newWidth >= props.minPanel2Width && newWidth <= maxPanel2Width.value
 }
 
 </script>
