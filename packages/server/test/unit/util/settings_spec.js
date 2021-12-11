@@ -223,7 +223,10 @@ describe('lib/util/settings', () => {
 
       ctx.actions.project.setActiveProjectForTestSetup(this.projectRoot)
 
-      return fs.writeFile(path.join(this.projectRoot, 'cypress.custom.js'), `module.exports = { baz: 'lurman' }`)
+      return fs.ensureDirAsync(this.projectRoot)
+      .then(() => {
+        return fs.writeFile(path.join(this.projectRoot, 'cypress.custom.js'), `module.exports = { baz: 'lurman' }`)
+      })
       .then(() => {
         return settings.read(this.projectRoot, { configFile: 'cypress.custom.js' })
         .then((settings) => {
