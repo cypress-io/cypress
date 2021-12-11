@@ -23,7 +23,6 @@ const config = require(`../../lib/config`)
 const { ServerE2E } = require(`../../lib/server-e2e`)
 const ProjectBase = require(`../../lib/project-base`).ProjectBase
 const { SpecsStore } = require(`../../lib/specs-store`)
-const Watchers = require(`../../lib/watchers`)
 const pluginsModule = require(`../../lib/plugins`)
 const preprocessor = require(`../../lib/plugins/preprocessor`)
 const resolve = require(`../../lib/util/resolve`)
@@ -163,7 +162,7 @@ describe('Routes', () => {
             httpsServer.start(8443),
 
             // and open our cypress server
-            (this.server = new ServerE2E(new Watchers())),
+            (this.server = new ServerE2E()),
 
             this.server.open(cfg, {
               SocketCtor: SocketE2E,

@@ -19,8 +19,6 @@ const runEvents = require(`../../lib/plugins/run_events`)
 const system = require(`../../lib/util/system`)
 const { fs } = require(`../../lib/util/fs`)
 const settings = require(`../../lib/util/settings`)
-const Watchers = require(`../../lib/watchers`)
-const { SocketE2E } = require(`../../lib/socket-e2e`)
 const { getCtx } = require(`../../lib/makeDataContext`)
 
 let ctx
@@ -350,26 +348,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       })
     })
 
-    // TODO: skip this for now
-    it.skip('watches cypress.config.js', function () {
-      return this.server.open().bind(this).then(() => {
-        expect(Watchers.prototype.watch).to.be.calledWith('/Users/brian/app/cypress.config.js')
-      })
-    })
-
-    // TODO: skip this for now
-    it.skip('passes watchers to Socket.startListening', function () {
-      const options = {}
-
-      return this.server.open(options).then(() => {
-        const { startListening } = SocketE2E.prototype
-
-        expect(startListening.getCall(0).args[0]).to.be.instanceof(Watchers)
-
-        expect(startListening.getCall(0).args[1]).to.eq(options)
-      })
-    })
-
     it('executes before:run if in interactive mode', function () {
       const sysInfo = {
         osName: 'darwin',
@@ -516,14 +494,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       })
     })
 
-    it('closes watchers', function () {
-      this.project.watchers = sinon.stub({ close () {} })
-
-      return this.project.close().then(() => {
-        expect(this.project.watchers.close).to.be.calledOnce
-      })
-    })
-
     it('can close when server + watchers arent open', function () {
       return this.project.close()
     })
@@ -660,7 +630,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     })
   })
 
-  context('#watchSettings', () => {
+  xcontext('#watchSettings', () => {
     beforeEach(function () {
       this.project = new ProjectBase({ projectRoot: '/_test-output/path/to/project-e2e', testingType: 'e2e' })
       this.project._server = { close () {}, startWebsockets () {} }
@@ -721,7 +691,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     })
   })
 
-  context('#watchPluginsFile', () => {
+  xcontext('#watchPluginsFile', () => {
     beforeEach(function () {
       sinon.stub(fs, 'pathExists').resolves(true)
       this.project = new ProjectBase({ projectRoot: '/_test-output/path/to/project-e2e', testingType: 'e2e' })

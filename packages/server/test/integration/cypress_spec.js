@@ -36,7 +36,6 @@ const cypress = require(`../../lib/cypress`)
 const ProjectBase = require(`../../lib/project-base`).ProjectBase
 const { ServerE2E } = require(`../../lib/server-e2e`)
 const Reporter = require(`../../lib/reporter`)
-const Watchers = require(`../../lib/watchers`)
 const browsers = require(`../../lib/browsers`)
 const videoCapture = require(`../../lib/video_capture`)
 const browserUtils = require(`../../lib/browsers/utils`)
@@ -443,18 +442,6 @@ describe('lib/cypress', () => {
         expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:8888/__/#/tests/integration/test2.coffee' })
       }).then(() => {
         expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:8888/__/#/tests/integration/test1.js' })
-        this.expectExitWith(0)
-      })
-    })
-
-    it('does not watch settings or plugins in run mode', function () {
-      const watch = sinon.spy(Watchers.prototype, 'watch')
-      const watchTree = sinon.spy(Watchers.prototype, 'watchTree')
-
-      return cypress.start([`--run-project=${this.pluginConfig}`])
-      .then(() => {
-        expect(watchTree).not.to.be.called
-        expect(watch).not.to.be.called
         this.expectExitWith(0)
       })
     })

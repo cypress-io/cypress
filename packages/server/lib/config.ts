@@ -136,7 +136,7 @@ export function get (
   ])
   .spread((settings, envFile) => {
     return set({
-      projectName: getNameFromRoot(projectRoot),
+      projectName: path.basename(projectRoot),
       projectRoot,
       config: _.cloneDeep(settings),
       envFile: _.cloneDeep(envFile),
@@ -613,8 +613,4 @@ export function getResolvedRuntimeConfig (config, runtimeConfig) {
     ...runtimeConfig,
     resolved: { ...config.resolved, ...resolvedRuntimeFields },
   }
-}
-
-export function getNameFromRoot (root = '') {
-  return path.basename(root)
 }

@@ -65,9 +65,6 @@ export interface OpenProjectLaunchOptions {
   configFile?: string | false
   browsers?: Cypress.Browser[]
 
-  // Callback to reload the Desktop GUI when cypress.config.{ts|js} is changed.
-  onSettingsChanged?: false | (() => void)
-
   // Optional callbacks used for triggering events via the web socket
   onReloadBrowser?: WebSocketOptionsCallback
   onFocusTests?: WebSocketOptionsCallback

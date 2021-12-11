@@ -26,7 +26,6 @@ import { fs } from './util/fs'
 import * as settings from './util/settings'
 import plugins from './plugins'
 import specsUtil from './util/specs'
-import Watchers from './watchers'
 import devServer from './plugins/dev-server'
 import preprocessor from './plugins/preprocessor'
 import { SpecsStore } from './specs-store'
@@ -64,7 +63,6 @@ export class ProjectBase<TServer extends Server> extends EE {
   // id is sha256 of projectRoot
   public id: string
 
-  protected watchers: Watchers
   protected ctx: DataContext
   protected _cfg?: Cfg
   protected _server?: TServer
@@ -77,7 +75,6 @@ export class ProjectBase<TServer extends Server> extends EE {
   public testingType: Cypress.TestingType
   public spec: Cypress.Cypress['spec'] | null
   public isOpen: boolean = false
-  private generatedProjectIdTimestamp: any
   projectRoot: string
 
   constructor ({
@@ -101,7 +98,6 @@ export class ProjectBase<TServer extends Server> extends EE {
 
     this.testingType = testingType
     this.projectRoot = path.resolve(projectRoot)
-    this.watchers = new Watchers()
     this.spec = null
     this.browser = null
     this.id = createHmac('sha256', 'secret-key').update(projectRoot).digest('hex')
@@ -117,11 +113,9 @@ export class ProjectBase<TServer extends Server> extends EE {
       onFocusTests () {},
       onError () {},
       onWarning () {},
-      onSettingsChanged: false,
       ...options,
     }
 
-    this.ctx.actions.projectConfig.killConfigProcess()
     this.ctx.actions.project.setCurrentProjectProperties({
       projectRoot: this.projectRoot,
       configChildProcess: null,
@@ -261,12 +255,6 @@ export class ProjectBase<TServer extends Server> extends EE {
       stateToSave.firstOpened = now
     }
 
-    this.watchSettings({
-      onSettingsChanged: this.options.onSettingsChanged,
-      projectRoot: this.projectRoot,
-      configFile: this.options.configFile,
-    })
-
     this.startWebsockets({
       onReloadBrowser: this.options.onReloadBrowser,
       onFocusTests: this.options.onFocusTests,
@@ -288,7 +276,6 @@ export class ProjectBase<TServer extends Server> extends EE {
 
     await Promise.all([
       checkSupportFile({ configFile: cfg.configFile, supportFile: cfg.supportFile }),
-      this.watchPluginsFile(cfg, this.options),
     ])
 
     if (cfg.isTextTerminal) {
@@ -352,7 +339,6 @@ export class ProjectBase<TServer extends Server> extends EE {
 
     await Promise.all([
       this.server?.close(),
-      this.watchers?.close(),
       closePreprocessor?.(),
     ])
 
@@ -481,80 +467,6 @@ export class ProjectBase<TServer extends Server> extends EE {
       ctDevServerPort,
       startSpecWatcher,
     })
-  }
-
-  async watchPluginsFile (cfg, options) {
-    debug(`attempt watch plugins file: ${cfg.pluginsFile}`)
-    if (!cfg.pluginsFile || options.isTextTerminal) {
-      return Promise.resolve()
-    }
-
-    // TODO(tim): remove this when we properly clean all of this up
-    if (options) {
-      this.options = options
-    }
-
-    const found = await fs.pathExists(cfg.pluginsFile)
-
-    debug(`plugins file found? ${found}`)
-    // ignore if not found. plugins#init will throw the right error
-    if (!found) {
-      return
-    }
-
-    debug('watch plugins file')
-
-    return this.watchers.watchTree(cfg.pluginsFile, {
-      onChange: () => {
-        // TODO: completely re-open project instead?
-        debug('plugins file changed')
-
-        // re-init plugins after a change
-        this.initializePlugins(cfg)
-        .catch((err) => {
-          options.onError(err)
-        })
-      },
-    })
-  }
-
-  watchSettings ({
-    onSettingsChanged,
-    configFile,
-    projectRoot,
-  }: {
-    projectRoot: string
-    configFile?: string | false
-    onSettingsChanged?: false | (() => void)
-  }) {
-    // bail if we havent been told to
-    // watch anything (like in run mode)
-    if (!onSettingsChanged) {
-      return
-    }
-
-    debug('watch settings files')
-
-    const obj = {
-      onChange: () => {
-        // dont fire change events if we generated
-        // a project id less than 1 second ago
-        if (this.generatedProjectIdTimestamp &&
-          ((Date.now() - this.generatedProjectIdTimestamp) < 1000)) {
-          return
-        }
-
-        // call our callback function
-        // when settings change!
-        onSettingsChanged()
-      },
-    }
-
-    if (configFile !== false) {
-      this.watchers.watchTree(settings.pathToConfigFile(projectRoot, { configFile }), obj)
-    }
-
-    return this.watchers.watch(settings.pathToCypressEnvJson(projectRoot), obj)
   }
 
   initializeReporter ({
