@@ -1,6 +1,6 @@
 require('../../spec_helper')
 
-const { apiRoutes } = require(`${root}../lib/util/routes`)
+const { apiRoutes } = require(`../../../lib/util/routes`)
 
 describe('lib/util/routes', () => {
   describe('api routes', () => {

@@ -1,9 +1,9 @@
 require('../spec_helper')
 
-const api = require(`${root}lib/api`)
-const cache = require(`${root}lib/cache`)
-const user = require(`${root}lib/user`)
-const errors = require(`${root}lib/errors`)
+const api = require(`../../lib/api`)
+const cache = require(`../../lib/cache`)
+const user = require(`../../lib/user`)
+const errors = require(`../../lib/errors`)
 
 describe('lib/user', () => {
   context('.get', () => {
