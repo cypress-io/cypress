@@ -37,7 +37,7 @@ exports['@packages/data-context initializeData initializes 1'] = {
     },
     "isAuthBrowserOpened": false,
     "wizard": {
-      "chosenTestingType": null,
+      "currentTestingType": null,
       "chosenBundler": null,
       "chosenFramework": null,
       "chosenLanguage": "js",

@@ -164,7 +164,7 @@ export class ProjectActions {
       throw Error('Cannot initialize project without an active project')
     }
 
-    if (!this.ctx.wizardData.chosenTestingType) {
+    if (!this.ctx.wizardData.currentTestingType) {
       throw Error('Cannot initialize project without choosing testingType')
     }
 
@@ -178,7 +178,7 @@ export class ProjectActions {
     const allModeOptionsWithLatest: InitializeProjectOptions = {
       ...this.ctx.modeOptions,
       projectRoot: this.ctx.currentProject.projectRoot,
-      testingType: this.ctx.wizardData.chosenTestingType,
+      testingType: this.ctx.wizardData.currentTestingType,
     }
 
     try {
@@ -235,7 +235,7 @@ export class ProjectActions {
       return null
     }
 
-    testingType = testingType || this.ctx.wizardData.chosenTestingType
+    testingType = testingType || this.ctx.wizardData.currentTestingType
 
     if (!testingType) {
       return null
@@ -292,7 +292,7 @@ export class ProjectActions {
     }
 
     this.ctx.actions.electron.hideBrowserWindow()
-    this.ctx.coreData.wizard.chosenTestingType = testingType
+    this.ctx.coreData.wizard.currentTestingType = testingType
     await this.initializeActiveProject()
     this.ctx.appData.currentTestingType = testingType
 

@@ -29,7 +29,7 @@ export interface ClientTestContext {
   wizard: {
     step: WizardStep
     canNavigateForward: boolean
-    chosenTestingType: TestingTypeEnum | null
+    currentTestingType: TestingTypeEnum | null
     chosenBundler: WizardBundler | null
     chosenFramework: WizardFrontendFramework | null
     chosenManualInstall: boolean
@@ -79,7 +79,7 @@ export function makeClientTestContext (): ClientTestContext {
     wizard: {
       step: 'configFiles',
       canNavigateForward: false,
-      chosenTestingType: null,
+      currentTestingType: null,
       chosenBundler: null,
       chosenFramework: null,
       chosenManualInstall: false,

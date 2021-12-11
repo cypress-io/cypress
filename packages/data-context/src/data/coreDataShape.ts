@@ -71,7 +71,7 @@ export interface WizardDataShape {
   currentStep: NexusGenEnums['WizardStep']
   chosenBundler: NexusGenEnums['SupportedBundlers'] | null
   allBundlers: typeof BUNDLERS
-  chosenTestingType: NexusGenEnums['TestingTypeEnum'] | null
+  currentTestingType: NexusGenEnums['TestingTypeEnum'] | null
   chosenFramework: NexusGenEnums['FrontendFrameworkEnum'] | null
   chosenLanguage: NexusGenEnums['CodeLanguageEnum']
   chosenManualInstall: boolean
@@ -139,7 +139,7 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
     isAuthBrowserOpened: false,
     currentProject: null,
     wizard: {
-      chosenTestingType: null,
+      currentTestingType: null,
       chosenBundler: null,
       chosenFramework: null,
       chosenLanguage: 'js',

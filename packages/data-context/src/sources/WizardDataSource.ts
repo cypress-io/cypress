@@ -38,12 +38,12 @@ export class WizardDataSource {
     ]
   }
 
-  get chosenTestingTypePluginsInitialized () {
-    if (this.chosenTestingType === 'component' && this.ctx.currentProject?.ctPluginsInitialized) {
+  get currentTestingTypePluginsInitialized () {
+    if (this.currentTestingType === 'component' && this.ctx.currentProject?.ctPluginsInitialized) {
       return true
     }
 
-    if (this.chosenTestingType === 'e2e' && this.ctx.currentProject?.e2ePluginsInitialized) {
+    if (this.currentTestingType === 'e2e' && this.ctx.currentProject?.e2ePluginsInitialized) {
       return true
     }
 
@@ -62,11 +62,11 @@ export class WizardDataSource {
     }
 
     if (data.currentStep === 'initializePlugins') {
-      if (data.chosenTestingType === 'component' && !this.ctx.currentProject?.ctPluginsInitialized) {
+      if (data.currentTestingType === 'component' && !this.ctx.currentProject?.ctPluginsInitialized) {
         return false
       }
 
-      if (data.chosenTestingType === 'e2e' && !this.ctx.currentProject?.e2ePluginsInitialized) {
+      if (data.currentTestingType === 'e2e' && !this.ctx.currentProject?.e2ePluginsInitialized) {
         return false
       }
     }
@@ -83,7 +83,7 @@ export class WizardDataSource {
       return null
     }
 
-    if (data.chosenTestingType === 'component') {
+    if (data.currentTestingType === 'component') {
       if (!this.chosenFramework || !this.chosenBundler) {
         return null
       }
@@ -96,7 +96,7 @@ export class WizardDataSource {
       })
     }
 
-    if (this.chosenTestingType === 'e2e') {
+    if (this.currentTestingType === 'e2e') {
       return wizardGetConfigCodeE2E({
         lang: this.chosenLanguage,
       })
@@ -106,7 +106,7 @@ export class WizardDataSource {
   }
 
   async sampleConfigFiles (): Promise<SampleConfigFile[]> {
-    const testingType = this.chosenTestingType
+    const testingType = this.currentTestingType
 
     const configFileContent = await this.sampleCode()
     const templateFileContent = await this.sampleTemplate()
@@ -152,8 +152,8 @@ export class WizardDataSource {
     })
   }
 
-  get chosenTestingType () {
-    return this.ctx.wizardData.chosenTestingType
+  get currentTestingType () {
+    return this.ctx.wizardData.currentTestingType
   }
 
   get chosenFramework () {

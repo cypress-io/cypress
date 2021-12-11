@@ -72,7 +72,7 @@ export const stubWizard: MaybeResolver<Wizard> = {
       status: 'error',
     },
   ],
-  chosenTestingTypePluginsInitialized: false,
+  currentTestingTypePluginsInitialized: false,
   frameworks: FRONTEND_FRAMEWORKS.map((framework, idx) => {
     // get around readonly errors
     const supportedBundlers = framework.supportedBundlers as unknown as Array<CodegenTypeMap['WizardBundler']>

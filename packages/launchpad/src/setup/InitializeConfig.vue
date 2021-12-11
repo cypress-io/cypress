@@ -9,7 +9,7 @@
         class="my-2"
       >
       <span class="my-2">
-        {{ props.gql.wizard.chosenTestingTypePluginsInitialized ? 'Project initialized.' : 'Initializing...' }}
+        {{ props.gql.wizard.currentTestingTypePluginsInitialized ? 'Project initialized.' : 'Initializing...' }}
       </span>
     </div>
   </WizardLayout>
@@ -24,7 +24,7 @@ import { InitializeConfig_ConfigFragment, InitializeOpenProjectDocument } from '
 gql`
 fragment InitializeConfig_WizardState on Wizard {
   canNavigateForward
-  chosenTestingTypePluginsInitialized
+  currentTestingTypePluginsInitialized
   step
 }
 `

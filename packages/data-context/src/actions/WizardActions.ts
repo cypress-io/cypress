@@ -17,18 +17,18 @@ export class WizardActions {
       throw Error('No active project found. Cannot open a browser without an active project')
     }
 
-    if (!this.data.chosenTestingType) {
+    if (!this.data.currentTestingType) {
       throw Error('Must set testingType before initializing a project')
     }
 
     // do not re-initialize plugins and dev-server.
-    if (this.data.chosenTestingType === 'component' && this.ctx.currentProject.ctPluginsInitialized) {
+    if (this.data.currentTestingType === 'component' && this.ctx.currentProject.ctPluginsInitialized) {
       this.ctx.debug('CT already initialized. Returning.')
 
       return
     }
 
-    if (this.data.chosenTestingType === 'e2e' && this.ctx.currentProject.e2ePluginsInitialized) {
+    if (this.data.currentTestingType === 'e2e' && this.ctx.currentProject.e2ePluginsInitialized) {
       this.ctx.debug('E2E already initialized. Returning.')
 
       return
@@ -37,12 +37,12 @@ export class WizardActions {
     await this.ctx.actions.project.initializeActiveProject()
 
     // Cannot have both the e2e & component plugins initialized at the same time
-    if (this.ctx.wizardData.chosenTestingType === 'e2e') {
+    if (this.ctx.wizardData.currentTestingType === 'e2e') {
       this.ctx.currentProject.e2ePluginsInitialized = true
       this.ctx.currentProject.ctPluginsInitialized = false
     }
 
-    if (this.ctx.wizardData.chosenTestingType === 'component') {
+    if (this.ctx.wizardData.currentTestingType === 'component') {
       this.ctx.currentProject.ctPluginsInitialized = true
       this.ctx.currentProject.e2ePluginsInitialized = false
     }
@@ -55,7 +55,7 @@ export class WizardActions {
   }
 
   setTestingType (type: 'component' | 'e2e') {
-    this.ctx.coreData.wizard.chosenTestingType = type
+    this.ctx.coreData.wizard.currentTestingType = type
 
     return this.data
   }
@@ -117,7 +117,7 @@ export class WizardActions {
       return this.data
     }
 
-    if (this.data.currentStep === 'welcome' && this.data.chosenTestingType === 'component') {
+    if (this.data.currentStep === 'welcome' && this.data.currentTestingType === 'component') {
       if (!this.ctx.currentProject?.isCTConfigured) {
         this.navigateToStep('selectFramework')
       } else if (!this.ctx.currentProject?.ctPluginsInitialized) {
@@ -131,7 +131,7 @@ export class WizardActions {
       return this.data
     }
 
-    if (this.data.currentStep === 'welcome' && this.data.chosenTestingType === 'e2e') {
+    if (this.data.currentStep === 'welcome' && this.data.currentTestingType === 'e2e') {
       if (!this.ctx.currentProject?.isE2EConfigured) {
         this.navigateToStep('configFiles')
       } else if (!this.ctx.currentProject?.e2ePluginsInitialized) {
@@ -158,7 +158,7 @@ export class WizardActions {
     }
 
     if (this.data.currentStep === 'configFiles') {
-      if (this.data.chosenTestingType === 'component') {
+      if (this.data.currentTestingType === 'component') {
         if (this.ctx.currentProject?.ctPluginsInitialized) {
           this.navigateToStep('setupComplete')
         } else {
@@ -166,7 +166,7 @@ export class WizardActions {
         }
       }
 
-      if (this.data.chosenTestingType === 'e2e') {
+      if (this.data.currentTestingType === 'e2e') {
         if (this.ctx.currentProject?.e2ePluginsInitialized) {
           this.navigateToStep('setupComplete')
         } else {
@@ -183,7 +183,7 @@ export class WizardActions {
     this.data.currentStep = 'welcome'
     this.data.history = ['welcome']
     this.data.chosenBundler = null
-    this.data.chosenTestingType = null
+    this.data.currentTestingType = null
     this.data.chosenFramework = null
     this.data.chosenLanguage = 'js'
     this.data.chosenManualInstall = false
