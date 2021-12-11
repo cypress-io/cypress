@@ -2,9 +2,13 @@ import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 import type { Interception } from '@packages/net-stubbing/lib/external-types'
 
 describe('Navigation', () => {
+  before(() => {
+    cy.scaffoldProject('todos')
+  })
+
   it('External links trigger mutation to open in a new browser', () => {
-    cy.setupE2E('component-tests')
-    cy.initializeApp()
+    cy.openProject('todos')
+    cy.startAppServer()
     cy.visitApp()
 
     cy.intercept('mutation-ExternalLink_OpenExternal', { 'data': { 'openExternal': true } }).as('OpenExternal')

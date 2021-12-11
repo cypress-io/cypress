@@ -5,13 +5,12 @@
   "scripts": {
     "check-ts": "vue-tsc --noEmit",
     "build-prod-ui": "cross-env NODE_ENV=production vite build",
-    "postinstall": "patch-package",
     "clean": "rimraf dist && rimraf ./node_modules/.vite && rimraf dist-e2e && echo 'cleaned'",
     "clean-deps": "rimraf node_modules",
     "test": "yarn cypress:run:ct && yarn types",
     "windi": "yarn windicss-analysis",
-    "cypress:open": "cross-env TZ=America/New_York node ../../scripts/cypress open --project ${PWD}",
-    "cypress:open:ct": "cross-env TZ=America/New_York node ../../scripts/cypress open --component --project ${PWD}",
+    "cypress:open": "cross-env TZ=America/New_York gulp open --project ${PWD}",
+    "cypress:open:ct": "cross-env TZ=America/New_York gulp open --component --project ${PWD}",
     "cypress:run:ct": "cross-env TZ=America/New_York node ../../scripts/cypress run --component --project ${PWD}",
     "cypress:run:e2e": "cross-env TZ=America/New_York node ../../scripts/cypress run --e2e --project ${PWD}",
     "dev": "yarn gulp dev --project ${PWD}",
@@ -29,7 +28,6 @@
     "@packages/frontend-shared": "0.0.0-development",
     "@percy/cypress": "^3.1.0",
     "@testing-library/cypress": "8.0.0",
-    "@toycode/markdown-it-class": "1.2.4",
     "@urql/core": "2.3.1",
     "@urql/devtools": "2.0.3",
     "@urql/vue": "0.4.3",
@@ -74,11 +72,6 @@
     "script",
     "src"
   ],
-  "workspaces": {
-    "nohoist": [
-      "@toycode/markdown-it-class"
-    ]
-  },
   "vite": {
     "optimizeDeps": {
       "include": [

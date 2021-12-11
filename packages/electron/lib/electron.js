@@ -119,7 +119,7 @@ module.exports = {
       // we have an active debugger session
       if (inspector.url()) {
         const dp = process.debugPort + 1
-        const inspectFlag = process.execArgv.includes('--inspect') ? '--inspect' : '--inspect-brk'
+        const inspectFlag = process.execArgv.some((f) => f === '--inspect' || f.startsWith('--inspect=')) ? '--inspect' : '--inspect-brk'
 
         argv.unshift(`${inspectFlag}=${dp}`)
       } else {

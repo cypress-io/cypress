@@ -1,15 +1,16 @@
 import _ from 'lodash'
 import fs from 'fs-extra'
+import util from 'util'
 import path from 'path'
-// we wrap glob to handle EMFILE error
+import glob from 'glob'
 import la from 'lazy-ass'
 import check from 'check-more-types'
 import execa from 'execa'
 import debugLib from 'debug'
 
-import externalUtils, { globby } from './3rd-party'
-
 const debug = debugLib('cypress:binary')
+
+const globAsync = util.promisify(glob)
 
 const pathToPackageJson = function (packageFolder) {
   la(check.unemptyString(packageFolder), 'expected package path', packageFolder)
@@ -41,17 +42,13 @@ const createCLIExecutable = (command) => {
 
 const yarn = createCLIExecutable('yarn')
 
-export const runAllBuild = _.partial(yarn, ['lerna', 'run', 'build-prod', '--ignore', 'cli'])
-
 export const runAllCleanJs = _.partial(yarn, ['lerna', 'run', 'clean-js', '--ignore', 'cli'])
 
 export async function copyAllToDist (distDir: string) {
   await fs.ensureDir(distDir)
 
   const started = new Date().valueOf()
-  const globbed = await externalUtils.globby(['./packages/*', './npm/*'], {
-    onlyFiles: false,
-  })
+  const globbed = await globAsync('./{packages,npm}/*')
 
   for (const pkg of globbed) {
     // copies the package to dist
@@ -74,11 +71,17 @@ export async function copyAllToDist (distDir: string) {
     const pkgFileMasks = [].concat(json.files || []).concat(json.main || [])
 
     debug('for pkg %s have the following file masks %o', pkg, pkgFileMasks)
-    const foundFileRelativeToPackageFolder = await externalUtils.globby(pkgFileMasks, {
-      cwd: pkg, // search in the package folder
-      absolute: false, // and return relative file paths
-      followSymbolicLinks: false, // do not follow symlinks
-    })
+    let foundFileRelativeToPackageFolder = []
+
+    if (pkgFileMasks.length > 0) {
+      const pattern = pkgFileMasks.length > 1 ? `{${pkgFileMasks.join(',')}}` : pkgFileMasks[0]
+
+      foundFileRelativeToPackageFolder = await globAsync(pattern, {
+        cwd: pkg, // search in the package folder
+        absolute: false, // and return relative file paths
+        follow: false, // do not follow symlinks
+      })
+    }
 
     console.log(`Copying ${pkg} to ${path.join(distDir, pkg)}`)
 
@@ -101,7 +104,6 @@ export async function copyAllToDist (distDir: string) {
     try {
       // Strip out dev-dependencies & scripts for everything in /packages so we can yarn install in there
       await fs.writeJson(path.join(distDir, pkg, 'package.json'), _.omit(json, [
-        'scripts',
         'devDependencies',
         'lint-staged',
         'engines',
@@ -123,12 +125,13 @@ export async function copyAllToDist (distDir: string) {
 export const replaceLocalNpmVersions = async function (basePath: string) {
   const visited = new Set<string>()
 
-  const pkgPaths = await globby('./packages/*/package.json', { cwd: basePath })
+  const pkgPaths = await globAsync('./packages/*/', { cwd: basePath })
 
   async function updatePackageJson (pkg: string) {
-    const pkgJsonPath = path.join(basePath, pkg)
+    const pkgPath = path.join(basePath, pkg)
+    const pkgJsonPath = path.join(basePath, pkg, 'package.json')
 
-    visited.add(pkg)
+    visited.add(pkgPath)
     const json = await fs.readJson(pkgJsonPath)
 
     const { dependencies } = json
@@ -145,15 +148,18 @@ export const replaceLocalNpmVersions = async function (basePath: string) {
 
         const pkgName = depName.startsWith('@cypress/') ? depName.split('/')[1] : depName
 
-        json.dependencies[depName] = `file:${path.join(basePath, 'npm', pkgName)}`
+        const localPkgPath = path.join(basePath, 'npm', pkgName)
+
+        json.dependencies[depName] = `file:${localPkgPath}`
         shouldWriteFile = true
 
-        if (!visited.has(depName)) {
-          await updatePackageJson(`./npm/${pkgName}/package.json`)
+        if (!visited.has(localPkgPath)) {
+          await updatePackageJson(`./npm/${pkgName}`)
         }
 
         shouldWriteFile = true
       }
+
       if (shouldWriteFile) {
         await fs.writeJson(pkgJsonPath, json, { spaces: 2 })
       }
@@ -166,9 +172,8 @@ export const replaceLocalNpmVersions = async function (basePath: string) {
 }
 
 export async function removeLocalNpmDirs (distPath: string, except: string[]) {
-  const toRemove = await globby(`${distPath}/npm/*`, {
-    ignore: except.map((e) => path.join(distPath, e).replace('/package.json', '')),
-    onlyDirectories: true,
+  const toRemove = await globAsync(`${distPath}/npm/*/`, {
+    ignore: except,
   })
 
   for (const dir of toRemove) {

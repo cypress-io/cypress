@@ -3,8 +3,7 @@
     class="h-full grid gap-8px grid-cols-[16px,auto,auto] items-center"
     data-cy="spec-item"
   >
-    <component
-      :is="DocumentIconBlank"
+    <i-cy-document-blank_x16
       class="icon-light-gray-50 icon-dark-gray-200"
     />
 
@@ -26,7 +25,6 @@
 </template>
 
 <script lang="ts" setup>
-import DocumentIconBlank from '~icons/cy/document-blank_x16'
 import HighlightedText from './HighlightedText.vue'
 
 withDefaults(defineProps<{
