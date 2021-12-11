@@ -87,6 +87,9 @@ type CloudProject implements Node {
   """The latest run for a given spec"""
   latestRun: CloudRun
 
+  """Given name of the project"""
+  name: String!
+
   """The organization the project is a member of"""
   organization: CloudOrganization
 
