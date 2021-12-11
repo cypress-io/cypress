@@ -85,31 +85,6 @@ describe('lib/util/settings', () => {
       })
     })
 
-    context('.id', () => {
-      beforeEach(function () {
-        this.projectRoot = path.join(projectRoot, '_test-output/path/to/project/')
-
-        ctx.actions.project.setActiveProjectForTestSetup(this.projectRoot)
-
-        return fs.ensureDirAsync(this.projectRoot)
-      })
-
-      afterEach(function () {
-        return fs.removeAsync(`${this.projectRoot}cypress.config.js`)
-      })
-
-      it('returns project id for project', function () {
-        return fs.writeFileAsync(`${this.projectRoot}cypress.config.js`, `module.exports = {
-          projectId: 'id-123',
-        }`)
-        .then(() => {
-          return settings.id(this.projectRoot, defaultOptions)
-        }).then((id) => {
-          expect(id).to.equal('id-123')
-        })
-      })
-    })
-
     context('.read', () => {
       it('promises cypress.config.js', function () {
         return this.setup({ foo: 'bar' })

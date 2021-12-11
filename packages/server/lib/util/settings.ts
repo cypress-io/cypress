@@ -131,14 +131,6 @@ export function configFile (options: SettingsOptions = {}) {
   return options.configFile === false ? false : (options.configFile || 'cypress.config.js')
 }
 
-export function id (projectRoot, options = {}) {
-  return read(projectRoot, options)
-  .then((config) => config.projectId)
-  .catch(() => {
-    return null
-  })
-}
-
 export function read (projectRoot, options: SettingsOptions = {}) {
   if (options.configFile === false) {
     return Promise.resolve({})
