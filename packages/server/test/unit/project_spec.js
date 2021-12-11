@@ -256,7 +256,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
   context('#open', () => {
     beforeEach(function () {
-      sinon.stub(this.project, 'watchSettings')
       sinon.stub(this.project, 'startWebsockets')
       this.checkSupportFileStub = sinon.stub(ProjectUtils, 'checkSupportFile').resolves()
       sinon.stub(this.project, 'scaffold').resolves()
@@ -266,16 +265,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       sinon.stub(config, 'updateWithPluginValues').returns(this.config)
       sinon.stub(scaffold, 'plugins').resolves()
       sinon.stub(plugins, 'init').resolves()
-    })
-
-    it('calls #watchSettings with options + config', function () {
-      return this.project.open().then(() => {
-        expect(this.project.watchSettings).to.be.calledWith({
-          configFile: undefined,
-          onSettingsChanged: false,
-          projectRoot: this.todosPath,
-        })
-      })
     })
 
     it('calls #startWebsockets with options + config', function () {
@@ -770,7 +759,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       this.project.watchers = {}
       this.project._server = { close () {}, startWebsockets: sinon.stub() }
       sinon.stub(ProjectBase.prototype, 'open').resolves()
-      sinon.stub(this.project, 'watchSettings')
     })
 
     it('calls server.startWebsockets with automation + config', async function () {
