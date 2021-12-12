@@ -2,6 +2,7 @@ import chalk from 'chalk'
 import { spawn } from 'child_process'
 import pDefer from 'p-defer'
 import { monorepoPaths } from '../monorepoPaths'
+import { winSpawn } from '../utils/childProcessUtils'
 import { addChildProcess } from './gulpRegistry'
 
 export function webpackRunner () {
@@ -24,9 +25,9 @@ export async function runWebpack (cfg: RunWebpackCfg) {
   const { cwd, args = [], env = process.env, devServer = false, prefix } = cfg
   const dfd = pDefer()
   const spawned = spawn(
-    devServer
-      ? './node_modules/.bin/webpack-dev-server'
-      : './node_modules/.bin/webpack',
+    winSpawn(devServer
+      ? 'webpack-dev-server'
+      : 'webpack'),
     args,
     {
       cwd,
