@@ -397,5 +397,13 @@
       "name": "Component Testing",
       "description": "Build and test your components from your design system in isolation in order to ensure each state matches your expectations."
     }
+  },
+  "migration": {
+    "renameAuto": {
+      "title": "We'll automatically rename your specs in this step — here's why:",
+      "changedSpecFolder": "We've changed the default spec folder from:",
+      "changedSpecExt": "We've changed the default spec file extension from:",
+      "changedE2EFolder": "Since you're currently using a custom directory for the {0}, we'll temporarily be moving your specs back to the default directory."
+    }
   }
 }

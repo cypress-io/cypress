@@ -1,12 +1,12 @@
 <template>
   <div class="text-16px leading-24px">
     <h3 class="font-medium my-8px text-gray-900 leading-28px">
-      We'll automatically rename your specs in this step — here's why:
+      {{ t('migration.renameAuto.title') }}
     </h3>
     <ul class="list-disc pl-24px text-jade-400">
       <li class="mb-4px">
         <span class="text-gray-600">
-          We've changed the default spec folder from:
+          {{ t('migration.renameAuto.changedSpecFolder') }}
         </span>
         <CodeTag
           class="text-red-500"
@@ -18,7 +18,7 @@
       </li>
       <li class="mb-4px">
         <span class="text-gray-600">
-          We've changed the default spec file extension from:
+          {{ t('migration.renameAuto.changedSpecExt') }}
         </span>
         <CodeTag
           class="text-red-500"
@@ -30,7 +30,9 @@
       </li>
       <li class="mb-4px">
         <span class="text-gray-600">
-          Since you're currently using a custom directory for the <CodeTag>integrationFolder</CodeTag>, we'll temporarily be moving your specs back to the default directory.
+          <i18n-t keypath="migration.renameAuto.changedE2EFolder">
+            <CodeTag>integrationFolder</CodeTag>
+          </i18n-t>
         </span>
       </li>
     </ul>
@@ -56,6 +58,9 @@
 import CodeTag from '@cy/components/CodeTag.vue'
 import BeforeAfter from './fragments/BeforeAfter.vue'
 import HighlightedFilesList from './fragments/HighlightedFilesList.vue'
+import { useI18n } from '@cy/i18n'
+
+const { t } = useI18n()
 
 // TODO: wire this properly
 const filesBefore = [
