@@ -27,7 +27,8 @@
             "ignores": [
               "pre",
               "textarea",
-              "Tag"
+              "code",
+              "CodeTag"
             ],
             "allowEmptyLines": false
           }
