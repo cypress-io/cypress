@@ -30,21 +30,6 @@ describe('lib/util/settings', () => {
       return fs.removeAsync('cypress.config.js')
     })
 
-    context('nested cypress object', () => {
-      it('flattens object on read', function () {
-        return this.setup({ cypress: { foo: 'bar' } })
-        .then(() => {
-          return settings.read(projectRoot, defaultOptions)
-        }).then((obj) => {
-          expect(obj).to.deep.eq({ foo: 'bar' })
-
-          return require(path.join(projectRoot, 'cypress.config.js'))
-        }).then((obj) => {
-          expect(obj).to.deep.eq({ foo: 'bar' })
-        })
-      })
-    })
-
     context('.readEnv', () => {
       afterEach(() => {
         return fs.removeAsync('cypress.env.json')
@@ -110,42 +95,6 @@ describe('lib/util/settings', () => {
           return settings.read(projectRoot, defaultOptions)
         }).then((obj) => {
           expect(obj).to.deep.eq({ a: 'c', e2e: { a: 'c' } })
-        })
-      })
-
-      it('renames commandTimeout -> defaultCommandTimeout', function () {
-        return this.setup({ commandTimeout: 30000, foo: 'bar' })
-        .then(() => {
-          return settings.read(projectRoot, defaultOptions)
-        }).then((obj) => {
-          expect(obj).to.deep.eq({ defaultCommandTimeout: 30000, foo: 'bar' })
-        })
-      })
-
-      it('renames supportFolder -> supportFile', function () {
-        return this.setup({ supportFolder: 'foo', foo: 'bar' })
-        .then(() => {
-          return settings.read(projectRoot, defaultOptions)
-        }).then((obj) => {
-          expect(obj).to.deep.eq({ supportFile: 'foo', foo: 'bar' })
-        })
-      })
-
-      it('renames visitTimeout -> pageLoadTimeout', function () {
-        return this.setup({ visitTimeout: 30000, foo: 'bar' })
-        .then(() => {
-          return settings.read(projectRoot, defaultOptions)
-        }).then((obj) => {
-          expect(obj).to.deep.eq({ pageLoadTimeout: 30000, foo: 'bar' })
-        })
-      })
-
-      it('renames visitTimeout -> pageLoadTimeout on nested cypress obj', function () {
-        return this.setup({ cypress: { visitTimeout: 30000, foo: 'bar' } })
-        .then(() => {
-          return settings.read(projectRoot, defaultOptions)
-        }).then((obj) => {
-          expect(obj).to.deep.eq({ pageLoadTimeout: 30000, foo: 'bar' })
         })
       })
 
