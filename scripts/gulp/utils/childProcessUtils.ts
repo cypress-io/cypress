@@ -89,11 +89,7 @@ export async function spawned (
   const { waitForExit, waitForData, tapErr, tapOut, ...spawnOpts } = opts
 
   const [executable, ...rest] = command.split(' ')
-  let useExecutable = executable
-
-  if (process.platform === 'win32' && !useExecutable.endsWith('.cmd')) {
-    useExecutable = `${executable}.cmd`
-  }
+  const useExecutable = winSpawn(executable)
 
   // console.log(useExecutable, rest, spawnOpts)
 
@@ -278,5 +274,5 @@ const isWin = process.platform === 'win32'
  * @returns
  */
 export function winSpawn (command: string): string {
-  return `${(`./node_modules/.bin/${command}`).replace(/\//g, '\\')}${isWin ? '.cmd' : ''}`
+  return `${(command).replace(/\//g, '\\')}${isWin ? '.cmd' : ''}`
 }
