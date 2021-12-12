@@ -88,7 +88,7 @@ export function id (projectRoot, options = {}) {
 
 export function read (projectRoot, options: SettingsOptions = {}) {
   if (options.configFile === false) {
-    return Promise.resolve({})
+    return Promise.resolve({} as Partial<Cypress.ConfigOptions>)
   }
 
   const file = pathToConfigFile(projectRoot, options)
@@ -117,7 +117,7 @@ export function read (projectRoot, options: SettingsOptions = {}) {
       throw err
     }
 
-    return _logReadErr(file, err)
+    throw _logReadErr(file, err)
   })
 }
 
