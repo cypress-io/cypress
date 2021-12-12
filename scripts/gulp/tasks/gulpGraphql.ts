@@ -9,8 +9,7 @@ import { minifyIntrospectionQuery } from '@urql/introspection'
 
 import { nexusTypegen, watchNexusTypegen } from '../utils/nexusTypegenUtil'
 import { monorepoPaths } from '../monorepoPaths'
-import { spawned, winSpawn } from '../utils/childProcessUtils'
-import { spawn } from 'child_process'
+import { spawned } from '../utils/childProcessUtils'
 import { DEFAULT_INTERNAL_CLOUD_ENV } from '../gulpConstants'
 
 export async function nexusCodegen () {
@@ -43,13 +42,13 @@ export async function graphqlCodegen () {
 }
 
 export async function graphqlCodegenWatch () {
-  const spawned = spawn(winSpawn('graphql-codegen'), ['--watch', '--config', 'graphql-codegen.yml'], {
+  const spawnedProcess = await spawned('gql-codegen', 'yarn graphql-codegen --watch --config graphql-codegen.yml', {
     cwd: monorepoPaths.root,
   })
   const dfd = pDefer()
   let hasResolved = false
 
-  spawned.stdout.on('data', (chunk) => {
+  spawnedProcess.stdout?.on('data', (chunk) => {
     const strs = `${chunk}`.split('\n').filter((f) => f)
     const timestampRegex = /\[\d{2}:\d{2}:\d{2}\]/
     const isFailureBlock = strs.some((s) => s.includes('[failed]'))
@@ -75,7 +74,7 @@ export async function graphqlCodegenWatch () {
     })
   })
 
-  spawned.stderr.on('data', (data) => {
+  spawnedProcess.stderr?.on('data', (data) => {
     console.error(chalk.red(String(data)))
   })
 

@@ -1,8 +1,7 @@
 import chalk from 'chalk'
-import { spawn } from 'child_process'
 import pDefer from 'p-defer'
 import { monorepoPaths } from '../monorepoPaths'
-import { winSpawn } from '../utils/childProcessUtils'
+import { spawned } from '../utils/childProcessUtils'
 import { addChildProcess } from './gulpRegistry'
 
 export function webpackRunner () {
@@ -24,23 +23,21 @@ type RunWebpackCfg = {
 export async function runWebpack (cfg: RunWebpackCfg) {
   const { cwd, args = [], env = process.env, devServer = false, prefix } = cfg
   const dfd = pDefer()
-  const spawned = spawn(
-    winSpawn(devServer
+  const spawnedProcess = await spawned('webpack-watch',
+    [devServer
       ? 'webpack-dev-server'
-      : 'webpack'),
-    args,
+      : 'webpack', ...args].join(' '),
     {
       cwd,
       env: {
         ...(env || process.env),
         FORCE_COLOR: '1',
       },
-    },
-  )
+    })
 
-  addChildProcess(spawned)
+  addChildProcess(spawnedProcess)
 
-  spawned.stdout.on('data', (chunk) => {
+  spawnedProcess.stdout?.on('data', (chunk) => {
     process.stdout.write('\n')
     String(chunk)
     .split('\n')
@@ -59,7 +56,7 @@ export async function runWebpack (cfg: RunWebpackCfg) {
     })
   })
 
-  spawned.stderr.on('data', (chunk) => {
+  spawnedProcess.stderr?.on('data', (chunk) => {
     process.stderr.write('\n')
     String(chunk)
     .split('\n')

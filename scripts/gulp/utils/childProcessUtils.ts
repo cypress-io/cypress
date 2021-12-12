@@ -7,6 +7,7 @@ import { prefixLog, prefixStream } from './prefixStream'
 import { addChildProcess } from '../tasks/gulpRegistry'
 
 export type AllSpawnableApps =
+  | `webpack-${string}`
   | `cmd-${string}`
   | `vite-${string}`
   | `vite:build-${string}`
@@ -268,15 +269,4 @@ function streamHandler (cp: ChildProcess, config: StreamHandlerConfig) {
   }
 
   return dfd.promise
-}
-
-const isWin = process.platform === 'win32'
-
-/**
- * Pretreat commands to make them compatible with windows
- * @param command
- * @returns
- */
-export function winSpawn (command: string): string {
-  return `${(`./node_modules/.bin/${command}`).replace(/\//g, '\\')}${isWin ? '.cmd' : ''}`
 }
