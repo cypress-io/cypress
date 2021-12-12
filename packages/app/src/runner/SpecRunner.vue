@@ -177,7 +177,11 @@ const containerHeight = computed(() => {
 })
 
 const handleResizeEnd = (panel: 'panel1' | 'panel2') => {
-  // save to prefs
+  if (panel === 'panel1') {
+    preferences.update('specsListWidth', specsListWidth.value)
+  } else {
+    preferences.update('reporterWidth', reporterWidth.value)
+  }
 }
 
 const handlePanelWidthUpdated = ({ panel, width }) => {
