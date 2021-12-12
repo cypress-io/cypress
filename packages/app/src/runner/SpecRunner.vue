@@ -8,6 +8,7 @@
       :max-total-width="windowWidth - 64"
       :initial-panel1-width="initialSpecsListWidth"
       :initial-panel2-width="initialReporterWidth"
+      :show-panel1="runnerUiStore.isSpecsListOpen"
       @resize-end="handleResizeEnd"
       @panel-width-updated="handlePanelWidthUpdated"
     >

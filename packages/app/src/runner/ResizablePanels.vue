@@ -57,7 +57,7 @@ export default {
 </script>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
+import { computed, ref, watchEffect } from 'vue'
 
 const props = withDefaults(defineProps<{
   showPanel1?: boolean // specsList in runner
@@ -90,8 +90,16 @@ const panel1HandleX = ref(props.initialPanel1Width)
 const panel2HandleX = ref(props.initialPanel2Width + props.initialPanel1Width)
 const panel1IsDragging = ref(false)
 const panel2IsDragging = ref(false)
-const cachedPanel1Width = ref(props.initialPanel1Width) // because panel 1 (the inline specs list) can be opened and closed in the UI, we cache the width
+const cachedPanel1Width = ref<number>(props.initialPanel1Width) // because panel 1 (the inline specs list) can be opened and closed in the UI, we cache the width
 const panel2Width = ref(props.initialPanel2Width)
+
+watchEffect(() => {
+  if (!props.showPanel1) {
+    emit('panelWidthUpdated', { panel: 'panel1', width: 0 })
+  } else if (props.showPanel1) {
+    emit('panelWidthUpdated', { panel: 'panel1', width: cachedPanel1Width.value })
+  }
+})
 
 const handleMousedown = (panel: 'panel1' | 'panel2', event: MouseEvent) => {
   if (panel === 'panel1') {
