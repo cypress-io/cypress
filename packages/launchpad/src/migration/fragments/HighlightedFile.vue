@@ -13,13 +13,11 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 
-const props = withDefaults(defineProps<{
+const props = defineProps<{
   file: string
   highlightRegExp: RegExp,
-  highlightClass?: string
-}>(), {
-  highlightClass: 'text-jade-500',
-})
+  highlightClass: string
+}>()
 
 const fileParts = computed(() => {
   let result:RegExpExecArray | null

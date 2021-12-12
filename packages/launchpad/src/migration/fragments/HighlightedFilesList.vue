@@ -22,6 +22,6 @@ withDefaults(defineProps<{
   highlightRegExp: RegExp,
   highlightClass?: string
 }>(), {
-  highlightClass: 'text-jade-500',
+  highlightClass: 'text-gray-500',
 })
 </script>

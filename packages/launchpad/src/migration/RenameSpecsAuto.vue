@@ -48,6 +48,7 @@
         <HighlightedFilesList
           :files="filesAfter"
           :highlight-reg-exp="/(e2e|\.cy)/gi"
+          highlight-class="text-jade-500"
         />
       </template>
     </BeforeAfter>
