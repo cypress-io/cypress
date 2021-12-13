@@ -576,7 +576,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
   context('#scaffold', () => {
     beforeEach(function () {
       this.project = new ProjectBase({ projectRoot: '/_test-output/path/to/project-e2e', testingType: 'e2e' })
-      sinon.stub(scaffold, 'integration').resolves()
       sinon.stub(scaffold, 'fixture').resolves()
       sinon.stub(scaffold, 'support').resolves()
       sinon.stub(scaffold, 'plugins').resolves()
