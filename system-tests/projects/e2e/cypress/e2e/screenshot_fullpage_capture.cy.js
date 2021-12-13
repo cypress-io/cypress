@@ -17,8 +17,8 @@ it('takes consistent fullPage captures', () => {
       cy.screenshot('fullPage-compare', options)
 
       cy.task('compare:screenshots', {
-        a: 'screenshot_fullpage_capture_spec.js/fullPage-original',
-        b: 'screenshot_fullpage_capture_spec.js/fullPage-compare',
+        a: 'screenshot_fullpage_capture.cy.js/fullPage-original',
+        b: 'screenshot_fullpage_capture.cy.js/fullPage-compare',
         blackout: true,
         devicePixelRatio,
       })

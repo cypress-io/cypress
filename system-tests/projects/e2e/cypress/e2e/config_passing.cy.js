@@ -37,9 +37,9 @@ describe('Cypress static methods + props', () => {
     const { spec } = Cypress
 
     expect(spec).to.be.an('object')
-    expect(spec.name).to.eq('config_passing_spec.js')
-    expect(spec.relative).to.eq('cypress/e2e/config_passing_spec.js')
-    expect(spec.absolute.indexOf('cypress/e2e/config_passing_spec.js')).to.be.gt(0)
+    expect(spec.name).to.eq('config_passing.cy.js')
+    expect(spec.relative).to.eq('cypress/e2e/config_passing.cy.js')
+    expect(spec.absolute.indexOf('cypress/e2e/config_passing.cy.js')).to.be.gt(0)
   })
 
   context('.env', () => {

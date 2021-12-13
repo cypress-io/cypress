@@ -4,7 +4,7 @@ module.exports = {
       const path = require('path')
 
       on('file:preprocessor', () => {
-        return path.join(__dirname, './cypress/e2e/another_spec.js')
+        return path.join(__dirname, './cypress/e2e/another.cy.js')
       })
 
       return config

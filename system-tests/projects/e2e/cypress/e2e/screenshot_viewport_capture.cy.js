@@ -16,8 +16,8 @@ it('takes consistent viewport captures', () => {
       cy.screenshot('viewport-compare', options)
 
       cy.task('compare:screenshots', {
-        a: 'screenshot_viewport_capture_spec.js/viewport-original',
-        b: 'screenshot_viewport_capture_spec.js/viewport-compare',
+        a: 'screenshot_viewport_capture.cy.js/viewport-original',
+        b: 'screenshot_viewport_capture.cy.js/viewport-compare',
         blackout: true,
         devicePixelRatio,
       })

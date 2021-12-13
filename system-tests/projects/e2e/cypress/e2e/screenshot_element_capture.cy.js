@@ -16,8 +16,8 @@ it('takes consistent element captures', () => {
       cy.get('.capture-me').screenshot('element-compare')
 
       cy.task('compare:screenshots', {
-        a: 'screenshot_element_capture_spec.js/element-original',
-        b: 'screenshot_element_capture_spec.js/element-compare', devicePixelRatio,
+        a: 'screenshot_element_capture.cy.js/element-original',
+        b: 'screenshot_element_capture.cy.js/element-compare', devicePixelRatio,
       })
     }
 
