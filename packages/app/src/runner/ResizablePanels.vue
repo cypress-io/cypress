@@ -1,13 +1,13 @@
 <template>
   <div
-    class="flex h-full"
+    class="flex h-full w-full"
     :class="{'select-none': panel1IsDragging || panel2IsDragging}"
     @mouseup="handleMouseup"
     @mousemove="handleMousemove"
   >
     <div
       v-show="showPanel1"
-      class="h-full bg-gray-1000 relative"
+      class="h-full bg-gray-1000 flex-shrink-0 relative"
       :style="{width: `${panel1Width}px`}"
     >
       <slot name="panel1">
@@ -24,7 +24,7 @@
 
     <div
       v-show="showPanel2"
-      class="h-full relative"
+      class="h-full flex-shrink-0 relative"
       :style="{width: `${panel2Width}px`}"
     >
       <slot name="panel2">
@@ -57,7 +57,7 @@ export default {
 </script>
 
 <script lang="ts" setup>
-import { computed, ref, watchEffect } from 'vue'
+import { computed, ref, watchEffect, nextTick } from 'vue'
 
 const props = withDefaults(defineProps<{
   showPanel1?: boolean // specsList in runner
@@ -96,7 +96,7 @@ const panel2Width = ref(props.initialPanel2Width)
 const handleMousedown = (panel: 'panel1' | 'panel2', event: MouseEvent) => {
   if (panel === 'panel1') {
     panel1IsDragging.value = true
-  } else {
+  } else if (panel === 'panel2') {
     panel2IsDragging.value = true
     panel2HandleX.value = event.clientX
   }
@@ -112,7 +112,7 @@ const handleMousemove = (event: MouseEvent) => {
     emit('panelWidthUpdated', { panel: 'panel2', width: panel2Width.value })
   }
 }
-const handleMouseup = () => {
+const handleMouseup = (event) => {
   if (panel1IsDragging.value) {
     panel1IsDragging.value = false
     handleResizeEnd('panel1')
@@ -151,8 +151,9 @@ function handleResizeEnd (panel: 'panel1' | 'panel2') {
 function isNewWidthAllowed (mouseClientX:number, panel: 'panel1' | 'panel2') {
   if (panel === 'panel1') {
     const newWidth = mouseClientX - props.offsetLeft
+    const result = panel1IsDragging.value && newWidth >= props.minPanel1Width && newWidth <= maxPanel1Width.value
 
-    return panel1IsDragging.value && newWidth >= props.minPanel1Width && newWidth <= maxPanel1Width.value
+    return result
   }
 
   const newWidth = mouseClientX - props.offsetLeft - panel1Width.value

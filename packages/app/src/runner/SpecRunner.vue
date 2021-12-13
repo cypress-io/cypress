@@ -6,6 +6,8 @@
     <ResizablePanels
       :offset-left="64"
       :max-total-width="windowWidth - 64"
+      :min-panel1-width="200"
+      :min-panel2-width="220"
       :initial-panel1-width="initialSpecsListWidth"
       :initial-panel2-width="initialReporterWidth"
       :show-panel1="runnerUiStore.isSpecsListOpen"

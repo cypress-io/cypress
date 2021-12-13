@@ -9,7 +9,7 @@ const panelSlots = {
 const defaultPanel1Width = 280
 const defaultPanel2Width = 320
 
-describe('<ResizablePanels />', { viewportWidth: 1500, defaultCommandTimeout: 100 }, () => {
+describe('<ResizablePanels />', { viewportWidth: 1500, defaultCommandTimeout: 4000 }, () => {
   it('playground with default slot and props', () => {
     cy.mount(() => <div class="h-screen"><ResizablePanels/></div>)
   })
@@ -28,22 +28,22 @@ describe('<ResizablePanels />', { viewportWidth: 1500, defaultCommandTimeout: 10
     cy.mount(() => (
       <div class="h-screen">
         <ResizablePanels
+          maxTotalWidth={1500}
           v-slots={panelSlots}
         />
       </div>))
 
     cy.contains('Panel 1').as('panel1')
-
     cy.get('@panel1').invoke('outerWidth').should('eq', defaultPanel1Width)
 
-    cy.get('[data-cy="panel1ResizeHandle"]').trigger('mousedown')
-    .trigger('mousemove', { clientX: 500 })
-    .trigger('mouseup')
+    cy.get('[data-cy="panel1ResizeHandle"]').trigger('mousedown', { eventConstructor: 'MouseEvent', force: true })
+    .trigger('mousemove', 230, 450, { eventConstructor: 'MouseEvent', force: true })
+    .trigger('mouseup', { eventConstructor: 'MouseEvent', force: true })
 
     cy.get('@panel1').invoke('outerWidth').should('eq', 500)
 
-    cy.get('[data-cy="panel1ResizeHandle"]').trigger('mousedown')
-    .trigger('mousemove', { clientX: 400 })
+    cy.get('[data-cy="panel1ResizeHandle"]').trigger('mousedown', { eventConstructor: 'MouseEvent' })
+    .trigger('mousemove', { clientX: 400, eventConstructor: 'MouseEvent', force: true })
     .trigger('mouseup')
 
     cy.get('@panel1').invoke('outerWidth').should('eq', 400)
