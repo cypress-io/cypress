@@ -8,7 +8,7 @@ exports['e2e domain / passes'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      2 found (domain_2_spec.js, domain_spec.js)                                         │
-  │ Searched:   cypress/integration/domain*                                                        │
+  │ Searched:   cypress/e2e/domain*                                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

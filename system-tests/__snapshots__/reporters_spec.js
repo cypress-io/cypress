@@ -31,7 +31,7 @@ exports['e2e reporters supports junit reporter and reporter options 1'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (simple_passing_spec.js)                                                   │
-  │ Searched:   cypress/integration/simple_passing_spec.js                                         │
+  │ Searched:   cypress/e2e/simple_passing_spec.js                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -84,7 +84,7 @@ exports['e2e reporters supports local custom reporter 1'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (simple_passing_spec.js)                                                   │
-  │ Searched:   cypress/integration/simple_passing_spec.js                                         │
+  │ Searched:   cypress/e2e/simple_passing_spec.js                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -139,7 +139,7 @@ exports['e2e reporters mochawesome passes with mochawesome-1.5.2 npm custom repo
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (simple_passing_spec.js)                                                   │
-  │ Searched:   cypress/integration/simple_passing_spec.js                                         │
+  │ Searched:   cypress/e2e/simple_passing_spec.js                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -206,7 +206,7 @@ exports['e2e reporters mochawesome fails with mochawesome-1.5.2 npm custom repor
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (simple_failing_hook_spec.js)                                              │
-  │ Searched:   cypress/integration/simple_failing_hook_spec.js                                    │
+  │ Searched:   cypress/e2e/simple_failing_hook_spec.js                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -319,7 +319,7 @@ exports['e2e reporters mochawesome passes with mochawesome-2.3.1 npm custom repo
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (simple_passing_spec.js)                                                   │
-  │ Searched:   cypress/integration/simple_passing_spec.js                                         │
+  │ Searched:   cypress/e2e/simple_passing_spec.js                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -384,7 +384,7 @@ exports['e2e reporters mochawesome fails with mochawesome-2.3.1 npm custom repor
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (simple_failing_hook_spec.js)                                              │
-  │ Searched:   cypress/integration/simple_failing_hook_spec.js                                    │
+  │ Searched:   cypress/e2e/simple_failing_hook_spec.js                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -495,7 +495,7 @@ exports['e2e reporters mochawesome passes with mochawesome-3.0.1 npm custom repo
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (simple_passing_spec.js)                                                   │
-  │ Searched:   cypress/integration/simple_passing_spec.js                                         │
+  │ Searched:   cypress/e2e/simple_passing_spec.js                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -560,7 +560,7 @@ exports['e2e reporters mochawesome fails with mochawesome-3.0.1 npm custom repor
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (simple_failing_hook_spec.js)                                              │
-  │ Searched:   cypress/integration/simple_failing_hook_spec.js                                    │
+  │ Searched:   cypress/e2e/simple_failing_hook_spec.js                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -688,7 +688,7 @@ exports['e2e reporters supports teamcity reporter and reporter options 1'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (simple_passing_spec.js)                                                   │
-  │ Searched:   cypress/integration/simple_passing_spec.js                                         │
+  │ Searched:   cypress/e2e/simple_passing_spec.js                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

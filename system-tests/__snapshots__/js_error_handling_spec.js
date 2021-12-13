@@ -8,7 +8,7 @@ exports['e2e js error handling / fails'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (js_error_handling_failing_spec.js)                                        │
-  │ Searched:   cypress/integration/js_error_handling_failing_spec.js                              │
+  │ Searched:   cypress/e2e/js_error_handling_failing_spec.js                              │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

@@ -8,7 +8,7 @@ exports['e2e interception spec character encodings does not mangle non-UTF-8 tex
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (character_encoding_spec.js)                                               │
-  │ Searched:   cypress/integration/character_encoding_spec.js                                     │
+  │ Searched:   cypress/e2e/character_encoding_spec.js                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

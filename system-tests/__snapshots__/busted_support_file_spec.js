@@ -8,7 +8,7 @@ exports['e2e busted support file passes 1'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (app_spec.js)                                                              │
-  │ Searched:   cypress/integration/**/*                                                           │
+  │ Searched:   cypress/e2e/**/*                                                           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

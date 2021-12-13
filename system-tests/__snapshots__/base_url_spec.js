@@ -8,7 +8,7 @@ exports['e2e baseUrl / https / passes'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (base_url_spec.js)                                                         │
-  │ Searched:   cypress/integration/base_url_spec.js                                               │
+  │ Searched:   cypress/e2e/base_url_spec.js                                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -69,7 +69,7 @@ exports['e2e baseUrl / http / passes'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (base_url_spec.js)                                                         │
-  │ Searched:   cypress/integration/base_url_spec.js                                               │
+  │ Searched:   cypress/e2e/base_url_spec.js                                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

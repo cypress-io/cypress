@@ -8,7 +8,7 @@ exports['e2e before:browser:launch / modifies preferences on disk if DNE'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (spec.js)                                                                  │
-  │ Searched:   cypress/integration/spec.js                                                        │
+  │ Searched:   cypress/e2e/spec.js                                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -63,7 +63,7 @@ exports['e2e before:browser:launch / can add extensions'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (spec.js)                                                                  │
-  │ Searched:   cypress/integration/spec.js                                                        │
+  │ Searched:   cypress/e2e/spec.js                                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

@@ -8,7 +8,7 @@ exports['e2e user agent / passes'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (user_agent_spec.js)                                                       │
-  │ Searched:   cypress/integration/user_agent_spec.js                                             │
+  │ Searched:   cypress/e2e/user_agent_spec.js                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

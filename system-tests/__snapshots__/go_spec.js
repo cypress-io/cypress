@@ -8,7 +8,7 @@ exports['e2e go / passes'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (go_spec.js)                                                               │
-  │ Searched:   cypress/integration/go_spec.js                                                     │
+  │ Searched:   cypress/e2e/go_spec.js                                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

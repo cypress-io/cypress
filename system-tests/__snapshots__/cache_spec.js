@@ -8,7 +8,7 @@ exports['e2e cache passes 1'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (cache_spec.js)                                                            │
-  │ Searched:   cypress/integration/cache_spec.js                                                  │
+  │ Searched:   cypress/e2e/cache_spec.js                                                  │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

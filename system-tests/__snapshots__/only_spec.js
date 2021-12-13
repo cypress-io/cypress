@@ -8,7 +8,7 @@ exports['e2e only spec failing 1'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      2 found (only_multiple_spec.js, only_spec.js)                                      │
-  │ Searched:   cypress/integration/only*.js                                                       │
+  │ Searched:   cypress/e2e/only*.js                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

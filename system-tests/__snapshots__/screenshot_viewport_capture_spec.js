@@ -8,7 +8,7 @@ exports['e2e screenshot viewport capture / passes'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (screenshot_viewport_capture_spec.js)                                      │
-  │ Searched:   cypress/integration/screenshot_viewport_capture_spec.js                            │
+  │ Searched:   cypress/e2e/screenshot_viewport_capture_spec.js                            │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

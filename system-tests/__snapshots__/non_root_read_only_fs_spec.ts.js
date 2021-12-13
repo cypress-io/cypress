@@ -17,7 +17,7 @@ If you don't require screenshots or videos to be stored you can safely ignore th
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (spec.js)                                                                  │
-  │ Searched:   cypress/integration/spec.js                                                        │
+  │ Searched:   cypress/e2e/spec.js                                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

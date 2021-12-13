@@ -8,7 +8,7 @@ exports['e2e typescript in spec and support file spec passes 1'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (typescript_passing_spec.ts)                                               │
-  │ Searched:   cypress/integration/typescript_passing_spec.ts                                     │
+  │ Searched:   cypress/e2e/typescript_passing_spec.ts                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -72,7 +72,7 @@ exports['e2e typescript in spec and support file spec fails with syntax error 1'
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (typescript_syntax_error_spec.ts)                                          │
-  │ Searched:   cypress/integration/typescript_syntax_error_spec.ts                                │
+  │ Searched:   cypress/e2e/typescript_syntax_error_spec.ts                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -151,7 +151,7 @@ exports['e2e typescript in spec and support file project passes 1'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      2 found (app_spec.ts, math.ts)                                                     │
-  │ Searched:   cypress/integration/**/*                                                           │
+  │ Searched:   cypress/e2e/**/*                                                           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

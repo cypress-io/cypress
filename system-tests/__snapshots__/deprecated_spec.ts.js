@@ -8,7 +8,7 @@ exports['deprecated before:browser:launch args / push and no return - warns user
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (app_spec.js)                                                              │
-  │ Searched:   cypress/integration/app_spec.js                                                    │
+  │ Searched:   cypress/e2e/app_spec.js                                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -68,7 +68,7 @@ exports['deprecated before:browser:launch args / using non-deprecated API - no w
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (app_spec.js)                                                              │
-  │ Searched:   cypress/integration/app_spec.js                                                    │
+  │ Searched:   cypress/e2e/app_spec.js                                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -121,7 +121,7 @@ exports['deprecated before:browser:launch args / no mutate return'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (app_spec.js)                                                              │
-  │ Searched:   cypress/integration/app_spec.js                                                    │
+  │ Searched:   cypress/e2e/app_spec.js                                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -174,7 +174,7 @@ exports['deprecated before:browser:launch args / concat return returns once per 
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      2 found (app_spec.js, app_spec2.js)                                                │
-  │ Searched:   cypress/integration/app_spec.js, cypress/integration/app_spec2.js                  │
+  │ Searched:   cypress/e2e/app_spec.js, cypress/integration/app_spec2.js                  │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -268,7 +268,7 @@ exports['deprecated before:browser:launch args / fails when adding unknown prope
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (app_spec.js)                                                              │
-  │ Searched:   cypress/integration/app_spec.js                                                    │
+  │ Searched:   cypress/e2e/app_spec.js                                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -301,7 +301,7 @@ exports['deprecated before:browser:launch args / displays errors thrown and abor
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      2 found (app_spec.js, app_spec2.js)                                                │
-  │ Searched:   cypress/integration/app_spec.js, cypress/integration/app_spec2.js                  │
+  │ Searched:   cypress/e2e/app_spec.js, cypress/integration/app_spec2.js                  │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -323,7 +323,7 @@ exports['deprecated before:browser:launch args / displays promises rejected and 
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      2 found (app_spec.js, app_spec2.js)                                                │
-  │ Searched:   cypress/integration/app_spec.js, cypress/integration/app_spec2.js                  │
+  │ Searched:   cypress/e2e/app_spec.js, cypress/integration/app_spec2.js                  │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

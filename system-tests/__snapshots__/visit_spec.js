@@ -8,7 +8,7 @@ exports['e2e visit / low response timeout / passes'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (visit_spec.js)                                                            │
-  │ Searched:   cypress/integration/visit_spec.js                                                  │
+  │ Searched:   cypress/e2e/visit_spec.js                                                  │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -91,7 +91,7 @@ exports['e2e visit / low response timeout / fails when network connection immedi
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (visit_http_network_error_failing_spec.js)                                 │
-  │ Searched:   cypress/integration/visit_http_network_error_failing_spec.js                       │
+  │ Searched:   cypress/e2e/visit_http_network_error_failing_spec.js                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -187,7 +187,7 @@ exports['e2e visit / low response timeout / fails when server responds with 500'
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (visit_http_500_response_failing_spec.js)                                  │
-  │ Searched:   cypress/integration/visit_http_500_response_failing_spec.js                        │
+  │ Searched:   cypress/e2e/visit_http_500_response_failing_spec.js                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -274,7 +274,7 @@ exports['e2e visit / low response timeout / fails when file server responds with
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (visit_file_404_response_failing_spec.js)                                  │
-  │ Searched:   cypress/integration/visit_file_404_response_failing_spec.js                        │
+  │ Searched:   cypress/e2e/visit_file_404_response_failing_spec.js                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -361,7 +361,7 @@ exports['e2e visit / low response timeout / fails when content type isnt html'] 
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (visit_non_html_content_type_failing_spec.js)                              │
-  │ Searched:   cypress/integration/visit_non_html_content_type_failing_spec.js                    │
+  │ Searched:   cypress/e2e/visit_non_html_content_type_failing_spec.js                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -450,7 +450,7 @@ exports['e2e visit / normal response timeouts / fails when visit times out'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (visit_http_timeout_failing_spec.js)                                       │
-  │ Searched:   cypress/integration/visit_http_timeout_failing_spec.js                             │
+  │ Searched:   cypress/e2e/visit_http_timeout_failing_spec.js                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -550,7 +550,7 @@ exports['e2e visit / low responseTimeout, normal pageLoadTimeout / fails when re
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (visit_response_never_ends_failing_spec.js)                                │
-  │ Searched:   cypress/integration/visit_response_never_ends_failing_spec.js                      │
+  │ Searched:   cypress/e2e/visit_response_never_ends_failing_spec.js                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -703,7 +703,7 @@ exports['e2e visit / low response timeout / calls onBeforeLoad when overwriting 
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (issue_2196_spec.js)                                                       │
-  │ Searched:   cypress/integration/issue_2196_spec.js                                             │
+  │ Searched:   cypress/e2e/issue_2196_spec.js                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

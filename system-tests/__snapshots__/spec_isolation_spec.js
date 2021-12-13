@@ -8,7 +8,7 @@ exports['e2e spec_isolation / failing with retries enabled'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      2 found (simple_failing_hook_spec.js, simple_retrying_spec.js)                     │
-  │ Searched:   cypress/integration/simple_failing_hook_spec.js, cypress/integration/simple_retryi │
+  │ Searched:   cypress/e2e/simple_failing_hook_spec.js, cypress/integration/simple_retryi │
   │             ng_spec.js                                                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 

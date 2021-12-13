@@ -9,7 +9,7 @@ exports['e2e record passing passes 1'] = `
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      4 found (record_error_spec.js, record_fail_spec.js, record_pass_spec.js, record_un │
   │             caught_spec.js)                                                                    │
-  │ Searched:   cypress/integration/record*                                                        │
+  │ Searched:   cypress/e2e/record*                                                        │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -281,7 +281,7 @@ exports['e2e record api interaction errors update instance stdout warns but proc
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (record_pass_spec.js)                                                      │
-  │ Searched:   cypress/integration/record_pass*                                                   │
+  │ Searched:   cypress/e2e/record_pass*                                                   │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -402,7 +402,7 @@ exports['e2e record video recording does not upload when not enabled 1'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (record_pass_spec.js)                                                      │
-  │ Searched:   cypress/integration/record_pass*                                                   │
+  │ Searched:   cypress/e2e/record_pass*                                                   │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -477,7 +477,7 @@ exports['e2e record api interaction errors uploading assets warns but proceeds 1
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (record_pass_spec.js)                                                      │
-  │ Searched:   cypress/integration/record_pass*                                                   │
+  │ Searched:   cypress/e2e/record_pass*                                                   │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -579,7 +579,7 @@ This error will not alter the exit code.
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (record_pass_spec.js)                                                      │
-  │ Searched:   cypress/integration/record_pass*                                                   │
+  │ Searched:   cypress/e2e/record_pass*                                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -642,7 +642,7 @@ exports['e2e record parallelization passes in parallel with group 1'] = `
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      4 found (record_error_spec.js, record_fail_spec.js, record_pass_spec.js, record_un │
   │             caught_spec.js)                                                                    │
-  │ Searched:   cypress/integration/record*                                                        │
+  │ Searched:   cypress/e2e/record*                                                        │
   │ Params:     Tag: nightly, Group: prod-e2e, Parallel: true                                      │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -718,7 +718,7 @@ exports['e2e record parallelization passes in parallel with group 2'] = `
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      4 found (record_error_spec.js, record_fail_spec.js, record_pass_spec.js, record_un │
   │             caught_spec.js)                                                                    │
-  │ Searched:   cypress/integration/record*                                                        │
+  │ Searched:   cypress/e2e/record*                                                        │
   │ Params:     Tag: nightly, Group: prod-e2e, Parallel: true                                      │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -980,7 +980,7 @@ exports['e2e record api interaction errors create instance 500 does not proceed 
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (record_pass_spec.js)                                                      │
-  │ Searched:   cypress/integration/record_pass*                                                   │
+  │ Searched:   cypress/e2e/record_pass*                                                   │
   │ Params:     Tag: nightly, Group: foo, Parallel: true                                           │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -1008,7 +1008,7 @@ exports['e2e record api interaction errors update instance 500 does not proceed 
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (record_pass_spec.js)                                                      │
-  │ Searched:   cypress/integration/record_pass*                                                   │
+  │ Searched:   cypress/e2e/record_pass*                                                   │
   │ Params:     Tag: nightly, Group: foo, Parallel: true                                           │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -1096,7 +1096,7 @@ StatusCodeError: 500 - "Internal Server Error"
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (record_pass_spec.js)                                                      │
-  │ Searched:   cypress/integration/record_pass*                                                   │
+  │ Searched:   cypress/e2e/record_pass*                                                   │
   │ Params:     Tag: nightly, Group: foo, Parallel: true                                           │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -1185,7 +1185,7 @@ This error will not alter the exit code.
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (record_pass_spec.js)                                                      │
-  │ Searched:   cypress/integration/record_pass*                                                   │
+  │ Searched:   cypress/e2e/record_pass*                                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -1305,7 +1305,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (record_pass_spec.js)                                                      │
-  │ Searched:   cypress/integration/record_pass*                                                   │
+  │ Searched:   cypress/e2e/record_pass*                                                   │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -1385,7 +1385,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (record_pass_spec.js)                                                      │
-  │ Searched:   cypress/integration/record_pass*                                                   │
+  │ Searched:   cypress/e2e/record_pass*                                                   │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -1469,7 +1469,7 @@ Details:
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (record_pass_spec.js)                                                      │
-  │ Searched:   cypress/integration/record_pass*                                                   │
+  │ Searched:   cypress/e2e/record_pass*                                                   │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -1805,7 +1805,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (record_pass_spec.js)                                                      │
-  │ Searched:   cypress/integration/record_pass*                                                   │
+  │ Searched:   cypress/e2e/record_pass*                                                   │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -1887,7 +1887,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (record_pass_spec.js)                                                      │
-  │ Searched:   cypress/integration/record_pass*                                                   │
+  │ Searched:   cypress/e2e/record_pass*                                                   │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -1967,7 +1967,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (record_pass_spec.js)                                                      │
-  │ Searched:   cypress/integration/record_pass*                                                   │
+  │ Searched:   cypress/e2e/record_pass*                                                   │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -2047,7 +2047,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (record_pass_spec.js)                                                      │
-  │ Searched:   cypress/integration/record_pass*                                                   │
+  │ Searched:   cypress/e2e/record_pass*                                                   │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -2127,7 +2127,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (record_pass_spec.js)                                                      │
-  │ Searched:   cypress/integration/record_pass*                                                   │
+  │ Searched:   cypress/e2e/record_pass*                                                   │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -2223,7 +2223,7 @@ exports['e2e record api interaction errors create instance 500 without paralleli
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      2 found (a_record.spec.js, b_record.spec.js)                                       │
-  │ Searched:   cypress/integration/*_record.spec.js                                               │
+  │ Searched:   cypress/e2e/*_record.spec.js                                               │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -2246,7 +2246,7 @@ exports['e2e record api interaction errors create instance errors and exits on c
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      2 found (a_record_instantfail.spec.js, config_record_spec.js)                      │
-  │ Searched:   cypress/integration/*_record_*                                                     │
+  │ Searched:   cypress/e2e/*_record_*                                                     │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -2269,7 +2269,7 @@ exports['e2e record api interaction errors postInstanceTests without paralleliza
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      2 found (a_record.spec.js, b_record.spec.js)                                       │
-  │ Searched:   cypress/integration/*_record.spec*                                                 │
+  │ Searched:   cypress/e2e/*_record.spec*                                                 │
   │ Params:     Tag: false, Group: foo, Parallel: false                                            │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -2300,7 +2300,7 @@ exports['e2e record api interaction errors postInstanceTests with parallelizatio
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      2 found (a_record.spec.js, b_record.spec.js)                                       │
-  │ Searched:   cypress/integration/*_record.spec.js                                               │
+  │ Searched:   cypress/e2e/*_record.spec.js                                               │
   │ Params:     Tag: false, Group: foo, Parallel: true                                             │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -2333,7 +2333,7 @@ exports['e2e record api interaction errors postInstanceResults errors and exits 
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (record_pass_spec.js)                                                      │
-  │ Searched:   cypress/integration/record_pass*                                                   │
+  │ Searched:   cypress/e2e/record_pass*                                                   │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -2395,7 +2395,7 @@ exports['e2e record api skips specs records tests and exits without executing 1'
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      2 found (a_record_instantfail.spec.js, b_record.spec.js)                           │
-  │ Searched:   cypress/integration/a_record_instantfail.spec.js, cypress/integration/b_record.spe │
+  │ Searched:   cypress/e2e/a_record_instantfail.spec.js, cypress/integration/b_record.spe │
   │             c.js                                                                               │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
@@ -2475,7 +2475,7 @@ exports['e2e record api skips specs records tests and exits without executing in
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      2 found (a_record_instantfail.spec.js, b_record.spec.js)                           │
-  │ Searched:   cypress/integration/a_record_instantfail.spec.js, cypress/integration/b_record.spe │
+  │ Searched:   cypress/e2e/a_record_instantfail.spec.js, cypress/integration/b_record.spe │
   │             c.js                                                                               │
   │ Params:     Tag: false, Group: abc, Parallel: true                                             │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
@@ -2555,7 +2555,7 @@ exports['e2e record empty specs succeeds when empty spec file 1'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      2 found (empty_suite.spec.js, empty.spec.js)                                       │
-  │ Searched:   cypress/integration/empty_suite.spec.js, cypress/integration/empty.spec.js         │
+  │ Searched:   cypress/e2e/empty_suite.spec.js, cypress/integration/empty.spec.js         │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -2668,7 +2668,7 @@ exports['e2e record metadata sends Studio usage metadata 1'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (studio_written.spec.js)                                                   │
-  │ Searched:   cypress/integration/studio_written.spec.js                                         │
+  │ Searched:   cypress/e2e/studio_written.spec.js                                         │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘

@@ -8,7 +8,7 @@ exports['e2e page_loading / passes'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (page_loading_spec.js)                                                     │
-  │ Searched:   cypress/integration/page_loading_spec.js                                           │
+  │ Searched:   cypress/e2e/page_loading_spec.js                                           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

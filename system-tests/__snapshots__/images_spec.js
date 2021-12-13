@@ -8,7 +8,7 @@ exports['e2e images / passes'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (images_spec.js)                                                           │
-  │ Searched:   cypress/integration/images_spec.js                                                 │
+  │ Searched:   cypress/e2e/images_spec.js                                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

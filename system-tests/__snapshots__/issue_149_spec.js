@@ -8,7 +8,7 @@ exports['e2e issue 149 failing 1'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (issue_149_spec.js)                                                        │
-  │ Searched:   cypress/integration/issue_149_spec.js                                              │
+  │ Searched:   cypress/e2e/issue_149_spec.js                                              │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

@@ -8,7 +8,7 @@ exports['e2e iframes / passes'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (iframe_spec.js)                                                           │
-  │ Searched:   cypress/integration/iframe_spec.js                                                 │
+  │ Searched:   cypress/e2e/iframe_spec.js                                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

@@ -8,7 +8,7 @@ exports['e2e es modules passes 1'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (es_modules_in_coffee_spec.coffee)                                         │
-  │ Searched:   cypress/integration/es_modules_in_coffee_spec.coffee                               │
+  │ Searched:   cypress/e2e/es_modules_in_coffee_spec.coffee                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -72,7 +72,7 @@ exports['e2e es modules fails 1'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (es_module_import_failing_spec.js)                                         │
-  │ Searched:   cypress/integration/es_module_import_failing_spec.js                               │
+  │ Searched:   cypress/e2e/es_module_import_failing_spec.js                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

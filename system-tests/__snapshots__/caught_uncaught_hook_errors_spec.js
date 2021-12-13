@@ -8,7 +8,7 @@ exports['e2e caught and uncaught hooks errors / failing1'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (hook_caught_error_failing_spec.js)                                        │
-  │ Searched:   cypress/integration/hook_caught_error_failing_spec.js                              │
+  │ Searched:   cypress/e2e/hook_caught_error_failing_spec.js                              │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -119,7 +119,7 @@ exports['e2e caught and uncaught hooks errors / failing2'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (hook_uncaught_error_failing_spec.js)                                      │
-  │ Searched:   cypress/integration/hook_uncaught_error_failing_spec.js                            │
+  │ Searched:   cypress/e2e/hook_uncaught_error_failing_spec.js                            │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -211,7 +211,7 @@ exports['e2e caught and uncaught hooks errors / failing3'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (hook_uncaught_root_error_failing_spec.js)                                 │
-  │ Searched:   cypress/integration/hook_uncaught_root_error_failing_spec.js                       │
+  │ Searched:   cypress/e2e/hook_uncaught_root_error_failing_spec.js                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -295,7 +295,7 @@ exports['e2e caught and uncaught hooks errors / failing4'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (hook_uncaught_error_events_failing_spec.js)                               │
-  │ Searched:   cypress/integration/hook_uncaught_error_events_failing_spec.js                     │
+  │ Searched:   cypress/e2e/hook_uncaught_error_events_failing_spec.js                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

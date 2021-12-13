@@ -8,7 +8,7 @@ exports['e2e uncaught errors / failing1'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (uncaught_synchronous_before_tests_parsed.js)                              │
-  │ Searched:   cypress/integration/uncaught_synchronous_before_tests_parsed.js                    │
+  │ Searched:   cypress/e2e/uncaught_synchronous_before_tests_parsed.js                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -90,7 +90,7 @@ exports['e2e uncaught errors / failing2'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (uncaught_synchronous_during_hook_spec.js)                                 │
-  │ Searched:   cypress/integration/uncaught_synchronous_during_hook_spec.js                       │
+  │ Searched:   cypress/e2e/uncaught_synchronous_during_hook_spec.js                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -172,7 +172,7 @@ exports['e2e uncaught errors / failing3'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (uncaught_during_test_spec.js)                                             │
-  │ Searched:   cypress/integration/uncaught_during_test_spec.js                                   │
+  │ Searched:   cypress/e2e/uncaught_during_test_spec.js                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -284,7 +284,7 @@ exports['e2e uncaught errors / failing4'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (uncaught_during_hook_spec.js)                                             │
-  │ Searched:   cypress/integration/uncaught_during_hook_spec.js                                   │
+  │ Searched:   cypress/e2e/uncaught_during_hook_spec.js                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -369,7 +369,7 @@ exports['e2e uncaught errors / failing5'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (caught_async_sync_test_spec.js)                                           │
-  │ Searched:   cypress/integration/caught_async_sync_test_spec.js                                 │
+  │ Searched:   cypress/e2e/caught_async_sync_test_spec.js                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

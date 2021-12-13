@@ -8,7 +8,7 @@ exports['e2e subdomain / passes'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (subdomain_spec.js)                                                        │
-  │ Searched:   cypress/integration/subdomain_spec.js                                              │
+  │ Searched:   cypress/e2e/subdomain_spec.js                                              │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

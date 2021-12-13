@@ -8,7 +8,7 @@ exports['e2e stdout displays errors from failures 1'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (stdout_failing_spec.js)                                                   │
-  │ Searched:   cypress/integration/stdout_failing_spec.js                                         │
+  │ Searched:   cypress/e2e/stdout_failing_spec.js                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -127,7 +127,7 @@ exports['e2e stdout displays errors from exiting early due to bundle errors 1'] 
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (stdout_exit_early_failing_spec.js)                                        │
-  │ Searched:   cypress/integration/stdout_exit_early_failing_spec.js                              │
+  │ Searched:   cypress/e2e/stdout_exit_early_failing_spec.js                              │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -204,7 +204,7 @@ exports['e2e stdout does not duplicate suites or tests between visits 1'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (stdout_passing_spec.js)                                                   │
-  │ Searched:   cypress/integration/stdout_passing_spec.js                                         │
+  │ Searched:   cypress/e2e/stdout_passing_spec.js                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -277,7 +277,7 @@ exports['e2e stdout displays fullname of nested specfile 1'] = `
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      3 found (spec.js, stdout_specfile.js, stdout_specfile_display_spec_with_a_really_l │
   │             ong_name_that_never_has_a_line_break_or_new_line.js)                               │
-  │ Searched:   cypress/integration/nested-1/nested-2/nested-3/*                                   │
+  │ Searched:   cypress/e2e/nested-1/nested-2/nested-3/*                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -421,7 +421,7 @@ exports['e2e stdout / displays assertion errors'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (stdout_assertion_errors_spec.js)                                          │
-  │ Searched:   cypress/integration/stdout_assertion_errors_spec.js                                │
+  │ Searched:   cypress/e2e/stdout_assertion_errors_spec.js                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
