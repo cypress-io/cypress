@@ -19,7 +19,7 @@ describe('max listeners warning spec', () => {
       CYPRESS_INTERNAL_ENV: 'production',
     },
     onRun: async (exec) => {
-      const integrationPath = path.join(projectPath, 'cypress/integration')
+      const integrationPath = path.join(projectPath, 'cypress/e2e')
 
       // create a bunch of dummy test files to reproduce #1305
       await fs.mkdirp(integrationPath)

@@ -71,7 +71,7 @@ describe('e2e reporters', () => {
       reporter: 'reporters/uses-file.js',
     })
     .then(({ stdout }) => {
-      expect(stdout).to.include('suite.file: cypress/integration/simple_passing_spec.js')
+      expect(stdout).to.include('suite.file: cypress/e2e/simple_passing_spec.js')
     })
   })
 

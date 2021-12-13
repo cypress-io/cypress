@@ -96,15 +96,15 @@ describe('e2e record', () => {
 
       // ensure its relative to projectRoot
       expect(postRun.body.specs).to.deep.eq([
-        'cypress/integration/record_error_spec.js',
-        'cypress/integration/record_fail_spec.js',
-        'cypress/integration/record_pass_spec.js',
-        'cypress/integration/record_uncaught_spec.js',
+        'cypress/e2e/record_error_spec.js',
+        'cypress/e2e/record_fail_spec.js',
+        'cypress/e2e/record_pass_spec.js',
+        'cypress/e2e/record_uncaught_spec.js',
       ])
 
       expect(postRun.body.projectId).to.eq('pid123')
       expect(postRun.body.recordKey).to.eq('f858a2bc-b469-4e48-be67-0876339ee7e1')
-      expect(postRun.body.specPattern).to.eq('cypress/integration/record*')
+      expect(postRun.body.specPattern).to.eq('cypress/e2e/record*')
       expect(postRun.body.testingType).to.eq('e2e')
 
       const firstInstance = requests[1]
@@ -233,10 +233,10 @@ describe('e2e record', () => {
 
   context('parallelization', () => {
     const allSpecs = [
-      'cypress/integration/record_error_spec.js',
-      'cypress/integration/record_fail_spec.js',
-      'cypress/integration/record_pass_spec.js',
-      'cypress/integration/record_uncaught_spec.js',
+      'cypress/e2e/record_error_spec.js',
+      'cypress/e2e/record_fail_spec.js',
+      'cypress/e2e/record_pass_spec.js',
+      'cypress/e2e/record_uncaught_spec.js',
     ]
 
     const postInstanceResponses = (specs) => {
@@ -258,7 +258,7 @@ describe('e2e record', () => {
     }
 
     // a1 does 3 specs, b2 does 1 spec
-    const a1Specs = _.without(allSpecs, 'cypress/integration/record_pass_spec.js')
+    const a1Specs = _.without(allSpecs, 'cypress/e2e/record_pass_spec.js')
     const b2Specs = _.difference(allSpecs, a1Specs)
 
     let firstRunResponse = false
@@ -913,7 +913,7 @@ describe('e2e record', () => {
           res (req, res) {
             return res.json({
               instanceId,
-              spec: 'cypress/integration/record_pass_spec.js',
+              spec: 'cypress/e2e/record_pass_spec.js',
               estimatedWallClockDuration: 5000,
               totalInstances: 1,
               claimedInstances: 1,
@@ -1411,7 +1411,7 @@ describe('e2e record', () => {
             if (count === 6) {
               return res.json({
                 instanceId,
-                spec: 'cypress/integration/record_pass_spec.js',
+                spec: 'cypress/e2e/record_pass_spec.js',
                 estimatedWallClockDuration: 5000,
                 totalInstances: 1,
                 claimedInstances: 1,

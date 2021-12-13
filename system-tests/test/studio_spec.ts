@@ -3,7 +3,7 @@ import systemTests from '../lib/system-tests'
 import Fixtures, { projectPath } from '../lib/fixtures'
 import { promises as fs } from 'fs'
 
-const snapshotFile = (project, file, folder = 'integration') => {
+const snapshotFile = (project, file, folder = 'e2e') => {
   const filePath = path.join(projectPath(project), 'cypress', folder, file)
 
   return fs.readFile(filePath).then((content) => {

@@ -753,7 +753,7 @@ const systemTests = {
           return spec
         }
 
-        const specDir = options.testingType === 'component' ? 'component' : 'integration'
+        const specDir = options.testingType === 'component' ? 'component' : 'e2e'
 
         return path.join(projectPath, 'cypress', specDir, spec)
       })
