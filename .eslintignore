@@ -39,10 +39,10 @@ cli/types
 packages/example
 
 packages/extension/test/helpers/background.js
-integration/stdout_exit_early_failing_spec.js
+e2e/stdout_exit_early_failing_spec.js
 
 npm/webpack-preprocessor/cypress/tests/e2e/compile-error.js
-npm/webpack-preprocessor/examples/use-babelrc/cypress/integration/spec.js
+npm/webpack-preprocessor/examples/use-babelrc/cypress/e2e/spec.cy.js
 
 npm/cypress-schematic/src/**/*.js
 
