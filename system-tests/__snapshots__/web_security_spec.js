@@ -160,8 +160,8 @@ exports['e2e web security / when disabled / passes'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (web_security.cy.js)                                                     │
-  │ Searched:   cypress/e2e/web_security.cy.js                                                   │
+  │ Specs:      1 found (web_security.cy.js)                                                       │
+  │ Searched:   cypress/e2e/web_security.cy.js                                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -191,7 +191,7 @@ exports['e2e web security / when disabled / passes'] = `
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     web_security.cy.js                                                             │
+  │ Spec Ran:     web_security.cy.js                                                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -224,8 +224,8 @@ exports['e2e web security / firefox / displays warning when firefox and chromeWe
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (simple_passing.cy.js)                                                   │
-  │ Searched:   cypress/e2e/simple_passing.cy.js                                                 │
+  │ Specs:      1 found (simple_passing.cy.js)                                                     │
+  │ Searched:   cypress/e2e/simple_passing.cy.js                                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -256,7 +256,7 @@ This option will not have an effect in Firefox. Tests that rely on web security 
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     simple_passing.cy.js                                                           │
+  │ Spec Ran:     simple_passing.cy.js                                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -273,7 +273,7 @@ This option will not have an effect in Firefox. Tests that rely on web security 
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  simple_passing.cy.js                   XX:XX        1        1        -        -        - │
+  │ ✔  simple_passing.cy.js                   XX:XX        1        1        -        -        -   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
