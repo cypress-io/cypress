@@ -333,6 +333,14 @@ export default {
       }
 
       const onError = (err: Error | string) => {
+        // If the runnable was marked as pending, this test was skipped
+        // go ahead and just return
+        const runnable = state('runnable')
+
+        if (runnable.isPending()) {
+          return
+        }
+
         if (state('onCommandFailed')) {
           return state('onCommandFailed')(err, queue, next)
         }

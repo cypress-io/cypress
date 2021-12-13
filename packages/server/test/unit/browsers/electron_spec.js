@@ -5,12 +5,12 @@ const EE = require('events')
 const la = require('lazy-ass')
 const check = require('check-more-types')
 
-const menu = require(`${root}../lib/gui/menu`)
-const plugins = require(`${root}../lib/plugins`)
-const Windows = require(`${root}../lib/gui/windows`)
-const electron = require(`${root}../lib/browsers/electron`)
-const savedState = require(`${root}../lib/saved_state`)
-const { Automation } = require(`${root}../lib/automation`)
+const menu = require(`../../../lib/gui/menu`)
+const plugins = require(`../../../lib/plugins`)
+const Windows = require(`../../../lib/gui/windows`)
+const electron = require(`../../../lib/browsers/electron`)
+const savedState = require(`../../../lib/saved_state`)
+const { Automation } = require(`../../../lib/automation`)
 
 const ELECTRON_PID = 10001
 

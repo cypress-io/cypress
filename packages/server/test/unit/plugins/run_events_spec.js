@@ -1,8 +1,8 @@
 require('../../spec_helper')
 
-const errors = require(`${root}../lib/errors`)
-const plugins = require(`${root}../lib/plugins`)
-const runEvents = require(`${root}../lib/plugins/run_events`)
+const errors = require(`../../../lib/errors`)
+const plugins = require(`../../../lib/plugins`)
+const runEvents = require(`../../../lib/plugins/run_events`)
 
 describe('lib/plugins/run_events', () => {
   context('#execute', () => {

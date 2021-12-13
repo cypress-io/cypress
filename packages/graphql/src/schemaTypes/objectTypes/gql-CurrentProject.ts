@@ -75,7 +75,7 @@ export const CurrentProject = objectType({
     t.connectionField('specs', {
       description: 'Specs for a project conforming to Relay Connection specification',
       type: 'Spec',
-      nodes: async (source, args, ctx) => {
+      nodes: (source, args, ctx) => {
         return ctx.currentProject?.specs || []
       },
     })
