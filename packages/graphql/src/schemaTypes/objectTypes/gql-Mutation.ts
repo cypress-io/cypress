@@ -90,7 +90,7 @@ export const mutation = mutationType({
         }
 
         if (args.input.testingType) {
-          ctx.actions.wizard.setTestingType(args.input.testingType)
+          ctx.actions.project.setCurrentTestingType(args.input.testingType)
         }
 
         if (args.input.direction) {
@@ -178,24 +178,6 @@ export const mutation = mutationType({
       description: 'Log out of Cypress Cloud',
       resolve: async (_, args, ctx) => {
         await ctx.actions.auth.logout()
-      },
-    })
-
-    t.liveMutation('initializeOpenProject', {
-      description: 'Initializes open_project global singleton to manager current project state',
-      resolve: async (_, args, ctx) => {
-        try {
-          await ctx.actions.wizard.initializeOpenProject()
-          ctx.coreData.baseError = null
-        } catch (error) {
-          const e = error as Error
-
-          ctx.coreData.baseError = {
-            title: 'Cypress Configuration Error',
-            message: e.message,
-            stack: e.stack,
-          }
-        }
       },
     })
 

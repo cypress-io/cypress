@@ -47,7 +47,7 @@ describe('Server', () => {
         // get all the config defaults
         // and allow us to override them
         // for each test
-        return config.set(obj)
+        return config.setupFullConfigWithDefaults(obj)
         .then((cfg) => {
           // use a jar for each test
           // but reset it automatically

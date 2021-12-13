@@ -562,7 +562,7 @@ describe('lib/cypress', () => {
       }).then((json) => {
         json.fixturesFolder = false
 
-        return settings.writeOnly(this.idsPath, json)
+        return settings.writeForTesting(this.idsPath, json)
       }).then(() => {
         return cypress.start([`--run-project=${this.idsPath}`])
       }).then(() => {
@@ -620,7 +620,7 @@ describe('lib/cypress', () => {
       }).then((json) => {
         json.reporter = 'dot'
 
-        return settings.writeOnly(this.idsPath, json)
+        return settings.writeForTesting(this.idsPath, json)
       }).then(() => {
         return cypress.start([`--run-project=${this.idsPath}`])
       }).then(() => {
@@ -678,7 +678,7 @@ describe('lib/cypress', () => {
     })
 
     it('logs error when supportFile doesn\'t exist', function () {
-      return settings.writeOnly(this.idsPath, { supportFile: '/does/not/exist' })
+      return settings.writeForTesting(this.idsPath, { supportFile: '/does/not/exist' })
       .then(() => {
         return cypress.start([`--run-project=${this.idsPath}`])
       }).then(() => {
@@ -784,7 +784,7 @@ describe('lib/cypress', () => {
     })
 
     it('logs error and exits when project has invalid cypress.config.js values', function () {
-      return settings.writeOnly(this.todosPath, { baseUrl: 'localhost:9999' })
+      return settings.writeForTesting(this.todosPath, { baseUrl: 'localhost:9999' })
       .then(() => {
         return cypress.start([`--run-project=${this.todosPath}`])
       }).then(() => {
@@ -1017,7 +1017,7 @@ describe('lib/cypress', () => {
         ee.maximize = sinon.stub
         ee.setSize = sinon.stub
 
-        sinon.stub(launch, 'launch').resolves(ee)
+        sinon.stub(launch, 'launch').returns(ee)
         sinon.stub(Windows, 'create').returns(ee)
       })
 
@@ -1700,7 +1700,7 @@ describe('lib/cypress', () => {
         // this should be overriden by the env argument
         json.baseUrl = 'http://localhost:8080'
 
-        return settings.writeOnly(this.todosPath, json)
+        return settings.writeForTesting(this.todosPath, json)
       }).then(() => {
         // TODO(tim): this shouldn't be needed when we refactor the ctx setup
         process.env.LAUNCHPAD = '0'

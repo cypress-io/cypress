@@ -36,13 +36,13 @@ plugins.registerHandler((ipc) => {
   ipc.on('preprocessor:rerun', (filePath) => {
     debug('ipc preprocessor:rerun event')
 
-    return baseEmitter.emit('file:updated', filePath)
+    baseEmitter.emit('file:updated', filePath)
   })
 
-  return baseEmitter.on('close', (filePath) => {
+  baseEmitter.on('close', (filePath) => {
     debug('base emitter plugin close event')
 
-    return ipc.send('preprocessor:close', filePath)
+    ipc.send('preprocessor:close', filePath)
   })
 })
 

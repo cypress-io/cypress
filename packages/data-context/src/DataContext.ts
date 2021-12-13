@@ -2,6 +2,8 @@ import type { AllModeOptions } from '@packages/types'
 import fsExtra from 'fs-extra'
 import path from 'path'
 import util from 'util'
+import chalk from 'chalk'
+import _ from 'lodash'
 
 import 'server-destroy'
 
@@ -20,7 +22,6 @@ import {
   BrowserDataSource,
   StorybookDataSource,
   CloudDataSource,
-  ProjectConfigDataSource,
   EnvDataSource,
   GraphQLDataSource,
   HtmlDataSource,
@@ -34,13 +35,26 @@ import type { App as ElectronApp } from 'electron'
 import { VersionsDataSource } from './sources/VersionsDataSource'
 import type { SocketIOServer } from '@packages/socket'
 import { globalPubSub } from '.'
+import { InjectedConfigApi, ProjectLifecycleManager } from './data/ProjectLifecycleManager'
 
+const DEBUG_LIFECYCLE = true
 const IS_DEV_ENV = process.env.CYPRESS_INTERNAL_ENV !== 'production'
 
 export type Updater = (proj: CoreDataShape) => void | undefined | CoreDataShape
 
+export type CurrentProjectUpdater = (proj: Exclude<CoreDataShape['currentProject'], null | undefined>) => void | undefined | CoreDataShape['currentProject']
+
 export interface InternalDataContextOptions {
   loadCachedProjects: boolean
+}
+
+export interface ErrorApiShape {
+  error: (type: string, ...args: any) => Error & { type: string, details: string, code?: string, isCypressErr: boolean}
+  message: (type: string, ...args: any) => string
+}
+
+export interface BrowserApiShape {
+  close: Promise<any>
 }
 
 export interface DataContextConfig {
@@ -55,14 +69,18 @@ export interface DataContextConfig {
   appApi: AppApiShape
   localSettingsApi: LocalSettingsApiShape
   authApi: AuthApiShape
+  errorApi: ErrorApiShape
+  configApi: InjectedConfigApi
   projectApi: ProjectApiShape
   electronApi: ElectronApiShape
+  browserApi: BrowserApiShape
 }
 
 export class DataContext {
   private _config: Omit<DataContextConfig, 'modeOptions'>
   private _modeOptions: Readonly<Partial<AllModeOptions>>
   private _coreData: CoreDataShape
+  readonly lifecycleManager: ProjectLifecycleManager
 
   constructor (_config: DataContextConfig) {
     const { modeOptions, ...rest } = _config
@@ -70,6 +88,32 @@ export class DataContext {
     this._config = rest
     this._modeOptions = modeOptions
     this._coreData = _config.coreData ?? makeCoreData(this._modeOptions)
+    this.lifecycleManager = new Proxy(new ProjectLifecycleManager(this), {
+      set (target, p: string, value, receiver) {
+        function serializeValue (key: string, val: unknown) {
+          if (_.isArray(val)) {
+            return val
+          }
+
+          if (_.isObject(val) && !_.isPlainObject(val)) {
+            return `[${val.constructor.name}]`
+          }
+
+          if (_.isFunction(val)) {
+            return `[Function: ${val.name}]`
+          }
+
+          return val
+        }
+
+        if (DEBUG_LIFECYCLE) {
+          // eslint-disable-next-line
+          console.log(`Setting: ${p} to ${JSON.stringify(value, serializeValue, 2)}`)
+        }
+
+        return Reflect.set(target, p, value, receiver)
+      },
+    })
   }
 
   get isRunMode () {
@@ -90,10 +134,6 @@ export class DataContext {
 
   get isGlobalMode () {
     return !this.currentProject
-  }
-
-  async initializeData () {
-
   }
 
   get modeOptions () {
@@ -155,11 +195,6 @@ export class DataContext {
   @cached
   get wizard () {
     return new WizardDataSource(this)
-  }
-
-  @cached
-  get config () {
-    return new ProjectConfigDataSource(this)
   }
 
   @cached
@@ -246,6 +281,12 @@ export class DataContext {
     updater(this._coreData)
   }
 
+  updateCurrentProject = (updater: CurrentProjectUpdater): void => {
+    if (this._coreData.currentProject) {
+      updater(this._coreData.currentProject)
+    }
+  }
+
   get appServerPort () {
     return this.coreData.servers.appServerPort
   }
@@ -270,7 +311,9 @@ export class DataContext {
     return {
       appApi: this._config.appApi,
       authApi: this._config.authApi,
+      configApi: this._config.configApi,
       projectApi: this._config.projectApi,
+      errorApi: this._config.errorApi,
       electronApi: this._config.electronApi,
       localSettingsApi: this._config.localSettingsApi,
     }
@@ -299,6 +342,23 @@ export class DataContext {
     // TODO(tim): handle this consistently
     // eslint-disable-next-line no-console
     console.error(e)
+  }
+
+  onError = (err: Error, source: 'plugins' | 'config' | 'global') => {
+    if (this.isRunMode) {
+      //
+    } else {
+      //
+    }
+  }
+
+  onWarning = (err: { message: string }) => {
+    if (this.isRunMode) {
+      // eslint-disable-next-line
+      console.log(chalk.yellow(err.message))
+    } else {
+      //
+    }
   }
 
   /**
@@ -354,7 +414,7 @@ export class DataContext {
     return Promise.all([
       this.cloud.reset(),
       this.util.disposeLoaders(),
-      this.actions.project.clearActiveProject(),
+      this.actions.project.clearCurrentProject(),
       // this.actions.currentProject?.clearCurrentProject(),
       this.actions.dev.dispose(),
     ])
@@ -371,7 +431,7 @@ export class DataContext {
   }
 
   error (type: string, ...args: any[]) {
-    throw this._apis.projectApi.error.throw(type, ...args)
+    return this._apis.errorApi.error(type, ...args)
   }
 
   private async initializeOpenMode () {
@@ -390,15 +450,15 @@ export class DataContext {
     ]
 
     // load projects from cache on start
-    toAwait.push(this.actioclearCurrentProjectjects())
+    toAwait.push(this.actions.project.loadProjects())
 
     if (this.modeOptions.projectRoot) {
       await this.actions.project.setCurrentProject(this.modeOptions.projectRoot)
 
-      if (this.coreData.currentProject?.preferences) {
-        // Skipping this until we sort out the lifecycle things
-        // toAwait.push(this.actions.project.launchProjectWithoutElectron())
-      }
+      // if (this.coreData.currentProject?.preferences) {
+      // Skipping this until we sort out the lifecycle things
+      // toAwait.push(this.actions.project.launchProjectWithoutElectron())
+      // }
     }
 
     if (this.modeOptions.testingType) {

@@ -62,7 +62,7 @@
 
 <script setup lang="ts">
 import { gql, useMutation } from '@urql/vue'
-import { GlobalProjectCardFragment, GlobalProjectCard_SetActiveProjectDocument } from '../generated/graphql'
+import { GlobalProjectCardFragment, GlobalProjectCard_SetCurrentProjectDocument } from '../generated/graphql'
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
 import { useI18n } from '@cy/i18n'
 
@@ -104,7 +104,7 @@ const menuItems: { name: string, event: eventName }[] = [
   { name: t('globalPage.openInFinder'), event: 'openInFinder' },
 ]
 
-const setCurrentProjectMutation = useMutation(GlobalProjectCard_SetActiveProjectDocument)
+const setCurrentProjectMutation = useMutation(GlobalProjectCard_SetCurrentProjectDocument)
 
 const setCurrentProject = (project: string) => {
   setCurrentProjectMutation.executeMutation({ path: project })

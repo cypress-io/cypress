@@ -61,16 +61,6 @@ export class WizardDataSource {
       return false
     }
 
-    if (data.currentStep === 'initializePlugins') {
-      if (data.currentTestingType === 'component' && !this.ctx.currentProject?.ctPluginsInitialized) {
-        return false
-      }
-
-      if (data.currentTestingType === 'e2e' && !this.ctx.currentProject?.e2ePluginsInitialized) {
-        return false
-      }
-    }
-
     // TODO: add constraints here to determine if we can move forward
     return true
   }

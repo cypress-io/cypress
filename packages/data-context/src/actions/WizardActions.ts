@@ -12,52 +12,8 @@ export class WizardActions {
     return this.data.history
   }
 
-  async initializeOpenProject () {
-    if (!this.ctx.currentProject) {
-      throw Error('No active project found. Cannot open a browser without an active project')
-    }
-
-    if (!this.data.currentTestingType) {
-      throw Error('Must set testingType before initializing a project')
-    }
-
-    // do not re-initialize plugins and dev-server.
-    if (this.data.currentTestingType === 'component' && this.ctx.currentProject.ctPluginsInitialized) {
-      this.ctx.debug('CT already initialized. Returning.')
-
-      return
-    }
-
-    if (this.data.currentTestingType === 'e2e' && this.ctx.currentProject.e2ePluginsInitialized) {
-      this.ctx.debug('E2E already initialized. Returning.')
-
-      return
-    }
-
-    await this.ctx.actions.project.initializeActiveProject()
-
-    // Cannot have both the e2e & component plugins initialized at the same time
-    if (this.ctx.wizardData.currentTestingType === 'e2e') {
-      this.ctx.currentProject.e2ePluginsInitialized = true
-      this.ctx.currentProject.ctPluginsInitialized = false
-    }
-
-    if (this.ctx.wizardData.currentTestingType === 'component') {
-      this.ctx.currentProject.ctPluginsInitialized = true
-      this.ctx.currentProject.e2ePluginsInitialized = false
-    }
-
-    this.ctx.debug('finishing initializing project')
-  }
-
   validateManualInstall () {
     //
-  }
-
-  setTestingType (type: 'component' | 'e2e') {
-    this.ctx.coreData.wizard.currentTestingType = type
-
-    return this.data
   }
 
   setFramework (framework: NexusGenEnums['FrontendFrameworkEnum']) {
@@ -111,18 +67,9 @@ export class WizardActions {
   }
 
   private navigateForward () {
-    if (this.data.currentStep === 'initializePlugins') {
-      this.navigateToStep('setupComplete')
-
-      return this.data
-    }
-
     if (this.data.currentStep === 'welcome' && this.data.currentTestingType === 'component') {
-      if (!this.ctx.currentProject?.isCTConfigured) {
+      if (!this.ctx.lifecycleManager.isTestingTypeConfigured('component')) {
         this.navigateToStep('selectFramework')
-      } else if (!this.ctx.currentProject?.ctPluginsInitialized) {
-        // not first time, and we haven't initialized plugins - initialize them
-        this.navigateToStep('initializePlugins')
       } else {
         // not first time, have already initialized plugins - just move to open browser screen
         this.navigateToStep('setupComplete')
@@ -132,11 +79,8 @@ export class WizardActions {
     }
 
     if (this.data.currentStep === 'welcome' && this.data.currentTestingType === 'e2e') {
-      if (!this.ctx.currentProject?.isE2EConfigured) {
+      if (!this.ctx.lifecycleManager.isTestingTypeConfigured('e2e')) {
         this.navigateToStep('configFiles')
-      } else if (!this.ctx.currentProject?.e2ePluginsInitialized) {
-        // not first time, and we haven't initialized plugins - initialize them
-        this.navigateToStep('initializePlugins')
       } else {
         // not first time, have already initialized plugins - just move to open browser screen
         this.navigateToStep('setupComplete')
@@ -158,21 +102,7 @@ export class WizardActions {
     }
 
     if (this.data.currentStep === 'configFiles') {
-      if (this.data.currentTestingType === 'component') {
-        if (this.ctx.currentProject?.ctPluginsInitialized) {
-          this.navigateToStep('setupComplete')
-        } else {
-          this.navigateToStep('initializePlugins')
-        }
-      }
-
-      if (this.data.currentTestingType === 'e2e') {
-        if (this.ctx.currentProject?.e2ePluginsInitialized) {
-          this.navigateToStep('setupComplete')
-        } else {
-          this.navigateToStep('initializePlugins')
-        }
-      }
+      this.navigateToStep('setupComplete')
     }
 
     return this.data

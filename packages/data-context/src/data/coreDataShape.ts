@@ -1,9 +1,10 @@
-import { BUNDLERS, FoundBrowser, FoundSpec, FullConfig, Preferences, Editor, Warning, AllowedState, AllModeOptions } from '@packages/types'
+import { BUNDLERS, FoundBrowser, FoundSpec, FullConfig, Preferences, Editor, Warning, AllowedState, AllModeOptions, TestingType } from '@packages/types'
 import type { NexusGenEnums, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
 import type { App, BrowserWindow } from 'electron'
 import type { ChildProcess } from 'child_process'
 import type { SocketIOServer } from '@packages/socket'
 import type { Server } from 'http'
+import type { ProjectMetaState } from './ProjectLifecycleManager'
 
 export type Maybe<T> = T | null | undefined
 
@@ -40,20 +41,6 @@ export interface ConfigChildProcessShape {
    * Config from the initial module.exports
    */
   resolvedBaseConfig: Promise<Cypress.ConfigOptions>
-}
-
-export interface ActiveProjectShape extends ProjectShape {
-  title: string
-  ctPluginsInitialized: Maybe<boolean>
-  e2ePluginsInitialized: Maybe<boolean>
-  isCTConfigured: Maybe<boolean>
-  isE2EConfigured: Maybe<boolean>
-  specs?: FoundSpec[]
-  config: Promise<FullConfig> | null
-  configChildProcess?: ConfigChildProcessShape | null
-  preferences?: Preferences | null
-  browsers: FoundBrowser[] | null
-  isMissingConfigFile: boolean
 }
 
 export interface AppDataShape {
@@ -104,7 +91,8 @@ export interface CoreDataShape {
   dev: DevStateShape
   localSettings: LocalSettingsDataShape
   app: AppDataShape
-  currentProject: ActiveProjectShape | null
+  currentProject: string | null
+  currentTestingType: TestingType | null
   wizard: WizardDataShape
   user: AuthenticatedUserShape | null
   electron: ElectronShape
@@ -138,6 +126,7 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
     },
     isAuthBrowserOpened: false,
     currentProject: null,
+    currentTestingType: null,
     wizard: {
       currentTestingType: null,
       chosenBundler: null,

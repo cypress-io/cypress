@@ -12,7 +12,22 @@
       </template>
 
       <template v-else>
-        <template v-if="query.data.value?.wizard.step === 'welcome'">
+        <BaseError
+          v-if="query.data.value.currentProject?.errorLoadingConfigFile"
+          :gql="query.data.value.currentProject.errorLoadingConfigFile"
+        />
+        <BaseError
+          v-else-if="query.data.value.currentProject?.errorLoadingNodeEvents"
+          :gql="query.data.value.currentProject.errorLoadingNodeEvents"
+        />
+        <template v-else-if="query.data.value.currentProject?.isLoadingConfigFile">
+          <Spinner />
+        </template>
+        <template v-else-if="query.data.value.currentProject?.isLoadingNodeEvents">
+          <WizardHeader :gql="{title: 'Initializing Config...', description: 'Please wait while we load your project and find browsers installed on your system.'}" />
+          <Spinner />
+        </template>
+        <template v-else-if="query.data.value?.wizard.step === 'welcome'">
           <WizardHeader :gql="query.data.value.wizard" />
           <StandardModal
             v-model="isTestingTypeModalOpen"
@@ -58,6 +73,7 @@ import GlobalPage from './global/GlobalPage.vue'
 import BaseError from './error/BaseError.vue'
 import StandardModal from '@cy/components/StandardModal.vue'
 import HeaderBar from '@cy/gql-components/HeaderBar.vue'
+import Spinner from '@cy/components/Spinner.vue'
 import CompareTestingTypes from './setup/CompareTestingTypes.vue'
 
 import { useI18n } from '@cy/i18n'
@@ -70,10 +86,20 @@ gql`
 query MainLaunchpadQuery {
   ...TestingTypeCards
   ...Wizard
-  ...BaseError
+  baseError {
+    ...BaseError_Data
+  }
 
   currentProject {
     id
+    isLoadingConfigFile
+    isLoadingNodeEvents
+    errorLoadingConfigFile {
+      ...BaseError_Data
+    }
+    errorLoadingNodeEvents {
+      ...BaseError_Data
+    }
   }
 
   wizard {

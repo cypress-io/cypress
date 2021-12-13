@@ -2,6 +2,7 @@ export interface CommonModeOptions {
   invokedFromCli: boolean
   userNodePath?: string
   userNodeVersion?: string
+  configFile?: false | string | null
 }
 
 export interface RunModeOptions extends CommonModeOptions {
@@ -18,7 +19,6 @@ export interface RunModeOptions extends CommonModeOptions {
   key?: string | null
   record?: boolean | null
   browser?: string | null
-  configFile?: boolean | string
   group?: string | null
   parallel?: boolean | null
   ciBuildId?: string | null
@@ -34,7 +34,6 @@ export interface OpenModeOptions extends CommonModeOptions {
   global?: boolean
   testingType?: TestingType
   updating?: boolean | null
-  configFile?: string | null
 }
 
 export type AllModeOptions = RunModeOptions & OpenModeOptions

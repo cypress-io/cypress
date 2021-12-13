@@ -266,7 +266,7 @@ export class OpenProject {
 
   _ctx?: DataContext
 
-  async create (path: string, args: InitializeProjectOptions, options: OpenProjectLaunchOptions, browsers: FoundBrowser[] = []) {
+  async create (path: string, args: InitializeProjectOptions, options: OpenProjectLaunchOptions) {
     this._ctx = getCtx()
     debug('open_project create %s', path)
 
@@ -304,7 +304,7 @@ export class OpenProject {
     })
 
     try {
-      await this.openProject.initializeConfig(browsers)
+      await this.openProject.initializeConfig()
       await this.openProject.open()
     } catch (err: any) {
       if (err.isCypressErr && err.portInUse) {

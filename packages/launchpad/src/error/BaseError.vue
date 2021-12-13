@@ -26,7 +26,8 @@
           class="font-light"
           data-testid="error-message"
         >
-          <OpenConfigFileInIDE :gql="props.gql" />
+          <!-- <OpenConfigFileInIDE /> -->
+          {{ 'TODO' }}
         </i18n-t>
       </slot>
       <!-- eslint-enable vue/multiline-html-element-content-newline  -->
@@ -44,11 +45,11 @@
     <div class="inline-flex gap-16px justify-between">
       <slot name="footer">
         <Button
-          v-if="lastMutationDefined"
+          v-if="onRetry"
           size="lg"
           variant="primary"
           data-testid="error-retry-button"
-          @click="retry()"
+          @click="onRetry"
         >
           {{ t('launchpadErrors.generic.retryButton') }}
         </Button>
@@ -71,16 +72,12 @@ import Button from '@cy/components/Button.vue'
 import { computed } from 'vue'
 import { useI18n } from '@cy/i18n'
 import type { BaseErrorFragment } from '../generated/graphql'
-import OpenConfigFileInIDE from '@packages/frontend-shared/src/gql-components/OpenConfigFileInIDE.vue'
 
 gql`
-fragment BaseError on Query {
-  baseError {
-    title
-    message
-    stack
-  }
-  ...OpenConfigFileInIDE
+fragment BaseError_Data on BaseError {
+  title
+  message
+  stack
 }
 `
 
@@ -92,27 +89,12 @@ const { t } = useI18n()
 
 const props = defineProps<{
   gql: BaseErrorFragment
+  onRetry: () => void
+  onReadDocs: () => void
 }>()
-
-const latestOperation = window.localStorage.getItem('latestGQLOperation')
-
-const retry = async () => {
-  const { getLaunchpadClient } = await import('../main')
-  const launchpadClient = getLaunchpadClient()
-
-  const op = latestOperation ? JSON.parse(latestOperation) : null
-
-  return launchpadClient.reexecuteOperation(
-    launchpadClient.createRequestOperation('mutation', op, {
-      requestPolicy: 'cache-and-network',
-    }),
-  )
-}
 
 const headerText = computed(() => props.gql.baseError?.title ? props.gql.baseError.title : t('launchpadErrors.generic.header'))
 const errorMessage = computed(() => props.gql?.baseError?.message ? props.gql.baseError.message : null)
 const stack = computed(() => props.gql?.baseError?.stack ? props.gql.baseError.stack : null)
-const lastMutationDefined = computed(() => {
-  return Boolean(latestOperation)
-})
+
 </script>

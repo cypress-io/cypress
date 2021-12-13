@@ -22,7 +22,7 @@ describe('lib/server', () => {
   beforeEach(function () {
     this.server = new ServerE2E()
 
-    return config.set({ projectRoot: '/foo/bar/' })
+    return config.setupFullConfigWithDefaults({ projectRoot: '/foo/bar/' })
     .then((cfg) => {
       this.config = cfg
     })
@@ -51,7 +51,7 @@ xdescribe('lib/server', () => {
 
     sinon.stub(fileServer, 'create').returns(this.fileServer)
 
-    return config.set({ projectRoot: '/foo/bar/' })
+    return config.setupFullConfigWithDefaults({ projectRoot: '/foo/bar/' })
     .then((cfg) => {
       this.config = cfg
       this.server = new ServerE2E()

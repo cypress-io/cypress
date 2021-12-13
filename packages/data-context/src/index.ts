@@ -27,6 +27,10 @@ export function clearCtx () {
   ctx = null
 }
 
+export function hasCtx () {
+  return Boolean(ctx)
+}
+
 /**
  * Gets the current DataContext, used in situations where it's too much work
  * to inject it deeply through the class hierearchy in legacy server code, but we

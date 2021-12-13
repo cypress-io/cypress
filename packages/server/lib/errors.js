@@ -1042,6 +1042,13 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
   }
 }
 
+/**
+ * @param {string} type
+ * @param {any} arg1
+ * @param {any} arg2
+ * @param {any} arg3
+ * @returns {Error & { isCypressErr: true, type: string, details: string }}
+ */
 const get = function (type, arg1, arg2, arg3) {
   let details
   let msg = getMsgByType(type, arg1, arg2, arg3)

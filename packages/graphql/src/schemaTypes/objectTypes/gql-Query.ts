@@ -39,7 +39,13 @@ export const Query = objectType({
     t.field('currentProject', {
       type: CurrentProject,
       description: 'The currently opened project',
-      resolve: (root, args, ctx) => ctx.coreData.currentProject,
+      resolve: (root, args, ctx) => {
+        if (ctx.coreData.currentProject) {
+          return ctx.lifecycleManager
+        }
+
+        return null
+      },
     })
 
     t.nonNull.list.nonNull.field('projects', {

@@ -1,5 +1,6 @@
 import { nonNull, objectType, stringArg } from 'nexus'
 import path from 'path'
+import { BaseError } from '.'
 import { cloudProjectBySlug } from '../../stitching/remoteGraphQLCalls'
 import { CodeGenTypeEnum } from '../enumTypes/gql-CodeGenTypeEnum'
 import { TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
@@ -16,9 +17,22 @@ export const CurrentProject = objectType({
   definition (t) {
     t.implements('ProjectLike')
 
-    t.nonNull.boolean('isRefreshingBrowsers', {
-      description: 'Whether we are currently refreshing the browsers list',
-      resolve: (source, args, ctx) => Boolean(ctx.appData.refreshingBrowsers),
+    t.field('errorLoadingConfigFile', {
+      type: BaseError,
+      description: 'If there is an error loading the config file, it is represented here',
+    })
+
+    t.field('errorLoadingNodeEvents', {
+      type: BaseError,
+      description: 'If there is an error related to the node events, it is represented here',
+    })
+
+    t.boolean('isLoadingConfigFile', {
+      description: 'Whether we are currently loading the configFile',
+    })
+
+    t.boolean('isLoadingNodeEvents', {
+      description: 'Whether we are currently loading the setupNodeEvents',
     })
 
     t.field('currentTestingType', {
@@ -59,19 +73,30 @@ export const CurrentProject = objectType({
       resolve: (source, args, ctx) => ctx.project.projectId(source.projectRoot),
     })
 
-    t.nonNull.boolean('isCTConfigured', {
+    t.boolean('isCTConfigured', {
       description: 'Whether the user configured this project to use Component Testing',
       resolve: (source, args, ctx) => {
-        return ctx.project.isTestingTypeConfigured(source.projectRoot, 'component')
+        return ctx.lifecycleManager.isTestingTypeConfigured('component')
       },
     })
 
-    t.nonNull.boolean('isE2EConfigured', {
+    t.boolean('isE2EConfigured', {
       description: 'Whether the user configured this project to use e2e Testing',
       resolve: (source, args, ctx) => {
-        return ctx.project.isTestingTypeConfigured(source.projectRoot, 'e2e')
+        return ctx.lifecycleManager.isTestingTypeConfigured('e2e')
       },
     })
+
+    t.boolean('needsLegacyConfigMigration', {
+      description: 'Whether the project needs to be migrated before proceeding',
+      resolve (source, args, ctx) {
+        return ctx.lifecycleManager.metaState.needsCypressJsonMigration
+      },
+    })
+
+    // t.list.field('testingTypes', {
+    //   type: TestingTypeInfo,
+    // })
 
     t.connectionField('specs', {
       description: 'Specs for a project conforming to Relay Connection specification',
@@ -84,29 +109,21 @@ export const CurrentProject = objectType({
     t.nonNull.json('config', {
       description: 'Project configuration',
       resolve: (source, args, ctx) => {
-        return ctx.project.getResolvedConfigFields(source.projectRoot)
+        return ctx.lifecycleManager.loadedFullConfig
       },
     })
 
     t.string('configFilePath', {
       description: 'Config File Path',
-      resolve: async (source, args, ctx) => {
-        const config = await ctx.project.getConfig(source.projectRoot)
-
-        return config.configFile ?? null
+      resolve: (source, args, ctx) => {
+        return ctx.lifecycleManager.configFilePath
       },
     })
 
     t.string('configFileAbsolutePath', {
       description: 'Config File Absolute Path',
       resolve: async (source, args, ctx) => {
-        const config = await ctx.project.getConfig(source.projectRoot)
-
-        if (!ctx.currentProject || !config.configFile) {
-          return null
-        }
-
-        return path.join(ctx.currentProject.projectRoot, config.configFile)
+        return ctx.lifecycleManager.configFilePath
       },
     })
 
@@ -151,5 +168,8 @@ export const CurrentProject = objectType({
       },
     })
   },
-
+  sourceType: {
+    module: '@packages/data-context/src/data/ProjectLifecycleManager',
+    export: 'ProjectLifecycleManager',
+  },
 })

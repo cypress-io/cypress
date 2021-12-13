@@ -24,11 +24,16 @@ export class ProjectDataSource {
   }
 
   getConfig (projectRoot: string) {
-    return this.ctx.config.getConfigForProject(projectRoot)
+    return this.ctx.lifecycleManager.loadedConfig
   }
 
   async findSpecs (projectRoot: string, specType: Maybe<SpecType>) {
-    const config = await this.getConfig(projectRoot)
+    const config = this.getConfig(projectRoot)
+
+    if (!config) {
+      return []
+    }
+
     const specs = await this.api.findSpecs({
       projectRoot,
       fixturesFolder: config.fixturesFolder ?? false,

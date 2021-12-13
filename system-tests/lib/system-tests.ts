@@ -916,7 +916,7 @@ const systemTests = {
     }
 
     if (ctx.settings) {
-      await settings.writeOnly(e2ePath, ctx.settings)
+      await settings.writeForTesting(e2ePath, ctx.settings)
     }
 
     args = options.args || ['index.js'].concat(args)

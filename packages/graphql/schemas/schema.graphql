@@ -348,17 +348,31 @@ type CurrentProject implements Node & ProjectLike {
   """The mode the interactive runner was launched in"""
   currentTestingType: TestingTypeEnum
 
+  """If there is an error loading the config file, it is represented here"""
+  errorLoadingConfigFile: BaseError
+
+  """
+  If there is an error related to the node events, it is represented here
+  """
+  errorLoadingNodeEvents: BaseError
+
   """Relay style Node ID field for the CurrentProject field"""
   id: ID!
 
   """Whether the user configured this project to use Component Testing"""
-  isCTConfigured: Boolean!
+  isCTConfigured: Boolean
 
   """Whether the user configured this project to use e2e Testing"""
-  isE2EConfigured: Boolean!
+  isE2EConfigured: Boolean
 
-  """Whether we are currently refreshing the browsers list"""
-  isRefreshingBrowsers: Boolean!
+  """Whether we are currently loading the configFile"""
+  isLoadingConfigFile: Boolean
+
+  """Whether we are currently loading the setupNodeEvents"""
+  isLoadingNodeEvents: Boolean
+
+  """Whether the project needs to be migrated before proceeding"""
+  needsLegacyConfigMigration: Boolean
 
   """Cached preferences for this project"""
   preferences: ProjectPreferences
@@ -548,11 +562,6 @@ type Mutation {
 
   """Hides the launchpad windows"""
   hideBrowserWindow: Boolean!
-
-  """
-  Initializes open_project global singleton to manager current project state
-  """
-  initializeOpenProject: Boolean
   internal_clearAllProjectPreferencesCache: Boolean
   internal_clearLatestProjectCache: Boolean
   internal_clearProjectPreferencesCache(projectTitle: String!): Boolean
@@ -993,7 +1002,6 @@ type WizardSampleConfigFile implements Node {
 
 enum WizardStep {
   configFiles
-  initializePlugins
   installDependencies
   selectFramework
   setupComplete

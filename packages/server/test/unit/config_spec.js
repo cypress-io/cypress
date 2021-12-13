@@ -100,21 +100,21 @@ describe('lib/config', () => {
       })
 
       it('can override default port', function () {
-        return config.get(this.projectRoot, { port: 8080, configFile: 'cypress.config.js' })
+        return config.get(this.projectRoot, { port: 8080 })
         .then((obj) => {
           expect(obj.port).to.eq(8080)
         })
       })
 
       it('updates browserUrl', function () {
-        return config.get(this.projectRoot, { port: 8080, configFile: 'cypress.config.js' })
+        return config.get(this.projectRoot, { port: 8080 })
         .then((obj) => {
           expect(obj.browserUrl).to.eq('http://localhost:8080/__/')
         })
       })
 
       it('updates proxyUrl', function () {
-        return config.get(this.projectRoot, { port: 8080, configFile: 'cypress.config.js' })
+        return config.get(this.projectRoot, { port: 8080 })
         .then((obj) => {
           expect(obj.proxyUrl).to.eq('http://localhost:8080')
         })

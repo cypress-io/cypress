@@ -148,7 +148,3 @@ export const checkSupportFile = async ({
 
   return
 }
-
-export async function getDefaultConfigFilePath (projectRoot: string): Promise<string | undefined> {
-  return getCtx().config.getDefaultConfigBasename(projectRoot)
-}
