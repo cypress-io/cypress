@@ -3,9 +3,9 @@ require('../../spec_helper')
 const _ = require('lodash')
 const os = require('os')
 const electron = require('electron')
-const appData = require(`${root}../lib/util/app_data`)
-const open = require(`${root}../lib/util/open`)
-const menu = require(`${root}../lib/gui/menu`)
+const appData = require(`../../../lib/util/app_data`)
+const open = require(`../../../lib/util/open`)
+const menu = require(`../../../lib/gui/menu`)
 
 const getMenuItem = function (label) {
   return _.find(electron.Menu.buildFromTemplate.lastCall.args[0], { label })

@@ -1,12 +1,11 @@
 require('../../spec_helper')
-const root = global.root
 
-const auth = require(`${root}../lib/gui/auth`)
+const auth = require(`../../../lib/gui/auth`)
 const electron = require('electron')
-const machineId = require(`${root}../lib/util/machine_id`)
+const machineId = require(`../../../lib/util/machine_id`)
 const os = require('os')
 const pkg = require('@packages/root')
-const random = require(`${root}../lib/util/random`)
+const random = require(`../../../lib/util/random`)
 
 const BASE_URL = 'https://foo.invalid/login.html'
 const RANDOM_STRING = 'a'.repeat(32)

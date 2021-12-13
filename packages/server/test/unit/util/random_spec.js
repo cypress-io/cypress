@@ -1,7 +1,7 @@
 require('../../spec_helper')
 
 const randomstring = require('randomstring')
-const random = require(`${root}../lib/util/random`)
+const random = require(`../../../lib/util/random`)
 
 context('.id', () => {
   it('returns random.generate string with length 5 by default', () => {
