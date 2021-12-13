@@ -73,7 +73,7 @@ describe('utils', () => {
     })
 
     it('displays filename with special characters', () => {
-      compare('cypress/integration/meta_&%_cy.ts', ['meta_&%_cy', '.ts'])
+      compare('cypress/integration/meta_&%.cy.ts', ['meta_&%.cy', '.ts'])
     })
 
     it('handles an unexpected number of extensions', () => {
