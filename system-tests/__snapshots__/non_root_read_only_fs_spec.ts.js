@@ -6,64 +6,14 @@ Writing to this directory is required by Cypress in order to store screenshots a
 Enable write permissions to this directory to ensure screenshots and videos are stored.
 
 If you don't require screenshots or videos to be stored you can safely ignore this warning.
-✅ not running as root
-✅ /foo/bar/.projects/read-only-project-root is not writable
+The support file is missing or invalid.
 
-====================================================================================================
+Your \`supportFile\` is set to \`/foo/bar/.projects/read-only-project-root/cypress/support/support.js\`, but either the file is missing or it's invalid. The \`supportFile\` must be a \`.js\`, \`.ts\`, \`.coffee\` file or be supported by your preprocessor plugin (if configured).
 
-  (Run Starting)
+Correct your \`cypress.config.js\`, create the appropriate file, or set \`supportFile\` to \`false\` if a support file is not necessary for your project.
 
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (spec.js)                                                                  │
-  │ Searched:   cypress/e2e/spec.js                                                                │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+Or you might have renamed the extension of your \`supportFile\` to \`.ts\`. If that's the case, restart the test runner.
 
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  spec.js                                                                         (1 of 1)
-
-
-  1) fails
-
-  0 passing
-  1 failing
-
-  1) fails:
-     Error: EACCES: permission denied, mkdir '/foo/bar/.projects/read-only-project-root/cypress/screenshots'
-  
-  
-
-
-
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        1                                                                                │
-  │ Passing:      0                                                                                │
-  │ Failing:      1                                                                                │
-  │ Pending:      0                                                                                │
-  │ Skipped:      0                                                                                │
-  │ Screenshots:  0                                                                                │
-  │ Video:        false                                                                            │
-  │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     spec.js                                                                          │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-====================================================================================================
-
-  (Run Finished)
-
-
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  spec.js                                  XX:XX        1        -        1        -        - │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
-
+Learn more at https://on.cypress.io/support-file-missing-or-invalid
 
 `

@@ -8,7 +8,7 @@ exports['e2e plugin run events / sends events'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      2 found (run_events_spec_1.js, run_events_spec_2.js)                               │
-  │ Searched:   cypress/e2e/*                                                              │
+  │ Searched:   cypress/e2e/*                                                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 before:run: cypress/e2e/run_events_spec_1.js electron
@@ -100,7 +100,7 @@ exports['e2e plugin run events / handles video being deleted in after:spec'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (after_spec_deletes_video.js)                                              │
-  │ Searched:   cypress/e2e/*                                                              │
+  │ Searched:   cypress/e2e/*                                                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -152,14 +152,14 @@ exports['e2e plugin run events / fails run if event handler throws'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (run_event_throws_spec.js)                                                 │
-  │ Searched:   cypress/e2e/*                                                              │
+  │ Specs:      1 found (run_event_throws.cy.js)                                                   │
+  │ Searched:   cypress/e2e/*                                                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  run_event_throws_spec.js                                                        (1 of 1)
+  Running:  run_event_throws.cy.js                                                          (1 of 1)
 An error was thrown in your plugins file while executing the handler for the 'before:spec' event.
 
 The error we received was:

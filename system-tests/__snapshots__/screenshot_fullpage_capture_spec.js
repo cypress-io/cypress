@@ -7,14 +7,14 @@ exports['e2e screenshot fullPage capture / passes'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (screenshot_fullpage_capture_spec.js)                                      │
-  │ Searched:   cypress/e2e/screenshot_fullpage_capture_spec.js                                    │
+  │ Specs:      1 found (screenshot_fullpage_capture.cy.js)                                      │
+  │ Searched:   cypress/e2e/screenshot_fullpage_capture.cy.js                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  screenshot_fullpage_capture_spec.js                                             (1 of 1)
+  Running:  screenshot_fullpage_capture.cy.js                                             (1 of 1)
 
 
   ✓ takes consistent fullPage captures
@@ -33,33 +33,33 @@ exports['e2e screenshot fullPage capture / passes'] = `
   │ Screenshots:  11                                                                               │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     screenshot_fullpage_capture_spec.js                                              │
+  │ Spec Ran:     screenshot_fullpage_capture.cy.js                                              │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_fullpage_capture_spec.js/fullPage-or      (600x500)
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_fullpage_capture.cy.js/fullPage-or      (600x500)
      iginal.png                                                                                     
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_fullpage_capture_spec.js/fullPage-co      (600x500)
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_fullpage_capture.cy.js/fullPage-co      (600x500)
      mpare.png                                                                                      
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_fullpage_capture_spec.js/fullPage-co      (600x500)
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_fullpage_capture.cy.js/fullPage-co      (600x500)
      mpare (1).png                                                                                  
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_fullpage_capture_spec.js/fullPage-co      (600x500)
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_fullpage_capture.cy.js/fullPage-co      (600x500)
      mpare (2).png                                                                                  
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_fullpage_capture_spec.js/fullPage-co      (600x500)
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_fullpage_capture.cy.js/fullPage-co      (600x500)
      mpare (3).png                                                                                  
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_fullpage_capture_spec.js/fullPage-co      (600x500)
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_fullpage_capture.cy.js/fullPage-co      (600x500)
      mpare (4).png                                                                                  
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_fullpage_capture_spec.js/fullPage-co      (600x500)
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_fullpage_capture.cy.js/fullPage-co      (600x500)
      mpare (5).png                                                                                  
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_fullpage_capture_spec.js/fullPage-co      (600x500)
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_fullpage_capture.cy.js/fullPage-co      (600x500)
      mpare (6).png                                                                                  
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_fullpage_capture_spec.js/fullPage-co      (600x500)
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_fullpage_capture.cy.js/fullPage-co      (600x500)
      mpare (7).png                                                                                  
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_fullpage_capture_spec.js/fullPage-co      (600x500)
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_fullpage_capture.cy.js/fullPage-co      (600x500)
      mpare (8).png                                                                                  
-  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_fullpage_capture_spec.js/fullPage-co      (600x500)
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_fullpage_capture.cy.js/fullPage-co      (600x500)
      mpare (9).png                                                                                  
 
 
@@ -77,7 +77,7 @@ exports['e2e screenshot fullPage capture / passes'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  screenshot_fullpage_capture_spec.js      XX:XX        1        1        -        -        - │
+  │ ✔  screenshot_fullpage_capture.cy.js      XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
