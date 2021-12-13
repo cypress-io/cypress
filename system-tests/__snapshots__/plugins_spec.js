@@ -119,14 +119,14 @@ exports['e2e plugins can modify config from plugins 1'] = `
 `
 
 exports['e2e plugins catches invalid browsers list returned from plugins 1'] = `
-An invalid configuration value returned from the setupNodeEvents on config file: \`../../../../../../../private/foo/bar/.projects/plugin-returns-empty-browsers-list/cypress.config.js\`
+An invalid configuration value returned from the setupNodeEvents on config file: \`cypress.config.js\`
 
 Expected at least one browser
 
 `
 
 exports['e2e plugins catches invalid browser returned from plugins 1'] = `
-An invalid configuration value returned from the setupNodeEvents on config file: \`../../../../../../../private/foo/bar/.projects/plugin-returns-invalid-browser/cypress.config.js\`
+An invalid configuration value returned from the setupNodeEvents on config file: \`cypress.config.js\`
 
 Found an error while validating the \`browsers\` list. Expected \`displayName\` to be a non-empty string. Instead the value was: \`{"name":"browser name","family":"chromium"}\`
 
@@ -320,7 +320,7 @@ exports['e2e plugins calls after:screenshot for cy.screenshot() and failure scre
 
   (Screenshots)
 
-  -  /private/XXX/XXX/XXX/screenshot-replacement.png                                           (YxX)
+  -  /XXX/XXX/XXX/screenshot-replacement.png                                                   (YxX)
   -  /XXX/XXX/XXX/cypress/screenshots/after_screenshot.cy.js/ignored-values.png                (YxX)
   -  /XXX/XXX/XXX/cypress/screenshots/after_screenshot.cy.js/invalid-return.png                (YxX)
 
@@ -346,7 +346,7 @@ exports['e2e plugins calls after:screenshot for cy.screenshot() and failure scre
 `
 
 exports['e2e plugins catches invalid viewportWidth returned from plugins 1'] = `
-An invalid configuration value returned from the setupNodeEvents on config file: \`../../../../../../../private/foo/bar/.projects/plugin-returns-bad-config/cypress.config.js\`
+An invalid configuration value returned from the setupNodeEvents on config file: \`cypress.config.js\`
 
 Expected \`viewportWidth\` to be a number. Instead the value was: \`"foo"\`
 
@@ -487,7 +487,7 @@ exports['e2e plugins does not report more screenshots than exist if user overwri
 
   (Screenshots)
 
-  -  /private/XXX/XXX/XXX/screenshot-replacement.png                                           (2x2)
+  -  /XXX/XXX/XXX/screenshot-replacement.png                                                   (2x2)
 
 
   (Video)
