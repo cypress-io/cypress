@@ -131,7 +131,7 @@ describe('driver/src/cypress/cy', () => {
       .then(() => {
         const userInvocationStack = cy.queue.find({ name: 'get' }).get('userInvocationStack')
 
-        expect(userInvocationStack).to.include('cy_spec.js')
+        expect(userInvocationStack).to.include('.cy.js')
       })
     })
 
@@ -142,7 +142,7 @@ describe('driver/src/cypress/cy', () => {
       .then(() => {
         const userInvocationStack = cy.queue.find({ name: 'find' }).get('userInvocationStack')
 
-        expect(userInvocationStack).to.include('cy_spec.js')
+        expect(userInvocationStack).to.include('.cy.js')
       })
     })
   })
@@ -189,7 +189,7 @@ describe('driver/src/cypress/cy', () => {
         .then(() => {
           const userInvocationStack = cy.queue.find({ name: 'getInput' }).get('userInvocationStack')
 
-          expect(userInvocationStack).to.include('cy_spec.js')
+          expect(userInvocationStack).to.include('.cy.js')
         })
       })
 
@@ -200,7 +200,7 @@ describe('driver/src/cypress/cy', () => {
         .then(() => {
           const userInvocationStack = cy.queue.find({ name: 'findInput' }).get('userInvocationStack')
 
-          expect(userInvocationStack).to.include('cy_spec.js')
+          expect(userInvocationStack).to.include('.cy.js')
         })
       })
     })
