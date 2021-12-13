@@ -168,7 +168,7 @@ describe('e2e requests', () => {
   })
 
   systemTests.it('passes', {
-    spec: 'request_spec.js',
+    spec: 'request.cy.js',
     snapshot: true,
     config: {
       responseTimeout: 1000,
@@ -177,7 +177,7 @@ describe('e2e requests', () => {
 
   it('fails when network immediately fails', function () {
     return systemTests.exec(this, {
-      spec: 'request_http_network_error_failing_spec.js',
+      spec: 'request_http_network_error_failing.cy.js',
       snapshot: true,
       expectedExitCode: 1,
     })
@@ -185,7 +185,7 @@ describe('e2e requests', () => {
 
   it('fails on status code', function () {
     return systemTests.exec(this, {
-      spec: 'request_status_code_failing_spec.js',
+      spec: 'request_status_code_failing.cy.js',
       snapshot: true,
       expectedExitCode: 1,
       onStdout (stdout) {
@@ -199,7 +199,7 @@ describe('e2e requests', () => {
 
   it('prints long http props on fail', function () {
     return systemTests.exec(this, {
-      spec: 'request_long_http_props_failing_spec.js',
+      spec: 'request_long_http_props_failing.cy.js',
       snapshot: true,
       expectedExitCode: 1,
       onStdout (stdout) {

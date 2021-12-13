@@ -15,7 +15,7 @@ describe('e2e baseUrl', () => {
     })
 
     systemTests.it('passes', {
-      spec: 'base_url_spec.js',
+      spec: 'base_url.cy.js',
       snapshot: true,
     })
   })
@@ -32,7 +32,7 @@ describe('e2e baseUrl', () => {
     })
 
     systemTests.it('passes', {
-      spec: 'base_url_spec.js',
+      spec: 'base_url.cy.js',
       snapshot: true,
     })
   })

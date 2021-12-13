@@ -27,7 +27,7 @@ describe('e2e user agent', () => {
   })
 
   systemTests.it('passes', {
-    spec: 'user_agent_spec.js',
+    spec: 'user_agent.cy.js',
     snapshot: true,
   })
 })

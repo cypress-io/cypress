@@ -8,7 +8,7 @@ describe('e2e config', () => {
 
   it('provides various environment details', function () {
     return systemTests.exec(this, {
-      spec: 'config_passing_spec.js',
+      spec: 'config_passing.cy.js',
       snapshot: true,
       config: {
         env: {

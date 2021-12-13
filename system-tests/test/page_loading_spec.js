@@ -78,7 +78,7 @@ describe('e2e page_loading', () => {
   // set we send an XHR which should not inject because its requested for JSON
   // but that another XHR which is requested for html should inject
   systemTests.it('passes', {
-    spec: 'page_loading_spec.js',
+    spec: 'page_loading.cy.js',
     snapshot: true,
   })
 })

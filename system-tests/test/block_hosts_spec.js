@@ -32,7 +32,7 @@ describe('e2e blockHosts', () => {
 
   it('passes', function () {
     return systemTests.exec(this, {
-      spec: 'block_hosts_spec.js',
+      spec: 'block_hosts.cy.js',
       snapshot: true,
     })
   })

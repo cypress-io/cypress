@@ -74,6 +74,6 @@ describe('e2e firefox', function () {
   systemTests.it.skip('can run multiple specs', {
     browser: 'firefox',
     project: 'e2e',
-    spec: 'simple_spec.js,simple_passing_spec.js',
+    spec: 'simple.cy.js,simple_passing.cy.js',
   })
 })

@@ -13,7 +13,7 @@ describe('e2e es modules', () => {
 
   it('fails', function () {
     return systemTests.exec(this, {
-      spec: 'es_module_import_failing_spec.js',
+      spec: 'es_module_import_failing.cy.js',
       snapshot: true,
       expectedExitCode: 1,
       noTypeScript: true,

@@ -5,7 +5,7 @@ describe('e2e return value', () => {
 
   it('failing1', function () {
     return systemTests.exec(this, {
-      spec: 'return_value_spec.js',
+      spec: 'return_value.cy.js',
       snapshot: true,
       expectedExitCode: 3,
     })

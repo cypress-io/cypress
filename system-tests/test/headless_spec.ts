@@ -5,7 +5,7 @@ describe('e2e headless', function () {
 
   describe('ELECTRON_RUN_AS_NODE', () => {
     const baseSpec = {
-      spec: 'headless_spec.js',
+      spec: 'headless.cy.js',
       config: {
         env: {
           'CI': process.env.CI,
@@ -43,7 +43,7 @@ describe('e2e headless', function () {
 
   // cypress run --headless
   systemTests.it('tests in headless mode pass', {
-    spec: 'headless_spec.js',
+    spec: 'headless.cy.js',
     config: {
       env: {
         'CI': process.env.CI,
@@ -65,7 +65,7 @@ describe('e2e headless', function () {
     '!electron',
   ].map((b) => {
     systemTests.it(`tests in headed mode pass in ${b}`, {
-      spec: 'headless_spec.js',
+      spec: 'headless.cy.js',
       config: {
         env: {
           'CI': process.env.CI,

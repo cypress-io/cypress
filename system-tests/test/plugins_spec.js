@@ -14,7 +14,7 @@ describe('e2e plugins', function () {
   // failed and the right error is displayed
   systemTests.it('fails when there is an async error at the root', {
     browser: 'chrome',
-    spec: 'app_spec.js',
+    spec: 'app.cy.js',
     project: 'plugins-root-async-error',
     expectedExitCode: 1,
     onRun (exec) {
@@ -26,7 +26,7 @@ describe('e2e plugins', function () {
 
   it('fails when there is an async error inside an event handler', function () {
     return systemTests.exec(this, {
-      spec: 'app_spec.js',
+      spec: 'app.cy.js',
       project: 'plugins-async-error',
       sanitizeScreenshotDimensions: true,
       snapshot: true,
@@ -39,7 +39,7 @@ describe('e2e plugins', function () {
 
   it('can modify config from plugins', function () {
     return systemTests.exec(this, {
-      spec: 'app_spec.js',
+      spec: 'app.cy.js',
       env: 'foo=foo,bar=bar',
       config: { pageLoadTimeout: 10000 },
       project: 'plugin-config',
@@ -97,7 +97,7 @@ describe('e2e plugins', function () {
 
   systemTests.it('works with user extensions', {
     browser: 'chrome',
-    spec: 'app_spec.js',
+    spec: 'app.cy.js',
     headed: true,
     project: 'plugin-extension',
     sanitizeScreenshotDimensions: true,
@@ -108,7 +108,7 @@ describe('e2e plugins', function () {
     const pluginsAbsolutePath = Fixtures.projectPath('plugins-absolute-path')
 
     return systemTests.exec(this, {
-      spec: 'absolute_spec.js',
+      spec: 'absolute.cy.js',
       config: {
         pluginsFile: path.join(
           pluginsAbsolutePath,
@@ -125,7 +125,7 @@ describe('e2e plugins', function () {
 
   it('calls after:screenshot for cy.screenshot() and failure screenshots', function () {
     return systemTests.exec(this, {
-      spec: 'after_screenshot_spec.js',
+      spec: 'after_screenshot.cy.js',
       project: pluginAfterScreenshot,
       sanitizeScreenshotDimensions: true,
       snapshot: true,
@@ -136,7 +136,7 @@ describe('e2e plugins', function () {
   // https://github.com/cypress-io/cypress/issues/8079
   it('does not report more screenshots than exist if user overwrites previous screenshot in afterScreenshot', function () {
     return systemTests.exec(this, {
-      spec: 'after_screenshot_overwrite_spec.js',
+      spec: 'after_screenshot_overwrite.cy.js',
       project: pluginAfterScreenshot,
       snapshot: true,
     })
@@ -144,7 +144,7 @@ describe('e2e plugins', function () {
 
   it('fails when invalid event is registered', function () {
     return systemTests.exec(this, {
-      spec: 'app_spec.js',
+      spec: 'app.cy.js',
       project: 'plugin-validation-error',
       sanitizeScreenshotDimensions: true,
       snapshot: true,
@@ -154,7 +154,7 @@ describe('e2e plugins', function () {
 
   it('fails when setupNodeEvents is not a function', function () {
     return systemTests.exec(this, {
-      spec: 'app_spec.js',
+      spec: 'app.cy.js',
       project: 'plugin-empty',
       sanitizeScreenshotDimensions: true,
       snapshot: true,
@@ -165,7 +165,7 @@ describe('e2e plugins', function () {
   describe('preprocessor', function () {
     it('passes with working preprocessor', function () {
       return systemTests.exec(this, {
-        spec: 'app_spec.js',
+        spec: 'app.cy.js',
         project: 'working-preprocessor',
         sanitizeScreenshotDimensions: true,
         snapshot: true,
@@ -174,7 +174,7 @@ describe('e2e plugins', function () {
 
     it('supports node builtins', function () {
       return systemTests.exec(this, {
-        spec: 'node_builtins_spec.js',
+        spec: 'node_builtins.cy.js',
       })
     })
 
@@ -189,7 +189,7 @@ describe('e2e plugins', function () {
   describe('extra properties', function () {
     it('passes projectRoot and default configFile to plugins function', function () {
       return systemTests.exec(this, {
-        spec: 'plugins_config_extras_spec.js',
+        spec: 'plugins_config_extras.cy.js',
         config: {
           env: {
             projectRoot: e2eProject,
@@ -201,7 +201,7 @@ describe('e2e plugins', function () {
 
     it('passes custom configFile to plugins function', function () {
       return systemTests.exec(this, {
-        spec: 'plugins_config_extras_spec.js',
+        spec: 'plugins_config_extras.cy.js',
         configFile: 'cypress-alt.config.js',
         config: {
           env: {
@@ -214,7 +214,7 @@ describe('e2e plugins', function () {
 
     it('passes false configFile to plugins function', function () {
       return systemTests.exec(this, {
-        spec: 'plugins_config_extras_spec.js',
+        spec: 'plugins_config_extras.cy.js',
         configFile: 'false',
         config: {
           env: {

@@ -90,12 +90,12 @@ describe('e2e forms', () => {
     systemTests.setup()
 
     systemTests.it('passing', {
-      spec: 'form_submission_passing_spec.js',
+      spec: 'form_submission_passing.cy.js',
       snapshot: true,
     })
 
     systemTests.it('failing', {
-      spec: 'form_submission_failing_spec.js',
+      spec: 'form_submission_failing.cy.js',
       snapshot: true,
       expectedExitCode: 1,
       onStdout: (stdout) => {
@@ -142,7 +142,7 @@ describe('e2e forms', () => {
       config: {
         baseUrl: `https://localhost:${HTTPS_PORT}`,
       },
-      spec: 'form_submission_multipart_spec.js',
+      spec: 'form_submission_multipart.cy.js',
       snapshot: true,
     })
 
@@ -150,7 +150,7 @@ describe('e2e forms', () => {
       config: {
         baseUrl: `http://localhost:${HTTP_PORT}`,
       },
-      spec: 'form_submission_multipart_spec.js',
+      spec: 'form_submission_multipart.cy.js',
       snapshot: true,
     })
   })
