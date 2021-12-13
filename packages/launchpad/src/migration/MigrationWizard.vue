@@ -31,22 +31,26 @@
   >
     <RenameSpecsManual />
     <template #footer>
-      <Button>
-        <template #prefix>
-          <i-cy-loading_x16
+      <div class="flex gap-16px">
+        <Button
+          disabled
+          variant="pending"
+        >
+          <template #prefix>
+            <i-cy-loading_x16
 
-            class="animate-spin icon-dark-white icon-light-gray-400"
-          />
-        </template>
-        t('migration.wizard.step2.buttonWait')
-      </Button>
-      <Button
-        variant="outline"
-        class="ml-24px"
-        @click="skipStep2"
-      >
-        {{ t('migration.wizard.step2.button') }}
-      </Button>
+              class="animate-spin icon-dark-white icon-light-gray-400"
+            />
+          </template>
+          t('migration.wizard.step2.buttonWait')
+        </Button>
+        <Button
+          variant="outline"
+          @click="skipStep2"
+        >
+          {{ t('migration.wizard.step2.button') }}
+        </Button>
+      </div>
     </template>
   </MigrationStep>
   <MigrationStep
