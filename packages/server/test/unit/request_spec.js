@@ -3,7 +3,7 @@ require('../spec_helper')
 const _ = require('lodash')
 const http = require('http')
 const Bluebird = require('bluebird')
-const Request = require(`${root}lib/request`)
+const Request = require(`../../lib/request`)
 const snapshot = require('snap-shot-it')
 
 const request = Request({ timeout: 100 })
