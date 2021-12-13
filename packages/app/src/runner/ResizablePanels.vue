@@ -7,7 +7,7 @@
   >
     <div
       v-show="showPanel1"
-      class="h-full relative"
+      class="h-full bg-gray-1000 relative"
       :style="{width: `${panel1Width}px`}"
     >
       <slot name="panel1">
@@ -93,14 +93,6 @@ const panel2IsDragging = ref(false)
 const cachedPanel1Width = ref<number>(props.initialPanel1Width) // because panel 1 (the inline specs list) can be opened and closed in the UI, we cache the width
 const panel2Width = ref(props.initialPanel2Width)
 
-watchEffect(() => {
-  if (!props.showPanel1) {
-    emit('panelWidthUpdated', { panel: 'panel1', width: 0 })
-  } else if (props.showPanel1) {
-    emit('panelWidthUpdated', { panel: 'panel1', width: cachedPanel1Width.value })
-  }
-})
-
 const handleMousedown = (panel: 'panel1' | 'panel2', event: MouseEvent) => {
   if (panel === 'panel1') {
     panel1IsDragging.value = true
@@ -167,5 +159,13 @@ function isNewWidthAllowed (mouseClientX:number, panel: 'panel1' | 'panel2') {
 
   return panel2IsDragging.value && newWidth >= props.minPanel2Width && newWidth <= maxPanel2Width.value
 }
+
+watchEffect(() => {
+  if (!props.showPanel1) {
+    emit('panelWidthUpdated', { panel: 'panel1', width: 0 })
+  } else if (props.showPanel1) {
+    emit('panelWidthUpdated', { panel: 'panel1', width: cachedPanel1Width.value })
+  }
+})
 
 </script>

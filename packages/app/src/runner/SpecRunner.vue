@@ -49,7 +49,7 @@
       <template #panel3>
         <div
           ref="runnerPane"
-          class="w-full relative"
+          class="h-full w-full relative"
         >
           <HideDuringScreenshot class="bg-white p-16px">
             <SpecRunnerHeader
