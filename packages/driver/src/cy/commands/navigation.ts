@@ -8,6 +8,7 @@ import Promise from 'bluebird'
 import $utils from '../../cypress/utils'
 import $errUtils from '../../cypress/error_utils'
 import $Log from '../../cypress/log'
+import { bothUrlsMatchAndOneHasHash } from '../navigation'
 import { $Location } from '../../cypress/location'
 
 import debugFn from 'debug'
@@ -58,19 +59,6 @@ const timedOutWaitingForPageLoad = (ms, log) => {
     },
     onFail: log,
   })
-}
-
-const bothUrlsMatchAndRemoteHasHash = (current, remote) => {
-  // the remote has a hash
-  // or the last char of href
-  // is a hash
-  return (remote.hash || remote.href.slice(-1) === '#') &&
-  // both must have the same origin
-  current.origin === remote.origin &&
-    // both must have the same pathname
-    current.pathname === remote.pathname &&
-      // both must have the same query params
-      current.search === remote.search
 }
 
 const cannotVisitDifferentOrigin = (origin, previousUrlVisited, remoteUrl, existingUrl, log) => {
@@ -138,9 +126,9 @@ const navigationChanged = (Cypress, cy, state, source, arg) => {
 
   const previousUrl = urls[urlPosition]
 
-  // ensure our new url doesnt match whatever
+  // ensure our new url doesn't match whatever
   // the previous was. this prevents logging
-  // additionally when the url didnt actually change
+  // additionally when the url didn't actually change
   if (url === previousUrl) {
     return
   }
@@ -148,11 +136,11 @@ const navigationChanged = (Cypress, cy, state, source, arg) => {
   // else notify the world and log this event
   Cypress.action('cy:url:changed', url)
 
-  const historyNav = state('historyNav') || {}
+  const navHistoryDelta = state('navHistoryDelta')
 
-  if (historyNav.event) {
-    urlPosition = urlPosition + historyNav.delta
-    state('historyNav', {})
+  if (navHistoryDelta) {
+    urlPosition = urlPosition + navHistoryDelta
+    state('navHistoryDelta', undefined)
   } else {
     urls = urls.slice(0, urlPosition + 1)
     urls.push(url)
@@ -930,7 +918,7 @@ export default (Commands, Cypress, cy, state, config) => {
         // the browser won't actually make a new http request
         // for this, and so we need to resolve onLoad immediately
         // and bypass the actual visit resolution stuff
-        if (bothUrlsMatchAndRemoteHasHash(current, remote)) {
+        if (bothUrlsMatchAndOneHasHash(current, remote)) {
           // https://github.com/cypress-io/cypress/issues/1311
           if (current.hash === remote.hash) {
             consoleProps['Note'] = 'Because this visit was to the same hash, the page did not reload and the onBeforeLoad and onLoad callbacks did not fire.'

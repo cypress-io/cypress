@@ -21,7 +21,6 @@ import { create as createFocused, IFocused } from '../cy/focused'
 import { create as createMouse, Mouse } from '../cy/mouse'
 import { Keyboard } from '../cy/keyboard'
 import { create as createLocation, ILocation } from '../cy/location'
-import { $Location } from '../cypress/location'
 import { create as createAssertions, IAssertions } from '../cy/assertions'
 import $Listeners from '../cy/listeners'
 import { $Chainer } from './chainer'
@@ -35,6 +34,7 @@ import { $Command } from './command'
 import { CommandQueue } from './command_queue'
 import { initVideoRecorder } from '../cy/video-recorder'
 import { TestConfigOverride } from '../cy/testConfigOverrides'
+import { historyNavigationTriggeredHashChange } from '../cy/navigation'
 
 const debugErrors = debugFn('cypress:driver:errors')
 
@@ -481,47 +481,18 @@ export class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuer
     // proxy has not injected Cypress.action('window:before:load')
     // so Cypress.onBeforeAppWindowLoad() was never called
     return $autIframe.on('load', () => {
-      const historyNav = this.state('historyNav')
-
-      if (historyNav && historyNav.event) {
-        const urls = this.state('urls')
-        const urlPosition = this.state('urlPosition')
-        const current = $Location.create(this.state('url'))
-        const delta = historyNav.delta || 0
-
-        const bothUrlsMatchAndOneHasHash = (current, remote) => {
-          const remoteHasHash = (remote.hash || remote.href.slice(-1) === '#')
-          const currHasHash = (current.hash || current.href.slice(-1) === '#')
-
-          // the remote has a hash  or the last char of href is a hash
-          return (remoteHasHash || currHasHash) &&
-            // both must have the same origin
-            current.origin === remote.origin &&
-            // both must have the same pathname
-            current.pathname === remote.pathname &&
-            // both must have the same query params
-            current.search === remote.search
-        }
-
-        if (delta !== 0) { // delta == 0 is a page refresh
-          const nextPosition = urlPosition + delta
-          const nextUrl = $Location.create(urls[nextPosition])
-
-          if (bothUrlsMatchAndOneHasHash(current, nextUrl)) {
-            // Skip load event.
-            // Chromium 97+ triggers fires iframe onload for cross-origin-initiated same-document
-            // navigations to make it appear to be a cross-document navigation, even when it wasn't
-            // to alleviate security risk where a cross-origin initiator can check whether
-            // or not onload fired to guess the url of a target frame.
-            // When the onload is fired, neither the before:unload or unload event is fired to remove
-            // the attached listeners or to clean up the current page state.
-            return
-          }
-        }
+      if (historyNavigationTriggeredHashChange(this.state)) {
+        // Skip load event.
+        // Chromium 97+ triggers fires iframe onload for cross-origin-initiated same-document
+        // navigations to make it appear to be a cross-document navigation, even when it wasn't
+        // to alleviate security risk where a cross-origin initiator can check whether
+        // or not onload fired to guess the url of a target frame.
+        // When the onload is fired, neither the before:unload or unload event is fired to remove
+        // the attached listeners or to clean up the current page state.
+        return
       }
 
-      // if setting these props failed
-      // then we know we're in a cross origin failure
+      // if setting these props failed then we know we're in a cross origin failure
       try {
         setWindowDocumentProps(getContentWindow($autIframe), this.state)
 
@@ -1120,8 +1091,8 @@ export class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuer
         // uncaught exception behavior (logging to console)
         return undefined
       },
-      onHistoryNav ({ event, delta }) {
-        cy.state('historyNav', { event, delta })
+      onHistoryNav (delta) {
+        cy.state('navHistoryDelta', delta)
       },
       onSubmit (e) {
         return cy.Cypress.action('app:form:submitted', e)

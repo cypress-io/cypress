@@ -86,10 +86,7 @@ export default {
       }
 
       contentWindow.history[attr] = function (delta) {
-        callbacks.onHistoryNav({
-          event: attr,
-          delta: attr === 'back' ? -1 : (attr === 'forward' ? 1 : delta),
-        })
+        callbacks.onHistoryNav(attr === 'back' ? -1 : (attr === 'forward' ? 1 : delta))
 
         orig.apply(this, [delta])
       }
