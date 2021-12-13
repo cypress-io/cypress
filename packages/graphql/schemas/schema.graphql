@@ -593,7 +593,7 @@ type Mutation {
   scaffoldIntegration: [CodeGenResultWithFileParts!]!
 
   """Set active project to run tests on"""
-  setActiveProject(path: String!): Boolean
+  setCurrentProject(path: String!): Boolean
 
   """
   Update local preferences (also known as  appData). The payload, `value`, should be a `JSON.stringified()` object of the new values you'd like to persist. Example: `setPreferences (value: JSON.stringify({ lastOpened: Date.now() }))`

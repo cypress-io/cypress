@@ -31,7 +31,7 @@ describe('lib/socket', () => {
 
     this.server = new ServerE2E(ctx)
 
-    ctx.actions.project.setActiveProjectForTestSetup(this.todosPath)
+    ctx.actions.project.setCurrentProjectForTestSetup(this.todosPath)
 
     return config.get(this.todosPath)
     .then((cfg) => {

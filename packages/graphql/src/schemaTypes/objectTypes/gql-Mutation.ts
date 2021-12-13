@@ -231,14 +231,14 @@ export const mutation = mutationType({
       },
     })
 
-    t.liveMutation('setActiveProject', {
+    t.liveMutation('setCurrentProject', {
       description: 'Set active project to run tests on',
       args: {
         path: nonNull(stringArg()),
       },
       resolve: async (_, args, ctx) => {
         try {
-          await ctx.actions.project.setActiveProject(args.path)
+          await ctx.actions.project.setCurrentProject(args.path)
           ctx.coreData.baseError = null
         } catch (error) {
           const e = error as Error

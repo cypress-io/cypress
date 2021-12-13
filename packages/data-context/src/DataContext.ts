@@ -393,7 +393,7 @@ export class DataContext {
     toAwait.push(this.actions.project.loadProjects())
 
     if (this.modeOptions.projectRoot) {
-      await this.actions.project.setActiveProject(this.modeOptions.projectRoot)
+      await this.actions.project.setCurrentProject(this.modeOptions.projectRoot)
 
       if (this.coreData.currentProject?.preferences) {
         // Skipping this until we sort out the lifecycle things

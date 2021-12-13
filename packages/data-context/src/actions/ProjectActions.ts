@@ -71,7 +71,7 @@ export class ProjectActions {
     execa(this.ctx.coreData.localSettings.preferences.preferredEditorBinary, [projectPath])
   }
 
-  async setActiveProject (projectRoot: string) {
+  async setCurrentProject (projectRoot: string) {
     const title = this.ctx.project.projectTitle(projectRoot)
 
     await this.clearActiveProject()
@@ -124,7 +124,7 @@ export class ProjectActions {
   }
 
   // Temporary: remove after other refactor lands
-  setActiveProjectForTestSetup (projectRoot: string) {
+  setCurrentProjectForTestSetup (projectRoot: string) {
     this.ctx.actions.projectConfig.killConfigProcess()
 
     const title = this.ctx.project.projectTitle(projectRoot)
@@ -210,7 +210,7 @@ export class ProjectActions {
     }
 
     if (args.open) {
-      await this.setActiveProject(projectRoot)
+      await this.setCurrentProject(projectRoot)
     }
   }
 

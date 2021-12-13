@@ -11,7 +11,7 @@ export const stubMutation: MaybeResolver<Mutation> = {
 
     return true
   },
-  setActiveProject (source, args, ctx) {
+  setCurrentProject (source, args, ctx) {
     const project = ctx.projects.find((p) => p.projectRoot === args.path)
 
     ctx.currentProject = project ? createTestCurrentProject(project.title) : null

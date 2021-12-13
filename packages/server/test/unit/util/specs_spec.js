@@ -17,7 +17,7 @@ describe('lib/util/specs', () => {
 
     this.todosPath = FixturesHelper.projectPath('todos')
 
-    ctx.actions.project.setActiveProjectForTestSetup(this.todosPath)
+    ctx.actions.project.setCurrentProjectForTestSetup(this.todosPath)
 
     return config.get(this.todosPath)
     .then((cfg) => {
@@ -55,7 +55,7 @@ describe('lib/util/specs', () => {
     it('by default, returns all files as long as they have a name and extension', () => {
       const filePath = FixturesHelper.projectPath('various-file-types')
 
-      ctx.actions.project.setActiveProjectForTestSetup(filePath)
+      ctx.actions.project.setCurrentProjectForTestSetup(filePath)
 
       return config.get(filePath)
       .then((cfg) => {
@@ -72,7 +72,7 @@ describe('lib/util/specs', () => {
     it('finds integration and component tests and assigns correct specType', () => {
       const filePath = FixturesHelper.projectPath('component-tests')
 
-      ctx.actions.project.setActiveProjectForTestSetup(filePath)
+      ctx.actions.project.setCurrentProjectForTestSetup(filePath)
 
       return config.get(filePath)
       .then((cfg) => {
@@ -101,7 +101,7 @@ describe('lib/util/specs', () => {
     it('returns files matching config.testFiles', () => {
       const filePath = FixturesHelper.projectPath('various-file-types')
 
-      ctx.actions.project.setActiveProjectForTestSetup(filePath)
+      ctx.actions.project.setCurrentProjectForTestSetup(filePath)
 
       return config.get(filePath)
       .then((cfg) => {
@@ -118,7 +118,7 @@ describe('lib/util/specs', () => {
     it('uses glob to process config.testFiles', () => {
       const filePath = FixturesHelper.projectPath('various-file-types')
 
-      ctx.actions.project.setActiveProjectForTestSetup(filePath)
+      ctx.actions.project.setCurrentProjectForTestSetup(filePath)
 
       return config.get(filePath)
       .then((cfg) => {
@@ -137,7 +137,7 @@ describe('lib/util/specs', () => {
     it('allows array in config.testFiles', () => {
       const filePath = FixturesHelper.projectPath('various-file-types')
 
-      ctx.actions.project.setActiveProjectForTestSetup(filePath)
+      ctx.actions.project.setCurrentProjectForTestSetup(filePath)
 
       return config.get(filePath)
       .then((cfg) => {
@@ -156,7 +156,7 @@ describe('lib/util/specs', () => {
     it('filters using specPattern', () => {
       const filePath = FixturesHelper.projectPath('various-file-types')
 
-      ctx.actions.project.setActiveProjectForTestSetup(filePath)
+      ctx.actions.project.setCurrentProjectForTestSetup(filePath)
 
       return config.get(filePath)
       .then((cfg) => {
@@ -175,7 +175,7 @@ describe('lib/util/specs', () => {
     it('filters using specPattern as array of glob patterns', () => {
       const filePath = FixturesHelper.projectPath('various-file-types')
 
-      ctx.actions.project.setActiveProjectForTestSetup(filePath)
+      ctx.actions.project.setCurrentProjectForTestSetup(filePath)
 
       return config.get(filePath)
       .then((cfg) => {
@@ -197,7 +197,7 @@ describe('lib/util/specs', () => {
     it('properly handles directories with names including \'.\'', () => {
       const filePath = FixturesHelper.projectPath('odd-directory-name')
 
-      ctx.actions.project.setActiveProjectForTestSetup(filePath)
+      ctx.actions.project.setCurrentProjectForTestSetup(filePath)
 
       return config.get(filePath)
       .then((cfg) => {

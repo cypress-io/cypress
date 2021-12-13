@@ -20,7 +20,7 @@ describe('lib/util/settings', () => {
   context('with default configFile option', () => {
     beforeEach(function () {
       this.setup = (obj = {}) => {
-        ctx.actions.project.setActiveProjectForTestSetup(projectRoot)
+        ctx.actions.project.setCurrentProjectForTestSetup(projectRoot)
 
         return fs.writeFileAsync('cypress.config.js', `module.exports = ${JSON.stringify(obj)}`)
       }
@@ -170,7 +170,7 @@ describe('lib/util/settings', () => {
     it('.read returns from configFile when its a JavaScript file', function () {
       this.projectRoot = path.join(projectRoot, '_test-output/path/to/project/')
 
-      ctx.actions.project.setActiveProjectForTestSetup(this.projectRoot)
+      ctx.actions.project.setCurrentProjectForTestSetup(this.projectRoot)
 
       return fs.ensureDirAsync(this.projectRoot)
       .then(() => {
