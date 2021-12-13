@@ -7,8 +7,8 @@ exports['e2e plugins preprocessor passes with working preprocessor 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (app.cy.js)                                                              │
-  │ Searched:   cypress/e2e/app.cy.js                                                            │
+  │ Specs:      1 found (app.cy.js)                                                                │
+  │ Searched:   cypress/e2e/app.cy.js                                                              │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -34,7 +34,7 @@ exports['e2e plugins preprocessor passes with working preprocessor 1'] = `
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     app.cy.js                                                                      │
+  │ Spec Ran:     app.cy.js                                                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -51,7 +51,7 @@ exports['e2e plugins preprocessor passes with working preprocessor 1'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  app.cy.js                              XX:XX        2        2        -        -        - │
+  │ ✔  app.cy.js                              XX:XX        2        2        -        -        -   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        2        2        -        -        -  
 
@@ -160,8 +160,8 @@ exports['e2e plugins / works with user extensions'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (app.cy.js)                                                              │
-  │ Searched:   cypress/e2e/app.cy.js                                                            │
+  │ Specs:      1 found (app.cy.js)                                                                │
+  │ Searched:   cypress/e2e/app.cy.js                                                              │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -186,7 +186,7 @@ exports['e2e plugins / works with user extensions'] = `
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     app.cy.js                                                                      │
+  │ Spec Ran:     app.cy.js                                                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -203,7 +203,7 @@ exports['e2e plugins / works with user extensions'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  app.cy.js                              XX:XX        1        1        -        -        - │
+  │ ✔  app.cy.js                              XX:XX        1        1        -        -        -   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
