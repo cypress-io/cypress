@@ -1,7 +1,9 @@
-import { BUNDLERS, FoundBrowser, FoundSpec, FullConfig, Preferences, Editor, Warning, AllowedState } from '@packages/types'
+import { BUNDLERS, FoundBrowser, FoundSpec, FullConfig, Preferences, Editor, Warning, AllowedState, AllModeOptions } from '@packages/types'
 import type { NexusGenEnums, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
-import type { BrowserWindow } from 'electron'
+import type { App, BrowserWindow } from 'electron'
 import type { ChildProcess } from 'child_process'
+import type { SocketIOServer } from '@packages/socket'
+import type { Server } from 'http'
 
 export type Maybe<T> = T | null | undefined
 
@@ -55,12 +57,13 @@ export interface ActiveProjectShape extends ProjectShape {
 }
 
 export interface AppDataShape {
+  isInGlobalMode: boolean
   browsers: ReadonlyArray<FoundBrowser> | null
   projects: ProjectShape[]
   currentTestingType: Maybe<TestingTypeEnum>
   refreshingBrowsers: Promise<FoundBrowser[]> | null
   refreshingNodePath: Promise<string> | null
-  nodePath: string | null
+  nodePath: Maybe<string>
 }
 
 export interface WizardDataShape {
@@ -77,6 +80,7 @@ export interface WizardDataShape {
 }
 
 export interface ElectronShape {
+  app: App | null
   browserWindow: BrowserWindow | null
 }
 
@@ -87,6 +91,15 @@ export interface BaseErrorDataShape {
 }
 
 export interface CoreDataShape {
+  servers: {
+    appServer?: Maybe<Server>
+    appServerPort?: Maybe<number>
+    appSocketServer?: Maybe<SocketIOServer>
+    gqlServer?: Maybe<Server>
+    gqlServerPort?: Maybe<number>
+    gqlSocketServer?: Maybe<SocketIOServer>
+  }
+  hasInitializedMode: 'run' | 'open' | null
   baseError: BaseErrorDataShape | null
   dev: DevStateShape
   localSettings: LocalSettingsDataShape
@@ -101,19 +114,22 @@ export interface CoreDataShape {
 /**
  * All state for the app should live here for now
  */
-export function makeCoreData (): CoreDataShape {
+export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDataShape {
   return {
+    servers: {},
+    hasInitializedMode: null,
     baseError: null,
     dev: {
       refreshState: null,
     },
     app: {
+      isInGlobalMode: Boolean(modeOptions.global),
       currentTestingType: null,
       refreshingBrowsers: null,
       browsers: null,
       projects: [],
       refreshingNodePath: null,
-      nodePath: null,
+      nodePath: modeOptions.userNodePath,
     },
     localSettings: {
       availableEditors: [],
@@ -136,6 +152,7 @@ export function makeCoreData (): CoreDataShape {
     },
     user: null,
     electron: {
+      app: null,
       browserWindow: null,
     },
   }

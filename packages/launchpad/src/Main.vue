@@ -3,7 +3,7 @@
     <HeaderBar />
     <div class="p-24px">
       <template v-if="query.data.value.baseError">
-        <BaseError :gql="query.data.value.baseError" />
+        <BaseError :gql="query.data.value" />
       </template>
       <template
         v-else-if="query.data.value.isInGlobalMode && !query.data.value?.currentProject"
@@ -70,13 +70,10 @@ gql`
 query MainLaunchpadQuery {
   ...TestingTypeCards
   ...Wizard
+  ...BaseError
 
   currentProject {
     id
-  }
-
-  baseError {
-    ...BaseError
   }
 
   wizard {

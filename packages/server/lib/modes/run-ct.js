@@ -1,6 +1,6 @@
 const { openProject } = require('../open_project')
 
-const run = (options) => {
+const run = (options, loading) => {
   // TODO: make sure if we need to run this in electron by default to match e2e behavior?
   options.browser = options.browser || 'electron'
   options.runAllSpecsInSameBrowserSession = true
@@ -19,7 +19,7 @@ const run = (options) => {
     })
   })
 
-  return require('./run').run(options)
+  return require('./run').run(options, loading)
 }
 
 module.exports = {

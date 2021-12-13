@@ -7,8 +7,8 @@
 
 <script lang="ts" setup>
 import { gql, useQuery } from '@urql/vue'
-import { SpecPageContainerDocument } from '../generated/graphql'
-import SpecRunnerContainer from '../runner/SpecRunnerContainer.vue'
+import { SpecPageContainerDocument } from '../../generated/graphql'
+import SpecRunnerContainer from '../../runner/SpecRunnerContainer.vue'
 
 gql`
 query SpecPageContainer {
@@ -22,7 +22,8 @@ const query = useQuery({ query: SpecPageContainerDocument })
 <route>
   {
     meta: {
-      header: false
+      header: false,
+      navBarExpandedAllowed: false
     }
   }
 </route>

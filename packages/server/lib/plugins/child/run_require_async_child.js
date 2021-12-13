@@ -1,14 +1,14 @@
 require('graceful-fs').gracefulify(require('fs'))
 const stripAnsi = require('strip-ansi')
-const debug = require('debug')('cypress:server:require_async:child')
-const tsNodeUtil = require('./ts_node')
-const util = require('../plugins/util')
-const RunPlugins = require('../plugins/child/run_plugins')
+const debug = require('debug')('cypress:server:plugins:child')
+const tsNodeUtil = require('../../util/ts_node')
+const util = require('../util')
+const RunPlugins = require('./run_plugins')
 
 let tsRegistered = false
 
 /**
- * runs and returns the passed `requiredFile` file in the ipc `load` event
+ * Executes and returns the passed `requiredFile` file in the ipc `load` event
  * @param {*} ipc Inter Process Comunication protocol
  * @param {*} requiredFile the file we are trying to load
  * @param {*} projectRoot the root of the typescript project (useful mainly for tsnode)

@@ -67,6 +67,8 @@ export function makeUrqlClient (target: 'launchpad' | 'app'): Client {
   //
   const io = getPubSubSource({ target, gqlPort: port, serverPort: SERVER_PORT_MATCH?.[1] })
 
+  let hasError = false
+
   const exchanges: Exchange[] = [
     dedupExchange,
     pubSubExchange(io),
@@ -81,9 +83,13 @@ export function makeUrqlClient (target: 'launchpad' | 'app'): Client {
         ${error.stack ?? ''}
       `
 
-        if (process.env.NODE_ENV !== 'production') {
+        if (process.env.NODE_ENV !== 'production' && !hasError) {
+          hasError = true
           toast.error(message, {
             timeout: false,
+            onClose () {
+              hasError = false
+            },
           })
         }
 

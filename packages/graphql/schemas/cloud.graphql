@@ -85,6 +85,11 @@ type CloudProject implements Node {
   latestRun: CloudRun
 
   """
+  Given name of the project
+  """
+  name: String!
+
+  """
   The organization the project is a member of
   """
   organization: CloudOrganization
@@ -289,6 +294,15 @@ enum CloudRunStatus {
 A CloudUser represents an User stored in the Cypress Cloud
 """
 type CloudUser implements Node {
+  """
+  Url to manage cloud organizations for this user
+  """
+  cloudOrganizationsUrl: String
+
+  """
+  Url to create a cloud organization for this user
+  """
+  createCloudOrganizationUrl: String
   email: String
 
   """
