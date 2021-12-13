@@ -1,7 +1,8 @@
 describe('App', () => {
   beforeEach(() => {
-    cy.setupE2E('component-tests')
-    cy.initializeApp()
+    cy.scaffoldProject('component-tests')
+    cy.openProject('component-tests')
+    cy.startAppServer()
   })
 
   it('resolves the home page', () => {

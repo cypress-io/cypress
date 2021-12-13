@@ -254,11 +254,16 @@ export class OpenProject {
 
       const specPattern = options.spec || cfg[testingType].specPattern
 
+      // exclude all specs matching e2e if in component testing
+      const ignoreSpecPattern = testingType === 'component'
+        ? cfg?.e2e?.specPattern ?? ''
+        : ''
+
       if (!specPattern) {
         throw Error('could not find pattern to load specs')
       }
 
-      const specs = await this._ctx.project.findSpecs(path, testingType, specPattern)
+      const specs = await this._ctx.project.findSpecs(path, testingType, specPattern, ignoreSpecPattern)
 
       this._ctx.actions.project.setSpecs(specs)
 

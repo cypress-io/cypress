@@ -18,7 +18,6 @@ export default defineConfig({
   experimentalInteractiveRunEvents: true,
   component: {
     supportFile: 'cypress/component/support/index.ts',
-    specPattern: 'src/**/*.{spec,cy}.{js,ts,tsx,jsx}',
     devServer (cypressConfig, devServerConfig) {
       const { startDevServer } = require('@cypress/vite-dev-server')
 

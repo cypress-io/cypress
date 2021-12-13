@@ -1,4 +1,5 @@
 import type { CodeGenType } from '@packages/graphql/src/gen/nxs.gen'
+import { xor } from 'lodash'
 import { FoundSpec, FrontendFramework, FRONTEND_FRAMEWORKS, ResolvedFromConfig, RESOLVED_FROM, SpecFileWithExtension, STORYBOOK_GLOB } from '@packages/types'
 import { scanFSForAvailableDependency } from 'create-cypress-tests'
 import path from 'path'
@@ -98,8 +99,13 @@ export class ProjectDataSource {
     return config[testingType]?.specPattern
   }
 
-  async findSpecs (projectRoot: string, testingType: Cypress.TestingType, specPattern: string | string[]): Promise<FoundSpec[]> {
-    const specAbsolutePaths = await this.ctx.file.getFilesByGlob(projectRoot, specPattern, { absolute: true })
+  async findSpecs (projectRoot: string, testingType: Cypress.TestingType, specPattern: string | string[], ignoreSpecPattern?: string | string[]): Promise<FoundSpec[]> {
+    let specAbsolutePaths = await this.ctx.file.getFilesByGlob(projectRoot, specPattern, { absolute: true })
+    const specsToExclude = ignoreSpecPattern
+      ? await this.ctx.file.getFilesByGlob(projectRoot, ignoreSpecPattern, { absolute: true })
+      : []
+
+    specAbsolutePaths = xor(specAbsolutePaths, specsToExclude)
 
     const matched = matchedSpecs({
       projectRoot,

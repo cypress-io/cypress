@@ -479,7 +479,7 @@ export class ProjectActions {
       throw Error(`Cannot create spec without activeProject.`)
     }
 
-    const integrationFolder = 'cypress/integration' || project.projectRoot
+    const integrationFolder = 'cypress/e2e' || project.projectRoot
 
     const results = await codeGenerator(
       { templateDir: templates['scaffoldIntegration'], target: integrationFolder },
@@ -501,14 +501,17 @@ export class ProjectActions {
       }
     })
 
-    const specPattern = await this.ctx.project.specPatternForTestingType(project.projectRoot, 'e2e')
+    const [specPattern, ignoreSpecPattern] = await Promise.all([
+      this.ctx.project.specPatternForTestingType(project.projectRoot, 'e2e'),
+      this.ctx.project.specPatternForTestingType(project.projectRoot, 'component'),
+    ])
 
     if (!specPattern) {
       throw Error('Could not find specPattern for project')
     }
 
     // created new specs - find and cache them!
-    project.specs = await this.ctx.project.findSpecs(project.projectRoot, 'e2e', specPattern)
+    project.specs = await this.ctx.project.findSpecs(project.projectRoot, 'e2e', specPattern, ignoreSpecPattern)
 
     return withFileParts
   }
