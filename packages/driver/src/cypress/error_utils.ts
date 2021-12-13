@@ -265,6 +265,7 @@ export class InternalCypressError extends Error {
 
 export class CypressError extends Error {
   docsUrl?: string
+  retry?: boolean
 
   constructor (message) {
     super(message)
