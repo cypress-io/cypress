@@ -3,7 +3,6 @@ module.exports = {
   'fixturesFolder': false,
   'viewportWidth': 500,
   'viewportHeight': 500,
-  'nodeVersion': 'system',
   'env': {
     'coverage': true,
   },

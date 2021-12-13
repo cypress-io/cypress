@@ -1539,7 +1539,7 @@ module.exports = {
       options.browsers = browsers
 
       return createAndOpenProject(socketId, options)
-      .then(async ({ project, projectId, config, configFile }) => {
+      .then(({ project, projectId, config, configFile }) => {
         debug('project created and opened with config %o', config)
 
         // if we have a project id and a key but record hasnt been given
