@@ -501,14 +501,20 @@ export class ProjectActions {
       }
     })
 
-    const specPattern = await this.ctx.project.specPatternForTestingType(project.projectRoot, 'e2e')
+    const { specPattern, ignoreSpecPattern } = await this.ctx.project.specPatternsForTestingType(project.projectRoot, 'e2e')
 
     if (!specPattern) {
       throw Error('Could not find specPattern for project')
     }
 
     // created new specs - find and cache them!
-    project.specs = await this.ctx.project.findSpecs(project.projectRoot, 'e2e', specPattern)
+    project.specs = await this.ctx.project.findSpecs(
+      project.projectRoot,
+      'e2e',
+      specPattern,
+      ignoreSpecPattern || [],
+      [],
+    )
 
     return withFileParts
   }

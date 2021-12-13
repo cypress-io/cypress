@@ -93,16 +93,37 @@ export class ProjectDataSource {
     return this.ctx.config.getConfigForProject(projectRoot)
   }
 
-  async specPatternForTestingType (projectRoot: string, testingType: Cypress.TestingType) {
+  async specPatternsForTestingType (projectRoot: string, testingType: Cypress.TestingType): Promise<{
+    specPattern?: string[]
+    ignoreSpecPattern?: string[]
+  }> {
+    const toArray = (val?: string | string[]) => val ? typeof val === 'string' ? [val] : val : undefined
+
     const config = await this.getConfig(projectRoot)
 
-    return config[testingType]?.specPattern
+    return {
+      specPattern: toArray(config[testingType]?.specPattern),
+      ignoreSpecPattern: toArray(config[testingType]?.ignoreSpecPattern),
+    }
   }
 
-  async findSpecs (projectRoot: string, testingType: Cypress.TestingType, specPattern: string | string[], ignoreSpecPattern?: string | string[]): Promise<FoundSpec[]> {
-    let specAbsolutePaths = await this.ctx.file.getFilesByGlob(projectRoot, specPattern, { absolute: true })
-    const specsToExclude = ignoreSpecPattern
-      ? await this.ctx.file.getFilesByGlob(projectRoot, ignoreSpecPattern, { absolute: true })
+  async findSpecs (
+    projectRoot: string,
+    testingType: Cypress.TestingType,
+    specPattern: string[],
+    ignoreSpecPattern: string[],
+    globToRemove: string[],
+  ): Promise<FoundSpec[]> {
+    let specAbsolutePaths = await this.ctx.file.getFilesByGlob(
+      projectRoot,
+      specPattern, {
+        absolute: true,
+        ignore: ignoreSpecPattern,
+      },
+    )
+
+    const specsToExclude = globToRemove
+      ? await this.ctx.file.getFilesByGlob(projectRoot, globToRemove, { absolute: true })
       : []
 
     specAbsolutePaths = xor(specAbsolutePaths, specsToExclude)
