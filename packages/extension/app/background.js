@@ -64,8 +64,6 @@ const connect = function (host, path, extraOpts) {
         ],
       }
     }, { urls: ['<all_urls>'] }, ['blocking', 'requestHeaders'])
-
-    return ws.emit('automation:client:connected')
   })
 
   const fail = (id, err) => {
@@ -119,6 +117,8 @@ const connect = function (host, path, extraOpts) {
     listenToCookieChanges()
     listenToDownloads()
     listenToOnBeforeHeaders()
+
+    ws.emit('automation:client:connected')
   })
 
   return ws

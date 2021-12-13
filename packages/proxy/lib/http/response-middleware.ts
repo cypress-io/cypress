@@ -271,14 +271,15 @@ const SetInjectionLevel: ResponseMiddleware = function () {
     }
 
     const isHTML = resContentTypeIs(this.incomingRes, 'text/html')
+    const isTheAUTFrame = isAUTFrame(this.req)
 
-    if (!isReqMatchOriginPolicy && isAUTFrame(this.req) && (isHTML || isRenderedHTML)) {
+    if (!isReqMatchOriginPolicy && isTheAUTFrame && (isHTML || isRenderedHTML)) {
       this.debug('- multidomain injection')
 
       return 'fullMultidomain'
     }
 
-    if (!isHTML) {
+    if (!isHTML || !isReqMatchOriginPolicy && !isTheAUTFrame) {
       debug('- no injection (not html)')
 
       return false

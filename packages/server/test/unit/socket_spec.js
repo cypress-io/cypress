@@ -133,6 +133,11 @@ describe('lib/socket', () => {
               query () {},
               executeScript () {},
             },
+            webRequest: {
+              onBeforeSendHeaders: {
+                addListener () {},
+              },
+            },
           }
 
           extensionBackgroundPage = require('@packages/extension/app/background')
