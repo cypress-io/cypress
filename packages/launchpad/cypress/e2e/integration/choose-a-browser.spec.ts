@@ -1,6 +1,6 @@
 import type { FoundBrowser } from '@packages/types/src'
 
-describe('Choose a Browser config', () => {
+describe('Choose a Browser Page', () => {
   // Walks through setup pages to get to browser selection
   const stepThroughConfigPages = () => {
     cy.get('h1').should('contain', 'Configuration Files')
@@ -66,6 +66,17 @@ describe('Choose a Browser config', () => {
     })
   }
 
+  // Force the server to return no detected browsers
+  const setupZeroMockBrowsers = function () {
+    cy.withCtx(async (ctx, o) => {
+      if (ctx._apis.appApi.getBrowsers.restore) {
+        ctx._apis.appApi.getBrowsers.restore()
+      }
+
+      sinon.stub(ctx._apis.appApi, 'getBrowsers').resolves([])
+    })
+  }
+
   // Creates and returns aliases for browsers found on the DOM
   const getBrowserAliases = function () {
     cy.get('[data-cy="open-browser-list"] [data-selected-browser]').eq(0).as('chromeRadioOption')
@@ -83,164 +94,187 @@ describe('Choose a Browser config', () => {
 
   beforeEach(() => {
     cy.scaffoldProject('launchpad')
-
-    setupMockBrowsers()
   })
 
-  it('should preselect valid --browser option', () => {
-    cy.openProject('launchpad', ['--e2e', '--browser', 'edge'])
+  describe('with found browsers', () => {
+    beforeEach(() => {
+      setupMockBrowsers()
+    })
 
-    cy.visitLaunchpad()
-    stepThroughConfigPages()
+    it('preselects browser that is provided through the command line', () => {
+      cy.openProject('launchpad', ['--e2e', '--browser', 'edge'])
 
-    cy.get('h1').should('contain', 'Choose a Browser')
+      cy.visitLaunchpad()
+      stepThroughConfigPages()
 
-    cy.get('[data-cy="open-browser-list"] [data-selected-browser="true"]')
-    .should('contain', 'Edge')
-  })
+      cy.get('h1').should('contain', 'Choose a Browser')
 
-  it('shows alert when launched with --browser option that cannot be found', () => {
-    cy.openProject('launchpad', ['--e2e', '--browser', 'doesNotExist'])
-    cy.visitLaunchpad()
+      cy.get('[data-cy="open-browser-list"] [data-selected-browser="true"]')
+      .should('contain', 'Edge')
+    })
 
-    stepThroughConfigPages()
+    it('shows warning when launched with --browser name that cannot be found', () => {
+      cy.openProject('launchpad', ['--e2e', '--browser', 'doesNotExist'])
+      cy.visitLaunchpad()
 
-    cy.get('h1').should('contain', 'Choose a Browser')
-    cy.get('[data-cy="alert-header"]').should('contain', 'Warning: Browser Not Found')
-    cy.get('[data-cy="alert-body"]')
-    .should('contain', 'The specified browser was not found on your system or is not supported by Cypress: doesNotExist')
+      stepThroughConfigPages()
 
-    cy.get('[data-cy="alert-body"] a').eq(1)
-    .should('have.attr', 'href')
-    .and('equal', 'https://on.cypress.io/troubleshooting-launching-browsers')
+      cy.get('h1').should('contain', 'Choose a Browser')
+      cy.get('[data-cy="alert-header"]').should('contain', 'Warning: Browser Not Found')
+      cy.get('[data-cy="alert-body"]')
+      .should('contain', 'The specified browser was not found on your system or is not supported by Cypress: doesNotExist')
 
-    cy.get('[data-cy="alert-suffix-icon"]').click()
-    cy.get('[data-cy="alert-header"]').should('not.exist')
-  })
+      cy.get('[data-cy="alert-body"] a').eq(1)
+      .should('have.attr', 'href')
+      .and('equal', 'https://on.cypress.io/troubleshooting-launching-browsers')
 
-  it('shows alert when launched with --browser path option that cannot be found', () => {
-    cy.openProject('launchpad', ['--e2e', '--browser', '/path/does/not/exist'])
+      // Ensure warning can be dismissed
+      cy.get('[data-cy="alert-suffix-icon"]').click()
+      cy.get('[data-cy="alert-header"]').should('not.exist')
+    })
 
-    cy.visitLaunchpad()
+    it('shows warning when launched with --browser path option that cannot be found', () => {
+      cy.openProject('launchpad', ['--e2e', '--browser', '/path/does/not/exist'])
 
-    stepThroughConfigPages()
+      cy.visitLaunchpad()
 
-    cy.get('h1').should('contain', 'Choose a Browser')
-    cy.get('[data-cy="alert-header"]').should('contain', 'Warning: Browser Not Found')
-    cy.get('[data-cy="alert-body"]')
-    .should('contain', 'We could not identify a known browser at the path you specified: /path/does/not/exist')
-    .should('contain', 'spawn /path/does/not/exist ENOENT')
+      stepThroughConfigPages()
 
-    cy.get('[data-cy="alert-body"] a')
-    .should('have.attr', 'href')
-    .and('equal', 'https://on.cypress.io/troubleshooting-launching-browsers')
+      cy.get('h1').should('contain', 'Choose a Browser')
+      cy.get('[data-cy="alert-header"]').should('contain', 'Warning: Browser Not Found')
+      cy.get('[data-cy="alert-body"]')
+      .should('contain', 'We could not identify a known browser at the path you specified: /path/does/not/exist')
+      .should('contain', 'spawn /path/does/not/exist ENOENT')
 
-    cy.get('[data-cy="alert-suffix-icon"]').click()
-    cy.get('[data-cy="alert-header"]').should('not.exist')
-  })
+      cy.get('[data-cy="alert-body"] a')
+      .should('have.attr', 'href')
+      .and('equal', 'https://on.cypress.io/troubleshooting-launching-browsers')
 
-  it('should show installed browsers with their relevant properties', () => {
-    cy.openProject('launchpad', ['--e2e'])
+      // Ensure warning can be dismissed
+      cy.get('[data-cy="alert-suffix-icon"]').click()
+      cy.get('[data-cy="alert-header"]').should('not.exist')
+    })
 
-    cy.visitLaunchpad()
+    it('shows installed browsers with their relevant properties', () => {
+      cy.openProject('launchpad', ['--e2e'])
 
-    stepThroughConfigPages()
+      cy.visitLaunchpad()
 
-    cy.get('h1').should('contain', 'Choose a Browser')
+      stepThroughConfigPages()
 
-    const { chrome, firefox, electron, edge } = getBrowserAliases()
+      cy.get('h1').should('contain', 'Choose a Browser')
 
-    cy.get(chrome)
-    .should('contain', 'Chrome')
-    .and('contain', 'v1.x')
-    .find('img')
-    .should('have.attr', 'alt', 'Chrome')
+      const { chrome, firefox, electron, edge } = getBrowserAliases()
 
-    cy.get(firefox)
-    .should('contain', 'Firefox')
-    .and('contain', 'v2.x')
-    .find('img')
-    .should('have.attr', 'alt', 'Firefox')
+      cy.get(chrome)
+      .should('contain', 'Chrome')
+      .and('contain', 'v1.x')
+      .find('img')
+      .should('have.attr', 'alt', 'Chrome')
 
-    cy.get(electron)
-    .should('contain', 'Electron')
-    .and('contain', 'v3.x')
-    .find('img')
-    .should('have.attr', 'alt', 'Electron')
+      cy.get(firefox)
+      .should('contain', 'Firefox')
+      .and('contain', 'v2.x')
+      .find('img')
+      .should('have.attr', 'alt', 'Firefox')
 
-    cy.get(edge)
-    .should('contain', 'Edge')
-    .and('contain', 'v4.x')
-    .find('img')
-    .should('have.attr', 'alt', 'Edge')
-  })
+      cy.get(electron)
+      .should('contain', 'Electron')
+      .and('contain', 'v3.x')
+      .find('img')
+      .should('have.attr', 'alt', 'Electron')
 
-  it('should launch selected browser when launch button is clicked', () => {
-    cy.openProject('launchpad', ['--e2e'])
+      cy.get(edge)
+      .should('contain', 'Edge')
+      .and('contain', 'v4.x')
+      .find('img')
+      .should('have.attr', 'alt', 'Edge')
+    })
 
-    cy.visitLaunchpad()
+    it('performs mutation to launch selected browser when launch button is pressed', () => {
+      cy.openProject('launchpad', ['--e2e'])
 
-    stepThroughConfigPages()
+      cy.visitLaunchpad()
 
-    cy.get('h1').should('contain', 'Choose a Browser')
+      stepThroughConfigPages()
 
-    cy.contains('Launch Chrome').as('launchButton')
+      cy.get('h1').should('contain', 'Choose a Browser')
 
-    // Stub out response to prevent browser launch but not break internals
-    cy.intercept('mutation-OpenBrowser_LaunchProject', {
-      body: {
-        data: {
-          launchOpenProject: true,
-          setProjectPreferences: {
-            currentProject: {
-              id: 'test-id',
-              title: 'launchpad',
-              __typename: 'CurrentProject',
+      cy.contains('Launch Chrome').as('launchButton')
+
+      // Stub out response to prevent browser launch but not break internals
+      cy.intercept('mutation-OpenBrowser_LaunchProject', {
+        body: {
+          data: {
+            launchOpenProject: true,
+            setProjectPreferences: {
+              currentProject: {
+                id: 'test-id',
+                title: 'launchpad',
+                __typename: 'CurrentProject',
+              },
+              __typename: 'Query',
             },
-            __typename: 'Query',
           },
         },
-      },
-    }).as('launchProject')
+      }).as('launchProject')
 
-    cy.get('@launchButton').click()
+      cy.get('@launchButton').click()
 
-    cy.wait('@launchProject').then(({ request }) => {
-      expect(request?.body.variables.browserPath).to.contain('/test/chrome/path')
-      expect(request?.body.variables.testingType).to.eq('e2e')
+      cy.wait('@launchProject').then(({ request }) => {
+        expect(request?.body.variables.browserPath).to.contain('/test/chrome/path')
+        expect(request?.body.variables.testingType).to.eq('e2e')
+      })
+    })
+
+    it('performs mutation to change selected browser when browser item is clicked', () => {
+      cy.openProject('launchpad', ['--e2e'])
+
+      cy.visitLaunchpad()
+      stepThroughConfigPages()
+
+      cy.get('h1').should('contain', 'Choose a Browser')
+
+      const { chrome, firefox } = getBrowserAliases()
+
+      cy.get(chrome)
+      .should('have.attr', 'data-selected-browser', 'true')
+
+      cy.get(firefox)
+      .should('have.attr', 'data-selected-browser', 'false')
+
+      cy.contains('Launch Chrome').should('be.visible')
+
+      cy.intercept('mutation-OpenBrowserList_SetBrowser').as('selectNewBrowserMutation')
+
+      cy.get(firefox).click()
+
+      cy.wait('@selectNewBrowserMutation')
+
+      cy.get(chrome)
+      .should('have.attr', 'data-selected-browser', 'false')
+
+      cy.get(firefox)
+      .should('have.attr', 'data-selected-browser', 'true')
+
+      cy.contains('Launch Firefox').should('be.visible')
     })
   })
 
-  it('should highlight browser radio item when clicked', () => {
-    cy.openProject('launchpad', ['--e2e'])
+  describe('with no found browsers', () => {
+    it('does not show browser list when no browsers are detected', () => {
+      setupZeroMockBrowsers()
 
-    cy.visitLaunchpad()
-    stepThroughConfigPages()
+      cy.openProject('launchpad', ['--e2e'])
 
-    cy.get('h1').should('contain', 'Choose a Browser')
+      cy.visitLaunchpad()
 
-    const { chrome, firefox } = getBrowserAliases()
+      stepThroughConfigPages()
 
-    cy.get(chrome)
-    .should('have.attr', 'data-selected-browser', 'true')
+      cy.get('h1').should('contain', 'Choose a Browser')
 
-    cy.get(firefox)
-    .should('have.attr', 'data-selected-browser', 'false')
-
-    cy.contains('Launch Chrome').should('be.visible')
-
-    cy.intercept('mutation-OpenBrowserList_SetBrowser').as('selectNewBrowserMutation')
-
-    cy.get(firefox).click()
-
-    cy.wait('@selectNewBrowserMutation')
-
-    cy.get(chrome)
-    .should('have.attr', 'data-selected-browser', 'false')
-
-    cy.get(firefox)
-    .should('have.attr', 'data-selected-browser', 'true')
-
-    cy.contains('Launch Firefox').should('be.visible')
+      cy.get('[data-cy="open-browser-list"]').children().should('have.length', 0)
+      cy.get('button').contains('Back').should('be.visible').and('not.be.disabled')
+    })
   })
 })
