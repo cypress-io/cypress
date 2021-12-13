@@ -94,9 +94,9 @@
         </div>
         <Input
           id="projectName"
+          v-model="projectName"
           class="mt-8px"
           input-classes="h-38px"
-          :model-value="projectName"
           :prefix-icon="FolderIcon"
           prefix-icon-classes="icon-dark-gray-500"
         />
