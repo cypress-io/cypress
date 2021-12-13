@@ -5,7 +5,6 @@ export default defineConfig({
   'video': false,
   'fixturesFolder': false,
   'component': {
-    'specPattern': 'cypress/components/**/*.spec.*',
     devServer (cypressConfig) {
       const path = require('path')
       const { startDevServer } = require('./dist')

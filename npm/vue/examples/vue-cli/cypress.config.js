@@ -2,7 +2,6 @@ module.exports = {
   'video': false,
   'fixturesFolder': false,
   'component': {
-    'specPattern': 'src/**/*spec.js',
     devServer (cypressConfig) {
       const { startDevServer } = require('@cypress/webpack-dev-server')
       const webpackConfig = require('@vue/cli-service/webpack.config')

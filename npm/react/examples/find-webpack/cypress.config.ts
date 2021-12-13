@@ -4,7 +4,6 @@ export default defineConfig({
   'video': true,
   'projectId': 'jq5xpp',
   'component': {
-    'specPattern': 'src/**/*.spec.{js,ts,jsx,tsx}',
     devServer (cypressConfig) {
       const findReactScriptsWebpackConfig = require('@cypress/react/plugins/react-scripts/findReactScriptsWebpackConfig')
       const { startDevServer } = require('@cypress/webpack-dev-server')
