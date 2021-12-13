@@ -51,9 +51,9 @@
 import CodeTag from '@cy/components/CodeTag.vue'
 import BeforeAfter from './fragments/BeforeAfter.vue'
 import HighlightedFilesList from './fragments/HighlightedFilesList.vue'
-import { useI18n } from '@cy/i18n'
 import MigrationList from './fragments/MigrationList.vue'
 import MigrationTitle from './fragments/MigrationTitle.vue'
+import { useI18n } from '@cy/i18n'
 
 const { t } = useI18n()
 

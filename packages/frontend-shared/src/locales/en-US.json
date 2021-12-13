@@ -399,6 +399,9 @@
     }
   },
   "migration": {
+    "before": "Before",
+    "after": "After",
+    "heresWhy": "here's why:",
     "renameAuto": {
       "title": "We'll automatically rename your specs in this step",
       "changedSpecFolder": "We've changed the default spec folder from:",
@@ -417,6 +420,26 @@
       "changedTheFile": "We've removed {jsonFile} in favor of a {jsFile} file.",
       "willConvert": "We'll automatically create a new {jsFile} file and seed it with your options from your existing {jsonFile}.",
       "removeJson": "We'll remove your existing {0} as part of this step."
+    },
+    "wizard": {
+      "title": "Migration Helper",
+      "description": "Complete the steps below to migrate your project to Cypress 10",
+      "step1": {
+        "title": "Automatically rename existing specs",
+        "description": "In this step, we'll automatically rename and move your existing spec files.",
+        "button": "Rename these specs for me"
+      },
+      "step2": {
+        "title": "Manually move your existing component specs",
+        "description": "In this step, you'll manually move your existing component specs to their new default location.",
+        "buttonWait": "Waiting for you to move your component specs...",
+        "button": "I'll do this later"
+      },
+      "step3": {
+        "title": "Automatically migrate the Cypress configuration file",
+        "description": "In this step, we'll automatically migrate your existing cypress configuration to the new Cypress configuration file.",
+        "button": "Migrate and continue"
+      }
     }
   }
 }

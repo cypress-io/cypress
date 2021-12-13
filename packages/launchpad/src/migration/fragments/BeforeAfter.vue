@@ -5,12 +5,12 @@
   >
     <div class="flex font-semibold bg-gray-50 px-16px text-gray-800 items-center">
       <slot name="beforeHeader">
-        Before
+        {{ t('migration.before') }}
       </slot>
     </div>
     <div class="flex font-semibold bg-gray-50 px-16px text-gray-800 items-center">
       <slot name="afterHeader">
-        After
+        {{ t('migration.after') }}
       </slot>
     </div>
     <div class="bg-white">
@@ -21,3 +21,9 @@
     </div>
   </div>
 </template>
+
+<script lang="ts" setup>
+import { useI18n } from '@cy/i18n'
+
+const { t } = useI18n()
+</script>

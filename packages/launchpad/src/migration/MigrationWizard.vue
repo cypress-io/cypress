@@ -1,24 +1,33 @@
 <template>
+  <h1 class="font-medium text-center pt-20px text-32px text-body-gray-900">
+    {{ t('migration.wizard.title') }}
+  </h1>
+  <p
+    class="mx-42px mt-12px text-center text-body-gray-600 text-18px"
+  >
+    {{ t('migration.wizard.description') }}
+  </p>
+
   <MigrationStep
     checked
     :step="1"
-    :title="'Automatically rename existing specs'"
-    :description="'In this step, we\'ll automatically rename and move your existing spec files.'"
+    :title="t('migration.wizard.step1.title')"
+    :description="t('migration.wizard.step1.description')"
   >
     <RenameSpecsAuto />
     <template #footer>
       <Button
         @click="renameSpecs"
       >
-        Rename these specs for me
+        {{ t('migration.wizard.step1.button') }}
       </Button>
     </template>
   </MigrationStep>
   <MigrationStep
     open
     :step="2"
-    :title="'Manually move your existing component specs'"
-    :description="'In this step, you\'ll manually move your existing component specs to their new default location.'"
+    :title="t('migration.wizard.step2.title')"
+    :description="t('migration.wizard.step2.description')"
   >
     <RenameSpecsManual />
     <template #footer>
@@ -29,28 +38,28 @@
             class="animate-spin icon-dark-white icon-light-gray-400"
           />
         </template>
-        Waiting for you to move your component specs...
+        t('migration.wizard.step2.buttonWait')
       </Button>
       <Button
         variant="outline"
         class="ml-24px"
         @click="skipStep2"
       >
-        I'll do this later
+        {{ t('migration.wizard.step2.button') }}
       </Button>
     </template>
   </MigrationStep>
   <MigrationStep
     :step="3"
-    :title="'Automatically migrate the Cypress configuration file'"
-    :description="'In this step, we\'ll automatically migrate your existing cypress configuration to the new Cypress configuration file.'"
+    :title="t('migration.wizard.step3.title')"
+    :description="t('migration.wizard.step3.description')"
   >
     <ConvertConfigFile />
     <template #footer>
       <Button
         @click="convertConfig"
       >
-        Migrate and continue
+        {{ t('migration.wizard.step3.button') }}
       </Button>
     </template>
   </MigrationStep>
@@ -62,6 +71,9 @@ import MigrationStep from './fragments/MigrationStep.vue'
 import RenameSpecsAuto from './RenameSpecsAuto.vue'
 import RenameSpecsManual from './RenameSpecsManual.vue'
 import ConvertConfigFile from './ConvertConfigFile.vue'
+import { useI18n } from '@cy/i18n'
+
+const { t } = useI18n()
 
 function renameSpecs () {
 
