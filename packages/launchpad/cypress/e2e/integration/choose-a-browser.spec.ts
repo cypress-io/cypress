@@ -1,3 +1,4 @@
+import type Sinon from '@packages/../cli/types/sinon'
 import type { FoundBrowser } from '@packages/types/src'
 
 describe('Choose a Browser Page', () => {
@@ -12,55 +13,45 @@ describe('Choose a Browser Page', () => {
   // Mocks server's browser detection with known list
   const setupMockBrowsers = function () {
     cy.withCtx(async (ctx, o) => {
-      if (ctx._apis.appApi.getBrowsers.restore) {
-        ctx._apis.appApi.getBrowsers.restore()
+      let mockedGetBrowsers = ctx._apis.appApi.getBrowsers as Sinon.SinonStub
+
+      if (mockedGetBrowsers.restore) {
+        mockedGetBrowsers.restore()
       }
 
       const mockBrowsers = [{
-        'id': '1',
         'channel': 'stable',
-        'disabled': false,
-        'isSelected': true,
         'displayName': 'Chrome',
         'family': 'chromium',
-        'majorVersion': '1',
         'name': 'chrome',
-        'path': '/test/chrome/path',
         'version': '1.2.333.445',
-      } as FoundBrowser, {
-        'id': '2',
+        'path': '/test/chrome/path',
+        'majorVersion': '1',
+      }, {
         'channel': 'stable',
-        'disabled': false,
-        'isSelected': false,
         'displayName': 'Firefox',
         'family': 'firefox',
-        'majorVersion': '2',
         'name': 'firefox',
         'path': '/test/firefox/path',
         'version': '2.3.444',
-      } as FoundBrowser, {
-        'id': '3',
+        'majorVersion': '2',
+      }, {
         'channel': 'stable',
-        'disabled': false,
-        'isSelected': false,
         'displayName': 'Electron',
         'family': 'chromium',
-        'majorVersion': '3',
         'name': 'electron',
         'path': '/test/electron/path',
         'version': '3.4.555.66',
-      } as FoundBrowser, {
-        'id': '4',
+        'majorVersion': '3',
+      }, {
         'channel': 'stable',
-        'disabled': false,
-        'isSelected': false,
         'displayName': 'Edge',
         'family': 'chromium',
-        'majorVersion': '4',
         'name': 'edge',
         'path': '/test/edge/path',
         'version': '4.5.666.77',
-      }]
+        'majorVersion': '4',
+      }] as FoundBrowser[]
 
       sinon.stub(ctx._apis.appApi, 'getBrowsers').resolves(mockBrowsers)
     })
@@ -69,11 +60,13 @@ describe('Choose a Browser Page', () => {
   // Force the server to return no detected browsers
   const setupZeroMockBrowsers = function () {
     cy.withCtx(async (ctx, o) => {
-      if (ctx._apis.appApi.getBrowsers.restore) {
-        ctx._apis.appApi.getBrowsers.restore()
+      let mockedGetBrowsers = ctx._apis.appApi.getBrowsers as Sinon.SinonStub
+
+      if (mockedGetBrowsers.restore) {
+        mockedGetBrowsers.restore()
       }
 
-      sinon.stub(ctx._apis.appApi, 'getBrowsers').resolves([])
+      sinon.stub(ctx._apis.appApi, 'getBrowsers').resolves([o])
     })
   }
 
