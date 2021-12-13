@@ -64,7 +64,6 @@ module.exports = {
     'openMode': 0,
   },
   'e2e': {
-    'specPattern': 'cypress/integration/**/*.jsx',
     setupNodeEvents (on, config) {
       on('file:preprocessor', wp({ webpackOptions }))
 

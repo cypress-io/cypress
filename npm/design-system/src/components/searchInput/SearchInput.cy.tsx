@@ -19,7 +19,8 @@ describe('SearchInput', () => {
   }
 
   it('should render', () => {
-    mountAndSnapshot(<SearchInput placeholder="foo" value="" aria-label="Search" onInput={() => {}} />)
+    function onInput () {}
+    mountAndSnapshot(<SearchInput placeholder="foo" value="" aria-label="Search" onInput={onInput} />)
     cy.get('input').should('exist')
   })
 
@@ -63,7 +64,8 @@ describe('SearchInput', () => {
     })
 
     it('should focus input on click', () => {
-      mount(<SearchInput placeholder="foo" value="a value" aria-label="Search" onInput={() => {}} />)
+      function onInput () {}
+      mount(<SearchInput placeholder="foo" value="a value" aria-label="Search" onInput={onInput} />)
 
       cy.get('[aria-label="Clear search"]').click()
 
