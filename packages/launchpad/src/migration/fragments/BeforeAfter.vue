@@ -13,10 +13,10 @@
         After
       </slot>
     </div>
-    <div class="bg-white py-4px">
+    <div class="bg-white">
       <slot name="before" />
     </div>
-    <div class="bg-white py-4px">
+    <div class="bg-white">
       <slot name="after" />
     </div>
   </div>

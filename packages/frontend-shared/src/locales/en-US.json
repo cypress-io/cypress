@@ -400,17 +400,23 @@
   },
   "migration": {
     "renameAuto": {
-      "title": "We'll automatically rename your specs in this step — here's why:",
+      "title": "We'll automatically rename your specs in this step",
       "changedSpecFolder": "We've changed the default spec folder from:",
       "changedSpecExt": "We've changed the default spec file extension from:",
       "changedE2EFolder": "Since you're currently using a custom directory for the {0}, we'll temporarily be moving your specs back to the default directory."
     },
     "renameManual": {
-      "title": "We need you to move your component specs manually — here's why:",
+      "title": "We need you to move your component specs manually",
       "componentFolderRemoved": "We've removed the {0} options from the Cypress config.",
       "addedSpecPattern": "We've added a new {0} option in the Cypress config that tells us where to find your component specs.",
       "cannotAuto": "We can't automatically migrate your existing component spec files. We recommend that you move the following component spec files next to your source component files (e.g. {0})",
       "ifSkipNote": "If you skip this step, Cypress will still be able to find them, but any new specs that you create will automatically be created next to your component files."
+    },
+    "configFile": {
+      "title": "We need to move the Cypress configuration file",
+      "changedTheFile": "We've removed {jsonFile} in favor of a {jsFile} file.",
+      "willConvert": "We'll automatically create a new {jsFile} file and seed it with your options from your existing {jsonFile}.",
+      "removeJson": "We'll remove your existing {0} as part of this step."
     }
   }
 }

@@ -1,13 +1,9 @@
 <template>
   <div class="text-16px leading-24px">
-    <h3 class="font-medium my-8px text-gray-900 leading-28px">
-      {{ t('migration.renameAuto.title') }}
-    </h3>
-    <ul class="list-disc pl-24px text-jade-400">
-      <li class="mb-4px">
-        <span class="text-gray-600">
-          {{ t('migration.renameAuto.changedSpecFolder') }}
-        </span>
+    <MigrationTitle :title="t('migration.renameAuto.title')" />
+    <MigrationList>
+      <template #line-1>
+        {{ t('migration.renameAuto.changedSpecFolder') }}
         <CodeTag
           class="text-red-500"
         >cypress/integration</CodeTag>
@@ -15,11 +11,9 @@
         <CodeTag
           class="text-jade-500"
         >cypress/e2e</CodeTag>
-      </li>
-      <li class="mb-4px">
-        <span class="text-gray-600">
-          {{ t('migration.renameAuto.changedSpecExt') }}
-        </span>
+      </template>
+      <template #line-2>
+        {{ t('migration.renameAuto.changedSpecExt') }}
         <CodeTag
           class="text-red-500"
         >[filename].spec.[ext]</CodeTag>
@@ -27,15 +21,13 @@
         <CodeTag
           class="text-jade-500"
         >[filename].cy.[ext]</CodeTag>
-      </li>
-      <li class="mb-4px">
-        <span class="text-gray-600">
-          <i18n-t keypath="migration.renameAuto.changedE2EFolder">
-            <CodeTag>integrationFolder</CodeTag>
-          </i18n-t>
-        </span>
-      </li>
-    </ul>
+      </template>
+      <template #line-3>
+        <i18n-t keypath="migration.renameAuto.changedE2EFolder">
+          <CodeTag>integrationFolder</CodeTag>
+        </i18n-t>
+      </template>
+    </MigrationList>
     <BeforeAfter>
       <template #before>
         <HighlightedFilesList
@@ -60,6 +52,8 @@ import CodeTag from '@cy/components/CodeTag.vue'
 import BeforeAfter from './fragments/BeforeAfter.vue'
 import HighlightedFilesList from './fragments/HighlightedFilesList.vue'
 import { useI18n } from '@cy/i18n'
+import MigrationList from './fragments/MigrationList.vue'
+import MigrationTitle from './fragments/MigrationTitle.vue'
 
 const { t } = useI18n()
 

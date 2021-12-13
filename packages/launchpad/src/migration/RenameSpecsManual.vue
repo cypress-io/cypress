@@ -1,36 +1,25 @@
 <template>
   <div class="text-16px leading-24px">
-    <h3 class="font-medium my-8px text-gray-900 leading-28px">
-      {{ t('migration.renameManual.title') }}
-    </h3>
-    <ul class="list-disc pl-24px text-jade-400">
-      <li class="mb-4px">
-        <span class="text-gray-600">
-          <i18n-t keypath="migration.renameManual.componentFolderRemoved">
-            <CodeTag class="text-red-500">componentFolder</CodeTag>
-          </i18n-t>
-        </span>
-      </li>
-      <li class="mb-4px">
-        <span class="text-gray-600">
-          <i18n-t keypath="migration.renameManual.addedSpecPattern">
-            <CodeTag class="text-jade-500">specPattern</CodeTag>
-          </i18n-t>
-        </span>
-      </li>
-      <li class="mb-4px">
-        <span class="text-gray-600">
-          <i18n-t keypath="migration.renameManual.cannotAuto">
-            <CodeTag class="text-jade-500">src/component/button/button.cy.js</CodeTag>
-          </i18n-t>
-        </span>
-      </li>
-      <li class="mb-4px">
-        <span class="text-gray-600">
-          <i18n-t keypath="migration.renameManual.ifSkipNote" />
-        </span>
-      </li>
-    </ul>
+    <MigrationTitle :title="t('migration.renameManual.title')" />
+    <MigrationList>
+      <template #line-1>
+        <i18n-t keypath="migration.renameManual.componentFolderRemoved">
+          <CodeTag class="text-red-500">
+            componentFolder
+          </CodeTag>
+        </i18n-t>
+      </template>
+      <template #line-2>
+        <i18n-t keypath="migration.renameManual.cannotAuto">
+          <CodeTag class="text-jade-500">
+            src/component/button/button.cy.js
+          </CodeTag>
+        </i18n-t>
+      </template>
+      <template #line-3>
+        <i18n-t keypath="migration.renameManual.ifSkipNote" />
+      </template>
+    </MigrationList>
     <div class="border rounded border-gray-100 mt-16px">
       <HighlightedFilesList
         :files="files"
@@ -44,6 +33,8 @@
 import CodeTag from '@cy/components/CodeTag.vue'
 import HighlightedFilesList from './fragments/HighlightedFilesList.vue'
 import { useI18n } from '@cy/i18n'
+import MigrationTitle from './fragments/MigrationTitle.vue'
+import MigrationList from './fragments/MigrationList.vue'
 
 const { t } = useI18n()
 
