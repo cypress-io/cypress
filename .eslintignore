@@ -25,8 +25,8 @@ system-tests/lib/scaffold/plugins/index.js
 system-tests/lib/scaffold/support/index.js
 system-tests/lib/scaffold/support/commands.js
 system-tests/test/support/projects/e2e/cypress/
-system-tests/projects/e2e/cypress/integration/stdout_exit_early_failing.cy.js
-system-tests/projects/e2e/cypress/integration/typescript_syntax_error.cy.ts
+system-tests/projects/e2e/cypress/e2e/stdout_exit_early_failing.cy.js
+system-tests/projects/e2e/cypress/e2e/typescript_syntax_error.cy.ts
 
 
 **/test/fixtures
