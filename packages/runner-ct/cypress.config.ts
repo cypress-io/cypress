@@ -10,7 +10,6 @@ export default defineConfig({
     configFile: '../../mocha-reporter-config.json',
   },
   component: {
-    specPattern: 'cypress/component/**/*spec.{ts,tsx}',
     devServer (cypressConfig) {
       const { startDevServer } = require('@cypress/webpack-dev-server')
 
