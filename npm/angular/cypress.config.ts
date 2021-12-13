@@ -7,7 +7,6 @@ export default defineConfig({
   'fileServerFolder': 'src',
   'projectId': 'nf7zag',
   'component': {
-    'specPattern': 'src/app/**/*cy-spec.ts',
     'setupNodeEvents': require('./cypress/plugins'),
     devServer (cypressConfig) {
       const { startDevServer } = require('@cypress/webpack-dev-server')
