@@ -69,7 +69,8 @@
   "module": "es2020",
   "workspaces": {
     "nohoist": [
-      "@toycode/markdown-it-class"
+      "@toycode/markdown-it-class",
+      "patch-package"
     ]
   },
   "vite": {
