@@ -46,6 +46,28 @@ const connect = function (host, path, extraOpts) {
     })
   })
 
+  const listenToOnBeforeHeaders = once(() => {
+    browser.webRequest.onBeforeSendHeaders.addListener((details) => {
+      if (
+        details.parentFrameId !== 0
+        || details.type !== 'sub_frame'
+        || details.url.includes('__cypress')
+      ) return
+
+      return {
+        requestHeaders: [
+          ...details.requestHeaders,
+          {
+            name: 'X-Cypress-Is-AUT-Frame',
+            value: 'true',
+          },
+        ],
+      }
+    }, { urls: ['<all_urls>'] }, ['blocking', 'requestHeaders'])
+
+    return ws.emit('automation:client:connected')
+  })
+
   const fail = (id, err) => {
     return ws.emit('automation:response', id, {
       __error: err.message,
@@ -96,26 +118,7 @@ const connect = function (host, path, extraOpts) {
   ws.on('connect', () => {
     listenToCookieChanges()
     listenToDownloads()
-
-    browser.webRequest.onBeforeSendHeaders.addListener((details) => {
-      if (
-        details.parentFrameId === -1
-        || details.parentFrameId === 0
-        || details.type !== 'sub_frame'
-      ) return
-
-      return {
-        requestHeaders: [
-          ...details.requestHeaders,
-          {
-            name: 'X-Cypress-Is-Nested-Iframe',
-            value: 'true',
-          },
-        ],
-      }
-    }, { urls: ['<all_urls>'] }, ['blocking', 'requestHeaders'])
-
-    return ws.emit('automation:client:connected')
+    listenToOnBeforeHeaders()
   })
 
   return ws

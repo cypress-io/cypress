@@ -348,14 +348,18 @@ module.exports = {
   _markNestedIframes (win) {
     const { session } = win.webContents
 
-    const isNested = (frame, numParents = 0) => {
-      if (!frame.parent || numParents > 1) return numParents > 1
+    const isFirstLevelIFrame = (frame, numParents = 0) => {
+      if (frame.parent && !frame.parent.parent) return true
 
-      return isNested(frame.parent, numParents + 1)
+      return false
     }
 
     session.webRequest.onBeforeSendHeaders((details, cb) => {
-      if (details.resourceType !== 'subFrame' || !isNested(details.frame)) {
+      if (
+        details.resourceType !== 'subFrame'
+        || !isFirstLevelIFrame(details.frame)
+        || details.url.includes('__cypress')
+      ) {
         cb({})
 
         return
@@ -364,7 +368,7 @@ module.exports = {
       cb({
         requestHeaders: {
           ...details.requestHeaders,
-          'X-Cypress-Is-Nested-Iframe': 'true',
+          'X-Cypress-Is-AUT-Frame': 'true',
         },
       })
     })
