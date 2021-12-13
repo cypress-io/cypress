@@ -222,7 +222,7 @@ describe('Routes', () => {
     return Promise.join(
       this.server.close(),
       httpsServer.stop(),
-      ctx.actions.project.clearActiveProject(),
+      ctx.actions.project.clearCurrentProject(),
     )
   })
 

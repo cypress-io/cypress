@@ -70,9 +70,9 @@ export const mutation = mutationType({
       },
     })
 
-    t.liveMutation('clearActiveProject', {
+    t.liveMutation('clearCurrentProject', {
       resolve: async (_, args, ctx) => {
-        await ctx.actions.project.clearActiveProject()
+        await ctx.actions.project.clearCurrentProject()
         ctx.actions.wizard.resetWizard()
       },
     })

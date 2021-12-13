@@ -535,7 +535,7 @@ type Mutation {
 
   """Create an Index HTML file for a new component testing project"""
   appCreateComponentIndexHtml(template: String!): Boolean
-  clearActiveProject: Boolean
+  clearCurrentProject: Boolean
   cloudProjectCreate(ciProviders: [String!], name: String!, orgId: ID!, public: Boolean!): CloudProject
 
   """

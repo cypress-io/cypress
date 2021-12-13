@@ -390,7 +390,7 @@ export class DataContext {
     ]
 
     // load projects from cache on start
-    toAwait.push(this.actions.project.loadProjects())
+    toAwait.push(this.actioclearCurrentProjectjects())
 
     if (this.modeOptions.projectRoot) {
       await this.actions.project.setCurrentProject(this.modeOptions.projectRoot)
