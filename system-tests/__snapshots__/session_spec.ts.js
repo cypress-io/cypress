@@ -7,8 +7,8 @@ exports['e2e sessions / session tests'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (session.cy.js)                                                          │
-  │ Searched:   cypress/e2e/session.cy.js                                                        │
+  │ Specs:      1 found (session.cy.js)                                                            │
+  │ Searched:   cypress/e2e/session.cy.js                                                          │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -138,7 +138,7 @@ exports['e2e sessions / session tests'] = `
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     session.cy.js                                                                  │
+  │ Spec Ran:     session.cy.js                                                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -149,7 +149,7 @@ exports['e2e sessions / session tests'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  session.cy.js                          XX:XX       55       54        -        1        - │
+  │ ✔  session.cy.js                          XX:XX       55       54        -        1        -   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX       55       54        -        1        -  
 
