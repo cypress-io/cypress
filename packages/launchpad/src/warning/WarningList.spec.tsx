@@ -3,7 +3,7 @@ import WarningList from './WarningList.vue'
 import faker from 'faker'
 import { defaultMessages } from '@cy/i18n'
 
-const warningSelector = '[data-testid=warning-alert]'
+const warningSelector = '[data-cy=warning-alert]'
 const message = faker.hacker.phrase()
 const title = faker.hacker.ingverb()
 
