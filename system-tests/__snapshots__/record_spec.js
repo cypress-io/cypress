@@ -7,9 +7,9 @@ exports['e2e record passing passes 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      4 found (record_error.cy.js, record_fail.cy.js, record_pass.cy.js, record_un │
-  │             caught.cy.js)                                                                    │
-  │ Searched:   cypress/e2e/record*                                                        │
+  │ Specs:      4 found (record_error.cy.js, record_fail.cy.js, record_pass.cy.js, record_un       │
+  │             caught.cy.js)                                                                      │
+  │ Searched:   cypress/e2e/record*                                                                │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -61,7 +61,7 @@ Fix the error in your code and re-run your tests.
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
   │ Estimated:    8 seconds                                                                        │
-  │ Spec Ran:     record_error.cy.js                                                             │
+  │ Spec Ran:     record_error.cy.js                                                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -110,7 +110,7 @@ Because this error occurred during a \`before each\` hook we are skipping the re
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
   │ Estimated:    8 seconds                                                                        │
-  │ Spec Ran:     record_fail.cy.js                                                              │
+  │ Spec Ran:     record_fail.cy.js                                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -159,7 +159,7 @@ plugin stdout
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
   │ Estimated:    8 seconds                                                                        │
-  │ Spec Ran:     record_pass.cy.js                                                              │
+  │ Spec Ran:     record_pass.cy.js                                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -210,7 +210,7 @@ We dynamically generated a new test to display this failure.
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
   │ Estimated:    8 seconds                                                                        │
-  │ Spec Ran:     record_uncaught.cy.js                                                          │
+  │ Spec Ran:     record_uncaught.cy.js                                                            │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -238,13 +238,13 @@ We dynamically generated a new test to display this failure.
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  record_error.cy.js                     XX:XX        -        -        1        -        - │
+  │ ✖  record_error.cy.js                     XX:XX        -        -        1        -        -   │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✖  record_fail.cy.js                      XX:XX        2        -        1        -        1 │
+  │ ✖  record_fail.cy.js                      XX:XX        2        -        1        -        1   │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✔  record_pass.cy.js                      XX:XX        2        1        -        1        - │
+  │ ✔  record_pass.cy.js                      XX:XX        2        1        -        1        -   │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✖  record_uncaught.cy.js                  XX:XX        1        -        1        -        - │
+  │ ✖  record_uncaught.cy.js                  XX:XX        1        -        1        -        -   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  3 of 4 failed (75%)                      XX:XX        5        1        3        1        1  
 
@@ -663,9 +663,9 @@ exports['e2e record parallelization passes in parallel with group 2'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      4 found (record_error.cy.js, record_fail.cy.js, record_pass.cy.js, record_un │
-  │             caught.cy.js)                                                                    │
-  │ Searched:   cypress/e2e/record*                                                        │
+  │ Specs:      4 found (record_error.cy.js, record_fail.cy.js, record_pass.cy.js, record_un       │
+  │             caught.cy.js)                                                                      │
+  │ Searched:   cypress/e2e/record*                                                                │
   │ Params:     Tag: nightly, Group: prod-e2e, Parallel: true                                      │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -717,7 +717,7 @@ Fix the error in your code and re-run your tests.
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
   │ Estimated:    1 second                                                                         │
-  │ Spec Ran:     record_error.cy.js                                                             │
+  │ Spec Ran:     record_error.cy.js                                                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -766,7 +766,7 @@ Because this error occurred during a \`before each\` hook we are skipping the re
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
   │ Estimated:    2 seconds                                                                        │
-  │ Spec Ran:     record_fail.cy.js                                                              │
+  │ Spec Ran:     record_fail.cy.js                                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -825,7 +825,7 @@ We dynamically generated a new test to display this failure.
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
   │ Estimated:    3 seconds                                                                        │
-  │ Spec Ran:     record_uncaught.cy.js                                                          │
+  │ Spec Ran:     record_uncaught.cy.js                                                            │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -853,11 +853,11 @@ We dynamically generated a new test to display this failure.
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  record_error.cy.js                     XX:XX        -        -        1        -        - │
+  │ ✖  record_error.cy.js                     XX:XX        -        -        1        -        -   │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✖  record_fail.cy.js                      XX:XX        2        -        1        -        1 │
+  │ ✖  record_fail.cy.js                      XX:XX        2        -        1        -        1   │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✖  record_uncaught.cy.js                  XX:XX        1        -        1        -        - │
+  │ ✖  record_uncaught.cy.js                  XX:XX        1        -        1        -        -   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  3 of 3 failed (100%)                     XX:XX        3        -        3        -        1  
 

@@ -7,8 +7,8 @@ exports['e2e xhr / passes in global mode'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (xhr.cy.js)                                                              │
-  │ Searched:   cypress/e2e/xhr.cy.js                                                            │
+  │ Specs:      1 found (xhr.cy.js)                                                                │
+  │ Searched:   cypress/e2e/xhr.cy.js                                                              │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -44,7 +44,7 @@ exports['e2e xhr / passes in global mode'] = `
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     xhr.cy.js                                                                      │
+  │ Spec Ran:     xhr.cy.js                                                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -61,7 +61,7 @@ exports['e2e xhr / passes in global mode'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  xhr.cy.js                              XX:XX        9        9        -        -        - │
+  │ ✔  xhr.cy.js                              XX:XX        9        9        -        -        -   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        9        9        -        -        -  
 

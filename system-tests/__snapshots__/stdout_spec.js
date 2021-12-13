@@ -144,7 +144,7 @@ The error was:
 Error: Webpack Compilation Error
 ./cypress/e2e/stdout_exit_early_failing.cy.js
 Module build failed (from [..]):
-SyntaxError: /private/foo/bar/.projects/e2e/cypress/e2e/stdout_exit_early_failing.cy.js: Unexpected token (1:1)
+SyntaxError: /foo/bar/.projects/e2e/cypress/e2e/stdout_exit_early_failing.cy.js: Unexpected token (1:1)
 
 > 1 | +>
     |  ^

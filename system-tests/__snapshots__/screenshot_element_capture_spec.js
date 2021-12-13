@@ -7,8 +7,8 @@ exports['e2e screenshot element capture / passes'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (screenshot_element_capture.cy.js)                                       │
-  │ Searched:   cypress/e2e/screenshot_element_capture.cy.js                                     │
+  │ Specs:      1 found (screenshot_element_capture.cy.js)                                         │
+  │ Searched:   cypress/e2e/screenshot_element_capture.cy.js                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -33,7 +33,7 @@ exports['e2e screenshot element capture / passes'] = `
   │ Screenshots:  11                                                                               │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     screenshot_element_capture.cy.js                                               │
+  │ Spec Ran:     screenshot_element_capture.cy.js                                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -77,7 +77,7 @@ exports['e2e screenshot element capture / passes'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  screenshot_element_capture.cy.js       XX:XX        1        1        -        -        - │
+  │ ✔  screenshot_element_capture.cy.js       XX:XX        1        1        -        -        -   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 

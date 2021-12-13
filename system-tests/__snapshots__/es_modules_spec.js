@@ -89,7 +89,7 @@ The error was:
 Error: Webpack Compilation Error
 ./lib/fail.js
 Module build failed (from [..]):
-SyntaxError: /private/foo/bar/.projects/e2e/lib/fail.js: Unexpected token (2:0)
+SyntaxError: /foo/bar/.projects/e2e/lib/fail.js: Unexpected token (2:0)
 
   1 | export default {
 > 2 |

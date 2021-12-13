@@ -24,18 +24,18 @@ The error was:
 
 Error: Webpack Compilation Error
 ./cypress/support/index.js
-Module not found: Error: Can't resolve './does/not/exist' in '/private/foo/bar/.projects/busted-support-file/cypress/support'
+Module not found: Error: Can't resolve './does/not/exist' in '/foo/bar/.projects/busted-support-file/cypress/support'
 Looked for and couldn't find the file at the following paths:
-[/private/foo/bar/.projects/busted-support-file/cypress/support/package.json]
-[/private/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist/package.json]
-[/private/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist]
-[/private/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.js]
-[/private/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.json]
-[/private/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.jsx]
-[/private/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.mjs]
-[/private/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.coffee]
-[/private/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.ts]
-[/private/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.tsx]
+[/foo/bar/.projects/busted-support-file/cypress/support/package.json]
+[/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist/package.json]
+[/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist]
+[/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.js]
+[/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.json]
+[/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.jsx]
+[/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.mjs]
+[/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.coffee]
+[/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.ts]
+[/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.tsx]
  @ ./cypress/support/index.js 3:0-27
  
       [stack trace lines]

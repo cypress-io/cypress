@@ -336,7 +336,7 @@ exports['e2e reporters mochawesome passes with mochawesome-2.3.1 npm custom repo
 
 [mochawesome] Report JSON saved to /foo/bar/.projects/e2e/mochawesome-report/mochawesome.json
 
-[mochawesome] Report HTML saved to /private/foo/bar/.projects/e2e/mochawesome-report/mochawesome.html
+[mochawesome] Report HTML saved to /foo/bar/.projects/e2e/mochawesome-report/mochawesome.html
 
 
   (Results)
@@ -437,7 +437,7 @@ Because this error occurred during a \`after all\` hook we are skipping the rema
 
 [mochawesome] Report JSON saved to /foo/bar/.projects/e2e/mochawesome-report/mochawesome.json
 
-[mochawesome] Report HTML saved to /private/foo/bar/.projects/e2e/mochawesome-report/mochawesome.html
+[mochawesome] Report HTML saved to /foo/bar/.projects/e2e/mochawesome-report/mochawesome.html
 
 
   (Results)
@@ -512,7 +512,7 @@ exports['e2e reporters mochawesome passes with mochawesome-3.0.1 npm custom repo
 
 [mochawesome] Report JSON saved to /foo/bar/.projects/e2e/mochawesome-report/mochawesome.json
 
-[mochawesome] Report HTML saved to /private/foo/bar/.projects/e2e/mochawesome-report/mochawesome.html
+[mochawesome] Report HTML saved to /foo/bar/.projects/e2e/mochawesome-report/mochawesome.html
 
 
   (Results)
@@ -613,7 +613,7 @@ Because this error occurred during a \`after all\` hook we are skipping the rema
 
 [mochawesome] Report JSON saved to /foo/bar/.projects/e2e/mochawesome-report/mochawesome.json
 
-[mochawesome] Report HTML saved to /private/foo/bar/.projects/e2e/mochawesome-report/mochawesome.html
+[mochawesome] Report HTML saved to /foo/bar/.projects/e2e/mochawesome-report/mochawesome.html
 
 
   (Results)

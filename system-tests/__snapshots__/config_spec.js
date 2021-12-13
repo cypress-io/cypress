@@ -7,8 +7,8 @@ exports['e2e config provides various environment details 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (config_passing.cy.js)                                                   │
-  │ Searched:   cypress/e2e/config_passing.cy.js                                                 │
+  │ Specs:      1 found (config_passing.cy.js)                                                     │
+  │ Searched:   cypress/e2e/config_passing.cy.js                                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -41,7 +41,7 @@ exports['e2e config provides various environment details 1'] = `
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     config_passing.cy.js                                                           │
+  │ Spec Ran:     config_passing.cy.js                                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -58,7 +58,7 @@ exports['e2e config provides various environment details 1'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  config_passing.cy.js                   XX:XX        6        6        -        -        - │
+  │ ✔  config_passing.cy.js                   XX:XX        6        6        -        -        -   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        6        6        -        -        -  
 
