@@ -487,7 +487,7 @@ describe('Routes', () => {
       })
 
       it('processes foo.coffee spec', function () {
-        return this.rp('http://localhost:2020/__cypress/tests?p=cypress/integration/foo.coffee')
+        return this.rp('http://localhost:2020/__cypress/tests?p=cypress/e2e/foo.coffee')
         .then((res) => {
           expect(res.statusCode).to.eq(200)
           expect(res.body).to.include('expect("foo.coffee")')
@@ -495,7 +495,7 @@ describe('Routes', () => {
       })
 
       it('processes dom.jsx spec', function () {
-        return this.rp('http://localhost:2020/__cypress/tests?p=cypress/integration/baz.js')
+        return this.rp('http://localhost:2020/__cypress/tests?p=cypress/e2e/baz.js')
         .then((res) => {
           expect(res.statusCode).to.eq(200)
           expect(res.body).to.include('React.createElement(')
@@ -503,7 +503,7 @@ describe('Routes', () => {
       })
 
       it('processes spec into modern javascript', function () {
-        return this.rp('http://localhost:2020/__cypress/tests?p=cypress/integration/es6.js')
+        return this.rp('http://localhost:2020/__cypress/tests?p=cypress/e2e/es6.js')
         .then((res) => {
           expect(res.statusCode).to.eq(200)
           // "modern" features should remain and not be transpiled into es5
@@ -538,7 +538,7 @@ describe('Routes', () => {
       })
 
       it('processes foo.coffee spec', function () {
-        return this.rp('http://localhost:2020/__cypress/tests?p=cypress/integration/foo.coffee')
+        return this.rp('http://localhost:2020/__cypress/tests?p=cypress/e2e/foo.coffee')
         .then((res) => {
           expect(res.statusCode).to.eq(200)
           expect(res.body).to.match(sourceMapRegex)
@@ -547,7 +547,7 @@ describe('Routes', () => {
       })
 
       it('processes dom.jsx spec', function () {
-        return this.rp('http://localhost:2020/__cypress/tests?p=cypress/integration/baz.js')
+        return this.rp('http://localhost:2020/__cypress/tests?p=cypress/e2e/baz.js')
         .then((res) => {
           expect(res.statusCode).to.eq(200)
           expect(res.body).to.match(sourceMapRegex)
@@ -575,7 +575,7 @@ describe('Routes', () => {
       })
 
       it('serves error javascript file when there\'s a syntax error', function () {
-        return this.rp('http://localhost:2020/__cypress/tests?p=cypress/integration/syntax_error.js')
+        return this.rp('http://localhost:2020/__cypress/tests?p=cypress/e2e/syntax_error.js')
         .then((res) => {
           expect(res.statusCode).to.eq(200)
           expect(res.body).to.include('Cypress.action("spec:script:error", {')
