@@ -85,7 +85,6 @@ system-tests/fixtures/large-img
 /packages/frontend-shared/src/generated
 
 # from npm/create-cypress-tests
-/npm/create-cypress-tests/initial-template
 /npm/create-cypress-tests/src/test-output
 
 # Building app binary
