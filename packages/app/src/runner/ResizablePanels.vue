@@ -78,7 +78,7 @@ const props = withDefaults(defineProps<{
   initialPanel1Width: 280,
   initialPanel2Width: 320,
   minPanel1Width: 200,
-  minPanel2Width: 200,
+  minPanel2Width: 220,
   minPanel3Width: 100,
   maxTotalWidth: window.innerWidth,
   offsetLeft: 0,
