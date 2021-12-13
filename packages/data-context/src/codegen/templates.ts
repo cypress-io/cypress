@@ -7,5 +7,5 @@ export default {
   component: getPath('./templates/component'),
   story: getPath('./templates/story'),
   integration: getPath('./templates/integration'),
-  scaffoldIntegration: cypressEx.getPathToIntegration(),
+  scaffoldIntegration: cypressEx.getPathToE2E(),
 } as const

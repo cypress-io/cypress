@@ -67,7 +67,7 @@ export const stubMutation: MaybeResolver<Mutation> = {
       codeGenResult: {
         id: 'U3BlYzovVXNlcnMvbGFjaGxhbi9jb2RlL3dvcmsvY3lwcmVzczUvcGFja2FnZXMvYXBwL3NyYy9CYXNpYy5zcGVjLnRzeA==',
         __typename: 'CodeGenResult',
-        file: '/Users/lachlan/code/work/cypress/packages/app/cypress/integration/basic/todo.spec.js',
+        file: '/Users/lachlan/code/work/cypress/packages/app/cypress/integration/basic/todo.cy.js',
         status: 'add',
         type: 'text',
         content: 'it(\'should load todos\', () => {})',
@@ -75,10 +75,10 @@ export const stubMutation: MaybeResolver<Mutation> = {
       fileParts: {
         id: 'U3BlYzovVXNlcnMvbGFjaGxhbi9jb2RlL3dvcmsvY3lwcmVzczUvcGFja2FnZXMvYXBwL3NyYy9CYXNpYy5zcGVjLnRzeA==',
         __typename: 'FileParts',
-        absolute: '/Users/lachlan/code/work/cypress/packages/app/cypress/integration/basic/todo.spec.js',
-        relative: 'cypress/integration/basic/todo.spec.js',
-        baseName: 'todo.spec.js',
-        name: 'basic/todo.spec.js',
+        absolute: '/Users/lachlan/code/work/cypress/packages/app/cypress/integration/basic/todo.cy.js',
+        relative: 'cypress/integration/basic/todo.cy.js',
+        baseName: 'todo.cy.js',
+        name: 'basic/todo.cy.js',
         fileName: 'todo',
         fileExtension: '.js',
       },

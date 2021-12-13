@@ -7,7 +7,7 @@ describe('App: Index', () => {
     cy.scaffoldProject('non-existent-spec')
     cy.openProject('non-existent-spec')
     cy.withCtx(async (ctx, o) => {
-      await ctx.actions.file.removeFileInProject('cypress/integration/spec.js')
+      await ctx.actions.file.removeFileInProject('cypress/e2e/spec.js')
     })
 
     cy.startAppServer()
