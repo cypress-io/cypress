@@ -12,7 +12,6 @@ module.exports = {
   ],
   fixturesFolder: false,
   component: {
-    specPattern: 'src/**/*spec.{js,jsx,ts,tsx}',
     devServer (cypressConfig) {
       const { startDevServer } = require('@cypress/vite-dev-server')
 
