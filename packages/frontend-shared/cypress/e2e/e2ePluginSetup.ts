@@ -103,6 +103,18 @@ async function makeE2ETasks () {
 
   const gqlPort = await makeGraphQLServer()
 
+  const __internal_scaffoldProject = (projectName: string) => {
+    if (fs.existsSync(Fixtures.projectPath(projectName))) {
+      Fixtures.removeProject(projectName)
+    }
+
+    Fixtures.scaffoldProject(projectName)
+
+    scaffoldedProjects.add(projectName)
+
+    return Fixtures.projectPath(projectName)
+  }
+
   return {
     /**
      * Called before all tests, cleans up any scaffolded projects and returns the global "gqlPort".
@@ -181,24 +193,14 @@ async function makeE2ETasks () {
     },
     async __internal_addProject (opts: InternalAddProjectOpts) {
       if (!scaffoldedProjects.has(opts.projectName)) {
-        this.__internal_scaffoldProject(opts.projectName)
+        __internal_scaffoldProject(opts.projectName)
       }
 
       await ctx.actions.project.addProject({ path: Fixtures.projectPath(opts.projectName), open: opts.open })
 
       return Fixtures.projectPath(opts.projectName)
     },
-    __internal_scaffoldProject (projectName: string) {
-      if (fs.existsSync(Fixtures.projectPath(projectName))) {
-        Fixtures.removeProject(projectName)
-      }
-
-      Fixtures.scaffoldProject(projectName)
-
-      scaffoldedProjects.add(projectName)
-
-      return Fixtures.projectPath(projectName)
-    },
+    __internal_scaffoldProject,
     async __internal_openGlobal (argv: string[] = []): Promise<ResetOptionsResult> {
       const openArgv = ['--global', ...argv]
 

@@ -17,7 +17,7 @@
     <Button
       aria-controls="dropzone"
       class="text-size-16px h-full"
-      data-testid="addProjectButton"
+      data-cy="addProjectButton"
       size="lg"
       :variant="showDropzone ? 'pending' : 'primary'"
       :aria-expanded="showDropzone"
@@ -37,7 +37,7 @@
   <FileDropzone
     v-if="showDropzone"
     id="dropzone"
-    data-testid="dropzone"
+    data-cy="dropzone"
     class="mb-24px"
     close-button
     @addProject="emit('addProject', $event)"

@@ -50,7 +50,7 @@ export class ProjectActions {
   }
 
   private get projects () {
-    return this.ctx.coreData.app.projects
+    return this.ctx.projectsList
   }
 
   private set projects (projects: ProjectShape[]) {
@@ -89,9 +89,6 @@ export class ProjectActions {
     })
 
     try {
-      // read the config and cache it
-      await this.ctx.project.getConfig(projectRoot)
-
       this.setCurrentProjectProperties({
         isCTConfigured: await this.ctx.project.isTestingTypeConfigured(projectRoot, 'component'),
         isE2EConfigured: await this.ctx.project.isTestingTypeConfigured(projectRoot, 'e2e'),
@@ -285,7 +282,7 @@ export class ProjectActions {
     }
 
     const spec = this.makeSpec(testingType)
-    const browser = this.findBrowerByPath(browserPath)
+    const browser = this.findBrowserByPath(browserPath)
 
     if (!browser) {
       throw Error(`Cannot find specified browser at given path: ${browserPath}.`)
@@ -308,12 +305,12 @@ export class ProjectActions {
     }
   }
 
-  private findBrowerByPath (browserPath: string) {
+  private findBrowserByPath (browserPath: string) {
     return this.ctx.coreData?.app?.browsers?.find((browser) => browser.path === browserPath)
   }
 
   removeProject (projectRoot: string) {
-    const found = this.ctx.projectsList.find((x) => x.projectRoot === projectRoot)
+    const found = this.projects.find((x) => x.projectRoot === projectRoot)
 
     if (!found) {
       throw new Error(`Cannot remove ${projectRoot}, it is not a known project`)

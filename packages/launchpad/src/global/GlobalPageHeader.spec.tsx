@@ -4,7 +4,7 @@ import { ref } from 'vue'
 
 const searchLabel = defaultMessages.globalPage.searchPlaceholder
 const fileInputSelector = 'input[type=file]'
-const addProjectSelector = '[data-testid=addProjectButton]'
+const addProjectSelector = '[data-cy=addProjectButton]'
 
 describe('<GlobalPageHeader />', () => {
   beforeEach(() => {
