@@ -1,3 +1,6 @@
+// @ts-ignore
+import pkg from '@packages/root'
+
 import type { DataContext } from '..'
 import pDefer from 'p-defer'
 import getenv from 'getenv'
@@ -74,6 +77,7 @@ export class CloudDataSource {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `bearer ${this.ctx.user.authToken}`,
+          'x-cypress-version': pkg.version,
         },
       },
     })
