@@ -17,7 +17,6 @@ export default defineConfig({
   },
   'component': {
     'supportFile': 'cypress/component/support/index.ts',
-    'pluginsFile': 'cypress/component/plugins/index.js',
     devServer (cypressConfig) {
       const { startDevServer } = require('@cypress/vite-dev-server')
 
@@ -29,7 +28,6 @@ export default defineConfig({
   },
   'e2e': {
     'supportFile': 'cypress/e2e/support/e2eSupport.ts',
-    'pluginsFile': 'cypress/e2e/plugins/index.ts',
     async setupNodeEvents (on, config) {
       const { e2ePluginSetup } = require('@packages/frontend-shared/cypress/e2e/e2ePluginSetup')
 
