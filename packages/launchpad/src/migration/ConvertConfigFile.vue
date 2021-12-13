@@ -81,12 +81,11 @@
 
 <script lang="ts" setup>
 import CodeTag from '@cy/components/CodeTag.vue'
-
-import { useI18n } from '@cy/i18n'
 import BeforeAfter from './fragments/BeforeAfter.vue'
 import ShikiHighlight from '../../../frontend-shared/src/components/ShikiHighlight.vue'
 import MigrationList from './fragments/MigrationList.vue'
 import MigrationTitle from './fragments/MigrationTitle.vue'
+import { useI18n } from '@cy/i18n'
 
 const { t } = useI18n()
 
