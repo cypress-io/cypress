@@ -3,7 +3,7 @@
     {{ t('migration.wizard.title') }}
   </h1>
   <p
-    class="mx-42px mt-12px text-center text-body-gray-600 text-18px"
+    class="mx-42px mt-12px text-center mb-32px text-body-gray-600 text-18px"
   >
     {{ t('migration.wizard.description') }}
   </p>
@@ -42,7 +42,7 @@
               class="animate-spin icon-dark-white icon-light-gray-400"
             />
           </template>
-          t('migration.wizard.step2.buttonWait')
+          {{ t('migration.wizard.step2.buttonWait') }}
         </Button>
         <Button
           variant="outline"
