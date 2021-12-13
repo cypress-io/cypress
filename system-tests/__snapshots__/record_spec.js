@@ -7,8 +7,8 @@ exports['e2e record passing passes 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      4 found (record_error.cy.js, record_fail.cy.js, record_pass.cy.js, record_un       │
-  │             caught.cy.js)                                                                      │
+  │ Specs:      4 found (record_error.cy.js, record_fail.cy.js, record_pass.cy.js, record_uncaught │
+  │             .cy.js)                                                                            │
   │ Searched:   cypress/e2e/record*                                                                │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
@@ -17,7 +17,7 @@ exports['e2e record passing passes 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  record_error.cy.js                                                            (1 of 4)
+  Running:  record_error.cy.js                                                              (1 of 4)
   Estimated: 8 seconds
 
 Oops...we found an error preparing this test file:
@@ -68,7 +68,7 @@ Fix the error in your code and re-run your tests.
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/record_error.cy.js.mp4            (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/record_error.cy.js.mp4              (X second)
 
 
   (Uploading Results)
@@ -77,7 +77,7 @@ Fix the error in your code and re-run your tests.
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  record_fail.cy.js                                                             (2 of 4)
+  Running:  record_fail.cy.js                                                               (2 of 4)
   Estimated: 8 seconds
 
 
@@ -116,14 +116,14 @@ Because this error occurred during a \`before each\` hook we are skipping the re
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/record_fail.cy.js/record fails -- fails 1 --      (1280x720)
-     before each hook (failed).png                                                                  
+  -  /XXX/XXX/XXX/cypress/screenshots/record_fail.cy.js/record fails -- fails 1 -- be     (1280x720)
+     fore each hook (failed).png                                                                    
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/record_fail.cy.js.mp4             (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/record_fail.cy.js.mp4               (X second)
 
 
   (Uploading Results)
@@ -133,7 +133,7 @@ Because this error occurred during a \`before each\` hook we are skipping the re
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  record_pass.cy.js                                                             (3 of 4)
+  Running:  record_pass.cy.js                                                               (3 of 4)
   Estimated: 8 seconds
 
 
@@ -165,7 +165,7 @@ plugin stdout
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png               (400x1022)
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
 
 
   (Uploading Results)
@@ -174,7 +174,7 @@ plugin stdout
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  record_uncaught.cy.js                                                         (4 of 4)
+  Running:  record_uncaught.cy.js                                                           (4 of 4)
   Estimated: 8 seconds
 
 
@@ -216,14 +216,14 @@ We dynamically generated a new test to display this failure.
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/record_uncaught.cy.js/An uncaught error was d     (1280x720)
-     etected outside of a test (failed).png                                                         
+  -  /XXX/XXX/XXX/cypress/screenshots/record_uncaught.cy.js/An uncaught error was det     (1280x720)
+     ected outside of a test (failed).png                                                           
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/record_uncaught.cy.js.mp4         (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/record_uncaught.cy.js.mp4           (X second)
 
 
   (Uploading Results)
@@ -238,13 +238,13 @@ We dynamically generated a new test to display this failure.
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  record_error.cy.js                     XX:XX        -        -        1        -        -   │
+  │ ✖  record_error.cy.js                       XX:XX        -        -        1        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✖  record_fail.cy.js                      XX:XX        2        -        1        -        1   │
+  │ ✖  record_fail.cy.js                        XX:XX        2        -        1        -        1 │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✔  record_pass.cy.js                      XX:XX        2        1        -        1        -   │
+  │ ✔  record_pass.cy.js                        XX:XX        2        1        -        1        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✖  record_uncaught.cy.js                  XX:XX        1        -        1        -        -   │
+  │ ✖  record_uncaught.cy.js                    XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  3 of 4 failed (75%)                      XX:XX        5        1        3        1        1  
 
@@ -648,9 +648,62 @@ exports['e2e record parallelization passes in parallel with group 1'] = `
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  record_pass.cy.js                                                               (1 of 4)
+  Estimated: 1 second
+
+
+  record pass
+    ✓ passes
+    - is pending
+
+
+  1 passing
+  1 pending
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        2                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      1                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  1                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Estimated:    1 second                                                                         │
+  │ Spec Ran:     record_pass.cy.js                                                                │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Screenshots)
+
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
+
+
+  (Uploading Results)
+
+  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/record_pass.cy.js/yay it passes.png
+
 ====================================================================================================
 
   (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔  record_pass.cy.js                        XX:XX        2        1        -        1        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✔  All specs passed!                        XX:XX        2        1        -        1        -  
+
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                       
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12                                   
+
 
 `
 
@@ -663,8 +716,8 @@ exports['e2e record parallelization passes in parallel with group 2'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      4 found (record_error.cy.js, record_fail.cy.js, record_pass.cy.js, record_un       │
-  │             caught.cy.js)                                                                      │
+  │ Specs:      4 found (record_error.cy.js, record_fail.cy.js, record_pass.cy.js, record_uncaught │
+  │             .cy.js)                                                                            │
   │ Searched:   cypress/e2e/record*                                                                │
   │ Params:     Tag: nightly, Group: prod-e2e, Parallel: true                                      │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
@@ -673,7 +726,7 @@ exports['e2e record parallelization passes in parallel with group 2'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  record_error.cy.js                                                            (2 of 4)
+  Running:  record_error.cy.js                                                              (2 of 4)
   Estimated: 1 second
 
 Oops...we found an error preparing this test file:
@@ -724,7 +777,7 @@ Fix the error in your code and re-run your tests.
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/record_error.cy.js.mp4            (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/record_error.cy.js.mp4              (X second)
 
 
   (Uploading Results)
@@ -733,7 +786,7 @@ Fix the error in your code and re-run your tests.
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  record_fail.cy.js                                                             (3 of 4)
+  Running:  record_fail.cy.js                                                               (3 of 4)
   Estimated: 2 seconds
 
 
@@ -772,14 +825,14 @@ Because this error occurred during a \`before each\` hook we are skipping the re
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/record_fail.cy.js/record fails -- fails 1 --      (1280x720)
-     before each hook (failed).png                                                                  
+  -  /XXX/XXX/XXX/cypress/screenshots/record_fail.cy.js/record fails -- fails 1 -- be     (1280x720)
+     fore each hook (failed).png                                                                    
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/record_fail.cy.js.mp4             (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/record_fail.cy.js.mp4               (X second)
 
 
   (Uploading Results)
@@ -789,7 +842,7 @@ Because this error occurred during a \`before each\` hook we are skipping the re
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  record_uncaught.cy.js                                                         (4 of 4)
+  Running:  record_uncaught.cy.js                                                           (4 of 4)
   Estimated: 3 seconds
 
 
@@ -831,14 +884,14 @@ We dynamically generated a new test to display this failure.
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/record_uncaught.cy.js/An uncaught error was d     (1280x720)
-     etected outside of a test (failed).png                                                         
+  -  /XXX/XXX/XXX/cypress/screenshots/record_uncaught.cy.js/An uncaught error was det     (1280x720)
+     ected outside of a test (failed).png                                                           
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/record_uncaught.cy.js.mp4         (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/record_uncaught.cy.js.mp4           (X second)
 
 
   (Uploading Results)
@@ -853,11 +906,11 @@ We dynamically generated a new test to display this failure.
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  record_error.cy.js                     XX:XX        -        -        1        -        -   │
+  │ ✖  record_error.cy.js                       XX:XX        -        -        1        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✖  record_fail.cy.js                      XX:XX        2        -        1        -        1   │
+  │ ✖  record_fail.cy.js                        XX:XX        2        -        1        -        1 │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✖  record_uncaught.cy.js                  XX:XX        1        -        1        -        -   │
+  │ ✖  record_uncaught.cy.js                    XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  3 of 3 failed (100%)                     XX:XX        3        -        3        -        1  
 
