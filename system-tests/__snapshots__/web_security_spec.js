@@ -167,7 +167,7 @@ exports['e2e web security / when disabled / passes'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  web_security.cy.js                                                            (1 of 1)
+  Running:  web_security.cy.js                                                              (1 of 1)
 
 
   web security
@@ -198,7 +198,7 @@ exports['e2e web security / when disabled / passes'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/web_security.cy.js.mp4            (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/web_security.cy.js.mp4              (X second)
 
 
 ====================================================================================================
@@ -208,7 +208,7 @@ exports['e2e web security / when disabled / passes'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  web_security.cy.js                     XX:XX        4        4        -        -        - │
+  │ ✔  web_security.cy.js                     XX:XX        4        4          -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        4        4        -        -        -  
 
