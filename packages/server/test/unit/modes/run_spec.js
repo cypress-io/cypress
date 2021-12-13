@@ -403,7 +403,7 @@ xdescribe('lib/modes/run', () => {
         startedVideoCapture,
         endVideoCapture,
         spec: {
-          path: 'cypress/integration/spec.js',
+          path: 'cypress/e2e/spec.cy.js',
         },
       })
       .then((obj) => {
@@ -425,7 +425,7 @@ xdescribe('lib/modes/run', () => {
           shouldUploadVideo: true,
           tests: results.tests,
           spec: {
-            path: 'cypress/integration/spec.js',
+            path: 'cypress/e2e/spec.cy.js',
           },
           stats: {
             tests: 1,
@@ -467,7 +467,7 @@ xdescribe('lib/modes/run', () => {
         startedVideoCapture,
         endVideoCapture,
         spec: {
-          path: 'cypress/integration/spec.js',
+          path: 'cypress/e2e/spec.cy.js',
         },
       })
       .then((obj) => {
@@ -488,7 +488,7 @@ xdescribe('lib/modes/run', () => {
           reporterStats: null,
           shouldUploadVideo: true,
           spec: {
-            path: 'cypress/integration/spec.js',
+            path: 'cypress/e2e/spec.cy.js',
           },
           stats: {
             failures: 1,
