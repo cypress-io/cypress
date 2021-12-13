@@ -87,6 +87,9 @@ type CloudProject implements Node {
   """The latest run for a given spec"""
   latestRun: CloudRun
 
+  """Given name of the project"""
+  name: String!
+
   """The organization the project is a member of"""
   organization: CloudOrganization
 
@@ -405,6 +408,9 @@ type DevState {
   When we have edited server related files, we may want to relaunch the client.
   """
   needsRelaunch: Boolean
+
+  """For debugging, the current application state"""
+  state: JSON
 }
 
 """Represents an editor on the local machine"""

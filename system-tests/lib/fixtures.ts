@@ -325,6 +325,10 @@ export function remove () {
   return fs.removeSync(tmpDir)
 }
 
+export function removeProject (name) {
+  return fs.removeSync(projectPath(name))
+}
+
 // returns the path to project fixture
 // in the tmpDir
 export function project (...args) {
