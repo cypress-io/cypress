@@ -97,16 +97,16 @@
 
   <TopNavList
     v-if="props.gql?.currentProject?.currentBrowser && showBrowsers"
-    data-cy="topnav-browser-list"
   >
     <template #heading="{ open }">
       <img
         class="w-16px filter group-hocus:grayscale-0"
+        data-cy="top-nav-active-browser-icon"
         :class="open ? 'grayscale-0' : 'grayscale'"
         :src="allBrowsersIcons[props.gql?.currentProject?.currentBrowser?.displayName || '']"
       >
       <span
-        data-cy="topnav-browser-list-active-browser"
+        data-cy="top-nav-active-browser"
       >{{ props.gql.currentProject?.currentBrowser?.displayName }} v{{ props.gql.currentProject?.currentBrowser?.majorVersion }}</span>
     </template>
     <TopNavListItem
@@ -115,6 +115,8 @@
       class="cursor-pointer min-w-240px py-12px px-16px"
       :class="browser.isSelected ? 'bg-jade-50' : ''"
       :selectable="!browser.isSelected"
+      data-cy="top-nav-browser-list-item"
+      :data-browser-id="browser.id"
       @click="handleBrowserChoice(browser)"
     >
       <template #prefix>
@@ -142,7 +144,7 @@
         v-if="browser.isSelected"
         #suffix
       >
-        <div>
+        <div data-cy="top-nav-browser-list-selected-item">
           <i-cy-circle-check_x24 class="h-24px w-24px icon-dark-jade-100 icon-light-jade-500" />
         </div>
       </template>
