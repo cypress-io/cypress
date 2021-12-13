@@ -469,7 +469,12 @@ const convertErrorEventPropertiesToObject = (args) => {
   })
 }
 
-const errorFromErrorEvent = (event) => {
+export interface ErrorFromErrorEvent {
+  originalErr: Error
+  err: Error
+}
+
+const errorFromErrorEvent = (event): ErrorFromErrorEvent => {
   let { message, filename, lineno, colno, error } = event
   let docsUrl = error?.docsUrl
 
@@ -497,7 +502,11 @@ const errorFromErrorEvent = (event) => {
   }
 }
 
-const errorFromProjectRejectionEvent = (event) => {
+export interface ErrorFromProjectRejectionEvent extends ErrorFromErrorEvent {
+  promise: Promise<any>
+}
+
+const errorFromProjectRejectionEvent = (event): ErrorFromProjectRejectionEvent => {
   // Bluebird triggers "unhandledrejection" with its own custom error event
   // where the `promise` and `reason` are attached to event.detail
   // http://bluebirdjs.com/docs/api/error-management-configuration.html

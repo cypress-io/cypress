@@ -135,7 +135,7 @@ const getCodeFrameFromSource = (sourceCode, { line, column, relativeFile, absolu
   }
 }
 
-const captureUserInvocationStack = (ErrorConstructor, userInvocationStack) => {
+const captureUserInvocationStack = (ErrorConstructor, userInvocationStack?) => {
   if (!userInvocationStack) {
     const newErr = new ErrorConstructor('userInvocationStack')
 
