@@ -4,6 +4,6 @@ describe('special characters', () => {
   it('displays file name with decoded special characters', () => {
     cy.wrap(Cypress.$(window.top.document.body))
     .find('.reporter .runnable-header a')
-    .should('have.text', 'meta_&%_spec.ts')
+    .should('have.text', 'meta_&%_cy.ts')
   })
 })

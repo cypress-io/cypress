@@ -12,7 +12,7 @@ Please remove the \`nodeVersion\` configuration option from \`cypress.config.js\
   │ Browser:        FooBrowser 88                                                                  │
   │ Node Version:   vX (/foo/bar/node)                                                             │
   │ Specs:          1 found (system.spec.js)                                                       │
-  │ Searched:       cypress/e2e/system.spec.js                                             │
+  │ Searched:       cypress/e2e/system.spec.js                                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -72,7 +72,7 @@ exports['e2e system node uses default node when launching plugins file 1'] = `
   │ Browser:        FooBrowser 88                                                                  │
   │ Node Version:   vX (/foo/bar/node)                                                             │
   │ Specs:          1 found (default.spec.js)                                                      │
-  │ Searched:       cypress/e2e/default.spec.js                                            │
+  │ Searched:       cypress/e2e/default.spec.js                                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
