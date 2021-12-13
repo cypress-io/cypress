@@ -233,10 +233,6 @@ const MaybeDelayForMultidomain: ResponseMiddleware = function () {
   const isRenderedHTML = reqWillRenderHtml(this.req)
   const isTheAUTFrame = isAUTFrame(this.req)
 
-  if (isTheAUTFrame) {
-    this.debug('!!! is AUT !!!')
-  }
-
   if (isCrossDomain && isTheAUTFrame && (isHTML || isRenderedHTML)) {
     this.debug('is cross-domain, delay until domain:ready event')
 

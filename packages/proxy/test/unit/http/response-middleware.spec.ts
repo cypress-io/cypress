@@ -27,6 +27,7 @@ describe('http/response-middleware', function () {
       'MaybeRemoveSecurity',
       'GzipBody',
       'SendResponseBodyToClient',
+      'CleanupCypressHeaders',
     ])
   })
 
@@ -148,11 +149,36 @@ describe('http/response-middleware', function () {
       })
     })
 
+    it('doesn\'t do anything when not AUT frame', function () {
+      prepareContext({
+        incomingRes: {
+          headers: {
+            'content-type': 'text/html',
+          },
+        },
+        getRemoteState () {
+          return {
+            strategy: 'foo',
+          }
+        },
+      })
+
+      return testMiddleware([MaybeDelayForMultidomain], ctx)
+      .then(() => {
+        expect(ctx.serverBus.emit).not.to.be.called
+      })
+    })
+
     it('waits for server signal if res is html', function () {
       prepareContext({
         incomingRes: {
           headers: {
             'content-type': 'text/html',
+          },
+        },
+        req: {
+          headers: {
+            'x-cypress-is-aut-frame': 'true',
           },
         },
         getRemoteState () {
@@ -179,6 +205,7 @@ describe('http/response-middleware', function () {
               'text/html',
               'application/xhtml+xml',
             ],
+            'x-cypress-is-aut-frame': 'true',
           },
         },
         getRemoteState () {

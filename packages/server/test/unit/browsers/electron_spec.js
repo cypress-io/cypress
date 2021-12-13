@@ -43,6 +43,9 @@ describe('lib/browsers/electron', () => {
             remove: sinon.stub(),
           },
           on: sinon.stub(),
+          webRequest: {
+            onBeforeSendHeaders () {},
+          },
         },
         getOSProcessId: sinon.stub().returns(ELECTRON_PID),
         'debugger': {
@@ -279,6 +282,122 @@ describe('lib/browsers/electron', () => {
         expect(this.win.webContents.debugger.sendCommand).to.be.calledWith('Page.setDownloadBehavior', {
           behavior: 'allow',
           downloadPath: 'downloads',
+        })
+      })
+    })
+
+    describe('adding header aut iframe requests', function () {
+      it('does not add header if not a sub frame', function () {
+        sinon.stub(this.win.webContents.session.webRequest, 'onBeforeSendHeaders')
+
+        return electron._launch(this.win, this.url, this.automation, this.options)
+        .then(() => {
+          const details = {
+            resourceType: 'stylesheet',
+          }
+          const cb = sinon.stub()
+
+          this.win.webContents.session.webRequest.onBeforeSendHeaders.lastCall.args[0](details, cb)
+
+          expect(cb).to.be.calledOnce
+          expect(cb).to.be.calledWith({})
+        })
+      })
+
+      it('does not add header if it is the top frame', function () {
+        sinon.stub(this.win.webContents.session.webRequest, 'onBeforeSendHeaders')
+
+        return electron._launch(this.win, this.url, this.automation, this.options)
+        .then(() => {
+          const details = {
+            resourceType: 'subFrame',
+            frame: {
+              parent: null,
+            },
+          }
+          const cb = sinon.stub()
+
+          this.win.webContents.session.webRequest.onBeforeSendHeaders.lastCall.args[0](details, cb)
+
+          expect(cb).to.be.calledOnce
+          expect(cb).to.be.calledWith({})
+        })
+      })
+
+      it('does not add header if it is a nested frame', function () {
+        sinon.stub(this.win.webContents.session.webRequest, 'onBeforeSendHeaders')
+
+        return electron._launch(this.win, this.url, this.automation, this.options)
+        .then(() => {
+          const details = {
+            resourceType: 'subFrame',
+            frame: {
+              parent: {
+                parent: {
+                  parent: null,
+                },
+              },
+            },
+          }
+          const cb = sinon.stub()
+
+          this.win.webContents.session.webRequest.onBeforeSendHeaders.lastCall.args[0](details, cb)
+
+          expect(cb).to.be.calledOnce
+          expect(cb).to.be.calledWith({})
+        })
+      })
+
+      it('does not add header if it is a spec frame request', function () {
+        sinon.stub(this.win.webContents.session.webRequest, 'onBeforeSendHeaders')
+
+        return electron._launch(this.win, this.url, this.automation, this.options)
+        .then(() => {
+          const details = {
+            resourceType: 'subFrame',
+            frame: {
+              parent: {
+                parent: null,
+              },
+            },
+            url: '/__cypress/integration/spec.js',
+          }
+          const cb = sinon.stub()
+
+          this.win.webContents.session.webRequest.onBeforeSendHeaders.lastCall.args[0](details, cb)
+
+          expect(cb).to.be.calledWith({})
+        })
+      })
+
+      it('adds X-Cypress-Is-AUT-Frame header to AUT iframe request', function () {
+        sinon.stub(this.win.webContents.session.webRequest, 'onBeforeSendHeaders')
+
+        return electron._launch(this.win, this.url, this.automation, this.options)
+        .then(() => {
+          const details = {
+            resourceType: 'subFrame',
+            frame: {
+              parent: {
+                parent: null,
+              },
+            },
+            url: 'http://localhost:3000/index.html',
+            requestHeaders: {
+              'X-Foo': 'Bar',
+            },
+          }
+          const cb = sinon.stub()
+
+          this.win.webContents.session.webRequest.onBeforeSendHeaders.lastCall.args[0](details, cb)
+
+          expect(cb).to.be.calledOnce
+          expect(cb).to.be.calledWith({
+            requestHeaders: {
+              'X-Foo': 'Bar',
+              'X-Cypress-Is-AUT-Frame': 'true',
+            },
+          })
         })
       })
     })

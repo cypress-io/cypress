@@ -33,6 +33,11 @@ const browser = {
     executeScript () {},
     captureVisibleTab () {},
   },
+  webRequest: {
+    onBeforeSendHeaders: {
+      addListener () {},
+    },
+  },
 }
 
 mockRequire('webextension-polyfill', browser)
@@ -274,6 +279,103 @@ describe('app/background', () => {
         addListener.getCall(0).args[0](downloadDelta)
 
         expect(client.emit).not.to.be.calledWith('automation:push:request')
+
+        done()
+      })
+    })
+  })
+
+  context('add header to aut iframe requests', () => {
+    it('does not add header if it is the top frame', function (done) {
+      const details = {
+        parentFrameId: -1,
+      }
+
+      sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
+
+      this.onConnect(() => {
+        const result = browser.webRequest.onBeforeSendHeaders.addListener.lastCall.args[0](details)
+
+        expect(result).to.be.undefined
+        done()
+      })
+    })
+
+    it('does not add header if it is a nested frame', function (done) {
+      const details = {
+        parentFrameId: 12345,
+      }
+
+      sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
+
+      this.onConnect(() => {
+        const result = browser.webRequest.onBeforeSendHeaders.addListener.lastCall.args[0](details)
+
+        expect(result).to.be.undefined
+        done()
+      })
+    })
+
+    it('does not add header if it is not a sub frame request', function (done) {
+      const details = {
+        parentFrameId: 0,
+        type: 'stylesheet',
+      }
+
+      sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
+
+      this.onConnect(() => {
+        const result = browser.webRequest.onBeforeSendHeaders.addListener.lastCall.args[0](details)
+
+        expect(result).to.be.undefined
+        done()
+      })
+    })
+
+    it('does not add header if it is a spec frame request', function (done) {
+      const details = {
+        parentFrameId: 0,
+        type: 'sub_frame',
+        url: '/__cypress/integration/spec.js',
+      }
+
+      sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
+
+      this.onConnect(() => {
+        const result = browser.webRequest.onBeforeSendHeaders.addListener.lastCall.args[0](details)
+
+        expect(result).to.be.undefined
+        done()
+      })
+    })
+
+    it('appends X-Cypress-Is-AUT-Frame header to AUT iframe request', function (done) {
+      const details = {
+        parentFrameId: 0,
+        type: 'sub_frame',
+        url: 'http://localhost:3000/index.html',
+        requestHeaders: [
+          { name: 'X-Foo', value: 'Bar' },
+        ],
+      }
+
+      sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
+
+      this.onConnect(() => {
+        const result = browser.webRequest.onBeforeSendHeaders.addListener.lastCall.args[0](details)
+
+        expect(result).to.deep.equal({
+          requestHeaders: [
+            {
+              name: 'X-Foo',
+              value: 'Bar',
+            },
+            {
+              name: 'X-Cypress-Is-AUT-Frame',
+              value: 'true',
+            },
+          ],
+        })
 
         done()
       })

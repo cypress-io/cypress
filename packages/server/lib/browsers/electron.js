@@ -256,7 +256,7 @@ module.exports = {
       return this._enableDebugger(win.webContents)
     })
     .then(() => {
-      this._markNestedIframes(win)
+      this._listenToOnBeforeHeaders(win)
 
       return this._handleDownloads(win, options.downloadsFolder, automation)
     })
@@ -345,16 +345,14 @@ module.exports = {
     })
   },
 
-  _markNestedIframes (win) {
-    const { session } = win.webContents
-
-    const isFirstLevelIFrame = (frame, numParents = 0) => {
+  _listenToOnBeforeHeaders (win) {
+    const isFirstLevelIFrame = (frame) => {
       if (frame.parent && !frame.parent.parent) return true
 
       return false
     }
 
-    session.webRequest.onBeforeSendHeaders((details, cb) => {
+    win.webContents.session.webRequest.onBeforeSendHeaders((details, cb) => {
       if (
         details.resourceType !== 'subFrame'
         || !isFirstLevelIFrame(details.frame)
