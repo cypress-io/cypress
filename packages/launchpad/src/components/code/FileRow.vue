@@ -1,7 +1,7 @@
 <template>
   <Collapsible
-    class="block w-full mb-4 overflow-hidden border border-gray-100 rounded
-  bg-light-50 hocus-default"
+    class="border rounded bg-light-50 border-gray-100 mb-4 w-full block
+  overflow-hidden hocus-default"
     max-height="500px"
     :initially-open="statusInfo.initiallyOpen"
   >
@@ -23,19 +23,19 @@
         <template #right>
           <i-cy-chevron-down
             :class="{ 'rotate-180': open }"
-            class="transform max-w-16px icon-dark-gray-400"
+            class="max-w-16px transform icon-dark-gray-400"
           />
         </template>
       </ListRowHeader>
     </template>
     <div
       v-if="status === 'changes'"
-      class="flex sticky top-0 z-1 border-b-gray-100 border-b items-center p-3 bg-warning-100 text-warning-600"
+      class="border-b flex bg-warning-100 border-b-gray-100 p-3 top-0 text-warning-600 z-1 sticky items-center"
     >
-      <p class="flex-grow ml-1 text-left">
+      <p class="flex-grow text-left ml-1">
         <span class="font-semibold">{{ t('setupPage.configFile.changesRequiredLabel') }}: </span>
         <i18n-t keypath="setupPage.configFile.changesRequiredDescription">
-          <span class="inline-block px-1 rounded bg-warning-200 text-warning-600">{{ filePath }}</span>
+          <span class="rounded bg-warning-200 px-1 text-warning-600 inline-block">{{ filePath }}</span>
         </i18n-t>
       </p>
       <Button
