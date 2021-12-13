@@ -42,6 +42,9 @@
     <div
       class="flex-grow h-full"
       :class="{'pointer-events-none':panel2IsDragging}"
+      :style="{
+        width: `${maxTotalWidth - panel1Width - panel2Width}px`
+      }"
     >
       <slot name="panel3">
         Panel 3 default content
@@ -112,7 +115,7 @@ const handleMousemove = (event: MouseEvent) => {
     emit('panelWidthUpdated', { panel: 'panel2', width: panel2Width.value })
   }
 }
-const handleMouseup = (event) => {
+const handleMouseup = () => {
   if (panel1IsDragging.value) {
     panel1IsDragging.value = false
     handleResizeEnd('panel1')

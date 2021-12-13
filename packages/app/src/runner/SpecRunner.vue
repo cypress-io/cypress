@@ -48,40 +48,37 @@
           />
         </HideDuringScreenshot>
       </template>
-      <template #panel3>
-        <div
-          ref="runnerPane"
-          class="h-full w-full relative"
-        >
-          <HideDuringScreenshot class="bg-white p-16px">
-            <SpecRunnerHeader
-              v-if="props.gql.currentProject"
-              :gql="props.gql.currentProject"
-              :event-manager="eventManager"
-              :get-aut-iframe="getAutIframeModel"
-            />
-          </HideDuringScreenshot>
-
-          <RemoveClassesDuringScreenshotting
-            class="h-full bg-gray-100 p-16px"
-          >
-            <ScriptError
-              v-if="autStore.scriptError"
-              :error="autStore.scriptError.error"
-            />
-            <div
-              v-show="!autStore.scriptError"
-              :id="RUNNER_ID"
-              class="origin-top-left viewport"
-              :style="viewportStyle"
-            />
-          </RemoveClassesDuringScreenshotting>
-          <SnapshotControls
+      <template
+        #panel3
+      >
+        <HideDuringScreenshot class="bg-white p-16px">
+          <SpecRunnerHeader
+            v-if="props.gql.currentProject"
+            :gql="props.gql.currentProject"
             :event-manager="eventManager"
             :get-aut-iframe="getAutIframeModel"
           />
-          <ScreenshotHelperPixels />
-        </div>
+        </HideDuringScreenshot>
+
+        <RemoveClassesDuringScreenshotting
+          class="h-full bg-gray-100 p-16px"
+        >
+          <ScriptError
+            v-if="autStore.scriptError"
+            :error="autStore.scriptError.error"
+          />
+          <div
+            v-show="!autStore.scriptError"
+            :id="RUNNER_ID"
+            class="origin-top-left viewport"
+            :style="viewportStyle"
+          />
+        </RemoveClassesDuringScreenshotting>
+        <SnapshotControls
+          :event-manager="eventManager"
+          :get-aut-iframe="getAutIframeModel"
+        />
+        <ScreenshotHelperPixels />
       </template>
     </ResizablePanels>
   </RemovePositioningDuringScreenshot>
@@ -159,8 +156,6 @@ preferences.update('isSpecsListOpen', props.gql.localSettings.preferences.isSpec
 preferences.update('reporterWidth', initialReporterWidth)
 preferences.update('specsListWidth', initialSpecsListWidth)
 
-const runnerPane = ref<HTMLDivElement>()
-
 const autMargin = 16
 
 const containerWidth = computed(() => {
@@ -195,10 +190,6 @@ const handlePanelWidthUpdated = ({ panel, width }) => {
 }
 
 const viewportStyle = computed(() => {
-  if (!runnerPane.value) {
-    return
-  }
-
   let scale: number = 1
 
   if (!screenshotStore.isScreenshotting) {
