@@ -8,7 +8,7 @@ exports['e2e headless / tests in headed mode pass in !electron'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (headless_spec.js)                                                         │
-  │ Searched:   cypress/e2e/headless_spec.js                                               │
+  │ Searched:   cypress/e2e/headless_spec.js                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -71,7 +71,7 @@ exports['e2e headless / tests in headless mode pass'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (headless_spec.js)                                                         │
-  │ Searched:   cypress/e2e/headless_spec.js                                               │
+  │ Searched:   cypress/e2e/headless_spec.js                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -128,7 +128,7 @@ exports['e2e headless / tests in headed mode pass in electron'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (headless_spec.js)                                                         │
-  │ Searched:   cypress/e2e/headless_spec.js                                               │
+  │ Searched:   cypress/e2e/headless_spec.js                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

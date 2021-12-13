@@ -8,7 +8,7 @@ exports['e2e screenshot in nested spec / passes'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (screenshot_nested_file_spec.js)                                           │
-  │ Searched:   cypress/e2e/nested-1/nested-2/screenshot_nested_file_spec.js               │
+  │ Searched:   cypress/e2e/nested-1/nested-2/screenshot_nested_file_spec.js                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

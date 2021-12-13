@@ -8,7 +8,7 @@ exports['e2e issue 7217 / shows correct error if browser does not connect'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (simple_passing_spec.js)                                                   │
-  │ Searched:   cypress/e2e/simple_passing_spec.js                                         │
+  │ Searched:   cypress/e2e/simple_passing_spec.js                                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

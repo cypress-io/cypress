@@ -8,7 +8,7 @@ exports['e2e requests / passes'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (request_spec.js)                                                          │
-  │ Searched:   cypress/e2e/request_spec.js                                                │
+  │ Searched:   cypress/e2e/request_spec.js                                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -82,7 +82,7 @@ exports['e2e requests fails when network immediately fails 1'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (request_http_network_error_failing_spec.js)                               │
-  │ Searched:   cypress/e2e/request_http_network_error_failing_spec.js                     │
+  │ Searched:   cypress/e2e/request_http_network_error_failing_spec.js                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -189,7 +189,7 @@ exports['e2e requests fails on status code 1'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (request_status_code_failing_spec.js)                                      │
-  │ Searched:   cypress/e2e/request_status_code_failing_spec.js                            │
+  │ Searched:   cypress/e2e/request_status_code_failing_spec.js                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -307,7 +307,7 @@ exports['e2e requests prints long http props on fail 1'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (request_long_http_props_failing_spec.js)                                  │
-  │ Searched:   cypress/e2e/request_long_http_props_failing_spec.js                        │
+  │ Searched:   cypress/e2e/request_long_http_props_failing_spec.js                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

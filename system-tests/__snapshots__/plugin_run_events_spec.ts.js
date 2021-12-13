@@ -11,13 +11,13 @@ exports['e2e plugin run events / sends events'] = `
   │ Searched:   cypress/e2e/*                                                              │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
-before:run: cypress/integration/run_events_spec_1.js electron
+before:run: cypress/e2e/run_events_spec_1.js electron
 before:run is awaited
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  run_events_spec_1.js                                                            (1 of 2)
-before:spec: cypress/integration/run_events_spec_1.js
+before:spec: cypress/e2e/run_events_spec_1.js
 before:spec is awaited
 
 
@@ -25,7 +25,7 @@ before:spec is awaited
 
   1 passing
 
-spec:end: cypress/integration/run_events_spec_1.js { tests: 1, passes: 1, failures: 0 }
+spec:end: cypress/e2e/run_events_spec_1.js { tests: 1, passes: 1, failures: 0 }
 after:spec is awaited
 
   (Results)
@@ -46,7 +46,7 @@ after:spec is awaited
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  run_events_spec_2.js                                                            (2 of 2)
-before:spec: cypress/integration/run_events_spec_2.js
+before:spec: cypress/e2e/run_events_spec_2.js
 before:spec is awaited
 
 
@@ -54,7 +54,7 @@ before:spec is awaited
 
   1 passing
 
-spec:end: cypress/integration/run_events_spec_2.js { tests: 1, passes: 1, failures: 0 }
+spec:end: cypress/e2e/run_events_spec_2.js { tests: 1, passes: 1, failures: 0 }
 after:spec is awaited
 
   (Results)

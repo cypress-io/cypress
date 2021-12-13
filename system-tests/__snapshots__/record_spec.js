@@ -22,13 +22,13 @@ exports['e2e record passing passes 1'] = `
 
 Oops...we found an error preparing this test file:
 
-  cypress/integration/record_error_spec.js
+  cypress/e2e/record_error_spec.js
 
 The error was:
 
 Error: Webpack Compilation Error
-./cypress/integration/record_error_spec.js
-Module not found: Error: Can't resolve '../it/does/not/exist' in '/foo/bar/.projects/e2e/cypress/integration'
+./cypress/e2e/record_error_spec.js
+Module not found: Error: Can't resolve '../it/does/not/exist' in '/foo/bar/.projects/e2e/cypress/e2e'
 Looked for and couldn't find the file at the following paths:
 [/foo/bar/.projects/e2e/cypress/it/does/not/exist]
 [/foo/bar/.projects/e2e/cypress/it/does/not/exist.js]
@@ -38,7 +38,7 @@ Looked for and couldn't find the file at the following paths:
 [/foo/bar/.projects/e2e/cypress/it/does/not/exist.coffee]
 [/foo/bar/.projects/e2e/cypress/it/does/not/exist.ts]
 [/foo/bar/.projects/e2e/cypress/it/does/not/exist.tsx]
- @ ./cypress/integration/record_error_spec.js 3:0-31
+ @ ./cypress/e2e/record_error_spec.js 3:0-31
  
       [stack trace lines]
 
@@ -554,7 +554,7 @@ Can't run because no spec files were found.
 
 We searched for any files matching this glob pattern:
 
-cypress/integration/notfound/**
+cypress/e2e/notfound/**
 
 Relative to the project root folder:
 
@@ -731,13 +731,13 @@ exports['e2e record parallelization passes in parallel with group 2'] = `
 
 Oops...we found an error preparing this test file:
 
-  cypress/integration/record_error_spec.js
+  cypress/e2e/record_error_spec.js
 
 The error was:
 
 Error: Webpack Compilation Error
-./cypress/integration/record_error_spec.js
-Module not found: Error: Can't resolve '../it/does/not/exist' in '/foo/bar/.projects/e2e/cypress/integration'
+./cypress/e2e/record_error_spec.js
+Module not found: Error: Can't resolve '../it/does/not/exist' in '/foo/bar/.projects/e2e/cypress/e2e'
 Looked for and couldn't find the file at the following paths:
 [/foo/bar/.projects/e2e/cypress/it/does/not/exist]
 [/foo/bar/.projects/e2e/cypress/it/does/not/exist.js]
@@ -747,7 +747,7 @@ Looked for and couldn't find the file at the following paths:
 [/foo/bar/.projects/e2e/cypress/it/does/not/exist.coffee]
 [/foo/bar/.projects/e2e/cypress/it/does/not/exist.ts]
 [/foo/bar/.projects/e2e/cypress/it/does/not/exist.tsx]
- @ ./cypress/integration/record_error_spec.js 3:0-31
+ @ ./cypress/e2e/record_error_spec.js 3:0-31
  
       [stack trace lines]
 
@@ -1562,9 +1562,9 @@ exports['e2e record passing passes 2'] = [
               "codeFrame": {
                 "line": 3,
                 "column": 11,
-                "originalFile": "cypress/integration/record_fail_spec.js",
-                "relativeFile": "cypress/integration/record_fail_spec.js",
-                "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/record_fail_spec.js",
+                "originalFile": "cypress/e2e/record_fail_spec.js",
+                "relativeFile": "cypress/e2e/record_fail_spec.js",
+                "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/record_fail_spec.js",
                 "frame": "  1 | describe('record fails', () => {\n  2 |   beforeEach(() => {\n> 3 |     throw new Error('foo')\n    |           ^\n  4 |   })\n  5 | \n  6 |   it('fails 1', () => {})",
                 "language": "js"
               }
@@ -1738,9 +1738,9 @@ exports['e2e record passing passes 2'] = [
               "codeFrame": {
                 "line": 1,
                 "column": 7,
-                "originalFile": "cypress/integration/record_uncaught_spec.js",
-                "relativeFile": "cypress/integration/record_uncaught_spec.js",
-                "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/record_uncaught_spec.js",
+                "originalFile": "cypress/e2e/record_uncaught_spec.js",
+                "relativeFile": "cypress/e2e/record_uncaught_spec.js",
+                "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/record_uncaught_spec.js",
                 "frame": "> 1 | throw new Error('instantly fails')\n    |       ^\n  2 | ",
                 "language": "js"
               }
@@ -2223,7 +2223,7 @@ exports['e2e record api interaction errors create instance 500 without paralleli
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      2 found (a_record.spec.js, b_record.spec.js)                                       │
-  │ Searched:   cypress/e2e/*_record.spec.js                                               │
+  │ Searched:   cypress/e2e/*_record.spec.js                                                       │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -2300,7 +2300,7 @@ exports['e2e record api interaction errors postInstanceTests with parallelizatio
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      2 found (a_record.spec.js, b_record.spec.js)                                       │
-  │ Searched:   cypress/e2e/*_record.spec.js                                               │
+  │ Searched:   cypress/e2e/*_record.spec.js                                                       │
   │ Params:     Tag: false, Group: foo, Parallel: true                                             │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -2395,7 +2395,7 @@ exports['e2e record api skips specs records tests and exits without executing 1'
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      2 found (a_record_instantfail.spec.js, b_record.spec.js)                           │
-  │ Searched:   cypress/e2e/a_record_instantfail.spec.js, cypress/integration/b_record.spe │
+  │ Searched:   cypress/e2e/a_record_instantfail.spec.js        , cypress/e2e/b_record.spe │
   │             c.js                                                                               │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
@@ -2475,7 +2475,7 @@ exports['e2e record api skips specs records tests and exits without executing in
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      2 found (a_record_instantfail.spec.js, b_record.spec.js)                           │
-  │ Searched:   cypress/e2e/a_record_instantfail.spec.js, cypress/integration/b_record.spe │
+  │ Searched:   cypress/e2e/a_record_instantfail.spec.js        , cypress/e2e/b_record.spe │
   │             c.js                                                                               │
   │ Params:     Tag: false, Group: abc, Parallel: true                                             │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
@@ -2555,7 +2555,7 @@ exports['e2e record empty specs succeeds when empty spec file 1'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      2 found (empty_suite.spec.js, empty.spec.js)                                       │
-  │ Searched:   cypress/e2e/empty_suite.spec.js, cypress/integration/empty.spec.js         │
+  │ Searched:   cypress/e2e/empty_suite.spec.js, cypress/e2e/empty.spec.js                 │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -2668,7 +2668,7 @@ exports['e2e record metadata sends Studio usage metadata 1'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (studio_written.spec.js)                                                   │
-  │ Searched:   cypress/e2e/studio_written.spec.js                                         │
+  │ Searched:   cypress/e2e/studio_written.spec.js                                                 │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘

@@ -9,7 +9,7 @@ Warning: Multiple attempts to register the following task(s): two. Only the last
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (multiple_task_registrations_spec.js)                                      │
-  │ Searched:   cypress/e2e/multiple_task_registrations_spec.js                            │
+  │ Searched:   cypress/e2e/multiple_task_registrations_spec.js                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -69,7 +69,7 @@ exports['e2e task handles undefined return and includes stack trace in error 1']
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (task_spec.js)                                                             │
-  │ Searched:   cypress/e2e/task_spec.js                                                   │
+  │ Searched:   cypress/e2e/task_spec.js                                                           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

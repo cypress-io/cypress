@@ -8,7 +8,7 @@ exports['e2e server sent events / passes'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (server_sent_events_spec.js)                                               │
-  │ Searched:   cypress/e2e/server_sent_events_spec.js                                     │
+  │ Searched:   cypress/e2e/server_sent_events_spec.js                                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

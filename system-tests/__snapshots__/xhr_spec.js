@@ -8,7 +8,7 @@ exports['e2e xhr / passes in global mode'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (xhr_spec.js)                                                              │
-  │ Searched:   cypress/e2e/xhr_spec.js                                                    │
+  │ Searched:   cypress/e2e/xhr_spec.js                                                            │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -78,7 +78,7 @@ exports['e2e xhr / passes through CLI'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (xhr_spec.js)                                                              │
-  │ Searched:   cypress/e2e/xhr_spec.js                                                    │
+  │ Searched:   cypress/e2e/xhr_spec.js                                                            │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

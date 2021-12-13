@@ -8,7 +8,7 @@ exports['e2e stdout displays errors from failures 1'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (stdout_failing_spec.js)                                                   │
-  │ Searched:   cypress/e2e/stdout_failing_spec.js                                         │
+  │ Searched:   cypress/e2e/stdout_failing_spec.js                                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -127,7 +127,7 @@ exports['e2e stdout displays errors from exiting early due to bundle errors 1'] 
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (stdout_exit_early_failing_spec.js)                                        │
-  │ Searched:   cypress/e2e/stdout_exit_early_failing_spec.js                              │
+  │ Searched:   cypress/e2e/stdout_exit_early_failing_spec.js                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -137,14 +137,14 @@ exports['e2e stdout displays errors from exiting early due to bundle errors 1'] 
 
 Oops...we found an error preparing this test file:
 
-  cypress/integration/stdout_exit_early_failing_spec.js
+  cypress/e2e/stdout_exit_early_failing_spec.js
 
 The error was:
 
 Error: Webpack Compilation Error
-./cypress/integration/stdout_exit_early_failing_spec.js
+./cypress/e2e/stdout_exit_early_failing_spec.js
 Module build failed (from [..]):
-SyntaxError: /foo/bar/.projects/e2e/cypress/integration/stdout_exit_early_failing_spec.js: Unexpected token (1:1)
+SyntaxError: /foo/bar/.projects/e2e/cypress/e2e/stdout_exit_early_failing_spec.js: Unexpected token (1:1)
 
 > 1 | +>
     |  ^
@@ -204,7 +204,7 @@ exports['e2e stdout does not duplicate suites or tests between visits 1'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (stdout_passing_spec.js)                                                   │
-  │ Searched:   cypress/e2e/stdout_passing_spec.js                                         │
+  │ Searched:   cypress/e2e/stdout_passing_spec.js                                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -421,7 +421,7 @@ exports['e2e stdout / displays assertion errors'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (stdout_assertion_errors_spec.js)                                          │
-  │ Searched:   cypress/e2e/stdout_assertion_errors_spec.js                                │
+  │ Searched:   cypress/e2e/stdout_assertion_errors_spec.js                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

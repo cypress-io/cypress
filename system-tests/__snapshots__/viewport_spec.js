@@ -8,7 +8,7 @@ exports['e2e viewport / passes'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (viewport_spec.js)                                                         │
-  │ Searched:   cypress/e2e/viewport_spec.js                                               │
+  │ Searched:   cypress/e2e/viewport_spec.js                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

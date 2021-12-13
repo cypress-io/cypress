@@ -8,7 +8,7 @@ exports['e2e issue 2891 passes 1'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (default_layout_spec.js)                                                   │
-  │ Searched:   cypress/e2e/default_layout_spec.js                                         │
+  │ Searched:   cypress/e2e/default_layout_spec.js                                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

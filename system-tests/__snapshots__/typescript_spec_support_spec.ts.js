@@ -82,12 +82,12 @@ exports['e2e typescript in spec and support file spec fails with syntax error 1'
 
 Oops...we found an error preparing this test file:
 
-  cypress/integration/typescript_syntax_error_spec.ts
+  cypress/e2e/typescript_syntax_error_spec.ts
 
 The error was:
 
 Error: Webpack Compilation Error
-./cypress/integration/typescript_syntax_error_spec.tsXX:XX
+./cypress/e2e/typescript_syntax_error_spec.tsXX:XX
 Module parse failed: Unexpected token (3:19)
 File was processed with these loaders:
  * relative/path/to/webpack-batteries-included-preprocessor/node_modules/ts-loader/index.js

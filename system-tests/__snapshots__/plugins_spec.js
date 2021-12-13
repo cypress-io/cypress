@@ -8,7 +8,7 @@ exports['e2e plugins preprocessor passes with working preprocessor 1'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (app_spec.js)                                                              │
-  │ Searched:   cypress/e2e/app_spec.js                                                    │
+  │ Searched:   cypress/e2e/app_spec.js                                                            │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -68,7 +68,7 @@ exports['e2e plugins can modify config from plugins 1'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (app_spec.js)                                                              │
-  │ Searched:   cypress/e2e/app_spec.js                                                    │
+  │ Searched:   cypress/e2e/app_spec.js                                                            │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -161,7 +161,7 @@ exports['e2e plugins / works with user extensions'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (app_spec.js)                                                              │
-  │ Searched:   cypress/e2e/app_spec.js                                                    │
+  │ Searched:   cypress/e2e/app_spec.js                                                            │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -220,7 +220,7 @@ exports['e2e plugins handles absolute path to pluginsFile 1'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (absolute_spec.js)                                                         │
-  │ Searched:   cypress/e2e/absolute_spec.js                                               │
+  │ Searched:   cypress/e2e/absolute_spec.js                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -279,7 +279,7 @@ exports['e2e plugins calls after:screenshot for cy.screenshot() and failure scre
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (after_screenshot_spec.js)                                                 │
-  │ Searched:   cypress/e2e/after_screenshot_spec.js                                       │
+  │ Searched:   cypress/e2e/after_screenshot_spec.js                                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -362,7 +362,7 @@ exports['e2e plugins fails when there is an async error inside an event handler 
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (app_spec.js)                                                              │
-  │ Searched:   cypress/e2e/app_spec.js                                                    │
+  │ Searched:   cypress/e2e/app_spec.js                                                            │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -454,7 +454,7 @@ exports['e2e plugins does not report more screenshots than exist if user overwri
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (after_screenshot_overwrite_spec.js)                                       │
-  │ Searched:   cypress/e2e/after_screenshot_overwrite_spec.js                             │
+  │ Searched:   cypress/e2e/after_screenshot_overwrite_spec.js                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

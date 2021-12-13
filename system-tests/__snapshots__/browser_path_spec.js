@@ -8,7 +8,7 @@ exports['e2e launching browsers by path works with an installed browser path 1']
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    Custom FooBrowser 88                                                               │
   │ Specs:      1 found (simple_spec.js)                                                           │
-  │ Searched:   cypress/e2e/simple_spec.js                                                 │
+  │ Searched:   cypress/e2e/simple_spec.js                                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

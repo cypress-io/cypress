@@ -8,7 +8,7 @@ exports['e2e websockets / passes'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (websockets_spec.js)                                                       │
-  │ Searched:   cypress/e2e/websockets_spec.js                                             │
+  │ Searched:   cypress/e2e/websockets_spec.js                                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

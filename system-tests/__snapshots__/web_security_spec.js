@@ -8,7 +8,7 @@ exports['e2e web security / when enabled / fails'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (web_security_spec.js)                                                     │
-  │ Searched:   cypress/e2e/web_security_spec.js                                           │
+  │ Searched:   cypress/e2e/web_security_spec.js                                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -161,7 +161,7 @@ exports['e2e web security / when disabled / passes'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (web_security_spec.js)                                                     │
-  │ Searched:   cypress/e2e/web_security_spec.js                                           │
+  │ Searched:   cypress/e2e/web_security_spec.js                                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -225,7 +225,7 @@ exports['e2e web security / firefox / displays warning when firefox and chromeWe
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (simple_passing_spec.js)                                                   │
-  │ Searched:   cypress/e2e/simple_passing_spec.js                                         │
+  │ Searched:   cypress/e2e/simple_passing_spec.js                                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

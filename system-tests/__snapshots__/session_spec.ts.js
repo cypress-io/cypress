@@ -8,7 +8,7 @@ exports['e2e sessions / session tests'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (session_spec.js)                                                          │
-  │ Searched:   cypress/e2e/session_spec.js                                                │
+  │ Searched:   cypress/e2e/session_spec.js                                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -166,7 +166,7 @@ exports['e2e sessions / sessions persist on reload, and clear between specs'] = 
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      2 found (session_persist_spec_1.js, session_persist_spec_2.js)                     │
-  │ Searched:   cypress/e2e/session_persist_spec_1.js, cypress/integration/session_persist │
+  │ Searched:   cypress/e2e/session_persist_spec_1.js        , cypress/e2e/session_persist │
   │             _spec_2.js                                                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 

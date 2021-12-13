@@ -8,7 +8,7 @@ exports['e2e plugins fails when spec does not exist 1'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (spec.js)                                                                  │
-  │ Searched:   cypress/e2e/spec.js                                                        │
+  │ Searched:   cypress/e2e/spec.js                                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -18,7 +18,7 @@ exports['e2e plugins fails when spec does not exist 1'] = `
 
 Oops...we found an error preparing this test file:
 
-  cypress/integration/spec.js
+  cypress/e2e/spec.js
 
 The error was:
 
@@ -76,7 +76,7 @@ exports['e2e plugins handles specs with $, &, and + in file name 1'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (s%p+ec&.js)                                                               │
-  │ Searched:   cypress/e2e/dir&1%/%dir2&/s%p+ec&.js                                       │
+  │ Searched:   cypress/e2e/dir&1%/%dir2&/s%p+ec&.js                                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

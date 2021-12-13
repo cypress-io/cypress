@@ -8,7 +8,7 @@ exports['e2e screenshots / passes'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (screenshots_spec.js)                                                      │
-  │ Searched:   cypress/e2e/screenshots_spec.js                                            │
+  │ Searched:   cypress/e2e/screenshots_spec.js                                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

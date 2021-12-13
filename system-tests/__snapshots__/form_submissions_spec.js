@@ -8,7 +8,7 @@ exports['e2e forms / <form> submissions / passes with https on localhost'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (form_submission_multipart_spec.js)                                        │
-  │ Searched:   cypress/e2e/form_submission_multipart_spec.js                              │
+  │ Searched:   cypress/e2e/form_submission_multipart_spec.js                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -77,7 +77,7 @@ exports['e2e forms / <form> submissions / passes with http on localhost'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (form_submission_multipart_spec.js)                                        │
-  │ Searched:   cypress/e2e/form_submission_multipart_spec.js                              │
+  │ Searched:   cypress/e2e/form_submission_multipart_spec.js                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -146,7 +146,7 @@ exports['e2e forms / submissions with jquery XHR POST / failing'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (form_submission_failing_spec.js)                                          │
-  │ Searched:   cypress/e2e/form_submission_failing_spec.js                                │
+  │ Searched:   cypress/e2e/form_submission_failing_spec.js                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -221,7 +221,7 @@ exports['e2e forms / submissions with jquery XHR POST / passing'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (form_submission_passing_spec.js)                                          │
-  │ Searched:   cypress/e2e/form_submission_passing_spec.js                                │
+  │ Searched:   cypress/e2e/form_submission_passing_spec.js                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

@@ -8,7 +8,7 @@ exports['e2e async timeouts / failing1'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (async_timeouts_spec.js)                                                   │
-  │ Searched:   cypress/e2e/async_timeouts_spec.js                                         │
+  │ Searched:   cypress/e2e/async_timeouts_spec.js                                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

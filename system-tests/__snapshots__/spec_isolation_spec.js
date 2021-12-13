@@ -8,7 +8,7 @@ exports['e2e spec_isolation / failing with retries enabled'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      2 found (simple_failing_hook_spec.js, simple_retrying_spec.js)                     │
-  │ Searched:   cypress/e2e/simple_failing_hook_spec.js, cypress/integration/simple_retryi │
+  │ Searched:   cypress/e2e/simple_failing_hook_spec.js        , cypress/e2e/simple_retryi │
   │             ng_spec.js                                                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -230,9 +230,9 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
         "specFileExtension": ".js",
         "relativeToCommonRoot": "simple_passing_spec.js",
         "specType": "integration",
-        "name": "cypress/integration/simple_passing_spec.js",
-        "relative": "cypress/integration/simple_passing_spec.js",
-        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_passing_spec.js"
+        "name": "cypress/e2e/simple_passing_spec.js",
+        "relative": "cypress/e2e/simple_passing_spec.js",
+        "absolute": "/foo/bar/.projects/e2e/cypress/e2e/simple_passing_spec.js"
       },
       "shouldUploadVideo": true
     },
@@ -357,9 +357,9 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
         "specFileExtension": ".js",
         "relativeToCommonRoot": "simple_hooks_spec.js",
         "specType": "integration",
-        "name": "cypress/integration/simple_hooks_spec.js",
-        "relative": "cypress/integration/simple_hooks_spec.js",
-        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_hooks_spec.js"
+        "name": "cypress/e2e/simple_hooks_spec.js",
+        "relative": "cypress/e2e/simple_hooks_spec.js",
+        "absolute": "/foo/bar/.projects/e2e/cypress/e2e/simple_hooks_spec.js"
       },
       "shouldUploadVideo": true
     },
@@ -406,9 +406,9 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
                 "codeFrame": {
                   "line": 4,
                   "column": 37,
-                  "originalFile": "cypress/integration/simple_failing_spec.js",
-                  "relativeFile": "cypress/integration/simple_failing_spec.js",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_spec.js",
+                  "originalFile": "cypress/e2e/simple_failing_spec.js",
+                  "relativeFile": "cypress/e2e/simple_failing_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_spec.js",
                   "frame": "  2 | describe('simple failing spec', () => {\n  3 |   it('fails1', () => {\n> 4 |     cy.wrap(true, { timeout: 100 }).should('be.false')\n    |                                     ^\n  5 |   })\n  6 | \n  7 |   it('fails2', () => {",
                   "language": "js"
                 }
@@ -446,9 +446,9 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
                 "codeFrame": {
                   "line": 8,
                   "column": 11,
-                  "originalFile": "cypress/integration/simple_failing_spec.js",
-                  "relativeFile": "cypress/integration/simple_failing_spec.js",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_spec.js",
+                  "originalFile": "cypress/e2e/simple_failing_spec.js",
+                  "relativeFile": "cypress/e2e/simple_failing_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_spec.js",
                   "frame": "   6 | \n   7 |   it('fails2', () => {\n>  8 |     throw new Error('fails2')\n     |           ^\n   9 |   })\n  10 | })\n  11 | ",
                   "language": "js"
                 }
@@ -478,9 +478,9 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
         "specFileExtension": ".js",
         "relativeToCommonRoot": "simple_failing_spec.js",
         "specType": "integration",
-        "name": "cypress/integration/simple_failing_spec.js",
-        "relative": "cypress/integration/simple_failing_spec.js",
-        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_spec.js"
+        "name": "cypress/e2e/simple_failing_spec.js",
+        "relative": "cypress/e2e/simple_failing_spec.js",
+        "absolute": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_spec.js"
       },
       "shouldUploadVideo": true
     },
@@ -550,9 +550,9 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
                 "codeFrame": {
                   "line": 4,
                   "column": 13,
-                  "originalFile": "cypress/integration/simple_failing_hook_spec.js",
-                  "relativeFile": "cypress/integration/simple_failing_hook_spec.js",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.js",
+                  "originalFile": "cypress/e2e/simple_failing_hook_spec.js",
+                  "relativeFile": "cypress/e2e/simple_failing_hook_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_hook_spec.js",
                   "frame": "  2 |   context('beforeEach hooks', () => {\n  3 |     beforeEach(() => {\n> 4 |       throw new Error('fail1')\n    |             ^\n  5 |     })\n  6 | \n  7 |     it('never gets here', () => {})",
                   "language": "js"
                 }
@@ -611,9 +611,9 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
                 "codeFrame": {
                   "line": 16,
                   "column": 13,
-                  "originalFile": "cypress/integration/simple_failing_hook_spec.js",
-                  "relativeFile": "cypress/integration/simple_failing_hook_spec.js",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.js",
+                  "originalFile": "cypress/e2e/simple_failing_hook_spec.js",
+                  "relativeFile": "cypress/e2e/simple_failing_hook_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_hook_spec.js",
                   "frame": "  14 |   context('afterEach hooks', () => {\n  15 |     afterEach(() => {\n> 16 |       throw new Error('fail2')\n     |             ^\n  17 |     })\n  18 | \n  19 |     it('runs this', () => {})",
                   "language": "js"
                 }
@@ -692,9 +692,9 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
                 "codeFrame": {
                   "line": 26,
                   "column": 13,
-                  "originalFile": "cypress/integration/simple_failing_hook_spec.js",
-                  "relativeFile": "cypress/integration/simple_failing_hook_spec.js",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.js",
+                  "originalFile": "cypress/e2e/simple_failing_hook_spec.js",
+                  "relativeFile": "cypress/e2e/simple_failing_hook_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_hook_spec.js",
                   "frame": "  24 |   context('after hooks', () => {\n  25 |     after(() => {\n> 26 |       throw new Error('fail3')\n     |             ^\n  27 |     })\n  28 | \n  29 |     it('runs this', () => {})",
                   "language": "js"
                 }
@@ -724,9 +724,9 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
         "specFileExtension": ".js",
         "relativeToCommonRoot": "simple_failing_hook_spec.js",
         "specType": "integration",
-        "name": "cypress/integration/simple_failing_hook_spec.js",
-        "relative": "cypress/integration/simple_failing_hook_spec.js",
-        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.js"
+        "name": "cypress/e2e/simple_failing_hook_spec.js",
+        "relative": "cypress/e2e/simple_failing_hook_spec.js",
+        "absolute": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_hook_spec.js"
       },
       "shouldUploadVideo": true
     }
@@ -818,9 +818,9 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
                 "codeFrame": {
                   "line": 4,
                   "column": 13,
-                  "originalFile": "cypress/integration/simple_failing_hook_spec.js",
-                  "relativeFile": "cypress/integration/simple_failing_hook_spec.js",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.js",
+                  "originalFile": "cypress/e2e/simple_failing_hook_spec.js",
+                  "relativeFile": "cypress/e2e/simple_failing_hook_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_hook_spec.js",
                   "frame": "  2 |   context('beforeEach hooks', () => {\n  3 |     beforeEach(() => {\n> 4 |       throw new Error('fail1')\n    |             ^\n  5 |     })\n  6 | \n  7 |     it('never gets here', () => {})",
                   "language": "js"
                 }
@@ -847,9 +847,9 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
                 "codeFrame": {
                   "line": 4,
                   "column": 13,
-                  "originalFile": "cypress/integration/simple_failing_hook_spec.js",
-                  "relativeFile": "cypress/integration/simple_failing_hook_spec.js",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.js",
+                  "originalFile": "cypress/e2e/simple_failing_hook_spec.js",
+                  "relativeFile": "cypress/e2e/simple_failing_hook_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_hook_spec.js",
                   "frame": "  2 |   context('beforeEach hooks', () => {\n  3 |     beforeEach(() => {\n> 4 |       throw new Error('fail1')\n    |             ^\n  5 |     })\n  6 | \n  7 |     it('never gets here', () => {})",
                   "language": "js"
                 }
@@ -908,9 +908,9 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
                 "codeFrame": {
                   "line": 16,
                   "column": 13,
-                  "originalFile": "cypress/integration/simple_failing_hook_spec.js",
-                  "relativeFile": "cypress/integration/simple_failing_hook_spec.js",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.js",
+                  "originalFile": "cypress/e2e/simple_failing_hook_spec.js",
+                  "relativeFile": "cypress/e2e/simple_failing_hook_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_hook_spec.js",
                   "frame": "  14 |   context('afterEach hooks', () => {\n  15 |     afterEach(() => {\n> 16 |       throw new Error('fail2')\n     |             ^\n  17 |     })\n  18 | \n  19 |     it('runs this', () => {})",
                   "language": "js"
                 }
@@ -937,9 +937,9 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
                 "codeFrame": {
                   "line": 16,
                   "column": 13,
-                  "originalFile": "cypress/integration/simple_failing_hook_spec.js",
-                  "relativeFile": "cypress/integration/simple_failing_hook_spec.js",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.js",
+                  "originalFile": "cypress/e2e/simple_failing_hook_spec.js",
+                  "relativeFile": "cypress/e2e/simple_failing_hook_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_hook_spec.js",
                   "frame": "  14 |   context('afterEach hooks', () => {\n  15 |     afterEach(() => {\n> 16 |       throw new Error('fail2')\n     |             ^\n  17 |     })\n  18 | \n  19 |     it('runs this', () => {})",
                   "language": "js"
                 }
@@ -1018,9 +1018,9 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
                 "codeFrame": {
                   "line": 26,
                   "column": 13,
-                  "originalFile": "cypress/integration/simple_failing_hook_spec.js",
-                  "relativeFile": "cypress/integration/simple_failing_hook_spec.js",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.js",
+                  "originalFile": "cypress/e2e/simple_failing_hook_spec.js",
+                  "relativeFile": "cypress/e2e/simple_failing_hook_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_hook_spec.js",
                   "frame": "  24 |   context('after hooks', () => {\n  25 |     after(() => {\n> 26 |       throw new Error('fail3')\n     |             ^\n  27 |     })\n  28 | \n  29 |     it('runs this', () => {})",
                   "language": "js"
                 }
@@ -1050,9 +1050,9 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
         "specFileExtension": ".js",
         "relativeToCommonRoot": "simple_failing_hook_spec.js",
         "specType": "integration",
-        "name": "cypress/integration/simple_failing_hook_spec.js",
-        "relative": "cypress/integration/simple_failing_hook_spec.js",
-        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.js"
+        "name": "cypress/e2e/simple_failing_hook_spec.js",
+        "relative": "cypress/e2e/simple_failing_hook_spec.js",
+        "absolute": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_hook_spec.js"
       },
       "shouldUploadVideo": true
     },
@@ -1099,9 +1099,9 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
                 "codeFrame": {
                   "line": 5,
                   "column": 11,
-                  "originalFile": "cypress/integration/simple_retrying_spec.js",
-                  "relativeFile": "cypress/integration/simple_retrying_spec.js",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_retrying_spec.js",
+                  "originalFile": "cypress/e2e/simple_retrying_spec.js",
+                  "relativeFile": "cypress/e2e/simple_retrying_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_retrying_spec.js",
                   "frame": "  3 |     const test = cy.state('test')\n  4 | \n> 5 |     throw new Error(`${test.title} attempt #${cy.state('test').currentRetry()}`)\n    |           ^\n  6 |   })\n  7 | \n  8 |   it('t2', () => {",
                   "language": "js"
                 }
@@ -1128,9 +1128,9 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
                 "codeFrame": {
                   "line": 5,
                   "column": 11,
-                  "originalFile": "cypress/integration/simple_retrying_spec.js",
-                  "relativeFile": "cypress/integration/simple_retrying_spec.js",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_retrying_spec.js",
+                  "originalFile": "cypress/e2e/simple_retrying_spec.js",
+                  "relativeFile": "cypress/e2e/simple_retrying_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_retrying_spec.js",
                   "frame": "  3 |     const test = cy.state('test')\n  4 | \n> 5 |     throw new Error(`${test.title} attempt #${cy.state('test').currentRetry()}`)\n    |           ^\n  6 |   })\n  7 | \n  8 |   it('t2', () => {",
                   "language": "js"
                 }
@@ -1179,9 +1179,9 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
         "specFileExtension": ".js",
         "relativeToCommonRoot": "simple_retrying_spec.js",
         "specType": "integration",
-        "name": "cypress/integration/simple_retrying_spec.js",
-        "relative": "cypress/integration/simple_retrying_spec.js",
-        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_retrying_spec.js"
+        "name": "cypress/e2e/simple_retrying_spec.js",
+        "relative": "cypress/e2e/simple_retrying_spec.js",
+        "absolute": "/foo/bar/.projects/e2e/cypress/e2e/simple_retrying_spec.js"
       },
       "shouldUploadVideo": true
     }
@@ -1273,9 +1273,9 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
                 "codeFrame": {
                   "line": 4,
                   "column": 13,
-                  "originalFile": "cypress/integration/simple_failing_hook_spec.js",
-                  "relativeFile": "cypress/integration/simple_failing_hook_spec.js",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.js",
+                  "originalFile": "cypress/e2e/simple_failing_hook_spec.js",
+                  "relativeFile": "cypress/e2e/simple_failing_hook_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_hook_spec.js",
                   "frame": "  2 |   context('beforeEach hooks', () => {\n  3 |     beforeEach(() => {\n> 4 |       throw new Error('fail1')\n    |             ^\n  5 |     })\n  6 | \n  7 |     it('never gets here', () => {})",
                   "language": "js"
                 }
@@ -1302,9 +1302,9 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
                 "codeFrame": {
                   "line": 4,
                   "column": 13,
-                  "originalFile": "cypress/integration/simple_failing_hook_spec.js",
-                  "relativeFile": "cypress/integration/simple_failing_hook_spec.js",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.js",
+                  "originalFile": "cypress/e2e/simple_failing_hook_spec.js",
+                  "relativeFile": "cypress/e2e/simple_failing_hook_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_hook_spec.js",
                   "frame": "  2 |   context('beforeEach hooks', () => {\n  3 |     beforeEach(() => {\n> 4 |       throw new Error('fail1')\n    |             ^\n  5 |     })\n  6 | \n  7 |     it('never gets here', () => {})",
                   "language": "js"
                 }
@@ -1363,9 +1363,9 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
                 "codeFrame": {
                   "line": 16,
                   "column": 13,
-                  "originalFile": "cypress/integration/simple_failing_hook_spec.js",
-                  "relativeFile": "cypress/integration/simple_failing_hook_spec.js",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.js",
+                  "originalFile": "cypress/e2e/simple_failing_hook_spec.js",
+                  "relativeFile": "cypress/e2e/simple_failing_hook_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_hook_spec.js",
                   "frame": "  14 |   context('afterEach hooks', () => {\n  15 |     afterEach(() => {\n> 16 |       throw new Error('fail2')\n     |             ^\n  17 |     })\n  18 | \n  19 |     it('runs this', () => {})",
                   "language": "js"
                 }
@@ -1392,9 +1392,9 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
                 "codeFrame": {
                   "line": 16,
                   "column": 13,
-                  "originalFile": "cypress/integration/simple_failing_hook_spec.js",
-                  "relativeFile": "cypress/integration/simple_failing_hook_spec.js",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.js",
+                  "originalFile": "cypress/e2e/simple_failing_hook_spec.js",
+                  "relativeFile": "cypress/e2e/simple_failing_hook_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_hook_spec.js",
                   "frame": "  14 |   context('afterEach hooks', () => {\n  15 |     afterEach(() => {\n> 16 |       throw new Error('fail2')\n     |             ^\n  17 |     })\n  18 | \n  19 |     it('runs this', () => {})",
                   "language": "js"
                 }
@@ -1473,9 +1473,9 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
                 "codeFrame": {
                   "line": 26,
                   "column": 13,
-                  "originalFile": "cypress/integration/simple_failing_hook_spec.js",
-                  "relativeFile": "cypress/integration/simple_failing_hook_spec.js",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.js",
+                  "originalFile": "cypress/e2e/simple_failing_hook_spec.js",
+                  "relativeFile": "cypress/e2e/simple_failing_hook_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_hook_spec.js",
                   "frame": "  24 |   context('after hooks', () => {\n  25 |     after(() => {\n> 26 |       throw new Error('fail3')\n     |             ^\n  27 |     })\n  28 | \n  29 |     it('runs this', () => {})",
                   "language": "js"
                 }
@@ -1505,9 +1505,9 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
         "specFileExtension": ".js",
         "relativeToCommonRoot": "simple_failing_hook_spec.js",
         "specType": "integration",
-        "name": "cypress/integration/simple_failing_hook_spec.js",
-        "relative": "cypress/integration/simple_failing_hook_spec.js",
-        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.js"
+        "name": "cypress/e2e/simple_failing_hook_spec.js",
+        "relative": "cypress/e2e/simple_failing_hook_spec.js",
+        "absolute": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_hook_spec.js"
       },
       "shouldUploadVideo": true
     },
@@ -1554,9 +1554,9 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
                 "codeFrame": {
                   "line": 5,
                   "column": 11,
-                  "originalFile": "cypress/integration/simple_retrying_spec.js",
-                  "relativeFile": "cypress/integration/simple_retrying_spec.js",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_retrying_spec.js",
+                  "originalFile": "cypress/e2e/simple_retrying_spec.js",
+                  "relativeFile": "cypress/e2e/simple_retrying_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_retrying_spec.js",
                   "frame": "  3 |     const test = cy.state('test')\n  4 | \n> 5 |     throw new Error(`${test.title} attempt #${cy.state('test').currentRetry()}`)\n    |           ^\n  6 |   })\n  7 | \n  8 |   it('t2', () => {",
                   "language": "js"
                 }
@@ -1583,9 +1583,9 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
                 "codeFrame": {
                   "line": 5,
                   "column": 11,
-                  "originalFile": "cypress/integration/simple_retrying_spec.js",
-                  "relativeFile": "cypress/integration/simple_retrying_spec.js",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_retrying_spec.js",
+                  "originalFile": "cypress/e2e/simple_retrying_spec.js",
+                  "relativeFile": "cypress/e2e/simple_retrying_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_retrying_spec.js",
                   "frame": "  3 |     const test = cy.state('test')\n  4 | \n> 5 |     throw new Error(`${test.title} attempt #${cy.state('test').currentRetry()}`)\n    |           ^\n  6 |   })\n  7 | \n  8 |   it('t2', () => {",
                   "language": "js"
                 }
@@ -1634,9 +1634,9 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
         "specFileExtension": ".js",
         "relativeToCommonRoot": "simple_retrying_spec.js",
         "specType": "integration",
-        "name": "cypress/integration/simple_retrying_spec.js",
-        "relative": "cypress/integration/simple_retrying_spec.js",
-        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_retrying_spec.js"
+        "name": "cypress/e2e/simple_retrying_spec.js",
+        "relative": "cypress/e2e/simple_retrying_spec.js",
+        "absolute": "/foo/bar/.projects/e2e/cypress/e2e/simple_retrying_spec.js"
       },
       "shouldUploadVideo": true
     }
@@ -1724,9 +1724,9 @@ exports['e2e spec_isolation fails [electron] 1'] = {
         "specFileExtension": ".js",
         "relativeToCommonRoot": "simple_passing_spec.js",
         "specType": "integration",
-        "name": "cypress/integration/simple_passing_spec.js",
-        "relative": "cypress/integration/simple_passing_spec.js",
-        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_passing_spec.js"
+        "name": "cypress/e2e/simple_passing_spec.js",
+        "relative": "cypress/e2e/simple_passing_spec.js",
+        "absolute": "/foo/bar/.projects/e2e/cypress/e2e/simple_passing_spec.js"
       },
       "shouldUploadVideo": true
     },
@@ -1851,9 +1851,9 @@ exports['e2e spec_isolation fails [electron] 1'] = {
         "specFileExtension": ".js",
         "relativeToCommonRoot": "simple_hooks_spec.js",
         "specType": "integration",
-        "name": "cypress/integration/simple_hooks_spec.js",
-        "relative": "cypress/integration/simple_hooks_spec.js",
-        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_hooks_spec.js"
+        "name": "cypress/e2e/simple_hooks_spec.js",
+        "relative": "cypress/e2e/simple_hooks_spec.js",
+        "absolute": "/foo/bar/.projects/e2e/cypress/e2e/simple_hooks_spec.js"
       },
       "shouldUploadVideo": true
     },
@@ -1900,9 +1900,9 @@ exports['e2e spec_isolation fails [electron] 1'] = {
                 "codeFrame": {
                   "line": 4,
                   "column": 37,
-                  "originalFile": "cypress/integration/simple_failing_spec.js",
-                  "relativeFile": "cypress/integration/simple_failing_spec.js",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_spec.js",
+                  "originalFile": "cypress/e2e/simple_failing_spec.js",
+                  "relativeFile": "cypress/e2e/simple_failing_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_spec.js",
                   "frame": "  2 | describe('simple failing spec', () => {\n  3 |   it('fails1', () => {\n> 4 |     cy.wrap(true, { timeout: 100 }).should('be.false')\n    |                                     ^\n  5 |   })\n  6 | \n  7 |   it('fails2', () => {",
                   "language": "js"
                 }
@@ -1940,9 +1940,9 @@ exports['e2e spec_isolation fails [electron] 1'] = {
                 "codeFrame": {
                   "line": 8,
                   "column": 11,
-                  "originalFile": "cypress/integration/simple_failing_spec.js",
-                  "relativeFile": "cypress/integration/simple_failing_spec.js",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_spec.js",
+                  "originalFile": "cypress/e2e/simple_failing_spec.js",
+                  "relativeFile": "cypress/e2e/simple_failing_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_spec.js",
                   "frame": "   6 | \n   7 |   it('fails2', () => {\n>  8 |     throw new Error('fails2')\n     |           ^\n   9 |   })\n  10 | })\n  11 | ",
                   "language": "js"
                 }
@@ -1972,9 +1972,9 @@ exports['e2e spec_isolation fails [electron] 1'] = {
         "specFileExtension": ".js",
         "relativeToCommonRoot": "simple_failing_spec.js",
         "specType": "integration",
-        "name": "cypress/integration/simple_failing_spec.js",
-        "relative": "cypress/integration/simple_failing_spec.js",
-        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_spec.js"
+        "name": "cypress/e2e/simple_failing_spec.js",
+        "relative": "cypress/e2e/simple_failing_spec.js",
+        "absolute": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_spec.js"
       },
       "shouldUploadVideo": true
     },
@@ -2044,9 +2044,9 @@ exports['e2e spec_isolation fails [electron] 1'] = {
                 "codeFrame": {
                   "line": 4,
                   "column": 13,
-                  "originalFile": "cypress/integration/simple_failing_hook_spec.js",
-                  "relativeFile": "cypress/integration/simple_failing_hook_spec.js",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.js",
+                  "originalFile": "cypress/e2e/simple_failing_hook_spec.js",
+                  "relativeFile": "cypress/e2e/simple_failing_hook_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_hook_spec.js",
                   "frame": "  2 |   context('beforeEach hooks', () => {\n  3 |     beforeEach(() => {\n> 4 |       throw new Error('fail1')\n    |             ^\n  5 |     })\n  6 | \n  7 |     it('never gets here', () => {})",
                   "language": "js"
                 }
@@ -2105,9 +2105,9 @@ exports['e2e spec_isolation fails [electron] 1'] = {
                 "codeFrame": {
                   "line": 16,
                   "column": 13,
-                  "originalFile": "cypress/integration/simple_failing_hook_spec.js",
-                  "relativeFile": "cypress/integration/simple_failing_hook_spec.js",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.js",
+                  "originalFile": "cypress/e2e/simple_failing_hook_spec.js",
+                  "relativeFile": "cypress/e2e/simple_failing_hook_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_hook_spec.js",
                   "frame": "  14 |   context('afterEach hooks', () => {\n  15 |     afterEach(() => {\n> 16 |       throw new Error('fail2')\n     |             ^\n  17 |     })\n  18 | \n  19 |     it('runs this', () => {})",
                   "language": "js"
                 }
@@ -2186,9 +2186,9 @@ exports['e2e spec_isolation fails [electron] 1'] = {
                 "codeFrame": {
                   "line": 26,
                   "column": 13,
-                  "originalFile": "cypress/integration/simple_failing_hook_spec.js",
-                  "relativeFile": "cypress/integration/simple_failing_hook_spec.js",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.js",
+                  "originalFile": "cypress/e2e/simple_failing_hook_spec.js",
+                  "relativeFile": "cypress/e2e/simple_failing_hook_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_hook_spec.js",
                   "frame": "  24 |   context('after hooks', () => {\n  25 |     after(() => {\n> 26 |       throw new Error('fail3')\n     |             ^\n  27 |     })\n  28 | \n  29 |     it('runs this', () => {})",
                   "language": "js"
                 }
@@ -2218,9 +2218,9 @@ exports['e2e spec_isolation fails [electron] 1'] = {
         "specFileExtension": ".js",
         "relativeToCommonRoot": "simple_failing_hook_spec.js",
         "specType": "integration",
-        "name": "cypress/integration/simple_failing_hook_spec.js",
-        "relative": "cypress/integration/simple_failing_hook_spec.js",
-        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.js"
+        "name": "cypress/e2e/simple_failing_hook_spec.js",
+        "relative": "cypress/e2e/simple_failing_hook_spec.js",
+        "absolute": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_hook_spec.js"
       },
       "shouldUploadVideo": true
     }
@@ -2308,9 +2308,9 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
         "specFileExtension": ".js",
         "relativeToCommonRoot": "simple_passing_spec.js",
         "specType": "integration",
-        "name": "cypress/integration/simple_passing_spec.js",
-        "relative": "cypress/integration/simple_passing_spec.js",
-        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_passing_spec.js"
+        "name": "cypress/e2e/simple_passing_spec.js",
+        "relative": "cypress/e2e/simple_passing_spec.js",
+        "absolute": "/foo/bar/.projects/e2e/cypress/e2e/simple_passing_spec.js"
       },
       "shouldUploadVideo": true
     },
@@ -2435,9 +2435,9 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
         "specFileExtension": ".js",
         "relativeToCommonRoot": "simple_hooks_spec.js",
         "specType": "integration",
-        "name": "cypress/integration/simple_hooks_spec.js",
-        "relative": "cypress/integration/simple_hooks_spec.js",
-        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_hooks_spec.js"
+        "name": "cypress/e2e/simple_hooks_spec.js",
+        "relative": "cypress/e2e/simple_hooks_spec.js",
+        "absolute": "/foo/bar/.projects/e2e/cypress/e2e/simple_hooks_spec.js"
       },
       "shouldUploadVideo": true
     },
@@ -2484,9 +2484,9 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
                 "codeFrame": {
                   "line": 4,
                   "column": 37,
-                  "originalFile": "cypress/integration/simple_failing_spec.js",
-                  "relativeFile": "cypress/integration/simple_failing_spec.js",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_spec.js",
+                  "originalFile": "cypress/e2e/simple_failing_spec.js",
+                  "relativeFile": "cypress/e2e/simple_failing_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_spec.js",
                   "frame": "  2 | describe('simple failing spec', () => {\n  3 |   it('fails1', () => {\n> 4 |     cy.wrap(true, { timeout: 100 }).should('be.false')\n    |                                     ^\n  5 |   })\n  6 | \n  7 |   it('fails2', () => {",
                   "language": "js"
                 }
@@ -2524,9 +2524,9 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
                 "codeFrame": {
                   "line": 8,
                   "column": 11,
-                  "originalFile": "cypress/integration/simple_failing_spec.js",
-                  "relativeFile": "cypress/integration/simple_failing_spec.js",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_spec.js",
+                  "originalFile": "cypress/e2e/simple_failing_spec.js",
+                  "relativeFile": "cypress/e2e/simple_failing_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_spec.js",
                   "frame": "   6 | \n   7 |   it('fails2', () => {\n>  8 |     throw new Error('fails2')\n     |           ^\n   9 |   })\n  10 | })\n  11 | ",
                   "language": "js"
                 }
@@ -2556,9 +2556,9 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
         "specFileExtension": ".js",
         "relativeToCommonRoot": "simple_failing_spec.js",
         "specType": "integration",
-        "name": "cypress/integration/simple_failing_spec.js",
-        "relative": "cypress/integration/simple_failing_spec.js",
-        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_spec.js"
+        "name": "cypress/e2e/simple_failing_spec.js",
+        "relative": "cypress/e2e/simple_failing_spec.js",
+        "absolute": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_spec.js"
       },
       "shouldUploadVideo": true
     },
@@ -2628,9 +2628,9 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
                 "codeFrame": {
                   "line": 4,
                   "column": 13,
-                  "originalFile": "cypress/integration/simple_failing_hook_spec.js",
-                  "relativeFile": "cypress/integration/simple_failing_hook_spec.js",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.js",
+                  "originalFile": "cypress/e2e/simple_failing_hook_spec.js",
+                  "relativeFile": "cypress/e2e/simple_failing_hook_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_hook_spec.js",
                   "frame": "  2 |   context('beforeEach hooks', () => {\n  3 |     beforeEach(() => {\n> 4 |       throw new Error('fail1')\n    |             ^\n  5 |     })\n  6 | \n  7 |     it('never gets here', () => {})",
                   "language": "js"
                 }
@@ -2689,9 +2689,9 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
                 "codeFrame": {
                   "line": 16,
                   "column": 13,
-                  "originalFile": "cypress/integration/simple_failing_hook_spec.js",
-                  "relativeFile": "cypress/integration/simple_failing_hook_spec.js",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.js",
+                  "originalFile": "cypress/e2e/simple_failing_hook_spec.js",
+                  "relativeFile": "cypress/e2e/simple_failing_hook_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_hook_spec.js",
                   "frame": "  14 |   context('afterEach hooks', () => {\n  15 |     afterEach(() => {\n> 16 |       throw new Error('fail2')\n     |             ^\n  17 |     })\n  18 | \n  19 |     it('runs this', () => {})",
                   "language": "js"
                 }
@@ -2770,9 +2770,9 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
                 "codeFrame": {
                   "line": 26,
                   "column": 13,
-                  "originalFile": "cypress/integration/simple_failing_hook_spec.js",
-                  "relativeFile": "cypress/integration/simple_failing_hook_spec.js",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.js",
+                  "originalFile": "cypress/e2e/simple_failing_hook_spec.js",
+                  "relativeFile": "cypress/e2e/simple_failing_hook_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_hook_spec.js",
                   "frame": "  24 |   context('after hooks', () => {\n  25 |     after(() => {\n> 26 |       throw new Error('fail3')\n     |             ^\n  27 |     })\n  28 | \n  29 |     it('runs this', () => {})",
                   "language": "js"
                 }
@@ -2802,9 +2802,9 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
         "specFileExtension": ".js",
         "relativeToCommonRoot": "simple_failing_hook_spec.js",
         "specType": "integration",
-        "name": "cypress/integration/simple_failing_hook_spec.js",
-        "relative": "cypress/integration/simple_failing_hook_spec.js",
-        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.js"
+        "name": "cypress/e2e/simple_failing_hook_spec.js",
+        "relative": "cypress/e2e/simple_failing_hook_spec.js",
+        "absolute": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_hook_spec.js"
       },
       "shouldUploadVideo": true
     }
@@ -2896,9 +2896,9 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
                 "codeFrame": {
                   "line": 4,
                   "column": 13,
-                  "originalFile": "cypress/integration/simple_failing_hook_spec.js",
-                  "relativeFile": "cypress/integration/simple_failing_hook_spec.js",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.js",
+                  "originalFile": "cypress/e2e/simple_failing_hook_spec.js",
+                  "relativeFile": "cypress/e2e/simple_failing_hook_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_hook_spec.js",
                   "frame": "  2 |   context('beforeEach hooks', () => {\n  3 |     beforeEach(() => {\n> 4 |       throw new Error('fail1')\n    |             ^\n  5 |     })\n  6 | \n  7 |     it('never gets here', () => {})",
                   "language": "js"
                 }
@@ -2925,9 +2925,9 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
                 "codeFrame": {
                   "line": 4,
                   "column": 13,
-                  "originalFile": "cypress/integration/simple_failing_hook_spec.js",
-                  "relativeFile": "cypress/integration/simple_failing_hook_spec.js",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.js",
+                  "originalFile": "cypress/e2e/simple_failing_hook_spec.js",
+                  "relativeFile": "cypress/e2e/simple_failing_hook_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_hook_spec.js",
                   "frame": "  2 |   context('beforeEach hooks', () => {\n  3 |     beforeEach(() => {\n> 4 |       throw new Error('fail1')\n    |             ^\n  5 |     })\n  6 | \n  7 |     it('never gets here', () => {})",
                   "language": "js"
                 }
@@ -2986,9 +2986,9 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
                 "codeFrame": {
                   "line": 16,
                   "column": 13,
-                  "originalFile": "cypress/integration/simple_failing_hook_spec.js",
-                  "relativeFile": "cypress/integration/simple_failing_hook_spec.js",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.js",
+                  "originalFile": "cypress/e2e/simple_failing_hook_spec.js",
+                  "relativeFile": "cypress/e2e/simple_failing_hook_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_hook_spec.js",
                   "frame": "  14 |   context('afterEach hooks', () => {\n  15 |     afterEach(() => {\n> 16 |       throw new Error('fail2')\n     |             ^\n  17 |     })\n  18 | \n  19 |     it('runs this', () => {})",
                   "language": "js"
                 }
@@ -3015,9 +3015,9 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
                 "codeFrame": {
                   "line": 16,
                   "column": 13,
-                  "originalFile": "cypress/integration/simple_failing_hook_spec.js",
-                  "relativeFile": "cypress/integration/simple_failing_hook_spec.js",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.js",
+                  "originalFile": "cypress/e2e/simple_failing_hook_spec.js",
+                  "relativeFile": "cypress/e2e/simple_failing_hook_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_hook_spec.js",
                   "frame": "  14 |   context('afterEach hooks', () => {\n  15 |     afterEach(() => {\n> 16 |       throw new Error('fail2')\n     |             ^\n  17 |     })\n  18 | \n  19 |     it('runs this', () => {})",
                   "language": "js"
                 }
@@ -3096,9 +3096,9 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
                 "codeFrame": {
                   "line": 26,
                   "column": 13,
-                  "originalFile": "cypress/integration/simple_failing_hook_spec.js",
-                  "relativeFile": "cypress/integration/simple_failing_hook_spec.js",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.js",
+                  "originalFile": "cypress/e2e/simple_failing_hook_spec.js",
+                  "relativeFile": "cypress/e2e/simple_failing_hook_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_hook_spec.js",
                   "frame": "  24 |   context('after hooks', () => {\n  25 |     after(() => {\n> 26 |       throw new Error('fail3')\n     |             ^\n  27 |     })\n  28 | \n  29 |     it('runs this', () => {})",
                   "language": "js"
                 }
@@ -3128,9 +3128,9 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
         "specFileExtension": ".js",
         "relativeToCommonRoot": "simple_failing_hook_spec.js",
         "specType": "integration",
-        "name": "cypress/integration/simple_failing_hook_spec.js",
-        "relative": "cypress/integration/simple_failing_hook_spec.js",
-        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.js"
+        "name": "cypress/e2e/simple_failing_hook_spec.js",
+        "relative": "cypress/e2e/simple_failing_hook_spec.js",
+        "absolute": "/foo/bar/.projects/e2e/cypress/e2e/simple_failing_hook_spec.js"
       },
       "shouldUploadVideo": true
     },
@@ -3177,9 +3177,9 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
                 "codeFrame": {
                   "line": 5,
                   "column": 11,
-                  "originalFile": "cypress/integration/simple_retrying_spec.js",
-                  "relativeFile": "cypress/integration/simple_retrying_spec.js",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_retrying_spec.js",
+                  "originalFile": "cypress/e2e/simple_retrying_spec.js",
+                  "relativeFile": "cypress/e2e/simple_retrying_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_retrying_spec.js",
                   "frame": "  3 |     const test = cy.state('test')\n  4 | \n> 5 |     throw new Error(`${test.title} attempt #${cy.state('test').currentRetry()}`)\n    |           ^\n  6 |   })\n  7 | \n  8 |   it('t2', () => {",
                   "language": "js"
                 }
@@ -3206,9 +3206,9 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
                 "codeFrame": {
                   "line": 5,
                   "column": 11,
-                  "originalFile": "cypress/integration/simple_retrying_spec.js",
-                  "relativeFile": "cypress/integration/simple_retrying_spec.js",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_retrying_spec.js",
+                  "originalFile": "cypress/e2e/simple_retrying_spec.js",
+                  "relativeFile": "cypress/e2e/simple_retrying_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/simple_retrying_spec.js",
                   "frame": "  3 |     const test = cy.state('test')\n  4 | \n> 5 |     throw new Error(`${test.title} attempt #${cy.state('test').currentRetry()}`)\n    |           ^\n  6 |   })\n  7 | \n  8 |   it('t2', () => {",
                   "language": "js"
                 }
@@ -3257,9 +3257,9 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
         "specFileExtension": ".js",
         "relativeToCommonRoot": "simple_retrying_spec.js",
         "specType": "integration",
-        "name": "cypress/integration/simple_retrying_spec.js",
-        "relative": "cypress/integration/simple_retrying_spec.js",
-        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_retrying_spec.js"
+        "name": "cypress/e2e/simple_retrying_spec.js",
+        "relative": "cypress/e2e/simple_retrying_spec.js",
+        "absolute": "/foo/bar/.projects/e2e/cypress/e2e/simple_retrying_spec.js"
       },
       "shouldUploadVideo": true
     }

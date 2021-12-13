@@ -8,7 +8,7 @@ exports['cy.visit performance tests / passes'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (fast_visit_spec.js)                                                       │
-  │ Searched:   cypress/e2e/fast_visit_spec.js                                             │
+  │ Searched:   cypress/e2e/fast_visit_spec.js                                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

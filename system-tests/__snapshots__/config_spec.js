@@ -8,7 +8,7 @@ exports['e2e config provides various environment details 1'] = `
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (config_passing_spec.js)                                                   │
-  │ Searched:   cypress/e2e/config_passing_spec.js                                         │
+  │ Searched:   cypress/e2e/config_passing_spec.js                                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
