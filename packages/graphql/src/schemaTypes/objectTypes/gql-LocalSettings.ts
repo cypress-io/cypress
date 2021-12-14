@@ -9,7 +9,7 @@ export const LocalSettingsPreferences = objectType({
     t.string('preferredEditorBinary')
     t.boolean('isSpecsListOpen')
     t.int('reporterWidth')
-    t.int('specsListWidth')
+    t.int('specListWidth')
     t.string('proxyServer', {
       resolve: (source, args, ctx) => ctx.env.HTTP_PROXY ?? null,
     })

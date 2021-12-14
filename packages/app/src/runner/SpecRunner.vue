@@ -122,7 +122,7 @@ fragment SpecRunner on Query {
       isSpecsListOpen
       autoScrollingEnabled
       reporterWidth
-      specsListWidth
+      specListWidth
     }
   }
 }
@@ -145,23 +145,23 @@ const autStore = useAutStore()
 const screenshotStore = useScreenshotStore()
 const runnerUiStore = useRunnerUiStore()
 const preferences = usePreferences()
-const initialSpecsListWidth: number = props.gql.localSettings.preferences.specsListWidth ?? 280
+const initialSpecsListWidth: number = props.gql.localSettings.preferences.specListWidth ?? 280
 const initialReporterWidth: number = props.gql.localSettings.preferences.reporterWidth ?? 320
 const reporterWidth = ref(initialReporterWidth)
-const specsListWidth = ref(initialSpecsListWidth)
+const specListWidth = ref(initialSpecsListWidth)
 
 // Todo: maybe `update` should take an object, not just a key-value pair and do updates like this all in one batch
 preferences.update('autoScrollingEnabled', props.gql.localSettings.preferences.autoScrollingEnabled ?? true)
 preferences.update('isSpecsListOpen', props.gql.localSettings.preferences.isSpecsListOpen ?? true)
 preferences.update('reporterWidth', initialReporterWidth)
-preferences.update('specsListWidth', initialSpecsListWidth)
+preferences.update('specListWidth', initialSpecsListWidth)
 
 const autMargin = 16
 const collapsedNavBarWidth = 64
 
 const containerWidth = computed(() => {
   const miscBorders = 4
-  const nonAutWidth = reporterWidth.value + specsListWidth.value + (autMargin * 2) + miscBorders + collapsedNavBarWidth
+  const nonAutWidth = reporterWidth.value + specListWidth.value + (autMargin * 2) + miscBorders + collapsedNavBarWidth
 
   return windowWidth.value - nonAutWidth
 })
@@ -178,7 +178,7 @@ const containerHeight = computed(() => {
 
 const handleResizeEnd = (panel: 'panel1' | 'panel2') => {
   if (panel === 'panel1') {
-    preferences.update('specsListWidth', specsListWidth.value)
+    preferences.update('specListWidth', specListWidth.value)
   } else {
     preferences.update('reporterWidth', reporterWidth.value)
   }
@@ -186,7 +186,7 @@ const handleResizeEnd = (panel: 'panel1' | 'panel2') => {
 
 const handlePanelWidthUpdated = ({ panel, width }) => {
   if (panel === 'panel1') {
-    specsListWidth.value = width
+    specListWidth.value = width
   } else {
     reporterWidth.value = width
   }
