@@ -1,6 +1,6 @@
 require('graceful-fs').gracefulify(require('fs'))
 const stripAnsi = require('strip-ansi')
-const debug = require('debug')('cypress:lifecycle:child')
+const debug = require('debug')(`cypress:lifecycle:child:run_require_async_child:${process.pid}`)
 const tsNodeUtil = require('../../util/ts_node')
 const util = require('../util')
 const { RunPlugins } = require('./RunPlugins')
@@ -64,9 +64,21 @@ function run (ipc, configFile, projectRoot) {
 
       const result = exp.default || exp
 
-      ipc.send('loadConfig:reply', { initialConfig: result, requires: util.nonNodeRequires() })
+      const replacer = (_key, val) => {
+        return typeof val === 'function' ? `[Function ${val.name}]` : val
+      }
+
+      ipc.send('loadConfig:reply', { initialConfig: JSON.stringify(result, replacer), requires: util.nonNodeRequires() })
+
+      let hasSetup = false
 
       ipc.on('setupTestingType', (testingType, options) => {
+        if (hasSetup) {
+          throw new Error('Already Setup')
+        }
+
+        hasSetup = true
+
         debug(`setupTestingType %s %o`, testingType, options)
 
         const runPlugins = new RunPlugins(ipc, projectRoot, configFile)

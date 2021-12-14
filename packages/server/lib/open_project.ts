@@ -3,6 +3,8 @@ import la from 'lazy-ass'
 import Debug from 'debug'
 import Bluebird from 'bluebird'
 import pluralize from 'pluralize'
+import assert from 'assert'
+
 import { ProjectBase } from './project-base'
 import browsers from './browsers'
 import specsUtil from './util/specs'
@@ -54,9 +56,19 @@ export class OpenProject {
     this.openProject.changeToUrl(newSpecUrl)
   }
 
-  launch (browser, spec: Cypress.Cypress['spec'], options: LaunchOpts = {
+  async launch (browser, spec: Cypress.Cypress['spec'], options: LaunchOpts = {
     onError: () => undefined,
   }) {
+    this._ctx = getCtx()
+
+    if (!this.openProject && this._ctx.currentProject) {
+      await this.create(this._ctx.currentProject, {
+        ...this._ctx.modeOptions,
+        projectRoot: this._ctx.currentProject,
+        testingType: this._ctx.coreData.currentTestingType!,
+      }, options)
+    }
+
     if (!this.openProject) {
       throw Error('Cannot launch runner if openProject is undefined!')
     }
@@ -283,6 +295,8 @@ export class OpenProject {
     // the config for the project instance
     debug('opening project %s', path)
     debug('and options %o', options)
+
+    assert(args.testingType)
 
     const testingType = args.testingType === 'component' ? 'component' : 'e2e'
 

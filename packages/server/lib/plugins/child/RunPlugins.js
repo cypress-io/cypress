@@ -6,7 +6,7 @@ const debugLib = require('debug')
 const Promise = require('bluebird')
 const _ = require('lodash')
 
-const debug = debugLib('cypress:server:RunPlugins')
+const debug = debugLib(`cypress:lifecycle:child:RunPlugins:${process.pid}`)
 
 const preprocessor = require('./preprocessor')
 const devServer = require('./dev-server')
@@ -29,7 +29,7 @@ class RunPlugins {
     this.registeredEventsByName = {}
   }
 
-  invoke (eventId, args = []) {
+  invoke = (eventId, args = []) => {
     const event = this.registeredEventsById[eventId]
 
     return event.handler(...args)
@@ -49,7 +49,7 @@ class RunPlugins {
   }
 
   load (initialConfig, setupNodeEvents) {
-    debug('run plugins function')
+    debug('Loading the RunPlugins')
 
     // we track the register calls and then send them all at once
     // to the parent process
@@ -99,7 +99,7 @@ class RunPlugins {
 
     Promise
     .try(() => {
-      debug('run plugins function')
+      debug('Calling setupNodeEvents')
 
       return setupNodeEvents(registerChildEvent, initialConfig)
     })
@@ -134,7 +134,7 @@ class RunPlugins {
       case 'dev-server:start':
         return devServer.wrap(this.invoke, ids, args)
       case 'file:preprocessor':
-        return preprocessor.wrap(this.invoke, ids, args)
+        return preprocessor.wrap(this.ipc, this.invoke, ids, args)
       case 'before:run':
       case 'before:spec':
       case 'after:run':
@@ -142,11 +142,11 @@ class RunPlugins {
       case 'after:screenshot':
         return wrapChildPromise()
       case 'task':
-        return this.taskExecute(this.registeredEventsById, ids, args)
+        return this.taskExecute(ids, args)
       case '_get:task:keys':
-        return this.taskGetKeys(this.registeredEventsById, ids)
+        return this.taskGetKeys(ids)
       case '_get:task:body':
-        return this.taskGetBody(this.registeredEventsById, ids, args)
+        return this.taskGetBody(ids, args)
       case 'before:browser:launch':
         return browserLaunch.wrap(this.invoke, ids, args)
       default:
@@ -185,24 +185,25 @@ class RunPlugins {
     util.wrapChildPromise(ipc, invoke, ids)
   }
 
-  taskGetKeys (ipc, events, ids) {
-    const taskEvent = _.find(events, { event: 'task' }).handler
+  taskGetKeys (ids) {
+    // @ts-ignore
+    const taskEvent = _.find(this.registeredEventsById, { event: 'task' }).handler
     const invoke = () => _.keys(taskEvent)
 
-    util.wrapChildPromise(ipc, invoke, ids)
+    util.wrapChildPromise(this.ipc, invoke, ids)
   }
 
-  taskMerge (prevEvents, events) {
-    const duplicates = _.intersection(_.keys(prevEvents), _.keys(events))
+  taskMerge (events) {
+    const duplicates = _.intersection(_.keys(this.registeredEventsById), _.keys(events))
 
     if (duplicates.length) {
       errors.warning('DUPLICATE_TASK_KEY', duplicates.join(', '))
     }
 
-    return _.extend(prevEvents, events)
+    return _.extend(this.registeredEventsById, events)
   }
 
-  taskExecute (ipc, events, ids, args) {
+  taskExecute (ids, args) {
     const task = args[0]
     let arg = args[1]
 
@@ -213,7 +214,7 @@ class RunPlugins {
     }
 
     const invoke = (eventId, args = []) => {
-      const handler = _.get(events, `${eventId}.handler.${task}`)
+      const handler = _.get(this.registeredEventsById, `${eventId}.handler.${task}`)
 
       if (_.isFunction(handler)) {
         return handler(...args)
@@ -222,7 +223,7 @@ class RunPlugins {
       return '__cypress_unhandled__'
     }
 
-    util.wrapChildPromise(ipc, invoke, ids, [arg])
+    util.wrapChildPromise(this.ipc, invoke, ids, [arg])
   }
 
   /**

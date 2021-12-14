@@ -16,25 +16,30 @@ export interface LoadConfigReply {
   requires: string[]
 }
 
+export interface SerializedLoadConfigReply {
+  initialConfig: string // stringified Cypress.ConfigOptions
+  requires: string[]
+}
+
 /**
  * The ProjectConfigIpc is an EventEmitter wrapping the childProcess,
  * adding a "send" method for sending events from the parent process into the childProcess,
  *
  */
 export class ProjectConfigIpc extends EventEmitter {
-  constructor (private proc: ChildProcess) {
+  constructor (readonly childProcess: ChildProcess) {
     super()
-    proc.on('error', (err) => {
+    childProcess.on('error', (err) => {
       this.emit('error', err)
     })
 
-    proc.on('message', (msg: { event: string, args: any[] }) => {
+    childProcess.on('message', (msg: { event: string, args: any[] }) => {
       this.emit(msg.event, ...msg.args)
     })
 
-    proc.once('disconnect', () => {
+    childProcess.once('disconnect', () => {
       this.emit('disconnect')
-      proc.removeAllListeners()
+      childProcess.removeAllListeners()
     })
   }
 
@@ -43,18 +48,25 @@ export class ProjectConfigIpc extends EventEmitter {
   send(event: 'setupTestingType', testingType: TestingType, options: Cypress.PluginConfigOptions): boolean
   send(event: 'loadConfig'): boolean
   send (event: string, ...args: any[]) {
-    if (this.proc.killed) {
+    if (this.childProcess.killed) {
       return false
     }
 
-    return this.proc.send({ event, args })
+    return this.childProcess.send({ event, args })
   }
+
+  on(evt: 'warning', listener: () => void): this
+  on (evt: string, listener: (...args: any[]) => void) {
+    return super.on(evt, listener)
+  }
+
+  once(evt: `promise:fulfilled:${string}`, listener: (err: any, value: any) => void): this
 
   /**
    * When the config is loaded, it comes back with either a "reply", or an "error" if there was a problem
    * sourcing the config (script error, etc.)
    */
-  once(evt: 'loadConfig:reply', listener: (payload: LoadConfigReply) => void): this
+  once(evt: 'loadConfig:reply', listener: (payload: SerializedLoadConfigReply) => void): this
   once(evt: 'loadConfig:error', listener: (realErrorCode: string, requiredFile: string, message: string) => void): this
 
   /**

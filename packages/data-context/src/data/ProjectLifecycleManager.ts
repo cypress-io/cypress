@@ -21,8 +21,9 @@ import { LoadConfigReply, SetupNodeEventsReply, ProjectConfigIpc, IpcHandler } f
 import assert from 'assert'
 import type { AllModeOptions, FoundBrowser, FullConfig, TestingType } from '@packages/types'
 import type { BaseErrorDataShape } from '.'
+import { autoBindDebug } from '../util/autoBindDebug'
 
-const debug = debugLib('cypress:lifecycle:ProjectLifecycleManager')
+const debug = debugLib(`cypress:lifecycle:ProjectLifecycleManager:${process.pid}`)
 
 const CHILD_PROCESS_FILE_PATH = require.resolve('@packages/server/lib/plugins/child/require_async_child')
 
@@ -30,7 +31,7 @@ const UNDEFINED_SERIALIZED = '__cypress_undefined__'
 
 // Explicitly picking off all the keys we need to use, so we can create stubs for a unit test
 export type Ctx_ProjectLifecycleManager = Pick<DataContext,
-  '_apis' | 'fs' | 'coreData' | 'modeOptions' | 'update' | 'updateCurrentProject' |
+  '_apis' | 'fs' | 'coreData' | 'modeOptions' | 'update' |
   'nodePath' | 'error' | 'onWarning' | 'onError' | 'isRunMode' | 'emitter'
 >
 
@@ -48,7 +49,7 @@ export interface SetupFullConfigOptions {
  */
 export interface InjectedConfigApi {
   cypressVersion: string
-  getHandlers: () => IpcHandler[]
+  getServerPluginHandlers: () => IpcHandler[]
   validateConfig<T extends Cypress.ConfigOptions>(config: Partial<T>, onErr: (errMsg: string) => never): T
   allowedConfig(config: Cypress.ConfigOptions): Cypress.ConfigOptions
   updateWithPluginValues(config: FullConfig, modifiedConfig: Partial<Cypress.ConfigOptions>): FullConfig
@@ -116,19 +117,6 @@ export class ProjectLifecycleManager {
   private _cachedFullConfig: FullConfig | undefined
 
   private _projectMetaState: ProjectMetaState = { ...PROJECT_META_STATE }
-  private _readyHandlers: pDefer.DeferredPromise<FullConfig>[] = []
-
-  /**
-   * Returns a Promise which resolves when the project is "ready",
-   * meaning that the Config & associated
-   */
-  projectReady (): Promise<FullConfig> {
-    const dfd = pDefer<FullConfig>()
-
-    this._readyHandlers.push(dfd)
-
-    return dfd.promise
-  }
 
   async getProjectId (): Promise<string | null> {
     try {
@@ -216,7 +204,7 @@ export class ProjectLifecycleManager {
   }
 
   constructor (private ctx: Ctx_ProjectLifecycleManager) {
-    this._handlers = this.ctx._apis.configApi.getHandlers()
+    this._handlers = this.ctx._apis.configApi.getServerPluginHandlers()
     this.legacyPluginGuard()
     this.watchers = new Set()
     this.loadGlobalBrowsers().catch(expectedError)
@@ -225,16 +213,23 @@ export class ProjectLifecycleManager {
       this.setCurrentProject(ctx.coreData.currentProject)
     }
 
+    if (ctx.coreData.currentTestingType) {
+      this.setCurrentTestingType(ctx.coreData.currentTestingType)
+    }
+
     // see timers/parent.js line #93 for why this is necessary
     process.on('exit', () => {
       this.resetInternalState()
     })
+
+    return autoBindDebug(this)
   }
 
   clearCurrentProject () {
     this.resetInternalState()
     this._projectRoot = undefined
     this._configFilePath = undefined
+    this._cachedFullConfig = undefined
   }
 
   /**
@@ -257,6 +252,8 @@ export class ProjectLifecycleManager {
     })
 
     this._projectMetaState = this.determineProjectMetaState()
+    this.configFileWarningCheck()
+
     if (this._projectMetaState.hasValidConfigFile) {
       this.initializeConfig().catch(expectedError)
     }
@@ -288,9 +285,10 @@ export class ProjectLifecycleManager {
     // registeredEvents (switching testing mode), we need to get a fresh
     // config IPC & re-execute the setupTestingType
     if (this._registeredEventsTarget && testingType !== this._registeredEventsTarget) {
-      this.reloadConfig(true)
+      this._configResult = { state: 'pending' }
+      this.initializeConfig()
     } else if (this._eventsIpc && !this._registeredEventsTarget && this._configResult.state === 'loaded') {
-      this.setupNodeEvents(this._configResult.value.initialConfig)
+      this.setupNodeEvents()
     }
   }
 
@@ -299,6 +297,18 @@ export class ProjectLifecycleManager {
       this._cleanupProcess(proc)
     }
     this.childProcesses = new Set()
+  }
+
+  private _cleanupIpc (ipc: ProjectConfigIpc) {
+    this._cleanupProcess(ipc.childProcess)
+    ipc.removeAllListeners()
+    if (this._eventsIpc === ipc) {
+      this._eventsIpc = undefined
+    }
+
+    if (this._eventProcess === ipc.childProcess) {
+      this._eventProcess = undefined
+    }
   }
 
   private _cleanupProcess (proc: ChildProcess) {
@@ -342,19 +352,32 @@ export class ProjectLifecycleManager {
       this.loadCypressEnvFile(),
     ])
 
-    this._cachedFullConfig = await this.buildBaseFullConfig(configFileContents, envFile, options, withBrowsers)
+    const fullConfig = await this.buildBaseFullConfig(configFileContents, envFile, options, withBrowsers)
 
-    return this._cachedFullConfig
+    if (this._currentTestingType) {
+      this._cachedFullConfig = fullConfig
+    }
+
+    return fullConfig
   }
 
   private async buildBaseFullConfig (configFileContents: Cypress.ConfigOptions, envFile: Cypress.ConfigOptions, options: Partial<AllModeOptions>, withBrowsers = true) {
+    if (this._currentTestingType) {
+      const testingTypeOverrides = configFileContents[this._currentTestingType] ?? {}
+
+      configFileContents = { ...configFileContents, ...testingTypeOverrides }
+    }
+
     // TODO: Convert this to be synchronous,
-    const fullConfig = await this.ctx._apis.configApi.setupFullConfigWithDefaults({
+    let fullConfig = await this.ctx._apis.configApi.setupFullConfigWithDefaults({
       projectName: path.basename(this.projectRoot),
       projectRoot: this.projectRoot,
       config: _.cloneDeep(configFileContents),
       envFile: _.cloneDeep(envFile),
-      options,
+      options: {
+        ...options,
+        testingType: this._currentTestingType ?? 'e2e',
+      },
     })
 
     if (withBrowsers) {
@@ -430,6 +453,7 @@ export class ProjectLifecycleManager {
 
     const { promise, child, ipc } = this._loadConfig()
 
+    this._cachedFullConfig = undefined
     this._configResult = { state: 'loading', value: promise }
 
     promise.then((result) => {
@@ -624,6 +648,10 @@ export class ProjectLifecycleManager {
   }
 
   private watchRequires (groupName: 'config' | 'setupNodeEvents', paths: string[]) {
+    if (this.ctx.isRunMode) {
+      return
+    }
+
     const filtered = paths.filter((p) => !p.includes('/node_modules/'))
     const group = this._requireWatchers[groupName]
     const missing = _.xor(Object.keys(group), filtered)
@@ -647,9 +675,8 @@ export class ProjectLifecycleManager {
    */
   private onConfigLoaded (child: ChildProcess, ipc: ProjectConfigIpc, result: LoadConfigReply) {
     this.watchRequires('config', result.requires)
-    if (this._eventProcess) {
-      this._eventsIpc?.removeAllListeners()
-      this._cleanupProcess(this._eventProcess)
+    if (this._eventsIpc) {
+      this._cleanupIpc(this._eventsIpc)
     }
 
     this._eventProcess = child
@@ -659,10 +686,12 @@ export class ProjectLifecycleManager {
       return
     }
 
-    this.setupNodeEvents(result.initialConfig)
+    this.setupNodeEvents().catch(expectedError)
   }
 
-  private setupNodeEvents (config: Cypress.ConfigOptions): Promise<SetupNodeEventsReply> {
+  private async setupNodeEvents (): Promise<SetupNodeEventsReply> {
+    const config = await this.initializeConfig()
+
     assert(this._eventsIpc)
     assert(this._currentTestingType)
 
@@ -680,11 +709,13 @@ export class ProjectLifecycleManager {
     const mergedConfig = { ...config, ...overrides }
 
     // alphabetize config by keys
-    let orderedConfig = {} as Cypress.ResolvedConfigOptions
+    let orderedConfig = {} as Cypress.PluginConfigOptions
 
     Object.keys(mergedConfig).sort().forEach((key) => {
+      const k = key as keyof typeof mergedConfig
+
       // @ts-ignore
-      orderedConfig[key] = config[key]
+      orderedConfig[k] = mergedConfig[k]
     })
 
     ipc.send('setupTestingType', this._currentTestingType, {
@@ -702,6 +733,7 @@ export class ProjectLifecycleManager {
       await this.handleSetupTestingTypeReply(ipc, val)
     })
     .catch((err) => {
+      this._cleanupIpc(ipc)
       this._eventsIpcResult = { state: 'errored', value: err }
     })
     .finally(() => {
@@ -709,10 +741,6 @@ export class ProjectLifecycleManager {
     })
 
     return promise
-  }
-
-  registerHandler () {
-    //
   }
 
   addWatcherFor (groupName: 'config' | 'setupNodeEvents', file: string) {
@@ -723,6 +751,8 @@ export class ProjectLifecycleManager {
       if (groupName === 'config') {
         this.reloadConfig()
       } else {
+        // If we've edited the setupNodeEvents file, we need to re-execute
+        // the config file to get a fresh ipc process to swap with
         this.reloadConfig(true)
       }
     })
@@ -873,7 +903,7 @@ export class ProjectLifecycleManager {
 
     ipc.once('loadConfig:reply', (val) => {
       debug('loadConfig:reply')
-      dfd.resolve(val)
+      dfd.resolve({ ...val, initialConfig: JSON.parse(val.initialConfig) })
     })
 
     ipc.once('loadConfig:error', (type, ...args) => {
@@ -912,6 +942,10 @@ export class ProjectLifecycleManager {
     }
   }
 
+  /**
+   * Find all information about the project we need to know to prompt different
+   * onboarding screens, suggestions in the onboarding wizard, etc.
+   */
   private determineProjectMetaState (): ProjectMetaState {
     const configFile = this.ctx.modeOptions.configFile
     const metaState: ProjectMetaState = {
@@ -970,10 +1004,6 @@ export class ProjectLifecycleManager {
       metaState.needsCypressJsonMigration = true
     }
 
-    // if (fs.existsSync(projectTsconfig) || )
-    //    const projectTsconfig = this._pathToFile('tsconfig.json')
-
-    // this.ctx.error('CONFIG_FILE_NOT_FOUND', configFileJs, this.projectRoot)
     return metaState
   }
 
@@ -1004,9 +1034,7 @@ export class ProjectLifecycleManager {
 
         debug('call event', event, 'for invocation id', invocationId)
 
-        const handlePromise = (err: any, value: any) => {
-          ipc.removeListener(`promise:fulfilled:${invocationId}`, handlePromise)
-
+        ipc.once(`promise:fulfilled:${invocationId}`, (err: any, value: any) => {
           if (err) {
             debug('promise rejected for id %s %o', invocationId, ':', err.stack)
             evtDfd.reject(_.extend(new Error(err.message), err))
@@ -1021,9 +1049,8 @@ export class ProjectLifecycleManager {
           debug(`promise resolved for id '${invocationId}' with value`, value)
 
           return evtDfd.resolve(value)
-        }
+        })
 
-        ipc.on(`promise:fulfilled:${invocationId}`, handlePromise)
         const ids = { invocationId, eventId }
 
         // no argument is passed for cy.task()
@@ -1091,7 +1118,7 @@ export class ProjectLifecycleManager {
   }
 
   isTestingTypeConfigured (testingType: TestingType) {
-    const config = this.loadedConfigFile
+    const config = this.loadedFullConfig ?? this.loadedConfigFile
 
     if (!config) {
       return null
@@ -1102,10 +1129,34 @@ export class ProjectLifecycleManager {
     }
 
     if (testingType === 'component') {
+      // @ts-expect-error
       return Boolean(config.component?.devServer)
     }
 
     return true
+  }
+
+  async initializeRunMode () {
+    if (!this._currentTestingType) {
+      this.setCurrentTestingType('e2e')
+      this.ctx.onWarning(this.ctx.error('TESTING_TYPE_NEEDED_FOR_RUN'))
+    }
+
+    if (!this.metaState.hasValidConfigFile) {
+      return this.ctx.onError(this.ctx.error('NO_DEFAULT_CONFIG_FILE_FOUND', this.projectRoot), 'global')
+    }
+
+    await this.setupNodeEvents()
+  }
+
+  private configFileWarningCheck () {
+    if (this.metaState.hasMultipleConfigPaths) {
+      this.ctx.onWarning(this.ctx.error('CONFIG_FILES_LANGUAGE_CONFLICT', this.projectRoot))
+    }
+
+    if (this.metaState.hasValidConfigFile && this.metaState.hasLegacyCypressJson) {
+      this.ctx.onWarning(this.ctx.error('LEGACY_CONFIG_FILE', this.projectRoot))
+    }
   }
 }
 
@@ -1114,38 +1165,3 @@ export class ProjectLifecycleManager {
 function expectedError (err: any) {
   err?.stack
 }
-
-// const cypressConfigFiles = ['cypress.config.js', 'cypress.config.ts']
-// const legacyConfigFile = 'cypress.json'
-
-// const filesInProjectDir = await this.ctx.fs.readdir(projectRoot)
-
-// const foundConfigFiles = [...cypressConfigFiles, legacyConfigFile].filter((file) => filesInProjectDir.includes(file))
-
-// if (foundConfigFiles.length === 1) {
-//   const configFile = foundConfigFiles[0]
-
-//   if (!configFile) {
-//     throw this.ctx.error('NO_DEFAULT_CONFIG_FILE_FOUND', projectRoot)
-//   }
-
-//   if (configFile === legacyConfigFile) {
-//     throw this.ctx.error('CONFIG_FILE_MIGRATION_NEEDED', projectRoot, configFile)
-//   }
-
-//   return configFile
-// }
-
-// // if we found more than one, throw a language conflict
-// if (foundConfigFiles.length > 1) {
-//   if (foundConfigFiles.includes(legacyConfigFile)) {
-//     const foundFiles = foundConfigFiles.filter((f) => f !== legacyConfigFile)
-
-//     throw this.ctx.error('LEGACY_CONFIG_FILE', projectRoot, ...foundFiles)
-//   }
-
-//   throw this.ctx.error('CONFIG_FILES_LANGUAGE_CONFLICT', projectRoot, ...foundConfigFiles)
-// }
-
-// throw this.ctx.error('NO_DEFAULT_CONFIG_FILE_FOUND', projectRoot)
-// }

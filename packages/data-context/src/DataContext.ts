@@ -3,7 +3,7 @@ import fsExtra from 'fs-extra'
 import path from 'path'
 import util from 'util'
 import chalk from 'chalk'
-import _ from 'lodash'
+import assert from 'assert'
 
 import 'server-destroy'
 
@@ -36,9 +36,7 @@ import { VersionsDataSource } from './sources/VersionsDataSource'
 import type { SocketIOServer } from '@packages/socket'
 import { globalPubSub } from '.'
 import { InjectedConfigApi, ProjectLifecycleManager } from './data/ProjectLifecycleManager'
-import dedent from 'dedent'
 
-const DEBUG_LIFECYCLE = false
 const IS_DEV_ENV = process.env.CYPRESS_INTERNAL_ENV !== 'production'
 
 export type Updater = (proj: CoreDataShape) => void | undefined | CoreDataShape
@@ -55,7 +53,7 @@ export interface ErrorApiShape {
 }
 
 export interface BrowserApiShape {
-  close: Promise<any>
+  close(): Promise<any>
 }
 
 export interface DataContextConfig {
@@ -89,36 +87,7 @@ export class DataContext {
     this._config = rest
     this._modeOptions = modeOptions
     this._coreData = _config.coreData ?? makeCoreData(this._modeOptions)
-    this.lifecycleManager = new Proxy(new ProjectLifecycleManager(this), {
-      set (target, p: string, value, receiver) {
-        function serializeValue (key: string, val: unknown) {
-          if (_.isArray(val)) {
-            return val.length < 10 ? val : dedent`
-              Array{${val.length}}[
-                ${val[0]}, ...
-              ]
-            `
-          }
-
-          if (_.isObject(val) && !_.isPlainObject(val)) {
-            return `[${val.constructor.name}]`
-          }
-
-          if (_.isFunction(val)) {
-            return `[Function: ${val.name}]`
-          }
-
-          return val
-        }
-
-        if (DEBUG_LIFECYCLE) {
-          // eslint-disable-next-line
-          console.log(`Setting: ${p} to ${JSON.stringify(value, serializeValue, 2)}`)
-        }
-
-        return Reflect.set(target, p, value, receiver)
-      },
-    })
+    this.lifecycleManager = new ProjectLifecycleManager(this)
   }
 
   get isRunMode () {
@@ -277,6 +246,11 @@ export class DataContext {
     this.update((d) => {
       d.servers.gqlSocketServer = socketServer
     })
+
+    // TODO: refine the whole socket communication layer
+    socketServer?.on('connect', (socket) => {
+      socket.emit('data-context-push')
+    })
   }
 
   /**
@@ -284,12 +258,6 @@ export class DataContext {
    */
   update = (updater: Updater): void => {
     updater(this._coreData)
-  }
-
-  updateCurrentProject = (updater: CurrentProjectUpdater): void => {
-    if (this._coreData.currentProject) {
-      updater(this._coreData.currentProject)
-    }
   }
 
   get appServerPort () {
@@ -343,6 +311,14 @@ export class DataContext {
 
   debug = debugLib('cypress:data-context')
 
+  private _debugCache: Record<string, debug.Debugger> = {}
+
+  debugNs = (ns: string, evt: string, ...args: any[]) => {
+    const _debug = this._debugCache[ns] ??= debugLib(`cypress:data-context:${ns}`)
+
+    _debug(evt, ...args)
+  }
+
   logError (e: unknown) {
     // TODO(tim): handle this consistently
     // eslint-disable-next-line no-console
@@ -351,9 +327,10 @@ export class DataContext {
 
   onError = (err: Error, source: 'plugins' | 'config' | 'global') => {
     if (this.isRunMode) {
-      //
+      // console.error(err)
+      throw err
     } else {
-      //
+      this.coreData.baseError = err
     }
   }
 
@@ -426,8 +403,10 @@ export class DataContext {
   }
 
   async initializeMode () {
+    assert(!this.coreData.hasInitializedMode)
+    this.coreData.hasInitializedMode = this._config.mode
     if (this._config.mode === 'run') {
-      await this.lifecycleManager.projectReady()
+      await this.lifecycleManager.initializeRunMode()
     } else if (this._config.mode === 'open') {
       await this.initializeOpenMode()
     } else {
@@ -454,56 +433,13 @@ export class DataContext {
     // load projects from cache on start
     toAwait.push(this.actions.project.loadProjects())
 
-    if (this.modeOptions.projectRoot) {
-      this.actions.project.setCurrentProject(this.modeOptions.projectRoot)
-
-      // if (this.coreData.currentProject?.preferences) {
-      // Skipping this until we sort out the lifecycle things
-      // toAwait.push(this.actions.project.launchProjectWithoutElectron())
-      // }
-    }
-
+    // TODO: rip out this imperative model of navigation & concept of the "wizard"
     if (this.modeOptions.testingType) {
-      this.lifecycleManager.setCurrentTestingType(this.modeOptions.testingType)
-    }
-
-    if (this.modeOptions.browser) {
-      this.coreData.cliBrowser = this.modeOptions.browser
+      this.lifecycleManager.initializeConfig().then(() => {
+        this.actions.wizard.navigate('forward')
+      })
     }
 
     return Promise.all(toAwait)
   }
-
-  // async initializeRunMode () {
-  //   if (this._coreData.hasInitializedMode) {
-  //     throw new Error(`
-  //       Mode already initialized. If this is a test context, be sure to call
-  //       resetForTest in a setup hook (before / beforeEach).
-  //     `)
-  //   }
-
-  //   this.coreData.hasInitializedMode = 'run'
-
-  //   const project = this.project
-
-  //   if (!project || !project.configFilePath || !this.actions.currentProject) {
-  //     throw this.error('NO_PROJECT_FOUND_AT_PROJECT_ROOT', project?.projectRoot ?? '(unknown)')
-  //   }
-
-  //   if (project.needsCypressJsonMigration) {
-  //     throw this.error('CONFIG_FILE_MIGRATION_NEEDED', project.projectRoot)
-  //   }
-
-  //   if (project.hasLegacyJson) {
-  //     this._apis.appApi.warn('LEGACY_CONFIG_FILE', project.configFilePath)
-  //   }
-
-  //   if (project.hasMultipleConfigPaths) {
-  //     this._apis.appApi.warn('CONFIG_FILES_LANGUAGE_CONFLICT', project.projectRoot, ...project.nonJsonConfigPaths)
-  //   }
-
-  //   if (!project.currentTestingType) {
-  //     throw this.error('TESTING_TYPE_NEEDED_FOR_RUN')
-  //   }
-  // }
 }

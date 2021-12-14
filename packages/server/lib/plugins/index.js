@@ -1,4 +1,4 @@
-const { getCtx, hasCtx } = require('@packages/data-context')
+const { getCtx } = require('@packages/data-context')
 
 const registerEvent = (event, callback) => {
   getCtx().lifecycleManager.registerEvent(event, callback)
@@ -14,7 +14,7 @@ const registerHandler = (handler) => {
   handlers.push(handler)
 }
 
-const getHandlers = () => {
+const getServerPluginHandlers = () => {
   return handlers
 }
 
@@ -42,7 +42,7 @@ module.exports = {
   init,
   registerEvent,
   registerHandler,
-  getHandlers,
+  getServerPluginHandlers,
 
   // for testing purposes
   _reset,

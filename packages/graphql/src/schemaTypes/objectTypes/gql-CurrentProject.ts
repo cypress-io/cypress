@@ -109,14 +109,14 @@ export const CurrentProject = objectType({
     t.nonNull.json('config', {
       description: 'Project configuration',
       resolve: (source, args, ctx) => {
-        return ctx.lifecycleManager.loadedFullConfig
+        return ctx.project.getResolvedConfigFields()
       },
     })
 
     t.string('configFilePath', {
       description: 'Config File Path',
       resolve: (source, args, ctx) => {
-        return ctx.lifecycleManager.configFilePath
+        return path.relative(ctx.lifecycleManager.projectRoot, ctx.lifecycleManager.configFilePath)
       },
     })
 

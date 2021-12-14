@@ -3,7 +3,7 @@ import type { RemoteGraphQLInterceptor, ResetOptionsResult, WithCtxInjected, Wit
 import { e2eProjectDirs } from './support/e2eProjectDirs'
 // import type { CloudExecuteRemote } from '@packages/data-context/src/sources'
 import { makeGraphQLServer } from '@packages/graphql/src/makeGraphQLServer'
-import { DataContext, globalPubSub, setCtx } from '@packages/data-context'
+import { clearCtx, DataContext, globalPubSub, setCtx } from '@packages/data-context'
 import * as inspector from 'inspector'
 import sinonChai from '@cypress/sinon-chai'
 import sinon from 'sinon'
@@ -99,6 +99,7 @@ async function makeE2ETasks () {
   let remoteGraphQLIntercept: RemoteGraphQLInterceptor | undefined
   let scaffoldedProjects = new Set<string>()
 
+  clearCtx()
   ctx = setCtx(makeDataContext({ mode: 'open', modeOptions: { cwd: process.cwd() } }))
 
   const gqlPort = await makeGraphQLServer()

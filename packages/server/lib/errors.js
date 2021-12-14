@@ -78,7 +78,9 @@ const isCypressErr = (err) => {
   return Boolean(err.isCypressErr)
 }
 
-const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
+const getMsgByType = function (type, ...args) {
+  const [arg1 = {}, arg2, arg3] = args
+
   // NOTE: declarations in case blocks are forbidden so we declare them up front
   let filePath; let err; let msg; let str
 
@@ -699,6 +701,13 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
 
         Learn more at https://on.cypress.io/reporters`
       // TODO: update with vetted cypress language
+    case 'TESTING_TYPE_NEEDED_FOR_RUN':
+      return stripIndent`
+        You need to specify the testing type for cypress run:
+          cypress run --e2e 
+
+          cypress run --component
+      `
     case 'NO_DEFAULT_CONFIG_FILE_FOUND':
       return stripIndent`\
         Could not find a Cypress configuration file, exiting.
@@ -721,10 +730,12 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
       // TODO: update with vetted cypress language
     case 'CONFIG_FILES_LANGUAGE_CONFLICT':
       return stripIndent`
-          There is both a \`${arg2}\` and a \`${arg3}\` at the location below:
+          There is both a \`cypress.config.js\` and a \`cypress.config.ts\` at the location below:
           ${arg1}
 
-          Cypress does not know which one to read for config. Please remove one of the two and try again.
+          This sometimes happens if you do not have cypress.config.ts excluded in your tsconfig.json.
+          Cypress will use the "cypress.config.ts" and ignore the ".js" file. Please add it to your
+          "excludes" option, and remove from your project.
           `
     case 'CONFIG_FILE_NOT_FOUND':
       return stripIndent`\

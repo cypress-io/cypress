@@ -25,8 +25,12 @@ const wrap = (ipc, invoke, ids, args) => {
       } else {
         const _child = fileObjects[filePath]
 
+        if (!_child) {
+          return
+        }
+
         delete fileObjects[filePath]
-        _child.emit('close')
+        _child?.emit('close')
       }
     })
   }

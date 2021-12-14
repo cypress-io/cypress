@@ -103,7 +103,7 @@ export interface CoreDataShape {
 export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDataShape {
   return {
     servers: {},
-    cliBrowser: null,
+    cliBrowser: modeOptions.browser ?? null,
     hasInitializedMode: null,
     baseError: null,
     dev: {
@@ -123,8 +123,8 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
       refreshing: null,
     },
     isAuthBrowserOpened: false,
-    currentProject: null,
-    currentTestingType: null,
+    currentProject: modeOptions.projectRoot ?? null,
+    currentTestingType: modeOptions.testingType ?? null,
     wizard: {
       chosenBundler: null,
       chosenFramework: null,

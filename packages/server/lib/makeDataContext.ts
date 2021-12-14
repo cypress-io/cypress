@@ -42,7 +42,7 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       message: errors.getMsgByType,
     },
     configApi: {
-      getHandlers: plugins.getHandlers,
+      getServerPluginHandlers: plugins.getServerPluginHandlers,
       allowedConfig: configUtils.allowed,
       cypressVersion: pkg.version,
       validateConfig: configUtils.validate,

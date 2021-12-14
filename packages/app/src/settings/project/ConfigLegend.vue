@@ -39,7 +39,7 @@
           href="https://on.cypress.io"
           class="text-purple-500"
         >
-          setupNodeEnv
+          setupNodeEvents
         </ExternalLink>
       </i18n-t>
     </ConfigBadge>

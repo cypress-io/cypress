@@ -38,6 +38,10 @@ export class ProjectActions {
   }
 
   async clearCurrentProject () {
+    this.ctx.update((d) => {
+      d.currentProject = null
+    })
+
     this.ctx.lifecycleManager.clearCurrentProject()
     await this.api.closeActiveProject()
   }

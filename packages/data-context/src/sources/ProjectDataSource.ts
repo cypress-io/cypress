@@ -1,5 +1,5 @@
 import type { CodeGenType, SpecType } from '@packages/graphql/src/gen/nxs.gen'
-import { FrontendFramework, FRONTEND_FRAMEWORKS, SpecFileWithExtension, STORYBOOK_GLOB } from '@packages/types'
+import { FrontendFramework, FRONTEND_FRAMEWORKS, ResolvedFromConfig, RESOLVED_FROM, SpecFileWithExtension, STORYBOOK_GLOB } from '@packages/types'
 import { scanFSForAvailableDependency } from 'create-cypress-tests'
 import path from 'path'
 import assert from 'assert'
@@ -105,6 +105,35 @@ export class ProjectDataSource {
     const framework = await this.frameworkLoader.load(this.ctx.currentProject)
 
     return framework?.glob ?? looseComponentGlob
+  }
+
+  async getResolvedConfigFields (): Promise<ResolvedFromConfig[]> {
+    const config = this.ctx.lifecycleManager.loadedFullConfig?.resolved ?? {}
+
+    interface ResolvedFromWithField extends ResolvedFromConfig {
+      field: typeof RESOLVED_FROM[number]
+    }
+
+    const mapEnvResolvedConfigToObj = (config: ResolvedFromConfig): ResolvedFromWithField => {
+      return Object.entries(config).reduce<ResolvedFromWithField>((acc, [field, value]) => {
+        return {
+          ...acc,
+          value: { ...acc.value, [field]: value.value },
+        }
+      }, {
+        value: {},
+        field: 'env',
+        from: 'env',
+      })
+    }
+
+    return Object.entries(config ?? {}).map(([key, value]) => {
+      if (key === 'env' && value) {
+        return mapEnvResolvedConfigToObj(value)
+      }
+
+      return { ...value, field: key }
+    }) as ResolvedFromConfig[]
   }
 
   async getCodeGenCandidates (glob: string): Promise<SpecFileWithExtension[]> {
