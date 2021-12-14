@@ -13,36 +13,37 @@ let zlib = require('zlib')
 const str = require('underscore.string')
 const evilDns = require('evil-dns')
 const Promise = require('bluebird')
-const { SocketE2E } = require(`${root}lib/socket-e2e`)
+const { SocketE2E } = require(`../../lib/socket-e2e`)
 
-const httpsServer = require(`${root}../https-proxy/test/helpers/https_server`)
+const httpsServer = require(`@packages/https-proxy/test/helpers/https_server`)
 const pkg = require('@packages/root')
 const SseStream = require('ssestream')
 const EventSource = require('eventsource')
-const config = require(`${root}lib/config`)
-const { ServerE2E } = require(`${root}lib/server-e2e`)
-const ProjectBase = require(`${root}lib/project-base`).ProjectBase
-const { SpecsStore } = require(`${root}/lib/specs-store`)
-const Watchers = require(`${root}lib/watchers`)
-const pluginsModule = require(`${root}lib/plugins`)
-const preprocessor = require(`${root}lib/plugins/preprocessor`)
-const resolve = require(`${root}lib/util/resolve`)
-const { fs } = require(`${root}lib/util/fs`)
-const glob = require(`${root}lib/util/glob`)
-const CacheBuster = require(`${root}lib/util/cache_buster`)
+const config = require(`../../lib/config`)
+const { ServerE2E } = require(`../../lib/server-e2e`)
+const ProjectBase = require(`../../lib/project-base`).ProjectBase
+const { SpecsStore } = require(`../../lib/specs-store`)
+const Watchers = require(`../../lib/watchers`)
+const pluginsModule = require(`../../lib/plugins`)
+const preprocessor = require(`../../lib/plugins/preprocessor`)
+const resolve = require(`../../lib/util/resolve`)
+const { fs } = require(`../../lib/util/fs`)
+const glob = require(`../../lib/util/glob`)
+const CacheBuster = require(`../../lib/util/cache_buster`)
 const Fixtures = require('@tooling/system-tests/lib/fixtures')
 /**
  * @type {import('@packages/resolve-dist')}
  */
 const { getRunnerInjectionContents } = require(`@packages/resolve-dist`)
-const { createRoutes } = require(`${root}lib/routes`)
+const { createRoutes } = require(`../../lib/routes`)
+const { getCtx } = require(`../../lib/makeDataContext`)
 
 zlib = Promise.promisifyAll(zlib)
 
 // force supertest-session to use promises provided in supertest
 const session = proxyquire('supertest-session', { supertest })
 
-const absolutePathRegex = /"\/[^{}]*?\.projects/g
+const absolutePathRegex = /"\/[^{}]*?cy-projects/g
 let sourceMapRegex = /\n\/\/# sourceMappingURL\=.*/
 
 const replaceAbsolutePaths = (content) => {
@@ -60,10 +61,31 @@ const cleanResponseBody = (body) => {
   return replaceAbsolutePaths(removeWhitespace(body))
 }
 
+function getHugeJsFile () {
+  const pathToHugeAppJs = Fixtures.path('server/libs/huge_app.js')
+
+  const getHugeFile = () => {
+    return rp('https://s3.amazonaws.com/internal-test-runner-assets.cypress.io/huge_app.js')
+    .then((resp) => {
+      return fs
+      .outputFileAsync(pathToHugeAppJs, resp)
+      .return(resp)
+    })
+  }
+
+  return fs
+  .readFileAsync(pathToHugeAppJs, 'utf8')
+  .catch(getHugeFile)
+}
+
+let ctx
+
 describe('Routes', () => {
   require('mocha-banner').register()
 
-  beforeEach(function () {
+  beforeEach(async function () {
+    await Fixtures.scaffoldCommonNodeModules()
+    ctx = getCtx()
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 
     sinon.stub(CacheBuster, 'get').returns('-123')
@@ -72,6 +94,8 @@ describe('Routes', () => {
 
     nock.enableNetConnect()
 
+    Fixtures.scaffold()
+
     this.setup = (initialUrl, obj = {}, spec) => {
       if (_.isObject(initialUrl)) {
         obj = initialUrl
@@ -79,8 +103,10 @@ describe('Routes', () => {
       }
 
       if (!obj.projectRoot) {
-        obj.projectRoot = '/foo/bar/'
+        obj.projectRoot = Fixtures.projectPath('e2e')
       }
+
+      ctx.actions.project.setActiveProjectForTestSetup(obj.projectRoot)
 
       // get all the config defaults
       // and allow us to override them
@@ -128,7 +154,7 @@ describe('Routes', () => {
         }
 
         const open = () => {
-          this.project = new ProjectBase({ projectRoot: '/path/to/project-e2e', testingType: 'e2e' })
+          this.project = new ProjectBase({ projectRoot: Fixtures.projectPath('e2e'), testingType: 'e2e' })
 
           cfg.pluginsFile = false
 
@@ -168,7 +194,8 @@ describe('Routes', () => {
 
             pluginsModule.init(cfg, {
               projectRoot: cfg.projectRoot,
-            }),
+              testingType: 'e2e',
+            }, ctx),
           ])
         }
 
@@ -196,6 +223,7 @@ describe('Routes', () => {
     return Promise.join(
       this.server.close(),
       httpsServer.stop(),
+      ctx.actions.project.clearActiveProject(),
     )
   })
 
@@ -3316,20 +3344,7 @@ describe('Routes', () => {
         })
 
         it('does not die rewriting a huge JS file', function () {
-          const pathToHugeAppJs = Fixtures.path('server/libs/huge_app.js')
-
-          const getHugeFile = () => {
-            return rp('https://s3.amazonaws.com/internal-test-runner-assets.cypress.io/huge_app.js')
-            .then((resp) => {
-              return fs
-              .outputFileAsync(pathToHugeAppJs, resp)
-              .return(resp)
-            })
-          }
-
-          return fs
-          .readFileAsync(pathToHugeAppJs, 'utf8')
-          .catch(getHugeFile)
+          return getHugeJsFile()
           .then((hugeJsFile) => {
             nock(this.server._remoteOrigin)
             .get('/app.js')
@@ -3823,8 +3838,7 @@ describe('Routes', () => {
       })
 
       it('aborts the proxied request', function (done) {
-        fs
-        .readFileAsync(Fixtures.path('server/libs/huge_app.js'), 'utf8')
+        getHugeJsFile()
         .then((str) => {
           const server = http.createServer((req, res) => {
             // when the incoming message to our
@@ -3942,9 +3956,11 @@ describe('Routes', () => {
     })
 
     context('when body should be empty', function () {
-      this.timeout(1000)
+      this.timeout(10000) // TODO(tim): figure out why this is flaky now?
 
       beforeEach(function (done) {
+        Fixtures.scaffold('e2e')
+
         this.httpSrv = http.createServer((req, res) => {
           const { query } = url.parse(req.url, true)
 

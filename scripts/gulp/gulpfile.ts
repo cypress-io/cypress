@@ -11,11 +11,10 @@ import gulp from 'gulp'
 import { autobarrelWatcher } from './tasks/gulpAutobarrel'
 import { startCypressWatch, openCypressLaunchpad, openCypressApp, runCypressLaunchpad, wrapRunWithExit, runCypressApp, killExistingCypress } from './tasks/gulpCypress'
 import { graphqlCodegen, graphqlCodegenWatch, nexusCodegen, nexusCodegenWatch, generateFrontendSchema, syncRemoteGraphQL } from './tasks/gulpGraphql'
-import { viteApp, viteCleanApp, viteCleanLaunchpad, viteLaunchpad, viteBuildApp, viteBuildAndWatchApp, viteBuildLaunchpad, viteBuildAndWatchLaunchpad, symlinkViteProjects, generateShikiTheme } from './tasks/gulpVite'
+import { viteApp, viteCleanApp, viteCleanLaunchpad, viteLaunchpad, viteBuildApp, viteBuildAndWatchApp, viteBuildLaunchpad, viteBuildAndWatchLaunchpad, symlinkViteProjects, generateShikiTheme, viteClean } from './tasks/gulpVite'
 import { checkTs } from './tasks/gulpTsc'
 import { makePathMap } from './utils/makePathMap'
 import { makePackage } from './tasks/gulpMakePackage'
-import { setGulpGlobal } from './gulpConstants'
 import { exitAfterAll } from './tasks/gulpRegistry'
 import { execSync } from 'child_process'
 import { webpackRunner } from './tasks/gulpWebpack'
@@ -26,10 +25,7 @@ import { e2eTestScaffold, e2eTestScaffoldWatch } from './tasks/gulpE2ETestScaffo
  *  * `yarn dev` is your primary command for getting work done
  *------------------------------------------------------------------------**/
 
-gulp.task('viteClean', gulp.parallel(
-  viteCleanApp,
-  viteCleanLaunchpad,
-))
+gulp.task(viteClean)
 
 gulp.task(
   'codegen',
@@ -62,21 +58,37 @@ gulp.task(
 )
 
 gulp.task(
+  'dev:watch',
+  gulp.parallel(
+    webpackRunner,
+    gulp.series(
+      makePathMap,
+      gulp.parallel(
+        viteClean,
+        'codegen',
+      ),
+
+      killExistingCypress,
+
+      // Now that we have the codegen, we can start the frontend(s)
+      gulp.parallel(
+        viteApp,
+        viteLaunchpad,
+        e2eTestScaffoldWatch,
+      ),
+
+      symlinkViteProjects,
+
+      // And we're finally ready for electron, watching for changes in
+      // /graphql to auto-restart the server
+    ),
+  ),
+)
+
+gulp.task(
   'dev',
   gulp.series(
-    makePathMap,
-
-    'codegen',
-
-    killExistingCypress,
-
-    // Now that we have the codegen, we can start the frontend(s)
-    gulp.parallel(
-      viteApp,
-      viteLaunchpad,
-      webpackRunner,
-      e2eTestScaffoldWatch,
-    ),
+    'dev:watch',
 
     // And we're finally ready for electron, watching for changes in
     // /graphql to auto-restart the server
@@ -84,31 +96,7 @@ gulp.task(
   ),
 )
 
-gulp.task('dev:clean', gulp.series(
-  // Clean any vite assets
-  'viteClean',
-  'dev',
-))
-
-gulp.task(
-  'debug',
-  gulp.series(
-    async function setupDebug () {
-      setGulpGlobal('debug', '--inspect')
-    },
-    'dev',
-  ),
-)
-
-gulp.task(
-  'debugBrk',
-  gulp.series(
-    async function setupDebugBrk () {
-      setGulpGlobal('debug', '--inspect-brk')
-    },
-    'dev',
-  ),
-)
+gulp.task('open', startCypressWatch)
 
 /**------------------------------------------------------------------------
  *                            Static Builds
@@ -117,7 +105,7 @@ gulp.task(
 
 gulp.task('buildProd',
   gulp.series(
-    'viteClean',
+    viteClean,
 
     syncRemoteGraphQL,
     nexusCodegen,
@@ -142,15 +130,18 @@ gulp.task(
 
 gulp.task('watchForE2E', gulp.series(
   'codegen',
-  gulp.parallel(
-    gulp.series(
-      viteBuildAndWatchLaunchpad,
-      viteBuildAndWatchApp,
+  gulp.series(
+    makePathMap,
+    gulp.parallel(
+      gulp.series(
+        viteBuildAndWatchLaunchpad,
+        viteBuildAndWatchApp,
+      ),
+      webpackRunner,
     ),
-    webpackRunner,
+    symlinkViteProjects,
+    e2eTestScaffold,
   ),
-  symlinkViteProjects,
-  e2eTestScaffold,
 ))
 
 /**------------------------------------------------------------------------
@@ -227,7 +218,7 @@ const cyOpenApp = gulp.series(
 // Open Cypress in production mode.
 // Rebuild the Launchpad app between changes.
 gulp.task('cyOpenLaunchpadE2E', gulp.series(
-  'viteClean',
+  viteClean,
 
   // 1. Build the Cypress App itself
   'commonSetup',
@@ -239,7 +230,7 @@ gulp.task('cyOpenLaunchpadE2E', gulp.series(
 // Open Cypress in production mode.
 // Rebuild the Launchpad app between changes.
 gulp.task('cyOpenAppE2E', gulp.series(
-  'viteClean',
+  viteClean,
 
   // 1. Build the Cypress App itself
   'commonSetup',
@@ -316,9 +307,11 @@ gulplog.warn = function (...args: string[]) {
 }
 
 process.on('exit', () => {
-  if (didntExitCorrectly) {
+  if (didntExitCorrectly && !process.env.CI) {
     execSync('killall Cypress')
     execSync('killall node')
     process.exitCode = 1
+  } else if (didntExitCorrectly) {
+    console.log(`Issue exiting correctly`)
   }
 })

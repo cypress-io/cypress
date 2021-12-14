@@ -1,5 +1,5 @@
-import type { CodeGenType, SpecType } from '@packages/graphql/src/gen/nxs.gen'
-import { FrontendFramework, FRONTEND_FRAMEWORKS, ResolvedFromConfig, RESOLVED_FROM, SpecFile, STORYBOOK_GLOB } from '@packages/types'
+import type { SpecType } from '@packages/graphql/src/gen/nxs.gen'
+import { FrontendFramework, FRONTEND_FRAMEWORKS, ResolvedFromConfig, RESOLVED_FROM, SpecFileWithExtension, STORYBOOK_GLOB } from '@packages/types'
 import { scanFSForAvailableDependency } from 'create-cypress-tests'
 import path from 'path'
 
@@ -50,6 +50,14 @@ export class ProjectDataSource {
     return specs.filter((spec) => spec.specType === specType)
   }
 
+  async getCurrentSpecByAbsolute (projectRoot: string, absolute: string) {
+    // TODO: should cache current specs so we don't need to
+    // call findSpecs each time we ask for the current spec.
+    const specs = await this.findSpecs(projectRoot, null)
+
+    return specs.find((x) => x.absolute === absolute)
+  }
+
   async getCurrentSpecById (projectRoot: string, base64Id: string) {
     // TODO: should cache current specs so we don't need to
     // call findSpecs each time we ask for the current spec.
@@ -92,21 +100,29 @@ export class ProjectDataSource {
   }
 
   async isTestingTypeConfigured (projectRoot: string, testingType: 'e2e' | 'component') {
-    const config = await this.getConfig(projectRoot)
+    try {
+      const config = await this.getConfig(projectRoot)
 
-    if (!config) {
-      return true
+      if (!config) {
+        return true
+      }
+
+      if (testingType === 'e2e') {
+        return Boolean(Object.keys(config.e2e ?? {}).length)
+      }
+
+      if (testingType === 'component') {
+        return Boolean(Object.keys(config.component ?? {}).length)
+      }
+
+      return false
+    } catch (error: any) {
+      if (error.type === 'NO_DEFAULT_CONFIG_FILE_FOUND') {
+        return false
+      }
+
+      throw error
     }
-
-    if (testingType === 'e2e') {
-      return Boolean(Object.keys(config.e2e ?? {}).length)
-    }
-
-    if (testingType === 'component') {
-      return Boolean(Object.keys(config.component ?? {}).length)
-    }
-
-    return false
   }
 
   async getProjectPreferences (projectTitle: string) {
@@ -132,40 +148,39 @@ export class ProjectDataSource {
     return guess ?? null
   }
 
-  async getCodeGenGlob (type: CodeGenType) {
-    const project = this.ctx.activeProject
+  async getCodeGenGlobs () {
+    const project = this.ctx.currentProject
 
     if (!project) {
-      throw Error(`Cannot find glob without activeProject.`)
+      throw Error(`Cannot find glob without currentProject.`)
     }
 
     const looseComponentGlob = '/**/*.{js,jsx,ts,tsx,.vue}'
 
-    if (type === 'story') {
-      return STORYBOOK_GLOB
-    }
-
     const framework = await this.frameworkLoader.load(project.projectRoot)
 
-    return framework?.glob ?? looseComponentGlob
+    return {
+      component: framework?.glob ?? looseComponentGlob,
+      story: STORYBOOK_GLOB,
+    }
   }
 
-  async getCodeGenCandidates (glob: string): Promise<SpecFile[]> {
+  async getCodeGenCandidates (glob: string): Promise<SpecFileWithExtension[]> {
     // Storybook can support multiple globs, so show default one while
     // still fetching all stories
     if (glob === STORYBOOK_GLOB) {
       return this.ctx.storybook.getStories()
     }
 
-    const project = this.ctx.activeProject
+    const project = this.ctx.currentProject
 
     if (!project) {
-      throw Error(`Cannot find components without activeProject.`)
+      throw Error(`Cannot find components without currentProject.`)
     }
 
     const config = await this.ctx.project.getConfig(project.projectRoot)
 
-    const codeGenCandidates = await this.ctx.file.getFilesByGlob(glob)
+    const codeGenCandidates = await this.ctx.file.getFilesByGlob(config.projectRoot || process.cwd(), glob)
 
     return codeGenCandidates.map(
       (file) => {

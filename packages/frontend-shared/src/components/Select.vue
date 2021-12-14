@@ -5,7 +5,7 @@
     @update:modelValue="handleUpdate"
   >
     <template #default="{ open }">
-      <ListboxLabel class="block text-sm font-medium text-gray-700">
+      <ListboxLabel class="font-medium text-sm text-gray-800 block">
         <template v-if="label">
           {{ label }}
         </template>
@@ -15,9 +15,15 @@
           :open="open"
         />
       </ListboxLabel>
-      <div class="mt-1 relative">
-        <ListboxButton class="bg-white text-gray-800 relative w-full border border-gray-300 rounded pl-3 pr-4 py-2 text-left cursor-default focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-          <span class="absolute inset-y-0 flex items-center">
+      <div
+        class="relative"
+      >
+        <ListboxButton
+          class="bg-white border rounded text-left w-full py-2 pr-4 pl-3 text-gray-800 hocus-default group relative sm:text-sm"
+
+          :class="open ? 'cursor-default default-ring' : 'cursor-pointer border-gray-100'"
+        >
+          <span class="flex inset-y-0 absolute items-center">
             <slot
               name="input-prefix"
               :value="modelValue"
@@ -42,21 +48,19 @@
               {{ get(modelValue, itemValue || '') }}
             </slot>
           </span>
-          <span class="absolute inset-y-0 right-0 pr-2 flex items-center">
+          <span class="flex pr-3 inset-y-0 right-0 absolute items-center">
             <slot
               name="input-suffix"
               :value="modelValue"
               :open="open"
             >
-              <Icon
-                :icon="IconCaret"
-                class="text-lg transform transition-transform"
+              <i-cy-chevron-down
                 data-testid="icon-caret"
-                aria-hidden="true"
                 :class="{
-                  'rotate-0 text-indigo-600': open,
-                  'rotate-180 text-gray-500': !open
+                  'rotate-180 icon-dark-indigo-600': open,
+                  'rotate-0 icon-dark-gray-500': !open
                 }"
+                class="max-w-16px transform transition duration-250 group-hocus:icon-dark-indigo-600"
               />
             </slot>
           </span>
@@ -67,25 +71,25 @@
           leave-from-class="opacity-100"
           leave-to-class="opacity-0"
         >
-          <ListboxOptions class="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
+          <ListboxOptions class="bg-white rounded shadow-lg ring-black mt-1 text-base w-full max-h-60 ring-1 ring-opacity-5 z-10 absolute overflow-auto sm:text-sm focus:outline-none">
             <ListboxOption
               v-for="option in options"
               :key="get(option, itemKey ?? '')"
               v-slot="{ active, selected }"
               as="ul"
               :value="option"
-              :disabled="option.disabled"
+              :disabled="option.disabled || false"
             >
               <li
-                class="cursor-default block truncate select-none relative py-2 pl-3 pr-9"
+                class="border-transparent cursor-pointer border-1 py-2 pr-8 pl-3 block truncate select-none relative "
                 :class="[{
-                  'font-medium': selected,
+                  'font-medium bg-jade-50': option.isSelected,
                   'bg-gray-50': active,
-                  'text-gray-900': !active,
-                  'text-opacity-40': option.disabled
+                  'text-gray-800': !option.isSelected && !active,
+                  'text-opacity-40': option.disabled || false
                 }]"
               >
-                <span class="absolute inset-y-0 flex items-center">
+                <span class="flex inset-y-0 absolute items-center">
                   <slot
                     name="item-prefix"
                     :selected="selected"
@@ -97,12 +101,12 @@
                   class="inline-block"
                   :class="{
                     'pl-8': $slots['item-prefix'],
-                    'pr-4': $slots['item-suffix'],
+                    'pr-6': $slots['item-suffix'],
                   }"
                 >
                   <slot
                     name="item-body"
-                    :selected="selected"
+                    :selected="option.isSelected"
                     :active="active"
                     :value="option"
                   >
@@ -110,20 +114,19 @@
                   </slot>
                 </span>
 
-                <span class="absolute inset-y-0 right-0 pr-8 flex text-sm items-center">
+                <span class="flex text-sm pr-3 inset-y-0 right-0 absolute items-center">
                   <slot
                     name="item-suffix"
-                    :selected="selected"
+                    :selected="option.isSelected"
                     :active="active"
                     :value="option"
                   >
                     <span
-                      v-if="selected"
-                      class="text-indigo-500 absolute flex items-center"
+                      v-if="option.isSelected"
+                      class="flex pr-3 right-0 text-jade-400 absolute items-center"
                     >
-                      <Icon
-                        :icon="IconCheck"
-                        class="text-sm"
+                      <i-mdi-check
+                        class="h-16px w-16px"
                         data-testid="icon-check"
                         aria-hidden="true"
                       />
@@ -147,9 +150,6 @@ export default {
 
 <script lang="ts" setup>
 import { Listbox, ListboxButton, ListboxLabel, ListboxOption, ListboxOptions } from '@headlessui/vue'
-import IconCheck from '~icons/mdi/check'
-import IconCaret from '~icons/mdi/caret'
-import Icon from './Icon.vue'
 import { get } from 'lodash'
 import { useI18n } from '@cy/i18n'
 
@@ -157,10 +157,11 @@ const { t } = useI18n()
 
 interface Option {
   [key: string]: any
+  disabled?: boolean,
 }
 
 const props = withDefaults(defineProps<{
-  options: Option[],
+  options: Option[] | readonly Option[],
   modelValue?: Option // Current object being selected
   placeholder?: string
   label?: string

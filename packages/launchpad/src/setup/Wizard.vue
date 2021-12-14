@@ -1,4 +1,5 @@
 <template>
+  <WarningList :gql="props.gql.wizard" />
   <WizardHeader
     v-if="props.gql.wizard"
     :gql="props.gql.wizard"
@@ -10,7 +11,7 @@
     />
     <InstallDependencies
       v-if="props.gql.wizard.step === 'installDependencies'"
-      :gql="props.gql.wizard"
+      :gql="props.gql"
     />
     <ConfigFiles
       v-if="props.gql.wizard.step === 'configFiles'"
@@ -33,6 +34,7 @@ import OpenBrowser from './OpenBrowser.vue'
 import { gql } from '@urql/core'
 import type { WizardFragment } from '../generated/graphql'
 import InitializeConfig from './InitializeConfig.vue'
+import WarningList from '../warning/WarningList.vue'
 
 gql`
 fragment Wizard on Query {
@@ -42,9 +44,10 @@ fragment Wizard on Query {
     step
     testingType
     ...EnvironmentSetup
-    ...InstallDependencies
     ...ConfigFiles
+    ...WarningList
   }
+  ...InstallDependencies
   ...InitializeConfig_Config
 }`
 

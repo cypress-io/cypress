@@ -1,6 +1,6 @@
 require('../../spec_helper')
 
-const CacheBuster = require(`${root}../lib/util/cache_buster`)
+const CacheBuster = require(`../../../lib/util/cache_buster`)
 
 describe('lib/cache_buster', () => {
   context('#get', () => {

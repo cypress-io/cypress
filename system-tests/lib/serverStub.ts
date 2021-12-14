@@ -72,15 +72,12 @@ const routeHandlers = {
     req: 'postRunInstanceRequest@2.1.0',
     resSchema: 'postRunInstanceResponse@2.1.0',
     res: (req, res) => {
-      console.log(mockServerState.allSpecs.length, mockServerState.specs.length)
       const response = {
         ...postRunInstanceResponse,
         spec: mockServerState.specs.shift() || null,
         claimedInstances: mockServerState.allSpecs.length - mockServerState.specs.length,
         totalInstances: mockServerState.allSpecs.length,
       }
-
-      console.log('response', response)
 
       return res.json(response)
     },
@@ -279,12 +276,8 @@ const onServer = (routes) => {
   })
 }
 
-export const setupStubbedServer = (routes, settings = {}) => {
+export const setupStubbedServer = (routes) => {
   systemTests.setup({
-    settings: _.extend({
-      projectId: 'pid123',
-      videoUploadOnPasses: false,
-    }, settings),
     servers: [{
       port: 1234,
       onServer: onServer(routes),

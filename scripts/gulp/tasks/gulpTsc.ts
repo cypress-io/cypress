@@ -18,7 +18,7 @@ export async function checkTs () {
     getTsPackages('npm'),
   ])
 
-  await buildPackageTsc({
+  await checkPackageTsc({
     tsPackages: new Set([...a, ...b]),
   })
 }
@@ -64,7 +64,7 @@ export function getTsPackages (packagesPath: string = 'packages'): Promise<Set<s
   return dfd.promise
 }
 
-export async function buildPackageTsc ({
+export async function checkPackageTsc ({
   tsPackages = new Set(),
   onlyPackages,
 }: {
@@ -72,15 +72,15 @@ export async function buildPackageTsc ({
   tsPackages?: Set<string>
   onlyPackages?: string[]
 }) {
+  const packages = onlyPackages || [...Array.from(tsPackages)]
+
   console.log(
-    chalk.blue(`TSC: Building deps for ${onlyPackages || 'All Packages'}`),
+    chalk.blue(`TSC: Checking types for ${onlyPackages || packages.join(', ')}`),
   )
 
   const errors = []
 
   let built = 0
-
-  const packages = onlyPackages || [...Array.from(tsPackages)]
 
   for (const pkg of packages) {
     const cwd = path.join(
@@ -89,29 +89,30 @@ export async function buildPackageTsc ({
     )
 
     try {
+      built++
       await execAsync('yarn check-ts', { cwd })
 
-      built++
       console.log(
         `${chalk.green(`Built`)} ${cwd} ${chalk.magenta(
           `${built} / ${packages.length}`,
         )}`,
       )
-    } catch (e) {
+    } catch (e: unknown?) {
       console.log(
         `${chalk.red(`Failed building`)} ${cwd} ${chalk.magenta(
           `${built} / ${packages.length}`,
         )}`,
       )
 
-      errors.push({ package: cwd, stdout: e.stdout })
+      console.error(chalk.red(e.stdout))
+
+      errors.push({ package: cwd })
     }
   }
 
   if (errors.length > 0) {
     errors.forEach((e) => {
       console.log(`Error building ${e.package}`)
-      console.error(chalk.red(e.stdout))
     })
 
     process.exit(1)

@@ -1,6 +1,11 @@
-import type { BrowserWindow } from 'electron'
+import type { App, BrowserWindow } from 'electron'
 import os from 'os'
 import type { DataContext } from '..'
+
+export interface ElectronApiShape {
+  openExternal(url: string): void
+  showItemInFolder(folder: string): void
+}
 
 export class ElectronActions {
   constructor (private ctx: DataContext) { }
@@ -13,25 +18,28 @@ export class ElectronActions {
     return os.platform() === 'darwin'
   }
 
+  setElectronApp (app: App) {
+    this.electron.app = app
+  }
+
   setBrowserWindow (window: BrowserWindow) {
     this.electron.browserWindow = window
   }
 
   hideBrowserWindow () {
-    this.electron.browserWindow?.hide()
-
-    if (this.isMac) {
-      this.ctx.electronApp.dock.hide()
-    } else {
-      this.electron.browserWindow?.setSkipTaskbar(true)
-    }
+    // this.electron.browserWindow?.hide()
+    // if (this.isMac) {
+    //   this.ctx.electronApp?.dock.hide()
+    // } else {
+    //   this.electron.browserWindow?.setSkipTaskbar(true)
+    // }
   }
 
   showBrowserWindow () {
     this.electron.browserWindow?.show()
 
     if (this.isMac) {
-      this.ctx.electronApp.dock.show()
+      this.ctx.electronApp?.dock.show()
     } else {
       this.electron.browserWindow?.setSkipTaskbar(false)
     }
@@ -45,5 +53,13 @@ export class ElectronActions {
 
   refreshBrowserWindow () {
     this.electron.browserWindow?.reload()
+  }
+
+  openExternal (url: string) {
+    this.ctx.electronApi.openExternal(url)
+  }
+
+  showItemInFolder (url: string) {
+    this.ctx.electronApi.showItemInFolder(url)
   }
 }

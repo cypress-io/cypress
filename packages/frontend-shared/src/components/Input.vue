@@ -25,6 +25,7 @@
       </div>
       <input
         v-model="localValue"
+        :style="style"
         :type="type"
         :spellcheck="false"
         :class="_inputClasses"
@@ -79,6 +80,7 @@ const props = withDefaults(defineProps<{
   suffixIcon?: FunctionalComponent<SVGAttributes, {}>
   suffixIconClasses?: string | string[] | Record<string, string>
   modelValue?: string
+  style?: string
 }>(), {
   type: 'text',
   modelValue: '',
@@ -87,6 +89,7 @@ const props = withDefaults(defineProps<{
   prefixIconClasses: undefined,
   suffixIcon: undefined,
   suffixIconClasses: undefined,
+  style: '',
 })
 
 const emits = defineEmits(['update:modelValue'])
@@ -110,3 +113,10 @@ const _inputClasses = computed(() => {
 })
 
 </script>
+
+<style scoped>
+::-webkit-search-cancel-button{
+    display: none;
+}
+
+</style>

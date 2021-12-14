@@ -1,23 +1,31 @@
-import { cloneDeep } from 'lodash'
-import type { CloudUser } from '../generated/test-cloud-graphql-types.gen'
-import type { WizardStep, NavItem, Project, Browser, WizardBundler, WizardFrontendFramework, TestingTypeEnum } from '../generated/test-graphql-types.gen'
-import { resetTestNodeIdx, testNodeId } from './clientTestUtils'
+import type { AuthenticatedUserShape } from '@packages/data-context/src/data'
+import type {
+  WizardStep,
+  CurrentProject,
+  Browser,
+  WizardBundler,
+  WizardFrontendFramework,
+  TestingTypeEnum,
+  GlobalProject,
+  VersionData,
+  LocalSettings,
+} from '../generated/test-graphql-types.gen'
+import { resetTestNodeIdx } from './clientTestUtils'
+import { stubBrowsers } from './stubgql-Browser'
 import * as cloudTypes from './stubgql-CloudTypes'
-import { stubNavigationMenu } from './stubgql-NavigationMenu'
-import { createTestProject } from './stubgql-Project'
-import { longBrowsersList } from './stubgql-App'
+import { createTestCurrentProject, createTestGlobalProject, stubGlobalProject } from './stubgql-Project'
 import { allBundlers } from './stubgql-Wizard'
 
 export interface ClientTestContext {
+  currentProject: CurrentProject | null
+  projects: GlobalProject[]
   app: {
-    navItem: NavItem
-    selectedBrowser: Browser | null
+    currentBrowser: Browser | null
     browsers: Browser[] | null
-    projects: Project[]
-    activeProject: Project | null
-    isInGlobalMode: boolean
-    isAuthBrowserOpened: boolean
   }
+  versions: VersionData
+  isAuthBrowserOpened: boolean
+  localSettings: LocalSettings
   wizard: {
     step: WizardStep
     canNavigateForward: boolean
@@ -29,10 +37,10 @@ export interface ClientTestContext {
     allBundlers: WizardBundler[]
     history: WizardStep[]
     chosenBrowser: null
+    warnings: []
   }
-  user: Partial<CloudUser> | null
+  user: AuthenticatedUserShape | null
   cloudTypes: typeof cloudTypes
-  navigationMenu: typeof stubNavigationMenu
   __mockPartial: any
 }
 
@@ -42,27 +50,32 @@ export interface ClientTestContext {
  */
 export function makeClientTestContext (): ClientTestContext {
   resetTestNodeIdx()
-  const browsers = longBrowsersList.map((browser, i): Browser => {
-    return {
-      ...testNodeId('Browser'),
-      ...browser,
-      disabled: false,
-      isSelected: i === 0,
-    }
-  })
 
-  const testProject = createTestProject('test-project')
+  const testProject = createTestCurrentProject('test-project')
 
   return {
+    currentProject: testProject,
+    projects: [stubGlobalProject, createTestGlobalProject('another-test-project')],
     app: {
-      navItem: 'settings',
-      browsers,
-      projects: [testProject, createTestProject('another-test-project')],
-      selectedBrowser: browsers[0],
-      activeProject: testProject,
-      isInGlobalMode: false,
-      isAuthBrowserOpened: false,
+      browsers: stubBrowsers,
+      currentBrowser: stubBrowsers[0],
     },
+    versions: {
+      __typename: 'VersionData',
+      current: {
+        __typename: 'Version',
+        id: '8.7.0',
+        version: '8.7.0',
+        released: '2021-10-25T21:38:59.983Z',
+      },
+      latest: {
+        __typename: 'Version',
+        id: '8.6.0',
+        version: '8.6.0',
+        released: '2021-10-11T19:40:49.036Z',
+      },
+    },
+    isAuthBrowserOpened: false,
     wizard: {
       step: 'configFiles',
       canNavigateForward: false,
@@ -74,10 +87,31 @@ export function makeClientTestContext (): ClientTestContext {
       allBundlers,
       history: ['welcome'],
       chosenBrowser: null,
+      warnings: [],
     },
     user: null,
     cloudTypes,
-    navigationMenu: cloneDeep(stubNavigationMenu),
+    localSettings: {
+      __typename: 'LocalSettings',
+      preferences: {
+        __typename: 'LocalSettingsPreferences',
+        autoScrollingEnabled: true,
+      },
+      availableEditors: [
+        {
+          __typename: 'Editor',
+          id: 'code',
+          name: 'VS Code',
+          binary: 'code',
+        },
+        {
+          __typename: 'Editor',
+          id: 'vim',
+          name: 'Vim',
+          binary: 'vim',
+        },
+      ],
+    },
     __mockPartial: {},
   }
 }

@@ -1,7 +1,7 @@
 import type { DataContext } from '..'
 import * as path from 'path'
-import type { FoundSpec, SpecFile } from '@packages/types'
 import globby, { GlobbyOptions } from 'globby'
+import type { FoundSpec, SpecFile } from '@packages/types'
 
 interface CreateFileParts {
   absolute: string
@@ -33,7 +33,7 @@ export class FileDataSource {
     }) as Promise<Result>
   }
 
-  normalizeFileToFileParts (options: CreateFileParts): SpecFile {
+  normalizeFileToFileParts (options: CreateFileParts): SpecFile & { fileExtension: string } {
     const parsed = path.parse(options.absolute)
 
     return {
@@ -42,6 +42,7 @@ export class FileDataSource {
       relative: path.relative(options.projectRoot, options.absolute),
       baseName: parsed.base,
       fileName: parsed.base.split('.')[0] || '',
+      fileExtension: parsed.ext,
     }
   }
 
@@ -54,11 +55,11 @@ export class FileDataSource {
     }
   }
 
-  async getFilesByGlob (glob: string | string[], globOptions?: GlobbyOptions) {
+  async getFilesByGlob (cwd: string, glob: string | string[], globOptions?: GlobbyOptions) {
     const globs = (Array.isArray(glob) ? glob : [glob]).concat('!**/node_modules/**')
 
     try {
-      const files = await globby(globs, { onlyFiles: true, absolute: true, ...globOptions })
+      const files = await globby(globs, { onlyFiles: true, absolute: true, cwd, ...globOptions })
 
       return files
     } catch (e) {

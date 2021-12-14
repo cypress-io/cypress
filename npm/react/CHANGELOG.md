@@ -1,3 +1,10 @@
+# [@cypress/react-v5.10.3](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.10.2...@cypress/react-v5.10.3) (2021-11-01)
+
+
+### Bug Fixes
+
+* **@cypress/react:** throw if using Next.js swc-loader without nodeVersion=system ([#18686](https://github.com/cypress-io/cypress/issues/18686)) ([d274a5b](https://github.com/cypress-io/cypress/commit/d274a5b5d92323cb6a9c9d0af3e41bf40e679ac1))
+
 # [@cypress/react-v5.10.2](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.10.1...@cypress/react-v5.10.2) (2021-10-29)
 
 
@@ -235,7 +242,7 @@
 
 * Added the need to install a preprocessor or a dev-server plugin
 * Removed the pre-instalation of test coverage 
-  * Install it manually by following [the documentation](https://docs.cypress.io/guides/tooling/code-coverage.html#Introduction)
+  * Install it manually by following [the documentation](https://on.cypress.io/code-coverage-introduction)
 * removed the pre-installation of `cypress-react-selector`
   * If you use `cy.react()` in your tests, the command will not work anymore. [Install it back in your support file](https://www.npmjs.com/package/cypress-react-selector) 
 

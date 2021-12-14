@@ -3,6 +3,7 @@
 import _ from 'lodash'
 
 import $errUtils from './error_utils'
+import $stackUtils from './stack_utils'
 
 import { allCommands } from '../cy/commands'
 import { addCommand } from '../cy/net-stubbing'
@@ -11,6 +12,76 @@ const builtInCommands = [
   ..._.toArray(allCommands).map((c) => c.default || c),
   addCommand,
 ]
+
+const reservedCommandNames = {
+  addAlias: true,
+  addChainer: true,
+  addCommand: true,
+  addCommandSync: true,
+  aliasNotFoundFor: true,
+  assert: true,
+  clearTimeout: true,
+  config: true,
+  createSnapshot: true,
+  detachDom: true,
+  devices: true,
+  documentHasFocus: true,
+  ensureAttached: true,
+  ensureDescendents: true,
+  ensureDocument: true,
+  ensureElDoesNotHaveCSS: true,
+  ensureElExistence: true,
+  ensureElement: true,
+  ensureElementIsNotAnimating: true,
+  ensureNotDisabled: true,
+  ensureNotHiddenByAncestors: true,
+  ensureNotReadonly: true,
+  ensureRunnable: true,
+  ensureScrollability: true,
+  ensureStrictVisibility: true,
+  ensureSubjectByType: true,
+  ensureValidPosition: true,
+  ensureVisibility: true,
+  ensureWindow: true,
+  expect: true,
+  fail: true,
+  fireBlur: true,
+  fireFocus: true,
+  getFocused: true,
+  getIndexedXhrByAlias: true,
+  getNextAlias: true,
+  getRemoteLocation: true,
+  getRemotejQueryInstance: true,
+  getRequestsByAlias: true,
+  getStyles: true,
+  getXhrTypeByAlias: true,
+  id: true,
+  initialize: true,
+  interceptBlur: true,
+  interceptFocus: true,
+  isCy: true,
+  isStable: true,
+  isStopped: true,
+  needsFocus: true,
+  now: true,
+  onBeforeAppWindowLoad: true,
+  onBeforeWindowLoad: true,
+  onCssModified: true,
+  onUncaughtException: true,
+  pauseTimers: true,
+  queue: true,
+  replayCommandsFrom: true,
+  reset: true,
+  resetTimer: true,
+  retry: true,
+  setRunnable: true,
+  state: true,
+  stop: true,
+  timeout: true,
+  validateAlias: true,
+  verifyUpcomingAssertions: true,
+  whenStable: true,
+}
 
 const getTypeByPrevSubject = (prevSubject) => {
   if (prevSubject === 'optional') {
@@ -30,6 +101,10 @@ export default {
     // of commands
     const commands = {}
     const commandBackups = {}
+    // we track built in commands to ensure users cannot
+    // add custom commands with the same name
+    const builtInCommandNames = {}
+    let addingBuiltIns
 
     const store = (obj) => {
       commands[obj.name] = obj
@@ -53,7 +128,7 @@ export default {
       // store the backup again now
       commandBackups[name] = original
 
-      const originalFn = (...args) => {
+      function originalFn (...args) {
         const current = state('current')
         let storedArgs = args
 
@@ -63,7 +138,7 @@ export default {
 
         current.set('args', storedArgs)
 
-        return original.fn(...args)
+        return original.fn.apply(this, args)
       }
 
       const overridden = _.clone(original)
@@ -126,6 +201,38 @@ export default {
       },
 
       add (name, options, fn) {
+        if (builtInCommandNames[name]) {
+          $errUtils.throwErrByPath('miscellaneous.invalid_new_command', {
+            args: {
+              name,
+            },
+            stack: (new state('specWindow').Error('add command stack')).stack,
+            errProps: {
+              appendToStack: {
+                title: 'From Cypress Internals',
+                content: $stackUtils.stackWithoutMessage((new Error('add command internal stack')).stack),
+              } },
+          })
+        }
+
+        if (reservedCommandNames[name]) {
+          $errUtils.throwErrByPath('miscellaneous.reserved_command', {
+            args: {
+              name,
+            },
+            stack: (new state('specWindow').Error('add command stack')).stack,
+            errProps: {
+              appendToStack: {
+                title: 'From Cypress Internals',
+                content: $stackUtils.stackWithoutMessage((new Error('add command internal stack')).stack),
+              } },
+          })
+        }
+
+        if (addingBuiltIns) {
+          builtInCommandNames[name] = true
+        }
+
         if (_.isFunction(options)) {
           fn = options
           options = {}
@@ -163,12 +270,14 @@ export default {
       },
     }
 
+    addingBuiltIns = true
     // perf loop
     for (let cmd of builtInCommands) {
       // support "export default" syntax
       cmd = cmd.default || cmd
       cmd(Commands, Cypress, cy, state, config)
     }
+    addingBuiltIns = false
 
     return Commands
   },

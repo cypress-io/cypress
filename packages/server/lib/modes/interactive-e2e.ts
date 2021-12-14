@@ -4,16 +4,18 @@ import { app, nativeImage as image } from 'electron'
 // eslint-disable-next-line no-duplicate-imports
 import type { WebContents } from 'electron'
 import cyIcons from '@cypress/icons'
-import savedState from '../saved_state'
+import * as savedState from '../saved_state'
 import menu from '../gui/menu'
-import Events from '../gui/events'
 import * as Windows from '../gui/windows'
-import { runInternalServer } from './internal-server'
+import { makeGraphQLServer } from '@packages/graphql/src/makeGraphQLServer'
+import { DataContext, globalPubSub, getCtx } from '@packages/data-context'
 import type { LaunchArgs, PlatformName } from '@packages/types'
-import EventEmitter from 'events'
+import { EventEmitter } from 'events'
+import Events from '../gui/events'
 
 const isDev = () => {
-  return process.env['CYPRESS_INTERNAL_ENV'] === 'development'
+  // TODO: (tim) ensure the process.env.LAUNCHPAD gets removed before release
+  return Boolean(process.env['CYPRESS_INTERNAL_ENV'] === 'development' || process.env.LAUNCHPAD)
 }
 
 export = {
@@ -128,26 +130,24 @@ export = {
    * @param {import('@packages/types').LaunchArgs} options
    * @returns
    */
-  ready (options: {projectRoot?: string} = {}) {
+  ready (options: {projectRoot?: string} = {}, port: number) {
     const { projectRoot } = options
-    const { serverPortPromise, bus, ctx } = process.env.LAUNCHPAD
-      ? runInternalServer(options)
-      : { bus: new EventEmitter, serverPortPromise: Promise.resolve(undefined), ctx: null }
+    const ctx = getCtx()
 
     // TODO: potentially just pass an event emitter
     // instance here instead of callback functions
     menu.set({
       withDevTools: isDev(),
       onLogOutClicked () {
-        return bus.emit('menu:item:clicked', 'log:out')
+        return globalPubSub.emit('menu:item:clicked', 'log:out')
+      },
+      getGraphQLPort: () => {
+        return ctx?.gqlServerPort
       },
     })
 
-    return Promise.all([
-      serverPortPromise,
-      savedState.create(projectRoot, false).then((state) => state.get()),
-    ])
-    .then(([port, state]) => {
+    return savedState.create(projectRoot, false).then((state) => state.get())
+    .then((state) => {
       return Windows.open(projectRoot, port, this.getWindowArgs(state))
       .then((win) => {
         ctx?.actions.electron.setBrowserWindow(win)
@@ -158,16 +158,19 @@ export = {
             return app.focus({ steal: true }) || win.focus()
           },
           os: os.platform() as PlatformName,
-        }, bus)
+        }, new EventEmitter())
 
         return win
       })
     })
   },
 
-  async run (options) {
-    await app.whenReady()
+  async run (options, ctx: DataContext) {
+    const [, port] = await Promise.all([
+      app.whenReady(),
+      makeGraphQLServer(),
+    ])
 
-    return this.ready(options)
+    return this.ready(options, port)
   },
 }

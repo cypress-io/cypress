@@ -5,22 +5,25 @@ import * as settings from './util/settings'
 import errors from './errors'
 import { fs } from './util/fs'
 import { escapeFilenameInUrl } from './util/escape_filename'
-import { makeLegacyDataContext } from './makeDataContext'
+import { getCtx } from '@packages/data-context'
 
 const debug = Debug('cypress:server:project_utils')
 
 const multipleForwardSlashesRe = /[^:\/\/](\/{2,})/g
+const multipleForwardSlashesReplacer = (match: string) => match.replace('//', '/')
 const backSlashesRe = /\\/g
 
 const normalizeSpecUrl = (browserUrl: string, specUrl: string) => {
-  const replacer = (match: string) => match.replace('//', '/')
+  if (process.env.LAUNCHPAD) {
+    return browserUrl
+  }
 
   return [
     browserUrl,
     '#/tests',
     escapeFilenameInUrl(specUrl),
   ].join('/')
-  .replace(multipleForwardSlashesRe, replacer)
+  .replace(multipleForwardSlashesRe, multipleForwardSlashesReplacer)
 }
 
 const getPrefixedPathToSpec = ({
@@ -83,6 +86,19 @@ export const getSpecUrl = ({
   specType ??= 'integration'
   browserUrl ??= ''
 
+  // App routes to spec with convention {browserUrl}#/specs/runner?file={relativeSpecPath}
+  if (process.env.LAUNCHPAD) {
+    if (!absoluteSpecPath) {
+      return browserUrl
+    }
+
+    const relativeSpecPath = path.relative(projectRoot, path.resolve(projectRoot, absoluteSpecPath))
+    .replace(backSlashesRe, '/')
+
+    return `${browserUrl}/#/specs/runner?file=${relativeSpecPath}`
+    .replace(multipleForwardSlashesRe, multipleForwardSlashesReplacer)
+  }
+
   debug('get spec url: %s for spec type %s', absoluteSpecPath, specType)
 
   // if we don't have a absoluteSpecPath or its __all
@@ -133,6 +149,6 @@ export const checkSupportFile = async ({
   return
 }
 
-export async function getDefaultConfigFilePath (projectRoot: string, ctx = makeLegacyDataContext()): Promise<string | undefined> {
-  return ctx.config.getDefaultConfigBasename(projectRoot)
+export async function getDefaultConfigFilePath (projectRoot: string): Promise<string | undefined> {
+  return getCtx().config.getDefaultConfigBasename(projectRoot)
 }

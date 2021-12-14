@@ -1,57 +1,41 @@
-import { DataContext } from '@packages/data-context'
-import os from 'os'
-import { app } from 'electron'
+import { DataContext, getCtx, clearCtx, setCtx } from '@packages/data-context'
+import electron from 'electron'
 
 import specsUtil from './util/specs'
-import type { FindSpecs, FoundBrowser, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions, PlatformName, Preferences, SettingsOptions } from '@packages/types'
+import type { AllModeOptions, AllowedState, FindSpecs, FoundBrowser, InitializeProjectOptions, LaunchOpts, OpenProjectLaunchOptions, Preferences, SettingsOptions } from '@packages/types'
 import browserUtils from './browsers/utils'
 import auth from './gui/auth'
 import user from './user'
 import * as config from './config'
-import { EventEmitter } from 'events'
 import { openProject } from './open_project'
 import cache from './cache'
 import errors from './errors'
+import findSystemNode from './util/find_system_node'
 import { graphqlSchema } from '@packages/graphql/src/schema'
+import { openExternal } from '@packages/server/lib/gui/links'
+import { getUserEditor } from './util/editors'
+import * as savedState from './saved_state'
+import appData from './util/app_data'
 
-const { getBrowsers } = browserUtils
+const { getBrowsers, ensureAndGetByNameOrPath } = browserUtils
 
 interface MakeDataContextOptions {
-  os: PlatformName
-  rootBus: EventEmitter
-  launchArgs: LaunchArgs
+  mode: 'run' | 'open'
+  modeOptions: Partial<AllModeOptions>
 }
 
-let legacyDataContext: DataContext | undefined
+export { getCtx, setCtx, clearCtx }
 
-// For testing
-export function clearLegacyDataContext () {
-  legacyDataContext = undefined
-}
-
-export function makeLegacyDataContext (launchArgs: LaunchArgs = {} as LaunchArgs): DataContext {
-  if (legacyDataContext && process.env.LAUNCHPAD) {
-    throw new Error(`Expected ctx to be passed as an arg, but used legacy data context`)
-  } else if (!legacyDataContext) {
-    legacyDataContext = makeDataContext({
-      rootBus: new EventEmitter,
-      launchArgs,
-      os: os.platform() as PlatformName,
-    })
-  }
-
-  return legacyDataContext
-}
-
-export function makeDataContext (options: MakeDataContextOptions) {
-  return new DataContext({
+export function makeDataContext (options: MakeDataContextOptions): DataContext {
+  const ctx = new DataContext({
     schema: graphqlSchema,
     ...options,
-    launchOptions: {},
-    electronApp: app,
     appApi: {
-      getBrowsers () {
-        return getBrowsers()
+      appData,
+      getBrowsers,
+      ensureAndGetByNameOrPath,
+      findNodePath () {
+        return findSystemNode.findNodeInFullPath()
       },
     },
     authApi: {
@@ -84,7 +68,7 @@ export function makeDataContext (options: MakeDataContextOptions) {
           },
         })
       },
-      initializeProject (args: LaunchArgs, options: OpenProjectLaunchOptions, browsers: FoundBrowser[]) {
+      initializeProject (args: InitializeProjectOptions, options: OpenProjectLaunchOptions, browsers: FoundBrowser[]) {
         return openProject.create(args.projectRoot, args, options, browsers)
       },
       insertProjectToCache (projectRoot: string) {
@@ -117,9 +101,34 @@ export function makeDataContext (options: MakeDataContextOptions) {
       closeActiveProject () {
         return openProject.closeActiveProject()
       },
-      error (type: string, ...args: any) {
-        throw errors.throw(type, ...args)
+      get error () {
+        return errors
+      },
+    },
+    electronApi: {
+      openExternal (url: string) {
+        openExternal(url)
+      },
+      showItemInFolder (folder: string) {
+        electron.shell.showItemInFolder(folder)
+      },
+    },
+    localSettingsApi: {
+      async setPreferences (object: AllowedState) {
+        const state = await savedState.create()
+
+        return state.set(object)
+      },
+      async getPreferences () {
+        return (await savedState.create()).get()
+      },
+      async getAvailableEditors () {
+        const { availableEditors } = await getUserEditor(true)
+
+        return availableEditors
       },
     },
   })
+
+  return ctx
 }

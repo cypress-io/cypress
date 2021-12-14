@@ -1,8 +1,10 @@
 import { arg, booleanArg, enumType, idArg, mutationType, nonNull, stringArg } from 'nexus'
-import { CodeGenTypeEnum } from '..'
-import { CodeLanguageEnum, FrontendFrameworkEnum, NavItemEnum, SupportedBundlerEnum, TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
+import { CodeGenTypeEnum } from '../enumTypes/gql-CodeGenTypeEnum'
+import { CodeLanguageEnum, FrontendFrameworkEnum, SupportedBundlerEnum, TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
+import { FileDetailsInput } from '../inputTypes/gql-FileDetailsInput'
 import { WizardUpdateInput } from '../inputTypes/gql-WizardUpdateInput'
-import { Wizard } from './gql-Wizard'
+import { CodeGenResultWithFileParts } from './gql-CodeGenResult'
+import { GeneratedSpec } from './gql-GeneratedSpec'
 
 export const mutation = mutationType({
   definition (t) {
@@ -26,31 +28,22 @@ export const mutation = mutationType({
       },
     })
 
-    t.field('internal_triggerIpcToLaunchpad', {
-      type: 'Boolean',
-      args: {
-        msg: nonNull(stringArg()),
-      },
-      resolve: (_, args, ctx) => {
-        ctx.emitter.toLaunchpad(args.msg)
-
-        return true
-      },
-    })
-
-    t.field('internal_triggerIpcToApp', {
-      type: 'Boolean',
-      resolve: (_, args, ctx) => {
-        ctx.emitter.toApp('someData')
-
-        return true
-      },
-    })
-
     t.field('internal_clearLatestProjectCache', {
       type: 'Boolean',
+      resolve: async (_, args, ctx) => {
+        await ctx.actions.project.clearLatestProjectCache()
+
+        return true
+      },
+    })
+
+    t.field('openExternal', {
+      type: 'Boolean',
+      args: {
+        url: nonNull(stringArg()),
+      },
       resolve: (_, args, ctx) => {
-        ctx.actions.project.clearLatestProjectCache()
+        ctx.actions.electron.openExternal(args.url)
 
         return true
       },
@@ -61,8 +54,8 @@ export const mutation = mutationType({
       args: {
         projectTitle: nonNull(stringArg()),
       },
-      resolve: (_, args, ctx) => {
-        ctx.actions.project.clearProjectPreferencesCache(args.projectTitle)
+      resolve: async (_, args, ctx) => {
+        await ctx.actions.project.clearProjectPreferencesCache(args.projectTitle)
 
         return true
       },
@@ -70,8 +63,8 @@ export const mutation = mutationType({
 
     t.field('internal_clearAllProjectPreferencesCache', {
       type: 'Boolean',
-      resolve: (_, args, ctx) => {
-        ctx.actions.project.clearAllProjectPreferencesCache()
+      resolve: async (_, args, ctx) => {
+        await ctx.actions.project.clearAllProjectPreferencesCache()
 
         return true
       },
@@ -103,12 +96,16 @@ export const mutation = mutationType({
         })),
       },
       resolve: async (_, args, ctx) => {
+        if (ctx.coreData.currentProject?.isMissingConfigFile) {
+          await ctx.actions.project.createConfigFile(args.input.testingType)
+        }
+
         if (args.input.testingType) {
-          await ctx.actions.wizard.setTestingType(args.input.testingType)
+          ctx.actions.wizard.setTestingType(args.input.testingType)
         }
 
         if (args.input.direction) {
-          await ctx.actions.wizard.navigate(args.input.direction)
+          ctx.actions.wizard.navigate(args.input.direction)
         }
       },
     })
@@ -140,24 +137,6 @@ export const mutation = mutationType({
       },
     })
 
-    t.field('wizardInstallDependencies', {
-      type: Wizard,
-      description: 'Installs the dependencies for the component testing step',
-      resolve: (_, args, ctx) => {
-        return ctx.wizardData
-      },
-    })
-
-    t.field('wizardValidateManualInstall', {
-      type: Wizard,
-      description: 'Validates that the manual install has occurred properly',
-      resolve: (_, args, ctx) => {
-        ctx.actions.wizard.validateManualInstall()
-
-        return ctx.wizardData
-      },
-    })
-
     t.liveMutation('launchpadSetBrowser', {
       description: 'Sets the active browser',
       args: {
@@ -166,18 +145,7 @@ export const mutation = mutationType({
         })),
       },
       resolve: async (_, args, ctx) => {
-        await ctx.actions.app.setActiveBrowser(args.id)
-      },
-    })
-
-    t.liveMutation('appCreateConfigFile', {
-      args: {
-        code: nonNull('String'),
-        configFilename: nonNull('String'),
-      },
-      description: 'Create a Cypress config file for a new project',
-      resolve: async (_, args, ctx) => {
-        await ctx.actions.project.createConfigFile(args)
+        await ctx.actions.app.setActiveBrowserById(args.id)
       },
     })
 
@@ -191,22 +159,22 @@ export const mutation = mutationType({
       },
     })
 
-    t.liveMutation('codeGenSpec', {
+    t.liveMutation('generateSpecFromSource', {
+      type: GeneratedSpec,
       description: 'Generate spec from source',
       args: {
         codeGenCandidate: nonNull(stringArg()),
         type: nonNull(CodeGenTypeEnum),
       },
       resolve: async (_, args, ctx) => {
-        await ctx.actions.project.codeGenSpec(args.codeGenCandidate, args.type)
+        return ctx.actions.project.codeGenSpec(args.codeGenCandidate, args.type)
       },
     })
 
-    t.liveMutation('navigationMenuSetItem', {
-      description: 'Set the current navigation item',
-      args: { type: nonNull(NavItemEnum) },
-      resolve: async (_, args, ctx) => {
-        await ctx.actions.wizard.setSelectedNavItem(args.type)
+    t.nonNull.list.nonNull.field('scaffoldIntegration', {
+      type: CodeGenResultWithFileParts,
+      resolve: (src, args, ctx) => {
+        return ctx.actions.project.scaffoldIntegration()
       },
     })
 
@@ -244,12 +212,11 @@ export const mutation = mutationType({
 
     t.liveMutation('launchOpenProject', {
       description: 'Launches project from open_project global singleton',
+      args: {
+        specPath: stringArg(),
+      },
       resolve: async (_, args, ctx) => {
-        if (!ctx.wizardData.chosenTestingType) {
-          throw Error('Cannot launch project without chosen testing type')
-        }
-
-        await ctx.actions.project.launchProject(ctx.wizardData.chosenTestingType, {})
+        await ctx.actions.project.launchProject(ctx.wizardData.chosenTestingType, {}, args.specPath)
       },
     })
 
@@ -296,22 +263,8 @@ export const mutation = mutationType({
       },
     })
 
-    t.liveMutation('setCurrentSpec', {
-      description: 'Set the current spec under test',
-      args: {
-        id: nonNull(idArg()),
-      },
-      resolve: async (_, args, ctx) => {
-        if (!ctx.activeProject) {
-          throw Error(`Cannot set spec without active project!`)
-        }
-
-        await ctx.actions.project.setCurrentSpec(args.id)
-      },
-    })
-
     t.nonNull.field('setProjectPreferences', {
-      type: 'App',
+      type: 'Query',
       description: 'Save the projects preferences to cache',
       args: {
         testingType: nonNull(TestingTypeEnum),
@@ -355,10 +308,71 @@ export const mutation = mutationType({
       },
     })
 
+    t.liveMutation('setPreferences', {
+      type: 'Boolean',
+      description: [
+        'Update local preferences (also known as  appData).',
+        'The payload, `value`, should be a `JSON.stringified()`',
+        'object of the new values you\'d like to persist.',
+        'Example: `setPreferences (value: JSON.stringify({ lastOpened: Date.now() }))`',
+      ].join(' '),
+      args: {
+        value: nonNull(stringArg()),
+      },
+      resolve: async (_, args, ctx) => {
+        await ctx.actions.localSettings.setPreferences(args.value)
+      },
+    })
+
     t.liveMutation('showElectronOnAppExit', {
       description: 'show the launchpad at the browser picker step',
       resolve: (_, args, ctx) => {
         ctx.actions.electron.showElectronOnAppExit()
+      },
+    })
+
+    t.field('openDirectoryInIDE', {
+      description: 'Open a path in preferred IDE',
+      type: 'Boolean',
+      args: {
+        path: nonNull(stringArg()),
+      },
+      resolve: (_, args, ctx) => {
+        ctx.actions.project.openDirectoryInIDE(args.path)
+
+        return true
+      },
+    })
+
+    t.field('openInFinder', {
+      description: 'Open a path in the local file explorer',
+      type: 'Boolean',
+      args: {
+        path: nonNull(stringArg()),
+      },
+      resolve: (_, args, ctx) => {
+        ctx.actions.electron.showItemInFolder(args.path)
+
+        return true
+      },
+    })
+
+    t.field('openFileInIDE', {
+      description: 'Open a file on specified line and column in preferred IDE',
+      type: 'Boolean',
+      args: {
+        input: nonNull(arg({
+          type: FileDetailsInput,
+        })),
+      },
+      resolve: (_, args, ctx) => {
+        ctx.actions.file.openFile(
+          args.input.absolute,
+          args.input.line || 1,
+          args.input.column || 1,
+        )
+
+        return true
       },
     })
   },

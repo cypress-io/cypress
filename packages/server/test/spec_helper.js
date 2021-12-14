@@ -4,7 +4,6 @@ const chai = require('chai')
 
 chai.use(require('chai-subset'))
 
-global.root = '../../'
 global.supertest = require('supertest')
 global.nock = require('nock')
 global.expect = chai.expect
@@ -98,7 +97,16 @@ before(function () {
 
 // appData.ensure()
 
+const { setCtx, getCtx, clearCtx, makeDataContext } = require('../lib/makeDataContext')
+
+before(() => {
+  clearCtx()
+  setCtx(makeDataContext({}))
+})
+
 beforeEach(function () {
+  clearCtx()
+  setCtx(makeDataContext({}))
   this.originalEnv = originalEnv
 
   nock.disableNetConnect()
@@ -109,7 +117,9 @@ beforeEach(function () {
   return cache.remove()
 })
 
-afterEach(() => {
+afterEach(async () => {
+  await getCtx()._reset()
+  clearCtx()
   sinon.restore()
 
   nock.cleanAll()

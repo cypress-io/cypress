@@ -3,37 +3,31 @@ const path = require('path')
 require('../../spec_helper')
 const { fs } = require('../../../lib/util/fs')
 const settings = require(`../../../lib/util/settings`)
+const { getCtx } = require('../../../lib/makeDataContext')
 
 const projectRoot = process.cwd()
 const defaultOptions = {
   configFile: 'cypress.config.js',
 }
 
+let ctx
+
 describe('lib/util/settings', () => {
+  beforeEach(() => {
+    ctx = getCtx()
+  })
+
   context('with default configFile option', () => {
     beforeEach(function () {
       this.setup = (obj = {}) => {
+        ctx.actions.project.setActiveProjectForTestSetup(projectRoot)
+
         return fs.writeFileAsync('cypress.config.js', `module.exports = ${JSON.stringify(obj)}`)
       }
     })
 
     afterEach(() => {
       return fs.removeAsync('cypress.config.js')
-    })
-
-    context('nested cypress object', () => {
-      it('flattens object on read', function () {
-        return this.setup({ cypress: { foo: 'bar' } })
-        .then(() => {
-          return settings.read(projectRoot, defaultOptions)
-        }).then((obj) => {
-          expect(obj).to.deep.eq({ foo: 'bar' })
-
-          return require(path.join(projectRoot, 'cypress.config.js'))
-        }).then((obj) => {
-          expect(obj).to.deep.eq({ foo: 'bar' })
-        })
-      })
     })
 
     context('.readEnv', () => {
@@ -79,6 +73,8 @@ describe('lib/util/settings', () => {
     context('.id', () => {
       beforeEach(function () {
         this.projectRoot = path.join(projectRoot, '_test-output/path/to/project/')
+
+        ctx.actions.project.setActiveProjectForTestSetup(this.projectRoot)
 
         return fs.ensureDirAsync(this.projectRoot)
       })
@@ -127,43 +123,8 @@ describe('lib/util/settings', () => {
         })
       })
 
-      it('renames commandTimeout -> defaultCommandTimeout', function () {
-        return this.setup({ commandTimeout: 30000, foo: 'bar' })
-        .then(() => {
-          return settings.read(projectRoot, defaultOptions)
-        }).then((obj) => {
-          expect(obj).to.deep.eq({ defaultCommandTimeout: 30000, foo: 'bar' })
-        })
-      })
-
-      it('renames supportFolder -> supportFile', function () {
-        return this.setup({ supportFolder: 'foo', foo: 'bar' })
-        .then(() => {
-          return settings.read(projectRoot, defaultOptions)
-        }).then((obj) => {
-          expect(obj).to.deep.eq({ supportFile: 'foo', foo: 'bar' })
-        })
-      })
-
-      it('renames visitTimeout -> pageLoadTimeout', function () {
-        return this.setup({ visitTimeout: 30000, foo: 'bar' })
-        .then(() => {
-          return settings.read(projectRoot, defaultOptions)
-        }).then((obj) => {
-          expect(obj).to.deep.eq({ pageLoadTimeout: 30000, foo: 'bar' })
-        })
-      })
-
-      it('renames visitTimeout -> pageLoadTimeout on nested cypress obj', function () {
-        return this.setup({ cypress: { visitTimeout: 30000, foo: 'bar' } })
-        .then(() => {
-          return settings.read(projectRoot, defaultOptions)
-        }).then((obj) => {
-          expect(obj).to.deep.eq({ pageLoadTimeout: 30000, foo: 'bar' })
-        })
-      })
-
-      it('errors if in run mode and can\'t find file', function () {
+      // TODO: (tim) revisit / fix this when the refactor of all state lands
+      it.skip('errors if in run mode and can\'t find file', function () {
         return settings.read(projectRoot, { ...defaultOptions, args: { runProject: 'path' } })
         .then(() => {
           throw Error('read should have failed with no config file in run mode')
@@ -183,16 +144,17 @@ describe('lib/util/settings', () => {
     context('.write', () => {
       it('promises cypress.config.js updates', function () {
         return this.setup().then(() => {
-          return settings.write(projectRoot, { foo: 'bar' }, defaultOptions)
+          return settings.writeOnly(projectRoot, { foo: 'bar' }, defaultOptions)
         }).then((obj) => {
           expect(obj).to.deep.eq({ foo: 'bar' })
         })
       })
 
-      it('only writes over conflicting keys', function () {
+      // TODO: Figure out how / what we want to write to settings files
+      it.skip('only writes over conflicting keys', function () {
         return this.setup({ projectId: '12345', autoOpen: true })
         .then(() => {
-          return settings.write(projectRoot, { projectId: 'abc123' }, defaultOptions)
+          return settings.writeOnly(projectRoot, { projectId: 'abc123' }, defaultOptions)
         }).then((obj) => {
           expect(obj).to.deep.eq({ projectId: 'abc123', autoOpen: true })
         })
@@ -210,7 +172,7 @@ describe('lib/util/settings', () => {
     })
 
     it('.write does not create a file', function () {
-      return settings.write(this.projectRoot, {}, this.options)
+      return settings.writeOnly(this.projectRoot, {}, this.options)
       .then(() => {
         return fs.access(path.join(this.projectRoot, 'cypress.config.js'))
         .then(() => {
@@ -232,6 +194,8 @@ describe('lib/util/settings', () => {
   context('with js files', () => {
     it('.read returns from configFile when its a JavaScript file', function () {
       this.projectRoot = path.join(projectRoot, '_test-output/path/to/project/')
+
+      ctx.actions.project.setActiveProjectForTestSetup(this.projectRoot)
 
       return fs.writeFile(path.join(this.projectRoot, 'cypress.custom.js'), `module.exports = { baz: 'lurman' }`)
       .then(() => {

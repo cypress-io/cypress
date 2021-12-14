@@ -1,9 +1,9 @@
 <template>
   <span
-    class="border-cool-gray-300 grid-flow-col grid items-center justify-between gap-6px rounded-sm border-1 text-sm text-center w-min cursor-default select-none px-8px"
+    class="rounded cursor-default border-gray-100 border-1 text-sm text-center grid-flow-col grid px-8px leading-22px gap-4px items-center justify-between select-none"
     :class="classes"
   >
-    <i-mdi-circle
+    <i-cy-dot-outline-small
       class="h-8px w-8px"
       :class="classes"
     />
@@ -17,10 +17,10 @@ import { computed } from 'vue'
 export type StatusIndicatorType = 'success' | 'warning' | 'error' | 'disabled'
 
 const typeClasses: Record<StatusIndicatorType, string> = {
-  success: 'text-jade-600',
-  error: 'text-red-600',
-  warning: 'text-amber-600',
-  disabled: 'text-cool-gray-400',
+  success: 'text-jade-500 icon-light-jade-500 icon-dark-jade-500 font-medium',
+  error: 'text-red-500 icon-light-red-500 icon-dark-red-500',
+  warning: 'text-warning-500 icon-light-warning-500 icon-dark-warning-500',
+  disabled: 'text-gray-500 icon-light-gray-50 icon-dark-gray-200',
 }
 
 const props = defineProps<{

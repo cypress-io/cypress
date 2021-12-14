@@ -21,6 +21,13 @@ export const CODE_GEN_FRAMEWORKS = ['react', 'vue'] as const
 
 export type CodeGenFramework = typeof CODE_GEN_FRAMEWORKS[number]
 
+export const FRONTEND_FRAMEWORK_CATEGORIES = ['react', 'vue', 'other'] as const
+
+export const STORYBOOK_DEPS = [
+  '@storybook/testing-react',
+  '@storybook/testing-vue3',
+] as const
+
 export const FRONTEND_FRAMEWORKS = [
   {
     type: 'cra',
@@ -29,7 +36,9 @@ export const FRONTEND_FRAMEWORKS = [
     package: '@cypress/react',
     glob: '**/*.{jsx,tsx}',
     deps: ['react-scripts', 'react', 'react-dom'],
+    category: FRONTEND_FRAMEWORK_CATEGORIES[0],
     codeGenFramework: CODE_GEN_FRAMEWORKS[0],
+    storybookDep: STORYBOOK_DEPS[0],
   },
   {
     type: 'vuecli',
@@ -38,7 +47,9 @@ export const FRONTEND_FRAMEWORKS = [
     package: '@cypress/vue',
     glob: '**/*.vue',
     deps: ['@vue/cli-service', 'vue'],
+    category: FRONTEND_FRAMEWORK_CATEGORIES[1],
     codeGenFramework: CODE_GEN_FRAMEWORKS[1],
+    storybookDep: STORYBOOK_DEPS[1],
   },
   {
     type: 'react',
@@ -47,7 +58,9 @@ export const FRONTEND_FRAMEWORKS = [
     package: '@cypress/react',
     glob: '**/*.{jsx,tsx}',
     deps: ['react', 'react-dom'],
+    category: FRONTEND_FRAMEWORK_CATEGORIES[0],
     codeGenFramework: CODE_GEN_FRAMEWORKS[0],
+    storybookDep: STORYBOOK_DEPS[0],
   },
   {
     type: 'vue',
@@ -56,7 +69,9 @@ export const FRONTEND_FRAMEWORKS = [
     package: '@cypress/vue',
     glob: '**/*.vue',
     deps: ['vue'],
+    category: FRONTEND_FRAMEWORK_CATEGORIES[1],
     codeGenFramework: CODE_GEN_FRAMEWORKS[1],
+    storybookDep: STORYBOOK_DEPS[1],
   },
   {
     type: 'nextjs',
@@ -65,7 +80,9 @@ export const FRONTEND_FRAMEWORKS = [
     package: '@cypress/react',
     glob: '**/*.{jsx,tsx}',
     deps: ['next', 'react', 'react-dom'],
+    category: FRONTEND_FRAMEWORK_CATEGORIES[0],
     codeGenFramework: CODE_GEN_FRAMEWORKS[0],
+    storybookDep: STORYBOOK_DEPS[0],
   },
   {
     type: 'nuxtjs',
@@ -74,25 +91,13 @@ export const FRONTEND_FRAMEWORKS = [
     package: '@cypress/vue',
     glob: '**/*.vue',
     deps: ['nuxt'],
+    category: FRONTEND_FRAMEWORK_CATEGORIES[1],
     codeGenFramework: CODE_GEN_FRAMEWORKS[1],
+    storybookDep: STORYBOOK_DEPS[1],
   },
 ] as const
 
 export type FrontendFramework = typeof FRONTEND_FRAMEWORKS[number]
-
-export const TESTING_TYPES = [
-  {
-    type: 'e2e',
-    title: 'E2E Testing',
-    description: 'Click here to configure end-to-end testing with Cypress.',
-  }, {
-    type: 'component',
-    title: 'Component Testing',
-    description: 'Click here to configure Component Testing with your choice of framework and dev server.',
-  },
-] as const
-
-export type TestingType = typeof TESTING_TYPES[number]
 
 export const CODE_LANGUAGES = [
   {
@@ -106,29 +111,6 @@ export const CODE_LANGUAGES = [
 ] as const
 
 export type CodeLanguage = typeof CODE_LANGUAGES[number]
-
-export const NAV_ITEMS = [
-  {
-    type: 'projectSetup',
-    name: 'Project Setup',
-    iconPath: 'clarity/dashboard-line',
-  },
-  {
-    type: 'runs',
-    name: 'Runs',
-    iconPath: 'clarity/bullet-list-line',
-  },
-  {
-    type: 'learn',
-    name: 'Learn',
-    iconPath: 'clarity/terminal-line',
-  },
-  {
-    type: 'settings',
-    name: 'Settings',
-    iconPath: 'clarity/settings-line',
-  },
-] as const
 
 export const WIZARD_STEPS = [
   {
@@ -163,7 +145,7 @@ export const WIZARD_STEPS = [
   },
 ] as const
 
-export type AllPackages = FrontendFramework['package'] | Bundler['package']
+export type AllPackages = FrontendFramework['package'] | Bundler['package'] | typeof STORYBOOK_DEPS[number]
 
 export type AllPackageTypes = FrontendFramework['type'] | Bundler['type']
 
@@ -172,5 +154,6 @@ export const PACKAGES_DESCRIPTIONS: Record<AllPackages, string> = {
   '@cypress/react': 'Allows Cypress to mount each React component using <span class="text-purple-400">cy.mount()</span>',
   '@cypress/webpack-dev-server': 'Allows Cypress to use your existing build configuration in order to bundle and run your tests',
   '@cypress/vite-dev-server': 'Allows Cypress to use your existing build configuration in order to bundle and run your tests',
-  // '@cypress/storybook': 'Allows Cypress to automatically read and test each of your stories',
+  '@storybook/testing-react': 'Testing utilities that allow you to reuse your stories in your unit tests',
+  '@storybook/testing-vue3': 'Testing utilities that allow you to reuse your stories in your unit tests',
 } as const

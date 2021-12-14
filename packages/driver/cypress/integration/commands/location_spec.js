@@ -1,3 +1,4 @@
+const { assertLogLength } = require('../../support/utils')
 const { _ } = Cypress
 
 describe('src/cy/commands/location', () => {
@@ -99,7 +100,7 @@ describe('src/cy/commands/location', () => {
 
       it('does not log an additional log on failure', function (done) {
         cy.on('fail', () => {
-          expect(this.logs.length).to.eq(2)
+          assertLogLength(this.logs, 2)
 
           done()
         })
@@ -249,7 +250,7 @@ describe('src/cy/commands/location', () => {
 
       it('does not log an additional log on failure', function (done) {
         cy.on('fail', () => {
-          expect(this.logs.length).to.eq(2)
+          assertLogLength(this.logs, 2)
 
           done()
         })
@@ -441,7 +442,7 @@ describe('src/cy/commands/location', () => {
         })
 
         cy.on('fail', () => {
-          expect(this.logs.length).to.eq(2)
+          assertLogLength(this.logs, 2)
 
           done()
         })

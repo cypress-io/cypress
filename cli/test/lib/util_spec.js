@@ -30,7 +30,7 @@ describe('util', () => {
   })
 
   context('.getGitHubIssueUrl', () => {
-    it('returls url for issue number', () => {
+    it('returns url for issue number', () => {
       const url = util.getGitHubIssueUrl(4034)
 
       expect(url).to.equal('https://github.com/cypress-io/cypress/issues/4034')

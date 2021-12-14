@@ -20,8 +20,8 @@
     "watch": "yarn build --watch"
   },
   "dependencies": {
-    "bluebird": "^3.7.1",
-    "debug": "4.3.2",
+    "bluebird": "3.7.1",
+    "debug": "^4.3.2",
     "lodash": "^4.17.20"
   },
   "devDependencies": {
@@ -29,6 +29,7 @@
     "@babel/plugin-proposal-nullish-coalescing-operator": "7.8.3",
     "@babel/preset-env": "^7.0.0",
     "@fellow/eslint-plugin-coffee": "0.4.13",
+    "@types/mocha": "9.0.0",
     "@types/webpack": "^4.41.12",
     "@typescript-eslint/eslint-plugin": "^4.18.0",
     "@typescript-eslint/parser": "^4.18.0",
@@ -52,13 +53,13 @@
     "react": "16.13.1",
     "react-dom": "16.13.1",
     "react-scripts": "3.2",
-    "semantic-release": "17.0.4",
+    "semantic-release": "17.2.3",
     "shx": "0.3.3",
     "sinon": "^9.0.0",
     "sinon-chai": "^3.5.0",
     "snap-shot-it": "7.9.2",
     "ts-node": "^10.2.1",
-    "webpack": "^4.41.12"
+    "webpack": "^4.44.2"
   },
   "peerDependencies": {
     "@babel/core": "^7.0.1",

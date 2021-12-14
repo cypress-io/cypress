@@ -1,6 +1,6 @@
 .reporter {
   .hooks-container {
-    margin: 5px 0 5px 5px;
+    margin: 5px 0 5px 9px;
     padding-left: 10px;
     border-left: 1px dotted $gray-900;
 
@@ -22,6 +22,7 @@
         }
 
         .hook-open-in-ide {
+          cursor: pointer;
           display: block;
         }
       }
@@ -45,7 +46,7 @@
       }
 
       .hook-failed-message {
-        color: $red-600;
+        color: $red-400;
         display: none;
       }
 
@@ -53,18 +54,20 @@
         align-items: center;
         color: $gray-400;
         display: none;
-        padding: 4px 10px;
+        padding: 4px;
 
         &:hover, &:focus {
           background-color: rgba($gray-700, 0.2);
           outline: none;
           text-decoration: none;
         }
-      }
-    }
 
-    i {
-      margin-right: 3px;
+        svg {
+          path:nth-child(2) {
+            fill: $gray-800;
+          }
+        }
+      }
     }
 
     .hook-failed .hook-failed-message {

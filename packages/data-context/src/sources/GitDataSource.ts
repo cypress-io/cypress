@@ -9,6 +9,7 @@ import type { DataContext } from '..'
 // eg '2021-09-14 13:43:19 +1000 2 days ago Lachlan Miller
 const GIT_LOG_REGEXP = /(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} [-+].+?)\s(.+ago)\s(.*)/
 const GIT_LOG_COMMAND = `git log -1 --pretty="format:%ci %ar %an"`
+const GIT_BRANCH_COMMAND = 'git rev-parse --abbrev-ref HEAD'
 
 export interface GitInfo {
   author: string | null
@@ -68,7 +69,7 @@ export class GitDataSource {
       // file is not under source control
       // ... etc ...
       // just return an empty map
-      return []
+      return new Array(absolutePaths.length).fill(null)
     }
   }
 
@@ -116,5 +117,21 @@ export class GitDataSource {
     }
 
     return stdout
+  }
+
+  public async getBranch (absolutePath: string) {
+    try {
+      const { stdout, exitCode = 0 } = await execa(GIT_BRANCH_COMMAND, { shell: true, cwd: absolutePath })
+
+      this.ctx.debug('executing command `%s`:', GIT_BRANCH_COMMAND)
+      this.ctx.debug('stdout for git branch', stdout)
+      this.ctx.debug('exitCode for git branch', exitCode)
+
+      return exitCode === 0 ? stdout.trim() : null
+    } catch (e) {
+      this.ctx.debug('Error getting git branch: %s', (e as Error).message)
+
+      return null
+    }
   }
 }

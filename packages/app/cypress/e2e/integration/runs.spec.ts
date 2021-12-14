@@ -1,8 +1,8 @@
-describe('App', () => {
+describe('App: Runs Page', () => {
   beforeEach(() => {
-    cy.setupE2E('component-tests')
-
-    cy.initializeApp()
+    cy.scaffoldProject('component-tests')
+    cy.openProject('component-tests')
+    cy.startAppServer()
   })
 
   it('resolves the runs page', () => {
@@ -55,14 +55,32 @@ describe('App', () => {
   })
 
   it('when no project Id in the config file, shows call to action', () => {
-    cy.loginUser()
-    cy.visitApp()
     cy.withCtx(async (ctx) => {
-      ctx.config.cleanupCachedConfigForActiveProject()
+      if (ctx.currentProject) {
+        ctx.currentProject.configChildProcess?.process.kill()
+        ctx.currentProject.config = null
+        ctx.currentProject.configChildProcess = null
+      }
+
       await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {}')
     })
 
+    cy.loginUser()
+    cy.visitApp()
+
     cy.get('[href="#/runs"]').click()
     cy.contains('Connect your project').should('exist')
+  })
+
+  it('if logged in and connected', { viewportWidth: 1200 }, () => {
+    cy.loginUser()
+    cy.visitApp()
+    cy.intercept('mutation-ExternalLink_OpenExternal', { 'data': { 'openExternal': true } }).as('OpenExternal')
+
+    cy.get('[href="#/runs"]').click()
+    cy.contains('a', 'OVERLIMIT').click()
+    cy.wait('@OpenExternal')
+    .its('request.body.variables.url')
+    .should('equal', 'http://dummy.cypress.io/runs/4')
   })
 })

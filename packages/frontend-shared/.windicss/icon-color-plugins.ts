@@ -18,12 +18,14 @@ interface RuleConfig {
 
 const makeRuleForClass = ({ name, theme, weight, color }: RuleConfig) => {
   const resolvedColor = color ? color : weight ? theme?.(`colors.${name}.${weight}`) : theme?.(`colors.${name}`)
-  let [lightKey, darkKey] = [`.icon-light-${name}`, `.icon-dark-${name}`]
+  let [lightKey, darkKey, secondaryLightKey, secondaryDarkKey] = [`.icon-light-${name}`, `.icon-dark-${name}`, `.icon-light-secondary-${name}`, `.icon-dark-secondary-${name}`]
 
   // transparent, black, and white
   if (weight) {
     lightKey += `-${weight}`
     darkKey += `-${weight}`
+    secondaryLightKey += `-${weight}`
+    secondaryDarkKey += `-${weight}`
   }
 
   return {
@@ -40,18 +42,49 @@ const makeRuleForClass = ({ name, theme, weight, color }: RuleConfig) => {
       '> *[fill][stroke].icon-light-fill': {
         fill: resolvedColor,
       },
+      '> *[fill][stroke].icon-light-stroke': {
+        stroke: resolvedColor,
+      },
     },
-    [darkKey]: {
-      '> *[fill].icon-dark-fill': {
+    [secondaryLightKey]: {
+      '> *[fill].icon-light-secondary': {
         fill: resolvedColor,
       },
+      '> *[stroke].icon-light-secondary': {
+        stroke: resolvedColor,
+      },
+      '> *[fill][stroke].icon-light-secondary-fill': {
+        fill: resolvedColor,
+      },
+      '> *[fill][stroke].icon-light-secondary-stroke': {
+        stroke: resolvedColor,
+      },
+    },
+    [darkKey]: {
       '> *[fill].icon-dark': {
         fill: resolvedColor,
       },
       '> *[stroke].icon-dark': {
         stroke: resolvedColor,
       },
+      '> *[fill][stroke].icon-dark-fill': {
+        fill: resolvedColor,
+      },
       '> *[fill][stroke].icon-dark-stroke': {
+        stroke: resolvedColor,
+      },
+    },
+    [secondaryDarkKey]: {
+      '> *[fill].icon-dark-secondary': {
+        fill: resolvedColor,
+      },
+      '> *[stroke].icon-dark-secondary': {
+        stroke: resolvedColor,
+      },
+      '> *[fill][stroke].icon-dark-secondary-fill': {
+        fill: resolvedColor,
+      },
+      '> *[fill][stroke].icon-dark-secondary-stroke': {
         stroke: resolvedColor,
       },
     },

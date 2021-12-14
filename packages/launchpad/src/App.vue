@@ -5,7 +5,6 @@
   <div
     v-else
     class="h-full mx-auto bg-white"
-    @click="handleLinkTargetBlank"
   >
     <Main />
   </div>
@@ -20,9 +19,7 @@ import { AppQueryDocument, App_DevRelaunchDocument } from './generated/graphql'
 
 gql`
 query AppQuery {
-  app {
-    __typename
-  }
+  __typename
   dev {
     needsRelaunch
   }
@@ -65,31 +62,27 @@ let isShowingRelaunch = ref(false)
 const toast = useToast()
 
 watch(query.data, () => {
-  if (query.data.value?.dev.needsRelaunch && !isShowingRelaunch.value) {
-    isShowingRelaunch.value = true
-    toast.info('Server updated, click to relaunch', {
-      timeout: false,
-      onClick: () => {
-        relaunchMutation.executeMutation({ action: 'trigger' })
-      },
-      onClose: () => {
-        isShowingRelaunch.value = false
-        relaunchMutation.executeMutation({ action: 'dismiss' })
-      },
-    })
+  if (process.env.NODE_ENV !== 'production') {
+    if (query.data.value?.dev.needsRelaunch && !isShowingRelaunch.value) {
+      isShowingRelaunch.value = true
+      toast.info('Server updated, click to relaunch', {
+        timeout: false,
+        onClick: () => {
+          relaunchMutation.executeMutation({ action: 'trigger' })
+        },
+        onClose: () => {
+          isShowingRelaunch.value = false
+          relaunchMutation.executeMutation({ action: 'dismiss' })
+        },
+      })
+    }
   }
 })
 
 interval = window.setInterval(poll, 200)
 
-const backendInitialized = computed(() => !!query.data?.value?.app)
+const backendInitialized = computed(() => !!query.data?.value?.__typename)
 
-const handleLinkTargetBlank = (event) => {
-  if (event.target.href && event.target.target === '_blank') {
-    event.preventDefault()
-    // TODO - use a mutation to open these links in the default user browser
-  }
-}
 </script>
 
 <style lang="scss">

@@ -54,6 +54,11 @@ shikiWrapperClasses computed property.
       @click="copyOnClick ? () => copyCode() : () => {}"
       v-html="highlightedCode"
     />
+    <pre
+      v-else
+      class="overflow-scroll border rounded border-gray-100 text-14px leading-24px font-light py-8px"
+      :class="[props.class, lineNumbers ? 'pl-56px' : 'pl-8px' ]"
+    >{{ code }}</pre>
     <CopyButton
       v-if="copyButton"
       variant="outline"
@@ -66,7 +71,7 @@ shikiWrapperClasses computed property.
 </template>
 
 <script lang="ts">
-import { Highlighter, getHighlighter, setOnigasmWASM, setCDN, Lang } from 'shiki'
+import { Highlighter, getHighlighter, setOnigasmWASM, setCDN } from 'shiki'
 import onigasm from 'onigasm/lib/onigasm.wasm?url'
 
 setOnigasmWASM(onigasm)
@@ -97,11 +102,9 @@ export { highlighter, inheritAttrs }
 </script>
 
 <script lang="ts" setup>
-import { computed, onBeforeMount, ref } from 'vue'
-import CopyButton from '@cy/components/CopyButton.vue'
-// eslint-disable-next-line no-duplicate-imports
-import type { Ref } from 'vue'
+import { computed, onBeforeMount, Ref, ref } from 'vue'
 import { useClipboard } from '@vueuse/core'
+import CopyButton from './CopyButton.vue'
 
 const highlighterInitialized = ref(false)
 
@@ -124,7 +127,7 @@ const props = withDefaults(defineProps<{
   inline: false,
   wrap: false,
   copyOnClick: false,
-  noCopyBotton: false,
+  copyButton: false,
   class: undefined,
 })
 
@@ -165,7 +168,7 @@ avoid colliding with styles elsewhere in the document.
 
 <style lang="scss" scoped>
 
-$offset: 1em;
+$offset: 1.1em;
 
 .inline:deep(.shiki) {
   @apply py-1 px-2 bg-gray-50 text-gray-500 inline-block;
@@ -173,7 +176,7 @@ $offset: 1em;
 
 .shiki-wrapper {
   &:deep(.shiki) {
-    @apply min-w-max border-r-10px border-r-transparent py-8px;
+    @apply min-w-max border-r-10px border-r-transparent;
   }
 
   &.wrap:deep(.line) {
@@ -181,6 +184,7 @@ $offset: 1em;
   }
 
   &.line-numbers:deep(.shiki) {
+    @apply py-8px;
     code {
       counter-reset: step;
       counter-increment: step 0;
@@ -196,12 +200,19 @@ $offset: 1em;
       // Adding padding to the top and bottom of these children adds unwanted
       // line-height to the line. This doesn't look good when you select the text.
       // To avoid this, we use box-shadows and offset the parent container.
-      .line:first-child::before {
-        box-shadow: 0 (-1 * $offset) theme('colors.gray.50') !important;
+      :not(.line:only-child) {
+        &:first-child:before {
+          box-shadow: 0 (-1 * $offset) theme('colors.gray.50') !important;
+        }
+
+        &:last-child::before {
+          box-shadow: 0 $offset theme('colors.gray.50') !important;
+        }
       }
 
-      .line:last-child::before {
-        box-shadow: 0 $offset theme('colors.gray.50') !important;
+      // If this rule was used for all of them, the gray would overlap between rows.
+      .line:only-child::before {
+        box-shadow: (-1 * $offset) 0 0 $offset theme('colors.gray.50') !important;
       }
     }
   }

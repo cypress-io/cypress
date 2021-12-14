@@ -16,7 +16,7 @@ describe('e2e new project', () => {
       throw new Error('support folder should not exist')
     }).catch(() => {
       return systemTests.exec(this, {
-        project: noScaffoldingPath,
+        project: 'no-scaffolding',
         sanitizeScreenshotDimensions: true,
         snapshot: true,
       })

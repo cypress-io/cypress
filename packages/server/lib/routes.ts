@@ -5,7 +5,6 @@ import { ErrorRequestHandler, Router } from 'express'
 import send from 'send'
 import { getPathToDist } from '@packages/resolve-dist'
 
-import { fs } from './util/fs'
 import type { SpecsStore } from './specs-store'
 import type { Browser } from './browsers/types'
 import type { NetworkProxy } from '@packages/proxy'
@@ -13,12 +12,12 @@ import type { Cfg } from './project-base'
 import xhrs from './controllers/xhrs'
 import { runner, ServeOptions } from './controllers/runner'
 import { iframesController } from './controllers/iframes'
-import type { DataContextShell } from '@packages/data-context/src/DataContextShell'
+import type { DataContext } from '@packages/data-context/src/DataContext'
 
 const debug = Debug('cypress:server:routes')
 
 export interface InitializeRoutes {
-  ctx: DataContextShell
+  ctx: DataContext
   specsStore: SpecsStore
   config: Cfg
   getSpec: () => Cypress.Spec | null
@@ -29,10 +28,6 @@ export interface InitializeRoutes {
   onError: (...args: unknown[]) => any
   testingType: Cypress.TestingType
   exit?: boolean
-}
-
-function replaceBody (ctx: DataContextShell) {
-  return `<body><script>window.__CYPRESS_GRAPHQL_PORT__ = ${JSON.stringify(ctx.gqlServerPort)};</script>\n`
 }
 
 export const createCommonRoutes = ({
@@ -89,31 +84,17 @@ export const createCommonRoutes = ({
     res.json(options)
   })
 
-  if (process.env.CYPRESS_INTERNAL_VITE_APP_PORT) {
+  if (process.env.CYPRESS_INTERNAL_VITE_DEV) {
     const proxy = httpProxy.createProxyServer({
       target: `http://localhost:${process.env.CYPRESS_INTERNAL_VITE_APP_PORT}/`,
     })
 
-    router.get('/__vite__/', (req, res) => {
-      ctx.html.appHtml().then((html) => res.send(html)).catch((e) => res.status(500).send({ stack: e.stack }))
-    })
-
-    // TODO: can namespace this onto a "unified" route like __app-unified__
-    // make sure to update the generated routes inside of vite.config.ts
-    router.get('/__vite__/*', (req, res) => {
-      debug('Proxy to __vite__')
+    router.get('/__cypress/assets/*', (req, res) => {
       proxy.web(req, res, {}, (e) => {})
     })
   } else {
-    router.get('/__vite__/*', (req, res) => {
+    router.get('/__cypress/assets/*', (req, res) => {
       const pathToFile = getPathToDist('app', req.params[0])
-
-      if (req.params[0] === '') {
-        return fs.readFile(pathToFile, 'utf8')
-        .then((file) => {
-          res.send(file.replace('<body>', replaceBody(ctx)))
-        })
-      }
 
       return send(req, pathToFile).pipe(res)
     })
@@ -146,15 +127,32 @@ export const createCommonRoutes = ({
   router.get(clientRoute, (req, res) => {
     debug('Serving Cypress front-end by requested URL:', req.url)
 
-    runner.serve(req, res, testingType === 'e2e' ? 'runner' : 'runner-ct', {
-      config,
-      testingType,
-      getSpec,
-      getCurrentBrowser,
-      getRemoteState,
-      specsStore,
-      exit,
-    })
+    if (process.env.LAUNCHPAD) {
+      ctx.html.appHtml()
+      .then((html) => res.send(html))
+      .catch((e) => res.status(500).send({ stack: e.stack }))
+    } else {
+      runner.serve(req, res, testingType === 'e2e' ? 'runner' : 'runner-ct', {
+        config,
+        testingType,
+        getSpec,
+        getCurrentBrowser,
+        getRemoteState,
+        specsStore,
+        exit,
+      })
+    }
+  })
+
+  // serve static assets from the dist'd Vite app
+  router.get([
+    `${clientRoute}assets/*`,
+    `${clientRoute}shiki/*`,
+  ], (req, res) => {
+    debug('proxying static assets %s, params[0] %s', req.url, req.params[0])
+    const pathToFile = getPathToDist('app', 'assets', req.params[0])
+
+    return send(req, pathToFile).pipe(res)
   })
 
   router.all('*', (req, res) => {

@@ -3,11 +3,11 @@ import { createPinia as _createPinia } from 'pinia'
 // Pinia client-side storage
 export * from './main-store'
 
-export * from './modals'
-
 export * from './specs-store'
 
 export * from './aut-store'
+
+export * from './runner-ui-store'
 
 // Mobx Store Wrapper from @packages/runner-shared
 export * from './mobx-runner-store'

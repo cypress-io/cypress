@@ -15,12 +15,14 @@
 import { onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import type { SpecRunnerFragment } from '../generated/graphql'
-import { UnifiedRunnerAPI } from '../runner'
+import { getAutIframeModel, UnifiedRunnerAPI } from '../runner'
 import { useSpecStore } from '../store'
+import { useSelectorPlaygroundStore } from '../store/selector-playground-store'
 import SpecRunner from './SpecRunner.vue'
 
 const initialized = ref(false)
 const specStore = useSpecStore()
+const selectorPlaygroundStore = useSelectorPlaygroundStore()
 const route = useRoute()
 
 onMounted(async () => {
@@ -33,7 +35,15 @@ const props = defineProps<{
 }>()
 
 watch(() => route.query.file, (queryParam) => {
-  const spec = props.gql.activeProject?.specs?.edges.find((x) => x.node.relative === queryParam)?.node
+  const spec = props.gql.currentProject?.specs?.edges.find((x) => x.node.relative === queryParam)?.node
+
+  if (selectorPlaygroundStore.show) {
+    const autIframe = getAutIframeModel()
+
+    autIframe.toggleSelectorPlayground(false)
+    selectorPlaygroundStore.setEnabled(false)
+    selectorPlaygroundStore.setShow(false)
+  }
 
   specStore.setActiveSpec(spec ?? null)
 }, { immediate: true, flush: 'post' })

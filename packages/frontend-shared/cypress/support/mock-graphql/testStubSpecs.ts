@@ -1,8 +1,7 @@
 import * as JustMyLuck from 'just-my-luck'
 import faker from 'faker'
-import { template, keys, reduce, templateSettings } from 'lodash'
+import { template, keys, reduce, templateSettings, TemplateExecutor } from 'lodash'
 import combineProperties from 'combine-properties'
-import type { FoundSpec } from '@packages/types'
 
 templateSettings.interpolate = /{{([\s\S]+?)}}/g
 
@@ -88,11 +87,17 @@ const nameTemplates = {
   medium1: template(`{{prefix}}{{modifier}}{{component}}`),
   medium2: template(`{{prefix}}{{component}}{{component2}}`),
   short: template(`{{prefix}}{{component}}`),
-}
+} as const
 
 const prefixes = ['I', 'V', 'Cy', null]
 
-export const componentNameGenerator = (options: { template: any, omit?: any, overrides?: any } = { template: nameTemplates.medium1, omit: [], overrides: {} }) => {
+interface ComponentNameGeneratorOptions {
+  template: TemplateExecutor
+  omit?: string[]
+  overrides?: object
+}
+
+export const componentNameGenerator = (options: ComponentNameGeneratorOptions = { template: nameTemplates.medium1, omit: [], overrides: {} }) => {
   const withoutValues = reduce(options.omit, (acc, v) => {
     acc[v] = null
 
@@ -126,29 +131,28 @@ const allRandomComponents = combineProperties({
   directory: keys(directories),
 })
 
-export const randomComponents = (n = 200): FoundSpec[] => {
+export const randomComponents = <T extends 'Spec' | 'FileParts'>(n = 200, baseTypename: T) => {
   return faker.random.arrayElements(allRandomComponents, n).map((d: ReturnType<typeof combineProperties>) => {
     const componentName = componentNameGenerator({
       overrides: d,
-      template: faker.random.objectElement(nameTemplates),
+      template: faker.random.objectElement<TemplateExecutor>(nameTemplates),
     })
 
     const name = `${componentName}${d.specPattern}${d.fileExtension}`
 
     return {
+      id: faker.datatype.uuid(),
       baseName: componentName,
       relative: `${directories[d.directory](d)}/${name}`,
       absolute: `${faker.system.directoryPath()}/${directories[d.directory](d)}/${name}`,
       name: `${componentName}${d.specPattern}`,
       specFileExtension: `${d.specPattern}${d.fileExtension}`,
       fileExtension: d.fileExtension,
-      specType: 'component',
+      specType: 'component' as const,
       fileName: componentName,
-      __typename: 'Spec',
-
-      id: faker.datatype.uuid(),
+      __typename: baseTypename,
       gitInfo: {
-        __typename: 'GitInfo',
+        __typename: 'GitInfo' as const,
         id: faker.datatype.uuid(),
         author: faker.internet.userName(),
         lastModifiedTimestamp: new Date(faker.random.arrayElement([

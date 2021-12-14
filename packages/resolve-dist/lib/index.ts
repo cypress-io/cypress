@@ -20,12 +20,12 @@ export const getPathToIndex = (pkg: RunnerPkg) => {
   return getPathToDist(pkg, 'index.html')
 }
 
-export const getPathToDesktopIndex = (pkg: 'desktop-gui' | 'launchpad', graphqlPort?: number) => {
-  // For now, if we see that there's a CYPRESS_INTERNAL_VITE_LAUNCHPAD_PORT
+export const getPathToDesktopIndex = (graphqlPort: number) => {
+  // For now, if we see that there's a CYPRESS_INTERNAL_VITE_DEV
   // we assume we're running Cypress targeting that (dev server)
-  if (pkg === 'launchpad' && process.env.CYPRESS_INTERNAL_VITE_LAUNCHPAD_PORT) {
+  if (process.env.CYPRESS_INTERNAL_VITE_DEV) {
     return `http://localhost:${process.env.CYPRESS_INTERNAL_VITE_LAUNCHPAD_PORT}?gqlPort=${graphqlPort}`
   }
 
-  return `file://${path.join(__dirname, '..', '..', pkg, 'dist', 'index.html')}?gqlPort=${graphqlPort}`
+  return `file://${path.join(__dirname, '..', '..', 'launchpad', 'dist', 'index.html')}?gqlPort=${graphqlPort}`
 }

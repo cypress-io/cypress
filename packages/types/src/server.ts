@@ -1,5 +1,4 @@
-import type { DataContext } from '@packages/data-context'
-import type { Browser, FoundBrowser } from './browser'
+import type { FoundBrowser } from './browser'
 import type { PlatformName } from './platform'
 
 export interface LaunchOpts {
@@ -21,7 +20,7 @@ export interface LaunchArgs {
   _: [string] // Cypress App binary location
   config: Record<string, unknown>
   cwd: string
-  browser: Browser
+  browser?: string
   configFile?: string
   // Global mode is triggered by CLI via `--global` or when there is no `projectRoot` (essentially when the Cypress Config file can't be found)
   global: boolean
@@ -56,13 +55,12 @@ export interface AutomationMiddleware {
 type WebSocketOptionsCallback = (...args: any[]) => any
 
 export interface OpenProjectLaunchOptions {
-  ctx?: DataContext
   args?: LaunchArgs
   /**
    * Whether to skip the plugin initialization, useful when
    * we're using Cypress to test Cypress
    */
-  skipPluginIntializeForTesting?: boolean
+  skipPluginInitializeForTesting?: boolean
 
   configFile?: string | false
   browsers?: Cypress.Browser[]

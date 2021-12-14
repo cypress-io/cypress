@@ -12,15 +12,16 @@
       <li
         v-for="item in list.children"
         :key="item.text"
-        class="flex items-center text-indigo-500 mb-4px"
+        class="flex mb-4px text-indigo-500 items-center"
       >
         <i-cy-book_x16 class="icon-dark-indigo-500 icon-light-indigo-50" />
-        <a
-          v-if="!item.changeContent || !activeProjectExists"
+        <ExternalLink
+          v-if="!item.changeContent || !currentProjectExists"
           :href="getUrl(item.link)"
-          target="_blank"
-          class="font-normal ml-4px whitespace-nowrap hocus-link-default"
-        >{{ item.text }}</a>
+          class="font-normal ml-4px whitespace-nowrap"
+        >
+          {{ item.text }}
+        </ExternalLink>
         <button
           v-else
           class="font-normal ml-4px whitespace-nowrap hocus-link-default"
@@ -37,6 +38,8 @@
 import Button from '@cy/components/Button.vue'
 import { useI18n } from '@cy/i18n'
 import { getUrlWithParams, LinkWithParams } from '../../utils/getUrlWithParams'
+import ExternalLink from '../ExternalLink.vue'
+
 const { t } = useI18n()
 
 export type DocsMenuVariant = 'ci1' | 'orchestration1' | 'main'
@@ -46,7 +49,7 @@ const emit = defineEmits<{
 }>()
 
 defineProps<{
-  activeProjectExists: boolean,
+  currentProjectExists: boolean,
 }>()
 
 const utm_medium = 'Docs Menu'
@@ -90,7 +93,7 @@ const docsMenu: {
   {
     text: t('topNav.docsMenu.organizingTests'),
     link: {
-      url: 'https://docs.cypress.io/guides/core-concepts/writing-and-organizing-tests',
+      url: 'https://on.cypress.io/writing-and-organizing-tests',
       params: {
         utm_medium,
         utm_content: 'Organizing Tests',

@@ -1,6 +1,6 @@
 require('../../spec_helper')
 
-const { apiRoutes, onRoutes } = require(`${root}../lib/util/routes`)
+const { apiRoutes } = require(`../../../lib/util/routes`)
 
 describe('lib/util/routes', () => {
   describe('api routes', () => {
@@ -40,18 +40,8 @@ describe('lib/util/routes', () => {
       expect(apiRoutes.project('123-foo')).to.eq('http://localhost:1234/projects/123-foo')
     })
 
-    it('projectRuns', () => {
-      expect(apiRoutes.projectRuns('123-foo')).to.eq('http://localhost:1234/projects/123-foo/runs')
-    })
-
     it('exceptions', () => {
       expect(apiRoutes.exceptions()).to.eq('http://localhost:1234/exceptions')
-    })
-  })
-
-  describe('on routes', () => {
-    it('releaseNotes', () => {
-      expect(onRoutes.releaseNotes('1.2.3')).to.eq('http://localhost:8080/release-notes/1.2.3')
     })
   })
 })

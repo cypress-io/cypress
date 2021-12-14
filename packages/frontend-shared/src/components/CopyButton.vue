@@ -1,6 +1,6 @@
 <template>
   <Button
-    size="md"
+    :size="size"
     :variant="variant"
     @click="copyToClipboard"
   >
@@ -9,7 +9,11 @@
       #prefix
     >
       <i-cy-copy-clipboard_x16
-        class="icon-dark-indigo-500 w-16px h-16px"
+        class="w-16px h-16px"
+        :class="{
+          'icon-dark-indigo-500': variant === 'tertiary',
+          'icon-dark-gray-500': variant === 'outline'
+        }"
       />
     </template>
     <TransitionQuickFade mode="out-in">
@@ -22,16 +26,18 @@
 <script setup lang="ts">
 import { useClipboard } from '@vueuse/core'
 import { useI18n } from '@cy/i18n'
-import Button, { ButtonVariants } from '../components/Button.vue'
+import Button, { ButtonSizes, ButtonVariants } from '../components/Button.vue'
 import TransitionQuickFade from '../components/transitions/TransitionQuickFade.vue'
 
 const props = withDefaults(defineProps<{
   text: string,
   noIcon?: boolean,
   variant?: ButtonVariants,
+  size?: ButtonSizes,
 }>(), {
   noIcon: false,
   variant: 'tertiary',
+  size: 'md',
 })
 
 const { copy, copied } = useClipboard({ copiedDuring: 2000 })

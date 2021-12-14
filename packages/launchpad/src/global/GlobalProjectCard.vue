@@ -73,7 +73,7 @@ mutation GlobalProjectCard_setActiveProject($path: String!) {
 `
 
 gql`
-fragment GlobalProjectCard on Project {
+fragment GlobalProjectCard on GlobalProject {
   id
   title
   projectRoot
@@ -94,7 +94,6 @@ const emit = defineEmits<{
 const props = defineProps<{
   gql: GlobalProjectCardFragment
 }>()
-
 const { t } = useI18n()
 
 type eventName = 'removeProject' | 'openInIDE' | 'openInFinder'

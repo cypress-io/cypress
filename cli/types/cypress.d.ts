@@ -280,7 +280,7 @@ declare namespace Cypress {
      * Currently executing test runnable instance.
      */
     currentTest: {
-      title: string,
+      title: string
       titlePath: string[]
     }
 
@@ -420,9 +420,9 @@ declare namespace Cypress {
      * @see https://on.cypress.io/api/commands
      */
     Commands: {
-      add(name: string, fn: (...args: any[]) => CanReturnChainable): void
-      add(name: string, options: CommandOptions, fn: (...args: any[]) => CanReturnChainable): void
-      overwrite(name: string, fn: (...args: any[]) => CanReturnChainable): void
+      add<T extends keyof Chainable>(name: T, fn: Chainable[T]): void
+      add<T extends keyof Chainable>(name: T, options: CommandOptions, fn: Chainable[T]): void
+      overwrite<T extends keyof Chainable>(name: T, fn: Chainable[T]): void
     }
 
     /**
@@ -2209,12 +2209,9 @@ declare namespace Cypress {
      * @see https://on.cypress.io/writefile
     ```
     cy.writeFile('path/to/message.txt', 'Hello World')
-      .then((text) => {
-        expect(text).to.equal('Hello World') // true
-      })
     ```
      */
-    writeFile<C extends FileContents>(filePath: string, contents: C, encoding: Encodings): Chainable<C>
+    writeFile(filePath: string, contents: FileContents, encoding: Encodings): Chainable<null>
     /**
      * Write to a file with the specified encoding and contents.
      *
@@ -2223,12 +2220,10 @@ declare namespace Cypress {
     cy.writeFile('path/to/ascii.txt', 'Hello World', {
       flag: 'a+',
       encoding: 'ascii'
-    }).then((text) => {
-      expect(text).to.equal('Hello World') // true
     })
     ```
      */
-    writeFile<C extends FileContents>(filePath: string, contents: C, options?: Partial<WriteFileOptions>): Chainable<C>
+    writeFile(filePath: string, contents: FileContents, options?: Partial<WriteFileOptions & Timeoutable>): Chainable<null>
     /**
      * Write to a file with the specified encoding and contents.
      *
@@ -2238,12 +2233,10 @@ declare namespace Cypress {
     ```
     cy.writeFile('path/to/ascii.txt', 'Hello World', 'utf8', {
       flag: 'a+',
-    }).then((text) => {
-      expect(text).to.equal('Hello World') // true
     })
     ```
      */
-    writeFile<C extends FileContents>(filePath: string, contents: C, encoding: Encodings, options?: Partial<WriteFileOptions>): Chainable<C>
+    writeFile(filePath: string, contents: FileContents, encoding: Encodings, options?: Partial<WriteFileOptions & Timeoutable>): Chainable<null>
 
     /**
      * jQuery library bound to the AUT
@@ -2813,6 +2806,11 @@ declare namespace Cypress {
      * An array of objects defining the certificates
      */
     clientCertificates: ClientCertificate[]
+
+     /**
+     * Handle Cypress plugins
+     */
+    setupNodeEvents: (on: PluginEvents, config: PluginConfigOptions) => Promise<PluginConfigOptions> | PluginConfigOptions
   }
 
   /**
@@ -2895,7 +2893,21 @@ declare namespace Cypress {
    * All configuration items are optional.
    */
   type CoreConfigOptions = Partial<Omit<ResolvedConfigOptions, TestingType>>
-  type ConfigOptions = CoreConfigOptions & { e2e?: CoreConfigOptions, component?: CoreConfigOptions }
+
+  interface ComponentConfigOptions<ComponentDevServerOpts = any> extends CoreConfigOptions {
+    // TODO(tim): Keeping optional until we land the implementation
+    devServer?: (cypressConfig: DevServerConfig, devServerConfig: ComponentDevServerOpts) => ResolvedDevServerConfig | Promise<ResolvedDevServerConfig>
+    devServerConfig?: ComponentDevServerOpts
+  }
+
+  /**
+   * Takes ComponentDevServerOpts to track the signature of the devServerConfig for the provided `devServer`,
+   * so we have proper completion for `devServerConfig`
+   */
+  type ConfigOptions<ComponentDevServerOpts = any> = CoreConfigOptions & {
+    e2e?: CoreConfigOptions,
+    component?: ComponentConfigOptions<ComponentDevServerOpts>
+  }
 
   interface PluginConfigOptions extends ResolvedConfigOptions {
     /**

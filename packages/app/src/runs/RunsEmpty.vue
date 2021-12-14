@@ -30,7 +30,7 @@
         <TerminalPrompt
           class="-ml-16px"
           command="git add cypress.config.js"
-          :project-name="projectName"
+          :project-folder-name="projectName"
         />
       </li>
       <li class="mt-24px">
@@ -39,8 +39,8 @@
         </p>
         <TerminalPrompt
           class="-ml-16px"
-          command="cypress run --record --key <record-key>"
-          :project-name="projectName"
+          :command="recordCommand"
+          :project-folder-name="projectName"
         />
       </li>
     </ol>
@@ -58,10 +58,18 @@ import type { RunsEmptyFragment } from '../generated/graphql'
 const { t } = useI18n()
 
 gql`
-fragment RunsEmpty on Project{
+fragment RunsEmpty on CurrentProject {
+  id
   title
   projectId
   configFilePath
+  cloudProject {
+    id
+    recordKeys {
+      id
+      ...RecordKey
+    }
+  }
 }
 `
 
@@ -77,6 +85,12 @@ const projectIdCode = computed(() => {
 
 const projectName = computed(() => props.gql.title)
 const configFilePath = computed(() => props.gql.configFilePath)
+const firstRecordKey = computed(() => {
+  return props.gql.cloudProject?.recordKeys?.[0]?.key ?? '<record-key>'
+})
+const recordCommand = computed(() => {
+  return `cypress run --record --key ${firstRecordKey.value}`
+})
 </script>
 
 <style scoped lang="scss">

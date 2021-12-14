@@ -100,7 +100,11 @@ export function createCloudProject (config: ConfigFor<CloudProject>) {
         return createCloudRun({
           status,
           totalPassed: i,
-          commitInfo: createCloudRunCommitInfo({ sha: `fake-sha-${getNodeIdx('CloudRun')}`, summary: `fix: make gql work ${status}` }),
+          url: `http://dummy.cypress.io/runs/${i}`,
+          commitInfo: createCloudRunCommitInfo({
+            sha: `fake-sha-${getNodeIdx('CloudRun')}`,
+            summary: `fix: make gql work ${status}`,
+          }),
         })
       })
 
@@ -182,8 +186,8 @@ export const CloudOrganizationStubs = {
 } as const
 
 export const CloudProjectStubs = {
-  e2eProject: createCloudProject({ slug: 'efgh' }),
-  componentProject: createCloudProject({ slug: 'abcd' }),
+  e2eProject: createCloudProject({ slug: 'efgh', name: 'e2e-project' }),
+  componentProject: createCloudProject({ slug: 'abcd', name: 'component-project' }),
 } as const
 
 interface CloudTypesContext {
@@ -203,7 +207,7 @@ export const CloudRunQuery: MaybeResolver<Query> = {
     return CloudProjectStubs.componentProject
   },
   cloudProjectsBySlugs (args: QueryCloudProjectsBySlugsArgs) {
-    return args.slugs.map((s) => projectsBySlug[s] ?? createCloudProject({ slug: s }))
+    return args.slugs.map((s) => projectsBySlug[s] ?? createCloudProject({ slug: s, name: `cloud-project-${s}` }))
   },
   cloudViewer (args, ctx) {
     if (ctx.__server__) {

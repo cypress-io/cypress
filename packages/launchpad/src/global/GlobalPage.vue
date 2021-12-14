@@ -30,6 +30,13 @@
     v-else
     @add-project="handleAddProject"
   />
+
+  <ChooseExternalEditorModal
+    :open="isChooseEditorOpen"
+    :gql="props.gql"
+    @close="isChooseEditorOpen = false"
+    @selected="editorChosen"
+  />
 </template>
 
 <script setup lang="ts">
@@ -39,7 +46,8 @@ import { gql, useMutation } from '@urql/vue'
 import GlobalProjectCard from './GlobalProjectCard.vue'
 import GlobalPageHeader from './GlobalPageHeader.vue'
 import GlobalEmpty from './GlobalEmpty.vue'
-import { GlobalPageFragment, GlobalPage_AddProjectDocument, GlobalPage_RemoveProjectDocument } from '../generated/graphql'
+import { GlobalPageFragment, GlobalPage_AddProjectDocument, GlobalPage_OpenDirectoryInIdeDocument, GlobalPage_RemoveProjectDocument, GlobalProjectCardFragment, GlobalPage_OpenInFinderDocument } from '../generated/graphql'
+import ChooseExternalEditorModal from '@packages/frontend-shared/src/gql-components/ChooseExternalEditorModal.vue'
 
 gql`
 mutation GlobalPage_addProject($path: String!, $open: Boolean = true) {
@@ -48,10 +56,11 @@ mutation GlobalPage_addProject($path: String!, $open: Boolean = true) {
 `
 
 gql`
-fragment GlobalPage on App {
+fragment GlobalPage on Query {
   projects {
     ...GlobalProjectCard
   }
+  ...ChooseExternalEditor
 }
 `
 
@@ -59,20 +68,42 @@ gql`
 mutation GlobalPage_RemoveProject($path: String!) {
   removeProject(path: $path) 
 }
+
+mutation GlobalPage_OpenDirectoryInIDE ($path: String!) {
+  openDirectoryInIDE(path: $path)
+}
+
+mutation GlobalPage_OpenInFinder ($path: String!) {
+  openInFinder(path: $path)
+}
 `
 
 const addProject = useMutation(GlobalPage_AddProjectDocument)
+const openDirectoryInIDE = useMutation(GlobalPage_OpenDirectoryInIdeDocument)
+const openInFinder = useMutation(GlobalPage_OpenInFinderDocument)
 
 function handleAddProject (path: string) {
   addProject.executeMutation({ path })
 }
 
 function handleOpenInFinder (path: string) {
-  // todo - add gql mutation for this action
+  openInFinder.executeMutation({ path })
+}
+
+let projectPathToOpen: string
+
+function editorChosen () {
+  isChooseEditorOpen.value = false
+  openDirectoryInIDE.executeMutation({ path: projectPathToOpen })
 }
 
 function handleOpenInIDE (path: string) {
-  // todo - add gql mutation for this action
+  if (!props.gql.localSettings.preferences.preferredEditorBinary) {
+    projectPathToOpen = path
+    isChooseEditorOpen.value = true
+  } else {
+    openDirectoryInIDE.executeMutation({ path })
+  }
 }
 
 const removeProject = useMutation(GlobalPage_RemoveProjectDocument)
@@ -86,9 +117,10 @@ const props = defineProps<{
 }>()
 
 const filteredProjects = computed(() => {
-  return props.gql.projects.filter((p) => p.title.toLowerCase().indexOf(match.value.toLowerCase()) !== -1)
+  return (props.gql.projects as GlobalProjectCardFragment[]).filter((p) => p.title.toLowerCase().indexOf(match.value.toLowerCase()) !== -1)
 })
 
 const match = ref('')
+const isChooseEditorOpen = ref(false)
 const { t } = useI18n()
 </script>

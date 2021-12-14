@@ -427,7 +427,7 @@ export default function (Commands, Cypress, cy, state, config) {
 
     // if a screenshot has not been taken (by cy.screenshot()) in the test
     // that failed, we can bypass UI-changing and pixel-checking (simple: true)
-    // otheriwse, we need to do all the standard checks
+    // otherwise, we need to do all the standard checks
     // to make sure the UI is in the right place (simple: false)
     screenshotConfig.capture = 'runner'
 

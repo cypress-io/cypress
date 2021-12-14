@@ -1,88 +1,151 @@
 <template>
-  <div class="flex text-xs">
-    <button
-      data-cy="header-studio"
-      :disabled="isDisabled"
-    >
-      Studio
-    </button>
-
-    <button
-      data-cy="header-selector"
-      :disabled="isDisabled"
-    >
-      Selector
-    </button>
-
-    <div
-      v-if="props.gql.activeTestingType === 'e2e'"
-      data-cy="aut-url"
-    >
-      <div
-        class="rounded-md flex shadow-md mx-2 url px-4"
-        :class="{
-          'bg-yellow-50': autStore.isLoadingUrl,
-          'bg-white': !autStore.isLoadingUrl,
-        }"
+  <div>
+    <div class="flex justify-between">
+      <!--
+        TODO: Studio. Out of scope for GA.
+        <button
+        data-cy="header-studio"
+        :disabled="isDisabled"
       >
-        <div>
-          {{ autStore.url }}
+        Studio
+      </button> -->
+
+      <button
+        data-cy="header-selector"
+        :disabled="isDisabled"
+        class="px-8px"
+        @click="togglePlayground"
+      >
+        <Icon
+          height="22px"
+          width="22px"
+          :icon="IconCrosshairsGPS"
+        />
+      </button>
+
+      <div
+        v-if="props.gql.currentTestingType === 'e2e'"
+        data-cy="aut-url"
+      >
+        <div
+          class="flex px-4 mx-2 rounded-md shadow-md url"
+          :class="{
+            'bg-yellow-50': autStore.isLoadingUrl,
+            'bg-white': !autStore.isLoadingUrl,
+          }"
+        >
+          <div>
+            {{ autStore.url }}
+          </div>
         </div>
+
+        <div>Loading URL: {{ autStore.isLoadingUrl }}</div>
       </div>
 
-      <div>Loading URL: {{ autStore.isLoadingUrl }}</div>
+      <Select
+        :model-value="browser"
+        data-cy="select-browser"
+        :options="browsers"
+        item-value="displayName"
+        @update:model-value="changeBrowser"
+      />
     </div>
 
-    <Select
-      v-model="browser"
-      data-cy="select-browser"
-      :options="browsers"
-      item-value="name"
-    />
+    <div
+      v-if="selectorPlaygroundStore.show"
+      class="mt-8px"
+    >
+      <SelectorPlayground
+        :get-aut-iframe="getAutIframe"
+        :event-manager="eventManager"
+      />
+    </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
-import { useAutStore } from '../store'
+import { computed, ref } from 'vue'
+import { useAutStore, useSpecStore } from '../store'
 import Select from '@packages/frontend-shared/src/components/Select.vue'
-import { gql } from '@urql/vue'
-import type { SpecRunnerHeaderFragment } from '../generated/graphql'
+import { gql, useMutation } from '@urql/vue'
+import IconCrosshairsGPS from '~icons/mdi/crosshairs-gps'
+import Icon from '@packages/frontend-shared/src/components/Icon.vue'
+import { SpecRunnerHeaderFragment, SpecRunnerHeader_SetBrowserDocument, SpecRunnerHeader_BrowserFragment } from '../generated/graphql'
+import SelectorPlayground from './selector-playground/SelectorPlayground.vue'
+import { useSelectorPlaygroundStore } from '../store/selector-playground-store'
+import type { EventManager } from './event-manager'
+import type { AutIframe } from './aut-iframe'
 
 gql`
-fragment SpecRunnerHeader on App {
-  activeTestingType
+fragment SpecRunnerHeader on CurrentProject {
+  id
+  currentTestingType
 
-  selectedBrowser {
+  currentBrowser {
     id
     displayName
   }
   browsers {
     id
-    name
-    displayName
+    ...SpecRunnerHeader_Browser
   }
 }
 `
 
+gql`
+fragment SpecRunnerHeader_Browser on Browser {
+  id
+  name
+  displayName
+}
+`
+
+gql`
+mutation SpecRunnerHeader_SetBrowser($browserId: ID!, $specPath: String!) {
+  launchpadSetBrowser(id: $browserId)
+  launchOpenProject(specPath: $specPath)
+}
+`
+
+const setBrowser = useMutation(SpecRunnerHeader_SetBrowserDocument)
+
 const props = defineProps<{
   gql: SpecRunnerHeaderFragment
+  eventManager: EventManager
+  getAutIframe: () => AutIframe
 }>()
 
-const browser = computed(() => {
-  if (!props.gql.selectedBrowser) {
+const autIframe = props.getAutIframe()
+
+const selectorPlaygroundStore = useSelectorPlaygroundStore()
+
+const togglePlayground = () => {
+  if (selectorPlaygroundStore.show) {
+    selectorPlaygroundStore.setShow(false)
+    autIframe.toggleSelectorPlayground(false)
+    selectorPlaygroundStore.setEnabled(false)
+  } else {
+    selectorPlaygroundStore.setShow(true)
+    autIframe.toggleSelectorPlayground(true)
+    selectorPlaygroundStore.setEnabled(true)
+  }
+}
+
+const specStore = useSpecStore()
+
+// Have to spread gql props since binding it to v-model causes error when testing
+const browser = ref({ ...props.gql.currentBrowser })
+const browsers = computed(() => props.gql.browsers?.slice().map((browser) => ({ ...browser })) ?? [])
+
+function changeBrowser (browser: SpecRunnerHeader_BrowserFragment) {
+  const activeSpec = specStore.activeSpec
+
+  if (props.gql.currentBrowser?.id === browser.id || !activeSpec) {
     return
   }
 
-  const dimensions = `${autStore.viewportDimensions.width}x${autStore.viewportDimensions.height}`
-
-  return {
-    id: props.gql.selectedBrowser.id,
-    name: `${props.gql.selectedBrowser.displayName} ${dimensions}`,
-  }
-})
-
-const browsers = computed(() => props.gql.browsers?.slice() ?? [])
+  setBrowser.executeMutation({ browserId: browser.id, specPath: activeSpec.absolute })
+}
 
 const autStore = useAutStore()
 
@@ -90,12 +153,7 @@ const isDisabled = computed(() => autStore.isRunning || autStore.isLoading)
 </script>
 
 <style scoped lang="scss">
-button, .url {
+.url {
   @apply flex items-center justify-center;
-}
-
-button {
-  @apply rounded-md bg-white flex shadow-md ml-2;
-  @apply w-20 hover:bg-gray-50;
 }
 </style>

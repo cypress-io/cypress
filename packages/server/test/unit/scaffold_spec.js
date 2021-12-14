@@ -4,15 +4,20 @@ const path = require('path')
 const Promise = require('bluebird')
 const cypressEx = require('@packages/example')
 const snapshot = require('snap-shot-it')
-const config = require(`${root}lib/config`)
-const ProjectBase = require(`${root}lib/project-base`).ProjectBase
-const scaffold = require(`${root}lib/scaffold`)
-const { fs } = require(`${root}lib/util/fs`)
-const glob = require(`${root}lib/util/glob`)
+const config = require(`../../lib/config`)
+const ProjectBase = require(`../../lib/project-base`).ProjectBase
+const scaffold = require(`../../lib/scaffold`)
+const { fs } = require(`../../lib/util/fs`)
+const glob = require(`../../lib/util/glob`)
 const Fixtures = require('@tooling/system-tests/lib/fixtures')
+const { getCtx } = require(`../../lib/makeDataContext`)
+
+let ctx
 
 describe('lib/scaffold', () => {
   beforeEach(() => {
+    ctx = getCtx()
+
     return Fixtures.scaffold()
   })
 
@@ -131,7 +136,10 @@ describe('lib/scaffold', () => {
     beforeEach(function () {
       const pristinePath = Fixtures.projectPath('pristine-with-config-file')
 
-      return config.get(pristinePath).then((cfg) => {
+      ctx.actions.project.setActiveProjectForTestSetup(pristinePath)
+
+      return config.get(pristinePath)
+      .then((cfg) => {
         this.cfg = cfg;
         ({ integrationFolder: this.integrationFolder } = this.cfg)
       })
@@ -210,122 +218,14 @@ describe('lib/scaffold', () => {
     })
   })
 
-  context('.removeIntegration', () => {
-    beforeEach(function () {
-      const pristinePath = Fixtures.projectPath('pristine-with-config-file')
-
-      return config.get(pristinePath).then((cfg) => {
-        this.cfg = cfg;
-        ({ integrationFolder: this.integrationFolder } = this.cfg)
-      })
-    })
-
-    it('removes all scaffolded files and folders', function () {
-      return scaffold.integration(this.integrationFolder, this.cfg)
-      .then(() => {
-        return glob('**/*', { cwd: this.integrationFolder })
-      })
-      .then((files) => {
-        expect(files.length).to.be.greaterThan(0)
-      })
-      .then(() => {
-        return scaffold.removeIntegration(this.integrationFolder, this.cfg)
-      })
-      .then(() => {
-        return glob('**/*', { cwd: this.integrationFolder })
-      })
-      .then((files) => {
-        expect(files.length).to.equal(0)
-      })
-    })
-
-    it('removes all scaffolded files and folders after the user has deleted files', function () {
-      return scaffold.integration(this.integrationFolder, this.cfg)
-      .then(() => {
-        return glob('**/*', { cwd: this.integrationFolder })
-      })
-      .then((files) => {
-        expect(files.length).to.be.greaterThan(0)
-
-        return Promise.join(
-          fs.unlinkAsync(`${this.integrationFolder}/2-advanced-examples/actions.spec.js`),
-          fs.unlinkAsync(`${this.integrationFolder}/2-advanced-examples/assertions.spec.js`),
-          fs.unlinkAsync(`${this.integrationFolder}/2-advanced-examples/location.spec.js`),
-        )
-      })
-      .then(() => {
-        return scaffold.removeIntegration(this.integrationFolder, this.cfg)
-      })
-      .then(() => {
-        return glob('**/*', { cwd: this.integrationFolder })
-      })
-      .then((files) => {
-        expect(files.length).to.equal(0)
-      })
-    })
-
-    it('does not remove files created by user', function () {
-      return scaffold.integration(this.integrationFolder, this.cfg)
-      .then(() => {
-        return glob('**/*', { cwd: this.integrationFolder })
-      })
-      .then((files) => {
-        expect(files.length).to.be.greaterThan(0)
-
-        return Promise.join(
-          fs.writeFileAsync(`${this.integrationFolder}/2-advanced-examples/custom1.spec.js`, 'foo'),
-          fs.writeFileAsync(`${this.integrationFolder}/2-advanced-examples/custom2.spec.js`, 'bar'),
-        )
-      })
-      .then(() => {
-        return scaffold.removeIntegration(this.integrationFolder, this.cfg)
-      })
-      .then(() => {
-        return glob('**/*', { cwd: this.integrationFolder })
-      })
-      .then((files) => {
-        expect(files).to.have.same.members([
-          '2-advanced-examples',
-          '2-advanced-examples/custom1.spec.js',
-          '2-advanced-examples/custom2.spec.js',
-        ])
-      })
-    })
-
-    it('does not remove files modified by user', function () {
-      return scaffold.integration(this.integrationFolder, this.cfg)
-      .then(() => {
-        return glob('**/*', { cwd: this.integrationFolder })
-      })
-      .then((files) => {
-        expect(files.length).to.be.greaterThan(0)
-
-        return Promise.join(
-          fs.writeFileAsync(`${this.integrationFolder}/2-advanced-examples/actions.spec.js`, 'foo'),
-          fs.writeFileAsync(`${this.integrationFolder}/2-advanced-examples/location.spec.js`, 'bar'),
-        )
-      })
-      .then(() => {
-        return scaffold.removeIntegration(this.integrationFolder, this.cfg)
-      })
-      .then(() => {
-        return glob('**/*', { cwd: this.integrationFolder })
-      })
-      .then((files) => {
-        expect(files).to.have.same.members([
-          '2-advanced-examples',
-          '2-advanced-examples/actions.spec.js',
-          '2-advanced-examples/location.spec.js',
-        ])
-      })
-    })
-  })
-
   context('.support', () => {
     beforeEach(function () {
       const pristinePath = Fixtures.projectPath('pristine-with-config-file')
 
-      return config.get(pristinePath).then((cfg) => {
+      ctx.actions.project.setActiveProjectForTestSetup(pristinePath)
+
+      return config.get(pristinePath)
+      .then((cfg) => {
         this.cfg = cfg;
         ({ supportFolder: this.supportFolder } = this.cfg)
       })
@@ -402,7 +302,10 @@ describe('lib/scaffold', () => {
     beforeEach(function () {
       const pristinePath = Fixtures.projectPath('pristine-with-config-file')
 
-      return config.get(pristinePath).then((cfg) => {
+      ctx.actions.project.setActiveProjectForTestSetup(pristinePath)
+
+      return config.get(pristinePath)
+      .then((cfg) => {
         this.cfg = cfg;
         ({ pluginsFile: this.pluginsFile } = this.cfg)
         this.pluginsFolder = path.dirname(this.pluginsFile)
@@ -458,7 +361,10 @@ describe('lib/scaffold', () => {
     beforeEach(function () {
       const pristinePath = Fixtures.projectPath('pristine-with-config-file')
 
-      return config.get(pristinePath).then((cfg) => {
+      ctx.actions.project.setActiveProjectForTestSetup(pristinePath)
+
+      return config.get(pristinePath)
+      .then((cfg) => {
         this.cfg = cfg;
         ({ fixturesFolder: this.fixturesFolder } = this.cfg)
       })
@@ -533,9 +439,11 @@ describe('lib/scaffold', () => {
     beforeEach(function () {
       const todosPath = Fixtures.projectPath('todos')
 
-      return config.get(todosPath).then((cfg) => {
+      ctx.actions.project.setActiveProjectForTestSetup(todosPath)
+
+      return config.get(todosPath)
+      .then((cfg) => {
         this.cfg = cfg
-        this.cfg.pluginsFile = path.join(this.cfg.projectRoot, 'cypress/plugins/index.js')
       })
     })
 

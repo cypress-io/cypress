@@ -10,6 +10,21 @@
     local("Roboto-Light"), local("DroidSans"), local("Tahoma");
 }
 
+/* Set up Roboto for modern browsers, all weights */
+@supports (font-variation-settings: normal) {
+  @font-face {
+    font-family: 'Fira Code';
+    src: url('/fonts/FiraCode-VF.woff2') format('woff2 supports variations'),
+         url('/fonts/FiraCode-VF.woff2') format('woff2-variations');
+    font-weight: 100 1000;
+    font-stretch: 25% 151%;
+  }
+}
+
+html, body {
+  @apply bg-white font-sans antialiased;
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
@@ -48,6 +63,11 @@ body {
 // Taken from Tailwind CSS Forms -- a plugin for tailwind.
 // We could probably add these into WindiCSS directly
 // https://github.com/tailwindlabs/tailwindcss-forms
+// [type="search"]::-webkit-search-cancel-button,
+// [type="search"]::-webkit-search-decoration {
+//   -webkit-appearance: none !important;
+//   appearance: none !important;
+// }
 
 [multiple],
 [type=date],

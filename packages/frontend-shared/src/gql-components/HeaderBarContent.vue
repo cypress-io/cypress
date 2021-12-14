@@ -1,9 +1,9 @@
 <template>
   <div
-    class="px-6 py-15px border-b border-b-gray-100 bg-white"
+    class="bg-white border-b border-b-gray-100 py-15px px-6"
     data-testid="header-bar"
   >
-    <div class="flex items-center justify-between">
+    <div class="flex h-full gap-12px items-center justify-between">
       <div v-if="pageName">
         {{ pageName }}
       </div>
@@ -12,25 +12,27 @@
         class="flex items-center"
       >
         <img
-          class="mr-18px w-32px h-32px"
+          class="h-32px mr-18px w-32px"
           src="../assets/logos/cypress-dark.png"
         >
         <a
-          :class="props.gql?.app?.activeProject ? 'text-indigo-500' :
+          :class="props.gql?.currentProject ? 'text-indigo-500' :
             'text-gray-700'"
-          :href="props.gql?.app?.activeProject ? 'global-mode' : undefined"
+          :href="props.gql?.currentProject ? 'global-mode' : undefined"
           @click.prevent="clearActiveProject"
-        >Projects</a>
+        >
+          Projects
+        </a>
         <!-- TODO: Replace with a cy icon -->
         <i-oi-chevron-right
-          v-if="props.gql?.app?.activeProject"
-          class="text-gray-300 h-8px"
+          v-if="props.gql?.currentProject"
+          class="h-8px text-gray-300"
         />
-        <span class="text-body-gray-700">{{ props.gql?.app?.activeProject?.title }}</span>
+        <span class="text-body-gray-700">{{ props.gql?.currentProject?.title }}</span>
       </div>
       <div class="flex gap-6">
         <TopNav
-          :gql="props.gql?.app"
+          :gql="props.gql"
           :show-browsers="props.showBrowsers"
           :force-open-docs="isForceOpenAllowed && isShowablePromptInSavedSatate"
           @clear-force-open="isForceOpenAllowed = false"
@@ -41,7 +43,7 @@
           >
             <UserAvatar
               :email="email"
-              class="w-24px h-24px"
+              class="h-24px w-24px"
             />
             <span class="sr-only">{{ t('topNav.login.actionLogin') }}</span>
           </template>
@@ -50,21 +52,21 @@
             #login-panel
           >
             <div class="min-w-248px">
-              <div class="flex border-b-gray-100 border-b p-16px">
+              <div class="border-b flex border-b-gray-100 p-16px">
                 <UserAvatar
                   :email="email"
-                  class="w-48px mr-16px h-48px"
+                  class="h-48px mr-16px w-48px"
                 />
                 <div>
                   <span class="text-gray-800">{{ props.gql?.cloudViewer?.fullName }}</span>
                   <br>
                   <span class="text-gray-600">{{ props.gql?.cloudViewer?.email }}</span>
                   <br>
-                  <a
-                    class="text-indigo-500 hocus-link-default"
+                  <ExternalLink
                     href="https://on.cypress.io/dashboard/profile"
-                    target="_blank"
-                  >Profile Settings</a>
+                  >
+                    Profile Settings
+                  </ExternalLink>
                 </div>
               </div>
 
@@ -80,11 +82,11 @@
         <div>
           <button
             v-if="!props.gql?.cloudViewer"
-            class="flex group items-center text-gray-600 focus:outline-transparent"
+            class="flex text-gray-600 group items-center focus:outline-transparent"
             @click="openLogin"
           >
             <i-cy-profile_x16
-              class="block icon-dark-gray-500 icon-light-gray-100 group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50 h-16px w-16px mr-8px"
+              class="h-16px mr-8px w-16px block icon-dark-gray-500 icon-light-gray-100 group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50"
             />
             <span class="group-hocus:text-indigo-500">{{ t('topNav.login.actionLogin') }}</span>
           </button>
@@ -109,6 +111,7 @@ import Auth from './Auth.vue'
 import { useI18n } from '@cy/i18n'
 import interval from 'human-interval'
 import { sortBy } from 'lodash'
+import ExternalLink from './ExternalLink.vue'
 
 gql`
 mutation GlobalPageHeader_clearActiveProject {
@@ -118,15 +121,12 @@ mutation GlobalPageHeader_clearActiveProject {
 
 gql`
 fragment HeaderBar_HeaderBarContent on Query {
-  app {
-    activeProject {
+    currentProject {
       id
       title
       config
-      savedState
     }
-    ...TopNav
-  }
+  ...TopNav
   ...Auth
 }
 `
@@ -140,7 +140,7 @@ const openLogin = () => {
 }
 
 const clearActiveProject = () => {
-  if (props.gql.app.activeProject) {
+  if (props.gql.currentProject) {
     clearActiveProjectMutation.executeMutation({})
   }
 }

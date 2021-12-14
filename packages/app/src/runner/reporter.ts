@@ -2,7 +2,7 @@ import { getMobxRunnerStore, MobxRunnerStore } from '../store'
 import { getReporterElement } from './utils'
 import { getEventManager } from '.'
 import type { EventManager } from './event-manager'
-
+import { useRunnerUiStore } from '../store/runner-ui-store'
 let hasInitializeReporter = false
 
 async function unmountReporter () {
@@ -29,11 +29,7 @@ function renderReporter (
   store: MobxRunnerStore,
   eventManager: EventManager,
 ) {
-  class EmptyHeader extends window.UnifiedRunner.React.Component {
-    render () {
-      return window.UnifiedRunner.React.createElement('div')
-    }
-  }
+  const runnerUiStore = useRunnerUiStore()
 
   const reporter = window.UnifiedRunner.React.createElement(window.UnifiedRunner.Reporter, {
     runMode: 'single' as const,
@@ -41,13 +37,11 @@ function renderReporter (
     key: store.specRunId,
     spec: store.spec,
     specRunId: store.specRunId,
+    autoScrollingEnabled: runnerUiStore.autoScrollingEnabled,
+    isSpecsListOpen: runnerUiStore.isSpecsListOpen,
     error: null, // errorMessages.reporterError(props.state.scriptError, props.state.spec.relative),
     resetStatsOnSpecChange: true,
     experimentalStudioEnabled: false,
-    // TODO: Are we re-skinning the Reporter header?
-    // If so, with React or Vue?
-    // For now, just render and empty div.
-    renderReporterHeader: (props: null) => window.UnifiedRunner.React.createElement(EmptyHeader, props),
   })
 
   window.UnifiedRunner.ReactDOM.render(reporter, root)

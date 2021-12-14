@@ -17,6 +17,7 @@ import shortcuts from './lib/shortcuts'
 
 import Header, { ReporterHeaderProps } from './header/header'
 import Runnables from './runnables/runnables'
+import TestingPreferences from './preferences/testing-preferences'
 
 let runnerListenersAdded = false
 
@@ -27,6 +28,8 @@ interface BaseReporterProps {
   runner: Runner
   scroller?: Scroller
   statsStore?: StatsStore
+  autoScrollingEnabled?: boolean
+  isSpecsListOpen?: boolean
   events?: Events
   error?: RunnablesErrorModel
   resetStatsOnSpecChange?: boolean
@@ -70,13 +73,17 @@ class Reporter extends Component<SingleReporterProps> {
         'studio-active': appState.studioActive,
       })}>
         {renderReporterHeader({ appState, statsStore })}
-        <Runnables
-          appState={appState}
-          error={error}
-          runnablesStore={runnablesStore}
-          scroller={scroller}
-          spec={this.props.spec}
-        />
+        {appState?.isPreferencesMenuOpen ? (
+          <TestingPreferences appState={appState} />
+        ) : (
+          <Runnables
+            appState={appState}
+            error={error}
+            runnablesStore={runnablesStore}
+            scroller={scroller}
+            spec={this.props.spec}
+          />
+        )}
       </div>
     )
   }
@@ -96,10 +103,14 @@ class Reporter extends Component<SingleReporterProps> {
   }
 
   componentDidMount () {
-    const { spec, appState, runnablesStore, runner, scroller, statsStore } = this.props
+    const { spec, appState, runnablesStore, runner, scroller, statsStore, autoScrollingEnabled, isSpecsListOpen } = this.props
 
     action('set:scrolling', () => {
-      appState.setAutoScrolling(appState.autoScrollingEnabled)
+      appState.setAutoScrolling(autoScrollingEnabled)
+    })()
+
+    action('set:specs:list', () => {
+      appState.setSpecsList(isSpecsListOpen ?? true)
     })()
 
     this.props.events.init({

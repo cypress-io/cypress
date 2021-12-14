@@ -26,21 +26,22 @@
             v-if="!viewer"
             keypath="topNav.login.bodyInitial"
           >
-            <a
+            <ExternalLink
               href="https://on.cypress.io/dashboard"
-              target="_blank"
-              class="text-indigo-500 hocus-link-default"
-            >{{ t('topNav.login.dashboard') }}</a>
+            >
+              {{ t('topNav.login.dashboard') }}
+            </ExternalLink>
           </i18n-t>
           <i18n-t
             v-else-if="viewer"
             keypath="topNav.login.bodySuccess"
           >
-            <a
+            <ExternalLink
               href="https://on.cypress.io/dashboard/profile"
-              target="_blank"
-              class="text-indigo-500 hover:underline font-medium"
-            >{{ viewer.fullName }}</a>
+              class="text-indigo-500 font-medium"
+            >
+              {{ viewer.fullName }}
+            </ExternalLink>
           </i18n-t>
         </DialogDescription>
 
@@ -59,6 +60,7 @@ import { useI18n } from '@cy/i18n'
 import { gql } from '@urql/core'
 import { computed } from 'vue'
 import Auth from '../Auth.vue'
+import ExternalLink from '../ExternalLink.vue'
 
 import {
   Dialog,
@@ -85,9 +87,7 @@ fragment LoginModal on Query {
     email
     fullName
   }
-  app {
-    isAuthBrowserOpened
-  }
+  isAuthBrowserOpened
 }
 `
 

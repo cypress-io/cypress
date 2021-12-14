@@ -3,9 +3,9 @@ require('../../spec_helper')
 const _ = require('lodash')
 const os = require('os')
 const electron = require('electron')
-const appData = require(`${root}../lib/util/app_data`)
-const open = require(`${root}../lib/util/open`)
-const menu = require(`${root}../lib/gui/menu`)
+const appData = require(`../../../lib/util/app_data`)
+const open = require(`../../../lib/util/open`)
+const menu = require(`../../../lib/gui/menu`)
 
 const getMenuItem = function (label) {
   return _.find(electron.Menu.buildFromTemplate.lastCall.args[0], { label })
@@ -89,6 +89,20 @@ describe('gui/menu', function () {
       menu.set({ onLogOutClicked })
       getSubMenuItem(getMenuItem('File'), 'Log Out').click()
       expect(onLogOutClicked).to.be.called
+    })
+
+    it('merges options and calls callback functions', () => {
+      const onLogOutClicked1 = sinon.stub()
+      const onLogOutClicked2 = sinon.stub()
+
+      menu.set()
+      menu.set({ onLogOutClicked: onLogOutClicked1 })
+      menu.set({ onLogOutClicked: onLogOutClicked2 })
+
+      getSubMenuItem(getMenuItem('File'), 'Log Out').click()
+
+      expect(onLogOutClicked1).not.to.be.called
+      expect(onLogOutClicked2).to.be.called
     })
 
     it('calls original logout callback when menu is reset without new callback', () => {
@@ -260,6 +274,8 @@ describe('gui/menu', function () {
         expect(labels).to.eql([
           'Reload',
           'Toggle Developer Tools',
+          'GraphiQL',
+          'View App Data',
         ])
       })
 

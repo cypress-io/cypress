@@ -8,11 +8,10 @@ const headerSelector = '[data-testid=error-header]'
 const messageSelector = '[data-testid=error-message]'
 const retryButtonSelector = '[data-testid=error-retry-button]'
 const docsButtonSelector = '[data-testid=error-read-the-docs-button]'
-const docsLinkSelector = '[data-testid=error-docs-link]'
 const customFooterSelector = '[data-testid=custom-error-footer]'
+const openConfigFileSelector = '[data-testid=open-config-file]'
 
 // Constants
-const docsLink = 'https://docs.cypress.io'
 const messages = defaultMessages.launchpadErrors.generic
 const customHeaderMessage = 'Well, this was unexpected!'
 const customMessage = `Don't worry, just click the "It's fixed now" button to try again.`
@@ -26,32 +25,45 @@ describe('<BaseError />', () => {
     })
   })
 
+  afterEach(() => {
+    cy.percySnapshot()
+  })
+
   it('renders the default error the correct messages', () => {
     cy.mountFragment(BaseErrorFragmentDoc, {
       onResult: (result) => {
-        result.title = messages.header
+        if (result.baseError) {
+          result.baseError.title = messages.header
+        }
+
+        if (result.currentProject) {
+          result.currentProject.configFilePath = 'cypress.config.ts'
+        }
       },
       render: (gqlVal) => <BaseError gql={gqlVal} />,
     })
     .get(headerSelector)
     .should('contain.text', messages.header)
     .get(messageSelector)
-    .should('contain.text', messages.message.replace('{0}', 'cypress.config.js'))
+    .should('contain.text', messages.message.replace('{0}', 'cypress.config.ts'))
     .get(retryButtonSelector)
     .should('contain.text', messages.retryButton)
     .get(docsButtonSelector)
     .should('contain.text', messages.readTheDocsButton)
-    .get(docsLinkSelector)
-    .should('have.attr', 'href', docsLink)
-    .and('have.attr', 'target', '_blank')
+    .get(openConfigFileSelector)
+    .click()
+
+    cy.get('#headlessui-dialog-title-3').contains('Select Preferred Editor')
   })
 
   // NOTE: Figure out how to stub the graphql mutation call
   it.skip('emits the retry event by default', () => {
     cy.mountFragment(BaseErrorFragmentDoc, {
       onResult: (result) => {
-        result.title = messages.header
-        result.message = null
+        if (result.baseError) {
+          result.baseError.title = messages.header
+          result.baseError.message = null
+        }
       },
       render: (gqlVal) => <BaseError gql={gqlVal} />,
     })
@@ -65,9 +77,11 @@ describe('<BaseError />', () => {
   it('renders custom error messages and headers with props', () => {
     cy.mountFragment(BaseErrorFragmentDoc, {
       onResult: (result) => {
-        result.title = customHeaderMessage
-        result.message = customMessage
-        result.stack = customStack
+        if (result.baseError) {
+          result.baseError.title = customHeaderMessage
+          result.baseError.message = customMessage
+          result.baseError.stack = customStack
+        }
       },
       render: (gqlVal) => <BaseError gql={gqlVal} />,
     })
@@ -80,8 +94,10 @@ describe('<BaseError />', () => {
   it('renders the header, message, and footer slots', () => {
     cy.mountFragment(BaseErrorFragmentDoc, {
       onResult: (result) => {
-        result.title = messages.header
-        result.message = messages.message
+        if (result.baseError) {
+          result.baseError.title = messages.header
+          result.baseError.message = messages.message
+        }
       },
       render: (gqlVal) => (
         <BaseError

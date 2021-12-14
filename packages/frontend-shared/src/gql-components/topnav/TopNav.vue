@@ -1,60 +1,114 @@
 <template>
-  <TopNavList v-if="versionList">
+  <TopNavList v-if="versions && runningOldVersion">
     <template #heading="{ open }">
-      <i-cy-box_x16
-        class="group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50 h-16px w-16px"
+      <i-cy-arrow-outline-down_x16
+        class="h-16px w-16px group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50"
         :class="open ? 'icon-dark-indigo-500 icon-light-indigo-50' : 'icon-dark-gray-500 icon-light-gray-100'"
       />
-      <span data-cy="topnav-version-list">v{{ versionList[0].version }}</span>
+      <span data-cy="topnav-version-list">v{{ versions.current.version }} <span
+        class="text-indigo-300"
+        aria-hidden="true"
+      >•</span> Upgrade</span>
     </template>
+
     <TopNavListItem
-      v-for="(item, index) in versionList"
-      :key="item.version"
-      :selectable="!!index"
-      class="px-16px py-8px min-w-240px"
-      :class="index ? '' : 'bg-jade-50'"
+      class="min-w-278px py-8px px-16px"
+      data-cy="update-hint"
     >
       <div class="whitespace-nowrap">
-        <a
-          :href="`${releasesUrl}/tag/v${item.version}`"
-          :class="index ? '' : 'text-jade-600'"
-          class="font-semibold"
-          target="_blank"
-        >{{ item.version }}</a>
+        <ExternalLink
+          :href="`${releasesUrl}/tag/v${versions.latest.version}`"
+          class="font-semibold text-indigo-500"
+          data-cy="latest-version"
+        >
+          {{ versions.latest.version }}
+        </ExternalLink>
         <br>
-        <span class="text-gray-600 text-14px">{{ t('topNav.released') }} {{ item.released }}</span>
+        <span class="text-gray-500 text-14px leading-20px">{{ t('topNav.released') }} {{ versions.latest.released }}</span>
       </div>
-      <template
-        v-if="!index"
-        #suffix
-      >
-        <i-cy-circle-check_x24 class="icon-dark-jade-100 icon-light-jade-500 w-24px h-24px" />
+      <template #suffix>
+        <span class="rounded-md bg-indigo-50">
+          <span class=" p-5px text-indigo-500">
+            {{ t('topNav.latest') }}
+          </span>
+        </span>
       </template>
     </TopNavListItem>
-    <TopNavListItem class="text-center p-16px bg-gray-50">
-      <a
+
+    <TopNavListItem class="py-8px px-16px pb-16px">
+      <p class="leading-normal py-8px pb-16px text-gray-500 text-14px">
+        {{ t('topNav.runningOldVersion') }}
+      </p>
+      <Button
+        class="w-full"
+        @click="showUpdateModal = true"
+      >
+        Update to {{ versions.latest.version }}
+      </Button>
+    </TopNavListItem>
+
+    <TopNavListItem
+      class="bg-yellow-50 py-8px px-16px"
+    >
+      <div class="whitespace-nowrap">
+        <ExternalLink
+          :href="`${releasesUrl}/tag/v${versions.current.version}`"
+          class="font-semibold text-amber-800"
+          data-cy="current-version"
+        >
+          {{ versions.current.version }}
+        </ExternalLink>
+        <br>
+        <span class="text-gray-600 text-14px">{{ t('topNav.released') }} {{ versions.current.released }}</span>
+      </div>
+      <template #suffix>
+        <span class="rounded-md bg-yellow-100">
+          <span class="p-5px text-amber-800">
+            {{ t('topNav.installed') }}
+          </span>
+        </span>
+      </template>
+    </TopNavListItem>
+
+    <TopNavListItem class="text-center p-16px text-indigo-600">
+      <ExternalLink
         :href="releasesUrl"
-        target="_blank"
-        class="block w-full border-gray-100 py-8px text-14px whitespace-nowrap border-rounded border-1 hover:no-underline hover:border-gray-200"
-      >{{ t('topNav.seeAllReleases') }}</a>
+        class="border-rounded border-gray-100 border-1 w-full py-8px text-12px block whitespace-nowrap hover:border-gray-200 hover:no-underline"
+      >
+        {{ t('topNav.seeAllReleases') }}
+      </ExternalLink>
     </TopNavListItem>
   </TopNavList>
 
-  <TopNavList v-if="props.gql?.selectedBrowser && showBrowsers">
+  <ExternalLink
+    v-else-if="versions"
+    :href="`${releasesUrl}/tag/v${versions.latest.version}`"
+    class="flex outline-transparent text-gray-600 gap-8px items-center group hocus:text-indigo-500 hocus:outline-0"
+    :use-default-hocus="false"
+  >
+    <i-cy-box_x16
+      class="h-16px w-16px group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50 icon-dark-gray-500 icon-light-gray-100"
+    />
+    <span>
+      v{{ versions.latest.version }}
+    </span>
+  </ExternalLink>
+
+  <TopNavList v-if="props.gql?.currentProject?.currentBrowser && showBrowsers">
     <template #heading="{ open }">
       <img
         class="w-16px filter group-hocus:grayscale-0"
         :class="open ? 'grayscale-0' : 'grayscale'"
-        :src="allBrowsersIcons[props.gql?.selectedBrowser?.displayName || '']"
+        :src="allBrowsersIcons[props.gql?.currentProject?.currentBrowser?.displayName || '']"
       >
       <span
         data-cy="topnav-browser-list"
-      >{{ props.gql.selectedBrowser?.displayName }} v{{ props.gql.selectedBrowser?.majorVersion }}</span>
+      >{{ props.gql.currentProject?.currentBrowser?.displayName }} v{{ props.gql.currentProject?.currentBrowser?.majorVersion }}</span>
     </template>
     <TopNavListItem
-      v-for="browser in props.gql.browsers"
+      v-for="browser in props.gql.currentProject.browsers"
       :key="browser.id"
-      class="px-16px py-12px min-w-240px cursor-pointer"
+      class="cursor-pointer min-w-240px py-12px px-16px"
       :class="browser.isSelected ? 'bg-jade-50' : ''"
       :selectable="!browser.isSelected"
       @click="handleBrowserChoice(browser)"
@@ -75,7 +129,7 @@
           {{ browser.displayName }}
         </button>
         <div
-          class="font-normal text-gray-500 mr-20px whitespace-nowrap text-14px"
+          class="font-normal mr-20px text-gray-500 text-14px whitespace-nowrap"
         >
           {{ t('topNav.version') }} {{ browser.version }}
         </div>
@@ -85,7 +139,7 @@
         #suffix
       >
         <div>
-          <i-cy-circle-check_x24 class="icon-dark-jade-100 icon-light-jade-500 w-24px h-24px" />
+          <i-cy-circle-check_x24 class="h-24px w-24px icon-dark-jade-100 icon-light-jade-500" />
         </div>
       </template>
     </TopNavListItem>
@@ -103,7 +157,7 @@
       #heading="{ open }"
     >
       <i-cy-life-ring_x16
-        class=" group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50 h-16px w-16px"
+        class=" h-16px w-16px group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50"
         :class="(open || forceOpenDocs) ? 'icon-dark-indigo-500 icon-light-indigo-50' : 'icon-dark-gray-500 icon-light-gray-100'"
       />
       <span :class="{'text-indigo-600': open || forceOpenDocs}">{{ t('topNav.docsMenu.docsHeading') }}</span>
@@ -113,7 +167,7 @@
       class="flex p-16px gap-24px"
     >
       <DocsMenuContent
-        :active-project-exists="!!props.gql?.activeProject"
+        :current-project-exists="!!props.gql?.currentProject"
         @setDocsContent="docsMenuVariant = $event"
       />
     </div>
@@ -121,14 +175,14 @@
       v-else
       class="w-484px"
     >
-      <div class="relative border-b border-b-gray-50 px-24px py-18px text-18px">
+      <div class="border-b border-b-gray-50 py-18px px-24px text-18px relative">
         {{ t(`topNav.docsMenu.prompts.${docsMenuVariant}.title`) }}
         <button
           aria-label="Close"
-          class="absolute border-transparent rounded-full p-5px border-1 hover:border-indigo-300 hocus-default right-20px top-15px"
+          class="border-transparent rounded-full border-1 p-5px top-15px right-20px absolute hocus-default hover:border-indigo-300"
           @click="docsMenuVariant = 'main'"
         >
-          <i-cy-delete_x12 class="icon-dark-gray-400 w-12px h-12px" />
+          <i-cy-delete_x12 class="h-12px w-12px icon-dark-gray-400" />
         </button>
       </div>
       <PromptContent
@@ -147,60 +201,64 @@
     </template>
     <slot name="login-panel" />
   </TopNavList>
+  <UpdateCypressModal
+    v-if="versions"
+    :show="showUpdateModal"
+    :installed-version="versions.current.version"
+    :latest-version="versions.latest.version"
+    :project-name="props.gql?.currentProject?.title"
+    @close="showUpdateModal = false"
+  />
 </template>
 
 <script setup lang="ts">
 import TopNavListItem from './TopNavListItem.vue'
 import TopNavList from './TopNavList.vue'
 import PromptContent from './PromptContent.vue'
-import { allBrowsersIcons } from '../../../../frontend-shared/src/assets/browserLogos'
+import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
 import { gql, useMutation } from '@urql/vue'
 import { TopNavFragment, TopNav_LaunchOpenProjectDocument, TopNav_SetBrowserDocument, TopNav_SetPromptShownDocument } from '../../generated/graphql'
 import { useI18n } from '@cy/i18n'
-import { ref, watch, watchEffect, ComponentPublicInstance } from 'vue'
-// eslint-disable-next-line no-duplicate-imports
+import { computed, ref, Ref, ComponentPublicInstance, watch, watchEffect } from 'vue'
 const { t } = useI18n()
-import { onClickOutside, onKeyStroke } from '@vueuse/core'
+import { onClickOutside, onKeyStroke, useTimeAgo } from '@vueuse/core'
 import DocsMenuContent, { DocsMenuVariant } from './DocsMenuContent.vue'
+import ExternalLink from '../ExternalLink.vue'
+import Button from '../../components/Button.vue'
+import UpdateCypressModal from './UpdateCypressModal.vue'
 
-const releasesUrl = 'https://github.com/cypress-io/cypress/releases/'
-
-// TODO: will come from gql
-const versionList = [
-  {
-    version: '8.4.1',
-    released: '2 days ago',
-  },
-  {
-    version: '8.4.0',
-    released: '6 days ago',
-  },
-  {
-    version: '8.3.1',
-    released: '12 days ago',
-  },
-  {
-    version: '8.3.0',
-    released: '2 weeks ago',
-  },
-]
+const releasesUrl = 'https://github.com/cypress-io/cypress/releases'
 
 gql`
-fragment TopNav on App {
-  activeProject {
-    id
+fragment TopNav on Query {
+  versions {
+    current {
+      id
+      version
+      released
+    }
+    latest {
+      id
+      version
+      released
+    }
   }
-  selectedBrowser {
+
+  currentProject {
     id
-    displayName
-    majorVersion
-  }
-  browsers {
-    id
-    isSelected
-    displayName
-    version
-    majorVersion
+    title
+    currentBrowser {
+      id
+      displayName
+      majorVersion
+    }
+    browsers {
+      id
+      isSelected
+      displayName
+      version
+      majorVersion
+    }
   }
 }
 `
@@ -246,9 +304,47 @@ const emit = defineEmits<{
   (e: 'clearForceOpen'): void,
 }>()
 
-const docsMenuVariant = ref<DocsMenuVariant>('main')
-
 const promptsEl = ref<ComponentPublicInstance | null>(null)
+const currentReleased = useTimeAgo(
+  props.gql.versions?.current?.released
+    ? new Date(props.gql.versions.current.released)
+    : '',
+)
+
+const latestReleased = useTimeAgo(
+  props.gql.versions?.latest?.released
+    ? new Date(props.gql.versions.latest.released)
+    : '',
+)
+
+const versions = computed(() => {
+  if (!props.gql.versions) {
+    return
+  }
+
+  if (!props.gql.versions) {
+    return null
+  }
+
+  return {
+    current: {
+      released: currentReleased.value,
+      version: props.gql.versions.current.version,
+    },
+    latest: {
+      released: latestReleased.value,
+      version: props.gql.versions.latest.version,
+    },
+  }
+})
+
+const runningOldVersion = computed(() => {
+  return props.gql.versions ? props.gql.versions.current.released < props.gql.versions.latest.released : false
+})
+
+const showUpdateModal = ref(false)
+
+const docsMenuVariant = ref<DocsMenuVariant>('main')
 
 watchEffect(() => {
   docsMenuVariant.value = props.forceOpenDocs ? 'ci1' : 'main'

@@ -205,7 +205,7 @@ const throwErr = (err, options = {}) => {
   let { onFail, errProps } = options
 
   // assume onFail is a command if
-  //# onFail is present and isnt a function
+  //# onFail is present and isn't a function
   if (onFail && !_.isFunction(onFail)) {
     const command = onFail
 
@@ -230,12 +230,14 @@ const throwErr = (err, options = {}) => {
 const throwErrByPath = (errPath, options = {}) => {
   const err = errByPath(errPath, options.args)
 
-  // gets rid of internal stack lines that just build the error
-  if (Error.captureStackTrace) {
+  if (options.stack) {
+    err.stack = $stackUtils.replacedStack(err, options.stack)
+  } else if (Error.captureStackTrace) {
+    // gets rid of internal stack lines that just build the error
     Error.captureStackTrace(err, throwErrByPath)
   }
 
-  return throwErr(err, options)
+  throwErr(err, options)
 }
 
 const warnByPath = (errPath, options = {}) => {
@@ -541,6 +543,7 @@ const logError = (Cypress, handlerType, err, handled = false) => {
 }
 
 export default {
+  stackWithReplacedProps,
   appendErrMsg,
   createUncaughtException,
   cypressErr,

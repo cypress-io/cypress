@@ -9,6 +9,8 @@
           {{ headerText }}
         </slot>
       </h1>
+      <!-- eslint-disable vue/multiline-html-element-content-newline  -->
+
       <slot name="message">
         <!-- Can't pull this out because of the i18n-t component -->
         <p
@@ -24,14 +26,10 @@
           class="font-light"
           data-testid="error-message"
         >
-          <a
-            class="text-indigo-500 underline-indigo-500 hocus-link-default underline-indigo-500 ring-indigo-500"
-            href="https://docs.cypress.io"
-            data-testid="error-docs-link"
-            target="_blank"
-          >cypress.config.js</a>
+          <OpenConfigFileInIDE :gql="props.gql" />
         </i18n-t>
       </slot>
+      <!-- eslint-enable vue/multiline-html-element-content-newline  -->
 
       <slot name="stack">
         <p
@@ -73,17 +71,21 @@ import Button from '@cy/components/Button.vue'
 import { computed } from 'vue'
 import { useI18n } from '@cy/i18n'
 import type { BaseErrorFragment } from '../generated/graphql'
+import OpenConfigFileInIDE from '@packages/frontend-shared/src/gql-components/OpenConfigFileInIDE.vue'
 
 gql`
-fragment BaseError on BaseError {
-  title
-  message
-  stack
+fragment BaseError on Query {
+  baseError {
+    title
+    message
+    stack
+  }
+  ...OpenConfigFileInIDE
 }
 `
 
 const openDocs = () => {
-  document.location.href = 'https://docs.cypress.io'
+  document.location.href = 'https://on.cypress.io'
 }
 
 const { t } = useI18n()
@@ -95,7 +97,8 @@ const props = defineProps<{
 const latestOperation = window.localStorage.getItem('latestGQLOperation')
 
 const retry = async () => {
-  const { launchpadClient } = await import('../main')
+  const { getLaunchpadClient } = await import('../main')
+  const launchpadClient = getLaunchpadClient()
 
   const op = latestOperation ? JSON.parse(latestOperation) : null
 
@@ -106,9 +109,9 @@ const retry = async () => {
   )
 }
 
-const headerText = computed(() => props.gql.title ? props.gql.title : t('launchpadErrors.generic.header'))
-const errorMessage = computed(() => props.gql.message ? props.gql.message : null)
-const stack = computed(() => props.gql.stack ? props.gql.stack : null)
+const headerText = computed(() => props.gql.baseError?.title ? props.gql.baseError.title : t('launchpadErrors.generic.header'))
+const errorMessage = computed(() => props.gql?.baseError?.message ? props.gql.baseError.message : null)
+const stack = computed(() => props.gql?.baseError?.stack ? props.gql.baseError.stack : null)
 const lastMutationDefined = computed(() => {
   return Boolean(latestOperation)
 })

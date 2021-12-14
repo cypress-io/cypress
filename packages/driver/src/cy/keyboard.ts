@@ -960,6 +960,9 @@ export class Keyboard {
       ..._.omitBy(
         {
           bubbles: true,
+          // allow propagation out of root of shadow-dom
+          // https://developer.mozilla.org/en-US/docs/Web/API/Event/composed
+          composed: true,
           cancelable,
           key,
           code,
@@ -1312,10 +1315,6 @@ export class Keyboard {
   }
 }
 
-const create = (state) => {
-  return new Keyboard(state)
-}
-
 let _defaults
 
 const reset = () => {
@@ -1360,7 +1359,6 @@ const defaults = (props: Partial<Cypress.KeyboardDefaultsOptions>) => {
 }
 
 export default {
-  create,
   defaults,
   getConfig,
   getKeymap,

@@ -6,6 +6,7 @@
     :page-name="pageName"
     :allow-automatic-prompt-open="allowAutomaticPromptOpen"
   />
+  <div v-else />
 </template>
 
 <script setup lang="ts">

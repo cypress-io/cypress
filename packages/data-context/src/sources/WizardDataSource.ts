@@ -19,31 +19,44 @@ export class WizardDataSource {
     return WIZARD_STEPS.find((step) => step.type === this.data.currentStep)?.title
   }
 
-  packagesToInstall (): Array<NexusGenObjects['WizardNpmPackage']> | null {
+  async packagesToInstall (): Promise<Array<NexusGenObjects['WizardNpmPackage']> | null> {
     if (!this.chosenFramework || !this.chosenBundler) {
       return null
     }
 
-    return [
+    const packages = [
       {
-        name: this.chosenFramework.name,
+        name: this.chosenFramework.name as string,
         description: PACKAGES_DESCRIPTIONS[this.chosenFramework.package],
         package: this.chosenFramework.package,
       },
       {
-        name: this.chosenBundler.name,
+        name: this.chosenBundler.name as string,
         description: PACKAGES_DESCRIPTIONS[this.chosenBundler.package],
-        package: this.chosenBundler.package,
+        package: this.chosenBundler.package as string,
       },
     ]
+
+    const storybookInfo = await this.ctx.storybook.loadStorybookInfo()
+    const { storybookDep } = this.chosenFramework
+
+    if (storybookInfo && storybookDep) {
+      packages.push({
+        name: storybookDep,
+        description: PACKAGES_DESCRIPTIONS[storybookDep],
+        package: storybookDep,
+      })
+    }
+
+    return packages
   }
 
   get chosenTestingTypePluginsInitialized () {
-    if (this.chosenTestingType === 'component' && this.ctx.activeProject?.ctPluginsInitialized) {
+    if (this.chosenTestingType === 'component' && this.ctx.currentProject?.ctPluginsInitialized) {
       return true
     }
 
-    if (this.chosenTestingType === 'e2e' && this.ctx.activeProject?.e2ePluginsInitialized) {
+    if (this.chosenTestingType === 'e2e' && this.ctx.currentProject?.e2ePluginsInitialized) {
       return true
     }
 
@@ -62,11 +75,11 @@ export class WizardDataSource {
     }
 
     if (data.currentStep === 'initializePlugins') {
-      if (data.chosenTestingType === 'component' && !this.ctx.activeProject?.ctPluginsInitialized) {
+      if (data.chosenTestingType === 'component' && !this.ctx.currentProject?.ctPluginsInitialized) {
         return false
       }
 
-      if (data.chosenTestingType === 'e2e' && !this.ctx.activeProject?.e2ePluginsInitialized) {
+      if (data.chosenTestingType === 'e2e' && !this.ctx.currentProject?.e2ePluginsInitialized) {
         return false
       }
     }
@@ -121,8 +134,8 @@ export class WizardDataSource {
       content: configFileContent,
       status: 'changes',
       warningText: ['Please merge the code below with your existing',
-        '<span class="px-1 inline-block rounded bg-warning-200 text-warning-600">cypress.config.js</span>'].join(' '),
-      warningLink: 'https://docs.cypress.io/config-file',
+        '<span class="rounded bg-warning-200 px-1 text-warning-600 inline-block">cypress.config.js</span>'].join(' '),
+      warningLink: 'https://on.cypress.io/guides/configuration',
     }
 
     if (testingType === 'component' && templateFileContent) {
@@ -267,14 +280,12 @@ const getFrameworkConfigFile = (opts: GetCodeOptsCt) => {
         const { getWebpackConfig } = require('nuxt')
 
         module.exports = {
-          component (on, config) {
-            on('dev-server:start', async (options) => {
-              let webpackConfig = await getWebpackConfig('modern', 'dev')
+          async devServer (cypressConfig, devServerConfig) {
+            let webpackConfig = await getWebpackConfig('modern', 'dev')
 
-              return startDevServer({
-                options,
-                webpackConfig,
-              })
+            return startDevServer({
+              options,
+              webpackConfig,
             })
           },
         }

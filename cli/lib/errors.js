@@ -38,6 +38,13 @@ const invalidRunProjectPath = {
   `,
 }
 
+const invalidOS = {
+  description: 'The Cypress App could not be installed. Your machine does not meet the operating system requirements.',
+  solution: stripIndent`
+
+  ${chalk.blue('https://on.cypress.io/guides/getting-started/installing-cypress#system-requirements')}`,
+}
+
 const failedDownload = {
   description: 'The Cypress App could not be downloaded.',
   solution: stripIndent`
@@ -73,7 +80,7 @@ const binaryNotExecutable = (executable) => {
 
     Please check that you have the appropriate user permissions.
 
-    You can also try clearing the cache with 'cypress cache clear' and reinstalling. 
+    You can also try clearing the cache with 'cypress cache clear' and reinstalling.
   `,
   }
 }
@@ -211,6 +218,16 @@ const invalidCypressEnv = {
 const invalidTestingType = {
   description: 'Invalid testingType',
   solution: `Please provide a valid testingType. Valid test types are ${chalk.cyan('\'e2e\'')} and ${chalk.cyan('\'component\'')}.`,
+}
+
+const incompatibleTestTypeFlags = {
+  description: '`--e2e` and `--component` cannot both be passed.',
+  solution: 'Either pass `--e2e` or `--component`, but not both.',
+}
+
+const incompatibleTestingTypeAndFlag = {
+  description: 'Set a `testingType` and also passed `--e2e` or `--component` flags.',
+  solution: 'Either set `testingType` or pass a testing type flag, but not both.',
 }
 
 /**
@@ -390,6 +407,7 @@ module.exports = {
     missingApp,
     notInstalledCI,
     missingDependency,
+    invalidOS,
     invalidSmokeTestDisplayError,
     versionMismatch,
     binaryNotExecutable,
@@ -404,5 +422,7 @@ module.exports = {
     incompatibleHeadlessFlags,
     invalidRunProjectPath,
     invalidTestingType,
+    incompatibleTestTypeFlags,
+    incompatibleTestingTypeAndFlag,
   },
 }

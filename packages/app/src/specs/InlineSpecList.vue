@@ -1,43 +1,61 @@
 <template>
-  <div>
-    <RouterLink
-      v-for="spec in specs"
-      :key="spec.node.id"
-      class="text-left grid grid-cols-[16px,auto,auto] items-center gap-10px"
-      :class="{ 'border-2 border-red-400': isCurrentSpec(spec) }"
-      :to="{ path: 'runner', query: { file: spec.node.relative } }"
-    >
-      <SpecName :gql="spec.node" />
-    </RouterLink>
+  <div class="w-280px">
+    <CreateSpecModal
+      v-if="props.gql.currentProject?.currentTestingType"
+      :show="showModal"
+      :gql="props.gql"
+      @close="showModal = false"
+    />
+    <InlineSpecListHeader
+      v-model:search="search"
+      :result-count="specs.length"
+      class="mb-12px"
+      @newSpec="showModal = true"
+    />
+    <InlineSpecListTree
+      :specs="specs"
+      class="pb-32px"
+    />
+    <!-- Fading top and bottom of the container. It may make sense for this to exist in a css utility or class. -->
+    <div class="bg-gradient-to-b to-transparent from-gray-1000 h-12px w-full top-66px right-0 left-0 scroller-fade absolute" />
+    <div class="bg-gradient-to-b from-transparent to-gray-1000 h-12px w-full right-0 bottom-12px scroller-fade absolute" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, Ref, ref } from 'vue'
 import { gql } from '@urql/vue'
-import type { SpecNode_InlineSpecListFragment, Specs_InlineSpecListFragment } from '../generated/graphql'
-import SpecName from './SpecName.vue'
-import { useSpecStore } from '../store'
-import { useRouter } from 'vue-router'
+import type { Specs_InlineSpecListFragment } from '../generated/graphql'
+import InlineSpecListHeader from './InlineSpecListHeader.vue'
+import InlineSpecListTree from './InlineSpecListTree.vue'
+import CreateSpecModal from './CreateSpecModal.vue'
+import fuzzySort from 'fuzzysort'
+import type { FuzzyFoundSpec } from '@packages/frontend-shared/src/utils/spec-utils'
 
 gql`
 fragment SpecNode_InlineSpecList on SpecEdge {
   node {
+    id
     name
     specType
     absolute
+    baseName
+    fileName
+    specFileExtension
+    fileExtension
     relative
   }
-  ...SpecListRow
 }
 `
 
 gql`
-fragment Specs_InlineSpecList on App {
-  activeProject {
+fragment Specs_InlineSpecList on Query {
+  ...CreateSpecModal
+  currentProject {
     id
     projectRoot
-    specs: specs(first: 25) {
+    currentTestingType
+    specs: specs(first: 1000) {
       edges {
         ...SpecNode_InlineSpecList
       }
@@ -50,13 +68,19 @@ const props = defineProps<{
   gql: Specs_InlineSpecListFragment
 }>()
 
-const specStore = useSpecStore()
+const showModal = ref(false)
+const search = ref('')
 
-const isCurrentSpec = (spec: SpecNode_InlineSpecListFragment) => {
-  return spec.node.relative === specStore.activeSpec?.relative
-}
+const specs = computed<FuzzyFoundSpec[]>(() => {
+  const specs = props.gql.currentProject?.specs?.edges.map((x) => ({ ...x.node, indexes: [] })) || []
 
-const router = useRouter()
+  if (!search.value) {
+    return specs
+  }
 
-const specs = computed(() => props.gql.activeProject?.specs?.edges || [])
+  return fuzzySort
+  .go(search.value, specs || [], { key: 'relative' })
+  .map(({ obj, indexes }) => ({ ...obj, indexes }))
+})
+
 </script>

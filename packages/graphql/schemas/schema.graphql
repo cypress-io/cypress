@@ -2,36 +2,6 @@
 ### Do not make changes to this file directly
 
 
-"""Namespace for information related to the app"""
-type App {
-  """Active project"""
-  activeProject: Project
-
-  """The mode the interactive runner was launched in"""
-  activeTestingType: TestingTypeEnum
-
-  """Browsers found that are compatible with Cypress"""
-  browsers: [Browser!]
-
-  """See if the GraphQL server is alive"""
-  healthCheck: String!
-
-  """Whether the browser has been opened for auth or not"""
-  isAuthBrowserOpened: Boolean!
-
-  """Whether the app is in global mode or not"""
-  isInGlobalMode: Boolean!
-
-  """Whether we are currently refreshing the browsers list"""
-  isRefreshingBrowsers: Boolean!
-
-  """All known projects for the app"""
-  projects: [Project!]!
-
-  """The currently selected browser for the application"""
-  selectedBrowser: Browser
-}
-
 """Base error"""
 type BaseError {
   message: String
@@ -71,25 +41,41 @@ type CloudOrganization implements Node {
   name: String
 
   """A connection for cloud projects associated with this organization"""
-  projects(after: String, before: String, first: Int, last: Int): CloudProjectConnection
+  projects(
+    """Returns the elements in the list that come after the specified cursor"""
+    after: String
+
+    """Returns the elements in the list that come before the specified cursor"""
+    before: String
+
+    """Returns the first n elements from the list."""
+    first: Int
+
+    """Returns the last n elements from the list."""
+    last: Int
+  ): CloudProjectConnection
 }
 
-"""A Connection adhering to the Relay Specification"""
 type CloudOrganizationConnection {
-  """A list of edges."""
+  """
+  https://facebook.github.io/relay/graphql/connections.htm#sec-Edge-Types
+  """
   edges: [CloudOrganizationEdge!]!
 
-  """A list of nodes."""
+  """Flattened list of CloudOrganization type"""
   nodes: [CloudOrganization!]!
 
-  """PageInfo result for the connection"""
+  """
+  https://facebook.github.io/relay/graphql/connections.htm#sec-undefined.PageInfo
+  """
   pageInfo: PageInfo!
 }
 
 type CloudOrganizationEdge {
+  """https://facebook.github.io/relay/graphql/connections.htm#sec-Cursor"""
   cursor: String!
 
-  """An edge adhering to the Relay Connection spec"""
+  """https://facebook.github.io/relay/graphql/connections.htm#sec-Node"""
   node: CloudOrganization!
 }
 
@@ -101,6 +87,9 @@ type CloudProject implements Node {
   """The latest run for a given spec"""
   latestRun: CloudRun
 
+  """Given name of the project"""
+  name: String!
+
   """The organization the project is a member of"""
   organization: CloudOrganization
 
@@ -108,28 +97,46 @@ type CloudProject implements Node {
   recordKeys: [CloudRecordKey!]
 
   """A connection field type"""
-  runs(after: String, before: String, cypressVersion: String, first: Int, last: Int, status: CloudRunStatus): CloudRunConnection
+  runs(
+    """Returns the elements in the list that come after the specified cursor"""
+    after: String
+
+    """Returns the elements in the list that come before the specified cursor"""
+    before: String
+    cypressVersion: String
+
+    """Returns the first n elements from the list."""
+    first: Int
+
+    """Returns the last n elements from the list."""
+    last: Int
+    status: CloudRunStatus
+  ): CloudRunConnection
 
   """Unique identifier for a Project"""
   slug: String!
 }
 
-"""A Connection adhering to the Relay Specification"""
 type CloudProjectConnection {
-  """A list of edges."""
+  """
+  https://facebook.github.io/relay/graphql/connections.htm#sec-Edge-Types
+  """
   edges: [CloudProjectEdge!]!
 
-  """A list of nodes."""
+  """Flattened list of CloudProject type"""
   nodes: [CloudProject!]!
 
-  """PageInfo result for the connection"""
+  """
+  https://facebook.github.io/relay/graphql/connections.htm#sec-undefined.PageInfo
+  """
   pageInfo: PageInfo!
 }
 
 type CloudProjectEdge {
+  """https://facebook.github.io/relay/graphql/connections.htm#sec-Cursor"""
   cursor: String!
 
-  """An edge adhering to the Relay Connection spec"""
+  """https://facebook.github.io/relay/graphql/connections.htm#sec-Node"""
   node: CloudProject!
 }
 
@@ -147,7 +154,7 @@ type CloudRecordKey implements Node {
 """A Recorded run of the Test Runner, typically to the cloud"""
 type CloudRun implements Node {
   commitInfo: CloudRunCommitInfo
-  createdAt: Date
+  createdAt: DateTime
 
   """Globally unique identifier representing a concrete GraphQL ObjectType"""
   id: ID!
@@ -175,6 +182,9 @@ type CloudRun implements Node {
 
   """This is the number of tests across all groups in the run"""
   totalTests: Int
+
+  """A link to the run page"""
+  url: String
 }
 
 type CloudRunCommitInfo {
@@ -192,23 +202,26 @@ type CloudRunCommitInfo {
   url: String
 }
 
-"""Connection type for CloudRun, adhering to the Relay Connection spec"""
 type CloudRunConnection {
-  """A list of edges."""
+  """
+  https://facebook.github.io/relay/graphql/connections.htm#sec-Edge-Types
+  """
   edges: [CloudRunEdge!]!
 
-  """A list of nodes."""
+  """Flattened list of CloudRun type"""
   nodes: [CloudRun!]!
 
-  """PageInfo result for the connection"""
+  """
+  https://facebook.github.io/relay/graphql/connections.htm#sec-undefined.PageInfo
+  """
   pageInfo: PageInfo!
 }
 
-"""Represents an individual Cloud test Run"""
 type CloudRunEdge {
+  """https://facebook.github.io/relay/graphql/connections.htm#sec-Cursor"""
   cursor: String!
 
-  """The item at the end of the edge."""
+  """https://facebook.github.io/relay/graphql/connections.htm#sec-Node"""
   node: CloudRun!
 }
 
@@ -226,6 +239,11 @@ enum CloudRunStatus {
 
 """A CloudUser represents an User stored in the Cypress Cloud"""
 type CloudUser implements Node {
+  """Url to manage cloud organizations for this user"""
+  cloudOrganizationsUrl: String
+
+  """Url to create a cloud organization for this user"""
+  createCloudOrganizationUrl: String
   email: String
 
   """The display name of the user, if we have one"""
@@ -235,21 +253,145 @@ type CloudUser implements Node {
   id: ID!
 
   """A connection field type"""
-  organizations(after: String, before: String, first: Int, last: Int): CloudOrganizationConnection
+  organizations(
+    """Returns the elements in the list that come after the specified cursor"""
+    after: String
+
+    """Returns the elements in the list that come before the specified cursor"""
+    before: String
+
+    """Returns the first n elements from the list."""
+    first: Int
+
+    """Returns the last n elements from the list."""
+    last: Int
+  ): CloudOrganizationConnection
 
   """Whether this user is the currently authenticated user"""
   userIsViewer: Boolean!
 }
 
+enum CodeGenGenResultType {
+  binary
+  text
+}
+
+"""Glob patterns for detecting files for code gen."""
+type CodeGenGlobs implements Node {
+  component: String!
+
+  """Relay style Node ID field for the CodeGenGlobs field"""
+  id: ID!
+  story: String!
+}
+
+"""Represents a spec on the file system"""
+type CodeGenResult implements Node {
+  """Content of generated file."""
+  content: String!
+
+  """Absolute path of generated file."""
+  file: String!
+
+  """Relay style Node ID field for the CodeGenResult field"""
+  id: ID!
+  status: CodeGenStatus!
+  type: CodeGenGenResultType!
+}
+
+"""Result of generated file with file parts"""
+type CodeGenResultWithFileParts {
+  codeGenResult: CodeGenResult!
+  fileParts: FileParts!
+}
+
+enum CodeGenStatus {
+  add
+  overwrite
+  skipped
+}
+
 enum CodeGenType {
   component
   integration
+  scaffoldIntegration
   story
 }
 
 enum CodeLanguageEnum {
   js
   ts
+}
+
+"""
+The currently opened Cypress project, represented by a cypress.config.{ts|js} file
+"""
+type CurrentProject implements Node & ProjectLike {
+  """The current branch of the project"""
+  branch: String
+
+  """Browsers found that are compatible with Cypress"""
+  browsers: [Browser!]
+
+  """The remote associated project from Cypress Cloud"""
+  cloudProject: CloudProject
+
+  """List of all code generation candidates stories"""
+  codeGenCandidates(glob: String!): [FileParts]
+  codeGenGlobs: CodeGenGlobs!
+
+  """Project configuration"""
+  config: JSON!
+
+  """Config File Absolute Path"""
+  configFileAbsolutePath: String
+
+  """Config File Path"""
+  configFilePath: String
+
+  """The currently selected browser for the application"""
+  currentBrowser: Browser
+
+  """The mode the interactive runner was launched in"""
+  currentTestingType: TestingTypeEnum
+
+  """Relay style Node ID field for the CurrentProject field"""
+  id: ID!
+
+  """Whether the user configured this project to use Component Testing"""
+  isCTConfigured: Boolean!
+
+  """Whether the user configured this project to use e2e Testing"""
+  isE2EConfigured: Boolean!
+
+  """Whether we are currently refreshing the browsers list"""
+  isRefreshingBrowsers: Boolean!
+
+  """Cached preferences for this project"""
+  preferences: ProjectPreferences
+
+  """Used to associate project with Cypress cloud"""
+  projectId: String
+
+  """Absolute path to the project on the filesystem"""
+  projectRoot: String!
+
+  """Specs for a project conforming to Relay Connection specification"""
+  specs(
+    """Returns the elements in the list that come after the specified cursor"""
+    after: String
+
+    """Returns the elements in the list that come before the specified cursor"""
+    before: String
+
+    """Returns the first n elements from the list."""
+    first: Int
+
+    """Returns the last n elements from the list."""
+    last: Int
+  ): SpecConnection
+  storybook: Storybook
+  title: String!
 }
 
 """
@@ -273,6 +415,25 @@ type DevState {
   When we have edited server related files, we may want to relaunch the client.
   """
   needsRelaunch: Boolean
+
+  """For debugging, the current application state"""
+  state: JSON
+}
+
+"""Represents an editor on the local machine"""
+type Editor {
+  """Binary that opens the editor"""
+  binary: String!
+  id: String!
+
+  """name of editor"""
+  name: String!
+}
+
+input FileDetailsInput {
+  absolute: String!
+  column: Int
+  line: Int
 }
 
 """Represents a spec on the file system"""
@@ -287,6 +448,11 @@ type FileParts implements Node {
   """
   baseName: String!
 
+  """
+  The spec file's extension, including "spec" pattern (e.g. .spec.tsx, -spec.tsx, -test.tsx)
+  """
+  fileExtension: String!
+
   """The first part of the file, without extensions (e.g. MySpec)"""
   fileName: String!
 
@@ -300,24 +466,9 @@ type FileParts implements Node {
   relative: String!
 }
 
-type FilePartsConnection {
-  """
-  https://facebook.github.io/relay/graphql/connections.htm#sec-Edge-Types
-  """
-  edges: [FilePartsEdge!]!
-
-  """
-  https://facebook.github.io/relay/graphql/connections.htm#sec-undefined.PageInfo
-  """
-  pageInfo: PageInfo!
-}
-
-type FilePartsEdge {
-  """https://facebook.github.io/relay/graphql/connections.htm#sec-Cursor"""
-  cursor: String!
-
-  """https://facebook.github.io/relay/graphql/connections.htm#sec-Node"""
-  node: FileParts!
+enum FrontendFrameworkCategoryEnum {
+  react
+  vue
 }
 
 enum FrontendFrameworkEnum {
@@ -348,10 +499,38 @@ type GitInfo {
   lastModifiedTimestamp: String
 }
 
+"""A project which exists on the filesystem but has not been opened"""
+type GlobalProject implements Node & ProjectLike {
+  """Relay style Node ID field for the GlobalProject field"""
+  id: ID!
+
+  """Used to associate project with Cypress cloud"""
+  projectId: String
+
+  """Absolute path to the project on the filesystem"""
+  projectRoot: String!
+  title: String!
+}
+
 """
 The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
 """
 scalar JSON
+
+"""local settings on a device-by-device basis"""
+type LocalSettings {
+  availableEditors: [Editor!]!
+  preferences: LocalSettingsPreferences!
+}
+
+"""local setting preferences"""
+type LocalSettingsPreferences {
+  autoScrollingEnabled: Boolean
+  isSpecsListOpen: Boolean
+  preferredEditorBinary: String
+  proxyBypass: String
+  proxyServer: String
+}
 
 type Mutation {
   """Add project to projects array and cache it"""
@@ -363,18 +542,16 @@ type Mutation {
 
   """Create an Index HTML file for a new component testing project"""
   appCreateComponentIndexHtml(template: String!): Boolean
-
-  """Create a Cypress config file for a new project"""
-  appCreateConfigFile(code: String!, configFilename: String!): Boolean
   clearActiveProject: Boolean
-
-  """Generate spec from source"""
-  codeGenSpec(codeGenCandidate: String!, type: CodeGenType!): Boolean
+  cloudProjectCreate(ciProviders: [String!], name: String!, orgId: ID!, public: Boolean!): CloudProject
 
   """
   Development only: Triggers or dismisses a prompted refresh by touching the file watched by our development scripts
   """
   devRelaunch(action: DevRelaunchAction!): Boolean
+
+  """Generate spec from source"""
+  generateSpecFromSource(codeGenCandidate: String!, type: CodeGenType!): GeneratedSpec
 
   """Hides the launchpad windows"""
   hideBrowserWindow: Boolean!
@@ -386,11 +563,9 @@ type Mutation {
   internal_clearAllProjectPreferencesCache: Boolean
   internal_clearLatestProjectCache: Boolean
   internal_clearProjectPreferencesCache(projectTitle: String!): Boolean
-  internal_triggerIpcToApp: Boolean
-  internal_triggerIpcToLaunchpad(msg: String!): Boolean
 
   """Launches project from open_project global singleton"""
-  launchOpenProject: Boolean
+  launchOpenProject(specPath: String): Boolean
 
   """Sets the active browser"""
   launchpadSetBrowser(
@@ -404,8 +579,15 @@ type Mutation {
   """Log out of Cypress Cloud"""
   logout: Boolean
 
-  """Set the current navigation item"""
-  navigationMenuSetItem(type: NavItem!): Boolean
+  """Open a path in preferred IDE"""
+  openDirectoryInIDE(path: String!): Boolean
+  openExternal(url: String!): Boolean
+
+  """Open a file on specified line and column in preferred IDE"""
+  openFileInIDE(input: FileDetailsInput!): Boolean
+
+  """Open a path in the local file explorer"""
+  openInFinder(path: String!): Boolean
 
   """show the launchpad windows"""
   reconfigureProject: Boolean!
@@ -415,24 +597,24 @@ type Mutation {
 
   """Reset the Wizard to the starting position"""
   resetWizard: Boolean!
+  scaffoldIntegration: [CodeGenResultWithFileParts!]!
 
   """Set active project to run tests on"""
   setActiveProject(path: String!): Boolean
 
-  """Set the current spec under test"""
-  setCurrentSpec(id: ID!): Boolean
+  """
+  Update local preferences (also known as  appData). The payload, `value`, should be a `JSON.stringified()` object of the new values you'd like to persist. Example: `setPreferences (value: JSON.stringify({ lastOpened: Date.now() }))`
+  """
+  setPreferences(value: String!): Boolean
 
   """Save the projects preferences to cache"""
-  setProjectPreferences(browserPath: String!, testingType: TestingTypeEnum!): App!
+  setProjectPreferences(browserPath: String!, testingType: TestingTypeEnum!): Query!
 
   """Save the prompt-shown state for this project"""
   setPromptShown(slug: String!): Boolean
 
   """show the launchpad at the browser picker step"""
   showElectronOnAppExit: Boolean
-
-  """Installs the dependencies for the component testing step"""
-  wizardInstallDependencies: Wizard
 
   """Sets the frontend bundler we want to use for the project"""
   wizardSetBundler(bundler: SupportedBundlers!): Boolean
@@ -445,33 +627,6 @@ type Mutation {
 
   """Updates the different fields of the wizard data store"""
   wizardUpdate(input: WizardUpdateInput!): Boolean
-
-  """Validates that the manual install has occurred properly"""
-  wizardValidateManualInstall: Wizard
-}
-
-enum NavItem {
-  learn
-  projectSetup
-  runs
-  settings
-}
-
-"""Container describing a single nav item"""
-type NavigationItem implements Node {
-  iconPath: String!
-
-  """Relay style Node ID field for the NavigationItem field"""
-  id: ID!
-  name: String!
-  selected: Boolean!
-  type: NavItem!
-}
-
-"""Container for state associated with the side navigation menu"""
-type NavigationMenu {
-  items: [NavigationItem!]!
-  selected: NavItem!
 }
 
 """Implements the Relay Node spec"""
@@ -481,34 +636,26 @@ interface Node {
 }
 
 """
-PageInfo object, adhering to the Relay Connection Spec:
-
-https://relay.dev/graphql/connections.htm#sec-undefined.PageInfo
+PageInfo cursor, as defined in https://facebook.github.io/relay/graphql/connections.htm#sec-undefined.PageInfo
 """
 type PageInfo {
   """
-  Must be the cursor corresponding to the last node in edges. Null if no such node exists
+  The cursor corresponding to the last nodes in edges. Null if the connection is empty.
   """
   endCursor: String
 
   """
   Used to indicate whether more edges exist following the set defined by the clients arguments.
-  If the client is paginating with first/after, then the server must return true if further edges
-  exist, otherwise false. If the client is paginating with last/before, then the client may return
-  true if edges further from before exist, if it can do so efficiently, otherwise may return false.
   """
   hasNextPage: Boolean!
 
   """
   Used to indicate whether more edges exist prior to the set defined by the clients arguments.
-  If the client is paginating with last/before, then the server must return true if prior edges exist,
-  otherwise false. If the client is paginating with first/after, then the client may return true if
-  edges prior to after exist, if it can do so efficiently, otherwise may return false.
   """
   hasPreviousPage: Boolean!
 
   """
-  Must be the cursor corresponding to the first node in edges. Null if no such node exists
+  The cursor corresponding to the first nodes in edges. Null if the connection is empty.
   """
   startCursor: String
 }
@@ -520,74 +667,13 @@ enum PluginsState {
   uninitialized
 }
 
-"""A Cypress Project is represented by a cypress.config.{ts|js} file"""
-type Project implements Node {
-  """The remote associated project from Cypress Cloud"""
-  cloudProject: CloudProject
-
-  """List of all code generation candidates stories"""
-  codeGenCandidates(
-    """Returns the elements in the list that come after the specified cursor"""
-    after: String
-
-    """Returns the elements in the list that come before the specified cursor"""
-    before: String
-
-    """Returns the first n elements from the list."""
-    first: Int
-    glob: String!
-
-    """Returns the last n elements from the list."""
-    last: Int
-  ): FilePartsConnection
-
-  """Glob pattern for component searching"""
-  codeGenGlob(type: CodeGenType!): String!
-
-  """Project configuration"""
-  config: JSON!
-
-  """Config File Path"""
-  configFilePath: String
-
-  """Currently selected spec"""
-  currentSpec: Spec
-  generatedSpec: GeneratedSpec
-
-  """Relay style Node ID field for the Project field"""
-  id: ID!
-
-  """Whether the user configured this project to use Component Testing"""
-  isCTConfigured: Boolean!
-
-  """Whether the user configured this project to use e2e Testing"""
-  isE2EConfigured: Boolean!
-
-  """Cached preferences for this project"""
-  preferences: ProjectPreferences
-
+"""Common base fields inherited by GlobalProject / CurrentProject"""
+interface ProjectLike {
   """Used to associate project with Cypress cloud"""
   projectId: String
+
+  """Absolute path to the project on the filesystem"""
   projectRoot: String!
-
-  """Project saved state"""
-  savedState: JSON
-
-  """Specs for a project conforming to Relay Connection specification"""
-  specs(
-    """Returns the elements in the list that come after the specified cursor"""
-    after: String
-
-    """Returns the elements in the list that come before the specified cursor"""
-    before: String
-
-    """Returns the first n elements from the list."""
-    first: Int
-
-    """Returns the last n elements from the list."""
-    last: Int
-  ): SpecConnection
-  storybook: Storybook
   title: String!
 }
 
@@ -602,7 +688,6 @@ type ProjectPreferences {
 
 """The root "Query" type containing all entry fields for our querying"""
 type Query {
-  app: App!
   baseError: BaseError
 
   """Returns an object conforming to the Relay spec"""
@@ -623,11 +708,26 @@ type Query {
   """A user within the Cypress Cloud"""
   cloudViewer: CloudUser
 
+  """The currently opened project"""
+  currentProject: CurrentProject
+
   """The state of any info related to local development of the runner"""
   dev: DevState!
 
-  """Metadata about the nagivation menu"""
-  navigationMenu: NavigationMenu
+  """Whether the browser has been opened for auth or not"""
+  isAuthBrowserOpened: Boolean!
+
+  """Whether the app is in global mode or not"""
+  isInGlobalMode: Boolean!
+
+  """local settings on a device-by-device basis"""
+  localSettings: LocalSettings!
+
+  """All known projects for the app"""
+  projects: [ProjectLike!]!
+
+  """Previous versions of cypress and their release date"""
+  versions: VersionData
 
   """Metadata about the wizard, null if we arent showing the wizard"""
   wizard: Wizard!
@@ -726,6 +826,34 @@ type TestingTypeInfo implements Node {
   type: TestingTypeEnum!
 }
 
+"""Version of Cypress and release date"""
+type Version {
+  """unique id"""
+  id: String!
+
+  """Release date as an iso8601 timestamp"""
+  released: String!
+
+  """Version number (follows semantic versioning)"""
+  version: String!
+}
+
+"""Version of Cypress and release date"""
+type VersionData {
+  """current version of cypress you are using"""
+  current: Version!
+
+  """latest version of cypress"""
+  latest: Version!
+}
+
+"""A warning"""
+type Warning {
+  message: String!
+  setupStep: String
+  title: String!
+}
+
 """
 The Wizard is a container for any state associated with initial onboarding to Cypress
 """
@@ -774,10 +902,12 @@ type Wizard {
   The testing type we are setting in the wizard, null if this has not been chosen
   """
   testingType: TestingTypeEnum
-  testingTypes: [TestingTypeInfo!]!
 
   """The title of the page, given the current step of the wizard"""
   title: String
+
+  """A list of warnings"""
+  warnings: [Warning!]!
 }
 
 """Wizard bundler"""
@@ -824,6 +954,9 @@ enum WizardConfigFileStatusEnum {
 
 """A frontend framework that we can setup within the app"""
 type WizardFrontendFramework implements Node {
+  """Classification or label of framework. e.g. React, Vue, or Other"""
+  category: FrontendFrameworkCategoryEnum!
+
   """Relay style Node ID field for the WizardFrontendFramework field"""
   id: ID!
 

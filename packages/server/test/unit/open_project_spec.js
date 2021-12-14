@@ -1,13 +1,11 @@
 require('../spec_helper')
 
 const path = require('path')
-const os = require('os')
-const chokidar = require('chokidar')
-const browsers = require(`${root}lib/browsers`)
-const ProjectBase = require(`${root}lib/project-base`).ProjectBase
+const browsers = require(`../../lib/browsers`)
+const ProjectBase = require(`../../lib/project-base`).ProjectBase
 const { openProject } = require('../../lib/open_project')
-const preprocessor = require(`${root}lib/plugins/preprocessor`)
-const runEvents = require(`${root}lib/plugins/run_events`)
+const preprocessor = require(`../../lib/plugins/preprocessor`)
+const runEvents = require(`../../lib/plugins/run_events`)
 const Fixtures = require('@tooling/system-tests/lib/fixtures')
 
 const todosPath = Fixtures.projectPath('todos')
@@ -36,18 +34,6 @@ describe('lib/open_project', () => {
     sinon.stub(preprocessor, 'removeFile')
 
     return openProject.create('/project/root', {}, {})
-  })
-
-  context('#create', () => {
-    // @see https://github.com/cypress-io/cypress/issues/18094
-    it('warns on win 32bit', async () => {
-      sinon.stub(os, 'platform').returns('win32')
-      sinon.stub(os, 'arch').returns('ia32')
-      const onWarning = sinon.stub()
-
-      await openProject.create('/root', {}, { onWarning })
-      expect(onWarning.getCall(0).args[0].message).to.include('You are running a 32-bit build')
-    })
   })
 
   context('#launch', () => {
@@ -225,74 +211,6 @@ describe('lib/open_project', () => {
         .then(() => {
           expect(runEvents.execute).to.be.calledWith('after:spec')
           expect(onError).to.be.calledWith(err)
-        })
-      })
-    })
-  })
-
-  context('#getSpecChanges', () => {
-    beforeEach(function () {
-      this.watcherStub = {
-        on: sinon.stub(),
-        close: sinon.stub(),
-      }
-
-      sinon.stub(chokidar, 'watch').returns(this.watcherStub)
-    })
-
-    it('watches spec files', function () {
-      return openProject.getSpecChanges({}).then(() => {
-        expect(chokidar.watch).to.be.calledWith(this.config.testFiles, {
-          cwd: this.config.integrationFolder,
-          ignored: this.config.ignoreTestFiles,
-          ignoreInitial: true,
-        })
-      })
-    })
-
-    it('calls onChange callback when file is added', function () {
-      const onChange = sinon.spy()
-
-      this.watcherStub.on.withArgs('add').yields()
-
-      return openProject.getSpecChanges({ onChange }).then(() => {
-        expect(onChange).to.be.called
-      })
-    })
-
-    it('calls onChange callback when file is removed', function () {
-      const onChange = sinon.spy()
-
-      this.watcherStub.on.withArgs('unlink').yields()
-
-      return openProject.getSpecChanges({ onChange }).then(() => {
-        expect(onChange).to.be.called
-      })
-    })
-
-    it('only calls onChange once if there are multiple changes in a row', function () {
-      const onChange = sinon.spy()
-
-      this.watcherStub.on.withArgs('unlink').yields()
-      this.watcherStub.on.withArgs('add').yields()
-      this.watcherStub.on.withArgs('unlink').yields()
-      this.watcherStub.on.withArgs('add').yields()
-
-      return openProject.getSpecChanges({ onChange }).then(() => {
-        expect(onChange).to.be.calledOnce
-      })
-    })
-
-    it('destroys and creates specsWatcher as expected', function () {
-      return openProject.getSpecChanges()
-      .then(() => {
-        expect(openProject.specsWatcher).to.exist
-        openProject.stopSpecsWatcher()
-        expect(openProject.specsWatcher).to.be.null
-
-        return openProject.getSpecChanges()
-        .then(() => {
-          expect(openProject.specsWatcher).to.exist
         })
       })
     })

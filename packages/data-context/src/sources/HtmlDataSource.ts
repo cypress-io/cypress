@@ -3,35 +3,60 @@
  * including the pre-hydration we use to bootstrap the script data for fast
  * initial loading
  */
-import type { DataContextShell } from '../DataContextShell'
+import type { DataContext } from '../DataContext'
 import { getPathToDist } from '@packages/resolve-dist'
 
 export class HtmlDataSource {
-  constructor (private ctx: DataContextShell) {}
+  constructor (private ctx: DataContext) {}
+
+  async fetchLaunchpadInitialData () {
+    const graphql = this.ctx.graphqlClient()
+
+    await Promise.all([
+      graphql.executeQuery('HeaderBar_HeaderBarQueryDocument', {}),
+      graphql.executeQuery('AppQueryDocument', {}),
+      graphql.executeQuery('MainLaunchpadQueryDocument', {}),
+    ])
+
+    return graphql.getSSRData()
+  }
 
   async fetchAppInitialData () {
     const graphql = this.ctx.graphqlClient()
 
     await Promise.all([
-      graphql.executeQuery('AppQueryDocument', {}),
-      graphql.executeQuery('NewSpec_NewSpecQueryDocument', {}),
-      graphql.executeQuery('ProjectSettingsDocument', {}),
+      graphql.executeQuery('SettingsDocument', {}),
       graphql.executeQuery('SpecsPageContainerDocument', {}),
       graphql.executeQuery('HeaderBar_HeaderBarQueryDocument', {}),
+      graphql.executeQuery('SideBarNavigationDocument', {}),
     ])
 
     return graphql.getSSRData()
   }
 
   async fetchAppHtml () {
-    if (this.ctx.env.CYPRESS_INTERNAL_VITE_APP_PORT) {
+    if (process.env.CYPRESS_INTERNAL_VITE_DEV) {
       const response = await this.ctx.util.fetch(`http://localhost:${process.env.CYPRESS_INTERNAL_VITE_APP_PORT}/`, { method: 'GET' })
       const html = await response.text()
 
       return html
     }
 
-    return this.ctx.fs.readFile(getPathToDist('app'), 'utf8')
+    // Check if the file exists. If it doesn't, it probably means that Vite is re-building
+    // and we should retry a few times until the file exists
+    let retryCount = 0
+    let err
+
+    while (retryCount < 5) {
+      try {
+        return await this.ctx.fs.readFile(getPathToDist('app', 'index.html'), 'utf8')
+      } catch (e) {
+        err = e
+        await new Promise((resolve) => setTimeout(resolve, 1000))
+      }
+    }
+
+    throw err
   }
 
   /**

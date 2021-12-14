@@ -81,6 +81,36 @@ describe('src/cy/commands/commands', () => {
         expect($ce.get(0)).to.eq(ce.get(0))
       })
     })
+
+    it('throws when attempting to add an existing command', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.eq('`Cypress.Commands.add()` is used to create new commands, but `get` is an existing Cypress command.\n\nPlease use `Cypress.Commands.overwrite()` if you would like to overwrite an existing command.\n')
+        expect(err.docsUrl).to.eq('https://on.cypress.io/custom-commands')
+
+        done()
+      })
+
+      Cypress.Commands.add('get', () => {
+        cy
+        .get('[contenteditable]')
+        .first()
+      })
+    })
+
+    it('throws when attempting to add a command with the same name as an internal function', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.eq('`Cypress.Commands.add()` cannot create a new command named `addChainer` because that name is reserved internally by Cypress.')
+        expect(err.docsUrl).to.eq('https://on.cypress.io/custom-commands')
+
+        done()
+      })
+
+      Cypress.Commands.add('addChainer', () => {
+        cy
+        .get('[contenteditable]')
+        .first()
+      })
+    })
   })
 
   context('errors', () => {

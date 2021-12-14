@@ -243,4 +243,30 @@ describe('code-generator', () => {
       return parse(fileContent, { sourceType: 'module', plugins: ['jsx'] })
     }).not.throw()
   })
+
+  it('should generate from scaffoldIntegration', async () => {
+    const target = path.join(tmpPath, 'scaffold-integration')
+    const action: Action = {
+      templateDir: templates.scaffoldIntegration,
+      target,
+    }
+
+    // We don't control the scaffold-integration template. It comes from
+    // https://github.com/cypress-io/cypress-example-kitchensink
+    const codeGenResult = await codeGenerator(action, {})
+
+    expect(codeGenResult.files.length).gt(0)
+    for (const res of codeGenResult.files) {
+      expect(async () => await fs.access(res.file, fs.constants.F_OK)).not.throw()
+      const shouldParse = ['js', 'ts'].some((ext) => res.file.endsWith(ext))
+
+      if (shouldParse) {
+        expect(() => {
+          return parse(res.content, {
+            sourceType: 'module',
+          })
+        }).not.throw()
+      }
+    }
+  })
 })

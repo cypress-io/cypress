@@ -1,5 +1,6 @@
 import SpecsListHeader from './SpecsListHeader.vue'
 import { defineComponent, ref, h } from 'vue'
+import { defaultMessages } from '@cy/i18n'
 
 const buttonSelector = '[data-testid=new-spec-button]'
 const inputSelector = 'input[type=search]'
@@ -30,13 +31,33 @@ describe('<SpecsListHeader />', { keystrokeDelay: 0 }, () => {
     const onNewSpec = cy.spy().as('new-spec')
     const search = ref('')
 
-    cy.mount(<div class="max-w-800px p-12 resize overflow-auto"><SpecsListHeader
+    cy.mount(() => (<div class="max-w-800px p-12 resize overflow-auto"><SpecsListHeader
       modelValue={search.value}
       onNewSpec={onNewSpec}
-    /></div>)
+      resultCount={0}
+    /></div>))
     .get(buttonSelector)
     .click()
     .get('@new-spec')
     .should('have.been.called')
+  })
+
+  it('shows the result count correctly', () => {
+    const mountWithResultCount = (count = 0) => {
+      cy.mount(() => (<div class="max-w-800px p-12 resize overflow-auto"><SpecsListHeader
+        modelValue={''}
+        resultCount={count}
+      /></div>))
+    }
+
+    mountWithResultCount(0)
+    cy.contains(`0 ${ defaultMessages.specPage.matchPlural}`)
+    .should('be.visible')
+    .and('have.attr', 'aria-live', 'polite')
+
+    mountWithResultCount(1)
+    cy.contains(`1 ${ defaultMessages.specPage.matchSingular}`).should('be.visible')
+    mountWithResultCount(100)
+    cy.contains(`100 ${ defaultMessages.specPage.matchPlural}`).should('be.visible')
   })
 })
