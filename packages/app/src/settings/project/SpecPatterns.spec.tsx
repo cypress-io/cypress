@@ -1,4 +1,3 @@
-import { SpecPatternsFragmentDoc } from '../../generated/graphql-test'
 import SpecPatterns from './SpecPatterns.vue'
 
 describe('<SpecPatterns />', () => {
@@ -7,14 +6,6 @@ describe('<SpecPatterns />', () => {
   })
 
   it('renders the SpecPatterns', () => {
-    cy.mountFragment(SpecPatternsFragmentDoc, {
-      render: (gqlVal) => (
-        <div class="py-4 px-8">
-          <SpecPatterns
-            gql={gqlVal}
-          />
-        </div>
-      ),
-    })
+    cy.mount(<SpecPatterns />)
   })
 })

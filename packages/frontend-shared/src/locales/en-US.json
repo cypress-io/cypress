@@ -358,14 +358,6 @@
       "autoScrollingEnabled": {
         "title": "Auto Scrolling Enabled",
         "description": "Scroll behavior when running tests."
-      },
-      "watchForSpecChange": {
-        "title": "Watch for Spec Change",
-        "description": "Re-run specs when a file changes."
-      },
-      "useDarkSidebar": {
-        "title": "Dark sidebar",
-        "description": "Select the color theme of the app sidebar."
       }
     },
     "footer": {

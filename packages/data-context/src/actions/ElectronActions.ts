@@ -1,4 +1,4 @@
-import type { BrowserWindow } from 'electron'
+import type { App, BrowserWindow } from 'electron'
 import os from 'os'
 import type { DataContext } from '..'
 
@@ -18,18 +18,21 @@ export class ElectronActions {
     return os.platform() === 'darwin'
   }
 
+  setElectronApp (app: App) {
+    this.electron.app = app
+  }
+
   setBrowserWindow (window: BrowserWindow) {
     this.electron.browserWindow = window
   }
 
   hideBrowserWindow () {
-    this.electron.browserWindow?.hide()
-
-    if (this.isMac) {
-      this.ctx.electronApp?.dock.hide()
-    } else {
-      this.electron.browserWindow?.setSkipTaskbar(true)
-    }
+    // this.electron.browserWindow?.hide()
+    // if (this.isMac) {
+    //   this.ctx.electronApp?.dock.hide()
+    // } else {
+    //   this.electron.browserWindow?.setSkipTaskbar(true)
+    // }
   }
 
   showBrowserWindow () {

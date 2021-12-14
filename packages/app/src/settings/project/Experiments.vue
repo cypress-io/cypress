@@ -45,7 +45,7 @@ fragment Experiments on CurrentProject {
 `
 
 const props = defineProps<{
-  gql?: ExperimentsFragment
+  gql?: ExperimentsFragment | null
 }>()
 
 const localExperiments = computed(() => {

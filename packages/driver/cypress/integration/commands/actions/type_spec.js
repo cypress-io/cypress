@@ -3592,5 +3592,16 @@ describe('src/cy/commands/actions/type - #type', () => {
       .find('input', { includeShadowDom: true })
       .type('foo')
     })
+
+    // https://github.com/cypress-io/cypress/issues/17531
+    it('text events propagate out of shadow root', () => {
+      cy.visit('fixtures/shadow-dom-type.html')
+
+      cy
+      .get('test-element').shadow()
+      .find('input').type('asdf')
+
+      cy.get('#result').should('have.text', 'typed')
+    })
   })
 })
