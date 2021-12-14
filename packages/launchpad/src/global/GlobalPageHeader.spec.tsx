@@ -44,7 +44,7 @@ describe('<GlobalPageHeader />', () => {
 
   it('handles a file upload', () => {
     cy.get(fileInputSelector)
-    .attachFile('fixtures/test-project/cypress.config.ts')
+    .attachFile('cypress/fixtures/test-project/cypress.config.ts')
     .get(addProjectSelector)
     .click()
     .get('@fileUpload').should('have.been.called')
