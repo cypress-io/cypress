@@ -127,7 +127,8 @@ const formatSymbolSummary = (failures) => {
 }
 
 const macOSRemovePrivate = (str) => {
-  if (str.startsWith('/private')) {
+  // consistent snapshots when running system tests on macOS
+  if (process.platform === 'darwin' && str.startsWith('/private')) {
     return str.slice(8)
   }
 
