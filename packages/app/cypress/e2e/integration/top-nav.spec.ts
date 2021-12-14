@@ -238,9 +238,40 @@ describe('App Top Nav Workflows', () => {
     })
   })
 
-  // describe('Docs', () => {
-  //   it('should render dropdown with documentation links', () => {
+  describe('Docs', () => {
+    beforeEach(() => {
+      setupMockBrowsers()
+      cy.openProject('launchpad', ['--browser', 'firefox'])
+      cy.startAppServer()
+      cy.visitApp()
 
-  //   })
-  // })
+      cy.findByTestId('app-header-bar').findByRole('button', { name: 'Docs', expanded: false }).as('docsButton')
+    })
+
+    it('shows shows popover with additional doc links', () => {
+      cy.get('@docsButton').click().should('have.attr', 'aria-expanded', 'true')
+
+      cy.findByRole('heading', { name: 'Getting Started', level: 2 })
+      cy.findByRole('heading', { name: 'References', level: 2 })
+      cy.findByRole('heading', { name: 'Run in CI/CD', level: 2 })
+
+      cy.findByRole('link', { name: 'Write your first test' }).should('have.attr', 'href', 'https://on.cypress.io/writing-first-test?utm_medium=Docs+Menu&utm_content=First+Test')
+      cy.findByRole('link', { name: 'Testing your app' }).should('have.attr', 'href', 'https://on.cypress.io/testing-your-app?utm_medium=Docs+Menu&utm_content=Testing+Your+App')
+      cy.findByRole('link', { name: 'Organizing Tests' }).should('have.attr', 'href', 'https://on.cypress.io/writing-and-organizing-tests?utm_medium=Docs+Menu&utm_content=Organizing+Tests')
+
+      cy.findByRole('link', { name: 'Best Practices' }).should('have.attr', 'href', 'https://on.cypress.io/best-practices?utm_medium=Docs+Menu&utm_content=Best+Practices')
+      cy.findByRole('link', { name: 'Configuration' }).should('have.attr', 'href', 'https://on.cypress.io/configuration?utm_medium=Docs+Menu&utm_content=Configuration')
+      cy.findByRole('link', { name: 'API' }).should('have.attr', 'href', 'https://on.cypress.io/api?utm_medium=Docs+Menu&utm_content=API')
+
+      cy.findByRole('link', { name: 'Run tests faster' }).should('have.attr', 'href', 'https://on.cypress.io/parallelization?utm_medium=Docs+Menu&utm_content=Parallelization')
+
+      cy.findByRole('button', { name: 'Set up CI' }).click()
+      cy.findByText('Configure CI').should('be.visible')
+      cy.findByRole('button', { name: 'Close' }).click()
+
+      cy.findByRole('button', { name: 'Smart Orchestration' }).click()
+      cy.findByText('Run tests faster in CI').should('be.visible')
+      cy.findByRole('button', { name: 'Close' }).click()
+    })
+  })
 })
