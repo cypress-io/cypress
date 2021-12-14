@@ -14,6 +14,7 @@ import findSystemNode from './util/find_system_node'
 import { graphqlSchema } from '@packages/graphql/src/schema'
 import { openExternal } from '@packages/server/lib/gui/links'
 import { getUserEditor } from './util/editors'
+import devServer from './plugins/dev-server'
 import * as savedState from './saved_state'
 import appData from './util/app_data'
 
@@ -58,6 +59,9 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       },
       initializeProject (args: InitializeProjectOptions, options: OpenProjectLaunchOptions, browsers: FoundBrowser[]) {
         return openProject.create(args.projectRoot, args, options, browsers)
+      },
+      getDevServer () {
+        return devServer
       },
       insertProjectToCache (projectRoot: string) {
         cache.insertProject(projectRoot)

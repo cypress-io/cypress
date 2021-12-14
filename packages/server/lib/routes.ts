@@ -5,7 +5,6 @@ import { ErrorRequestHandler, Router } from 'express'
 import send from 'send'
 import { getPathToDist } from '@packages/resolve-dist'
 
-import type { SpecsStore } from './specs-store'
 import type { Browser } from './browsers/types'
 import type { NetworkProxy } from '@packages/proxy'
 import type { Cfg } from './project-base'
@@ -19,7 +18,6 @@ const debug = Debug('cypress:server:routes')
 
 export interface InitializeRoutes {
   ctx: DataContext
-  specsStore: SpecsStore
   config: Cfg
   getSpec: () => FoundSpec | null
   getCurrentBrowser: () => Browser
@@ -37,7 +35,6 @@ export const createCommonRoutes = ({
   testingType,
   getSpec,
   getCurrentBrowser,
-  specsStore,
   getRemoteState,
   nodeProxy,
   ctx,
@@ -48,7 +45,6 @@ export const createCommonRoutes = ({
       ...options.config,
       testingType,
       browser: options.getCurrentBrowser?.(),
-      specs: options.specsStore?.specFiles,
     } as Cfg
 
     if (testingType === 'e2e') {
@@ -79,7 +75,6 @@ export const createCommonRoutes = ({
     const options = makeServeConfig({
       config,
       getCurrentBrowser,
-      specsStore,
     })
 
     res.json(options)
@@ -139,7 +134,6 @@ export const createCommonRoutes = ({
         getSpec,
         getCurrentBrowser,
         getRemoteState,
-        specsStore,
         exit,
       })
     }

@@ -1,7 +1,6 @@
 import Debug from 'debug'
 import _ from 'lodash'
 import send from 'send'
-import type { SpecsStore } from '@packages/server/lib/specs-store'
 import { getPathToIndex, getPathToDist } from '@packages/resolve-dist'
 import type { Cfg } from '@packages/server/lib/project-base'
 import type { Browser } from '@packages/server/lib/browsers/types'
@@ -9,7 +8,6 @@ import type { Browser } from '@packages/server/lib/browsers/types'
 interface ServeOptions {
   config: Cfg
   getCurrentBrowser: () => Browser
-  specsStore: SpecsStore
 }
 
 const debug = Debug('cypress:server:runner-ct')
@@ -25,7 +23,6 @@ export const makeServeConfig = (options) => {
   const config = {
     ...options.config,
     browser: options.getCurrentBrowser(),
-    specs: options.specsStore.specFiles,
   } as Cfg
 
   // TODO: move the component file watchers in here

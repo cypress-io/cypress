@@ -357,6 +357,7 @@ export class DataContext {
       this.actions.project.clearActiveProject(),
       // this.actions.currentProject?.clearCurrentProject(),
       this.actions.dev.dispose(),
+      this.project.stopSpecWatcher(),
     ])
   }
 

@@ -22,7 +22,7 @@ const _serveNonProxiedError = (res: Response) => {
   })
 }
 
-export interface ServeOptions extends Pick<InitializeRoutes, 'getSpec' | 'config' | 'getCurrentBrowser' | 'getRemoteState' | 'specsStore' | 'exit'> {
+export interface ServeOptions extends Pick<InitializeRoutes, 'getSpec' | 'config' | 'getCurrentBrowser' | 'getRemoteState' | 'exit'> {
   testingType: Cypress.TestingType
 }
 
@@ -47,7 +47,7 @@ export const runner = {
       return _serveNonProxiedError(res)
     }
 
-    let { config, getRemoteState, getCurrentBrowser, getSpec, specsStore, exit } = options
+    let { config, getRemoteState, getCurrentBrowser, getSpec, exit } = options
 
     config = _.clone(config)
     // at any given point, rather than just arbitrarily modifying it.
@@ -71,8 +71,7 @@ export const runner = {
     config.version = pkg.version
     config.platform = os.platform() as PlatformName
     config.arch = os.arch()
-    config.spec = spec ? { ...spec, name: spec.baseName } : null
-    config.specs = specsStore.specFiles
+    config.spec = spec ?? null
     config.browser = getCurrentBrowser()
     config.exit = exit ?? true
 

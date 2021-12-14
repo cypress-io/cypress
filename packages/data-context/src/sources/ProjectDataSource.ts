@@ -4,6 +4,7 @@ import { scanFSForAvailableDependency } from 'create-cypress-tests'
 import path from 'path'
 import Debug from 'debug'
 import commonPathPrefix from 'common-path-prefix'
+import chokidar, { FSWatcher } from 'chokidar'
 
 const debug = Debug('cypress:data-context')
 
@@ -72,6 +73,8 @@ export function transformSpec (projectRoot: string, absolute: string, testingTyp
 }
 
 export class ProjectDataSource {
+  private _specWatcher: FSWatcher | null = null
+
   constructor (private ctx: DataContext) {}
 
   private get api () {
@@ -94,8 +97,13 @@ export class ProjectDataSource {
 
   async specPatternForTestingType (projectRoot: string, testingType: Cypress.TestingType) {
     const config = await this.getConfig(projectRoot)
+    const specPattern = config[testingType]?.specPattern
 
-    return config[testingType]?.specPattern
+    if (!specPattern) {
+      throw new Error('Could not find pattern to load specs')
+    }
+
+    return specPattern
   }
 
   async findSpecs (projectRoot: string, testingType: Cypress.TestingType, specPattern: string | string[]): Promise<FoundSpec[]> {
@@ -117,6 +125,39 @@ export class ProjectDataSource {
     }
 
     return this.ctx.currentProject.specs?.find((x) => x.absolute === absolute)
+  }
+
+  async startSpecWatcher (projectRoot: string, testingType: Cypress.TestingType) {
+    if (this._specWatcher) {
+      await this._specWatcher.close()
+    }
+
+    const currentProject = this.ctx.currentProject
+
+    if (!currentProject) {
+      throw new Error('Cannot start spec watcher without current project')
+    }
+
+    const specPatterns = await this.specPatternForTestingType(projectRoot, testingType)
+
+    const onSpecsChanged = async () => {
+      const specFiles = await this.findSpecs(projectRoot, testingType, specPatterns)
+
+      currentProject.specs = specFiles
+      if (testingType === 'component') {
+        this.api.getDevServer().updateSpecs(specFiles)
+      }
+
+      this.ctx.emitter.toApp()
+    }
+
+    this._specWatcher = chokidar.watch(specPatterns ?? [], { cwd: projectRoot, ignoreInitial: true })
+    this._specWatcher.on('add', onSpecsChanged)
+    this._specWatcher.on('unlink', onSpecsChanged)
+  }
+
+  async stopSpecWatcher () {
+    await this._specWatcher?.close()
   }
 
   async getResolvedConfigFields (projectRoot: string): Promise<ResolvedFromConfig[]> {

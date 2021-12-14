@@ -6,7 +6,10 @@ describe('App: Index', () => {
   beforeEach(() => {
     cy.scaffoldProject('non-existent-spec')
     cy.openProject('non-existent-spec')
-    cy.withCtx(async (ctx, o) => {
+    cy.withCtx(async (ctx, { testState }) => {
+      testState.newFilePath = 'cypress/integration/new-file-spec.js'
+
+      await ctx.actions.file.removeFileInProject(testState.newFilePath)
       await ctx.actions.file.removeFileInProject('cypress/integration/spec.js')
     })
 
@@ -21,6 +24,30 @@ describe('App: Index', () => {
       // In the meantime, the Create Spec vs No Specs Found differences are covered in component tests,
       // we just can't mock config values in GQL yet.
       cy.contains(defaultMessages.createSpec.page.defaultPatternNoSpecs.title).should('be.visible')
+    })
+  })
+
+  context('with specs', () => {
+    it('refreshes spec list on spec changes', () => {
+      cy.visitApp()
+
+      cy.withCtx(async (ctx, { testState }) => {
+        const addedSpec = ctx.currentProject?.specs?.find((spec) => spec.absolute.includes(testState.newFilePath))
+
+        expect(addedSpec).be.equal(undefined)
+
+        await ctx.actions.file.writeFileInProject(testState.newFilePath, '')
+      })
+
+      // ctx.emitter.toApp is not triggering a re-query, so we can't test against UI (yet)
+      cy.wait(200)
+      cy.withCtx(async (ctx, { testState }) => {
+        expect(ctx.currentProject?.specs).have.length(1)
+
+        const addedSpec = ctx.currentProject?.specs?.find((spec) => spec.absolute.includes(testState.newFilePath))
+
+        expect(addedSpec).not.be.equal(undefined)
+      })
     })
   })
 

@@ -26,6 +26,9 @@ export interface ProjectApiShape {
   clearProjectPreferences(projectTitle: string): Promise<unknown>
   clearAllProjectPreferences(): Promise<unknown>
   closeActiveProject(): Promise<unknown>
+  getDevServer (): {
+    updateSpecs: (specs: FoundSpec[]) => void
+  }
   error: {
     throw: (type: string, ...args: any) => Error
     get(type: string, ...args: any): Error & { code: string, isCypressErr: boolean}
@@ -268,6 +271,11 @@ export class ProjectActions {
 
     this.ctx.appData.currentTestingType = testingType
 
+    const specPattern = await this.ctx.project.specPatternForTestingType(this.ctx.currentProject.projectRoot, testingType)
+
+    this.ctx.currentProject.specs = await this.ctx.project.findSpecs(this.ctx.currentProject.projectRoot, testingType, specPattern)
+    this.ctx.project.startSpecWatcher(this.ctx.currentProject.projectRoot, testingType)
+
     return this.api.launchProject(browser, activeSpec ?? emptySpec, options)
   }
 
@@ -294,6 +302,11 @@ export class ProjectActions {
     this.ctx.coreData.wizard.chosenTestingType = testingType
     await this.initializeActiveProject()
     this.ctx.appData.currentTestingType = testingType
+
+    const specPattern = await this.ctx.project.specPatternForTestingType(this.ctx.currentProject.projectRoot, testingType)
+
+    this.ctx.currentProject.specs = await this.ctx.project.findSpecs(this.ctx.currentProject.projectRoot, testingType, specPattern)
+    this.ctx.project.startSpecWatcher(this.ctx.currentProject.projectRoot, testingType)
 
     return this.api.launchProject(browser, spec, {})
   }
@@ -470,6 +483,7 @@ export class ProjectActions {
     this.ctx.actions.wizard.resetWizard()
     this.ctx.actions.electron.refreshBrowserWindow()
     this.ctx.actions.electron.showBrowserWindow()
+    this.ctx.project.stopSpecWatcher()
   }
 
   async scaffoldIntegration () {
