@@ -70,7 +70,7 @@ import TestResultsIcon from '~icons/cy/test-results_x24.svg'
 
 const props = defineProps<{
   title: string,
-  codeGenGlob: any
+  codeGenGlob: string
 }>()
 
 const { t } = useI18n()
@@ -89,7 +89,10 @@ title.value = t('createSpec.component.importFromComponent.chooseAComponentHeader
 gql`
 fragment ComponentGeneratorStepOne_codeGenGlob on CurrentProject {
   id
-  codeGenGlob(type: component)
+  codeGenGlobs {
+    id
+    component
+  }
 }
 `
 
@@ -149,7 +152,7 @@ whenever(result, () => {
 
 const makeSpec = async (file) => {
   const { data } = await mutation.executeMutation({
-    codeGenCandidate: file.relative,
+    codeGenCandidate: file.absolute,
     type: 'component',
   })
 
