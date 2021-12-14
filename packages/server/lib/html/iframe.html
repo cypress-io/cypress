@@ -13,7 +13,9 @@
         if (!Cypress) {
           throw new Error("Tests cannot run without a reference to Cypress!");
         }
-        return Cypress.onSpecWindow(window, {{scripts | safe}});
+        if (window.parent && window.parent === window.top) {
+          return Cypress.onSpecWindow(window, {{scripts | safe}});
+        }
       })(window.opener || window.parent);
     </script>
   </body>
