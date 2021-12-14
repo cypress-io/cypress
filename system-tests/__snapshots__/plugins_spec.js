@@ -203,7 +203,7 @@ exports['e2e plugins / works with user extensions'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  app.cy.js                              XX:XX          1        1        -        -        - │
+  │ ✔  app.cy.js                                XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
