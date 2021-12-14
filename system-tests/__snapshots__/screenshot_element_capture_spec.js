@@ -40,34 +40,34 @@ exports['e2e screenshot element capture / passes'] = `
   (Screenshots)
 
   -  /XXX/XXX/XXX/cypress/screenshots/screenshot_element_capture.cy.js/element-origin      (560x302)
-     al.png                                                                                       
+     al.png                                                                                         
   -  /XXX/XXX/XXX/cypress/screenshots/screenshot_element_capture.cy.js/element-compar      (560x302)
-     e.png                                                                                        
+     e.png                                                                                          
   -  /XXX/XXX/XXX/cypress/screenshots/screenshot_element_capture.cy.js/element-compar      (560x302)
-     e (1).png                                                                                    
+     e (1).png                                                                                      
   -  /XXX/XXX/XXX/cypress/screenshots/screenshot_element_capture.cy.js/element-compar      (560x302)
-     e (2).png                                                                                    
+     e (2).png                                                                                      
   -  /XXX/XXX/XXX/cypress/screenshots/screenshot_element_capture.cy.js/element-compar      (560x302)
-     e (3).png                                                                                    
+     e (3).png                                                                                      
   -  /XXX/XXX/XXX/cypress/screenshots/screenshot_element_capture.cy.js/element-compar      (560x302)
-     e (4).png                                                                                    
+     e (4).png                                                                                      
   -  /XXX/XXX/XXX/cypress/screenshots/screenshot_element_capture.cy.js/element-compar      (560x302)
-     e (5).png                                                                                    
+     e (5).png                                                                                      
   -  /XXX/XXX/XXX/cypress/screenshots/screenshot_element_capture.cy.js/element-compar      (560x302)
-     e (6).png                                                                                    
+     e (6).png                                                                                      
   -  /XXX/XXX/XXX/cypress/screenshots/screenshot_element_capture.cy.js/element-compar      (560x302)
-     e (7).png                                                                                    
+     e (7).png                                                                                      
   -  /XXX/XXX/XXX/cypress/screenshots/screenshot_element_capture.cy.js/element-compar      (560x302)
-     e (8).png                                                                                    
+     e (8).png                                                                                      
   -  /XXX/XXX/XXX/cypress/screenshots/screenshot_element_capture.cy.js/element-compar      (560x302)
-     e (9).png                                                                                    
+     e (9).png                                                                                      
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/screenshot_element_capture_spec     (X second)
-                          .js.mp4                                                                   
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/screenshot_element_capture.cy.j     (X second)
+                          s.mp4                                                                     
 
 
 ====================================================================================================

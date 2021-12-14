@@ -40,64 +40,64 @@ exports['e2e screenshot viewport capture / passes'] = `
   (Screenshots)
 
   -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture.cy.js/viewport-orig     (1000x660)
-     inal.png                                                                                     
+     inal.png                                                                                       
   -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture.cy.js/viewport-comp     (1000x660)
-     are.png                                                                                      
+     are.png                                                                                        
   -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture.cy.js/viewport-comp     (1000x660)
-     are (1).png                                                                                  
+     are (1).png                                                                                    
   -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture.cy.js/viewport-comp     (1000x660)
-     are (2).png                                                                                  
+     are (2).png                                                                                    
   -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture.cy.js/viewport-comp     (1000x660)
-     are (3).png                                                                                  
+     are (3).png                                                                                    
   -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture.cy.js/viewport-comp     (1000x660)
-     are (4).png                                                                                  
+     are (4).png                                                                                    
   -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture.cy.js/viewport-comp     (1000x660)
-     are (5).png                                                                                  
+     are (5).png                                                                                    
   -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture.cy.js/viewport-comp     (1000x660)
-     are (6).png                                                                                  
+     are (6).png                                                                                    
   -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture.cy.js/viewport-comp     (1000x660)
-     are (7).png                                                                                  
+     are (7).png                                                                                    
   -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture.cy.js/viewport-comp     (1000x660)
-     are (8).png                                                                                  
+     are (8).png                                                                                    
   -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture.cy.js/viewport-comp     (1000x660)
-     are (9).png                                                                                  
+     are (9).png                                                                                    
   -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture.cy.js/viewport-comp     (1000x660)
-     are (10).png                                                                                 
+     are (10).png                                                                                   
   -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture.cy.js/viewport-comp     (1000x660)
-     are (11).png                                                                                 
+     are (11).png                                                                                   
   -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture.cy.js/viewport-comp     (1000x660)
-     are (12).png                                                                                 
+     are (12).png                                                                                   
   -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture.cy.js/viewport-comp     (1000x660)
-     are (13).png                                                                                 
+     are (13).png                                                                                   
   -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture.cy.js/viewport-comp     (1000x660)
-     are (14).png                                                                                 
+     are (14).png                                                                                   
   -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture.cy.js/viewport-comp     (1000x660)
-     are (15).png                                                                                 
+     are (15).png                                                                                   
   -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture.cy.js/viewport-comp     (1000x660)
-     are (16).png                                                                                 
+     are (16).png                                                                                   
   -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture.cy.js/viewport-comp     (1000x660)
-     are (17).png                                                                                 
+     are (17).png                                                                                   
   -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture.cy.js/viewport-comp     (1000x660)
-     are (18).png                                                                                 
+     are (18).png                                                                                   
   -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture.cy.js/viewport-comp     (1000x660)
-     are (19).png                                                                                 
+     are (19).png                                                                                   
   -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture.cy.js/viewport-comp     (1000x660)
-     are (20).png                                                                                 
+     are (20).png                                                                                   
   -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture.cy.js/viewport-comp     (1000x660)
-     are (21).png                                                                                 
+     are (21).png                                                                                   
   -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture.cy.js/viewport-comp     (1000x660)
-     are (22).png                                                                                 
+     are (22).png                                                                                   
   -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture.cy.js/viewport-comp     (1000x660)
-     are (23).png                                                                                 
+     are (23).png                                                                                   
   -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture.cy.js/viewport-comp     (1000x660)
-     are (24).png                                                                                 
+     are (24).png                                                                                   
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/screenshot_viewport_capture_spe     (X second)
-                          c.js.mp4                                                                  
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/screenshot_viewport_capture.cy.     (X second)
+                          js.mp4                                                                    
 
 
 ====================================================================================================

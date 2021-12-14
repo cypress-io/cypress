@@ -208,74 +208,9 @@ exports['e2e web security / when disabled / passes'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  web_security.cy.js                     XX:XX        4        4          -        -        - │
+  │ ✔  web_security.cy.js                       XX:XX        4        4        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        4        4        -        -        -  
-
-
-`
-
-exports['e2e web security / firefox / displays warning when firefox and chromeWebSecurity:false'] = `
-
-====================================================================================================
-
-  (Run Starting)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (simple_passing.cy.js)                                                     │
-  │ Searched:   cypress/e2e/simple_passing.cy.js                                                   │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  simple_passing.cy.js                                                          (1 of 1)
-
-Your project has set the configuration option: \`chromeWebSecurity: false\`
-
-This option will not have an effect in Firefox. Tests that rely on web security being disabled will not run as expected.
-
-
-  simple passing spec
-    ✓ passes
-
-
-  1 passing
-
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        1                                                                                │
-  │ Passing:      1                                                                                │
-  │ Failing:      0                                                                                │
-  │ Pending:      0                                                                                │
-  │ Skipped:      0                                                                                │
-  │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
-  │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     simple_passing.cy.js                                                             │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/simple_passing.cy.js.mp4          (X second)
-
-
-====================================================================================================
-
-  (Run Finished)
-
-
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  simple_passing.cy.js                   XX:XX        1        1        -        -        -   │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
 
 `

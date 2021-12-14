@@ -48,7 +48,7 @@ exports['e2e config provides various environment details 1'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/config_passing.cy.js.mp4          (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/config_passing.cy.js.mp4            (X second)
 
 
 ====================================================================================================
