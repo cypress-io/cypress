@@ -164,6 +164,10 @@ export class ProjectLifecycleManager {
       return this._cachedFullConfig.browsers as FoundBrowser[]
     }
 
+    if (this._browserResult.state === 'loaded') {
+      return this._browserResult.value
+    }
+
     return null
   }
 
@@ -798,15 +802,15 @@ export class ProjectLifecycleManager {
     this._browserResult = { state: 'loading', value: p }
     p.then(
       (b) => {
-        if (p === this._browserResult.value) {
-          this._browserResult = { state: 'loaded', value: b }
+        this._browserResult = { state: 'loaded', value: b }
+
+        if (this._cachedFullConfig) {
+          this._cachedFullConfig.browsers = b as Cypress.Browser[]
         }
       },
       (e) => {
-        if (p === this._browserResult.value) {
-          this._browserResult = { state: 'errored', value: e }
-          this.ctx.onError(e, 'global')
-        }
+        this._browserResult = { state: 'errored', value: e }
+        this.ctx.onError(e, 'global')
       },
     )
 
@@ -1103,6 +1107,10 @@ export class ProjectLifecycleManager {
 
     if (testingType === 'component') {
       return Boolean(config.component?.devServer)
+    }
+
+    if (testingType === 'e2e') {
+      return Boolean(config.e2e?.setupNodeEvents)
     }
 
     return true

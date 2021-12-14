@@ -64,7 +64,19 @@ function run (ipc, configFile, projectRoot) {
 
       const result = exp.default || exp
 
-      ipc.send('loadConfig:reply', { initialConfig: result, requires: util.nonNodeRequires() })
+      const resultWithStringiedFns = (cfg) => {
+        if (cfg.component.devServer) {
+          cfg.component.devServer = '[Function: devServer]'
+        }        
+
+        if (cfg.e2e.setupNodeEvents) {
+          cfg.e2e.setupNodeEvents = '[Function: setupNodeEvents]'
+        }        
+
+        return cfg
+      }
+
+      ipc.send('loadConfig:reply', { initialConfig: resultWithStringiedFns(result), requires: util.nonNodeRequires() })
 
       ipc.on('setupTestingType', (testingType, options) => {
         debug(`setupTestingType %s %o`, testingType, options)

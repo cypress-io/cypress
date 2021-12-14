@@ -52,6 +52,9 @@ export const CurrentProject = objectType({
     t.list.nonNull.field('browsers', {
       type: Browser,
       description: 'Browsers found that are compatible with Cypress',
+      resolve: async (source, args, ctx) => {
+        return ctx.lifecycleManager.browsers
+      }
     })
 
     t.field('cloudProject', {
