@@ -174,18 +174,29 @@ const ffToStandardResourceTypeMap: { [ff: string]: ResourceType } = {
   'webmanifest': 'manifest',
 }
 
+interface CdpAutomationOptions {
+  onBrowserPreRequest?: (BrowserPreRequest) => void
+}
+
 export class CdpAutomation {
-  constructor (private sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, private automation: Automation) {
+  frameTree?: Protocol.Page.FrameTree
+
+  constructor (private sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, private automation: Automation, private options: CdpAutomationOptions = {}) {
     onFn('Network.requestWillBeSent', this.onNetworkRequestWillBeSent)
     onFn('Network.responseReceived', this.onResponseReceived)
-    sendDebuggerCommandFn('Network.enable', {
+  }
+
+  async enable () {
+    await this.sendDebuggerCommandFn('Network.enable', {
       maxTotalBufferSize: 0,
       maxResourceBufferSize: 0,
       maxPostDataSize: 0,
     })
+
+    await this.sendDebuggerCommandFn('Page.enable')
   }
 
-  private onNetworkRequestWillBeSent = (params: Protocol.Network.RequestWillBeSentEvent) => {
+  private onNetworkRequestWillBeSent = async (params: Protocol.Network.RequestWillBeSentEvent) => {
     debugVerbose('received networkRequestWillBeSent %o', params)
     let url = params.request.url
 
@@ -204,6 +215,7 @@ export class CdpAutomation {
     }
 
     this.automation.onBrowserPreRequest?.(browserPreRequest)
+    this.options.onBrowserPreRequest?.(browserPreRequest)
   }
 
   private onResponseReceived = (params: Protocol.Network.ResponseReceivedEvent) => {

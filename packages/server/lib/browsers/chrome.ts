@@ -8,6 +8,7 @@ import path from 'path'
 import extension from '@packages/extension'
 import mime from 'mime'
 import { launch } from '@packages/launcher'
+import type { Protocol } from 'devtools-protocol'
 
 import appData from '../util/app_data'
 import { fs } from '../util/fs'
@@ -295,8 +296,6 @@ const _navigateUsingCRI = async function (client, url) {
 }
 
 const _handleDownloads = async function (client, dir, automation) {
-  await client.send('Page.enable')
-
   client.on('Page.downloadWillBegin', (data) => {
     const downloadItem = {
       id: data.guid,
@@ -329,10 +328,86 @@ const _handleDownloads = async function (client, dir, automation) {
   })
 }
 
-const _setAutomation = (client, automation) => {
-  return automation.use(
-    new CdpAutomation(client.send, client.on, automation),
-  )
+let frameTree
+
+const _onBrowserPreRequest = (client) => {
+  return async (prerequest) => {
+  // this gets the frame tree ahead of the Fetch.requestPaused event, because
+  // the CDP is tied up during that event and can't be utilized. however,
+  // we avoid the overhead if it's not possible that the request will be for
+  // the AUT frame
+    if (
+      prerequest.originalResourceType !== 'Document'
+    || prerequest.url.includes('__cypress')
+    ) {
+      return
+    }
+
+    frameTree = (await client.send('Page.getFrameTree')).frameTree
+  }
+}
+
+const _continueRequest = (client, params, header?) => {
+  const details: Protocol.Fetch.ContinueRequestRequest = {
+    requestId: params.requestId,
+  }
+
+  if (header) {
+    // headers are received as an object but need to be an array
+    // to modify them
+    const currentHeaders = _.map(params.request.headers, (value, name) => ({ name, value }))
+
+    details.headers = [
+      ...currentHeaders,
+      header,
+    ]
+  }
+
+  client.send('Fetch.continueRequest', details)
+}
+
+interface HasFrame {
+  frame: Protocol.Page.Frame
+}
+
+const _getAUTFrame = () => {
+  const frame = _.find(frameTree?.childFrames || [], ({ frame }) => {
+    return frame?.name?.startsWith('Your App:')
+  }) as HasFrame | undefined
+
+  if (frame) {
+    return { id: frame.frame.id }
+  }
+
+  return { id: null }
+}
+
+const _handlePausedRequests = async (client) => {
+  await client.send('Fetch.enable')
+
+  client.on('Fetch.requestPaused', (params: Protocol.Fetch.RequestPausedEvent) => {
+    if (
+      params.resourceType !== 'Document'
+      || _getAUTFrame().id !== params.frameId
+    ) {
+      return _continueRequest(client, params)
+    }
+
+    _continueRequest(client, params, {
+      name: 'X-Cypress-Is-AUT-Frame',
+      value: 'true',
+    })
+  })
+}
+
+const _setAutomation = async (client, automation) => {
+  const cdpAutomation = new CdpAutomation(client.send, client.on, automation, {
+    onBrowserPreRequest: _onBrowserPreRequest(client),
+  })
+
+  await cdpAutomation.enable()
+
+  return automation.use(cdpAutomation)
 }
 
 export = {
@@ -353,6 +428,8 @@ export = {
   _navigateUsingCRI,
 
   _handleDownloads,
+
+  _handlePausedRequests,
 
   _setAutomation,
 
@@ -514,7 +591,7 @@ export = {
       throw new Error(`Cypress requires at least Chrome 64.\n\nDetails:\n${err.message}`)
     })
 
-    this._setAutomation(criClient, automation)
+    await this._setAutomation(criClient, automation)
 
     // monkey-patch the .kill method to that the CDP connection is closed
     const originalBrowserKill = launchedBrowser.kill
@@ -532,6 +609,7 @@ export = {
     await this._maybeRecordVideo(criClient, options, browser.majorVersion)
     await this._navigateUsingCRI(criClient, url)
     await this._handleDownloads(criClient, options.downloadsFolder, automation)
+    await this._handlePausedRequests(criClient)
 
     // return the launched browser process
     // with additional method to close the remote connection

@@ -111,6 +111,8 @@ const tab3 = {
 
 describe('app/background', () => {
   beforeEach(function (done) {
+    global.window = {}
+
     this.httpSrv = http.createServer()
     this.server = socket.server(this.httpSrv, { path: '/__socket.io' })
 
@@ -283,6 +285,20 @@ describe('app/background', () => {
         done()
       })
     })
+
+    it('does not add downloads listener if in chrome-like browser', function (done) {
+      global.window.chrome = {}
+
+      const onCreated = sinon.stub(browser.downloads.onCreated, 'addListener')
+      const onChanged = sinon.stub(browser.downloads.onChanged, 'addListener')
+
+      this.onConnect(() => {
+        expect(onCreated).not.to.be.called
+        expect(onChanged).not.to.be.called
+
+        done()
+      })
+    })
   })
 
   context('add header to aut iframe requests', () => {
@@ -376,6 +392,18 @@ describe('app/background', () => {
             },
           ],
         })
+
+        done()
+      })
+    })
+
+    it('does not add before-headers listener if in chrome-like browser', function (done) {
+      global.window.chrome = {}
+
+      const onBeforeSendHeaders = sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
+
+      this.onConnect(() => {
+        expect(onBeforeSendHeaders).not.to.be.called
 
         done()
       })

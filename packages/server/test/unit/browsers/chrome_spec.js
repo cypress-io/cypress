@@ -70,13 +70,14 @@ describe('lib/browsers/chrome', () => {
       return chrome.open('chrome', 'http://', {}, this.automation)
       .then(() => {
         expect(utils.getPort).to.have.been.calledOnce // to get remote interface port
-        expect(this.criClient.send.callCount).to.equal(5)
-        expect(this.criClient.send).to.have.been.calledWith('Page.bringToFront')
+        expect(this.criClient.send.callCount).to.equal(6)
 
+        expect(this.criClient.send).to.have.been.calledWith('Page.bringToFront')
         expect(this.criClient.send).to.have.been.calledWith('Page.navigate')
         expect(this.criClient.send).to.have.been.calledWith('Page.enable')
         expect(this.criClient.send).to.have.been.calledWith('Page.setDownloadBehavior')
         expect(this.criClient.send).to.have.been.calledWith('Network.enable')
+        expect(this.criClient.send).to.have.been.calledWith('Fetch.enable')
       })
     })
 
@@ -361,6 +362,159 @@ describe('lib/browsers/chrome', () => {
             id: '1',
           })
         })
+      })
+    })
+
+    describe('adding header to AUT iframe request', function () {
+      beforeEach(function () {
+        const frameTree = {
+          frameTree: {
+            childFrames: [
+              {
+                frame: {
+                  id: 'aut-frame-id',
+                  name: 'Your App: "FakeBlock"',
+                },
+              },
+              {
+                frame: {
+                  id: 'spec-frame-id',
+                  name: 'Your Spec: "spec.js"',
+                },
+              },
+            ],
+          },
+        }
+
+        this.criClient.send.withArgs('Page.getFrameTree').resolves(frameTree)
+      })
+
+      it('does not add header when not a document', async function () {
+        await chrome.open('chrome', 'http://', {}, this.automation)
+
+        const cdpAutomation = this.automation.use.lastCall.args[0]
+
+        await cdpAutomation.options.onBrowserPreRequest({
+          originalResourceType: 'Script',
+        })
+
+        this.criClient.on.withArgs('Fetch.requestPaused').yield({
+          requestId: '1234',
+          resourceType: 'Script',
+        })
+
+        expect(this.criClient.send).to.be.calledWith('Fetch.continueRequest', {
+          requestId: '1234',
+        })
+      })
+
+      it('does not add header when it is a spec frame request', async function () {
+        await chrome.open('chrome', 'http://', {}, this.automation)
+
+        const cdpAutomation = this.automation.use.lastCall.args[0]
+
+        await cdpAutomation.options.onBrowserPreRequest({
+          originalResourceType: 'Document',
+          url: '/__cypress/integration/spec.js',
+        })
+
+        this.criClient.on.withArgs('Fetch.requestPaused').yield({
+          requestId: '1234',
+          resourceType: 'Document',
+          request: {
+            url: '/__cypress/integration/spec.js',
+          },
+        })
+
+        expect(this.criClient.send).to.be.calledWith('Fetch.continueRequest', {
+          requestId: '1234',
+        })
+      })
+
+      it('does not add header when it is a spec frame request', async function () {
+        await chrome.open('chrome', 'http://', {}, this.automation)
+
+        const cdpAutomation = this.automation.use.lastCall.args[0]
+
+        await cdpAutomation.options.onBrowserPreRequest({
+          originalResourceType: 'Document',
+          url: '/__cypress/integration/spec.js',
+        })
+
+        this.criClient.on.withArgs('Fetch.requestPaused').yield({
+          frameId: 'spec-frame-id',
+          requestId: '1234',
+          resourceType: 'Document',
+          request: {
+            url: '/__cypress/integration/spec.js',
+          },
+        })
+
+        expect(this.criClient.send).to.be.calledWith('Fetch.continueRequest', {
+          requestId: '1234',
+        })
+      })
+
+      it('appends X-Cypress-Is-AUT-Frame header to AUT iframe request', async function () {
+        await chrome.open('chrome', 'http://', {}, this.automation)
+
+        const cdpAutomation = this.automation.use.lastCall.args[0]
+
+        await cdpAutomation.options.onBrowserPreRequest({
+          originalResourceType: 'Document',
+          url: 'http://localhost:3000/index.html',
+        })
+
+        this.criClient.on.withArgs('Fetch.requestPaused').yield({
+          frameId: 'aut-frame-id',
+          requestId: '1234',
+          resourceType: 'Document',
+          request: {
+            url: 'http://localhost:3000/index.html',
+            headers: {
+              'X-Foo': 'Bar',
+            },
+          },
+        })
+
+        expect(this.criClient.send).to.be.calledWith('Fetch.continueRequest', {
+          requestId: '1234',
+          headers: [
+            {
+              name: 'X-Foo',
+              value: 'Bar',
+            },
+            {
+              name: 'X-Cypress-Is-AUT-Frame',
+              value: 'true',
+            },
+          ],
+        })
+      })
+
+      it('does not get frame tree if it is not a document', async function () {
+        await chrome.open('chrome', 'http://', {}, this.automation)
+
+        const cdpAutomation = this.automation.use.lastCall.args[0]
+
+        await cdpAutomation.options.onBrowserPreRequest({
+          originalResourceType: 'Script',
+        })
+
+        expect(this.criClient.send).not.to.be.calledWith('Page.getFrameTree')
+      })
+
+      it('does not get frame tree if it is a spec frame request', async function () {
+        await chrome.open('chrome', 'http://', {}, this.automation)
+
+        const cdpAutomation = this.automation.use.lastCall.args[0]
+
+        await cdpAutomation.options.onBrowserPreRequest({
+          originalResourceType: 'Document',
+          url: '/__cypress/integration/spec.js',
+        })
+
+        expect(this.criClient.send).not.to.be.calledWith('Page.getFrameTree')
       })
     })
   })

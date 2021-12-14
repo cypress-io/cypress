@@ -1,3 +1,4 @@
+/* global window */
 const map = require('lodash/map')
 const pick = require('lodash/pick')
 const once = require('lodash/once')
@@ -19,6 +20,8 @@ const firstOrNull = (cookies) => {
 }
 
 const connect = function (host, path, extraOpts) {
+  const isChromeLike = !!window.chrome && !window.browser
+
   const listenToCookieChanges = once(() => {
     return browser.cookies.onChanged.addListener((info) => {
       if (info.cause !== 'overwrite') {
@@ -115,8 +118,11 @@ const connect = function (host, path, extraOpts) {
 
   ws.on('connect', () => {
     listenToCookieChanges()
-    listenToDownloads()
-    listenToOnBeforeHeaders()
+    // chrome-like browsers use CDP instead
+    if (!isChromeLike) {
+      listenToDownloads()
+      listenToOnBeforeHeaders()
+    }
 
     ws.emit('automation:client:connected')
   })
