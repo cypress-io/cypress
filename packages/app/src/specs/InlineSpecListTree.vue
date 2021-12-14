@@ -5,7 +5,7 @@
   >
     <ul
       v-bind="wrapperProps"
-      class="children:h-30px"
+      class="mt-8px children:h-30px"
     >
       <li
         v-for="row in list"
@@ -162,7 +162,7 @@ a::before {
 /** h-[calc] was getting dropped so moved to styles. Virtual list requires defined height. */
 /** Header is 80px, padding-bottom is 8px **/
 .specs-list-container {
-  height: calc(100vh - 80px - 8px);
+  height: calc(100vh - 64px - 8px);
 }
 
 </style>

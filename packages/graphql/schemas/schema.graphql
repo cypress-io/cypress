@@ -534,7 +534,7 @@ type LocalSettingsPreferences {
   proxyBypass: String
   proxyServer: String
   reporterWidth: Int
-  specsListWidth: Int
+  specListWidth: Int
 }
 
 type Mutation {
