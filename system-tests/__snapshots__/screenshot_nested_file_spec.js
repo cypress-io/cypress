@@ -40,14 +40,14 @@ exports['e2e screenshot in nested spec / passes'] = `
   (Screenshots)
 
   -  /XXX/XXX/XXX/cypress/screenshots/screenshot_nested_file.cy.js/nests the file bas     (1280x720)
-     ed on spec path.png                                                                          
+     ed on spec path.png                                                                            
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
   -  Finished processing: /XXX/XXX/XXX/cypress/videos/screenshot_nested_file.cy.js.mp     (X second)
-                          4                                                                       
+                          4                                                                         
 
 
 ====================================================================================================
@@ -57,7 +57,7 @@ exports['e2e screenshot in nested spec / passes'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  screenshot_nested_file.cy.js           XX:XX          1        1        -        -        - │
+  │ ✔  screenshot_nested_file.cy.js             XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
