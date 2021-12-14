@@ -55,7 +55,7 @@ describe('e2e firefox', function () {
   systemTests.it('launches maximized by default', {
     browser: 'firefox',
     project: 'screen-size',
-    spec: 'maximized.spec.js',
+    spec: 'maximized.cy.js',
     onRun: async (exec) => {
       const { stderr } = await exec({
         processEnv: {

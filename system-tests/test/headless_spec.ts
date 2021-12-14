@@ -81,12 +81,12 @@ describe('e2e headless', function () {
   systemTests.it('launches maximized by default in headless mode (1920x1080)', {
     headed: false,
     project: 'screen-size',
-    spec: 'default_size.spec.js',
+    spec: 'default_size.cy.js',
   })
 
   systemTests.it('launches at DPR 1x', {
     headed: false,
     project: 'screen-size',
-    spec: 'device_pixel_ratio.spec.js',
+    spec: 'device_pixel_ratio.cy.js',
   })
 })
