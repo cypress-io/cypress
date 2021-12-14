@@ -22,11 +22,11 @@ describe('e2e before:browser:launch', () => {
     },
     project: 'chrome-browser-preferences',
     snapshot: true,
-    spec: 'spec.js',
+    spec: 'spec.cy.js',
   })
 
   systemTests.it('can add extensions', {
-    spec: 'spec.js',
+    spec: 'spec.cy.js',
     config: {
       video: false,
     },
