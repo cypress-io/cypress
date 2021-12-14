@@ -92,9 +92,7 @@ const { t } = useI18n()
 const gqlCodeBefore = `{
   "baseUrl": "http://localhost:1234/",
   "retries": 2
-}
-
-`
+}`
 
 // TODO: wire this properly
 const gqlCodeAfter = `const { defineConfig } = require('cypress')

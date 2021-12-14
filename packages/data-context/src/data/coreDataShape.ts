@@ -79,6 +79,10 @@ export interface WizardDataShape {
   warnings: Warning[]
 }
 
+export interface MigrationDataShape{
+  step: 'renameManual'
+}
+
 export interface ElectronShape {
   app: App | null
   browserWindow: BrowserWindow | null
@@ -106,6 +110,7 @@ export interface CoreDataShape {
   app: AppDataShape
   currentProject: ActiveProjectShape | null
   wizard: WizardDataShape
+  migration: MigrationDataShape | null
   user: AuthenticatedUserShape | null
   electron: ElectronShape
   isAuthBrowserOpened: boolean
