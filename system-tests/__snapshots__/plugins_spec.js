@@ -41,7 +41,7 @@ exports['e2e plugins preprocessor passes with working preprocessor 1'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/app.cy.js.mp4                     (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/app.cy.js.mp4                       (X second)
 
 
 ====================================================================================================
@@ -51,7 +51,7 @@ exports['e2e plugins preprocessor passes with working preprocessor 1'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  app.cy.js                              XX:XX        2        2        -        -        -   │
+  │ ✔  app.cy.js                              XX:XX          2        2        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        2        2        -        -        -  
 
@@ -167,7 +167,7 @@ exports['e2e plugins / works with user extensions'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  app.cy.js                                                                     (1 of 1)
+  Running:  app.cy.js                                                                       (1 of 1)
 
 
   ✓ can inject text from an extension
@@ -193,7 +193,7 @@ exports['e2e plugins / works with user extensions'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/app.cy.js.mp4                     (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/app.cy.js.mp4                       (X second)
 
 
 ====================================================================================================
@@ -203,7 +203,7 @@ exports['e2e plugins / works with user extensions'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  app.cy.js                              XX:XX        1        1        -        -        -   │
+  │ ✔  app.cy.js                              XX:XX          1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 

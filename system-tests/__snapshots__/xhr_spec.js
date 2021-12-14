@@ -14,7 +14,7 @@ exports['e2e xhr / passes in global mode'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  xhr.cy.js                                                                     (1 of 1)
+  Running:  xhr.cy.js                                                                       (1 of 1)
 
 
   xhrs
@@ -51,7 +51,7 @@ exports['e2e xhr / passes in global mode'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/xhr.cy.js.mp4                     (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/xhr.cy.js.mp4                       (X second)
 
 
 ====================================================================================================
@@ -61,7 +61,7 @@ exports['e2e xhr / passes in global mode'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  xhr.cy.js                              XX:XX        9        9        -        -        -   │
+  │ ✔  xhr.cy.js                              XX:XX          9        9        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        9        9        -        -        -  
 

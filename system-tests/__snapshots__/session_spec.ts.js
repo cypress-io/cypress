@@ -14,7 +14,7 @@ exports['e2e sessions / session tests'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  session.cy.js                                                                 (1 of 1)
+  Running:  session.cy.js                                                                   (1 of 1)
 
 
   cross origin automations
@@ -149,7 +149,7 @@ exports['e2e sessions / session tests'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  session.cy.js                          XX:XX       55       54        -        1        -   │
+  │ ✔  session.cy.js                            XX:XX       55       54        -        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX       55       54        -        1        -  
 

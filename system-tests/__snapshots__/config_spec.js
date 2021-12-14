@@ -14,7 +14,7 @@ exports['e2e config provides various environment details 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  config_passing.cy.js                                                          (1 of 1)
+  Running:  config_passing.cy.js                                                            (1 of 1)
 
 
   Cypress static methods + props
@@ -58,7 +58,7 @@ exports['e2e config provides various environment details 1'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  config_passing.cy.js                   XX:XX        6        6        -        -        -   │
+  │ ✔  config_passing.cy.js                     XX:XX        6        6        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        6        6        -        -        -  
 
