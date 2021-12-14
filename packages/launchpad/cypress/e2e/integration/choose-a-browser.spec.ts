@@ -46,6 +46,7 @@ describe('Choose a Browser Page', () => {
         majorVersion: '4',
       }] as FoundBrowser[]
 
+      // @ts-ignore sinon is a global in the node process where this is executed
       sinon.stub(ctx._apis.appApi, 'getBrowsers').resolves(mockBrowsers)
     })
   }
@@ -53,6 +54,7 @@ describe('Choose a Browser Page', () => {
   // Force the server to return no detected browsers
   const setupZeroMockBrowsers = function () {
     cy.withCtx(async (ctx, o) => {
+      // @ts-ignore sinon is a global in the node process where this is executed
       sinon.stub(ctx._apis.appApi, 'getBrowsers').resolves([])
     })
   }
