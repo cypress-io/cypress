@@ -13,10 +13,7 @@
       <slot
         name="panel1"
         :isDragging="panel1IsDragging"
-      >
-        Width: {{ panel1Width }}
-        HandleX: {{ panel1HandleX }}
-      </slot>
+      />
 
       <div
         data-cy="panel1ResizeHandle"
@@ -30,10 +27,7 @@
       class="h-full flex-shrink-0 relative"
       :style="{width: `${panel2Width}px`}"
     >
-      <slot name="panel2">
-        Width: {{ panel2Width }}
-        HandleX: {{ panel2HandleX }}
-      </slot>
+      <slot name="panel2" />
 
       <div
         data-cy="panel2ResizeHandle"
@@ -49,9 +43,7 @@
         width: `${maxTotalWidth - panel1Width - panel2Width}px`
       }"
     >
-      <slot name="panel3">
-        Panel 3 default content
-      </slot>
+      <slot name="panel3" />
     </div>
   </div>
 </template>
