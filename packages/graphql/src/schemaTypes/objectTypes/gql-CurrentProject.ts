@@ -38,14 +38,14 @@ export const CurrentProject = objectType({
     t.field('currentTestingType', {
       description: 'The mode the interactive runner was launched in',
       type: TestingTypeEnum,
-      resolve: (_, args, ctx) => ctx.wizard.currentTestingType,
+      resolve: (_, args, ctx) => ctx.coreData.currentTestingType,
     })
 
     t.field('currentBrowser', {
       type: Browser,
       description: 'The currently selected browser for the application',
       resolve: (source, args, ctx) => {
-        return ctx.wizardData.chosenBrowser
+        return ctx.coreData.chosenBrowser
       },
     })
 
@@ -58,7 +58,7 @@ export const CurrentProject = objectType({
       type: 'CloudProject',
       description: 'The remote associated project from Cypress Cloud',
       resolve: async (source, args, ctx, info) => {
-        const projectId = await ctx.project.projectId(source.projectRoot)
+        const projectId = await ctx.project.projectId()
 
         if (!projectId) {
           return null
@@ -70,7 +70,7 @@ export const CurrentProject = objectType({
 
     t.string('projectId', {
       description: 'Used to associate project with Cypress cloud',
-      resolve: (source, args, ctx) => ctx.project.projectId(source.projectRoot),
+      resolve: (source, args, ctx) => ctx.project.projectId(),
     })
 
     t.boolean('isCTConfigured', {
@@ -102,7 +102,7 @@ export const CurrentProject = objectType({
       description: 'Specs for a project conforming to Relay Connection specification',
       type: Spec,
       nodes: (source, args, ctx) => {
-        return ctx.project.findSpecs(source.projectRoot, ctx.appData.currentTestingType === 'component' ? 'component' : 'integration')
+        return ctx.project.findSpecs(source.projectRoot, ctx.coreData.currentTestingType === 'component' ? 'component' : 'integration')
       },
     })
 

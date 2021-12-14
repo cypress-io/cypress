@@ -12,7 +12,7 @@ export class FileActions {
       throw new Error(`Cannot write file in project without active project`)
     }
 
-    const filePath = path.join(this.ctx.currentProject?.projectRoot, relativePath)
+    const filePath = path.join(this.ctx.currentProject, relativePath)
 
     await this.ctx.fs.writeFile(
       filePath,
@@ -25,7 +25,7 @@ export class FileActions {
       throw new Error(`Cannot remove file in project without active project`)
     }
 
-    await this.ctx.fs.remove(path.join(this.ctx.currentProject?.projectRoot, relativePath))
+    await this.ctx.fs.remove(path.join(this.ctx.currentProject, relativePath))
   }
 
   async checkIfFileExists (relativePath: string) {
@@ -33,7 +33,7 @@ export class FileActions {
       throw new Error(`Cannot check file in project exists without active project`)
     }
 
-    const filePath = path.join(this.ctx.currentProject?.projectRoot, relativePath)
+    const filePath = path.join(this.ctx.currentProject, relativePath)
 
     return await this.ctx.fs.stat(filePath)
   }

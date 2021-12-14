@@ -11,7 +11,7 @@ import runEvents from './plugins/run_events'
 import * as session from './session'
 import { getSpecUrl } from './project_utils'
 import errors from './errors'
-import type { LaunchOpts, OpenProjectLaunchOptions, FoundBrowser, InitializeProjectOptions } from '@packages/types'
+import type { LaunchOpts, OpenProjectLaunchOptions, InitializeProjectOptions } from '@packages/types'
 import { DataContext, getCtx } from '@packages/data-context'
 
 const debug = Debug('cypress:server:open_project')
@@ -238,27 +238,20 @@ export class OpenProject {
   }
 
   closeOpenProjectAndBrowsers () {
-    return this.closeBrowser()
-    .then(() => {
-      return this.openProject?.close()
-    })
-    .then(() => {
-      this.resetOpenProject()
+    this.openProject?.close()
+    this.resetOpenProject()
 
-      return null
-    })
+    return this.closeBrowser()
   }
 
   close () {
     debug('closing opened project')
 
-    return Promise.all([
-      this.closeOpenProjectAndBrowsers(),
-    ]).then(() => null)
+    this.closeOpenProjectAndBrowsers()
   }
 
   // close existing open project if it exists, for example
-  // if  you are switching from CT to E2E or vice versa.
+  // if you are switching from CT to E2E or vice versa.
   // used by launchpad
   async closeActiveProject () {
     await this.closeOpenProjectAndBrowsers()
@@ -280,7 +273,7 @@ export class OpenProject {
       },
     })
 
-    if (!_.isUndefined(args.configFile)) {
+    if (!_.isUndefined(args.configFile) && !_.isNull(args.configFile)) {
       options.configFile = args.configFile
     }
 

@@ -21,7 +21,7 @@ fragment TestingTypeCards on Query {
 `
 
 gql`
-  mutation TestingTypeSelection($input: WizardUpdateInput!) {
+mutation TestingTypeSelection($input: WizardUpdateInput!) {
   wizardUpdate(input: $input)
 }
 `

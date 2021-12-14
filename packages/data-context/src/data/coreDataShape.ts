@@ -1,10 +1,9 @@
-import { BUNDLERS, FoundBrowser, FoundSpec, FullConfig, Preferences, Editor, Warning, AllowedState, AllModeOptions, TestingType } from '@packages/types'
-import type { NexusGenEnums, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
+import { BUNDLERS, FoundBrowser, Editor, Warning, AllowedState, AllModeOptions, TestingType } from '@packages/types'
+import type { NexusGenEnums } from '@packages/graphql/src/gen/nxs.gen'
 import type { App, BrowserWindow } from 'electron'
 import type { ChildProcess } from 'child_process'
 import type { SocketIOServer } from '@packages/socket'
 import type { Server } from 'http'
-import type { ProjectMetaState } from './ProjectLifecycleManager'
 
 export type Maybe<T> = T | null | undefined
 
@@ -47,7 +46,6 @@ export interface AppDataShape {
   isInGlobalMode: boolean
   browsers: ReadonlyArray<FoundBrowser> | null
   projects: ProjectShape[]
-  currentTestingType: Maybe<TestingTypeEnum>
   refreshingBrowsers: Promise<FoundBrowser[]> | null
   refreshingNodePath: Promise<string> | null
   nodePath: Maybe<string>
@@ -58,11 +56,9 @@ export interface WizardDataShape {
   currentStep: NexusGenEnums['WizardStep']
   chosenBundler: NexusGenEnums['SupportedBundlers'] | null
   allBundlers: typeof BUNDLERS
-  currentTestingType: NexusGenEnums['TestingTypeEnum'] | null
   chosenFramework: NexusGenEnums['FrontendFrameworkEnum'] | null
   chosenLanguage: NexusGenEnums['CodeLanguageEnum']
   chosenManualInstall: boolean
-  chosenBrowser: FoundBrowser | null
   warnings: Warning[]
 }
 
@@ -78,6 +74,8 @@ export interface BaseErrorDataShape {
 }
 
 export interface CoreDataShape {
+  cliBrowser: string | null
+  chosenBrowser: FoundBrowser | null
   servers: {
     appServer?: Maybe<Server>
     appServerPort?: Maybe<number>
@@ -105,6 +103,7 @@ export interface CoreDataShape {
 export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDataShape {
   return {
     servers: {},
+    cliBrowser: null,
     hasInitializedMode: null,
     baseError: null,
     dev: {
@@ -112,7 +111,6 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
     },
     app: {
       isInGlobalMode: Boolean(modeOptions.global),
-      currentTestingType: null,
       refreshingBrowsers: null,
       browsers: null,
       projects: [],
@@ -128,7 +126,6 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
     currentProject: null,
     currentTestingType: null,
     wizard: {
-      currentTestingType: null,
       chosenBundler: null,
       chosenFramework: null,
       chosenLanguage: 'js',
@@ -136,9 +133,9 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
       currentStep: 'welcome',
       allBundlers: BUNDLERS,
       history: ['welcome'],
-      chosenBrowser: null,
       warnings: [],
     },
+    chosenBrowser: null,
     user: null,
     electron: {
       app: null,

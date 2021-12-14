@@ -67,7 +67,7 @@ export class WizardActions {
   }
 
   private navigateForward () {
-    if (this.data.currentStep === 'welcome' && this.data.currentTestingType === 'component') {
+    if (this.data.currentStep === 'welcome' && this.ctx.coreData.currentTestingType === 'component') {
       if (!this.ctx.lifecycleManager.isTestingTypeConfigured('component')) {
         this.navigateToStep('selectFramework')
       } else {
@@ -78,7 +78,7 @@ export class WizardActions {
       return this.data
     }
 
-    if (this.data.currentStep === 'welcome' && this.data.currentTestingType === 'e2e') {
+    if (this.data.currentStep === 'welcome' && this.ctx.coreData.currentTestingType === 'e2e') {
       if (!this.ctx.lifecycleManager.isTestingTypeConfigured('e2e')) {
         this.navigateToStep('configFiles')
       } else {
@@ -113,7 +113,6 @@ export class WizardActions {
     this.data.currentStep = 'welcome'
     this.data.history = ['welcome']
     this.data.chosenBundler = null
-    this.data.currentTestingType = null
     this.data.chosenFramework = null
     this.data.chosenLanguage = 'js'
     this.data.chosenManualInstall = false

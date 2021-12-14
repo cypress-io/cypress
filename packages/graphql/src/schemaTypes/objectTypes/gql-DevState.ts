@@ -19,6 +19,7 @@ export const DevState = objectType({
         return {
           coreData: JSON.parse(JSON.stringify(ctx.coreData, replacer)),
           modeOptions: ctx.modeOptions,
+          lifecycleManager: JSON.parse(JSON.stringify(ctx.lifecycleManager, replacer)),
         }
       },
     })

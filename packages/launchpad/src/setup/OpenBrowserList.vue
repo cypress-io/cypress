@@ -82,7 +82,10 @@ import { OpenBrowserListFragment, OpenBrowserList_SetBrowserDocument } from '../
 
 gql`
 mutation OpenBrowserList_SetBrowser($id: ID!) {
-  launchpadSetBrowser(id: $id)
+  launchpadSetBrowser(id: $id) {
+    id
+    ...OpenBrowserList
+  }
 }
 `
 

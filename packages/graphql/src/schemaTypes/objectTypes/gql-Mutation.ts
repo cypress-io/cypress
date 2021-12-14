@@ -4,6 +4,7 @@ import { CodeLanguageEnum, FrontendFrameworkEnum, SupportedBundlerEnum, TestingT
 import { FileDetailsInput } from '../inputTypes/gql-FileDetailsInput'
 import { WizardUpdateInput } from '../inputTypes/gql-WizardUpdateInput'
 import { CodeGenResultWithFileParts } from './gql-CodeGenResult'
+import { CurrentProject } from './gql-CurrentProject'
 import { GeneratedSpec } from './gql-GeneratedSpec'
 
 export const mutation = mutationType({
@@ -85,9 +86,9 @@ export const mutation = mutationType({
         })),
       },
       resolve: async (_, args, ctx) => {
-        if (ctx.coreData.currentProject?.isMissingConfigFile) {
-          await ctx.actions.project.createConfigFile(args.input.testingType)
-        }
+        // if (ctx.coreData.currentProject?.isMissingConfigFile) {
+        //   await ctx.actions.project.createConfigFile(args.input.testingType)
+        // }
 
         if (args.input.testingType) {
           ctx.actions.project.setCurrentTestingType(args.input.testingType)
@@ -126,15 +127,18 @@ export const mutation = mutationType({
       },
     })
 
-    t.liveMutation('launchpadSetBrowser', {
+    t.field('launchpadSetBrowser', {
+      type: CurrentProject,
       description: 'Sets the active browser',
       args: {
         id: nonNull(idArg({
           description: 'ID of the browser that we want to set',
         })),
       },
-      resolve: async (_, args, ctx) => {
-        await ctx.actions.app.setActiveBrowserById(args.id)
+      resolve (_, args, ctx) {
+        ctx.actions.app.setActiveBrowserById(args.id)
+
+        return ctx.lifecycleManager
       },
     })
 
@@ -187,7 +191,7 @@ export const mutation = mutationType({
         specPath: stringArg(),
       },
       resolve: async (_, args, ctx) => {
-        await ctx.actions.project.launchProject(ctx.wizardData.currentTestingType, {}, args.specPath)
+        await ctx.actions.project.launchProject(ctx.coreData.currentTestingType, {}, args.specPath)
       },
     })
 

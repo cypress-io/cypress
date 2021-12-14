@@ -38,18 +38,6 @@ export class WizardDataSource {
     ]
   }
 
-  get currentTestingTypePluginsInitialized () {
-    if (this.currentTestingType === 'component' && this.ctx.currentProject?.ctPluginsInitialized) {
-      return true
-    }
-
-    if (this.currentTestingType === 'e2e' && this.ctx.currentProject?.e2ePluginsInitialized) {
-      return true
-    }
-
-    return false
-  }
-
   get canNavigateForward () {
     const data = this.ctx.wizardData
 
@@ -66,14 +54,13 @@ export class WizardDataSource {
   }
 
   async sampleCode () {
-    const data = this.ctx.wizardData
     const storybookInfo = await this.ctx.storybook.loadStorybookInfo()
 
     if (!this.chosenLanguage) {
       return null
     }
 
-    if (data.currentTestingType === 'component') {
+    if (this.currentTestingType === 'component') {
       if (!this.chosenFramework || !this.chosenBundler) {
         return null
       }
@@ -143,7 +130,7 @@ export class WizardDataSource {
   }
 
   get currentTestingType () {
-    return this.ctx.wizardData.currentTestingType
+    return this.ctx.coreData.currentTestingType
   }
 
   get chosenFramework () {

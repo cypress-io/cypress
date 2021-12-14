@@ -1,7 +1,9 @@
 import type { CodeGenType, MutationAddProjectArgs, MutationSetProjectPreferencesArgs, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
-import type { InitializeProjectOptions, FindSpecs, FoundBrowser, FoundSpec, LaunchOpts, OpenProjectLaunchOptions, Preferences, SettingsOptions, TestingType } from '@packages/types'
+import type { InitializeProjectOptions, FindSpecs, FoundBrowser, FoundSpec, LaunchOpts, OpenProjectLaunchOptions, Preferences, TestingType } from '@packages/types'
 import execa from 'execa'
 import path from 'path'
+import assert from 'assert'
+
 import type { ProjectShape } from '../data/coreDataShape'
 
 import type { DataContext } from '..'
@@ -15,7 +17,7 @@ export interface ProjectApiShape {
    * TODO(tim): figure out what this is actually doing, it seems it's necessary in
    *   order for CT to startup
    */
-  initializeProject(args: InitializeProjectOptions, options: OpenProjectLaunchOptions): Promise<unknown>
+  openProjectCreate(args: InitializeProjectOptions, options: OpenProjectLaunchOptions): Promise<unknown>
   launchProject(browser: FoundBrowser, spec: Cypress.Spec, options: LaunchOpts): void
   insertProjectToCache(projectRoot: string): void
   removeProjectFromCache(projectRoot: string): void
@@ -36,13 +38,8 @@ export class ProjectActions {
   }
 
   async clearCurrentProject () {
-    // this.ctx.actions.projectConfig.killConfigProcess()
     this.ctx.lifecycleManager.clearCurrentProject()
     await this.api.closeActiveProject()
-
-    // TODO(tim): Improve general state management w/ immutability (immer) & updater fn
-    this.ctx.coreData.currentProject = null
-    this.ctx.coreData.app.currentTestingType = null
   }
 
   private get projects () {
@@ -69,8 +66,6 @@ export class ProjectActions {
 
   setCurrentTestingType (type: TestingType) {
     this.ctx.lifecycleManager.setCurrentTestingType(type)
-    // TODO: Remove from wizard
-    this.ctx.coreData.wizard.currentTestingType = type
   }
 
   async setCurrentProject (projectRoot: string) {
@@ -101,19 +96,19 @@ export class ProjectActions {
       throw Error('Cannot initialize project without an active project')
     }
 
-    if (!this.ctx.wizardData.currentTestingType) {
+    if (!this.ctx.coreData.currentTestingType) {
       throw Error('Cannot initialize project without choosing testingType')
     }
 
     const allModeOptionsWithLatest: InitializeProjectOptions = {
       ...this.ctx.modeOptions,
       projectRoot: this.ctx.currentProject,
-      testingType: this.ctx.wizardData.currentTestingType,
+      testingType: this.ctx.coreData.currentTestingType,
     }
 
     try {
       await this.api.closeActiveProject()
-      await this.api.initializeProject(allModeOptionsWithLatest, {
+      await this.api.openProjectCreate(allModeOptionsWithLatest, {
         ...options,
         ctx: this.ctx,
       })
@@ -165,7 +160,7 @@ export class ProjectActions {
       return null
     }
 
-    testingType = testingType || this.ctx.wizardData.currentTestingType
+    testingType = testingType || this.ctx.coreData.currentTestingType
 
     if (!testingType) {
       return null
@@ -182,7 +177,7 @@ export class ProjectActions {
       await this.ctx.appData.refreshingBrowsers
     }
 
-    const browser = this.ctx.wizardData.chosenBrowser ?? this.ctx.appData.browsers?.[0]
+    const browser = this.ctx.coreData.chosenBrowser ?? this.ctx.appData.browsers?.[0]
 
     if (!browser) {
       return null
@@ -197,7 +192,7 @@ export class ProjectActions {
       specType: testingType === 'e2e' ? 'integration' : 'component',
     }
 
-    this.ctx.appData.currentTestingType = testingType
+    this.ctx.coreData.currentTestingType = testingType
 
     return this.api.launchProject(browser, activeSpec ?? emptySpec, options)
   }
@@ -214,6 +209,8 @@ export class ProjectActions {
       throw Error('Cannot launch project without stored browserPath or testingType')
     }
 
+    this.ctx.lifecycleManager.setCurrentTestingType(testingType)
+
     const spec = this.makeSpec(testingType)
     const browser = this.findBrowerByPath(browserPath)
 
@@ -222,9 +219,8 @@ export class ProjectActions {
     }
 
     this.ctx.actions.electron.hideBrowserWindow()
-    this.ctx.coreData.wizard.currentTestingType = testingType
+
     await this.initializeActiveProject()
-    this.ctx.appData.currentTestingType = testingType
 
     return this.api.launchProject(browser, spec, {})
   }
@@ -392,14 +388,12 @@ export class ProjectActions {
   }
 
   async scaffoldIntegration () {
-    const project = this.ctx.currentProject
+    const projectRoot = this.ctx.currentProject
 
-    if (!project) {
-      throw Error(`Cannot create spec without activeProject.`)
-    }
+    assert(projectRoot, `Cannot create spec without currentProject.`)
 
-    const config = await this.ctx.project.getConfig(project)
-    const integrationFolder = config.integrationFolder || project
+    const config = await this.ctx.lifecycleManager.getFullInitialConfig()
+    const integrationFolder = config.integrationFolder || projectRoot
 
     const results = await codeGenerator(
       { templateDir: templates['scaffoldIntegration'], target: integrationFolder },
@@ -414,7 +408,7 @@ export class ProjectActions {
       return {
         fileParts: this.ctx.file.normalizeFileToFileParts({
           absolute: res.file,
-          projectRoot: project,
+          projectRoot,
           searchFolder: integrationFolder,
         }),
         codeGenResult: res,

@@ -36,8 +36,9 @@ import { VersionsDataSource } from './sources/VersionsDataSource'
 import type { SocketIOServer } from '@packages/socket'
 import { globalPubSub } from '.'
 import { InjectedConfigApi, ProjectLifecycleManager } from './data/ProjectLifecycleManager'
+import dedent from 'dedent'
 
-const DEBUG_LIFECYCLE = true
+const DEBUG_LIFECYCLE = false
 const IS_DEV_ENV = process.env.CYPRESS_INTERNAL_ENV !== 'production'
 
 export type Updater = (proj: CoreDataShape) => void | undefined | CoreDataShape
@@ -92,7 +93,11 @@ export class DataContext {
       set (target, p: string, value, receiver) {
         function serializeValue (key: string, val: unknown) {
           if (_.isArray(val)) {
-            return val
+            return val.length < 10 ? val : dedent`
+              Array{${val.length}}[
+                ${val[0]}, ...
+              ]
+            `
           }
 
           if (_.isObject(val) && !_.isPlainObject(val)) {
@@ -422,7 +427,7 @@ export class DataContext {
 
   async initializeMode () {
     if (this._config.mode === 'run') {
-      await this.actions.app.refreshBrowsers()
+      await this.lifecycleManager.projectReady()
     } else if (this._config.mode === 'open') {
       await this.initializeOpenMode()
     } else {
@@ -440,9 +445,6 @@ export class DataContext {
     }
 
     const toAwait: Promise<any>[] = [
-      // Fetch the browsers when the app starts, so we have some by
-      // the time we're continuing.
-      this.actions.app.refreshBrowsers(),
       // load the cached user & validate the token on start
       this.actions.auth.getUser(),
       // and grab the user device settings
@@ -453,7 +455,7 @@ export class DataContext {
     toAwait.push(this.actions.project.loadProjects())
 
     if (this.modeOptions.projectRoot) {
-      await this.actions.project.setCurrentProject(this.modeOptions.projectRoot)
+      this.actions.project.setCurrentProject(this.modeOptions.projectRoot)
 
       // if (this.coreData.currentProject?.preferences) {
       // Skipping this until we sort out the lifecycle things
@@ -462,16 +464,11 @@ export class DataContext {
     }
 
     if (this.modeOptions.testingType) {
-      this.appData.currentTestingType = this.modeOptions.testingType
-      // It should be possible to skip the first step in the wizard, if the
-      // user already told us the testing type via command line argument
-      this.actions.wizard.setTestingType(this.modeOptions.testingType)
-      this.actions.wizard.navigate('forward')
-      this.emitter.toLaunchpad()
+      this.lifecycleManager.setCurrentTestingType(this.modeOptions.testingType)
     }
 
     if (this.modeOptions.browser) {
-      toAwait.push(this.actions.app.setActiveBrowserByNameOrPath(this.modeOptions.browser))
+      this.coreData.cliBrowser = this.modeOptions.browser
     }
 
     return Promise.all(toAwait)

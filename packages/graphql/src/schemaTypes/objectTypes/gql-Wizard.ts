@@ -36,13 +36,6 @@ export const Wizard = objectType({
       resolve: (source, args, ctx) => ctx.wizard.chosenBundler ?? null,
     })
 
-    t.nonNull.boolean('currentTestingTypePluginsInitialized', {
-      description: 'Whether the plugins for the selected testing type has been initialized',
-      resolve: (source, args, ctx) => {
-        return ctx.wizard.currentTestingTypePluginsInitialized
-      },
-    })
-
     t.nonNull.boolean('canNavigateForward', {
       description: 'Given the current state, returns whether the user progress to the next step of the wizard',
       resolve: (source, args, ctx) => ctx.wizard.canNavigateForward,
@@ -105,7 +98,7 @@ export const Wizard = objectType({
     t.field('testingType', {
       type: TestingTypeEnum,
       description: 'The testing type we are setting in the wizard, null if this has not been chosen',
-      resolve: (source) => source.currentTestingType,
+      resolve: (source, args, ctx) => ctx.coreData.currentTestingType,
     })
 
     t.string('title', {

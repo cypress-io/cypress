@@ -223,6 +223,22 @@ import UpdateCypressModal from './UpdateCypressModal.vue'
 const releasesUrl = 'https://github.com/cypress-io/cypress/releases'
 
 gql`
+fragment TopNav_Browsers on CurrentProject {
+  id
+  currentBrowser {
+    id
+    displayName
+    majorVersion
+  }
+  browsers {
+    id
+    isSelected
+    displayName
+    version
+    majorVersion
+  }
+}
+
 fragment TopNav on Query {
   versions {
     current {
@@ -240,18 +256,7 @@ fragment TopNav on Query {
   currentProject {
     id
     title
-    currentBrowser {
-      id
-      displayName
-      majorVersion
-    }
-    browsers {
-      id
-      isSelected
-      displayName
-      version
-      majorVersion
-    }
+    ...TopNav_Browsers
   }
 }
 `
@@ -264,7 +269,10 @@ mutation TopNav_LaunchOpenProject  {
 
 gql`
 mutation TopNav_SetBrowser($id: ID!) {
-  launchpadSetBrowser(id: $id)
+  launchpadSetBrowser(id: $id) {
+    id
+    ...TopNav_Browsers
+  }
 }
 `
 

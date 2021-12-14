@@ -573,7 +573,7 @@ type Mutation {
   launchpadSetBrowser(
     """ID of the browser that we want to set"""
     id: ID!
-  ): Boolean
+  ): CurrentProject
 
   """Auth with Cypress Cloud"""
   login: Boolean
@@ -868,9 +868,6 @@ type Wizard {
   Given the current state, returns whether the user progress to the next step of the wizard
   """
   canNavigateForward: Boolean!
-
-  """Whether the plugins for the selected testing type has been initialized"""
-  currentTestingTypePluginsInitialized: Boolean!
 
   """The title of the page, given the current step of the wizard"""
   description: String

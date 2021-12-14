@@ -9,11 +9,6 @@ export interface LaunchOpts {
   onBrowserClose?: (...args: unknown[]) => void
   onBrowserOpen?: (...args: unknown[]) => void
   onError?: (err: Error) => void
-  /**
-   * Whether we want to skip opening the browser, in the case we're
-   * using Cypress to test the server directly
-   */
-  skipBrowserOpenForTest?: true
 }
 
 export interface LaunchArgs {
@@ -63,7 +58,7 @@ export interface OpenProjectLaunchOptions {
   skipPluginInitializeForTesting?: boolean
 
   configFile?: string | false
-  browsers?: Cypress.Browser[]
+  browsers?: FoundBrowser[]
 
   // Optional callbacks used for triggering events via the web socket
   onReloadBrowser?: WebSocketOptionsCallback

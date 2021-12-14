@@ -4,7 +4,7 @@ import pkg from '@packages/root'
 import configUtils from '@packages/config'
 
 import specsUtil from './util/specs'
-import type { AllModeOptions, AllowedState, FindSpecs, FoundBrowser, InitializeProjectOptions, LaunchOpts, OpenProjectLaunchOptions, Preferences, SettingsOptions } from '@packages/types'
+import type { AllModeOptions, AllowedState, FindSpecs, FoundBrowser, InitializeProjectOptions, LaunchOpts, OpenProjectLaunchOptions, Preferences } from '@packages/types'
 import browserUtils from './browsers/utils'
 import auth from './gui/auth'
 import user from './user'
@@ -72,7 +72,7 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       launchProject (browser: FoundBrowser, spec: Cypress.Spec, options?: LaunchOpts) {
         return openProject.launch({ ...browser }, spec, options)
       },
-      initializeProject (args: InitializeProjectOptions, options: OpenProjectLaunchOptions) {
+      openProjectCreate (args: InitializeProjectOptions, options: OpenProjectLaunchOptions) {
         return openProject.create(args.projectRoot, args, options)
       },
       insertProjectToCache (projectRoot: string) {

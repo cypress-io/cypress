@@ -51,7 +51,7 @@ export interface InjectedConfigApi {
   getHandlers: () => IpcHandler[]
   validateConfig<T extends Cypress.ConfigOptions>(config: Partial<T>, onErr: (errMsg: string) => never): T
   allowedConfig(config: Cypress.ConfigOptions): Cypress.ConfigOptions
-  updateWithPluginValues(config: Cypress.ConfigOptions, modifiedConfig: Partial<Cypress.ConfigOptions>): Cypress.ConfigOptions
+  updateWithPluginValues(config: FullConfig, modifiedConfig: Partial<Cypress.ConfigOptions>): FullConfig
   setupFullConfigWithDefaults(config: SetupFullConfigOptions): Promise<FullConfig>
 }
 
@@ -116,6 +116,19 @@ export class ProjectLifecycleManager {
   private _cachedFullConfig: FullConfig | undefined
 
   private _projectMetaState: ProjectMetaState = { ...PROJECT_META_STATE }
+  private _readyHandlers: pDefer.DeferredPromise<FullConfig>[] = []
+
+  /**
+   * Returns a Promise which resolves when the project is "ready",
+   * meaning that the Config & associated
+   */
+  projectReady (): Promise<FullConfig> {
+    const dfd = pDefer<FullConfig>()
+
+    this._readyHandlers.push(dfd)
+
+    return dfd.promise
+  }
 
   async getProjectId (): Promise<string | null> {
     try {
@@ -132,6 +145,10 @@ export class ProjectLifecycleManager {
     return Object.freeze(this._projectMetaState)
   }
 
+  get legacyJsonPath () {
+    return path.join(this.configFilePath, 'cypress.json')
+  }
+
   get configFilePath () {
     assert(this._configFilePath, 'Expected configFilePath to be found')
 
@@ -142,11 +159,19 @@ export class ProjectLifecycleManager {
     return path.join(this.projectRoot, 'cypress.env.json')
   }
 
+  get browsers () {
+    if (this._cachedFullConfig) {
+      return this._cachedFullConfig.browsers as FoundBrowser[]
+    }
+
+    return null
+  }
+
   get errorLoadingConfigFile (): BaseErrorDataShape | null {
     if (this._configResult.state === 'errored') {
       return {
         title: 'Error Loading Config',
-        message: this._configResult.value,
+        message: String(this._configResult.value), // TODO: fix
       }
     }
 
@@ -157,7 +182,7 @@ export class ProjectLifecycleManager {
     if (this._configResult.state === 'errored') {
       return {
         title: 'Error Loading Config',
-        message: this._configResult.value,
+        message: String(this._configResult.value), // TODO: fix
       }
     }
 
@@ -177,7 +202,7 @@ export class ProjectLifecycleManager {
   }
 
   get loadedFullConfig (): FullConfig | null {
-    return null
+    return this._cachedFullConfig ?? null
   }
 
   get projectRoot () {
@@ -236,9 +261,7 @@ export class ProjectLifecycleManager {
       this.initializeConfig().catch(expectedError)
     }
 
-    if (this._projectMetaState.hasCypressEnvFile) {
-      this.loadCypressEnvFile().catch(expectedError)
-    }
+    this.loadCypressEnvFile().catch(expectedError)
 
     this.initializeConfigWatchers()
   }
@@ -249,8 +272,6 @@ export class ProjectLifecycleManager {
   setCurrentTestingType (testingType: TestingType | null) {
     this.ctx.update((d) => {
       d.currentTestingType = testingType
-      // TODO: Get rid of this
-      d.wizard.currentTestingType = testingType
     })
 
     if (this._currentTestingType === testingType) {
@@ -312,12 +333,22 @@ export class ProjectLifecycleManager {
    * this sources the config from all the
    */
   async getFullInitialConfig (options: Partial<AllModeOptions> = this.ctx.modeOptions, withBrowsers = true): Promise<FullConfig> {
+    if (this._cachedFullConfig) {
+      return this._cachedFullConfig
+    }
+
     const [configFileContents, envFile] = await Promise.all([
       this.getConfigFileContents(),
       this.loadCypressEnvFile(),
     ])
 
-    // TODO: Convert to syncronous
+    this._cachedFullConfig = await this.buildBaseFullConfig(configFileContents, envFile, options, withBrowsers)
+
+    return this._cachedFullConfig
+  }
+
+  private async buildBaseFullConfig (configFileContents: Cypress.ConfigOptions, envFile: Cypress.ConfigOptions, options: Partial<AllModeOptions>, withBrowsers = true) {
+    // TODO: Convert this to be synchronous,
     const fullConfig = await this.ctx._apis.configApi.setupFullConfigWithDefaults({
       projectName: path.basename(this.projectRoot),
       projectRoot: this.projectRoot,
@@ -347,28 +378,24 @@ export class ProjectLifecycleManager {
       })
     }
 
-    this._cachedFullConfig = _.cloneDeep(fullConfig)
-
-    return this._cachedFullConfig
+    return _.cloneDeep(fullConfig)
   }
 
-  private injectCtSpecificConfig (cfg: FullConfig) {
-    cfg.resolved.testingType = { value: 'component' }
-
-    // This value is normally set up in the `packages/server/lib/plugins/index.js#110`
-    // But if we don't return it in the plugins function, it never gets set
-    // Since there is no chance that it will have any other value here, we set it to "component"
-    // This allows users to not return config in the `cypress/plugins/index.js` file
-    // https://github.com/cypress-io/cypress/issues/16860
-    const rawJson = cfg.rawJson as Cfg
-
-    return {
-      ...cfg,
-      componentTesting: true,
-      viewportHeight: rawJson.viewportHeight ?? 500,
-      viewportWidth: rawJson.viewportWidth ?? 500,
-    }
-  }
+  // private injectCtSpecificConfig (cfg: FullConfig) {
+  //   cfg.resolved.testingType = { value: 'component' }
+  //   // This value is normally set up in the `packages/server/lib/plugins/index.js#110`
+  //   // But if we don't return it in the plugins function, it never gets set
+  //   // Since there is no chance that it will have any other value here, we set it to "component"
+  //   // This allows users to not return config in the `cypress/plugins/index.js` file
+  //   // https://github.com/cypress-io/cypress/issues/16860
+  //   const rawJson = cfg.rawJson as Cfg
+  //   return {
+  //     ...cfg,
+  //     componentTesting: true,
+  //     viewportHeight: rawJson.viewportHeight ?? 500,
+  //     viewportWidth: rawJson.viewportWidth ?? 500,
+  //   }
+  // }
 
   async getConfigFileContents () {
     if (this.ctx.modeOptions.configFile === false) {
@@ -439,6 +466,14 @@ export class ProjectLifecycleManager {
       return
     }
 
+    if (this._projectMetaState.hasLegacyCypressJson) {
+      const legacyFileWatcher = this.addWatcher(this.legacyJsonPath)
+
+      legacyFileWatcher.on('all', () => {
+        this._projectMetaState = this.determineProjectMetaState()
+      })
+    }
+
     const configFileWatcher = this.addWatcher(this.configFilePath)
 
     configFileWatcher.on('all', () => {
@@ -477,7 +512,7 @@ export class ProjectLifecycleManager {
     try {
       const result = await promise
 
-      // If we've swapped out _configResult during the async, we don't want to mutate it
+      // If we've swapped out _configResult during the async/await, we don't want to mutate it
       if (currentResult !== this._configResult) {
         return {}
       }
@@ -509,7 +544,7 @@ export class ProjectLifecycleManager {
 
   loadCypressEnvFile () {
     if (!this._projectMetaState.hasCypressEnvFile) {
-      return Promise.resolve({})
+      this._envFileResult = { state: 'loaded', value: {} }
     }
 
     if (this._envFileResult.state === 'loading') {
@@ -613,6 +648,7 @@ export class ProjectLifecycleManager {
   private onConfigLoaded (child: ChildProcess, ipc: ProjectConfigIpc, result: LoadConfigReply) {
     this.watchRequires('config', result.requires)
     if (this._eventProcess) {
+      this._eventsIpc?.removeAllListeners()
       this._cleanupProcess(this._eventProcess)
     }
 
@@ -647,7 +683,7 @@ export class ProjectLifecycleManager {
     let orderedConfig = {} as Cypress.ResolvedConfigOptions
 
     Object.keys(mergedConfig).sort().forEach((key) => {
-      // @ts-expect-error
+      // @ts-ignore
       orderedConfig[key] = config[key]
     })
 
@@ -661,9 +697,9 @@ export class ProjectLifecycleManager {
 
     this._eventsIpcResult = { state: 'loading', value: promise }
 
-    promise.then((val) => {
+    promise.then(async (val) => {
       this._eventsIpcResult = { state: 'loaded', value: val }
-      this.handleSetupTestingTypeReply(ipc, val)
+      await this.handleSetupTestingTypeReply(ipc, val)
     })
     .catch((err) => {
       this._eventsIpcResult = { state: 'errored', value: err }
@@ -903,7 +939,7 @@ export class ProjectLifecycleManager {
         }
       }
     } catch {
-      //
+      // No need to handle
     }
 
     if (typeof configFile === 'string') {
@@ -955,7 +991,7 @@ export class ProjectLifecycleManager {
     }
   }
 
-  private handleSetupTestingTypeReply (ipc: ProjectConfigIpc, result: SetupNodeEventsReply) {
+  private async handleSetupTestingTypeReply (ipc: ProjectConfigIpc, result: SetupNodeEventsReply) {
     this._registeredEvents = {}
     this.watchRequires('setupNodeEvents', result.requires)
 
@@ -1004,7 +1040,12 @@ export class ProjectLifecycleManager {
       })
     }
 
-    // await this.ctx._apis.configApi.updateWithPluginValues(this._cfg, modifiedCfg)
+    assert(this._envFileResult.state === 'loaded')
+    assert(this._configResult.state === 'loaded')
+
+    const fullConfig = await this.buildBaseFullConfig(this._configResult.value.initialConfig, this._envFileResult.value, this.ctx.modeOptions)
+
+    this._cachedFullConfig = this.ctx._apis.configApi.updateWithPluginValues(fullConfig, result.setupConfig ?? {})
   }
 
   private registerSetupIpcHandlers (ipc: ProjectConfigIpc) {

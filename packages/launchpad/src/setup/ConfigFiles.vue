@@ -57,7 +57,7 @@ mutation ConfigFilesNavigate($input: WizardUpdateInput!) {
 const navigate = useMutation(ConfigFilesNavigateDocument)
 
 const props = defineProps<{
-  gql:ConfigFilesFragment
+  gql: ConfigFilesFragment
 }>()
 const files = computed(() => props.gql.sampleConfigFiles)
 

@@ -7,7 +7,7 @@ import { createHmac } from 'crypto'
 
 import browsers from './browsers'
 import pkg from '@packages/root'
-import { allowed } from '@packages/config'
+// import { allowed } from '@packages/config'
 import { ServerCt } from './server-ct'
 import { SocketCt } from './socket-ct'
 import { SocketE2E } from './socket-e2e'
@@ -22,8 +22,8 @@ import scaffold from './scaffold'
 import { ServerE2E } from './server-e2e'
 import system from './util/system'
 import { ensureProp } from './util/class-helpers'
-import * as settings from './util/settings'
-import plugins from './plugins'
+// import * as settings from './util/settings'
+// import plugins from './plugins'
 import specsUtil from './util/specs'
 import devServer from './plugins/dev-server'
 import preprocessor from './plugins/preprocessor'
@@ -570,7 +570,7 @@ export class ProjectBase<TServer extends Server> extends EE {
     return family === 'chromium' || (family === 'firefox' && majorVersion >= 86)
   }
 
-  setCurrentSpecAndBrowser (spec, browser: Cypress.Browser) {
+  setCurrentSpecAndBrowser (spec, browser: FoundBrowser) {
     this.spec = spec
     this.browser = browser
   }
@@ -580,7 +580,7 @@ export class ProjectBase<TServer extends Server> extends EE {
   }
 
   async initializeConfig (): Promise<Cfg> {
-    let theCfg: Cfg = await this.ctx.lifecycleManager.getFullInitialConfig()
+    let theCfg: Cfg = await this.ctx.lifecycleManager.getFullInitialConfig() as Cfg // ?? types are definitely wrong here I think
 
     theCfg = this.testingType === 'e2e'
       ? theCfg

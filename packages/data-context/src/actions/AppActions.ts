@@ -1,6 +1,5 @@
 import type Bluebird from 'bluebird'
 import type { FoundBrowser } from '@packages/types'
-import pDefer from 'p-defer'
 
 import type { DataContext } from '..'
 
@@ -22,14 +21,14 @@ export class AppActions {
   constructor (private ctx: DataContext) {}
 
   setActiveBrowser (browser: FoundBrowser) {
-    this.ctx.coreData.wizard.chosenBrowser = browser
+    this.ctx.coreData.chosenBrowser = browser
   }
 
   setActiveBrowserById (id: string) {
     const browserId = this.ctx.fromId(id, 'Browser')
 
     // Ensure that this is a valid ID to set
-    const browser = this.ctx.appData.browsers?.find((b) => this.idForBrowser(b) === browserId)
+    const browser = this.ctx.lifecycleManager.browsers?.find((b) => this.idForBrowser(b as FoundBrowser) === browserId)
 
     if (browser) {
       this.setActiveBrowser(browser)
@@ -65,32 +64,6 @@ export class AppActions {
     }
   }
 
-  async refreshBrowsers () {
-    if (this.ctx.coreData.app.refreshingBrowsers) {
-      return
-    }
-
-    const dfd = pDefer<FoundBrowser[]>()
-
-    this.ctx.coreData.app.refreshingBrowsers = dfd.promise
-
-    // TODO(tim): global unhandled error concept
-    const browsers = await this.ctx._apis.appApi.getBrowsers()
-
-    this.ctx.coreData.app.browsers = browsers
-
-    if (this.ctx.coreData.currentProject) {
-      this.ctx.coreData.currentProject.browsers = browsers
-    }
-
-    // If we don't have a chosen browser, assign to the first one in the list
-    if (!this.hasValidChosenBrowser(browsers) && browsers[0]) {
-      this.ctx.coreData.wizard.chosenBrowser = browsers[0]
-    }
-
-    dfd.resolve(browsers)
-  }
-
   private idForBrowser (obj: FoundBrowser) {
     return this.ctx.browser.idForBrowser(obj)
   }
@@ -100,7 +73,7 @@ export class AppActions {
    * ones we have selected
    */
   private hasValidChosenBrowser (browsers: FoundBrowser[]) {
-    const chosenBrowser = this.ctx.coreData.wizard.chosenBrowser
+    const chosenBrowser = this.ctx.coreData.chosenBrowser
 
     if (!chosenBrowser) {
       return false

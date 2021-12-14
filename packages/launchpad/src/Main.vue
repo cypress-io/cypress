@@ -2,15 +2,15 @@
   <template v-if="query.data.value">
     <HeaderBar />
     <div class="p-24px">
-      <template v-if="query.data.value.baseError">
-        <BaseError :gql="query.data.value" />
-      </template>
-      <template
+      <BaseError
+        v-if="query.data.value.baseError"
+        :gql="query.data.value.baseError"
+      />
+      <GlobalPage
         v-else-if="query.data.value.isInGlobalMode && !query.data.value?.currentProject"
-      >
-        <GlobalPage :gql="query.data.value" />
-      </template>
-
+        :gql="query.data.value"
+      />
+      <MigrationPage v-else-if="query.data.value.currentProject?.needsLegacyConfigMigration" />
       <template v-else>
         <BaseError
           v-if="query.data.value.currentProject?.errorLoadingConfigFile"
@@ -75,6 +75,7 @@ import StandardModal from '@cy/components/StandardModal.vue'
 import HeaderBar from '@cy/gql-components/HeaderBar.vue'
 import Spinner from '@cy/components/Spinner.vue'
 import CompareTestingTypes from './setup/CompareTestingTypes.vue'
+import MigrationPage from './setup/MigrationPage.vue'
 
 import { useI18n } from '@cy/i18n'
 import { ref } from 'vue'
@@ -94,6 +95,7 @@ query MainLaunchpadQuery {
     id
     isLoadingConfigFile
     isLoadingNodeEvents
+    needsLegacyConfigMigration
     errorLoadingConfigFile {
       ...BaseError_Data
     }

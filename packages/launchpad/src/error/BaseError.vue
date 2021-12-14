@@ -71,7 +71,7 @@ import { gql } from '@urql/vue'
 import Button from '@cy/components/Button.vue'
 import { computed } from 'vue'
 import { useI18n } from '@cy/i18n'
-import type { BaseErrorFragment } from '../generated/graphql'
+import type { BaseError_DataFragment } from '../generated/graphql'
 
 gql`
 fragment BaseError_Data on BaseError {
@@ -88,13 +88,13 @@ const openDocs = () => {
 const { t } = useI18n()
 
 const props = defineProps<{
-  gql: BaseErrorFragment
-  onRetry: () => void
-  onReadDocs: () => void
+  gql: BaseError_DataFragment
+  onRetry?: () => void
+  onReadDocs?: () => void
 }>()
 
-const headerText = computed(() => props.gql.baseError?.title ? props.gql.baseError.title : t('launchpadErrors.generic.header'))
-const errorMessage = computed(() => props.gql?.baseError?.message ? props.gql.baseError.message : null)
-const stack = computed(() => props.gql?.baseError?.stack ? props.gql.baseError.stack : null)
+const headerText = computed(() => props.gql.title ?? t('launchpadErrors.generic.header'))
+const errorMessage = computed(() => props.gql.message ?? null)
+const stack = computed(() => props.gql.stack ?? null)
 
 </script>

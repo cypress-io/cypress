@@ -8,7 +8,7 @@ import type { OpenModeOptions } from '@packages/types'
 import type { E2ETaskMap } from '../e2ePluginSetup'
 
 const NO_TIMEOUT = 1000 * 1000
-const FOUR_SECONDS = 4 * 1000
+const TEN_SECONDS = 10 * 1000
 
 export type ProjectFixture = typeof e2eProjectDirs[number]
 
@@ -153,14 +153,13 @@ function openProject (projectName: ProjectFixture, argv: string[] = []) {
 function startAppServer (mode: 'component' | 'e2e' = 'e2e') {
   return logInternal('startAppServer', (log) => {
     return cy.withCtx(async (ctx, o) => {
-      ctx.actions.wizard.setTestingType(o.mode)
+      ctx.actions.project.setCurrentTestingType(o.mode)
+      // ctx.lifecycleManager.isReady()
       await ctx.actions.project.initializeActiveProject({
         skipPluginInitializeForTesting: true,
       })
 
-      await ctx.actions.project.launchProject(o.mode, {
-        skipBrowserOpenForTest: true,
-      })
+      await ctx.actions.project.launchProject(o.mode, {})
 
       return ctx.appServerPort
     }, { log: false, mode }).then((serverPort) => {
@@ -220,7 +219,7 @@ function withCtx<T extends Partial<WithCtxOptions>, R> (fn: (ctx: DataContext, o
   return cy.task<UnwrapPromise<R>>('__internal_withCtx', {
     fn: fn.toString(),
     options: rest,
-  }, { timeout: timeout ?? Cypress.env('e2e_isDebugging') ? NO_TIMEOUT : FOUR_SECONDS, log: Boolean(Cypress.env('e2e_isDebugging')) }).then((result) => {
+  }, { timeout: timeout ?? Cypress.env('e2e_isDebugging') ? NO_TIMEOUT : TEN_SECONDS, log: Boolean(Cypress.env('e2e_isDebugging')) }).then((result) => {
     _log.end()
 
     return result
@@ -257,7 +256,7 @@ type Resolved<V> = V extends Promise<infer U> ? U : V
 function taskInternal<T extends keyof E2ETaskMap> (name: T, arg: Parameters<E2ETaskMap[T]>[0]) {
   const isDebugging = Boolean(Cypress.env('e2e_isDebugging'))
 
-  return cy.task<Resolved<ReturnType<E2ETaskMap[T]>>>(name, arg, { log: isDebugging, timeout: isDebugging ? NO_TIMEOUT : FOUR_SECONDS })
+  return cy.task<Resolved<ReturnType<E2ETaskMap[T]>>>(name, arg, { log: isDebugging, timeout: isDebugging ? NO_TIMEOUT : TEN_SECONDS })
 }
 
 function logInternal<T> (name: string | Partial<Cypress.LogConfig>, cb: (log: Cypress.Log) => Cypress.Chainable<T>, opts: Partial<Cypress.Loggable> = {}): Cypress.Chainable<T> {
