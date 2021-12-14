@@ -1,5 +1,5 @@
 <template>
-  <div class="relative p-24px h-full">
+  <div class="h-full p-24px relative">
     <TransitionQuickFade>
       <RunsSkeleton v-if="query.fetching.value || !query.data.value" />
       <RunsPage
@@ -24,12 +24,3 @@ query Runs {
 
 const query = useQuery({ query: RunsDocument })
 </script>
-
-<route>
-{
-  name: "Runs",
-  meta: {
-    title: "Runs"
-  }
-}
-</route>

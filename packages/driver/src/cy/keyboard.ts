@@ -960,6 +960,9 @@ export class Keyboard {
       ..._.omitBy(
         {
           bubbles: true,
+          // allow propagation out of root of shadow-dom
+          // https://developer.mozilla.org/en-US/docs/Web/API/Event/composed
+          composed: true,
           cancelable,
           key,
           code,

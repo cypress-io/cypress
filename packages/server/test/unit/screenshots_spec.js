@@ -7,12 +7,12 @@ const { Buffer } = require('buffer')
 const dataUriToBuffer = require('data-uri-to-buffer')
 const sizeOf = require('image-size')
 const Fixtures = require('@tooling/system-tests/lib/fixtures')
-const config = require(`${root}lib/config`)
-const screenshots = require(`${root}lib/screenshots`)
-const { fs } = require(`${root}lib/util/fs`)
-const plugins = require(`${root}lib/plugins`)
-const { Screenshot } = require(`${root}lib/automation/screenshot`)
-const { makeLegacyDataContext } = require(`${root}lib/makeDataContext`)
+const config = require(`../../lib/config`)
+const screenshots = require(`../../lib/screenshots`)
+const { fs } = require(`../../lib/util/fs`)
+const plugins = require(`../../lib/plugins`)
+const { Screenshot } = require(`../../lib/automation/screenshot`)
+const { getCtx } = require(`../../lib/makeDataContext`)
 
 const image = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAALlJREFUeNpi1F3xYAIDA4MBA35wgQWqyB5dRoaVmeHJ779wPhOM0aQtyBAoyglmOwmwM6z1lWY44CMDFgcBFmRTGp3EGGJe/WIQ5mZm4GRlBGJmhlm3PqGaeODpNzCtKsbGIARUCALvvv6FWw9XeOvrH4bbQNOQwfabnzHdGK3AwyAjyAqX2HPzC0Pn7Y9wPtyNIMGlD74wmAqwMZz+8AvFxzATVZAFQIqwABWQiWtgAY5uCnKAAwQYAPr8OZysiz4PAAAAAElFTkSuQmCC'
 const iso8601Regex = /^\d{4}\-\d{2}\-\d{2}T\d{2}\:\d{2}\:\d{2}\.?\d*Z?$/
@@ -21,7 +21,7 @@ let ctx
 
 describe('lib/screenshots', () => {
   beforeEach(function () {
-    ctx = makeLegacyDataContext()
+    ctx = getCtx()
     // make each test timeout after only 1 sec
     // so that durations are handled correctly
     this.currentTest.timeout(1000)

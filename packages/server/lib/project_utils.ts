@@ -5,7 +5,7 @@ import * as settings from './util/settings'
 import errors from './errors'
 import { fs } from './util/fs'
 import { escapeFilenameInUrl } from './util/escape_filename'
-import { makeLegacyDataContext } from './makeDataContext'
+import { getCtx } from '@packages/data-context'
 
 const debug = Debug('cypress:server:project_utils')
 
@@ -86,7 +86,7 @@ export const getSpecUrl = ({
   specType ??= 'integration'
   browserUrl ??= ''
 
-  // App routes to spec with convention {browserUrl}#/runner?file={relativeSpecPath}
+  // App routes to spec with convention {browserUrl}#/specs/runner?file={relativeSpecPath}
   if (process.env.LAUNCHPAD) {
     if (!absoluteSpecPath) {
       return browserUrl
@@ -95,7 +95,7 @@ export const getSpecUrl = ({
     const relativeSpecPath = path.relative(projectRoot, path.resolve(projectRoot, absoluteSpecPath))
     .replace(backSlashesRe, '/')
 
-    return `${browserUrl}/#/runner?file=${relativeSpecPath}`
+    return `${browserUrl}/#/specs/runner?file=${relativeSpecPath}`
     .replace(multipleForwardSlashesRe, multipleForwardSlashesReplacer)
   }
 
@@ -149,6 +149,6 @@ export const checkSupportFile = async ({
   return
 }
 
-export async function getDefaultConfigFilePath (projectRoot: string, ctx = makeLegacyDataContext()): Promise<string | undefined> {
-  return ctx.config.getDefaultConfigBasename(projectRoot)
+export async function getDefaultConfigFilePath (projectRoot: string): Promise<string | undefined> {
+  return getCtx().config.getDefaultConfigBasename(projectRoot)
 }

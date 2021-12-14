@@ -2,7 +2,7 @@ require('../../spec_helper')
 
 const Promise = require('bluebird')
 
-const util = require(`${root}../lib/plugins/util`)
+const util = require(`../../../lib/plugins/util`)
 
 describe('lib/plugins/util', () => {
   context('#wrapIpc', () => {
