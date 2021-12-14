@@ -1,9 +1,9 @@
 require('../../spec_helper')
 
-const info = require(`${root}../lib/modes/info`)
-const capture = require(`${root}../lib/capture`)
-const browserUtils = require(`${root}../lib/browsers/utils`)
-const { fs } = require(`${root}../lib/util/fs`)
+const info = require(`../../../lib/modes/info`)
+const capture = require(`../../../lib/capture`)
+const browserUtils = require(`../../../lib/browsers/utils`)
+const { fs } = require(`../../../lib/util/fs`)
 const detect = require('@packages/launcher/lib/detect')
 const snapshot = require('snap-shot-it')
 const stripAnsi = require('strip-ansi')
