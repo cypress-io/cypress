@@ -8,14 +8,16 @@
       :max-total-width="windowWidth - 64"
       :initial-panel1-width="initialSpecsListWidth"
       :initial-panel2-width="initialReporterWidth"
-      :show-panel1="runnerUiStore.isSpecsListOpen"
+      :show-panel1="runnerUiStore.isSpecsListOpen && !screenshotStore.isScreenshotting"
+      :show-panel2="!screenshotStore.isScreenshotting"
       @resize-end="handleResizeEnd"
       @panel-width-updated="handlePanelWidthUpdated"
     >
-      <template #panel1>
+      <template #panel1="{isDragging}">
         <HideDuringScreenshot
           id="inline-spec-list"
           class="bg-gray-1000"
+          :class="{'pointer-events-none': isDragging}"
         >
           <div
             v-if="props.gql.currentProject"
@@ -155,15 +157,18 @@ preferences.update('reporterWidth', initialReporterWidth)
 preferences.update('specsListWidth', initialSpecsListWidth)
 
 const autMargin = 16
+const collapsedNavBarWidth = 64
 
 const containerWidth = computed(() => {
   const miscBorders = 4
-  const nonAutWidth = reporterWidth.value + specsListWidth.value + (autMargin * 2) + miscBorders + 64
+  const nonAutWidth = reporterWidth.value + specsListWidth.value + (autMargin * 2) + miscBorders + collapsedNavBarWidth
 
   return windowWidth.value - nonAutWidth
 })
 
 const containerHeight = computed(() => {
+  // TODO: in UNIFY-595 the header's contents will be finalized
+  // at narrow widths content will start to wrap
   const autHeaderHeight = 70
 
   const nonAutHeight = autHeaderHeight + (autMargin * 2)
@@ -259,8 +264,6 @@ onMounted(() => {
 
   eventManager.on('save:app:state', (state) => {
     preferences.update('isSpecsListOpen', state.isSpecsListOpen)
-    // TODO: set initial values here from saved state
-    // reporterHandleX.value = state.isSpecsListOpen ? runnerUiStore.specsListWidth : 0
     preferences.update('autoScrollingEnabled', state.autoScrollingEnabled)
   })
 

@@ -10,7 +10,10 @@
       class="h-full bg-gray-1000 flex-shrink-0 relative"
       :style="{width: `${panel1Width}px`}"
     >
-      <slot name="panel1">
+      <slot
+        name="panel1"
+        :isDragging="panel1IsDragging"
+      >
         Width: {{ panel1Width }}
         HandleX: {{ panel1HandleX }}
       </slot>
@@ -60,7 +63,7 @@ export default {
 </script>
 
 <script lang="ts" setup>
-import { computed, ref, watchEffect, nextTick } from 'vue'
+import { computed, ref, watchEffect } from 'vue'
 
 const props = withDefaults(defineProps<{
   showPanel1?: boolean // specsList in runner

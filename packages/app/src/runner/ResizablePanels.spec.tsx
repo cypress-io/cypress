@@ -130,4 +130,56 @@ describe('<ResizablePanels />', { viewportWidth: 1500, defaultCommandTimeout: 40
       assertWidth('panel2', 280)
     })
   })
+
+  describe('when panels are hidden', () => {
+    it('panel 1 can be hidden with a prop', () => {
+      cy.mount(() => (
+        <div class="h-screen">
+          <ResizablePanels
+            maxTotalWidth={1500}
+            v-slots={slotContents}
+            showPanel1={false}
+          />
+        </div>))
+
+      cy.contains('panel1').should('not.be.visible')
+      assertWidth('panel2', defaultPanel2Width)
+      dragHandleToClientX('panel2', 1000)
+      assertWidth('panel2', 1000)
+      assertWidth('panel3', 500)
+    })
+
+    it('panel 2 can be hidden with a prop', () => {
+      cy.mount(() => (
+        <div class="h-screen">
+          <ResizablePanels
+            maxTotalWidth={1500}
+            v-slots={slotContents}
+            showPanel2={false}
+          />
+        </div>))
+
+      cy.contains('panel2').should('not.be.visible')
+      assertWidth('panel1', defaultPanel1Width)
+      dragHandleToClientX('panel1', 1000)
+      assertWidth('panel1', 1000)
+      assertWidth('panel3', 500)
+    })
+
+    it('Panel 3 resizes correctly when both panels are hidden', () => {
+      cy.mount(() => (
+        <div class="h-screen">
+          <ResizablePanels
+            maxTotalWidth={1500}
+            v-slots={slotContents}
+            showPanel1={false}
+            showPanel2={false}
+          />
+        </div>))
+
+      cy.contains('panel1').should('not.be.visible')
+      cy.contains('panel2').should('not.be.visible')
+      assertWidth('panel3', 1500)
+    })
+  })
 })
