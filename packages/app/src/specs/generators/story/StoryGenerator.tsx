@@ -14,5 +14,5 @@ export const StoryGenerator: SpecGenerator = {
 
     return false
   },
-  id: 'story-generator',
+  id: 'story',
 }

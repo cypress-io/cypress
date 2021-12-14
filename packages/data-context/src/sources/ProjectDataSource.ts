@@ -1,4 +1,3 @@
-import type { CodeGenType } from '@packages/graphql/src/gen/nxs.gen'
 import { FoundSpec, FrontendFramework, FRONTEND_FRAMEWORKS, ResolvedFromConfig, RESOLVED_FROM, SpecFileWithExtension, STORYBOOK_GLOB } from '@packages/types'
 import { scanFSForAvailableDependency } from 'create-cypress-tests'
 import path from 'path'
@@ -238,7 +237,7 @@ export class ProjectDataSource {
     return guess ?? null
   }
 
-  async getCodeGenGlob (type: CodeGenType) {
+  async getCodeGenGlobs () {
     const project = this.ctx.currentProject
 
     if (!project) {
@@ -247,13 +246,12 @@ export class ProjectDataSource {
 
     const looseComponentGlob = '/**/*.{js,jsx,ts,tsx,.vue}'
 
-    if (type === 'story') {
-      return STORYBOOK_GLOB
-    }
-
     const framework = await this.frameworkLoader.load(project.projectRoot)
 
-    return framework?.glob ?? looseComponentGlob
+    return {
+      component: framework?.glob ?? looseComponentGlob,
+      story: STORYBOOK_GLOB,
+    }
   }
 
   async getCodeGenCandidates (glob: string): Promise<SpecFileWithExtension[]> {

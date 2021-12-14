@@ -20,7 +20,7 @@
         v-if="generator"
         :key="generator.id"
         v-model:title="title"
-        :code-gen-glob="props.gql.currentProject?.codeGenGlob"
+        :code-gen-glob="codeGenGlob"
         @restart="currentGeneratorId = undefined"
         @close="close"
       />
@@ -64,6 +64,7 @@ fragment CreateSpecModal on Query {
   currentProject {
     id
     ...ComponentGeneratorStepOne_codeGenGlob
+    ...StoryGeneratorStepOne_codeGenGlob
   }
 }
 `
@@ -77,6 +78,14 @@ const generator = computed(() => {
   if (currentGeneratorId.value) return generators[currentGeneratorId.value]
 
   return null
+})
+
+const codeGenGlob = computed(() => {
+  if (!generator.value) {
+    return null
+  }
+
+  return props.gql.currentProject?.codeGenGlobs[generator.value.id]
 })
 
 whenever(not(generator), () => {
