@@ -26,7 +26,7 @@ const fileMatchIndicatorSelector = '[data-testid=file-match-indicator]'
 
 // No Results
 const noResultsSelector = '[data-testid=no-results]'
-const noResultsClearButtonSelector = '[data-testid=no-results-clear]'
+const noResultsClearButtonSelector = '[data-cy=no-results-clear]'
 
 // Loading
 const loadingSelector = '[data-testid=loading]'
