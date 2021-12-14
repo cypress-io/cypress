@@ -401,7 +401,7 @@
   "migration": {
     "before": "Before",
     "after": "After",
-    "heresWhy": "here's why:",
+    "heresWhy": "here's why",
     "renameAuto": {
       "title": "We'll automatically rename your specs in this step",
       "changedSpecFolder": "We've changed the default spec folder from:",

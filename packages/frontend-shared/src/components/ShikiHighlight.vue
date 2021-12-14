@@ -18,7 +18,7 @@ shikiWrapperClasses computed property.
 -->
 
 <template>
-  <div class="relative text-left cursor-text">
+  <div class="cursor-text text-left relative">
     <div
       v-if="highlighterInitialized"
       ref="codeEl"
@@ -56,14 +56,14 @@ shikiWrapperClasses computed property.
     />
     <pre
       v-else
-      class="overflow-scroll border rounded border-gray-100 text-14px leading-24px font-light py-8px"
+      class="border rounded font-light border-gray-100 py-8px text-14px leading-24px overflow-scroll"
       :class="[props.class, lineNumbers ? 'pl-56px' : 'pl-8px' ]"
     >{{ code }}</pre>
     <CopyButton
       v-if="copyButton"
       variant="outline"
       tabindex="-1"
-      class="absolute bottom-8px right-8px"
+      class="right-8px bottom-8px absolute"
       :text="code"
       no-icon
     />
@@ -121,6 +121,7 @@ const props = withDefaults(defineProps<{
   wrap?: boolean,
   copyOnClick?: boolean,
   copyButton?: boolean,
+  skipTrim?: boolean,
   class?: string | string[] | Record<string, any>
 }>(), {
   lineNumbers: false,
@@ -128,6 +129,7 @@ const props = withDefaults(defineProps<{
   wrap: false,
   copyOnClick: false,
   copyButton: false,
+  skipTrim: false,
   class: undefined,
 })
 
@@ -141,7 +143,7 @@ const resolvedLang = computed(() => {
 })
 
 const highlightedCode = computed(() => {
-  return highlighter?.codeToHtml(props.code.trim(), resolvedLang.value)
+  return highlighter?.codeToHtml(props.skipTrim ? props.code : props.code.trim(), resolvedLang.value)
 })
 
 const codeEl: Ref<HTMLElement | null> = ref(null)
@@ -171,12 +173,12 @@ avoid colliding with styles elsewhere in the document.
 $offset: 1.1em;
 
 .inline:deep(.shiki) {
-  @apply py-1 px-2 bg-gray-50 text-gray-500 inline-block;
+  @apply bg-gray-50 py-1 px-2 text-gray-500 inline-block;
 }
 
 .shiki-wrapper {
   &:deep(.shiki) {
-    @apply min-w-max border-r-10px border-r-transparent;
+    @apply border-r-transparent min-w-max border-r-10px;
   }
 
   &.wrap:deep(.line) {
@@ -191,7 +193,7 @@ $offset: 1.1em;
 
       // Keep bg-gray-50 synced with the box-shadows.
       .line::before, .line:first-child::before {
-        @apply bg-gray-50 text-gray-500 min-w-40px inline-block text-right px-8px mr-16px sticky;
+        @apply bg-gray-50 text-right mr-16px min-w-40px px-8px text-gray-500 inline-block sticky;
         left: 0px !important;
         content: counter(step);
         counter-increment: step;

@@ -58,22 +58,20 @@
         </CodeTag>
       </template>
       <template #before>
-        <div class="h-full relative before:bg-gray-50 before:top-0 before:bottom-0 before:w-40px before:absolute before:block">
-          <ShikiHighlight
-            :code="codeBefore"
-            lang="json"
-            line-numbers
-          />
-        </div>
+        <ShikiHighlight
+          :code="codeBefore"
+          lang="json"
+          line-numbers
+          skip-trim
+        />
       </template>
       <template #after>
-        <div class="h-full bg-gray-50">
-          <ShikiHighlight
-            :code="codeAfter"
-            lang="js"
-            line-numbers
-          />
-        </div>
+        <ShikiHighlight
+          :code="codeAfter"
+          lang="js"
+          line-numbers
+          skip-trim
+        />
       </template>
     </BeforeAfter>
   </div>
@@ -86,17 +84,20 @@ import ShikiHighlight from '../../../frontend-shared/src/components/ShikiHighlig
 import MigrationList from './fragments/MigrationList.vue'
 import MigrationTitle from './fragments/MigrationTitle.vue'
 import { useI18n } from '@cy/i18n'
+import { computed } from 'vue'
 
 const { t } = useI18n()
 
 // TODO: wire this properly
-const codeBefore = `{
+const gqlCodeBefore = `{
   "baseUrl": "http://localhost:1234/",
   "retries": 2
-}`
+}
+
+`
 
 // TODO: wire this properly
-const codeAfter = `const { defineConfig } = require('cypress')
+const gqlCodeAfter = `const { defineConfig } = require('cypress')
 
 module.exports = defineConfig({
   retries: 2,
@@ -111,6 +112,18 @@ module.exports = defineConfig({
     }
   },
 })`
+
+const gqlCodeBeforeLines = computed(() => gqlCodeBefore.split('\n').length)
+const gqlCodeAfterLines = computed(() => gqlCodeAfter.split('\n').length)
+const gqlCodeMaxLines = computed(() => Math.max(gqlCodeBeforeLines.value, gqlCodeAfterLines.value))
+
+const codeBefore = computed(() => {
+  return gqlCodeBefore + Array(gqlCodeMaxLines.value - gqlCodeBeforeLines.value).fill('\r\n').join(' ')
+})
+
+const codeAfter = computed(() => {
+  return gqlCodeAfter + Array(gqlCodeMaxLines.value - gqlCodeAfterLines.value).fill('\r\n').join(' ')
+})
 </script>
 
 <style lang="scss" scoped>
