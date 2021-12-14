@@ -1,11 +1,11 @@
 <template>
   <div
     v-bind="containerProps"
-    class="specs-list-container overscroll-contain"
+    class="specs-list-container overscroll-contain overflow-y-auto"
   >
     <ul
       v-bind="wrapperProps"
-      class="overflow-x-hidden children:h-30px"
+      class="children:h-30px"
     >
       <li
         v-for="row in list"

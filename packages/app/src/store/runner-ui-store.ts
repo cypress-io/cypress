@@ -12,6 +12,8 @@ export interface RunnerUiStore {
   showChooseExternalEditorModal: boolean
   autoScrollingEnabled: boolean
   isSpecsListOpen: boolean
+  specsListWidth: number
+  reporterWidth: number
 }
 
 export const useRunnerUiStore = defineStore({
@@ -22,6 +24,8 @@ export const useRunnerUiStore = defineStore({
       showChooseExternalEditorModal: false,
       autoScrollingEnabled: true,
       isSpecsListOpen: true,
+      specsListWidth: 280,
+      reporterWidth: 320,
     }
   },
 
