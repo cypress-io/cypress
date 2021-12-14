@@ -125,6 +125,7 @@ fragment HeaderBar_HeaderBarContent on Query {
       id
       title
       config
+      savedState
     }
 
   ...TopNav

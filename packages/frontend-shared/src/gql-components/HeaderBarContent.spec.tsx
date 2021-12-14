@@ -189,11 +189,11 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
         function mountWithSavedState (state?: object) {
           return cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
             onResult: (result) => {
-              if (!result.app.activeProject) {
+              if (!result.currentProject) {
                 return
               }
 
-              result.app.activeProject.savedState = {
+              result.currentProject.savedState = {
                 firstOpened: 1609459200000,
                 lastOpened: 1609459200000,
                 promptsShown: {},
@@ -242,11 +242,11 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
           // we should be sure that, eg, in launchpad, this would not open up after a testing type is configured
           cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
             onResult: (result) => {
-              if (!result.app.activeProject) {
+              if (!result.currentProject) {
                 return
               }
 
-              result.app.activeProject.savedState = {
+              result.currentProject.savedState = {
                 firstOpened: 1609459200000,
                 lastOpened: 1609459200000,
                 promptsShown: {},
