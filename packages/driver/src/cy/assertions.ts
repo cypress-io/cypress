@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import _ from 'lodash'
 import Promise from 'bluebird'
 
@@ -54,12 +52,18 @@ const isDomSubjectAndMatchesValue = (value, subject) => {
   return false
 }
 
+type Parsed = {
+  subject?: any
+  actual?: any
+  expected?: any
+}
+
 // Rules:
 // 1. always remove value
 // 2. if value is a jquery object set a subject
 // 3. if actual is undefined or its not expected remove both actual + expected
 const parseValueActualAndExpected = (value, actual, expected) => {
-  const obj = { actual, expected }
+  const obj: Parsed = { actual, expected }
 
   if ($dom.isJquery(value)) {
     obj.subject = value
@@ -77,7 +81,7 @@ export const create = (Cypress, cy) => {
   const getUpcomingAssertions = () => {
     const index = cy.state('index') + 1
 
-    const assertions = []
+    const assertions: any[] = []
 
     // grab the rest of the queue'd commands
     for (let cmd of cy.queue.slice(index)) {
@@ -137,7 +141,11 @@ export const create = (Cypress, cy) => {
       message = message.replace(stackTracesRe, '\n')
     }
 
-    let obj = parseValueActualAndExpected(value, actual, expected)
+    let parsed = parseValueActualAndExpected(value, actual, expected)
+    // TODO: make it more specific after defining the type for Cypress.log().
+    let obj: Record<string, any> = {
+      ...parsed,
+    }
 
     if ($dom.isElement(value)) {
       obj.$el = $dom.wrap(value)
@@ -216,10 +224,18 @@ export const create = (Cypress, cy) => {
     })
   }
 
+  type VerifyUpcomingAssertionsCallbacks = {
+    ensureExistenceFor?: 'subject' | 'dom' | boolean
+    onPass?: Function
+    onFail?: (err?, isDefaultAssertionErr?: boolean, cmds?: any[]) => void
+    onRetry?: () => any
+  }
+
   return {
     finishAssertions,
 
-    verifyUpcomingAssertions (subject, options = {}, callbacks = {}) {
+    // TODO: define the specific type of options
+    verifyUpcomingAssertions (subject, options: Record<string, any> = {}, callbacks: VerifyUpcomingAssertionsCallbacks = {}) {
       const cmds = getUpcomingAssertions()
 
       cy.state('upcomingAssertions', cmds)
@@ -433,12 +449,13 @@ export const create = (Cypress, cy) => {
         cy.state('onBeforeLog', setCommandLog)
 
         // send verify=true as the last arg
-        return assertFn.apply(this, args.concat(true))
+        return assertFn.apply(this, args.concat(true) as any)
       }
 
       const fns = injectAssertionFns(cmds)
 
-      const subjects = []
+      // TODO: remove any when the type of subject, the first argument of this function is specified.
+      const subjects: any[] = []
 
       // iterate through each subject
       // and force the assertion to return
