@@ -14,7 +14,7 @@ exports['e2e plugins preprocessor passes with working preprocessor 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  app.cy.js                                                                     (1 of 1)
+  Running:  app.cy.js                                                                       (1 of 1)
 
 
   ✓ is another spec
@@ -51,7 +51,7 @@ exports['e2e plugins preprocessor passes with working preprocessor 1'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  app.cy.js                              XX:XX          2        2        -        -        - │
+  │ ✔  app.cy.js                                XX:XX        2        2        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        2        2        -        -        -  
 
