@@ -88,7 +88,7 @@ describe('App: Settings', { viewportWidth: 600 }, () => {
       cy.intercept('POST', 'mutation-ExternalEditorSettings_SetPreferredEditorBinary').as('SetPreferred')
 
       cy.contains('Choose your editor...').click()
-      cy.get('[data-testid="computer"]').click()
+      cy.get('[data-cy="computer"]').click()
 
       cy.wait('@SetPreferred').its('request.body.variables.value').should('include', 'computer')
       cy.get('[data-cy="use-well-known-editor"]').should('be.checked')
