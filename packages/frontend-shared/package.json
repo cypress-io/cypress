@@ -83,7 +83,6 @@
         "@urql/vue",
         "@vue/test-utils",
         "@vueuse/core",
-        "cypress-file-upload",
         "dedent",
         "fake-uuid",
         "graphql",

@@ -7,7 +7,6 @@ import { print, FragmentDefinitionNode } from 'graphql'
 import { testUrqlClient } from './clientTestUrqlClient'
 import { Component, computed, watch, defineComponent, h, toRaw } from 'vue'
 import { each } from 'lodash'
-import 'cypress-file-upload'
 import { createI18n } from '@cy/i18n'
 
 /**
