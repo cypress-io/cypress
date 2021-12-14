@@ -1,9 +1,8 @@
 module.exports = {
   'pluginsFile': false,
   'supportFile': false,
-  'integrationFolder': 'test',
-  'fixturesFolder': 'test/fixtures',
+  'fixturesFolder': 'cypress/fixtures',
   'e2e': {
-    'specPattern': '**/*spec.js',
+    'specPattern': 'cypress/**/*.cy.js',
   },
 }
