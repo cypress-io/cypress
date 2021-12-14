@@ -1,4 +1,4 @@
-import { useRunnerUiStore } from '../store'
+import { useRunnerUiStore, RunnerUiStore } from '../store'
 import { useMutation, gql } from '@urql/vue'
 import { Preferences_SetPreferencesDocument } from '@packages/data-context/src/gen/all-operations.gen'
 
@@ -9,7 +9,7 @@ mutation Preferences_SetPreferences ($value: String!) {
   setPreferences (value: $value)
 }`
 
-type Preference = 'autoScrollingEnabled' | 'isSpecsListOpen' | 'reporterWidth' | 'specsListWidth'
+type Preference = keyof RunnerUiStore
 
 export function usePreferences () {
   const setPreferences = useMutation(Preferences_SetPreferencesDocument)
