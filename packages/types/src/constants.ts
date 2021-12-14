@@ -23,6 +23,11 @@ export type CodeGenFramework = typeof CODE_GEN_FRAMEWORKS[number]
 
 export const FRONTEND_FRAMEWORK_CATEGORIES = ['react', 'vue', 'other'] as const
 
+export const STORYBOOK_DEPS = [
+  '@storybook/testing-react',
+  '@storybook/testing-vue3',
+] as const
+
 export const FRONTEND_FRAMEWORKS = [
   {
     type: 'cra',
@@ -33,6 +38,7 @@ export const FRONTEND_FRAMEWORKS = [
     deps: ['react-scripts', 'react', 'react-dom'],
     category: FRONTEND_FRAMEWORK_CATEGORIES[0],
     codeGenFramework: CODE_GEN_FRAMEWORKS[0],
+    storybookDep: STORYBOOK_DEPS[0],
   },
   {
     type: 'vuecli',
@@ -43,6 +49,7 @@ export const FRONTEND_FRAMEWORKS = [
     deps: ['@vue/cli-service', 'vue'],
     category: FRONTEND_FRAMEWORK_CATEGORIES[1],
     codeGenFramework: CODE_GEN_FRAMEWORKS[1],
+    storybookDep: STORYBOOK_DEPS[1],
   },
   {
     type: 'react',
@@ -53,6 +60,7 @@ export const FRONTEND_FRAMEWORKS = [
     deps: ['react', 'react-dom'],
     category: FRONTEND_FRAMEWORK_CATEGORIES[0],
     codeGenFramework: CODE_GEN_FRAMEWORKS[0],
+    storybookDep: STORYBOOK_DEPS[0],
   },
   {
     type: 'vue',
@@ -63,6 +71,7 @@ export const FRONTEND_FRAMEWORKS = [
     deps: ['vue'],
     category: FRONTEND_FRAMEWORK_CATEGORIES[1],
     codeGenFramework: CODE_GEN_FRAMEWORKS[1],
+    storybookDep: STORYBOOK_DEPS[1],
   },
   {
     type: 'nextjs',
@@ -73,6 +82,7 @@ export const FRONTEND_FRAMEWORKS = [
     deps: ['next', 'react', 'react-dom'],
     category: FRONTEND_FRAMEWORK_CATEGORIES[0],
     codeGenFramework: CODE_GEN_FRAMEWORKS[0],
+    storybookDep: STORYBOOK_DEPS[0],
   },
   {
     type: 'nuxtjs',
@@ -83,6 +93,7 @@ export const FRONTEND_FRAMEWORKS = [
     deps: ['nuxt'],
     category: FRONTEND_FRAMEWORK_CATEGORIES[1],
     codeGenFramework: CODE_GEN_FRAMEWORKS[1],
+    storybookDep: STORYBOOK_DEPS[1],
   },
 ] as const
 
@@ -134,7 +145,7 @@ export const WIZARD_STEPS = [
   },
 ] as const
 
-export type AllPackages = FrontendFramework['package'] | Bundler['package']
+export type AllPackages = FrontendFramework['package'] | Bundler['package'] | typeof STORYBOOK_DEPS[number]
 
 export type AllPackageTypes = FrontendFramework['type'] | Bundler['type']
 
@@ -143,5 +154,6 @@ export const PACKAGES_DESCRIPTIONS: Record<AllPackages, string> = {
   '@cypress/react': 'Allows Cypress to mount each React component using <span class="text-purple-400">cy.mount()</span>',
   '@cypress/webpack-dev-server': 'Allows Cypress to use your existing build configuration in order to bundle and run your tests',
   '@cypress/vite-dev-server': 'Allows Cypress to use your existing build configuration in order to bundle and run your tests',
-  // '@cypress/storybook': 'Allows Cypress to automatically read and test each of your stories',
+  '@storybook/testing-react': 'Testing utilities that allow you to reuse your stories in your unit tests',
+  '@storybook/testing-vue3': 'Testing utilities that allow you to reuse your stories in your unit tests',
 } as const
