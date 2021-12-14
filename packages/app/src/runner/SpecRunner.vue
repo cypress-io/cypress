@@ -16,7 +16,7 @@
       <template #panel1="{isDragging}">
         <HideDuringScreenshot
           id="inline-spec-list"
-          class="bg-gray-1000"
+          class="h-full bg-gray-1000"
           :class="{'pointer-events-none': isDragging}"
         >
           <div
@@ -105,7 +105,7 @@ import type { SpecRunnerFragment } from '../generated/graphql'
 import { usePreferences } from '../composables/usePreferences'
 import ScriptError from './ScriptError.vue'
 import { useWindowSize } from '@vueuse/core'
-import ResizablePanels from './ResizablePanels.vue'
+import ResizablePanels, { DraggablePanel } from './ResizablePanels.vue'
 
 const { height: windowHeight, width: windowWidth } = useWindowSize()
 
@@ -176,7 +176,7 @@ const containerHeight = computed(() => {
   return windowHeight.value - nonAutHeight
 })
 
-const handleResizeEnd = (panel: 'panel1' | 'panel2') => {
+const handleResizeEnd = (panel: DraggablePanel) => {
   if (panel === 'panel1') {
     preferences.update('specListWidth', specListWidth.value)
   } else {

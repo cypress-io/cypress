@@ -1,4 +1,4 @@
-import ResizablePanels from './ResizablePanels.vue'
+import ResizablePanels, { ResizablePanelName, DraggablePanel } from './ResizablePanels.vue'
 
 // default values
 const defaultPanel1Width = 280
@@ -8,11 +8,11 @@ const minPanel2Width = 100
 const minPanel3Width = 500
 
 // helpers
-const assertWidth = (panel: 'panel1' | 'panel2' | 'panel3', width: number) => {
+const assertWidth = (panel: ResizablePanelName, width: number) => {
   cy.contains(panel).invoke('outerWidth').should('eq', width)
 }
 
-const dragHandleToClientX = (panel: 'panel1' | 'panel2', x: number) => {
+const dragHandleToClientX = (panel: DraggablePanel, x: number) => {
   cy.get(`[data-cy="${panel}ResizeHandle"]`).trigger('mousedown', { eventConstructor: 'MouseEvent' })
   .trigger('mousemove', { clientX: x })
   .trigger('mouseup', { eventConstructor: 'MouseEvent' })
