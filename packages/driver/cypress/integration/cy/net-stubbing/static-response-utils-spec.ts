@@ -26,16 +26,7 @@ describe('static-response-utils', () => {
       })
 
       it('parses fixture string without file encoding', () => {
-        let staticResponse = getBackendStaticResponse({ fixture: 'file.html' })
-
-        expect(staticResponse.fixture).to.deep.equal({
-          filePath: 'file.html',
-          encoding: undefined,
-        })
-
-        staticResponse = getBackendStaticResponse({ fixture: {
-          filePath: 'file.html',
-        } })
+        const staticResponse = getBackendStaticResponse({ fixture: 'file.html' })
 
         expect(staticResponse.fixture).to.deep.equal({
           filePath: 'file.html',
@@ -44,17 +35,7 @@ describe('static-response-utils', () => {
       })
 
       it('parses fixture string with file encoding', () => {
-        let staticResponse = getBackendStaticResponse({ fixture: 'file.html,utf8' })
-
-        expect(staticResponse.fixture).to.deep.equal({
-          filePath: 'file.html',
-          encoding: 'utf8',
-        })
-
-        staticResponse = getBackendStaticResponse({ fixture: {
-          filePath: 'file.html',
-          encoding: 'utf8',
-        } })
+        const staticResponse = getBackendStaticResponse({ fixture: 'file.html,utf8' })
 
         expect(staticResponse.fixture).to.deep.equal({
           filePath: 'file.html',
@@ -63,17 +44,7 @@ describe('static-response-utils', () => {
       })
 
       it('parses fixture string with file encoding set as null to indicate Buffer', () => {
-        let staticResponse = getBackendStaticResponse({ fixture: 'file.html,null' })
-
-        expect(staticResponse.fixture).to.deep.equal({
-          filePath: 'file.html',
-          encoding: null,
-        })
-
-        staticResponse = getBackendStaticResponse({ fixture: {
-          filePath: 'file.html',
-          encoding: null,
-        } })
+        const staticResponse = getBackendStaticResponse({ fixture: 'file.html,null' })
 
         expect(staticResponse.fixture).to.deep.equal({
           filePath: 'file.html',

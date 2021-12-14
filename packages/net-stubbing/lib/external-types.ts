@@ -386,15 +386,10 @@ export type RouteHandlerController = HttpRequestInterceptor
 
 export type RouteHandler = string | StaticResponse | RouteHandlerController | object
 
-export type Fixture = {
-  encoding: string | null
-  filePath: string
-}
-
 /**
  * Describes a response that will be sent back to the browser to fulfill the request.
  */
-export type StaticResponse = GenericStaticResponse<string | Fixture, string | object | boolean | ArrayBuffer | null> & {
+export type StaticResponse = GenericStaticResponse<string, string | object | boolean | ArrayBuffer | null> & {
   /**
    * Milliseconds to delay before the response is sent.
    * @deprecated Use `delay` instead of `delayMs`.
