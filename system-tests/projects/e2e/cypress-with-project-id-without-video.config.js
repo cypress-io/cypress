@@ -4,6 +4,7 @@ module.exports = {
   'video': false,
   'defaultCommandTimeout': 9999,
   'e2e': {
+    'supportFile': 'cypress/support/index.js',
     setupNodeEvents (on, config) {
       const plugin = require('./cypress/plugins')
 

@@ -5,6 +5,7 @@ module.exports = {
   'viewportHeight': 800,
   'componentFolder': 'src',
   'component': {
+    'supportFile': 'cypress/support/component.ts',
     setupNodeEvents (on, config) {
       const devServer = require('@cypress/react/plugins/react-scripts')
 
