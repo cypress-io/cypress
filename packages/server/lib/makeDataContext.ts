@@ -60,7 +60,7 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
         return openProject.create(args.projectRoot, args, options, browsers)
       },
       insertProjectToCache (projectRoot: string) {
-        cache.insertProject(projectRoot)
+        return cache.insertProject(projectRoot)
       },
       getProjectRootsFromCache () {
         return cache.getProjectRoots()

@@ -37,14 +37,8 @@ describe('Launchpad: Global Mode', () => {
   describe('when projects have been added', () => {
     const setupProjects = (projectList) => {
       cy.openGlobalMode()
-      cy.withCtx(async (ctx) => {
-        ctx.appData.projects = []
-
-        return Promise.resolve()
-      }).then(() => {
-        projectList.forEach((projectName) => {
-          cy.addProject(projectName)
-        })
+      projectList.forEach((projectName) => {
+        cy.addProject(projectName)
       })
 
       cy.visitLaunchpad()
