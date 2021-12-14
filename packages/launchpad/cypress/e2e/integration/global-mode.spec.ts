@@ -13,33 +13,49 @@ describe('Launchpad: Global Mode', () => {
       .should('contain', 'browse manually')
     })
 
-    // TODO: finish test
-    it.skip('can add a project by dragging folder into project dropzone', () => {
+    it('can add a project by dragging folder into project dropzone', () => {
       cy.openGlobalMode()
       cy.visitLaunchpad()
       cy.get('h1').should('contain', defaultMessages.globalPage.empty.title)
       cy.get('[data-cy="dropzone"]')
       .should('contain', defaultMessages.globalPage.empty.dropText.split('{0}')[0])
+
+      cy.scaffoldProject('todos')
+      .then((projectPath) => {
+        cy.get('[data-cy="dropzone"]')
+        .dropFileWithPath(projectPath)
+      })
+
+      cy.contains('Welcome to Cypress!')
+      cy.get('a').contains('Projects').click()
+      cy.get('[data-cy="project-card"]')
+      .should('have.length', 1)
+      .should('contain', 'todos')
     })
   })
 
   describe('when projects have been added', () => {
     const setupProjects = (projectList) => {
-      projectList.forEach((projectName) => {
-        cy.addProject(projectName)
+      cy.openGlobalMode()
+      cy.withCtx(async (ctx) => {
+        ctx.appData.projects = []
+
+        return Promise.resolve()
+      }).then(() => {
+        projectList.forEach((projectName) => {
+          cy.addProject(projectName)
+        })
       })
 
-      cy.openGlobalMode()
       cy.visitLaunchpad()
 
       cy.log('The recents list shows all projects that have been added')
       cy.contains(defaultMessages.globalPage.recentProjectsHeader)
+
       cy.get('[data-cy="project-card"]')
       .should('have.length', projectList.length)
       .each((card, index) => {
-        const projectName = projectList[projectList.length - 1 - index]
-
-        expect(card).to.contain(projectName)
+        expect(card).to.contain(projectList[index])
       })
     }
 
@@ -58,9 +74,7 @@ describe('Launchpad: Global Mode', () => {
       .should('have.length', 0)
     })
 
-    // FIXME: when an active project is set, the state cleanup and/or cache isn't cleaning
-    // up so the next test has the project list from this test.
-    it.skip('updates most-recently opened project list when returning from next step', () => {
+    it('updates most-recently opened project list when returning from next step', () => {
       const projectList = ['todos', 'ids', 'cookies', 'plugin-empty']
 
       setupProjects(projectList)
@@ -124,7 +138,7 @@ describe('Launchpad: Global Mode', () => {
 
         cy.get('[data-cy="project-card"]')
         .should('have.length', 1)
-        .should('contain', projectList[0])
+        .should('contain', projectList[1])
       })
 
       it('shows file drop zone when no more projects are in list when clicking "Remove Project" menu item', () => {
