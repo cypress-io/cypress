@@ -1,7 +1,6 @@
 module.exports = {
-  'supportFile': 'cypress/support.ts',
-  'pluginsFile': 'cypress/plugins.ts',
   'e2e': {
+    'supportFile': 'cypress/support.ts',
     setupNodeEvents (on, config) {
       on('before:browser:launch', (browser, launchOptions) => {
         if (browser.family === 'chromium' && browser.name !== 'electron') {

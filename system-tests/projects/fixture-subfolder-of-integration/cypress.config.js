@@ -1,7 +1,9 @@
 module.exports = {
   'pluginsFile': false,
-  'supportFile': false,
   'integrationFolder': 'test',
   'fixturesFolder': 'test/fixtures',
   'testFiles': '**/*spec.js',
+  'e2e': {
+    'supportFile': false,
+  },
 }

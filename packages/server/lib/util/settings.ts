@@ -102,6 +102,10 @@ export function read (projectRoot, options: SettingsOptions = {}) {
     return Promise.reject(err)
   })
   .then((configObject = {}) => {
+    if (configObject.supportFile) {
+      return Promise.reject(errors.get('SUPPORT_FILE_ROOT_NOT_SUPPORTED'))
+    }
+
     if (isComponentTesting(options) && 'component' in configObject) {
       configObject = { ...configObject, ...configObject.component }
     }

@@ -814,16 +814,6 @@ export class ProjectBase<TServer extends Server> extends EE {
 
     const push = scaffolds.push.bind(scaffolds) as any
 
-    // TODO: we are currently always scaffolding support
-    // even when headlessly - this is due to a major breaking
-    // change of 0.18.0
-    // we can later force this not to always happen when most
-    // of our users go beyond 0.18.0
-    //
-    // ensure support dir is created
-    // and example support file if dir doesnt exist
-    push(scaffold.support(cfg.supportFolder, cfg))
-
     // if we're in headed mode add these other scaffolding tasks
     debug('scaffold flags %o', {
       isTextTerminal: cfg.isTextTerminal,
@@ -839,6 +829,7 @@ export class ProjectBase<TServer extends Server> extends EE {
       }
 
       push(scaffold.fixture(cfg.fixturesFolder, cfg))
+      push(scaffold.support(cfg.supportFolder, cfg))
     } else {
       debug('will not scaffold integration or fixtures folder')
     }

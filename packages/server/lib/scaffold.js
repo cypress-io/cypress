@@ -312,7 +312,7 @@ module.exports = {
       if (config.supportFolder && (config.supportFile !== false)) {
         files = files.concat([
           getFilePath(config.supportFolder, 'commands.js'),
-          getFilePath(config.supportFolder, 'index.js'),
+          getFilePath(config.supportFolder, config.testingType === 'component' ? 'component.js' : 'e2e.js'),
         ])
       }
 

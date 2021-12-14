@@ -71,7 +71,7 @@ describe('init component tests script', () => {
     )
 
     const supportFile = fs.readFileSync(
-      path.join(e2eTestOutputPath, 'cypress', 'support', 'index.js'),
+      path.join(e2eTestOutputPath, 'cypress', 'support', 'component.js'),
       { encoding: 'utf-8' },
     )
 

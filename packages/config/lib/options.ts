@@ -250,9 +250,8 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     validation: validate.isOneOf('center', 'top', 'bottom', 'nearest', false),
   }, {
     name: 'supportFile',
-    defaultValue: 'cypress/support',
+    defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? 'cypress/support/component.js' : 'cypress/support/e2e.js',
     validation: validate.isStringOrFalse,
-    isFolder: true,
   }, {
     name: 'supportFolder',
     defaultValue: false,
