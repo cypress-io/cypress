@@ -1,3 +1,4 @@
+import { configure } from '@testing-library/cypress'
 import '@testing-library/cypress/add-commands'
 import i18n from '../../../src/locales/en-US.json'
 import type { DataContext } from '@packages/data-context'
@@ -6,6 +7,8 @@ import type { AuthenticatedUserShape } from '@packages/data-context/src/data'
 import type { DocumentNode, ExecutionResult } from 'graphql'
 import type { OpenModeOptions } from '@packages/types'
 import type { E2ETaskMap } from '../e2ePluginSetup'
+
+configure({ testIdAttribute: 'data-cy' })
 
 const NO_TIMEOUT = 1000 * 1000
 const FOUR_SECONDS = 4 * 1000

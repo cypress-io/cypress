@@ -1,11 +1,14 @@
 <template>
-  <TopNavList v-if="versions && runningOldVersion">
+  <TopNavList
+    v-if="versions && runningOldVersion"
+    data-cy="cypress-update-popover"
+  >
     <template #heading="{ open }">
       <i-cy-arrow-outline-down_x16
         class="h-16px w-16px group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50"
         :class="open ? 'icon-dark-indigo-500 icon-light-indigo-50' : 'icon-dark-gray-500 icon-light-gray-100'"
       />
-      <span data-cy="topnav-version-list">v{{ versions.current.version }} <span
+      <span data-cy="top-nav-version-list">v{{ versions.current.version }} <span
         class="text-indigo-300"
         aria-hidden="true"
       >•</span> Upgrade</span>
@@ -49,6 +52,7 @@
 
     <TopNavListItem
       class="bg-yellow-50 py-8px px-16px"
+      data-cy="current-hint"
     >
       <div class="whitespace-nowrap">
         <ExternalLink
