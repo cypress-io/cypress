@@ -252,6 +252,7 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     name: 'supportFile',
     defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? 'cypress/support/component.js' : 'cypress/support/e2e.js',
     validation: validate.isStringOrFalse,
+    isFolder: true,
   }, {
     name: 'supportFolder',
     defaultValue: false,
