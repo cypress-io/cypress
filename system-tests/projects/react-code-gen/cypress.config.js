@@ -1,6 +1,6 @@
 module.exports = {
   testFiles: '**/*.cy.{js,jsx}',
-  componentFolder: 'cypress/component-tests',
+  componentFolder: 'src',
   supportFile: 'cypress/component/support.js',
   component: {
     devServer (cypressConfig, devServerConfig) {

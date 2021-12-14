@@ -27,14 +27,14 @@ describe('Code Generation', () => {
     const componentGlob = '**/*.{jsx,tsx}'
 
     cy.findByTestId('file-match-button').contains(componentGlob)
-    checkCodeGenCandidates(['Button.jsx', 'Button.stories.jsx'])
+    checkCodeGenCandidates(['App.cy.jsx', 'App.jsx', 'index.jsx', 'Button.jsx', 'Button.stories.jsx'])
 
     cy.intercept('query-ComponentGeneratorStepOne').as('code-gen-candidates')
     cy.findByTestId('file-match-button').click()
     cy.get(extensionInputSelector).clear().type('**/App.*')
     cy.wait('@code-gen-candidates')
 
-    checkCodeGenCandidates(['App.css', 'App.cy.js', 'App.js'])
+    checkCodeGenCandidates(['App.css', 'App.cy.jsx', 'App.jsx'])
 
     cy.get(extensionInputSelector).clear().type(componentGlob, { parseSpecialCharSequences: false })
     cy.contains('Button.jsx').click()
