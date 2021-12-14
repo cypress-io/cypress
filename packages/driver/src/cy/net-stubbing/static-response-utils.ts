@@ -3,7 +3,7 @@ import _ from 'lodash'
 import type {
   StaticResponse,
   BackendStaticResponseWithArrayBuffer,
-  FixtureOpts,
+  Fixture,
 } from '@packages/net-stubbing/lib/types'
 import {
   caseInsensitiveHas,
@@ -28,8 +28,17 @@ export function validateStaticResponse (cmd: string, staticResponse: StaticRespo
     err('`body` and `fixture` cannot both be set, pick one.')
   }
 
-  if (fixture && !_.isString(fixture)) {
-    err('`fixture` must be a string containing a path and, optionally, an encoding separated by a comma (for example, "foo.txt,ascii").')
+  if (fixture) {
+    if (_.isObject(fixture)) {
+      if (_.isUndefined(fixture.filePath) || !_.isString(fixture.filePath)) {
+        err('`fixture` object must contain the filePath key set to a string containing a path (for example, {"filePath": "foo.txt" }).')
+      }
+    } else {
+      if (!_.isString(fixture)) {
+        err('`fixture` must be a string containing a path and, optionally, an encoding separated by a comma (for example, "foo.txt,ascii") or \
+      it can be an object with the keys `filePath` and `encoding` (for example, {"filePath": "foo.txt", encoding: "ascii" }).')
+      }
+    }
   }
 
   // statusCode must be a three-digit integer
@@ -92,10 +101,14 @@ export function parseStaticResponseShorthand (statusCodeOrBody: number | string 
   return
 }
 
-function getFixtureOpts (fixture: string): FixtureOpts {
+function getFixtureOpts (fixture: string | Fixture): Fixture {
+  if (_.isObject(fixture)) {
+    return { ...{ encoding: undefined }, ...fixture }
+  }
+
   const [filePath, encoding] = fixture.split(',')
 
-  return { filePath, encoding }
+  return { filePath, encoding: encoding === 'null' ? null : encoding }
 }
 
 export function getBackendStaticResponse (staticResponse: Readonly<StaticResponse>): BackendStaticResponseWithArrayBuffer {

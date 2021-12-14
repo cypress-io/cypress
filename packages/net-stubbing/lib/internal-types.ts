@@ -4,16 +4,12 @@ import type {
   GenericStaticResponse,
   Subscription,
   CyHttpMessages,
+  Fixture,
 } from './external-types'
 
-export type FixtureOpts = {
-  encoding: string
-  filePath: string
-}
+export type BackendStaticResponse = GenericStaticResponse<Fixture, string>
 
-export type BackendStaticResponse = GenericStaticResponse<FixtureOpts, string>
-
-export type BackendStaticResponseWithArrayBuffer = GenericStaticResponse<FixtureOpts, string | ArrayBuffer>
+export type BackendStaticResponseWithArrayBuffer = GenericStaticResponse<Fixture, string | ArrayBuffer>
 
 export const SERIALIZABLE_REQ_PROPS = [
   'headers',
