@@ -38,7 +38,6 @@ macWorkflowFilters: &mac-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ '10.0-release', << pipeline.git.branch >> ]
-    - equal: [ 'issue-3672-remove-deprecated-wmic', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -48,6 +47,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ '10.0-release', << pipeline.git.branch >> ]
+    - equal: [ 'issue-3672-remove-deprecated-wmic', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
