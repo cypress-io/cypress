@@ -135,14 +135,18 @@ const showModal = ref(false)
 const search = ref('')
 
 const specs = computed(() => {
-  const specs = props.gql.currentProject?.specs?.edges.map((x) => x.node) || []
+  const specs = props.gql.currentProject?.specs?.edges.map((x) => {
+    const specs = x.node
+
+    return specs
+  }) ?? []
 
   if (!search.value) {
     return specs.map((spec) => ({ ...spec, indexes: [] as number[] }))
   }
 
   return fuzzySort
-  .go(search.value, specs || [], { key: 'relative' })
+  .go(search.value, specs || [], { key: 'baseName', allowTypo: false })
   .map(({ obj, indexes }) => ({ ...obj, indexes }))
 })
 
