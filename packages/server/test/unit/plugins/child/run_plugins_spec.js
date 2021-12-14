@@ -3,13 +3,13 @@ require('../../../spec_helper')
 const _ = require('lodash')
 const Promise = require('bluebird')
 
-const preprocessor = require(`${root}../../lib/plugins/child/preprocessor`)
-const task = require(`${root}../../lib/plugins/child/task`)
-const util = require(`${root}../../lib/plugins/util`)
-const resolve = require(`${root}../../lib/util/resolve`)
-const browserUtils = require(`${root}../../lib/browsers/utils`)
+const preprocessor = require(`../../../../lib/plugins/child/preprocessor`)
+const task = require(`../../../../lib/plugins/child/task`)
+const util = require(`../../../../lib/plugins/util`)
+const resolve = require(`../../../../lib/util/resolve`)
+const browserUtils = require(`../../../../lib/browsers/utils`)
 
-const RunPlugins = require(`${root}../../lib/plugins/child/run_plugins`)
+const RunPlugins = require(`../../../../lib/plugins/child/run_plugins`)
 
 const deferred = () => {
   let reject

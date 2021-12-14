@@ -40,3 +40,5 @@ export * from './storybook'
 export * from './util'
 
 export * from './warning'
+
+export * from './modeOptions'

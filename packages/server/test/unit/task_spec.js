@@ -1,8 +1,8 @@
 require('../spec_helper')
 
 const Promise = require('bluebird')
-const plugins = require(`${root}lib/plugins`)
-const task = require(`${root}lib/task`)
+const plugins = require(`../../lib/plugins`)
+const task = require(`../../lib/task`)
 
 describe('lib/task', () => {
   beforeEach(function () {

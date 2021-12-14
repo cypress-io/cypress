@@ -1,7 +1,11 @@
-describe('Settings', { viewportWidth: 1000 }, () => {
+describe('App: Settings', { viewportWidth: 600 }, () => {
+  before(() => {
+    cy.scaffoldProject('todos')
+  })
+
   beforeEach(() => {
-    cy.setupE2E('component-tests')
-    cy.initializeApp()
+    cy.openProject('todos')
+    cy.startAppServer('e2e')
   })
 
   it('visits settings page', () => {

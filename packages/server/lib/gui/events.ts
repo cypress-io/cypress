@@ -183,6 +183,6 @@ export = {
 
   async start (options: EventsStartArgs, bus: EventEmitter) {
     // curry left options
-    ipc.on('request', _.partial(this.handleEvent, options, bus))
+    // ipc.on('request', _.partial(this.handleEvent, options, bus))
   },
 }

@@ -1,8 +1,8 @@
-import { DataContext, getCtx, setCtx, clearCtx } from '@packages/data-context'
+import { DataContext, getCtx, clearCtx, setCtx } from '@packages/data-context'
 import electron from 'electron'
 
 import specsUtil from './util/specs'
-import type { AllowedState, FindSpecs, FoundBrowser, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions, Preferences, SettingsOptions } from '@packages/types'
+import type { AllModeOptions, AllowedState, FindSpecs, FoundBrowser, InitializeProjectOptions, LaunchOpts, OpenProjectLaunchOptions, Preferences, SettingsOptions } from '@packages/types'
 import browserUtils from './browsers/utils'
 import auth from './gui/auth'
 import user from './user'
@@ -15,17 +15,23 @@ import { graphqlSchema } from '@packages/graphql/src/schema'
 import { openExternal } from '@packages/server/lib/gui/links'
 import { getUserEditor } from './util/editors'
 import * as savedState from './saved_state'
+import appData from './util/app_data'
 
 const { getBrowsers, ensureAndGetByNameOrPath } = browserUtils
 
+interface MakeDataContextOptions {
+  mode: 'run' | 'open'
+  modeOptions: Partial<AllModeOptions>
+}
+
 export { getCtx, setCtx, clearCtx }
 
-export function makeDataContext (launchArgs: LaunchArgs): DataContext {
+export function makeDataContext (options: MakeDataContextOptions): DataContext {
   const ctx = new DataContext({
     schema: graphqlSchema,
-    launchArgs,
-    launchOptions: {},
+    ...options,
     appApi: {
+      appData,
       getBrowsers,
       ensureAndGetByNameOrPath,
       findNodePath () {
@@ -50,7 +56,7 @@ export function makeDataContext (launchArgs: LaunchArgs): DataContext {
       launchProject (browser: FoundBrowser, spec: Cypress.Spec, options?: LaunchOpts) {
         return openProject.launch({ ...browser }, spec, options)
       },
-      initializeProject (args: LaunchArgs, options: OpenProjectLaunchOptions, browsers: FoundBrowser[]) {
+      initializeProject (args: InitializeProjectOptions, options: OpenProjectLaunchOptions, browsers: FoundBrowser[]) {
         return openProject.create(args.projectRoot, args, options, browsers)
       },
       insertProjectToCache (projectRoot: string) {

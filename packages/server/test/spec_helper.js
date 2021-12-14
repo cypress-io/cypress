@@ -4,7 +4,6 @@ const chai = require('chai')
 
 chai.use(require('chai-subset'))
 
-global.root = '../../'
 global.supertest = require('supertest')
 global.nock = require('nock')
 global.expect = chai.expect
@@ -119,7 +118,7 @@ beforeEach(function () {
 })
 
 afterEach(async () => {
-  await getCtx().destroy()
+  await getCtx()._reset()
   clearCtx()
   sinon.restore()
 

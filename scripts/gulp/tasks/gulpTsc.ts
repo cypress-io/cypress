@@ -18,7 +18,7 @@ export async function checkTs () {
     getTsPackages('npm'),
   ])
 
-  await buildPackageTsc({
+  await checkPackageTsc({
     tsPackages: new Set([...a, ...b]),
   })
 }
@@ -64,7 +64,7 @@ export function getTsPackages (packagesPath: string = 'packages'): Promise<Set<s
   return dfd.promise
 }
 
-export async function buildPackageTsc ({
+export async function checkPackageTsc ({
   tsPackages = new Set(),
   onlyPackages,
 }: {
@@ -75,7 +75,7 @@ export async function buildPackageTsc ({
   const packages = onlyPackages || [...Array.from(tsPackages)]
 
   console.log(
-    chalk.blue(`TSC: Building deps for ${onlyPackages || packages.join(', ')}`),
+    chalk.blue(`TSC: Checking types for ${onlyPackages || packages.join(', ')}`),
   )
 
   const errors = []
@@ -89,9 +89,9 @@ export async function buildPackageTsc ({
     )
 
     try {
+      built++
       await execAsync('yarn check-ts', { cwd })
 
-      built++
       console.log(
         `${chalk.green(`Built`)} ${cwd} ${chalk.magenta(
           `${built} / ${packages.length}`,
