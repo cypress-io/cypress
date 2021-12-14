@@ -2435,7 +2435,7 @@ linux-workflow: &linux-workflow
         <<: *mainBuildFilters
         requires:
           - create-build-artifacts
-     - test-binary-against-recipes-chrome:
+    - test-binary-against-recipes-chrome:
         <<: *onlyMainBranches
         requires:
           - create-build-artifacts
