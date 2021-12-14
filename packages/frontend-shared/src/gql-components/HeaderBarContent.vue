@@ -102,7 +102,7 @@
 
 <script setup lang="ts">
 import { gql, useMutation } from '@urql/vue'
-import { ref, computed, watch } from 'vue'
+import { ref, computed } from 'vue'
 import { GlobalPageHeader_ClearActiveProjectDocument, HeaderBar_HeaderBarContentFragment } from '../generated/graphql'
 import TopNav from './topnav/TopNav.vue'
 import LoginModal from './topnav/LoginModal.vue'
@@ -126,6 +126,7 @@ fragment HeaderBar_HeaderBarContent on Query {
       title
       config
     }
+
   ...TopNav
   ...Auth
 }
@@ -146,11 +147,11 @@ const clearActiveProject = () => {
 }
 
 const savedState = computed(() => {
-  return props.gql?.app?.activeProject?.savedState
+  return props.gql?.currentProject?.savedState
 })
 
 const cloudProjectId = computed(() => {
-  return props.gql?.app?.activeProject?.config?.find((item: { field: string }) => item.field === 'projectId')?.value
+  return props.gql?.currentProject?.config?.find((item: { field: string }) => item.field === 'projectId')?.value
 })
 
 const props = defineProps<{

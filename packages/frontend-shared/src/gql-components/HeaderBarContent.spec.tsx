@@ -32,7 +32,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
     cy.contains('button', text.docsMenu.docsHeading).click()
     cy.contains('a', text.docsMenu.firstTest).should('be.visible')
     cy.get('body').click()
-    cy.contains('a', text.docsMenu.firstTest).should('not.exist')
+    cy.contains('a', text.docsMenu.firstTest).should('not.be.visible')
   })
 
   it('does not show hint when on latest version of Cypress', () => {
