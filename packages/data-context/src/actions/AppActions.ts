@@ -49,7 +49,9 @@ export class AppActions {
 
     try {
       await this.ctx.coreData.app.refreshingBrowsers
-      browser = (await this.ctx._apis.appApi.ensureAndGetByNameOrPath(browserNameOrPath, false, this.ctx.coreData.app.browsers)) as FoundBrowser | undefined
+      const foundBrowsers = this.ctx.coreData.app.browsers ? [...this.ctx.coreData.app.browsers] : undefined
+
+      browser = (await this.ctx._apis.appApi.ensureAndGetByNameOrPath(browserNameOrPath, false, foundBrowsers)) as FoundBrowser | undefined
     } catch (err: unknown?) {
       this.ctx.debug('Error getting browser by name or path (%s): %s', browserNameOrPath, err?.stack || err)
       const message = err.details ? `${err.message}\n\n\`\`\`\n${err.details}\n\`\`\`` : err.message

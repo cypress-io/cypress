@@ -18,6 +18,7 @@
           'hover:border-indigo-200 hover:ring-2 hover:ring-indigo-50': !browser.disabled && !browser.isSelected
         }"
         :data-selected-browser="browser.isSelected"
+        :data-browser-id="browser.id"
       >
         <input
           :id="browser.id"

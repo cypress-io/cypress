@@ -1,4 +1,3 @@
-import type Sinon from '@packages/../cli/types/sinon'
 import type { FoundBrowser } from '@packages/types/src'
 
 describe('Choose a Browser Page', () => {
@@ -13,44 +12,38 @@ describe('Choose a Browser Page', () => {
   // Mocks server's browser detection with known list
   const setupMockBrowsers = function () {
     cy.withCtx(async (ctx, o) => {
-      let mockedGetBrowsers = ctx._apis.appApi.getBrowsers as Sinon.SinonStub
-
-      if (mockedGetBrowsers.restore) {
-        mockedGetBrowsers.restore()
-      }
-
       const mockBrowsers = [{
-        'channel': 'stable',
-        'displayName': 'Chrome',
-        'family': 'chromium',
-        'name': 'chrome',
-        'version': '1.2.333.445',
-        'path': '/test/chrome/path',
-        'majorVersion': '1',
+        channel: 'stable',
+        displayName: 'Chrome',
+        family: 'chromium',
+        name: 'chrome',
+        version: '1.2.333.445',
+        path: '/test/chrome/path',
+        majorVersion: '1',
       }, {
-        'channel': 'stable',
-        'displayName': 'Firefox',
-        'family': 'firefox',
-        'name': 'firefox',
-        'path': '/test/firefox/path',
-        'version': '2.3.444',
-        'majorVersion': '2',
+        channel: 'stable',
+        displayName: 'Firefox',
+        family: 'firefox',
+        name: 'firefox',
+        path: '/test/firefox/path',
+        version: '2.3.444',
+        majorVersion: '2',
       }, {
-        'channel': 'stable',
-        'displayName': 'Electron',
-        'family': 'chromium',
-        'name': 'electron',
-        'path': '/test/electron/path',
-        'version': '3.4.555.66',
-        'majorVersion': '3',
+        channel: 'stable',
+        displayName: 'Electron',
+        family: 'chromium',
+        name: 'electron',
+        path: '/test/electron/path',
+        version: '3.4.555.66',
+        majorVersion: '3',
       }, {
-        'channel': 'stable',
-        'displayName': 'Edge',
-        'family': 'chromium',
-        'name': 'edge',
-        'path': '/test/edge/path',
-        'version': '4.5.666.77',
-        'majorVersion': '4',
+        channel: 'stable',
+        displayName: 'Edge',
+        family: 'chromium',
+        name: 'edge',
+        path: '/test/edge/path',
+        version: '4.5.666.77',
+        majorVersion: '4',
       }] as FoundBrowser[]
 
       sinon.stub(ctx._apis.appApi, 'getBrowsers').resolves(mockBrowsers)
@@ -60,13 +53,7 @@ describe('Choose a Browser Page', () => {
   // Force the server to return no detected browsers
   const setupZeroMockBrowsers = function () {
     cy.withCtx(async (ctx, o) => {
-      let mockedGetBrowsers = ctx._apis.appApi.getBrowsers as Sinon.SinonStub
-
-      if (mockedGetBrowsers.restore) {
-        mockedGetBrowsers.restore()
-      }
-
-      sinon.stub(ctx._apis.appApi, 'getBrowsers').resolves([o])
+      sinon.stub(ctx._apis.appApi, 'getBrowsers').resolves([])
     })
   }
 
@@ -89,7 +76,7 @@ describe('Choose a Browser Page', () => {
     cy.scaffoldProject('launchpad')
   })
 
-  describe('with found browsers', () => {
+  describe('System Browsers Detected', () => {
     beforeEach(() => {
       setupMockBrowsers()
     })
@@ -106,7 +93,7 @@ describe('Choose a Browser Page', () => {
       .should('contain', 'Edge')
     })
 
-    it('shows warning when launched with --browser name that cannot be found', () => {
+    it('shows warning when launched with --browser name that cannot be matched to found browsers', () => {
       cy.openProject('launchpad', ['--e2e', '--browser', 'doesNotExist'])
       cy.visitLaunchpad()
 
@@ -126,7 +113,7 @@ describe('Choose a Browser Page', () => {
       cy.get('[data-cy="alert-header"]').should('not.exist')
     })
 
-    it('shows warning when launched with --browser path option that cannot be found', () => {
+    it('shows warning when launched with --browser path option that cannot be matched to found browsers', () => {
       cy.openProject('launchpad', ['--e2e', '--browser', '/path/does/not/exist'])
 
       cy.visitLaunchpad()
@@ -134,6 +121,7 @@ describe('Choose a Browser Page', () => {
       stepThroughConfigPages()
 
       cy.get('h1').should('contain', 'Choose a Browser')
+
       cy.get('[data-cy="alert-header"]').should('contain', 'Warning: Browser Not Found')
       cy.get('[data-cy="alert-body"]')
       .should('contain', 'We could not identify a known browser at the path you specified: /path/does/not/exist')
@@ -230,19 +218,16 @@ describe('Choose a Browser Page', () => {
 
       const { chrome, firefox } = getBrowserAliases()
 
-      cy.get(chrome)
-      .should('have.attr', 'data-selected-browser', 'true')
-
-      cy.get(firefox)
-      .should('have.attr', 'data-selected-browser', 'false')
+      cy.get(chrome).should('have.attr', 'data-selected-browser', 'true')
+      cy.get(firefox).should('have.attr', 'data-selected-browser', 'false')
 
       cy.contains('Launch Chrome').should('be.visible')
 
-      cy.intercept('mutation-OpenBrowserList_SetBrowser').as('selectNewBrowserMutation')
+      cy.intercept('mutation-OpenBrowserList_SetBrowser').as('setBrowser')
 
-      cy.get(firefox).click()
-
-      cy.wait('@selectNewBrowserMutation')
+      cy.get(firefox).click().then(($element) => {
+        cy.wait('@setBrowser').its('request.body.variables.id').should('eq', $element.attr('data-browser-id'))
+      })
 
       cy.get(chrome)
       .should('have.attr', 'data-selected-browser', 'false')
@@ -254,10 +239,12 @@ describe('Choose a Browser Page', () => {
     })
   })
 
-  describe('with no found browsers', () => {
-    it('does not show browser list when no browsers are detected', () => {
+  describe('No System Browsers Detected', () => {
+    beforeEach(() => {
       setupZeroMockBrowsers()
+    })
 
+    it('does not show browser list when no browsers are detected', () => {
       cy.openProject('launchpad', ['--e2e'])
 
       cy.visitLaunchpad()
