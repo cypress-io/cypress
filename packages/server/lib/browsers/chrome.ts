@@ -366,17 +366,17 @@ const _continueRequest = (client, params, header?) => {
   }
 
   debug('continueRequest: %o', details)
-}
 
-client.send('Fetch.continueRequest', details).catch((err) => {
-  // swallow this error so it doesn't crash Cypress.
-  // an "Invalid InterceptionId" error can randomly happen in the driver tests
-  // when testing the redirection loop limit, when a redirect request happens
-  // to be sent after the test has moved on. this shouldn't crash Cypress, in
-  // any case, and likely wouldn't happen for standard user tests, since they
-  // will properly fail and not move on like the drive tests
-  debug('continueRequest failed, url: %s, error: %s', params.request.url, err?.stack || err)
-})
+  client.send('Fetch.continueRequest', details).catch((err) => {
+    // swallow this error so it doesn't crash Cypress.
+    // an "Invalid InterceptionId" error can randomly happen in the driver tests
+    // when testing the redirection loop limit, when a redirect request happens
+    // to be sent after the test has moved on. this shouldn't crash Cypress, in
+    // any case, and likely wouldn't happen for standard user tests, since they
+    // will properly fail and not move on like the driver tests
+    debug('continueRequest failed, url: %s, error: %s', params.request.url, err?.stack || err)
+  })
+}
 
 interface HasFrame {
   frame: Protocol.Page.Frame
