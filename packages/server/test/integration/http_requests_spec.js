@@ -3022,7 +3022,7 @@ describe('Routes', () => {
         })
 
         this.server._eventBus.on('delaying:cross:domain:html', () => {
-          this.server._eventBus.emit('ready:for:domain', { success: true })
+          this.server._eventBus.emit('ready:for:domain', { shouldInject: true })
         })
 
         return this.rp({

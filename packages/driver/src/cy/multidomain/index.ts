@@ -3,7 +3,7 @@ import $Log from '../../cypress/log'
 import { createDeferred } from '../../util/deferred'
 
 export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: Cypress.State) {
-  let switchedToDomain = false
+  let timeoutId
 
   // @ts-ignore
   Cypress.on('cross:domain:html:received', () => {
@@ -17,21 +17,17 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
     // cy.isAnticipatingMultidomain(true) will free the queue to move forward.
     // if the next command isn't switchToDomain, this timeout will hit and
     // the test will fail with a cross-origin error
-    setTimeout(() => {
-      if (!switchedToDomain) {
-        // @ts-ignore
-        Cypress.backend('ready:for:domain', { success: false })
-      }
-
-      switchedToDomain = false
-    }, 1000)
+    timeoutId = setTimeout(() => {
+      // @ts-ignore
+      Cypress.backend('ready:for:domain', { shouldInject: false })
+    }, 2000)
   })
 
   Commands.addAll({
     // this isn't fully implemented, but in place to be able to test out
     // the other parts of multidomain
     switchToDomain (domain, fn) {
-      switchedToDomain = true
+      clearTimeout(timeoutId)
 
       Cypress.log({
         name: 'switchToDomain',
@@ -134,11 +130,13 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
           // let the proxy know to let the response for the secondary
           // domain html through, so the page will finish loading
           // @ts-ignore
-          Cypress.backend('ready:for:domain', { success: true })
+          Cypress.backend('ready:for:domain', { shouldInject: true })
         })
 
         // @ts-ignore
-        cy.once('cross:domain:window:load', () => {
+        cy.once('internal:window:load', ({ type }) => {
+          if (type !== 'cross:domain') return
+
           // once the secondary domain page loads, send along the
           // user-specified callback to run in that domain
           Cypress.action('cy:cross:domain:message', {

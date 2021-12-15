@@ -236,8 +236,8 @@ const MaybeDelayForMultidomain: ResponseMiddleware = function () {
   if (isCrossDomain && isTheAUTFrame && (isHTML || isRenderedHTML)) {
     this.debug('is cross-domain, delay until domain:ready event')
 
-    this.serverBus.once('ready:for:domain', ({ success }) => {
-      if (success) {
+    this.serverBus.once('ready:for:domain', ({ shouldInject }) => {
+      if (shouldInject) {
         this.debug('ready for domain, let it go')
       } else {
         this.debug('not ready for domain, let it go without injection')

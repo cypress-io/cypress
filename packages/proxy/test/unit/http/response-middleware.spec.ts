@@ -135,13 +135,7 @@ describe('http/response-middleware', function () {
     let ctx
 
     it('doesn\'t do anything when not html or rendered html', function () {
-      prepareContext({
-        getRemoteState () {
-          return {
-            strategy: 'foo',
-          }
-        },
-      })
+      prepareContext({})
 
       return testMiddleware([MaybeDelayForMultidomain], ctx)
       .then(() => {
@@ -156,11 +150,6 @@ describe('http/response-middleware', function () {
             'content-type': 'text/html',
           },
         },
-        getRemoteState () {
-          return {
-            strategy: 'foo',
-          }
-        },
       })
 
       return testMiddleware([MaybeDelayForMultidomain], ctx)
@@ -169,7 +158,7 @@ describe('http/response-middleware', function () {
       })
     })
 
-    it('waits for server signal if res is html', function () {
+    it('waits for server signal if res is html, letting it continue after receiving ready:for:domain', function () {
       prepareContext({
         incomingRes: {
           headers: {
@@ -181,23 +170,18 @@ describe('http/response-middleware', function () {
             'x-cypress-is-aut-frame': 'true',
           },
         },
-        getRemoteState () {
-          return {
-            strategy: 'foo',
-          }
-        },
       })
 
       const promise = testMiddleware([MaybeDelayForMultidomain], ctx)
 
       expect(ctx.serverBus.emit).to.be.calledWith('delaying:cross:domain:html')
 
-      ctx.serverBus.once.withArgs('ready:for:domain').args[0][1]()
+      ctx.serverBus.once.withArgs('ready:for:domain').args[0][1]({ shouldInject: true })
 
       return promise
     })
 
-    it('waits for server signal if incomingRes is rendered html', function () {
+    it('waits for server signal if incomingRes is rendered html, letting it continue after receiving ready:for:domain', function () {
       prepareContext({
         req: {
           headers: {
@@ -208,10 +192,30 @@ describe('http/response-middleware', function () {
             'x-cypress-is-aut-frame': 'true',
           },
         },
-        getRemoteState () {
-          return {
-            strategy: 'foo',
-          }
+      })
+
+      const promise = testMiddleware([MaybeDelayForMultidomain], ctx)
+
+      expect(ctx.serverBus.emit).to.be.calledWith('delaying:cross:domain:html')
+
+      ctx.serverBus.once.withArgs('ready:for:domain').args[0][1]({ shouldInject: true })
+
+      expect(ctx.res.wantsInjection).to.be.undefined
+
+      return promise
+    })
+
+    it('lets the response continue after receiving ready:for:domain with shouldInject: false, flagging it not to receive injection', function () {
+      prepareContext({
+        incomingRes: {
+          headers: {
+            'content-type': 'text/html',
+          },
+        },
+        req: {
+          headers: {
+            'x-cypress-is-aut-frame': 'true',
+          },
         },
       })
 
@@ -219,7 +223,9 @@ describe('http/response-middleware', function () {
 
       expect(ctx.serverBus.emit).to.be.calledWith('delaying:cross:domain:html')
 
-      ctx.serverBus.once.withArgs('ready:for:domain').args[0][1]()
+      ctx.serverBus.once.withArgs('ready:for:domain').args[0][1]({ shouldInject: false })
+
+      expect(ctx.res.wantsInjection).to.be.false
 
       return promise
     })
@@ -242,6 +248,11 @@ describe('http/response-middleware', function () {
         serverBus: {
           emit: sinon.stub(),
           once: sinon.stub(),
+        },
+        getRemoteState () {
+          return {
+            strategy: 'foo',
+          }
         },
         debug () {},
         onError (error) {

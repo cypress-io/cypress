@@ -49,7 +49,7 @@ describe('multidomain', { experimentalSessionSupport: true }, () => {
 
       // @ts-ignore
       cy.switchToDomain('foobar.com', () => {
-        Cypress.on('form:submitted', () => {
+        Cypress.once('form:submitted', () => {
           top!.postMessage({ host: location.host, actual: 'form:submitted' }, '*')
         })
 
@@ -57,12 +57,16 @@ describe('multidomain', { experimentalSessionSupport: true }, () => {
       })
     })
 
-    it('window:before:unload', (done) => {
+    // FIXME: reloading the page is problematic because the proxy delays the
+    // request, but the driver currently waits for a switchToDomain, which
+    // has already been called and won't be called again. need to handle any
+    // sort of page reloading in the AUT when it's cross-domain
+    it.skip('window:before:unload', (done) => {
       expectTextMessage('window:before:unload', done)
 
       // @ts-ignore
       cy.switchToDomain('foobar.com', () => {
-        Cypress.on('window:before:unload', () => {
+        Cypress.once('window:before:unload', () => {
           top!.postMessage({ host: location.host, actual: 'window:before:unload' }, '*')
         })
 
@@ -79,7 +83,7 @@ describe('multidomain', { experimentalSessionSupport: true }, () => {
 
       // @ts-ignore
       cy.switchToDomain('foobar.com', () => {
-        Cypress.on('window:unload', () => {
+        Cypress.once('window:unload', () => {
           top!.postMessage({ host: location.host, actual: 'window:unload' }, '*')
         })
 
@@ -94,7 +98,7 @@ describe('multidomain', { experimentalSessionSupport: true }, () => {
 
       // @ts-ignore
       cy.switchToDomain('foobar.com', () => {
-        Cypress.on('navigation:changed', () => {
+        Cypress.once('navigation:changed', () => {
           top!.postMessage({ host: location.host, actual: 'navigation:changed' }, '*')
         })
 
@@ -109,7 +113,7 @@ describe('multidomain', { experimentalSessionSupport: true }, () => {
 
       // @ts-ignore
       cy.switchToDomain('foobar.com', () => {
-        Cypress.on('window:alert', (text) => {
+        Cypress.once('window:alert', (text) => {
           top!.postMessage({ host: location.host, actual: `window:alert ${text}` }, '*')
         })
 
@@ -124,7 +128,7 @@ describe('multidomain', { experimentalSessionSupport: true }, () => {
 
       // @ts-ignore
       cy.switchToDomain('foobar.com', () => {
-        Cypress.on('window:confirm', (text) => {
+        Cypress.once('window:confirm', (text) => {
           top!.postMessage({ host: location.host, actual: `window:confirm ${text}` }, '*')
         })
 
@@ -139,7 +143,7 @@ describe('multidomain', { experimentalSessionSupport: true }, () => {
 
       // @ts-ignore
       cy.switchToDomain('foobar.com', () => {
-        Cypress.on('window:confirmed', (text, returnedFalse) => {
+        Cypress.once('window:confirmed', (text, returnedFalse) => {
           top!.postMessage({ host: location.host, actual: `window:confirmed ${text} - ${returnedFalse}` }, '*')
         })
 
@@ -160,7 +164,7 @@ describe('multidomain', { experimentalSessionSupport: true }, () => {
 
       // @ts-ignore
       cy.switchToDomain('foobar.com', () => {
-        Cypress.on('window:confirmed', (text, returnedFalse) => {
+        Cypress.once('window:confirmed', (text, returnedFalse) => {
           top!.postMessage({ host: location.host, actual: `window:confirmed ${text} - ${returnedFalse}` }, '*')
         })
 
