@@ -530,6 +530,11 @@ class $Cypress {
         return this.emit('form:submitted', args[0])
 
       case 'app:window:load':
+        this.emit('internal:window:load', {
+          type: 'same:domain',
+          event: args[0],
+        })
+
         return this.emit('window:load', args[0])
 
       case 'app:window:before:unload':
@@ -560,10 +565,13 @@ class $Cypress {
         return this.emit('cross:domain:bridge:ready')
 
       case 'runner:cross:domain:window:load':
-        return this.emit('cross:domain:window:load')
+        return this.emit('internal:window:load', { type: 'cross:domain' })
 
       case 'cy:cross:domain:failure':
-        return this.emit('cross:domain:failure', args[0])
+        return this.emit('internal:window:load', {
+          type: 'cross:domain:failure',
+          error: args[0],
+        })
 
       case 'runner:cross:domain:ran:domain:fn':
         return this.emit('cross:domain:ran:domain:fn')

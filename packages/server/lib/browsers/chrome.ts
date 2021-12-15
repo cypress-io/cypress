@@ -343,6 +343,8 @@ const _onBrowserPreRequest = (client) => {
       return
     }
 
+    debug('get frame tree')
+
     frameTree = (await client.send('Page.getFrameTree')).frameTree
   }
 }
@@ -363,7 +365,7 @@ const _continueRequest = (client, params, header?) => {
     ]
   }
 
-  client.send('Fetch.continueRequest', details)
+  debug('continueRequest: %o', details)
 }
 
 interface HasFrame {
@@ -392,6 +394,8 @@ const _handlePausedRequests = async (client) => {
     ) {
       return _continueRequest(client, params)
     }
+
+    debug('add X-Cypress-Is-AUT-Frame header to: %s', params.request.url)
 
     _continueRequest(client, params, {
       name: 'X-Cypress-Is-AUT-Frame',

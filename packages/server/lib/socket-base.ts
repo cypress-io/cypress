@@ -415,12 +415,7 @@ export class SocketBase {
               return
             }
             case 'ready:for:domain':
-              this.localBus.emit('ready:for:domain')
-
-              return
-
-            case 'not:ready:for:domain':
-              this.localBus.emit('not:ready:for:domain')
+              this.localBus.emit('ready:for:domain', args[0])
 
               return
             default:

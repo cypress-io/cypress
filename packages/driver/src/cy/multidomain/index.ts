@@ -20,7 +20,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
     setTimeout(() => {
       if (!switchedToDomain) {
         // @ts-ignore
-        Cypress.backend('not:ready:for:domain')
+        Cypress.backend('ready:for:domain', { success: false })
       }
 
       switchedToDomain = false
@@ -134,7 +134,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
           // let the proxy know to let the response for the secondary
           // domain html through, so the page will finish loading
           // @ts-ignore
-          Cypress.backend('ready:for:domain')
+          Cypress.backend('ready:for:domain', { success: true })
         })
 
         // @ts-ignore

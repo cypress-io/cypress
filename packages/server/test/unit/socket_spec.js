@@ -562,11 +562,13 @@ describe('lib/socket', () => {
 
     context('on(ready:for:domain)', () => {
       it('emits ready:for:domain on local bus', function (done) {
-        this.server.socket.localBus.on('ready:for:domain', () => {
+        this.server.socket.localBus.on('ready:for:domain', (arg) => {
+          expect(arg).to.deep.equal({ success: true })
+
           done()
         })
 
-        this.client.emit('backend:request', 'ready:for:domain', () => {})
+        this.client.emit('backend:request', 'ready:for:domain', { success: true }, () => {})
       })
     })
   })
