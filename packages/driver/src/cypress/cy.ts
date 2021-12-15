@@ -489,6 +489,7 @@ export class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuer
         // or not onload fired to guess the url of a target frame.
         // When the onload is fired, neither the before:unload or unload event is fired to remove
         // the attached listeners or to clean up the current page state.
+        // https://github.com/cypress-io/cypress/issues/19230
         return
       }
 
