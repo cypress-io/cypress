@@ -1,6 +1,6 @@
 <template>
   <StandardModal
-    :model-value="true"
+    model-value
     :title="newProject
       ? t('runs.connect.modal.selectProject.createProject')
       : t('runs.connect.modal.title')"

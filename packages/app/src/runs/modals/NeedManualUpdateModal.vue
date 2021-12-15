@@ -1,6 +1,6 @@
 <template>
   <StandardModal
-    :model-value="true"
+    model-value
     :title="t('runs.connect.modal.connectManually.title')"
     @update:model-value="emit('cancel')"
   >

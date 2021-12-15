@@ -1,7 +1,8 @@
 <template>
   <StandardModal
+    model-value
     :title="t('runs.connect.modal.title')"
-    :model-value="show"
+    @update:model-value="emit('cancel')"
   >
     <div class="border border-dashed rounded border-gray-100 p-24px w-592px ">
       <p class="text-center text-gray-700">
@@ -63,8 +64,6 @@ fragment CreateCloudOrgModal on CloudUser {
   createCloudOrganizationUrl
 }
 `
-
-const show = ref(true)
 
 const props = defineProps<{
   gql: CreateCloudOrgModalFragment,
