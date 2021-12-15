@@ -33,6 +33,7 @@ import { CommandQueue } from './command_queue'
 import { initVideoRecorder } from '../cy/video-recorder'
 import { TestConfigOverride } from '../cy/testConfigOverrides'
 import { historyNavigationTriggeredHashChange } from '../cy/navigation'
+import { EventEmitter2 } from 'eventemitter2'
 
 const debugErrors = debugFn('cypress:driver:errors')
 
@@ -114,7 +115,7 @@ const setTopOnError = function (Cypress, cy: $Cy) {
   top.__alreadySetErrorHandlers__ = true
 }
 
-export class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILocation, ITimer, IChai, IXhr, IAliases, IEnsures, ISnapshots, IFocused {
+export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILocation, ITimer, IChai, IXhr, IAliases, IEnsures, ISnapshots, IFocused {
   id: string
   specWindow: any
   state: any
@@ -199,6 +200,8 @@ export class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuer
   private commandFns: Record<string, Function> = {}
 
   constructor (specWindow, Cypress, Cookies, state, config) {
+    super()
+
     state('specWindow', specWindow)
 
     this.specWindow = specWindow
@@ -821,6 +824,8 @@ export class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuer
         r(err)
       }
     }
+
+    return
   }
 
   setRunnable (runnable, hookId) {
@@ -1164,7 +1169,8 @@ export class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuer
     return this.Cypress.action('cy:command:enqueued', obj)
   }
 
-  private getCommandsUntilFirstParentOrValidSubject (command, memo = []) {
+  // TODO: Replace any with Command type.
+  private getCommandsUntilFirstParentOrValidSubject (command, memo: any[] = []) {
     if (!command) {
       return null
     }
@@ -1180,11 +1186,12 @@ export class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuer
     return this.getCommandsUntilFirstParentOrValidSubject(command.get('prev'), memo)
   }
 
-  private pushSubjectAndValidate (name, args, firstCall, prevSubject) {
+  // TODO: make string[] more
+  private pushSubjectAndValidate (name, args, firstCall, prevSubject: string[]) {
     if (firstCall) {
       // if we have a prevSubject then error
       // since we're invoking this improperly
-      if (prevSubject && ![].concat(prevSubject).includes('optional')) {
+      if (prevSubject && !([] as string[]).concat(prevSubject).includes('optional')) {
         const stringifiedArg = $utils.stringifyActual(args[0])
 
         $errUtils.throwErrByPath('miscellaneous.invoking_child_without_parent', {
