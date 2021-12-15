@@ -138,6 +138,9 @@ const navigationChanged = (Cypress, cy, state, source, arg) => {
 
   const navHistoryDelta = state('navHistoryDelta')
 
+  // if navigation was changed via a manipulation of the browser session we
+  // need to update the urlPosition to match the position of the history stack
+  // and we do not need to push a new url onto the urls state
   if (navHistoryDelta) {
     urlPosition = urlPosition + navHistoryDelta
     state('navHistoryDelta', undefined)
