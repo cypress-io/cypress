@@ -15,20 +15,16 @@
     >
       <template #panel1="{isDragging}">
         <HideDuringScreenshot
+          v-if="props.gql.currentProject"
+          v-show="runnerUiStore.isSpecsListOpen"
           id="inline-spec-list"
           class="h-full bg-gray-1000"
           :class="{'pointer-events-none': isDragging}"
         >
-          <div
-            v-if="props.gql.currentProject"
-            v-show="runnerUiStore.isSpecsListOpen"
-          >
-            <InlineSpecList
-              id="reporter-inline-specs-list"
-              :gql="props.gql"
-            />
-          </div>
-
+          <InlineSpecList
+            id="reporter-inline-specs-list"
+            :gql="props.gql"
+          />
           <ChooseExternalEditorModal
             :open="runnerUiStore.showChooseExternalEditorModal"
             :gql="props.gql"
