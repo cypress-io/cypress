@@ -37,7 +37,6 @@ macWorkflowFilters: &mac-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ tgriesser/fix/patch-resolutions, << pipeline.git.branch >> ]
     - equal: [ renovate/cypress-request-2.x, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
@@ -48,7 +47,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     or:
     - equal: [ master, << pipeline.git.branch >> ]
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ tgriesser/fix/patch-resolutions, << pipeline.git.branch >> ]
+    - equal: [ test-binary-downstream-windows, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -1588,7 +1587,7 @@ jobs:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "tgriesser/fix/patch-resolutions" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "test-binary-downstream-windows" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -1664,7 +1663,12 @@ jobs:
 
   test-binary-and-npm-against-other-projects:
     <<: *defaults
-    resource_class: medium
+    parameters:
+      <<: *defaultsParameters
+      resource_class:
+        type: string
+        default: medium
+    resource_class: << parameters.resource_class >>
     steps:
       # needs uploaded NPM and test binary
       - restore_cached_workspace
@@ -2431,6 +2435,14 @@ windows-workflow: &windows-workflow
           - test-runner:commit-status-checks
         requires:
           - windows-build
+
+    - test-binary-and-npm-against-other-projects:
+        context: test-runner:trigger-test-jobs
+        name: windows-test-binary-and-npm-against-other-projects
+        executor: windows
+        resource_class: windows.medium
+        requires:
+          - windows-create-build-artifacts
 
 workflows:
   linux:
