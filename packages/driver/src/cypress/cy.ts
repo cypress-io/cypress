@@ -517,12 +517,16 @@ export class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuer
           this.isStable(true, 'load')
         }
       } catch (err) {
-        // the user's window:load handler threw an error, so propagate that
-        // and fail the test
-        const r = this.state('reject')
+        if (err.isFromWindowLoadEvent) {
+          delete err.isFromWindowLoadEvent
 
-        if (r) {
-          return r(err)
+          // the user's window:load handler threw an error, so propagate that
+          // and fail the test
+          const r = this.state('reject')
+
+          if (r) {
+            return r(err)
+          }
         }
 
         // we failed setting the remote window props which
