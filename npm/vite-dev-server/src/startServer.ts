@@ -52,7 +52,11 @@ const resolveServerConfig = async ({ viteConfig, options, indexHtml }: StartDevS
 
   finalConfig.server = finalConfig.server || {}
 
-  finalConfig.server.port = await getPort({ port: finalConfig.server.port || 3000, host: 'localhost' }),
+  finalConfig.server.port = await getPort({
+    port: finalConfig.server.port || 4000,
+    host: 'localhost',
+    exclusive: true,
+  }),
 
   // Ask vite to pre-optimize all dependencies of the specs
   finalConfig.optimizeDeps = finalConfig.optimizeDeps || {}
