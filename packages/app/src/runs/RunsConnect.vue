@@ -29,24 +29,12 @@
       v-model="isLoginOpen"
       :gql="props.gql"
     />
-    <SelectCloudProjectModal
+    <CloudConnectModals
       v-if="isProjectConnectOpen"
       :show="isProjectConnectOpen"
       :gql="props.gql"
       @cancel="isProjectConnectOpen = false"
       @success="isProjectConnectOpen = false; emit('success')"
-      @update-project-id-failed="(projectId: string) => {
-        isProjectConnectOpen = false
-        isManualUpdateOpen = true
-        newProjectId = projectId
-      }"
-    />
-    <NeedManualUpdateModal
-      v-else-if="isManualUpdateOpen
-        && props.gql.currentProject"
-      :gql="props.gql.currentProject"
-      :new-project-id="newProjectId"
-      @cancel="isManualUpdateOpen = false"
     />
   </div>
 </template>
@@ -60,24 +48,16 @@ import ChartIcon from '~icons/cy/illustration-chart_x120.svg'
 import UserIcon from '~icons/cy/user-outline_x16.svg'
 import ChainIcon from '~icons/cy/chain-link_x16.svg'
 import Button from '@cy/components/Button.vue'
+import CloudConnectModals from './modals/CloudConnectModals.vue'
 import LoginModal from '@cy/gql-components/topnav/LoginModal.vue'
 import { useI18n } from '@cy/i18n'
 import type { RunsConnectFragment } from '../generated/graphql'
-import SelectCloudProjectModal from './modals/SelectCloudProjectModal.vue'
-import NeedManualUpdateModal from './modals/NeedManualUpdateModal.vue'
 
 const { t } = useI18n()
 
 gql`
 fragment RunsConnect on Query {
-  ...SelectCloudProjectModal
-  currentProject {
-    id
-    ...NeedManualUpdateModal
-  }
-  cloudViewer{
-    id
-  }
+  ...CloudConnectModals
   ...LoginModal
 }
 `

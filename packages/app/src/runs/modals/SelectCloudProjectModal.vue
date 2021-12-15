@@ -1,7 +1,6 @@
 <template>
   <StandardModal
-    v-if="organizations.length > 0 && organizationUrl"
-    :model-value="show"
+    :model-value="true"
     :title="newProject
       ? t('runs.connect.modal.selectProject.createProject')
       : t('runs.connect.modal.title')"
@@ -141,11 +140,6 @@
       </div>
     </template>
   </StandardModal>
-  <CreateCloudOrgModal
-    v-else-if="gql.cloudViewer"
-    :gql="gql.cloudViewer"
-    @cancel="emit('cancel')"
-  />
 </template>
 
 <script lang="ts" setup>
@@ -163,7 +157,6 @@ import FolderIcon from '~icons/cy/folder-outline_x16.svg'
 import OrganizationIcon from '~icons/cy/office-building_x16.svg'
 import { SelectCloudProjectModalFragment, SelectCloudProjectModal_CreateCloudProjectDocument } from '../../generated/graphql'
 import { SelectCloudProjectModal_SetProjectIdDocument } from '@packages/data-context/src/gen/all-operations.gen'
-import CreateCloudOrgModal from './CreateCloudOrgModal.vue'
 import { useI18n } from '@cy/i18n'
 
 const { t } = useI18n()
@@ -191,6 +184,7 @@ fragment SelectCloudProjectModal on Query {
   currentProject{
     id
     title
+    ...NeedManualUpdateModal
   }
 }
 `
@@ -211,7 +205,6 @@ mutation SelectCloudProjectModal_CreateCloudProject( $name: String!, $orgId: ID!
 `
 
 const props = defineProps<{
-  show: boolean,
   gql: SelectCloudProjectModalFragment,
 }>()
 

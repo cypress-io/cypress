@@ -4,6 +4,12 @@
       v-if="currentProject && showConnectSuccessAlert"
       :gql="currentProject"
     />
+    <CloudConnectModals
+      v-if="showConnectDialog"
+      :show="showConnectDialog"
+      :gql="props.gql"
+      @cancel="showConnectDialog = false"
+    />
     <RunsConnect
       v-if="!currentProject?.projectId || !cloudViewer?.id"
       :gql="props.gql"
@@ -15,6 +21,7 @@
       :button-text="t('runs.errors.notfound.button')"
       :button-icon="ConnectIcon"
       :message="t('runs.errors.notfound.title')"
+      @button-click="showConnectDialog = true"
     >
       <i18n-t keypath="runs.errors.notfound.description">
         <CodeTag
@@ -54,6 +61,7 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
 import { gql } from '@urql/vue'
+import CodeTag from '@cy/components/CodeTag.vue'
 import RunCard from './RunCard.vue'
 import RunsConnect from './RunsConnect.vue'
 import RunsConnectSuccessAlert from './RunsConnectSuccessAlert.vue'
@@ -63,7 +71,7 @@ import RunsError from './RunsError.vue'
 import ConnectIcon from '~icons/cy/chain-link_x16.svg'
 import SendIcon from '~icons/cy/paper-airplane_x16.svg'
 import { useI18n } from '@cy/i18n'
-import CodeTag from '../../../frontend-shared/src/components/CodeTag.vue'
+import CloudConnectModals from './modals/CloudConnectModals.vue'
 
 const { t } = useI18n()
 
@@ -104,19 +112,12 @@ const props = defineProps<{
 }>()
 
 const showConnectSuccessAlert = ref(false)
+const showConnectDialog = ref(false)
 
 const currentProject = computed(() => props.gql.currentProject)
 const cloudViewer = computed(() => props.gql.cloudViewer)
-</script>
 
-<route>
-{
-  name: "Runs",
-  meta: {
-    title: "Runs"
-  }
-}
-</route>
+</script>
 
 <style scoped>
 .fade-enter-active, .fade-leave-active {

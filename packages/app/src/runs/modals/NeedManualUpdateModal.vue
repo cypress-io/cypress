@@ -1,6 +1,6 @@
 <template>
   <StandardModal
-    :model-value="show"
+    :model-value="true"
     :title="t('runs.connect.modal.connectManually.title')"
     @update:model-value="emit('cancel')"
   >
@@ -75,11 +75,6 @@ const props = defineProps<{
   gql: NeedManualUpdateModalFragment
   newProjectId: string
 }>()
-
-const show = computed(() => {
-  // TODO: this should also check if newCloudProject has a value
-  return !props.gql.projectId
-})
 
 // TODO: make this projectId come form newCloudProject
 const projectIdCode = computed(() => `projectId: '${props.newProjectId}'`)
