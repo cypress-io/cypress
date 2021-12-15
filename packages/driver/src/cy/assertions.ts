@@ -151,15 +151,7 @@ export const create = (Cypress, cy) => {
     } else {
       obj.end = true
       obj.error = error
-
-      // If we're in the middle of retrying a failing assertion, we don't want to
-      // take a snapshot every 50ms - we only need a snapshot when we pass or
-      // finally fail. If we're done retrying, retries.ts adds a snapshot to the
-      // as part of modifying the log message.
-      // https://github.com/cypress-io/cypress/issues/18549
-      if (!cy.state('inRetries')) {
-        obj.snapshot = true
-      }
+      obj.snapshot = true
     }
 
     const isChildLike = (subject, current) => {

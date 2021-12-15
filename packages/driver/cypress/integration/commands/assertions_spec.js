@@ -1,5 +1,5 @@
 const { assertLogLength } = require('../../support/utils')
-const { $, _ } = Cypress
+const { $, _, sinon } = Cypress
 
 describe('src/cy/commands/assertions', () => {
   before(() => {
@@ -2925,6 +2925,25 @@ describe('src/cy/commands/assertions', () => {
     it(`doesn't throw when iframe with name attribute exists`, () => {
       cy.visit('fixtures/cross_origin_name.html')
       cy.get('.foo').should('not.exist')
+    })
+  })
+
+  context('implicit assertions', () => {
+    // https://github.com/cypress-io/cypress/issues/18549
+    it('only snapshots once when failing to find DOM elements', (done) => {
+      sinon.spy(cy, 'createSnapshot')
+      cy.on('fail', (err) => {
+        // We have a regression where snapshots are being taken for every failed retry on implicit assertions
+        // for element existence. The exact number expected is unclear (and this test should be updated with a
+        // more exact assertion once we've solved the regression) - but it definitely shouldn't be above 5!
+        expect(cy.createSnapshot.callCount).to.be.lessThan(5)
+
+        cy.createSnapshot.restore()
+        done()
+      })
+
+      //
+      cy.get('.badId', { timeout: 300 })
     })
   })
 })
