@@ -1693,7 +1693,7 @@ jobs:
       - run:
           name: Verify Cypress binary
           working_directory: /tmp/testing
-          command: $(yarn bin)/cypress verify
+          command: $(yarn bin cypress) verify
       - run:
           name: Running other test projects with new NPM package and binary
           command: |
