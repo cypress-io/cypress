@@ -1,4 +1,4 @@
-import { useRunnerUiStore, RunnerUiStore } from '../store'
+import { useRunnerUiStore, RunnerUiState } from '../store'
 import { useMutation, gql } from '@urql/vue'
 import { Preferences_SetPreferencesDocument } from '@packages/data-context/src/gen/all-operations.gen'
 
@@ -9,12 +9,10 @@ mutation Preferences_SetPreferences ($value: String!) {
   setPreferences (value: $value)
 }`
 
-type Preference = keyof RunnerUiStore
-
 export function usePreferences () {
   const setPreferences = useMutation(Preferences_SetPreferencesDocument)
 
-  function update (preference: Preference, value: any) {
+  function update<K extends keyof RunnerUiState> (preference: K, value: RunnerUiState[K]) {
     if (runnerUiStore[preference] !== value) {
       // only set the value and trigger the mutation if the value has actually changed
       runnerUiStore.setPreference(preference, value)
