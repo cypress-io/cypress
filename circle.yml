@@ -1314,6 +1314,7 @@ jobs:
     steps:
       - run-new-ui-tests:
           browser: chrome
+          percy: true
           package: frontend-shared
           type: ct
 
@@ -1334,6 +1335,7 @@ jobs:
     steps:
       - run-new-ui-tests:
           browser: chrome
+          percy: true
           package: launchpad
           type: e2e
 
@@ -1353,6 +1355,7 @@ jobs:
     steps:
       - run-new-ui-tests:
           browser: chrome
+          percy: true
           package: app
           type: e2e
 
@@ -2179,10 +2182,14 @@ linux-workflow: &linux-workflow
         required_env_var: PERCY_TOKEN # skips job if not defined (external PR)
         requires:
           - cli-visual-tests
-          - runner-integration-tests-chrome
-          - runner-ct-integration-tests-chrome
           - reporter-integration-tests
           - run-app-component-tests-chrome
+          - run-app-integration-tests-chrome
+          - run-frontend-shared-component-tests-chrome
+          - run-launchpad-component-tests-chrome
+          - run-launchpad-integration-tests-chrome
+          - runner-integration-tests-chrome
+          - runner-ct-integration-tests-chrome
     - lint-types:
         requires:
           - build
