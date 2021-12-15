@@ -555,7 +555,10 @@ export class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuer
 
         Cypress.action('cy:cross:domain:failure', e)
 
-        cy.fail(e)
+        // need async:true since this is outside the command queue promise
+        // chain and cy.fail needs to know to use the reference to the
+        // last command to reject it
+        cy.fail(e, { async: true })
       }
     })
   }
