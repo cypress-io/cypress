@@ -2959,16 +2959,22 @@
     lodash "^4.17.5"
     source-map "^0.6.1"
 
+"@ffmpeg-installer/darwin-arm64@4.1.5":
+  version "4.1.5"
+  resolved "https://registry.yarnpkg.com/@ffmpeg-installer/darwin-arm64/-/darwin-arm64-4.1.5.tgz#b7b5c262dd96d1aea4807514e1cdcf6e11f82743"
+  integrity sha512-hYqTiP63mXz7wSQfuqfFwfLOfwwFChUedeCVKkBtl/cliaTM7/ePI9bVzfZ2c+dWu3TqCwLDRWNSJ5pqZl8otA==
+
 "@ffmpeg-installer/darwin-x64@4.1.0":
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/@ffmpeg-installer/darwin-x64/-/darwin-x64-4.1.0.tgz#48e1706c690e628148482bfb64acb67472089aaa"
   integrity sha512-Z4EyG3cIFjdhlY8wI9aLUXuH8nVt7E9SlMVZtWvSPnm2sm37/yC2CwjUzyCQbJbySnef1tQwGG2Sx+uWhd9IAw==
 
-"@ffmpeg-installer/ffmpeg@1.0.20":
-  version "1.0.20"
-  resolved "https://registry.yarnpkg.com/@ffmpeg-installer/ffmpeg/-/ffmpeg-1.0.20.tgz#d3c9c2bbcd76149468fb0886c2b3fe9e4795490b"
-  integrity sha512-wbgd//6OdwbFXYgV68ZyKrIcozEQpUKlvV66XHaqO2h3sFbX0jYLzx62Q0v8UcFWN21LoxT98NU2P+K0OWsKNA==
+"@ffmpeg-installer/ffmpeg@1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@ffmpeg-installer/ffmpeg/-/ffmpeg-1.1.0.tgz#87fdb9e7d180e8d78f7903f9441e36f978938a90"
+  integrity sha512-Uq4rmwkdGxIa9A6Bd/VqqYbT7zqh1GrT5/rFwCwKM70b42W5gIjWeVETq6SdcL0zXqDtY081Ws/iJWhr1+xvQg==
   optionalDependencies:
+    "@ffmpeg-installer/darwin-arm64" "4.1.5"
     "@ffmpeg-installer/darwin-x64" "4.1.0"
     "@ffmpeg-installer/linux-arm" "4.1.3"
     "@ffmpeg-installer/linux-arm64" "4.1.4"
@@ -38247,9 +38253,9 @@ ssri@^5.2.4:
     safe-buffer "^5.1.1"
 
 ssri@^6.0.0, ssri@^6.0.1:
-  version "6.0.1"
-  resolved "https://registry.yarnpkg.com/ssri/-/ssri-6.0.1.tgz#2a3c41b28dd45b62b63676ecb74001265ae9edd8"
-  integrity sha512-3Wge10hNcT1Kur4PDFwEieXSCMCJs/7WvSACcrMYrNp+b8kDL1/0wJch5Ni2WrtwEa2IO8OsVfeKIciKCDx/QA==
+  version "6.0.2"
+  resolved "https://registry.yarnpkg.com/ssri/-/ssri-6.0.2.tgz#157939134f20464e7301ddba3e90ffa8f7728ac5"
+  integrity sha512-cepbSq/neFK7xB6A50KHN0xHDotYzq58wWCa5LeWqnPrHG8GzfEjO/4O8kpmcGW+oaxkvhEJCWgbgNk4/ZV93Q==
   dependencies:
     figgy-pudding "^3.5.1"
 
