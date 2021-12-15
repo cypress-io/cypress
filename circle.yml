@@ -2009,6 +2009,14 @@ jobs:
           repo: cypress-example-recipes
           command: npm run test:ci:firefox
 
+  "test-binary-against-recipes-chrome":
+    <<: *defaults
+    steps:
+      - test-binary-against-repo:
+          repo: cypress-example-recipes
+          browser: chrome
+          command: npm run test:ci:chrome
+
   # This is a special job. It allows you to test the current
   # built test runner against a pull request in the repo
   # cypress-example-recipes.
@@ -2439,6 +2447,10 @@ linux-workflow: &linux-workflow
     #     requires:
     #       - create-build-artifacts
     - test-binary-against-recipes-firefox:
+        <<: *mainBuildFilters
+        requires:
+          - create-build-artifacts
+    - test-binary-against-recipes-chrome:
         <<: *mainBuildFilters
         requires:
           - create-build-artifacts

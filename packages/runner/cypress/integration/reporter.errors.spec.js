@@ -728,9 +728,14 @@ describe('errors ui', () => {
   })
 
   describe('docs url', () => {
+    after(() => {
+      window.top.__cySkipValidateConfig = false
+    })
+
     const file = 'docs_url_spec.js'
     const docsUrl = 'https://on.cypress.io/viewport'
 
+    window.top.__cySkipValidateConfig = true
     verify.it('displays as button in interactive mode', { retries: 1 }, {
       file,
       verifyFn () {
