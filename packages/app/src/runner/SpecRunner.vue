@@ -102,6 +102,7 @@ import { usePreferences } from '../composables/usePreferences'
 import ScriptError from './ScriptError.vue'
 import { useWindowSize } from '@vueuse/core'
 import ResizablePanels, { DraggablePanel } from './ResizablePanels.vue'
+import { runnerConstants } from './runner-constants'
 
 const { height: windowHeight, width: windowWidth } = useWindowSize()
 
@@ -141,8 +142,8 @@ const autStore = useAutStore()
 const screenshotStore = useScreenshotStore()
 const runnerUiStore = useRunnerUiStore()
 const preferences = usePreferences()
-const initialSpecsListWidth: number = props.gql.localSettings.preferences.specListWidth ?? 280
-const initialReporterWidth: number = props.gql.localSettings.preferences.reporterWidth ?? 320
+const initialSpecsListWidth: number = props.gql.localSettings.preferences.specListWidth ?? runnerConstants.defaultSpecListWidth
+const initialReporterWidth: number = props.gql.localSettings.preferences.reporterWidth ?? runnerConstants.defaultReporterWidth
 const reporterWidth = ref(initialReporterWidth)
 const specListWidth = ref(initialSpecsListWidth)
 

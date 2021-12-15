@@ -56,6 +56,7 @@ export default {
 
 <script lang="ts" setup>
 import { computed, ref, watchEffect } from 'vue'
+import { runnerConstants } from './runner-constants'
 
 export type ResizablePanelName = 'panel1' | 'panel2' | 'panel3'
 
@@ -74,8 +75,8 @@ const props = withDefaults(defineProps<{
 }>(), {
   showPanel1: true,
   showPanel2: true,
-  initialPanel1Width: 280,
-  initialPanel2Width: 320,
+  initialPanel1Width: runnerConstants.defaultSpecListWidth,
+  initialPanel2Width: runnerConstants.defaultReporterWidth,
   minPanel1Width: 200,
   minPanel2Width: 220,
   minPanel3Width: 100,

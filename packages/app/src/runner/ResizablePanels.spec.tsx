@@ -1,8 +1,9 @@
 import ResizablePanels, { ResizablePanelName, DraggablePanel } from './ResizablePanels.vue'
+import { runnerConstants } from './runner-constants'
 
 // default values
-const defaultPanel1Width = 280
-const defaultPanel2Width = 320
+const defaultPanel1Width = runnerConstants.defaultSpecListWidth
+const defaultPanel2Width = runnerConstants.defaultReporterWidth
 const minPanel1Width = 100
 const minPanel2Width = 100
 const minPanel3Width = 500
@@ -127,7 +128,7 @@ describe('<ResizablePanels />', { viewportWidth: 1500, defaultCommandTimeout: 40
       dragHandleToClientX('panel2', 600)
       assertWidth('panel2', 300)
       dragHandleToClientX('panel2', 580)
-      assertWidth('panel2', 280)
+      assertWidth('panel2', defaultPanel2Width)
     })
   })
 

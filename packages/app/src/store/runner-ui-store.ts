@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { runnerConstants } from '../runner/runner-constants'
 
 /**
  * Store for reactive properties used in the runner UI.
@@ -24,8 +25,8 @@ export const useRunnerUiStore = defineStore({
       showChooseExternalEditorModal: false,
       autoScrollingEnabled: true,
       isSpecsListOpen: true,
-      specListWidth: 280,
-      reporterWidth: 320,
+      specListWidth: runnerConstants.defaultSpecListWidth,
+      reporterWidth: runnerConstants.defaultReporterWidth,
     }
   },
 
