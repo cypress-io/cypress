@@ -504,13 +504,27 @@ export class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuer
         // about:blank in a visit, we do need these
         this.contentWindowListeners(autWindow)
 
-        this.Cypress.action('app:window:load', this.state('window'))
+        try {
+          this.Cypress.action('app:window:load', this.state('window'))
+        } catch (err) {
+          err.isFromWindowLoadEvent = true
 
-        // we are now stable again which is purposefully
-        // the last event we call here, to give our event
-        // listeners time to be invoked prior to moving on
-        this.isStable(true, 'load')
+          throw err
+        } finally {
+          // we are now stable again which is purposefully
+          // the last event we call here, to give our event
+          // listeners time to be invoked prior to moving on
+          this.isStable(true, 'load')
+        }
       } catch (err) {
+        // the user's window:load handler threw an error, so propagate that
+        // and fail the test
+        const r = this.state('reject')
+
+        if (r) {
+          return r(err)
+        }
+
         // we failed setting the remote window props which
         // means the page navigated to a different domain
 
