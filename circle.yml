@@ -1342,6 +1342,7 @@ jobs:
     steps:
       - run-new-ui-tests:
           browser: chrome
+          percy: true
           package: app
           type: ct
 
