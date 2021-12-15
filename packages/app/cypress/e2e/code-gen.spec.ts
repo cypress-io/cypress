@@ -41,8 +41,9 @@ describe('Code Generation', () => {
     cy.findByTestId('file-row').contains('src/stories/Button.cy.js').click()
 
     cy.withCtx(async (ctx) => {
-      const spec = await (await ctx.project.findSpecs(ctx.currentProject?.projectRoot ?? '', 'component'))
-      .find((spec) => spec.relative === 'src/stories/Button.cy.jsx')
+      const spec = (
+        await ctx.project.findSpecs(ctx.currentProject?.projectRoot ?? '', 'component', '**/*.cy.jsx')
+      ).find((spec) => spec.relative === 'src/stories/Button.cy.jsx')
 
       expect(spec).to.exist
     })
@@ -62,7 +63,7 @@ describe('Code Generation', () => {
     cy.contains('composeStories')
 
     cy.withCtx(async (ctx) => {
-      const spec = await (await ctx.project.findSpecs(ctx.currentProject?.projectRoot ?? '', 'component'))
+      const spec = (await ctx.project.findSpecs(ctx.currentProject?.projectRoot ?? '', 'component', '**/*.cy.jsx'))
       .find((spec) => spec.relative === 'src/stories/Button.stories.cy.jsx')
 
       expect(spec).to.exist
