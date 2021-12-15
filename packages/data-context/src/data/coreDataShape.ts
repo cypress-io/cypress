@@ -27,6 +27,12 @@ export interface LocalSettingsDataShape {
   preferences: AllowedState
 }
 
+export interface SavedStateShape {
+  firstOpened?: number | null
+  lastOpened?: number | null
+  promptsShown?: object | null
+}
+
 export interface ConfigChildProcessShape {
   /**
    * Child process executing the config & sourcing plugin events
@@ -54,7 +60,7 @@ export interface ActiveProjectShape extends ProjectShape {
   preferences?: Preferences | null
   browsers: FoundBrowser[] | null
   isMissingConfigFile: boolean
-  savedState: object // todo: add detail
+  savedState: SavedStateShape
 }
 
 export interface AppDataShape {
