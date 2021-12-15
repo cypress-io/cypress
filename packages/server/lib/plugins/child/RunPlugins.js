@@ -129,10 +129,6 @@ class RunPlugins {
   execute (event, ids, args = []) {
     debug(`execute plugin event: ${event} (%o)`, ids)
 
-    const wrapChildPromise = () => {
-      util.wrapChildPromise(this.invoke, ids, args)
-    }
-
     switch (event) {
       case 'dev-server:start':
         return devServer.wrap(this.invoke, ids, args)
@@ -143,7 +139,7 @@ class RunPlugins {
       case 'after:run':
       case 'after:spec':
       case 'after:screenshot':
-        return wrapChildPromise()
+        return util.wrapChildPromise(this.ipc, this.invoke, ids, args)
       case 'task':
         return this.taskExecute(ids, args)
       case '_get:task:keys':
