@@ -1,4 +1,5 @@
 require('graceful-fs').gracefulify(require('fs'))
+const _ = require('lodash')
 const stripAnsi = require('strip-ansi')
 const debug = require('debug')('cypress:server:plugins:child')
 const tsNodeUtil = require('../../util/ts_node')
@@ -64,7 +65,19 @@ function run (ipc, requiredFile, projectRoot) {
 
       const result = exp.default || exp
 
-      ipc.send('loaded', result)
+      const resultWithStringiedFns = (cfg) => {
+        if (cfg?.component?.devServer) {
+          cfg.component.devServer = '[Function: devServer]'
+        }
+
+        if (cfg?.e2e?.setupNodeEvents) {
+          cfg.e2e.setupNodeEvents = '[Function: setupNodeEvents]'
+        }
+
+        return cfg
+      }
+
+      ipc.send('loaded', resultWithStringiedFns(_.cloneDeep(result)))
 
       ipc.on('plugins', (testingType) => {
         const runPlugins = new RunPlugins(ipc, projectRoot, requiredFile)

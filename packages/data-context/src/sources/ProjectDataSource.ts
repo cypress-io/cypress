@@ -206,11 +206,11 @@ export class ProjectDataSource {
       }
 
       if (testingType === 'e2e') {
-        return Boolean(Object.keys(config.e2e ?? {}).length)
+        return Boolean(config.e2e?.setupNodeEvents)
       }
 
       if (testingType === 'component') {
-        return Boolean(Object.keys(config.component ?? {}).length)
+        return Boolean(config.component?.devServer)
       }
 
       return false

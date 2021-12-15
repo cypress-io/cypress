@@ -1,6 +1,7 @@
 module.exports = {
   'e2e': {
     'specPattern': 'tests/**/*',
+    'setupNodeEvents': (on, config) => config,
   },
   'fixturesFolder': 'tests/_fixtures',
   'supportFile': 'tests/_support/spec_helper.js',
