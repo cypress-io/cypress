@@ -592,7 +592,7 @@ export class EventManager {
     this.selectorPlaygroundModel.setOpen(false)
   }
 
-  teardownReporter () {
+  resetReporter () {
     return new Promise((resolve) => {
       this.reporterBus.once('reporter:restarted', resolve)
       this.reporterBus.emit('reporter:restart:test:run')
@@ -600,7 +600,7 @@ export class EventManager {
   }
 
   async _rerun () {
-    await this.teardownReporter()
+    await this.resetReporter()
 
     // this probably isn't 100% necessary
     // since Cypress will fall out of scope

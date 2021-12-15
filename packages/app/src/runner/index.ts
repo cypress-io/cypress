@@ -144,6 +144,10 @@ function teardownSpec () {
   return getEventManager().teardown(getMobxRunnerStore())
 }
 
+export function teardown () {
+  UnifiedReporterAPI.setInitializedReporter(false)
+}
+
 /**
  * Set up a spec by creating a fresh AUT and initializing
  * Cypress on it.
@@ -268,13 +272,14 @@ async function initialize () {
  *    description for more information.
  */
 async function executeSpec (spec: BaseSpec) {
+  await teardownSpec()
+
   const mobxRunnerStore = getMobxRunnerStore()
 
   mobxRunnerStore.setSpec(spec)
 
   await UnifiedReporterAPI.resetReporter()
 
-  await teardownSpec()
   UnifiedReporterAPI.setupReporter()
 
   if (window.UnifiedRunner.config.testingType === 'e2e') {
@@ -291,4 +296,5 @@ async function executeSpec (spec: BaseSpec) {
 export const UnifiedRunnerAPI = {
   initialize,
   executeSpec,
+  teardown,
 }
