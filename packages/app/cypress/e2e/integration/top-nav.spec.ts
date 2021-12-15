@@ -241,7 +241,7 @@ describe('App Top Nav Workflows', () => {
   describe('Docs', () => {
     beforeEach(() => {
       setupMockBrowsers()
-      cy.openProject('launchpad', ['--browser', 'firefox'])
+      cy.openProject('launchpad')
       cy.startAppServer()
       cy.visitApp()
 
