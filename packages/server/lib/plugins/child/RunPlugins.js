@@ -25,6 +25,9 @@ class RunPlugins {
     this.requiredFile = requiredFile
     this.eventIdCount = 0
     this.registrations = []
+    /**
+     * @type {Record<string, {event: string, handler: Function}>}
+     */
     this.registeredEventsById = {}
     this.registeredEventsByName = {}
   }
@@ -148,7 +151,7 @@ class RunPlugins {
       case '_get:task:body':
         return this.taskGetBody(ids, args)
       case 'before:browser:launch':
-        return browserLaunch.wrap(this.invoke, ids, args)
+        return browserLaunch.wrap(this.ipc, this.invoke, ids, args)
       default:
         debug('unexpected execute message:', event, args)
 
@@ -173,20 +176,19 @@ class RunPlugins {
     })
   }
 
-  taskGetBody (ipc, events, ids, args) {
+  taskGetBody (ids, args) {
     const [event] = args
-    const taskEvent = _.find(events, { event: 'task' }).handler
+    const taskEvent = _.find(this.registeredEventsById, { event: 'task' }).handler
     const invoke = () => {
       const fn = taskEvent[event]
 
       return _.isFunction(fn) ? fn.toString() : ''
     }
 
-    util.wrapChildPromise(ipc, invoke, ids)
+    util.wrapChildPromise(this.ipc, invoke, ids)
   }
 
   taskGetKeys (ids) {
-    // @ts-ignore
     const taskEvent = _.find(this.registeredEventsById, { event: 'task' }).handler
     const invoke = () => _.keys(taskEvent)
 

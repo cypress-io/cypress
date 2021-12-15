@@ -288,6 +288,16 @@ const addCypressOpenCommand = (program) => {
   .option('--dev', text('dev'), coerceFalse)
 }
 
+const maybeAddInspectFlags = (program) => {
+  if (process.argv.includes('--dev')) {
+    return program
+    .option('--inspect', 'Node option')
+    .option('--inspect-brk', 'Node option')
+  }
+
+  return program
+}
+
 /**
  * Casts known command line options for "cypress run" to their intended type.
  * For example if the user passes "--port 5005" the ".port" property should be
@@ -336,7 +346,7 @@ module.exports = {
       debug('creating program parser')
       const program = createProgram()
 
-      addCypressRunCommand(program)
+      maybeAddInspectFlags(addCypressRunCommand(program))
       .action((...fnArgs) => {
         debug('parsed Cypress run %o', fnArgs)
         const options = parseVariableOpts(fnArgs, cliArgs)
@@ -377,7 +387,7 @@ module.exports = {
       debug('creating program parser')
       const program = createProgram()
 
-      addCypressOpenCommand(program)
+      maybeAddInspectFlags(addCypressOpenCommand(program))
       .action((...fnArgs) => {
         debug('parsed Cypress open %o', fnArgs)
         const options = parseVariableOpts(fnArgs, cliArgs)
@@ -446,7 +456,7 @@ module.exports = {
       showVersions(args)
     })
 
-    addCypressOpenCommand(program)
+    maybeAddInspectFlags(addCypressOpenCommand(program))
     .action((opts) => {
       debug('opening Cypress')
       require('./exec/open')
@@ -455,7 +465,7 @@ module.exports = {
       .catch(util.logErrorExit1)
     })
 
-    addCypressRunCommand(program)
+    maybeAddInspectFlags(addCypressRunCommand(program))
     .action((...fnArgs) => {
       debug('running Cypress with args %o', fnArgs)
       require('./exec/run')

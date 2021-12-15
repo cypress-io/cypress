@@ -1,5 +1,8 @@
 import { clearCtx, setCtx } from '@packages/data-context'
+import _ from 'lodash'
+
 import { makeDataContext } from '../makeDataContext'
+import random from '../util/random'
 
 export = (mode, options) => {
   if (mode === 'record') {
@@ -12,6 +15,17 @@ export = (mode, options) => {
 
   // When we're in testing mode, this is setup automatically as a beforeEach
   clearCtx()
+
+  if (mode === 'run') {
+    _.defaults(options, {
+      socketId: random.id(10),
+      isTextTerminal: true,
+      browser: 'electron',
+      quiet: false,
+      morgan: false,
+      report: true,
+    })
+  }
 
   const ctx = setCtx(makeDataContext({ mode: mode === 'run' ? mode : 'open', modeOptions: options }))
   const loadingPromise = ctx.initializeMode()

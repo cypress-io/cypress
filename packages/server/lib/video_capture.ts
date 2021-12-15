@@ -9,6 +9,7 @@ import BlackHoleStream from 'black-hole-stream'
 import { fs } from './util/fs'
 
 const debug = Debug('cypress:server:video')
+const debugVerbose = Debug('cypress-verbose:server:video')
 // extra verbose logs for logging individual frames
 const debugFrames = Debug('cypress-verbose:server:video:frames')
 
@@ -218,7 +219,7 @@ export function start (name, options: StartOptions = {}) {
       }).on('codecData', (data) => {
         return debug('capture codec data: %o', data)
       }).on('stderr', (stderr) => {
-        return debug('capture stderr log %o', { message: stderr })
+        return debugVerbose('capture stderr log %o', { message: stderr })
       }).on('error', (err, stdout, stderr) => {
         debug('capture errored: %o', { error: err.message, stdout, stderr })
 

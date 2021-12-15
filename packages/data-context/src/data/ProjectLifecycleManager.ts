@@ -23,7 +23,7 @@ import type { AllModeOptions, FoundBrowser, FullConfig, TestingType } from '@pac
 import type { BaseErrorDataShape } from '.'
 import { autoBindDebug } from '../util/autoBindDebug'
 
-const debug = debugLib(`cypress:lifecycle:ProjectLifecycleManager:${process.pid}`)
+const debug = debugLib(`cypress:lifecycle:ProjectLifecycleManager`)
 
 const CHILD_PROCESS_FILE_PATH = require.resolve('@packages/server/lib/plugins/child/require_async_child')
 
@@ -467,6 +467,10 @@ export class ProjectLifecycleManager {
       if (this._configResult.value === promise) {
         this._configResult = { state: 'errored', value: err }
       }
+
+      if (this._pendingInitialize) {
+        this._pendingInitialize.reject(err)
+      }
     })
     .finally(() => {
       this.ctx.emitter.toLaunchpad()
@@ -735,6 +739,9 @@ export class ProjectLifecycleManager {
     .catch((err) => {
       this._cleanupIpc(ipc)
       this._eventsIpcResult = { state: 'errored', value: err }
+      if (this._pendingInitialize) {
+        this._pendingInitialize.reject(err)
+      }
     })
     .finally(() => {
       this.ctx.emitter.toLaunchpad()
@@ -1073,6 +1080,11 @@ export class ProjectLifecycleManager {
     const fullConfig = await this.buildBaseFullConfig(this._configResult.value.initialConfig, this._envFileResult.value, this.ctx.modeOptions)
 
     this._cachedFullConfig = this.ctx._apis.configApi.updateWithPluginValues(fullConfig, result.setupConfig ?? {})
+
+    if (this._pendingInitialize) {
+      this._pendingInitialize.resolve()
+      this._pendingInitialize = undefined
+    }
   }
 
   private registerSetupIpcHandlers (ipc: ProjectConfigIpc) {
@@ -1136,7 +1148,11 @@ export class ProjectLifecycleManager {
     return true
   }
 
+  private _pendingInitialize?: pDefer.DeferredPromise<void>
+
   async initializeRunMode () {
+    this._pendingInitialize = pDefer()
+
     if (!this._currentTestingType) {
       this.setCurrentTestingType('e2e')
       this.ctx.onWarning(this.ctx.error('TESTING_TYPE_NEEDED_FOR_RUN'))
@@ -1146,7 +1162,7 @@ export class ProjectLifecycleManager {
       return this.ctx.onError(this.ctx.error('NO_DEFAULT_CONFIG_FILE_FOUND', this.projectRoot), 'global')
     }
 
-    await this.setupNodeEvents()
+    await this._pendingInitialize.promise
   }
 
   private configFileWarningCheck () {

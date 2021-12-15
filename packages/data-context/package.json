@@ -35,6 +35,7 @@
     "launch-editor": "2.2.1",
     "lodash": "4.17.21",
     "p-defer": "^3.0.0",
+    "randomstring": "1.1.5",
     "wonka": "^4.0.15"
   },
   "devDependencies": {
