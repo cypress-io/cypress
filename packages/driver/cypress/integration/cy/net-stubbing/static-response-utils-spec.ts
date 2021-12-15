@@ -2,7 +2,7 @@ const {
   getBackendStaticResponse,
 } = require('../../../../src/cy/net-stubbing/static-response-utils')
 
-describe('static-response-utils', () => {
+describe('driver/src/cy/net-stubbing/static-response-utils', () => {
   describe('.getBackendStaticResponse', () => {
     describe('delay', () => {
       it('does not set delay when delayMS is not provided', () => {
