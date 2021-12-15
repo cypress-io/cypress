@@ -1681,6 +1681,9 @@ module.exports = {
       await app.whenReady()
     }
 
-    return loading.then(() => this.ready(options))
+    return loading.then(() => this.ready(options)).catch((e) => {
+      this.exitEarly(e)
+      this.ready(options)
+    })
   },
 }

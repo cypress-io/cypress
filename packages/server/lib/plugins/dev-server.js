@@ -36,7 +36,7 @@ const API = {
       throw errors.get('CT_NO_DEV_START_EVENT', config.pluginsFile)
     }
 
-    plugins.execute('dev-server:start', { specs, config })
+    return plugins.execute('dev-server:start', { specs, config })
   },
 
   updateSpecs (specs) {
