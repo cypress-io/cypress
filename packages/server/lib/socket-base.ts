@@ -418,6 +418,11 @@ export class SocketBase {
               this.localBus.emit('ready:for:domain')
 
               return
+
+            case 'not:ready:for:domain':
+              this.localBus.emit('not:ready:for:domain')
+
+              return
             default:
               throw new Error(
                 `You requested a backend event we cannot handle: ${eventName}`,

@@ -562,6 +562,9 @@ class $Cypress {
       case 'runner:cross:domain:window:load':
         return this.emit('cross:domain:window:load')
 
+      case 'cy:cross:domain:failure':
+        return this.emit('cross:domain:failure', args[0])
+
       case 'runner:cross:domain:ran:domain:fn':
         return this.emit('cross:domain:ran:domain:fn')
 

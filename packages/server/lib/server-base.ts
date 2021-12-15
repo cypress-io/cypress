@@ -140,9 +140,17 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     this._fileServer = null
 
     this._eventBus.on('delaying:cross:domain:html', () => {
-      this.socket.localBus.once('ready:for:domain', () => {
+      const onReady = () => {
+        this.socket.localBus.off('not:ready:for:domain', onNotReady)
         this._eventBus.emit('ready:for:domain')
-      })
+      }
+      const onNotReady = () => {
+        this.socket.localBus.off('ready:for:domain', onReady)
+        this._eventBus.emit('not:ready:for:domain')
+      }
+
+      this.socket.localBus.once('ready:for:domain', onReady)
+      this.socket.localBus.once('not:ready:for:domain', onNotReady)
 
       this.socket.toDriver('cross:domain:html:received')
     })

@@ -342,6 +342,7 @@ const stabilityChanged = (Cypress, state, config, stable) => {
     return new Promise((resolve) => {
       const onWindowLoad = (e) => {
         cy.off('cross:domain:window:load', onCrossDomainWindowLoad)
+        cy.off('cross:domain:failure', onCrossDomainFailure)
 
         // this prevents a log occurring when we navigate to about:blank inbetween tests
         if (!state('duringUserTestExecution')) return
@@ -360,14 +361,28 @@ const stabilityChanged = (Cypress, state, config, stable) => {
 
       const onCrossDomainWindowLoad = () => {
         cy.off('window:load', onWindowLoad)
+        cy.off('cross:domain:failure', onCrossDomainFailure)
 
         options._log.set('message', '--page loaded--').snapshot().end()
 
         resolve()
       }
 
+      const onCrossDomainFailure = (err) => {
+        cy.off('window:load', onWindowLoad)
+        cy.off('cross:domain:window:load', onCrossDomainWindowLoad)
+
+        options._log.set('message', '--page loaded--').snapshot().end()
+        options._log.set('state', 'failed')
+        options._log.set('error', err)
+
+        resolve()
+      }
+
+      // TODO: refactor into one event with different payloads
       cy.once('window:load', onWindowLoad)
       cy.once('cross:domain:window:load', onCrossDomainWindowLoad)
+      cy.once('cross:domain:failure', onCrossDomainFailure)
     })
   }
 

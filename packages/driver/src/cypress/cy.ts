@@ -517,7 +517,7 @@ export class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuer
         // we expect a cross-origin error and are setting things up
         // elsewhere to handle running cross-domain, so don't fail
         // because of it
-        if (this.state('anticipatingMultidomain')) {
+        if (this.state('readyForMultidomain')) {
           this.isStable(true, 'load')
 
           return
@@ -535,12 +535,9 @@ export class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuer
           e = onpl(e)
         }
 
-        // and now reject with it
-        const r = this.state('reject')
+        Cypress.action('cy:cross:domain:failure', e)
 
-        if (r) {
-          return r(e)
-        }
+        cy.fail(e)
       }
     })
   }

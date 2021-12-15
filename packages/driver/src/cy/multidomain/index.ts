@@ -2,7 +2,9 @@ import Bluebird from 'bluebird'
 import $Log from '../../cypress/log'
 import { createDeferred } from '../../util/deferred'
 
-export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy) {
+export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: Cypress.State) {
+  let switchedToDomain = false
+
   // @ts-ignore
   Cypress.on('cross:domain:html:received', () => {
     // when a secondary domain is detected by the proxy, it holds it up
@@ -11,12 +13,26 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy)
     // ahead because we're anticipating multidomain
     // @ts-ignore
     cy.isAnticipatingMultidomain(true)
+
+    // cy.isAnticipatingMultidomain(true) will free the queue to move forward.
+    // if the next command isn't switchToDomain, this timeout will hit and
+    // the test will fail with a cross-origin error
+    setTimeout(() => {
+      if (!switchedToDomain) {
+        // @ts-ignore
+        Cypress.backend('not:ready:for:domain')
+      }
+
+      switchedToDomain = false
+    }, 1000)
   })
 
   Commands.addAll({
     // this isn't fully implemented, but in place to be able to test out
     // the other parts of multidomain
     switchToDomain (domain, fn) {
+      switchedToDomain = true
+
       Cypress.log({
         name: 'switchToDomain',
         type: 'parent',
@@ -114,6 +130,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy)
         // receive messages
         // @ts-ignore
         Cypress.once('cross:domain:bridge:ready', () => {
+          state('readyForMultidomain', true)
           // let the proxy know to let the response for the secondary
           // domain html through, so the page will finish loading
           // @ts-ignore
@@ -132,6 +149,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy)
             fn: fn.toString(),
           })
 
+          state('readyForMultidomain', false)
           // @ts-ignore
           cy.isAnticipatingMultidomain(false)
         })

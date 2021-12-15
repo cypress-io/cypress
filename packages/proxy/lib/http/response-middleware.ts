@@ -236,10 +236,25 @@ const MaybeDelayForMultidomain: ResponseMiddleware = function () {
   if (isCrossDomain && isTheAUTFrame && (isHTML || isRenderedHTML)) {
     this.debug('is cross-domain, delay until domain:ready event')
 
-    this.serverBus.once('ready:for:domain', () => {
+    const onReady = () => {
       this.debug('ready for domain, let it go')
+
+      this.serverBus.off('not:ready:for:domain', onNotReady)
+
       this.next()
-    })
+    }
+
+    const onNotReady = () => {
+      this.debug('not ready for domain, let it go without injection')
+
+      this.res.wantsInjection = false
+      this.serverBus.off('ready:for:domain', onReady)
+
+      this.next()
+    }
+
+    this.serverBus.once('ready:for:domain', onReady)
+    this.serverBus.once('not:ready:for:domain', onNotReady)
 
     this.serverBus.emit('delaying:cross:domain:html')
 
@@ -302,11 +317,11 @@ const SetInjectionLevel: ResponseMiddleware = function () {
     return 'partial'
   }
 
-  if (this.res.wantsInjection) {
+  if (this.res.wantsInjection != null) {
     this.debug('- already has injection: %s', this.res.wantsInjection)
   }
 
-  if (!this.res.wantsInjection) {
+  if (this.res.wantsInjection == null) {
     this.res.wantsInjection = getInjectionLevel()
   }
 

@@ -455,7 +455,7 @@ describe('src/cy/commands/navigation', () => {
       })
 
       it('only logs once on error', function (done) {
-        cy.on('fail', (err) => {
+        cy.once('fail', (err) => {
           assertLogLength(this.logs, 1)
           expect(this.logs[0].get('error')).to.eq(err)
 
