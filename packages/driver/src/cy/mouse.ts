@@ -740,7 +740,7 @@ const sendEvent = (evtName, el, evtOptions, bubbles = false, cancelable = false,
     evt.stopPropagation = function (...args) {
       evt._hasStoppedPropagation = true
 
-      // stopPropagation doesn't have argument. So, we cannot type-safely pass the second argument.
+      // stopPropagation doesn't have any arguments. So, we cannot type-safely pass the second argument.
       // But we're passing it just in case.
       // @ts-ignore
       return stopPropagation.apply(this, ...args)
