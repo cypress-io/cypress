@@ -80,7 +80,8 @@ export interface WizardDataShape {
 }
 
 export interface MigrationDataShape{
-  step: 'renameManual'
+  // TODO: have the model of migration here
+  step: NexusGenEnums['MigrationStepEnum']
 }
 
 export interface ElectronShape {
@@ -154,6 +155,9 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
       history: ['welcome'],
       chosenBrowser: null,
       warnings: [],
+    },
+    migration: {
+      step: 'renameAuto',
     },
     user: null,
     electron: {

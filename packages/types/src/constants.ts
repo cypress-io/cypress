@@ -145,6 +145,8 @@ export const WIZARD_STEPS = [
   },
 ] as const
 
+export const MIGRATION_STEPS = ['renameAuto', 'renameManual', 'configFile'] as const
+
 export type AllPackages = FrontendFramework['package'] | Bundler['package'] | typeof STORYBOOK_DEPS[number]
 
 export type AllPackageTypes = FrontendFramework['type'] | Bundler['type']
