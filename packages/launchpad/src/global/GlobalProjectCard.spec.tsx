@@ -3,8 +3,8 @@ import { GlobalProjectCardFragmentDoc } from '../generated/graphql-test'
 import { defaultMessages } from '@cy/i18n'
 
 const defaultPath = '/usr/local/dev/projects/some-test-title'
-const menuSelector = '[data-testid=project-card-menu-items]'
-const projectCardSelector = '[data-testid=project-card]'
+const menuSelector = '[data-cy=project-card-menu-items]'
+const projectCardSelector = '[data-cy=project-card]'
 
 describe('<GlobalProjectCard />', () => {
   beforeEach(() => {
