@@ -118,6 +118,28 @@ export class ProjectLifecycleManager {
 
   private _projectMetaState: ProjectMetaState = { ...PROJECT_META_STATE }
 
+  constructor (private ctx: Ctx_ProjectLifecycleManager) {
+    this._handlers = this.ctx._apis.configApi.getServerPluginHandlers()
+    this.legacyPluginGuard()
+    this.watchers = new Set()
+    this.loadGlobalBrowsers().catch(expectedError)
+
+    if (ctx.coreData.currentProject) {
+      this.setCurrentProject(ctx.coreData.currentProject)
+    }
+
+    if (ctx.coreData.currentTestingType) {
+      this.setCurrentTestingType(ctx.coreData.currentTestingType)
+    }
+
+    // see timers/parent.js line #93 for why this is necessary
+    process.on('exit', () => {
+      this.resetInternalState()
+    })
+
+    return autoBindDebug(this)
+  }
+
   async getProjectId (): Promise<string | null> {
     try {
       const contents = await this.getConfigFileContents()
@@ -201,28 +223,6 @@ export class ProjectLifecycleManager {
 
   get projectTitle () {
     return path.basename(this.projectRoot)
-  }
-
-  constructor (private ctx: Ctx_ProjectLifecycleManager) {
-    this._handlers = this.ctx._apis.configApi.getServerPluginHandlers()
-    this.legacyPluginGuard()
-    this.watchers = new Set()
-    this.loadGlobalBrowsers().catch(expectedError)
-
-    if (ctx.coreData.currentProject) {
-      this.setCurrentProject(ctx.coreData.currentProject)
-    }
-
-    if (ctx.coreData.currentTestingType) {
-      this.setCurrentTestingType(ctx.coreData.currentTestingType)
-    }
-
-    // see timers/parent.js line #93 for why this is necessary
-    process.on('exit', () => {
-      this.resetInternalState()
-    })
-
-    return autoBindDebug(this)
   }
 
   clearCurrentProject () {
@@ -876,7 +876,7 @@ export class ProjectLifecycleManager {
       .value()
     }
 
-    debug('fork child process', CHILD_PROCESS_FILE_PATH, configProcessArgs, childOptions)
+    debug('fork child process', CHILD_PROCESS_FILE_PATH, configProcessArgs, _.omit(childOptions, 'env'))
 
     const proc = fork(CHILD_PROCESS_FILE_PATH, configProcessArgs, childOptions)
 

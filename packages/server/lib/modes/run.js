@@ -27,7 +27,6 @@ const newlines = require('../util/newlines')
 const terminal = require('../util/terminal')
 const specsUtil = require('../util/specs')
 const humanTime = require('../util/human_time')
-const settings = require('../util/settings')
 const chromePolicyCheck = require('../util/chrome_policy_check')
 const experiments = require('../experiments')
 const objUtils = require('../util/obj_utils')
@@ -1545,7 +1544,7 @@ module.exports = {
         recordMode.throwIfRecordParamsWithoutRecording(record, ciBuildId, parallel, group, tag)
 
         if (record) {
-          recordMode.throwIfNoProjectId(projectId, settings.configFile(options.configFile === undefined || options.configFile === null ? { configFile } : options))
+          recordMode.throwIfNoProjectId(projectId, options.configFile)
           recordMode.throwIfIncorrectCiBuildIdUsage(ciBuildId, parallel, group)
           recordMode.throwIfIndeterminateCiBuildId(ciBuildId, parallel, group)
         }

@@ -248,7 +248,7 @@ export class DataContext {
     })
 
     // TODO: refine the whole socket communication layer
-    socketServer?.on('connect', (socket) => {
+    socketServer?.once('connect', (socket) => {
       socket.emit('data-context-push')
     })
   }
@@ -380,6 +380,9 @@ export class DataContext {
 
     this._modeOptions = modeOptions
     this._coreData = makeCoreData(modeOptions)
+    // @ts-expect-error - we've already cleaned up, this is for testing only
+    this.lifecycleManager = new ProjectLifecycleManager(this)
+
     globalPubSub.emit('reset:data-context', this)
   }
 
