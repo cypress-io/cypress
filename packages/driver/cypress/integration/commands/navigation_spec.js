@@ -2481,6 +2481,7 @@ describe('src/cy/commands/navigation', () => {
         })
       })
 
+      // https://github.com/cypress-io/cypress/issues/19230
       it('filters page load events when going back with window navigation', () => {
         const emit = cy.spy(Cypress, 'emit').log(false).withArgs('navigation:changed')
 
