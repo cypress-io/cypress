@@ -255,7 +255,8 @@ describe('src/cy/commands/actions/attachFile', () => {
       defaultCommandTimeout: 50,
     }, () => {
       it('is a child command', (done) => {
-        cy.on('fail', () => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.include('A child command must be chained after a parent because it operates on a previous subject.')
           done()
         })
 
@@ -263,7 +264,8 @@ describe('src/cy/commands/actions/attachFile', () => {
       })
 
       it('throws when non dom subject', (done) => {
-        cy.on('fail', () => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.include('`cy.attachFile()` failed because it requires a DOM element.')
           done()
         })
 
