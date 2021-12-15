@@ -10,12 +10,21 @@ Installing Cypress (version: 1.2.3)
 ✔  Unzipped Cypress
 ✔  Downloaded Cypress
 ✔  Unzipped Cypress
+⠋  Pruned Cache
+✔  Downloaded Cypress
+✔  Unzipped Cypress
+✔  Pruned Cache
+✔  Downloaded Cypress
+✔  Unzipped Cypress
+✔  Pruned Cache
 ⠋  Finished Installation   /cache/Cypress/1.2.3
 ✔  Downloaded Cypress
 ✔  Unzipped Cypress
+✔  Pruned Cache
 ✔  Finished Installation   /cache/Cypress/1.2.3
 ✔  Downloaded Cypress
 ✔  Unzipped Cypress
+✔  Pruned Cache
 ✔  Finished Installation   /cache/Cypress/1.2.3
 
 You can now open Cypress by running: node_modules/.bin/cypress open
@@ -40,12 +49,21 @@ Installing Cypress (version: 1.2.3)
 ✔  Unzipped Cypress
 ✔  Downloaded Cypress
 ✔  Unzipped Cypress
+⠋  Pruned Cache
+✔  Downloaded Cypress
+✔  Unzipped Cypress
+✔  Pruned Cache
+✔  Downloaded Cypress
+✔  Unzipped Cypress
+✔  Pruned Cache
 ⠋  Finished Installation   /cache/Cypress/1.2.3
 ✔  Downloaded Cypress
 ✔  Unzipped Cypress
+✔  Pruned Cache
 ✔  Finished Installation   /cache/Cypress/1.2.3
 ✔  Downloaded Cypress
 ✔  Unzipped Cypress
+✔  Pruned Cache
 ✔  Finished Installation   /cache/Cypress/1.2.3
 
 You can now open Cypress by running: node_modules/.bin/cypress open
@@ -70,12 +88,21 @@ Installing Cypress (version: 1.2.3)
 ✔  Unzipped Cypress
 ✔  Downloaded Cypress
 ✔  Unzipped Cypress
+⠋  Pruned Cache
+✔  Downloaded Cypress
+✔  Unzipped Cypress
+✔  Pruned Cache
+✔  Downloaded Cypress
+✔  Unzipped Cypress
+✔  Pruned Cache
 ⠋  Finished Installation   /cache/Cypress/1.2.3
 ✔  Downloaded Cypress
 ✔  Unzipped Cypress
+✔  Pruned Cache
 ✔  Finished Installation   /cache/Cypress/1.2.3
 ✔  Downloaded Cypress
 ✔  Unzipped Cypress
+✔  Pruned Cache
 ✔  Finished Installation   /cache/Cypress/1.2.3
 
 You can now open Cypress by running: node_modules/.bin/cypress open
@@ -113,12 +140,21 @@ Installing Cypress (version: 1.2.3)
 ✔  Unzipped Cypress
 ✔  Downloaded Cypress
 ✔  Unzipped Cypress
+⠋  Pruned Cache
+✔  Downloaded Cypress
+✔  Unzipped Cypress
+✔  Pruned Cache
+✔  Downloaded Cypress
+✔  Unzipped Cypress
+✔  Pruned Cache
 ⠋  Finished Installation   /cache/Cypress/1.2.3
 ✔  Downloaded Cypress
 ✔  Unzipped Cypress
+✔  Pruned Cache
 ✔  Finished Installation   /cache/Cypress/1.2.3
 ✔  Downloaded Cypress
 ✔  Unzipped Cypress
+✔  Pruned Cache
 ✔  Finished Installation   /cache/Cypress/1.2.3
 
 You can now open Cypress by running: node_modules/.bin/cypress open
@@ -179,12 +215,21 @@ Installing Cypress (version: 0.12.1)
 ✔  Unzipped Cypress
 ✔  Downloaded Cypress
 ✔  Unzipped Cypress
+⠋  Pruned Cache
+✔  Downloaded Cypress
+✔  Unzipped Cypress
+✔  Pruned Cache
+✔  Downloaded Cypress
+✔  Unzipped Cypress
+✔  Pruned Cache
 ⠋  Finished Installation   /cache/Cypress/1.2.3
 ✔  Downloaded Cypress
 ✔  Unzipped Cypress
+✔  Pruned Cache
 ✔  Finished Installation   /cache/Cypress/1.2.3
 ✔  Downloaded Cypress
 ✔  Unzipped Cypress
+✔  Pruned Cache
 ✔  Finished Installation   /cache/Cypress/1.2.3
 
 You can now open Cypress by running: node_modules/.bin/cypress open
@@ -226,12 +271,21 @@ Installing Cypress (version: 1.2.3)
 ✔  Unzipped Cypress
 ✔  Downloaded Cypress
 ✔  Unzipped Cypress
+⠋  Pruned Cache
+✔  Downloaded Cypress
+✔  Unzipped Cypress
+✔  Pruned Cache
+✔  Downloaded Cypress
+✔  Unzipped Cypress
+✔  Pruned Cache
 ⠋  Finished Installation   /cache/Cypress/1.2.3
 ✔  Downloaded Cypress
 ✔  Unzipped Cypress
+✔  Pruned Cache
 ✔  Finished Installation   /cache/Cypress/1.2.3
 ✔  Downloaded Cypress
 ✔  Unzipped Cypress
+✔  Pruned Cache
 ✔  Finished Installation   /cache/Cypress/1.2.3
 
 ⚠ Warning: It looks like you've installed Cypress globally.
@@ -255,5 +309,32 @@ https://on.cypress.io/guides/getting-started/installing-cypress#system-requireme
 ----------
 
 Platform: win32-ia32
+
+`
+
+exports['continues to install when the prune task fails'] = `
+Installing Cypress (version: 1.2.3)
+
+
+⠋  Downloaded Cypress
+✔  Downloaded Cypress
+✔  Downloaded Cypress
+⠋  Unzipped Cypress
+✔  Downloaded Cypress
+✔  Unzipped Cypress
+✔  Downloaded Cypress
+✔  Unzipped Cypress
+◼  Finished Installation   /cache/Cypress/1.2.3
+✔  Downloaded Cypress
+✔  Unzipped Cypress
+✔  Finished Installation   /cache/Cypress/1.2.3
+✔  Downloaded Cypress
+✔  Unzipped Cypress
+✔  Finished Installation   /cache/Cypress/1.2.3
+
+You can now open Cypress by running: node_modules/.bin/cypress open
+
+https://on.cypress.io/installing-cypress
+
 
 `

@@ -167,7 +167,6 @@ const downloadAndUnzip = ({ version, installDir, downloadDir }) => {
   logger.log()
 
   const tasks = new Listr([
-    pruneTask({ rendererOptions }),
     {
       options: { title: util.titleize('Downloading Cypress') },
       task: (ctx, task) => {
@@ -196,6 +195,7 @@ const downloadAndUnzip = ({ version, installDir, downloadDir }) => {
       installDir,
       rendererOptions,
     }),
+    pruneTask({ rendererOptions }),
     {
       options: { title: util.titleize('Finishing Installation') },
       task: (ctx, task) => {

@@ -250,7 +250,7 @@ describe('lib/tasks/cache', () => {
       })
 
       // the second binary has never been accessed
-      statAsync.onSecondCall().resolves()
+      statAsync.onSecondCall().resolves({})
 
       await cache.list()
       await snapshotWithHtml('second-binary-never-used.html')
@@ -266,7 +266,7 @@ describe('lib/tasks/cache', () => {
       })
 
       // the second binary has never been accessed
-      statAsync.onSecondCall().resolves()
+      statAsync.onSecondCall().resolves({})
 
       await cache.list(true)
       await snapshotWithHtml('show-size.html')

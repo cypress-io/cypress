@@ -21,7 +21,6 @@ const cache = require(`${lib}/tasks/cache`)
 const registry = require(`${lib}/registry`)
 
 const normalize = require('../../support/normalize')
-const { sinon } = require('@packages/https-proxy/test/spec_helper')
 
 const packageVersion = '1.2.3'
 const downloadDestination = path.join(os.tmpdir(), `cypress-${process.pid}.zip`)
@@ -59,8 +58,8 @@ describe('/lib/tasks/install', function () {
       sinon.stub(state, 'getBinaryDir').returns('/cache/Cypress/1.2.3/Cypress.app')
       sinon.stub(state, 'getBinaryPkgAsync').resolves()
       sinon.stub(fs, 'ensureDirAsync').resolves(undefined)
-      sinon.stub(cache, 'prune').resolves(undefined)
-      sinon.stub(registry, 'registerBinary').resolves(undefined)
+      sinon.stub(cache, 'prune').resolves()
+      sinon.stub(registry, 'registerBinary').resolves()
       os.platform.returns('darwin')
     })
 
@@ -459,6 +458,31 @@ describe('/lib/tasks/install', function () {
 
         snapshot(
           'error when installing on unsupported os',
+          normalize(this.stdout.toString()),
+        )
+      })
+    })
+
+    it('registers the version in the registry', () => {
+      return install.start()
+      .then(() => {
+        expect(registry.registerBinary).to.be.calledWithMatch({
+          name: 'cypress',
+          version: packageVersion,
+        })
+      })
+    })
+
+    it('continues to install when the prune task fails', function () {
+      cache.prune.throws()
+      state.getBinaryPkgAsync.resolves(null)
+
+      return install.start()
+      .then(() => {
+        cache.prune.resolves()
+
+        return snapshot(
+          'continues to install when the prune task fails',
           normalize(this.stdout.toString()),
         )
       })
