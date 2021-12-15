@@ -17,6 +17,7 @@
     <Button
       :prefix-icon="buttonIcon"
       prefix-icon-class="icon-dark-white icon-light-transparent"
+      :disabled="buttonDisabled"
       @click="emit('button-click')"
     >
       {{ buttonText }}
@@ -33,6 +34,7 @@ defineProps<{
   message: string,
   buttonText: string,
   buttonIcon: FunctionalComponent<SVGAttributes, {}>,
+  buttonDisabled?: boolean,
 }>()
 
 const emit = defineEmits<{
