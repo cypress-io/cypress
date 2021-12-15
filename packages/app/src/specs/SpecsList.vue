@@ -46,7 +46,7 @@
               <SpecItem
                 :file-name="row.data.data?.fileName || row.data.name"
                 :extension="row.data.data?.specFileExtension || ''"
-                :indexes="getIndexes(row.data)"
+                :indexes="row.data.data?.fileIndexes"
                 :style="{ paddingLeft: `${((row.data.depth - 2) * 10) + 16 + 22}px` }"
               />
             </RouterLink>
@@ -57,7 +57,7 @@
               :expanded="treeSpecList[row.index].expanded.value"
               :depth="row.data.depth - 2"
               :style="{ paddingLeft: `${((row.data.depth - 2) * 10) + 16}px` }"
-              :indexes="getIndexes(row.data)"
+              :indexes="getDirIndexes(row.data)"
               @click="row.data.toggle"
             />
           </template>
@@ -83,11 +83,10 @@ import { computed, ref, watch } from 'vue'
 import CreateSpecModal from './CreateSpecModal.vue'
 import type { Specs_SpecsListFragment, SpecListRowFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
-import { buildSpecTree, FuzzyFoundSpec, getIndexes } from '@packages/frontend-shared/src/utils/spec-utils'
+import { buildSpecTree, FuzzyFoundSpec, fuzzySortSpecs, getDirIndexes } from '@packages/frontend-shared/src/utils/spec-utils'
 import { useCollapsibleTree } from '@packages/frontend-shared/src/composables/useCollapsibleTree'
 import RowDirectory from './RowDirectory.vue'
 import SpecItem from './SpecItem.vue'
-import fuzzySort from 'fuzzysort'
 import { useVirtualList } from '@packages/frontend-shared/src/composables/useVirtualList'
 
 const { t } = useI18n()
@@ -136,18 +135,16 @@ const search = ref('')
 
 const specs = computed(() => {
   const specs = props.gql.currentProject?.specs?.edges.map((x) => {
-    const specs = x.node
-
-    return specs
-  }) ?? []
+    return {
+      ...x.node,
+    }
+  })
 
   if (!search.value) {
-    return specs.map((spec) => ({ ...spec, indexes: [] as number[] }))
+    return specs
   }
 
-  return fuzzySort
-  .go(search.value, specs || [], { key: 'baseName', allowTypo: false })
-  .map(({ obj, indexes }) => ({ ...obj, indexes }))
+  return fuzzySortSpecs(specs, search.value)
 })
 
 const collapsible = computed(() => useCollapsibleTree(buildSpecTree<FuzzyFoundSpec & { gitInfo: SpecListRowFragment }>(specs.value), { dropRoot: true }))

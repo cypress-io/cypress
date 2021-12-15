@@ -9,18 +9,19 @@ type PartialSpec = {
 export function fuzzySortSpecs<T extends PartialSpec> (specs: T[], searchValue: string) {
   const transformedSpecs = addMetadataToSpecs(specs)
 
-  return fuzzySort
-  .go(searchValue, transformedSpecs, { keys: ['baseName', 'directory'] })
+  const result = fuzzySort
+  .go(searchValue, transformedSpecs, { keys: ['baseName', 'directory'], allowTypo: false })
   .map((result) => {
-    const [file, dir, obj] = result
+    const [file, dir] = result
 
     return {
-      ...obj,
-      indexes: [1],
+      ...result.obj,
       fileIndexes: file?.indexes ?? [],
       dirIndexes: dir?.indexes ?? [],
     }
   })
+
+  return result
 }
 
 function addMetadataToSpecs<T extends PartialSpec> (specs: T[]) {
@@ -28,7 +29,6 @@ function addMetadataToSpecs<T extends PartialSpec> (specs: T[]) {
     return {
       ...spec,
       directory: getDirectoryPath(spec.relative),
-      indexes: [],
       fileIndexes: [],
       dirIndexes: [],
     }

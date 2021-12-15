@@ -1,7 +1,11 @@
+import fuzzySort from 'fuzzysort'
 import type { FoundSpec } from '@packages/types'
 import type { UseCollapsibleTreeNode } from '../composables/useCollapsibleTree'
 
-export type FuzzyFoundSpec = FoundSpec & { indexes: number[] }
+export type FuzzyFoundSpec = FoundSpec & {
+  fileIndexes: number[]
+  dirIndexes: number[]
+}
 
 export type SpecTreeNode<T extends FoundSpec = FoundSpec> = {
   id: string
@@ -63,13 +67,52 @@ function collapseEmptyChildren<T extends FoundSpec> (node: SpecTreeNode<T>) {
   return
 }
 
-export function getIndexes (row: UseCollapsibleTreeNode<SpecTreeNode<FuzzyFoundSpec>>) {
-  const indexes = row.data?.indexes || []
+export function getDirIndexes (row: UseCollapsibleTreeNode<SpecTreeNode<FuzzyFoundSpec>>) {
+  const indexes = row.data?.dirIndexes ?? []
 
   const maxIndex = row.id.length - 1
   const minIndex = maxIndex - row.name.length + 1
 
-  const res = indexes?.filter((index) => index >= minIndex && index <= maxIndex)
+  const res = indexes.filter((index) => index >= minIndex && index < maxIndex)
 
   return res.map((idx) => idx - minIndex)
+}
+
+type PartialSpec = {
+  id: string
+  baseName: string
+  relative: string
+}
+
+export function fuzzySortSpecs<T extends PartialSpec> (specs: T[], searchValue: string) {
+  const transformedSpecs = addMetadataToSpecs(specs)
+
+  const result = fuzzySort
+  .go(searchValue, transformedSpecs, { keys: ['baseName', 'directory'], allowTypo: false })
+  .map((result) => {
+    const [file, dir] = result
+
+    return {
+      ...result.obj,
+      fileIndexes: file?.indexes ?? [],
+      dirIndexes: dir?.indexes ?? [],
+    }
+  })
+
+  return result
+}
+
+function addMetadataToSpecs<T extends PartialSpec> (specs: T[]) {
+  return specs.map((spec) => {
+    return {
+      ...spec,
+      directory: getDirectoryPath(spec.relative),
+      fileIndexes: [],
+      dirIndexes: [],
+    }
+  })
+}
+
+function getDirectoryPath (path: string) {
+  return path.slice(0, path.lastIndexOf('/'))
 }

@@ -23,15 +23,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed, Ref, ref } from 'vue'
+import { computed, ref } from 'vue'
 import { gql } from '@urql/vue'
 import type { Specs_InlineSpecListFragment } from '../generated/graphql'
 import InlineSpecListHeader from './InlineSpecListHeader.vue'
 import InlineSpecListTree from './InlineSpecListTree.vue'
 import CreateSpecModal from './CreateSpecModal.vue'
-import fuzzySort from 'fuzzysort'
-import type { FuzzyFoundSpec } from '@packages/frontend-shared/src/utils/spec-utils'
-import { fuzzySortSpecs } from './fuzzySortSpecs'
+import type { fuzzySortSpecs } from '@packages/frontend-shared/src/utils/spec-utils'
 
 gql`
 fragment SpecNode_InlineSpecList on SpecEdge {
