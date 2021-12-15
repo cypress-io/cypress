@@ -54,6 +54,7 @@ export interface ActiveProjectShape extends ProjectShape {
   preferences?: Preferences | null
   browsers: FoundBrowser[] | null
   isMissingConfigFile: boolean
+  savedState: object // todo: add detail
 }
 
 export interface AppDataShape {
