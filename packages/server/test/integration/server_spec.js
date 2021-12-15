@@ -135,6 +135,7 @@ describe('Server', () => {
           config: {
             port: 2000,
             fileServerFolder: 'dev',
+            supportFile: false,
           },
         })
       })
@@ -332,6 +333,7 @@ describe('Server', () => {
           projectRoot: '/foo/bar/',
           config: {
             port: 2000,
+            supportFile: false,
           },
         })
       })
@@ -918,6 +920,7 @@ describe('Server', () => {
           config: {
             port: 2000,
             fileServerFolder: 'dev',
+            supportFile: false,
           },
         })
       })

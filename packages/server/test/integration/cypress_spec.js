@@ -540,7 +540,7 @@ describe('lib/cypress', () => {
       })
     })
 
-    it('scaffolds out support + files if they do not exist', function () {
+    it('do not scaffolds out support + files if they do not exist in run mode', function () {
       const supportFolder = path.join(this.pristineWithConfigPath, 'cypress/support')
 
       ctx.actions.project.setActiveProjectForTestSetup(this.pristineWithConfigPath)
@@ -555,9 +555,9 @@ describe('lib/cypress', () => {
         }).then(() => {
           return fs.statAsync(supportFolder)
         }).then(() => {
-          return fs.statAsync(path.join(supportFolder, 'index.js'))
-        }).then(() => {
-          return fs.statAsync(path.join(supportFolder, 'commands.js'))
+          throw new Error('supportFolder should not exist!')
+        }).catch((err) => {
+          expect(err.code).eq('ENOENT')
         })
       })
     })
@@ -691,7 +691,7 @@ describe('lib/cypress', () => {
     })
 
     it('logs error when supportFile doesn\'t exist', function () {
-      return settings.writeOnly(this.idsPath, { supportFile: '/does/not/exist' })
+      return settings.writeOnly(this.idsPath, { e2e: { supportFile: '/does/not/exist' } })
       .then(() => {
         return cypress.start([`--run-project=${this.idsPath}`])
       }).then(() => {
@@ -861,7 +861,7 @@ describe('lib/cypress', () => {
 
       return fs.mkdirAsync(permissionsPath)
       .then(() => {
-        return fs.outputFileAsync(cypressConfig, 'module.exports = {}')
+        return fs.outputFileAsync(cypressConfig, 'module.exports = { e2e: { supportFile: false } }')
       }).then(() => {
         // read only
         return fs.chmodAsync(permissionsPath, '555')
@@ -1708,7 +1708,7 @@ describe('lib/cypress', () => {
       ctx.actions.project.setActiveProjectForTestSetup(this.todosPath)
 
       return user.set({ name: 'brian', authToken: 'auth-token-123' })
-      .then(() => settings.read(this.todosPath))
+      .then(() => ctx.config.getOrCreateBaseConfig())
       .then((json) => {
         // this should be overriden by the env argument
         json.baseUrl = 'http://localhost:8080'

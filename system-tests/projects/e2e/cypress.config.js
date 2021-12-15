@@ -9,7 +9,7 @@ module.exports = {
     },
   },
   'component': {
-    'supportFile': 'cypress/support/index.js',
+    'supportFile': false,
     devServer (cypressConfig, devServerConfig) {
       const { startDevServer } = require('@cypress/webpack-dev-server')
 

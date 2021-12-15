@@ -14,6 +14,7 @@ export default defineConfig({
     'openMode': 0,
   },
   'e2e': {
+    'supportFile': 'cypress/support/e2e.ts',
     setupNodeEvents (on, config) {
       const express = require('express')
 

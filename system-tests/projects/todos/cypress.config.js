@@ -8,4 +8,7 @@ module.exports = {
     'specFilePattern': 'src/**/*.spec.cy.js',
     'supportFile': 'tests/_support/spec_helper.js',
   },
+  'e2e': {
+    'supportFile': 'tests/_support/spec_helper.js',
+  },
 }

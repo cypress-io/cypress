@@ -764,6 +764,7 @@ describe('Routes', () => {
 
         return this.setup({
           projectRoot: Fixtures.projectPath('failures'),
+          supportFile: false,
         })
       })
 
@@ -992,6 +993,7 @@ describe('Routes', () => {
             config: {
               integrationFolder: 'tests',
               fixturesFolder: 'tests/_fixtures',
+              supportFile: false,
             },
           })
         })
@@ -3484,6 +3486,7 @@ describe('Routes', () => {
           config: {
             fileServerFolder: 'dev',
             integrationFolder: 'my-tests',
+            supportFile: false,
           },
         })
         .then(() => {
