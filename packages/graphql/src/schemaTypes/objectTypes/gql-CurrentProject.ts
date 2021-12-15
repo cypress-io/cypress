@@ -1,9 +1,9 @@
 import { nonNull, objectType, stringArg } from 'nexus'
 import path from 'path'
 import { cloudProjectBySlug } from '../../stitching/remoteGraphQLCalls'
-import { CodeGenTypeEnum } from '../enumTypes/gql-CodeGenTypeEnum'
 import { TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
 import { Browser } from './gql-Browser'
+import { CodeGenGlobs } from './gql-CodeGenGlobs'
 import { FileParts } from './gql-FileParts'
 import { ProjectPreferences } from './gql-ProjectPreferences'
 import { Spec } from './gql-Spec'
@@ -123,12 +123,9 @@ export const CurrentProject = objectType({
       resolve: (source, args, ctx) => ctx.storybook.loadStorybookInfo(),
     })
 
-    t.nonNull.string('codeGenGlob', {
-      description: 'Glob pattern for component searching',
-      args: {
-        type: nonNull(CodeGenTypeEnum),
-      },
-      resolve: (src, args, ctx) => ctx.project.getCodeGenGlob(args.type),
+    t.nonNull.field('codeGenGlobs', {
+      type: CodeGenGlobs,
+      resolve: (src, args, ctx) => ctx.project.getCodeGenGlobs(),
     })
 
     t.list.field('codeGenCandidates', {
