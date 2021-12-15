@@ -35,12 +35,6 @@ export function initializeEventManager (UnifiedRunner: any) {
   )
 }
 
-function destroyEventManager () {
-  getEventManager().teardown(getMobxRunnerStore())
-  getEventManager().resetReporter()
-  _eventManager = undefined
-}
-
 export function getEventManager () {
   if (!_eventManager) {
     throw Error(`eventManager is undefined. Make sure you call initializeEventManager before attempting to access it.`)
@@ -150,9 +144,20 @@ function teardownSpec () {
   return getEventManager().teardown(getMobxRunnerStore())
 }
 
+let isTorndown = false
+
+/**
+ * Called when navigating away from the runner page.
+ * This will teardown the reporter, event maanger, and
+ * any associated events.
+ */
 export function teardown () {
   UnifiedReporterAPI.setInitializedReporter(false)
-  destroyEventManager()
+  _eventManager?.stop()
+  _eventManager?.teardown(getMobxRunnerStore())
+  _eventManager?.resetReporter()
+  _eventManager = undefined
+  isTorndown = true
 }
 
 /**
@@ -255,7 +260,13 @@ function runSpecE2E (spec: BaseSpec) {
  * This only needs to happen once, prior to running the first spec.
  */
 async function initialize () {
+  isTorndown = false
+
   await injectBundle()
+
+  if (isTorndown) {
+    return
+  }
 
   const response = await window.fetch('/api')
   const data = await response.json()
