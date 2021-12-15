@@ -127,8 +127,8 @@ describe('<ResizablePanels />', { viewportWidth: 1500, defaultCommandTimeout: 40
 
       dragHandleToClientX('panel2', 600)
       assertWidth('panel2', 300)
-      dragHandleToClientX('panel2', 580)
-      assertWidth('panel2', defaultPanel2Width)
+      dragHandleToClientX('panel2', 590)
+      assertWidth('panel2', 290)
     })
   })
 
