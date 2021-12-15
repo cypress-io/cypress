@@ -1,5 +1,38 @@
 const { assertLogLength } = require('../../support/utils')
-const { $, _, sinon } = Cypress
+const { $, _ } = Cypress
+
+const captureCommands = () => {
+  const commands = []
+
+  let current
+
+  cy.on('command:start', (command) => {
+    current = command
+    commands.push({
+      name: command.attributes.name,
+      snapshots: 0,
+      retries: 0,
+    })
+  })
+
+  cy.on('command:retry', () => {
+    commands[commands.length - 1].retries++
+  })
+
+  cy.on('snapshot', () => {
+    // Snapshots can occur outside the context of a command - for example, `expect(foo).to.exist` without any wrapping cy command.
+    // So we keep track of the current command when one starts, and if we're not inside that, create an 'empty' command
+    // for the snapshot to belong to
+    if (!commands.length || current !== cy.state('current')) {
+      current = null
+      commands.push({ name: null, snapshots: 0, retries: 0 })
+    }
+
+    commands[commands.length - 1].snapshots++
+  })
+
+  return commands
+}
 
 describe('src/cy/commands/assertions', () => {
   before(() => {
@@ -10,10 +43,14 @@ describe('src/cy/commands/assertions', () => {
     })
   })
 
+  let testCommands
+
   beforeEach(function () {
     const doc = cy.state('document')
 
     $(doc.body).empty().html(this.body)
+
+    testCommands = captureCommands()
   })
 
   context('#should', () => {
@@ -31,6 +68,15 @@ describe('src/cy/commands/assertions', () => {
     it('returns the subject for chainability', () => {
       cy.noop({ foo: 'bar' }).should('deep.eq', { foo: 'bar' }).then((obj) => {
         expect(obj).to.deep.eq({ foo: 'bar' })
+      })
+
+      cy.then(() => {
+        expect(testCommands).to.eql([
+          { name: 'noop', snapshots: 0, retries: 0 },
+          { name: 'should', snapshots: 1, retries: 0 },
+          { name: 'then', snapshots: 1, retries: 0 },
+          { name: 'then', snapshots: 0, retries: 0 },
+        ])
       })
     })
 
@@ -2930,20 +2976,27 @@ describe('src/cy/commands/assertions', () => {
 
   context('implicit assertions', () => {
     // https://github.com/cypress-io/cypress/issues/18549
+    // We have an issue where multiple snapshots are being taken for a single failed assertion
     it('only snapshots once when failing to find DOM elements', (done) => {
-      sinon.spy(cy, 'createSnapshot')
       cy.on('fail', (err) => {
-        // We have a regression where snapshots are being taken for every failed retry on implicit assertions
-        // for element existence. The exact number expected is unclear (and this test should be updated with a
-        // more exact assertion once we've solved the regression) - but it definitely shouldn't be above 5!
-        expect(cy.createSnapshot.callCount).to.be.lessThan(5)
-
-        cy.createSnapshot.restore()
+        expect(testCommands[0].snapshots).to.eq(1)
         done()
       })
 
-      //
-      cy.get('.badId', { timeout: 300 })
+      cy.get('.badId', { timeout: 0 })
+    })
+
+    // https://github.com/cypress-io/cypress/issues/18549
+    // We also have an issue where snapshots are being taken for every failed retry on implicit assertions
+    // for element existence. This is likely a symptom of the above, rather than a separate issue, but
+    // I wanted to leave this in as a more dramatic reproduction of why this is important.
+    it('only snapshots once when retrying assertions', (done) => {
+      cy.on('fail', (err) => {
+        expect(testCommands[0].snapshots).to.eq(1)
+        done()
+      })
+
+      cy.get('.badId', { timeout: 1000 })
     })
   })
 })

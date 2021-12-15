@@ -132,6 +132,7 @@ export const create = ($$, state) => {
   }
 
   const createSnapshot = (name, $elToHighlight) => {
+    Cypress.action('cy:snapshot', name)
     // create a unique selector for this el
     // but only IF the subject is truly an element. For example
     // we might be wrapping a primitive like "$([1, 2]).first()"
