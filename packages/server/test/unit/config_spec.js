@@ -2056,7 +2056,7 @@ describe('lib/config', () => {
       .then((result) => {
         expect(result).to.eql({
           projectRoot,
-          supportFile: `${projectRoot}/cypress/support/index.js`,
+          supportFile: `${projectRoot}/cypress/support/e2e.js`,
           supportFolder: `${projectRoot}/cypress/support`,
         })
       })

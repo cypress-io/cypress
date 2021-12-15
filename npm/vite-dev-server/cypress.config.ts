@@ -7,6 +7,7 @@ export default defineConfig({
   'testFiles': '**/*.spec.*',
   'componentFolder': 'cypress/components',
   'component': {
+    'supportFile': 'cypress/support.js',
     devServer (cypressConfig) {
       const path = require('path')
       const { startDevServer } = require('./dist')

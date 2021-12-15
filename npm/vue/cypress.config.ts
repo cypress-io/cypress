@@ -30,4 +30,7 @@ export default defineConfig({
       return config
     },
   },
+  'e2e': {
+    'supportFile': false,
+  },
 })

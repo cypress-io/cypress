@@ -5,6 +5,7 @@ const { expect } = require('chai')
 module.exports = {
   'retries': null,
   'e2e': {
+    'supportFile': 'cypress/support.js',
     setupNodeEvents (on, config) {
       expect(process.geteuid()).to.not.eq(0)
       console.log('✅ not running as root')

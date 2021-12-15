@@ -1,6 +1,6 @@
 import { registerMountFn } from '@packages/frontend-shared/cypress/support/common'
 // ***********************************************************
-// This example support/index.js is processed and
+// This example support/index.ts is processed and
 // loaded automatically before your test files.
 //
 // This is a great place to put global configuration and

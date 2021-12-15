@@ -314,7 +314,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       return this.project.open().then(() => {
         expect(this.checkSupportFileStub).to.be.calledWith({
           configFile: 'cypress.config.js',
-          supportFile: '/foo/bar/cypress/support/index.js',
+          supportFile: '/foo/bar/cypress/support/e2e.js',
         })
       })
     })

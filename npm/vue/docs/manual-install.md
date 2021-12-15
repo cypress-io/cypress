@@ -19,7 +19,7 @@ module.exports = (on, config) => {
 }
 ```
 
-3. Include the support file from your project's `cypress/support/index.js` file
+3. Include the support file from your project's `cypress/support/component.js` file
 
 ```js
 import '@cypress/vue/dist/support'

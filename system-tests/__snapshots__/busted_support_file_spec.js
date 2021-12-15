@@ -17,12 +17,12 @@ exports['e2e busted support file passes 1'] = `
 
 Oops...we found an error preparing this test file:
 
-  cypress/support/index.js
+  cypress/support/e2e.js
 
 The error was:
 
 Error: Webpack Compilation Error
-./cypress/support/index.js
+./cypress/support/e2e.js
 Module not found: Error: Can't resolve './does/not/exist' in '/foo/bar/.projects/busted-support-file/cypress/support'
 Looked for and couldn't find the file at the following paths:
 [/foo/bar/.projects/busted-support-file/cypress/support/package.json]
@@ -35,7 +35,7 @@ Looked for and couldn't find the file at the following paths:
 [/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.coffee]
 [/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.ts]
 [/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.tsx]
- @ ./cypress/support/index.js 3:0-27
+ @ ./cypress/support/e2e.js 3:0-27
  
       [stack trace lines]
 

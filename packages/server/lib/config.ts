@@ -55,59 +55,26 @@ export const utils = {
     return require.resolve(name)
   },
 
-  // tries to find support or plugins file
   // returns:
   //   false - if the file should not be set
   //   string - found filename
   //   null - if there is an error finding the file
   discoverModuleFile (options) {
     debug('discover module file %o', options)
-    const { filename, isDefault } = options
+    const { filename } = options
 
-    if (!isDefault) {
-      // they have it explicitly set, so it should be there
-      return fs.pathExists(filename)
-      .then((found) => {
-        if (found) {
-          debug('file exists, assuming it will load')
-
-          return filename
-        }
-
-        debug('could not find %o', { filename })
-
-        return null
-      })
-    }
-
-    // support or plugins file doesn't exist on disk?
-    debug(`support file is default, check if ${path.dirname(filename)} exists`)
-
+    // they have it explicitly set, so it should be there
     return fs.pathExists(filename)
     .then((found) => {
       if (found) {
-        debug('is there index.ts in the support or plugins folder %s?', filename)
-        const tsFilename = path.join(filename, 'index.ts')
+        debug('file exists, assuming it will load')
 
-        return fs.pathExists(tsFilename)
-        .then((foundTsFile) => {
-          if (foundTsFile) {
-            debug('found index TS file %s', tsFilename)
-
-            return tsFilename
-          }
-
-          // if the directory exists, set it to false so it's ignored
-          debug('setting support or plugins file to false')
-
-          return false
-        })
+        return filename
       }
 
-      debug('folder does not exist, set to default index.js')
+      debug('could not find %o', { filename })
 
-      // otherwise, set it up to be scaffolded later
-      return path.join(filename, 'index.js')
+      return null
     })
   },
 }
@@ -458,11 +425,8 @@ export function setSupportFileAndFolder (obj, defaults) {
   }).catch({ code: 'MODULE_NOT_FOUND' }, () => {
     debug('support JS module %s does not load', sf)
 
-    const loadingDefaultSupportFile = sf === path.resolve(obj.projectRoot, defaults.supportFile)
-
     return utils.discoverModuleFile({
       filename: sf,
-      isDefault: loadingDefaultSupportFile,
       projectRoot: obj.projectRoot,
     })
     .then((result) => {

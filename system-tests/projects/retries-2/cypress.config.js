@@ -1,6 +1,7 @@
 module.exports = {
   'retries': 2,
   'e2e': {
+    'supportFile': false,
     setupNodeEvents (on, config) {
       const { useFixedBrowserLaunchSize } = require('@tooling/system-tests/lib/pluginUtils')
 

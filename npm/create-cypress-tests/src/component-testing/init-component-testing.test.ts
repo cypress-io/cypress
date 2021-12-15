@@ -81,9 +81,9 @@ describe('init component tests script', () => {
     }
 
     snapshot(
-      `${name} support/index.js`,
+      `${name} support/component.js`,
       fs.readFileSync(
-        path.join(e2eTestOutputPath, 'cypress', 'support', 'index.js'),
+        path.join(e2eTestOutputPath, 'cypress', 'support', 'component.js'),
         { encoding: 'utf-8' },
       ),
     )
@@ -92,7 +92,7 @@ describe('init component tests script', () => {
   it('determines more presumable configuration to suggest', async () => {
     createTempFiles({
       '/cypress.config.ts': 'export default {}',
-      '/cypress/support/index.js': '',
+      '/cypress/support/component.js': '',
       '/cypress/plugins/index.js': 'module.exports = (on, config) => {}',
       // For next.js user will have babel config, but we want to suggest to use the closest config for the application code
       '/babel.config.js': 'module.exports = { }',
@@ -115,7 +115,7 @@ describe('init component tests script', () => {
   it('automatically suggests to the user which config to use', async () => {
     createTempFiles({
       '/cypress.config.ts': 'export default {}',
-      '/cypress/support/index.js': 'import "./commands.js";',
+      '/cypress/support/component.js': 'import "./commands.js";',
       '/cypress/plugins/index.js': 'module.exports = () => {}',
       '/package.json': JSON.stringify({
         dependencies: {

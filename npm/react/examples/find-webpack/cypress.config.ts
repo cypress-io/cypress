@@ -4,6 +4,7 @@ export default defineConfig({
   'video': true,
   'projectId': 'jq5xpp',
   'component': {
+    'supportFile': 'cypress/support/component.ts',
     'testFiles': '**/*.spec.{js,ts,jsx,tsx}',
     'componentFolder': 'src',
     devServer (cypressConfig) {

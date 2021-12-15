@@ -147,7 +147,7 @@
             "string",
             "boolean"
           ],
-          "default": "cypress/support/index.js",
+          "default": "cypress/support/e2e.js",
           "description": "Path to file to load before test files load. This file is compiled and bundled. (Pass false to disable)"
         },
         "videosFolder": {

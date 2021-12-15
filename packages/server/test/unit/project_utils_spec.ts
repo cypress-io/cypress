@@ -112,7 +112,7 @@ describe('lib/project_utils', () => {
       try {
         await checkSupportFile({
           configFile: 'cypress.config.ts',
-          supportFile: '/this/file/does/not/exist/foo/bar/cypress/support/index.js',
+          supportFile: '/this/file/does/not/exist/foo/bar/cypress/support/e2e.js',
         })
       } catch (e) {
         expect(e.message).to.include('The support file is missing or invalid.')
