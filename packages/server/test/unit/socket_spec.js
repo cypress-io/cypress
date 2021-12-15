@@ -5,26 +5,26 @@ const path = require('path')
 const Promise = require('bluebird')
 const socketIo = require('@packages/socket/lib/browser')
 const httpsAgent = require('https-proxy-agent')
-const errors = require(`${root}lib/errors`)
-const config = require(`${root}lib/config`)
-const { SocketE2E } = require(`${root}lib/socket-e2e`)
-const { ServerE2E } = require(`${root}lib/server-e2e`)
-const { Automation } = require(`${root}lib/automation`)
-const { SpecsStore } = require(`${root}/lib/specs-store`)
-const exec = require(`${root}lib/exec`)
-const preprocessor = require(`${root}lib/plugins/preprocessor`)
-const { fs } = require(`${root}lib/util/fs`)
-const open = require(`${root}lib/util/open`)
+const errors = require(`../../lib/errors`)
+const config = require(`../../lib/config`)
+const { SocketE2E } = require(`../../lib/socket-e2e`)
+const { ServerE2E } = require(`../../lib/server-e2e`)
+const { Automation } = require(`../../lib/automation`)
+const { SpecsStore } = require(`../../lib/specs-store`)
+const exec = require(`../../lib/exec`)
+const preprocessor = require(`../../lib/plugins/preprocessor`)
+const { fs } = require(`../../lib/util/fs`)
+const open = require(`../../lib/util/open`)
 const Fixtures = require('@tooling/system-tests/lib/fixtures')
-const firefoxUtil = require(`${root}lib/browsers/firefox-util`).default
-const { createRoutes } = require(`${root}lib/routes`)
-const { makeLegacyDataContext } = require(`${root}lib/makeDataContext`)
+const firefoxUtil = require(`../../lib/browsers/firefox-util`).default
+const { createRoutes } = require(`../../lib/routes`)
+const { getCtx } = require(`../../lib/makeDataContext`)
 
 let ctx
 
 describe('lib/socket', () => {
   beforeEach(function () {
-    ctx = makeLegacyDataContext()
+    ctx = getCtx()
     Fixtures.scaffold()
 
     this.todosPath = Fixtures.projectPath('todos')

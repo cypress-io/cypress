@@ -34,7 +34,7 @@
           :class="{'before:border-r-indigo-300 before:border-r-4': isCurrentSpec(row.data),
                    'group-hocus:bg-gray-900 focus:bg-gray-900 before:focus-within:(border-r-0) before:(border-r-gray-1000) before:group-hover:(h-26px border-r-gray-900)': !isCurrentSpec(row.data)
           }"
-          :to="{ path: 'runner', query: { file: row.data.data?.relative } }"
+          :to="{ path: '/specs/runner', query: { file: row.data.data?.relative } }"
           @focus="resetFocusIfNecessary(row, row.index)"
           @click.capture.prevent="submit(row.data, row.index)"
           @keydown.enter.space.prevent.stop="submit(row.data, row.index)"
@@ -124,7 +124,7 @@ const submit = (row: UseCollapsibleTreeNode<SpecTreeNode<FuzzyFoundSpec>>, idx: 
       return
     }
 
-    router.push({ path: 'runner', query: { file: row.data.relative } })
+    router.push({ path: '/specs/runner', query: { file: row.data.relative } })
   } else {
     row.toggle()
   }

@@ -87,6 +87,9 @@ type CloudProject implements Node {
   """The latest run for a given spec"""
   latestRun: CloudRun
 
+  """Given name of the project"""
+  name: String!
+
   """The organization the project is a member of"""
   organization: CloudOrganization
 
@@ -236,6 +239,11 @@ enum CloudRunStatus {
 
 """A CloudUser represents an User stored in the Cypress Cloud"""
 type CloudUser implements Node {
+  """Url to manage cloud organizations for this user"""
+  cloudOrganizationsUrl: String
+
+  """Url to create a cloud organization for this user"""
+  createCloudOrganizationUrl: String
   email: String
 
   """The display name of the user, if we have one"""
@@ -266,6 +274,15 @@ type CloudUser implements Node {
 enum CodeGenGenResultType {
   binary
   text
+}
+
+"""Glob patterns for detecting files for code gen."""
+type CodeGenGlobs implements Node {
+  component: String!
+
+  """Relay style Node ID field for the CodeGenGlobs field"""
+  id: ID!
+  story: String!
 }
 
 """Represents a spec on the file system"""
@@ -321,9 +338,7 @@ type CurrentProject implements Node & ProjectLike {
 
   """List of all code generation candidates stories"""
   codeGenCandidates(glob: String!): [FileParts]
-
-  """Glob pattern for component searching"""
-  codeGenGlob(type: CodeGenType!): String!
+  codeGenGlobs: CodeGenGlobs!
 
   """Project configuration"""
   config: JSON!
@@ -400,6 +415,9 @@ type DevState {
   When we have edited server related files, we may want to relaunch the client.
   """
   needsRelaunch: Boolean
+
+  """For debugging, the current application state"""
+  state: JSON
 }
 
 """Represents an editor on the local machine"""
@@ -512,8 +530,6 @@ type LocalSettingsPreferences {
   preferredEditorBinary: String
   proxyBypass: String
   proxyServer: String
-  useDarkSidebar: Boolean
-  watchForSpecChange: Boolean
 }
 
 type Mutation {

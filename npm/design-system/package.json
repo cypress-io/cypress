@@ -75,7 +75,7 @@
     "rollup-plugin-copy": "^3.4.0",
     "rollup-plugin-peer-deps-external": "2.2.4",
     "rollup-plugin-postcss": "^4.0.0",
-    "sass": "1.32.8",
+    "sass": "1.44.0",
     "sass-loader": "10.1.1",
     "style-loader": "^2.0.0",
     "svg-url-loader": "3.0.3",

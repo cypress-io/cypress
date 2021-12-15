@@ -2,9 +2,9 @@ require('../../../spec_helper')
 
 const tsnode = require('ts-node')
 
-const resolve = require(`${root}../../lib/util/resolve`)
+const resolve = require(`../../../../lib/util/resolve`)
 
-const tsNodeUtil = require(`${root}../../lib/util/ts_node`)
+const tsNodeUtil = require(`../../../../lib/util/ts_node`)
 
 describe('lib/util/ts_node', () => {
   beforeEach(() => {

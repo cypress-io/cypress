@@ -47,7 +47,7 @@ fragment ProjectId on CurrentProject {
 `
 
 const props = defineProps<{
-  gql?: ProjectIdFragment
+  gql?: ProjectIdFragment | null
 }>()
 
 const { t } = useI18n()

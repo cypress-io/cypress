@@ -13,7 +13,7 @@
         <InlineSpecList
           v-show="runnerUiStore.isSpecsListOpen"
           id="reporter-inline-specs-list"
-          :gql="props.gql.currentProject"
+          :gql="props.gql"
         />
       </template>
 
@@ -46,15 +46,19 @@
       </HideDuringScreenshot>
 
       <RemoveClassesDuringScreenshotting
-        class="flex h-full bg-gray-100 p-16px justify-center"
+        class="h-full bg-gray-100 p-16px"
       >
+        <ScriptError
+          v-if="autStore.scriptError"
+          :error="autStore.scriptError.error"
+        />
         <div
+          v-show="!autStore.scriptError"
           :id="RUNNER_ID"
           class="origin-top-left viewport"
           :style="viewportStyle"
         />
       </RemoveClassesDuringScreenshotting>
-
       <SnapshotControls
         :event-manager="eventManager"
         :get-aut-iframe="getAutIframeModel"
@@ -80,15 +84,19 @@ import ScreenshotHelperPixels from './screenshot/ScreenshotHelperPixels.vue'
 import { useScreenshotStore } from '../store/screenshot-store'
 import ChooseExternalEditorModal from '@packages/frontend-shared/src/gql-components/ChooseExternalEditorModal.vue'
 import { useMutation, gql } from '@urql/vue'
-import { OpenFileInIdeDocument, SpecRunner_SetPreferencesDocument } from '@packages/data-context/src/gen/all-operations.gen'
+import { OpenFileInIdeDocument } from '@packages/data-context/src/gen/all-operations.gen'
 import type { SpecRunnerFragment } from '../generated/graphql'
 import { usePreferences } from '../composables/usePreferences'
+import ScriptError from './ScriptError.vue'
+import { useWindowSize } from '@vueuse/core'
+
+const { width, height } = useWindowSize()
 
 gql`
 fragment SpecRunner on Query {
+  ...Specs_InlineSpecList
   currentProject {
     id
-    ...Specs_InlineSpecList
     ...SpecRunnerHeader
   }
   ...ChooseExternalEditor
@@ -107,11 +115,6 @@ mutation OpenFileInIDE ($input: FileDetailsInput!) {
 }
 `
 
-gql`
-mutation SpecRunner_SetPreferences ($value: String!) {
-  setPreferences (value: $value)
-}`
-
 const props = defineProps<{
   gql: SpecRunnerFragment
   activeSpec: BaseSpec
@@ -127,23 +130,41 @@ const preferences = usePreferences()
 preferences.update('autoScrollingEnabled', props.gql.localSettings.preferences.autoScrollingEnabled ?? true)
 preferences.update('isSpecsListOpen', props.gql.localSettings.preferences.isSpecsListOpen ?? true)
 
-const setPreferences = useMutation(SpecRunner_SetPreferencesDocument)
-
 const runnerPane = ref<HTMLDivElement>()
+
+const autMargin = 16
+
+const containerWidth = computed(() => {
+  // TODO: make these values dynamic in UNIFY-592:
+  const reporterWidth = 320
+  const navWidth = 64
+  const specsListWidth = runnerUiStore.isSpecsListOpen ? 280 : 0
+  const miscBorders = 4
+  const nonAutWidth = reporterWidth + navWidth + specsListWidth + (autMargin * 2) + miscBorders
+
+  return width.value - nonAutWidth
+})
+
+const containerHeight = computed(() => {
+  // TODO: make these values dynamic in UNIFY-592:
+  const autHeaderHeight = 70
+
+  const nonAutHeight = autHeaderHeight + (autMargin * 2)
+
+  return height.value - nonAutHeight
+})
 
 const viewportStyle = computed(() => {
   if (!runnerPane.value) {
     return
   }
 
-  let scale: number
+  let scale: number = 1
 
   if (screenshotStore.isScreenshotting) {
     scale = 1
   } else {
-    scale = runnerPane.value.clientWidth < autStore.viewportDimensions.width
-      ? runnerPane.value.clientWidth / autStore.viewportDimensions.width
-      : 1
+    scale = Math.min(containerWidth.value / autStore.viewportDimensions.width, containerHeight.value / autStore.viewportDimensions.height, 1)
   }
 
   return `
@@ -153,6 +174,7 @@ const viewportStyle = computed(() => {
 })
 
 function runSpec () {
+  autStore.setScriptError(null)
   UnifiedRunnerAPI.executeSpec(props.activeSpec)
 }
 
@@ -212,6 +234,10 @@ onMounted(() => {
     preferences.update('isSpecsListOpen', state.isSpecsListOpen)
     preferences.update('autoScrollingEnabled', state.autoScrollingEnabled)
   })
+
+  eventManager.on('script:error', (err) => {
+    autStore.scriptError = err
+  })
 })
 
 onBeforeUnmount(() => {
@@ -234,7 +260,7 @@ $navbar-width: 80px;
     https://github.com/cypress-io/cypress/blob/develop/packages/driver/src/cy/actionability.ts#L375
     Basically `scrollIntoView` is applied even outside of the <iframe>,
     scrolling an element "upwards", messing up the UI
-    Easiest way to reprodudce is remove the `position: fixed`
+    Easiest way to reproduce is remove the `position: fixed`
     and run the `SpecList.spec.tsx` test in runner-ct
     in CT mode.
     Ideally we should not need `position: fixed`, but I don't see
