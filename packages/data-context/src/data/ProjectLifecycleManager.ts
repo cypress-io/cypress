@@ -694,7 +694,7 @@ export class ProjectLifecycleManager {
   }
 
   private async setupNodeEvents (): Promise<SetupNodeEventsReply> {
-    const config = await this.initializeConfig()
+    const config = await this.getFullInitialConfig()
 
     assert(this._eventsIpc)
     assert(this._currentTestingType)
