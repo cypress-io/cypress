@@ -8,16 +8,24 @@ const invalidTargets = new Set(['_parent', '_top'])
  */
 export function handleInvalidEventTarget (e: Event & {target: HTMLFormElement | HTMLAnchorElement}) {
   let targetValue = e.target.target
+  let targetSet = e.target.hasAttribute('target')
 
   if (invalidTargets.has(e.target.target)) {
     e.target.target = ''
   }
 
-  const { getAttribute, setAttribute } = e.target
+  const { getAttribute, setAttribute, removeAttribute } = e.target
   const targetDescriptor = Object.getOwnPropertyDescriptor(e.target, 'target')
 
   e.target.getAttribute = function (k) {
     if (k === 'target') {
+      // https://github.com/cypress-io/cypress/issues/17512
+      // When the target attribute doesn't exist, it should return null.
+      // @see https://developer.mozilla.org/en-US/docs/Web/API/Element/getAttribute#non-existing_attributes
+      if (!targetSet) {
+        return null
+      }
+
       return targetValue
     }
 
@@ -26,12 +34,23 @@ export function handleInvalidEventTarget (e: Event & {target: HTMLFormElement | 
 
   e.target.setAttribute = function (k, v) {
     if (k === 'target') {
+      targetSet = true
       targetValue = v
 
       return $elements.callNativeMethod(this, 'setAttribute', 'cyTarget', v)
     }
 
     return setAttribute.call(this, k, v)
+  }
+
+  e.target.removeAttribute = function (k) {
+    if (k === 'target') {
+      targetSet = false
+      targetValue = ''
+
+      // We're not using `$elements.callNativeMethod` here because it disallows `removeAttribute`.
+      return removeAttribute.call(this, k)
+    }
   }
 
   if (!targetDescriptor) {
