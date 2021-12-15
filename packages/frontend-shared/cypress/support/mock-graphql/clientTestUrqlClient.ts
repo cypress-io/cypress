@@ -15,6 +15,7 @@ import dedent from 'dedent'
 import { stubQuery } from './stubgql-Query'
 import { stubGlobalProject, stubProject } from './stubgql-Project'
 import { CloudOrganizationStubs, CloudProjectStubs, CloudRecordKeyStubs, CloudRunStubs } from './stubgql-CloudTypes'
+import { stubMigration } from './stubgql-Migration'
 
 type MaybeResolveMap = {[K in keyof CodegenTypeMap]: MaybeResolver<CodegenTypeMap[K]>}
 
@@ -23,6 +24,7 @@ const GQLStubRegistry: Partial<MaybeResolveMap> = {
   ProjectLike: stubProject,
   GlobalProject: stubGlobalProject,
   CurrentProject: stubProject,
+  Migration: stubMigration,
   Mutation: stubMutation,
   Query: stubQuery,
   CloudOrganization: CloudOrganizationStubs.cyOrg,

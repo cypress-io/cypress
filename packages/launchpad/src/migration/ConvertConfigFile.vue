@@ -78,49 +78,38 @@
 </template>
 
 <script lang="ts" setup>
+import { computed } from 'vue'
 import CodeTag from '@cy/components/CodeTag.vue'
 import BeforeAfter from './fragments/BeforeAfter.vue'
 import ShikiHighlight from '../../../frontend-shared/src/components/ShikiHighlight.vue'
 import MigrationList from './fragments/MigrationList.vue'
 import MigrationTitle from './fragments/MigrationTitle.vue'
 import { useI18n } from '@cy/i18n'
-import { computed } from 'vue'
+import { gql } from '@urql/vue'
+import type { ConvertConfigFileFragment } from '../generated/graphql'
 
 const { t } = useI18n()
 
-// TODO: wire this properly
-const gqlCodeBefore = `{
-  "baseUrl": "http://localhost:1234/",
-  "retries": 2
+gql`
+fragment ConvertConfigFile on Migration {
+  configBeforeCode
+  configAfterCode
 }`
 
-// TODO: wire this properly
-const gqlCodeAfter = `const { defineConfig } = require('cypress')
+const props = defineProps<{
+  gql: ConvertConfigFileFragment
+}>()
 
-module.exports = defineConfig({
-  retries: 2,
-  e2e: {
-    // End-to-end config overrides go here
-    baseUrl: "http://localhost:1234/"
-
-    setupNodeEvents (on, config) {
-      // We've imported your old cypress plugins here.
-      // You may want to clean this up later by importing these directly
-      return require('cypress/plugins/index.js')(on, config) }
-    }
-  },
-})`
-
-const gqlCodeBeforeLines = computed(() => gqlCodeBefore.split('\n').length)
-const gqlCodeAfterLines = computed(() => gqlCodeAfter.split('\n').length)
+const gqlCodeBeforeLines = computed(() => props.gql.configBeforeCode.split('\n').length)
+const gqlCodeAfterLines = computed(() => props.gql.configAfterCode.split('\n').length)
 const gqlCodeMaxLines = computed(() => Math.max(gqlCodeBeforeLines.value, gqlCodeAfterLines.value))
 
 const codeBefore = computed(() => {
-  return gqlCodeBefore + Array(gqlCodeMaxLines.value - gqlCodeBeforeLines.value).fill('\r\n').join(' ')
+  return props.gql.configBeforeCode + Array(gqlCodeMaxLines.value - gqlCodeBeforeLines.value).fill('\n').join('')
 })
 
 const codeAfter = computed(() => {
-  return gqlCodeAfter + Array(gqlCodeMaxLines.value - gqlCodeAfterLines.value).fill('\r\n').join(' ')
+  return props.gql.configAfterCode + Array(gqlCodeMaxLines.value - gqlCodeAfterLines.value).fill('\n').join('')
 })
 </script>
 

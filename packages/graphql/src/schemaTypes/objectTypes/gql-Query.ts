@@ -19,13 +19,13 @@ export const Query = objectType({
 
     t.nonNull.field('wizard', {
       type: Wizard,
-      description: 'Metadata about the wizard, null if we arent showing the wizard',
+      description: 'Metadata about the wizard',
       resolve: (root, args, ctx) => ctx.coreData.wizard,
     })
 
     t.field('migration', {
       type: Migration,
-      description: 'Metadata about the migration, null if we arent showing it',
+      description: 'Metadata about the migration, null if we aren\'t showing it',
       resolve: (root, args, ctx) => ctx.coreData.migration,
     })
 

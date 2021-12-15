@@ -9,12 +9,13 @@
   </p>
 
   <MigrationStep
-    checked
+    :open="props.gql.step === 'renameAuto'"
+    :checked="props.gql.step !== 'renameAuto'"
     :step="1"
     :title="t('migration.wizard.step1.title')"
     :description="t('migration.wizard.step1.description')"
   >
-    <RenameSpecsAuto />
+    <RenameSpecsAuto :gql="props.gql" />
     <template #footer>
       <Button
         @click="renameSpecs"
@@ -24,12 +25,13 @@
     </template>
   </MigrationStep>
   <MigrationStep
-    open
+    :open="props.gql.step === 'renameManual'"
+    :checked="props.gql.step === 'configFile'"
     :step="2"
     :title="t('migration.wizard.step2.title')"
     :description="t('migration.wizard.step2.description')"
   >
-    <RenameSpecsManual />
+    <RenameSpecsManual :gql="props.gql" />
     <template #footer>
       <div class="flex gap-16px">
         <Button
@@ -54,11 +56,12 @@
     </template>
   </MigrationStep>
   <MigrationStep
+    :open="props.gql.step === 'configFile'"
     :step="3"
     :title="t('migration.wizard.step3.title')"
     :description="t('migration.wizard.step3.description')"
   >
-    <ConvertConfigFile />
+    <ConvertConfigFile :gql="props.gql" />
     <template #footer>
       <Button
         @click="convertConfig"
@@ -76,8 +79,22 @@ import RenameSpecsAuto from './RenameSpecsAuto.vue'
 import RenameSpecsManual from './RenameSpecsManual.vue'
 import ConvertConfigFile from './ConvertConfigFile.vue'
 import { useI18n } from '@cy/i18n'
+import { gql } from '@urql/vue'
+import type { MigrationWizardFragment } from '../generated/graphql'
 
 const { t } = useI18n()
+
+gql`
+fragment MigrationWizard on Migration {
+  step
+  ...RenameSpecsAuto
+  ...RenameSpecsManual
+  ...ConvertConfigFile
+}`
+
+const props = defineProps<{
+  gql: MigrationWizardFragment
+}>()
 
 function renameSpecs () {
 

@@ -20,7 +20,7 @@
 import HighlightedFile from './HighlightedFile.vue'
 
 withDefaults(defineProps<{
-  files:string[];
+  files:readonly string[];
   highlightRegExp: RegExp,
   highlightClass?: string
 }>(), {

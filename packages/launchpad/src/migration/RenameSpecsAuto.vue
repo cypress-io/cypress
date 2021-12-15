@@ -31,14 +31,14 @@
     <BeforeAfter>
       <template #before>
         <HighlightedFilesList
-          :files="filesBefore"
+          :files="props.gql.specFilesBefore"
           :highlight-reg-exp="/(integration|[_,-,.]?spec)/gi"
           highlight-class="text-red-500"
         />
       </template>
       <template #after>
         <HighlightedFilesList
-          :files="filesAfter"
+          :files="props.gql.specFilesAfter"
           :highlight-reg-exp="/(e2e|\.cy)/gi"
           highlight-class="text-jade-500"
         />
@@ -53,27 +53,19 @@ import BeforeAfter from './fragments/BeforeAfter.vue'
 import HighlightedFilesList from './fragments/HighlightedFilesList.vue'
 import MigrationList from './fragments/MigrationList.vue'
 import MigrationTitle from './fragments/MigrationTitle.vue'
+import { gql } from '@urql/vue'
+import type { RenameSpecsAutoFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
 
 const { t } = useI18n()
 
-// TODO: wire this properly
-const filesBefore = [
-  'cypress/integration/app_spec.js',
-  'cypress/integration/blog-post-spec.js',
-  'cypress/integration/homeSpec.js',
-  'cypress/integration/company.js',
-  'cypress/integration/sign-up.spec.js',
-  'cypress/component/button.spec.js',
-]
+gql`
+fragment RenameSpecsAuto on Migration {
+  specFilesBefore
+  specFilesAfter
+}`
 
-// TODO: wire this properly
-const filesAfter = [
-  'cypress/e2e/app.cy.js',
-  'cypress/e2e/blog-post.cy.js',
-  'cypress/e2e/homeSpec.cy.js',
-  'cypress/e2e/company.cy.js',
-  'cypress/e2e/sign-up.cy.js',
-  'cypress/component/button.cy.js',
-]
+const props = defineProps<{
+  gql: RenameSpecsAutoFragment
+}>()
 </script>
