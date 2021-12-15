@@ -132,7 +132,7 @@ describe('lib/tasks/cache', () => {
     })
   })
 
-  describe('.prune', () => {
+  /*describe('.prune', () => {
     it('deletes cache binaries for all version but the current one', async () => {
       await cache.prune()
 
@@ -174,7 +174,7 @@ describe('lib/tasks/cache', () => {
 
       defaultSnapshot()
     })
-  })
+  })*/
 
   describe('.list', () => {
     let restoreEnv

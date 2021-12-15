@@ -7,9 +7,15 @@ const Table = require('cli-table3')
 const dayjs = require('dayjs')
 const relativeTime = require('dayjs/plugin/relativeTime')
 const chalk = require('chalk')
-const _ = require('lodash')
 const getFolderSize = require('./get-folder-size')
-const Bluebird = require('bluebird')
+const registry = require('../registry')
+
+const MAX_BINARY_AGE = 90 //Days
+
+const reservedCacheKeys = [
+  'registry',
+  'cy',
+]
 
 dayjs.extend(relativeTime)
 
@@ -31,34 +37,71 @@ const clear = () => {
   return fs.removeAsync(state.getCacheDir())
 }
 
-const prune = () => {
-  const cacheDir = state.getCacheDir()
-  const currentVersion = util.pkgVersion()
+const pruneCypressVersions = async ({ cacheDir, registeredVersions }) => {
+  let versions
 
-  let deletedBinary = false
-
-  return fs.readdirAsync(cacheDir)
-  .then((versions) => {
-    return Bluebird.all(versions.map((version) => {
-      if (version !== currentVersion) {
-        deletedBinary = true
-
-        const versionDir = join(cacheDir, version)
-
-        return fs.removeAsync(versionDir)
-      }
-    }))
-  })
-  .then(() => {
-    if (deletedBinary) {
-      logger.always(`Deleted all binary caches except for the ${currentVersion} binary cache.`)
-    } else {
-      logger.always(`No binary caches found to prune.`)
+  // Read the cache dir
+  try {
+    versions = await fs.readdirAsync(cacheDir)
+  } catch (e) {
+    if (e === 'ENOENT') {
+      return []
     }
-  })
-  .catch({ code: 'ENOENT' }, () => {
-    logger.always(`No Cypress cache was found at ${cacheDir}. Nothing to prune.`)
-  })
+
+    throw e
+  }
+
+  return versions.reduce(async (accumulatorPromise, version) => {
+    const acc = await accumulatorPromise
+
+    // ignore reserved cache keys since they are mixed with cypress versions and registered cypress versions.
+    if (!reservedCacheKeys.includes(version) && !registeredVersions.has(version)) {
+      // If the version is 9.x or lower, check the atime since those versions don't register themselves.
+      if (version.match(/^\d\./)) {
+        const binaryDir = state.getBinaryDir(version)
+        const executable = state.getPathToExecutable(binaryDir)
+        const stat = await fs.statAsync(executable)
+
+        // If the binary was created or accessed in the last 90 days, don't prune it.
+        const binaryTime = stat.atime || stat.birthtime
+        const diff = Date.now() - new Date(binaryTime).valueOf()
+
+        //convert days to milliseconds.
+        if (diff < (MAX_BINARY_AGE * 86400000)) {
+          return acc
+        }
+      }
+
+      acc.push(version)
+
+      const versionDir = join(cacheDir, version)
+
+      await fs.removeAsync(versionDir)
+    }
+
+    return acc
+  }, [])
+}
+
+const prune = async () => {
+  const cacheDir = state.getCacheDir()
+  let deletedBinaries = []
+
+  try {
+    const registeredBinaries = await registry.registeredBinaries()
+
+    await pruneCypressVersions({ cacheDir, registeredVersions: registeredBinaries.cypress })
+  } catch (e) {
+    logger.always('Failed to prune cache')
+
+    throw e
+  }
+
+  if (deletedBinaries.length > 0) {
+    logger.always(`Pruned Cypress version(s) ${deletedBinaries.join(', ')} from the binary cache.`)
+  } else {
+    logger.always(`No binary caches found to prune.`)
+  }
 }
 
 const fileSizeInMB = (size) => {
@@ -119,7 +162,7 @@ const getCachedVersions = (showSize) => {
     const executable = state.getPathToExecutable(binaryDir)
 
     return fs.statAsync(executable).then((stat) => {
-      const lastAccessedTime = _.get(stat, 'atime')
+      const lastAccessedTime = stat.atime
 
       if (!lastAccessedTime) {
         // the test runner has never been opened

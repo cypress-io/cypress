@@ -16,6 +16,8 @@ const unzip = require('./unzip')
 const logger = require('../logger')
 const { throwFormErrorText, errors } = require('../errors')
 const verbose = require('../VerboseRenderer')
+const registry = require('../registry')
+const cache = require('./cache')
 
 const getNpmArgv = () => {
   const json = process.env.npm_config_argv
@@ -165,6 +167,7 @@ const downloadAndUnzip = ({ version, installDir, downloadDir }) => {
   logger.log()
 
   const tasks = new Listr([
+    pruneTask({ rendererOptions }),
     {
       options: { title: util.titleize('Downloading Cypress') },
       task: (ctx, task) => {
@@ -203,6 +206,7 @@ const downloadAndUnzip = ({ version, installDir, downloadDir }) => {
         }
 
         return cleanup()
+        .then(registry.registerBinary({ name: 'cypress', version }))
         .then(() => {
           debug('finished installation in', installDir)
 
@@ -467,6 +471,33 @@ const progessify = (task, title) => {
       util.titleize(title, percentComplete, remaining),
       getRendererOptions().renderer,
     )
+  }
+}
+
+const pruneTask = ({ rendererOptions }) => {
+  return {
+    exitOnError: false, // We shouldn't fail installing if pruning fails.
+    task: (ctx, task) => {
+      return cache.prune().then(() => {
+        util.setTaskTitle(
+          task,
+          util.titleize(chalk.green('Pruned Cache')),
+          rendererOptions.renderer,
+        )
+      })
+      .catch((e) => {
+        // catch the error to set the red failed text.
+        util.setTaskTitle(
+          task,
+          util.titleize(chalk.red('Failed to prune cache')),
+          rendererOptions.renderer,
+        )
+
+        debug(`Failed to prune cache: ${e}`)
+
+        throw 'Failed to prune cache' // re throw the error to get the red x.
+      })
+    },
   }
 }
 

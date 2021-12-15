@@ -17,8 +17,11 @@ const state = require(`${lib}/tasks/state`)
 const unzip = require(`${lib}/tasks/unzip`)
 const logger = require(`${lib}/logger`)
 const util = require(`${lib}/util`)
+const cache = require(`${lib}/tasks/cache`)
+const registry = require(`${lib}/registry`)
 
 const normalize = require('../../support/normalize')
+const { sinon } = require('@packages/https-proxy/test/spec_helper')
 
 const packageVersion = '1.2.3'
 const downloadDestination = path.join(os.tmpdir(), `cypress-${process.pid}.zip`)
@@ -56,6 +59,8 @@ describe('/lib/tasks/install', function () {
       sinon.stub(state, 'getBinaryDir').returns('/cache/Cypress/1.2.3/Cypress.app')
       sinon.stub(state, 'getBinaryPkgAsync').resolves()
       sinon.stub(fs, 'ensureDirAsync').resolves(undefined)
+      sinon.stub(cache, 'prune').resolves(undefined)
+      sinon.stub(registry, 'registerBinary').resolves(undefined)
       os.platform.returns('darwin')
     })
 
