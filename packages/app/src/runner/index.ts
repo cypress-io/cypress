@@ -15,7 +15,7 @@
  *
  */
 import { watchEffect } from 'vue'
-import { getMobxRunnerStore, useAutStore } from '../store'
+import { getMobxRunnerStore, initializeMobxStore, useAutStore } from '../store'
 import { injectBundle } from './injectBundle'
 import type { BaseSpec } from '@packages/types/src/spec'
 import { UnifiedReporterAPI } from './reporter'
@@ -24,7 +24,7 @@ import { IframeModel } from './iframe-model'
 import { AutIframe } from './aut-iframe'
 import { EventManager } from './event-manager'
 
-let _eventManager: EventManager
+let _eventManager: EventManager | undefined
 
 export function initializeEventManager (UnifiedRunner: any) {
   _eventManager = new EventManager(
@@ -33,6 +33,12 @@ export function initializeEventManager (UnifiedRunner: any) {
     UnifiedRunner.selectorPlaygroundModel,
     UnifiedRunner.StudioRecorder,
   )
+}
+
+function destroyEventManager () {
+  getEventManager().teardown(getMobxRunnerStore())
+  getEventManager().resetReporter()
+  _eventManager = undefined
 }
 
 export function getEventManager () {
@@ -146,6 +152,7 @@ function teardownSpec () {
 
 export function teardown () {
   UnifiedReporterAPI.setInitializedReporter(false)
+  destroyEventManager()
 }
 
 /**
@@ -249,6 +256,30 @@ function runSpecE2E (spec: BaseSpec) {
  */
 async function initialize () {
   await injectBundle()
+
+  const response = await window.fetch('/api')
+  const data = await response.json()
+
+  const config = window.UnifiedRunner.decodeBase64(data.base64Config) as any
+  const autStore = useAutStore()
+
+  // TODO(lachlan): use GraphQL to get the viewport dimensions
+  // once it is more practical to do so
+  // find out if we need to continue managing viewportWidth/viewportHeight in MobX at all.
+  autStore.updateDimensions(config.viewportWidth, config.viewportHeight)
+
+  window.UnifiedRunner.config = config
+
+  // window.UnifiedRunner exists now, since the Webpack bundle with
+  // the UnifiedRunner namespace was injected.
+  initializeEventManager(window.UnifiedRunner)
+
+  window.UnifiedRunner.MobX.runInAction(() => {
+    const store = initializeMobxStore(window.UnifiedRunner.config.testingType)
+
+    store.updateDimensions(config.viewportWidth, config.viewportHeight)
+  })
+
   window.UnifiedRunner.MobX.runInAction(() => setupRunner())
 }
 
