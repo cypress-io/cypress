@@ -9,6 +9,31 @@
       :gql="props.gql"
       @success="showConnectSuccessAlert = true"
     />
+    <RunsError
+      v-else-if="currentProject?.cloudProject?.__typename === 'CloudProjectNotFound'"
+      icon="error"
+      :button-text="t('runs.errors.notfound.button')"
+      :button-icon="ConnectIcon"
+      :message="t('runs.errors.notfound.title')"
+    >
+      <i18n-t keypath="runs.errors.notfound.description">
+        <CodeTag
+          bg
+          class="bg-purple-50 text-purple-500"
+        >
+          projectId: "{{ currentProject?.projectId }}"
+        </CodeTag>
+      </i18n-t>
+    </RunsError>
+    <RunsError
+      v-else-if="currentProject?.cloudProject?.__typename === 'CloudProjectUnauthorized'"
+      icon="access"
+      :button-text="t('runs.errors.unauthorized.button')"
+      :button-icon="SendIcon"
+      :message="t('runs.errors.unauthorized.title')"
+    >
+      {{ t('runs.errors.unauthorized.description') }}
+    </RunsError>
     <RunsEmpty
       v-else-if="!currentProject?.cloudProject?.runs?.nodes.length"
       :gql="currentProject"
@@ -34,6 +59,13 @@ import RunsConnect from './RunsConnect.vue'
 import RunsConnectSuccessAlert from './RunsConnectSuccessAlert.vue'
 import RunsEmpty from './RunsEmpty.vue'
 import type { RunsContainerFragment } from '../generated/graphql'
+import RunsError from './RunsError.vue'
+import ConnectIcon from '~icons/cy/chain-link_x16.svg'
+import SendIcon from '~icons/cy/paper-airplane_x16.svg'
+import { useI18n } from '@cy/i18n'
+import CodeTag from '../../../frontend-shared/src/components/CodeTag.vue'
+
+const { t } = useI18n()
 
 gql`
 fragment RunsContainer on Query {
@@ -43,12 +75,21 @@ fragment RunsContainer on Query {
     ...RunsEmpty
     ...RunsConnectSuccessAlert
     cloudProject {
-      id
-      runs(first: 10) {
-        nodes {
-          id
-          ...RunCard
+      __typename
+      ... on CloudProject {
+        id
+        runs {
+          nodes {
+            id
+            ...RunCard
+          }
         }
+      }
+      ... on CloudProjectNotFound {
+        message
+      }
+      ... on CloudProjectUnauthorized {
+        message
       }
     }
   }

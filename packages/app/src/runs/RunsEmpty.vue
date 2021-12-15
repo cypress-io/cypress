@@ -1,13 +1,13 @@
 <template>
   <div
     data-cy="no-runs"
-    class="flex flex-col items-center justify-center min-h-full mx-auto leading-24px max-w-688px"
+    class="flex flex-col mx-auto min-h-full max-w-688px leading-24px items-center justify-center"
   >
     <i-cy-dashboard-checkmark_x48 class="h-48px w-48px icon-dark-gray-500 icon-light-gray-100" />
-    <h2 class="text-gray-900 text-18px mt-32px mb-8px">
+    <h2 class="mt-32px mb-8px text-gray-900 text-18px">
       {{ t("runs.empty.title") }}
     </h2>
-    <p class="text-gray-600 h-48px mb-8px">
+    <p class="h-48px mb-8px text-gray-600">
       {{ t("runs.empty.description") }}
     </p>
     <TerminalPrompt
@@ -35,10 +35,13 @@ fragment RunsEmpty on CurrentProject {
   projectId
   configFilePath
   cloudProject {
-    id
-    recordKeys {
+    __typename
+    ... on CloudProject {
       id
-      ...RecordKey
+      recordKeys {
+        id
+        ...RecordKey
+      }
     }
   }
 }
@@ -50,7 +53,9 @@ const props = defineProps<{
 
 const projectName = computed(() => props.gql.title)
 const firstRecordKey = computed(() => {
-  return props.gql.cloudProject?.recordKeys?.[0]?.key ?? '<record-key>'
+  return props.gql.cloudProject?.__typename === 'CloudProject' && props.gql.cloudProject.recordKeys?.[0]?.key
+    ? props.gql.cloudProject.recordKeys[0].key
+    : '<record-key>'
 })
 const recordCommand = computed(() => {
   return `cypress run --record --key ${firstRecordKey.value}`

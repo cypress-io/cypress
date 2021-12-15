@@ -161,6 +161,36 @@ type CloudProjectEdge {
   node: CloudProject!
 }
 
+"""
+Unable to find cloud project
+"""
+type CloudProjectNotFound {
+  """
+  an error message
+  """
+  message: String!
+}
+
+union CloudProjectResult =
+    CloudProject
+  | CloudProjectNotFound
+  | CloudProjectUnauthorized
+
+"""
+Unauthorized access
+"""
+type CloudProjectUnauthorized {
+  """
+  does the user have a requested access pending
+  """
+  hasRequestedAccess: Boolean
+
+  """
+  an error message
+  """
+  message: String!
+}
+
 type CloudRecordKey implements Node {
   createdAt: DateTime
 
@@ -419,7 +449,7 @@ type Query {
   """
   Lookup an individual project by the slug
   """
-  cloudProjectBySlug(slug: String!): CloudProject
+  cloudProjectBySlug(slug: String!): CloudProjectResult
 
   """
   Lookup a list of projects by their slug
@@ -429,7 +459,7 @@ type Query {
     A list of Project slugs
     """
     slugs: [String!]!
-  ): [CloudProject]
+  ): [CloudProjectResult]
 
   """
   A user within the Cypress Cloud
