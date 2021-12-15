@@ -125,6 +125,8 @@ export const create = (Cypress, state, timeout, clearTimeout, whenStable, finish
         options._start = undefined
       }
 
+      // invoke the passed in retry fn
+      // once we reach stability
       return whenStable(fn)
     })
   },

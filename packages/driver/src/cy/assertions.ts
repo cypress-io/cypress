@@ -150,8 +150,8 @@ export const create = (Cypress, cy) => {
       obj._error = error
     } else {
       obj.end = true
-      obj.error = error
       obj.snapshot = true
+      obj.error = error
     }
 
     const isChildLike = (subject, current) => {
