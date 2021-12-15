@@ -73,6 +73,7 @@
     "ssestream": "1.0.1",
     "supertest": "4.0.2",
     "systeminformation": "5.6.4",
+    "temp-dir": "^2.0.0",
     "webpack": "^4.44.2",
     "ws": "5.2.3"
   },

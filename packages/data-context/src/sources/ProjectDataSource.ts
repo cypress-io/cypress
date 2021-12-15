@@ -1,4 +1,4 @@
-import type { CodeGenType, SpecType } from '@packages/graphql/src/gen/nxs.gen'
+import type { SpecType } from '@packages/graphql/src/gen/nxs.gen'
 import { FrontendFramework, FRONTEND_FRAMEWORKS, ResolvedFromConfig, RESOLVED_FROM, SpecFileWithExtension, STORYBOOK_GLOB } from '@packages/types'
 import { scanFSForAvailableDependency } from 'create-cypress-tests'
 import path from 'path'
@@ -93,18 +93,17 @@ export class ProjectDataSource {
     return guess ?? null
   }
 
-  async getCodeGenGlob (type: CodeGenType) {
+  async getCodeGenGlobs () {
     assert(this.ctx.currentProject, `Cannot find glob without currentProject.`)
 
     const looseComponentGlob = '/**/*.{js,jsx,ts,tsx,.vue}'
 
-    if (type === 'story') {
-      return STORYBOOK_GLOB
-    }
-
     const framework = await this.frameworkLoader.load(this.ctx.currentProject)
 
-    return framework?.glob ?? looseComponentGlob
+    return {
+      component: framework?.glob ?? looseComponentGlob,
+      story: STORYBOOK_GLOB,
+    }
   }
 
   async getResolvedConfigFields (): Promise<ResolvedFromConfig[]> {
