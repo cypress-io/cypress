@@ -1,7 +1,7 @@
-import { matchedSpecs } from '../../../src/sources'
 import { expect } from 'chai'
+import { matchedSpecs, transformSpec, SpecWithRelativeRoot } from '../../../src/sources'
 
-describe('ProjectDataSource', () => {
+describe('matchedSpecs', () => {
   context('got a single spec pattern from --spec via cli', () => {
     it('returns spec name only', () => {
       const result = matchedSpecs({
@@ -13,7 +13,19 @@ describe('ProjectDataSource', () => {
         specPattern: '/var/folders/T/cy-projects/e2e/cypress/integration/screenshot_element_capture_spec.js',
       })
 
-      expect(result[0].relativeToCommonRoot).to.eq('screenshot_element_capture_spec.js')
+      const actual: SpecWithRelativeRoot[] = [{
+        absolute: '/var/folders/T/cy-projects/e2e/cypress/integration/screenshot_element_capture_spec.js',
+        baseName: 'screenshot_element_capture_spec.js',
+        fileExtension: '.js',
+        fileName: 'screenshot_element_capture_spec',
+        name: 'cypress/integration/screenshot_element_capture_spec.js',
+        relative: 'cypress/integration/screenshot_element_capture_spec.js',
+        relativeToCommonRoot: 'screenshot_element_capture_spec.js',
+        specFileExtension: '.js',
+        specType: 'integration',
+      }]
+
+      expect(result).to.eql(actual)
     })
   })
 
@@ -73,5 +85,32 @@ describe('ProjectDataSource', () => {
 
       expect(result[0].relativeToCommonRoot).to.eq('screenshot_nested_file_spec.js')
     })
+  })
+})
+
+describe('transformSpec', () => {
+  it('handles backslashes by normalizing to posix, eg win32', () => {
+    const result = transformSpec({
+      projectRoot: 'C:\\Windows\\Project',
+      testingType: 'e2e',
+      absolute: 'C:\\Windows\\Project\\src\\spec.cy.js',
+      commonRoot: 'C:\\Windows\\Project\\src',
+      platform: 'win32',
+      sep: '\\',
+    })
+
+    const actual: SpecWithRelativeRoot = {
+      absolute: 'C:/Windows/Project/src/spec.cy.js',
+      specFileExtension: '.cy.js',
+      fileExtension: '.js',
+      specType: 'integration',
+      baseName: 'spec.cy.js',
+      fileName: 'spec',
+      relative: 'src/spec.cy.js',
+      name: 'src/spec.cy.js',
+      relativeToCommonRoot: 'C:/Windows/Project/src/spec.cy.js',
+    }
+
+    expect(result).to.eql(actual)
   })
 })
