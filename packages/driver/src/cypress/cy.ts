@@ -553,7 +553,7 @@ export class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuer
           e = onpl(e)
         }
 
-        Cypress.action('cy:cross:domain:failure', e)
+        Cypress.multiDomainEventBus.emit('cross:origin:error', e)
 
         // need async:true since this is outside the command queue promise
         // chain and cy.fail needs to know to use the reference to the

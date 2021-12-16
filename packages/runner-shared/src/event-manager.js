@@ -26,9 +26,9 @@ const driverToReporterEvents = 'paused session:add'.split(' ')
 const driverToLocalAndReporterEvents = 'run:start run:end'.split(' ')
 const driverToSocketEvents = 'backend:request automation:request mocha recorder:frame'.split(' ')
 const driverTestEvents = 'test:before:run:async test:after:run'.split(' ')
-const driverToLocalEvents = 'viewport:changed config stop url:changed page:loading visit:failed visit:blank expect:domain'.split(' ')
+const driverToLocalEvents = 'viewport:changed config stop url:changed page:loading visit:failed visit:blank'.split(' ')
 const socketRerunEvents = 'runner:restart watched:file:changed'.split(' ')
-const socketToDriverEvents = 'net:stubbing:event request:event script:error cross:domain:html:received'.split(' ')
+const socketToDriverEvents = 'net:stubbing:event request:event script:error'.split(' ')
 const localToReporterEvents = 'reporter:log:add reporter:log:state:changed reporter:log:remove'.split(' ')
 
 const localBus = new EventEmitter()
@@ -128,6 +128,10 @@ export const eventManager = {
       ws.on(event, (...args) => {
         Cypress.emit(event, ...args)
       })
+    })
+
+    ws.on('cross:domain:html:received', () => {
+      Cypress.multiDomainEventBus.emit('html:received')
     })
 
     _.each(localToReporterEvents, (event) => {
@@ -314,31 +318,32 @@ export const eventManager = {
       this._setUnload()
     })
 
+    // TODO: refactor to promise based API
     top.addEventListener('message', (event) => {
       // currently used for tests, can be removed later
       if (event.data && event.data.actual) return
 
-      switch (event.data.event) {
-        case 'cross:domain:window:before:load':
-          this.crossDomainDriverWindow = event.source
+      // check if message is cross domain and if so, feed the message into
+      // the cross domain bus with args and strip prefix
+      // console.log('Event Manager received', event)
+      // console.log('EM received', event)
+      if (event.data.event.includes('cross:domain:')) {
+        const messageName = event.data.event.replace('cross:domain:', '')
 
-          return
-        case 'cross:domain:window:load':
-          return Cypress.action('runner:cross:domain:window:load')
-        case 'cross:domain:bridge:ready':
-          return Cypress.action('runner:cross:domain:bridge:ready')
-        case 'cross:domain:ran:domain:fn':
-          return Cypress.action('runner:cross:domain:ran:domain:fn')
-        case 'cross:domain:queue:finished':
-          return Cypress.action('runner:cross:domain:queue:finished')
-        case 'cross:domain:command:enqueued':
-          return Cypress.action('runner:cross:domain:command:enqueued', event.data.data)
-        case 'cross:domain:command:update':
-          return Cypress.action('runner:cross:domain:command:update', event.data.data)
-        default:
-          // eslint-disable-next-line no-console
-          console.log('Unexpected postMessage:', event.data)
+        // NOTE: need a special case here for 'window:before:load'
+        // where we need to set the crossDomainDriverWindow to source to
+        // communicate back to the iframe
+        if (messageName === 'window:before:load') {
+          Cypress.multiDomainEventBus.emit(messageName, event.source)
+        } else {
+          Cypress.multiDomainEventBus.emit(messageName, event.data.data)
+        }
+
+        return
       }
+
+      // eslint-disable-next-line no-console
+      console.log('Unexpected postMessage:', event.data)
     }, false)
   },
 
@@ -528,8 +533,30 @@ export const eventManager = {
       }
     })
 
-    Cypress.on('cross:domain:message', (data) => {
+    // TODO: verify this
+    Cypress.multiDomainEventBus.on('to:spec:bridge', (data) => {
+      // console.log('sending data to cross domain driver window', data)
       this.crossDomainDriverWindow.postMessage(data, '*')
+    })
+
+    // TODO: verify this
+    Cypress.multiDomainEventBus.on('window:before:load', (source) => {
+      this.crossDomainDriverWindow = source
+    })
+
+    Cypress.multiDomainEventBus.on('window:load', () => {
+      Cypress.emit('internal:window:load', { type: 'cross:domain' })
+    })
+
+    Cypress.multiDomainEventBus.on('cross:origin:error', (error) => {
+      Cypress.emit('internal:window:load', {
+        type: 'cross:domain:failure',
+        error,
+      })
+    })
+
+    Cypress.multiDomainEventBus.on('expect:domain', (domain) => {
+      localBus.emit('expect:domain', domain)
     })
   },
 
@@ -624,7 +651,7 @@ export const eventManager = {
   },
 
   notifyCrossDomainBridgeReady () {
-    Cypress.emit('cross:domain:bridge:ready')
+    Cypress.multiDomainEventBus.emit('bridge:ready')
   },
 
   focusTests () {

@@ -6,7 +6,8 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
   let timeoutId
 
   // @ts-ignore
-  Cypress.on('cross:domain:html:received', () => {
+  Cypress.multiDomainEventBus.on('html:received', () => {
+    console.log('html received!')
     // when a secondary domain is detected by the proxy, it holds it up
     // to provide time for the spec bridge to be set up. normally, the queue
     // will not continue until the page is stable, but this signals it to go
@@ -27,6 +28,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
     // this isn't fully implemented, but in place to be able to test out
     // the other parts of multidomain
     switchToDomain (domain, fn) {
+      console.log(`switching to domain: ${domain}`)
       clearTimeout(timeoutId)
 
       Cypress.log({
@@ -59,8 +61,8 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
           // @ts-ignore
           cy.clearTimeout()
 
-          Cypress.action('cy:cross:domain:message', {
-            message: 'run:command',
+          Cypress.multiDomainEventBus.emit('to:spec:bridge', {
+            event: 'run:command',
           })
 
           return deferred.promise
@@ -103,29 +105,31 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
         }
       }
 
+      console.log('rebinding commands')
       // @ts-ignore
-      Cypress.on('cross:domain:command:enqueued', addCommand)
+      Cypress.multiDomainEventBus.on('command:enqueued', addCommand)
       // @ts-ignore
-      Cypress.on('cross:domain:command:update', updateCommand)
+      Cypress.multiDomainEventBus.on('command:update', updateCommand)
 
       return new Bluebird((resolve) => {
         // @ts-ignore
-        Cypress.once('cross:domain:ran:domain:fn', () => {
+        Cypress.multiDomainEventBus.once('ran:domain:fn', () => {
           resolve()
         })
 
         // @ts-ignore
-        Cypress.once('cross:domain:queue:finished', () => {
+        Cypress.multiDomainEventBus.once('queue:finished', () => {
+          console.log('unbinding commands')
           // @ts-ignore
-          Cypress.off('cross:domain:command:enqueued', addCommand)
+          Cypress.multiDomainEventBus.off('command:enqueued', addCommand)
           // @ts-ignore
-          Cypress.off('cross:domain:command:update', updateCommand)
+          Cypress.multiDomainEventBus.off('command:update', updateCommand)
         })
 
         // fired once the spec bridge is set up and ready to
         // receive messages
         // @ts-ignore
-        Cypress.once('cross:domain:bridge:ready', () => {
+        Cypress.multiDomainEventBus.once('bridge:ready', () => {
           state('readyForMultidomain', true)
           // let the proxy know to let the response for the secondary
           // domain html through, so the page will finish loading
@@ -139,12 +143,14 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
 
           // once the secondary domain page loads, send along the
           // user-specified callback to run in that domain
-          Cypress.action('cy:cross:domain:message', {
-            message: 'run:domain:fn',
-            // the log count needs to be synced between domains so logs
-            // are guaranteed to have unique ids
-            logCounter: $Log.getCounter(),
-            fn: fn.toString(),
+          Cypress.multiDomainEventBus.emit('to:spec:bridge', {
+            event: 'run:domain:fn',
+            data: {
+              // the log count needs to be synced between domains so logs
+              // are guaranteed to have unique ids
+              logCounter: $Log.getCounter(),
+              fn: fn.toString(),
+            },
           })
 
           state('readyForMultidomain', false)
@@ -154,7 +160,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
 
         // this signals to the runner to create the spec bridge for
         // the specified domain
-        Cypress.action('cy:expect:domain', domain)
+        Cypress.multiDomainEventBus.emit('expect:domain', domain)
       })
     },
   })

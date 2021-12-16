@@ -94,6 +94,10 @@ export default class Iframes extends Component {
 
     this.props.eventManager.on('print:selector:elements:to:console', this._printSelectorElementsToConsole)
 
+    // const Cypress = this.props.eventManager.getCypress()
+
+    // Cypress.multiDomainEventBus.on('expect:domain', this._addCrossDomainIframe)
+
     this.props.eventManager.on('expect:domain', this._addCrossDomainIframe)
 
     this._disposers.push(autorun(() => {

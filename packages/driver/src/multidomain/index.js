@@ -1,4 +1,5 @@
 import 'setimmediate'
+import { EventEmitter } from 'events'
 
 import '../config/bluebird'
 import '../config/jquery'
@@ -13,9 +14,12 @@ import { create as createJQuery } from '../cy/jquery'
 import $Listeners from '../cy/listeners'
 import { create as createSnapshots } from '../cy/snapshots'
 import { create as createOverrides } from '../cy/overrides'
+const multiDomainEventBus = new EventEmitter()
 
-const postMessage = (event, data) => {
-  top.postMessage({ event, data }, '*')
+const postCrossDomainMessage = (event, data) => {
+  let prefixedEvent = `cross:domain:${event}`
+
+  top.postMessage({ event: prefixedEvent, data }, '*')
 }
 
 const onBeforeAppWindowLoad = (autWindow) => {
@@ -69,23 +73,23 @@ const onBeforeAppWindowLoad = (autWindow) => {
 
     // it's not strictly necessary to send the name, but it can be useful
     // for debugging purposes
-    postMessage('cross:domain:command:enqueued', { id, name })
+    postCrossDomainMessage('command:enqueued', { id, name })
   }
 
   const onCommandEnd = (command) => {
     const id = command.get('id')
 
-    postMessage('cross:domain:command:update', { id, end: true })
+    postCrossDomainMessage('command:update', { id, end: true })
   }
 
   const onLogAdded = (attrs) => {
-    postMessage('cross:domain:command:update', {
+    postCrossDomainMessage('command:update', {
       logAdded: $Log.toSerializedJSON(attrs),
     })
   }
 
   const onLogChanged = (attrs) => {
-    postMessage('cross:domain:command:update', {
+    postCrossDomainMessage('command:update', {
       logChanged: $Log.toSerializedJSON(attrs),
     })
   }
@@ -96,17 +100,27 @@ const onBeforeAppWindowLoad = (autWindow) => {
   Cypress.on('log:added', onLogAdded)
   Cypress.on('log:changed', onLogChanged)
 
-  const run = (data) => {
+  // if (multiDomainEventBus.id) {
+  //   console.log('multidomain event bus: ', multiDomainEventBus.id)
+  // } else {
+  //   console.log('setting multi domain event bus id')
+  //   multiDomainEventBus.id = 5
+  // }
+
+  console.log('binding run:domain:fn')
+  multiDomainEventBus.on('run:domain:fn', (data) => {
+    console.log('run:domain:fn:cross:origin')
     // syncs up the log number with the primary domain
     $Log.setCounter(data.logCounter)
 
     // TODO: await this if it's a promise, or do whatever cy.then does
     window.eval(`(${data.fn})()`)
 
-    postMessage('cross:domain:ran:domain:fn')
-  }
+    postCrossDomainMessage('ran:domain:fn')
+  })
 
-  const runCommand = () => {
+  multiDomainEventBus.on('run:command', () => {
+    console.log('run:command:cross:origin')
     const next = state('next')
 
     if (next) {
@@ -117,22 +131,15 @@ const onBeforeAppWindowLoad = (autWindow) => {
     // the queue hasn't started yet, so run it
     cy.queue.run(false)
     .then(() => {
-      postMessage('cross:domain:queue:finished')
+      console.log('iframe queue finished')
+      postCrossDomainMessage('queue:finished')
     })
-  }
+  })
 
   const onMessage = (event) => {
     if (!event.data) return
 
-    switch (event.data.message) {
-      case 'run:domain:fn':
-        return run(event.data)
-      case 'run:command':
-        return runCommand()
-      default:
-        // eslint-disable-next-line no-console
-        console.log('Unknown message received in', window.location.origin, ':', event.data)
-    }
+    multiDomainEventBus.emit(event.data.event, event.data.data)
   }
 
   // incoming messages from the primary domain
@@ -165,7 +172,7 @@ const onBeforeAppWindowLoad = (autWindow) => {
       return undefined
     },
     onLoad () {
-      postMessage('cross:domain:window:load')
+      postCrossDomainMessage('window:load')
     },
     onUnload (e) {
       window.removeEventListener('message', onMessage)
@@ -198,9 +205,9 @@ const onBeforeAppWindowLoad = (autWindow) => {
     },
   })
 
-  postMessage('cross:domain:window:before:load')
+  postCrossDomainMessage('window:before:load')
 }
 
 window.__onBeforeAppWindowLoad = onBeforeAppWindowLoad
 
-postMessage('cross:domain:bridge:ready')
+postCrossDomainMessage('bridge:ready')
