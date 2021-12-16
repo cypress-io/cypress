@@ -1170,8 +1170,12 @@ export class ProjectLifecycleManager {
   }
 
   private configFileWarningCheck () {
+    if (this.metaState.hasLegacyCypressJson && !this.metaState.hasValidConfigFile) {
+      this.ctx.onError(this.ctx.error('CONFIG_FILE_MIGRATION_NEEDED', this.projectRoot), 'global')
+    }
+
     if (this.metaState.hasMultipleConfigPaths) {
-      this.ctx.onWarning(this.ctx.error('CONFIG_FILES_LANGUAGE_CONFLICT', this.projectRoot))
+      this.ctx.onError(this.ctx.error('CONFIG_FILES_LANGUAGE_CONFLICT', this.projectRoot), 'global')
     }
 
     if (this.metaState.hasValidConfigFile && this.metaState.hasLegacyCypressJson) {
