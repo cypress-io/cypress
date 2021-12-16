@@ -1,3 +1,4 @@
+import type { Socket } from '@packages/socket/lib/browser'
 import type MobX from 'mobx'
 
 export {}
@@ -17,6 +18,8 @@ export {}
  */
 declare global {
   interface Window {
+    ws: Socket
+
     UnifiedRunner: {
       /**
        * decode config, which we receive as a base64 string
