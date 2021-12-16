@@ -338,6 +338,7 @@ export class EventManager {
   setup (config) {
     Cypress = this.Cypress = this.$CypressDriver.create(config)
 
+    // @ts-ignore
     window.Cypress = Cypress
 
     this._addListeners()
