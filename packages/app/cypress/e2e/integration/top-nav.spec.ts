@@ -237,68 +237,50 @@ describe('App Top Nav Workflows', () => {
     })
   })
 
-  // describe('Login', () => {
-  //   context('user logged in', () => {
-  //     beforeEach(() => {
-  //       setupMockBrowsers()
-  //       cy.openProject('launchpad')
-  //       cy.startAppServer()
-  //       cy.loginUser()
-  //       cy.withCtx(async (ctx) => {
-  //         ctx.coreData.isAuthBrowserOpened = true
-  //         // sinon.stub(ctx._apis.authApi, 'logOut').resolves()
-  //       })
-  //       // cy.remoteGraphQLIntercept(async (obj) => {
-  //       //   obj.result.data.cloudViewer = null
+  describe('Login', () => {
+    context('user logged in', () => {
+      beforeEach(() => {
+        cy.findBrowsers()
+        cy.openProject('launchpad')
+        cy.startAppServer()
+        cy.loginUser()
+        cy.visitApp()
 
-  //       //   return obj.result
-  //       // })
+        cy.findByTestId('app-header-bar').findByRole('button', { name: 'Log In', expanded: false }).as('logInButton')
+      })
 
-  //       cy.visitApp()
+      it('shows user in top nav when logged in', () => {
+        cy.get('@logInButton').click()
 
-  //       cy.findByTestId('app-header-bar').findByRole('button', { name: 'Log In', expanded: false }).as('logInButton')
-  //     })
+        cy.findByTestId('login-panel').contains('Test User').should('be.visible')
+        cy.findByTestId('login-panel').contains('test@example.com').should('be.visible')
+        cy.findByRole('link', { name: 'Profile Settings' }).should('be.visible').and('have.attr', 'href', 'https://on.cypress.io/dashboard/profile')
 
-  //     it.only('shows user in top nav when logged in', () => {
-  //       cy.get('@logInButton').click()
+        cy.intercept('mutation-Logout').as('logout')
 
-  //       cy.findByTestId('login-panel').contains('Test User').should('be.visible')
-  //       cy.findByTestId('login-panel').contains('test@example.com').should('be.visible')
-  //       cy.findByRole('link', { name: 'Profile Settings' }).should('be.visible').and('have.attr', 'href', 'https://on.cypress.io/dashboard/profile')
+        cy.findByRole('button', { name: 'Log Out' }).should('be.visible').click()
 
-  //       cy.intercept('mutation-Logout').as('logout')
+        cy.wait('@logout')
+      })
+    })
 
-  //       cy.pause()
+    context('user not logged in', () => {
+      beforeEach(() => {
+        cy.findBrowsers()
+        cy.openProject('launchpad')
+        cy.startAppServer()
+        cy.visitApp()
 
-  //       cy.findByRole('button', { name: 'Log Out' }).should('be.visible').click()
+        cy.findByTestId('app-header-bar').findByRole('button', { name: 'Log In' }).as('logInButton')
+      })
 
-  //       cy.wait('@logout').then(({ request, response }) => {
-  //         debugger
-  //       })
+      it('shows log in modal when button is pressed', () => {
+        cy.get('@logInButton').click()
 
-  //       cy.pause()
-
-  //       cy.findByTestId('login-panel').should('not.be.visible')
-  //     })
-  //   })
-
-  //   context('user not logged in', () => {
-  //     beforeEach(() => {
-  //       setupMockBrowsers()
-  //       cy.openProject('launchpad')
-  //       cy.startAppServer()
-  //       cy.visitApp()
-
-  //       cy.findByTestId('app-header-bar').findByRole('button', { name: 'Log In' }).as('logInButton')
-  //     })
-
-  //     it('shows log in modal when button is pressed', () => {
-  //       cy.get('@logInButton').click()
-
-  //       cy.findByRole('dialog', { name: 'Log In To Cypress' }).as('logInModal')
-  //       cy.get('@logInModal').findByRole('button', { name: 'Log In' })
-  //       cy.get('@logInModal').findByRole('button', { name: 'Close' }).click()
-  //     })
-  //   })
-  // })
+        cy.findByRole('dialog', { name: 'Log In To Cypress' }).as('logInModal')
+        cy.get('@logInModal').findByRole('button', { name: 'Log In' })
+        cy.get('@logInModal').findByRole('button', { name: 'Close' }).click()
+      })
+    })
+  })
 })
