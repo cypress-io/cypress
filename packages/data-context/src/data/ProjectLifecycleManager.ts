@@ -325,14 +325,21 @@ export class ProjectLifecycleManager {
   }
 
   private resetInternalState () {
+    if (this._eventsIpc) {
+      this._cleanupIpc(this._eventsIpc)
+    }
+
     this.killChildProcesses()
     this.closeWatchers()
     this._configResult = { state: 'pending' }
     this._eventsIpcResult = { state: 'pending' }
+    this._envFileResult = { state: 'pending' }
     this._requireWatchers = { config: {}, setupNodeEvents: {} }
     this._eventProcess = undefined
+    this._registeredEventsTarget = undefined
     this._currentTestingType = null
     this._configFilePath = undefined
+    this._cachedFullConfig = undefined
   }
 
   get eventProcessPid () {
