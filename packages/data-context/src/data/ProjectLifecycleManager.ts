@@ -1175,7 +1175,7 @@ export class ProjectLifecycleManager {
     }
 
     if (this.metaState.hasValidConfigFile && this.metaState.hasLegacyCypressJson) {
-      this.ctx.onWarning(this.ctx.error('LEGACY_CONFIG_FILE', this.projectRoot))
+      this.ctx.onError(this.ctx.error('LEGACY_CONFIG_FILE', this.projectRoot, path.basename(this.configFilePath)), 'config')
     }
   }
 }
