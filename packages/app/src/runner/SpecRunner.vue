@@ -3,68 +3,80 @@
     id="main-pane"
     class="flex border-gray-900 border-l-1"
   >
-    <HideDuringScreenshot
-      id="inline-spec-list"
-      class="bg-gray-1000"
+    <ResizablePanels
+      :offset-left="64"
+      :max-total-width="windowWidth - 64"
+      :initial-panel1-width="initialSpecsListWidth"
+      :initial-panel2-width="initialReporterWidth"
+      :show-panel1="runnerUiStore.isSpecsListOpen && !screenshotStore.isScreenshotting"
+      :show-panel2="!screenshotStore.isScreenshotting"
+      @resize-end="handleResizeEnd"
+      @panel-width-updated="handlePanelWidthUpdated"
     >
-      <template
-        v-if="props.gql.currentProject"
-      >
-        <InlineSpecList
-          v-show="runnerUiStore.isSpecsListOpen"
-          id="reporter-inline-specs-list"
-          :gql="props.gql"
-        />
-      </template>
-
-      <ChooseExternalEditorModal
-        :open="runnerUiStore.showChooseExternalEditorModal"
-        :gql="props.gql"
-        @close="runnerUiStore.setShowChooseExternalEditorModal(false)"
-        @selected="openFile"
-      />
-    </HideDuringScreenshot>
-
-    <HideDuringScreenshot class="min-w-320px">
-      <div
-        v-once
-        :id="REPORTER_ID"
-      />
-    </HideDuringScreenshot>
-
-    <div
-      ref="runnerPane"
-      class="w-full relative"
-    >
-      <HideDuringScreenshot class="bg-white p-16px">
-        <SpecRunnerHeader
+      <template #panel1="{isDragging}">
+        <HideDuringScreenshot
           v-if="props.gql.currentProject"
-          :gql="props.gql.currentProject"
+          v-show="runnerUiStore.isSpecsListOpen"
+          id="inline-spec-list"
+          class="h-full bg-gray-1000"
+          :class="{'pointer-events-none': isDragging}"
+        >
+          <InlineSpecList
+            id="reporter-inline-specs-list"
+            :gql="props.gql"
+          />
+          <ChooseExternalEditorModal
+            :open="runnerUiStore.showChooseExternalEditorModal"
+            :gql="props.gql"
+            @close="runnerUiStore.setShowChooseExternalEditorModal(false)"
+            @selected="openFile"
+          />
+        </HideDuringScreenshot>
+      </template>
+      <template #panel2>
+        <HideDuringScreenshot
+          class="h-full"
+        >
+          <div
+            v-once
+            :id="REPORTER_ID"
+            class="w-full"
+          />
+        </HideDuringScreenshot>
+      </template>
+      <template
+        #panel3
+      >
+        <HideDuringScreenshot class="bg-white p-16px">
+          <SpecRunnerHeader
+            v-if="props.gql.currentProject"
+            :gql="props.gql.currentProject"
+            :event-manager="eventManager"
+            :get-aut-iframe="getAutIframeModel"
+          />
+        </HideDuringScreenshot>
+
+        <RemoveClassesDuringScreenshotting
+          class="h-full bg-gray-100 p-16px"
+        >
+          <ScriptError
+            v-if="autStore.scriptError"
+            :error="autStore.scriptError.error"
+          />
+          <div
+            v-show="!autStore.scriptError"
+            :id="RUNNER_ID"
+            class="origin-top-left viewport"
+            :style="viewportStyle"
+          />
+        </RemoveClassesDuringScreenshotting>
+        <SnapshotControls
           :event-manager="eventManager"
           :get-aut-iframe="getAutIframeModel"
         />
-      </HideDuringScreenshot>
-
-      <RemoveClassesDuringScreenshotting
-        class="h-full bg-gray-100 p-16px"
-      >
-        <ScriptError
-          v-if="autStore.scriptError"
-          :error="autStore.scriptError.error"
-        />
-        <div
-          v-show="!autStore.scriptError"
-          :id="RUNNER_ID"
-          class="origin-top-left viewport"
-          :style="viewportStyle"
-        />
-      </RemoveClassesDuringScreenshotting>
-      <SnapshotControls
-        :event-manager="eventManager"
-        :get-aut-iframe="getAutIframeModel"
-      />
-      <ScreenshotHelperPixels />
-    </div>
+        <ScreenshotHelperPixels />
+      </template>
+    </ResizablePanels>
   </RemovePositioningDuringScreenshot>
 </template>
 
@@ -89,8 +101,10 @@ import type { SpecRunnerFragment } from '../generated/graphql'
 import { usePreferences } from '../composables/usePreferences'
 import ScriptError from './ScriptError.vue'
 import { useWindowSize } from '@vueuse/core'
+import ResizablePanels, { DraggablePanel } from './ResizablePanels.vue'
+import { runnerConstants } from './runner-constants'
 
-const { width, height } = useWindowSize()
+const { height: windowHeight, width: windowWidth } = useWindowSize()
 
 gql`
 fragment SpecRunner on Query {
@@ -104,6 +118,8 @@ fragment SpecRunner on Query {
     preferences {
       isSpecsListOpen
       autoScrollingEnabled
+      reporterWidth
+      specListWidth
     }
   }
 }
@@ -126,44 +142,57 @@ const autStore = useAutStore()
 const screenshotStore = useScreenshotStore()
 const runnerUiStore = useRunnerUiStore()
 const preferences = usePreferences()
+const initialSpecsListWidth: number = props.gql.localSettings.preferences.specListWidth ?? runnerConstants.defaultSpecListWidth
+const initialReporterWidth: number = props.gql.localSettings.preferences.reporterWidth ?? runnerConstants.defaultReporterWidth
+const reporterWidth = ref(initialReporterWidth)
+const specListWidth = ref(initialSpecsListWidth)
 
+// Todo: maybe `update` should take an object, not just a key-value pair and do updates like this all in one batch
 preferences.update('autoScrollingEnabled', props.gql.localSettings.preferences.autoScrollingEnabled ?? true)
 preferences.update('isSpecsListOpen', props.gql.localSettings.preferences.isSpecsListOpen ?? true)
-
-const runnerPane = ref<HTMLDivElement>()
+preferences.update('reporterWidth', initialReporterWidth)
+preferences.update('specListWidth', initialSpecsListWidth)
 
 const autMargin = 16
+const collapsedNavBarWidth = 64
 
 const containerWidth = computed(() => {
-  // TODO: make these values dynamic in UNIFY-592:
-  const reporterWidth = 320
-  const navWidth = 64
-  const specsListWidth = runnerUiStore.isSpecsListOpen ? 280 : 0
   const miscBorders = 4
-  const nonAutWidth = reporterWidth + navWidth + specsListWidth + (autMargin * 2) + miscBorders
+  const nonAutWidth = reporterWidth.value + specListWidth.value + (autMargin * 2) + miscBorders + collapsedNavBarWidth
 
-  return width.value - nonAutWidth
+  return windowWidth.value - nonAutWidth
 })
 
 const containerHeight = computed(() => {
-  // TODO: make these values dynamic in UNIFY-592:
+  // TODO: in UNIFY-595 the header's contents will be finalized
+  // at narrow widths content will start to wrap
   const autHeaderHeight = 70
 
   const nonAutHeight = autHeaderHeight + (autMargin * 2)
 
-  return height.value - nonAutHeight
+  return windowHeight.value - nonAutHeight
 })
 
-const viewportStyle = computed(() => {
-  if (!runnerPane.value) {
-    return
+const handleResizeEnd = (panel: DraggablePanel) => {
+  if (panel === 'panel1') {
+    preferences.update('specListWidth', specListWidth.value)
+  } else {
+    preferences.update('reporterWidth', reporterWidth.value)
   }
+}
 
+const handlePanelWidthUpdated = ({ panel, width }) => {
+  if (panel === 'panel1') {
+    specListWidth.value = width
+  } else {
+    reporterWidth.value = width
+  }
+}
+
+const viewportStyle = computed(() => {
   let scale: number = 1
 
-  if (screenshotStore.isScreenshotting) {
-    scale = 1
-  } else {
+  if (!screenshotStore.isScreenshotting) {
     scale = Math.min(containerWidth.value / autStore.viewportDimensions.width, containerHeight.value / autStore.viewportDimensions.height, 1)
   }
 
@@ -276,6 +305,7 @@ $navbar-width: 80px;
 
 #unified-runner {
   position: relative;
+  margin: 0 auto;
 }
 
 #unified-reporter {

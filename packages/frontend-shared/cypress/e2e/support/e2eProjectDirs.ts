@@ -56,6 +56,7 @@ export const e2eProjectDirs = [
   'plugins-root-async-error',
   'pristine',
   'pristine-with-config-file',
+  'react-code-gen',
   'read-only-project-root',
   'record',
   'remote-debugging-disconnect',

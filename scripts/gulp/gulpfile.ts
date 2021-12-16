@@ -33,11 +33,6 @@ gulp.task(
     // Autobarrel watcher
     autobarrelWatcher,
 
-    // Codegen for our GraphQL Server so we have the latest schema to build
-    // the frontend codegen correctly
-    // Fetch the latest "remote" schema from the Cypress cloud
-    syncRemoteGraphQL,
-
     // Codegen for our GraphQL Server so we have the latest schema to build the frontend codegen correctly
     nexusCodegenWatch,
 

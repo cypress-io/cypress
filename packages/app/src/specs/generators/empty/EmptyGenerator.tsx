@@ -7,5 +7,5 @@ export const EmptyGenerator: SpecGenerator = {
   entry: EmptyGeneratorCard,
   matches: filters.matchesE2E,
   disabled: () => { },
-  id: 'empty-generator',
+  id: 'empty',
 }
