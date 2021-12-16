@@ -2,6 +2,10 @@
   <template v-if="query.data.value">
     <HeaderBar />
     <div class="p-24px">
+      <BaseError
+        v-if="query.data.value.baseError"
+        :gql="query.data.value"
+      />
       <GlobalPage
         v-if="query.data.value.isInGlobalMode && !query.data.value?.currentProject"
         :gql="query.data.value"
@@ -66,6 +70,7 @@ gql`
 query MainLaunchpadQuery {
   ...TestingTypeCards
   ...Wizard
+  ...BaseError
 
   currentProject {
     id

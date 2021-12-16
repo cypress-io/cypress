@@ -29,8 +29,9 @@ query AppQuery {
     needsRelaunch
   }
   baseError {
-    ...BaseError
+    __typename
   }
+  ...BaseError
 }
 `
 
