@@ -155,7 +155,5 @@ export class ProjectConfigDataActions {
       { projectId },
       this.ctx._apis.projectApi.error,
     )
-
-    // TODO: refresh config object
   }
 }
