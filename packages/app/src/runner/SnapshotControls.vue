@@ -1,6 +1,6 @@
 <template>
-  <div class="absolute inset-x-0 bottom-24">
-    <div class="h-11 flex justify-center">
+  <div class="inset-x-0 bottom-24 absolute">
+    <div class="flex justify-center children:h-11">
       <SnapshotMessage
         v-if="snapshotStore.messageTitle"
         :message-title="snapshotStore.messageTitle"
