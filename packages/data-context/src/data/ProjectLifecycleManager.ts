@@ -20,7 +20,7 @@ import type { DataContext } from '..'
 import { LoadConfigReply, SetupNodeEventsReply, ProjectConfigIpc, IpcHandler } from './ProjectConfigIpc'
 import assert from 'assert'
 import type { AllModeOptions, FoundBrowser, FullConfig, TestingType } from '@packages/types'
-import type { BaseErrorDataShape } from '.'
+import type { BaseErrorDataShape, WarningError } from '.'
 import { autoBindDebug } from '../util/autoBindDebug'
 
 const debug = debugLib(`cypress:lifecycle:ProjectLifecycleManager`)
@@ -1117,16 +1117,16 @@ export class ProjectLifecycleManager {
     //       }
     //     }
 
-    //     const handleWarning = (warningErr) => {
-    //       debug('plugins process warning:', warningErr.stack)
-    //       if (!pluginsProcess) return // prevent repeating this in case of multiple warnings
+    const handleWarning = (warningErr: WarningError) => {
+      debug('plugins process warning:', warningErr.stack)
+      // if (!pluginsProcess) return // prevent repeating this in case of multiple warnings
 
-    //       return options.onWarning(warningErr)
-    //     }
+      return this.ctx.onWarning(warningErr)
+    }
 
     //     pluginsProcess.on('error', handleError)
-    //     ipc.on('error:plugins', handleError)
-    //     ipc.on('warning', handleWarning)
+    // ipc.on('error:plugins', handleError)
+    ipc.on('warning', handleWarning)
 
     return dfd
   }

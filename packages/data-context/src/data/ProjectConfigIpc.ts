@@ -21,6 +21,12 @@ export interface SerializedLoadConfigReply {
   requires: string[]
 }
 
+export interface WarningError {
+  name: 'Error'
+  message: string
+  stack: string
+}
+
 /**
  * The ProjectConfigIpc is an EventEmitter wrapping the childProcess,
  * adding a "send" method for sending events from the parent process into the childProcess,
@@ -55,7 +61,7 @@ export class ProjectConfigIpc extends EventEmitter {
     return this.childProcess.send({ event, args })
   }
 
-  on(evt: 'warning', listener: () => void): this
+  on(evt: 'warning', listener: (warningErr: WarningError) => void): this
   on (evt: string, listener: (...args: any[]) => void) {
     return super.on(evt, listener)
   }
