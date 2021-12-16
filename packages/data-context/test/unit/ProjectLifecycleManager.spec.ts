@@ -1,12 +1,12 @@
-import sinon from 'sinon'
-import { ProjectLifecycleManager, Ctx_ProjectLifecycleManager } from '../../src/data/ProjectLifecycleManager'
+// import sinon from 'sinon'
+// import { Ctx_ProjectLifecycleManager } from '../../src/data/ProjectLifecycleManager'
 
-function fakeCtx (): Ctx_ProjectLifecycleManager {
-  return {
-    fs: sinon.stub() as any,
+// function fakeCtx (): Ctx_ProjectLifecycleManager {
+//   return {
+//     fs: sinon.stub() as any,
 
-  }
-}
+//   }
+// }
 
 describe('ProjectLifecycleManager', () => {
   describe('constructor', () => {
@@ -15,15 +15,15 @@ describe('ProjectLifecycleManager', () => {
     })
   })
 
-  function FakeDataContext () {
-    return {
-      fs: {
-        readJSON: sinon.stub(),
-        stat: sinon.stub(),
-      },
+  // function FakeDataContext () {
+  //   return {
+  //     fs: {
+  //       readJSON: sinon.stub(),
+  //       stat: sinon.stub(),
+  //     },
 
-    }
-  }
+  //   }
+  // }
 
   context('Creation', () => {
     it('Guards against legacy plugins')

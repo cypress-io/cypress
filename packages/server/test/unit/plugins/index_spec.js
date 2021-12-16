@@ -33,7 +33,7 @@ describe.skip('lib/plugins/index', () => {
       configFile: `${todosPath}/cypress.config.js`,
     }
 
-    ctx.setCurrentProjectForTestSetup(projectRoot)
+    ctx.setCurrentProjectForTestSetup(todosPath)
 
     getOptions = (overrides = {}) => {
       return {

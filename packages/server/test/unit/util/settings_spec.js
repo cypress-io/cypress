@@ -31,7 +31,7 @@ describe('lib/util/settings', () => {
       it('promises cypress.config.js', function () {
         return this.setup({ foo: 'bar' })
         .then(() => {
-          return settings.read(projectRoot, defaultOptions)
+          return settings.read(projectRoot)
         }).then((obj) => {
           expect(obj).to.deep.eq({ foo: 'bar' })
         })

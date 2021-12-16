@@ -17,7 +17,6 @@ const savedState = require(`../../lib/saved_state`)
 const plugins = require(`../../lib/plugins`)
 const runEvents = require(`../../lib/plugins/run_events`)
 const system = require(`../../lib/util/system`)
-const { fs } = require(`../../lib/util/fs`)
 const settings = require(`../../lib/util/settings`)
 const { getCtx } = require(`../../lib/makeDataContext`)
 
