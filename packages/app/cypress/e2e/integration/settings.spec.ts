@@ -12,7 +12,7 @@ describe('App: Settings', { viewportWidth: 600 }, () => {
     cy.visitApp()
     cy.findByText('Settings').click()
 
-    cy.get('div[data-testid="header-bar"]').should('contain', 'Settings')
+    cy.get('div[data-cy="app-header-bar"]').should('contain', 'Settings')
     cy.findByText('Device Settings').should('be.visible')
     cy.findByText('Project Settings').should('be.visible')
   })

@@ -9,7 +9,7 @@ const difficultFile = {
 
 const noResultsSlot = () => <div data-testid="no-results">No Results</div>
 const noResultsSelector = '[data-testid=no-results]'
-const fileRowSelector = '[data-testid=file-list-row]'
+const fileRowSelector = '[data-cy=file-list-row]'
 
 const allFiles = randomComponents(10, 'FileParts')
 

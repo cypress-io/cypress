@@ -1,6 +1,6 @@
 <template>
   <button
-    data-testid="file-match-button"
+    data-cy="file-match-button"
     class="inline-flex items-center h-full text-gray-700 transition duration-150 rounded-l outline-none group bg-gray-50 border-r-gray-100 border-r-1 hocus:bg-indigo-50 hocus:border-r-indigo-300 hocus:text-indigo-500 px-12px"
   >
     <i-cy-chevron-right-small_x16
