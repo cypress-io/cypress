@@ -9,6 +9,7 @@ import { createRouter } from './router/router'
 import { createPinia } from './store'
 import Toast, { POSITION } from 'vue-toastification'
 import 'vue-toastification/dist/index.css'
+import { createWebsocket } from './runner'
 
 // set a global so we can run
 // conditional code in the vite branch
@@ -17,6 +18,10 @@ import 'vue-toastification/dist/index.css'
 window.__vite__ = true
 
 const app = createApp(App)
+
+const ws = createWebsocket()
+
+window.ws = ws
 
 app.use(Toast, {
   position: POSITION.BOTTOM_RIGHT,
