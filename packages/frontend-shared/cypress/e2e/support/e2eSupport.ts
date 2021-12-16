@@ -6,6 +6,7 @@ import type { AuthenticatedUserShape } from '@packages/data-context/src/data'
 import type { DocumentNode, ExecutionResult } from 'graphql'
 import type { OpenModeOptions } from '@packages/types'
 import type { E2ETaskMap } from '../e2ePluginSetup'
+import installCustomPercyCommand from '@packages/ui-components/cypress/support/customPercyCommand'
 
 const NO_TIMEOUT = 1000 * 1000
 const FOUR_SECONDS = 4 * 1000
@@ -282,3 +283,5 @@ Cypress.Commands.add('startAppServer', startAppServer)
 Cypress.Commands.add('openProject', openProject)
 Cypress.Commands.add('withCtx', withCtx)
 Cypress.Commands.add('remoteGraphQLIntercept', remoteGraphQLIntercept)
+
+installCustomPercyCommand()
