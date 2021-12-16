@@ -4,11 +4,11 @@ const _ = require('lodash')
 const debug = require('debug')('test')
 const Fixtures = require('@tooling/system-tests/lib/fixtures')
 
-const config = require(`${root}lib/config`)
-const errors = require(`${root}lib/errors`)
-const configUtil = require(`${root}lib/util/config`)
-const scaffold = require(`${root}lib/scaffold`)
-let settings = require(`${root}lib/util/settings`)
+const config = require(`../../lib/config`)
+const errors = require(`../../lib/errors`)
+const configUtil = require(`../../lib/util/config`)
+const scaffold = require(`../../lib/scaffold`)
+let settings = require(`../../lib/util/settings`)
 
 describe('lib/config', () => {
   before(function () {
@@ -1430,6 +1430,7 @@ describe('lib/config', () => {
             e2e: { from: 'default', value: {} },
             env: {},
             execTimeout: { value: 60000, from: 'default' },
+            exit: { value: true, from: 'default' },
             experimentalFetchPolyfill: { value: false, from: 'default' },
             experimentalInteractiveRunEvents: { value: false, from: 'default' },
             experimentalSourceRewriting: { value: false, from: 'default' },
@@ -1441,6 +1442,8 @@ describe('lib/config', () => {
             ignoreTestFiles: { value: '*.hot-update.js', from: 'default' },
             includeShadowDom: { value: false, from: 'default' },
             integrationFolder: { value: 'cypress/integration', from: 'default' },
+            isInteractive: { value: true, from: 'default' },
+            keystrokeDelay: { value: 0, from: 'default' },
             modifyObstructiveCode: { value: true, from: 'default' },
             numTestsKeptInMemory: { value: 50, from: 'default' },
             pageLoadTimeout: { value: 60000, from: 'default' },
@@ -1517,6 +1520,7 @@ describe('lib/config', () => {
             downloadsFolder: { value: 'cypress/downloads', from: 'default' },
             e2e: { from: 'default', value: {} },
             execTimeout: { value: 60000, from: 'default' },
+            exit: { value: true, from: 'default' },
             experimentalFetchPolyfill: { value: false, from: 'default' },
             experimentalInteractiveRunEvents: { value: false, from: 'default' },
             experimentalSourceRewriting: { value: false, from: 'default' },
@@ -1550,6 +1554,8 @@ describe('lib/config', () => {
             ignoreTestFiles: { value: '*.hot-update.js', from: 'default' },
             includeShadowDom: { value: false, from: 'default' },
             integrationFolder: { value: 'cypress/integration', from: 'default' },
+            isInteractive: { value: true, from: 'default' },
+            keystrokeDelay: { value: 0, from: 'default' },
             modifyObstructiveCode: { value: true, from: 'default' },
             numTestsKeptInMemory: { value: 50, from: 'default' },
             pageLoadTimeout: { value: 60000, from: 'default' },

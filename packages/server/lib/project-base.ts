@@ -48,6 +48,7 @@ export interface Cfg extends ReceivedCypressOptions {
   state?: {
     firstOpened?: number | null
     lastOpened?: number | null
+    promptsShown?: object | null
   }
 }
 
@@ -857,7 +858,7 @@ export class ProjectBase<TServer extends Server> extends EE {
       return readSettings.projectId
     }
 
-    errors.throw('NO_PROJECT_ID', settings.configFile(this.options), this.projectRoot)
+    throw errors.throw('NO_PROJECT_ID', settings.configFile(this.options), this.projectRoot)
   }
 
   async verifyExistence () {
