@@ -6,8 +6,6 @@ import type MobX from 'mobx'
 import type { LocalBusEmitsMap, LocalBusEventMap } from './event-manager-types'
 import type { FileDetails } from '@packages/types'
 
-import { client } from '@packages/socket/lib/browser'
-
 import { automation } from '@packages/runner-shared/src/automation'
 import { logger } from '@packages/runner-shared/src/logger'
 
@@ -15,30 +13,9 @@ import { logger } from '@packages/runner-shared/src/logger'
 // cannot import because it's not type safe and tsc throw many type errors.
 type $Cypress = any
 
-const automationElementId = '__cypress-string' as const
-
-const PORT_MATCH = /serverPort=(\d+)/.exec(window.location.search)
-
-const socketConfig = {
-  path: '/__socket.io',
-  transports: ['websocket'],
-}
-
-// @ts=ignore
-const ws = PORT_MATCH ? client(`http://localhost:${PORT_MATCH[1]}`, socketConfig) : client(socketConfig)
-
-declare global {
-  interface Window {
-    runnerWs: typeof ws
-    Cypress: typeof Cypress
-  }
-}
-
 const noop = () => {}
 
-ws.on('connect', () => {
-  ws.emit('runner:connected')
-})
+const automationElementId = '__cypress-string' as const
 
 const driverToReporterEvents = 'paused session:add'.split(' ')
 const driverToLocalAndReporterEvents = 'run:start run:end'.split(' ')
@@ -48,9 +25,6 @@ const driverToLocalEvents = 'viewport:changed config stop url:changed page:loadi
 const socketRerunEvents = 'runner:restart watched:file:changed'.split(' ')
 const socketToDriverEvents = 'net:stubbing:event request:event script:error'.split(' ')
 const localToReporterEvents = 'reporter:log:add reporter:log:state:changed reporter:log:remove'.split(' ')
-
-// NOTE: this is exposed for testing, ideally we should only expose this if a test flag is set
-window.runnerWs = ws
 
 /**
  * @type {Cypress.Cypress}
@@ -93,18 +67,18 @@ export class EventManager {
       return this.runSpec(state)
     }
 
-    ws.emit('is:automation:client:connected', connectionInfo, this.Mobx.action('automationEnsured', (isConnected) => {
+    window.ws.emit('is:automation:client:connected', connectionInfo, this.Mobx.action('automationEnsured', (isConnected) => {
       state.automation = isConnected ? automation.CONNECTED : automation.MISSING
-      ws.on('automation:disconnected', this.Mobx.action('automationDisconnected', () => {
+      window.ws.on('automation:disconnected', this.Mobx.action('automationDisconnected', () => {
         state.automation = automation.DISCONNECTED
       }))
     }))
 
-    ws.on('change:to:url', (url) => {
+    window.ws.on('change:to:url', (url) => {
       window.location.href = url
     })
 
-    ws.on('automation:push:message', (msg, data = {}) => {
+    window.ws.on('automation:push:message', (msg, data = {}) => {
       if (!Cypress) return
 
       switch (msg) {
@@ -122,12 +96,12 @@ export class EventManager {
       }
     })
 
-    ws.on('watched:file:changed', () => {
+    window.ws.on('watched:file:changed', () => {
       this.studioRecorder.cancel()
       rerun()
     })
 
-    ws.on('specs:changed', ({ specs, testingType }) => {
+    window.ws.on('specs:changed', ({ specs, testingType }) => {
       // do not emit the event if e2e runner is not displaying an inline spec list.
       if (testingType === 'e2e' && state.useInlineSpecList === false) {
         return
@@ -136,23 +110,23 @@ export class EventManager {
       state.setSpecs(specs)
     })
 
-    ws.on('dev-server:hmr:error', (error) => {
+    window.ws.on('dev-server:hmr:error', (error) => {
       Cypress.stop()
       this.localBus.emit('script:error', error)
     })
 
-    ws.on('dev-server:compile:success', ({ specFile }) => {
+    window.ws.on('dev-server:compile:success', ({ specFile }) => {
       if (!specFile || specFile === state?.spec?.absolute) {
         rerun()
       }
     })
 
     socketRerunEvents.forEach((event) => {
-      ws.on(event, rerun)
+      window.ws.on(event, rerun)
     })
 
     socketToDriverEvents.forEach((event) => {
-      ws.on(event, (...args) => {
+      window.ws.on(event, (...args) => {
         if (!Cypress) return
 
         Cypress.emit(event, ...args)
@@ -189,7 +163,7 @@ export class EventManager {
     })
 
     this.reporterBus.on('set:user:editor', (editor) => {
-      ws.emit('set:user:editor', editor)
+      window.ws.emit('set:user:editor', editor)
     })
 
     this.reporterBus.on('runner:restart', rerun)
@@ -248,11 +222,11 @@ export class EventManager {
     })
 
     this.reporterBus.on('external:open', (url) => {
-      ws.emit('external:open', url)
+      window.ws.emit('external:open', url)
     })
 
     this.reporterBus.on('get:user:editor', (cb) => {
-      ws.emit('get:user:editor', cb)
+      window.ws.emit('get:user:editor', cb)
     })
 
     this.reporterBus.on('open:file:unified', (file: FileDetails) => {
@@ -260,11 +234,11 @@ export class EventManager {
     })
 
     this.reporterBus.on('open:file', (url) => {
-      ws.emit('open:file', url)
+      window.ws.emit('open:file', url)
     })
 
     const studioInit = () => {
-      ws.emit('studio:init', (showedStudioModal) => {
+      window.ws.emit('studio:init', (showedStudioModal) => {
         if (!showedStudioModal) {
           this.studioRecorder.showInitModal()
         } else {
@@ -312,7 +286,7 @@ export class EventManager {
     })
 
     this.localBus.on('studio:save', (saveInfo) => {
-      ws.emit('studio:save', saveInfo, (err) => {
+      window.ws.emit('studio:save', saveInfo, (err) => {
         if (err) {
           this.reporterBus.emit('test:set:state', this.studioRecorder.saveError(err), noop)
         }
@@ -355,7 +329,7 @@ export class EventManager {
 
   start (config) {
     if (config.socketId) {
-      ws.emit('app:connect', config.socketId)
+      window.ws.emit('app:connect', config.socketId)
     }
   }
 
@@ -372,7 +346,7 @@ export class EventManager {
 
     this._addListeners()
 
-    ws.emit('watch:test:file', config.spec)
+    window.ws.emit('watch:test:file', config.spec)
   }
 
   isBrowser (browserName) {
@@ -389,7 +363,7 @@ export class EventManager {
       onSpecReady: () => {
         // get the current runnable in case we reran mid-test due to a visit
         // to a new domain
-        ws.emit('get:existing:run:state', (state: RunState = {}) => {
+        window.ws.emit('get:existing:run:state', (state: RunState = {}) => {
           if (!Cypress.runner) {
             // the tests have been reloaded
             return
@@ -419,7 +393,7 @@ export class EventManager {
           if (config.isTextTerminal && !state.currentId) {
             // we are in run mode and it's the first load
             // store runnables in backend and maybe send to dashboard
-            return ws.emit('set:runnables:and:maybe:record:tests', runnables, run)
+            return window.ws.emit('set:runnables:and:maybe:record:tests', runnables, run)
           }
 
           if (state.currentId) {
@@ -437,12 +411,12 @@ export class EventManager {
 
   _addListeners () {
     Cypress.on('message', (msg, data, cb) => {
-      ws.emit('client:request', msg, data, cb)
+      window.ws.emit('client:request', msg, data, cb)
     })
 
     driverToSocketEvents.forEach((event) => {
       Cypress.on(event, (...args) => {
-        return ws.emit(event, ...args)
+        return window.ws.emit(event, ...args)
       })
     })
 
@@ -574,7 +548,7 @@ export class EventManager {
 
   stop () {
     this.localBus.removeAllListeners()
-    ws.off()
+    window.ws.off()
   }
 
   async teardown (state: BaseStore) {
@@ -635,7 +609,7 @@ export class EventManager {
   }
 
   _studioCopyToClipboard (cb) {
-    ws.emit('studio:get:commands:text', this.studioRecorder.logs, (commandsText) => {
+    window.ws.emit('studio:get:commands:text', this.studioRecorder.logs, (commandsText) => {
       this.studioRecorder.copyToClipboard(commandsText)
       .then(cb)
     })
@@ -657,7 +631,7 @@ export class EventManager {
   }
 
   notifyRunningSpec (specFile) {
-    ws.emit('spec:changed', specFile)
+    window.ws.emit('spec:changed', specFile)
   }
 
   snapshotUnpinned () {
@@ -675,7 +649,7 @@ export class EventManager {
   }
 
   launchBrowser (browser) {
-    ws.emit('reload:browser', window.location.toString(), browser && browser.name)
+    window.ws.emit('reload:browser', window.location.toString(), browser && browser.name)
   }
 
   // clear all the cypress specific cookies

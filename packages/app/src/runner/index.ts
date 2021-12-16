@@ -23,8 +23,26 @@ import { getRunnerElement, empty } from './utils'
 import { IframeModel } from './iframe-model'
 import { AutIframe } from './aut-iframe'
 import { EventManager } from './event-manager'
+import { client } from '@packages/socket/lib/browser'
 
 let _eventManager: EventManager | undefined
+
+export function createWebsocket () {
+  const PORT_MATCH = /serverPort=(\d+)/.exec(window.location.search)
+
+  const socketConfig = {
+    path: '/__socket.io',
+    transports: ['websocket'],
+  }
+
+  const ws = PORT_MATCH ? client(`http://localhost:${PORT_MATCH[1]}`, socketConfig) : client(socketConfig)
+
+  ws.on('connect', () => {
+    ws.emit('runner:connected')
+  })
+
+  return ws
+}
 
 export function initializeEventManager (UnifiedRunner: any) {
   _eventManager = new EventManager(

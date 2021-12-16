@@ -8,11 +8,18 @@ import NoSpec from './errors/no-spec'
 import State from './lib/state'
 import { Container, selectorPlaygroundModel, StudioRecorder } from '@packages/runner-shared'
 import { EventManager } from '@packages/app/src/runner/event-manager'
+import { createWebsocket } from '@packages/app/src/runner'
 import util from './lib/util'
 
 const driverUtils = $Cypress.utils
 
 MobX.configure({ enforceActions: 'always' })
+
+const ws = createWebsocket()
+
+// NOTE: this is exposed for testing, ideally we should only expose this if a test flag is set
+window.runnerWs = ws
+window.ws = ws
 
 const eventManager = new EventManager(
   $Cypress,
