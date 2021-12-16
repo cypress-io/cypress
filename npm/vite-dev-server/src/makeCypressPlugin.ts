@@ -1,4 +1,4 @@
-import { resolve, posix, sep } from 'path'
+import { resolve, sep } from 'path'
 import { readFile } from 'fs'
 import { promisify } from 'util'
 import Debug from 'debug'
