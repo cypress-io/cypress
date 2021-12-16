@@ -1,4 +1,5 @@
-import { FoundSpec, FrontendFramework, FRONTEND_FRAMEWORKS, ResolvedFromConfig, RESOLVED_FROM, SpecFileWithExtension, STORYBOOK_GLOB } from '@packages/types'
+import os from 'os'
+import { FrontendFramework, FRONTEND_FRAMEWORKS, ResolvedFromConfig, RESOLVED_FROM, SpecFileWithExtension, STORYBOOK_GLOB, FoundSpec } from '@packages/types'
 import { scanFSForAvailableDependency } from 'create-cypress-tests'
 import path from 'path'
 import Debug from 'debug'
@@ -8,8 +9,9 @@ import chokidar, { FSWatcher } from 'chokidar'
 const debug = Debug('cypress:data-context')
 
 import type { DataContext } from '..'
+import { toPosix } from '../util/file'
 
-type SpecWithRelativeRoot = FoundSpec & { relativeToCommonRoot: string }
+export type SpecWithRelativeRoot = FoundSpec & { relativeToCommonRoot: string }
 
 interface MatchedSpecs {
   projectRoot: string
@@ -33,14 +35,35 @@ export function matchedSpecs ({
   }
 
   const specs = specAbsolutePaths.map((absolute) => {
-    return transformSpec(projectRoot, absolute, testingType, commonRoot)
+    return transformSpec({ projectRoot, absolute, testingType, commonRoot, platform: os.platform(), sep: path.sep })
   })
 
   return specs
 }
 
-export function transformSpec (projectRoot: string, absolute: string, testingType: Cypress.TestingType, commonRoot: string): SpecWithRelativeRoot {
-  const relative = path.relative(projectRoot, absolute).replace(/\\/g, '/')
+export interface TranformSpec {
+  projectRoot: string
+  absolute: string
+  testingType: Cypress.TestingType
+  commonRoot: string
+  platform: NodeJS.Platform
+  sep: string
+}
+
+export function transformSpec ({
+  projectRoot,
+  absolute,
+  testingType,
+  commonRoot,
+  platform,
+  sep,
+}: TranformSpec): SpecWithRelativeRoot {
+  if (platform === 'win32') {
+    absolute = toPosix(absolute, sep)
+    projectRoot = toPosix(projectRoot, sep)
+  }
+
+  const relative = path.relative(projectRoot, absolute)
   const parsedFile = path.parse(absolute)
   const fileExtension = path.extname(absolute)
 
@@ -49,7 +72,7 @@ export function transformSpec (projectRoot: string, absolute: string, testingTyp
   .find((ext) => absolute.endsWith(ext)) || fileExtension
 
   const parts = absolute.split(projectRoot)
-  let name = parts[parts.length - 1]?.replace(/\\/g, '/') || ''
+  let name = parts[parts.length - 1] || ''
 
   if (name.startsWith('/')) {
     name = name.slice(1)
