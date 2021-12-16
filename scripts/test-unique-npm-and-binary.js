@@ -1,22 +1,26 @@
 /* eslint-disable no-console */
 const minimist = require('minimist')
-const options = minimist(process.argv)
+const os = require('os')
 const la = require('lazy-ass')
 const fs = require('fs-extra')
 const is = require('check-more-types')
 const execa = require('execa')
 const { getNameAndBinary } = require('./utils')
 
+const options = minimist(process.argv)
+
 const cwd = options.cwd || '/tmp/testing'
 
 fs.ensureDirSync(cwd)
 
-console.log('Create Dummy Project')
-execa('npm init -y', {
+const spawnOpts = {
   cwd,
-  shell: true,
+  shell: os.platform() === 'win32' ? 'bash.exe' : '/bin/bash',
   stdio: 'inherit',
-})
+}
+
+console.log('Create Dummy Project')
+execa('npm init -y', spawnOpts)
 .then(console.log)
 .catch((e) => {
   console.error(e)
@@ -30,13 +34,10 @@ la(is.unemptyString(binary), 'missing binary url')
 
 console.log('testing NPM from', npm)
 console.log('and binary from', binary)
-
 console.log('in', cwd)
 
 execa(`npm install ${npm}`, {
-  cwd,
-  shell: true,
-  stdio: 'inherit',
+  ...spawnOpts,
   env: {
     CYPRESS_INSTALL_BINARY: binary,
   },
@@ -48,11 +49,7 @@ execa(`npm install ${npm}`, {
 })
 
 console.log('Verify Cypress binary')
-execa('$(yarn bin cypress) verify', {
-  cwd,
-  shell: true,
-  stdio: 'inherit',
-})
+execa('$(yarn bin cypress) verify', spawnOpts)
 .then(console.log)
 .catch((e) => {
   console.error(e)
