@@ -7,7 +7,7 @@
       <component
         :is="prefixIcon"
         v-if="prefixIcon"
-        data-testid="alert-prefix-icon"
+        data-cy="alert-prefix-icon"
         class="h-16px w-16px icon-dark-current"
         :class="prefixIconClass"
       />
