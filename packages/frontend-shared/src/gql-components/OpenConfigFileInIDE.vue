@@ -20,6 +20,7 @@
       @selected="openFile"
     />
   </template>
+  <div v-else />
 </template>
 
 <script lang="ts" setup>
