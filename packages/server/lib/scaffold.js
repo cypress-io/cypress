@@ -193,7 +193,7 @@ module.exports = {
     }
 
     return this.verifyScaffolding(folder, () => {
-      debug(`copying commands.js and index.js to ${folder}`)
+      debug(`copying commands.js and {e2e|component}.js to ${folder}`)
 
       return cypressEx.getPathToSupportFiles()
       .then((supportFiles) => {

@@ -1,6 +1,5 @@
 module.exports = {
   'component': {
-    'supportFile': false,
     devServer (cypressConfig) {
       const { startDevServer } = require('@cypress/webpack-dev-server')
 

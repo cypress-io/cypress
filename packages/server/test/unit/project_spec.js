@@ -48,7 +48,7 @@ describe('lib/project-base', () => {
     .then((obj = {}) => {
       ({ projectId: this.projectId } = obj)
 
-      return config.set({ projectName: 'project', projectRoot: '/foo/bar' })
+      return config.set({ projectName: 'project', projectRoot: '/foo/bar', config: { supportFile: false } })
       .then((config1) => {
         this.config = config1
         this.project = new ProjectBase({ projectRoot: this.todosPath, testingType: 'e2e' })
@@ -314,7 +314,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       return this.project.open().then(() => {
         expect(this.checkSupportFileStub).to.be.calledWith({
           configFile: 'cypress.config.js',
-          supportFile: '/foo/bar/cypress/support/e2e.js',
+          supportFile: false,
         })
       })
     })
@@ -654,7 +654,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
           expect(scaffold.integration).to.not.be.calledWith(this.obj.integrationFolder)
           expect(scaffold.fixture).to.not.be.calledWith(this.obj.fixturesFolder)
           // still scaffolds support folder due to old logic
-          expect(scaffold.support).to.be.calledWith(this.obj.supportFolder)
+          expect(scaffold.support).to.not.be.calledWith(this.obj.supportFolder)
         })
       })
     })

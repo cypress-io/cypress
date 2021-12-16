@@ -1,5 +1,5 @@
 module.exports = {
-  e2: {
+  e2e: {
     supportFile: false,
   },
 }

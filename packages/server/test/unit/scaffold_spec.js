@@ -251,8 +251,11 @@ describe('lib/scaffold', () => {
     it('does not create any files if supportFile is not default', function () {
       this.cfg.resolved.supportFile.from = 'config'
 
-      return scaffold.support(this.supportFolder, this.cfg)
+      // first remove it
+      return fs.removeAsync(this.supportFolder)
       .then(() => {
+        return scaffold.support(this.supportFolder, this.cfg)
+      }).then(() => {
         return glob('**/*', { cwd: this.supportFolder })
       }).then((files) => {
         expect(files.length).to.eq(0)
@@ -262,8 +265,11 @@ describe('lib/scaffold', () => {
     it('does not create any files if supportFile is false', function () {
       this.cfg.supportFile = false
 
-      return scaffold.support(this.supportFolder, this.cfg)
+      // first remove it
+      return fs.removeAsync(this.supportFolder)
       .then(() => {
+        return scaffold.support(this.supportFolder, this.cfg)
+      }).then(() => {
         return glob('**/*', { cwd: this.supportFolder })
       }).then((files) => {
         expect(files.length).to.eq(0)
@@ -284,11 +290,13 @@ describe('lib/scaffold', () => {
     })
 
     it('creates supportFolder and commands.js and index.js when supportFolder does not exist', function () {
-      return scaffold.support(this.supportFolder, this.cfg)
+      return fs.removeAsync(this.supportFolder)
       .then(() => {
+        return scaffold.support(this.supportFolder, this.cfg)
+      }).then(() => {
         return Promise.join(
           fs.readFileAsync(`${this.supportFolder}/commands.js`, 'utf8'),
-          fs.readFileAsync(`${this.supportFolder}/index.js`, 'utf8'),
+          fs.readFileAsync(`${this.supportFolder}/e2e.js`, 'utf8'),
         ).spread((commandsContents, indexContents) => {
           snapshot(commandsContents)
 

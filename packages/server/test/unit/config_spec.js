@@ -2020,7 +2020,7 @@ describe('lib/config', () => {
 
   context('.setSupportFileAndFolder', () => {
     const mockSupportDefaults = {
-      supportFile: 'cypress/support',
+      supportFile: 'cypress/support/e2e.ts',
       supportFolder: false,
       configFile: 'cypress.json',
     }

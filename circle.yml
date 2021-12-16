@@ -803,10 +803,13 @@ commands:
             CYPRESS_INTERNAL_FORCE_SCAFFOLD: "1"
           command: |
             if [[ -f cypress.json ]]; then
-              mv cypress/support/index.js cypress/support/e2e.js
               rm -rf cypress.json
               echo 'module.exports = {}' > cypress.config.js
             fi
+      - run:
+          name: Rename support file
+          working_directory: /tmp/<<parameters.repo>>
+          command: mv cypress/support/index.js cypress/support/e2e.js
       - run:
           name: Print Cypress version
           working_directory: /tmp/<<parameters.repo>>
@@ -1683,8 +1686,6 @@ jobs:
           name: Rename support file
           description: Rename support file for the new default
           working_directory: /tmp/cypress-example-kitchensink
-          environment:
-            CYPRESS_INTERNAL_FORCE_SCAFFOLD: "1"
           command: mv cypress/support/index.js cypress/support/e2e.js 
       - run:
           name: Install prod dependencies
@@ -1957,7 +1958,6 @@ jobs:
           environment:
             CYPRESS_INTERNAL_FORCE_SCAFFOLD: "1"
           command: |
-            mv cypress/support/index.js cypress/support/e2e.js
             rm -rf cypress.json
             echo "export default {
                     e2e: {
@@ -1974,6 +1974,10 @@ jobs:
                       },
                     },
                   }" > cypress.config.ts
+      - run:
+          name: Rename support file
+          working_directory: <<parameters.wd>>
+          command: mv cypress/support/index.js cypress/support/e2e.js
       - run:
           name: Run project tests 🗳
           working_directory: <<parameters.wd>>
@@ -2159,9 +2163,12 @@ jobs:
           environment:
             CYPRESS_INTERNAL_FORCE_SCAFFOLD: "1"
           command: |
-            mv cypress/support/index.js cypress/support/e2e.js
             rm -rf cypress.json
             echo 'module.exports = {}' > cypress.config.js
+      - run:
+          name: Rename support file
+          working_directory: test-binary
+          command: mv cypress/support/index.js cypress/support/e2e.js
       - run:
           name: Verify Cypress binary
           working_directory: test-binary
