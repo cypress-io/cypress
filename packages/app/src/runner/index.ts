@@ -148,14 +148,14 @@ let isTorndown = false
 
 /**
  * Called when navigating away from the runner page.
- * This will teardown the reporter, event maanger, and
+ * This will teardown the reporter, event manager, and
  * any associated events.
  */
-export function teardown () {
+export async function teardown () {
   UnifiedReporterAPI.setInitializedReporter(false)
   _eventManager?.stop()
   _eventManager?.teardown(getMobxRunnerStore())
-  _eventManager?.resetReporter()
+  await _eventManager?.resetReporter()
   _eventManager = undefined
   isTorndown = true
 }
@@ -279,10 +279,12 @@ async function initialize () {
   // find out if we need to continue managing viewportWidth/viewportHeight in MobX at all.
   autStore.updateDimensions(config.viewportWidth, config.viewportHeight)
 
+  // just stick config on window until we figure out how we are
+  // going to manage it
   window.UnifiedRunner.config = config
 
   // window.UnifiedRunner exists now, since the Webpack bundle with
-  // the UnifiedRunner namespace was injected.
+  // the UnifiedRunner namespace was injected by `injectBundle`.
   initializeEventManager(window.UnifiedRunner)
 
   window.UnifiedRunner.MobX.runInAction(() => {

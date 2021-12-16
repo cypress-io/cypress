@@ -21,10 +21,6 @@ export async function injectBundle () {
   document.head.appendChild(link)
 
   return new Promise<void>((resolve) => {
-    script.onload = () => {
-      // just stick config on window until we figure out how we are
-      // going to manage it
-      resolve()
-    }
+    script.onload = () => resolve()
   })
 }
