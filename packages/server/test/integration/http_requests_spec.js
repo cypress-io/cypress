@@ -764,7 +764,9 @@ describe('Routes', () => {
 
         return this.setup({
           projectRoot: Fixtures.projectPath('failures'),
-          supportFile: false,
+          config: {
+            supportFile: false,
+          },
         })
       })
 

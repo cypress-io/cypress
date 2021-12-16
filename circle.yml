@@ -803,6 +803,7 @@ commands:
             CYPRESS_INTERNAL_FORCE_SCAFFOLD: "1"
           command: |
             if [[ -f cypress.json ]]; then
+              mv cypress/support/index.js cypress/support/e2e.js
               rm -rf cypress.json
               echo 'module.exports = {}' > cypress.config.js
             fi
@@ -1679,6 +1680,13 @@ jobs:
             CYPRESS_INTERNAL_FORCE_SCAFFOLD: "1"
           command: rm -rf cypress.json
       - run:
+          name: Rename support file
+          description: Rename support file for the new default
+          working_directory: /tmp/cypress-example-kitchensink
+          environment:
+            CYPRESS_INTERNAL_FORCE_SCAFFOLD: "1"
+          command: mv cypress/support/index.js cypress/support/e2e.js 
+      - run:
           name: Install prod dependencies
           command: yarn --production
           working_directory: /tmp/cypress-example-kitchensink
@@ -1949,6 +1957,7 @@ jobs:
           environment:
             CYPRESS_INTERNAL_FORCE_SCAFFOLD: "1"
           command: |
+            mv cypress/support/index.js cypress/support/e2e.js
             rm -rf cypress.json
             echo "export default {
                     e2e: {
@@ -2150,6 +2159,7 @@ jobs:
           environment:
             CYPRESS_INTERNAL_FORCE_SCAFFOLD: "1"
           command: |
+            mv cypress/support/index.js cypress/support/e2e.js
             rm -rf cypress.json
             echo 'module.exports = {}' > cypress.config.js
       - run:
