@@ -3,7 +3,7 @@
     <div>
       <h1
         class="text-32px font-medium text-gray-900 leading-snug"
-        data-testid="error-header"
+        data-cy="error-header"
       >
         <slot name="header">
           {{ headerText }}
@@ -24,7 +24,7 @@
           keypath="launchpadErrors.generic.message"
           tag="p"
           class="font-light"
-          data-testid="error-message"
+          data-cy="error-message"
         >
           <OpenConfigFileInIDE :gql="props.gql" />
         </i18n-t>
@@ -47,7 +47,7 @@
           v-if="lastMutationDefined"
           size="lg"
           variant="primary"
-          data-testid="error-retry-button"
+          data-cy="error-retry-button"
           @click="retry()"
         >
           {{ t('launchpadErrors.generic.retryButton') }}
@@ -55,7 +55,7 @@
         <Button
           size="lg"
           variant="outline"
-          data-testid="error-read-the-docs-button"
+          data-cy="error-read-the-docs-button"
           @click="openDocs"
         >
           {{ t('launchpadErrors.generic.readTheDocsButton') }}

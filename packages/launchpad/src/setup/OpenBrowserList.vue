@@ -50,7 +50,7 @@
           type="submit"
           class="inline mr-2"
           :suffix-icon="openInNew"
-          data-testid="launch-button"
+          data-cy="launch-button"
           size="lg-wide"
         >
           {{ launchText }}

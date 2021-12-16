@@ -55,7 +55,7 @@
               :open="open"
             >
               <i-cy-chevron-down
-                data-testid="icon-caret"
+                data-cy="icon-caret"
                 :class="{
                   'rotate-180 icon-dark-indigo-600': open,
                   'rotate-0 icon-dark-gray-500': !open
@@ -128,7 +128,7 @@
                     >
                       <i-mdi-check
                         class="h-16px w-16px"
-                        data-testid="icon-check"
+                        data-cy="icon-check"
                         aria-hidden="true"
                       />
                     </span>

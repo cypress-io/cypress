@@ -14,13 +14,13 @@
   >
     <div class="m-x-auto max-w-600px">
       <h1
-        data-testid="create-spec-page-title"
+        data-cy="create-spec-page-title"
         class="mb-12px text-gray-900 text-32px"
       >
         {{ props.title }}
       </h1>
       <p
-        data-testid="create-spec-page-description"
+        data-cy="create-spec-page-description"
         class="leading-normal mb-32px text-gray-600 text-18px"
       >
         <i18n-t :keypath="descriptionKeyPath">

@@ -31,7 +31,7 @@ it('closes when the X button is pressed', () => {
   cy.mount(<BaseModal />)
     .get('[aria-label=Close]')
     .click()
-    .get('[data-testid=modal]')
+    .get('[data-cy=modal]')
     .should('not.exist')
 })
 `
@@ -39,14 +39,14 @@ it('closes when the X button is pressed', () => {
 const e2eCode = `
 it('only shows a promotional modal on first visit', () => {
   cy.visit('http://localhost:3000/')
-    .get('[data-testid=modal]')
+    .get('[data-cy=modal]')
     .should('be.visible')
     .get('[aria-label=Close]')
     .click()
 
     // should not load a second time
     .reload()
-    .get('[data-testid=modal]')
+    .get('[data-cy=modal]')
     .should('not.exist')
 })
 `

@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="search || emptySearch"
-    data-testid="no-results"
+    data-cy="no-results"
     class="text-center"
   >
     <NoResultsIllustration
@@ -16,7 +16,7 @@
       >{{ search }}</span>
     </p>
     <Button
-      data-testid="no-results-clear"
+      data-cy="no-results-clear"
       class="mx-auto mt-20px"
       size="lg"
       variant="outline"

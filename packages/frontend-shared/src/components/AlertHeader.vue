@@ -7,7 +7,7 @@
       <component
         :is="prefixIcon"
         v-if="prefixIcon"
-        data-testid="alert-prefix-icon"
+        data-cy="alert-prefix-icon"
         class="h-16px w-16px icon-dark-current"
         :class="prefixIconClass"
       />
@@ -27,7 +27,7 @@
       >
         <button
           v-if="suffixIcon"
-          data-testid="alert-suffix-icon"
+          data-cy="alert-suffix-icon"
           :aria-label="suffixIconAriaLabel"
           class="rounded-full flex outline-none h-32px -top-16px -right-8px w-32px hocus:ring-current items-center justify-center absolute hocus:ring-1"
           :class="suffixButtonClass"

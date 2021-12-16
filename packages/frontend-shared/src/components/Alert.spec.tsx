@@ -7,14 +7,14 @@ import { ref } from 'vue'
 
 const messages = defaultMessages.components.alert
 
-const alertBodySelector = '[data-testid=alert-body]'
-const alertHeaderSelector = '[data-testid=alert-header]'
+const alertBodySelector = '[data-cy=alert-body]'
+const alertHeaderSelector = '[data-cy=alert-header]'
 
-const suffixIconSelector = '[data-testid=alert-suffix-icon]'
-const prefixIconSelector = '[data-testid=alert-prefix-icon]'
+const suffixIconSelector = '[data-cy=alert-suffix-icon]'
+const prefixIconSelector = '[data-cy=alert-prefix-icon]'
 
 // This divider should eventually be tested inside of a visual regression test.
-const dividerLineSelector = '[data-testid=alert-body-divider]'
+const dividerLineSelector = '[data-cy=alert-body-divider]'
 const dismissSelector = `[aria-label=${messages.dismissAriaLabel}]`
 
 const alertTitle = faker.hacker.phrase()
@@ -31,8 +31,8 @@ const makeDismissibleProps = () => {
   return { modelValue, methods }
 }
 
-const prefixIcon = () => <CoffeeIcon data-testid="coffee-icon"/>
-const suffixIcon = () => <LoadingIcon data-testid="loading-icon" class="animate-spin"/>
+const prefixIcon = () => <CoffeeIcon data-cy="coffee-icon"/>
+const suffixIcon = () => <LoadingIcon data-cy="loading-icon" class="animate-spin"/>
 
 describe('<Alert />', () => {
   describe('classes', () => {
@@ -49,23 +49,23 @@ describe('<Alert />', () => {
 
     it('renders the prefixIcon slot', () => {
       cy.mount(() => <Alert v-slots={{ prefixIcon }} />)
-      .get('[data-testid=coffee-icon]').should('be.visible')
+      .get('[data-cy=coffee-icon]').should('be.visible')
     })
 
     it('renders the prefixIcon slot even when an icon is passed in', () => {
       cy.mount(() => (<Alert
         v-slots={{ prefixIcon }}
-        icon={() => <LoadingIcon data-testid="loading-icon" />}
+        icon={() => <LoadingIcon data-cy="loading-icon" />}
       />))
-      .get('[data-testid=coffee-icon]').should('be.visible')
-      .get('[data-testid=loading-icon]').should('not.exist')
+      .get('[data-cy=coffee-icon]').should('be.visible')
+      .get('[data-cy=loading-icon]').should('not.exist')
     })
   })
 
   describe('suffix', () => {
     it('renders the suffixIcon slot', () => {
       cy.mount(() => <Alert title="Alert" v-slots={{ suffixIcon }} />)
-      .get('[data-testid=loading-icon]').should('be.visible')
+      .get('[data-cy=loading-icon]').should('be.visible')
     })
   })
 
@@ -74,12 +74,12 @@ describe('<Alert />', () => {
       cy.mount(() => (
         <div class="space-y-2 text-center p-4">
           <Alert title="Alert">
-            <p data-testid="body-content">{ faker.lorem.paragraphs(5) }</p>
+            <p data-cy="body-content">{ faker.lorem.paragraphs(5) }</p>
           </Alert>
         </div>
       ))
 
-      cy.get('[data-testid=body-content]').should('be.visible')
+      cy.get('[data-cy=body-content]').should('be.visible')
     })
   })
 
@@ -90,19 +90,19 @@ describe('<Alert />', () => {
       cy.mount(() => (
         <div class="space-y-2 text-center p-4">
           <Alert title="Alert" dismissible modelValue={modelValue.value} {...methods}>
-            <p data-testid="body-content">{ faker.lorem.paragraphs(5) }</p>
+            <p data-cy="body-content">{ faker.lorem.paragraphs(5) }</p>
           </Alert>
         </div>
       ))
 
-      cy.get('[data-testid=body-content]').should('be.visible')
+      cy.get('[data-cy=body-content]').should('be.visible')
     })
 
     it('cannot be collapsed', () => {
       const { modelValue, methods } = makeDismissibleProps()
 
       cy.mount(() => (<Alert title="Alert" dismissible modelValue={modelValue.value} {...methods}>
-        <p data-testid="body-content">{ faker.lorem.paragraphs(5) }</p>
+        <p data-cy="body-content">{ faker.lorem.paragraphs(5) }</p>
       </Alert>))
       .get(alertBodySelector).should('be.visible')
       .get(alertHeaderSelector).click()

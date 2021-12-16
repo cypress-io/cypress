@@ -1,4 +1,5 @@
 import '@testing-library/cypress/add-commands'
+import { configure } from '@testing-library/cypress'
 import i18n from '../../../src/locales/en-US.json'
 import type { DataContext } from '@packages/data-context'
 import { e2eProjectDirs } from './e2eProjectDirs'
@@ -10,6 +11,10 @@ import installCustomPercyCommand from '@packages/ui-components/cypress/support/c
 
 const NO_TIMEOUT = 1000 * 1000
 const FOUR_SECONDS = 4 * 1000
+
+// Updating *ByTestId queries provided by testing-library to look
+// for data-cy attributes (rather than data-testid).
+configure({ testIdAttribute: 'data-cy' })
 
 export type ProjectFixture = typeof e2eProjectDirs[number]
 

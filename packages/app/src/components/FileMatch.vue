@@ -57,7 +57,7 @@
       <slot name="matches">
         <FileMatchIndicator
           class="truncate"
-          data-testid="file-match-indicator"
+          data-cy="file-match-indicator"
         >
           {{ indicatorText }}
         </FileMatchIndicator>

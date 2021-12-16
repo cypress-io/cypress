@@ -14,13 +14,13 @@ We're going to print out some \`console.log('cool code')\` and see how well it f
 describe('<Warning />', () => {
   it('renders with title and message', () => {
     cy.mount(() => (<div class="p-4"><Warning
-      data-testid="warning"
+      data-cy="warning"
       title={title}
       message={message}
     /></div>))
 
     cy.contains(title)
-    cy.get('[data-testid=warning]')
+    cy.get('[data-cy=warning]')
     .should('contain.text', 'Hello!')
     .and('contain.text', 'This is a markdown formatted message!')
     .and('contain.text', `We're going to print out some console.log('cool code') and see how well it formats inside of our warning.`)

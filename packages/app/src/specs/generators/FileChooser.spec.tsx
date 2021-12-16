@@ -13,23 +13,23 @@ const nonExistentFileName = 'non existent file'
 
 /*----------  Selectors  ----------*/
 // File List
-const fileRowSelector = '[data-testid=file-list-row]'
+const fileRowSelector = '[data-cy=file-list-row]'
 
 // Inputs
 const filenameInputSelector = `[placeholder="${defaultMessages.components.fileSearch.byFilenameInput}"]:first`
 const extensionInputSelector = `[placeholder="${defaultMessages.components.fileSearch.byExtensionInput}"]`
-const fileMatchButtonSelector = '[data-testid=file-match-button]'
+const fileMatchButtonSelector = '[data-cy=file-match-button]'
 
 // File Match Indicator
 // X out of Y Matches when searching the file list
-const fileMatchIndicatorSelector = '[data-testid=file-match-indicator]'
+const fileMatchIndicatorSelector = '[data-cy=file-match-indicator]'
 
 // No Results
-const noResultsSelector = '[data-testid=no-results]'
-const noResultsClearButtonSelector = '[data-testid=no-results-clear]'
+const noResultsSelector = '[data-cy=no-results]'
+const noResultsClearButtonSelector = '[data-cy=no-results-clear]'
 
 // Loading
-const loadingSelector = '[data-testid=loading]'
+const loadingSelector = '[data-cy=loading]'
 
 describe('<FileChooser />', () => {
   it('renders files in a list', () => {
@@ -185,10 +185,10 @@ describe('<FileChooser />', () => {
     it('toggles a reactive loading indicator', () => {
       // Use a button to toggle "loading" state externally
       const loading = ref(true)
-      const buttonSelector = '[data-testid=toggle-button]'
+      const buttonSelector = '[data-cy=toggle-button]'
 
       cy.mount(() => (<div>
-        <button data-testid="toggle-button" onClick={() => loading.value = !loading.value}>Toggle Loading</button>
+        <button data-cy="toggle-button" onClick={() => loading.value = !loading.value}>Toggle Loading</button>
         <FileChooser files={allFiles} loading={loading.value} extensionPattern={extensionPattern} /></div>))
       .get(loadingSelector).should('be.visible')
       .get(buttonSelector).click()

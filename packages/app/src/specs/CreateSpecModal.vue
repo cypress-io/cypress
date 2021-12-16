@@ -5,7 +5,7 @@
     variant="bare"
     :title="title"
     :model-value="show"
-    data-testid="create-spec-modal"
+    data-cy="create-spec-modal"
     @update:model-value="close"
   >
     <template #overlay="{classes}">

@@ -1,20 +1,20 @@
 <template>
   <CreateSpecCards
-    data-testid="create-spec-page-cards"
+    data-cy="create-spec-page-cards"
     :gql="props.gql"
     @select="choose"
   />
 
   <div class="text-center border-t-1 pt-32px mt-32px">
     <p
-      data-testid="no-specs-message"
+      data-cy="no-specs-message"
       class="leading-normal text-gray-600 text-16px mb-16px"
     >
       {{ t('createSpec.noSpecsMessage') }}
     </p>
     <OpenConfigFileInIDE :gql="props.gql">
       <Button
-        data-testid="view-spec-pattern"
+        data-cy="view-spec-pattern"
         variant="outline"
         prefix-icon-class="icon-light-gray-50 icon-dark-gray-400"
         :prefix-icon="SettingsIcon"

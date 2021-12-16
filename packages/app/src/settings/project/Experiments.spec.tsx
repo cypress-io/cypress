@@ -15,7 +15,7 @@ describe('<Experiments />', () => {
       },
     })
 
-    cy.contains('[data-testid="experiment"]', 'Interactive Run Events')
+    cy.contains('[data-cy="experiment"]', 'Interactive Run Events')
     .should('contain', 'Enabled')
   })
 })

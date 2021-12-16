@@ -3,9 +3,9 @@ import faker from 'faker'
 
 const targetText = 'Target'
 const contentText = 'Content'
-const targetSelector = '[data-testid=target]'
-const contentSelector = '[data-testid=content]'
-const defaultTargetSlot = ({ open }) => <div data-testid="target" class={open ? 'open' : 'not-open'}>{ targetText }</div>
+const targetSelector = '[data-cy=target]'
+const contentSelector = '[data-cy=content]'
+const defaultTargetSlot = ({ open }) => <div data-cy="target" class={open ? 'open' : 'not-open'}>{ targetText }</div>
 const defaultSlots = { target: defaultTargetSlot }
 
 describe('<Collapsible />', { viewportHeight: 450, viewportWidth: 350 }, () => {
@@ -13,7 +13,7 @@ describe('<Collapsible />', { viewportHeight: 450, viewportWidth: 350 }, () => {
     it('defaults to closed', () => {
       cy.mount(() => (<>
         <Collapsible v-slots={defaultSlots}>
-          <p data-testid="content">{ contentText }</p>
+          <p data-cy="content">{ contentText }</p>
         </Collapsible>
       </>)).get(targetSelector).should('have.class', 'not-open')
     })
@@ -21,7 +21,7 @@ describe('<Collapsible />', { viewportHeight: 450, viewportWidth: 350 }, () => {
     it('can be set to open initially', () => {
       cy.mount(() => (<>
         <Collapsible v-slots={defaultSlots} initiallyOpen>
-          <p data-testid="content">{ contentText }</p>
+          <p data-cy="content">{ contentText }</p>
         </Collapsible>
       </>)).get(targetSelector).should('have.class', 'open')
     })
@@ -30,7 +30,7 @@ describe('<Collapsible />', { viewportHeight: 450, viewportWidth: 350 }, () => {
   it('renders the target and content slots', () => {
     cy.mount(() => (<>
       <Collapsible v-slots={defaultSlots}>
-        <p data-testid="content">{ contentText }</p>
+        <p data-cy="content">{ contentText }</p>
       </Collapsible>
     </>))
     .get(targetSelector)
@@ -44,7 +44,7 @@ describe('<Collapsible />', { viewportHeight: 450, viewportWidth: 350 }, () => {
   it('does not render default slot if lazy', () => {
     cy.mount(() => (<>
       <Collapsible v-slots={defaultSlots} lazy={true}>
-        <p data-testid="content">{ contentText }</p>
+        <p data-cy="content">{ contentText }</p>
       </Collapsible>
     </>))
     .get(targetSelector)
@@ -56,11 +56,11 @@ describe('<Collapsible />', { viewportHeight: 450, viewportWidth: 350 }, () => {
   })
 
   it('overflows properly', () => {
-    const overflowedContentSelector = '[data-testid=overflowed-content]'
+    const overflowedContentSelector = '[data-cy=overflowed-content]'
 
     cy.mount(() => (<Collapsible maxHeight="200px" v-slots={defaultSlots}>
       <div class="h-900px">Large content</div>
-      <p data-testid="overflowed-content">Out-of-bounds content</p>
+      <p data-cy="overflowed-content">Out-of-bounds content</p>
     </Collapsible>))
     .get(targetSelector).click()
     .get(overflowedContentSelector)

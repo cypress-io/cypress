@@ -3,8 +3,8 @@ import { ref } from 'vue'
 import { defaultMessages } from '@cy/i18n'
 
 const modalCloseSelector = '[aria-label=Close]'
-const triggerButtonSelector = '[data-testid=trigger]'
-const modalSelector = '[data-testid=create-spec-modal]'
+const triggerButtonSelector = '[data-cy=trigger]'
+const modalSelector = '[data-cy=create-spec-modal]'
 
 const messages = defaultMessages.createSpec.component.importFromComponent
 
@@ -66,7 +66,7 @@ describe('playground', () => {
     const show = ref(false)
 
     cy.mount(() => (<>
-      <button data-testid="trigger" onClick={() => show.value = true}>Open Modal</button>
+      <button data-cy="trigger" onClick={() => show.value = true}>Open Modal</button>
       <br/>
       <CreateSpecModal
         gql={{

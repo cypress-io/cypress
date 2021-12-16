@@ -21,7 +21,7 @@
 
     <div class="flex h-40px gap-16px min-w-127px">
       <Button
-        data-testid="new-spec-button"
+        data-cy="new-spec-button"
         :prefix-icon="IconAdd"
         prefix-icon-class="justify-center text-lg text-center icon-light-transparent icon-dark-white"
         class="min-w-127px"

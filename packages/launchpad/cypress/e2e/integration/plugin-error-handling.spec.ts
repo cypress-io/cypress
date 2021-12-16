@@ -16,7 +16,7 @@ describe('Plugin error handling', () => {
       await ctx.actions.file.writeFileInProject('cypress.config.js', `module.exports = { e2e: { baseUrl: 'https://cypress.com' } }`)
     })
 
-    cy.get('[data-testid=error-retry-button]').click()
+    cy.findByTestId('error-retry-button').click()
 
     cy.get('body')
     .should('not.contain.text', 'Cypress Configuration Error')

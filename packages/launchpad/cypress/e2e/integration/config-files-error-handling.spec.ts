@@ -26,7 +26,7 @@ describe.skip('Config files error handling', () => {
       await ctx.actions.file.removeFileInProject('cypress.config.ts')
     })
 
-    cy.get('[data-testid=error-retry-button]').click()
+    cy.findByTestId('error-retry-button').click()
     cy.get('body')
     .should('not.contain.text', 'Cypress Configuration Error')
   })
@@ -54,7 +54,7 @@ describe.skip('Config files error handling', () => {
       await ctx.actions.file.removeFileInProject('cypress.json')
     })
 
-    cy.get('[data-testid=error-retry-button]').click()
+    cy.findByTestId('error-retry-button').click()
     cy.get('body')
     .should('contain.text', 'Cypress Configuration Error')
     .and('contain.text', 'Could not find a Cypress configuration file, exiting.')
@@ -63,7 +63,7 @@ describe.skip('Config files error handling', () => {
       await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {}')
     })
 
-    cy.get('[data-testid=error-retry-button]').click()
+    cy.findByTestId('error-retry-button').click()
     cy.get('body')
     .should('not.contain.text', 'Cypress Configuration Error')
   })
@@ -90,7 +90,7 @@ describe.skip('Config files error handling', () => {
       await ctx.actions.file.removeFileInProject('cypress.json')
     })
 
-    cy.get('[data-testid=error-retry-button]').click()
+    cy.findByTestId('error-retry-button').click()
     cy.get('body')
     .should('not.contain.text', 'Cypress Configuration Error')
   })

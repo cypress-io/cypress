@@ -2,7 +2,7 @@
   <div class="text-sm">
     <p
       class="font-mono whitespace-nowrap rounded px-2px w-min"
-      data-testid="legend-label"
+      data-cy="legend-label"
       v-bind="$attrs"
     >
       {{ label }}

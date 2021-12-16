@@ -2,12 +2,12 @@ import ConfigCode from './ConfigCode.vue'
 import config from '../../../../frontend-shared/cypress/fixtures/config.json'
 import { defaultMessages } from '@cy/i18n'
 
-const selector = '[data-testid=code]'
+const selector = '[data-cy=code]'
 
 describe('<ConfigCode />', () => {
   beforeEach(() => {
     cy.mount(() => (<div class="p-12 overflow-auto">
-      <ConfigCode data-testid="code" config={config as any} />
+      <ConfigCode data-cy="code" config={config as any} />
     </div>))
   })
 

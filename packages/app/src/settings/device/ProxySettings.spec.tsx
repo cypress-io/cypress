@@ -13,9 +13,9 @@ describe('<ProxySettings />', () => {
     })
 
     cy.findByText('Proxy Bypass List')
-    .get('[data-testid=bypass-list]').contains('proxy-bypass')
+    .findByTestId('bypass-list').contains('proxy-bypass')
 
     cy.findByText('Proxy Server')
-    .get('[data-testid=proxy-server]').contains('proxy-server')
+    .findByTestId('proxy-server').contains('proxy-server')
   })
 })

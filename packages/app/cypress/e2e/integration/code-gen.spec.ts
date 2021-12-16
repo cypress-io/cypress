@@ -20,7 +20,7 @@ describe('Code Generation', () => {
     cy.findByTestId('new-spec-button').click()
     cy.findByTestId('create-spec-modal').should('be.visible').within(() => {
       cy.contains('Create a new spec').should('be.visible')
-      cy.get('[data-cy="external"]').should('have.attr', 'href', 'https://on.cypress.io')
+      cy.findByTestId('external').should('have.attr', 'href', 'https://on.cypress.io')
     })
 
     cy.contains('Create from component').click()

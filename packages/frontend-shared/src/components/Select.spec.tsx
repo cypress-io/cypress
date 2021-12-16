@@ -11,8 +11,8 @@ const selectText = defaultMessages.components.select
 // Selectors
 const optionsSelector = '[role=option]'
 const inputSelector = '[aria-haspopup=true]'
-const caretIconSelector = '[data-testid=icon-caret]'
-const checkIconSelector = '[data-testid=icon-check]'
+const caretIconSelector = '[data-cy=icon-caret]'
+const checkIconSelector = '[data-cy=icon-check]'
 
 // Helpers
 const openSelect = () => cy.get(inputSelector).click()
@@ -167,19 +167,19 @@ describe('<Select />', () => {
     it('renders all of the slots', () => {
       const vSlots = {
         'item-body': () => 'Item Body',
-        'item-prefix': () => <Icon icon={IconHeart} data-testid="item-prefix" />,
-        'item-suffix': () => <Icon icon={IconHeart} data-testid="item-suffix" />,
+        'item-prefix': () => <Icon icon={IconHeart} data-cy="item-prefix" />,
+        'item-suffix': () => <Icon icon={IconHeart} data-cy="item-suffix" />,
         'selected': () => 'Selected',
-        'input-prefix': () => <Icon icon={IconHeart} data-testid="input-prefix" />,
-        'input-suffix': () => <Icon icon={IconHeart} data-testid="input-suffix" />,
+        'input-prefix': () => <Icon icon={IconHeart} data-cy="input-prefix" />,
+        'input-suffix': () => <Icon icon={IconHeart} data-cy="input-suffix" />,
       }
 
       mountSelect({ vSlots })
 
       // The input and tis prefixes and suffixes should be visible
       cy.findByText('Selected').should('be.visible')
-      .get(`[data-testid=input-prefix]`).should('be.visible')
-      .get(`[data-testid=input-suffix]`).should('be.visible')
+      .get(`[data-cy=input-prefix]`).should('be.visible')
+      .get(`[data-cy=input-suffix]`).should('be.visible')
 
       // The caret icon shouldn't exist because we overwrote it
       .get(caretIconSelector).should('not.exist')
@@ -189,8 +189,8 @@ describe('<Select />', () => {
 
       // The options and their prefixes + suffixes should be visible
       .get(optionsSelector).should('be.visible')
-      .get(`[data-testid=item-prefix]`).should('be.visible')
-      .get(`[data-testid=item-suffix]`).should('be.visible')
+      .get(`[data-cy=item-prefix]`).should('be.visible')
+      .get(`[data-cy=item-suffix]`).should('be.visible')
 
       // Choose an option
       .then(selectFirstOption)

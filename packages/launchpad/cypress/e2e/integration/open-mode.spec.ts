@@ -56,7 +56,7 @@ describe('Launchpad: Open Mode', () => {
     cy.contains('Next Step').click()
     cy.get('h1').should('contain', 'Choose a Browser')
     cy.contains('Firefox').parent().should('have.class', 'border-jade-300')
-    cy.get('button[data-testid=launch-button]').invoke('text').should('include', 'Launch Firefox')
+    cy.get('button[data-cy=launch-button]').invoke('text').should('include', 'Launch Firefox')
   })
 
   describe('when there is a list of projects', () => {
@@ -107,7 +107,7 @@ describe('Launchpad: Open Mode', () => {
       cy.get('[aria-label="Project Actions"]').click()
       cy.get('button').contains('Open In IDE').click()
 
-      cy.get('[data-cy="choose-editor-modal"]').as('modal')
+      cy.findByTestId('choose-editor-modal').as('modal')
 
       cy.intercept('POST', 'mutation-ChooseExternalEditorModal_SetPreferredEditorBinary').as('SetPreferred')
       cy.get('@modal').contains('Choose your editor...').click()

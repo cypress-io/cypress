@@ -23,7 +23,7 @@ describe('<PromptContent />', { viewportWidth: 500, viewportHeight: 800 }, () =>
     })
 
     // links populate with params
-    cy.get('[data-testid="provider-list"] li')
+    cy.get('[data-cy="provider-list"] li')
     .should('have.length', 6)
     .eq(0)
     .find('a')

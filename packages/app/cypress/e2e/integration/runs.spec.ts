@@ -10,7 +10,7 @@ describe('App: Runs Page', () => {
     cy.visitApp()
     cy.wait(1000)
     cy.get('[href="#/runs"]').click()
-    cy.get('[data-cy="runs"]')
+    cy.findByTestId('runs')
   })
 
   it('shows the loader', () => {
@@ -23,8 +23,8 @@ describe('App: Runs Page', () => {
 
     cy.visitApp()
     cy.get('[href="#/runs"]').click()
-    cy.get('[data-cy="runs-loader"]')
-    cy.get('[data-cy="runs"]')
+    cy.findByTestId('runs-loader')
+    cy.findByTestId('runs')
   })
 
   it('when no runs, shows call to action', () => {
@@ -45,7 +45,7 @@ describe('App: Runs Page', () => {
 
     cy.visitApp()
     cy.get('[href="#/runs"]').click()
-    cy.get('[data-cy="no-runs"]')
+    cy.findByTestId('no-runs')
   })
 
   it('when logged out, shows call to action', () => {

@@ -1,7 +1,7 @@
 <template>
   <div
     class="bg-white border-b border-b-gray-100 py-15px px-6"
-    data-testid="header-bar"
+    data-cy="header-bar"
   >
     <div class="flex h-full gap-12px items-center justify-between">
       <div v-if="pageName">

@@ -7,9 +7,9 @@ const difficultFile = {
   fileExtension: '.vue',
 }
 
-const noResultsSlot = () => <div data-testid="no-results">No Results</div>
-const noResultsSelector = '[data-testid=no-results]'
-const fileRowSelector = '[data-testid=file-list-row]'
+const noResultsSlot = () => <div data-cy="no-results">No Results</div>
+const noResultsSelector = '[data-cy=no-results]'
+const fileRowSelector = '[data-cy=file-list-row]'
 
 const allFiles = randomComponents(10, 'FileParts')
 
@@ -50,7 +50,7 @@ describe('<FileList />', { viewportHeight: 500, viewportWidth: 400 }, () => {
       let idx = 0
 
       cy.mount(() => (<div>
-        <button data-testid="add-file"
+        <button data-cy="add-file"
           onClick={() => {
             files.value.push(allFiles[idx]); idx++
           }}>
@@ -63,7 +63,7 @@ describe('<FileList />', { viewportHeight: 500, viewportWidth: 400 }, () => {
 
       </div>))
       .get(noResultsSelector).should('be.visible')
-      .get('[data-testid=add-file]')
+      .get('[data-cy=add-file]')
       .click()
       .get(noResultsSelector).should('not.exist')
     })

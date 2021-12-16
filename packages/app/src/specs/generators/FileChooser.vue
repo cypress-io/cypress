@@ -38,7 +38,7 @@
 
     <div
       v-show="loading"
-      data-testid="loading"
+      data-cy="loading"
     >
       <!-- TODO(ryan): Get mocks for a loading state here -->
       Loading

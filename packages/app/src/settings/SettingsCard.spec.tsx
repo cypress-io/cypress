@@ -8,12 +8,12 @@ describe('<SettingsCard />', () => {
   const collapsibleSelector = `[data-cy="${title}"]`
 
   it('renders', () => {
-    const contentSelector = '[data-testid=content]'
+    const contentSelector = '[data-cy=content]'
 
     cy.mount(() => (
       <div class="p-24px">
         <SettingsCard title={title} description={description} icon={IconLaptop} maxHeight="800px">
-          <div data-testid="content">
+          <div data-cy="content">
             <p>The body of the content</p>
           </div>
         </SettingsCard>
@@ -47,12 +47,12 @@ describe('<SettingsCard />', () => {
     cy.mount(() => (
       <div class="p-24px">
         <SettingsCard title={title} description={description} icon={IconLaptop} maxHeight="800px">
-          <div data-testid="content">
+          <div data-cy="content">
             <p>The body of the content</p>
           </div>
         </SettingsCard>
         <SettingsCard title={title2} description={description2} icon={IconLaptop} maxHeight="800px">
-          <div data-testid="content">
+          <div data-cy="content">
             <p>Second content</p>
           </div>
         </SettingsCard>

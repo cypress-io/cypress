@@ -4,12 +4,12 @@ import Button from '@cy/components/Button.vue'
 import { BaseErrorFragmentDoc } from '../generated/graphql-test'
 
 // Selectors
-const headerSelector = '[data-testid=error-header]'
-const messageSelector = '[data-testid=error-message]'
-const retryButtonSelector = '[data-testid=error-retry-button]'
-const docsButtonSelector = '[data-testid=error-read-the-docs-button]'
-const customFooterSelector = '[data-testid=custom-error-footer]'
-const openConfigFileSelector = '[data-testid=open-config-file]'
+const headerSelector = '[data-cy=error-header]'
+const messageSelector = '[data-cy=error-message]'
+const retryButtonSelector = '[data-cy=error-retry-button]'
+const docsButtonSelector = '[data-cy=error-read-the-docs-button]'
+const customFooterSelector = '[data-cy=custom-error-footer]'
+const openConfigFileSelector = '[data-cy=open-config-file]'
 
 // Constants
 const messages = defaultMessages.launchpadErrors.generic
@@ -103,7 +103,7 @@ describe('<BaseError />', () => {
         <BaseError
           gql={gqlVal}
           v-slots={{
-            footer: () => <Button size="lg" data-testid="custom-error-footer">{ customFooterText }</Button>,
+            footer: () => <Button size="lg" data-cy="custom-error-footer">{ customFooterText }</Button>,
             header: () => <>{customHeaderMessage}</>,
             message: () => <>{customMessage}</> }}
         />),

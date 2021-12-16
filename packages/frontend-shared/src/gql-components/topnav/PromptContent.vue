@@ -6,7 +6,7 @@
       </p>
       <ul
         class="flex flex-wrap gap-16px"
-        data-testid="provider-list"
+        data-cy="provider-list"
       >
         <li
           v-for="provider in ciProviders"

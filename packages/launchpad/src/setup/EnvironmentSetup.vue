@@ -10,7 +10,7 @@
         :placeholder="t('setupPage.projectSetup.frameworkPlaceholder')"
         :label="t('setupPage.projectSetup.frameworkLabel')"
         selector-type="framework"
-        data-testid="select-framework"
+        data-cy="select-framework"
         @select-framework="setFEFramework"
       />
       <SelectFwOrBundler
@@ -21,7 +21,7 @@
         :placeholder="t('setupPage.projectSetup.bundlerPlaceholder')"
         :label="t('setupPage.projectSetup.bundlerLabel')"
         selector-type="bundler"
-        data-testid="select-bundler"
+        data-cy="select-bundler"
         @select-bundler="setFEBundler"
       />
       <SelectLanguage

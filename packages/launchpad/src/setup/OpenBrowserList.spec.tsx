@@ -2,7 +2,7 @@ import { OpenBrowserListFragmentDoc } from '../generated/graphql-test'
 import OpenBrowserList from './OpenBrowserList.vue'
 import { longBrowsersList } from '@packages/frontend-shared/cypress/support/mock-graphql/longBrowsersList'
 
-const launchButtonSelector = 'button[data-testid=launch-button]'
+const launchButtonSelector = 'button[data-cy=launch-button]'
 
 describe('<OpenBrowserList />', () => {
   beforeEach(() => {

@@ -12,7 +12,7 @@ describe('App: Settings', { viewportWidth: 600 }, () => {
     cy.visitApp()
     cy.findByText('Settings').click()
 
-    cy.get('div[data-testid="header-bar"]').should('contain', 'Settings')
+    cy.findByTestId('header-bar').should('contain', 'Settings')
     cy.findByText('Device Settings').should('be.visible')
     cy.findByText('Project Settings').should('be.visible')
   })
@@ -58,10 +58,10 @@ describe('App: Settings', { viewportWidth: 600 }, () => {
       cy.visitApp()
       cy.get('[href="#/settings"]').click()
       cy.wait(100)
-      cy.get('[data-cy="Device Settings"]').click()
+      cy.findByTestId('Device Settings').click()
 
-      cy.get('[data-cy="use-well-known-editor"]').should('be.checked')
-      cy.get('[data-cy="use-custom-editor"]').should('not.be.checked')
+      cy.findByTestId('use-well-known-editor').should('be.checked')
+      cy.findByTestId('use-custom-editor').should('not.be.checked')
     })
 
     it('allows custom editor', () => {
@@ -77,22 +77,22 @@ describe('App: Settings', { viewportWidth: 600 }, () => {
       // preferred editor entered from input should have been persisted
       cy.get('[href="#/settings"]').click()
       cy.wait(100)
-      cy.get('[data-cy="Device Settings"]').click()
+      cy.findByTestId('Device Settings').click()
 
-      cy.get('[data-cy="use-well-known-editor"]').should('not.be.checked')
-      cy.get('[data-cy="use-custom-editor"]').should('be.checked')
-      cy.get('[data-cy="custom-editor"]').should('have.value', '/usr/local/bin/vim')
+      cy.findByTestId('use-well-known-editor').should('not.be.checked')
+      cy.findByTestId('use-custom-editor').should('be.checked')
+      cy.findByTestId('custom-editor').should('have.value', '/usr/local/bin/vim')
     })
 
     it('lists file browser as available editor', () => {
       cy.intercept('POST', 'mutation-ExternalEditorSettings_SetPreferredEditorBinary').as('SetPreferred')
 
       cy.contains('Choose your editor...').click()
-      cy.get('[data-cy="computer"]').click()
+      cy.findByTestId('computer').click()
 
       cy.wait('@SetPreferred').its('request.body.variables.value').should('include', 'computer')
-      cy.get('[data-cy="use-well-known-editor"]').should('be.checked')
-      cy.get('[data-cy="use-custom-editor"]').should('not.be.checked')
+      cy.findByTestId('use-well-known-editor').should('be.checked')
+      cy.findByTestId('use-custom-editor').should('not.be.checked')
     })
   })
 })
