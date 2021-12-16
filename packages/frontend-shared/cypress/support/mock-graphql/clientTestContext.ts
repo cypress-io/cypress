@@ -5,7 +5,6 @@ import type {
   Browser,
   WizardBundler,
   WizardFrontendFramework,
-  TestingTypeEnum,
   GlobalProject,
   VersionData,
   LocalSettings,
@@ -29,7 +28,6 @@ export interface ClientTestContext {
   wizard: {
     step: WizardStep
     canNavigateForward: boolean
-    currentTestingType: TestingTypeEnum | null
     chosenBundler: WizardBundler | null
     chosenFramework: WizardFrontendFramework | null
     chosenManualInstall: boolean
@@ -79,7 +77,6 @@ export function makeClientTestContext (): ClientTestContext {
     wizard: {
       step: 'configFiles',
       canNavigateForward: false,
-      currentTestingType: null,
       chosenBundler: null,
       chosenFramework: null,
       chosenManualInstall: false,

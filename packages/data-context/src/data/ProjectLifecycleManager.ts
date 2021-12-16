@@ -365,7 +365,8 @@ export class ProjectLifecycleManager {
     if (this._currentTestingType) {
       const testingTypeOverrides = configFileContents[this._currentTestingType] ?? {}
 
-      configFileContents = { ...configFileContents, ...testingTypeOverrides }
+      // TODO: pass in options.config overrides separately, so they are reflected in the UI
+      configFileContents = { ...configFileContents, ...testingTypeOverrides, ...options.config }
     }
 
     // TODO: Convert this to be synchronous,
