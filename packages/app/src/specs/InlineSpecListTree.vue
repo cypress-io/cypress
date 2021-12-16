@@ -1,11 +1,11 @@
 <template>
   <div
     v-bind="containerProps"
-    class="specs-list-container overscroll-contain"
+    class="pt-8px specs-list-container overscroll-contain overflow-y-auto"
   >
     <ul
       v-bind="wrapperProps"
-      class="overflow-x-hidden children:h-30px"
+      class="children:h-30px"
     >
       <li
         v-for="row in list"
@@ -23,6 +23,7 @@
           'hover:border-gray-1000': isCurrentSpec(row.data),
         }"
         data-testid="spec-row-item"
+        :data-selected-spec="isCurrentSpec(row.data)"
         @click.self="submit(row.data, row.index)"
       >
         <RouterLink
@@ -160,9 +161,9 @@ a::before {
 }
 
 /** h-[calc] was getting dropped so moved to styles. Virtual list requires defined height. */
-/** Header is 80px, padding-bottom is 8px **/
+/** Header is 64px, padding-bottom is 8px **/
 .specs-list-container {
-  height: calc(100vh - 80px - 8px);
+  height: calc(100vh - 64px - 8px);
 }
 
 </style>

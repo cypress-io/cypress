@@ -460,6 +460,10 @@ commands:
       browser:
         description: browser shortname to target
         type: string
+      percy:
+        description: enable percy
+        type: boolean
+        default: false
       type:
         description: ct or e2e
         type: enum
@@ -472,6 +476,7 @@ commands:
       - restore_cached_workspace
       - run: 
           command: |
+            cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --parallel -- --') || true
             DEBUG=<<parameters.debug>> \
             CYPRESS_INTERNAL_FORCE_BROWSER_RELAUNCH='true' \
             CYPRESS_KONFIG_ENV=production \
@@ -479,7 +484,7 @@ commands:
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
-            yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --record --parallel --group <<parameters.package>>-<<parameters.type>>
+            $cmd yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --record --parallel --group <<parameters.package>>-<<parameters.type>>
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
@@ -1309,6 +1314,7 @@ jobs:
     steps:
       - run-new-ui-tests:
           browser: chrome
+          percy: true
           package: frontend-shared
           type: ct
 
@@ -1318,6 +1324,7 @@ jobs:
     steps:
       - run-new-ui-tests:
           browser: chrome
+          percy: true
           package: launchpad
           type: ct
           # debug: cypress:*,engine:socket
@@ -1328,6 +1335,7 @@ jobs:
     steps:
       - run-new-ui-tests:
           browser: chrome
+          percy: true
           package: launchpad
           type: e2e
 
@@ -1337,6 +1345,7 @@ jobs:
     steps:
       - run-new-ui-tests:
           browser: chrome
+          percy: true
           package: app
           type: ct
 
@@ -1346,6 +1355,7 @@ jobs:
     steps:
       - run-new-ui-tests:
           browser: chrome
+          percy: true
           package: app
           type: e2e
 
@@ -1999,6 +2009,14 @@ jobs:
           repo: cypress-example-recipes
           command: npm run test:ci:firefox
 
+  "test-binary-against-recipes-chrome":
+    <<: *defaults
+    steps:
+      - test-binary-against-repo:
+          repo: cypress-example-recipes
+          browser: chrome
+          command: npm run test:ci:chrome
+
   # This is a special job. It allows you to test the current
   # built test runner against a pull request in the repo
   # cypress-example-recipes.
@@ -2172,9 +2190,14 @@ linux-workflow: &linux-workflow
         required_env_var: PERCY_TOKEN # skips job if not defined (external PR)
         requires:
           - cli-visual-tests
+          - reporter-integration-tests
+          - run-app-component-tests-chrome
+          - run-app-integration-tests-chrome
+          - run-frontend-shared-component-tests-chrome
+          - run-launchpad-component-tests-chrome
+          - run-launchpad-integration-tests-chrome
           - runner-integration-tests-chrome
           - runner-ct-integration-tests-chrome
-          - reporter-integration-tests
     - lint-types:
         requires:
           - build
@@ -2424,6 +2447,10 @@ linux-workflow: &linux-workflow
     #     requires:
     #       - create-build-artifacts
     - test-binary-against-recipes-firefox:
+        <<: *mainBuildFilters
+        requires:
+          - create-build-artifacts
+    - test-binary-against-recipes-chrome:
         <<: *mainBuildFilters
         requires:
           - create-build-artifacts

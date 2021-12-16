@@ -530,6 +530,8 @@ type LocalSettingsPreferences {
   preferredEditorBinary: String
   proxyBypass: String
   proxyServer: String
+  reporterWidth: Int
+  specListWidth: Int
 }
 
 type Mutation {
