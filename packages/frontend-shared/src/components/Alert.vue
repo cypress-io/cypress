@@ -41,7 +41,7 @@
     </div>
     <hr
       v-if="props.stackTrace && slots.details"
-      class="border-error-200"
+      class="border-error-100"
     >
     <div
       v-if="props.stackTrace"
