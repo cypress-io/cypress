@@ -33,7 +33,7 @@
     "@urql/vue": "0.4.3",
     "@vitejs/plugin-vue": "1.2.4",
     "@vitejs/plugin-vue-jsx": "1.1.6",
-    "@vueuse/core": "5.2.0",
+    "@vueuse/core": "7.2.2",
     "@windicss/plugin-interaction-variants": "1.0.0",
     "ansi-to-html": "0.6.14",
     "bluebird": "3.5.3",
