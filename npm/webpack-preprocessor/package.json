@@ -22,8 +22,7 @@
   "dependencies": {
     "bluebird": "3.7.1",
     "debug": "^4.3.2",
-    "lodash": "^4.17.20",
-    "webpack": "^5.39.0"
+    "lodash": "^4.17.20"
   },
   "devDependencies": {
     "@babel/core": "^7.0.1",
@@ -31,6 +30,7 @@
     "@babel/preset-env": "^7.0.0",
     "@fellow/eslint-plugin-coffee": "0.4.13",
     "@types/mocha": "9.0.0",
+    "@types/webpack": "^4.41.12",
     "@typescript-eslint/eslint-plugin": "^4.18.0",
     "@typescript-eslint/parser": "^4.18.0",
     "babel-loader": "^8.0.2",
@@ -58,7 +58,8 @@
     "sinon": "^9.0.0",
     "sinon-chai": "^3.5.0",
     "snap-shot-it": "7.9.2",
-    "ts-node": "^10.2.1"
+    "ts-node": "^10.2.1",
+    "webpack": "^4.44.2"
   },
   "peerDependencies": {
     "@babel/core": "^7.0.1",
