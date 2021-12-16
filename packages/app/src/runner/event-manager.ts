@@ -8,6 +8,7 @@ import type { FileDetails } from '@packages/types'
 
 import { automation } from '@packages/runner-shared/src/automation'
 import { logger } from '@packages/runner-shared/src/logger'
+import type { Socket } from '@packages/socket/lib/browser'
 
 // type is default export of '@packages/driver'
 // cannot import because it's not type safe and tsc throw many type errors.
@@ -47,6 +48,7 @@ export class EventManager {
     selectorPlaygroundModel: any,
     // StudioRecorder constructor
     StudioRecorderCtor: any,
+    private ws: Socket,
   ) {
     this.studioRecorder = new StudioRecorderCtor(this)
     this.selectorPlaygroundModel = selectorPlaygroundModel
@@ -67,18 +69,18 @@ export class EventManager {
       return this.runSpec(state)
     }
 
-    window.ws.emit('is:automation:client:connected', connectionInfo, this.Mobx.action('automationEnsured', (isConnected) => {
+    this.ws.emit('is:automation:client:connected', connectionInfo, this.Mobx.action('automationEnsured', (isConnected) => {
       state.automation = isConnected ? automation.CONNECTED : automation.MISSING
-      window.ws.on('automation:disconnected', this.Mobx.action('automationDisconnected', () => {
+      this.ws.on('automation:disconnected', this.Mobx.action('automationDisconnected', () => {
         state.automation = automation.DISCONNECTED
       }))
     }))
 
-    window.ws.on('change:to:url', (url) => {
+    this.ws.on('change:to:url', (url) => {
       window.location.href = url
     })
 
-    window.ws.on('automation:push:message', (msg, data = {}) => {
+    this.ws.on('automation:push:message', (msg, data = {}) => {
       if (!Cypress) return
 
       switch (msg) {
@@ -96,12 +98,12 @@ export class EventManager {
       }
     })
 
-    window.ws.on('watched:file:changed', () => {
+    this.ws.on('watched:file:changed', () => {
       this.studioRecorder.cancel()
       rerun()
     })
 
-    window.ws.on('specs:changed', ({ specs, testingType }) => {
+    this.ws.on('specs:changed', ({ specs, testingType }) => {
       // do not emit the event if e2e runner is not displaying an inline spec list.
       if (testingType === 'e2e' && state.useInlineSpecList === false) {
         return
@@ -110,23 +112,23 @@ export class EventManager {
       state.setSpecs(specs)
     })
 
-    window.ws.on('dev-server:hmr:error', (error) => {
+    this.ws.on('dev-server:hmr:error', (error) => {
       Cypress.stop()
       this.localBus.emit('script:error', error)
     })
 
-    window.ws.on('dev-server:compile:success', ({ specFile }) => {
+    this.ws.on('dev-server:compile:success', ({ specFile }) => {
       if (!specFile || specFile === state?.spec?.absolute) {
         rerun()
       }
     })
 
     socketRerunEvents.forEach((event) => {
-      window.ws.on(event, rerun)
+      this.ws.on(event, rerun)
     })
 
     socketToDriverEvents.forEach((event) => {
-      window.ws.on(event, (...args) => {
+      this.ws.on(event, (...args) => {
         if (!Cypress) return
 
         Cypress.emit(event, ...args)
@@ -163,7 +165,7 @@ export class EventManager {
     })
 
     this.reporterBus.on('set:user:editor', (editor) => {
-      window.ws.emit('set:user:editor', editor)
+      this.ws.emit('set:user:editor', editor)
     })
 
     this.reporterBus.on('runner:restart', rerun)
@@ -222,11 +224,11 @@ export class EventManager {
     })
 
     this.reporterBus.on('external:open', (url) => {
-      window.ws.emit('external:open', url)
+      this.ws.emit('external:open', url)
     })
 
     this.reporterBus.on('get:user:editor', (cb) => {
-      window.ws.emit('get:user:editor', cb)
+      this.ws.emit('get:user:editor', cb)
     })
 
     this.reporterBus.on('open:file:unified', (file: FileDetails) => {
@@ -234,11 +236,11 @@ export class EventManager {
     })
 
     this.reporterBus.on('open:file', (url) => {
-      window.ws.emit('open:file', url)
+      this.ws.emit('open:file', url)
     })
 
     const studioInit = () => {
-      window.ws.emit('studio:init', (showedStudioModal) => {
+      this.ws.emit('studio:init', (showedStudioModal) => {
         if (!showedStudioModal) {
           this.studioRecorder.showInitModal()
         } else {
@@ -286,7 +288,7 @@ export class EventManager {
     })
 
     this.localBus.on('studio:save', (saveInfo) => {
-      window.ws.emit('studio:save', saveInfo, (err) => {
+      this.ws.emit('studio:save', saveInfo, (err) => {
         if (err) {
           this.reporterBus.emit('test:set:state', this.studioRecorder.saveError(err), noop)
         }
@@ -329,7 +331,7 @@ export class EventManager {
 
   start (config) {
     if (config.socketId) {
-      window.ws.emit('app:connect', config.socketId)
+      this.ws.emit('app:connect', config.socketId)
     }
   }
 
@@ -346,7 +348,7 @@ export class EventManager {
 
     this._addListeners()
 
-    window.ws.emit('watch:test:file', config.spec)
+    this.ws.emit('watch:test:file', config.spec)
   }
 
   isBrowser (browserName) {
@@ -363,7 +365,7 @@ export class EventManager {
       onSpecReady: () => {
         // get the current runnable in case we reran mid-test due to a visit
         // to a new domain
-        window.ws.emit('get:existing:run:state', (state: RunState = {}) => {
+        this.ws.emit('get:existing:run:state', (state: RunState = {}) => {
           if (!Cypress.runner) {
             // the tests have been reloaded
             return
@@ -393,7 +395,7 @@ export class EventManager {
           if (config.isTextTerminal && !state.currentId) {
             // we are in run mode and it's the first load
             // store runnables in backend and maybe send to dashboard
-            return window.ws.emit('set:runnables:and:maybe:record:tests', runnables, run)
+            return this.ws.emit('set:runnables:and:maybe:record:tests', runnables, run)
           }
 
           if (state.currentId) {
@@ -411,12 +413,12 @@ export class EventManager {
 
   _addListeners () {
     Cypress.on('message', (msg, data, cb) => {
-      window.ws.emit('client:request', msg, data, cb)
+      this.ws.emit('client:request', msg, data, cb)
     })
 
     driverToSocketEvents.forEach((event) => {
       Cypress.on(event, (...args) => {
-        return window.ws.emit(event, ...args)
+        return this.ws.emit(event, ...args)
       })
     })
 
@@ -548,7 +550,7 @@ export class EventManager {
 
   stop () {
     this.localBus.removeAllListeners()
-    window.ws.off()
+    this.ws.off()
   }
 
   async teardown (state: BaseStore) {
@@ -609,7 +611,7 @@ export class EventManager {
   }
 
   _studioCopyToClipboard (cb) {
-    window.ws.emit('studio:get:commands:text', this.studioRecorder.logs, (commandsText) => {
+    this.ws.emit('studio:get:commands:text', this.studioRecorder.logs, (commandsText) => {
       this.studioRecorder.copyToClipboard(commandsText)
       .then(cb)
     })
@@ -631,7 +633,7 @@ export class EventManager {
   }
 
   notifyRunningSpec (specFile) {
-    window.ws.emit('spec:changed', specFile)
+    this.ws.emit('spec:changed', specFile)
   }
 
   snapshotUnpinned () {
@@ -649,7 +651,7 @@ export class EventManager {
   }
 
   launchBrowser (browser) {
-    window.ws.emit('reload:browser', window.location.toString(), browser && browser.name)
+    this.ws.emit('reload:browser', window.location.toString(), browser && browser.name)
   }
 
   // clear all the cypress specific cookies

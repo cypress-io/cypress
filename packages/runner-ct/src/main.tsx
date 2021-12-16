@@ -87,6 +87,7 @@ const Runner: any = {
       MobX,
       selectorPlaygroundModel,
       StudioRecorder,
+      ws,
     )
 
     MobX.action('started', () => {

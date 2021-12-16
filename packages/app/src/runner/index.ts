@@ -50,6 +50,8 @@ export function initializeEventManager (UnifiedRunner: any) {
     UnifiedRunner.MobX,
     UnifiedRunner.selectorPlaygroundModel,
     UnifiedRunner.StudioRecorder,
+    // created once when opening runner at the very top level in main.ts
+    window.ws,
   )
 }
 

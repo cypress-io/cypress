@@ -26,6 +26,7 @@ const eventManager = new EventManager(
   MobX,
   selectorPlaygroundModel,
   StudioRecorder,
+  ws,
 )
 
 // NOTE: this is for testing Cypress-in-Cypress, window.Cypress is undefined here
