@@ -1319,8 +1319,8 @@ describe('network stubbing', function () {
         cy.contains('#result', '""').should('be.visible')
       })
 
-      // @see https://github.com/cypress-io/cypress/issues/8623
-      // @see https://github.com/cypress-io/cypress/issues/8623
+      // @see https://github.com/cypress-io/cypress/issues/19330
+      // @see https://github.com/cypress-io/cypress/issues/19344
       it('load fixture as Buffer when encoding is null', function () {
         // call through normally on everything
         cy.spy(Cypress, 'backend')
