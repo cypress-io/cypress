@@ -20,6 +20,7 @@ const breakingKeys = _.map(breakingOptions, 'name')
 const defaultValues = createIndex(options, 'name', 'defaultValue')
 const publicConfigKeys = _(options).reject({ isInternal: true }).map('name').value()
 const validationRules = createIndex(options, 'name', 'validation')
+const testConfigOverrideOptions = createIndex(options, 'name', 'canUpdateDuringTestTime')
 
 module.exports = {
   allowed: (obj = {}) => {
@@ -100,5 +101,17 @@ module.exports = {
         })
       }
     })
+  },
+
+  validateNoReadOnlyConfig: (config, onErr) => {
+    let errProperty
+
+    Object.keys(config).some((option) => {
+      return errProperty = testConfigOverrideOptions[option] === false ? option : undefined
+    })
+
+    if (errProperty) {
+      return onErr(errProperty)
+    }
   },
 }
