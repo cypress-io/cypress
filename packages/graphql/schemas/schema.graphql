@@ -140,6 +140,23 @@ type CloudProjectEdge {
   node: CloudProject!
 }
 
+"""Unable to find cloud project"""
+type CloudProjectNotFound {
+  """an error message"""
+  message: String!
+}
+
+union CloudProjectResult = CloudProject | CloudProjectNotFound | CloudProjectUnauthorized
+
+"""Unauthorized access"""
+type CloudProjectUnauthorized {
+  """does the user have a requested access pending"""
+  hasRequestedAccess: Boolean
+
+  """an error message"""
+  message: String!
+}
+
 type CloudRecordKey implements Node {
   createdAt: DateTime
 
@@ -334,7 +351,7 @@ type CurrentProject implements Node & ProjectLike {
   browsers: [Browser!]
 
   """The remote associated project from Cypress Cloud"""
-  cloudProject: CloudProject
+  cloudProject: CloudProjectResult
 
   """List of all code generation candidates stories"""
   codeGenCandidates(glob: String!): [FileParts]
@@ -543,7 +560,12 @@ type Mutation {
   """Create an Index HTML file for a new component testing project"""
   appCreateComponentIndexHtml(template: String!): Boolean
   clearActiveProject: Boolean
+
+  """Create a project in the dashboard and return its object"""
   cloudProjectCreate(ciProviders: [String!], name: String!, orgId: ID!, public: Boolean!): CloudProject
+
+  """Request access to an organization from a projectId"""
+  cloudProjectRequestAccess(projectSlug: String!): Boolean
 
   """
   Development only: Triggers or dismisses a prompted refresh by touching the file watched by our development scripts
@@ -694,13 +716,13 @@ type Query {
   ): Node
 
   """Lookup an individual project by the slug"""
-  cloudProjectBySlug(slug: String!): CloudProject
+  cloudProjectBySlug(slug: String!): CloudProjectResult
 
   """Lookup a list of projects by their slug"""
   cloudProjectsBySlugs(
     """A list of Project slugs"""
     slugs: [String!]!
-  ): [CloudProject]
+  ): [CloudProjectResult]
 
   """A user within the Cypress Cloud"""
   cloudViewer: CloudUser
