@@ -53,7 +53,7 @@ const isDomSubjectAndMatchesValue = (value, subject) => {
 }
 
 type Parsed = {
-  subject?: any
+  subject?: JQuery<any>
   actual?: any
   expected?: any
 }
