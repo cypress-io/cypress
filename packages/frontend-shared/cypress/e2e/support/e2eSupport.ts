@@ -259,14 +259,14 @@ function findBrowsers (options: SetFoundBrowsersOptions = {}) {
   if (!filteredBrowsers) {
     const reducer = (result: FoundBrowser[], browser: Browser, index: number): FoundBrowser[] => {
       if (!options.filter || options.filter(browser)) {
-        const foundBrowser = {
+        const foundBrowser: FoundBrowser = {
           ...browser,
           version: `${index + 1}.${index + 2}.${index + 3}`,
           majorVersion: `${index + 1}`,
           path: `/test/${browser.name}/path`,
         }
 
-        result.push(foundBrowser as FoundBrowser)
+        result.push(foundBrowser)
       }
 
       return result
