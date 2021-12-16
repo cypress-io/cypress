@@ -547,18 +547,20 @@ describe('lib/cypress', () => {
 
       return config.get(this.pristineWithConfigPath)
       .then(() => {
+        return fs.rmdir(supportFolder, { recursive: true })
+      }).then(() => {
         return fs.statAsync(supportFolder)
-        .then(() => {
-          throw new Error('supportFolder should not exist!')
-        }).catch({ code: 'ENOENT' }, () => {
-          return cypress.start([`--run-project=${this.pristineWithConfigPath}`, '--no-run-mode'])
-        }).then(() => {
-          return fs.statAsync(supportFolder)
-        }).then(() => {
-          throw new Error('supportFolder should not exist!')
-        }).catch((err) => {
-          expect(err.code).eq('ENOENT')
-        })
+      })
+      .then(() => {
+        throw new Error('supportFolder should not exist!')
+      }).catch({ code: 'ENOENT' }, () => {
+        return cypress.start([`--run-project=${this.pristineWithConfigPath}`])
+      }).then(() => {
+        return fs.statAsync(supportFolder)
+      }).then(() => {
+        throw new Error('supportFolder should not exist!')
+      }).catch((err) => {
+        expect(err.code).eq('ENOENT')
       })
     })
 
@@ -1190,7 +1192,13 @@ describe('lib/cypress', () => {
 
     describe('--config-file', () => {
       it('false does not require cypress.config.js to run', function () {
-        return fs.statAsync(path.join(this.pristinePath, 'cypress.config.js'))
+        return fs.mkdirAsync(path.join(this.pristinePath, 'cypress/support'), { recursive: true })
+        .then(() => {
+          return fs.writeFileAsync(path.join(this.pristinePath, 'cypress/support', 'e2e.js'), '')
+        })
+        .then(() => {
+          return fs.statAsync(path.join(this.pristinePath, 'cypress.config.js'))
+        })
         .then(() => {
           throw new Error('cypress.config.js should not exist')
         }).catch({ code: 'ENOENT' }, () => {

@@ -1922,6 +1922,10 @@ jobs:
           command: |
             echo 'module.exports = {}' > cypress.config.js
             npx cypress run
+      - run:
+          name: Rename support file
+          working_directory: <<parameters.wd>>
+          command: mv cypress/support/index.ts cypress/support/e2e.js
 
   test-full-typescript-project:
     parameters:
@@ -1977,7 +1981,7 @@ jobs:
       - run:
           name: Rename support file
           working_directory: <<parameters.wd>>
-          command: mv cypress/support/index.js cypress/support/e2e.js
+          command: mv cypress/support/index.ts cypress/support/e2e.js
       - run:
           name: Run project tests 🗳
           working_directory: <<parameters.wd>>

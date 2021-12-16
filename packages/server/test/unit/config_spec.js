@@ -585,7 +585,7 @@ describe('lib/config', () => {
 
       context('supportFile', () => {
         it('passes if a string', function () {
-          this.setup({ supportFile: 'cypress/support' })
+          this.setup({ supportFile: 'cypress/support/e2e.js' })
 
           return this.expectValidationPasses()
         })
@@ -2059,7 +2059,7 @@ describe('lib/config', () => {
 
       const obj = config.setAbsolutePaths({
         projectRoot,
-        supportFile: 'cypress/support',
+        supportFile: 'cypress/support/e2e.js',
       })
 
       return config.setSupportFileAndFolder(obj, mockSupportDefaults)
@@ -2077,7 +2077,7 @@ describe('lib/config', () => {
 
       const obj = config.setAbsolutePaths({
         projectRoot,
-        supportFile: 'cypress/support',
+        supportFile: false,
       })
 
       return config.setSupportFileAndFolder(obj, mockSupportDefaults)

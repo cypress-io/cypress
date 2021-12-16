@@ -349,7 +349,9 @@ describe('Proxy Performance', function () {
 
         Config.set({
           projectRoot: '/tmp/a',
-          supportFile: false,
+          config: {
+            supportFile: false,
+          },
         }).then((config) => {
           config.port = CY_PROXY_PORT
 
