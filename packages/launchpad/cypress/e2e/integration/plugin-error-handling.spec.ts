@@ -13,7 +13,7 @@ describe('Plugin error handling', () => {
     .and('contain.text', 'The function exported by the plugins file threw an error')
 
     cy.withCtx(async (ctx) => {
-      await ctx.actions.file.writeFileInProject('cypress.config.js', `module.exports = { e2e: { baseUrl: 'https://cypress.com' } }`)
+      await ctx.actions.file.writeFileInProject('cypress.config.js', `module.exports = { e2e: { baseUrl: 'https://cypress.com', supportFile: false } }`)
     })
 
     cy.get('[data-testid=error-retry-button]').click()
