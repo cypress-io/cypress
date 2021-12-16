@@ -22,3 +22,6 @@ import '@purge-icons/generated'
 
 import './commands'
 import './attachFileWithPath'
+import installCustomPercyCommand from '@packages/ui-components/cypress/support/customPercyCommand'
+
+installCustomPercyCommand()

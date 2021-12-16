@@ -1,5 +1,5 @@
+import Bluebird from 'bluebird'
 import { EventEmitter } from 'events'
-import Promise from 'bluebird'
 import type { BaseStore } from '@packages/runner-shared/src/store'
 import type { RunState } from '@packages/types/src/driver'
 import type MobX from 'mobx'
@@ -448,10 +448,10 @@ export class EventManager {
 
     Cypress.on('collect:run:state', () => {
       if (Cypress.env('NO_COMMAND_LOG')) {
-        return Promise.resolve()
+        return Bluebird.resolve()
       }
 
-      return new Promise((resolve) => {
+      return new Bluebird((resolve) => {
         this.reporterBus.emit('reporter:collect:run:state', (reporterState) => {
           resolve({
             ...reporterState,
@@ -592,15 +592,15 @@ export class EventManager {
     this.selectorPlaygroundModel.setOpen(false)
   }
 
-  teardownReporter () {
-    return new Promise((resolve) => {
+  resetReporter () {
+    return new Bluebird((resolve) => {
       this.reporterBus.once('reporter:restarted', resolve)
       this.reporterBus.emit('reporter:restart:test:run')
     })
   }
 
   async _rerun () {
-    await this.teardownReporter()
+    await this.resetReporter()
 
     // this probably isn't 100% necessary
     // since Cypress will fall out of scope

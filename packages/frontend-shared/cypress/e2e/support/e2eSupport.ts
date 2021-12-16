@@ -8,6 +8,7 @@ import type { DocumentNode, ExecutionResult } from 'graphql'
 import type { Browser, FoundBrowser, OpenModeOptions } from '@packages/types'
 import { browsers } from '@packages/types/src/browser'
 import type { E2ETaskMap } from '../e2ePluginSetup'
+import installCustomPercyCommand from '@packages/ui-components/cypress/support/customPercyCommand'
 
 configure({ testIdAttribute: 'data-cy' })
 
@@ -326,3 +327,5 @@ Cypress.Commands.add('openProject', openProject)
 Cypress.Commands.add('withCtx', withCtx)
 Cypress.Commands.add('remoteGraphQLIntercept', remoteGraphQLIntercept)
 Cypress.Commands.add('findBrowsers', findBrowsers)
+
+installCustomPercyCommand()

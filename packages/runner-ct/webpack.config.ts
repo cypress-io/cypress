@@ -60,6 +60,17 @@ const config: webpack.Configuration = {
     rules: [
       ...nonPngRules,
       pngRule,
+      {
+        test: /index\.js/,
+        exclude: /node_modules/,
+        use: [{
+          loader: 'ifdef-loader',
+          options: {
+            DEBUG: true,
+            'ifdef-verbose': true,
+          },
+        }],
+      },
     ],
   },
   entry: {
