@@ -131,10 +131,10 @@ describe('Sidebar Navigation', () => {
   it('has a menu item labeled "Runs" which takes you to the Runs page', () => {
     cy.get('[aria-expanded]').should('have.attr', 'aria-expanded', 'true')
 
-    cy.get('[data-testid="header-bar"]').findByText('Runs').should('not.exist')
+    cy.get('[data-cy="app-header-bar"]').findByText('Runs').should('not.exist')
     cy.findByText('Runs').should('be.visible')
     cy.findByText('Runs').click()
-    cy.get('[data-testid="header-bar"]').findByText('Runs').should('be.visible')
+    cy.get('[data-cy="app-header-bar"]').findByText('Runs').should('be.visible')
     cy.get('.router-link-active').findByText('Runs').should('be.visible')
     cy.get('[data-e2e-href="/runs"] > svg > path').should('have.css', 'fill', 'rgb(0, 50, 32)')
   })
@@ -142,10 +142,10 @@ describe('Sidebar Navigation', () => {
   it('has a menu item labeled "Specs" which takes you to the Spec List page', () => {
     cy.get('[aria-expanded]').should('have.attr', 'aria-expanded', 'true')
 
-    cy.get('[data-testid="header-bar"]').findByText('Specs-Index').should('not.exist')
+    cy.get('[data-cy="app-header-bar"]').findByText('Specs-Index').should('not.exist')
     cy.findByText('Specs').should('be.visible')
     cy.findByText('Specs').click()
-    cy.get('[data-testid="header-bar"]').findByText('Specs-Index').should('be.visible')
+    cy.get('[data-cy="app-header-bar"]').findByText('Specs-Index').should('be.visible')
     cy.get('.router-link-active').findByText('Specs').should('be.visible')
     cy.get('[data-e2e-href="/specs"] > svg > path').should('have.css', 'fill', 'rgb(0, 50, 32)')
   })
@@ -153,10 +153,10 @@ describe('Sidebar Navigation', () => {
   it('has a menu item labeled "Settings" which takes you to the Settings page', () => {
     cy.get('[aria-expanded]').should('have.attr', 'aria-expanded', 'true')
 
-    cy.get('[data-testid="header-bar"]').findByText('Settings').should('not.exist')
+    cy.get('[data-cy="app-header-bar"]').findByText('Settings').should('not.exist')
     cy.findByText('Settings').should('be.visible')
     cy.findByText('Settings').click()
-    cy.get('[data-testid="header-bar"]').findByText('Settings').should('be.visible')
+    cy.get('[data-cy="app-header-bar"]').findByText('Settings').should('be.visible')
     cy.get('.router-link-active').findByText('Settings').should('be.visible')
     cy.get('[data-e2e-href="/settings"] > svg > path').should('have.css', 'fill', 'rgb(0, 50, 32)')
   })
