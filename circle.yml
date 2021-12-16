@@ -1678,23 +1678,14 @@ jobs:
       - run: ls -la binary-url.json npm-package-url.json
       - run: cat binary-url.json
       - run: cat npm-package-url.json
-      - run: mkdir /tmp/testing
-      - run:
-          name: create dummy package
-          working_directory: /tmp/testing
-          command: npm init -y
       - run:
           # install NPM from unique urls
-          name: Install Cypress
+          name: Install Cypress Binary in Dummy Package
           command: |
             node scripts/test-unique-npm-and-binary.js \
               --npm npm-package-url.json \
               --binary binary-url.json \
               --cwd /tmp/testing
-      - run:
-          name: Verify Cypress binary
-          working_directory: /tmp/testing
-          command: $(yarn bin cypress) verify
       - run:
           name: Running other test projects with new NPM package and binary
           command: |
