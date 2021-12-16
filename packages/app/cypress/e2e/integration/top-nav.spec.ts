@@ -1,56 +1,13 @@
-import type { FoundBrowser } from '@packages/types/src'
-
 describe('App Top Nav Workflows', () => {
-  const setupMockBrowsers = function () {
-    cy.withCtx(async (ctx, o) => {
-      const mockBrowsers = [{
-        channel: 'stable',
-        displayName: 'Chrome',
-        family: 'chromium',
-        name: 'chrome',
-        version: '1.2.333.445',
-        path: '/test/chrome/path',
-        majorVersion: '1',
-      }, {
-        channel: 'stable',
-        displayName: 'Firefox',
-        family: 'firefox',
-        name: 'firefox',
-        path: '/test/firefox/path',
-        version: '2.3.444',
-        majorVersion: '2',
-      }, {
-        channel: 'stable',
-        displayName: 'Electron',
-        family: 'chromium',
-        name: 'electron',
-        path: '/test/electron/path',
-        version: '3.4.555.66',
-        majorVersion: '3',
-      }, {
-        channel: 'stable',
-        displayName: 'Edge',
-        family: 'chromium',
-        name: 'edge',
-        path: '/test/edge/path',
-        version: '4.5.666.77',
-        majorVersion: '4',
-      }] as FoundBrowser[]
-
-      // @ts-ignore sinon is a global in the node process where this is executed
-      sinon.stub(ctx._apis.appApi, 'getBrowsers').resolves(mockBrowsers)
-    })
-  }
-
   beforeEach(() => {
     cy.scaffoldProject('launchpad')
 
-    cy.clock(Date.UTC(2021, 10, 31), ['Date'])
+    cy.clock(Date.UTC(2021, 9, 30), ['Date'])
   })
 
   describe('Page Name', () => {
     it('shows the current page name in the top nav', () => {
-      setupMockBrowsers()
+      cy.findBrowsers()
       cy.openProject('launchpad')
       cy.startAppServer()
       cy.visitApp()
@@ -62,7 +19,7 @@ describe('App Top Nav Workflows', () => {
   describe('Browser List', () => {
     context('with command line args', () => {
       it('shows current browser when launched with browser option', () => {
-        setupMockBrowsers()
+        cy.findBrowsers()
         cy.openProject('launchpad', ['--browser', 'firefox'])
         cy.startAppServer()
         cy.visitApp()
@@ -71,13 +28,18 @@ describe('App Top Nav Workflows', () => {
         .should('have.attr', 'src')
         .and('contain', 'firefox')
 
-        cy.findByTestId('top-nav-active-browser').should('contain', 'Firefox v2')
+        cy.findByTestId('top-nav-active-browser').should('contain', 'Firefox v5')
       })
     })
 
     context('without command line args', () => {
       beforeEach(() => {
-        setupMockBrowsers()
+        cy.findBrowsers({
+          filter: (browser) => {
+            return Cypress._.includes(['chrome', 'firefox', 'electron', 'edge'], browser.name) && browser.channel === 'stable'
+          },
+        })
+
         cy.openProject('launchpad')
         cy.startAppServer()
         cy.visitApp()
@@ -98,25 +60,25 @@ describe('App Top Nav Workflows', () => {
 
         cy.get('@browserItems').eq(0)
         .should('contain', 'Chrome')
-        .and('contain', 'Version 1.2.333.445')
+        .and('contain', 'Version 1.2.3')
         .findByTestId('top-nav-browser-list-selected-item')
         .should('exist')
 
         cy.get('@browserItems').eq(1)
         .should('contain', 'Firefox')
-        .and('contain', 'Version 2.3.444')
+        .and('contain', 'Version 5.6.7')
         .findByTestId('top-nav-browser-list-selected-item')
         .should('not.exist')
 
         cy.get('@browserItems').eq(2)
-        .should('contain', 'Electron')
-        .and('contain', 'Version 3.4.555.66')
+        .should('contain', 'Edge')
+        .and('contain', 'Version 8.9.10')
         .findByTestId('top-nav-browser-list-selected-item')
         .should('not.exist')
 
         cy.get('@browserItems').eq(3)
-        .should('contain', 'Edge')
-        .and('contain', 'Version 4.5.666.77')
+        .should('contain', 'Electron')
+        .and('contain', 'Version 12.13.14')
         .findByTestId('top-nav-browser-list-selected-item')
         .should('not.exist')
       })
@@ -141,7 +103,7 @@ describe('App Top Nav Workflows', () => {
   describe('Cypress Version', () => {
     context('user version current', () => {
       it('renders link to external docs if version is current', () => {
-        setupMockBrowsers()
+        cy.findBrowsers()
         cy.withCtx(async (ctx) => {
         // @ts-ignore sinon is a global in the node process where this is executed
           sinon.stub(ctx, 'versions').resolves({
@@ -168,10 +130,10 @@ describe('App Top Nav Workflows', () => {
 
     context('user version outdated', () => {
       beforeEach(() => {
-        setupMockBrowsers()
+        cy.findBrowsers()
         cy.withCtx(async (ctx) => {
-          const currRelease = new Date(Date.UTC(2021, 10, 31))
-          const prevRelease = new Date(Date.UTC(2021, 10, 30))
+          const currRelease = new Date(Date.UTC(2021, 9, 30))
+          const prevRelease = new Date(Date.UTC(2021, 9, 29))
 
           // @ts-ignore sinon is a global in the node process where this is executed
           sinon.stub(ctx, 'versions').resolves({
@@ -240,7 +202,7 @@ describe('App Top Nav Workflows', () => {
 
   describe('Docs', () => {
     beforeEach(() => {
-      setupMockBrowsers()
+      cy.findBrowsers()
       cy.openProject('launchpad')
       cy.startAppServer()
       cy.visitApp()
@@ -274,4 +236,69 @@ describe('App Top Nav Workflows', () => {
       cy.findByRole('button', { name: 'Close' }).click()
     })
   })
+
+  // describe('Login', () => {
+  //   context('user logged in', () => {
+  //     beforeEach(() => {
+  //       setupMockBrowsers()
+  //       cy.openProject('launchpad')
+  //       cy.startAppServer()
+  //       cy.loginUser()
+  //       cy.withCtx(async (ctx) => {
+  //         ctx.coreData.isAuthBrowserOpened = true
+  //         // sinon.stub(ctx._apis.authApi, 'logOut').resolves()
+  //       })
+  //       // cy.remoteGraphQLIntercept(async (obj) => {
+  //       //   obj.result.data.cloudViewer = null
+
+  //       //   return obj.result
+  //       // })
+
+  //       cy.visitApp()
+
+  //       cy.findByTestId('app-header-bar').findByRole('button', { name: 'Log In', expanded: false }).as('logInButton')
+  //     })
+
+  //     it.only('shows user in top nav when logged in', () => {
+  //       cy.get('@logInButton').click()
+
+  //       cy.findByTestId('login-panel').contains('Test User').should('be.visible')
+  //       cy.findByTestId('login-panel').contains('test@example.com').should('be.visible')
+  //       cy.findByRole('link', { name: 'Profile Settings' }).should('be.visible').and('have.attr', 'href', 'https://on.cypress.io/dashboard/profile')
+
+  //       cy.intercept('mutation-Logout').as('logout')
+
+  //       cy.pause()
+
+  //       cy.findByRole('button', { name: 'Log Out' }).should('be.visible').click()
+
+  //       cy.wait('@logout').then(({ request, response }) => {
+  //         debugger
+  //       })
+
+  //       cy.pause()
+
+  //       cy.findByTestId('login-panel').should('not.be.visible')
+  //     })
+  //   })
+
+  //   context('user not logged in', () => {
+  //     beforeEach(() => {
+  //       setupMockBrowsers()
+  //       cy.openProject('launchpad')
+  //       cy.startAppServer()
+  //       cy.visitApp()
+
+  //       cy.findByTestId('app-header-bar').findByRole('button', { name: 'Log In' }).as('logInButton')
+  //     })
+
+  //     it('shows log in modal when button is pressed', () => {
+  //       cy.get('@logInButton').click()
+
+  //       cy.findByRole('dialog', { name: 'Log In To Cypress' }).as('logInModal')
+  //       cy.get('@logInModal').findByRole('button', { name: 'Log In' })
+  //       cy.get('@logInModal').findByRole('button', { name: 'Close' }).click()
+  //     })
+  //   })
+  // })
 })

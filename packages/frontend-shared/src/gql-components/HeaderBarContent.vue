@@ -46,7 +46,10 @@
             v-if="!!props.gql?.cloudViewer"
             #login-panel
           >
-            <div class="min-w-248px">
+            <div
+              class="min-w-248px"
+              data-cy="login-panel"
+            >
               <div class="border-b flex border-b-gray-100 p-16px">
                 <UserAvatar
                   :email="email"
@@ -141,7 +144,6 @@ const props = defineProps<{
   gql: HeaderBar_HeaderBarContentFragment,
   showBrowsers?: boolean,
   pageName?: string,
-  testId?: string,
 }>()
 
 const { t } = useI18n()

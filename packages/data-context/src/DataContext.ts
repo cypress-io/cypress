@@ -303,7 +303,7 @@ export class DataContext {
 
   /**
    * If we really want to get around the guards added in proxyContext
-   * which disallow referencing ctx.actions / ctx.emitter from contexct for a GraphQL query,
+   * which disallow referencing ctx.actions / ctx.emitter from context for a GraphQL query,
    * we can call ctx.deref.emitter, etc. This should only be used in exceptional situations where
    * we're certain this is a good idea.
    */

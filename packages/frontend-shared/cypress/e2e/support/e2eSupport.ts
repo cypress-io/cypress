@@ -5,7 +5,8 @@ import type { DataContext } from '@packages/data-context'
 import { e2eProjectDirs } from './e2eProjectDirs'
 import type { AuthenticatedUserShape } from '@packages/data-context/src/data'
 import type { DocumentNode, ExecutionResult } from 'graphql'
-import type { OpenModeOptions } from '@packages/types'
+import type { Browser, FoundBrowser, OpenModeOptions } from '@packages/types'
+import { browsers } from '@packages/types/src/browser'
 import type { E2ETaskMap } from '../e2ePluginSetup'
 
 configure({ testIdAttribute: 'data-cy' })
@@ -36,6 +37,11 @@ export interface RemoteGraphQLInterceptPayload {
 }
 
 export type RemoteGraphQLInterceptor = (obj: RemoteGraphQLInterceptPayload) => ExecutionResult | Promise<ExecutionResult>
+
+export interface SetFoundBrowsersOptions {
+  filter?(browser: Browser): boolean
+  browsers?: FoundBrowser[]
+}
 
 declare global {
   namespace Cypress {
@@ -93,6 +99,7 @@ declare global {
       disableRemoteGraphQLFakes(): void
       visitApp(href?: string): Chainable<AUTWindow>
       visitLaunchpad(href?: string): Chainable<AUTWindow>
+      findBrowsers(options?: SetFoundBrowsersOptions): void
     }
   }
 }
@@ -245,6 +252,39 @@ function loginUser (userShape: Partial<AuthenticatedUserShape> = {}) {
   })
 }
 
+function findBrowsers (options: SetFoundBrowsersOptions = {}) {
+  let filteredBrowsers = options.browsers
+
+  if (!filteredBrowsers) {
+    const reducer = (result: FoundBrowser[], browser: Browser, index: number): FoundBrowser[] => {
+      if (!options.filter || options.filter(browser)) {
+        const foundBrowser = {
+          ...browser,
+          version: `${index + 1}.${index + 2}.${index + 3}`,
+          majorVersion: `${index + 1}`,
+          path: `/test/${browser.name}/path`,
+        }
+
+        result.push(foundBrowser as FoundBrowser)
+      }
+
+      return result
+    }
+
+    filteredBrowsers = [...browsers, {
+      name: 'electron',
+      channel: 'stable',
+      family: 'chromium',
+      displayName: 'Electron',
+    } as Browser].reduce(reducer, [])
+  }
+
+  cy.withCtx(async (ctx, o) => {
+    // @ts-ignore sinon is a global in the node process where this is executed
+    sinon.stub(ctx._apis.appApi, 'getBrowsers').resolves(o.browsers)
+  }, { browsers: filteredBrowsers })
+}
+
 function remoteGraphQLIntercept (fn: RemoteGraphQLInterceptor) {
   return logInternal('remoteGraphQLIntercept', () => {
     return taskInternal('__internal_remoteGraphQLIntercept', fn.toString())
@@ -285,3 +325,4 @@ Cypress.Commands.add('startAppServer', startAppServer)
 Cypress.Commands.add('openProject', openProject)
 Cypress.Commands.add('withCtx', withCtx)
 Cypress.Commands.add('remoteGraphQLIntercept', remoteGraphQLIntercept)
+Cypress.Commands.add('findBrowsers', findBrowsers)
