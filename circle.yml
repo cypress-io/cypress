@@ -29,6 +29,7 @@ mainBuildFilters: &mainBuildFilters
       only:
         - develop
         - 10.0-release
+        - test-binary-downstream-windows
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -1685,11 +1686,11 @@ jobs:
       - run:
           # install NPM from unique urls
           name: Install Cypress
+          working_directory: /tmp/testing
           command: |
             node scripts/test-unique-npm-and-binary.js \
               --npm npm-package-url.json \
-              --binary binary-url.json \
-              --cwd /tmp/testing
+              --binary binary-url.json
       - run:
           name: Verify Cypress binary
           working_directory: /tmp/testing
@@ -1724,19 +1725,19 @@ jobs:
       - run:
           name: Cypress version
           working_directory: test-binary
-          command: $(yarn bin)/cypress version
+          command: $(yarn bin cypress) version
       - run:
           name: Verify Cypress binary
           working_directory: test-binary
-          command: $(yarn bin)/cypress verify
+          command: $(yarn bin cypress) verify
       - run:
           name: Cypress help
           working_directory: test-binary
-          command: $(yarn bin)/cypress help
+          command: $(yarn bin cypress) help
       - run:
           name: Cypress info
           working_directory: test-binary
-          command: $(yarn bin)/cypress info
+          command: $(yarn bin cypress) info
       - store-npm-logs
 
   test-npm-module-on-minimum-node-version:
@@ -1895,7 +1896,7 @@ jobs:
             CYPRESS_PROJECT_ID=$TEST_TINY_PROJECT_ID \
             CYPRESS_RECORD_KEY=$TEST_TINY_RECORD_KEY \
             CYPRESS_INTERNAL_ENV=staging \
-            $(yarn bin)/cypress run --record
+            $(yarn bin cypress) run --record
       - store-npm-logs
 
   test-binary-against-recipes-firefox:
@@ -2030,11 +2031,11 @@ jobs:
       - run:
           name: Cypress help
           working_directory: test-binary
-          command: $(yarn bin)/cypress help
+          command: $(yarn bin cypress) help
       - run:
           name: Cypress info
           working_directory: test-binary
-          command: $(yarn bin)/cypress info
+          command: $(yarn bin cypress) info
       - run:
           name: Add Cypress demo
           working_directory: test-binary
@@ -2042,11 +2043,11 @@ jobs:
       - run:
           name: Verify Cypress binary
           working_directory: test-binary
-          command: DEBUG=cypress:cli $(yarn bin)/cypress verify
+          command: DEBUG=cypress:cli $(yarn bin cypress) verify
       - run:
           name: Run Cypress binary
           working_directory: test-binary
-          command: DEBUG=cypress:cli $(yarn bin)/cypress run
+          command: DEBUG=cypress:cli $(yarn bin cypress) run
       - store-npm-logs
 
 linux-workflow: &linux-workflow

@@ -1,5 +1,3 @@
-const minimist = require('minimist')
-const options = minimist(process.argv)
 const la = require('lazy-ass')
 const is = require('check-more-types')
 const execa = require('execa')
@@ -14,12 +12,9 @@ la(is.unemptyString(binary), 'missing binary url')
 
 console.log('testing NPM from', npm)
 console.log('and binary from', binary)
-const cwd = options.cwd || process.cwd()
-
-console.log('in', cwd)
+console.log('in', process.cwd())
 
 execa(`npm install ${npm}`, {
-  cwd,
   shell: true,
   stdio: 'inherit',
   env: {
