@@ -131,7 +131,7 @@ class RunPlugins {
 
     switch (event) {
       case 'dev-server:start':
-        return devServer.wrap(this.invoke, ids, args)
+        return devServer.wrap(this.ipc, this.invoke, ids, args)
       case 'file:preprocessor':
         return preprocessor.wrap(this.ipc, this.invoke, ids, args)
       case 'before:run':
