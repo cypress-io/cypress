@@ -3,7 +3,12 @@ import { getReporterElement } from './utils'
 import { getEventManager } from '.'
 import type { EventManager } from './event-manager'
 import { useRunnerUiStore } from '../store/runner-ui-store'
+
 let hasInitializeReporter = false
+
+export function setInitializedReporter (val: boolean) {
+  hasInitializeReporter = val
+}
 
 async function unmountReporter () {
   // We do not need to unmount the reporter at any point right now,
@@ -13,14 +18,17 @@ async function unmountReporter () {
 
 async function resetReporter () {
   if (hasInitializeReporter) {
-    await getEventManager().teardownReporter()
+    await getEventManager().resetReporter()
   }
 }
 
 function setupReporter () {
   const $reporterRoot = getReporterElement()
 
+  if (hasInitializeReporter) return
+
   renderReporter($reporterRoot, getMobxRunnerStore(), getEventManager())
+
   hasInitializeReporter = true
 }
 
@@ -52,4 +60,5 @@ export const UnifiedReporterAPI = {
   setupReporter,
   hasInitializeReporter,
   resetReporter,
+  setInitializedReporter,
 }
