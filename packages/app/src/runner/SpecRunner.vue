@@ -323,13 +323,21 @@ $navbar-width: 80px;
 
 <style>
 #unified-runner > div {
-  height: min(100%, 100vh);
+  height: 100%
 }
 
-.aut-iframe {
+iframe.aut-iframe {
   width: 100%;
   height: 100%;
   background: white;
+}
+
+iframe.spec-iframe {
+    border: none;
+    height: 0;
+    position: absolute;
+    visibility: hidden;
+    width: 0;
 }
 
 .highlight {
