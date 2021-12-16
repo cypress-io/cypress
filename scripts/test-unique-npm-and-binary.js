@@ -18,39 +18,32 @@ const spawnOpts = {
   shell: os.platform() === 'win32' ? 'bash.exe' : '/bin/bash',
   stdio: 'inherit',
 }
-
-console.log('Create Dummy Project')
-execa('npm init -y', spawnOpts)
-.then(console.log)
-.catch((e) => {
-  console.error(e)
-  process.exit(1)
-})
-
 const { npm, binary } = getNameAndBinary(process.argv)
 
 la(is.unemptyString(npm), 'missing npm url')
 la(is.unemptyString(binary), 'missing binary url')
 
-console.log('testing NPM from', npm)
-console.log('and binary from', binary)
-console.log('in', cwd)
-
-execa(`npm install ${npm}`, {
-  ...spawnOpts,
-  env: {
-    CYPRESS_INSTALL_BINARY: binary,
-  },
-})
+console.log('Create Dummy Project')
+execa('npm init -y', spawnOpts)
 .then(console.log)
-.catch((e) => {
-  console.error(e)
-  process.exit(1)
-})
+.then(() => {
+  console.log('testing NPM from', npm)
+  console.log('and binary from', binary)
+  console.log('in', cwd)
 
-console.log('Verify Cypress binary')
-execa('$(yarn bin cypress) verify', spawnOpts)
-.then(console.log)
+  return execa(`npm install ${npm}`, {
+    ...spawnOpts,
+    env: {
+      CYPRESS_INSTALL_BINARY: binary,
+    },
+  }).then(console.log)
+})
+.then(() => {
+  console.log('Verify Cypress binary')
+
+  return execa('$(yarn bin cypress) verify', spawnOpts)
+  .then(console.log)
+})
 .catch((e) => {
   console.error(e)
   process.exit(1)
