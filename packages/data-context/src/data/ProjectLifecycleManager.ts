@@ -726,7 +726,7 @@ export class ProjectLifecycleManager {
     ipc.send('setupTestingType', this._currentTestingType, {
       ...orderedConfig,
       projectRoot: this.projectRoot,
-      configFile: this.configFilePath,
+      configFile: path.basename(this.configFilePath),
       version: this.ctx._apis.configApi.cypressVersion,
       testingType: this._currentTestingType,
     })
