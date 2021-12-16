@@ -95,7 +95,7 @@ export function parseStaticResponseShorthand (statusCodeOrBody: number | string 
 function getFixtureOpts (fixture: string): FixtureOpts {
   const [filePath, encoding] = fixture.split(',')
 
-  return { filePath, encoding }
+  return { filePath, encoding: encoding === 'null' ? null : encoding }
 }
 
 export function getBackendStaticResponse (staticResponse: Readonly<StaticResponse>): BackendStaticResponseWithArrayBuffer {
