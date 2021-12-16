@@ -82,6 +82,8 @@ export class ProjectActions {
   setCurrentProjectForTestSetup (projectRoot: string) {
     this.ctx.lifecycleManager.clearCurrentProject()
     this.ctx.lifecycleManager.setCurrentProject(projectRoot)
+    // @ts-expect-error - we are setting this as a convenience for our integration tests
+    this.ctx.modeOptions = {}
   }
 
   async loadProjects () {

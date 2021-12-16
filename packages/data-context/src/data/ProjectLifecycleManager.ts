@@ -121,7 +121,6 @@ export class ProjectLifecycleManager {
   constructor (private ctx: Ctx_ProjectLifecycleManager) {
     this._handlers = this.ctx._apis.configApi.getServerPluginHandlers()
     this.watchers = new Set()
-    this.loadGlobalBrowsers().catch(expectedError)
 
     if (ctx.coreData.currentProject) {
       this.setCurrentProject(ctx.coreData.currentProject)
@@ -147,7 +146,6 @@ export class ProjectLifecycleManager {
 
       return contents.projectId ?? null
     } catch {
-      // throw errors.throw('NO_PROJECT_ID', settings.configFile(this.options), this.projectRoot)
       return null
     }
   }
@@ -245,6 +243,7 @@ export class ProjectLifecycleManager {
       return
     }
 
+    this.loadGlobalBrowsers().catch(expectedError)
     this.verifyProjectRoot(projectRoot)
     this._projectRoot = projectRoot
     this.resetInternalState()
@@ -605,6 +604,7 @@ export class ProjectLifecycleManager {
     this._envFileResult = { state: 'loading', value: promise }
 
     promise.then((value) => {
+      this.validateConfigFile(this.envFilePath, value)
       this._envFileResult = { state: 'loaded', value }
     })
     .catch((e) => {
@@ -618,32 +618,22 @@ export class ProjectLifecycleManager {
   }
 
   private async reloadCypressEnvFile () {
-    if (this._envFileResult.state === 'errored') {
-      this._envFileResult = { state: 'pending' }
-
-      return this.loadCypressEnvFile()
-    }
-
     if (this._envFileResult.state === 'loading') {
       return this._envFileResult.value
     }
 
-    if (this._envFileResult.state === 'loaded') {
-      this.readCypressEnvFile()
-    }
+    this._envFileResult = { state: 'pending' }
+
+    return this.loadCypressEnvFile()
   }
 
   /**
    * Initializes the config by reading the config file, if we
    * know we have one for the project
    */
-  private async readCypressEnvFile () {
+  private async readCypressEnvFile (): Promise<Cypress.ConfigOptions> {
     try {
-      const data = await this.ctx.fs.readJSON(this.envFilePath)
-
-      this.validateConfigFile(this.envFilePath, data)
-
-      return data
+      return await this.ctx.fs.readJSON(this.envFilePath)
     } catch (err: any) {
       if (err.code === 'ENOENT') {
         return {}
@@ -1032,7 +1022,7 @@ export class ProjectLifecycleManager {
   private verifyProjectRoot (root: string) {
     try {
       if (!fs.statSync(root).isDirectory()) {
-        throw new Error()
+        throw new Error('NOT DIRECTORY')
       }
     } catch (err) {
       throw this.ctx.error('NO_PROJECT_FOUND_AT_PROJECT_ROOT', this.projectRoot)

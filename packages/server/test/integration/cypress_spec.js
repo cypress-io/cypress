@@ -361,26 +361,6 @@ describe('lib/cypress', () => {
       })
     })
 
-    it('does not generate a project id even if missing one', function () {
-      sinon.stub(api, 'createProject')
-
-      return user.set({ authToken: 'auth-token-123' })
-      .then(() => {
-        return cypress.start([`--run-project=${this.noScaffolding}`])
-      }).then(() => {
-        this.expectExitWith(0)
-      }).then(() => {
-        expect(api.createProject).not.to.be.called
-
-        return (new ProjectBase({ projectRoot: this.noScaffolding, testingType: 'e2e' })).getProjectId()
-        .then(() => {
-          throw new Error('should have caught error but did not')
-        }).catch((err) => {
-          expect(err.type).to.eq('NO_PROJECT_ID')
-        })
-      })
-    })
-
     it('does not add project to the global cache', function () {
       return cache.getProjectRoots()
       .then((projects) => {

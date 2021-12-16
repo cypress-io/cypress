@@ -1,14 +1,16 @@
+const path = require('path')
+
 require('../spec_helper')
 
 const _ = require('lodash')
 const debug = require('debug')('test')
 const Fixtures = require('@tooling/system-tests/lib/fixtures')
+const { getCtx } = require('@packages/data-context')
 
 const config = require(`../../lib/config`)
 const errors = require(`../../lib/errors`)
 const configUtil = require(`../../lib/util/config`)
 const scaffold = require(`../../lib/scaffold`)
-let settings = require(`../../lib/util/settings`)
 
 describe('lib/config', () => {
   before(function () {
@@ -53,11 +55,28 @@ describe('lib/config', () => {
 
   context('.get', () => {
     beforeEach(function () {
+      const ctx = getCtx()
+
       this.projectRoot = '/_test-output/path/to/project'
+      sinon.stub(ctx.lifecycleManager, 'determineProjectMetaState').callsFake(() => {
+        ctx.lifecycleManager._configFilePath = path.join(this.projectRoot, 'cypress.config.js')
+
+        return {
+          hasFrontendFramework: false,
+          hasTypescript: false,
+          hasLegacyCypressJson: false,
+          hasMultipleConfigPaths: false,
+          hasCypressEnvFile: false,
+          hasValidConfigFile: false,
+          needsCypressJsonMigration: false,
+        }
+      })
+
+      sinon.stub(ctx.lifecycleManager, 'verifyProjectRoot').returns(undefined)
 
       this.setup = (cypressJson = {}, cypressEnvJson = {}) => {
-        sinon.stub(settings, 'read').withArgs(this.projectRoot).resolves(cypressJson)
-        sinon.stub(settings, 'readEnv').withArgs(this.projectRoot).resolves(cypressEnvJson)
+        sinon.stub(ctx.lifecycleManager, 'getConfigFileContents').resolves(cypressJson)
+        sinon.stub(ctx.lifecycleManager, 'readCypressEnvFile').resolves(cypressEnvJson)
       }
     })
 
