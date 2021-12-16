@@ -483,7 +483,9 @@ export class ProjectLifecycleManager {
 
   private validateConfigFile (file: string, config: Cypress.ConfigOptions) {
     this.ctx._apis.configApi.validateConfig(config, (errMsg) => {
-      throw this.ctx.error('SETTINGS_VALIDATION_ERROR', file, errMsg)
+      const base = path.basename(file)
+
+      throw this.ctx.error('SETTINGS_VALIDATION_ERROR', base, errMsg)
     })
   }
 
