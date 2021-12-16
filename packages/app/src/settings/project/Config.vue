@@ -5,7 +5,7 @@
     </template>
     <template #description>
       <i18n-t keypath="settingsPage.config.description">
-        <OpenConfigFileInIDE :gql="props.gql" />
+        <OpenConfigFileInIDE />
       </i18n-t>
     </template>
     <div class="flex w-full">
@@ -39,8 +39,6 @@ fragment Config on Query {
     id
     config
   }
-  ...ConfigLegend
-  ...OpenConfigFileInIDE
 }
 `
 

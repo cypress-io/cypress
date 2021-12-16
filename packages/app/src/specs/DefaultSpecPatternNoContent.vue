@@ -12,7 +12,7 @@
     >
       {{ t('createSpec.noSpecsMessage') }}
     </p>
-    <OpenConfigFileInIDE :gql="props.gql">
+    <OpenConfigFileInIDE>
       <Button
         data-testid="view-spec-pattern"
         variant="outline"
@@ -40,7 +40,6 @@ const { t } = useI18n()
 gql`
 fragment CreateSpecContent on Query {
   ...CreateSpecCards
-  ...OpenConfigFileInIDE
 }
 `
 

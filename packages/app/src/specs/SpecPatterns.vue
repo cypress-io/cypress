@@ -3,7 +3,7 @@
     <div class="flex justify-between p-14px">
       <InlineCodeFragment>specPattern</InlineCodeFragment>
       <div>
-        <OpenConfigFileInIDE :gql="props.gql">
+        <OpenConfigFileInIDE>
           <button
             class="text-indigo-500 flex gap-8px items-center group outline-transparent"
           >
@@ -40,7 +40,6 @@ fragment SpecPatterns on Query {
     id
     config
   }
-  ...OpenConfigFileInIDE
 }
 `
 
