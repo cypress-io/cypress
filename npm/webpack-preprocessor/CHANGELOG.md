@@ -1,3 +1,10 @@
+# [@cypress/webpack-preprocessor-v5.11.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.10.0...@cypress/webpack-preprocessor-v5.11.0) (2021-12-16)
+
+
+### Features
+
+* use hoisted yarn install in binary build ([#17285](https://github.com/cypress-io/cypress/issues/17285)) ([e4f5b10](https://github.com/cypress-io/cypress/commit/e4f5b106d49d6ac0857c5fdac886f83b99558c88))
+
 # [@cypress/webpack-preprocessor-v5.10.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.9.1...@cypress/webpack-preprocessor-v5.10.0) (2021-11-10)
 
 
