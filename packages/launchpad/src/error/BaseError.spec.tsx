@@ -9,7 +9,6 @@ const messageSelector = '[data-testid=error-message]'
 const retryButtonSelector = '[data-testid=error-retry-button]'
 const docsButtonSelector = '[data-testid=error-read-the-docs-button]'
 const customFooterSelector = '[data-testid=custom-error-footer]'
-const openConfigFileSelector = '[data-testid=open-config-file]'
 
 // Constants
 const messages = defaultMessages.launchpadErrors.generic
@@ -28,20 +27,16 @@ describe('<BaseError />', () => {
       onResult: (result) => {
         result.title = messages.header
       },
-      render: (gqlVal) => <BaseError gql={gqlVal} />,
+      render: (gqlVal) => <BaseError gql={gqlVal} retry={() => {}} />,
     })
     .get(headerSelector)
     .should('contain.text', messages.header)
     .get(messageSelector)
-    .should('contain.text', messages.message.replace('{0}', 'cypress.config.ts'))
+    .should('contain.text', `It looks like there's some issues that need to be resolved before we continue`)
     .get(retryButtonSelector)
     .should('contain.text', messages.retryButton)
     .get(docsButtonSelector)
     .should('contain.text', messages.readTheDocsButton)
-    .get(openConfigFileSelector)
-    .click()
-
-    cy.get('#headlessui-dialog-title-3').contains('Select Preferred Editor')
   })
 
   // NOTE: Figure out how to stub the graphql mutation call

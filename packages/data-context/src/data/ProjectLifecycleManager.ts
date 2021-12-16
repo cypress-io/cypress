@@ -20,7 +20,7 @@ import type { DataContext } from '..'
 import { LoadConfigReply, SetupNodeEventsReply, ProjectConfigIpc, IpcHandler } from './ProjectConfigIpc'
 import assert from 'assert'
 import type { AllModeOptions, FoundBrowser, FullConfig, TestingType } from '@packages/types'
-import type { BaseErrorDataShape } from '.'
+import type { BaseErrorDataShape, WarningError } from '.'
 import { autoBindDebug } from '../util/autoBindDebug'
 
 const debug = debugLib(`cypress:lifecycle:ProjectLifecycleManager`)
@@ -120,7 +120,6 @@ export class ProjectLifecycleManager {
 
   constructor (private ctx: Ctx_ProjectLifecycleManager) {
     this._handlers = this.ctx._apis.configApi.getServerPluginHandlers()
-    this.legacyPluginGuard()
     this.watchers = new Set()
     this.loadGlobalBrowsers().catch(expectedError)
 
@@ -131,6 +130,8 @@ export class ProjectLifecycleManager {
     if (ctx.coreData.currentTestingType) {
       this.setCurrentTestingType(ctx.coreData.currentTestingType)
     }
+
+    this.legacyPluginGuard()
 
     // see timers/parent.js line #93 for why this is necessary
     process.on('exit', () => {
@@ -482,7 +483,9 @@ export class ProjectLifecycleManager {
 
   private validateConfigFile (file: string, config: Cypress.ConfigOptions) {
     this.ctx._apis.configApi.validateConfig(config, (errMsg) => {
-      throw this.ctx.error('SETTINGS_VALIDATION_ERROR', file, errMsg)
+      const base = path.basename(file)
+
+      throw this.ctx.error('SETTINGS_VALIDATION_ERROR', base, errMsg)
     })
   }
 
@@ -726,7 +729,7 @@ export class ProjectLifecycleManager {
     ipc.send('setupTestingType', this._currentTestingType, {
       ...orderedConfig,
       projectRoot: this.projectRoot,
-      configFile: this.configFilePath,
+      configFile: path.basename(this.configFilePath),
       version: this.ctx._apis.configApi.cypressVersion,
       testingType: this._currentTestingType,
     })
@@ -1116,16 +1119,16 @@ export class ProjectLifecycleManager {
     //       }
     //     }
 
-    //     const handleWarning = (warningErr) => {
-    //       debug('plugins process warning:', warningErr.stack)
-    //       if (!pluginsProcess) return // prevent repeating this in case of multiple warnings
+    const handleWarning = (warningErr: WarningError) => {
+      debug('plugins process warning:', warningErr.stack)
+      // if (!pluginsProcess) return // prevent repeating this in case of multiple warnings
 
-    //       return options.onWarning(warningErr)
-    //     }
+      return this.ctx.onWarning(warningErr)
+    }
 
     //     pluginsProcess.on('error', handleError)
-    //     ipc.on('error:plugins', handleError)
-    //     ipc.on('warning', handleWarning)
+    // ipc.on('error:plugins', handleError)
+    ipc.on('warning', handleWarning)
 
     return dfd
   }
@@ -1167,12 +1170,16 @@ export class ProjectLifecycleManager {
   }
 
   private configFileWarningCheck () {
+    if (this.metaState.hasLegacyCypressJson && !this.metaState.hasValidConfigFile) {
+      this.ctx.onError(this.ctx.error('CONFIG_FILE_MIGRATION_NEEDED', this.projectRoot), 'global')
+    }
+
     if (this.metaState.hasMultipleConfigPaths) {
-      this.ctx.onWarning(this.ctx.error('CONFIG_FILES_LANGUAGE_CONFLICT', this.projectRoot))
+      this.ctx.onError(this.ctx.error('CONFIG_FILES_LANGUAGE_CONFLICT', this.projectRoot), 'global')
     }
 
     if (this.metaState.hasValidConfigFile && this.metaState.hasLegacyCypressJson) {
-      this.ctx.onWarning(this.ctx.error('LEGACY_CONFIG_FILE', this.projectRoot))
+      this.ctx.onError(this.ctx.error('LEGACY_CONFIG_FILE', this.projectRoot, path.basename(this.configFilePath)), 'config')
     }
   }
 }

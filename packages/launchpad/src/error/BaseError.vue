@@ -26,8 +26,7 @@
           class="font-light"
           data-testid="error-message"
         >
-          <!-- <OpenConfigFileInIDE /> -->
-          {{ 'TODO' }}
+          <OpenConfigFileInIDE />
         </i18n-t>
       </slot>
       <!-- eslint-enable vue/multiline-html-element-content-newline  -->
@@ -45,11 +44,11 @@
     <div class="inline-flex gap-16px justify-between">
       <slot name="footer">
         <Button
-          v-if="onRetry"
+          v-if="retry"
           size="lg"
           variant="primary"
           data-testid="error-retry-button"
-          @click="onRetry"
+          @click="retry"
         >
           {{ t('launchpadErrors.generic.retryButton') }}
         </Button>
@@ -89,7 +88,7 @@ const { t } = useI18n()
 
 const props = defineProps<{
   gql: BaseError_DataFragment
-  onRetry?: () => void
+  retry?: () => void
   onReadDocs?: () => void
 }>()
 
