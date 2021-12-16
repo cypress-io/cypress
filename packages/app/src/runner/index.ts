@@ -15,7 +15,7 @@
  *
  */
 import { watchEffect } from 'vue'
-import { getMobxRunnerStore, useAutStore } from '../store'
+import { getMobxRunnerStore, initializeMobxStore, useAutStore } from '../store'
 import { injectBundle } from './injectBundle'
 import type { BaseSpec } from '@packages/types/src/spec'
 import { UnifiedReporterAPI } from './reporter'
@@ -24,7 +24,7 @@ import { IframeModel } from './iframe-model'
 import { AutIframe } from './aut-iframe'
 import { EventManager } from './event-manager'
 
-let _eventManager: EventManager
+let _eventManager: EventManager | undefined
 
 export function initializeEventManager (UnifiedRunner: any) {
   _eventManager = new EventManager(
@@ -144,6 +144,22 @@ function teardownSpec () {
   return getEventManager().teardown(getMobxRunnerStore())
 }
 
+let isTorndown = false
+
+/**
+ * Called when navigating away from the runner page.
+ * This will teardown the reporter, event manager, and
+ * any associated events.
+ */
+export async function teardown () {
+  UnifiedReporterAPI.setInitializedReporter(false)
+  _eventManager?.stop()
+  _eventManager?.teardown(getMobxRunnerStore())
+  await _eventManager?.resetReporter()
+  _eventManager = undefined
+  isTorndown = true
+}
+
 /**
  * Set up a spec by creating a fresh AUT and initializing
  * Cypress on it.
@@ -244,7 +260,39 @@ function runSpecE2E (spec: BaseSpec) {
  * This only needs to happen once, prior to running the first spec.
  */
 async function initialize () {
+  isTorndown = false
+
   await injectBundle()
+
+  if (isTorndown) {
+    return
+  }
+
+  const response = await window.fetch('/api')
+  const data = await response.json()
+
+  const config = window.UnifiedRunner.decodeBase64(data.base64Config) as any
+  const autStore = useAutStore()
+
+  // TODO(lachlan): use GraphQL to get the viewport dimensions
+  // once it is more practical to do so
+  // find out if we need to continue managing viewportWidth/viewportHeight in MobX at all.
+  autStore.updateDimensions(config.viewportWidth, config.viewportHeight)
+
+  // just stick config on window until we figure out how we are
+  // going to manage it
+  window.UnifiedRunner.config = config
+
+  // window.UnifiedRunner exists now, since the Webpack bundle with
+  // the UnifiedRunner namespace was injected by `injectBundle`.
+  initializeEventManager(window.UnifiedRunner)
+
+  window.UnifiedRunner.MobX.runInAction(() => {
+    const store = initializeMobxStore(window.UnifiedRunner.config.testingType)
+
+    store.updateDimensions(config.viewportWidth, config.viewportHeight)
+  })
+
   window.UnifiedRunner.MobX.runInAction(() => setupRunner())
 }
 
@@ -268,13 +316,14 @@ async function initialize () {
  *    description for more information.
  */
 async function executeSpec (spec: BaseSpec) {
+  await teardownSpec()
+
   const mobxRunnerStore = getMobxRunnerStore()
 
   mobxRunnerStore.setSpec(spec)
 
   await UnifiedReporterAPI.resetReporter()
 
-  await teardownSpec()
   UnifiedReporterAPI.setupReporter()
 
   if (window.UnifiedRunner.config.testingType === 'e2e') {
@@ -291,4 +340,5 @@ async function executeSpec (spec: BaseSpec) {
 export const UnifiedRunnerAPI = {
   initialize,
   executeSpec,
+  teardown,
 }
