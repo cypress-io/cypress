@@ -1521,7 +1521,7 @@ describe('src/cy/commands/assertions', () => {
           done()
         })
 
-        cy.get('div').should(($divs) => {
+        cy.get('div', { timeout: 100 }).should(($divs) => {
           expect($divs, 'Filter should have 1 items').to.have.length(1)
         })
       })
@@ -2976,7 +2976,8 @@ describe('src/cy/commands/assertions', () => {
 
   context('implicit assertions', () => {
     // https://github.com/cypress-io/cypress/issues/18549
-    // We have an issue where multiple snapshots are being taken for a single failed assertion
+    // A targeted test for the above issue - in the absence of retries, only a single snapshot
+    // should be taken.
     it('only snapshots once when failing to find DOM elements', (done) => {
       cy.on('fail', (err) => {
         expect(testCommands[0].snapshots).to.eq(1)
@@ -2987,12 +2988,15 @@ describe('src/cy/commands/assertions', () => {
     })
 
     // https://github.com/cypress-io/cypress/issues/18549
-    // We also have an issue where snapshots are being taken for every failed retry on implicit assertions
-    // for element existence. This is likely a symptom of the above, rather than a separate issue, but
-    // I wanted to leave this in as a more dramatic reproduction of why this is important.
+    // This issue was also causing two DOM snapshots to be taken every 50ms
+    // while waiting for an element to exist. The first test is sufficient to
+    // prevent regressions of the specific issue, but this one is intended to
+    // more generally assert that retries do not trigger multiple snapshots.
     it('only snapshots once when retrying assertions', (done) => {
       cy.on('fail', (err) => {
-        expect(testCommands[0].snapshots).to.eq(1)
+        const totalSnapshots = _.sum(_.map(testCommands, 'snapshots'))
+
+        expect(totalSnapshots).to.eq(1)
         done()
       })
 

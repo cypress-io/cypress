@@ -267,6 +267,7 @@ export const create = (Cypress, cy) => {
       }
 
       const onPassFn = () => {
+        cy.state('overrideAssert', undefined)
         if (_.isFunction(callbacks.onPass)) {
           return callbacks.onPass.call(this, cmds, options.assertions)
         }
@@ -289,6 +290,7 @@ export const create = (Cypress, cy) => {
           err = e2
         }
 
+        cy.state('overrideAssert', undefined)
         err.isDefaultAssertionErr = isDefaultAssertionErr
 
         options.error = err
@@ -324,6 +326,10 @@ export const create = (Cypress, cy) => {
       // bail if we have no assertions and apply
       // the default assertions if applicable
       if (!cmds.length) {
+        cy.state('overrideAssert', function (...args) {
+          return assertFn.apply(this, args.concat(true))
+        })
+
         return Promise
         .try(ensureExistence)
         .then(onPassFn)
