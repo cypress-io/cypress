@@ -23,6 +23,7 @@
           'hover:border-gray-1000': isCurrentSpec(row.data),
         }"
         data-testid="spec-row-item"
+        :data-selected-spec="isCurrentSpec(row.data)"
         @click.self="submit(row.data, row.index)"
       >
         <RouterLink
