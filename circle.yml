@@ -1686,11 +1686,11 @@ jobs:
       - run:
           # install NPM from unique urls
           name: Install Cypress
-          working_directory: /tmp/testing
           command: |
             node scripts/test-unique-npm-and-binary.js \
               --npm npm-package-url.json \
-              --binary binary-url.json
+              --binary binary-url.json \
+              --cwd /tmp/testing
       - run:
           name: Verify Cypress binary
           working_directory: /tmp/testing
