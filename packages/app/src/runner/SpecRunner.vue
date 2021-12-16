@@ -326,7 +326,7 @@ $navbar-width: 80px;
   height: min(100%, 100vh);
 }
 
-iframe {
+.aut-iframe {
   width: 100%;
   height: 100%;
   background: white;
