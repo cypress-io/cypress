@@ -120,7 +120,6 @@ export class ProjectLifecycleManager {
 
   constructor (private ctx: Ctx_ProjectLifecycleManager) {
     this._handlers = this.ctx._apis.configApi.getServerPluginHandlers()
-    this.legacyPluginGuard()
     this.watchers = new Set()
     this.loadGlobalBrowsers().catch(expectedError)
 
@@ -131,6 +130,8 @@ export class ProjectLifecycleManager {
     if (ctx.coreData.currentTestingType) {
       this.setCurrentTestingType(ctx.coreData.currentTestingType)
     }
+
+    this.legacyPluginGuard()
 
     // see timers/parent.js line #93 for why this is necessary
     process.on('exit', () => {
