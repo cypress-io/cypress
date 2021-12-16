@@ -15,12 +15,17 @@ import { getSpecUrl } from './project_utils'
 import errors from './errors'
 import type { LaunchOpts, OpenProjectLaunchOptions, InitializeProjectOptions } from '@packages/types'
 import { DataContext, getCtx } from '@packages/data-context'
+import { autoBindDebug } from '@packages/data-context/src/util'
 
 const debug = Debug('cypress:server:open_project')
 
 export class OpenProject {
   openProject: ProjectBase<any> | null = null
   relaunchBrowser: ((...args: unknown[]) => Bluebird<void>) | null = null
+
+  constructor () {
+    return autoBindDebug(this)
+  }
 
   resetOpenProject () {
     this.openProject = null

@@ -126,8 +126,8 @@ export async function get (
 }
 
 export function setupFullConfigWithDefaults (obj: Record<string, any> = {}) {
-  debug('setting config object')
-  let { projectRoot, projectName, config, envFile, options } = obj
+  debug('setting config object %o', obj)
+  let { projectRoot, projectName, config, envFile, options, cliConfig } = obj
 
   // just force config to be an object so we dont have to do as much
   // work in our tests
@@ -142,10 +142,10 @@ export function setupFullConfigWithDefaults (obj: Record<string, any> = {}) {
   config.projectRoot = projectRoot
   config.projectName = projectName
 
-  return mergeDefaults(config, options)
+  return mergeDefaults(config, options, cliConfig)
 }
 
-export function mergeDefaults (config: Record<string, any> = {}, options: Record<string, any> = {}) {
+export function mergeDefaults (config: Record<string, any> = {}, options: Record<string, any> = {}, cliConfig = {}) {
   const resolved = {}
 
   config.rawJson = _.cloneDeep(config)
@@ -154,7 +154,7 @@ export function mergeDefaults (config: Record<string, any> = {}, options: Record
   debug('merged config with options, got %o', config)
 
   _
-  .chain(configUtils.allowed(options))
+  .chain(configUtils.allowed({ ...options, ...cliConfig }))
   .omit('env')
   .omit('browsers')
   .each((val, key) => {
@@ -182,7 +182,7 @@ export function mergeDefaults (config: Record<string, any> = {}, options: Record
   config.cypressEnv = process.env.CYPRESS_INTERNAL_ENV
   debug('using CYPRESS_INTERNAL_ENV %s', config.cypressEnv)
   if (!isValidCypressInternalEnvValue(config.cypressEnv)) {
-    errors.throw('INVALID_CYPRESS_INTERNAL_ENV', config.cypressEnv)
+    throw errors.get('INVALID_CYPRESS_INTERNAL_ENV', config.cypressEnv)
   }
 
   delete config.envFile
@@ -212,10 +212,12 @@ export function mergeDefaults (config: Record<string, any> = {}, options: Record
   // validate config again here so that we catch configuration errors coming
   // from the CLI overrides or env var overrides
   configUtils.validate(_.omit(config, 'browsers'), (errMsg) => {
-    return errors.throw('CONFIG_VALIDATION_ERROR', errMsg)
+    throw errors.get('CONFIG_VALIDATION_ERROR', errMsg)
   })
 
-  configUtils.validateNoBreakingConfig(config, errors.warning, errors.throw)
+  configUtils.validateNoBreakingConfig(config, errors.warning, (err) => {
+    throw err
+  })
 
   return setSupportFileAndFolder(config, defaultsForRuntime)
   .then(setScaffoldPaths)

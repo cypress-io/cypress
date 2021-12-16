@@ -2,6 +2,7 @@
 import type { TestingType } from '@packages/types'
 import type { ChildProcess } from 'child_process'
 import EventEmitter from 'events'
+import { autoBindDebug } from '../util'
 
 export type IpcHandler = (ipc: ProjectConfigIpc) => void
 
@@ -47,6 +48,8 @@ export class ProjectConfigIpc extends EventEmitter {
       this.emit('disconnect')
       childProcess.removeAllListeners()
     })
+
+    return autoBindDebug(this)
   }
 
   // TODO: options => Cypress.TestingTypeOptions

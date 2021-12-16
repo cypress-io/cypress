@@ -38,6 +38,7 @@ export type Ctx_ProjectLifecycleManager = Pick<DataContext,
 export interface SetupFullConfigOptions {
   projectName: string
   projectRoot: string
+  cliConfig: Partial<Cypress.ConfigOptions>
   config: Partial<Cypress.ConfigOptions>
   envFile: Partial<Cypress.ConfigOptions>
   options: Partial<AllModeOptions>
@@ -81,6 +82,7 @@ export interface ProjectMetaState {
   hasValidConfigFile: boolean
   hasMultipleConfigPaths: boolean
   needsCypressJsonMigration: boolean
+  // configuredTestingTypes: TestingType[]
 }
 
 const PROJECT_META_STATE: ProjectMetaState = {
@@ -91,6 +93,7 @@ const PROJECT_META_STATE: ProjectMetaState = {
   hasCypressEnvFile: false,
   hasValidConfigFile: false,
   needsCypressJsonMigration: false,
+  // configuredTestingTypes: [],
 }
 
 export class ProjectLifecycleManager {
@@ -133,11 +136,13 @@ export class ProjectLifecycleManager {
     this.legacyPluginGuard()
 
     // see timers/parent.js line #93 for why this is necessary
-    process.on('exit', () => {
-      this.resetInternalState()
-    })
+    process.on('exit', this.onProcessExit)
 
     return autoBindDebug(this)
+  }
+
+  private onProcessExit = () => {
+    this.resetInternalState()
   }
 
   async getProjectId (): Promise<string | null> {
@@ -162,6 +167,10 @@ export class ProjectLifecycleManager {
     assert(this._configFilePath, 'Expected configFilePath to be found')
 
     return this._configFilePath
+  }
+
+  get configFile () {
+    return this.ctx.modeOptions.configFile || 'cypress.config.js'
   }
 
   get envFilePath () {
@@ -243,7 +252,7 @@ export class ProjectLifecycleManager {
       return
     }
 
-    this.loadGlobalBrowsers().catch(expectedError)
+    this.loadGlobalBrowsers().catch(this.onError)
     this.verifyProjectRoot(projectRoot)
     this._projectRoot = projectRoot
     this.resetInternalState()
@@ -255,10 +264,10 @@ export class ProjectLifecycleManager {
     this.configFileWarningCheck()
 
     if (this._projectMetaState.hasValidConfigFile) {
-      this.initializeConfig().catch(expectedError)
+      this.initializeConfig().catch(this.onError)
     }
 
-    this.loadCypressEnvFile().catch(expectedError)
+    this.loadCypressEnvFile().catch(this.onError)
 
     this.initializeConfigWatchers()
   }
@@ -373,11 +382,12 @@ export class ProjectLifecycleManager {
       const testingTypeOverrides = configFileContents[this._currentTestingType] ?? {}
 
       // TODO: pass in options.config overrides separately, so they are reflected in the UI
-      configFileContents = { ...configFileContents, ...testingTypeOverrides, ...options.config }
+      configFileContents = { ...configFileContents, ...testingTypeOverrides }
     }
 
     // TODO: Convert this to be synchronous,
     let fullConfig = await this.ctx._apis.configApi.setupFullConfigWithDefaults({
+      cliConfig: options.config ?? {},
       projectName: path.basename(this.projectRoot),
       projectRoot: this.projectRoot,
       config: _.cloneDeep(configFileContents),
@@ -408,6 +418,8 @@ export class ProjectLifecycleManager {
         }
       })
     }
+
+    this.validateConfigFile(this.configFile, fullConfig)
 
     return _.cloneDeep(fullConfig)
   }
@@ -472,6 +484,8 @@ export class ProjectLifecycleManager {
       }
     })
     .catch((err) => {
+      debug(`catch %o`, err)
+      // this._cleanupIpc(ipc)
       if (this._configResult.value === promise) {
         this._configResult = { state: 'errored', value: err }
       }
@@ -515,7 +529,7 @@ export class ProjectLifecycleManager {
     const configFileWatcher = this.addWatcher(this.configFilePath)
 
     configFileWatcher.on('all', () => {
-      this.reloadConfig().catch(expectedError)
+      this.reloadConfig().catch(this.onError)
     })
 
     const cypressEnvFileWatcher = this.addWatcher(this.envFilePath)
@@ -563,6 +577,7 @@ export class ProjectLifecycleManager {
 
       return result.initialConfig
     } catch (e: any) {
+      // this._cleanupIpc(ipc)
       // If we have a known good state from eariler, then we
       // don't want this error to blow it away. Instead trigger
       // an error.
@@ -604,11 +619,12 @@ export class ProjectLifecycleManager {
     this._envFileResult = { state: 'loading', value: promise }
 
     promise.then((value) => {
-      this.validateConfigFile(this.envFilePath, value)
       this._envFileResult = { state: 'loaded', value }
+      this.validateConfigFile(this.envFilePath, value)
     })
     .catch((e) => {
       this._envFileResult = { state: 'errored', value: e }
+      this._pendingInitialize?.reject(e)
     })
     .finally(() => {
       this.ctx.emitter.toLaunchpad()
@@ -691,7 +707,7 @@ export class ProjectLifecycleManager {
       return
     }
 
-    this.setupNodeEvents().catch(expectedError)
+    this.setupNodeEvents().catch(this.onError)
   }
 
   private async setupNodeEvents (): Promise<SetupNodeEventsReply> {
@@ -738,11 +754,10 @@ export class ProjectLifecycleManager {
       await this.handleSetupTestingTypeReply(ipc, val)
     })
     .catch((err) => {
+      debug(`catch %o`, err)
       this._cleanupIpc(ipc)
       this._eventsIpcResult = { state: 'errored', value: err }
-      if (this._pendingInitialize) {
-        this._pendingInitialize.reject(err)
-      }
+      this._pendingInitialize?.reject(err)
     })
     .finally(() => {
       this.ctx.emitter.toLaunchpad()
@@ -1082,10 +1097,7 @@ export class ProjectLifecycleManager {
 
     this._cachedFullConfig = this.ctx._apis.configApi.updateWithPluginValues(fullConfig, result.setupConfig ?? {})
 
-    if (this._pendingInitialize) {
-      this._pendingInitialize.resolve()
-      this._pendingInitialize = undefined
-    }
+    this._pendingInitialize?.resolve()
   }
 
   private registerSetupIpcHandlers (ipc: ProjectConfigIpc) {
@@ -1156,14 +1168,17 @@ export class ProjectLifecycleManager {
 
     if (!this._currentTestingType) {
       this.setCurrentTestingType('e2e')
-      this.ctx.onWarning(this.ctx.error('TESTING_TYPE_NEEDED_FOR_RUN'))
+      // TODO: Warn on this
+      // this.ctx.onWarning(this.ctx.error('TESTING_TYPE_NEEDED_FOR_RUN'))
     }
 
     if (!this.metaState.hasValidConfigFile) {
       return this.ctx.onError(this.ctx.error('NO_DEFAULT_CONFIG_FILE_FOUND', this.projectRoot), 'global')
     }
 
-    await this._pendingInitialize.promise
+    await this._pendingInitialize.promise.finally(() => {
+      this._pendingInitialize = undefined
+    })
   }
 
   private configFileWarningCheck () {
@@ -1179,10 +1194,8 @@ export class ProjectLifecycleManager {
       this.ctx.onError(this.ctx.error('LEGACY_CONFIG_FILE', this.projectRoot, path.basename(this.configFilePath)), 'config')
     }
   }
-}
 
-// When we expect an error, but we want to handle it so we don't have an unhandled promise,
-// and we want to read the `stack` property of the error
-function expectedError (err: any) {
-  err?.stack
+  private onError = (err: any) => {
+    this._pendingInitialize?.reject(err)
+  }
 }

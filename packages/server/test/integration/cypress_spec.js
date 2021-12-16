@@ -426,7 +426,8 @@ describe('lib/cypress', () => {
       })
     })
 
-    it('scaffolds out integration and example specs if they do not exist when not runMode', function () {
+    // NOTE: We no longer do this in the new flow
+    it.skip('scaffolds out integration and example specs if they do not exist when not runMode', function () {
       ctx.actions.project.setCurrentProjectForTestSetup(this.pristineWithConfigPath)
 
       return config.get(this.pristineWithConfigPath)

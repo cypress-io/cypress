@@ -114,7 +114,7 @@ function run (ipc, configFile, projectRoot) {
         }
       })
 
-      debug('config %o', result)
+      debug('loaded config from %s %o', configFile, result)
     } catch (err) {
       if (err.name === 'TSError') {
         // beause of this https://github.com/TypeStrong/ts-node/issues/1418
