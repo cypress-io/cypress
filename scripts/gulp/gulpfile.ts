@@ -90,7 +90,7 @@ gulp.task(
     startCypressWatch,
 
     // Before dev, fetch the latest "remote" schema from the Cypress cloud
-    // syncRemoteGraphQL,
+    syncRemoteGraphQL,
   ),
 )
 
@@ -105,7 +105,6 @@ gulp.task('buildProd',
   gulp.series(
     viteClean,
 
-    // syncRemoteGraphQL,
     nexusCodegen,
     graphqlCodegen,
     generateShikiTheme,
