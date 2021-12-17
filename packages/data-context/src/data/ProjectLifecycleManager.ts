@@ -419,9 +419,11 @@ export class ProjectLifecycleManager {
           warning: browser.warning || this.ctx._apis.errorApi.message('CHROME_WEB_SECURITY_NOT_SUPPORTED', browser.name),
         }
       })
-    }
 
-    this.validateConfigFile(this.configFile, fullConfig)
+      // If we have withBrowsers set to false, it means we're coming from the legacy config.get API
+      // in tests, which shouldn't be validating the config
+      this.validateConfigFile(this.configFile, fullConfig)
+    }
 
     return _.cloneDeep(fullConfig)
   }
