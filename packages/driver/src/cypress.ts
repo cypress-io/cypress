@@ -1,6 +1,6 @@
 // @ts-nocheck
 
-import { validate } from '@packages/config'
+import { validate, validateNoReadOnlyConfig } from '@packages/config'
 import _ from 'lodash'
 import $ from 'jquery'
 import * as blobUtil from 'blob-util'
@@ -14,7 +14,7 @@ import browserInfo from './cypress/browser'
 import $scriptUtils from './cypress/script_utils'
 
 import $Commands from './cypress/commands'
-import $Cy from './cypress/cy'
+import { $Cy } from './cypress/cy'
 import $dom from './dom'
 import $Downloads from './cypress/downloads'
 import $errorMessages from './cypress/error_messages'
@@ -144,6 +144,24 @@ class $Cypress {
     this.state = $SetterGetter.create({})
     this.originalConfig = _.cloneDeep(config)
     this.config = $SetterGetter.create(config, (config) => {
+      if (!window.top.__cySkipValidateConfig) {
+        validateNoReadOnlyConfig(config, (errProperty) => {
+          let errMessage
+
+          if (this.state('runnable')) {
+            errMessage = $errUtils.errByPath('config.invalid_cypress_config_override', {
+              errProperty,
+            })
+          } else {
+            errMessage = $errUtils.errByPath('config.invalid_test_config_override', {
+              errProperty,
+            })
+          }
+
+          throw new this.state('specWindow').Error(errMessage)
+        })
+      }
+
       validate(config, (errMsg) => {
         throw new this.state('specWindow').Error(errMsg)
       })
@@ -209,12 +227,8 @@ class $Cypress {
   // or parsed. we have not received any custom commands
   // at this point
   onSpecWindow (specWindow, scripts) {
-    const logFn = (...args) => {
-      return this.log.apply(this, args)
-    }
-
     // create cy and expose globally
-    this.cy = $Cy.create(specWindow, this, this.Cookies, this.state, this.config, logFn)
+    this.cy = new $Cy(specWindow, this, this.Cookies, this.state, this.config)
     window.cy = this.cy
     this.isCy = this.cy.isCy
     this.log = $Log.create(this, this.cy, this.state, this.config)

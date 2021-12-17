@@ -11,6 +11,8 @@ describe('http/util/prerequests', () => {
   })
 
   it('synchronously matches a pre-request that existed at the time of the request', () => {
+    // should match in reverse order
+    preRequests.addPending({ requestId: '1234', url: 'foo', method: 'WRONGMETHOD' } as BrowserPreRequest)
     preRequests.addPending({ requestId: '1234', url: 'foo', method: 'GET' } as BrowserPreRequest)
 
     const cb = sinon.stub()
