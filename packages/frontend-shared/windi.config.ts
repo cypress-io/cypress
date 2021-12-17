@@ -23,6 +23,7 @@ export const defaultConfig: WindiCssOptions = {
     },
     cursor: {
       'ew-resize': 'ew-resize',
+      'pointer': 'pointer',
     },
   },
   safelist,
