@@ -165,7 +165,7 @@ module.exports = {
 
       return obj
     }).catch((err) => {
-      throw new Error(`'${fixture}' is not a valid JavaScript object.${err.toString()}`)
+      throw new Error(`'${fixture}' is not a valid JavaScript object.\n${err.toString()}`)
     })
   },
 
@@ -190,10 +190,16 @@ module.exports = {
   parseHtml (p, fixture) {
     return fs.readFileAsync(p, 'utf8')
     .bind(this)
+    .catch((err) => {
+      throw new Error(`Unable to parse '${fixture}'.\n${err.toString()}`)
+    })
   },
 
   parse (p, fixture, encoding) {
     return fs.readFileAsync(p, encoding)
     .bind(this)
+    .catch((err) => {
+      throw new Error(`Unable to parse '${fixture}'.\n${err.toString()}`)
+    })
   },
 }
