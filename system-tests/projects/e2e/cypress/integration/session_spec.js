@@ -1,4 +1,5 @@
 /// <reference types="cypress" />
+window.top.__cySkipValidateConfig = true
 Cypress.config('isInteractive', true)
 Cypress.config('experimentalSessionSupport', true)
 
