@@ -73,7 +73,7 @@ export function getDirIndexes (row: UseCollapsibleTreeNode<SpecTreeNode<FuzzyFou
   const maxIndex = row.id.length - 1
   const minIndex = maxIndex - row.name.length + 1
 
-  const res = indexes.filter((index) => index >= minIndex && index < maxIndex)
+  const res = indexes.filter((index) => index >= minIndex && index <= maxIndex)
 
   return res.map((idx) => idx - minIndex)
 }
