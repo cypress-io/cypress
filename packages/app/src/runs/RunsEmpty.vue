@@ -10,7 +10,10 @@
     <ol class="list-decimal ml-16px w-full text-gray-600">
       <li>
         <p class="mb-8px">
-          <i18n-t keypath="runs.empty.step1">
+          <i18n-t
+            scope="global"
+            keypath="runs.empty.step1"
+          >
             <span class="text-indigo-500">{{ configFilePath }}</span>
           </i18n-t>
         </p>
@@ -23,7 +26,10 @@
       </li>
       <li class="mt-24px">
         <p class="mb-8px">
-          <i18n-t keypath="runs.empty.step2">
+          <i18n-t
+            scope="global"
+            keypath="runs.empty.step2"
+          >
             <span class="text-indigo-400">{{ configFilePath }}</span>
           </i18n-t>
         </p>
