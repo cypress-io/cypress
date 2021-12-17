@@ -9,7 +9,7 @@
     <SpecsListHeader
       v-model="search"
       class="pb-32px"
-      :result-count="specs.length"
+      :result-count="specs?.length"
       @newSpec="showModal = true"
     />
 
@@ -83,7 +83,7 @@ import { computed, ref, watch } from 'vue'
 import CreateSpecModal from './CreateSpecModal.vue'
 import type { Specs_SpecsListFragment, SpecListRowFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
-import { buildSpecTree, FuzzyFoundSpec, fuzzySortSpecs, getDirIndexes } from '@packages/frontend-shared/src/utils/spec-utils'
+import { buildSpecTree, FuzzyFoundSpec, fuzzySortSpecs, getDirIndexes, makeFuzzyFoundSpec } from '@packages/frontend-shared/src/utils/spec-utils'
 import { useCollapsibleTree } from '@packages/frontend-shared/src/composables/useCollapsibleTree'
 import RowDirectory from './RowDirectory.vue'
 import SpecItem from './SpecItem.vue'
@@ -134,11 +134,13 @@ const showModal = ref(false)
 const search = ref('')
 
 const specs = computed(() => {
-  const specs = props.gql.currentProject?.specs?.edges.map((x) => {
-    return {
-      ...x.node,
-    }
-  })
+  const edges = props.gql.currentProject?.specs?.edges
+
+  if (!edges) {
+    return []
+  }
+
+  const specs = edges.map((x) => makeFuzzyFoundSpec(x.node))
 
   if (!search.value) {
     return specs
