@@ -446,11 +446,8 @@ export class DataContext {
     // load projects from cache on start
     toAwait.push(this.actions.project.loadProjects())
 
-    // TODO: rip out this imperative model of navigation & concept of the "wizard"
     if (this.modeOptions.testingType) {
-      this.lifecycleManager.initializeConfig().then(() => {
-        this.actions.wizard.navigate('forward')
-      }).catch((err) => {
+      this.lifecycleManager.initializeConfig().catch((err) => {
         this.coreData.baseError = err
       })
     }

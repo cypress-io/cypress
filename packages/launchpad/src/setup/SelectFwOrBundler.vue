@@ -71,9 +71,9 @@ const selectedOptionObject = computed(() => {
 
 const selectOption = (opt) => {
   if (props.selectorType === 'framework') {
-    emit('selectFramework', opt.type)
+    emit('selectFramework', opt.id)
   } else {
-    emit('selectBundler', opt.type)
+    emit('selectBundler', opt.id)
   }
 }
 

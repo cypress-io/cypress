@@ -48,6 +48,7 @@ const props = withDefaults(
     noContainer?: boolean
     altFn?: (val: boolean) => void
     nextFn?: (...args: unknown[]) => any,
+    backFn?: (...args: unknown[]) => any,
   }>(), {
     next: undefined,
     showNext: true,
@@ -57,6 +58,7 @@ const props = withDefaults(
     noContainer: undefined,
     altFn: undefined,
     nextFn: undefined,
+    backFn: undefined,
   },
 )
 

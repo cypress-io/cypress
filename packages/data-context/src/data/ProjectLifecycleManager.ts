@@ -1009,6 +1009,10 @@ export class ProjectLifecycleManager {
       }
     }
 
+    if (!this._configFilePath) {
+      this._configFilePath = metaState.hasTypescript ? configFileTs : configFileJs
+    }
+
     if (metaState.hasLegacyCypressJson && !metaState.hasValidConfigFile) {
       metaState.needsCypressJsonMigration = true
     }

@@ -1,5 +1,5 @@
 // TODO: add when we land the lifecycle management
-describe.skip('Config files error handling', () => {
+describe('Config files error handling', () => {
   beforeEach(() => {
     cy.scaffoldProject('pristine')
     cy.scaffoldProject('pristine-with-config-file')

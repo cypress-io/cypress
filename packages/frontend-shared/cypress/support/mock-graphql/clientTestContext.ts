@@ -70,7 +70,6 @@ export function makeClientTestContext (): ClientTestContext {
     },
     isAuthBrowserOpened: false,
     wizard: {
-      canNavigateForward: false,
       chosenBundler: null,
       chosenFramework: null,
       chosenManualInstall: false,

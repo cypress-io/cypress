@@ -13,8 +13,6 @@ export const allBundlers = BUNDLERS.map((bundler, idx) => {
 
 export const stubWizard: MaybeResolver<Wizard> = {
   __typename: 'Wizard',
-  canNavigateForward: true,
-  step: 'welcome',
   isManualInstall: false,
   packagesToInstall: [
     {

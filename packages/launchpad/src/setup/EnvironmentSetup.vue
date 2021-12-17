@@ -1,12 +1,14 @@
 <template>
   <WizardLayout
+    :back-fn="onBack"
+    :next-fn="onNext"
     :can-navigate-forward="canNavigateForward"
     class="max-w-640px"
   >
     <div class="m-24px">
       <SelectFwOrBundler
         :options="frameworks || []"
-        :value="props.gql.framework?.id ?? undefined"
+        :value="data.framework ?? undefined"
         :placeholder="t('setupPage.projectSetup.frameworkPlaceholder')"
         :label="t('setupPage.projectSetup.frameworkLabel')"
         selector-type="framework"
@@ -17,7 +19,7 @@
         v-if="props.gql.framework?.id && (!props.gql.bundler || bundlers.length > 1)"
         class="pt-3px"
         :options="bundlers || []"
-        :value="props.gql.bundler?.id ?? undefined"
+        :value="data.bundler ?? undefined"
         :placeholder="t('setupPage.projectSetup.bundlerPlaceholder')"
         :label="t('setupPage.projectSetup.bundlerLabel')"
         selector-type="bundler"
@@ -116,6 +118,10 @@ const bundlers = computed(() => {
 const frameworks = computed(() => {
   return sortBy((props.gql.frameworks ?? []).map((f) => ({ ...f })), 'category')
 })
+
+const onNext = () => {}
+
+const onBack = () => {}
 
 const languages = computed(() => props.gql.allLanguages ?? [])
 
