@@ -175,10 +175,6 @@ export class ProjectBase<TServer extends Server> extends EE {
 
     this._server = this.createServer(this.testingType)
 
-    // if (!this.options.skipPluginInitializeForTesting) {
-    //   cfg = await this.initializePlugins(cfg, this.options)
-    // }
-
     const {
       specsStore,
       startSpecWatcher,
@@ -371,24 +367,6 @@ export class ProjectBase<TServer extends Server> extends EE {
     })
 
     return this.initSpecStore({ specs, config: updatedConfig })
-  }
-
-  // TODO(tim): Improve this when we completely overhaul the rest of the code here,
-  async initializePlugins (options = this.options) {
-    // only init plugins with the
-    // allowed config values to
-    // prevent tampering with the
-    // internals and breaking cypress
-    // const modifiedCfg = await plugins.init(allowed(this._cfg), {
-    //   projectRoot: this.projectRoot,
-    //   configFile: settings.pathToConfigFile(this.projectRoot),
-    //   testingType: options.testingType,
-    //   onError: (err: Error) => this._onError(err, options),
-    //   onWarning: options.onWarning,
-    // })
-
-    // debug('plugin config yielded: %o', modifiedCfg)
-    // return
   }
 
   async startCtDevServer (specs: Cypress.Cypress['spec'][], config: any) {

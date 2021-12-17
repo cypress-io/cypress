@@ -80,6 +80,7 @@ export interface ProjectMetaState {
   hasLegacyCypressJson: boolean
   hasCypressEnvFile: boolean
   hasValidConfigFile: boolean
+  hasSpecifiedConfigViaCLI: false | string
   hasMultipleConfigPaths: boolean
   needsCypressJsonMigration: boolean
   // configuredTestingTypes: TestingType[]
@@ -91,6 +92,7 @@ const PROJECT_META_STATE: ProjectMetaState = {
   hasLegacyCypressJson: false,
   hasMultipleConfigPaths: false,
   hasCypressEnvFile: false,
+  hasSpecifiedConfigViaCLI: false,
   hasValidConfigFile: false,
   needsCypressJsonMigration: false,
   // configuredTestingTypes: [],
@@ -894,11 +896,7 @@ export class ProjectLifecycleManager {
       child.stderr.on('data', (data) => process.stderr.write(data))
     }
 
-    function onError (err: Error) {
-      dfd.reject(err)
-    }
-
-    child.on('error', onError)
+    child.on('error', dfd.reject)
 
     ipc.once('loadConfig:reply', (val) => {
       debug('loadConfig:reply')
@@ -976,8 +974,15 @@ export class ProjectLifecycleManager {
     }
 
     if (typeof configFile === 'string') {
-      metaState.hasValidConfigFile = true
-      this._configFilePath = this._pathToFile(configFile)
+      metaState.hasSpecifiedConfigViaCLI = this._pathToFile(configFile)
+      if (configFile.endsWith('.json')) {
+        metaState.needsCypressJsonMigration = true
+      } else {
+        this._configFilePath = this._pathToFile(configFile)
+        if (fs.existsSync(this._configFilePath)) {
+          metaState.hasValidConfigFile = true
+        }
+      }
 
       return metaState
     }
@@ -1079,40 +1084,20 @@ export class ProjectLifecycleManager {
   private registerSetupIpcHandlers (ipc: ProjectConfigIpc) {
     const dfd = pDefer<SetupNodeEventsReply>()
 
+    ipc.childProcess.on('error', dfd.reject)
+
     // For every registration event, we want to turn into an RPC with the child process
     ipc.once('setupTestingType:reply', dfd.resolve)
     ipc.once('setupTestingType:error', (type, ...args) => {
       dfd.reject(this.ctx.error(type, ...args))
     })
 
-    //     const handleError = (err) => {
-    //       debug('plugins process error:', err.stack)
-
-    //       if (!pluginsProcess) return // prevent repeating this in case of multiple errors
-
-    //       killPluginsProcess()
-
-    //       err = errors.get('SETUP_NODE_EVENTS_UNEXPECTED_ERROR', config.testingType, config.configFile, err.annotated || err.stack || err.message)
-    //       err.title = 'Error running plugin'
-
-    //       // this can sometimes trigger before the promise is fulfilled and
-    //       // sometimes after, so we need to handle each case differently
-    //       if (fulfilled) {
-    //         options.onError(err)
-    //       } else {
-    //         reject(err)
-    //       }
-    //     }
-
     const handleWarning = (warningErr: WarningError) => {
       debug('plugins process warning:', warningErr.stack)
-      // if (!pluginsProcess) return // prevent repeating this in case of multiple warnings
 
       return this.ctx.onWarning(warningErr)
     }
 
-    //     pluginsProcess.on('error', handleError)
-    // ipc.on('error:plugins', handleError)
     ipc.on('warning', handleWarning)
 
     return dfd
@@ -1163,6 +1148,10 @@ export class ProjectLifecycleManager {
   }
 
   private configFileWarningCheck () {
+    if (!this.metaState.hasValidConfigFile && this.metaState.hasSpecifiedConfigViaCLI !== false) {
+      this.ctx.onError(this.ctx.error('CONFIG_FILE_NOT_FOUND', path.basename(this.metaState.hasSpecifiedConfigViaCLI), path.dirname(this.metaState.hasSpecifiedConfigViaCLI)), 'global')
+    }
+
     if (this.metaState.hasLegacyCypressJson && !this.metaState.hasValidConfigFile) {
       this.ctx.onError(this.ctx.error('CONFIG_FILE_MIGRATION_NEEDED', this.projectRoot), 'global')
     }
