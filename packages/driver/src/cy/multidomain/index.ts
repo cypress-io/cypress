@@ -1,5 +1,4 @@
 import Bluebird from 'bluebird'
-import $Log from '../../cypress/log'
 import { createDeferred } from '../../util/deferred'
 
 export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: Cypress.State) {
@@ -7,7 +6,6 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
 
   // @ts-ignore
   Cypress.multiDomainEventBus.on('html:received', () => {
-    console.log('html received!')
     // when a secondary domain is detected by the proxy, it holds it up
     // to provide time for the spec bridge to be set up. normally, the queue
     // will not continue until the page is stable, but this signals it to go
@@ -28,7 +26,6 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
     // this isn't fully implemented, but in place to be able to test out
     // the other parts of multidomain
     switchToDomain (domain, fn) {
-      console.log(`switching to domain: ${domain}`)
       clearTimeout(timeoutId)
 
       Cypress.log({
@@ -63,6 +60,9 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
 
           Cypress.multiDomainEventBus.emit('to:spec:bridge', {
             event: 'run:command',
+            data: {
+              name: attrs.name,
+            },
           })
 
           return deferred.promise
@@ -105,7 +105,6 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
         }
       }
 
-      console.log('rebinding commands')
       // @ts-ignore
       Cypress.multiDomainEventBus.on('command:enqueued', addCommand)
       // @ts-ignore
@@ -119,7 +118,6 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
 
         // @ts-ignore
         Cypress.multiDomainEventBus.once('queue:finished', () => {
-          console.log('unbinding commands')
           // @ts-ignore
           Cypress.multiDomainEventBus.off('command:enqueued', addCommand)
           // @ts-ignore
@@ -146,9 +144,6 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
           Cypress.multiDomainEventBus.emit('to:spec:bridge', {
             event: 'run:domain:fn',
             data: {
-              // the log count needs to be synced between domains so logs
-              // are guaranteed to have unique ids
-              logCounter: $Log.getCounter(),
               fn: fn.toString(),
             },
           })

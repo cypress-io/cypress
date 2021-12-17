@@ -1,5 +1,4 @@
 import 'setimmediate'
-import { EventEmitter } from 'events'
 
 import '../config/bluebird'
 import '../config/jquery'
@@ -9,12 +8,7 @@ import $Cypress from '../cypress'
 import { $Cy } from '../cypress/cy'
 import $Commands from '../cypress/commands'
 import $Log from '../cypress/log'
-import { create as createFocused } from '../cy/focused'
-import { create as createJQuery } from '../cy/jquery'
 import $Listeners from '../cy/listeners'
-import { create as createSnapshots } from '../cy/snapshots'
-import { create as createOverrides } from '../cy/overrides'
-const multiDomainEventBus = new EventEmitter()
 
 const postCrossDomainMessage = (event, data) => {
   let prefixedEvent = `cross:domain:${event}`
@@ -22,11 +16,35 @@ const postCrossDomainMessage = (event, data) => {
   top.postMessage({ event: prefixedEvent, data }, '*')
 }
 
-const onBeforeAppWindowLoad = (autWindow) => {
-  const specWindow = {
-    Error,
-  }
-  const Cypress = $Cypress.create({
+const onCommandEnqueued = (commandAttrs) => {
+  const { id, name } = commandAttrs
+
+  // it's not strictly necessary to send the name, but it can be useful
+  // for debugging purposes
+  postCrossDomainMessage('command:enqueued', { id, name })
+}
+
+const onCommandEnd = (command) => {
+  const id = command.get('id')
+  const name = command.get('name')
+
+  postCrossDomainMessage('command:update', { id, name, end: true })
+}
+
+const onLogAdded = (attrs) => {
+  postCrossDomainMessage('command:update', {
+    logAdded: $Log.toSerializedJSON(attrs),
+  })
+}
+
+const onLogChanged = (attrs) => {
+  postCrossDomainMessage('command:update', {
+    logChanged: $Log.toSerializedJSON(attrs),
+  })
+}
+
+const setup = () => {
+  const Cypress = window.Cypress = $Cypress.create({
     browser: {
       channel: 'stable',
       displayName: 'Chrome',
@@ -40,18 +58,14 @@ const onBeforeAppWindowLoad = (autWindow) => {
       version: '90.0.4430.212',
     },
   })
-  const cy = new $Cy(specWindow, Cypress, Cypress.Cookies, Cypress.state, Cypress.config, false)
 
-  window.Cypress = Cypress
-  window.cy = cy
+  const cy = window.cy = new $Cy(window, Cypress, Cypress.Cookies, Cypress.state, Cypress.config, false)
 
   Cypress.log = $Log.create(Cypress, cy, Cypress.state, Cypress.config)
   Cypress.runner = {
     addLog () {},
   }
 
-  Cypress.state('window', autWindow)
-  Cypress.state('document', autWindow.document)
   Cypress.state('runnable', {
     ctx: {},
     clearTimeout () {},
@@ -60,39 +74,8 @@ const onBeforeAppWindowLoad = (autWindow) => {
   })
 
   const { state, config } = Cypress
-  const jquery = createJQuery(state)
-  const focused = createFocused(state)
-  const snapshots = createSnapshots(jquery.$$, state)
-
-  const overrides = createOverrides(state, config, focused, snapshots)
 
   $Commands.create(Cypress, cy, state, config)
-
-  const onCommandEnqueued = (commandAttrs) => {
-    const { id, name } = commandAttrs
-
-    // it's not strictly necessary to send the name, but it can be useful
-    // for debugging purposes
-    postCrossDomainMessage('command:enqueued', { id, name })
-  }
-
-  const onCommandEnd = (command) => {
-    const id = command.get('id')
-
-    postCrossDomainMessage('command:update', { id, end: true })
-  }
-
-  const onLogAdded = (attrs) => {
-    postCrossDomainMessage('command:update', {
-      logAdded: $Log.toSerializedJSON(attrs),
-    })
-  }
-
-  const onLogChanged = (attrs) => {
-    postCrossDomainMessage('command:update', {
-      logChanged: $Log.toSerializedJSON(attrs),
-    })
-  }
 
   Cypress.on('command:enqueued', onCommandEnqueued)
   Cypress.on('command:end', onCommandEnd)
@@ -100,27 +83,14 @@ const onBeforeAppWindowLoad = (autWindow) => {
   Cypress.on('log:added', onLogAdded)
   Cypress.on('log:changed', onLogChanged)
 
-  // if (multiDomainEventBus.id) {
-  //   console.log('multidomain event bus: ', multiDomainEventBus.id)
-  // } else {
-  //   console.log('setting multi domain event bus id')
-  //   multiDomainEventBus.id = 5
-  // }
-
-  console.log('binding run:domain:fn')
-  multiDomainEventBus.on('run:domain:fn', (data) => {
-    console.log('run:domain:fn:cross:origin')
-    // syncs up the log number with the primary domain
-    $Log.setCounter(data.logCounter)
-
+  Cypress.multiDomainEventBus.on('run:domain:fn', (data) => {
     // TODO: await this if it's a promise, or do whatever cy.then does
     window.eval(`(${data.fn})()`)
 
     postCrossDomainMessage('ran:domain:fn')
   })
 
-  multiDomainEventBus.on('run:command', () => {
-    console.log('run:command:cross:origin')
+  Cypress.multiDomainEventBus.on('run:command', ({ name }) => {
     const next = state('next')
 
     if (next) {
@@ -131,7 +101,6 @@ const onBeforeAppWindowLoad = (autWindow) => {
     // the queue hasn't started yet, so run it
     cy.queue.run(false)
     .then(() => {
-      console.log('iframe queue finished')
       postCrossDomainMessage('queue:finished')
     })
   })
@@ -139,16 +108,26 @@ const onBeforeAppWindowLoad = (autWindow) => {
   const onMessage = (event) => {
     if (!event.data) return
 
-    multiDomainEventBus.emit(event.data.event, event.data.data)
+    Cypress.multiDomainEventBus.emit(event.data.event, event.data.data)
   }
+
+  cy.onBeforeAppWindowLoad = onBeforeAppWindowLoad(cy, Cypress)
 
   // incoming messages from the primary domain
   window.addEventListener('message', onMessage, false)
 
+  return cy
+}
+
+// eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
+const onBeforeAppWindowLoad = (cy, Cypress) => (autWindow) => {
   autWindow.Cypress = Cypress
   autWindow.cy = cy
 
-  overrides.wrapNativeMethods(autWindow)
+  Cypress.state('window', autWindow)
+  Cypress.state('document', autWindow.document)
+
+  cy.overrides.wrapNativeMethods(autWindow)
   // TODO: DRY this up with the mostly-the-same code in src/cypress/cy.js
   $Listeners.bindTo(autWindow, {
     // TODO: implement this once there's a better way to forward
@@ -175,14 +154,6 @@ const onBeforeAppWindowLoad = (autWindow) => {
       postCrossDomainMessage('window:load')
     },
     onUnload (e) {
-      window.removeEventListener('message', onMessage)
-
-      Cypress.off('command:enqueued', onCommandEnqueued)
-      Cypress.off('command:end', onCommandEnd)
-      Cypress.off('skipped:command:end', onCommandEnd)
-      Cypress.off('log:added', onLogAdded)
-      Cypress.off('log:changed', onLogChanged)
-
       return Cypress.action('app:window:unload', e)
     },
     // TODO: this currently only works on hashchange, but needs work
@@ -208,6 +179,12 @@ const onBeforeAppWindowLoad = (autWindow) => {
   postCrossDomainMessage('window:before:load')
 }
 
-window.__onBeforeAppWindowLoad = onBeforeAppWindowLoad
+// eventually, setup will get called again on rerun and cy will
+// get re-created
+const cy = setup()
+
+window.__onBeforeAppWindowLoad = (autWindow) => {
+  cy.onBeforeAppWindowLoad(autWindow)
+}
 
 postCrossDomainMessage('bridge:ready')
