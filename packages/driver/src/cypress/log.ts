@@ -105,10 +105,6 @@ const countLogsByTests = function (tests = {}) {
   .value()
 }
 
-const getCounter = () => {
-  return counter
-}
-
 const setCounter = (num) => {
   return counter = num
 }
@@ -181,8 +177,10 @@ const defaults = function (state, config, obj) {
     return t._currentRetry || 0
   }
 
+  counter++
+
   _.defaults(obj, {
-    id: (counter += 1),
+    id: `log-${window.location.origin}-${counter}`,
     state: 'pending',
     instrument: 'command',
     url: state('url'),
@@ -512,8 +510,6 @@ export default {
   getSnapshotProps,
 
   countLogsByTests,
-
-  getCounter,
 
   setCounter,
 
