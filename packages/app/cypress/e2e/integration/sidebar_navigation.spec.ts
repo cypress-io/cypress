@@ -6,6 +6,10 @@ describe('Sidebar Navigation', () => {
     cy.visitApp()
   })
 
+  it('expands the left nav bar by default', () => {
+    cy.get('[aria-expanded]').should('have.attr', 'aria-expanded', 'true')
+  })
+
   it('highlights indicator on hover showing you can click to expand', () => {
     cy.findByLabelText('toggle navigation', {
       selector: 'button',
@@ -16,7 +20,7 @@ describe('Sidebar Navigation', () => {
     }).realHover().should('have.css', 'outline', 'rgba(0, 0, 0, 0) solid 2px')
   })
 
-  it('closes the bar when clicking the expand button (if expanded)', () => {
+  it('closes the left nav bar when clicking the expand button (if expanded)', () => {
     cy.get('[aria-expanded]').should('have.attr', 'aria-expanded', 'true')
     cy.findByText('todos').should('be.visible')
     cy.findByLabelText('toggle navigation', {
@@ -66,7 +70,7 @@ describe('Sidebar Navigation', () => {
     cy.get('[data-e2e-href="/settings"]').trigger('mouseout')
   })
 
-  it('opens the bar when clicking the expand button (if unexpanded)', () => {
+  it('opens the left nav bar when clicking the expand button (if unexpanded)', () => {
     cy.get('[aria-expanded]').should('have.attr', 'aria-expanded', 'false')
     cy.findByText('todos').should('not.be.visible')
 
@@ -78,12 +82,10 @@ describe('Sidebar Navigation', () => {
     cy.findByText('todos').should('be.visible')
   })
 
-  // TODO: assert absolute path is showing (doesn't seem to be implemented right now)
   it('displays the project name and absolute path (expanded state)', () => {
     cy.get('[aria-expanded]').should('have.attr', 'aria-expanded', 'true')
 
     cy.findByText('todos').should('be.visible')
-    // cy.findByText('/cypress/integration/spec.js').should('be.visible')
   })
 
   it('has menu item labeled by current active testing type that opens a modal to switch testing type (expanded state)', () => {
