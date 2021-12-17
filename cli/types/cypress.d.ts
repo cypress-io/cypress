@@ -3123,6 +3123,7 @@ declare namespace Cypress {
   }
 
   interface Session {
+    // Clear all saved sessions and re-run the current spec file.
     clearAllSavedSessions: () => Promise<void>;
 
   }
