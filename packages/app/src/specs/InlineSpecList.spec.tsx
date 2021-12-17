@@ -54,10 +54,25 @@ describe('InlineSpecList', () => {
   })
 
   it('should handle spec refresh', () => {
+    const scrollVirtualList = (lastItem: string) => {
+      cy.findAllByTestId('spec-row-item').last().dblclick().then(($el) => {
+        if (!$el.text().includes(lastItem)) {
+          scrollVirtualList(lastItem)
+        }
+      })
+    }
+
     let _gqlValue: Specs_InlineSpecListFragment
 
     cy.mountFragment(Specs_InlineSpecListFragmentDoc, {
-      render: (gqlValue) => {
+      onResult (ctx) {
+        if (ctx.currentProject?.specs?.edges) {
+          ctx.currentProject.specs.edges = ctx.currentProject.specs.edges.slice(0, 50)
+        }
+
+        return ctx
+      },
+      render (gqlValue) {
         _gqlValue = gqlValue
 
         return (
@@ -68,9 +83,11 @@ describe('InlineSpecList', () => {
       },
     }).then(() => {
       const sortedSpecs = _gqlValue?.currentProject?.specs?.edges.sort((a, b) => a.node.relative < b.node.relative ? -1 : 1) || []
+      const firstSpec = sortedSpecs[0]
       const lastSpec = sortedSpecs[sortedSpecs.length - 1]
 
-      cy.get('.specs-list-container').scrollTo('bottom')
+      cy.contains(firstSpec.node.fileName).should('be.visible')
+      scrollVirtualList(lastSpec.node.fileName)
       cy.contains(lastSpec.node.fileName).should('be.visible')
       cy.then(() => {
         // Emulating a gql update that shouldn't cause a scroll snap
@@ -90,7 +107,8 @@ describe('InlineSpecList', () => {
         }
       })
 
-      cy.get('.specs-list-container').scrollTo('bottom')
+      cy.contains(firstSpec.node.fileName).should('be.visible')
+      scrollVirtualList(newSpec.node.fileName)
       cy.contains(newSpec.node.fileName).should('be.visible')
 
       cy.then(() => {
@@ -100,7 +118,8 @@ describe('InlineSpecList', () => {
         }
       })
 
-      cy.get('.specs-list-container').scrollTo('bottom')
+      cy.contains(firstSpec.node.fileName).should('be.visible')
+      scrollVirtualList(lastSpec.node.fileName)
       cy.contains(newSpec.node.fileName).should('not.exist')
     })
   })
