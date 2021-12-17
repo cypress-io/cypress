@@ -20,8 +20,7 @@ const style = computed(() => {
   }
 
   return {
-    width: `calc(100% - ${navbarWidth}px)`,
-    left: `${navbarWidth}px`,
+    width: `calc(100% - ${navbarWidth})`,
   }
 })
 </script>
