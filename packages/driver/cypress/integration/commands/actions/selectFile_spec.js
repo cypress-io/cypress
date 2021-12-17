@@ -24,7 +24,7 @@ describe('src/cy/commands/actions/selectFile', () => {
   })
 
   context('#selectFile', () => {
-    it('attaches a single file', () => {
+    it('selects a single file', () => {
       cy.get('#basic')
       .selectFile({ contents: '@foo', fileName: 'foo.txt' })
 
@@ -43,7 +43,7 @@ describe('src/cy/commands/actions/selectFile', () => {
       })
     })
 
-    it('attaches multiple files', () => {
+    it('selects multiple files', () => {
       cy.get('#multiple')
       .selectFile([
         {
@@ -73,7 +73,7 @@ describe('src/cy/commands/actions/selectFile', () => {
       })
     })
 
-    it('attaches files with custom lastModified', () => {
+    it('allows custom lastModified', () => {
       cy.get('#basic').selectFile({
         contents: '@foo',
         lastModified: 1234,
@@ -84,7 +84,7 @@ describe('src/cy/commands/actions/selectFile', () => {
       })
     })
 
-    it('attaches files to an input from a label', () => {
+    it('selects files with an input from a label', () => {
       cy.get('#basic-label').selectFile({ contents: '@foo' })
 
       cy.get('#basic')
@@ -94,7 +94,7 @@ describe('src/cy/commands/actions/selectFile', () => {
       })
     })
 
-    it('attaches files to an input from a containing label', () => {
+    it('selects files with an input from a containing label', () => {
       cy.get('#containing-label').selectFile({ contents: '@foo' })
 
       cy.get('#contained')
@@ -217,7 +217,7 @@ describe('src/cy/commands/actions/selectFile', () => {
         .then(getFileContents)
         .then((contents) => {
           // Because json files are loaded as objects, they get reencoded before
-          // being attached, stripping spaces and newlines
+          // being used, stripping spaces and newlines
           expect(contents[0]).to.eql('{"foo":1,"bar":{"baz":"cypress"}}')
         })
       })
@@ -437,7 +437,7 @@ describe('src/cy/commands/actions/selectFile', () => {
     describe('actionability', {
       defaultCommandTimeout: 50,
     }, () => {
-      it('attaches files to a hidden input from a visible label', () => {
+      it('selects files with a hidden input from a visible label', () => {
         cy.get('#hidden-label').selectFile({ contents: '@foo' })
 
         cy.get('#hidden')
@@ -626,7 +626,7 @@ is being covered by another element:
         })
       })
 
-      it('does not attach multiple files to a single input', () => {
+      it('does not select multiple files with a single-file input', () => {
         cy.get('#basic').selectFile(['@foo', '@foo'], { action: 'drag-drop' })
         cy.get('#basic').then((input) => {
           expect(input[0].files.length).to.eql(0)

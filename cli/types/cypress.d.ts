@@ -658,10 +658,10 @@ declare namespace Cypress {
     as(alias: string): Chainable<Subject>
 
     /**
-     * Attach a file to the given <input> element, or drag and drop a file over any subject.
+     * Select a file with the given <input> element, or drag and drop a file over any DOM subject.
      *
-     * @param {FileReference} files - The file(s) to attach or drag onto this element.
-     * @see https://on.cypress.io/selectFile
+     * @param {FileReference} files - The file(s) to select or drag onto this element.
+     * @see https://on.cypress.io/selectfile
      * @example
      *    cy.get('input[type=file]').selectFile(Buffer.from('text'))
      *    cy.get('input[type=file]').selectFile({
