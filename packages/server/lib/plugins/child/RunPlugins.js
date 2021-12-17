@@ -191,14 +191,14 @@ class RunPlugins {
     util.wrapChildPromise(this.ipc, invoke, ids)
   }
 
-  taskMerge (events) {
+  taskMerge (target, events) {
     const duplicates = _.intersection(_.keys(this.registeredEventsById), _.keys(events))
 
     if (duplicates.length) {
       errors.warning('DUPLICATE_TASK_KEY', duplicates.join(', '))
     }
 
-    return _.extend(this.registeredEventsById, events)
+    return _.extend(target, events)
   }
 
   taskExecute (ids, args) {
