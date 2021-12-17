@@ -35,9 +35,9 @@ describe('InlineSpecList', () => {
   })
 
   it('should support fuzzy sort', () => {
-    cy.get('input').type('scomeA', { force: true })
+    cy.get('input').type('scome', { force: true })
 
-    cy.get('li').should('have.length', 2)
+    cy.get('li').should('have.length', 4)
     .should('contain', 'src/components')
     .and('contain', 'Spec-A.spec.tsx')
   })
