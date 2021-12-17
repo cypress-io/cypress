@@ -182,7 +182,7 @@ export function mergeDefaults (config: Record<string, any> = {}, options: Record
   config.cypressEnv = process.env.CYPRESS_INTERNAL_ENV
   debug('using CYPRESS_INTERNAL_ENV %s', config.cypressEnv)
   if (!isValidCypressInternalEnvValue(config.cypressEnv)) {
-    throw errors.get('INVALID_CYPRESS_INTERNAL_ENV', config.cypressEnv)
+    throw errors.throw('INVALID_CYPRESS_INTERNAL_ENV', config.cypressEnv)
   }
 
   delete config.envFile
@@ -203,17 +203,17 @@ export function mergeDefaults (config: Record<string, any> = {}, options: Record
     config = setUrls(config)
   }
 
+  // validate config again here so that we catch configuration errors coming
+  // from the CLI overrides or env var overrides
+  configUtils.validate(_.omit(config, 'browsers'), (errMsg) => {
+    throw errors.throw('CONFIG_VALIDATION_ERROR', errMsg)
+  })
+
   config = setAbsolutePaths(config)
 
   config = setParentTestsPaths(config)
 
   config = setNodeBinary(config, options.userNodePath, options.userNodeVersion)
-
-  // validate config again here so that we catch configuration errors coming
-  // from the CLI overrides or env var overrides
-  configUtils.validate(_.omit(config, 'browsers'), (errMsg) => {
-    throw errors.get('CONFIG_VALIDATION_ERROR', errMsg)
-  })
 
   configUtils.validateNoBreakingConfig(config, errors.warning, (err) => {
     throw err

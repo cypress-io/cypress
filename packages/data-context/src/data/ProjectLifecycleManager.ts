@@ -131,11 +131,9 @@ export class ProjectLifecycleManager {
       this.setCurrentProject(ctx.coreData.currentProject)
     }
 
-    if (ctx.coreData.currentTestingType) {
+    if (ctx.coreData.currentTestingType && this._projectRoot) {
       this.setCurrentTestingType(ctx.coreData.currentTestingType)
     }
-
-    this.legacyPluginGuard()
 
     // see timers/parent.js line #93 for why this is necessary
     process.on('exit', this.onProcessExit)
@@ -254,9 +252,10 @@ export class ProjectLifecycleManager {
       return
     }
 
+    this._projectRoot = projectRoot
+    this.legacyPluginGuard()
     this.loadGlobalBrowsers().catch(this.onLoadError)
     this.verifyProjectRoot(projectRoot)
-    this._projectRoot = projectRoot
     this.resetInternalState()
     this.ctx.update((s) => {
       s.currentProject = projectRoot
@@ -270,6 +269,10 @@ export class ProjectLifecycleManager {
     }
 
     this.loadCypressEnvFile().catch(this.onLoadError)
+
+    if (this.ctx.coreData.currentTestingType) {
+      this.setCurrentTestingType(this.ctx.coreData.currentTestingType)
+    }
 
     this.initializeConfigWatchers()
   }
