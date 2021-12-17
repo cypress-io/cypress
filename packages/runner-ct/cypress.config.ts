@@ -17,7 +17,7 @@ export default defineConfig({
 
       function injectStylesInlineForPercyInPlace (webpackConfig) {
         webpackConfig.module.rules = webpackConfig.module.rules.map((rule) => {
-          if (rule?.use[0]?.loader.includes('mini-css-extract-plugin')) {
+          if (rule?.use?.[0]?.loader.includes('mini-css-extract-plugin')) {
             return {
               ...rule,
               use: [{
