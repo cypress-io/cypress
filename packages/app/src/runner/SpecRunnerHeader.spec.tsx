@@ -38,6 +38,8 @@ describe('SpecRunnerHeader', () => {
     })
 
     cy.get('[data-cy="header-selector"]').should('be.disabled')
+
+    cy.percySnapshot()
   })
 
   it('disabled selector playground button when isLoading is true', () => {
