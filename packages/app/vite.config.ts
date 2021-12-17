@@ -20,7 +20,9 @@ export default makeConfig({
     Layouts(),
     Pages({ extensions: ['vue'] }),
     ViteFaviconsPlugin({
-      logo: require.resolve('@packages/frontend-shared/src/assets/logos/cypress-dark.png'),
+      logo: require.resolve('@packages/frontend-shared/src/assets/logos/favicon.png'),
+      // avoid building favicons for all formats at startup by explicitly saying no to most
+      // It takes a good 20 sec to make if we dont and we don't use it anyway
       favicons: {
         icons: {
           android: false, // Create Android homescreen icon. `boolean` or `{ offset, background }` or an array of sources
