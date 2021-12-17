@@ -45,11 +45,11 @@ describe('Launchpad: Global Mode', () => {
 
       cy.log('The recents list shows all projects that have been added')
       cy.contains(defaultMessages.globalPage.recentProjectsHeader)
-
       cy.get('[data-cy="project-card"]')
       .should('have.length', projectList.length)
       .each((card, index) => {
         expect(card).to.contain(projectList[index])
+        expect(card).to.contain(path.join('cy-projects', projectList[index]))
       })
     }
 
@@ -133,6 +133,16 @@ describe('Launchpad: Global Mode', () => {
         cy.get('[data-cy="project-card"]')
         .should('have.length', 1)
         .should('contain', projectList[1])
+      })
+
+      it('opens "Open in IDE" modal when clicking "Open in IDE" menu item and IDE had not been configured', () => {
+        const projectList = ['todos']
+
+        setupProjects(projectList)
+        cy.get('[data-cy="project-card"] > button').click()
+
+        cy.get('[data-cy="Open In IDE"]').click()
+        cy.contains('Select Preferred Editor')
       })
 
       it('shows file drop zone when no more projects are in list when clicking "Remove Project" menu item', () => {
