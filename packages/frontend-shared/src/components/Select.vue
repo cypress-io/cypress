@@ -88,6 +88,7 @@
                   'text-gray-800': !option.isSelected && !active,
                   'text-opacity-40': option.disabled || false
                 }]"
+                :data-cy="get(option, itemKey)"
               >
                 <span class="flex inset-y-0 absolute items-center">
                   <slot

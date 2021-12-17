@@ -20,13 +20,22 @@ export default defineConfig({
   'component': {
     'testFiles': '**/*.spec.{js,ts,tsx,jsx}',
     'supportFile': 'cypress/component/support/index.ts',
-    devServer (cypressConfig) {
+    devServer (cypressConfig, devServerConfig) {
       const { startDevServer } = require('@cypress/vite-dev-server')
 
       return startDevServer({
         options: cypressConfig,
-        viteConfig: require('./vite.config'),
+        ...devServerConfig,
       })
+    },
+    devServerConfig: {
+      viteConfig: {
+        optimizeDeps: {
+          include: [
+            '@packages/ui-components/cypress/support/customPercyCommand',
+          ],
+        },
+      },
     },
   },
   'e2e': {
