@@ -48,7 +48,6 @@ export class ElectronActions {
   }
 
   showElectronOnAppExit () {
-    this.ctx.coreData.wizard.currentStep = 'setupComplete'
     this.refreshBrowserWindow()
     this.showBrowserWindow()
   }

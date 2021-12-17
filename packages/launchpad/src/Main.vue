@@ -10,25 +10,29 @@
         v-else-if="query.data.value.isInGlobalMode && !query.data.value?.currentProject"
         :gql="query.data.value"
       />
-      <MigrationPage v-else-if="query.data.value.currentProject?.needsLegacyConfigMigration" />
+      <MigrationPage v-else-if="currentProject?.needsLegacyConfigMigration" />
       <template v-else>
         <BaseError
-          v-if="query.data.value.currentProject?.errorLoadingConfigFile"
-          :gql="query.data.value.currentProject.errorLoadingConfigFile"
+          v-if="currentProject?.errorLoadingConfigFile"
+          :gql="currentProject.errorLoadingConfigFile"
         />
         <BaseError
-          v-else-if="query.data.value.currentProject?.errorLoadingNodeEvents"
-          :gql="query.data.value.currentProject.errorLoadingNodeEvents"
+          v-else-if="currentProject?.errorLoadingNodeEvents"
+          :gql="currentProject.errorLoadingNodeEvents"
         />
-        <template v-else-if="query.data.value.currentProject?.isLoadingConfigFile">
+        <Spinner v-else-if="currentProject?.isLoadingConfigFile" />
+        <template v-else-if="currentProject?.isLoadingNodeEvents">
+          <LaunchpadHeader
+            title="Initializing Config..."
+            description="Please wait while we load your project and find browsers installed on your system"
+          />
           <Spinner />
         </template>
-        <template v-else-if="query.data.value.currentProject?.isLoadingNodeEvents">
-          <WizardHeader :gql="{title: 'Initializing Config...', description: 'Please wait while we load your project and find browsers installed on your system.'}" />
-          <Spinner />
-        </template>
-        <template v-else-if="query.data.value?.wizard.step === 'welcome'">
-          <WizardHeader :gql="query.data.value.wizard" />
+        <template v-else-if="!currentProject?.currentTestingType">
+          <LaunchpadHeader
+            title="Welcome to Cypress!"
+            description=""
+          />
           <StandardModal
             v-model="isTestingTypeModalOpen"
             class="h-full sm:h-auto sm:w-auto w-full sm:mx-[5%]"
@@ -36,7 +40,6 @@
             <template #title>
               Key Differences
             </template>
-
             <CompareTestingTypes />
           </StandardModal>
           <button
@@ -52,15 +55,17 @@
           />
         </template>
         <Wizard
-          v-else
+          v-else-if="currentProject.currentTestingType === 'component' && !currentProject.isCTConfigured"
           :gql="query.data.value"
         />
+        <E2ESetupFiles
+          v-else-if="currentProject.currentTestingType === 'e2e' && !currentProject.isE2EConfigured"
+          :gql="query.data.value"
+        />
+        <OpenBrowser v-else />
       </template>
     </div>
   </template>
-  <div v-else>
-    Loading
-  </div>
 </template>
 
 <script lang="ts" setup>
@@ -68,7 +73,6 @@ import { gql, useQuery } from '@urql/vue'
 import { MainLaunchpadQueryDocument } from './generated/graphql'
 import TestingTypeCards from './setup/TestingTypeCards.vue'
 import Wizard from './setup/Wizard.vue'
-import WizardHeader from './setup/WizardHeader.vue'
 import GlobalPage from './global/GlobalPage.vue'
 import BaseError from './error/BaseError.vue'
 import StandardModal from '@cy/components/StandardModal.vue'
@@ -76,9 +80,12 @@ import HeaderBar from '@cy/gql-components/HeaderBar.vue'
 import Spinner from '@cy/components/Spinner.vue'
 import CompareTestingTypes from './setup/CompareTestingTypes.vue'
 import MigrationPage from './setup/MigrationPage.vue'
+import E2ESetupFiles from './setup/E2ESetupFiles.vue'
 
 import { useI18n } from '@cy/i18n'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import LaunchpadHeader from './setup/LaunchpadHeader.vue'
+import OpenBrowser from './setup/OpenBrowser.vue'
 
 const { t } = useI18n()
 const isTestingTypeModalOpen = ref(false)
@@ -90,9 +97,10 @@ query MainLaunchpadQuery {
   baseError {
     ...BaseError_Data
   }
-
+  currentTestingType
   currentProject {
     id
+    isCTConfigured
     isLoadingConfigFile
     isLoadingNodeEvents
     needsLegacyConfigMigration
@@ -103,16 +111,11 @@ query MainLaunchpadQuery {
       ...BaseError_Data
     }
   }
-
-  wizard {
-    canNavigateForward
-    ...WizardHeader
-  }
-
   isInGlobalMode
   ...GlobalPage
 }
 `
 
 const query = useQuery({ query: MainLaunchpadQueryDocument })
+const currentProject = computed(() => query.data.value?.currentProject)
 </script>

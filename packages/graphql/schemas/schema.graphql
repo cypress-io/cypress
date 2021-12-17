@@ -559,6 +559,7 @@ type Mutation {
   """Create an Index HTML file for a new component testing project"""
   appCreateComponentIndexHtml(template: String!): Boolean
   clearCurrentProject: Boolean
+  clearCurrentTestingType: Query
   cloudProjectCreate(ciProviders: [String!], name: String!, orgId: ID!, public: Boolean!): CloudProject
 
   """
@@ -612,6 +613,7 @@ type Mutation {
 
   """Set active project to run tests on"""
   setCurrentProject(path: String!): Boolean
+  setCurrentTestingType(testingType: TestingTypeEnum!): Query
 
   """
   Update local preferences (also known as  appData). The payload, `value`, should be a `JSON.stringified()` object of the new values you'd like to persist. Example: `setPreferences (value: JSON.stringify({ lastOpened: Date.now() }))`
@@ -623,15 +625,6 @@ type Mutation {
 
   """show the launchpad at the browser picker step"""
   showElectronOnAppExit: Boolean
-
-  """Sets the frontend bundler we want to use for the project"""
-  wizardSetBundler(bundler: SupportedBundlers!): Boolean
-
-  """Sets the language we want to use for the config file"""
-  wizardSetCodeLanguage(language: CodeLanguageEnum!): Boolean
-
-  """Sets the frontend framework we want to use for the project"""
-  wizardSetFramework(framework: FrontendFrameworkEnum!): Boolean
 
   """Updates the different fields of the wizard data store"""
   wizardUpdate(input: WizardUpdateInput!): Boolean
@@ -718,6 +711,9 @@ type Query {
 
   """The currently opened project"""
   currentProject: CurrentProject
+
+  """The mode the interactive runner was launched in"""
+  currentTestingType: TestingTypeEnum
 
   """The state of any info related to local development of the runner"""
   dev: DevState!
@@ -872,14 +868,6 @@ type Wizard {
   """All of the languages to choose from"""
   allLanguages: [WizardCodeLanguage!]!
   bundler: WizardBundler
-
-  """
-  Given the current state, returns whether the user progress to the next step of the wizard
-  """
-  canNavigateForward: Boolean!
-
-  """The title of the page, given the current step of the wizard"""
-  description: String
   framework: WizardFrontendFramework
 
   """All of the component testing frameworks to choose from"""
@@ -901,10 +889,6 @@ type Wizard {
 
   """IndexHtml file based on bundler and framework of choice"""
   sampleTemplate: String
-  step: WizardStep!
-
-  """The title of the page, given the current step of the wizard"""
-  title: String
 
   """A list of warnings"""
   warnings: [Warning!]!
@@ -973,11 +957,6 @@ type WizardFrontendFramework implements Node {
   type: FrontendFrameworkEnum!
 }
 
-enum WizardNavigateDirection {
-  back
-  forward
-}
-
 """Details about an NPM Package listed during the wizard install"""
 type WizardNpmPackage implements Node {
   description: String!
@@ -1010,6 +989,7 @@ enum WizardStep {
 }
 
 input WizardUpdateInput {
-  direction: WizardNavigateDirection
-  testingType: TestingTypeEnum
+  bundler: SupportedBundlers
+  framework: FrontendFrameworkEnum
+  language: CodeLanguageEnum
 }

@@ -17,7 +17,6 @@ import Warning from '../warning/Warning.vue'
 
 gql`
 fragment WarningList on Wizard {
-  step
   warnings {
     title
     message

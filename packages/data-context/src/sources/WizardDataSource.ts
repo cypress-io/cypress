@@ -51,21 +51,6 @@ export class WizardDataSource {
     return packages
   }
 
-  get canNavigateForward () {
-    const data = this.ctx.wizardData
-
-    if (data.currentStep === 'setupComplete') {
-      return false
-    }
-
-    if (data.currentStep === 'selectFramework' && (!data.chosenBundler || !data.chosenFramework)) {
-      return false
-    }
-
-    // TODO: add constraints here to determine if we can move forward
-    return true
-  }
-
   async sampleCode () {
     const storybookInfo = await this.ctx.storybook.loadStorybookInfo()
 

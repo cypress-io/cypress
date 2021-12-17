@@ -3,7 +3,6 @@ import { WizardFrontendFramework } from './gql-WizardFrontendFramework'
 import { WizardNpmPackage } from './gql-WizardNpmPackage'
 import { objectType } from 'nexus'
 import { BUNDLERS, CODE_LANGUAGES, FRONTEND_FRAMEWORKS } from '@packages/types'
-import { WizardStepEnum } from '../enumTypes/gql-WizardEnums'
 import { WizardCodeLanguage } from './gql-WizardCodeLanguage'
 import { WizardSampleConfigFile } from './gql-WizardSampleConfigFile'
 
@@ -34,16 +33,6 @@ export const Wizard = objectType({
     t.field('bundler', {
       type: WizardBundler,
       resolve: (source, args, ctx) => ctx.wizard.chosenBundler ?? null,
-    })
-
-    t.nonNull.boolean('canNavigateForward', {
-      description: 'Given the current state, returns whether the user progress to the next step of the wizard',
-      resolve: (source, args, ctx) => ctx.wizard.canNavigateForward,
-    })
-
-    t.string('description', {
-      description: 'The title of the page, given the current step of the wizard',
-      resolve: (source, args, ctx) => ctx.wizard.description ?? null,
     })
 
     t.field('framework', {
@@ -88,16 +77,6 @@ export const Wizard = objectType({
     t.string('sampleTemplate', {
       description: 'IndexHtml file based on bundler and framework of choice',
       resolve: (source, args, ctx) => ctx.wizard.sampleTemplate(),
-    })
-
-    t.nonNull.field('step', {
-      type: WizardStepEnum,
-      resolve: (source) => source.currentStep,
-    })
-
-    t.string('title', {
-      description: 'The title of the page, given the current step of the wizard',
-      resolve: (source, args, ctx) => ctx.wizard.title ?? null,
     })
 
     t.nonNull.list.nonNull.field('warnings', {

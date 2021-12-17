@@ -1,6 +1,6 @@
 <template>
   <WizardLayout
-    :can-navigate-forward="props.gql.canNavigateForward"
+    :can-navigate-forward="canNavigateForward"
     class="max-w-640px"
   >
     <div class="m-24px">
@@ -11,7 +11,7 @@
         :label="t('setupPage.projectSetup.frameworkLabel')"
         selector-type="framework"
         data-testid="select-framework"
-        @select-framework="setFEFramework"
+        @select-framework="emit.bind(emit, 'wizardSetup', 'framework')"
       />
       <SelectFwOrBundler
         v-if="props.gql.framework?.id && (!props.gql.bundler || bundlers.length > 1)"
@@ -22,13 +22,13 @@
         :label="t('setupPage.projectSetup.bundlerLabel')"
         selector-type="bundler"
         data-testid="select-bundler"
-        @select-bundler="setFEBundler"
+        @select-bundler="emit.bind(emit, 'wizardSetup', 'bundler')"
       />
       <SelectLanguage
         :name="t('setupPage.projectSetup.languageLabel')"
         :options="languages || []"
         :value="props.gql.language?.id ?? 'js'"
-        @select="setLanguage"
+        @select="emit.bind(emit, 'wizardSetup', 'codeLanguage')"
       />
     </div>
   </WizardLayout>
@@ -40,40 +40,18 @@ import WizardLayout from './WizardLayout.vue'
 import SelectFwOrBundler from './SelectFwOrBundler.vue'
 import SelectLanguage from './SelectLanguage.vue'
 import { gql } from '@urql/core'
-import {
-  EnvironmentSetupFragment,
-  EnvironmentSetupSetFrameworkDocument,
-  EnvironmentSetupSetBundlerDocument,
-  EnvironmentSetupSetCodeLanguageDocument,
-  FrontendFrameworkEnum,
-  SupportedBundlers,
-  CodeLanguageEnum,
-} from '../generated/graphql'
-import { useMutation } from '@urql/vue'
+import type { EnvironmentSetupFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
 import { sortBy } from 'lodash'
+import type { CurrentStep, WizardSetupData } from './Wizard.vue'
 
-gql`
-mutation EnvironmentSetupSetFramework($framework: FrontendFrameworkEnum!) {
-  wizardSetFramework(framework: $framework) 
-}
-`
-
-gql`
-mutation EnvironmentSetupSetBundler($bundler: SupportedBundlers!) {
-  wizardSetBundler(bundler: $bundler) 
-}
-`
-
-gql`
-mutation EnvironmentSetupSetCodeLanguage($language: CodeLanguageEnum!) {
-  wizardSetCodeLanguage(language: $language)
-}
-`
+const emit = defineEmits<{
+  (event: 'navigate', currentStep: CurrentStep): void
+  <K extends keyof WizardSetupData>(event: 'wizardSetup', key: K, val: WizardSetupData[K]): void
+}>()
 
 gql`
 fragment EnvironmentSetup on Wizard {
-  canNavigateForward
   bundler {
     id
     name
@@ -120,23 +98,8 @@ fragment EnvironmentSetup on Wizard {
 
 const props = defineProps<{
   gql: EnvironmentSetupFragment
+  data: WizardSetupData
 }>()
-
-const setFramework = useMutation(EnvironmentSetupSetFrameworkDocument)
-const setBundler = useMutation(EnvironmentSetupSetBundlerDocument)
-const setLanguageMutation = useMutation(EnvironmentSetupSetCodeLanguageDocument)
-
-const setFEBundler = (bundler: SupportedBundlers) => {
-  setBundler.executeMutation({ bundler })
-}
-
-const setFEFramework = (framework: FrontendFrameworkEnum) => {
-  setFramework.executeMutation({ framework })
-}
-
-const setLanguage = (language: CodeLanguageEnum) => {
-  setLanguageMutation.executeMutation({ language })
-}
 
 const { t } = useI18n()
 
@@ -155,4 +118,6 @@ const frameworks = computed(() => {
 })
 
 const languages = computed(() => props.gql.allLanguages ?? [])
+
+const canNavigateForward = computed(() => Object.values(props.data).filter((f) => f).length === 3)
 </script>

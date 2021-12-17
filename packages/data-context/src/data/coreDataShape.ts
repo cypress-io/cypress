@@ -53,7 +53,6 @@ export interface AppDataShape {
 
 export interface WizardDataShape {
   history: NexusGenEnums['WizardStep'][]
-  currentStep: NexusGenEnums['WizardStep']
   chosenBundler: NexusGenEnums['SupportedBundlers'] | null
   allBundlers: typeof BUNDLERS
   chosenFramework: NexusGenEnums['FrontendFrameworkEnum'] | null
@@ -132,9 +131,7 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
       chosenFramework: null,
       chosenLanguage: 'js',
       chosenManualInstall: false,
-      currentStep: 'welcome',
       allBundlers: BUNDLERS,
-      history: ['welcome'],
       warnings: [],
     },
     chosenBrowser: null,
