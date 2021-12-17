@@ -4,7 +4,7 @@ import SelectorPlayground from './SelectorPlayground.vue'
 
 // TODO: Test is failing due to Percy conflict
 // eslint-disable-next-line
-describe.skip('SelectorPlayground', () => {
+describe('SelectorPlayground', () => {
   const mountSelectorPlayground = (
     eventManager = createEventManager(),
     autIframe = createTestAutIframe(),
@@ -49,6 +49,16 @@ describe.skip('SelectorPlayground', () => {
     })
   })
 
+  it('populates cy.get by default with a selector of body', () => {
+    const { autIframe } = mountSelectorPlayground()
+
+    cy.spy(autIframe, 'toggleSelectorHighlight')
+    cy.get('[data-cy="playground-method"]').as('method')
+    cy.get('[data-cy="playground-selector"]').as('selector')
+    cy.get('@method').should('contain', 'cy.get')
+    cy.get('@selector').should('have.value', 'body')
+  })
+
   it('changes method from cy.get to cy.contains', () => {
     const selectorPlaygroundStore = useSelectorPlaygroundStore()
 
@@ -85,7 +95,7 @@ describe.skip('SelectorPlayground', () => {
     cy.get('@copy').should('be.focused')
   })
 
-  it('copies selector text', { browser: 'electron' }, () => {
+  it('copies selector text', () => {
     const { autIframe } = mountSelectorPlayground()
 
     cy.spy(autIframe, 'toggleSelectorHighlight')
@@ -95,7 +105,10 @@ describe.skip('SelectorPlayground', () => {
     cy.get('@copy').click()
     cy.get('@copy').should('be.focused')
 
-    cy.get('@writeClipboard').should('have.been.calledWith', '.foo-bar')
+    cy.spy(document, 'execCommand')
+    cy.get('[data-cy="playground-copy"]').click().then(() => {
+      expect(document.execCommand).to.be.calledWith('copy')
+    })
   })
 
   it('prints nothing to console when no selected elements found', () => {
