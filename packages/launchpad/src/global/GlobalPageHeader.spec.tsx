@@ -45,7 +45,7 @@ describe('<GlobalPageHeader />', () => {
 
   it('handles a file upload', () => {
     cy.get(dropzoneSelector)
-    .attachFile('cypress/fixtures/test-project/cypress.config.ts', { action: 'drag-n-drop' })
+    .selectFile('cypress/fixtures/test-project/cypress.config.ts', { action: 'drag-drop' })
     .get(addProjectSelector)
     .click()
     .get('@fileUpload').should('have.been.called')

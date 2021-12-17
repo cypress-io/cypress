@@ -1,5 +1,5 @@
 {
-  "name": "@test-project/attachFile",
+  "name": "@test-project/selectFile",
   "version": "0.0.0-test",
   "devDependencies": {
     "@uppy/core": "^2.1.2",

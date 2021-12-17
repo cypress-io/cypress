@@ -30,5 +30,5 @@ interface NodeEventEmitter {
 
 // The Buffer type is automatically imported for the browser by webpack
 // and we use it for dealing with binary data, especially around the
-// attachFile interface.
+// selectFile interface.
 type BufferType = import("buffer/").Buffer

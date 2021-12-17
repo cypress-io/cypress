@@ -128,25 +128,25 @@ export default {
     },
   },
 
-  attachFile: {
-    docsUrl: 'https://on.cypress.io/attachfile',
+  selectFile: {
+    docsUrl: 'https://on.cypress.io/selectfile',
     invalid_action: {
-      message: `${cmd('attachFile')} \`action\` can only be \`input\` or \`drag-n-drop\`. You passed: \`{{action}}\`.`,
+      message: `${cmd('selectFile')} \`action\` can only be \`select\` or \`drag-drop\`. You passed: \`{{action}}\`.`,
     },
     invalid_array_file_reference: {
-      message: `${cmd('attachFile')} must be passed an array of Buffers or objects with non-null \`contents\`. At files[{{index}}] you passed: \`{{file}}\`.`,
+      message: `${cmd('selectFile')} must be passed an array of Buffers or objects with non-null \`contents\`. At files[{{index}}] you passed: \`{{file}}\`.`,
     },
     invalid_single_file_reference: {
-      message: `${cmd('attachFile')} must be passed a Buffer or an object with a non-null \`contents\` property as its 1st argument. You passed: \`{{file}}\`.`,
+      message: `${cmd('selectFile')} must be passed a Buffer or an object with a non-null \`contents\` property as its 1st argument. You passed: \`{{file}}\`.`,
     },
     multiple_elements: {
-      message: `${cmd('attachFile')} can only be called on a single element. Your subject contained {{num}} elements.`,
+      message: `${cmd('selectFile')} can only be called on a single element. Your subject contained {{num}} elements.`,
     },
     not_file_input: {
-      message: `${cmd('attachFile')} can only be called on an \`<input type="file">\` or a \`<label for="fileInput">\` pointing to or containing one. Your subject is: \`{{node}}\`.`,
+      message: `${cmd('selectFile')} can only be called on an \`<input type="file">\` or a \`<label for="fileInput">\` pointing to or containing one. Your subject is: \`{{node}}\`.`,
     },
     invalid_alias: {
-      message: `${cmd('attachFile')} can only attach strings, Buffers or objects, while your alias \`{{alias}}\` resolved to: \`{{subject}}\`.`,
+      message: `${cmd('selectFile')} can only attach strings, Buffers or objects, while your alias \`{{alias}}\` resolved to: \`{{subject}}\`.`,
     },
   },
 

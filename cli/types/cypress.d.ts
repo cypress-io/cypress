@@ -629,15 +629,15 @@ declare namespace Cypress {
      * Attach a file to the given <input> element, or drag and drop a file over any subject.
      *
      * @param {FileReference} files - The file(s) to attach or drag onto this element.
-     * @see https://on.cypress.io/attachFile
+     * @see https://on.cypress.io/selectFile
      * @example
-     *    cy.get('input[type=file]').attachFile(Buffer.from('text'))
-     *    cy.get('input[type=file]').attachFile({
+     *    cy.get('input[type=file]').selectFile(Buffer.from('text'))
+     *    cy.get('input[type=file]').selectFile({
      *      fileName: 'users.json',
      *      fileContents: [{name: 'John Doe'}]
      *    })
      */
-    attachFile(files: FileReference | FileReference[], options?: Partial<AttachFileOptions>): Chainable<Subject>
+    selectFile(files: FileReference | FileReference[], options?: Partial<SelectFileOptions>): Chainable<Subject>
 
     /**
      * Blur a focused element. This element must currently be in focus.
@@ -2437,15 +2437,15 @@ declare namespace Cypress {
     scrollBehavior: scrollBehaviorOptions
   }
 
-  interface AttachFileOptions extends Loggable, Timeoutable, ActionableOptions {
+  interface SelectFileOptions extends Loggable, Timeoutable, ActionableOptions {
     /**
-     * Which user action to perform. `input` matches selecting a file while
-     * `drag-n-drop` matches dragging files from the operating system into the
+     * Which user action to perform. `select` matches selecting a file while
+     * `drag-drop` matches dragging files from the operating system into the
      * document.
      *
-     * @default 'input'
+     * @default 'select'
      */
-    action: 'input' | 'drag-n-drop'
+    action: 'select' | 'drag-drop'
   }
 
   interface BlurOptions extends Loggable, Forceable { }

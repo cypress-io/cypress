@@ -2,7 +2,7 @@ const { _, $ } = Cypress
 
 // Reading and decoding files from an input element would, in the real world,
 // be handled by the application under test, and they would assert on their
-// application state. We want to assert on how attachFile behaves directly
+// application state. We want to assert on how selectFile behaves directly
 // though, and getting the files associated with an <input> as strings is
 // handy.
 function getFileContents (subject) {
@@ -17,16 +17,16 @@ function getFileContents (subject) {
   return Promise.all(fileContents)
 }
 
-describe('src/cy/commands/actions/attachFile', () => {
+describe('src/cy/commands/actions/selectFile', () => {
   beforeEach(() => {
     cy.visit('/fixtures/files-form.html')
     cy.wrap(Buffer.from('foo')).as('foo')
   })
 
-  context('#attachFile', () => {
+  context('#selectFile', () => {
     it('attaches a single file', () => {
       cy.get('#basic')
-      .attachFile({ contents: '@foo', fileName: 'foo.txt' })
+      .selectFile({ contents: '@foo', fileName: 'foo.txt' })
 
       cy.get('#basic')
       .then((input) => {
@@ -45,7 +45,7 @@ describe('src/cy/commands/actions/attachFile', () => {
 
     it('attaches multiple files', () => {
       cy.get('#multiple')
-      .attachFile([
+      .selectFile([
         {
           contents: '@foo',
           fileName: 'foo.txt',
@@ -74,7 +74,7 @@ describe('src/cy/commands/actions/attachFile', () => {
     })
 
     it('attaches files with custom lastModified', () => {
-      cy.get('#basic').attachFile({
+      cy.get('#basic').selectFile({
         contents: '@foo',
         lastModified: 1234,
       })
@@ -85,7 +85,7 @@ describe('src/cy/commands/actions/attachFile', () => {
     })
 
     it('attaches files to an input from a label', () => {
-      cy.get('#basic-label').attachFile({ contents: '@foo' })
+      cy.get('#basic-label').selectFile({ contents: '@foo' })
 
       cy.get('#basic')
       .then(getFileContents)
@@ -95,7 +95,7 @@ describe('src/cy/commands/actions/attachFile', () => {
     })
 
     it('attaches files to an input from a containing label', () => {
-      cy.get('#containing-label').attachFile({ contents: '@foo' })
+      cy.get('#containing-label').selectFile({ contents: '@foo' })
 
       cy.get('#contained')
       .then(getFileContents)
@@ -133,7 +133,7 @@ describe('src/cy/commands/actions/attachFile', () => {
         })
       })
 
-      cy.get('#basic').attachFile({ contents: '@foo' })
+      cy.get('#basic').selectFile({ contents: '@foo' })
     })
 
     it('bubbles events', (done) => {
@@ -143,7 +143,7 @@ describe('src/cy/commands/actions/attachFile', () => {
         })
       })
 
-      cy.get('#basic').attachFile({ contents: '@foo' })
+      cy.get('#basic').selectFile({ contents: '@foo' })
     })
 
     it('invokes events on the input without changing subject when passed a label', (done) => {
@@ -155,13 +155,13 @@ describe('src/cy/commands/actions/attachFile', () => {
         done()
       })
 
-      cy.get('#basic-label').attachFile({ contents: '@foo' })
+      cy.get('#basic-label').selectFile({ contents: '@foo' })
       .should('have.id', 'basic-label')
     })
 
     it('can empty previously filled input', () => {
-      cy.get('#basic').attachFile({ contents: '@foo' })
-      cy.get('#basic').attachFile([])
+      cy.get('#basic').selectFile({ contents: '@foo' })
+      cy.get('#basic').selectFile([])
       .then((input) => {
         expect(input[0].files.length).to.eq(0)
       })
@@ -172,7 +172,7 @@ describe('src/cy/commands/actions/attachFile', () => {
       .shadow()
       .find('input')
       .as('shadowInput')
-      .attachFile('@foo')
+      .selectFile('@foo')
 
       cy.get('@shadowInput')
       .then(getFileContents)
@@ -193,7 +193,7 @@ describe('src/cy/commands/actions/attachFile', () => {
       it('works with aliased strings', () => {
         cy.wrap('foobar').as('alias')
 
-        cy.get('#basic').attachFile('@alias')
+        cy.get('#basic').selectFile('@alias')
         .then(getFileContents)
         .then((contents) => {
           expect(contents[0]).to.eql('foobar')
@@ -203,7 +203,7 @@ describe('src/cy/commands/actions/attachFile', () => {
       it('works with aliased objects', () => {
         cy.wrap({ foo: 'bar' }).as('alias')
 
-        cy.get('#basic').attachFile('@alias')
+        cy.get('#basic').selectFile('@alias')
         .then(getFileContents)
         .then((contents) => {
           expect(contents[0]).to.eql('{"foo":"bar"}')
@@ -213,7 +213,7 @@ describe('src/cy/commands/actions/attachFile', () => {
       it('works with aliased fixtures', () => {
         cy.fixture('valid.json').as('myFixture')
 
-        cy.get('#basic').attachFile('@myFixture')
+        cy.get('#basic').selectFile('@myFixture')
         .then(getFileContents)
         .then((contents) => {
           // Because json files are loaded as objects, they get reencoded before
@@ -227,7 +227,7 @@ describe('src/cy/commands/actions/attachFile', () => {
       it('works with files read with null encoding', () => {
         cy.readFile('cypress/fixtures/valid.json', { encoding: null }).as('myFile')
 
-        cy.get('#basic').attachFile('@myFile')
+        cy.get('#basic').selectFile('@myFile')
         .then(getFileContents)
         .then((contents) => {
           expect(contents[0]).to.eql(validJsonString)
@@ -235,7 +235,7 @@ describe('src/cy/commands/actions/attachFile', () => {
       })
 
       it('works with passed in paths', () => {
-        cy.get('#multiple').attachFile(['cypress/fixtures/valid.json', 'cypress/fixtures/app.js'])
+        cy.get('#multiple').selectFile(['cypress/fixtures/valid.json', 'cypress/fixtures/app.js'])
         .then(getFileContents)
         .then((contents) => {
           expect(contents[0]).to.eql(validJsonString)
@@ -260,176 +260,176 @@ describe('src/cy/commands/actions/attachFile', () => {
           done()
         })
 
-        cy.attachFile({ contents: '@foo' })
+        cy.selectFile({ contents: '@foo' })
       })
 
       it('throws when non dom subject', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.attachFile()` failed because it requires a DOM element.')
+          expect(err.message).to.include('`cy.selectFile()` failed because it requires a DOM element.')
           done()
         })
 
-        cy.noop({}).attachFile({ contents: '@foo' })
+        cy.noop({}).selectFile({ contents: '@foo' })
       })
 
       it('throws when non-input subject', function (done) {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.attachFile()` can only be called on an `<input type="file">` or a `<label for="fileInput">` pointing to or containing one. Your subject is: `<body>...</body>`')
-          expect(err.docsUrl).to.eq('https://on.cypress.io/attachfile')
+          expect(err.message).to.include('`cy.selectFile()` can only be called on an `<input type="file">` or a `<label for="fileInput">` pointing to or containing one. Your subject is: `<body>...</body>`')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/selectfile')
           done()
         })
 
-        cy.get('body').attachFile({ contents: '@foo' })
+        cy.get('body').selectFile({ contents: '@foo' })
       })
 
       it('throws when non-file input', function (done) {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.attachFile()` can only be called on an `<input type="file">` or a `<label for="fileInput">` pointing to or containing one. Your subject is: `<input type="text" id="text-input">`')
-          expect(err.docsUrl).to.eq('https://on.cypress.io/attachfile')
+          expect(err.message).to.include('`cy.selectFile()` can only be called on an `<input type="file">` or a `<label for="fileInput">` pointing to or containing one. Your subject is: `<input type="text" id="text-input">`')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/selectfile')
           done()
         })
 
-        cy.get('#text-input').attachFile({ contents: '@foo' })
+        cy.get('#text-input').selectFile({ contents: '@foo' })
       })
 
       it('throws when label for non-file input', function (done) {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.attachFile()` can only be called on an `<input type="file">` or a `<label for="fileInput">` pointing to or containing one. Your subject is: `<label for="text-input" id="text-label">Text label</label>`')
-          expect(err.docsUrl).to.eq('https://on.cypress.io/attachfile')
+          expect(err.message).to.include('`cy.selectFile()` can only be called on an `<input type="file">` or a `<label for="fileInput">` pointing to or containing one. Your subject is: `<label for="text-input" id="text-label">Text label</label>`')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/selectfile')
           done()
         })
 
-        cy.get('#text-label').attachFile({ contents: '@foo' })
+        cy.get('#text-label').selectFile({ contents: '@foo' })
       })
 
       it('throws when label without an attached input', function (done) {
         // Even though this label contains a file input, testing on real browsers confirms that clicking it
         // does *not* activate the contained input.
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.attachFile()` can only be called on an `<input type="file">` or a `<label for="fileInput">` pointing to or containing one. Your subject is: `<label for="nonexistent" id="nonexistent-label">...</label>`')
-          expect(err.docsUrl).to.eq('https://on.cypress.io/attachfile')
+          expect(err.message).to.include('`cy.selectFile()` can only be called on an `<input type="file">` or a `<label for="fileInput">` pointing to or containing one. Your subject is: `<label for="nonexistent" id="nonexistent-label">...</label>`')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/selectfile')
           done()
         })
 
-        cy.get('#nonexistent-label').attachFile({ contents: '@foo' })
+        cy.get('#nonexistent-label').selectFile({ contents: '@foo' })
       })
 
       it('throws when subject is collection of elements', function (done) {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.attachFile()` can only be called on a single element. Your subject contained')
-          expect(err.docsUrl).to.eq('https://on.cypress.io/attachfile')
+          expect(err.message).to.include('`cy.selectFile()` can only be called on a single element. Your subject contained')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/selectfile')
           done()
         })
 
-        cy.get('input[type="file"]').attachFile({ contents: '@foo' })
+        cy.get('input[type="file"]').selectFile({ contents: '@foo' })
       })
 
       it('throws when no arguments given', function (done) {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.attachFile()` must be passed a Buffer or an object with a non-null `contents` property as its 1st argument. You passed: `undefined`.')
-          expect(err.docsUrl).to.eq('https://on.cypress.io/attachfile')
+          expect(err.message).to.include('`cy.selectFile()` must be passed a Buffer or an object with a non-null `contents` property as its 1st argument. You passed: `undefined`.')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/selectfile')
           done()
         })
 
-        cy.get('#basic').attachFile()
+        cy.get('#basic').selectFile()
       })
 
       it('throws when file is null', function (done) {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.attachFile()` must be passed a Buffer or an object with a non-null `contents` property as its 1st argument. You passed: `null`.')
-          expect(err.docsUrl).to.eq('https://on.cypress.io/attachfile')
+          expect(err.message).to.include('`cy.selectFile()` must be passed a Buffer or an object with a non-null `contents` property as its 1st argument. You passed: `null`.')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/selectfile')
           done()
         })
 
-        cy.get('#basic').attachFile(null)
+        cy.get('#basic').selectFile(null)
       })
 
       it('throws when single file.contents is null', function (done) {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.attachFile()` must be passed a Buffer or an object with a non-null `contents` property as its 1st argument. You passed: `{"contents":null}`.')
-          expect(err.docsUrl).to.eq('https://on.cypress.io/attachfile')
+          expect(err.message).to.include('`cy.selectFile()` must be passed a Buffer or an object with a non-null `contents` property as its 1st argument. You passed: `{"contents":null}`.')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/selectfile')
           done()
         })
 
-        cy.get('#basic').attachFile({ contents: null })
+        cy.get('#basic').selectFile({ contents: null })
       })
 
       it('throws when file is an unknown alias', function (done) {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.attachFile()` could not find a registered alias for: `@unknown`.')
+          expect(err.message).to.include('`cy.selectFile()` could not find a registered alias for: `@unknown`.')
           done()
         })
 
-        cy.get('#basic').attachFile('@unknown')
+        cy.get('#basic').selectFile('@unknown')
       })
 
       it('throws when file is an alias for a DOM node', function (done) {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.attachFile()` can only attach strings, Buffers or objects, while your alias `@body` resolved to: `<body>...</body>`.')
-          expect(err.docsUrl).to.eq('https://on.cypress.io/attachfile')
+          expect(err.message).to.include('`cy.selectFile()` can only attach strings, Buffers or objects, while your alias `@body` resolved to: `<body>...</body>`.')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/selectfile')
           done()
         })
 
         cy.get('body').as('body')
-        cy.get('#basic').attachFile('@body')
+        cy.get('#basic').selectFile('@body')
       })
 
       it('throws when file is an alias for null', function (done) {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.attachFile()` can only attach strings, Buffers or objects, while your alias `@null` resolved to: `null`.')
-          expect(err.docsUrl).to.eq('https://on.cypress.io/attachfile')
+          expect(err.message).to.include('`cy.selectFile()` can only attach strings, Buffers or objects, while your alias `@null` resolved to: `null`.')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/selectfile')
           done()
         })
 
         cy.wrap(null).as('null')
-        cy.get('#basic').attachFile('@null')
+        cy.get('#basic').selectFile('@null')
       })
 
       it('throws with aliased intercepts', function (done) {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.attachFile()` can only attach strings, Buffers or objects, while your alias `@postUser` resolved to: `null`.')
-          expect(err.docsUrl).to.eq('https://on.cypress.io/attachfile')
+          expect(err.message).to.include('`cy.selectFile()` can only attach strings, Buffers or objects, while your alias `@postUser` resolved to: `null`.')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/selectfile')
           done()
         })
 
         cy.intercept('POST', '/users', {}).as('postUser')
-        cy.get('#basic').attachFile('@postUser')
+        cy.get('#basic').selectFile('@postUser')
       })
 
       it('throws when any path does not exist', function (done) {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.attachFile("this/file/doesNotExist.json")` failed because the file does not exist at the following path:')
-          expect(err.docsUrl).to.eq('https://on.cypress.io/attachfile')
+          expect(err.message).to.include('`cy.selectFile("this/file/doesNotExist.json")` failed because the file does not exist at the following path:')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/selectfile')
           done()
         })
 
-        cy.get('#basic').attachFile(['cypress/fixtures/valid.json', 'this/file/doesNotExist.json'])
+        cy.get('#basic').selectFile(['cypress/fixtures/valid.json', 'this/file/doesNotExist.json'])
       })
 
       it('throws when any file\'s contents is undefined', function (done) {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.attachFile()` must be passed an array of Buffers or objects with non-null `contents`. At files[1] you passed: `{}`.')
-          expect(err.docsUrl).to.eq('https://on.cypress.io/attachfile')
+          expect(err.message).to.include('`cy.selectFile()` must be passed an array of Buffers or objects with non-null `contents`. At files[1] you passed: `{}`.')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/selectfile')
           done()
         })
 
-        cy.get('#basic').attachFile([{ contents: '@foo' }, {}])
+        cy.get('#basic').selectFile([{ contents: '@foo' }, {}])
       })
 
       it('throws on invalid action', function (done) {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.attachFile()` `action` can only be `input` or `drag-n-drop`. You passed: `foobar`.')
-          expect(err.docsUrl).to.eq('https://on.cypress.io/attachfile')
+          expect(err.message).to.include('`cy.selectFile()` `action` can only be `select` or `drag-drop`. You passed: `foobar`.')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/selectfile')
           done()
         })
 
-        cy.get('#basic').attachFile({ contents: '@foo' }, { action: 'foobar' })
+        cy.get('#basic').selectFile({ contents: '@foo' }, { action: 'foobar' })
       })
     })
 
     /*
      * The tests around actionability are somewhat limited, since the functionality is thoroughly tested in the
-     * `cy.trigger()` unit tests. We include a few tests directly on `cy.attachFile()` in order to ensure we're
+     * `cy.trigger()` unit tests. We include a few tests directly on `cy.selectFile()` in order to ensure we're
      * using $actionability.verify() properly, but don't extensively exercise the logic within it here.
      *
      * See trigger_spec.js for the full actionability test suite.
@@ -438,7 +438,7 @@ describe('src/cy/commands/actions/attachFile', () => {
       defaultCommandTimeout: 50,
     }, () => {
       it('attaches files to a hidden input from a visible label', () => {
-        cy.get('#hidden-label').attachFile({ contents: '@foo' })
+        cy.get('#hidden-label').selectFile({ contents: '@foo' })
 
         cy.get('#hidden')
         .then(getFileContents)
@@ -449,15 +449,15 @@ describe('src/cy/commands/actions/attachFile', () => {
 
       it('does not work on hidden inputs by default', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.attachFile()` failed because this element is not visible')
+          expect(err.message).to.include('`cy.selectFile()` failed because this element is not visible')
           done()
         })
 
-        cy.get('#hidden').attachFile({ contents: '@foo' })
+        cy.get('#hidden').selectFile({ contents: '@foo' })
       })
 
       it('can force on hidden inputs', () => {
-        cy.get('#hidden').attachFile({ contents: '@foo' }, { force: true })
+        cy.get('#hidden').selectFile({ contents: '@foo' }, { force: true })
       })
 
       it('does not work on covered inputs by default', (done) => {
@@ -471,37 +471,37 @@ is being covered by another element:
           done()
         })
 
-        cy.get('#covered').attachFile({ contents: '@foo' })
+        cy.get('#covered').selectFile({ contents: '@foo' })
       })
 
       it('can force on covered inputs', () => {
-        cy.get('#covered').attachFile({ contents: '@foo' }, { force: true })
+        cy.get('#covered').selectFile({ contents: '@foo' }, { force: true })
       })
 
       it('does not work on disabled inputs by default', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.attachFile()` failed because this element is `disabled`')
+          expect(err.message).to.include('`cy.selectFile()` failed because this element is `disabled`')
           done()
         })
 
-        cy.get('#disabled-label').attachFile({ contents: '@foo' })
+        cy.get('#disabled-label').selectFile({ contents: '@foo' })
       })
 
       it('can force on disabled inputs', () => {
-        cy.get('#disabled-label').attachFile({ contents: '@foo' }, { force: true })
+        cy.get('#disabled-label').selectFile({ contents: '@foo' }, { force: true })
       })
 
       it('does not work on hidden labels by default', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.attachFile()` failed because this element is not visible')
+          expect(err.message).to.include('`cy.selectFile()` failed because this element is not visible')
           done()
         })
 
-        cy.get('#hidden-basic-label').attachFile({ contents: '@foo' })
+        cy.get('#hidden-basic-label').selectFile({ contents: '@foo' })
       })
 
       it('can force on hidden labels', () => {
-        cy.get('#hidden-basic-label').attachFile({ contents: '@foo' }, { force: true })
+        cy.get('#hidden-basic-label').selectFile({ contents: '@foo' }, { force: true })
       })
 
       it('can scroll to input', () => {
@@ -511,7 +511,7 @@ is being covered by another element:
           scrolled.push(type)
         })
 
-        cy.get('#scroll').attachFile({ contents: '@foo' })
+        cy.get('#scroll').selectFile({ contents: '@foo' })
         .then(() => {
           expect(scrolled).not.to.be.empty
         })
@@ -524,7 +524,7 @@ is being covered by another element:
           scrolled.push(type)
         })
 
-        cy.get('#scroll-label').attachFile({ contents: '@foo' })
+        cy.get('#scroll-label').selectFile({ contents: '@foo' })
         .then(() => {
           expect(scrolled).not.to.be.empty
         })
@@ -537,7 +537,7 @@ is being covered by another element:
           scrolled.push(type)
         })
 
-        cy.get('#scroll-label').attachFile({ contents: '@foo' }, { force: true })
+        cy.get('#scroll-label').selectFile({ contents: '@foo' }, { force: true })
         .then(() => {
           expect(scrolled).to.be.empty
         })
@@ -556,7 +556,7 @@ is being covered by another element:
         .throws(new Error('animating!'))
         .onThirdCall().returns()
 
-        cy.get('#basic').attachFile({ contents: '@foo' }).then(() => {
+        cy.get('#basic').selectFile({ contents: '@foo' }).then(() => {
           expect(retries).to.eq(3)
           expect(cy.ensureElementIsNotAnimating).to.be.calledThrice
         })
@@ -567,7 +567,7 @@ is being covered by another element:
           cy.spy(el[0], 'scrollIntoView')
         })
 
-        cy.get('#scroll').attachFile({ contents: '@foo' }, { scrollBehavior: 'bottom' })
+        cy.get('#scroll').selectFile({ contents: '@foo' }, { scrollBehavior: 'bottom' })
 
         cy.get('#scroll').then((el) => {
           expect(el[0].scrollIntoView).to.be.calledWith({ block: 'end' })
@@ -575,9 +575,9 @@ is being covered by another element:
       })
     })
 
-    describe('drag-n-drop', () => {
+    describe('drag-drop', () => {
       it('attaches a file to an input when targeted', () => {
-        cy.get('#basic').attachFile({ contents: '@foo' }, { action: 'drag-n-drop' })
+        cy.get('#basic').selectFile({ contents: '@foo' }, { action: 'drag-drop' })
 
         cy.get('#basic')
         .then(getFileContents)
@@ -615,11 +615,11 @@ is being covered by another element:
           })
         })
 
-        cy.get('#basic').attachFile({ contents: '@foo' }, { action: 'drag-n-drop' })
+        cy.get('#basic').selectFile({ contents: '@foo' }, { action: 'drag-drop' })
       })
 
       it('does not follow labels to their inputs', () => {
-        cy.get('#basic-label').attachFile({ contents: '@foo' }, { action: 'drag-n-drop' })
+        cy.get('#basic-label').selectFile({ contents: '@foo' }, { action: 'drag-drop' })
 
         cy.get('#basic').then((input) => {
           expect(input[0].files.length).to.eql(0)
@@ -627,7 +627,7 @@ is being covered by another element:
       })
 
       it('does not attach multiple files to a single input', () => {
-        cy.get('#basic').attachFile(['@foo', '@foo'], { action: 'drag-n-drop' })
+        cy.get('#basic').selectFile(['@foo', '@foo'], { action: 'drag-drop' })
         cy.get('#basic').then((input) => {
           expect(input[0].files.length).to.eql(0)
         })
@@ -659,7 +659,7 @@ is being covered by another element:
           done()
         })
 
-        cy.get('body').attachFile('@foo', { action: 'drag-n-drop' })
+        cy.get('body').selectFile('@foo', { action: 'drag-drop' })
       })
 
       it('includes an entry in `dataTransfer.types`', (done) => {
@@ -668,7 +668,7 @@ is being covered by another element:
           done()
         })
 
-        cy.get('#multiple').attachFile({ contents: '@foo' }, { action: 'drag-n-drop' })
+        cy.get('#multiple').selectFile({ contents: '@foo' }, { action: 'drag-drop' })
       })
     })
   })

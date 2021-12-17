@@ -3,7 +3,7 @@ import Dashboard from '@uppy/dashboard'
 
 import Dropzone from 'dropzone'
 
-describe('attachFile', () => {
+describe('selectFile', () => {
   describe('uppy', () => {
     beforeEach(() => {
       cy.document().then((doc) => {
@@ -26,7 +26,7 @@ describe('attachFile', () => {
       // Because Uppy triggers file input on clicking a button - via js event
       // handler - there's no way for cypress know that a button should trigger
       // the file input. We have to target the hidden input and `force` it.
-      cy.get('input').first().attachFile([
+      cy.get('input').first().selectFile([
         { contents: Buffer.from('foo'), fileName: 'bar.txt' },
         { contents: Buffer.from('foo2'), fileName: 'baz.txt' },
       ], { force: true })
@@ -39,10 +39,10 @@ describe('attachFile', () => {
     })
 
     it('can drop files', () => {
-      cy.get('.uppy-Dashboard-AddFiles').first().attachFile([
+      cy.get('.uppy-Dashboard-AddFiles').first().selectFile([
         { contents: Buffer.from('foo'), fileName: 'bar.txt' },
         { contents: Buffer.from('foo2'), fileName: 'baz.txt' },
-      ], { action: 'drag-n-drop' })
+      ], { action: 'drag-drop' })
 
       cy.get('#uppy')
       .should('contain', 'bar.txt')
@@ -74,7 +74,7 @@ describe('attachFile', () => {
       // Because dropzone triggers file input on clicking a button - via js event
       // handler - there's no way for cypress know that a button should trigger
       // the file input. We have to target the hidden input and `force` it.
-      cy.get('input').first().attachFile([
+      cy.get('input').first().selectFile([
         { contents: Buffer.from('foo'), fileName: 'bar.txt' },
         { contents: Buffer.from('foo2'), fileName: 'baz.txt' },
       ], { force: true })
@@ -90,10 +90,10 @@ describe('attachFile', () => {
       // Because dropzone triggers file input on clicking a button - via js event
       // handler - there's no way for cypress know that a button should trigger
       // the file input. We have to target the hidden input and `force` it.
-      cy.get('.dropzone').first().attachFile([
+      cy.get('.dropzone').first().selectFile([
         { contents: Buffer.from('foo'), fileName: 'bar.txt' },
         { contents: Buffer.from('foo2'), fileName: 'baz.txt' },
-      ], { action: 'drag-n-drop' })
+      ], { action: 'drag-drop' })
 
       cy.get('.dz-preview')
       .should('contain', 'bar.txt')

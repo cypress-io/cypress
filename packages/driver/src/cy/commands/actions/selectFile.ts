@@ -68,13 +68,13 @@ const createDataTransfer = (files: Cypress.FileReferenceObject[]): DataTransfer 
   return dataTransfer
 }
 
-interface InternalAttachFileOptions extends Cypress.AttachFileOptions {
+interface InternalSelectFileOptions extends Cypress.SelectFileOptions {
   _log: any
   $el: JQuery
 }
 
 const ACTIONS = {
-  input: (element, dataTransfer, coords, state) => {
+  select: (element, dataTransfer, coords, state) => {
     (element as HTMLInputElement).files = dataTransfer.files
     const inputEventOptions = addEventCoords({
       bubbles: true,
@@ -88,7 +88,7 @@ const ACTIONS = {
     dispatch(element, state('window'), 'input', inputEventOptions)
     dispatch(element, state('window'), 'change', changeEventOptions)
   },
-  'drag-n-drop': (element, dataTransfer, coords, state) => {
+  'drag-drop': (element, dataTransfer, coords, state) => {
     const dragEventOptions = addEventCoords({
       bubbles: true,
       composed: true,
@@ -106,21 +106,21 @@ const ACTIONS = {
     // If a user drops multiple files over an input without the "multiple" attribute,
     // the browser does nothing, and we want to mimic this behavior.
     if ($dom.isInputType(element, 'file') && (dataTransfer.files.length === 1 || element.multiple)) {
-      ACTIONS['input'](element, dataTransfer, coords, state)
+      ACTIONS['select'](element, dataTransfer, coords, state)
     }
   },
 }
 
 export default (Commands, Cypress, cy, state, config) => {
   const handleAlias = (file, options) => {
-    const aliasObj = cy.getAlias(file.contents, 'attachFile', options._log)
+    const aliasObj = cy.getAlias(file.contents, 'selectFile', options._log)
 
     if (!aliasObj) {
       return
     }
 
     if (aliasObj.subject == null) {
-      $errUtils.throwErrByPath('attachFile.invalid_alias', {
+      $errUtils.throwErrByPath('selectFile.invalid_alias', {
         onFail: options._log,
         args: { alias: file.contents, subject: aliasObj.subject },
       })
@@ -129,7 +129,7 @@ export default (Commands, Cypress, cy, state, config) => {
     if ($dom.isElement(aliasObj.subject)) {
       const subject = $dom.stringify(aliasObj.subject)
 
-      $errUtils.throwErrByPath('attachFile.invalid_alias', {
+      $errUtils.throwErrByPath('selectFile.invalid_alias', {
         onFail: options._log,
         args: { alias: file.contents, subject },
       })
@@ -142,7 +142,7 @@ export default (Commands, Cypress, cy, state, config) => {
   }
 
   // Uses backend read:file rather than cy.readFile because we don't want to retry
-  // loading a specific file until timeout, but rather retry the attachFile command as a whole
+  // loading a specific file until timeout, but rather retry the selectFile command as a whole
   const handlePath = async (file, options) => {
     return Cypress.backend('read:file', file.contents, { encoding: null })
     .then(({ contents }) => {
@@ -156,13 +156,13 @@ export default (Commands, Cypress, cy, state, config) => {
     .catch((err) => {
       if (err.code === 'ENOENT') {
         $errUtils.throwErrByPath('files.nonexistent', {
-          args: { cmd: 'attachFile', file: file.contents, filePath: err.filePath },
+          args: { cmd: 'selectFile', file: file.contents, filePath: err.filePath },
         })
       }
 
       $errUtils.throwErrByPath('files.unexpected_error', {
         onFail: options._log,
-        args: { cmd: 'attachFile', action: 'read', file, filePath: err.filePath, error: err.message },
+        args: { cmd: 'selectFile', action: 'read', file, filePath: err.filePath, error: err.message },
       })
     })
   }
@@ -187,12 +187,12 @@ export default (Commands, Cypress, cy, state, config) => {
       if (!file || file.contents == null) {
         // Different error messages if the user passed in one file vs. an array of files
         if (filesArray.length > 1) {
-          $errUtils.throwErrByPath('attachFile.invalid_array_file_reference', {
+          $errUtils.throwErrByPath('selectFile.invalid_array_file_reference', {
             onFail: options._log,
             args: { file: JSON.stringify(file), index },
           })
         } else {
-          $errUtils.throwErrByPath('attachFile.invalid_single_file_reference', {
+          $errUtils.throwErrByPath('selectFile.invalid_single_file_reference', {
             onFail: options._log,
             args: { file: JSON.stringify(file) },
           })
@@ -212,9 +212,9 @@ export default (Commands, Cypress, cy, state, config) => {
   }
 
   Commands.addAll({ prevSubject: 'element' }, {
-    async attachFile (subject: JQuery<any>, files: Cypress.FileReference | Cypress.FileReference[], options: Partial<InternalAttachFileOptions>): Promise<JQuery> {
+    async selectFile (subject: JQuery<any>, files: Cypress.FileReference | Cypress.FileReference[], options: Partial<InternalSelectFileOptions>): Promise<JQuery> {
       options = _.defaults({}, options, {
-        action: 'input',
+        action: 'select',
         log: true,
         $el: subject,
       })
@@ -235,14 +235,14 @@ export default (Commands, Cypress, cy, state, config) => {
       }
 
       if (!options.action || !ACTIONS[options.action]) {
-        $errUtils.throwErrByPath('attachFile.invalid_action', {
+        $errUtils.throwErrByPath('selectFile.invalid_action', {
           onFail: options._log,
           args: { action: options.action },
         })
       }
 
       if (subject.length > 1) {
-        $errUtils.throwErrByPath('attachFile.multiple_elements', {
+        $errUtils.throwErrByPath('selectFile.multiple_elements', {
           onFail: options._log,
           args: { num: subject.length },
         })
@@ -250,9 +250,9 @@ export default (Commands, Cypress, cy, state, config) => {
 
       let eventTarget = subject
 
-      // drag-n-drop always targets the subject directly, but input
+      // drag-drop always targets the subject directly, but select
       // may switch <label> -> <input> element
-      if (options.action === 'input') {
+      if (options.action === 'select') {
         if (eventTarget.is('label')) {
           eventTarget = $dom.getInputFromLabel(eventTarget)
         }
@@ -260,7 +260,7 @@ export default (Commands, Cypress, cy, state, config) => {
         if (eventTarget.length < 1 || !$dom.isInputType(eventTarget, 'file')) {
           const node = $dom.stringify(options.$el)
 
-          $errUtils.throwErrByPath('attachFile.not_file_input', {
+          $errUtils.throwErrByPath('selectFile.not_file_input', {
             onFail: options._log,
             args: { node },
           })
