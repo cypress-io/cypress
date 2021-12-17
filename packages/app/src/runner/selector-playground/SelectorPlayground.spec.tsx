@@ -20,15 +20,14 @@ describe('SelectorPlayground', () => {
     }
   }
 
-  it('playground', () => {
-    cy.mount(() => (
-      <div class="bg-gray-100 h-100">
-        <SelectorPlayground
-          eventManager={createEventManager()}
-          getAutIframe={() => createTestAutIframe()}
-        />
-      </div>
-    ))
+  it('populates cy.get by default with a selector of body', () => {
+    const { autIframe } = mountSelectorPlayground()
+
+    cy.spy(autIframe, 'toggleSelectorHighlight')
+    cy.get('[data-cy="playground-method"]').as('method')
+    cy.get('[data-cy="playground-selector"]').as('selector')
+    cy.get('@method').should('contain', 'cy.get')
+    cy.get('@selector').should('have.value', 'body')
 
     cy.percySnapshot()
   })
@@ -47,16 +46,6 @@ describe('SelectorPlayground', () => {
       expect(autIframe.toggleSelectorPlayground).to.have.been.called
       cy.percySnapshot('toggle-enabled')
     })
-  })
-
-  it('populates cy.get by default with a selector of body', () => {
-    const { autIframe } = mountSelectorPlayground()
-
-    cy.spy(autIframe, 'toggleSelectorHighlight')
-    cy.get('[data-cy="playground-method"]').as('method')
-    cy.get('[data-cy="playground-selector"]').as('selector')
-    cy.get('@method').should('contain', 'cy.get')
-    cy.get('@selector').should('have.value', 'body')
   })
 
   it('changes method from cy.get to cy.contains', () => {
@@ -83,19 +72,11 @@ describe('SelectorPlayground', () => {
 
     mountSelectorPlayground()
     cy.get('[data-cy="playground-num-elements"]').contains('10')
+
+    cy.percySnapshot()
   })
 
   it('focuses and copies selector text', () => {
-    const { autIframe } = mountSelectorPlayground()
-
-    cy.spy(autIframe, 'toggleSelectorHighlight')
-
-    cy.get('[data-cy="playground-selector"]').as('copy').clear().type('.foo-bar')
-    cy.get('@copy').click()
-    cy.get('@copy').should('be.focused')
-  })
-
-  it('copies selector text', () => {
     const { autIframe } = mountSelectorPlayground()
 
     cy.spy(autIframe, 'toggleSelectorHighlight')
