@@ -143,7 +143,7 @@ const checkOrUncheck = (Cypress, cy, type, subject, values = [], userOptions = {
         if (options._log) {
           options._log.snapshot().end()
         }
-        
+
         if ($el.prop('intermediate')) {
           $el.removeProp('intermediate')
         }
