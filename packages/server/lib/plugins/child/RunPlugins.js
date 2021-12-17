@@ -75,7 +75,7 @@ class RunPlugins {
         const existingEventId = this.registeredEventsByName[event]
 
         if (existingEventId) {
-          handler = this.taskMerge(this.registeredEventsById[existingEventId].handler, handler)
+          handler = this.taskMerge(handler)
           this.registeredEventsById[existingEventId] = { event, handler }
           debug('extend task events with id', existingEventId)
 
