@@ -197,10 +197,10 @@ export class ProjectLifecycleManager {
   }
 
   get errorLoadingNodeEvents (): BaseErrorDataShape | null {
-    if (this._configResult.state === 'errored') {
+    if (this._eventsIpcResult.state === 'errored') {
       return {
         title: 'Error Loading Config',
-        message: String(this._configResult.value), // TODO: fix
+        message: String(this._eventsIpcResult.value), // TODO: fix
       }
     }
 
@@ -252,7 +252,7 @@ export class ProjectLifecycleManager {
       return
     }
 
-    this.loadGlobalBrowsers().catch(this.onError)
+    this.loadGlobalBrowsers().catch(this.onLoadError)
     this.verifyProjectRoot(projectRoot)
     this._projectRoot = projectRoot
     this.resetInternalState()
@@ -264,10 +264,10 @@ export class ProjectLifecycleManager {
     this.configFileWarningCheck()
 
     if (this._projectMetaState.hasValidConfigFile) {
-      this.initializeConfig().catch(this.onError)
+      this.initializeConfig().catch(this.onLoadError)
     }
 
-    this.loadCypressEnvFile().catch(this.onError)
+    this.loadCypressEnvFile().catch(this.onLoadError)
 
     this.initializeConfigWatchers()
   }
@@ -295,9 +295,9 @@ export class ProjectLifecycleManager {
     // config IPC & re-execute the setupTestingType
     if (this._registeredEventsTarget && testingType !== this._registeredEventsTarget) {
       this._configResult = { state: 'pending' }
-      this.initializeConfig()
+      this.initializeConfig().catch(this.onLoadError)
     } else if (this._eventsIpc && !this._registeredEventsTarget && this._configResult.state === 'loaded') {
-      this.setupNodeEvents()
+      this.setupNodeEvents().catch(this.onLoadError)
     }
   }
 
@@ -529,13 +529,15 @@ export class ProjectLifecycleManager {
     const configFileWatcher = this.addWatcher(this.configFilePath)
 
     configFileWatcher.on('all', () => {
-      this.reloadConfig().catch(this.onError)
+      this.ctx.coreData.baseError = null
+      this.reloadConfig().catch(this.onLoadError)
     })
 
     const cypressEnvFileWatcher = this.addWatcher(this.envFilePath)
 
     cypressEnvFileWatcher.on('all', () => {
-      this.reloadCypressEnvFile()
+      this.ctx.coreData.baseError = null
+      this.reloadCypressEnvFile().catch(this.onLoadError)
     })
   }
 
@@ -544,8 +546,8 @@ export class ProjectLifecycleManager {
    * This sources a fresh IPC channel & reads the config. If we detect a change
    * to the config or the list of imported files, we will re-execute the setupNodeEvents
    */
-  async reloadConfig (force = false) {
-    if (this._configResult.state === 'errored') {
+  reloadConfig () {
+    if (this._configResult.state === 'errored' || this._configResult.state === 'loaded') {
       this._configResult = { state: 'pending' }
 
       return this.initializeConfig()
@@ -555,36 +557,7 @@ export class ProjectLifecycleManager {
       return this.initializeConfig()
     }
 
-    assert.strictEqual(this._configResult.state, 'loaded')
-
-    const { ipc, child, promise } = this._loadConfig()
-
-    const currentResult = this._configResult
-
-    try {
-      const result = await promise
-
-      // If we've swapped out _configResult during the async/await, we don't want to mutate it
-      if (currentResult !== this._configResult) {
-        return {}
-      }
-
-      if (force || !_.isEqual(result, this._configResult.value)) {
-        this.validateConfigFile(this.configFilePath, result.initialConfig)
-        this._configResult.value = result
-        this.onConfigLoaded(child, ipc, result)
-      }
-
-      return result.initialConfig
-    } catch (e: any) {
-      // this._cleanupIpc(ipc)
-      // If we have a known good state from eariler, then we
-      // don't want this error to blow it away. Instead trigger
-      // an error.
-      this.ctx.onError(e, 'config')
-
-      return {}
-    }
+    throw new Error(`Unreachable state`)
   }
 
   private _loadConfig () {
@@ -614,21 +587,21 @@ export class ProjectLifecycleManager {
 
     assert.strictEqual(this._envFileResult.state, 'pending')
 
-    const promise = this.readCypressEnvFile()
-
-    this._envFileResult = { state: 'loading', value: promise }
-
-    promise.then((value) => {
-      this._envFileResult = { state: 'loaded', value }
+    const promise = this.readCypressEnvFile().then((value) => {
       this.validateConfigFile(this.envFilePath, value)
+      this._envFileResult = { state: 'loaded', value }
+
+      return value
     })
     .catch((e) => {
       this._envFileResult = { state: 'errored', value: e }
-      this._pendingInitialize?.reject(e)
+      throw e
     })
     .finally(() => {
       this.ctx.emitter.toLaunchpad()
     })
+
+    this._envFileResult = { state: 'loading', value: promise }
 
     return promise
   }
@@ -707,7 +680,7 @@ export class ProjectLifecycleManager {
       return
     }
 
-    this.setupNodeEvents().catch(this.onError)
+    this.setupNodeEvents().catch(this.onLoadError)
   }
 
   private async setupNodeEvents (): Promise<SetupNodeEventsReply> {
@@ -771,12 +744,13 @@ export class ProjectLifecycleManager {
 
     w.on('all', (evt) => {
       debug(`changed ${file}: ${evt}`)
+      // TODO: in the future, we will make this more specific to the individual process we need to load
       if (groupName === 'config') {
-        this.reloadConfig()
+        this.reloadConfig().catch(this.onLoadError)
       } else {
         // If we've edited the setupNodeEvents file, we need to re-execute
         // the config file to get a fresh ipc process to swap with
-        this.reloadConfig(true)
+        this.reloadConfig().catch(this.onLoadError)
       }
     })
 
@@ -920,9 +894,11 @@ export class ProjectLifecycleManager {
       child.stderr.on('data', (data) => process.stderr.write(data))
     }
 
-    child.on('error', (err) => {
+    function onError (err: Error) {
       dfd.reject(err)
-    })
+    }
+
+    child.on('error', onError)
 
     ipc.once('loadConfig:reply', (val) => {
       debug('loadConfig:reply')
@@ -1142,6 +1118,11 @@ export class ProjectLifecycleManager {
     return dfd
   }
 
+  destroy () {
+    // @ts-ignore
+    process.removeListener('exit', this.onProcessExit)
+  }
+
   isTestingTypeConfigured (testingType: TestingType) {
     const config = this.loadedFullConfig ?? this.loadedConfigFile
 
@@ -1195,7 +1176,12 @@ export class ProjectLifecycleManager {
     }
   }
 
-  private onError = (err: any) => {
+  /**
+   * When we have an error while "loading" a resource,
+   * we handle it internally with the promise state, and therefore
+   * do not
+   */
+  private onLoadError = (err: any) => {
     this._pendingInitialize?.reject(err)
   }
 }

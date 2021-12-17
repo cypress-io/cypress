@@ -131,6 +131,7 @@ export class SocketE2E extends SocketBase {
               this.removeOnStudioTestFileChange()
             }
           })
+          .catch(() => {})
         })
 
         socket.on('studio:get:commands:text', (commands, cb) => {

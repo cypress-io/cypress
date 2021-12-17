@@ -102,7 +102,7 @@ gulp.task('buildProd',
   gulp.series(
     viteClean,
 
-    syncRemoteGraphQL,
+    // syncRemoteGraphQL,
     nexusCodegen,
     graphqlCodegen,
     generateShikiTheme,

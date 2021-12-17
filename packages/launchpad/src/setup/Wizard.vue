@@ -37,7 +37,6 @@ fragment Wizard on Query {
     title
     description
     step
-    testingType
     ...EnvironmentSetup
     ...ConfigFiles
     ...WarningList

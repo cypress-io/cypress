@@ -37,7 +37,7 @@ export async function makeGraphQLServer () {
     ctx.html.fetchLaunchpadInitialData().then((data) => {
       res.json(data)
     }).catch((e) => {
-      ctx.logError(e)
+      ctx.logTraceError(e)
       res.json({})
     })
   })

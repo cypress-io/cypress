@@ -53,7 +53,7 @@ export async function delegateToRemoteQueryBatched<T extends KnownBatchFields> (
     })
   } catch (e) {
     if (IS_PROD) {
-      config.context.logError(e)
+      config.context.logTraceError(e)
 
       return null
     }

@@ -85,7 +85,7 @@ export class DataContext {
     const { modeOptions, ...rest } = _config
 
     this._config = rest
-    this._modeOptions = modeOptions
+    this._modeOptions = modeOptions ?? {} // {} For legacy tests
     this._coreData = _config.coreData ?? makeCoreData(this._modeOptions)
     this.lifecycleManager = new ProjectLifecycleManager(this)
   }
@@ -131,7 +131,16 @@ export class DataContext {
   }
 
   get baseError () {
-    return this.coreData.baseError
+    if (!this.coreData.baseError) {
+      return null
+    }
+
+    // TODO: Standardize approach to serializing errors
+    return {
+      title: this.coreData.baseError.title,
+      message: this.coreData.baseError.message,
+      stack: this.coreData.baseError.stack,
+    }
   }
 
   @cached
@@ -319,7 +328,7 @@ export class DataContext {
     _debug(evt, ...args)
   }
 
-  logError (e: unknown) {
+  logTraceError (e: unknown) {
     // TODO(tim): handle this consistently
     // eslint-disable-next-line no-console
     console.error(e)
@@ -397,6 +406,7 @@ export class DataContext {
     // this._patches.push([{ op: 'add', path: [], value: this._coreData }])
 
     return Promise.all([
+      this.lifecycleManager.destroy(),
       this.cloud.reset(),
       this.util.disposeLoaders(),
       this.actions.project.clearCurrentProject(),
@@ -440,6 +450,8 @@ export class DataContext {
     if (this.modeOptions.testingType) {
       this.lifecycleManager.initializeConfig().then(() => {
         this.actions.wizard.navigate('forward')
+      }).catch((err) => {
+        this.coreData.baseError = err
       })
     }
 

@@ -903,11 +903,6 @@ type Wizard {
   sampleTemplate: String
   step: WizardStep!
 
-  """
-  The testing type we are setting in the wizard, null if this has not been chosen
-  """
-  testingType: TestingTypeEnum
-
   """The title of the page, given the current step of the wizard"""
   title: String
 

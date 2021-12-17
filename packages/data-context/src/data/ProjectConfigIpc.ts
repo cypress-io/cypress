@@ -37,7 +37,7 @@ export class ProjectConfigIpc extends EventEmitter {
   constructor (readonly childProcess: ChildProcess) {
     super()
     childProcess.on('error', (err) => {
-      this.emit('error', err)
+      // this.emit('error', err)
     })
 
     childProcess.on('message', (msg: { event: string, args: any[] }) => {
