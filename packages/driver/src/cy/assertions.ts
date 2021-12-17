@@ -143,9 +143,19 @@ export const create = (Cypress, cy) => {
       obj.$el = $dom.wrap(value)
     }
 
-    // if we are simply verifying the upcoming
-    // assertions then do not immediately end or snapshot
-    // else do
+    // `verifying` represents whether we're deciding whether or not to resolve
+    // a command (true) or of we're actually performing a user-facing assertion
+    // (false).
+
+    // If we're verifying upcoming assertions (implicit or explicit),
+    // then we don't need to take a DOM snapshot - one will be taken later when
+    // retries time out or the command otherwise entirely fails or passes.
+    // We save the error on _error because we may use it to construct the
+    // timeout error which we eventually do display to the user.
+
+    // If we're actually performing an assertion which will be displayed to the
+    // user though, then we want to take a DOM snapshot and display this error
+    // (if any) in the log message on screen.
     if (verifying) {
       obj._error = error
     } else {
@@ -326,6 +336,20 @@ export const create = (Cypress, cy) => {
       // bail if we have no assertions and apply
       // the default assertions if applicable
       if (!cmds.length) {
+        // In general in cypress, when assertions fail we want to take a DOM
+        // snapshot to display to the user. In this case though, when we invoke
+        // ensureExistence, we're not going to display the error (if there is
+        // one) to the user - we're only deciding whether to resolve this current
+        // command (assertions pass) or fail (and probably retry). A DOM snapshot
+        // isn't necessary in either case - one will be taken later as part of the
+        // command (if they pass) or when we time out retrying.
+
+        // Chai assertions have a signature of (passed, message, value, actual,
+        // expected, error). Our assertFn, defined earlier in the file, adds
+        // on a 7th arg, "verifying", which defaults to false. We here override
+        // the assert function with our own, which just invokes the old one
+        // with verifying = true. This override is cleaned up immediately
+        // afterwards, in either onPassFn or onFailFn.
         cy.state('overrideAssert', function (...args) {
           return assertFn.apply(this, args.concat(true))
         })
@@ -483,8 +507,6 @@ export const create = (Cypress, cy) => {
         return cy.state('overrideAssert', undefined)
       }
 
-      // store this in case our test ends early
-      // and we reset between tests
       cy.state('overrideAssert', overrideAssert)
 
       return Promise
