@@ -1319,6 +1319,61 @@ describe('network stubbing', function () {
         cy.contains('#result', '""').should('be.visible')
       })
 
+      // @see https://github.com/cypress-io/cypress/issues/19330
+      // @see https://github.com/cypress-io/cypress/issues/19344
+      it('load fixture as Buffer when encoding is null', function () {
+        // call through normally on everything
+        cy.spy(Cypress, 'backend')
+
+        cy.intercept('/fixtures/media/small.mp4', {
+          fixture: 'media/small.mp4,null',
+        }).as('video')
+
+        cy.visit('/fixtures/video.html')
+        .then(() => {
+          // @ts-ignore .getCall is a Sinon spy command
+          expect(Cypress.backend.getCall(0)).to.be.calledWithMatch(
+            'net',
+            'route:added',
+            {
+              staticResponse: {
+                fixture: {
+                  filePath: 'media/small.mp4',
+                  encoding: null,
+                },
+              },
+            },
+          )
+        })
+      })
+
+      it('load fixture with specified encoding', function () {
+        // call through normally on everything
+        cy.spy(Cypress, 'backend')
+
+        cy.intercept('non-existing-image.png', {
+          headers: { 'content-type': 'image/jpeg' },
+          fixture: 'media/cypress.png,base64',
+        }).as('video')
+
+        cy.visit('/fixtures/img-embed.html')
+        .then(() => {
+          // @ts-ignore .getCall is a Sinon spy command
+          expect(Cypress.backend.getCall(0)).to.be.calledWithMatch(
+            'net',
+            'route:added',
+            {
+              staticResponse: {
+                fixture: {
+                  filePath: 'media/cypress.png',
+                  encoding: 'base64',
+                },
+              },
+            },
+          )
+        })
+      })
+
       // @see https://github.com/cypress-io/cypress/issues/8623
       it('works with images', function () {
         cy.visit('/fixtures/img-embed.html')
