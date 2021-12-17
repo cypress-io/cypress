@@ -34,6 +34,7 @@ import { $Command } from './command'
 import { CommandQueue } from './command_queue'
 import { initVideoRecorder } from '../cy/video-recorder'
 import { TestConfigOverride } from '../cy/testConfigOverrides'
+import { historyNavigationTriggeredHashChange } from '../cy/navigation'
 
 const debugErrors = debugFn('cypress:driver:errors')
 
@@ -480,8 +481,19 @@ export class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuer
     // proxy has not injected Cypress.action('window:before:load')
     // so Cypress.onBeforeAppWindowLoad() was never called
     return $autIframe.on('load', () => {
-      // if setting these props failed
-      // then we know we're in a cross origin failure
+      if (historyNavigationTriggeredHashChange(this.state)) {
+        // Skip load event.
+        // Chromium 97+ triggers fires iframe onload for cross-origin-initiated same-document
+        // navigations to make it appear to be a cross-document navigation, even when it wasn't
+        // to alleviate security risk where a cross-origin initiator can check whether
+        // or not onload fired to guess the url of a target frame.
+        // When the onload is fired, neither the before:unload or unload event is fired to remove
+        // the attached listeners or to clean up the current page state.
+        // https://github.com/cypress-io/cypress/issues/19230
+        return
+      }
+
+      // if setting these props failed then we know we're in a cross origin failure
       try {
         setWindowDocumentProps(getContentWindow($autIframe), this.state)
 
@@ -1079,6 +1091,9 @@ export class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuer
         // return undefined so the browser does its default
         // uncaught exception behavior (logging to console)
         return undefined
+      },
+      onHistoryNav (delta) {
+        cy.state('navHistoryDelta', delta)
       },
       onSubmit (e) {
         return cy.Cypress.action('app:form:submitted', e)
