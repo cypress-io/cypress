@@ -17,13 +17,11 @@
           'filter grayscale bg-gray-100': browser.disabled,
           'hover:border-indigo-200 hover:ring-2 hover:ring-indigo-50': !browser.disabled && !browser.isSelected
         }"
-        :data-selected-browser="browser.isSelected"
-        :data-browser-id="browser.id"
       >
         <input
           :id="browser.id"
           :key="browser.id"
-          v-model="browser.id"
+          v-model="selectedBrowserId"
           type="radio"
           :value="browser.id"
           :disabled="browser.disabled"
@@ -133,6 +131,9 @@ const setSelected = (browserId: string) => {
 }
 
 const launchText = computed(() => props.gql.currentBrowser ? `${t('setupPage.openBrowser.launch')} ${props.gql.currentBrowser.displayName}` : '')
+
+const selectedBrowserId = computed(() => props.gql.currentBrowser ? props.gql.currentBrowser.id : null)
+
 </script>
 
 <style scoped>

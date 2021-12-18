@@ -4,15 +4,15 @@ describe('Choose a Browser Page', () => {
   // Walks through setup pages to get to browser selection
   const stepThroughConfigPages = () => {
     cy.get('h1').should('contain', 'Configuration Files')
-    cy.contains('Continue').click()
+    cy.contains('button', 'Continue').click()
     cy.get('h1').should('contain', 'Initializing Config...')
-    cy.contains('Next Step').click()
+    cy.contains('button', 'Next Step').click()
   }
 
   // Mocks server's browser detection with known list
   const setupMockBrowsers = function () {
     cy.withCtx(async (ctx, o) => {
-      const mockBrowsers = [{
+      const mockBrowsers: FoundBrowser[] = [{
         channel: 'stable',
         displayName: 'Chrome',
         family: 'chromium',
@@ -44,7 +44,7 @@ describe('Choose a Browser Page', () => {
         path: '/test/edge/path',
         version: '4.5.666.77',
         majorVersion: '4',
-      }] as FoundBrowser[]
+      }]
 
       // @ts-ignore sinon is a global in the node process where this is executed
       sinon.stub(ctx._apis.appApi, 'getBrowsers').resolves(mockBrowsers)
@@ -57,21 +57,6 @@ describe('Choose a Browser Page', () => {
       // @ts-ignore sinon is a global in the node process where this is executed
       sinon.stub(ctx._apis.appApi, 'getBrowsers').resolves([])
     })
-  }
-
-  // Creates and returns aliases for browsers found on the DOM
-  const getBrowserAliases = function () {
-    cy.get('[data-cy="open-browser-list"] [data-selected-browser]').eq(0).as('chromeRadioOption')
-    cy.get('[data-cy="open-browser-list"] [data-selected-browser]').eq(1).as('firefoxRadioOption')
-    cy.get('[data-cy="open-browser-list"] [data-selected-browser]').eq(2).as('electronRadioOption')
-    cy.get('[data-cy="open-browser-list"] [data-selected-browser]').eq(3).as('edgeRadioOption')
-
-    return {
-      chrome: '@chromeRadioOption',
-      firefox: '@firefoxRadioOption',
-      electron: '@electronRadioOption',
-      edge: '@edgeRadioOption',
-    }
   }
 
   beforeEach(() => {
@@ -91,8 +76,7 @@ describe('Choose a Browser Page', () => {
 
       cy.get('h1').should('contain', 'Choose a Browser')
 
-      cy.get('[data-cy="open-browser-list"] [data-selected-browser="true"]')
-      .should('contain', 'Edge')
+      cy.findByRole('radio', { name: 'Edge v4.x', checked: true })
     })
 
     it('shows warning when launched with --browser name that cannot be matched to found browsers', () => {
@@ -147,31 +131,13 @@ describe('Choose a Browser Page', () => {
 
       cy.get('h1').should('contain', 'Choose a Browser')
 
-      const { chrome, firefox, electron, edge } = getBrowserAliases()
+      cy.findByRole('radio', { name: 'Chrome v1.x' })
 
-      cy.get(chrome)
-      .should('contain', 'Chrome')
-      .and('contain', 'v1.x')
-      .find('img')
-      .should('have.attr', 'alt', 'Chrome')
+      cy.findByRole('radio', { name: 'Firefox v2.x' })
 
-      cy.get(firefox)
-      .should('contain', 'Firefox')
-      .and('contain', 'v2.x')
-      .find('img')
-      .should('have.attr', 'alt', 'Firefox')
+      cy.findByRole('radio', { name: 'Electron v3.x' })
 
-      cy.get(electron)
-      .should('contain', 'Electron')
-      .and('contain', 'v3.x')
-      .find('img')
-      .should('have.attr', 'alt', 'Electron')
-
-      cy.get(edge)
-      .should('contain', 'Edge')
-      .and('contain', 'v4.x')
-      .find('img')
-      .should('have.attr', 'alt', 'Edge')
+      cy.findByRole('radio', { name: 'Edge v4.x' })
     })
 
     it('performs mutation to launch selected browser when launch button is pressed', () => {
@@ -183,7 +149,7 @@ describe('Choose a Browser Page', () => {
 
       cy.get('h1').should('contain', 'Choose a Browser')
 
-      cy.contains('Launch Chrome').as('launchButton')
+      cy.contains('button', 'Launch Chrome').as('launchButton')
 
       // Stub out response to prevent browser launch but not break internals
       cy.intercept('mutation-OpenBrowser_LaunchProject', {
@@ -218,26 +184,23 @@ describe('Choose a Browser Page', () => {
 
       cy.get('h1').should('contain', 'Choose a Browser')
 
-      const { chrome, firefox } = getBrowserAliases()
+      cy.findByRole('radio', { name: 'Chrome v1.x', checked: true }).as('chromeItem')
+      cy.findByRole('radio', { name: 'Firefox v2.x', checked: false }).as('firefoxItem')
 
-      cy.get(chrome).should('have.attr', 'data-selected-browser', 'true')
-      cy.get(firefox).should('have.attr', 'data-selected-browser', 'false')
-
-      cy.contains('Launch Chrome').should('be.visible')
+      cy.contains('button', 'Launch Chrome').should('be.visible')
 
       cy.intercept('mutation-OpenBrowserList_SetBrowser').as('setBrowser')
 
-      cy.get(firefox).click().then(($element) => {
-        cy.wait('@setBrowser').its('request.body.variables.id').should('eq', $element.attr('data-browser-id'))
+      cy.get('@firefoxItem').then(($input) => {
+        cy.get(`label[for=${$input.attr('id')}]`).click().then(() => {
+          cy.wait('@setBrowser').its('request.body.variables.id').should('eq', $input.attr('id'))
+        })
       })
 
-      cy.get(chrome)
-      .should('have.attr', 'data-selected-browser', 'false')
+      cy.findByRole('radio', { name: 'Chrome v1.x', checked: false })
+      cy.findByRole('radio', { name: 'Firefox v2.x', checked: true })
 
-      cy.get(firefox)
-      .should('have.attr', 'data-selected-browser', 'true')
-
-      cy.contains('Launch Firefox').should('be.visible')
+      cy.contains('button', 'Launch Firefox').should('be.visible')
     })
   })
 
@@ -256,7 +219,7 @@ describe('Choose a Browser Page', () => {
       cy.get('h1').should('contain', 'Choose a Browser')
 
       cy.get('[data-cy="open-browser-list"]').children().should('have.length', 0)
-      cy.get('button').contains('Back').should('be.visible').and('not.be.disabled')
+      cy.contains('button', 'Back').should('be.visible').and('not.be.disabled')
     })
   })
 })
