@@ -215,8 +215,8 @@ export function mergeDefaults (config: Record<string, any> = {}, options: Record
 
   config = setNodeBinary(config, options.userNodePath, options.userNodeVersion)
 
-  configUtils.validateNoBreakingConfig(config, errors.warning, (err) => {
-    throw err
+  configUtils.validateNoBreakingConfig(config, errors.warning, (err, ...args) => {
+    throw errors.get(err, ...args)
   })
 
   return setSupportFileAndFolder(config, defaultsForRuntime)
