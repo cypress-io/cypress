@@ -83,7 +83,7 @@ import { computed, ref, watch } from 'vue'
 import CreateSpecModal from './CreateSpecModal.vue'
 import type { Specs_SpecsListFragment, SpecListRowFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
-import { buildSpecTree, FuzzyFoundSpec, getIndexes } from '@packages/frontend-shared/src/utils/spec-utils'
+import { buildSpecTree, FuzzyFoundSpec, getIndexes, useCachedSpecs } from '@packages/frontend-shared/src/utils/spec-utils'
 import { useCollapsibleTree } from '@packages/frontend-shared/src/composables/useCollapsibleTree'
 import RowDirectory from './RowDirectory.vue'
 import SpecItem from './SpecItem.vue'
@@ -133,12 +133,13 @@ const props = defineProps<{
 
 const showModal = ref(false)
 const search = ref('')
+const cachedSpecs = useCachedSpecs(computed(() => props.gql.currentProject?.specs?.edges || []))
 
 const specs = computed(() => {
-  const specs = props.gql.currentProject?.specs?.edges.map((x) => x.node) || []
+  const specs = cachedSpecs.value.map((x) => ({ ...x.node, indexes: [] })) || []
 
   if (!search.value) {
-    return specs.map((spec) => ({ ...spec, indexes: [] as number[] }))
+    return specs
   }
 
   return fuzzySort
