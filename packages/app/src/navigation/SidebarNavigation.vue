@@ -86,6 +86,7 @@
       >
         <i-cy-command-key_x16
           class="h-16px w-16px icon-dark-gray-500"
+          data-cy="keyboard-shortcuts"
         />
         <template #popper>
           {{ t('sideBar.keyboardShortcuts.title') }}

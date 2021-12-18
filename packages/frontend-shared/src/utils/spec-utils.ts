@@ -1,5 +1,6 @@
 import fuzzySort from 'fuzzysort'
 import type { FoundSpec } from '@packages/types'
+import { ref, watch } from 'vue'
 import type { UseCollapsibleTreeNode } from '../composables/useCollapsibleTree'
 
 export type FuzzyFoundSpec = FoundSpec & {
@@ -113,4 +114,24 @@ export function makeFuzzyFoundSpec (spec: FoundSpec): FuzzyFoundSpec {
     fileIndexes: [],
     dirIndexes: [],
   }
+}
+
+type SpecEdges = { node: FoundSpec }[]
+
+export function useCachedSpecs (specs) {
+  const cachedSpecs = ref<SpecEdges>([])
+
+  watch(specs, (currentSpecs: SpecEdges, prevSpecs: SpecEdges = []) => {
+    const specsAreDifferent =
+        currentSpecs.length !== prevSpecs.length ||
+        currentSpecs.some(
+          (spec, idx) => spec.node.absolute !== prevSpecs[idx]?.node?.absolute,
+        )
+
+    if (specsAreDifferent) {
+      cachedSpecs.value = currentSpecs
+    }
+  }, { immediate: true })
+
+  return cachedSpecs
 }

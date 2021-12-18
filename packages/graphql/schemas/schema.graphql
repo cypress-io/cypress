@@ -302,6 +302,15 @@ enum CodeGenGenResultType {
   text
 }
 
+"""Glob patterns for detecting files for code gen."""
+type CodeGenGlobs implements Node {
+  component: String!
+
+  """Relay style Node ID field for the CodeGenGlobs field"""
+  id: ID!
+  story: String!
+}
+
 """Represents a spec on the file system"""
 type CodeGenResult implements Node {
   """Content of generated file."""
@@ -351,13 +360,11 @@ type CurrentProject implements Node & ProjectLike {
   browsers: [Browser!]
 
   """The remote associated project from Cypress Cloud"""
-  cloudProject: CloudProject
+  cloudProject: CloudProjectResult
 
   """List of all code generation candidates stories"""
   codeGenCandidates(glob: String!): [FileParts]
-
-  """Glob pattern for component searching"""
-  codeGenGlob(type: CodeGenType!): String!
+  codeGenGlobs: CodeGenGlobs!
 
   """Project configuration"""
   config: JSON!
@@ -549,6 +556,8 @@ type LocalSettingsPreferences {
   preferredEditorBinary: String
   proxyBypass: String
   proxyServer: String
+  reporterWidth: Int
+  specListWidth: Int
 }
 
 type Mutation {
