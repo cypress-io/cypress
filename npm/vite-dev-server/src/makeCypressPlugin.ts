@@ -1,4 +1,4 @@
-import { resolve, sep } from 'path'
+import { resolve } from 'path'
 import { readFile } from 'fs/promises'
 import Debug from 'debug'
 import { ModuleNode, Plugin, ViteDevServer, normalizePath } from 'vite'
@@ -6,7 +6,6 @@ import { ModuleNode, Plugin, ViteDevServer, normalizePath } from 'vite'
 const debug = Debug('cypress:vite-dev-server:plugin')
 
 const pluginName = 'cypress-transform-html'
-const OSSepRE = new RegExp(`\\${sep}`, 'g')
 
 const INIT_FILEPATH = resolve(__dirname, '../client/initCypressTests.js')
 
@@ -49,24 +48,22 @@ export const makeCypressPlugin = (
     configResolved (config) {
       base = config.base
     },
-    async transformIndexHtml () {
-      debug('transformIndexHtml with base', base)
-      const indexHtmlPath = indexHtml ? resolve(projectRoot, indexHtml) : resolve(__dirname, '..', 'index.html')
-      const indexHtmlContent = await readFile(indexHtmlPath, { encoding: 'utf8' })
+    async transform (code: string, id: string): Promise<string> {
+      if (id === resolve(projectRoot, 'index.html')) {
+        debug('transformIndexHtml with base', base)
+        const indexHtmlPath = indexHtml ? resolve(projectRoot, indexHtml) : resolve(__dirname, '..', 'index.html')
+        const indexHtmlContent = await readFile(indexHtmlPath, { encoding: 'utf8' })
+        // find </body> last index
+        const endOfBody = indexHtmlContent.lastIndexOf('</body>')
 
-      return {
-        html: indexHtmlContent,
-        // load the script at the end of the body
-        // script has to be loaded when the vite client is connected
-        tags: [{
-          tag: 'script',
-          injectTo: 'body',
-          attrs: {
-            type: 'module',
-            src: `${base}cypress:client-init-test`,
-          },
-        }],
+        // insert the script in the end of the body
+        return `${indexHtmlContent.substring(0, endOfBody)
+        }<script src="${normalizedSupportFilePath}" type="module"></script>${
+          indexHtmlContent.substring(endOfBody)
+        }`
       }
+
+      return code
     },
     resolveId (id) {
       if (id === 'cypress:config') {

@@ -77,7 +77,8 @@ export default async ({ viteConfig, options, indexHtml }: StartDevServerOptions)
 
   finalConfig.build = {
     outDir: `${projectRoot}/node_modules/.cypress/vite-dev-server`,
-    sourcemap: 'inline',
+    sourcemap: true,
+    minify: false,
   },
 
   debug(`the resolved server config is ${JSON.stringify(finalConfig, null, 2)}`)
