@@ -1,4 +1,4 @@
-import { resolve, posix, sep } from 'path'
+import { resolve, sep } from 'path'
 import { readFile } from 'fs'
 import { promisify } from 'util'
 import Debug from 'debug'
@@ -83,6 +83,18 @@ export const makeCypressPlugin = (
           attrs: { type: 'module' },
           children: `import(${JSON.stringify(`${base}@fs/${INIT_FILEPATH}`)})`,
         }],
+      }
+    },
+    resolveId (id) {
+      if (id === 'virtual:cypress-spec-loaders') {
+        return id
+      }
+    },
+    load (id) {
+      if (id === 'virtual:cypress-spec-loaders') {
+        return `export default {\n${specs.map((s) => {
+          return `${JSON.stringify(s.relative)}:()=>import(${JSON.stringify(s.absolute)})`
+        }).join(',\n')}\n}`
       }
     },
     configureServer: async (server: ViteDevServer) => {

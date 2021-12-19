@@ -1,15 +1,16 @@
 // This file is merged in a <script type=module> into index.html
 // it will be used to load and kick start the selected spec
-
+import specLoaders from 'virtual:cypress-spec-loaders'
 const supportPath = import.meta.env.__cypress_supportPath
 const originAutUrl = import.meta.env.__cypress_originAutUrl
 
 const specPath = window.location.pathname.replace(originAutUrl, '')
 
-const importsToLoad = [() => import(/* @vite-ignore */ specPath)]
+const specLoader = specLoaders[specPath]
+const importsToLoad = [specLoader || (() => import(/* @vite-ignore */ specPath))]
 
 if (supportPath) {
-  importsToLoad.unshift(() => import(/* @vite-ignore */ supportPath))
+  importsToLoad.unshift(() => import(import.meta.env.__cypress_supportPath))
 }
 
 const CypressInstance = window.Cypress = parent.Cypress

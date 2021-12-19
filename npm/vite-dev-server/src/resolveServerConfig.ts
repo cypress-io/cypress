@@ -1,5 +1,5 @@
 import Debug from 'debug'
-import { createServer, ViteDevServer, InlineConfig } from 'vite'
+import type { InlineConfig } from 'vite'
 import { dirname, resolve } from 'path'
 import getPort from 'get-port'
 import { makeCypressPlugin } from './makeCypressPlugin'
@@ -25,8 +25,8 @@ export interface StartDevServerOptions {
   indexHtml?: string
 }
 
-const resolveServerConfig = async ({ viteConfig, options, indexHtml }: StartDevServerOptions): Promise<InlineConfig> => {
-  const { projectRoot, supportFile } = options.config
+export default async ({ viteConfig, options, indexHtml }: StartDevServerOptions): Promise<InlineConfig> => {
+  const { projectRoot, supportFile, isTextTerminal } = options.config
 
   const requiredOptions: InlineConfig = {
     base: '/__cypress/src/',
@@ -75,19 +75,12 @@ const resolveServerConfig = async ({ viteConfig, options, indexHtml }: StartDevS
     }
   }
 
+  finalConfig.build = {
+    outDir: `${projectRoot}/node_modules/.cypress/vite-dev-server`,
+    sourcemap: 'inline',
+  },
+
   debug(`the resolved server config is ${JSON.stringify(finalConfig, null, 2)}`)
 
   return finalConfig
-}
-
-export async function start (devServerOptions: StartDevServerOptions): Promise<ViteDevServer> {
-  if (!devServerOptions.viteConfig) {
-    debug('User did not pass in any Vite dev server configuration')
-    devServerOptions.viteConfig = {}
-  }
-
-  debug('starting vite dev server')
-  const resolvedConfig = await resolveServerConfig(devServerOptions)
-
-  return createServer(resolvedConfig)
 }
