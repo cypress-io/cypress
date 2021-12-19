@@ -86,12 +86,16 @@ export const makeCypressPlugin = (
       }
     },
     resolveId (id) {
-      if (id === 'virtual:cypress-spec-loaders') {
+      if (id === 'cypress:support-path') {
+        return normalizedSupportFilePath
+      }
+
+      if (id === 'cypress:spec-loaders') {
         return id
       }
     },
     load (id) {
-      if (id === 'virtual:cypress-spec-loaders') {
+      if (id === 'cypress:spec-loaders') {
         return `export default {\n${specs.map((s) => {
           return `${JSON.stringify(s.relative)}:()=>import(${JSON.stringify(s.absolute)})`
         }).join(',\n')}\n}`
