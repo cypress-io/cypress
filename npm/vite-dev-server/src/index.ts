@@ -13,19 +13,6 @@ export async function startDevServer (startDevServerArgs: StartDevServerOptions)
 
   debug('starting vite dev server')
   const resolvedConfig = await resolveServerConfig(startDevServerArgs)
-
-  // if (devServerOptions.options.config.isTextTerminal) {
-  //   await build(resolvedConfig)
-
-  //   const port = resolvedConfig.server!.port!
-
-  //   const server = await connect()
-
-  //   return { close () {
-  //     // server.httpServer.close()
-  //   }, port }
-  // }
-
   const viteDevServer = await createServer(resolvedConfig)
   const app = await viteDevServer.listen()
   const port = app.config.server.port!
