@@ -58,12 +58,31 @@ export const makeCypressPlugin = (
 
         // insert the script in the end of the body
         return `${indexHtmlContent.substring(0, endOfBody)
-        }<script src="${normalizedSupportFilePath}" type="module"></script>${
+        }<script src="${base}cypress:client-init-test" type="module"></script>${
           indexHtmlContent.substring(endOfBody)
         }`
       }
 
       return code
+    },
+    async transformIndexHtml () {
+      debug('transformIndexHtml with base', base)
+      const indexHtmlPath = indexHtml ? resolve(projectRoot, indexHtml) : resolve(__dirname, '..', 'index.html')
+      const indexHtmlContent = await readFile(indexHtmlPath, { encoding: 'utf8' })
+
+      return {
+        html: indexHtmlContent,
+        // load the script at the end of the body
+        // script has to be loaded when the vite client is connected
+        tags: [{
+          tag: 'script',
+          injectTo: 'body',
+          attrs: {
+            type: 'module',
+            src: `${base}cypress:client-init-test`,
+          },
+        }],
+      }
     },
     resolveId (id) {
       if (id === 'cypress:config') {
