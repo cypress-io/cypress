@@ -4,7 +4,7 @@ import http, { RequestListener } from 'http'
 import fs from 'fs/promises'
 import path from 'path'
 
-export default function (port: number, root: string, base: string, exceptions: Record<string, RequestListener>) {
+export default function (port: number, root: string, base: string) {
   return http.createServer(async function (request, response) {
     let filePath = request.url?.startsWith(base) ? request.url?.substring(base.length) : request.url || ''
 
@@ -32,12 +32,6 @@ export default function (port: number, root: string, base: string, exceptions: R
     }
 
     let contentType = mimeTypes[extname] || 'application/octet-stream'
-
-    if (exceptions[filePath]) {
-      exceptions[filePath](request, response)
-
-      return
-    }
 
     if (filePath.startsWith('@fs/')) {
       filePath = filePath.substring(3)

@@ -1,4 +1,6 @@
 import { debug as debugFn } from 'debug'
+import { readFile } from 'fs/promises'
+import { resolve } from 'path'
 import { build, createServer, InlineConfig } from 'vite'
 import httpServer from './http-server'
 import { default as resolveServerConfig, StartDevServerOptions } from './resolveServerConfig'
@@ -18,8 +20,10 @@ export async function startDevServer (startDevServerArgs: StartDevServerOptions)
 
   if (startDevServerArgs.options.config.isTextTerminal) {
     await build(resolvedConfig)
+    const root = resolvedConfig.build!.outDir!
+    const specs = startDevServerArgs.options.specs
 
-    const server = await httpServer(port, resolvedConfig.build!.outDir!, resolvedConfig.base!, {})
+    const server = await httpServer(port, root, resolvedConfig.base!, {})
 
     return { port, close: () => {
       server.close()
@@ -27,7 +31,8 @@ export async function startDevServer (startDevServerArgs: StartDevServerOptions)
   }
 
   const viteDevServer = await createServer(resolvedConfig)
-  const app = await viteDevServer.listen()
+
+  await viteDevServer.listen()
 
   debug('Component testing vite server started on port', port)
 
