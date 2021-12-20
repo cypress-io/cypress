@@ -9,7 +9,6 @@ import Promise from 'bluebird'
 import sinon from 'sinon'
 import fakeTimers from '@sinonjs/fake-timers'
 import debugFn from 'debug'
-import { EventEmitter } from 'events'
 
 import browserInfo from './cypress/browser'
 import $scriptUtils from './cypress/script_utils'
@@ -40,6 +39,7 @@ import ProxyLogging from './cypress/proxy-logging'
 import * as $Events from './cypress/events'
 import $Keyboard from './cy/keyboard'
 import * as resolvers from './cypress/resolvers'
+import { PrimaryDomainCommunicator } from './multidomain/communicator'
 
 const debug = debugFn('cypress:driver:cypress')
 
@@ -67,7 +67,7 @@ class $Cypress {
     this.Commands = null
     this.$autIframe = null
     this.onSpecReady = null
-    this.multiDomainEventBus = new EventEmitter()
+    this.multiDomainCommunicator = new PrimaryDomainCommunicator()
 
     this.events = $Events.extend(this)
     this.$ = jqueryProxyFn.bind(this)

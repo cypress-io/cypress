@@ -9,36 +9,33 @@ import { $Cy } from '../cypress/cy'
 import $Commands from '../cypress/commands'
 import $Log from '../cypress/log'
 import $Listeners from '../cy/listeners'
+import { SpecBridgeDomainCommunicator } from './communicator'
 
-const postCrossDomainMessage = (event, data) => {
-  let prefixedEvent = `cross:domain:${event}`
-
-  top.postMessage({ event: prefixedEvent, data }, '*')
-}
+const specBridgeCommunicator = new SpecBridgeDomainCommunicator()
 
 const onCommandEnqueued = (commandAttrs) => {
   const { id, name } = commandAttrs
 
   // it's not strictly necessary to send the name, but it can be useful
   // for debugging purposes
-  postCrossDomainMessage('command:enqueued', { id, name })
+  specBridgeCommunicator.toPrimary('command:enqueued', { id, name })
 }
 
 const onCommandEnd = (command) => {
   const id = command.get('id')
   const name = command.get('name')
 
-  postCrossDomainMessage('command:update', { id, name, end: true })
+  specBridgeCommunicator.toPrimary('command:update', { id, name, end: true })
 }
 
 const onLogAdded = (attrs) => {
-  postCrossDomainMessage('command:update', {
+  specBridgeCommunicator.toPrimary('command:update', {
     logAdded: $Log.toSerializedJSON(attrs),
   })
 }
 
 const onLogChanged = (attrs) => {
-  postCrossDomainMessage('command:update', {
+  specBridgeCommunicator.toPrimary('command:update', {
     logChanged: $Log.toSerializedJSON(attrs),
   })
 }
@@ -83,38 +80,32 @@ const setup = () => {
   Cypress.on('log:added', onLogAdded)
   Cypress.on('log:changed', onLogChanged)
 
-  Cypress.multiDomainEventBus.on('run:domain:fn', (data) => {
+  specBridgeCommunicator.on('run:domain:fn', (data) => {
     // TODO: await this if it's a promise, or do whatever cy.then does
     window.eval(`(${data.fn})()`)
 
-    postCrossDomainMessage('ran:domain:fn')
+    specBridgeCommunicator.toPrimary('run:domain:fn')
   })
 
-  Cypress.multiDomainEventBus.on('run:command', ({ name }) => {
-    const next = state('next')
+  specBridgeCommunicator.on('run:command',
+    ({ name }) => {
+      const next = state('next')
 
-    if (next) {
-      return next()
-    }
+      if (next) {
+        return next()
+      }
 
-    // if there's no state('next') for running the next command,
-    // the queue hasn't started yet, so run it
-    cy.queue.run(false)
-    .then(() => {
-      postCrossDomainMessage('queue:finished')
+      // if there's no state('next') for running the next command,
+      // the queue hasn't started yet, so run it
+      cy.queue.run(false)
+      .then(() => {
+        specBridgeCommunicator.toPrimary('queue:finished')
+      })
     })
-  })
-
-  const onMessage = (event) => {
-    if (!event.data) return
-
-    Cypress.multiDomainEventBus.emit(event.data.event, event.data.data)
-  }
 
   cy.onBeforeAppWindowLoad = onBeforeAppWindowLoad(cy, Cypress)
 
-  // incoming messages from the primary domain
-  window.addEventListener('message', onMessage, false)
+  specBridgeCommunicator.initialize(window)
 
   return cy
 }
@@ -151,7 +142,7 @@ const onBeforeAppWindowLoad = (cy, Cypress) => (autWindow) => {
       return undefined
     },
     onLoad () {
-      postCrossDomainMessage('window:load')
+      specBridgeCommunicator.toPrimary('window:load')
     },
     onUnload (e) {
       return Cypress.action('app:window:unload', e)
@@ -176,7 +167,7 @@ const onBeforeAppWindowLoad = (cy, Cypress) => (autWindow) => {
     },
   })
 
-  postCrossDomainMessage('window:before:load')
+  specBridgeCommunicator.toPrimary('window:before:load')
 }
 
 // eventually, setup will get called again on rerun and cy will
@@ -187,4 +178,4 @@ window.__onBeforeAppWindowLoad = (autWindow) => {
   cy.onBeforeAppWindowLoad(autWindow)
 }
 
-postCrossDomainMessage('bridge:ready')
+specBridgeCommunicator.toPrimary('bridge:ready')

@@ -131,7 +131,7 @@ export const eventManager = {
     })
 
     ws.on('cross:domain:html:received', () => {
-      Cypress.multiDomainEventBus.emit('html:received')
+      Cypress.multiDomainCommunicator.emit('html:received')
     })
 
     _.each(localToReporterEvents, (event) => {
@@ -317,34 +317,6 @@ export const eventManager = {
       this._clearAllCookies()
       this._setUnload()
     })
-
-    // TODO: refactor to promise based API
-    top.addEventListener('message', (event) => {
-      // currently used for tests, can be removed later
-      if (event.data && event.data.actual) return
-
-      // check if message is cross domain and if so, feed the message into
-      // the cross domain bus with args and strip prefix
-      // console.log('Event Manager received', event)
-      // console.log('EM received', event)
-      if (event.data.event.includes('cross:domain:')) {
-        const messageName = event.data.event.replace('cross:domain:', '')
-
-        // NOTE: need a special case here for 'window:before:load'
-        // where we need to set the crossDomainDriverWindow to source to
-        // communicate back to the iframe
-        if (messageName === 'window:before:load') {
-          Cypress.multiDomainEventBus.emit(messageName, event.source)
-        } else {
-          Cypress.multiDomainEventBus.emit(messageName, event.data.data)
-        }
-
-        return
-      }
-
-      // eslint-disable-next-line no-console
-      console.log('Unexpected postMessage:', event.data)
-    }, false)
   },
 
   start (config) {
@@ -533,29 +505,20 @@ export const eventManager = {
       }
     })
 
-    // TODO: verify this
-    Cypress.multiDomainEventBus.on('to:spec:bridge', (data) => {
-      // console.log('sending data to cross domain driver window', data)
-      this.crossDomainDriverWindow.postMessage(data, '*')
-    })
+    Cypress.multiDomainCommunicator.initialize(window)
 
-    // TODO: verify this
-    Cypress.multiDomainEventBus.on('window:before:load', (source) => {
-      this.crossDomainDriverWindow = source
-    })
-
-    Cypress.multiDomainEventBus.on('window:load', () => {
+    Cypress.multiDomainCommunicator.on('window:load', () => {
       Cypress.emit('internal:window:load', { type: 'cross:domain' })
     })
 
-    Cypress.multiDomainEventBus.on('cross:origin:error', (error) => {
+    Cypress.multiDomainCommunicator.on('cross:origin:error', (error) => {
       Cypress.emit('internal:window:load', {
         type: 'cross:domain:failure',
         error,
       })
     })
 
-    Cypress.multiDomainEventBus.on('expect:domain', (domain) => {
+    Cypress.multiDomainCommunicator.on('expect:domain', (domain) => {
       localBus.emit('expect:domain', domain)
     })
   },
@@ -651,7 +614,7 @@ export const eventManager = {
   },
 
   notifyCrossDomainBridgeReady () {
-    Cypress.multiDomainEventBus.emit('bridge:ready')
+    Cypress.multiDomainCommunicator.emit('bridge:ready')
   },
 
   focusTests () {
