@@ -21,9 +21,8 @@ export async function startDevServer (startDevServerArgs: StartDevServerOptions)
   if (startDevServerArgs.options.config.isTextTerminal) {
     await build(resolvedConfig)
     const root = resolvedConfig.build!.outDir!
-    const specs = startDevServerArgs.options.specs
 
-    const server = await httpServer(port, root, resolvedConfig.base!, {})
+    const server = await httpServer(port, root, resolvedConfig.base!)
 
     return { port, close: () => {
       server.close()
