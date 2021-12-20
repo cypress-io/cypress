@@ -903,6 +903,14 @@ export class ProjectLifecycleManager {
 
     child.on('error', dfd.reject)
 
+    /**
+     * This reject cannot be caught anywhere??
+     *
+     * It's supposed to be caught on lib/modes/run.js:1689,
+     * but it's not.
+     */
+    child.on('setupTestingType:uncaughtError', dfd.reject)
+
     ipc.once('loadConfig:reply', (val) => {
       debug('loadConfig:reply')
       dfd.resolve({ ...val, initialConfig: JSON.parse(val.initialConfig) })
