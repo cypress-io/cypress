@@ -1,20 +1,5 @@
 // @ts-ignore / session support is needed for visiting about:blank between tests
 describe('multidomain', { experimentalSessionSupport: true }, () => {
-  const expectTextMessage = (expected, done) => {
-    const onMessage = (event) => {
-      if (event.data && event.data.actual !== undefined) {
-        expect(event.data.host).to.equal('foobar.com')
-        expect(event.data.actual).to.equal(expected)
-
-        top!.removeEventListener('message', onMessage)
-
-        done()
-      }
-    }
-
-    top!.addEventListener('message', onMessage, false)
-  }
-
   beforeEach(() => {
     cy.visit('/fixtures/multidomain.html')
     // @ts-ignore
@@ -45,12 +30,13 @@ describe('multidomain', { experimentalSessionSupport: true }, () => {
 
   describe('window events', () => {
     it('form:submitted', (done) => {
-      expectTextMessage('form:submitted', done)
-
       // @ts-ignore
       cy.switchToDomain('foobar.com', () => {
-        Cypress.once('form:submitted', () => {
-          top!.postMessage({ host: location.host, actual: 'form:submitted' }, '*')
+        const $form = cy.$$('form')
+
+        Cypress.once('form:submitted', (e) => {
+          expect(e.target).to.eq($form.get(0))
+          done()
         })
 
         cy.get('form').submit()
@@ -62,12 +48,11 @@ describe('multidomain', { experimentalSessionSupport: true }, () => {
     // has already been called and won't be called again. need to handle any
     // sort of page reloading in the AUT when it's cross-domain
     it.skip('window:before:unload', (done) => {
-      expectTextMessage('window:before:unload', done)
-
       // @ts-ignore
       cy.switchToDomain('foobar.com', () => {
         Cypress.once('window:before:unload', () => {
-          top!.postMessage({ host: location.host, actual: 'window:before:unload' }, '*')
+          expect(location.host).to.equal('foobar.com')
+          done()
         })
 
         cy.window().then((window) => {
@@ -79,12 +64,11 @@ describe('multidomain', { experimentalSessionSupport: true }, () => {
     // FIXME: currently causes tests to hang. need to implement proper
     // stability-handling on secondary domains
     it.skip('window:unload', (done) => {
-      expectTextMessage('window:unload', done)
-
       // @ts-ignore
       cy.switchToDomain('foobar.com', () => {
         Cypress.once('window:unload', () => {
-          top!.postMessage({ host: location.host, actual: 'window:unload' }, '*')
+          expect(location.host).to.equal('foobar.com')
+          done()
         })
 
         cy.window().then((window) => {
@@ -94,12 +78,11 @@ describe('multidomain', { experimentalSessionSupport: true }, () => {
     })
 
     it('navigation:changed', (done) => {
-      expectTextMessage('navigation:changed', done)
-
       // @ts-ignore
       cy.switchToDomain('foobar.com', () => {
         Cypress.once('navigation:changed', () => {
-          top!.postMessage({ host: location.host, actual: 'navigation:changed' }, '*')
+          expect(location.host).to.equal('foobar.com')
+          done()
         })
 
         cy.window().then((window) => {
@@ -109,12 +92,12 @@ describe('multidomain', { experimentalSessionSupport: true }, () => {
     })
 
     it('window:alert', (done) => {
-      expectTextMessage('window:alert the alert text', done)
-
       // @ts-ignore
       cy.switchToDomain('foobar.com', () => {
         Cypress.once('window:alert', (text) => {
-          top!.postMessage({ host: location.host, actual: `window:alert ${text}` }, '*')
+          expect(location.host).to.equal('foobar.com')
+          expect(`window:alert ${text}`).to.equal('window:alert the alert text')
+          done()
         })
 
         cy.get('[data-cy="alert"]').then(($el) => {
@@ -124,12 +107,12 @@ describe('multidomain', { experimentalSessionSupport: true }, () => {
     })
 
     it('window:confirm', (done) => {
-      expectTextMessage('window:confirm the confirm text', done)
-
       // @ts-ignore
       cy.switchToDomain('foobar.com', () => {
         Cypress.once('window:confirm', (text) => {
-          top!.postMessage({ host: location.host, actual: `window:confirm ${text}` }, '*')
+          expect(location.host).to.equal('foobar.com')
+          expect(`window:confirm ${text}`).to.equal('window:confirm the confirm text')
+          done()
         })
 
         cy.get('[data-cy="confirm"]').then(($el) => {
@@ -139,12 +122,12 @@ describe('multidomain', { experimentalSessionSupport: true }, () => {
     })
 
     it('window:confirmed - true when no window:confirm listeners return false', (done) => {
-      expectTextMessage('window:confirmed the confirm text - true', done)
-
       // @ts-ignore
       cy.switchToDomain('foobar.com', () => {
         Cypress.once('window:confirmed', (text, returnedFalse) => {
-          top!.postMessage({ host: location.host, actual: `window:confirmed ${text} - ${returnedFalse}` }, '*')
+          expect(location.host).to.equal('foobar.com')
+          expect(`window:confirmed ${text} - ${returnedFalse}`).to.equal('window:confirmed the confirm text - true')
+          done()
         })
 
         Cypress.on('window:confirm', () => {})
@@ -160,12 +143,12 @@ describe('multidomain', { experimentalSessionSupport: true }, () => {
     })
 
     it('window:confirmed - false when any window:confirm listeners return false', (done) => {
-      expectTextMessage('window:confirmed the confirm text - false', done)
-
       // @ts-ignore
       cy.switchToDomain('foobar.com', () => {
         Cypress.once('window:confirmed', (text, returnedFalse) => {
-          top!.postMessage({ host: location.host, actual: `window:confirmed ${text} - ${returnedFalse}` }, '*')
+          expect(location.host).to.equal('foobar.com')
+          expect(`window:confirmed ${text} - ${returnedFalse}`).to.equal('window:confirmed the confirm text - false')
+          done()
         })
 
         Cypress.on('window:confirm', () => {

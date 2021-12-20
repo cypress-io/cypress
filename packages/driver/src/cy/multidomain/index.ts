@@ -27,6 +27,26 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
     // this isn't fully implemented, but in place to be able to test out
     // the other parts of multidomain
     switchToDomain (domain, fn) {
+      const done = cy.state('done')
+
+      const deferredDone = createDeferred()
+      const invokeDone = (err) => {
+        return deferredDone.resolve({
+          crossDomainDoneCalled: true,
+          error: err,
+        })
+      }
+
+      // if done has been provided to the test, allow the user to call done
+      // from the switchToDomain context running in the secondary domain.
+      if (done) {
+        communicator.once('done:called', invokeDone)
+      } else {
+        // if done has not been provided, settle this promise now as
+        // done should not be available in the secondary domain
+        deferredDone.resolve()
+      }
+
       clearTimeout(timeoutId)
 
       Cypress.log({
@@ -60,6 +80,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
 
           communicator.toSpecBridge('run:command', {
             name: attrs.name,
+            isDoneFnAvailable: !!done,
           })
 
           return deferred.promise
@@ -105,8 +126,26 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
       communicator.on('command:enqueued', addCommand)
       communicator.on('command:update', updateCommand)
 
-      return new Bluebird((resolve) => {
-        communicator.once('ran:domain:fn', resolve)
+      return new Bluebird((resolve, reject) => {
+        communicator.once('run:domain:fn', (err) => err ? reject(err) : resolve())
+
+        communicator.once('unbind:done:called', () => {
+          // if done is to be called from the secondary domain, the 'done:called' event
+          // should have already been invoked in the switchToDomain function
+          // Go ahead and remove the listener
+          communicator.off('done:called', invokeDone)
+        })
+
+        // By the time the command queue is finished, this promise should be settled as
+        // as done will be invoked within the secondary domain already, if applicable
+        deferredDone.promise.then(({ crossDomainDoneCalled, error } = {
+          crossDomainDoneCalled: false,
+          error: undefined,
+        }) => {
+          if (crossDomainDoneCalled) {
+            done(error)
+          }
+        })
 
         communicator.once('queue:finished', () => {
           communicator.off('command:enqueued', addCommand)
@@ -129,6 +168,7 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
           // user-specified callback to run in that domain
           communicator.toSpecBridge('run:domain:fn', {
             fn: fn.toString(),
+            isDoneFnAvailable: !!done,
           })
 
           state('readyForMultidomain', false)

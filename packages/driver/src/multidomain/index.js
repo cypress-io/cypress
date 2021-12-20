@@ -10,6 +10,7 @@ import $Commands from '../cypress/commands'
 import $Log from '../cypress/log'
 import $Listeners from '../cy/listeners'
 import { SpecBridgeDomainCommunicator } from './communicator'
+import { createDeferred } from '../util/deferred'
 
 const specBridgeCommunicator = new SpecBridgeDomainCommunicator()
 
@@ -80,11 +81,64 @@ const setup = () => {
   Cypress.on('log:added', onLogAdded)
   Cypress.on('log:changed', onLogChanged)
 
-  specBridgeCommunicator.on('run:domain:fn', (data) => {
-    // TODO: await this if it's a promise, or do whatever cy.then does
-    window.eval(`(${data.fn})()`)
+  specBridgeCommunicator.on('run:domain:fn', async ({ fn, isDoneFnAvailable = false }) => {
+    const deferredSwitchToDomain = createDeferred()
 
-    specBridgeCommunicator.toPrimary('ran:domain:fn')
+    cy.state('switchToDomainDeferred', deferredSwitchToDomain)
+    const evalFn = `(${fn})()`
+
+    // await the eval func, whether it is a promise or not
+    // we should not need to transpile this as our target browsers support async/await
+    // see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function for more details
+    const asyncWrapper = `(async () => {
+      const deferredSwitchToDomain = cy.state('switchToDomainDeferred')
+
+      try {
+        await ${evalFn}
+        deferredSwitchToDomain.resolve()
+      } catch(e){
+        deferredSwitchToDomain.reject(e)
+      }
+    })()`
+
+    if (isDoneFnAvailable) {
+      // stub out the 'done' function if available in the primary domain
+      // to notify the primary domain if the done() callback is invoked
+      // within the spec bridge
+      const done = (err = undefined) => {
+        // TODO: calling this currently causes some queue issues with subsequent tests. This needs to be explored as to why in the near future
+        // cy.doneEarly()
+
+        // signal to the primary domain that done has been called and to signal that the command queue is finished in the secondary domain
+        specBridgeCommunicator.toPrimary('done:called', err)
+        specBridgeCommunicator.toPrimary('queue:finished')
+
+        return null
+      }
+
+      // similar to the primary domain, the done() callback will be stored in state
+      // if undefined and a user tries to call done, the same effect is granted
+      cy.state('done', done)
+
+      const fnDoneWrapper = `(() => {
+        const done = cy.state('done');
+        ${asyncWrapper}
+      })()`
+
+      window.eval(fnDoneWrapper)
+    } else {
+      window.eval(asyncWrapper)
+    }
+
+    try {
+      await deferredSwitchToDomain.promise
+      specBridgeCommunicator.toPrimary('run:domain:fn')
+    } catch (err) {
+      specBridgeCommunicator.toPrimary('run:domain:fn', err)
+    } finally {
+      cy.state('done', undefined)
+      cy.state('switchToDomainDeferred', undefined)
+    }
   })
 
   specBridgeCommunicator.on('run:command',
