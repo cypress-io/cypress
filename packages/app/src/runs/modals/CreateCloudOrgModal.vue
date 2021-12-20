@@ -16,6 +16,12 @@
       >
         {{ t('runs.connect.modal.createOrg.button') }}
       </ExternalLink>
+      <Button
+        v-if="!polling"
+        @click="startPolling()"
+      >
+        {{ t('runs.connect.modal.createOrg.refreshButton') }}
+      </Button>
     </div>
     <template #footer>
       <div class="flex gap-16px">
@@ -43,13 +49,14 @@
 </template>
 
 <script lang="ts" setup>
-import { gql } from '@urql/vue'
 import { computed, ref } from 'vue'
+import { gql, useQuery } from '@urql/vue'
+import { useIntervalFn } from '@vueuse/core'
 import StandardModal from '@cy/components/StandardModal.vue'
 import Button from '@cy/components/Button.vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import OrganizationIcon from '~icons/cy/office-building_x16.svg'
-import type { CreateCloudOrgModalFragment } from '../../generated/graphql'
+import { CheckCloudOrganizationsDocument, CreateCloudOrgModalFragment } from '../../generated/graphql'
 import { useI18n } from '@cy/i18n'
 
 const { t } = useI18n()
@@ -62,6 +69,24 @@ gql`
 fragment CreateCloudOrgModal on CloudUser {
   id
   createCloudOrganizationUrl
+  organizationControl: organizations (first: 1) {
+    nodes {
+      id
+    }
+  }
+}
+`
+
+gql`
+query CheckCloudOrganizations {
+  cloudViewer {
+    id
+    organizations (first:1) {
+      nodes {
+        id
+      }
+    }
+  } 
 }
 `
 
@@ -69,5 +94,33 @@ const props = defineProps<{
   gql: CreateCloudOrgModalFragment,
 }>()
 
-const createOrgUrl = computed(() => props.gql.createCloudOrganizationUrl)
+const query = useQuery({
+  query: CheckCloudOrganizationsDocument,
+})
+
+const polling = ref(true)
+
+const { pause, resume } = useIntervalFn(() => {
+  if (props?.gql?.organizationControl?.nodes?.length || 0 > 0) {
+    pause()
+  } else {
+    query.executeQuery()
+  }
+}, 2000)
+
+function startPolling () {
+  if (!polling.value) {
+    resume()
+    polling.value = true
+  }
+
+  setTimeout(() => {
+    pause()
+    polling.value = false
+  }, 18000)
+}
+
+startPolling()
+
+const createOrgUrl = computed(() => props.gql.createCloudOrganizationUrl || '#')
 </script>
