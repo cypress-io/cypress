@@ -53,7 +53,7 @@ describe('<BaseError />', () => {
     .get(openConfigFileSelector)
     .click()
 
-    cy.get('#headlessui-dialog-title-3').contains('Select Preferred Editor')
+    cy.contains('Select Preferred Editor').should('be.visible')
   })
 
   // NOTE: Figure out how to stub the graphql mutation call
