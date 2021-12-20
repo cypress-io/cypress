@@ -1,8 +1,9 @@
 require('../../spec_helper')
 
-const browsers = require(`${root}../lib/browsers`)
-const utils = require(`${root}../lib/browsers/utils`)
+const browsers = require(`../../../lib/browsers`)
+const utils = require(`../../../lib/browsers/utils`)
 const snapshot = require('snap-shot-it')
+const { EventEmitter } = require('events')
 
 const normalizeBrowsers = (message) => {
   return message.replace(/(found on your system are:)(?:\n- .*)*/, '$1\n- chrome\n- firefox\n- electron')
@@ -22,7 +23,14 @@ after(() => {
 describe('lib/browsers/index', () => {
   context('.getBrowserInstance', () => {
     it('returns instance', () => {
-      const instance = { pid: 1234 }
+      const ee = new EventEmitter()
+
+      ee.kill = () => {
+        ee.emit('exit')
+      }
+
+      ee.pid = 1234
+      const instance = ee
 
       browsers._setInstance(instance)
 

@@ -17,7 +17,12 @@ describe('<CreateSpecModal />', () => {
         gql={{
           currentProject: {
             id: 'id',
-            codeGenGlob: '**.vue',
+            codeGenGlobs: {
+              id: 'super-unique-id',
+              __typename: 'CodeGenGlobs',
+              component: '**.vue',
+              story: '**/*.stories.*',
+            },
             storybook: null,
             currentTestingType: 'component',
           },
@@ -67,7 +72,12 @@ describe('playground', () => {
         gql={{
           currentProject: {
             id: 'id',
-            codeGenGlob: '**.vue',
+            codeGenGlobs: {
+              id: 'super-unique-id',
+              __typename: 'CodeGenGlobs',
+              component: '**.vue',
+              story: '**/*.stories.*',
+            },
             storybook: null,
             currentTestingType: 'component',
           },

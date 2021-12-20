@@ -4,19 +4,35 @@ import SettingsContainer from './SettingsContainer.vue'
 import { useRoute } from 'vue-router'
 
 describe('<SettingsContainer />', { viewportHeight: 800, viewportWidth: 900 }, () => {
-  it('renders', () => {
-    cy.mountFragment(SettingsContainerFragmentDoc, { render: (gql) => <SettingsContainer gql={gql} /> })
+  const mountSettingsConatainer = () => cy.mountFragment(SettingsContainerFragmentDoc, { render: (gql) => <SettingsContainer gql={gql} /> })
+
+  it('expands and collapses device settings', () => {
+    mountSettingsConatainer()
+
+    cy.contains('Device Settings').click()
+
+    cy.findByText(defaultMessages.settingsPage.editor.title).should('be.visible')
+    cy.findByText(defaultMessages.settingsPage.proxy.title).should('be.visible')
+    cy.findByText(defaultMessages.settingsPage.testingPreferences.title).should('be.visible')
+
+    cy.findByText('Device Settings').click()
+
+    cy.findByText(defaultMessages.settingsPage.editor.title).should('not.exist')
+  })
+
+  it('expands and collapses project settings', () => {
+    mountSettingsConatainer()
 
     cy.contains('Project Settings').click()
 
-    cy.findByText(defaultMessages.settingsPage.projectId.title).should('be.visible')
-    cy.findByText(defaultMessages.settingsPage.config.title).scrollIntoView().should('be.visible').click()
-  })
+    cy.findByText(defaultMessages.settingsPage.projectId.title).scrollIntoView().should('be.visible')
+    cy.findByText(defaultMessages.settingsPage.experiments.title).scrollIntoView().should('be.visible')
+    cy.findByText(defaultMessages.settingsPage.specPattern.title).scrollIntoView().should('be.visible')
+    cy.findByText(defaultMessages.settingsPage.config.title).scrollIntoView().should('be.visible')
 
-  it('renders a footer', () => {
-    cy.mountFragment(SettingsContainerFragmentDoc, { render: (gql) => <SettingsContainer gql={gql} /> })
-    cy.findByText(defaultMessages.settingsPage.footer.text)
-    cy.findByText(defaultMessages.settingsPage.footer.button)
+    cy.findByText('Project Settings').click()
+
+    cy.findByText(defaultMessages.settingsPage.projectId.title).should('not.exist')
   })
 
   context('scrolls to setting', () => {

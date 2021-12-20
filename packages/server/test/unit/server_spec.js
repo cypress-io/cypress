@@ -5,12 +5,12 @@ const os = require('os')
 const express = require('express')
 const Promise = require('bluebird')
 const { connect } = require('@packages/network')
-const config = require(`${root}lib/config`)
-const logger = require(`${root}lib/logger`)
-const { ServerE2E } = require(`${root}lib/server-e2e`)
-const { SocketE2E } = require(`${root}lib/socket-e2e`)
-const fileServer = require(`${root}lib/file_server`)
-const ensureUrl = require(`${root}lib/util/ensure-url`)
+const config = require(`../../lib/config`)
+const logger = require(`../../lib/logger`)
+const { ServerE2E } = require(`../../lib/server-e2e`)
+const { SocketE2E } = require(`../../lib/socket-e2e`)
+const fileServer = require(`../../lib/file_server`)
+const ensureUrl = require(`../../lib/util/ensure-url`)
 
 const morganFn = function () {}
 

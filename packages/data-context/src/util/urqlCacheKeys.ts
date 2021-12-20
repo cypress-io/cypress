@@ -13,6 +13,7 @@ export const urqlCacheKeys: Partial<CacheExchangeOpts> = {
     App: (data) => data.__typename,
     DevState: (data) => data.__typename,
     Wizard: (data) => data.__typename,
+    CloudRunCommitInfo: () => null,
     GitInfo: () => null,
     BaseError: () => null,
     ProjectPreferences: (data) => data.__typename,

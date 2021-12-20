@@ -1,6 +1,7 @@
 describe('Plugin error handling', () => {
   it('it handles a plugin error', () => {
-    cy.setupE2E('unify-plugin-errors')
+    cy.scaffoldProject('unify-plugin-errors')
+    cy.openProject('unify-plugin-errors')
     cy.loginUser()
 
     cy.visitLaunchpad()

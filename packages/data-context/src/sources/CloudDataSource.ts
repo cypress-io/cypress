@@ -34,7 +34,11 @@ export class CloudDataSource {
   private _cloudUrqlClient: Client
 
   constructor (private ctx: DataContext) {
-    this._cloudUrqlClient = createClient({
+    this._cloudUrqlClient = this.reset()
+  }
+
+  reset () {
+    return this._cloudUrqlClient = createClient({
       url: `${REMOTE_SCHEMA_URLS[cloudEnv]}/test-runner-graphql`,
       exchanges: [
         dedupExchange,

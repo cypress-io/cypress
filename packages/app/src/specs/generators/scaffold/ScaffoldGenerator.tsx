@@ -8,5 +8,5 @@ export const ScaffoldGenerator: SpecGenerator = {
   entry: ScaffoldGeneratorStepOne,
   matches: filters.matchesE2E,
   disabled: () => { },
-  id: 'scaffold-generator',
+  id: 'scaffold',
 }

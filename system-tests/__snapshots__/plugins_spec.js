@@ -370,7 +370,7 @@ exports['e2e plugins fails when there is an async error inside an event handler 
                                                                                                     
   Running:  app_spec.js                                                                     (1 of 1)
 
-The following error was thrown by a plugin. We stopped running your tests because a plugin crashed. Please check your setupNodeEvents method for (\`e2e\`) on file (\`/foo/bar/.projects/plugins-async-error/cypress.config.js\`)
+The following error was thrown by a plugin. We stopped running your tests because a plugin crashed. Please check your e2e.setupNodeEvents method in \`/foo/bar/.projects/plugins-async-error/cypress.config.js\`
 
  Error: Async error from plugins file
       [stack trace lines]

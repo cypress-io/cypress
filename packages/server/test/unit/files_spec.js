@@ -3,13 +3,13 @@ require('../spec_helper')
 const files = require('../../lib/files')
 const config = require('../../lib/config')
 const FixturesHelper = require('@tooling/system-tests/lib/fixtures')
-const { makeLegacyDataContext } = require('../../lib/makeDataContext')
+const { getCtx } = require('../../lib/makeDataContext')
 
 let ctx
 
 describe('lib/files', () => {
   beforeEach(function () {
-    ctx = makeLegacyDataContext()
+    ctx = getCtx()
     FixturesHelper.scaffold()
 
     this.todosPath = FixturesHelper.projectPath('todos')

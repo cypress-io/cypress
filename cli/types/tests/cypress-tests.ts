@@ -64,7 +64,7 @@ namespace CypressIsCyTests {
 
 declare namespace Cypress {
   interface Chainable {
-    newCommand: (arg: string) => void
+    newCommand: (arg: string) => Chainable<number>
   }
 }
 
@@ -74,20 +74,106 @@ namespace CypressCommandsTests {
     arg
     return
   })
-  Cypress.Commands.add('newCommand', { prevSubject: true }, (arg) => {
+  Cypress.Commands.add('newCommand', (arg) => {
     // $ExpectType string
     arg
+  })
+  Cypress.Commands.add('newCommand', function(arg) {
+    this // $ExpectType Context
+    arg // $ExpectType string
+  })
+  Cypress.Commands.add('newCommand', { prevSubject: true }, (subject, arg) => {
+    subject // $ExpectType unknown
+    arg // $ExpectType string
     return
+  })
+  Cypress.Commands.add('newCommand', { prevSubject: false }, (arg) => {
+    arg // $ExpectType string
+    return
+  })
+  Cypress.Commands.add('newCommand', { prevSubject: 'optional' }, (subject, arg) => {
+    subject // $ExpectType unknown
+    arg // $ExpectType string
+    return
+  })
+  Cypress.Commands.add('newCommand', { prevSubject: 'optional' }, (subject, arg) => {
+    subject // $ExpectType unknown
+    arg // $ExpectType string
+  })
+  Cypress.Commands.add('newCommand', { prevSubject: ['optional'] }, (subject, arg) => {
+    subject // $ExpectType unknown
+    arg // $ExpectType string
+  })
+  Cypress.Commands.add('newCommand', { prevSubject: 'document' }, (subject, arg) => {
+    subject // $ExpectType Document
+    arg // $ExpectType string
+  })
+  Cypress.Commands.add('newCommand', { prevSubject: 'window' }, (subject, arg) => {
+    subject // $ExpectType Window
+    arg // $ExpectType string
+  })
+  Cypress.Commands.add('newCommand', { prevSubject: 'element' }, (subject, arg) => {
+    subject // $ExpectType JQuery<HTMLElement>
+    arg // $ExpectType string
+  })
+  Cypress.Commands.add('newCommand', { prevSubject: ['element'] }, (subject, arg) => {
+    subject // $ExpectType JQuery<HTMLElement>
+    arg // $ExpectType string
+  })
+  Cypress.Commands.add('newCommand', { prevSubject: ['element', 'document', 'window'] }, (subject, arg) => {
+    if (subject instanceof Window) {
+      subject // $ExpectType Window
+    } else if (subject instanceof Document) {
+      subject // $ExpectType Document
+    } else {
+      subject // $ExpectType JQuery<HTMLElement>
+    }
+    arg // $ExpectType string
+  })
+  Cypress.Commands.add('newCommand', { prevSubject: ['window', 'document', 'optional', 'element'] }, (subject, arg) => {
+    if (subject instanceof Window) {
+      subject // $ExpectType Window
+    } else if (subject instanceof Document) {
+      subject // $ExpectType Document
+    } else if (subject) {
+      subject // $ExpectType JQuery<HTMLElement>
+    } else {
+      subject // $ExpectType void
+    }
+    arg // $ExpectType string
   })
   Cypress.Commands.add('newCommand', (arg) => {
     // $ExpectType string
     arg
-    return new Promise((resolve) => {})
+    return cy.wrap(new Promise<number>((resolve) => { resolve(5) }))
   })
-  Cypress.Commands.overwrite('newCommand', (arg) => {
-    // $ExpectType string
-    arg
-    return
+  Cypress.Commands.overwrite('newCommand', (originalFn, arg) => {
+    arg // $ExpectType string
+    originalFn // $ExpectedType Chainable['newCommand']
+    originalFn(arg) // $ExpectType Chainable<number>
+  })
+  Cypress.Commands.overwrite('newCommand', function(originalFn, arg) {
+    this // $ExpectType Context
+    arg // $ExpectType string
+    originalFn // $ExpectedType Chainable['newCommand']
+    originalFn.apply(this, [arg]) // $ExpectType Chainable<number>
+  })
+  Cypress.Commands.overwrite<'type', 'element'>('type', (originalFn, element, text, options?: Partial<Cypress.TypeOptions & {sensitive: boolean}>) => {
+    element // $ExpectType JQuery<HTMLElement>
+    text // $ExpectType string
+
+    if (options && options.sensitive) {
+      // turn off original log
+      options.log = false
+      // create our own log with masked message
+      Cypress.log({
+        $el: element,
+        name: 'type',
+        message: '*'.repeat(text.length),
+      })
+    }
+
+    return originalFn(element, text, options)
   })
 }
 

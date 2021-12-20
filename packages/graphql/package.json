@@ -24,12 +24,14 @@
     "getenv": "1.0.0",
     "graphql": "^15.5.1",
     "graphql-scalars": "^1.10.0",
-    "nexus": "^1.2.0-next.15"
+    "nexus": "^1.2.0-next.15",
+    "server-destroy": "^1.0.1"
   },
   "devDependencies": {
     "@packages/data-context": "0.0.0-development",
     "@packages/types": "0.0.0-development",
     "@types/dedent": "^0.7.0",
+    "@types/server-destroy": "^1.0.1",
     "chai": "^4.2.0",
     "mocha": "^8.1.3",
     "rimraf": "3.0.2",

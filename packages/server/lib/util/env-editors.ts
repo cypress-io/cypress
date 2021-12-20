@@ -84,7 +84,7 @@ export const macOSEditors = [
   }, {
     id: 'insiders',
     binary: 'code-insiders',
-    name: 'Visual Studio Vode Insiders',
+    name: 'Visual Studio Code Insiders',
   }, {
     id: 'emacs',
     binary: 'emacs',

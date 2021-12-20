@@ -6,20 +6,20 @@ const electron = require('electron')
 const stripAnsi = require('strip-ansi')
 const snapshot = require('snap-shot-it')
 const pkg = require('@packages/root')
-const { fs } = require(`${root}../lib/util/fs`)
-const user = require(`${root}../lib/user`)
-const errors = require(`${root}../lib/errors`)
-const ProjectBase = require(`${root}../lib/project-base`).ProjectBase
-const browsers = require(`${root}../lib/browsers`)
-const Reporter = require(`${root}../lib/reporter`)
-const runMode = require(`${root}../lib/modes/run`)
-const { openProject } = require(`${root}../lib/open_project`)
-const videoCapture = require(`${root}../lib/video_capture`)
-const env = require(`${root}../lib/util/env`)
-const random = require(`${root}../lib/util/random`)
-const system = require(`${root}../lib/util/system`)
-const specsUtil = require(`${root}../lib/util/specs`)
-const { experimental } = require(`${root}../lib/experiments`)
+const { fs } = require(`../../../lib/util/fs`)
+const user = require(`../../../lib/user`)
+const errors = require(`../../../lib/errors`)
+const ProjectBase = require(`../../../lib/project-base`).ProjectBase
+const browsers = require(`../../../lib/browsers`)
+const Reporter = require(`../../../lib/reporter`)
+const runMode = require(`../../../lib/modes/run`)
+const { openProject } = require(`../../../lib/open_project`)
+const videoCapture = require(`../../../lib/video_capture`)
+const env = require(`../../../lib/util/env`)
+const random = require(`../../../lib/util/random`)
+const system = require(`../../../lib/util/system`)
+const specsUtil = require(`../../../lib/util/specs`)
+const { experimental } = require(`../../../lib/experiments`)
 
 describe('lib/modes/run', () => {
   beforeEach(function () {
@@ -672,7 +672,7 @@ describe('lib/modes/run', () => {
       sinon.stub(videoCapture, 'start').resolves()
       sinon.stub(openProject, 'launch').resolves()
       this.projectInstance.__setConfig(config)
-      sinon.stub(openProject, 'getProject').resolves(this.projectInstance)
+      sinon.stub(openProject, 'getProject').returns(this.projectInstance)
       sinon.spy(errors, 'warning')
 
       sinon.stub(specsUtil.default, 'findSpecs').resolves([
@@ -757,7 +757,7 @@ describe('lib/modes/run', () => {
       sinon.spy(runMode, 'waitForBrowserToConnect')
       sinon.spy(runMode, 'runSpecs')
       sinon.stub(openProject, 'launch').resolves()
-      sinon.stub(openProject, 'getProject').resolves(this.projectInstance)
+      sinon.stub(openProject, 'getProject').returns(this.projectInstance)
       sinon.stub(specsUtil.default, 'findSpecs').resolves([
         {
           name: 'foo_spec.js',

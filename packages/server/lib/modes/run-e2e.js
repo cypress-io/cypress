@@ -1,5 +1,5 @@
-const run = (options) => {
-  return require('./run').run(options)
+const run = (options, loading) => {
+  return require('./run').run(options, loading)
 }
 
 module.exports = {

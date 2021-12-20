@@ -3,7 +3,7 @@ import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 describe('Launchpad: Open Mode', () => {
   describe('global mode', () => {
     beforeEach(() => {
-      cy.setupE2E()
+      cy.openGlobalMode()
       cy.visitLaunchpad()
     })
 
@@ -11,33 +11,17 @@ describe('Launchpad: Open Mode', () => {
       cy.get('h1').should('contain', defaultMessages.globalPage.empty.title)
     })
 
-    it('shows projects when projects have been added', () => {
-      cy.get('h1').should('contain', defaultMessages.globalPage.empty.title)
-    })
-
     it('shows the projects page when a project is not specified', () => {
-      cy.task('scaffoldProject', 'todos').then((projectPath) => {
-        cy.withCtx(async (ctx, o) => {
-          ctx.actions.project.addProject({ path: o.projectPath as string, open: false })
-        }, { projectPath })
-      })
-
+      cy.addProject('todos')
       cy.visitLaunchpad()
-
       cy.contains(defaultMessages.globalPage.recentProjectsHeader)
     })
   })
 
   it('goes directly to e2e tests when launched with --e2e', () => {
-    cy.setupE2E('todos')
+    cy.scaffoldProject('todos')
+    cy.openProject('todos', ['--e2e'])
     cy.visitLaunchpad()
-
-    cy.withCtx(async (ctx) => {
-      // Though the data context is previously initialized,
-      // we re-initialize it here so that it reflects the new launchArg
-      ctx.launchArgs.testingType = 'e2e'
-      await ctx.initializeData()
-    })
 
     cy.withCtx(async (ctx, o) => {
       ctx.emitter.toLaunchpad()
@@ -48,15 +32,9 @@ describe('Launchpad: Open Mode', () => {
   })
 
   it('goes directly to component tests when launched with --component', () => {
-    cy.setupE2E('launchpad')
+    cy.scaffoldProject('launchpad')
+    cy.openProject('launchpad', ['--component'])
     cy.visitLaunchpad()
-
-    cy.withCtx(async (ctx) => {
-      // Though the data context is previously initialized,
-      // we re-initialize it here so that it reflects the new launchArg
-      ctx.launchArgs.testingType = 'component'
-      await ctx.initializeData()
-    })
 
     cy.withCtx(async (ctx, o) => {
       ctx.emitter.toLaunchpad()
@@ -67,18 +45,12 @@ describe('Launchpad: Open Mode', () => {
   })
 
   it('auto-selects the browser when launched with --browser', () => {
-    cy.setupE2E('launchpad')
+    cy.scaffoldProject('launchpad')
+    cy.openProject('launchpad', ['--browser', 'firefox', '--e2e'])
     cy.visitLaunchpad()
-
-    cy.withCtx(async (ctx) => {
-      ctx.launchArgs.testingType = 'e2e'
-      ctx.launchArgs.browser = 'firefox'
-
-      await ctx.initializeData()
-    })
 
     // Need to visit after args have been configured, todo: fix in #18776
-    cy.visitLaunchpad()
+    // cy.visitLaunchpad()
 
     cy.contains('Continue').click()
     cy.contains('Next Step').click()
@@ -89,7 +61,7 @@ describe('Launchpad: Open Mode', () => {
 
   describe('when there is a list of projects', () => {
     it('goes to an active project if one is added', () => {
-      cy.setupE2E('todos')
+      cy.openProject('todos')
       cy.visitLaunchpad()
 
       cy.withCtx(async (ctx, o) => {
@@ -102,7 +74,7 @@ describe('Launchpad: Open Mode', () => {
 
   describe('when a user interacts with the header', () => {
     it('the Docs menu opens when clicked', () => {
-      cy.setupE2E('todos')
+      cy.openProject('todos')
       cy.visitLaunchpad()
 
       cy.contains('Projects').should('be.visible')
@@ -113,7 +85,7 @@ describe('Launchpad: Open Mode', () => {
 
   describe('open in ide', () => {
     it('configures an editor if one is not configured', () => {
-      cy.setupE2E('todos')
+      cy.openProject('todos')
       cy.withCtx(async (ctx, o) => {
         ctx.coreData.localSettings.preferences.preferredEditorBinary = undefined
         ctx.coreData.localSettings.availableEditors = [
@@ -145,7 +117,7 @@ describe('Launchpad: Open Mode', () => {
     })
 
     it('opens using finder', () => {
-      cy.setupE2E('todos')
+      cy.openProject('todos')
       cy.withCtx(async (ctx, o) => {
         ctx.coreData.app.projects = [{ projectRoot: '/some/project' }]
       })

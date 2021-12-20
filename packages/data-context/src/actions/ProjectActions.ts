@@ -1,5 +1,5 @@
 import type { CodeGenType, MutationAddProjectArgs, MutationSetProjectPreferencesArgs, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
-import type { FindSpecs, FoundBrowser, FoundSpec, FullConfig, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions, Preferences, SettingsOptions } from '@packages/types'
+import type { InitializeProjectOptions, FindSpecs, FoundBrowser, FoundSpec, FullConfig, LaunchOpts, OpenProjectLaunchOptions, Preferences, SettingsOptions } from '@packages/types'
 import execa from 'execa'
 import path from 'path'
 import type { ActiveProjectShape, ProjectShape } from '../data/coreDataShape'
@@ -16,7 +16,7 @@ export interface ProjectApiShape {
    * TODO(tim): figure out what this is actually doing, it seems it's necessary in
    *   order for CT to startup
    */
-  initializeProject(args: LaunchArgs, options: OpenProjectLaunchOptions, browsers: FoundBrowser[]): Promise<unknown>
+  initializeProject(args: InitializeProjectOptions, options: OpenProjectLaunchOptions, browsers: FoundBrowser[]): Promise<unknown>
   launchProject(browser: FoundBrowser, spec: Cypress.Spec, options: LaunchOpts): void
   insertProjectToCache(projectRoot: string): void
   removeProjectFromCache(projectRoot: string): void
@@ -77,7 +77,7 @@ export class ProjectActions {
     await this.clearActiveProject()
 
     // Set initial properties, so we can set the config object on the active project
-    await this.setCurrentProjectProperties({
+    this.setCurrentProjectProperties({
       projectRoot,
       title,
       ctPluginsInitialized: false,
@@ -107,7 +107,19 @@ export class ProjectActions {
         return this
       }
 
-      throw error
+      if (this.ctx.isRunMode) {
+        throw error
+      }
+
+      this.ctx.update((d) => {
+        d.baseError = {
+          title: 'Error',
+          message: error.message,
+          stack: error.stack,
+        }
+      })
+
+      return this
     }
   }
 
@@ -163,16 +175,15 @@ export class ProjectActions {
 
     const browsers = [...(this.ctx.browserList ?? [])]
 
-    const launchArgs: LaunchArgs = {
-      ...this.ctx.launchArgs,
+    const allModeOptionsWithLatest: InitializeProjectOptions = {
+      ...this.ctx.modeOptions,
       projectRoot: this.ctx.currentProject.projectRoot,
       testingType: this.ctx.wizardData.chosenTestingType,
     }
 
     try {
       await this.api.closeActiveProject()
-      await this.api.initializeProject(launchArgs, {
-        ...this.ctx.launchOptions,
+      await this.api.initializeProject(allModeOptionsWithLatest, {
         ...options,
         ctx: this.ctx,
       }, browsers)
