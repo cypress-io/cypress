@@ -19,7 +19,7 @@ const getServerPluginHandlers = () => {
 }
 
 const init = (config, options) => {
-  return getCtx().lifecycleManager.initPlugins()
+  // return getCtx().lifecycleManager.ready()
 }
 
 const has = (event) => {

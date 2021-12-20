@@ -80,6 +80,7 @@ export interface ProjectMetaState {
   hasLegacyCypressJson: boolean
   hasCypressEnvFile: boolean
   hasValidConfigFile: boolean
+  hasSpecifiedConfigViaCLI: false | string
   hasMultipleConfigPaths: boolean
   needsCypressJsonMigration: boolean
   // configuredTestingTypes: TestingType[]
@@ -91,6 +92,7 @@ const PROJECT_META_STATE: ProjectMetaState = {
   hasLegacyCypressJson: false,
   hasMultipleConfigPaths: false,
   hasCypressEnvFile: false,
+  hasSpecifiedConfigViaCLI: false,
   hasValidConfigFile: false,
   needsCypressJsonMigration: false,
   // configuredTestingTypes: [],
@@ -129,11 +131,9 @@ export class ProjectLifecycleManager {
       this.setCurrentProject(ctx.coreData.currentProject)
     }
 
-    if (ctx.coreData.currentTestingType) {
+    if (ctx.coreData.currentTestingType && this._projectRoot) {
       this.setCurrentTestingType(ctx.coreData.currentTestingType)
     }
-
-    this.legacyPluginGuard()
 
     // see timers/parent.js line #93 for why this is necessary
     process.on('exit', this.onProcessExit)
@@ -197,10 +197,10 @@ export class ProjectLifecycleManager {
   }
 
   get errorLoadingNodeEvents (): BaseErrorDataShape | null {
-    if (this._configResult.state === 'errored') {
+    if (this._eventsIpcResult.state === 'errored') {
       return {
         title: 'Error Loading Config',
-        message: String(this._configResult.value), // TODO: fix
+        message: String(this._eventsIpcResult.value), // TODO: fix
       }
     }
 
@@ -252,9 +252,10 @@ export class ProjectLifecycleManager {
       return
     }
 
-    this.loadGlobalBrowsers().catch(this.onError)
-    this.verifyProjectRoot(projectRoot)
     this._projectRoot = projectRoot
+    this.legacyPluginGuard()
+    this.loadGlobalBrowsers().catch(this.onLoadError)
+    this.verifyProjectRoot(projectRoot)
     this.resetInternalState()
     this.ctx.update((s) => {
       s.currentProject = projectRoot
@@ -264,10 +265,14 @@ export class ProjectLifecycleManager {
     this.configFileWarningCheck()
 
     if (this._projectMetaState.hasValidConfigFile) {
-      this.initializeConfig().catch(this.onError)
+      this.initializeConfig().catch(this.onLoadError)
     }
 
-    this.loadCypressEnvFile().catch(this.onError)
+    this.loadCypressEnvFile().catch(this.onLoadError)
+
+    if (this.ctx.coreData.currentTestingType) {
+      this.setCurrentTestingType(this.ctx.coreData.currentTestingType)
+    }
 
     this.initializeConfigWatchers()
   }
@@ -295,9 +300,9 @@ export class ProjectLifecycleManager {
     // config IPC & re-execute the setupTestingType
     if (this._registeredEventsTarget && testingType !== this._registeredEventsTarget) {
       this._configResult = { state: 'pending' }
-      this.initializeConfig()
+      this.initializeConfig().catch(this.onLoadError)
     } else if (this._eventsIpc && !this._registeredEventsTarget && this._configResult.state === 'loaded') {
-      this.setupNodeEvents()
+      this.setupNodeEvents().catch(this.onLoadError)
     }
   }
 
@@ -417,9 +422,11 @@ export class ProjectLifecycleManager {
           warning: browser.warning || this.ctx._apis.errorApi.message('CHROME_WEB_SECURITY_NOT_SUPPORTED', browser.name),
         }
       })
-    }
 
-    this.validateConfigFile(this.configFile, fullConfig)
+      // If we have withBrowsers set to false, it means we're coming from the legacy config.get API
+      // in tests, which shouldn't be validating the config
+      this.validateConfigFile(this.configFile, fullConfig)
+    }
 
     return _.cloneDeep(fullConfig)
   }
@@ -529,13 +536,15 @@ export class ProjectLifecycleManager {
     const configFileWatcher = this.addWatcher(this.configFilePath)
 
     configFileWatcher.on('all', () => {
-      this.reloadConfig().catch(this.onError)
+      this.ctx.coreData.baseError = null
+      this.reloadConfig().catch(this.onLoadError)
     })
 
     const cypressEnvFileWatcher = this.addWatcher(this.envFilePath)
 
     cypressEnvFileWatcher.on('all', () => {
-      this.reloadCypressEnvFile()
+      this.ctx.coreData.baseError = null
+      this.reloadCypressEnvFile().catch(this.onLoadError)
     })
   }
 
@@ -544,8 +553,8 @@ export class ProjectLifecycleManager {
    * This sources a fresh IPC channel & reads the config. If we detect a change
    * to the config or the list of imported files, we will re-execute the setupNodeEvents
    */
-  async reloadConfig (force = false) {
-    if (this._configResult.state === 'errored') {
+  reloadConfig () {
+    if (this._configResult.state === 'errored' || this._configResult.state === 'loaded') {
       this._configResult = { state: 'pending' }
 
       return this.initializeConfig()
@@ -555,36 +564,7 @@ export class ProjectLifecycleManager {
       return this.initializeConfig()
     }
 
-    assert.strictEqual(this._configResult.state, 'loaded')
-
-    const { ipc, child, promise } = this._loadConfig()
-
-    const currentResult = this._configResult
-
-    try {
-      const result = await promise
-
-      // If we've swapped out _configResult during the async/await, we don't want to mutate it
-      if (currentResult !== this._configResult) {
-        return {}
-      }
-
-      if (force || !_.isEqual(result, this._configResult.value)) {
-        this.validateConfigFile(this.configFilePath, result.initialConfig)
-        this._configResult.value = result
-        this.onConfigLoaded(child, ipc, result)
-      }
-
-      return result.initialConfig
-    } catch (e: any) {
-      // this._cleanupIpc(ipc)
-      // If we have a known good state from eariler, then we
-      // don't want this error to blow it away. Instead trigger
-      // an error.
-      this.ctx.onError(e, 'config')
-
-      return {}
-    }
+    throw new Error(`Unreachable state`)
   }
 
   private _loadConfig () {
@@ -614,21 +594,21 @@ export class ProjectLifecycleManager {
 
     assert.strictEqual(this._envFileResult.state, 'pending')
 
-    const promise = this.readCypressEnvFile()
-
-    this._envFileResult = { state: 'loading', value: promise }
-
-    promise.then((value) => {
-      this._envFileResult = { state: 'loaded', value }
+    const promise = this.readCypressEnvFile().then((value) => {
       this.validateConfigFile(this.envFilePath, value)
+      this._envFileResult = { state: 'loaded', value }
+
+      return value
     })
     .catch((e) => {
       this._envFileResult = { state: 'errored', value: e }
-      this._pendingInitialize?.reject(e)
+      throw e
     })
     .finally(() => {
       this.ctx.emitter.toLaunchpad()
     })
+
+    this._envFileResult = { state: 'loading', value: promise }
 
     return promise
   }
@@ -707,7 +687,7 @@ export class ProjectLifecycleManager {
       return
     }
 
-    this.setupNodeEvents().catch(this.onError)
+    this.setupNodeEvents().catch(this.onLoadError)
   }
 
   private async setupNodeEvents (): Promise<SetupNodeEventsReply> {
@@ -771,12 +751,13 @@ export class ProjectLifecycleManager {
 
     w.on('all', (evt) => {
       debug(`changed ${file}: ${evt}`)
+      // TODO: in the future, we will make this more specific to the individual process we need to load
       if (groupName === 'config') {
-        this.reloadConfig()
+        this.reloadConfig().catch(this.onLoadError)
       } else {
         // If we've edited the setupNodeEvents file, we need to re-execute
         // the config file to get a fresh ipc process to swap with
-        this.reloadConfig(true)
+        this.reloadConfig().catch(this.onLoadError)
       }
     })
 
@@ -920,9 +901,7 @@ export class ProjectLifecycleManager {
       child.stderr.on('data', (data) => process.stderr.write(data))
     }
 
-    child.on('error', (err) => {
-      dfd.reject(err)
-    })
+    child.on('error', dfd.reject)
 
     ipc.once('loadConfig:reply', (val) => {
       debug('loadConfig:reply')
@@ -1000,8 +979,15 @@ export class ProjectLifecycleManager {
     }
 
     if (typeof configFile === 'string') {
-      metaState.hasValidConfigFile = true
-      this._configFilePath = this._pathToFile(configFile)
+      metaState.hasSpecifiedConfigViaCLI = this._pathToFile(configFile)
+      if (configFile.endsWith('.json')) {
+        metaState.needsCypressJsonMigration = true
+      } else {
+        this._configFilePath = this._pathToFile(configFile)
+        if (fs.existsSync(this._configFilePath)) {
+          metaState.hasValidConfigFile = true
+        }
+      }
 
       return metaState
     }
@@ -1103,43 +1089,28 @@ export class ProjectLifecycleManager {
   private registerSetupIpcHandlers (ipc: ProjectConfigIpc) {
     const dfd = pDefer<SetupNodeEventsReply>()
 
+    ipc.childProcess.on('error', dfd.reject)
+
     // For every registration event, we want to turn into an RPC with the child process
     ipc.once('setupTestingType:reply', dfd.resolve)
     ipc.once('setupTestingType:error', (type, ...args) => {
       dfd.reject(this.ctx.error(type, ...args))
     })
 
-    //     const handleError = (err) => {
-    //       debug('plugins process error:', err.stack)
-
-    //       if (!pluginsProcess) return // prevent repeating this in case of multiple errors
-
-    //       killPluginsProcess()
-
-    //       err = errors.get('SETUP_NODE_EVENTS_UNEXPECTED_ERROR', config.testingType, config.configFile, err.annotated || err.stack || err.message)
-    //       err.title = 'Error running plugin'
-
-    //       // this can sometimes trigger before the promise is fulfilled and
-    //       // sometimes after, so we need to handle each case differently
-    //       if (fulfilled) {
-    //         options.onError(err)
-    //       } else {
-    //         reject(err)
-    //       }
-    //     }
-
     const handleWarning = (warningErr: WarningError) => {
       debug('plugins process warning:', warningErr.stack)
-      // if (!pluginsProcess) return // prevent repeating this in case of multiple warnings
 
       return this.ctx.onWarning(warningErr)
     }
 
-    //     pluginsProcess.on('error', handleError)
-    // ipc.on('error:plugins', handleError)
     ipc.on('warning', handleWarning)
 
     return dfd
+  }
+
+  destroy () {
+    // @ts-ignore
+    process.removeListener('exit', this.onProcessExit)
   }
 
   isTestingTypeConfigured (testingType: TestingType) {
@@ -1182,6 +1153,10 @@ export class ProjectLifecycleManager {
   }
 
   private configFileWarningCheck () {
+    if (!this.metaState.hasValidConfigFile && this.metaState.hasSpecifiedConfigViaCLI !== false) {
+      this.ctx.onError(this.ctx.error('CONFIG_FILE_NOT_FOUND', path.basename(this.metaState.hasSpecifiedConfigViaCLI), path.dirname(this.metaState.hasSpecifiedConfigViaCLI)), 'global')
+    }
+
     if (this.metaState.hasLegacyCypressJson && !this.metaState.hasValidConfigFile) {
       this.ctx.onError(this.ctx.error('CONFIG_FILE_MIGRATION_NEEDED', this.projectRoot), 'global')
     }
@@ -1195,7 +1170,12 @@ export class ProjectLifecycleManager {
     }
   }
 
-  private onError = (err: any) => {
+  /**
+   * When we have an error while "loading" a resource,
+   * we handle it internally with the promise state, and therefore
+   * do not
+   */
+  private onLoadError = (err: any) => {
     this._pendingInitialize?.reject(err)
   }
 }

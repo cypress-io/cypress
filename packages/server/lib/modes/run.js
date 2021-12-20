@@ -9,6 +9,7 @@ const debug = require('debug')('cypress:server:run')
 const Promise = require('bluebird')
 const logSymbols = require('log-symbols')
 const assert = require('assert')
+const { getCtx } = require('@packages/data-context')
 
 const recordMode = require('./record')
 const errors = require('../errors')
@@ -637,7 +638,7 @@ const createAndOpenProject = async (options) => {
     project: _project,
     config: _config,
     projectId: _projectId,
-    configFile: project.options.configFile,
+    configFile: getCtx().lifecycleManager.configFile,
   }
 }
 
@@ -1544,7 +1545,7 @@ module.exports = {
         recordMode.throwIfRecordParamsWithoutRecording(record, ciBuildId, parallel, group, tag)
 
         if (record) {
-          recordMode.throwIfNoProjectId(projectId, options.configFile)
+          recordMode.throwIfNoProjectId(projectId, configFile)
           recordMode.throwIfIncorrectCiBuildIdUsage(ciBuildId, parallel, group)
           recordMode.throwIfIndeterminateCiBuildId(ciBuildId, parallel, group)
         }

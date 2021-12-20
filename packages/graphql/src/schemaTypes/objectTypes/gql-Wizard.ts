@@ -3,7 +3,7 @@ import { WizardFrontendFramework } from './gql-WizardFrontendFramework'
 import { WizardNpmPackage } from './gql-WizardNpmPackage'
 import { objectType } from 'nexus'
 import { BUNDLERS, CODE_LANGUAGES, FRONTEND_FRAMEWORKS } from '@packages/types'
-import { TestingTypeEnum, WizardStepEnum } from '../enumTypes/gql-WizardEnums'
+import { WizardStepEnum } from '../enumTypes/gql-WizardEnums'
 import { WizardCodeLanguage } from './gql-WizardCodeLanguage'
 import { WizardSampleConfigFile } from './gql-WizardSampleConfigFile'
 
@@ -93,12 +93,6 @@ export const Wizard = objectType({
     t.nonNull.field('step', {
       type: WizardStepEnum,
       resolve: (source) => source.currentStep,
-    })
-
-    t.field('testingType', {
-      type: TestingTypeEnum,
-      description: 'The testing type we are setting in the wizard, null if this has not been chosen',
-      resolve: (source, args, ctx) => ctx.coreData.currentTestingType,
     })
 
     t.string('title', {

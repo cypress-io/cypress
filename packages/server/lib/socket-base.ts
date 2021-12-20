@@ -480,10 +480,11 @@ export class SocketBase {
       socket.on('get:user:editor', (cb) => {
         getUserEditor(false)
         .then(cb)
+        .catch(() => {})
       })
 
       socket.on('set:user:editor', (editor) => {
-        setUserEditor(editor)
+        setUserEditor(editor).catch(() => {})
       })
 
       socket.on('open:file', async (fileDetails: OpenFileDetails) => {

@@ -88,6 +88,9 @@ gulp.task(
     // And we're finally ready for electron, watching for changes in
     // /graphql to auto-restart the server
     startCypressWatch,
+
+    // Before dev, fetch the latest "remote" schema from the Cypress cloud
+    syncRemoteGraphQL,
   ),
 )
 
@@ -102,7 +105,6 @@ gulp.task('buildProd',
   gulp.series(
     viteClean,
 
-    syncRemoteGraphQL,
     nexusCodegen,
     graphqlCodegen,
     generateShikiTheme,

@@ -108,7 +108,9 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
     },
     electronApi: {
       openExternal (url: string) {
-        openExternal(url)
+        openExternal(url).catch((e) => {
+          ctx.logTraceError(e)
+        })
       },
       showItemInFolder (folder: string) {
         electron.shell.showItemInFolder(folder)

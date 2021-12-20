@@ -508,7 +508,8 @@ describe('lib/cypress', () => {
       })
     })
 
-    it('scaffolds out support + files if they do not exist', function () {
+    // NOTE: The scaffolding of files behavior has changed
+    it.skip('scaffolds out support + files if they do not exist', function () {
       const supportFolder = path.join(this.pristineWithConfigPath, 'cypress/support')
 
       ctx.actions.project.setCurrentProjectForTestSetup(this.pristineWithConfigPath)
@@ -530,7 +531,8 @@ describe('lib/cypress', () => {
       })
     })
 
-    it('removes fixtures when they exist and fixturesFolder is false', function (done) {
+    // NOTE: Removal of fixtures is not supported in new flow
+    it.skip('removes fixtures when they exist and fixturesFolder is false', function (done) {
       ctx.actions.project.setCurrentProjectForTestSetup(this.idsPath)
 
       config.get(this.idsPath)
@@ -1157,7 +1159,8 @@ describe('lib/cypress', () => {
     })
 
     describe('--config-file', () => {
-      it('false does not require cypress.config.js to run', function () {
+      // NOTE: --config-file=false is not supported
+      it.skip('false does not require cypress.config.js to run', function () {
         return fs.statAsync(path.join(this.pristinePath, 'cypress.config.js'))
         .then(() => {
           throw new Error('cypress.config.js should not exist')
@@ -1173,8 +1176,8 @@ describe('lib/cypress', () => {
         })
       })
 
-      it('with a custom config file fails when it doesn\'t exist', function () {
-        this.filename = 'abcdefgh.test.json'
+      it(`with a custom config file fails when it doesn't exist`, function () {
+        this.filename = 'abcdefgh.test.js'
 
         return fs.statAsync(path.join(this.todosPath, this.filename))
         .then(() => {

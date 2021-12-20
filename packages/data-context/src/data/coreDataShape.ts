@@ -75,6 +75,7 @@ export interface BaseErrorDataShape {
 
 export interface CoreDataShape {
   cliBrowser: string | null
+  cliTestingType: string | null
   chosenBrowser: FoundBrowser | null
   servers: {
     appServer?: Maybe<Server>
@@ -104,6 +105,7 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
   return {
     servers: {},
     cliBrowser: modeOptions.browser ?? null,
+    cliTestingType: modeOptions.testingType ?? null,
     hasInitializedMode: null,
     baseError: null,
     dev: {

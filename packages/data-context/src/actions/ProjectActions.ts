@@ -83,7 +83,7 @@ export class ProjectActions {
     this.ctx.lifecycleManager.clearCurrentProject()
     this.ctx.lifecycleManager.setCurrentProject(projectRoot)
     // @ts-expect-error - we are setting this as a convenience for our integration tests
-    this.ctx.modeOptions = {}
+    this.ctx._modeOptions = {}
   }
 
   async loadProjects () {

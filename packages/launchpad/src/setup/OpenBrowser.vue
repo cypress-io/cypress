@@ -28,10 +28,8 @@ gql`
 query OpenBrowser {
   currentProject {
     id
+    currentTestingType
     ...OpenBrowserList
-  }
-  wizard {
-    testingType
   }
 }
 `
@@ -55,7 +53,7 @@ mutation OpenBrowser_LaunchProject ($testingType: TestingTypeEnum!, $browserPath
 const launchOpenProject = useMutation(OpenBrowser_LaunchProjectDocument)
 
 const launch = (browserPath?: string) => {
-  const testingType = query.data.value?.wizard?.testingType
+  const testingType = query.data.value?.currentProject?.currentTestingType
 
   if (browserPath && testingType) {
     launchOpenProject.executeMutation({

@@ -39,7 +39,9 @@ export class ElectronActions {
     this.electron.browserWindow?.show()
 
     if (this.isMac) {
-      this.ctx.electronApp?.dock.show()
+      this.ctx.electronApp?.dock.show().catch((e) => {
+        this.ctx.logTraceError(e)
+      })
     } else {
       this.electron.browserWindow?.setSkipTaskbar(false)
     }

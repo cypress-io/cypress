@@ -145,7 +145,7 @@ export function setupFullConfigWithDefaults (obj: Record<string, any> = {}) {
   return mergeDefaults(config, options, cliConfig)
 }
 
-export function mergeDefaults (config: Record<string, any> = {}, options: Record<string, any> = {}, cliConfig = {}) {
+export function mergeDefaults (config: Record<string, any> = {}, options: Record<string, any> = {}, cliConfig: Record<string, any> = {}) {
   const resolved = {}
 
   config.rawJson = _.cloneDeep(config)
@@ -154,7 +154,7 @@ export function mergeDefaults (config: Record<string, any> = {}, options: Record
   debug('merged config with options, got %o', config)
 
   _
-  .chain(configUtils.allowed({ ...options, ...cliConfig }))
+  .chain(configUtils.allowed({ ...cliConfig, ...options }))
   .omit('env')
   .omit('browsers')
   .each((val, key) => {
@@ -177,12 +177,12 @@ export function mergeDefaults (config: Record<string, any> = {}, options: Record
 
   // split out our own app wide env from user env variables
   // and delete envFile
-  config.env = parseEnv(config, options.env, resolved)
+  config.env = parseEnv(config, { ...cliConfig.env, ...options.env }, resolved)
 
   config.cypressEnv = process.env.CYPRESS_INTERNAL_ENV
   debug('using CYPRESS_INTERNAL_ENV %s', config.cypressEnv)
   if (!isValidCypressInternalEnvValue(config.cypressEnv)) {
-    throw errors.get('INVALID_CYPRESS_INTERNAL_ENV', config.cypressEnv)
+    throw errors.throw('INVALID_CYPRESS_INTERNAL_ENV', config.cypressEnv)
   }
 
   delete config.envFile
@@ -203,20 +203,20 @@ export function mergeDefaults (config: Record<string, any> = {}, options: Record
     config = setUrls(config)
   }
 
+  // validate config again here so that we catch configuration errors coming
+  // from the CLI overrides or env var overrides
+  configUtils.validate(_.omit(config, 'browsers'), (errMsg) => {
+    throw errors.throw('CONFIG_VALIDATION_ERROR', errMsg)
+  })
+
   config = setAbsolutePaths(config)
 
   config = setParentTestsPaths(config)
 
   config = setNodeBinary(config, options.userNodePath, options.userNodeVersion)
 
-  // validate config again here so that we catch configuration errors coming
-  // from the CLI overrides or env var overrides
-  configUtils.validate(_.omit(config, 'browsers'), (errMsg) => {
-    throw errors.get('CONFIG_VALIDATION_ERROR', errMsg)
-  })
-
-  configUtils.validateNoBreakingConfig(config, errors.warning, (err) => {
-    throw err
+  configUtils.validateNoBreakingConfig(config, errors.warning, (err, ...args) => {
+    throw errors.get(err, ...args)
   })
 
   return setSupportFileAndFolder(config, defaultsForRuntime)
