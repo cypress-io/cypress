@@ -1,6 +1,6 @@
 require('../spec_helper')
 
-const { getExperiments, formatExperiments } = require(`${root}lib/experiments.ts`)
+const { getExperiments, formatExperiments } = require(`../../lib/experiments.ts`)
 
 describe('experiments', () => {
   context('#formatExperiments', () => {

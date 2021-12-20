@@ -3,11 +3,11 @@ require('../../spec_helper')
 const _ = require('lodash')
 const os = require('os')
 const electron = require('electron')
-const savedState = require(`${root}../lib/saved_state`)
-const menu = require(`${root}../lib/gui/menu`)
-const Events = require(`${root}../lib/gui/events`)
-const Windows = require(`${root}../lib/gui/windows`)
-const interactiveMode = require(`${root}../lib/modes/interactive-e2e`)
+const savedState = require(`../../../lib/saved_state`)
+const menu = require(`../../../lib/gui/menu`)
+const Events = require(`../../../lib/gui/events`)
+const Windows = require(`../../../lib/gui/windows`)
+const interactiveMode = require(`../../../lib/modes/interactive-e2e`)
 
 describe('gui/interactive', () => {
   context('.isMac', () => {

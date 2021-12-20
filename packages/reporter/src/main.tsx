@@ -19,8 +19,6 @@ import Header, { ReporterHeaderProps } from './header/header'
 import Runnables from './runnables/runnables'
 import TestingPreferences from './preferences/testing-preferences'
 
-let runnerListenersAdded = false
-
 interface BaseReporterProps {
   appState?: AppState
   className?: string
@@ -120,10 +118,7 @@ class Reporter extends Component<SingleReporterProps> {
       statsStore,
     })
 
-    if (!runnerListenersAdded) {
-      this.props.events.listen(runner)
-      runnerListenersAdded = true
-    }
+    this.props.events.listen(runner)
 
     shortcuts.start()
     EQ.init()

@@ -2,8 +2,8 @@ require('../spec_helper')
 
 const style = require('ansi-styles')
 const chalk = require('chalk')
-const errors = require(`${root}lib/errors`)
-const logger = require(`${root}lib/logger`)
+const errors = require(`../../lib/errors`)
+const logger = require(`../../lib/logger`)
 const snapshot = require('snap-shot-it')
 
 describe('lib/errors', () => {

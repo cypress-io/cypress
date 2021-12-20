@@ -10,17 +10,11 @@ import defaultEvents from '@packages/reporter/src/lib/events'
 import { Reporter } from '@packages/reporter/src/main'
 import shortcuts from '@packages/reporter/src/lib/shortcuts'
 import * as MobX from 'mobx'
+import { createWebsocket } from '@packages/app/src/runner'
 
 export function getSpecUrl (namespace: string, spec: FoundSpec, prefix = '') {
   return spec ? `${prefix}/${namespace}/iframes/${spec.absolute}` : ''
 }
-
-const eventManager = new EventManager(
-  $Cypress,
-  MobX,
-  selectorPlaygroundModel,
-  StudioRecorder,
-)
 
 const UnifiedRunner = {
   _,
@@ -82,6 +76,20 @@ const Runner: any = {
   },
 
   start (el, base64Config) {
+    const ws = createWebsocket()
+
+    // NOTE: this is exposed for testing, ideally we should only expose this if a test flag is set
+    window.runnerWs = ws
+    window.ws = ws
+
+    const eventManager = new EventManager(
+      $Cypress,
+      MobX,
+      selectorPlaygroundModel,
+      StudioRecorder,
+      ws,
+    )
+
     MobX.action('started', () => {
       const config = JSON.parse(driverUtils.decodeBase64Unicode(base64Config))
 

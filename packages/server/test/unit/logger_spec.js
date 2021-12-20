@@ -2,9 +2,9 @@ require('../spec_helper')
 
 const _ = require('lodash')
 const Promise = require('bluebird')
-const appData = require(`${root}lib/util/app_data`)
-const logger = require(`${root}lib/logger`)
-const exception = require(`${root}lib/exception`)
+const appData = require(`../../lib/util/app_data`)
+const logger = require(`../../lib/logger`)
+const exception = require(`../../lib/exception`)
 
 describe('lib/logger', () => {
   beforeEach(() => {

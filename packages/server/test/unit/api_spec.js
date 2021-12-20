@@ -6,10 +6,10 @@ const {
   agent,
 } = require('@packages/network')
 const pkg = require('@packages/root')
-const api = require(`${root}lib/api`)
-const cache = require(`${root}lib/cache`)
-const errors = require(`${root}lib/errors`)
-const machineId = require(`${root}lib/util/machine_id`)
+const api = require(`../../lib/api`)
+const cache = require(`../../lib/cache`)
+const errors = require(`../../lib/errors`)
+const machineId = require(`../../lib/util/machine_id`)
 const Promise = require('bluebird')
 
 const API_BASEURL = 'http://localhost:1234'

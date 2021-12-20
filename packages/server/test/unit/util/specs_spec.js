@@ -3,7 +3,7 @@ require('../../spec_helper')
 const _ = require('lodash')
 const path = require('path')
 const config = require('../../../lib/config')
-const specsUtil = require(`${root}../lib/util/specs`).default
+const specsUtil = require(`../../../lib/util/specs`).default
 const FixturesHelper = require('@tooling/system-tests/lib/fixtures')
 const debug = require('debug')('test')
 const { getCtx } = require('../../../lib/makeDataContext')
