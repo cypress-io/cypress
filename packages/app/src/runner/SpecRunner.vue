@@ -45,7 +45,7 @@
         </HideDuringScreenshot>
       </template>
       <template
-        #panel3
+        #panel3="{width}"
       >
         <HideDuringScreenshot class="bg-white p-16px">
           <SpecRunnerHeader
@@ -53,6 +53,7 @@
             :gql="props.gql.currentProject"
             :event-manager="eventManager"
             :get-aut-iframe="getAutIframeModel"
+            :width="width - 32"
           />
         </HideDuringScreenshot>
 
@@ -207,6 +208,10 @@ function runSpec () {
   UnifiedRunnerAPI.executeSpec(props.activeSpec)
 }
 
+const runnerMargin = computed(() => {
+  return screenshotStore.isScreenshotting ? 'unset' : '0 auto'
+})
+
 let fileToOpen: FileDetails
 
 const openFileInIDE = useMutation(OpenFileInIdeDocument)
@@ -305,7 +310,7 @@ $navbar-width: 80px;
 
 #unified-runner {
   position: relative;
-  margin: 0 auto;
+  margin: v-bind('runnerMargin');
 }
 
 #unified-reporter {

@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div :style="{width: `${props.width}px`}">
     <div class="flex justify-between">
       <!--
         TODO: Studio. Out of scope for GA.
@@ -28,7 +28,7 @@
         data-cy="aut-url"
       >
         <div
-          class="flex px-4 mx-2 rounded-md shadow-md url"
+          class="rounded-md flex shadow-md mx-2 px-4 url"
           :class="{
             'bg-yellow-50': autStore.isLoadingUrl,
             'bg-white': !autStore.isLoadingUrl,
@@ -113,6 +113,7 @@ const props = defineProps<{
   gql: SpecRunnerHeaderFragment
   eventManager: EventManager
   getAutIframe: () => AutIframe
+  width?: number
 }>()
 
 const autIframe = props.getAutIframe()
