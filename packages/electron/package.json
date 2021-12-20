@@ -24,7 +24,11 @@
   },
   "devDependencies": {
     "electron": "15.2.0",
+<<<<<<< HEAD
     "electron-packager": "15.4.0",
+=======
+    "electron-packager": "15.1.0",
+>>>>>>> develop
     "execa": "4.1.0",
     "mocha": "3.5.3",
     "rimraf": "3.0.2"
