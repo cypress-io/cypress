@@ -1,5 +1,5 @@
 <template>
-  <div class="mx-auto space-y-32px text-center min-w-476px max-w-565px pt-16px children:text-center">
+  <div class="mx-auto space-y-32px text-center min-w-476px max-w-848px pt-16px children:text-center">
     <div>
       <h1
         class="font-medium leading-snug text-32px text-gray-900"
@@ -28,7 +28,8 @@
           body-class="p-0px bg-red-50"
           alert-class="bg-red-50"
           header-class="bg-red-100 text-red-600 rounded-b-none"
-          :prefix-icon="ErrorOutlineIcon"
+          :icon="ErrorOutlineIcon"
+          icon-classes="icon-dark-red-400"
         >
           <p
             v-if="errorMessage"
@@ -47,7 +48,8 @@
             >
               <template #target="{open, toggle}">
                 <p
-                  class="pb-8px gap-8px inline-flex items-center justify-center"
+                  class="gap-8px inline-flex items-center justify-center"
+                  :class="{'pb-8px': open}"
                 >
                   <i-cy-chevron-right-small_x16
                     class="min-w-8px min-h-8px transform duration-150 icon-dark-red-400"

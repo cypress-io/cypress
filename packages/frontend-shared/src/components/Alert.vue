@@ -108,6 +108,7 @@ const props = withDefaults(defineProps<{
   dismissible?: boolean,
   collapsible?: boolean,
   modelValue?: boolean,
+  iconClasses?: string
 }>(), {
   modelValue: true,
   alertClass: undefined,
@@ -115,6 +116,8 @@ const props = withDefaults(defineProps<{
   icon: undefined,
   headerClass: undefined,
   divider: true,
+  bodyClass: '',
+  iconClasses: '',
 })
 
 const title = computed(() => props.title ?? 'Alert')
@@ -173,7 +176,7 @@ const canCollapse = computed(() => slots.default && props.collapsible)
 const initiallyOpen = computed(() => slots.default && !props.collapsible)
 
 const prefix = computed(() => {
-  if (props.icon) return { icon: props.icon }
+  if (props.icon) return { classes: props.iconClasses, icon: props.icon }
 
   if (canCollapse.value) {
     return {
