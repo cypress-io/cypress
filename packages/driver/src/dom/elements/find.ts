@@ -125,8 +125,14 @@ export const getFirstDeepestElement = ($el: JQuery, index = 0) => {
   const $current = $el.slice(index, index + 1)
   const $next = $el.slice(index + 1, index + 2)
 
-  if (!$next) {
+  if (!$next || $current.length === 0) {
     return $current
+  }
+
+  // https://github.com/cypress-io/cypress/issues/19377
+  // filter out <script> and <style> tags
+  if ($current && ['SCRIPT', 'STYLE'].includes($current.prop('tagName'))) {
+    return getFirstDeepestElement($el, index + 1)
   }
 
   // does current contain next?
