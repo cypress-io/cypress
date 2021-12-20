@@ -29,11 +29,11 @@ export class PrimaryDomainCommunicator extends EventEmitter {
 
     this.windowReference.top.addEventListener('message', ({ data, source }) => {
       // currently used for tests, can be removed later
-      if (data && data.actual) return
+      if (data?.actual) return
 
       // check if message is cross domain and if so, feed the message into
       // the cross domain bus with args and strip prefix
-      if (data.event.includes(CROSS_DOMAIN_PREFIX)) {
+      if (data?.event?.includes(CROSS_DOMAIN_PREFIX)) {
         const messageName = data.event.replace(CROSS_DOMAIN_PREFIX, '')
 
         // NOTE: need a special case here for 'window:before:load'
