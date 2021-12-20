@@ -574,6 +574,10 @@ export default (Commands, Cypress, cy, state) => {
             $el = $dom.getFirstDeepestElement($el)
           }
 
+          if ($el.length > 0 && ['SCRIPT', 'STYLE'].includes($el[0].tagName)) {
+            $el = $el.slice($el.length)
+          }
+
           setEl($el)
 
           return cy.verifyUpcomingAssertions($el, options, {

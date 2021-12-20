@@ -4,7 +4,7 @@ import $document from '../document'
 import $jquery from '../jquery'
 import { getTagName } from './elementHelpers'
 import { isWithinShadowRoot, getShadowElementFromPoint } from './shadow'
-import { normalizeWhitespaces, escapeQuotes, isSelector } from './utils'
+import { normalizeWhitespaces, escapeQuotes } from './utils'
 
 /**
  * Find Parents relative to an initial element
@@ -217,20 +217,6 @@ export const getElements = ($el) => {
   return els
 }
 
-// Remove <style> and <script> elements inside <body>. Even though the contains
-// selector avoids selecting them with :not(script,style), it will find the
-// text anyway and attribute it to the <body>
-// https://github.com/cypress-io/cypress/issues/14861
-const removeScriptAndStyleElements = (elem) => {
-  const $elem = $(elem)
-
-  if (!isSelector($elem, 'body')) return elem
-
-  $elem.find('script,style').remove()
-
-  return $elem[0]
-}
-
 export const getContainsSelector = (text, filter = '', options: {
   matchCase?: boolean
 } = {}) => {
@@ -252,14 +238,12 @@ export const getContainsSelector = (text, filter = '', options: {
 
     // taken from jquery's normal contains method
     cyContainsSelector = function (elem) {
-      elem = removeScriptAndStyleElements(elem)
       let testText = normalizeWhitespaces(elem)
 
       return text.test(testText)
     }
   } else if (_.isString(text)) {
     cyContainsSelector = function (elem) {
-      elem = removeScriptAndStyleElements(elem)
       let testText = normalizeWhitespaces(elem)
 
       if (!options.matchCase) {
@@ -284,7 +268,7 @@ export const getContainsSelector = (text, filter = '', options: {
     const textToFind = escapedText.includes(`\'`) ? `"${escapedText}"` : `'${escapedText}'`
 
     // use custom cy-contains selector that is registered above
-    return `${filter}:not(script,style):cy-contains(${textToFind}), ${filter}[type='submit'][value~=${textToFind}]`
+    return `${filter}:cy-contains(${textToFind}), ${filter}[type='submit'][value~=${textToFind}]`
   })
 
   return selectors.join()
