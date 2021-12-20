@@ -4,28 +4,23 @@
     :title="t('runs.connect.modal.title')"
     @update:model-value="emit('cancel')"
   >
-    <div class="border border-dashed rounded border-gray-100 p-24px w-592px ">
-      <p class="text-center text-gray-700">
+    <div class="border border-dashed rounded border-gray-100 text-center p-24px w-592px">
+      <p class=" mb-16px text-gray-700">
         {{ t('runs.connect.modal.createOrg.description') }}
       </p>
       <ExternalLink
-        class="mx-auto mt-16px"
+        class="border rounded mx-auto border-gray-100 py-4px px-16px text-indigo-500 inline-block"
         :href="createOrgUrl"
         :prefix-icon="OrganizationIcon"
         prefix-icon-class="icon-light-transparent icon-dark-white"
       >
         {{ t('runs.connect.modal.createOrg.button') }}
       </ExternalLink>
-      <Button
-        v-if="!polling"
-        @click="startPolling()"
-      >
-        {{ t('runs.connect.modal.createOrg.refreshButton') }}
-      </Button>
     </div>
     <template #footer>
       <div class="flex gap-16px">
         <Button
+          v-if="polling"
           size="lg"
           variant="pending"
         >
@@ -35,6 +30,13 @@
             />
           </template>
           {{ t('runs.connect.modal.createOrg.waitingButton') }}
+        </Button>
+        <Button
+          v-else
+          size="lg"
+          @click="startPolling()"
+        >
+          {{ t('runs.connect.modal.createOrg.refreshButton') }}
         </Button>
         <Button
           variant="outline"
@@ -106,7 +108,7 @@ const { pause, resume } = useIntervalFn(() => {
   } else {
     query.executeQuery()
   }
-}, 2000)
+}, 3000)
 
 function startPolling () {
   if (!polling.value) {

@@ -380,7 +380,7 @@
           "description": "You need to create an organization in the Cypress Dashboard to continue.",
           "button": "Create Organization",
           "waitingButton": "Waiting for you to create an organization...",
-          "refreshButton": "Refresh"
+          "refreshButton": "Refresh Organizations List"
         },
         "selectProject": {
           "organization": "Organization",
