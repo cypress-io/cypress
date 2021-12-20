@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 /* eslint-disable prefer-rest-params */
 import _ from 'lodash'
 import Promise from 'bluebird'
@@ -8,14 +6,14 @@ import { registerFetch } from 'unfetch'
 
 import $dom from '../dom'
 import $utils from './utils'
-import $errUtils from './error_utils'
+import $errUtils, { ErrorFromProjectRejectionEvent } from './error_utils'
 import $stackUtils from './stack_utils'
 
 import { create as createChai, IChai } from '../cy/chai'
 import { create as createXhr, IXhr } from '../cy/xhrs'
 import { create as createJQuery, IJQuery } from '../cy/jquery'
 import { create as createAliases, IAliases } from '../cy/aliases'
-import * as $Events from './events'
+import { extend as extendEvents } from './events'
 import { create as createEnsures, IEnsures } from '../cy/ensures'
 import { create as createFocused, IFocused } from '../cy/focused'
 import { create as createMouse, Mouse } from '../cy/mouse'
@@ -35,6 +33,7 @@ import { CommandQueue } from './command_queue'
 import { initVideoRecorder } from '../cy/video-recorder'
 import { TestConfigOverride } from '../cy/testConfigOverrides'
 import { historyNavigationTriggeredHashChange } from '../cy/navigation'
+import { EventEmitter2 } from 'eventemitter2'
 
 const debugErrors = debugFn('cypress:driver:errors')
 
@@ -56,7 +55,7 @@ function __stackReplacementMarker (fn, ctx, args) {
   return fn.apply(ctx, args)
 }
 
-declare let top: WindowProxy & { __alreadySetErrorHandlers__: boolean } | null
+declare let top: WindowProxy & { __alreadySetErrorHandlers__: boolean }
 
 // We only set top.onerror once since we make it configurable:false
 // but we update cy instance every run (page reload or rerun button)
@@ -78,7 +77,7 @@ const setTopOnError = function (Cypress, cy: $Cy) {
 
   // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
   const onTopError = (handlerType) => (event) => {
-    const { originalErr, err, promise } = $errUtils.errorFromUncaughtEvent(handlerType, event)
+    const { originalErr, err, promise } = $errUtils.errorFromUncaughtEvent(handlerType, event) as ErrorFromProjectRejectionEvent
 
     // in some callbacks like for cy.intercept, we catch the errors and then
     // rethrow them, causing them to get caught by the top frame
@@ -116,7 +115,7 @@ const setTopOnError = function (Cypress, cy: $Cy) {
   top.__alreadySetErrorHandlers__ = true
 }
 
-export class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILocation, ITimer, IChai, IXhr, IAliases, IEnsures, ISnapshots, IFocused {
+export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILocation, ITimer, IChai, IXhr, IAliases, IEnsures, ISnapshots, IFocused {
   id: string
   specWindow: any
   state: any
@@ -201,6 +200,8 @@ export class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuer
   private commandFns: Record<string, Function> = {}
 
   constructor (specWindow, Cypress, Cookies, state, config) {
+    super()
+
     state('specWindow', specWindow)
 
     this.specWindow = specWindow
@@ -248,7 +249,7 @@ export class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuer
     this.verifyUpcomingAssertions = assertions.verifyUpcomingAssertions
 
     const onFinishAssertions = function () {
-      return assertions.finishAssertions.apply(window, arguments)
+      return assertions.finishAssertions.apply(window, arguments as any)
     }
 
     const retries = createRetries(Cypress, state, this.timeout, this.clearTimeout, this.whenStable, onFinishAssertions)
@@ -342,7 +343,7 @@ export class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuer
     // make cy global in the specWindow
     specWindow.cy = this
 
-    $Events.extend(this)
+    extendEvents(this)
   }
 
   $$ (selector, context) {
@@ -361,7 +362,7 @@ export class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuer
     return this.queue.stopped
   }
 
-  fail (err, options = {}) {
+  fail (err, options: { async?: boolean } = {}) {
     // this means the error has already been through this handler and caught
     // again. but we don't need to run it through again, so we can re-throw
     // it and it will fail the test as-is
@@ -443,7 +444,7 @@ export class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuer
     try {
       // collect all of the callbacks for 'fail'
       rets = this.Cypress.action('cy:fail', err, this.state('runnable'))
-    } catch (cyFailErr) {
+    } catch (cyFailErr: any) {
       // and if any of these throw synchronously immediately error
       cyFailErr.isCyFailErr = true
 
@@ -506,7 +507,7 @@ export class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuer
         // about:blank in a visit, we do need these
         this.contentWindowListeners(getContentWindow($autIframe))
 
-        cy.Cypress.action('app:window:load', this.state('window'))
+        this.Cypress.action('app:window:load', this.state('window'))
 
         // we are now stable again which is purposefully
         // the last event we call here, to give our event
@@ -823,6 +824,8 @@ export class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuer
         r(err)
       }
     }
+
+    return
   }
 
   setRunnable (runnable, hookId) {
@@ -1076,7 +1079,7 @@ export class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuer
     $Listeners.bindTo(contentWindow, {
       // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
       onError: (handlerType) => (event) => {
-        const { originalErr, err, promise } = $errUtils.errorFromUncaughtEvent(handlerType, event)
+        const { originalErr, err, promise } = $errUtils.errorFromUncaughtEvent(handlerType, event) as ErrorFromProjectRejectionEvent
         const handled = cy.onUncaughtException({
           err,
           promise,
@@ -1166,7 +1169,8 @@ export class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuer
     return this.Cypress.action('cy:command:enqueued', obj)
   }
 
-  private getCommandsUntilFirstParentOrValidSubject (command, memo = []) {
+  // TODO: Replace any with Command type.
+  private getCommandsUntilFirstParentOrValidSubject (command, memo: any[] = []) {
     if (!command) {
       return null
     }
@@ -1182,11 +1186,12 @@ export class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuer
     return this.getCommandsUntilFirstParentOrValidSubject(command.get('prev'), memo)
   }
 
-  private pushSubjectAndValidate (name, args, firstCall, prevSubject) {
+  // TODO: make string[] more
+  private pushSubjectAndValidate (name, args, firstCall, prevSubject: string[]) {
     if (firstCall) {
       // if we have a prevSubject then error
       // since we're invoking this improperly
-      if (prevSubject && ![].concat(prevSubject).includes('optional')) {
+      if (prevSubject && !([] as string[]).concat(prevSubject).includes('optional')) {
         const stringifiedArg = $utils.stringifyActual(args[0])
 
         $errUtils.throwErrByPath('miscellaneous.invoking_child_without_parent', {
@@ -1208,7 +1213,7 @@ export class $Cy implements ITimeouts, IStability, IAssertions, IRetries, IJQuer
     if (prevSubject) {
       // make sure our current subject is valid for
       // what we expect in this command
-      this.ensureSubjectByType(subject, prevSubject, name)
+      this.ensureSubjectByType(subject, prevSubject)
     }
 
     args.unshift(subject)
