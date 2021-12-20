@@ -572,10 +572,10 @@ export default (Commands, Cypress, cy, state) => {
         return cy.now('get', selector, getOptions).then(($el) => {
           if ($el && $el.length) {
             $el = $dom.getFirstDeepestElement($el)
-          }
 
-          if ($el.length > 0 && ['SCRIPT', 'STYLE'].includes($el[0].tagName)) {
-            $el = $el.slice($el.length)
+            if (['SCRIPT', 'STYLE'].includes($el[0].tagName)) {
+              $el = $el.slice($el.length)
+            }
           }
 
           setEl($el)
