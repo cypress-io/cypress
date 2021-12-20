@@ -22,7 +22,7 @@ describe('lib/controllers/spec', () => {
     sinon.stub(preprocessor, 'getFile').resolves(outputFilePath)
     this.onError = sinon.spy()
 
-    this.handle = (filePath, config = {}) => {
+    this.handle = (filePath, config = { projectRoot: '/project/root' }) => {
       return spec.handle(filePath, {}, this.res, config, (() => {}), this.onError)
     }
   })
@@ -56,7 +56,7 @@ describe('lib/controllers/spec', () => {
   it('calls onError callback in run mode', function () {
     preprocessor.getFile.rejects(new Error('Reason request failed'))
 
-    return this.handle(specName, { isTextTerminal: true }).then(() => {
+    return this.handle(specName, { isTextTerminal: true, projectRoot: '/project/root' }).then(() => {
       expect(this.onError).to.be.called
       expect(this.onError.lastCall.args[0].message).to.include('Oops...we found an error preparing this test file')
       expect(this.onError.lastCall.args[0].message).to.include('Reason request failed')

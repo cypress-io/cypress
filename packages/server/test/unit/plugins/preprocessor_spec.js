@@ -32,14 +32,14 @@ describe('lib/plugins/preprocessor', () => {
 
   context('#getFile', () => {
     it('executes the plugin with file path', function () {
-      preprocessor.getFile(this.filePath, this.config)
+      preprocessor.getFile(this.fullFilePath, this.config)
       expect(this.plugin).to.be.called
 
       expect(this.plugin.lastCall.args[0].filePath).to.equal(this.fullFilePath)
     })
 
     it('executes the plugin with output path', function () {
-      preprocessor.getFile(this.filePath, this.config)
+      preprocessor.getFile(this.fullFilePath, this.config)
       const expectedPath = appData.projectsPath(appData.toHashName(this.todosPath), 'bundles', this.filePath)
 
       expect(this.plugin.lastCall.args[0].outputPath).to.equal(expectedPath)
@@ -53,7 +53,7 @@ describe('lib/plugins/preprocessor', () => {
     })
 
     it('returns a promise resolved with the plugin\'s outputPath', function () {
-      return preprocessor.getFile(this.filePath, this.config).then((filePath) => {
+      return preprocessor.getFile(this.fullFilePath, this.config).then((filePath) => {
         expect(filePath).to.equal('/path/to/output.js')
       })
     })
@@ -62,7 +62,7 @@ describe('lib/plugins/preprocessor', () => {
       const fileUpdated = sinon.spy()
 
       preprocessor.emitter.on('file:updated', fileUpdated)
-      preprocessor.getFile(this.filePath, this.config)
+      preprocessor.getFile(this.fullFilePath, this.config)
       this.plugin.lastCall.args[0].emit('rerun')
 
       expect(fileUpdated).to.be.calledWith(this.fullFilePath)
@@ -70,16 +70,16 @@ describe('lib/plugins/preprocessor', () => {
 
     it('invokes plugin again when isTextTerminal: false', function () {
       this.config.isTextTerminal = false
-      preprocessor.getFile(this.filePath, this.config)
-      preprocessor.getFile(this.filePath, this.config)
+      preprocessor.getFile(this.fullFilePath, this.config)
+      preprocessor.getFile(this.fullFilePath, this.config)
 
       expect(this.plugin).to.be.calledTwice
     })
 
     it('does not invoke plugin again when isTextTerminal: true', function () {
       this.config.isTextTerminal = true
-      preprocessor.getFile(this.filePath, this.config)
-      preprocessor.getFile(this.filePath, this.config)
+      preprocessor.getFile(this.fullFilePath, this.config)
+      preprocessor.getFile(this.fullFilePath, this.config)
 
       expect(this.plugin).to.be.calledOnce
     })
@@ -87,11 +87,11 @@ describe('lib/plugins/preprocessor', () => {
 
   context('#removeFile', () => {
     it('emits \'close\'', function () {
-      preprocessor.getFile(this.filePath, this.config)
+      preprocessor.getFile(this.fullFilePath, this.config)
       const onClose = sinon.spy()
 
       this.plugin.lastCall.args[0].on('close', onClose)
-      preprocessor.removeFile(this.filePath, this.config)
+      preprocessor.removeFile(this.fullFilePath, this.config)
 
       expect(onClose).to.be.called
     })
@@ -100,7 +100,7 @@ describe('lib/plugins/preprocessor', () => {
       const onClose = sinon.spy()
 
       preprocessor.emitter.on('close', onClose)
-      preprocessor.getFile(this.filePath, this.config)
+      preprocessor.getFile(this.fullFilePath, this.config)
       preprocessor.removeFile(this.filePath, this.config)
 
       expect(onClose).to.be.calledWith(this.fullFilePath)
@@ -109,7 +109,7 @@ describe('lib/plugins/preprocessor', () => {
 
   context('#close', () => {
     it('emits \'close\' on config emitter', function () {
-      preprocessor.getFile(this.filePath, this.config)
+      preprocessor.getFile(this.fullFilePath, this.config)
       const onClose = sinon.spy()
 
       this.plugin.lastCall.args[0].on('close', onClose)
@@ -122,7 +122,7 @@ describe('lib/plugins/preprocessor', () => {
       const onClose = sinon.spy()
 
       preprocessor.emitter.on('close', onClose)
-      preprocessor.getFile(this.filePath, this.config)
+      preprocessor.getFile(this.fullFilePath, this.config)
       preprocessor.close()
 
       expect(onClose).to.be.called

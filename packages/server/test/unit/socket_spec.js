@@ -681,7 +681,7 @@ describe('lib/socket', () => {
 
         this.socket.watchTestFileByPath(this.cfg, spec)
 
-        expect(preprocessor.getFile).to.be.calledWith(spec.relative, this.cfg)
+        expect(preprocessor.getFile).to.be.calledWith(spec.absolute, this.cfg)
       })
 
       it('triggers watched:file:changed event when preprocessor \'file:updated\' is received', function (done) {
