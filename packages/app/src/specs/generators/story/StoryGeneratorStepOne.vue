@@ -32,7 +32,7 @@
     >
       <router-link
         class="outline-none"
-        :to="{ path: 'specs/runner', query: { file: result.spec.relative } }
+        :to="{ path: '/specs/runner', query: { file: result.spec.relative } }
         "
       >
         <Button
@@ -70,7 +70,7 @@ import TestResultsIcon from '~icons/cy/test-results_x24.svg'
 
 const props = defineProps<{
   title: string,
-  codeGenGlob: any
+  codeGenGlob: string
 }>()
 
 const { t } = useI18n()
@@ -89,7 +89,10 @@ title.value = t('createSpec.component.importFromStory.header')
 gql`
 fragment StoryGeneratorStepOne_codeGenGlob on CurrentProject {
   id
-  codeGenGlob(type: story)
+  codeGenGlobs {
+    id
+    story
+  }
 }
 `
 
@@ -149,8 +152,8 @@ whenever(result, () => {
 
 const makeSpec = async (file) => {
   const { data } = await mutation.executeMutation({
-    codeGenCandidate: file.relative,
-    type: 'component',
+    codeGenCandidate: file.absolute,
+    type: 'story',
   })
 
   result.value = data?.generateSpecFromSource

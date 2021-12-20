@@ -3,6 +3,7 @@
 
 export * from './gql-BaseError'
 export * from './gql-Browser'
+export * from './gql-CodeGenGlobs'
 export * from './gql-CodeGenResult'
 export * from './gql-CurrentProject'
 export * from './gql-DevState'
