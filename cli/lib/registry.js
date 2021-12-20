@@ -66,7 +66,11 @@ const registeredBinaries = async () => {
   }, { cypress: new Set([util.pkgVersion()]) })// The current version should always be added to the registered versions.
 }
 
-const addUnassociatedVersion = ({ versions = {}, version }) => {
+const addUnassociatedBinaryVersion = ({ versions = {}, version }) => {
+  if (versions.hasOwnProperty(version)) {
+    return undefined
+  }
+
   return {
     [version]: {
       installed: new Date().toISOString(),
@@ -75,10 +79,10 @@ const addUnassociatedVersion = ({ versions = {}, version }) => {
   }
 }
 
-const addRegisteredVersion = ({ versions = [], version }) => {
+const addBinaryVersion = ({ versions = [], version }) => {
   // if the first entry is same as the version we're trying to insert, bail.
   if (versions.length > 0 && versions[0].version === version) {
-    return versions
+    return undefined
   }
 
   return [
@@ -111,15 +115,29 @@ const registerBinary = async ({ name, version, isUnassociated }) => {
     version: '1',
     packagePath: PACKAGE_PATH,
     binaries: {},
-    unassociated: {},
+    unassociatedBinaries: {},
   }
 
-  const { unassociated = {}, binaries = {} } = registry
+  const { unassociatedBinaries = {}, binaries = {} } = registry
 
   if (isUnassociated) {
-    registry.unassociated[name] = addUnassociatedVersion({ versions: unassociated[name], version })
+    const updatedUnassociatedVersions = addUnassociatedBinaryVersion({ versions: unassociatedBinaries[name], version })
+
+    if (!unassociatedBinaries) {
+      // No updates, version already present.
+      return
+    }
+
+    registry.unassociatedBinaries[name] = updatedUnassociatedVersions
   } else {
-    registry.binaries[name] = addRegisteredVersion({ versions: binaries[name], version })
+    const updatedBinaryVersions = addBinaryVersion({ versions: binaries[name], version })
+
+    if (!updatedBinaryVersions) {
+      // No updates, version already present.
+      return
+    }
+
+    registry.binaries[name] = updatedBinaryVersions
   }
 
   // save registry file
