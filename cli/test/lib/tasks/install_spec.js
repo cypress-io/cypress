@@ -473,6 +473,24 @@ describe('/lib/tasks/install', function () {
       })
     })
 
+    it('aborts pruning when the CYPRESS_DISABLE_CACHE_PRUNING env is set', () => {
+      process.env.CYPRESS_DISABLE_CACHE_PRUNING = 'true'
+
+      return install.start()
+      .then(() => {
+        expect(cache.prune).not.to.be.called
+      })
+    })
+
+    it('aborts pruning when the isCI returns true', () => {
+      util.isCi.returns(true)
+
+      return install.start()
+      .then(() => {
+        expect(cache.prune).not.to.be.called
+      })
+    })
+
     it('continues to install when the prune task fails', function () {
       cache.prune.throws()
       state.getBinaryPkgAsync.resolves(null)

@@ -6,6 +6,7 @@ const fs = require(`${lib}/fs`)
 const state = require(`${lib}/tasks/state`)
 const util = require(`${lib}/util`)
 const cache = require(`${lib}/tasks/cache`)
+const registry = require(`${lib}/registry`)
 const stdout = require('../../support/stdout')
 const snapshot = require('../../support/snapshot')
 const dayjs = require('dayjs')
@@ -132,49 +133,203 @@ describe('lib/tasks/cache', () => {
     })
   })
 
-  /*describe('.prune', () => {
-    it('deletes cache binaries for all version but the current one', async () => {
-      await cache.prune()
+  describe('.prune', () => {
+    it('throws when there is a problem', async () => {
+      sinon.stub(registry, 'registeredBinaries').throws()
+      await cache.prune().catch((e) => {
+        defaultSnapshot()
+      })
+    })
 
-      const currentVersion = util.pkgVersion()
+    it('does not delete binaries with an atime younger than 90 days', async () => {
+      const currentVersion = '10.0.0'
+
+      sinon.stub(registry, 'registeredBinaries').resolves({ cypress: new Set([currentVersion]) })
+      util.pkgVersion.returns(currentVersion)
+      sinon.stub(state, 'getPathToExecutable').returns('/.cache/Cypress/2.3.4/cypress')
+      mockfs({
+        '/.cache/Cypress': {
+          '2.3.4': {
+            'Cypress.app': {},
+          },
+        },
+      })
+
+      sinon.stub(fs, 'statAsync').resolves({
+        atime: Date.now(),
+      })
+
+      await cache.prune()
 
       const files = await fs.readdir('/.cache/Cypress')
 
       expect(files.length).to.eq(1)
 
-      files.forEach((file) => {
-        expect(file).to.eq(currentVersion)
-      })
+      expect(files[0]).to.eq('2.3.4')
 
       defaultSnapshot()
     })
 
-    it('doesn\'t delete any cache binaries', async () => {
-      const dir = path.join(state.getCacheDir(), '2.3.4')
+    it('does not delete binaries with a birthtime younger than 90 days', async () => {
+      const currentVersion = '10.0.0'
 
-      await fs.removeAsync(dir)
+      sinon.stub(registry, 'registeredBinaries').resolves({ cypress: new Set([currentVersion]) })
+      util.pkgVersion.returns(currentVersion)
+      sinon.stub(state, 'getPathToExecutable').returns('/.cache/Cypress/2.3.4/cypress')
+      mockfs({
+        '/.cache/Cypress': {
+          '2.3.4': {
+            'Cypress.app': {},
+          },
+        },
+      })
+
+      sinon.stub(fs, 'statAsync').resolves({
+        atime: undefined,
+        birthtime: Date.now(),
+      })
+
       await cache.prune()
 
-      const currentVersion = util.pkgVersion()
-
-      const files = await fs.readdirAsync('/.cache/Cypress')
+      const files = await fs.readdir('/.cache/Cypress')
 
       expect(files.length).to.eq(1)
 
-      files.forEach((file) => {
-        expect(file).to.eq(currentVersion)
+      expect(files[0]).to.eq('2.3.4')
+
+      defaultSnapshot()
+    })
+
+    it('deletes binaries older than 90 days', async () => {
+      const currentVersion = '10.0.0'
+
+      sinon.stub(registry, 'registeredBinaries').resolves({ cypress: new Set([currentVersion]) })
+      util.pkgVersion.returns(currentVersion)
+      sinon.stub(state, 'getPathToExecutable').returns('/.cache/Cypress/2.3.4/cypress')
+      mockfs({
+        '/.cache/Cypress': {
+          '2.3.4': {
+            'Cypress.app': {},
+          },
+        },
       })
+
+      sinon.stub(fs, 'statAsync').resolves({
+        atime: Date.now() - 7776000000, // 90 days old
+      })
+
+      await cache.prune()
+
+      const files = await fs.readdir('/.cache/Cypress')
+
+      expect(files.length).to.eq(0)
+
+      defaultSnapshot()
+    })
+
+    it('deletes unregistered binaries greater than 10.0.0', async () => {
+      const currentVersion = '10.0.1'
+
+      sinon.stub(registry, 'registeredBinaries').resolves({ cypress: new Set([currentVersion]) })
+      util.pkgVersion.returns(currentVersion)
+      sinon.stub(state, 'getPathToExecutable').returns('/.cache/Cypress/2.3.4/cypress')
+      mockfs({
+        '/.cache/Cypress': {
+          '9.0.0': {
+            'Cypress.app': {},
+          },
+          '10.0.0': {
+            'Cypress.app': {},
+          },
+          '11.0.0': {
+            'Cypress.app': {},
+          },
+        },
+      })
+
+      sinon.stub(fs, 'statAsync').resolves({
+        atime: Date.now(),
+      })
+
+      await cache.prune()
+
+      const files = await fs.readdir('/.cache/Cypress')
+
+      expect(files.length).to.eq(1)
+      expect(files[0]).to.eq('9.0.0')
+
+      defaultSnapshot()
+    })
+
+    it('does not delete registered binaries', async () => {
+      const currentVersion = '10.0.0'
+
+      sinon.stub(registry, 'registeredBinaries').resolves({ cypress: new Set([currentVersion]) })
+      util.pkgVersion.returns(currentVersion)
+      mockfs({
+        '/.cache/Cypress': {
+          '10.0.0': {
+            'Cypress': {
+              'file1': Buffer.from(new Array(32 * 1024).fill(1)),
+              'dir': {
+                'file2': Buffer.from(new Array(128 * 1042).fill(2)),
+              },
+            },
+          },
+        },
+      })
+
+      await cache.prune()
+
+      const files = await fs.readdir('/.cache/Cypress')
+
+      expect(files.length).to.eq(1)
+
+      expect(files[0]).to.eq(currentVersion)
+
+      defaultSnapshot()
+    })
+
+    it('does not delete the cy or registry folders', async () => {
+      const currentVersion = '10.0.0'
+
+      sinon.stub(registry, 'registeredBinaries').resolves({ cypress: new Set([currentVersion]) })
+      util.pkgVersion.returns(currentVersion)
+      mockfs({
+        '/.cache/Cypress': {
+          'cy': {
+            'Cypress.app': {},
+          },
+          'registry': {
+            'Cypress.app': {},
+          },
+        },
+      })
+
+      sinon.stub(fs, 'statAsync').resolves({
+        atime: Date.now() - 7776000000, // 90 days old
+      })
+
+      await cache.prune()
+
+      const files = await fs.readdir('/.cache/Cypress')
+
+      expect(files.length).to.eq(2)
+
+      expect(files[0]).to.eq('cy')
+      expect(files[1]).to.eq('registry')
 
       defaultSnapshot()
     })
 
     it('exits cleanly if cache dir DNE', async () => {
+      sinon.stub(registry, 'registeredBinaries').resolves({ cypress: ['1.2.3'] })
       await fs.removeAsync(state.getCacheDir())
       await cache.prune()
 
       defaultSnapshot()
     })
-  })*/
+  })
 
   describe('.list', () => {
     let restoreEnv

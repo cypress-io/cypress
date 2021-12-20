@@ -37,19 +37,20 @@ const clear = () => {
   return fs.removeAsync(state.getCacheDir())
 }
 
+/**
+ * Prunes cypress versions that are not registered or, are older than version 10 and haven't been accessed in 90 days.
+ */
 const pruneCypressVersions = async ({ cacheDir, registeredVersions }) => {
-  let versions
-
   // Read the cache dir
-  try {
-    versions = await fs.readdirAsync(cacheDir)
-  } catch (e) {
-    if (e === 'ENOENT') {
+  const versions = await fs.readdirAsync(cacheDir).catch((error) => {
+    if (error.code === 'ENOENT') {
+      logger.always(`No cache directory found at ${cacheDir}.`)
+
       return []
     }
 
-    throw e
-  }
+    throw error
+  })
 
   return versions.reduce(async (accumulatorPromise, version) => {
     const acc = await accumulatorPromise
@@ -83,24 +84,39 @@ const pruneCypressVersions = async ({ cacheDir, registeredVersions }) => {
   }, [])
 }
 
+/**
+ * Prunes binary versions from the cache directory.
+ */
 const prune = async () => {
   const cacheDir = state.getCacheDir()
-  let deletedBinaries = []
+  const deletedVersions = {}
 
   try {
     const registeredBinaries = await registry.registeredBinaries()
 
-    await pruneCypressVersions({ cacheDir, registeredVersions: registeredBinaries.cypress })
-  } catch (e) {
-    logger.always('Failed to prune cache')
+    const deletedCypressVersions = await pruneCypressVersions({ cacheDir, registeredVersions: registeredBinaries.cypress })
 
-    throw e
+    if (deletedCypressVersions.length > 0) {
+      deletedVersions.cypress = deletedCypressVersions
+    }
+  } catch (error) {
+    if (error === 'Newer registry files detected.') {
+      logger.always('A reliable list of registered binaries cannot be created. Try running prune with a newer version of Cypress.')
+    } else {
+      logger.always('Failed to prune cache')
+    }
+
+    throw error
   }
 
-  if (deletedBinaries.length > 0) {
-    logger.always(`Pruned Cypress version(s) ${deletedBinaries.join(', ')} from the binary cache.`)
+  if (Object.keys(deletedVersions).length > 0) {
+    const formattedVersions = Object.entries(deletedVersions).map(([binary, versions]) => {
+      return versions.map((version) => `${binary}: ${version}`).join('\n')
+    }).join('\n')
+
+    logger.always(`Pruned the following versions from cache:\n${formattedVersions}`)
   } else {
-    logger.always(`No binary caches found to prune.`)
+    logger.always(`No versions found to prune.`)
   }
 }
 

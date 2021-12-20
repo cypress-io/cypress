@@ -2,16 +2,9 @@ exports['lib/tasks/cache .clear deletes cache folder and everything inside it 1'
 [no output]
 `
 
-exports['lib/tasks/cache .prune deletes cache binaries for all version but the current one 1'] = `
-Deleted all binary caches except for the 1.2.3 binary cache.
-`
-
-exports['lib/tasks/cache .prune doesn\'t delete any cache binaries 1'] = `
-No binary caches found to prune.
-`
-
 exports['lib/tasks/cache .prune exits cleanly if cache dir DNE 1'] = `
-No Cypress cache was found at /.cache/Cypress. Nothing to prune.
+No cache directory found at /.cache/Cypress.
+No versions found to prune.
 `
 
 exports['lib/tasks/cache .list lists all versions of cached binary 1'] = `
@@ -76,4 +69,35 @@ exports['lib/tasks/cache .list shows sizes 1'] = `
 ├─────────┼──────────────┼───────┤
 │ 2.3.4   │ unknown      │ 0.2MB │
 └─────────┴──────────────┴───────┘
+`
+
+exports['lib/tasks/cache .prune throws when there is a problem 1'] = `
+Failed to prune cache
+`
+
+exports['lib/tasks/cache .prune does not delete binaries with an atime younger than 90 days 1'] = `
+No versions found to prune.
+`
+
+exports['lib/tasks/cache .prune does not delete binaries with a birthtime younger than 90 days 1'] = `
+No versions found to prune.
+`
+
+exports['lib/tasks/cache .prune does not delete registered binaries 1'] = `
+No versions found to prune.
+`
+
+exports['lib/tasks/cache .prune does not delete the cy or registry folders 1'] = `
+No versions found to prune.
+`
+
+exports['lib/tasks/cache .prune deletes binaries older than 90 days 1'] = `
+Pruned the following versions from cache:
+cypress: 2.3.4
+`
+
+exports['lib/tasks/cache .prune deletes unregistered binaries greater than 10.0.0 1'] = `
+Pruned the following versions from cache:
+cypress: 10.0.0
+cypress: 11.0.0
 `

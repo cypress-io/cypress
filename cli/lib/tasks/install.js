@@ -474,10 +474,20 @@ const progessify = (task, title) => {
   }
 }
 
+/**
+ * pruneTask
+ *  This is the task that represents pruning the cache after an install.
+ * @returns listr2 task object
+ */
 const pruneTask = ({ rendererOptions }) => {
   return {
     exitOnError: false, // We shouldn't fail installing if pruning fails.
     task: (ctx, task) => {
+      // Bail on pruning if the env is present or we're running in CI
+      if (util.getEnv('CYPRESS_DISABLE_CACHE_PRUNING') || util.isCi()) {
+        return
+      }
+
       return cache.prune().then(() => {
         util.setTaskTitle(
           task,
