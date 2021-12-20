@@ -367,7 +367,7 @@ export const create = (Cypress, cy) => {
         // with verifying = true. This override is cleaned up immediately
         // afterwards, in either onPassFn or onFailFn.
         cy.state('overrideAssert', function (...args) {
-          return assertFn.apply(this, args.concat(true))
+          return assertFn.apply(this, args.concat(true) as any)
         })
 
         return Promise
