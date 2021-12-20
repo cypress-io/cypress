@@ -130,8 +130,8 @@ $color-transition: color 150ms ease-out;
     height: 24px;
 
     .testing-preferences-toggle {
-      border-right: 1px solid $gray-900;
-      margin-right: -1px;
+      border-left: none;
+      margin-left: 0;
 
       &.open {
         background-color: $gray-900;
@@ -149,6 +149,8 @@ $color-transition: color 150ms ease-out;
         color: $gray-400;
         width: 31px;
         padding: 0px;
+        border-left: 1px solid $gray-900;
+        margin-left: -1px;
       }
     }
   }

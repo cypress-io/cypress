@@ -20,10 +20,9 @@ export const defaultConfig: WindiCssOptions = {
         mono: '"Fira Code", monospace',
       },
       colors,
-    },
-    cursor: {
-      'ew-resize': 'ew-resize',
-      'pointer': 'pointer',
+      cursor: {
+        'ew-resize': 'ew-resize',
+      },
     },
   },
   safelist,
