@@ -145,7 +145,11 @@ export function setupFullConfigWithDefaults (obj: Record<string, any> = {}) {
   return mergeDefaults(config, options, cliConfig)
 }
 
-export function mergeDefaults (config: Record<string, any> = {}, options: Record<string, any> = {}, cliConfig: Record<string, any> = {}) {
+export function mergeDefaults (
+  config: Record<string, any> = {},
+  options: Record<string, any> = {},
+  cliConfig: Record<string, any> = {},
+) {
   const resolved = {}
 
   config.rawJson = _.cloneDeep(config)
@@ -262,10 +266,10 @@ export function updateWithPluginValues (cfg, overrides) {
   // make sure every option returned from the plugins file
   // passes our validation functions
   configUtils.validate(overrides, (errMsg) => {
-    if (cfg.configFile && cfg.projectRoot) {
-      const relativeConfigPath = path.relative(cfg.projectRoot, cfg.configFile)
+    const configFile = getCtx().lifecycleManager.configFile
 
-      return errors.throw('PLUGINS_CONFIG_VALIDATION_ERROR', relativeConfigPath, errMsg)
+    if (configFile) {
+      return errors.throw('PLUGINS_CONFIG_VALIDATION_ERROR', configFile, errMsg)
     }
 
     return errors.throw('CONFIG_VALIDATION_ERROR', errMsg)

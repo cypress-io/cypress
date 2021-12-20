@@ -33,7 +33,7 @@ function run (ipc, configFile, projectRoot) {
 
   process.on('uncaughtException', (err) => {
     debug('uncaught exception:', util.serializeError(err))
-    ipc.send(areSetupNodeEventsLoaded ? 'setupTestingType:uncaughtError' : 'error', util.serializeError(err))
+    ipc.send(areSetupNodeEventsLoaded ? 'childProcess:unhandledError' : 'setupTestingType:uncaughtError', util.serializeError(err))
 
     return false
   })
@@ -42,7 +42,7 @@ function run (ipc, configFile, projectRoot) {
     const err = (event && event.reason) || event
 
     debug('unhandled rejection:', util.serializeError(err))
-    ipc.send('error', util.serializeError(err))
+    ipc.send('childProcess:unhandledError', util.serializeError(err))
 
     return false
   })

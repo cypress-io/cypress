@@ -604,8 +604,8 @@ const getMsgByType = function (type, ...args) {
         We invoked the function exported by \`${arg1}\`, but it threw an error.`
 
       return { msg, details: arg2 }
-    case 'SETUP_NODE_EVENTS_UNEXPECTED_ERROR':
-      msg = `The following error was thrown by a plugin. We stopped running your tests because a plugin crashed. Please check your ${arg1}.setupNodeEvents method in \`${arg2}\``
+    case 'CHILD_PROCESS_UNEXPECTED_ERROR':
+      msg = `\nThe following error was thrown by a plugin. We stopped running your tests because a plugin crashed. Please check your ${arg1}.setupNodeEvents method in \`${arg2}\``
 
       return { msg, details: arg3 }
     case 'PLUGINS_VALIDATION_ERROR':
