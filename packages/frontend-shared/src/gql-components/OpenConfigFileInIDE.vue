@@ -2,11 +2,12 @@
   <template v-if="query?.data?.value">
     <button
       data-testid="open-config-file"
+      class="hocus-link-default underline-purple-500"
       @click="showCypressConfigInIDE()"
     >
       <slot>
         <span
-          class="text-purple-500 cursor-pointer"
+          class="cursor-pointer text-purple-500"
         >
           {{ configFile }}
         </span>
