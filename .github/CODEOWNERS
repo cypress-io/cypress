@@ -1,6 +1,6 @@
 # Each line is a file pattern followed by one or more owners.
 
-# Test Runner team are owners of code within root packages concerning e2e, cli, and other utils
+# End-to-end team are owners of code within root packages concerning e2e, cli, and other utils
 /.github/  @cypress-io/end-to-end
 /browser-versions.json  @cypress-io/end-to-end
 /cli/  @cypress-io/end-to-end
