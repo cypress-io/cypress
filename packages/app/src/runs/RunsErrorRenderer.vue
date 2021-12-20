@@ -49,9 +49,9 @@
 
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
-import { gql } from '@urql/vue'
+import { gql, useMutation } from '@urql/vue'
 import RunsError from './RunsError.vue'
-import type { RunsErrorRendererFragment } from '../generated/graphql'
+import { RunsErrorRendererFragment, RunsErrorRenderer_RequestAccessDocument } from '../generated/graphql'
 import ConnectIcon from '~icons/cy/chain-link_x16.svg'
 import SendIcon from '~icons/cy/paper-airplane_x16.svg'
 import { useI18n } from '@cy/i18n'
@@ -88,8 +88,20 @@ const currentProject = computed(() => props.gql.currentProject)
 
 const showConnectDialog = ref(false)
 
+gql`
+mutation RunsErrorRenderer_RequestAccess( $projectId: String! ) {
+  cloudProjectRequestAccess(projectSlug: $projectId)
+}
+`
+
+const requestAccessMutation = useMutation(RunsErrorRenderer_RequestAccessDocument)
+
 function requestAccess () {
-  // TODO: implement request access mutation
+  const projectId = props.gql.currentProject?.projectId
+
+  if (projectId) {
+    requestAccessMutation.executeMutation({ projectId })
+  }
 }
 
 </script>
