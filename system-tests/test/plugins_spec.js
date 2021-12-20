@@ -216,7 +216,7 @@ describe('e2e plugins', function () {
       })
     })
 
-    it('passes false configFile to plugins function', function () {
+    temporarySkip('passes false configFile to plugins function', function () {
       return systemTests.exec(this, {
         spec: 'plugins_config_extras_spec.js',
         configFile: 'false',

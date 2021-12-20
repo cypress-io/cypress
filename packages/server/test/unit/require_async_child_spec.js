@@ -49,19 +49,19 @@ describe('lib/plugins/child/run_require_async_child', () => {
     })
 
     it('sends the serialized error via ipc on process uncaughtException', function () {
-      process.on.withArgs('uncaughtException').yield(this.err)
+      process.on.withArgs('setupTestingType:uncaughtError').yield(this.err)
 
       expect(this.ipc.send).to.be.calledWith('error', this.err)
     })
 
     it('sends the serialized error via ipc on process unhandledRejection', function () {
-      process.on.withArgs('unhandledRejection').yield(this.err)
+      process.on.withArgs('setupTestingType:uncaughtError').yield(this.err)
 
       expect(this.ipc.send).to.be.calledWith('error', this.err)
     })
 
     it('sends the serialized reason via ipc on process unhandledRejection', function () {
-      process.on.withArgs('unhandledRejection').yield({ reason: this.err })
+      process.on.withArgs('setupTestingType:uncaughtError').yield({ reason: this.err })
 
       expect(this.ipc.send).to.be.calledWith('error', this.err)
     })
