@@ -127,7 +127,7 @@ export async function get (
 
 export function setupFullConfigWithDefaults (obj: Record<string, any> = {}) {
   debug('setting config object %o', obj)
-  let { projectRoot, projectName, config, envFile, options, cliConfig, hasShownConfigWarnings } = obj
+  let { projectRoot, projectName, config, envFile, options, cliConfig } = obj
 
   // just force config to be an object so we dont have to do as much
   // work in our tests
@@ -142,14 +142,13 @@ export function setupFullConfigWithDefaults (obj: Record<string, any> = {}) {
   config.projectRoot = projectRoot
   config.projectName = projectName
 
-  return mergeDefaults(config, options, cliConfig, hasShownConfigWarnings)
+  return mergeDefaults(config, options, cliConfig)
 }
 
 export function mergeDefaults (
   config: Record<string, any> = {},
   options: Record<string, any> = {},
   cliConfig: Record<string, any> = {},
-  hasShownConfigWarnings: boolean = false,
 ) {
   const resolved = {}
 

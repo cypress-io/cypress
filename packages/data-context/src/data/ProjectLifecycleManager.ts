@@ -42,7 +42,6 @@ export interface SetupFullConfigOptions {
   config: Partial<Cypress.ConfigOptions>
   envFile: Partial<Cypress.ConfigOptions>
   options: Partial<AllModeOptions>
-  hasShownConfigWarnings: boolean
 }
 
 /**
@@ -121,7 +120,6 @@ export class ProjectLifecycleManager {
   private _configFilePath: string | undefined
 
   private _cachedFullConfig: FullConfig | undefined
-  private _hasShownConfigWarnings: boolean = false
 
   private _projectMetaState: ProjectMetaState = { ...PROJECT_META_STATE }
 
@@ -399,7 +397,6 @@ export class ProjectLifecycleManager {
       projectRoot: this.projectRoot,
       config: _.cloneDeep(configFileContents),
       envFile: _.cloneDeep(envFile),
-      hasShownConfigWarnings: this._hasShownConfigWarnings,
       options: {
         ...options,
         testingType: this._currentTestingType ?? 'e2e',
@@ -725,7 +722,7 @@ export class ProjectLifecycleManager {
     ipc.send('setupTestingType', this._currentTestingType, {
       ...orderedConfig,
       projectRoot: this.projectRoot,
-      configFile: path.basename(this.configFilePath),
+      configFile: this.configFilePath,
       version: this.ctx._apis.configApi.cypressVersion,
       testingType: this._currentTestingType,
     })
