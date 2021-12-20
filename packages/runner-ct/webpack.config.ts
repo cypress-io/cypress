@@ -60,6 +60,10 @@ const config: webpack.Configuration = {
     rules: [
       ...nonPngRules,
       pngRule,
+      {
+        test: /index\.js/,
+        exclude: /node_modules/,
+      },
     ],
   },
   entry: {
