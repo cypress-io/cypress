@@ -36,7 +36,7 @@
         </template>
       </Select>
       <Select
-        v-if="!newProject"
+        v-if="!newProject && projects.length > 0"
         v-model="pickedProject"
         class="mt-16px transition-all"
         :class="pickedOrganization ? undefined : 'opacity-50'"
