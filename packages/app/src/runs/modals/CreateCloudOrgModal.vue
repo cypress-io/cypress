@@ -119,7 +119,7 @@ function startPolling () {
   setTimeout(() => {
     pause()
     polling.value = false
-  }, 18000)
+  }, 180000)
 }
 
 startPolling()
