@@ -29,9 +29,6 @@ export default defineConfig({
 
       return startDevServer({ options: cypressConfig, ...devServerConfig })
     },
-    setupNodeEvents () {
-      throw new Error('whats going on')
-    },
     devServerConfig: {
       viteConfig: {
         // TODO(tim): Figure out why this isn't being picked up

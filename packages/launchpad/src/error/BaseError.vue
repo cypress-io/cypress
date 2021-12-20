@@ -60,7 +60,7 @@
                     class="cursor-pointer font-medium outline-none text-red-600 hocus:underline"
                     @click="toggle()"
                     @keypress.space.enter.self.prevent="toggle()"
-                  >Stack Trace</a>
+                  >{{ t('launchpadErrors.generic.stackTraceLabel') }}</a>
                 </p>
               </template>
               <pre

@@ -200,7 +200,8 @@
       "header": "Something went wrong",
       "message": "It looks like there's some issues that need to be resolved before we continue. Please confirm that everything looks correct in your {0} file.",
       "readTheDocsButton": "Read the docs",
-      "retryButton": "Try again"
+      "retryButton": "Try again",
+      "stackTraceLabel": "Stack Trace"
     }
   },
   "setupPage": {
