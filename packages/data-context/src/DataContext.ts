@@ -334,7 +334,7 @@ export class DataContext {
     console.error(e)
   }
 
-  onError = (err: Error, source: 'plugins' | 'config' | 'global') => {
+  onError = (err: Error) => {
     if (this.isRunMode) {
       // console.error(err)
       throw err

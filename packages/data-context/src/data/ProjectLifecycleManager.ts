@@ -141,6 +141,22 @@ export class ProjectLifecycleManager {
     return autoBindDebug(this)
   }
 
+  async allSettled () {
+    while (
+      this._browserResult.state === 'loading' ||
+      this._envFileResult.state === 'loading' ||
+      this._configResult.state === 'loading' ||
+      this._eventsIpcResult.state === 'loading'
+    ) {
+      await Promise.allSettled([
+        this._browserResult.value,
+        this._envFileResult.value,
+        this._configResult.value,
+        this._eventsIpcResult.value,
+      ])
+    }
+  }
+
   private onProcessExit = () => {
     this.resetInternalState()
   }
@@ -568,7 +584,7 @@ export class ProjectLifecycleManager {
   }
 
   private _loadConfig () {
-    const dfd = pDefer<LoadConfigReply>()
+    const dfd = pDeferFulfilled<LoadConfigReply>()
     const child = this.forkConfigProcess()
     const ipc = this.wrapConfigProcess(child, dfd)
 
@@ -805,13 +821,13 @@ export class ProjectLifecycleManager {
   executeNodeEvent (event: string, args: any[]) {
     debug(`execute plugin event '${event}' Node '${process.version}' with args: %o %o %o`, ...args)
 
-    if (this._registeredEvents[event]) {
-      return this._registeredEvents[event]?.(...args)
+    const evtFn = this._registeredEvents[event]
+
+    if (typeof evtFn !== 'function') {
+      throw new Error(`Missing event for ${event}`)
     }
 
-    // Warn &
-
-    return false
+    return evtFn(...args)
   }
 
   loadGlobalBrowsers () {
@@ -839,7 +855,7 @@ export class ProjectLifecycleManager {
       (e) => {
         if (p === this._browserResult.value) {
           this._browserResult = { state: 'errored', value: e }
-          this.ctx.onError(e, 'global')
+          this.ctx.onError(e)
         }
       },
     )
@@ -862,6 +878,7 @@ export class ProjectLifecycleManager {
       env: {
         ...process.env,
         NODE_OPTIONS: process.env.ORIGINAL_NODE_OPTIONS || '',
+        // DEBUG: '*',
       },
       execPath: this.ctx.nodePath ?? undefined,
     }
@@ -889,7 +906,7 @@ export class ProjectLifecycleManager {
     child.removeAllListeners()
   }
 
-  private wrapConfigProcess (child: ChildProcess, dfd: pDefer.DeferredPromise<LoadConfigReply>) {
+  private wrapConfigProcess (child: ChildProcess, dfd: pDefer.DeferredPromise<LoadConfigReply> & { settled: boolean }) {
     // The "IPC" is an EventEmitter wrapping the child process, adding a "send"
     // method, and re-emitting any "message" that comes through the channel through the EventEmitter
     const ipc = new ProjectConfigIpc(child)
@@ -901,7 +918,9 @@ export class ProjectLifecycleManager {
       child.stderr.on('data', (data) => process.stderr.write(data))
     }
 
-    child.on('error', dfd.reject)
+    child.on('error', (err) => {
+      this.handleChildProcessError(err, ipc, dfd)
+    })
 
     /**
      * This reject cannot be caught anywhere??
@@ -909,7 +928,8 @@ export class ProjectLifecycleManager {
      * It's supposed to be caught on lib/modes/run.js:1689,
      * but it's not.
      */
-    child.on('setupTestingType:uncaughtError', dfd.reject)
+    ipc.on('childProcess:unhandledError', (err) => this.handleChildProcessError(err, ipc, dfd))
+    child.on('setupTestingType:uncaughtError', (err) => this.handleChildProcessError(err, ipc, dfd))
 
     ipc.once('loadConfig:reply', (val) => {
       debug('loadConfig:reply')
@@ -937,6 +957,23 @@ export class ProjectLifecycleManager {
     ipc.send('loadConfig')
 
     return ipc
+  }
+
+  private handleChildProcessError (err: any, ipc: ProjectConfigIpc, dfd: pDefer.DeferredPromise<any> & {settled: boolean}) {
+    debug('plugins process error:', err.stack)
+
+    this._cleanupIpc(ipc)
+
+    err = this.ctx._apis.errorApi.error('CHILD_PROCESS_UNEXPECTED_ERROR', this._currentTestingType, this.configFile, err.annotated || err.stack || err.message)
+    err.title = 'Error running plugin'
+
+    // this can sometimes trigger before the promise is fulfilled and
+    // sometimes after, so we need to handle each case differently
+    if (dfd.settled) {
+      this.ctx.onError(err)
+    } else {
+      dfd.reject(err)
+    }
   }
 
   private legacyPluginGuard () {
@@ -1046,41 +1083,40 @@ export class ProjectLifecycleManager {
       debug('register plugins process event', event, 'with id', eventId)
 
       this.registerEvent(event, function (...args: any[]) {
-        const evtDfd = pDefer()
-        const invocationId = _.uniqueId('inv')
+        return new Promise((resolve, reject) => {
+          const invocationId = _.uniqueId('inv')
 
-        debug('call event', event, 'for invocation id', invocationId)
+          debug('call event', event, 'for invocation id', invocationId)
 
-        ipc.once(`promise:fulfilled:${invocationId}`, (err: any, value: any) => {
-          if (err) {
-            debug('promise rejected for id %s %o', invocationId, ':', err.stack)
-            evtDfd.reject(_.extend(new Error(err.message), err))
+          ipc.once(`promise:fulfilled:${invocationId}`, (err: any, value: any) => {
+            if (err) {
+              debug('promise rejected for id %s %o', invocationId, ':', err.stack)
+              reject(_.extend(new Error(err.message), err))
 
-            return
+              return
+            }
+
+            if (value === UNDEFINED_SERIALIZED) {
+              value = undefined
+            }
+
+            debug(`promise resolved for id '${invocationId}' with value`, value)
+
+            return resolve(value)
+          })
+
+          const ids = { invocationId, eventId }
+
+          // no argument is passed for cy.task()
+          // This is necessary because undefined becomes null when it is sent through ipc.
+          if (event === 'task' && args[1] === undefined) {
+            args[1] = {
+              __cypress_task_no_argument__: true,
+            }
           }
 
-          if (value === UNDEFINED_SERIALIZED) {
-            value = undefined
-          }
-
-          debug(`promise resolved for id '${invocationId}' with value`, value)
-
-          return evtDfd.resolve(value)
+          ipc.send('execute:plugins', event, ids, args)
         })
-
-        const ids = { invocationId, eventId }
-
-        // no argument is passed for cy.task()
-        // This is necessary because undefined becomes null when it is sent through ipc.
-        if (event === 'task' && args[1] === undefined) {
-          args[1] = {
-            __cypress_task_no_argument__: true,
-          }
-        }
-
-        ipc.send('execute:plugins', event, ids, args)
-
-        return evtDfd.promise
       })
     }
 
@@ -1152,7 +1188,7 @@ export class ProjectLifecycleManager {
     }
 
     if (!this.metaState.hasValidConfigFile) {
-      return this.ctx.onError(this.ctx.error('NO_DEFAULT_CONFIG_FILE_FOUND', this.projectRoot), 'global')
+      return this.ctx.onError(this.ctx.error('NO_DEFAULT_CONFIG_FILE_FOUND', this.projectRoot))
     }
 
     await this._pendingInitialize.promise.finally(() => {
@@ -1162,19 +1198,19 @@ export class ProjectLifecycleManager {
 
   private configFileWarningCheck () {
     if (!this.metaState.hasValidConfigFile && this.metaState.hasSpecifiedConfigViaCLI !== false) {
-      this.ctx.onError(this.ctx.error('CONFIG_FILE_NOT_FOUND', path.basename(this.metaState.hasSpecifiedConfigViaCLI), path.dirname(this.metaState.hasSpecifiedConfigViaCLI)), 'global')
+      this.ctx.onError(this.ctx.error('CONFIG_FILE_NOT_FOUND', path.basename(this.metaState.hasSpecifiedConfigViaCLI), path.dirname(this.metaState.hasSpecifiedConfigViaCLI)))
     }
 
     if (this.metaState.hasLegacyCypressJson && !this.metaState.hasValidConfigFile) {
-      this.ctx.onError(this.ctx.error('CONFIG_FILE_MIGRATION_NEEDED', this.projectRoot), 'global')
+      this.ctx.onError(this.ctx.error('CONFIG_FILE_MIGRATION_NEEDED', this.projectRoot))
     }
 
     if (this.metaState.hasMultipleConfigPaths) {
-      this.ctx.onError(this.ctx.error('CONFIG_FILES_LANGUAGE_CONFLICT', this.projectRoot), 'global')
+      this.ctx.onError(this.ctx.error('CONFIG_FILES_LANGUAGE_CONFLICT', this.projectRoot))
     }
 
     if (this.metaState.hasValidConfigFile && this.metaState.hasLegacyCypressJson) {
-      this.ctx.onError(this.ctx.error('LEGACY_CONFIG_FILE', this.projectRoot, path.basename(this.configFilePath)), 'config')
+      this.ctx.onError(this.ctx.error('LEGACY_CONFIG_FILE', this.projectRoot, path.basename(this.configFilePath)))
     }
   }
 
@@ -1185,5 +1221,32 @@ export class ProjectLifecycleManager {
    */
   private onLoadError = (err: any) => {
     this._pendingInitialize?.reject(err)
+  }
+}
+
+function pDeferFulfilled<T> (): pDefer.DeferredPromise<T> & {settled: boolean} {
+  const dfd = pDefer<T>()
+  let settled = false
+  const { promise, resolve, reject } = dfd
+
+  const resolveFn = function (val: T) {
+    settled = true
+
+    return resolve(val)
+  }
+
+  const rejectFn = function (val: any) {
+    settled = true
+
+    return reject(val)
+  }
+
+  return {
+    promise,
+    resolve: resolveFn,
+    reject: rejectFn,
+    get settled () {
+      return settled
+    },
   }
 }

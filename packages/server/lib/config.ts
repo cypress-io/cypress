@@ -266,10 +266,10 @@ export function updateWithPluginValues (cfg, overrides) {
   // make sure every option returned from the plugins file
   // passes our validation functions
   configUtils.validate(overrides, (errMsg) => {
-    if (cfg.configFile && cfg.projectRoot) {
-      const relativeConfigPath = path.relative(cfg.projectRoot, cfg.configFile)
+    const configFile = getCtx().lifecycleManager.configFile
 
-      return errors.throw('PLUGINS_CONFIG_VALIDATION_ERROR', relativeConfigPath, errMsg)
+    if (configFile) {
+      return errors.throw('PLUGINS_CONFIG_VALIDATION_ERROR', configFile, errMsg)
     }
 
     return errors.throw('CONFIG_VALIDATION_ERROR', errMsg)
