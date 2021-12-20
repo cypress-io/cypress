@@ -71,10 +71,32 @@ export const mutation = mutationType({
       },
     })
 
-    t.liveMutation('clearCurrentProject', {
+    t.field('scaffoldTestingType', {
+      type: 'Query',
+      resolve: async (_, args, ctx) => {
+        await ctx.actions.wizard.scaffoldTestingType()
+
+        return {}
+      },
+    })
+
+    t.field('completeSetup', {
+      type: 'Query',
+      resolve: async (_, args, ctx) => {
+        ctx.actions.wizard.completeSetup()
+
+        return {}
+      },
+    })
+
+    t.field('clearCurrentProject', {
+      type: 'Query',
+      description: 'Clears the currently active project',
       resolve: async (_, args, ctx) => {
         await ctx.actions.project.clearCurrentProject()
         ctx.actions.wizard.resetWizard()
+
+        return {}
       },
     })
 
@@ -113,8 +135,8 @@ export const mutation = mutationType({
           ctx.actions.wizard.setFramework(args.input.framework)
         }
 
-        if (args.input.language) {
-          ctx.actions.wizard.setCodeLanguage(args.input.language)
+        if (args.input.codeLanguage) {
+          ctx.actions.wizard.setCodeLanguage(args.input.codeLanguage)
         }
       },
     })

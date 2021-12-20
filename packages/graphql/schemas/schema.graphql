@@ -479,6 +479,9 @@ type FileParts implements Node {
   """
   baseName: String!
 
+  """The contents of the file"""
+  contents: String!
+
   """
   The spec file's extension, including "spec" pattern (e.g. .spec.tsx, -spec.tsx, -test.tsx)
   """
@@ -575,7 +578,9 @@ type Mutation {
 
   """Create an Index HTML file for a new component testing project"""
   appCreateComponentIndexHtml(template: String!): Boolean
-  clearCurrentProject: Boolean
+
+  """Clears the currently active project"""
+  clearCurrentProject: Query
   clearCurrentTestingType: Query
 
   """Create a project in the dashboard and return its object"""
@@ -583,6 +588,7 @@ type Mutation {
 
   """Request access to an organization from a projectId"""
   cloudProjectRequestAccess(projectSlug: String!): Boolean
+  completeSetup: Query
 
   """
   Development only: Triggers or dismisses a prompted refresh by touching the file watched by our development scripts
@@ -632,6 +638,7 @@ type Mutation {
   """Reset the Wizard to the starting position"""
   resetWizard: Boolean!
   scaffoldIntegration: [CodeGenResultWithFileParts!]!
+  scaffoldTestingType: Query
 
   """Set active project to run tests on"""
   setCurrentProject(path: String!): Boolean
@@ -752,11 +759,26 @@ type Query {
   """All known projects for the app"""
   projects: [ProjectLike!]!
 
+  """The files that have just been scaffolded"""
+  scaffoldedFiles: [ScaffoldedFile!]
+
   """Previous versions of cypress and their release date"""
   versions: VersionData
 
   """Metadata about the wizard, null if we arent showing the wizard"""
   wizard: Wizard!
+}
+
+"""A file that we just added to the filesystem during project setup"""
+type ScaffoldedFile {
+  """Info about the file we just scaffolded"""
+  description: String!
+
+  """Info about the file"""
+  file: FileParts!
+
+  """Info about the field"""
+  status: WizardConfigFileStatusEnum!
 }
 
 """Represents a spec on the file system"""
@@ -894,23 +916,12 @@ type Wizard {
 
   """All of the component testing frameworks to choose from"""
   frameworks: [WizardFrontendFramework!]!
-
-  """Whether we have chosen manual install or not"""
-  isManualInstall: Boolean!
   language: WizardCodeLanguage
 
   """
   A list of packages to install, null if we have not chosen both a framework and bundler
   """
   packagesToInstall: [WizardNpmPackage!]
-
-  """
-  Set of sample configuration files based bundler, framework and language of choice
-  """
-  sampleConfigFiles: [WizardSampleConfigFile!]
-
-  """IndexHtml file based on bundler and framework of choice"""
-  sampleTemplate: String
 
   """A list of warnings"""
   warnings: [Warning!]!
@@ -1012,6 +1023,6 @@ enum WizardStep {
 
 input WizardUpdateInput {
   bundler: SupportedBundlers
+  codeLanguage: CodeLanguageEnum
   framework: FrontendFrameworkEnum
-  language: CodeLanguageEnum
 }

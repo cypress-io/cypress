@@ -1,15 +1,15 @@
 import {
   ConfigFilesFragmentDoc,
 } from '../generated/graphql-test'
-import ConfigFiles from './ConfigFiles.vue'
+import ScaffoldedFiles from './ScaffoldedFiles.vue'
 
-describe('<ConfigFile />', () => {
+describe('<ScaffoldedFiles />', () => {
   beforeEach(() => {
     cy.mountFragment(ConfigFilesFragmentDoc, {
       render: (qgl) => {
         return (
           <div>
-            <ConfigFiles gql={qgl} />
+            <ScaffoldedFiles gql={qgl} />
           </div>
         )
       },

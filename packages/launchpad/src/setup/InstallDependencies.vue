@@ -2,6 +2,8 @@
   <WizardLayout
     :next=" t('setupPage.install.confirmManualInstall')"
     :can-navigate-forward="true"
+    :back-fn="() => emits('navigate', 'selectFramework')"
+    :next-fn="confirmInstalled"
     class="max-w-640px"
   >
     <ManualInstall
@@ -14,11 +16,20 @@
 import WizardLayout from './WizardLayout.vue'
 import ManualInstall from './ManualInstall.vue'
 import { gql } from '@urql/core'
-import type { InstallDependenciesFragment } from '../generated/graphql'
+import { InstallDependenciesFragment, InstallDependencies_ScaffoldFilesDocument } from '../generated/graphql'
 import type { CurrentStep } from './Wizard.vue'
 import { useI18n } from '@cy/i18n'
+import { useMutation } from '@urql/vue'
 
-defineEmits<{
+gql`
+mutation InstallDependencies_scaffoldFiles {
+  scaffoldTestingType {
+    ...ScaffoldedFiles
+  }
+}
+`
+
+const emits = defineEmits<{
   (event: 'navigate', currentStep: CurrentStep): void
 }>()
 
@@ -33,5 +44,10 @@ const props = defineProps<{
 }>()
 
 const { t } = useI18n()
+const mutation = useMutation(InstallDependencies_ScaffoldFilesDocument)
+
+const confirmInstalled = () => {
+  mutation.executeMutation({})
+}
 
 </script>

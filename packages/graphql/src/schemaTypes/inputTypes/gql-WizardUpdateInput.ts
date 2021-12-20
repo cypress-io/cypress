@@ -12,7 +12,7 @@ export const WizardUpdateInput = inputObjectType({
       type: SupportedBundlerEnum,
     })
 
-    t.field('language', {
+    t.field('codeLanguage', {
       type: CodeLanguageEnum,
     })
   },

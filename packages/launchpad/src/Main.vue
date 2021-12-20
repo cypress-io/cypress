@@ -7,13 +7,17 @@
         :gql="query.data.value.baseError"
       />
       <GlobalPage
-        v-else-if="query.data.value.isInGlobalMode && !query.data.value?.currentProject"
+        v-else-if="query.data.value.isInGlobalMode || !query.data.value?.currentProject"
         :gql="query.data.value"
       />
       <MigrationPage v-else-if="currentProject?.needsLegacyConfigMigration" />
       <template v-else>
+        <ScaffoldedFiles
+          v-if="query.data.value.scaffoldedFiles"
+          :gql="query.data.value"
+        />
         <BaseError
-          v-if="currentProject?.errorLoadingConfigFile"
+          v-else-if="currentProject?.errorLoadingConfigFile"
           :gql="currentProject.errorLoadingConfigFile"
         />
         <BaseError
@@ -58,14 +62,11 @@
           v-else-if="currentProject.currentTestingType === 'component' && !currentProject.isCTConfigured"
           :gql="query.data.value"
         />
-        <E2ESetupFiles
-          v-else-if="currentProject.currentTestingType === 'e2e' && !currentProject.isE2EConfigured"
-          :gql="query.data.value"
-        />
         <OpenBrowser v-else />
       </template>
     </div>
   </template>
+  <div data-e2e />
 </template>
 
 <script lang="ts" setup>
@@ -80,7 +81,7 @@ import HeaderBar from '@cy/gql-components/HeaderBar.vue'
 import Spinner from '@cy/components/Spinner.vue'
 import CompareTestingTypes from './setup/CompareTestingTypes.vue'
 import MigrationPage from './setup/MigrationPage.vue'
-import E2ESetupFiles from './setup/E2ESetupFiles.vue'
+import ScaffoldedFiles from './setup/ScaffoldedFiles.vue'
 
 import { useI18n } from '@cy/i18n'
 import { computed, ref } from 'vue'
@@ -104,6 +105,7 @@ query MainLaunchpadQuery {
     isLoadingConfigFile
     isLoadingNodeEvents
     needsLegacyConfigMigration
+    currentTestingType
     errorLoadingConfigFile {
       ...BaseError_Data
     }
@@ -113,6 +115,7 @@ query MainLaunchpadQuery {
   }
   isInGlobalMode
   ...GlobalPage
+  ...ScaffoldedFiles
 }
 `
 

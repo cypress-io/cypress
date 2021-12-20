@@ -1,6 +1,6 @@
 import { objectType } from 'nexus'
 import { BaseError } from '.'
-import { ProjectLike, TestingTypeEnum } from '..'
+import { ProjectLike, ScaffoldedFile, TestingTypeEnum } from '..'
 import { CurrentProject } from './gql-CurrentProject'
 import { DevState } from './gql-DevState'
 import { LocalSettings } from './gql-LocalSettings'
@@ -76,6 +76,12 @@ export const Query = objectType({
       description: 'The mode the interactive runner was launched in',
       type: TestingTypeEnum,
       resolve: (_, args, ctx) => ctx.coreData.currentTestingType,
+    })
+
+    t.list.nonNull.field('scaffoldedFiles', {
+      description: 'The files that have just been scaffolded',
+      type: ScaffoldedFile,
+      resolve: (_, args, ctx) => ctx.coreData.scaffoldedFiles,
     })
   },
 })

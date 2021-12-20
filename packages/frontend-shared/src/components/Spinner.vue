@@ -1,5 +1,8 @@
 <template>
-  <div id="vue-spinner" />
+  <div
+    id="vue-spinner"
+    data-e2e="spin"
+  />
 </template>
 
 <script lang="ts" setup>

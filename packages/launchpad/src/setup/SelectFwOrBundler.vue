@@ -66,14 +66,14 @@ const emit = defineEmits<{
 }>()
 
 const selectedOptionObject = computed(() => {
-  return props.options.find((opt) => opt.id === props.value)
+  return props.options.find((opt) => opt.type === props.value)
 })
 
 const selectOption = (opt) => {
   if (props.selectorType === 'framework') {
-    emit('selectFramework', opt.id)
+    emit('selectFramework', opt.type)
   } else {
-    emit('selectBundler', opt.id)
+    emit('selectBundler', opt.type)
   }
 }
 

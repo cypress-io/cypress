@@ -29,12 +29,6 @@ const CHILD_PROCESS_FILE_PATH = require.resolve('@packages/server/lib/plugins/ch
 
 const UNDEFINED_SERIALIZED = '__cypress_undefined__'
 
-// Explicitly picking off all the keys we need to use, so we can create stubs for a unit test
-export type Ctx_ProjectLifecycleManager = Pick<DataContext,
-  '_apis' | 'fs' | 'coreData' | 'modeOptions' | 'update' |
-  'nodePath' | 'error' | 'onWarning' | 'onError' | 'isRunMode' | 'emitter'
->
-
 export interface SetupFullConfigOptions {
   projectName: string
   projectRoot: string
@@ -123,7 +117,7 @@ export class ProjectLifecycleManager {
 
   private _projectMetaState: ProjectMetaState = { ...PROJECT_META_STATE }
 
-  constructor (private ctx: Ctx_ProjectLifecycleManager) {
+  constructor (private ctx: DataContext) {
     this._handlers = this.ctx._apis.configApi.getServerPluginHandlers()
     this.watchers = new Set()
 
@@ -157,10 +151,6 @@ export class ProjectLifecycleManager {
 
   get metaState () {
     return Object.freeze(this._projectMetaState)
-  }
-
-  get legacyJsonPath () {
-    return path.join(this.configFilePath, 'cypress.json')
   }
 
   get configFilePath () {
@@ -261,10 +251,11 @@ export class ProjectLifecycleManager {
       s.currentProject = projectRoot
     })
 
-    this._projectMetaState = this.determineProjectMetaState()
+    const metaState = this.refreshMetaState()
+
     this.configFileWarningCheck()
 
-    if (this._projectMetaState.hasValidConfigFile) {
+    if (metaState.hasValidConfigFile) {
       this.initializeConfig().catch(this.onLoadError)
     }
 
@@ -295,6 +286,19 @@ export class ProjectLifecycleManager {
       return
     }
 
+    if (!this.metaState.hasValidConfigFile) {
+      if (testingType === 'e2e') {
+        this.ctx.actions.wizard.scaffoldTestingType()
+      }
+    } else {
+      this.loadTestingType()
+    }
+  }
+
+  private loadTestingType () {
+    const testingType = this._currentTestingType
+
+    assert(testingType, 'loadTestingType requires a testingType')
     // If we have set a testingType, and it's not the "target" of the
     // registeredEvents (switching testing mode), we need to get a fresh
     // config IPC & re-execute the setupTestingType
@@ -525,13 +529,21 @@ export class ProjectLifecycleManager {
       return
     }
 
-    if (this._projectMetaState.hasLegacyCypressJson) {
-      const legacyFileWatcher = this.addWatcher(this.legacyJsonPath)
+    const legacyFileWatcher = this.addWatcher(_.without([
+      this._pathToFile('cypress.json'),
+      this._pathToFile('cypress.config.js'),
+      this._pathToFile('cypress.config.ts'),
+    ], this.configFilePath))
 
-      legacyFileWatcher.on('all', () => {
-        this._projectMetaState = this.determineProjectMetaState()
-      })
-    }
+    legacyFileWatcher.on('all', (change) => {
+      const metaState = this._projectMetaState
+      const nextMetaState = this.refreshMetaState()
+
+      if (!_.isEqual(metaState, nextMetaState)) {
+        this.ctx.coreData.baseError = null
+        this.reloadConfig().catch(this.onLoadError)
+      }
+    })
 
     const configFileWatcher = this.addWatcher(this.configFilePath)
 
@@ -667,10 +679,6 @@ export class ProjectLifecycleManager {
     }
   }
 
-  refreshCypressEnvFile () {
-    //
-  }
-
   /**
    * Called on the completion of the
    */
@@ -685,6 +693,21 @@ export class ProjectLifecycleManager {
 
     if (!this._currentTestingType || this._eventsIpcResult.state === 'loading') {
       return
+    }
+
+    if (!this.isTestingTypeConfigured(this._currentTestingType)) {
+      this.ctx.actions.wizard.scaffoldTestingType()
+
+      return
+    }
+
+    if (this.ctx.coreData.scaffoldedFiles) {
+      this.ctx.coreData.scaffoldedFiles.filter((f) => {
+        if (f.file.absolute === this.configFilePath && f.status !== 'valid') {
+          f.status = 'valid'
+          this.ctx.emitter.toLaunchpad()
+        }
+      })
     }
 
     this.setupNodeEvents().catch(this.onLoadError)
@@ -764,7 +787,7 @@ export class ProjectLifecycleManager {
     return w
   }
 
-  addWatcher (file: string) {
+  addWatcher (file: string | string[]) {
     const w = chokidar.watch(file, {
       ignoreInitial: true,
     })
@@ -948,7 +971,7 @@ export class ProjectLifecycleManager {
    * Find all information about the project we need to know to prompt different
    * onboarding screens, suggestions in the onboarding wizard, etc.
    */
-  private determineProjectMetaState (): ProjectMetaState {
+  refreshMetaState (): ProjectMetaState {
     const configFile = this.ctx.modeOptions.configFile
     const metaState: ProjectMetaState = {
       ...PROJECT_META_STATE,
@@ -1016,6 +1039,8 @@ export class ProjectLifecycleManager {
     if (metaState.hasLegacyCypressJson && !metaState.hasValidConfigFile) {
       metaState.needsCypressJsonMigration = true
     }
+
+    this._projectMetaState = metaState
 
     return metaState
   }
@@ -1157,11 +1182,12 @@ export class ProjectLifecycleManager {
   }
 
   private configFileWarningCheck () {
+    // Only if they've explicitly specified a config file path do we error, otherwise they'll go through onboarding
     if (!this.metaState.hasValidConfigFile && this.metaState.hasSpecifiedConfigViaCLI !== false) {
       this.ctx.onError(this.ctx.error('CONFIG_FILE_NOT_FOUND', path.basename(this.metaState.hasSpecifiedConfigViaCLI), path.dirname(this.metaState.hasSpecifiedConfigViaCLI)), 'global')
     }
 
-    if (this.metaState.hasLegacyCypressJson && !this.metaState.hasValidConfigFile) {
+    if (this.metaState.hasLegacyCypressJson && !this.metaState.hasValidConfigFile && this.ctx.isRunMode) {
       this.ctx.onError(this.ctx.error('CONFIG_FILE_MIGRATION_NEEDED', this.projectRoot), 'global')
     }
 

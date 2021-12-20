@@ -14,7 +14,10 @@ export class FileActions {
 
     const filePath = path.join(this.ctx.currentProject, relativePath)
 
-    await this.ctx.fs.writeFile(
+    this.ctx.fs.ensureDirSync(path.dirname(filePath))
+
+    // Typically used in e2e tests, simpler than forcing async
+    this.ctx.fs.writeFileSync(
       filePath,
       data,
     )
@@ -25,7 +28,8 @@ export class FileActions {
       throw new Error(`Cannot remove file in project without active project`)
     }
 
-    await this.ctx.fs.remove(path.join(this.ctx.currentProject, relativePath))
+    // Typically used in e2e tests, simpler than forcing async
+    this.ctx.fs.removeSync(path.join(this.ctx.currentProject, relativePath))
   }
 
   async checkIfFileExists (relativePath: string) {

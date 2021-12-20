@@ -111,7 +111,11 @@ import ExternalLink from './ExternalLink.vue'
 
 gql`
 mutation GlobalPageHeader_clearCurrentProject {
-  clearCurrentProject
+  clearCurrentProject {
+    currentProject {
+      id
+    }
+  }
 }
 `
 

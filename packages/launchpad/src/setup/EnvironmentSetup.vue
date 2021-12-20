@@ -8,29 +8,29 @@
     <div class="m-24px">
       <SelectFwOrBundler
         :options="frameworks || []"
-        :value="data.framework ?? undefined"
+        :value="props.gql.framework?.type ?? undefined"
         :placeholder="t('setupPage.projectSetup.frameworkPlaceholder')"
         :label="t('setupPage.projectSetup.frameworkLabel')"
         selector-type="framework"
         data-testid="select-framework"
-        @select-framework="emit.bind(emit, 'wizardSetup', 'framework')"
+        @select-framework="val => emit('wizardSetup', 'framework', val)"
       />
       <SelectFwOrBundler
-        v-if="props.gql.framework?.id && (!props.gql.bundler || bundlers.length > 1)"
+        v-if="props.gql.framework?.type && (!props.gql.bundler || bundlers.length > 1)"
         class="pt-3px"
         :options="bundlers || []"
-        :value="data.bundler ?? undefined"
+        :value="props.gql.bundler?.type ?? undefined"
         :placeholder="t('setupPage.projectSetup.bundlerPlaceholder')"
         :label="t('setupPage.projectSetup.bundlerLabel')"
         selector-type="bundler"
         data-testid="select-bundler"
-        @select-bundler="emit.bind(emit, 'wizardSetup', 'bundler')"
+        @select-bundler="val => emit('wizardSetup', 'bundler', val)"
       />
       <SelectLanguage
         :name="t('setupPage.projectSetup.languageLabel')"
         :options="languages || []"
         :value="props.gql.language?.id ?? 'js'"
-        @select="emit.bind(emit, 'wizardSetup', 'codeLanguage')"
+        @select="val => emit('wizardSetup', 'codeLanguage', val)"
       />
     </div>
   </WizardLayout>
@@ -48,7 +48,7 @@ import { sortBy } from 'lodash'
 import type { CurrentStep, WizardSetupData } from './Wizard.vue'
 
 const emit = defineEmits<{
-  (event: 'navigate', currentStep: CurrentStep): void
+  (event: 'navigate', toPage: CurrentStep): void
   <K extends keyof WizardSetupData>(event: 'wizardSetup', key: K, val: WizardSetupData[K]): void
 }>()
 
@@ -119,9 +119,13 @@ const frameworks = computed(() => {
   return sortBy((props.gql.frameworks ?? []).map((f) => ({ ...f })), 'category')
 })
 
-const onNext = () => {}
+const onNext = () => {
+  emit('navigate', 'installDependencies')
+}
 
-const onBack = () => {}
+const onBack = () => {
+  // Clear current testing type
+}
 
 const languages = computed(() => props.gql.allLanguages ?? [])
 

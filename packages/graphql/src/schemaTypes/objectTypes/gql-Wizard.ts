@@ -4,7 +4,6 @@ import { WizardNpmPackage } from './gql-WizardNpmPackage'
 import { objectType } from 'nexus'
 import { BUNDLERS, CODE_LANGUAGES, FRONTEND_FRAMEWORKS } from '@packages/types'
 import { WizardCodeLanguage } from './gql-WizardCodeLanguage'
-import { WizardSampleConfigFile } from './gql-WizardSampleConfigFile'
 
 const Warning = objectType({
   name: 'Warning',
@@ -57,26 +56,10 @@ export const Wizard = objectType({
       resolve: () => Array.from(CODE_LANGUAGES), // TODO(tim): fix this in nexus to accept Readonly
     })
 
-    t.nonNull.boolean('isManualInstall', {
-      description: 'Whether we have chosen manual install or not',
-      resolve: (source) => source.chosenManualInstall,
-    })
-
     t.list.nonNull.field('packagesToInstall', {
       type: WizardNpmPackage,
       description: 'A list of packages to install, null if we have not chosen both a framework and bundler',
       resolve: (source, args, ctx) => ctx.wizard.packagesToInstall(),
-    })
-
-    t.list.nonNull.field('sampleConfigFiles', {
-      type: WizardSampleConfigFile,
-      description: 'Set of sample configuration files based bundler, framework and language of choice',
-      resolve: (source, args, ctx) => ctx.wizard.sampleConfigFiles(),
-    })
-
-    t.string('sampleTemplate', {
-      description: 'IndexHtml file based on bundler and framework of choice',
-      resolve: (source, args, ctx) => ctx.wizard.sampleTemplate(),
     })
 
     t.nonNull.list.nonNull.field('warnings', {

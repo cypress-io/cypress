@@ -196,16 +196,20 @@ function visitApp (href?: string) {
 
 function visitLaunchpad () {
   return logInternal(`visitLaunchpad ${Cypress.env('e2e_gqlPort')}`, () => {
-    return cy.visit(`dist-launchpad/index.html?gqlPort=${Cypress.env('e2e_gqlPort')}`, { log: false })
+    return cy.visit(`dist-launchpad/index.html?gqlPort=${Cypress.env('e2e_gqlPort')}`, { log: false }).then((val) => {
+      return cy.get('[data-e2e]', { timeout: 10000, log: false }).then(() => {
+        return val
+      })
+    })
   })
 }
 
 type UnwrapPromise<R> = R extends PromiseLike<infer U> ? U : R
 
-function withCtx<T extends Partial<WithCtxOptions>, R> (fn: (ctx: DataContext, o: T & WithCtxInjected) => Promise<R>, opts: T = {} as T): Cypress.Chainable<UnwrapPromise<R>> {
+function withCtx<T extends Partial<WithCtxOptions>, R> (fn: (ctx: DataContext, o: T & WithCtxInjected) => Promise<R> | R, opts: T = {} as T): Cypress.Chainable<UnwrapPromise<R>> {
   const { log, timeout, ...rest } = opts
 
-  const _log = log === false ? { end () {} } : Cypress.log({
+  const _log = log === false ? { end () {}, set (key: string, val: any) {} } : Cypress.log({
     name: 'withCtx',
     message: '(view in console)',
     consoleProps () {
@@ -221,6 +225,7 @@ function withCtx<T extends Partial<WithCtxOptions>, R> (fn: (ctx: DataContext, o
     fn: fn.toString(),
     options: rest,
   }, { timeout: timeout ?? Cypress.env('e2e_isDebugging') ? NO_TIMEOUT : TEN_SECONDS, log: Boolean(Cypress.env('e2e_isDebugging')) }).then((result) => {
+    _log.set('result', result)
     _log.end()
 
     return result

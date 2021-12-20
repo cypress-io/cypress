@@ -1,4 +1,5 @@
 import type { SpecFileWithExtension, StorybookInfo } from '@packages/types'
+import assert from 'assert'
 import * as path from 'path'
 import type { DataContext } from '..'
 
@@ -13,19 +14,15 @@ export class StorybookDataSource {
   constructor (private ctx: DataContext) {}
 
   async loadStorybookInfo () {
-    if (!this.ctx.currentProject) {
-      return Promise.resolve(null)
-    }
+    assert(this.ctx.currentProject)
 
     return this.storybookInfoLoader.load(this.ctx.currentProject)
   }
 
   async getStories (): Promise<SpecFileWithExtension[]> {
-    const projectRoot = this.ctx.currentProject
+    const { currentProject } = this.ctx
 
-    if (!projectRoot) {
-      throw Error(`Cannot find stories without currentProject.`)
-    }
+    assert(currentProject)
 
     const storybook = await this.ctx.storybook.loadStorybookInfo()
 
@@ -35,7 +32,7 @@ export class StorybookDataSource {
 
     const config = await this.ctx.lifecycleManager.getFullInitialConfig()
     const normalizedGlobs = storybook.storyGlobs.map((glob) => path.join(storybook.storybookRoot, glob))
-    const files = await this.ctx.file.getFilesByGlob(projectRoot, normalizedGlobs)
+    const files = await this.ctx.file.getFilesByGlob(currentProject, normalizedGlobs)
 
     // Don't currently support mdx
     return files.reduce((acc, file) => {
@@ -45,8 +42,8 @@ export class StorybookDataSource {
 
       const spec = this.ctx.file.normalizeFileToFileParts({
         absolute: file,
-        projectRoot,
-        searchFolder: config.componentFolder || projectRoot,
+        projectRoot: currentProject,
+        searchFolder: config.componentFolder || currentProject,
       })
 
       return [...acc, spec]
