@@ -832,7 +832,7 @@ describe('src/cy/commands/request', () => {
           assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
-          expect(err.message).to.eq('`cy.request()` must be provided a fully qualified `url` - one that begins with `http`. By default `cy.request()` will use either the current window\'s origin or the `baseUrl` in `cypress.config.ts`. Neither of those values were present.')
+          expect(err.message).to.eq('`cy.request()` must be provided a fully qualified `url` - one that begins with `http`. By default `cy.request()` will use either the current window\'s origin or the `baseUrl` in `/root/cypress/packages/driver/cypress.config.ts`. Neither of those values were present.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/request')
 
           done()
