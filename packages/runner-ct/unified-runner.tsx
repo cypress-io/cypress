@@ -1,19 +1,16 @@
+import React from 'react'
 import 'regenerator-runtime/runtime'
 import _ from 'lodash'
-import * as MobX from 'mobx'
-import React from 'react'
 import ReactDOM from 'react-dom'
 import $Cypress from '@packages/driver'
-import defaultEvents from '@packages/reporter/src/lib/events'
-import shortcuts from '@packages/reporter/src/lib/shortcuts'
-import { Reporter } from '@packages/reporter/src/main'
-import {
-  blankContents, dom, logger, selectorPlaygroundModel, visitFailure, AutIframe, StudioRecorder,
-} from '@packages/runner-shared'
-
 const driverUtils = $Cypress.utils
+import { AutIframe, selectorPlaygroundModel, StudioRecorder, logger, dom, blankContents, visitFailure } from '@packages/runner-shared'
+import defaultEvents from '@packages/reporter/src/lib/events'
+import { Reporter } from '@packages/reporter/src/main'
+import shortcuts from '@packages/reporter/src/lib/shortcuts'
+import * as MobX from 'mobx'
 
-const UnifiedRunner = {
+export const UnifiedRunner = {
   _,
 
   CypressJQuery: $Cypress.$,
@@ -54,6 +51,3 @@ const UnifiedRunner = {
     defaultEvents.emit(evt, ...args)
   },
 }
-
-// @ts-ignore
-window.UnifiedRunner = UnifiedRunner

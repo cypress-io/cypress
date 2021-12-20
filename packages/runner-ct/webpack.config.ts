@@ -63,13 +63,6 @@ const config: webpack.Configuration = {
       {
         test: /index\.js/,
         exclude: /node_modules/,
-        use: [{
-          loader: 'ifdef-loader',
-          options: {
-            DEBUG: true,
-            'ifdef-verbose': true,
-          },
-        }],
       },
     ],
   },

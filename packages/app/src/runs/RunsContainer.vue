@@ -3,20 +3,22 @@
     v-if="!currentProject?.projectId || !cloudViewer?.id"
     :gql="props.gql"
   />
-  <RunsEmpty
-    v-else-if="!currentProject?.cloudProject?.runs?.nodes.length"
-    :gql="currentProject"
-  />
-  <div
-    v-else
-    data-cy="runs"
-  >
-    <RunCard
-      v-for="run of currentProject?.cloudProject?.runs?.nodes"
-      :key="run.id"
-      :gql="run"
+  <template v-else-if="currentProject?.cloudProject?.__typename === 'CloudProject'">
+    <RunsEmpty
+      v-if="!currentProject?.cloudProject?.runs?.nodes.length"
+      :gql="currentProject"
     />
-  </div>
+    <div
+      v-else
+      data-cy="runs"
+    >
+      <RunCard
+        v-for="run of currentProject?.cloudProject?.runs?.nodes"
+        :key="run.id"
+        :gql="run"
+      />
+    </div>
+  </template>
 </template>
 
 <script lang="ts" setup>
@@ -33,11 +35,14 @@ fragment RunsContainer on Query {
     id
     ...RunsEmpty
     cloudProject {
-      id
-      runs(first: 10) {
-        nodes {
-          id
-          ...RunCard
+      __typename
+      ... on CloudProject {
+        id
+        runs(first: 10) {
+          nodes {
+            id
+            ...RunCard
+          }
         }
       }
     }
@@ -55,15 +60,6 @@ const props = defineProps<{
 const currentProject = computed(() => props.gql.currentProject)
 const cloudViewer = computed(() => props.gql.cloudViewer)
 </script>
-
-<route>
-{
-  name: "Runs",
-  meta: {
-    title: "Runs"
-  }
-}
-</route>
 
 <style scoped>
 .fade-enter-active, .fade-leave-active {
