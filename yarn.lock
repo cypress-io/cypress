@@ -11842,11 +11842,7 @@ asap@^2.0.0, asap@~2.0.3, asap@~2.0.6:
   resolved "https://registry.yarnpkg.com/asap/-/asap-2.0.6.tgz#e50347611d7e690943208bbdafebcbc2fb866d46"
   integrity sha1-5QNHYR1+aQlDIIu9r+vLwvuGbUY=
 
-<<<<<<< HEAD
 asar@^3.0.3, asar@^3.1.0:
-=======
-asar@^3.0.0, asar@^3.0.3:
->>>>>>> develop
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/asar/-/asar-3.1.0.tgz#70b0509449fe3daccc63beb4d3c7d2e24d3c6473"
   integrity sha512-vyxPxP5arcAqN4F/ebHd/HhwnAiZtwhglvdmc7BR2f0ywbVNTOpSeyhLDbGXtE/y58hv1oC75TaNIXutnsOZsQ==
@@ -18688,11 +18684,7 @@ electron-is-dev@^2.0.0:
   resolved "https://registry.npmjs.org/electron-is-dev/-/electron-is-dev-2.0.0.tgz#833487a069b8dad21425c67a19847d9064ab19bd"
   integrity sha512-3X99K852Yoqu9AcW50qz3ibYBWY79/pBhlMCab8ToEWS48R0T9tyxRiQhwylE7zQdXrMnx2JKqUJyMPmt5FBqA==
 
-<<<<<<< HEAD
 electron-notarize@^1.1.1:
-=======
-electron-notarize@^1.0.0, electron-notarize@^1.1.1:
->>>>>>> develop
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/electron-notarize/-/electron-notarize-1.1.1.tgz#3ed274b36158c1beb1dbef14e7faf5927e028629"
   integrity sha512-kufsnqh86CTX89AYNG3NCPoboqnku/+32RxeJ2+7A4Rbm4bbOx0Nc7XTy3/gAlBfpj9xPAxHfhZLOHgfi6cJVw==
@@ -18712,7 +18704,6 @@ electron-osx-sign@^0.5.0:
     minimist "^1.2.0"
     plist "^3.0.1"
 
-<<<<<<< HEAD
 electron-packager@15.4.0:
   version "15.4.0"
   resolved "https://registry.yarnpkg.com/electron-packager/-/electron-packager-15.4.0.tgz#07ea036b70cde2062d4c8dce4d907d793b303998"
@@ -18724,18 +18715,6 @@ electron-packager@15.4.0:
     debug "^4.0.1"
     electron-notarize "^1.1.1"
     electron-osx-sign "^0.5.0"
-=======
-electron-packager@15.1.0:
-  version "15.1.0"
-  resolved "https://registry.yarnpkg.com/electron-packager/-/electron-packager-15.1.0.tgz#16a3733e4cad26112a2ac36f0b0f35c3b0170eff"
-  integrity sha512-THNm4bz1DfvR9f0g51+NjuAYELflM8+1vhQ/iv/G8vyZNKzSMuFd5doobngQKq3rRsLdPNZVnGqDdgS884d7Og==
-  dependencies:
-    "@electron/get" "^1.6.0"
-    asar "^3.0.0"
-    debug "^4.0.1"
-    electron-notarize "^1.0.0"
-    electron-osx-sign "^0.4.11"
->>>>>>> develop
     extract-zip "^2.0.0"
     filenamify "^4.1.0"
     fs-extra "^9.0.0"
@@ -18747,11 +18726,7 @@ electron-packager@15.1.0:
     rcedit "^3.0.1"
     resolve "^1.1.6"
     semver "^7.1.3"
-<<<<<<< HEAD
     yargs-parser "^20.0.0"
-=======
-    yargs-parser "^19.0.1"
->>>>>>> develop
 
 electron-publish@22.13.1:
   version "22.13.1"
@@ -39823,7 +39798,6 @@ title-case@^2.1.0:
     no-case "^2.2.0"
     upper-case "^1.0.3"
 
-<<<<<<< HEAD
 title-case@^3.0.3:
   version "3.0.3"
   resolved "https://registry.yarnpkg.com/title-case/-/title-case-3.0.3.tgz#bc689b46f02e411f1d1e1d081f7c3deca0489982"
@@ -39831,8 +39805,6 @@ title-case@^3.0.3:
   dependencies:
     tslib "^2.0.3"
 
-=======
->>>>>>> develop
 tmp-promise@^3.0.2:
   version "3.0.3"
   resolved "https://registry.yarnpkg.com/tmp-promise/-/tmp-promise-3.0.3.tgz#60a1a1cc98c988674fcbfd23b6e3367bdeac4ce7"
@@ -43736,16 +43708,7 @@ yargs-parser@^18.1.2:
     camelcase "^5.0.0"
     decamelize "^1.2.0"
 
-<<<<<<< HEAD
 yargs-parser@^20.0.0, yargs-parser@^20.2.2, yargs-parser@^20.2.3, yargs-parser@^20.2.7:
-=======
-yargs-parser@^19.0.1:
-  version "19.0.4"
-  resolved "https://registry.yarnpkg.com/yargs-parser/-/yargs-parser-19.0.4.tgz#99183a3a59268b205c6b04177f2a5bfb46e79ba7"
-  integrity sha512-eXeQm7yXRjPFFyf1voPkZgXQZJjYfjgQUmGPbD2TLtZeIYzvacgWX7sQ5a1HsRgVP+pfKAkRZDNtTGev4h9vhw==
-
-yargs-parser@^20.2.2, yargs-parser@^20.2.3:
->>>>>>> develop
   version "20.2.9"
   resolved "https://registry.yarnpkg.com/yargs-parser/-/yargs-parser-20.2.9.tgz#2eb7dc3b0289718fc295f362753845c41a0c94ee"
   integrity sha512-y11nGElTIV+CT3Zv9t7VKl+Q3hTQoT9a1Qzezhhl6Rp21gJ/IVTW7Z3y9EWXhuUBC2Shnf+DX0antecpAwSP8w==
