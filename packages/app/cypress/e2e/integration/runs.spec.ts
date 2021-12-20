@@ -11,6 +11,7 @@ describe('App: Runs Page', () => {
     cy.wait(1000)
     cy.get('[href="#/runs"]').click()
     cy.get('[data-cy="runs"]')
+    cy.get('[data-testid="header-bar"]').findByText('Runs').should('be.visible')
   })
 
   it('shows the loader', () => {
@@ -51,7 +52,15 @@ describe('App: Runs Page', () => {
   it('when logged out, shows call to action', () => {
     cy.visitApp()
     cy.get('[href="#/runs"]').click()
-    cy.contains('Log in').should('exist')
+    cy.contains('Log In').should('exist')
+  })
+
+  it('clicking the Login button will open the Login modal', () => {
+    cy.visitApp()
+    cy.get('[href="#/runs"]').click()
+    cy.contains('Log In').click()
+    cy.get('h2').contains('Log In To Cypress')
+    cy.get('button').contains('Log In')
   })
 
   it('when no project Id in the config file, shows call to action', () => {
