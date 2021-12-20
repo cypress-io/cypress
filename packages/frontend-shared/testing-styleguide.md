@@ -26,7 +26,7 @@ cy.findByLabelText('toggle navigation', {
     }).click()
 ```
 
-#### Label-like selectors that are not labels
+#### Label-like locators that are not labels
 
 We should be cautious with a locator like `cy.findByPlaceholderText('My placeholder')` to target a form input, as an input that only has a `placeholder`, but no `label`, is not fully accessible. Even though it may be useful to assert the placeholder contents for its own sake, we should prefer to locate an input by `label` when interacting.
 
