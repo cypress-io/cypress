@@ -31,7 +31,7 @@ const captureCommands = () => {
     commands[commands.length - 1].snapshots++
   })
 
-  return commands
+  return () => _.cloneDeep(commands)
 }
 
 describe('src/cy/commands/assertions', () => {
@@ -69,12 +69,10 @@ describe('src/cy/commands/assertions', () => {
       cy
       .noop({ foo: 'bar' }).should('deep.eq', { foo: 'bar' })
       .then((obj) => {
-        expect(obj).to.deep.eq({ foo: 'bar' })
-
-        expect(testCommands).to.eql([
+        expect(testCommands()).to.eql([
           { name: 'noop', snapshots: 0, retries: 0 },
           { name: 'should', snapshots: 1, retries: 0 },
-          { name: 'then', snapshots: 1, retries: 0 },
+          { name: 'then', snapshots: 0, retries: 0 },
         ])
       })
     })
@@ -172,12 +170,10 @@ describe('src/cy/commands/assertions', () => {
       })
       .should('deep.eq', { foo: 'baz' })
       .then(() => {
-        const c = _.cloneDeep(testCommands)
-
-        expect(c).to.deep.eq([
+        expect(testCommands()).to.containSubset([
           { name: 'wrap', snapshots: 1, retries: 0 },
           { name: 'then', snapshots: 0, retries: 0 },
-          { name: 'wrap', snapshots: 2, retries: 5 }, // swap in the chai-match-pattern lib to make this "greater than 1"
+          { name: 'wrap', snapshots: 2, retries: (r) => r > 1 },
           { name: 'then', snapshots: 0, retries: 0 },
         ])
       })
@@ -207,15 +203,13 @@ describe('src/cy/commands/assertions', () => {
           expect($button).to.have.class('ready')
         })
         .then(() => {
-          const c = _.cloneDeep(testCommands)
-
-          expect(c).to.eql([
-            // the cy.get() has 2 snapshots, 1 for itself, and 1
+          expect(testCommands()).to.eql([
+            // cy.get() has 2 snapshots, 1 for itself, and 1
             // for the .should(...) assertion.
-            // TODO: investigate whether or not the 2 commands are
-            // snapshotted at the same time... assuming they are
-            // and there's not a tick between them, we could reuse
-            // the snapshots and combine into 1
+
+            // TODO: Investigate whether or not the 2 commands are
+            // snapshotted at the same time. If there's no tick between
+            // them, we could reuse the snapshots
             { name: 'get', snapshots: 2, retries: 2 },
             { name: 'then', snapshots: 0, retries: 0 },
           ])
@@ -3003,7 +2997,12 @@ describe('src/cy/commands/assertions', () => {
     // should be taken.
     it('only snapshots once when failing to find DOM elements and not retrying', (done) => {
       cy.on('fail', (err) => {
-        expect(testCommands[0].snapshots).to.eq(1)
+        expect(testCommands()).to.eql([{
+          name: 'get',
+          snapshots: 1,
+          retries: 0,
+        }])
+
         done()
       })
 
@@ -3017,9 +3016,12 @@ describe('src/cy/commands/assertions', () => {
     // more generally assert that retries do not trigger multiple snapshots.
     it('only snapshots once when retrying assertions', (done) => {
       cy.on('fail', (err) => {
-        const totalSnapshots = _.sum(_.map(testCommands, 'snapshots'))
+        expect(testCommands()).to.containSubset([{
+          name: 'get',
+          snapshots: 1,
+          retries: (v) => v > 1,
+        }])
 
-        expect(totalSnapshots).to.eq(1)
         done()
       })
 
