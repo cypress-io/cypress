@@ -130,7 +130,7 @@ export const getFirstDeepestElement = ($el: JQuery, index = 0) => {
   }
 
   // https://github.com/cypress-io/cypress/issues/14861
-  // filter out <script> and <style> tags
+  // filter out the <script> and <style> tags
   if ($current && ['SCRIPT', 'STYLE'].includes($current.prop('tagName'))) {
     return getFirstDeepestElement($el, index + 1)
   }
