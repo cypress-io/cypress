@@ -339,12 +339,8 @@ export class EventManager {
     Cypress = this.Cypress = this.$CypressDriver.create(config)
 
     // expose Cypress globally
-    // since CT AUT shares the window with the spec, we don't want to overwrite
-    // our spec Cypress instance with the component's Cypress instance
-    if (window.top === window) {
-      // @ts-ignore
-      window.Cypress = Cypress
-    }
+    // @ts-ignore
+    window.Cypress = Cypress
 
     this._addListeners()
 
