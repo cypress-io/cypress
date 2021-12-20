@@ -9,7 +9,7 @@ describe('App: Spec List', () => {
   it('highlights the currently running spec', () => {
     cy.contains('fails').click()
 
-    cy.get('[data-selected-spec="true"').should('contain', 'fails')
-    cy.get('[data-selected-spec="false"').should('contain', 'foo')
+    cy.get('[data-selected-spec="true"]').should('contain', 'fails')
+    cy.get('[data-selected-spec="false"]').should('contain', 'foo')
   })
 })
