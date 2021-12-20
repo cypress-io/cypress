@@ -1,6 +1,4 @@
 import { debug as debugFn } from 'debug'
-import { readFile } from 'fs/promises'
-import { resolve } from 'path'
 import { build, createServer, InlineConfig } from 'vite'
 import httpServer from './http-server'
 import { default as resolveServerConfig, StartDevServerOptions } from './resolveServerConfig'
