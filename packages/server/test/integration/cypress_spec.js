@@ -748,7 +748,8 @@ describe('lib/cypress', () => {
       })
     })
 
-    it('logs error and exits when project has cypress.config.js syntax error', function () {
+    // TODO: test this
+    it.skip('logs error and exits when project has cypress.config.js syntax error', function () {
       return fs.writeFileAsync(`${this.todosPath}/cypress.config.js`, `module.exports = {`)
       .then(() => {
         return cypress.start([`--run-project=${this.todosPath}`])
@@ -1700,7 +1701,7 @@ describe('lib/cypress', () => {
         delete process.env.LAUNCHPAD
         const options = Events.start.firstCall.args[0]
 
-        return openProject.create(this.todosPath, options, {}, [])
+        return openProject.create(this.todosPath, { ...options, testingType: 'e2e' }, [])
       }).then(() => {
         const projectOptions = openProject.getProject().options
 
