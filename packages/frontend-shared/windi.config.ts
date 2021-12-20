@@ -21,6 +21,9 @@ export const defaultConfig: WindiCssOptions = {
       },
       colors,
     },
+    cursor: {
+      'ew-resize': 'ew-resize',
+    },
   },
   safelist,
   variants: {

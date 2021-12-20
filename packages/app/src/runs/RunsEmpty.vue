@@ -20,7 +20,6 @@
 
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
-import { useRoute } from 'vue-router'
 import { gql } from '@urql/vue'
 import TerminalPrompt from '@cy/components/TerminalPrompt.vue'
 import type { RunsEmptyFragment } from '../generated/graphql'
@@ -43,6 +42,7 @@ fragment RunsEmpty on CurrentProject {
         ...RecordKey
       }
     }
+    
   }
 }
 `

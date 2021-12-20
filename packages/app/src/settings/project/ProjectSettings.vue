@@ -2,7 +2,10 @@
   <ProjectId
     :gql="props.gql.currentProject"
   />
-  <template v-if="props.gql.currentProject?.cloudProject?.__typename === 'CloudProject' && props.gql.currentProject?.cloudProject?.recordKeys?.length">
+  <template
+    v-if="props.gql.currentProject?.cloudProject?.__typename === 'CloudProject'
+      && props.gql.currentProject.cloudProject.recordKeys?.length"
+  >
     <RecordKey
       v-for="key of props.gql.currentProject.cloudProject.recordKeys"
       :key="key.id"

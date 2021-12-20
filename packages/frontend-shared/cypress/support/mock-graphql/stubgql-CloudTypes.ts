@@ -185,9 +185,14 @@ export const CloudOrganizationStubs = {
   cyOrg: createCloudOrganization({}),
 } as const
 
+const stubProjectUrls = {
+  cloudProjectUrl: 'https://project.cypress.io',
+  cloudProjectSettingsUrl: 'https://project.cypress.io/settings',
+}
+
 export const CloudProjectStubs = {
-  e2eProject: createCloudProject({ slug: 'efgh', name: 'e2e-project' }),
-  componentProject: createCloudProject({ slug: 'abcd', name: 'component-project' }),
+  e2eProject: createCloudProject({ ...stubProjectUrls, slug: 'e2e', name: 'e2e-project' }),
+  componentProject: createCloudProject({ ...stubProjectUrls, slug: 'ct', name: 'component-project' }),
 } as const
 
 interface CloudTypesContext {
@@ -207,7 +212,7 @@ export const CloudRunQuery: MaybeResolver<Query> = {
     return CloudProjectStubs.componentProject
   },
   cloudProjectsBySlugs (args: QueryCloudProjectsBySlugsArgs) {
-    return args.slugs.map((s) => projectsBySlug[s] ?? createCloudProject({ slug: s, name: `cloud-project-${s}` }))
+    return args.slugs.map((s) => projectsBySlug[s] ?? createCloudProject({ ...stubProjectUrls, slug: s, name: `cloud-project-${s}` }))
   },
   cloudViewer (args, ctx) {
     if (ctx.__server__) {

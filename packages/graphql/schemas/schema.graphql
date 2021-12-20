@@ -81,6 +81,12 @@ type CloudOrganizationEdge {
 
 """A CloudProject represents a Project stored in the Cypress Cloud"""
 type CloudProject implements Node {
+  """A link to the settings page of the project in the dashboard"""
+  cloudProjectSettingsUrl: String!
+
+  """A link to the project in the dashboard"""
+  cloudProjectUrl: String!
+
   """Globally unique identifier representing a concrete GraphQL ObjectType"""
   id: ID!
 
@@ -258,6 +264,9 @@ enum CloudRunStatus {
 type CloudUser implements Node {
   """Url to manage cloud organizations for this user"""
   cloudOrganizationsUrl: String
+
+  """Url to the profile of the current user on the dashboard"""
+  cloudProfileUrl: String
 
   """Url to create a cloud organization for this user"""
   createCloudOrganizationUrl: String
@@ -547,6 +556,8 @@ type LocalSettingsPreferences {
   preferredEditorBinary: String
   proxyBypass: String
   proxyServer: String
+  reporterWidth: Int
+  specListWidth: Int
 }
 
 type Mutation {
@@ -560,7 +571,12 @@ type Mutation {
   """Create an Index HTML file for a new component testing project"""
   appCreateComponentIndexHtml(template: String!): Boolean
   clearActiveProject: Boolean
+
+  """Create a project in the dashboard and return its object"""
   cloudProjectCreate(ciProviders: [String!], name: String!, orgId: ID!, public: Boolean!): CloudProject
+
+  """Request access to an organization from a projectId"""
+  cloudProjectRequestAccess(projectSlug: String!): Boolean
 
   """
   Development only: Triggers or dismisses a prompted refresh by touching the file watched by our development scripts

@@ -52,7 +52,7 @@ fragment RunsContainer on Query {
       __typename
       ... on CloudProject {
         id
-        runs {
+        runs(first: 10) {
           nodes {
             id
             ...RunCard
