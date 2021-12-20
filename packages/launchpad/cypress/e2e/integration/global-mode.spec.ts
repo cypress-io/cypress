@@ -35,7 +35,7 @@ describe('Launchpad: Global Mode', () => {
   })
 
   describe('when projects have been added', () => {
-    const setupProjects = (projectList) => {
+    const setupAndValidateProjectsList = (projectList) => {
       cy.openGlobalMode()
       projectList.forEach((projectName) => {
         cy.addProject(projectName)
@@ -45,6 +45,8 @@ describe('Launchpad: Global Mode', () => {
 
       cy.log('The recents list shows all projects that have been added')
       cy.contains(defaultMessages.globalPage.recentProjectsHeader)
+      .should('be.visible')
+
       cy.get('[data-cy="project-card"]')
       .should('have.length', projectList.length)
       .each((card, index) => {
@@ -56,13 +58,13 @@ describe('Launchpad: Global Mode', () => {
     it('shows the recent projects list sorted by most-recently opened', () => {
       const projectList = ['todos', 'ids', 'cookies', 'plugin-empty']
 
-      setupProjects(projectList)
+      setupAndValidateProjectsList(projectList)
     })
 
     it('takes user to the next step when clicking on a project card', () => {
       const projectList = ['todos']
 
-      setupProjects(projectList)
+      setupAndValidateProjectsList(projectList)
       cy.get('[data-cy="project-card"]').click()
       cy.get('[data-cy="project-card"]')
       .should('have.length', 0)
@@ -71,7 +73,7 @@ describe('Launchpad: Global Mode', () => {
     it('updates most-recently opened project list when returning from next step', () => {
       const projectList = ['todos', 'ids', 'cookies', 'plugin-empty']
 
-      setupProjects(projectList)
+      setupAndValidateProjectsList(projectList)
 
       cy.get('[data-cy="project-card"]').within((cards) => cards.get(2).click())
       cy.get('h1').contains('Welcome to Cypress!')
@@ -79,7 +81,8 @@ describe('Launchpad: Global Mode', () => {
 
       cy.get('[data-cy="project-card"]')
       .should('have.length', projectList.length)
-      // // TO DO: fix most recently updated list
+      // TODO: fix most recently updated list ()
+      // https://cypress-io.atlassian.net/browse/UNIFY-646
       // .then((list) => {
       // expect(list.get(0)).to.contain(projectList[2])
       // expect(list.get(0)).to.contain(path.join('cy-projects', path.sep, projectList[2]))
@@ -87,7 +90,7 @@ describe('Launchpad: Global Mode', () => {
     })
 
     it('can open and close the add project dropzone', () => {
-      setupProjects(['todos'])
+      setupAndValidateProjectsList(['todos'])
       cy.log('Clicking the "Add Project" button shows the Project Dropzone')
       cy.get('[data-cy="addProjectButton"').click()
       cy.get('[data-cy="dropzone"]').should('exist')
@@ -108,7 +111,7 @@ describe('Launchpad: Global Mode', () => {
 
     describe('Project card menu', () => {
       it('can be opened', () => {
-        setupProjects(['todos'])
+        setupAndValidateProjectsList(['todos'])
         cy.log('Project cards have a menu can be opened')
         cy.get('[data-cy="project-card"] > button').click()
 
@@ -123,7 +126,7 @@ describe('Launchpad: Global Mode', () => {
       it('removes project from list when clicking "Remove Project" menu item', () => {
         const projectList = ['todos', 'cookies']
 
-        setupProjects(projectList)
+        setupAndValidateProjectsList(projectList)
         cy.get('[data-cy="project-card"] > button').then((menu) => {
           menu.get(0).click()
         })
@@ -138,7 +141,7 @@ describe('Launchpad: Global Mode', () => {
       it('opens "Open in IDE" modal when clicking "Open in IDE" menu item and IDE had not been configured', () => {
         const projectList = ['todos']
 
-        setupProjects(projectList)
+        setupAndValidateProjectsList(projectList)
         cy.get('[data-cy="project-card"] > button').click()
 
         cy.get('[data-cy="Open In IDE"]').click()
@@ -146,7 +149,7 @@ describe('Launchpad: Global Mode', () => {
       })
 
       it('shows file drop zone when no more projects are in list when clicking "Remove Project" menu item', () => {
-        setupProjects(['todos'])
+        setupAndValidateProjectsList(['todos'])
         cy.get('[data-cy="project-card"] > button').click()
         cy.get('[data-cy="Remove Project"]').click()
 
@@ -160,7 +163,7 @@ describe('Launchpad: Global Mode', () => {
       const projectList = ['todos', 'ids', 'cookies', 'plugin-empty']
 
       it('filters project results when searching by project name', () => {
-        setupProjects(projectList)
+        setupAndValidateProjectsList(projectList)
         cy.log('Searching for a project by the project name will filter the project results to only show that project')
         cy.get('#project-search').type('tod')
         cy.get('[data-cy="project-card"]')
@@ -174,9 +177,9 @@ describe('Launchpad: Global Mode', () => {
         .should('have.length', projectList.length)
       })
 
-      // FIXME: fix Search by project path logic
+      // FIXME: fix Search by project path logic - https://cypress-io.atlassian.net/browse/UNIFY-646
       it.skip('filters project results when searching by project path', () => {
-        setupProjects(projectList)
+        setupAndValidateProjectsList(projectList)
         cy.get('#project-search').type('packages')
         cy.get('[data-cy="project-card"')
         .should('have.length', projectList.length)
@@ -186,7 +189,7 @@ describe('Launchpad: Global Mode', () => {
       })
 
       it('shows "empty results" pages when searching for a non-existent name', () => {
-        setupProjects(projectList)
+        setupAndValidateProjectsList(projectList)
         cy.get('#project-search').type('hi')
         cy.get('[data-cy="project-card"]')
         .should('have.length', 0)
@@ -199,9 +202,9 @@ describe('Launchpad: Global Mode', () => {
         .should('have.length', projectList.length)
       })
 
-      // FIXME: fix Search by project path logic
+      // FIXME: fix Search by project path logic - https://cypress-io.atlassian.net/browse/UNIFY-646
       it.skip('shows "empty results" pages when searching for a non-existent path', () => {
-        setupProjects(projectList)
+        setupAndValidateProjectsList(projectList)
         cy.get('#project-search').type('packages')
         cy.get('[data-cy="project-card"')
         .should('have.length', projectList.length)

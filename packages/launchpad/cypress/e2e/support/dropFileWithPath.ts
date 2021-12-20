@@ -3,12 +3,12 @@ import path from 'path'
 declare global {
   namespace Cypress {
     interface Chainable {
-      dropFileWithPath: (path: string) => Chainable<HTMLInputElement>
+      dropFileWithPath(filePath: string): Cypress.Chainable<JQuery<HTMLInputElement>>
     }
   }
 }
 
-export function dropFileWithPath (subject: HTMLInputElement, filePath: string) {
+const dropFileWithPath = (subject, filePath) => {
   const attachedFile = new File([new Blob()], 'cypress.config.ts')
   const fullPath = path.resolve(filePath)
 
@@ -26,9 +26,4 @@ export function dropFileWithPath (subject: HTMLInputElement, filePath: string) {
   .trigger('drop', { dataTransfer })
 }
 
-Cypress.Commands.add(
-  'dropFileWithPath',
-  { prevSubject: true },
-  // @ts-ignore - fixed by https://github.com/cypress-io/cypress/pull/19003
-  dropFileWithPath,
-)
+Cypress.Commands.add('dropFileWithPath', { prevSubject: 'element' }, dropFileWithPath)
