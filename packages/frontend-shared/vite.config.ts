@@ -85,6 +85,7 @@ export const makeConfig = (config: Partial<UserConfig> = {}, plugins: PluginOpti
     // Production-only build options
     build: {
       minify: false,
+      ...(config.build || {}),
     },
 
     css: {

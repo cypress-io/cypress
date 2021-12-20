@@ -75,14 +75,17 @@ export default async ({ viteConfig, options, indexHtml }: StartDevServerOptions)
     }
   }
 
+  finalConfig.build = finalConfig.build || {}
+
   finalConfig.build = {
     outDir: `${projectRoot}/node_modules/.cypress/vite-dev-server`,
     sourcemap: true,
     minify: false,
     commonjsOptions: {
-      ignoreGlobal: true,
       transformMixedEsModules: true,
+      ...finalConfig.build.commonjsOptions,
     },
+    ...finalConfig.build,
   },
 
   debug(`the resolved server config is ${JSON.stringify(finalConfig, null, 2)}`)
