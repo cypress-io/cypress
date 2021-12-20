@@ -360,11 +360,11 @@ type CurrentProject implements Node & ProjectLike {
   """Project configuration"""
   config: JSON!
 
+  """Config File, specified by the CLI or """
+  configFile: String
+
   """Config File Absolute Path"""
   configFileAbsolutePath: String
-
-  """Config File Path"""
-  configFilePath: String
 
   """The currently selected browser for the application"""
   currentBrowser: Browser

@@ -1,11 +1,8 @@
-import type Bluebird from 'bluebird'
 import type { FoundBrowser } from '@packages/types'
 
 import type { DataContext } from '..'
 
 export interface AppApiShape {
-  getBrowsers(): Promise<FoundBrowser[]>
-  ensureAndGetByNameOrPath(nameOrPath: string, returnAll?: boolean, browsers?: FoundBrowser[]): Bluebird<FoundBrowser | FoundBrowser[] | undefined>
   findNodePath(): Promise<string>
   appData: ApplicationDataApiShape
 }
@@ -41,27 +38,6 @@ export class AppActions {
 
   async ensureAppDataDirExists () {
     await this.ctx._apis.appApi.appData.ensure()
-  }
-
-  async setActiveBrowserByNameOrPath (browserNameOrPath: string) {
-    let browser
-
-    try {
-      browser = (await this.ctx._apis.appApi.ensureAndGetByNameOrPath(browserNameOrPath)) as FoundBrowser | undefined
-    } catch (err: unknown?) {
-      this.ctx.debug('Error getting browser by name or path (%s): %s', browserNameOrPath, err?.stack || err)
-      const message = err.details ? `${err.message}\n\n\`\`\`\n${err.details}\n\`\`\`` : err.message
-
-      this.ctx.coreData.wizard.warnings.push({
-        title: 'Warning: Browser Not Found',
-        message,
-        setupStep: 'setupComplete',
-      })
-    }
-
-    if (browser) {
-      this.setActiveBrowser(browser)
-    }
   }
 
   private idForBrowser (obj: FoundBrowser) {

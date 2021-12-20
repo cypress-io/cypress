@@ -202,7 +202,7 @@ function visitLaunchpad () {
 
 type UnwrapPromise<R> = R extends PromiseLike<infer U> ? U : R
 
-function withCtx<T extends Partial<WithCtxOptions>, R> (fn: (ctx: DataContext, o: T & WithCtxInjected) => Promise<R>, opts: T = {} as T): Cypress.Chainable<UnwrapPromise<R>> {
+function withCtx<T extends Partial<WithCtxOptions>, R> (fn: (ctx: DataContext, o: T & WithCtxInjected) => R | Promise<R>, opts: T = {} as T): Cypress.Chainable<UnwrapPromise<R>> {
   const { log, timeout, ...rest } = opts
 
   const _log = log === false ? { end () {} } : Cypress.log({

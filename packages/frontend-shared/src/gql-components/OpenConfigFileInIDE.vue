@@ -34,7 +34,7 @@ gql`
 query OpenConfigFileInIDE {
   currentProject {
     id
-    configFilePath
+    configFile
     configFileAbsolutePath
   }
   localSettings {
@@ -54,7 +54,7 @@ mutation OpenConfigFile ($input: FileDetailsInput!) {
 
 const query = useQuery({ query: OpenConfigFileInIdeDocument, requestPolicy: 'network-only' })
 
-const configFile = computed(() => query.data?.value?.currentProject?.configFilePath ?? 'cypress.config.js')
+const configFile = computed(() => query.data?.value?.currentProject?.configFile ?? 'cypress.config.js')
 
 const OpenConfigFileInIDE = useMutation(OpenConfigFileDocument)
 

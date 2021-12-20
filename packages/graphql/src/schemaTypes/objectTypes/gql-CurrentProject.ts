@@ -113,10 +113,10 @@ export const CurrentProject = objectType({
       },
     })
 
-    t.string('configFilePath', {
-      description: 'Config File Path',
+    t.string('configFile', {
+      description: 'Config File, specified by the CLI or ',
       resolve: (source, args, ctx) => {
-        return path.relative(ctx.lifecycleManager.projectRoot, ctx.lifecycleManager.configFilePath)
+        return ctx.lifecycleManager.configFile
       },
     })
 

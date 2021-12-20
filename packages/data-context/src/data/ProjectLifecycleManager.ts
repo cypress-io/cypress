@@ -29,12 +29,6 @@ const CHILD_PROCESS_FILE_PATH = require.resolve('@packages/server/lib/plugins/ch
 
 const UNDEFINED_SERIALIZED = '__cypress_undefined__'
 
-// Explicitly picking off all the keys we need to use, so we can create stubs for a unit test
-export type Ctx_ProjectLifecycleManager = Pick<DataContext,
-  '_apis' | 'fs' | 'coreData' | 'modeOptions' | 'update' |
-  'nodePath' | 'error' | 'onWarning' | 'onError' | 'isRunMode' | 'emitter'
->
-
 export interface SetupFullConfigOptions {
   projectName: string
   projectRoot: string
@@ -123,7 +117,7 @@ export class ProjectLifecycleManager {
 
   private _projectMetaState: ProjectMetaState = { ...PROJECT_META_STATE }
 
-  constructor (private ctx: Ctx_ProjectLifecycleManager) {
+  constructor (private ctx: DataContext) {
     this._handlers = this.ctx._apis.configApi.getServerPluginHandlers()
     this.watchers = new Set()
 
@@ -179,14 +173,14 @@ export class ProjectLifecycleManager {
     return path.join(this.configFilePath, 'cypress.json')
   }
 
+  get configFile () {
+    return this.ctx.modeOptions.configFile ?? 'cypress.config.js'
+  }
+
   get configFilePath () {
     assert(this._configFilePath, 'Expected configFilePath to be found')
 
     return this._configFilePath
-  }
-
-  get configFile () {
-    return this.ctx.modeOptions.configFile || 'cypress.config.js'
   }
 
   get envFilePath () {
@@ -270,7 +264,7 @@ export class ProjectLifecycleManager {
 
     this._projectRoot = projectRoot
     this.legacyPluginGuard()
-    this.loadGlobalBrowsers().catch(this.onLoadError)
+    Promise.resolve(this.ctx.browser.machineBrowsers()).catch(this.onLoadError)
     this.verifyProjectRoot(projectRoot)
     this.resetInternalState()
     this.ctx.update((s) => {
@@ -406,7 +400,7 @@ export class ProjectLifecycleManager {
       configFileContents = { ...configFileContents, ...testingTypeOverrides }
     }
 
-    // TODO: Convert this to be synchronous,
+    // TODO: Convert this to be synchronous, it's just FS checks
     let fullConfig = await this.ctx._apis.configApi.setupFullConfigWithDefaults({
       cliConfig: options.config ?? {},
       projectName: path.basename(this.projectRoot),
@@ -420,7 +414,7 @@ export class ProjectLifecycleManager {
     })
 
     if (withBrowsers) {
-      const browsers = await this.loadGlobalBrowsers()
+      const browsers = await this.ctx.browser.machineBrowsers()
 
       if (!fullConfig.browsers || fullConfig.browsers.length === 0) {
         // @ts-ignore - we don't know if the browser is headed or headless at this point.
@@ -830,45 +824,6 @@ export class ProjectLifecycleManager {
     return evtFn(...args)
   }
 
-  loadGlobalBrowsers () {
-    if (this._browserResult.state === 'loaded') {
-      return Promise.resolve(this._browserResult.value)
-    }
-
-    if (this._browserResult.state === 'errored') {
-      return Promise.reject(this._browserResult.value)
-    }
-
-    if (this._browserResult.state === 'loading') {
-      return this._browserResult.value
-    }
-
-    const p = this.ctx._apis.appApi.getBrowsers()
-
-    this._browserResult = { state: 'loading', value: p }
-    p.then(
-      (b) => {
-        if (p === this._browserResult.value) {
-          this._browserResult = { state: 'loaded', value: b }
-        }
-      },
-      (e) => {
-        if (p === this._browserResult.value) {
-          this._browserResult = { state: 'errored', value: e }
-          this.ctx.onError(e)
-        }
-      },
-    )
-
-    return p
-  }
-
-  reloadGlobalBrowsers () {
-    this._browserResult = { state: 'pending' }
-
-    return this.loadGlobalBrowsers()
-  }
-
   private forkConfigProcess () {
     const configProcessArgs = ['--projectRoot', this.projectRoot, '--file', this.configFilePath]
 
@@ -1125,9 +1080,26 @@ export class ProjectLifecycleManager {
 
     const fullConfig = await this.buildBaseFullConfig(this._configResult.value.initialConfig, this._envFileResult.value, this.ctx.modeOptions)
 
-    this._cachedFullConfig = this.ctx._apis.configApi.updateWithPluginValues(fullConfig, result.setupConfig ?? {})
+    const finalConfig = this._cachedFullConfig = this.ctx._apis.configApi.updateWithPluginValues(fullConfig, result.setupConfig ?? {})
 
-    this._pendingInitialize?.resolve()
+    if (this.ctx.coreData.cliBrowser) {
+      await this.setActiveBrowser(finalConfig, this.ctx.coreData.cliBrowser)
+    }
+
+    this._pendingInitialize?.resolve(finalConfig)
+  }
+
+  private async setActiveBrowser (config: FullConfig, cliBrowser: string) {
+    // When we're starting up, if we've chosen a browser to run with, check if it exists
+    this.ctx.coreData.cliBrowser = null
+
+    try {
+      const browser = await this.ctx._apis.browserApi.ensureAndGetByNameOrPath(cliBrowser)
+
+      this.ctx.coreData.chosenBrowser = browser ?? null
+    } catch (e) {
+      this.ctx.onWarning(e)
+    }
   }
 
   private registerSetupIpcHandlers (ipc: ProjectConfigIpc) {
@@ -1176,7 +1148,7 @@ export class ProjectLifecycleManager {
     return true
   }
 
-  private _pendingInitialize?: pDefer.DeferredPromise<void>
+  private _pendingInitialize?: pDefer.DeferredPromise<FullConfig>
 
   async initializeRunMode () {
     this._pendingInitialize = pDefer()
@@ -1191,13 +1163,13 @@ export class ProjectLifecycleManager {
       return this.ctx.onError(this.ctx.error('NO_DEFAULT_CONFIG_FILE_FOUND', this.projectRoot))
     }
 
-    await this._pendingInitialize.promise.finally(() => {
+    return this._pendingInitialize.promise.finally(() => {
       this._pendingInitialize = undefined
     })
   }
 
   private configFileWarningCheck () {
-    if (!this.metaState.hasValidConfigFile && this.metaState.hasSpecifiedConfigViaCLI !== false) {
+    if (!this.metaState.hasValidConfigFile && this.metaState.hasSpecifiedConfigViaCLI !== false && this.ctx.isRunMode) {
       this.ctx.onError(this.ctx.error('CONFIG_FILE_NOT_FOUND', path.basename(this.metaState.hasSpecifiedConfigViaCLI), path.dirname(this.metaState.hasSpecifiedConfigViaCLI)))
     }
 

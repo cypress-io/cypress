@@ -15,7 +15,6 @@
       />
       <ConfigLegend
         class="rounded-tr-md px-22px py-28px border-1 border-l-0 rounded-br-md min-w-280px"
-        :gql="props.gql"
       />
     </div>
   </SettingsSection>
