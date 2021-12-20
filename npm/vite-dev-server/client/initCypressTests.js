@@ -46,3 +46,4 @@ CypressInstance.on('test:before:run', () => {
 
 // Make usage of node test plugins possible
 window.global = window
+window.process = typeof process !== 'undefined' ? process : {}

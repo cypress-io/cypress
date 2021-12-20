@@ -16,7 +16,7 @@ export async function startDevServer (startDevServerArgs: StartDevServerOptions)
   const resolvedConfig = await resolveServerConfig(startDevServerArgs)
   const port = resolvedConfig.server!.port!
 
-  if (startDevServerArgs.options.config.isTextTerminal && startDevServerArgs.enableRunPrebuild) {
+  if (startDevServerArgs.options.config.isTextTerminal) {
     await build(resolvedConfig)
     const root = resolvedConfig.build!.outDir!
 

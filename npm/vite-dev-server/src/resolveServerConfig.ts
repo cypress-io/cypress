@@ -23,10 +23,9 @@ export interface StartDevServerOptions {
    * which your components will be rendered.
    */
   indexHtml?: string
-  enableRunPrebuild?: boolean
 }
 
-export default async ({ viteConfig, options, indexHtml, enableRunPrebuild }: StartDevServerOptions): Promise<InlineConfig> => {
+export default async ({ viteConfig, options, indexHtml }: StartDevServerOptions): Promise<InlineConfig> => {
   const { projectRoot, supportFile, isTextTerminal } = options.config
 
   const requiredOptions: InlineConfig = {
@@ -36,7 +35,7 @@ export default async ({ viteConfig, options, indexHtml, enableRunPrebuild }: Sta
 
   const finalConfig: InlineConfig = { ...viteConfig, ...requiredOptions }
 
-  finalConfig.plugins = [...(finalConfig.plugins || []), makeCypressPlugin(projectRoot, supportFile, options.devServerEvents, options.specs, isTextTerminal && !!enableRunPrebuild, indexHtml)]
+  finalConfig.plugins = [...(finalConfig.plugins || []), makeCypressPlugin(projectRoot, supportFile, options.devServerEvents, options.specs, isTextTerminal, indexHtml)]
 
   // This alias is necessary to avoid a "prefixIdentifiers" issue from slots mounting
   // only cjs compiler-core accepts using prefixIdentifiers in slots which vue test utils use.
