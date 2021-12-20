@@ -43,6 +43,19 @@ export const makeCypressPlugin = (
 
   const normalizedSupportFilePath = posixSupportFilePath ? `${base}@fs/${posixSupportFilePath}` : undefined
 
+  async function getHTMLCode (): Promise<string> {
+    const indexHtmlPath = indexHtml ? resolve(projectRoot, indexHtml) : resolve(__dirname, '..', 'index.html')
+    const indexHtmlContent = await readFile(indexHtmlPath, { encoding: 'utf8' })
+    // find </body> last index
+    const endOfBody = indexHtmlContent.lastIndexOf('</body>')
+
+    // insert the script in the end of the body
+    return `${indexHtmlContent.substring(0, endOfBody)
+    }<script src="${buildMode ? '/' : base}cypress:client-init-test" type="module"></script>${
+      indexHtmlContent.substring(endOfBody)
+    }`
+  }
+
   return {
     name: pluginName,
     enforce: 'pre',
@@ -51,39 +64,20 @@ export const makeCypressPlugin = (
     },
     async transform (code: string, id: string): Promise<string> {
       if (id === resolve(projectRoot, 'index.html') && buildMode) {
-        debug('transformIndexHtml with base', base)
-        const indexHtmlPath = indexHtml ? resolve(projectRoot, indexHtml) : resolve(__dirname, '..', 'index.html')
-        const indexHtmlContent = await readFile(indexHtmlPath, { encoding: 'utf8' })
-        // find </body> last index
-        const endOfBody = indexHtmlContent.lastIndexOf('</body>')
+        debug('transformIndexHtml with base (buildMode)', base)
 
-        // insert the script in the end of the body
-        return `${indexHtmlContent.substring(0, endOfBody)
-        }<script src="/cypress:client-init-test" type="module"></script>${
-          indexHtmlContent.substring(endOfBody)
-        }`
+        return getHTMLCode()
       }
 
       return code
     },
     async transformIndexHtml () {
       if (!buildMode) {
-        debug('transformIndexHtml with base', base)
-        const indexHtmlPath = indexHtml ? resolve(projectRoot, indexHtml) : resolve(__dirname, '..', 'index.html')
-        const indexHtmlContent = await readFile(indexHtmlPath, { encoding: 'utf8' })
+        debug('transformIndexHtml with base (openMode)', base)
 
         return {
-          html: indexHtmlContent,
-          // load the script at the end of the body
-          // script has to be loaded when the vite client is connected
-          tags: [{
-            tag: 'script',
-            injectTo: 'body',
-            attrs: {
-              type: 'module',
-              src: `${base}cypress:client-init-test`,
-            },
-          }],
+          html: await getHTMLCode(),
+          tags: [],
         }
       }
     },
