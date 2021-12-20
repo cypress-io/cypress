@@ -515,6 +515,9 @@ class $Cypress {
       case 'cy:scrolled':
         return this.emit('scrolled', ...args)
 
+      case 'cy:snapshot':
+        return this.emit('snapshot', ...args)
+
       case 'app:uncaught:exception':
         return this.emitMap('uncaught:exception', ...args)
 
