@@ -115,9 +115,7 @@ export const makeConfig = (config: Partial<UserConfig> = {}, plugins: PluginOpti
     // Please use the PluginsOverride option for this.
     plugins: makePlugins(plugins),
     define: {
-      'process.env': {
-        CYPRESS_INTERNAL_ENV: 'development',
-      },
+      'process.env.CYPRESS_INTERNAL_ENV': 'development',
       'setImmediate': {},
     },
     ...config,
