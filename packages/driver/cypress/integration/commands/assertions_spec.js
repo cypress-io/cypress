@@ -66,16 +66,15 @@ describe('src/cy/commands/assertions', () => {
     })
 
     it('returns the subject for chainability', () => {
-      cy.noop({ foo: 'bar' }).should('deep.eq', { foo: 'bar' }).then((obj) => {
+      cy
+      .noop({ foo: 'bar' }).should('deep.eq', { foo: 'bar' })
+      .then((obj) => {
         expect(obj).to.deep.eq({ foo: 'bar' })
-      })
 
-      cy.then(() => {
         expect(testCommands).to.eql([
           { name: 'noop', snapshots: 0, retries: 0 },
           { name: 'should', snapshots: 1, retries: 0 },
           { name: 'then', snapshots: 1, retries: 0 },
-          { name: 'then', snapshots: 0, retries: 0 },
         ])
       })
     })
@@ -167,11 +166,21 @@ describe('src/cy/commands/assertions', () => {
       cy.wrap(obj).then(() => {
         setTimeout(() => {
           obj.foo = 'baz'
-        }
-        , 100)
+        }, 100)
 
         cy.wrap(obj)
-      }).should('deep.eq', { foo: 'baz' })
+      })
+      .should('deep.eq', { foo: 'baz' })
+      .then(() => {
+        const c = _.cloneDeep(testCommands)
+
+        expect(c).to.deep.eq([
+          { name: 'wrap', snapshots: 1, retries: 0 },
+          { name: 'then', snapshots: 0, retries: 0 },
+          { name: 'wrap', snapshots: 2, retries: 5 }, // swap in the chai-match-pattern lib to make this "greater than 1"
+          { name: 'then', snapshots: 0, retries: 0 },
+        ])
+      })
     })
 
     // https://github.com/cypress-io/cypress/issues/16006
@@ -196,6 +205,20 @@ describe('src/cy/commands/assertions', () => {
 
         cy.get('button:first').should(($button) => {
           expect($button).to.have.class('ready')
+        })
+        .then(() => {
+          const c = _.cloneDeep(testCommands)
+
+          expect(c).to.eql([
+            // the cy.get() has 2 snapshots, 1 for itself, and 1
+            // for the .should(...) assertion.
+            // TODO: investigate whether or not the 2 commands are
+            // snapshotted at the same time... assuming they are
+            // and there's not a tick between them, we could reuse
+            // the snapshots and combine into 1
+            { name: 'get', snapshots: 2, retries: 2 },
+            { name: 'then', snapshots: 0, retries: 0 },
+          ])
         })
       })
 
@@ -2978,7 +3001,7 @@ describe('src/cy/commands/assertions', () => {
     // https://github.com/cypress-io/cypress/issues/18549
     // A targeted test for the above issue - in the absence of retries, only a single snapshot
     // should be taken.
-    it('only snapshots once when failing to find DOM elements', (done) => {
+    it('only snapshots once when failing to find DOM elements and not retrying', (done) => {
       cy.on('fail', (err) => {
         expect(testCommands[0].snapshots).to.eq(1)
         done()
