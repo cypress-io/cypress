@@ -1,0 +1,13 @@
+diff --git a/node_modules/tsconfig-paths/lib/register.js b/node_modules/tsconfig-paths/lib/register.js
+index 311c7fd..ac9feec 100644
+--- a/node_modules/tsconfig-paths/lib/register.js
++++ b/node_modules/tsconfig-paths/lib/register.js
+@@ -51,7 +51,7 @@ function register(explicitParams) {
+         explicitParams: explicitParams,
+     });
+     if (configLoaderResult.resultType === "failed") {
+-        console.warn(configLoaderResult.message + ". tsconfig-paths will be skipped");
++        // console.warn(configLoaderResult.message + ". tsconfig-paths will be skipped");
+         return noOp;
+     }
+     var matchPath = match_path_sync_1.createMatchPath(configLoaderResult.absoluteBaseUrl, configLoaderResult.paths, configLoaderResult.mainFields, configLoaderResult.addMatchAll);

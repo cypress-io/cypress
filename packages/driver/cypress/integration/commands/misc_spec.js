@@ -1,3 +1,4 @@
+const { assertLogLength } = require('../../support/utils')
 const { _, $, dom } = Cypress
 
 describe('src/cy/commands/misc', () => {
@@ -67,7 +68,7 @@ describe('src/cy/commands/misc', () => {
         return cy.log('foobarbaz', [{}]).then(function () {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
             Command: 'log',
-            args: [{}],
+            args: [[{}]],
             message: 'foobarbaz',
           })
         })
@@ -82,6 +83,16 @@ describe('src/cy/commands/misc', () => {
           return await Object.keys(data).length
         }).then((test) => {
           expect(test).to.eq(1)
+        })
+      })
+
+      // https://github.com/cypress-io/cypress/issues/16068
+      it('log does not have limit to the number of arguments', function () {
+        cy.log('msg', 1, 2, 3, 4)
+        .then(() => {
+          const { lastLog } = this
+
+          expect(lastLog.get('message')).to.eq('msg, 1, 2, 3, 4')
         })
       })
     })
@@ -258,7 +269,7 @@ describe('src/cy/commands/misc', () => {
         Cypress.config('defaultCommandTimeout', 100)
 
         cy.on('fail', (err) => {
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(err.message).to.include('`cy.wrap()` timed out waiting `100ms` to complete.')
           expect(err.message).to.include('You called `cy.wrap()` with a promise that never resolved.')
           expect(err.message).to.include('To increase the timeout, use `{ timeout: number }`')
@@ -277,7 +288,7 @@ describe('src/cy/commands/misc', () => {
 
       it('throws when exceeding custom timeout', function (done) {
         cy.on('fail', (err) => {
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(err.message).to.include('`cy.wrap()` timed out waiting `100ms` to complete.')
           expect(err.message).to.include('You called `cy.wrap()` with a promise that never resolved.')
           expect(err.message).to.include('To increase the timeout, use `{ timeout: number }`')
@@ -296,7 +307,7 @@ describe('src/cy/commands/misc', () => {
 
       it('logs once when promise parameter is rejected', function (done) {
         cy.on('fail', (err) => {
-          expect(this.logs.length).to.eq(1)
+          assertLogLength(this.logs, 1)
           expect(err.message).to.include('custom error')
           expect(this.lastLog.get('error')).to.eq(err)
           done()

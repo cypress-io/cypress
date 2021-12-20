@@ -3,7 +3,6 @@ const debug = require('debug')('cypress:server:info')
 const launcher = require('@packages/launcher')
 const pluralize = require('pluralize')
 const { stripIndent } = require('common-tags')
-const { sortWith, ascend, prop } = require('ramda')
 const browserUtils = require('../browsers/utils')
 const _ = require('lodash')
 const chalk = require('chalk')
@@ -83,11 +82,7 @@ const print = (browsers = []) => {
 
   console.log('')
 
-  const sortByNameAndMajor = sortWith([
-    ascend(prop('name')),
-    ascend(prop('majorVersion')),
-  ])
-  const sortedByNameAndMajorVersion = sortByNameAndMajor(browsers)
+  const sortedByNameAndMajorVersion = _.sortBy(browsers, ['name', 'majorVersion'])
 
   sortedByNameAndMajorVersion.forEach((browser, k) => {
     const text = stripIndent`

@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { InputHTMLAttributes, RefAttributes } from 'react'
+import { RefAttributes } from 'react'
 import cs from 'classnames'
 import { useFocusRing } from '@react-aria/focus'
 import { PressEvent } from '@react-types/shared'
@@ -7,7 +7,7 @@ import { Icon, IconProps } from '../icon/Icon'
 import { BasicInput, InputBase, InputProps, InputRenderer } from './InputBase'
 
 import { focusClass, modifySize } from 'css/derived/util'
-import { textSizeToClassName } from '../text/StyledText'
+import { textSizeToClassName } from 'core/text/styledText'
 import { IconButton, IconButtonProps } from '../button/IconButton'
 
 import styles from './IconInput.module.scss'
@@ -29,12 +29,12 @@ export type IconSettings = {
 export type IconInputProps = InputProps<{
   prefixIcon?: IconSettings
   suffixIcon?: IconSettings
-} & Omit<InputHTMLAttributes<HTMLInputElement>, 'size'>>
+}>
 & RefAttributes<HTMLInputElement>
 
-export const IconInput: React.FC<IconInputProps> = (props) => <InputBase {...props} inputRenderer={IconInputComponent} />
+export const IconInput: React.FC<IconInputProps> = (props) => <InputBase {...props} InputRenderer={IconInputComponent} />
 
-const IconInputComponent: InputRenderer<IconInputProps> = ({ size = 'm', prefixIcon, suffixIcon, className, ...props }, inputProps, inputRef) => {
+const IconInputComponent: InputRenderer<IconInputProps> = ({ componentProps: { size = 'm', prefixIcon, suffixIcon, className, ...props }, inputProps, inputRef }) => {
   const iconSize = modifySize(size, 2)
   const { isFocused, focusProps } = useFocusRing({ isTextInput: true })
 
@@ -68,6 +68,7 @@ const IconInputComponent: InputRenderer<IconInputProps> = ({ size = 'm', prefixI
       {/* Apply iconSize to input wrapper, so we have the same em measure */}
       <div className={cs(textSizeToClassName(iconSize), styles.wrapper)}>
         <BasicInput
+          {...props}
           {...inputProps}
           {...focusProps}
           inputRef={inputRef}

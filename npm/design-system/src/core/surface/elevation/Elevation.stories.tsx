@@ -1,5 +1,4 @@
 import * as React from 'react'
-import { Story } from '@storybook/react'
 
 import { createStory, createStorybookConfig } from 'stories/util'
 
@@ -22,22 +21,20 @@ export default createStorybookConfig({
   },
 })
 
-const Template: Story<{
-  elevation: SurfaceElevation
-}> = ({ elevation }) => (
-  <div>
-    <ElevationComponent elevation={elevation}>
-      {lorem}
-    </ElevationComponent>
-    <br />
-    <StoryHighlightWrapper>
+export const Elevation = createStory<{
+    elevation: SurfaceElevation
+  }>(({ elevation }) => (
+    <div>
       <ElevationComponent elevation={elevation}>
         {lorem}
       </ElevationComponent>
-    </StoryHighlightWrapper>
-  </div>
-)
-
-export const Elevation = createStory(Template, {
-  elevation: 'bordered',
-})
+      <br />
+      <StoryHighlightWrapper>
+        <ElevationComponent elevation={elevation}>
+          {lorem}
+        </ElevationComponent>
+      </StoryHighlightWrapper>
+    </div>
+  ), {
+    elevation: 'bordered',
+  })

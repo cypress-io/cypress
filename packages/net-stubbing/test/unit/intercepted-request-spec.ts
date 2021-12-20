@@ -12,6 +12,8 @@ describe('InterceptedRequest', () => {
       }
       const state = NetStubbingState()
       const interceptedRequest = new InterceptedRequest({
+        // @ts-ignore
+        req: {},
         state,
         socket,
         matchingRoutes: [
@@ -19,11 +21,13 @@ describe('InterceptedRequest', () => {
           {
             id: '1',
             hasInterceptor: true,
+            routeMatcher: {},
           },
           // @ts-ignore
           {
             id: '2',
             hasInterceptor: true,
+            routeMatcher: {},
           },
         ],
       })
@@ -37,7 +41,7 @@ describe('InterceptedRequest', () => {
       const data = { foo: 'bar' }
 
       socket.toDriver.callsFake((eventName, subEventName, frame) => {
-        expect(eventName).to.eq('net:event')
+        expect(eventName).to.eq('net:stubbing:event')
         expect(subEventName).to.eq('before:request')
         expect(frame).to.deep.include({
           subscription: {

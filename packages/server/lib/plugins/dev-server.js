@@ -3,6 +3,7 @@ require('../cwd')
 const EE = require('events')
 const debug = require('debug')('cypress:ct:dev-server')
 const plugins = require('../plugins')
+const errors = require('../errors')
 
 const baseEmitter = new EE()
 
@@ -15,8 +16,8 @@ plugins.registerHandler((ipc) => {
     baseEmitter.emit('dev-server:compile:error', error)
   })
 
-  ipc.on('dev-server:compile:success', () => {
-    baseEmitter.emit('dev-server:compile:success')
+  ipc.on('dev-server:compile:success', ({ specFile } = {}) => {
+    baseEmitter.emit('dev-server:compile:success', { specFile })
   })
 
   return baseEmitter.on('dev-server:close', () => {
@@ -32,8 +33,7 @@ const API = {
 
   start ({ specs, config }) {
     if (!plugins.has('dev-server:start')) {
-      // TODO: add link to the documentation in the error message
-      throw new Error('It is required to register dev-server plugin that implements `dev-server:start` event for component testing.')
+      return errors.throw('CT_NO_DEV_START_EVENT', config.pluginsFile)
     }
 
     return plugins.execute('dev-server:start', { specs, config })

@@ -37,12 +37,12 @@ $input-icon-margin: 0.25em;
 
     &:first-child {
       // If first child, apply border padding
-      padding-left: spacing(ms);
+      padding-left: spacing(s);
     }
 
     &:last-child {
       // If last child, apply border padding
-      padding-right: spacing(ms);
+      padding-right: spacing(s);
     }
   }
 
@@ -50,9 +50,11 @@ $input-icon-margin: 0.25em;
     flex-grow: 1;
     // Required to allow input to shrink in certain size scenarios
     width: 0;
+    padding: 0;
 
     background-color: transparent;
     border: 0;
+    border-radius: 0;
 
     &:focus {
       outline: none;

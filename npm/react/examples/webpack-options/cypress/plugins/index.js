@@ -3,8 +3,11 @@ const path = require('path')
 const { startDevServer } = require('@cypress/webpack-dev-server')
 const babelConfig = require('../../babel.config')
 
-// Cypress Webpack preprocessor includes Babel env preset,
-// but to transpile JSX code we need to add Babel React preset
+/**
+ * Cypress Webpack devServer includes Babel env preset,
+ * but to transpile JSX code we need to add Babel React preset
+ * @type {Cypress.PluginConfig}
+ */
 module.exports = (on, config) => {
   /** @type import("webpack").Configuration */
   const webpackConfig = {

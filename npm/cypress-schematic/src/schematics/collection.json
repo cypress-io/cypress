@@ -1,0 +1,18 @@
+{
+  "$schema": "../../node_modules/@angular-devkit/schematics/collection-schema.json",
+  "schematics": {
+    "ng-add": {
+      "description": "Adds Cypress to an Angular project.",
+      "factory": "./ng-add/index",
+      "schema": "./ng-add/schema.json"
+    },
+    "e2e": {
+      "description": "Create an e2e spec file",
+      "factory": "./ng-generate/e2e/index",
+      "schema": "./ng-generate/e2e/schema.json",
+      "aliases": [
+        "e2e-spec"
+      ]
+    }
+  }
+}

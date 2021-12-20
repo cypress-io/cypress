@@ -39,15 +39,12 @@ yarn workspace @packages/server build-prod
 * `yarn test-unit` executes unit tests in [`test/unit`](./test/unit)
 * `yarn test-integration` executes integration tests in [`test/integration`](./test/integration)
 * `yarn test-performance` executes performance tests in [`test/performance`](./test/performance)
-* `yarn test-e2e` executes the large (slow) end to end tests in [`test/e2e`](./test/e2e)
 
 You can also use the `test-watch` command to rerun a test file whenever there is a change:
 
 ```bash
 yarn test-watch /test/path/to/spec.js
 ```
-
-When running e2e tests, some test projects output verbose logs. To see them run the test with `DEBUG=cypress:e2e` environment variable.
 
 ### Running individual unit tests
 
@@ -67,19 +64,9 @@ yarn test test/integration/cli_spec.js
 yarn test-integration cli_spec ## shorthand, uses globbing to find spec
 ```
 
-### Running individual e2e tests
+### Running e2e/system tests
 
-```bash
-yarn test <path/to/test>
-yarn test test/e2e/1_async_timeouts_spec.js
-## or
-yarn test-e2e 1_async ## shorthand, uses globbing to find spec
-```
-
-To keep the browser open after a spec run (for easier debugging and iterating on specs), you can pass the `--no-exit` flag to the e2e test command. Live reloading due to spec changes should also work:
-```sh
-yarn test test/e2e/2_go_spec.js --browser chrome --no-exit
-```
+> With the addition of Component Testing, `e2e` tests have been renamed to `system-tests` and moved to the [`system-tests`](../../system-tests) directory.
 
 ### Updating snaphots
 
@@ -88,5 +75,4 @@ Prepend `SNAPSHOT_UPDATE=1` to any test command. See [`snap-shot-it` instruction
 ```bash
 SNAPSHOT_UPDATE=1 yarn test test/unit/api_spec.js
 SNAPSHOT_UPDATE=1 yarn test test/integration/cli_spec.js
-SNAPSHOT_UPDATE=1 yarn test-e2e 1_async
 ```

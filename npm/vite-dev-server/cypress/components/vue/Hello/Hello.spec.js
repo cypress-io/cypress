@@ -4,7 +4,7 @@ import Hello from './Hello.vue'
 
 describe('Hello', () => {
   it('shows error for short text', () => {
-    cy.viewport(300, 200)
+    cy.viewport(500, 800)
     mount(Hello)
     // use the component like a real user
     cy.findByRole('textbox').type('abc')

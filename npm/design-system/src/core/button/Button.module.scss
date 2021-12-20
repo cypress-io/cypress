@@ -3,7 +3,7 @@
 @use 'spacing' as *;
 @use 'surfaces' as *;
 @use 'func' as *;
-@use 'util';
+@use 'css-util' as util;
 
 $button-vertical-padding: change-rem-unit-to-em(spacing(xs));
 $button-horizontal-padding: change-rem-unit-to-em(spacing(s));

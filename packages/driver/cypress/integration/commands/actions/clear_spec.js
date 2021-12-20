@@ -1,5 +1,6 @@
 const { _, $ } = Cypress
 const {
+  assertLogLength,
   attachKeyListeners,
   shouldBeCalledOnce,
   shouldNotBeCalled,
@@ -122,6 +123,13 @@ describe('src/cy/commands/actions/type - #clear', () => {
     cy.get('input:first').then((el) => {
       expect(el[0].scrollIntoView).to.be.calledWith({ block: 'start' })
     })
+  })
+
+  // https://github.com/cypress-io/cypress/issues/4233
+  it('can scroll to an element behind a sticky header', () => {
+    cy.viewport(400, 400)
+    cy.visit('./fixtures/sticky-header.html')
+    cy.get('input:first').clear()
   })
 
   // https://github.com/cypress-io/cypress/issues/5835
@@ -279,7 +287,7 @@ describe('src/cy/commands/actions/type - #clear', () => {
       cy.on('fail', (err) => {
         const { lastLog } = this
 
-        expect(this.logs.length).to.eq(3)
+        assertLogLength(this.logs, 3)
         expect(lastLog.get('error')).to.eq(err)
         expect(err.message).to.include('`cy.clear()` failed because it requires a valid clearable element.')
         expect(err.message).to.include('The element cleared was:')
@@ -374,7 +382,7 @@ describe('src/cy/commands/actions/type - #clear', () => {
       cy.on('fail', (err) => {
         const { lastLog } = this
 
-        expect(this.logs.length).to.eq(1)
+        assertLogLength(this.logs, 1)
         expect(lastLog.get('error')).to.eq(err)
 
         done()
@@ -401,7 +409,7 @@ describe('src/cy/commands/actions/type - #clear', () => {
       .prependTo(cy.$$('body'))
 
       cy.on('fail', (err) => {
-        expect(this.logs.length).to.eq(2)
+        assertLogLength(this.logs, 2)
         expect(err.message).to.include('`cy.clear()` failed because this element')
         expect(err.message).to.include('is being covered by another element')
 
@@ -435,7 +443,7 @@ describe('src/cy/commands/actions/type - #clear', () => {
       })
 
       cy.on('fail', () => {
-        expect(this.logs.length).to.eq(3)
+        assertLogLength(this.logs, 3)
 
         done()
       })

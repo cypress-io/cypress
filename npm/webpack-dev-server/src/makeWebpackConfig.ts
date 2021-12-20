@@ -2,12 +2,12 @@ import { debug as debugFn } from 'debug'
 import * as path from 'path'
 import * as webpack from 'webpack'
 import { merge } from 'webpack-merge'
-import defaultWebpackConfig from './webpack.config'
-import CypressCTOptionsPlugin, { CypressCTOptionsPluginOptions } from './plugin'
+import makeDefaultWebpackConfig from './webpack.config'
+import CypressCTOptionsPlugin, { CypressCTOptionsPluginOptionsWithEmitter } from './plugin'
 
 const debug = debugFn('cypress:webpack-dev-server:makeWebpackConfig')
 
-const removeList = ['HtmlWebpackPlugin', 'PreloadPlugin']
+const removeList = ['HtmlWebpackPlugin', 'PreloadPlugin', 'HtmlPwaPlugin']
 
 export interface UserWebpackDevServerOptions {
   /**
@@ -17,16 +17,17 @@ export interface UserWebpackDevServerOptions {
   disableLazyCompilation?: boolean
 }
 
-interface MakeWebpackConfigOptions extends CypressCTOptionsPluginOptions, UserWebpackDevServerOptions {
+interface MakeWebpackConfigOptions extends CypressCTOptionsPluginOptionsWithEmitter, UserWebpackDevServerOptions {
   devServerPublicPathRoute: string
   isOpenMode: boolean
+  template?: string
 }
 
 const OsSeparatorRE = RegExp(`\\${path.sep}`, 'g')
 const posixSeparator = '/'
 
 export async function makeWebpackConfig (userWebpackConfig: webpack.Configuration, options: MakeWebpackConfigOptions): Promise<webpack.Configuration> {
-  const { projectRoot, devServerPublicPathRoute, files, supportFile, devServerEvents } = options
+  const { projectRoot, devServerPublicPathRoute, files, supportFile, devServerEvents, template } = options
 
   debug(`User passed in webpack config with values %o`, userWebpackConfig)
 
@@ -79,7 +80,7 @@ export async function makeWebpackConfig (userWebpackConfig: webpack.Configuratio
 
   const mergedConfig = merge<webpack.Configuration>(
     userWebpackConfig,
-    defaultWebpackConfig,
+    makeDefaultWebpackConfig(template),
     dynamicWebpackConfig,
   )
 

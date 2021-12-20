@@ -62,7 +62,7 @@ const Routes = observer(({ model }: RoutesProps) => (
               <thead>
                 <tr>
                   <th>Method</th>
-                  <th>Url</th>
+                  <th>Route Matcher</th>
                   <th>Stubbed</th>
                   <th>Alias</th>
                   <th>

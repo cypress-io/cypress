@@ -1,6 +1,5 @@
 /// <reference types="cypress" />
 const path = require('path')
-const percyHealthCheck = require('@percy/cypress/task')
 const { startDevServer } = require('@cypress/webpack-dev-server')
 
 function injectStylesInlineForPercyInPlace (webpackConfig) {
@@ -21,8 +20,6 @@ function injectStylesInlineForPercyInPlace (webpackConfig) {
  * @type {Cypress.PluginConfig}
  */
 module.exports = (on, config) => {
-  on('task', percyHealthCheck)
-
   on('dev-server:start', (options) => {
     /** @type {import('webpack').Configuration} */
     const { default: webpackConfig } = require(path.resolve(__dirname, '..', '..', 'webpack.config.ts'))

@@ -1,7 +1,7 @@
 const fs = require('fs')
 const path = require('path')
 const execa = require('execa')
-const Listr = require('listr')
+const { Listr } = require('listr2')
 const commander = require('commander')
 
 const program = new commander.Command()
@@ -41,6 +41,7 @@ program
     })
   }
 
+  const tsc = require.resolve('typescript/bin/tsc')
   const options = ['--noEmit', '--pretty']
 
   if (program.skipLibCheck) {
@@ -51,37 +52,26 @@ program
     return {
       title: proj.name,
       task: () => {
-        const cwd = proj.path
-        const tsc = require.resolve('typescript/bin/tsc')
-
-        return execa(tsc, options, {
-          cwd,
-        }).catch((err) => {
-          throw {
-            name: proj.name,
-            err,
-          }
-        })
+        return execa(tsc, options, { cwd: proj.path })
       },
     }
   }), {
-    concurrent: 4,
+    concurrent: process.env.CI ? 4 : 1,
+    renderer: process.env.CI ? 'verbose' : 'default',
     exitOnError: false,
-    renderer: program.ignoreProgress ? 'silent' : 'default',
   })
 
   tasks.run()
   .then(() => {
-    log('')
-    log('Type check passed successfully.')
-  })
-  .catch((err) => {
-    process.exitCode = 1
+    if (tasks.err[0] && tasks.err[0].errors.length > 0) {
+      process.exitCode = 1
 
-    err.errors.forEach((e) => {
       log('')
-      log(`${e.name} failed\n${e.err.stdout}`)
-    })
+      log('Type check failed.')
+    } else {
+      log('')
+      log('Type check passed successfully.')
+    }
   })
 })
 

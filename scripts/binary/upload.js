@@ -86,19 +86,16 @@ module.exports = {
         // keep these for compatibility purposes
         // although they are now deprecated
         mac: getUrl('darwin-x64'),
-        win: getUrl('win32-ia32'),
         linux64: getUrl('linux-x64'),
 
         // start adding the new ones
         // using node's platform
         darwin: getUrl('darwin-x64'),
-        win32: getUrl('win32-ia32'),
         linux: getUrl('linux-x64'),
 
         // the new-new names that use platform and arch as is
         'darwin-x64': getUrl('darwin-x64'),
         'linux-x64': getUrl('linux-x64'),
-        'win32-ia32': getUrl('win32-ia32'),
         'win32-x64': getUrl('win32-x64'),
       },
     }

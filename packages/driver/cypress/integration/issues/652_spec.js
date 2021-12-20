@@ -5,11 +5,8 @@ describe('issue 652', () => {
   })
 
   it('should visit all the hashes', () => {
-    // cy.wait(0)
     cy.visit('/fixtures/issue-652.html#one')
-    // cy.wait(0)
     cy.visit('/fixtures/issue-652.html#two')
-    // cy.wait(0)
     cy.visit('/fixtures/issue-652.html#three')
 
     cy.get('#visited')

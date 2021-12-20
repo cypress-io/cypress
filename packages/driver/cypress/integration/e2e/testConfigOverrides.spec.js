@@ -5,6 +5,7 @@ describe('per-test config', () => {
     ranFirefox: false,
     ranChrome: false,
     ranChromium: false,
+    ranElectron: false,
   }
 
   after(function () {
@@ -15,6 +16,7 @@ describe('per-test config', () => {
         ranChrome: false,
         ranChromium: false,
         ranFirefox: true,
+        ranElectron: false,
       })
     }
 
@@ -23,6 +25,7 @@ describe('per-test config', () => {
         ranChrome: true,
         ranChromium: false,
         ranFirefox: false,
+        ranElectron: false,
       })
     }
 
@@ -31,6 +34,16 @@ describe('per-test config', () => {
         ranChrome: false,
         ranChromium: true,
         ranFirefox: false,
+        ranElectron: false,
+      })
+    }
+
+    if (Cypress.browser.name === 'electron') {
+      return expect(testState).deep.eq({
+        ranChrome: false,
+        ranChromium: false,
+        ranFirefox: false,
+        ranElectron: true,
       })
     }
 
@@ -83,6 +96,13 @@ describe('per-test config', () => {
   }, () => {
     testState.ranFirefox = true
     expect(Cypress.browser.name).eq('firefox')
+  })
+
+  it('can specify only run in electron', {
+    browser: 'electron',
+  }, () => {
+    testState.ranElectron = true
+    expect(Cypress.browser.name).eq('electron')
   })
 
   describe('mutating global config via Cypress.config and Cypress.env', () => {
@@ -254,7 +274,7 @@ describe('per-test config', () => {
     })
   })
 
-  describe('in mulitple nested suites', () => {
+  describe('in multiple nested suites', () => {
     describe('config in suite', {
       foo: true,
     }, () => {
@@ -275,7 +295,7 @@ describe('per-test config', () => {
     })
   })
 
-  describe('emtpy config', {}, () => {
+  describe('empty config', {}, () => {
     it('empty config in test', {}, () => {
       expect(true).ok
     })
@@ -354,6 +374,28 @@ describe('testConfigOverrides baseUrl @slow', () => {
   it('visit 2', { baseUrl: 'http://localhost:3500' }, () => {
     cy.visit('/fixtures/generic.html')
     cy.url().should('eq', 'http://localhost:3500/fixtures/generic.html')
+  })
+})
+
+describe('cannot set read-only properties', () => {
+  afterEach(() => {
+    window.top.__cySkipValidateConfig = true
+  })
+
+  it('throws if mutating read-only config with Cypress.config()', (done) => {
+    window.top.__cySkipValidateConfig = false
+    cy.on('fail', (err) => {
+      expect(err.message).to.include('`Cypress.config()` cannot mutate option `chromeWebSecurity` because it is a read-only property.')
+      done()
+    })
+
+    Cypress.config('chromeWebSecurity', false)
+  })
+
+  it('does not throw for non-Cypress config values', () => {
+    expect(() => {
+      Cypress.config('foo', 'bar')
+    }).to.not.throw()
   })
 })
 

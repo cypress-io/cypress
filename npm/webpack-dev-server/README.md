@@ -46,7 +46,7 @@ by calling an event `devServerEvents.emit('dev-server:compile:success')`
 
 ## Webpack
 
-Webpack-dev-server fulfills his reponsibilities by
+Webpack-dev-server fulfills his responsibilities by
 
 - Making a `webpack.config` from the users setup by changing the entrypoint to `browser.ts`
 - Launches the webpack dev server with `devServer.publicPath = "__cypress/src/"` and `devServer.hot = false`
@@ -57,6 +57,16 @@ Webpack-dev-server fulfills his reponsibilities by
     - compares the url with each spec path given by the plugin
     - picks the spec that should be run
     - runs the `AUT-Runner.ts` to load and launch the support file and the current spec
+
+## API
+
+`startDevServer` takes an object of options.
+
+- `options` (required): this contains various internal configuration. It's provided as the first argument to the `dev-server:start` event. Just make sure you pass it to the `startDevServer`.
+- `webpackConfig` (optional): the webpack config used by your application. We provide some [presets](https://github.com/cypress-io/cypress/tree/develop/npm/react/plugins), but you can pass the `webpackConfig` manually, too.
+- `template` (optional): by default [this index.html](https://github.com/cypress-io/cypress/blob/develop/npm/webpack-dev-server/index-template.html) is used. You can provide your own using this option. This is useful if you'd like to include some CDN links, or in some way customize the default html. If you are passing this option, ensure your `index.html` contains the same content as [the default template](https://github.com/cypress-io/cypress/blob/develop/npm/webpack-dev-server/index-template.html). Some of our presets include a custom `index.html`, such as [Next](https://github.com/cypress-io/cypress/tree/develop/npm/react/plugins/next). 
+
+See [npm/react/plugins/next](https://github.com/cypress-io/cypress/blob/develop/npm/react/plugins/next/index.js) for a full example using all the options.
 
 ## Performance tests 
 
@@ -83,3 +93,7 @@ In order to update the `{name-of-project}.json` file and use new stats as a base
 ```sh
 WEBPACK_PERF_MEASURE=true WEBPACK_PERF_MEASURE_UPDATE=true WEBPACK_PERF_MEASURE_COMPARE={name-of-project} yarn cypress run-ct
 ```
+
+## Changelog
+
+[Changelog](./CHANGELOG.md)

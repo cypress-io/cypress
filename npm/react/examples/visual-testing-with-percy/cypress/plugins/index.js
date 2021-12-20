@@ -1,11 +1,14 @@
-// load file preprocessor that comes with this plugin
-// https://github.com/bahmutov/@cypress/react#install
-const percyHealthCheck = require('@percy/cypress/task')
-const preprocessor = require('@cypress/react/plugins/react-scripts')
+// @ts-check
 
+// load file devServer that comes with this plugin
+// https://github.com/bahmutov/@cypress/react#install
+const devServer = require('@cypress/react/plugins/react-scripts')
+
+/**
+ * @type {Cypress.PluginConfig}
+ */
 module.exports = (on, config) => {
-  on('task', percyHealthCheck)
-  preprocessor(on, config)
+  devServer(on, config)
 
   // IMPORTANT to return the config object
   // with the any changed environment variables

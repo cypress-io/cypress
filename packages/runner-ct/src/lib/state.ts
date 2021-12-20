@@ -1,8 +1,7 @@
 import { action, computed, observable } from 'mobx'
 import _ from 'lodash'
-import automation from './automation'
 import { UIPlugin } from '../plugins/UIPlugin'
-import { nanoid } from 'nanoid'
+import { automation, BaseStore, RunMode } from '@packages/runner-shared'
 import {
   DEFAULT_REPORTER_WIDTH,
   LEFT_NAV_WIDTH,
@@ -13,31 +12,23 @@ import {
   DEFAULT_PLUGINS_HEIGHT,
 } from '../app/RunnerCt'
 
-export type RunMode = 'single' | 'multi'
-
 interface Defaults {
   messageTitle: string | null
   messageDescription: string | null
   messageType: string
   messageControls: unknown
 
-  width: number
-  height: number
-
   reporterWidth: number | null
   pluginsHeight: number | null
   specListWidth: number | null
   isSpecsListOpen: boolean
 
-  viewportHeight: number
-  viewportWidth: number
+  height: number
+  width: number
 
   url: string
   highlightUrl: boolean
   isLoadingUrl: boolean
-
-  spec: Cypress.Cypress['spec'] | null
-  specs: Cypress.Cypress['spec'][]
 
   callbackAfterUpdate: ((...args: unknown[]) => void) | null
 }
@@ -48,11 +39,8 @@ const _defaults: Defaults = {
   messageType: '',
   messageControls: null,
 
-  width: 500,
   height: 500,
-
-  viewportHeight: 500,
-  viewportWidth: 500,
+  width: 500,
 
   pluginsHeight: PLUGIN_BAR_HEIGHT,
 
@@ -64,13 +52,10 @@ const _defaults: Defaults = {
   highlightUrl: false,
   isLoadingUrl: false,
 
-  spec: null,
-  specs: [],
-
   callbackAfterUpdate: null,
 }
 
-export default class State {
+export default class State extends BaseStore {
   defaults = _defaults
 
   @observable isLoading = true
@@ -111,33 +96,26 @@ export default class State {
   @observable windowWidth = 0
   @observable windowHeight = 0
 
-  @observable viewportWidth = _defaults.viewportWidth
-  @observable viewportHeight = _defaults.viewportHeight
-
   @observable automation = automation.CONNECTING
 
-  @observable.ref scriptError = null
+  @observable.ref scriptError: string | undefined
 
-  @observable spec = _defaults.spec
-  @observable specs = _defaults.specs
   @observable specRunId: string | null = null
-  /** @type {"single" | "multi"} */
-  @observable runMode: RunMode = 'single'
-  @observable multiSpecs: Cypress.Cypress['spec'][] = [];
 
   @observable readyToRunTests = false
   @observable activePlugin: string | null = null
   @observable plugins: UIPlugin[] = []
 
   constructor ({
-    spec = _defaults.spec,
-    specs = _defaults.specs,
+    spec,
+    specs = [],
     runMode = 'single' as RunMode,
     multiSpecs = [],
     reporterWidth = DEFAULT_REPORTER_WIDTH,
     specListWidth = DEFAULT_LIST_WIDTH,
     isSpecsListOpen = true,
   }, config: Cypress.RuntimeConfigOptions) {
+    super()
     this.reporterWidth = reporterWidth
     this.isSpecsListOpen = isSpecsListOpen
     this.spec = spec
@@ -175,10 +153,10 @@ export default class State {
       return 1
     }
 
-    if (autAreaWidth < this.viewportWidth || autAreaHeight < this.viewportHeight) {
+    if (autAreaWidth < this.width || autAreaHeight < this.height) {
       return Math.min(
-        autAreaWidth / this.viewportWidth,
-        autAreaHeight / this.viewportHeight,
+        autAreaWidth / this.width,
+        autAreaHeight / this.height,
       )
     }
 
@@ -218,9 +196,9 @@ export default class State {
     this.screenshotting = screenshotting
   }
 
-  @action updateAutViewportDimensions (dimensions: { viewportWidth: number, viewportHeight: number }) {
-    this.viewportHeight = dimensions.viewportHeight
-    this.viewportWidth = dimensions.viewportWidth
+  @action updateDimensions (width: number, height: number) {
+    this.height = height
+    this.width = width
   }
 
   @action toggleIsSpecsListOpen () {
@@ -249,13 +227,21 @@ export default class State {
     this.specListWidth = width
   }
 
-  @action updateWindowDimensions ({ windowWidth, windowHeight }: { windowWidth?: number, windowHeight?: number }) {
+  @action updateWindowDimensions ({
+    windowWidth,
+    windowHeight,
+    headerHeight,
+  }: { windowWidth?: number, windowHeight?: number, headerHeight?: number }) {
     if (windowWidth) {
       this.windowWidth = windowWidth
     }
 
     if (windowHeight) {
       this.windowHeight = windowHeight
+    }
+
+    if (headerHeight) {
+      this.headerHeight = headerHeight
     }
   }
 
@@ -283,30 +269,12 @@ export default class State {
     this.isLoadingUrl = _defaults.isLoadingUrl
   }
 
-  @action setSpec (spec: Cypress.Cypress['spec'] | null) {
-    this.spec = spec
-    this.specRunId = nanoid()
-  }
-
-  @action setSpecs (specs) {
-    this.specs = specs
-  }
-
   @action updateSpecByUrl (specUrl) {
-    const foundSpec = _.find(this.specs, { name: specUrl })
+    const foundSpec = _.find(this.specs, { name: decodeURI(specUrl) })
 
     if (foundSpec) {
       this.spec = foundSpec
     }
-  }
-
-  @action setSingleSpec (spec: Cypress.Cypress['spec'] | undefined) {
-    if (this.runMode === 'multi') {
-      this.runMode = 'single'
-      this.multiSpecs = []
-    }
-
-    this.setSpec(spec)
   }
 
   @action addSpecToMultiMode (newSpec: Cypress.Cypress['spec']) {
@@ -330,7 +298,7 @@ export default class State {
   }
 
   runMultiMode = async () => {
-    const eventManager = require('./event-manager').default
+    const eventManager = require('@packages/runner-shared').eventManager
     const waitForRunEnd = () => new Promise((res) => eventManager.on('run:end', res))
 
     this.setSpec(null)
@@ -347,6 +315,16 @@ export default class State {
         ReactDevTools.create(),
       ]
     }))
+  }
+
+  @action
+  setShowSnapshotHighlight = (showingHighlights: boolean) => {
+    this.snapshot.showingHighlights = showingHighlights
+  }
+
+  @action
+  setSnapshotIndex = (stateIndex: number) => {
+    this.snapshot.stateIndex = stateIndex
   }
 
   @action

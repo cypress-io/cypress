@@ -52,7 +52,7 @@ export function _rewriteJsUnsafe (url: string, js: string, deferSourceMapRewrite
 
   try {
     astTypes.visit(ast, jsRules)
-  } catch (err) {
+  } catch (err: any) {
     // if visiting fails, it points to a bug in our rewriting logic, so raise the error to the driver
     return _generateDriverError(url, err)
   }

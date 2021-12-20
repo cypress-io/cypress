@@ -58,6 +58,12 @@ module.exports = {
   },
 
   isNeeded () {
+    if (process.env.ELECTRON_RUN_AS_NODE) {
+      debug('Environment variable ELECTRON_RUN_AS_NODE detected, xvfb is not needed')
+
+      return false // xvfb required for electron processes only.
+    }
+
     if (os.platform() !== 'linux') {
       return false
     }

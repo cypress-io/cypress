@@ -9,6 +9,7 @@ import RouteModel, { RouteProps } from '../routes/route-model'
 import TestModel, { TestProps, UpdatableTestProps, UpdateTestCallback } from '../test/test-model'
 import RunnableModel from './runnable-model'
 import SuiteModel, { SuiteProps } from './suite-model'
+import { SessionProps } from '../sessions/sessions-model'
 
 const defaults = {
   hasSingleTest: false,
@@ -24,7 +25,7 @@ interface Props {
   scroller: Scroller
 }
 
-export type LogProps = AgentProps | CommandProps | RouteProps
+export type LogProps = AgentProps | CommandProps | RouteProps | SessionProps
 
 export type RunnableArray = Array<TestModel | SuiteModel>
 
@@ -81,7 +82,7 @@ export class RunnablesStore {
     this.hasTests = numTests > 0
     this.hasSingleTest = numTests === 1
 
-    this._startRendering()
+    this._finishedInitialRendering()
   }
 
   _createRunnableChildren (runnableProps: RootRunnable, level: number) {
@@ -118,24 +119,6 @@ export class RunnablesStore {
     this._tests[test.id] = test
 
     return test
-  }
-
-  // progressively renders the runnables instead of all of them being rendered
-  // at once. this prevents a noticeable lag in initial rendering when there
-  // is a large number of tests
-  _startRendering (index = 0) {
-    requestAnimationFrame(action('start:rendering', () => {
-      const runnable = this._runnablesQueue[index]
-
-      if (!runnable) {
-        this._finishedInitialRendering()
-
-        return
-      }
-
-      runnable.shouldRender = true
-      this._startRendering(index + 1)
-    }))
   }
 
   _finishedInitialRendering () {

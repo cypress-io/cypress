@@ -1,0 +1,16 @@
+{
+  "plugins": [
+    "cypress",
+    "@cypress/dev"
+  ],
+  "extends": [
+    "plugin:@cypress/dev/general"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "env": {
+    "cypress/globals": true
+  },
+  "rules": {
+    "no-console": "off"
+  }
+}

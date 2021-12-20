@@ -5,6 +5,7 @@ import runnablesStore, { RunnablesStore, RootRunnable, LogProps } from '../runna
 import statsStore, { StatsStore, StatsStoreStartInfo } from '../header/stats-store'
 import scroller, { Scroller } from './scroller'
 import TestModel, { UpdatableTestProps, UpdateTestCallback, TestProps } from '../test/test-model'
+import { SessionProps } from '../sessions/sessions-model'
 
 const localBus = new EventEmitter()
 
@@ -34,7 +35,6 @@ export interface Events {
 
 interface StartInfo extends StatsStoreStartInfo {
   autoScrollingEnabled: boolean
-  firefoxGcInterval: number
   scrollTop: number
   studioActive: boolean
 }
@@ -72,6 +72,10 @@ const events: Events = {
       runnablesStore.updateLog(log)
     }))
 
+    runner.on('session:add', action('session:add', (props: SessionProps) => {
+      runnablesStore._withTest(props.testId, (test) => test.addSession(props))
+    }))
+
     runner.on('reporter:log:remove', action('log:remove', (log: LogProps) => {
       runnablesStore.removeLog(log)
     }))
@@ -91,7 +95,6 @@ const events: Events = {
 
     runner.on('reporter:start', action('start', (startInfo: StartInfo) => {
       appState.temporarilySetAutoScrolling(startInfo.autoScrollingEnabled)
-      appState.setFirefoxGcInterval(startInfo.firefoxGcInterval)
       runnablesStore.setInitialScrollTop(startInfo.scrollTop)
       appState.setStudioActive(startInfo.studioActive)
       if (runnablesStore.hasTests) {
@@ -135,16 +138,6 @@ const events: Events = {
       appState.pinnedSnapshotId = null
     }))
 
-    runner.on('before:firefox:force:gc', action('before:firefox:force:gc', ({ gcInterval }) => {
-      appState.setForcingGc(true)
-      appState.setFirefoxGcInterval(gcInterval)
-    }))
-
-    runner.on('after:firefox:force:gc', action('after:firefox:force:gc', ({ gcInterval }) => {
-      appState.setForcingGc(false)
-      appState.setFirefoxGcInterval(gcInterval)
-    }))
-
     localBus.on('resume', action('resume', () => {
       appState.resume()
       statsStore.resume()
@@ -152,6 +145,8 @@ const events: Events = {
     }))
 
     localBus.on('next', action('next', () => {
+      appState.resume()
+      statsStore.resume()
       runner.emit('runner:next')
     }))
 
@@ -201,6 +196,10 @@ const events: Events = {
       runner.emit('get:user:editor', cb)
     })
 
+    localBus.on('clear:session', (cb) => {
+      runner.emit('clear:session', cb)
+    })
+
     localBus.on('set:user:editor', (editor) => {
       runner.emit('set:user:editor', editor)
     })
@@ -237,6 +236,10 @@ const events: Events = {
 
     localBus.on('studio:save', () => {
       runner.emit('studio:save')
+    })
+
+    localBus.on('studio:copy:to:clipboard', (cb) => {
+      runner.emit('studio:copy:to:clipboard', cb)
     })
   },
 

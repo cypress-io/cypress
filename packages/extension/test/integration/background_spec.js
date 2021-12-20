@@ -515,23 +515,12 @@ describe('app/background', () => {
       beforeEach(() => {
         browser.runtime.lastError = { message: 'some error' }
 
-        sinon.stub(browser.cookies, 'getAll')
-        .withArgs({ domain: 'google.com' })
-        .resolves([
-          { name: 'session', value: 'key', path: '/', domain: 'google.com', secure: true, httpOnly: true, expirationDate: 123 },
-          { name: 'foo', value: 'bar', path: '/foo', domain: 'google.com', secure: false, httpOnly: false, expirationDate: 456 },
-        ])
-        .withArgs({ domain: 'should.throw' })
-        .resolves([
-          { name: 'shouldThrow', value: 'key', path: '/', domain: 'should.throw', secure: false, httpOnly: true, expirationDate: 123 },
-        ])
-        .withArgs({ domain: 'no.details' })
-        .resolves([
-          { name: 'shouldThrow', value: 'key', path: '/', domain: 'no.details', secure: false, httpOnly: true, expirationDate: 123 },
-        ])
-
         return sinon.stub(browser.cookies, 'remove')
-        .withArgs({ name: 'session', url: 'https://google.com/' })
+        .callsFake(function () {
+          // eslint-disable-next-line no-console
+          console.log('unstubbed browser.cookies.remove', ...arguments)
+        })
+        .withArgs({ url: 'https://google.com', name: 'foo' })
         .resolves(
           { name: 'session', url: 'https://google.com/', storeId: '123' },
         )
@@ -539,27 +528,37 @@ describe('app/background', () => {
         .resolves(
           { name: 'foo', url: 'https://google.com/foo', storeId: '123' },
         )
-        .withArgs({ name: 'noDetails', url: 'http://no.details/' })
+        .withArgs({ name: 'noDetails', url: 'http://no.details' })
         .resolves(null)
-        .withArgs({ name: 'shouldThrow', url: 'http://should.throw/' })
+        .withArgs({ name: 'shouldThrow', url: 'http://should.throw' })
         .rejects({ message: 'some error' })
       })
 
       it('resolves with array of removed cookies', function (done) {
+        const cookieArr = [{ domain: 'google.com', name: 'foo', secure: true }]
+
         this.socket.on('automation:response', (id, obj = {}) => {
           expect(id).to.eq(123)
-          expect(obj.response).to.deep.eq([
-            { name: 'session', value: 'key', path: '/', domain: 'google.com', secure: true, httpOnly: true, expirationDate: 123 },
-            { name: 'foo', value: 'bar', path: '/foo', domain: 'google.com', secure: false, httpOnly: false, expirationDate: 456 },
-          ])
+          expect(obj.response).to.deep.eq(cookieArr)
 
           return done()
         })
 
-        return this.server.emit('automation:request', 123, 'clear:cookies', { domain: 'google.com' })
+        return this.server.emit('automation:request', 123, 'clear:cookies', cookieArr)
       })
 
-      it('rejects with error thrown', function (done) {
+      it('rejects when no cookie.name', function (done) {
+        this.socket.on('automation:response', (id, obj = {}) => {
+          expect(id).to.eq(123)
+          expect(obj.__error).to.contain('did not include a name')
+
+          return done()
+        })
+
+        return this.server.emit('automation:request', 123, 'clear:cookies', [{ domain: 'should.throw' }])
+      })
+
+      it('rejects with error thrown in browser.cookies.remove', function (done) {
         this.socket.on('automation:response', (id, obj = {}) => {
           expect(id).to.eq(123)
           expect(obj.__error).to.eq('some error')
@@ -567,18 +566,20 @@ describe('app/background', () => {
           return done()
         })
 
-        return this.server.emit('automation:request', 123, 'clear:cookies', { domain: 'should.throw' })
+        return this.server.emit('automation:request', 123, 'clear:cookies', [{ domain: 'should.throw', name: 'shouldThrow' }])
       })
 
-      it('rejects when no details', function (done) {
+      it('doesnt fail when no found cookie', function (done) {
+        const cookieArr = [{ domain: 'no.details', name: 'noDetails' }]
+
         this.socket.on('automation:response', (id, obj = {}) => {
           expect(id).to.eq(123)
-          expect(obj.__error).to.eq(`Removing cookie failed for: ${JSON.stringify({ url: 'http://no.details/', name: 'shouldThrow' })}`)
+          expect(obj.response).to.deep.eq(cookieArr)
 
           return done()
         })
 
-        return this.server.emit('automation:request', 123, 'clear:cookies', { domain: 'no.details' })
+        return this.server.emit('automation:request', 123, 'clear:cookies', cookieArr)
       })
     })
 

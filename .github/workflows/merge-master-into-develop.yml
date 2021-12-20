@@ -22,8 +22,12 @@ jobs:
         id: check-conflict
         run: echo "::set-output name=merge_conflict::$(git merge-tree $(git merge-base HEAD master) master HEAD | egrep '<<<<<<<')"
       - name: Merge master into develop
+        id: merge-master
         run: git merge master
         if: ${{ !steps.check-conflict.outputs.merge_conflict }}
+      - name: Failed merge, set merged status as failed
+        run: echo "::set-output name=merge_conflict::'failed merge'"
+        if: ${{ steps.merge-master.outcome != 'success' }}
       - name: Push
         run: git push
         if: ${{ !steps.check-conflict.outputs.merge_conflict }}

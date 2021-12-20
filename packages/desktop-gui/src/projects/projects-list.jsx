@@ -46,7 +46,7 @@ class ProjectsList extends Component {
     return (
       <div className='alert alert-danger'>
         <p>
-          <i className='fas fa-exclamation-triangle'></i>{' '}
+          <i className='fas fa-exclamation-triangle' />{' '}
           <strong>Error</strong>
         </p>
         <p dangerouslySetInnerHTML={{

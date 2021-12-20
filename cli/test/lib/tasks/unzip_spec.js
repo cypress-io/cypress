@@ -76,11 +76,11 @@ describe('lib/tasks/unzip', function () {
     it('can try unzip first then fall back to node unzip', function (done) {
       const zipFilePath = path.join('test', 'fixture', 'example.zip')
 
-      sinon.stub(unzip.utils.unzipTools, 'extract').callsFake((filePath, opts, cb) => {
+      sinon.stub(unzip.utils.unzipTools, 'extract').callsFake((filePath, opts) => {
         debug('unzip extract called with %s', filePath)
         expect(filePath, 'zipfile is the same').to.equal(zipFilePath)
-        expect(cb, 'has callback').to.be.a('function')
-        setTimeout(cb, 10)
+
+        return new Promise((resolve) => resolve())
       })
 
       const unzipChildProcess = new events.EventEmitter()
@@ -117,11 +117,11 @@ describe('lib/tasks/unzip', function () {
     it('calls node unzip just once', function (done) {
       const zipFilePath = path.join('test', 'fixture', 'example.zip')
 
-      sinon.stub(unzip.utils.unzipTools, 'extract').callsFake((filePath, opts, cb) => {
+      sinon.stub(unzip.utils.unzipTools, 'extract').callsFake((filePath, opts) => {
         debug('unzip extract called with %s', filePath)
         expect(filePath, 'zipfile is the same').to.equal(zipFilePath)
-        expect(cb, 'has callback').to.be.a('function')
-        setTimeout(cb, 10)
+
+        return new Promise((resolve) => resolve())
       })
 
       const unzipChildProcess = new events.EventEmitter()
@@ -169,11 +169,11 @@ describe('lib/tasks/unzip', function () {
     it('calls node unzip just once', function (done) {
       const zipFilePath = path.join('test', 'fixture', 'example.zip')
 
-      sinon.stub(unzip.utils.unzipTools, 'extract').callsFake((filePath, opts, cb) => {
+      sinon.stub(unzip.utils.unzipTools, 'extract').callsFake((filePath, opts) => {
         debug('unzip extract called with %s', filePath)
         expect(filePath, 'zipfile is the same').to.equal(zipFilePath)
-        expect(cb, 'has callback').to.be.a('function')
-        setTimeout(cb, 10)
+
+        return new Promise((resolve) => resolve())
       })
 
       const unzipChildProcess = new events.EventEmitter()

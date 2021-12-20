@@ -8,8 +8,8 @@ const awspublish = require('gulp-awspublish')
 const rename = require('gulp-rename')
 const gulpDebug = require('gulp-debug')
 const gulp = require('gulp')
-const R = require('ramda')
 const hasha = require('hasha')
+const _ = require('lodash')
 
 const uploadUtils = require('./util/upload')
 const {
@@ -147,9 +147,8 @@ const uploadUniqueBinary = function (args = []) {
   })
 
   console.log('Upload unique binary options')
-  const pickOptions = R.pick(['file', 'version', 'hash'])
 
-  console.log(pickOptions(options))
+  console.log(_.pick(options, ['file', 'version', 'hash']))
 
   la(check.unemptyString(options.file), 'missing file to upload', options)
   la(isBinaryFile(options.file),

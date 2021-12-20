@@ -1,8 +1,7 @@
 import { findApp, FindAppParams } from './util'
-import { Browser, DetectedBrowser } from '../types'
+import type { Browser, DetectedBrowser } from '../types'
 import * as linuxHelper from '../linux'
 import { log } from '../log'
-import { merge } from 'ramda'
 import { get } from 'lodash'
 
 type Detectors = {
@@ -17,6 +16,12 @@ export const browsers: Detectors = {
       appName: 'Google Chrome.app',
       executable: 'Contents/MacOS/Google Chrome',
       appId: 'com.google.Chrome',
+      versionProperty: 'KSVersion',
+    },
+    beta: {
+      appName: 'Google Chrome Beta.app',
+      executable: 'Contents/MacOS/Google Chrome Beta',
+      appId: 'com.google.Chrome.beta',
       versionProperty: 'KSVersion',
     },
     canary: {
@@ -99,7 +104,7 @@ export function detect (browser: Browser): Promise<DetectedBrowser> {
   }
 
   return findApp(findAppParams)
-  .then(merge({ name: browser.name }))
+  .then((val) => ({ name: browser.name, ...val }))
   .catch(() => {
     log('could not detect %s using traditional Mac methods', browser.name)
     log('trying linux search')

@@ -35,10 +35,10 @@ export const showSaveDialog = (integrationFolder: string) => {
     showsTagField: false,
     filters: [{
       name: 'JavaScript',
-      extensions: ['.js'],
+      extensions: ['js'],
     }, {
       name: 'TypeScript',
-      extensions: ['.ts'],
+      extensions: ['ts'],
     }, {
       name: 'Other',
       extensions: ['*'],

@@ -25,6 +25,8 @@ const pkg = require('@packages/root')
 // or development as default
 const env = process.env['CYPRESS_INTERNAL_ENV'] || (process.env['CYPRESS_INTERNAL_ENV'] = pkg.env != null ? pkg.env : 'development')
 
+process.env['CYPRESS'] = 'true'
+
 const config = {
   // uses cancellation for automation timeouts
   cancellation: true,

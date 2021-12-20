@@ -1,8 +1,8 @@
-import {
+import type {
   RouteMatcherOptions,
   BackendStaticResponse,
 } from '../types'
-import {
+import type {
   InterceptedRequest,
 } from './intercepted-request'
 
@@ -14,6 +14,8 @@ export interface BackendRoute {
   hasInterceptor: boolean
   staticResponse?: BackendStaticResponse
   getFixture: GetFixtureFn
+  matches: number
+  disabled?: boolean
 }
 
 export interface NetStubbingState {

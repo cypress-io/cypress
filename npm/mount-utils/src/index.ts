@@ -200,7 +200,7 @@ export function setupHooks (optionalCallback?: Function) {
   })
 
   // @ts-ignore
-  beforeEach(() => {
+  Cypress.on('test:before:run', () => {
     optionalCallback?.()
     cleanupStyles()
   })

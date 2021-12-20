@@ -4,8 +4,7 @@ const url = require('url')
 const path = require('path')
 const chalk = require('chalk')
 const debug = require('debug')('cypress:cli')
-const Listr = require('listr')
-const verbose = require('@cypress/listr-verbose-renderer')
+const { Listr } = require('listr2')
 const Promise = require('bluebird')
 const logSymbols = require('log-symbols')
 const { stripIndent } = require('common-tags')
@@ -16,6 +15,7 @@ const state = require('./state')
 const unzip = require('./unzip')
 const logger = require('../logger')
 const { throwFormErrorText, errors } = require('../errors')
+const verbose = require('../VerboseRenderer')
 
 const getNpmArgv = () => {
   const json = process.env.npm_config_argv
@@ -37,6 +37,10 @@ const getNpmArgv = () => {
 // for example: "^5.0.0", "https://cdn.cypress.io/...", ...
 const getVersionSpecifier = (startDir = path.resolve(__dirname, '../..')) => {
   const argv = getNpmArgv()
+
+  if ((process.env.npm_package_resolved || '').endsWith('cypress.tgz')) {
+    return process.env.npm_package_resolved
+  }
 
   if (argv) {
     const tgz = _.find(argv, (t) => t.endsWith('cypress.tgz'))
@@ -81,7 +85,7 @@ const getVersionSpecifier = (startDir = path.resolve(__dirname, '../..')) => {
   })
 }
 
-const betaNpmUrlRe = /^\/beta\/npm\/(?<version>[0-9.]+)\/(?<artifactSlug>[^/]+)\/cypress\.tgz$/
+const betaNpmUrlRe = /^\/beta\/npm\/(?<version>[0-9.]+)\/(?<artifactSlug>.+?)\/cypress\.tgz$/
 
 // convert a prerelease NPM package .tgz URL to the corresponding binary .zip URL
 const getBinaryUrlFromPrereleaseNpmUrl = (npmUrl) => {
@@ -162,7 +166,7 @@ const downloadAndUnzip = ({ version, installDir, downloadDir }) => {
 
   const tasks = new Listr([
     {
-      title: util.titleize('Downloading Cypress'),
+      options: { title: util.titleize('Downloading Cypress') },
       task: (ctx, task) => {
         // as our download progresses indicate the status
         progress.onProgress = progessify(task, 'Downloading Cypress')
@@ -190,7 +194,7 @@ const downloadAndUnzip = ({ version, installDir, downloadDir }) => {
       rendererOptions,
     }),
     {
-      title: util.titleize('Finishing Installation'),
+      options: { title: util.titleize('Finishing Installation') },
       task: (ctx, task) => {
         const cleanup = () => {
           debug('removing zip file %s', downloadDestination)
@@ -210,10 +214,16 @@ const downloadAndUnzip = ({ version, installDir, downloadDir }) => {
         })
       },
     },
-  ], rendererOptions)
+  ], { rendererOptions })
 
   // start the tasks!
   return Promise.resolve(tasks.run())
+}
+
+const validateOS = () => {
+  return util.getPlatformInfo().then((platformInfo) => {
+    return platformInfo.match(/(darwin|linux|win32)-x64/)
+  })
 }
 
 const start = (options = {}) => {
@@ -271,7 +281,14 @@ const start = (options = {}) => {
   const cacheDir = state.getCacheDir()
   const binaryDir = state.getBinaryDir(pkgVersion)
 
-  return fs.ensureDirAsync(cacheDir)
+  return validateOS().then((isValid) => {
+    if (!isValid) {
+      return throwFormErrorText(errors.invalidOS)()
+    }
+  })
+  .then(() => {
+    return fs.ensureDirAsync(cacheDir)
+  })
   .catch({ code: 'EACCES' }, (err) => {
     return throwFormErrorText(errors.invalidCacheDirectory)(stripIndent`
     Failed to access ${chalk.cyan(cacheDir)}:
@@ -390,7 +407,7 @@ const start = (options = {}) => {
           zipFilePath: absolutePath,
           installDir,
           rendererOptions,
-        })], rendererOptions).run()
+        })], { rendererOptions }).run()
       }
 
       if (options.force) {
@@ -420,7 +437,7 @@ module.exports = {
 
 const unzipTask = ({ zipFilePath, installDir, progress, rendererOptions }) => {
   return {
-    title: util.titleize('Unzipping Cypress'),
+    options: { title: util.titleize('Unzipping Cypress') },
     task: (ctx, task) => {
     // as our unzip progresses indicate the status
       progress.onProgress = progessify(task, 'Unzipping Cypress')

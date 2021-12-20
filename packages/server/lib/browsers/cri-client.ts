@@ -30,12 +30,14 @@ namespace CRI {
     'Page.navigate' |
     'Page.startScreencast' |
     'Page.screencastFrameAck' |
-    'Page.setDownloadBehavior'
+    'Page.setDownloadBehavior' |
+    string
 
   export type EventName =
     'Page.screencastFrame' |
     'Page.downloadWillBegin' |
-    'Page.downloadProgress'
+    'Page.downloadProgress' |
+    string
 }
 
 /**
@@ -189,7 +191,6 @@ export const create = Bluebird.method((target: websocketUrl, onAsynchronousError
       maybeDebugCdpMessages(cri)
 
       cri.send = Bluebird.promisify(cri.send, { context: cri })
-      cri.close = Bluebird.promisify(cri.close, { context: cri })
 
       // @see https://github.com/cyrus-and/chrome-remote-interface/issues/72
       cri._notifier.on('disconnect', reconnect)

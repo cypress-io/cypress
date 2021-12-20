@@ -3,6 +3,7 @@ const path = require('path')
 const server = require('socket.io')
 const client = require('socket.io-client')
 const parser = require('socket.io-parser')
+const { hasBinary } = require('socket.io-parser/dist/is-binary')
 const expect = require('chai').expect
 const pkg = require('../package.json')
 const lib = require('../index')
@@ -71,7 +72,7 @@ describe('Socket', function () {
       decoder.on('decoded', (packet) => {
         obj.data = originalData
         obj.attachments = undefined
-        expect(obj).to.eql(packet)
+        expect(packet).to.eql(obj)
         done()
       })
 
@@ -104,7 +105,79 @@ describe('Socket', function () {
 
       decoder.on('decoded', (packet) => {
         obj.data = originalData
-        expect(obj).to.eql(packet)
+        expect(packet.data[1] === packet.data[1].foo.circularObj).to.be.true
+        expect(packet).to.eql(obj)
+        done()
+      })
+
+      for (let i = 0; i < encodedPackets.length; i++) {
+        decoder.add(encodedPackets[i])
+      }
+    })
+
+    it('correctly encodes and decodes circular data in array', (done) => {
+      const encoder = new parser.Encoder()
+
+      const circularObj = {
+        foo: {},
+      }
+
+      circularObj.foo.circularArray = [circularObj, circularObj]
+
+      const obj = {
+        type: PacketType.EVENT,
+        data: ['a', circularObj],
+        id: 23,
+        nsp: '/cool',
+      }
+
+      const originalData = obj.data
+
+      const encodedPackets = encoder.encode(obj)
+
+      const decoder = new parser.Decoder()
+
+      decoder.on('decoded', (packet) => {
+        obj.data = originalData
+        expect(packet.data[1] === packet.data[1].foo.circularArray[0]).to.be.true
+        expect(packet.data[1] === packet.data[1].foo.circularArray[1]).to.be.true
+        expect(packet).to.eql(obj)
+        done()
+      })
+
+      for (let i = 0; i < encodedPackets.length; i++) {
+        decoder.add(encodedPackets[i])
+      }
+    })
+
+    it('correctly encodes and decodes circular data containing binary', (done) => {
+      const encoder = new parser.Encoder()
+
+      const circularObj = {
+        foo: {},
+        bin: Buffer.from('abc', 'utf8'),
+      }
+
+      circularObj.foo.circularObj = circularObj
+
+      const obj = {
+        type: PacketType.EVENT,
+        data: ['a', circularObj],
+        id: 23,
+        nsp: '/cool',
+      }
+
+      const originalData = obj.data
+
+      const encodedPackets = encoder.encode(obj)
+
+      const decoder = new parser.Decoder()
+
+      decoder.on('decoded', (packet) => {
+        obj.data = originalData
+        obj.attachments = undefined
+        expect(packet.data[1] === packet.data[1].foo.circularObj).to.be.true
+        expect(packet).to.eql(obj)
         done()
       })
 
@@ -136,13 +209,27 @@ describe('Socket', function () {
       decoder.on('decoded', (packet) => {
         obj.data = originalData
         obj.attachments = undefined
-        expect(obj).to.eql(packet)
+        expect(packet).to.eql(obj)
         done()
       })
 
       for (let i = 0; i < encodedPackets.length; i++) {
         decoder.add(encodedPackets[i])
       }
+    })
+  })
+
+  context('hasBinary', () => {
+    it('hasBinary handles binary data in toJSON()', () => {
+      const x = {
+        toJSON () {
+          return Buffer.from('123', 'utf8')
+        },
+      }
+
+      const data = ['a', x]
+
+      expect(hasBinary(data)).to.be.true
     })
   })
 })

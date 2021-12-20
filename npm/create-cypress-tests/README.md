@@ -50,3 +50,7 @@ Here is a list of available configuration options:
 ## License
 
 The project is licensed under the terms of [MIT license](../../LICENSE)
+
+## Changelog
+
+[Changelog](./CHANGELOG.md)

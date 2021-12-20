@@ -15,9 +15,14 @@ $err-text: #cd0a17;
 $err-header-background: #fee0e3;
 $err-header-text: #cc3943;
 
+$warn-background: hsl(42, 100%, 98%);
+$warn-header-background: hsl(42, 94%, 94%);
+$warn-header-text: hsl(42, 59%, 51%);
+$warn-text: hsl(42, 91%, 35%);
+
 $header-height: 46px;
 $reporter-contents-min-width: 170px;
 
-$muli: 'Muli', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+$font-sans: 'Mulish', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 $open-sans: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 $monospace: Consolas, Monaco, 'Andale Mono', monospace;

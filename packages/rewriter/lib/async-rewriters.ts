@@ -1,5 +1,5 @@
 import { queueRewriting } from './threads'
-import { DeferSourceMapRewriteFn } from './js'
+import type { DeferSourceMapRewriteFn } from './js'
 
 // these functions are not included in `./js` or `./html` because doing so
 // would mean that `./threads/worker` would unnecessarily end up loading in the

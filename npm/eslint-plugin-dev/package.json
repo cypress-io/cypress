@@ -10,7 +10,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "bluebird": "^3.5.5",
+    "bluebird": "3.5.5",
     "chalk": "^2.4.2",
     "eslint-rule-composer": "^0.3.0",
     "lodash": "^4.17.15",
@@ -45,7 +45,6 @@
     "url": "https://github.com/cypress-io/cypress.git"
   },
   "homepage": "https://github.com/cypress-io/cypress/tree/master/npm/eslint-plugin-dev#readme",
-  "author": "Chris Breiding (chris@cypress.io)",
   "bugs": {
     "url": "https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm%3A%20%40cypress%2Feslint-plugin-dev&template=bug-report.md"
   },

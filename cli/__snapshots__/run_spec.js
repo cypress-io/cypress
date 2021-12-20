@@ -27,3 +27,8 @@ exports['exec run .processRunOptions passes --config-file false option 1'] = [
   "--config-file",
   false
 ]
+
+exports['exec run .processRunOptions defaults to e2e testingType 1'] = [
+  "--run-project",
+  null
+]

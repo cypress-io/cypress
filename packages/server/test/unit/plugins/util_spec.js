@@ -86,7 +86,7 @@ describe('lib/plugins/util', () => {
       expect(util.wrapChildPromise(this.ipc, this.invoke, this.ids)).to.be.an.instanceOf(Promise)
     })
 
-    it('sends \'promise:fulfilled:{invocatationId}\' with value when promise resolves', function () {
+    it('sends "promise:fulfilled:{invocatationId}" with value when promise resolves', function () {
       this.invoke.resolves('value')
 
       return util.wrapChildPromise(this.ipc, this.invoke, this.ids).then(() => {
@@ -102,7 +102,7 @@ describe('lib/plugins/util', () => {
       })
     })
 
-    it('sends \'promise:fulfilled:{invocatationId}\' with error when promise rejects', function () {
+    it('sends "promise:fulfilled:{invocatationId}" with error when promise rejects', function () {
       const err = new Error('fail')
 
       err.code = 'ERM_DUN_FAILED'
@@ -138,7 +138,7 @@ describe('lib/plugins/util', () => {
       expect(util.wrapParentPromise(this.ipc, 0, this.callback)).to.be.an.instanceOf(Promise)
     })
 
-    it('resolves the promise when \'promise:fulfilled:{invocationId}\' event is received without error', function () {
+    it('resolves the promise when "promise:fulfilled:{invocationId}" event is received without error', function () {
       const promise = util.wrapParentPromise(this.ipc, 0, this.callback)
       const invocationId = this.callback.lastCall.args[0]
 
@@ -160,7 +160,7 @@ describe('lib/plugins/util', () => {
       })
     })
 
-    it('rejects the promise when \'promise:fulfilled:{invocationId}\' event is received with error', function () {
+    it('rejects the promise when "promise:fulfilled:{invocationId}" event is received with error', function () {
       const promise = util.wrapParentPromise(this.ipc, 0, this.callback)
       const invocationId = this.callback.lastCall.args[0]
       const err = {

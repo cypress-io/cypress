@@ -5,17 +5,12 @@ const makeUserPackageFile = require('../../scripts/build')
 const snapshot = require('../support/snapshot')
 const la = require('lazy-ass')
 const is = require('check-more-types')
-const R = require('ramda')
 
 const hasVersion = (json) => {
   return la(is.semver(json.version), 'cannot find version', json)
 }
 
-const hasAuthor = (json) => {
-  return la(json.author === 'Brian Mann', 'wrong author name', json)
-}
-
-const changeVersion = R.assoc('version', 'x.y.z')
+const changeVersion = (o) => ({ ...o, version: 'x.y.z' })
 
 describe('package.json build', () => {
   beforeEach(function () {
@@ -30,9 +25,8 @@ describe('package.json build', () => {
     sinon.stub(fs, 'outputJsonAsync').resolves()
   })
 
-  it('author name and version', () => {
+  it('version', () => {
     return makeUserPackageFile()
-    .tap(hasAuthor)
     .tap(hasVersion)
   })
 

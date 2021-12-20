@@ -1,22 +1,27 @@
 import { debug as debugFn } from 'debug'
-import { Server } from 'http'
-import { start as createDevServer, StartDevServer } from './startServer'
+import { InlineConfig } from 'vite'
+import { start as createDevServer, StartDevServerOptions } from './startServer'
 const debug = debugFn('cypress:vite-dev-server:vite')
 
-export { StartDevServer }
+export { StartDevServerOptions }
 
-export interface ResolvedDevServerConfig {
-  port: number
-  server: Server
-}
-
-export async function startDevServer (startDevServerArgs: StartDevServer): Promise<ResolvedDevServerConfig> {
+export async function startDevServer (startDevServerArgs: StartDevServerOptions): Promise<Cypress.ResolvedDevServerConfig> {
   const viteDevServer = await createDevServer(startDevServerArgs)
 
   const app = await viteDevServer.listen()
-  const port = app.config.server.port
+  const port = app.config.server.port!
 
   debug('Component testing vite server started on port', port)
 
-  return { port, server: app.httpServer }
+  return { port, close: app.httpServer!.close }
+}
+
+export type CypressViteDevServerConfig = Omit<InlineConfig, 'base' | 'root'>
+
+export function devServer (cypressDevServerConfig: Cypress.DevServerConfig, devServerConfig?: CypressViteDevServerConfig) {
+  return startDevServer({ options: cypressDevServerConfig, viteConfig: devServerConfig })
+}
+
+export function defineDevServerConfig (devServerConfig: CypressViteDevServerConfig) {
+  return devServerConfig
 }

@@ -4,13 +4,14 @@ import React, { Component } from 'react'
 
 import authApi from './auth-api'
 import authStore from './auth-store'
-import ipc from '../lib/ipc'
 import MarkdownRenderer from '../lib/markdown-renderer'
 
 @observer
 class LoginForm extends Component {
   static defaultProps = {
     onSuccess () {},
+    buttonClassName: 'btn btn-login btn-primary btn-wide',
+    buttonContent: 'Log In to Dashboard',
   }
 
   state = {
@@ -20,25 +21,27 @@ class LoginForm extends Component {
 
   render () {
     const { message } = authStore
+    const { buttonClassName } = this.props
 
     return (
       <div className='login-content'>
         {this._error()}
-        <button
-          className={cs('btn btn-login btn-primary btn-wide', {
-            disabled: this.state.isLoggingIn,
-          })}
-          onClick={this._login}
-          disabled={this.state.isLoggingIn}
-        >
-          {this._buttonContent(message)}
-        </button>
+        <div className='button-wrapper'>
+          <button
+            className={cs(buttonClassName, {
+              disabled: this.state.isLoggingIn,
+            })}
+            onClick={this._login}
+            disabled={this.state.isLoggingIn}
+          >
+            {this._buttonContent(message)}
+          </button>
+        </div>
         {
           message && <p className={`message ${message.type}`} onClick={this._selectUrl}>
             <MarkdownRenderer markdown={message.message}/>
           </p>
         }
-        <p className='terms'>By logging in, you agree to the <a onClick={this._openTerms}>Terms of Use</a> and <a onClick={this._openPrivacy}>Privacy Policy</a>.</p>
       </div>
     )
   }
@@ -77,7 +80,7 @@ class LoginForm extends Component {
 
     return (
       <span>
-        Log In to Dashboard
+        {this.props.buttonContent}
       </span>
     )
   }
@@ -125,14 +128,6 @@ class LoginForm extends Component {
         error,
       })
     })
-  }
-
-  _openTerms () {
-    ipc.externalOpen('https://on.cypress.io/terms-of-use')
-  }
-
-  _openPrivacy () {
-    ipc.externalOpen('https://on.cypress.io/privacy-policy')
   }
 }
 

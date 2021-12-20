@@ -58,3 +58,7 @@ Install `@cypress/vue` or `@cypress/react` to get this package working properly
 
 Vite is reponsible for compiling and bundling all the files. We use its error overlay to display any transpiling error.
 Omly runtime errors have to be handled through cypress
+
+## Changelog
+
+[Changelog](./CHANGELOG.md)

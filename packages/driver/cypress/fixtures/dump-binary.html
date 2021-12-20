@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Post and dump binary data</title>
+  </head>
+  <body>
+    <script type='text/javascript'>
+      var xhr = new XMLHttpRequest()
+      var url = 'http://localhost:3500/binary'
+      xhr.onload = function() {
+        var arrayBuffer = xhr.response
+        var uint8 = new Uint8Array(arrayBuffer)
+        var divNode = document.getElementById('result')
+        divNode.innerText = uint8.join(', ')
+      }
+      xhr.open('POST', url + '?_=' + Date.now(), true)
+      xhr.setRequestHeader('content-type', 'application/octet-stream')
+      xhr.responseType = 'arraybuffer'
+      const data = new Uint8Array(2)
+      data[0] = 41
+      data[1] = 155
+      xhr.send(data)
+    </script>
+    <div id='result'></div>
+  </body>
+</html>

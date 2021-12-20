@@ -14,6 +14,7 @@ const pluginConfig2: Cypress.PluginConfig = (on, config) => {
   config.videoCompression // $ExpectType: number | false
   config.projectRoot // $ExpectType: string
   config.version // $ExpectType: string
+  config.testingType // $ExpectType: TestingType
 
   on('before:browser:launch', (browser, options) => {
     browser.displayName // $ExpectType string

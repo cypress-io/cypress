@@ -1,5 +1,5 @@
 const { $ } = Cypress
-const $SnapshotsCss = require('../../../src/cy/snapshots_css')
+const { create } = require('../../../src/cy/snapshots_css')
 
 const normalizeStyles = (styles) => {
   return styles
@@ -17,7 +17,7 @@ describe('driver/src/cy/snapshots_css', () => {
   let snapshotCss
 
   beforeEach(() => {
-    snapshotCss = $SnapshotsCss.create(cy.$$, cy.state)
+    snapshotCss = create(cy.$$, cy.state)
 
     cy.viewport(400, 600)
     cy.visit('/fixtures/generic.html').then(() => {

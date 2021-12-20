@@ -7,7 +7,16 @@ const webpackConfig = require('../../webpack.config')
  */
 module.exports = (on, config) => {
   if (config.testingType !== 'component') {
-    throw Error(`This is a component testing project. testingType should be 'component'. Received ${config.testingType}`)
+    return config
+  }
+
+  if (!webpackConfig.resolve) {
+    webpackConfig.resolve = {}
+  }
+
+  webpackConfig.resolve.alias = {
+    ...webpackConfig.resolve.alias,
+    '@vue/compiler-core$': '@vue/compiler-core/dist/compiler-core.cjs.js',
   }
 
   require('@cypress/code-coverage/task')(on, config)

@@ -1,11 +1,12 @@
 {
   "compilerOptions": {
     /* Basic Options */
-    "target": "es5" /* Specify ECMAScript target version: 'ES3' (default), 'ES5', 'ES2015', 'ES2016', 'ES2017', or 'ESNEXT'. */,
-    "module": "commonjs" /* Specify module code generation: 'none', 'commonjs', 'amd', 'system', 'umd', 'es2015', or 'ESNext'. */,
+    "target": "ES2020" /* Specify ECMAScript target version: 'ES3' (default), 'ES5', 'ES2015', 'ES2016', 'ES2017', or 'ESNEXT'. */,
+    "module": "ESNext" /* Specify module code generation: 'none', 'commonjs', 'amd', 'system', 'umd', 'es2015', or 'ESNext'. */,
     "skipLibCheck": true,
+    "moduleResolution": "node",
     "lib": [
-      "es2016",
+      "ES2020",
       "dom"
     ] /* Specify library files to be included in the compilation:  */,
     "declaration": true,                   /* Generates corresponding '.d.ts' file. */
@@ -17,7 +18,8 @@
     "strict": true /* Enable all strict type-checking options. */,
     /* Module Resolution Options */
     "types": [
-      "cypress"
+      "cypress",
+      "@percy/cypress"
     ] /* Type declaration files to be included in compilation. */,
     "allowSyntheticDefaultImports": true /* Allow default imports from modules with no default export. This does not affect code emit, just typechecking. */,
     "esModuleInterop": true,
@@ -33,5 +35,4 @@
     }
   },
   "include": ["src"],
-  "exclude": ["src/**/*.spec.ts", "src/**/*.spec.tsx"],
 }

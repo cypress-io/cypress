@@ -55,7 +55,7 @@ const stats = {
   timings: true,
 }
 
-function makeSassLoaders ({ modules }): RuleSetRule {
+function makeSassLoaders ({ modules }: { modules: boolean }): RuleSetRule {
   const exclude = [/node_modules/]
 
   if (!modules) exclude.push(/\.modules?\.s[ac]ss$/i)
@@ -65,6 +65,13 @@ function makeSassLoaders ({ modules }): RuleSetRule {
     exclude,
     enforce: 'pre',
     use: [
+      {
+        loader: require.resolve('css-modules-typescript-loader'),
+        options: {
+          modules: true,
+          mode: process.env.CI ? 'verify' : 'emit',
+        },
+      },
       {
         loader: require.resolve('css-loader'),
         options: {
@@ -249,3 +256,7 @@ export const getSimpleConfig = () => ({
 })
 
 export { HtmlWebpackPlugin }
+
+export function getCopyWebpackPlugin () {
+  return require('copy-webpack-plugin')
+}

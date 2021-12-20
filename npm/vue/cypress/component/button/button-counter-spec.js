@@ -14,14 +14,11 @@ describe('ButtonCounter', () => {
   })
 
   it('emits "increment" event on click', () => {
-    const spy = cy.spy()
-
-    Cypress.vue.$on('increment', spy)
     cy.get('button')
     .click()
     .click()
     .then(() => {
-      expect(spy).to.be.calledTwice
+      cy.wrap(Cypress.vueWrapper.emitted()).should('have.property', 'increment')
     })
   })
 })

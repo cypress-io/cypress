@@ -47,6 +47,8 @@ describe('windows browser detection', () => {
     stubBrowser('C:/Program Files (x86)/Google/Chrome/Application/chrome.exe', '1.2.3')
     stubBrowser('C:/Program Files (x86)/Google/chrome-win32/chrome.exe', '2.3.4')
 
+    stubBrowser('C:/Program Files (x86)/Google/Chrome Beta/Application/chrome.exe', '6.7.8')
+
     // canary is installed in homedir
     stubBrowser(`${HOMEDIR}/AppData/Local/Google/Chrome SxS/Application/chrome.exe`, '3.4.5')
 
@@ -68,6 +70,13 @@ describe('windows browser detection', () => {
     stubBrowser(`${HOMEDIR}/AppData/Local/Microsoft/Edge SxS/Application/msedge.exe`, '14')
 
     snapshot(await detect(browsers))
+  })
+
+  it('detects 64-bit Chrome Beta app path', async () => {
+    stubBrowser('C:/Program Files/Google/Chrome Beta/Application/chrome.exe', '9.0.1')
+    const chrome = _.find(browsers, { name: 'chrome', channel: 'beta' })
+
+    snapshot(await windowsHelper.detect(chrome))
   })
 
   // @see https://github.com/cypress-io/cypress/issues/8425

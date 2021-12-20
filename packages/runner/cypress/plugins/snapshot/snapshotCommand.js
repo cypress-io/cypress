@@ -6,6 +6,7 @@ const chalk = require('chalk')
 const stripAnsi = require('strip-ansi')
 const { stripIndent } = require('common-tags')
 const { printVar, stringifyShort, isObject, addPluginButton, fmt, typeColors } = require('./snapshotUtils')
+const $ = require('jquery')
 
 const debug = Debug('plugin:snapshot')
 
@@ -40,7 +41,6 @@ function saveSnapshot (ctx, exactSpecName, file, exp, act) {
 const registerInCypress = () => {
   // need to use correct sinon version for matcher.isMatcher to work
   sinon = Cypress.sinon
-  const $ = Cypress.$
 
   let snapshotIndex = {}
 

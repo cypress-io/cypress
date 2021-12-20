@@ -9,6 +9,8 @@ const { getInstallJson } = require('@cypress/commit-message-install')
 
 /* eslint-disable no-console */
 
+// See ../guides/testing-other-projects.md for documentation.
+
 const { npm, binary } = getNameAndBinary(process.argv)
 
 la(is.unemptyString(npm), 'missing npm url')
@@ -109,17 +111,6 @@ const getStatusAndMessage = (projectRepoName) => {
     message += '\n'
     message += stripIndent`
       CircleCI job url: ${process.env.CIRCLE_BUILD_URL}
-    `
-  }
-
-  if (process.env.APPVEYOR) {
-    const account = process.env.APPVEYOR_ACCOUNT_NAME
-    const slug = process.env.APPVEYOR_PROJECT_SLUG
-    const build = process.env.APPVEYOR_BUILD_NUMBER
-
-    message += '\n'
-    message += stripIndent`
-      AppVeyor: ${account}/${slug} ${build}
     `
   }
 

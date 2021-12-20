@@ -16,7 +16,7 @@ describe('Single component mount', () => {
 
     mount(EmptyComponent, { extensions })
 
-    cy.window().its('Vue').invoke('aPluginMethod').should('equal', 'foo')
+    cy.wrap(Cypress).its('vue').invoke('aPluginMethod').should('equal', 'foo')
   })
 })
 
@@ -32,11 +32,11 @@ describe('Custom plugin MyPlugin', () => {
   beforeEach(mountCallback(EmptyComponent, { extensions }))
 
   it('registers global method on Vue instance', () => {
-    cy.window().its('Vue').its('aPluginMethod').should('be.a', 'function')
+    cy.wrap(Cypress).its('vue').its('aPluginMethod').should('be.a', 'function')
   })
 
   it('can call this global function', () => {
-    cy.window().its('Vue').invoke('aPluginMethod').should('equal', 'foo')
+    cy.wrap(Cypress).its('vue').invoke('aPluginMethod').should('equal', 'foo')
   })
 })
 
@@ -55,10 +55,9 @@ describe('Plugins with options', () => {
     mount(EmptyComponent, { extensions })
 
     // first plugin works
-    cy.window().its('Vue').invoke('aPluginMethod').should('equal', 'foo')
+    cy.wrap(Cypress).its('vue').invoke('aPluginMethod').should('equal', 'foo')
     // second plugin works
-    cy.window()
-    .its('Vue')
+    cy.wrap(Cypress).its('vue')
     .invoke('anotherPluginMethod')
     .should('equal', 'testing')
   })

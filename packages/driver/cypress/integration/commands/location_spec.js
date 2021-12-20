@@ -1,3 +1,4 @@
+const { assertLogLength } = require('../../support/utils')
 const { _ } = Cypress
 
 describe('src/cy/commands/location', () => {
@@ -28,6 +29,15 @@ describe('src/cy/commands/location', () => {
       .onSecondCall().returns('http://localhost:3500/baz.html')
 
       cy.url().should('include', '/baz.html')
+    })
+
+    // https://github.com/cypress-io/cypress/issues/17399
+    it('url decode option', () => {
+      // encodeURI() is used below because we cannot visit the site without it.
+      // For the curious, 사랑 means "love" in Korean.
+      cy.visit(encodeURI('/custom-headers?x=사랑'))
+
+      cy.url({ decode: true }).should('contain', '사랑')
     })
 
     describe('assertion verification', () => {
@@ -90,7 +100,7 @@ describe('src/cy/commands/location', () => {
 
       it('does not log an additional log on failure', function (done) {
         cy.on('fail', () => {
-          expect(this.logs.length).to.eq(2)
+          assertLogLength(this.logs, 2)
 
           done()
         })
@@ -240,7 +250,7 @@ describe('src/cy/commands/location', () => {
 
       it('does not log an additional log on failure', function (done) {
         cy.on('fail', () => {
-          expect(this.logs.length).to.eq(2)
+          assertLogLength(this.logs, 2)
 
           done()
         })
@@ -336,6 +346,20 @@ describe('src/cy/commands/location', () => {
       cy.location().should('have.property', 'pathname').and('match', /users/)
     })
 
+    // https://github.com/cypress-io/cypress/issues/16463
+    it('eventually returns a given key', function () {
+      cy.stub(cy, 'getRemoteLocation')
+      .onFirstCall().returns('')
+      .onSecondCall().returns({
+        pathname: '/my/path',
+      })
+
+      cy.location('pathname').should('equal', '/my/path')
+      .then(() => {
+        expect(cy.getRemoteLocation).to.have.been.calledTwice
+      })
+    })
+
     describe('assertion verification', () => {
       beforeEach(function () {
         cy.on('log:added', (attrs, log) => {
@@ -418,7 +442,7 @@ describe('src/cy/commands/location', () => {
         })
 
         cy.on('fail', () => {
-          expect(this.logs.length).to.eq(2)
+          assertLogLength(this.logs, 2)
 
           done()
         })

@@ -28,7 +28,7 @@ URL: https://download.cypress.io/desktop?platform=OS&arch=ARCH
 
 ----------
 
-Platform: darwin (Foo-OsVersion)
+Platform: darwin-x64 (Foo-OsVersion)
 Cypress Version: 1.2.3
 
 `

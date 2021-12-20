@@ -3,6 +3,6 @@
     "./test/_test-output",
     "node_modules"
   ],
-  "require": "ts-node/register",
+  "require": "../../node_modules/@packages/web-config/node-register",
   "exit": true
 }
