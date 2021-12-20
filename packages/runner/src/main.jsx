@@ -10,8 +10,11 @@ import { Container, selectorPlaygroundModel, StudioRecorder } from '@packages/ru
 import { EventManager } from '@packages/app/src/runner/event-manager'
 import { createWebsocket } from '@packages/app/src/runner'
 import util from './lib/util'
+import { UnifiedRunner } from '@packages/runner-ct/unified-runner'
 
 const driverUtils = $Cypress.utils
+
+window.UnifiedRunner = UnifiedRunner
 
 MobX.configure({ enforceActions: 'always' })
 
