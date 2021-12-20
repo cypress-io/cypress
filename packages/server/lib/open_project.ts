@@ -166,7 +166,7 @@ export class OpenProject {
 
       afterSpec()
       .catch((err) => {
-        this.projectBase?.options.onError(err)
+        this.projectBase?.options.onError?.(err)
       })
 
       if (onBrowserClose) {

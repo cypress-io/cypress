@@ -68,6 +68,7 @@ export interface OpenProjectLaunchOptions {
   onSpecChanged?: WebSocketOptionsCallback
   onSavedStateChanged?: WebSocketOptionsCallback
   onChange?: WebSocketOptionsCallback
+  onError?: (err: Error) => void
 
   [key: string]: any
 }
