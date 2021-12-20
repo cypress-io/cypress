@@ -1981,7 +1981,7 @@ space
 
       // https://github.com/cypress-io/cypress/issues/19377
       describe('cy.contains() does not remove <style> and <script> tags', () => {
-        it('cy.contains removes style tags from the DOM', () => {
+        it('cy.contains() does not remove style tags from the DOM', () => {
           cy.visit('fixtures/content-in-body.html')
 
           cy.get('button#my_button_1').should('be.visible')
@@ -1989,7 +1989,7 @@ space
           cy.get('button#my_button_1').should('be.visible')
         })
 
-        it('cy.contains removes script tags from the DOM', () => {
+        it('cy.contains() does not remove script tags from the DOM', () => {
           cy.visit('fixtures/content-in-body.html')
 
           cy.window().then((win) => {

@@ -129,7 +129,7 @@ export const getFirstDeepestElement = ($el: JQuery, index = 0) => {
     return $current
   }
 
-  // https://github.com/cypress-io/cypress/issues/19377
+  // https://github.com/cypress-io/cypress/issues/14861
   // filter out <script> and <style> tags
   if ($current && ['SCRIPT', 'STYLE'].includes($current.prop('tagName'))) {
     return getFirstDeepestElement($el, index + 1)
@@ -244,7 +244,7 @@ export const getContainsSelector = (text, filter = '', options: {
 
     // taken from jquery's normal contains method
     cyContainsSelector = function (elem) {
-      let testText = normalizeWhitespaces(elem)
+      const testText = normalizeWhitespaces(elem)
 
       return text.test(testText)
     }
