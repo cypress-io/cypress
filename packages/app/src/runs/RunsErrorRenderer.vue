@@ -43,6 +43,7 @@
     :show="showConnectDialog"
     :gql="props.gql"
     @cancel="showConnectDialog = false"
+    @success="showConnectDialog = false"
   />
 </template>
 
