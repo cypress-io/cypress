@@ -64,6 +64,17 @@ index 57a2761..0000000
 @@ -1 +0,0 @@
 -{"version":3,"file":"unfetch.umd.js","sources":["../src/index.mjs"],"sourcesContent":["export default function(url, options) {\n\toptions = options || {};\n\treturn new Promise( (resolve, reject) => {\n\t\tconst request = new XMLHttpRequest();\n\t\tconst keys = [];\n\t\tconst all = [];\n\t\tconst headers = {};\n\n\t\tconst response = () => ({\n\t\t\tok: (request.status/100|0) == 2,\t\t// 200-299\n\t\t\tstatusText: request.statusText,\n\t\t\tstatus: request.status,\n\t\t\turl: request.responseURL,\n\t\t\ttext: () => Promise.resolve(request.responseText),\n\t\t\tjson: () => Promise.resolve(JSON.parse(request.responseText)),\n\t\t\tblob: () => Promise.resolve(new Blob([request.response])),\n\t\t\tclone: response,\n\t\t\theaders: {\n\t\t\t\tkeys: () => keys,\n\t\t\t\tentries: () => all,\n\t\t\t\tget: n => headers[n.toLowerCase()],\n\t\t\t\thas: n => n.toLowerCase() in headers\n\t\t\t}\n\t\t});\n\n\t\trequest.open(options.method || 'get', url, true);\n\n\t\trequest.onload = () => {\n\t\t\trequest.getAllResponseHeaders().replace(/^(.*?):[^\\S\\n]*([\\s\\S]*?)$/gm, (m, key, value) => {\n\t\t\t\tkeys.push(key = key.toLowerCase());\n\t\t\t\tall.push([key, value]);\n\t\t\t\theaders[key] = headers[key] ? `${headers[key]},${value}` : value;\n\t\t\t});\n\t\t\tresolve(response());\n\t\t};\n\n\t\trequest.onerror = reject;\n\n\t\trequest.withCredentials = options.credentials=='include';\n\n\t\tfor (const i in options.headers) {\n\t\t\trequest.setRequestHeader(i, options.headers[i]);\n\t\t}\n\n\t\trequest.send(options.body || null);\n\t});\n}\n"],"names":["url","options","Promise","resolve","reject","request","XMLHttpRequest","keys","all","headers","response","ok","status","statusText","responseURL","text","responseText","json","JSON","parse","blob","Blob","clone","entries","get","n","toLowerCase","has","const","i","open","method","onload","getAllResponseHeaders","replace","m","key","value","push","onerror","withCredentials","credentials","setRequestHeader","send","body"],"mappings":"6KAAe,SAASA,EAAKC,UAC5BA,EAAUA,GAAW,GACd,IAAIC,iBAAUC,EAASC,OACvBC,EAAU,IAAIC,eACdC,EAAO,GACPC,EAAM,GACNC,EAAU,GAEVC,oBACLC,GAA8B,IAAzBN,EAAQO,OAAO,IAAI,GACxBC,WAAYR,EAAQQ,WACpBD,OAAQP,EAAQO,OAChBZ,IAAKK,EAAQS,YACbC,uBAAYb,QAAQC,QAAQE,EAAQW,eACpCC,uBAAYf,QAAQC,QAAQe,KAAKC,MAAMd,EAAQW,gBAC/CI,uBAAYlB,QAAQC,QAAQ,IAAIkB,KAAK,CAAChB,EAAQK,aAC9CY,MAAOZ,EACPD,QAAS,CACRF,uBAAYA,GACZgB,0BAAef,GACfgB,aAAKC,UAAKhB,EAAQgB,EAAEC,gBACpBC,aAAKF,UAAKA,EAAEC,gBAAiBjB,UAmB1BmB,IAAMC,KAfXxB,EAAQyB,KAAK7B,EAAQ8B,QAAU,MAAO/B,GAAK,GAE3CK,EAAQ2B,kBACP3B,EAAQ4B,wBAAwBC,QAAQ,wCAAiCC,EAAGC,EAAKC,GAChF9B,EAAK+B,KAAKF,EAAMA,EAAIV,eACpBlB,EAAI8B,KAAK,CAACF,EAAKC,IACf5B,EAAQ2B,GAAO3B,EAAQ2B,GAAU3B,EAAQ2B,OAAQC,EAAUA,IAE5DlC,EAAQO,MAGTL,EAAQkC,QAAUnC,EAElBC,EAAQmC,gBAAuC,WAArBvC,EAAQwC,YAElBxC,EAAQQ,QACvBJ,EAAQqC,iBAAiBb,EAAG5B,EAAQQ,QAAQoB,IAG7CxB,EAAQsC,KAAK1C,EAAQ2C,MAAQ"}
 \ No newline at end of file
+diff --git a/node_modules/unfetch/src/index.d.ts b/node_modules/unfetch/src/index.d.ts
+index 0c53ad9..8dd2d54 100644
+--- a/node_modules/unfetch/src/index.d.ts
++++ b/node_modules/unfetch/src/index.d.ts
+@@ -14,4 +14,6 @@ declare namespace unfetch {
+ 
+ declare const unfetch: typeof fetch;
+ 
++export function registerFetch(window: Window): unfetch;
++
+ export default unfetch;
 diff --git a/node_modules/unfetch/src/index.mjs b/node_modules/unfetch/src/index.mjs
 deleted file mode 100644
 index 783ad42..0000000
