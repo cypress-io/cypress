@@ -360,7 +360,7 @@ type CurrentProject implements Node & ProjectLike {
   browsers: [Browser!]
 
   """The remote associated project from Cypress Cloud"""
-  cloudProject: CloudProject
+  cloudProject: CloudProjectResult
 
   """List of all code generation candidates stories"""
   codeGenCandidates(glob: String!): [FileParts]
