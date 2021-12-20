@@ -1,3 +1,5 @@
+import type { Interception } from '@packages/net-stubbing/lib/external-types'
+
 describe('Sidebar Navigation', () => {
   before(() => {
     cy.scaffoldProject('todos')
@@ -82,7 +84,7 @@ describe('Sidebar Navigation', () => {
     cy.findByText('todos').should('be.visible')
   })
 
-  it('displays the project name and absolute path (expanded state)', () => {
+  it('displays the project name (expanded state)', () => {
     cy.get('[aria-expanded]').should('have.attr', 'aria-expanded', 'true')
 
     cy.findByText('todos').should('be.visible')
@@ -93,6 +95,12 @@ describe('Sidebar Navigation', () => {
     cy.findByText('E2E Testing').should('be.visible')
     cy.get('[data-cy="switch-testing-type"]').click()
     cy.findByText('Choose a testing type').should('be.visible')
+    cy.intercept('mutation-SwitchTestingType_ReconfigureProject').as('SwitchTestingType')
+    cy.get('[data-cy-testingtype="component"]').click()
+    cy.wait('@SwitchTestingType').then((interception: Interception) => {
+      expect(interception.request.url).to.include('graphql/mutation-SwitchTestingType_ReconfigureProject')
+    })
+
     cy.get('[aria-label="Close"]').click()
     cy.findByText('Choose a testing type').should('not.exist')
   })
