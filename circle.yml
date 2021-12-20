@@ -37,7 +37,7 @@ macWorkflowFilters: &mac-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ '10.0-release', << pipeline.git.branch >> ]
+    - equal: [ '10.0-release', 'tgriesser/10.0-release/refactor-lifecycle-ui', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -46,7 +46,7 @@ windowsWorkflowFilters: &windows-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ '10.0-release', << pipeline.git.branch >> ]
+    - equal: [ '10.0-release', 'tgriesser/10.0-release/refactor-lifecycle-ui', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -1665,7 +1665,7 @@ jobs:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "10.0-release" && "$CIRCLE_BRANCH" != "renovate/cypress-request-2.x" && "$CIRCLE_BRANCH" != "tgriesser/fix/patch-resolutions" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "tgriesser/10.0-release/refactor-lifecycle-ui" && "$CIRCLE_BRANCH" != "10.0-release" && "$CIRCLE_BRANCH" != "renovate/cypress-request-2.x" && "$CIRCLE_BRANCH" != "tgriesser/fix/patch-resolutions" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi

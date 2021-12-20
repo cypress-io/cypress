@@ -304,7 +304,7 @@ export class ProjectLifecycleManager {
 
     if (!this.metaState.hasValidConfigFile) {
       if (testingType === 'e2e') {
-        this.ctx.actions.wizard.scaffoldTestingType()
+        this.ctx.actions.wizard.scaffoldTestingType().catch(this.onLoadError)
       }
     } else {
       this.loadTestingType()
@@ -712,7 +712,7 @@ export class ProjectLifecycleManager {
     }
 
     if (!this.isTestingTypeConfigured(this._currentTestingType)) {
-      this.ctx.actions.wizard.scaffoldTestingType()
+      this.ctx.actions.wizard.scaffoldTestingType().catch(this.onLoadError)
 
       return
     }
