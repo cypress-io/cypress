@@ -29,7 +29,6 @@
           :class="{
             'filter grayscale': browser.disabled
           }"
-          @click="setSelected(browser.id)"
         >
         <label
           :for="browser.id"
@@ -76,7 +75,7 @@
 <script lang="ts" setup>
 import { useI18n } from '@cy/i18n'
 import Button from '@packages/frontend-shared/src/components/Button.vue'
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 import _clone from 'lodash/clone'
 import openInNew from '~icons/mdi/open-in-new'
 import { useMutation, gql } from '@urql/vue'
@@ -132,7 +131,14 @@ const setSelected = (browserId: string) => {
 
 const launchText = computed(() => props.gql.currentBrowser ? `${t('setupPage.openBrowser.launch')} ${props.gql.currentBrowser.displayName}` : '')
 
-const selectedBrowserId = computed(() => props.gql.currentBrowser ? props.gql.currentBrowser.id : null)
+const selectedBrowserId = computed({
+  get: () => props.gql.currentBrowser ? props.gql.currentBrowser.id : null,
+  set: (newVal) => {
+    if (newVal) {
+      setSelected(newVal)
+    }
+  },
+})
 
 </script>
 
