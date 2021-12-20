@@ -1,5 +1,6 @@
 const debug = require('debug')('cypress:server:controllers:spec')
 const Promise = require('bluebird')
+const path = require('path')
 const errors = require('../errors')
 const preprocessor = require('../plugins/preprocessor')
 
@@ -36,7 +37,7 @@ module.exports = {
     res.type('js')
 
     return preprocessor
-    .getFile(spec, config)
+    .getFile(path.join(config.projectRoot, spec), config)
     .then((filePath) => {
       debug('sending spec %o', { filePath })
       const sendFile = Promise.promisify(res.sendFile.bind(res))

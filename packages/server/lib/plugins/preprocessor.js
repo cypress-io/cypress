@@ -57,9 +57,6 @@ const API = {
   getFile (filePath, config) {
     let fileObject; let fileProcessor
 
-    debug(`getting file ${filePath}`)
-    filePath = path.resolve(config.projectRoot, filePath)
-
     debug(`getFile ${filePath}`)
 
     if (!(fileObject = fileObjects[filePath])) {

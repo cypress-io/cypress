@@ -65,7 +65,7 @@ export class SocketE2E extends SocketBase {
     // previously we have assumed that we pass integration spec path with "integration/" prefix
     // now we pass spec config object that tells what kind of spec it is, has relative path already
     // so the only special handling remains for special paths like "integration/__all"
-    const filePath = typeof specConfig === 'string' ? cleanIntegrationPrefix(specConfig) : specConfig.relative
+    const filePath = typeof specConfig === 'string' ? cleanIntegrationPrefix(specConfig) : specConfig.absolute
 
     // bail if this is special path like "__all"
     // maybe the client should not ask to watch non-spec files?
