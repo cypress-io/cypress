@@ -2,6 +2,8 @@ const { $ } = Cypress
 
 const isActuallyInteractive = Cypress.config('isInteractive')
 
+window.top.__cySkipValidateConfig = true
+
 if (!isActuallyInteractive) {
   // we want to only enable retries in runMode
   // and because we set `isInteractive` above

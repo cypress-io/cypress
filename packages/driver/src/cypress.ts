@@ -1,6 +1,6 @@
 // @ts-nocheck
 
-import { validate } from '@packages/config'
+import { validate, validateNoReadOnlyConfig } from '@packages/config'
 import _ from 'lodash'
 import $ from 'jquery'
 import * as blobUtil from 'blob-util'
@@ -144,6 +144,24 @@ class $Cypress {
     this.state = $SetterGetter.create({})
     this.originalConfig = _.cloneDeep(config)
     this.config = $SetterGetter.create(config, (config) => {
+      if (!window.top.__cySkipValidateConfig) {
+        validateNoReadOnlyConfig(config, (errProperty) => {
+          let errMessage
+
+          if (this.state('runnable')) {
+            errMessage = $errUtils.errByPath('config.invalid_cypress_config_override', {
+              errProperty,
+            })
+          } else {
+            errMessage = $errUtils.errByPath('config.invalid_test_config_override', {
+              errProperty,
+            })
+          }
+
+          throw new this.state('specWindow').Error(errMessage)
+        })
+      }
+
       validate(config, (errMsg) => {
         throw new this.state('specWindow').Error(errMsg)
       })
