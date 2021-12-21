@@ -272,8 +272,10 @@
     "**/@types/react": "16.9.50",
     "**/jquery": "3.1.1",
     "**/pretty-format": "26.4.0",
+    "**/sharp": "0.29.3",
     "**/socket.io-parser": "4.0.4",
     "**/ua-parser-js": "0.7.24",
+    "sharp": "0.29.3",
     "vue-template-compiler": "2.6.12"
   }
 }
