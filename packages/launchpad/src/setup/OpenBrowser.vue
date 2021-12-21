@@ -1,15 +1,12 @@
 <template>
   <WizardLayout
+    v-if="query.data.value?.currentProject"
     no-container
     :can-navigate-forward="false"
     :show-next="false"
     #="{backFn}"
   >
-    <div v-if="!query.data.value?.currentProject">
-      Loading browsers...
-    </div>
     <OpenBrowserList
-      v-else
       variant=""
       :gql="query.data.value.currentProject"
       @navigated-back="backFn"
