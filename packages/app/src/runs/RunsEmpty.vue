@@ -1,13 +1,13 @@
 <template>
   <div
     data-cy="no-runs"
-    class="min-h-full flex flex-col justify-center items-center leading-24px max-w-688px mx-auto"
+    class="flex flex-col mx-auto min-h-full max-w-688px leading-24px justify-center items-center"
   >
     <i-cy-dashboard-checkmark_x48 class="h-48px w-48px icon-dark-gray-500 icon-light-gray-100" />
-    <h2 class="text-18px mt-32px mb-24px text-gray-900">
+    <h2 class="mt-32px mb-24px text-18px text-gray-900">
       {{ t("runs.empty.title") }}
     </h2>
-    <ol class="list-decimal w-full text-gray-600 ml-16px">
+    <ol class="list-decimal ml-16px w-full text-gray-600">
       <li>
         <p class="mb-8px">
           <i18n-t keypath="runs.empty.step1">
@@ -15,7 +15,7 @@
           </i18n-t>
         </p>
         <ShikiHighlight
-          class="rounded border border-gray-100 -ml-16px"
+          class="border rounded border-gray-100 -ml-16px"
           :code="projectIdCode"
           lang="js"
           line-numbers
@@ -64,11 +64,15 @@ fragment RunsEmpty on CurrentProject {
   projectId
   configFilePath
   cloudProject {
-    id
-    recordKeys {
+    __typename
+    ... on CloudProject {
       id
-      ...RecordKey
+      recordKeys {
+        id
+        ...RecordKey
+      }
     }
+    
   }
 }
 `
@@ -86,7 +90,9 @@ const projectIdCode = computed(() => {
 const projectName = computed(() => props.gql.title)
 const configFilePath = computed(() => props.gql.configFilePath)
 const firstRecordKey = computed(() => {
-  return props.gql.cloudProject?.recordKeys?.[0]?.key ?? '<record-key>'
+  return props.gql.cloudProject?.__typename === 'CloudProject' && props.gql.cloudProject.recordKeys?.[0]
+    ? props.gql.cloudProject?.recordKeys?.[0]?.key
+    : '<record-key>'
 })
 const recordCommand = computed(() => {
   return `cypress run --record --key ${firstRecordKey.value}`

@@ -3,7 +3,7 @@ require('../spec_helper')
 const _ = require('lodash')
 const chokidar = require('chokidar')
 const dependencyTree = require('dependency-tree')
-const Watchers = require(`${root}lib/watchers`)
+const Watchers = require(`../../lib/watchers`)
 
 describe('lib/watchers', () => {
   beforeEach(function () {

@@ -12,7 +12,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref, watch } from 'vue'
+import { onMounted, ref, watch, onBeforeUnmount } from 'vue'
 import { useRoute } from 'vue-router'
 import type { SpecRunnerFragment } from '../generated/graphql'
 import { getAutIframeModel, UnifiedRunnerAPI } from '../runner'
@@ -28,6 +28,10 @@ const route = useRoute()
 onMounted(async () => {
   await UnifiedRunnerAPI.initialize()
   initialized.value = true
+})
+
+onBeforeUnmount(() => {
+  UnifiedRunnerAPI.teardown()
 })
 
 const props = defineProps<{

@@ -8,5 +8,5 @@ export const ComponentGenerator: SpecGenerator = {
   entry: ComponentGeneratorStepOne,
   disabled: () => { },
   matches: filters.matchesCT,
-  id: 'component-generator',
+  id: 'component',
 }

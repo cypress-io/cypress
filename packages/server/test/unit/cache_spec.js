@@ -1,10 +1,10 @@
 require('../spec_helper')
-require(`${root}lib/cwd`)
+require(`../../lib/cwd`)
 
 const Promise = require('bluebird')
 const { __get } = require('../../lib/cache')
-const cache = require(`${root}lib/cache`)
-const { fs } = require(`${root}lib/util/fs`)
+const cache = require(`../../lib/cache`)
+const { fs } = require(`../../lib/util/fs`)
 const Fixtures = require('@tooling/system-tests/lib/fixtures')
 
 describe('lib/cache', () => {

@@ -39,7 +39,7 @@
     "@vue/compiler-core": "3.2.6",
     "@vue/compiler-dom": "3.2.6",
     "@vue/compiler-sfc": "3.2.6",
-    "@vueuse/core": "5.2.0",
+    "@vueuse/core": "7.2.2",
     "@windicss/plugin-interaction-variants": "1.0.0",
     "bluebird": "3.5.3",
     "classnames": "2.3.1",
@@ -69,7 +69,8 @@
   "module": "es2020",
   "workspaces": {
     "nohoist": [
-      "@toycode/markdown-it-class"
+      "@toycode/markdown-it-class",
+      "patch-package"
     ]
   },
   "vite": {

@@ -16,8 +16,8 @@ const HarCapturer = require('chrome-har-capturer')
 const performance = require('@tooling/system-tests/lib/performance')
 const Promise = require('bluebird')
 const sanitizeFilename = require('sanitize-filename')
-const { createRoutes } = require(`${root}lib/routes`)
-const { SpecsStore } = require(`${root}/lib/specs-store`)
+const { createRoutes } = require(`../../lib/routes`)
+const { SpecsStore } = require(`../../lib/specs-store`)
 
 process.env.CYPRESS_INTERNAL_ENV = 'development'
 
