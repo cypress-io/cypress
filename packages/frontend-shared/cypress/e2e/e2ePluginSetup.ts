@@ -126,6 +126,7 @@ async function makeE2ETasks () {
       await ctx.actions.app.removeAppDataDir()
       await ctx.actions.app.ensureAppDataDirExists()
       await ctx.resetForTest()
+      sinon.reset()
       sinon.restore()
       remoteGraphQLIntercept = undefined
 

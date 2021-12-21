@@ -2,7 +2,7 @@ import SpecsListHeader from './SpecsListHeader.vue'
 import { defineComponent, ref, h } from 'vue'
 import { defaultMessages } from '@cy/i18n'
 
-const buttonSelector = '[data-testid=new-spec-button]'
+const buttonSelector = '[data-cy=new-spec-button]'
 const inputSelector = 'input[type=search]'
 
 describe('<SpecsListHeader />', { keystrokeDelay: 0 }, () => {

@@ -10,7 +10,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
       render: (gqlVal) => <div class="resize overflow-auto border-current border-1 h-700px"><HeaderBarContent gql={gqlVal} show-browsers={true} /></div>,
     })
 
-    cy.get('[data-cy="topnav-browser-list"]')
+    cy.get('[data-cy="top-nav-active-browser"]')
     .should('be.visible')
     .click()
 
@@ -28,7 +28,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
     })
 
     cy.contains('Projects').should('be.visible')
-    cy.get('[data-cy="topnav-browser-list"]').should('not.exist')
+    cy.get('[data-cy="top-nav-active-browser"]').should('not.exist')
     cy.contains('button', text.docsMenu.docsHeading).click()
     cy.contains('a', text.docsMenu.firstTest).should('be.visible')
     cy.get('body').click()
