@@ -1,7 +1,7 @@
 require('../../spec_helper')
 
 const cp = require('child_process')
-const open = require(`${root}../lib/util/open`)
+const open = require(`../../../lib/util/open`)
 
 const platform = (p) => {
   return Object.defineProperty(process, 'platform', {

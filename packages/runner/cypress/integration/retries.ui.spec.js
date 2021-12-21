@@ -401,8 +401,13 @@ describe('runner/cypress retries.ui.spec', { viewportWidth: 600, viewportHeight:
   })
 
   describe('can configure retries', () => {
+    after(() => {
+      window.top.__cySkipValidateConfig = false
+    })
+
     const haveCorrectError = ($el) => cy.wrap($el).last().parentsUntil('.collapsible').last().parent().find('.runnable-err').should('contain', 'Unspecified AssertionError')
 
+    window.top.__cySkipValidateConfig = true
     it('via config value', () => {
       runIsolatedCypress({
         suites: {

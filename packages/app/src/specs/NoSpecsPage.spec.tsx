@@ -20,7 +20,13 @@ describe('<NoSpecsPage />', () => {
             id: 'id',
             storybook: null,
             configFileAbsolutePath: '/usr/bin/cypress.config.ts',
-            codeGenGlob: '**.vue',
+            configFilePath: 'cypress.config.ts',
+            codeGenGlobs: {
+              id: 'super-unique-id',
+              __typename: 'CodeGenGlobs',
+              component: '**.vue',
+              story: '**/*.stories.*',
+            },
             currentTestingType: 'component',
           }
         },
@@ -52,10 +58,16 @@ describe('<NoSpecsPage />', () => {
             ...ctx.currentProject,
             config: {},
             configFileAbsolutePath: '/usr/bin/cypress.config.ts',
+            configFilePath: 'cypress.config.ts',
             id: 'id',
             storybook: null,
-            codeGenGlob: '**.vue',
             currentTestingType: 'e2e',
+            codeGenGlobs: {
+              id: 'super-unique-id',
+              __typename: 'CodeGenGlobs',
+              component: '**.vue',
+              story: '**/*.stories.*',
+            },
           }
         },
         render: (gql) => {

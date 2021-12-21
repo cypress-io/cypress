@@ -48,7 +48,7 @@ const getOriginalHeaders = (req = {}) => {
 }
 
 const getDelayForRetry = function (options = {}) {
-  const { err, opts, delaysRemaining, retryIntervals, onNext, onElse } = options
+  const { err, opts, delaysRemaining, retryIntervals, retryFn, onEnd } = options
 
   let delay = delaysRemaining.shift()
 
@@ -56,7 +56,7 @@ const getDelayForRetry = function (options = {}) {
     // no more delays, bailing
     debug('exhausted all attempts retrying request %o', merge(opts, { err }))
 
-    return onElse()
+    return onEnd()
   }
 
   // figure out which attempt we're on...
@@ -76,7 +76,7 @@ const getDelayForRetry = function (options = {}) {
     attempt,
   }))
 
-  return onNext(delay, attempt)
+  return retryFn({ delay, attempt })
 }
 
 const hasRetriableStatusCodeFailure = (res, retryOnStatusCodeFailure) => {
@@ -105,8 +105,8 @@ const maybeRetryOnNetworkFailure = function (err, options = {}) {
     retryIntervals,
     delaysRemaining,
     retryOnNetworkFailure,
-    onNext,
-    onElse,
+    retryFn,
+    onEnd,
   } = options
 
   debug('received an error making http request %o', merge(opts, { err }))
@@ -118,10 +118,15 @@ const maybeRetryOnNetworkFailure = function (err, options = {}) {
     // https://github.com/cypress-io/cypress/pull/6705
     debug('detected TLS version error, setting min version to TLSv1')
     opts.minVersion = 'TLSv1'
+
+    if (retryIntervals.length === 0) {
+      // normally, this request would not be retried, but we need to retry in order to support TLSv1
+      return retryFn({ delay: 0, attempt: 1 })
+    }
   }
 
   if (!isTlsVersionError && !isErrEmptyResponseError(err.originalErr || err) && !isRetriableError(err, retryOnNetworkFailure)) {
-    return onElse()
+    return onEnd()
   }
 
   // else see if we have more delays left...
@@ -130,8 +135,8 @@ const maybeRetryOnNetworkFailure = function (err, options = {}) {
     opts,
     retryIntervals,
     delaysRemaining,
-    onNext,
-    onElse,
+    retryFn,
+    onEnd,
   })
 }
 
@@ -143,8 +148,8 @@ const maybeRetryOnStatusCodeFailure = function (res, options = {}) {
     retryIntervals,
     delaysRemaining,
     retryOnStatusCodeFailure,
-    onNext,
-    onElse,
+    retryFn,
+    onEnd,
   } = options
 
   debug('received status code & headers on request %o', {
@@ -156,7 +161,7 @@ const maybeRetryOnStatusCodeFailure = function (res, options = {}) {
   // is this a retryable status code failure?
   if (!hasRetriableStatusCodeFailure(res, retryOnStatusCodeFailure)) {
     // if not then we're done here
-    return onElse()
+    return onEnd()
   }
 
   // else see if we have more delays left...
@@ -165,8 +170,8 @@ const maybeRetryOnStatusCodeFailure = function (res, options = {}) {
     opts,
     retryIntervals,
     delaysRemaining,
-    onNext,
-    onElse,
+    retryFn,
+    onEnd,
   })
 }
 
@@ -201,7 +206,7 @@ const createRetryingRequestPromise = function (opts) {
     retryOnStatusCodeFailure,
   } = opts
 
-  const retry = (delay) => {
+  const retry = ({ delay }) => {
     return Promise.delay(delay)
     .then(() => {
       return createRetryingRequestPromise(opts)
@@ -216,8 +221,8 @@ const createRetryingRequestPromise = function (opts) {
       retryIntervals,
       delaysRemaining,
       retryOnNetworkFailure,
-      onNext: retry,
-      onElse () {
+      retryFn: retry,
+      onEnd () {
         throw err
       },
     })
@@ -229,8 +234,8 @@ const createRetryingRequestPromise = function (opts) {
       retryIntervals,
       delaysRemaining,
       retryOnStatusCodeFailure,
-      onNext: retry,
-      onElse: _.constant(res),
+      retryFn: retry,
+      onEnd: _.constant(res),
     })
   })
 }
@@ -281,7 +286,7 @@ const createRetryingRequestStream = function (opts = {}) {
     const reqStream = r(opts)
     let didReceiveResponse = false
 
-    const retry = function (delay, attempt) {
+    const retry = function ({ delay, attempt }) {
       retryStream.emit('retry', { attempt, delay })
 
       return setTimeout(tryStartStream, delay)
@@ -337,8 +342,8 @@ const createRetryingRequestStream = function (opts = {}) {
         retryIntervals,
         delaysRemaining,
         retryOnNetworkFailure,
-        onNext: retry,
-        onElse () {
+        retryFn: retry,
+        onEnd () {
           return emitError(err)
         },
       })
@@ -360,8 +365,8 @@ const createRetryingRequestStream = function (opts = {}) {
         delaysRemaining,
         retryIntervals,
         retryOnStatusCodeFailure,
-        onNext: retry,
-        onElse () {
+        retryFn: retry,
+        onEnd () {
           debug('successful response received', { requestId })
 
           cleanup()
@@ -414,7 +419,7 @@ const setDefaults = (opts) => {
   .chain(opts)
   .defaults({
     requestId: _.uniqueId('request'),
-    retryIntervals: [0, 1000, 2000, 2000],
+    retryIntervals: [],
     retryOnNetworkFailure: true,
     retryOnStatusCodeFailure: false,
   })

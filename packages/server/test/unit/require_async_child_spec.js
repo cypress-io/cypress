@@ -1,10 +1,10 @@
 require('../spec_helper')
 
-const tsNodeUtil = require(`${root}lib/util/ts_node`)
-const runRequireAsyncChild = require(`${root}lib/util/run_require_async_child`)
-const resolve = require(`${root}lib/util/resolve`)
+const tsNodeUtil = require(`../../lib/util/ts_node`)
+const runRequireAsyncChild = require(`../../lib/plugins/child/run_require_async_child`)
+const resolve = require(`../../lib/util/resolve`)
 
-describe('lib/util/run_require_async_child', () => {
+describe('lib/plugins/child/run_require_async_child', () => {
   beforeEach(function () {
     this.ipc = {
       send: sinon.spy(),

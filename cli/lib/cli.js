@@ -106,7 +106,7 @@ const descriptions = {
   ciBuildId: 'the unique identifier for a run on your CI provider. typically a "BUILD_ID" env var. this value is automatically detected for most CI providers',
   component: 'runs component tests',
   config: 'sets configuration values. separate multiple values with a comma. overrides any value in cypress.config.{ts|js}.',
-  configFile: 'path to JSON file where configuration values are set. defaults to "cypress.config.{ts|js}". pass "false" to disable.',
+  configFile: 'path to script file where configuration values are set. defaults to "cypress.config.{ts|js}". pass "false" to disable.',
   detached: 'runs Cypress application in detached mode',
   dev: 'runs cypress in development and bypasses binary check',
   e2e: 'runs end to end tests',
@@ -270,6 +270,24 @@ const addCypressRunCommand = (program) => {
   .option('--dev', text('dev'), coerceFalse)
 }
 
+const addCypressOpenCommand = (program) => {
+  return program
+  .command('open')
+  .usage('[options]')
+  .description('Opens Cypress in the interactive GUI.')
+  .option('-b, --browser <browser-path>', text('browser'))
+  .option('--component', text('component'))
+  .option('-c, --config <config>', text('config'))
+  .option('-C, --config-file <config-file>', text('configFile'))
+  .option('-d, --detached [bool]', text('detached'), coerceFalse)
+  .option('--e2e', text('e2e'))
+  .option('-e, --env <env>', text('env'))
+  .option('--global', text('global'))
+  .option('-p, --port <port>', text('port'))
+  .option('-P, --project <project-path>', text('project'))
+  .option('--dev', text('dev'), coerceFalse)
+}
+
 /**
  * Casts known command line options for "cypress run" to their intended type.
  * For example if the user passes "--port 5005" the ".port" property should be
@@ -277,7 +295,7 @@ const addCypressRunCommand = (program) => {
  *
  * Returns a clone of the original object.
  */
-const castCypressRunOptions = (opts) => {
+const castCypressOptions = (opts) => {
   // only properties that have type "string | false" in our TS definition
   // require special handling, because CLI parsing takes care of purely
   // boolean arguments
@@ -325,7 +343,48 @@ module.exports = {
 
         debug('parsed options %o', options)
 
-        const casted = castCypressRunOptions(options)
+        const casted = castCypressOptions(options)
+
+        debug('casted options %o', casted)
+        resolve(casted)
+      })
+
+      debug('parsing args: %o', cliArgs)
+      program.parse(cliArgs)
+    })
+  },
+
+  /**
+   * Parses `cypress open` command line option array into an object
+   * with options that you can feed into cy.openModeSystemTest test calls
+   * @example
+   *  const options = parseOpenCommand(['cypress', 'open', '--browser', 'chrome'])
+   *  // options is {browser: 'chrome'}
+   */
+  parseOpenCommand (args) {
+    return new Promise((resolve, reject) => {
+      if (!Array.isArray(args)) {
+        return reject(new Error('Expected array of arguments'))
+      }
+
+      // make a copy of the input arguments array
+      // and add placeholders where "node ..." would usually be
+      // also remove "cypress" keyword at the start if present
+      const cliArgs = args[0] === 'cypress' ? [...args.slice(1)] : [...args]
+
+      cliArgs.unshift(null, null)
+
+      debug('creating program parser')
+      const program = createProgram()
+
+      addCypressOpenCommand(program)
+      .action((...fnArgs) => {
+        debug('parsed Cypress open %o', fnArgs)
+        const options = parseVariableOpts(fnArgs, cliArgs)
+
+        debug('parsed options %o', options)
+
+        const casted = castCypressOptions(options)
 
         debug('casted options %o', casted)
         resolve(casted)
@@ -387,21 +446,7 @@ module.exports = {
       showVersions(args)
     })
 
-    program
-    .command('open')
-    .usage('[options]')
-    .description('Opens Cypress in the interactive GUI.')
-    .option('-b, --browser <browser-path>', text('browser'))
-    .option('--component', text('component'))
-    .option('-c, --config <config>', text('config'))
-    .option('-C, --config-file <config-file>', text('configFile'))
-    .option('-d, --detached [bool]', text('detached'), coerceFalse)
-    .option('--e2e', text('e2e'))
-    .option('-e, --env <env>', text('env'))
-    .option('--global', text('global'))
-    .option('-p, --port <port>', text('port'))
-    .option('-P, --project <project-path>', text('project'))
-    .option('--dev', text('dev'), coerceFalse)
+    addCypressOpenCommand(program)
     .action((opts) => {
       debug('opening Cypress')
       require('./exec/open')

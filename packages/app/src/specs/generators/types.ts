@@ -1,6 +1,6 @@
 import type { Component } from 'vue'
 
-export type GeneratorId = 'component-generator' | 'empty-generator' | 'scaffold-generator' | 'story-generator'
+export type GeneratorId = 'component' | 'empty' | 'scaffold' | 'story'
 
 export interface SpecGenerator {
   card: Component

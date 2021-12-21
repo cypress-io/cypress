@@ -13,30 +13,30 @@ let zlib = require('zlib')
 const str = require('underscore.string')
 const evilDns = require('evil-dns')
 const Promise = require('bluebird')
-const { SocketE2E } = require(`${root}lib/socket-e2e`)
+const { SocketE2E } = require(`../../lib/socket-e2e`)
 
-const httpsServer = require(`${root}../https-proxy/test/helpers/https_server`)
+const httpsServer = require(`@packages/https-proxy/test/helpers/https_server`)
 const pkg = require('@packages/root')
 const SseStream = require('ssestream')
 const EventSource = require('eventsource')
-const config = require(`${root}lib/config`)
-const { ServerE2E } = require(`${root}lib/server-e2e`)
-const ProjectBase = require(`${root}lib/project-base`).ProjectBase
-const { SpecsStore } = require(`${root}/lib/specs-store`)
-const Watchers = require(`${root}lib/watchers`)
-const pluginsModule = require(`${root}lib/plugins`)
-const preprocessor = require(`${root}lib/plugins/preprocessor`)
-const resolve = require(`${root}lib/util/resolve`)
-const { fs } = require(`${root}lib/util/fs`)
-const glob = require(`${root}lib/util/glob`)
-const CacheBuster = require(`${root}lib/util/cache_buster`)
+const config = require(`../../lib/config`)
+const { ServerE2E } = require(`../../lib/server-e2e`)
+const ProjectBase = require(`../../lib/project-base`).ProjectBase
+const { SpecsStore } = require(`../../lib/specs-store`)
+const Watchers = require(`../../lib/watchers`)
+const pluginsModule = require(`../../lib/plugins`)
+const preprocessor = require(`../../lib/plugins/preprocessor`)
+const resolve = require(`../../lib/util/resolve`)
+const { fs } = require(`../../lib/util/fs`)
+const glob = require(`../../lib/util/glob`)
+const CacheBuster = require(`../../lib/util/cache_buster`)
 const Fixtures = require('@tooling/system-tests/lib/fixtures')
 /**
  * @type {import('@packages/resolve-dist')}
  */
 const { getRunnerInjectionContents } = require(`@packages/resolve-dist`)
-const { createRoutes } = require(`${root}lib/routes`)
-const { makeLegacyDataContext } = require(`${root}lib/makeDataContext`)
+const { createRoutes } = require(`../../lib/routes`)
+const { getCtx } = require(`../../lib/makeDataContext`)
 
 zlib = Promise.promisifyAll(zlib)
 
@@ -85,7 +85,7 @@ describe('Routes', () => {
 
   beforeEach(async function () {
     await Fixtures.scaffoldCommonNodeModules()
-    ctx = makeLegacyDataContext()
+    ctx = getCtx()
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 
     sinon.stub(CacheBuster, 'get').returns('-123')

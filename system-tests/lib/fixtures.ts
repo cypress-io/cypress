@@ -1,15 +1,15 @@
 import fs from 'fs-extra'
 import _path from 'path'
 import chokidar from 'chokidar'
-import os from 'os'
 import cachedir from 'cachedir'
 import execa from 'execa'
+import tempDir from 'temp-dir'
 
 const root = _path.join(__dirname, '..')
 
 const serverRoot = _path.join(__dirname, '../../packages/server/')
 const projects = _path.join(root, 'projects')
-let tmpDir = _path.join(os.tmpdir(), 'cy-projects')
+const cyTmpDir = _path.join(tempDir, 'cy-projects')
 
 // copy contents instead of deleting+creating new file, which can cause
 // filewatchers to lose track of toFile.
@@ -27,9 +27,9 @@ const copyContents = (fromFile, toFile) => {
 }
 
 // copies all of the project fixtures
-// to the tmpDir .projects in the root
+// to the cyTmpDir .projects in the root
 export function scaffold () {
-  fs.copySync(projects, tmpDir)
+  fs.copySync(projects, cyTmpDir)
 }
 
 /**
@@ -37,7 +37,7 @@ export function scaffold () {
  */
 export function scaffoldProject (project: string): void {
   const from = _path.join(projects, project)
-  const to = _path.join(tmpDir, project)
+  const to = _path.join(cyTmpDir, project)
 
   fs.copySync(from, to)
 }
@@ -131,7 +131,7 @@ function getYarnCommand (opts: {
 
   // in CircleCI, this offline cache can be used
   if (opts.isCI) cmd += ` --cache-folder=~/.yarn-${process.platform} `
-  else cmd += ` --cache-folder=${_path.join(os.tmpdir(), 'cy-system-tests-yarn-cache', String(Date.now()))}`
+  else cmd += ` --cache-folder=${_path.join(tempDir, 'cy-system-tests-yarn-cache', String(Date.now()))}`
 
   return cmd
 }
@@ -291,7 +291,7 @@ export async function scaffoldCommonNodeModules () {
 }
 
 export async function symlinkNodeModule (pkg) {
-  const from = _path.join(tmpDir, 'node_modules', pkg)
+  const from = _path.join(cyTmpDir, 'node_modules', pkg)
   const to = pathToPackage(pkg)
 
   await fs.ensureDir(_path.dirname(from))
@@ -312,7 +312,7 @@ export function scaffoldWatch () {
   chokidar.watch(watchdir, {
   })
   .on('change', (srcFilepath, stats) => {
-    const tmpFilepath = _path.join(tmpDir, _path.relative(watchdir, srcFilepath))
+    const tmpFilepath = _path.join(cyTmpDir, _path.relative(watchdir, srcFilepath))
 
     return copyContents(srcFilepath, tmpFilepath)
   })
@@ -320,19 +320,23 @@ export function scaffoldWatch () {
 }
 
 // removes all of the project fixtures
-// from the tmpDir .projects in the root
+// from the cyTmpDir .projects in the root
 export function remove () {
-  return fs.removeSync(tmpDir)
+  return fs.removeSync(cyTmpDir)
+}
+
+export function removeProject (name) {
+  return fs.removeSync(projectPath(name))
 }
 
 // returns the path to project fixture
-// in the tmpDir
+// in the cyTmpDir
 export function project (...args) {
   return this.projectPath.apply(this, args)
 }
 
 export function projectPath (name) {
-  return _path.join(tmpDir, name)
+  return _path.join(cyTmpDir, name)
 }
 
 export function get (fixture, encoding: BufferEncoding = 'utf8') {
@@ -341,10 +345,6 @@ export function get (fixture, encoding: BufferEncoding = 'utf8') {
 
 export function path (fixture) {
   return _path.join(serverRoot, 'test', 'support', 'fixtures', fixture)
-}
-
-export function setTmpDir (dir: string) {
-  tmpDir = dir
 }
 
 export default module.exports

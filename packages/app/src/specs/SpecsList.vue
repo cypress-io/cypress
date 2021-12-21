@@ -9,11 +9,11 @@
     <SpecsListHeader
       v-model="search"
       class="pb-32px"
-      :result-count="specs.length"
+      :result-count="specs?.length"
       @newSpec="showModal = true"
     />
 
-    <div class="grid grid-cols-2 children:text-gray-800 children:font-medium">
+    <div class="grid grid-cols-2 children:font-medium children:text-gray-800">
       <div
         class="flex justify-between items-center"
         data-cy="specs-testing-type-header"
@@ -26,7 +26,7 @@
       </div>
     </div>
     <div
-      class="grid spec-list-container"
+      class="grid pb-32px spec-list-container"
       v-bind="containerProps"
     >
       <div
@@ -41,12 +41,12 @@
             <RouterLink
               v-if="row.data.isLeaf && row.data"
               :key="row.data.data?.absolute"
-              :to="{ path: 'runner', query: { file: row.data.data?.relative } }"
+              :to="{ path: '/specs/runner', query: { file: row.data.data?.relative } }"
             >
               <SpecItem
                 :file-name="row.data.data?.fileName || row.data.name"
                 :extension="row.data.data?.specFileExtension || ''"
-                :indexes="getIndexes(row.data)"
+                :indexes="row.data.data?.fileIndexes"
                 :style="{ paddingLeft: `${((row.data.depth - 2) * 10) + 16 + 22}px` }"
               />
             </RouterLink>
@@ -57,7 +57,7 @@
               :expanded="treeSpecList[row.index].expanded.value"
               :depth="row.data.depth - 2"
               :style="{ paddingLeft: `${((row.data.depth - 2) * 10) + 16}px` }"
-              :indexes="getIndexes(row.data)"
+              :indexes="getDirIndexes(row.data)"
               @click="row.data.toggle"
             />
           </template>
@@ -83,11 +83,10 @@ import { computed, ref, watch } from 'vue'
 import CreateSpecModal from './CreateSpecModal.vue'
 import type { Specs_SpecsListFragment, SpecListRowFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
-import { buildSpecTree, FuzzyFoundSpec, getIndexes } from '@packages/frontend-shared/src/utils/spec-utils'
+import { buildSpecTree, FuzzyFoundSpec, fuzzySortSpecs, getDirIndexes, makeFuzzyFoundSpec, useCachedSpecs } from '@packages/frontend-shared/src/utils/spec-utils'
 import { useCollapsibleTree } from '@packages/frontend-shared/src/composables/useCollapsibleTree'
 import RowDirectory from './RowDirectory.vue'
 import SpecItem from './SpecItem.vue'
-import fuzzySort from 'fuzzysort'
 import { useVirtualList } from '@packages/frontend-shared/src/composables/useVirtualList'
 
 const { t } = useI18n()
@@ -133,17 +132,16 @@ const props = defineProps<{
 
 const showModal = ref(false)
 const search = ref('')
+const cachedSpecs = useCachedSpecs(computed(() => props.gql.currentProject?.specs?.edges || []))
 
 const specs = computed(() => {
-  const specs = props.gql.currentProject?.specs?.edges.map((x) => x.node) || []
+  const specs = cachedSpecs.value.map((x) => makeFuzzyFoundSpec(x.node))
 
   if (!search.value) {
-    return specs.map((spec) => ({ ...spec, indexes: [] as number[] }))
+    return specs
   }
 
-  return fuzzySort
-  .go(search.value, specs || [], { key: 'relative' })
-  .map(({ obj, indexes }) => ({ ...obj, indexes }))
+  return fuzzySortSpecs(specs, search.value)
 })
 
 const collapsible = computed(() => useCollapsibleTree(buildSpecTree<FuzzyFoundSpec & { gitInfo: SpecListRowFragment }>(specs.value), { dropRoot: true }))

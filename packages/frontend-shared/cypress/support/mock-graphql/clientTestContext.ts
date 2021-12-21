@@ -96,8 +96,6 @@ export function makeClientTestContext (): ClientTestContext {
       preferences: {
         __typename: 'LocalSettingsPreferences',
         autoScrollingEnabled: true,
-        useDarkSidebar: true,
-        watchForSpecChange: true,
       },
       availableEditors: [
         {

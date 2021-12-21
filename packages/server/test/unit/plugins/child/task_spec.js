@@ -1,7 +1,7 @@
 require('../../../spec_helper')
 
-const util = require(`${root}../../lib/plugins/util`)
-const task = require(`${root}../../lib/plugins/child/task`)
+const util = require(`../../../../lib/plugins/util`)
+const task = require(`../../../../lib/plugins/child/task`)
 
 describe('lib/plugins/child/task', () => {
   beforeEach(function () {

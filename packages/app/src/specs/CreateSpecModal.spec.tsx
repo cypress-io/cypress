@@ -4,7 +4,7 @@ import { defaultMessages } from '@cy/i18n'
 
 const modalCloseSelector = '[aria-label=Close]'
 const triggerButtonSelector = '[data-testid=trigger]'
-const modalSelector = '[data-testid=create-spec-modal]'
+const modalSelector = '[data-cy=create-spec-modal]'
 
 const messages = defaultMessages.createSpec.component.importFromComponent
 
@@ -17,7 +17,12 @@ describe('<CreateSpecModal />', () => {
         gql={{
           currentProject: {
             id: 'id',
-            codeGenGlob: '**.vue',
+            codeGenGlobs: {
+              id: 'super-unique-id',
+              __typename: 'CodeGenGlobs',
+              component: '**.vue',
+              story: '**/*.stories.*',
+            },
             storybook: null,
             currentTestingType: 'component',
           },
@@ -67,7 +72,12 @@ describe('playground', () => {
         gql={{
           currentProject: {
             id: 'id',
-            codeGenGlob: '**.vue',
+            codeGenGlobs: {
+              id: 'super-unique-id',
+              __typename: 'CodeGenGlobs',
+              component: '**.vue',
+              story: '**/*.stories.*',
+            },
             storybook: null,
             currentTestingType: 'component',
           },

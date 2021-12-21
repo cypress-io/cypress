@@ -7,7 +7,10 @@
       {{ t('settingsPage.specPattern.title') }}
     </template>
     <template #description>
-      <i18n-t keypath="settingsPage.specPattern.description">
+      <i18n-t
+        scope="global"
+        keypath="settingsPage.specPattern.description"
+      >
         <ExternalLink
           href="https://on.cypress.io"
         >
@@ -23,7 +26,10 @@
           <span class="font-medium text-gray-700">{{ t('settingsPage.specPattern.defaultIndicator') }}</span>
         </StatusIndicator>
         <span class="rounded bg-jade-100 py-4px px-8px text-jade-600 text-size-14px leading-16px">
-          <i18n-t keypath="settingsPage.specPattern.matches">
+          <i18n-t
+            scope="global"
+            keypath="settingsPage.specPattern.matches"
+          >
             {{ matches }}
           </i18n-t>
         </span>
@@ -43,23 +49,10 @@
 
 <script lang="ts" setup>
 import { useI18n } from '@cy/i18n'
-import { gql } from '@urql/vue'
 import StatusIndicator from '@cy/components/StatusIndicator.vue'
-import type { SpecPatternsFragment } from '../../generated/graphql'
 import SettingsSection from '../SettingsSection.vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 const { t } = useI18n()
-
-gql`
-fragment SpecPatterns on CurrentProject {
-  id
-  config
-}
-`
-
-defineProps<{
-  gql?: SpecPatternsFragment
-}>()
 
 const defaultValues = true
 

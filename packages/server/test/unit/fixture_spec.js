@@ -2,11 +2,11 @@ require('../spec_helper')
 
 const path = require('path')
 const Promise = require('bluebird')
-const config = require(`${root}lib/config`)
-const fixture = require(`${root}lib/fixture`)
-const { fs } = require(`${root}lib/util/fs`)
+const config = require(`../../lib/config`)
+const fixture = require(`../../lib/fixture`)
+const { fs } = require(`../../lib/util/fs`)
 const FixturesHelper = require('@tooling/system-tests/lib/fixtures')
-const { makeLegacyDataContext } = require(`${root}lib/makeDataContext`)
+const { getCtx } = require(`../../lib/makeDataContext`)
 const os = require('os')
 const eol = require('eol')
 
@@ -18,7 +18,7 @@ let ctx
 
 describe('lib/fixture', () => {
   beforeEach(function () {
-    ctx = makeLegacyDataContext()
+    ctx = getCtx()
     FixturesHelper.scaffold()
 
     this.todosPath = FixturesHelper.projectPath('todos')
@@ -224,7 +224,7 @@ ParseError: Unterminated string constant\
       .then(() => {
         throw new Error('should have failed but did not')
       }).catch((err) => {
-        expect(err.message).to.eq(`'bad_js.js' is not a valid JavaScript object.\n${e}`)
+        expect(err.message).to.eq(`'bad_js.js' is not a valid JavaScript object.\n\n${e}`)
       })
     })
   })

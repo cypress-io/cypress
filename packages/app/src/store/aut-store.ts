@@ -1,5 +1,7 @@
 import { defineStore } from 'pinia'
 
+type ScriptError = { type: string, error: string } | null
+
 interface AutStoreState {
   url?: string
   highlightUrl: boolean
@@ -8,6 +10,7 @@ interface AutStoreState {
   isLoadingUrl: boolean
   isLoading: boolean
   isRunning: boolean
+  scriptError: ScriptError
   viewportUpdateCallback: (() => void) | null
 }
 
@@ -24,6 +27,7 @@ export const useAutStore = defineStore({
       isLoading: false,
       isRunning: false,
       viewportUpdateCallback: null,
+      scriptError: null,
     }
   },
 
@@ -61,6 +65,9 @@ export const useAutStore = defineStore({
       this.url = undefined
       this.highlightUrl = false
       this.isLoadingUrl = false
+    },
+    setScriptError (err: ScriptError) {
+      this.scriptError = err
     },
   },
 

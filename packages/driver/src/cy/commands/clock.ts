@@ -39,7 +39,7 @@ export default function (Commands, Cypress, cy, state) {
   return Commands.addAll({ type: 'utility' }, {
     clock (subject, now, methods, options = {}) {
       let userOptions = options
-      const ctx = this
+      const ctx = state('ctx')
 
       if (clock) {
         return clock

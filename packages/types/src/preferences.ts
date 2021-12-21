@@ -1,8 +1,6 @@
 import type { Editor } from '.'
 
 export const defaultPreferences: AllowedState = {
-  watchForSpecChange: true,
-  useDarkSidebar: true,
   autoScrollingEnabled: true,
   isSpecsListOpen: true,
 }
@@ -32,8 +30,6 @@ export const allowedKeys: Readonly<Array<keyof AllowedState>> = [
   'firstOpened',
   'lastOpened',
   'promptsShown',
-  'watchForSpecChange',
-  'useDarkSidebar',
   'preferredEditorBinary',
 ] as const
 
@@ -64,7 +60,5 @@ export type AllowedState = Partial<{
   firstOpened: Maybe<number>
   lastOpened: Maybe<number>
   promptsShown: Maybe<object>
-  watchForSpecChange: Maybe<boolean>
-  useDarkSidebar: Maybe<boolean>
   preferredEditorBinary: Maybe<string>
 }>

@@ -114,6 +114,13 @@ export type KeyEventType =
   | 'textInput'
   | 'beforeinput'
 
+export type ModifiersEventOptions = {
+  altKey: boolean
+  ctrlKey: boolean
+  metaKey: boolean
+  shiftKey: boolean
+}
+
 const toModifiersEventOptions = (modifiers: KeyboardModifiers) => {
   return {
     altKey: modifiers.alt,
@@ -960,6 +967,9 @@ export class Keyboard {
       ..._.omitBy(
         {
           bubbles: true,
+          // allow propagation out of root of shadow-dom
+          // https://developer.mozilla.org/en-US/docs/Web/API/Event/composed
+          composed: true,
           cancelable,
           key,
           code,

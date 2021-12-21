@@ -6,10 +6,10 @@ export const LocalSettingsPreferences = objectType({
   description: 'local setting preferences',
   definition (t) {
     t.boolean('autoScrollingEnabled')
-    t.boolean('watchForSpecChange')
-    t.boolean('useDarkSidebar')
     t.string('preferredEditorBinary')
     t.boolean('isSpecsListOpen')
+    t.int('reporterWidth')
+    t.int('specListWidth')
     t.string('proxyServer', {
       resolve: (source, args, ctx) => ctx.env.HTTP_PROXY ?? null,
     })

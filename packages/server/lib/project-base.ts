@@ -32,8 +32,7 @@ import preprocessor from './plugins/preprocessor'
 import { SpecsStore } from './specs-store'
 import { checkSupportFile, getDefaultConfigFilePath } from './project_utils'
 import type { FoundBrowser, OpenProjectLaunchOptions } from '@packages/types'
-import { makeLegacyDataContext } from './makeDataContext'
-import type { DataContext } from '@packages/data-context'
+import { DataContext, getCtx } from '@packages/data-context'
 
 // Cannot just use RuntimeConfigOptions as is because some types are not complete.
 // Instead, this is an interface of values that have been manually validated to exist
@@ -49,6 +48,7 @@ export interface Cfg extends ReceivedCypressOptions {
   state?: {
     firstOpened?: number | null
     lastOpened?: number | null
+    promptsShown?: object | null
   }
 }
 
@@ -106,7 +106,7 @@ export class ProjectBase<TServer extends Server> extends EE {
     this.spec = null
     this.browser = null
     this.id = createHmac('sha256', 'secret-key').update(projectRoot).digest('hex')
-    this.ctx = options.ctx ?? makeLegacyDataContext()
+    this.ctx = getCtx()
 
     debug('Project created %o', {
       testingType: this.testingType,
@@ -349,7 +349,7 @@ export class ProjectBase<TServer extends Server> extends EE {
     const closePreprocessor = this.testingType === 'e2e' ? preprocessor.close : undefined
 
     this.ctx.setAppServerPort(undefined)
-    this.ctx.emitter.setAppSocketServer(undefined)
+    this.ctx.setAppSocketServer(undefined)
 
     await Promise.all([
       this.server?.close(),
@@ -664,7 +664,7 @@ export class ProjectBase<TServer extends Server> extends EE {
       },
     })
 
-    this.ctx.emitter.setAppSocketServer(io)
+    this.ctx.setAppSocketServer(io)
   }
 
   changeToUrl (url) {
@@ -703,10 +703,10 @@ export class ProjectBase<TServer extends Server> extends EE {
   async initializeConfig (browsers: FoundBrowser[] = []): Promise<Cfg> {
     // set default for "configFile" if undefined
     if (this.options.configFile === undefined || this.options.configFile === null) {
-      this.options.configFile = await getDefaultConfigFilePath(this.projectRoot, this.ctx)
+      this.options.configFile = await getDefaultConfigFilePath(this.projectRoot)
     }
 
-    let theCfg: Cfg = await config.get(this.projectRoot, this.options, this.ctx)
+    let theCfg: Cfg = await config.get(this.projectRoot, this.options)
 
     if (!theCfg.browsers || theCfg.browsers.length === 0) {
       // @ts-ignore - we don't know if the browser is headed or headless at this point.
@@ -858,7 +858,7 @@ export class ProjectBase<TServer extends Server> extends EE {
       return readSettings.projectId
     }
 
-    errors.throw('NO_PROJECT_ID', settings.configFile(this.options), this.projectRoot)
+    throw errors.throw('NO_PROJECT_ID', settings.configFile(this.options), this.projectRoot)
   }
 
   async verifyExistence () {

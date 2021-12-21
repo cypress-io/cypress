@@ -1,7 +1,12 @@
+import fuzzySort from 'fuzzysort'
 import type { FoundSpec } from '@packages/types'
+import { ref, watch } from 'vue'
 import type { UseCollapsibleTreeNode } from '../composables/useCollapsibleTree'
 
-export type FuzzyFoundSpec = FoundSpec & { indexes: number[] }
+export type FuzzyFoundSpec = FoundSpec & {
+  fileIndexes: number[]
+  dirIndexes: number[]
+}
 
 export type SpecTreeNode<T extends FoundSpec = FoundSpec> = {
   id: string
@@ -63,13 +68,70 @@ function collapseEmptyChildren<T extends FoundSpec> (node: SpecTreeNode<T>) {
   return
 }
 
-export function getIndexes (row: UseCollapsibleTreeNode<SpecTreeNode<FuzzyFoundSpec>>) {
-  const indexes = row.data?.indexes || []
+export function getDirIndexes (row: UseCollapsibleTreeNode<SpecTreeNode<FuzzyFoundSpec>>) {
+  const indexes = row.data?.dirIndexes ?? []
 
   const maxIndex = row.id.length - 1
   const minIndex = maxIndex - row.name.length + 1
 
-  const res = indexes?.filter((index) => index >= minIndex && index <= maxIndex)
+  const res = indexes.filter((index) => index >= minIndex && index <= maxIndex)
 
   return res.map((idx) => idx - minIndex)
+}
+
+export function fuzzySortSpecs (specs: FuzzyFoundSpec[], searchValue: string) {
+  const transformedSpecs = addDirectoryToSpecs(specs)
+
+  return fuzzySort
+  .go(searchValue, transformedSpecs, { keys: ['baseName', 'directory'], allowTypo: false })
+  .map((result) => {
+    const [file, dir] = result
+
+    return {
+      ...result.obj,
+      fileIndexes: file?.indexes ?? [],
+      dirIndexes: dir?.indexes ?? [],
+    }
+  }) as FuzzyFoundSpec[]
+}
+
+function addDirectoryToSpecs (specs: Partial<FuzzyFoundSpec>[]) {
+  return specs.map((spec) => {
+    return {
+      ...spec,
+      directory: getDirectoryPath(spec?.relative ?? ''),
+    }
+  })
+}
+
+function getDirectoryPath (path: string) {
+  return path.slice(0, path.lastIndexOf('/'))
+}
+
+export function makeFuzzyFoundSpec (spec: FoundSpec): FuzzyFoundSpec {
+  return {
+    ...spec,
+    fileIndexes: [],
+    dirIndexes: [],
+  }
+}
+
+type SpecEdges = { node: FoundSpec }[]
+
+export function useCachedSpecs (specs) {
+  const cachedSpecs = ref<SpecEdges>([])
+
+  watch(specs, (currentSpecs: SpecEdges, prevSpecs: SpecEdges = []) => {
+    const specsAreDifferent =
+        currentSpecs.length !== prevSpecs.length ||
+        currentSpecs.some(
+          (spec, idx) => spec.node.absolute !== prevSpecs[idx]?.node?.absolute,
+        )
+
+    if (specsAreDifferent) {
+      cachedSpecs.value = currentSpecs
+    }
+  }, { immediate: true })
+
+  return cachedSpecs
 }

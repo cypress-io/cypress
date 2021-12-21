@@ -24,6 +24,7 @@
         <DialogDescription class="font-normal p-24px text-gray-700">
           <i18n-t
             v-if="!viewer"
+            scope="global"
             keypath="topNav.login.bodyInitial"
           >
             <ExternalLink
@@ -34,6 +35,7 @@
           </i18n-t>
           <i18n-t
             v-else-if="viewer"
+            scope="global"
             keypath="topNav.login.bodySuccess"
           >
             <ExternalLink

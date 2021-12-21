@@ -3,13 +3,14 @@
     <div class="flex justify-between p-14px">
       <InlineCodeFragment>specPattern</InlineCodeFragment>
       <div>
-        <button
-          class="text-indigo-500 flex gap-8px items-center group outline-transparent"
-          @click="emit('showCypressConfigInIDE')"
-        >
-          <i-cy-document-text_x16 class="icon-light-gray-100 icon-dark-gray-500" />
-          <span class="group-hocus:underline">cypress.config.js</span>
-        </button>
+        <OpenConfigFileInIDE :gql="props.gql">
+          <button
+            class="text-indigo-500 flex gap-8px items-center group outline-transparent"
+          >
+            <i-cy-document-text_x16 class="icon-light-gray-100 icon-dark-gray-500" />
+            <span class="group-hocus:underline">cypress.config.js</span>
+          </button>
+        </OpenConfigFileInIDE>
       </div>
     </div>
 
@@ -31,15 +32,15 @@ import { computed } from 'vue'
 import Button from '@cy/components/Button.vue'
 import { gql } from '@urql/core'
 import type { SpecPatternsFragment } from '../generated/graphql'
-
-const emit = defineEmits<{
-  (e: 'showCypressConfigInIDE'): void
-}>()
+import OpenConfigFileInIDE from '@packages/frontend-shared/src/gql-components/OpenConfigFileInIDE.vue'
 
 gql`
-fragment SpecPatterns on CurrentProject {
-  id
-  config
+fragment SpecPatterns on Query {
+  currentProject {
+    id
+    config
+  }
+  ...OpenConfigFileInIDE
 }
 `
 
@@ -48,7 +49,7 @@ const props = defineProps<{
 }>()
 
 const specPatterns = computed<string[]>(() => {
-  let patterns = props.gql.config.find((x) => x.field === 'testFiles')?.value
+  let patterns = props.gql.currentProject?.config.find((x) => x.field === 'testFiles')?.value
 
   if (!patterns) {
     return []

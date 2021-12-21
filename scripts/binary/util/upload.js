@@ -29,10 +29,6 @@ const formHashFromEnvironment = function () {
     return `circle-${env.CIRCLE_BRANCH}-${env.CIRCLE_SHA1}`
   }
 
-  if (env.APPVEYOR) {
-    return `appveyor-${env.APPVEYOR_REPO_BRANCH}-${env.APPVEYOR_REPO_COMMIT}`
-  }
-
   throw new Error('Do not know how to form unique build hash on this CI')
 }
 

@@ -15,7 +15,6 @@ const { expect } = chai
 const packages = require('../../../binary/util/packages')
 const { transformRequires, rewritePackageNames } = require('../../../binary/util/transform-requires')
 const { testPackageStaticAssets } = require('../../../binary/util/testStaticAssets')
-const externalUtils = require('../../../binary/util/3rd-party')
 
 global.beforeEach(() => {
   mockfs.restore()
@@ -40,19 +39,6 @@ describe('packages', () => {
         },
       },
     })
-
-    const globbyStub = sinon.stub(externalUtils, 'globby')
-
-    globbyStub
-    .withArgs(['./packages/*', './npm/*'])
-    .resolves(['./packages/coffee'])
-
-    globbyStub
-    .withArgs(['lib', 'src/main.js'])
-    .resolves([
-      'lib/foo.js',
-      'src/main.js',
-    ])
 
     const destinationFolder = os.tmpdir()
 
@@ -112,18 +98,6 @@ describe('transformRequires', () => {
       },
     })
 
-    sinon.stub(externalUtils, 'globby')
-    .withArgs([
-      'build/linux/Cypress/resources/app/packages/**/*.js',
-      'build/linux/Cypress/resources/app/npm/**/*.js',
-    ])
-    .resolves([
-      'build/linux/Cypress/resources/app/packages/foo/src/main.js',
-      'build/linux/Cypress/resources/app/packages/foo/lib/foo.js',
-      'build/linux/Cypress/resources/app/packages/bar/src/main.js',
-      'build/linux/Cypress/resources/app/packages/bar/lib/foo.js',
-    ])
-
     // should return number of transformed requires
     await expect(transformRequires(buildRoot)).to.eventually.eq(2)
 
@@ -160,18 +134,6 @@ describe('transformRequires', () => {
       },
       },
     })
-
-    sinon.stub(externalUtils, 'globby')
-    .withArgs([
-      'build/linux/Cypress/resources/app/packages/**/*.js',
-      'build/linux/Cypress/resources/app/npm/**/*.js',
-    ])
-    .resolves([
-      'build/linux/Cypress/resources/app/packages/foo/src/main.js',
-      'build/linux/Cypress/resources/app/packages/foo/lib/foo.js',
-      'build/linux/Cypress/resources/app/packages/bar/src/main.js',
-      'build/linux/Cypress/resources/app/packages/bar/lib/foo.js',
-    ])
 
     await transformRequires(buildRoot)
 
@@ -323,7 +285,7 @@ const getFs = () => {
       let nextDepth = null
 
       if (d !== null) {
-        if (d === -1) {
+        if (d < 0) {
           nextDepth = d + 1
         } else if (!(d > cwd.length) && key === cwd[d]) {
           key = 'foo'
@@ -345,5 +307,8 @@ const getFs = () => {
     }))
   }
 
-  return recurse({ root: mockfs.getMockRoot() }, -1).root
+  // ignore C:// when on windows
+  const depth = process.env.PLATFORM === 'windows' ? -2 : -1
+
+  return recurse({ root: mockfs.getMockRoot() }, depth).root
 }

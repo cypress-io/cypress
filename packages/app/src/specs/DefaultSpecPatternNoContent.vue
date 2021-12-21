@@ -12,16 +12,17 @@
     >
       {{ t('createSpec.noSpecsMessage') }}
     </p>
-    <Button
-      data-testid="view-spec-pattern"
-      variant="outline"
-      prefix-icon-class="icon-light-gray-50 icon-dark-gray-400"
-      :prefix-icon="SettingsIcon"
-      class="mx-auto duration-300 hocus:ring-gray-50 hocus:border-gray-200"
-      @click.prevent="emit('showCypressConfigInIDE')"
-    >
-      {{ t('createSpec.viewSpecPatternButton') }}
-    </Button>
+    <OpenConfigFileInIDE :gql="props.gql">
+      <Button
+        data-testid="view-spec-pattern"
+        variant="outline"
+        prefix-icon-class="icon-light-gray-50 icon-dark-gray-400"
+        :prefix-icon="SettingsIcon"
+        class="mx-auto duration-300 hocus:ring-gray-50 hocus:border-gray-200"
+      >
+        {{ t('createSpec.viewSpecPatternButton') }}
+      </Button>
+    </OpenConfigFileInIDE>
   </div>
 </template>
 
@@ -32,11 +33,14 @@ import Button from '@cy/components/Button.vue'
 import CreateSpecCards from './CreateSpecCards.vue'
 import { gql } from '@urql/vue'
 import type { CreateSpecContentFragment } from '../generated/graphql'
+import OpenConfigFileInIDE from '@packages/frontend-shared/src/gql-components/OpenConfigFileInIDE.vue'
+
 const { t } = useI18n()
 
 gql`
 fragment CreateSpecContent on Query {
   ...CreateSpecCards
+  ...OpenConfigFileInIDE
 }
 `
 
@@ -46,7 +50,6 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'choose', id: string): void
-  (e: 'showCypressConfigInIDE'): void
 }>()
 
 const choose = (id: string) => {

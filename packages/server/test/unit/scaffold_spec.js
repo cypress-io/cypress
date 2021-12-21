@@ -4,19 +4,19 @@ const path = require('path')
 const Promise = require('bluebird')
 const cypressEx = require('@packages/example')
 const snapshot = require('snap-shot-it')
-const config = require(`${root}lib/config`)
-const ProjectBase = require(`${root}lib/project-base`).ProjectBase
-const scaffold = require(`${root}lib/scaffold`)
-const { fs } = require(`${root}lib/util/fs`)
-const glob = require(`${root}lib/util/glob`)
+const config = require(`../../lib/config`)
+const ProjectBase = require(`../../lib/project-base`).ProjectBase
+const scaffold = require(`../../lib/scaffold`)
+const { fs } = require(`../../lib/util/fs`)
+const glob = require(`../../lib/util/glob`)
 const Fixtures = require('@tooling/system-tests/lib/fixtures')
-const { makeLegacyDataContext } = require(`${root}lib/makeDataContext`)
+const { getCtx } = require(`../../lib/makeDataContext`)
 
 let ctx
 
 describe('lib/scaffold', () => {
   beforeEach(() => {
-    ctx = makeLegacyDataContext()
+    ctx = getCtx()
 
     return Fixtures.scaffold()
   })

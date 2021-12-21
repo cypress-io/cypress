@@ -18,7 +18,7 @@ interface ForkConfigProcessOptions {
 export class ProjectConfigDataActions {
   constructor (private ctx: DataContext) {}
 
-  static CHILD_PROCESS_FILE_PATH = path.join(__dirname, '../../../server/lib/util', 'require_async_child.js')
+  static CHILD_PROCESS_FILE_PATH = path.join(__dirname, '../../../server/lib/plugins/child', 'require_async_child.js')
 
   killConfigProcess () {
     if (this.ctx.currentProject?.configChildProcess) {

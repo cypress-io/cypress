@@ -11,13 +11,11 @@
       :class="CONFIG_LEGEND_COLOR_MAP.config"
       :label="legendText.config.label"
     >
-      <i18n-t :keypath="legendText.config.descriptionKey">
-        <ExternalLink
-          href="https://on.cypress.io/guides/configuration"
-          class="text-purple-500"
-        >
-          cypress.config.js
-        </ExternalLink>
+      <i18n-t
+        scope="global"
+        :keypath="legendText.config.descriptionKey"
+      >
+        <OpenConfigFileInIDE :gql="props.gql" />
       </i18n-t>
     </ConfigBadge>
 
@@ -39,7 +37,10 @@
       :class="CONFIG_LEGEND_COLOR_MAP.plugin"
       :label="legendText.dynamic.label"
     >
-      <i18n-t :keypath="legendText.dynamic.descriptionKey">
+      <i18n-t
+        scope="global"
+        :keypath="legendText.dynamic.descriptionKey"
+      >
         <ExternalLink
           href="https://on.cypress.io"
           class="text-purple-500"
@@ -57,6 +58,19 @@ import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import { computed } from 'vue'
 import { useI18n } from '@cy/i18n'
 import { CONFIG_LEGEND_COLOR_MAP } from './ConfigSourceColors'
+import type { ConfigLegendFragment } from '../../generated/graphql'
+import OpenConfigFileInIDE from '@packages/frontend-shared/src/gql-components/OpenConfigFileInIDE.vue'
+import { gql } from '@urql/vue'
+
+gql`
+fragment ConfigLegend on Query {
+  ...OpenConfigFileInIDE
+}
+`
+
+const props = defineProps<{
+  gql: ConfigLegendFragment
+}>()
 
 const { t } = useI18n()
 const legendText = computed(() => {

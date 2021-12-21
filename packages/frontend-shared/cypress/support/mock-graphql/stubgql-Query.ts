@@ -27,4 +27,7 @@ export const stubQuery: MaybeResolver<Query> = {
   isInGlobalMode (source, args, ctx) {
     return !ctx.currentProject
   },
+  baseError (source, args, ctx) {
+    return {}
+  },
 }

@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 const fs = require('fs-extra')
 const { join } = require('path')
-const globby = require('globby')
+const glob = require('glob')
 const os = require('os')
 const path = require('path')
 
@@ -13,9 +13,8 @@ module.exports = async function (params) {
   console.log(params.electronPlatformName)
   console.log('****************************')
 
-  const packages = await globby('packages/*/node_modules', {
+  const packages = glob.sync('packages/*/node_modules', {
     cwd: params.packager.info._appDir,
-    onlyFiles: false,
   })
 
   const buildSubfoldersPerPlatform = {

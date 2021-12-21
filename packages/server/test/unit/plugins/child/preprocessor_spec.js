@@ -2,8 +2,8 @@ require('../../../spec_helper')
 
 const EE = require('events')
 
-const util = require(`${root}../../lib/plugins/util`)
-const preprocessor = require(`${root}../../lib/plugins/child/preprocessor`)
+const util = require(`../../../../lib/plugins/util`)
+const preprocessor = require(`../../../../lib/plugins/child/preprocessor`)
 
 describe('lib/plugins/child/preprocessor', () => {
   beforeEach(function () {

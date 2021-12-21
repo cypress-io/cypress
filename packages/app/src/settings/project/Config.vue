@@ -4,13 +4,11 @@
       {{ t('settingsPage.config.title') }}
     </template>
     <template #description>
-      <i18n-t keypath="settingsPage.config.description">
-        <ExternalLink
-          href="https://on.cypress.io/guides/configuration"
-          class="text-purple-500"
-        >
-          cypress.config.js
-        </ExternalLink>
+      <i18n-t
+        scope="global"
+        keypath="settingsPage.config.description"
+      >
+        <OpenConfigFileInIDE :gql="props.gql" />
       </i18n-t>
     </template>
     <div class="flex w-full">
@@ -20,6 +18,7 @@
       />
       <ConfigLegend
         class="rounded-tr-md px-22px py-28px border-1 border-l-0 rounded-br-md min-w-280px"
+        :gql="props.gql"
       />
     </div>
   </SettingsSection>
@@ -32,15 +31,19 @@ import SettingsSection from '../SettingsSection.vue'
 import { useI18n } from '@cy/i18n'
 import ConfigLegend from './ConfigLegend.vue'
 import ConfigCode from './ConfigCode.vue'
-import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import type { ConfigFragment } from '../../generated/graphql'
+import OpenConfigFileInIDE from '@packages/frontend-shared/src/gql-components/OpenConfigFileInIDE.vue'
 
 const { t } = useI18n()
 
 gql`
-fragment Config on CurrentProject {
-  id
-  config
+fragment Config on Query {
+  currentProject {
+    id
+    config
+  }
+  ...ConfigLegend
+  ...OpenConfigFileInIDE
 }
 `
 
@@ -48,5 +51,5 @@ const props = defineProps<{
   gql: ConfigFragment
 }>()
 
-const configObject = computed(() => props.gql.config)
+const configObject = computed(() => props.gql.currentProject?.config)
 </script>

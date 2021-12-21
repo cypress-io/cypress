@@ -1,20 +1,19 @@
 <template>
   <!-- TODO: spread on props.gql is needed due to bug in mountFragment. Fix -->
-  <SpecPatterns
-    :gql="{...props.gql}"
-    @showCypressConfigInIDE="emit('showCypressConfigInIDE')"
-  />
+  <SpecPatterns :gql="{...props.gql}" />
 
   <div class="flex justify-center gap-16px mt-32px">
-    <Button
-      size="lg"
-      @click="emit('showCypressConfigInIDE')"
-    >
-      <template #prefix>
-        <i-cy-code-editor_x16 class="icon-dark-white" />
-      </template>
-      {{ t('createSpec.updateSpecPattern') }}
-    </Button>
+    <OpenConfigFileInIDE :gql="props.gql">
+      <Button
+        size="lg"
+      >
+        <template #prefix>
+          <i-cy-code-editor_x16 class="icon-dark-white" />
+        </template>
+        {{ t('createSpec.updateSpecPattern') }}
+      </Button>
+    </OpenConfigFileInIDE>
+
     <Button
       size="lg"
       variant="outline"
@@ -31,25 +30,25 @@
 <script lang="ts" setup>
 import Button from '@cy/components/Button.vue'
 import { gql } from '@urql/core'
-import type { SpecPatternsFragment } from '../generated/graphql'
+import type { CustomPatternNoSpecContentFragment } from '../generated/graphql'
 import SpecPatterns from './SpecPatterns.vue'
 import { useI18n } from '@cy/i18n'
+import OpenConfigFileInIDE from '@packages/frontend-shared/src/gql-components/OpenConfigFileInIDE.vue'
 
 const { t } = useI18n()
 
 const emit = defineEmits<{
-  (e: 'showCypressConfigInIDE'): void
   (e: 'newSpec'): void
 }>()
 
 gql`
-fragment SpecPatterns on CurrentProject {
-  id
-  config
+fragment CustomPatternNoSpecContent on Query {
+  ...SpecPatterns
+  ...OpenConfigFileInIDE
 }
 `
 
 const props = defineProps<{
-  gql: SpecPatternsFragment
+  gql: CustomPatternNoSpecContentFragment
 }>()
 </script>

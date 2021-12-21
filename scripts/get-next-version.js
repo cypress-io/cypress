@@ -1,5 +1,7 @@
 /* eslint-disable no-console */
 
+// See ../guides/next-version.md for documentation.
+
 const semver = require('semver')
 const Bluebird = require('bluebird')
 const bumpCb = require('conventional-recommended-bump')
