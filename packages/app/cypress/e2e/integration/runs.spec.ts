@@ -1,95 +1,254 @@
-describe('App: Runs Page', () => {
+describe('App: Runs', () => {
   beforeEach(() => {
     cy.scaffoldProject('component-tests')
     cy.openProject('component-tests')
     cy.startAppServer()
   })
 
-  it('resolves the runs page', () => {
-    cy.loginUser()
-    cy.visitApp()
-    cy.wait(1000)
-    cy.get('[href="#/runs"]').click()
-    cy.get('[data-cy="runs"]')
-    cy.get('[data-testid="header-bar"]').findByText('Runs').should('be.visible')
-  })
-
-  it('shows the loader', () => {
-    cy.loginUser()
-    cy.remoteGraphQLIntercept(async (obj) => {
-      await new Promise((resolve) => setTimeout(resolve, 200))
-
-      return obj.result
+  context('Runs Page', () => {
+    it('resolves the runs page', () => {
+      cy.loginUser()
+      cy.visitApp()
+      cy.wait(1000)
+      cy.get('[href="#/runs"]').click()
+      cy.get('[data-cy="runs"]')
+      cy.get('[data-testid="header-bar"]').findByText('Runs').should('be.visible')
     })
 
-    cy.visitApp()
-    cy.get('[href="#/runs"]').click()
-    cy.get('[data-cy="runs-loader"]')
-    cy.get('[data-cy="runs"]')
+    it('shows the loader', () => {
+      cy.loginUser()
+      cy.remoteGraphQLIntercept(async (obj) => {
+        await new Promise((resolve) => setTimeout(resolve, 200))
+
+        return obj.result
+      })
+
+      cy.visitApp()
+      cy.get('[href="#/runs"]').click()
+      cy.get('[data-cy="runs-loader"]')
+      cy.get('[data-cy="runs"]')
+    })
   })
 
-  it('when no runs, shows call to action', () => {
-    cy.loginUser()
-    cy.remoteGraphQLIntercept(async (obj) => {
-      // Currently, all remote requests go through here, we want to use this to modify the
-      // remote request before it's used and avoid touching the login query
-      if (obj.result.data?.cloudProjectsBySlugs) {
-        for (const proj of obj.result.data.cloudProjectsBySlugs) {
-          if (proj.runs?.nodes) {
-            proj.runs.nodes = []
+  context('Runs - Login', () => {
+    it('when logged out, shows call to action', () => {
+      cy.visitApp()
+      cy.get('[href="#/runs"]').click()
+      cy.contains('Log In').should('exist')
+    })
+
+    it('clicking the login button will open the login modal', () => {
+      cy.visitApp()
+      cy.get('[href="#/runs"]').click()
+      cy.contains('Log In').click()
+      cy.get('h2').contains('Log In To Cypress')
+      cy.get('button').contains('Log In')
+    })
+
+    it('if logged in and connected', { viewportWidth: 1200 }, () => {
+      cy.loginUser()
+      cy.visitApp()
+      cy.intercept('mutation-ExternalLink_OpenExternal', { 'data': { 'openExternal': true } }).as('OpenExternal')
+
+      cy.get('[href="#/runs"]').click()
+      cy.contains('a', 'OVERLIMIT').click()
+      cy.wait('@OpenExternal')
+      .its('request.body.variables.url')
+      .should('equal', 'http://dummy.cypress.io/runs/4')
+    })
+  })
+
+  context('Runs - Connect Project', () => {
+    it('when no project Id in the config file, shows call to action', () => {
+      cy.withCtx(async (ctx) => {
+        if (ctx.currentProject) {
+          ctx.currentProject.configChildProcess?.process.kill()
+          ctx.currentProject.config = null
+          ctx.currentProject.configChildProcess = null
+        }
+
+        await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {}')
+      })
+
+      cy.loginUser()
+      cy.visitApp()
+
+      cy.get('[href="#/runs"]').click()
+      cy.contains('Connect your project').should('exist')
+    })
+
+    it('opens Connect Project modal after clicking Connect Project button', () => {
+      cy.withCtx(async (ctx) => {
+        if (ctx.currentProject) {
+          ctx.currentProject.configChildProcess?.process.kill()
+          ctx.currentProject.config = null
+          ctx.currentProject.configChildProcess = null
+        }
+
+        await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {}')
+      })
+
+      cy.loginUser()
+      cy.visitApp()
+
+      cy.get('[href="#/runs"]').click()
+      cy.findByText('Connect your project to the Cypress Dashboard').click()
+    })
+  })
+
+  context('Runs - Cannot Find Project', () => {
+    it('if project Id is specified in config file that does not exist, shows call to action', () => {
+      cy.withCtx(async (ctx) => {
+        if (ctx.currentProject) {
+          ctx.currentProject.configChildProcess?.process.kill()
+          ctx.currentProject.config = null
+          ctx.currentProject.configChildProcess = null
+        }
+
+        await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {\'projectId\': \'abcdef\'}')
+      })
+
+      cy.loginUser()
+      cy.visitApp()
+
+      cy.get('[href="#/runs"]').click()
+      cy.contains('Reconnect project').should('exist')
+    })
+
+    it('opens Connect Project modal after clicking Reconnect Project button', () => {
+      cy.withCtx(async (ctx) => {
+        if (ctx.currentProject) {
+          ctx.currentProject.configChildProcess?.process.kill()
+          ctx.currentProject.config = null
+          ctx.currentProject.configChildProcess = null
+        }
+
+        await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {\'projectId\': \'abcdef\'}')
+      })
+
+      cy.loginUser()
+      cy.visitApp()
+
+      cy.get('[href="#/runs"]').click()
+      cy.findByText('Connect your project to the Cypress Dashboard').click()
+    })
+  })
+
+  context('Runs - No Runs', () => {
+    it('when no runs, shows call to action', () => {
+      cy.loginUser()
+      cy.remoteGraphQLIntercept(async (obj) => {
+        // Currently, all remote requests go through here, we want to use this to modify the
+        // remote request before it's used and avoid touching the login query
+        if (obj.result.data?.cloudProjectsBySlugs) {
+          for (const proj of obj.result.data.cloudProjectsBySlugs) {
+            if (proj.runs?.nodes) {
+              proj.runs.nodes = []
+            }
           }
         }
-      }
 
-      return obj.result
+        return obj.result
+      })
+
+      cy.visitApp()
+      cy.get('[href="#/runs"]').click()
+      cy.get('[data-cy="no-runs"]')
     })
 
-    cy.visitApp()
-    cy.get('[href="#/runs"]').click()
-    cy.get('[data-cy="no-runs"]')
-  })
+    it('displays the projectId as it is in their config file', () => {
+      cy.withCtx(async (ctx) => {
+        if (ctx.currentProject) {
+          ctx.currentProject.configChildProcess?.process.kill()
+          ctx.currentProject.config = null
+          ctx.currentProject.configChildProcess = null
+        }
 
-  it('when logged out, shows call to action', () => {
-    cy.visitApp()
-    cy.get('[href="#/runs"]').click()
-    cy.contains('Log In').should('exist')
-  })
+        await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {\'projectId\': \'abcdef\'}')
+      })
 
-  it('clicking the Login button will open the Login modal', () => {
-    cy.visitApp()
-    cy.get('[href="#/runs"]').click()
-    cy.contains('Log In').click()
-    cy.get('h2').contains('Log In To Cypress')
-    cy.get('button').contains('Log In')
-  })
+      cy.loginUser()
+      cy.remoteGraphQLIntercept(async (obj) => {
+        if (obj.result.data?.cloudProjectsBySlugs) {
+          for (const proj of obj.result.data.cloudProjectsBySlugs) {
+            if (proj.runs?.nodes) {
+              proj.runs.nodes = []
+            }
+          }
+        }
 
-  it('when no project Id in the config file, shows call to action', () => {
-    cy.withCtx(async (ctx) => {
-      if (ctx.currentProject) {
-        ctx.currentProject.configChildProcess?.process.kill()
-        ctx.currentProject.config = null
-        ctx.currentProject.configChildProcess = null
-      }
+        return obj.result
+      })
 
-      await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {}')
+      cy.visitApp()
+      cy.get('[href="#/runs"]').click()
+      cy.contains('projectId: \'abcdef\'')
     })
 
-    cy.loginUser()
-    cy.visitApp()
+    it('displays correct source control instructions', () => {
+      cy.loginUser()
+      cy.remoteGraphQLIntercept(async (obj) => {
+        if (obj.result.data?.cloudProjectsBySlugs) {
+          for (const proj of obj.result.data.cloudProjectsBySlugs) {
+            if (proj.runs?.nodes) {
+              proj.runs.nodes = []
+            }
+          }
+        }
 
-    cy.get('[href="#/runs"]').click()
-    cy.contains('Connect your project').should('exist')
+        return obj.result
+      })
+
+      cy.visitApp()
+      cy.get('[href="#/runs"]').click()
+      cy.contains('Ensure that your cypress.config.js file is checked into source control:')
+      cy.get('[data-cy="copy-button"]').first().click()
+      cy.contains('Copied!')
+    })
+
+    it('displays correct instructions on how to record a run', () => {
+      cy.loginUser()
+      cy.remoteGraphQLIntercept(async (obj) => {
+        if (obj.result.data?.cloudProjectsBySlugs) {
+          for (const proj of obj.result.data.cloudProjectsBySlugs) {
+            if (proj.runs?.nodes) {
+              proj.runs.nodes = []
+            }
+          }
+        }
+
+        return obj.result
+      })
+
+      cy.visitApp()
+      cy.get('[href="#/runs"]').click()
+      cy.contains('Run this command in your local development terminal or in CI:')
+      cy.contains('--record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')
+      cy.get('[data-cy="copy-button"]').last().click()
+      cy.contains('Copied!')
+    })
   })
 
-  it('if logged in and connected', { viewportWidth: 1200 }, () => {
-    cy.loginUser()
-    cy.visitApp()
-    cy.intercept('mutation-ExternalLink_OpenExternal', { 'data': { 'openExternal': true } }).as('OpenExternal')
+  context('Runs - Runs List', () => {
+    it('if a run has been recorded, a list of recorded runs is displayed', () => {
+      cy.loginUser()
+      cy.visitApp()
+      cy.get('[href="#/runs"]').click()
+      cy.get('[data-cy="runs"]')
+    })
 
-    cy.get('[href="#/runs"]').click()
-    cy.contains('a', 'OVERLIMIT').click()
-    cy.wait('@OpenExternal')
-    .its('request.body.variables.url')
-    .should('equal', 'http://dummy.cypress.io/runs/4')
+    it('displays each run with correct information', () => {
+      cy.loginUser()
+      cy.visitApp()
+      cy.get('[href="#/runs"]').click()
+      cy.get('[href="http://dummy.cypress.io/runs/0"]').first().findByText('fix: make gql work CANCELLED')
+    })
+
+    it('opens the run page if a run is clicked', () => {
+      cy.loginUser()
+      cy.visitApp()
+      cy.get('[href="#/runs"]').click()
+      cy.get('[data-cy="external"]').first().click()
+    })
   })
 })

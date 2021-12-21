@@ -2,6 +2,7 @@
   <Button
     :size="size"
     :variant="variant"
+    data-cy="copy-button"
     @click="copyToClipboard"
   >
     <template
