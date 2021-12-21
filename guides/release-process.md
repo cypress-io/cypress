@@ -18,11 +18,11 @@ The `@cypress/`-namespaced NPM packages that live inside the [`/npm`](../npm) di
 - Set up the following environment variables:
     - Cypress AWS access key and secret in `aws_credentials_json`, which looks like this:
         ```text
-        aws_credentials_json={"bucket":"cdn.cypress.io","folder":"desktop","key":"...","secret":"..."}
+        aws_credentials_json='{"bucket":"cdn.cypress.io","folder":"desktop","key":"...","secret":"..."}'
         ```
     - A [GitHub token](https://github.com/settings/tokens) and a [CircleCI token](https://circleci.com/account/api) in `ci_json`:
         ```text
-        ci_json={"githubToken":"...","circleToken":"..."}
+        ci_json='{"githubToken":"...","circleToken":"..."}'
         ```
     - You'll also need to put the GitHub token under its own variable and get a [ZenHub API token](https://app.zenhub.com/dashboard/tokens) for the `release-automations` step.
         ```text
