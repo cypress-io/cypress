@@ -3,7 +3,7 @@
     v-model="show"
     dismissible
     status="warning"
-    data-testid="warning-alert"
+    data-cy="warning-alert"
     header-class="text-warning-600"
     :title="title"
     :icon="ErrorOutlineIcon"
