@@ -126,6 +126,22 @@ export function createCloudUser (config: ConfigFor<CloudUser>): CloudUser {
     ...testNodeId('CloudUser'),
     email: 'test@example.com',
     fullName: 'Test User',
+    cloudOrganizationsUrl: '/cloud/organizations',
+    createCloudOrganizationUrl: '/cloud/organizations/create',
+    organizations: {
+      __typename: 'CloudOrganizationConnection',
+      nodes: [createCloudOrganization({})],
+      edges: [{
+        __typename: 'CloudOrganizationEdge',
+        cursor: 'cursor',
+        node: createCloudOrganization({}),
+      }],
+      pageInfo: {
+        __typename: 'PageInfo',
+        hasNextPage: false,
+        hasPreviousPage: false,
+      },
+    },
     ...config,
   }
 

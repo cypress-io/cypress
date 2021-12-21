@@ -1,16 +1,17 @@
 import RunsContainer from './RunsContainer.vue'
 import { RunsContainerFragmentDoc } from '../generated/graphql-test'
+import { CloudUserStubs } from '@packages/frontend-shared/cypress/support/mock-graphql/stubgql-CloudTypes'
 
 describe('<RunsContainer />', { keystrokeDelay: 0 }, () => {
   const cloudViewer = {
-    __typename: 'CloudUser' as const,
+    ...CloudUserStubs.me,
     id: '1',
     email: 'test@test.test',
     fullName: 'Tester Test',
-    organizations: {
-      __typename: 'CloudOrganizationConnection' as const,
-      nodes: [],
-    },
+    cloudOrganizationsUrl: null,
+    createCloudOrganizationUrl: null,
+    organizations: null,
+    organizationControl: null,
   }
 
   it('playground', () => {

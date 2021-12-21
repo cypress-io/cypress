@@ -1,12 +1,13 @@
+import { CreateCloudOrgModalFragmentDoc } from '../../generated/graphql-test'
 import CreateCloudOrgModal from './CreateCloudOrgModal.vue'
 
 describe('<CreateCloudOrgModal />', () => {
   it('should show a normal error', () => {
-    cy.mount({
-      name: 'CreateCloudOrgModal',
-      render () {
+    cy.mountFragment(CreateCloudOrgModalFragmentDoc, {
+
+      render (gql) {
         return (<div class="h-screen">
-          <CreateCloudOrgModal />
+          <CreateCloudOrgModal gql={gql}/>
         </div>)
       },
     })

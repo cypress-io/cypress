@@ -20,6 +20,9 @@ describe('<RunsConnect />', () => {
     id: '1',
     email: 'test@test.test',
     fullName: 'Tester Test',
+    cloudOrganizationsUrl: '/cloud/organizations',
+    createCloudOrganizationUrl: '/cloud/organizations/create',
+    organizationControl: null,
     organizations: {
       __typename: 'CloudOrganizationConnection' as const,
       nodes: [
@@ -33,6 +36,7 @@ describe('<RunsConnect />', () => {
               {
                 __typename: 'CloudProject' as const,
                 id: '1',
+                name: 'Test Project',
                 slug: 'test-project',
               },
             ],

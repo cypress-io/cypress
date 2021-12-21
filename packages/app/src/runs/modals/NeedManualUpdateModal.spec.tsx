@@ -6,13 +6,14 @@ describe('<NeedManualUpdateModal />', () => {
     cy.mountFragment(NeedManualUpdateModalFragmentDoc, {
       onResult: (result) => {
         result.projectId = null
-        // result.newCloudProject = { projectId: 'asdfgh' }
       },
       render (gql) {
         return (<div class="h-screen">
-          <NeedManualUpdateModal gql={gql} />
+          <NeedManualUpdateModal gql={gql} newProjectId='123456'/>
         </div>)
       },
     })
+
+    cy.contains('123456').should('be.visible')
   })
 })

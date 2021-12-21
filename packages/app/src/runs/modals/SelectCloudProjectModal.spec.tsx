@@ -16,6 +16,7 @@ describe('<SelectCloudProjectModal />', () => {
             {
               __typename: 'CloudProject' as const,
               id: '1',
+              name: 'Test Project 1',
               slug: 'test-project',
             },
           ],
@@ -40,17 +41,22 @@ describe('<SelectCloudProjectModal />', () => {
           __typename: 'CurrentProject' as const,
           id: '1',
           title: 'Test Project',
+          projectId: null,
         }
 
         result.cloudViewer = {
           __typename: 'CloudUser' as const,
           id: '2',
+          cloudOrganizationsUrl: null,
+          createCloudOrganizationUrl: null,
+          fullName: null,
+          organizationControl: null,
           organizations: noorgs ? null : organizations,
         }
       },
       render (gql) {
         return (<div class="h-screen">
-          <SelectCloudProjectModal show gql={gql}/>
+          <SelectCloudProjectModal gql={gql}/>
         </div>)
       },
     })
