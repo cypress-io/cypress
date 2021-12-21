@@ -39,9 +39,17 @@ export interface RemoteGraphQLInterceptPayload {
 
 export type RemoteGraphQLInterceptor = (obj: RemoteGraphQLInterceptPayload) => ExecutionResult | Promise<ExecutionResult>
 
-export interface SetFoundBrowsersOptions {
-  filter?(browser: Browser): boolean
+export interface FindBrowsersOptions {
+  // Array of FoundBrowser objects that will be used as the mock output
   browsers?: FoundBrowser[]
+  /**
+   * Function used to filter the standard set of mocked browsers. Ignored if browsers option is provided.
+   * Ex.
+   * cy.findBrowsers({
+   *   filter: (browser) => browser.name === 'chrome' // Sets Chrome, Chrome Beta, Canary
+   * })
+   */
+  filter?(browser: Browser): boolean
 }
 
 declare global {
@@ -100,7 +108,10 @@ declare global {
       disableRemoteGraphQLFakes(): void
       visitApp(href?: string): Chainable<AUTWindow>
       visitLaunchpad(href?: string): Chainable<AUTWindow>
-      findBrowsers(options?: SetFoundBrowsersOptions): void
+      /**
+       * Mocks the system browser retrieval to return the desired browsers
+       */
+      findBrowsers(options?: FindBrowsersOptions): void
     }
   }
 }
@@ -253,7 +264,7 @@ function loginUser (userShape: Partial<AuthenticatedUserShape> = {}) {
   })
 }
 
-function findBrowsers (options: SetFoundBrowsersOptions = {}) {
+function findBrowsers (options: FindBrowsersOptions = {}) {
   let filteredBrowsers = options.browsers
 
   if (!filteredBrowsers) {
@@ -281,7 +292,7 @@ function findBrowsers (options: SetFoundBrowsersOptions = {}) {
   }
 
   cy.withCtx(async (ctx, o) => {
-    // @ts-ignore sinon is a global in the node process where this is executed
+    // @ts-ignore sinon is a global in the process where this is executed
     sinon.stub(ctx._apis.appApi, 'getBrowsers').resolves(o.browsers)
   }, { browsers: filteredBrowsers })
 }
