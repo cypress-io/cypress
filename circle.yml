@@ -39,11 +39,8 @@ macWorkflowFilters: &mac-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ '10.0-release', << pipeline.git.branch >> ]
-<<<<<<< HEAD
     - equal: [ 'tgriesser/10.0-release/refactor-lifecycle-ui', << pipeline.git.branch >> ]
-=======
     - equal: [ renovate/cypress-request-2.x, << pipeline.git.branch >> ]
->>>>>>> origin/tgriesser/10.0-release/refactor-lifecycle
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -53,11 +50,8 @@ windowsWorkflowFilters: &windows-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ '10.0-release', << pipeline.git.branch >> ]
-<<<<<<< HEAD
     - equal: [ 'tgriesser/10.0-release/refactor-lifecycle-ui', << pipeline.git.branch >> ]
-=======
     - equal: [ test-binary-downstream-windows, << pipeline.git.branch >> ]
->>>>>>> origin/tgriesser/10.0-release/refactor-lifecycle
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
