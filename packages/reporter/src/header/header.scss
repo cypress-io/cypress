@@ -133,21 +133,11 @@ $color-transition: color 150ms ease-out;
       border-left: none;
       color: $gray-700;
       margin-left: 0;
-      padding: 1px 8px;
 
       &.open {
         background-color: $gray-900;
         color: $white;
       }
-    }
-
-    .stop {
-      padding: 1px 8px;
-    }
-
-    span:last-child button,
-    .play {
-      padding: 1px 10px;
     }
 
     span {
