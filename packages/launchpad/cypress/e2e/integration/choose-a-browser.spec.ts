@@ -1,5 +1,3 @@
-import type { FoundBrowser } from '@packages/types/src'
-
 describe('Choose a Browser Page', () => {
   // Walks through setup pages to get to browser selection
   const stepThroughConfigPages = () => {
@@ -9,63 +7,17 @@ describe('Choose a Browser Page', () => {
     cy.contains('button', 'Next Step').click()
   }
 
-  // Mocks server's browser detection with known list
-  const setupMockBrowsers = function () {
-    cy.withCtx(async (ctx, o) => {
-      const mockBrowsers: FoundBrowser[] = [{
-        channel: 'stable',
-        displayName: 'Chrome',
-        family: 'chromium',
-        name: 'chrome',
-        version: '1.2.333.445',
-        path: '/test/chrome/path',
-        majorVersion: '1',
-      }, {
-        channel: 'stable',
-        displayName: 'Firefox',
-        family: 'firefox',
-        name: 'firefox',
-        path: '/test/firefox/path',
-        version: '2.3.444',
-        majorVersion: '2',
-      }, {
-        channel: 'stable',
-        displayName: 'Electron',
-        family: 'chromium',
-        name: 'electron',
-        path: '/test/electron/path',
-        version: '3.4.555.66',
-        majorVersion: '3',
-      }, {
-        channel: 'stable',
-        displayName: 'Edge',
-        family: 'chromium',
-        name: 'edge',
-        path: '/test/edge/path',
-        version: '4.5.666.77',
-        majorVersion: '4',
-      }]
-
-      // @ts-ignore sinon is a global in the node process where this is executed
-      sinon.stub(ctx._apis.appApi, 'getBrowsers').resolves(mockBrowsers)
-    })
-  }
-
-  // Force the server to return no detected browsers
-  const setupZeroMockBrowsers = function () {
-    cy.withCtx(async (ctx, o) => {
-      // @ts-ignore sinon is a global in the node process where this is executed
-      sinon.stub(ctx._apis.appApi, 'getBrowsers').resolves([])
-    })
-  }
-
   beforeEach(() => {
     cy.scaffoldProject('launchpad')
   })
 
   describe('System Browsers Detected', () => {
     beforeEach(() => {
-      setupMockBrowsers()
+      cy.findBrowsers({
+        filter: (browser) => {
+          return Cypress._.includes(['chrome', 'firefox', 'electron', 'edge'], browser.name) && browser.channel === 'stable'
+        },
+      })
     })
 
     it('preselects browser that is provided through the command line', () => {
@@ -76,7 +28,7 @@ describe('Choose a Browser Page', () => {
 
       cy.get('h1').should('contain', 'Choose a Browser')
 
-      cy.findByRole('radio', { name: 'Edge v4.x', checked: true })
+      cy.findByRole('radio', { name: 'Edge v8.x', checked: true })
     })
 
     it('shows warning when launched with --browser name that cannot be matched to found browsers', () => {
@@ -133,11 +85,11 @@ describe('Choose a Browser Page', () => {
 
       cy.findByRole('radio', { name: 'Chrome v1.x' })
 
-      cy.findByRole('radio', { name: 'Firefox v2.x' })
+      cy.findByRole('radio', { name: 'Firefox v5.x' })
 
-      cy.findByRole('radio', { name: 'Electron v3.x' })
+      cy.findByRole('radio', { name: 'Electron v12.x' })
 
-      cy.findByRole('radio', { name: 'Edge v4.x' })
+      cy.findByRole('radio', { name: 'Edge v8.x' })
     })
 
     it('performs mutation to launch selected browser when launch button is pressed', () => {
@@ -185,7 +137,7 @@ describe('Choose a Browser Page', () => {
       cy.get('h1').should('contain', 'Choose a Browser')
 
       cy.findByRole('radio', { name: 'Chrome v1.x', checked: true }).as('chromeItem')
-      cy.findByRole('radio', { name: 'Firefox v2.x', checked: false }).as('firefoxItem')
+      cy.findByRole('radio', { name: 'Firefox v5.x', checked: false }).as('firefoxItem')
 
       cy.contains('button', 'Launch Chrome').should('be.visible')
 
@@ -198,18 +150,18 @@ describe('Choose a Browser Page', () => {
       })
 
       cy.findByRole('radio', { name: 'Chrome v1.x', checked: false })
-      cy.findByRole('radio', { name: 'Firefox v2.x', checked: true })
+      cy.findByRole('radio', { name: 'Firefox v5.x', checked: true })
 
       cy.contains('button', 'Launch Firefox').should('be.visible')
     })
   })
 
   describe('No System Browsers Detected', () => {
-    beforeEach(() => {
-      setupZeroMockBrowsers()
-    })
-
     it('does not show browser list when no browsers are detected', () => {
+      cy.findBrowsers({
+        browsers: [],
+      })
+
       cy.openProject('launchpad', ['--e2e'])
 
       cy.visitLaunchpad()
@@ -220,6 +172,27 @@ describe('Choose a Browser Page', () => {
 
       cy.get('[data-cy="open-browser-list"]').children().should('have.length', 0)
       cy.contains('button', 'Back').should('be.visible').and('not.be.disabled')
+    })
+
+    it('can show single electron browser option as expected when no system browsers are detected', () => {
+      cy.log('This test mocks the browser retrieval to simulate the Electron browser injection')
+      cy.findBrowsers({
+        filter: (browser) => {
+          return browser.name === 'electron'
+        },
+      })
+
+      cy.openProject('launchpad', ['--e2e'])
+
+      cy.visitLaunchpad()
+
+      stepThroughConfigPages()
+
+      cy.get('h1').should('contain', 'Choose a Browser')
+
+      cy.get('[data-cy="open-browser-list"]').children().should('have.length', 1)
+
+      cy.findByRole('radio', { name: 'Electron v12.x', checked: true })
     })
   })
 })
