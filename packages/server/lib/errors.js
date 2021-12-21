@@ -734,6 +734,7 @@ const getMsgByType = function (type, ...args) {
           ${arg1}
 
           This sometimes happens if you do not have cypress.config.ts excluded in your tsconfig.json.
+
           Please add it to your "excludes" option, and remove from your project.
           `
     case 'CONFIG_FILE_NOT_FOUND':
