@@ -76,7 +76,7 @@ export type AlertClasses = {
   suffixIconClass: string
   suffixButtonClass: string
   alertClass: string
-  bodyClass: string
+  bodyClass?: string
   dividerClass: string
   ring: string
 }
@@ -110,6 +110,7 @@ const props = withDefaults(defineProps<{
   modelValue?: boolean,
   iconClasses?: string
 }>(), {
+  title: undefined,
   modelValue: true,
   alertClass: undefined,
   status: 'info',
