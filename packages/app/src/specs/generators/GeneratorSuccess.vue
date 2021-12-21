@@ -5,7 +5,7 @@
     <template #target="{open}">
       <div
         class="gap-8px px-24px py-16px flex items-center cursor-pointer"
-        data-testid="file-row"
+        data-cy="file-row"
       >
         <i-cy-status-passed-solid_x16 />
         <span class="text-jade-500 font-medium truncate">{{ file.spec.relative }}</span>
