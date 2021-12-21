@@ -6,6 +6,7 @@ $color-transition: color 150ms ease-out;
     display: flex;
     flex-shrink: 0;
     flex-wrap: wrap;
+    gap: 8px;
     font-family: $font-system;
     min-height: $header-height;
     outline: 0;
@@ -123,7 +124,6 @@ $color-transition: color 150ms ease-out;
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    margin-left: 8px;
 
     .testing-preferences-toggle {
       padding: 1px 8px;

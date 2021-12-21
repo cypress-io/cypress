@@ -4,7 +4,10 @@
       {{ t('settingsPage.config.title') }}
     </template>
     <template #description>
-      <i18n-t keypath="settingsPage.config.description">
+      <i18n-t
+        scope="global"
+        keypath="settingsPage.config.description"
+      >
         <OpenConfigFileInIDE :gql="props.gql" />
       </i18n-t>
     </template>
