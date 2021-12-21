@@ -8,6 +8,7 @@ import Promise from 'bluebird'
 import $utils from '../../cypress/utils'
 import $errUtils from '../../cypress/error_utils'
 import $Log from '../../cypress/log'
+import { bothUrlsMatchAndOneHasHash } from '../navigation'
 import { $Location } from '../../cypress/location'
 import type { RunState } from '../../cypress/runner'
 
@@ -59,19 +60,6 @@ const timedOutWaitingForPageLoad = (ms, log) => {
     },
     onFail: log,
   })
-}
-
-const bothUrlsMatchAndRemoteHasHash = (current, remote) => {
-  // the remote has a hash
-  // or the last char of href
-  // is a hash
-  return (remote.hash || remote.href.slice(-1) === '#') &&
-  // both must have the same origin
-  current.origin === remote.origin &&
-    // both must have the same pathname
-    current.pathname === remote.pathname &&
-      // both must have the same query params
-      current.search === remote.search
 }
 
 const cannotVisitDifferentOrigin = (origin, previousUrlVisited, remoteUrl, existingUrl, log) => {
@@ -130,13 +118,18 @@ const navigationChanged = (Cypress, cy, state, source, arg) => {
   }
 
   // start storing the history entries
-  const urls = state('urls') || []
+  let urls = state('urls') || []
+  let urlPosition = state('urlPosition')
 
-  const previousUrl = _.last(urls)
+  if (urlPosition === undefined) {
+    urlPosition = -1
+  }
 
-  // ensure our new url doesnt match whatever
+  const previousUrl = urls[urlPosition]
+
+  // ensure our new url doesn't match whatever
   // the previous was. this prevents logging
-  // additionally when the url didnt actually change
+  // additionally when the url didn't actually change
   if (url === previousUrl) {
     return
   }
@@ -144,11 +137,23 @@ const navigationChanged = (Cypress, cy, state, source, arg) => {
   // else notify the world and log this event
   Cypress.action('cy:url:changed', url)
 
-  urls.push(url)
+  const navHistoryDelta = state('navHistoryDelta')
+
+  // if navigation was changed via a manipulation of the browser session we
+  // need to update the urlPosition to match the position of the history stack
+  // and we do not need to push a new url onto the urls state
+  if (navHistoryDelta) {
+    urlPosition = urlPosition + navHistoryDelta
+    state('navHistoryDelta', undefined)
+  } else {
+    urls = urls.slice(0, urlPosition + 1)
+    urls.push(url)
+    urlPosition = urlPosition + 1
+  }
 
   state('urls', urls)
-
   state('url', url)
+  state('urlPosition', urlPosition)
 
   // don't output a command log for 'load' or 'before:load' events
   // return if source in command
@@ -574,10 +579,8 @@ export default (Commands, Cypress, cy, state, config) => {
       })
     },
 
-    go (numberOrString, options = {}) {
-      const userOptions = options
-
-      options = _.defaults({}, userOptions, {
+    go (numberOrString, userOptions = {}) {
+      const options = _.defaults({}, userOptions, {
         log: true,
         timeout: config('pageLoadTimeout'),
       })
@@ -919,7 +922,7 @@ export default (Commands, Cypress, cy, state, config) => {
         // the browser won't actually make a new http request
         // for this, and so we need to resolve onLoad immediately
         // and bypass the actual visit resolution stuff
-        if (bothUrlsMatchAndRemoteHasHash(current, remote)) {
+        if (bothUrlsMatchAndOneHasHash(current, remote)) {
           // https://github.com/cypress-io/cypress/issues/1311
           if (current.hash === remote.hash) {
             consoleProps['Note'] = 'Because this visit was to the same hash, the page did not reload and the onBeforeLoad and onLoad callbacks did not fire.'
