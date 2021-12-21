@@ -51,7 +51,7 @@ shikiWrapperClasses computed property.
 
         props.class,
       ]"
-      @click="copyOnClick ? () => copyCode() : () => {}"
+      @click="copyOnClick && isSupported ? () => copyCode() : () => {}"
       v-html="highlightedCode"
     />
     <pre
@@ -148,7 +148,7 @@ const highlightedCode = computed(() => {
 
 const codeEl: Ref<HTMLElement | null> = ref(null)
 
-const { copy, copied } = useClipboard()
+const { copy, isSupported } = useClipboard()
 
 const copyCode = () => {
   if (codeEl.value) {

@@ -34,7 +34,10 @@
     >
       <p class="flex-grow text-left ml-1">
         <span class="font-semibold">{{ t('setupPage.configFile.changesRequiredLabel') }}: </span>
-        <i18n-t keypath="setupPage.configFile.changesRequiredDescription">
+        <i18n-t
+          scope="global"
+          keypath="setupPage.configFile.changesRequiredDescription"
+        >
           <span class="rounded bg-warning-200 px-1 text-warning-600 inline-block">{{ filePath }}</span>
         </i18n-t>
       </p>

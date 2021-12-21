@@ -114,6 +114,13 @@ export type KeyEventType =
   | 'textInput'
   | 'beforeinput'
 
+export type ModifiersEventOptions = {
+  altKey: boolean
+  ctrlKey: boolean
+  metaKey: boolean
+  shiftKey: boolean
+}
+
 const toModifiersEventOptions = (modifiers: KeyboardModifiers) => {
   return {
     altKey: modifiers.alt,
