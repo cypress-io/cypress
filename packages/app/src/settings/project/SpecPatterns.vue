@@ -7,7 +7,10 @@
       {{ t('settingsPage.specPattern.title') }}
     </template>
     <template #description>
-      <i18n-t keypath="settingsPage.specPattern.description">
+      <i18n-t
+        scope="global"
+        keypath="settingsPage.specPattern.description"
+      >
         <ExternalLink
           href="https://on.cypress.io"
         >
@@ -23,7 +26,10 @@
           <span class="font-medium text-gray-700">{{ t('settingsPage.specPattern.defaultIndicator') }}</span>
         </StatusIndicator>
         <span class="rounded bg-jade-100 py-4px px-8px text-jade-600 text-size-14px leading-16px">
-          <i18n-t keypath="settingsPage.specPattern.matches">
+          <i18n-t
+            scope="global"
+            keypath="settingsPage.specPattern.matches"
+          >
             {{ matches }}
           </i18n-t>
         </span>
