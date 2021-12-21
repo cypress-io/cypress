@@ -1,12 +1,4 @@
 describe('Choose a Browser Page', () => {
-  // Walks through setup pages to get to browser selection
-  const stepThroughConfigPages = () => {
-    cy.get('h1').should('contain', 'Configuration Files')
-    cy.contains('button', 'Continue').click()
-    cy.get('h1').should('contain', 'Initializing Config...')
-    cy.contains('button', 'Next Step').click()
-  }
-
   beforeEach(() => {
     cy.scaffoldProject('launchpad')
   })
@@ -24,7 +16,6 @@ describe('Choose a Browser Page', () => {
       cy.openProject('launchpad', ['--e2e', '--browser', 'edge'])
 
       cy.visitLaunchpad()
-      stepThroughConfigPages()
 
       cy.get('h1').should('contain', 'Choose a Browser')
 
@@ -34,8 +25,6 @@ describe('Choose a Browser Page', () => {
     it('shows warning when launched with --browser name that cannot be matched to found browsers', () => {
       cy.openProject('launchpad', ['--e2e', '--browser', 'doesNotExist'])
       cy.visitLaunchpad()
-
-      stepThroughConfigPages()
 
       cy.get('h1').should('contain', 'Choose a Browser')
       cy.get('[data-cy="alert-header"]').should('contain', 'Warning: Browser Not Found')
@@ -55,8 +44,6 @@ describe('Choose a Browser Page', () => {
       cy.openProject('launchpad', ['--e2e', '--browser', '/path/does/not/exist'])
 
       cy.visitLaunchpad()
-
-      stepThroughConfigPages()
 
       cy.get('h1').should('contain', 'Choose a Browser')
 
@@ -79,8 +66,6 @@ describe('Choose a Browser Page', () => {
 
       cy.visitLaunchpad()
 
-      stepThroughConfigPages()
-
       cy.get('h1').should('contain', 'Choose a Browser')
 
       cy.findByRole('radio', { name: 'Chrome v1' })
@@ -96,8 +81,6 @@ describe('Choose a Browser Page', () => {
       cy.openProject('launchpad', ['--e2e'])
 
       cy.visitLaunchpad()
-
-      stepThroughConfigPages()
 
       cy.get('h1').should('contain', 'Choose a Browser')
 
@@ -132,7 +115,6 @@ describe('Choose a Browser Page', () => {
       cy.openProject('launchpad', ['--e2e'])
 
       cy.visitLaunchpad()
-      stepThroughConfigPages()
 
       cy.get('h1').should('contain', 'Choose a Browser')
 
@@ -168,8 +150,6 @@ describe('Choose a Browser Page', () => {
       cy.openProject('launchpad', ['--e2e'])
 
       cy.visitLaunchpad()
-
-      stepThroughConfigPages()
 
       cy.get('h1').should('contain', 'Choose a Browser')
 
