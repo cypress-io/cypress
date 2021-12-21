@@ -37,14 +37,8 @@ describe('Launchpad: Open Mode', () => {
   it('auto-selects the browser when launched with --browser', () => {
     cy.scaffoldProject('launchpad')
     cy.openProject('launchpad', ['--browser', 'firefox', '--e2e'])
-    cy.visitLaunchpad()
-<<<<<<< HEAD
-
     // Need to visit after args have been configured, todo: fix in #18776
-    // cy.visitLaunchpad()
-
-=======
->>>>>>> tgriesser/10.0-release/refactor-lifecycle
+    cy.visitLaunchpad()
     cy.get('h1').should('contain', 'Choose a Browser')
     cy.get('[data-cy-browser=firefox]').should('have.class', 'border-jade-300')
     cy.get('button[data-testid=launch-button]').invoke('text').should('include', 'Launch Firefox')

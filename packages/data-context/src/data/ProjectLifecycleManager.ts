@@ -169,8 +169,6 @@ export class ProjectLifecycleManager {
     return Object.freeze(this._projectMetaState)
   }
 
-<<<<<<< HEAD
-=======
   get legacyJsonPath () {
     return path.join(this.configFilePath, 'cypress.json')
   }
@@ -179,7 +177,6 @@ export class ProjectLifecycleManager {
     return this.ctx.modeOptions.configFile ?? 'cypress.config.js'
   }
 
->>>>>>> tgriesser/10.0-release/refactor-lifecycle
   get configFilePath () {
     assert(this._configFilePath, 'Expected configFilePath to be found')
 
@@ -1219,12 +1216,8 @@ export class ProjectLifecycleManager {
   }
 
   private configFileWarningCheck () {
-<<<<<<< HEAD
     // Only if they've explicitly specified a config file path do we error, otherwise they'll go through onboarding
-    if (!this.metaState.hasValidConfigFile && this.metaState.hasSpecifiedConfigViaCLI !== false) {
-=======
     if (!this.metaState.hasValidConfigFile && this.metaState.hasSpecifiedConfigViaCLI !== false && this.ctx.isRunMode) {
->>>>>>> tgriesser/10.0-release/refactor-lifecycle
       this.ctx.onError(this.ctx.error('CONFIG_FILE_NOT_FOUND', path.basename(this.metaState.hasSpecifiedConfigViaCLI), path.dirname(this.metaState.hasSpecifiedConfigViaCLI)))
     }
 
