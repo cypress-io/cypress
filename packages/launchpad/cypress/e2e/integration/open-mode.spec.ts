@@ -41,7 +41,7 @@ describe('Launchpad: Open Mode', () => {
     cy.visitLaunchpad()
     cy.get('h1').should('contain', 'Choose a Browser')
     cy.get('[data-cy-browser=firefox]').should('have.class', 'border-jade-300')
-    cy.get('button[data-testid=launch-button]').invoke('text').should('include', 'Launch Firefox')
+    cy.get('button[data-cy=launch-button]').invoke('text').should('include', 'Launch Firefox')
   })
 
   describe('when there is a list of projects', () => {
