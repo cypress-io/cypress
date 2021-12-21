@@ -1028,6 +1028,8 @@ export class ProjectLifecycleManager {
         }
       }
 
+      this._projectMetaState = metaState
+
       return metaState
     }
 
