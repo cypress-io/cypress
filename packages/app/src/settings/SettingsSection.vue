@@ -3,7 +3,7 @@
     <h2 class="font-medium text-size-16px text-gray-900 leading-24px inline-flex items-baseline align-middle relative">
       <div
         :id="`${anchorId}-anchor`"
-        class="absolute left-0 top-[-10px]"
+        class="top-[-10px] left-0 absolute"
       />
       <slot name="title" />
       <code

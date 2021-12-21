@@ -1,6 +1,6 @@
 <template>
   <div
-    class="h-[calc(100vh-64px)] overflow-auto space-y-32px p-32px"
+    class="space-y-32px h-[calc(100vh-64px)] p-32px overflow-auto"
     data-cy="settings"
   >
     <div class="space-y-24px">
@@ -58,7 +58,7 @@ import IconLaptop from '~icons/cy/laptop_x24.svg'
 import IconFolder from '~icons/cy/folder-outline_x24.svg'
 import SettingsIcon from '~icons/cy/settings_x16.svg'
 import { useRoute } from 'vue-router'
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref, watchEffect } from 'vue'
 
 const { t } = useI18n()
 
@@ -82,11 +82,17 @@ const props = defineProps<{
 
 const route = useRoute()
 
-onMounted(() => {
-  const scrollToElement = document.getElementById(`${(route.query.setting as string)}-anchor`)
+const isMounted = ref(false)
 
-  if (scrollToElement) {
-    scrollToElement.scrollIntoView({ behavior: 'smooth', block: 'start' })
+onMounted(() => isMounted.value = true)
+
+watchEffect(() => {
+  if (route.name === 'Settings' && isMounted.value) {
+    const scrollToElement = document.getElementById(`${(route.query.setting as string)}-anchor`)
+
+    if (scrollToElement) {
+      scrollToElement.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
   }
 })
 

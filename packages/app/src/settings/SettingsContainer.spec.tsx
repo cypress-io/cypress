@@ -1,7 +1,7 @@
 import { SettingsContainerFragmentDoc } from '../generated/graphql-test'
 import { defaultMessages } from '@cy/i18n'
 import SettingsContainer from './SettingsContainer.vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 
 describe('<SettingsContainer />', { viewportHeight: 800, viewportWidth: 900 }, () => {
   const mountSettingsConatainer = () => cy.mountFragment(SettingsContainerFragmentDoc, { render: (gql) => <SettingsContainer gql={gql} /> })
@@ -51,7 +51,10 @@ describe('<SettingsContainer />', { viewportHeight: 800, viewportWidth: 900 }, (
       it(`should scroll to ${setting}`, () => {
         cy.mountFragment(SettingsContainerFragmentDoc, {
           render: (gql) => {
+            const router = useRouter()
             const route = useRoute()
+
+            router.push({ path: '/settings', query: { section, setting } })
 
             route.query.section = section
             route.query.setting = setting
@@ -62,7 +65,7 @@ describe('<SettingsContainer />', { viewportHeight: 800, viewportWidth: 900 }, (
 
         cy.get(`[data-cy="${name}"]`).within(() => {
           cy.get('[data-cy="collapsible-header"]').should('have.attr', 'aria-expanded', 'true')
-          cy.contains(defaultMessages.settingsPage[section].title).should('be.visible')
+          cy.contains(defaultMessages.settingsPage[setting].title).should('be.visible')
         })
       })
     }))
