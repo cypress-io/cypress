@@ -7,12 +7,37 @@ declare namespace Cypress {
   type HttpMethod = string
   type RequestBody = string | object
   type ViewportOrientation = 'portrait' | 'landscape'
-  type PrevSubject = 'optional' | 'element' | 'document' | 'window'
+  type PrevSubject = keyof PrevSubjectMap
   type TestingType = 'e2e' | 'component'
   type PluginConfig = (on: PluginEvents, config: PluginConfigOptions) => void | ConfigOptions | Promise<ConfigOptions>
 
+  interface PrevSubjectMap<O = unknown> {
+    optional: O
+    element: JQuery
+    document: Document
+    window: Window
+  }
+
   interface CommandOptions {
     prevSubject: boolean | PrevSubject | PrevSubject[]
+  }
+  interface CommandFn<T extends keyof ChainableMethods> {
+    (this: Mocha.Context, ...args: Parameters<ChainableMethods[T]>): ReturnType<ChainableMethods[T]> | void
+  }
+  interface CommandFnWithSubject<T extends keyof ChainableMethods, S> {
+    (this: Mocha.Context, prevSubject: S, ...args: Parameters<ChainableMethods[T]>): ReturnType<ChainableMethods[T]> | void
+  }
+  interface CommandOriginalFn<T extends keyof ChainableMethods> extends CallableFunction {
+    (...args: Parameters<ChainableMethods[T]>): ReturnType<ChainableMethods[T]>
+  }
+  interface CommandOriginalFnWithSubject<T extends keyof ChainableMethods, S> extends CallableFunction {
+    (prevSubject: S, ...args: Parameters<ChainableMethods[T]>): ReturnType<ChainableMethods[T]>
+  }
+  interface CommandFnWithOriginalFn<T extends keyof Chainable> {
+    (this: Mocha.Context, originalFn: CommandOriginalFn<T>, ...args: Parameters<ChainableMethods[T]>): ReturnType<ChainableMethods[T]> | void
+  }
+  interface CommandFnWithOriginalFnAndSubject<T extends keyof Chainable, S> {
+    (this: Mocha.Context, originalFn: CommandOriginalFnWithSubject<T, S>, prevSubject: S, ...args: Parameters<ChainableMethods[T]>): ReturnType<ChainableMethods[T]> | void
   }
   interface ObjectLike {
     [key: string]: any
@@ -295,6 +320,11 @@ declare namespace Cypress {
     LocalStorage: LocalStorage
 
     /**
+     * Internal class for session management.
+     */
+    session: Session
+
+    /**
      * Current testing type, determined by the Test Runner chosen to run.
      */
     testingType: TestingType
@@ -328,7 +358,7 @@ declare namespace Cypress {
     // 60000
     ```
      */
-    config<K extends keyof ConfigOptions>(key: K): ResolvedConfigOptions[K]
+    config<K extends keyof Config>(key: K): Config[K]
     /**
      * Sets one configuration value.
      * @see https://on.cypress.io/config
@@ -337,7 +367,7 @@ declare namespace Cypress {
     Cypress.config('viewportWidth', 800)
     ```
      */
-    config<K extends keyof ConfigOptions>(key: K, value: ResolvedConfigOptions[K]): void
+    config<K extends keyof TestConfigOverrides>(key: K, value: TestConfigOverrides[K]): void
     /**
      * Sets multiple configuration values at once.
      * @see https://on.cypress.io/config
@@ -420,9 +450,16 @@ declare namespace Cypress {
      * @see https://on.cypress.io/api/commands
      */
     Commands: {
-      add<T extends keyof Chainable>(name: T, fn: Chainable[T]): void
-      add<T extends keyof Chainable>(name: T, options: CommandOptions, fn: Chainable[T]): void
-      overwrite<T extends keyof Chainable>(name: T, fn: Chainable[T]): void
+      add<T extends keyof Chainable>(name: T, fn: CommandFn<T>): void
+      add<T extends keyof Chainable>(name: T, options: CommandOptions & {prevSubject: false}, fn: CommandFn<T>): void
+      add<T extends keyof Chainable, S extends PrevSubject>(
+          name: T, options: CommandOptions & { prevSubject: true | S | ['optional'] }, fn: CommandFnWithSubject<T, PrevSubjectMap[S]>,
+      ): void
+      add<T extends keyof Chainable, S extends PrevSubject>(
+          name: T, options: CommandOptions & { prevSubject: S[] }, fn: CommandFnWithSubject<T, PrevSubjectMap<void>[S]>,
+      ): void
+      overwrite<T extends keyof Chainable>(name: T, fn: CommandFnWithOriginalFn<T>): void
+      overwrite<T extends keyof Chainable, S extends PrevSubject>(name: T, fn: CommandFnWithOriginalFnAndSubject<T, PrevSubjectMap[S]>): void
     }
 
     /**
@@ -2209,12 +2246,9 @@ declare namespace Cypress {
      * @see https://on.cypress.io/writefile
     ```
     cy.writeFile('path/to/message.txt', 'Hello World')
-      .then((text) => {
-        expect(text).to.equal('Hello World') // true
-      })
     ```
      */
-    writeFile<C extends FileContents>(filePath: string, contents: C, encoding: Encodings): Chainable<C>
+    writeFile(filePath: string, contents: FileContents, encoding: Encodings): Chainable<null>
     /**
      * Write to a file with the specified encoding and contents.
      *
@@ -2223,12 +2257,10 @@ declare namespace Cypress {
     cy.writeFile('path/to/ascii.txt', 'Hello World', {
       flag: 'a+',
       encoding: 'ascii'
-    }).then((text) => {
-      expect(text).to.equal('Hello World') // true
     })
     ```
      */
-    writeFile<C extends FileContents>(filePath: string, contents: C, options?: Partial<WriteFileOptions>): Chainable<C>
+    writeFile(filePath: string, contents: FileContents, options?: Partial<WriteFileOptions & Timeoutable>): Chainable<null>
     /**
      * Write to a file with the specified encoding and contents.
      *
@@ -2238,12 +2270,10 @@ declare namespace Cypress {
     ```
     cy.writeFile('path/to/ascii.txt', 'Hello World', 'utf8', {
       flag: 'a+',
-    }).then((text) => {
-      expect(text).to.equal('Hello World') // true
     })
     ```
      */
-    writeFile<C extends FileContents>(filePath: string, contents: C, encoding: Encodings, options?: Partial<WriteFileOptions>): Chainable<C>
+    writeFile(filePath: string, contents: FileContents, encoding: Encodings, options?: Partial<WriteFileOptions & Timeoutable>): Chainable<null>
 
     /**
      * jQuery library bound to the AUT
@@ -2253,6 +2283,12 @@ declare namespace Cypress {
      *    cy.$$('p')
      */
     $$<TElement extends Element = HTMLElement>(selector: JQuery.Selector, context?: Element | Document | JQuery): JQuery<TElement>
+  }
+
+  type ChainableMethods<Subject = any> = {
+    [P in keyof Chainable<Subject>]: Chainable<Subject>[P] extends ((...args: any[]) => any)
+        ? Chainable<Subject>[P]
+        : never
   }
 
   interface SinonSpyAgent<A extends sinon.SinonSpy> {
@@ -2886,7 +2922,7 @@ declare namespace Cypress {
     xhrUrl: string
   }
 
-  interface TestConfigOverrides extends Partial<Pick<ConfigOptions, 'animationDistanceThreshold' | 'baseUrl' | 'defaultCommandTimeout' | 'env' | 'execTimeout' | 'includeShadowDom' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>> {
+  interface TestConfigOverrides extends Partial<Pick<ConfigOptions, 'animationDistanceThreshold' | 'baseUrl' | 'blockHosts' | 'defaultCommandTimeout' | 'env' | 'execTimeout' | 'includeShadowDom' | 'numTestsKeptInMemory' | 'pageLoadTimeout' | 'redirectionLimit' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'screenshotOnRunFailure' | 'slowTestThreshold' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>> {
     browser?: IsBrowserMatcher | IsBrowserMatcher[]
     keystrokeDelay?: number
   }
@@ -3084,6 +3120,11 @@ declare namespace Cypress {
     onAnyRequest(route: RouteOptions, proxy: any): void
     onAnyResponse(route: RouteOptions, proxy: any): void
     onAnyAbort(route: RouteOptions, proxy: any): void
+  }
+
+  interface Session {
+    // Clear all saved sessions and re-run the current spec file.
+    clearAllSavedSessions: () => Promise<void>
   }
 
   type SameSiteStatus = 'no_restriction' | 'strict' | 'lax'
