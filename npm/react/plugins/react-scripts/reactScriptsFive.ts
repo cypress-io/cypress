@@ -17,7 +17,9 @@ export function reactScriptsFiveModifications (webpackConfig: Configuration) {
   // depending on the environment (process.env.NODE_ENV). Since we set
   // process.env.NODE_ENV = "test", webpack is unable to find any browsers and errors.
   // We set BROWSERSLIST_ENV = "development" to override the default NODE_ENV search of browsers.
-  process.env.BROWSERSLIST_ENV = 'development'
+  if (!process.env.BROWSERSLIST_ENV) {
+    process.env.BROWSERSLIST_ENV = 'development'
+  }
 
   // We use the "development" configuration of the react-scripts webpack config.
   // There is a conflict when settings process.env.NODE_ENV = "test" since DefinePlugin
@@ -56,4 +58,4 @@ export function reactScriptsFiveModifications (webpackConfig: Configuration) {
   }
 }
 
-export const isReactScripts5 = reactScriptsPackageJson.version.startsWith('5')
+export const isReactScripts5 = Number(reactScriptsPackageJson.version[0]) >= 5
