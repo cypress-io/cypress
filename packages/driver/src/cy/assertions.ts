@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import _ from 'lodash'
 import Promise from 'bluebird'
 
@@ -54,12 +52,18 @@ const isDomSubjectAndMatchesValue = (value, subject) => {
   return false
 }
 
+type Parsed = {
+  subject?: JQuery<any>
+  actual?: any
+  expected?: any
+}
+
 // Rules:
 // 1. always remove value
 // 2. if value is a jquery object set a subject
 // 3. if actual is undefined or its not expected remove both actual + expected
 const parseValueActualAndExpected = (value, actual, expected) => {
-  const obj = { actual, expected }
+  const obj: Parsed = { actual, expected }
 
   if ($dom.isJquery(value)) {
     obj.subject = value
@@ -77,7 +81,7 @@ export const create = (Cypress, cy) => {
   const getUpcomingAssertions = () => {
     const index = cy.state('index') + 1
 
-    const assertions = []
+    const assertions: any[] = []
 
     // grab the rest of the queue'd commands
     for (let cmd of cy.queue.slice(index)) {
@@ -137,15 +141,29 @@ export const create = (Cypress, cy) => {
       message = message.replace(stackTracesRe, '\n')
     }
 
-    let obj = parseValueActualAndExpected(value, actual, expected)
+    let parsed = parseValueActualAndExpected(value, actual, expected)
+    // TODO: make it more specific after defining the type for Cypress.log().
+    let obj: Record<string, any> = {
+      ...parsed,
+    }
 
     if ($dom.isElement(value)) {
       obj.$el = $dom.wrap(value)
     }
 
-    // if we are simply verifying the upcoming
-    // assertions then do not immediately end or snapshot
-    // else do
+    // `verifying` represents whether we're deciding whether or not to resolve
+    // a command (true) or of we're actually performing a user-facing assertion
+    // (false).
+
+    // If we're verifying upcoming assertions (implicit or explicit),
+    // then we don't need to take a DOM snapshot - one will be taken later when
+    // retries time out or the command otherwise entirely fails or passes.
+    // We save the error on _error because we may use it to construct the
+    // timeout error which we eventually do display to the user.
+
+    // If we're actually performing an assertion which will be displayed to the
+    // user though, then we want to take a DOM snapshot and display this error
+    // (if any) in the log message on screen.
     if (verifying) {
       obj._error = error
     } else {
@@ -216,10 +234,18 @@ export const create = (Cypress, cy) => {
     })
   }
 
+  type VerifyUpcomingAssertionsCallbacks = {
+    ensureExistenceFor?: 'subject' | 'dom' | boolean
+    onPass?: Function
+    onFail?: (err?, isDefaultAssertionErr?: boolean, cmds?: any[]) => void
+    onRetry?: () => any
+  }
+
   return {
     finishAssertions,
 
-    verifyUpcomingAssertions (subject, options = {}, callbacks = {}) {
+    // TODO: define the specific type of options
+    verifyUpcomingAssertions (subject, options: Record<string, any> = {}, callbacks: VerifyUpcomingAssertionsCallbacks = {}) {
       const cmds = getUpcomingAssertions()
 
       cy.state('upcomingAssertions', cmds)
@@ -267,6 +293,7 @@ export const create = (Cypress, cy) => {
       }
 
       const onPassFn = () => {
+        cy.state('overrideAssert', undefined)
         if (_.isFunction(callbacks.onPass)) {
           return callbacks.onPass.call(this, cmds, options.assertions)
         }
@@ -289,6 +316,7 @@ export const create = (Cypress, cy) => {
           err = e2
         }
 
+        cy.state('overrideAssert', undefined)
         err.isDefaultAssertionErr = isDefaultAssertionErr
 
         options.error = err
@@ -324,6 +352,24 @@ export const create = (Cypress, cy) => {
       // bail if we have no assertions and apply
       // the default assertions if applicable
       if (!cmds.length) {
+        // In general in cypress, when assertions fail we want to take a DOM
+        // snapshot to display to the user. In this case though, when we invoke
+        // ensureExistence, we're not going to display the error (if there is
+        // one) to the user - we're only deciding whether to resolve this current
+        // command (assertions pass) or fail (and probably retry). A DOM snapshot
+        // isn't necessary in either case - one will be taken later as part of the
+        // command (if they pass) or when we time out retrying.
+
+        // Chai assertions have a signature of (passed, message, value, actual,
+        // expected, error). Our assertFn, defined earlier in the file, adds
+        // on a 7th arg, "verifying", which defaults to false. We here override
+        // the assert function with our own, which just invokes the old one
+        // with verifying = true. This override is cleaned up immediately
+        // afterwards, in either onPassFn or onFailFn.
+        cy.state('overrideAssert', function (...args) {
+          return assertFn.apply(this, args.concat(true) as any)
+        })
+
         return Promise
         .try(ensureExistence)
         .then(onPassFn)
@@ -433,12 +479,13 @@ export const create = (Cypress, cy) => {
         cy.state('onBeforeLog', setCommandLog)
 
         // send verify=true as the last arg
-        return assertFn.apply(this, args.concat(true))
+        return assertFn.apply(this, args.concat(true) as any)
       }
 
       const fns = injectAssertionFns(cmds)
 
-      const subjects = []
+      // TODO: remove any when the type of subject, the first argument of this function is specified.
+      const subjects: any[] = []
 
       // iterate through each subject
       // and force the assertion to return
@@ -477,8 +524,6 @@ export const create = (Cypress, cy) => {
         return cy.state('overrideAssert', undefined)
       }
 
-      // store this in case our test ends early
-      // and we reset between tests
       cy.state('overrideAssert', overrideAssert)
 
       return Promise
