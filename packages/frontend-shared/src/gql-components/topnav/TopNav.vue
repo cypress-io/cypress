@@ -1,11 +1,14 @@
 <template>
-  <TopNavList v-if="versions && runningOldVersion">
+  <TopNavList
+    v-if="versions && runningOldVersion"
+    data-cy="cypress-update-popover"
+  >
     <template #heading="{ open }">
       <i-cy-arrow-outline-down_x16
         class="h-16px w-16px group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50"
         :class="open ? 'icon-dark-indigo-500 icon-light-indigo-50' : 'icon-dark-gray-500 icon-light-gray-100'"
       />
-      <span data-cy="topnav-version-list">v{{ versions.current.version }} <span
+      <span data-cy="top-nav-version-list">v{{ versions.current.version }} <span
         class="text-indigo-300"
         aria-hidden="true"
       >•</span> Upgrade</span>
@@ -49,6 +52,7 @@
 
     <TopNavListItem
       class="bg-yellow-50 py-8px px-16px"
+      data-cy="current-hint"
     >
       <div class="whitespace-nowrap">
         <ExternalLink
@@ -85,6 +89,7 @@
     :href="`${releasesUrl}/tag/v${versions.latest.version}`"
     class="flex outline-transparent text-gray-600 gap-8px items-center group hocus:text-indigo-500 hocus:outline-0"
     :use-default-hocus="false"
+    data-cy="top-nav-cypress-version-current-link"
   >
     <i-cy-box_x16
       class="h-16px w-16px group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50 icon-dark-gray-500 icon-light-gray-100"
@@ -94,15 +99,18 @@
     </span>
   </ExternalLink>
 
-  <TopNavList v-if="props.gql?.currentProject?.currentBrowser && showBrowsers">
+  <TopNavList
+    v-if="props.gql?.currentProject?.currentBrowser && showBrowsers"
+  >
     <template #heading="{ open }">
       <img
         class="w-16px filter group-hocus:grayscale-0"
+        data-cy="top-nav-active-browser-icon"
         :class="open ? 'grayscale-0' : 'grayscale'"
         :src="allBrowsersIcons[props.gql?.currentProject?.currentBrowser?.displayName || '']"
       >
       <span
-        data-cy="topnav-browser-list"
+        data-cy="top-nav-active-browser"
       >{{ props.gql.currentProject?.currentBrowser?.displayName }} v{{ props.gql.currentProject?.currentBrowser?.majorVersion }}</span>
     </template>
     <TopNavListItem
@@ -111,6 +119,8 @@
       class="cursor-pointer min-w-240px py-12px px-16px"
       :class="browser.isSelected ? 'bg-jade-50' : ''"
       :selectable="!browser.isSelected"
+      data-cy="top-nav-browser-list-item"
+      :data-browser-id="browser.id"
       @click="handleBrowserChoice(browser)"
     >
       <template #prefix>
@@ -138,7 +148,7 @@
         v-if="browser.isSelected"
         #suffix
       >
-        <div>
+        <div data-cy="top-nav-browser-list-selected-item">
           <i-cy-circle-check_x24 class="h-24px w-24px icon-dark-jade-100 icon-light-jade-500" />
         </div>
       </template>

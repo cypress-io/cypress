@@ -15,7 +15,7 @@ const logger = require('../logger')
 const xvfb = require('../exec/xvfb')
 const state = require('./state')
 
-const VERIFY_TEST_RUNNER_TIMEOUT_MS = 30000
+const VERIFY_TEST_RUNNER_TIMEOUT_MS = process.env.CYPRESS_VERIFY_TIMEOUT || 30000
 
 const checkExecutable = (binaryDir) => {
   const executable = state.getPathToExecutable(binaryDir)
