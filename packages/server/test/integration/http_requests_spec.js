@@ -3961,29 +3961,30 @@ describe('Routes', () => {
       this.timeout(10000) // TODO(tim): figure out why this is flaky now?
 
       beforeEach(function (done) {
-        Fixtures.scaffold('e2e')
+        Fixtures.scaffoldProject('e2e')
+        .then(() => {
+          this.httpSrv = http.createServer((req, res) => {
+            const { query } = url.parse(req.url, true)
 
-        this.httpSrv = http.createServer((req, res) => {
-          const { query } = url.parse(req.url, true)
+            if (_.has(query, 'chunked')) {
+              res.setHeader('tranfer-encoding', 'chunked')
+            } else {
+              res.setHeader('content-length', '0')
+            }
 
-          if (_.has(query, 'chunked')) {
-            res.setHeader('tranfer-encoding', 'chunked')
-          } else {
-            res.setHeader('content-length', '0')
-          }
+            res.writeHead(Number(query.status), {
+              'x-foo': 'bar',
+            })
 
-          res.writeHead(Number(query.status), {
-            'x-foo': 'bar',
+            return res.end()
           })
 
-          return res.end()
-        })
+          return this.httpSrv.listen(() => {
+            this.port = this.httpSrv.address().port
 
-        return this.httpSrv.listen(() => {
-          this.port = this.httpSrv.address().port
-
-          return this.setup(`http://localhost:${this.port}`)
-          .then(_.ary(done, 0))
+            return this.setup(`http://localhost:${this.port}`)
+            .then(_.ary(done, 0))
+          })
         })
       })
 
@@ -3995,7 +3996,7 @@ describe('Routes', () => {
         it(`passes through a ${status} response immediately`, function () {
           return this.rp({
             url: `http://localhost:${this.port}/?status=${status}`,
-            timeout: 100,
+            timeout: 1000,
           })
           .then((res) => {
             expect(res.headers['x-foo']).to.eq('bar')
