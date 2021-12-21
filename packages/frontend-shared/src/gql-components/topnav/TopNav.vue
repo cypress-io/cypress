@@ -9,7 +9,6 @@
       />
       <span
         data-cy="top-nav-version-list"
-
         class="font-semibold text-indigo-500"
       >v{{ versions.current.version }} <span
         class="text-indigo-300"
