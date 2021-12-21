@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 describe('Launchpad: Onboarding Flow', () => {
   beforeEach(() => {
     cy.scaffoldProject('pristine')
@@ -7,6 +8,14 @@ describe('Launchpad: Onboarding Flow', () => {
         name: 'cypress',
         main: 'index.js',
       }))
+=======
+// NOTE: Will restore in https://github.com/cypress-io/cypress/pull/19425
+describe.skip('Onboarding Flow', () => {
+  it('can scaffold a project in e2e mode', () => {
+    cy.scaffoldProject('unify-onboarding')
+    cy.openProject('unify-onboarding')
+    cy.loginUser()
+>>>>>>> tgriesser/10.0-release/refactor-lifecycle
 
       ctx.actions.file.writeFileInProject('node_modules/@cypress/webpack-dev-server/package.json', JSON.stringify({
         name: '@cypress/webpack-dev-server',

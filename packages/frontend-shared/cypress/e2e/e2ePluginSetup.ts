@@ -250,6 +250,7 @@ async function makeE2ETasks () {
         testState,
         require,
         process,
+        sinon,
         projectDir (projectName) {
           if (!e2eProjectDirs.includes(projectName)) {
             throw new Error(`${projectName} is not a fixture project`)

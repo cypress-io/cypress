@@ -38,12 +38,15 @@ describe('Launchpad: Open Mode', () => {
     cy.scaffoldProject('launchpad')
     cy.openProject('launchpad', ['--browser', 'firefox', '--e2e'])
     cy.visitLaunchpad()
+<<<<<<< HEAD
 
     // Need to visit after args have been configured, todo: fix in #18776
     // cy.visitLaunchpad()
 
+=======
+>>>>>>> tgriesser/10.0-release/refactor-lifecycle
     cy.get('h1').should('contain', 'Choose a Browser')
-    cy.contains('Firefox').parent().should('have.class', 'border-jade-300')
+    cy.get('[data-cy-browser=firefox]').should('have.class', 'border-jade-300')
     cy.get('button[data-testid=launch-button]').invoke('text').should('include', 'Launch Firefox')
   })
 
@@ -105,8 +108,10 @@ describe('Launchpad: Open Mode', () => {
     })
 
     it('opens using finder', () => {
+      cy.scaffoldProject('todos')
       cy.openProject('todos')
       cy.withCtx(async (ctx, o) => {
+        ctx.actions.electron.showItemInFolder = o.sinon.stub()
         ctx.coreData.app.projects = [{ projectRoot: '/some/project' }]
       })
 
@@ -119,6 +124,10 @@ describe('Launchpad: Open Mode', () => {
       cy.get('button').contains('Open In Finder').click()
 
       cy.wait('@OpenInFinder')
+
+      cy.withCtx((ctx, o) => {
+        expect(ctx.actions.electron.showItemInFolder).to.have.been.calledOnceWith('/some/project')
+      })
     })
   })
 })

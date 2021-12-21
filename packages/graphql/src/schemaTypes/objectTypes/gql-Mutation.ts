@@ -205,7 +205,11 @@ export const mutation = mutationType({
         specPath: stringArg(),
       },
       resolve: async (_, args, ctx) => {
-        await ctx.actions.project.launchProject(ctx.coreData.currentTestingType, {}, args.specPath)
+        try {
+          await ctx.actions.project.launchProject(ctx.coreData.currentTestingType, {}, args.specPath)
+        } catch (e) {
+          ctx.coreData.baseError = e as Error
+        }
       },
     })
 
