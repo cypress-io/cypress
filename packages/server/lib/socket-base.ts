@@ -17,7 +17,6 @@ import type { DestroyableHttpServer } from './util/server_destroy'
 import * as session from './session'
 // eslint-disable-next-line no-duplicate-imports
 import type { Socket } from '@packages/socket'
-import path from 'path'
 import type { DataContext } from '@packages/data-context'
 
 type StartListeningCallbacks = {
@@ -407,7 +406,7 @@ export class SocketBase {
             case 'exec':
               return exec.run(config.projectRoot, args[0])
             case 'task':
-              return task.run(config.configFile ? path.join(config.projectRoot, config.configFile) : null, args[0])
+              return task.run(config.configFile ? config.configFile : null, args[0])
             case 'save:session':
               return session.saveSession(args[0])
             case 'clear:session':
