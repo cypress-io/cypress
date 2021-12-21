@@ -1130,13 +1130,13 @@ export class ProjectLifecycleManager {
     const finalConfig = this._cachedFullConfig = this.ctx._apis.configApi.updateWithPluginValues(fullConfig, result.setupConfig ?? {})
 
     if (this.ctx.coreData.cliBrowser) {
-      await this.setActiveBrowser(finalConfig, this.ctx.coreData.cliBrowser)
+      await this.setActiveBrowser(this.ctx.coreData.cliBrowser)
     }
 
     this._pendingInitialize?.resolve(finalConfig)
   }
 
-  private async setActiveBrowser (config: FullConfig, cliBrowser: string) {
+  private async setActiveBrowser (cliBrowser: string) {
     // When we're starting up, if we've chosen a browser to run with, check if it exists
     this.ctx.coreData.cliBrowser = null
 

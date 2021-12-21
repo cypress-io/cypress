@@ -28,7 +28,7 @@ describe('App Top Nav Workflows', () => {
         .should('have.attr', 'src')
         .and('contain', 'firefox')
 
-        cy.findByTestId('top-nav-active-browser').should('contain', 'Firefox v5')
+        cy.findByTestId('top-nav-active-browser').should('contain', 'Firefox 5')
       })
     })
 
@@ -50,7 +50,7 @@ describe('App Top Nav Workflows', () => {
         .should('have.attr', 'src')
         .and('contain', 'chrome')
 
-        cy.findByTestId('top-nav-active-browser').should('contain', 'Chrome v1')
+        cy.findByTestId('top-nav-active-browser').should('contain', 'Chrome 1')
       })
 
       it('shows list of browser options in dropdown when selected', () => {

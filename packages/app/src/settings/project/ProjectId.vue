@@ -2,6 +2,7 @@
   <SettingsSection
     code="projectId"
     data-cy="settings-projectId"
+    anchor-id="projectId"
   >
     <template #title>
       {{ t('settingsPage.projectId.title') }}

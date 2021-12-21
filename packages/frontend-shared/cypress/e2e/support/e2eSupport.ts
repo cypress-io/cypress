@@ -286,7 +286,7 @@ function findBrowsers (options: SetFoundBrowsersOptions = {}) {
 
   cy.withCtx(async (ctx, o) => {
     // @ts-ignore sinon is a global in the node process where this is executed
-    sinon.stub(ctx._apis.appApi, 'getBrowsers').resolves(o.browsers)
+    sinon.stub(ctx._apis.browserApi, 'getBrowsers').resolves(o.browsers)
   }, { browsers: filteredBrowsers })
 }
 
