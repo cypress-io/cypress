@@ -1,10 +1,16 @@
 <template>
-  <SettingsSection data-cy="settings-config">
+  <SettingsSection
+    data-cy="settings-config"
+    anchor-id="config"
+  >
     <template #title>
       {{ t('settingsPage.config.title') }}
     </template>
     <template #description>
-      <i18n-t keypath="settingsPage.config.description">
+      <i18n-t
+        scope="global"
+        keypath="settingsPage.config.description"
+      >
         <OpenConfigFileInIDE :gql="props.gql" />
       </i18n-t>
     </template>

@@ -19,7 +19,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import { gql } from '@urql/vue'
 import TerminalPrompt from '@cy/components/TerminalPrompt.vue'
 import type { RunsEmptyFragment } from '../generated/graphql'

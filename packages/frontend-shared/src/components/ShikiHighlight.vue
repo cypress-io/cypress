@@ -51,7 +51,7 @@ shikiWrapperClasses computed property.
 
         props.class,
       ]"
-      @click="copyOnClick ? () => copyCode() : () => {}"
+      @click="copyOnClick && isSupported ? () => copyCode() : () => {}"
       v-html="highlightedCode"
     />
     <pre
@@ -60,7 +60,7 @@ shikiWrapperClasses computed property.
       :class="[props.class, lineNumbers ? 'pl-56px' : 'pl-8px' ]"
     >{{ trimmedCode }}</pre>
     <CopyButton
-      v-if="copyButton"
+      v-if="copyButton && isSupported"
       variant="outline"
       tabindex="-1"
       class="absolute"
@@ -151,7 +151,7 @@ const highlightedCode = computed(() => {
 
 const codeEl: Ref<HTMLElement | null> = ref(null)
 
-const { copy } = useClipboard()
+const { copy, isSupported } = useClipboard()
 
 const copyCode = () => {
   if (codeEl.value) {
