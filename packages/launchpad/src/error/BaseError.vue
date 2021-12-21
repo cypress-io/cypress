@@ -14,6 +14,7 @@
       <slot name="message">
         <!-- Can't pull this out because of the i18n-t component -->
         <i18n-t
+          scope="global"
           keypath="launchpadErrors.generic.message"
           tag="p"
           class="font-light pb-24px"

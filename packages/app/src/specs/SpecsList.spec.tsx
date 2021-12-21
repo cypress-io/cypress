@@ -45,9 +45,14 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
       .get(rowSelector)
       .should('not.exist')
 
-      cy.get(inputSelector).clear().type(longestSpec.relative)
+      cy.get(inputSelector).clear().type(longestSpec.fileName)
       cy.get(rowSelector).first().should('contain', longestSpec.relative.replace(`/${longestSpec.fileName}${longestSpec.specFileExtension}`, ''))
       cy.get(rowSelector).last().should('contain', `${longestSpec.fileName}${longestSpec.specFileExtension}`)
+
+      const directory = longestSpec.relative.slice(0, longestSpec.relative.lastIndexOf('/'))
+
+      cy.get(inputSelector).clear().type(directory)
+      cy.get(rowSelector).first().should('contain', directory)
     })
 
     it('should close directories', () => {
