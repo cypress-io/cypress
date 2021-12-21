@@ -116,7 +116,7 @@ export const CurrentProject = objectType({
     t.string('configFile', {
       description: 'Config File, specified by the CLI or ',
       resolve: (source, args, ctx) => {
-        return ctx.lifecycleManager.configFile
+        return ctx.lifecycleManager.configFile.toString()
       },
     })
 

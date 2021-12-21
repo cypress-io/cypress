@@ -518,8 +518,14 @@ export class ProjectLifecycleManager {
     return promise.then((v) => v.initialConfig)
   }
 
-  private validateConfigFile (file: string, config: Cypress.ConfigOptions) {
+  private validateConfigFile (file: string | false, config: Cypress.ConfigOptions) {
     this.ctx._apis.configApi.validateConfig(config, (errMsg) => {
+      if (!file) {
+        // This should never happen, b/c if the config file is false, the config
+        // should be the default one
+        throw this.ctx.error('CONFIG_VALIDATION_ERROR', errMsg)
+      }
+
       const base = path.basename(file)
 
       throw this.ctx.error('SETTINGS_VALIDATION_ERROR', base, errMsg)
@@ -1098,7 +1104,9 @@ export class ProjectLifecycleManager {
 
       this.ctx.coreData.chosenBrowser = browser ?? null
     } catch (e) {
-      this.ctx.onWarning(e)
+      const error = e as Error
+
+      this.ctx.onWarning(error)
     }
   }
 
