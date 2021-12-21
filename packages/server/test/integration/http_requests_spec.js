@@ -4008,7 +4008,7 @@ describe('Routes', () => {
         it(`passes through a ${status} response with chunked encoding immediately`, function () {
           return this.rp({
             url: `http://localhost:${this.port}/?status=${status}&chunked`,
-            timeout: 100,
+            timeout: 1000,
           })
           .then((res) => {
             expect(res.headers['x-foo']).to.eq('bar')
