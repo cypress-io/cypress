@@ -113,6 +113,7 @@
       >
       <span
         data-cy="top-nav-active-browser"
+        class="font-semibold"
       >{{ props.gql.currentProject?.currentBrowser?.displayName }} v{{ props.gql.currentProject?.currentBrowser?.majorVersion }}</span>
     </template>
     <TopNavListItem

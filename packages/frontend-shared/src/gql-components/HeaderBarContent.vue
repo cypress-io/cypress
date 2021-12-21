@@ -86,7 +86,7 @@
             <i-cy-profile_x16
               class="h-16px mr-8px w-16px block icon-dark-gray-500 icon-light-gray-100 group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50"
             />
-            <span class="group-hocus:text-indigo-500">{{ t('topNav.login.actionLogin') }}</span>
+            <span class="font-semibold group-hocus:text-indigo-500">{{ t('topNav.login.actionLogin') }}</span>
           </button>
         </div>
       </div>
