@@ -69,13 +69,5 @@ withDefaults(defineProps<{
   checked: false,
 })
 
-const slots = useSlots()
-const slotNames:string[] = []
-let i = 0
-
-while (slots[`step-${++i}`]) {
-  slotNames.push(`step-${i}`)
-}
-
 const emit = defineEmits(['toggle'])
 </script>
