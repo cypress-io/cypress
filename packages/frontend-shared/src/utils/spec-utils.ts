@@ -1,4 +1,5 @@
 import type { FoundSpec } from '@packages/types'
+import { ref, watch } from 'vue'
 import type { UseCollapsibleTreeNode } from '../composables/useCollapsibleTree'
 
 export type FuzzyFoundSpec = FoundSpec & { indexes: number[] }
@@ -72,4 +73,24 @@ export function getIndexes (row: UseCollapsibleTreeNode<SpecTreeNode<FuzzyFoundS
   const res = indexes?.filter((index) => index >= minIndex && index <= maxIndex)
 
   return res.map((idx) => idx - minIndex)
+}
+
+type SpecEdges = { node: FoundSpec }[]
+
+export function useCachedSpecs (specs) {
+  const cachedSpecs = ref<SpecEdges>([])
+
+  watch(specs, (currentSpecs: SpecEdges, prevSpecs: SpecEdges = []) => {
+    const specsAreDifferent =
+      currentSpecs.length !== prevSpecs.length ||
+      currentSpecs.some(
+        (spec, idx) => spec.node.absolute !== prevSpecs[idx]?.node?.absolute,
+      )
+
+    if (specsAreDifferent) {
+      cachedSpecs.value = currentSpecs
+    }
+  }, { immediate: true })
+
+  return cachedSpecs
 }

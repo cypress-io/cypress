@@ -22,6 +22,8 @@ const publicConfigKeys = _(options).reject({ isInternal: true }).map('name').val
 const validationRules = createIndex(options, 'name', 'validation')
 const testConfigOverrideOptions = createIndex(options, 'name', 'canUpdateDuringTestTime')
 
+const issuedWarnings = new Set()
+
 module.exports = {
   allowed: (obj = {}) => {
     const propertyNames = publicConfigKeys.concat(breakingKeys)
@@ -85,6 +87,13 @@ module.exports = {
         }
 
         if (isWarning) {
+          if (issuedWarnings.has(errorKey)) {
+            return
+          }
+
+          // avoid re-issuing the same warning more than once
+          issuedWarnings.add(errorKey)
+
           return onWarning(errorKey, {
             name,
             newName,

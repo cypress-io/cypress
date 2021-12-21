@@ -1,4 +1,5 @@
 const _ = require('lodash')
+const path = require('path')
 const la = require('lazy-ass')
 const chalk = require('chalk')
 const check = require('check-more-types')
@@ -444,7 +445,7 @@ const createRun = Promise.method((options = {}) => {
         }
       }
       case 404:
-        return errors.throw('DASHBOARD_PROJECT_NOT_FOUND', projectId, options.configFile)
+        return errors.throw('DASHBOARD_PROJECT_NOT_FOUND', projectId, path.basename(options.configFile))
       case 412:
         return errors.throw('DASHBOARD_INVALID_RUN_REQUEST', err.error)
       case 422: {

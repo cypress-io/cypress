@@ -9,7 +9,8 @@ const projectRoot = process.cwd()
 
 let ctx
 
-describe('lib/util/settings', () => {
+// NOTE: tested by cypress open mode tests now
+describe.skip('lib/util/settings', () => {
   beforeEach(() => {
     ctx = getCtx()
   })

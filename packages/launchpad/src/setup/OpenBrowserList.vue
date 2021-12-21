@@ -7,6 +7,7 @@
       <div
         v-for="browser of props.gql.browsers"
         :key="browser.id"
+        :data-cy-browser="browser.name"
         class="relative block pt-6 pb-4 text-center rounded w-160px border-1"
         :class="{
           'border-jade-300 ring-2 ring-jade-50': browser.isSelected,

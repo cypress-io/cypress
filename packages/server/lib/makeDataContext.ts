@@ -36,6 +36,12 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
     ...options,
     browserApi: {
       close: browsers.close,
+      getBrowsers,
+      async ensureAndGetByNameOrPath (nameOrPath: string) {
+        const browsers = await ctx.browser.machineBrowsers()
+
+        return await ensureAndGetByNameOrPath(nameOrPath, false, browsers)
+      },
     },
     errorApi: {
       error: errors.get,
@@ -51,8 +57,6 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
     },
     appApi: {
       appData,
-      getBrowsers,
-      ensureAndGetByNameOrPath,
       findNodePath () {
         return findSystemNode.findNodeInFullPath()
       },

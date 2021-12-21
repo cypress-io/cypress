@@ -192,7 +192,7 @@ class RunPlugins {
   }
 
   taskMerge (target, events) {
-    const duplicates = _.intersection(_.keys(this.registeredEventsById), _.keys(events))
+    const duplicates = _.intersection(_.keys(target), _.keys(events))
 
     if (duplicates.length) {
       errors.warning('DUPLICATE_TASK_KEY', duplicates.join(', '))

@@ -26,6 +26,7 @@ import {
   GraphQLDataSource,
   HtmlDataSource,
   UtilDataSource,
+  BrowserApiShape,
 } from './sources/'
 import { cached } from './util/cached'
 import type { GraphQLSchema } from 'graphql'
@@ -50,10 +51,6 @@ export interface InternalDataContextOptions {
 export interface ErrorApiShape {
   error: (type: string, ...args: any) => Error & { type: string, details: string, code?: string, isCypressErr: boolean}
   message: (type: string, ...args: any) => string
-}
-
-export interface BrowserApiShape {
-  close(): Promise<any>
 }
 
 export interface DataContextConfig {
@@ -293,6 +290,7 @@ export class DataContext {
     return {
       appApi: this._config.appApi,
       authApi: this._config.authApi,
+      browserApi: this._config.browserApi,
       configApi: this._config.configApi,
       projectApi: this._config.projectApi,
       errorApi: this._config.errorApi,
@@ -334,7 +332,7 @@ export class DataContext {
     console.error(e)
   }
 
-  onError = (err: Error, source: 'plugins' | 'config' | 'global') => {
+  onError = (err: Error) => {
     if (this.isRunMode) {
       // console.error(err)
       throw err
@@ -348,7 +346,13 @@ export class DataContext {
       // eslint-disable-next-line
       console.log(chalk.yellow(err.message))
     } else {
-      //
+      // const message = err.details ? `${err.message}\n\n\`\`\`\n${err.details}\n\`\`\`` : err.message
+
+      // this.ctx.coreData.wizard.warnings.push({
+      //   title: 'Warning: Browser Not Found',
+      //   message,
+      //   setupStep: 'setupComplete',
+      // })
     }
   }
 

@@ -1,4 +1,5 @@
-describe('Onboarding Flow', () => {
+// NOTE: Will restore in https://github.com/cypress-io/cypress/pull/19425
+describe.skip('Onboarding Flow', () => {
   it('can scaffold a project in e2e mode', () => {
     cy.scaffoldProject('unify-onboarding')
     cy.openProject('unify-onboarding')
