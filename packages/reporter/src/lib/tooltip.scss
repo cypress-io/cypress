@@ -2,15 +2,16 @@ $cy-tooltip-class: 'cy-tooltip';
 @import '../../node_modules/@cypress/react-tooltip/dist/tooltip.scss';
 
 .cy-tooltip {
+  background-color: $gray-50;
+  border-color: $gray-50;
+  color: $gray-1000;
   font-family: $font-sans;
   word-wrap: break-word;
-  background-color: $gray-50;
-  color: $gray-1000;
 
   .cy-tooltip-arrow {
     svg {
       fill: $gray-50;
-      stroke: $gray-1000;
+      stroke: $gray-50;
     }
   }
 
