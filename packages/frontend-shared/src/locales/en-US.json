@@ -318,7 +318,14 @@
     "recordKey": {
       "title": "Record Key",
       "description": "The Record Key configured for this project inside of Cypress Cloud. {0}",
-      "manageKeys": "Manage Keys"
+      "manageKeys": "Manage Keys",
+      "errorEmpty": "You do not have permission to record on this project",
+      "errorEmptyButton": "Request record rights",
+      "errorAccess": "You do not have permission to view this project",
+      "errorAccessPending": "Your request for access to this project is pending approval",
+      "errorAccessButton": "Request access",
+      "errorNotFound": "Project not found",
+      "errorNotFoundButton": "Connect it again"
     },
     "project": {
       "title": "Project Settings",
