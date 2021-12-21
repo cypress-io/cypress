@@ -1,6 +1,6 @@
 import { arg, booleanArg, enumType, idArg, mutationType, nonNull, stringArg } from 'nexus'
 import { CodeGenTypeEnum } from '../enumTypes/gql-CodeGenTypeEnum'
-import { CodeLanguageEnum, FrontendFrameworkEnum, SupportedBundlerEnum, TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
+import { TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
 import { FileDetailsInput } from '../inputTypes/gql-FileDetailsInput'
 import { WizardUpdateInput } from '../inputTypes/gql-WizardUpdateInput'
 import { CodeGenResultWithFileParts } from './gql-CodeGenResult'
@@ -71,59 +71,73 @@ export const mutation = mutationType({
       },
     })
 
-    t.liveMutation('clearCurrentProject', {
+    t.field('scaffoldTestingType', {
+      type: 'Query',
+      resolve: async (_, args, ctx) => {
+        await ctx.actions.wizard.scaffoldTestingType()
+
+        return {}
+      },
+    })
+
+    t.field('completeSetup', {
+      type: 'Query',
+      resolve: async (_, args, ctx) => {
+        ctx.actions.wizard.completeSetup()
+
+        return {}
+      },
+    })
+
+    t.field('clearCurrentProject', {
+      type: 'Query',
+      description: 'Clears the currently active project',
       resolve: async (_, args, ctx) => {
         await ctx.actions.project.clearCurrentProject()
         ctx.actions.wizard.resetWizard()
+
+        return {}
+      },
+    })
+
+    t.field('clearCurrentTestingType', {
+      type: 'Query',
+      resolve: async (_, args, ctx) => {
+        ctx.lifecycleManager.setCurrentTestingType(null)
+
+        return {}
+      },
+    })
+
+    t.field('setCurrentTestingType', {
+      type: 'Query',
+      args: {
+        testingType: nonNull(arg({ type: TestingTypeEnum })),
+      },
+      resolve: (source, args, ctx) => {
+        ctx.actions.project.setCurrentTestingType(args.testingType)
+
+        return {}
       },
     })
 
     t.liveMutation('wizardUpdate', {
       description: 'Updates the different fields of the wizard data store',
       args: {
-        input: nonNull(arg({
-          type: WizardUpdateInput,
-        })),
+        input: nonNull(arg({ type: WizardUpdateInput })),
       },
-      resolve: async (_, args, ctx) => {
-        // if (ctx.coreData.currentProject?.isMissingConfigFile) {
-        //   await ctx.actions.project.createConfigFile(args.input.testingType)
-        // }
-
-        if (args.input.testingType) {
-          ctx.actions.project.setCurrentTestingType(args.input.testingType)
+      resolve: async (source, args, ctx) => {
+        if (args.input.bundler !== undefined) {
+          ctx.actions.wizard.setBundler(args.input.bundler)
         }
 
-        if (args.input.direction) {
-          ctx.actions.wizard.navigate(args.input.direction)
+        if (args.input.framework !== undefined) {
+          ctx.actions.wizard.setFramework(args.input.framework)
         }
-      },
-    })
 
-    t.liveMutation('wizardSetFramework', {
-      description: 'Sets the frontend framework we want to use for the project',
-      args: { framework: nonNull(FrontendFrameworkEnum) },
-      resolve: async (_, args, ctx) => {
-        await ctx.actions.wizard.setFramework(args.framework)
-      },
-    })
-
-    // TODO: Move these 3 to a single wizardUpdate(input: WizardUpdateInput!)
-    t.liveMutation('wizardSetBundler', {
-      description: 'Sets the frontend bundler we want to use for the project',
-      args: {
-        bundler: nonNull(SupportedBundlerEnum),
-      },
-      resolve: async (_, args, ctx) => {
-        await ctx.actions.wizard.setBundler(args.bundler)
-      },
-    })
-
-    t.liveMutation('wizardSetCodeLanguage', {
-      description: 'Sets the language we want to use for the config file',
-      args: { language: nonNull(CodeLanguageEnum) },
-      resolve: async (_, args, ctx) => {
-        await ctx.actions.wizard.setCodeLanguage(args.language)
+        if (args.input.codeLanguage) {
+          ctx.actions.wizard.setCodeLanguage(args.input.codeLanguage)
+        }
       },
     })
 

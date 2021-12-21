@@ -734,8 +734,8 @@ const getMsgByType = function (type, ...args) {
           ${arg1}
 
           This sometimes happens if you do not have cypress.config.ts excluded in your tsconfig.json.
-          Cypress will use the "cypress.config.ts" and ignore the ".js" file. Please add it to your
-          "excludes" option, and remove from your project.
+
+          Please add it to your "excludes" option, and remove from your project.
           `
     case 'CONFIG_FILE_NOT_FOUND':
       return stripIndent`\

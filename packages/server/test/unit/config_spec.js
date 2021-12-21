@@ -1,5 +1,3 @@
-const path = require('path')
-
 require('../spec_helper')
 
 const _ = require('lodash')
@@ -62,20 +60,6 @@ describe('lib/config', () => {
       const ctx = getCtx()
 
       this.projectRoot = '/_test-output/path/to/project'
-      sinon.stub(ctx.lifecycleManager, 'determineProjectMetaState').callsFake(() => {
-        ctx.lifecycleManager._configFilePath = path.join(this.projectRoot, 'cypress.config.js')
-
-        return {
-          hasFrontendFramework: false,
-          hasTypescript: false,
-          hasLegacyCypressJson: false,
-          hasMultipleConfigPaths: false,
-          hasCypressEnvFile: false,
-          hasSpecifiedConfigViaCLI: false,
-          hasValidConfigFile: false,
-          needsCypressJsonMigration: false,
-        }
-      })
 
       sinon.stub(ctx.lifecycleManager, 'verifyProjectRoot').returns(undefined)
 

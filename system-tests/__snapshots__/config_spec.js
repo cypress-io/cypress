@@ -158,8 +158,8 @@ There is both a \`cypress.config.js\` and a \`cypress.config.ts\` at the locatio
 /foo/bar/.projects/pristine-with-config-file
 
 This sometimes happens if you do not have cypress.config.ts excluded in your tsconfig.json.
-Cypress will use the "cypress.config.ts" and ignore the ".js" file. Please add it to your
-"excludes" option, and remove from your project.
+
+Please add it to your "excludes" option, and remove from your project.
 
 
 `

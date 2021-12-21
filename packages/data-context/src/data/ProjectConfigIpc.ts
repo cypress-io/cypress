@@ -45,8 +45,8 @@ export class ProjectConfigIpc extends EventEmitter {
     })
 
     childProcess.once('disconnect', () => {
+      // console.log('Disconnected')
       this.emit('disconnect')
-      childProcess.removeAllListeners()
     })
 
     return autoBindDebug(this)

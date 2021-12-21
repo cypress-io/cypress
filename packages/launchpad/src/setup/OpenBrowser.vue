@@ -1,25 +1,29 @@
 <template>
-  <WizardLayout
+  <template
     v-if="query.data.value?.currentProject"
-    no-container
-    :can-navigate-forward="false"
-    :show-next="false"
-    #="{backFn}"
   >
+    <LaunchpadHeader
+      :title="t('setupWizard.chooseBrowser.title')"
+      :description="t('setupWizard.chooseBrowser.description')"
+    />
     <OpenBrowserList
       variant=""
       :gql="query.data.value.currentProject"
       @navigated-back="backFn"
       @launch="launch"
     />
-  </WizardLayout>
+    <ButtonBar />
+  </template>
 </template>
 
 <script lang="ts" setup>
 import { useMutation, gql, useQuery } from '@urql/vue'
 import OpenBrowserList from './OpenBrowserList.vue'
-import WizardLayout from './WizardLayout.vue'
-import { OpenBrowserDocument, OpenBrowser_LaunchProjectDocument } from '../generated/graphql'
+import { OpenBrowserDocument, OpenBrowser_ClearTestingTypeDocument, OpenBrowser_LaunchProjectDocument } from '../generated/graphql'
+import LaunchpadHeader from './LaunchpadHeader.vue'
+import { useI18n } from '@cy/i18n'
+
+const { t } = useI18n()
 
 gql`
 query OpenBrowser {
@@ -28,10 +32,23 @@ query OpenBrowser {
     currentTestingType
     ...OpenBrowserList
   }
+  currentTestingType
 }
 `
 
 const query = useQuery({ query: OpenBrowserDocument })
+
+gql`
+mutation OpenBrowser_ClearTestingType {
+  clearCurrentTestingType {
+    currentTestingType
+    currentProject {
+      id
+      currentTestingType
+    }
+  }
+}
+`
 
 gql`
 mutation OpenBrowser_LaunchProject ($testingType: TestingTypeEnum!, $browserPath: String!)  {
@@ -48,9 +65,10 @@ mutation OpenBrowser_LaunchProject ($testingType: TestingTypeEnum!, $browserPath
 `
 
 const launchOpenProject = useMutation(OpenBrowser_LaunchProjectDocument)
+const clearCurrentTestingType = useMutation(OpenBrowser_ClearTestingTypeDocument)
 
 const launch = (browserPath?: string) => {
-  const testingType = query.data.value?.currentProject?.currentTestingType
+  const testingType = query.data.value?.currentTestingType
 
   if (browserPath && testingType) {
     launchOpenProject.executeMutation({
@@ -60,4 +78,7 @@ const launch = (browserPath?: string) => {
   }
 }
 
+const backFn = () => {
+  clearCurrentTestingType.executeMutation({})
+}
 </script>

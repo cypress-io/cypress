@@ -488,6 +488,9 @@ type FileParts implements Node {
   """
   baseName: String!
 
+  """The contents of the file"""
+  contents: String!
+
   """
   The spec file's extension, including "spec" pattern (e.g. .spec.tsx, -spec.tsx, -test.tsx)
   """
@@ -584,13 +587,17 @@ type Mutation {
 
   """Create an Index HTML file for a new component testing project"""
   appCreateComponentIndexHtml(template: String!): Boolean
-  clearCurrentProject: Boolean
+
+  """Clears the currently active project"""
+  clearCurrentProject: Query
+  clearCurrentTestingType: Query
 
   """Create a project in the dashboard and return its object"""
   cloudProjectCreate(ciProviders: [String!], name: String!, orgId: ID!, public: Boolean!): CloudProject
 
   """Request access to an organization from a projectId"""
   cloudProjectRequestAccess(projectSlug: String!): Boolean
+  completeSetup: Query
 
   """
   Development only: Triggers or dismisses a prompted refresh by touching the file watched by our development scripts
@@ -640,9 +647,11 @@ type Mutation {
   """Reset the Wizard to the starting position"""
   resetWizard: Boolean!
   scaffoldIntegration: [CodeGenResultWithFileParts!]!
+  scaffoldTestingType: Query
 
   """Set active project to run tests on"""
   setCurrentProject(path: String!): Boolean
+  setCurrentTestingType(testingType: TestingTypeEnum!): Query
 
   """
   Update local preferences (also known as  appData). The payload, `value`, should be a `JSON.stringified()` object of the new values you'd like to persist. Example: `setPreferences (value: JSON.stringify({ lastOpened: Date.now() }))`
@@ -654,15 +663,6 @@ type Mutation {
 
   """show the launchpad at the browser picker step"""
   showElectronOnAppExit: Boolean
-
-  """Sets the frontend bundler we want to use for the project"""
-  wizardSetBundler(bundler: SupportedBundlers!): Boolean
-
-  """Sets the language we want to use for the config file"""
-  wizardSetCodeLanguage(language: CodeLanguageEnum!): Boolean
-
-  """Sets the frontend framework we want to use for the project"""
-  wizardSetFramework(framework: FrontendFrameworkEnum!): Boolean
 
   """Updates the different fields of the wizard data store"""
   wizardUpdate(input: WizardUpdateInput!): Boolean
@@ -750,6 +750,9 @@ type Query {
   """The currently opened project"""
   currentProject: CurrentProject
 
+  """The mode the interactive runner was launched in"""
+  currentTestingType: TestingTypeEnum
+
   """The state of any info related to local development of the runner"""
   dev: DevState!
 
@@ -765,11 +768,26 @@ type Query {
   """All known projects for the app"""
   projects: [ProjectLike!]!
 
+  """The files that have just been scaffolded"""
+  scaffoldedFiles: [ScaffoldedFile!]
+
   """Previous versions of cypress and their release date"""
   versions: VersionData
 
   """Metadata about the wizard, null if we arent showing the wizard"""
   wizard: Wizard!
+}
+
+"""A file that we just added to the filesystem during project setup"""
+type ScaffoldedFile {
+  """Info about the file we just scaffolded"""
+  description: String!
+
+  """Info about the file"""
+  file: FileParts!
+
+  """Info about the field"""
+  status: WizardConfigFileStatusEnum!
 }
 
 """Represents a spec on the file system"""
@@ -903,39 +921,16 @@ type Wizard {
   """All of the languages to choose from"""
   allLanguages: [WizardCodeLanguage!]!
   bundler: WizardBundler
-
-  """
-  Given the current state, returns whether the user progress to the next step of the wizard
-  """
-  canNavigateForward: Boolean!
-
-  """The title of the page, given the current step of the wizard"""
-  description: String
   framework: WizardFrontendFramework
 
   """All of the component testing frameworks to choose from"""
   frameworks: [WizardFrontendFramework!]!
-
-  """Whether we have chosen manual install or not"""
-  isManualInstall: Boolean!
   language: WizardCodeLanguage
 
   """
   A list of packages to install, null if we have not chosen both a framework and bundler
   """
   packagesToInstall: [WizardNpmPackage!]
-
-  """
-  Set of sample configuration files based bundler, framework and language of choice
-  """
-  sampleConfigFiles: [WizardSampleConfigFile!]
-
-  """IndexHtml file based on bundler and framework of choice"""
-  sampleTemplate: String
-  step: WizardStep!
-
-  """The title of the page, given the current step of the wizard"""
-  title: String
 
   """A list of warnings"""
   warnings: [Warning!]!
@@ -1004,11 +999,6 @@ type WizardFrontendFramework implements Node {
   type: FrontendFrameworkEnum!
 }
 
-enum WizardNavigateDirection {
-  back
-  forward
-}
-
 """Details about an NPM Package listed during the wizard install"""
 type WizardNpmPackage implements Node {
   description: String!
@@ -1041,6 +1031,7 @@ enum WizardStep {
 }
 
 input WizardUpdateInput {
-  direction: WizardNavigateDirection
-  testingType: TestingTypeEnum
+  bundler: SupportedBundlers
+  codeLanguage: CodeLanguageEnum
+  framework: FrontendFrameworkEnum
 }

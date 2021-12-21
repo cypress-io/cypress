@@ -1,5 +1,5 @@
 import { BUNDLERS, FoundBrowser, Editor, Warning, AllowedState, AllModeOptions, TestingType } from '@packages/types'
-import type { NexusGenEnums } from '@packages/graphql/src/gen/nxs.gen'
+import type { NexusGenEnums, NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
 import type { App, BrowserWindow } from 'electron'
 import type { ChildProcess } from 'child_process'
 import type { SocketIOServer } from '@packages/socket'
@@ -52,8 +52,6 @@ export interface AppDataShape {
 }
 
 export interface WizardDataShape {
-  history: NexusGenEnums['WizardStep'][]
-  currentStep: NexusGenEnums['WizardStep']
   chosenBundler: NexusGenEnums['SupportedBundlers'] | null
   allBundlers: typeof BUNDLERS
   chosenFramework: NexusGenEnums['FrontendFrameworkEnum'] | null
@@ -97,6 +95,7 @@ export interface CoreDataShape {
   user: AuthenticatedUserShape | null
   electron: ElectronShape
   isAuthBrowserOpened: boolean
+  scaffoldedFiles: NexusGenObjects['ScaffoldedFile'][] | null
 }
 
 /**
@@ -134,9 +133,7 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
       chosenFramework: null,
       chosenLanguage: 'js',
       chosenManualInstall: false,
-      currentStep: 'welcome',
       allBundlers: BUNDLERS,
-      history: ['welcome'],
       warnings: [],
     },
     chosenBrowser: null,
@@ -145,5 +142,6 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
       app: null,
       browserWindow: null,
     },
+    scaffoldedFiles: null,
   }
 }
