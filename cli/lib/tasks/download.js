@@ -270,11 +270,14 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca, version }) =>
         // status codes here are all 2xx
       } else {
         // We only enable this pipe connection when we know we've got a successful return
-        response.pipe(fs.createWriteStream(downloadDestination))
         // and handle the completion with verify and resolve
-        response.on('end', () => {
+        // there was a possible race condition between end of request and close of writestream
+        // that is made ordered with this Promise.all
+        Promise.all([new Promise((r) => {
+          return response.pipe(fs.createWriteStream(downloadDestination).on('close', r))
+        }), new Promise((r) => response.on('end', r))])
+        .then(() => {
           debug('downloading finished')
-
           verifyDownloadedFile(downloadDestination, expectedSize,
             expectedChecksum)
           .then(() => debug('verified'))
