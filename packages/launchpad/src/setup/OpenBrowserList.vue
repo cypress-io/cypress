@@ -3,12 +3,12 @@
     v-if="props.gql.browsers"
     @submit.prevent="emit('launch', props.gql?.currentBrowser?.path)"
   >
-    <div class="flex flex-wrap justify-center gap-6 py-16">
+    <div class="flex flex-wrap py-16 gap-6 justify-center">
       <div
         v-for="browser of props.gql.browsers"
         :key="browser.id"
         :data-cy-browser="browser.name"
-        class="relative block pt-6 pb-4 text-center rounded w-160px border-1"
+        class="rounded border-1 text-center pt-6 pb-4 w-160px relative block"
         :class="{
           'border-jade-300 ring-2 ring-jade-50': browser.isSelected,
           'border-gray-200': !browser.isSelected,
@@ -22,7 +22,7 @@
           type="radio"
           :value="browser.id"
           :disabled="browser.disabled"
-          class="absolute opacity-0"
+          class="opacity-0 absolute"
           :class="{
             'filter grayscale': browser.disabled
           }"
@@ -36,20 +36,20 @@
             <img
               :src="allBrowsersIcons[browser.displayName]"
               :alt="browser.displayName"
-              class="inline w-40px h-40px"
+              class="h-40px w-40px inline"
             >
           </div>
-          <div class="pt-2 text-lg text-indigo-600">{{ browser.displayName }}</div>
-          <div class="text-xs text-gray-400">v{{ browser.majorVersion }}.x</div>
+          <div class="text-lg pt-2 text-indigo-600">{{ browser.displayName }}</div>
+          <div class="text-xs text-gray-400">v{{ browser.majorVersion }}</div>
         </label>
       </div>
     </div>
     <div class="mb-14">
-      <div class="flex items-center justify-center mb-4">
+      <div class="flex mb-4 items-center justify-center">
         <Button
           v-if="launchText"
           type="submit"
-          class="inline mr-2"
+          class="mr-2 inline"
           :suffix-icon="openInNew"
           data-testid="launch-button"
           size="lg-wide"
@@ -59,7 +59,7 @@
         <Button
           type="button"
           size="lg"
-          class="inline ml-2"
+          class="ml-2 inline"
           variant="outline"
           @click="emit('navigated-back')"
         >

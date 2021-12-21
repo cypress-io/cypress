@@ -111,7 +111,7 @@
       >
       <span
         data-cy="top-nav-active-browser"
-      >{{ props.gql.currentProject?.currentBrowser?.displayName }} v{{ props.gql.currentProject?.currentBrowser?.majorVersion }}</span>
+      >{{ props.gql.currentProject?.currentBrowser?.displayName }} {{ props.gql.currentProject?.currentBrowser?.majorVersion }}</span>
     </template>
     <TopNavListItem
       v-for="browser in props.gql.currentProject.browsers"
