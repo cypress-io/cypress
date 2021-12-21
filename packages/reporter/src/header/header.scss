@@ -126,10 +126,12 @@ $color-transition: color 150ms ease-out;
     justify-content: center;
 
     .testing-preferences-toggle {
+      color: $gray-700;
       padding: 1px 8px;
 
       &.open {
         background-color: $gray-900;
+        color: $white;
       }
     }
 
