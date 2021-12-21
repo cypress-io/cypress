@@ -40,8 +40,16 @@ export interface RemoteGraphQLInterceptPayload {
 export type RemoteGraphQLInterceptor = (obj: RemoteGraphQLInterceptPayload) => ExecutionResult | Promise<ExecutionResult>
 
 export interface FindBrowsersOptions {
-  filter?(browser: Browser): boolean
+  // Array of FoundBrowser objects that will be used as the mock output
   browsers?: FoundBrowser[]
+  /**
+   * Function used to filter the standard set of mocked browsers. Ignored if browsers option is provided.
+   * Ex.
+   * cy.findBrowsers({
+   *   filter: (browser) => browser.name === 'chrome' // Sets Chrome, Chrome Beta, Canary
+   * })
+   */
+  filter?(browser: Browser): boolean
 }
 
 declare global {

@@ -28,7 +28,7 @@ describe('Choose a Browser Page', () => {
 
       cy.get('h1').should('contain', 'Choose a Browser')
 
-      cy.findByRole('radio', { name: 'Edge v8.x', checked: true })
+      cy.findByRole('radio', { name: 'Edge v8', checked: true })
     })
 
     it('shows warning when launched with --browser name that cannot be matched to found browsers', () => {
@@ -83,13 +83,13 @@ describe('Choose a Browser Page', () => {
 
       cy.get('h1').should('contain', 'Choose a Browser')
 
-      cy.findByRole('radio', { name: 'Chrome v1.x' })
+      cy.findByRole('radio', { name: 'Chrome v1' })
 
-      cy.findByRole('radio', { name: 'Firefox v5.x' })
+      cy.findByRole('radio', { name: 'Firefox v5' })
 
-      cy.findByRole('radio', { name: 'Electron v12.x' })
+      cy.findByRole('radio', { name: 'Electron v12' })
 
-      cy.findByRole('radio', { name: 'Edge v8.x' })
+      cy.findByRole('radio', { name: 'Edge v8' })
     })
 
     it('performs mutation to launch selected browser when launch button is pressed', () => {
@@ -136,8 +136,8 @@ describe('Choose a Browser Page', () => {
 
       cy.get('h1').should('contain', 'Choose a Browser')
 
-      cy.findByRole('radio', { name: 'Chrome v1.x', checked: true }).as('chromeItem')
-      cy.findByRole('radio', { name: 'Firefox v5.x', checked: false }).as('firefoxItem')
+      cy.findByRole('radio', { name: 'Chrome v1', checked: true }).as('chromeItem')
+      cy.findByRole('radio', { name: 'Firefox v5', checked: false }).as('firefoxItem')
 
       cy.contains('button', 'Launch Chrome').should('be.visible')
 
@@ -149,8 +149,8 @@ describe('Choose a Browser Page', () => {
         })
       })
 
-      cy.findByRole('radio', { name: 'Chrome v1.x', checked: false })
-      cy.findByRole('radio', { name: 'Firefox v5.x', checked: true })
+      cy.findByRole('radio', { name: 'Chrome v1', checked: false })
+      cy.findByRole('radio', { name: 'Firefox v5', checked: true })
 
       cy.contains('button', 'Launch Firefox').should('be.visible')
     })
@@ -175,7 +175,7 @@ describe('Choose a Browser Page', () => {
 
       cy.get('[data-cy="open-browser-list"]').children().should('have.length', 1)
 
-      cy.findByRole('radio', { name: 'Electron v12.x', checked: true })
+      cy.findByRole('radio', { name: 'Electron v12', checked: true })
     })
   })
 })
