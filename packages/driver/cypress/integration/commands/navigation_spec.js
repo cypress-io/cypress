@@ -315,6 +315,59 @@ describe('src/cy/commands/navigation', () => {
       })
     })
 
+    it('handles hashchange events', () => {
+      const emit = cy.spy(Cypress, 'emit').log(false).withArgs('url:changed')
+
+      cy
+      .visit('/fixtures/generic.html')
+      .get('#hashchange').click()
+      .then(() => {
+        cy.go('back')
+        cy.go('forward')
+        cy.get('#dimensions').click()
+        cy.go('back')
+        cy.go('back')
+      })
+      .then(function () {
+        expect(emit.firstCall).to.be.calledWith(
+          'url:changed',
+          'http://localhost:3500/fixtures/generic.html',
+        )
+
+        expect(emit.secondCall).to.be.calledWith(
+          'url:changed',
+          'http://localhost:3500/fixtures/generic.html#hashchange',
+        )
+
+        expect(emit.thirdCall).to.be.calledWith(
+          'url:changed',
+          'http://localhost:3500/fixtures/generic.html',
+        )
+
+        expect(emit.getCall(3)).to.be.calledWith(
+          'url:changed',
+          'http://localhost:3500/fixtures/generic.html#hashchange',
+        )
+
+        expect(emit.getCall(4)).to.be.calledWith(
+          'url:changed',
+          'http://localhost:3500/fixtures/dimensions.html',
+        )
+
+        expect(emit.getCall(5)).to.be.calledWith(
+          'url:changed',
+          'http://localhost:3500/fixtures/generic.html#hashchange',
+        )
+
+        expect(emit.getCall(6)).to.be.calledWith(
+          'url:changed',
+          'http://localhost:3500/fixtures/generic.html',
+        )
+
+        expect(emit.callCount).to.eq(7)
+      })
+    })
+
     it('removes listeners', () => {
       cy
       .visit('/fixtures/generic.html')
@@ -1440,30 +1493,6 @@ describe('src/cy/commands/navigation', () => {
       })
 
       it('throws attempting to visit 2 unique ip addresses', function (done) {
-        const $autIframe = cy.state('$autIframe')
-
-        const load = () => {
-          return $autIframe.trigger('load')
-        }
-
-        cy.stub(Cypress, 'backend')
-        .withArgs('resolve:url')
-        .resolves({
-          isOkStatusCode: true,
-          isHtml: true,
-          url: 'http://127.0.0.1:3500',
-        })
-
-        // whenever we're told to change the src
-        // just fire the load event directly on the $autIframe
-        cy.stub(Cypress.utils, 'iframeSrc').callsFake(load)
-
-        // make it seem like we're already on http://127.0.0.1:3500
-        const one = Cypress.Location.create('http://127.0.0.1:3500/fixtures/generic.html')
-
-        cy.stub(Cypress.utils, 'locExisting')
-        .returns(one)
-
         cy.on('fail', (err) => {
           const { lastLog } = this
 
@@ -2136,8 +2165,7 @@ describe('src/cy/commands/navigation', () => {
     })
   })
 
-  // this tests isLoading spinner
-  // and page load event
+  // this tests isLoading spinner and page load event
   context('#page loading', () => {
     beforeEach(function () {
       this.logs = []
@@ -2449,6 +2477,105 @@ describe('src/cy/commands/navigation', () => {
               'url:changed',
               'http://localhost:3500/fixtures/generic.html#hashchange',
             )
+          })
+        })
+      })
+
+      // https://github.com/cypress-io/cypress/issues/19230
+      it('filters page load events when going back with window navigation', () => {
+        const emit = cy.spy(Cypress, 'emit').log(false).withArgs('navigation:changed')
+
+        cy
+        .visit('/fixtures/generic.html')
+        .get('#hashchange').click()
+        .window().then((win) => {
+          return new Promise((resolve) => {
+            cy.once('navigation:changed', resolve)
+
+            win.history.back()
+          }).then(() => {
+            return new Promise((resolve) => {
+              cy.once('navigation:changed', resolve)
+
+              win.history.forward()
+            })
+          })
+        })
+
+        cy.get('#dimensions').click()
+        .window().then((win) => {
+          return new Promise((resolve) => {
+            cy.on('navigation:changed', (event) => {
+              if (event.includes('(load)')) {
+                resolve()
+              }
+            })
+
+            win.history.back()
+          })
+          .then(() => {
+            return new Promise((resolve) => {
+              cy.on('navigation:changed', resolve)
+              win.history.back()
+            })
+          })
+          .then(() => {
+            expect(emit.firstCall).to.be.calledWith(
+              'navigation:changed',
+              'page navigation event (load)',
+            )
+
+            expect(emit.secondCall).to.be.calledWith(
+              'navigation:changed',
+              'page navigation event (before:load)',
+            )
+
+            expect(emit.thirdCall).to.be.calledWith(
+              'navigation:changed',
+              'page navigation event (load)',
+            )
+
+            expect(emit.getCall(3)).to.be.calledWithMatch(
+              'navigation:changed',
+              'hashchange',
+            )
+
+            expect(emit.getCall(4)).to.be.calledWithMatch(
+              'navigation:changed',
+              'hashchange',
+            )
+
+            expect(emit.getCall(5)).to.be.calledWithMatch(
+              'navigation:changed',
+              'hashchange',
+            )
+
+            expect(emit.getCall(6)).to.be.calledWith(
+              'navigation:changed',
+              'page navigation event (before:load)',
+            )
+
+            expect(emit.getCall(7)).to.be.calledWith(
+              'navigation:changed',
+              'page navigation event (load)',
+            )
+
+            expect(emit.getCall(8)).to.be.calledWith(
+              'navigation:changed',
+              'page navigation event (before:load)',
+            )
+
+            expect(emit.getCall(9)).to.be.calledWith(
+              'navigation:changed',
+              'page navigation event (load)',
+            )
+
+            expect(emit.getCall(10)).to.be.calledWithMatch(
+              'navigation:changed',
+              'hashchange',
+            )
+
+            expect(emit.callCount).to.eq(11)
           })
         })
       })

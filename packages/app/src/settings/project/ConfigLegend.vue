@@ -11,7 +11,10 @@
       :class="CONFIG_LEGEND_COLOR_MAP.config"
       :label="legendText.config.label"
     >
-      <i18n-t :keypath="legendText.config.descriptionKey">
+      <i18n-t
+        scope="global"
+        :keypath="legendText.config.descriptionKey"
+      >
         <OpenConfigFileInIDE :gql="props.gql" />
       </i18n-t>
     </ConfigBadge>
@@ -34,7 +37,10 @@
       :class="CONFIG_LEGEND_COLOR_MAP.plugin"
       :label="legendText.dynamic.label"
     >
-      <i18n-t :keypath="legendText.dynamic.descriptionKey">
+      <i18n-t
+        scope="global"
+        :keypath="legendText.dynamic.descriptionKey"
+      >
         <ExternalLink
           href="https://on.cypress.io"
           class="text-purple-500"
