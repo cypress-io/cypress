@@ -157,25 +157,8 @@ describe('Choose a Browser Page', () => {
   })
 
   describe('No System Browsers Detected', () => {
-    it('does not show browser list when no browsers are detected', () => {
-      cy.findBrowsers({
-        browsers: [],
-      })
-
-      cy.openProject('launchpad', ['--e2e'])
-
-      cy.visitLaunchpad()
-
-      stepThroughConfigPages()
-
-      cy.get('h1').should('contain', 'Choose a Browser')
-
-      cy.get('[data-cy="open-browser-list"]').children().should('have.length', 0)
-      cy.contains('button', 'Back').should('be.visible').and('not.be.disabled')
-    })
-
-    it('can show single electron browser option as expected when no system browsers are detected', () => {
-      cy.log('This test mocks the browser retrieval to simulate the Electron browser injection')
+    it('shows single electron browser option when no system browsers are detected and process is running in electron', () => {
+      cy.log('This test simulates the Electron browser injection performed by server.getBrowsers')
       cy.findBrowsers({
         filter: (browser) => {
           return browser.name === 'electron'
