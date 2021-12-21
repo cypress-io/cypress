@@ -29,6 +29,7 @@ mainBuildFilters: &mainBuildFilters
       only:
         - develop
         - 10.0-release
+        - test-binary-downstream-windows
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -38,6 +39,7 @@ macWorkflowFilters: &mac-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ '10.0-release', << pipeline.git.branch >> ]
+    - equal: [ renovate/cypress-request-2.x, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -47,6 +49,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ '10.0-release', << pipeline.git.branch >> ]
+    - equal: [ test-binary-downstream-windows, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -1665,7 +1668,7 @@ jobs:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "10.0-release" && "$CIRCLE_BRANCH" != "renovate/cypress-request-2.x" && "$CIRCLE_BRANCH" != "tgriesser/fix/patch-resolutions" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" &&  "$CIRCLE_BRANCH" != "test-binary-downstream-windows" && "$CIRCLE_BRANCH" != "10.0-release" && "$CIRCLE_BRANCH" != "renovate/cypress-request-2.x" && "$CIRCLE_BRANCH" != "tgriesser/fix/patch-resolutions" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -1750,7 +1753,12 @@ jobs:
 
   test-binary-and-npm-against-other-projects:
     <<: *defaults
-    resource_class: medium
+    parameters:
+      <<: *defaultsParameters
+      resource_class:
+        type: string
+        default: medium
+    resource_class: << parameters.resource_class >>
     steps:
       # needs uploaded NPM and test binary
       - restore_cached_workspace
@@ -1759,23 +1767,14 @@ jobs:
       - run: ls -la binary-url.json npm-package-url.json
       - run: cat binary-url.json
       - run: cat npm-package-url.json
-      - run: mkdir /tmp/testing
-      - run:
-          name: create dummy package
-          working_directory: /tmp/testing
-          command: npm init -y
       - run:
           # install NPM from unique urls
-          name: Install Cypress
+          name: Install Cypress Binary in Dummy Package
           command: |
             node scripts/test-unique-npm-and-binary.js \
               --npm npm-package-url.json \
               --binary binary-url.json \
               --cwd /tmp/testing
-      - run:
-          name: Verify Cypress binary
-          working_directory: /tmp/testing
-          command: $(yarn bin)/cypress verify
       - run:
           name: Running other test projects with new NPM package and binary
           command: |
@@ -1806,19 +1805,19 @@ jobs:
       - run:
           name: Cypress version
           working_directory: test-binary
-          command: $(yarn bin)/cypress version
+          command: $(yarn bin cypress) version
       - run:
           name: Verify Cypress binary
           working_directory: test-binary
-          command: $(yarn bin)/cypress verify
+          command: $(yarn bin cypress) verify
       - run:
           name: Cypress help
           working_directory: test-binary
-          command: $(yarn bin)/cypress help
+          command: $(yarn bin cypress) help
       - run:
           name: Cypress info
           working_directory: test-binary
-          command: $(yarn bin)/cypress info
+          command: $(yarn bin cypress) info
       - store-npm-logs
 
   test-npm-module-on-minimum-node-version:
@@ -1999,7 +1998,7 @@ jobs:
             CYPRESS_PROJECT_ID=$TEST_TINY_PROJECT_ID \
             CYPRESS_RECORD_KEY=$TEST_TINY_RECORD_KEY \
             CYPRESS_INTERNAL_ENV=staging \
-            $(yarn bin)/cypress run --record
+            $(yarn bin cypress) run --record
       - store-npm-logs
 
   test-binary-against-recipes-firefox:
@@ -2145,11 +2144,11 @@ jobs:
       - run:
           name: Cypress help
           working_directory: test-binary
-          command: $(yarn bin)/cypress help
+          command: $(yarn bin cypress) help
       - run:
           name: Cypress info
           working_directory: test-binary
-          command: $(yarn bin)/cypress info
+          command: $(yarn bin cypress) info
       - run:
           name: Add Cypress demo
           working_directory: test-binary
@@ -2165,11 +2164,11 @@ jobs:
       - run:
           name: Verify Cypress binary
           working_directory: test-binary
-          command: DEBUG=cypress:cli $(yarn bin)/cypress verify
+          command: DEBUG=cypress:cli $(yarn bin cypress) verify
       - run:
           name: Run Cypress binary
           working_directory: test-binary
-          command: DEBUG=cypress:cli $(yarn bin)/cypress run
+          command: DEBUG=cypress:cli $(yarn bin cypress) run
       - store-npm-logs
 
 linux-workflow: &linux-workflow
@@ -2583,6 +2582,14 @@ windows-workflow: &windows-workflow
           - test-runner:commit-status-checks
         requires:
           - windows-build
+
+    - test-binary-and-npm-against-other-projects:
+        context: test-runner:trigger-test-jobs
+        name: windows-test-binary-and-npm-against-other-projects
+        executor: windows
+        resource_class: windows.medium
+        requires:
+          - windows-create-build-artifacts
 
 workflows:
   linux:

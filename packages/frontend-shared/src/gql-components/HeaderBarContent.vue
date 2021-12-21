@@ -1,8 +1,5 @@
 <template>
-  <div
-    class="bg-white border-b border-b-gray-100 py-15px px-6"
-    data-testid="header-bar"
-  >
+  <div class="bg-white border-b border-b-gray-100 py-15px px-6">
     <div class="flex h-full gap-12px items-center justify-between">
       <div v-if="pageName">
         {{ pageName }}
@@ -49,7 +46,10 @@
             v-if="!!props.gql?.cloudViewer"
             #login-panel
           >
-            <div class="min-w-248px">
+            <div
+              class="min-w-248px"
+              data-cy="login-panel"
+            >
               <div class="border-b flex border-b-gray-100 p-16px">
                 <UserAvatar
                   :email="email"
@@ -143,7 +143,7 @@ const clearActiveProject = () => {
 const props = defineProps<{
   gql: HeaderBar_HeaderBarContentFragment,
   showBrowsers?: boolean,
-  pageName?: string
+  pageName?: string,
 }>()
 
 const { t } = useI18n()

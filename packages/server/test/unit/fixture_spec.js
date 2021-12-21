@@ -224,7 +224,7 @@ ParseError: Unterminated string constant\
       .then(() => {
         throw new Error('should have failed but did not')
       }).catch((err) => {
-        expect(err.message).to.eq(`'bad_js.js' is not a valid JavaScript object.\n${e}`)
+        expect(err.message).to.eq(`'bad_js.js' is not a valid JavaScript object.\n\n${e}`)
       })
     })
   })

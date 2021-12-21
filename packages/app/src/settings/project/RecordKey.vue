@@ -1,10 +1,16 @@
 <template>
-  <SettingsSection data-cy="settings-recordKey">
+  <SettingsSection
+    data-cy="settings-recordKey"
+    anchor-id="recordKey"
+  >
     <template #title>
       {{ t('settingsPage.recordKey.title') }}
     </template>
     <template #description>
-      <i18n-t keypath="settingsPage.recordKey.description">
+      <i18n-t
+        scope="global"
+        keypath="settingsPage.recordKey.description"
+      >
         <ExternalLink
           href="https://on.cypress.io/what-is-a-record-key"
         >

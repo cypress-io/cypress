@@ -75,6 +75,16 @@ A CloudProject represents a Project stored in the Cypress Cloud
 """
 type CloudProject implements Node {
   """
+  A link to the settings page of the project in the dashboard
+  """
+  cloudProjectSettingsUrl: String!
+
+  """
+  A link to the project in the dashboard
+  """
+  cloudProjectUrl: String!
+
+  """
   Globally unique identifier representing a concrete GraphQL ObjectType
   """
   id: ID!
@@ -159,6 +169,36 @@ type CloudProjectEdge {
   https://facebook.github.io/relay/graphql/connections.htm#sec-Node
   """
   node: CloudProject!
+}
+
+"""
+Unable to find cloud project
+"""
+type CloudProjectNotFound {
+  """
+  an error message
+  """
+  message: String!
+}
+
+union CloudProjectResult =
+    CloudProject
+  | CloudProjectNotFound
+  | CloudProjectUnauthorized
+
+"""
+Unauthorized access
+"""
+type CloudProjectUnauthorized {
+  """
+  does the user have a requested access pending
+  """
+  hasRequestedAccess: Boolean
+
+  """
+  an error message
+  """
+  message: String!
 }
 
 type CloudRecordKey implements Node {
@@ -300,6 +340,11 @@ type CloudUser implements Node {
   cloudOrganizationsUrl: String
 
   """
+  Url to the profile of the current user on the dashboard
+  """
+  cloudProfileUrl: String
+
+  """
   Url to create a cloud organization for this user
   """
   createCloudOrganizationUrl: String
@@ -357,12 +402,20 @@ A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `dat
 scalar DateTime
 
 type Mutation {
+  """
+  Create a project in the dashboard and return its object
+  """
   cloudProjectCreate(
     ciProviders: [String!]
     name: String!
     orgId: ID!
     public: Boolean!
   ): CloudProject
+
+  """
+  Request access to an organization from a projectId
+  """
+  cloudProjectRequestAccess(projectSlug: String!): Boolean
 
   """
   Adding as a test
@@ -419,7 +472,7 @@ type Query {
   """
   Lookup an individual project by the slug
   """
-  cloudProjectBySlug(slug: String!): CloudProject
+  cloudProjectBySlug(slug: String!): CloudProjectResult
 
   """
   Lookup a list of projects by their slug
@@ -429,7 +482,7 @@ type Query {
     A list of Project slugs
     """
     slugs: [String!]!
-  ): [CloudProject]
+  ): [CloudProjectResult]
 
   """
   A user within the Cypress Cloud

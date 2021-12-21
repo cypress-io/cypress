@@ -22,14 +22,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed, Ref, ref } from 'vue'
+import { computed, ref } from 'vue'
 import { gql } from '@urql/vue'
 import type { Specs_InlineSpecListFragment } from '../generated/graphql'
 import InlineSpecListHeader from './InlineSpecListHeader.vue'
 import InlineSpecListTree from './InlineSpecListTree.vue'
 import CreateSpecModal from './CreateSpecModal.vue'
-import fuzzySort from 'fuzzysort'
-import type { FuzzyFoundSpec } from '@packages/frontend-shared/src/utils/spec-utils'
+import { FuzzyFoundSpec, fuzzySortSpecs, makeFuzzyFoundSpec, useCachedSpecs } from '@packages/frontend-shared/src/utils/spec-utils'
 
 gql`
 fragment SpecNode_InlineSpecList on SpecEdge {
@@ -69,17 +68,14 @@ const props = defineProps<{
 
 const showModal = ref(false)
 const search = ref('')
+const cachedSpecs = useCachedSpecs(computed(() => (props.gql.currentProject?.specs?.edges) || []))
 
 const specs = computed<FuzzyFoundSpec[]>(() => {
-  const specs = props.gql.currentProject?.specs?.edges.map((x) => ({ ...x.node, indexes: [] })) || []
+  const specs = cachedSpecs.value.map((x) => makeFuzzyFoundSpec(x.node))
 
-  if (!search.value) {
-    return specs
-  }
+  if (!search.value) return specs
 
-  return fuzzySort
-  .go(search.value, specs || [], { key: 'relative' })
-  .map(({ obj, indexes }) => ({ ...obj, indexes }))
+  return fuzzySortSpecs(specs, search.value)
 })
 
 </script>

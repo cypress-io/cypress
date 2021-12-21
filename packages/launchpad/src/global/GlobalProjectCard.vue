@@ -3,7 +3,7 @@
     class="cursor-pointer relative w-full rounded border border-gray-100
   bg-white pr-4px pt-13px pb-13px flex items-center space-x-3 group
   hocus-default focus-within-default"
-    data-testid="project-card"
+    data-cy="project-card"
     @click="setActiveProject(props.gql.projectRoot)"
   >
     <div
@@ -38,7 +38,7 @@
         />
       </MenuButton>
       <MenuItems
-        data-testid="project-card-menu-items"
+        data-cy="project-card-menu-items"
         class="absolute bg-gray-900 text-white flex flex-col right-0
       -bottom-104px right-18px outline-transparent z-40 rounded overflow-scroll"
       >
