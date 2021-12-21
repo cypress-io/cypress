@@ -277,7 +277,7 @@ describe('App Top Nav Workflows', () => {
       it('shows log in modal when button is pressed', () => {
         cy.get('@logInButton').click()
 
-        cy.findByRole('dialog', { name: 'Log In To Cypress' }).as('logInModal')
+        cy.findByRole('dialog', { name: 'Log in to Cypress' }).as('logInModal')
         cy.get('@logInModal').findByRole('button', { name: 'Log In' })
         cy.get('@logInModal').findByRole('button', { name: 'Close' }).click()
       })
