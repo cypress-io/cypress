@@ -4,7 +4,7 @@ import { defaultMessages } from '@cy/i18n'
 
 const modalCloseSelector = '[aria-label=Close]'
 const triggerButtonSelector = '[data-testid=trigger]'
-const modalSelector = '[data-testid=create-spec-modal]'
+const modalSelector = '[data-cy=create-spec-modal]'
 
 const messages = defaultMessages.createSpec.component.importFromComponent
 

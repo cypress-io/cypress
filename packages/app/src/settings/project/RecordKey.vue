@@ -7,7 +7,10 @@
       {{ t('settingsPage.recordKey.title') }}
     </template>
     <template #description>
-      <i18n-t keypath="settingsPage.recordKey.description">
+      <i18n-t
+        scope="global"
+        keypath="settingsPage.recordKey.description"
+      >
         <ExternalLink
           href="https://on.cypress.io/what-is-a-record-key"
         >

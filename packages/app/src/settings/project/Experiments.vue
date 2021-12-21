@@ -7,7 +7,10 @@
       {{ t('settingsPage.experiments.title') }}
     </template>
     <template #description>
-      <i18n-t keypath="settingsPage.experiments.description">
+      <i18n-t
+        scope="global"
+        keypath="settingsPage.experiments.description"
+      >
         <ExternalLink
           href="https://on.cypress.io/experiments"
         >
