@@ -1,5 +1,6 @@
 <template>
   <Button
+    v-if="isSupported"
     :size="size"
     :variant="variant"
     @click="copyToClipboard"
@@ -9,7 +10,7 @@
       #prefix
     >
       <i-cy-copy-clipboard_x16
-        class="w-16px h-16px"
+        class="h-16px w-16px"
         :class="{
           'icon-dark-indigo-500': variant === 'tertiary',
           'icon-dark-gray-500': variant === 'outline'
@@ -40,7 +41,7 @@ const props = withDefaults(defineProps<{
   size: 'md',
 })
 
-const { copy, copied } = useClipboard({ copiedDuring: 2000 })
+const { copy, copied, isSupported } = useClipboard({ copiedDuring: 2000 })
 const copyToClipboard = () => {
   if (props.text) {
     copy(props.text)

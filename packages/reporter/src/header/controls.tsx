@@ -33,13 +33,6 @@ const Controls = observer(({ events = defaultEvents, appState }: Props) => {
 
   return (
     <div className='controls'>
-      {ifThen(appState.isPaused, (
-        <Tooltip placement='bottom' title={<p>Resume <span className='kbd'>C</span></p>} className='cy-tooltip'>
-          <button aria-label='Resume' className='play' onClick={emit('resume')}>
-            <PlayIcon />
-          </button>
-        </Tooltip>
-      ))}
       <Tooltip placement='bottom' title={<p>Open Testing Preferences</p>} className='cy-tooltip'>
         <button
           aria-label='Open testing preferences'
@@ -53,6 +46,13 @@ const Controls = observer(({ events = defaultEvents, appState }: Props) => {
           )}
         </button>
       </Tooltip>
+      {ifThen(appState.isPaused, (
+        <Tooltip placement='bottom' title={<p>Resume <span className='kbd'>C</span></p>} className='cy-tooltip'>
+          <button aria-label='Resume' className='play' onClick={emit('resume')}>
+            <PlayIcon />
+          </button>
+        </Tooltip>
+      ))}
       {ifThen(appState.isRunning && !appState.isPaused, (
         <Tooltip placement='bottom' title={<p>Stop Running <span className='kbd'>S</span></p>} className='cy-tooltip' visible={appState.studioActive ? false : null}>
           <button aria-label='Stop' className='stop' onClick={emit('stop')} disabled={appState.studioActive}>

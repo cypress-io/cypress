@@ -7,7 +7,10 @@
       {{ t('settingsPage.projectId.title') }}
     </template>
     <template #description>
-      <i18n-t keypath="settingsPage.projectId.description">
+      <i18n-t
+        scope="global"
+        keypath="settingsPage.projectId.description"
+      >
         <ExternalLink
           href="https://on.cypress.io/what-is-a-project-id"
         >
@@ -15,7 +18,7 @@
         </ExternalLink>
       </i18n-t>
     </template>
-    <div class="flex items-center gap-10px">
+    <div class="flex gap-10px items-center">
       <CodeBox
         :code="props.gql?.projectId || ''"
         :prefix-icon="IconOctothorpe"
@@ -39,6 +42,8 @@ import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import CodeBox from './CodeBox.vue'
 import type { ProjectIdFragment } from '../../generated/graphql'
 
+const { t } = useI18n()
+
 gql`
 fragment ProjectId on CurrentProject {
   id
@@ -50,5 +55,4 @@ const props = defineProps<{
   gql?: ProjectIdFragment | null
 }>()
 
-const { t } = useI18n()
 </script>

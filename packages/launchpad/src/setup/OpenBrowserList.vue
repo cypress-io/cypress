@@ -42,7 +42,7 @@
             >
           </div>
           <div class="text-lg pt-2 text-indigo-600">{{ browser.displayName }}</div>
-          <div class="text-xs text-gray-400">v{{ browser.majorVersion }}.x</div>
+          <div class="text-xs text-gray-400">v{{ browser.majorVersion }}</div>
         </label>
       </div>
     </div>
