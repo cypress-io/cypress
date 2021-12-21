@@ -21,6 +21,7 @@
         </p>
         <i18n-t
           v-else
+          scope="global"
           keypath="launchpadErrors.generic.message"
           tag="p"
           class="font-light"
