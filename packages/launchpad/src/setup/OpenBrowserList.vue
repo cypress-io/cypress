@@ -3,7 +3,10 @@
     v-if="props.gql.browsers"
     @submit.prevent="emit('launch', props.gql?.currentBrowser?.path)"
   >
-    <div class="flex flex-wrap py-40px gap-24px justify-center">
+    <div
+      class="flex flex-wrap py-40px gap-24px justify-center"
+      data-cy="open-browser-list"
+    >
       <div
         v-for="browser of props.gql.browsers"
         :key="browser.id"
@@ -18,6 +21,7 @@
         <input
           :id="browser.id"
           :key="browser.id"
+          v-model="selectedBrowserId"
           type="radio"
           :value="browser.id"
           :disabled="browser.disabled"
@@ -25,7 +29,6 @@
           :class="{
             'filter grayscale': browser.disabled
           }"
-          @click="setSelected(browser.id)"
         >
         <label
           :for="browser.id"
@@ -37,7 +40,7 @@
           <div class="text-center">
             <img
               :src="allBrowsersIcons[browser.displayName]"
-              :alt="browser.displayName"
+              alt=""
               class="h-40px w-40px inline"
             >
           </div>
@@ -56,7 +59,7 @@
           type="submit"
           class="mr-2 inline"
           :suffix-icon="openInNew"
-          data-testid="launch-button"
+          data-cy="launch-button"
           size="lg-wide"
         >
           {{ launchText }}
@@ -78,7 +81,7 @@
 <script lang="ts" setup>
 import { useI18n } from '@cy/i18n'
 import Button from '@packages/frontend-shared/src/components/Button.vue'
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 import _clone from 'lodash/clone'
 import openInNew from '~icons/mdi/open-in-new'
 import { useMutation, gql } from '@urql/vue'
@@ -133,6 +136,16 @@ const setSelected = (browserId: string) => {
 }
 
 const launchText = computed(() => props.gql.currentBrowser ? `${t('setupPage.openBrowser.launch')} ${props.gql.currentBrowser.displayName}` : '')
+
+const selectedBrowserId = computed({
+  get: () => props.gql.currentBrowser ? props.gql.currentBrowser.id : null,
+  set: (newVal) => {
+    if (newVal) {
+      setSelected(newVal)
+    }
+  },
+})
+
 </script>
 
 <style scoped>
