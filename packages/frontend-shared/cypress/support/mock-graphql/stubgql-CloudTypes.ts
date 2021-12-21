@@ -121,13 +121,14 @@ export function createCloudProject (config: ConfigFor<CloudProject>) {
   return indexNode(cloudProject)
 }
 
-export function createCloudUser (config: ConfigFor<CloudUser>): CloudUser {
-  const cloudUser: CloudUser = {
+export function createCloudUser (config: ConfigFor<CloudUser>): Required<CloudUser> {
+  const cloudUser: Required<CloudUser> = {
     ...testNodeId('CloudUser'),
     email: 'test@example.com',
     fullName: 'Test User',
-    cloudOrganizationsUrl: '/cloud/organizations',
-    createCloudOrganizationUrl: '/cloud/organizations/create',
+    cloudProfileUrl: 'http://dummy.cypress.io/profile',
+    cloudOrganizationsUrl: 'http://dummy.cypress.io/organizations',
+    createCloudOrganizationUrl: 'http://dummy.cypress.io/organizations/create',
     organizations: {
       __typename: 'CloudOrganizationConnection',
       nodes: [createCloudOrganization({})],
@@ -148,8 +149,8 @@ export function createCloudUser (config: ConfigFor<CloudUser>): CloudUser {
   return indexNode(cloudUser)
 }
 
-export function createCloudRun (config: Partial<CloudRun>): CloudRun {
-  const cloudRunData: CloudRun = {
+export function createCloudRun (config: Partial<CloudRun>): Required<CloudRun> {
+  const cloudRunData: Required<CloudRun> = {
     ...testNodeId('CloudRun'),
     status: 'PASSED',
     totalFailed: 0,
@@ -158,8 +159,11 @@ export function createCloudRun (config: Partial<CloudRun>): CloudRun {
     totalRunning: 0,
     totalTests: 10,
     totalPassed: 10,
-    ...config,
+    commitInfo: null,
+    totalDuration: 300,
+    url: 'http://dummy.cypress.io/runs/1',
     createdAt: new Date().toISOString(),
+    ...config,
   }
 
   return indexNode(cloudRunData)
@@ -190,16 +194,16 @@ export const CloudRunStubs = {
   running: createCloudRun({ status: 'RUNNING', totalRunning: 2, totalPassed: 8 }),
   someSkipped: createCloudRun({ status: 'PASSED', totalPassed: 7, totalSkipped: 3 }),
   allSkipped: createCloudRun({ status: 'ERRORED', totalPassed: 0, totalSkipped: 10 }),
-} as const
+} as Record<string, Required<CloudRun>>
 
 export const CloudUserStubs = {
   me: createCloudUser({ userIsViewer: true }),
   // meAsAdmin: createCloudUser({ userIsViewer: true }), TODO(tim): add when we have roles
-} as const
+} as Record<string, Required<CloudUser>>
 
 export const CloudOrganizationStubs = {
   cyOrg: createCloudOrganization({}),
-} as const
+} as Record<string, CloudOrganization>
 
 const stubProjectUrls = {
   cloudProjectUrl: 'https://project.cypress.io',

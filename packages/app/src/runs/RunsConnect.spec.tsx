@@ -1,5 +1,6 @@
 import RunsConnect from './RunsConnect.vue'
 import { RunsConnectFragmentDoc } from '../generated/graphql-test'
+import { CloudUserStubs } from '@packages/frontend-shared/cypress/support/mock-graphql/stubgql-CloudTypes'
 
 describe('<RunsConnect />', () => {
   it('show user connect if not connected', () => {
@@ -16,12 +17,7 @@ describe('<RunsConnect />', () => {
   })
 
   const cloudViewer = {
-    __typename: 'CloudUser' as const,
-    id: '1',
-    email: 'test@test.test',
-    fullName: 'Tester Test',
-    cloudOrganizationsUrl: '/cloud/organizations',
-    createCloudOrganizationUrl: '/cloud/organizations/create',
+    ...CloudUserStubs.me,
     organizationControl: null,
     organizations: {
       __typename: 'CloudOrganizationConnection' as const,

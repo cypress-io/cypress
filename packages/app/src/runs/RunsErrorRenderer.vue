@@ -65,7 +65,7 @@ fragment RunsErrorRenderer on Query {
   currentProject {  
     id
     projectId
-    cloudProject{
+    cloudProject {
       __typename
       ... on CloudProjectNotFound {
         message

@@ -5,11 +5,6 @@ import { CloudUserStubs } from '@packages/frontend-shared/cypress/support/mock-g
 describe('<RunsContainer />', { keystrokeDelay: 0 }, () => {
   const cloudViewer = {
     ...CloudUserStubs.me,
-    id: '1',
-    email: 'test@test.test',
-    fullName: 'Tester Test',
-    cloudOrganizationsUrl: null,
-    createCloudOrganizationUrl: null,
     organizations: null,
     organizationControl: null,
   }
