@@ -113,7 +113,6 @@ class RunPlugins {
       }
     })
     .then((modifiedCfg) => {
-      modifiedCfg = _.omit(modifiedCfg, 'projectRoot', 'configFile')
       debug('plugins file successfully loaded')
       this.ipc.send('setupTestingType:reply', {
         setupConfig: modifiedCfg,
