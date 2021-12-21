@@ -9,8 +9,10 @@ $cy-tooltip-class: 'cy-tooltip';
   word-wrap: break-word;
 
   .cy-tooltip-arrow {
+    overflow: visible;
     svg {
       fill: $gray-50;
+      overflow: visible;
       stroke: $gray-50;
     }
   }
