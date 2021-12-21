@@ -620,7 +620,6 @@ commands:
                   command: |
                     git fetch origin pull/<<parameters.pull_request_id>>/head:pr-<<parameters.pull_request_id>>
                     git checkout pr-<<parameters.pull_request_id>>
-                    git log -n 2
 
   test-binary-against-rwa:
     description: |
@@ -1336,7 +1335,7 @@ jobs:
 
   run-launchpad-integration-tests-chrome:
     <<: *defaults
-    parallelism: 1
+    parallelism: 2
     steps:
       - run-new-ui-tests:
           browser: chrome
@@ -1346,7 +1345,7 @@ jobs:
 
   run-app-component-tests-chrome:
     <<: *defaults
-    parallelism: 1
+    parallelism: 7
     steps:
       - run-new-ui-tests:
           browser: chrome
@@ -1356,7 +1355,7 @@ jobs:
 
   run-app-integration-tests-chrome:
     <<: *defaults
-    parallelism: 1
+    parallelism: 2
     steps:
       - run-new-ui-tests:
           browser: chrome
