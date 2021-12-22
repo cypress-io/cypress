@@ -86,10 +86,6 @@ const isValidBrowserList = (key, browsers) => {
     return 'Browsers should be an array'
   }
 
-  if (!browsers.length) {
-    return 'Expected at least one browser'
-  }
-
   for (let k = 0; k < browsers.length; k += 1) {
     const err = isValidBrowser(browsers[k])
 

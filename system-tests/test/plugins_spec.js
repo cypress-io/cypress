@@ -64,11 +64,11 @@ describe('e2e plugins', function () {
     })
   })
 
-  it('catches invalid browsers list returned from plugins', function () {
+  it('allows for an empty browsers list if browser set via command line', function () {
     return systemTests.exec(this, {
       project: 'plugin-returns-empty-browsers-list',
-      expectedExitCode: 1,
-      snapshot: true,
+      expectedExitCode: 0,
+      snapshot: false,
     })
   })
 

@@ -257,21 +257,25 @@ export = {
         majorVersion = getMajorVersion(version)
       }
 
-      const electronBrowser: FoundBrowser = {
-        name: 'electron',
-        channel: 'stable',
-        family: 'chromium',
-        displayName: 'Electron',
-        version,
-        path: '',
-        majorVersion,
-        info: 'Electron is the default browser that comes with Cypress. This is the default browser that runs in headless mode. Selecting this browser is useful when debugging. The version number indicates the underlying Chromium version that Electron uses.',
+      if (!process.env.ELECTRON_RUN_AS_NODE) {
+        const electronBrowser: FoundBrowser = {
+          name: 'electron',
+          channel: 'stable',
+          family: 'chromium',
+          displayName: 'Electron',
+          version,
+          path: '',
+          majorVersion,
+          info: 'Electron is the default browser that comes with Cypress. This is the default browser that runs in headless mode. Selecting this browser is useful when debugging. The version number indicates the underlying Chromium version that Electron uses.',
+        }
+
+        // the internal version of Electron, which won't be detected by `launcher`
+        debug('adding Electron browser %o', electronBrowser)
+
+        return browsers.concat(electronBrowser)
       }
 
-      // the internal version of Electron, which won't be detected by `launcher`
-      debug('adding Electron browser %o', electronBrowser)
-
-      return browsers.concat(electronBrowser)
+      return browsers
     })
   },
 }

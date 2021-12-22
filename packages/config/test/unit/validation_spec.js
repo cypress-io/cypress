@@ -89,9 +89,8 @@ describe('src/validation', () => {
   })
 
   describe('.isValidBrowserList', () => {
-    it('does not allow empty or not browsers', () => {
+    it('does not allow non-array value for browsers', () => {
       snapshot('undefined browsers', validation.isValidBrowserList('browsers'))
-      snapshot('empty list of browsers', validation.isValidBrowserList('browsers', []))
 
       return snapshot('browsers list with a string', validation.isValidBrowserList('browsers', ['foo']))
     })
