@@ -362,13 +362,11 @@ function validateExternalLink (subject, options: ValidateExternalLinkOptions | s
     ({ name, href } = options)
   }
 
-  cy.wrap(subject).findByRole('link', { name: name || href }).as('Link')
-
-  cy.get('@Link').should('have.attr', 'href', href)
-
   cy.intercept('mutation-ExternalLink_OpenExternal', { 'data': { 'openExternal': true } }).as('OpenExternal')
 
-  cy.get('@Link').click()
+  cy.wrap(subject).findByRole('link', { name: name || href }).as('Link')
+  .should('have.attr', 'href', href)
+  .click()
 
   cy.wait('@OpenExternal')
   .its('request.body.variables.url')
