@@ -51,5 +51,4 @@ export const stubWizard: MaybeResolver<Wizard> = {
       isSelected: idx === 0,
     }
   }),
-  warnings: [],
 }

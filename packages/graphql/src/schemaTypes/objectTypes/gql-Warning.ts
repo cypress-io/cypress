@@ -7,7 +7,6 @@ export const Warning = objectType({
     t.nonNull.string('title')
     t.nonNull.string('message')
     t.string('details')
-    t.string('setupStep')
   },
   sourceType: {
     module: '@packages/types',

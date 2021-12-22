@@ -22,7 +22,6 @@ fragment WarningList on Query {
     title
     message
     details
-    setupStep
   }
 }`
 
@@ -32,8 +31,6 @@ const props = defineProps<{
 
 const dismissed = ref({})
 const warnings = computed(() => {
-  // console.log(props.gql.warnings)
-
   return props.gql.warnings
   .map((w) => ({ ...w, key: `${w.title}${w.message}` }))
   .filter((warning) => {

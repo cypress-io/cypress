@@ -911,7 +911,6 @@ type VersionData {
 type Warning {
   details: String
   message: String!
-  setupStep: String
   title: String!
 }
 
