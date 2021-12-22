@@ -4,9 +4,12 @@
     :title="t('runs.connect.modal.connectManually.title')"
     @update:model-value="emit('cancel')"
   >
-    <Alert status="warning">
-      {{ t('runs.connect.modal.connectManually.warning') }}
-    </Alert>
+    <Alert
+      status="warning"
+      :title="t('runs.connect.modal.connectManually.warning')"
+      :icon="WarningIcon"
+      icon-classes="icon-dark-orange-400"
+    />
     <p class="mt-24px mb-16px text-16px leading-24px">
       <i18n-t keypath="runs.connect.modal.connectManually.mainMessage">
         <template #projectId>
@@ -56,6 +59,7 @@ import StandardModal from '@cy/components/StandardModal.vue'
 import Button from '@cy/components/Button.vue'
 import Alert from '@cy/components/Alert.vue'
 import ShikiHighlight from '@cy/components/ShikiHighlight.vue'
+import WarningIcon from '~icons/cy/warning_x16.svg'
 import { useI18n } from '@cy/i18n'
 import type { NeedManualUpdateModalFragment } from '../../generated/graphql'
 

@@ -282,7 +282,7 @@ export class ProjectActions {
   }
 
   async setProjectIdInConfigFile (projectId: string) {
-    insertValuesInConfigFile(this.ctx.lifecycleManager.configFilePath, { projectId }, { get (id: string) {
+    return insertValuesInConfigFile(this.ctx.lifecycleManager.configFilePath, { projectId }, { get (id: string) {
       return Error(id)
     } })
   }
