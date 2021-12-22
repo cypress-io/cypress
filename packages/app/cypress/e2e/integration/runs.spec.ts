@@ -74,7 +74,7 @@ describe('App: Runs', () => {
     })
 
     // TODO: does not open modal
-    it('opens Connect Project modal after clicking Connect Project button', () => {
+    it.skip('opens Connect Project modal after clicking Connect Project button', () => {
       cy.withCtx(async (ctx) => {
         await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {}')
       })
