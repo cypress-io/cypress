@@ -1,5 +1,5 @@
 describe('Sidebar Navigation', () => {
-  before(() => {
+  beforeEach(() => {
     cy.scaffoldProject('todos')
     cy.openProject('todos')
     cy.startAppServer()
@@ -18,17 +18,17 @@ describe('Sidebar Navigation', () => {
 
   it('closes the bar when clicking the expand button (if expanded)', () => {
     cy.get('[aria-expanded]').should('have.attr', 'aria-expanded', 'true')
-    cy.findByText('todos').should('be.visible')
+    cy.findByText('todos').as('title')
+    cy.get('@title').should('be.visible')
     cy.findByLabelText('toggle navigation', {
       selector: 'button',
     }).click()
 
     cy.get('[aria-expanded]').should('have.attr', 'aria-expanded', 'false')
-    cy.findByText('todos').should('not.be.visible')
+    cy.get('@title').should('not.be.visible')
   })
 
   it('has unlabeled menu item that shows the keyboard shortcuts modal (unexpanded state)', () => {
-    cy.get('[aria-expanded]').should('have.attr', 'aria-expanded', 'false')
     cy.get('[data-cy="keyboard-shortcuts"]').should('be.visible')
     cy.get('[data-cy="keyboard-shortcuts"]').click()
     cy.get('h2').findByText('Keyboard Shortcuts').should('be.visible')
@@ -43,7 +43,9 @@ describe('Sidebar Navigation', () => {
   })
 
   it('shows a tooltip when hovering over menu item', () => {
-    cy.get('[aria-expanded]').should('have.attr', 'aria-expanded', 'false')
+    cy.findByLabelText('toggle navigation', {
+      selector: 'button',
+    }).click()
 
     cy.get('[data-cy="sidebar-header"').realHover()
     cy.contains('#tooltip-target > div', 'todos').should('be.visible')
@@ -67,7 +69,10 @@ describe('Sidebar Navigation', () => {
   })
 
   it('opens the bar when clicking the expand button (if unexpanded)', () => {
-    cy.get('[aria-expanded]').should('have.attr', 'aria-expanded', 'false')
+    cy.findByLabelText('toggle navigation', {
+      selector: 'button',
+    }).click()
+
     cy.findByText('todos').should('not.be.visible')
 
     cy.findByLabelText('toggle navigation', {
@@ -142,7 +147,7 @@ describe('Sidebar Navigation', () => {
   it('has a menu item labeled "Specs" which takes you to the Spec List page', () => {
     cy.get('[aria-expanded]').should('have.attr', 'aria-expanded', 'true')
 
-    cy.get('[data-cy="app-header-bar"]').findByText('Specs-Index').should('not.exist')
+    // cy.get('[data-cy="app-header-bar"]').findByText('Specs-Index').should('not.exist')
     cy.findByText('Specs').should('be.visible')
     cy.findByText('Specs').click()
     cy.get('[data-cy="app-header-bar"]').findByText('Specs-Index').should('be.visible')
