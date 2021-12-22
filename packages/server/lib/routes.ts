@@ -89,26 +89,29 @@ export const createCommonRoutes = ({
       target: `http://localhost:${process.env.CYPRESS_INTERNAL_VITE_APP_PORT}/`,
     })
 
-    router.get('/__cypress/assets/*', (req, res) => {
+    router.get(`/__cypress/assets/*`, (req, res) => {
       proxy.web(req, res, {}, (e) => {})
     })
   } else {
-    router.get('/__cypress/assets/*', (req, res) => {
+    router.get(`/__cypress/assets/*`, (req, res) => {
       const pathToFile = getPathToDist('app', req.params[0])
 
       return send(req, pathToFile).pipe(res)
     })
   }
 
-  router.get('/__cypress/runner/*', (req, res) => {
+  // /__cypress/runner/*
+  router.get(`/${config.namespace}/runner/*`, (req, res) => {
     runner.handle(testingType, req, res)
   })
 
-  router.all('/__cypress/xhrs/*', (req, res, next) => {
+  // /__cypress/xhrs/*
+  router.all(`/${config.namespace}/xhrs/*`, (req, res, next) => {
     xhrs.handle(req, res, config, next)
   })
 
-  router.get('/__cypress/iframes/*', (req, res) => {
+  // /__cypress/iframes/*
+  router.get(`/${config.namespace}/iframes/*`, (req, res) => {
     if (testingType === 'e2e') {
       iframesController.e2e({ config, getSpec, getRemoteState }, req, res)
     }

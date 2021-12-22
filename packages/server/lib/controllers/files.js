@@ -8,8 +8,6 @@ const pathHelpers = require('../util/path_helpers')
 const debug = require('debug')('cypress:server:controllers')
 const { escapeFilenameInUrl } = require('../util/escape_filename')
 
-const SPEC_URL_PREFIX = '/__cypress/tests?p'
-
 module.exports = {
   handleFiles (req, res, config) {
     debug('handle files')
@@ -62,7 +60,7 @@ module.exports = {
 
       debug('converted %s to %s', spec, convertedSpec)
 
-      return this.prepareForBrowser(convertedSpec, config.projectRoot)
+      return this.prepareForBrowser(convertedSpec, config.projectRoot, config.namespace)
     }
 
     const specFilter = _.get(extraOptions, 'specFilter')
@@ -114,7 +112,9 @@ module.exports = {
     })
   },
 
-  prepareForBrowser (filePath, projectRoot) {
+  prepareForBrowser (filePath, projectRoot, namespace) {
+    const SPEC_URL_PREFIX = `/${namespace}/tests?p`
+
     filePath = filePath.replace(SPEC_URL_PREFIX, '__CYPRESS_SPEC_URL_PREFIX__')
     filePath = escapeFilenameInUrl(filePath).replace('__CYPRESS_SPEC_URL_PREFIX__', SPEC_URL_PREFIX)
     const relativeFilePath = path.relative(projectRoot, filePath)
@@ -122,12 +122,12 @@ module.exports = {
     return {
       absolute: filePath,
       relative: relativeFilePath,
-      relativeUrl: this.getTestUrl(relativeFilePath),
+      relativeUrl: this.getTestUrl(relativeFilePath, namespace),
     }
   },
 
-  getTestUrl (file) {
-    const url = `${SPEC_URL_PREFIX}=${file}`
+  getTestUrl (file, namespace) {
+    const url = `/${namespace}/tests?p=${file}`
 
     debug('test url for file %o', { file, url })
 
@@ -143,7 +143,7 @@ module.exports = {
   },
 
   getSupportFile (config) {
-    const { projectRoot, supportFile } = config
+    const { projectRoot, supportFile, namespace } = config
 
     let files = []
 
@@ -173,7 +173,7 @@ module.exports = {
       return glob(p, { nodir: true })
     }).then(_.flatten)
     .map((filePath) => {
-      return this.prepareForBrowser(filePath, projectRoot)
+      return this.prepareForBrowser(filePath, projectRoot, namespace)
     })
   },
 

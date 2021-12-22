@@ -12,6 +12,10 @@ export default defineConfig({
     openMode: 0,
   },
 
+  // @ts-expect-error
+  clientRoute: '/zz/',
+  namespace: '__app',
+
   testFiles: '**/*.{spec,cy}.{js,ts,tsx,jsx}',
   reporter: '../../node_modules/cypress-multi-reporters/index.js',
   reporterOptions: {

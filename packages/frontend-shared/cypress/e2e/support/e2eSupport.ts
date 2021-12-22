@@ -192,7 +192,7 @@ function startAppServer (mode: 'component' | 'e2e' = 'e2e') {
 }
 
 function visitApp (href?: string) {
-  const { e2e_serverPort, e2e_gqlPort } = Cypress.env()
+  const { e2e_serverPort } = Cypress.env()
 
   if (!e2e_serverPort) {
     throw new Error(`
@@ -202,17 +202,7 @@ function visitApp (href?: string) {
     `)
   }
 
-  return cy.withCtx(async (ctx) => {
-    return JSON.stringify(await ctx.html.fetchAppInitialData())
-  }, { log: false }).then((ssrData) => {
-    return cy.visit(`dist-app/index.html?serverPort=${e2e_serverPort}${href || ''}`, {
-      onBeforeLoad (win) {
-        // Simulates the inject SSR data when we're loading the page normally in the app
-        win.__CYPRESS_INITIAL_DATA__ = JSON.parse(ssrData)
-        win.__CYPRESS_GRAPHQL_PORT__ = e2e_gqlPort
-      },
-    })
-  })
+  return cy.visit(`http://localhost:${e2e_serverPort}/__/${href ?? ''}`)
 }
 
 function visitLaunchpad () {

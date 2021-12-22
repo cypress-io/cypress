@@ -31,6 +31,9 @@ declare global {
   interface Window {
     __CYPRESS_INITIAL_DATA__: SSRData
     __CYPRESS_GRAPHQL_PORT__?: string
+    __CYPRESS_CONFIG__: {
+      base64Config: string
+    }
   }
 }
 
@@ -48,7 +51,7 @@ function gqlPort () {
 
 export async function preloadLaunchpadData () {
   try {
-    const resp = await fetch(`http://localhost:${gqlPort()}/__cypress/launchpad-preload`)
+    const resp = await fetch(`http://localhost:${gqlPort()}/__launchpad/preload`)
 
     window.__CYPRESS_INITIAL_DATA__ = await resp.json()
   } catch {

@@ -4,7 +4,7 @@ import pkg from '@packages/root'
 import configUtils from '@packages/config'
 
 import specsUtil from './util/specs'
-import type { AllModeOptions, AllowedState, FindSpecs, FoundBrowser, InitializeProjectOptions, LaunchOpts, OpenProjectLaunchOptions, Preferences } from '@packages/types'
+import type { AllModeOptions, AllowedState, FindSpecs, FoundBrowser, FullConfig, InitializeProjectOptions, LaunchOpts, OpenProjectLaunchOptions, Preferences } from '@packages/types'
 import browserUtils from './browsers/utils'
 import auth from './gui/auth'
 import user from './user'
@@ -108,6 +108,9 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       },
       closeActiveProject () {
         return openProject.closeActiveProject()
+      },
+      getConfig () {
+        return openProject.getConfig() as FullConfig
       },
     },
     electronApi: {

@@ -10,6 +10,10 @@ export interface BrowserApiShape {
 export class BrowserDataSource {
   constructor (private ctx: DataContext) {}
 
+  selectedBrowser () {
+    return this.ctx.coreData.chosenBrowser
+  }
+
   /**
    * Gets the browsers from the machine, caching the Promise on the coreData
    * so we only look them up once

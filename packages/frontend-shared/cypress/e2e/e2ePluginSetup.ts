@@ -230,7 +230,7 @@ async function makeE2ETasks () {
 
       // Runs the launchArgs through the whole pipeline for the CLI open process,
       // which probably needs a bit of refactoring / consolidating
-      const cliOptions = await cli.parseOpenCommand(['open', ...openArgv])
+      const cliOptions = await cli.parseOpenCommand(['open', ...openArgv, '--port', '4455'])
       const processedArgv = cliOpen.processOpenOptions(cliOptions)
       const modeOptions = argUtils.toObject(processedArgv)
 

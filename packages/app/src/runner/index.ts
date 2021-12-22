@@ -282,16 +282,20 @@ function runSpecE2E (spec: BaseSpec) {
 async function initialize () {
   isTorndown = false
 
-  await injectBundle()
+  function decodeBase64Unicode (str: string) {
+    return decodeURIComponent(atob(str).split('').map((char) => {
+      return `%${(`00${char.charCodeAt(0).toString(16)}`).slice(-2)}`
+    }).join(''))
+  }
+
+  const config = JSON.parse(decodeBase64Unicode(window.__CYPRESS_CONFIG__.base64Config)) as Cypress.Config
+
+  await injectBundle(config)
 
   if (isTorndown) {
     return
   }
 
-  const response = await window.fetch('/api')
-  const data = await response.json()
-
-  const config = window.UnifiedRunner.decodeBase64(data.base64Config) as any
   const autStore = useAutStore()
 
   // TODO(lachlan): use GraphQL to get the viewport dimensions

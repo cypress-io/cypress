@@ -600,7 +600,13 @@ export class ProjectBase<TServer extends Server> extends EE {
 
     debug('project has config %o', this._cfg)
 
-    return this._cfg
+    return {
+      ...this._cfg,
+      remote: this._server?._getRemoteState() ?? {} as Cypress.RemoteState,
+      browser: this.browser,
+      testingType: this.ctx.coreData.currentTestingType ?? 'e2e',
+      specs: [],
+    }
   }
 
   // Saved state

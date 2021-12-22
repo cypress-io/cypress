@@ -21,22 +21,26 @@ export const createRoutesE2E = ({
 
   // routing for the actual specs which are processed automatically
   // this could be just a regular .js file or a .coffee file
-  routesE2E.get('/__cypress/tests', (req, res, next) => {
+  // '/__cypress/tests'
+  routesE2E.get(`/${config.namespace}/tests`, (req, res, next) => {
     // slice out the cache buster
     const test = decodeURIComponent(CacheBuster.strip(req.query.p))
 
     specController.handle(test, req, res, config, next, onError)
   })
 
-  routesE2E.get('/__cypress/socket.io.js', (req, res) => {
+  // '/__cypress/socket.io.js'
+  routesE2E.get(`/${config.namespace}/socket.io.js`, (req, res) => {
     client.handle(req, res)
   })
 
-  routesE2E.get('/__cypress/reporter/*', (req, res) => {
+  // '/__cypress/reporter/*'
+  routesE2E.get(`/${config.namespace}/reporter/*`, (req, res) => {
     reporter.handle(req, res)
   })
 
-  routesE2E.get('/__cypress/automation/getLocalStorage', (req, res) => {
+  // '/__cypress/automation/getLocalStorage'
+  routesE2E.get(`/${config.namespace}/automation/getLocalStorage`, (req, res) => {
     // gathers and sends localStorage and sessionStorage via postMessage to the Cypress frame
     // detect existence of local/session storage with JSON.stringify(...).length since localStorage.length may not be accurate
     res.send(`<html><body><script>(${(function () {
@@ -63,7 +67,8 @@ export const createRoutesE2E = ({
   })
 
   /* eslint-disable no-undef */
-  routesE2E.get('/__cypress/automation/setLocalStorage', (req, res) => {
+  // '/__cypress/automation/setLocalStorage'
+  routesE2E.get(`/${config.namespace}/automation/setLocalStorage`, (req, res) => {
     const origin = req.originalUrl.slice(req.originalUrl.indexOf('?') + 1)
 
     networkProxy.http.getRenderedHTMLOrigins()[origin] = true
@@ -105,23 +110,26 @@ export const createRoutesE2E = ({
   /* eslint-enable no-undef */
 
   // routing for /files JSON endpoint
-  routesE2E.get('/__cypress/files', (req, res) => {
+  // '/__cypress/files'
+  routesE2E.get(`/${config.namespace}/files`, (req, res) => {
     files.handleFiles(req, res, config)
   })
 
-  routesE2E.get('/__cypress/source-maps/:id.map', (req, res) => {
+  // '/__cypress/source-maps/:id.map'
+  routesE2E.get(`/${config.namespace}/source-maps/:id.map`, (req, res) => {
     networkProxy.handleSourceMapRequest(req, res)
   })
 
   // special fallback - serve local files from the project's root folder
-  routesE2E.get('/__root/*', (req, res) => {
+  routesE2E.get(`/__root/*`, (req, res) => {
     const file = path.join(config.projectRoot, req.params[0])
 
     res.sendFile(file, { etag: false })
   })
 
   // special fallback - serve dist'd (bundled/static) files from the project path folder
-  routesE2E.get('/__cypress/bundled/*', (req, res) => {
+  // '/__cypress/bundled/*'
+  routesE2E.get(`/${config.namespace}/bundled/*`, (req, res) => {
     const file = AppData.getBundledFilePath(config.projectRoot, path.join('src', req.params[0]))
 
     debug(`Serving dist'd bundle at file path: %o`, { path: file, url: req.url })
