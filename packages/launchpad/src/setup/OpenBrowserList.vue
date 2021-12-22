@@ -4,19 +4,19 @@
     @submit.prevent="emit('launch', props.gql?.currentBrowser?.path)"
   >
     <div
-      class="flex flex-wrap py-16 gap-6 justify-center"
+      class="flex flex-wrap py-40px gap-24px justify-center"
       data-cy="open-browser-list"
     >
       <div
         v-for="browser of props.gql.browsers"
         :key="browser.id"
         :data-cy-browser="browser.name"
-        class="rounded border-1 text-center pt-6 pb-4 w-160px relative block"
+        class="rounded border-1 text-center min-h-144px pt-6 pb-4 w-160px relative block"
         :class="{
-          'border-jade-300 ring-2 ring-jade-50': browser.isSelected,
+          'border-jade-300 ring-2 ring-jade-100 focus:border-jade-400 focus:border-1 focus:outline-none': browser.isSelected,
           'border-gray-200': !browser.isSelected,
           'filter grayscale bg-gray-100': browser.disabled,
-          'hover:border-indigo-200 hover:ring-2 hover:ring-indigo-50': !browser.disabled && !browser.isSelected
+          'hover:border-indigo-300 hover:ring-2 hover:ring-indigo-100': !browser.disabled && !browser.isSelected
         }"
       >
         <input
@@ -34,6 +34,9 @@
         <label
           :for="browser.id"
           class="radio-label"
+          :class="{
+            'before:hocus:cursor-pointer': !browser.isSelected
+          }"
         >
           <div class="text-center">
             <img
@@ -42,8 +45,11 @@
               class="h-40px w-40px inline"
             >
           </div>
-          <div class="text-lg pt-2 text-indigo-600">{{ browser.displayName }}</div>
-          <div class="text-xs text-gray-400">v{{ browser.majorVersion }}</div>
+          <div
+            class="pt-2 text-indigo-600 text-18px leading-28px"
+            :class="{ 'text-jade-600': browser.isSelected }"
+          >{{ browser.displayName }}</div>
+          <div class="text-14px text-gray-500 leading-20px">v{{ browser.majorVersion }}</div>
         </label>
       </div>
     </div>
