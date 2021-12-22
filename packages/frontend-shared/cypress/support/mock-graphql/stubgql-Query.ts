@@ -31,6 +31,9 @@ export const stubQuery: MaybeResolver<Query> = {
   baseError (source, args, ctx) {
     return {}
   },
+  warnings () {
+    return []
+  },
   scaffoldedFiles () {
     // return [
     //   {
