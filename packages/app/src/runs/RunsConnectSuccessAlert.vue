@@ -2,10 +2,10 @@
   <TransitionQuickFade>
     <Alert
       v-if="showAlert"
-      type="success"
+      v-model="showAlert"
+      status="success"
       class="top-24px right-24px left-24px absolute"
-      close-button
-      @close="showAlert = false"
+      dismissible
     >
       {{ t('runs.connectSuccessAlert.title') }}
       <template #details>

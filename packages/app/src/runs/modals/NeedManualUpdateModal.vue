@@ -4,7 +4,7 @@
     :title="t('runs.connect.modal.connectManually.title')"
     @update:model-value="emit('cancel')"
   >
-    <Alert type="warning">
+    <Alert status="warning">
       {{ t('runs.connect.modal.connectManually.warning') }}
     </Alert>
     <p class="mt-24px mb-16px text-16px leading-24px">
