@@ -12,6 +12,7 @@ export const allBundlers = BUNDLERS.map((bundler, idx) => {
 
 export const stubWizard: MaybeResolver<Wizard> = {
   __typename: 'Wizard',
+  warnings: [],
   packagesToInstall: [
     {
       ...testNodeId('WizardNpmPackage'),
