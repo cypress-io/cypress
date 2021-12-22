@@ -21,7 +21,8 @@ const system = require(`../../../lib/util/system`)
 const specsUtil = require(`../../../lib/util/specs`)
 const { experimental } = require(`../../../lib/experiments`)
 
-describe('lib/modes/run', () => {
+// NOTE: Covered by e2e/integration tests
+describe.skip('lib/modes/run', () => {
   beforeEach(function () {
     this.projectInstance = new ProjectBase({ projectRoot: '/_test-output/path/to/project-e2e', testingType: 'e2e' })
   })

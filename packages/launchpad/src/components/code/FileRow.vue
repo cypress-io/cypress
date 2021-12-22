@@ -4,6 +4,7 @@
   bg-light-50 hocus-default"
     max-height="500px"
     :initially-open="statusInfo.initiallyOpen"
+    :data-e2e="status"
   >
     <template #target="{open}">
       <ListRowHeader
@@ -34,7 +35,10 @@
     >
       <p class="flex-grow ml-1 text-left">
         <span class="font-semibold">{{ t('setupPage.configFile.changesRequiredLabel') }}: </span>
-        <i18n-t keypath="setupPage.configFile.changesRequiredDescription">
+        <i18n-t
+          scope="global"
+          keypath="setupPage.configFile.changesRequiredDescription"
+        >
           <span class="inline-block px-1 rounded bg-warning-200 text-warning-600">{{ filePath }}</span>
         </i18n-t>
       </p>
@@ -119,10 +123,11 @@ const statusInfo: ComputedRef<StatusInfo> = computed(() => {
       badgeLabel: t('setupPage.configFile.skippedLabel'),
       badgeType: 'skipped',
       icon: SkippedIcon,
-      initiallyOpen: true,
+      initiallyOpen: false,
     },
     valid: {
       icon: AddedIcon,
+      initiallyOpen: true,
     },
     error: {
       icon: ErrorIcon,

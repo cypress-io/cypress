@@ -320,6 +320,11 @@ declare namespace Cypress {
     LocalStorage: LocalStorage
 
     /**
+     * Internal class for session management.
+     */
+    session: Session
+
+    /**
      * Current testing type, determined by the Test Runner chosen to run.
      */
     testingType: TestingType
@@ -2932,10 +2937,11 @@ declare namespace Cypress {
    */
   type CoreConfigOptions = Partial<Omit<ResolvedConfigOptions, TestingType>>
 
+  type DevServerFn<ComponentDevServerOpts = any> = (cypressConfig: DevServerConfig, devServerConfig: ComponentDevServerOpts) => ResolvedDevServerConfig | Promise<ResolvedDevServerConfig>
   interface ComponentConfigOptions<ComponentDevServerOpts = any> extends CoreConfigOptions {
     // TODO(tim): Keeping optional until we land the implementation
-    devServer?: (cypressConfig: DevServerConfig, devServerConfig: ComponentDevServerOpts) => ResolvedDevServerConfig | Promise<ResolvedDevServerConfig>
-    devServerConfig?: ComponentDevServerOpts
+    devServer?: Promise<{ devServer: DevServerFn<ResolvedDevServerConfig>}> | { devServer: DevServerFn<ResolvedDevServerConfig> } | DevServerFn<ResolvedDevServerConfig>
+    devServerConfig?: ComponentDevServerOpts | Promise<ComponentDevServerOpts>
   }
 
   /**
@@ -3134,6 +3140,11 @@ declare namespace Cypress {
     onAnyRequest(route: RouteOptions, proxy: any): void
     onAnyResponse(route: RouteOptions, proxy: any): void
     onAnyAbort(route: RouteOptions, proxy: any): void
+  }
+
+  interface Session {
+    // Clear all saved sessions and re-run the current spec file.
+    clearAllSavedSessions: () => Promise<void>
   }
 
   type SameSiteStatus = 'no_restriction' | 'strict' | 'lax'

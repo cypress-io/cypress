@@ -90,25 +90,28 @@ $color-transition: color 150ms ease-out;
     display: flex;
     flex-wrap: wrap;
     height: 24px;
-    justify-content: center;
-    padding-right: 8px;
+    justify-content: space-between;
+    padding: 0 4px;
+    width: 124px;
 
     li {
-      display: inline-block;
+      display: flex;
       font-size: 12px;
       font-weight: 600;
-      line-height: 24px;
       list-style-type: none;
-      padding: 1px 0px 0 4px;
+      padding: 0 4px;
 
       svg {
-        margin: 0px 4px;
+        margin-right: 2px;
       }
 
       .num {
         color: $white;
         line-height: 12px;
         vertical-align: text-top;
+        width: 16px;
+        display: inline-block;
+        text-align: center;
 
         &.empty {
           color: $gray-800;
@@ -124,29 +127,30 @@ $color-transition: color 150ms ease-out;
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
+    height: 24px;
 
     .testing-preferences-toggle {
-      padding: 1px 8px;
+      border-left: none;
+      margin-left: 0;
 
       &.open {
         background-color: $gray-900;
       }
     }
 
-    span:last-child button,
-    .play {
-      padding: 1px 10px;
-    }
-
     span {
+      height: 100%;
+
       button {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
         color: $gray-400;
-        height: 22px;
-      }
-      &:not(:last-child) {
-        button {
-          border-right: 1px solid $gray-900;
-        }
+        width: 31px;
+        padding: 0px;
+        border-left: 1px solid $gray-900;
+        margin-left: -1px;
       }
     }
   }

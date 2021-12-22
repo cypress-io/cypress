@@ -2,6 +2,7 @@ import type { SpecType } from '@packages/graphql/src/gen/nxs.gen'
 import { FrontendFramework, FRONTEND_FRAMEWORKS, ResolvedFromConfig, RESOLVED_FROM, SpecFileWithExtension, STORYBOOK_GLOB } from '@packages/types'
 import { scanFSForAvailableDependency } from 'create-cypress-tests'
 import path from 'path'
+import assert from 'assert'
 
 import type { DataContext } from '..'
 import type { Maybe } from '../data/coreDataShape'
@@ -13,22 +14,25 @@ export class ProjectDataSource {
     return this.ctx._apis.projectApi
   }
 
-  async projectId (projectRoot: string) {
-    const config = await this.getConfig(projectRoot)
-
-    return config?.projectId ?? null
+  projectId () {
+    return this.ctx.lifecycleManager.getProjectId()
   }
 
   projectTitle (projectRoot: string) {
     return path.basename(projectRoot)
   }
 
-  getConfig (projectRoot: string) {
-    return this.ctx.config.getConfigForProject(projectRoot)
+  getConfig () {
+    return this.ctx.lifecycleManager.loadedFullConfig
   }
 
   async findSpecs (projectRoot: string, specType: Maybe<SpecType>) {
-    const config = await this.getConfig(projectRoot)
+    const config = this.getConfig()
+
+    if (!config) {
+      return []
+    }
+
     const specs = await this.api.findSpecs({
       projectRoot,
       fixturesFolder: config.fixturesFolder ?? false,
@@ -66,61 +70,6 @@ export class ProjectDataSource {
     return specs.find((x) => x.absolute === currentSpecAbs) ?? null
   }
 
-  async getResolvedConfigFields (projectRoot: string): Promise<ResolvedFromConfig[]> {
-    const config = await this.getConfig(projectRoot)
-
-    interface ResolvedFromWithField extends ResolvedFromConfig {
-      field: typeof RESOLVED_FROM[number]
-    }
-
-    const mapEnvResolvedConfigToObj = (config: ResolvedFromConfig): ResolvedFromWithField => {
-      return Object.entries(config).reduce<ResolvedFromWithField>((acc, [field, value]) => {
-        return {
-          ...acc,
-          value: { ...acc.value, [field]: value.value },
-        }
-      }, {
-        value: {},
-        field: 'env',
-        from: 'env',
-      })
-    }
-
-    return Object.entries(config.resolved).map(([key, value]) => {
-      if (key === 'env' && value) {
-        return mapEnvResolvedConfigToObj(value)
-      }
-
-      return { ...value, field: key }
-    }) as ResolvedFromConfig[]
-  }
-
-  async isTestingTypeConfigured (projectRoot: string, testingType: 'e2e' | 'component') {
-    try {
-      const config = await this.getConfig(projectRoot)
-
-      if (!config) {
-        return true
-      }
-
-      if (testingType === 'e2e') {
-        return Boolean(Object.keys(config.e2e ?? {}).length)
-      }
-
-      if (testingType === 'component') {
-        return Boolean(Object.keys(config.component ?? {}).length)
-      }
-
-      return false
-    } catch (error: any) {
-      if (error.type === 'NO_DEFAULT_CONFIG_FILE_FOUND') {
-        return false
-      }
-
-      throw error
-    }
-  }
-
   async getProjectPreferences (projectTitle: string) {
     const preferences = await this.api.getProjectPreferencesFromCache()
 
@@ -145,20 +94,45 @@ export class ProjectDataSource {
   }
 
   async getCodeGenGlobs () {
-    const project = this.ctx.currentProject
-
-    if (!project) {
-      throw Error(`Cannot find glob without currentProject.`)
-    }
+    assert(this.ctx.currentProject, `Cannot find glob without currentProject.`)
 
     const looseComponentGlob = '/**/*.{js,jsx,ts,tsx,.vue}'
 
-    const framework = await this.frameworkLoader.load(project.projectRoot)
+    const framework = await this.frameworkLoader.load(this.ctx.currentProject)
 
     return {
       component: framework?.glob ?? looseComponentGlob,
       story: STORYBOOK_GLOB,
     }
+  }
+
+  async getResolvedConfigFields (): Promise<ResolvedFromConfig[]> {
+    const config = this.ctx.lifecycleManager.loadedFullConfig?.resolved ?? {}
+
+    interface ResolvedFromWithField extends ResolvedFromConfig {
+      field: typeof RESOLVED_FROM[number]
+    }
+
+    const mapEnvResolvedConfigToObj = (config: ResolvedFromConfig): ResolvedFromWithField => {
+      return Object.entries(config).reduce<ResolvedFromWithField>((acc, [field, value]) => {
+        return {
+          ...acc,
+          value: { ...acc.value, [field]: value.value },
+        }
+      }, {
+        value: {},
+        field: 'env',
+        from: 'env',
+      })
+    }
+
+    return Object.entries(config ?? {}).map(([key, value]) => {
+      if (key === 'env' && value) {
+        return mapEnvResolvedConfigToObj(value)
+      }
+
+      return { ...value, field: key }
+    }) as ResolvedFromConfig[]
   }
 
   async getCodeGenCandidates (glob: string): Promise<SpecFileWithExtension[]> {
@@ -168,13 +142,13 @@ export class ProjectDataSource {
       return this.ctx.storybook.getStories()
     }
 
-    const project = this.ctx.currentProject
+    const projectRoot = this.ctx.currentProject
 
-    if (!project) {
+    if (!projectRoot) {
       throw Error(`Cannot find components without currentProject.`)
     }
 
-    const config = await this.ctx.project.getConfig(project.projectRoot)
+    const config = await this.ctx.lifecycleManager.getFullInitialConfig()
 
     const codeGenCandidates = await this.ctx.file.getFilesByGlob(config.projectRoot || process.cwd(), glob)
 
@@ -182,8 +156,8 @@ export class ProjectDataSource {
       (file) => {
         return this.ctx.file.normalizeFileToFileParts({
           absolute: file,
-          projectRoot: project.projectRoot,
-          searchFolder: project.projectRoot ?? config.componentFolder,
+          projectRoot,
+          searchFolder: projectRoot ?? config.componentFolder,
         })
       },
     )

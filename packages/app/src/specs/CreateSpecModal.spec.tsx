@@ -4,7 +4,7 @@ import { defaultMessages } from '@cy/i18n'
 
 const modalCloseSelector = '[aria-label=Close]'
 const triggerButtonSelector = '[data-testid=trigger]'
-const modalSelector = '[data-testid=create-spec-modal]'
+const modalSelector = '[data-cy=create-spec-modal]'
 
 const messages = defaultMessages.createSpec.component.importFromComponent
 
@@ -38,11 +38,11 @@ describe('<CreateSpecModal />', () => {
   })
 
   describe('dismissing', () => {
-    it('is not dismissed when you press escape or click outside', () => {
+    it('is dismissed when you click outside', () => {
       cy.get(modalSelector)
       .click(0, 0)
       .get(modalSelector)
-      .should('be.visible')
+      .should('not.exist')
     })
 
     it('is dismissed when the X button is clicked', () => {

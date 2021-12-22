@@ -1,8 +1,10 @@
 import { DataContext, getCtx, clearCtx, setCtx } from '@packages/data-context'
 import electron from 'electron'
+import pkg from '@packages/root'
+import configUtils from '@packages/config'
 
 import specsUtil from './util/specs'
-import type { AllModeOptions, AllowedState, FindSpecs, FoundBrowser, InitializeProjectOptions, LaunchOpts, OpenProjectLaunchOptions, Preferences, SettingsOptions } from '@packages/types'
+import type { AllModeOptions, AllowedState, FindSpecs, FoundBrowser, InitializeProjectOptions, LaunchOpts, OpenProjectLaunchOptions, Preferences } from '@packages/types'
 import browserUtils from './browsers/utils'
 import auth from './gui/auth'
 import user from './user'
@@ -16,6 +18,8 @@ import { openExternal } from '@packages/server/lib/gui/links'
 import { getUserEditor } from './util/editors'
 import * as savedState from './saved_state'
 import appData from './util/app_data'
+import plugins from './plugins'
+import browsers from './browsers'
 
 const { getBrowsers, ensureAndGetByNameOrPath } = browserUtils
 
@@ -30,10 +34,29 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
   const ctx = new DataContext({
     schema: graphqlSchema,
     ...options,
+    browserApi: {
+      close: browsers.close,
+      getBrowsers,
+      async ensureAndGetByNameOrPath (nameOrPath: string) {
+        const browsers = await ctx.browser.machineBrowsers()
+
+        return await ensureAndGetByNameOrPath(nameOrPath, false, browsers)
+      },
+    },
+    errorApi: {
+      error: errors.get,
+      message: errors.getMsgByType,
+    },
+    configApi: {
+      getServerPluginHandlers: plugins.getServerPluginHandlers,
+      allowedConfig: configUtils.allowed,
+      cypressVersion: pkg.version,
+      validateConfig: configUtils.validate,
+      updateWithPluginValues: config.updateWithPluginValues,
+      setupFullConfigWithDefaults: config.setupFullConfigWithDefaults,
+    },
     appApi: {
       appData,
-      getBrowsers,
-      ensureAndGetByNameOrPath,
       findNodePath () {
         return findSystemNode.findNodeInFullPath()
       },
@@ -50,14 +73,11 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       },
     },
     projectApi: {
-      getConfig (projectRoot: string, options?: SettingsOptions) {
-        return config.get(projectRoot, options)
-      },
       launchProject (browser: FoundBrowser, spec: Cypress.Spec, options?: LaunchOpts) {
         return openProject.launch({ ...browser }, spec, options)
       },
-      initializeProject (args: InitializeProjectOptions, options: OpenProjectLaunchOptions, browsers: FoundBrowser[]) {
-        return openProject.create(args.projectRoot, args, options, browsers)
+      openProjectCreate (args: InitializeProjectOptions, options: OpenProjectLaunchOptions) {
+        return openProject.create(args.projectRoot, args, options)
       },
       insertProjectToCache (projectRoot: string) {
         cache.insertProject(projectRoot)
@@ -89,13 +109,12 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       closeActiveProject () {
         return openProject.closeActiveProject()
       },
-      get error () {
-        return errors
-      },
     },
     electronApi: {
       openExternal (url: string) {
-        openExternal(url)
+        openExternal(url).catch((e) => {
+          ctx.logTraceError(e)
+        })
       },
       showItemInFolder (folder: string) {
         electron.shell.showItemInFolder(folder)

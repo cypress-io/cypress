@@ -6,8 +6,9 @@
   "browser": "src/index.ts",
   "scripts": {
     "build-prod": "tsc || echo 'built, with errors'",
-    "check-ts": "tsc --noEmit",
+    "check-ts": "tsc --noEmit && yarn -s tslint",
     "clean-deps": "rimraf node_modules",
+    "tslint": "tslint --project tslint.json 'src/**/*.{ts,js}'",
     "clean": "rimraf './{src,test}/**/*.js'",
     "test-unit": "mocha -r @packages/ts/register test/unit/**/*.spec.ts --config ./test/.mocharc.js --exit",
     "test-integration": "mocha -r @packages/ts/register test/integration/**/*.spec.ts --config ./test/.mocharc.js --exit"
@@ -35,6 +36,8 @@
     "launch-editor": "2.2.1",
     "lodash": "4.17.21",
     "p-defer": "^3.0.0",
+    "randomstring": "1.1.5",
+    "underscore.string": "^3.3.5",
     "wonka": "^4.0.15"
   },
   "devDependencies": {
@@ -46,7 +49,8 @@
     "@types/dedent": "^0.7.0",
     "@types/ejs": "^3.1.0",
     "mocha": "7.0.1",
-    "rimraf": "3.0.2"
+    "rimraf": "3.0.2",
+    "tslint": "^6.1.3"
   },
   "files": [
     "src"

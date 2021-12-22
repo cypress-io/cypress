@@ -2,7 +2,7 @@
   <div class="border-t rounded-b flex bg-gray-50 border-t-1 border-t-gray-100 py-16px px-24px gap-3">
     <slot>
       <Button
-        v-if="showNext"
+        v-if="nextFn"
         size="lg"
         :disabled="!canNavigateForward"
         @click="nextFn"
@@ -10,6 +10,7 @@
         {{ next }}
       </Button>
       <Button
+        v-if="backFn"
         size="lg"
         variant="outline"
         @click="backFn"
@@ -43,18 +44,20 @@ import Button from '@cy/components/Button.vue'
 import Switch from '@cy/components/Switch.vue'
 
 const props = withDefaults(defineProps<{
-  next: string
-  back: string
-  nextFn: () => void
-  backFn: () => void
+  next?: string
+  back?: string
+  nextFn?: () => void
+  backFn?: () => void
   alt?: string
   altFn?: (value: boolean) => void
   canNavigateForward?: boolean
-  showNext: boolean
 }>(), {
-  showNext: true,
   alt: undefined,
   altFn: undefined,
+  next: undefined,
+  back: undefined,
+  backFn: undefined,
+  nextFn: undefined,
 })
 
 const altValue = ref(false)
