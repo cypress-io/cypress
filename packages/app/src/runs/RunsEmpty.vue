@@ -32,7 +32,7 @@ fragment RunsEmpty on CurrentProject {
   id
   title
   projectId
-  configFilePath
+  configFile
   cloudProject {
     __typename
     ... on CloudProject {

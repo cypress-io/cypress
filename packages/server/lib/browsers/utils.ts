@@ -1,3 +1,4 @@
+/* eslint-disable no-redeclare */
 import Bluebird from 'bluebird'
 import _ from 'lodash'
 import type { FoundBrowser } from '@packages/types'
@@ -244,7 +245,10 @@ const parseBrowserOption = (opt) => {
   }
 }
 
-const ensureAndGetByNameOrPath = (nameOrPath: string, returnAll = false, browsers: FoundBrowser[] = []): Bluebird<FoundBrowser | FoundBrowser[] | undefined> => {
+function ensureAndGetByNameOrPath(nameOrPath: string, returnAll: false, browsers: FoundBrowser[]): Bluebird<FoundBrowser | undefined>
+function ensureAndGetByNameOrPath(nameOrPath: string, returnAll: true, browsers: FoundBrowser[]): Bluebird<FoundBrowser[] | undefined>
+
+function ensureAndGetByNameOrPath (nameOrPath: string, returnAll = false, browsers: FoundBrowser[] = []) {
   const findBrowsers = browsers.length ? Bluebird.resolve(browsers) : getBrowsers()
 
   return findBrowsers

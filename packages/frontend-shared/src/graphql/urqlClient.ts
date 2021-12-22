@@ -18,7 +18,6 @@ import { urqlSchema } from '../generated/urql-introspection.gen'
 
 import { pubSubExchange } from './urqlExchangePubsub'
 import { namedRouteExchange } from './urqlExchangeNamedRoute'
-import { latestMutationExchange } from './urqlExchangeLatestMutation'
 
 const GQL_PORT_MATCH = /gqlPort=(\d+)/.exec(window.location.search)
 const SERVER_PORT_MATCH = /serverPort=(\d+)/.exec(window.location.search)
@@ -73,7 +72,6 @@ export function makeUrqlClient (target: 'launchpad' | 'app'): Client {
   const exchanges: Exchange[] = [
     dedupExchange,
     pubSubExchange(io),
-    latestMutationExchange,
     errorExchange({
       onError (error) {
         const message = `

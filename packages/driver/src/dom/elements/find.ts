@@ -279,3 +279,22 @@ export const getContainsSelector = (text, filter = '', options: {
 
   return selectors.join()
 }
+
+export const getInputFromLabel = ($el) => {
+  if (!$el.is('label')) {
+    return $([])
+  }
+
+  // If an element has a "for" attribute, then clicking on it won't
+  // focus / activate any contained inputs, even if the "for" target doesn't
+  // exist.
+  if ($el.attr('for')) {
+    // The parent().last() is the current document, which is where we want to
+    // search from.
+    return $(`#${$el.attr('for')}`, $el.parents().last())
+  }
+
+  // Alternately, if a label contains inputs, clicking it focuses / activates
+  // the first one.
+  return $('input', $el).first()
+}

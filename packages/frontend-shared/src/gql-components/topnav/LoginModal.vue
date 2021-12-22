@@ -1,14 +1,14 @@
 <template>
   <Dialog
     :open="modelValue"
-    class="fixed inset-0 z-10 overflow-y-auto"
+    class="inset-0 z-10 fixed overflow-y-auto"
     @close="setIsOpen"
   >
-    <div class="flex items-center justify-center min-h-screen">
-      <DialogOverlay class="fixed inset-0 bg-gray-800 opacity-90" />
+    <div class="flex min-h-screen items-center justify-center">
+      <DialogOverlay class="bg-gray-800 opacity-90 inset-0 fixed" />
 
-      <div class="relative w-480px mx-auto bg-white rounded">
-        <div class="border-b-1px min-h-64px flex justify-between items-center px-24px">
+      <div class="bg-white rounded mx-auto w-480px relative">
+        <div class="flex border-b-1px min-h-64px px-24px justify-between items-center">
           <DialogTitle class="text-gray-900 text-18px">
             {{ title }}
           </DialogTitle>
@@ -17,11 +17,11 @@
             class="hocus-default"
             @click="setIsOpen(false)"
           >
-            <i-cy-delete_x12 class="icon-dark-gray-400 w-12px h-12px" />
+            <i-cy-delete_x12 class="h-12px w-12px icon-dark-gray-400" />
           </button>
         </div>
 
-        <DialogDescription class="p-24px text-gray-700 font-normal">
+        <DialogDescription class="font-normal p-24px text-gray-700">
           <i18n-t
             v-if="!viewer"
             scope="global"
@@ -30,7 +30,7 @@
             <ExternalLink
               href="https://on.cypress.io/dashboard"
             >
-              {{ t('topNav.login.dashboard') }}
+              {{ t('topNav.login.cloud') }}
             </ExternalLink>
           </i18n-t>
           <i18n-t
@@ -40,14 +40,14 @@
           >
             <ExternalLink
               href="https://on.cypress.io/dashboard/profile"
-              class="text-indigo-500 font-medium"
+              class="font-medium text-indigo-500"
             >
               {{ viewer.fullName }}
             </ExternalLink>
           </i18n-t>
         </DialogDescription>
 
-        <div class="border-t-1px px-24px py-16px bg-gray-50">
+        <div class="bg-gray-50 border-t-1px py-16px px-24px">
           <Auth
             :gql="props.gql"
             @continue="$emit('update:modelValue', false)"
