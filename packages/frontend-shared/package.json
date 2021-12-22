@@ -51,6 +51,7 @@
     "modern-normalize": "1.1.0",
     "patch-package": "6.4.7",
     "rimraf": "3.0.2",
+    "spin.js": "^4.1.1",
     "unplugin-icons": "^0.11.4",
     "unplugin-vue-components": "^0.15.4",
     "vite": "2.4.4",

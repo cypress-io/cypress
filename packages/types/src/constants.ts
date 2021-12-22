@@ -119,11 +119,6 @@ export const WIZARD_STEPS = [
     description: 'Choose which method of testing you would like to get started with for this project.',
   },
   {
-    type: 'initializePlugins',
-    title: 'Initializing Config...',
-    description: 'Please wait while we load your project and find browsers installed on your system.',
-  },
-  {
     type: 'selectFramework',
     title: 'Project Setup',
     description: 'Confirm the front-end framework and bundler used in your project.',

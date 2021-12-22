@@ -21,8 +21,7 @@
       >
         <AlertHeader
           :title="title"
-          v-bind="classes"
-          :header-class="canCollapse ? 'group-hocus:underline' : ''"
+          :header-class="`${props.headerClass} ${canCollapse ? 'group-hocus:underline' : ''}`"
           :prefix-icon="prefix?.icon"
           :prefix-icon-class="open ? prefix?.classes + ' rotate-180' : prefix?.classes"
           :suffix-icon-aria-label="props.dismissible ? t('components.alert.dismissAriaLabel') : ''"
@@ -51,7 +50,7 @@
           </template>
         </AlertHeader>
         <div
-          v-if="open"
+          v-if="divider && open"
           data-cy="alert-body-divider"
           class="mx-auto h-1px transform w-[calc(100%-32px)] translate-y-1px"
           :class="[classes.dividerClass]"
@@ -62,6 +61,7 @@
       v-if="$slots.default"
       class="text-left p-16px"
       data-cy="alert-body"
+      :class="bodyClass"
     >
       <slot />
     </div>
@@ -76,6 +76,7 @@ export type AlertClasses = {
   suffixIconClass: string
   suffixButtonClass: string
   alertClass: string
+  bodyClass?: string
   dividerClass: string
   ring: string
 }
@@ -101,16 +102,23 @@ const props = withDefaults(defineProps<{
   status?: AlertStatus
   icon?: FunctionalComponent<SVGAttributes, {}>,
   headerClass?: string,
+  bodyClass?: string,
+  divider?: boolean,
   alertClass?: string,
   dismissible?: boolean,
   collapsible?: boolean,
   modelValue?: boolean,
+  iconClasses?: string
 }>(), {
+  title: undefined,
   modelValue: true,
   alertClass: undefined,
   status: 'info',
   icon: undefined,
   headerClass: undefined,
+  divider: true,
+  bodyClass: '',
+  iconClasses: '',
 })
 
 const title = computed(() => props.title ?? 'Alert')
@@ -161,7 +169,7 @@ const alertStyles: Record<AlertStatus, AlertClasses> = {
 const classes = computed(() => {
   return {
     ...alertStyles[props.status],
-    headerClass: props.headerClass ?? alertStyles[props.status].headerClass,
+    headerClass: alertStyles[props.status].headerClass,
     alertClass: props.alertClass ?? alertStyles[props.status].alertClass,
   }
 })
@@ -169,7 +177,7 @@ const canCollapse = computed(() => slots.default && props.collapsible)
 const initiallyOpen = computed(() => slots.default && !props.collapsible)
 
 const prefix = computed(() => {
-  if (props.icon) return { icon: props.icon }
+  if (props.icon) return { classes: props.iconClasses, icon: props.icon }
 
   if (canCollapse.value) {
     return {

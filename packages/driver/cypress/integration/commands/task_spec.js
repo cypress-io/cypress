@@ -1,6 +1,5 @@
 const { assertLogLength } = require('../../support/utils')
 const { _, Promise } = Cypress
-const path = require('path')
 
 describe('src/cy/commands/task', () => {
   context('#task', {
@@ -211,7 +210,7 @@ describe('src/cy/commands/task', () => {
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
 
-          expect(err.message).to.eq(`\`cy.task('bar')\` failed with the following error:\n\nThe task 'bar' was not handled in the setupNodeEvents method. The following tasks are registered: return:arg, cypress:env, arg:is:undefined, wait, create:long:file\n\nFix this in your setupNodeEvents method here:\n${path.join(Cypress.config('projectRoot'), Cypress.config('configFile'))}`)
+          expect(err.message).to.eq(`\`cy.task('bar')\` failed with the following error:\n\nThe task 'bar' was not handled in the setupNodeEvents method. The following tasks are registered: return:arg, cypress:env, arg:is:undefined, wait, create:long:file\n\nFix this in your setupNodeEvents method here:\n${Cypress.config('configFile')}`)
 
           done()
         })

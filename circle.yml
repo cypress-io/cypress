@@ -39,6 +39,7 @@ macWorkflowFilters: &mac-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ '10.0-release', << pipeline.git.branch >> ]
+    - equal: [ 'tgriesser/10.0-release/refactor-lifecycle-ui', << pipeline.git.branch >> ]
     - equal: [ renovate/cypress-request-2.x, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
@@ -49,6 +50,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ '10.0-release', << pipeline.git.branch >> ]
+    - equal: [ 'tgriesser/10.0-release/refactor-lifecycle-ui', << pipeline.git.branch >> ]
     - equal: [ test-binary-downstream-windows, << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
@@ -618,7 +620,6 @@ commands:
                   command: |
                     git fetch origin pull/<<parameters.pull_request_id>>/head:pr-<<parameters.pull_request_id>>
                     git checkout pr-<<parameters.pull_request_id>>
-                    git log -n 2
 
   test-binary-against-rwa:
     description: |
@@ -1334,7 +1335,7 @@ jobs:
 
   run-launchpad-integration-tests-chrome:
     <<: *defaults
-    parallelism: 1
+    parallelism: 2
     steps:
       - run-new-ui-tests:
           browser: chrome
@@ -1344,7 +1345,7 @@ jobs:
 
   run-app-component-tests-chrome:
     <<: *defaults
-    parallelism: 1
+    parallelism: 7
     steps:
       - run-new-ui-tests:
           browser: chrome
@@ -1354,7 +1355,7 @@ jobs:
 
   run-app-integration-tests-chrome:
     <<: *defaults
-    parallelism: 1
+    parallelism: 2
     steps:
       - run-new-ui-tests:
           browser: chrome
@@ -1668,7 +1669,7 @@ jobs:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" &&  "$CIRCLE_BRANCH" != "test-binary-downstream-windows" && "$CIRCLE_BRANCH" != "10.0-release" && "$CIRCLE_BRANCH" != "renovate/cypress-request-2.x" && "$CIRCLE_BRANCH" != "tgriesser/fix/patch-resolutions" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "test-binary-downstream-windows" && "$CIRCLE_BRANCH" != "tgriesser/10.0-release/refactor-lifecycle-ui" && "$CIRCLE_BRANCH" != "10.0-release" && "$CIRCLE_BRANCH" != "renovate/cypress-request-2.x" && "$CIRCLE_BRANCH" != "tgriesser/fix/patch-resolutions" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi

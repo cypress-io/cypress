@@ -66,7 +66,7 @@ const emit = defineEmits<{
 }>()
 
 const selectedOptionObject = computed(() => {
-  return props.options.find((opt) => opt.id === props.value)
+  return props.options.find((opt) => opt.type === props.value)
 })
 
 const selectOption = (opt) => {

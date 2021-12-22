@@ -9,16 +9,14 @@ describe('Plugin error handling', () => {
     cy.get('[data-cy-testingType=e2e]').click()
 
     cy.get('body')
-    .should('contain.text', 'Cypress Configuration Error')
+    .should('contain.text', 'Error Loading Config')
     .and('contain.text', 'The function exported by the plugins file threw an error')
 
     cy.withCtx(async (ctx) => {
       await ctx.actions.file.writeFileInProject('cypress.config.js', `module.exports = { e2e: { baseUrl: 'https://cypress.com' } }`)
     })
 
-    cy.get('[data-testid=error-retry-button]').click()
-
     cy.get('body')
-    .should('not.contain.text', 'Cypress Configuration Error')
+    .should('not.contain.text', 'Error Loading Config')
   })
 })

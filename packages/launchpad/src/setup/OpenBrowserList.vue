@@ -10,6 +10,7 @@
       <div
         v-for="browser of props.gql.browsers"
         :key="browser.id"
+        :data-cy-browser="browser.name"
         class="rounded border-1 text-center min-h-144px pt-6 pb-4 w-160px relative block"
         :class="{
           'border-jade-300 ring-2 ring-jade-100 focus:border-jade-400 focus:border-1 focus:outline-none': browser.isSelected,
@@ -91,7 +92,10 @@ import { OpenBrowserListFragment, OpenBrowserList_SetBrowserDocument } from '../
 
 gql`
 mutation OpenBrowserList_SetBrowser($id: ID!) {
-  launchpadSetBrowser(id: $id)
+  launchpadSetBrowser(id: $id) {
+    id
+    ...OpenBrowserList
+  }
 }
 `
 
