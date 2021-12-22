@@ -2,6 +2,7 @@
   <template
     v-if="query.data.value?.currentProject"
   >
+    <WarningList :gql="query.data.value" />
     <LaunchpadHeader
       :title="t('setupWizard.chooseBrowser.title')"
       :description="t('setupWizard.chooseBrowser.description')"
@@ -12,13 +13,13 @@
       @navigated-back="backFn"
       @launch="launch"
     />
-    <ButtonBar />
   </template>
 </template>
 
 <script lang="ts" setup>
 import { useMutation, gql, useQuery } from '@urql/vue'
 import OpenBrowserList from './OpenBrowserList.vue'
+import WarningList from '../warning/WarningList.vue'
 import { OpenBrowserDocument, OpenBrowser_ClearTestingTypeDocument, OpenBrowser_LaunchProjectDocument } from '../generated/graphql'
 import LaunchpadHeader from './LaunchpadHeader.vue'
 import { useI18n } from '@cy/i18n'
@@ -32,6 +33,7 @@ query OpenBrowser {
     currentTestingType
     ...OpenBrowserList
   }
+  ...WarningList
   currentTestingType
 }
 `

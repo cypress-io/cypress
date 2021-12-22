@@ -57,7 +57,6 @@ export interface WizardDataShape {
   chosenFramework: NexusGenEnums['FrontendFrameworkEnum'] | null
   chosenLanguage: NexusGenEnums['CodeLanguageEnum']
   chosenManualInstall: boolean
-  warnings: Warning[]
 }
 
 export interface ElectronShape {
@@ -96,6 +95,7 @@ export interface CoreDataShape {
   electron: ElectronShape
   isAuthBrowserOpened: boolean
   scaffoldedFiles: NexusGenObjects['ScaffoldedFile'][] | null
+  warnings: Warning[]
 }
 
 /**
@@ -134,8 +134,8 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
       chosenLanguage: 'js',
       chosenManualInstall: false,
       allBundlers: BUNDLERS,
-      warnings: [],
     },
+    warnings: [],
     chosenBrowser: null,
     user: null,
     electron: {

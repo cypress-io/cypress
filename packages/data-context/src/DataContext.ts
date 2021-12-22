@@ -4,6 +4,7 @@ import path from 'path'
 import util from 'util'
 import chalk from 'chalk'
 import assert from 'assert'
+import s from 'underscore.string'
 
 import 'server-destroy'
 
@@ -354,18 +355,18 @@ export class DataContext {
     }
   }
 
-  onWarning = (err: { message: string }) => {
+  onWarning = (err: { message: string, type?: string, details?: string }) => {
     if (this.isRunMode) {
       // eslint-disable-next-line
       console.log(chalk.yellow(err.message))
     } else {
-      // const message = err.details ? `${err.message}\n\n\`\`\`\n${err.details}\n\`\`\`` : err.message
+      this.coreData.warnings.push({
+        title: `Warning: ${s.titleize(s.humanize(err.type ?? ''))}`,
+        message: err.message,
+        details: err.details,
+      })
 
-      // this.ctx.coreData.wizard.warnings.push({
-      //   title: 'Warning: Browser Not Found',
-      //   message,
-      //   setupStep: 'setupComplete',
-      // })
+      this.emitter.toLaunchpad()
     }
   }
 

@@ -774,6 +774,9 @@ type Query {
   """Previous versions of cypress and their release date"""
   versions: VersionData
 
+  """A list of warnings"""
+  warnings: [Warning!]!
+
   """Metadata about the wizard, null if we arent showing the wizard"""
   wizard: Wizard!
 }
@@ -904,8 +907,9 @@ type VersionData {
   latest: Version!
 }
 
-"""A warning"""
+"""A generic warning"""
 type Warning {
+  details: String
   message: String!
   setupStep: String
   title: String!
@@ -931,9 +935,6 @@ type Wizard {
   A list of packages to install, null if we have not chosen both a framework and bundler
   """
   packagesToInstall: [WizardNpmPackage!]
-
-  """A list of warnings"""
-  warnings: [Warning!]!
 }
 
 """Wizard bundler"""

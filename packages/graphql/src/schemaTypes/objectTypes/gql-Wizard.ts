@@ -5,20 +5,6 @@ import { objectType } from 'nexus'
 import { BUNDLERS, CODE_LANGUAGES, FRONTEND_FRAMEWORKS } from '@packages/types'
 import { WizardCodeLanguage } from './gql-WizardCodeLanguage'
 
-const Warning = objectType({
-  name: 'Warning',
-  description: 'A warning',
-  definition (t) {
-    t.nonNull.string('title')
-    t.nonNull.string('message')
-    t.string('setupStep')
-  },
-  sourceType: {
-    module: '@packages/types',
-    export: 'Warning',
-  },
-})
-
 export const Wizard = objectType({
   name: 'Wizard',
   description: 'The Wizard is a container for any state associated with initial onboarding to Cypress',
@@ -60,14 +46,6 @@ export const Wizard = objectType({
       type: WizardNpmPackage,
       description: 'A list of packages to install, null if we have not chosen both a framework and bundler',
       resolve: (source, args, ctx) => ctx.wizard.packagesToInstall(),
-    })
-
-    t.nonNull.list.nonNull.field('warnings', {
-      type: Warning,
-      description: 'A list of warnings',
-      resolve: (source, args, ctx) => {
-        return ctx.coreData.wizard.warnings
-      },
     })
   },
   sourceType: {

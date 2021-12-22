@@ -6,6 +6,7 @@ import { DevState } from './gql-DevState'
 import { LocalSettings } from './gql-LocalSettings'
 import { VersionData } from './gql-VersionData'
 import { Wizard } from './gql-Wizard'
+import { Warning } from './gql-Warning'
 
 export const Query = objectType({
   name: 'Query',
@@ -14,6 +15,14 @@ export const Query = objectType({
     t.field('baseError', {
       type: BaseError,
       resolve: (root, args, ctx) => ctx.baseError,
+    })
+
+    t.nonNull.list.nonNull.field('warnings', {
+      type: Warning,
+      description: 'A list of warnings',
+      resolve: (source, args, ctx) => {
+        return ctx.coreData.warnings
+      },
     })
 
     t.nonNull.field('wizard', {

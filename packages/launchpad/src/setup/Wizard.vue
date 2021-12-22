@@ -1,5 +1,5 @@
 <template>
-  <WarningList :gql="props.gql.wizard" />
+  <WarningList :gql="props.gql" />
   <LaunchpadHeader
     :title="title"
     :description="description"
@@ -75,9 +75,9 @@ const setCurrentStep = (step: CurrentStep) => {
 gql`
 fragment Wizard on Query {
   ...ScaffoldedFiles
+  ...WarningList
   wizard {
     ...EnvironmentSetup
-    ...WarningList
     bundler {
       id
       type
