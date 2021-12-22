@@ -212,6 +212,8 @@ const parseOpts = (opts) => {
     'group',
     'headed',
     'headless',
+    'inspect',
+    'inspectBrk',
     'key',
     'path',
     'parallel',

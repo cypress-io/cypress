@@ -3,6 +3,7 @@ const EE = require('events')
 const path = require('path')
 const Bluebird = require('bluebird')
 const debug = require('debug')('cypress:server:browsers:electron')
+const debugVerbose = require('debug')('cypress-verbose:server:browsers:electron')
 const menu = require('../gui/menu')
 const Windows = require('../gui/windows')
 const { CdpAutomation, screencastOpts } = require('./cdp_automation')
@@ -273,7 +274,7 @@ module.exports = {
     const originalSendCommand = webContents.debugger.sendCommand
 
     webContents.debugger.sendCommand = function (message, data) {
-      debug('debugger: sending %s with params %o', message, data)
+      debugVerbose('debugger: sending %s with params %o', message, data)
 
       return originalSendCommand.call(webContents.debugger, message, data)
       .then((res) => {
@@ -284,7 +285,7 @@ module.exports = {
           debugRes.data = `${debugRes.data.slice(0, 100)} [truncated]`
         }
 
-        debug('debugger: received response to %s: %o', message, debugRes)
+        debugVerbose('debugger: received response to %s: %o', message, debugRes)
 
         return res
       }).catch((err) => {

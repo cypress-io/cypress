@@ -271,13 +271,6 @@ gulp.task(viteBuildLaunchpad)
 gulp.task(viteBuildAndWatchApp)
 gulp.task(viteBuildAndWatchLaunchpad)
 
-gulp.task('debugCypressLaunchpad', gulp.series(
-  async function setupDebugBrk () {
-    setGulpGlobal('debug', '--inspect-brk')
-  },
-  openCypressLaunchpad,
-))
-
 gulp.task(e2eTestScaffoldWatch)
 gulp.task(e2eTestScaffold)
 gulp.task(startCypressWatch)
