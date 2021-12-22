@@ -19,7 +19,7 @@
         :title="t('settingsPage.project.title')"
         :description="t('settingsPage.project.description')"
         :icon="IconFolder"
-        max-height="3600px"
+        max-height="10000px"
         :initially-open="initiallyOpen.project"
       >
         <ProjectSettings
