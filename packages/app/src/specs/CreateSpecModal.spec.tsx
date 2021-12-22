@@ -38,11 +38,11 @@ describe('<CreateSpecModal />', () => {
   })
 
   describe('dismissing', () => {
-    it('is not dismissed when you press escape or click outside', () => {
+    it('is dismissed when you click outside', () => {
       cy.get(modalSelector)
       .click(0, 0)
       .get(modalSelector)
-      .should('be.visible')
+      .should('not.exist')
     })
 
     it('is dismissed when the X button is clicked', () => {

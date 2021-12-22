@@ -2,7 +2,6 @@
   <StandardModal
     class="transition transition-all duration-200"
     variant="bare"
-    :click-outside="false"
     :title="title"
     :model-value="show"
     data-cy="create-spec-modal"
