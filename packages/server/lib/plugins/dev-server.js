@@ -20,10 +20,10 @@ plugins.registerHandler((ipc) => {
     baseEmitter.emit('dev-server:compile:success', { specFile })
   })
 
-  return baseEmitter.on('dev-server:close', () => {
+  baseEmitter.on('dev-server:close', () => {
     debug('base emitter plugin close event')
 
-    return ipc.send('dev-server:close')
+    ipc.send('dev-server:close')
   })
 })
 
@@ -33,21 +33,21 @@ const API = {
 
   start ({ specs, config }) {
     if (!plugins.has('dev-server:start')) {
-      return errors.throw('CT_NO_DEV_START_EVENT', config.pluginsFile)
+      throw errors.get('CT_NO_DEV_START_EVENT', config.pluginsFile)
     }
 
     return plugins.execute('dev-server:start', { specs, config })
   },
 
   updateSpecs (specs) {
-    return baseEmitter.emit('dev-server:specs:changed', specs)
+    baseEmitter.emit('dev-server:specs:changed', specs)
   },
 
   close () {
     debug('close dev-server')
     baseEmitter.emit('close')
 
-    return baseEmitter.removeAllListeners()
+    baseEmitter.removeAllListeners()
   },
 }
 

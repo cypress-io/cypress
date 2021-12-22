@@ -4,7 +4,7 @@
 import FileMatchButton from './FileMatchButton.vue'
 import faker from 'faker'
 import { ref } from 'vue'
-const fileMatchButtonSelector = '[data-testid=file-match-button]'
+const fileMatchButtonSelector = '[data-cy=file-match-button]'
 
 describe('<FileMatchButton />', () => {
   it('renders a small extension', () => {

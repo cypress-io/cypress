@@ -1,14 +1,14 @@
 <template>
   <a
-    class="block h-auto text-center rounded outline-none
-  cursor-pointer group
-  children:hyphens-manual border-1 hocus-default
-  focus-within-default"
+    class="rounded cursor-pointer h-auto outline-none border-1
+  text-center block
+  group hocus-default focus-within-default
+  children:hyphens-manual"
     :class="{
       'bg-gray-50 border-gray-100 pointer-events-none': disabled
     }"
     data-cy="card"
-    :tabindex="disabled ? 0 : undefined"
+    :tabindex="disabled ? -1 : 1"
     @click="emits('click')"
   >
     <div
@@ -18,7 +18,7 @@
       <component
         :is="hoverIcon"
         v-if="hoverIcon"
-        class="absolute opacity-0 group-hover:opacity-100"
+        class="opacity-0 absolute group-hover:opacity-100"
         :class="iconClass"
         data-cy="card-icon"
       />
@@ -32,14 +32,14 @@
       />
     </div>
     <h2
-      class="text-indigo-500 m-8px text-18px leading-24px"
+      class="m-8px text-indigo-500 text-18px leading-24px"
       :class="{
         'text-gray-700': disabled
       }"
     >
       {{ title }}
     </h2>
-    <p class="text-gray-600 tracking-tight text-14px leading-20px">
+    <p class="tracking-tight text-gray-600 text-14px leading-20px">
       {{ description }}
     </p>
     <slot name="footer" />

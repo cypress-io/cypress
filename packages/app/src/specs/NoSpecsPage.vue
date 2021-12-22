@@ -23,7 +23,10 @@
         data-testid="create-spec-page-description"
         class="leading-normal mb-32px text-gray-600 text-18px"
       >
-        <i18n-t :keypath="descriptionKeyPath">
+        <i18n-t
+          scope="global"
+          :keypath="descriptionKeyPath"
+        >
           <button
             class="text-purple-500 hocus-link-default"
           >

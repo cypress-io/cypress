@@ -67,7 +67,7 @@
       },
       "customPatternNoSpecs": {
         "title": "No Specs Found",
-        "description": "We couldn’t find any files matching the following spec patterns. You may need to move your specs or update your {0} to find them."
+        "description": "We couldn't find any files matching the following spec patterns. You may need to move your specs or update your {0} to find them."
       }
     },
     "noSpecsMessage": "If you feel that you're seeing this screen in error, and there should be specs listed here, you likely need to update the spec pattern.",
@@ -161,7 +161,7 @@
           "noParallelTime": "12 mins",
           "withParallelization": "with Parallelization",
           "withoutParallelization": "without Parallelization",
-          "intro": " With Smart Orchestration, you’ll be able to:",
+          "intro": "With Smart Orchestration, you'll be able to:",
           "bullet1": "Run spec files in parallel",
           "bullet2": "Prioritize failed specs to run first",
           "bullet3": "Cancel CI runs on test failure",
@@ -174,8 +174,8 @@
       "bodySuccess": "You are now logged in as {0}.",
       "bodyError": "An error occurred while attempting to log in:",
       "bodyBrowserError": "Cypress was unable to open your installed browser. To continue logging in, please paste this URL into your web browser:",
-      "dashboard": "Cypress Dashboard Service",
-      "titleInitial": "Log In To Cypress",
+      "cloud": "Cypress Dashboard Service",
+      "titleInitial": "Log in to Cypress",
       "titleSuccess": "Login Successful",
       "titleFailed": "Login Failed",
       "titleBrowserError": "Browser Error",
@@ -193,14 +193,16 @@
       "pasteToUpgradeProject": "To upgrade to the latest version for your project, first {0}, then paste the command below into your terminal:",
       "pasteToUpgradeGlobal": "To upgrade to the latest version, first {0}, then paste the command below into your terminal:",
       "rememberToCloseInsert": "close this app"
-    }
+    },
+    "upgradeText": "Upgrade"
   },
   "launchpadErrors": {
     "generic": {
       "header": "Something went wrong",
       "message": "It looks like there's some issues that need to be resolved before we continue. Please confirm that everything looks correct in your {0} file.",
       "readTheDocsButton": "Read the docs",
-      "retryButton": "It's fixed now"
+      "retryButton": "Try again",
+      "stackTraceLabel": "Stack Trace"
     }
   },
   "setupPage": {
@@ -361,7 +363,7 @@
       }
     },
     "footer": {
-      "text": "You can reconfigure the settings for this project if you’re experiencing issues with your Cypress configuration.",
+      "text": "You can reconfigure the settings for this project if you're experiencing issues with your Cypress configuration.",
       "button": "Reconfigure Project"
     }
   },
@@ -396,6 +398,24 @@
     "component": {
       "name": "Component Testing",
       "description": "Build and test your components from your design system in isolation in order to ensure each state matches your expectations."
+    }
+  },
+  "setupWizard": {
+    "selectFramework": {
+      "title": "Project Setup",
+      "description": "Confirm the front-end framework and bundler used in your project."
+    },
+    "installDependencies": {
+      "title": "Install Dev Dependencies",
+      "description": "Paste the command below into your terminal to install the required packages."
+    },
+    "configFiles": {
+      "title": "Configuration Files",
+      "description": "We added the following files to your project."
+    },
+    "chooseBrowser": {
+      "title": "Choose a Browser",
+      "description": "Choose your preferred browser for testing your components."
     }
   }
 }
