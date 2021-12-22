@@ -9,7 +9,7 @@ const viewSpecsSelector = '[data-testid=view-spec-pattern]'
 
 const messages = defaultMessages.createSpec
 
-describe('<NoSpecsPage />', () => {
+describe('<NoSpecsPage />', { viewportHeight: 655, viewportWidth: 1032 }, () => {
   describe('mounting in component mode with default specPattern set', () => {
     beforeEach(() => {
       cy.mountFragment(NoSpecsPageFragmentDoc, {
@@ -41,6 +41,8 @@ describe('<NoSpecsPage />', () => {
       .and('contain.text', messages.noSpecsMessage)
       .get(viewSpecsSelector)
       .should('be.visible')
+      .and('contain.text', messages.viewSpecPatternButton)
+      .and('have.attr', 'href', '#/settings?section=project&setting=specPattern')
     })
 
     it('renders the correct text for component testing', () => {
