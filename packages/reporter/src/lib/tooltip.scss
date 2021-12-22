@@ -12,6 +12,8 @@ $cy-tooltip-class: 'cy-tooltip';
     overflow: visible;
     svg {
       fill: $gray-50;
+      max-width: 12px;
+      max-height: 10px;
       overflow: visible;
       stroke: $gray-50;
     }
