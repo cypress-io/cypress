@@ -29,7 +29,7 @@ const resolveServerConfig = async ({ viteConfig, options, indexHtml }: StartDevS
   const { projectRoot, supportFile } = options.config
 
   const requiredOptions: InlineConfig = {
-    base: '/__cypress/src/',
+    base: `/${options.config.namespace}/src/`,
     root: projectRoot,
   }
 

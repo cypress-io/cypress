@@ -32,13 +32,8 @@ import { InitializeRoutes, createCommonRoutes } from './routes'
 import { createRoutesE2E } from './routes-e2e'
 import { createRoutesCT } from './routes-ct'
 import type { DataContext } from '@packages/data-context/src/DataContext'
+import { getCtx } from '@packages/data-context'
 
-const ALLOWED_PROXY_BYPASS_URLS = [
-  '/',
-  '/__cypress/runner/cypress_runner.css',
-  '/__cypress/runner/cypress_runner.js', // TODO: fix this
-  '/__cypress/runner/favicon.ico',
-]
 const DEFAULT_DOMAIN_NAME = 'localhost'
 const fullyQualifiedRe = /^https?:\/\//
 
@@ -51,6 +46,16 @@ const _isNonProxiedRequest = (req) => {
 }
 
 const _forceProxyMiddleware = function (clientRoute) {
+  // @ts-expect-error
+  const namespace = getCtx().lifecycleManager.loadedConfigFile?.namespace ?? '__cypress'
+
+  const ALLOWED_PROXY_BYPASS_URLS = [
+    '/',
+    `/${namespace}/runner/cypress_runner.css`,
+    `/${namespace}/runner/cypress_runner.js`, // TODO: fix this
+    `/${namespace}/runner/favicon.ico`,
+  ]
+
   // normalize clientRoute to help with comparison
   const trimmedClientRoute = _.trimEnd(clientRoute, '/')
 
@@ -58,6 +63,8 @@ const _forceProxyMiddleware = function (clientRoute) {
     const trimmedUrl = _.trimEnd(req.proxiedUrl, '/')
 
     if (_isNonProxiedRequest(req) && !ALLOWED_PROXY_BYPASS_URLS.includes(trimmedUrl) && (trimmedUrl !== trimmedClientRoute)) {
+      debug('Redirecting!!!!! %o', { namespace, url: req.proxiedUrl })
+
       // this request is non-proxied and non-allowed, redirect to the runner error page
       return res.redirect(clientRoute)
     }

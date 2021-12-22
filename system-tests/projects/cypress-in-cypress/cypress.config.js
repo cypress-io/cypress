@@ -1,5 +1,8 @@
 module.exports = {
   projectId: 'abc123',
+  // @ts-expect-error
+  clientRoute: '/cy-child/',
+  namespace: 'cy-child',
   testFiles: '**/*.{spec,cy}.{js,ts,tsx,jsx}',
   integrationFolder: 'cypress/e2e/integration',
   componentFolder: 'src',

@@ -64,25 +64,14 @@ export const createCommonRoutes = ({
     // base64 before embedding so user-supplied contents can't break out of <script>
     // https://github.com/cypress-io/cypress/issues/4952
 
-    const base64Config = Buffer.from(JSON.stringify(config)).toString('base64')
-
     return {
-      base64Config,
+      ...config,
       projectName: config.projectName,
     }
   }
 
   const router = Router()
-
-  router.get(['/api', '/__/api'], (req, res) => {
-    const options = makeServeConfig({
-      config,
-      getCurrentBrowser,
-      specsStore,
-    })
-
-    res.json(options)
-  })
+  const { clientRoute, namespace } = config
 
   if (process.env.CYPRESS_INTERNAL_VITE_DEV) {
     const proxy = httpProxy.createProxyServer({
@@ -100,15 +89,15 @@ export const createCommonRoutes = ({
     })
   }
 
-  router.get('/__cypress/runner/*', (req, res) => {
+  router.get(`/${namespace}/runner/*`, (req, res) => {
     runner.handle(testingType, req, res)
   })
 
-  router.all('/__cypress/xhrs/*', (req, res, next) => {
+  router.all(`/${namespace}/xhrs/*`, (req, res, next) => {
     xhrs.handle(req, res, config, next)
   })
 
-  router.get('/__cypress/iframes/*', (req, res) => {
+  router.get(`/${namespace}/iframes/*`, (req, res) => {
     if (testingType === 'e2e') {
       iframesController.e2e({ config, getSpec, getRemoteState }, req, res)
     }
@@ -118,8 +107,6 @@ export const createCommonRoutes = ({
     }
   })
 
-  const clientRoute = config.clientRoute
-
   if (!clientRoute) {
     throw Error(`clientRoute is required. Received ${clientRoute}`)
   }
@@ -128,7 +115,13 @@ export const createCommonRoutes = ({
     debug('Serving Cypress front-end by requested URL:', req.url)
 
     if (process.env.LAUNCHPAD) {
-      ctx.html.appHtml()
+      const options = makeServeConfig({
+        config,
+        getCurrentBrowser,
+        specsStore,
+      })
+
+      ctx.html.appHtml(options)
       .then((html) => res.send(html))
       .catch((e) => res.status(500).send({ stack: e.stack }))
     } else {
