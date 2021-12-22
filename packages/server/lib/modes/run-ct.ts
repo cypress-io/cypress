@@ -1,12 +1,14 @@
-const { openProject } = require('../open_project')
+import type { LaunchArgs } from '@packages/types'
 
-const run = (options, loading) => {
+import { openProject } from '../open_project'
+
+export const run = (options: LaunchArgs, loadingPromise: Promise<void>) => {
   // TODO: make sure if we need to run this in electron by default to match e2e behavior?
   options.browser = options.browser || 'electron'
   options.runAllSpecsInSameBrowserSession = true
 
-  require('../plugins/dev-server').emitter.on('dev-server:compile:error', (error) => {
-    options.onError(
+  require('../plugins/dev-server').emitter.on('dev-server:compile:error', (error: Error) => {
+    options.onError?.(
       new Error(`Dev-server compilation failed. We can not run tests if dev-server can not compile and emit assets, please make sure that all syntax errors resolved before running cypress. \n\n ${error}`),
     )
 
@@ -19,9 +21,5 @@ const run = (options, loading) => {
     })
   })
 
-  return require('./run').run(options, loading)
-}
-
-module.exports = {
-  run,
+  return require('./run').run(options, loadingPromise)
 }

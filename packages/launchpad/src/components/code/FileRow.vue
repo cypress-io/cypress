@@ -4,6 +4,7 @@
   bg-light-50 hocus-default"
     max-height="500px"
     :initially-open="statusInfo.initiallyOpen"
+    :data-e2e="status"
   >
     <template #target="{open}">
       <ListRowHeader
@@ -122,10 +123,11 @@ const statusInfo: ComputedRef<StatusInfo> = computed(() => {
       badgeLabel: t('setupPage.configFile.skippedLabel'),
       badgeType: 'skipped',
       icon: SkippedIcon,
-      initiallyOpen: true,
+      initiallyOpen: false,
     },
     valid: {
       icon: AddedIcon,
+      initiallyOpen: true,
     },
     error: {
       icon: ErrorIcon,

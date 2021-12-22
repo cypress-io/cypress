@@ -21,8 +21,18 @@ fragment TestingTypeCards on Query {
 `
 
 gql`
-  mutation TestingTypeSelection($input: WizardUpdateInput!) {
-  wizardUpdate(input: $input)
+mutation TestingTypeSelection($testingType: TestingTypeEnum!) {
+  setCurrentTestingType(testingType: $testingType) {
+    currentTestingType
+    currentProject {
+      id
+      currentTestingType
+      isCTConfigured
+      isE2EConfigured
+      isLoadingConfigFile
+      isLoadingNodeEvents
+    }
+  }
 }
 `
 
@@ -33,7 +43,7 @@ const props = defineProps<{
 }>()
 
 function selectTestingType (testingType: 'e2e' | 'component') {
-  mutation.executeMutation({ input: { testingType, direction: 'forward' } })
+  mutation.executeMutation({ testingType })
 }
 
 </script>

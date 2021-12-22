@@ -1,23 +1,23 @@
 require('graceful-fs').gracefulify(require('fs'))
 const stripAnsi = require('strip-ansi')
-const debug = require('debug')('cypress:server:plugins:child')
+const debug = require('debug')(`cypress:lifecycle:child:run_require_async_child:${process.pid}`)
 const tsNodeUtil = require('../../util/ts_node')
 const util = require('../util')
-const RunPlugins = require('./run_plugins')
+const { RunPlugins } = require('./RunPlugins')
 
 let tsRegistered = false
 
 /**
- * Executes and returns the passed `requiredFile` file in the ipc `load` event
+ * Executes and returns the passed `configFile` file in the ipc `loadConfig` event
  * @param {*} ipc Inter Process Comunication protocol
- * @param {*} requiredFile the file we are trying to load
+ * @param {*} configFile the file we are trying to load
  * @param {*} projectRoot the root of the typescript project (useful mainly for tsnode)
  * @returns
  */
-function run (ipc, requiredFile, projectRoot) {
+function run (ipc, configFile, projectRoot) {
   let areSetupNodeEventsLoaded = false
 
-  debug('requiredFile:', requiredFile)
+  debug('configFile:', configFile)
   debug('projectRoot:', projectRoot)
   if (!projectRoot) {
     throw new Error('Unexpected: projectRoot should be a string')
@@ -25,7 +25,7 @@ function run (ipc, requiredFile, projectRoot) {
 
   if (!tsRegistered) {
     debug('register typescript for required file')
-    tsNodeUtil.register(projectRoot, requiredFile)
+    tsNodeUtil.register(projectRoot, configFile)
 
     // ensure typescript is only registered once
     tsRegistered = true
@@ -33,7 +33,7 @@ function run (ipc, requiredFile, projectRoot) {
 
   process.on('uncaughtException', (err) => {
     debug('uncaught exception:', util.serializeError(err))
-    ipc.send(areSetupNodeEventsLoaded ? 'error:plugins' : 'error', util.serializeError(err))
+    ipc.send(areSetupNodeEventsLoaded ? 'childProcess:unhandledError' : 'setupTestingType:uncaughtError', util.serializeError(err))
 
     return false
   })
@@ -42,14 +42,14 @@ function run (ipc, requiredFile, projectRoot) {
     const err = (event && event.reason) || event
 
     debug('unhandled rejection:', util.serializeError(err))
-    ipc.send('error', util.serializeError(err))
+    ipc.send('childProcess:unhandledError', util.serializeError(err))
 
     return false
   })
 
   const isValidSetupNodeEvents = (setupNodeEvents) => {
     if (setupNodeEvents && typeof setupNodeEvents !== 'function') {
-      ipc.send('load:error:plugins', 'SETUP_NODE_EVENTS_IS_NOT_FUNCTION', requiredFile, setupNodeEvents)
+      ipc.send('setupTestingType:error', 'SETUP_NODE_EVENTS_IS_NOT_FUNCTION', configFile, setupNodeEvents)
 
       return false
     }
@@ -57,17 +57,31 @@ function run (ipc, requiredFile, projectRoot) {
     return true
   }
 
-  ipc.on('load', () => {
+  ipc.on('loadConfig', () => {
     try {
-      debug('try loading', requiredFile)
-      const exp = require(requiredFile)
+      debug('try loading', configFile)
+      const exp = require(configFile)
 
       const result = exp.default || exp
 
-      ipc.send('loaded', result)
+      const replacer = (_key, val) => {
+        return typeof val === 'function' ? `[Function ${val.name}]` : val
+      }
 
-      ipc.on('plugins', (testingType) => {
-        const runPlugins = new RunPlugins(ipc, projectRoot, requiredFile)
+      ipc.send('loadConfig:reply', { initialConfig: JSON.stringify(result, replacer), requires: util.nonNodeRequires() })
+
+      let hasSetup = false
+
+      ipc.on('setupTestingType', (testingType, options) => {
+        if (hasSetup) {
+          throw new Error('Already Setup')
+        }
+
+        hasSetup = true
+
+        debug(`setupTestingType %s %o`, testingType, options)
+
+        const runPlugins = new RunPlugins(ipc, projectRoot, configFile)
 
         areSetupNodeEventsLoaded = true
         if (testingType === 'component') {
@@ -75,7 +89,7 @@ function run (ipc, requiredFile, projectRoot) {
             return
           }
 
-          runPlugins.runSetupNodeEvents((on, config) => {
+          runPlugins.runSetupNodeEvents(options, (on, config) => {
             if (result.component?.devServer) {
               on('dev-server:start', (options) => result.component.devServer(options, result.component?.devServerConfig))
             }
@@ -91,14 +105,16 @@ function run (ipc, requiredFile, projectRoot) {
 
           const setupNodeEvents = result.e2e?.setupNodeEvents ?? ((on, config) => {})
 
-          runPlugins.runSetupNodeEvents(setupNodeEvents)
+          runPlugins.runSetupNodeEvents(options, setupNodeEvents)
         } else {
           // Notify the plugins init that there's no plugins to resolve
-          ipc.send('empty:plugins')
+          ipc.send('setupTestingType:reply', {
+            requires: util.nonNodeRequires(),
+          })
         }
       })
 
-      debug('config %o', result)
+      debug('loaded config from %s %o', configFile, result)
     } catch (err) {
       if (err.name === 'TSError') {
         // beause of this https://github.com/TypeStrong/ts-node/issues/1418
@@ -107,13 +123,13 @@ function run (ipc, requiredFile, projectRoot) {
         // replace the first line with better text (remove potentially misleading word TypeScript for example)
         .replace(/^.*\n/g, 'Error compiling file\n')
 
-        ipc.send('load:error', err.name, requiredFile, cleanMessage)
+        ipc.send('loadConfig:error', err.name, configFile, cleanMessage)
       } else {
         const realErrorCode = err.code || err.name
 
-        debug('failed to load file:%s\n%s: %s', requiredFile, realErrorCode, err.message)
+        debug('failed to load file:%s\n%s: %s', configFile, realErrorCode, err.message)
 
-        ipc.send('load:error', realErrorCode, requiredFile, err.message)
+        ipc.send('loadConfig:error', realErrorCode, configFile, err.message)
       }
     }
   })

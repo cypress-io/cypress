@@ -1,5 +1,7 @@
 /// <reference path="../../../cli/types/cypress.d.ts" />
 
+import type { AllModeOptions } from '.'
+
 export const RESOLVED_FROM = ['plugin', 'env', 'default', 'runtime', 'config'] as const
 
 export type ResolvedConfigurationOptionSource = typeof RESOLVED_FROM[number]
@@ -33,8 +35,5 @@ export interface SampleConfigFile{
 
 export interface SettingsOptions {
   testingType?: 'component' |'e2e'
-  configFile?: string | false
-  args?: {
-    runProject?: string
-  }
+  args?: AllModeOptions
 }

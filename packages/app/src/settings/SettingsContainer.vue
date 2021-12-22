@@ -1,6 +1,6 @@
 <template>
   <div
-    class="h-full space-y-32px p-32px"
+    class="space-y-32px h-[calc(100vh-64px)] p-32px overflow-auto"
     data-cy="settings"
   >
     <div class="space-y-24px">
@@ -9,6 +9,7 @@
         :description="t('settingsPage.device.description')"
         :icon="IconLaptop"
         max-height="800px"
+        :initially-open="initiallyOpen.device"
       >
         <ExternalEditorSettings :gql="props.gql" />
         <ProxySettings :gql="props.gql" />
@@ -18,7 +19,8 @@
         :title="t('settingsPage.project.title')"
         :description="t('settingsPage.project.description')"
         :icon="IconFolder"
-        max-height="3328px"
+        max-height="10000px"
+        :initially-open="initiallyOpen.project"
       >
         <ProjectSettings
           v-if="props.gql"
@@ -55,6 +57,8 @@ import { SettingsContainer_ReconfigureProjectDocument, SettingsContainerFragment
 import IconLaptop from '~icons/cy/laptop_x24.svg'
 import IconFolder from '~icons/cy/folder-outline_x24.svg'
 import SettingsIcon from '~icons/cy/settings_x16.svg'
+import { useRoute } from 'vue-router'
+import { computed, onMounted, ref, watchEffect } from 'vue'
 
 const { t } = useI18n()
 
@@ -75,6 +79,29 @@ fragment SettingsContainer on Query {
 const props = defineProps<{
   gql: SettingsContainerFragment
 }>()
+
+const route = useRoute()
+
+const isMounted = ref(false)
+
+onMounted(() => isMounted.value = true)
+
+watchEffect(() => {
+  if (route.name === 'Settings' && isMounted.value) {
+    const scrollToElement = document.getElementById(`${(route.query.setting as string)}-anchor`)
+
+    if (scrollToElement) {
+      scrollToElement.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }
+})
+
+const initiallyOpen = computed(() => {
+  return {
+    device: route.query.section === 'device',
+    project: route.query.section === 'project',
+  }
+})
 
 const openElectron = useMutation(SettingsContainer_ReconfigureProjectDocument)
 
