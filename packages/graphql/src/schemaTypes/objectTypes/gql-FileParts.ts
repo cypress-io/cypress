@@ -12,6 +12,14 @@ export const FileParts = objectType({
   description: 'Represents a spec on the file system',
   node: 'absolute',
   definition (t) {
+    t.nonNull.string('specListPath', {
+      description: 'Path to render as a link in the specList',
+      resolve: (source, args, ctx) => {
+        // return `${ctx}`
+      },
+
+    })
+
     t.nonNull.string('absolute', {
       description: 'Absolute path to spec (e.g. /Users/jess/my-project/src/component/MySpec.test.tsx)',
     })

@@ -13,7 +13,7 @@ export default defineConfig({
   },
 
   // @ts-expect-error
-  clientRoute: '/zz/',
+  clientRoute: '/__app/',
   namespace: '__app',
 
   testFiles: '**/*.{spec,cy}.{js,ts,tsx,jsx}',

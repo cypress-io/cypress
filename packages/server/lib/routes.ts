@@ -12,6 +12,7 @@ import xhrs from './controllers/xhrs'
 import { runner } from './controllers/runner'
 import { iframesController } from './controllers/iframes'
 import type { DataContext } from '@packages/data-context/src/DataContext'
+import { getCtx } from '@packages/data-context'
 
 const debug = Debug('cypress:server:routes')
 
@@ -58,6 +59,14 @@ export const createCommonRoutes = ({
       return send(req, pathToFile).pipe(res)
     })
   }
+
+  const proxy = httpProxy.createProxyServer({
+    target: `http://localhost:${getCtx().gqlServerPort}/graphql`,
+  })
+
+  router.all(`/${config.namespace}/graphql/*`, (req, res) => {
+    proxy.web(req, res, {}, (e) => {})
+  })
 
   // /__cypress/runner/*
   router.get(`/${config.namespace}/runner/*`, (req, res) => {

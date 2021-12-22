@@ -507,6 +507,9 @@ type FileParts implements Node {
 
   """Relative path to spec (e.g. src/component/MySpec.test.tsx)"""
   relative: String!
+
+  """Path to render as a link in the specList"""
+  specListPath: String!
 }
 
 enum FrontendFrameworkCategoryEnum {

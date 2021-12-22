@@ -62,7 +62,19 @@ export async function preloadLaunchpadData () {
 export function makeUrqlClient (target: 'launchpad' | 'app'): Client {
   const port = gqlPort()
 
-  const GRAPHQL_URL = `http://localhost:${port}/graphql`
+  let GRAPHQL_URL = `http://localhost:${port}/graphql`
+
+  if (window.__CYPRESS_CONFIG__) {
+    const decodeBase64Unicode = function decodeBase64Unicode (str: string) {
+      return decodeURIComponent(atob(str).split('').map((char) => {
+        return `%${(`00${char.charCodeAt(0).toString(16)}`).slice(-2)}`
+      }).join(''))
+    }
+
+    const config = JSON.parse(decodeBase64Unicode(window.__CYPRESS_CONFIG__.base64Config)) as Cypress.Config
+
+    GRAPHQL_URL = `/${config.namespace}/graphql`
+  }
 
   // If we're in the launchpad, we connect to the known GraphQL Socket port,
   // otherwise we connect to the /__socket.io of the current domain, unless we've explicitly
