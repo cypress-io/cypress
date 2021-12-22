@@ -124,7 +124,10 @@ describe('App Top Nav Workflows', () => {
         cy.startAppServer()
         cy.visitApp()
 
-        cy.findByTestId('top-nav-cypress-version-current-link').should('have.attr', 'href', 'https://github.com/cypress-io/cypress/releases/tag/v10.0.0')
+        cy.findByTestId('app-header-bar').validateExternalLink({
+          name: 'v10.0.0',
+          href: 'https://github.com/cypress-io/cypress/releases/tag/v10.0.0',
+        })
       })
     })
 
@@ -158,20 +161,22 @@ describe('App Top Nav Workflows', () => {
       it('shows dropdown with version info if user version is outdated', () => {
         cy.findByTestId('top-nav-version-list').contains('v10.0.0 • Upgrade').click()
 
-        cy.findByTestId('update-hint').findByRole('link', { name: '10.1.0' })
-        .should('have.attr', 'href', 'https://github.com/cypress-io/cypress/releases/tag/v10.1.0')
-
-        cy.findByTestId('update-hint').findByText('Latest')
+        cy.findByTestId('update-hint').within(() => {
+          cy.validateExternalLink({ name: '10.1.0', href: 'https://github.com/cypress-io/cypress/releases/tag/v10.1.0' })
+          cy.findByText('Latest').should('be.visible')
+        })
 
         cy.findByTestId('cypress-update-popover').findByRole('button', { name: 'Update to 10.1.0' })
 
-        cy.findByTestId('current-hint').findByRole('link', { name: '10.0.0' })
-        .should('have.attr', 'href', 'https://github.com/cypress-io/cypress/releases/tag/v10.0.0')
+        cy.findByTestId('current-hint').within(() => {
+          cy.validateExternalLink({ name: '10.0.0', href: 'https://github.com/cypress-io/cypress/releases/tag/v10.0.0' })
+          cy.findByText('Installed').should('be.visible')
+        })
 
-        cy.findByTestId('current-hint').findByText('Installed')
-
-        cy.findByTestId('cypress-update-popover').findByRole('link', { name: 'See all releases' })
-        .should('have.attr', 'href', 'https://github.com/cypress-io/cypress/releases')
+        cy.findByTestId('cypress-update-popover').validateExternalLink({
+          name: 'See all releases',
+          href: 'https://github.com/cypress-io/cypress/releases',
+        })
       })
 
       it('hides dropdown when version in header is clicked', () => {
@@ -217,15 +222,40 @@ describe('App Top Nav Workflows', () => {
       cy.findByRole('heading', { name: 'References', level: 2 })
       cy.findByRole('heading', { name: 'Run in CI/CD', level: 2 })
 
-      cy.findByRole('link', { name: 'Write your first test' }).should('have.attr', 'href', 'https://on.cypress.io/writing-first-test?utm_medium=Docs+Menu&utm_content=First+Test')
-      cy.findByRole('link', { name: 'Testing your app' }).should('have.attr', 'href', 'https://on.cypress.io/testing-your-app?utm_medium=Docs+Menu&utm_content=Testing+Your+App')
-      cy.findByRole('link', { name: 'Organizing Tests' }).should('have.attr', 'href', 'https://on.cypress.io/writing-and-organizing-tests?utm_medium=Docs+Menu&utm_content=Organizing+Tests')
+      cy.validateExternalLink({
+        name: 'Write your first test',
+        href: 'https://on.cypress.io/writing-first-test?utm_medium=Docs+Menu&utm_content=First+Test',
+      })
 
-      cy.findByRole('link', { name: 'Best Practices' }).should('have.attr', 'href', 'https://on.cypress.io/best-practices?utm_medium=Docs+Menu&utm_content=Best+Practices')
-      cy.findByRole('link', { name: 'Configuration' }).should('have.attr', 'href', 'https://on.cypress.io/configuration?utm_medium=Docs+Menu&utm_content=Configuration')
-      cy.findByRole('link', { name: 'API' }).should('have.attr', 'href', 'https://on.cypress.io/api?utm_medium=Docs+Menu&utm_content=API')
+      cy.validateExternalLink({
+        name: 'Testing your app',
+        href: 'https://on.cypress.io/testing-your-app?utm_medium=Docs+Menu&utm_content=Testing+Your+App',
+      })
 
-      cy.findByRole('link', { name: 'Run tests faster' }).should('have.attr', 'href', 'https://on.cypress.io/parallelization?utm_medium=Docs+Menu&utm_content=Parallelization')
+      cy.validateExternalLink({
+        name: 'Organizing Tests',
+        href: 'https://on.cypress.io/writing-and-organizing-tests?utm_medium=Docs+Menu&utm_content=Organizing+Tests',
+      })
+
+      cy.validateExternalLink({
+        name: 'Best Practices',
+        href: 'https://on.cypress.io/best-practices?utm_medium=Docs+Menu&utm_content=Best+Practices',
+      })
+
+      cy.validateExternalLink({
+        name: 'Configuration',
+        href: 'https://on.cypress.io/configuration?utm_medium=Docs+Menu&utm_content=Configuration',
+      })
+
+      cy.validateExternalLink({
+        name: 'API',
+        href: 'https://on.cypress.io/api?utm_medium=Docs+Menu&utm_content=API',
+      })
+
+      cy.validateExternalLink({
+        name: 'Run tests faster',
+        href: 'https://on.cypress.io/parallelization?utm_medium=Docs+Menu&utm_content=Parallelization',
+      })
 
       cy.findByRole('button', { name: 'Set up CI' }).click()
       cy.findByText('Configure CI').should('be.visible')
@@ -254,7 +284,11 @@ describe('App Top Nav Workflows', () => {
 
         cy.findByTestId('login-panel').contains('Test User').should('be.visible')
         cy.findByTestId('login-panel').contains('test@example.com').should('be.visible')
-        cy.findByRole('link', { name: 'Profile Settings' }).should('be.visible').and('have.attr', 'href', 'https://on.cypress.io/dashboard/profile')
+
+        cy.validateExternalLink({
+          name: 'Profile Settings',
+          href: 'https://on.cypress.io/dashboard/profile',
+        })
 
         cy.intercept('mutation-Logout').as('logout')
 

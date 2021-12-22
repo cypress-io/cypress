@@ -44,6 +44,18 @@ export interface SetFoundBrowsersOptions {
   browsers?: FoundBrowser[]
 }
 
+export interface ValidateExternalLinkOptions {
+  /**
+   * The user-visible descriptor for the link. If omitted, the href
+   * is assumed to be the name.
+   */
+  name?: string
+  /**
+   * The href value of the link to be validated.
+   */
+  href: string
+}
+
 declare global {
   namespace Cypress {
     interface Chainable {
@@ -101,6 +113,11 @@ declare global {
       visitApp(href?: string): Chainable<AUTWindow>
       visitLaunchpad(href?: string): Chainable<AUTWindow>
       findBrowsers(options?: SetFoundBrowsersOptions): void
+      /**
+       * Finds a link with the provided text and href, either globally or within a chained subject,
+       * and asserts that it triggers the appropriate mutation when clicked.
+       */
+      validateExternalLink(options: ValidateExternalLinkOptions | string): Chainable<JQuery<HTMLElement>>
     }
   }
 }
@@ -316,6 +333,35 @@ function logInternal<T> (name: string | Partial<Cypress.LogConfig>, cb: (log: Cy
   })
 }
 
+/**
+ * Finds a link with the provided text and href, either globally or within a chained subject,
+ * and asserts that it triggers the appropriate mutation when clicked.
+ */
+function validateExternalLink (subject, options: ValidateExternalLinkOptions | string): Cypress.Chainable<JQuery<HTMLElement>> {
+  let name
+  let href
+
+  if (Cypress._.isString(options)) {
+    name = href = options
+  } else {
+    ({ name, href } = options)
+  }
+
+  cy.wrap(subject).findByRole('link', { name: name || href }).as('Link')
+
+  cy.get('@Link').should('have.attr', 'href', href)
+
+  cy.intercept('mutation-ExternalLink_OpenExternal', { 'data': { 'openExternal': true } }).as('OpenExternal')
+
+  cy.get('@Link').click()
+
+  cy.wait('@OpenExternal')
+  .its('request.body.variables.url')
+  .should('equal', href)
+
+  return cy.get('@Link')
+}
+
 Cypress.Commands.add('scaffoldProject', scaffoldProject)
 Cypress.Commands.add('addProject', addProject)
 Cypress.Commands.add('openGlobalMode', openGlobalMode)
@@ -327,5 +373,6 @@ Cypress.Commands.add('openProject', openProject)
 Cypress.Commands.add('withCtx', withCtx)
 Cypress.Commands.add('remoteGraphQLIntercept', remoteGraphQLIntercept)
 Cypress.Commands.add('findBrowsers', findBrowsers)
+Cypress.Commands.add('validateExternalLink', { prevSubject: ['optional', 'element'] }, validateExternalLink)
 
 installCustomPercyCommand()
