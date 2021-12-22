@@ -86,7 +86,6 @@
         "@urql/vue",
         "@vueuse/core",
         "bluebird",
-        "cypress-file-upload",
         "cypress-real-events",
         "dedent",
         "events",

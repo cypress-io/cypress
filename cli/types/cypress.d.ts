@@ -663,6 +663,20 @@ declare namespace Cypress {
     as(alias: string): Chainable<Subject>
 
     /**
+     * Select a file with the given <input> element, or drag and drop a file over any DOM subject.
+     *
+     * @param {FileReference} files - The file(s) to select or drag onto this element.
+     * @see https://on.cypress.io/selectfile
+     * @example
+     *    cy.get('input[type=file]').selectFile(Buffer.from('text'))
+     *    cy.get('input[type=file]').selectFile({
+     *      fileName: 'users.json',
+     *      fileContents: [{name: 'John Doe'}]
+     *    })
+     */
+    selectFile(files: FileReference | FileReference[], options?: Partial<SelectFileOptions>): Chainable<Subject>
+
+    /**
      * Blur a focused element. This element must currently be in focus.
      * If you want to ensure an element is focused before blurring,
      * try using .focus() before .blur().
@@ -2464,6 +2478,17 @@ declare namespace Cypress {
      * @default 'top'
      */
     scrollBehavior: scrollBehaviorOptions
+  }
+
+  interface SelectFileOptions extends Loggable, Timeoutable, ActionableOptions {
+    /**
+     * Which user action to perform. `select` matches selecting a file while
+     * `drag-drop` matches dragging files from the operating system into the
+     * document.
+     *
+     * @default 'select'
+     */
+    action: 'select' | 'drag-drop'
   }
 
   interface BlurOptions extends Loggable, Forceable { }
@@ -5659,6 +5684,16 @@ declare namespace Cypress {
     code: number
     stdout: string
     stderr: string
+  }
+
+  type FileReference = string | BufferType | FileReferenceObject
+  interface FileReferenceObject {
+    /*
+     * Buffers and strings will be used as-is. All other types will have `JSON.stringify()` applied.
+     */
+    contents: any
+    fileName?: string
+    lastModified?: number
   }
 
   interface LogAttrs {
