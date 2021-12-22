@@ -2,8 +2,6 @@ import { createEventManager, createTestAutIframe } from '../../../cypress/compon
 import { useSelectorPlaygroundStore } from '../../store/selector-playground-store'
 import SelectorPlayground from './SelectorPlayground.vue'
 
-// TODO: Test is failing due to Percy conflict
-// eslint-disable-next-line
 describe('SelectorPlayground', () => {
   const mountSelectorPlayground = (
     eventManager = createEventManager(),
@@ -24,10 +22,8 @@ describe('SelectorPlayground', () => {
     const { autIframe } = mountSelectorPlayground()
 
     cy.spy(autIframe, 'toggleSelectorHighlight')
-    cy.get('[data-cy="playground-method"]').as('method')
-    cy.get('[data-cy="playground-selector"]').as('selector')
-    cy.get('@method').should('contain', 'cy.get')
-    cy.get('@selector').should('have.value', 'body')
+    cy.get('[data-cy="playground-method"]').should('contain', 'cy.get')
+    cy.get('[data-cy="playground-selector"]').should('have.value', 'body')
 
     cy.percySnapshot()
   })
