@@ -212,6 +212,10 @@ const runnerMargin = computed(() => {
   return screenshotStore.isScreenshotting ? 'unset' : '0 auto'
 })
 
+const screenshotAltHeight = computed(() => {
+  return screenshotStore.isScreenshotting ? '100vh' : '100%'
+})
+
 let fileToOpen: FileDetails
 
 const openFileInIDE = useMutation(OpenFileInIdeDocument)
@@ -327,8 +331,8 @@ $navbar-width: 80px;
 </route>
 
 <style>
-#unified-runner > div {
-  height: 100%
+#unified-runner > .screenshot-height-container {
+  height: min(100%, v-bind('screenshotAltHeight'));
 }
 
 iframe.aut-iframe {
