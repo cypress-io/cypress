@@ -12,8 +12,8 @@ The `@cypress/`-namespaced NPM packages that live inside the [`/npm`](../npm) di
 
 - Ensure you have the following permissions set up:
   - An AWS account with permission to create AWS access keys for the Cypress CDN.
-    - Permissions for your npm account to publish the `cypress` package.
-    - Permissions to update releases in ZenHub.
+  - Permissions for your npm account to publish the `cypress` package.
+  - Permissions to update releases in ZenHub.
 
 - Set up the following environment variables:
   - Cypress AWS access key and secret in `aws_credentials_json`, which looks like this:
